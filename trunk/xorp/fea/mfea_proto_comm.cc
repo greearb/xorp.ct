@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.2 2003/05/16 00:35:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.3 2003/05/16 19:23:17 pavlin Exp $"
 
 
 //
@@ -174,7 +174,7 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     _rcvmh.msg_iov		= _rcviov;
@@ -299,7 +299,7 @@ ProtoComm::ip_hdr_include(bool enable_bool)
 #endif // HAVE_IPV6
 	
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -411,7 +411,7 @@ ProtoComm::recv_pktinfo(bool enable_bool)
 #endif // HAVE_IPV6
     
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -461,7 +461,7 @@ ProtoComm::set_mcast_ttl(int ttl)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -511,7 +511,7 @@ ProtoComm::set_multicast_loop(bool enable_bool)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -570,7 +570,7 @@ ProtoComm::set_default_multicast_vif(uint16_t vif_index)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -645,7 +645,7 @@ ProtoComm::join_multicast_group(uint16_t vif_index, const IPvX& group)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -719,7 +719,7 @@ ProtoComm::leave_multicast_group(uint16_t vif_index, const IPvX& group)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -809,7 +809,7 @@ ProtoComm::open_proto_socket(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -888,7 +888,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return;			// Error
     }
     
@@ -1188,7 +1188,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return;			// Error
     }
     
@@ -1223,7 +1223,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    return;		// Error
 #endif // HAVE_IPV6
 	default:
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    return;		// Error
 	}
     }
@@ -1366,7 +1366,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1585,7 +1585,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.7 2003/02/09 00:25:30 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.8 2003/03/10 23:20:49 hodson Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -1134,7 +1134,7 @@ PimMrt::add_task_add_pim_mre(PimMre *pim_mre)
     PimMreTrackState::input_state_t input_state = PimMreTrackState::INPUT_STATE_MAX;
     
     if (pim_mre->is_task_delete_pending()) {
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return;
     }
     
@@ -1158,7 +1158,7 @@ PimMrt::add_task_add_pim_mre(PimMre *pim_mre)
 	    input_state = PimMreTrackState::INPUT_STATE_IN_ADD_PIM_MRE_SG_RPT;
 	    break;
 	}
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return;
     } while (false);
     
@@ -1219,7 +1219,7 @@ PimMrt::add_task_delete_pim_mre(PimMre *pim_mre)
 	    input_state = PimMreTrackState::INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT;
 	    break;
 	}
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return;
     } while (false);
     

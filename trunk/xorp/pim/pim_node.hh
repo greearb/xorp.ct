@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.12 2003/05/15 23:40:38 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.13 2003/05/19 00:20:23 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -356,7 +356,7 @@ public:
 				    const IPvX&	, // dst,
 				    const uint8_t * , // sndbuf,
 				    size_t	  // sndlen
-	) { XLOG_ASSERT(false); return (XORP_ERROR); }
+	) { XLOG_UNREACHABLE(); return (XORP_ERROR); }
 
     /**
      * Start the protocol with the kernel.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.2 2003/05/14 01:13:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.3 2003/05/20 17:26:37 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -277,7 +277,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	break;
 #endif // HAVE_IPV6
 	default:
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    break;
 	}
 	
@@ -302,7 +302,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		break;	// IPv6 doesn't have the idea of broadcast
 #endif // HAVE_IPV6
 	    default:
-		XLOG_ASSERT(false);
+		XLOG_UNREACHABLE();
 		break;
 	    }
 	}
@@ -344,7 +344,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    break;
 #endif // HAVE_IPV6
 	    default:
-		XLOG_ASSERT(false);
+		XLOG_UNREACHABLE();
 		break;
 	    }
 	}
@@ -385,7 +385,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	}
 #endif // HAVE_IPV6
 	default:
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    break;
 	}
     }

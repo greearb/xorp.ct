@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_mrib_rawsock.cc,v 1.4 2003/02/08 09:18:26 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_mrib_rawsock.cc,v 1.5 2003/03/10 23:20:41 hodson Exp $"
 
 
 //
@@ -154,7 +154,7 @@ UnixComm::get_mrib_osdep(const IPvX& dest_addr, Mrib& mrib)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     rtm->rtm_version = RTM_VERSION;

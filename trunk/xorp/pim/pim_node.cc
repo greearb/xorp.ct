@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.8 2003/05/15 23:40:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.9 2003/05/19 00:20:23 pavlin Exp $"
 
 
 //
@@ -508,7 +508,7 @@ PimNode::delete_vif_addr(const string& vif_name,
     
     VifAddr vif_addr = *tmp_vif_addr;	// Get a copy
     if (pim_vif->delete_address(addr) != XORP_OK) {
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -699,7 +699,7 @@ PimNode::proto_recv(const string&	, // src_module_instance_name,
     //
     pim_vif = vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL) {
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     if (! pim_vif->is_up())
@@ -717,7 +717,7 @@ PimNode::proto_recv(const string&	, // src_module_instance_name,
     return (ret_value);
     
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (XORP_ERROR);
     
     UNUSED(src_module_id);

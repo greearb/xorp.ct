@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.2 2003/05/14 01:13:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.3 2003/05/21 03:08:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -224,7 +224,7 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     rtm->rtm_version = RTM_VERSION;
@@ -302,7 +302,7 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     rtm->rtm_version = RTM_VERSION;
@@ -330,7 +330,7 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     IPvX netmask = IPvX::make_prefix(dst.af(), dst.prefix_len());

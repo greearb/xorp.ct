@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.11 2003/04/02 18:57:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.12 2003/04/02 19:51:14 hodson Exp $"
 
 
 //
@@ -453,7 +453,7 @@ PimVif::pim_send(const IPvX& dst,
 	}
 #endif // HAVE_IPV6
 	default:
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
 	}
     default:
@@ -549,7 +549,7 @@ PimVif::pim_send(const IPvX& dst,
     return (ret_value);
     
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(message_type),
@@ -561,7 +561,7 @@ PimVif::pim_send(const IPvX& dst,
     // XXX: this should not happen. The only way to jump here
     // is if we are trying to send a PIM Register message that did not
     // contain an IP header, but this is not a valid PIM Register message.
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (XORP_ERROR);
 }
 
@@ -1007,7 +1007,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     return (XORP_OK);
     
  rcvlen_error:    
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_WARNING("RX %s packet from %s to %s: "
 		 "some fields are too short",
 		 module_name(),
@@ -1015,7 +1015,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     return (XORP_ERROR);
     
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_WARNING("RX %s packet from %s to %s: "
 		 "internal error",
 		 module_name(),
@@ -1054,7 +1054,7 @@ PimVif::buffer_send_prepare(buffer_t *buffer)
     return (buffer);
     
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("INTERNAL buffer_send_prepare() ERROR: buffer size too small");
     return (NULL);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.13 2003/03/01 19:50:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.14 2003/03/10 23:20:48 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -3291,7 +3291,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_RP_MFC:				// 3
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	// pim_mfc.recompute_rp_mfc();
 	break;
 	
@@ -3348,7 +3348,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_IIF_OLIST_MFC:			// 17
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	// pim_mfc.recompute_iif_olist_mfc();
 	break;
 	
@@ -3610,7 +3610,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	break;
 	
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
 }
@@ -3629,7 +3629,7 @@ PimMreAction::perform_action(PimMfc& pim_mfc)
 	break;
 	
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.14 2003/04/02 19:51:13 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.15 2003/04/22 23:27:21 hodson Exp $"
 
 
 //
@@ -278,7 +278,7 @@ Mld6igmpVif::igmp_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     return (XORP_OK);
     
  rcvlen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_WARNING("RX %s packet from %s to %s: "
 		 "some fields are too short",
 		 module_name(),

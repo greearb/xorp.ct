@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.11 2003/05/15 23:40:37 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.12 2003/05/19 00:18:40 pavlin Exp $"
 
 
 //
@@ -417,7 +417,7 @@ MfeaNode::add_protocol(const string& module_instance_name,
 	    break;
 #endif // HAVE_IPV6
 	default:
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    _proto_register.delete_protocol(module_instance_name, module_id);
 	    return (XORP_ERROR);
 	}
@@ -430,7 +430,7 @@ MfeaNode::add_protocol(const string& module_instance_name,
 	ipproto = -1;
 	break;
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	_proto_register.delete_protocol(module_instance_name, module_id);
 	return (XORP_ERROR);
     }
@@ -1122,7 +1122,7 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 	}
 #endif // HAVE_IPV6
 	default:
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
 	}
 	return (XORP_OK);

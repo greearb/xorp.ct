@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.15 2003/04/23 09:39:18 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.16 2003/05/19 00:18:40 pavlin Exp $"
 
 
 //
@@ -108,7 +108,7 @@ UnixComm::UnixComm(MfeaNode& mfea_node, int ipproto, xorp_module_id module_id)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     _rcvmh.msg_iov		= _rcviov;
@@ -511,7 +511,7 @@ UnixComm::open_mrouter_socket(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -724,7 +724,7 @@ UnixComm::ip_hdr_include(bool enable_bool)
 #endif // HAVE_IPV6
 	
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -836,7 +836,7 @@ UnixComm::recv_pktinfo(bool enable_bool)
 #endif // HAVE_IPV6
     
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -886,7 +886,7 @@ UnixComm::set_mcast_ttl(int ttl)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -936,7 +936,7 @@ UnixComm::set_multicast_loop(bool enable_bool)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -977,7 +977,7 @@ UnixComm::start_mrt(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1153,7 +1153,7 @@ UnixComm::stop_mrt(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1194,7 +1194,7 @@ UnixComm::start_pim(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1238,7 +1238,7 @@ UnixComm::stop_pim(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1298,7 +1298,7 @@ UnixComm::set_default_multicast_vif(uint16_t vif_index)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1373,7 +1373,7 @@ UnixComm::join_multicast_group(uint16_t vif_index, const IPvX& group)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1447,7 +1447,7 @@ UnixComm::leave_multicast_group(uint16_t vif_index, const IPvX& group)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1543,7 +1543,7 @@ UnixComm::add_multicast_vif(uint16_t vif_index)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1595,7 +1595,7 @@ UnixComm::delete_multicast_vif(uint16_t vif_index)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1699,7 +1699,7 @@ UnixComm::add_mfc(const IPvX& source, const IPvX& group,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1756,7 +1756,7 @@ UnixComm::delete_mfc(const IPvX& source, const IPvX& group)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1887,7 +1887,7 @@ UnixComm::add_bw_upcall(const IPvX& source, const IPvX& group,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -2028,7 +2028,7 @@ UnixComm::delete_bw_upcall(const IPvX& source, const IPvX& group,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -2119,7 +2119,7 @@ UnixComm::delete_all_bw_upcall(const IPvX& source, const IPvX& group)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -2219,7 +2219,7 @@ UnixComm::get_sg_count(const IPvX& source, const IPvX& group,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -2317,7 +2317,7 @@ UnixComm::get_vif_count(uint16_t vif_index, VifCount& vif_count)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -2387,7 +2387,7 @@ UnixComm::is_multicast_capable(uint16_t vif_index) const
     }	
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (false);
     }
     
@@ -2432,7 +2432,7 @@ UnixComm::open_proto_socket(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -2506,7 +2506,7 @@ UnixComm::open_proto_socket(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -2554,7 +2554,7 @@ UnixComm::close_proto_socket(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -2610,7 +2610,7 @@ UnixComm::proto_socket_read(int fd, SelectorMask mask)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return;			// Error
     }
     
@@ -2912,7 +2912,7 @@ UnixComm::proto_socket_read(int fd, SelectorMask mask)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return;			// Error
     }
     
@@ -2947,7 +2947,7 @@ UnixComm::proto_socket_read(int fd, SelectorMask mask)
 	    return;		// Error
 #endif // HAVE_IPV6
 	default:
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    return;		// Error
 	}
     }
@@ -3089,7 +3089,7 @@ UnixComm::proto_socket_write(uint16_t vif_index,
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -3308,7 +3308,7 @@ UnixComm::proto_socket_write(uint16_t vif_index,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -3503,7 +3503,7 @@ UnixComm::kernel_call_process(uint8_t *databuf, size_t datalen)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     

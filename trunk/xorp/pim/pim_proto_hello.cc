@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.8 2003/04/02 18:57:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.9 2003/04/22 23:27:24 hodson Exp $"
 
 
 //
@@ -567,7 +567,7 @@ PimVif::pim_hello_send()
     return (pim_send(IPvX::PIM_ROUTERS(family()), PIM_HELLO, buffer));
     
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_HELLO),

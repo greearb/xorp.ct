@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.6 2003/05/20 00:43:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.7 2003/05/20 17:29:46 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -395,7 +395,7 @@ XrlMfeaVifManager::xrl_result_get_all_vif_names(
 		break;
 #endif // HAVE_IPV6
 	    default:
-		XLOG_ASSERT(false);
+		XLOG_UNREACHABLE();
 		break;
 	    }
 	}

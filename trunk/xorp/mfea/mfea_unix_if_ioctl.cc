@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_if_ioctl.cc,v 1.2 2003/03/05 23:13:08 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_if_ioctl.cc,v 1.3 2003/03/10 23:20:40 hodson Exp $"
 
 
 //
@@ -294,7 +294,7 @@ UnixComm::get_mcast_vifs_osdep(vector<MfeaVif *>& mfea_vifs_vector)
 	    break;
 #endif // HAVE_IPV6
 	default:
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    break;
 	}
 	
@@ -321,7 +321,7 @@ UnixComm::get_mcast_vifs_osdep(vector<MfeaVif *>& mfea_vifs_vector)
 		break;		// IPv6 doesn't have the idea of broadcast
 #endif // HAVE_IPV6
 	    default:
-		XLOG_ASSERT(false);
+		XLOG_UNREACHABLE();
 		break;
 	    }
 	}
@@ -360,7 +360,7 @@ UnixComm::get_mcast_vifs_osdep(vector<MfeaVif *>& mfea_vifs_vector)
 		break;
 #endif // HAVE_IPV6
 	    default:
-		XLOG_ASSERT(false);
+		XLOG_UNREACHABLE();
 		break;
 	    }
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.6 2003/04/22 23:27:22 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.7 2003/05/19 00:19:58 pavlin Exp $"
 
 
 //
@@ -382,7 +382,7 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
     
     VifAddr vif_addr = *tmp_vif_addr;	// Get a copy
     if (mld6igmp_vif->delete_address(addr) != XORP_OK) {
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -574,7 +574,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
     //
     mld6igmp_vif = vif_find_by_vif_index(vif_index);
     if (mld6igmp_vif == NULL) {
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     if (! mld6igmp_vif->is_up())
@@ -592,7 +592,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
     return (ret_value);
     
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (XORP_ERROR);
     
     UNUSED(src_module_id);
@@ -736,7 +736,7 @@ Mld6igmpNode::join_prune_notify_routing(const string& module_instance_name,
 			       vif_index, source, group);
 	break;
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     

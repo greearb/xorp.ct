@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.7 2003/01/17 23:57:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.8 2003/03/10 23:20:52 hodson Exp $"
 
 
 //
@@ -286,7 +286,7 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 	break;
 	
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     XLOG_ASSERT(jp_sources != NULL);
@@ -682,7 +682,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     return (XORP_OK);
     
  pim_mre_find_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("INTERNAL PimMrt ERROR: "
 	       "cannot create entry for (%s,%s) create_flags = %#x",
 	       cstring(source_addr), cstring(group_addr), create_flags);
@@ -905,7 +905,7 @@ PimJpHeader::network_commit(PimNbr *pim_nbr, buffer_t *buffer)
     return (XORP_OK);
     
  invalid_addr_family_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("INTERNAL %s ERROR: "
 	       "invalid address family error = %d",
 	       PIMTYPE2ASCII(PIM_JOIN_PRUNE),

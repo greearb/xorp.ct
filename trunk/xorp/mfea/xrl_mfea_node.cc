@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.15 2003/05/15 23:40:37 pavlin Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.16 2003/05/18 03:19:57 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -201,7 +201,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -302,7 +302,7 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while(false);
     
@@ -359,7 +359,7 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     
@@ -400,7 +400,7 @@ XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     
@@ -574,7 +574,7 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -1352,7 +1352,7 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 		break;
 #endif // HAVE_IPV6
 	    default:
-		XLOG_ASSERT(false);
+		XLOG_UNREACHABLE();
 		break;
 	    }
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.15 2003/04/02 17:10:41 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.16 2003/04/22 23:27:24 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -180,7 +180,7 @@ PimMre::is_pim_nbr_missing() const
 	return (false);
     }
     
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     
     return (false);
 }
@@ -1330,7 +1330,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_sg_changed()
     pim_mre_sg_rpt = pim_mrt().pim_mre_find(source_addr(), group_addr(),
 					    PIM_MRE_SG_RPT, PIM_MRE_SG_RPT);
     if (pim_mre_sg_rpt == NULL) {
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	XLOG_ERROR("INTERNAL PimMrt ERROR: "
 		   "cannot create entry for (%s,%s) create_flags = %#x",
 		   cstring(source_addr()), cstring(group_addr()),

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.20 2003/03/30 03:50:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.21 2003/04/01 00:56:20 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -174,7 +174,7 @@ PimMre::add_pim_mre_lists()
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -254,7 +254,7 @@ PimMre::remove_pim_mre_lists()
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     

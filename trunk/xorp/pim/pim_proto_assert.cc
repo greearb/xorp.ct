@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.9 2003/02/10 03:09:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.10 2003/03/10 23:20:50 hodson Exp $"
 
 
 //
@@ -368,7 +368,7 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
     return (pim_send(IPvX::PIM_ROUTERS(family()), PIM_ASSERT, buffer));
     
  invalid_addr_family_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "invalid address family error = %d",
 	       PIMTYPE2ASCII(PIM_ASSERT),
@@ -378,7 +378,7 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
     return (XORP_ERROR);
     
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_ASSERT),

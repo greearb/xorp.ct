@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.16 2003/04/01 00:56:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.17 2003/04/22 23:27:23 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -294,7 +294,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
 	break;
 	
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     return (XORP_ERROR);
@@ -412,7 +412,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 	break;
 	
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     return (XORP_ERROR);
@@ -831,7 +831,7 @@ PimMre::assert_winner_metric_sg(uint16_t vif_index) const
 	return (NULL);
     
     if (! is_sg()) {
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (NULL);
     }
     
@@ -869,7 +869,7 @@ PimMre::set_assert_winner_metric_sg(uint16_t vif_index, AssertMetric *v)
 	return;
     
     if (! is_sg()) {
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return;
     }
     
@@ -942,7 +942,7 @@ PimMre::delete_assert_winner_metric_sg(uint16_t vif_index)
 	return;
     
     if (! is_sg()) {
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return;
     }
     

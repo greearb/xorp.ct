@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.18 2003/05/08 00:01:34 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.19 2003/05/19 00:20:23 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -285,7 +285,7 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
 	
@@ -409,7 +409,7 @@ XrlPimNode::start_protocol_kernel_vif(uint16_t vif_index)
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -461,7 +461,7 @@ XrlPimNode::stop_protocol_kernel_vif(uint16_t vif_index)
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -516,7 +516,7 @@ XrlPimNode::join_multicast_group(uint16_t vif_index,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -572,9 +572,9 @@ XrlPimNode::leave_multicast_group(uint16_t vif_index,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
-    } while(false);
+    } while (false);
     
     return (XORP_OK);
 }
@@ -631,7 +631,7 @@ XrlPimNode::add_mfc_to_kernel(const PimMfc& pim_mfc)
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -672,7 +672,7 @@ XrlPimNode::delete_mfc_from_kernel(const PimMfc& pim_mfc)
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -738,7 +738,7 @@ XrlPimNode::add_dataflow_monitor(const IPvX& source_addr,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -794,7 +794,7 @@ XrlPimNode::delete_dataflow_monitor(const IPvX& source_addr,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -826,7 +826,7 @@ XrlPimNode::delete_all_dataflow_monitor(const IPvX& source_addr,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     

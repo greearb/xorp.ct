@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.8 2003/04/16 04:53:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.9 2003/04/22 23:27:22 hodson Exp $"
 
 
 //
@@ -74,7 +74,7 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
 #ifdef HAVE_IPV6
 	set_proto_version_default(MLD_VERSION_DEFAULT);
 #else
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 #endif
     }
     set_proto_version(proto_version_default());
@@ -392,7 +392,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
     return (ret_value);
     
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       proto_message_type2ascii(message_type),
@@ -446,7 +446,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 	    break;
 	}
 #endif
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	ret_value = XORP_ERROR;
 	break;
     } while (false);

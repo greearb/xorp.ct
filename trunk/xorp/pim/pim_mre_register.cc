@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.9 2003/04/02 19:51:14 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.10 2003/04/22 23:27:23 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -182,7 +182,7 @@ PimMre::recompute_is_could_register_sg()
 	goto not_could_register_sg_label;
     if (is_could_register_sg())
 	goto could_register_sg_label;
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (false);
     
  not_could_register_sg_label:
@@ -291,7 +291,7 @@ PimMre::receive_register_stop()
     if (is_register_prune_state())
 	goto register_prune_state_label;
     
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return;
     
  register_noinfo_state_label:
@@ -356,7 +356,7 @@ PimMre::rp_register_sg_changed()
     if (is_register_prune_state())
 	goto register_prune_state_label;
     
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return;
     
  register_noinfo_state_label:

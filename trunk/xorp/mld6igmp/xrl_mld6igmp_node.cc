@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.10 2003/05/08 00:01:34 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.11 2003/05/19 00:19:58 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -229,7 +229,7 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -329,7 +329,7 @@ XrlMld6igmpNode::start_protocol_kernel_vif(uint16_t vif_index)
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -381,7 +381,7 @@ XrlMld6igmpNode::stop_protocol_kernel_vif(uint16_t vif_index)
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -436,7 +436,7 @@ XrlMld6igmpNode::join_multicast_group(uint16_t vif_index,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -491,7 +491,7 @@ XrlMld6igmpNode::leave_multicast_group(uint16_t vif_index,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -552,7 +552,7 @@ XrlMld6igmpNode::send_add_membership(const string& dst_module_instance_name,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while (false);
     
@@ -613,7 +613,7 @@ XrlMld6igmpNode::send_delete_membership(const string& dst_module_instance_name,
 	    break;
 	}
 	
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     } while(false);
     

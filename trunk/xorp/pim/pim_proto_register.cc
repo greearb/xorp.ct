@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.2 2003/03/10 23:20:52 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.3 2003/04/16 07:45:24 pavlin Exp $"
 
 
 //
@@ -129,7 +129,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 #endif // HAVE_IPV6
     
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -449,7 +449,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -646,7 +646,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
     return (XORP_OK);
     
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_REGISTER),
@@ -716,14 +716,14 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 #endif // HAVE_IPV6
     
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
     return (pim_send(rp_addr, PIM_REGISTER, buffer));
     
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s%s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_REGISTER),

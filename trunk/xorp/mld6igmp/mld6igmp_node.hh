@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.6 2003/04/22 23:27:22 hodson Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.7 2003/05/19 00:19:58 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -268,7 +268,7 @@ public:
 			    const IPvX&		, // dst,
 			    const uint8_t *	, // rcvbuf,
 			    size_t		  // rcvlen
-	) { XLOG_ASSERT(false); return (XORP_ERROR); }
+	) { XLOG_UNREACHABLE(); return (XORP_ERROR); }
     
     /**
      * Send signal message: not used by MLD/IGMP.
@@ -281,7 +281,7 @@ public:
 			    const IPvX&		, // dst,
 			    const uint8_t *	, // sndbuf,
 			    size_t		  // sndlen
-	) { XLOG_ASSERT(false); return (XORP_ERROR); }
+	) { XLOG_UNREACHABLE(); return (XORP_ERROR); }
     
     /**
      * Start the protocol with the kernel.

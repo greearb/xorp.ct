@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.11 2003/03/10 23:20:49 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.12 2003/04/01 00:56:22 pavlin Exp $"
 
 
 //
@@ -210,7 +210,7 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    break;
 	default:
 	    zone_state_string = "InvalidState";
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
 	    break;
 	}
@@ -273,7 +273,7 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    break;
 	default:
 	    zone_state_string = "InvalidState";
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
 	    break;
 	}
@@ -336,7 +336,7 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    break;
 	default:
 	    zone_state_string = "InvalidState";
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
 	    break;
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.4 2003/05/19 00:27:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.5 2003/05/19 06:48:38 pavlin Exp $"
 
 
 //
@@ -124,7 +124,7 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     _rcvmh.msg_iov		= _rcviov;
@@ -253,7 +253,7 @@ MfeaMrouter::open_mrouter_socket(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -293,7 +293,7 @@ MfeaMrouter::open_mrouter_socket(void)
     break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -362,7 +362,7 @@ MfeaMrouter::start_mrt(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -538,7 +538,7 @@ MfeaMrouter::stop_mrt(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -579,7 +579,7 @@ MfeaMrouter::start_pim(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -623,7 +623,7 @@ MfeaMrouter::stop_pim(void)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -702,7 +702,7 @@ MfeaMrouter::add_multicast_vif(uint16_t vif_index)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -754,7 +754,7 @@ MfeaMrouter::delete_multicast_vif(uint16_t vif_index)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -858,7 +858,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -915,7 +915,7 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1046,7 +1046,7 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1187,7 +1187,7 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1278,7 +1278,7 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1369,7 +1369,7 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1457,7 +1457,7 @@ MfeaMrouter::get_vif_count(uint16_t vif_index, VifCount& vif_count)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     
@@ -1496,7 +1496,7 @@ MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return;			// Error
     }
     
@@ -1567,7 +1567,7 @@ MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     
@@ -1743,7 +1743,7 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
     

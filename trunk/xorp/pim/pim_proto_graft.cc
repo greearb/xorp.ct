@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_graft.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_graft.cc,v 1.2 2003/03/10 23:20:52 hodson Exp $"
 
 
 //
@@ -81,7 +81,7 @@ PimVif::pim_graft_recv(PimNbr *pim_nbr,
     
     // Various error processing
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_GRAFT_ACK),
@@ -101,7 +101,7 @@ PimVif::pim_graft_send(const IPvX& dst, buffer_t *buffer)
 
     // Various error processing
  buflen_error:
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_GRAFT),

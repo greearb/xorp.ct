@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.4 2003/05/21 00:46:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.5 2003/05/21 03:08:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -144,7 +144,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     rtm->rtm_version = RTM_VERSION;
@@ -222,7 +222,7 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 	break;
 #endif // HAVE_IPV6
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	break;
     }
     rtm->rtm_version = RTM_VERSION;

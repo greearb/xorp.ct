@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.19 2003/04/02 19:51:13 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.20 2003/04/22 23:27:23 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1735,7 +1735,7 @@ PimMre::recompute_is_join_desired_rp()
 	goto not_joined_state_label;
     if (is_joined_state())
 	goto joined_state_label;
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (false);
     
  not_joined_state_label:
@@ -1817,7 +1817,7 @@ PimMre::recompute_is_join_desired_wc()
 	goto not_joined_state_label;
     if (is_joined_state())
 	goto joined_state_label;
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (false);
     
  not_joined_state_label:
@@ -1914,7 +1914,7 @@ PimMre::recompute_is_join_desired_sg()
 	goto not_joined_state_label;
     if (is_joined_state())
 	goto joined_state_label;
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (false);
     
  not_joined_state_label:
@@ -1999,7 +1999,7 @@ PimMre::recompute_is_prune_desired_sg_rpt()
 	goto pruned_state_label;
     if (is_not_pruned_state())
 	goto not_pruned_state_label;
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (false);
     
  rpt_not_joined_state_label:
@@ -2127,7 +2127,7 @@ PimMre::recompute_is_prune_desired_sg_rpt_sg()
     pim_mre_sg_rpt = pim_mrt().pim_mre_find(source_addr(), group_addr(),
 					    PIM_MRE_SG_RPT, PIM_MRE_SG_RPT);
     if (pim_mre_sg_rpt == NULL) {
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	XLOG_ERROR("INTERNAL PimMrt ERROR: "
 		   "cannot create entry for (%s,%s) create_flags = %#x",
 		   cstring(source_addr()), cstring(group_addr()),
@@ -2160,7 +2160,7 @@ PimMre::recompute_is_rpt_join_desired_g()
 	goto pruned_state_label;
     if (is_not_pruned_state())
 	goto not_pruned_state_label;
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (false);
     
  rpt_not_joined_state_label:
@@ -2201,7 +2201,7 @@ PimMre::recompute_inherited_olist_sg_rpt()
 	goto pruned_state_label;
     if (is_not_pruned_state())
 	goto not_pruned_state_label;
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (false);
     
  rpt_not_joined_state_label:

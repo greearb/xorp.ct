@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_rp.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_rp.cc,v 1.2 2003/03/10 23:20:52 hodson Exp $"
 
 
 //
@@ -209,13 +209,13 @@ RpTable::compare_rp(const IPvX& group_addr, PimRp *rp1, PimRp *rp2) const
 		return (rp2);
 	    break;
 	default:
-	    XLOG_ASSERT(false);
+	    XLOG_UNREACHABLE();
 	    // Unknown learned method. Ignore the RP.
 	    return (rp1);
 	}
 	break;
     default:
-	XLOG_ASSERT(false);
+	XLOG_UNREACHABLE();
 	// Unknown learned method. Ignore the RP.
 	return (rp2);
     }

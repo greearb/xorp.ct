@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.19 2003/04/02 18:57:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.20 2003/04/22 23:27:23 hodson Exp $"
 
 
 //
@@ -1682,7 +1682,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
     if (bsr_zone_state() == BsrZone::STATE_ELECTED_BSR)
 	goto bsr_zone_state_elected_bsr_label;
     // Invalid state
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (false);
     
  bsr_zone_state_candidate_bsr_label:
@@ -1801,7 +1801,7 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
     if (bsr_zone_state() == BsrZone::STATE_ACCEPT_PREFERRED)
 	goto bsr_zone_state_accept_preferred_label;
     // Invalid state
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return (false);
     
  bsr_zone_state_no_info_label:
@@ -2020,7 +2020,7 @@ BsrZone::bsr_timer_timeout()
     if (bsr_zone_state() == BsrZone::STATE_ACCEPT_PREFERRED)
 	goto bsr_zone_state_accept_preferred_label;
     // Invalid state
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return;
     
  bsr_zone_state_candidate_bsr_label:
@@ -2109,7 +2109,7 @@ BsrZone::scope_zone_expiry_timer_timeout()
     if (bsr_zone_state() == BsrZone::STATE_ACCEPT_ANY)
 	goto bsr_zone_state_accept_any_label;
     // Invalid state
-    XLOG_ASSERT(false);
+    XLOG_UNREACHABLE();
     return;
     
  bsr_zone_state_accept_any_label:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_if_sysctl.cc,v 1.3 2003/03/10 23:20:40 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_if_sysctl.cc,v 1.4 2003/04/10 03:12:03 pavlin Exp $"
 
 
 //
@@ -234,13 +234,13 @@ UnixComm::get_mcast_vifs_osdep(vector<MfeaVif *>& mfea_vifs_vector)
 	if (ifm->ifm_type == RTM_NEWADDR) {
 	    // Misc. checks
 	    if (mfea_vif == NULL) {
-		XLOG_ASSERT(false);		// Cannot happen
+		XLOG_UNREACHABLE();
 		continue;
 	    }
 	    ifam = (struct ifa_msghdr *)ifm;
 	    if ((mfea_vif->pif_index() > 0)
 		&& (mfea_vif->pif_index() != ifam->ifam_index)) {
-		XLOG_ASSERT(false);		// Cannot happen
+		XLOG_UNREACHABLE();
 		continue;
 	    }
 	    
