@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.18 2003/03/10 23:20:09 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.19 2003/04/02 22:18:59 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -107,6 +107,9 @@ Peer::copy(const Peer& rhs)
 bool
 Peer::pending()
 {
+    debug_msg("pending? : %s\n", (_session && !_established && !_passive)
+		  ? "true" : "false");
+
     if(_session && !_established && !_passive)
 	return true;
 
