@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.6 2003/03/16 07:18:57 pavlin Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.7 2003/03/17 23:32:42 pavlin Exp $"
 
 #include <sysexits.h>
 
@@ -43,11 +43,14 @@ main (int /* argc */, char *argv[])
 	//
 	EventLoop event_loop;
 	XrlStdRouter xrl_std_router_rib(event_loop, "rib");
-	    
+	
 	//
 	// The RIB manager
 	//
 	RibManager rib_manager(event_loop, xrl_std_router_rib);
+	// Add the FEA as a RIB client
+	rib_manager.add_rib_client("fea", AF_INET, true, false);
+	
 	rib_manager.run_event_loop();
     } catch (...) {
 	xorp_catch_standard_exceptions();

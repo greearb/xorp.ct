@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.7 2003/03/19 09:05:19 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.8 2003/03/20 00:57:53 pavlin Exp $"
 
 #include "rib_module.h"
 #include "rib_client.hh"
@@ -23,13 +23,13 @@
 #define codepath(x) printf("ExTabCodePath: %d\n", x);
 
 template<class A>
-ExportTable<A>::ExportTable<A>(const string&  tablename,
-			       RouteTable<A>  *parent,
-			       RibClient      *rib_client)
+ExportTable<A>::ExportTable<A>(const string&	 tablename,
+			       RouteTable<A>	 *parent,
+			       list<RibClient *> *rib_clients_list)
     : RouteTable<A>(tablename)
 {
     _parent = parent;
-    _rib_client = rib_client;
+    _rib_clients_list = rib_clients_list;
 
     // plumb ourselves into the table graph
     if (_parent != NULL) {
@@ -57,8 +57,17 @@ ExportTable<A>::add_route(const IPRouteEntry<A>& route,
 	printf("Add route called for connected route\n");
 	return 0;
     }
-    _rib_client->add_route(route);
-
+    
+    //
+    // Add the route to all RIB clients
+    //
+    list<RibClient *>::iterator iter;
+    for (iter = _rib_clients_list->begin();
+	 iter != _rib_clients_list->end(); ++iter) {
+	RibClient *rib_client = *iter;
+	rib_client->add_route(route);
+    }
+    
     debug_msg(("Add route called on export table " + _tablename +
 	       "\n").c_str());
     return 0;
@@ -75,7 +84,16 @@ ExportTable<A>::delete_route(const IPRouteEntry<A> *route,
 	printf("Delete route called for connected route\n");
 	return 0;
     }
-    _rib_client->delete_route(*route);
+
+    //
+    // Delete the route from all RIB clients
+    //
+    list<RibClient *>::iterator iter;
+    for (iter = _rib_clients_list->begin();
+	 iter != _rib_clients_list->end(); ++iter) {
+	RibClient *rib_client = *iter;
+	rib_client->delete_route(*route);
+    }
 
     debug_msg("Delete route called on export table\n");
     return 0;

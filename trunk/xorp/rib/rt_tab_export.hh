@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_export.hh,v 1.5 2003/03/19 09:05:20 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_export.hh,v 1.6 2003/03/20 00:57:53 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXPORT_HH__
 #define __RIB_RT_TAB_EXPORT_HH__
@@ -37,11 +37,12 @@ public:
      * @param tablename the name of the table, used for debugging purposes.
      * @param parent the @ref RouteTable immediately preceding this
      * one.  Usually this will be a @ref RegisterTable.
-     * @param rib_client a pointer to the RIB's @ref RibClient instance.  The
-     * RibClient is used to communicate with the RIB client using XRLs.
+     * @param rib_clients_list a pointer to the RIB's list of @ref RibClient
+     * instances.  The list of RibClient instances is used to communicate
+     * with the RIB clients using XRLs.
      */
     ExportTable(const string& tablename, RouteTable<A> *parent, 
-		RibClient *rib_client);
+		list<RibClient *> *rib_clients_list);
 
     /**
      * ExportTable Destructor
@@ -123,7 +124,7 @@ public:
     
 private:
     RouteTable<A>	*_parent;
-    RibClient		*_rib_client;
+    list<RibClient *>	*_rib_clients_list;
 };
 
 #endif // __RIB_RT_TAB_EXPORT_HH__

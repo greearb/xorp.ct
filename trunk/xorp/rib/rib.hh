@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.7 2003/03/19 09:05:19 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.8 2003/03/20 00:57:53 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -81,9 +81,10 @@ public:
      * exported to the RIB clients (e.g., the FEA).
      *
      * @see ExportTable
+     * @param rib_clients_list a pointer to the list of RIB clients.
      * @return -1 if already initialized.
      */
-    int initialize_export(RibClient *rib_client);
+    int initialize_export(list<RibClient *> *rib_clients_list);
 
     /**
      * Initialize the RIB's RegisterTable.  The RegisterTable allows

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rib/TODO,v 1.2 2003/03/15 02:05:10 pavlin Exp $
+# $XORP: xorp/rib/TODO,v 1.3 2003/03/20 00:57:52 pavlin Exp $
 #
 
 RIB To Do List, 9/24/02
@@ -34,6 +34,5 @@ the same route.
 
 12. Change virtual XrlCmdError rib_0_1_no_fea(); to enable/disable
     RIB clients.
-13. Fix XrlRibTarget::rib_0_1_no_fea() to correspond to rib clients.
 
-    
+13. Fix XrlRibTarget::rib_0_1_no_fea() to correspond to rib clients.

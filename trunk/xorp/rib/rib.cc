@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.9 2003/03/19 09:05:19 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.10 2003/03/20 00:57:52 pavlin Exp $"
 
 #include "config.h"
 #include "rib_module.h"
@@ -200,10 +200,10 @@ RIB<A>::RIB(RibTransportType t)
 
 template<class A>
 int
-RIB<A>::initialize_export(RibClient *rib_client)
+RIB<A>::initialize_export(list<RibClient *> *rib_clients_list)
 {
     ExportTable<A> *et = new ExportTable<A>("ExportToRibClients", 0,
-					    rib_client);
+					    rib_clients_list);
     
     if (add_table("ExportToRibClients", et) != 0) {
 	XLOG_FATAL("Export already initialized.");

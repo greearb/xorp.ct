@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/fea_client.hh,v 1.9 2003/03/19 09:05:19 pavlin Exp $
+// $XORP: xorp/rib/rib_client.hh,v 1.1 2003/03/20 00:57:53 pavlin Exp $
 
 #ifndef __RIB_RIB_CLIENT_HH__
 #define __RIB_RIB_CLIENT_HH__
@@ -52,17 +52,24 @@ public:
     ~RibClient();
 
     /**
+     * Get the target name.
+     * 
+     * @return the target name.
+     */
+    const string& target_name() const { return _target_name; }
+
+    /**
      * Set enabled state.
      *
      * When enabled RibClient attempts to send commands to the RIB client.
      * When disabled it silently ignores the requests.
      */
-    void set_enabled(bool en);
+    void set_enabled(bool en) { _enabled = en; }
 
     /**
      * Get enabled state.
      */
-    bool enabled() const;
+    bool enabled() const { return (_enabled); }
     
     /**
      * Communicate the addition of a new IPv4 route to the RIB client.
@@ -184,7 +191,7 @@ private:
 					  // for later deletion.
     const size_t _max_ops;		// Max. allowed tasks in a transaction
     size_t	_op_count;		// Number of tasks in this transaction
-    bool	_enabled;		// Enabled state
+    bool	_enabled;		// True if enabled
 };
 
 #endif // __RIB_RIB_CLIENT_HH__

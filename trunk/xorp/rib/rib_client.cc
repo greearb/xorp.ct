@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.12 2003/03/19 09:05:19 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_client.cc,v 1.1 2003/03/20 00:57:53 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -306,18 +306,6 @@ RibClient::RibClient(XrlRouter& rtr, const string& target_name, size_t max_ops)
 
 RibClient::~RibClient()
 {
-}
-
-void
-RibClient::set_enabled(bool en)
-{
-    _enabled = en;
-}
-
-bool
-RibClient::enabled() const
-{
-    return _enabled;
 }
 
 void
