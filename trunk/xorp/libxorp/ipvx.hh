@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.3 2003/02/26 00:14:14 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.4 2003/03/10 23:20:33 hodson Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -56,14 +56,6 @@ public:
      */
     IPvX(int family, uint8_t *from_uint8) throw (InvalidFamily);
     
-    /**
-     * Constructor from a string.
-     * 
-     * @param from_cstring C-style string in the IPv4 dotted decimal
-     * or IPv6 canonical human-readable format used for initialization.
-     */
-    IPvX(const char *from_cstring) throw (InvalidString);
-
     /**
      * Constructor from an IPv4 address.
      * 
@@ -122,9 +114,17 @@ public:
     IPvX(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily);
 
     /**
+     * Constructor from a string.
+     * 
+     * @param from_cstring C-style string in the IPv4 dotted decimal
+     * or IPv6 canonical human-readable format used for initialization.
+     */
+    IPvX(const char *from_cstring) throw (InvalidString);
+
+    /**
      * Copy the IPvX raw address to specified memory location.
      * 
-     * @param: to_uint8 the pointer to the memory to copy the address to
+     * @param: to_uint8 the pointer to the memory to copy the address to.
      * @return the number of copied octets.
      */
     size_t copy_out(uint8_t *to_uint8) const;
@@ -189,7 +189,8 @@ public:
     size_t copy_out(sockaddr_in6& to_sockaddr_in6) const throw (InvalidFamily);
     
     /**
-     * Copy a raw address of specified family type into IPvX structure.
+     * Copy a raw address of specified family type from specified memory
+     * location into IPvX structure.
      * 
      * @param family the address family.
      * @param from_uint8 the memory address to copy the address from.

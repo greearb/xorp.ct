@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.2 2003/03/10 23:20:33 hodson Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -65,19 +65,6 @@ IPvX::IPvX(const IPv6& ipv6)
     memcpy(_addr, &ipv6, 16);
 }
 
-IPvX::IPvX(char const *from_cstring) throw (InvalidString) {
-    if (from_cstring == NULL) {
-	xorp_throw(InvalidString, "Null value");
-    } else if (inet_pton(AF_INET, from_cstring, _addr) > 0) {
-	_af = AF_INET;
-    } else if (inet_pton(AF_INET6, from_cstring, _addr) > 0) {
-	_af = AF_INET6;
-    } else {
-	xorp_throw(InvalidString, 
-		   c_format("Bad IPvX \"%s\"", from_cstring));
-    }
-}
-
 IPvX::IPvX(const in_addr& from_in_addr)
 {
     copy_in(AF_INET, reinterpret_cast<const uint8_t *>(&from_in_addr));
@@ -103,6 +90,19 @@ IPvX::IPvX(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
     copy_in(from_sockaddr_in6);
 }
 
+IPvX::IPvX(char const *from_cstring) throw (InvalidString)
+{
+    if (from_cstring == NULL) {
+	xorp_throw(InvalidString, "Null value");
+    } else if (inet_pton(AF_INET, from_cstring, _addr) > 0) {
+	_af = AF_INET;
+    } else if (inet_pton(AF_INET6, from_cstring, _addr) > 0) {
+	_af = AF_INET6;
+    } else {
+	xorp_throw(InvalidString, 
+		   c_format("Bad IPvX \"%s\"", from_cstring));
+    }
+}
 
 
 // TODO: if this method is used very often, then reimplement it
