@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.7 2003/03/10 23:20:01 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.8 2003/09/27 03:42:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -45,7 +45,6 @@ BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
 BGPPeerData::~BGPPeerData()
 {
 }
-
 
 // Set whether a peer is internal or external
 void
@@ -101,8 +100,7 @@ BGPPeerData::set_keepalive_duration(uint32_t d)
 }
 
 void
-BGPPeerData::add_parameter(const BGPParameter* p,
-			   ParameterList& p_list)
+BGPPeerData::add_parameter(const BGPParameter* p, ParameterList& p_list)
 {
     debug_msg("add_parameter %s\n", p->str().c_str());
     debug_msg("%p\n", p);
@@ -117,11 +115,6 @@ BGPPeerData::remove_parameter(const BGPParameter* p,
     iter = p_list.begin();
     while (iter != p_list.end()) {
 	if (*iter == p) {
-	    // XXX I think we have to delete it here, because no-one
-	    // else should be storing this, but there's no way to be
-	    // sure.
-	    debug_msg("deleting parameter %x\n", (uint)p);
-	    delete p;
 	    p_list.erase(iter);
 	    break;
 	}
