@@ -1,10 +1,59 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.15 2003/06/06 02:52:23 mjh Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.16 2003/06/09 20:08:49 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
+
+Release 0.4 (2003/??/??)
+========================
+  ALL:
+    - 
+
+  LIBXORP:
+    - 
+
+  LIBXIPC:
+    - 
+
+  XRL:
+    - 
+
+  RTRMGR:
+    - 
+
+  XORPSH:
+    - 
+
+  FEA/MFEA:
+    - Bug fix: if the multicast protocol to start/stop is PIM, then start/stop
+      PIM multicast routing in the kernel.
+
+  RIB: 
+    - 
+
+  BGP:
+    - 
+
+  MLD/IGMP:
+    - 
+
+  PIM-SM:
+    - Implement Join/Prune items fragmentation across Join/Prune messages
+      when generating Join/Prune messages.
+
+    - Fix some of the XRL names related to static RP configuration
+      in the configuration shell scripts.
+
+  CLI:
+    - 
+
+  SNMP:
+    - 
+
+  RIP:
+    - 
 
 Release 0.3 (2003/06/09)
 ========================
