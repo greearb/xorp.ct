@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.2 2004/05/24 01:22:35 hodson Exp $"
+#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.3 2004/05/28 05:00:37 hodson Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -304,7 +304,6 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	XorpTimer t = e.set_flag_after_ms(5000, &flag);
 	while (flag == false &&
 	       smon.have_status(ServiceStatus(~(FAILED|SHUTDOWN)))) {
-	    printf("x");
 	    e.run();
 	}
 
