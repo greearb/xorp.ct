@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.16 2005/03/18 08:15:03 mjh Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.17 2005/03/25 02:52:46 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -92,6 +92,7 @@ private:
      * Called when the dump table has completed its tasks.
      */
     void completed();
+    void schedule_unplumb_self();
     void unplumb_self();
     void wakeup_downstream();
     bool do_next_route_dump();

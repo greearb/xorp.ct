@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.34 2005/03/21 20:42:09 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.35 2005/03/25 02:52:46 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -367,10 +367,7 @@ DumpTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	    //the queue upstream has now drained
 	    //we can finally delete ourselves
 
-	    unplumb_self();
-	    delete this;
-	    //XXX careful we only access stack state after
-	    //deleting ourselves...
+	    schedule_unplumb_self();
 	}
 	return messages_queued;
     }
@@ -509,8 +506,25 @@ DumpTable<A>::completed()
 	return;
     } 
 
-    unplumb_self();
-    delete this;
+    schedule_unplumb_self();
+}
+
+template<class A>
+void
+DumpTable<A>::schedule_unplumb_self() 
+{
+    /* it's too scary to unplumb directly here, because this method
+       can be called in the middle of passing messages up and
+       downstream.  Having tables just remove themselves in the middle
+       of message processing can cause local state and iterators in
+       other tables to become invalid, with unintended side effects.
+       So we schedule the unplumbing once the current message
+       processing has finished, and do it when nothing else is going
+       on */
+    _dump_timer = eventloop().
+	new_oneoff_after_ms(0,
+			    callback(this,
+				     &DumpTable<A>::unplumb_self));
 }
 
 template<class A>
@@ -535,6 +549,7 @@ DumpTable<A>::unplumb_self()
     // ensure we can't continue to operate
     this->_next_table = reinterpret_cast<BGPRouteTable<A>*>(0xd0d0);
     this->_parent = reinterpret_cast<BGPRouteTable<A>*>(0xd0d0);
+    delete this;
 }
 
 #ifdef AUDIT_ENABLE
