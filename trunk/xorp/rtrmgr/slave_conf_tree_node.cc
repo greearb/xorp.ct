@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.5 2003/09/24 16:16:07 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.6 2003/12/02 09:38:57 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -65,11 +65,11 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
     }
 
     if (depth > 0) {	
-	XLOG_ASSERT(_template != NULL);
+	XLOG_ASSERT(_template_tree_node != NULL);
 	cmd_tree.push(_segname);
 	if (include_intermediates 
-	    && (_template->is_tag() == false)
-	    && (_template->children().empty() == false)) {
+	    && (_template_tree_node->is_tag() == false)
+	    && (_template_tree_node->children().empty() == false)) {
 	    //
 	    // Include_intermediates indicates that we want to include all
 	    // true subtree interior nodes.  This is needed for show and
@@ -77,15 +77,15 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 	    // hierarchy.
 	    //
 	    debug_msg("ACTIVATE NODE: %s\n", _path.c_str());
-	    cmd_tree.instantiate(this, _template);
+	    cmd_tree.instantiate(this, _template_tree_node);
 	    instantiated = true;
 	} else {
 	    // Check to see if this node has a command that matches
 	    // what we're looking for.
 	    list<string>::const_iterator iter;
 	    for (iter = cmd_names.begin(); iter != cmd_names.end(); ++iter) {
-		if (_template->const_command(*iter) != NULL) {
-		    cmd_tree.instantiate(this, _template);
+		if (_template_tree_node->const_command(*iter) != NULL) {
+		    cmd_tree.instantiate(this, _template_tree_node);
 		    instantiated = true;
 		    break;
 		}
@@ -102,7 +102,7 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 					include_intermediates,
 					include_templates);
 	if (done) {
-	    templates_done.insert(sctn->template_node());
+	    templates_done.insert(sctn->template_tree_node());
 	    instantiated = true;
 	}
     }
@@ -124,10 +124,10 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
     // If we haven't already added the children of the template node,
     // we need to consider whether they can add to the command tree too.
     //
-    if ((_template != NULL)  && include_templates) {
+    if ((_template_tree_node != NULL)  && include_templates) {
 	list<TemplateTreeNode*>::const_iterator ttn_iter;
-	for (ttn_iter = _template->children().begin();
-	     ttn_iter != _template->children().end();
+	for (ttn_iter = _template_tree_node->children().begin();
+	     ttn_iter != _template_tree_node->children().end();
 	     ++ttn_iter) {
 	    if (templates_done.find(*ttn_iter) == templates_done.end()) {
 
@@ -217,7 +217,8 @@ SlaveConfigTreeNode::get_deletions(const SlaveConfigTreeNode& master_node)
 
     printf("get_deletions >%s<\n", _path.c_str());
 
-    if ((!master_node.deleted()) || (_template!=NULL && is_tag())) {
+    if ((! master_node.deleted())
+	|| (_template_tree_node != NULL && is_tag())) {
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = master_node.const_children().begin();
 	     iter != master_node.const_children().end();
@@ -252,38 +253,20 @@ SlaveConfigTreeNode::check_allowed_value(string& errmsg) const
 {
     const AllowCommand* cmd;
 
-    if (_template == NULL)
+    if (_template_tree_node == NULL)
 	return true;
 
-    cmd = dynamic_cast<const AllowCommand *>(_template->const_command("%allow"));
+    cmd = dynamic_cast<const AllowCommand *>(_template_tree_node->const_command("%allow"));
     if (cmd != NULL) {
-	try {
-	    cmd->execute(*this);
-	} catch (ParseError(&pe)) {
+	string tmpmsg;
+	if (cmd->verify_variable_value(*this, tmpmsg) != true) {
 	    string errpath;
 	    if (_parent != NULL && _parent->is_tag())
 		errpath = _parent->path();
 	    else
 		errpath = path();
-	    errmsg = "Bad value for \"" + errpath + "\"\n";
-	    list<string> allowed_values = cmd->allowed_values();
-	    if (allowed_values.size() == 1) {
-		errmsg += "The only value allowed is " +
-		    allowed_values.front() + ".\n";
-	    } else {
-		errmsg += "Allowed values are ";
-		errmsg += allowed_values.front();
-		allowed_values.pop_front();
-		while (!allowed_values.empty()) {
-		    if (allowed_values.size() == 1)
-			errmsg += " and ";
-		    else
-			errmsg += ", ";
-		    errmsg += allowed_values.front();
-		    allowed_values.pop_front();
-		}
-		errmsg += ".\n";
-	    }
+	    errmsg = c_format("Bad value for \"%s\": %s; ",
+			      errpath.c_str(), errmsg.c_str());
 	    return false;
 	}
     }
