@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/timer2xorp.cc,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $"
+#ident "$XORP: xorp/mrt/timer2xorp.cc,v 1.2 2003/03/10 23:20:45 hodson Exp $"
 
 
 //
@@ -46,12 +46,12 @@ static XorpTimer _xorp_mtimer;
 //
 // Local functions prototypes
 //
-static void	xorp_process_mtimer(void *);
+static void	xorp_process_mtimer();
 
 
 // A dummy function to process the first mtimer that is pending
 static void
-xorp_process_mtimer(void *)
+xorp_process_mtimer()
 {
     // XXX: xorp_schedule_mtimer() will be executed immediately after
     // that and it will call TIMER_PROCESS()
@@ -74,7 +74,8 @@ xorp_schedule_mtimer(EventLoop& e)
 	|| TIMEVAL_CMP(&timeval_next_abs, &timeval_curr_abs, < )) {
 	TIMEVAL_COPY(&timeval_next_abs, &timeval_curr_abs);
 	_xorp_mtimer.unschedule();
-	_xorp_mtimer = e.new_oneoff_at(timeval_next_abs, xorp_process_mtimer);
+	_xorp_mtimer = e.new_oneoff_at(timeval_next_abs,
+				       callback(xorp_process_mtimer));
 	return (true);
     }
     

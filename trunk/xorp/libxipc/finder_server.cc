@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/finder_server.cc,v 1.5 2003/03/16 08:20:28 pavlin Exp $"
 
 #include <sys/time.h>
 #include <sys/types.h>
@@ -82,10 +82,10 @@ protected:
 
 private:
     void receive();
-    static void	receive_hook(int fd, SelectorMask m, void* thunk_connection);
+    void receive_hook(int fd, SelectorMask m);
 
     bool helo_carry_on();
-    static bool periodic_helo_hook(void* thunk_connection);
+    bool periodic_helo_hook();
 
     static void write_failure(FinderConnectionInfo* fci);
 };
@@ -99,12 +99,11 @@ FinderConnectionInfo::FinderConnectionInfo(FinderServer *s,
 
     _e = e;
     _helo_timer = _e->new_periodic((int)HELO_TIMEOUT_MILLISEC,
-				      periodic_helo_hook,
-				      reinterpret_cast<void*>(this));
+			callback(this,
+				 &FinderConnectionInfo::periodic_helo_hook));
 
-    _e->add_selector(_connection->descriptor(),
-		     SEL_RD, receive_hook,
-		     reinterpret_cast<void*>(this));
+    _e->add_selector(_connection->descriptor(), SEL_RD,
+		     callback(this, &FinderConnectionInfo::receive_hook));
 }
 
 FinderConnectionInfo::~FinderConnectionInfo()
@@ -248,14 +247,12 @@ FinderConnectionInfo::receive()
 }
 
 void
-FinderConnectionInfo::receive_hook(int fd, SelectorMask m, void *thunk_fci)
+FinderConnectionInfo::receive_hook(int fd, SelectorMask m)
 {
-    FinderConnectionInfo* fci =
-	reinterpret_cast<FinderConnectionInfo*>(thunk_fci);
-    assert(fd == fci->_connection->descriptor());
+    assert(fd == _connection->descriptor());
     assert(m == SEL_RD);
     debug_msg("receive hook\n");
-    fci->receive();
+    receive();
 }
 
 void
@@ -285,15 +282,13 @@ FinderConnectionInfo::helo_carry_on()
 }
 
 bool
-FinderConnectionInfo::periodic_helo_hook(void *thunk_fci)
+FinderConnectionInfo::periodic_helo_hook()
 {
-    FinderConnectionInfo* fci =
-	reinterpret_cast<FinderConnectionInfo*>(thunk_fci);
-
-    bool carry_on = fci->helo_carry_on();
-    if (carry_on == false)
-	delete fci;
-    return carry_on;
+    if (helo_carry_on() == false) {
+    	delete this;
+	return false;
+    }
+    return true;
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.4 2003/01/26 04:06:20 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.5 2003/03/10 23:20:22 hodson Exp $"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -265,48 +265,45 @@ FinderClient::error_handler(const FinderMessage& msg)
 }
 
 void
-FinderClient::receive_hook(int fd, SelectorMask sm, void* thunked_client)
+FinderClient::receive_hook(int fd, SelectorMask sm)
 {
-    FinderClient* c = reinterpret_cast<FinderClient*>(thunked_client);
-
-    assert(c->_connection->descriptor() == fd);
+    assert(_connection->descriptor() == fd);
     assert(sm == SEL_RD);
-
-    c->_reaper_timer.schedule_after_ms(CONNECT_REAP_MILLISEC);
+    _reaper_timer.schedule_after_ms(CONNECT_REAP_MILLISEC);
 
     FinderMessage msg;
-    c->_connection->read_message(msg);
+    _connection->read_message(msg);
 
     switch (msg.type()) {
     case HELLO:
-	c->hello_handler(msg);
+	hello_handler(msg);
 	break;
     case BYE:
-	c->bye_handler(msg);
+	bye_handler(msg);
 	return;
     case REGISTER:
-	c->register_handler(msg);
+	register_handler(msg);
 	break;
     case UNREGISTER:
-	c->unregister_handler(msg);
+	unregister_handler(msg);
 	break;
     case NOTIFY:
-	c->notify_handler(msg);
+	notify_handler(msg);
 	break;
     case LOCATE:
-	c->locate_handler(msg);
+	locate_handler(msg);
 	break;
     case ERROR:
-	c->error_handler(msg);
+	error_handler(msg);
 	break;
     }
 
-    if (msg.is_ack() == false && c->_connection != 0) {
+    if (msg.is_ack() == false && _connection != 0) {
 	FinderMessage ack;
 
-	c->_connection->prepare_ack(msg, ack);
-	if (c->_connection->write_message(ack) <= 0) {
-	    c->restart_connection();
+	_connection->prepare_ack(msg, ack);
+	if (_connection->write_message(ack) <= 0) {
+	    restart_connection();
 	    return;
 	}
     }
@@ -383,49 +380,50 @@ FinderClient::invalidate(const string& name)
 // Connection related
 
 void
-FinderClient::initiate_hook(void *thunked_client)
+FinderClient::initiate_hook()
 {
-    FinderClient *c = reinterpret_cast<FinderClient*>(thunked_client);
-
-    assert(c->_connection == NULL);
-    c->_connection =
-	FinderTCPClientIPCFactory::create(c->_finder_host.c_str(),
-					  c->_finder_port);
-    if (c->_connection) {
+    assert(_connection == NULL);
+    _connection =
+	FinderTCPClientIPCFactory::create(_finder_host.c_str(),
+					  _finder_port);
+    if (_connection) {
 	struct timeval now;
 	gettimeofday(&now, NULL);
 	debug_msg("Connected to Finder. Re-registering...%lu.%06lu\n",
 		  (unsigned long)now.tv_sec, (unsigned long)now.tv_usec);
 
 	// Connect succeed
-	c->_event_loop.add_selector(c->_connection->descriptor(),
-				     SEL_RD, receive_hook, thunked_client);
+	_event_loop.add_selector(_connection->descriptor(),
+				    SEL_RD,
+				    callback(this,
+					     &FinderClient::receive_hook));
 
 	// Send everything that has been registered with client
-	for (RI r = c->_registered.begin(); r != c->_registered.end(); r++) {
-	    c->send_register(r->second);
+	for (RI r = _registered.begin(); r != _registered.end(); r++) {
+	    send_register(r->second);
 	}
 
 	// Start _reaper_timer as one way to spot when server has died
-	c->_reaper_timer = c->_event_loop.new_oneoff_after_ms
-	    (CONNECT_REAP_MILLISEC, reap_hook, thunked_client);
-	c->_connect_timer.clear(); // timer free'd when this fn returns
+	_reaper_timer =
+	    _event_loop.new_oneoff_after_ms(CONNECT_REAP_MILLISEC,
+		callback(this, &FinderClient::reap_hook));
+	_connect_timer.clear(); // timer free'd when this fn returns
     } else {
 	debug_msg("Failed to connect to Finder. Retrying...\n");
 	// Connect failed try again
-	c->_connect_timer = c->_event_loop.new_oneoff_after_ms
-	    (CONNECT_RETRY_MILLISEC, initiate_hook, thunked_client);
+	_connect_timer =
+	    _event_loop.new_oneoff_after_ms(CONNECT_RETRY_MILLISEC,
+		callback(this, &FinderClient::initiate_hook));
     }
 }
 
 void
-FinderClient::reap_hook(void* thunked_client)
+FinderClient::reap_hook()
 {
-    FinderClient* c = reinterpret_cast<FinderClient*>(thunked_client);
-    if (c->_connection == 0) {
-	initiate_hook(thunked_client);
+    if (_connection == 0) {
+	initiate_hook();
     } else {
-	c->restart_connection();
+	restart_connection();
     }
 }
 
@@ -441,7 +439,7 @@ void
 FinderClient::start_connection()
 {
     assert(_connection == 0);
-    initiate_hook(reinterpret_cast<void*>(this));
+    initiate_hook();
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.5 2003/03/10 23:20:22 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.6 2003/03/16 08:20:26 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_CLIENT_HH__
 #define __LIBXIPC_FINDER_CLIENT_HH__
@@ -102,17 +102,17 @@ private:
     void locate_handler(const FinderMessage& msg);
     void error_handler(const FinderMessage& msg);
 
-    static void receive_hook(int fd, SelectorMask m, void *thunked_client);
+    void receive_hook(int fd, SelectorMask m);
 
     // Connection related methods, hooks, and timers
     void start_connection();
     void terminate_connection();
     void restart_connection();
 
-    static void initiate_hook(void* thunked_client);
+    void initiate_hook();
     XorpTimer _connect_timer; // Connection retry timer.
 
-    static void reap_hook(void* thunked_client);
+    void reap_hook();
     XorpTimer _reaper_timer;  // If connection quiet too long, reaper kills it.
 };
 

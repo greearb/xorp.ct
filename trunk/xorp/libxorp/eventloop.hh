@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.2 2003/03/10 23:20:31 hodson Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -129,50 +129,6 @@ public:
     XorpTimer new_periodic(int ms, const PeriodicTimerCallback& pcb);
 
     /**
-     * [Deprecated] Add a new one-off timer to the EventLoop.
-     * 
-     * @param when the absolute time when the timer expires.
-     * @param hook user function that is invoked when timer expires.
-     * @param thunk argument supplied to user function when timer expires.
-     * @return a @ref XorpTimer object that must be assigned to remain 
-     * scheduled.
-     */
-    XorpTimer new_oneoff_at(const timeval& when,
-			    OneoffTimerHook hook = 0, 
-			    void* thunk = 0);
-
-    /**
-     * [Deprecated] Add a new one-off timer to the EventLoop. 
-     * 
-     * @param ms the relative time in milliseconds when the timer expires.
-     * @param hook user function that is invoked when timer expires.
-     * @param thunk argument supplied to user function when timer expires.
-     * @return a @ref XorpTimer object that must be assigned to remain 
-     * scheduled.
-     */
-    XorpTimer new_oneoff_after_ms(int ms, 
-				  OneoffTimerHook hook = 0, 
-				  void* thunk = 0);
-
-    /**
-     * [Deprecated] Add periodic timer to the EventLoop.
-     * 
-     * @param ms the period in milliseconds when the timer expires.
-     * 
-     * @param hook user function that is invoked when timer expires.
-     * If the hook returns false the periodic XorpTimer is unscheduled.
-     * 
-     * @param thunk argument supplied to user function when timer
-     * expires.
-     * 
-     * @return a @ref XorpTimer object that must be assigned to remain 
-     * scheduled.
-     */
-    XorpTimer new_periodic(int ms, 
-			   PeriodicTimerHook hook, 
-			   void* thunk = 0);
-
-    /**
      * Add a flag setting timer to the EventLoop.
      * 
      * @param when the absolute time when the timer expires.
@@ -211,31 +167,6 @@ public:
      * scheduled.
      */
     XorpTimer new_timer(const BasicTimerCallback& cb);
-
-    /**
-     * [Deprecated] Add a file descriptor and callback to be invoked when
-     * descriptor is ready for input or output.
-     * 
-     * A SelectorMask determines what type of I/O event will cause the
-     * callback to be invoked.
-     * 
-     * Only one callback may be associated with each event
-     * type, e.g. one callback for read pending, one callback for
-     * write pending.
-     * 
-     * If multiple event types in are associated with the same
-     * callback, the callback is only invoked once, but the mask
-     * argument passed to the callback shows multiple event types.
-     * 
-     * @param fd the file descriptor.  
-     * @param mask the @ref SelectorMask of the event types to that
-     * will invoke hook.  
-     * @param hook hook to be invoked when file descriptor has I/O pending.
-     * @param thunk user value to be passed into hook.
-     * @return true on success.  
-     */
-    inline bool add_selector(int fd, SelectorMask mask, SelectorHook hook, 
-			     void *thunk);
 
     /**
      * Add a file descriptor and callback to be invoked when
@@ -324,24 +255,6 @@ EventLoop::new_periodic(int period_ms, const PeriodicTimerCallback& pcb)
 }
 
 inline XorpTimer
-EventLoop::new_oneoff_at(const timeval &tv, OneoffTimerHook hook, void *thunk)
-{
-    return new_oneoff_at(tv, callback(hook, thunk));
-}
-
-inline XorpTimer
-EventLoop::new_oneoff_after_ms(int ms, OneoffTimerHook hook, void *thunk)
-{
-    return new_oneoff_after_ms(ms, callback(hook,thunk));
-}
-
-inline XorpTimer
-EventLoop::new_periodic(int period_ms, PeriodicTimerHook hook, void *thunk)
-{
-   return new_periodic(period_ms, callback(hook, thunk));
-}
-
-inline XorpTimer
 EventLoop::set_flag_at(const timeval &tv, bool *flag_ptr)
 {
     return _timer_list.set_flag_at(tv, flag_ptr);
@@ -351,15 +264,6 @@ inline XorpTimer
 EventLoop::set_flag_after_ms(int ms, bool *flag_ptr)
 {
     return _timer_list.set_flag_after_ms(ms, flag_ptr);
-}
-
-inline bool
-EventLoop::add_selector(int		fd,
-			SelectorMask	mask, 
-			SelectorHook	hook,
-			void*		thunk)
-{
-    return _selector_list.add_selector(fd, mask, hook, thunk);
 }
 
 inline bool

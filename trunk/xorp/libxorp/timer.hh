@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.3 2003/02/23 06:45:12 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.4 2003/03/10 23:20:36 hodson Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -36,15 +36,6 @@ typedef XorpCallback0<void>::RefPtr OneoffTimerCallback;
 typedef XorpCallback0<bool>::RefPtr PeriodicTimerCallback; 
 
 typedef XorpCallback1<void, XorpTimer&>::RefPtr BasicTimerCallback;
-
-//typedef void (*TimerHook)(XorpTimer&, void*);
-
-/**
- * Deprecated callback types - use OneoffTimerCallback/PeriodicTimerCallback
- * instead.
- */
-typedef void (*OneoffTimerHook)(void*);	  
-typedef bool (*PeriodicTimerHook)(void*); 
 
 /**
  * @short XorpTimer class
@@ -209,60 +200,6 @@ public:
      * @return the @ref XorpTimer created.  
      */
     XorpTimer new_periodic(int ms, const PeriodicTimerCallback& pcb);
-
-    /**
-     * [Deprecated]
-     * Create a XorpTimer that will be scheduled once.
-     *
-     * @param when the absolute time when the timer expires.
-     * @param hook user function that is invoked when timer expires.
-     * @param thunk argument supplied to user function when timer expires.
-     *
-     * @return the @ref XorpTimer created.
-     */
-    inline XorpTimer new_oneoff_at(const timeval& when, 
-				   OneoffTimerHook hook, 
-				   void* thunk = 0)
-    {
-	return new_oneoff_at(when, callback(hook, thunk));
-    }
-
-    /**
-     * [Deprecated]
-     * Create a XorpTimer that will invoke a callback once. 
-     *
-     * @param ms the relative time in milliseconds when the timer expires.
-     * @param hook user function that is invoked when timer expires.
-     * @param thunk argument supplied to user function when timer expires.
-     *
-     * @return the @ref XorpTimer created.
-     */
-    inline XorpTimer new_oneoff_after_ms(int ms, 
-					 OneoffTimerHook hook, 
-					 void* thunk = 0)
-    {
-	return new_oneoff_after_ms(ms, callback(hook, thunk));
-    }
-
-    /**
-     * [Deprecated]
-     * Create a XorpTimer that will invoke a callback periodically. 
-     *
-     * @param ms the period in milliseconds when the timer expires.
-     *
-     * @param hook user function that is invoked when timer expires.
-     * If the hook returns false the periodic XorpTimer is unscheduled.
-     *
-     * @param thunk argument supplied to user function when timer
-     * expires.
-     *
-     * @return the @ref XorpTimer created.  
-     */
-    inline XorpTimer new_periodic(int ms, 
-				  PeriodicTimerHook hook, void* thunk = 0)
-    {
-	return new_periodic(ms, callback(hook, thunk));
-    }
 
     /**
      * Create a XorpTimer to set a flag.

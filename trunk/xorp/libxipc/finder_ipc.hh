@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libxipc/finder_ipc.hh,v 1.4 2003/03/16 08:20:27 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_IPC_HH__
 #define __LIBXIPC_FINDER_IPC_HH__
@@ -166,7 +166,7 @@ public:
     FinderTCPServerIPCFactory(const FinderTCPServerIPCFactory&);
 protected:
     FinderTCPIPCService* FinderTCPServerIPCFactory::create();
-    static void connect_hook(int fd, SelectorMask m, void* thunked_factory);
+    void connect_hook(int fd, SelectorMask m);
 
     SelectorList&		_selector_list;
     ServiceCreationHook		_creation_hook;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_comm.hh,v 1.3 2003/03/14 12:20:27 pavlin Exp $
+// $XORP: xorp/mfea/mfea_unix_comm.hh,v 1.4 2003/03/18 02:44:35 pavlin Exp $
 
 
 #ifndef __MFEA_MFEA_UNIX_COMM_HH__
@@ -56,8 +56,9 @@
 
 #include <vector>
 
-#include "libproto/proto_unit.hh"
+#include "libxorp/eventloop.hh"
 
+#include "libproto/proto_unit.hh"
 
 //
 // Constants definitions
@@ -772,13 +773,13 @@ public:
     /**
      * Read data from a protocol socket, and then call the appropriate protocol
      * module to process it.
-     * 
-     * Note: this function should not be called directly, but should be called
-     * by its wrapper: unix_comm_proto_socket_read().
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     *
+     * This is called as a SelectorList callback.
+     * @param fd file descriptor that with event caused this method to be
+     * called.
+     * @param m mask representing event type.
      */
-    int		proto_socket_read();
+    void	proto_socket_read(int fd, SelectorMask m);
     
     /**
      * Send a packet on a protocol socket.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.6 2003/03/14 12:20:26 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.7 2003/03/18 02:44:35 pavlin Exp $"
 
 
 //
@@ -22,7 +22,6 @@
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
-#include "libxorp/eventloop.hh"
 #include "libxorp/utils.hh"
 #include "mrt/max_vifs.h"
 #include "mrt/multicast_defs.h"
@@ -57,7 +56,6 @@ int UnixComm::_rtm_seq = 1;
 // Local structures/classes, typedefs and macros
 //
 
-
 //
 // Local variables
 //
@@ -65,9 +63,6 @@ int UnixComm::_rtm_seq = 1;
 //
 // Local functions prototypes
 //
-static void unix_comm_proto_socket_read(int fd, SelectorMask mask,
-					void *thunk);
-
 
 /**
  * UnixComm::UnixComm:
@@ -2513,7 +2508,7 @@ UnixComm::open_proto_socket(void)
     
     // Assign a function to read from this socket
     if (mfea_node().event_loop().add_selector(_proto_socket, SEL_RD,
-					      unix_comm_proto_socket_read, this)
+		      callback(this, &UnixComm::proto_socket_read))
 	== false) {
 	return (XORP_ERROR);
     }
@@ -2571,42 +2566,15 @@ UnixComm::close_proto_socket(void)
 }
 
 /**
- * unix_comm_proto_socket_read:
- * @fd: The file descriptor that is ready to read.
- * @mask: The selector event type mask that describes the status of @fd.
- * @thunk: The #UnixComm object that corresponds to the protocol socket that
- * is ready to read.
- * 
- * A wrapper to call the appropriate method to read data
- * from a protocol socket.
- * XXX: This function should not be called directly, but should be assigned to
- * read a socket by mfea_node().event_loop().add_selector().
- * 
- **/
-static void
-unix_comm_proto_socket_read(int fd, SelectorMask mask, void *thunk)
-{
-    UnixComm	*unix_comm = reinterpret_cast<UnixComm*>(thunk);
-    
-    unix_comm->proto_socket_read();
-    
-    UNUSED(fd);
-    UNUSED(mask);
-}
-
-/**
  * UnixComm::proto_socket_read:
- * @void: 
+ * @fd: file descriptor of arriving data.
+ * @mask: The selector event type mask that describes the status of @fd.
  * 
  * Read data from a protocol socket, and then call the appropriate protocol
  * module to process it.
- * XXX: This function should not be called directly, but should be called
- * by its wrapper: unix_comm_proto_socket_read().
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
-int
-UnixComm::proto_socket_read(void)
+void
+UnixComm::proto_socket_read(int fd, SelectorMask mask)
 {
     int		nbytes;
     int		ip_hdr_len = 0;
@@ -2618,6 +2586,9 @@ UnixComm::proto_socket_read(void)
     bool	router_alert_bool = false; // Router Alert option received
     int		pif_index = 0;
     MfeaVif	*mfea_vif = NULL;
+
+    UNUSED(fd);
+    UNUSED(mask);
     
     // Zero and reset various fields
     _rcvmh.msg_controllen = sizeof(_rcvcmsgbuf);
@@ -2636,16 +2607,16 @@ UnixComm::proto_socket_read(void)
 #endif // HAVE_IPV6
     default:
 	XLOG_ASSERT(false);
-	return (XORP_ERROR);
+	return;
     }
     
     // Read from the socket
     nbytes = recvmsg(_proto_socket, &_rcvmh, 0);
     if (nbytes < 0) {
 	if (errno == EINTR)
-	    return (XORP_OK);		// XXX
+	    return;		// XXX
 	XLOG_ERROR("recvmsg() failed: %s", strerror(errno));
-	return (XORP_ERROR);
+	return;
     }
     
     // Check if it is a signal from the kernel to the user-level
@@ -2659,14 +2630,14 @@ UnixComm::proto_socket_read(void)
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
 			 nbytes, (uint32_t)sizeof(*igmpmsg));
-	    return (XORP_ERROR);
+	    return;
 	}
 	if (igmpmsg->im_mbz == 0) {
 	    //
 	    // XXX: Packets sent up from kernel to daemon have
 	    //      igmpmsg->im_mbz = ip->ip_p = 0
 	    //
-	    return (kernel_call_process(_rcvbuf0, nbytes));
+	    return;
 	}
 	break;
     }
@@ -2682,7 +2653,7 @@ UnixComm::proto_socket_read(void)
 			 "kernel signal packet size %d is smaller than minimum size %u",
 			 nbytes,
 			 min((uint32_t)sizeof(*mrt6msg), (uint32_t)sizeof(struct mld6_hdr)));
-	    return (XORP_ERROR);
+	    return;
 	}
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
 	    //
@@ -2698,7 +2669,7 @@ UnixComm::proto_socket_read(void)
 	    // April 2000, FreeBSD-4.0) which don't have the
 	    //     'icmp6_type = 0' mechanism.
 	    //
-	    return (kernel_call_process(_rcvbuf0, nbytes));
+	    kernel_call_process(_rcvbuf0, nbytes);
 	}
 	break;
     }
@@ -2727,7 +2698,7 @@ UnixComm::proto_socket_read(void)
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "packet size %d is smaller than minimum size %u",
 			 nbytes, (uint32_t)sizeof(*ip));
-	    return (XORP_ERROR);
+	    return;
 	}
 	src.copy_in(_from4);
 	dst.copy_in(ip->ip_dst);
@@ -2777,7 +2748,7 @@ UnixComm::proto_socket_read(void)
 		       "hdr+datalen=%d+%d=%d",
 		       cstring(src), cstring(dst), nbytes,
 		       ip_hdr_len, ip_data_len, ip_hdr_len + ip_data_len);
-	    return (XORP_ERROR);
+	    return;
 	}
 	
 	for (cmsgp = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
@@ -2840,7 +2811,7 @@ UnixComm::proto_socket_read(void)
 	    XLOG_ERROR("proto_socket_read() failed: "
 		       "RX packet from %s with size of %d bytes is truncated",
 		       cstring(src), nbytes);
-	    return (XORP_ERROR);
+	    return;
 	}
 	if (_rcvmh.msg_controllen < sizeof(struct cmsghdr)) {
 	    XLOG_ERROR("proto_socket_read() failed: "
@@ -2849,7 +2820,7 @@ UnixComm::proto_socket_read(void)
 		       cstring(src),
 		       _rcvmh.msg_controllen,
 		       (uint32_t)sizeof(struct cmsghdr));
-	    return (XORP_ERROR);
+	    return;
 	}
 	
 	//
@@ -2936,26 +2907,26 @@ UnixComm::proto_socket_read(void)
 #endif // HAVE_IPV6
     default:
 	XLOG_ASSERT(false);
-	return (XORP_ERROR);
+	return;
     }
     
     // Various checks
     if (! src.is_unicast()) {
 	XLOG_ERROR("proto_socket_read() failed: "
 		   "invalid unicast sender address: %s", cstring(src));
-	return (XORP_ERROR);
+	return;
     }
     if (! (dst.is_multicast() || dst.is_unicast())) {
 	XLOG_ERROR("proto_socket_read() failed: "
 		   "invalid destination address: %s", cstring(dst));
-	return (XORP_ERROR);
+	return;
     }
     if (ip_ttl < 0) {
 	// TODO: what about ip_ttl = 0? Is it OK?
 	XLOG_ERROR("proto_socket_read() failed: "
 		   "invalid Hop-Limit (TTL) from %s to %s: %d",
 		   cstring(src), cstring(dst), ip_ttl);
-	return (XORP_ERROR);
+	return;
     }
     if (pif_index == 0) {
 	switch (family()) {
@@ -2967,11 +2938,11 @@ UnixComm::proto_socket_read(void)
 	    XLOG_ERROR("proto_socket_read() failed: "
 		       "invalid interface pif_index from %s to %s: %d",
 		       cstring(src), cstring(dst), pif_index);
-	    return (XORP_ERROR);
+	    return;
 #endif // HAVE_IPV6
 	default:
 	    XLOG_ASSERT(false);
-	    return (XORP_ERROR);
+	    return;
 	}
     }
     
@@ -2979,7 +2950,7 @@ UnixComm::proto_socket_read(void)
     // TODO: this search is probably too much overhead?
     if (ignore_my_packets()) {
 	if (mfea_node().vif_find_by_addr(src) != NULL)
-	    return (XORP_ERROR);
+	    return;
     }
     
     // Find the vif this message was received on.
@@ -3010,11 +2981,11 @@ UnixComm::proto_socket_read(void)
 	XLOG_WARNING("proto_socket_read() failed: "
 		     "RX packet from %s to %s: no vif found",
 		     cstring(src), cstring(dst));
-	return (XORP_ERROR);
+	return;
     }
     if (! mfea_vif->is_up()) {
 	// This vif is down. Silently ignore this packet.
-	return (XORP_ERROR);
+	return;
     }
     
     // Process the result
@@ -3023,10 +2994,10 @@ UnixComm::proto_socket_read(void)
 				   src, dst, ip_ttl, ip_tos, router_alert_bool,
 				   _rcvbuf0 + ip_hdr_len, nbytes - ip_hdr_len)
 	== XORP_OK) {
-	return (XORP_OK);
+	return;
     }
     
-    return (XORP_ERROR);
+    return;
 }
 
 

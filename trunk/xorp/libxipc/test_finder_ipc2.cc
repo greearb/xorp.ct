@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_ipc2.cc,v 1.4 2003/03/16 08:20:30 pavlin Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,9 +32,8 @@
 static bool can_read = false;
 
 static void
-select_hook(int fd, SelectorMask m, void *thunk)
+select_hook(int fd, SelectorMask m, FinderTCPIPCService* ipc)
 {
-    FinderTCPIPCService *ipc = reinterpret_cast<FinderTCPIPCService*>(thunk);
     assert(ipc->descriptor() == fd);
     assert(m == SEL_RD);
     can_read = true;
@@ -48,7 +47,7 @@ connect_hook(FinderTCPIPCService* created, void* thunk)
 }
 
 static bool
-periodic_dot_printing(void*)
+periodic_dot_printing()
 {
     printf(".");
     fflush(stdout);
@@ -212,7 +211,8 @@ run_test(EventLoop*		event_loop,
 
     printf("Testing %s...", name);
 
-    XorpTimer dot_printer = event_loop->new_periodic(100, periodic_dot_printing, 0);
+    XorpTimer dot_printer =
+	event_loop->new_periodic(100, callback(periodic_dot_printing));
 
     bool failed = false;
     for (int i = 0; i < 20 && failed == false; i++) {
@@ -246,7 +246,7 @@ main(int /* argc */, char *argv[])
     for (server = NULL; server == NULL; event_loop.run());
 
     event_loop.add_selector(server->descriptor(), SEL_RD,
-			    select_hook, server);
+			    callback(&select_hook, server));
 
     bool failed = false;
     failed |= run_test(&event_loop, server, client, test_hello_iter, "HELLO");

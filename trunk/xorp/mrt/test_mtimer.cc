@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/test_mtimer.cc,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $"
+#ident "$XORP: xorp/mrt/test_mtimer.cc,v 1.2 2003/03/10 23:20:45 hodson Exp $"
 
 
 //
@@ -49,18 +49,17 @@
 //
 // Local functions prototypes
 //
-static	bool wakeup_hook(void *);
+static	bool wakeup_hook();
 
 
 static Timer my_mtimer;
 static void
-my_mtimer_timeout(void *data_pointer)
+my_mtimer_timeout(void*)
 {
     fprintf(stdout, "%s My mtimer expired!\n", xlog_localtime2string());
     fflush(stdout);
     
     my_mtimer.start(1, 0, my_mtimer_timeout, NULL);
-    UNUSED(data_pointer);
 }
 
 int
@@ -78,7 +77,8 @@ main(int /* argc */, char *argv[])
     
     try {
 	EventLoop e;
-	XorpTimer wakeywakey = e.new_periodic(5000, wakeup_hook);
+	XorpTimer wakeywakey = e.new_periodic(5000,
+					      callback(wakeup_hook));
 	
 	timers_init();
 	
@@ -104,7 +104,7 @@ main(int /* argc */, char *argv[])
 }
 
 static bool
-wakeup_hook(void *)
+wakeup_hook()
 {
     fprintf(stdout, "%s XorpTimer expired!\n", xlog_localtime2string());
     fflush(stdout);

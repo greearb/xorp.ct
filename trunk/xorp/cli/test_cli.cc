@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.6 2003/03/17 23:23:29 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.7 2003/03/18 02:44:33 pavlin Exp $"
 
 
 //
@@ -59,7 +59,7 @@ CliNode *global_cli_node = NULL;
 //
 // Local functions prototypes
 //
-static	bool wakeup_hook(void*);
+static	bool wakeup_hook();
 static	bool wakeup_hook2(int, int);
 static	CliNode& cli_node(void);
 static	void usage(const char *argv0, int exit_value);
@@ -231,7 +231,7 @@ main(int argc, char *argv[])
 	// cli_node6.start();
 	
 	// Test timer    
-	XorpTimer wakeywakey = event_loop.new_periodic(1000, wakeup_hook);
+	XorpTimer wakeywakey = event_loop.new_periodic(1000, callback(wakeup_hook));
 	XorpTimer wakeywakey2 = event_loop.new_periodic(5000, callback(wakeup_hook2, 3, 5));
 	XorpTimer wakeywakey3 = event_loop.new_periodic(2000, callback(f, &Foo::print));
 	
@@ -257,7 +257,7 @@ main(int argc, char *argv[])
 }
 
 static bool
-wakeup_hook(void*)
+wakeup_hook()
 {
     fprintf(stdout, "%s\n", xlog_localtime2string());
     fflush(stdout);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.2 2003/03/01 21:49:05 hodson Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.3 2003/03/10 23:20:34 hodson Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -37,11 +37,6 @@ enum SelectorMask {
     SEL_EX	= 0x04,				// Exception events
     SEL_ALL	= SEL_RD | SEL_WR | SEL_EX	// All events
 };
-
-/**
- * SelectorList event hook type.
- */
-typedef void (*SelectorHook)(int fd, SelectorMask mask, void* cookie);
 
 typedef XorpCallback2<void,int,SelectorMask>::RefPtr SelectorCallback;
 
@@ -89,19 +84,6 @@ public:
      */
      bool add_selector(int fd, SelectorMask mask, 
 		       const SelectorCallback& scb);
-
-    /**
-     * [Deprecated]
-     * Historical add_selector method.
-     */
-    inline bool add_selector(int fd, SelectorMask mask, 
-			     SelectorHook h, void* cookie) 
-    { 
-	return add_selector(fd, mask, callback(h, cookie)); 
-    }
-
-    // Not implemented - new interface
-    inline Selector add_selector(int fd, SelectorMask mask);
 
     /**
      * Remove hooks for pending I/O operations.
@@ -168,28 +150,6 @@ private:
     fd_set		_fds[SEL_MAX_IDX];
     int			_maxfd;
     size_t		_descriptor_count;
-};
-
-class SelectorTag {
-public:
-    SelectorTag(SelectorList& l, int fd, SelectorMask mask) :
-	_sl(l), _fd(fd), _mask(mask) {}
-    ~SelectorTag() {
-	remove_selector();
-    }
-    inline void remove_selector() {
-	if (_fd >= 0) {
-	    _sl.remove_selector(_fd, _mask);
-	    _fd = -1;
-	}
-    }
-    inline bool connected() const {
-	return _fd == -1;
-    }
-private:
-    SelectorList&	_sl;
-    int			_fd;
-    SelectorMask	_mask;
 };
 
 #endif // __LIBXORP_SELECTOR_HH__

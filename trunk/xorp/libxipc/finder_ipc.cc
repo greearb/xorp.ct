@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/finder_ipc.cc,v 1.5 2003/03/16 08:20:26 pavlin Exp $"
 
 #include "config.h"
 
@@ -655,8 +655,8 @@ FinderTCPServerIPCFactory::FinderTCPServerIPCFactory(SelectorList& slctr,
 	xorp_throw(FactoryError, strerror(errno));
     }
 
-    _selector_list.add_selector(_fd, SEL_RD, connect_hook,
-				 reinterpret_cast<void*>(this));
+    _selector_list.add_selector(_fd, SEL_RD,
+	callback(this, &FinderTCPServerIPCFactory::connect_hook));
 }
 
 FinderTCPServerIPCFactory::~FinderTCPServerIPCFactory()
@@ -684,17 +684,14 @@ FinderTCPServerIPCFactory::create()
 }
 
 void
-FinderTCPServerIPCFactory::connect_hook(int fd, SelectorMask m,
-					void* thunked_factory) {
-    FinderTCPServerIPCFactory *f =
-	reinterpret_cast<FinderTCPServerIPCFactory*>(thunked_factory);
-
-    assert(fd == f->_fd);
+FinderTCPServerIPCFactory::connect_hook(int fd, SelectorMask m)
+{
+    assert(fd == _fd);
     assert(m == SEL_RD);
 
-    FinderTCPIPCService* service = f->create();
-    if (service && f->_creation_hook) {
-	f->_creation_hook(service, f->_creation_thunk);
+    FinderTCPIPCService* service = create();
+    if (service && _creation_hook) {
+	_creation_hook(service, _creation_thunk);
     }
 }
 

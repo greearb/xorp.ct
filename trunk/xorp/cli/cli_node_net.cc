@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.4 2003/03/12 10:14:59 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.5 2003/03/12 10:32:51 pavlin Exp $"
 
 
 //
@@ -86,20 +86,17 @@ CliNode::sock_serv_open()
 }
 
 void
-CliNode::accept_connection(int fd, SelectorMask mask, void *thunk)
+CliNode::accept_connection(int fd, SelectorMask mask)
 {
-    int client_socket;
-    CliNode *cli_node = reinterpret_cast<CliNode*>(thunk);
-    
     debug_msg("Received connection on socket = %d, family = %d\n",
-	      fd, cli_node->family());
+	      fd, family());
     
     XLOG_ASSERT(mask == SEL_RD);
     
-    client_socket = comm_sock_accept(fd);
+    int client_socket = comm_sock_accept(fd);
     
     if (client_socket >= 0)
-	cli_node->add_connection(client_socket);
+	add_connection(client_socket);
 }
 
 CliClient *

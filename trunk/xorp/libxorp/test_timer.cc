@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.2 2003/01/26 04:06:21 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.3 2003/03/10 23:20:36 hodson Exp $"
 
 //
 // demo program to test timers and event loops (and show
@@ -28,14 +28,15 @@
 #include "libxorp/xlog.h"
 
 int fired = 0 ;
+
 // callback for non-periodic timer. Does not need to return a value
-static void some_foo(void*) {
+static void some_foo() {
     fired++;
     printf("O"); fflush(stdout);
 }
 
 // callback for a periodic timer. If true, the timer is rescheduled.
-static bool print_dot(void*) {
+static bool print_dot() {
     printf("."); fflush(stdout);
     return true;
 }
@@ -52,7 +53,7 @@ test_many()
     fired = 0 ;
     fprintf(stderr, "++ create a bunch of timers to fire in about 2s\n");
     for (i=0; i<N ; i++) {
-	a[i] = e.new_oneoff_after_ms(2110+1*i, some_foo);
+	a[i] = e.new_oneoff_after_ms(2110+1*i, callback(some_foo));
     }
     fprintf(stderr, "++ move deadline of 1/3 of them by 5s\n");
     for (i=0; i<N ; i += 3) {
@@ -61,7 +62,7 @@ test_many()
     fprintf(stderr, "++ create 100K timers which never fire because\n"
 	"they go out of scope and are automatically deleted\n");
     for (i=0; i<100000 ; i++) {
-	XorpTimer b = e.new_oneoff_after_ms(2110+1*i, some_foo);
+	XorpTimer b = e.new_oneoff_after_ms(2110+1*i, callback(some_foo));
     }
     fprintf(stderr, "++ wait for the two batches of events at 2 and 5s\n");
     while (e.timers_pending()) {
@@ -101,10 +102,10 @@ void run_test()
     test_wrap();
 
     XorpTimer show_stopper; 
-    show_stopper = e.new_oneoff_after_ms(500, some_foo);
+    show_stopper = e.new_oneoff_after_ms(500, callback(some_foo));
     assert(show_stopper.scheduled());
 
-    XorpTimer zzz = e.new_periodic(3, print_dot, 0);
+    XorpTimer zzz = e.new_periodic(3, callback(print_dot));
     assert(zzz.scheduled());
 
     while(show_stopper.scheduled()) {
