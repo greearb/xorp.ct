@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.14 2003/08/07 00:27:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.15 2003/08/07 01:07:28 pavlin Exp $"
 
 
 //
@@ -1222,11 +1222,18 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 		    is_leq_upcall);
 	    }
 #endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
-	    break;
 	}
+	break;
+	
 #ifdef HAVE_IPV6
 	case AF_INET6:
 	{
+#ifndef HAVE_IPV6_MULTICAST_ROUTING
+	XLOG_ERROR("signal_message_recv() failed: "
+		   "IPv6 multicast routing not supported");
+	return (XORP_ERROR);
+#else
+	
 #if defined(MRT6_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MCAST_API)
 	    size_t from = 0;
 	    struct bw6_upcall bw_upcall;
@@ -1262,9 +1269,11 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 		    is_leq_upcall);
 	    }
 #endif // MRT6_ADD_BW_UPCALL && ENABLE_ADVANCED_MCAST_API
-	    break;
+#endif // HAVE_IPV6_MULTICAST_ROUTING
 	}
+	break;
 #endif // HAVE_IPV6
+	
 	default:
 	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
@@ -1529,18 +1538,33 @@ MfeaNode::add_mfc(const string& , // module_instance_name,
 	oifs_flags[i] = 0;
 	
 	if (oiflist_disable_wrongvif.test(i)) {
-	    if (family() == AF_INET) {
+	    switch (family()) {
+	    case AF_INET:
 #if defined(MRT_MFC_FLAGS_DISABLE_WRONGVIF) && defined(ENABLE_ADVANCED_MCAST_API)
 		oifs_flags[i] |= MRT_MFC_FLAGS_DISABLE_WRONGVIF;
 #endif
-	    }
+		break;
+		
 #ifdef HAVE_IPV6
-	    if (family() == AF_INET6) {
+	    case AF_INET6:
+	    {
+#ifndef HAVE_IPV6_MULTICAST_ROUTING
+		XLOG_ERROR("add_mfc() failed: "
+			   "IPv6 multicast routing not supported");
+		return (XORP_ERROR);
+#else
 #if defined(MRT6_MFC_FLAGS_DISABLE_WRONGVIF) && defined(ENABLE_ADVANCED_MCAST_API)
 		oifs_flags[i] |= MRT6_MFC_FLAGS_DISABLE_WRONGVIF;
 #endif
+#endif // HAVE_IPV6_MULTICAST_ROUTING
 	    }
+	    break;
 #endif // HAVE_IPV6
+	    
+	    default:
+		XLOG_UNREACHABLE();
+		return (XORP_ERROR);
+	    }
 	}
     }
     
@@ -1957,8 +1981,9 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 			     cstring(mrib.dest_prefix()));
 	    }
 	}
-	break;
     }
+    break;
+    
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -2007,9 +2032,10 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 			     cstring(mrib.dest_prefix()));
 	    }
 	}
-	break;
     }
+    break;
 #endif // HAVE_IPV6
+    
     default:
 	XLOG_UNREACHABLE();
 	break;

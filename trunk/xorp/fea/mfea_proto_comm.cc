@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.7 2003/08/05 05:44:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.8 2003/08/07 01:07:28 pavlin Exp $"
 
 
 //
@@ -457,11 +457,17 @@ ProtoComm::set_mcast_ttl(int ttl)
 		       ip_ttl, strerror(errno));
 	    return (XORP_ERROR);
 	}
-	break;
     }
+    break;
+    
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
+#ifndef HAVE_IPV6_MULTICAST
+		XLOG_ERROR("set_mcast_ttl() failed: "
+			   "IPv6 multicast not supported");
+		return (XORP_ERROR);
+#else
 	int ip_ttl = ttl;
 	
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
@@ -470,9 +476,11 @@ ProtoComm::set_mcast_ttl(int ttl)
 		       ip_ttl, strerror(errno));
 	    return (XORP_ERROR);
 	}
-	break;
+#endif // HAVE_IPV6_MULTICAST
     }
+    break;
 #endif // HAVE_IPV6
+    
     default:
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
@@ -507,11 +515,17 @@ ProtoComm::set_multicast_loop(bool enable_bool)
 		       loop, strerror(errno));
 	    return (XORP_ERROR);
 	}
-	break;
     }
+    break;
+    
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
+#ifndef HAVE_IPV6_MULTICAST
+	XLOG_ERROR("set_multicast_loop() failed: "
+		   "IPv6 multicast not supported");
+		return (XORP_ERROR);
+#else
 	uint loop6 = enable_bool;
 	
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
@@ -520,9 +534,11 @@ ProtoComm::set_multicast_loop(bool enable_bool)
 		       loop6, strerror(errno));
 	    return (XORP_ERROR);
 	}
-	break;
+#endif // HAVE_IPV6_MULTICAST
     }
+    break;
 #endif // HAVE_IPV6
+    
     default:
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
@@ -566,11 +582,17 @@ ProtoComm::set_default_multicast_vif(uint16_t vif_index)
 		       cstring(*mfea_vif->addr_ptr()), strerror(errno));
 	    return (XORP_ERROR);
 	}
-	break;
     }
+    break;
+    
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
+#ifndef HAVE_IPV6_MULTICAST
+	XLOG_ERROR("set_default_multicast_vif() failed: "
+		   "IPv6 multicast not supported");
+		return (XORP_ERROR);
+#else
 	u_int pif_index = mfea_vif->pif_index();
 	
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_MULTICAST_IF,
@@ -579,9 +601,11 @@ ProtoComm::set_default_multicast_vif(uint16_t vif_index)
 		       mfea_vif->name().c_str(), strerror(errno));
 	    return (XORP_ERROR);
 	}
-	break;
+#endif // HAVE_IPV6_MULTICAST
     }
+    break;
 #endif // HAVE_IPV6
+    
     default:
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
@@ -638,11 +662,17 @@ ProtoComm::join_multicast_group(uint16_t vif_index, const IPvX& group)
 		       strerror(errno));
 	    return (XORP_ERROR);
 	}
-	break;
     }
+    break;
+    
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
+#ifndef HAVE_IPV6_MULTICAST
+	XLOG_ERROR("join_multicast_group() failed: "
+		   "IPv6 multicast not supported");
+		return (XORP_ERROR);
+#else
 	struct ipv6_mreq mreq6;
 	
 	group.copy_out(mreq6.ipv6mr_multiaddr);
@@ -654,9 +684,11 @@ ProtoComm::join_multicast_group(uint16_t vif_index, const IPvX& group)
 		       strerror(errno));
 	    return (XORP_ERROR);
 	}
-	break;
+#endif // HAVE_IPV6_MULTICAST
     }
+    break;
 #endif // HAVE_IPV6
+    
     default:
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
@@ -712,11 +744,17 @@ ProtoComm::leave_multicast_group(uint16_t vif_index, const IPvX& group)
 		       strerror(errno));
 	    return (XORP_ERROR);
 	}
-	break;
     }
+    break;
+    
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
+#ifndef HAVE_IPV6_MULTICAST
+	XLOG_ERROR("leave_multicast_group() failed: "
+		   "IPv6 multicast not supported");
+		return (XORP_ERROR);
+#else
 	struct ipv6_mreq mreq6;
 	
 	group.copy_out(mreq6.ipv6mr_multiaddr);
@@ -728,9 +766,11 @@ ProtoComm::leave_multicast_group(uint16_t vif_index, const IPvX& group)
 		       strerror(errno));
 	    return (XORP_ERROR);
 	}
-	break;
+#endif // HAVE_IPV6_MULTICAST
     }
+    break;
 #endif // HAVE_IPV6
+    
     default:
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
@@ -796,8 +836,7 @@ ProtoComm::open_proto_socket()
 	return (XORP_ERROR);
     }
     // Restrict multicast TTL
-    if (set_mcast_ttl(MINTTL)
-	< 0) {
+    if (set_mcast_ttl(MINTTL) < 0) {
 	close_proto_socket();
 	return (XORP_ERROR);
     }
@@ -812,19 +851,25 @@ ProtoComm::open_proto_socket()
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	if (_ipproto == IPPROTO_ICMPV6) {
+    {
+	if (ipproto() == IPPROTO_ICMPV6) {
 	    struct icmp6_filter filter;
 	    
-	    // Filter all non-MLD ICMPv6 messages
-	    ICMP6_FILTER_SETBLOCKALL(&filter);
-	    ICMP6_FILTER_SETPASS(MLD_LISTENER_QUERY, &filter);
-	    ICMP6_FILTER_SETPASS(MLD_LISTENER_REPORT, &filter);
-	    ICMP6_FILTER_SETPASS(MLD_LISTENER_DONE, &filter);
-	    ICMP6_FILTER_SETPASS(MLD_MTRACE_RESP, &filter);
-	    ICMP6_FILTER_SETPASS(MLD_MTRACE, &filter);
+	    // Pass all ICMPv6 messages
+	    ICMP6_FILTER_SETPASSALL(&filter);	    
+	    
+	    if (xorp_module_id() == XORP_MODULE_MLD6IGMP) {
+		// Filter all non-MLD ICMPv6 messages
+		ICMP6_FILTER_SETBLOCKALL(&filter);
+		ICMP6_FILTER_SETPASS(MLD_LISTENER_QUERY, &filter);
+		ICMP6_FILTER_SETPASS(MLD_LISTENER_REPORT, &filter);
+		ICMP6_FILTER_SETPASS(MLD_LISTENER_DONE, &filter);
+		ICMP6_FILTER_SETPASS(MLD_MTRACE_RESP, &filter);
+		ICMP6_FILTER_SETPASS(MLD_MTRACE, &filter);
 #ifdef MLDV2_LISTENER_REPORT
-	    ICMP6_FILTER_SETPASS(MLDV2_LISTENER_REPORT, &filter);
+		ICMP6_FILTER_SETPASS(MLDV2_LISTENER_REPORT, &filter);
 #endif
+	    }
 	    if (setsockopt(_proto_socket, _ipproto, ICMP6_FILTER,
 			   (void *)&filter, sizeof(filter)) < 0) {
 		close_proto_socket();
@@ -833,7 +878,8 @@ ProtoComm::open_proto_socket()
 		return (XORP_ERROR);
 	    }
 	}
-	break;
+    }
+    break;
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
@@ -964,18 +1010,28 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    mfea_node().mfea_mrouter().kernel_call_process(_rcvbuf0, nbytes);
 	    return;		// OK
 	}
-	break;
     }
+    break;
+    
 #ifdef HAVE_IPV6
     case IPPROTO_ICMPV6:
     {
+#ifndef HAVE_IPV6_MULTICAST_ROUTING
+	if (nbytes < (ssize_t)sizeof(struct mld_hdr)) {
+	    XLOG_WARNING("proto_socket_read() failed: "
+			 "packet size %d is smaller than minimum size %u",
+			 nbytes,
+			 (uint32_t)sizeof(struct mld_hdr));
+	    return;		// Error
+	}
+#else
 	struct mrt6msg *mrt6msg;
 	
 	mrt6msg = (struct mrt6msg *)_rcvbuf0;
 	if ((nbytes < (ssize_t)sizeof(*mrt6msg))
 	    && (nbytes < (ssize_t)sizeof(struct mld_hdr))) {
 	    XLOG_WARNING("proto_socket_read() failed: "
-			 "kernel signal packet size %d is smaller than minimum size %u",
+			 "kernel signal or packet size %d is smaller than minimum size %u",
 			 nbytes,
 			 min((uint32_t)sizeof(*mrt6msg), (uint32_t)sizeof(struct mld_hdr)));
 	    return;		// Error
@@ -997,9 +1053,11 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    mfea_node().mfea_mrouter().kernel_call_process(_rcvbuf0, nbytes);
 	    return;		// OK
 	}
-	break;
+#endif // HAVE_IPV6_MULTICAST_ROUTING
     }
+    break;
 #endif // HAVE_IPV6
+    
     default:
 	break;
     }
@@ -1067,6 +1125,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 		is_datalen_error = false;
 		break;
 	    }
+	    break;
 	} while (false);
 	if (is_datalen_error) {
 	    XLOG_ERROR("proto_socket_read() failed: "
@@ -1091,8 +1150,8 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 		    continue;
 		sdl = (struct sockaddr_dl *)CMSG_DATA(cmsgp);
 		pif_index = sdl->sdl_index;
-		break;
 	    }
+	    break;
 #endif // IP_RECVIF
 	    default:
 		break;
@@ -1123,9 +1182,9 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    
 	    break;
 	} while (false);
-	
-	break;
     }
+    break;
+    
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -1227,10 +1286,10 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	
 	ip_hdr_len = 0;
 	ip_data_len = nbytes;
-	
-	break;
     }
+    break;
 #endif // HAVE_IPV6
+    
     default:
 	XLOG_UNREACHABLE();
 	return;			// Error
@@ -1390,6 +1449,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
+    {
 	// Assign the TTL
 	if (ip_ttl < 0) {
 	    if (router_alert_bool)
@@ -1407,7 +1467,8 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 		ip_tos = 0;
 	    }
 	}
-	break;
+    }
+    break;
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
@@ -1624,10 +1685,10 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	memcpy(_sndbuf0, databuf, datalen); // XXX: goes to _sndiov[0].iov_base
 	// _sndiov[0].iov_base	= (caddr_t)databuf;
 	_sndiov[0].iov_len  = datalen;
-	
-	break;
     }
+    break;
 #endif // HAVE_IPV6
+    
     default:
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_osdep.hh,v 1.1 2003/05/15 23:10:31 pavlin Exp $
+// $XORP: xorp/fea/mfea_osdep.hh,v 1.2 2003/05/16 19:23:17 pavlin Exp $
 
 #ifndef __FEA_MFEA_OSDEP_HH__
 #define __FEA_MFEA_OSDEP_HH__
@@ -77,7 +77,7 @@
 // On newer systems, all MLD-related definitions use
 // mld_xxx and MLD_XXX instead of mld6_xxx and MLD6_XXX.
 //
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
 #ifndef MLD_LISTENER_QUERY
 #define MLD_LISTENER_QUERY		MLD6_LISTENER_QUERY
 #endif
@@ -105,7 +105,7 @@
 #    define MLD_MINLEN	(sizeof(struct mld6_hdr))
 #  endif
 #endif // ! MLD_MINLEN
-#endif // HAVE_IPV6
+#endif // HAVE_IPV6_MULTICAST_ROUTING
 
 //
 // Test if the kernel multicast signal message types are consistent
@@ -122,7 +122,7 @@
 // for IPv4 and IPv6. Maybe later this will change...
 //
 
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
 
 #if IGMPMSG_NOCACHE != MRT6MSG_NOCACHE
 #  error "MFEA message handling needs fix, because IGMPMSG_NOCACHE != MRT6MSG_NOCACHE"
@@ -142,7 +142,7 @@
 #endif
 #endif
 
-#endif // HAVE_IPV6
+#endif // HAVE_IPV6_MULTICAST_ROUTING
 
 #if IGMPMSG_NOCACHE != MFEA_KERNEL_MESSAGE_NOCACHE
 #  error "MFEA message handling needs fix, because IGMPMSG_NOCACHE != MFEA_KERNEL_MESSAGE_NOCACHE"
