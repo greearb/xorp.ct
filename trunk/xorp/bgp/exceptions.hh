@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/exceptions.hh,v 1.1 2003/01/26 17:55:48 rizzo Exp $
 
 #ifndef __BGP_EXCEPTIONS_HH__
 #define __BGP_EXCEPTIONS_HH__
@@ -69,4 +69,4 @@ private:
     const uint8_t *	_data;
     const size_t	_len;
 };
-#endif __BGP_EXCEPTIONS_HH__
+#endif // __BGP_EXCEPTIONS_HH__
