@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.11 2003/06/19 00:44:42 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.12 2003/06/19 19:20:07 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_CLIENT_HH__
 #define __LIBXIPC_FINDER_CLIENT_HH__
@@ -180,6 +180,16 @@ public:
      * @return pointer to cached entry on success, 0 otherwise.
      */
     const FinderDBEntry* query_cache(const string& xrl) const;
+
+    /**
+     * Remove an resolved entry from cache.
+     *
+     * This method is typically called when the information provided
+     * has been useful to consumer.  ie because the answer is found to
+     * be no longer valid.
+     *
+     */
+    void uncache_result(const FinderDBEntry* dbe);
 
     /**
      * Resolve Xrl that an Xrl Target associated with the FinderClient

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.31 2003/09/18 19:08:00 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.32 2003/09/26 21:34:35 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -316,12 +316,15 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 	list<XrlPFSender*>::iterator i;
 	for (i = _senders.begin(); i != _senders.end(); ++i) {
 	    s = *i;
+
 	    if (s->protocol() != x.protocol() || s->address()  != x.target()) {
 		continue;
 	    }
+
 	    if (s->alive()) {
 		goto __got_sender;
 	    }
+
 	    XLOG_INFO("Sender died (protocol = \"%s\", address = \"%s\")",
 		      s->protocol(), s->address().c_str());
 	    XrlPFSenderFactory::destroy_sender(s);
@@ -335,7 +338,12 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 	    XLOG_ERROR("Could not create XrlPFSender for protocol = \"%s\" "
 		       "address = \"%s\" ",
 		       x.protocol().c_str(), x.target().c_str());
-	    return false;
+
+	    // Notify Finder client that result was bad.
+	    _fc->uncache_result(dbe);
+
+	    // Coerce finder client to check with Finder.
+	    return send(xrl, cb);
 	}
 	XLOG_ASSERT(s->protocol() == x.protocol());
 	XLOG_ASSERT(s->address()  == x.target());
@@ -468,9 +476,7 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
     string xrl_no_args = xrl.string_no_args();
     const FinderDBEntry* fdbe = _fc->query_cache(xrl_no_args);
     if (_dsl.empty() && fdbe) {
-	send_resolved(xrl, fdbe, xcb);
-	// XXX check for error
-	return true;
+	return send_resolved(xrl, fdbe, xcb);
     }
 
     //

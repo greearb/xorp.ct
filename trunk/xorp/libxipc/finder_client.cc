@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.20 2003/06/19 00:44:41 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.21 2003/06/19 19:20:07 hodson Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -656,6 +656,17 @@ FinderClient::query_cache(const string& key) const
 {
     ResolvedTable::const_iterator i = _rt.find(key);
     return (_rt.end() == i) ? 0 : &i->second;
+}
+
+void
+FinderClient::uncache_result(const FinderDBEntry* fdbe)
+{
+    if (fdbe) {
+	ResolvedTable::iterator i = _rt.find(fdbe->key());
+	if (i == _rt.end())
+	    return;
+	_rt.erase(i);
+    }
 }
 
 bool
