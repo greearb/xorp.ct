@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.24 2004/05/06 20:14:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.25 2004/05/18 07:47:20 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -248,12 +248,16 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	fticonfig.stop();
 
 #ifndef FEA_DUMMY
-	while (! xrl_mfea_node4.MfeaNode::is_down()) {
-	    eventloop.run();
+	if (xrl_mfea_node4.MfeaNode::node_status() != PROC_STARTUP) {
+	    while (! xrl_mfea_node4.MfeaNode::is_down()) {
+		eventloop.run();
+	    }
 	}
 #ifdef HAVE_IPV6_MULTICAST
-	while (! xrl_mfea_node6.MfeaNode::is_down()) {
-	    eventloop.run();
+	if (xrl_mfea_node6.MfeaNode::node_status() != PROC_STARTUP) {
+	    while (! xrl_mfea_node6.MfeaNode::is_down()) {
+		eventloop.run();
+	    }
 	}
 #endif
 #endif // ! FEA_DUMMY
