@@ -70,7 +70,7 @@ How to use it
 =============
 
 Using the XORP LiveCD is very simple. It consists basically of one
-scripts: LiveCD/livecd.sh
+script: LiveCD/livecd.sh
 
 The livecd.sh script is the main tool, used to generate the ISO image.
 
