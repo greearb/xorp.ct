@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.62 2005/03/25 02:12:55 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.63 2005/03/31 19:36:46 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -205,7 +205,7 @@ Release 1.1 (2005/04/??)
     - Various other bug fixes, improvements and cleanup.
 
   FIB2MRIB:
-    - Bug fix in deleting the Fib2Mrib entries.
+    - Bug fixes when adding and deleting the Fib2Mrib entries.
 
     - Improvements in handling stored routes if they are affected by
       network interface information updates.
