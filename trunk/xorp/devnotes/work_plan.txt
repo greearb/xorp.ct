@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.6 2003/03/26 03:04:40 pavlin Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.7 2003/04/01 18:22:19 jcardona Exp $
 #
 
 Priority:
@@ -13,18 +13,40 @@ Who:
  - OH (Orion Hodson)
  - PR (Pavlin Radoslavov)
  - LR (Luigi Rizzo)
+ - JC (Javier Cardona)
+
+================================ FEA =========================================
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.3:
+Note: mfea2fea_merge_plan.txt
+
+Route tagging in kernel. So that routes can be		H
+withdrawn on startup and controlled shutdown.
+
+Handle errors as specified in error doc.		H
+
+For 0.x:
+Complete Linux support.
 
 ================================ BGP =========================================
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-* Finish Kdoc'ing BGP                                   M	as needed
+For 0.3:
+
+* Correct behaviour on error + tests			H	AG + MH
 * Integration tests 					H	AG
-* Filter to add and remove MEDs on EBGP peerings        H	MH
+* Make plan for monitoring interface
+* Finish Kdoc'ing BGP                                   M	as needed
+
+For 0.x:
+
 * IPv6 support						L	AG
-* Handle unrecognized optional transitive attributes	H	MH
+* Add test for unrecognized optional transitive attributes	H	MH
 * Test harness vs Cisco and Zebra to validate tests     L	AG
 * Monitoring/Instrumentation (show ip bgp, MIB)		H	AG + MH
+
 * Filters						M	??
    - which user-specified filters?	
    - how to do user configuration?
@@ -44,6 +66,7 @@ Longer Term tasks
 * Route Reflector
 * Route Refresh
 * TCP MD5
+* TCP connection mediation through FEA
 
 ================================ Multicast ===================================
 
