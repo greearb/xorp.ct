@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.3 2002/12/18 00:36:38 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.4 2002/12/20 06:42:47 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -57,6 +57,13 @@ BGPPeer::~BGPPeer()
     delete _peerdata;
 }
 
+/*
+ * This call is dispatched by the reader after making sure that
+ * we have a packet with at least a fixed_header and whose
+ * length matches the one in the fixed_header.
+ * Our job now is to decode the message and dispatch it to the
+ * state machine.
+ */
 bool
 BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 			 size_t length)
@@ -86,14 +93,12 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 
     const fixed_header *header =
 	reinterpret_cast<const struct fixed_header *>(buf);
-    struct fixed_header fh = *header;
-    fh._length = ntohs(header->_length);
 
     /* XXX
     ** Put the marker authentication code here.
     */
     try {
-	switch (fh._type) {
+	switch (header->_type) {
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
