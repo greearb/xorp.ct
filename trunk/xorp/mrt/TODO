@@ -1,8 +1,11 @@
 #
-# $XORP: xorp/mrt/TODO,v 1.2 2003/03/11 00:13:13 pavlin Exp $
+# $XORP: xorp/mrt/TODO,v 1.3 2003/11/06 22:19:44 pavlin Exp $
 #
 
-* Clean-up the test programs according to the new style.
+* Clean-up the test_mrib program according to the new style.
+
+* Add more tests to test_mrt to cover corner cases
+  (e.g, listing all source or group entries by prefix 255.0.0.0/8, etc).
 
 * Should remove() of Mrib entries remove them from the table, but
   should not delete the entries themselves?
