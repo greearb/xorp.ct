@@ -38,15 +38,25 @@ Ospf<A>::Ospf(OspfTypes::Version version, IO* io)
     switch(get_version()) {
     case OspfTypes::V2:
 	_packet_decoder.register_decoder(new HelloPacket(OspfTypes::V2));
+	_packet_decoder.
+	    register_decoder(new DataDescriptionPacket(OspfTypes::V2));
+	_packet_decoder.
+	    register_decoder(new  LinkStateRequestPacket(OspfTypes::V2));
 	break;
     case OspfTypes::V3:
 	_packet_decoder.register_decoder(new HelloPacket(OspfTypes::V3));
+	_packet_decoder.
+	    register_decoder(new DataDescriptionPacket(OspfTypes::V3));
+	_packet_decoder.
+	    register_decoder(new  LinkStateRequestPacket(OspfTypes::V3));
 	break;
     }
 
     // Now that all the packet decoders are in place register for
     // receiving packets.
     _io->register_receive(callback(this,&Ospf<A>::receive));
+
+    // The peer manager will solicit packets from the various interfaces.
 }
 
 /**
