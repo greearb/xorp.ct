@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim/pim_arch.tex,v 1.8 2003/11/06 19:37:06 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.9 2003/11/17 00:34:37 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -336,29 +336,35 @@ value of the XRL target name that should be used by default when
 validating an XRL specification (\eg if the specification uses a variable
 inside that module to specify the XRL target name).
 
-\item {{\tt \%modinfo: startcommit }{\it XRL}}  \\The {\tt startcommit} subcommand takes one additional
-parameter, and gives the XRL to call before performing
-any change to the configuration of the module.
+\item {{\tt \%modinfo: startcommit }{\it method }{\it argument}}  \\The {\tt
+startcommit} subcommand takes two or more additional parameters, that are
+used to specify the mechanism to be call before performing any change to the
+configuration of the module. The only method currently supported is {\tt xrl}
+which takes an XRL specification as an argument.
 
-\item {{\tt \%modinfo: endcommit }{\it XRL}}  \\The {\tt endcommit} subcommand takes one additional
-parameter, and gives the XRL to call to complete any
-change to the configuration of the module.  startcommit and
-endcommit are optional.  They provide a way to make batch changes to a
-module configuration as an atomic operation.
+\item {{\tt \%modinfo: endcommit }{\it method }{\it argument}}  \\The {\tt
+endcommit} subcommand takes two or more additional parameters, that are
+used to specify the mechanism to be called to complete any change to the
+configuration of the module. The only method currently supported is {\tt xrl}
+which takes an XRL specification as an argument.
+Both {\tt startcommit} and {\tt endcommit} are optional. They provide a way
+to make batch changes to a module configuration as an atomic operation.
 
-\item {{\tt \%modinfo: statusmethod }{\it method}}  \\The {\tt
-statusmethod} subcommand indicates the mechanism to be used to
-discover the status of the module.  The only method current supported
-is {\tt xrl} which indicates usage of the common interface {\tt
-get\_status} XRL.
+\item {{\tt \%modinfo: statusmethod }{\it method }{\it argument}}  \\The {\tt
+statusmethod} subcommand takes two or more additional parameters, that are
+used to specify the mechanism to be used to discover the status of the module.
+The only method current supported is {\tt xrl} which takes an XRL
+specification as an argument.
 
-\item {{\tt \%modinfo: shutdownmethod }{\it method}}  \\The {\tt
-shutdownmethod} subcommand indicates the mechanism to be used to
-gracefully shutdown the module.  The only method current supported
-is {\tt xrl} which indicates usage of the common interface {\tt
-shutdown} XRL.  If the process does not then transition to {\tt
-PROC\_SHUTDOWN} state, the rtrmgr will then kill the process.
+\item {{\tt \%modinfo: shutdownmethod }{\it method }{\it argument}}  \\The {\tt
+shutdownmethod} subcommand takes two or more additional parameters, that are
+used to specify the mechanism to be used to gracefully shutdown the module.
+The only method current supported is {\tt xrl} which takes an XRL
+specification as an argument.
+If the process does not then transition to {\tt PROC\_SHUTDOWN} state, the
+rtrmgr will then kill the process.
 \end{description}
+
 \subsubsection{The {\tt \%create} Command.}
 {\tt \%create} is used to create a new instance of an interior node in
 the configuration tree.  
