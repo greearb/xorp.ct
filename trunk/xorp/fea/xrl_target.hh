@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.30 2004/05/13 08:06:54 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.31 2004/06/10 22:40:59 hodson Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -743,8 +743,8 @@ public:
      *
      *  @param ad administrative distance of origin routing protocol.
      *
-     *  @param cookie value set be requestor to identify redistribution source.
-     *  Typical value is the originating protocol name.
+     *  @param cookie value set by the requestor to identify redistribution
+     *  source. Typical value is the originating protocol name.
      *
      *  @param protocol_origin the name of the protocol that originated this
      *  entry.
@@ -765,6 +765,19 @@ public:
 	// Input values,
 	const uint32_t&	tid,
 	const IPv4Net&	network,
+	const string&	cookie);
+
+    /**
+     *  Delete all routing entries.
+     *
+     *  @param tid the transaction ID of this transaction.
+     *
+     *  @param cookie value set by the requestor to identify redistribution
+     *  source. Typical value is the originating protocol name.
+     */
+    XrlCmdError redist_transaction4_0_1_delete_all_routes(
+	// Input values,
+	const uint32_t&	tid,
 	const string&	cookie);
 
     /**
@@ -811,8 +824,8 @@ public:
      *
      *  @param ad administrative distance of origin routing protocol.
      *
-     *  @param cookie value set be requestor to identify redistribution source.
-     *  Typical value is the originating protocol name.
+     *  @param cookie value set by the requestor to identify redistribution
+     *  source. Typical value is the originating protocol name.
      *
      *  @param protocol_origin the name of the protocol that originated this
      *  entry.
@@ -833,6 +846,19 @@ public:
 	// Input values,
 	const uint32_t&	tid,
 	const IPv6Net&	network,
+	const string&	cookie);
+
+    /**
+     *  Delete all routing entries.
+     *
+     *  @param tid the transaction ID of this transaction.
+     *
+     *  @param cookie value set by the requestor to identify redistribution
+     *  source. Typical value is the originating protocol name.
+     */
+    XrlCmdError redist_transaction6_0_1_delete_all_routes(
+	// Input values,
+	const uint32_t&	tid,
 	const string&	cookie);
 
     //

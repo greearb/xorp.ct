@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.42 2004/05/15 23:12:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.43 2004/06/10 22:40:59 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1790,6 +1790,26 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
 }
 
 XrlCmdError
+XrlFeaTarget::redist_transaction4_0_1_delete_all_routes(
+	// Input values,
+	const uint32_t&	tid,
+	const string&	cookie)
+{
+    if (! have_ipv4())
+	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
+
+    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // memory here is handed it to to manage.
+
+    FtiTransactionManager::Operation op(
+	new FtiDeleteAllEntries4(_xftm.ftic())
+	);
+    return _xftm.add(tid, op);
+
+    UNUSED(cookie);
+}
+
+XrlCmdError
 XrlFeaTarget::redist_transaction6_0_1_start_transaction(
     // Output values,
     uint32_t&	tid)
@@ -1860,6 +1880,26 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
 	new FtiDeleteEntry6(_xftm.ftic(), network)
+	);
+    return _xftm.add(tid, op);
+
+    UNUSED(cookie);
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
+	// Input values,
+	const uint32_t&	tid,
+	const string&	cookie)
+{
+    if (! have_ipv6())
+	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
+
+    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // memory here is handed it to to manage.
+
+    FtiTransactionManager::Operation op(
+	new FtiDeleteAllEntries6(_xftm.ftic())
 	);
     return _xftm.add(tid, op);
 

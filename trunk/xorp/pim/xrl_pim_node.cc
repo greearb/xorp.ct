@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.54 2004/06/08 14:09:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.55 2004/06/10 22:41:35 hodson Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2660,6 +2660,34 @@ XrlPimNode::redist_transaction4_0_1_delete_route(
 }
 
 XrlCmdError
+XrlPimNode::redist_transaction4_0_1_delete_all_routes(
+    // Input values, 
+    const uint32_t&	tid, 
+    const string&	cookie)
+{
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv4()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    //
+    // Add a transaction item to remove all entries
+    //
+    PimNode::pim_mrib_table().add_pending_remove_all_entries(tid);
+
+    //
+    // Success
+    //
+    return XrlCmdError::OKAY();
+
+    UNUSED(cookie);
+}
+
+XrlCmdError
 XrlPimNode::redist_transaction6_0_1_start_transaction(
     // Output values, 
     uint32_t&	tid)
@@ -2809,6 +2837,34 @@ XrlPimNode::redist_transaction6_0_1_delete_route(
     // Add the Mrib to the list of pending transactions as an 'remove()' entry
     //
     PimNode::pim_mrib_table().add_pending_remove(tid, mrib);
+
+    //
+    // Success
+    //
+    return XrlCmdError::OKAY();
+
+    UNUSED(cookie);
+}
+
+XrlCmdError
+XrlPimNode::redist_transaction6_0_1_delete_all_routes(
+    // Input values, 
+    const uint32_t&	tid, 
+    const string&	cookie)
+{
+    //
+    // Verify the address family
+    //
+    if (! PimNode::is_ipv6()) {
+	string error_msg = c_format("Received protocol message with "
+				    "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    //
+    // Add a transaction item to remove all entries
+    //
+    PimNode::pim_mrib_table().add_pending_remove_all_entries(tid);
 
     //
     // Success

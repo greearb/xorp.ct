@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.16 2004/03/02 00:29:45 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/redist_transaction6.xif,v 1.4 2004/05/13 08:00:52 pavlin Exp $ */
 
 /*
  * RIB routes redistribution transaction-based XRL interface.
@@ -38,8 +38,9 @@ interface redist_transaction6/0.1 {
 	 * @param vifname virtual interface name with nexthop.
 	 * @param metric origin routing protocol metric for route.
 	 * @param ad administrative distance of origin routing protocol.
-	 * @param cookie value set be requestor to identify redistribution
-	 *        source.  Typical value is the originating protocol name.
+	 * @param cookie value set by the requestor to identify
+	 *        redistribution source.  Typical value is the originating
+	 *        protocol name.
 	 * @param protocol_origin the name of the protocol that originated
 	 * this entry.
 	 */
@@ -56,5 +57,14 @@ interface redist_transaction6/0.1 {
 	delete_route ? tid:u32						\
 		     & network:ipv6net					\
 		     & cookie:txt
-}
 
+	/**
+	 * Delete all routing entries.
+	 *
+	 * @param tid the transaction ID of this transaction.
+	 * @param cookie value set by the requestor to identify
+	 *        redistribution source.  Typical value is the originating
+	 *        protocol name.
+	 */
+	delete_all_routes ? tid:u32 & cookie:txt
+}
