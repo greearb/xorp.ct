@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.16 2004/05/26 04:24:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.17 2004/05/26 12:41:19 pavlin Exp $"
 
 #include <glob.h>
 #include <sys/types.h>
@@ -251,7 +251,7 @@ OpCommand::select_positional_argument(const list<string>& arguments,
 			     "expected values must be in interval "
 			     "[0, %u]",
 			     position.c_str(),
-			     arguments.size());
+			     static_cast<uint32_t>(arguments.size()));
 	return string("");
     }
 
