@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.11 2003/08/12 15:11:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.12 2003/09/30 18:27:05 pavlin Exp $"
 
 
 //
@@ -370,7 +370,7 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
     XLOG_ERROR("TX %s from %s to %s: "
 	       "invalid address family error = %d",
 	       PIMTYPE2ASCII(PIM_CAND_RP_ADV),
-	       cstring(addr()), cstring(bsr_addr),
+	       cstring(domain_wide_addr()), cstring(bsr_addr),
 	       family());
     return (XORP_ERROR);
     
@@ -379,6 +379,6 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_CAND_RP_ADV),
-	       cstring(addr()), cstring(bsr_addr));
+	       cstring(domain_wide_addr()), cstring(bsr_addr));
     return (XORP_ERROR);
 }
