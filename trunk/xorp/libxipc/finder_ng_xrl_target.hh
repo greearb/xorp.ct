@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libxipc/finder_ng_xrl_target.hh,v 1.1 2003/01/28 00:42:24 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_XRL_TGT_HH__
 #define __LIBXIPC_FINDER_XRL_TGT_HH__
@@ -24,6 +24,58 @@ class FinderNG;
 class FinderNGXrlTarget : public XrlFinderTargetBase {
 public:
     FinderNGXrlTarget(FinderNG& finder);
+
+    /**
+     *  Get name of Xrl Target
+     */
+    XrlCmdError common_0_1_get_target_name(string&	name);
+    /**
+     *  Get version string from Xrl Target
+     */
+    XrlCmdError common_0_1_get_version(string&	version);
+
+    /**
+     *  Fails if target_name is already registered. The target_name must
+     *  support the finder_client interface in order to be able to process
+     *  messages from the finder.
+     */
+    XrlCmdError finder_0_1_register_finder_client(const string&	target_name,
+						  const string&	class_name,
+						  const string& in_cookie,
+						  string&	out_cookie);  
+
+    XrlCmdError finder_0_1_unregister_finder_client(const string& target_name);
+
+    /**
+     *  Add resolved Xrl into system, fails if xrl is already registered.
+     */
+    XrlCmdError finder_0_1_add_xrl(const string& xrl, 
+				   const string& protocol_name, 
+				   const string& protocol_args, 
+				   string&	 resolved_xrl_method_name);
+
+    /**
+     *  Remove xrl
+     */
+    XrlCmdError finder_0_1_remove_xrl(const string&	xrl);
+
+    /**
+     *  Resolve Xrl
+     */
+    XrlCmdError finder_0_1_resolve_xrl(const string&	xrl,
+				       XrlAtomList&	resolutions);
+    
+    /**
+     *  Get list of registered Xrl targets
+     */
+    XrlCmdError finder_0_1_get_xrl_targets(XrlAtomList&	target_names);
+
+    /**
+     *  Get list of Xrls registered by target
+     */
+    XrlCmdError finder_0_1_get_xrls_registered_by(const string&	target_name, 
+						  XrlAtomList&	xrls);
+
 
 protected:
     FinderNG& _finder;

@@ -12,28 +12,98 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng.cc,v 1.1 2003/01/24 02:48:21 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng.cc,v 1.2 2003/01/28 00:42:23 hodson Exp $"
 
 #include "finder_module.h"
 
+#include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
 #include "finder_tcp.hh"
 #include "finder_ng.hh"
+
+#include "finder_ng_xrl_queue.hh"
+
+///////////////////////////////////////////////////////////////////////////////
+// FinderNGTarget
+//
+// This class is a container for values associated with a particular
+// target.  It contains a one-to-many mapping for values associated with
+// the target, eg unresolved xrl to resolved xrls, name-to-values, etc...
+//
+
+class FinderNGTarget {
+public:
+    typedef FinderNG::Resolveables Resolveables;
+    typedef map<string, Resolveables> ResolveMap;
+public:
+    FinderNGTarget(const string& name,
+		   const string& classname,
+		   const string& cookie,
+		   FinderMessengerBase* fm)
+	: _name(name), _classname(classname), _cookie(cookie), _messenger(fm)
+    {}
+
+    inline const string& name() const { return _name; }
+
+    inline const string& classname() const { return _classname; }
+
+    inline const string& cookie() const { return _cookie; }
+    
+    inline const FinderMessengerBase* messenger() const { return _messenger; }
+
+    inline const ResolveMap& resolve_map() const { return _resolutions; }
+
+    bool add_resolution(const string& key, const string& value)
+    {
+	Resolveables& r = _resolutions[key];
+	if (find(r.begin(), r.end(), value) == r.end()) 
+	    r.push_back(value);
+	return true;
+    }
+
+    bool remove_resolutions(const string& key)
+    {
+	ResolveMap::iterator i = _resolutions.find(key);
+	if (_resolutions.end() != i) {
+	    _resolutions.erase(i);
+	    return true;
+	}
+	return false;
+    }
+
+    const Resolveables*
+    resolveables(const string& key) const {
+	ResolveMap::const_iterator i = _resolutions.find(key);
+	if (_resolutions.end() == i)
+	    return false;
+	return &i->second;
+    }
+    
+protected:
+    string			_name;		// name of target
+    string			_classname;	// name of target class
+    string			_cookie;
+    ResolveMap			_resolutions;	// items registered by target
+    FinderMessengerBase*	_messenger;	// source of registrations
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // FinderNG
 //
 
-FinderNG::FinderNG()
+FinderNG::FinderNG() : _cmds("finder"), _active_messenger(0)
 {}
 
 FinderNG::~FinderNG()
 {
+    _targets.clear();
     while (false == _messengers.empty()) {
+	FinderMessengerBase* old_front = _messengers.front();
 	delete _messengers.front();
-	_messengers.pop_front();
+	// Expect death event for messenger to remove item from list
+	assert(_messengers.front() != old_front);
     }
 }
 
@@ -41,6 +111,7 @@ void
 FinderNG::messenger_active_event(FinderMessengerBase* m)
 {
     XLOG_ASSERT(0 == _active_messenger);
+    debug_msg("messenger %p active\n", m);
     _active_messenger = m;
 }
 
@@ -48,6 +119,7 @@ void
 FinderNG::messenger_inactive_event(FinderMessengerBase* m)
 {
     XLOG_ASSERT(m == _active_messenger);
+    debug_msg("messenger %p inactive\n", m);
     _active_messenger = 0;
 }
 
@@ -55,21 +127,62 @@ void
 FinderNG::messenger_stopped_event(FinderMessengerBase* m)
 {
     XLOG_INFO("Messenger %p stopped.", m);
+    delete m;
 }
 
 void
 FinderNG::messenger_birth_event(FinderMessengerBase* m)
 {
+    XLOG_ASSERT(
+	_messengers.end() == find(_messengers.begin(), _messengers.end(), m)
+	);
     _messengers.push_back(m);
+
+    debug_msg("messenger %p birth\n", m);    
+    XLOG_ASSERT(_out_queues.end() == _out_queues.find(m));
+    _out_queues.insert(OutQueueTable::value_type(m,
+						FinderNGXrlCommandQueue(*m)));
 }
 
 void
 FinderNG::messenger_death_event(FinderMessengerBase* m)
 {
-    // The messenger is telling us it's about to die, ie we're losing
-    // the connection to a particular process and it can be considered
-    // dead.  We need to do something here
-    XLOG_INFO("FinderMessenger dead (instance @ 0x%p)\n", m);
+    debug_msg("FinderNG::messenger %p death\n", m);    
+    // 1. Remove from Messenger list
+    FinderMessengerList::iterator mi;
+
+    mi = find(_messengers.begin(), _messengers.end(), m);
+    XLOG_ASSERT(_messengers.end() != mi);
+    _messengers.erase(mi);
+
+    // 2. Clear up queue associated with messenger
+    OutQueueTable::iterator oi;
+    oi = _out_queues.find(m);
+    XLOG_ASSERT(_out_queues.end() != oi);
+    _out_queues.erase(oi);
+
+    // 3. Walk targets associated with messenger, remove them and announce fact
+    TargetTable::iterator ti;
+    for (ti = _targets.begin(); ti != _targets.end(); ++ti) {
+	FinderNGTarget& tgt = ti->second;
+	if (tgt.messenger() == m) {
+	    announce_departure(tgt.name());
+	    _targets.erase(ti);
+	}
+    }
+}
+
+bool
+FinderNG::manages(const FinderMessengerBase* m) const
+{
+    return _messengers.end() !=
+	find(_messengers.begin(), _messengers.end(), m);
+}
+
+size_t
+FinderNG::messengers() const
+{
+    return _messengers.size();
 }
 
 XrlCmdMap&
@@ -78,84 +191,170 @@ FinderNG::commands()
     return _cmds;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//
-// FinderTcpMessenger methods
-//
-
-FinderTcpMessenger::FinderTcpMessenger(EventLoop& e,
-				       FinderNG&  finder,
-				       int	  fd,
-				       XrlCmdMap& cmds)
-    : FinderTcpMessengerBase(e, fd, cmds), _finder(&finder)
+bool
+FinderNG::add_target(const string& tgt,
+		     const string& cls,
+		     const string& cookie)
 {
-    _finder->messenger_birth_event(this);
+    debug_msg("add_target %s / %s / %s\n", tgt.c_str(), cls.c_str(),
+	      cookie.c_str());
+
+    TargetTable::const_iterator existing = _targets.find(tgt);
+    if (existing->second.messenger() == _active_messenger) {
+	debug_msg("already registered by messenger.\n");
+	return true;
+    }
+
+    if (_targets.end() == existing) {
+	_targets.insert(
+			TargetTable::value_type(tgt,
+				FinderNGTarget(tgt, cls, cookie,
+					       _active_messenger))
+			);
+	return true;
+    }
+    debug_msg("FAIL registered by another messenger.");
+    return false;
+
 }
 
-FinderTcpMessenger::FinderTcpMessenger(EventLoop& e,
-				       int	  fd,
-				       XrlCmdMap& cmds)
-    : FinderTcpMessengerBase(e, fd, cmds), _finder(0)
+bool
+FinderNG::active_messenger_represents_target(const string& tgt) const
 {
-    if (_finder)
-	_finder->messenger_birth_event(this);
-}
-
-FinderTcpMessenger::~FinderTcpMessenger()
-{
-    if (_finder)
-	_finder->messenger_death_event(this);
-}
-
-void
-FinderTcpMessenger::pre_dispatch_xrl()
-{
-    if (_finder)
-	_finder->messenger_active_event(this);
-}
-
-void
-FinderTcpMessenger::post_dispatch_xrl()
-{
-    if (_finder)
-	_finder->messenger_inactive_event(this);
-}
-
-void
-FinderTcpMessenger::close_event()
-{
-    if (_finder)
-	_finder->messenger_stopped_event(this);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// FinderNGTcpListener methods
-//
-
-FinderNGTcpListener::FinderNGTcpListener(FinderNG&  finder,
-					 EventLoop& e,
-					 IPv4	    interface,
-					 uint16_t   port)
-    throw (InvalidPort)
-    : FinderTcpListenerBase(e, interface, port), _finder(finder)
-{
-}
-					 
-FinderNGTcpListener::~FinderNGTcpListener()
-{
-    while (false == _messengers.empty()) {
-	delete _messengers.front();
-	_messengers.pop_front();
+    TargetTable::const_iterator i = _targets.find(tgt);
+    if (_targets.end() == i) {
+	debug_msg("Failed to find target %s\n", tgt.c_str());
+	for (TargetTable::const_iterator ci = _targets.begin();
+	     ci != _targets.end(); ++ci) {
+	    debug_msg("Target \"%s\"\n", ci->first.c_str());
+	}
+	return false;
+    } else {
+	return i->second.messenger() == _active_messenger;
     }
 }
 
 bool
-FinderNGTcpListener::connection_event(int fd)
+FinderNG::remove_target_with_cookie(const string& cookie)
 {
-    FinderTcpMessenger* m = new FinderTcpMessenger(event_loop(),
-						   _finder, fd,
-						   _finder.commands());
-    _messengers.push_back(m);
+    TargetTable::iterator i;
+    for (i = _targets.begin(); i != _targets.end(); ++i) {
+	if (i->second.cookie() == cookie) {
+	    debug_msg("Removing target %s / %s / %s\n",
+		      i->second.name().c_str(),
+		      i->second.classname().c_str(),
+		      i->second.cookie().c_str());
+	    announce_departure(i->second.name());
+	    _targets.erase(i);
+
+	    return true;
+	}
+    }
+    debug_msg("Failed to find target with cookie %s\n", cookie.c_str());
+    return false;
+}
+
+bool
+FinderNG::remove_target(const string& tgt)
+{
+    TargetTable::iterator i = _targets.find(tgt);
+
+    if (_targets.end() == i) {
+	return false;
+    }
+
+    if (i->second.messenger() != _active_messenger) {
+	// XXX TODO walk list of targets and print out what offending
+	// messenger is responsible for + string representation of messenger.
+	XLOG_WARNING("Messenger illegally attempted to remove %s\n",
+		     tgt.c_str());
+	return false;
+    }
+    
+    _targets.erase(i);
+    announce_departure(tgt);
+
     return true;
 }
+
+bool
+FinderNG::add_resolution(const string& tgt,
+			 const string& key,
+			 const string& value)
+{
+    TargetTable::iterator i = _targets.find(tgt);
+
+    if (_targets.end() == i) {
+	return false;
+    }
+
+    if (i->second.messenger() != _active_messenger) {
+	XLOG_WARNING("Messenger illegally attempted to add to %s\n",
+		     tgt.c_str());
+	return false;
+    }
+
+    FinderNGTarget& t = i->second;
+    return t.add_resolution(key, value);
+}
+
+bool
+FinderNG::remove_resolutions(const string& tgt,
+			     const string& key)
+{
+    TargetTable::iterator i = _targets.find(tgt);
+
+    if (_targets.end() == i) {
+	return false;
+    }
+
+    if (i->second.messenger() != _active_messenger) {
+	XLOG_WARNING("Messenger illegally attempted to add to %s\n",
+		     tgt.c_str());
+	return false;
+    }
+
+    FinderNGTarget& t = i->second;
+    if (t.remove_resolutions(key)) {
+	announce_departure(tgt, key);
+	return true;
+    }
+    return false;
+}
+
+const FinderNG::Resolveables*
+FinderNG::resolve(const string& tgt, const string& key)
+{
+    TargetTable::iterator i = _targets.find(tgt);
+    if (_targets.end() == i) {
+	return 0;
+    }
+    return i->second.resolveables(key);
+}
+
+void
+FinderNG::announce_departure(const string& tgt)
+{
+    FinderMessengerList::iterator i;
+
+    for (i = _messengers.begin(); i != _messengers.end(); ++i) {
+	OutQueueTable::iterator qi = _out_queues.find(*i);
+	XLOG_ASSERT(_out_queues.end() != qi);
+	FinderNGXrlCommandQueue& q = qi->second;
+	q.enqueue(new FinderNGSendRemoveXrls(q, tgt));
+    }
+}
+
+void
+FinderNG::announce_departure(const string& tgt, const string& key)
+{
+    FinderMessengerList::iterator i;
+
+    for (i = _messengers.begin(); i != _messengers.end(); ++i) {
+	OutQueueTable::iterator qi = _out_queues.find(*i);
+	XLOG_ASSERT(_out_queues.end() != qi);
+	FinderNGXrlCommandQueue& q = qi->second;
+	q.enqueue(new FinderNGSendRemoveXrl(q, tgt, key));
+    }
+}
+

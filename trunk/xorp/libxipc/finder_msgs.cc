@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_msgs.cc,v 1.1 2003/01/21 18:51:36 hodson Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/c_format.hh"
@@ -249,7 +249,7 @@ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
 
     p1++;
     if (*p1 != '\0')
-	_xrl_args = new XrlArgs(p1 + 1);
+	_xrl_args = new XrlArgs(p1);
 }
 
 ParsedFinderXrlResponse::~ParsedFinderXrlResponse()

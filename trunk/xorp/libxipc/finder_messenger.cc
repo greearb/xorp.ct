@@ -12,15 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_messenger.cc,v 1.1 2003/01/21 18:51:36 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_messenger.cc,v 1.2 2003/01/28 00:42:23 hodson Exp $"
 
 #include "finder_module.h"
 #include "finder_messenger.hh"
 
 #include "libxorp/xlog.h"
 
+FinderMessengerBase::FinderMessengerBase(EventLoop&		 e,
+					 FinderMessengerManager& fmm,
+					 XrlCmdMap& 		 cmds)
+    : _event_loop(e), _manager(fmm), _cmds(cmds)
+{
+    //    _manager.messenger_birth_event(this);
+}
+
 FinderMessengerBase::~FinderMessengerBase()
 {
+    _manager.messenger_death_event(this);
 }
 
 bool
@@ -62,16 +71,6 @@ FinderMessengerBase::response_timeout(uint32_t seqno)
 }
 
 void
-FinderMessengerBase::pre_dispatch_xrl()
-{
-}
-
-void
-FinderMessengerBase::post_dispatch_xrl()
-{
-}
-
-void
 FinderMessengerBase::dispatch_xrl(uint32_t seqno, const Xrl& xrl)
 {
     const XrlCmdEntry* ce = command_map().get_handler(xrl.command());
@@ -81,7 +80,8 @@ FinderMessengerBase::dispatch_xrl(uint32_t seqno, const Xrl& xrl)
 	return;
     }
 
-    pre_dispatch_xrl();
+    // Announce we're about to dispatch an xrl
+    _manager.messenger_active_event(this);
     
     XrlArgs reply_args;
     XrlError e = ce->callback->dispatch(xrl, &reply_args);
@@ -91,5 +91,6 @@ FinderMessengerBase::dispatch_xrl(uint32_t seqno, const Xrl& xrl)
 	reply(seqno, e, 0);
     }
 
-    post_dispatch_xrl();
+    // Announce we've dispatched xrl
+    _manager.messenger_inactive_event(this);
 }

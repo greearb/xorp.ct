@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_msgs.cc,v 1.1 2003/01/21 18:51:36 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -176,6 +176,35 @@ test_main()
 	    }
 	}
     }
+
+    verbose_log("Checking XrlArgs handling in XrlResponses\n");
+    XrlArgs a;
+    a.add_int32("an-int", 67);
+    a.add_ipv4("an-ipv4", IPv4("10.0.0.1"));
+    uint32_t seqno = 1999111;
+
+    FinderXrlResponse fxr(seqno, XrlError::OKAY(), &a);
+    ParsedFinderXrlResponse pfxr(fxr.str().c_str());
+    //    verbose_log("Message is \"%s\"\n", fxr.str().c_str());
+    if (pfxr.seqno() != seqno) {
+	verbose_log("Failed on seqno (%u != %u)\n", pfxr.seqno(), seqno);
+	return 1;
+    }
+    if (pfxr.xrl_error() != XrlError::OKAY()) {
+	verbose_log("Failed on XrlError (%s != %s)\n",
+		    pfxr.xrl_error().str().c_str(), XrlError::OKAY().str().c_str());
+	return 1;
+    }
+    if (pfxr.xrl_args() == 0) {
+	verbose_log("Missing arguments in parsed response\n");
+	return 1;
+    }
+    if (*pfxr.xrl_args() != a) {
+	verbose_log("Arguments mismatch \"%s\" != \"%s\"\n",
+		    pfxr.xrl_args()->str().c_str(), a.str().c_str());
+	return 1;
+    }
+    
     verbose_log("All is well on the western front\n");
     return 0;
 }

@@ -12,92 +12,75 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng.hh,v 1.1 2003/01/24 02:48:22 hodson Exp $
+// $XORP: xorp/libxipc/finder_ng.hh,v 1.2 2003/01/28 00:42:24 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_HH__
 #define __LIBXIPC_FINDER_NG_HH__
 
 #include "config.h"
 
-#include "libxipc/xrl_cmd_map.hh"
-#include "finder_messenger.hh"
+#include <list>
+#include <map>
 
-class FinderNG {
+#include "xrl_cmd_map.hh"
+#include "finder_messenger.hh"
+#include "finder_ng_xrl_queue.hh"
+
+class FinderNGTarget;
+
+class FinderNG : public FinderMessengerManager {
 public:
+    typedef list<FinderMessengerBase*> FinderMessengerList;
+    typedef map<FinderMessengerBase*, FinderNGXrlCommandQueue> OutQueueTable;
+    typedef map<string, FinderNGTarget> TargetTable;
+    typedef list<string> Resolveables;
     
 public:
     FinderNG();
-    ~FinderNG();
+    virtual ~FinderNG();
 
+protected:
+    /* Methods for FinderMessengerManager interface */
     void messenger_active_event(FinderMessengerBase*);
     void messenger_inactive_event(FinderMessengerBase*);
     void messenger_stopped_event(FinderMessengerBase*);
     void messenger_birth_event(FinderMessengerBase*);
     void messenger_death_event(FinderMessengerBase*);
-
+    bool manages(const FinderMessengerBase*) const;
+    
+public:    
     XrlCmdMap& commands();
+
+    bool add_target(const string& target_name,
+		    const string& class_name,
+		    const string& cookie);
+
+    bool active_messenger_represents_target(const string& target_name) const;
+    
+    bool remove_target(const string& target_name);
+    bool remove_target_with_cookie(const string& cookie);
+    
+    bool add_resolution(const string& target,
+			const string& key,
+			const string& value);
+
+    bool remove_resolutions(const string& target,
+			    const string& key);
+
+    const Resolveables* resolve(const string& target, const string& key);
+
+    size_t messengers() const;
     
 protected:
-    XrlCmdMap _cmds;
+    void announce_departure(const string& target);
+    void announce_departure(const string& target, const string& key);
+    
+protected:
+    XrlCmdMap		 _cmds;
     FinderMessengerBase* _active_messenger;
-    list<FinderMessengerBase*> _messengers;
-};
-
-#include "finder_tcp.hh"
-#include "finder_tcp_messenger.hh"
-
-class FinderTcpMessenger : public FinderTcpMessengerBase {
-public:
-    FinderTcpMessenger(EventLoop& e,
-		       FinderNG&  finder,
-		       int	  fd,
-		       XrlCmdMap& cmds);
-
-    FinderTcpMessenger(EventLoop& e,
-		       int	  fd,
-		       XrlCmdMap& cmds);
-
-    ~FinderTcpMessenger();
-    
-    void pre_dispatch_xrl();
-
-    void post_dispatch_xrl();
-
-    void close_event();
-    
-protected:
-    FinderNG* _finder;
-};
-
-/**
- * Class that creates FinderMessengers for incoming connections.
- *
- * New FinderMessengers are announced to the Finder via
- * FinderNG::messenger_birth_event, and the Finder becomes responsible
- * for the memory management of the messengers.
- */
-class FinderNGTcpListener : public FinderTcpListenerBase {
-public:
-    typedef FinderTcpListenerBase::AddrList Addr4List;
-    typedef FinderTcpListenerBase::NetList Net4List;
-
-    FinderNGTcpListener(FinderNG&  finder,
-			EventLoop& e,
-			IPv4	   interface,
-			uint16_t   port)
-	throw (InvalidPort);
-
-    ~FinderNGTcpListener();
-
-    /**
-     * Instantiate a Messenger instance for fd.
-     * @return true on success, false on failure.
-     */
-    bool connection_event(int fd);
-    
-protected:
-    FinderNG&			_finder;
-    list<FinderTcpMessenger*> _messengers;
+    FinderMessengerList	 _messengers;
+    TargetTable		 _targets;
+    OutQueueTable	 _out_queues;
 };
 
 #endif // __LIBXIPC_FINDER_NG_HH__

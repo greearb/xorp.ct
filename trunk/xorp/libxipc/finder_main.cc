@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.1 2003/01/24 02:48:22 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.2 2003/01/28 00:42:24 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -194,10 +194,11 @@ finder_main(int argc, char* const argv[])
     try {
 	EventLoop		 e;
 	FinderNG	  	 finder;
-	FinderNGTcpListener	 finder_tcp4_source(finder, e,
+	FinderNGTcpListener	 finder_tcp4_source(e,
+						    finder, finder.commands(),
 						    bind_addr, bind_port);
 
-	// FinderNGXrlTarget finder_xrl_target(finder);
+	//	FinderNGXrlTarget finder_xrl_target(finder);
 
 	finder_tcp4_source.add_permitted_addrs(permitted_addrs);
 	finder_tcp4_source.add_permitted_nets(permitted_nets);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.4 2003/01/24 02:47:25 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.5 2003/01/28 00:42:24 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -22,6 +22,7 @@
 
 #include <vector>
 
+#include "config.h"
 #include "libxorp/xorp.h"
 #include "libxorp/asyncio.hh"
 #include "libxorp/eventloop.hh"
@@ -127,7 +128,8 @@ public:
 public:
     FinderTcpListenerBase(EventLoop&	e,
 			  IPv4		interface,
-			  uint16_t	port)
+			  uint16_t	port,
+			  bool		en = true)
 	throw (InvalidPort);
 
     virtual ~FinderTcpListenerBase();
@@ -143,6 +145,16 @@ public:
      */
     virtual bool connection_event(int fd) = 0;
 
+    /**
+     * Determine whether listener is enabled.
+     */
+    bool enabled() const;
+
+    /**
+     * Control whether listener is enabled.
+     */
+    void set_enabled(bool en);
+    
     /**
      * Add addr to list of addresses allowed to connect with finder.
      * @return true if host is not on list already.
@@ -182,6 +194,7 @@ protected:
 protected:
     EventLoop&	_e;
     int		_lfd;
+    bool	_en;
 
     AddrList	_ok_addrs;
     NetList	_ok_nets;

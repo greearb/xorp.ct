@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_messenger.hh,v 1.1 2003/01/21 18:51:36 hodson Exp $
+// $XORP: xorp/libxipc/finder_messenger.hh,v 1.2 2003/01/28 00:42:23 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_MESSENGER__
 #define __LIBXIPC_FINDER_MESSENGER__
@@ -22,6 +22,46 @@
 #include "libxorp/eventloop.hh"
 #include "xrl_cmd_map.hh"
 #include "xrl_sender.hh"
+
+class FinderMessengerBase;
+
+/**
+ * Base class for classes managing descendents of FinderMessengerBase.
+ */
+class FinderMessengerManager {
+public:
+    /**
+     * Method called by messenger constructor.
+     */
+    virtual void messenger_birth_event(FinderMessengerBase*) = 0;
+
+    /**
+     * Method called by messenger destructor.
+     */
+    virtual void messenger_death_event(FinderMessengerBase*) = 0;
+
+    /**
+     * Method called before Xrl is dispatched.
+     */
+    virtual void messenger_active_event(FinderMessengerBase*) = 0;
+
+    /**
+     * Method called immediately after Xrl is dispatched.
+     */
+    virtual void messenger_inactive_event(FinderMessengerBase*) = 0;
+
+    /**
+     * Method called when Messenger is unable to continue.  For instance,
+     * network connection lost.
+     */
+    virtual void messenger_stopped_event(FinderMessengerBase*) = 0;
+
+    /**
+     * Method called to tell if FinderMessengerManager instance manages
+     * a particular messenger.
+     */
+    virtual bool manages(const FinderMessengerBase*) const = 0;
+};
 
 /**
  * @short Base class for FinderMessenger classes.
@@ -34,14 +74,14 @@
 class FinderMessengerBase : public XrlSender
 {
 public:
+    typedef XrlSender::Callback SendCallback;
+
+public:
     FinderMessengerBase(EventLoop& e,
-			XrlCmdMap& cmds)
-	: _event_loop(e), _cmds(cmds)
-    {}
+			FinderMessengerManager& fmm,
+			XrlCmdMap& cmds);
     
     virtual ~FinderMessengerBase();
-    
-    typedef XrlSender::Callback SendCallback;
 
     virtual bool send(const Xrl& xrl, const SendCallback& scb) = 0;
 
@@ -53,29 +93,10 @@ public:
     
 protected:
     /**
-     * A method derived classes can implement to perform an action, eg
-     * set context, immediately before the an Xrl is dispatched.
-     *
-     * By default a no-op.
-     */
-    virtual void pre_dispatch_xrl();
-
-    /**
      * Find command associated with Xrl and dispatch it.  pre_dispatch_xrl()
      * and post_dispatch_xrl() are called either side of Xrl.  
-     *
-     * @param seqno sequence number to be passed to reply.
      */
     void dispatch_xrl(uint32_t seqno, const Xrl& x);
-
-    /**
-     * A method derived classes can implement to perform an action, eg
-     * clear context, immediately after an Xrl is dispatched.  Response is
-     * propagated by calling reply().
-     *
-     * By default a no-op.
-     */
-    virtual void post_dispatch_xrl();
     
     bool dispatch_xrl_response(uint32_t seqno,
 			       const XrlError& e,
@@ -89,6 +110,8 @@ protected:
 
     void response_timeout(uint32_t seqno);
 
+    inline FinderMessengerManager& manager();
+    
 private:
     struct ResponseState {
 	ResponseState(uint32_t		   seqno,
@@ -111,9 +134,10 @@ private:
     friend class ResponseState;
 
 private:
-    EventLoop&			 _event_loop;
-    SeqNoResponseMap		 _expected_responses;
-    XrlCmdMap&			 _cmds;
+    EventLoop&				_event_loop;
+    FinderMessengerManager&		_manager;
+    SeqNoResponseMap		 	_expected_responses;
+    XrlCmdMap&			 	_cmds;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,6 +154,12 @@ inline EventLoop&
 FinderMessengerBase::event_loop()
 {
     return _event_loop;
+}
+
+inline FinderMessengerManager&
+FinderMessengerBase::manager()
+{
+    return _manager;
 }
 
 #endif // __LIBXIPC_FINDER_MESSENGER__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.1 2003/01/21 18:51:36 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.2 2003/01/28 00:42:24 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
@@ -25,20 +25,22 @@
 #include "finder_msgs.hh"
 #include "finder_messenger.hh"
 
-class FinderNG;
-
-class FinderTcpMessengerBase
+class FinderTcpMessenger
     : public FinderMessengerBase, protected FinderTcpBase
 {
 public:
-    FinderTcpMessengerBase(EventLoop& e, int fd, XrlCmdMap& cmds) :
-	FinderMessengerBase(e, cmds), FinderTcpBase(e, fd) {}
+    FinderTcpMessenger(EventLoop&		e,
+		       FinderMessengerManager&	mm,
+		       int			fd,
+		       XrlCmdMap&		cmds);
 
-    ~FinderTcpMessengerBase();
+    virtual ~FinderTcpMessenger();
 
     bool send(const Xrl& xrl, const SendCallback& scb);
 
     bool pending() const;
+
+    inline void close() { FinderTcpBase::close(); }
     
 protected:
     // FinderTcpBase methods
@@ -67,6 +69,111 @@ protected:
 
     typedef list<const FinderMessageBase*> OutputQueue;
     OutputQueue _out_queue;
+};
+
+/**
+ * Class that creates FinderMessengers for incoming connections.
+ */
+class FinderNGTcpListener : public FinderTcpListenerBase {
+public:
+    typedef FinderTcpListenerBase::AddrList Addr4List;
+    typedef FinderTcpListenerBase::NetList Net4List;
+
+    FinderNGTcpListener(EventLoop&		e,
+			FinderMessengerManager& mm,
+			XrlCmdMap&		cmds,
+			IPv4			interface,
+			uint16_t		port,
+			bool			enabled = true)
+	throw (InvalidPort);
+
+    ~FinderNGTcpListener();
+
+    /**
+     * Instantiate a Messenger instance for fd.
+     * @return true on success, false on failure.
+     */
+    bool connection_event(int fd);
+    
+protected:
+    FinderMessengerManager& _mm;
+    XrlCmdMap& _cmds;
+};
+
+class FinderNGTcpConnector {
+public:
+    FinderNGTcpConnector(EventLoop&		 e,
+			 FinderMessengerManager& mm,
+			 XrlCmdMap&		 cmds,
+			 IPv4			 host,
+			 uint16_t		 port);
+
+    /**
+     * Connect to host specified in constructor.
+     *
+     * @param created_messenger pointer to be assigned messenger created upon
+     * successful connect.
+     * @return 0 on success, errno on failure.
+     */
+    int connect(FinderTcpMessenger*& created_messenger);
+
+protected:
+    EventLoop&		    _e;
+    FinderMessengerManager& _mm;
+    XrlCmdMap&		    _cmds;
+    IPv4		    _host;
+    uint16_t		    _port;
+};
+
+/**
+ * Class to establish and manage a single connection to a FinderNGTcpListener.
+ * Should the connection fail after being established a new connection is
+ * started.
+ */
+class FinderNGTcpAutoConnector
+    : public FinderNGTcpConnector, public FinderMessengerManager
+{
+public:
+    FinderNGTcpAutoConnector(EventLoop&		     e,
+			     FinderMessengerManager& mm,
+			     XrlCmdMap&		     cmds,
+			     IPv4		     host,
+			     uint16_t		     port,
+			     bool		     enabled = true);
+    virtual ~FinderNGTcpAutoConnector();
+
+    void set_enabled(bool en);
+    bool enabled() const;
+    bool connected() const;
+
+protected:
+    void do_auto_connect();
+    void start_timer(uint32_t ms = 0);
+    void stop_timer();
+
+protected:
+    /*
+     * Implement FinderMessengerManager interface to catch death of
+     * active messenger to trigger auto-reconnect.  All methods are
+     * forwarded to _real_manager.
+     */
+    void messenger_birth_event(FinderMessengerBase*);
+    void messenger_death_event(FinderMessengerBase*);
+    void messenger_active_event(FinderMessengerBase*);
+    void messenger_inactive_event(FinderMessengerBase*);
+    void messenger_stopped_event(FinderMessengerBase*);
+    bool manages(const FinderMessengerBase*) const;
+
+protected:
+    FinderMessengerManager& _real_manager;
+    bool		    _connected;
+    bool		    _enabled;
+    XorpTimer		    _retry_timer;
+    int			    _last_error;
+    size_t		    _consec_error;
+    
+    static const uint32_t CONNECT_RETRY_PAUSE_MS = 100;
+    static const uint32_t CONNECT_FAILS_BEFORE_LOGGING = 10;
 };
 
 #endif // __LIBXIPC_FINDER_TCP_MESSENGER_HH__

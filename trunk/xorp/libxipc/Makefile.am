@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.6 2003/01/24 02:48:21 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.7 2003/01/28 00:42:23 hodson Exp $
 ##
 
 # - The library
-noinst_LIBRARIES = libxipc.a
+noinst_LIBRARIES = libxipc.a libfinder.a
 
 # -- Programs
 bin_PROGRAMS  =	call_xrl finder finder_ng
@@ -14,6 +14,7 @@ bin_PROGRAMS  =	call_xrl finder finder_ng
 noinst_PROGRAMS  = test_finder_client test_finder_ipc test_finder_ipc2
 noinst_PROGRAMS += test_finder_msg test_finder_transport test_header
 noinst_PROGRAMS += test_finder_msgs test_finder_tcp test_finder_messenger
+noinst_PROGRAMS += test_finder_ng
 noinst_PROGRAMS += test_inproc test_lemming test_sudp test_stcp
 noinst_PROGRAMS += test_xrl_error test_xrl test_xrl_atom test_xrl_args 
 noinst_PROGRAMS += test_xrl_router test_xrl_parser
@@ -22,7 +23,7 @@ TESTS = $(noinst_PROGRAMS) test_xrl_parser.sh
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS		 = -all-static
-LDADD		 = $(noinst_LIBRARIES)
+LDADD		 = ./libxipc.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 
@@ -30,13 +31,11 @@ LDADD		+= $(top_builddir)/libcomm/libcomm.a
 call_xrl_SOURCES		= call_xrl.cc
 finder_SOURCES			= finder.cc
 
-finder_ng_SOURCES		 = finder_ng.hh 
-finder_ng_SOURCES		+= finder_ng.cc
 finder_ng_SOURCES		+= finder_ng_main.cc
-finder_ng_SOURCES		+= finder_base.hh
-finder_ng_SOURCES		+= finder_base.cc
-finder_ng_SOURCES		+= finder_ng_xrl_target.hh
-finder_ng_SOURCES		+= finder_ng_xrl_target.cc
+finder_ng_LDADD			+= libfinder.a
+finder_ng_LDADD		 	+= ./libxipc.a
+finder_ng_LDADD			+= $(top_builddir)/libxorp/libxorp.a
+finder_ng_LDADD			+= $(top_builddir)/libcomm/libcomm.a
 
 test_finder_client_SOURCES	= test_finder_client.cc
 test_finder_ipc_SOURCES		= test_finder_ipc.cc
@@ -58,7 +57,10 @@ test_xrl_parser_SOURCES		= test_xrl_parser.cc
 test_xrl_router_SOURCES		= test_xrl_router.cc
 test_xrl_error_SOURCES		= test_xrl_error.cc
 
-# -- Library Sources
+test_finder_ng_SOURCES		= test_finder_ng.cc
+test_finder_ng_LDADD		= libfinder.a $(LDADD)
+
+# -- Library Sources (libxipc)
 libxipc_a_SOURCES  = finder_module.h
 libxipc_a_SOURCES += ipc_module.h
 libxipc_a_SOURCES += xrl_module.h
@@ -69,6 +71,8 @@ libxipc_a_SOURCES += finder_ipc.hh
 libxipc_a_SOURCES += finder_messenger.hh
 libxipc_a_SOURCES += finder_msg.hh
 libxipc_a_SOURCES += finder_msgs.hh
+libxipc_a_SOURCES += finder_ng_client.hh
+libxipc_a_SOURCES += finder_ng_client_xrl_target.hh
 libxipc_a_SOURCES += finder_server.hh
 libxipc_a_SOURCES += finder_tcp_messenger.hh
 libxipc_a_SOURCES += finder_transport.hh
@@ -105,6 +109,8 @@ libxipc_a_SOURCES += finder_ipc.cc
 libxipc_a_SOURCES += finder_messenger.cc
 libxipc_a_SOURCES += finder_msg.cc
 libxipc_a_SOURCES += finder_msgs.cc
+libxipc_a_SOURCES += finder_ng_client.cc
+libxipc_a_SOURCES += finder_ng_client_xrl_target.cc
 libxipc_a_SOURCES += finder_server.cc
 libxipc_a_SOURCES += finder_tcp.cc
 libxipc_a_SOURCES += finder_tcp_messenger.cc
@@ -131,6 +137,17 @@ libxipc_a_SOURCES += xrl_std_router.cc
 libxipc_a_SOURCES += xrl_error.cc
 libxipc_a_SOURCES += xuid.cc
 
+# -- Library Sources (libfinder) 
+libfinder_a_SOURCES += finder_base.hh
+libfinder_a_SOURCES  = finder_ng.hh 
+libfinder_a_SOURCES += finder_ng_xrl_queue.hh
+libfinder_a_SOURCES += finder_ng_xrl_target.hh
+
+libfinder_a_SOURCES += finder_base.cc
+libfinder_a_SOURCES += finder_ng.cc
+libfinder_a_SOURCES += finder_ng_xrl_queue.cc
+libfinder_a_SOURCES += finder_ng_xrl_target.cc
+
 # magic-script:			magic-script.in
 # 	sed -e 's/whatever//' < $(srcdir)/magic-script.in > magic-script
 # 	chmod +x magic-script
@@ -142,28 +159,31 @@ libxipc_a_SOURCES += xuid.cc
 ## to anybody else
 ##
 
-# -- Generated Sources used in libxipc (see explanation at end of file)
+# -- Generated Sources used in libxipc and libfinder (see explanation at end of file)
 BUILT_SOURCES += common_xif.hh
 BUILT_SOURCES += common_xif.cc
-BUILT_SOURCES += finder_client_base.hh
-BUILT_SOURCES += finder_client_base.cc
 BUILT_SOURCES += finder_base.hh
 BUILT_SOURCES += finder_base.cc
+BUILT_SOURCES += finder_client_base.hh
+BUILT_SOURCES += finder_client_base.cc
+BUILT_SOURCES += finder_client_xif.hh
+BUILT_SOURCES += finder_client_xif.cc
 BUILT_SOURCES += finder_xif.hh
 BUILT_SOURCES += finder_xif.cc
 
-CLEANFILES = finder_client_base.hh finder_client_base.cc 		      \
-	     finder_xif.hh finder_xif.cc 				      \
-             finder_base.hh finder_base.cc
+CLEANFILES = $(BUILT_SOURCES)
 
 libxipc_a_SOURCES += common_xif.hh
 libxipc_a_SOURCES += common_xif.cc
 libxipc_a_SOURCES += finder_client_base.hh
 libxipc_a_SOURCES += finder_client_base.cc
-libxipc_a_SOURCES += finder_base.hh
-libxipc_a_SOURCES += finder_base.cc
 libxipc_a_SOURCES += finder_xif.hh
 libxipc_a_SOURCES += finder_xif.cc
+
+libfinder_a_SOURCES += finder_base.hh
+libfinder_a_SOURCES += finder_base.cc
+libfinder_a_SOURCES += finder_client_xif.hh
+libfinder_a_SOURCES += finder_client_xif.cc
 
 ###############################################################################
 #
@@ -184,6 +204,11 @@ common_xif.%: $(IDIR)/common_xif.%
 	$(RM) $@
 	$(LN_S) $(IDIR)/$@ .
 
+finder_base.%: $(TDIR)/finder_base.%
+	cd $(TDIR) && $(MAKE) $(notdir $@)
+	$(RM) $@
+	$(LN_S) $(TDIR)/$@ .
+
 finder_xif.%: $(IDIR)/finder_xif.%
 	cd $(IDIR) && $(MAKE) $(notdir $@)
 	$(RM) $@
@@ -194,10 +219,11 @@ finder_client_base.%: $(TDIR)/finder_client_base.%
 	$(RM) $@
 	$(LN_S) $(TDIR)/$@ .
 
-finder_base.%: $(TDIR)/finder_base.%
-	cd $(TDIR) && $(MAKE) $(notdir $@)
+finder_client_xif.%: $(IDIR)/finder_client_xif.%
+	cd $(IDIR) && $(MAKE) $(notdir $@)
 	$(RM) $@
-	$(LN_S) $(TDIR)/$@ .
+	$(LN_S) $(IDIR)/$@ .
+
 
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.3 2003/01/24 02:47:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.4 2003/01/28 00:42:25 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -62,8 +62,6 @@ do {									\
 // Localized Test 
 //
 
-static XrlCmdMap xrl_cmds;
-
 const XrlCmdError
 hello_cmd(const Xrl& xrl, XrlArgs*)
 {
@@ -81,7 +79,7 @@ send_hello_complete(const XrlError& e, XrlArgs*, bool *success, bool* done)
 }
 
 static void
-send_hello(FinderTcpMessengerBase* fm, bool* success, bool* done)
+send_hello(FinderMessengerBase* fm, bool* success, bool* done)
 {
     bool send_okay;
 
@@ -97,89 +95,69 @@ add_commands(XrlCmdMap& cmds)
     cmds.add_handler("hello", callback(hello_cmd));
 }
 
-static void
-connect_client(EventLoop* e, FinderTcpMessengerBase** m, bool* failed)
-{
-    IPv4 ipc_addr = if_get_preferred();
-    struct in_addr ia;
-    ia.s_addr = ipc_addr.addr();
-
-    int fd = comm_connect_tcp4(&ia, FINDER_TCP_DEFAULT_PORT);
-    if (fd < 0) {
-	fprintf(stderr, "Client failed to connect\n");
-	*failed = true;
-	return;
-    }
-    verbose_log("Client connected to server\n");
-    *m = new FinderTcpMessengerBase(*e, fd, xrl_cmds);
-}
-
-class DummyFinder;
-
-class FinderAttachedTcpMessenger : public FinderTcpMessengerBase {
+class DummyFinder : public FinderMessengerManager {
 public:
-    FinderAttachedTcpMessenger(DummyFinder& 	finder,
-			       EventLoop&   	e,
-			       int		fd,
-			       XrlCmdMap&	cmds)
-	: FinderTcpMessengerBase(e, fd, cmds), _finder(finder)
-    {}
+    DummyFinder() : _messenger(0) {}
 
-    void pre_dispatch_xrl();
-    void post_dispatch_xrl();
-protected:
-    DummyFinder& _finder;
-};
-
-class DummyFinder : public FinderTcpListenerBase {
-public:
-    DummyFinder(EventLoop&  e,
-		IPv4	    interface,
-		uint16_t    port = FINDER_TCP_DEFAULT_PORT)
-	throw (InvalidPort)
-	: FinderTcpListenerBase(e, interface, port), _messenger(0)
-    {
-	add_permitted_addr(interface);
+    virtual ~DummyFinder() {
+	if (_messenger)
+	    delete _messenger;
     }
 
-    ~DummyFinder()
-    {
-	delete _messenger;
-    }
+    XrlCmdMap& commands() { return _commands; }
+
+    FinderMessengerBase* messenger() const { return _messenger; }
     
-    bool connection_event(int fd)
+protected:
+    void messenger_active_event(FinderMessengerBase* m)
     {
-	assert(0 == _messenger);
-	_messenger = new FinderAttachedTcpMessenger(*this, _e, fd, xrl_cmds);
-	verbose_log("Server accepted client connection\n");
-	return true;
+	verbose_log("Messenger %p active event\n", m);
     }
 
-    FinderTcpMessengerBase* messenger() { return _messenger; }
-
-    void set_xrl_dispatcher(FinderTcpMessengerBase* fm)
+    void messenger_inactive_event(FinderMessengerBase* m)
     {
-	verbose_log("Setting dispatcher to %p\n", fm);
+	verbose_log("Messenger %p inactive event\n", m);
+    }
+
+    void messenger_stopped_event(FinderMessengerBase* m)
+    {
+	verbose_log("Messenger %p stopped event\n", m);
+    }
+
+    void messenger_birth_event(FinderMessengerBase* m)
+    {
+	verbose_log("Messenger %p birth event\n", m);
+	assert(_messenger == 0);
+	_messenger = m;
+    }
+
+    void messenger_death_event(FinderMessengerBase* m)
+    {
+	verbose_log("Messenger %p death event\n", m);
+	if (m == _messenger) {
+	    _messenger = 0;
+	}
+    }
+
+    bool manages(const FinderMessengerBase* m) const
+    {
+	return m == _messenger;
     }
     
 protected:
-    FinderTcpMessengerBase* _messenger;
+    FinderMessengerBase* _messenger;
+    XrlCmdMap _commands;
 };
 
-void
-FinderAttachedTcpMessenger::pre_dispatch_xrl() {
-    _finder.set_xrl_dispatcher(this);
-}
-
-void
-FinderAttachedTcpMessenger::post_dispatch_xrl() {
-    _finder.set_xrl_dispatcher(0);
-}
+// For the purposes of this test the client and finder are
+// indestinguishable - they are both just holders of the object under
+// test tcp based messenger
+typedef DummyFinder DummyFinderClient;
 
 static int
-test_hellos(EventLoop&e,
-	    FinderTcpMessengerBase* src,
-	    FinderTcpMessengerBase* dst)
+test_hellos(EventLoop& e,
+	    FinderMessengerBase* src,
+	    FinderMessengerBase* dst)
 {
     bool timeout_flag = false;
     XorpTimer timeout = e.set_flag_after_ms(0, &timeout_flag);
@@ -219,59 +197,55 @@ test_main(void)
 {
     EventLoop e;
 
-    FinderTcpMessengerBase* client = 0;
-
     IPv4 ipc_addr = if_get_preferred();
-    DummyFinder finder(e, ipc_addr);
 
-    add_commands(xrl_cmds);
+    DummyFinder finder;
+    FinderNGTcpListener listener(e,
+				 finder, finder.commands(),
+				 ipc_addr, 12222);
+
+    listener.add_permitted_addr(ipc_addr);
+
+    DummyFinderClient finder_client;
+    FinderNGTcpAutoConnector connector(e,
+				       finder_client, finder_client.commands(),
+				       ipc_addr, 12222);
+    
+    add_commands(finder.commands());
+    add_commands(finder_client.commands());
 
     bool timeout_flag = false;
     XorpTimer timeout;
 
-    /*************** Prepare to connect client to DummyFinder ****************/
-    bool client_failed = false;
-    XorpTimer connect_timer = e.new_oneoff_after_ms(
-				1, callback(connect_client,
-					    &e, &client, &client_failed));
-
     timeout = e.set_flag_after_ms(5000, &timeout_flag);
     
-    while (client_failed == false && timeout_flag == false) {
-	verbose_log("client %p, server connection %p\n",
-		    client, finder.messenger());
+    while ((finder_client.messenger() == 0 || finder.messenger() == 0) && 
+	   timeout_flag == false) {
 	e.run();
-	if (0 != client && 0 != finder.messenger())
-	    break;
     }
 
-    if (client_failed) {
-	verbose_log("Client connect failed.");
-	return 1;
-    }
     if (timeout_flag) {
-	verbose_log("Client connect timeout.");
+	verbose_log(
+	    "Timed out: finder messenger (%p), client messenger (%p)\n",
+	    finder.messenger(), finder_client.messenger());
 	return 1;
     }
 
     timeout.unschedule();
 
-    /******************* Get client to say hello to finder *******************/
+    /* Get client to say hello to finder */
 
-    if (test_hellos(e, client, finder.messenger())) {
-	delete client;
+    if (test_hellos(e, finder_client.messenger(), finder.messenger())) {
 	return 1;
     }
-    if (test_hellos(e, finder.messenger(), client)) {
-	delete client;
+
+    /* Get finder to say hello to client */
+    if (test_hellos(e, finder.messenger(), finder_client.messenger())) {
 	return 1;
     }
-    
-    delete client;
 
     return 0;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.4 2003/01/24 02:03:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.5 2003/01/24 02:47:25 hodson Exp $"
 
 #include <functional>
 
@@ -42,6 +42,8 @@ FinderTcpBase::FinderTcpBase(EventLoop& e, int fd)
 
 FinderTcpBase::~FinderTcpBase()
 {
+    _writer.stop();
+    _reader.stop();
     if (!closed())
 	close();
 }
@@ -119,6 +121,9 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
     case AsyncFileOperator::FLUSHING:
 	return;
     case AsyncFileOperator::END_OF_FILE:
+	debug_msg("End of file (%s)\n", strerror(errno));
+	_reader.stop();
+	close();
 	return;
     case AsyncFileOperator::ERROR_CHECK_ERRNO:
 	if (EAGAIN == errno) {
@@ -201,7 +206,7 @@ FinderTcpBase::write_callback(AsyncFileOperator::Event	ev,
     if (offset == buffer_bytes && _writer.buffers_remaining() == 0) {
 	// Reached last byte of last buffer, write completed
 	write_event(0, buffer, buffer_bytes);
-	assert(_writer.running() == false);
+	//	assert(_writer.running() == false);
 	return;
     }
 }
@@ -248,9 +253,10 @@ FinderTcpBase::closed() const
 
 FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
 					     IPv4	interface,
-					     uint16_t	port)
+					     uint16_t	port,
+					     bool	en)
     throw (InvalidPort)
-    : _e(e)
+    : _e(e), _en(false)
 {
     comm_init();
 
@@ -262,16 +268,38 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
 	xorp_throw(InvalidPort, strerror(errno));
     }
 
-    SelectorCallback cb = callback(this, &FinderTcpListenerBase::connect_hook);
-    if (false == e.add_selector(_lfd, SEL_RD, cb)) {
-	XLOG_FATAL("Failed to add selector\n");
-    }
+    if (en)
+	set_enabled(en);
 }
 
 FinderTcpListenerBase::~FinderTcpListenerBase()
 {
-    _e.remove_selector(_lfd);
+    set_enabled(false);
     comm_close(_lfd);
+}
+
+void
+FinderTcpListenerBase::set_enabled(bool en)
+{
+    if (en == _en)
+	return;
+
+    if (en) {
+	SelectorCallback cb = callback(this,
+				       &FinderTcpListenerBase::connect_hook);
+	if (false == _e.add_selector(_lfd, SEL_RD, cb)) {
+	    XLOG_FATAL("Failed to add selector\n");
+	}
+    } else {
+	_e.remove_selector(_lfd);
+    }
+    _en = en;
+}
+
+bool
+FinderTcpListenerBase::enabled() const
+{
+    return _en;
 }
 
 bool
