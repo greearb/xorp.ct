@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.8 2004/02/24 03:16:55 atanu Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.9 2004/04/01 19:54:06 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -29,7 +29,7 @@ inline void
 RefTrieNode<IPv4, const SubnetRoute<IPv4> >
 ::delete_payload(const SubnetRoute<IPv4>* p) 
 {
-    printf("delete_payload %p\n", p);
+    debug_msg("delete_payload %p\n", p);
     p->unref();
 }
 
