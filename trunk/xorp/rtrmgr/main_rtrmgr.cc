@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.36 2003/12/03 20:27:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.37 2003/12/15 22:31:54 pavlin Exp $"
 
 #include <signal.h>
 
@@ -40,7 +40,7 @@
 #include "userdb.hh"
 #include "xrl_rtrmgr_interface.hh"
 #include "randomness.hh"
-#include "main_rtrmgr.hh"
+#include "rtrmgr_error.hh"
 #include "util.hh"
 
 //
@@ -209,15 +209,15 @@ main(int argc, char* const argv[])
     }
 
     // read the router config template files
-    TemplateTree *tt;
+    TemplateTree *tt = NULL;
     try {
-	tt = new TemplateTree(xorp_config_root_dir(),
-			      template_dir,
-			      xrl_dir);
-    } catch (const XorpException&) {
-	printf("caught exception\n");
-	xorp_unexpected_handler();
+	tt = new TemplateTree(xorp_config_root_dir(), template_dir, xrl_dir);
+    } catch (const InitError& e) {
+	XLOG_ERROR("rtrmgr shutting down due to an init error: %s",
+		   e.why().c_str());
+	exit(1);
     }
+
 #if 0
     tt->display_tree();
 #endif
@@ -242,7 +242,7 @@ main(int argc, char* const argv[])
 	fs = new FinderServer(eventloop, bind_port);
 	while (bind_addrs.empty() == false) {
 	    if (fs->add_binding(bind_addrs.front(), bind_port) == false) {
-		XLOG_WARNING("Finder failed to bind interface %s port %d\n",
+		XLOG_WARNING("Finder failed to bind interface %s port %d",
 			     bind_addrs.front().str().c_str(), bind_port);
 	    }
 	    bind_addrs.pop_front();
@@ -326,9 +326,9 @@ main(int argc, char* const argv[])
 	    eventloop.run();
 	}
 	delete ct;
-    } catch (InitError& e) {
-	XLOG_ERROR("rtrmgr shutting down due to error\n");
-	fprintf(stderr, "rtrmgr shutting down due to error\n");
+    } catch (const InitError& e) {
+	XLOG_ERROR("rtrmgr shutting down due to an init error: %s",
+		   e.why().c_str());
 	errcode = 1;
 	running = false;
     }
