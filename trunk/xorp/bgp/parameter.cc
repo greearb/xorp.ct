@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.16 2003/09/27 03:42:20 atanu Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.17 2003/09/27 08:37:00 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -20,6 +20,7 @@
 #include "bgp_module.h"
 #include "config.h"
 #include "libxorp/debug.h"
+#include "libxorp/xlog.h"
 
 #include "packet.hh"
 
@@ -246,7 +247,7 @@ string
 BGPRefreshCapability::str() const
 {
     string s;
-    s = "BGP Refresh Capability\n";
+    s = "BGP Refresh Capability";
     return s;
 }
 
@@ -255,7 +256,7 @@ BGPRefreshCapability::str() const
 /* ************** BGPMultiProtocolCapability - ****************** */
 
 BGPMultiProtocolCapability::
-BGPMultiProtocolCapability( uint16_t afi, uint8_t safi )
+BGPMultiProtocolCapability(AddressFamily afi, SubsequentAddressFamily safi)
 {
     _cap_code = CAPABILITYMULTIPROTOCOL;
     _length = 8;
@@ -304,9 +305,36 @@ BGPMultiProtocolCapability::decode()
     XLOG_ASSERT(_cap_code == CAPABILITYMULTIPROTOCOL);
 
     _cap_length = *(_data+3);
-    _address_family = ntohs(*reinterpret_cast<uint16_t *>(_data+4));
+    uint16_t afi = ntohs(*reinterpret_cast<uint16_t *>(_data+4));
+    switch(afi) {
+    case AFI_IPV4_VAL:
+	_address_family = AFI_IPV4;
+	break;
+    case AFI_IPV6_VAL:
+	_address_family = AFI_IPV6;
+	break;
+    default:
+	xorp_throw(CorruptMessage,
+		   c_format("MultiProtocol Capability unrecognised afi %u",
+			    afi),
+		   OPENMSGERROR, UNSUPOPTPAR);
+    }
+
     debug_msg("address family %d\n", _address_family);
-    _subsequent_address_family = *(_data+7);
+    uint8_t safi = *(_data+7);
+    switch(safi) {
+    case SAFI_NLRI_UNICAST_VAL:
+	_subsequent_address_family = SAFI_NLRI_UNICAST;
+	break;
+    case SAFI_NLRI_MULTICAST_VAL:
+	_subsequent_address_family = SAFI_NLRI_MULTICAST;
+	break;
+    default:
+	xorp_throw(CorruptMessage,
+		   c_format("MultiProtocol Capability unrecognised safi %u",
+			    safi),
+		   OPENMSGERROR, UNSUPOPTPAR);
+    }
 }
 
 void
@@ -323,22 +351,28 @@ BGPMultiProtocolCapability::encode() const
     _data[7] = _subsequent_address_family ; // SAFI
 }
 
+// bool BGPMultiProtocolCapability::operator==(const BGPParameter& rhs) const {
+bool 
+BGPMultiProtocolCapability::compare(const BGPParameter& rhs) const {
+    const BGPMultiProtocolCapability *ptr = 
+	dynamic_cast<const BGPMultiProtocolCapability *>(&rhs);
+    if(!ptr)
+	return false;
+
+    if (_address_family != ptr->get_address_family())
+	return false;
+    if (_subsequent_address_family != 
+	ptr->get_subsequent_address_family_id())
+	return false;
+
+    return true;
+}
+
 string
 BGPMultiProtocolCapability::str() const
 {
     return c_format("BGP Multiple Protocol Capability AFI = %d SAFI = %d",
 		    _address_family, _subsequent_address_family);
-}
-
-bool
-BGPMultiProtocolCapability::operator==(const BGPMultiProtocolCapability& him)
-    const
-{
-    if (_address_family != him.get_address_family())
-	return false;
-    if (_subsequent_address_family != him.get_subsequent_address_family_id())
-	return false;
-    return true;
 }
 
 /* ************** BGPMultiRouteCapability - ****************** */
@@ -538,9 +572,6 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
     }
 
     default :
-	debug_msg("Some other type\n");
-	debug_msg("Throw exception\n");
-	debug_msg("Send invalid packet");
 	xorp_throw(CorruptMessage,
 	       c_format("Unrecognised optional parameter %d max_len %u len %u",
 			param_type, max_len, (uint32_t)len),

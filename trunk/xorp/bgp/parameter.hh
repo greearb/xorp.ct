@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.7 2003/09/25 02:54:43 atanu Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.8 2003/09/27 03:42:20 atanu Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -20,14 +20,26 @@
 // address family assignments from
 // http:// www.iana.org/assignments/address-family-numbers
 // not a complete list
-const size_t AFI_IPV4 = 1;
-const size_t AFI_IPV6 = 2;
+// Only use the following two defines in packet decode routines.
+#define	AFI_IPV4_VAL 1
+#define	AFI_IPV6_VAL 2
+
+enum AddressFamily {
+    AFI_IPV4 = AFI_IPV4_VAL,
+    AFI_IPV6 = AFI_IPV6_VAL
+};
 
 // sub-address family assignments from
 // RFC 2858
 // NLRI = Network Layer Reachability Information
-const size_t SAFI_NLRI_UNICAST = 1;
-const size_t SAFI_NLRI_MULTICAST = 2;
+// Only use the following two defines in packet decode routines.
+#define	SAFI_NLRI_UNICAST_VAL 1
+#define	SAFI_NLRI_MULTICAST_VAL 2
+enum  SubsequentAddressFamily {
+    SAFI_NLRI_UNICAST = SAFI_NLRI_UNICAST_VAL,
+    SAFI_NLRI_MULTICAST = SAFI_NLRI_MULTICAST_VAL,
+};
+
 // #define SAFI_NLRI_UNICASTMULTICAST 3 - Removed in:
 //					  draft-ietf-idr-rfc2858bis-03.txt
 
@@ -71,6 +83,10 @@ public:
     virtual ~BGPParameter()			{ delete[] _data; }
     virtual void decode() = 0;
     virtual void encode() const = 0;
+
+//     virtual bool operator==(const BGPParameter&) const = 0;
+    virtual bool compare(const BGPParameter&) const = 0;
+
     void dump_contents() const ;
 
     void set_type(ParamType t) {
@@ -117,6 +133,18 @@ public:
     BGPAuthParameter(const BGPAuthParameter& param);
     void encode() const;
     void decode();
+
+//     bool operator==(const BGPParameter& rhs) const {
+    bool compare(const BGPParameter& rhs) const {
+	const BGPAuthParameter *ptr = 
+	    dynamic_cast<const BGPAuthParameter *>(&rhs);
+	if(!ptr)
+	    return false;
+
+	XLOG_UNFINISHED();
+	return false;
+    }
+
     void set_authcode(uint8_t a) {
 	debug_msg("_auth_code set %d\n", a);
 	_auth_code = a;
@@ -148,6 +176,17 @@ public:
     // ~BGPCapParameter();
     // virtual void decode() = 0;
     // virtual void encode() = 0;
+
+//     bool operator==(const BGPParameter& rhs) const {
+    bool compare(const BGPParameter& rhs) const {
+	const BGPCapParameter *ptr = 
+	    dynamic_cast<const BGPCapParameter *>(&rhs);
+	if(!ptr)
+	    return false;
+
+	return ptr->_cap_code == _cap_code && ptr->_cap_length == _cap_length;
+    }
+
     CapType cap_code() const { return _cap_code; }
     virtual string str() const = 0;
 protected:
@@ -163,6 +202,16 @@ public:
     BGPRefreshCapability(const BGPRefreshCapability& cap);
     void decode();
     void encode() const;
+//     bool operator==(const BGPParameter& rhs) const {
+    bool compare(const BGPParameter& rhs) const {
+	const BGPRefreshCapability *ptr = 
+	    dynamic_cast<const BGPRefreshCapability *>(&rhs);
+	if(!ptr)
+	    return false;
+
+	return true;
+    }
+
     string str() const;
 protected:
 private:
@@ -173,21 +222,27 @@ private:
 
 class BGPMultiProtocolCapability : public BGPCapParameter {
 public:
-    BGPMultiProtocolCapability(uint16_t afi, uint8_t safi);
+    BGPMultiProtocolCapability(AddressFamily afi,
+			       SubsequentAddressFamily safi);
     BGPMultiProtocolCapability(uint8_t l, const uint8_t* d);
     BGPMultiProtocolCapability(const BGPMultiProtocolCapability& cap);
     void decode();
     void encode() const;
-    void set_address_family(uint16_t f) { _address_family = f; }
-    uint16_t get_address_family() const { return _address_family; }
-    void set_subsequent_address_family_id(uint8_t f) { _subsequent_address_family = f; }
-    uint8_t get_subsequent_address_family_id() const { return _subsequent_address_family; }
+    void set_address_family(AddressFamily f) { _address_family = f; }
+    AddressFamily get_address_family() const { return _address_family; }
+    void set_subsequent_address_family_id(SubsequentAddressFamily f) { 
+	_subsequent_address_family = f;
+    }
+    SubsequentAddressFamily get_subsequent_address_family_id() const {
+	return _subsequent_address_family; 
+    }
+    bool compare(const BGPParameter& rhs) const;
+
     string str() const;
-    bool operator==(const BGPMultiProtocolCapability& him) const;
 protected:
 private:
-    uint16_t _address_family;
-    uint8_t _subsequent_address_family;
+    AddressFamily _address_family;
+    SubsequentAddressFamily _subsequent_address_family;
 };
 
 class BGPMultiRouteCapability : public BGPCapParameter {
@@ -225,6 +280,7 @@ private:
 /**
  * List of parameters
  */
-typedef list <ref_ptr<const BGPParameter> > ParameterList;
+typedef ref_ptr<const BGPParameter> ParameterNode;
+typedef list <ParameterNode> ParameterList;
 
 #endif // __BGP_PARAMETER_HH__

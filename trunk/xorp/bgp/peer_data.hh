@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.6 2003/09/25 04:06:57 atanu Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.7 2003/09/27 03:42:20 atanu Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -58,25 +58,25 @@ public:
     bool get_internal_peer() const;
     void set_internal_peer(bool p);
 
-    void add_recv_parameter(const BGPParameter *p) {
-	add_parameter(p, _recv_parameters);
+    void add_recv_parameter(const ParameterNode& p) {
+	add_parameter(_recv_parameters, p);
     };
-    void remove_recv_parameter(const BGPParameter *p) {
-	remove_parameter(p, _recv_parameters);
-    };
-
-    void add_sent_parameter(const BGPParameter *p){
-	add_parameter(p, _sent_parameters);
-    };
-    void remove_sent_parameter(const BGPParameter *p){
-	remove_parameter(p, _sent_parameters);
+    void remove_recv_parameter(const ParameterNode& p) {
+	remove_parameter(_recv_parameters, p);
     };
 
-    void add_negotiated_parameter(const BGPParameter *p){
-	add_parameter(p, _negotiated_parameters);
+    void add_sent_parameter(const ParameterNode& p){
+	add_parameter(_sent_parameters, p);
     };
-    void remove_negotiated_parameter(const BGPParameter *p) {
-	remove_parameter(p, _negotiated_parameters);
+    void remove_sent_parameter(const ParameterNode& p){
+	remove_parameter(_sent_parameters, p);
+    };
+
+    void add_negotiated_parameter(const ParameterNode& p){
+	add_parameter(_negotiated_parameters, p);
+    };
+    void remove_negotiated_parameter(const ParameterNode& p) {
+	remove_parameter(_negotiated_parameters, p);
     };
 
     const ParameterList& parameter_recv_list() const {
@@ -121,11 +121,10 @@ public:
 	return _multicast_ipv6;
     }
 
-    void dump_peer_data() const;
-    void set_v4_local_addr(const IPv4& addr) { _local_v4_addr = addr; }
-    void set_v6_local_addr(const IPv6& addr) { _local_v6_addr = addr; }
-    const IPv4& get_v4_local_addr() const { return _local_v4_addr; }
-    const IPv6& get_v6_local_addr() const { return _local_v6_addr; }
+    void set_v4_local_addr(const IPv4& addr) { _nexthop_ipv4 = addr; }
+    void set_v6_local_addr(const IPv6& addr) { _nexthop_ipv6 = addr; }
+    const IPv4& get_v4_local_addr() const { return _nexthop_ipv4; }
+    const IPv6& get_v6_local_addr() const { return _nexthop_ipv6; }
 
     void set_configured_hold_time(uint16_t hold) {
 	_configured_hold_time = hold;
@@ -143,14 +142,16 @@ public:
 	return _next_hop_rewrite;
     }
 
+    /**
+     * Dump the state of the peer data (debugging).
+     */
+    void dump_peer_data() const;
 protected:
 private:
-    void add_parameter(const BGPParameter *,
-	 ParameterList& p_list);
-    void remove_parameter(const BGPParameter *p,
-	 ParameterList& p_list);
+    void add_parameter(ParameterList& p_list, const ParameterNode& p);
+    void remove_parameter(ParameterList& p_list, const ParameterNode& p);
 
-    /*
+    /**
      * Local Interface, Local Server Port, Peer Interface and
      * Peer Server Port tuple.
      */
@@ -159,14 +160,14 @@ private:
     bool	_internal;	// set if our peer has the same _as
     AsNum	_as;
 
-    /*
-    ** Holdtime in seconds. Value sent in open negotiation.
-    */
+    /**
+     * Holdtime in seconds. Value sent in open negotiation.
+     */
     uint16_t _configured_hold_time;
 
-    /*
-    ** Peer's BGP ID.
-    */
+    /**
+     * Peer's BGP ID.
+     */
     IPv4 _id;
 
     /*
@@ -176,11 +177,15 @@ private:
     uint32_t _retry_duration;
     uint32_t _keepalive_duration;
 
-    IPv4 _local_v4_addr; /* this is the address we advertise to
-			    external peers as the nexthop */
-    IPv6 _local_v6_addr; /* this is the address we advertise to
-			    external peers as the nexthop */
+    /**
+     * IPv4 nexthop
+     */
+    IPv4 _nexthop_ipv4;
 
+    /**
+     * IPv6 nexthop
+     */
+    IPv6 _nexthop_ipv6;
     
     /**
      * Parameters received by our peer.
@@ -201,7 +206,6 @@ private:
      * The set of different topologies that we support.
      */
     bool _unicast_ipv4, _unicast_ipv6, _multicast_ipv4,  _multicast_ipv6;
-     
 
     /* XXX
     ** Eventually we will have totally programmable filters. As a
