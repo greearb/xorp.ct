@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.17 2003/07/05 19:46:13 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.18 2003/07/08 01:32:25 pavlin Exp $"
 
 
 //
@@ -716,9 +716,16 @@ PimNode::set_switch_to_spt_threshold(bool is_enabled,
     if (start_config(reason) != XORP_OK)
 	return (XORP_ERROR);
     
-    is_switch_to_spt_enabled().set(is_enabled);
-    switch_to_spt_threshold_interval_sec().set(interval_sec);
-    switch_to_spt_threshold_bytes().set(bytes);
+    if ((is_switch_to_spt_enabled().get() != is_enabled)
+	|| (switch_to_spt_threshold_interval_sec().get() != interval_sec)
+	|| (switch_to_spt_threshold_bytes().get() != bytes)) {
+	is_switch_to_spt_enabled().set(is_enabled);
+	switch_to_spt_threshold_interval_sec().set(interval_sec);
+	switch_to_spt_threshold_bytes().set(bytes);
+	
+	// Add the task to update the SPT-switch threshold
+	pim_mrt().add_task_spt_switch_threshold_changed();
+    }
     
     if (end_config(reason) != XORP_OK)
 	return (XORP_ERROR);
@@ -732,9 +739,24 @@ PimNode::reset_switch_to_spt_threshold(string& reason)
     if (start_config(reason) != XORP_OK)
 	return (XORP_ERROR);
     
-    is_switch_to_spt_enabled().reset();
-    switch_to_spt_threshold_interval_sec().reset();
-    switch_to_spt_threshold_bytes().reset();
+    do {
+	bool is_enabled = is_switch_to_spt_enabled().get();
+	uint32_t interval_sec = switch_to_spt_threshold_interval_sec().get();
+	uint32_t bytes = switch_to_spt_threshold_bytes().get();
+	
+	// Reset the values
+	is_switch_to_spt_enabled().reset();
+	switch_to_spt_threshold_interval_sec().reset();
+	switch_to_spt_threshold_bytes().reset();
+	
+	if ((is_switch_to_spt_enabled().get() != is_enabled)
+	    || (switch_to_spt_threshold_interval_sec().get() != interval_sec)
+	    || (switch_to_spt_threshold_bytes().get() != bytes)) {
+	    
+	    // Add the task to update the SPT-switch threshold
+	    pim_mrt().add_task_spt_switch_threshold_changed();
+	}
+    } while (false);
     
     if (end_config(reason) != XORP_OK)
 	return (XORP_ERROR);

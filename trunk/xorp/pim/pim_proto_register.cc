@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.5 2003/06/13 01:32:33 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.6 2003/07/08 01:36:55 pavlin Exp $"
 
 
 //
@@ -232,17 +232,17 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     
     olist = pim_mre->inherited_olist_sg();
     
-    if (olist.any() && pim_mre->check_switch_to_spt_sg(inner_src, inner_dst,
-						       pim_mre_sg)) {
+    if (olist.any() && pim_mre->is_switch_to_spt_desired_sg(0, 0)) {
 	//
-	// XXX: the check_switch_to_spt_sg() check is not in the spec,
+	// XXX: the is_switch_to_spt_desired_sg() check is not in the spec,
 	// but we use it here to switch conditionally to the SPT.
 	// More specifically, the pseudo-code of
 	// "packet_arrives_on_rp_tunnel( pkt )" the line
 	//	restart KeepaliveTimer(S,G)
 	// has been changed to:
-	//	if( inherited_olist(S,G) != NULL )
-	//	    CheckSwitchToSpt(S,G)
+	//	if(( inherited_olist(S,G) != NULL ) AND
+	//	    SwitchToSptDesired(S,G))
+	//	    restart KeepaliveTimer(S,G)
 	// However, now we need to restart the KeepaliveTimer() in some
 	// of the code below to compensate for its conditional restart
 	// in its original place.
@@ -265,8 +265,9 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	// would become:
 	//
 	// if( I_am_RP( G ) && outer.dst == RP(G) ) {
-	//	if( inherited_olist(S,G) != NULL )
-	//	    CheckSwitchToSpt(S,G)
+	//	if(( inherited_olist(S,G) != NULL ) AND
+	//	    SwitchToSptDesired(S,G))
+	//	    restart KeepaliveTimer(S,G)
 	//	if(( inherited_olist(S,G) == NULL ) OR SPTbit(S,G)) {
 	//	    restart KeepaliveTimer(S,G)
 	//	    send RegisterStop(S,G) to outer.src
@@ -288,9 +289,16 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	//  that group. Thus, when new members join, the RP can immediately
 	//  send (S,G) Join toward each S and the data will start flowing;
 	//  otherwise, no traffic will be received from a source until the
-	//  Register Stop timer at its DR expires.
+	//  Register Stop timer at that source's DR expires.
 	//
 	
+	if (pim_mre_sg == NULL) {
+	    pim_mre_sg = pim_node().pim_mrt().pim_mre_find(inner_src,
+							   inner_dst,
+							   PIM_MRE_SG,
+							   PIM_MRE_SG);
+	}
+	pim_mre_sg->start_keepalive_timer();
 	is_keepalive_timer_restarted = true;
     }
     
@@ -300,7 +308,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	    // XXX: we need to restart KeepaliveTimer(S,G) now, because
 	    // the timer was conditionally started above. The reason is
 	    // because the RP needs to create an (S,G) state when
-	    // it has no downstream members. Thus, if a new member join,
+	    // it has no downstream members. Thus, if a new member joins,
 	    // the RP can immediately send (S,G)Join toward S instead
 	    // of waiting for the Register Stop timer at the DR for that S
 	    // to expire.
@@ -341,18 +349,39 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	}
     }
     
-    if (pim_mre_sg == NULL)
-	return (XORP_OK);
-    
     pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst, false);
+    
+    if (pim_mre_sg == NULL) {
+	//
+	// If necessary, add a dataflow monitor to monitor whether it is
+	// time to switch to the SPT.
+	//
+	if (pim_mfc == NULL)
+	    return (XORP_OK);
+	if (pim_node().is_switch_to_spt_enabled().get()
+	    && (! pim_mfc->has_spt_switch_dataflow_monitor())) {
+	    uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
+	    uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
+	    pim_mfc->add_dataflow_monitor(sec, 0,
+					  0,		// threshold_packets
+					  bytes,	// threshold_bytes
+					  false, // is_threshold_in_packets
+					  true,	 // is_threshold_in_bytes
+					  true,		// is_geq_upcall ">="
+					  false);	// is_leq_upcall "<="
+	}
+	
+	return (XORP_OK);
+    }
+    
     if (pim_mfc == NULL) {
 	pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst, true);
 	pim_mfc->set_iif_vif_index(register_vif_index);
 	pim_mfc->set_olist(olist);
 	pim_mfc->add_mfc_to_kernel();
     }
-    // TODO: XXX: PAVPAVPAV: get rid of has_dataflow_monitor() test
-    if (is_keepalive_timer_restarted || (! pim_mfc->has_dataflow_monitor())) {
+    if (is_keepalive_timer_restarted
+	|| (! pim_mfc->has_idle_dataflow_monitor())) {
 	//
 	// Add a dataflow monitor to expire idle (S,G) PimMre state
 	// and/or idle PimMfc+MFC state
@@ -371,7 +400,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 				      false,	// is_geq_upcall ">="
 				      true);	// is_leq_upcall "<="
     }
-    
+
     return (XORP_OK);
     
     UNUSED(pim_nbr);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mfc.hh,v 1.2 2003/01/30 00:39:32 pavlin Exp $
+// $XORP: xorp/pim/pim_mfc.hh,v 1.3 2003/03/10 23:20:47 hodson Exp $
 
 
 #ifndef __PIM_PIM_MFC_HH__
@@ -79,6 +79,9 @@ public:
     
     void	recompute_rp_mfc();
     void	recompute_iif_olist_mfc();
+    void	recompute_spt_switch_threshold_changed_mfc();
+    void	recompute_monitoring_switch_to_spt_desired_mfc();
+    void	install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre);
     
     int		add_mfc_to_kernel();
     int		delete_mfc_from_kernel();
@@ -116,12 +119,20 @@ public:
 	    _flags &= ~PIM_MFC_TASK_DELETE_DONE;
     }
     
-    bool	has_dataflow_monitor() const { return (_flags & PIM_MFC_HAS_DATAFLOW_MONITOR); }
-    void	set_has_dataflow_monitor(bool v) {
+    bool	has_idle_dataflow_monitor() const { return (_flags & PIM_MFC_HAS_IDLE_DATAFLOW_MONITOR); }
+    void	set_has_idle_dataflow_monitor(bool v) {
 	if (v)
-	    _flags |= PIM_MFC_HAS_DATAFLOW_MONITOR;
+	    _flags |= PIM_MFC_HAS_IDLE_DATAFLOW_MONITOR;
 	else
-	    _flags &= ~PIM_MFC_HAS_DATAFLOW_MONITOR;
+	    _flags &= ~PIM_MFC_HAS_IDLE_DATAFLOW_MONITOR;
+    }
+
+    bool	has_spt_switch_dataflow_monitor() const { return (_flags & PIM_MFC_HAS_SPT_SWITCH_DATAFLOW_MONITOR); }
+    void	set_has_spt_switch_dataflow_monitor(bool v) {
+	if (v)
+	    _flags |= PIM_MFC_HAS_SPT_SWITCH_DATAFLOW_MONITOR;
+	else
+	    _flags &= ~PIM_MFC_HAS_SPT_SWITCH_DATAFLOW_MONITOR;
     }
     
 private:
@@ -137,10 +148,11 @@ private:
     enum {
 	PIM_MFC_TASK_DELETE_PENDING = 1 << 0,	// Entry is pending deletion
 	PIM_MFC_TASK_DELETE_DONE    = 1 << 1,	// Entry is ready to be deleted
-	PIM_MFC_HAS_DATAFLOW_MONITOR = 1 << 2	// Entry has a dataflow monitor
+	PIM_MFC_HAS_IDLE_DATAFLOW_MONITOR = 1 << 2, // Entry has an idle dataflow monitor
+	PIM_MFC_HAS_SPT_SWITCH_DATAFLOW_MONITOR = 1 << 3 // Entry has a SPT-switch dataflow monitor
     };
     
-    uint32_t	_flags;			// Various flags (see PIM_MFC_*) above
+    uint32_t	_flags;			// Various flags (see PIM_MFC_* above)
 };
 
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.10 2003/03/10 23:20:47 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.11 2003/06/13 01:32:32 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -218,6 +218,154 @@ PimMfc::recompute_iif_olist_mfc()
     // a dataflow monitor.
 }
 
+//
+// The SPT-switch threshold has changed.
+// XXX: we will unconditionally install/deinstall SPT-switch dataflow monitor,
+// because we don't keep state about the previous value of the threshold.
+//
+void
+PimMfc::recompute_spt_switch_threshold_changed_mfc()
+{
+    install_spt_switch_dataflow_monitor_mfc(NULL);
+}
+
+//
+// Conditionally install/deinstall SPT-switch dataflow monitor
+// (i.e., only if the conditions whether we need dataflow monitor have changed)
+//
+void
+PimMfc::recompute_monitoring_switch_to_spt_desired_mfc()
+{
+    PimMre *pim_mre;
+    PimMre *pim_mre_sg;
+    uint32_t lookup_flags;
+    bool has_spt_switch = has_spt_switch_dataflow_monitor();
+    bool is_spt_switch_desired;
+    
+    lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
+    pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+				     lookup_flags, 0);
+    
+    if (pim_mre == NULL)
+	return;		// Nothing to install
+    
+    //
+    // Get the (S,G) entry (if exists)
+    //
+    pim_mre_sg = NULL;
+    do {
+	if (pim_mre->is_sg()) {
+	    pim_mre_sg = pim_mre;
+	    break;
+	}
+	if (pim_mre->is_sg_rpt()) {
+	    pim_mre_sg = pim_mre->sg_entry();
+	    break;
+	}
+	break;
+    } while (false);
+    
+    is_spt_switch_desired
+	= pim_mre->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg);
+    if ((pim_mre_sg != NULL) && (pim_mre_sg->is_keepalive_timer_running()))
+	is_spt_switch_desired = false;
+    
+    if (has_spt_switch == is_spt_switch_desired)
+	return;		// Nothing changed
+    
+    install_spt_switch_dataflow_monitor_mfc(pim_mre);
+}
+
+//
+// Unconditionally install/deinstall SPT-switch dataflow monitor
+//
+void
+PimMfc::install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre)
+{
+    PimMre *pim_mre_sg;
+    bool has_idle = has_idle_dataflow_monitor();
+    bool has_spt_switch = has_spt_switch_dataflow_monitor();
+    
+    // If necessary, perform the PimMre table lookup
+    if (pim_mre == NULL) {
+	uint32_t lookup_flags;
+	
+	lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
+	pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+					 lookup_flags, 0);
+	if (pim_mre == NULL)
+	    return;		// Nothing to install
+    }
+    
+    //
+    // Get the (S,G) entry (if exists)
+    //
+    pim_mre_sg = NULL;
+    do {
+	if (pim_mre->is_sg()) {
+	    pim_mre_sg = pim_mre;
+	    break;
+	}
+	if (pim_mre->is_sg_rpt()) {
+	    pim_mre_sg = pim_mre->sg_entry();
+	    break;
+	}
+	break;
+    } while (false);
+    
+    //
+    // Delete the existing SPT-switch dataflow monitor (if such)
+    //
+    // XXX: because we don't keep state about the original value of
+    // dataflow_monitor_sec, therefore we remove all dataflows for
+    // this (S,G), and then if necessary we install back the
+    // idle dataflow monitor.
+    //
+    if (has_spt_switch) {
+	delete_all_dataflow_monitor();
+	if (has_idle) {
+	    // Restore the idle dataflow monitor
+	    uint32_t expected_dataflow_monitor_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
+	    if ((iif_vif_index() == pim_node().pim_register_vif_index())
+		&& (pim_mre->i_am_rp())) {
+		if (expected_dataflow_monitor_sec
+		    < PIM_RP_KEEPALIVE_PERIOD_DEFAULT) {
+		    expected_dataflow_monitor_sec
+			= PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
+		}
+	    }
+	    add_dataflow_monitor(expected_dataflow_monitor_sec, 0,
+				 0,		// threshold_packets
+				 0,		// threshold_bytes
+				 true,		// is_threshold_in_packets
+				 false,		// is_threshold_in_bytes
+				 false,		// is_geq_upcall ">="
+				 true);		// is_leq_upcall "<="
+				 
+	}
+    }
+    
+    //
+    // If necessary, install a new SPT-switch dataflow monitor
+    //
+    if (pim_node().is_switch_to_spt_enabled().get()
+	&& (! ((pim_mre_sg != NULL)
+	       && (pim_mre_sg->is_keepalive_timer_running())))) {
+	uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
+	uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
+	
+	if (pim_mre->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg)) {
+	    add_dataflow_monitor(sec, 0,
+				 0,		// threshold_packets
+				 bytes,		// threshold_bytes
+				 false,		// is_threshold_in_packets
+				 true,		// is_threshold_in_bytes
+				 true,		// is_geq_upcall ">="
+				 false);	// is_leq_upcall "<="
+	}
+    }
+}
+
 int
 PimMfc::add_mfc_to_kernel()
 {
@@ -292,7 +440,15 @@ PimMfc::add_dataflow_monitor(uint32_t threshold_interval_sec,
 	return (XORP_ERROR);
     }
     
-    set_has_dataflow_monitor(true);
+    if (is_leq_upcall
+	&& ((is_threshold_in_packets && (threshold_packets == 0))
+	    || (is_threshold_in_bytes && (threshold_bytes == 0)))) {
+	set_has_idle_dataflow_monitor(true);
+    }
+    
+    if (is_geq_upcall) {
+	set_has_spt_switch_dataflow_monitor(true);
+    }
     
     return (XORP_OK);
 }
@@ -319,8 +475,16 @@ PimMfc::delete_dataflow_monitor(uint32_t threshold_interval_sec,
 					   is_leq_upcall) < 0) {
 	return (XORP_ERROR);
     }
+
+    if (is_leq_upcall
+	&& ((is_threshold_in_packets && (threshold_packets == 0))
+	    || (is_threshold_in_bytes && (threshold_bytes == 0)))) {
+	set_has_idle_dataflow_monitor(false);
+    }
     
-    set_has_dataflow_monitor(true);
+    if (is_geq_upcall) {
+	set_has_spt_switch_dataflow_monitor(false);
+    }
     
     return (XORP_OK);
 }
@@ -328,7 +492,8 @@ PimMfc::delete_dataflow_monitor(uint32_t threshold_interval_sec,
 int
 PimMfc::delete_all_dataflow_monitor()
 {
-    set_has_dataflow_monitor(false);
+    set_has_idle_dataflow_monitor(false);
+    set_has_spt_switch_dataflow_monitor(false);
     
     if (pim_node().delete_all_dataflow_monitor(source_addr(),
 					       group_addr()) < 0) {

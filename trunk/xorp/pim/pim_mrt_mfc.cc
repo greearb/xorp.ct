@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.12 2003/07/03 07:19:45 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.13 2003/07/08 01:36:55 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -160,6 +160,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     PimVif *pim_vif;
     PimMre *pim_mre;
     PimMre *pim_mre_sg = NULL;
+    PimMre *pim_mre_wc = NULL;
     PimMfc *pim_mfc = NULL;
     Mifset olist;
     uint32_t lookup_flags;
@@ -200,7 +201,17 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	}
 	break;
     } while (false);
-    
+
+    //
+    // Get the (*,G) entry (if exists).
+    //
+    if (pim_mre != NULL) {
+	if (pim_mre->is_wc()) {
+	    pim_mre_wc = pim_mre;
+	} else {
+	    pim_mre_wc = pim_mre->wc_entry();
+	}
+    }
     if ((pim_mre != NULL) && pim_mre->is_sg())
 	pim_mre_sg = pim_mre;
     
@@ -236,7 +247,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	
 	pim_mfc->set_iif_vif_index(iif_vif_index);
 	pim_mfc->add_mfc_to_kernel();
-	if (! pim_mfc->has_dataflow_monitor()) {
+	if (! pim_mfc->has_idle_dataflow_monitor()) {
 	    // Add a dataflow monitor to expire idle (S,G) MFC state
 	    // XXX: strictly speaking, the period doesn't have
 	    // to be PIM_KEEPALIVE_PERIOD_DEFAULT, because it has nothing
@@ -295,7 +306,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	       && (is_sptbit_set == false)) {
 	is_wrong_iif = false;
 	olist = pim_mre->inherited_olist_sg_rpt();
-	if (pim_mre->check_switch_to_spt_sg(src, dst, pim_mre_sg)) {
+	if (pim_mre->check_switch_to_spt_sg(src, dst, pim_mre_sg, 0, 0)) {
 	    XLOG_ASSERT(pim_mre_sg != NULL);
 	    is_keepalive_timer_restarted = true;
 	}
@@ -311,17 +322,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 		   && (pim_mre->inherited_olist_sg_rpt().test(
 		       iif_vif_index))) {
 	    // send Assert(*,G) on iif_vif_index
-	    PimMre *pim_mre_wc = NULL;
 	    bool is_new_entry = false;
-	    
-	    do {
-		if (pim_mre->is_wc()) {
-		    pim_mre_wc = pim_mre;
-		    break;
-		}
-		pim_mre_wc = pim_mre->wc_entry();
-		break;
-	    } while (false);
 	    if (pim_mre_wc == NULL) {
 		pim_mre_wc = pim_mre_find(src, dst, PIM_MRE_WC, PIM_MRE_WC);
 		is_new_entry = true;
@@ -347,7 +348,8 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     }
     pim_mfc->set_olist(olist);
     pim_mfc->add_mfc_to_kernel();
-    if (is_keepalive_timer_restarted || (! pim_mfc->has_dataflow_monitor())) {
+    if (is_keepalive_timer_restarted
+	|| (! pim_mfc->has_idle_dataflow_monitor())) {
 	//
 	// Add a dataflow monitor to expire idle (S,G) PimMre state
 	// and/or idle PimMfc+MFC state
@@ -356,25 +358,13 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	// for (S,G) entry in the RP that is used for Register decapsulation.
 	uint32_t expected_dataflow_monitor_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
 	if (is_keepalive_timer_restarted
-	    && (iif_vif_index == pim_register_vif_index())) {
-	    bool i_am_rp = false;
-	    do {
-		if (pim_mre_sg != NULL) {
-		    i_am_rp = pim_mre_sg->i_am_rp();
-		    break;
-		}
-		if (pim_mre != NULL) {
-		    i_am_rp = pim_mre->i_am_rp();
-		    break;
-		}
-	    } while (false);
-	    if (i_am_rp) {
+	    && (iif_vif_index == pim_register_vif_index())
+	    && (pim_mre->i_am_rp())) {
 		if (expected_dataflow_monitor_sec
 		    < PIM_RP_KEEPALIVE_PERIOD_DEFAULT) {
 		    expected_dataflow_monitor_sec
 			= PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
 		}
-	    }
 	}
 	
 	pim_mfc->add_dataflow_monitor(expected_dataflow_monitor_sec, 0,
@@ -386,8 +376,24 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 				      true);	// is_leq_upcall "<="
     }
     
-    // TODO: XXX: PAVPAVPAV: if a (*,G) entry, add a dataflow monitor
-    // to monitor whether it is time to switch to the SPT.
+    //
+    // If necessary, add a dataflow monitor to monitor whether it is
+    // time to switch to the SPT.
+    //
+    if ((pim_mre_wc != NULL)
+	&& (pim_mre_sg == NULL)
+	&& pim_node().is_switch_to_spt_enabled().get()
+	&& (! pim_mfc->has_spt_switch_dataflow_monitor())) {
+	uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
+	uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
+	pim_mfc->add_dataflow_monitor(sec, 0,
+				      0,	// threshold_packets
+				      bytes,	// threshold_bytes
+				      false,	// is_threshold_in_packets
+				      true,	// is_threshold_in_bytes
+				      true,	// is_geq_upcall ">="
+				      false);	// is_leq_upcall "<="
+    }
 }
 
 int
@@ -458,42 +464,73 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	}
 	break;
     } while (false);
-    
+
     //
     // Get the (*,G) entry
     //
     pim_mre_wc = NULL;
-    do {
-	if (pim_mre == NULL)
-	    break;
-	if (pim_mre->is_sg()) {
-	    pim_mre_wc = pim_mre->wc_entry();
-	    break;
-	}
-	if (pim_mre->is_sg_rpt()) {
-	    pim_mre_wc = pim_mre->wc_entry();
-	    break;
-	}
-	if (pim_mre->is_wc()) {
+    if (pim_mre != NULL) {
+	if (pim_mre->is_wc())
 	    pim_mre_wc = pim_mre;
-	    break;
-	}
-	break;
-    } while (false);
+	else
+	    pim_mre_wc = pim_mre->wc_entry();
+    }
     
     if (is_geq_upcall)
 	goto is_geq_upcall_label;
     else
 	goto is_leq_upcall_label;
     
+    
  is_geq_upcall_label:
     //
     // Received >= upcall
     //
     
-    if (pim_mre->is_wc()) {
-	// TODO: XXX: PAVPAVPAV: check if switch to SPT is desired.
-	// TODO: XXX: PAVPAVPAV: if true, remove the dataflow monitor
+    //
+    // Check whether we really need SPT-switch dataflow monitor,
+    // and whether this is the right dataflow monitor.
+    //
+    if (! (((pim_mre != NULL)
+	    && (pim_mre->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg)))
+	   && (! ((pim_mre_sg != NULL)
+		  && (pim_mre_sg->is_keepalive_timer_running())))
+	   && pim_node().is_switch_to_spt_enabled().get()
+	   && (is_threshold_in_bytes
+	       && (pim_node().switch_to_spt_threshold_interval_sec().get()
+		   == threshold_interval_sec)
+	       && (pim_node().switch_to_spt_threshold_bytes().get()
+		   == threshold_bytes)))) {
+	// This dataflow monitor is not needed, hence delete it.
+	pim_mfc->delete_dataflow_monitor(threshold_interval_sec,
+					 threshold_interval_usec,
+					 threshold_packets,
+					 threshold_bytes,
+					 is_threshold_in_packets,
+					 is_threshold_in_bytes,
+					 is_geq_upcall,
+					 is_leq_upcall);
+	return (XORP_ERROR);	// We don't need this dataflow monitor
+    }
+    
+    if ((pim_mre != NULL)
+	&& pim_mre->check_switch_to_spt_sg(source_addr, group_addr,
+					   pim_mre_sg,
+					   measured_interval_sec,
+					   measured_bytes)) {
+	//
+	// SPT switch is desired, and is initiated by check_switch_to_spt_sg().
+	// Remove the dataflow monitor, because we don't need it anymore.
+	//
+	pim_mfc->delete_dataflow_monitor(threshold_interval_sec,
+					 threshold_interval_usec,
+					 threshold_packets,
+					 threshold_bytes,
+					 is_threshold_in_packets,
+					 is_threshold_in_bytes,
+					 is_geq_upcall,
+					 is_leq_upcall);
+	return (XORP_OK);
     }
     
     return (XORP_OK);

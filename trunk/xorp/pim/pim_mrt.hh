@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrt.hh,v 1.5 2003/03/18 02:44:36 pavlin Exp $
+// $XORP: xorp/pim/pim_mrt.hh,v 1.6 2003/07/07 23:13:02 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRT_HH__
@@ -251,6 +251,7 @@ public:
     void add_task_i_am_dr(uint16_t vif_index);
     void add_task_my_ip_address(uint16_t vif_index);
     void add_task_my_ip_subnet_address(uint16_t vif_index);
+    void add_task_spt_switch_threshold_changed();
     void add_task_keepalive_timer_sg(const IPvX& source_addr,
 				     const IPvX& group_addr);
     void add_task_sptbit_sg(const IPvX& source_addr, const IPvX& group_addr);

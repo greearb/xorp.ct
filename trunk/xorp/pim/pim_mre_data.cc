@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.7 2003/07/07 23:13:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.8 2003/07/08 01:36:55 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry data handling
@@ -81,42 +81,84 @@ PimMre::update_sptbit_sg(uint16_t iif_vif_index)
     }
 }
 
-// Policy-defined SPT switch.
-// Note: applies only for (*,G), (S,G), (S,G,rpt)
+// Return true if monitoring switch to SPT is desired, otherwise false.
+// Note: this implements part of the CheckSwitchToSpt(S,G) macro
+// (i.e., check_switch_to_spt_sg()).
+// Note: applies for all entries
+// Note: by spec definition it should apply only for (*,G), (S,G), (S,G,rpt),
+// but the RP-based SPT switch extends it for (*,*,RP) entries as well.
 bool
-PimMre::is_switch_to_spt_desired_sg() const
-{
-    if (! (is_wc() || is_sg() || is_sg_rpt()))
-	return (false);
-    
-    if (! pim_node().is_switch_to_spt_enabled().get())
-	return (false);		// SPT-switch disabled
-    
-    if (pim_node().is_switch_to_spt_enabled().get()
-	&& (pim_node().switch_to_spt_threshold_bytes().get() == 0)) {
-	return (true);		// SPT-switch enabled on first packet
-    }
-    
-    return (false);	// TODO: XXX: PAVPAVPAV: temp. no SPT-switch
-}
-
-// Return true if switch to SPT is desired, and the Keepalive Timer was
-// restarted, otherwise false.
-// Note: applies only for (*,G), (S,G), (S,G,rpt)
-bool
-PimMre::check_switch_to_spt_sg(const IPvX& src, const IPvX& dst,
-			       PimMre*& pim_mre_sg)
+PimMre::is_monitoring_switch_to_spt_desired_sg(const PimMre *pim_mre_sg) const
 {
     Mifset mifs;
     
+    //
+    // XXX: the RP-based SPT switch is not in the spec
+    //
+    if (i_am_rp() && inherited_olist_sg().any())
+	return (true);
+    
+    //
+    // The last-hop router SPT switch (as described in the spec)
+    //
     if (! (is_wc() || is_sg() || is_sg_rpt()))
 	return (false);
     
     mifs = pim_include_wc();
-    mifs &= ~pim_exclude_sg();
-    mifs |= pim_include_sg();
+    if (pim_mre_sg != NULL) {
+	mifs &= ~pim_mre_sg->pim_exclude_sg();
+	mifs |= pim_mre_sg->pim_include_sg();
+    }
     
-    if (mifs.any() && is_switch_to_spt_desired_sg()) {
+    return (mifs.any());
+}
+
+// Policy-defined SPT switch.
+// Note: applies for all entries
+bool
+PimMre::is_switch_to_spt_desired_sg(uint32_t threshold_interval_sec,
+				    uint32_t threshold_bytes) const
+{
+    if (! pim_node().is_switch_to_spt_enabled().get())
+	return (false);		// SPT-switch disabled
+    
+    //
+    // SPT-switch enabled
+    //
+    
+    //
+    // Test whether the number of forwarded bytes is equal or above
+    // the threshold value, and this is within the boundaries of the
+    // pre-defined interval.
+    //
+    if ((threshold_bytes >= pim_node().switch_to_spt_threshold_bytes().get())
+	&& (threshold_interval_sec
+	    <= pim_node().switch_to_spt_threshold_interval_sec().get())) {
+	return (true);
+    }
+    
+    return (false);
+}
+
+// Return true if switch to SPT is desired, otherwise false.
+// Note: if switch to SPT is desired, then the (S,G) Keepalive Timer is
+// always restarted.
+// Note: applies for all entries
+// Note: by spec definition it should apply only for (*,G), (S,G), (S,G,rpt),
+// but the RP-based SPT switch extends it for (*,*,RP) entries as well.
+bool
+PimMre::check_switch_to_spt_sg(const IPvX& src, const IPvX& dst,
+			       PimMre*& pim_mre_sg,
+			       uint32_t threshold_interval_sec,
+			       uint32_t threshold_bytes)
+{
+    //
+    // XXX: Part of the CheckSwitchToSpt(S,G) macro
+    // is implemented by is_monitoring_switch_to_spt_desired_sg()
+    //
+    if (is_monitoring_switch_to_spt_desired_sg(pim_mre_sg)
+	&& is_switch_to_spt_desired_sg(threshold_interval_sec,
+				       threshold_bytes)) {
 	// restart KeepAliveTimer(S,G);
 	if (pim_mre_sg == NULL) {
 	    // XXX: create the (S,G) entry

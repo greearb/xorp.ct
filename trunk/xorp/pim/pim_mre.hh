@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.29 2003/07/07 23:13:01 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.30 2003/07/08 01:36:55 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -750,11 +750,16 @@ public:
     //
     // Note: applies only for (S,G)
     void	update_sptbit_sg(uint16_t iif_vif_index);
-    // Note: applies only for (*,G), (S,G), (S,G,rpt)
-    bool	is_switch_to_spt_desired_sg() const;
-    // Note: applies only for (*,G), (S,G), (S,G,rpt)
+    // Note: applies for all entries
+    bool	is_monitoring_switch_to_spt_desired_sg(const PimMre *pim_mre_sg) const;
+    // Note: applies for all entries
+    bool	is_switch_to_spt_desired_sg(uint32_t threshold_interval_sec,
+					    uint32_t threshold_bytes) const;
+    // Note: applies for all entries
     bool	check_switch_to_spt_sg(const IPvX& src, const IPvX& dst,
-				       PimMre*& pim_mre_sg);
+				       PimMre*& pim_mre_sg,
+				       uint32_t threshold_interval_sec,
+				       uint32_t threshold_bytes);
     
     
     //
@@ -856,7 +861,7 @@ public:
     }
     
 private:
-    uint32_t	_flags;			// Various flags (see PIM_MRE_*) above
+    uint32_t	_flags;			// Various flags (see PIM_MRE_* above)
 };
 
 //
