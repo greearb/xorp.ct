@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.39 2005/02/27 21:32:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.40 2005/03/10 01:13:42 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -68,8 +68,7 @@ XrlMfeaNode::XrlMfeaNode(int		family,
 
 XrlMfeaNode::~XrlMfeaNode()
 {
-    MfeaNodeCli::stop();
-    MfeaNode::stop();
+    shutdown();
 
     _ifmgr.detach_hint_observer(dynamic_cast<MfeaNode*>(this));
     _ifmgr.unset_observer(dynamic_cast<MfeaNode*>(this));
@@ -87,10 +86,15 @@ XrlMfeaNode::startup()
 bool
 XrlMfeaNode::shutdown()
 {
-    if (stop_mfea() < 0)
-	return false;
+    bool ret_value = true;
 
-    return true;
+    if (stop_cli() < 0)
+	ret_value = false;
+
+    if (stop_mfea() < 0)
+	ret_value = false;
+
+    return (ret_value);
 }
 
 int
@@ -1624,8 +1628,8 @@ XrlMfeaNode::common_0_1_get_status(
 XrlCmdError
 XrlMfeaNode::common_0_1_shutdown()
 {
-    if (stop_mfea() != XORP_OK) {
-	string error_msg = c_format("Failed to stop MFEA");
+    if (shutdown() != true) {
+	string error_msg = c_format("Failed to shutdown MFEA");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
