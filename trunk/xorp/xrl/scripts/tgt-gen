@@ -113,6 +113,7 @@ def target_handler_hooks(cls, name, methods):
              (xorp_indent(3), cls, cpp_name(m.name()))
         s += "\t    XLOG_ERROR(\"Failed to xrl handler finder://%s/%s\");\n\t}\n" % \
               (name, m.name())
+    s += "\t_cmds->finalize();\n"
     s += "    }\n\n"
 
     s += "    void remove_handlers()\n    {\n"

@@ -54,6 +54,11 @@ public:
 
     const XrlCmdEntry* get_handler(uint32_t index) const;
 
+    /**
+     * Mark command map as finished.
+     */
+    virtual void finalize();
+    
 protected:
     bool add_handler (const XrlCmdEntry& c);
     
