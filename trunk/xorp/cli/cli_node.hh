@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.8 2003/03/27 01:51:58 hodson Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.9 2003/04/22 23:27:16 hodson Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -304,7 +304,7 @@ public:
      * @return a pointer to the CLI client (@ref CliClient) with enabled
      * stdio access on success, otherwise NULL.
      */
-    CliClient *enable_stdio_access();
+    CliClient *add_stdio_client();
     
     typedef XorpCallback1<void,
 	CliClient*		// CLI client to delete
