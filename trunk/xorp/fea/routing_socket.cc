@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.1 2003/05/02 07:50:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.2 2003/08/06 01:19:16 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -80,8 +80,8 @@ RoutingSocket::RoutingSocket(EventLoop& e)
 
 RoutingSocket::~RoutingSocket()
 {
-    shutdown();
-    assert(_ol.empty());
+    stop();
+    XLOG_ASSERT(_ol.empty());
 }
 
 int
@@ -170,7 +170,7 @@ RoutingSocket::force_read()
 	//  sizeof(u_short) + 2 * sizeof(u_char)
 	//
 	if (got < (ssize_t)(sizeof(u_short) + 2 * sizeof(u_char))) {
-	    XLOG_ERROR("Routing socket read failed: message truncated : "
+	    XLOG_ERROR("Routing socket read failed: message truncated: "
 		       "received %d bytes instead of (at least) %u bytes",
 		       got, (uint32_t)(sizeof(u_short) + 2 * sizeof(u_char)));
 	    shutdown();
@@ -180,7 +180,7 @@ RoutingSocket::force_read()
 	//
 	// Received message (probably) OK
 	//
-	const if_msghdr* mh = reinterpret_cast<if_msghdr*>(_buffer);
+	const struct if_msghdr* mh = reinterpret_cast<const struct if_msghdr*>(_buffer);
 	XLOG_ASSERT(mh->ifm_msglen <= RTSOCK_BYTES);
 	XLOG_ASSERT(mh->ifm_msglen == got);
 	break;
@@ -197,8 +197,8 @@ RoutingSocket::force_read()
 void
 RoutingSocket::select_hook(int fd, SelectorMask m)
 {
-    assert(fd == _fd);
-    assert(m == SEL_RD);
+    XLOG_ASSERT(fd == _fd);
+    XLOG_ASSERT(m == SEL_RD);
     force_read();
 }
 
@@ -218,7 +218,7 @@ struct RoutingSocketPlumber {
 	ObserverList::iterator i = find(ol.begin(), ol.end(), o);
 	debug_msg("Plumbing RoutingSocketObserver %p to RoutingSocket%p\n",
 		  o, &r);
-	assert(i == ol.end());
+	XLOG_ASSERT(i == ol.end());
 	ol.push_back(o);
     }
     static void
@@ -228,7 +228,7 @@ struct RoutingSocketPlumber {
 	debug_msg("Unplumbing RoutingSocketObserver%p from "
 		  "RoutingSocket %p\n", o, &r);
 	ObserverList::iterator i = find(ol.begin(), ol.end(), o);
-	assert(i != ol.end());
+	XLOG_ASSERT(i != ol.end());
 	ol.erase(i);
     }
 };
