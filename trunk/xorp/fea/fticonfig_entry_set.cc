@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set.cc,v 1.5 2004/10/21 00:10:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set.cc,v 1.6 2004/11/12 00:33:31 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -58,6 +58,13 @@ FtiConfigEntrySet::register_ftic_secondary()
     // XXX: push the current config into the new secondary
     //
     if (_is_running) {
-	// TODO: XXX: PAVPAVPAV: implement it!
+	// XXX: nothing to do. 
+	//
+	// XXX: note that the forwarding table state in the secondary methods
+	// is pushed by FtiConfigTableSet::register_ftic_secondary(), hence
+	// we don't need to do it here again. However, this is based on the
+	// assumption that for each FtiConfigEntrySet secondary method
+	// there is a corresponding FtiConfigTableSet secondary method.
+	//
     }
 }
