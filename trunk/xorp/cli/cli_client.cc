@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.18 2004/03/04 04:47:42 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.19 2004/04/04 23:42:41 pavlin Exp $"
 
 
 //
@@ -511,6 +511,9 @@ CliClient::page_buffer2window_line_n(size_t buffer_line_n)
 size_t
 CliClient::window_lines_n(size_t buffer_line_n)
 {
+    bool has_newline = false;
+    size_t window_line_n = 0;
+
     XLOG_ASSERT(buffer_line_n < _page_buffer->size());
 
     const string& line = page_buffer_line(buffer_line_n);
@@ -520,13 +523,16 @@ CliClient::window_lines_n(size_t buffer_line_n)
     while (line_size > 0) {
 	if ((line[line_size - 1] == '\r') || (line[line_size - 1] == '\n')) {
 	    line_size--;
+	    has_newline = true;
 	    continue;
 	}
 	break;
     }
 
-    size_t window_line_n = (line_size / window_width())
+    window_line_n = (line_size / window_width())
 	+ ((line_size % window_width())? (1) : (0));
+    if ((line_size == 0) && has_newline)
+	window_line_n++;
 
     return (window_line_n);
 }
