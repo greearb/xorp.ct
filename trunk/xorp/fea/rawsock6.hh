@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock6.hh,v 1.1 2004/11/19 10:54:28 bms Exp $
+// $XORP: xorp/fea/rawsock6.hh,v 1.2 2004/11/23 00:53:20 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "libxorp/exceptions.hh"
-#include "libxorp/ipv6.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/eventloop.hh"
 
@@ -48,10 +47,10 @@ public:
     /**
      * Write data to raw socket.
      *
-     * @param buf pointer to raw IPv6 packet. Packet fields are expected
-     * to be in network order.
-     *
-     * @param bufbytes number of bytes in packet pointed to by @ref buf.
+     * @param src source IPv6 address.
+     * @param dst destination IPv6 address.
+     * @param payload pointer to IPv6 packet payload.
+     * @param len length of payload in bytes.
      *
      * @return number of bytes written on success.  If return value is
      * negative check errno for system errors.  Invalid IPv6 fields
@@ -59,8 +58,8 @@ public:
      * in which case errno will not indicate an error.  The error is
      * recorded in the xlog.
      */
-    ssize_t write(const IPv6& src, const IPv6& dst, const uint8_t* buf,
-		  size_t bufbytes) const;
+    ssize_t write(const IPv6& src, const IPv6& dst, const uint8_t* payload,
+		  size_t len) const;
 
 private:
     RawSocket6(const RawSocket6&);		// Not implemented.
@@ -69,6 +68,21 @@ private:
 protected:
     int32_t  _fd;
     uint32_t _pf;
+};
+
+/**
+ * Simple structure used to cache commonly passed IPv6 header information
+ * which comes from socket control message headers. This is used when
+ * reading from the kernel, so we use C types, rather than XORP C++ Class
+ * Library types.
+ */
+
+struct IPv6HeaderInfo {
+	IPv6		src;
+	IPv6		dst;
+	uint16_t	rcvifindex;
+	uint8_t		tclass;
+	uint8_t		hoplimit;
 };
 
 /**
@@ -89,13 +103,13 @@ public:
     ~IoRawSocket6();
 
 protected:
-    virtual void process_recv_data(const vector<uint8_t>& buf) = 0;
+    virtual void process_recv_data(const struct IPv6HeaderInfo& hdrinfo,
+				   const vector<uint8_t>& options,
+				   const vector<uint8_t>& payload) = 0;
 
 protected:
     void recv(int fd, SelectorMask m);
-
     bool eventloop_hook();
-
     void eventloop_unhook();
 
 private:
@@ -103,10 +117,19 @@ private:
     IoRawSocket6 operator=(const IoRawSocket6&);	// Not implemented.
 
 private:
-    enum { RECVBUF_BYTES = 131072 };
     EventLoop&		_eventloop;
     bool		_autohook;
-    vector<uint8_t>	_recvbuf;
+
+    // Cached properties of most recently received datagram.
+    struct IPv6HeaderInfo	_hdrinfo;
+
+    enum { CMSGBUF_BYTES = 10240 };
+    enum { OPTBUF_BYTES = 1024 };
+    enum { RECVBUF_BYTES = 131072 };
+
+    vector<uint8_t>		_cmsgbuf;
+    vector<uint8_t>		_optbuf;
+    vector<uint8_t>		_recvbuf;
 };
 
 /**
@@ -126,7 +149,9 @@ public:
 	 * Method invoked when data arrives on associated FilterRawSocket6
 	 * instance.
 	 */
-	virtual void recv(const vector<uint8_t>& data) = 0;
+	virtual void recv(const struct IPv6HeaderInfo& hdrinfo,
+			  const vector<uint8_t>& options,
+			  const vector<uint8_t>& payload) = 0;
 
 	/**
 	 * Method invoked by the destructor of the associated
@@ -158,7 +183,9 @@ public:
     bool empty() const { return _filters.empty(); }
 
 protected:
-    void process_recv_data(const vector<uint8_t>& buf);
+    void process_recv_data(const struct IPv6HeaderInfo& hdrinfo,
+			   const vector<uint8_t>& options,
+			   const vector<uint8_t>& payload);
 
 private:
     FilterRawSocket6(const FilterRawSocket6&);		 // Not implemented.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.2 2004/11/23 00:53:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.3 2004/11/23 19:04:08 atanu Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -54,6 +54,8 @@ RawSocket6::RawSocket6(uint32_t protocol) throw (RawSocket6Exception)
 	"setsockopt(IPV6_PKTINFO) failed", errno);
     }
 #endif // ! IPV6_RECVPKTINFO
+
+    // XXX: Add more things we're interested in receiving here.
 }
 
 RawSocket6::~RawSocket6()
@@ -63,7 +65,7 @@ RawSocket6::~RawSocket6()
 }
 
 ssize_t
-RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* buf,
+RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* payload,
 		  size_t nbytes) const
 {
     uint8_t cmsgbuf[CMSG_SPACE(sizeof(struct in6_pktinfo))];
@@ -89,9 +91,9 @@ RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* buf,
     sdst.sin6_len = sizeof(sockaddr_in6);
 #endif /* HAVE_SIN_LEN */
 
-    // Payload.  XXX: Hello Nasty.
+    // Payload.
     struct iovec iov;
-    iov.iov_base = reinterpret_cast<caddr_t>(const_cast<uint8_t *>(buf));
+    iov.iov_base = reinterpret_cast<caddr_t>(const_cast<uint8_t *>(payload));
     iov.iov_len = nbytes;
 
     // Message header.
@@ -119,6 +121,14 @@ IoRawSocket6::IoRawSocket6(EventLoop&	eventloop,
     if (fcntl(_fd, F_SETFL, fl | O_NONBLOCK) < 0)
 	xorp_throw(RawSocket6Exception, "fcntl (O_NON_BLOCK)", errno);
 
+    _cmsgbuf.reserve(CMSGBUF_BYTES);
+    if (_cmsgbuf.capacity() != CMSGBUF_BYTES)
+	xorp_throw(RawSocket6Exception, "cmsg buffer reserve() failed", 0);
+
+    _optbuf.reserve(OPTBUF_BYTES);
+    if (_optbuf.capacity() != OPTBUF_BYTES)
+	xorp_throw(RawSocket6Exception, "options buffer reserve() failed", 0);
+
     _recvbuf.reserve(RECVBUF_BYTES);
     if (_recvbuf.capacity() != RECVBUF_BYTES)
 	xorp_throw(RawSocket6Exception, "receive buffer reserve() failed", 0);
@@ -138,21 +148,14 @@ IoRawSocket6::~IoRawSocket6()
 }
 
 void
-IoRawSocket6::recv(int /* fd */, SelectorMask /* m */)
+IoRawSocket6::recv(int fd, SelectorMask m)
 {
-    uint8_t cmsgbuf[CMSG_SPACE(sizeof(struct in6_pktinfo))];
-    struct cmsghdr* cmsgp = reinterpret_cast<struct cmsghdr*>(cmsgbuf);
-    struct in6_pktinfo* pktinfo = reinterpret_cast<struct in6_pktinfo*>(
-				  CMSG_DATA(cmsgp));
+    UNUSED(fd);
+    UNUSED(m);
 
     // Source.
     struct sockaddr_in6 ssrc;
     memset(&ssrc, 0, sizeof(struct sockaddr_in6));
-
-    // Control message header.
-    cmsgp->cmsg_level = IPPROTO_IPV6;
-    cmsgp->cmsg_type = IPV6_PKTINFO;
-    cmsgp->cmsg_len = CMSG_LEN(sizeof(struct in6_pktinfo));
 
     // Payload.
     struct iovec iov;
@@ -165,8 +168,8 @@ IoRawSocket6::recv(int /* fd */, SelectorMask /* m */)
     mh.msg_namelen = sizeof(ssrc);
     mh.msg_iov = &iov;
     mh.msg_iovlen = 1;
-    mh.msg_control = reinterpret_cast<caddr_t>(const_cast<uint8_t *>(cmsgbuf));
-    mh.msg_controllen = sizeof(cmsgbuf);
+    mh.msg_control = (caddr_t)&_cmsgbuf[0];
+    mh.msg_controllen = CMSGBUF_BYTES;
     mh.msg_flags = 0;
 
     ssize_t n = recvmsg(_fd, &mh, 0);
@@ -176,10 +179,49 @@ IoRawSocket6::recv(int /* fd */, SelectorMask /* m */)
     }
     _recvbuf.resize(n);
 
-    // TODO: Process incoming CMSG data.
-    UNUSED(pktinfo);
+    _hdrinfo.src.copy_in(ssrc.sin6_addr);
 
-    process_recv_data(_recvbuf);
+    // Process the received control message headers.
+    struct cmsghdr *chp;
+    for (chp = CMSG_FIRSTHDR(&mh); chp != NULL; chp = CMSG_NXTHDR(&mh, chp)) {
+	uint32_t*		intp;
+	struct in6_pktinfo*	pip;
+
+	if (chp->cmsg_level == IPPROTO_IPV6) {
+	    switch (chp->cmsg_type) {
+#ifdef IPV6_PKTINFO
+	    case IPV6_PKTINFO:
+		pip = (struct in6_pktinfo *)CMSG_DATA(&mh);
+		_hdrinfo.dst.copy_in(pip->ipi6_addr);
+		_hdrinfo.rcvifindex = pip->ipi6_ifindex;
+		break;
+#endif
+#ifdef IPV6_HOPLIMIT
+	    case IPV6_HOPLIMIT:
+		intp = (uint32_t *)CMSG_DATA(&mh);
+		_hdrinfo.hoplimit = *intp & 0xFF;
+		break;
+#endif
+#ifdef IPV6_TCLASS
+	    case IPV6_TCLASS:
+		intp = (uint32_t *)CMSG_DATA(&mh);
+		_hdrinfo.tclass = *intp & 0xFF;
+		break;
+#endif
+#ifdef IPV6_HOPOPTS
+	    case IPV6_HOPOPTS:
+		bcopy(chp, &_cmsgbuf[0], chp->cmsg_len -
+		    sizeof(struct cmsghdr));
+		_cmsgbuf.resize(chp->cmsg_len);
+		break;
+#endif
+	    default:
+		continue;
+	    }
+	}
+    }
+
+    process_recv_data(_hdrinfo, _optbuf, _recvbuf);
 }
 
 bool
@@ -257,10 +299,12 @@ FilterRawSocket6::remove_filter(InputFilter* filter)
 }
 
 void
-FilterRawSocket6::process_recv_data(const vector<uint8_t>& buf)
+FilterRawSocket6::process_recv_data(const struct IPv6HeaderInfo& hdrinfo,
+				    const vector<uint8_t>& options,
+				    const vector<uint8_t>& payload)
 {
     for (list<InputFilter*>::iterator i = _filters.begin();
 	 i != _filters.end(); ++i) {
-	(*i)->recv(buf);
+	(*i)->recv(hdrinfo, options, payload);
     }
 }
