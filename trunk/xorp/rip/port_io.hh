@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_io.hh,v 1.4 2003/07/17 16:11:03 hodson Exp $
+// $XORP: xorp/rip/port_io.hh,v 1.5 2003/07/21 18:05:55 hodson Exp $
 
 #ifndef __RIP_PORT_IO_HH__
 #define __RIP_PORT_IO_HH__
@@ -43,7 +43,8 @@ public:
     PortIOBase(PortIOUser&	user,
 	       const string&	ifname,
 	       const string&	vifname,
-	       const Addr&	address);
+	       const Addr&	address,
+	       bool		enabled = true);
 
     virtual ~PortIOBase();
 
@@ -60,15 +61,13 @@ public:
      *
      * @param dst_addr address to send packet.
      * @param dst_port port to send packet to.
-     * @param rip_packet pointer to rip packet.
-     * @param rip_packet_bytes size of packet to write.
+     * @param rip_packet vector containing rip packet to be sent.
      *
      * @return false on immediately detectable failure, true otherwise.
      */
-    virtual bool send(const Addr&	dst_addr,
-		      uint16_t		dst_port,
-		      const uint8_t*	rip_packet,
-		      size_t		rip_packet_bytes) = 0;
+    virtual bool send(const Addr&		dst_addr,
+		      uint16_t			dst_port,
+		      const vector<uint8_t>&	rip_packet) = 0;
 
     /**
      * Check if send request is pending.
@@ -139,8 +138,7 @@ public:
 
     virtual ~PortIOUserBase();
 
-    virtual void port_io_send_completion(const uint8_t* rip_packet,
-					 bool		success) = 0;
+    virtual void port_io_send_completion(bool		success) = 0;
 
     virtual void port_io_receive(const A&	src_addr,
 				 uint16_t	src_port,
@@ -169,9 +167,10 @@ template <typename A>
 PortIOBase<A>::PortIOBase(PortIOUser&	user,
 			  const string&	ifname,
 			  const string&	vifname,
-			  const Addr&	addr)
+			  const Addr&	addr,
+			  bool		en)
     : _user(user), _ifname(ifname), _vifname(vifname), _addr(addr),
-      _max_rte_pp(RIPv2_ROUTES_PER_PACKET), _en(true)
+      _max_rte_pp(RIPv2_ROUTES_PER_PACKET), _en(en)
 {}
 
 template <typename A>

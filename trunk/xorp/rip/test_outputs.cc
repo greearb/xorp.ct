@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.3 2003/08/05 06:55:14 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.4 2003/09/04 05:26:53 hodson Exp $"
 
 #include <set>
 
@@ -133,8 +133,7 @@ public:
      */
     bool send(const Addr&,
 	      uint16_t,
-	      const uint8_t*,
-	      size_t)
+	      const vector<uint8_t>&)
     {
 	XLOG_FATAL("Called send inappropriately");
 	return true;

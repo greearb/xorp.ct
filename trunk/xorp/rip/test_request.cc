@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.3 2003/08/01 04:08:13 hodson Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.4 2003/09/04 05:26:53 hodson Exp $"
 
 #include <set>
 
@@ -191,13 +191,11 @@ public:
      */
     bool send(const Addr&    addr,
 	      uint16_t	     port,
-	      const uint8_t* rip_packet,
-	      size_t	     rip_packet_bytes)
+	      const vector<uint8_t>& rip_packet)
     {
 	_lo_addr = addr;
 	_lo_port = port;
-	_lo_data.resize(rip_packet_bytes);
-	memcpy(&_lo_data[0], rip_packet, rip_packet_bytes);
+	_lo_data = rip_packet;
 	_pending = true;
 	return true;
     }
