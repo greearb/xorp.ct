@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.16 2004/09/17 19:52:35 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.17 2005/01/29 07:14:32 bms Exp $"
 
 #include "static_routes_module.h"
 
@@ -424,9 +424,8 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_death(
 {
 
     if ((_fea_target == target_class) || (_rib_target == target_class)) {
-	XLOG_ERROR("FEA or RIB died, exiting.");
-	// TODO: Actually clean up.
-	::exit(-1);
+	XLOG_ERROR("FEA or RIB died, shutting down.");
+	StaticRoutesNode::shutdown();
     }
 
     return XrlCmdError::OKAY();
