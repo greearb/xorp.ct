@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.23 2002/12/10 05:38:33 mjh Exp $
+// $XORP: xorp/rib/rib.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -406,6 +406,14 @@ private:
     inline RouteTable<A>* find_table(const string& tablename);
 
     /**
+     * Find a routing protcol, given its protocol name
+     *
+     * @param protocol the name of the table to search for.
+     * @return pointer to table if exists, 0 otherwise.
+     */
+    inline Protocol* find_protocol(const string& protocol);
+
+    /**
      * Add table to RIB, but don't do any plumbing.  The caller should
      * first check that table does not already exist using @ref
      * find_table.
@@ -503,6 +511,7 @@ protected:
     bool		_mcast;
 
     map<const string, RouteTable<A>*>	_tables;
+    map<const string, Protocol*>        _protocols;
     map<const string, Vif>		_vifs;
     map<const string, int>		_admin_distances;
     map<const A, IPExternalNextHop<A> >	_external_nexthops;

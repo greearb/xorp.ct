@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.2 2003/01/17 03:46:41 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.3 2003/02/24 22:20:42 hodson Exp $"
 
 #include "config.h"
 #include "urib_module.h"
@@ -32,6 +32,17 @@ RIB<A>::find_table(const string& tablename)
 {
     typename map<string, RouteTable<A>*>::iterator mi = _tables.find(tablename);
     if (mi == _tables.end()) {
+	return 0;
+    }
+    return mi->second;
+}
+
+template<class A> 
+Protocol*
+RIB<A>::find_protocol(const string& protocol)
+{
+    typename map<string, Protocol*>::iterator mi = _protocols.find(protocol);
+    if (mi == _protocols.end()) {
 	return 0;
     }
     return mi->second;
@@ -401,6 +412,14 @@ int RIB<A>::add_route(const string& tablename,
 	return -1;
     }
 
+    Protocol* proto = find_protocol(tablename);
+    if (proto == NULL) {
+	XLOG_ERROR("Attempting to add route with unknown protocol \"%s\".",
+		   tablename.c_str());
+	abort();
+	return -1;
+    }
+
     OriginTable<A>* ot = dynamic_cast<OriginTable<A>* >(rt);
     if (ot == NULL) {
 	XLOG_ERROR("Attempting to add route to table \"%s\" that is not "
@@ -417,14 +436,14 @@ int RIB<A>::add_route(const string& tablename,
 	if (re->directly_connected()) {
 	    debug_msg("**directly connected route found for nexthop\n");
 	    IPNextHop<A>* nh = find_or_create_peer_nexthop(nexthop_addr);
-	    ot->add_route(IPRouteEntry<A>(net, re->vif(), nh, NULL, metric));
+	    ot->add_route(IPRouteEntry<A>(net, re->vif(), nh, *proto, metric));
 	    flush();
 	    return 0;
 	} else {
 	    debug_msg("**not directly connected route found for nexthop\n");
 	    IPNextHop<A>* nh = find_or_create_external_nexthop(nexthop_addr);
 	    ot->add_route(IPRouteEntry<A>(net, /*No vif*/NULL, nh, 
-					  NULL, metric));
+					  *proto, metric));
 	    flush();
 	    return 0;
 	}
@@ -451,7 +470,7 @@ int RIB<A>::add_route(const string& tablename,
 	metric &= 0xffff;
     }
 
-    ot->add_route(IPRouteEntry<A>(net, vif, nh, NULL, metric));
+    ot->add_route(IPRouteEntry<A>(net, vif, nh, *proto, metric));
 
     flush();
     return 0;
@@ -687,6 +706,14 @@ int
 RIB<A>::add_origin_table(const string& tablename, int type) {
     debug_msg("add_origin_table %s type: %dn\n",
 	      tablename.c_str(), type);
+
+    Protocol* proto = find_protocol(tablename);
+    if (proto == NULL) {
+	proto = new Protocol(tablename, type, 0);
+	_protocols[tablename] = proto;
+    } else {
+	proto->increment_genid();
+    }
 
     /* Check if table exists and check type if so */
     RouteTable<A>* rt = find_table(tablename);

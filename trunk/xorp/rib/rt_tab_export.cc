@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.14 2002/12/10 06:56:08 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
 
 #include "urib_module.h"
 #include "fea_client.hh"
@@ -51,6 +51,11 @@ ExportTable<A>::add_route(const IPRouteEntry<A> &route,
 {
     if (caller != _parent)
 	abort();
+
+    if (route.protocol().name() == "connected") {
+	printf("Add route called for connected route\n");
+	return 0;
+    }
     _fea->add_route(route);
 
     debug_msg(("Add route called on export table " + _tablename +
@@ -65,6 +70,10 @@ ExportTable<A>::delete_route(const IPRouteEntry<A> *route,
 {
     if (caller != _parent)
 	abort();
+    if (route->protocol().name() == "connected") {
+	printf("Delete route called for connected route\n");
+	return 0;
+    }
     _fea->delete_route(*route);
 
     debug_msg("Delete route called on export table\n");

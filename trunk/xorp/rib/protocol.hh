@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/protocol.hh,v 1.10 2002/12/10 06:56:08 mjh Exp $
+// $XORP: xorp/rib/protocol.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
 
 #ifndef __RIB_PROTOCOL_HH__
 #define __RIB_PROTOCOL_HH__
@@ -47,6 +47,8 @@ public:
      * @return the canonical name of the routing protocol
      */
     const string& name() const { return _name; }
+
+    void increment_genid() { _genid++; }
 private:
     string _name;
 

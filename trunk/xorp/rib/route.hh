@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.2 2003/01/17 03:46:42 pavlin Exp $
+// $XORP: xorp/rib/route.hh,v 1.3 2003/02/23 06:45:13 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -35,11 +35,6 @@
 class RouteEntry {
 public:
     /**
-     * Default contructor.
-     */
-    RouteEntry();
-
-    /**
      * Constructor for a route entry.
      *
      * @param vif the Virtual Interface on which packets matching this
@@ -49,7 +44,7 @@ public:
      * @param proto the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    RouteEntry(Vif *vif, NextHop *nh, Protocol *proto, uint16_t metric);
+    RouteEntry(Vif *vif, NextHop *nh, const Protocol& proto, uint16_t metric);
 
     /**
      * Destructor
@@ -102,7 +97,7 @@ public:
      *
      * @return the routing protocol that originated this route.
      */
-    Protocol &protocol() const { return *_proto; }
+    const Protocol &protocol() const { return _proto; }
 
     /**
      * Display the route for debugging purposes
@@ -144,7 +139,7 @@ protected:
     uint16_t _metric; // lower is better
 
     // The routing protocol that instantiated this route
-    Protocol *_proto;
+    const Protocol& _proto;
 
 };
 
@@ -159,11 +154,6 @@ template <class A>
 class IPRouteEntry : public RouteEntry {
 public:
     /**
-     * Default IPRouteEntry constructor
-     */
-    IPRouteEntry();
-
-    /**
      * Constructor for IPRouteEntry
      *
      * @param net the Subnet (address and mask) of the routing table entry.
@@ -175,7 +165,7 @@ public:
      * @param metric the routing protocol metric for this route.
      */
     IPRouteEntry(const IPNet<A> &net, Vif *vif, NextHop *nh,
-		 Protocol *proto, uint16_t metric) :
+		 const Protocol& proto, uint16_t metric) :
 	RouteEntry(vif, nh, proto, metric), _net(net) {}
     /**
      * Destructor for Routing Table Entry
@@ -261,7 +251,7 @@ public:
      * @param egp_parent the orginal route entry with a non-local nexthop.
      */
     ResolvedIPRouteEntry(const IPNet<A> &net, Vif *vif, NextHop *nh,
-			 Protocol *proto, uint16_t metric,
+			 const Protocol& proto, uint16_t metric,
 			 const IPRouteEntry<A>* igp_parent,
 			 const IPRouteEntry<A>* egp_parent) :
 	IPRouteEntry<A>(net, vif, nh, proto, metric),

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.2 2003/01/17 03:46:42 pavlin Exp $"
 
 #include "urib_module.h"
 #include "libxorp/xlog.h"
@@ -146,7 +146,7 @@ ExtIntTable<A>::resolve_and_store_route(const IPRouteEntry<A> &route,
     resolved_route =
 	new ResolvedIPRouteEntry<A>(route.net(), nhroute->vif(),
 				    nhroute->nexthop(),
-				    &route.protocol(), route.metric(),
+				    route.protocol(), route.metric(),
 				    nhroute, &route);
     resolved_route->set_admin_distance(route.admin_distance());
     _ip_route_table.insert(resolved_route->net(),
