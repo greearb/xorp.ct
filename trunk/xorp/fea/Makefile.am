@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.54 2004/12/10 14:18:20 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.55 2004/12/10 14:48:15 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -11,7 +11,7 @@ SUBDIRS = . tools
 
 # -- Real Programs
 bin_PROGRAMS		 = xorp_fea xorp_fea_dummy
-bin_PROGRAMS		+= xorp_fea_click_config_generator
+bin_SCRIPTS		 = xorp_fea_click_config_generator
 
 # -- Test Programs and Scripts
 TESTS			 = test_rawsock4
@@ -84,9 +84,6 @@ xorp_fea_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 xorp_fea_dummy_CXXFLAGS	 = -DFEA_DUMMY
 xorp_fea_dummy_SOURCES	 = fea.cc
 xorp_fea_dummy_LDADD	 = $(xorp_fea_LDADD)
-
-# -- Sources for xorp_fea_click_config_generator
-xorp_fea_click_config_generator_SOURCES	 = xorp_fea_click_config_generator
 
 # -- Sources and Linkage for test_mfea
 test_mfea_SOURCES	 = test_mfea.cc
@@ -323,6 +320,7 @@ EXTRA_DIST	 = DEVNOTES.mfea
 EXTRA_DIST	+= command_mfea
 EXTRA_DIST	+= configure_mfea
 EXTRA_DIST	+= test_xrls.sh
+EXTRA_DIST	+= xorp_fea_click_config_generator
 EXTRA_DIST	+= xrl_mfea_shell_funcs.sh
 
 

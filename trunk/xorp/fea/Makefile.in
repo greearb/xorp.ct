@@ -98,7 +98,8 @@ bindir = $(prefix)/$(subdir)
 SUBDIRS = . tools
 
 # -- Real Programs
-bin_PROGRAMS = xorp_fea xorp_fea_dummy xorp_fea_click_config_generator
+bin_PROGRAMS = xorp_fea xorp_fea_dummy
+bin_SCRIPTS = xorp_fea_click_config_generator
 
 # -- Test Programs and Scripts
 TESTS = test_rawsock4 test_ifmanager_transaction test_xrl_sockets4_udp.sh
@@ -134,9 +135,6 @@ xorp_fea_dummy_CXXFLAGS = -DFEA_DUMMY
 xorp_fea_dummy_SOURCES = fea.cc
 xorp_fea_dummy_LDADD = $(xorp_fea_LDADD)
 
-# -- Sources for xorp_fea_click_config_generator
-xorp_fea_click_config_generator_SOURCES = xorp_fea_click_config_generator
-
 # -- Sources and Linkage for test_mfea
 test_mfea_SOURCES = test_mfea.cc
 
@@ -171,7 +169,7 @@ demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientb
 libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh click_socket.hh fte.hh fti.hh fti_transaction.hh fticonfig.hh fticonfig_entry_get.hh fticonfig_entry_observer.hh fticonfig_entry_set.hh fticonfig_table_get.hh fticonfig_table_observer.hh fticonfig_table_set.hh ifconfig.hh ifconfig_addr_table.hh ifconfig_get.hh ifconfig_observer.hh ifconfig_set.hh ifmanager.hh ifmanager_transaction.hh iftree.hh kernel_utils.hh libfeaclient_bridge.hh mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh mfea_vif.hh netlink_socket.hh netlink_socket_utils.hh nexthop_port_mapper.hh pa_backend.hh pa_backend_dummy.hh pa_entry.hh pa_table.hh pa_transaction.hh profile_vars.hh rawsock4.hh rawsock6.hh routing_socket.hh routing_socket_utils.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh xrl_mfea_node.hh xrl_packet_acl.hh xrl_rawsock4.hh xrl_rawsock6.hh xrl_socket_cmds.hh xrl_socket_server.hh xrl_target.hh addr_table.cc click_socket.cc fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc fticonfig_entry_get_click.cc fticonfig_entry_get_dummy.cc fticonfig_entry_get_netlink.cc fticonfig_entry_get_rtsock.cc fticonfig_entry_observer.cc fticonfig_entry_observer_dummy.cc fticonfig_entry_observer_netlink.cc fticonfig_entry_observer_rtsock.cc fticonfig_entry_parse_nlm.cc fticonfig_entry_parse_rtm.cc fticonfig_entry_set.cc fticonfig_entry_set_click.cc fticonfig_entry_set_dummy.cc fticonfig_entry_set_netlink.cc fticonfig_entry_set_rtsock.cc fticonfig_table_get.cc fticonfig_table_get_click.cc fticonfig_table_get_dummy.cc fticonfig_table_get_netlink.cc fticonfig_table_get_sysctl.cc fticonfig_table_observer.cc fticonfig_table_observer_dummy.cc fticonfig_table_observer_netlink.cc fticonfig_table_observer_rtsock.cc fticonfig_table_parse_nlm.cc fticonfig_table_parse_rtm.cc fticonfig_table_set.cc fticonfig_table_set_click.cc fticonfig_table_set_dummy.cc fticonfig_table_set_netlink.cc fticonfig_table_set_rtsock.cc ifconfig.cc ifconfig_addr_table.cc ifconfig_get.cc ifconfig_get_click.cc ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc ifconfig_get_netlink.cc ifconfig_get_proc_linux.cc ifconfig_get_sysctl.cc ifconfig_observer.cc ifconfig_observer_dummy.cc ifconfig_observer_netlink.cc ifconfig_observer_rtsock.cc ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc ifconfig_parse_nlm.cc ifconfig_parse_rtm.cc ifconfig_set.cc ifconfig_set_click.cc ifconfig_set_dummy.cc ifconfig_set_ioctl.cc ifconfig_set_netlink.cc ifmanager_transaction.cc iftree.cc libfeaclient_bridge.cc mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc mfea_proto_comm.cc mfea_vif.cc netlink_socket.cc netlink_socket_utils.cc nexthop_port_mapper.cc pa_backend_dummy.cc pa_entry.cc pa_table.cc pa_transaction.cc profile_vars.cc rawsock4.cc rawsock6.cc routing_socket.cc routing_socket_utils.cc xrl_packet_acl.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc xrl_mfea_node.cc xrl_rawsock4.cc xrl_rawsock6.cc xrl_socket_cmds.cc xrl_socket_server.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = DEVNOTES.mfea command_mfea configure_mfea test_xrls.sh xrl_mfea_shell_funcs.sh
+EXTRA_DIST = DEVNOTES.mfea command_mfea configure_mfea test_xrls.sh xorp_fea_click_config_generator xrl_mfea_shell_funcs.sh
 
 
 ################################################################
@@ -225,8 +223,7 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fti_transaction.lo \
 	xrl_rawsock4.lo xrl_rawsock6.lo xrl_socket_cmds.lo \
 	xrl_socket_server.lo xrl_target.lo
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
-bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT) \
-	xorp_fea_click_config_generator$(EXEEXT)
+bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT)
 check_PROGRAMS = test_ifmanager_transaction$(EXEEXT) test_mfea$(EXEEXT) \
 	test_rawsock4$(EXEEXT) test_xrl_sockets4_udp$(EXEEXT)
 noinst_PROGRAMS = demo_fea_ifmgr_client$(EXEEXT)
@@ -334,12 +331,6 @@ xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 xorp_fea_LDFLAGS =
-am_xorp_fea_click_config_generator_OBJECTS =
-xorp_fea_click_config_generator_OBJECTS = \
-	$(am_xorp_fea_click_config_generator_OBJECTS)
-xorp_fea_click_config_generator_LDADD = $(LDADD)
-xorp_fea_click_config_generator_DEPENDENCIES =
-xorp_fea_click_config_generator_LDFLAGS =
 am_xorp_fea_dummy_OBJECTS = xorp_fea_dummy-fea.$(OBJEXT)
 xorp_fea_dummy_OBJECTS = $(am_xorp_fea_dummy_OBJECTS)
 xorp_fea_dummy_DEPENDENCIES = libfea.la \
@@ -373,6 +364,8 @@ xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 xorp_fea_dummy_LDFLAGS =
+SCRIPTS = $(bin_SCRIPTS)
+
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -493,8 +486,7 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 DIST_SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) \
 	$(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) \
 	$(test_rawsock4_SOURCES) $(test_xrl_sockets4_udp_SOURCES) \
-	$(xorp_fea_SOURCES) $(xorp_fea_click_config_generator_SOURCES) \
-	$(xorp_fea_dummy_SOURCES)
+	$(xorp_fea_SOURCES) $(xorp_fea_dummy_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -502,7 +494,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) $(test_rawsock4_SOURCES) $(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) $(xorp_fea_click_config_generator_SOURCES) $(xorp_fea_dummy_SOURCES)
+SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) $(test_rawsock4_SOURCES) $(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) $(xorp_fea_dummy_SOURCES)
 
 all: all-recursive
 
@@ -577,13 +569,31 @@ test_xrl_sockets4_udp$(EXEEXT): $(test_xrl_sockets4_udp_OBJECTS) $(test_xrl_sock
 xorp_fea$(EXEEXT): $(xorp_fea_OBJECTS) $(xorp_fea_DEPENDENCIES) 
 	@rm -f xorp_fea$(EXEEXT)
 	$(CXXLINK) $(xorp_fea_LDFLAGS) $(xorp_fea_OBJECTS) $(xorp_fea_LDADD) $(LIBS)
-xorp_fea_click_config_generator$(EXEEXT): $(xorp_fea_click_config_generator_OBJECTS) $(xorp_fea_click_config_generator_DEPENDENCIES) 
-	@rm -f xorp_fea_click_config_generator$(EXEEXT)
-	$(LINK) $(xorp_fea_click_config_generator_LDFLAGS) $(xorp_fea_click_config_generator_OBJECTS) $(xorp_fea_click_config_generator_LDADD) $(LIBS)
 xorp_fea_dummy-fea.$(OBJEXT): fea.cc
 xorp_fea_dummy$(EXEEXT): $(xorp_fea_dummy_OBJECTS) $(xorp_fea_dummy_DEPENDENCIES) 
 	@rm -f xorp_fea_dummy$(EXEEXT)
 	$(CXXLINK) $(xorp_fea_dummy_LDFLAGS) $(xorp_fea_dummy_OBJECTS) $(xorp_fea_dummy_LDADD) $(LIBS)
+install-binSCRIPTS: $(bin_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	@list='$(bin_SCRIPTS)'; for p in $$list; do \
+	  f="`echo $$p|sed '$(transform)'`"; \
+	  if test -f $$p; then \
+	    echo " $(INSTALL_SCRIPT) $$p $(DESTDIR)$(bindir)/$$f"; \
+	    $(INSTALL_SCRIPT) $$p $(DESTDIR)$(bindir)/$$f; \
+	  elif test -f $(srcdir)/$$p; then \
+	    echo " $(INSTALL_SCRIPT) $(srcdir)/$$p $(DESTDIR)$(bindir)/$$f"; \
+	    $(INSTALL_SCRIPT) $(srcdir)/$$p $(DESTDIR)$(bindir)/$$f; \
+	  else :; fi; \
+	done
+
+uninstall-binSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_SCRIPTS)'; for p in $$list; do \
+	  f="`echo $$p|sed '$(transform)'`"; \
+	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
+	  rm -f $(DESTDIR)$(bindir)/$$f; \
+	done
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -921,10 +931,10 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS)
 installdirs: installdirs-recursive
 installdirs-am:
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
+	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(bindir)
 
 install: install-recursive
 install-exec: install-exec-recursive
@@ -970,7 +980,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-binSCRIPTS
 
 install-info: install-info-recursive
 
@@ -987,7 +997,8 @@ mostlyclean: mostlyclean-recursive
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool
 
-uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
+	uninstall-info-am
 
 uninstall-info: uninstall-info-recursive
 
@@ -998,17 +1009,17 @@ uninstall-info: uninstall-info-recursive
 	distclean-generic distclean-libtool distclean-recursive \
 	distclean-tags distdir dvi dvi-am dvi-recursive info info-am \
 	info-recursive install install-am install-binPROGRAMS \
-	install-data install-data-am install-data-recursive \
-	install-exec install-exec-am install-exec-recursive \
-	install-info install-info-am install-info-recursive install-man \
-	install-recursive install-strip installcheck installcheck-am \
-	installdirs installdirs-am installdirs-recursive \
-	maintainer-clean maintainer-clean-generic \
-	maintainer-clean-recursive mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
-	tags tags-recursive uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am \
-	uninstall-info-recursive uninstall-recursive
+	install-binSCRIPTS install-data install-data-am \
+	install-data-recursive install-exec install-exec-am \
+	install-exec-recursive install-info install-info-am \
+	install-info-recursive install-man install-recursive \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am installdirs-recursive maintainer-clean \
+	maintainer-clean-generic maintainer-clean-recursive mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	mostlyclean-recursive tags tags-recursive uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-binSCRIPTS \
+	uninstall-info-am uninstall-info-recursive uninstall-recursive
 
 
 # Test scripts dependency
