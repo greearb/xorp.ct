@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.17 2005/03/22 08:15:18 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.18 2005/03/23 09:45:17 pavlin Exp $ */
 
 protocols {
     pimsm6 {
@@ -146,16 +146,22 @@ protocols {
 	    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/config_static_rp_done";
 	    rp @ {
 		%help:	short "Configure a static RP";
+		%delete:	xrl "$(pimsm6.targetname)/pim/0.1/delete_config_all_static_group_prefixes_rp6?rp_addr:ipv6=$(rp.@)";
+		%delete:	xrl "$(pimsm6.targetname)/pim/0.1/config_static_rp_done";
+
 		group-prefix @ {
 		    %help:	short "Configure the group prefix address covered by the RP";
 		    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(@.rp-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/delete_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)";
+		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/config_static_rp_done";
 
 		    rp-priority {
 			%help:	short "Configure the RP priority";
 			%allow-range: $(@) "0" "255";
 			%create:;
 			%set:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(group-prefix.@.rp-priority)&hash_mask_len:u32=$(group-prefix.@.hash-mask-len)";
+			%delete:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(DEFAULT)&hash_mask_len:u32=$(group-prefix.@.hash-mask-len)";
+			%delete:	xrl "$(pimsm6.targetname)/pim/0.1/config_static_rp_done";
 		    }
 
 		    hash-mask-len {
@@ -163,6 +169,8 @@ protocols {
 			%allow-range: $(@) "8" "128";
 			%create:;
 			%set:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(group-prefix.@.rp-priority)&hash_mask_len:u32=$(group-prefix.@.hash-mask-len)";
+			%delete:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(group-prefix.@.rp-priority)&hash_mask_len:u32=$(DEFAULT)";
+			%delete:	xrl "$(pimsm6.targetname)/pim/0.1/config_static_rp_done";
 		    }
 		}
 	    }
