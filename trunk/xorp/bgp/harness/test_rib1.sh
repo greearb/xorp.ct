@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.12 2003/10/30 04:37:45 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.13 2003/10/30 04:55:40 atanu Exp $
 #
 
 #
@@ -119,7 +119,6 @@ NH2_IPV6=50:50:50:50:50:50:50:50
 
 configure_rib()
 {
-    no_fea
     make_rib_errors_fatal
 
     VIF0="vif0"
