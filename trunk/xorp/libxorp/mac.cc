@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.3 2003/01/27 08:37:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.4 2003/03/10 23:20:33 hodson Exp $"
 
 #include "xorp.h"
 #include "mac.hh"
@@ -63,7 +63,7 @@ EtherMac::EtherMac(const Mac& m) throw (BadMac)
 	       c_format("Bad EtherMac representation: %s", _srep.c_str()));
 }
 
-EtherMac::EtherMac(const ether_addr& ea) throw (BadMac)
+EtherMac::EtherMac(const struct ether_addr& ea) throw (BadMac)
 {
     // XXX: we need to const_cast the ether_ntoa() argument,
     // because in some OS (e.g., MacOS X 10.2.3) the ether_ntoa(3)
@@ -85,9 +85,17 @@ EtherMac::EtherMac(const ether_addr& ea) throw (BadMac)
 }
 
 bool
-EtherMac::get_ether_addr(ether_addr& ea) const
+EtherMac::get_ether_addr(struct ether_addr& ea) const
 {
-    const struct ether_addr* p = ether_aton(_srep.c_str());
+    //
+    // XXX: work-around because of broken ether_aton() declarations that
+    // are missing the 'const' in the argument.
+    //
+    char buf[_srep.size() + 1];
+    strncpy(buf, _srep.c_str(), sizeof(buf) - 1);
+    buf[sizeof(buf) - 1] = '\0';
+
+    const struct ether_addr* p = ether_aton(buf);
     if (p) {
 	memcpy(&ea, p, sizeof(ea));
 	return true;
@@ -98,6 +106,14 @@ EtherMac::get_ether_addr(ether_addr& ea) const
 bool
 EtherMac::valid(const string& s)
 {
-    return ether_aton(s.c_str()) != 0;
+    //
+    // XXX: work-around because of broken ether_aton() declarations that
+    // are missing the 'const' in the argument.
+    //
+    char buf[s.size() + 1];
+    strncpy(buf, s.c_str(), sizeof(buf) - 1);
+    buf[sizeof(buf) - 1] = '\0';
+
+    return ether_aton(buf) != 0;
 }
 
