@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.18 2004/06/10 22:41:22 hodson Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.19 2004/09/27 01:04:13 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -27,6 +27,7 @@
 class XorpTimer;
 class TimerNode;
 class TimerList;
+class ClockBase;
 
 typedef XorpCallback0<void>::RefPtr OneoffTimerCallback;
 
@@ -157,10 +158,6 @@ private:
     friend class TimerList;
 };
 
-
-// TimerList can use alternate clock that uses this prototype
-typedef void (*query_current_time)(TimeVal*);
-
 /**
  * @short XorpTimer creation and scheduling entity
  *
@@ -195,11 +192,11 @@ while ( ! timer_list.empty() ) {
 class TimerList : public Heap {
 public:
     /**
-     * @param query_current_time specifiable current time function.
-     * If no argument is supplied, gettimeofday is used.
+     * @param clock clock object to use to query time.
      */
-    inline TimerList(query_current_time q = system_gettimeofday);
-    inline ~TimerList() { }
+    TimerList(ClockBase* clock);
+
+    ~TimerList();
 
     /**
      * Expire all pending @ref XorpTimer objects associated with @ref
@@ -331,26 +328,44 @@ public:
      * @return true if there is a XorpTimer awaiting expiry, false otherwise.
      */
     bool get_next_delay(TimeVal& tv) const;
-    bool get_next_expire(TimeVal& tv) const;
 
     /**
-     * Read from clock used by @ref TimerList object.
+     * Read the latest known value from the clock used by @ref
+     * TimerList object.
      *
      * @param now the return-by-reference value with the current time.
      */
-    inline void current_time(TimeVal& now) const { _current_time_proc(&now); }
+    void current_time(TimeVal& now) const;
+
+    /**
+     * Advance time.  This method fetches the time from clock object
+     * associated with the TimerList and sets the TimerList current
+     * time to this value.
+     */
+    void advance_time();
 
     /**
      * Default time querier.
      *
-     * Get the current time by using the default time querier.
-     * E.g., in non-simulation environment, this typically would
-     * be gettimeofday(2).
+     * Get the current time.  This method is analogous to calling
+     * gettimeofday(2) and is implemented as a call to advance_time()
+     * followed by a call to current_time().
      *
      * @param tv a pointer to the @ref TimeVal storage to store the current
      * time.
      */
-    static void system_gettimeofday(TimeVal *tv);	// default time querier
+    static void system_gettimeofday(TimeVal* tv);
+
+    /**
+     * Suspend process execution for a defined interval.
+     *
+     * This methid is analogous to calling sleep(3) or usleep(3),
+     * and is implemented as a call to sleep(3) and/or usleep(3)
+     * followed by a call to advance_time().
+     *
+     * @param tv the period of time to suspend execution.
+     */
+    static void system_sleep(const TimeVal& tv);
 
     /**
      * Register an observer object with this class
@@ -363,6 +378,13 @@ public:
      * Unregister the current observer
      */
     void remove_observer();
+
+    /**
+     * Get pointer to sole TimerList instance.
+     *
+     * @return pointer if TimerList has been constructed, NULL otherwise.
+     */
+    static TimerList* instance();
 
 private:
     void schedule_node(TimerNode* t);		// insert in time ordered pos.
@@ -377,8 +399,8 @@ private:
     TimerList operator=(const TimerList&);	// not implemented
 
 private:
-    query_current_time _current_time_proc;	// called to get time
-    TimerListObserverBase * _observer;
+    ClockBase* 			_clock;
+    TimerListObserverBase* 	_observer;
 
     friend class TimerNode;
     friend class TimerListObserverBase;
@@ -527,12 +549,6 @@ XorpTimer::clear()
     if (_node)
 	_node->release_ref();
     _node = 0;
-}
-
-TimerList::TimerList(query_current_time q)
-    : Heap(OFFSET_OF(_dummy_timer_node, _pos_in_heap)),
-      _current_time_proc(q), _observer(NULL)
-{
 }
 
 #endif // __LIBXORP_TIMER_HH__

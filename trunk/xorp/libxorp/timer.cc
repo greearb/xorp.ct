@@ -28,10 +28,11 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.17 2004/06/10 22:41:21 hodson Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.18 2004/09/27 01:04:13 pavlin Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
+#include "clock.hh"
 
 // Implementation Notes:
 //
@@ -207,7 +208,62 @@ TimerNode TimerList::_dummy_timer_node(0, 0);
 
 
 // ----------------------------------------------------------------------------
-// XorpTimer factories
+// TimerList implemention
+
+static TimerList* the_timerlist = NULL;
+
+TimerList::TimerList(ClockBase* clock)
+    : Heap(OFFSET_OF(_dummy_timer_node, _pos_in_heap)),
+      _clock(clock), _observer(NULL)
+{
+    assert(the_timerlist == NULL);
+    the_timerlist = this;
+}
+
+TimerList::~TimerList()
+{
+    the_timerlist = NULL;
+}
+
+TimerList*
+TimerList::instance()
+{
+    return the_timerlist;
+}
+
+void
+TimerList::current_time(TimeVal& now) const
+{
+    _clock->current_time(now);
+}
+
+void
+TimerList::advance_time()
+{
+    _clock->advance_time();
+}
+
+void
+TimerList::system_gettimeofday(TimeVal* tv)
+{
+    TimerList* instance = TimerList::instance();
+    instance->advance_time();
+    instance->current_time(*tv);
+}
+
+void
+TimerList::system_sleep(const TimeVal& tv)
+{
+    TimerList* instance = TimerList::instance();
+
+    if (tv.sec() > 0)
+	sleep(tv.sec());
+    if (tv.usec() > 0)
+	usleep(tv.usec());
+
+    instance->advance_time();
+}
+
 
 XorpTimer
 TimerList::new_oneoff_at(const TimeVal& tv, const OneoffTimerCallback& cb)
@@ -274,25 +330,14 @@ TimerList::set_flag_after_ms(int ms, bool *flag_ptr, bool to_value)
     return new_oneoff_after_ms(ms, callback(set_flag_hook, flag_ptr, to_value));
 }
 
-// Default XorpTimer and TimerList clock
-void
-TimerList::system_gettimeofday(TimeVal *tv)
-{
-    struct timeval timeval_tmp;
-
-    if (tv != NULL) {
-	gettimeofday(&timeval_tmp, NULL);
-	tv->copy_in(timeval_tmp);
-    }
-}
-
 void
 TimerList::run()
 {
     static const TimeVal WAY_BACK_GAP(15,0);
 
     TimeVal now;
-    _current_time_proc(&now);
+    advance_time();
+    current_time(now);
 
     struct heap_entry *n;
     while ((n = top()) != 0 && n->key <= now) {
@@ -357,7 +402,8 @@ TimerList::get_next_delay(TimeVal& tv) const
 	return false;
     } else {
 	TimeVal now;
-	_current_time_proc(&now);
+	_clock->advance_time();
+	_clock->current_time(now);
 	if (t->key > now) {
 	    // next event is in the future
 	    tv = t->key - now ;
@@ -365,26 +411,6 @@ TimerList::get_next_delay(TimeVal& tv) const
 	    // next event is already in the past, return 0.0
 	    tv = TimeVal::ZERO();
 	}
-	return true;
-    }
-}
-
-bool
-TimerList::get_next_expire(TimeVal &tv) const
-{
-    acquire_lock();
-    struct heap_entry *t = top();
-    release_lock();
-    if (t == 0) {
-	tv  = TimeVal::MAXIMUM();
-	return false;
-    } else {
-	TimeVal now ;
-	_current_time_proc(&now);
-	if ( t->key > now) // next event is in the future
-	    tv = t->key;
-	else // next event is already in the past, return 0.0
-	    tv = TimeVal::ZERO();
 	return true;
     }
 }

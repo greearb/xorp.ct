@@ -134,7 +134,7 @@ test_profile_SOURCES = test_profile.cc
 
 # -- Library Sources
 # libxorp_a_SOURCES += ether_compat.c
-libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh profile.hh debug.c utility.c xlog.c asyncio.cc c_format.cc callback.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc profile.cc
+libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh clock.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh profile.hh debug.c utility.c xlog.c asyncio.cc c_format.cc callback.cc clock.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc profile.cc
 
 BUILT_SOURCES = callback_nodebug.hh callback_debug.hh
 
@@ -154,12 +154,13 @@ libxorp_a_AR = $(AR) cru
 libxorp_a_LIBADD =
 am_libxorp_a_OBJECTS = debug.$(OBJEXT) utility.$(OBJEXT) xlog.$(OBJEXT) \
 	asyncio.$(OBJEXT) c_format.$(OBJEXT) callback.$(OBJEXT) \
-	eventloop.$(OBJEXT) exceptions.$(OBJEXT) heap.$(OBJEXT) \
-	ipv4.$(OBJEXT) ipv6.$(OBJEXT) ipvx.$(OBJEXT) mac.$(OBJEXT) \
-	nexthop.$(OBJEXT) ref_ptr.$(OBJEXT) safe_callback_obj.$(OBJEXT) \
-	selector.$(OBJEXT) service.$(OBJEXT) time_slice.$(OBJEXT) \
-	timer.$(OBJEXT) token.$(OBJEXT) transaction.$(OBJEXT) \
-	vif.$(OBJEXT) profile.$(OBJEXT)
+	clock.$(OBJEXT) eventloop.$(OBJEXT) exceptions.$(OBJEXT) \
+	heap.$(OBJEXT) ipv4.$(OBJEXT) ipv6.$(OBJEXT) ipvx.$(OBJEXT) \
+	mac.$(OBJEXT) nexthop.$(OBJEXT) ref_ptr.$(OBJEXT) \
+	safe_callback_obj.$(OBJEXT) selector.$(OBJEXT) \
+	service.$(OBJEXT) time_slice.$(OBJEXT) timer.$(OBJEXT) \
+	token.$(OBJEXT) transaction.$(OBJEXT) vif.$(OBJEXT) \
+	profile.$(OBJEXT)
 libxorp_a_OBJECTS = $(am_libxorp_a_OBJECTS)
 bin_PROGRAMS =
 noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
@@ -302,13 +303,13 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/asyncio.Po $(DEPDIR)/c_format.Po \
-@AMDEP_TRUE@	$(DEPDIR)/callback.Po $(DEPDIR)/debug.Po \
-@AMDEP_TRUE@	$(DEPDIR)/eventloop.Po $(DEPDIR)/exceptions.Po \
-@AMDEP_TRUE@	$(DEPDIR)/heap.Po $(DEPDIR)/ipv4.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ipv6.Po $(DEPDIR)/ipvx.Po \
-@AMDEP_TRUE@	$(DEPDIR)/mac.Po $(DEPDIR)/nexthop.Po \
-@AMDEP_TRUE@	$(DEPDIR)/profile.Po $(DEPDIR)/ref_ptr.Po \
-@AMDEP_TRUE@	$(DEPDIR)/safe_callback_obj.Po \
+@AMDEP_TRUE@	$(DEPDIR)/callback.Po $(DEPDIR)/clock.Po \
+@AMDEP_TRUE@	$(DEPDIR)/debug.Po $(DEPDIR)/eventloop.Po \
+@AMDEP_TRUE@	$(DEPDIR)/exceptions.Po $(DEPDIR)/heap.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ipv4.Po $(DEPDIR)/ipv6.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ipvx.Po $(DEPDIR)/mac.Po \
+@AMDEP_TRUE@	$(DEPDIR)/nexthop.Po $(DEPDIR)/profile.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ref_ptr.Po $(DEPDIR)/safe_callback_obj.Po \
 @AMDEP_TRUE@	$(DEPDIR)/selector.Po $(DEPDIR)/service.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_asyncio.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_callback.Po \
@@ -484,6 +485,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/asyncio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/c_format.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/callback.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/clock.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/eventloop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/exceptions.Po@am__quote@

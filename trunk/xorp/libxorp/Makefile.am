@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.26 2004/09/09 19:09:37 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.27 2004/09/21 17:59:47 atanu Exp $
 ##
 
 # -- Real Programs
@@ -105,6 +105,7 @@ libxorp_a_SOURCES += c_format.hh
 libxorp_a_SOURCES += callback.hh
 libxorp_a_SOURCES += callback_nodebug.hh
 libxorp_a_SOURCES += callback_debug.hh
+libxorp_a_SOURCES += clock.hh
 libxorp_a_SOURCES += config_param.hh
 libxorp_a_SOURCES += eventloop.hh
 libxorp_a_SOURCES += exceptions.hh
@@ -143,6 +144,7 @@ libxorp_a_SOURCES += xlog.c
 libxorp_a_SOURCES += asyncio.cc
 libxorp_a_SOURCES += c_format.cc
 libxorp_a_SOURCES += callback.cc
+libxorp_a_SOURCES += clock.cc
 libxorp_a_SOURCES += eventloop.cc
 libxorp_a_SOURCES += exceptions.cc
 libxorp_a_SOURCES += heap.cc

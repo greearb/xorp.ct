@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.10 2004/06/10 22:41:15 hodson Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.11 2004/09/27 01:04:13 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
 
 #include <sys/time.h>
 
+#include "clock.hh"
 #include "timer.hh"
 #include "selector.hh"
 
@@ -276,8 +277,9 @@ private:
     EventLoop& operator=(const EventLoop&);	// not implemented
 
 private:
-    TimerList    _timer_list;
-    SelectorList _selector_list;
+    ClockBase*		_clock;
+    TimerList		_timer_list;
+    SelectorList	_selector_list;
 };
 
 // ----------------------------------------------------------------------------
