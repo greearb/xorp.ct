@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.31 2005/01/10 02:58:18 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.32 2005/01/19 00:08:10 pavlin Exp $"
 
 
 #include <glob.h>
@@ -552,6 +552,24 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts) const
     }
 
     return NULL;
+}
+
+const TemplateTreeNode*
+TemplateTreeNode::find_first_deprecated_ancestor() const
+{
+    const TemplateTreeNode* ttn = _parent;
+    const TemplateTreeNode* deprecated_ttn = NULL;
+
+    if (is_deprecated())
+	deprecated_ttn = this;
+
+    while (ttn != NULL) {
+	if (ttn->is_deprecated())
+	    deprecated_ttn = ttn;
+	ttn = ttn->parent();
+    }
+
+    return (deprecated_ttn);
 }
 
 #if 0

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.20 2005/01/10 02:58:18 mjh Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.21 2005/01/19 00:08:10 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -115,6 +115,12 @@ public:
     void set_deprecated(bool v) { _is_deprecated = v; }
     const string& deprecated_reason() const { return _deprecated_reason; }
     void set_deprecated_reason(const string& v) { _deprecated_reason = v; }
+
+    /**
+     * @return the oldest deprecated ancestor or NULL if no ancestor
+     * is deprecated.
+     */
+    const TemplateTreeNode* find_first_deprecated_ancestor() const;
 
 protected:
     void add_child(TemplateTreeNode* child);
