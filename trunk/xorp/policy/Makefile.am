@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+## $XORP: xorp/policy/Makefile.am,v 1.1 2003/01/30 19:21:10 mjh Exp $
 ##
 
 # -- Real Programs
@@ -10,7 +10,7 @@ bin_PROGRAMS		 =
 bin_PROGRAMS		+= test_policy
 
 # -- Test scripts
-TESTS 			 = 
+#TESTS 			 = 
 
 noinst_LIBRARIES	 = libpolicy.a
 
