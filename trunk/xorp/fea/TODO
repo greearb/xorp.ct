@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.13 2003/09/23 02:48:36 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.14 2003/11/06 21:10:50 pavlin Exp $
 #
 
 * Check ioctl(SIOCGETTUNNEL) usage from Linux net-tools from USAGI's
@@ -47,6 +47,11 @@
 
 ==============================================================================
 ==== MFEA-specific TODO (mostly copied-in from the old stand-alone MFEA) =====
+
+* The IPv4 raw packet input in case of OpenBSD has changed between versions.
+  E.g., if (defined(__OpenBSD__) && (OpenBSD < 200311))
+  then the processing should be same as FreeBSD and NetBSD.
+  In other words, newer OpenBSD behave differently.
 
 * When start/stop multicast routing, call start_pim/stop_pim XRL as well.
 
