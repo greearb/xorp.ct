@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.13 2003/10/31 18:47:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.14 2003/11/03 07:38:48 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -109,7 +109,13 @@ NetlinkSocket::start(int af)
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	socket_protocol = NETLINK_ROUTE6;
+	//
+	// XXX: the netlink(7) manual page is incorrect that for IPv6
+	// we need NETLINK_ROUTE6.
+	// The truth is that it has to be NETLINK_ROUTE.
+	//
+	// socket_protocol = NETLINK_ROUTE6;
+	socket_protocol = NETLINK_ROUTE;
 	break;
 #endif // HAVE_IPV6
     default:
