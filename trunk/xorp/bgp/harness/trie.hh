@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie.hh,v 1.8 2003/09/11 03:38:38 atanu Exp $
+// $XORP: xorp/bgp/harness/trie.hh,v 1.9 2003/09/11 08:19:15 atanu Exp $
 
 #ifndef __BGP_HARNESS_TRIE_HH__
 #define __BGP_HARNESS_TRIE_HH__
@@ -38,7 +38,8 @@
  */
 class Trie {
 public:
-    Trie() : _first(0), _last(0), _update_cnt(0) {
+    Trie() : _first(0), _last(0), _update_cnt(0), _changes(0), 
+	     _warning(true) {
     }
 
     const UpdatePacket *lookup(const string& net) const;
@@ -68,6 +69,14 @@ public:
 	return _update_cnt;
     }
 
+    uint32_t changes() {
+	return _changes;
+    }
+
+    void set_warning(bool warning) {
+	_warning = warning;
+    }
+
 private:
     template <class A> void add(IPNet<A> net, TriePayload&);
     template <class A> void del(IPNet<A> net, TriePayload&);
@@ -83,6 +92,9 @@ private:
     TrieData *_last;
 
     uint32_t _update_cnt;	// Number of update packets seen
+    uint32_t _changes;		// Number of trie entry changes.
+
+    bool _warning;		// Print warning messages;
 };
 
 #endif // __BGP_HARNESS_TRIE_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.10 2003/09/11 03:46:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.11 2003/09/11 08:19:15 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -212,8 +212,27 @@ Trie::tree_walk_table(const TreeWalker_ipv6& tw) const
 void
 Trie::replay_walk(const ReplayWalker uw) const
 {
-    for(const TrieData *p = _first; p; p = p->next())
-	uw->dispatch(p->data(), p->tv());
+    /*
+    ** It should be sufficient to just walk the list of stored
+    ** packets. However it is possible that we have saved withdraws
+    ** that in effect will be a noop. So insert the packets into a
+    ** local trie, only if the packet changes the local trie do we
+    ** propogate it back to the caller.
+    */
+    Trie trie;
+    trie.set_warning(false);
+    uint32_t changes = 0;
+
+    for(const TrieData *p = _first; p; p = p->next()) {
+	changes = trie.changes();
+	size_t len;
+	UpdatePacket *packet = const_cast<UpdatePacket *>(p->data());
+	const uint8_t *data = packet->encode(len);
+	trie.process_update_packet(p->tv(), data, len);
+	delete [] data;
+	if(trie.changes() != changes)
+	    uw->dispatch(p->data(), p->tv());
+    }
 }
 
 template <>
@@ -237,6 +256,7 @@ void
 Trie::add(IPNet<A> net, TriePayload& payload)
 {
     debug_msg("%s %s\n", net.str().c_str(), payload.get()->str().c_str());
+    _changes++;
 
     RealTrie<A> *head, *del;
     get_heads<A>(head, del);
@@ -265,8 +285,13 @@ Trie::del(IPNet<A> net, TriePayload& payload)
     RealTrie<A> *head, *del;
     get_heads<A>(head, del);
 
-    if(!head->del(net))
-	XLOG_WARNING("Could not delete %s", net.str().c_str());
+    if(!head->del(net)) {
+	if(_warning)
+	    XLOG_WARNING("Could not delete %s", net.str().c_str());
+    } else {
+	_changes++;
+    }
+
     /*
     ** We save deleted state for replays. 
     */

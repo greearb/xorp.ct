@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.7 2003/09/11 03:57:12 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.8 2003/09/11 10:44:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -457,17 +457,11 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     data_w2 = packet_w2->encode(len_w2);
     trie.process_update_packet(tv, data_w2, len_w2);
 
-    /* XXX
-    ** Now this is a bummer at this point the replay code should not
-    ** return anything. But as an artifact of the implementation we
-    ** will return the now redundant withdraws.
+    /* 
+    ** The replay list should be empty.
     */
     pos = 0;
     ulist.clear();
-    ulist.push_back(packet_w1);
-    ulist.push_back(packet_w2);
-    DOUT(info) << "0\t" << ulist[0]->str() << endl;
-    DOUT(info) << "1\t" << ulist[1]->str() << endl;
     trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist));
 
     /*
@@ -491,17 +485,11 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     trie.process_update_packet(tv, data_w1, len_w1);
     trie.process_update_packet(tv, data_w2, len_w2);
 
-    /* XXX
-    ** Now this is a bummer at this point the replay code should not
-    ** return anything. But as an artifact of the implementation we
-    ** will return the now redundant withdraws.
+    /*
+    ** The replay list should be empty.
     */
     pos = 0;
     ulist.clear();
-    ulist.push_back(packet_w1);
-    ulist.push_back(packet_w2);
-    DOUT(info) << "0\t" << ulist[0]->str() << endl;
-    DOUT(info) << "1\t" << ulist[1]->str() << endl;
     trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist));
 
     /*
