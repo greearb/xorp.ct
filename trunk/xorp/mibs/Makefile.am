@@ -11,7 +11,9 @@ lib_LTLIBRARIES = libnetsnmpxorp.la
 #noinst_LTLIBRARIES = bgp4_mib_1657.la ospf_mib_1850.la xorp_if_mib_module.la 
 
 # -- Test Programs 
-noinst_PROGRAMS = test_xorpevents 
+TESTS           = test_xorpevents
+
+noinst_PROGRAMS = $(TESTS)
 
 # -- Compiler and pre compiler flags
 AM_CPPFLAGS = `net-snmp-config --cflags`
