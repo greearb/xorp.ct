@@ -102,7 +102,7 @@ TARGET_DIR = $(top_srcdir)/xrl/targets
 ###############################################################################
 
 # Add your target file here
-tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt fib2mrib.tgt finder.tgt finder_client.tgt packet_acl.tgt mfea.tgt mld6igmp.tgt ospf.tgt ospfv2.tgt ospfv3.tgt policy.tgt profiler.tgt pim.tgt rip.tgt ripng.tgt rib.tgt ribclient.tgt rtrmgr.tgt show_routes.tgt socket_server.tgt static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt test_socket4.tgt test_socket6.tgt test_xrls.tgt xorp_if_mib.tgt xorpsh.tgt
+tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt fib2mrib.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt ospfv2.tgt ospfv3.tgt packet_acl.tgt pim.tgt policy.tgt profiler.tgt rib.tgt ribclient.tgt rip.tgt ripng.tgt rtrmgr.tgt show_routes.tgt socket_server.tgt static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt test_socket4.tgt test_socket6.tgt test_xrls.tgt xorp_if_mib.tgt xorpsh.tgt
 
 # Automatically compute the list of the *.xrls files
 xrls_files = $(tgt_files:%.tgt=%.xrls)
@@ -111,7 +111,7 @@ xrls_files = $(tgt_files:%.tgt=%.xrls)
 data_DATA = $(xrls_files)
 
 # Add your target's library here
-noinst_LTLIBRARIES = libbgpbase.la libbgp4mibbase.la libclibase.la libcoordbase.la libdemofeaifmgrclientbase.la libfeabase.la libfeaifmgrmirrorbase.la libfib2mribbase.la libfinderbase.la libfinderclientbase.la libpacketaclbase.la libmfeabase.la libmld6igmpbase.la libospfbase.la libospfv2base.la libospfv3base.la libpimbase.la libpolicybase.la libprofileclientbase.la libribbase.la libribclientbase.la libripbase.la libripngbase.la librtrmgrbase.la libshowroutesbase.la libsocketserverbase.la libstaticroutesbase.la libtestbase.la libtestfeaifmgrmirrorbase.la libtestfindereventsbase.la libtestpeerbase.la libtestsocket4.la libtestsocket6.la libtestxrlsbase.la libxorpifmibbase.la libxorpshbase.la
+noinst_LTLIBRARIES = libbgpbase.la libbgp4mibbase.la libclibase.la libcoordbase.la libdemofeaifmgrclientbase.la libfeabase.la libfeaifmgrmirrorbase.la libfib2mribbase.la libfinderbase.la libfinderclientbase.la libmfeabase.la libmld6igmpbase.la libospfbase.la libospfv2base.la libospfv3base.la libpacketaclbase.la libpimbase.la libpolicybase.la libprofileclientbase.la libribbase.la libribclientbase.la libripbase.la libripngbase.la librtrmgrbase.la libshowroutesbase.la libsocketserverbase.la libstaticroutesbase.la libtestbase.la libtestfeaifmgrmirrorbase.la libtestfindereventsbase.la libtestpeerbase.la libtestsocket4.la libtestsocket6.la libtestxrlsbase.la libxorpifmibbase.la libxorpshbase.la
 
 # BGP
 libbgpbase_la_SOURCES = bgp_base.hh bgp_base.cc
@@ -157,9 +157,6 @@ libfinderbase_la_SOURCES = finder_base.hh finder_base.cc
 #
 libfinderclientbase_la_SOURCES = finder_client_base.hh finder_client_base.cc
 
-# FIREWALL (FEA)
-libpacketaclbase_la_SOURCES = packet_acl_base.hh packet_acl_base.cc
-
 # MFEA
 libmfeabase_la_SOURCES = mfea_base.hh mfea_base.cc
 
@@ -174,6 +171,9 @@ libospfv2base_la_SOURCES = ospfv2_base.hh ospfv2_base.cc
 
 # OSPF V3
 libospfv3base_la_SOURCES = ospfv3_base.hh ospfv3_base.cc
+
+# FIREWALL (FEA)
+libpacketaclbase_la_SOURCES = packet_acl_base.hh packet_acl_base.cc
 
 # PIM
 libpimbase_la_SOURCES = pim_base.hh pim_base.cc
@@ -855,9 +855,6 @@ $(srcdir)/finder_base.hh $(srcdir)/finder_base.cc : 			\
 $(srcdir)/finder_client_base.hh $(srcdir)/finder_client_base.cc: 	\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder_client.xif
-$(srcdir)/packet_acl_base.hh $(srcdir)/packet_acl_base.cc:		\
-		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/packet_acl.xif
 $(srcdir)/mfea_base.hh $(srcdir)/mfea_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
@@ -878,6 +875,9 @@ $(srcdir)/ospfv2_base.hh $(srcdir)/ospfv2_base.cc:			\
 $(srcdir)/ospfv3_base.hh $(srcdir)/ospfv3_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/ospfv3.xif
+$(srcdir)/packet_acl_base.hh $(srcdir)/packet_acl_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/packet_acl.xif
 $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\

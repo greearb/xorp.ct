@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.54 2005/02/17 00:58:23 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.55 2005/02/19 02:51:54 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -22,19 +22,19 @@ tgt_files		+= fea_ifmgr_mirror.tgt
 tgt_files		+= fib2mrib.tgt
 tgt_files		+= finder.tgt
 tgt_files		+= finder_client.tgt
-tgt_files		+= packet_acl.tgt
 tgt_files		+= mfea.tgt
 tgt_files		+= mld6igmp.tgt
 tgt_files		+= ospf.tgt
 tgt_files		+= ospfv2.tgt
 tgt_files		+= ospfv3.tgt
+tgt_files		+= packet_acl.tgt
+tgt_files		+= pim.tgt
 tgt_files		+= policy.tgt
 tgt_files		+= profiler.tgt
-tgt_files		+= pim.tgt
-tgt_files		+= rip.tgt
-tgt_files		+= ripng.tgt
 tgt_files		+= rib.tgt
 tgt_files		+= ribclient.tgt
+tgt_files		+= rip.tgt
+tgt_files		+= ripng.tgt
 tgt_files		+= rtrmgr.tgt
 tgt_files		+= show_routes.tgt
 tgt_files		+= socket_server.tgt
@@ -69,12 +69,12 @@ noinst_LTLIBRARIES	+= libfeaifmgrmirrorbase.la
 noinst_LTLIBRARIES	+= libfib2mribbase.la
 noinst_LTLIBRARIES	+= libfinderbase.la
 noinst_LTLIBRARIES	+= libfinderclientbase.la
-noinst_LTLIBRARIES	+= libpacketaclbase.la
 noinst_LTLIBRARIES	+= libmfeabase.la
 noinst_LTLIBRARIES	+= libmld6igmpbase.la
 noinst_LTLIBRARIES	+= libospfbase.la
 noinst_LTLIBRARIES	+= libospfv2base.la
 noinst_LTLIBRARIES	+= libospfv3base.la
+noinst_LTLIBRARIES	+= libpacketaclbase.la
 noinst_LTLIBRARIES	+= libpimbase.la
 noinst_LTLIBRARIES	+= libpolicybase.la
 noinst_LTLIBRARIES	+= libprofileclientbase.la
@@ -191,12 +191,6 @@ $(srcdir)/finder_client_base.hh $(srcdir)/finder_client_base.cc: 	\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder_client.xif
 
-# FIREWALL (FEA)
-libpacketaclbase_la_SOURCES = packet_acl_base.hh packet_acl_base.cc
-$(srcdir)/packet_acl_base.hh $(srcdir)/packet_acl_base.cc:		\
-		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/packet_acl.xif
-
 # MFEA
 libmfeabase_la_SOURCES = mfea_base.hh mfea_base.cc
 $(srcdir)/mfea_base.hh $(srcdir)/mfea_base.cc:				\
@@ -231,6 +225,12 @@ libospfv3base_la_SOURCES = ospfv3_base.hh ospfv3_base.cc
 $(srcdir)/ospfv3_base.hh $(srcdir)/ospfv3_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/ospfv3.xif
+
+# FIREWALL (FEA)
+libpacketaclbase_la_SOURCES = packet_acl_base.hh packet_acl_base.cc
+$(srcdir)/packet_acl_base.hh $(srcdir)/packet_acl_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/packet_acl.xif
 
 # PIM
 libpimbase_la_SOURCES = pim_base.hh pim_base.cc
