@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.14 2003/10/27 00:36:34 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.15 2003/10/28 07:34:43 pavlin Exp $
 #
 
 #
@@ -68,6 +68,11 @@ case ${HOSTNAME} in
 	Linux)
 	HAVE_IPV6="false"
 	IFNAME="eth0"
+	;;
+
+	FreeBSD)
+	HAVE_IPV6="false"
+	IFNAME="xl0"
 	;;
 
 	NetBSD)
