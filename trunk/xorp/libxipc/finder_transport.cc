@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_transport.cc,v 1.4 2003/01/26 04:06:20 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_transport.cc,v 1.5 2003/03/10 23:20:23 hodson Exp $"
 
 #include <vector>
 
@@ -63,7 +63,7 @@ public:
     FinderTcpTransport(EventLoop& e, int fd) :
 	FinderTransport(), _fd(fd), _reader(e, fd), _read_pos(0), _writer(e, fd)
     {
-	reader_reprovision(1480);
+	reader_reprovision(1480, 0);
     }
 
     ~FinderTcpTransport()
@@ -95,7 +95,7 @@ protected:
 		     size_t			buffer_bytes,
 		     size_t			offset);
 
-    void reader_reprovision(size_t bytes_required);
+    void reader_reprovision(size_t bytes_required, size_t bytes_keep);
     void async_read(AsyncFileReader::Event	e,
 		     const uint8_t*		buffer,
 		     size_t			buffer_bytes,
@@ -174,22 +174,24 @@ FinderTcpTransport::async_write(AsyncFileWriter::Event	e,
 }
 
 void
-FinderTcpTransport::reader_reprovision(size_t extra_bytes)
+FinderTcpTransport::reader_reprovision(size_t extra_bytes, size_t bytes_keep)
 {
-    assert(extra_bytes >= _read_data.size() - _read_pos);
+    // assert(extra_bytes >= _read_data.size() - _read_pos);
+    assert(_read_pos + bytes_keep <= _read_data.size());
 
-    size_t resume_pos;	// point where next read will be
     if (_read_pos > extra_bytes) {
 	// Free space exists at start of buffer
 	// Copy all pending data there.
-	copy(_read_data.begin() + _read_pos, _read_data.end(),
+	copy(_read_data.begin() + _read_pos,
+	     _read_data.begin() + _read_pos + bytes_keep,
 	     _read_data.begin());
-	resume_pos = _read_data.size() - _read_pos;
 	_read_pos = 0;
+
     } else {
 	_read_data.resize(_read_data.size() + extra_bytes);
-	resume_pos = _read_pos;
     }
+    size_t resume_pos;	// point where next read will be
+    resume_pos = _read_pos + bytes_keep;
     _reader.flush_buffers();
 
     debug_msg("Reprovision %u (%u -> %u)\n", (uint32_t)_read_pos,
@@ -243,7 +245,7 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
 	    if (header_bytes < 0) {
 		size_t max_header_bytes = FinderParser::max_header_bytes();
 		if ((size_t)available < max_header_bytes) {
-		    reader_reprovision(max_header_bytes);
+		    reader_reprovision(max_header_bytes, available);
 		} else {
 		    XLOG_ERROR("FinderTcpTransport::async_read could not find "
 			       "message header");
@@ -264,7 +266,7 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
 		size_t req = msg_bytes - (_read_pos - _read_data.size());
 		debug_msg("short of space adding more buffering %u -> %u\n",
 			  (uint32_t)_read_data.size(), (uint32_t)req);
-		reader_reprovision(req);
+		reader_reprovision(req, available);
 		break;
 	    }
 
@@ -274,7 +276,7 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
 	    announce_arrival(msg);
 	    _read_pos += msg_bytes;
 	    if (_read_pos == _read_data.size()) {
-		reader_reprovision(0);
+		reader_reprovision(0, 0);
 		break;
 	    }
 	} catch (const BadFinderMessage &bmf) {
