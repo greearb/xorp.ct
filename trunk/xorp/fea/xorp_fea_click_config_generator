@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.4 2004/12/11 02:33:00 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.5 2004/12/11 03:20:47 pavlin Exp $
 #
 
 #
@@ -61,12 +61,66 @@ function calculate_state()
     iftree_vifs_max = 0;
     xorp_rt_port = 0;
 
+    #
+    # Clear-up some temporary state
+    # At the same time, compute the value of iftree_vifs_max
+    #
     for (ii = 0; ii < iftree_interfaces_max; ii++) {
+	ifaces_chosen[ii] = 0;
 	for (vi = 0; vi < iftree_interfaces_vifs_max[ii]; vi++) {
-	    iftree_interfaces_vifs_port[ii,vi] = xorp_rt_port++;
+	    ifaces_vifs_chosen[ii,vi] = 0;
 	    iftree_vifs_max++;
 	}
     }
+
+    #
+    # Select the interfaces and vifs by using string comparison:
+    # the "smaller" name first.
+    #
+    for (ci = 0; ci < iftree_interfaces_max; ci++) {
+	best_ii = -1;
+	for (ii = 0; ii < iftree_interfaces_max; ii++) {
+	    if (ifaces_chosen[ii])
+		continue;
+	    if (best_ii == -1) {
+		best_ii = ii;
+		continue;
+	    }
+	    best_ifname = iftree_interfaces_ifname[best_ii];
+	    if (iftree_interfaces_ifname[ii] < best_ifname) {
+		best_ii = ii;
+	    }
+	}
+	if (best_ii < 0) {
+	    printf("Internal error: cannot sort the interface names\n");
+	    exit(1);
+	}
+	ifaces_chosen[best_ii] = 1;
+
+	for (cv = 0; cv < iftree_interfaces_vifs_max[best_ii]; cv++) {
+	    best_vi = -1;
+	    for (vi = 0; vi < iftree_interfaces_vifs_max[best_ii]; vi++) {
+		if (ifaces_vifs_chosen[best_ii,vi])
+		    continue;
+		if (best_vi == -1) {
+		    best_vi = vi;
+		    continue;
+		}
+		best_vifname = iftree_interfaces_vifs_vifname[best_ii,best_vi];
+		if (iftree_interfaces_vifs_vifname[best_ii,vi] < best_vifname) {
+		    best_vi = vi;
+		}
+	    }
+	    if (best_vi < 0) {
+		printf("Internal error: cannot sort the vif names\n");
+		exit(1);
+	    }
+	    ifaces_vifs_chosen[best_ii,best_vi] = 1;
+
+	    iftree_interfaces_vifs_port[best_ii,best_vi] = xorp_rt_port++;
+	}
+    }
+
     max_xorp_rt_port = xorp_rt_port;
 }
 
