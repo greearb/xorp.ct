@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.10 2003/09/26 23:56:14 hodson Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.11 2004/06/10 22:41:18 hodson Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -25,7 +25,7 @@
 
 #include "callback.hh"
 
-
+class ClockBase;
 class SelectorList;
 class TimeVal;
 
@@ -90,7 +90,7 @@ public:
     /**
      * Default constructor.
      */
-    SelectorList();
+    SelectorList(ClockBase* clock);
 
     /**
      * Add a hook for pending I/O operations on a callback.
@@ -220,6 +220,7 @@ private:
     size_t		_descriptor_count;
 
     SelectorListObserverBase * _observer;
+    ClockBase*		_clock;
 };
 
 #endif // __LIBXORP_SELECTOR_HH__

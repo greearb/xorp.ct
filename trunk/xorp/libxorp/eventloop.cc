@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.6 2004/06/10 22:41:15 hodson Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.7 2004/10/06 20:32:53 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -32,7 +32,7 @@ static int instance_count = 0;
 static time_t last_ev_run;
 
 EventLoop::EventLoop()
-    : _clock(new SystemClock), _timer_list(_clock)
+    : _clock(new SystemClock), _timer_list(_clock), _selector_list(_clock)
 {
     instance_count++;
     XLOG_ASSERT(instance_count == 1);

@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.21 2004/06/10 22:41:18 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.22 2004/12/18 03:40:30 atanu Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
 #include "debug.h"
 #include "selector.hh"
 #include "timeval.hh"
+#include "clock.hh"
 #include "utility.h"
 #include "xlog.h"
 
@@ -122,8 +123,8 @@ SelectorList::Node::is_empty()
 // ----------------------------------------------------------------------------
 // SelectorList implementation
 
-SelectorList::SelectorList()
-    : _maxfd(0), _descriptor_count(0), _observer(NULL)
+SelectorList::SelectorList(ClockBase *clock)
+    : _maxfd(0), _descriptor_count(0), _observer(NULL), _clock(clock)
 {
     static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)
 		  && SEL_EX == (1 << SEL_EX_IDX) && SEL_MAX_IDX == 3);
@@ -215,6 +216,10 @@ SelectorList::select(TimeVal* timeout)
 		     &testfds[SEL_EX_IDX],
 		     &tv_to);
     }
+
+    // We need to re-read the system wallclock time immediately
+    // after returning from a possibly blocking select() syscall.
+    _clock->advance_time();
 
     if (n < 0) {
 	switch (errno) {
