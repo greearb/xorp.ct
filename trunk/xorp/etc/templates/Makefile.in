@@ -94,7 +94,7 @@ snmpd2 = @snmpd2@
 datadir = $(prefix)/$(subdir)
 
 # -- Data
-data_DATA = bgp.cmds bgp.tp fea.cmds fea.tp ospf.tp rib.tp rip4.tp rip6.tp snmp.tp static_routes.tp
+data_DATA = bgp.cmds bgp.tp fea.cmds fea.tp ospf.tp rib.tp rip.tp ripng.tp snmp.tp static_routes.tp
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = $(data_DATA)

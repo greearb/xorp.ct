@@ -1,0 +1,27 @@
+/*
+ * RIP NG attributes
+ */
+
+protocols
+{
+    ripng
+    {
+	targetname: text = "ripng";
+    }
+}
+
+/*
+ * The gory details
+ */
+protocols
+{
+    ripng
+    {
+	%modinfo:	provides		"ripng";
+    	%modinfo:	depends			"rib";
+	%modinfo:	path			"rip/xorp_ripng";
+	%modinfo:	default_targetname	"ripng";
+	%modinfo:	statusmethod xrl	"$(ripng.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdownmethod xrl	"$(ripng.targetname)/common/0.1/shutdown";
+    }
+}

@@ -93,7 +93,7 @@ snmpd2 = @snmpd2@
 bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
-bin_PROGRAMS = xorp_rip4 xorp_rip6
+bin_PROGRAMS = xorp_rip xorp_ripng
 
 # -- Test Programs
 TESTS = test_auth test_packets test_request test_route_walk test_timers test_update_queue test_outputs
@@ -109,10 +109,10 @@ LDFLAGS =
 LDADD = ./librip.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Real Program Sources
-xorp_rip4_SOURCES = xorp_rip4.cc xrl_target4.hh xrl_target4.cc
-xorp_rip4_LDADD = ./libripxrl.a ./librip.a $(top_builddir)/xrl/targets/librip4base.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+xorp_rip_SOURCES = xorp_rip.cc xrl_target_rip.hh xrl_target_rip.cc
+xorp_rip_LDADD = ./libripxrl.a ./librip.a $(top_builddir)/xrl/targets/libripbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
-xorp_rip6_SOURCES = xorp_rip6.cc
+xorp_ripng_SOURCES = xorp_ripng.cc
 
 # -- Test Program Sources
 test_auth_SOURCES = test_auth.cc
@@ -151,7 +151,7 @@ am_libripxrl_a_OBJECTS = xrl_port_manager.$(OBJEXT) \
 	xrl_port_io.$(OBJEXT) xrl_process_spy.$(OBJEXT) \
 	xrl_rib_notifier.$(OBJEXT)
 libripxrl_a_OBJECTS = $(am_libripxrl_a_OBJECTS)
-bin_PROGRAMS = xorp_rip4$(EXEEXT) xorp_rip6$(EXEEXT)
+bin_PROGRAMS = xorp_rip$(EXEEXT) xorp_ripng$(EXEEXT)
 noinst_PROGRAMS = test_auth$(EXEEXT) test_packets$(EXEEXT) \
 	test_request$(EXEEXT) test_route_walk$(EXEEXT) \
 	test_timers$(EXEEXT) test_update_queue$(EXEEXT) \
@@ -195,10 +195,10 @@ test_update_queue_LDADD = $(LDADD)
 test_update_queue_DEPENDENCIES = ./librip.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_update_queue_LDFLAGS =
-am_xorp_rip4_OBJECTS = xorp_rip4.$(OBJEXT) xrl_target4.$(OBJEXT)
-xorp_rip4_OBJECTS = $(am_xorp_rip4_OBJECTS)
-xorp_rip4_DEPENDENCIES = ./libripxrl.a ./librip.a \
-	$(top_builddir)/xrl/targets/librip4base.a \
+am_xorp_rip_OBJECTS = xorp_rip.$(OBJEXT) xrl_target_rip.$(OBJEXT)
+xorp_rip_OBJECTS = $(am_xorp_rip_OBJECTS)
+xorp_rip_DEPENDENCIES = ./libripxrl.a ./librip.a \
+	$(top_builddir)/xrl/targets/libripbase.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/libfeaclient/libfeaclient.a \
@@ -210,12 +210,12 @@ xorp_rip4_DEPENDENCIES = ./libripxrl.a ./librip.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
-xorp_rip4_LDFLAGS =
-am_xorp_rip6_OBJECTS = xorp_rip6.$(OBJEXT)
-xorp_rip6_OBJECTS = $(am_xorp_rip6_OBJECTS)
-xorp_rip6_LDADD = $(LDADD)
-xorp_rip6_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
-xorp_rip6_LDFLAGS =
+xorp_rip_LDFLAGS =
+am_xorp_ripng_OBJECTS = xorp_ripng.$(OBJEXT)
+xorp_ripng_OBJECTS = $(am_xorp_ripng_OBJECTS)
+xorp_ripng_LDADD = $(LDADD)
+xorp_ripng_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
+xorp_ripng_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -233,12 +233,12 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_route_walk.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_timers.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_update_queue.Po \
-@AMDEP_TRUE@	$(DEPDIR)/update_queue.Po $(DEPDIR)/xorp_rip4.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xorp_rip6.Po $(DEPDIR)/xrl_port_io.Po \
+@AMDEP_TRUE@	$(DEPDIR)/update_queue.Po $(DEPDIR)/xorp_rip.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_ripng.Po $(DEPDIR)/xrl_port_io.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_port_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_process_spy.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_rib_notifier.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_target4.Po
+@AMDEP_TRUE@	$(DEPDIR)/xrl_target_rip.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -254,10 +254,10 @@ DIST_SOURCES = $(librip_a_SOURCES) $(libripxrl_a_SOURCES) \
 	$(test_auth_SOURCES) $(test_outputs_SOURCES) \
 	$(test_packets_SOURCES) $(test_request_SOURCES) \
 	$(test_route_walk_SOURCES) $(test_timers_SOURCES) \
-	$(test_update_queue_SOURCES) $(xorp_rip4_SOURCES) \
-	$(xorp_rip6_SOURCES)
+	$(test_update_queue_SOURCES) $(xorp_rip_SOURCES) \
+	$(xorp_ripng_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in TODO
-SOURCES = $(librip_a_SOURCES) $(libripxrl_a_SOURCES) $(test_auth_SOURCES) $(test_outputs_SOURCES) $(test_packets_SOURCES) $(test_request_SOURCES) $(test_route_walk_SOURCES) $(test_timers_SOURCES) $(test_update_queue_SOURCES) $(xorp_rip4_SOURCES) $(xorp_rip6_SOURCES)
+SOURCES = $(librip_a_SOURCES) $(libripxrl_a_SOURCES) $(test_auth_SOURCES) $(test_outputs_SOURCES) $(test_packets_SOURCES) $(test_request_SOURCES) $(test_route_walk_SOURCES) $(test_timers_SOURCES) $(test_update_queue_SOURCES) $(xorp_rip_SOURCES) $(xorp_ripng_SOURCES)
 
 all: all-am
 
@@ -330,12 +330,12 @@ test_timers$(EXEEXT): $(test_timers_OBJECTS) $(test_timers_DEPENDENCIES)
 test_update_queue$(EXEEXT): $(test_update_queue_OBJECTS) $(test_update_queue_DEPENDENCIES) 
 	@rm -f test_update_queue$(EXEEXT)
 	$(CXXLINK) $(test_update_queue_LDFLAGS) $(test_update_queue_OBJECTS) $(test_update_queue_LDADD) $(LIBS)
-xorp_rip4$(EXEEXT): $(xorp_rip4_OBJECTS) $(xorp_rip4_DEPENDENCIES) 
-	@rm -f xorp_rip4$(EXEEXT)
-	$(CXXLINK) $(xorp_rip4_LDFLAGS) $(xorp_rip4_OBJECTS) $(xorp_rip4_LDADD) $(LIBS)
-xorp_rip6$(EXEEXT): $(xorp_rip6_OBJECTS) $(xorp_rip6_DEPENDENCIES) 
-	@rm -f xorp_rip6$(EXEEXT)
-	$(CXXLINK) $(xorp_rip6_LDFLAGS) $(xorp_rip6_OBJECTS) $(xorp_rip6_LDADD) $(LIBS)
+xorp_rip$(EXEEXT): $(xorp_rip_OBJECTS) $(xorp_rip_DEPENDENCIES) 
+	@rm -f xorp_rip$(EXEEXT)
+	$(CXXLINK) $(xorp_rip_LDFLAGS) $(xorp_rip_OBJECTS) $(xorp_rip_LDADD) $(LIBS)
+xorp_ripng$(EXEEXT): $(xorp_ripng_OBJECTS) $(xorp_ripng_DEPENDENCIES) 
+	@rm -f xorp_ripng$(EXEEXT)
+	$(CXXLINK) $(xorp_ripng_LDFLAGS) $(xorp_ripng_OBJECTS) $(xorp_ripng_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -361,13 +361,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_timers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_update_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_queue.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip4.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip6.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_rip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ripng.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_port_io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_port_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_process_spy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_rib_notifier.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target_rip.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)

@@ -7,7 +7,7 @@
 bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
-bin_PROGRAMS	 = xorp_rip4 xorp_rip6
+bin_PROGRAMS	 = xorp_rip xorp_ripng
 
 # -- Test Programs
 TESTS		 = test_auth
@@ -36,24 +36,24 @@ LDADD				 = ./librip.a
 LDADD				+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Real Program Sources
-xorp_rip4_SOURCES		 = xorp_rip4.cc
-xorp_rip4_SOURCES		+= xrl_target4.hh
-xorp_rip4_SOURCES		+= xrl_target4.cc
-xorp_rip4_LDADD			 = ./libripxrl.a ./librip.a
-xorp_rip4_LDADD			+= $(top_builddir)/xrl/targets/librip4base.a
-xorp_rip4_LDADD			+= $(top_builddir)/xrl/interfaces/libribxif.a
-xorp_rip4_LDADD			+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
-xorp_rip4_LDADD			+= $(top_builddir)/libfeaclient/libfeaclient.a
-xorp_rip4_LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
-xorp_rip4_LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
-xorp_rip4_LDADD			+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
-xorp_rip4_LDADD			+= $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a
-xorp_rip4_LDADD			+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
-xorp_rip4_LDADD			+= $(top_builddir)/libxipc/libxipc.a
-xorp_rip4_LDADD			+= $(top_builddir)/libcomm/libcomm.a
-xorp_rip4_LDADD			+= $(top_builddir)/libxorp/libxorp.a
+xorp_rip_SOURCES		 = xorp_rip.cc
+xorp_rip_SOURCES		+= xrl_target_rip.hh
+xorp_rip_SOURCES		+= xrl_target_rip.cc
+xorp_rip_LDADD			 = ./libripxrl.a ./librip.a
+xorp_rip_LDADD			+= $(top_builddir)/xrl/targets/libripbase.a
+xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libribxif.a
+xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
+xorp_rip_LDADD			+= $(top_builddir)/libfeaclient/libfeaclient.a
+xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
+xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
+xorp_rip_LDADD			+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
+xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a
+xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
+xorp_rip_LDADD			+= $(top_builddir)/libxipc/libxipc.a
+xorp_rip_LDADD			+= $(top_builddir)/libcomm/libcomm.a
+xorp_rip_LDADD			+= $(top_builddir)/libxorp/libxorp.a
 
-xorp_rip6_SOURCES		 = xorp_rip6.cc
+xorp_ripng_SOURCES		 = xorp_ripng.cc
 
 # -- Test Program Sources
 test_auth_SOURCES		 = test_auth.cc

@@ -1,4 +1,4 @@
-interface rip4/0.1 {
+interface rip/0.1 {
 
     /**
      * Add an address to run RIP process on.  The addition of address is
@@ -244,7 +244,4 @@ interface rip4/0.1 {
      */
      delete_static_route ? network:ipv4net
 
-}
-
-interface rip6/0.1 {
 }

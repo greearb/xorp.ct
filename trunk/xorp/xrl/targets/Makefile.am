@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.20 2004/01/09 00:17:05 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.21 2004/02/12 20:02:43 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -25,7 +25,7 @@ tgt_files		+= mfea.tgt
 tgt_files		+= mld6igmp.tgt
 tgt_files		+= ospf.tgt
 tgt_files		+= pim.tgt
-tgt_files		+= rip4.tgt
+tgt_files		+= rip.tgt
 tgt_files		+= rib.tgt
 tgt_files		+= ribclient.tgt
 tgt_files		+= rtrmgr.tgt
@@ -64,8 +64,8 @@ noinst_LIBRARIES	+= libospfbase.a
 noinst_LIBRARIES	+= libpimbase.a
 noinst_LIBRARIES	+= libribbase.a
 noinst_LIBRARIES	+= libribclientbase.a
-noinst_LIBRARIES	+= librip4base.a
-noinst_LIBRARIES	+= librip6base.a
+noinst_LIBRARIES	+= libripbase.a
+noinst_LIBRARIES	+= libripngbase.a
 noinst_LIBRARIES	+= librtrmgrbase.a
 noinst_LIBRARIES	+= libsocketserverbase.a
 noinst_LIBRARIES	+= libstaticroutesbase.a
@@ -194,18 +194,18 @@ libribclientbase_a_SOURCES = ribclient_base.hh ribclient_base.cc
 $(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
 		$(INTERFACES_DIR)/rib_client.xif
 
-# RIP IPv4
-librip4base_a_SOURCES = rip4_base.hh rip4_base.cc
-$(srcdir)/rip4_base.hh $(srcdir)/rip4_base.cc:				\
+# RIP
+libripbase_a_SOURCES = rip_base.hh rip_base.cc
+$(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rip.xif				\
 		$(INTERFACES_DIR)/socket4_user.xif
 
-# RIP IPv6
-librip6base_a_SOURCES = rip6_base.hh rip6_base.cc
-$(srcdir)/rip6_base.hh $(srcdir)/rip6_base.cc:				\
+# RIP NG
+libripngbase_a_SOURCES = ripng_base.hh ripng_base.cc
+$(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/rip.xif
+		$(INTERFACES_DIR)/ripng.xif
 
 # RTRMGR
 librtrmgrbase_a_SOURCES = rtrmgr_base.hh rtrmgr_base.cc

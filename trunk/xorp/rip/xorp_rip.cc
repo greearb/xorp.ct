@@ -26,7 +26,7 @@
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
 #include "rip/system.hh"
-#include "rip/xrl_target4.hh"
+#include "rip/xrl_target_rip.hh"
 #include "rip/xrl_port_manager.hh"
 #include "rip/xrl_process_spy.hh"
 #include "rip/xrl_rib_notifier.hh"
@@ -68,7 +68,7 @@ protected:
     }
 
 public:
-    Service2XrlTarget4Status(XrlRip4Target& t) : _t(t), _st(READY) {}
+    Service2XrlTarget4Status(XrlRipTarget& t) : _t(t), _st(READY) {}
 
     ~Service2XrlTarget4Status()
     {
@@ -145,7 +145,7 @@ public:
     }
 
 protected:
-    XrlRip4Target& 	_t;
+    XrlRipTarget& 	_t;
     list<ServiceBase*>	_services;
     ServiceStatus	_st;
 };
@@ -158,13 +158,13 @@ rip_main(const string& finder_host, uint16_t finder_port)
     try {
 	EventLoop 	     e;
 	System<IPv4> 	     rip_system(e);
-	XrlStdRouter 	     xsr(e, "rip4", finder_host.c_str(), finder_port);
+	XrlStdRouter 	     xsr(e, "rip", finder_host.c_str(), finder_port);
 	XrlProcessSpy	     xps(xsr);
 	IfMgrXrlMirror	     ixm(e, "fea");
 	XrlPortManager<IPv4> xpm(rip_system, xsr, ixm);
 
 	bool stop_requested(false);
-	XrlRip4Target xr4t(xsr, xps, xpm, stop_requested);
+	XrlRipTarget xr4t(xsr, xps, xpm, stop_requested);
 
 	while (xsr.ready() == false) {
 	    e.run();
@@ -218,7 +218,7 @@ rip_main(const string& finder_host, uint16_t finder_port)
 static void
 usage()
 {
-    fprintf(stderr, "Usage: xorp_rip4 [options]\n");
+    fprintf(stderr, "Usage: xorp_rip [options]\n");
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -F <host>[:<port>]  Specify Finder host and port\n");
     fprintf(stderr, "  -h                  Display this information\n");
