@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.16 2004/01/05 23:24:52 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.20 2004/05/18 07:11:08 pavlin Exp $
 #
 
 Urgent
@@ -8,8 +8,6 @@ Urgent
 Configure Mode
 
  - There are lots of hard-coded values in master_conf_tree.cc
- - Get rid of the printf() in master_conf_tree.cc and elsewhere.
-   At least, the info should be printed only if in debug mode.
  - Implement node locking in MasterConfigTree
  - Use node locking to prevent two users editing the same node.
  - Templates need %delete commands adding.
@@ -67,8 +65,6 @@ General
  - User database needs proper implementation of capabilities.
  - When the rtrmgr is running in no-exec mode do not instantiate a
    finder and XrlRouter.
- - Change the behavior of command-line option "-d" from "Display defaults"
-   to "Enable debug output" (for both the rtrmgr and xorpsh).
 
 Configure Mode
 
@@ -106,4 +102,10 @@ RESOLVED: restart is detected and user is advised to logout and login again.
 RESOLVED: actually it was correct, the comment was wrong.
 
  - Module unloading when relevant config is deleted. (Done)
-
+ - Get rid of the printf() in master_conf_tree.cc and elsewhere.
+   At least, the info should be printed only if in debug mode.
+ - Change the behavior of command-line option "-d" from "Display defaults"
+   to "Enable debug output" (for both the rtrmgr and xorpsh).
+RESOLVED: "-d" is removed, because it is redundant (the same info
+   is printed by "-h"). The new command-line option to print
+   verbose output is "-v".
