@@ -160,6 +160,18 @@ public:
     ~Port();
 
     /**
+     * Set enabled state.  When a port is enabled it can perform input
+     * and output processing.  When not enabled, input data is
+     * discarded and output processing can not occur.
+     */
+    void set_enabled(bool en);
+
+    /**
+     * Get enabled state.
+     */
+    bool enabled() const				{ return _en; }
+
+    /**
      * Get timer constants in use for routes received on this port.
      */
     inline PortTimerConstants& constants()		{ return _constants; }
@@ -240,6 +252,19 @@ public:
      */
     void set_accept_default_route(bool en);
 
+
+    /**
+     * Accept routes, but do not advertise them.
+     * @return true if this port is passive.
+     */
+    inline bool passive() const				{ return _passive; }
+
+    /**
+     * Accept routes, but do not advertise them.
+     * @param passive true if port should receive and not send packets.
+     */
+    void set_passive(bool passive);
+
     /**
      * Get Peers associated with this Port.
      */
@@ -309,6 +334,13 @@ protected:
      * return true if peers still exist, false otherwise.
      */
     bool peer_gc_timeout();
+
+    /**
+     * Kill peer routes.  Change cost of routes learned from peers to
+     * infinity.  Typically called when port instance is disabled or
+     * io system reports that it is not enabled.
+     */
+    void kill_peer_routes();
 
 protected:
     /**
@@ -392,6 +424,20 @@ protected:
     void triggered_update_timeout();
 
     /**
+     * Query output process policy.
+     *
+     * Check whether instance is enabled, whether it is active or
+     * passive, and whether the associated I/O object is enabled.
+     */
+    bool output_allowed() const;
+
+    /**
+     * Check whether output is allowed and start or stop output
+     * processing accordingly.
+     */
+    void start_stop_output_processing();
+
+    /**
      * Start output processing.
      *
      * Starts timers for unsolicited updates and triggered updates.
@@ -462,11 +508,13 @@ protected:
     XorpTimer		_tu_timer;		// Triggered update timer
     XorpTimer		_query_blocked_timer;	// Rate limiting on queries
 
+    bool		_en;			// enabled state
     uint32_t		_cost;			// Cost metric of port
     RipHorizon		_horizon;		// Port Horizon type
     bool		_advertise;		// Advertise IO port
     bool		_adv_def_rt;		// Advertise default route
     bool		_acc_def_rt;		// Accept default route
+    bool		_passive;		// Passive (recv only port)
 
     PacketQueue<A>*	_packet_queue;		// Outbound packet queue
     PortTimerConstants	_constants;		// Port related timer constants

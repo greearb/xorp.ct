@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.21 2004/02/24 19:41:39 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.22 2004/02/25 00:08:50 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -91,11 +91,13 @@ PortAFSpecState<IPv4>::auth_handler()
 template <typename A>
 Port<A>::Port(PortManagerBase<A>& pm)
     :  _pm(pm),
+       _en(false),
        _cost(1),
        _horizon(SPLIT_POISON_REVERSE),
        _advertise(false),
        _adv_def_rt(false),
        _acc_def_rt(false),
+       _passive(false),
        _ur_out(0),
        _tu_out(0),
        _su_out(0)
@@ -487,12 +489,76 @@ template <typename A>
 void
 Port<A>::port_io_enabled_change(bool en)
 {
-    if (en) {
+    start_stop_output_processing();
+    if (en == false)
+	kill_peer_routes();
+}
+
+template <typename A>
+void
+Port<A>::start_stop_output_processing()
+{
+    if (output_allowed()) {
 	start_request_table_timer();
 	start_output_processing();
     } else {
 	stop_request_table_timer();
 	stop_output_processing();
+    }
+}
+
+template <typename A>
+void
+Port<A>::kill_peer_routes()
+{
+    RouteDB<Addr>& rdb = _pm.system().route_db();
+
+    typename PeerList::iterator pli = _peers.begin();
+    while (pli != _peers.end()) {
+	vector<const RouteEntry<A>*> routes;
+	Peer<A>* p = *pli;
+	p->dump_routes(routes);
+	typename vector<const RouteEntry<A>*>::const_iterator ri;
+	for (ri = routes.begin(); ri != routes.end(); ++ri) {
+	    const RouteEntry<A>* r = *ri;
+	    rdb.update_route(r->net(), r->nexthop(), RIP_INFINITY, r->tag(),
+			     p);
+	}
+	pli++;
+    }
+}
+
+template <typename A>
+bool
+Port<A>::output_allowed() const
+{
+    return enabled() && port_io_enabled() && (passive() == false);
+}
+
+template <typename A>
+void
+Port<A>::set_enabled(bool en)
+{
+    bool old_allowed = output_allowed();
+    _en = en;
+    bool allowed = output_allowed();
+    if (allowed != old_allowed) {
+	start_stop_output_processing();
+    }
+
+    if (en == false)
+	kill_peer_routes();
+}
+
+template <typename A>
+void
+Port<A>::set_passive(bool p)
+{
+    bool old_allowed = output_allowed();
+    _passive = p;
+    bool allowed = output_allowed();
+    if (allowed != old_allowed) {
+	start_stop_output_processing();
     }
 }
 
@@ -518,7 +584,8 @@ Port<A>::parse_request(const Addr&			src_addr,
 		       uint32_t				n_entries)
 {
     if (port_io_enabled() == false) {
-	XLOG_INFO("Discarding RIP request: port io disabled.");
+	debug_msg("Discarding RIP request: port io system not enabled.");
+	return;
     }
 
     if (n_entries == 1 && entries[0].is_table_request()) {
@@ -605,6 +672,11 @@ Port<A>::port_io_receive(const A&	src_address,
 {
     static_assert(sizeof(RipPacketHeader) == 4);
     static_assert(sizeof(PacketRouteEntry<A>) == 20);
+
+    if (enabled() == false) {
+	debug_msg("Discarding RIP packet: Port not enabled.");
+	return;
+    }
 
     Peer<A>* p = peer(src_address);
     record_packet(p);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.7 2004/01/24 13:33:48 hodson Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.8 2004/02/20 21:19:11 hodson Exp $"
 
 #include <set>
 
@@ -56,6 +56,7 @@ public:
     {
 	_peers.push_back(new Peer<A>(*this, addr));
 	verbose_log("Constructing SpoofPort instance\n");
+	set_enabled(true);
     }
     ~SpoofPort()
     {
