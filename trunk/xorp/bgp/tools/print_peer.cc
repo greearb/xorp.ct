@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.3 2003/01/18 05:32:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.4 2003/01/18 21:41:04 mjh Exp $"
 
 #include "print_peer.hh"
 
@@ -316,7 +316,11 @@ PrintPeers::time_units(uint32_t secs) const {
 void 
 PrintPeers::do_verbose_peer_print()
 {
-    printf("  Peer ID: %s\n", _peer_id.str().c_str());
+    if (_peer_state == 6) {
+	printf("  Peer ID: %s\n", _peer_id.str().c_str());
+    } else {
+	printf("  Peer ID: none\n");
+    }
     printf("  Peer State: ");
     switch (_peer_state) {
     case 1:
@@ -365,12 +369,23 @@ PrintPeers::do_verbose_peer_print()
 	   _in_updates, _out_updates);
     printf("  Messages Received: %d,  Messages Sent: %d\n",
 	   _in_msgs, _out_msgs);
-    printf("  Time since last received update: %s\n",
-	   time_units(_in_update_elapsed).c_str());
+    if (_in_updates > 0) {
+	printf("  Time since last received update: %s\n",
+	       time_units(_in_update_elapsed).c_str());
+    } else {
+	printf("  Time since last received update: n/a\n");
+    }
     printf("  Number of transitions to ESTABLISHED: %d\n",
 	   _transitions);
-    printf("  Time since last transition to ESTABLISHED: %s\n",
-	   time_units(_established_time).c_str());
+    if (_peer_state == 6) {
+	printf("  Time since last entering ESTABLISHED state: %s\n",
+	       time_units(_established_time).c_str());
+    } else if (_transitions > 0) {
+	printf("  Time since last in ESTABLISHED state: %s\n",
+	       time_units(_established_time).c_str());
+    } else {
+	printf("  Time since last in ESTABLISHED state: n/a\n");
+    }
     printf("  Retry Interval: %s\n", time_units(_retry_interval).c_str());
     if (_peer_state == 6) {
 	printf("  Hold Time: %s,  Keep Alive Time: %s\n",
