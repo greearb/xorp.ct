@@ -15,11 +15,86 @@
  */
 
 /*
- * $XORP: xorp/libxorp/status_codes.h,v 1.2 2003/05/07 23:49:59 pavlin Exp $
+ * $XORP: xorp/libxorp/status_codes.h,v 1.3 2003/05/09 05:23:07 mjh Exp $
  */
 
 #ifndef __LIBXORP_STATUS_CODES_H__
 #define __LIBXORP_STATUS_CODES_H__
+
+/*
+Explanation of Process States
+-----------------------------
+
+    +-------------> NULL
+    |                |
+    |                | (1)
+    |                V
+    |             STARTUP
+    |                |
+    |                | (2
+    |                V
+    |            NOT_READY
+    |             |     ^
+    |(7)      (3) |     | (4)
+    |             V     |
+    |              READY
+    |              /   \
+    |          (5)/     \(6)
+    |            V       V
+    |       SHUTDOWN    FAIL
+    |            |       |
+    |            |       |
+    +------------+-------+
+
+Events/Actions
+--------------
+(1) Register with finder
+(2) External dependencies satisfied, ready to be configured.
+(3) Finished processing any config changes, ready for other processes that 
+    depend on this process to be configured.
+(4) Received a config change that needs to be processed before other 
+    processes that depend on this process are configured.
+(5) Received a request for a clean shutdown.
+(6) Something failed, this process is no longer functioning correctly.
+(7) Deregister with finder.
+
+States
+------
+NULL      Process is not registered with finder.  It may or may not be running.
+
+STARTUP   Process is registered with finder, but is waiting on some other 
+          processes before it is ready to be configured.
+
+NOT_READY For any reason, the process is not ready for processes that depend 
+          on this process to be configured or reconfigured.  A common reason 
+          is that this process just received a config change, and is still 
+          in the process of making the config change active.
+
+READY     Process is running normally.  Processes that depend on the state 
+          of this process can be configured or reconfigured.
+
+SHUTDOWN  Process has received a shutdown request is shutting down cleanly.  
+          Normally the process will terminate by itself after being in this 
+          state.
+
+FAIL      Process has suffered a fatal error, and is in the process of 
+          cleaning up the mess.  Normally the process will terminate by 
+          itself after being in this state.
+
+Notes
+-----
+
+A process may spend zero time in STARTUP, NOT_READY, READY, SHUTDOWN or FAIL 
+states.  For example, a process may effectively go directly from NULL to 
+READY state on startup if there are no dependencies that need to be taken 
+into account.  A process may go from STARTUP or NOT_READY states to SHUTDOWN 
+or FAIL states without spending any time in READY state if required.
+
+On reconfiguration, a process does not need to go to NOT_READY state unless 
+it needs to delay the reconfiguration of processes that depend on the 
+completion of this reconfiguration. 
+
+*/
 
 typedef enum {
     PROC_NULL		= 0,
