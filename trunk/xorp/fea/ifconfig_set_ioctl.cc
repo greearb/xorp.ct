@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.16 2003/10/30 18:57:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.17 2003/10/30 19:37:41 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -45,6 +45,26 @@
 
 #include "ifconfig.hh"
 #include "ifconfig_set.hh"
+
+#ifdef HAVE_IPV6
+#ifdef HOST_OS_LINUX
+//
+// XXX: In case of Linux, we have "struct in6_ifreq" defined
+// in <linux/ipv6.h>. However, we cannot include that file along
+// with <netinet/in.h> because of replicated structure definitions
+// in <netinet/in.h> and <linux/in6.h> where the latter one is
+// included by <linux/ipv6.h>.
+// Hence, we have no choice but explicitly define here "struct in6_ifreq".
+// BTW, please note that the Linux struct in6_ifreq has nothing in common
+// with the original KAME's "struct in6_ifreq".
+//
+struct in6_ifreq {
+    struct in6_addr ifr6_addr;
+    uint32_t ifr6_prefixlen;
+    unsigned int ifr6_ifindex;
+};
+#endif // HOST_OS_LINUX
+#endif // HAVE_IPV6
 
 
 //
@@ -534,7 +554,7 @@ IfConfigSetIoctl::set_vif_address6(const string& ifname,
     // Set the p2p address
     if (is_p2p) {
 	dst.copy_out(in6_ifreq.ifr6_addr);
-	if (ioctl(_s6, SIOCSIFDSTADDR, &ifreq) < 0) {
+	if (ioctl(_s6, SIOCSIFDSTADDR, &in6_ifreq) < 0) {
 	    reason = c_format("%s", strerror(errno));
 	    return (XORP_ERROR);
 	}
