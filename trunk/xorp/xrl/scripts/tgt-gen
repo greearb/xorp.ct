@@ -242,8 +242,9 @@ def finish_target_hh(hh_file):
     return "\n#endif /* %s */\n" % protect(hh_file)
 
 def prepare_target_cc(target_hh, target_cc):
+    r = target_hh.rfind("/") + 1
     s = Xif.util.standard_preamble(0, target_cc)
-    s += "\n#include \"%s\"\n\n" % target_hh
+    s += "\n#include \"%s\"\n\n" % target_hh[r:]
     return s
 
 def output_target_cc(cls, tgt_name, methods):
@@ -298,7 +299,8 @@ def main():
         sys.exit(1)
     basename = sourcefile[:-4]
 
-    modulename = "Xrl%sTarget" % cpp_classname(basename)
+    modulename = "Xrl%sTarget" % \
+                 cpp_classname(basename[basename.rfind("/") + 1:])
     hh_file = "%s_base.hh" % basename
     cc_file = "%s_base.cc" % basename
     xrl_file = "%s.xrls" % basename
