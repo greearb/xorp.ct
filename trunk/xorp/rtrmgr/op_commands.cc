@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.22 2004/06/01 19:49:57 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.23 2004/06/02 01:23:53 pavlin Exp $"
 
 
 #include <glob.h>
@@ -342,19 +342,31 @@ OpCommand::execute(EventLoop* eventloop, const list<string>& command_line,
 }
 
 bool
-OpCommand::prefix_matches(const list<string>& path_parts,
-			  SlaveConfigTree* conf_tree) const
+OpCommand::command_match(const list<string>& path_parts,
+			 SlaveConfigTree* conf_tree,
+			 bool exact_match) const
 {
     list<string>::const_iterator them, us;
 
     them = path_parts.begin();
     us = _command_parts.begin();
+
+    //
     // First go through the fixed parts of the command
+    //
     while (true) {
-	if (them == path_parts.end())
+	if ((them == path_parts.end()) && (us == _command_parts.end())) {
 	    return true;
+	}
+	if (them == path_parts.end()) {
+	    if (exact_match)
+		return false;
+	    else
+		return true;
+	}
 	if (us == _command_parts.end())
-	    break;
+		break;
+
 	if ((*us)[0] == '$') {
 	    // Matching against a varname
 	    list<string> varmatches;
@@ -375,7 +387,10 @@ OpCommand::prefix_matches(const list<string>& path_parts,
 	++them;
 	++us;
     }
+
+    //
     // No more fixed parts, try optional parameters
+    //
     while (them != path_parts.end()) {
 	map<string, string>::const_iterator opi;
 	bool ok = false;
@@ -537,11 +552,12 @@ OpCommandList::find_op_command(const list<string>& command_parts)
 }
 
 bool
-OpCommandList::prefix_matches(const list<string>& command_parts) const
+OpCommandList::command_match(const list<string>& command_parts,
+			     bool exact_match) const
 {
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
-	if ((*iter)->prefix_matches(command_parts, _conf_tree))
+	if ((*iter)->command_match(command_parts, _conf_tree, exact_match))
 	    return true;
     }
     return false;
@@ -554,7 +570,7 @@ OpCommandList::execute(EventLoop *eventloop, const list<string>& command_parts,
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	// Find the right command
-	if ((*iter)->prefix_matches(command_parts, _conf_tree)) {
+	if ((*iter)->command_match(command_parts, _conf_tree, true)) {
 	    // Execute it
 	    (*iter)->execute(eventloop, command_parts, cb);
 	    // XXX: don't worry about errors - the callback reports them.
@@ -640,12 +656,15 @@ OpCommandList::top_level_commands() const
 	    is_top_command = true;
 
 	if (is_top_command) {
+	    commands.erase(top_command);
 	    commands.insert(make_pair(top_command, op_command->help_string()));
 	    continue;
 	}
 
-	// TODO: XXX: Get rid of this hard-coded "help" string!!
-	commands.insert(make_pair(top_command, string("help")));
+	if (commands.find(top_command) == commands.end()) {
+	    commands.insert(make_pair(top_command,
+				      string("-- no help available --")));
+	}
     }
     return commands;
 }
@@ -662,7 +681,7 @@ OpCommandList::childlist(const string& path, bool& is_executable,
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	const OpCommand* op_command = *iter;
-	if (op_command->prefix_matches(path_parts, _conf_tree)) {
+	if (op_command->command_match(path_parts, _conf_tree, false)) {
 	    map<string, string> matches;
 	    bool tmp_is_executable;
 	    bool tmp_can_pipe;
