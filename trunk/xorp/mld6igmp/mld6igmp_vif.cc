@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.2 2003/03/10 23:20:43 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.3 2003/03/13 00:32:05 pavlin Exp $"
 
 
 //
@@ -120,11 +120,13 @@ Mld6igmpVif::set_proto_version(int proto_version)
 	return (XORP_ERROR);
     }
     
+#ifdef HAVE_IPV6
     if (proto_is_mld6()) {
 	if ((proto_version < MLD6_VERSION_MIN)
 	    || (proto_version > MLD6_VERSION_MAX))
 	return (XORP_ERROR);
     }
+#endif // HAVE_IPV6
     
     ProtoUnit::set_proto_version(proto_version);
     
@@ -350,6 +352,31 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
     // Compute the checksum
     //
     cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
+#ifdef HAVE_IPV6
+    // Add the checksum for the IPv6 pseudo-header
+    if (proto_is_mld6()) {
+	uint16_t cksum2;
+	struct in6_addr in6_src;
+	struct in6_addr in6_dst;
+	uint32_t pkt_len;
+	uint32_t next_header;
+	
+	addr_ptr()->copy_out(in6_src);
+	dst.copy_out(in6_dst);
+	pkt_len = BUFFER_DATA_SIZE(buffer);
+	pkt_len = htonl(pkt_len);
+	next_header = htonl(IPPROTO_ICMPV6);
+	
+	cksum2 = INET_CKSUM(&in6_src, sizeof(in6_src));
+	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	cksum2 = INET_CKSUM(&in6_dst, sizeof(in6_dst));
+	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	cksum2 = INET_CKSUM(&pkt_len, sizeof(pkt_len));
+	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	cksum2 = INET_CKSUM(&next_header, sizeof(next_header));
+	cksum = INET_CKSUM_ADD(cksum, cksum2);
+    }
+#endif // HAVE_IPV6
     BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the ckecksum
     
     XLOG_TRACE(mld6igmp_node().is_log_trace(), "TX %s from %s to %s",
