@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.14 2004/04/23 19:31:01 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.15 2004/04/26 23:03:04 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -183,7 +183,8 @@ Redistributor<A>::dump_a_route()
     // Lookup route and announce it via output
     const IPRouteEntry<A>* ipr = _table->lookup_route(*ci);
     XLOG_ASSERT(ipr != 0);
-    _output->add_route(*ipr);
+    if (policy_accepts(*ipr))
+	_output->add_route(*ipr);
 
     // Record last net dumped and reschedule
     _last_net = *ci;
@@ -201,6 +202,10 @@ template <typename A>
 void
 Redistributor<A>::RedistEventInterface::did_add(const IPRouteEntry<A>& ipr)
 {
+    if (_r->policy_accepts(ipr) == false) {
+	return;
+    }
+
     if (_r->dumping() == true) {
 	// We're in a dump, if the route is greater than current
 	// position we ignore it as it'll be picked up later,
@@ -222,6 +227,10 @@ template <typename A>
 void
 Redistributor<A>::RedistEventInterface::will_delete(const IPRouteEntry<A>& ipr)
 {
+    if (_r->policy_accepts(ipr) == false) {
+	return;
+    }
+
     // We only care that a route is about to be deleted when we are
     // doing the initial route dump.  The pending delete may affect the
     // last route dumped and as a result nobble our iteration of the valid
@@ -258,6 +267,10 @@ template <typename A>
 void
 Redistributor<A>::RedistEventInterface::did_delete(const IPRouteEntry<A>& ipr)
 {
+    if (_r->policy_accepts(ipr) == false) {
+	return;
+    }
+
     if (_r->dumping()) {
 	if (_r->last_dumped_net() == Redistributor<A>::NO_LAST_NET) {
 	    debug_msg("did_delete with no last net\n");
@@ -378,8 +391,7 @@ RedistTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
     while (i != _outputs.end()) {
 	Redistributor<A>* r = *i;
 	i++;	// XXX for safety increment iterator before prodding output
-	if (r->policy_accepts(route))
-	    r->redist_event().did_add(route);
+	r->redist_event().did_add(route);
     }
 
     return XORP_OK;
@@ -387,14 +399,16 @@ RedistTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 
 template <typename A>
 int
-RedistTable<A>::delete_route(const IPRouteEntry<A>* route,
+RedistTable<A>::delete_route(const IPRouteEntry<A>* r,
 			     RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
 
-    debug_msg("delete_route for %s\n", route->net().str().c_str());
+    const IPRouteEntry<A>& route = *r;
 
-    typename RouteIndex::iterator rci = _rt_index.find(route->net());
+    debug_msg("delete_route for %s\n", route.net().str().c_str());
+
+    typename RouteIndex::iterator rci = _rt_index.find(route.net());
     XLOG_ASSERT(rci != _rt_index.end());
 
     typename list<Redistributor<A>*>::iterator i;
@@ -404,8 +418,7 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* route,
     while (i != _outputs.end()) {
 	Redistributor<A>* r = *i;
 	i++;	// XXX for safety increment iterator before prodding output
-	if (r->policy_accepts(*route))
-	    r->redist_event().will_delete(*route);
+	r->redist_event().will_delete(route);
     }
 
     _rt_index.erase(rci);
@@ -415,8 +428,7 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* route,
     while (i != _outputs.end()) {
 	Redistributor<A>* r = *i;
 	i++;	// XXX for safety increment iterator before prodding output
-	if (r->policy_accepts(*route))
-	    r->redist_event().did_delete(*route);
+	r->redist_event().did_delete(route);
     }
 
     return XORP_OK;
