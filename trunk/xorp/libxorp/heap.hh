@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-// $XORP: xorp/libxorp/heap.hh,v 1.4 2003/04/02 02:53:50 pavlin Exp $
+// $XORP: xorp/libxorp/heap.hh,v 1.5 2004/06/10 22:41:16 hodson Exp $
 
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
@@ -45,7 +45,7 @@
  * The OFFSET_OF macro is used to return the offset of a field within
  * a structure. It is used by the heap management routines.
  */
-#define OFFSET_OF(obj, field) ((int)(&((obj).field)) - (int)&(obj) )
+#define OFFSET_OF(obj, field) ((int) ((ssize_t)(&((obj).field)) - (ssize_t)&(obj) ) )
 
 const int NOT_IN_HEAP =	-1 ;
 
