@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.2 2003/05/16 00:35:03 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.3 2003/05/16 19:23:17 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -78,6 +78,13 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
+
+    /**
+     * Get the IP protocol number.
+     * 
+     * @return the IP protocol number.
+     */
+    int		ipproto() const { return (_ipproto); }
     
     /**
      * Get the protocol socket.
