@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.6 2003/09/30 18:27:05 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.7 2003/09/30 18:42:40 pavlin Exp $
  */
 
 
@@ -26,7 +26,7 @@
 /*
  * Protocol Independent Multicast protocol-specific definitions
  * (both for PIM-SMv2 and PIM-DMv2, as per
- * draft-ietf-pim-sm-v2-new-07.txt and draft-ietf-pim-dm-new-v2-03.txt)
+ * draft-ietf-pim-sm-v2-new-09.txt and draft-ietf-pim-dm-new-v2-03.txt)
  */
 
 
@@ -87,13 +87,15 @@
 #define PIM_HELLO_LAN_PRUNE_DELAY_OPTION	2
 #define PIM_HELLO_LAN_PRUNE_DELAY_LENGTH	4
 #define PIM_HELLO_LAN_PRUNE_DELAY_TBIT		(1 << 15)
-#define PIM_HELLO_DR_ELECTION_PRIORITY_OPTION	19
-#define PIM_HELLO_DR_ELECTION_PRIORITY_LENGTH	4
-#define PIM_HELLO_DR_ELECTION_PRIORITY_DEFAULT	1
-#define PIM_HELLO_DR_ELECTION_PRIORITY_LOWEST	0
-#define PIM_HELLO_DR_ELECTION_PRIORITY_HIGHEST	0xffffffffU
+#define PIM_HELLO_DR_PRIORITY_OPTION		19
+#define PIM_HELLO_DR_PRIORITY_LENGTH		4
+#define PIM_HELLO_DR_PRIORITY_DEFAULT		1
+#define PIM_HELLO_DR_PRIORITY_LOWEST		0
+#define PIM_HELLO_DR_PRIORITY_HIGHEST		0xffffffffU
 #define PIM_HELLO_GENID_OPTION			20
 #define PIM_HELLO_GENID_LENGTH			4
+#define PIM_HELLO_ADDRESS_LIST_OPTION		24
+#define PIM_HELLO_ADDRESS_LIST_PRIVATE_OPTION	65001	/* TODO: temporary */
 
 #define PIM_HELLO_HELLO_TRIGGERED_DELAY_DEFAULT	5
 #define PIM_HELLO_HELLO_PERIOD_DEFAULT		30
@@ -123,6 +125,7 @@
 /* PIM_REGISTER-related definitions */
 #define PIM_REGISTER_SUPPRESSION_TIME_DEFAULT	60
 #define PIM_REGISTER_PROBE_TIME_DEFAULT		5
+#define PIM_REGISTER_HEADER_LENGTH		8
 
 /* PIM_CAND_RP_ADV-related definitions */
 #define PIM_CAND_RP_ADV_PERIOD_DEFAULT		60
