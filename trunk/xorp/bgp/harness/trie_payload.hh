@@ -12,17 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.1 2003/09/10 03:19:26 atanu Exp $
 
 #ifndef __BGP_HARNESS_TRIE_PAYLOAD_HH__
 #define __BGP_HARNESS_TRIE_PAYLOAD_HH__
 
+/**
+ * A BGP update packet can have many NLRIs. Each NLRI is stored in a
+ * trie node. Rather than keep multiple copies of a BGP update
+ * packet. A single reference counted copy is kept in TrieData. A
+ * TriePayload is stored in the trie and holds a pointer to the TrieData.
+ */
 class TrieData {
 public:
     TrieData(const TimeVal& tv, const uint8_t *buf, size_t len,
 	     TrieData* &first, TrieData* &last) : _tv(tv),
-						_first(first),
-						_last(last) {
+						  _first(first),
+						  _last(last) {
 	_packet = new UpdatePacket(buf, len);
 	_refcnt = 1;
 
@@ -36,13 +42,11 @@ public:
 	_last = this;
     }
 
-    void
-    incr_refcnt() {
+    void incr_refcnt() {
 	_refcnt++;
     }
 
-    bool
-    decr_refcnt() {
+    bool decr_refcnt() {
 	_refcnt--;
 
 	XLOG_ASSERT(_refcnt >= 0);
@@ -87,6 +91,9 @@ private:
     TrieData *_prev;
 };
 
+/**
+ * The paylaod of a RealTrie.
+ */
 class TriePayload {
 public:
     TriePayload() : _data(0) {}
@@ -135,8 +142,7 @@ public:
 	return _data->data();
     }
 
-    void
-    zap() {
+    void zap() {
 // 	if(_data)
 // 	    debug_msg("refcnt: %d %#x\n", _data->_refcnt - 1, _data);
 	if(_data && _data->decr_refcnt()) {
