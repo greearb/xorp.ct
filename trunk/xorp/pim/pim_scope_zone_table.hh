@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
+// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.2 2003/01/30 00:39:32 pavlin Exp $
 
 
 #ifndef __PIM_PIM_SCOPE_ZONE_TABLE_HH__
@@ -41,6 +41,25 @@
 class PimNode;
 class PimScopeZone;
 
+// The PIM Scope Zone ID
+class PimScopeZoneId {
+public:
+    PimScopeZoneId(const IPvXNet& scope_zone_prefix, bool is_scope_zone);
+    
+    const IPvXNet& scope_zone_prefix() const { return (_scope_zone_prefix); }
+    bool is_scope_zone() const { return (_is_scope_zone); }
+    bool operator==(const PimScopeZoneId& other) const;
+    bool is_overlap(const PimScopeZoneId& other) const;
+    bool contains(const IPvXNet& ipvxnet) const;
+    bool contains(const IPvX& ipvx) const;
+    string str() const;
+    
+private:
+    IPvXNet	_scope_zone_prefix;	// The scope zone address prefix
+    bool	_is_scope_zone;		// If true, this is admin. scoped zone
+};
+
+
 // PIM-specific scope zone table
 class PimScopeZoneTable {
 public:
@@ -51,6 +70,7 @@ public:
     void delete_scope_zone(const IPvXNet& scope_zone_prefix);
     
     bool is_scoped(const IPvX& addr, uint16_t vif_index) const;
+    bool is_scoped(const PimScopeZoneId& zone_id, uint16_t vif_index) const;
     
     PimNode&	pim_node() const	{ return (_pim_node);		}
     
@@ -60,7 +80,6 @@ private:
     // Private state
     PimNode&	_pim_node;		// The PIM node I belong to
     list<PimScopeZone> _pim_scope_zone_list;	// The list with scoped zones
-    
 };
 
 class PimScopeZone {
@@ -73,6 +92,7 @@ public:
     
     bool is_set(uint16_t vif_index) const;
     bool is_scoped(const IPvX& addr, uint16_t vif_index) const;
+    bool is_scoped(const PimScopeZoneId& zone_id, uint16_t vif_index) const;
     bool is_same_scope_zone(const IPvXNet& scope_zone_prefix) const;
     
 private:

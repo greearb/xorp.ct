@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.22 2002/12/09 18:29:28 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 
 //
@@ -74,10 +74,11 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
     IPvXNet	group_prefix(family());
     uint8_t	group_addr_reserved_flags;
     PimBsr&	pim_bsr = pim_node().pim_bsr();
-    bool	admin_scope_zone_bool = false;
+    bool	is_scope_zone = false;
     BsrZone	*active_bsr_zone = NULL;
     BsrRp	*bsr_rp;
     string	error_msg = "";
+    bool	bool_add_rps_to_rp_table = false;
     
     //
     // Parse the message
@@ -98,11 +99,10 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
     
     if (prefix_count == 0) {
 	// Prefix count of 0 implies all multicast groups.
-	admin_scope_zone_bool = false;
+	is_scope_zone = false;
 	group_prefix = IPvXNet::ip_multicast_base_prefix(family());
-	active_bsr_zone = pim_bsr.find_active_bsr_zone_by_prefix(
-	    admin_scope_zone_bool,
-	    group_prefix);
+	active_bsr_zone = pim_bsr.find_active_bsr_zone_by_prefix(group_prefix,
+								 is_scope_zone);
 	if (active_bsr_zone == NULL)
 	    return (XORP_ERROR);	// XXX: don't know anything about this zone yet
 	if (active_bsr_zone->bsr_zone_state() != BsrZone::STATE_ELECTED_BSR) {
@@ -115,24 +115,24 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 	//
 	bool is_rp_info_changed = false;
 	do {
-	    BsrRp *org_bsr_rp
+	    BsrRp *active_bsr_rp
 		= active_bsr_zone->find_rp(group_prefix, rp_addr);
-	    if (org_bsr_rp == NULL) {
+	    if (active_bsr_rp == NULL) {
 		is_rp_info_changed = true;
 		break;
 	    }
-	    if (rp_priority != org_bsr_rp->rp_priority()) {
+	    if (rp_priority != active_bsr_rp->rp_priority()) {
 		is_rp_info_changed = true;
 		break;
 	    }
-	    if (rp_holdtime != org_bsr_rp->rp_holdtime()) {
+	    if (rp_holdtime != active_bsr_rp->rp_holdtime()) {
 		is_rp_info_changed = true;
 		break;
 	    }
 	} while (false);
 	
-	bsr_rp = active_bsr_zone->add_rp(admin_scope_zone_bool,
-					 group_prefix,
+	bsr_rp = active_bsr_zone->add_rp(group_prefix,
+					 is_scope_zone,
 					 rp_addr,
 					 rp_priority,
 					 rp_holdtime,
@@ -145,7 +145,7 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 			 cstring(src), cstring(dst),
 			 cstring(rp_addr),
 			 cstring(group_prefix),
-			 cstring(active_bsr_zone->admin_scope_zone_id()),
+			 cstring(active_bsr_zone->zone_id()),
 			 error_msg.c_str());
 	    return (XORP_ERROR);
 	}
@@ -166,9 +166,9 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 	GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_masklen,
 			       group_addr_reserved_flags, buffer);
 	if (group_addr_reserved_flags & EGADDR_Z_BIT)
-	    admin_scope_zone_bool = true;
+	    is_scope_zone = true;
 	else
-	    admin_scope_zone_bool = false;
+	    is_scope_zone = false;
 	group_prefix = IPvXNet(group_addr, group_masklen);
 	if (! group_prefix.masked_addr().is_multicast()) {
 	    XLOG_WARNING("RX %s from %s to %s: "
@@ -178,9 +178,8 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 			 cstring(group_prefix));
 	    continue;
 	}
-	active_bsr_zone = pim_bsr.find_active_bsr_zone_by_prefix(
-	    admin_scope_zone_bool,
-	    group_prefix);
+	active_bsr_zone = pim_bsr.find_active_bsr_zone_by_prefix(group_prefix,
+								 is_scope_zone);
 	if (active_bsr_zone == NULL)
 	    continue;		// XXX: don't know anything about this zone yet
 	if (active_bsr_zone->bsr_zone_state() != BsrZone::STATE_ELECTED_BSR) {
@@ -193,24 +192,24 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 	//
 	bool is_rp_info_changed = false;
 	do {
-	    BsrRp *org_bsr_rp
+	    BsrRp *active_bsr_rp
 		= active_bsr_zone->find_rp(group_prefix, rp_addr);
-	    if (org_bsr_rp == NULL) {
+	    if (active_bsr_rp == NULL) {
 		is_rp_info_changed = true;
 		break;
 	    }
-	    if (rp_priority != org_bsr_rp->rp_priority()) {
+	    if (rp_priority != active_bsr_rp->rp_priority()) {
 		is_rp_info_changed = true;
 		break;
 	    }
-	    if (rp_holdtime != org_bsr_rp->rp_holdtime()) {
+	    if (rp_holdtime != active_bsr_rp->rp_holdtime()) {
 		is_rp_info_changed = true;
 		break;
 	    }
 	} while (false);
 	
-	bsr_rp = active_bsr_zone->add_rp(admin_scope_zone_bool,
-					 group_prefix,
+	bsr_rp = active_bsr_zone->add_rp(group_prefix,
+					 is_scope_zone,
 					 rp_addr,
 					 rp_priority,
 					 rp_holdtime,
@@ -223,16 +222,22 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
 			 cstring(src), cstring(dst),
 			 cstring(rp_addr),
 			 cstring(group_prefix),
-			 cstring(active_bsr_zone->admin_scope_zone_id()),
+			 cstring(active_bsr_zone->zone_id()),
 			 error_msg.c_str());
 	    continue;
 	}
 	bsr_rp->start_candidate_rp_expiry_timer();
 	
 	// XXX: schedule to send immediately a Bootstrap message if needed
-	if (is_rp_info_changed)
+	if (is_rp_info_changed) {
 	    active_bsr_zone->timeout_bsr_timer();
+	    bool_add_rps_to_rp_table = true;
+	}
     }
+    // If needed, add RPs to the RP table.
+    if (bool_add_rps_to_rp_table)
+	pim_bsr.add_rps_to_rp_table();
+    
     
     UNUSED(pim_nbr);
     
@@ -272,12 +277,15 @@ PimVif::pim_cand_rp_adv_send(const BsrZone& bsr_zone)
     //
     // Find the active BsrZone
     //
-    const BsrZone *active_bsr_zone = bsr_zone.find_matching_active_bsr_zone();
+    const BsrZone *active_bsr_zone = pim_node().pim_bsr().find_active_bsr_zone(bsr_zone.zone_id());
     if (active_bsr_zone == NULL)
 	return (XORP_ERROR);	// No active BsrZone yet
     
     if (! active_bsr_zone->bsr_addr().is_unicast())
 	return (XORP_ERROR);	// We don't know the BSR address
+    
+    if (active_bsr_zone->i_am_bsr())
+	return (XORP_OK);	// I am the BSR, hence don't send the message
     
     //
     // XXX: for some reason, the 'Priority' and 'Holdtime' fields
@@ -322,11 +330,14 @@ PimVif::pim_cand_rp_adv_send(const BsrZone& bsr_zone)
 	    else
 		BUFFER_PUT_OCTET(1, buffer);	// XXX: send one group prefix
 	    BUFFER_PUT_OCTET(bsr_rp->rp_priority(), buffer);
-	    BUFFER_PUT_HOST_16(bsr_rp->rp_holdtime(), buffer);
+	    if (bsr_zone.is_cancel())
+		BUFFER_PUT_HOST_16(0, buffer);
+	    else
+		BUFFER_PUT_HOST_16(bsr_rp->rp_holdtime(), buffer);
 	    PUT_ENCODED_UNICAST_ADDR(family(), bsr_rp->rp_addr(), buffer);
 	    if (! all_multicast_groups_bool) {
 		uint8_t group_addr_reserved_flags = 0;
-		if (bsr_group_prefix->is_admin_scope_zone())
+		if (bsr_group_prefix->is_scope_zone())
 		    group_addr_reserved_flags |= EGADDR_Z_BIT;
 		PUT_ENCODED_GROUP_ADDR(family(),
 				       group_prefix.masked_addr(),

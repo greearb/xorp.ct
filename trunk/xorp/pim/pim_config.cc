@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.2 2003/01/07 01:43:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.3 2003/01/13 20:11:21 pavlin Exp $"
 
 
 //
@@ -352,8 +352,8 @@ PimNode::reset_vif_join_prune_period(const string& vif_name)
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::add_config_cand_bsr_by_vif_name(bool is_admin_scope_zone,
-					 const IPvXNet& admin_scope_zone_id,
+PimNode::add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
+					 bool is_scope_zone,
 					 const string& vif_name,
 					 uint8_t bsr_priority,
 					 uint8_t hash_masklen)
@@ -373,13 +373,9 @@ PimNode::add_config_cand_bsr_by_vif_name(bool is_admin_scope_zone,
 		   vif_name.c_str());
 	return (XORP_ERROR);	// The vif has no address yet
     }
-
-    // XXX: if hash_masklen is 0, then set its value to default
-    if (hash_masklen == 0)
-	hash_masklen = PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(family());
     
-    if (add_config_cand_bsr_by_addr(is_admin_scope_zone,
-				    admin_scope_zone_id,
+    if (add_config_cand_bsr_by_addr(scope_zone_id,
+				    is_scope_zone,
 				    *pim_vif->addr_ptr(),
 				    bsr_priority,
 				    hash_masklen) < 0) {
@@ -390,66 +386,36 @@ PimNode::add_config_cand_bsr_by_vif_name(bool is_admin_scope_zone,
 }
 
 //
+// Add myself as a Cand-BSR.
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::add_config_cand_bsr_by_addr(bool is_admin_scope_zone,
-				     const IPvXNet& admin_scope_zone_id,
+PimNode::add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
+				     bool is_scope_zone,
 				     const IPvX& my_cand_bsr_addr,
 				     uint8_t bsr_priority,
 				     uint8_t hash_masklen)
 {
-    if (! is_my_addr(my_cand_bsr_addr)) {
-	XLOG_ERROR("Cannot add configure BSR with address %s: not my address",
-		   cstring(my_cand_bsr_addr));
+    uint16_t fragment_tag = RANDOM(0xffff);
+    string error_msg = "";
+    PimScopeZoneId zone_id(scope_zone_id, is_scope_zone);
+    
+    // XXX: if hash_masklen is 0, then set its value to default
+    if (hash_masklen == 0)
+	hash_masklen = PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(family());
+    
+    BsrZone new_bsr_zone(pim_bsr(), my_cand_bsr_addr, bsr_priority,
+			 hash_masklen, fragment_tag);
+    new_bsr_zone.set_zone_id(zone_id);
+    new_bsr_zone.set_i_am_candidate_bsr(true, my_cand_bsr_addr, bsr_priority);
+    
+    if (pim_bsr().add_config_bsr_zone(new_bsr_zone, error_msg) == NULL) {
+	XLOG_ERROR("Cannot add configure BSR with address %s "
+		   "for zone %s: %s",
+		   cstring(my_cand_bsr_addr), cstring(zone_id),
+		   error_msg.c_str());
 	return (XORP_ERROR);
     }
-    
-    if (! my_cand_bsr_addr.is_unicast()) {
-	XLOG_ERROR("Cannot add configure BSR with address %s: "
-		   "not an unicast address",
-		   cstring(my_cand_bsr_addr));
-	return (XORP_ERROR);
-    }
-    
-    // XXX: add myself as a Cand-BSR
-    do {
-	BsrZone *config_bsr_zone = NULL;
-	uint16_t fragment_tag = RANDOM(0xffff);
-	string error_msg = "";
-	
-	// XXX: if hash_masklen is 0, then set its value to default
-	if (hash_masklen == 0)
-	    hash_masklen = PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(family());
-	
-	config_bsr_zone = pim_bsr().find_bsr_zone_from_list(
-	    pim_bsr().config_bsr_zone_list(),
-	    is_admin_scope_zone,
-	    admin_scope_zone_id);
-	
-	if (config_bsr_zone != NULL) {
-	    XLOG_ERROR("Cannot add configure BSR for %s zone %s: "
-		       "already have such zone",
-		       (is_admin_scope_zone)? "scoped" : "non-scoped",
-		       cstring(admin_scope_zone_id));
-	    return (XORP_ERROR);
-	}
-	
-	BsrZone new_bsr_zone(pim_bsr(), my_cand_bsr_addr, bsr_priority,
-			     hash_masklen, fragment_tag);
-	new_bsr_zone.set_admin_scope_zone(is_admin_scope_zone,
-					  admin_scope_zone_id);
-	new_bsr_zone.set_i_am_candidate_bsr(true, my_cand_bsr_addr,
-					    bsr_priority);
-	config_bsr_zone = pim_bsr().add_config_bsr_zone(new_bsr_zone,
-							error_msg);
-	
-	if (config_bsr_zone == NULL) {
-	    XLOG_ERROR("Cannot add configure BSR with address %s: %s",
-		       cstring(my_cand_bsr_addr), error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-    } while (false);
     
     return (XORP_OK);
 }
@@ -458,24 +424,21 @@ PimNode::add_config_cand_bsr_by_addr(bool is_admin_scope_zone,
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::delete_config_cand_bsr(bool is_admin_scope_zone,
-				const IPvXNet& admin_scope_zone_id)
+PimNode::delete_config_cand_bsr(const IPvXNet& scope_zone_id,
+				bool is_scope_zone)
 {
-    BsrZone *bsr_zone;
+    BsrZone *bsr_zone = NULL;
     bool is_up = false;
+    PimScopeZoneId zone_id(scope_zone_id, is_scope_zone);
     
     //
     // Find the BSR zone
     //
-    bsr_zone = pim_bsr().find_bsr_zone_from_list(
-	pim_bsr().config_bsr_zone_list(),
-	is_admin_scope_zone,
-	admin_scope_zone_id);
+    bsr_zone = pim_bsr().find_config_bsr_zone(zone_id);
     if (bsr_zone == NULL) {
-	XLOG_ERROR("Cannot delete configure BSR for %s zone %s: "
+	XLOG_ERROR("Cannot delete configure BSR for zone %s: "
 		   "zone not found",
-		   (is_admin_scope_zone)? "scoped" : "non-scoped",
-		   cstring(admin_scope_zone_id));
+		   cstring(zone_id));
 	return (XORP_ERROR);
     }
     
@@ -487,13 +450,11 @@ PimNode::delete_config_cand_bsr(bool is_admin_scope_zone,
     
     if (bsr_zone->bsr_group_prefix_list().empty()) {
 	// No Cand-RP, therefore delete the zone.
-	pim_bsr().delete_config_bsr_zone(bsr_zone);	
+	pim_bsr().delete_config_bsr_zone(bsr_zone);
     } else {
 	// There is Cand-RP configuration, therefore only reset the Cand-BSR
 	// configuration.
-	bsr_zone->set_i_am_candidate_bsr(false,
-					 IPvX::ZERO(family()),
-					 0);
+	bsr_zone->set_i_am_candidate_bsr(false, IPvX::ZERO(family()), 0);
     }
     
     if (is_up)
@@ -506,22 +467,14 @@ PimNode::delete_config_cand_bsr(bool is_admin_scope_zone,
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::add_config_cand_rp_by_vif_name(bool is_admin_scope_zone,
-					const IPvXNet& group_prefix,
+PimNode::add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
+					bool is_scope_zone,
 					const string& vif_name,
 					uint8_t rp_priority,
 					uint16_t rp_holdtime)
 {
     // XXX: Find the vif address
     PimVif *pim_vif = vif_find_by_name(vif_name);
-    
-    if (! group_prefix.is_multicast()) {
-	XLOG_ERROR("Cannot add configure Cand-RP "
-		   "for group prefix %s: "
-		   "not a multicast group prefix",
-		   cstring(group_prefix));
-	return (XORP_ERROR);
-    }
     
     if (pim_vif == NULL) {
 	XLOG_ERROR("Cannot add configure Cand-RP with vif %s: no such vif",
@@ -536,8 +489,8 @@ PimNode::add_config_cand_rp_by_vif_name(bool is_admin_scope_zone,
 	return (XORP_ERROR);	// The vif has no address yet
     }
     
-    if (add_config_cand_rp_by_addr(is_admin_scope_zone,
-				   group_prefix,
+    if (add_config_cand_rp_by_addr(group_prefix,
+				   is_scope_zone,
 				   *pim_vif->addr_ptr(),
 				   rp_priority,
 				   rp_holdtime) < 0) {
@@ -548,22 +501,19 @@ PimNode::add_config_cand_rp_by_vif_name(bool is_admin_scope_zone,
 }
 
 //
+// Add myself as a Cand-RP
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::add_config_cand_rp_by_addr(bool is_admin_scope_zone,
-				    const IPvXNet& group_prefix,
+PimNode::add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
+				    bool is_scope_zone,
 				    const IPvX& my_cand_rp_addr,
 				    uint8_t rp_priority,
 				    uint16_t rp_holdtime)
 {
-    if (! group_prefix.is_multicast()) {
-	XLOG_ERROR("Cannot add configure Cand-RP "
-		   "for group prefix %s: "
-		   "not a multicast group prefix",
-		   cstring(group_prefix));
-	return (XORP_ERROR);
-    }
+    BsrZone *config_bsr_zone = NULL;
+    string error_msg = "";
+    bool is_new_zone = false;
     
     if (! is_my_addr(my_cand_rp_addr)) {
 	XLOG_ERROR("Cannot add configure Cand-RP with address %s: "
@@ -572,83 +522,50 @@ PimNode::add_config_cand_rp_by_addr(bool is_admin_scope_zone,
 	return (XORP_ERROR);
     }
     
-    if (! my_cand_rp_addr.is_unicast()) {
-	XLOG_ERROR("Cannot add configure Cand-RP with address %s: "
-		   "not an unicast address",
-		   cstring(my_cand_rp_addr));
-	return (XORP_ERROR);
-    }
+    config_bsr_zone = pim_bsr().find_config_bsr_zone_by_prefix(group_prefix,
+							       is_scope_zone);
     
-    // XXX: add myself as a Cand-RP
-    do {
-	BsrZone *config_bsr_zone = NULL;
-	BsrRp *bsr_rp = NULL;
-	string error_msg = "";
-	
-	config_bsr_zone = pim_bsr().find_bsr_zone_by_prefix_from_list(
-	    pim_bsr().config_bsr_zone_list(),
-	    is_admin_scope_zone,
-	    group_prefix);
-	
+    if (config_bsr_zone == NULL) {
+	BsrZone new_bsr_zone(pim_bsr(), PimScopeZoneId(group_prefix,
+						       is_scope_zone));
+	config_bsr_zone = pim_bsr().add_config_bsr_zone(new_bsr_zone,
+							error_msg);
 	if (config_bsr_zone == NULL) {
-	    BsrZone new_bsr_zone(pim_bsr(), is_admin_scope_zone, group_prefix);
-	    config_bsr_zone = pim_bsr().add_config_bsr_zone(new_bsr_zone,
-							    error_msg);
-	    if (config_bsr_zone == NULL) {
-		XLOG_ERROR("Cannot add configure Cand-RP for %s "
-			   "zone group prefix %s: %s",
-			   (is_admin_scope_zone)? "scoped" : "non-scoped",
-			   cstring(group_prefix),
-			   error_msg.c_str());
-		return (XORP_ERROR);
-	    }
-	}
-	XLOG_ASSERT(config_bsr_zone != NULL);
-	
-	bsr_rp = config_bsr_zone->add_rp(
-	    is_admin_scope_zone,
-	    group_prefix,
-	    my_cand_rp_addr,
-	    rp_priority,
-	    rp_holdtime,
-	    error_msg);
-	
-	if (bsr_rp == NULL) {
-	    if (config_bsr_zone == NULL) {
-		XLOG_ERROR("Cannot add configure Cand-RP address %s for %s "
-			   "zone group prefix %s: %s",
-			   cstring(my_cand_rp_addr),
-			   (is_admin_scope_zone)? "scoped" : "non-scoped",
-			   cstring(group_prefix),
-			   error_msg.c_str());
-		return (XORP_ERROR);
-	    }
-	    
-	    XLOG_ERROR("Cannot add add Cand-RP %s for group prefix %s",
-		       cstring(my_cand_rp_addr),
-		       cstring(IPvXNet::ip_multicast_base_prefix(family())));
+	    XLOG_ERROR("Cannot add configure Cand-RP for "
+		       "zone group prefix %s (%s): %s",
+		       cstring(group_prefix),
+		       (is_scope_zone)? "scoped" : "non-scoped",
+		       error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-    } while (false);
+	is_new_zone = true;
+    }
+    
+    if (config_bsr_zone->add_rp(group_prefix, is_scope_zone,
+				my_cand_rp_addr, rp_priority,
+				rp_holdtime, error_msg)
+	== NULL) {
+	XLOG_ERROR("Cannot add configure Cand-RP address %s for "
+		   "zone group prefix %s (%s): %s",
+		   cstring(my_cand_rp_addr),
+		   cstring(group_prefix),
+		   (is_scope_zone)? "scoped" : "non-scoped",
+		   error_msg.c_str());
+	if (is_new_zone)
+	    pim_bsr().delete_config_bsr_zone(config_bsr_zone);
+	return (XORP_ERROR);
+    }
     
     return (XORP_OK);
 }
 
 int
-PimNode::delete_config_cand_rp_by_vif_name(bool is_admin_scope_zone,
-					   const IPvXNet& group_prefix,
+PimNode::delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
+					   bool is_scope_zone,
 					   const string& vif_name)
 {
     // XXX: Find the vif address
     PimVif *pim_vif = vif_find_by_name(vif_name);
-    
-    if (! group_prefix.is_multicast()) {
-	XLOG_ERROR("Cannot delete configure Cand-RP "
-		   "for group prefix %s: "
-		   "not a multicast group prefix",
-		   cstring(group_prefix));
-	return (XORP_ERROR);
-    }
     
     if (pim_vif == NULL) {
 	XLOG_ERROR("Cannot delete configure Cand-RP with vif %s: no such vif",
@@ -663,8 +580,8 @@ PimNode::delete_config_cand_rp_by_vif_name(bool is_admin_scope_zone,
 	return (XORP_ERROR);	// The vif has no address yet
     }
     
-    if (delete_config_cand_rp_by_addr(is_admin_scope_zone,
-				      group_prefix,
+    if (delete_config_cand_rp_by_addr(group_prefix,
+				      is_scope_zone,
 				      *pim_vif->addr_ptr()) < 0) {
 	return (XORP_ERROR);
     }
@@ -673,8 +590,8 @@ PimNode::delete_config_cand_rp_by_vif_name(bool is_admin_scope_zone,
 }
 
 int
-PimNode::delete_config_cand_rp_by_addr(bool is_admin_scope_zone,
-				       const IPvXNet& group_prefix,
+PimNode::delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
+				       bool is_scope_zone,
 				       const IPvX& my_cand_rp_addr)
 {
     BsrZone *bsr_zone;
@@ -682,32 +599,16 @@ PimNode::delete_config_cand_rp_by_addr(bool is_admin_scope_zone,
     BsrRp *bsr_rp;
     bool is_up = false;
     
-    if (! group_prefix.is_multicast()) {
-	XLOG_ERROR("Cannot delete configure Cand-RP "
-		   "for group prefix %s: "
-		   "not a multicast group prefix",
-		   cstring(group_prefix));
-	return (XORP_ERROR);
-    }
-    
-    if (! my_cand_rp_addr.is_unicast()) {
-	XLOG_ERROR("Cannot delete configure Cand-RP with address %s: "
-		   "not an unicast address",
-		   cstring(my_cand_rp_addr));
-	return (XORP_ERROR);
-    }
-    
     //
     // Find the BSR zone
     //
-    bsr_zone = pim_bsr().find_config_bsr_zone_by_prefix(
-	is_admin_scope_zone,
-	group_prefix);
+    bsr_zone = pim_bsr().find_config_bsr_zone_by_prefix(group_prefix,
+							is_scope_zone);
     if (bsr_zone == NULL) {
-	XLOG_ERROR("Cannot delete configure Cand-RP for %s zone for "
-		   "group prefix %s: zone not found",
-		   (is_admin_scope_zone)? "scoped" : "non-scoped",
-		   cstring(group_prefix));
+	XLOG_ERROR("Cannot delete configure Cand-RP for zone for "
+		   "group prefix %s (%s): zone not found",
+		   cstring(group_prefix),
+		   (is_scope_zone)? "scoped" : "non-scoped");
 	return (XORP_ERROR);
     }
     
@@ -716,22 +617,22 @@ PimNode::delete_config_cand_rp_by_addr(bool is_admin_scope_zone,
     //
     bsr_group_prefix = bsr_zone->find_bsr_group_prefix(group_prefix);
     if (bsr_group_prefix == NULL) {
-	XLOG_ERROR("Cannot delete configure Cand-RP for %s zone for "
-		   "group prefix %s: prefix not found",
-		   (is_admin_scope_zone)? "scoped" : "non-scoped",
-		   cstring(group_prefix));
+	XLOG_ERROR("Cannot delete configure Cand-RP for zone for "
+		   "group prefix %s (%s): prefix not found",
+		   cstring(group_prefix),
+		   (is_scope_zone)? "scoped" : "non-scoped");
 	return (XORP_ERROR);
     }
     
     //
-    // Find the BSR RP.
+    // Find the RP
     //
     bsr_rp = bsr_group_prefix->find_rp(my_cand_rp_addr);
     if (bsr_rp == NULL) {
-	XLOG_ERROR("Cannot delete configure Cand-RP for %s zone for "
-		   "group prefix %s and RP %s: RP not found",
-		   (is_admin_scope_zone)? "scoped" : "non-scoped",
+	XLOG_ERROR("Cannot delete configure Cand-RP for zone for "
+		   "group prefix %s (%s) and RP %s: RP not found",
 		   cstring(group_prefix),
+		   (is_scope_zone)? "scoped" : "non-scoped",
 		   cstring(my_cand_rp_addr));
 	return (XORP_ERROR);
     }
@@ -776,7 +677,7 @@ PimNode::add_config_rp(const IPvXNet& group_prefix,
     if (! group_prefix.is_multicast()) {
 	XLOG_ERROR("Cannot add configure RP with address %s "
 		   "for group prefix %s: "
-		   "not a multicast group prefix",
+		   "not a multicast address",
 		   cstring(rp_addr),
 		   cstring(group_prefix));
 	return (XORP_ERROR);
@@ -813,25 +714,8 @@ PimNode::add_config_rp(const IPvXNet& group_prefix,
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::delete_config_rp(const IPvXNet& group_prefix,
-			  const IPvX& rp_addr)
+PimNode::delete_config_rp(const IPvXNet& group_prefix, const IPvX& rp_addr)
 {
-    if (! group_prefix.is_multicast()) {
-	XLOG_ERROR("Cannot delete configure RP with address %s "
-		   "for group prefix %s: "
-		   "not a multicast group prefix",
-		   cstring(rp_addr),
-		   cstring(group_prefix));
-	return (XORP_ERROR);
-    }
-    
-    if (! rp_addr.is_unicast()) {
-	XLOG_ERROR("Cannot delete configure RP with address %s: "
-		   "not an unicast address",
-		   cstring(rp_addr));
-	return (XORP_ERROR);
-    }
-    
     if (rp_table().delete_rp(rp_addr, group_prefix,
 			     PimRp::RP_LEARNED_METHOD_STATIC)
 	!= XORP_OK) {

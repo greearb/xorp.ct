@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.2 2003/01/07 01:43:03 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.3 2003/01/13 20:11:22 pavlin Exp $
 #
 
 #
@@ -210,238 +210,238 @@ pim_stop_bsr()
 pim_add_config_cand_bsr_by_vif_name4()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_bsr_by_vif_name4 <is_admin_scope_zone:bool> <admin_scope_zone_id:ipv4net> <vif_name:txt> <bsr_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_cand_bsr_by_vif_name4 <scope_zone_id:ipv4net> <is_scope_zone:bool> <vif_name:txt> <bsr_priority:u32> <hash_masklen:u32>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    admin_scope_zone_id=$2
+    scope_zone_id=$1
+    is_scope_zone=$2
     vif_name=$3
     bsr_priority=$4
     hash_masklen=$5
     
     echo "pim_add_config_cand_bsr_by_vif_name4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_vif_name4"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&admin_scope_zone_id:ipv4net=$admin_scope_zone_id&vif_name:txt=$vif_name&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
+    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_add_config_cand_bsr_by_vif_name6()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_bsr_by_vif_name6 <is_admin_scope_zone:bool> <admin_scope_zone_id:ipv6net> <vif_name:txt> <bsr_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_cand_bsr_by_vif_name6 <scope_zone_id:ipv6net> <is_scope_zone:bool> <vif_name:txt> <bsr_priority:u32> <hash_masklen:u32>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    admin_scope_zone_id=$2
+    scope_zone_id=$1
+    is_scope_zone=$2
     vif_name=$3
     bsr_priority=$4
     hash_masklen=$5
     
     echo "pim_add_config_cand_bsr_by_vif_name6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_vif_name6"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&admin_scope_zone_id:ipv6net=$admin_scope_zone_id&vif_name:txt=$vif_name&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
+    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_add_config_cand_bsr_by_addr4()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_bsr_by_addr4 <is_admin_scope_zone:bool> <admin_scope_zone_id:ipv4net> <cand_bsr_addr:ipv4> <bsr_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_cand_bsr_by_addr4 <scope_zone_id:ipv4net> <is_scope_zone:bool> <cand_bsr_addr:ipv4> <bsr_priority:u32> <hash_masklen:u32>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    admin_scope_zone_id=$2
+    scope_zone_id=$1
+    is_scope_zone=$2
     cand_bsr_addr=$3
     bsr_priority=$4
     hash_masklen=$5
     
     echo "pim_add_config_cand_bsr_by_addr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_addr4"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&admin_scope_zone_id:ipv4net=$admin_scope_zone_id&cand_bsr_addr:ipv4=$cand_bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
+    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&cand_bsr_addr:ipv4=$cand_bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_add_config_cand_bsr_by_addr6()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_bsr_by_addr6 <is_admin_scope_zone:bool> <admin_scope_zone_id:ipv6net> <cand_bsr_addr:ipv6> <bsr_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_cand_bsr_by_addr6 <scope_zone_id:ipv6net> <is_scope_zone:bool> <cand_bsr_addr:ipv6> <bsr_priority:u32> <hash_masklen:u32>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    admin_scope_zone_id=$2
+    scope_zone_id=$1
+    is_scope_zone=$2
     cand_bsr_addr=$3
     bsr_priority=$4
     hash_masklen=$5
     
     echo "pim_add_config_cand_bsr_by_addr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_addr6"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&admin_scope_zone_id:ipv6net=$admin_scope_zone_id&cand_bsr_addr:ipv6=$cand_bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
+    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&cand_bsr_addr:ipv6=$cand_bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_delete_config_cand_bsr4()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_delete_config_cand_bsr4 <is_admin_scope_zone:bool> <admin_scope_zone_id:ipv4net>"
+	echo "Usage: pim_delete_config_cand_bsr4 <scope_zone_id:ipv4net> <is_scope_zone:bool>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    admin_scope_zone_id=$2
+    scope_zone_id=$1
+    is_scope_zone=$2
     
     echo "pim_delete_config_cand_bsr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_bsr4"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&admin_scope_zone_id:ipv4net=$admin_scope_zone_id"
+    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_delete_config_cand_bsr6()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_delete_config_cand_bsr6 <is_admin_scope_zone:bool> <admin_scope_zone_id:ipv6net>"
+	echo "Usage: pim_delete_config_cand_bsr6 <scope_zone_id:ipv6net> <is_scope_zone:bool>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    admin_scope_zone_id=$2
+    scope_zone_id=$1
+    is_scope_zone=$2
     
     echo "pim_delete_config_cand_bsr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_bsr6"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&admin_scope_zone_id:ipv6net=$admin_scope_zone_id"
+    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_add_config_cand_rp_by_vif_name4()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_rp_by_vif_name4 <is_admin_scope_zone:bool> <group_prefix:ipv4net> <vif_name:txt> <rp_priority:u32> <rp_holdtime:u32>"
+	echo "Usage: pim_add_config_cand_rp_by_vif_name4 <group_prefix:ipv4net> <is_scope_zone:bool> <vif_name:txt> <rp_priority:u32> <rp_holdtime:u32>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    group_prefix=$2
+    group_prefix=$1
+    is_scope_zone=$2
     vif_name=$3
     rp_priority=$4
     rp_holdtime=$5
     
     echo "pim_add_config_cand_rp_by_vif_name4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_rp_by_vif_name4"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&group_prefix:ipv4net=$group_prefix&vif_name:txt=$vif_name&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
+    XRL_ARGS="?group_prefix:ipv4net=$group_prefix&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_add_config_cand_rp_by_vif_name6()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_rp_by_vif_name6 <is_admin_scope_zone:bool> <group_prefix:ipv6net> <vif_name:txt> <rp_priority:u32> <rp_holdtime:u32>"
+	echo "Usage: pim_add_config_cand_rp_by_vif_name6 <group_prefix:ipv6net> <is_scope_zone:bool> <vif_name:txt> <rp_priority:u32> <rp_holdtime:u32>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    group_prefix=$2
+    group_prefix=$1
+    is_scope_zone=$2
     vif_name=$3
     rp_priority=$4
     rp_holdtime=$5
     
     echo "pim_add_config_cand_rp_by_vif_name6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_rp_by_vif_name6"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&group_prefix:ipv6net=$group_prefix&vif_name:txt=$vif_name&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
+    XRL_ARGS="?group_prefix:ipv6net=$group_prefix&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_add_config_cand_rp_by_addr4()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_rp_by_addr4 <is_admin_scope_zone:bool> <group_prefix:ipv4net> <cand_rp_addr:ipv4> <rp_priority:u32> <rp_holdtime:u32>"
+	echo "Usage: pim_add_config_cand_rp_by_addr4 <group_prefix:ipv4net> <is_scope_zone:bool> <cand_rp_addr:ipv4> <rp_priority:u32> <rp_holdtime:u32>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    group_prefix=$2
+    group_prefix=$1
+    is_scope_zone=$2
     cand_rp_addr=$3
     rp_priority=$4
     rp_holdtime=$5
     
     echo "pim_add_config_cand_rp_by_addr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_rp_by_addr4"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&group_prefix:ipv4net=$group_prefix&cand_rp_addr:ipv4=$cand_rp_addr&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
+    XRL_ARGS="?group_prefix:ipv4net=$group_prefix&is_scope_zone:bool=$is_scope_zone&cand_rp_addr:ipv4=$cand_rp_addr&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_add_config_cand_rp_by_addr6()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_rp_by_addr6 <is_admin_scope_zone:bool> <group_prefix:ipv6net> <cand_rp_addr:ipv6> <rp_priority:u32> <rp_holdtime:u32>"
+	echo "Usage: pim_add_config_cand_rp_by_addr6 <group_prefix:ipv6net> <is_scope_zone:bool> <cand_rp_addr:ipv6> <rp_priority:u32> <rp_holdtime:u32>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    group_prefix=$2
+    group_prefix=$1
+    is_scope_zone=$2
     cand_rp_addr=$3
     rp_priority=$4
     rp_holdtime=$5
     
     echo "pim_add_config_cand_rp_by_addr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_rp_by_addr6"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&group_prefix:ipv6net=$group_prefix&cand_rp_addr:ipv6=$cand_rp_addr&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
+    XRL_ARGS="?group_prefix:ipv6net=$group_prefix&is_scope_zone:bool=$is_scope_zone&cand_rp_addr:ipv6=$cand_rp_addr&rp_priority:u32=$rp_priority&rp_holdtime:u32=$rp_holdtime"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_delete_config_cand_rp_by_vif_name4()
 {
     if [ $# -lt 3 ] ; then
-	echo "Usage: pim_delete_config_cand_rp_by_vif_name4 <is_admin_scope_zone:bool> <group_prefix:ipv4net> <vif_name:txt>"
+	echo "Usage: pim_delete_config_cand_rp_by_vif_name4 <group_prefix:ipv4net> <is_scope_zone:bool> <vif_name:txt>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    group_prefix=$2
+    group_prefix=$1
+    is_scope_zone=$2
     vif_name=$3
     
     echo "pim_delete_config_cand_rp_by_vif_name4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_rp_by_vif_name4"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&group_prefix:ipv4net=$group_prefix&vif_name:txt=$vif_name"
+    XRL_ARGS="?group_prefix:ipv4net=$group_prefix&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_delete_config_cand_rp_by_vif_name6()
 {
     if [ $# -lt 3 ] ; then
-	echo "Usage: pim_delete_config_cand_rp_by_vif_name6 <is_admin_scope_zone:bool> <group_prefix:ipv6net> <vif_name:txt>"
+	echo "Usage: pim_delete_config_cand_rp_by_vif_name6 <group_prefix:ipv6net> <is_scope_zone:bool> <vif_name:txt>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    group_prefix=$2
+    group_prefix=$1
+    is_scope_zone=$2
     vif_name=$3
     
     echo "pim_delete_config_cand_rp_by_vif_name6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_rp_by_vif_name6"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&group_prefix:ipv6net=$group_prefix&vif_name:txt=$vif_name"
+    XRL_ARGS="?group_prefix:ipv6net=$group_prefix&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_delete_config_cand_rp_by_addr4()
 {
     if [ $# -lt 3 ] ; then
-	echo "Usage: pim_delete_config_cand_rp_by_addr4 <is_admin_scope_zone:bool> <group_prefix:ipv4net> <cand_rp_addr:ipv4>"
+	echo "Usage: pim_delete_config_cand_rp_by_addr4 <group_prefix:ipv4net> <is_scope_zone:bool> <cand_rp_addr:ipv4>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    group_prefix=$2
+    group_prefix=$1
+    is_scope_zone=$2
     cand_rp_addr=$3
     
     echo "pim_delete_config_cand_rp_by_addr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_rp_by_addr4"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&group_prefix:ipv4net=$group_prefix&cand_rp_addr:ipv4=$cand_rp_addr"
+    XRL_ARGS="?group_prefix:ipv4net=$group_prefix&is_scope_zone:bool=$is_scope_zone&cand_rp_addr:ipv4=$cand_rp_addr"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 
 pim_delete_config_cand_rp_by_addr6()
 {
     if [ $# -lt 3 ] ; then
-	echo "Usage: pim_delete_config_cand_rp_by_addr6 <is_admin_scope_zone:bool> <group_prefix:ipv6net> <cand_rp_addr:ipv6>"
+	echo "Usage: pim_delete_config_cand_rp_by_addr6 <group_prefix:ipv6net> <is_scope_zone:bool> <cand_rp_addr:ipv6>"
 	exit 1
     fi
-    is_admin_scope_zone=$1
-    group_prefix=$2
+    group_prefix=$1
+    is_scope_zone=$2
     cand_rp_addr=$3
     
     echo "pim_delete_config_cand_rp_by_addr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/delete_config_cand_rp_by_addr6"
-    XRL_ARGS="?is_admin_scope_zone:bool=$is_admin_scope_zone&group_prefix:ipv6net=$group_prefix&cand_rp_addr:ipv6=$cand_rp_addr"
+    XRL_ARGS="?group_prefix:ipv6net=$group_prefix&is_scope_zone:bool=$is_scope_zone&cand_rp_addr:ipv6=$cand_rp_addr"
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.2 2003/01/30 00:39:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.3 2003/02/19 05:35:17 pavlin Exp $"
 
 
 //
@@ -45,6 +45,98 @@
 // Local functions prototypes
 //
 
+
+/**
+ * PimScopeZoneId::PimScopeZoneId:
+ * @scope_zone_prefix: The scope zone address prefix.
+ * @is_scope_zone: If true, this is administratively scoped zone, otherwise
+ * this is the global zone.
+ * 
+ * PimScopeZoneId constructor.
+ **/
+PimScopeZoneId::PimScopeZoneId(const IPvXNet& scope_zone_prefix,
+			       bool is_scope_zone)
+    : _scope_zone_prefix(scope_zone_prefix),
+      _is_scope_zone(is_scope_zone)
+{
+    
+}
+
+/**
+ * Equality Operator
+ * 
+ * @param other the right-hand operand to compare against.
+ * @return true if the left-hand operand is numerically same as the
+ * right-hand operand.
+ */
+bool
+PimScopeZoneId::operator==(const PimScopeZoneId& other) const
+{
+    return ((scope_zone_prefix() == other.scope_zone_prefix())
+	    && (is_scope_zone() == other.is_scope_zone()));
+}
+
+/**
+ * PimScopeZoneId::is_overlap:
+ * 
+ * Tehst whether a scope zone overlaps with another zone.
+ * 
+ * @param other the other scope zone ID to compare against.
+ * @return true if both zones are scoped and the the scope zone prefixes
+ * for this zone and @other do overlap.
+ */
+bool
+PimScopeZoneId::is_overlap(const PimScopeZoneId& other) const
+{
+    return (is_scope_zone()
+	    && other.is_scope_zone()
+	    && scope_zone_prefix().is_overlap(other.scope_zone_prefix()));
+}
+
+/**
+ * PimScopeZoneId::contains:
+ * @ipvxnet: The subnet address to compare whether is contained within this
+ * scope zone.
+ * 
+ * Test whether a scope zone contains a subnet address.
+ * 
+ * Return value: true if this scope zone contains @ipvxnet, otherwise false.
+ **/
+bool
+PimScopeZoneId::contains(const IPvXNet& ipvxnet) const
+{
+    return (scope_zone_prefix().contains(ipvxnet));
+}
+
+/**
+ * PimScopeZoneId::contains:
+ * @ipvx: The address to compare whether is contained within this
+ * scope zone.
+ * 
+ * Test whether a scope zone contains an address.
+ * 
+ * Return value: true if this scope zone contains @ipvx, otherwise false.
+ **/
+bool
+PimScopeZoneId::contains(const IPvX& ipvx) const
+{
+    return (scope_zone_prefix().contains(ipvx));
+}
+
+/**
+ * PimScopeZoneId::str:
+ * 
+ * Convert this scope zone ID from binary for to presentation format.
+ * 
+ * Return value: C++ string with the human-readable ASCII representation
+ * of the scope zone ID.
+ **/
+string
+PimScopeZoneId::str() const
+{
+    return (c_format("%s(%s)", _scope_zone_prefix.str().c_str(),
+		     _is_scope_zone? "scoped" : "non-scoped"));
+}
 
 /**
  * PimScopeZoneTable::PimScopeZoneTable:
@@ -143,6 +235,36 @@ PimScopeZoneTable::is_scoped(const IPvX& addr, uint16_t vif_index) const
 }
 
 /**
+ * PimScopeZoneTable::is_scoped:
+ * @zone_id: The zone ID to test whether it is scoped.
+ * @vif_index: The vif index of the interface to test.
+ * 
+ * Test if zone with zone ID of @zone_id is scoped on interface with
+ * vif index of @vif_index.
+ * Note that we test against all scope zones until a scoping one is found.
+ * 
+ * Return value: True if @zone_id is scoped on @vif_index, otherwise false.
+ **/
+bool
+PimScopeZoneTable::is_scoped(const PimScopeZoneId& zone_id,
+			     uint16_t vif_index) const
+{
+    if (! zone_id.is_scope_zone())
+	return (false);
+    
+    list<PimScopeZone>::const_iterator iter;
+    for (iter = _pim_scope_zone_list.begin();
+	 iter != _pim_scope_zone_list.end();
+	 ++iter) {
+	const PimScopeZone& pim_scope_zone = *iter;
+	if (pim_scope_zone.is_scoped(zone_id, vif_index))
+	    return (true);
+    }
+    
+    return (false);
+}
+
+/**
  * PimScopeZone::PimScopeZone:
  * @scope_zone_prefix: The scope zone address prefix.
  * 
@@ -212,6 +334,31 @@ bool
 PimScopeZone::is_scoped(const IPvX& addr, uint16_t vif_index) const
 {
     if (! _scope_zone_prefix.contains(addr))
+	return (false);
+    
+    return (is_set(vif_index));
+}
+
+/**
+ * PimScopeZone::is_scoped:
+ * @zone_id: The zone ID to test whether it is scoped.
+ * @vif_index: The vif index of the interface to test.
+ * 
+ * Test if zone with zone ID of @zone_id is scoped on interface with
+ * vif index of @vif_index.
+ * 
+ * Return value: True if @zone_id is scoped on @vif_index, otherwise false.
+ **/
+bool
+PimScopeZone::is_scoped(const PimScopeZoneId& zone_id,
+			uint16_t vif_index) const
+{
+    if (! zone_id.is_scope_zone())
+	return (false);
+    
+    // XXX: scoped zones don't nest, hence if the scope zone prefixes
+    // do overlap, then there is scoping.
+    if (! _scope_zone_prefix.is_overlap(zone_id.scope_zone_prefix()))
 	return (false);
     
     return (is_set(vif_index));

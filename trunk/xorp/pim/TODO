@@ -1,6 +1,15 @@
 #
-# $XORP: xorp/pim/TODO,v 1.24 2003/02/07 19:13:21 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.25 2003/02/11 23:29:32 pavlin Exp $
 #
+
+* IMPL+SPEC: If Cand-RP received by BSR, when to send the next BSM
+  with the updated RP-Set? Currently, the spec doesn't say anything;
+  the implementation sends the new BSM immediately. However, the
+  problem with that is that whenever there is a new BSR, all Cand-RPs
+  start sending to it the Cand-RP messages as soon as they learn
+  about the new BSR. On the other hand, the BSR then generates
+  new BSM for each new Cand-RP. Result: sudden explosion of
+  Cand-RP and Bootstrap messages.
 
 * IMPL+SPEC: if the current Assert winner neighbor timeout, then
   the action is A5, and move to NI state (this applies for both

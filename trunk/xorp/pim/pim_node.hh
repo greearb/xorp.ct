@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.2 2003/01/07 01:43:03 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.3 2003/01/13 20:11:21 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -774,33 +774,33 @@ public:
 					  uint16_t join_prune_period);
     int		reset_vif_join_prune_period(const string& vif_name);
     //
-    int		add_config_cand_bsr_by_vif_name(bool is_admin_scope_zone,
-						const IPvXNet& admin_scope_zone_id,
+    int		add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
+						bool is_scope_zone,
 						const string& vif_name,
 						uint8_t bsr_priority,
 						uint8_t hash_masklen);
-    int		add_config_cand_bsr_by_addr(bool is_admin_scope_zone,
-					    const IPvXNet& admin_scope_zone_id,
+    int		add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
+					    bool is_scope_zone,
 					    const IPvX& my_cand_bsr_addr,
 					    uint8_t bsr_priority,
 					    uint8_t hash_masklen);
-    int		delete_config_cand_bsr(bool is_admin_scope_zone,
-				       const IPvXNet& admin_scope_zone_id);
-    int		add_config_cand_rp_by_vif_name(bool is_admin_scope_zone,
-					       const IPvXNet& group_prefix,
+    int		delete_config_cand_bsr(const IPvXNet& scope_zone_id,
+				       bool is_scope_zone);
+    int		add_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
+					       bool is_scope_zone,
 					       const string& vif_name,
 					       uint8_t rp_priority,
 					       uint16_t rp_holdtime);
-    int		add_config_cand_rp_by_addr(bool is_admin_scope_zone,
-					   const IPvXNet& group_prefix,
+    int		add_config_cand_rp_by_addr(const IPvXNet& group_prefix,
+					   bool is_scope_zone,
 					   const IPvX& my_cand_rp_addr,
 					   uint8_t rp_priority,
 					   uint16_t rp_holdtime);
-    int		delete_config_cand_rp_by_vif_name(bool is_admin_scope_zone,
-						  const IPvXNet& group_prefix,
+    int		delete_config_cand_rp_by_vif_name(const IPvXNet& group_prefix,
+						  bool is_scope_zone,
 						  const string& vif_name);
-    int		delete_config_cand_rp_by_addr(bool is_admin_scope_zone,
-					      const IPvXNet& group_prefix,
+    int		delete_config_cand_rp_by_addr(const IPvXNet& group_prefix,
+					      bool is_scope_zone,
 					      const IPvX& my_cand_rp_addr);
     int		add_config_rp(const IPvXNet& group_prefix,
 			      const IPvX& rp_addr,

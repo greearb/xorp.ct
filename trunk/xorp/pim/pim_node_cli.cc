@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.5 2003/01/26 04:06:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.6 2003/02/14 23:59:03 pavlin Exp $"
 
 
 //
@@ -148,8 +148,8 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
     // Check the optional argument
     if (argv.size()) {
 	try {
-	    IPvXNet admin_scope_zone_id(argv[0].c_str());
-	    if (admin_scope_zone_id.masked_addr().af() != family()) {
+	    IPvXNet scope_zone_id(argv[0].c_str());
+	    if (scope_zone_id.masked_addr().af() != family()) {
 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
 			   argv[0].c_str()));
 		return (XORP_ERROR);
@@ -158,15 +158,11 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    // Try to find a scoped zone. If not found, then try
 	    // a non-scoped zone.
 	    //
-	    show_bsr_zone = pim_node().pim_bsr().find_bsr_zone_from_list(
-		pim_node().pim_bsr().active_bsr_zone_list(),
-		true,
-		admin_scope_zone_id);
+	    show_bsr_zone = pim_node().pim_bsr().find_active_bsr_zone(
+		PimScopeZoneId(scope_zone_id, true));
 	    if (show_bsr_zone == NULL) {
-		show_bsr_zone = pim_node().pim_bsr().find_bsr_zone_from_list(
-		    pim_node().pim_bsr().active_bsr_zone_list(),
-		    false,
-		    admin_scope_zone_id);
+		show_bsr_zone = pim_node().pim_bsr().find_active_bsr_zone(
+		    PimScopeZoneId(scope_zone_id, false));
 	    }
 	    if (show_bsr_zone == NULL) {
 		cli_print(c_format("ERROR: cannot find a zone with zone ID: %s\n",
@@ -301,8 +297,8 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
     // Check the optional argument
     if (argv.size()) {
 	try {
-	    IPvXNet admin_scope_zone_id(argv[0].c_str());
-	    if (admin_scope_zone_id.masked_addr().af() != family()) {
+	    IPvXNet scope_zone_id(argv[0].c_str());
+	    if (scope_zone_id.masked_addr().af() != family()) {
 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
 			   argv[0].c_str()));
 		return (XORP_ERROR);
@@ -311,15 +307,11 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 	    // Try to find an active scoped zone. If not found, then try
 	    // a non-scoped zone.
 	    //
-	    show_active_bsr_zone = pim_node().pim_bsr().find_bsr_zone_from_list(
-		pim_node().pim_bsr().active_bsr_zone_list(),
-		true,
-		admin_scope_zone_id);
+	    show_active_bsr_zone = pim_node().pim_bsr().find_active_bsr_zone(
+		PimScopeZoneId(scope_zone_id, true));
 	    if (show_active_bsr_zone == NULL) {
-		show_active_bsr_zone = pim_node().pim_bsr().find_bsr_zone_from_list(
-		    pim_node().pim_bsr().active_bsr_zone_list(),
-		    false,
-		    admin_scope_zone_id);
+		show_active_bsr_zone = pim_node().pim_bsr().find_active_bsr_zone(
+		    PimScopeZoneId(scope_zone_id, false));
 	    }
 	    if (show_active_bsr_zone == NULL) {
 		cli_print(c_format("ERROR: cannot find an active zone with zone ID: %s\n",
@@ -330,15 +322,11 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 	    // Try to find a configured scoped zone. If not found, then try
 	    // a non-scoped zone.
 	    //
-	    show_config_bsr_zone = pim_node().pim_bsr().find_bsr_zone_from_list(
-		pim_node().pim_bsr().config_bsr_zone_list(),
-		true,
-		admin_scope_zone_id);
+	    show_config_bsr_zone = pim_node().pim_bsr().find_config_bsr_zone(
+		PimScopeZoneId(scope_zone_id, true));
 	    if (show_config_bsr_zone == NULL) {
-		show_config_bsr_zone = pim_node().pim_bsr().find_bsr_zone_from_list(
-		    pim_node().pim_bsr().config_bsr_zone_list(),
-		    false,
-		    admin_scope_zone_id);
+		show_config_bsr_zone = pim_node().pim_bsr().find_config_bsr_zone(
+		    PimScopeZoneId(scope_zone_id, false));
 	    }
 	    if (show_config_bsr_zone == NULL) {
 		cli_print(c_format("ERROR: cannot find a config zone with zone ID: %s\n",
@@ -1130,18 +1118,17 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 		// Try first a scoped zone, then a non-scoped zone
 		BsrZone *bsr_zone
 		    = pim_node().pim_bsr().find_active_bsr_zone_by_prefix(
-			true,
-			pim_rp->group_prefix());
+			pim_rp->group_prefix(),
+			true);
 		if (bsr_zone == NULL) {
 		    bsr_zone = pim_node().pim_bsr().find_active_bsr_zone_by_prefix(
-			false,
-			pim_rp->group_prefix());
+			pim_rp->group_prefix(),
+			false);
 		}
 		if (bsr_zone == NULL)
 		    break;
-		BsrRp *bsr_rp
-		    = bsr_zone->find_rp(pim_rp->group_prefix(),
-					pim_rp->rp_addr());
+		BsrRp *bsr_rp = bsr_zone->find_rp(pim_rp->group_prefix(),
+						  pim_rp->rp_addr());
 		if (bsr_rp == NULL)
 		    break;
 		holdtime = bsr_rp->rp_holdtime();

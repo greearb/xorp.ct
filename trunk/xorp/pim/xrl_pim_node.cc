@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.4 2003/01/13 20:40:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.5 2003/01/16 19:32:51 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2493,8 +2493,8 @@ XrlPimNode::pim_0_1_stop_bsr(
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
-    const IPv4Net&	admin_scope_zone_id, 
+    const IPv4Net&	scope_zone_id, 
+    const bool&		is_scope_zone, 
     const string&	vif_name, 
     const uint32_t&	bsr_priority, 
     const uint32_t&	hash_masklen, 
@@ -2502,8 +2502,8 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::add_config_cand_bsr_by_vif_name(is_admin_scope_zone,
-						 IPvXNet(admin_scope_zone_id),
+    if (PimNode::add_config_cand_bsr_by_vif_name(IPvXNet(scope_zone_id),
+						 is_scope_zone,
 						 vif_name,
 						 bsr_priority,
 						 hash_masklen) < 0) {
@@ -2519,8 +2519,8 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name6(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
-    const IPv6Net&	admin_scope_zone_id, 
+    const IPv6Net&	scope_zone_id, 
+    const bool&		is_scope_zone, 
     const string&	vif_name, 
     const uint32_t&	bsr_priority, 
     const uint32_t&	hash_masklen, 
@@ -2528,8 +2528,8 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name6(
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::add_config_cand_bsr_by_vif_name(is_admin_scope_zone,
-						 IPvXNet(admin_scope_zone_id),
+    if (PimNode::add_config_cand_bsr_by_vif_name(IPvXNet(scope_zone_id),
+						 is_scope_zone,
 						 vif_name,
 						 bsr_priority,
 						 hash_masklen) < 0) {
@@ -2545,8 +2545,8 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name6(
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr4(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
-    const IPv4Net&	admin_scope_zone_id, 
+    const IPv4Net&	scope_zone_id, 
+    const bool&		is_scope_zone, 
     const IPv4&		cand_bsr_addr, 
     const uint32_t&	bsr_priority, 
     const uint32_t&	hash_masklen, 
@@ -2554,8 +2554,8 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr4(
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::add_config_cand_bsr_by_addr(is_admin_scope_zone,
-					     IPvXNet(admin_scope_zone_id),
+    if (PimNode::add_config_cand_bsr_by_addr(IPvXNet(scope_zone_id),
+					     is_scope_zone,
 					     IPvX(cand_bsr_addr),
 					     bsr_priority,
 					     hash_masklen) < 0) {
@@ -2571,8 +2571,8 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr4(
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr6(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
-    const IPv6Net&	admin_scope_zone_id, 
+    const IPv6Net&	scope_zone_id, 
+    const bool&		is_scope_zone, 
     const IPv6&		cand_bsr_addr, 
     const uint32_t&	bsr_priority, 
     const uint32_t&	hash_masklen, 
@@ -2580,8 +2580,8 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr6(
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::add_config_cand_bsr_by_addr(is_admin_scope_zone,
-					     IPvXNet(admin_scope_zone_id),
+    if (PimNode::add_config_cand_bsr_by_addr(IPvXNet(scope_zone_id),
+					     is_scope_zone,
 					     IPvX(cand_bsr_addr),
 					     bsr_priority,
 					     hash_masklen) < 0) {
@@ -2597,14 +2597,14 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr6(
 XrlCmdError
 XrlPimNode::pim_0_1_delete_config_cand_bsr4(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
-    const IPv4Net&	admin_scope_zone_id, 
+    const IPv4Net&	scope_zone_id, 
+    const bool&		is_scope_zone, 
     // Output values, 
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::delete_config_cand_bsr(is_admin_scope_zone,
-					IPvXNet(admin_scope_zone_id)) < 0) {
+    if (PimNode::delete_config_cand_bsr(IPvXNet(scope_zone_id),
+					is_scope_zone) < 0) {
 	fail = true;
     } else {
 	fail = false;
@@ -2617,14 +2617,14 @@ XrlPimNode::pim_0_1_delete_config_cand_bsr4(
 XrlCmdError
 XrlPimNode::pim_0_1_delete_config_cand_bsr6(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
-    const IPv6Net&	admin_scope_zone_id, 
+    const IPv6Net&	scope_zone_id, 
+    const bool&		is_scope_zone, 
     // Output values, 
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::delete_config_cand_bsr(is_admin_scope_zone,
-					IPvXNet(admin_scope_zone_id)) < 0) {
+    if (PimNode::delete_config_cand_bsr(IPvXNet(scope_zone_id),
+					is_scope_zone) < 0) {
 	fail = true;
     } else {
 	fail = false;
@@ -2637,8 +2637,8 @@ XrlPimNode::pim_0_1_delete_config_cand_bsr6(
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name4(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
     const IPv4Net&	group_prefix, 
+    const bool&		is_scope_zone, 
     const string&	vif_name, 
     const uint32_t&	rp_priority, 
     const uint32_t&	rp_holdtime, 
@@ -2646,8 +2646,8 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name4(
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::add_config_cand_rp_by_vif_name(is_admin_scope_zone,
-						IPvXNet(group_prefix),
+    if (PimNode::add_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
+						is_scope_zone,
 						vif_name,
 						rp_priority,
 						rp_holdtime) < 0) {
@@ -2663,8 +2663,8 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name4(
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name6(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
     const IPv6Net&	group_prefix, 
+    const bool&		is_scope_zone, 
     const string&	vif_name, 
     const uint32_t&	rp_priority, 
     const uint32_t&	rp_holdtime, 
@@ -2672,8 +2672,8 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name6(
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::add_config_cand_rp_by_vif_name(is_admin_scope_zone,
-						IPvXNet(group_prefix),
+    if (PimNode::add_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
+						is_scope_zone,
 						vif_name,
 						rp_priority,
 						rp_holdtime) < 0) {
@@ -2689,8 +2689,8 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name6(
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_cand_rp_by_addr4(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
     const IPv4Net&	group_prefix, 
+    const bool&		is_scope_zone, 
     const IPv4&		cand_rp_addr, 
     const uint32_t&	rp_priority, 
     const uint32_t&	rp_holdtime, 
@@ -2698,8 +2698,8 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr4(
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::add_config_cand_rp_by_addr(is_admin_scope_zone,
-					    IPvXNet(group_prefix),
+    if (PimNode::add_config_cand_rp_by_addr(IPvXNet(group_prefix),
+					    is_scope_zone,
 					    IPvX(cand_rp_addr),
 					    rp_priority,
 					    rp_holdtime) < 0) {
@@ -2715,8 +2715,8 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr4(
 XrlCmdError
 XrlPimNode::pim_0_1_add_config_cand_rp_by_addr6(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
     const IPv6Net&	group_prefix, 
+    const bool&		is_scope_zone, 
     const IPv6&		cand_rp_addr, 
     const uint32_t&	rp_priority, 
     const uint32_t&	rp_holdtime, 
@@ -2724,8 +2724,8 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr6(
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::add_config_cand_rp_by_addr(is_admin_scope_zone,
-					    IPvXNet(group_prefix),
+    if (PimNode::add_config_cand_rp_by_addr(IPvXNet(group_prefix),
+					    is_scope_zone,
 					    IPvX(cand_rp_addr),
 					    rp_priority,
 					    rp_holdtime) < 0) {
@@ -2741,15 +2741,15 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr6(
 XrlCmdError
 XrlPimNode::pim_0_1_delete_config_cand_rp_by_vif_name4(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
     const IPv4Net&	group_prefix, 
+    const bool&		is_scope_zone, 
     const string&	vif_name, 
     // Output values, 
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::delete_config_cand_rp_by_vif_name(is_admin_scope_zone,
-						   IPvXNet(group_prefix),
+    if (PimNode::delete_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
+						   is_scope_zone,
 						   vif_name) < 0) {
 	fail = true;
     } else {
@@ -2763,15 +2763,15 @@ XrlPimNode::pim_0_1_delete_config_cand_rp_by_vif_name4(
 XrlCmdError
 XrlPimNode::pim_0_1_delete_config_cand_rp_by_vif_name6(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
     const IPv6Net&	group_prefix, 
+    const bool&		is_scope_zone, 
     const string&	vif_name, 
     // Output values, 
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::delete_config_cand_rp_by_vif_name(is_admin_scope_zone,
-						   IPvXNet(group_prefix),
+    if (PimNode::delete_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
+						   is_scope_zone,
 						   vif_name) < 0) {
 	fail = true;
     } else {
@@ -2785,15 +2785,15 @@ XrlPimNode::pim_0_1_delete_config_cand_rp_by_vif_name6(
 XrlCmdError
 XrlPimNode::pim_0_1_delete_config_cand_rp_by_addr4(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
     const IPv4Net&	group_prefix, 
+    const bool&		is_scope_zone, 
     const IPv4&		cand_rp_addr, 
     // Output values, 
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::delete_config_cand_rp_by_addr(is_admin_scope_zone,
-					       IPvXNet(group_prefix),
+    if (PimNode::delete_config_cand_rp_by_addr(IPvXNet(group_prefix),
+					       is_scope_zone,
 					       IPvX(cand_rp_addr)) < 0) {
 	fail = true;
     } else {
@@ -2807,15 +2807,15 @@ XrlPimNode::pim_0_1_delete_config_cand_rp_by_addr4(
 XrlCmdError
 XrlPimNode::pim_0_1_delete_config_cand_rp_by_addr6(
     // Input values, 
-    const bool&		is_admin_scope_zone, 
     const IPv6Net&	group_prefix, 
+    const bool&		is_scope_zone, 
     const IPv6&		cand_rp_addr, 
     // Output values, 
     bool&		fail, 
     string&		reason)
 {
-    if (PimNode::delete_config_cand_rp_by_addr(is_admin_scope_zone,
-					       IPvXNet(group_prefix),
+    if (PimNode::delete_config_cand_rp_by_addr(IPvXNet(group_prefix),
+					       is_scope_zone,
 					       IPvX(cand_rp_addr)) < 0) {
 	fail = true;
     } else {

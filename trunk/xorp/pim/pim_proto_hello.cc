@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.2 2003/01/06 20:28:45 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.3 2003/01/07 22:54:44 pavlin Exp $"
 
 
 //
@@ -512,28 +512,8 @@ PimVif::pim_hello_first_send()
 	     ++nbr_iter) {
 	    const IPvX& nbr_addr = *nbr_iter;
 	    
-	    if (pim_nbr_find(nbr_addr) == NULL)
-		continue;
-	    
 	    // Unicast the Bootstrap messages
-	    PimBsr& pim_bsr = pim_node().pim_bsr();
-	    list<BsrZone *>::iterator bsr_zone_iter;
-	    for (bsr_zone_iter = pim_bsr.active_bsr_zone_list().begin();
-		 bsr_zone_iter != pim_bsr.active_bsr_zone_list().end();
-		 ++bsr_zone_iter) {
-		BsrZone& bsr_zone = *(*bsr_zone_iter);
-		
-		if ((bsr_zone.bsr_zone_state() == BsrZone::STATE_PENDING_BSR)
-		    && (bsr_zone.bsr_addr() == bsr_zone.my_bsr_addr())) {
-		    //
-		    // TODO: XXX: PAVPAVPAV: a hack of not sending immediately
-		    // my messages on start-up. Need to fix the draft to decide
-		    // what to do in that case...
-		    //
-		    continue;
-		}
-		pim_bootstrap_send(nbr_addr, bsr_zone);
-	    }
+	    pim_node().pim_bsr().unicast_pim_bootstrap(this, nbr_addr);
 	}
 	
 	delete_send_unicast_bootstrap_nbr_list();

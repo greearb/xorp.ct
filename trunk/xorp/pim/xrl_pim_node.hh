@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.6 2003/01/28 00:37:54 hodson Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.7 2003/02/06 22:21:32 hodson Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -938,10 +938,9 @@ protected:
     /**
      *  Add/delete candidate-BSR configuration.
      *  
-     *  @param is_admin_scope_zone true if configuring adminstratively scoped
-     *  zone.
+     *  @param scope_zone_id the ID of the configured zone.
      *  
-     *  @param admin_scope_zone_id the ID of the configured zone.
+     *  @param is_scope_zone true if configuring administratively scoped zone.
      *  
      *  @param vif_name the name of the vif to use its address as a
      *  candidate-BSR.
@@ -956,8 +955,8 @@ protected:
      */
     XrlCmdError pim_0_1_add_config_cand_bsr_by_vif_name4(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
-	const IPv4Net&	admin_scope_zone_id, 
+	const IPv4Net&	scope_zone_id, 
+	const bool&	is_scope_zone, 
 	const string&	vif_name, 
 	const uint32_t&	bsr_priority, 
 	const uint32_t&	hash_masklen, 
@@ -967,8 +966,8 @@ protected:
 
     XrlCmdError pim_0_1_add_config_cand_bsr_by_vif_name6(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
-	const IPv6Net&	admin_scope_zone_id, 
+	const IPv6Net&	scope_zone_id, 
+	const bool&	is_scope_zone, 
 	const string&	vif_name, 
 	const uint32_t&	bsr_priority, 
 	const uint32_t&	hash_masklen, 
@@ -978,8 +977,8 @@ protected:
 
     XrlCmdError pim_0_1_add_config_cand_bsr_by_addr4(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
-	const IPv4Net&	admin_scope_zone_id, 
+	const IPv4Net&	scope_zone_id, 
+	const bool&	is_scope_zone, 
 	const IPv4&	cand_bsr_addr, 
 	const uint32_t&	bsr_priority, 
 	const uint32_t&	hash_masklen, 
@@ -989,8 +988,8 @@ protected:
 
     XrlCmdError pim_0_1_add_config_cand_bsr_by_addr6(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
-	const IPv6Net&	admin_scope_zone_id, 
+	const IPv6Net&	scope_zone_id, 
+	const bool&	is_scope_zone, 
 	const IPv6&	cand_bsr_addr, 
 	const uint32_t&	bsr_priority, 
 	const uint32_t&	hash_masklen, 
@@ -1000,16 +999,16 @@ protected:
 
     XrlCmdError pim_0_1_delete_config_cand_bsr4(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
-	const IPv4Net&	admin_scope_zone_id, 
+	const IPv4Net&	scope_zone_id, 
+	const bool&	is_scope_zone, 
 	// Output values, 
 	bool&	fail, 
 	string&	reason);
 
     XrlCmdError pim_0_1_delete_config_cand_bsr6(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
-	const IPv6Net&	admin_scope_zone_id, 
+	const IPv6Net&	scope_zone_id, 
+	const bool&	is_scope_zone, 
 	// Output values, 
 	bool&	fail, 
 	string&	reason);
@@ -1017,10 +1016,9 @@ protected:
     /**
      *  Add/delete Candidate-RP configuration.
      *  
-     *  @param is_admin_scope_zone true if configuring adminstratively scoped
-     *  zone.
-     *  
      *  @param group_prefix the group prefix of the configured zone.
+     *  
+     *  @param is_scope_zone true if configuring administratively scoped zone.
      *  
      *  @param vif_name the name of the vif to use its address as a
      *  candidate-RP.
@@ -1035,8 +1033,8 @@ protected:
      */
     XrlCmdError pim_0_1_add_config_cand_rp_by_vif_name4(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
 	const IPv4Net&	group_prefix, 
+	const bool&	is_scope_zone, 
 	const string&	vif_name, 
 	const uint32_t&	rp_priority, 
 	const uint32_t&	rp_holdtime, 
@@ -1046,8 +1044,8 @@ protected:
 
     XrlCmdError pim_0_1_add_config_cand_rp_by_vif_name6(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
 	const IPv6Net&	group_prefix, 
+	const bool&	is_scope_zone, 
 	const string&	vif_name, 
 	const uint32_t&	rp_priority, 
 	const uint32_t&	rp_holdtime, 
@@ -1057,8 +1055,8 @@ protected:
 
     XrlCmdError pim_0_1_add_config_cand_rp_by_addr4(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
 	const IPv4Net&	group_prefix, 
+	const bool&	is_scope_zone, 
 	const IPv4&	cand_rp_addr, 
 	const uint32_t&	rp_priority, 
 	const uint32_t&	rp_holdtime, 
@@ -1068,8 +1066,8 @@ protected:
 
     XrlCmdError pim_0_1_add_config_cand_rp_by_addr6(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
 	const IPv6Net&	group_prefix, 
+	const bool&	is_scope_zone, 
 	const IPv6&	cand_rp_addr, 
 	const uint32_t&	rp_priority, 
 	const uint32_t&	rp_holdtime, 
@@ -1079,8 +1077,8 @@ protected:
 
     XrlCmdError pim_0_1_delete_config_cand_rp_by_vif_name4(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
 	const IPv4Net&	group_prefix, 
+	const bool&	is_scope_zone, 
 	const string&	vif_name, 
 	// Output values, 
 	bool&	fail, 
@@ -1088,8 +1086,8 @@ protected:
 
     XrlCmdError pim_0_1_delete_config_cand_rp_by_vif_name6(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
 	const IPv6Net&	group_prefix, 
+	const bool&	is_scope_zone, 
 	const string&	vif_name, 
 	// Output values, 
 	bool&	fail, 
@@ -1097,8 +1095,8 @@ protected:
 
     XrlCmdError pim_0_1_delete_config_cand_rp_by_addr4(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
 	const IPv4Net&	group_prefix, 
+	const bool&	is_scope_zone, 
 	const IPv4&	cand_rp_addr, 
 	// Output values, 
 	bool&	fail, 
@@ -1106,8 +1104,8 @@ protected:
 
     XrlCmdError pim_0_1_delete_config_cand_rp_by_addr6(
 	// Input values, 
-	const bool&	is_admin_scope_zone, 
 	const IPv6Net&	group_prefix, 
+	const bool&	is_scope_zone, 
 	const IPv6&	cand_rp_addr, 
 	// Output values, 
 	bool&	fail, 

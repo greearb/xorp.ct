@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.37 2002/12/09 18:29:28 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 
 //
@@ -65,350 +65,252 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 {
     int		rcvd_family;
     PimBsr&	pim_bsr = pim_node().pim_bsr();
-    bool	unicast_message_bool = false;
+    bool	is_unicast_message = false;
     IPvX	bsr_addr(family());
     uint8_t	hash_masklen, bsr_priority;
     uint16_t	fragment_tag;
     uint32_t	group_masklen = 0;
+    BsrZone	*bsr_zone = NULL;
+    BsrZone	*active_bsr_zone;
+    size_t	group_prefix_n = 0;
+    string	error_msg = "";
+    int		ret_value = XORP_ERROR;
     
     //
     // Parse the head of the message
     //
-    do {
-	BUFFER_GET_HOST_16(fragment_tag, buffer);
-	BUFFER_GET_OCTET(hash_masklen, buffer);
-	BUFFER_GET_OCTET(bsr_priority, buffer);
-	GET_ENCODED_UNICAST_ADDR(rcvd_family, bsr_addr, buffer);
-	if (! bsr_addr.is_unicast()) {
-	    XLOG_WARNING("RX %s from %s to %s: "
-			 "invalid Bootstrap router "
-			 "address: %s. "
-			 "Ignoring whole message.",
-			 PIMTYPE2ASCII(PIM_BOOTSTRAP),
-			 cstring(src), cstring(dst),
-			 cstring(bsr_addr));
-	    return (XORP_ERROR);
+    BUFFER_GET_HOST_16(fragment_tag, buffer);
+    BUFFER_GET_OCTET(hash_masklen, buffer);
+    BUFFER_GET_OCTET(bsr_priority, buffer);
+    GET_ENCODED_UNICAST_ADDR(rcvd_family, bsr_addr, buffer);
+    if (! bsr_addr.is_unicast()) {
+	XLOG_WARNING("RX %s from %s to %s: "
+		     "invalid Bootstrap router "
+		     "address: %s. "
+		     "Ignoring whole message.",
+		     PIMTYPE2ASCII(PIM_BOOTSTRAP),
+		     cstring(src), cstring(dst),
+		     cstring(bsr_addr));
+	ret_value = XORP_ERROR;
+	goto ret_label;
+    }
+    
+    //
+    // Message check
+    //
+    // XXX: the following checks were performed earlier:
+    //      - There is Hello state for BSM.src_ip_address
+    //      - The sender is directly connected
+    // RPF check
+    if (dst == IPvX::PIM_ROUTERS(family())) {
+	PimNbr *pim_nbr_rpf = pim_node().pim_nbr_rpf_find(bsr_addr);
+	if (pim_nbr_rpf != pim_nbr) {
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
-	
-	//
-	// Message check
-	//
-	// XXX: the following checks were performed earlier:
-	//      - There is Hello state for BSM.src_ip_address
-	//      - The sender is directly connected
-	// RPF check
-	if (dst == IPvX::PIM_ROUTERS(family())) {
-	    PimNbr *pim_nbr_rpf = pim_node().pim_nbr_rpf_find(bsr_addr);
-	    if (pim_nbr_rpf != pim_nbr)
-		return (XORP_ERROR);
-	} else if (pim_node().vif_find_by_addr(dst) != NULL) {
-	    // BSM.dst_ip_address is one of my addresses
-	    unicast_message_bool = true;
-	} else {
-	    // Either the destination is not the right multicast group, or
-	    // somehow an unicast packet for somebody else came to me.
-	    // A third possibility is the destition unicast address is
-	    // one of mine, but it is not enabled for multicast routing.
-	    return (XORP_ERROR);
-	}
-    } while (false);
+    } else if (pim_node().vif_find_by_addr(dst) != NULL) {
+	// BSM.dst_ip_address is one of my addresses
+	is_unicast_message = true;
+    } else {
+	// Either the destination is not the right multicast group, or
+	// somehow an unicast packet for somebody else came to me.
+	// A third possibility is the destition unicast address is
+	// one of mine, but it is not enabled for multicast routing.
+	ret_value = XORP_ERROR;
+	goto ret_label;
+    }
     
     //
     // Process the rest of the message
     //
-    do {
-	size_t group_prefix_n = 0;
-	string error_msg = "";
-	
-	//
-	// Create a new BsrZone that would contain all information
-	// from this message.
-	//
-	BsrZone bsr_zone(pim_bsr, bsr_addr, bsr_priority,
-			 hash_masklen, fragment_tag);
-	
-	//
-	// Main loop for message parsing
-	//
-	while (BUFFER_DATA_SIZE(buffer) > 0) {
-	    IPvX	group_addr(family());
-	    uint8_t	group_addr_reserved_flags;
-	    uint8_t	rp_count, fragment_rp_count;
-	    bool	admin_scope_zone_bool;
-	    BsrGroupPrefix *bsr_group_prefix = NULL;
-	    
-	    //
-	    // The Group (prefix) address
-	    //
-	    group_prefix_n++;
-	    GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_masklen,
-				   group_addr_reserved_flags, buffer);
-	    IPvXNet group_prefix(group_addr, group_masklen);
-	    if (! group_prefix.is_multicast()) {
-		XLOG_WARNING("RX %s from %s to %s: "
-			     "invalid group prefix: %s. "
-			     "Ignoring whole message.",
-			     PIMTYPE2ASCII(PIM_BOOTSTRAP),
-			     cstring(src), cstring(dst),
-			     cstring(group_prefix));
-		return (XORP_ERROR);
-	    }
-	    if (group_addr_reserved_flags & EGADDR_Z_BIT)
-		admin_scope_zone_bool = true;
-	    else
-		admin_scope_zone_bool = false;
-	    
-	    if (admin_scope_zone_bool
-		&& (group_prefix_n == 1)
-		&& pim_node().pim_scope_zone_table().is_scoped(
-		    group_addr,
-		    pim_nbr->vif_index())) {
-		// if (the interface the message arrived on is an Admin Scope
-		//     border for the BSM.first_group_address) {
-		//   drop the BS message silently
-		// }
-		// TODO: XXX: PAVPAVPAV: print a warning if the scoped zone
-		// is NOT the local scoped zone!!
-		return (XORP_ERROR);
-	    }
-	    
-	    if (admin_scope_zone_bool) {
-		if (group_prefix_n == 1) {
-		    // Set the scope zone
-		    bsr_zone.set_admin_scope_zone(admin_scope_zone_bool,
-						  group_prefix);
-		} else {
-		    // Test if the group prefix is contained by the scope zone
-		    if (! bsr_zone.admin_scope_zone_id().contains(group_prefix)) {
-			XLOG_WARNING("RX %s from %s to %s: "
-				     "group prefix %s is not contained in "
-				     "scope zone %s."
-				     "Ignoring whole message.",
-				     PIMTYPE2ASCII(PIM_BOOTSTRAP),
-				     cstring(src), cstring(dst),
-				     cstring(group_prefix),
-				     cstring(bsr_zone.admin_scope_zone_id()));
-			return (XORP_ERROR);
-		    }
-		}
-	    }
-	    
-	    BUFFER_GET_OCTET(rp_count, buffer);
-	    BUFFER_GET_OCTET(fragment_rp_count, buffer);
-	    BUFFER_GET_SKIP(2, buffer);		// Reserved
-	    
-	    if (fragment_rp_count > rp_count) {
-		XLOG_WARNING("RX %s from %s to %s: "
-			     "RP count %d is larger than "
-			     "fragment RP count %d. "
-			     "Ignoring whole message.",
-			     PIMTYPE2ASCII(PIM_BOOTSTRAP),
-			     cstring(src), cstring(dst),
-			     rp_count, fragment_rp_count);
-		return (XORP_ERROR);
-	    }
-	    
-	    // Add the group prefix
-	    bsr_group_prefix = bsr_zone.add_bsr_group_prefix(
-		admin_scope_zone_bool,
-		group_prefix,
-		rp_count,
-		error_msg);
-	    if (bsr_group_prefix == NULL) {
-		XLOG_WARNING("RX %s from %s to %s: "
-			     "cannot add group prefix %s to zone %s. "
-			     "Ignoring whole message. Reason: %s",
-			     PIMTYPE2ASCII(PIM_BOOTSTRAP),
-			     cstring(src), cstring(dst),
-			     cstring(group_prefix),
-			     cstring(bsr_zone.admin_scope_zone_id()),
-			     error_msg.c_str());
-		return (XORP_ERROR);
-	    }
-	    
-	    //
-	    // The set of RPs
-	    //
-	    while (fragment_rp_count--) {
-		IPvX		rp_addr(family());
-		uint8_t		rp_priority;
-		uint16_t	rp_holdtime;
-		BsrRp		*bsr_rp = NULL;
-		
-		GET_ENCODED_UNICAST_ADDR(rcvd_family, rp_addr, buffer);
-		if (! rp_addr.is_unicast()) {
-		    XLOG_WARNING("RX %s from %s to %s: "
-				 "invalid RP address: %s."
-				 "Ignoring whole message.",
-				 PIMTYPE2ASCII(PIM_BOOTSTRAP),
-				 cstring(src), cstring(dst),
-				 cstring(rp_addr));
-		    return (XORP_ERROR);
-		}
-		BUFFER_GET_HOST_16(rp_holdtime, buffer);
-		BUFFER_GET_OCTET(rp_priority, buffer);
-		BUFFER_GET_SKIP(1, buffer);		// Reserved
-		if (bsr_group_prefix != NULL) {
-		    bsr_rp = bsr_group_prefix->add_rp(rp_addr, rp_priority,
-						      rp_holdtime, error_msg);
-		    if (bsr_rp == NULL) {
-			XLOG_WARNING("RX %s from %s to %s: "
-				     "cannot add RP address %s to group %s."
-				     "Ignoring whole message. Reason: %s",
-				     PIMTYPE2ASCII(PIM_BOOTSTRAP),
-				     cstring(src), cstring(dst),
-				     cstring(rp_addr),
-				     cstring(bsr_group_prefix->group_prefix()),
-				     error_msg.c_str());
-			return (XORP_ERROR);
-		    }
-		}
-	    }
-	}
-	
-	//
-	// Test if this is not a bogus unicast Bootstrap message.
-	//
-	bool is_accepted_previous_bsm = false;
-	do {
-	    // Find if accepted previous BSM
-	    BsrZone *tmp_bsr_zone = pim_bsr.find_bsr_zone_from_list(
-		pim_bsr.active_bsr_zone_list(),
-		bsr_zone.is_admin_scope_zone(),
-		bsr_zone.admin_scope_zone_id());
-	    if (tmp_bsr_zone != NULL)
-		is_accepted_previous_bsm = tmp_bsr_zone->is_accepted_previous_bsm();
-	} while (false);
-	if (unicast_message_bool && is_accepted_previous_bsm) {
-	    // The packet was unicast, but this wasn't a quick refresh
-	    // on startup. Drop the BS message silently.
-	    return (XORP_ERROR);
-	}
-	
-	//
-	// Test if the received data is consistent
-	//
-	if (! bsr_zone.is_consistent(error_msg)) {
-	    XLOG_WARNING("RX %s from %s to %s: "
-			 "inconsistent Bootstrap zone %s: %s",
-			 PIMTYPE2ASCII(PIM_BOOTSTRAP),
-			 cstring(src), cstring(dst),
-			 cstring(bsr_zone.admin_scope_zone_id()),
-			 error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	
-	//
-	// Test if the information in the new BSM was received already.
-	//
-	if (pim_bsr.contains_bsr_zone_info(pim_bsr.active_bsr_zone_list(),
-					   bsr_zone)) {
-	    // Redundant information. Silently ignore it.
-	    continue;
-	}
-	
-	//
-	// Test if we should set the 'is_accepted_previous_bsm' flag.
-	//
-	// XXX: we continue accepting unicast fragments as long as
-	// they carry the same fragment tag of the first fragment.
-	//
-	do {
-	    // Find if have previous BSM.
-	    BsrZone *tmp_bsr_zone = pim_bsr.find_bsr_zone_from_list(
-		pim_bsr.active_bsr_zone_list(),
-		bsr_zone.is_admin_scope_zone(),
-		bsr_zone.admin_scope_zone_id());
-	    if (tmp_bsr_zone != NULL) {
-		if (tmp_bsr_zone->fragment_tag() != bsr_zone.fragment_tag()) {
-		    tmp_bsr_zone->set_accepted_previous_bsm(true);
-		    bsr_zone.set_accepted_previous_bsm(true);
-		}
-	    }
-	} while (false);
-	
-	//
-	// Try to add the received BSM
-	//
-	if (pim_bsr.add_active_bsr_zone(bsr_zone, error_msg) == NULL) {
-	    XLOG_WARNING("RX %s from %s to %s: "
-			 "cannot add Bootstrap zone %s: %s",
-			 PIMTYPE2ASCII(PIM_BOOTSTRAP),
-			 cstring(src), cstring(dst),
-			 cstring(bsr_zone.admin_scope_zone_id()),
-			 error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	
-	//
-	// Forward the BSR message if needed
-	//
-	if (bsr_zone.is_bsm_forward()) {
-	    // Forward the Bootstrap message
-	    for (uint16_t vif_index = 0;
-		 vif_index < pim_node().maxvifs();
-		 vif_index++) {
-		PimVif *pim_vif = pim_node().vif_find_by_vif_index(vif_index);
-		if (pim_vif == NULL)
-		    continue;
-		if (pim_vif == this)
-		    continue;		// Don't forward back on the iif
-		
-		// Don't send the Bootstrap message across scope zone boundries
-		if (bsr_zone.is_admin_scope_zone()
-		    && pim_node().pim_scope_zone_table().is_scoped(
-			bsr_zone.admin_scope_zone_id().masked_addr(),
-			vif_index))
-		    continue;
-		
-		pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(family()),
-					    bsr_zone);
-	    }
-	}
-    } while (false);
     
     //
-    // Originate my own BSR messages if needed
+    // Create a new BsrZone that would contain all information
+    // from this message.
     //
-    do {
-	list<BsrZone *>::iterator iter_zone;
-	for (iter_zone = pim_bsr.active_bsr_zone_list().begin();
-	     iter_zone != pim_bsr.active_bsr_zone_list().end();
-	     ++iter_zone) {
-	    BsrZone& bsr_zone = *(*iter_zone);
-	    if (! bsr_zone.is_bsm_originate())
-		continue;
-	    bsr_zone.new_fragment_tag();
-	    // Send the Bootstrap message
-	    for (uint16_t vif_index = 0;
-		 vif_index < pim_node().maxvifs();
-		 vif_index++) {
-		PimVif *pim_vif = pim_node().vif_find_by_vif_index(vif_index);
-		if (pim_vif == NULL)
-		    continue;
-		
-		// Don't send the Bootstrap message across scope zone boundries
-		if (bsr_zone.is_admin_scope_zone()
-		    && pim_node().pim_scope_zone_table().is_scoped(
-			bsr_zone.admin_scope_zone_id().masked_addr(),
-			vif_index))
-		    continue;
-		pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(family()),
-					    bsr_zone);
-	    }
-	    
-	    // Housekeeping: reset the bsm_forward/bsm_originate flags.
-	    bsr_zone.set_bsm_forward(false);
-	    bsr_zone.set_bsm_originate(false);
+    bsr_zone = new BsrZone(pim_bsr, bsr_addr, bsr_priority, hash_masklen,
+			   fragment_tag);
+    bsr_zone->set_is_accepted_message(true);
+    bsr_zone->set_is_unicast_message(is_unicast_message, src);
+    
+    //
+    // Main loop for message parsing
+    //
+    while (BUFFER_DATA_SIZE(buffer) > 0) {
+	IPvX	group_addr(family());
+	uint8_t	group_addr_reserved_flags;
+	uint8_t	rp_count, fragment_rp_count;
+	bool	is_scope_zone;
+	BsrGroupPrefix *bsr_group_prefix = NULL;
+	
+	//
+	// The Group (prefix) address
+	//
+	group_prefix_n++;
+	GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_masklen,
+			       group_addr_reserved_flags, buffer);
+	IPvXNet group_prefix(group_addr, group_masklen);
+	
+	// Set the scope zone
+	if (group_addr_reserved_flags & EGADDR_Z_BIT)
+	    is_scope_zone = true;
+	else
+	    is_scope_zone = false;
+	if (is_scope_zone && (group_prefix_n == 1)) {
+	    PimScopeZoneId zone_id(group_prefix, is_scope_zone);
+	    bsr_zone->set_zone_id(zone_id);
 	}
-    } while (false);
+	
+	BUFFER_GET_OCTET(rp_count, buffer);
+	BUFFER_GET_OCTET(fragment_rp_count, buffer);
+	BUFFER_GET_SKIP(2, buffer);		// Reserved
+	
+	// Add the group prefix
+	bsr_group_prefix = bsr_zone->add_bsr_group_prefix(group_prefix,
+							  is_scope_zone,
+							  rp_count);
+	XLOG_ASSERT(bsr_group_prefix != NULL);
+	
+	//
+	// The set of RPs
+	//
+	while (fragment_rp_count--) {
+	    IPvX	rp_addr(family());
+	    uint8_t	rp_priority;
+	    uint16_t	rp_holdtime;
+	    
+	    GET_ENCODED_UNICAST_ADDR(rcvd_family, rp_addr, buffer);
+	    BUFFER_GET_HOST_16(rp_holdtime, buffer);
+	    BUFFER_GET_OCTET(rp_priority, buffer);
+	    BUFFER_GET_SKIP(1, buffer);		// Reserved
+	    bsr_group_prefix->add_rp(rp_addr, rp_priority, rp_holdtime);
+	}
+    }
+    
+    //
+    // Test if this is not a bogus unicast Bootstrap message
+    //
+    if (is_unicast_message) {
+	// Find if accepted previous BSM for same scope
+	active_bsr_zone = pim_bsr.find_active_bsr_zone(bsr_zone->zone_id());
+	if ((active_bsr_zone != NULL)
+	    && (active_bsr_zone->is_accepted_message())) {
+	    if (! (active_bsr_zone->is_unicast_message()
+		   && (active_bsr_zone->unicast_message_src()
+		       == bsr_zone->unicast_message_src())
+		   && (active_bsr_zone->fragment_tag()
+		       == bsr_zone->fragment_tag()))) {
+		//
+		// Any previous BSM for this scope has been accepted.
+		// The packet was unicast, but this wasn't a quick refresh
+		// on startup. Drop the BS message silently.
+		//
+		ret_value = XORP_ERROR;
+		goto ret_label;
+	    }
+	}
+    }
+    
+    //
+    // Test whether the message is crossing Admin Scope border
+    //
+    if (pim_node().pim_scope_zone_table().is_scoped(bsr_zone->zone_id(),
+						    pim_nbr->vif_index())) {
+	// if (the interface the message arrived on is an Admin Scope
+	//     border for the BSM.first_group_address) {
+	//   drop the BS message silently
+	// }
+	// TODO: XXX: PAVPAVPAV: print a warning if the scoped zone
+	// is NOT the local scoped zone!!
+	ret_value = XORP_ERROR;
+	goto ret_label;
+    }
+    
+    
+    //
+    // Test if the received data is consistent
+    //
+    if (! bsr_zone->is_consistent(error_msg)) {
+	XLOG_WARNING("RX %s from %s to %s: "
+		     "inconsistent Bootstrap zone %s: %s",
+		     PIMTYPE2ASCII(PIM_BOOTSTRAP),
+		     cstring(src), cstring(dst),
+		     cstring(bsr_zone->zone_id()),
+		     error_msg.c_str());
+	ret_value = XORP_ERROR;
+	goto ret_label;
+    }
+    
+    //
+    // Try to add the received BSM
+    //
+    active_bsr_zone = pim_bsr.add_active_bsr_zone(*bsr_zone, error_msg);
+    if (active_bsr_zone == NULL) {
+	XLOG_WARNING("RX %s from %s to %s: "
+		     "cannot add Bootstrap zone %s: %s",
+		     PIMTYPE2ASCII(PIM_BOOTSTRAP),
+		     cstring(src), cstring(dst),
+		     cstring(bsr_zone->zone_id()),
+		     error_msg.c_str());
+	ret_value = XORP_ERROR;
+	goto ret_label;
+    }
+    
+    // Find the active BSR zone
+    active_bsr_zone = pim_bsr.find_active_bsr_zone(bsr_zone->zone_id());
+    
+    //
+    // If needed, originate my own BSR message
+    //
+    if ((active_bsr_zone != NULL)
+	&& (active_bsr_zone->is_bsm_originate())) {
+	active_bsr_zone->new_fragment_tag();
+	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	    PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
+	    if (pim_vif == NULL)
+		continue;
+	    // Don't send the Bootstrap message across scope zone boundries
+	    if (pim_node().pim_scope_zone_table().is_scoped(
+		active_bsr_zone->zone_id(), i))
+		continue;
+	    pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(family()),
+					*active_bsr_zone);
+	}
+	// Housekeeping: reset the bsm_originate flag.
+	active_bsr_zone->set_bsm_originate(false);
+    }
+    
+    //
+    // If needed, forward the Bootstrap message
+    //
+    if ((active_bsr_zone != NULL) && (active_bsr_zone->is_bsm_forward())) {
+	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	    PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
+	    if (pim_vif == NULL)
+		continue;
+	    // XXX: always forward-back on the iif, because the 06 I-D is wrong
+	    // if (pim_vif == this)
+	    //	continue;		// Don't forward back on the iif
+	    // Don't forward the Bootstrap message across scope zone boundries
+	    if (pim_node().pim_scope_zone_table().is_scoped(
+		active_bsr_zone->zone_id(), i))
+		continue;
+	    // XXX: use the BSR zone that was received to forward the message
+	    pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(family()),
+					*bsr_zone);
+	}
+	// Housekeeping: reset the bsm_forward flag.
+	active_bsr_zone->set_bsm_forward(false);
+    }
+    
     
     //
     // Apply the new RP info
     //
     pim_bsr.add_rps_to_rp_table();
     
-    return (XORP_OK);
+    ret_value = XORP_OK;
+    goto ret_label;
     
     // Various error processing
  rcvlen_error:
@@ -416,7 +318,8 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 		 "invalid message length",
 		 PIMTYPE2ASCII(PIM_BOOTSTRAP),
 		 cstring(src), cstring(dst));
-    return (XORP_ERROR);
+    ret_value = XORP_ERROR;
+    goto ret_label;
     
  rcvd_masklen_error:
     XLOG_WARNING("RX %s from %s to %s: "
@@ -424,7 +327,8 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 		 PIMTYPE2ASCII(PIM_BOOTSTRAP),
 		 cstring(src), cstring(dst),
 		 group_masklen);
-    return (XORP_ERROR);
+    ret_value = XORP_ERROR;
+    goto ret_label;
     
  rcvd_family_error:
     XLOG_WARNING("RX %s from %s to %s: "
@@ -432,13 +336,18 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 		 PIMTYPE2ASCII(PIM_BOOTSTRAP),
 		 cstring(src), cstring(dst),
 		 rcvd_family);
-    return (XORP_ERROR);
+    ret_value = XORP_ERROR;
+    goto ret_label;
+    
+ ret_label:
+    if (bsr_zone != NULL)
+	delete bsr_zone;
+    return (ret_value);
 }
 
 // Return: %XORP_OK on success, otherwise %XORP_ERROR
 int
-PimVif::pim_bootstrap_send(const IPvX& dst_addr,
-			   const BsrZone& bsr_zone)
+PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
 {
     size_t avail_buffer_size = 0;
     
@@ -467,7 +376,7 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr,
 	size_t send_remain_rp_count = 0;
 	uint8_t group_addr_reserved_flags = 0;
 	
-	if (bsr_group_prefix->is_admin_scope_zone())
+	if (bsr_group_prefix->is_scope_zone())
 	    group_addr_reserved_flags |= EGADDR_Z_BIT;
 	
 	needed_size =
@@ -641,7 +550,10 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& dst_addr,
     //
     BUFFER_PUT_HOST_16(bsr_zone.fragment_tag(), buffer);
     BUFFER_PUT_OCTET(hash_masklen, buffer);
-    BUFFER_PUT_OCTET(bsr_zone.bsr_priority(), buffer);
+    if (bsr_zone.is_cancel())
+	BUFFER_PUT_OCTET(PIM_BOOTSTRAP_LOWEST_PRIORITY, buffer);
+    else
+	BUFFER_PUT_OCTET(bsr_zone.bsr_priority(), buffer);
     PUT_ENCODED_UNICAST_ADDR(family(), bsr_zone.bsr_addr(), buffer);
     
     //
@@ -649,7 +561,7 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& dst_addr,
     // range with no RPs.
     //
     do {
-	if (! bsr_zone.is_admin_scope_zone())
+	if (! bsr_zone.zone_id().is_scope_zone())
 	    break;
 	
 	list<BsrGroupPrefix *>::const_iterator iter_prefix
@@ -659,7 +571,7 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& dst_addr,
 	BsrGroupPrefix *bsr_group_prefix = *iter_prefix;
 	if (is_first_fragment
 	    && (bsr_group_prefix->group_prefix()
-		== bsr_zone.admin_scope_zone_id()))
+		== bsr_zone.zone_id().scope_zone_prefix()))
 	    break;	// XXX: the admin scope range will be added later
 	
 	//
@@ -668,8 +580,8 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& dst_addr,
 	group_addr_reserved_flags = 0;
 	group_addr_reserved_flags |= EGADDR_Z_BIT;
 	PUT_ENCODED_GROUP_ADDR(family(),
-			       bsr_zone.admin_scope_zone_id().masked_addr(),
-			       bsr_zone.admin_scope_zone_id().prefix_len(),
+			       bsr_zone.zone_id().scope_zone_prefix().masked_addr(),
+			       bsr_zone.zone_id().scope_zone_prefix().prefix_len(),
 			       group_addr_reserved_flags, buffer);
 	BUFFER_PUT_OCTET(0, buffer);		// RP count
 	BUFFER_PUT_OCTET(0, buffer);		// Fragment RP count
