@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.34 2004/01/14 22:50:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.35 2004/01/15 08:49:22 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -46,7 +46,6 @@ ConfigTreeNode::ConfigTreeNode()
       _on_parent_path(false)
 
 {
-
 }
 
 ConfigTreeNode::ConfigTreeNode(const string& nodename,
@@ -73,6 +72,10 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 
     TimerList::system_gettimeofday(&_modification_time);
     parent->add_child(this);
+    if (_segname == "protocols") {
+	printf("contructor 2\n");
+	printf("%p (%s)\n", ttn, ttn->s().c_str());
+    }
 }
 
 ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
@@ -95,7 +98,9 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _cmd_that_failed(NULL),
       _on_parent_path(false)
 {
-
+    if (_segname == "protocols") {
+	printf("contructor 3\n");
+    }
 }
 
 ConfigTreeNode::~ConfigTreeNode()
@@ -917,6 +922,11 @@ ConfigTreeNode::type() const
 bool 
 ConfigTreeNode::is_tag() const
 {
+    /*only the root node does not have a template tree node, and it is
+      not a tag*/
+    if (_template_tree_node == NULL)
+	return false;
+
     return _template_tree_node->is_tag();
 }
 
@@ -1009,7 +1019,12 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 		s += ": " + value;
 	    }
 	}
-	if (_children.size() == 0) {
+	if (_children.size() == 0 
+	    && (type() != NODE_VOID || _has_value)) {
+	    //normally if a node has no children, we don't want the
+	    //braces, but certain grouping nodes, with type NODE_VOID
+	    //(e.g. "protocols") won't parse correctly if we print
+	    //them without the braces
 	    s += "\n";
 	    return s;
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.14 2004/01/13 00:52:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.15 2004/01/15 08:51:58 pavlin Exp $"
 
 // #define DEBUG_COMMIT
 #include "rtrmgr_module.h"
@@ -253,7 +253,8 @@ SlaveConfigTree::mark_subtree_for_deletion(const list<string>& path_segments,
     if (found == NULL)
 	return string("ERROR");
 
-    if ((found->parent() != NULL)
+    if ((found->parent() != NULL) /* this is not the root node*/
+        && (found->parent()->parent() != NULL)
 	&& found->parent()->is_tag()
 	&& (found->parent()->children().size() == 1)) {
 	found = found->parent();

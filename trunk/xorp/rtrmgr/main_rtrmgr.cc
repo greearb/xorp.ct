@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.39 2004/01/14 01:42:33 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.40 2004/01/14 08:25:32 pavlin Exp $"
 
 #include <signal.h>
 
@@ -153,7 +153,7 @@ rtrmgr_main()
 	XLOG_ERROR("Shutting down due to an init error: %s", e.why().c_str());
 	return (1);
     }
-#if 0
+#if 1
     tt->display_tree();
 #endif
 
