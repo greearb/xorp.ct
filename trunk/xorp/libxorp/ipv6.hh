@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.14 2003/11/05 20:24:28 hodson Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.15 2004/02/11 20:18:28 hodson Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -296,6 +296,14 @@ public:
      * @return true if the address is a valid multicast address.
      */
     bool is_multicast() const;
+
+    /**
+     * Test if this address is a valid link-local unicast address.
+     *
+     * @return true if the address is a valid unicast address,
+     * and the scope of the address is link-local.
+     */
+    bool is_linklocal_unicast() const;
 
     /**
      * Test if this address is a valid node-local multicast address.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.9 2003/10/02 03:51:53 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.10 2003/11/05 20:24:27 hodson Exp $"
 
 #include "xorp.h"
 #include "ipv6.hh"
@@ -377,6 +377,14 @@ IPv6::is_multicast() const
     in6_addr *addr6 = reinterpret_cast<in6_addr *>(nc);
 
     return (IN6_IS_ADDR_MULTICAST(addr6));
+}
+
+bool
+IPv6::is_linklocal_unicast() const
+{
+    const in6_addr *addr6 = reinterpret_cast<const in6_addr *>(_addr);
+
+    return (IN6_IS_ADDR_LINKLOCAL(addr6));
 }
 
 bool

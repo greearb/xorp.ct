@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.10 2003/10/02 03:51:54 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.11 2003/11/05 20:24:28 hodson Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -478,6 +478,14 @@ IPvX::is_multicast() const
     if (_af == AF_INET)
 	return get_ipv4().is_multicast();
     return get_ipv6().is_multicast();
+}
+
+bool
+IPvX::is_linklocal_unicast() const
+{
+    if (_af == AF_INET)
+	return get_ipv4().is_linklocal_unicast();
+    return get_ipv6().is_linklocal_unicast();
 }
 
 bool
