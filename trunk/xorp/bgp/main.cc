@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.28 2003/07/18 01:25:12 atanu Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.29 2003/07/29 18:41:45 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -48,6 +48,7 @@ BGPMain::BGPMain()
 				eventloop(), *this);
 
     _process_watch = new ProcessWatch(_xrl_router, eventloop(),
+				      bgp_mib_name().c_str(),
 				      ::callback(this,
 						 &BGPMain::terminate));
 }

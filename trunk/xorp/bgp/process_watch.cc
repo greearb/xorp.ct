@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/process_watch.cc,v 1.6 2003/06/20 22:21:53 atanu Exp $"
+#ident "$XORP: xorp/bgp/process_watch.cc,v 1.7 2003/08/25 21:50:43 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,12 +23,12 @@
 #include "process_watch.hh"
 
 ProcessWatch::ProcessWatch(XrlStdRouter *xrl_router, EventLoop& eventloop,
-		 TerminateCallback cb) :
+			   const char *bgp_mib_name, TerminateCallback cb) :
     _eventloop(eventloop), _shutdown(cb), _fea(false), _rib(false)
 {
 	
     /*
-    ** Register interest in the fea and rib.
+    ** Register interest in the fea and rib and snmp trap handler.
     */
     XrlFinderEventNotifierV0p1Client finder(xrl_router);
     finder.send_register_class_event_interest("finder",
@@ -37,7 +37,9 @@ ProcessWatch::ProcessWatch(XrlStdRouter *xrl_router, EventLoop& eventloop,
     finder.send_register_class_event_interest("finder",
 	xrl_router->instance_name(), "rib",
 	    callback(this, &ProcessWatch::interest_callback));
-	
+    finder.send_register_class_event_interest("finder",
+	xrl_router->instance_name(), bgp_mib_name,
+	    callback(this, &ProcessWatch::interest_callback));
 }
 
 void
@@ -62,7 +64,7 @@ ProcessWatch::birth(const string& target_class, const string& target_instance)
 	_rib = true;
 	_rib_instance = target_instance;
     } else
-	add_process(target_class, target_instance);
+	add_target(target_class, target_instance);
 }
 
 void 
@@ -78,7 +80,7 @@ ProcessWatch::death(const string& target_class, const string& target_instance)
 	start_kill_timer();
 	_shutdown->dispatch();
     } else
-	remove_process(target_class, target_instance);
+	remove_target(target_class, target_instance);
 }
 
 void
@@ -102,33 +104,37 @@ ProcessWatch::ready() const
 }
 
 bool
-ProcessWatch::process_exists(const string& target) const
+ProcessWatch::target_exists(const string& target) const
 {
-    debug_msg("process_exists: %s\n", target.c_str());
+    debug_msg("target_exists: %s\n", target.c_str());
 
     list<Process>::const_iterator i;
     for(i = _processes.begin(); i != _processes.end(); i++)
-	if(target == i->_target_class)
+	if(target == i->_target_class) {
+	    debug_msg("target: %s found\n", target.c_str());
 	    return true;
+	}
+
+    debug_msg("target %s not found\n", target.c_str());
 
     return false;
 }
 
 void 
-ProcessWatch::add_process(const string& target_class,
+ProcessWatch::add_target(const string& target_class,
 			  const string& target_instance)
 {
-    debug_msg("add_process: %s %s\n", target_class.c_str(),
+    debug_msg("add_target: %s %s\n", target_class.c_str(),
 	      target_instance.c_str());
 
     _processes.push_back(Process(target_class, target_instance));
 }
 
 void 
-ProcessWatch::remove_process(const string& target_class,
+ProcessWatch::remove_target(const string& target_class,
 			     const string& target_instance)
 {
-    debug_msg("remove_process: %s %s\n", target_class.c_str(),
+    debug_msg("remove_target: %s %s\n", target_class.c_str(),
 	      target_instance.c_str());
 
     list<Process>::iterator i;
@@ -139,6 +145,6 @@ ProcessWatch::remove_process(const string& target_class,
 	    return;
 	}
 
-    XLOG_FATAL("unknown process %s %s", target_class.c_str(),
+    XLOG_FATAL("unknown target %s %s", target_class.c_str(),
 	       target_instance.c_str());
 }

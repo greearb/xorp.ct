@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.15 2003/06/17 06:44:15 atanu Exp $
+// $XORP: xorp/bgp/main.hh,v 1.16 2003/08/25 21:52:42 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -327,7 +327,7 @@ public:
      * Check to see if the bgp snmp entity is running.
      */
     bool do_snmp_trap() const {
-	return _process_watch->process_exists(bgp_mib_name());
+	return _process_watch->target_exists(bgp_mib_name());
     }
 
     /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/process_watch.hh,v 1.5 2003/08/21 19:00:30 atanu Exp $
+// $XORP: xorp/bgp/process_watch.hh,v 1.6 2003/08/25 21:50:44 atanu Exp $
 
 #ifndef __BGP_PROCESS_WATCH_HH__
 #define __BGP_PROCESS_WATCH_HH__
@@ -29,6 +29,7 @@ public:
     typedef XorpCallback0<void>::RefPtr TerminateCallback;
 
     ProcessWatch(XrlStdRouter *xrl_router, EventLoop& eventloop,
+		 const char *bgp_mib_name,
 		 TerminateCallback cb);
 
     /**
@@ -61,13 +62,13 @@ public:
     /**
      * @return true if the target process exists.
      */
-    bool process_exists(const string& target) const;
+    bool target_exists(const string& target) const;
 
 protected:
     void interest_callback(const XrlError& error);
-    void add_process(const string& target_class,
+    void add_target(const string& target_class,
 		     const string& target_instance);
-    void remove_process(const string& target_class,
+    void remove_target(const string& target_class,
 			const string& target_instance);
 
 private:
