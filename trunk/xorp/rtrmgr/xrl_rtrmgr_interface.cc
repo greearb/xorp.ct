@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.12 2003/11/17 19:34:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.13 2003/12/02 09:39:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -350,7 +350,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
     }
     // XXX: TBD
-    printf("\nXRI got config change: deltas: \n%s\nend deltas\ndeletions:\n%s\nend deletions\n",
+    printf("\nXRL got config change: deltas: \n%s\nend deltas\ndeletions:\n%s\nend deletions\n",
 	   deltas.c_str(), deletions.c_str());
 
     string response;
@@ -385,7 +385,7 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
 					     string deltas,
 					     string deletions)
 {
-    printf("XRI apply_config_change_done:\n  status:%d\n  response: %s\n  target: %s\n",
+    printf("XRL apply_config_change_done:\n  status:%d\n  response: %s\n  target: %s\n",
 	   success, errmsg.c_str(), target.c_str());
 
     if (success) {
