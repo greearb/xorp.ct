@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.1 2004/10/26 23:58:29 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -64,6 +64,9 @@ FtiConfigEntrySetClick::start()
     if (ClickSocket::start() < 0)
 	return (XORP_ERROR);
 
+    // XXX: add myself as an observer to the NexthopPortMapper
+    ftic().nexthop_port_mapper().add_observer(this);
+
     _is_running = true;
 
     return (XORP_OK);
@@ -76,6 +79,9 @@ FtiConfigEntrySetClick::stop()
 
     if (! _is_running)
 	return (XORP_OK);
+
+    // XXX: delete myself as an observer to the NexthopPortMapper
+    ftic().nexthop_port_mapper().delete_observer(this);
 
     ret_value = ClickSocket::stop();
 
@@ -127,17 +133,203 @@ FtiConfigEntrySetClick::delete_entry6(const Fte6& fte)
 bool
 FtiConfigEntrySetClick::add_entry(const FteX& fte)
 {
-    // TODO: XXX: PAVPAVPAV: implement it!!
-    UNUSED(fte);
+    string config;
+    string errmsg;
+    int port = -1;
 
-    return (false);
+    debug_msg("add_entry "
+	      "(network = %s nexthop = %s)",
+	      fte.net().str().c_str(), fte.nexthop().str().c_str());
+
+    // Check that the family is supported
+    do {
+	if (fte.nexthop().is_ipv4()) {
+	    if (! ftic().have_ipv4())
+		return (false);
+	    break;
+	}
+	if (fte.nexthop().is_ipv6()) {
+	    if (! ftic().have_ipv6())
+		return (false);
+	    break;
+	}
+	break;
+    } while (false);
+
+    //
+    // Get the outgoing port number
+    //
+    do {
+	NexthopPortMapper& m = ftic().nexthop_port_mapper();
+	port = m.lookup_nexthop_interface(fte.ifname(), fte.vifname());
+	if (port >= 0)
+	    break;
+	if (fte.nexthop().is_ipv4()) {
+	    port = m.lookup_nexthop_ipv4(fte.nexthop().get_ipv4());
+	    if (port >= 0)
+		break;
+	}
+	if (fte.nexthop().is_ipv6()) {
+	    port = m.lookup_nexthop_ipv6(fte.nexthop().get_ipv6());
+	    if (port >= 0)
+		break;
+	}
+	break;
+    } while (false);
+
+    if (port < 0) {
+	XLOG_ERROR("Cannot find outgoing port number for the Click forwarding "
+		   "table element to add entry %s", fte.str().c_str());
+	return (false);
+    }
+
+    config = c_format("_xorp_rt.add %s %s %d\n",
+		      fte.net().str().c_str(),
+		      fte.nexthop().str().c_str(),
+		      port);
+
+    //
+    // TODO: XXX: PAVPAVPAV: the code for WRITEDATA below is a copy
+    // from IfConfigSetClick::config_end(). Add a new method
+    // to ClickSocket that eliminates the need for such replication.
+    //
+    string write_config = c_format("WRITEDATA hotconfig %u\n",
+				   static_cast<uint32_t>(config.size()));
+    write_config += config;
+    if (ClickSocket::write(write_config.c_str(), write_config.size())
+	!= static_cast<ssize_t>(write_config.size())) {
+	errmsg = c_format("Error writing to Click socket: %s",
+			  strerror(errno));
+	XLOG_ERROR("%s", errmsg.c_str());
+	return (false);
+    }
+
+    //
+    // Check the command status
+    //
+    bool is_warning, is_error;
+    string command_warning, command_error;
+    if (ClickSocket::check_command_status(is_warning, command_warning,
+					  is_error, command_error,
+					  errmsg) != XORP_OK) {
+	errmsg = c_format("Error verifying the command status after writing to Click socket: %s",
+			  errmsg.c_str());
+	XLOG_ERROR("%s", errmsg.c_str());
+	return (false);
+    }
+
+    if (is_warning) {
+	XLOG_WARNING("Click command warning: %s", command_warning.c_str());
+    }
+    if (is_error) {
+	XLOG_ERROR("Click command error: %s", command_error.c_str());
+	return (false);
+    }
+
+    return (true);
 }
 
 bool
 FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 {
-    // TODO: XXX: PAVPAVPAV: implement it!!
-    UNUSED(fte);
+    string config;
+    string errmsg;
+    int port = -1;
 
-    return (false);
+    debug_msg("delete_entry "
+	      "(network = %s nexthop = %s)",
+	      fte.net().str().c_str(), fte.nexthop().str().c_str());
+
+    // Check that the family is supported
+    do {
+	if (fte.nexthop().is_ipv4()) {
+	    if (! ftic().have_ipv4())
+		return (false);
+	    break;
+	}
+	if (fte.nexthop().is_ipv6()) {
+	    if (! ftic().have_ipv6())
+		return (false);
+	    break;
+	}
+	break;
+    } while (false);
+
+    //
+    // Get the outgoing port number
+    //
+    do {
+	NexthopPortMapper& m = ftic().nexthop_port_mapper();
+	port = m.lookup_nexthop_interface(fte.ifname(), fte.vifname());
+	if (port >= 0)
+	    break;
+	if (fte.nexthop().is_ipv4()) {
+	    port = m.lookup_nexthop_ipv4(fte.nexthop().get_ipv4());
+	    if (port >= 0)
+		break;
+	}
+	if (fte.nexthop().is_ipv6()) {
+	    port = m.lookup_nexthop_ipv6(fte.nexthop().get_ipv6());
+	    if (port >= 0)
+		break;
+	}
+	break;
+    } while (false);
+
+    if (port < 0) {
+	XLOG_ERROR("Cannot find outgoing port number for the Click forwarding "
+		   "table element to delete entry %s", fte.str().c_str());
+	return (false);
+    }
+
+    config = c_format("_xorp_rt.remove %s %s %d\n",
+		      fte.net().str().c_str(),
+		      fte.nexthop().str().c_str(),
+		      port);
+
+    //
+    // TODO: XXX: PAVPAVPAV: the code for WRITEDATA below is a copy
+    // from IfConfigSetClick::config_end(). Add a new method
+    // to ClickSocket that eliminates the need for such replication.
+    //
+    string write_config = c_format("WRITEDATA hotconfig %u\n",
+				   static_cast<uint32_t>(config.size()));
+    write_config += config;
+    if (ClickSocket::write(write_config.c_str(), write_config.size())
+	!= static_cast<ssize_t>(write_config.size())) {
+	errmsg = c_format("Error writing to Click socket: %s",
+			  strerror(errno));
+	XLOG_ERROR("%s", errmsg.c_str());
+	return (false);
+    }
+
+    //
+    // Check the command status
+    //
+    bool is_warning, is_error;
+    string command_warning, command_error;
+    if (ClickSocket::check_command_status(is_warning, command_warning,
+					  is_error, command_error,
+					  errmsg) != XORP_OK) {
+	errmsg = c_format("Error verifying the command status after writing to Click socket: %s",
+			  errmsg.c_str());
+	XLOG_ERROR("%s", errmsg.c_str());
+	return (false);
+    }
+
+    if (is_warning) {
+	XLOG_WARNING("Click command warning: %s", command_warning.c_str());
+    }
+    if (is_error) {
+	XLOG_ERROR("Click command error: %s", command_error.c_str());
+	return (false);
+    }
+
+    return (true);
+}
+
+void
+FtiConfigEntrySetClick::nexthop_port_mapper_event()
+{
+    // TODO: XXX: PAVPAVPAV: implement it!
 }

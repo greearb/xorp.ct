@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.10 2004/10/21 00:10:24 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.11 2004/10/26 23:58:29 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -22,6 +22,7 @@
 #include "libxorp/ipvx.hh"
 
 #include "fte.hh"
+#include "nexthop_port_mapper.hh"
 #include "click_socket.hh"
 #include "netlink_socket.hh"
 #include "routing_socket.hh"
@@ -356,7 +357,8 @@ private:
 };
 
 class FtiConfigEntrySetClick : public FtiConfigEntrySet,
-			       public ClickSocket {
+			       public ClickSocket,
+			       public NexthopPortMapperObserver {
 public:
     FtiConfigEntrySetClick(FtiConfig& ftic);
     virtual ~FtiConfigEntrySetClick();
@@ -415,6 +417,8 @@ public:
     virtual bool delete_entry6(const Fte6& fte);
 
 private:
+    virtual void nexthop_port_mapper_event();
+
     bool add_entry(const FteX& fte);
     bool delete_entry(const FteX& fte);
 
