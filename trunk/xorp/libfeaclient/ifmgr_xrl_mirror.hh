@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.8 2005/02/09 23:25:30 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.9 2005/02/12 08:09:06 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -99,12 +99,26 @@ public:
      * @param eventloop to use for events.
      * @param rtarget name of Xrl class or target to supply interface
      *                configuration updates.
-     * @param finder_host address to route finder messages to.
+     * @param finder_addr address to route finder messages to.
      * @param finder_port port to direct finder messages to.
      */
     IfMgrXrlMirror(EventLoop&	e,
 		   const char*	rtarget,
-		   IPv4		finder_host,
+		   IPv4		finder_addr,
+		   uint16_t	finder_port);
+
+    /**
+     * Constructor
+     *
+     * @param eventloop to use for events.
+     * @param rtarget name of Xrl class or target to supply interface
+     *                configuration updates.
+     * @param finder_hostname host name to route finder messages to.
+     * @param finder_port port to direct finder messages to.
+     */
+    IfMgrXrlMirror(EventLoop&	e,
+		   const char*	rtarget,
+		   const char*	finder_hostname,
 		   uint16_t	finder_port);
 
     ~IfMgrXrlMirror();
@@ -164,7 +178,8 @@ protected:
 
 protected:
     EventLoop&			_e;
-    IPv4			_finder_host;
+    IPv4			_finder_addr;
+    string			_finder_hostname;
     uint16_t			_finder_port;
     IfMgrIfTree	   		_iftree;
     IfMgrCommandDispatcher	_dispatcher;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.13 2005/02/09 23:27:26 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.14 2005/02/12 08:09:06 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -794,6 +794,13 @@ public:
 	: XrlStdRouter(e, class_name, finder_addr, finder_port), _o(0)
     {}
 
+    IfMgrXrlMirrorRouter(EventLoop&	e,
+			 const char*	class_name,
+			 const char*	finder_hostname,
+			 uint16_t	finder_port)
+	: XrlStdRouter(e, class_name, finder_hostname, finder_port), _o(0)
+    {}
+
     /**
      * Attach an observer to router.  Only one observer is permitted.
      *
@@ -849,11 +856,22 @@ static const char* CLSNAME = "ifmgr_mirror";
 
 IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
 			       const char*	rtarget,
-			       IPv4		finder_host,
+			       IPv4		finder_addr,
 			       uint16_t		finder_port)
 
     : ServiceBase("FEA Interface Mirror"),
-      _e(e), _finder_host(finder_host), _finder_port(finder_port),
+      _e(e), _finder_addr(finder_addr), _finder_port(finder_port),
+      _dispatcher(_iftree), _rtarget(rtarget), _rtr(0), _xrl_tgt(0)
+{
+}
+
+IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
+			       const char*	rtarget,
+			       const char*	finder_hostname,
+			       uint16_t		finder_port)
+
+    : ServiceBase("FEA Interface Mirror"),
+      _e(e), _finder_hostname(finder_hostname), _finder_port(finder_port),
       _dispatcher(_iftree), _rtarget(rtarget), _rtr(0), _xrl_tgt(0)
 {
 }
@@ -882,8 +900,15 @@ IfMgrXrlMirror::startup()
 	return false;
 
     if (_rtr == NULL) {
-	_rtr = new IfMgrXrlMirrorRouter(_e, CLSNAME, _finder_host,
-					_finder_port);
+	if (! _finder_hostname.empty()) {
+	    _rtr = new IfMgrXrlMirrorRouter(_e, CLSNAME,
+					    _finder_hostname.c_str(),
+					    _finder_port);
+	} else {
+	    _rtr = new IfMgrXrlMirrorRouter(_e, CLSNAME,
+					    _finder_addr,
+					    _finder_port);
+	}
 	_rtr->attach(this);
     }
     if (_xrl_tgt == NULL) {
