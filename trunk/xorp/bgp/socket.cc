@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.17 2004/08/06 07:30:33 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.18 2004/12/05 16:14:35 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -200,13 +200,17 @@ void
 SocketClient::connected(int s)
 {
 #ifdef	DEBUG_PEERNAME
-    struct sockaddr_in sin;
-    socklen_t len = sizeof(sin);
-    if(1 == getpeername(s, reinterpret_cast<struct sockaddr *>(&sin), &len))
+    char socket_buffer[SOCKET_BUFFER_SIZE];
+    struct sockaddr *sin = reinterpret_cast<struct sockaddr *>(socket_buffer);
+    socklen_t len = sizeof(socket_buffer);
+    if (-1 == getpeername(s, sin, &len))
 	XLOG_FATAL("getpeername failed: %s", strerror(errno));
-    set_remote_host(inet_ntoa(sin.sin_addr));
-	
+    char hostname[1024];
+    if (getnameinfo(sin, len, hostname, sizeof(hostname), 0, 0, 0))
+	XLOG_FATAL("getnameinfo failed: %s", strerror(errno));
+    set_remote_host(hostname);
 #endif
+
     debug_msg("Connected to remote Peer %s\n", get_remote_host());
 
     XLOG_ASSERT(UNCONNECTED == get_sock());
@@ -450,6 +454,9 @@ SocketClient::connect_socket(int sock, string raddr, uint16_t port,
 		  strerror(errno), raddr.c_str(), port);
 //  	XLOG_ERROR("Connect failed: %s raddr %s port %d",
 // 		   strerror(errno), inet_ntoa(raddr), ntohs(port));
+	// If the connect really failed still drop into complete code
+	// to tidy up. The completion code should be able to detect if
+	// there is an error.
     }
 
     // Its possible that the connection completed immediately, this
@@ -472,8 +479,9 @@ SocketClient::connect_socket_complete(int sock, SelectorMask m,
 
     eventloop().remove_selector(sock);
 
-    struct sockaddr sin;
-    socklen_t len = sizeof(sin);
+    char socket_buffer[SOCKET_BUFFER_SIZE];
+    struct sockaddr *sin = reinterpret_cast<struct sockaddr *>(socket_buffer);
+    socklen_t len = sizeof(socket_buffer);
     int error;
 
     /*
@@ -488,13 +496,23 @@ SocketClient::connect_socket_complete(int sock, SelectorMask m,
     }
 
     // Did the connection succeed?
-    memset(&sin, 0, sizeof(sin));
+    memset(sin, 0, len);
     len = sizeof(sin);
-    if (1 == getpeername(sock, &sin, &len)) {
+    if (-1 == getpeername(sock, sin, &len)) {
 	debug_msg("connect failed (geetpeername) %d\n", sock);
 	goto failed;
     }
-    
+
+
+#if	0
+    // If we need to check the result of getpeername.
+    char hostname[1024];
+    if (getnameinfo(sin, len, hostname, sizeof(hostname), 0, 0,
+		    NI_NUMERICHOST)) {
+	debug_msg("getnameinfo failed: %s\n", strerror(errno)); 
+	goto failed;
+    }
+#endif    
 #if	0
     if (0 == sin.sin_port) {
 	debug_msg("connect failed (sin_port) %d\n", sock);
