@@ -220,10 +220,42 @@ protected:
     XrlCmdMap* _cmds;
 
 public:
-    %s(XrlCmdMap* cmds) : _cmds(cmds) { add_handlers(); }
-    virtual ~%s() { remove_handlers(); }
+    /**
+     * Constructor.
+     *
+     * @param cmds an XrlCmdMap that the commands associated with the target
+     *		   should be added to.  This is typically the XrlRouter
+     *		   associated with the target.
+     */
+    %s(XrlCmdMap* cmds = 0);
 
+    /**
+     * Destructor.
+     *
+     * Dissociates instance commands from command map.
+     */
+    virtual ~%s();
+
+    /**
+     * Set command map.
+     *
+     * @param cmds pointer to command map to associate commands with.  This
+     * argument is typically a pointer to the XrlRouter associated with the
+     * target.
+     *
+     * @return true on success, false if cmds is null or a command map has
+     * already been supplied.
+     */
+    bool set_command_map(XrlCmdMap* cmds);
+
+    /**
+     * Get Xrl instance name associated with command map.
+     */
     inline const string& name() const { return _cmds->name(); }
+
+    /**
+     * Get version string of instance.
+     */
     inline const char* version() const { return "%s/%s"; }
 
 protected:
@@ -249,7 +281,30 @@ def prepare_target_cc(target_hh, target_cc):
     return s
 
 def output_target_cc(cls, tgt_name, methods):
-    s = target_handler_methods(cls, tgt_name, methods)
+    s = """
+%s::%s(XrlCmdMap* cmds)
+    : _cmds(cmds)
+{
+    if (_cmds)
+	add_handlers();
+}
+
+%s::~%s()
+{
+    if (_cmds)
+	remove_handlers();
+}
+
+bool
+%s::set_command_map(XrlCmdMap* cmds)
+{
+    if (_cmds || cmds == 0)
+	return false;
+    _cmds = cmds;
+    return true;
+}
+""" % (cls, cls, cls, cls, cls)
+    s += target_handler_methods(cls, tgt_name, methods)
     return s
 
 def generate_target_methods(tgt, interfaces):
