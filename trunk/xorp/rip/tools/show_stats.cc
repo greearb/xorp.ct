@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.1 2004/03/11 00:04:20 hodson Exp $"
+#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.2 2004/04/22 01:11:53 pavlin Exp $"
 
 #include <iomanip>
 
@@ -103,6 +103,17 @@ parse_finder_args(const string& host_colon_port, string& host, uint16_t& port)
     return true;
 }
 
+template <typename A>
+static void
+print_header(const string&	ifn,
+	     const string&	vifn,
+	     const A&		addr)
+{
+    cout << endl;
+    cout << "* RIP statistics for " << ifn << " " << vifn << " "
+	 << addr.str() << endl << endl;
+}
+
 static void
 pretty_print_counters(const XrlAtomList* descriptions,
 		      const XrlAtomList* values)
@@ -114,11 +125,13 @@ pretty_print_counters(const XrlAtomList* descriptions,
     ios::fmtflags fl = cout.flags();
 
     cout.flags(ios::left);
+    cout << "  ";
     cout << setw(COL1) << "Counter" << setw(0) << " ";
     cout.flags(ios::right);
     cout << setw(COL2) << "Value" << endl;
 
     cout.flags(ios::left);
+    cout << "  ";
     cout << setw(COL1) << string(COL1, '-') << setw(0) << " ";
     cout.flags(ios::right);
     cout << setw(COL2) << string(COL2, '-') << endl;
@@ -128,6 +141,7 @@ pretty_print_counters(const XrlAtomList* descriptions,
 	const XrlAtom& v = values->get(i);
 
 	cout.flags(ios::left);
+	cout << setw(0) << "  ";
 	// NB we use string.c_str() here as GCC's string ostream renderer
 	// seems to ignore the field width.
 	cout << setw(COL1) << d.text().c_str();
@@ -152,10 +166,13 @@ class XrlJobBase;
  */
 class XrlJobQueueBase {
 public:
+    typedef ref_ptr<XrlJobBase> Job;
+
+public:
     virtual ~XrlJobQueueBase() {}
     virtual XrlSender*	  sender()	 = 0;
     virtual const string& target() const = 0;
-
+    virtual void enqueue(const Job& j)	 = 0;
     virtual void dispatch_complete(const XrlError&	xe,
 				   const XrlJobBase*	cmd) = 0;
 };
@@ -212,8 +229,7 @@ protected:
 		 const XrlAtomList*	values)
     {
 	if (xe == XrlError::OKAY()) {
-	    cout << "RIP statistics for " << _ifn << " " << _vifn << " "
-		 << _a.str() << endl << endl;
+	    print_header(_ifn, _vifn, _a);
 	    pretty_print_counters(descriptions, values);
 	}
 	queue().dispatch_complete(xe, this);
@@ -226,14 +242,54 @@ protected:
 };
 
 /**
+ * Invoke Xrl to get all addresses, which we then use to get the counters
+ * for to pretty print result.
+ */
+class GetAllAddressStats4 : public XrlJobBase {
+public:
+    GetAllAddressStats4(XrlJobQueueBase& jq)
+	: XrlJobBase(jq)
+    {}
+
+    bool
+    dispatch()
+    {
+	XrlRipV0p1Client cl(queue().sender());
+	return cl.send_get_all_addresses(queue().target().c_str(),
+			callback(this, &GetAllAddressStats4::cmd_callback)
+					 );
+    }
+
+protected:
+    void
+    cmd_callback(const XrlError&	xe,
+		 const XrlAtomList*	ifnames,
+		 const XrlAtomList*	vifnames,
+		 const XrlAtomList*	addrs)
+    {
+	if (xe == XrlError::OKAY()) {
+	    for (size_t i = 0; i < ifnames->size(); i++) {
+		const string& 	ifn 	  = ifnames->get(i).text();
+		const string& 	vifn 	  = vifnames->get(i).text();
+		const IPv4& 	addr 	  = addrs->get(i).ipv4();
+		queue().enqueue(
+				new GetAddressStats4(queue(), ifn, vifn, addr)
+				);
+	    }
+	}
+	queue().dispatch_complete(xe, this);
+    }
+};
+
+/**
  * Invoke Xrl to get address stats on RIPng address and pretty print result.
  */
 class GetAddressStats6 : public XrlJobBase {
 public:
     GetAddressStats6(XrlJobQueueBase&	d,
-		     const string&		ifname,
-		     const string&		vifname,
-		     const IPv6&		addr)
+		     const string&	ifname,
+		     const string&	vifname,
+		     const IPv6&	addr)
 	: XrlJobBase(d), _ifn(ifname), _vifn(vifname), _a(addr)
     {}
 
@@ -253,8 +309,7 @@ protected:
 		 const XrlAtomList*	values)
     {
 	if (xe == XrlError::OKAY()) {
-	    cout << "RIP statistics for " << _ifn << " " << _vifn << " "
-		 << _a.str() << endl << endl;
+	    print_header(_ifn, _vifn, _a);
 	    pretty_print_counters(descriptions, values);
 	}
 	queue().dispatch_complete(xe, this);
@@ -266,7 +321,46 @@ protected:
     IPv6   _a;
 };
 
+/**
+ * Invoke Xrl to get all addresses, which we then use to get the counters
+ * for to pretty print result.
+ */
+class GetAllAddressStats6 : public XrlJobBase {
+public:
+    GetAllAddressStats6(XrlJobQueueBase& jq)
+	: XrlJobBase(jq)
+    {}
 
+    bool
+    dispatch()
+    {
+	XrlRipV0p1Client cl(queue().sender());
+	return cl.send_get_all_addresses(queue().target().c_str(),
+			callback(this, &GetAllAddressStats6::cmd_callback)
+					 );
+    }
+
+protected:
+    void
+    cmd_callback(const XrlError&	xe,
+		 const XrlAtomList*	ifnames,
+		 const XrlAtomList*	vifnames,
+		 const XrlAtomList*	addrs)
+    {
+	if (xe == XrlError::OKAY()) {
+	    for (size_t i = 0; i < ifnames->size(); i++) {
+		const string& 	ifn 	  = ifnames->get(i).text();
+		const string& 	vifn 	  = vifnames->get(i).text();
+		const IPv6& 	addr 	  = addrs->get(i).ipv6();
+		queue().enqueue(
+				new GetAddressStats6(queue(), ifn, vifn, addr)
+				);
+	    }
+	}
+	queue().dispatch_complete(xe, this);
+    }
+};
+
 /**
  * Xrl Job Queue
  */
@@ -320,6 +414,11 @@ public:
 	XLOG_ASSERT(_jobs.front().get() == cmd);
 
 	if (xe != XrlError::OKAY()) {
+	    if (xe == XrlError::COMMAND_FAILED()) {
+		cout << "Error: " << xe.note() << endl;
+	    } else {
+		cout << xe.str() << endl;
+	    }
 	    shutdown();
 	    return;
 	}
@@ -425,10 +524,11 @@ main(int argc, char* const argv[])
 		    break;
 		}
 	    }
-	    if (argc == 3) {
-		EventLoop e;
-		XrlJobQueue job_queue(e, finder_host, finder_port, xrl_target);
 
+	    EventLoop e;
+	    XrlJobQueue job_queue(e, finder_host, finder_port, xrl_target);
+
+	    if (argc == 3) {
 		if (ip_version == 4) {
 		    job_queue.enqueue(
 			new GetAddressStats4(job_queue,
@@ -440,20 +540,25 @@ main(int argc, char* const argv[])
 					     argv[0], argv[1], argv[2])
 			);
 		}
-
-		job_queue.startup();
-		while (job_queue.status() != SHUTDOWN) {
-		    if (job_queue.status() == FAILED) {
-			cerr << "Failed: " << job_queue.status_note() << endl;
-			break;
-		    }
-		    e.run();
+	    } else if (argc == 0) {
+		if (ip_version == 4) {
+		    job_queue.enqueue(new GetAllAddressStats4(job_queue));
+		} else if (ip_version == 6) {
+		    job_queue.enqueue(new GetAllAddressStats6(job_queue));
 		}
 	    } else {
 		fprintf(stderr, "Expected <ifname> <vifname> <address>\n");
 		usage();
 	    }
 
+	    job_queue.startup();
+	    while (job_queue.status() != SHUTDOWN) {
+		if (job_queue.status() == FAILED) {
+		    cerr << "Failed: " << job_queue.status_note() << endl;
+		    break;
+		}
+		e.run();
+	    }
 	}
     } catch (...) {
 	xorp_print_standard_exceptions();

@@ -410,6 +410,14 @@ XrlRipngTarget::ripng_0_1_rip_address_status(const string&	ifn,
 }
 
 XrlCmdError
+XrlRipngTarget::ripng_0_1_get_all_addresses(XrlAtomList&	ifnames,
+					    XrlAtomList&	vifnames,
+					    XrlAtomList&	addrs)
+{
+    return _ct->ripx_0_1_get_all_addresses(ifnames, vifnames, addrs);
+}
+
+XrlCmdError
 XrlRipngTarget::ripng_0_1_get_peers(const string&	ifn,
 				    const string&	vifn,
 				    const IPv6&		a,

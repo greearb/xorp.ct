@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.10 2004/05/03 23:11:58 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.11 2004/05/06 17:42:57 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -242,6 +242,10 @@ public:
 					    const string&	vifname,
 					    const A&		addr,
 					    string&		status);
+
+    XrlCmdError ripx_0_1_get_all_addresses(XrlAtomList&	ifnames,
+					   XrlAtomList&	vifnames,
+					   XrlAtomList&	addrs);
 
     XrlCmdError ripx_0_1_get_peers(const string& ifname,
 				   const string& vifname,
@@ -947,6 +951,29 @@ XrlRipCommonTarget<A>::ripx_0_1_rip_address_status(const string&	ifn,
 
     return XrlCmdError::OKAY();
 }
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_get_all_addresses(XrlAtomList&	ifnames,
+						  XrlAtomList&	vifnames,
+						  XrlAtomList&	addrs)
+{
+    const typename PortManagerBase<A>::PortList & ports = _xpm.const_ports();
+    typename PortManagerBase<A>::PortList::const_iterator pci;
+
+    for (pci = ports.begin(); pci != ports.end(); ++pci) {
+	const Port<A>*	     	port = *pci;
+	const PortIOBase<A>* 	pio  = port->io_handler();
+	if (pio == 0) {
+	    continue;
+	}
+	ifnames.append  ( XrlAtom(pio->ifname())   );
+	vifnames.append ( XrlAtom(pio->vifname())  );
+	addrs.append    ( XrlAtom(pio->address())  );
+    }
+    return XrlCmdError::OKAY();
+}
+
 
 template <typename A>
 XrlCmdError

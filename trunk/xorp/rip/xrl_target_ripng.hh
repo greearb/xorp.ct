@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.10 2004/05/03 23:11:58 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.11 2004/05/06 17:42:57 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -243,6 +243,10 @@ public:
 					     const string&	vifname,
 					     const IPv6&	addr,
 					     string&		status);
+
+    XrlCmdError ripng_0_1_get_all_addresses(XrlAtomList&	ifnames,
+					    XrlAtomList&	vifnames,
+					    XrlAtomList&	addrs);
 
     XrlCmdError ripng_0_1_get_peers(const string&		ifname,
 				    const string&		vifname,

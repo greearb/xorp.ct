@@ -471,6 +471,17 @@ rip_rip_rip_address_status()
     call_xrl_wrapper -p all "${XRL}"
 }
 
+rip_rip_get_all_addresses()
+{
+    if [ $# -ne 0 ] ; then
+        echo "Usage: rip_rip_get_all_addresses"
+        exit 1
+    fi
+
+    XRL="finder://rip/rip/0.1/get_all_addresses"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
 rip_rip_get_counters()
 {
     if [ $# -ne 3 ] ; then

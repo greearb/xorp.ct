@@ -397,7 +397,6 @@ XrlRipTarget::rip_0_1_interpacket_delay_milliseconds(
     return _ct->ripx_0_1_set_interpacket_delay_milliseconds(ifn, vifn, a, t);
 }
 
-
 XrlCmdError
 XrlRipTarget::rip_0_1_set_authentication(const string&	ifname,
 					 const string&	vifname,
@@ -482,7 +481,6 @@ XrlRipTarget::rip_0_1_authentication(const string&	ifname,
     return XrlCmdError::OKAY();
 }
 
-
 XrlCmdError
 XrlRipTarget::rip_0_1_rip_address_status(const string&	ifn,
 					 const string&	vifn,
@@ -492,6 +490,13 @@ XrlRipTarget::rip_0_1_rip_address_status(const string&	ifn,
     return _ct->ripx_0_1_rip_address_status(ifn, vifn, a, status);
 }
 
+XrlCmdError
+XrlRipTarget::rip_0_1_get_all_addresses(XrlAtomList&	ifnames,
+					XrlAtomList&	vifnames,
+					XrlAtomList&	addrs)
+{
+    return _ct->ripx_0_1_get_all_addresses(ifnames, vifnames, addrs);
+}
 
 XrlCmdError
 XrlRipTarget::rip_0_1_get_peers(const string&	ifn,

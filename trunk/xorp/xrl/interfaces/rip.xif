@@ -306,9 +306,16 @@ interface rip/0.1 {
 					-> status:txt
 
     /**
+     * Get addresses running RIP.
+     */
+    get_all_addresses			-> ifnames:list			\
+					&  vifnames:list		\
+					&  addrs:list
+
+    /**
      * Get counters associated with interface / vif /address.
      */
-     get_counters			? ifname:txt			\
+    get_counters			? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
 					-> counter_descriptions:list	\

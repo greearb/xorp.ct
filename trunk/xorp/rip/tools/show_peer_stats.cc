@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/show_peer_stats.cc,v 1.1 2004/03/11 00:04:20 hodson Exp $"
+#ident "$XORP: xorp/rip/tools/show_peer_stats.cc,v 1.2 2004/04/22 01:11:52 pavlin Exp $"
 
 #include <iomanip>
 
@@ -110,6 +110,7 @@ print_peer_header(const A& 	peer,
 		  const string& vifn,
 		  const A& 	addr)
 {
+    cout << endl;
     cout << "* RIP statistics for peer " << peer.str() << " on "
 	 << ifn << " " << vifn << " " << addr.str() << endl << endl;
 }
