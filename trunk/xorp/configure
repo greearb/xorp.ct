@@ -4445,11 +4445,11 @@ echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
 	pid=$!
 	sleep 3
 	if ( ps | grep ${pid} > /dev/null ); then
-	    kill ${pid} > /dev/null
+	    kill ${pid} &> /dev/null
 	    snmpd_valid=yes
 	    break
 	fi
-	kill ${pid} > /dev/null
+	kill ${pid} &> /dev/null
     done
     if test "${snmpd_valid}" = "yes" ; then
 	# Verify that dlmod directive was recognized
