@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.21 2003/05/13 23:59:15 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.22 2003/05/22 22:25:21 hodson Exp $
 ##
 
 # - The library
@@ -10,11 +10,11 @@ noinst_LIBRARIES = libxipc.a libfinder.a
 bin_PROGRAMS  =	call_xrl finder
 
 # -- Test Programs and scripts (order of increasing complexity)
-test_programs  = test_xrl_error test_xrl test_xrl_atom test_xrl_args 
+test_programs  = test_xrl_error test_xrl test_xrl_atom test_xrl_args
 test_programs += test_header test_inproc test_sudp test_stcp
 test_programs += test_lemming test_xrl_router
-test_programs += test_finder_tcp test_finder_messenger test_finder_msgs 
-test_programs += test_finder test_finder_events 
+test_programs += test_finder_tcp test_finder_messenger test_finder_msgs
+test_programs += test_finder test_finder_events
 
 test_extra_programs = test_xrl_parser test_finder_to
 
@@ -78,12 +78,12 @@ libxipc_a_SOURCES += ipc_module.h
 libxipc_a_SOURCES += xrl_module.h
 libxipc_a_SOURCES += hmac_md5.h
 libxipc_a_SOURCES += finder_client.hh
+libxipc_a_SOURCES += finder_constants.hh
 libxipc_a_SOURCES += finder_ipc.hh
 libxipc_a_SOURCES += finder_messenger.hh
 libxipc_a_SOURCES += finder_msgs.hh
 libxipc_a_SOURCES += finder_client.hh
 libxipc_a_SOURCES += finder_client_xrl_target.hh
-libxipc_a_SOURCES += finder_server.hh
 libxipc_a_SOURCES += finder_tcp_messenger.hh
 libxipc_a_SOURCES += finder_tcp.hh
 libxipc_a_SOURCES += header.hh
@@ -144,14 +144,18 @@ libxipc_a_SOURCES += xrl_std_router.cc
 libxipc_a_SOURCES += xrl_error.cc
 libxipc_a_SOURCES += xuid.cc
 
-# -- Library Sources (libfinder) 
+# -- Library Sources (libfinder)
 libfinder_a_SOURCES  = finder_base.hh
-libfinder_a_SOURCES += finder.hh 
+libfinder_a_SOURCES += finder_constants.hh
+libfinder_a_SOURCES += finder.hh
+libfinder_a_SOURCES += finder_server.hh
+
 libfinder_a_SOURCES += finder_xrl_queue.hh
 libfinder_a_SOURCES += finder_xrl_target.hh
 
 libfinder_a_SOURCES += finder_base.cc
 libfinder_a_SOURCES += finder.cc
+libfinder_a_SOURCES += finder_server.cc
 libfinder_a_SOURCES += finder_xrl_queue.cc
 libfinder_a_SOURCES += finder_xrl_target.cc
 

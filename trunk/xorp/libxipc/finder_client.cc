@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.15 2003/05/09 21:00:51 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.16 2003/05/22 22:25:21 hodson Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -118,7 +118,7 @@ public:
     virtual void execute(FinderMessengerBase* m) = 0;
 
     inline FinderClient& client() { return _fc; }
-    
+
 protected:
     FinderClient& _fc;
 };
@@ -176,7 +176,7 @@ public:
     {
 	finder_trace("Destructing ClientQuery \"%s\"", _key.c_str());
     }
-    
+
     void
     execute(FinderMessengerBase* m)
     {
@@ -292,7 +292,7 @@ public:
     {
 	finder_trace("Destructing ForwardedXrl \"%s\"", _xrl.str().c_str());
     }
-    
+
     void
     execute(FinderMessengerBase* m)
     {
@@ -324,7 +324,7 @@ public:
 	_xcb->dispatch(e, _xrl, 0);
     }
 
-    
+
 protected:
     Xrl		_xrl;
     XrlCallback	_xcb;
@@ -375,7 +375,7 @@ public:
 		   _iname.c_str(), _cname.c_str(), e.str().c_str());
 	client().notify_failed(this);
     }
-    
+
 protected:
     string _iname;
     string _cname;
@@ -428,7 +428,7 @@ public:
 	   client().notify_failed(this);
 	}
     }
-    
+
 protected:
     LocalResolvedTable& _lrt;
     string _xrl;
@@ -454,7 +454,7 @@ public:
     {
 	finder_trace("Destructing EnableXrls \"%s\"", _iname.c_str());
     }
-    
+
     void execute(FinderMessengerBase* m)
     {
 	finder_trace_init("execute EnableXrls \"%s\"", _iname.c_str());
@@ -585,7 +585,7 @@ FinderClient::register_xrl_target(const string&		instance_name,
 		     instance_name.c_str());
 	return true;
     }
-    
+
     _ids.push_back(InstanceInfo(instance_name, class_name, dispatcher));
 
     // We should check whether item exists on queue already.
@@ -696,7 +696,7 @@ FinderClient::notify_done(const FinderClientOp* op)
     XLOG_ASSERT(_todo_list.empty() == false);
     XLOG_ASSERT(_todo_list.front().get() == op);
     XLOG_ASSERT(_pending_result == true);
-    
+
     // If item is repeatable, ie we'd need to repeat it after a failure
     // put in the done list so we can recover it later.
     if (dynamic_cast<const FinderClientRepeatOp*>(op))
@@ -725,14 +725,14 @@ FinderClient::notify_failed(const FinderClientOp* op)
     OperationQueue::iterator i = _todo_list.begin();
     while (i != _todo_list.end()) {
 	OperationQueue::iterator curr = i++;
-	FinderClientOneOffOp* o = 
+	FinderClientOneOffOp* o =
 	    dynamic_cast<FinderClientOneOffOp*>(curr->get());
 	if (o) {
 	    o->force_failure(XrlError::NO_FINDER());
 	}
 	_todo_list.erase(curr);
     }
-    
+
     _pending_result = false;
 
     // trigger restart
@@ -748,13 +748,13 @@ FinderClient::prepare_for_restart()
     size_t old_size = _todo_list.size();
     _todo_list.splice(_todo_list.begin(), _done_list);
     XLOG_ASSERT(_todo_list.size() >= old_size);
-    
+
     // Clear resolved table
     _rt.clear();
 
     // Clear local resolutions
     _lrt.clear();
-    
+
     _pending_result = false;
     _xrls_registered = false;
 }
@@ -767,7 +767,7 @@ FinderClient::prepare_for_restart()
 void
 FinderClient::messenger_birth_event(FinderMessengerBase* m)
 {
-    finder_trace("messenger %p birth\n", m);    
+    finder_trace("messenger %p birth\n", m);
     XLOG_ASSERT(0 == _messenger);
     prepare_for_restart();
     _messenger = m;
@@ -872,7 +872,7 @@ FinderClient::dispatch_tunneled_xrl(const string& xrl_str)
 	Xrl dispatch_me(xrl.target(), local_xrl_command, xrl.args());
 	XrlArgs ret_vals;
 	i->dispatcher()->dispatch_xrl(dispatch_me, ret_vals);
-	
+
 	finder_trace_result("success");
 	return XrlCmdError::OKAY();
     } catch (InvalidString&) {

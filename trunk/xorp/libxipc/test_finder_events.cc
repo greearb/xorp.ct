@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.1 2003/05/22 22:25:22 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.2 2003/05/29 21:17:15 mjh Exp $"
 
 #include <list>
 #include <vector>
@@ -23,7 +23,7 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/xlog.h"
 
-#include "finder.hh"
+#include "finder_server.hh"
 #include "finder_tcp_messenger.hh"
 #include "finder_xrl_target.hh"
 #include "permits.hh"
@@ -70,28 +70,6 @@ do {									\
 	printf(x);							\
     }									\
 } while(0)
-
-
-/**
- * Simple Wrapper for Finder and it's components.
- */
-class FinderPackage
-{
-public:
-    FinderPackage(EventLoop& e, IPv4 host, uint16_t port)
-	: _finder(e), _finder_xrl_handler(_finder),
-	  _finder_tcp4_source(e, _finder, _finder.commands(),
-			      IPv4::ANY(), port)
-    {
-	add_permitted_host(host);
-    }
-    Finder& finder() { return _finder; }
-
-protected:
-    Finder		_finder;
-    FinderXrlTarget	_finder_xrl_handler;
-    FinderTcpListener	_finder_tcp4_source;
-};
 
 
 /**
@@ -448,10 +426,10 @@ static int
 test_main()
 {
     EventLoop e;
-    IPv4      test_host = if_get_preferred();
+    IPv4      test_host(FINDER_DEFAULT_HOST);
     uint16_t  test_port = 16600;
 
-    FinderPackage f(e, test_host, test_port);
+    FinderServer f(e, test_port, test_host);
     FinderEventObserverPackage* pfeo = 0;
 
     list<AnXrlTarget*> tgt_store;
@@ -472,7 +450,7 @@ test_main()
     //
     // Create observer, clean up observer
     //
-	
+
     SPACED_EVENT(create_observer, &e, &pfeo, test_host, test_port);
 
     SPACED_EVENT(assert_observer_ready, &pfeo);
@@ -631,7 +609,7 @@ test_main()
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -647,7 +625,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -664,7 +642,7 @@ main(int argc, char * const argv[])
 {
     int ret_value = 0;
     const char* const argv0 = argv[0];
-    
+
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
         switch (ch) {
@@ -693,7 +671,7 @@ main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	ret_value = test_main();
@@ -702,12 +680,12 @@ main(int argc, char * const argv[])
         xorp_print_standard_exceptions();
         ret_value = 2;
     }
-   
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
+
     return (ret_value);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.9 2003/05/09 19:36:16 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.10 2003/05/09 21:00:52 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -22,7 +22,7 @@
 #include "libxorp/debug.h"
 #include "sockutil.hh"
 
-#include "finder.hh"
+#include "finder_server.hh"
 #include "finder_xrl_target.hh"
 #include "finder_client.hh"
 #include "finder_client_xrl_target.hh"
@@ -128,27 +128,10 @@ test_xrls_locally_resolve(EventLoop& e, FinderClient& fc1, list<string>& xrls)
     }
     verbose_log("Xrl command \"%s\" resolves as \"%s\"\n",
 		lx.command().c_str(), local_xrl_command.c_str());
-    
+
     return 0;
-}    
+} 
 #endif // 0
-
-class FinderPackage {
-public:
-    FinderPackage(EventLoop& e, IPv4 host, uint16_t port) 
-	: _finder(e), _finder_xrl_handler(_finder),
-	  _finder_tcp4_source(e, _finder, _finder.commands(), IPv4::ANY(), port)
-    {
-	add_permitted_host(host);
-    }
-    Finder& finder() { return _finder; }
-
-protected:
-    Finder		_finder;
-    FinderXrlTarget	_finder_xrl_handler;
-    FinderTcpListener	_finder_tcp4_source;
-};
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -160,13 +143,13 @@ test_main(void)
 {
     EventLoop e;
 
-    IPv4 test_host = if_get_preferred();
+    IPv4 test_host(FINDER_DEFAULT_HOST);
     uint16_t test_port = 16666;
 
     //
     // Construct finder and messenger source for finder
     //
-    FinderPackage* finder_box = new FinderPackage(e, test_host, test_port);
+    FinderServer* finder_box = new FinderServer(e, test_port);
 
     //
     // Construct first finder client and messenger source for it.
@@ -187,8 +170,8 @@ test_main(void)
     //
     verbose_log("Establishing connection between first finder client and "
 		"finder...\n");
-    while (!expired && fc1.ready() == false && 
-	   finder_box->finder().messengers() == 0)
+    while (!expired && fc1.ready() == false &&
+	   finder_box->connection_count() == 0)
 	e.run();
 
     if (expired) {
@@ -233,11 +216,11 @@ test_main(void)
 	verbose_log("succeeded\n");
     }
     fc1.enable_xrls(instance_name);
-    
+
     while (!expired)
 	e.run();
 
-    int r = test_xrls_resolve(e, fc1, xrls); 
+    int r = test_xrls_resolve(e, fc1, xrls);
     if (r)
 	return r;
 
@@ -249,14 +232,14 @@ test_main(void)
     FinderTcpMessenger* ftm =
 	dynamic_cast<FinderTcpMessenger*>(fc1.messenger());
     ftm->close();
-#endif    
+#endif
 
     expired = false;
     t = e.set_flag_after_ms(1000, &expired);
     while (expired == false)
 	e.run();
-    
-    r = test_xrls_resolve(e, fc1, xrls); 
+
+    r = test_xrls_resolve(e, fc1, xrls);
     if (r)
 	return r;
 
@@ -266,7 +249,7 @@ test_main(void)
     FinderClient fc2;
     FinderClientXrlTarget fc2_xrl_handler(&fc2, &fc2.commands());
     FinderTcpAutoConnector fc2_connector(e, fc2, fc2.commands(),
-					   test_host, test_port);
+					 test_host, test_port);
 
     // Register test client
     string instance_name2("test_client");
@@ -280,7 +263,7 @@ test_main(void)
 	verbose_log("Failed to enable xrls on test client\n");
 	return 1;
     }
-    
+
     //
     // Start an expiry timer
     //
@@ -293,8 +276,8 @@ test_main(void)
     verbose_log("Establishing connection between second finder client and "
 		"finder...\n");
     while (!expired &&
-	   (fc2.ready() == false || 
-	    finder_box->finder().messengers() < 2))
+	   (fc2.ready() == false ||
+	    finder_box->connection_count() < 2))
 	e.run();
 
     if (expired) {
@@ -305,7 +288,7 @@ test_main(void)
 
     verbose_log("Testing Client 2 can resolve Client 1 registrations\n");
     // Test second finder client can resolve xrls on first finder
-    r = test_xrls_resolve(e, fc2, xrls); 
+    r = test_xrls_resolve(e, fc2, xrls);
     if (r)
 	return r;
 
@@ -323,8 +306,8 @@ test_main(void)
     debug_msg("Expired %d\n", expired);
 
     // Test we can restart finder
-    verbose_log("Restarting finder\n");    
-    finder_box = new FinderPackage(e, test_host, test_port);
+    verbose_log("Restarting finder\n");
+    finder_box = new FinderServer(e, test_port);
     expired = false;
     t = e.set_flag_after_ms(1000, &expired);
     while (expired == false)
@@ -340,7 +323,7 @@ test_main(void)
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -356,7 +339,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -373,7 +356,7 @@ main(int argc, char * const argv[])
 {
     int ret_value = 0;
     const char* const argv0 = argv[0];
-    
+
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
         switch (ch) {
@@ -402,7 +385,7 @@ main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	ret_value = test_main();
@@ -411,12 +394,12 @@ main(int argc, char * const argv[])
         xorp_print_standard_exceptions();
         ret_value = 2;
     }
-   
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
+
     return (ret_value);
 }

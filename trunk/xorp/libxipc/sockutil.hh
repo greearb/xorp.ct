@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/sockutil.hh,v 1.4 2003/03/10 23:20:24 hodson Exp $
+// $XORP: xorp/libxipc/sockutil.hh,v 1.5 2003/03/16 08:20:29 pavlin Exp $
 
 /* Some helper functions for sockets */
 
@@ -113,6 +113,15 @@ bool address_lookup(const string& addr, in_addr& ia);
  * @return number of network interfaces reported by OS.
  */
 uint32_t if_count();
+
+/**
+ * Determine if address is an interface address on host.
+ *
+ * @param ia address to be checked.
+ *
+ * @return true if address is a valid interface address, false otherwise.
+ */
+bool if_valid(const in_addr& ia);
 
 /**
  * Query interface parameters.

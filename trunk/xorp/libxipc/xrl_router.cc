@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.19 2003/05/09 21:00:53 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.20 2003/05/21 23:04:42 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -31,6 +31,7 @@
 
 #include "sockutil.hh"
 
+
 // ----------------------------------------------------------------------------
 // Xrl Tracing central
 
@@ -51,7 +52,7 @@ do {									      \
     if (xrl_trace.on()) XLOG_INFO(string((p) + (x).str()).c_str());	      \
 } while (0)
 
-
+
 struct XrlRouterDispatchState {
 public:
     typedef XrlRouter::XrlCallback XrlCallback;
@@ -68,7 +69,7 @@ public:
     {
 	delete _xrs;
     }
-    
+
     inline const XrlRouter* router() const { return _rtr; }
 
     inline const Xrl& xrl() const { return _xrl; }
@@ -79,7 +80,7 @@ public:
     }
 
     inline void set_sender(XrlPFSender* s) { _xrs = s; }
-    
+
 protected:
     const XrlRouter*		_rtr;
     Xrl				_xrl;
@@ -87,6 +88,7 @@ protected:
     XrlPFSender*		_xrs;
 };
 
+
 //
 // This is scatty and temporary
 //
@@ -108,11 +110,11 @@ mk_instance_name(EventLoop& e, const char* classname)
     static uint32_t sp = (uint32_t)getpid();
     static uint32_t sa = if_get_preferred().s_addr;
     static uint32_t sc;
-    
+
     TimeVal now;
     e.current_time(now);
     sc++;
-    
+
     uint32_t data[5];
     data[0] = sa;
     data[1] = sp;
@@ -128,8 +130,27 @@ mk_instance_name(EventLoop& e, const char* classname)
     char asc_digest[33];
     if (hmac_md5_digest_to_ascii(digest, asc_digest, sizeof(asc_digest)) == 0)
 	XLOG_FATAL("Could not make ascii md5 digest representation");
-    
+
     return c_format("%s-%s@", classname, asc_digest) + IPv4(sa).str();
+}
+
+void
+XrlRouter::initialize(const char* class_name,
+		      IPv4	  finder_addr,
+		      uint16_t	  finder_port)
+{
+    _fc = new FinderClient();
+
+    _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
+
+    _fac = new FinderTcpAutoConnector(_e, *_fc, _fc->commands(),
+				      finder_addr, finder_port);
+
+    _instance_name = mk_instance_name(_e, class_name);
+
+    if (_fc->register_xrl_target(_instance_name, class_name, this) == false) {
+	XLOG_FATAL("Failed to register target %s\n", class_name);
+    }
 }
 
 XrlRouter::XrlRouter(EventLoop&  e,
@@ -139,40 +160,26 @@ XrlRouter::XrlRouter(EventLoop&  e,
     throw (InvalidAddress)
     : XrlDispatcher(class_name), _e(e), _rpend(0), _spend(0)
 {
-    _fc = new FinderClient();
-    _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
 
+    IPv4 finder_ip = finder_addr ? finder_host(finder_addr)
+	: FINDER_DEFAULT_HOST;
     if (0 == finder_port)
-	finder_port = FINDER_NG_TCP_DEFAULT_PORT;
-    _fac = new FinderTcpAutoConnector(e, *_fc, _fc->commands(),
-				      finder_host(finder_addr),
-				      finder_port);
+	finder_port = FINDER_DEFAULT_PORT;
 
-    _instance_name = mk_instance_name(e, class_name);
-    if (_fc->register_xrl_target(_instance_name, class_name, this) == false) {
-	XLOG_FATAL("Failed to register target %s\n", class_name);
-    }
+    initialize(class_name, finder_ip, finder_port);
 }
 
 XrlRouter::XrlRouter(EventLoop&  e,
 		     const char* class_name,
-		     IPv4 	 finder_addr,
+		     IPv4 	 finder_ip,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
     : XrlDispatcher(class_name), _e(e), _rpend(0), _spend(0)
 {
-    _fc = new FinderClient();
-    _fxt = new FinderClientXrlTarget(_fc, &_fc->commands());
-
     if (0 == finder_port)
-	finder_port = FINDER_NG_TCP_DEFAULT_PORT;
-    _fac = new FinderTcpAutoConnector(e, *_fc, _fc->commands(),
-					finder_addr, finder_port);
+	finder_port = FINDER_DEFAULT_PORT;
 
-    _instance_name = mk_instance_name(e, class_name);
-    if (_fc->register_xrl_target(_instance_name, class_name, this) == false) {
-	XLOG_FATAL("Failed to register target %s\n", class_name);
-    }
+    initialize(class_name, finder_ip, finder_port);
 }
 
 XrlRouter::~XrlRouter()
@@ -221,7 +228,7 @@ XrlRouter::add_listener(XrlPFListener* l)
 {
     _listeners.push_back(l);
     l->set_dispatcher(this);
-    
+
     // Walk list of Xrl in command map and register them with finder client
     XrlCmdMap::CmdMap::const_iterator ci = _cmd_map.begin();
     while (ci != _cmd_map.end()) {
@@ -232,7 +239,7 @@ XrlRouter::add_listener(XrlPFListener* l)
 			  l->protocol(), l->address());
 	++ci;
     }
-    
+
     return true;
 }
 
@@ -313,7 +320,7 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
     }
     dispose(ds);
 
-    return;    
+    return;
 }
 
 bool
@@ -321,7 +328,7 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& xcb)
 {
     trace_xrl("Resolving xrl:", xrl);
     _rpend++;
-    
+
     DispatchState *ds = new XrlRouterDispatchState(this, xrl, xcb);
     _dsl.push_back(ds);
 

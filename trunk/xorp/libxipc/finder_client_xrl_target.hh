@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client_xrl_target.hh,v 1.5 2003/05/09 21:00:51 hodson Exp $
+// $XORP: xorp/libxipc/finder_client_xrl_target.hh,v 1.6 2003/05/29 21:17:15 mjh Exp $
 
-#ifndef __LIBXIPC_FINDER_NG_CLIENT_XRL_TARGET_HH__
-#define __LIBXIPC_FINDER_NG_CLIENT_XRL_TARGET_HH__
+#ifndef __LIBXIPC_FINDER_CLIENT_XRL_TARGET_HH__
+#define __LIBXIPC_FINDER_CLIENT_XRL_TARGET_HH__
 
 #include "finder_client_base.hh"
 
@@ -46,4 +46,4 @@ protected:
     FinderClientXrlCommandInterface* _client;
 };
 
-#endif // __LIBXIPC_FINDER_NG_CLIENT_XRL_TARGET_HH__
+#endif // __LIBXIPC_FINDER_CLIENT_XRL_TARGET_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.17 2003/05/09 21:00:53 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.18 2003/05/21 23:04:42 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -24,6 +24,7 @@
 #include "xrl_sender.hh"
 #include "xrl_dispatcher.hh"
 #include "xrl_pf.hh"
+#include "finder_constants.hh"
 
 class DispatchState;
 
@@ -35,32 +36,32 @@ class XrlRouterDispatchState;
 
 class XrlRouter : public XrlDispatcher, public XrlSender {
 public:
-    typedef XrlSender::Callback XrlCallback;    
+    typedef XrlSender::Callback XrlCallback;
     typedef XrlRouterDispatchState DispatchState;
-    
+
 public:
     XrlRouter(EventLoop&	e,
 	      const char*	class_name,
 	      const char*	finder_address,
-	      uint16_t		finder_port = 0)
+	      uint16_t		finder_port = FINDER_DEFAULT_PORT)
 	throw (InvalidAddress);
 
     XrlRouter(EventLoop&	e,
 	      const char*	class_name,
-	      IPv4		finder_address = IPv4("127.0.0.1"),
-	      uint16_t		finder_port = 0)
+	      IPv4		finder_address = FINDER_DEFAULT_HOST,
+	      uint16_t		finder_port = FINDER_DEFAULT_PORT)
 	throw (InvalidAddress);
 
     virtual ~XrlRouter();
-    
+
     bool add_listener(XrlPFListener* listener);
 
     void finalize();
-    
+
     bool connected() const;
 
     bool ready() const;
-    
+
     bool pending() const;
 
     bool send(const Xrl& xrl, const XrlCallback& cb);
@@ -70,7 +71,7 @@ public:
     inline EventLoop& eventloop()		{ return _e; }
     inline const string& instance_name() const	{ return _instance_name; }
     inline const string& class_name() const	{ return XrlCmdMap::name(); }
-    
+
 protected:
     void resolve_callback(const XrlError&		e,
 			  const FinderDBEntry*		dbe,
@@ -82,7 +83,11 @@ protected:
 		       XrlRouterDispatchState*	ds);
 
     void dispose(XrlRouterDispatchState*);
-    
+
+    void initialize(const char* class_name,
+		    IPv4	finder_addr,
+		    uint16_t	finder_port);
+
 protected:
     EventLoop&			_e;
     FinderClient*		_fc;

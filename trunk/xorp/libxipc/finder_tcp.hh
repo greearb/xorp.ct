@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.9 2003/03/10 23:20:23 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.10 2003/04/22 23:27:18 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -30,8 +30,6 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ref_ptr.hh"
-
-static const uint16_t FINDER_NG_TCP_DEFAULT_PORT = 19999;
 
 class FinderTcpBase {
 public:
@@ -62,7 +60,7 @@ public:
      * @return true if read events are enabled.
      */
     bool read_enabled() const;
-    
+
     /**
      * Write data on TCP connection.  To avoid an unnecessary data
      * copy, the client is expected to ensure the data is valid until
@@ -77,7 +75,7 @@ public:
     bool write_data(const uint8_t* data, uint32_t data_bytes);
 
     bool write_data(const iovec* iov, uint32_t iovcnt);
-    
+
     /**
      * Method to be implemented by derived classes that is called when
      * data writing completes or an error occurs when processing when write.
@@ -95,7 +93,7 @@ public:
     virtual void close_event();
 
     virtual void error_event();
-    
+
     void close();
     bool closed() const;
 
@@ -107,14 +105,14 @@ protected:
 		       const uint8_t*, size_t, size_t);
     void write_callback(AsyncFileOperator::Event,
 			const uint8_t*, size_t, size_t);
-    
-protected:    
+
+protected:
     int _fd;
     vector<uint8_t> _input_buffer;
 
     AsyncFileReader _reader;
     AsyncFileWriter _writer;
-    
+
     uint32_t _isize;	// input buffer size as received.
     uint32_t _osize;	// output buffer size as advertised.
 
@@ -132,7 +130,7 @@ public:
 			  IPv4		interface,
 			  uint16_t	port,
 			  bool		en = true)
-	throw (InvalidPort);
+	throw (InvalidAddress, InvalidPort);
 
     virtual ~FinderTcpListenerBase();
 
@@ -156,23 +154,36 @@ public:
      * Control whether listener is enabled.
      */
     void set_enabled(bool en);
-    
+
+    /**
+     * Get interface address listener is operating on.
+     */
+    inline IPv4 address() const		{ return _addr; }
+
+    /**
+     * Get port listener is bound to.
+     */
+    inline uint16_t port() const	{ return _port; }
+
 protected:
     /**
      * Accepts connection, checks source address, and then calls
      * connection_event() if source is valid.
      */
     void connect_hook(int fd, SelectorMask m);
-    
+
     FinderTcpListenerBase(const FinderTcpListenerBase&);	    // Not impl
     FinderTcpListenerBase& operator=(const FinderTcpListenerBase&); // Not impl
 
     inline EventLoop& eventloop() const { return _e; }
-    
+
 protected:
     EventLoop&	_e;
     int		_lfd;
     bool	_en;
+
+    IPv4	_addr;
+    uint16_t	_port;
 
     AddrList	_ok_addrs;
     NetList	_ok_nets;

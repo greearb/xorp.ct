@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.6 2003/05/09 21:00:51 hodson Exp $
+// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.7 2003/05/22 22:25:22 hodson Exp $
 
-#ifndef __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
-#define __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
+#ifndef __LIBXIPC_FINDER_XRL_QUEUE_HH__
+#define __LIBXIPC_FINDER_XRL_QUEUE_HH__
 
 #include <list>
 #include "libxorp/ref_ptr.hh"
@@ -219,4 +219,4 @@ protected:
     string _xrl;
 };
 
-#endif // __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
+#endif // __LIBXIPC_FINDER_XRL_QUEUE_HH__

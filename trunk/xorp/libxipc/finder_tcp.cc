@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.12 2003/03/10 23:20:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.13 2003/03/12 20:02:44 hodson Exp $"
 
 #include <functional>
 
@@ -143,7 +143,7 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
 	// Not enough data to do anything useful with
 	return;
     }
-    
+
     if (reinterpret_cast<const uint8_t*>(&_isize) == buffer) {
 	// Read length of data to follow
 	_isize = ntohl(_isize);
@@ -202,7 +202,7 @@ FinderTcpBase::write_callback(AsyncFileOperator::Event	ev,
 	// Not enough data to do anything useful with
 	return;
     }
-    
+
     if (reinterpret_cast<const uint8_t*>(&_osize) == buffer) {
 	// Notified of length information write
 	return;
@@ -230,7 +230,7 @@ void
 FinderTcpBase::set_read_enabled(bool en)
 {
     bool running = _reader.running();
-    if (false == en && running) 
+    if (false == en && running)
 	_reader.stop();
     else if (en && false == running)
 	_reader.resume();
@@ -268,13 +268,17 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
 					     IPv4	interface,
 					     uint16_t	port,
 					     bool	en)
-    throw (InvalidPort)
-    : _e(e), _en(false)
+    throw (InvalidAddress, InvalidPort)
+    : _e(e), _en(false), _addr(interface), _port(port)
 {
     comm_init();
 
     in_addr if_ia;
     if_ia.s_addr = interface.addr();
+
+    if (if_valid(if_ia) == false && interface != IPv4::ANY()) {
+	xorp_throw(InvalidAddress, "Not a valid interface address");
+    }
 
     _lfd = comm_bind_tcp4(&if_ia, htons(port));
     if (XORP_ERROR == _lfd) {

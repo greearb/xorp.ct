@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder.hh,v 1.10 2003/05/09 21:00:51 hodson Exp $
+// $XORP: xorp/libxipc/finder.hh,v 1.11 2003/05/22 22:25:21 hodson Exp $
 
-#ifndef __LIBXIPC_FINDER_NG_HH__
-#define __LIBXIPC_FINDER_NG_HH__
+#ifndef __LIBXIPC_FINDER_HH__
+#define __LIBXIPC_FINDER_HH__
 
 #include "config.h"
 
@@ -154,4 +154,4 @@ protected:
     						// FinderMessenger instances
 };
 
-#endif // __LIBXIPC_FINDER_NG_HH__
+#endif // __LIBXIPC_FINDER_HH__

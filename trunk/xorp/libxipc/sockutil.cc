@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.3 2003/03/04 23:41:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.4 2003/03/10 23:20:24 hodson Exp $"
 
 #include "config.h"
 
@@ -413,17 +413,6 @@ address_lookup(const string& addr, in_addr& ia)
 	return true;
     }
 
-    if (strcasecmp(addr.c_str(), "default") == 0) {
-	ia = if_get_preferred();
-	return true;
-    }
-
-    // XXX I don't like doing this...
-    if (strcasecmp(addr.c_str(), "localhost") == 0) {
-	ia = if_get_preferred();
-	return true;
-    }
-
     int retry = 0;
     do {
 	struct hostent *h = gethostbyname(addr.c_str());
@@ -490,6 +479,23 @@ if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags)
     return true;
 }
 
+bool
+if_valid(const in_addr& a)
+{
+    uint32_t n = if_count();
+
+    string if_name;
+    in_addr if_addr;
+    uint16_t if_flags;
+
+    for (uint32_t i = 1; i <= n; i++) {
+	if (if_probe(i, if_name, if_addr, if_flags) &&
+	    if_addr.s_addr == a.s_addr) {
+	    return true;
+	}
+    }
+    return false;
+}
 
 static in_addr s_if_preferred;
 

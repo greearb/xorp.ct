@@ -20,6 +20,7 @@
 #include "finder_client.hh"
 #include "finder_client_xrl_target.hh"
 #include "finder_tcp_messenger.hh"
+#include "finder_constants.hh"
 
 //
 // A client process to help test the finder keepalive and time out
@@ -71,7 +72,7 @@ test_main(uint32_t pre_block_secs,
     FinderClient fc;
     FinderClientXrlTarget fxt(&fc, &fc.commands());
     FinderTcpAutoConnector fac(e, fc, fc.commands(),
-			       IPv4("127.0.0.1"), finder_port);
+			       FINDER_DEFAULT_HOST, finder_port);
 
     bool timeout = false;
     XorpTimer t = e.set_flag_after(TimeVal(1, 0), &timeout);
@@ -87,7 +88,7 @@ test_main(uint32_t pre_block_secs,
     string instance_foo("foo");
     fc.register_xrl_target(instance_foo, "bar", 0);
     fc.enable_xrls(instance_foo);
-    
+
     timeout = false;
     t = e.set_flag_after(TimeVal(1, 0), &timeout);
     while (fc.ready() == false && timeout == false) {
@@ -99,7 +100,7 @@ test_main(uint32_t pre_block_secs,
 	return 1;
     }
 
-    verbose_log("Running for %d seconds\n", pre_block_secs);    
+    verbose_log("Running for %d seconds\n", pre_block_secs);
     t = e.set_flag_after(TimeVal(pre_block_secs, 0), &timeout);
     while (t.scheduled()) {
 	e.run();
@@ -111,13 +112,13 @@ test_main(uint32_t pre_block_secs,
     }
 
     fprintf(stderr, "Connected %d\n", fc.connected());
-    
-    verbose_log("Running for %d seconds\n", block_secs);    
+
+    verbose_log("Running for %d seconds\n", block_secs);
     t = e.set_flag_after(TimeVal(post_block_secs, 0), &timeout);
     while (t.scheduled()) {
 	e.run();
     }
-    
+
     return 0;
 }
 
@@ -128,7 +129,7 @@ test_main(uint32_t pre_block_secs,
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -144,7 +145,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -195,7 +196,7 @@ main(int argc, char * const argv[])
 	    usage(argv[0]);
 	}
     }
-    
+
     argc -= optind;
     argv += optind;
 
@@ -204,9 +205,9 @@ main(int argc, char * const argv[])
     } else if (argc == 1) {
 	port = strtoul(argv[0], 0, 10);
     } else {
-	port = FINDER_NG_TCP_DEFAULT_PORT;	
+	port = FINDER_DEFAULT_PORT;
     }
-    
+
     if (exec_secs < pre_block_secs + block_secs) {
 	fprintf(stderr,
 		"Execution time must be greater or equal to the block and "
@@ -236,7 +237,7 @@ main(int argc, char * const argv[])
         xorp_print_standard_exceptions();
         ret_value = 2;
     }
-   
+
     //
     // Gracefully stop and exit xlog
     //

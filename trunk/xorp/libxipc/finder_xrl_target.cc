@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.14 2003/05/22 22:25:22 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.15 2003/05/29 21:17:15 mjh Exp $"
 
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
@@ -51,19 +51,28 @@ do {									      \
     }									      \
 } while (0)
 
+
 /**
  * Helper method to pass back consistent message when it is discovered that
  * a client is trying to manipulate state for a non-existent target or
  * a target it is not registered to administer.
  */
 static inline string
-bad_target_message(const string& tgt_name)
+restricted_target_message(const string& tgt_name)
 {
     return c_format("Target \"%s\" does not exist "
 		    "or caller is not responsible "
-		    "for it.\n", tgt_name.c_str());
+		    "for it.", tgt_name.c_str());
 }
 
+static inline string
+bad_target_message(const string& tgt_name)
+{
+    return c_format("Target \"%s\" does not exist or is not enabled.",
+		    tgt_name.c_str());
+}
+
+
 static string
 make_cookie()
 {
@@ -79,6 +88,7 @@ make_cookie()
     return c_format("%08x%08x", invoked, r ^ hash_base);
 }
 
+
 FinderXrlTarget::FinderXrlTarget(Finder& finder)
     : XrlFinderTargetBase(&(finder.commands())), _finder(finder)
 {
@@ -157,7 +167,7 @@ FinderXrlTarget::finder_0_2_unregister_finder_client(const string& tgt_name)
 
     finder_trace_result("failed");
 
-    return XrlCmdError::COMMAND_FAILED(bad_target_message(tgt_name));
+    return XrlCmdError::COMMAND_FAILED(restricted_target_message(tgt_name));
 }
 
 XrlCmdError
@@ -173,7 +183,7 @@ FinderXrlTarget::finder_0_2_set_finder_client_enabled(const string& tgt_name,
 	return XrlCmdError::OKAY();
     }
     finder_trace_result("failed (not originator)");
-    return XrlCmdError::COMMAND_FAILED(bad_target_message(tgt_name));
+    return XrlCmdError::COMMAND_FAILED(restricted_target_message(tgt_name));
 }
 
 XrlCmdError
@@ -215,7 +225,8 @@ FinderXrlTarget::finder_0_2_add_xrl(const string& xrl,
     // unresolved Xrl
     if (false == _finder.active_messenger_represents_target(u.target())) {
 	finder_trace_result("fail (inappropriate message source).");
-	return XrlCmdError::COMMAND_FAILED(bad_target_message(u.target()));
+	return
+	    XrlCmdError::COMMAND_FAILED(restricted_target_message(u.target()));
     }
 
     // Construct resolved Xrl, appended string should very hard to guess :-)
@@ -249,13 +260,15 @@ FinderXrlTarget::finder_0_2_remove_xrl(const string&	xrl)
     // Check active messenger is responsible for target described in Xrl
     if (false == _finder.active_messenger_represents_target(u.target())) {
 	finder_trace_result("fail (inappropriate message source).");
-	return XrlCmdError::COMMAND_FAILED(bad_target_message(u.target()));
+	return
+	    XrlCmdError::COMMAND_FAILED(restricted_target_message(u.target()));
     }
 
     // Unregister Xrl
     if (false == _finder.remove_resolutions(u.target(), u.str())) {
 	finder_trace_result("fail (xrl does not exist).");
-	return XrlCmdError::COMMAND_FAILED("Xrl does not exist");
+	return
+	    XrlCmdError::COMMAND_FAILED(restricted_target_message(u.target()));
     }
     finder_trace_result("okay");
     return XrlCmdError::OKAY();
@@ -298,7 +311,7 @@ FinderXrlTarget::finder_0_2_resolve_xrl(const string&	xrl,
     bool en;
     if (_finder.target_enabled(instance, en) == false) {
 	finder_trace_result("fail (target does not exist).");
-	return XrlCmdError::COMMAND_FAILED("Xrl target does not exist.");
+	return XrlCmdError::COMMAND_FAILED(bad_target_message(instance));
     } else if (en == false) {
 	finder_trace_result("fail (xrl exists but is not enabled).");
 	return XrlCmdError::COMMAND_FAILED("Xrl target is not enabled.");

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.8 2003/05/09 21:00:51 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.9 2003/05/29 14:44:37 hodson Exp $
 
-#ifndef __LIBXIPC_FINDER_NG_CLIENT_HH__
-#define __LIBXIPC_FINDER_NG_CLIENT_HH__
+#ifndef __LIBXIPC_FINDER_CLIENT_HH__
+#define __LIBXIPC_FINDER_CLIENT_HH__
 
 #include <list>
 #include <map>
@@ -275,4 +275,4 @@ protected:
     bool		 _xrls_registered;
 };
 
-#endif // __LIBXIPC_FINDER_NG_CLIENT_HH__
+#endif // __LIBXIPC_FINDER_CLIENT_HH__

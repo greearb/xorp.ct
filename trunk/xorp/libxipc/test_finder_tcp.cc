@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.8 2003/04/21 22:02:55 mjh Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.9 2003/04/21 22:40:11 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -22,6 +22,7 @@
 
 #include "sockutil.hh"
 #include "finder_tcp.hh"
+#include "finder_constants.hh"
 #include "permits.hh"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,7 +102,7 @@ class DummyFinder : public FinderTcpListenerBase {
 public:
     DummyFinder(EventLoop&  e,
 		IPv4	    interface,
-		uint16_t    port = FINDER_NG_TCP_DEFAULT_PORT)
+		uint16_t    port = FINDER_DEFAULT_PORT)
 	throw (InvalidPort)
 	: FinderTcpListenerBase(e, interface, port), _connection(0)
     {
@@ -122,7 +123,7 @@ public:
     }
 
     DummyFinderTcp* connection() { return _connection; }
-    
+
 protected:
     DummyFinderTcp* _connection;
 };
@@ -132,11 +133,10 @@ static DummyFinderTcp* client_end;
 static void
 connect_client(EventLoop* e, bool* client_connect_failed)
 {
-    IPv4 ipc_addr = if_get_preferred();
     struct in_addr ia;
-    ia.s_addr = ipc_addr.addr();
+    ia.s_addr = FINDER_DEFAULT_HOST.addr();
 
-    int fd = comm_connect_tcp4(&ia, htons(FINDER_NG_TCP_DEFAULT_PORT));
+    int fd = comm_connect_tcp4(&ia, htons(FINDER_DEFAULT_PORT));
     if (fd < 0) {
 	fprintf(stderr, "Client failed to connect\n");
 	*client_connect_failed = true;
@@ -151,15 +151,14 @@ test_main()
 {
     EventLoop   e;
 
-    IPv4 ipc_addr = if_get_preferred();
-    DummyFinder df(e, ipc_addr);
+    DummyFinder df(e, FINDER_DEFAULT_HOST);
 
     bool client_connect_failed = false;
     XorpTimer	connect_timer = e.new_oneoff_after_ms(
 				   200, callback(connect_client,
 						 &e,
 						 &client_connect_failed));
-    
+
     while (client_connect_failed == false) {
 	e.run();
 	if (0 == client_end || 0 == df.connection())
@@ -185,7 +184,7 @@ test_main()
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -200,7 +199,7 @@ print_program_info(FILE *stream)
 }
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -216,7 +215,7 @@ int
 main(int argc, char * const argv[])
 {
    int ret_value = 0;
-    
+
     //
     // Initialize and start xlog
     //
@@ -226,7 +225,7 @@ main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
         switch (ch) {

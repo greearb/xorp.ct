@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.9 2003/04/24 19:32:47 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.10 2003/05/22 19:07:48 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -30,9 +30,7 @@
 #include "libxorp/eventloop.hh"
 
 #include "sockutil.hh"
-#include "finder.hh"
-#include "finder_tcp_messenger.hh"
-#include "finder_xrl_target.hh"
+#include "finder_server.hh"
 #include "permits.hh"
 
 static bool
@@ -90,8 +88,8 @@ static void
 finder_main(int argc, char* const argv[])
 {
     bool	run_verbose = false;
-    IPv4	bind_addr = IPv4::ANY();
-    uint16_t	bind_port = FINDER_NG_TCP_DEFAULT_PORT;
+    list<IPv4>  bind_addrs;
+    uint16_t	bind_port = FINDER_DEFAULT_PORT;
 
     int ch;
     while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) {
@@ -114,13 +112,14 @@ finder_main(int argc, char* const argv[])
 	    // User is specifying which interface to bind finder to
 	    //
 	    try {
-		bind_addr = IPv4(optarg);
+		IPv4 bind_addr = IPv4(optarg);
 		if (valid_interface(bind_addr) == false) {
 		    fprintf(stderr,
 			    "%s is not the address of an active interface.\n",
 			    optarg);
 		    exit(-1);
 		}
+		bind_addrs.push_back(bind_addr);
 	    } catch (const InvalidString&) {
 		fprintf(stderr, "%s is not a valid interface address.\n",
 			optarg);
@@ -170,20 +169,26 @@ finder_main(int argc, char* const argv[])
     //
     // Add preferred ipc address on host
     //
-    add_permitted_host(if_get_preferred());
-    add_permitted_host(IPv4("127.0.0.1"));
-    
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	EventLoop e;
-	Finder f(e);
-	FinderTcpListener s(e, f, f.commands(), bind_addr, bind_port);
-	FinderXrlTarget x(f);
-	
+	FinderServer fs(e, bind_port);
+
+	list<IPv4>::const_iterator ci = bind_addrs.begin();
+	while (ci != bind_addrs.end()) {
+	    if (fs.add_binding(*ci, bind_port) == false) {
+		XLOG_WARNING("Failed to bind interface %s port %d\n",
+			     ci->str().c_str(), bind_port);
+	    } else if (run_verbose) {
+		XLOG_INFO("Finder bound to interface %s port %d\n",
+			  ci->str().c_str(), bind_port);
+	    }
+	    ++ci;
+	}
 	XorpTimer twirl;
 	if (run_verbose)
 	    twirl = e.new_periodic(250, callback(print_twirl));
-	
+
 	for (;;) {
 	    e.run();
 	}
