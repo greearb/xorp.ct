@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.19 2003/10/28 23:48:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.20 2004/03/24 23:26:59 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -274,7 +274,31 @@ IfConfig::unmap_ifindex(uint32_t ifindex)
 }
 
 const char *
-IfConfig::get_ifname(uint32_t ifindex)
+IfConfig::find_ifname(uint32_t ifindex) const
+{
+    IfIndex2NameMap::const_iterator i = _ifnames.find(ifindex);
+
+    if (_ifnames.end() == i)
+	return NULL;
+
+    return i->second.c_str();
+}
+
+uint32_t
+IfConfig::find_ifindex(const string& ifname) const
+{
+    IfIndex2NameMap::const_iterator i;
+
+    for (i = _ifnames.begin(); i != _ifnames.end(); ++i) {
+	if (i->second == ifname)
+	    return i->first;
+    }
+
+    return 0;
+}
+
+const char *
+IfConfig::get_insert_ifname(uint32_t ifindex)
 {
     IfIndex2NameMap::const_iterator i = _ifnames.find(ifindex);
 
@@ -295,7 +319,7 @@ IfConfig::get_ifname(uint32_t ifindex)
 }
 
 uint32_t
-IfConfig::get_ifindex(const string& ifname)
+IfConfig::get_insert_ifindex(const string& ifname)
 {
     IfIndex2NameMap::const_iterator i;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.11 2004/03/23 11:33:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.12 2004/03/26 01:28:58 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -377,7 +377,7 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
     //
     // Get the interface name
     //
-    const char* name = ifc.get_ifname(if_index);
+    const char* name = ifc.get_insert_ifname(if_index);
     if (name == NULL) {
 	if (is_deleted) {
 	    //

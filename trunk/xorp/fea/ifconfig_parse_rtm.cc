@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.17 2004/03/17 07:16:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.18 2004/03/24 19:14:05 atanu Exp $"
 
 
 #include "fea_module.h"
@@ -160,7 +160,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	    return;
 	}
 	
-	const char* name = ifc.get_ifname(if_index);
+	const char* name = ifc.get_insert_ifname(if_index);
 	if (name == NULL) {
 	    char name_buf[IF_NAMESIZE];
 #ifdef HAVE_IF_INDEXTONAME
@@ -424,7 +424,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 		   "with unknown index");
     }
     
-    const char* name = ifc.get_ifname(if_index);
+    const char* name = ifc.get_insert_ifname(if_index);
     if (name == NULL) {
 #ifdef HAVE_IF_INDEXTONAME
 	char name_buf[IF_NAMESIZE];

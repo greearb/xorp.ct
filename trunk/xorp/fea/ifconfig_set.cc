@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.5 2003/10/22 19:27:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.6 2004/03/26 01:26:59 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -64,7 +64,7 @@ IfConfigSet::push_config(const IfTree& it)
     //
     for (ii = it.ifs().begin(); ii != it.ifs().end(); ++ii) {
 	const IfTreeInterface& i = ii->second;
-	if (ifc().get_ifindex(i.ifname()) == 0) {
+	if (ifc().get_insert_ifindex(i.ifname()) == 0) {
 	    ifc().er().interface_error(i.ifname(), "interface not recognized");
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return false;
@@ -117,7 +117,7 @@ IfConfigSet::push_config(const IfTree& it)
 void
 IfConfigSet::push_interface(const IfTreeInterface& i)
 {
-    uint16_t if_index = ifc().get_ifindex(i.ifname());
+    uint16_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
 
     //
@@ -240,7 +240,7 @@ void
 IfConfigSet::push_vif(const IfTreeInterface&	i,
 		      const IfTreeVif&		v)
 {
-    uint16_t if_index = ifc().get_ifindex(i.ifname());
+    uint16_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
 
     //
@@ -286,7 +286,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 			      const IfTreeVif&		v,
 			      const IfTreeAddr4&	a)
 {
-    uint16_t if_index = ifc().get_ifindex(i.ifname());
+    uint16_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
 
     bool enabled = (i.enabled() & v.enabled() & a.enabled());
@@ -396,7 +396,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 			      const IfTreeVif&		v,
 			      const IfTreeAddr6&	a)
 {
-    uint16_t if_index = ifc().get_ifindex(i.ifname());
+    uint16_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
 
     bool enabled = (i.enabled() & v.enabled() & a.enabled());
