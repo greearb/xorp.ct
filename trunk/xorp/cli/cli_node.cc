@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.17 2004/02/28 21:14:48 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.18 2004/02/29 22:58:40 pavlin Exp $"
 
 
 //
@@ -65,7 +65,7 @@ CliNode::CliNode(int init_family, xorp_module_id module_id,
     : ProtoNode<Vif>(init_family, module_id, init_eventloop),
       _cli_command_root(NULL, "", "")
 {
-    assert(module_id == XORP_MODULE_CLI);
+    XLOG_ASSERT(module_id == XORP_MODULE_CLI);
     if (module_id != XORP_MODULE_CLI) {
 	XLOG_FATAL("Invalid module ID = %d (must be 'XORP_MODULE_CLI' = %d)",
 		   module_id, XORP_MODULE_CLI);
