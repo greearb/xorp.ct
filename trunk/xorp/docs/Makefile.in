@@ -69,12 +69,15 @@ CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 GMAKE = @GMAKE@
+LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
+MIBS = @MIBS@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
+net_snmp_found = @net_snmp_found@
 SUBDIRS = bgp design_arch fea libxipc libxorp mfea mld6igmp multicast pim pim_testsuite rib rtrmgr snmp  test_harness
 
 # -- Extra files and directories to add to the distribution
@@ -266,6 +269,7 @@ clean-am:  clean-tags clean-generic mostlyclean-am
 clean: clean-recursive
 
 distclean-am:  distclean-tags distclean-generic clean-am
+	-rm -f libtool
 
 distclean: distclean-recursive
 
