@@ -798,9 +798,9 @@ $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/bgp.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
-                $(INTERFACES_DIR)/policy_backend.xif                    \
-                $(INTERFACES_DIR)/policy_redist4.xif                    \
-                $(INTERFACES_DIR)/policy_redist6.xif			\
+		$(INTERFACES_DIR)/policy_backend.xif			\
+		$(INTERFACES_DIR)/policy_redist4.xif			\
+		$(INTERFACES_DIR)/policy_redist6.xif			\
 		$(INTERFACES_DIR)/rib_client.xif
 $(srcdir)/bgp4_mib_base.hh $(srcdir)/bgp4_mib_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
@@ -865,10 +865,10 @@ $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/redist_transaction6.xif		\
 		$(INTERFACES_DIR)/mld6igmp_client.xif			\
 		$(INTERFACES_DIR)/pim.xif
-$(srcdir)/policy_base.hh $(srcdir)/policy_base.cc:                      \
-                $(INTERFACES_DIR)/common.xif                            \
-                $(INTERFACES_DIR)/finder_event_observer.xif		\
-                $(INTERFACES_DIR)/policy.xif
+$(srcdir)/policy_base.hh $(srcdir)/policy_base.cc:			\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
+		$(INTERFACES_DIR)/policy.xif
 $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
@@ -879,16 +879,16 @@ $(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
 $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
-                $(INTERFACES_DIR)/policy_backend.xif                    \
-                $(INTERFACES_DIR)/policy_redist4.xif			\
+		$(INTERFACES_DIR)/policy_backend.xif			\
+		$(INTERFACES_DIR)/policy_redist4.xif			\
 		$(INTERFACES_DIR)/rip.xif				\
 		$(INTERFACES_DIR)/redist4.xif				\
 		$(INTERFACES_DIR)/socket4_user.xif
 $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
-                $(INTERFACES_DIR)/policy_backend.xif                    \
-                $(INTERFACES_DIR)/policy_redist6.xif			\
+		$(INTERFACES_DIR)/policy_backend.xif			\
+		$(INTERFACES_DIR)/policy_redist6.xif			\
 		$(INTERFACES_DIR)/ripng.xif				\
 		$(INTERFACES_DIR)/redist6.xif				\
 		$(INTERFACES_DIR)/socket6_user.xif
@@ -907,7 +907,7 @@ $(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
 		$(INTERFACES_DIR)/socket6.xif
 $(srcdir)/static_routes_base.hh $(srcdir)/static_routes_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
-                $(INTERFACES_DIR)/policy_backend.xif			\
+		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/static_routes.xif
 $(srcdir)/test_fea_ifmgr_mirror_base.hh					\
 $(srcdir)/test_fea_ifmgr_mirror_base.cc:				\
