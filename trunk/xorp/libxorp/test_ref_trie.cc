@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.4 2003/07/28 23:37:50 jcardona Exp $"
+#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.5 2004/03/02 17:37:21 atanu Exp $"
 
 #include "xorp.h"
 #include "ipv4net.hh"
@@ -582,4 +582,61 @@ int main() {
 	exit(1);
     }
     printf("PASS\n");
+
+#if	0
+    //-------------------------------------------------------    
+    printf("-----------\n");
+    printf("Test of iterator, with insertion\n");
+    printf("-----------\n");
+
+    IPv4RouteEntry d21;
+    IPv4Net n21("1.2.2.0", 24);
+
+    int cnt;
+    int insert_pos = 0;
+    int entries = trie.route_count();
+
+    RefTrie<IPv4, IPv4RouteEntry*>::PreOrderIterator iteri;
+
+    for(cnt = 0, iteri = trie.begin(); iteri != trie.end(); iteri++, cnt++) {
+	if (n21 > iteri.cur()->k()) {
+	    printf("*** node: %-26s %s\n", iteri.cur()->k().str().c_str(),
+		   iteri.cur()->has_payload() ? "PL" : "[]");
+	    insert_pos = cnt;
+	    break;
+	}
+    }
+
+    for(cnt = 0, iteri = trie.begin(); iteri != trie.end(); iteri++, cnt++) {
+	if (cnt == insert_pos) {
+	    printf("adding n21: %s route: %x\n", n21.str().c_str(),
+		   (u_int)(&d21));
+	    trie.insert(n21, &d21);
+	}
+	printf("*** node: %-26s %s\n", iteri.cur()->k().str().c_str(),
+	       iteri.cur()->has_payload() ? "PL" : "[]");
+    }
+
+    if(entries != cnt) {
+	fprintf(stderr,
+		"Failed to print correct number of nodes inserted\n");
+	exit(1);
+    }
+
+    printf("PASS\n");
+
+    IPv4Net prev = trie.begin().cur()->k();
+    for(iteri = trie.begin(); iteri != trie.end(); iteri++, cnt++) {
+	printf("*** node: %-26s %s\n", iteri.cur()->k().str().c_str(),
+	       iteri.cur()->has_payload() ? "PL" : "[]");
+	if (iteri.cur()->k() < prev) {
+	    fprintf(stderr,
+		"Ordering problem\n");
+	    exit(1);
+	}
+	prev = iteri.cur()->k();
+    }
+
+    printf("PASS\n");
+#endif
 }
