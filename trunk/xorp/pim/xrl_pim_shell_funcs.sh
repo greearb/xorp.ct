@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.9 2003/03/27 00:19:04 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.10 2003/06/03 18:52:19 pavlin Exp $
 #
 
 #
@@ -569,10 +569,10 @@ pim_delete_config_cand_rp_by_addr6()
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
-pim_add_config_rp4()
+pim_add_config_static_rp4()
 {
     if [ $# -lt 4 ] ; then
-	echo "Usage: pim_add_config_rp4 <group_prefix:ipv4net> <rp_addr:ipv4> <rp_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_static_rp4 <group_prefix:ipv4net> <rp_addr:ipv4> <rp_priority:u32> <hash_masklen:u32>"
 	exit 1
     fi
     group_prefix=$1
@@ -580,16 +580,16 @@ pim_add_config_rp4()
     rp_priority=$3
     hash_masklen=$4
     
-    echo "pim_add_config_rp4" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/add_config_rp4"
+    echo "pim_add_config_static_rp4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_config_static_rp4"
     XRL_ARGS="?group_prefix:ipv4net=$group_prefix&rp_addr:ipv4=$rp_addr&rp_priority:u32=$rp_priority&hash_masklen:u32=$hash_masklen"
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
-pim_add_config_rp6()
+pim_add_config_static_rp6()
 {
     if [ $# -lt 4 ] ; then
-	echo "Usage: pim_add_config_rp6 <group_prefix:ipv6net> <rp_addr:ipv6> <rp_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_static_rp6 <group_prefix:ipv6net> <rp_addr:ipv6> <rp_priority:u32> <hash_masklen:u32>"
 	exit 1
     fi
     group_prefix=$1
@@ -597,51 +597,51 @@ pim_add_config_rp6()
     rp_priority=$3
     hash_masklen=$4
     
-    echo "pim_add_config_rp6" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/add_config_rp6"
+    echo "pim_add_config_static_rp6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_config_static_rp6"
     XRL_ARGS="?group_prefix:ipv6net=$group_prefix&rp_addr:ipv6=$rp_addr&rp_priority:u32=$rp_priority&hash_masklen:u32=$hash_masklen"
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
-pim_delete_config_rp4()
+pim_delete_config_static_rp4()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_delete_config_rp4 <group_prefix:ipv4net> <rp_addr:ipv4>"
+	echo "Usage: pim_delete_config_static_rp4 <group_prefix:ipv4net> <rp_addr:ipv4>"
 	exit 1
     fi
     group_prefix=$1
     rp_addr=$2
     
-    echo "pim_delete_config_rp4" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/delete_config_rp4"
+    echo "pim_delete_config_static_rp4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/delete_config_static_rp4"
     XRL_ARGS="?group_prefix:ipv4net=$group_prefix&rp_addr:ipv4=$rp_addr"
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
-pim_delete_config_rp6()
+pim_delete_config_static_rp6()
 {
     if [ $# -lt 2 ] ; then
-	echo "Usage: pim_delete_config_rp6 <group_prefix:ipv6net> <rp_addr:ipv6>"
+	echo "Usage: pim_delete_config_static_rp6 <group_prefix:ipv6net> <rp_addr:ipv6>"
 	exit 1
     fi
     group_prefix=$1
     rp_addr=$2
     
-    echo "pim_delete_config_rp6" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/delete_config_rp6"
+    echo "pim_delete_config_static_rp6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/delete_config_static_rp6"
     XRL_ARGS="?group_prefix:ipv6net=$group_prefix&rp_addr:ipv6=$rp_addr"
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
-pim_config_rp_done()
+pim_config_static_rp_done()
 {
     if [ $# -lt 0 ] ; then
-	echo "Usage: pim_config_rp_done"
+	echo "Usage: pim_config_static_rp_done"
 	exit 1
     fi
     
-    echo "pim_config_rp_done" $*
-    XRL="finder://$PIM_TARGET/pim/0.1/config_rp_done"
+    echo "pim_config_static_rp_done" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/config_static_rp_done"
     XRL_ARGS=""
     call_xrl -r 0 $XRL$XRL_ARGS
 }

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.14 2003/05/31 17:53:37 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.15 2003/06/06 23:47:18 pavlin Exp $
 #
 
 #
@@ -258,7 +258,7 @@ done
 #
 if [ "${STATIC_RPS}" != "" ] ; then
 	for rp in ${STATIC_RPS}; do
-		pim_add_config_rp4 224.0.0.0/4 ${rp} 192 0
+		pim_add_config_static_rp4 224.0.0.0/4 ${rp} 192 0
 	done
 	pim_config_static_rp_done
 fi
