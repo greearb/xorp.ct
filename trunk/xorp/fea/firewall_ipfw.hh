@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.hh,v 1.10 2004/09/21 21:31:03 pavlin Exp $
+// $XORP: xorp/fea/firewall_ipfw.hh,v 1.11 2004/09/23 12:15:56 bms Exp $
 
 #ifndef	__FEA_FIREWALL_IPFW_HH__
 #define __FEA_FIREWALL_IPFW_HH__
@@ -27,6 +27,13 @@
 /****************************************************************************/
 
 class IpfwFwProvider;
+template <typename N> class IpfwFwRule;
+
+#ifdef HAVE_FIREWALL_IPFW
+// Forward declaration of templatized conversion function.
+template <typename N> void
+convert_to_ipfw(IpfwFwRule<N>& new_rule, const FwRule<N>& old_rule);
+#endif
 
 // Decorator for Ipfw FwRules
 
@@ -51,12 +58,6 @@ protected:
 typedef IpfwFwRule<IPv4> IpfwFwRule4;
 typedef IpfwFwRule<IPv6> IpfwFwRule6;
 typedef IpfwFwRule<IPvX> IpfwFwRuleX;
-
-#ifdef HAVE_FIREWALL_IPFW
-// Forward declaration of templatized conversion function.
-template <typename N> void
-convert_to_ipfw(IpfwFwRule<N>& new_rule, const FwRule<N>& old_rule);
-#endif
 
 // deferred constructor definition.
 // This is necessary because I can't force static linkage for a
