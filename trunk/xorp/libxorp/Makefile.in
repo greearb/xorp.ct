@@ -133,7 +133,7 @@ test_vif_SOURCES = test_vif.cc
 
 # -- Library Sources
 # libxorp_a_SOURCES += ether_compat.c
-libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh transaction.hh trie.hh utils.hh vif.hh debug.c utility.c xlog.c asyncio.cc c_format.cc callback.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
+libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh debug.c utility.c xlog.c asyncio.cc c_format.cc callback.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
 
 BUILT_SOURCES = callback_nodebug.hh callback_debug.hh
 
