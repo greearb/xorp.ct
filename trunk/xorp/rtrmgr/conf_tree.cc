@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.16 2004/05/16 02:50:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.17 2004/05/18 01:06:49 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -232,9 +232,7 @@ ConfigTree::terminal_value(char* value, int type) throw (ParseError)
 	}
     }
     if ((ctn->type() == NODE_TEXT) && (type == NODE_TEXT)) {
-	// Trim the quotes
-	if (svalue[0] == '"' && svalue[svalue.size()-1] == '"')
-	    svalue = svalue.substr(1, svalue.size() - 2);
+	svalue = unquote(svalue);
     } else if ((ctn->type() == NODE_TEXT) && (type != NODE_TEXT)) {
 	// We'll accept anything as text
     } else if ((ctn->type() != NODE_TEXT) && (type == NODE_TEXT)) {
@@ -242,8 +240,7 @@ ConfigTree::terminal_value(char* value, int type) throw (ParseError)
 	// The value was quoted in the bootfile.  We can't tell if
 	// there's a mismatch without doing some secondary parsing.
 	//
-	if (svalue[0] == '"' && svalue[svalue.size()-1] == '"')
-	    svalue = svalue.substr(1, svalue.size() - 2);
+	svalue = unquote(svalue);
 
 	switch (ctn->type()) {
 	case NODE_VOID:
