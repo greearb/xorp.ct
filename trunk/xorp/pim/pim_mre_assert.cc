@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.7 2003/01/30 02:36:16 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.8 2003/02/05 05:02:28 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -277,12 +277,20 @@ PimMre::assert_process_wc(PimVif *pim_vif,
 	break;
 	
     case ASSERT_STATE_LOSER:
-	if (!i_am_assert_winner_bool) {
+	if (assert_metric->is_better(assert_winner_metric_wc(vif_index))) {
+	    // Receive preferred assert
 	    goto a2;
 	}
-	if (i_am_assert_winner_bool
+	if ((! i_am_assert_winner_bool)
 	    && (assert_winner_metric_wc(vif_index)->addr()
 		== assert_metric->addr())) {
+	    // Receive acceptable assert from current winner
+	    goto a2;
+	}
+	if ((i_am_assert_winner_bool)
+	    && (assert_winner_metric_wc(vif_index)->addr()
+		== assert_metric->addr())) {
+	    // Receive inferior assert from current winner
 	    goto a5;
 	}
 	break;
@@ -387,7 +395,14 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 	break;
 	
     case ASSERT_STATE_LOSER:
-	if (! i_am_assert_winner_bool) {
+	if (assert_metric->is_better(assert_winner_metric_sg(vif_index))) {
+	    // Receive preferred assert
+	    goto a2;
+	}
+	if ((! i_am_assert_winner_bool)
+	    && (assert_winner_metric_sg(vif_index)->addr()
+		== assert_metric->addr())) {
+	    // Receive acceptable assert from current winner
 	    goto a2;
 	}
 	if ((i_am_assert_winner_bool)
