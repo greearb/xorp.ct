@@ -180,8 +180,7 @@ peer1 assert queue 0
 
 Each {\em peer} has two tries associated with it, a sent and a
 received trie. Each update packet that is sent to, or received from,
-the BGP process is passed to the appropriate trie.  Update packets
-containing only WITHDRAWs are not saved at this time. At this time two
+the BGP process is passed to the appropriate trie. At this time two
 types of {\em lookups} can be performed on a trie (Figure
 \ref{prog:trie_lookup}). If a {\em lookup} fails then an error is
 returned. A test might therefore involve sending many update packets
