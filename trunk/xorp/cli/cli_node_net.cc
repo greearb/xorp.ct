@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.21 2004/02/28 04:38:56 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.22 2004/02/28 21:14:49 pavlin Exp $"
 
 
 //
@@ -358,6 +358,26 @@ CliClient::start_connection()
 	    term_name = "vt100";	// Set to default
     }
 
+    // Get the terminal size
+    if (is_stdio()) {
+	struct winsize window_size;
+
+	if (ioctl(cli_fd(), TIOCGWINSZ, &window_size) < 0) {
+	    XLOG_ERROR("Cannot get window size (ioctl(TIOCGWINSZ) failed): %s",
+		       strerror(errno));
+	} else {
+	    // Set the window width and height
+	    set_window_width(window_size.ws_col);
+	    set_window_height(window_size.ws_row);
+	    gl_terminal_size(gl(), window_width(),
+			     window_height());
+	    debug_msg("Client window size changed to width = %u "
+		      "height = %u\n",
+		      (uint32_t)window_width(),
+		      (uint32_t)window_height());
+	}
+    }
+
     // Change the input and output streams for libtecla
     if (gl_change_terminal(_gl, _cli_fd_file_read, _cli_fd_file_write,
 			   term_name.c_str())
@@ -642,6 +662,8 @@ CliClient::process_telnet_option(int val)
 		    new_window_height += telnet_sb_buffer().data(4);
 		    set_window_width(new_window_width);
 		    set_window_height(new_window_height);
+		    gl_terminal_size(gl(), new_window_width,
+				     new_window_height);
 		    debug_msg("Client window size changed to width = %u "
 			      "height = %u\n",
 			      (uint32_t)window_width(),
