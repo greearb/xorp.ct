@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/igmp.tp,v 1.8 2004/06/07 18:16:25 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/igmp.tp,v 1.9 2005/03/09 22:50:39 pavlin Exp $ */
 
 protocols {
     igmp {
@@ -62,6 +62,7 @@ protocols {
 	    vif @ {
 		%help:	short "Configure IGMP on a virtual interface";
 		%activate: xrl "$(igmp.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
+		%update: xrl "$(igmp.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
 
 		disable {
 		    %help:	short "Disable IGMP on an interface";

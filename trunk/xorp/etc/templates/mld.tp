@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mld.tp,v 1.8 2004/06/07 18:16:25 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mld.tp,v 1.9 2005/03/09 22:50:40 pavlin Exp $ */
 
 protocols {
     mld {
@@ -62,6 +62,7 @@ protocols {
 	    vif @ {
 		%help:	short "Configure MLD on a virtual interface";
 		%activate: xrl "$(mld.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
+		%update: xrl "$(mld.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
 
 		disable {
 		    %help:	short "Disable MLD on an interface";
