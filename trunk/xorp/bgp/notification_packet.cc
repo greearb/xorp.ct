@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.16 2003/11/06 02:31:41 atanu Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.17 2004/06/10 22:40:30 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -30,7 +30,7 @@ NotificationPacket::NotificationPacket(uint8_t		ec,
 				       size_t		elen)
 {
     debug_msg("Error code %d sub code %d data %#x len %u\n", ec, esc,
-	      (int)ed, (uint32_t)elen);
+	      (int)ed, XORP_UINT_CAST(elen));
 
     if (elen == 0)
 	ed = 0;
@@ -78,7 +78,8 @@ NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
 const uint8_t *
 NotificationPacket::encode(size_t& len, uint8_t *buf) const
 {
-    debug_msg("Encode in NotificationPacket called (%u)\n", (uint32_t)_Length);
+    debug_msg("Encode in NotificationPacket called (%u)\n",
+	      XORP_UINT_CAST(_Length));
     if (buf != 0)		// have a buffer, check length
 	assert(len >= _Length);	// XXX should become an exception
 

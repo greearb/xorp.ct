@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.23 2004/12/17 01:31:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.24 2004/12/18 03:21:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -546,7 +546,7 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
 		   OPENMSGERROR, 0);
     }
     debug_msg("param type %d len+header %u\n", param_type,
-	      static_cast<uint32_t>(len));
+	      XORP_UINT_CAST(len));
 
     BGPParameter *p = NULL;
     switch (param_type) {
@@ -579,7 +579,7 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
     default :
 	xorp_throw(CorruptMessage,
 	       c_format("Unrecognised optional parameter %d max_len %u len %u",
-			param_type, max_len, (uint32_t)len),
+			param_type, max_len, XORP_UINT_CAST(len)),
 	       OPENMSGERROR, UNSUPOPTPAR);
     }
     return p;
