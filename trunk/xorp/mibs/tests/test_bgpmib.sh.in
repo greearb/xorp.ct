@@ -23,6 +23,7 @@ set -e
 # to debug 
 # set -x
 
+
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 BGP_SRCDIR=`(cd ${srcdir}/../../bgp ; pwd)`
 XORP_TOP_BUILDDIR=`(cd ${PWD}/../..; pwd)`
@@ -30,6 +31,11 @@ XORP_TOP_BUILDDIR=`(cd ${PWD}/../..; pwd)`
 CALLXRL='../../libxipc/call_xrl -r 5 -w 20'
 . ${BGP_SRCDIR}/harness/xrl_shell_funcs.sh ""
 . ${BGP_SRCDIR}/xrl_shell_funcs.sh ""
+
+# uncomment next line to use mpatrol
+# MPATROL='/usr/local/bin/mpatrol -I --dynamic'
+
+MPATROL=${MPATROL:-""}
 
 configure_snmp()
 {
@@ -53,7 +59,7 @@ configure_snmp()
     echo "trap2sink localhost xorp ${SNMPTRAPPORT}" >> ${SNMPDCONF}
 
     # these variables are used by the tests
-    export SNMPCONF='-t 10 -c xorp -v 2c'
+    export SNMPCONF='-t 20 -c xorp -v 2c'
     export SNMPHOST=localhost:51515
     export SNMPTRAPHOST="localhost:${SNMPTRAPPORT}"
 }
@@ -438,7 +444,7 @@ then
     ${XTB}/bgp/xorp_bgp       = $CXRL finder://bgp/common/0.1/get_target_name
     ${BH}/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
     ${BH}/coord = $CXRL finder://coord/common/0.1/get_target_name
-    ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -C -c ${SNMPDCONF} -r ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status
+    ${MPATROL} ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -C -c ${SNMPDCONF} -r ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status
     ${SNMPTRAPD} -f -o ${SNMPTRAPLOG} ${SNMPTRAPHOST}
 EOF
     trap '' 0
