@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.10 2003/04/21 19:19:43 mjh Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.11 2003/04/22 19:20:23 mjh Exp $"
 
 #include <sysexits.h>
 
@@ -51,9 +51,7 @@ main (int /* argc */, char *argv[])
 	rib_manager.enable();
 	// Add the FEA as a RIB client
 	rib_manager.add_rib_client("fea", AF_INET, true, false);
-#ifdef HAVE_IPV6
 	rib_manager.add_rib_client("fea", AF_INET6, true, false);
-#endif
 	rib_manager.start();
 	
 	//

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.14 2003/04/22 19:20:24 mjh Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.15 2003/05/08 05:51:27 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -318,14 +318,12 @@ RibManager::select_rib_clients_list(int family, bool unicast, bool multicast)
 	if (multicast)
 	    return (&_mrib4_clients_list);
 	break;
-#ifdef HAVE_IPV6
     case AF_INET6:
 	if (unicast)
 	    return (&_urib6_clients_list);
 	if (multicast)
 	    return (&_mrib6_clients_list);
 	break;
-#endif // HAVE_IPV6
     default:
 	XLOG_FATAL("Invalid address family: %d", family);
 	break;
@@ -501,9 +499,7 @@ RibManager::no_fea()
 {
     // TODO: FEA target name hardcoded
     disable_rib_client("fea", AF_INET, true, false);
-#ifdef HAVE_IPV6
     disable_rib_client("fea", AF_INET6, true, false);
-#endif
     
     _vif_manager.no_fea();
     
