@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.21 2004/05/20 22:18:18 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.22 2004/05/20 23:45:46 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -68,16 +68,22 @@ protected:
 
 protected:
 
+    /**
+     *  Get name of Xrl Target
+     */
     XrlCmdError common_0_1_get_target_name(
 	// Output values,
 	string&	name);
 
+    /**
+     *  Get version string from Xrl Target
+     */
     XrlCmdError common_0_1_get_version(
 	// Output values,
 	string&	version);
 
     /**
-     *  Get status from Xrl Target
+     *  Get status of Xrl Target
      */
     XrlCmdError common_0_1_get_status(
 	// Output values,
@@ -85,7 +91,7 @@ protected:
 	string&	reason);
 
     /**
-     *  shutdown cleanly
+     *  Request clean shutdown of Xrl Target
      */
     XrlCmdError common_0_1_shutdown();
 
@@ -416,10 +422,26 @@ protected:
 	// Output values,
 	IPv6&		nexthop);
 
+    /**
+     *  Add a vif or a vif address to the RIB. This interface should be used
+     *  only for testing purpose.
+     *
+     *  @param name the name of the vif.
+     */
     XrlCmdError rib_0_1_new_vif(
 	// Input values,
 	const string&	name);
 
+    /**
+     *  Add a vif address to the RIB. This interface should be used only for
+     *  testing purpose.
+     *
+     *  @param name the name of the vif.
+     *
+     *  @param addr the address to add.
+     *
+     *  @param subnet the subnet address to add.
+     */
     XrlCmdError rib_0_1_add_vif_addr4(
 	// Input values,
 	const string&	name,
@@ -432,6 +454,23 @@ protected:
 	const IPv6&	addr,
 	const IPv6Net&	subnet);
 
+    /**
+     *  Enable route redistribution from one routing protocol to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist4/0.1.
+     *
+     *  @param from_protocol the name of the routing process routes are to be
+     *  redistributed from.
+     *
+     *  @param unicast enable for unicast RIBs matching from and to.
+     *
+     *  @param multicast enable for multicast RIBs matching from and to.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist4/0.1 interface.
+     */
     XrlCmdError rib_0_1_redist_enable4(
 	// Input values,
 	const string&	to_xrl_target,
@@ -440,6 +479,23 @@ protected:
 	const bool&	multicast,
 	const string&	cookie);
 
+    /**
+     *  Enable route redistribution from one routing protocol to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist6/0.1.
+     *
+     *  @param from_protocol the name of the routing process routes are to be
+     *  redistributed from.
+     *
+     *  @param unicast enable for unicast RIBs matching from and to.
+     *
+     *  @param multicast enable for multicast RIBs matching from and to.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist6/0.1 interface.
+     */
     XrlCmdError rib_0_1_redist_enable6(
 	// Input values,
 	const string&	to_xrl_target,
@@ -448,6 +504,16 @@ protected:
 	const bool&	multicast,
 	const string&	cookie);
 
+    /**
+     *  Disable route redistribution from one routing protocol to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist4/0.1 and previously called redist_enable4.
+     *
+     *  @param unicast disable for unicast RIBs matching from and to.
+     *
+     *  @param multicast disable for multicast RIBs matching from and to.
+     */
     XrlCmdError rib_0_1_redist_disable4(
 	// Input values,
 	const string&	to_xrl_target,
@@ -456,6 +522,16 @@ protected:
 	const bool&	multicast,
 	const string&	cookie);
 
+    /**
+     *  Disable route redistribution from one routing protocol to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist6/0.1 and previously called redist_enable6.
+     *
+     *  @param unicast disable for unicast RIBs matching from and to.
+     *
+     *  @param multicast disable for multicast RIBs matching from and to.
+     */
     XrlCmdError rib_0_1_redist_disable6(
 	// Input values,
 	const string&	to_xrl_target,
@@ -464,6 +540,24 @@ protected:
 	const bool&	multicast,
 	const string&	cookie);
 
+    /**
+     *  Enable transaction-based route redistribution from one routing protocol
+     *  to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist_transaction4/0.1.
+     *
+     *  @param from_protocol the name of the routing process routes are to be
+     *  redistributed from.
+     *
+     *  @param unicast enable for unicast RIBs matching from and to.
+     *
+     *  @param multicast enable for multicast RIBs matching from and to.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist_transaction4/0.1 interface.
+     */
     XrlCmdError rib_0_1_redist_transaction_enable4(
 	// Input values,
 	const string&	to_xrl_target,
@@ -472,6 +566,24 @@ protected:
 	const bool&	multicast,
 	const string&	cookie);
 
+    /**
+     *  Enable transaction-based route redistribution from one routing protocol
+     *  to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist_transaction6/0.1.
+     *
+     *  @param from_protocol the name of the routing process routes are to be
+     *  redistributed from.
+     *
+     *  @param unicast enable for unicast RIBs matching from and to.
+     *
+     *  @param multicast enable for multicast RIBs matching from and to.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist_transaction6/0.1 interface.
+     */
     XrlCmdError rib_0_1_redist_transaction_enable6(
 	// Input values,
 	const string&	to_xrl_target,
@@ -480,6 +592,18 @@ protected:
 	const bool&	multicast,
 	const string&	cookie);
 
+    /**
+     *  Disable transaction-based route redistribution from one routing
+     *  protocol to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist_transaction4/0.1 and previously called
+     *  redist_transaction_enable4.
+     *
+     *  @param unicast disable for unicast RIBs matching from and to.
+     *
+     *  @param multicast disable for multicast RIBs matching from and to.
+     */
     XrlCmdError rib_0_1_redist_transaction_disable4(
 	// Input values,
 	const string&	to_xrl_target,
@@ -488,6 +612,18 @@ protected:
 	const bool&	multicast,
 	const string&	cookie);
 
+    /**
+     *  Disable transaction-based route redistribution from one routing
+     *  protocol to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist_transaction6/0.1 and previously called
+     *  redist_transaction_enable6.
+     *
+     *  @param unicast disable for unicast RIBs matching from and to.
+     *
+     *  @param multicast disable for multicast RIBs matching from and to.
+     */
     XrlCmdError rib_0_1_redist_transaction_disable6(
 	// Input values,
 	const string&	to_xrl_target,
@@ -497,12 +633,12 @@ protected:
 	const string&	cookie);
 
     /**
-     *  Register an interest in a route
+     *  Register an interest in a route.
      *
      *  @param target the name of the XRL module to notify when the information
      *  returned by this call becomes invalid.
      *
-     *  @param addr address of interest
+     *  @param addr address of interest.
      *
      *  @param resolves returns whether or not the address resolves to a route
      *  that can be used for forwarding.
@@ -520,9 +656,9 @@ protected:
      *  debugging reasons.
      *
      *  @param nexthop returns the address of the next hop for packets sent to
-     *  addr
+     *  addr.
      *
-     *  @param metric returns the IGP metric for this route
+     *  @param metric returns the IGP metric for this route.
      */
     XrlCmdError rib_0_1_register_interest4(
 	// Input values,
@@ -537,9 +673,9 @@ protected:
 	uint32_t&	metric);
 
     /**
-     *  De-register an interest in a route
+     *  De-register an interest in a route.
      *
-     *  @param target the name of the XRL module that registered the interest
+     *  @param target the name of the XRL module that registered the interest.
      *
      *  @param addr the address of the previous registered interest. addr
      *  should be the base address of the add/prefix_len subnet.
@@ -554,12 +690,12 @@ protected:
 	const uint32_t&	prefix_len);
 
     /**
-     *  Register an interest in a route
+     *  Register an interest in a route.
      *
      *  @param target the name of the XRL module to notify when the information
      *  returned by this call becomes invalid.
      *
-     *  @param addr address of interest
+     *  @param addr address of interest.
      *
      *  @param resolves returns whether or not the address resolves to a route
      *  that can be used for forwarding.
@@ -577,9 +713,9 @@ protected:
      *  debugging reasons.
      *
      *  @param nexthop returns the address of the next hop for packets sent to
-     *  addr
+     *  addr.
      *
-     *  @param metric returns the IGP metric for this route
+     *  @param metric returns the IGP metric for this route.
      */
     XrlCmdError rib_0_1_register_interest6(
 	// Input values,
@@ -594,9 +730,9 @@ protected:
 	uint32_t&	metric);
 
     /**
-     *  De-register an interest in a route
+     *  De-register an interest in a route.
      *
-     *  @param target the name of the XRL module that registered the interest
+     *  @param target the name of the XRL module that registered the interest.
      *
      *  @param addr the address of the previous registered interest. addr
      *  should be the base address of the add/prefix_len subnet.

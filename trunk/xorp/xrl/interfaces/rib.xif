@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.14 2004/05/12 08:22:55 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.15 2004/05/20 23:45:46 pavlin Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -190,8 +190,22 @@ interface rib/0.1 {
 	lookup_route6 ? addr:ipv6 & unicast:bool & multicast:bool	      \
 		-> nexthop:ipv6
 
+	/**
+	 * Add a vif or a vif address to the RIB.
+	 * This interface should be used only for testing purpose.
+	 *
+	 * @param name the name of the vif.
+	 */
 	new_vif ? name:txt
 
+	/**
+	 * Add a vif address to the RIB.
+	 * This interface should be used only for testing purpose.
+	 *
+	 * @param name the name of the vif.
+	 * @param addr the address to add.
+	 * @param subnet the subnet address to add.
+	 */
 	add_vif_addr4 ? name:txt & addr:ipv4 & subnet:ipv4net
 
 	add_vif_addr6 ? name:txt & addr:ipv6 & subnet:ipv6net
@@ -387,12 +401,12 @@ interface rib/0.1 {
 					& cookie:txt
 
 	/**
- 	 * Register an interest in a route
+ 	 * Register an interest in a route.
 	 *
 	 * @param target the name of the XRL module to notify when the
          * information returned by this call becomes invalid.
 	 *
-	 * @param addr address of interest
+	 * @param addr address of interest.
          *
          * @param resolves returns whether or not the address resolves
          * to a route that can be used for forwarding.
@@ -411,19 +425,19 @@ interface rib/0.1 {
          * is primarily given for debugging reasons.
 	 *
 	 * @param nexthop returns the address of the next hop for packets sent
-	 * to addr
+	 * to addr.
 	 *
-	 * @param metric returns the IGP metric for this route
+	 * @param metric returns the IGP metric for this route.
          */
 	register_interest4 ? target:txt & addr:ipv4 \
 		-> resolves:bool & base_addr:ipv4 & prefix_len:u32 & \
                    real_prefix_len:u32 & nexthop:ipv4 & metric:u32
 
 	/**
-	 * De-register an interest in a route
+	 * De-register an interest in a route.
 	 *
 	 * @param target the name of the XRL module that registered
-         * the interest
+         * the interest.
 	 *
 	 * @param addr the address of the previous registered
          * interest.  addr should be the base address of the
@@ -435,12 +449,12 @@ interface rib/0.1 {
 	deregister_interest4 ?  target:txt & addr:ipv4 & prefix_len:u32
 
 	/**
- 	 * Register an interest in a route
+ 	 * Register an interest in a route.
 	 *
 	 * @param target the name of the XRL module to notify when the
          * information returned by this call becomes invalid.
 	 *
-	 * @param addr address of interest
+	 * @param addr address of interest.
 	 *
          * @param resolves returns whether or not the address resolves
          * to a route that can be used for forwarding.
@@ -458,19 +472,19 @@ interface rib/0.1 {
          * is primarily given for debugging reasons.
 	 *
 	 * @param nexthop returns the address of the next hop for packets sent
-	 * to addr
+	 * to addr.
 	 *
-	 * @param metric returns the IGP metric for this route
+	 * @param metric returns the IGP metric for this route.
          */
 	register_interest6 ? target:txt & addr:ipv6 \
 		-> resolves:bool & base_addr:ipv6 & prefix_len:u32 & \
                    real_prefix_len:u32 & nexthop:ipv6 & metric:u32
 
 	/**
-	 * De-register an interest in a route
+	 * De-register an interest in a route.
 	 *
 	 * @param target the name of the XRL module that registered
-         * the interest
+         * the interest.
 	 *
 	 * @param addr the address of the previous registered
          * interest.  addr should be the base address of the
@@ -481,4 +495,3 @@ interface rib/0.1 {
 	 */
 	deregister_interest6 ?  target:txt & addr:ipv6 & prefix_len:u32
 }
-
