@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.49 2005/02/25 05:14:26 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.50 2005/02/28 20:02:37 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -667,59 +667,42 @@ RIB<A>::add_route(const string&		tablename,
     }
 
     //
-    // Find the vif so we can see if the nexthop is directly connected.
+    // Find the vif so we can see if the nexthop is directly connected
     //
-    const IPRouteEntry<A>* re = _final_table->lookup_route(nexthop_addr);
-    if (re != NULL) {
-	// We found a route for the nexthop.
-	Vif* vif = re->vif();
-	if ((vif != NULL)
-	    && (vif->is_same_subnet(IPvXNet(re->net()))
-		|| vif->is_same_p2p(IPvX(nexthop_addr)))) {
-	    debug_msg("**directly connected route found for nexthop\n");
-	    IPNextHop<A>* nexthop = find_or_create_peer_nexthop(nexthop_addr);
-	    ot->add_route(IPRouteEntry<A>(net, re->vif(), nexthop,
-					  *protocol, metric, policytags));
-	    flush();
-	    return XORP_OK;
-	} else {
-	    debug_msg("**not directly connected route found for nexthop\n");
-	    //
-	    // XXX: If the route came from an IGP, then we must have
-	    // a directly-connected interface toward the next-hop router.
-	    //
-	    if (protocol->protocol_type() == IGP) {
-		XLOG_ERROR("Attempting to add IGP route to table \"%s\" "
-			   "(prefix %s next-hop %s): no directly connected "
-			   "interface toward the next-hop router",
-			   tablename.c_str(), net.str().c_str(),
-			   nexthop_addr.str().c_str());
-		return XORP_ERROR;
+    Vif* vif = NULL;
+    IPNextHop<A>* nexthop = NULL;
+    do {
+	//
+	// Search for a route to a directly-connected destination
+	//
+	const IPRouteEntry<A>* re = _final_table->lookup_route(nexthop_addr);
+	if (re != NULL) {
+	    // We found a route for the nexthop
+	    vif = re->vif();
+	    if ((vif != NULL)
+		&& (vif->is_same_subnet(IPvXNet(re->net()))
+		    || vif->is_same_p2p(IPvX(nexthop_addr)))) {
+		debug_msg("**directly connected route found for nexthop\n");
+		break;
 	    }
-
-	    IPNextHop<A>* nexthop = find_or_create_external_nexthop(nexthop_addr);
-	    ot->add_route(IPRouteEntry<A>(net, /* No vif */ NULL, nexthop,
-					  *protocol, metric, policytags));
-	    flush();
-	    return XORP_OK;
 	}
-    }
 
-    debug_msg("** no route\n");
-    //
-    // We failed to find a route.  One final possibility is that this
-    // route is the route for a directly connected subnet, so we need
-    // to test all the Vifs to see if this is the case.
-    //
-    Vif* vif = find_vif(nexthop_addr);
-    debug_msg("Vif %p\n", vif);
-    IPNextHop<A>* nexthop;
-    if (vif != NULL) {
-	nexthop = find_or_create_peer_nexthop(nexthop_addr);
-    } else {
+	//
+	// We failed to find a route, or the route wasn't for a
+	// directly-connected destination. One final possibility is that
+	// we are trying to add a route for a directly connected subnet,
+	// so we need to test all the Vifs to see if this is the case.
+	//
+	vif = find_vif(nexthop_addr);
+	debug_msg("Vif %p\n", vif);
+	break;
+    } while (false);
+
+    if (vif == NULL) {
+	debug_msg("**not directly connected route found for nexthop\n");
 	//
 	// XXX: If the route came from an IGP, then we must have
-	// a directly-connected interface toward the next-hop router
+	// a directly-connected interface toward the next-hop router.
 	//
 	if (protocol->protocol_type() == IGP) {
 	    XLOG_ERROR("Attempting to add IGP route to table \"%s\" "
@@ -729,21 +712,32 @@ RIB<A>::add_route(const string&		tablename,
 		       nexthop_addr.str().c_str());
 	    return XORP_ERROR;
 	}
+    }
 
+    if (vif != NULL) {
+	nexthop = find_or_create_peer_nexthop(nexthop_addr);
+    } else {
 	nexthop = find_or_create_external_nexthop(nexthop_addr);
     }
     XLOG_ASSERT(nexthop->addr() == nexthop_addr);
 
+    //
     // Only accept the least significant 16 bits of metric.
-    if (metric > 0xffff) {
-	XLOG_WARNING("IGP metric value %u is greater than 0xffff",
-		     XORP_UINT_CAST(metric));
-	metric &= 0xffff;
+    //
+    if (protocol->protocol_type() == IGP) {
+	// TODO: shouldn't the check apply for all protocols?
+	if (metric > 0xffff) {
+	    XLOG_WARNING("IGP metric value %u is greater than 0xffff",
+			 XORP_UINT_CAST(metric));
+	    metric &= 0xffff;
+	}
     }
 
-    ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol,
-				  metric, policytags));
-
+    //
+    // Add the route
+    //
+    ot->add_route(IPRouteEntry<A>(net, vif, nexthop,
+				  *protocol, metric, policytags));
     flush();
     return XORP_OK;
 }
