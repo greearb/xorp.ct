@@ -167,10 +167,9 @@ libxipc_a_SOURCES = finder_module.h hmac_md5.h ipc_module.h xrl_module.h finder_
 # -- Library Sources (libfinder - built sources)
 libfinder_a_SOURCES = finder.hh finder_constants.hh finder_server.hh finder_xrl_queue.hh finder_xrl_target.hh finder.cc finder_server.cc finder_xrl_queue.cc finder_xrl_target.cc finder_base.hh finder_base.cc finder_client_xif.hh finder_client_xif.cc finder_event_observer_xif.hh finder_event_observer_xif.cc
 
+# -- Extra files and directories to add to the distribution
+EXTRA_DIST = bench_ipc.awk bench_ipc.sh
 
-# magic-script:			magic-script.in
-#	sed -e 's/whatever//' < $(srcdir)/magic-script.in > magic-script
-#	chmod +x magic-script
 
 ################################################################
 INCLUDES = -I$(top_srcdir)

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.34 2004/10/04 14:49:51 kohler Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.35 2004/10/04 19:25:13 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -197,9 +197,9 @@ libfinder_a_SOURCES += finder_client_xif.cc
 libfinder_a_SOURCES += finder_event_observer_xif.hh
 libfinder_a_SOURCES += finder_event_observer_xif.cc
 
-# magic-script:			magic-script.in
-#	sed -e 's/whatever//' < $(srcdir)/magic-script.in > magic-script
-#	chmod +x magic-script
+# -- Extra files and directories to add to the distribution
+EXTRA_DIST	 = bench_ipc.awk
+EXTRA_DIST	+= bench_ipc.sh
 
 
 ################################################################
