@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.10 2004/06/10 22:41:31 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.11 2004/07/17 00:18:16 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry task
@@ -629,7 +629,7 @@ PimMreTask::run_task_wc()
 			time_slice_expired = true;
 		}
 		if (time_slice_expired || _time_slice.is_expired()) {
-		    // Time slice has expired. Save state to continue late
+		    // Time slice has expired. Save state to continue later
 		    // from here.
 		    _is_processing_wc = true;
 		    _is_processing_pim_nbr_addr_wc = true;
