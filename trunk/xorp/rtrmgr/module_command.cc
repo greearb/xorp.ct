@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.3 2003/05/05 22:43:03 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.4 2003/05/09 23:47:47 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -209,9 +209,9 @@ ModuleCommand::end_transaction(ConfigTreeNode& ctn,
     XrlRouter::XrlCallback cb 
 	= callback(const_cast<ModuleCommand*>(this),
 		   &ModuleCommand::action_complete,
-		   &ctn, _startcommit,
-		   string("start transaction"));
-    XrlAction *xa = dynamic_cast<XrlAction*>(_startcommit);
+		   &ctn, _endcommit,
+		   string("end transaction"));
+    XrlAction *xa = dynamic_cast<XrlAction*>(_endcommit);
     assert(xa != NULL);
 
     return xa->execute(ctn, task_manager, cb);
