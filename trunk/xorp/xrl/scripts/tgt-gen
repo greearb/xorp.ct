@@ -135,7 +135,7 @@ def target_handler_methods(cls, name, methods):
         s += "{"
         s += """
     if (xrl.const_args().size() != %d) { 
-	XLOG_ERROR(\"Wrong number of arguments (%%d != %d) handling %s\", xrl.const_args().size());
+	XLOG_ERROR(\"Wrong number of arguments (%%u != %d) handling %s\", (uint32_t)xrl.const_args().size());
 	return XrlCmdError::BAD_ARGS();
     }
 """ % (len(m.args()), len(m.args()), m.name())
