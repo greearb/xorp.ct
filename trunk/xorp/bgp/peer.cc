@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -39,6 +39,16 @@ BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
     _SocketClient = sock;
     _output_queue_was_busy = false;
     _handler = NULL;
+
+    _in_updates = 0;
+    _out_updates = 0;
+    _in_total_messages = 0;
+    _out_total_messages = 0;
+    _last_error[0] = 0;
+    _last_error[1] = 0;
+    _established_transitions = 0;
+    gettimeofday(&_established_time, NULL);
+    gettimeofday(&_in_update_time, NULL);
 }
 
 BGPPeer::~BGPPeer()
@@ -65,6 +75,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	// XLOG_ASSERT(!is_connected());
 	return false;
     }
+
+    _in_total_messages++;
 
     /*
     ** We should only have a good packet at this point.
@@ -104,6 +116,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	}
 	case MESSAGETYPEUPDATE: {
 	    debug_msg("UPDATE Packet RECEIVED\n");
+	    _in_updates++;
+	    gettimeofday(&_in_update_time, NULL);
 	    UpdatePacket pac(buf, length);
 	    // All decode errors should throw a CorruptMessage.
 	    pac.decode();
@@ -118,6 +132,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		NotificationPacket pac(buf, length);
 		// All decode errors should throw an InvalidPacket
 		pac.decode();
+		_last_error[0] = pac.error_code();
+		_last_error[1] = pac.error_subcode();
 		debug_msg(pac.str().c_str());
 		action(EVENTRECNOTMESS, &pac);
 	    } catch (InvalidPacket& err) {
@@ -178,6 +194,10 @@ BGPPeer::send_message(const BGPPacket& p)
 		   c_format("Unknown packet type %d\n", packet_type));
 
     }
+
+    _out_total_messages++;
+    if (packet_type == MESSAGETYPEUPDATE)
+	_out_updates++;
 
     const uint8_t *buf;
     int cnt;
@@ -1161,6 +1181,14 @@ BGPPeer::established()
     } else {
 	_handler->peering_came_up();
     }
+
+    _in_updates = 0;
+    _out_updates = 0;
+    _in_total_messages = 0;
+    _out_total_messages = 0;
+    _established_transitions++;
+    gettimeofday(&_established_time, NULL);
+    gettimeofday(&_in_update_time, NULL);
     return true;
 }
 
@@ -1342,6 +1370,13 @@ BGPPeer::release_resources()
     if (is_connected())
 	_SocketClient->disconnect();
 
+    // clear the counters.
+    _in_updates = 0;
+    _out_updates = 0;
+    _in_total_messages = 0;
+    _out_total_messages = 0;
+
+    gettimeofday(&_established_time, NULL);
     return true;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.54 2002/12/09 18:28:45 hodson Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -135,6 +135,16 @@ private:
     XorpTimer _timer_connect_retry;
     XorpTimer _timer_hold_time;
     XorpTimer _timer_keep_alive;
+
+    // counters needed for the BGP MIB
+    uint32_t _in_updates;
+    uint32_t _out_updates;
+    uint32_t _in_total_messages;
+    uint32_t _out_total_messages;
+    uint8_t _last_error[2];
+    uint32_t _established_transitions;
+    struct timeval _established_time;
+    struct timeval _in_update_time;
 
     /**
      * This timer is to break us out of the stopped state.
