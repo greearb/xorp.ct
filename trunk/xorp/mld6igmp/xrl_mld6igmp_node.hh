@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.26 2005/02/18 00:40:00 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.27 2005/02/23 17:37:37 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -586,6 +586,8 @@ protected:
 	const uint32_t&	vif_index);
     
 private:
+    class XrlTaskBase;
+
     /**
      * Called when Finder connection is established.
      *
@@ -600,15 +602,21 @@ private:
      */
     virtual void finder_disconnect_event();
 
+    //
+    // Methods to handle the XRL tasks
+    //
+    void add_task(XrlTaskBase* xrl_task);
+    void send_xrl_task();
+    void pop_xrl_task();
+    void retry_xrl_task();
+
     void mfea_register_startup();
     void finder_register_interest_mfea_cb(const XrlError& xrl_error);
     void mfea_register_shutdown();
     void finder_deregister_interest_mfea_cb(const XrlError& xrl_error);
 
-    void send_mfea_add_protocol();
-    void mfea_client_send_add_protocol_cb(const XrlError& xrl_error);
-    void send_mfea_delete_protocol();
-    void mfea_client_send_delete_protocol_cb(const XrlError& xrl_error);
+    void send_mfea_add_delete_protocol();
+    void mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_error);
 
     //
     // Protocol node methods
@@ -628,7 +636,6 @@ private:
 			    uint16_t vif_index,
 			    const IPvX& source,
 			    const IPvX& group);
-
     int send_delete_membership(const string& dst_module_instance_name,
 			       xorp_module_id dst_module_id,
 			       uint16_t vif_index,
@@ -660,23 +667,88 @@ private:
     const string& my_xrl_target_name() {
 	return XrlMld6igmpTargetBase::name();
     }
-    
     int family() const { return (Mld6igmpNode::family()); }
 
+
     /**
-     * Class for handling the queue of Join/Leave multicast group requests
+     * A base class for handling tasks for sending XRL requests.
      */
-    class JoinLeaveMulticastGroup {
+    class XrlTaskBase {
     public:
-	JoinLeaveMulticastGroup(uint16_t vif_index,
-				const IPvX& multicast_group,
-				bool is_join)
-	    : _vif_index(vif_index),
+	XrlTaskBase(XrlMld6igmpNode& xrl_mld6igmp_node)
+	    : _xrl_mld6igmp_node(xrl_mld6igmp_node) {}
+	virtual ~XrlTaskBase() {}
+
+	virtual void dispatch() = 0;
+
+    protected:
+	XrlMld6igmpNode&	_xrl_mld6igmp_node;
+    private:
+    };
+
+    /**
+     * Class for handling the task of start/stop a protocol interface with
+     * the MFEA
+     */
+    class StartStopProtocolKernelVif : public XrlTaskBase {
+    public:
+	StartStopProtocolKernelVif(XrlMld6igmpNode&	xrl_mld6igmp_node,
+				   uint16_t		vif_index,
+				   bool			is_start)
+	    : XrlTaskBase(xrl_mld6igmp_node),
+	      _vif_index(vif_index),
+	      _is_start(is_start) {}
+
+	void		dispatch() {
+	    _xrl_mld6igmp_node.send_start_stop_protocol_kernel_vif();
+	}
+	uint16_t	vif_index() const { return _vif_index; }
+	bool		is_start() const { return _is_start; }
+
+    private:
+	uint16_t	_vif_index;
+	bool		_is_start;
+    };
+
+    /**
+     * Class for handling the task of adding/deleting a protocol with the MFEA
+     */
+    class MfeaAddDeleteProtocol : public XrlTaskBase {
+    public:
+	MfeaAddDeleteProtocol(XrlMld6igmpNode&	xrl_mld6igmp_node,
+			      bool		is_add)
+	    : XrlTaskBase(xrl_mld6igmp_node),
+	      _is_add(is_add) {}
+
+	void		dispatch() {
+	    _xrl_mld6igmp_node.send_mfea_add_delete_protocol();
+	}
+	bool		is_add() const { return _is_add; }
+
+    private:
+	bool		_is_add;
+    };
+
+    /**
+     * Class for handling the task of join/leave multicast group requests
+     */
+    class JoinLeaveMulticastGroup : public XrlTaskBase {
+    public:
+	JoinLeaveMulticastGroup(XrlMld6igmpNode&	xrl_mld6igmp_node,
+				uint16_t		vif_index,
+				const IPvX&		multicast_group,
+				bool			is_join)
+	    : XrlTaskBase(xrl_mld6igmp_node),
+	      _vif_index(vif_index),
 	      _multicast_group(multicast_group),
 	      _is_join(is_join) {}
-	uint16_t vif_index() const { return _vif_index; }
-	const IPvX& multicast_group() const { return _multicast_group; }
-	bool is_join() const { return _is_join; }
+
+	void		dispatch() {
+	    _xrl_mld6igmp_node.send_join_leave_multicast_group();
+	}
+	uint16_t	vif_index() const { return _vif_index; }
+	const IPvX&	multicast_group() const { return _multicast_group; }
+	bool		is_join() const { return _is_join; }
 
     private:
 	uint16_t	_vif_index;
@@ -728,13 +800,6 @@ private:
     XrlCliManagerV0p1Client	_xrl_cli_manager_client;
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
 
-    list<pair<uint16_t, bool> >	_start_stop_protocol_kernel_vif_queue;
-    XorpTimer			_start_stop_protocol_kernel_vif_queue_timer;
-    list<JoinLeaveMulticastGroup> _join_leave_multicast_group_queue;
-    XorpTimer			_join_leave_multicast_group_queue_timer;
-    list<SendAddDeleteMembership> _send_add_delete_membership_queue;
-    XorpTimer			_send_add_delete_membership_queue_timer;
-
     static const TimeVal	RETRY_TIMEVAL;
 
     bool			_is_finder_alive;
@@ -747,6 +812,11 @@ private:
     XorpTimer			_mfea_register_shutdown_timer;
     bool			_is_mfea_add_protocol_registered;
     XorpTimer			_mfea_add_protocol_timer;
+
+    list<XrlTaskBase* >		_xrl_tasks_queue;
+    XorpTimer			_xrl_tasks_queue_timer;
+    list<SendAddDeleteMembership> _send_add_delete_membership_queue;
+    XorpTimer			_send_add_delete_membership_queue_timer;
 };
 
 #endif // __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__

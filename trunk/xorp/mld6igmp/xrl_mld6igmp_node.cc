@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.39 2005/03/15 00:52:22 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.40 2005/03/16 21:54:54 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -21,6 +21,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 #include "libxorp/status_codes.h"
+#include "libxorp/utils.hh"
 
 #include "mld6igmp_node.hh"
 #include "mld6igmp_node_cli.hh"
@@ -68,6 +69,7 @@ XrlMld6igmpNode::XrlMld6igmpNode(int		family,
 XrlMld6igmpNode::~XrlMld6igmpNode()
 {
     shutdown();
+    delete_pointers_list(_xrl_tasks_queue);
 }
 
 bool
@@ -191,6 +193,54 @@ XrlMld6igmpNode::finder_disconnect_event()
 }
 
 //
+// Task-related methods
+//
+void
+XrlMld6igmpNode::add_task(XrlTaskBase* xrl_task)
+{
+    _xrl_tasks_queue.push_back(xrl_task);
+
+    // If the queue was empty before, start sending the changes
+    if (_xrl_tasks_queue.size() == 1)
+	send_xrl_task();
+}
+
+void
+XrlMld6igmpNode::send_xrl_task()
+{
+    if (_xrl_tasks_queue.empty())
+	return;
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    XLOG_ASSERT(xrl_task_base != NULL);
+
+    xrl_task_base->dispatch();
+}
+
+void
+XrlMld6igmpNode::pop_xrl_task()
+{
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    XLOG_ASSERT(xrl_task_base != NULL);
+
+    delete xrl_task_base;
+    _xrl_tasks_queue.pop_front();
+}
+
+void
+XrlMld6igmpNode::retry_xrl_task()
+{
+    if (_xrl_tasks_queue_timer.scheduled())
+	return;		// XXX: already scheduled
+
+    _xrl_tasks_queue_timer = _eventloop.new_oneoff_after(
+	RETRY_TIMEVAL,
+	callback(this, &XrlMld6igmpNode::send_xrl_task));
+}
+
+//
 // Register with the MFEA
 //
 void
@@ -283,8 +333,7 @@ XrlMld6igmpNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	if (! _mfea_register_startup_timer.scheduled()) {
 	    XLOG_ERROR("Failed to register interest in finder events: %s. "
@@ -341,7 +390,7 @@ XrlMld6igmpNode::mfea_register_shutdown()
 	return;
     }
 
-    send_mfea_delete_protocol();
+    add_task(new MfeaAddDeleteProtocol(*this, false));
 }
 
 void
@@ -392,8 +441,7 @@ XrlMld6igmpNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	if (! _mfea_register_shutdown_timer.scheduled()) {
 	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
@@ -408,67 +456,127 @@ XrlMld6igmpNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
 }
 
 //
-// Add protocol with the MFEA
+// Add/delete protocol with the MFEA
 //
 void
-XrlMld6igmpNode::send_mfea_add_protocol()
+XrlMld6igmpNode::send_mfea_add_delete_protocol()
 {
     bool success = true;
 
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    //
-    // Register the protocol with the MFEA
-    //
-    if (! _is_mfea_add_protocol_registered) {
-	if (Mld6igmpNode::is_ipv4()) {
-	    success = _xrl_mfea_client.send_add_protocol4(
-		_mfea_target.c_str(),
-		my_xrl_target_name(),
-		string(Mld6igmpNode::module_name()),
-		Mld6igmpNode::module_id(),
-		callback(this, &XrlMld6igmpNode::mfea_client_send_add_protocol_cb));
-	    if (success)
-		return;
-	}
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    MfeaAddDeleteProtocol* entry;
 
-	if (Mld6igmpNode::is_ipv6()) {
-	    success = _xrl_mfea_client.send_add_protocol6(
-		_mfea_target.c_str(),
-		my_xrl_target_name(),
-		string(Mld6igmpNode::module_name()),
-		Mld6igmpNode::module_id(),
-		callback(this, &XrlMld6igmpNode::mfea_client_send_add_protocol_cb));
-	    if (success)
-		return;
+    entry = dynamic_cast<MfeaAddDeleteProtocol*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_add = entry->is_add();
+
+    if (is_add) {
+	//
+	// Register the protocol with the MFEA
+	//
+	if (! _is_mfea_add_protocol_registered) {
+	    if (Mld6igmpNode::is_ipv4()) {
+		success = _xrl_mfea_client.send_add_protocol4(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    string(Mld6igmpNode::module_name()),
+		    Mld6igmpNode::module_id(),
+		    callback(this, &XrlMld6igmpNode::mfea_client_send_add_delete_protocol_cb));
+		if (success)
+		    return;
+	    }
+
+	    if (Mld6igmpNode::is_ipv6()) {
+		success = _xrl_mfea_client.send_add_protocol6(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    string(Mld6igmpNode::module_name()),
+		    Mld6igmpNode::module_id(),
+		    callback(this, &XrlMld6igmpNode::mfea_client_send_add_delete_protocol_cb));
+		if (success)
+		    return;
+	    }
+	}
+    } else {
+	//
+	// De-register the protocol with the MFEA
+	//
+	if (_is_mfea_add_protocol_registered) {
+	    if (Mld6igmpNode::is_ipv4()) {
+		bool success4;
+		success4 = _xrl_mfea_client.send_delete_protocol4(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    string(Mld6igmpNode::module_name()),
+		    Mld6igmpNode::module_id(),
+		    callback(this, &XrlMld6igmpNode::mfea_client_send_add_delete_protocol_cb));
+		if (success4 != true)
+		    success = false;
+	    }
+
+	    if (Mld6igmpNode::is_ipv6()) {
+		bool success6;
+		success6 = _xrl_mfea_client.send_delete_protocol6(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    string(Mld6igmpNode::module_name()),
+		    Mld6igmpNode::module_id(),
+		    callback(this, &XrlMld6igmpNode::mfea_client_send_add_delete_protocol_cb));
+		if (success6 != true)
+		    success = false;
+	    }
 	}
     }
 
     if (! success) {
-	//
-	// If an error, then start a timer to try again
-	//
-	XLOG_ERROR("Failed to add protocol with the MFEA. "
-		   "Will try again.");
-	_mfea_add_protocol_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlMld6igmpNode::send_mfea_add_protocol));
-	return;
+	if (is_add) {
+	    //
+	    // If an error, then start a timer to try again
+	    //
+	    XLOG_ERROR("Failed to add protocol with the MFEA. "
+		       "Will try again.");
+	    retry_xrl_task();
+	    return;
+	} else {
+	    XLOG_ERROR("Failed to delete protocol with the MFEA. "
+		       "Will give up.");
+	    Mld6igmpNode::set_status(SERVICE_FAILED);
+	    Mld6igmpNode::update_status();
+	}
     }
 }
 
 void
-XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
+XrlMld6igmpNode::mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_error)
 {
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    MfeaAddDeleteProtocol* entry;
+
+    entry = dynamic_cast<MfeaAddDeleteProtocol*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_add = entry->is_add();
+
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then we are done
+	// If success, then send the next change
 	//
-	_is_mfea_add_protocol_registered = true;
-	send_mfea_add_protocol();
-	Mld6igmpNode::decr_startup_requests_n();
+	if (is_add) {
+	    _is_mfea_add_protocol_registered = true;
+	    Mld6igmpNode::decr_startup_requests_n();
+	} else {
+	    _is_mfea_add_protocol_registered = false;
+	    Mld6igmpNode::decr_shutdown_requests_n();
+	}
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -476,7 +584,8 @@ XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot add protocol with the MFEA: %s",
+	XLOG_FATAL("Cannot %s protocol with the MFEA: %s",
+		   (is_add)? "add" : "delete",
 		   xrl_error.str().c_str());
 	break;
 
@@ -489,7 +598,14 @@ XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
-	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	if (is_add) {
+	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	} else {
+	    _is_mfea_add_protocol_registered = false;
+	    Mld6igmpNode::decr_shutdown_requests_n();
+	    pop_xrl_task();
+	    send_xrl_task();
+	}
 	break;
 
     case BAD_ARGS:
@@ -506,125 +622,13 @@ XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
-	if (! _mfea_add_protocol_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add protocol with the MFEA: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _mfea_add_protocol_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlMld6igmpNode::send_mfea_add_protocol));
-	}
-	break;
-    }
-}
-
-//
-// Delete protocol with the MFEA
-//
-void
-XrlMld6igmpNode::send_mfea_delete_protocol()
-{
-    bool success = true;
-
-    if (! _is_finder_alive)
-	return;		// The Finder is dead
-
-    if (_is_mfea_add_protocol_registered) {
-	if (Mld6igmpNode::is_ipv4()) {
-	    bool success4;
-	    success4 = _xrl_mfea_client.send_delete_protocol4(
-		_mfea_target.c_str(),
-		my_xrl_target_name(),
-		string(Mld6igmpNode::module_name()),
-		Mld6igmpNode::module_id(),
-		callback(this, &XrlMld6igmpNode::mfea_client_send_delete_protocol_cb));
-	    if (success4 != true)
-		success = false;
-	}
-
-	if (Mld6igmpNode::is_ipv6()) {
-	    bool success6;
-	    success6 = _xrl_mfea_client.send_delete_protocol6(
-		_mfea_target.c_str(),
-		my_xrl_target_name(),
-		string(Mld6igmpNode::module_name()),
-		Mld6igmpNode::module_id(),
-		callback(this, &XrlMld6igmpNode::mfea_client_send_delete_protocol_cb));
-	    if (success6 != true)
-		success = false;
-	}
-    }
-
-    if (! success) {
-	XLOG_ERROR("Failed to delete protocol with the MFEA. "
-		   "Will give up.");
-	Mld6igmpNode::set_status(SERVICE_FAILED);
-	Mld6igmpNode::update_status();
-    }
-}
-
-void
-XrlMld6igmpNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then we are done
-	//
-	_is_mfea_add_protocol_registered = false;
-	Mld6igmpNode::decr_shutdown_requests_n();
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot delete protocol with the MFEA: %s",
+	XLOG_ERROR("Failed to %s protocol with the MFEA: %s. "
+		   "Will try again.",
+		   (is_add)? "add" : "delete",
 		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	_is_mfea_add_protocol_registered = false;
-	Mld6igmpNode::decr_shutdown_requests_n();
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _mfea_register_shutdown_timer.scheduled()) {
-	    XLOG_ERROR("Failed to delete protocol with the MFEA: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-	    callback(this, &XrlMld6igmpNode::mfea_register_shutdown));
-	}
+	retry_xrl_task();
 	break;
     }
 }
@@ -639,15 +643,9 @@ XrlMld6igmpNode::start_protocol_kernel_vif(uint16_t vif_index)
 		   "no such vif", vif_index);
 	return (XORP_ERROR);
     }
-    
-    _start_stop_protocol_kernel_vif_queue.push_back(make_pair(vif_index, true));
 
     Mld6igmpNode::incr_startup_requests_n();
-
-    // If the queue was empty before, start sending the changes
-    if (_start_stop_protocol_kernel_vif_queue.size() == 1) {
-	send_start_stop_protocol_kernel_vif();
-    }
+    add_task(new StartStopProtocolKernelVif(*this, vif_index, true));
 
     return (XORP_OK);
 }
@@ -662,15 +660,9 @@ XrlMld6igmpNode::stop_protocol_kernel_vif(uint16_t vif_index)
 		   "no such vif", vif_index);
 	return (XORP_ERROR);
     }
-    
-    _start_stop_protocol_kernel_vif_queue.push_back(make_pair(vif_index, false));
 
     Mld6igmpNode::incr_shutdown_requests_n();
-
-    // If the queue was empty before, start sending the changes
-    if (_start_stop_protocol_kernel_vif_queue.size() == 1) {
-	send_start_stop_protocol_kernel_vif();
-    }
+    add_task(new StartStopProtocolKernelVif(*this, vif_index, false));
 
     return (XORP_OK);
 }
@@ -684,18 +676,22 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    if (_start_stop_protocol_kernel_vif_queue.empty())
-	return;			// No more changes
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    StartStopProtocolKernelVif* entry;
 
-    uint16_t vif_index = _start_stop_protocol_kernel_vif_queue.front().first;
-    bool is_start = _start_stop_protocol_kernel_vif_queue.front().second;
+    entry = dynamic_cast<StartStopProtocolKernelVif*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_start = entry->is_start();
+    uint16_t vif_index = entry->vif_index();
 
     //
     // Check whether we have already registered with the MFEA
     //
     if (! _is_mfea_add_protocol_registered) {
-	success = false;
-	goto start_timer_label;
+	retry_xrl_task();
+	return;
     }
 
     mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
@@ -704,7 +700,8 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		   "no such vif",
 		   (is_start)? "start" : "stop",
 		   vif_index);
-	_start_stop_protocol_kernel_vif_queue.pop_front();
+	pop_xrl_task();
+	retry_xrl_task();
 	return;
     }
 
@@ -772,10 +769,8 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		   "Will try again.",
 		   (is_start)? "start" : "stop",
 		   mld6igmp_vif->name().c_str());
-    start_timer_label:
-	_start_stop_protocol_kernel_vif_queue_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlMld6igmpNode::send_start_stop_protocol_kernel_vif));
+	retry_xrl_task();
+	return;
     }
 }
 
@@ -783,19 +778,26 @@ void
 XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
     const XrlError& xrl_error)
 {
-    bool is_start = _start_stop_protocol_kernel_vif_queue.front().second;
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    StartStopProtocolKernelVif* entry;
+
+    entry = dynamic_cast<StartStopProtocolKernelVif*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_start = entry->is_start();
 
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
 	// If success, then send the next change
 	//
-	_start_stop_protocol_kernel_vif_queue.pop_front();
-	send_start_stop_protocol_kernel_vif();
 	if (is_start)
 	    Mld6igmpNode::decr_startup_requests_n();
 	else
 	    Mld6igmpNode::decr_shutdown_requests_n();
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -820,9 +822,9 @@ XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
 	if (is_start) {
 	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
 	} else {
-	    _start_stop_protocol_kernel_vif_queue.pop_front();
-	    send_start_stop_protocol_kernel_vif();
 	    Mld6igmpNode::decr_shutdown_requests_n();
+	    pop_xrl_task();
+	    send_xrl_task();
 	}
 	break;
 
@@ -840,18 +842,13 @@ XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
-	if (! _start_stop_protocol_kernel_vif_queue_timer.scheduled()) {
-	    XLOG_ERROR("Failed to %s protocol vif with the MFEA: %s. "
-		       "Will try again.",
-		       (is_start)? "start" : "stop",
-		       xrl_error.str().c_str());
-	    _start_stop_protocol_kernel_vif_queue_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlMld6igmpNode::send_start_stop_protocol_kernel_vif));
-	}
+	XLOG_ERROR("Failed to %s protocol vif with the MFEA: %s. "
+		   "Will try again.",
+		   (is_start)? "start" : "stop",
+		   xrl_error.str().c_str());
+	retry_xrl_task();
 	break;
     }
 }
@@ -867,16 +864,10 @@ XrlMld6igmpNode::join_multicast_group(uint16_t vif_index,
 		   "no such vif", cstring(multicast_group), vif_index);
 	return (XORP_ERROR);
     }
-    
-    _join_leave_multicast_group_queue.push_back(
-	JoinLeaveMulticastGroup(vif_index, multicast_group, true));
 
     Mld6igmpNode::incr_startup_requests_n();
-
-    // If the queue was empty before, start sending the changes
-    if (_join_leave_multicast_group_queue.size() == 1) {
-	send_join_leave_multicast_group();
-    }
+    add_task(new JoinLeaveMulticastGroup(*this, vif_index, multicast_group,
+					 true));
 
     return (XORP_OK);
 }
@@ -892,16 +883,10 @@ XrlMld6igmpNode::leave_multicast_group(uint16_t vif_index,
 		   "no such vif", cstring(multicast_group), vif_index);
 	return (XORP_ERROR);
     }
-    
-    _join_leave_multicast_group_queue.push_back(
-	JoinLeaveMulticastGroup(vif_index, multicast_group, false));
 
     Mld6igmpNode::incr_shutdown_requests_n();
-
-    // If the queue was empty before, start sending the changes
-    if (_join_leave_multicast_group_queue.size() == 1) {
-	send_join_leave_multicast_group();
-    }
+    add_task(new JoinLeaveMulticastGroup(*this, vif_index, multicast_group,
+					 false));
 
     return (XORP_OK);
 }
@@ -915,28 +900,34 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    if (_join_leave_multicast_group_queue.empty())
-	return;			// No more changes
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    JoinLeaveMulticastGroup* entry;
 
-    JoinLeaveMulticastGroup& group = _join_leave_multicast_group_queue.front();
-    bool is_join = group.is_join();
+    entry = dynamic_cast<JoinLeaveMulticastGroup*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_join = entry->is_join();
+    uint16_t vif_index = entry->vif_index();
+    const IPvX& multicast_group = entry->multicast_group();
 
     //
     // Check whether we have already registered with the MFEA
     //
     if (! _is_mfea_add_protocol_registered) {
-	success = false;
-	goto start_timer_label;
+	retry_xrl_task();
+	return;
     }
 
-    mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(group.vif_index());
+    mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
     if (mld6igmp_vif == NULL) {
 	XLOG_ERROR("Cannot %s group %s on vif with vif_index %d: "
 		   "no such vif",
 		   (is_join)? "join" : "leave",
-		   cstring(group.multicast_group()),
-		   group.vif_index());
-	_join_leave_multicast_group_queue.pop_front();
+		   cstring(multicast_group),
+		   vif_index);
+	pop_xrl_task();
+	retry_xrl_task();
 	return;
     }
 
@@ -949,8 +940,8 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
 		mld6igmp_vif->name(),
-		group.vif_index(),
-		group.multicast_group().get_ipv4(),
+		vif_index,
+		multicast_group.get_ipv4(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
 	    if (success)
 		return;
@@ -963,8 +954,8 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
 		mld6igmp_vif->name(),
-		group.vif_index(),
-		group.multicast_group().get_ipv6(),
+		vif_index,
+		multicast_group.get_ipv6(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
 	    if (success)
 		return;
@@ -978,8 +969,8 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
 		mld6igmp_vif->name(),
-		group.vif_index(),
-		group.multicast_group().get_ipv4(),
+		vif_index,
+		multicast_group.get_ipv4(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
 	    if (success)
 		return;
@@ -992,8 +983,8 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		string(Mld6igmpNode::module_name()),
 		Mld6igmpNode::module_id(),
 		mld6igmp_vif->name(),
-		group.vif_index(),
-		group.multicast_group().get_ipv6(),
+		vif_index,
+		multicast_group.get_ipv6(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb));
 	    if (success)
 		return;
@@ -1007,12 +998,10 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 	XLOG_ERROR("Failed to %s group %s on vif %s with the MFEA. "
 		   "Will try again.",
 		   (is_join)? "join" : "leave",
-		   cstring(group.multicast_group()),
+		   cstring(multicast_group),
 		   mld6igmp_vif->name().c_str());
-    start_timer_label:
-	_join_leave_multicast_group_queue_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlMld6igmpNode::send_join_leave_multicast_group));
+	retry_xrl_task();
+	return;
     }
 }
 
@@ -1020,19 +1009,28 @@ void
 XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(
     const XrlError& xrl_error)
 {
-    bool is_join = _join_leave_multicast_group_queue.front().is_join();
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    JoinLeaveMulticastGroup* entry;
+
+    entry = dynamic_cast<JoinLeaveMulticastGroup*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_join = entry->is_join();
+    uint16_t vif_index = entry->vif_index();
+    const IPvX& multicast_group = entry->multicast_group();
 
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
 	// If success, then send the next change
 	//
-	_join_leave_multicast_group_queue.pop_front();
-	send_join_leave_multicast_group();
 	if (is_join)
 	    Mld6igmpNode::decr_startup_requests_n();
 	else
 	    Mld6igmpNode::decr_shutdown_requests_n();
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -1057,9 +1055,9 @@ XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(
 	if (is_join) {
 	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
 	} else {
-	    _join_leave_multicast_group_queue.pop_front();
-	    send_join_leave_multicast_group();
 	    Mld6igmpNode::decr_shutdown_requests_n();
+	    pop_xrl_task();
+	    send_xrl_task();
 	}
 	break;
 
@@ -1077,18 +1075,16 @@ XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
-	if (! _join_leave_multicast_group_queue_timer.scheduled()) {
-	    XLOG_ERROR("Failed to %s a multicast group with the MFEA: %s. "
-		       "Will try again.",
-		       (is_join)? "join" : "leave",
-		       xrl_error.str().c_str());
-	    _join_leave_multicast_group_queue_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlMld6igmpNode::send_join_leave_multicast_group));
-	}
+	XLOG_ERROR("Failed to %s group %s on vif with vif_index %d "
+		   "with the MFEA: %s. "
+		   "Will try again.",
+		   (is_join)? "join" : "leave",
+		   cstring(multicast_group),
+		   vif_index,
+		   xrl_error.str().c_str());
+	retry_xrl_task();
 	break;
     }
 }
@@ -1318,8 +1314,7 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	if (! _send_add_delete_membership_queue_timer.scheduled()) {
 	    XLOG_ERROR("Failed to %s a multicast group with a client: %s. "
@@ -1581,8 +1576,7 @@ XrlMld6igmpNode::cli_manager_client_send_add_cli_command_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	//
 	// TODO: if the command failed, then we should retransmit it
@@ -1663,8 +1657,7 @@ XrlMld6igmpNode::cli_manager_client_send_delete_cli_command_cb(
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
 	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
+	// If a transient error, then try again
 	//
 	//
 	// TODO: if the command failed, then we should retransmit it
@@ -1745,7 +1738,7 @@ XrlMld6igmpNode::finder_event_observer_0_1_xrl_target_birth(
 {
     if (target_class == _mfea_target) {
 	_is_mfea_alive = true;
-	send_mfea_add_protocol();
+	add_task(new MfeaAddDeleteProtocol(*this, true));
     }
 
     return XrlCmdError::OKAY();
