@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock6.hh,v 1.4 2004/11/29 07:33:34 bms Exp $
+// $XORP: xorp/fea/rawsock6.hh,v 1.5 2004/11/29 09:18:19 bms Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -80,9 +80,9 @@ protected:
 struct IPv6HeaderInfo {
 	IPv6		src;
 	IPv6		dst;
-	uint16_t	rcvifindex;
-	uint8_t		tclass;
-	uint8_t		hoplimit;
+	uint32_t	rcvifindex;
+	uint32_t	tclass;
+	uint32_t	hoplimit;
 };
 
 /**

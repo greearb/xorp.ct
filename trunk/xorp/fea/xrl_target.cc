@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.60 2004/11/29 09:18:19 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.61 2004/11/29 09:25:09 bms Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -2151,7 +2151,7 @@ static const char* XRL_RAW_SOCKET6_NULL = "XrlRawSocket6Manager not present" ;
 
 XrlCmdError
 XrlFeaTarget::raw_packet6_0_1_send_raw(
-				       // Input values,
+				// Input values,
 				const IPv6&	src_address,
 				const IPv6&	dst_address,
 				const string&	vif_name,
@@ -2165,23 +2165,11 @@ XrlFeaTarget::raw_packet6_0_1_send_raw(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-#ifdef notyet
     if (_xrsm6 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
     }
-    return _xrsm6->send(vifname, pktinfo, packet);
-#else
-    return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
-
-    UNUSED(src_address);
-    UNUSED(dst_address);
-    UNUSED(vif_name);
-    UNUSED(proto);
-    UNUSED(tclass);
-    UNUSED(hoplimit);
-    UNUSED(hopopts);
-    UNUSED(packet);
-#endif
+    return _xrsm6->send(src_address, dst_address, vif_name, proto,
+			tclass, hoplimit, hopopts, packet);
 }
 
 XrlCmdError
@@ -2193,19 +2181,10 @@ XrlFeaTarget::raw_packet6_0_1_register_vif_receiver(
 						   const uint32_t& proto
 						   )
 {
-#ifdef notyet
     if (_xrsm6 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
     }
     return _xrsm6->register_vif_receiver(router_name, ifname, vifname, proto);
-#else
-    return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
-
-    UNUSED(router_name);
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(proto);
-#endif
 }
 
 XrlCmdError
@@ -2217,19 +2196,10 @@ XrlFeaTarget::raw_packet6_0_1_unregister_vif_receiver(
 						     const uint32_t& proto
 						     )
 {
-#ifdef notyet
     if (_xrsm6 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
     }
     return _xrsm6->unregister_vif_receiver(router_name, ifname, vifname, proto);
-#else
-    return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
-
-    UNUSED(router_name);
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(proto);
-#endif
 }
 
 // ----------------------------------------------------------------------------
