@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fte.hh,v 1.10 2004/08/03 03:51:46 pavlin Exp $
+// $XORP: xorp/fea/fte.hh,v 1.11 2004/10/26 01:59:11 bms Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -42,12 +42,10 @@ public:
 	const string&	vifname,
 	uint32_t	metric,
 	uint32_t	admin_distance,
-	bool		xorp_route,
-	bool		is_discard = false)
+	bool		xorp_route)
 	: _net(net), _nexthop(nexthop), _ifname(ifname), _vifname(vifname),
 	  _metric(metric), _admin_distance(admin_distance),
-	  _xorp_route(xorp_route), _is_deleted(false),
-	  _is_discard(is_discard) {}
+	  _xorp_route(xorp_route), _is_deleted(false) {}
     Fte(const N& net)
 	: _net(net), _nexthop(A::ZERO(net.af())),
 	  _metric(0), _admin_distance(0), _xorp_route(false) {}
@@ -60,7 +58,6 @@ public:
     uint32_t	admin_distance() const	{ return _admin_distance; }
     bool	xorp_route() const 	{ return _xorp_route; }
     bool	is_deleted() const	{ return _is_deleted; }
-    bool	is_discard() const	{ return _is_discard; }
     void	mark_deleted()		{ _is_deleted = true; }
 
     /**
@@ -75,7 +72,6 @@ public:
 	_admin_distance = 0;
 	_xorp_route = false;
 	_is_deleted = false;
-	_is_discard = false;
     }
 
     /**
@@ -94,13 +90,12 @@ public:
     string str() const {
 	return c_format("net = %s nexthop = %s ifname = %s vifname = %s "
 			"metric = %u admin_distance = %u xorp_route = %s "
-			"is_deleted = %s is_discard = %s",
+			"is_deleted = %s",
 			_net.str().c_str(), _nexthop.str().c_str(),
 			_ifname.c_str(), _vifname.c_str(),
 			_metric, _admin_distance,
 			_xorp_route ? "true" : "false",
-			_is_deleted ? "true" : "false",
-			_is_discard ? "true" : "false");
+			_is_deleted ? "true" : "false");
     }
 
 private:
@@ -112,8 +107,6 @@ private:
     uint32_t	_admin_distance;	// Route admin distance
     bool	_xorp_route;		// This route was installed by XORP
     bool	_is_deleted;		// True if the entry was deleted
-    bool	_is_discard;		// True if the entry acts as a
-					// black hole i.e. drops packets
 };
 
 typedef Fte<IPv4, IPv4Net> Fte4;
