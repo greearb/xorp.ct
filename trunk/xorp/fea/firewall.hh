@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall.hh,v 1.5 2004/09/08 10:09:15 bms Exp $
+// $XORP: xorp/fea/firewall.hh,v 1.6 2004/09/14 15:02:25 bms Exp $
 
 #ifndef __FEA_FIREWALL_HH__
 #define __FEA_FIREWALL_HH__
@@ -199,7 +199,7 @@ public:
 	FwProvider(FirewallManager& m)
 	    throw(InvalidFwProvider)
 	    : _m(m) { throw InvalidFwProvider(); }
-	virtual ~FwProvider() = 0;
+	virtual ~FwProvider() {};
 
 	/* General provider interface */
 	virtual bool get_enabled() const = 0;
@@ -218,6 +218,8 @@ public:
 	virtual int delete_rule6(FwRule6& rule) = 0;
 	virtual uint32_t get_num_xorp_rules6() const = 0;
 	virtual uint32_t get_num_system_rules6() const = 0;
+
+	//virtual int take_table_ownership() = 0;
 
 protected:
 	FirewallManager&	_m;	// Back-reference to XRL target and
