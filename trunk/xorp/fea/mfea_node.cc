@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.9 2003/07/03 07:05:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.10 2003/07/16 02:56:55 pavlin Exp $"
 
 
 //
@@ -1782,23 +1782,33 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 	for (iter = fte_list4.begin(); iter != fte_list4.end(); ++iter) {
 	    Fte4& fte = *iter;
 	    Mrib& mrib = mrib_table[mrib_table_n++];
-	    MfeaVif *mfea_vif;
+	    MfeaVif *mfea_vif = NULL;
 	    mrib.set_dest_prefix(IPvXNet(fte.net()));
 	    mrib.set_metric_preference(mrib_table_default_metric_preference().get());
 	    mrib.set_metric(mrib_table_default_metric().get());
 	    mrib.set_next_hop_router_addr(IPvX(fte.gateway()));
 	    
 	    // Get the vif index
-	    mfea_vif = vif_find_same_subnet_or_p2p(mrib.next_hop_router_addr());
+	    do {
+		mfea_vif = vif_find_same_subnet_or_p2p(mrib.next_hop_router_addr());
+		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
+		    break;
+		
+		// Try again in case it is a LAN address.
+		mfea_vif = vif_find_same_subnet(mrib.dest_prefix());
+		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
+		    break;
+		
+		// Try again in case it is a P2P entry
+		if (mrib.dest_prefix().prefix_len()
+		    == IPvX::addr_bitlen(family())) {
+		    mfea_vif = vif_find_same_subnet_or_p2p(mrib.dest_prefix().masked_addr());
+		}
+		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
+		    break;
+	    } while (false);
 	    if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up()) {
 		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
-	    }
-	    // If it didn't work, then try (again) in case it is a LAN addr.
-	    if (mrib.next_hop_vif_index() >= maxvifs()) {
-		mfea_vif = vif_find_same_subnet(mrib.dest_prefix());
-		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up()) {
-		    mrib.set_next_hop_vif_index(mfea_vif->vif_index());
-		}
 	    }
 	    if (mrib.next_hop_vif_index() >= maxvifs()) {
 		XLOG_WARNING("get_mrib_table() error: "
@@ -1822,27 +1832,33 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 	for (iter = fte_list6.begin(); iter != fte_list6.end(); ++iter) {
 	    Fte6& fte = *iter;
 	    Mrib& mrib = mrib_table[mrib_table_n++];
-	    MfeaVif *mfea_vif;
+	    MfeaVif *mfea_vif = NULL;
 	    mrib.set_dest_prefix(IPvXNet(fte.net()));
 	    mrib.set_metric_preference(mrib_table_default_metric_preference().get());
 	    mrib.set_metric(mrib_table_default_metric().get());
 	    mrib.set_next_hop_router_addr(IPvX(fte.gateway()));
 	    
 	    // Get the vif index
-	    mfea_vif = vif_find_same_subnet_or_p2p(mrib.next_hop_router_addr());
-	    if ((mfea_vif != NULL) && (mfea_vif->is_underlying_vif_up())) {
-		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
-	    } else {
-		mfea_vif = NULL;
-	    }
-	    // If it didn't work, then try (again) in case it is a LAN addr.
-	    if (mrib.next_hop_vif_index() >= maxvifs()) {
+	    do {
+		mfea_vif = vif_find_same_subnet_or_p2p(mrib.next_hop_router_addr());
+		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
+		    break;
+		
+		// Try again in case it is a LAN address.
 		mfea_vif = vif_find_same_subnet(mrib.dest_prefix());
-		if ((mfea_vif != NULL) && (mfea_vif->is_underlying_vif_up())) {
-		    mrib.set_next_hop_vif_index(mfea_vif->vif_index());
-		} else {
-		    mfea_vif = NULL;
+		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
+		    break;
+		
+		// Try again in case it is a P2P entry
+		if (mrib.dest_prefix().prefix_len()
+		    == IPvX::addr_bitlen(family())) {
+		    mfea_vif = vif_find_same_subnet_or_p2p(mrib.dest_prefix().masked_addr());
 		}
+		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up())
+		    break;
+	    } while (false);
+	    if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up()) {
+		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
 	    }
 	    if (mrib.next_hop_vif_index() >= maxvifs()) {
 		XLOG_WARNING("get_mrib_table() error: "
