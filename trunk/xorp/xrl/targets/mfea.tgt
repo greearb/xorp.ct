@@ -1,0 +1,7 @@
+/* $XORP: xorp/xrl/targets/mfea.tgt,v 1.6 2002/11/05 17:26:27 hodson Exp $ */
+
+#include "common.xif"
+#include "cli_processor.xif"
+#include "mfea.xif"
+
+target mfea implements common/0.1, cli_processor/0.1, mfea/0.1

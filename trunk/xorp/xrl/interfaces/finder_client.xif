@@ -1,0 +1,23 @@
+
+/** A finder-client is client of the Finder. These may cache results *
+from Finder queries regarding Xrl's.  As a result the Finder needs to
+let clients know when their cached values are stale.
+*/
+
+interface finder_client/0.1 {
+
+	/** No op method used by finder to poll for liveness. */
+	hello
+
+	/** Remove Xrl from cache.  The client should remove currently
+	 *  cached value for Xrl from it's cached.  On the next invocation
+	 * of Xrl, the client will need to consult the Finder for updated
+	 * information, though implementations may consult the Finder for
+	 * updated information before.
+	 */
+
+	remove_xrl_from_cache ? xrl:txt
+
+	/** Remove all Xrls relating to target from cache */
+	remove_xrls_for_target_from_cache ? target_name:txt
+}

@@ -1,0 +1,408 @@
+#local Vifs
+#     type  name   addr  netmask 
+vif Ethernet de0 10.0.0.1
+vif Ethernet de1 10.0.1.1
+vif Ethernet de2 10.0.2.1
+#vif Ethernet disc 0.0.0.0
+#
+#routing tables
+#     type  name  tag     ad_dist
+#table origin connected 0
+#table origin static    1
+#table origin ospf      110
+#table origin ebgp      20
+#table origin ibgp      200
+#table merged igp1 connected static
+#table merged igp igp1 ospf
+#table merged egp ebgp ibgp
+#table extint final egp igp
+add_egp_table ebgp
+add_egp_table ibgp
+add_igp_table ospf
+add_igp_table static
+add_igp_table connected
+#
+#redistribute enable ospf ebgp
+#
+#routes for connected subnets
+#     cmd   table     subnet     nexthop
+route add connected 10.0.0.0/24 10.0.0.1 0
+route add connected 10.0.1.0/24 10.0.1.1 0
+route add connected 10.0.2.0/24 10.0.2.1 0
+#
+#add a default route to the discard interface
+#route add connected 0.0.0.0/0 0.0.0.0 0
+#
+#test connected subnets
+route verify 10.0.0.2 de0 10.0.0.1 0
+route verify 10.0.1.2 de1 10.0.1.1 0
+route verify 10.0.2.2 de2 10.0.2.1 0
+#
+#verify default works
+#route verify 192.150.187.1 disc 0.0.0.0
+#
+#-------------------------------------------------------------------
+#add static routes
+route add static 128.16.0.0/16 10.0.1.2 1
+route verify 128.16.0.1 de1 10.0.1.2 1
+#
+route add static 128.16.64.0/20 10.0.2.2 1
+route verify 128.16.64.1 de2 10.0.2.2 1
+route verify 128.16.0.1 de1 10.0.1.2 1
+route verify 128.16.128.1 de1 10.0.1.2 1
+#
+route add static 128.16.0.0/20 10.0.0.2 1
+route verify 128.16.0.1 de0 10.0.0.2 1
+route verify 128.16.64.1 de2 10.0.2.2 1
+route verify 128.16.128.1 de1 10.0.1.2 1
+#
+#-------------------------------------------------------------------
+#check basic deletion works
+route delete static 128.16.64.0/20
+route verify 128.16.64.1 de1 10.0.1.2 1
+#OK, add it back again
+route add static 128.16.64.0/20 10.0.2.2 1
+route verify 128.16.64.1 de2 10.0.2.2 1
+route verify 128.16.0.1 de0 10.0.0.2 1
+route verify 128.16.128.1 de1 10.0.1.2 1
+#
+#-------------------------------------------------------------------
+#Now add IGP routes to test override works properly
+#
+#this shouldn't change anything as static overrides it
+route add ospf 128.16.64.0/20 10.0.1.2 5
+route verify 128.16.64.1 de2 10.0.2.2 1
+#
+#add a new route to ospf table
+route add ospf 192.150.187.0/24 10.0.0.2 5
+route verify 192.150.187.1 de0 10.0.0.2 5
+#add a static to override it.
+route add static 192.150.187.0/24 10.0.1.2 5
+route verify 192.150.187.1 de1 10.0.1.2 5
+#delete the static and check it reverts to the ospf route
+route delete static 192.150.187.0/24
+route verify 192.150.187.1 de0 10.0.0.2 5
+#
+#-------------------------------------------------------------------
+#Now add an EBGP route
+route add ebgp 18.26.0.0/24 10.0.0.100 10
+# Add the same route again
+route add ebgp 18.26.0.0/24 10.0.0.100 10
+#note that we don't want 10.0.0.100 to be resolved to 10.0.0.1 because
+#10.0.0.100 is on a directly connected interface
+route verify 18.26.0.1 de0 10.0.0.100 10
+#
+#Now add an IBGP route
+route add ibgp 18.26.1.0/24 192.150.187.1 7
+# Add the same route again
+route add ibgp 18.26.1.0/24 192.150.187.1 7
+#note that we do want 18.26.1.1 to be resolved to 10.0.0.2 because
+#192.150.187.1 is not on a directly connected interface
+route verify 18.26.1.1 de0 10.0.0.2 7
+#
+#Now add an IBGP route where we can't reach the nexthop
+route add ibgp 18.26.2.0/24 192.150.188.1 7
+route verify 18.26.2.1 discard 0.0.0.0 0
+#
+#then add the OSPF route to the nexthop
+route add ospf 192.150.188.0/24 10.0.2.4 5
+route verify 18.26.2.1 de2 10.0.2.4 7
+#
+#now delete the OSPF entry
+route delete ospf 192.150.188.0/24
+route verify 18.26.2.1 discard 0.0.0.0 0
+#
+#then add the OSPF route to the nexthop back again
+route add ospf 192.150.188.0/24 10.0.2.4 5
+route verify 18.26.2.1 de2 10.0.2.4 7
+#
+#now add a more specific OSPF route to the nexthop and check the nexthop
+#for the IBGP route also changes
+route add ospf 192.150.188.0/25 10.0.1.4 5
+route verify 18.26.2.1 de1 10.0.1.4 7
+#
+#delete the more specific OSPF route and check the fallback works
+route delete ospf 192.150.188.0/25
+route verify 18.26.2.1 de2 10.0.2.4 7
+#
+#-------------------------------------------------------------------
+#specific codepath tests
+#
+#tests to ensure that extint chooses between internal and external 
+#routes correctly
+route add ospf 1.2.3.0/24 10.0.1.4 5
+route verify 1.2.3.4 de1 10.0.1.4 5
+route add ibgp 1.2.3.0/24 10.0.2.4 7
+route verify 1.2.3.4 de1 10.0.1.4 5
+#
+route delete ibgp 1.2.3.0/24
+route verify 1.2.3.4 de1 10.0.1.4 5
+#
+route add ebgp 1.2.3.0/24 10.0.2.4 10
+route verify 1.2.3.4 de2 10.0.2.4 10
+route delete ebgp 1.2.3.0/24
+route verify 1.2.3.4 de1 10.0.1.4 5
+#
+route delete ospf 1.2.3.0/24
+#
+#
+route verify 192.150.188.1 de2 10.0.2.4 5
+route add ebgp 1.2.3.0/24 192.150.188.1 10
+route verify 1.2.3.4 de2 10.0.2.4 10
+route add ospf 1.2.3.0/24 10.0.1.4 10
+route verify 1.2.3.4 de2 10.0.2.4 10
+#
+route delete ebgp 1.2.3.0/24
+route verify 1.2.3.4 de1 10.0.1.4 10
+route delete ospf 1.2.3.0/24
+#
+#
+route add ibgp 1.2.3.0/24 192.150.188.1 7
+route verify 1.2.3.4 de2 10.0.2.4 7
+route add ospf 1.2.3.0/24 10.0.1.4 7
+route verify 1.2.3.4 de1 10.0.1.4 7
+#
+route delete ospf 1.2.3.0/24
+route verify 1.2.3.4 de2 10.0.2.4 7
+route delete ibgp 1.2.3.0/24
+#
+#
+route add ebgp 1.2.3.0/24 192.150.188.1 10
+route verify 1.2.3.4 de2 10.0.2.4 10
+route verify 18.26.2.1 de2 10.0.2.4 7
+route delete ebgp 1.2.3.0/24
+route delete ibgp 18.26.2.0/24
+route verify 1.2.3.4 discard 0.0.0.0 0
+route verify 18.26.2.1 discard 0.0.0.0 0
+#
+#
+#tests for resolve_unresolved_nexthops
+#
+route add ebgp 1.2.3.0/24 2.0.0.1 10
+route add ebgp 1.2.4.0/24 2.0.1.1 10
+route add ebgp 1.2.5.0/24 2.0.2.1 10
+route verify 1.2.3.1 discard 0.0.0.0 0
+route verify 1.2.4.1 discard 0.0.0.0 0
+route verify 1.2.5.1 discard 0.0.0.0 0
+#
+route add ospf 2.0.1.0/24 10.0.1.4 5
+route verify 1.2.3.1 discard 0.0.0.0 0
+route verify 1.2.4.1 de1 10.0.1.4 10
+route verify 1.2.5.1 discard 0.0.0.0 0
+#
+route delete ebgp 1.2.3.0/24
+route delete ebgp 1.2.4.0/24
+route delete ebgp 1.2.5.0/24
+route delete ospf 2.0.1.0/24
+#
+#
+# tests for lookup_next_by_igp_nexthop
+#
+route add ebgp 1.2.2.0/24 2.0.1.1 10
+route add ebgp 1.2.3.0/24 2.0.0.1 10
+route add ebgp 1.2.4.0/24 2.0.0.2 10
+route add ebgp 1.2.5.0/24 2.0.0.3 10
+route add ebgp 1.2.6.0/24 2.0.1.1 10
+route add ebgp 1.2.7.0/24 2.0.1.1 10
+route verify 1.2.2.1 discard 0.0.0.0 0
+route verify 1.2.3.1 discard 0.0.0.0 0
+route verify 1.2.4.1 discard 0.0.0.0 0
+route verify 1.2.5.1 discard 0.0.0.0 0
+route verify 1.2.6.1 discard 0.0.0.0 0
+route verify 1.2.7.1 discard 0.0.0.0 0
+#
+route add ospf 2.0.0.0/24 10.0.1.4 5
+route verify 1.2.2.1 discard 0.0.0.0 0
+route verify 1.2.3.1 de1 10.0.1.4 10
+route verify 1.2.4.1 de1 10.0.1.4 10
+route verify 1.2.5.1 de1 10.0.1.4 10
+route verify 1.2.6.1 discard 0.0.0.0 0
+route verify 1.2.7.1 discard 0.0.0.0 0
+#
+route add ospf 2.0.128.0/25 10.0.2.4 5
+route verify 1.2.2.1 discard 0.0.0.0 0
+route verify 1.2.3.1 de1 10.0.1.4 10
+route verify 1.2.4.1 de1 10.0.1.4 10 
+route verify 1.2.5.1 de1 10.0.1.4 10
+route verify 1.2.6.1 discard 0.0.0.0 0
+route verify 1.2.7.1 discard 0.0.0.0 0
+#
+route delete ospf 2.0.128.0/25
+route verify 1.2.2.1 discard 0.0.0.0 0
+route verify 1.2.3.1 de1 10.0.1.4 10
+route verify 1.2.4.1 de1 10.0.1.4 10
+route verify 1.2.5.1 de1 10.0.1.4 10
+route verify 1.2.6.1 discard 0.0.0.0 0
+route verify 1.2.7.1 discard 0.0.0.0 0
+#
+route add ospf 2.0.0.0/25 10.0.2.4 5
+route verify 1.2.2.1 discard 0.0.0.0 0
+route verify 1.2.3.1 de2 10.0.2.4 10
+route verify 1.2.4.1 de2 10.0.2.4 10
+route verify 1.2.5.1 de2 10.0.2.4 10
+route verify 1.2.6.1 discard 0.0.0.0 0
+route verify 1.2.7.1 discard 0.0.0.0 0
+#
+route delete ospf 2.0.0.0/25
+route verify 1.2.2.1 discard 0.0.0.0 0
+route verify 1.2.3.1 de1 10.0.1.4 10
+route verify 1.2.4.1 de1 10.0.1.4 10
+route verify 1.2.5.1 de1 10.0.1.4 10
+route verify 1.2.6.1 discard 0.0.0.0 0
+route verify 1.2.7.1 discard 0.0.0.0 0
+#
+route add ospf 2.0.0.2/32 10.0.2.4 5 
+route verify 1.2.2.1 discard 0.0.0.0 0
+route verify 1.2.3.1 de1 10.0.1.4 10
+route verify 1.2.4.1 de2 10.0.2.4 10
+route verify 1.2.5.1 de1 10.0.1.4 10
+route verify 1.2.6.1 discard 0.0.0.0 0
+route verify 1.2.7.1 discard 0.0.0.0 0
+#
+route delete ospf 2.0.0.0/24
+route verify 1.2.2.1 discard 0.0.0.0 0
+route verify 1.2.3.1 discard 0.0.0.0 0
+route verify 1.2.4.1 de2 10.0.2.4 10
+route verify 1.2.5.1 discard 0.0.0.0 0
+route verify 1.2.6.1 discard 0.0.0.0 0
+route verify 1.2.7.1 discard 0.0.0.0 0
+#
+route add ospf 2.0.1.0/24 10.0.0.4 5
+route verify 1.2.2.1 de0 10.0.0.4 10
+route verify 1.2.3.1 discard 0.0.0.0 0
+route verify 1.2.4.1 de2 10.0.2.4 10
+route verify 1.2.5.1 discard 0.0.0.0 0
+route verify 1.2.6.1 de0 10.0.0.4 10
+route verify 1.2.7.1 de0 10.0.0.4 10
+#
+route add ospf 2.0.1.0/25 10.0.2.4 5 
+route verify 1.2.2.1 de2 10.0.2.4 10
+route verify 1.2.3.1 discard 0.0.0.0 0
+route verify 1.2.4.1 de2 10.0.2.4 10
+route verify 1.2.5.1 discard 0.0.0.0 0
+route verify 1.2.6.1 de2 10.0.2.4 10
+route verify 1.2.7.1 de2 10.0.2.4 10
+#
+route delete ospf 2.0.1.0/25
+route verify 1.2.2.1 de0 10.0.0.4 10
+route verify 1.2.3.1 discard 0.0.0.0 0
+route verify 1.2.4.1 de2 10.0.2.4 10
+route verify 1.2.5.1 discard 0.0.0.0 0
+route verify 1.2.6.1 de0 10.0.0.4 10
+route verify 1.2.7.1 de0 10.0.0.4 10
+#
+route delete ospf 2.0.1.0/24
+route delete ebgp 1.2.2.0/24
+route delete ebgp 1.2.3.0/24
+route delete ebgp 1.2.4.0/24
+route delete ebgp 1.2.5.0/24
+route delete ebgp 1.2.6.0/24
+route verify 1.2.2.1 discard 0.0.0.0 0
+route verify 1.2.3.1 discard 0.0.0.0 0
+route verify 1.2.4.1 discard 0.0.0.0 0
+route verify 1.2.5.1 discard 0.0.0.0 0
+route verify 1.2.6.1 discard 0.0.0.0 0
+route verify 1.2.7.1 discard 0.0.0.0 0
+#
+#
+#test cases for lookup_route
+#
+route add ospf 1.2.3.0/24 10.0.0.1 5
+route add ebgp 1.2.3.0/25 10.0.1.1 10
+route verify 1.2.3.1 de1 10.0.1.1 10
+route verify 1.2.3.129 de0 10.0.0.1 5
+#
+route delete ospf 1.2.3.0/24
+route delete ebgp 1.2.3.0/25
+#
+route add ebgp 1.2.3.0/24 10.0.0.1 10
+route add ospf 1.2.3.0/25 10.0.1.1 5
+route verify 1.2.3.1 de1 10.0.1.1 5
+route verify 1.2.3.129 de0 10.0.0.1 10
+#
+route delete ebgp 1.2.3.0/24
+route delete ospf 1.2.3.0/25
+#
+route add ospf 1.2.3.0/24 10.0.1.1 5
+route verify 1.2.3.1 de1 10.0.1.1 5
+route add ebgp 1.2.3.0/24 10.0.0.1 10
+route verify 1.2.3.1 de0 10.0.0.1 10
+route delete ebgp 1.2.3.0/24
+route verify 1.2.3.1 de1 10.0.1.1 5
+route delete ospf 1.2.3.0/24
+route verify 1.2.3.1 discard 0.0.0.0 0
+#
+#--------------------------------------------------------------
+#test code for merged table
+#
+route verify 1.2.3.1 discard 0.0.0.0 0
+route add ibgp 1.2.3.0/24 10.0.0.1 7
+route verify 1.2.3.1 de0 10.0.0.1 7
+route add ebgp 1.2.3.0/24 10.0.0.3 10
+route verify 1.2.3.1 de0 10.0.0.3 10
+#
+route add ospf 1.2.3.0/24 10.0.0.4 5
+route verify 1.2.3.1 de0 10.0.0.3 10
+route delete ospf 1.2.3.0/24
+route verify 1.2.3.1 de0 10.0.0.3 10
+#
+route delete ebgp 1.2.3.0/24
+route verify 1.2.3.1 de0 10.0.0.1 7
+route delete ibgp 1.2.3.0/24
+route verify 1.2.3.1 discard 0.0.0.0 0
+#
+route verify 1.2.3.1 discard 0.0.0.0 0
+route add ibgp 1.2.3.0/24 10.0.0.1 7
+route verify 1.2.3.1 de0 10.0.0.1 7
+route add ebgp 1.2.3.0/24 10.0.0.3 10
+route verify 1.2.3.1 de0 10.0.0.3 10
+#
+route delete ibgp 1.2.3.0/24
+route verify 1.2.3.1 de0 10.0.0.3 10
+route delete ebgp 1.2.3.0/24
+route verify 1.2.3.1 discard 0.0.0.0 0
+#
+route verify 1.2.3.1 discard 0.0.0.0 0
+route add ospf 1.2.3.0/24 10.0.0.1 5
+route verify 1.2.3.1 de0 10.0.0.1 5
+route add static 1.2.3.0/24 10.0.0.3 1
+route verify 1.2.3.1 de0 10.0.0.3 1
+#
+route add ibgp 1.2.3.0/24 10.0.0.4 7
+route verify 1.2.3.1 de0 10.0.0.3 1
+route delete ibgp 1.2.3.0/24
+route verify 1.2.3.1 de0 10.0.0.3 1
+route delete static 1.2.3.0/24
+route delete ospf 1.2.3.0/24
+route verify 1.2.3.1 discard 0.0.0.0 0
+#
+route add ospf 1.2.3.0/24 10.0.0.1 5
+route verify 1.2.3.1 de0 10.0.0.1 5
+route add static 1.2.3.0/24 10.0.0.3 1
+route verify 1.2.3.1 de0 10.0.0.3 1
+route delete static 1.2.3.0/24
+route delete ospf 1.2.3.0/24
+route verify 1.2.3.1 discard 0.0.0.0 0
+#
+route verify 1.2.3.1 discard 0.0.0.0 0
+route add ibgp 1.2.3.0/24 10.0.0.1 7
+route verify 1.2.3.1 de0 10.0.0.1 7
+route add ebgp 1.2.3.0/25 10.0.0.3 10
+route verify 1.2.3.1 de0 10.0.0.3 10
+#
+route delete ibgp 1.2.3.0/24 
+route verify 1.2.3.1 de0 10.0.0.3 10
+route delete ebgp 1.2.3.0/25
+route verify 1.2.3.1 discard 0.0.0.0 0
+#
+route verify 1.2.3.1 discard 0.0.0.0 0
+route add ibgp 1.2.3.0/25 10.0.0.1 7
+route verify 1.2.3.1 de0 10.0.0.1 7
+route add ebgp 1.2.3.0/24 10.0.0.3 10
+route verify 1.2.3.1 de0 10.0.0.1 7
+#
+route delete ibgp 1.2.3.0/25
+route verify 1.2.3.1 de0 10.0.0.3 10
+route delete ebgp 1.2.3.0/24
+route verify 1.2.3.1 discard 0.0.0.0 0
+#

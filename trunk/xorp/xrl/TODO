@@ -1,0 +1,5 @@
+#
+# $XORP: xorp/xrl/TODO,v 1.2 2002/12/09 02:56:19 pavlin Exp $
+#
+
+* Add 'XrlRouter& xrl_router()' and use that one instead of _router ?

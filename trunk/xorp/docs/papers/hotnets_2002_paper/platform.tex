@@ -1,0 +1,51 @@
+% -*- mode: latex; tex-main-file: "pospaper.tex" -*-
+
+\section{Low-level Platform and APIs}
+ 
+The low-level platform needs to provide OS support to the routing
+protocols, including memory management and scheduling.  This can best
+be provided by taking an existing stable open-source operating system
+as the base development platform rather than developing a complete OS
+from scratch, and we aim to support both FreeBSD and Linux as viable
+XORP OSes.
+
+Whilst the original Unix forwarding code can be used, our preferred
+approach is to replace it with a modular forwarding path based on the
+Click modular router architecture~\cite{click}.  Unlike at the higher
+level, where we care strongly about robustness and extensibility, in
+the forwarding path we care strongly about performance and
+extensibility.  Robustness is still important, but solutions such as
+memory protection that serve well for higher level functionality are
+not acceptable in the forwarding path.  Robustness here comes through
+simplicity, and through re-use of well tested and well understood
+software.
+
+Click unambiguously satisfies these requirements.  A Click forwarding path
+is built at run-time from a large collection of very simple composible
+software elements, configured using a declarative definition of the
+desired plumbing, and organized around the flow of packets.
+
+Click forwarding paths are extensible in two key ways:
+\begin{itemize}
+\item Existing defined elements can by interposed into a forwarding
+path to add new functionality.
+\item New Click elements can be created, loaded as kernel modules, and
+then plumbed in to the forwarding path.
+\end{itemize}
+The ability to add new functionality into almost any place in the
+forwarding path, even at runtime, is a very powerful extension
+mechanism.  It's applicability for researchers should be obvious, but
+this is also a very useful capability in a production router.  For
+example, if a network administrator needs to keep some traffic
+statistics on a very specific subset of the traffic, it is simple to
+define a new classifier that matches that traffic and insert it into
+the relevant place in the forwarding path where it can maintain the
+relevant packet counts.
+
+When we need to use hardware assistance to improve performance, Click
+should aid the integration of such hardware.  It is a fairly natural
+process whereby some parts of the forwarding patch and performed in
+what to other Click elements look like just another element, but in
+fact are a shim to special purpose hardware.  However our initial
+implementation does not target advanced platforms due to our limited
+resources.

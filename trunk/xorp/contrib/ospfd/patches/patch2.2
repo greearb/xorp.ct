@@ -1,0 +1,852 @@
+diff -X exclude_files -Nabur ospfd2.1/linux/linux.C ospfd2.2/linux/linux.C
+--- ospfd2.1/linux/linux.C	Thu Apr 19 17:50:48 2001
++++ ospfd2.2/linux/linux.C	Mon May 14 14:27:10 2001
+@@ -90,6 +90,20 @@
+     }
+ }
+ 
++/* Cloase all monitor connections. Necessary when, for example,
++ * simulated ospfd restarts but its process remains.
++ */
++
++void Linux::close_monitor_connections()
++
++{
++    AVLsearch iter(&monfds);
++    TcpConn *conn;
++
++    while ((conn = (TcpConn *)iter.next()))
++        close_monitor_connection(conn);
++}
++
+ void Linux::process_mon_io(fd_set *fdsetp, fd_set *wrsetp)
+ 
+ {
+@@ -123,7 +137,7 @@
+      fd = conn->monfd();
+      if ((nbytes = conn->monpkt.receive((void **)&msg, type, subtype)) < 0)
+ 	  close_monitor_connection(conn);
+-     else if (type != 0)
++     else if (type != 0 && ospf)
+ 	  ospf->monitor((MonMsg *)msg, type, nbytes, fd);
+ }
+ 
+@@ -157,6 +171,7 @@
+ {
+     close(conn->monfd());
+     monfds.remove(conn);
++    if (ospf)
+     ospf->register_for_opqs(conn->monfd(), true);
+     delete conn;
+ }
+diff -X exclude_files -Nabur ospfd2.1/linux/linux.h ospfd2.2/linux/linux.h
+--- ospfd2.1/linux/linux.h	Thu Apr 19 17:50:48 2001
++++ ospfd2.2/linux/linux.h	Mon May 14 14:27:10 2001
+@@ -37,6 +37,7 @@
+     void process_monitor_request(class TcpConn *);
+     void accept_monitor_connection();
+     void close_monitor_connection(class TcpConn *);
++    void close_monitor_connections();
+     void monitor_listen();
+ };
+ 
+diff -X exclude_files -Nabur ospfd2.1/linux/ospfd_linux.C ospfd2.2/linux/ospfd_linux.C
+--- ospfd2.1/linux/ospfd_linux.C	Thu Apr 19 17:50:48 2001
++++ ospfd2.2/linux/ospfd_linux.C	Mon May 14 14:27:10 2001
+@@ -267,7 +267,8 @@
+         syslog(LOG_ERR, "rtnetlink recvfrom: %m");
+ 	return;
+     }
+-    msg = (nlmsghdr *)buffer;
++    for (msg = (nlmsghdr *)buffer; NLMSG_OK(msg, (uns32)plen);
++	 msg = NLMSG_NEXT(msg, plen)) {
+     switch (msg->nlmsg_type) {
+         in_addr in;
+ 	ifinfomsg *ifinfo;
+@@ -277,6 +278,7 @@
+ 	rtmsg *rtm;
+ 	InAddr net;
+ 	InMask mask;
++	    nlmsgerr *errmsg;
+       case RTM_NEWLINK:	// Interface flags change
+ 	ifinfo = (ifinfomsg *)NLMSG_DATA(msg);
+ 	syslog(LOG_NOTICE, "Ifc change IfIndex %d flags 0x%x",
+@@ -307,6 +309,7 @@
+ 	syslog(LOG_NOTICE, "Interface addr change %s", inet_ntoa(in));
+ 	read_config();
+ 	break;
++          case RTM_NEWROUTE:
+       case RTM_DELROUTE:
+ 	rtm = (rtmsg *)NLMSG_DATA(msg);
+ 	if (rtm->rtm_protocol != PROT_OSPF)
+@@ -328,12 +331,27 @@
+ 	    mask = ~((1 << (32-rtm->rtm_dst_len)) - 1);
+ 	    net = ntoh32(in.s_addr) & mask;
+ 	}
++	    if (msg->nlmsg_type == RTM_DELROUTE) {
+ 	syslog(LOG_NOTICE, "Krt Delete %s", inet_ntoa(in));
+ 	ospf->krt_delete_notification(net, mask);
++	    }
++	    else if (dumping_remnants)
++	        ospf->remnant_notification(net, mask);
++	    break;
++	  case NLMSG_DONE:
++	    dumping_remnants = false;
++	    break;
++          case NLMSG_OVERRUN:
++	    syslog(LOG_ERR, "Overrun on routing socket: %m");
++	    break;
++	  case NLMSG_ERROR:
++	    errmsg = (nlmsgerr *)NLMSG_DATA(msg);
++	    syslog(LOG_ERR, "Netlink error %d", errmsg->error);
+ 	break;
+       default:
+ 	break;
+     }
++    }
+ }
+ #else
+ void LinuxOspfd::netlink_receive(int)
+@@ -394,6 +412,7 @@
+     (void) gettimeofday(&last_time, NULL);
+     changing_routerid = false;
+     change_complete = false;
++    dumping_remnants = false;
+     // Allow core files
+     rlim.rlim_max = RLIM_INFINITY;
+     (void) setrlimit(RLIMIT_CORE, &rlim);
+diff -X exclude_files -Nabur ospfd2.1/linux/ospfd_linux.h ospfd2.2/linux/ospfd_linux.h
+--- ospfd2.1/linux/ospfd_linux.h	Thu Apr 19 17:50:48 2001
++++ ospfd2.2/linux/ospfd_linux.h	Mon May 14 14:27:11 2001
+@@ -38,6 +38,7 @@
+     FILE *logstr;
+     bool changing_routerid;
+     bool change_complete;
++    bool dumping_remnants;
+   public:
+     LinuxOspfd();
+     ~LinuxOspfd();
+@@ -57,6 +58,7 @@
+     void rtdel(InAddr, InMask, MPath *ompp);
+     void add_mcache(InAddr src, InAddr group, MCache *);
+     void del_mcache(InAddr src, InAddr group);
++    void upload_remnants();
+     char *phyname(int phyint);
+     void sys_spflog(int msgno, char *msgbuf);
+     void halt(int code, char *string);
+diff -X exclude_files -Nabur ospfd2.1/linux/system.C ospfd2.2/linux/system.C
+--- ospfd2.1/linux/system.C	Thu Apr 19 17:50:48 2001
++++ ospfd2.2/linux/system.C	Mon May 14 14:27:11 2001
+@@ -407,6 +407,16 @@
+     if (-1 == ioctl(udpfd, SIOCDELRT, (char *)&m))
+ 	syslog(LOG_ERR, "SIOCDELRT: %m");
+ }
++
++/* Uploading remnant routing table entries is not supported
++ * on older Linux versions.
++ */
++
++void LinuxOspfd::upload_remnants()
++
++{
++}
++
+ #else
+ /* On Linux 2.2, add and delete routing table entries
+  * via the rtnetlink interface. Note that we are setting
+@@ -553,6 +563,45 @@
+     if (-1 == send(rtsock, nlm, size, 0))
+ 	syslog(LOG_ERR, "del route through routing socket: %m");
+ }
++
++/* Request the kernel to upload the current set of routing
++ * table entries that it has.
++ */
++
++void LinuxOspfd::upload_remnants()
++
++{
++    nlmsghdr *nlm;
++    rtmsg *rtm;
++    int size;
++
++    // Set state to dumping
++    dumping_remnants = true;
++
++    // Calculate size of netlink message
++    size = NLMSG_SPACE(sizeof(*rtm)); // Only a routing message
++    // Allocate netlink message
++    nlm = (nlmsghdr *) new char[size];
++    nlm->nlmsg_len = size;
++    nlm->nlmsg_type = RTM_GETROUTE;
++    nlm->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
++    nlm->nlmsg_seq = nlm_seq++;
++    nlm->nlmsg_pid = 0;
++    rtm = (rtmsg *) NLMSG_DATA(nlm);
++    rtm->rtm_family = AF_INET;
++    rtm->rtm_dst_len = 0;
++    rtm->rtm_src_len = 0;
++    rtm->rtm_table = 0;
++    rtm->rtm_protocol = PROT_OSPF;
++    rtm->rtm_scope = RT_SCOPE_UNIVERSE;
++    rtm->rtm_type = RTN_UNICAST;
++    rtm->rtm_flags = 0;
++
++    // Send to routing socket
++    if (-1 == send(rtsock, nlm, size, 0))
++	syslog(LOG_ERR, "routing table dump: %m");
++}
++
+ #endif
+ 
+ /* Add a multicast routing table entry to the kernel.
+diff -X exclude_files -Nabur ospfd2.1/ospf_sim/ospf_sim.tcl ospfd2.2/ospf_sim/ospf_sim.tcl
+--- ospfd2.1/ospf_sim/ospf_sim.tcl	Thu Apr 19 17:50:50 2001
++++ ospfd2.2/ospf_sim/ospf_sim.tcl	Mon May 14 14:27:15 2001
+@@ -1514,9 +1514,11 @@
+ .mbar.add add command -label "Virtual Link" -command "AddVL"
+ .mbar.add add command -label "Static Route" -command [list SelectRouter add_static_menu]
+ menu .mbar.toggle -tearoff 0
+-.mbar add cascade -label "Toggle" -underline 0 -menu .mbar.toggle
+-.mbar.toggle add command -label "Router" -command [list SelectRouter togglertr]
+-.mbar.toggle add command -label "Interface" -command "ToggleInterface"
++.mbar add cascade -label "Router" -underline 0 -menu .mbar.toggle
++.mbar.toggle add command -label "Toggle" -command [list SelectRouter togglertr]
++.mbar.toggle add command -label "Restart" -command [list SelectRouter rstrtr]
++.mbar.toggle add command -label "Hitless Restart" -command [list SelectRouter hitlessrtr]
++.mbar.toggle add command -label "Toggle Interface" -command "ToggleInterface"
+ menu .mbar.sim
+ .mbar add cascade -label "Simulation" -underline 0 -menu .mbar.sim
+ .mbar.sim add command -label "Resume" -command "time_resume"
+diff -X exclude_files -Nabur ospfd2.1/ospf_sim/ospfd_sim.C ospfd2.2/ospf_sim/ospfd_sim.C
+--- ospfd2.1/ospf_sim/ospfd_sim.C	Thu Apr 19 17:50:50 2001
++++ ospfd2.2/ospf_sim/ospfd_sim.C	Mon May 14 14:27:15 2001
+@@ -189,6 +189,11 @@
+ {
+     InPkt *pkt;
+     InAddr daddr;
++    SimRte *rte;
++
++    // Discard packet if OSPF not ready
++    if (!ospf)
++        return;
+ 
+     pkt = (InPkt *) (pkthdr+1);
+     daddr = ntoh32(pkt->i_dest);
+@@ -196,8 +201,7 @@
+     if (!IN_CLASSD(daddr)) {
+ 	InAddr home;
+         if ((!get_port_addr(daddr, home)) || (home != ospf->my_id())) {
+-	    MPath *mpp;
+-	    if ((mpp = ospf->ip_lookup(daddr)) == 0) {
++	    if (!(rte = rttbl.best_match(daddr))) {
+ 	        sendicmp(ICMP_TYPE_UNREACH, ICMP_CODE_UNREACH_HOST,
+ 			 0, 0, pkt, 0, 0, 0);
+ 	    }
+@@ -208,10 +212,10 @@
+ 	    }
+ 	    else {
+ 	        InAddr gw;
+-		gw = mpp->NHs[0].gw;
+-		if (gw != 0 && mpp->NHs[0].if_addr == 0)
++		gw = rte->gw;
++		if (gw != 0 && rte->if_addr == 0)
+ 		    gw = (InAddr) -1;
+-	        sendpkt(pkt, mpp->NHs[0].phyint, gw);
++	        sendpkt(pkt, rte->phyint, gw);
+ 	    }
+ 	}
+ 	else
+@@ -497,6 +501,14 @@
+ 	    mtraces.add(mtrace);
+ 	    mtrace->send_query();
+ 	    break;
++ 	  case SIM_RESTART:
++	    close_monitor_connections();
++	    delete ospf;
++	    ospf = 0;
++	    // Will then get First tick, and config
++	    break;
++ 	  case SIM_RESTART_HITLESS:
++	    break;
+ 	  default:
+ 	    break;
+       }
+@@ -961,4 +973,85 @@
+     else
+         simsys->sendpkt(iphdr);
+     delete [] ((byte *) iphdr);
++}
++
++/* The follow two routines taken from ospfd's INtbl
++ * and INrte classes.
++ * Should make these utility routines.
++ */
++
++/* Add an entry to an IP routing table entry. Install the
++ * prefix pointers so that the best match operations will
++ * work correctly.
++ */
++
++SimRte *SimRttbl::add(uns32 net, uns32 mask)
++
++{
++    SimRte *rte;
++    SimRte *parent;
++    SimRte *child;
++    AVLsearch iter(&routes);
++
++    if ((rte = (SimRte *) routes.find(net, mask)))
++	return(rte);
++    // Add to routing table entry
++    rte = new SimRte(net, mask);
++    routes.add(rte);
++    // Set prefix pointer
++    parent = (SimRte *) routes.previous(net, mask);
++    for (; parent; parent = parent->prefix) {
++	if (rte->is_child(parent)) {
++	    rte->prefix = parent;
++	    break;
++	}
++    }
++    // Set children's parent pointers
++    iter.seek(rte);
++    while ((child = (SimRte *)iter.next()) && child->is_child(rte)) {
++	if (child->prefix && child->prefix->is_child(rte))
++	    continue;
++	child->prefix = rte;
++    }
++
++    return(rte);
++}
++
++/* Find the best matching routing table entry for a given
++ * IP destination.
++ */
++
++SimRte *SimRttbl::best_match(uns32 addr)
++
++{
++    SimRte *rte;
++    SimRte *prev;
++
++    rte = (SimRte *) routes.root();
++    prev = 0;
++    while (rte) {
++	if (addr < rte->net())
++	    rte = (SimRte *) rte->go_left();
++	else if (addr > rte->net() ||
++		 0xffffffff > rte->mask()) {
++	    prev = rte;
++	    rte = (SimRte *) rte->go_right();
++	}
++	else
++	    // Matching host route
++	    break;
++    }
++
++    // If no exact match, take previous entry
++    if (!rte)
++	rte = prev;
++    // Go up prefix chain, looking for valid routes
++    for (; rte; rte = rte->prefix) {
++	if ((addr & rte->mask()) != rte->net())
++	    continue;
++	if (rte->reachable)
++	    break;
++    }
++
++    return(rte->reject ? 0 : rte);
+ }
+diff -X exclude_files -Nabur ospfd2.1/ospf_sim/ospfd_sim.h ospfd2.2/ospf_sim/ospfd_sim.h
+--- ospfd2.1/ospf_sim/ospfd_sim.h	Thu Apr 19 17:50:50 2001
++++ ospfd2.2/ospf_sim/ospfd_sim.h	Mon May 14 14:27:15 2001
+@@ -20,6 +20,57 @@
+ extern char *LOOPADDR;
+ 
+ class SimPktQ;
++class SimRte;
++
++/* Routing table kept within a simulated OSPF router. We don't
++ * use the simulated ospfd's table, so that we can simulate
++ * hitless restart scenarios.
++ */
++
++class SimRttbl {
++  public:
++    AVLtree routes;
++    SimRte *add(InAddr net, InMask mask);
++    SimRte *best_match(InAddr addr);
++};
++
++class SimRte : public AVLitem {
++  public:
++    SimRte *prefix;
++    bool reachable;
++    bool reject;
++    int phyint;		// Outgoing interface
++    InAddr if_addr;
++    InAddr gw;		// Next hop address
++    
++    inline SimRte(InAddr, InMask);
++    inline InAddr net();
++    inline InAddr mask();
++    inline int is_child(SimRte *o);
++};    
++
++inline SimRte::SimRte(InAddr a, InMask m) : AVLitem(a, m)
++{
++    prefix = 0;
++    reachable = false;
++    reject = false;
++}
++inline InAddr SimRte::net()
++{
++    return(index1());
++}
++inline InAddr SimRte::mask()
++{
++    return(index2());
++}
++inline int SimRte::is_child(SimRte *o)
++{
++    return((net() & o->mask()) == o->net() && mask() >= o->mask());
++}
++
++/* Global class representing a simulated OSPF router. Contains
++ * the implementation of its system interface.
++ */
+ 
+ class SimSys : public Linux {
+     int ctl_fd;     // Connection to controller
+@@ -30,6 +81,7 @@
+     AVLtree address_map; // IP address to group mapping
+     AVLtree port_map; // Phyint to file descriptor mapping
+     AVLtree membership; // Interface group membership		   
++    SimRttbl rttbl;	// Routing table
+     SimPktQ *rcv_head;  // Queued receives
+     SimPktQ *rcv_tail;
+     SPFtime xmt_stamp; // Transmission timestamp
+@@ -56,6 +108,7 @@
+     void rtdel(InAddr, InMask, MPath *);
+     void add_mcache(InAddr src, InAddr group, MCache *);
+     void del_mcache(InAddr src, InAddr group);
++    virtual void upload_remnants();
+     char *phyname(int phyint);
+     void sys_spflog(int code, char *buffer);
+     void halt(int code, char *string);
+diff -X exclude_files -Nabur ospfd2.1/ospf_sim/sim.C ospfd2.2/ospf_sim/sim.C
+--- ospfd2.1/ospf_sim/sim.C	Thu Apr 19 17:50:50 2001
++++ ospfd2.2/ospf_sim/sim.C	Mon May 14 14:27:15 2001
+@@ -52,6 +52,8 @@
+ 
+ int StartRouter(ClientData, Tcl_Interp *, int, char *argv[]);
+ int ToggleRouter(ClientData, Tcl_Interp *, int, char *argv[]);
++int RestartRouter(ClientData, Tcl_Interp *, int, char *argv[]);
++int HitlessRestart(ClientData, Tcl_Interp *, int, char *argv[]);
+ int StartPing(ClientData, Tcl_Interp *, int, char *argv[]);
+ int StopPing(ClientData, Tcl_Interp *, int, char *argv[]);
+ int StartTraceroute(ClientData, Tcl_Interp *, int, char *argv[]);
+@@ -240,6 +242,8 @@
+     // Install C-language TCl commands
+     Tcl_CreateCommand(interp, "startrtr", StartRouter, 0, 0);
+     Tcl_CreateCommand(interp, "togglertr", ToggleRouter, 0, 0);
++    Tcl_CreateCommand(interp, "rstrtr", RestartRouter, 0, 0);
++    Tcl_CreateCommand(interp, "hitlessrtr", HitlessRestart, 0, 0);
+     Tcl_CreateCommand(interp, "start_ping", StartPing, 0, 0);
+     Tcl_CreateCommand(interp, "stop_ping", StopPing, 0, 0);
+     Tcl_CreateCommand(interp, "start_traceroute", StartTraceroute, 0, 0);
+@@ -467,30 +471,9 @@
+ 	switch(type) {
+ 	    char tcl_command[80];
+ 	  case SIM_HELLO:
+-	    SimNode *newnode;
+-	    // Delete temporary router
+ 	    hello = (SimHello *)msg;
+-	    newnode = new SimNode(hello->rtrid, fd);
+-	    sim->simnodes.add(newnode);
+-	    newnode->home_port = ntoh16(hello->myport);
+-	    addr.s_addr = hton32(newnode->id());
+-	    newnode->color = SimNode::WHITE;
+-	    if (Tcl_VarEval(sim->interp, "color_router ", inet_ntoa(addr),
+-			" white", 0) != TCL_OK)
+-	        printf("color_router: %s\n", sim->interp->result);
+-	    // Initialize its idea of time
+-	    TickBody tm;
+-	    tm.tick = sim->n_ticks;
+-	    newnode->pktdata.queue_xpkt(&tm, SIM_FIRST_TICK, 0, sizeof(tm));
+-	    // Send address to port maps
+-	    send_addrmap(newnode);
+-	    send_addrmap_increment(0, newnode);
+-	    // Download node's configuration
+-	    if (Tcl_VarEval(sim->interp,"sendcfg ",
+-			    inet_ntoa(addr),0) != TCL_OK)
+-	        printf("sendcfg: %s\n", sim->interp->result);
+-	    // Also frees message space
+-	    delete node;
++	    // Start the node, reassigning simnode class
++	    restart_node(node, hello->rtrid, fd, ntoh16(hello->myport));
+ 	    break;
+ 	  case SIM_TICK_RESPONSE:
+             NodeStats *statentry;
+@@ -567,6 +550,43 @@
+     }
+ }
+ 
++/* (Re)start a router.
++ */
++
++void SimCtl::restart_node(SimNode *node, InAddr id, int fd, uns16 home_port)
++
++{
++    in_addr addr;
++    TickBody tm;
++    SimNode *newnode;
++
++    newnode = new SimNode(id, fd);
++    sim->simnodes.add(newnode);
++    newnode->home_port = home_port;
++    addr.s_addr = hton32(newnode->id());
++    newnode->color = SimNode::WHITE;
++    if (Tcl_VarEval(sim->interp, "color_router ", inet_ntoa(addr),
++		    " white", 0) != TCL_OK)
++        printf("color_router: %s\n", sim->interp->result);
++    // If the router has already been running, tell it to restart
++    if (node->id() != 0)
++        newnode->pktdata.queue_xpkt(NULL, SIM_RESTART, 0, 0);
++    // Initialize its idea of time
++    tm.tick = sim->n_ticks;
++    newnode->pktdata.queue_xpkt(&tm, SIM_FIRST_TICK, 0, sizeof(tm));
++    // Send address to port maps
++    send_addrmap(newnode);
++    send_addrmap_increment(0, newnode);
++    // Download node's configuration
++    addr.s_addr = hton32(newnode->id());
++    if (Tcl_VarEval(sim->interp,"sendcfg ", inet_ntoa(addr),0) != TCL_OK)
++        printf("sendcfg: %s\n", sim->interp->result);
++
++    // Delete previous router
++    // Also frees message space
++    delete node;
++}
++
+ /* Construct a node statistics entry.
+  */
+ 
+@@ -725,6 +745,48 @@
+         Tcl_VarEval(interp, "startrtr ", argv[1], 0);
+     else
+         node->pktdata.queue_xpkt(NULL, SIM_SHUTDOWN, 0, 0);
++
++    return(TCL_OK);
++}
++
++/* Restart a simulated router.
++ * If it is not running, simply start it.
++ */
++
++int RestartRouter(ClientData, Tcl_Interp *interp, int, char *argv[])
++
++{
++    InAddr id;
++    SimNode *node;
++
++    id = ntoh32(inet_addr(argv[1]));
++    if (!(node = (SimNode *) sim->simnodes.find(id, 0)))
++        Tcl_VarEval(interp, "startrtr ", argv[1], 0);
++    else {
++	sim->simnodes.remove(node);
++	sim->restart_node(node, node->id(), node->fd, node->home_port);
++    }
++
++    return(TCL_OK);
++}
++
++/* Perform a hitless restart of a simulated router.
++ * If it is not running, simply start it.
++ */
++
++int HitlessRestart(ClientData, Tcl_Interp *interp, int, char *argv[])
++
++{
++    InAddr id;
++    SimNode *node;
++    HitlessRestartMsg m;
++
++    m.period = 60;
++    id = ntoh32(inet_addr(argv[1]));
++    if (!(node = (SimNode *) sim->simnodes.find(id, 0)))
++        Tcl_VarEval(interp, "startrtr ", argv[1], 0);
++    else
++        node->pktdata.queue_xpkt(&m, SIM_RESTART_HITLESS, 0, sizeof(m));
+ 
+     return(TCL_OK);
+ }
+diff -X exclude_files -Nabur ospfd2.1/ospf_sim/sim.h ospfd2.2/ospf_sim/sim.h
+--- ospfd2.1/ospf_sim/sim.h	Thu Apr 19 17:50:50 2001
++++ ospfd2.2/ospf_sim/sim.h	Mon May 14 14:27:15 2001
+@@ -39,6 +39,8 @@
+     SIM_ADD_MEMBER,	// Add membership on segment
+     SIM_DEL_MEMBER,	// Delete membership on segment
+     SIM_START_MTRACE,	// Start multicast traceroute session
++    SIM_RESTART,	// Restart router
++    SIM_RESTART_HITLESS,// Hitless restart of router
+ 
+     // Responses from ospfds
+     SIM_HELLO = 100,	// Initial identification
+@@ -91,6 +93,14 @@
+     InAddr src;
+     InAddr dest;
+     byte ttl;
++};
++
++/* Body of the Hitless Restart message contains the length
++ * of the hitless restart period in seconds.
++ */
++
++struct HitlessRestartMsg {
++    uns16 period;
+ };
+ 
+ /* Tick responses carry the #LSAs and checksum for 
+diff -X exclude_files -Nabur ospfd2.1/ospf_sim/sim_system.C ospfd2.2/ospf_sim/sim_system.C
+--- ospfd2.1/ospf_sim/sim_system.C	Thu Apr 19 17:50:50 2001
++++ ospfd2.2/ospf_sim/sim_system.C	Mon May 14 14:27:15 2001
+@@ -215,22 +215,50 @@
+ }
+ 
+ /* Add/modify a kernel routing table entry.
+- * NULL for simulator, as we just use the routing table
+- * entries internal to the OSPF application.
+  */
+ 
+-void SimSys::rtadd(InAddr, InMask, MPath *, MPath *, bool)
++void SimSys::rtadd(InAddr net, InMask mask, MPath *mpp, MPath *, bool reject)
+ 
+ {
++    SimRte *rte;
++    rte = rttbl.add(net, mask);
++    rte->reachable = true;
++    rte->reject = reject;
++    if (mpp) {
++	rte->phyint = mpp->NHs[0].phyint;
++	rte->if_addr = mpp->NHs[0].if_addr;
++	rte->gw = mpp->NHs[0].gw;
++    }
+ }
+ 
+ /* Delete a kernel routing table entry.
+- * Again, NULL for simulator.
++ * We don't actually delete them, but instead set the
++ * reachability to false - this will cause the lookup to
++ * fall back on a less-specific prefix.
+  */
+ 
+-void SimSys::rtdel(InAddr, InMask, MPath *)
++void SimSys::rtdel(InAddr net, InMask mask, MPath *)
+ 
+ {
++    SimRte *rte;
++    rte = rttbl.add(net, mask);
++    rte->reachable = false;
++}
++
++/* Upload the current set of routing
++ * table entries into the OSPF application.
++ */
++
++void SimSys::upload_remnants()
++
++{
++    SimRte *rte;
++    AVLsearch iter(&rttbl.routes);
++
++    while ((rte = (SimRte *)iter.next())) {
++        if (rte->reachable)
++	    ospf->remnant_notification(rte->net(), rte->mask());
++    }
+ }
+ 
+ /* Add a multicast routing table entry to the kernel.
+diff -X exclude_files -Nabur ospfd2.1/ospf_sim/simctl.h ospfd2.2/ospf_sim/simctl.h
+--- ospfd2.1/ospf_sim/simctl.h	Thu Apr 19 17:50:50 2001
++++ ospfd2.2/ospf_sim/simctl.h	Mon May 14 14:27:15 2001
+@@ -29,6 +29,7 @@
+     void store_mapping(uns32 net_or_addr, uns32 rtr);
+     void send_addrmap(class SimNode *);
+     void send_addrmap_increment(class IfMap *, class SimNode *);
++    void restart_node(SimNode *, InAddr, int, uns16);
+ 
+     friend class SimNode;
+     friend int main(int argc, char *argv[]);
+@@ -36,6 +37,8 @@
+     friend void tick(ClientData);
+     friend int StartRouter(ClientData, Tcl_Interp *, int, char *argv[]);
+     friend int ToggleRouter(ClientData, Tcl_Interp *interp, int, char *argv[]);
++    friend int RestartRouter(ClientData,Tcl_Interp *interp, int, char *argv[]);
++    friend int HitlessRestart(ClientData,Tcl_Interp *interp,int, char *argv[]);
+     friend int AddMapping(ClientData, Tcl_Interp *interp, int, char *argv[]);
+     friend int AddNetMember(ClientData, Tcl_Interp *interp, int, char *argv[]);
+     friend int TimeStop(ClientData, Tcl_Interp *, int, char *argv[]);
+@@ -106,6 +109,8 @@
+     friend int main(int argc, char *argv[]);
+     friend void tick(ClientData);
+     friend int ToggleRouter(ClientData, Tcl_Interp *interp, int, char *argv[]);
++    friend int RestartRouter(ClientData,Tcl_Interp *interp, int, char *argv[]);
++    friend int HitlessRestart(ClientData,Tcl_Interp *interp,int, char *argv[]);
+     friend int SendGeneral(ClientData, Tcl_Interp *, int, char *argv[]);
+     friend int SendArea(ClientData, Tcl_Interp *, int, char *argv[]);
+     friend int SendInterface(ClientData, Tcl_Interp *, int, char *argv[]);
+diff -X exclude_files -Nabur ospfd2.1/src/dbage.C ospfd2.2/src/dbage.C
+--- ospfd2.1/src/dbage.C	Thu Apr 19 17:50:47 2001
++++ ospfd2.2/src/dbage.C	Mon May 14 14:27:10 2001
+@@ -130,6 +130,12 @@
+     // Process any pending LSA activity (flooding, origination)
+     // Synchronize with kernel
+     ospf->krt_sync();
++
++    // If not performing a hitless restart, upload remnants
++    if (ospf->need_remnants) {
++        ospf->need_remnants = false;
++	sys->upload_remnants();
++    }
+ }
+ 
+ /* Main aging routine called once a second. Increment the current
+diff -X exclude_files -Nabur ospfd2.1/src/ospf.C ospfd2.2/src/ospf.C
+--- ospfd2.1/src/ospf.C	Thu Apr 19 17:50:47 2001
++++ ospfd2.2/src/ospf.C	Mon May 14 14:27:10 2001
+@@ -106,6 +106,7 @@
+     ospf_mtu = 65535;
+     full_sched = false;
+     ase_sched = false;
++    need_remnants = true;
+ 
+     n_dijkstras = 0;
+ 
+@@ -700,6 +701,25 @@
+         KrtSync *item;
+ 	item = new KrtSync(net, mask);
+ 	krtdeletes.add(item);
++    }
++}
++
++/* Kernel has indicated that we have previously installed
++ * a route to this destination. If we don't have the destination
++ * currently in our routing table, assume that it is a remnant
++ * from a previous execution run, and delete the route.
++ */
++
++void OSPF::remnant_notification(InAddr net, InMask mask)
++
++{
++    INrte *rte;
++
++    if (!(rte = inrttbl->find(net, mask)) || !rte->valid()) {
++        if (spflog(LOG_REMNANT, 5)) {
++	    log(&net, &mask);
++	}
++	sys->rtdel(net, mask, 0);
+     }
+ }
+ 
+diff -X exclude_files -Nabur ospfd2.1/src/ospf.h ospfd2.2/src/ospf.h
+--- ospfd2.1/src/ospf.h	Thu Apr 19 17:50:47 2001
++++ ospfd2.2/src/ospf.h	Mon May 14 14:27:10 2001
+@@ -87,6 +87,7 @@
+     bool delete_neighbors; // Neighbors being deleted?
+     AVLtree phyints;	// Physical interfaces
+     AVLtree krtdeletes;	// Deleted, unsynced kernel routing entries
++    bool need_remnants; // Yet to get remnants?
+     // Flooding queues
+     int	n_local_flooded;// AS-external-LSAs originated this tick
+     ExRtData *ases_pending; // Pending AS-external-LSA originations
+@@ -265,12 +266,13 @@
+     void log(InAddr *addr);
+     void log(class LSA *);
+     void log(class INrte *);
++    void log(InAddr *addr, InMask *mask);
+ 
+   public:
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 1,	// Minor version number
++	vminor = 2,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+@@ -287,6 +289,7 @@
+     void phy_up(int phyint);
+     void phy_down(int phyint);
+     void krt_delete_notification(InAddr net, InMask mask);
++    void remnant_notification(InAddr net, InMask mask);
+     MPath *ip_lookup(InAddr dest);
+     InAddr ip_source(InAddr dest);
+     InAddr if_addr(int phyint);
+diff -X exclude_files -Nabur ospfd2.1/src/spflog.h ospfd2.2/src/spflog.h
+--- ospfd2.1/src/spflog.h	Thu Apr 19 17:50:47 2001
++++ ospfd2.2/src/spflog.h	Mon May 14 14:27:10 2001
+@@ -83,6 +83,8 @@
+     IGMP_RCV,		// Received IGMP packet
+     LOG_SPFDEBUG,	// Debug statements
+     LOG_KRTSYNC,	// Synch kernel routing entry
++    LOG_REMNANT,	// Deleting remnant routing entry
++    LOG_DEBUGGING,	// Debug statements
+     MAXLOG,		// KEEP THIS LAST!!!!
+ };
+ 
+diff -X exclude_files -Nabur ospfd2.1/src/spfutil.C ospfd2.2/src/spfutil.C
+--- ospfd2.1/src/spfutil.C	Thu Apr 19 17:50:47 2001
++++ ospfd2.2/src/spfutil.C	Mon May 14 14:27:10 2001
+@@ -408,6 +408,10 @@
+ 	return("DEBUG");
+       case LOG_KRTSYNC:
+ 	return("Synching kernel routing entry");
++      case LOG_REMNANT:
++	return("Deleting remnant");
++      case LOG_DEBUGGING:
++	return("");
+       default:
+ 	break;
+     }
+@@ -701,6 +705,28 @@
+     log(".");
+     log((int) ptr[3]);
+ }
++
++/* Log a network/mask combination in CIDR format.
++ */
++
++void OSPF::log(InAddr *addr, InMask *mask)
++
++{
++    int prefix_len;
++    int bit;
++
++    prefix_len = 32;
++    bit = 1;
++    while (prefix_len > 0 && (bit & *mask) == 0) {
++	prefix_len--;
++	bit = bit << 1;
++    }
++
++    log(addr);
++    log("/");
++    log(prefix_len);
++}
++
+ 
+ /* Initialize the OspfSysCalls class. Time begins at zero.
+  */
+diff -X exclude_files -Nabur ospfd2.1/src/system.h ospfd2.2/src/system.h
+--- ospfd2.1/src/system.h	Thu Apr 19 17:50:47 2001
++++ ospfd2.2/src/system.h	Mon May 14 14:27:10 2001
+@@ -43,6 +43,7 @@
+     virtual void rtdel(InAddr, InMask, MPath *ompp)=0;
+     virtual void add_mcache(InAddr, InAddr, MCache *)=0;
+     virtual void del_mcache(InAddr src, InAddr group)=0;
++    virtual void upload_remnants()=0;
+     virtual void monitor_response(struct MonMsg *, uns16, int, int)=0;
+     virtual char *phyname(int phyint)=0;
+     virtual void sys_spflog(int msgno, char *msgbuf)=0;

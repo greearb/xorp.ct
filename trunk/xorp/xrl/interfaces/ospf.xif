@@ -1,0 +1,372 @@
+/* $XORP: xorp/xrl/interfaces/ospf.xif,v 1.14 2002/10/01 04:08:19 mjh Exp $ */
+
+/*
+ * OSPF protocol XRL interface.
+ */
+
+interface ospf/0.1 {
+	  /** Set router id */
+	  set_router_id ? id:u32
+
+	  /** Get router id */
+	  get_router_id -> id:u32
+
+	  /** Set maximum number of AS-external LSA's */
+	  set_lsdb_limit ? limit:i32
+	  get_lsdb_limit -> limit:i32
+
+	  /** Enable / disable MOSPF */
+	  set_mospf ? enabled:bool
+	  get_mospf -> enabled:bool
+
+	  /** Enable / Disable Inter-area multicast */
+	  set_interarea_mc ? enabled:bool
+	  get_interarea_mc -> enabled:bool
+
+	  /** Set time to exit overflow state */
+	  set_overflow_interval ? ovfl_int:i32
+	  get_overflow_interval -> ovfl_int:i32
+	  
+	  /** Set flood rate - self orig per second */
+	  set_flood_rate ? rate:i32
+	  get_flood_rate -> rate:i32
+
+	  /** Set back-to-back retransmissions */
+	  set_max_rxmt_window ? window:u32
+	  get_max_rxmt_window -> window:u32
+
+	  /** Set maximum simultaneous DB exchanges */
+	  set_max_dds ? max_dds:u32
+	  get_max_dds -> max_dds:u32
+
+	  /** Set rate to refresh DoNotAge LSAs */
+	  set_lsa_refresh_rate ? rate:u32
+	  get_lsa_refresh_rate -> rate:u32
+
+	  /** Set the maximum number of point-to-point links that will
+	   * become adjacent to a particular neighbor.  If there is no 
+	   * limit then value is zero.
+	   */
+	  set_p2p_adj_limit ? max_adj:u32
+	  get_p2p_adj_limit -> max_adj:u32
+
+	  /** Set randomized LSA refreshes */
+	  set_random_refresh ? enabled:bool
+	  get_random_refresh -> enabled:bool
+
+	  /* --------------------------------------------------------------- */
+	  /* Area related */
+
+	  /** Create area */
+	  add_or_configure_area ? area_id:u32 				      \
+				& is_stub:bool				      \
+				& default_cost:u32			      \
+				& import_summary_routes:bool
+
+	  /** Delete area */
+	  delete_area ? area_id:u32	  
+
+	  /** Query area options */
+	  query_area ? area_id:u32 					      \
+		     -> is_stub:bool  					      \
+		      & default_cost:u32 				      \
+		      & import_summary_routes:bool
+
+	  /**
+	   * @param area_ids list of value area_ids.  Each id is a u32.
+	   */
+	  list_area_ids -> area_ids:list
+
+	  /* --------------------------------------------------------------- */
+	  /* Aggregate related */
+
+	  /** Add or configure aggregate.
+	   *  @param area_id id of area aggregate belongs to.
+	   *  @param network network identifier.
+	   *  @param netmask netmask identifier.
+	   *  @param suppress_advertisement of aggregate.
+	   */
+	  add_or_configure_aggregate ? area_id:u32 			      \
+				     & network:ipv4			      \
+				     & netmask:ipv4			      \
+				     & suppress_advertisement:bool
+
+	  /** Delete aggregate identified by area_id, network, and netmask */
+	  delete_aggregate ? area_id:u32				      \
+			   & network:ipv4				      \
+			   & netmask:ipv4
+
+	  /** Query aggregate identified by area_id, network, and netmask */
+	  query_aggregate ? area_id:u32 				      \
+			  & network:ipv4				      \
+			  & netmask:ipv4				      \
+			  -> suppress_advertisement:bool
+
+	  /** Return list of aggregate identifiers for area identified
+	   *  by area_id.  Two lists are returned, the nth elements in
+	   *  each list comprise the tuple (network,netmask) that uniquely
+	   *  identifies the aggregate within the area.
+	   */
+	  list_aggregates ? area_id:u32					      \
+			  -> networks:list & netmasks:list
+
+	  /* --------------------------------------------------------------- */
+	  /* Host related */
+
+	  /** Add or configure host routes. 
+	   *  @param area_id host is to be advertised in.
+	   *  @param cost metric associated with host (0-65535).
+	   */
+	  add_or_configure_host ? network:ipv4				      \
+				& netmask:ipv4				      \
+				& area_id:u32				      \
+				& cost:u32
+
+	  /** Delete host identified by network and netmask */
+	  delete_host ?	network:ipv4					      \
+		      & netmask:ipv4					      \
+		      & area_id:u32
+
+	  /** Query host identified by network and netmask */
+	  query_host ? network:ipv4					      \
+		     & netmask:ipv4					      \
+		     & area_id:u32					      \
+		     -> cost:u32
+
+	  /** Return list of host identifiers for area identified
+	   *  by area_id.  Two lists are returned, the nth elements in
+	   *  each list comprise the tuple (network,netmask) that uniquely
+	   *  identifies the host within the area.
+	   */
+	  list_hosts ? area_id:u32					      \
+		     -> networks:list & netmasks:list
+
+	  /* --------------------------------------------------------------- */
+	  /* Virtual Link related */
+	  
+	  add_vlink ? transit_area:u32 & neighbor_id:u32
+
+	  delete_vlink ? transit_area:u32 & neighbor_id:u32
+
+	  vlink_set_transmit_delay ? transit_area:u32 			      \
+				   & neighbor_id:u32  			      \
+				   & delay_secs:u32
+
+	  vlink_get_transmit_delay ? transit_area:u32 			      \
+				   & neighbor_id:u32  			      \
+				   -> delay_secs:u32
+
+	  vlink_set_retransmit_interval ? transit_area:u32 		      \
+	  				& neighbor_id:u32  		      \
+					& interval_secs:u32
+
+	  vlink_get_retransmit_interval ? transit_area:u32		      \
+					& neighbor_id:u32  		      \
+					-> interval_secs:u32
+
+	  vlink_set_hello_interval ? transit_area:u32			      \
+				   & neighbor_id:u32			      \
+				   & interval_secs:u32
+
+	  vlink_get_hello_interval ? transit_area:u32			      \
+				   & neighbor_id:u32  			      \
+				   -> interval_secs:u32
+
+	  vlink_set_router_dead_interval ? transit_area:u32		      \
+	  				 & neighbor_id:u32		      \
+					 & interval_secs:u32
+
+	  vlink_get_router_dead_interval ? transit_area:u32 		      \
+					 & neighbor_id:u32  		      \
+					 -> interval_secs:u32
+
+	  /** @param type is one of "none", "cleartext", "md5" */
+	  vlink_set_authentication ? transit_area:u32			      \
+				   & neighbor_id:u32			      \
+				   & type:txt				      \
+				   & key:txt
+
+	  vlink_get_authentication ? transit_area:u32 			      \
+				   & neighbor_id:u32  			      \
+				   -> type:txt				      \
+				    & key:txt
+
+	  /** Return list of neighbour id's (unsigned 32 bit values) */
+	  list_vlinks ? transit_id:u32					      \
+		      -> neighbor_ids:list
+
+	  /* --------------------------------------------------------------- */
+	  /* External route related */
+
+	  add_or_configure_external_route ? network:ipv4net		      \
+					  & gateway:ipv4		      \
+					  & type:u32			      \
+					  & cost:u32			      \
+					  & multicast:bool		      \
+					  & external_route_tag:u32
+
+	  delete_external_route ? network:ipv4net			      \
+				& gateway:ipv4				     
+
+	  query_external_route ? network:ipv4net			      \
+			       & gateway:ipv4				      \
+			       -> type:u32				      \
+			        & cost:u32				      \
+				& multicast:bool			      \
+				& external_route_tag:u32
+
+	  list_external_routes ? network:ipv4net			      \
+			       -> gateways:list
+
+	  /* --------------------------------------------------------------- */
+	  /* Interface configuration related */
+	  
+	  add_interface ? identifier:txt				      \
+			& if_index:u32					      \
+			& area_id:u32					      \
+			& cost:u32					      \
+			& mtu:u32					      \
+			& type:txt					      \
+			& on_demand:bool				      \
+			& passive:bool
+
+	  interface_set_if_index ? identifier:txt			      \
+				 & index:u32
+	  interface_get_if_index ? identifier:txt			      \
+				 -> index:u32
+
+	  interface_set_area_id ? identifier:txt			      \
+				& area_id:u32
+	  interface_get_area_id ? identifier:txt			      \
+				-> area_id:u32
+
+	  interface_set_cost ? identifier:txt				      \
+			     & cost:u32
+	  interface_get_cost ? identifier:txt				      \
+			     -> cost:u32
+
+	  interface_set_mtu ? identifier:txt				      \
+			    & mtu:u32
+	  interface_get_mtu ? identifier:txt				      \
+			    -> mtu:u32
+
+	  interface_set_type ? identifier:txt				      \
+			     & type:txt
+	  interface_get_type ? identifier:txt				      \
+			     -> type:txt
+
+	  interface_set_dr_priority ? identifier:txt			      \
+				    & dr_priority:u32
+	  interface_get_dr_priority ? identifier:txt			      \
+				    -> dr_priority:u32
+
+	  interface_set_transit_delay ? identifier:txt			      \
+				      & delay_secs:u32
+	  interface_get_transit_delay ? identifier:txt			      \
+				      -> delay_secs:u32
+
+	  interface_set_retransmit_interval ? identifier:txt		      \
+					    & interval_secs:u32
+	  interface_get_retransmit_interval ? identifier:txt		      \
+	  				    -> interval_secs:u32
+				    
+	  interface_set_router_dead_interval ? identifier:txt		      \
+					     & interval_secs:u32
+	  interface_get_router_dead_interval ? identifier:txt		      \
+					     -> interval_secs:u32
+				    
+	  interface_set_poll_interval ? identifier:txt			      \
+				      & interval_secs:u32
+	  interface_get_poll_interval ? identifier:txt			      \
+				      -> interval_secs:u32
+
+	  interface_set_authentication ? identifier:txt			      \
+				       & type:txt			      \
+				       & key:txt
+	  interface_get_authentication ? identifier:txt			      \
+				       -> type:txt			      \
+				        & key:txt
+
+	  /** Set state of multicast forwarding on interface.
+	   *
+	   *  @param type multicast type can be one of three values:
+	   *  "blocked" meaning not enabled, "multicast" meaning data-link
+	   *  multicast, or "unicast" meaning multicast packets should be
+	   *  unicast on data-link.
+	   */
+	  interface_set_multicast_forwarding ? identifier:txt		      \
+				  & type:txt
+	  interface_get_multicast_forwarding ? identifier:txt		      \
+				  -> type:txt
+
+	  interface_set_on_demand ? identifier:txt			      \
+				  & on_demand:bool
+	  interface_get_on_demand ? identifier:txt			      \
+				  -> on_demand:bool
+
+	  interface_set_passive ? identifier:txt			      \
+				& passive:bool
+	  interface_get_passive ? identifier:txt			      \
+				-> passive:bool
+
+	  interface_set_igmp ? identifier:txt				      \
+			     & enabled:bool
+	  interface_get_igmp ? identifier:txt				      \
+			     -> enabled:bool
+
+	  delete_interface ? identifier:txt
+
+	  list_interfaces -> identifiers:list
+
+	  /* --------------------------------------------------------------- */
+	  /* Interface MD5 Authentication */
+
+	  /** 
+	    * Add md5 key to interface.
+	    *
+	    * The key may be used for both receiving and transmitting packets.
+	    * Separate time periods are used to describe when the key is valid
+	    * for receiving and transmitting.  These periods are bound by
+	    * times start_receive, stop_receive and start_transmit, 
+	    * stop_transmit.
+	    *	    
+	    * The expected date format is "%Y-%m-%d %H:%M:%S".  This code 
+	    * uses strptime and strftime internally.
+	    *
+	    * @param identifier interface key is to be used for.
+	    * @param key_id a value between 1-255 that identifies the key.
+	    */
+
+	  interface_add_md5_key ? identifier:txt			      \
+				& key_id:u32				      \
+				& md5key:txt				      \
+				& start_receive:txt			      \
+				& stop_receive:txt			      \
+				& start_transmit:txt			      \
+				& stop_transmit:txt
+
+	  interface_get_md5_key ? identifier:txt			      \
+				& key_id:u32				      \
+				-> md5key:txt				      \
+				 & start_receive:txt			      \
+				 & stop_receive:txt			      \
+				 & start_transmit:txt			      \
+				 & stop_transmit:txt
+
+	  interface_delete_md5_key ? identifier:txt			      \
+				   & key_id:u32
+
+	  interface_list_md5_keys ? identifier:txt			      \
+				  -> key_ids:list
+
+	  /* --------------------------------------------------------------- */
+	  /* Static neighbor configuration */
+
+	  add_neighbor ? nbr_addr:ipv4 & dr_eligible:bool
+	  get_neighbor ? nbr_addr:ipv4 -> dr_eligible:bool
+	  delete_neighbor ? nbr_addr:ipv4
+	  list_neighbors -> nbr_addrs:list
+}
+					  
+
+

@@ -1,0 +1,186 @@
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.11 2002/09/22 02:34:58 mjh Exp $ */
+
+/*
+ * Routing Information Base XRL interface.
+ */
+
+interface rib/0.1 {
+	add_igp_table4 ? protocol:txt & unicast:bool & multicast:bool
+
+	add_igp_table6 ? protocol:txt & unicast:bool & multicast:bool
+
+	delete_igp_table4 ? protocol:txt & unicast:bool & multicast:bool
+
+	delete_igp_table6 ? protocol:txt & unicast:bool & multicast:bool
+	
+	add_egp_table4 ? protocol:txt & unicast:bool & multicast:bool
+
+	add_egp_table6 ? protocol:txt & unicast:bool & multicast:bool
+
+	delete_egp_table4 ? protocol:txt & unicast:bool & multicast:bool
+
+	delete_egp_table6 ? protocol:txt & unicast:bool & multicast:bool
+	
+	add_route4 ? protocol:txt & unicast:bool & multicast:bool & \
+		     network:ipv4net & nexthop:ipv4 & metric:u32
+
+	add_route6 ? protocol:txt & unicast:bool & multicast:bool & \
+		     network:ipv6net & nexthop:ipv6 & metric:u32
+	
+	replace_route4 ? protocol:txt & unicast:bool & multicast:bool & \
+			 network:ipv4net & nexthop:ipv4 & metric:u32
+
+	replace_route6 ? protocol:txt & unicast:bool & multicast:bool & \
+			 network:ipv6net & nexthop:ipv6 & metric:u32
+
+	delete_route4 ? protocol:txt & unicast:bool & multicast:bool & \
+		        network:ipv4net
+
+	delete_route6 ? protocol:txt & unicast:bool & multicast:bool & \
+		        network:ipv6net
+
+	/**
+	 * Lookup nexthop.
+	 *
+	 * @param addr address to lookup.
+	 *
+	 * @param unicast look in unicast RIB.
+	 *
+	 * @param multicast look in multicast RIB.
+	 *
+	 * @param nexthop contains the resolved nexthop if successful,
+	 * IPv4::ZERO otherwise.  It is an error for the unicast and multicast
+	 * fields to both be true or both false.
+	 */
+	lookup_route4 ? addr:ipv4 & unicast:bool & multicast:bool \
+		-> nexthop:ipv4
+
+	/**
+	 * Lookup nexthop.
+	 *
+	 * @param addr address to lookup.
+	 *
+	 * @param unicast look in unicast RIB.
+	 *
+	 * @param multicast look in multicast RIB.
+	 *
+	 * @param nexthop contains the resolved nexthop if successful,
+	 * IPv6::ZERO otherwise.  It is an error for the unicast and multicast
+	 * fields to both be true or both false.
+	 */
+	lookup_route6 ? addr:ipv6 & unicast:bool & multicast:bool	      \
+		-> nexthop:ipv6
+	
+	new_vif ? name:txt
+	
+	add_vif_addr4 ? name:txt & addr:ipv4 & subnet:ipv4net
+
+	add_vif_addr6 ? name:txt & addr:ipv6 & subnet:ipv6net
+	
+	redist_enable4 ? from:txt & to:txt & unicast:bool & multicast:bool
+
+	redist_enable6	? from:txt & to:txt & unicast:bool & multicast:bool
+
+	redist_disable4	? from:txt & to:txt & unicast:bool & multicast:bool
+
+	redist_disable6	? from:txt & to:txt & unicast:bool & multicast:bool
+
+	/**
+ 	 * Register an interest in a route
+	 *
+	 * @param target the name of the XRL module to notify when the
+         * information returned by this call becomes invalid.
+	 *
+	 * @param addr address of interest
+         *
+         * @param resolves returns whether or not the address resolves
+         * to a route that can be used for forwarding.
+	 *
+	 * @param base_addr returns the address of interest (actually
+         * the base address of the subnet covered by addr/prefix).
+	 *
+	 * @param prefix prefix returns the prefix that the registration
+         * covers.  This response applies to all addresses in addr/prefix.
+	 *
+	 * @param realprefix realprefix returns the actual prefix of the
+         * route that will be used to route addr.  If realprefix is
+         * not the same as prefix, this is because there are some more
+         * specific routes that overlap addr/realprefix.  realprefix
+         * is primarily given for debugging reasons.
+	 * 
+	 * @param nexthop returns the address of the next hop for packets sent
+	 * to addr
+	 *
+	 * @param metric returns the IGP metric for this route
+         */
+
+	register_interest4 ? target:txt & addr:ipv4 \
+		-> resolves:bool & base_addr:ipv4 & prefix:u32 & \
+                   realprefix:u32 & nexthop:ipv4 & metric:u32
+
+	/**
+	 * De-register an interest in a route
+	 *
+	 * @param target the name of the XRL module that registered
+         * the interest
+	 *
+	 * @param addr the address of the previous registered
+         * interest.  addr should be the base address of the
+         * add/prefix subnet.
+	 * 
+	 * @param prefix the prefix length of the registered interest,
+         * as given in the response from register_interest.
+	 */
+
+	deregister_interest4 ?  target:txt & addr:ipv4 & prefix:u32
+
+	/**
+ 	 * Register an interest in a route
+	 *
+	 * @param target the name of the XRL module to notify when the
+         * information returned by this call becomes invalid.
+	 *
+	 * @param addr address of interest
+	 *
+         * @param resolves returns whether or not the address resolves
+         * to a route that can be used for forwarding.
+	 *
+	 * @param base_addr returns the address of interest (actually
+         * the base address of the subnet covered by addr/prefix).
+	 *
+	 * @param prefix prefix returns the prefix that the registration
+         * covers.  This response applies to all addresses in addr/prefix.
+	 *
+	 * @param realprefix realprefix returns the actual prefix of the
+         * route that will be used to route addr.  If realprefix is
+         * not the same as prefix, this is because there are some more
+         * specific routes that overlap addr/realprefix.  realprefix
+         * is primarily given for debugging reasons.
+	 * 
+	 * @param nexthop returns the address of the next hop for packets sent
+	 * to addr
+	 *
+	 * @param metric returns the IGP metric for this route
+         */
+
+	register_interest6 ? target:txt & addr:ipv6 \
+		-> resolves:bool & base_addr:ipv6 & prefix:u32 & \
+                   realprefix:u32 & nexthop:ipv6 & metric:u32
+
+	/**
+	 * De-register an interest in a route
+	 *
+	 * @param target the name of the XRL module that registered
+         * the interest
+	 *
+	 * @param addr the address of the previous registered
+         * interest.  addr should be the base address of the
+         * add/prefix subnet.
+	 * 
+	 * @param prefix the prefix length of the registered interest,
+         * as given in the response from register_interest.
+	 */
+
+	deregister_interest6 ?  target:txt & addr:ipv6 & prefix:u32
+}
+

@@ -1,0 +1,435 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+
+// Copyright (c) 2001,2002 International Computer Science Institute
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software")
+// to deal in the Software without restriction, subject to the conditions
+// listed in the XORP LICENSE file. These conditions include: you must
+// preserve this copyright notice, and you cannot mention the copyright
+// holders in advertising related to the Software without their permission.
+// The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+// notice is a summary of the XORP LICENSE file; the license in that file is
+// legally binding.
+
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.34 2002/12/09 18:29:26 hodson Exp $"
+
+//
+// PIM Multicast Routing Entry Register handling
+//
+
+
+#include "pim_module.h"
+#include "pim_private.hh"
+#include "pim_proto.h"
+#include "pim_mfc.hh"
+#include "pim_mre.hh"
+#include "pim_node.hh"
+#include "pim_vif.hh"
+
+
+//
+// Exported variables
+//
+
+//
+// Local constants definitions
+//
+
+//
+// Local structures/classes, typedefs and macros
+//
+
+//
+// Local variables
+//
+
+//
+// Local functions prototypes
+//
+static void pim_mre_register_stop_timeout(void *data_pointer);
+
+
+// Note: applies for (S,G)
+bool
+PimMre::compute_is_could_register_sg() const
+{
+    uint16_t vif_index;
+    Mifset mifs;
+    
+    if (! is_sg())
+	return (false);
+    
+    vif_index = rpf_interface_s();
+    if (vif_index == Vif::VIF_INDEX_INVALID)
+	return (false);
+    
+    mifs = i_am_dr();
+    
+    return (mifs.test(vif_index)
+	    && is_keepalive_timer_running()
+	    && is_directly_connected_s()
+	    && (! i_am_rp()));
+}
+
+//
+// PIM Register state (for the pim_register_vif_index() interface)
+//
+// Note: applies for (S,G)
+void
+PimMre::set_register_noinfo_state()
+{
+    if (! is_sg())
+	return;
+    
+    if (is_register_noinfo_state())
+	return;			// Nothing changed
+    
+    _flags &= ~(PIM_MRE_REGISTER_JOIN_STATE
+		| PIM_MRE_REGISTER_PRUNE_STATE
+		| PIM_MRE_REGISTER_JOIN_PENDING_STATE);
+}
+
+// Note: applies for (S,G)
+void
+PimMre::set_register_join_state()
+{
+    if (! is_sg())
+	return;
+    
+    if (is_register_join_state())
+	return;			// Nothing changed
+    
+    _flags &= ~(PIM_MRE_REGISTER_JOIN_STATE
+		| PIM_MRE_REGISTER_PRUNE_STATE
+		| PIM_MRE_REGISTER_JOIN_PENDING_STATE);
+    _flags |= PIM_MRE_REGISTER_JOIN_STATE;
+}
+
+// Note: applies for (S,G)
+void
+PimMre::set_register_prune_state()
+{
+    if (! is_sg())
+	return;
+    
+    if (is_register_prune_state())
+	return;			// Nothing changed
+    
+    _flags &= ~(PIM_MRE_REGISTER_JOIN_STATE
+		| PIM_MRE_REGISTER_PRUNE_STATE
+		| PIM_MRE_REGISTER_JOIN_PENDING_STATE);
+    _flags |= PIM_MRE_REGISTER_PRUNE_STATE;
+}
+
+// Note: applies for (S,G)
+void
+PimMre::set_register_join_pending_state()
+{
+    if (! is_sg())
+	return;
+    
+    if (is_register_join_pending_state())
+	return;			// Nothing changed
+    
+    _flags &= ~(PIM_MRE_REGISTER_JOIN_STATE
+		| PIM_MRE_REGISTER_PRUNE_STATE
+		| PIM_MRE_REGISTER_JOIN_PENDING_STATE);
+    _flags |= PIM_MRE_REGISTER_JOIN_PENDING_STATE;
+}
+
+// Note: applies for (S,G)
+bool
+PimMre::is_register_noinfo_state() const
+{
+    return (! (_flags & (PIM_MRE_REGISTER_JOIN_STATE
+			 | PIM_MRE_REGISTER_PRUNE_STATE
+			 | PIM_MRE_REGISTER_JOIN_PENDING_STATE)));
+}
+
+// Note: applies for (S,G)
+bool
+PimMre::is_register_join_state() const
+{
+    return (_flags & PIM_MRE_REGISTER_JOIN_STATE);
+}
+
+// Note: applies for (S,G)
+bool
+PimMre::is_register_prune_state() const
+{
+    return (_flags & PIM_MRE_REGISTER_PRUNE_STATE);
+}
+
+// Note: applies for (S,G)
+bool
+PimMre::is_register_join_pending_state() const
+{
+    return (_flags & PIM_MRE_REGISTER_JOIN_PENDING_STATE);
+}
+
+// Return true if state has changed, otherwise return false.
+// Note: applies for (S,G)
+bool
+PimMre::recompute_is_could_register_sg()
+{
+    if (! is_sg())
+	return (false);
+    
+    if (is_not_could_register_sg())
+	goto not_could_register_sg_label;
+    if (is_could_register_sg())
+	goto could_register_sg_label;
+    XLOG_ASSERT(false);
+    return (false);
+    
+ not_could_register_sg_label:
+    // CouldRegister -> true
+    if (! compute_is_could_register_sg())
+	return (false);		// Nothing changed
+    
+    if (is_register_noinfo_state()) {
+	// Register NoInfo state -> Register Join state
+	set_register_join_state();
+	// Add reg tunnel
+	add_register_tunnel();
+    }
+    // Set the new state
+    set_could_register_sg();
+    return (true);
+    
+ could_register_sg_label:
+    // CouldRegister -> false
+    if (compute_is_could_register_sg())
+	return (false);		// Nothing changed
+    
+    if (is_register_join_state()
+	|| is_register_join_pending_state()
+	|| is_register_prune_state()) {
+	// Register Join state -> Register NoInfo state
+	set_register_noinfo_state();
+	// Remove reg tunnel
+	remove_register_tunnel();
+    }
+    // Set the new state
+    set_not_could_register_sg();
+    return (true);
+}
+
+static void
+pim_mre_register_stop_timeout(void *data_pointer)
+{
+    PimMre *pim_mre = (PimMre *)data_pointer;
+    PimVif *pim_vif = NULL;
+    
+    if (! pim_mre->is_sg())
+	return;
+    
+    if (pim_mre->is_register_noinfo_state())
+	goto register_noinfo_state;
+    if (pim_mre->is_register_join_state())
+	goto register_join_state;
+    if (pim_mre->is_register_join_pending_state())
+	goto register_join_pending_state;
+    if (pim_mre->is_register_prune_state())
+	goto register_prune_state;
+    
+ register_noinfo_state:
+    // Register NoInfo state
+    // Ignore
+    return;
+    
+ register_join_state:
+    // Register Join state
+    // Ignore
+    return;
+    
+ register_join_pending_state:
+    // Register JoinPending state
+    // Register JoinPending state -> Register Join state
+    pim_mre->set_register_join_state();
+    // Add reg tunnel
+    pim_mre->add_register_tunnel();
+    return;
+    
+ register_prune_state:
+    // Register Prune state
+    // Register Prune state -> Register JoinPending state
+    pim_mre->set_register_join_pending_state();
+    // Stop timer(**) (** The RegisterStopTimer is set to Register_Probe_Time
+    pim_mre->register_stop_timer().start(PIM_REGISTER_PROBE_TIME_DEFAULT, 0,
+					 pim_mre_register_stop_timeout,
+					 pim_mre);
+    // Send Null Register
+    pim_vif = pim_mre->pim_node().vif_find_direct(pim_mre->source_addr());
+    const IPvX *rp_addr_ptr = pim_mre->rp_addr_ptr();
+    if ((pim_vif != NULL) && (rp_addr_ptr != NULL)) {
+	pim_vif->pim_register_null_send(*rp_addr_ptr,
+					pim_mre->source_addr(),
+					pim_mre->group_addr());
+    }
+    return;
+}
+
+// Note: applies for (S,G)
+void
+PimMre::receive_register_stop()
+{
+    if (! is_sg())
+	return;
+    
+    struct timeval register_stop_timeval;
+    struct timeval register_probe_timeval;
+    
+    if (is_register_noinfo_state())
+	goto register_noinfo_state_label;
+    if (is_register_join_state())
+	goto register_join_state_label;
+    if (is_register_join_pending_state())
+	goto register_join_pending_state_label;
+    if (is_register_prune_state())
+	goto register_prune_state_label;
+    
+    XLOG_ASSERT(false);
+    return;
+    
+ register_noinfo_state_label:
+    // Register NoInfo state
+    return;		// Ignore
+    
+ register_join_state_label:
+    // Register Join state
+    // Register Join state -> Register Prune state
+    set_register_prune_state();
+    // Remove reg tunnel
+    remove_register_tunnel();
+    // Set Register-Stop timer
+    TIMEVAL_SET(&register_stop_timeval,
+		PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
+    TIMEVAL_RANDOM(&register_stop_timeval, 0.5);
+    TIMEVAL_SET(&register_probe_timeval, PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
+    TIMEVAL_DECR(&register_stop_timeval, &register_probe_timeval);
+    register_stop_timer().start(TIMEVAL_SEC(&register_stop_timeval),
+				TIMEVAL_USEC(&register_stop_timeval),
+				pim_mre_register_stop_timeout, this);
+    return;
+    
+ register_join_pending_state_label:
+    // Register JoinPending state
+    // Register JoinPending state -> Register Prune state
+    set_register_prune_state();
+    // Set Register-Stop timer
+    TIMEVAL_SET(&register_stop_timeval,
+		PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
+    TIMEVAL_RANDOM(&register_stop_timeval, 0.5);
+    TIMEVAL_SET(&register_probe_timeval, PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
+    TIMEVAL_DECR(&register_stop_timeval, &register_probe_timeval);
+    register_stop_timer().start(TIMEVAL_SEC(&register_stop_timeval),
+				TIMEVAL_USEC(&register_stop_timeval),
+				pim_mre_register_stop_timeout, this);
+    return;
+    
+ register_prune_state_label:
+    // Register Prune state
+    return;		// Ignore
+}
+
+// TODO: call it when approppriate
+// Note: applies for (S,G)
+void
+PimMre::recompute_rp_register_sg_changed()
+{
+    if (! is_sg())
+	return;
+    
+    if (is_register_noinfo_state())
+	goto register_noinfo_state_label;
+    if (is_register_join_state())
+	goto register_join_state_label;
+    if (is_register_join_pending_state())
+	goto register_join_pending_state_label;
+    if (is_register_prune_state())
+	goto register_prune_state_label;
+    
+    XLOG_ASSERT(false);
+    return;
+    
+ register_noinfo_state_label:
+    // Register NoInfo state
+    return;		// Ignore
+    
+ register_join_state_label:
+    // Register Join state
+    // Register Join state -> Register Join state
+    // Update Register tunnel
+    update_register_tunnel();
+    return;
+    
+ register_join_pending_state_label:
+    // Register JoinPending state
+    // Register JoinPending state -> Register Join state
+    set_register_join_state();
+    // Add reg tunnel
+    add_register_tunnel();
+    // Cancel Register-Stop timer
+    register_stop_timer().cancel();
+    return;
+    
+ register_prune_state_label:
+    // Register Prune state
+    // Register Prune state -> Register Join state
+    set_register_join_state();
+    // Add reg tunnel
+    add_register_tunnel();
+    // Cancel Register-Stop timer
+    register_stop_timer().cancel();
+    return;
+}
+
+// XXX: The Register vif implementation is not RP-specific, so it is
+// sufficient to update the DownstreamJpState(S,G,VI) only.
+// Note: applies for (S,G)
+void
+PimMre::add_register_tunnel()
+{
+    uint16_t register_vif_index;
+    
+    if (! is_sg())
+	return;
+    
+    register_vif_index = pim_register_vif_index();
+    if (register_vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+    
+    set_downstream_join_state(register_vif_index);
+}
+
+// XXX: The Register vif implementation is not RP-specific, so it is
+// sufficient to update the DownstreamJpState(S,G,VI) only.
+// Note: applies for (S,G)
+void
+PimMre::remove_register_tunnel()
+{
+    uint16_t register_vif_index;
+    
+    if (! is_sg())
+	return;
+
+    register_vif_index = pim_register_vif_index();
+    if (register_vif_index == Vif::VIF_INDEX_INVALID)
+	return;
+    
+    set_downstream_noinfo_state(register_vif_index);
+}
+
+// XXX: nothing to do because the Register vif implementation
+// is not RP-specific.
+// Note: applies for (S,G)
+void
+PimMre::update_register_tunnel()
+{
+    if (! is_sg())
+	return;
+    
+    return;
+}

@@ -1,0 +1,202 @@
+diff -X exclude_files -Nabur ospfd2.12/src/ifcfsm.C ospfd2.13/src/ifcfsm.C
+--- ospfd2.12/src/ifcfsm.C	Thu Nov 15 13:04:46 2001
++++ ospfd2.13/src/ifcfsm.C	Tue Nov 20 13:32:58 2001
+@@ -149,8 +149,11 @@
+     // Newly up or down
+     if (if_ostate == IFS_DOWN)
+ 	if_area->IfcChange(1);
+-    else if (if_state == IFS_DOWN)
++    else if (if_state == IFS_DOWN) {
++        // Delete link-local-LSAs
++        delete_lsdb();
+ 	if_area->IfcChange(-1);
++    }
+     // Want AllDRouters now?
+     if (if_state > IFS_OTHER && if_ostate <= IFS_OTHER)
+ 	ospf->app_join(if_phyint, AllDRouters);
+diff -X exclude_files -Nabur ospfd2.12/src/lsa.h ospfd2.13/src/lsa.h
+--- ospfd2.12/src/lsa.h	Thu Nov 15 13:04:46 2001
++++ ospfd2.13/src/lsa.h	Tue Nov 20 13:32:58 2001
+@@ -103,6 +103,7 @@
+ 
+     friend class OSPF;
+     friend class SpfNbr;
++    friend class SpfIfc;
+     friend class SpfArea;
+     friend class LsaListIterator;
+     friend class LocalOrigTimer;
+diff -X exclude_files -Nabur ospfd2.12/src/lsdb.C ospfd2.13/src/lsdb.C
+--- ospfd2.12/src/lsdb.C	Thu Nov 15 13:04:46 2001
++++ ospfd2.13/src/lsdb.C	Tue Nov 20 13:32:58 2001
+@@ -301,17 +301,28 @@
+ 	    lsa_flush(lsap);
+ }
+ 
+-/* Flush all LSAs from an area's link-state database.
++/* Delete LSAs from an area's link-state database. This is done
++ * silently, without reflooding, as this routine is only called when
++ * there are no operational interfaces left connecting to the
++ * area (this could be as a result of something like a change in
++ * the area's stub status). However, we do inform local applications
++ * that Opaque-LSAs have been deleted.
++ *
++ * This routine must perform the logic included in OSPF::DeleteLSA()
++ * for each LSA, although we choose to do it here in a more
++ * efficient manner.
++ *
+  * All AS-external-LSAs are left alone, as they belong to all
+- * areas. This happens when, for example, an area's
+- * stub status changes, or the last interface to an area is
+- * deleted.
++ * areas. Link-local-LSAs are deleted in SpfIfc::delete_lsdb().
+  */
+ 
+-void SpfArea::flush_lsdb(bool everything)
++void SpfArea::delete_lsdb()
+ 
+ {
+     byte lstype;
++    SpfArea *bb;
++
++    bb = ospf->FindArea(BACKBONE);
+ 
+     for (lstype = 0; lstype <= MAX_LST; lstype++) {
+ 	AVLtree *tree;
+@@ -322,14 +333,63 @@
+ 	if (!(tree = ospf->FindLSdb(0, this, lstype)))
+ 	    continue;
+ 	iter = new AVLsearch(tree);
+-	while ((lsap = (LSA *)iter->next()))
+-	    if (everything || lsap->adv_rtr() == ospf->my_id())
+-		lsa_flush(lsap);
++	while ((lsap = (LSA *)iter->next())) {
++	    lsap->stop_aging();
++	    ospf->UnParseLSA(lsap);
++	    switch(lstype) {
++  	      case LST_AREA_OPQ:
++		// Notify applications of Opaque-LSA deletion?
++		if (lsap->lsa_rcvage != MaxAge) {
++		    lsap->lsa_rcvage = MaxAge;
++		    ospf->upload_opq(lsap);
++		}
++		break;
++	      case LST_GM:
++		if (bb && bb->n_active_if != 0)
++		    bb->grp_orig(lsap->ls_id(), 0);
++		break;
++	      default:
++		break;
++	    }
++	}
+ 	delete iter;
++	// This frees the LSAs, unless they are on some list
++	tree->clear();
++    }
++
++    // Reset database checksum
++    db_xsum = 0;
++}
++
++/* Silently delete all link-local Opaque-LSAs. Analogue to
++ * SpfArea::delete_lsdb(), this is only called when the
++ * interface becomes inoperational.
++ */
++
++void SpfIfc::delete_lsdb()
++
++{
++    AVLtree *tree;
++    AVLsearch *iter;
++    LSA *lsap;
++
++    tree = ospf->FindLSdb(this, if_area, LST_LINK_OPQ);
++    iter = new AVLsearch(tree);
++    while ((lsap = (LSA *)iter->next())) {
++	lsap->stop_aging();
++	ospf->UnParseLSA(lsap);
++	// Notify applications of Opaque-LSA deletion?
++	if (lsap->lsa_rcvage != MaxAge) {
++	    lsap->lsa_rcvage = MaxAge;
++	    ospf->upload_opq(lsap);
+     }
++    }
++    delete iter;
++    // This frees the LSAs, unless they are on some list
++    tree->clear();
+ 
+-    // Get rid of things from MaxAge list immediately
+-    ospf->free_maxage_lsas();
++    // Reset database checksum
++    db_xsum = 0;
+ }
+ 
+ /* Parse an LSA. Call the LSA-specific parse routine. If that
+diff -X exclude_files -Nabur ospfd2.12/src/ospf.h ospfd2.13/src/ospf.h
+--- ospfd2.12/src/ospf.h	Thu Nov 15 13:04:46 2001
++++ ospfd2.13/src/ospf.h	Tue Nov 20 13:32:58 2001
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 12,	// Minor version number
++	vminor = 13,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+diff -X exclude_files -Nabur ospfd2.12/src/spfarea.C ospfd2.13/src/spfarea.C
+--- ospfd2.12/src/spfarea.C	Thu Nov 15 13:04:46 2001
++++ ospfd2.13/src/spfarea.C	Tue Nov 20 13:32:58 2001
+@@ -169,7 +169,7 @@
+     while ((ip = if_iter.get_next()))
+ 	delete ip;
+     // Delete database
+-    flush_lsdb();
++    delete_lsdb();
+     // Remove ABRs
+     while ((abr = (RTRrte *) abr_iter.next())) {
+ 	abr_tbl.remove(abr);
+@@ -283,7 +283,7 @@
+     }
+     else if (n_active_if == 0) {
+ 	ospf->rl_orig();
+-	flush_lsdb(true);
++	delete_lsdb();
+     }
+ }
+ 
+@@ -330,9 +330,10 @@
+     // Take down interfaces to area
+     while ((ip = iter.get_next()))
+ 	ip->run_fsm(IFE_DOWN);
+-    // Flush all our self-originated LSAs in area
+-    flush_lsdb();
++    // Delete entire link-state database
++    delete_lsdb();
+     // Bring up interfaces that are physically operational
++    // This will re-create the area's link-state database
+     iter.reset();
+     while ((ip = iter.get_next())) {
+ 	if (sys->phy_operational(ip->if_phyint))
+diff -X exclude_files -Nabur ospfd2.12/src/spfarea.h ospfd2.13/src/spfarea.h
+--- ospfd2.12/src/spfarea.h	Thu Nov 15 13:04:46 2001
++++ ospfd2.13/src/spfarea.h	Tue Nov 20 13:32:58 2001
+@@ -97,7 +97,7 @@
+     void asbr_orig(class ASBRrte *rte, int forced=0);
+     bool needs_indication();
+     void grp_orig(InAddr group, int forced=0);
+-    void flush_lsdb(bool everything=false);
++    void delete_lsdb();
+     void a_flush_donotage();
+     void reinitialize();
+     void generate_summaries();
+diff -X exclude_files -Nabur ospfd2.12/src/spfifc.h ospfd2.13/src/spfifc.h
+--- ospfd2.12/src/spfifc.h	Thu Nov 15 13:04:46 2001
++++ ospfd2.13/src/spfifc.h	Tue Nov 20 13:32:58 2001
+@@ -218,6 +218,7 @@
+     SpfArea *transit_area();
+     rtid_t *vl_endpt();
+     void AddTypesToList(byte lstype, LsaList *lp);
++    void delete_lsdb();
+ 
+     // Virtual functions
+     virtual void clear_config();

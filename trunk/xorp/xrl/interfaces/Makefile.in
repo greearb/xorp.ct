@@ -1,0 +1,554 @@
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
+
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+###############################################################################
+# Client Interface related
+###############################################################################
+
+# BGP Client Interface 
+
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = ../..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AR = @AR@
+CC = @CC@
+CPP = @CPP@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+GMAKE = @GMAKE@
+LN_S = @LN_S@
+OSPFD = @OSPFD@
+OSPFD_OS = @OSPFD_OS@
+PYTHON = @PYTHON@
+PY_BUILD = @PY_BUILD@
+RANLIB = @RANLIB@
+RIP = @RIP@
+RIP_OS = @RIP_OS@
+
+#
+# Sample Test Client Interface 
+#
+noinst_LIBRARIES = libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libfeaftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libtestpeerxif.a libtestxif.a
+libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
+libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
+libcliprocessorxif_a_SOURCES = cli_processor_xif.hh cli_processor_xif.cc
+libcommonxif_a_SOURCES = common_xif.hh common_xif.cc
+libcoordxif_a_SOURCES = coord_xif.hh coord_xif.cc
+libdatainxif_a_SOURCES = datain_xif.hh datain_xif.cc
+libfeaifmgrxif_a_SOURCES = fea_ifmgr_xif.hh fea_ifmgr_xif.cc
+libfeaifmgrclientxif_a_SOURCES = fea_ifmgr_client_xif.hh  fea_ifmgr_client_xif.cc 
+libfeaftixif_a_SOURCES = fea_fti_xif.hh fea_fti_xif.cc
+libfearawpkt_a_SOURCES = fea_rawpkt_xif.hh fea_rawpkt_xif.cc
+libfearawpktclient_a_SOURCES = fea_rawpkt_client_xif.hh  fea_rawpkt_client_xif.cc 
+libfinderxif_a_SOURCES = finder_xif.hh finder_xif.cc
+libfinderclientxif_a_SOURCES = finder_client_xif.hh finder_client_xif.cc
+libmfeaxif_a_SOURCES = mfea_xif.hh mfea_xif.cc
+libmfeaclientxif_a_SOURCES = mfea_client_xif.hh mfea_client_xif.cc
+libmld6igmpxif_a_SOURCES = mld6igmp_xif.hh mld6igmp_xif.cc
+libmld6igmpclientxif_a_SOURCES = mld6igmp_client_xif.hh mld6igmp_client_xif.cc
+libospfxif_a_SOURCES = ospf_xif.hh ospf_xif.cc
+libpimxif_a_SOURCES = pim_xif.hh pim_xif.cc
+libribxif_a_SOURCES = rib_xif.hh rib_xif.cc
+libribclientxif_a_SOURCES = rib_client_xif.hh rib_client_xif.cc
+librtrmgrxif_a_SOURCES = rtrmgr_xif.hh rtrmgr_xif.cc
+librtrmgr_clientxif_a_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
+libtestpeerxif_a_SOURCES = test_peer_xif.hh test_peer_xif.cc
+libtestxif_a_SOURCES = test_xif.hh test_xif.cc
+
+###############################################################################
+# Implicit Rules
+###############################################################################
+
+SCRIPT_DIR = ../scripts
+CLNTGEN_PY = $(SCRIPT_DIR)/clnt-gen
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
+CONFIG_HEADER = ../../config.h
+CONFIG_CLEAN_FILES = 
+LIBRARIES =  $(noinst_LIBRARIES)
+
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I../..
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+libbgpxif_a_LIBADD = 
+libbgpxif_a_OBJECTS =  bgp_xif.o
+libclimanagerxif_a_LIBADD = 
+libclimanagerxif_a_OBJECTS =  cli_manager_xif.o
+libcliprocessorxif_a_LIBADD = 
+libcliprocessorxif_a_OBJECTS =  cli_processor_xif.o
+libcommonxif_a_LIBADD = 
+libcommonxif_a_OBJECTS =  common_xif.o
+libcoordxif_a_LIBADD = 
+libcoordxif_a_OBJECTS =  coord_xif.o
+libdatainxif_a_LIBADD = 
+libdatainxif_a_OBJECTS =  datain_xif.o
+libfeaifmgrxif_a_LIBADD = 
+libfeaifmgrxif_a_OBJECTS =  fea_ifmgr_xif.o
+libfeaifmgrclientxif_a_LIBADD = 
+libfeaifmgrclientxif_a_OBJECTS =  fea_ifmgr_client_xif.o
+libfeaftixif_a_LIBADD = 
+libfeaftixif_a_OBJECTS =  fea_fti_xif.o
+libfearawpkt_a_LIBADD = 
+libfearawpkt_a_OBJECTS =  fea_rawpkt_xif.o
+libfearawpktclient_a_LIBADD = 
+libfearawpktclient_a_OBJECTS =  fea_rawpkt_client_xif.o
+libfinderxif_a_LIBADD = 
+libfinderxif_a_OBJECTS =  finder_xif.o
+libfinderclientxif_a_LIBADD = 
+libfinderclientxif_a_OBJECTS =  finder_client_xif.o
+libmfeaxif_a_LIBADD = 
+libmfeaxif_a_OBJECTS =  mfea_xif.o
+libmfeaclientxif_a_LIBADD = 
+libmfeaclientxif_a_OBJECTS =  mfea_client_xif.o
+libmld6igmpxif_a_LIBADD = 
+libmld6igmpxif_a_OBJECTS =  mld6igmp_xif.o
+libmld6igmpclientxif_a_LIBADD = 
+libmld6igmpclientxif_a_OBJECTS =  mld6igmp_client_xif.o
+libospfxif_a_LIBADD = 
+libospfxif_a_OBJECTS =  ospf_xif.o
+libpimxif_a_LIBADD = 
+libpimxif_a_OBJECTS =  pim_xif.o
+libribxif_a_LIBADD = 
+libribxif_a_OBJECTS =  rib_xif.o
+libribclientxif_a_LIBADD = 
+libribclientxif_a_OBJECTS =  rib_client_xif.o
+librtrmgrxif_a_LIBADD = 
+librtrmgrxif_a_OBJECTS =  rtrmgr_xif.o
+librtrmgr_clientxif_a_LIBADD = 
+librtrmgr_clientxif_a_OBJECTS =  rtrmgr_client_xif.o
+libtestpeerxif_a_LIBADD = 
+libtestpeerxif_a_OBJECTS =  test_peer_xif.o
+libtestxif_a_LIBADD = 
+libtestxif_a_OBJECTS =  test_xif.o
+CXXFLAGS = @CXXFLAGS@
+CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  Makefile.am Makefile.in
+
+
+PACKAGE = @PACKAGE@
+VERSION = @VERSION@
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = tar
+GZIP_ENV = --best
+DEP_FILES =  .deps/bgp_xif.P .deps/cli_manager_xif.P \
+.deps/cli_processor_xif.P .deps/common_xif.P .deps/coord_xif.P \
+.deps/datain_xif.P .deps/fea_fti_xif.P .deps/fea_ifmgr_client_xif.P \
+.deps/fea_ifmgr_xif.P .deps/fea_rawpkt_client_xif.P \
+.deps/fea_rawpkt_xif.P .deps/finder_client_xif.P .deps/finder_xif.P \
+.deps/mfea_client_xif.P .deps/mfea_xif.P .deps/mld6igmp_client_xif.P \
+.deps/mld6igmp_xif.P .deps/ospf_xif.P .deps/pim_xif.P \
+.deps/rib_client_xif.P .deps/rib_xif.P .deps/rtrmgr_client_xif.P \
+.deps/rtrmgr_xif.P .deps/test_peer_xif.P .deps/test_xif.P
+SOURCES = $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaftixif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfinderxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES)
+OBJECTS = $(libbgpxif_a_OBJECTS) $(libclimanagerxif_a_OBJECTS) $(libcliprocessorxif_a_OBJECTS) $(libcommonxif_a_OBJECTS) $(libcoordxif_a_OBJECTS) $(libdatainxif_a_OBJECTS) $(libfeaifmgrxif_a_OBJECTS) $(libfeaifmgrclientxif_a_OBJECTS) $(libfeaftixif_a_OBJECTS) $(libfearawpkt_a_OBJECTS) $(libfearawpktclient_a_OBJECTS) $(libfinderxif_a_OBJECTS) $(libfinderclientxif_a_OBJECTS) $(libmfeaxif_a_OBJECTS) $(libmfeaclientxif_a_OBJECTS) $(libmld6igmpxif_a_OBJECTS) $(libmld6igmpclientxif_a_OBJECTS) $(libospfxif_a_OBJECTS) $(libpimxif_a_OBJECTS) $(libribxif_a_OBJECTS) $(libribclientxif_a_OBJECTS) $(librtrmgrxif_a_OBJECTS) $(librtrmgr_clientxif_a_OBJECTS) $(libtestpeerxif_a_OBJECTS) $(libtestxif_a_OBJECTS)
+
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .cc .o .s
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu xrl/interfaces/Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+
+mostlyclean-noinstLIBRARIES:
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+
+distclean-noinstLIBRARIES:
+
+maintainer-clean-noinstLIBRARIES:
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+libbgpxif.a: $(libbgpxif_a_OBJECTS) $(libbgpxif_a_DEPENDENCIES)
+	-rm -f libbgpxif.a
+	$(AR) cru libbgpxif.a $(libbgpxif_a_OBJECTS) $(libbgpxif_a_LIBADD)
+	$(RANLIB) libbgpxif.a
+
+libclimanagerxif.a: $(libclimanagerxif_a_OBJECTS) $(libclimanagerxif_a_DEPENDENCIES)
+	-rm -f libclimanagerxif.a
+	$(AR) cru libclimanagerxif.a $(libclimanagerxif_a_OBJECTS) $(libclimanagerxif_a_LIBADD)
+	$(RANLIB) libclimanagerxif.a
+
+libcliprocessorxif.a: $(libcliprocessorxif_a_OBJECTS) $(libcliprocessorxif_a_DEPENDENCIES)
+	-rm -f libcliprocessorxif.a
+	$(AR) cru libcliprocessorxif.a $(libcliprocessorxif_a_OBJECTS) $(libcliprocessorxif_a_LIBADD)
+	$(RANLIB) libcliprocessorxif.a
+
+libcommonxif.a: $(libcommonxif_a_OBJECTS) $(libcommonxif_a_DEPENDENCIES)
+	-rm -f libcommonxif.a
+	$(AR) cru libcommonxif.a $(libcommonxif_a_OBJECTS) $(libcommonxif_a_LIBADD)
+	$(RANLIB) libcommonxif.a
+
+libcoordxif.a: $(libcoordxif_a_OBJECTS) $(libcoordxif_a_DEPENDENCIES)
+	-rm -f libcoordxif.a
+	$(AR) cru libcoordxif.a $(libcoordxif_a_OBJECTS) $(libcoordxif_a_LIBADD)
+	$(RANLIB) libcoordxif.a
+
+libdatainxif.a: $(libdatainxif_a_OBJECTS) $(libdatainxif_a_DEPENDENCIES)
+	-rm -f libdatainxif.a
+	$(AR) cru libdatainxif.a $(libdatainxif_a_OBJECTS) $(libdatainxif_a_LIBADD)
+	$(RANLIB) libdatainxif.a
+
+libfeaifmgrxif.a: $(libfeaifmgrxif_a_OBJECTS) $(libfeaifmgrxif_a_DEPENDENCIES)
+	-rm -f libfeaifmgrxif.a
+	$(AR) cru libfeaifmgrxif.a $(libfeaifmgrxif_a_OBJECTS) $(libfeaifmgrxif_a_LIBADD)
+	$(RANLIB) libfeaifmgrxif.a
+
+libfeaifmgrclientxif.a: $(libfeaifmgrclientxif_a_OBJECTS) $(libfeaifmgrclientxif_a_DEPENDENCIES)
+	-rm -f libfeaifmgrclientxif.a
+	$(AR) cru libfeaifmgrclientxif.a $(libfeaifmgrclientxif_a_OBJECTS) $(libfeaifmgrclientxif_a_LIBADD)
+	$(RANLIB) libfeaifmgrclientxif.a
+
+libfeaftixif.a: $(libfeaftixif_a_OBJECTS) $(libfeaftixif_a_DEPENDENCIES)
+	-rm -f libfeaftixif.a
+	$(AR) cru libfeaftixif.a $(libfeaftixif_a_OBJECTS) $(libfeaftixif_a_LIBADD)
+	$(RANLIB) libfeaftixif.a
+
+libfearawpkt.a: $(libfearawpkt_a_OBJECTS) $(libfearawpkt_a_DEPENDENCIES)
+	-rm -f libfearawpkt.a
+	$(AR) cru libfearawpkt.a $(libfearawpkt_a_OBJECTS) $(libfearawpkt_a_LIBADD)
+	$(RANLIB) libfearawpkt.a
+
+libfearawpktclient.a: $(libfearawpktclient_a_OBJECTS) $(libfearawpktclient_a_DEPENDENCIES)
+	-rm -f libfearawpktclient.a
+	$(AR) cru libfearawpktclient.a $(libfearawpktclient_a_OBJECTS) $(libfearawpktclient_a_LIBADD)
+	$(RANLIB) libfearawpktclient.a
+
+libfinderxif.a: $(libfinderxif_a_OBJECTS) $(libfinderxif_a_DEPENDENCIES)
+	-rm -f libfinderxif.a
+	$(AR) cru libfinderxif.a $(libfinderxif_a_OBJECTS) $(libfinderxif_a_LIBADD)
+	$(RANLIB) libfinderxif.a
+
+libfinderclientxif.a: $(libfinderclientxif_a_OBJECTS) $(libfinderclientxif_a_DEPENDENCIES)
+	-rm -f libfinderclientxif.a
+	$(AR) cru libfinderclientxif.a $(libfinderclientxif_a_OBJECTS) $(libfinderclientxif_a_LIBADD)
+	$(RANLIB) libfinderclientxif.a
+
+libmfeaxif.a: $(libmfeaxif_a_OBJECTS) $(libmfeaxif_a_DEPENDENCIES)
+	-rm -f libmfeaxif.a
+	$(AR) cru libmfeaxif.a $(libmfeaxif_a_OBJECTS) $(libmfeaxif_a_LIBADD)
+	$(RANLIB) libmfeaxif.a
+
+libmfeaclientxif.a: $(libmfeaclientxif_a_OBJECTS) $(libmfeaclientxif_a_DEPENDENCIES)
+	-rm -f libmfeaclientxif.a
+	$(AR) cru libmfeaclientxif.a $(libmfeaclientxif_a_OBJECTS) $(libmfeaclientxif_a_LIBADD)
+	$(RANLIB) libmfeaclientxif.a
+
+libmld6igmpxif.a: $(libmld6igmpxif_a_OBJECTS) $(libmld6igmpxif_a_DEPENDENCIES)
+	-rm -f libmld6igmpxif.a
+	$(AR) cru libmld6igmpxif.a $(libmld6igmpxif_a_OBJECTS) $(libmld6igmpxif_a_LIBADD)
+	$(RANLIB) libmld6igmpxif.a
+
+libmld6igmpclientxif.a: $(libmld6igmpclientxif_a_OBJECTS) $(libmld6igmpclientxif_a_DEPENDENCIES)
+	-rm -f libmld6igmpclientxif.a
+	$(AR) cru libmld6igmpclientxif.a $(libmld6igmpclientxif_a_OBJECTS) $(libmld6igmpclientxif_a_LIBADD)
+	$(RANLIB) libmld6igmpclientxif.a
+
+libospfxif.a: $(libospfxif_a_OBJECTS) $(libospfxif_a_DEPENDENCIES)
+	-rm -f libospfxif.a
+	$(AR) cru libospfxif.a $(libospfxif_a_OBJECTS) $(libospfxif_a_LIBADD)
+	$(RANLIB) libospfxif.a
+
+libpimxif.a: $(libpimxif_a_OBJECTS) $(libpimxif_a_DEPENDENCIES)
+	-rm -f libpimxif.a
+	$(AR) cru libpimxif.a $(libpimxif_a_OBJECTS) $(libpimxif_a_LIBADD)
+	$(RANLIB) libpimxif.a
+
+libribxif.a: $(libribxif_a_OBJECTS) $(libribxif_a_DEPENDENCIES)
+	-rm -f libribxif.a
+	$(AR) cru libribxif.a $(libribxif_a_OBJECTS) $(libribxif_a_LIBADD)
+	$(RANLIB) libribxif.a
+
+libribclientxif.a: $(libribclientxif_a_OBJECTS) $(libribclientxif_a_DEPENDENCIES)
+	-rm -f libribclientxif.a
+	$(AR) cru libribclientxif.a $(libribclientxif_a_OBJECTS) $(libribclientxif_a_LIBADD)
+	$(RANLIB) libribclientxif.a
+
+librtrmgrxif.a: $(librtrmgrxif_a_OBJECTS) $(librtrmgrxif_a_DEPENDENCIES)
+	-rm -f librtrmgrxif.a
+	$(AR) cru librtrmgrxif.a $(librtrmgrxif_a_OBJECTS) $(librtrmgrxif_a_LIBADD)
+	$(RANLIB) librtrmgrxif.a
+
+librtrmgr_clientxif.a: $(librtrmgr_clientxif_a_OBJECTS) $(librtrmgr_clientxif_a_DEPENDENCIES)
+	-rm -f librtrmgr_clientxif.a
+	$(AR) cru librtrmgr_clientxif.a $(librtrmgr_clientxif_a_OBJECTS) $(librtrmgr_clientxif_a_LIBADD)
+	$(RANLIB) librtrmgr_clientxif.a
+
+libtestpeerxif.a: $(libtestpeerxif_a_OBJECTS) $(libtestpeerxif_a_DEPENDENCIES)
+	-rm -f libtestpeerxif.a
+	$(AR) cru libtestpeerxif.a $(libtestpeerxif_a_OBJECTS) $(libtestpeerxif_a_LIBADD)
+	$(RANLIB) libtestpeerxif.a
+
+libtestxif.a: $(libtestxif_a_OBJECTS) $(libtestxif_a_DEPENDENCIES)
+	-rm -f libtestxif.a
+	$(AR) cru libtestxif.a $(libtestxif_a_OBJECTS) $(libtestxif_a_LIBADD)
+	$(RANLIB) libtestxif.a
+.cc.o:
+	$(CXXCOMPILE) -c $<
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = xrl/interfaces
+
+distdir: $(DISTFILES)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(top_distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu xrl/interfaces/Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES)
+
+mostlyclean-depend:
+
+clean-depend:
+
+distclean-depend:
+	-rm -rf .deps
+
+maintainer-clean-depend:
+
+%.o: %.c
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.c
+	@echo '$(LTCOMPILE) -c $<'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+
+%.o: %.cc
+	@echo '$(CXXCOMPILE) -c $<'; \
+	$(CXXCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.cc
+	@echo '$(LTCXXCOMPILE) -c $<'; \
+	$(LTCXXCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am:
+install-exec: install-exec-am
+
+install-data-am:
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am:
+uninstall: uninstall-am
+all-am: Makefile $(LIBRARIES)
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+
+
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
+		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-noinstLIBRARIES clean-compile clean-tags clean-depend \
+		clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-noinstLIBRARIES distclean-compile \
+		distclean-tags distclean-depend distclean-generic \
+		clean-am
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
+		maintainer-clean-compile maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
+clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile tags mostlyclean-tags distclean-tags \
+clean-tags maintainer-clean-tags distdir mostlyclean-depend \
+distclean-depend clean-depend maintainer-clean-depend info-am info \
+dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
+install-exec install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+@PY_BUILD@%_xif.hh %_xif.cc: %.xif $(CLNTGEN_PY)
+@PY_BUILD@	$(PYTHON) $(CLNTGEN_PY) $<
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

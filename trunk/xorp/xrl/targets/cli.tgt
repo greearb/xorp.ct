@@ -1,0 +1,6 @@
+/* $XORP: xorp/xrl/targets/cli.tgt,v 1.5 2002/11/05 17:26:27 hodson Exp $ */
+
+#include "common.xif"
+#include "cli_manager.xif"
+
+target cli implements common/0.1, cli_manager/0.1

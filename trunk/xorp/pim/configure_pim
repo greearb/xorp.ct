@@ -1,0 +1,226 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/pim/configure_pim,v 1.36 2002/12/09 14:07:52 pavlin Exp $
+#
+
+#
+# Send configuration commands to a running PIM process.
+#
+
+. ../mfea/xrl_mfea_shell_funcs.sh
+. ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
+. ../pim/xrl_pim_shell_funcs.sh
+
+MODULE_NAME="PIM-SM"
+HOSTNAME=`hostname`
+
+echo "Configuring $MODULE_NAME on $HOSTNAME..."
+
+###############################################################
+# USER CONFIGURATION BEGIN
+###############################################################
+
+#
+# Select the vifs to enable, and the Candidate-BSR and Candidate-RP vifs.
+#
+case $HOSTNAME in
+	xorp1)
+	ENABLE_VIFS="dc1 dc2 dc4"
+	CAND_BSR_VIF="dc1"
+	CAND_RP_VIF="dc1"
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
+	STATIC_RPS="10.2.0.1"
+	STATIC_RPS=""
+	;;
+
+	xorp2)
+	ENABLE_VIFS="dc1 dc2"
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
+	CAND_BSR_VIF="dc1"
+	CAND_RP_VIF="dc1"
+	STATIC_RPS="10.2.0.1"
+	STATIC_RPS=""
+	;;
+
+	xorp3)
+	ENABLE_VIFS="dc0 dc1 dc2 dc3"
+	ENABLE_VIFS="dc0 dc1 dc2"
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
+	CAND_BSR_VIF="dc0"
+	CAND_RP_VIF="dc0"
+	STATIC_RPS="10.2.0.1"
+	STATIC_RPS=""
+	;;
+
+	xorp4)
+	ENABLE_VIFS="eth0 eth1 eth2 eth4 eth5 eth6 eth7"
+	ENABLE_VIFS="eth2 eth6"
+	CAND_BSR_VIF="eth7"
+	CAND_RP_VIF="eth7"
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
+	STATIC_RPS="10.2.0.1"
+	STATIC_RPS=""
+	;;
+
+	possum.icir.org)
+	ENABLE_VIFS="fxp0"
+	CAND_BSR_VIF="fxp0"
+	CAND_RP_VIF="fxp0"
+	STATIC_RPS=""
+	;;
+
+	oreo.icir.org)
+	ENABLE_VIFS="wi0"
+	CAND_BSR_VIF="wi0"
+	CAND_RP_VIF="wi0"
+	STATIC_RPS=""
+	;;
+	
+	*)
+		echo "Unknown host : $HOSTNAME"
+		exit 1
+	;;
+esac
+
+#
+# Comment-out to disable log trace
+#
+MFEA_ENABLE_LOG_TRACE=yes
+MLD6IGMP_ENABLE_LOG_TRACE=yes
+PIM_ENABLE_LOG_TRACE=yes
+
+###############################################################
+# USER CONFIGURATION END
+###############################################################
+
+
+# Add the PIM 'register_vif' to the list of interfaces to enable
+MFEA_ENABLE_VIFS="$ENABLE_VIFS register_vif"
+MLD6IGMP_ENABLE_VIFS="$ENABLE_VIFS"
+PIM_ENABLE_VIFS="$ENABLE_VIFS register_vif"
+
+#
+# Disable log trace
+#
+if [ "$MFEA_ENABLE_LOG_TRACE" != "yes" ] ; then
+	mfea_disable_log_trace
+fi
+if [ "$MLD6IGMP_ENABLE_LOG_TRACE" != "yes" ] ; then
+	mld6igmp_disable_log_trace
+fi
+if [ "$PIM_ENABLE_LOG_TRACE" != "yes" ] ; then
+	pim_disable_log_trace
+fi
+
+#
+# Enable and start MFEA CLI
+#
+mfea_enable_cli
+mfea_start_cli
+
+#
+# Enable and start MFEA
+#
+mfea_enable_mfea
+mfea_start_mfea
+
+#
+# Enable and start MFEA vifs
+#
+for vif in $MFEA_ENABLE_VIFS; do
+	mfea_enable_vif $vif
+	mfea_start_vif $vif
+done
+
+
+#
+# Enable and start MLD6IGMP CLI
+#
+mld6igmp_enable_cli
+mld6igmp_start_cli
+
+#
+# Enable and start MLD6IGMP
+#
+mld6igmp_enable_mld6igmp
+mld6igmp_start_mld6igmp
+
+#
+# Wait to get the list of vifs
+#
+mld6igmp_is_vif_setup_completed
+
+#
+# Enable and start MLD6IGMP vifs
+#
+for vif in $MLD6IGMP_ENABLE_VIFS; do
+	mld6igmp_enable_vif $vif
+	mld6igmp_start_vif $vif
+done
+
+
+#
+# Enable and start PIM CLI
+#
+pim_enable_cli
+pim_start_cli
+
+#
+# Enable and start PIM
+#
+pim_enable_pim
+pim_start_pim
+
+#
+# Wait to get the list of vifs
+#
+pim_is_vif_setup_completed
+
+#
+# Enable and start PIM vifs
+#
+for vif in $PIM_ENABLE_VIFS; do
+	pim_enable_vif $vif
+	
+	# XXX: temp. for testing purpose
+	#if [ $vif = "register_vif" ] ; then
+	#    sleep 5;
+	#fi
+	
+	pim_start_vif $vif
+done
+
+#
+# Add static RP configuration
+#
+if [ X"$STATIC_RPS" != X ] ; then
+	for rp in $STATIC_RPS; do
+		pim_add_config_rp4 224.0.0.0/4 $rp 192 0
+	done
+fi
+pim_config_rp_done
+
+#
+# Enable and start PIM BSR
+#
+pim_enable_bsr
+if [ X"$CAND_BSR_VIF" != X ] ; then
+	pim_add_config_cand_bsr_by_vif_name4 false 224.0.0.0/4 $CAND_BSR_VIF 1 30
+fi
+if [ X"$CAND_RP_VIF" != X ] ; then
+	pim_add_config_cand_rp_by_vif_name4 false 224.0.0.0/4 $CAND_RP_VIF 192 150
+fi
+pim_start_bsr
+
+
+#
+# Done
+#
+echo "Configuration done."
+
+exit 0

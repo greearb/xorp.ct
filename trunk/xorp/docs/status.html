@@ -1,0 +1,113 @@
+<HTML>
+<HEAD>
+<TITLE>XORP Software Status</TITLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<H1>XORP Software Status</H1>
+<center><img src="processes3.png"></center>
+<P>
+See the <a href="index.html">software overview</a> for details of the XORP processes.
+<P>
+As of Release 0.1 (December 2002), the status is as follows:
+<DL>
+<DT><B>RIB</B>
+
+<DD>Release 0.1: The basic RIB is complete.  There are probably still many
+bugs but the core is reasonably stable. IPv4 and IPv6 are supported,
+and both unicast and multicast routes can be stored.  There's no
+external way to monitor what's going on.  While regular BGP nexthop
+resolution using IGP data works, recursive nexthop resolution does not
+work.  Route redistribution from one routing protocol to another
+doesn't yet work.
+
+<DT><B>FEA</B>
+
+<DD>Release 0.1: The FEA for FreeBSD is basically complete.  The FEA for
+Click doesn't currently work.  The FEA for Linux doesn't exist.
+
+<P>
+<DT><B>MFEA</B>
+<DD>For the time being, multicast routing is handled by a separate FEA.
+<P>
+Release 0.1: The Multicast FEA for FreeBSD and Linux is basically complete.
+The MFEA for Click doesn't exist.
+
+<P>
+<DT><B>BGP</B>
+
+<DD>Release 0.1: The core of BGP is basically complete.  There are
+probably still many bugs but the core is reasonably stable.  
+<P>
+There are <B>no</B> features.  You can't monitor what's going on.  You
+can't install any optional filters, which means in practice it isn't
+too useful.  Redistribution of routes into BGP and origination of
+routes currently work.  IPv4 routing works.  IPv6 doesn't, but the
+core of the architecture is IPv6-ready.
+
+<P>
+<DT><B>OSPF</B>
+
+<DD>Release 0.1: A reasonably complete port of OSPFd to the XORP
+environment exists, but it hasn't been well enough tested to know if
+it works or doesn't work.
+
+<P>
+<DT><B>RIP</B>
+
+<DD>Release 0.1: Port to XORP not yet done.
+
+<P>
+<DT><B>IS-IS</B>
+
+<DD>Not yet started.
+
+<P>
+<DT><B>PIM-SM</B>
+
+<DD>Release 0.1: The PIM-SM implementation (including the Bootstrap mechanism)
+is reasonably complete, but testing continues.  The code is not yet
+stable. The SSM support is not yet started.
+
+<P>
+<DT><B>IGMP</B>
+
+<DD>Release 0.1: The IGMPv1 and v2 implementation is reasonably complete, but
+testing continues.  The IGMPv3 implementation is not yet started.
+
+<P>
+<DT><B>MLD</B>
+
+<DD>Release 0.1: The MLDv1 implementation is reasonably complete, but
+testing continues.  The MLDv2 implementation is not yet started.
+
+<P>
+<DT><B>Rtrmgr and Xorpsh Command Line Interface</B>
+
+<DD>Release 0.1: The rtrmgr is capable of starting up and using xorpsh, a
+user can reconfigure the XORP processes that comprise a
+router. However, the code is not yet stable.  Operational mode
+(monitoring a running router) is work in progress.
+
+<P>
+<DT><B>LibXIPC</B>
+
+<DD>Release 0.1: The XRL inter-process communication code is stable and
+working very well, but many functional enhancements are in progress
+that will improve performance and flexibility.
+<P>
+<DT><B>SNMP</B>
+
+<DD>Not yet started.
+</DL>
+
+<hr>
+<address><a href="mailto:feedback@xorp.org">feedback@xorp.org</a></address>
+<!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
+<!-- hhmts start -->
+<small>
+Last modified: $XORP: xorp/docs/status.html,v 1.4 2002/12/11 22:55:04 hodson Exp $
+</small>
+<!-- hhmts end -->
+
+</BODY>
+</HTML>
