@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.4 2003/05/21 05:32:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.5 2003/05/21 14:26:27 pavlin Exp $"
 
 
 //
@@ -1837,6 +1837,25 @@ MfeaNode::mrib_table_read_timer_timeout()
     MribTable new_mrib_table(family());
     MribTable::iterator iter;
     bool is_changed = false;
+    
+    if (maxvifs() == 0) {
+	//
+	// XXX: we don't have vifs yet, hence no point to get the MRIB table
+	// Restart the timer after a much shorter interval.
+	//
+	TimeVal timeval(MRIB_TABLE_READ_PERIOD_SEC,
+			MRIB_TABLE_READ_PERIOD_USEC);
+	timeval = timeval/4 + TimeVal(1, 0);
+	
+	//
+	// Start again the timer
+	//
+	_mrib_table_read_timer =
+	    eventloop().new_oneoff_after(timeval,
+					 callback(this,
+						  &MfeaNode::mrib_table_read_timer_timeout));
+	return;
+    }
     
     //
     // Add all new entries to the temporary table
