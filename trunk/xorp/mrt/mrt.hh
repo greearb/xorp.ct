@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrt.hh,v 1.2 2003/01/16 19:31:08 pavlin Exp $
+// $XORP: xorp/mrt/mrt.hh,v 1.3 2003/03/10 23:20:45 hodson Exp $
 
 #ifndef __MRT_MRT_HH__
 #define __MRT_MRT_HH__
@@ -439,6 +439,8 @@ public:
 	
 	IPvXNet next_prefix_s(prefix_s);
 	++next_prefix_s;
+	if (next_prefix_s.masked_addr().is_zero())
+	    return (_sg_table.end());		// XXX: special case
 	
 	const_sg_iterator pos
 	    = _sg_table.lower_bound(
@@ -479,6 +481,8 @@ public:
 	
 	IPvXNet next_prefix_g(prefix_g);
 	++next_prefix_g;
+	if (next_prefix_g.masked_addr().is_zero())
+	    return (_gs_table.end());		// XXX: special case
 	
 	const_gs_iterator pos
 	    = _gs_table.lower_bound(
