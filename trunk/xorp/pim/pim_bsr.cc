@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.21 2003/05/21 05:32:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.22 2003/08/07 01:09:10 pavlin Exp $"
 
 
 //
@@ -649,7 +649,7 @@ PimBsr::add_rps_to_rp_table()
 		pim_node().rp_table().add_rp(bsr_rp->rp_addr(),
 					     bsr_rp->rp_priority(),
 					     bsr_group_prefix->group_prefix(),
-					     bsr_zone->hash_masklen(),
+					     bsr_zone->hash_mask_len(),
 					     PimRp::RP_LEARNED_METHOD_BOOTSTRAP);
 	    }
 	}
@@ -678,7 +678,7 @@ PimBsr::add_rps_to_rp_table()
 		pim_node().rp_table().add_rp(bsr_rp->rp_addr(),
 					     bsr_rp->rp_priority(),
 					     bsr_group_prefix->group_prefix(),
-					     bsr_zone->hash_masklen(),
+					     bsr_zone->hash_mask_len(),
 					     PimRp::RP_LEARNED_METHOD_BOOTSTRAP);
 	    }
 	}
@@ -914,11 +914,11 @@ PimBsr::can_add_active_bsr_zone(const BsrZone& bsr_zone,
 //
 BsrZone	*
 PimBsr::add_test_bsr_zone(const PimScopeZoneId& zone_id, const IPvX& bsr_addr,
-			  uint8_t bsr_priority, uint8_t hash_masklen,
+			  uint8_t bsr_priority, uint8_t hash_mask_len,
 			  uint16_t fragment_tag)
 {
     BsrZone *new_bsr_zone = new BsrZone(*this, bsr_addr, bsr_priority,
-					hash_masklen, fragment_tag);
+					hash_mask_len, fragment_tag);
     new_bsr_zone->set_zone_id(zone_id);
     new_bsr_zone->set_test_bsr_zone(true);
     _test_bsr_zone_list.push_back(new_bsr_zone);
@@ -1105,7 +1105,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
       _is_test_bsr_zone(bsr_zone.is_test_bsr_zone()),
       _bsr_addr(bsr_zone.bsr_addr()),
       _bsr_priority(bsr_zone.bsr_priority()),
-      _hash_masklen(bsr_zone.hash_masklen()),
+      _hash_mask_len(bsr_zone.hash_mask_len()),
       _fragment_tag(bsr_zone.fragment_tag()),
       _is_accepted_message(bsr_zone.is_accepted_message()),
       _is_unicast_message(bsr_zone.is_unicast_message()),
@@ -1167,7 +1167,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const PimScopeZoneId& zone_id)
       _is_test_bsr_zone(false),
       _bsr_addr(IPvX::ZERO(_pim_bsr.family())),
       _bsr_priority(0),
-      _hash_masklen(PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(_pim_bsr.family())),
+      _hash_mask_len(PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(_pim_bsr.family())),
       _fragment_tag(RANDOM(0xffff)),
       _is_accepted_message(false),
       _is_unicast_message(false),
@@ -1184,7 +1184,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const PimScopeZoneId& zone_id)
 }
 
 BsrZone::BsrZone(PimBsr& pim_bsr, const IPvX& bsr_addr, uint8_t bsr_priority,
-		 uint8_t hash_masklen, uint16_t fragment_tag)
+		 uint8_t hash_mask_len, uint16_t fragment_tag)
     : _pim_bsr(pim_bsr),
       _is_config_bsr_zone(false),
       _is_active_bsr_zone(false),
@@ -1192,7 +1192,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const IPvX& bsr_addr, uint8_t bsr_priority,
       _is_test_bsr_zone(false),
       _bsr_addr(bsr_addr),
       _bsr_priority(bsr_priority),
-      _hash_masklen(hash_masklen),
+      _hash_mask_len(hash_mask_len),
       _fragment_tag(fragment_tag),
       _is_accepted_message(false),
       _is_unicast_message(false),
@@ -1374,15 +1374,15 @@ BsrZone::can_merge_rp_set(const BsrZone& bsr_zone, string& error_msg) const
     }
     
     //
-    // Check the new fragment hash masklen for consistency
+    // Check the new fragment hash mask length for consistency
     //
-    if (hash_masklen() != bsr_zone.hash_masklen()) {
+    if (hash_mask_len() != bsr_zone.hash_mask_len()) {
 	error_msg = c_format("inconsistent fragment: "
-			     "old fragment for zone %s has hash masklen %d; "
-			     "new fragment has hash masklen %d",
+			     "old fragment for zone %s has hash mask_len %d; "
+			     "new fragment has hash mask_len %d",
 			     cstring(zone_id()),
-			     hash_masklen(),
-			     bsr_zone.hash_masklen());
+			     hash_mask_len(),
+			     bsr_zone.hash_mask_len());
 	return (false);
     }
     
@@ -1539,7 +1539,7 @@ BsrZone::store_rp_set(const BsrZone& bsr_zone)
     // Set the new BSR
     _bsr_addr = bsr_zone.bsr_addr();
     _bsr_priority = bsr_zone.bsr_priority();
-    _hash_masklen = bsr_zone.hash_masklen();
+    _hash_mask_len = bsr_zone.hash_mask_len();
     _fragment_tag = bsr_zone.fragment_tag();
     _is_accepted_message = bsr_zone.is_accepted_message(),
     _is_unicast_message = bsr_zone.is_unicast_message();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.4 2003/05/22 01:05:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.5 2003/09/20 00:41:02 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -172,7 +172,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
     
     IPvX gateway_addr(family);
     IPvX dst_addr(family);
-    int dst_masklen = 0;
+    int dst_mask_len = 0;
     
     // rtmsg check
     if (rtmsg->rtm_type == RTN_LOCAL) {
@@ -218,9 +218,9 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
     }
     
     //
-    // Get the destination masklen
+    // Get the destination mask length
     //
-    dst_masklen = rtmsg->rtm_dst_len;
+    dst_mask_len = rtmsg->rtm_dst_len;
     
     //
     // Get the interface index
@@ -252,7 +252,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
     // TODO: define default routing metric and admin distance instead of ~0
     //
     // TODO: XXX: PAVPAVPAV: must set the xorp_route flag!!
-    fte = FteX(IPvXNet(dst_addr, dst_masklen), gateway_addr, if_name, if_name,
+    fte = FteX(IPvXNet(dst_addr, dst_mask_len), gateway_addr, if_name, if_name,
 	       ~0, ~0, false /* TODO: XXX: PAVPAVPAV: xorp_route */);
     
     return true;

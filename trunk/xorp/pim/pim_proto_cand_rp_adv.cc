@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.10 2003/06/16 22:48:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.11 2003/08/12 15:11:37 pavlin Exp $"
 
 
 //
@@ -70,7 +70,7 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
     IPvX	rp_addr(family());
     int		rcvd_family;
     IPvX	group_addr(family());
-    uint8_t	group_masklen;
+    uint8_t	group_mask_len;
     IPvXNet	group_prefix(family());
     uint8_t	group_addr_reserved_flags;
     PimBsr&	pim_bsr = pim_node().pim_bsr();
@@ -168,13 +168,13 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
     }
     
     while (prefix_count--) {
-	GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_masklen,
+	GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_mask_len,
 			       group_addr_reserved_flags, buffer);
 	if (group_addr_reserved_flags & EGADDR_Z_BIT)
 	    is_scope_zone = true;
 	else
 	    is_scope_zone = false;
-	group_prefix = IPvXNet(group_addr, group_masklen);
+	group_prefix = IPvXNet(group_addr, group_mask_len);
 	if (! group_prefix.masked_addr().is_multicast()) {
 	    XLOG_WARNING("RX %s from %s to %s: "
 			 "invalid group address: %s ",
@@ -264,12 +264,12 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
     ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
 
- rcvd_masklen_error:
+ rcvd_mask_len_error:
     XLOG_WARNING("RX %s from %s to %s: "
-		 "invalid masklen = %d",
+		 "invalid group mask length = %d",
 		 PIMTYPE2ASCII(PIM_CAND_RP_ADV),
 		 cstring(src), cstring(dst),
-		 group_masklen);
+		 group_mask_len);
     return (XORP_ERROR);
     
  rcvd_family_error:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.7 2003/09/30 03:07:59 pavlin Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.8 2003/09/30 03:17:03 pavlin Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -212,7 +212,7 @@ public:
 	throw (InvalidFamily)
     {
 	return IPvXNet(IPvX::MULTICAST_BASE(family),
-		       IPvX::ip_multicast_base_address_masklen(family));
+		       IPvX::ip_multicast_base_address_mask_len(family));
     }
 
     /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.9 2003/09/30 03:07:59 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.10 2003/09/30 03:17:03 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -445,51 +445,51 @@ public:
     size_t addr_bitlen() const { return NBBY * sizeof(uint8_t) * addr_size(); }
 
     /**
-     * Get the masklen for the multicast base address.
+     * Get the mask length for the multicast base address.
      * 
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   size_t my_len = IPvX::ip_multicast_base_address_masklen(my_family);
+     *   size_t my_len = IPvX::ip_multicast_base_address_mask_len(my_family);
      * 
      * @param family the address family.
-     * @return the multicast base address masklen for an address of
+     * @return the multicast base address mask length for an address of
      * address family of @ref family.
      */
-    static size_t ip_multicast_base_address_masklen(int family)
+    static size_t ip_multicast_base_address_mask_len(int family)
 	throw (InvalidFamily);
 
     /**
-     * Get the masklen for the multicast base address for this address.
+     * Get the mask length for the multicast base address for this address.
      * 
      * Note that this is not a static function, hence it has to be used with
      * a particular object. Example:
-     *   size_t my_len = ipvx.ip_multicast_base_address_masklen();
+     *   size_t my_len = ipvx.ip_multicast_base_address_mask_len();
      * 
      * @param family the address family.
-     * @return the multicast base address masklen for this IPvX address.
+     * @return the multicast base address mask length for this IPvX address.
      */
-    size_t ip_multicast_base_address_masklen() const {
-	return IPvX::ip_multicast_base_address_masklen(_af);
+    size_t ip_multicast_base_address_mask_len() const {
+	return IPvX::ip_multicast_base_address_mask_len(_af);
     }
     
     /**
      * Make an IPvX mask prefix.
      * 
      * @param family the address family.
-     * @param masklen the length of the mask to create.
-     * @return a new IPvX address that contains a mask of length @ref masklen.
+     * @param mask_len the length of the mask to create.
+     * @return a new IPvX address that contains a mask of length @ref mask_len.
      */
-    static IPvX make_prefix(int family, size_t masklen)
+    static IPvX make_prefix(int family, size_t mask_len)
 	throw (InvalidFamily, InvalidNetmaskLength);
 
     /**
      * Make an IPvX mask prefix for the address family of this address.
      * 
-     * @param masklen the length of the mask to create.
-     * @return a new IPvX address that contains a mask of length @ref masklen.
+     * @param mask_len the length of the mask to create.
+     * @return a new IPvX address that contains a mask of length @ref mask_len.
      */
-    IPvX make_prefix(size_t masklen) const throw (InvalidNetmaskLength) {
-	return IPvX::make_prefix(_af, masklen);
+    IPvX make_prefix(size_t mask_len) const throw (InvalidNetmaskLength) {
+	return IPvX::make_prefix(_af, mask_len);
     }
     
     /**
@@ -507,7 +507,7 @@ public:
      * @return the prefix length of the contiguous mask presumably stored
      * as an IPvX address.
      */
-    size_t masklen() const;
+    size_t mask_len() const;
     
     /**
      * Test if this address is IPv4 address.

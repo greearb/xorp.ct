@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_rp.cc,v 1.3 2003/05/21 05:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_rp.cc,v 1.4 2003/08/07 01:09:10 pavlin Exp $"
 
 
 //
@@ -230,8 +230,8 @@ RpTable::compare_rp(const IPvX& group_addr, PimRp *rp1, PimRp *rp2) const
     uint32_t derived_rp1 = 0;
     uint32_t derived_rp2 = 0;
     do {
-	IPvXNet group_masked_addr1(group_addr, rp1->hash_masklen());
-	IPvXNet group_masked_addr2(group_addr, rp2->hash_masklen());
+	IPvXNet group_masked_addr1(group_addr, rp1->hash_mask_len());
+	IPvXNet group_masked_addr2(group_addr, rp2->hash_mask_len());
 	
 	derived_masked_group1 = derived_addr(group_masked_addr1.masked_addr());
 	derived_masked_group2 = derived_addr(group_masked_addr2.masked_addr());
@@ -279,7 +279,7 @@ PimRp *
 RpTable::add_rp(const IPvX& rp_addr,
 		uint8_t rp_priority,
 		const IPvXNet& group_prefix,
-		uint8_t hash_masklen,
+		uint8_t hash_mask_len,
 		PimRp::rp_learned_method_t rp_learned_method)
 {
     //
@@ -306,14 +306,14 @@ RpTable::add_rp(const IPvX& rp_addr,
 	    continue;
 	}
 	if ((pim_rp->rp_priority() == rp_priority)
-	    && (pim_rp->hash_masklen() == hash_masklen)) {
+	    && (pim_rp->hash_mask_len() == hash_mask_len)) {
 	    // Found exactly same entry. Return it.
 	    return (pim_rp);
 	}
 	// Found an entry for same RP and group prefix.
-	// Update its priority and hash masklen.
+	// Update its priority and hash mask length.
 	pim_rp->set_rp_priority(rp_priority);
-	pim_rp->set_hash_masklen(hash_masklen);
+	pim_rp->set_hash_mask_len(hash_mask_len);
 	pim_rp->set_is_updated(true);
 	return (pim_rp);
     }
@@ -322,7 +322,7 @@ RpTable::add_rp(const IPvX& rp_addr,
     // Add a new RP entry
     //
     PimRp *new_pim_rp = new PimRp(*this, rp_addr, rp_priority,
-				  group_prefix, hash_masklen,
+				  group_prefix, hash_mask_len,
 				  rp_learned_method);
     _rp_list.push_back(new_pim_rp);
     new_pim_rp->set_is_updated(true);
@@ -1036,13 +1036,13 @@ RpTable::has_rp_addr(const IPvX& rp_addr)
 }
 
 PimRp::PimRp(RpTable& rp_table, const IPvX& rp_addr, uint8_t rp_priority,
-	     const IPvXNet& group_prefix, uint8_t hash_masklen,
+	     const IPvXNet& group_prefix, uint8_t hash_mask_len,
 	     rp_learned_method_t rp_learned_method)
     : _rp_table(rp_table),
       _rp_addr(rp_addr),
       _rp_priority(rp_priority),
       _group_prefix(group_prefix),
-      _hash_masklen(hash_masklen),
+      _hash_mask_len(hash_mask_len),
       _rp_learned_method(rp_learned_method),
       _is_updated(true),
       _i_am_rp(_rp_table.pim_node().is_my_addr(rp_addr))
@@ -1055,7 +1055,7 @@ PimRp::PimRp(RpTable& rp_table, const PimRp& pim_rp)
       _rp_addr(pim_rp.rp_addr()),
       _rp_priority(pim_rp.rp_priority()),
       _group_prefix(pim_rp.group_prefix()),
-      _hash_masklen(pim_rp.hash_masklen()),
+      _hash_mask_len(pim_rp.hash_mask_len()),
       _rp_learned_method(pim_rp.rp_learned_method()),
       _is_updated(pim_rp.is_updated()),
       _i_am_rp(pim_rp.i_am_rp())

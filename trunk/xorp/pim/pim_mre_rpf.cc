@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.18 2003/07/03 07:13:42 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.19 2003/07/07 18:46:58 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -868,7 +868,7 @@ PimMre::recompute_mrib_next_hop_rp_changed()
     if (old_pim_nbr != NULL) {
 	bool new_group_bool = false; // Group together all (*,*,RP) entries
 	old_pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
-				  IPvX::ip_multicast_base_address_masklen(family()),
+				  IPvX::ip_multicast_base_address_mask_len(family()),
 				  MRT_ENTRY_RP,
 				  ACTION_PRUNE,
 				  old_pim_nbr->pim_vif().join_prune_holdtime().get(),
@@ -880,7 +880,7 @@ PimMre::recompute_mrib_next_hop_rp_changed()
     if (new_pim_nbr != NULL) {
 	bool new_group_bool = false; // Group together all (*,*,RP) entries
 	new_pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
-				  IPvX::ip_multicast_base_address_masklen(family()),
+				  IPvX::ip_multicast_base_address_mask_len(family()),
 				  MRT_ENTRY_RP,
 				  ACTION_JOIN,
 				  new_pim_nbr->pim_vif().join_prune_holdtime().get(),

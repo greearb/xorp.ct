@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.29 2003/08/16 18:05:12 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.30 2003/09/12 23:45:43 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1089,7 +1089,7 @@ protected:
      *  
      *  @param bsr_priority the BSR priority (larger is better).
      *  
-     *  @param hash_masklen the hash mask length.
+     *  @param hash_mask_len the hash mask length.
      */
     XrlCmdError pim_0_1_add_config_cand_bsr_by_vif_name4(
 	// Input values, 
@@ -1097,7 +1097,7 @@ protected:
 	const bool&	is_scope_zone, 
 	const string&	vif_name, 
 	const uint32_t&	bsr_priority, 
-	const uint32_t&	hash_masklen);
+	const uint32_t&	hash_mask_len);
 
     XrlCmdError pim_0_1_add_config_cand_bsr_by_vif_name6(
 	// Input values, 
@@ -1105,7 +1105,7 @@ protected:
 	const bool&	is_scope_zone, 
 	const string&	vif_name, 
 	const uint32_t&	bsr_priority, 
-	const uint32_t&	hash_masklen);
+	const uint32_t&	hash_mask_len);
 
     XrlCmdError pim_0_1_add_config_cand_bsr_by_addr4(
 	// Input values, 
@@ -1113,7 +1113,7 @@ protected:
 	const bool&	is_scope_zone, 
 	const IPv4&	cand_bsr_addr, 
 	const uint32_t&	bsr_priority, 
-	const uint32_t&	hash_masklen);
+	const uint32_t&	hash_mask_len);
 
     XrlCmdError pim_0_1_add_config_cand_bsr_by_addr6(
 	// Input values, 
@@ -1121,7 +1121,7 @@ protected:
 	const bool&	is_scope_zone, 
 	const IPv6&	cand_bsr_addr, 
 	const uint32_t&	bsr_priority, 
-	const uint32_t&	hash_masklen);
+	const uint32_t&	hash_mask_len);
 
     XrlCmdError pim_0_1_delete_config_cand_bsr4(
 	// Input values, 
@@ -1212,23 +1212,23 @@ protected:
      *  
      *  @param rp_priority the RP priority (smaller is better).
      *  
-     *  @param hash_masklen the hash masklen used in computing an RP for a
-     *  group. It should be same across all RPs. If set to zero, the default
-     *  one will be used.
+     *  @param hash_mask_len the hash mask length used in computing an RP
+     *  for a group. It should be same across all RPs. If set to zero,
+     *  the default one will be used.
      */
     XrlCmdError pim_0_1_add_config_static_rp4(
 	// Input values, 
 	const IPv4Net&	group_prefix, 
 	const IPv4&	rp_addr, 
 	const uint32_t&	rp_priority, 
-	const uint32_t&	hash_masklen);
+	const uint32_t&	hash_mask_len);
 
     XrlCmdError pim_0_1_add_config_static_rp6(
 	// Input values, 
 	const IPv6Net&	group_prefix, 
 	const IPv6&	rp_addr, 
 	const uint32_t&	rp_priority, 
-	const uint32_t&	hash_masklen);
+	const uint32_t&	hash_mask_len);
 
     XrlCmdError pim_0_1_delete_config_static_rp4(
 	// Input values, 
@@ -1449,7 +1449,7 @@ protected:
 	// Input values, 
 	const IPv4&	source_addr, 
 	const IPv4&	group_addr, 
-	const uint32_t&	group_masklen, 
+	const uint32_t&	group_mask_len, 
 	const string&	mrt_entry_type, 
 	const string&	action_jp, 
 	const uint32_t&	holdtime, 
@@ -1459,7 +1459,7 @@ protected:
 	// Input values, 
 	const IPv6&	source_addr, 
 	const IPv6&	group_addr, 
-	const uint32_t&	group_masklen, 
+	const uint32_t&	group_mask_len, 
 	const string&	mrt_entry_type, 
 	const string&	action_jp, 
 	const uint32_t&	holdtime, 
@@ -1518,7 +1518,8 @@ protected:
      *  
      *  @param bsr_priority the priority of the Bootstrap router.
      *  
-     *  @param hash_masklen the hash masklen inside the Bootstrap messages.
+     *  @param hash_mask_len the hash mask length inside the Bootstrap
+     *  messages.
      *  
      *  @param fragment_tag the fragment tag inside the Bootstrap messages.
      */
@@ -1528,7 +1529,7 @@ protected:
 	const bool&	zone_id_is_scope_zone, 
 	const IPv4&	bsr_addr, 
 	const uint32_t&	bsr_priority, 
-	const uint32_t&	hash_masklen, 
+	const uint32_t&	hash_mask_len, 
 	const uint32_t&	fragment_tag);
 
     XrlCmdError pim_0_1_add_test_bsr_zone6(
@@ -1537,7 +1538,7 @@ protected:
 	const bool&	zone_id_is_scope_zone, 
 	const IPv6&	bsr_addr, 
 	const uint32_t&	bsr_priority, 
-	const uint32_t&	hash_masklen, 
+	const uint32_t&	hash_mask_len, 
 	const uint32_t&	fragment_tag);
 
     XrlCmdError pim_0_1_add_test_bsr_group_prefix4(

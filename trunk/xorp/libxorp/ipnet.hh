@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.7 2003/04/26 06:15:04 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.8 2003/09/30 03:07:58 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -223,7 +223,7 @@ public:
      */
     static const IPNet<A> ip_multicast_base_prefix() {
 	return IPNet(A::MULTICAST_BASE(),
-		     A::ip_multicast_base_address_masklen());
+		     A::ip_multicast_base_address_mask_len());
     }
     
     /**

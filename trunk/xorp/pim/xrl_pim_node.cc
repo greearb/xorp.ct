@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.38 2003/08/16 18:05:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.39 2003/09/12 23:45:43 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -3051,7 +3051,7 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
     const bool&		is_scope_zone, 
     const string&	vif_name, 
     const uint32_t&	bsr_priority, 
-    const uint32_t&	hash_masklen)
+    const uint32_t&	hash_mask_len)
 {
     string error_msg;
     
@@ -3061,9 +3061,9 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (hash_masklen > 0xff) {
-	error_msg = c_format("Invalid hash masklen = %d",
-			     hash_masklen);
+    if (hash_mask_len > 0xff) {
+	error_msg = c_format("Invalid hash mask length = %d",
+			     hash_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3071,7 +3071,7 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
 						 is_scope_zone,
 						 vif_name,
 						 reinterpret_cast<const uint8_t&>(bsr_priority),
-						 reinterpret_cast<const uint8_t&>(hash_masklen),
+						 reinterpret_cast<const uint8_t&>(hash_mask_len),
 						 error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -3087,7 +3087,7 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name6(
     const bool&		is_scope_zone, 
     const string&	vif_name, 
     const uint32_t&	bsr_priority, 
-    const uint32_t&	hash_masklen)
+    const uint32_t&	hash_mask_len)
 {
     string error_msg;
     
@@ -3097,9 +3097,9 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (hash_masklen > 0xff) {
-	error_msg = c_format("Invalid hash masklen = %d",
-			     hash_masklen);
+    if (hash_mask_len > 0xff) {
+	error_msg = c_format("Invalid hash mask length = %d",
+			     hash_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3107,7 +3107,7 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name6(
 						 is_scope_zone,
 						 vif_name,
 						 reinterpret_cast<const uint8_t&>(bsr_priority),
-						 reinterpret_cast<const uint8_t&>(hash_masklen),
+						 reinterpret_cast<const uint8_t&>(hash_mask_len),
 						 error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -3123,7 +3123,7 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr4(
     const bool&		is_scope_zone, 
     const IPv4&		cand_bsr_addr, 
     const uint32_t&	bsr_priority, 
-    const uint32_t&	hash_masklen)
+    const uint32_t&	hash_mask_len)
 {
     string error_msg;
     
@@ -3133,9 +3133,9 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (hash_masklen > 0xff) {
-	error_msg = c_format("Invalid hash masklen = %d",
-			     hash_masklen);
+    if (hash_mask_len > 0xff) {
+	error_msg = c_format("Invalid hash mask length = %d",
+			     hash_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3143,7 +3143,7 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr4(
 					     is_scope_zone,
 					     IPvX(cand_bsr_addr),
 					     reinterpret_cast<const uint8_t&>(bsr_priority),
-					     reinterpret_cast<const uint8_t&>(hash_masklen),
+					     reinterpret_cast<const uint8_t&>(hash_mask_len),
 					     error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -3159,7 +3159,7 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr6(
     const bool&		is_scope_zone, 
     const IPv6&		cand_bsr_addr, 
     const uint32_t&	bsr_priority, 
-    const uint32_t&	hash_masklen)
+    const uint32_t&	hash_mask_len)
 {
     string error_msg;
     
@@ -3169,9 +3169,9 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (hash_masklen > 0xff) {
-	error_msg = c_format("Invalid hash masklen = %d",
-			     hash_masklen);
+    if (hash_mask_len > 0xff) {
+	error_msg = c_format("Invalid hash mask length = %d",
+			     hash_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3179,7 +3179,7 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr6(
 					     is_scope_zone,
 					     IPvX(cand_bsr_addr),
 					     reinterpret_cast<const uint8_t&>(bsr_priority),
-					     reinterpret_cast<const uint8_t&>(hash_masklen),
+					     reinterpret_cast<const uint8_t&>(hash_mask_len),
 					     error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -3452,7 +3452,7 @@ XrlPimNode::pim_0_1_add_config_static_rp4(
     const IPv4Net&	group_prefix, 
     const IPv4&		rp_addr, 
     const uint32_t&	rp_priority, 
-    const uint32_t&	hash_masklen)
+    const uint32_t&	hash_mask_len)
 {
     string error_msg;
     
@@ -3462,16 +3462,16 @@ XrlPimNode::pim_0_1_add_config_static_rp4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (hash_masklen > 0xff) {
-	error_msg = c_format("Invalid hash masklen = %d",
-			     hash_masklen);
+    if (hash_mask_len > 0xff) {
+	error_msg = c_format("Invalid hash mask length = %d",
+			     hash_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (PimNode::add_config_static_rp(IPvXNet(group_prefix),
 				      IPvX(rp_addr),
 				      reinterpret_cast<const uint8_t&>(rp_priority),
-				      reinterpret_cast<const uint8_t&>(hash_masklen),
+				      reinterpret_cast<const uint8_t&>(hash_mask_len),
 				      error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -3486,7 +3486,7 @@ XrlPimNode::pim_0_1_add_config_static_rp6(
     const IPv6Net&	group_prefix, 
     const IPv6&		rp_addr, 
     const uint32_t&	rp_priority, 
-    const uint32_t&	hash_masklen)
+    const uint32_t&	hash_mask_len)
 {
     string error_msg;
     
@@ -3496,16 +3496,16 @@ XrlPimNode::pim_0_1_add_config_static_rp6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (hash_masklen > 0xff) {
-	error_msg = c_format("Invalid hash masklen = %d",
-			     hash_masklen);
+    if (hash_mask_len > 0xff) {
+	error_msg = c_format("Invalid hash mask length = %d",
+			     hash_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (PimNode::add_config_static_rp(IPvXNet(group_prefix),
 				      IPvX(rp_addr),
 				      reinterpret_cast<const uint8_t&>(rp_priority),
-				      reinterpret_cast<const uint8_t&>(hash_masklen),
+				      reinterpret_cast<const uint8_t&>(hash_mask_len),
 				      error_msg)
 	< 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -4162,7 +4162,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
     // Input values, 
     const IPv4&		source_addr, 
     const IPv4&		group_addr, 
-    const uint32_t&	group_masklen, 
+    const uint32_t&	group_mask_len, 
     const string&	mrt_entry_type, 
     const string&	action_jp, 
     const uint32_t&	holdtime, 
@@ -4215,15 +4215,15 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     } while (false);
     
-    if (group_masklen > 0xff) {
-	string error_msg = c_format("Invalid group masklen = %d",
-				    group_masklen);
+    if (group_mask_len > 0xff) {
+	string error_msg = c_format("Invalid group mask length = %d",
+				    group_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (group_masklen > 0xff) {
-	string error_msg = c_format("Invalid group masklen = %d",
-				    group_masklen);
+    if (group_mask_len > 0xff) {
+	string error_msg = c_format("Invalid group mask length = %d",
+				    group_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4234,7 +4234,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
     }
     
     if (PimNode::add_test_jp_entry(IPvX(source_addr), IPvX(group_addr),
-				   reinterpret_cast<const uint8_t&>(group_masklen),
+				   reinterpret_cast<const uint8_t&>(group_mask_len),
 				   entry_type, action_type,
 				   reinterpret_cast<const uint16_t&>(holdtime),
 				   new_group_bool)
@@ -4254,7 +4254,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
     // Input values, 
     const IPv6&		source_addr, 
     const IPv6&		group_addr, 
-    const uint32_t&	group_masklen, 
+    const uint32_t&	group_mask_len, 
     const string&	mrt_entry_type, 
     const string&	action_jp, 
     const uint32_t&	holdtime, 
@@ -4307,9 +4307,9 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     } while (false);
     
-    if (group_masklen > 0xff) {
-	string error_msg = c_format("Invalid group masklen = %d",
-				    group_masklen);
+    if (group_mask_len > 0xff) {
+	string error_msg = c_format("Invalid group mask length = %d",
+				    group_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4320,7 +4320,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
     }
     
     if (PimNode::add_test_jp_entry(IPvX(source_addr), IPvX(group_addr),
-				   reinterpret_cast<const uint8_t&>(group_masklen),
+				   reinterpret_cast<const uint8_t&>(group_mask_len),
 				   entry_type, action_type,
 				   reinterpret_cast<const uint16_t&>(holdtime),
 				   new_group_bool)
@@ -4428,7 +4428,7 @@ XrlPimNode::pim_0_1_add_test_bsr_zone4(
     const bool&		zone_id_is_scope_zone, 
     const IPv4&		bsr_addr, 
     const uint32_t&	bsr_priority, 
-    const uint32_t&	hash_masklen, 
+    const uint32_t&	hash_mask_len, 
     const uint32_t&	fragment_tag)
 {
     if (bsr_priority > 0xff) {
@@ -4437,9 +4437,9 @@ XrlPimNode::pim_0_1_add_test_bsr_zone4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (hash_masklen > 0xff) {
-	string error_msg = c_format("Invalid hash masklen = %d",
-				    hash_masklen);
+    if (hash_mask_len > 0xff) {
+	string error_msg = c_format("Invalid hash mask length = %d",
+				    hash_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4453,7 +4453,7 @@ XrlPimNode::pim_0_1_add_test_bsr_zone4(
 						  zone_id_is_scope_zone),
 				   IPvX(bsr_addr),
 				   reinterpret_cast<const uint8_t&>(bsr_priority),
-				   reinterpret_cast<const uint8_t&>(hash_masklen),
+				   reinterpret_cast<const uint8_t&>(hash_mask_len),
 				   reinterpret_cast<const uint16_t&>(fragment_tag))
 	< 0) {
 	string error_msg = c_format("Failed to add BSR test zone %s "
@@ -4474,7 +4474,7 @@ XrlPimNode::pim_0_1_add_test_bsr_zone6(
     const bool&		zone_id_is_scope_zone, 
     const IPv6&		bsr_addr, 
     const uint32_t&	bsr_priority, 
-    const uint32_t&	hash_masklen, 
+    const uint32_t&	hash_mask_len, 
     const uint32_t&	fragment_tag)
 {
     if (bsr_priority > 0xff) {
@@ -4483,9 +4483,9 @@ XrlPimNode::pim_0_1_add_test_bsr_zone6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (hash_masklen > 0xff) {
-	string error_msg = c_format("Invalid hash masklen = %d",
-				    hash_masklen);
+    if (hash_mask_len > 0xff) {
+	string error_msg = c_format("Invalid hash mask length = %d",
+				    hash_mask_len);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4499,7 +4499,7 @@ XrlPimNode::pim_0_1_add_test_bsr_zone6(
 						  zone_id_is_scope_zone),
 				   IPvX(bsr_addr),
 				   reinterpret_cast<const uint8_t&>(bsr_priority),
-				   reinterpret_cast<const uint8_t&>(hash_masklen),
+				   reinterpret_cast<const uint8_t&>(hash_mask_len),
 				   reinterpret_cast<const uint16_t&>(fragment_tag))
 	< 0) {
 	string error_msg = c_format("Failed to add BSR test zone %s "

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.24 2003/06/26 23:18:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.25 2003/06/27 22:26:15 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1043,7 +1043,7 @@ PimMre::downstream_prune_pending_timer_timeout_rp(uint16_t vif_index)
 	pim_nbr_me = &pim_vif->pim_nbr_me();
 	bool new_group_bool = false;	// Group together all (*,*,RP) entries
 	pim_nbr_me->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
-				 IPvX::ip_multicast_base_address_masklen(family()),
+				 IPvX::ip_multicast_base_address_mask_len(family()),
 				 MRT_ENTRY_RP,
 				 ACTION_PRUNE,
 				 pim_nbr_me->pim_vif().join_prune_holdtime().get(),
@@ -1762,7 +1762,7 @@ PimMre::recompute_is_join_desired_rp()
     } else {
 	bool new_group_bool = false;	// Group together all (*,*,RP) entries
 	pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
-			      IPvX::ip_multicast_base_address_masklen(family()),
+			      IPvX::ip_multicast_base_address_mask_len(family()),
 			      MRT_ENTRY_RP,
 			      ACTION_JOIN,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
@@ -1793,7 +1793,7 @@ PimMre::recompute_is_join_desired_rp()
     } else {
 	bool new_group_bool = false;	// Group together all (*,*,RP) entries
 	pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
-			      IPvX::ip_multicast_base_address_masklen(family()),
+			      IPvX::ip_multicast_base_address_mask_len(family()),
 			      MRT_ENTRY_RP,
 			      ACTION_PRUNE,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),
@@ -2370,7 +2370,7 @@ PimMre::join_timer_timeout()
     } else {
 	bool new_group_bool = false; // Group together all (*,*,RP) entries
 	pim_nbr->jp_entry_add(*rp_addr_ptr(), IPvX::MULTICAST_BASE(family()),
-			      IPvX::ip_multicast_base_address_masklen(family()),
+			      IPvX::ip_multicast_base_address_mask_len(family()),
 			      MRT_ENTRY_RP,
 			      ACTION_JOIN,
 			      pim_nbr->pim_vif().join_prune_holdtime().get(),

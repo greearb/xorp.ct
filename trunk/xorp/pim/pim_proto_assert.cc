@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.15 2003/06/27 22:28:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.16 2003/08/12 15:11:37 pavlin Exp $"
 
 
 //
@@ -67,7 +67,7 @@ PimVif::pim_assert_recv(PimNbr *pim_nbr,
 			buffer_t *buffer)
 {
     int			rcvd_family;
-    uint8_t		group_masklen;
+    uint8_t		group_mask_len;
     uint8_t		group_addr_reserved_flags;
     IPvX		assert_source_addr(family());
     IPvX		assert_group_addr(family());
@@ -78,7 +78,7 @@ PimVif::pim_assert_recv(PimNbr *pim_nbr,
     //
     // Parse the message
     //
-    GET_ENCODED_GROUP_ADDR(rcvd_family, assert_group_addr, group_masklen,
+    GET_ENCODED_GROUP_ADDR(rcvd_family, assert_group_addr, group_mask_len,
 			   group_addr_reserved_flags, buffer);
     GET_ENCODED_UNICAST_ADDR(rcvd_family, assert_source_addr, buffer);
     BUFFER_GET_HOST_32(metric_preference, buffer);
@@ -101,7 +101,7 @@ PimVif::pim_assert_recv(PimNbr *pim_nbr,
     //
     pim_assert_process(pim_nbr, src, dst,
 		       assert_source_addr, assert_group_addr,
-		       group_masklen, &assert_metric);
+		       group_mask_len, &assert_metric);
     
     // UNUSED(dst);
     return (XORP_OK);
@@ -115,11 +115,11 @@ PimVif::pim_assert_recv(PimNbr *pim_nbr,
     ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
     
- rcvd_masklen_error:
+ rcvd_mask_len_error:
     XLOG_WARNING("RX %s from %s to %s: "
-		 "invalid masklen = %d",
+		 "invalid group mask length = %d",
 		 PIMTYPE2ASCII(PIM_ASSERT),
-		 cstring(src), cstring(dst), group_masklen);
+		 cstring(src), cstring(dst), group_mask_len);
     return (XORP_ERROR);
     
  rcvd_family_error:
@@ -135,18 +135,18 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 			   const IPvX& src, const IPvX& dst,
 			   const IPvX& assert_source_addr,
 			   const IPvX& assert_group_addr,
-			   uint8_t group_masklen, AssertMetric *assert_metric)
+			   uint8_t group_mask_len, AssertMetric *assert_metric)
 {
     PimMre	*pim_mre_sg, *pim_mre_wc;
     int ret_value;
     
-    if (group_masklen != IPvX::addr_bitlen(family())) {
+    if (group_mask_len != IPvX::addr_bitlen(family())) {
 	XLOG_WARNING("RX %s from %s to %s: "
 		     "invalid group mask length = %d "
 		     "instead of %u",
 		     PIMTYPE2ASCII(PIM_ASSERT),
 		     cstring(src), cstring(dst),
-		     group_masklen, (uint32_t)IPvX::addr_bitlen(family()));
+		     group_mask_len, (uint32_t)IPvX::addr_bitlen(family()));
 	return (XORP_ERROR);
     }
     
@@ -353,7 +353,7 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
 {
     buffer_t *buffer = buffer_send_prepare();
     uint8_t group_addr_reserved_flags = 0;
-    uint8_t group_masklen = IPvX::addr_bitlen(family());
+    uint8_t group_mask_len = IPvX::addr_bitlen(family());
     
     if (rpt_bit)
 	metric_preference |= PIM_ASSERT_RPT_BIT;
@@ -361,7 +361,7 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
 	metric_preference &= ~PIM_ASSERT_RPT_BIT;
     
     // Write all data to the buffer
-    PUT_ENCODED_GROUP_ADDR(family(), assert_group_addr, group_masklen,
+    PUT_ENCODED_GROUP_ADDR(family(), assert_group_addr, group_mask_len,
 			   group_addr_reserved_flags, buffer);
     PUT_ENCODED_UNICAST_ADDR(family(), assert_source_addr, buffer);
     BUFFER_PUT_HOST_32(metric_preference, buffer);

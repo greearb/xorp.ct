@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.8 2003/08/14 01:16:35 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.9 2003/09/05 15:49:51 pavlin Exp $"
 
 //
 // PIM neigbor routers handling
@@ -117,7 +117,7 @@ PimNbr::vif_index() const
 
 int
 PimNbr::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
-		     uint8_t group_masklen,
+		     uint8_t group_mask_len,
 		     mrt_entry_type_t mrt_entry_type,
 		     action_jp_t action_jp, uint16_t holdtime,
 		     bool new_group_bool)
@@ -125,7 +125,7 @@ PimNbr::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
     int ret_value;
     
     ret_value = _jp_header.jp_entry_add(source_addr, group_addr,
-					group_masklen, mrt_entry_type,
+					group_mask_len, mrt_entry_type,
 					action_jp, holdtime, new_group_bool);
     
     // (Re)start the timer to send the J/P message after time 0.

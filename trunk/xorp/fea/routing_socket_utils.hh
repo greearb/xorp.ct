@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket_utils.hh,v 1.2 2003/05/05 19:34:00 pavlin Exp $
+// $XORP: xorp/fea/routing_socket_utils.hh,v 1.3 2003/05/14 01:13:43 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_UTILS_HH__
 #define __FEA_ROUTING_SOCKET_UTILS_HH__
@@ -44,13 +44,13 @@ public:
 				 const struct sockaddr* rti_info[]);
 
     /**
-     * Get the masklen encoded in sockaddr.
+     * Get the mask length encoded in sockaddr.
      * 
      * @param family the address family.
-     * @param sock the socket address with the encoded masklen.
-     * @return the masklen if successfully decoded, otherwise -1.
+     * @param sock the socket address with the encoded mask length.
+     * @return the mask length if successfully decoded, otherwise -1.
      */
-    static int get_sock_masklen(int family, const struct sockaddr* sock);
+    static int get_sock_mask_len(int family, const struct sockaddr* sock);
     
     /**
      * Extract the routing information from RTM message.

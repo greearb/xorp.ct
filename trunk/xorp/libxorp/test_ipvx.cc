@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.5 2003/09/09 00:40:05 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.6 2003/09/30 03:07:59 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -977,13 +977,13 @@ test_ipvx_address_const()
     verbose_assert(IPvX::addr_bitlen(AF_INET6) == 128, "addr_bitlen()");
     
     //
-    // Test the masklen for the multicast base address.
+    // Test the mask length for the multicast base address.
     //
-    verbose_assert(IPvX::ip_multicast_base_address_masklen(AF_INET) == 4,
-		   "ip_multicast_base_address_masklen()");
+    verbose_assert(IPvX::ip_multicast_base_address_mask_len(AF_INET) == 4,
+		   "ip_multicast_base_address_mask_len()");
 
-    verbose_assert(IPvX::ip_multicast_base_address_masklen(AF_INET6) == 8,
-		   "ip_multicast_base_address_masklen()");
+    verbose_assert(IPvX::ip_multicast_base_address_mask_len(AF_INET6) == 8,
+		   "ip_multicast_base_address_mask_len()");
     
     //
     // Test the address family.
@@ -1115,11 +1115,11 @@ test_ipvx_manipulate_address()
     //
     // Test getting the prefix length of the contiguous mask.
     //
-    verbose_assert(IPvX("255.255.255.0").masklen() == 24,
-		   "masklen()");
+    verbose_assert(IPvX("255.255.255.0").mask_len() == 24,
+		   "mask_len()");
 
-    verbose_assert(IPvX("ffff:ff00::").masklen() == 24,
-		   "masklen()");
+    verbose_assert(IPvX("ffff:ff00::").mask_len() == 24,
+		   "mask_len()");
     
     // XXX: for IPvX we don't have addr() and set_addr() methods, hence
     // we don't test them.

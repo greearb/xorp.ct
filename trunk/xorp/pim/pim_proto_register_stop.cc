@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.5 2003/06/16 22:48:04 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.6 2003/08/12 15:11:37 pavlin Exp $"
 
 
 //
@@ -67,13 +67,13 @@ PimVif::pim_register_stop_recv(PimNbr *pim_nbr,
 {
     int rcvd_family;
     uint8_t group_addr_reserved_flags;
-    uint8_t group_masklen;
+    uint8_t group_mask_len;
     IPvX source_addr(family()), group_addr(family());
     
     //
     // Parse the message
     //
-    GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_masklen,
+    GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_mask_len,
 			   group_addr_reserved_flags, buffer);
     GET_ENCODED_UNICAST_ADDR(rcvd_family, source_addr, buffer);
     
@@ -109,7 +109,7 @@ PimVif::pim_register_stop_recv(PimNbr *pim_nbr,
     //
     // Process the Register-Stop data
     //
-    pim_register_stop_process(src, source_addr, group_addr, group_masklen);
+    pim_register_stop_process(src, source_addr, group_addr, group_mask_len);
     
     UNUSED(pim_nbr);
     return (XORP_OK);
@@ -123,12 +123,12 @@ PimVif::pim_register_stop_recv(PimNbr *pim_nbr,
     ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
     
- rcvd_masklen_error:
+ rcvd_mask_len_error:
     XLOG_WARNING("RX %s from %s to %s: "
-		 "invalid masklen = %d",
+		 "invalid group mask length = %d",
 		 PIMTYPE2ASCII(PIM_REGISTER_STOP),
 		 cstring(src), cstring(dst),
-		 group_masklen);
+		 group_mask_len);
     return (XORP_ERROR);
     
  rcvd_family_error:
@@ -144,20 +144,20 @@ int
 PimVif::pim_register_stop_process(const IPvX& rp_addr,
 				  const IPvX& source_addr,
 				  const IPvX& group_addr,
-				  uint8_t group_masklen)
+				  uint8_t group_mask_len)
 {
     uint32_t	lookup_flags;
     PimMre	*pim_mre;
     
     lookup_flags = PIM_MRE_SG;
     
-    if (group_masklen != IPvX::addr_bitlen(family())) {
+    if (group_mask_len != IPvX::addr_bitlen(family())) {
 	XLOG_WARNING("RX %s from %s to %s: "
 		     "invalid group mask length = %d "
 		     "instead of %u",
 		     PIMTYPE2ASCII(PIM_REGISTER_STOP),
 		     cstring(rp_addr), cstring(addr()),
-		     group_masklen, (uint32_t)IPvX::addr_bitlen(family()));
+		     group_mask_len, (uint32_t)IPvX::addr_bitlen(family()));
 	return (XORP_ERROR);
     }
     
@@ -194,12 +194,12 @@ PimVif::pim_register_stop_send(const IPvX& dr_addr,
 			       const IPvX& source_addr,
 			       const IPvX& group_addr)
 {
-    uint8_t group_masklen = IPvX::addr_bitlen(family());
+    uint8_t group_mask_len = IPvX::addr_bitlen(family());
     buffer_t *buffer = buffer_send_prepare();
     uint8_t group_addr_reserved_flags = 0;
     
     // Write all data to the buffer
-    PUT_ENCODED_GROUP_ADDR(family(), group_addr, group_masklen,
+    PUT_ENCODED_GROUP_ADDR(family(), group_addr, group_mask_len,
 			   group_addr_reserved_flags, buffer);
     PUT_ENCODED_UNICAST_ADDR(family(), source_addr, buffer);
     

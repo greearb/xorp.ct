@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.8 2003/09/20 07:01:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.9 2003/09/30 03:07:57 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -185,10 +185,10 @@ RtmUtils::get_rta_sockaddr(uint32_t amask, const struct sockaddr* sock,
 }
 
 /*
- * Return masklen on success, otherwise -1
+ * Return the mask length on success, otherwise -1
  */
 int
-RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
+RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 {
 
 #ifndef HAVE_SA_LEN
@@ -198,7 +198,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 	// XXX: sock->sa_family is undefined
 	const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(sock);
 	IPv4 netmask(sin->sin_addr);
-	return (netmask.masklen());
+	return (netmask.mask_len());
     }
 #ifdef HAVE_IPV6
     case AF_INET:
@@ -206,7 +206,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 	// XXX: sock->sa_family is undefined
 	const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(sock);
 	IPv6 netmask(sin6->sin6_addr);
-	return (netmask.masklen());
+	return (netmask.mask_len());
     }
 #endif // HAVE_IPV6
     default:
@@ -238,7 +238,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 	    buf[0] = *(ptr + 0);
 	    {
 		IPv4 netmask(buf);
-		return (netmask.masklen());
+		return (netmask.mask_len());
 	    }
 	default:
 	    XLOG_ERROR("Unknown mask: family = %d, sa_len = %d",
@@ -249,7 +249,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 		// XXX: sock->sa_family is undefined
 		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(sock);
 		IPv4 netmask(sin->sin_addr);
-		return (netmask.masklen());
+		return (netmask.mask_len());
 	    }
 	}
     }
@@ -266,7 +266,7 @@ RtmUtils::get_sock_masklen(int family, const struct sockaddr* sock)
 	// XXX: sock->sa_family is undefined
 	const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(sock);
 	IPv6 netmask(sin6->sin6_addr);
-	return (netmask.masklen());
+	return (netmask.mask_len());
     }
 #endif // HAVE_IPV6
     
@@ -298,7 +298,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     
     IPvX dst_addr(family);
     IPvX gateway_addr(family);
-    int dst_masklen = 0;
+    int dst_mask_len = 0;
     
     //
     // Get the destination
@@ -332,18 +332,18 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     }
     
     //
-    // Get the destination masklen
+    // Get the destination mask length
     //
     if ( (sa = rti_info[RTAX_NETMASK]) != NULL) {
-	dst_masklen = RtmUtils::get_sock_masklen(family, sa);
+	dst_mask_len = RtmUtils::get_sock_mask_len(family, sa);
     }
     
     //
-    // Patch the destination masklen (if necessary)
+    // Patch the destination mask length (if necessary)
     //
     if (rtm->rtm_flags & RTF_HOST) {
-	if (dst_masklen == 0)
-	    dst_masklen = IPvX::addr_bitlen(family);
+	if (dst_mask_len == 0)
+	    dst_mask_len = IPvX::addr_bitlen(family);
     }
     
     //
@@ -386,7 +386,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     //
     // TODO: define default routing metric and admin distance instead of ~0
     //
-    fte = FteX(IPvXNet(dst_addr, dst_masklen), gateway_addr, if_name, if_name,
+    fte = FteX(IPvXNet(dst_addr, dst_mask_len), gateway_addr, if_name, if_name,
 	       ~0, ~0, xorp_route);
     
     return true;

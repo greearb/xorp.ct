@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_click.cc,v 1.3 2003/05/02 07:50:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_click.cc,v 1.4 2003/09/30 03:07:55 pavlin Exp $"
 
 #include <fstream>
 #include <string>
@@ -537,10 +537,10 @@ IfconfigClick::config()
     */
     for (i = _ifs.begin(); i != _ifs.end(); i++) {
 	os += i->address.str() + "/32 0,\n";	// My address.
-	IPvX subnet = i->address.mask_by_prefix_len(i->mask.masklen())
+	IPvX subnet = i->address.mask_by_prefix_len(i->mask.mask_len())
 		       | ~i->mask;
 	os += subnet.str() + "/32 0,\n";	// Subnet broadcast correct.
-	subnet = i->address.mask_by_prefix_len(i->mask.masklen());
+	subnet = i->address.mask_by_prefix_len(i->mask.mask_len());
 	os += subnet.str() + "/32 0,\n";	// Subnet broadcast old compat.
     }
 
@@ -549,7 +549,7 @@ IfconfigClick::config()
     */
     for (i = _ifs.begin(); i != _ifs.end(); i++) {
 	int port = this->port(*i) - 1;
-	os += i->address.mask_by_prefix_len(i->mask.masklen()).str() +
+	os += i->address.mask_by_prefix_len(i->mask.mask_len()).str() +
 	    "/" + i->mask.str() + " " + itos(port + 1) + ",\n";
     }
 
@@ -578,7 +578,7 @@ IfconfigClick::config()
     os += "ip :: Strip(14)\n";
     os += "    -> CheckIPHeader(";
     for (i = _ifs.begin(); i != _ifs.end(); i++) {
-	IPvX subnet = i->address.mask_by_prefix_len(i->mask.masklen())
+	IPvX subnet = i->address.mask_by_prefix_len(i->mask.mask_len())
 		       | ~i->mask;
 	os += subnet.str() + " ";	// Subnet broadcast correct.
     }

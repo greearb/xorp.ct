@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.9 2003/09/09 00:40:05 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.10 2003/09/30 03:07:59 pavlin Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -357,16 +357,16 @@ public:
     }
 
     /**
-     * Get the masklen for the multicast base address.
+     * Get the mask length for the multicast base address.
      * 
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   size_t my_len = IPv4::ip_multicast_base_address_masklen();	OK
-     *   size_t my_len = ipv4.ip_multicast_base_address_masklen();	OK
+     *   size_t my_len = IPv4::ip_multicast_base_address_mask_len();	OK
+     *   size_t my_len = ipv4.ip_multicast_base_address_mask_len();	OK
      * 
-     * @return the multicast base address masklen for family AF_INET.
+     * @return the multicast base address mask length for family AF_INET.
      */
-    static size_t ip_multicast_base_address_masklen() {
+    static size_t ip_multicast_base_address_mask_len() {
 #define IP_MULTICAST_BASE_ADDRESS_MASKLEN_IPV4	4
 	return (IP_MULTICAST_BASE_ADDRESS_MASKLEN_IPV4);
 #undef IP_MULTICAST_BASE_ADDRESS_MASKLEN_IPV4
@@ -375,10 +375,10 @@ public:
     /**
      * Make an IPv4 mask prefix.
      * 
-     * @param masklen the length of the mask to create.
-     * @return a new IPv4 address that contains a mask of length @ref masklen.
+     * @param mask_len the length of the mask to create.
+     * @return a new IPv4 address that contains a mask of length @ref mask_len.
      */
-    static IPv4 make_prefix(size_t masklen) throw (InvalidNetmaskLength);
+    static IPv4 make_prefix(size_t mask_len) throw (InvalidNetmaskLength);
 
     /**
      * Make an IPv4 address prefix.
@@ -387,9 +387,9 @@ public:
      * @return a new IPv4 address created by masking this address with a mask
      * of length @ref prefix_len.
      */
-    inline IPv4 mask_by_prefix_len(size_t masklen) const
+    inline IPv4 mask_by_prefix_len(size_t mask_len) const
 	throw (InvalidNetmaskLength) {
-	return (*this) & make_prefix(masklen);
+	return (*this) & make_prefix(mask_len);
     }
 
     /**
@@ -398,7 +398,7 @@ public:
      * @return the prefix length of the contiguous mask presumably stored
      * as an IPv4 address.
      */
-    size_t masklen() const;
+    size_t mask_len() const;
     
     /**
      * Get the uint32_t raw value of this address.

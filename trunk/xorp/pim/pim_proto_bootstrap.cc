@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.7 2003/06/16 22:48:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.8 2003/08/12 15:11:37 pavlin Exp $"
 
 
 //
@@ -67,9 +67,9 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     PimBsr&	pim_bsr = pim_node().pim_bsr();
     bool	is_unicast_message = false;
     IPvX	bsr_addr(family());
-    uint8_t	hash_masklen, bsr_priority;
+    uint8_t	hash_mask_len, bsr_priority;
     uint16_t	fragment_tag;
-    uint8_t	group_masklen = 0;
+    uint8_t	group_mask_len = 0;
     BsrZone	*bsr_zone = NULL;
     BsrZone	*active_bsr_zone;
     size_t	group_prefix_n = 0;
@@ -80,7 +80,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     // Parse the head of the message
     //
     BUFFER_GET_HOST_16(fragment_tag, buffer);
-    BUFFER_GET_OCTET(hash_masklen, buffer);
+    BUFFER_GET_OCTET(hash_mask_len, buffer);
     BUFFER_GET_OCTET(bsr_priority, buffer);
     GET_ENCODED_UNICAST_ADDR(rcvd_family, bsr_addr, buffer);
     if (! bsr_addr.is_unicast()) {
@@ -130,7 +130,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     // Create a new BsrZone that would contain all information
     // from this message.
     //
-    bsr_zone = new BsrZone(pim_bsr, bsr_addr, bsr_priority, hash_masklen,
+    bsr_zone = new BsrZone(pim_bsr, bsr_addr, bsr_priority, hash_mask_len,
 			   fragment_tag);
     bsr_zone->set_is_accepted_message(true);
     bsr_zone->set_is_unicast_message(is_unicast_message, src);
@@ -149,9 +149,9 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 	// The Group (prefix) address
 	//
 	group_prefix_n++;
-	GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_masklen,
+	GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_mask_len,
 			       group_addr_reserved_flags, buffer);
-	IPvXNet group_prefix(group_addr, group_masklen);
+	IPvXNet group_prefix(group_addr, group_mask_len);
 	
 	// Set the scope zone
 	if (group_addr_reserved_flags & EGADDR_Z_BIT)
@@ -316,12 +316,12 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     ret_value = XORP_ERROR;
     goto ret_label;
     
- rcvd_masklen_error:
+ rcvd_mask_len_error:
     XLOG_WARNING("RX %s from %s to %s: "
-		 "invalid masklen = %d",
+		 "invalid group mask length = %d",
 		 PIMTYPE2ASCII(PIM_BOOTSTRAP),
 		 cstring(src), cstring(dst),
-		 group_masklen);
+		 group_mask_len);
     ret_value = XORP_ERROR;
     goto ret_label;
     
@@ -549,14 +549,14 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& dst_addr,
 				   bool is_first_fragment)
 {
     buffer_t *buffer = buffer_send_prepare(_buffer_send_bootstrap);
-    uint8_t hash_masklen = bsr_zone.hash_masklen();
+    uint8_t hash_mask_len = bsr_zone.hash_mask_len();
     uint8_t group_addr_reserved_flags = 0;
     
     //
     // Write zone-related data to the buffer
     //
     BUFFER_PUT_HOST_16(bsr_zone.fragment_tag(), buffer);
-    BUFFER_PUT_OCTET(hash_masklen, buffer);
+    BUFFER_PUT_OCTET(hash_mask_len, buffer);
     if (bsr_zone.is_cancel())
 	BUFFER_PUT_OCTET(PIM_BOOTSTRAP_LOWEST_PRIORITY, buffer);
     else

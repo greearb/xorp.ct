@@ -90,7 +90,7 @@ the precise values are not yet standardized.
 \item 
 {\tt urib/add\_route/protocol[txt]{\it protocol}\& netbase[ipv4]{\it net}\&
 \newline
-...\hspace{0.25in}masklen[i32]{\it masklen}\& nexthop[ipv4]{\it nexthop}}
+...\hspace{0.25in}mask_len[i32]{\it mask_len}\& nexthop[ipv4]{\it nexthop}}
 \newline
 {\bf Returns:} {\tt result[i32]{\it result}}
 \newline
@@ -99,9 +99,9 @@ protocol} in the URIB.  The routing table must already have been
 created, and the route must not be a duplicate of an existing route
 (although it may overlap existing routes with a different prefix
 length).  {\it netbase} is the base address of the route's subnet.
-{\it masklen} is the prefix (mask) length in bits.  {\it nexthop} is
+{\it mask_len} is the prefix (mask) length in bits.  {\it nexthop} is
 the router via which packets to this subnet should be forwarded.  For
-example, protocol=''ospf'', netbase=10.1.2.0, masklen=24 and
+example, protocol=''ospf'', netbase=10.1.2.0, mask_len=24 and
 nexthop=128.16.64.1 would add a route to subnet 10.1.2.0/24 via
 gateway 128.16.64.1 to the routing table associate with OSPF.
 
@@ -112,14 +112,14 @@ the precise values are not yet standardized.
 \item 
 {\tt urib/delete\_route/protocol[txt]{\it protocol}\& netbase[ipv4]{\it net}\&
 \newline
-...\hspace{0.25in}masklen[i32]{\it masklen}}
+...\hspace{0.25in}mask_len[i32]{\it mask_len}}
 \newline
 {\bf Returns:} {\tt result[i32]{\it result}}
 \newline
 {\tt delete\_route} deletes the specified route from the routing table
 called {\it protocol} in the URIB.  The routing table must already
 have been created, and the route must already exist.  {\it netbase} is
-the base address of the route's subnet.  {\it masklen} is the prefix
+the base address of the route's subnet.  {\it mask_len} is the prefix
 (mask) length in bits.  {\it nexthop} is the router via which packets
 to this subnet should be forwarded.  The route will only be deleted
 from the table specified by {\it protocol}, irrespective of whether or

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.16 2003/08/14 02:08:38 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.17 2003/08/14 02:57:00 pavlin Exp $
 #
 
 #
@@ -349,72 +349,72 @@ pim_delete_config_scope_zone_by_vif_addr6()
 pim_add_config_cand_bsr_by_vif_name4()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_bsr_by_vif_name4 <scope_zone_id:ipv4net> <is_scope_zone:bool> <vif_name:txt> <bsr_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_cand_bsr_by_vif_name4 <scope_zone_id:ipv4net> <is_scope_zone:bool> <vif_name:txt> <bsr_priority:u32> <hash_mask_len:u32>"
 	exit 1
     fi
     scope_zone_id=$1
     is_scope_zone=$2
     vif_name=$3
     bsr_priority=$4
-    hash_masklen=$5
+    hash_mask_len=$5
     
     echo "pim_add_config_cand_bsr_by_vif_name4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_vif_name4"
-    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
+    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&bsr_priority:u32=$bsr_priority&hash_mask_len:u32=$hash_mask_len"
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_cand_bsr_by_vif_name6()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_bsr_by_vif_name6 <scope_zone_id:ipv6net> <is_scope_zone:bool> <vif_name:txt> <bsr_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_cand_bsr_by_vif_name6 <scope_zone_id:ipv6net> <is_scope_zone:bool> <vif_name:txt> <bsr_priority:u32> <hash_mask_len:u32>"
 	exit 1
     fi
     scope_zone_id=$1
     is_scope_zone=$2
     vif_name=$3
     bsr_priority=$4
-    hash_masklen=$5
+    hash_mask_len=$5
     
     echo "pim_add_config_cand_bsr_by_vif_name6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_vif_name6"
-    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
+    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&vif_name:txt=$vif_name&bsr_priority:u32=$bsr_priority&hash_mask_len:u32=$hash_mask_len"
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_cand_bsr_by_addr4()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_bsr_by_addr4 <scope_zone_id:ipv4net> <is_scope_zone:bool> <cand_bsr_addr:ipv4> <bsr_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_cand_bsr_by_addr4 <scope_zone_id:ipv4net> <is_scope_zone:bool> <cand_bsr_addr:ipv4> <bsr_priority:u32> <hash_mask_len:u32>"
 	exit 1
     fi
     scope_zone_id=$1
     is_scope_zone=$2
     cand_bsr_addr=$3
     bsr_priority=$4
-    hash_masklen=$5
+    hash_mask_len=$5
     
     echo "pim_add_config_cand_bsr_by_addr4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_addr4"
-    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&cand_bsr_addr:ipv4=$cand_bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
+    XRL_ARGS="?scope_zone_id:ipv4net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&cand_bsr_addr:ipv4=$cand_bsr_addr&bsr_priority:u32=$bsr_priority&hash_mask_len:u32=$hash_mask_len"
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_cand_bsr_by_addr6()
 {
     if [ $# -lt 5 ] ; then
-	echo "Usage: pim_add_config_cand_bsr_by_addr6 <scope_zone_id:ipv6net> <is_scope_zone:bool> <cand_bsr_addr:ipv6> <bsr_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_cand_bsr_by_addr6 <scope_zone_id:ipv6net> <is_scope_zone:bool> <cand_bsr_addr:ipv6> <bsr_priority:u32> <hash_mask_len:u32>"
 	exit 1
     fi
     scope_zone_id=$1
     is_scope_zone=$2
     cand_bsr_addr=$3
     bsr_priority=$4
-    hash_masklen=$5
+    hash_mask_len=$5
     
     echo "pim_add_config_cand_bsr_by_addr6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_cand_bsr_by_addr6"
-    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&cand_bsr_addr:ipv6=$cand_bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen"
+    XRL_ARGS="?scope_zone_id:ipv6net=$scope_zone_id&is_scope_zone:bool=$is_scope_zone&cand_bsr_addr:ipv6=$cand_bsr_addr&bsr_priority:u32=$bsr_priority&hash_mask_len:u32=$hash_mask_len"
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
@@ -587,34 +587,34 @@ pim_delete_config_cand_rp_by_addr6()
 pim_add_config_static_rp4()
 {
     if [ $# -lt 4 ] ; then
-	echo "Usage: pim_add_config_static_rp4 <group_prefix:ipv4net> <rp_addr:ipv4> <rp_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_static_rp4 <group_prefix:ipv4net> <rp_addr:ipv4> <rp_priority:u32> <hash_mask_len:u32>"
 	exit 1
     fi
     group_prefix=$1
     rp_addr=$2
     rp_priority=$3
-    hash_masklen=$4
+    hash_mask_len=$4
     
     echo "pim_add_config_static_rp4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_static_rp4"
-    XRL_ARGS="?group_prefix:ipv4net=$group_prefix&rp_addr:ipv4=$rp_addr&rp_priority:u32=$rp_priority&hash_masklen:u32=$hash_masklen"
+    XRL_ARGS="?group_prefix:ipv4net=$group_prefix&rp_addr:ipv4=$rp_addr&rp_priority:u32=$rp_priority&hash_mask_len:u32=$hash_mask_len"
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
 pim_add_config_static_rp6()
 {
     if [ $# -lt 4 ] ; then
-	echo "Usage: pim_add_config_static_rp6 <group_prefix:ipv6net> <rp_addr:ipv6> <rp_priority:u32> <hash_masklen:u32>"
+	echo "Usage: pim_add_config_static_rp6 <group_prefix:ipv6net> <rp_addr:ipv6> <rp_priority:u32> <hash_mask_len:u32>"
 	exit 1
     fi
     group_prefix=$1
     rp_addr=$2
     rp_priority=$3
-    hash_masklen=$4
+    hash_mask_len=$4
     
     echo "pim_add_config_static_rp6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_config_static_rp6"
-    XRL_ARGS="?group_prefix:ipv6net=$group_prefix&rp_addr:ipv6=$rp_addr&rp_priority:u32=$rp_priority&hash_masklen:u32=$hash_masklen"
+    XRL_ARGS="?group_prefix:ipv6net=$group_prefix&rp_addr:ipv6=$rp_addr&rp_priority:u32=$rp_priority&hash_mask_len:u32=$hash_mask_len"
     call_xrl -r 0 $XRL$XRL_ARGS
 }
 
@@ -1155,12 +1155,12 @@ pim_disable_log_trace()
 pim_add_test_jp_entry4()
 {
     if [ $# -lt 7 ] ; then
-	echo "Usage: pim_add_test_jp_entry4 <source_addr:ipv4> <group_addr:ipv4> <group_masklen:u32> <mrt_entry_type:txt (SG, SG_RPT, WC, RP)> <action_jp:txt (JOIN, PRUNE)> <holdtime:u32> <new_group_bool:bool>"
+	echo "Usage: pim_add_test_jp_entry4 <source_addr:ipv4> <group_addr:ipv4> <group_mask_len:u32> <mrt_entry_type:txt (SG, SG_RPT, WC, RP)> <action_jp:txt (JOIN, PRUNE)> <holdtime:u32> <new_group_bool:bool>"
 	exit 1
     fi
     source_addr=$1
     group_addr=$2
-    group_masklen=$3
+    group_mask_len=$3
     mrt_entry_type=$4	# Must be one of: SG, SG_RPT, WC, RP
     action_jp=$5	# Must be one of: JOIN, PRUNE
     holdtime=$6
@@ -1168,19 +1168,19 @@ pim_add_test_jp_entry4()
     
     echo "pim_add_test_jp_entry4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_jp_entry4"
-    XRL_ARGS="?source_addr:ipv4=$source_addr&group_addr:ipv4=$group_addr&group_masklen:u32=$group_masklen&mrt_entry_type:txt=$mrt_entry_type&action_jp:txt=$action_jp&holdtime:u32=$holdtime&new_group_bool:bool=$new_group_bool"
+    XRL_ARGS="?source_addr:ipv4=$source_addr&group_addr:ipv4=$group_addr&group_mask_len:u32=$group_mask_len&mrt_entry_type:txt=$mrt_entry_type&action_jp:txt=$action_jp&holdtime:u32=$holdtime&new_group_bool:bool=$new_group_bool"
     call_xrl $XRL$XRL_ARGS
 }
 
 pim_add_test_jp_entry6()
 {
     if [ $# -lt 7 ] ; then
-	echo "Usage: pim_add_test_jp_entry6 <source_addr:ipv6> <group_addr:ipv6> <group_masklen:u32> <mrt_entry_type:txt (SG, SG_RPT, WC, RP)> <action_jp:txt (JOIN, PRUNE)> <holdtime:u32> <new_group_bool:bool>"
+	echo "Usage: pim_add_test_jp_entry6 <source_addr:ipv6> <group_addr:ipv6> <group_mask_len:u32> <mrt_entry_type:txt (SG, SG_RPT, WC, RP)> <action_jp:txt (JOIN, PRUNE)> <holdtime:u32> <new_group_bool:bool>"
 	exit 1
     fi
     source_addr=$1
     group_addr=$2
-    group_masklen=$3
+    group_mask_len=$3
     mrt_entry_type=$4	# Must be one of: SG, SG_RPT, WC, RP
     action_jp=$5	# Must be one of: JOIN, PRUNE
     holdtime=$6
@@ -1188,7 +1188,7 @@ pim_add_test_jp_entry6()
     
     echo "pim_add_test_jp_entry6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_jp_entry6"
-    XRL_ARGS="?source_addr:ipv6=$source_addr&group_addr:ipv6=$group_addr&group_masklen:u32=$group_masklen&mrt_entry_type:txt=$mrt_entry_type&action_jp:txt=$action_jp&holdtime:u32=$holdtime&new_group_bool:bool=$new_group_bool"
+    XRL_ARGS="?source_addr:ipv6=$source_addr&group_addr:ipv6=$group_addr&group_mask_len:u32=$group_mask_len&mrt_entry_type:txt=$mrt_entry_type&action_jp:txt=$action_jp&holdtime:u32=$holdtime&new_group_bool:bool=$new_group_bool"
     call_xrl $XRL$XRL_ARGS
 }
 
@@ -1261,38 +1261,38 @@ pim_send_test_assert6()
 pim_add_test_bsr_zone4()
 {
     if [ $# -lt 6 ] ; then
-	echo "Usage: pim_add_test_bsr_zone4 <zone_id_scope_zone_prefix:ipv4net> <zone_id_is_scope_zone:bool> <bsr_addr:ipv4> <bsr_priority:u32> <hash_masklen:u32> <fragment_tag:u32>"
+	echo "Usage: pim_add_test_bsr_zone4 <zone_id_scope_zone_prefix:ipv4net> <zone_id_is_scope_zone:bool> <bsr_addr:ipv4> <bsr_priority:u32> <hash_mask_len:u32> <fragment_tag:u32>"
 	exit 1
     fi
     zone_id_scope_zone_prefix=$1
     zone_id_is_scope_zone=$2
     bsr_addr=$3
     bsr_priority=$4
-    hash_masklen=$5
+    hash_mask_len=$5
     fragment_tag=$6
     
     echo "pim_add_test_bsr_zone4" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_zone4"
-    XRL_ARGS="?zone_id_scope_zone_prefix:ipv4net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&bsr_addr:ipv4=$bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen&fragment_tag:u32=$fragment_tag"
+    XRL_ARGS="?zone_id_scope_zone_prefix:ipv4net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&bsr_addr:ipv4=$bsr_addr&bsr_priority:u32=$bsr_priority&hash_mask_len:u32=$hash_mask_len&fragment_tag:u32=$fragment_tag"
     call_xrl $XRL$XRL_ARGS
 }
 
 pim_add_test_bsr_zone6()
 {
     if [ $# -lt 6 ] ; then
-	echo "Usage: pim_add_test_bsr_zone6 <zone_id_scope_zone_prefix:ipv6net> <zone_id_is_scope_zone:bool> <bsr_addr:ipv6> <bsr_priority:u32> <hash_masklen:u32> <fragment_tag:u32>"
+	echo "Usage: pim_add_test_bsr_zone6 <zone_id_scope_zone_prefix:ipv6net> <zone_id_is_scope_zone:bool> <bsr_addr:ipv6> <bsr_priority:u32> <hash_mask_len:u32> <fragment_tag:u32>"
 	exit 1
     fi
     zone_id_scope_zone_prefix=$1
     zone_id_is_scope_zone=$2
     bsr_addr=$3
     bsr_priority=$4
-    hash_masklen=$5
+    hash_mask_len=$5
     fragment_tag=$6
     
     echo "pim_add_test_bsr_zone6" $*
     XRL="finder://$PIM_TARGET/pim/0.1/add_test_bsr_zone6"
-    XRL_ARGS="?zone_id_scope_zone_prefix:ipv6net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&bsr_addr:ipv6=$bsr_addr&bsr_priority:u32=$bsr_priority&hash_masklen:u32=$hash_masklen&fragment_tag:u32=$fragment_tag"
+    XRL_ARGS="?zone_id_scope_zone_prefix:ipv6net=$zone_id_scope_zone_prefix&zone_id_is_scope_zone:bool=$zone_id_is_scope_zone&bsr_addr:ipv6=$bsr_addr&bsr_priority:u32=$bsr_priority&hash_mask_len:u32=$hash_mask_len&fragment_tag:u32=$fragment_tag"
     call_xrl $XRL$XRL_ARGS
 }
 

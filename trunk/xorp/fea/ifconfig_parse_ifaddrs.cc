@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.13 2003/09/26 16:03:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.14 2003/09/30 03:07:56 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -354,7 +354,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 				  && has_peer_addr);
 	    fa.set_multicast(fv.multicast() && (flags & IFF_MULTICAST));
 	    
-	    fa.set_prefix_len(subnet_mask.masklen());
+	    fa.set_prefix_len(subnet_mask.mask_len());
 	    if (fa.broadcast())
 		fa.set_bcast(broadcast_addr);
 	    if (fa.point_to_point())
@@ -405,7 +405,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 				  && has_peer_addr);
 	    fa.set_multicast(fv.multicast() && (flags & IFF_MULTICAST));
 	    
-	    fa.set_prefix_len(subnet_mask.masklen());
+	    fa.set_prefix_len(subnet_mask.mask_len());
 	    if (fa.point_to_point())
 		fa.set_endpoint(peer_addr);
 	    

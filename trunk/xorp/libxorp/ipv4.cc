@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.6 2003/09/30 03:07:58 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.7 2003/09/30 03:17:03 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipv4.hh"
@@ -180,16 +180,16 @@ IPv4::operator<(const IPv4& other) const
 }
 
 IPv4
-IPv4::make_prefix(size_t masklen) throw (InvalidNetmaskLength)
+IPv4::make_prefix(size_t mask_len) throw (InvalidNetmaskLength)
 {
-    if (masklen > 32)
-	xorp_throw(InvalidNetmaskLength, masklen);
-    uint32_t m = (masklen == 0) ? 0 : ((~0) << (32 - masklen));
+    if (mask_len > 32)
+	xorp_throw(InvalidNetmaskLength, mask_len);
+    uint32_t m = (mask_len == 0) ? 0 : ((~0) << (32 - mask_len));
     return IPv4(htonl(m));
 }
 
 size_t
-IPv4::masklen() const
+IPv4::mask_len() const
 {
     size_t ctr = 0;
     uint32_t shift = ntohl(_addr);

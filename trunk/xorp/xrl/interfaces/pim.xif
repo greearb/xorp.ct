@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.11 2003/08/12 15:49:23 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.12 2003/08/13 07:29:57 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -81,28 +81,28 @@ interface pim/0.1 {
 	 * candidate-BSR.
 	 * @param cand_bsr_addr the address to use as a candidate-BSR.
 	 * @param bsr_priority the BSR priority (larger is better).
-	 * @param hash_masklen the hash mask length.
+	 * @param hash_mask_len the hash mask length.
 	 */
 	add_config_cand_bsr_by_vif_name4? scope_zone_id:ipv4net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
 					& bsr_priority:u32		\
-					& hash_masklen:u32
+					& hash_mask_len:u32
 	add_config_cand_bsr_by_vif_name6? scope_zone_id:ipv6net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
 					& bsr_priority:u32		\
-					& hash_masklen:u32
+					& hash_mask_len:u32
 	add_config_cand_bsr_by_addr4	? scope_zone_id:ipv4net		\
 					& is_scope_zone:bool		\
 					& cand_bsr_addr:ipv4		\
 					& bsr_priority:u32		\
-					& hash_masklen:u32
+					& hash_mask_len:u32
 	add_config_cand_bsr_by_addr6	? scope_zone_id:ipv6net		\
 					& is_scope_zone:bool		\
 					& cand_bsr_addr:ipv6		\
 					& bsr_priority:u32		\
-					& hash_masklen:u32
+					& hash_mask_len:u32
 	delete_config_cand_bsr4		? scope_zone_id:ipv4net		\
 					& is_scope_zone:bool
 	delete_config_cand_bsr6		? scope_zone_id:ipv6net		\
@@ -159,18 +159,18 @@ interface pim/0.1 {
 	 * @param group_prefix the group prefix for the RP.
 	 * @param rp_addr the RP address.
 	 * @param rp_priority the RP priority (smaller is better).
-	 * @param hash_masklen the hash masklen used in computing an RP for
-	 * a group. It should be same across all RPs. If set to zero,
+	 * @param hash_mask_len the hash mask length used in computing an RP
+	 * for a group. It should be same across all RPs. If set to zero,
 	 * the default one will be used.
 	 */
 	add_config_static_rp4		? group_prefix:ipv4net		\
 					& rp_addr:ipv4			\
 					& rp_priority:u32		\
-					& hash_masklen:u32
+					& hash_mask_len:u32
 	add_config_static_rp6		? group_prefix:ipv6net		\
 					& rp_addr:ipv6			\
 					& rp_priority:u32		\
-					& hash_masklen:u32
+					& hash_mask_len:u32
 	delete_config_static_rp4	? group_prefix:ipv4net		\
 					& rp_addr:ipv4
 	delete_config_static_rp6	? group_prefix:ipv6net		\
@@ -276,13 +276,13 @@ interface pim/0.1 {
 	 * to a neighbor.
 	 */
 	add_test_jp_entry4	? source_addr:ipv4 & group_addr:ipv4	\
-				& group_masklen:u32			\
+				& group_mask_len:u32			\
 				& mrt_entry_type:txt			\
 				& action_jp:txt				\
 				& holdtime:u32				\
 				& new_group_bool:bool
 	add_test_jp_entry6	? source_addr:ipv6 & group_addr:ipv6	\
-				& group_masklen:u32			\
+				& group_mask_len:u32			\
 				& mrt_entry_type:txt			\
 				& action_jp:txt				\
 				& holdtime:u32				\
@@ -319,7 +319,8 @@ interface pim/0.1 {
 	 * @param zone_id_is_scope_zone true if the zone is scoped.
 	 * @param bsr_addr the address of the Bootstrap router.
 	 * @param bsr_priority the priority of the Bootstrap router.
-	 * @param hash_masklen the hash masklen inside the Bootstrap messages.
+	 * @param hash_mask_len the hash mask length inside the Bootstrap
+	 * messages.
 	 * @param fragment_tag the fragment tag inside the Bootstrap messages.
 	 * @param group_prefix the group prefix.
 	 * @param is_scope_zone true if the group prefix has the scope zone
@@ -336,13 +337,13 @@ interface pim/0.1 {
 				& zone_id_is_scope_zone:bool		\
 				& bsr_addr:ipv4				\
 				& bsr_priority:u32			\
-				& hash_masklen:u32			\
+				& hash_mask_len:u32			\
 				& fragment_tag:u32
 	add_test_bsr_zone6	? zone_id_scope_zone_prefix:ipv6net	\
 				& zone_id_is_scope_zone:bool		\
 				& bsr_addr:ipv6				\
 				& bsr_priority:u32			\
-				& hash_masklen:u32			\
+				& hash_mask_len:u32			\
 				& fragment_tag:u32
 	add_test_bsr_group_prefix4 ? zone_id_scope_zone_prefix:ipv4net	\
 				& zone_id_is_scope_zone:bool		\

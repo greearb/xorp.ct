@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.5 2003/06/23 18:56:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.6 2003/08/12 15:11:37 pavlin Exp $"
 
 
 //
@@ -74,7 +74,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
     int		rcvd_family;
     IPvX	target_nbr_addr(family());
     IPvX	source_addr(family()), group_addr(family());
-    uint8_t	source_masklen, group_masklen;
+    uint8_t	source_mask_len, group_mask_len;
     uint8_t	group_addr_reserved_flags;
     int		groups_n, sources_n, sources_j_n, sources_p_n;
     uint8_t	source_flags;
@@ -109,7 +109,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
     // we should be liberal about such errors.
     //
     while (groups_n--) {
-	GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_masklen,
+	GET_ENCODED_GROUP_ADDR(rcvd_family, group_addr, group_mask_len,
 			       group_addr_reserved_flags, buffer);
 	BUFFER_GET_HOST_16(sources_j_n, buffer);
 	BUFFER_GET_HOST_16(sources_p_n, buffer);
@@ -119,10 +119,10 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 	new_group_bool = true;
 	
 	//
-	// Check the group address and masklen
+	// Check the group address and mask length
 	//
 	do {
-	    if (group_masklen == IPvX::ip_multicast_base_address_masklen(family())
+	    if (group_mask_len == IPvX::ip_multicast_base_address_mask_len(family())
 		&& (group_addr == IPvX::MULTICAST_BASE(family()))) {
 		// XXX: (*,*,RP) Join/Prune
 		ignore_group_bool = false;
@@ -149,14 +149,14 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 		ignore_group_bool = true;
 		break;
 	    }
-	    if (group_masklen != group_addr.addr_bitlen()) {
+	    if (group_mask_len != group_addr.addr_bitlen()) {
 		ignore_group_bool = true;
 		XLOG_WARNING("RX %s from %s to %s: "
-			     "invalid group masklen for group %s: %d",
+			     "invalid group mask length for group %s: %d",
 			     PIMTYPE2ASCII(message_type),
 			     cstring(src), cstring(dst),
 			     cstring(group_addr),
-			     group_masklen);
+			     group_mask_len);
 		break;
 	    }
 	    ignore_group_bool = false;
@@ -175,11 +175,11 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 	    }
 	    
 	    GET_ENCODED_SOURCE_ADDR(rcvd_family, source_addr,
-				    source_masklen, source_flags, buffer);
+				    source_mask_len, source_flags, buffer);
 	    if (ignore_group_bool)
 		continue;
 	    
-	    // Check the source address and masklen
+	    // Check the source address and mask length
 	    if (! source_addr.is_unicast()) {
 		XLOG_WARNING("RX %s from %s to %s: "
 			     "invalid source/RP address: %s",
@@ -188,15 +188,15 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 			     cstring(source_addr));
 		continue;
 	    }
-	    if (source_masklen != source_addr.addr_bitlen()) {
+	    if (source_mask_len != source_addr.addr_bitlen()) {
 		XLOG_WARNING("RX %s from %s to %s: "
-			     "invalid source masklen "
+			     "invalid source mask length "
 			     "for group %s source/RP %s: %d",
 			     PIMTYPE2ASCII(message_type),
 			     cstring(src), cstring(dst),
 			     cstring(group_addr),
 			     cstring(source_addr),
-			     source_masklen);
+			     source_mask_len);
 		continue;
 	    }
 	    
@@ -301,7 +301,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 	    // An the entry to the pool of entries pending commit.
 	    // TODO: if error, then ignore the whole message??
 	    jp_header.jp_entry_add(source_addr, group_addr,
-				   group_masklen, mrt_entry_type,
+				   group_mask_len, mrt_entry_type,
 				   action_jp, holdtime, new_group_bool);
 	    new_group_bool = false;
 	    // Keep statistics per entry type
@@ -354,12 +354,12 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
     ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
     
- rcvd_masklen_error:
+ rcvd_mask_len_error:
     XLOG_WARNING("RX %s from %s to %s: "
-		 "invalid masklen = %d",
+		 "invalid group mask length = %d",
 		 PIMTYPE2ASCII(PIM_JOIN_PRUNE),
 		 cstring(src), cstring(dst),
-		 group_masklen);
+		 group_mask_len);
     return (XORP_ERROR);
     
  rcvd_family_error:

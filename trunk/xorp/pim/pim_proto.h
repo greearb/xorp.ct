@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.4 2003/06/13 19:06:20 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.5 2003/06/16 22:45:32 pavlin Exp $
  */
 
 
@@ -216,7 +216,7 @@
  *
  * XXX: the macros below assume that the code has the following
  * labels that can be used to jump and process the particular error:
- *	'rcvd_family_error' 'rcvd_masklen_error' 'rcvlen_error'
+ *	'rcvd_family_error' 'rcvd_mask_len_error' 'rcvlen_error'
  * The also assume that function family() is defined (to return
  * the IP address family within the current context.
  */
@@ -241,7 +241,7 @@ do {									\
 #define ENCODED_UNICAST_ADDR_SIZE(ip_family)				\
 			(2*sizeof(uint8_t) + FAMILY2ADDRSIZE(ip_family))
 
-#define GET_ENCODED_GROUP_ADDR(rcvd_family, group_ipaddr, masklen, reserved, buffer) \
+#define GET_ENCODED_GROUP_ADDR(rcvd_family, group_ipaddr, mask_len, reserved, buffer) \
 do {									\
 	int addr_family_;						\
 									\
@@ -251,15 +251,15 @@ do {									\
 		goto rcvd_family_error;					\
 	BUFFER_GET_SKIP(1, (buffer));		/* Encoding type */	\
 	BUFFER_GET_OCTET((reserved), (buffer));				\
-	BUFFER_GET_OCTET((masklen), (buffer));				\
+	BUFFER_GET_OCTET((mask_len), (buffer));				\
 	BUFFER_GET_IPADDR((rcvd_family), (group_ipaddr), (buffer));	\
-	if ((u_int)(masklen) > FAMILY2PREFIXLEN((rcvd_family)))		\
-		goto rcvd_masklen_error;				\
+	if ((u_int)(mask_len) > FAMILY2PREFIXLEN((rcvd_family)))	\
+		goto rcvd_mask_len_error;				\
 } while (0)
 #define ENCODED_GROUP_ADDR_SIZE(ip_family)				\
 			(4*sizeof(uint8_t) + FAMILY2ADDRSIZE(ip_family))
 
-#define GET_ENCODED_SOURCE_ADDR(rcvd_family, source_ipaddr, masklen, flags, buffer) \
+#define GET_ENCODED_SOURCE_ADDR(rcvd_family, source_ipaddr, mask_len, flags, buffer) \
 do {									\
 	int addr_family_;						\
 									\
@@ -269,10 +269,10 @@ do {									\
 		goto rcvd_family_error;					\
 	BUFFER_GET_SKIP(1, (buffer));		/* Encoding type */	\
 	BUFFER_GET_OCTET((flags), (buffer));				\
-	BUFFER_GET_OCTET((masklen), (buffer));				\
+	BUFFER_GET_OCTET((mask_len), (buffer));				\
 	BUFFER_GET_IPADDR((rcvd_family), (source_ipaddr), (buffer));	\
-	if ((u_int)(masklen) > FAMILY2PREFIXLEN((rcvd_family)))		\
-		goto rcvd_masklen_error;				\
+	if ((u_int)(mask_len) > FAMILY2PREFIXLEN((rcvd_family)))	\
+		goto rcvd_mask_len_error;				\
 } while (0)
 #define ENCODED_SOURCE_ADDR_SIZE(ip_family)				\
 			(4*sizeof(uint8_t) + FAMILY2ADDRSIZE(ip_family))
@@ -296,7 +296,7 @@ do {									\
 	BUFFER_PUT_IPADDR((unicast_ipaddr), (buffer));			\
 } while (0)
 
-#define PUT_ENCODED_GROUP_ADDR(ip_family, group_ipaddr, masklen, reserved, buffer)\
+#define PUT_ENCODED_GROUP_ADDR(ip_family, group_ipaddr, mask_len, reserved, buffer)\
 do {									\
 	int addr_family_;						\
 									\
@@ -306,11 +306,11 @@ do {									\
 	BUFFER_PUT_OCTET(addr_family_, (buffer));			\
 	BUFFER_PUT_OCTET(ADDRF_NATIVE_ENCODING, (buffer));		\
 	BUFFER_PUT_OCTET(reserved, (buffer));	/* E.g., EGADDR_Z_BIT */\
-	BUFFER_PUT_OCTET((masklen), (buffer));				\
+	BUFFER_PUT_OCTET((mask_len), (buffer));				\
 	BUFFER_PUT_IPADDR((group_ipaddr), (buffer));			\
 } while (0)
 
-#define PUT_ENCODED_SOURCE_ADDR(ip_family, source_ipaddr, masklen, flags, buffer) \
+#define PUT_ENCODED_SOURCE_ADDR(ip_family, source_ipaddr, mask_len, flags, buffer) \
 do {									\
 	int addr_family_;						\
 									\
@@ -320,7 +320,7 @@ do {									\
 	BUFFER_PUT_OCTET(addr_family_, (buffer));			\
 	BUFFER_PUT_OCTET(ADDRF_NATIVE_ENCODING, (buffer));		\
 	BUFFER_PUT_OCTET((flags), (buffer));				\
-	BUFFER_PUT_OCTET((masklen), (buffer));				\
+	BUFFER_PUT_OCTET((mask_len), (buffer));				\
 	BUFFER_PUT_IPADDR((source_ipaddr), (buffer));			\
 } while (0)
 

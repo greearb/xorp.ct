@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_rp.hh,v 1.2 2003/03/10 23:20:52 hodson Exp $
+// $XORP: xorp/pim/pim_rp.hh,v 1.3 2003/04/01 00:56:24 pavlin Exp $
 
 
 #ifndef __PIM_PIM_RP_HH__
@@ -57,7 +57,7 @@ public:
     };
     
     PimRp(RpTable& rp_table, const IPvX& rp_addr, uint8_t rp_priority,
-	  const IPvXNet& group_prefix, uint8_t hash_masklen,
+	  const IPvXNet& group_prefix, uint8_t hash_mask_len,
 	  rp_learned_method_t rp_learned_method);
     PimRp(RpTable& rp_table, const PimRp& pim_rp);
     ~PimRp();
@@ -68,8 +68,8 @@ public:
     uint8_t	rp_priority()	const	{ return (_rp_priority);	}
     void	set_rp_priority(uint8_t v) { _rp_priority = v;		}
     const IPvXNet& group_prefix() const	{ return (_group_prefix);	}
-    uint8_t	hash_masklen()	const	{ return (_hash_masklen);	}
-    void	set_hash_masklen(uint8_t v) { _hash_masklen = v;	}
+    uint8_t	hash_mask_len()	const	{ return (_hash_mask_len);	}
+    void	set_hash_mask_len(uint8_t v) { _hash_mask_len = v;	}
     rp_learned_method_t rp_learned_method() const { return (_rp_learned_method); }
     static const string rp_learned_method_str(rp_learned_method_t rp_learned_method);
     const string rp_learned_method_str() const;
@@ -105,7 +105,7 @@ private:
     IPvX	_rp_addr;		// The RP address
     uint8_t	_rp_priority;		// The RP priority
     IPvXNet	_group_prefix;		// The group address prefix
-    uint8_t	_hash_masklen;		// The RP hash masklen
+    uint8_t	_hash_mask_len;		// The RP hash mask length
     rp_learned_method_t _rp_learned_method; // How learned about this RP
     bool	_is_updated;		// True if just created or updated
     list<PimMre *> _pim_mre_wc_list;	// List of all related (*,G) entries
@@ -152,7 +152,7 @@ public:
     PimRp	*add_rp(const IPvX& rp_addr,
 			uint8_t rp_priority,
 			const IPvXNet& group_prefix,
-			uint8_t hash_masklen,
+			uint8_t hash_mask_len,
 			PimRp::rp_learned_method_t rp_learned_method);
     int		delete_rp(const IPvX& rp_addr,
 			  const IPvXNet& group_prefix,

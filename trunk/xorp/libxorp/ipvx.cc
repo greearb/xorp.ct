@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.7 2003/09/30 03:07:59 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.8 2003/09/30 03:17:03 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -224,13 +224,13 @@ IPvX::operator++() {
 }
 
 IPvX
-IPvX::make_prefix(int family, size_t masklen)
+IPvX::make_prefix(int family, size_t mask_len)
     throw (InvalidFamily, InvalidNetmaskLength)
 {
     if (family == AF_INET)
-	return IPv4::make_prefix(masklen);
+	return IPv4::make_prefix(mask_len);
     else if (family == AF_INET6)
-	return IPv6::make_prefix(masklen);
+	return IPv6::make_prefix(mask_len);
     else 
 	xorp_throw(InvalidFamily, family);
     return IPvX(0);	/* Not Reached */
@@ -255,12 +255,12 @@ IPvX::str() const
 }
 
 size_t
-IPvX::masklen() const
+IPvX::mask_len() const
 {
     if (is_ipv4())
-	return get_ipv4().masklen();
+	return get_ipv4().mask_len();
     else
-	return get_ipv6().masklen();
+	return get_ipv6().mask_len();
 }
 
 /**
@@ -539,12 +539,12 @@ IPvX::addr_size(int family) throw (InvalidFamily)
 }
 
 size_t
-IPvX::ip_multicast_base_address_masklen(int family) throw (InvalidFamily)
+IPvX::ip_multicast_base_address_mask_len(int family) throw (InvalidFamily)
 {
     if (family == AF_INET)
-	return (IPv4::ip_multicast_base_address_masklen());
+	return (IPv4::ip_multicast_base_address_mask_len());
     if (family == AF_INET6)
-	return (IPv6::ip_multicast_base_address_masklen());
+	return (IPv6::ip_multicast_base_address_mask_len());
     
     xorp_throw(InvalidFamily, family);
     return ((size_t)-1);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.10 2003/06/16 22:48:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.11 2003/06/23 18:56:54 pavlin Exp $"
 
 
 //
@@ -144,7 +144,7 @@ PimJpGroup::PimJpGroup(PimJpHeader& jp_header, int family)
       _family(family),
       _group_addr(family)
 {
-    _group_masklen = IPvX::addr_bitlen(family);
+    _group_mask_len = IPvX::addr_bitlen(family);
     _j_sources_n = 0;
     _p_sources_n = 0;
 }
@@ -154,7 +154,7 @@ PimJpGroup::PimJpGroup(PimJpHeader& jp_header, int family)
 // @new_group_bool: if true, create a new PimJpGroup().
 int
 PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
-			  uint8_t group_masklen,
+			  uint8_t group_mask_len,
 			  mrt_entry_type_t mrt_entry_type,
 			  action_jp_t action_jp, uint16_t holdtime,
 			  bool new_group_bool)
@@ -171,7 +171,7 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 	     ++iter) {
 	    jp_group = *iter;
 	    if ( (group_addr != jp_group->group_addr())
-		 || (group_masklen != jp_group->group_masklen()))
+		 || (group_mask_len != jp_group->group_mask_len()))
 		continue;
 	    jp_group_found_bool = true;
 	    break;
@@ -183,7 +183,7 @@ PimJpHeader::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
 	jp_group = new PimJpGroup(*this, family());
 	_jp_groups_list.push_back(jp_group);
 	jp_group->set_group_addr(group_addr);
-	jp_group->set_group_masklen(group_masklen);
+	jp_group->set_group_mask_len(group_mask_len);
 	incr_jp_groups_n();
     }
     _holdtime = holdtime;	// XXX: the older holdtime may be modified
@@ -314,7 +314,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     uint32_t	lookup_flags = 0, create_flags = 0;
     uint16_t	vif_index;
     uint16_t	holdtime;
-    uint8_t	source_masklen, group_masklen;
+    uint8_t	source_mask_len, group_mask_len;
     IPvX	source_addr(family()), group_addr(family());
     list<PimJpGroup *>::iterator iter;
     PimMre	*pim_mre;
@@ -341,8 +341,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     ++iter) {
 	    PimJpGroup *jp_group = *iter;
 	    group_addr = jp_group->group_addr();
-	    group_masklen = jp_group->group_masklen();
-	    if (group_masklen != group_addr.addr_bitlen())
+	    group_mask_len = jp_group->group_mask_len();
+	    if (group_mask_len != group_addr.addr_bitlen())
 		continue;	// XXX: exclude (e.g., probably (*,*,RP) entry)
 	    groups_map.insert(pair<IPvX, IPvX>(group_addr, group_addr));
 	}
@@ -356,7 +356,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	list<IPvX>::iterator iter2;
 	PimJpGroup *jp_group = *iter;
 	group_addr = jp_group->group_addr();
-	group_masklen = jp_group->group_masklen();
+	group_mask_len = jp_group->group_mask_len();
 	holdtime = _holdtime;
 	
 	//
@@ -372,7 +372,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->rp()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router_bool)
 		pim_mrt().add_task_receive_join_rp(vif_index, source_addr);
@@ -401,7 +401,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->rp()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router_bool)
 		pim_mrt().add_task_receive_prune_rp(vif_index, source_addr);
@@ -429,7 +429,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->wc()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router_bool)
 		pim_mrt().add_task_receive_join_wc(vif_index, group_addr);
@@ -458,7 +458,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->wc()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router_bool) {
 		pim_mrt().add_task_receive_prune_wc(vif_index, group_addr);
@@ -489,7 +489,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg_rpt()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router_bool) {
 		pim_mrt().add_task_receive_join_sg_rpt(vif_index, source_addr,
@@ -518,7 +518,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg_rpt()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router_bool) {
 		pim_mrt().add_task_receive_prune_sg_rpt(vif_index, source_addr,
@@ -581,7 +581,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router_bool) {
 		pim_mrt().add_task_receive_join_sg(vif_index, source_addr,
@@ -612,7 +612,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router_bool) {
 		pim_mrt().add_task_receive_prune_sg(vif_index, source_addr,
@@ -857,7 +857,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    source_addr = *iter2;
 	    jp_header.jp_entry_add(source_addr,
 				   jp_group->group_addr(),
-				   jp_group->group_masklen(),
+				   jp_group->group_mask_len(),
 				   MRT_ENTRY_RP,
 				   ACTION_JOIN,
 				   _holdtime,
@@ -881,7 +881,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    source_addr = *iter2;
 	    jp_header.jp_entry_add(source_addr,
 				   jp_group->group_addr(),
-				   jp_group->group_masklen(),
+				   jp_group->group_mask_len(),
 				   MRT_ENTRY_RP,
 				   ACTION_PRUNE,
 				   _holdtime,
@@ -909,7 +909,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    source_addr = *iter2;
 	    jp_header.jp_entry_add(source_addr,
 				   jp_group->group_addr(),
-				   jp_group->group_masklen(),
+				   jp_group->group_mask_len(),
 				   MRT_ENTRY_WC,
 				   ACTION_JOIN,
 				   _holdtime,
@@ -933,7 +933,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    source_addr = *iter2;
 	    jp_header.jp_entry_add(source_addr,
 				   jp_group->group_addr(),
-				   jp_group->group_masklen(),
+				   jp_group->group_mask_len(),
 				   MRT_ENTRY_WC,
 				   ACTION_PRUNE,
 				   _holdtime,
@@ -978,7 +978,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    source_addr = map_iter->second;
 	    jp_header.jp_entry_add(source_addr,
 				   jp_group->group_addr(),
-				   jp_group->group_masklen(),
+				   jp_group->group_mask_len(),
 				   MRT_ENTRY_SG_RPT,
 				   ACTION_PRUNE,
 				   _holdtime,
@@ -1002,7 +1002,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    source_addr = *iter2;
 	    jp_header.jp_entry_add(source_addr,
 				   jp_group->group_addr(),
-				   jp_group->group_masklen(),
+				   jp_group->group_mask_len(),
 				   MRT_ENTRY_SG_RPT,
 				   ACTION_JOIN,
 				   _holdtime,
@@ -1030,7 +1030,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    source_addr = *iter2;
 	    jp_header.jp_entry_add(source_addr,
 				   jp_group->group_addr(),
-				   jp_group->group_masklen(),
+				   jp_group->group_mask_len(),
 				   MRT_ENTRY_SG,
 				   ACTION_JOIN,
 				   _holdtime,
@@ -1054,7 +1054,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    source_addr = *iter2;
 	    jp_header.jp_entry_add(source_addr,
 				   jp_group->group_addr(),
-				   jp_group->group_masklen(),
+				   jp_group->group_mask_len(),
 				   MRT_ENTRY_SG,
 				   ACTION_PRUNE,
 				   _holdtime,
@@ -1076,7 +1076,7 @@ int
 PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
 {
     uint32_t	flags;
-    uint8_t	source_masklen;
+    uint8_t	source_mask_len;
     IPvX	source_addr(family());
     list<PimJpGroup *>::iterator iter;
     uint8_t sparse_bit = pim_node().proto_is_pimsm() ? ESADDR_S_BIT : 0;
@@ -1101,7 +1101,7 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	uint8_t group_addr_reserved_flags = 0;
 	
 	PUT_ENCODED_GROUP_ADDR(family(), jp_group->group_addr(),
-			       jp_group->group_masklen(),
+			       jp_group->group_mask_len(),
 			       group_addr_reserved_flags, buffer);
 	// The number of joined sources
 	BUFFER_PUT_HOST_16(jp_group->j_sources_n(), buffer);
@@ -1113,9 +1113,9 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->rp()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    flags		= ESADDR_RPT_BIT | ESADDR_WC_BIT | sparse_bit;
-	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_masklen,
+	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_mask_len,
 				    flags, buffer);
 	}
 	// (*,*,RP) Prune
@@ -1123,9 +1123,9 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->rp()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    flags		= ESADDR_RPT_BIT | ESADDR_WC_BIT | sparse_bit;
-	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_masklen,
+	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_mask_len,
 				    flags, buffer);
 	}
 	// (*,G) Join
@@ -1133,9 +1133,9 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->wc()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    flags		= ESADDR_RPT_BIT | ESADDR_WC_BIT | sparse_bit;
-	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_masklen,
+	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_mask_len,
 				    flags, buffer);
 	}
 	// (S,G,rpt) Join
@@ -1143,9 +1143,9 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg_rpt()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    flags		= ESADDR_RPT_BIT | sparse_bit;
-	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_masklen,
+	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_mask_len,
 				    flags, buffer);
 	}
 	// (S,G) Join
@@ -1153,9 +1153,9 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    flags		= sparse_bit;
-	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_masklen,
+	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_mask_len,
 				    flags, buffer);
 	}
 	// (*,G) Prune
@@ -1163,9 +1163,9 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->wc()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    flags		= ESADDR_RPT_BIT | ESADDR_WC_BIT | sparse_bit;
-	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_masklen,
+	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_mask_len,
 				    flags, buffer);
 	}
 	// (S,G,rpt) Prune
@@ -1173,9 +1173,9 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg_rpt()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    flags		= ESADDR_RPT_BIT | sparse_bit;
-	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_masklen,
+	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_mask_len,
 				    flags, buffer);
 	}
 	// (S,G) Prune
@@ -1183,9 +1183,9 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_masklen	= IPvX::addr_bitlen(family());
+	    source_mask_len	= IPvX::addr_bitlen(family());
 	    flags		= sparse_bit;
-	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_masklen,
+	    PUT_ENCODED_SOURCE_ADDR(family(), source_addr, source_mask_len,
 				    flags, buffer);
 	}
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.9 2003/09/09 00:40:05 pavlin Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.10 2003/09/30 03:07:59 pavlin Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -345,16 +345,16 @@ public:
     }
     
     /**
-     * Get the masklen for the multicast base address.
+     * Get the mask length for the multicast base address.
      * 
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   size_t my_len = IPv6::ip_multicast_base_address_masklen();	OK
-     *   size_t my_len = ipv6.ip_multicast_base_address_masklen();	OK
+     *   size_t my_len = IPv6::ip_multicast_base_address_mask_len();	OK
+     *   size_t my_len = ipv6.ip_multicast_base_address_mask_len();	OK
      * 
-     * @return the multicast base address masklen for family AF_INET6.
+     * @return the multicast base address mask_len for family AF_INET6.
      */
-    static size_t ip_multicast_base_address_masklen() {
+    static size_t ip_multicast_base_address_mask_len() {
 #define IP_MULTICAST_BASE_ADDRESS_MASKLEN_IPV6	8
 	return (IP_MULTICAST_BASE_ADDRESS_MASKLEN_IPV6);
 #undef IP_MULTICAST_BASE_ADDRESS_MASKLEN_IPV6
@@ -363,10 +363,10 @@ public:
     /**
      * Make an IPv6 mask prefix.
      * 
-     * @param masklen the length of the mask to create.
-     * @return a new IPv6 address that contains a mask of length @ref masklen.
+     * @param mask_len the length of the mask to create.
+     * @return a new IPv6 address that contains a mask of length @ref mask_len.
      */
-    static const IPv6& make_prefix(size_t masklen) throw (InvalidNetmaskLength);
+    static const IPv6& make_prefix(size_t mask_len) throw (InvalidNetmaskLength);
 
     /**
      * Make an IPv6 address prefix.
@@ -386,7 +386,7 @@ public:
      * @return the prefix length of the contiguous mask presumably stored
      * as an IPv6 address.
      */
-    size_t masklen() const;
+    size_t mask_len() const;
     
     /**
      * Get the uint32_t raw value of this address.

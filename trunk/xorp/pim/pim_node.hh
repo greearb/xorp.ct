@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.26 2003/08/12 15:11:37 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.27 2003/08/12 15:50:13 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -959,13 +959,13 @@ public:
 						bool is_scope_zone,
 						const string& vif_name,
 						uint8_t bsr_priority,
-						uint8_t hash_masklen,
+						uint8_t hash_mask_len,
 						string& error_msg);
     int		add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
 					    bool is_scope_zone,
 					    const IPvX& my_cand_bsr_addr,
 					    uint8_t bsr_priority,
-					    uint8_t hash_masklen,
+					    uint8_t hash_mask_len,
 					    string& error_msg);
     int		delete_config_cand_bsr(const IPvXNet& scope_zone_id,
 				       bool is_scope_zone,
@@ -993,7 +993,7 @@ public:
     int		add_config_static_rp(const IPvXNet& group_prefix,
 				     const IPvX& rp_addr,
 				     uint8_t rp_priority,
-				     uint8_t hash_masklen,
+				     uint8_t hash_mask_len,
 				     string& error_msg);
     int		delete_config_static_rp(const IPvXNet& group_prefix,
 					const IPvX& rp_addr,
@@ -1028,7 +1028,7 @@ public:
     // Join/Prune test-related methods
     int		add_test_jp_entry(const IPvX& source_addr,
 				  const IPvX& group_addr,
-				  uint8_t group_masklen,
+				  uint8_t group_mask_len,
 				  mrt_entry_type_t mrt_entry_type,
 				  action_jp_t action_jp, uint16_t holdtime,
 				  bool new_group_bool);
@@ -1044,7 +1044,7 @@ public:
     int		add_test_bsr_zone(const PimScopeZoneId& zone_id,
 				  const IPvX& bsr_addr,
 				  uint8_t bsr_priority,
-				  uint8_t hash_masklen,
+				  uint8_t hash_mask_len,
 				  uint16_t fragment_tag);
     int		add_test_bsr_group_prefix(const PimScopeZoneId& zone_id,
 					  const IPvXNet& group_prefix,

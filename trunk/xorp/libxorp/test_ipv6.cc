@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.6 2003/09/09 00:40:05 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.7 2003/09/30 03:07:59 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -562,10 +562,10 @@ test_ipv6_address_const()
     verbose_assert(IPv6::addr_bitlen() == 128, "addr_bitlen()");
     
     //
-    // Test the masklen for the multicast base address.
+    // Test the mask length for the multicast base address.
     //
-    verbose_assert(IPv6::ip_multicast_base_address_masklen() == 8,
-		   "ip_multicast_base_address_masklen()");
+    verbose_assert(IPv6::ip_multicast_base_address_mask_len() == 8,
+		   "ip_multicast_base_address_mask_len()");
     
     //
     // Test the address family.
@@ -642,8 +642,8 @@ test_ipv6_manipulate_address()
     //
     // Test getting the prefix length of the contiguous mask.
     //
-    verbose_assert(IPv6("ffff:ff00::").masklen() == 24,
-		   "masklen()");
+    verbose_assert(IPv6("ffff:ff00::").mask_len() == 24,
+		   "mask_len()");
     
     //
     // Test getting the raw value of the address.

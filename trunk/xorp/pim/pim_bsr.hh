@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.7 2003/03/30 03:50:46 pavlin Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.8 2003/04/01 00:56:20 pavlin Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -96,7 +96,7 @@ public:
     BsrZone	*add_test_bsr_zone(const PimScopeZoneId& zone_id,
 				   const IPvX& bsr_addr,
 				   uint8_t bsr_priority,
-				   uint8_t hash_masklen,
+				   uint8_t hash_mask_len,
 				   uint16_t fragment_tag);
     BsrZone	*find_test_bsr_zone(const PimScopeZoneId& zone_id) const;
     BsrGroupPrefix *add_test_bsr_group_prefix(const PimScopeZoneId& zone_id,
@@ -141,7 +141,7 @@ public:
     BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone);
     BsrZone(PimBsr& pim_bsr, const PimScopeZoneId& zone_id);
     BsrZone(PimBsr& pim_bsr, const IPvX& bsr_addr, uint8_t bsr_priority,
-	    uint8_t hash_masklen, uint16_t fragment_tag);
+	    uint8_t hash_mask_len, uint16_t fragment_tag);
     ~BsrZone();
     
     PimBsr&	pim_bsr()		{ return (_pim_bsr);		}
@@ -160,7 +160,7 @@ public:
     
     const IPvX&	bsr_addr() const	{ return (_bsr_addr);		}
     uint8_t	bsr_priority() const	{ return (_bsr_priority);	}
-    uint8_t	hash_masklen() const	{ return (_hash_masklen);	}
+    uint8_t	hash_mask_len() const	{ return (_hash_mask_len);	}
     uint16_t	fragment_tag() const	{ return (_fragment_tag);	}
     uint16_t	new_fragment_tag()	{ return (++_fragment_tag);	}
     bool	is_accepted_message() const { return (_is_accepted_message); }
@@ -271,7 +271,7 @@ private:
     // State at all routers
     IPvX	_bsr_addr;		// The address of the Bootstrap router
     uint8_t	_bsr_priority;		// The BSR priority (larger is better)
-    uint8_t	_hash_masklen;		// The hash mask length
+    uint8_t	_hash_mask_len;		// The hash mask length
     uint16_t	_fragment_tag;		// The fragment tag
     bool	_is_accepted_message;	// True if info accepted already
     bool	_is_unicast_message;	// True if info received by unicast

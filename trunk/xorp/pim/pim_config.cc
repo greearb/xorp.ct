@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.19 2003/07/12 01:14:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.20 2003/08/07 00:31:58 pavlin Exp $"
 
 
 //
@@ -1083,7 +1083,7 @@ PimNode::add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
 					 bool is_scope_zone,
 					 const string& vif_name,
 					 uint8_t bsr_priority,
-					 uint8_t hash_masklen,
+					 uint8_t hash_mask_len,
 					 string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
@@ -1113,7 +1113,7 @@ PimNode::add_config_cand_bsr_by_vif_name(const IPvXNet& scope_zone_id,
 					is_scope_zone,
 					*pim_vif->addr_ptr(),
 					bsr_priority,
-					hash_masklen,
+					hash_mask_len,
 					error_msg));
 }
 
@@ -1126,7 +1126,7 @@ PimNode::add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
 				     bool is_scope_zone,
 				     const IPvX& my_cand_bsr_addr,
 				     uint8_t bsr_priority,
-				     uint8_t hash_masklen,
+				     uint8_t hash_mask_len,
 				     string& error_msg)
 {
     uint16_t fragment_tag = RANDOM(0xffff);
@@ -1136,12 +1136,12 @@ PimNode::add_config_cand_bsr_by_addr(const IPvXNet& scope_zone_id,
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
-    // XXX: if hash_masklen is 0, then set its value to default
-    if (hash_masklen == 0)
-	hash_masklen = PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(family());
+    // XXX: if hash_mask_len is 0, then set its value to default
+    if (hash_mask_len == 0)
+	hash_mask_len = PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(family());
     
     BsrZone new_bsr_zone(pim_bsr(), my_cand_bsr_addr, bsr_priority,
-			 hash_masklen, fragment_tag);
+			 hash_mask_len, fragment_tag);
     new_bsr_zone.set_zone_id(zone_id);
     new_bsr_zone.set_i_am_candidate_bsr(true, my_cand_bsr_addr, bsr_priority);
     
@@ -1478,7 +1478,7 @@ int
 PimNode::add_config_static_rp(const IPvXNet& group_prefix,
 			      const IPvX& rp_addr,
 			      uint8_t rp_priority,
-			      uint8_t hash_masklen,
+			      uint8_t hash_mask_len,
 			      string& error_msg)
 {
     if (start_config(error_msg) != XORP_OK)
@@ -1504,11 +1504,11 @@ PimNode::add_config_static_rp(const IPvXNet& group_prefix,
 	return (XORP_ERROR);
     }
     
-    // XXX: if hash_masklen is 0, then set its value to default
-    if (hash_masklen == 0)
-	hash_masklen = PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(family());
+    // XXX: if hash_mask_len is 0, then set its value to default
+    if (hash_mask_len == 0)
+	hash_mask_len = PIM_BOOTSTRAP_HASH_MASKLEN_DEFAULT(family());
     
-    if (rp_table().add_rp(rp_addr, rp_priority, group_prefix, hash_masklen,
+    if (rp_table().add_rp(rp_addr, rp_priority, group_prefix, hash_mask_len,
 			  PimRp::RP_LEARNED_METHOD_STATIC)
 	== NULL) {
 	// XXX: don't call end_config(error_msg);
@@ -1581,7 +1581,7 @@ PimNode::config_static_rp_done(string& error_msg)
 //
 int
 PimNode::add_test_jp_entry(const IPvX& source_addr, const IPvX& group_addr,
-			   uint8_t group_masklen,
+			   uint8_t group_mask_len,
 			   mrt_entry_type_t mrt_entry_type,
 			   action_jp_t action_jp, uint16_t holdtime,
 			   bool new_group_bool)
@@ -1589,7 +1589,7 @@ PimNode::add_test_jp_entry(const IPvX& source_addr, const IPvX& group_addr,
     int ret_value;
     
     ret_value = _test_jp_header.jp_entry_add(source_addr, group_addr,
-					     group_masklen, mrt_entry_type,
+					     group_mask_len, mrt_entry_type,
 					     action_jp, holdtime,
 					     new_group_bool);
     
@@ -1648,11 +1648,11 @@ int
 PimNode::add_test_bsr_zone(const PimScopeZoneId& zone_id,
 			   const IPvX& bsr_addr,
 			   uint8_t bsr_priority,
-			   uint8_t hash_masklen,
+			   uint8_t hash_mask_len,
 			   uint16_t fragment_tag)
 {
     if (pim_bsr().add_test_bsr_zone(zone_id, bsr_addr, bsr_priority,
-				    hash_masklen, fragment_tag)
+				    hash_mask_len, fragment_tag)
 	== NULL) {
 	return (XORP_ERROR);
     }

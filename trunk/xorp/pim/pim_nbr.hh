@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_nbr.hh,v 1.5 2003/06/16 22:48:03 pavlin Exp $
+// $XORP: xorp/pim/pim_nbr.hh,v 1.6 2003/08/14 01:16:35 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NBR_HH__
@@ -101,7 +101,7 @@ public:
     void	set_is_nohello_neighbor(bool v) { _is_nohello_neighbor = v; }
     
     int		jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
-			     uint8_t group_masklen,
+			     uint8_t group_mask_len,
 			     mrt_entry_type_t mrt_entry_type,
 			     action_jp_t action_jp, uint16_t holdtime,
 			     bool new_group_bool);
