@@ -1,5 +1,6 @@
 
 Bugzilla URL:	
+Bug found by:	
 Submitted by:	
 Requested by:	
 Reviewed by:	
@@ -8,6 +9,7 @@ Obtained from:
 CVS: ----------------------------------------------------------------------
 CVS: Bugzilla URL:    Fill this in if a Bugzilla entry is affected by the
 CVS:                  change.
+CVS: Bug found by:    Fill this in if someone else found the bug.
 CVS: Submitted by:    Fill this in if someone else sent in the change.
 CVS: Requested by:    Fill this in if someone else requested the change.
 CVS: Reviewed by:     Fill this in if someone else reviewed your modification.

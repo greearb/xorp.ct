@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/cfg_local.pm,v 1.1 2004/08/02 07:06:53 pavlin Exp $
+# $XORP: CVSROOT/cfg_local.pm,v 1.2 2004/08/02 07:57:48 pavlin Exp $
 # $FreeBSD: CVSROOT-src/cfg_local.pm,v 1.27 2004/06/05 10:47:00 des Exp $
 #
 
@@ -24,6 +24,7 @@ $UNEXPAND_RCSID = 1;
 
 %TEMPLATE_HEADERS = (
 	"Bugzilla URL"		=> '.*',
+	"Bug found by"		=> '.*',
 	"Submitted by"		=> '.*',
 	"Requested by"		=> '.*',
 	"Reviewed by"		=> '.*',
