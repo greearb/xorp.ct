@@ -1,0 +1,136 @@
+\documentclass[11pt]{article}
+\usepackage{xspace}
+\usepackage{times}
+\usepackage{psfig}
+\usepackage{amsmath}
+\newcommand{\module} {{\em module}\@\xspace}
+\newcommand{\modules} {{\em modules}\@\xspace}
+\newcommand{\finder} {{\em Finder}\@\xspace}
+\newcommand{\cm} {{\em CM}\@\xspace}
+\newcommand{\xrl} {{\em XRL}\@\xspace}
+\textwidth 6.5in
+\topmargin 0.0in
+\textheight 8.5in
+\headheight 0in
+\headsep 0in
+\oddsidemargin 0in
+%\date{}
+\title{Error Handling in XORP}
+\author{Second pass: Atanu Ghosh}
+%\twocolumn
+\begin{document}
+\parsep 0ex
+\parskip 1.0ex
+\parindent 0em
+\noindent
+\maketitle                            
+\section{Introduction}
+
+A xorp router is made up of a number processes that communicate via
+XRLS [REF] (a messaging system developed for XORP). In this document
+we will focus on how to deal with errors that are generated directly
+or indirectly by \xrl calls. As well as dealing with process failure
+and restarts. Most XORP processes share routing state that must remain
+synchronised. The BGP process sends the result of its decision process
+to the RIB. If the RIB fails then BGP has lost the ability to
+manipulate the FIB. BGP should either withdraw all routes or more
+catastrophically drop all peerings until the RIB restarts.
+
+A critical component of the \xrl infrastructure is the \finder. The
+\finder is the rendezous point for the \xrl system.  As the \finder is
+the rendezous point for \xrl communication it is able to detect
+process failures and restarts.
+
+In any complex system such as a xorp router errors can occur. The
+errors can range from a xorp process failing to an attempt to install
+a route that already exists. Errors will occur and need to be dealt
+with in a consistent manor. The types of error that may occur are
+categorised below.
+
+The first type of error a {\em Communication Error}. At the most basic
+level an attempt to send an \xrl has failed. The process that was the
+recipient of the \xrl may have failed or be slow to respond. The
+message that was being sent may have been lost in transit.
+
+The second type of error {\em Execution Error} is when an an XRL call
+returns an error due to some underlying interaction failure. The most
+fundamental example of this type of error is a route add failing. Lets
+consider what interactions occur when a route is passed from BGP to
+RIB to FEA. BGP receives an update packet, the update packet will
+contain one or both of withdraws and nlris. These components of the
+update packet may cause the BGP decision process to be rerun. A
+consequence of the running of the decision process may be the addition
+or deletion of a route.
+
+The third type of error {\em Type Error} is when an XRL call fails
+because the arguments passed to an XRL are invalid. This error will
+most likely be due to a version mismatch between xorp processes. If
+all the processes in a XORP router have been built from the source
+same tree this error should not occur. As we are building an
+extensbile router it may be the case that a process built from a
+different source tree may encounter compatibility problems.
+
+\section{Communication Error}
+
+\subsection{BGP}
+The 
+
+\section{Process interactions}
+Each process in a XORP router is described and how it should behave
+when another process in the system fails. Processes can explicitly
+register interest in the status of other processes through the
+\finder.
+
+It is conceivable that the \finder could restart and in the same time
+window another monitored process could restart. In which case the
+restarting of the monitored process could be missed. To guard against
+this possible race if the \finder fails or restarts all processes
+should exit. The assumption is that the \finder failing is a very low
+probability event.
+
+\subsection{RTRMGR - Router manager}
+
+
+\subsection{FEA - Forwarding Engine Abstraction}
+The FEA primarily excepts routes from the RIB and places them in the
+kernel. The FEA should tag all routes that it has installed in the
+kernel. The FEA on restart should remove all routes that a previous
+incarnation of the FEA has placed in the kernel.
+
+The FEA process should register interest in the RIB. If the RIB fails
+the FEA should withdraw all routes that the RIB has sent it.
+
+\subsection{RIB - Routing Information Base}
+Routes from the routing processes are sent to the RIB the winners are
+sent to the FEA.
+
+The RIB should register interest in the FEA. If the FEA fails the RIB
+needs to notify all the routing processs that are feeding it routes
+that it can no longer accept routes. The simplest way to do this may
+be for the RIB to exit. Another solution may be an upcall to the
+routing processes saying control plane gone.
+
+
+\subsection{RIP}
+
+\subsection{IS-IS}
+
+\subsection{OSPF}
+
+\subsection{PIM}
+
+\subsection{BGP}
+The major interaction that the BGP process has is with the RIB. At the
+time of writing the BGP process creates and manages its own TCP
+connections (In the future it may be the case that the TCP connections
+are mediated through the FEA). 
+
+The BGP process should register interest in status changes of the RIB.
+If the BGP process detects that the RIB has failed then it should
+withdraw all routes that have been sent to its peers and wait for the
+RIB to restart. A more drastic solution would be to tear out all
+peerings and wait for the RIB to restart.
+
+\bibliographystyle{plain}
+\bibliography{xorp}
+\end{document}
