@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.1 2003/05/02 07:50:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.2 2003/05/14 01:13:43 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -346,6 +346,8 @@ protected:
  * @short class to set IPv6 interface addresses
  */
 #ifdef HAVE_IPV6
+// TODO: XXX: PAVPAVPAV: this won't work on Linux!!
+#ifndef HOST_OS_LINUX
 class IfDelAddr6 : public IfIoctl {
 public:
     IfDelAddr6(int fd, const string& ifname, const IPv6& addr) : IfIoctl(fd) {
@@ -360,6 +362,21 @@ public:
 protected:
     struct ifaliasreq _ifra;
 };
+#else
+class IfDelAddr6 : public IfIoctl {
+public:
+    IfDelAddr6(int fd, const string& ifname, const IPv6& addr) : IfIoctl(fd) {
+	UNUSED(ifname);
+	UNUSED(addr);
+	debug_msg("IfDelAddr6(fd = %d, ifname = %s, addr = %s)\n",
+		  fd, ifname.c_str(), addr.str().c_str());
+    }
+
+    int execute() const { return -1; }
+
+protected:
+};
+#endif // HOST_OS_LINUX
 #endif // HAVE_IPV6
 
 bool
