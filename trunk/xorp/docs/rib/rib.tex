@@ -10,13 +10,13 @@
 
 \title{XORP Routing Information Base (RIB) Process \\
 \vspace{1ex}
-Version 0.2}
+Version 0.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 10, 2003}
+\date{June 6, 2003}
 
 %\twocolumn
 \begin{document}
@@ -188,9 +188,14 @@ Each RIB only contains a single RegisterTable.
 
 \subsection{ExportTable}
 
-The ExportTable exists to communicate to the FEA the changes
-that make it through to the end of the tree of tables.  Only the
-unicast RIBs have an ExportTable.
+The ExportTable exists to communicate to the FEA (and other registered
+processes) the changes that make it through to the end of the tree of
+tables.  Both the unicast and multicast RIBs have an ExportTable.
+
+By default the unicast RIBs export routes to the FEA, and the
+multicast RIBs don't export routes to anyone.  Processes which need to
+see the whole routing table can register to be added to the export
+list for one or more RIBs. The ExportTable maintains this list.
 
 Routes for directly connected subnets (from the ``connected''
 OriginTable) are not propagated back to the FEA, as it already knows
@@ -198,7 +203,7 @@ about these.
 
 \subsection{RedistTable}
 
-{\it Note, March 2003: RedistTable is unfinished.}
+{\it Note, June 2003: RedistTable is unfinished.}
 
 A RedistTable can by dynamically plumbed into the tree of tables at
 any point, but it is most likely to be inserted immediately after an
@@ -301,7 +306,7 @@ redist_disable6 ? from:txt & to:txt & unicast:bool & multicast:bool
 \end{verbatim}
 These XRLs are intended to be used to enable route redistribution
 between routing protocols.  However, this interface is currently
-(March 2003) incomplete and should not be used.
+(June 2003) incomplete and should not be used.
 
 \subsection{Registration of Interest in Routes}
 \label{reg}
@@ -362,4 +367,35 @@ information associated with the specified subnet is no longer correct.
 The registration with the RIB is no longer valid, and the routing
 protocol must re-register with the RIB to find out what happened.
 
+
+\subsection{Adding and deleting RIB clients}
+
+\begin{verbatim}
+add_rib_client4	? target_name:txt & unicast:bool & multicast:bool
+add_rib_client6	? target_name:txt & unicast:bool & multicast:bool
+
+delete_rib_client4 ? target_name:txt & unicast:bool & multicast:bool
+delete_rib_client6 ? target_name:txt & unicast:bool & multicast:bool
+
+enable_rib_client4 ? target_name:txt & unicast:bool & multicast:bool
+enable_rib_client6 ? target_name:txt & unicast:bool & multicast:bool
+
+disable_rib_client4 ? target_name:txt & unicast:bool & multicast:bool
+disable_rib_client6 ? target_name:txt & unicast:bool & multicast:bool
+\end{verbatim}
+
+The RIB's ExportTable is responsible for exporting all the winning
+unicast routes and any changes of those routes to the FEA.  However
+from the RIB's point of view the FEA is just a RibClient, and other
+processes may also register to be RibClients and to receive all the
+routing information.  By default the FEA is a RibClient for unicast
+routes only (it doesn't need to register).  Processes may use the {\tt
+add\_rib\_client} XRLs above to become a RibClient for unicast routes,
+for multicast routes, or both.  They may also enable and disable the
+propagation of this routing information, or deregister completely
+using {\tt delete\_rib\_client}.
+
 \end{document}
+
+
+
