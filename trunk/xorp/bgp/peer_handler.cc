@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.14 2003/05/23 00:02:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.15 2003/09/02 21:39:01 atanu Exp $"
 
-//#define DEBUG_LOGGING
+#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
@@ -120,9 +120,10 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 	pa = *pai;
 	
 	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
-	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
-	    const IPv6NextHopAttribute nh6(mpreach->nexthop());
-	    pa_list6.add_path_attribute(nh6);
+ 	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
+// 	    const IPv6NextHopAttribute nh6(mpreach->nexthop());
+// 	    pa_list6.add_path_attribute(nh6);
+	    pa_list6.add_path_attribute(*mpreach);
 	    continue;
 	}
 	
