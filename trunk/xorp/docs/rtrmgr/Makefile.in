@@ -116,7 +116,7 @@ TEXINPUTS_PATH = $(top_srcdir)/docs/tex:
 SUFFIXES = .tex .bbl .dvi .ps .pdf .fig .ps .eps
 
 # -- Document Names
-DOCS = rtrmgr
+DOCS = rtrmgr xorpsh_userguide
 
 # -- Document Sources
 rtrmgr_LATEX = rtrmgr.tex
@@ -125,6 +125,9 @@ rtrmgr_FIGURES = figs/config.ps			\
 			  figs/template.ps			\
 			  figs/xorpsh.ps
 
+
+xorpsh_userguide_LATEX = xorpsh_userguide.tex
+xorpsh_userguide_FIGURES = figs/xorpsh.ps
 subdir = docs/rtrmgr
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
