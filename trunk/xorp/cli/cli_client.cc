@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.19 2004/04/04 23:42:41 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.20 2004/05/26 14:49:52 pavlin Exp $"
 
 
 //
@@ -1281,43 +1281,62 @@ CliClient::process_command(const string& command_line)
     }
     
  print_syntax_error_label:
+    //
     // If there are more tokens, the first one has to be a sub-command.
     // However, there wasn't a match in our search, hence it has
     // to be an error.
     // Further, there was no processing function, hence those cannot
     // be command arguments.
+    //
     syntax_error_offset_next -= token.size();
+
+    // Unknown command
     if (parent_cli_command == current_cli_command()) {
 	cli_print(c_format("%*s%s\n", syntax_error_offset_next, " ", "^"));
 	cli_print("unknown command.\n");
-    } else {
-	if (token.empty())
-	    syntax_error_offset_next++;
-	cli_print(c_format("%*s%s\n", syntax_error_offset_next, " ", "^"));
-	cli_print("syntax error, expecting");
-	if (parent_cli_command->child_command_list().size() > 4) {
-	    // TODO: replace the hard-coded "4" with a #define or a parameter.
-	    cli_print(" <command>.\n");
-	} else {
-	    list<CliCommand *>::iterator iter;
-	    i = 0;
-	    for (iter = parent_cli_command->child_command_list().begin();
-		 iter != parent_cli_command->child_command_list().end();
-		 ++iter) {
-		child_cli_command = *iter;
-		if (i > 0) {
-		    cli_print(",");
-		    if ((size_t)(i + 1)
-			== parent_cli_command->child_command_list().size())
-			cli_print(" or");
-		}
-		i++;
-		cli_print(c_format(" `%s'",
-				   child_cli_command->name().c_str()));
-	    }
-	    cli_print(".\n");
-	}
+	return (XORP_ERROR);
     }
+
+    if (token.empty())
+	syntax_error_offset_next++;
+
+    // Command that cannot be executed
+    if (parent_cli_command->child_command_list().empty()) {
+	if (token.empty()) {
+	    cli_print(c_format("syntax error, command \"%s\" is not executable.\n",
+			       parent_cli_command->global_name().c_str()));
+	} else {
+	    cli_print(c_format("syntax error, command \"%s\" cannot be executed with argument \"%s\".\n",
+			       parent_cli_command->global_name().c_str(),
+			       token.c_str()));
+	}
+	return (XORP_ERROR);
+    }
+
+    // Command with invalid sub-parts
+    cli_print(c_format("%*s%s\n", syntax_error_offset_next, " ", "^"));
+    cli_print("syntax error, expecting");
+    if (parent_cli_command->child_command_list().size() > 4) {
+	// TODO: replace the hard-coded "4" with a #define or a parameter.
+	cli_print(" <command>.\n");
+	return (XORP_ERROR);
+    }
+    list<CliCommand *>::iterator iter;
+    i = 0;
+    for (iter = parent_cli_command->child_command_list().begin();
+	 iter != parent_cli_command->child_command_list().end();
+	 ++iter) {
+	child_cli_command = *iter;
+	if (i > 0) {
+	    cli_print(",");
+	    if ((size_t)(i + 1)
+		== parent_cli_command->child_command_list().size())
+		cli_print(" or");
+	}
+	i++;
+	cli_print(c_format(" `%s'", child_cli_command->name().c_str()));
+    }
+    cli_print(".\n");
     
     return (XORP_ERROR);
 }
