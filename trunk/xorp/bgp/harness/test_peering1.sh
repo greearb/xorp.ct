@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.15 2003/09/19 22:08:25 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.16 2003/10/28 00:48:09 atanu Exp $
 #
 
 #
@@ -843,7 +843,7 @@ test26()
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6 test9 
     test10 test11 test12 test13 test14 test15 test16 test17 test18 test19
-    test20 test21 test22 test23 test24 test25 test26 test27'
+    test20 test21 test22 test23 test24 test25 test26'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
