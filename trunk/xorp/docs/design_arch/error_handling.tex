@@ -375,6 +375,50 @@ The application SHOULD cause this XRL interface to go dormant, in the
 expectation that it will authoritatively discover from the finder that
 the target has died.
 
+\section{Execution Error}
+
+A XORP router is partitioned into many processes most of the operating
+system specific interactions are performed by the FEA. In a router the
+most frequent operation will be the adding and deleting of routes.
+Consider BGP adding a route; first the BGP process will send the route
+to the RIB, then the route may be sent to FEA. If the addition of the
+route from the RIB to the FEA fails then there is no way of
+propogating this failure back to the BGP process due to the
+asynchronous nature of XRLs. If adding/deleting a route fails a very
+drastic way of propogating this failure back to the BGP process would
+be for either or both the FEA and RIB processes to exit. If which case
+the process failure responses already described would be used and BGP
+would exit. Processes exiting would be an extreme response to failing
+to add a route because it already exists. It is important though not
+to mask over implementation problems by ignoring errors. In the rest
+of this section we will outline how to deal with a number of common
+errors.
+
+\subsection{Adding/Deleting route failures}
+
+As stated above a highly likely error could failures when adding or
+deleting routes. Typically the interaction will occur between the RIB
+and FEA. When an error occurs it should be logged by the FEA and the
+cause be returned to the RIB. The RIB can be configured with policy on
+how to react to different errors.
+
+Adding a route will typically fail because a route already exists.
+Firstly, if a route already exists it is either the same or different
+to the one that we attempted to add. Secondly, either the FEA
+installed the route or a third party installed it. Therefore when
+adding a route fails the FEA should return if the current route is the
+same or different to the one we attempted to add as well as who
+installed the route originally. The RIB on receiving the error state
+from the FEA can decide as a matter of policy how to proceed. If an
+attempt to add a route fails because a different route exists the RIB
+could choose to delete the old route and add the new route.
+
+The most common reason for a route deletion to fail would be that the
+route is no longer present. The FEA should log that it has been asked
+to delete a route that doesn't exist. The RIB should decide if this
+problem should be considered fatal.
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     BIBLIOGRAPHY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
