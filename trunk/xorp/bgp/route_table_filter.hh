@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.6 2003/08/06 17:52:55 atanu Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.7 2004/02/24 03:16:56 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -131,6 +131,26 @@ public:
 private:
 };
 
+/**
+ * Perform any filter operations that are required for routes that we
+ * originate.
+ * 
+ * Currently this only involves prepending our AS number on IBGP
+ * peers. We assume that on EBGP peers the AS number has already been
+ * prepended.
+ *
+ */
+template<class A>
+class OriginateRouteFilter : public BGPRouteFilter<A> {
+public:
+    OriginateRouteFilter(const AsNum &as_num, const bool ibgp);
+    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
+				     bool &modified) const ;
+private:
+    AsNum _as_num;
+    bool _ibgp;
+};
+
 /*
  * FilterTable is a route table that can hold banks of route
  * filters.  Normally FilterTable propagates add_route,
@@ -178,6 +198,7 @@ public:
     int add_med_insertion_filter();
     int add_med_removal_filter();
     int add_unknown_filter();
+    int add_originate_route_filter(const AsNum &asn, const bool);
 private:
     const InternalMessage<A> *
         apply_filters(const InternalMessage<A> *rtmsg) const;

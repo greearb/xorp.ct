@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.17 2004/02/25 05:03:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.18 2004/04/01 19:54:07 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -415,6 +415,61 @@ UnknownFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
+OriginateRouteFilter<A>::OriginateRouteFilter<A>(const AsNum &as_num,
+						 const bool ibgp)
+    :  _as_num(as_num), _ibgp(ibgp)
+{
+}
+
+template<class A>
+const InternalMessage<A>* 
+OriginateRouteFilter<A>::filter(const InternalMessage<A> *rtmsg,
+				 bool &modified) const
+{
+    debug_msg("Originate Route Filter\n");
+
+    // If we didn't originate this route forget it.
+    if (!rtmsg->origin_peer()->originate_route_handler())
+	return rtmsg;
+
+    // If this is an EBGP peering then assume the AS is already
+    // present. Perhaps we should check.
+    if (false == _ibgp)
+	return rtmsg;
+
+    //Create a new AS path with our AS number prepended to it.
+    AsPath new_as_path(rtmsg->route()->attributes()->aspath());
+    new_as_path.prepend_as(_as_num);
+
+    //Form a new path attribute list containing the new AS path
+    PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
+    palist.replace_AS_path(new_as_path);
+    palist.rehash();
+    
+    //Create a new route message with the new path attribute list
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist, 
+			     rtmsg->route()->original_route(), 
+			     rtmsg->route()->igp_metric());
+    InternalMessage<A> *new_rtmsg = 
+	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
+			       rtmsg->genid());
+
+    propagate_flags(rtmsg, new_rtmsg);
+    
+    //drop and free the old message
+    drop_message(rtmsg, modified);
+
+    //note that we changed the route
+    modified = true;
+    new_rtmsg->set_changed();
+
+    return new_rtmsg;
+}
+
+/*************************************************************************/
+
+template<class A>
 FilterTable<A>::FilterTable(string table_name,  
 			    Safi safi,
 			    BGPRouteTable<A> *parent_table,
@@ -736,6 +791,16 @@ FilterTable<A>::add_unknown_filter()
     UnknownFilter<A> *unknown_filter;
     unknown_filter = new UnknownFilter<A>();
     _filters.push_back(unknown_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterTable<A>::add_originate_route_filter(const AsNum &asn, const bool ibgp)
+{
+    OriginateRouteFilter<A> *originate_route_filter;
+    originate_route_filter = new OriginateRouteFilter<A>(asn, ibgp);
+    _filters.push_back(originate_route_filter);
     return 0;
 }
 
