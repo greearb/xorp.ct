@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.17 2003/04/23 20:50:50 hodson Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.18 2003/05/23 00:24:44 pavlin Exp $"
 
 
 //
@@ -92,9 +92,9 @@ usage(const char *argv0, int exit_value)
     else
 	output = stderr;
     
-    fprintf(output, "Usage: %s [-f <finder_hostname>[/<finder_port>]]\n",
+    fprintf(output, "Usage: %s [-F <finder_hostname>[:<finder_port>]]\n",
 	    progname);
-    fprintf(output, "           -f <finder_hostname>[/<finder_port>]  : finder hostname and port\n");
+    fprintf(output, "           -f <finder_hostname>[:<finder_port>]  : finder hostname and port\n");
     fprintf(output, "           -h                                    : usage (this message)\n");
     fprintf(output, "\n");
     fprintf(output, "Program name:   %s\n", progname);
@@ -128,9 +128,9 @@ main(int argc, char *argv[])
     //
     // Get the program options
     //
-    while ((ch = getopt(argc, argv, "f:h")) != -1) {
+    while ((ch = getopt(argc, argv, "F:h")) != -1) {
 	switch (ch) {
-	case 'f':
+	case 'F':
 	    // Finder hostname and port
 	    finder_hostname_port = optarg;
 	    break;
@@ -161,7 +161,7 @@ main(int argc, char *argv[])
 	
 	// Get the finder address
 	strcpy(buf, finder_hostname_port);
-	p = strrchr(buf, '/');
+	p = strrchr(buf, ':');
 	if (p != NULL)
 	    *p = '\0';
 	h = gethostbyname(buf);
@@ -186,7 +186,7 @@ main(int argc, char *argv[])
 	
 	// Get the finder port
 	strcpy(buf, finder_hostname_port);
-	p = strrchr(buf, '/');
+	p = strrchr(buf, ':');
 	if (p != NULL) {
 	    p++;
 	    finder_port = static_cast<uint16_t>(atoi(p));

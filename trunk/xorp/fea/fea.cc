@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.8 2003/05/21 14:26:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.9 2003/05/23 00:38:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -64,9 +64,9 @@ usage(const char *argv0, int exit_value)
     else
 	output = stderr;
 
-    fprintf(output, "Usage: %s [-f <finder_hostname>[/<finder_port>]]\n",
+    fprintf(output, "Usage: %s [-F <finder_hostname>[:<finder_port>]]\n",
 	    progname);
-    fprintf(output, "           -f <finder_hostname>[/<finder_port>]  : finder hostname and port\n");
+    fprintf(output, "           -F <finder_hostname>[:<finder_port>]  : finder hostname and port\n");
     fprintf(output, "           -h                                    : usage (this message)\n");
     fprintf(output, "\n");
     fprintf(output, "Program name:   %s\n", progname);
@@ -192,17 +192,17 @@ main(int argc, char *argv[])
     //
     // Get the program options
     //
-    while ((c = getopt(argc, argv, "f:h")) != -1) {
+    while ((c = getopt(argc, argv, "F:h")) != -1) {
 	switch (c) {
-	case 'f':
+	case 'F':
 	    // Finder hostname and port
 	    char *p;
 	    strncpy(finder_hostname, optarg, sizeof(finder_hostname) - 1);
 	    finder_hostname[sizeof(finder_hostname) - 1] = '\0';
-	    p = strrchr(finder_hostname, '/');
+	    p = strrchr(finder_hostname, ':');
 	    if (p != NULL)
 		*p = '\0';
-	    p = strrchr(optarg, '/');
+	    p = strrchr(optarg, ':');
 	    if (p != NULL) {
 		p++;
 		finder_port = static_cast<uint16_t>(atoi(p));
