@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.6 2003/04/21 04:34:21 pavlin Exp $
+# $XORP: xorp/bootstrap,v 1.7 2003/04/21 05:05:08 pavlin Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
@@ -29,6 +29,15 @@ check_necessary()
     echo -n "Checking configuration files..."
 
     NEWER_AM_FILES=`find . -name 'Makefile.am' -a -newer ${checkfile}`
+
+    # Look files included or used by Makefile.am files
+    SPECIAL_AM_FILES="docs/mk/Makefile.doc.am"
+    for s in ${SPECIAL_AM_FILES} ; do
+	if [ ${s} -nt ${checkfile} ] ; then
+	    NEWER_AM_FILES="${NEWER_AM_FILES} ${s}"
+	fi
+    done
+
     NEWER_CONFIG_IN=`find . -name 'configure.in' -a -newer ${checkfile}`
 
     echo "done."
@@ -39,8 +48,8 @@ check_necessary()
 
 	cat <<EOF 
 
-Neither configure.in nor Makefile.am's have been edited.  You almost
-certainly do not want to run this script which will regenerate
+Neither configure.in nor any Makefile.am files have been edited.  You
+almost certainly do not want to run this script which will regenerate
 automake/autoconf output files.
 
 Proceed at your own risk (y/n)?
