@@ -13,7 +13,7 @@ protocols {
     }
   }
 }
-		
+
 
 protocols {
   bgp {
@@ -23,8 +23,8 @@ protocols {
     %modinfo: statusmethod xrl;
     %modinfo: shutdownmethod xrl;
     bgp-id {
-      %set: xrl "bgp/bgp/0.2/set_bgpid?id:ipv4=$(@)";
-      %get: xrl "bgp/bgp/0.2/get_bgpid->id:ipv4";
+      %set: xrl "bgp/bgp/0.2/set_bgp_id?id:ipv4=$(@)";
+      %get: xrl "bgp/bgp/0.2/get_bgp_id->id:ipv4";
     }
     local-as {
       %set: xrl "bgp/bgp/0.2/set_local_as?as:u32=$(@)";
