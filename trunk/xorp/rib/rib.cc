@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.44 2005/01/22 06:02:16 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.45 2005/01/27 23:36:22 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -736,7 +736,8 @@ RIB<A>::add_route(const string&		tablename,
 
     // Only accept the least significant 16 bits of metric.
     if (metric > 0xffff) {
-	XLOG_WARNING("IGP metric value %d is greater than 0xffff", metric);
+	XLOG_WARNING("IGP metric value %u is greater than 0xffff",
+		     XORP_UINT_CAST(metric));
 	metric &= 0xffff;
     }
 
@@ -871,12 +872,13 @@ RIB<A>::verify_route(const A& lookup_addr,
 		  re->vif()->name().c_str());
     }
     if (metric != re->metric()) {
-	XLOG_ERROR("Metric \"%d\" does not match expected \"%d\".",
-		   re->metric(), metric);
+	XLOG_ERROR("Metric \"%u\" does not match expected \"%u\".",
+		   XORP_UINT_CAST(re->metric()), XORP_UINT_CAST(metric));
 	return XORP_ERROR;
     } else {
-	debug_msg("Metric: Exp: %d == Got: %d\n", metric,
-		  re->metric());
+	debug_msg("Metric: Exp: %u == Got: %u\n",
+		  XORP_UINT_CAST(metric),
+		  XORP_UINT_CAST(re->metric()));
     }
     debug_msg("****IP ROUTE SUCCESSFULLY VERIFIED****\n");
     return XORP_OK;
