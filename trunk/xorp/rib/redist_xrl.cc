@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.5 2004/05/13 01:43:54 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.6 2004/05/13 06:06:26 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -576,7 +576,8 @@ RedistXrlOutput<A>::RedistXrlOutput(Redistributor<A>*	redistributor,
     : RedistOutput<A>(redistributor), _xrl_router(xrl_router),
       _from_protocol(from_protocol), _target_name(xrl_target_name),
       _cookie(cookie), _is_xrl_transaction_output(is_xrl_transaction_output),
-      _tid(0), _transaction_in_progress(false), _transaction_in_error(false)
+      _n_tasks(0), _tid(0), _transaction_in_progress(false),
+      _transaction_in_error(false)
 {
 }
 
