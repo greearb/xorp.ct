@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.22 2004/12/15 23:54:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.23 2005/02/28 08:13:45 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -78,11 +78,25 @@ IfConfigSet::push_config(IfTree& it)
     //
     for (ii = it.ifs().begin(); ii != it.ifs().end(); ++ii) {
 	const IfTreeInterface& i = ii->second;
+	//
+	// Skip the ifindex check if the interface has no mapping to
+	// an existing interface in the system.
+	//
+	if (i.is_soft() || (i.discard() && is_discard_emulated(i)))
+	    continue;
+
+	//
+	// Check that the interface is recognized by the system
+	//
 	if (ifc().get_insert_ifindex(i.ifname()) == 0) {
 	    ifc().er().interface_error(i.ifname(), "interface not recognized");
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return false;
 	}
+
+	//
+	// Check the interface and vif name
+	//
 	for (vi = i.vifs().begin(); i.vifs().end() != vi; ++vi) {
 	    const IfTreeVif& v= vi->second;
 	    if (v.vifname() != i.ifname()) {
