@@ -1,9 +1,9 @@
 #
-# $XORP: xorp/fea/TODO,v 1.4 2003/05/14 09:37:55 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.5 2003/05/19 03:15:42 pavlin Exp $
 #
 
-* Make sure that the XrlMfeaVifManager works for IPv6 as well.
-  Also, apply the fixes to the RIB as well!!
+* Do we need to include <asm/types.h> for Linux, when we include
+  <linux/rtnetlink.h> ?
 
 * Do we need file test_ifconfig_rtsock.cc ??
 
