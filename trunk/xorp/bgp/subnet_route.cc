@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.2 2002/12/16 21:48:33 mjh Exp $"
 
 #include "bgp_module.h"
 #include "subnet_route.hh"
@@ -28,7 +28,8 @@ SubnetRoute<A>::SubnetRoute<A>(const SubnetRoute<A>& route_to_clone)
     //relying in C++ for the default constructor, or we get the
     //reference counts wrong in the attribute manager
 
-    _net = route_to_clone.net();
+    _net = route_to_clone._net;
+    _parent_route = route_to_clone._parent_route;
 
     const PathAttributeList<A>* atts;
     atts = route_to_clone.attributes();
@@ -42,8 +43,9 @@ SubnetRoute<A>::SubnetRoute<A>(const SubnetRoute<A>& route_to_clone)
 
 template<class A>
 SubnetRoute<A>::SubnetRoute<A>(const IPNet<A> &n, 
-			       const PathAttributeList<A>* atts)
-    : _net(n) {
+			       const PathAttributeList<A>* atts,
+			       const SubnetRoute<A>* parent_route)
+    : _net(n), _parent_route(parent_route) {
     debug_msg("SubnetRoute constructor2 giving %x\n", (uint)this);
     //the attribute manager handles memory management, and ensuring
     //that only one copy of each attribute list is ever stored
@@ -61,8 +63,9 @@ SubnetRoute<A>::SubnetRoute<A>(const IPNet<A> &n,
 template<class A>
 SubnetRoute<A>::SubnetRoute<A>(const IPNet<A> &n, 
 			       const PathAttributeList<A>* atts,
+			       const SubnetRoute<A>* parent_route,
 			       uint32_t igp_metric)
-    : _net(n) {
+    : _net(n), _parent_route(parent_route) {
     debug_msg("SubnetRoute constructor3 giving %x\n", (uint)this);
     //the attribute manager handles memory management, and ensuring
     //that only one copy of each attribute list is ever stored
@@ -99,12 +102,18 @@ void
 SubnetRoute<A>::set_is_winner(uint32_t igp_metric) const {
     _flags |= SRF_WINNER;
     _igp_metric = igp_metric;
+    if (_parent_route) {
+	_parent_route->set_is_winner(igp_metric);
+    }
 }
 
 template<class A>
 void 
 SubnetRoute<A>::set_is_not_winner() const {
     _flags &= ~SRF_WINNER;
+    if (_parent_route) {
+	_parent_route->set_is_not_winner();
+    }
 }
 
 template<class A>
@@ -114,6 +123,9 @@ SubnetRoute<A>::set_in_use(bool used) const {
 	_flags |= SRF_IN_USE;
     } else {
 	_flags &= ~SRF_IN_USE;
+    }
+    if (_parent_route) {
+	_parent_route->set_in_use(used);
     }
 #ifdef DEBUG_FLAGS
     printf("set_in_use: %p = ", this);

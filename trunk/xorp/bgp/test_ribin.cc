@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.7 2003/01/28 22:06:59 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.8 2003/01/29 00:38:57 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -92,7 +92,7 @@ int main(int, char** argv)
 
     //create a subnet route
     SubnetRoute<IPv4> *sr1, *sr2, *sr3, *sr4;
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
 
     //================================================================
     //Test1: trivial add and delete
@@ -143,7 +143,7 @@ int main(int, char** argv)
     debug_table->write_separator();
 
     //create a subnet route
-    sr2 = new SubnetRoute<IPv4>(net1, palist2);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
 
     //temporarily, we should have two managed palists
     assert(sr2->number_of_managed_atts() == 2);
@@ -189,8 +189,8 @@ int main(int, char** argv)
     palist2 =
 	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
-    sr2 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
 
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD FIRST ROUTE");
@@ -235,8 +235,8 @@ int main(int, char** argv)
     palist2 =
 	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
-    sr2 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
 
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD FIRST ROUTE");
@@ -283,14 +283,14 @@ int main(int, char** argv)
     palist2 =
 	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
     delete sr1;
     delete palist1;
 
-    sr2 = new SubnetRoute<IPv4>(net2, palist2);
+    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
@@ -311,8 +311,8 @@ int main(int, char** argv)
     palist2 =
 	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
-    sr2 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
 
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD FIRST ROUTE");
@@ -378,8 +378,8 @@ int main(int, char** argv)
     //palist1 has the same nexthop, but different palist as the route for net1
     palist4 =
 	new PathAttributeList<IPv4>(nhatt1, aspathatt2, igp_origin_att);
-    sr3 = new SubnetRoute<IPv4>(net3, palist3);
-    sr4 = new SubnetRoute<IPv4>(net4, palist4);
+    sr3 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    sr4 = new SubnetRoute<IPv4>(net4, palist4, NULL);
 
     msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
     debug_table->write_comment("ADD THIRD ROUTE");
@@ -425,28 +425,28 @@ int main(int, char** argv)
     palist4 =
 	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
     delete palist1;
     delete sr1;
 
-    sr2 = new SubnetRoute<IPv4>(net2, palist2);
+    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
     delete palist2;
     delete sr2;
 
-    sr3 = new SubnetRoute<IPv4>(net3, palist3);
+    sr3 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
     delete palist3;
     delete sr3;
 
-    sr4 = new SubnetRoute<IPv4>(net4, palist4);
+    sr4 = new SubnetRoute<IPv4>(net4, palist4, NULL);
     msg = new InternalMessage<IPv4>(sr4, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;

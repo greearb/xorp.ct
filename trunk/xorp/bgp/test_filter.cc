@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.7 2003/01/28 22:06:58 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.8 2003/01/29 00:38:57 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -119,7 +119,7 @@ int main(int, char** argv) {
     // add a route
     debug_table->write_comment("TEST 1");
     debug_table->write_comment("ADD AND DELETE UNFILTERED");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     filter_table->add_route(*msg, ribin_table);
 
@@ -140,7 +140,7 @@ int main(int, char** argv) {
     debug_table->write_comment("TEST 1a");
     debug_table->write_comment("ADD AND DELETE FILTERING");
     debug_table->write_comment("ADD, FILTERED");
-    sr1 = new SubnetRoute<IPv4>(net1, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     filter_table->add_route(*msg, ribin_table);
 
@@ -159,10 +159,10 @@ int main(int, char** argv) {
     // ================================================================
     // add a route
     debug_table->write_comment("TEST 2");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
 
-    sr2 = new SubnetRoute<IPv4>(net1, palist3);
+    sr2 = new SubnetRoute<IPv4>(net1, palist3, NULL);
     InternalMessage<IPv4>* msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("REPLACE ROUTE");
     filter_table->replace_route(*msg, *msg2, ribin_table);
@@ -179,10 +179,10 @@ int main(int, char** argv) {
     // ================================================================
     // add a route
     debug_table->write_comment("TEST 2a");
-    sr1 = new SubnetRoute<IPv4>(net1, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
 
-    sr2 = new SubnetRoute<IPv4>(net1, palist1);
+    sr2 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("REPLACE ROUTE, OLD ROUTE FILTERED");
     filter_table->replace_route(*msg, *msg2, ribin_table);
@@ -199,10 +199,10 @@ int main(int, char** argv) {
     // ================================================================
     // add a route
     debug_table->write_comment("TEST 2b");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
 
-    sr2 = new SubnetRoute<IPv4>(net1, palist2);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("REPLACE ROUTE, NEW ROUTE FILTERED");
     filter_table->replace_route(*msg, *msg2, ribin_table);
@@ -219,10 +219,10 @@ int main(int, char** argv) {
     // ================================================================
     // add a route
     debug_table->write_comment("TEST 2c");
-    sr1 = new SubnetRoute<IPv4>(net1, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
 
-    sr2 = new SubnetRoute<IPv4>(net1, palist2);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("REPLACE ROUTE, BOTH ROUTES FILTERED");
     filter_table->replace_route(*msg, *msg2, ribin_table);
@@ -239,7 +239,7 @@ int main(int, char** argv) {
     // ================================================================
     // add a route
     debug_table->write_comment("TEST 3");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
 
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ROUTE DUMP");
@@ -253,7 +253,7 @@ int main(int, char** argv) {
     // ================================================================
     // add a route
     debug_table->write_comment("TEST 3a");
-    sr1 = new SubnetRoute<IPv4>(net1, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
 
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ROUTE_DUMP, FILTERED");
@@ -268,7 +268,7 @@ int main(int, char** argv) {
     // add a route
     debug_table->write_comment("TEST 4");
     debug_table->write_comment("ADD, LOOKUP AND DELETE UNFILTERED");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin_table->add_route(*msg, NULL);
     delete sr1;
@@ -286,7 +286,7 @@ int main(int, char** argv) {
     debug_table->write_separator();
 
     // delete the route
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin_table->delete_route(*msg, NULL);
     delete sr1;
@@ -299,7 +299,7 @@ int main(int, char** argv) {
     // add a route
     debug_table->write_comment("TEST 4a");
     debug_table->write_comment("ADD, LOOKUP AND DELETE FILTERED");
-    sr1 = new SubnetRoute<IPv4>(net1, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD, SHOULD BE FILTERED");
     ribin_table->add_route(*msg, NULL);
@@ -316,7 +316,7 @@ int main(int, char** argv) {
     debug_table->write_separator();
 
     // delete the route
-    sr1 = new SubnetRoute<IPv4>(net1, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("DELETE, SHOULD BE FILTERED");
     ribin_table->delete_route(*msg, NULL);
@@ -332,7 +332,7 @@ int main(int, char** argv) {
     // add a route
     debug_table->write_comment("TEST 5");
     debug_table->write_comment("ADD AND DELETE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     filter_table->add_route(*msg, ribin_table);
 

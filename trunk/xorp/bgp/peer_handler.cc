@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.6 2003/01/29 23:38:13 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.7 2003/01/31 00:08:15 rizzo Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -127,7 +127,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     list <BGPUpdateAttrib>::const_iterator ni;
     ni = p->nlri_list().begin();
     while (ni != p->nlri_list().end()) {
-	SubnetRoute<IPv4> msg_route(ni->net(), &pa_list);
+	SubnetRoute<IPv4> msg_route(ni->net(), &pa_list, NULL);
 	InternalMessage<IPv4> msg(&msg_route, this, GENID_UNKNOWN);
 	_plumbing->add_route(msg, this);
 	++ni;

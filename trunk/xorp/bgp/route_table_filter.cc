@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.6 2003/01/16 23:18:58 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.7 2003/01/29 00:38:56 rizzo Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -99,7 +99,8 @@ ASPrependFilter<A>::filter(const InternalMessage<A> *rtmsg,
     
     //Create a new route message with the new path attribute list
     SubnetRoute<A> *new_route 
-	= new SubnetRoute<A>(rtmsg->net(), &palist,
+	= new SubnetRoute<A>(rtmsg->net(), &palist, 
+			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
@@ -138,6 +139,7 @@ NexthopRewriteFilter<A>::filter(const InternalMessage<A> *rtmsg,
     //Create a new route message with the new path attribute list
     SubnetRoute<A> *new_route 
 	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
 
     debug_msg("NexthopRewriteFilter: new route: %x with attributes %x\n",
@@ -210,6 +212,7 @@ LocalPrefInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
     //Create a new route message with the new path attribute list
     SubnetRoute<A> *new_route 
 	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
 
     InternalMessage<A> *new_rtmsg = 
@@ -254,6 +257,7 @@ LocalPrefRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
     //Create a new route message with the new path attribute list
     SubnetRoute<A> *new_route 
 	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
 
     InternalMessage<A> *new_rtmsg = 
@@ -301,6 +305,7 @@ MEDInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
     //Create a new route message with the new path attribute list
     SubnetRoute<A> *new_route 
 	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
 
     InternalMessage<A> *new_rtmsg = 
@@ -345,6 +350,7 @@ MEDRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
     //Create a new route message with the new path attribute list
     SubnetRoute<A> *new_route 
 	= new SubnetRoute<A>(rtmsg->net(), &palist, 
+			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
 
     InternalMessage<A> *new_rtmsg = 
@@ -662,6 +668,9 @@ FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg) const {
 	    debug_msg("different\n");
 	    XLOG_ASSERT(filtered_msg->changed());
 	}
+	//Check the filters correctly preserved the parent route
+	XLOG_ASSERT(filtered_msg->route()->original_route() 
+		    == rtmsg->route()->original_route());
 	++iter;
     }
     return filtered_msg;

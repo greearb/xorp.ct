@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.6 2003/01/28 22:06:58 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.7 2003/01/29 00:38:57 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -222,7 +222,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("TEST 1");
     debug_table1->write_comment("ADD AND DELETE");
     debug_table1->write_comment("SENDING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -232,7 +232,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
 
     //delete the route
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1,  0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -252,7 +252,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -261,7 +261,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -284,7 +284,7 @@ int main(int, char** argv) {
     //delete the routes
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -293,7 +293,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -314,7 +314,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -323,7 +323,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -332,7 +332,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -341,7 +341,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -364,7 +364,7 @@ int main(int, char** argv) {
     //delete the routes
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -373,7 +373,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -382,7 +382,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -391,7 +391,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -413,7 +413,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -422,7 +422,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -431,7 +431,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -440,7 +440,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -468,7 +468,7 @@ int main(int, char** argv) {
     //delete the routes
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -477,7 +477,7 @@ int main(int, char** argv) {
 
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -508,7 +508,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -518,7 +518,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -528,7 +528,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -570,7 +570,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -603,7 +603,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -613,7 +613,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -646,7 +646,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -680,7 +680,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -690,7 +690,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -700,7 +700,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -736,7 +736,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -770,7 +770,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -780,7 +780,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -790,7 +790,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -822,7 +822,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -855,7 +855,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -865,7 +865,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -875,7 +875,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -943,7 +943,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -953,7 +953,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -963,7 +963,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net4, palist4);
+    sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -980,7 +980,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1006,7 +1006,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 3 WHEN EVENTLOOP RUNS");
-    sr1 = new SubnetRoute<IPv4>(net0, palist5);
+    sr1 = new SubnetRoute<IPv4>(net0, palist5, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1016,7 +1016,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net5, palist5);
+    sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1036,7 +1036,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1048,7 +1048,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1060,7 +1060,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1072,7 +1072,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net4, palist4);
+    sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1084,7 +1084,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.0.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.0.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net0, palist5);
+    sr1 = new SubnetRoute<IPv4>(net0, palist5, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1096,7 +1096,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net5, palist5);
+    sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1118,7 +1118,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1128,7 +1128,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1138,7 +1138,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net4, palist4);
+    sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1155,7 +1155,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
     debug_table1->write_comment("EXPECT REPLACE AT PEER 2");
-    sr1 = new SubnetRoute<IPv4>(net1, palist5);
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
@@ -1176,7 +1176,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT REPLACE AT PEER 1");
     debug_table1->write_comment("EXPECT REPLACE AT PEER 3 WHEN EVENTLOOP RUNS");
-    sr1 = new SubnetRoute<IPv4>(net3, palist5);
+    sr1 = new SubnetRoute<IPv4>(net3, palist5, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1186,7 +1186,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 2");
     debug_table1->write_comment("EXPECT REPLACE AT PEER 1");
-    sr1 = new SubnetRoute<IPv4>(net4, palist5);
+    sr1 = new SubnetRoute<IPv4>(net4, palist5, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
@@ -1206,7 +1206,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("DELETING FROM PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
@@ -1218,7 +1218,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
@@ -1230,7 +1230,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("DELETING FROM PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 3");
-    sr1 = new SubnetRoute<IPv4>(net4, palist4);
+    sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);

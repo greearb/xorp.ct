@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.7 2003/01/28 22:06:58 rizzo Exp $"
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.8 2003/01/29 23:38:13 rizzo Exp $"
 
 #include "fcntl.h"
 
@@ -89,7 +89,7 @@ PlumbingTest::test1()
     IPv4 rtaddr1("10.10.10.0");
     SubnetRoute<IPv4> *route1;
     route1 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				      &pathattr1);
+				      &pathattr1, NULL);
 
     InternalMessage<IPv4> *rtm1;
     rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
@@ -121,7 +121,7 @@ PlumbingTest::test1()
 
     printf("Adding Route 1\n");
     route1 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				      &pathattr1);
+				   &pathattr1, NULL);
     rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
     add_route(*rtm1, &dummy_peerhandler1);
     printf("Add done\n");
@@ -131,7 +131,7 @@ PlumbingTest::test1()
     InternalMessage<IPv4> *rtm2;
     printf("Adding Route 2\n");
     route2 = new SubnetRoute<IPv4>(IPv4Net(rtaddr2, 24),
-				      &pathattr1);
+				   &pathattr1, NULL);
     rtm2 = new InternalMessage<IPv4>(route2, &dummy_peerhandler1, GENID_UNKNOWN);
     add_route(*rtm2, &dummy_peerhandler1);
     printf("Add done\n");
@@ -145,7 +145,7 @@ PlumbingTest::test1()
     printf("------------------------------------------------------\n");
     printf("Deleting Route 2\n");
     route2 = new SubnetRoute<IPv4>(IPv4Net(rtaddr2, 24),
-				      &pathattr1);
+				   &pathattr1, NULL);
     rtm2 = new InternalMessage<IPv4>(route2, &dummy_peerhandler1, GENID_UNKNOWN);
     rtm2->set_push();
     delete_route(*rtm2, &dummy_peerhandler1);
@@ -155,7 +155,7 @@ PlumbingTest::test1()
     printf("------------------------------------------------------\n");
     printf("Deleting Route 1\n");
     route1 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				      &pathattr1);
+				   &pathattr1, NULL);
     rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
     rtm1->set_push();
     delete_route(*rtm1, &dummy_peerhandler1);
@@ -166,7 +166,7 @@ PlumbingTest::test1()
     printf("Test1 of decision\n");
     printf("Adding Route 1\n");
     route1 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				      &pathattr1);
+				      &pathattr1, NULL);
     rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
     add_route(*rtm1, &dummy_peerhandler1);
     printf("Add done\n");
@@ -182,7 +182,7 @@ PlumbingTest::test1()
     PathAttributeList<IPv4> pathattr2(nexthop2, aspathatt, origin);
     printf("\n\nAdding Route 2 - this should lose to route 1\n");
     route2 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				      &pathattr2);
+				   &pathattr2, NULL);
     rtm2 = new InternalMessage<IPv4>(route2, &dummy_peerhandler2, GENID_UNKNOWN);
     add_route(*rtm2, &dummy_peerhandler2);
     printf("Add done\n");
@@ -195,7 +195,7 @@ PlumbingTest::test1()
 
     printf("\n\nDeleting Route 2 - shouldn't affect RibOut\n");
     route2 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				      &pathattr2);
+				   &pathattr2, NULL);
     rtm2 = new InternalMessage<IPv4>(route2, &dummy_peerhandler2, GENID_UNKNOWN);
     delete_route(*rtm2, &dummy_peerhandler2);
     printf("Delete done\n");
@@ -211,7 +211,7 @@ PlumbingTest::test1()
     PathAttributeList<IPv4> pathattr3(nexthop3, aspathatt, origin);
     printf("\n\nAdding Route 3 - this should beat route 1\n");
     route2 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				      &pathattr3);
+				   &pathattr3, NULL);
     rtm2 = new InternalMessage<IPv4>(route2, &dummy_peerhandler2, GENID_UNKNOWN);
     add_route(*rtm2, &dummy_peerhandler2);
     printf("Add done\n");
@@ -285,7 +285,7 @@ PlumbingTest::test2()
     IPv4 rtaddr1("10.10.10.0");
     SubnetRoute<IPv4> *route1;
     route1 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				      &pathattr1);
+				   &pathattr1, NULL);
 
     InternalMessage<IPv4> *rtm1;
     rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);

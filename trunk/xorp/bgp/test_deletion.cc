@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.6 2003/01/28 22:06:58 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.7 2003/01/29 00:38:57 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -119,7 +119,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -150,7 +150,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -158,7 +158,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist1);
+    sr1 = new SubnetRoute<IPv4>(net2, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -166,7 +166,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -197,7 +197,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -205,7 +205,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -213,7 +213,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -244,7 +244,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -252,7 +252,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -260,7 +260,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -268,7 +268,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -329,7 +329,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -337,7 +337,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -345,7 +345,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -353,7 +353,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -369,7 +369,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -377,7 +377,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -419,7 +419,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -427,7 +427,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -435,7 +435,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -443,7 +443,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -459,7 +459,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -467,7 +467,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist3);
+    sr1 = new SubnetRoute<IPv4>(net4, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -509,7 +509,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -517,7 +517,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -525,7 +525,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -533,7 +533,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -549,7 +549,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist3);
+    sr1 = new SubnetRoute<IPv4>(net1, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -557,7 +557,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -599,7 +599,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -607,7 +607,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -623,7 +623,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -631,7 +631,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -671,7 +671,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;
@@ -687,7 +687,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->add_route(*msg, NULL);
     delete sr1;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.5 2003/01/28 22:06:58 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.6 2003/01/29 00:38:57 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -101,7 +101,7 @@ int main(int, char** argv) {
 
     // create a subnet route
     SubnetRoute<IPv4> *sr1, *sr2;
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
 
     // ================================================================
     // Test1: trivial add and delete
@@ -134,7 +134,7 @@ int main(int, char** argv) {
     debug_table->write_comment("TEST 1a");
     debug_table->write_comment("ADD AND DELETE WITH CACHING.");
     debug_table->write_comment("ADD, CACHED");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_changed();
     msg->set_push();
@@ -150,7 +150,7 @@ int main(int, char** argv) {
     debug_table->write_comment("DELETE, CACHED");
 
     // delete the route
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     cache_table->delete_route(*msg, NULL);
@@ -171,10 +171,10 @@ int main(int, char** argv) {
     // add a route
     debug_table->write_comment("TEST 2");
     debug_table->write_comment("REPLACE ROUTE, NOT CACHED");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
 
-    sr2 = new SubnetRoute<IPv4>(net1, palist3);
+    sr2 = new SubnetRoute<IPv4>(net1, palist3, NULL);
     InternalMessage<IPv4>* msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     msg2->set_push();
     cache_table->replace_route(*msg, *msg2, NULL);
@@ -193,7 +193,7 @@ int main(int, char** argv) {
     // add a route
     debug_table->write_comment("TEST 2a");
     debug_table->write_comment("REPLACE ROUTE, OLD ROUTE CACHEED");
-    sr1 = new SubnetRoute<IPv4>(net1, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_changed();
     cache_table->add_route(*msg, NULL);
@@ -202,11 +202,11 @@ int main(int, char** argv) {
     delete msg;
     assert(cache_table->route_count() == 1);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_changed();
 
-    sr2 = new SubnetRoute<IPv4>(net1, palist1);
+    sr2 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     msg2->set_push();
     cache_table->replace_route(*msg, *msg2, NULL);
@@ -224,10 +224,10 @@ int main(int, char** argv) {
     assert(cache_table->route_count() == 0);
     debug_table->write_comment("TEST 2b");
     debug_table->write_comment("REPLACE ROUTE, NEW ROUTE TO BE CACHED");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
 
-    sr2 = new SubnetRoute<IPv4>(net1, palist2);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     msg2->set_changed();
     msg2->set_push();
@@ -244,7 +244,7 @@ int main(int, char** argv) {
 
     // delete the route
     debug_table->write_comment("CLEANUP");
-    sr2 = new SubnetRoute<IPv4>(net1, palist2);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     msg->set_changed();
     cache_table->delete_route(*msg, NULL);
@@ -258,7 +258,7 @@ int main(int, char** argv) {
     debug_table->write_comment("TEST 2c");
     debug_table->write_comment("REPLACE ROUTE, BOTH ROUTES CACHED");
     assert(cache_table->route_count() == 0);
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_changed();
     debug_table->write_comment("ADD ROUTE TO CACHE");
@@ -267,11 +267,11 @@ int main(int, char** argv) {
     delete msg;
 
     assert(cache_table->route_count() == 1);
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_changed();
 
-    sr2 = new SubnetRoute<IPv4>(net1, palist2);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     msg2->set_changed();
     msg2->set_push();
@@ -289,7 +289,7 @@ int main(int, char** argv) {
     delete msg2;
 
     // delete the route
-    sr2 = new SubnetRoute<IPv4>(net1, palist2);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     msg->set_changed();
     debug_table->write_comment("CLEANUP");
@@ -306,7 +306,7 @@ int main(int, char** argv) {
     debug_table->write_comment("TEST 3");
     debug_table->write_comment("FLUSH_CACHE");
     assert(cache_table->route_count() == 0);
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_changed();
     cache_table->add_route(*msg, NULL);

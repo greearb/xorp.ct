@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.5 2003/01/28 22:06:58 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.6 2003/01/29 00:38:57 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -143,7 +143,7 @@ int main(int, char** argv) {
     //pretend we have already resolved the nexthop
     nh_resolver.set_response(true);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     nhlookup_table->add_route(*msg, NULL);
     delete sr1;
@@ -152,7 +152,7 @@ int main(int, char** argv) {
     debug_table->write_separator();
 
     //delete the route
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     nhlookup_table->delete_route(*msg, NULL);
 
@@ -171,7 +171,7 @@ int main(int, char** argv) {
     //pretend we have already resolved the nexthop
     nh_resolver.set_response(false);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     nhlookup_table->add_route(*msg, NULL);
     delete msg;
@@ -196,7 +196,7 @@ int main(int, char** argv) {
     //pretend we have not yet resolved the nexthop
     nh_resolver.set_response(false);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     nhlookup_table->add_route(*msg, NULL);
     //Note: don't delete sr1 here - the NhLookupTable assumes the
@@ -234,14 +234,14 @@ int main(int, char** argv) {
     //pretend we have not yet resolved the nexthop
     nh_resolver.set_response(false);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     nhlookup_table->add_route(*msg, NULL);
     //Note: don't delete sr1 here - the NhLookupTable assumes the
     //subnet route is still held in the RIB-In.
     delete msg;
 
-    sr2 = new SubnetRoute<IPv4>(net2, palist1);
+    sr2 = new SubnetRoute<IPv4>(net2, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     nhlookup_table->add_route(*msg, NULL);
     //Note: don't delete sr2 here - the NhLookupTable assumes the
@@ -284,7 +284,7 @@ int main(int, char** argv) {
     //pretend we have not yet resolved the nexthop
     nh_resolver.set_response(false);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD");
     nhlookup_table->add_route(*msg, NULL);
@@ -295,7 +295,7 @@ int main(int, char** argv) {
     debug_table->write_separator();
  
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    sr2 = new SubnetRoute<IPv4>(net1, palist2);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0); 
     debug_table->write_comment("REPLACE");
     nhlookup_table->replace_route(*msg, *msg2, NULL);
@@ -334,7 +334,7 @@ int main(int, char** argv) {
     //pretend we have not yet resolved the nexthop
     nh_resolver.set_response(false);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD");
     nhlookup_table->add_route(*msg, NULL);
@@ -344,11 +344,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
  
-    sr3 = new SubnetRoute<IPv4>(net1, palist1);
+    sr3 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
     //delete the old route, as might happen with a replace route on RibIn
     delete sr1;
-    sr2 = new SubnetRoute<IPv4>(net1, palist2);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0); 
     debug_table->write_comment("REPLACE");
     nhlookup_table->replace_route(*msg, *msg2, NULL);
@@ -392,8 +392,8 @@ int main(int, char** argv) {
 
     nh_resolver.set_response(false);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
-    sr2 = new SubnetRoute<IPv4>(net1, palist2);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("FIRST REPLACE");
@@ -407,8 +407,8 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
  
-    sr1 = new SubnetRoute<IPv4>(net1, palist2);
-    sr3 = new SubnetRoute<IPv4>(net1, palist3);
+    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
+    sr3 = new SubnetRoute<IPv4>(net1, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg2 = new InternalMessage<IPv4>(sr3, &handler1, 0); 
     debug_table->write_comment("SECOND REPLACE");
@@ -451,7 +451,7 @@ int main(int, char** argv) {
     //pretend we have not yet resolved the nexthop
     nh_resolver.set_response(false);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     nhlookup_table->add_route(*msg, NULL);
@@ -459,7 +459,7 @@ int main(int, char** argv) {
     //subnet route is still held in the RIB-In.
     delete msg;
 
-    sr2 = new SubnetRoute<IPv4>(net2, palist1);
+    sr2 = new SubnetRoute<IPv4>(net2, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     nhlookup_table->add_route(*msg, NULL);
     //Note: don't delete sr2 here - the NhLookupTable assumes the

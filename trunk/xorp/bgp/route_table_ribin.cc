@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.6 2003/01/17 03:50:48 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.7 2003/01/31 23:39:40 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -113,6 +113,7 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 #endif
 	// preserve the information
 	SubnetRoute<A> route_copy(*existing_route);
+	assert(route_copy.original_route() == &route_copy);
 	deletion_nexthop_check(existing_route);
 
 	// delete from the Trie
@@ -181,6 +182,7 @@ RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	// preserve the information
 	SubnetRoute<A> route_copy(*existing_route);
 	deletion_nexthop_check(existing_route);
+	assert(route_copy.original_route() == &route_copy);
 
 	// remove from the Trie
 	_route_table->erase(rtmsg.net());

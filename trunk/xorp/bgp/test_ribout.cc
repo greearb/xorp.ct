@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.6 2003/01/28 22:06:59 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.7 2003/01/29 00:38:57 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -109,7 +109,6 @@ int main(int, char** argv) {
     InternalMessage<IPv4>* msg;
 
     UNUSED(sr2);
-    UNUSED(palist2);
     UNUSED(palist3);
     //================================================================
     //Test1: trivial add and delete
@@ -117,7 +116,7 @@ int main(int, char** argv) {
     //add a route
     debug_table->write_comment("TEST 1");
     debug_table->write_comment("ADD AND DELETE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     msg->set_push();
     ribout_table->add_route(*msg, debug_table);
@@ -138,19 +137,19 @@ int main(int, char** argv) {
     //add a route
     debug_table->write_comment("TEST 2");
     debug_table->write_comment("THREE ADDS ON TWO PA_LISTS");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->add_route(*msg, debug_table);
     delete sr1;
     delete msg;
 
-    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->add_route(*msg, debug_table);
     delete sr1;
     delete msg;
 
-    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->add_route(*msg, debug_table);
     delete sr1;
@@ -166,13 +165,13 @@ int main(int, char** argv) {
     //add a route
     debug_table->write_comment("TEST 3");
     debug_table->write_comment("DELETE THEN ADD");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->delete_route(*msg, debug_table);
     delete sr1;
     delete msg;
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->add_route(*msg, debug_table);
     delete sr1;
@@ -190,7 +189,7 @@ int main(int, char** argv) {
     debug_table->write_comment("ADD WHEN PEER BUSY");
     handler.set_canned_response(PEER_OUTPUT_BUSY);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->add_route(*msg, debug_table);
     delete sr1;

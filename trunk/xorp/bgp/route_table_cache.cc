@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.4 2002/12/20 23:40:50 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.5 2003/01/16 23:18:57 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -119,7 +119,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     IPNet<A> net = old_rtmsg.net();
     assert(net == new_rtmsg.net());
 
-    const SubnetRoute<A> *old_cached_route = NULL;
+    SubnetRoute<A> *old_route_copy = NULL;
     const InternalMessage<A> *old_rtmsg_ptr = &old_rtmsg;
     int result = ADD_USED;
 
@@ -133,11 +133,17 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	    abort();
 	} else {
 	    //preserve the information
-	    old_cached_route = new SubnetRoute<A>(iter.payload());
+	    old_route_copy = new SubnetRoute<A>(iter.payload());
 
-	    old_rtmsg_ptr = new InternalMessage<A>(old_cached_route,
-					       old_rtmsg.origin_peer(),
-					       old_rtmsg.genid());
+	    //set the parent route of the copy to one that still
+	    //exists, because the parent_route pointer of our cached
+	    //version is probably now invalid.
+	    old_route_copy->
+		set_parent_route(old_rtmsg.route()->original_route());
+
+	    old_rtmsg_ptr = new InternalMessage<A>(old_route_copy,
+						   old_rtmsg.origin_peer(),
+						   old_rtmsg.genid());
 
 	    //delete it from our cache, 
 	    _route_table.erase(old_rtmsg.net());
@@ -192,8 +198,8 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     if (old_rtmsg_ptr != &old_rtmsg) {
 	delete old_rtmsg_ptr;
-	assert(old_cached_route != NULL);
-	delete old_cached_route;
+	assert(old_route_copy != NULL);
+	delete old_route_copy;
     }
 
     return result;
@@ -219,6 +225,11 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	debug_msg("Found cached route: %s\n", existing_route->str().c_str());
 	//preserve the information
 	SubnetRoute<A> route_copy(*existing_route);
+
+	//set the copy's parent route to one that still exists, because
+	//the parent_route pointer of our cached version is
+	//probably now invalid
+	route_copy.set_parent_route(rtmsg.route()->original_route());
 
 	//delete it from our cache trie 
 	_route_table.erase(net);

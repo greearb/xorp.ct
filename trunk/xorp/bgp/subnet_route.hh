@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.2 2002/12/16 21:48:34 mjh Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -33,9 +33,11 @@ class SubnetRoute
 public:
     SubnetRoute(const SubnetRoute<A>& route_to_clone);
     SubnetRoute(const IPNet<A> &net, 
-		const PathAttributeList<A> *attributes);
+		const PathAttributeList<A> *attributes,
+		const SubnetRoute<A>* parent_route);
     SubnetRoute(const IPNet<A> &net, 
 		const PathAttributeList<A> *attributes,
+		const SubnetRoute<A>* parent_route,
 		uint32_t igp_metric);
     ~SubnetRoute();
     bool operator==(const SubnetRoute<A>& them) const;
@@ -62,11 +64,25 @@ public:
 	return _att_mgr.number_of_managed_atts();
     }
     uint32_t igp_metric() const {return _igp_metric;}
+
+    const SubnetRoute<A> *original_route() const {
+	if (_parent_route)
+	    return _parent_route;
+	else
+	    return this;
+    }
+
+    void set_parent_route(const SubnetRoute<A> *parent) 
+    {
+	_parent_route = parent;
+    }
 protected:
 private:
     static AttributeManager<A> _att_mgr;
     IPNet<A> _net;
     const PathAttributeList<A> *_attributes;
+
+    const SubnetRoute<A> *_parent_route;
 
     /*Flags: */
     /* SRF_IN_USE indicates whether this route is currently used for

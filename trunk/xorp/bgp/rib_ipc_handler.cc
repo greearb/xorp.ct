@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.4 2003/01/26 04:06:18 pavlin Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.5 2003/02/05 07:22:14 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -276,7 +276,7 @@ RibIpcHandler::insert_static_route(const OriginType origin,
     /*
     ** Create a subnet route
     */
-    SubnetRoute<IPv4> msg_route(nlri, &pa_list);
+    SubnetRoute<IPv4> msg_route(nlri, &pa_list, NULL);
     
     /*
     ** Make an internal message.
@@ -300,7 +300,7 @@ RibIpcHandler::delete_static_route(const IPNet<IPv4>& nlri)
     /*
     ** Create a subnet route
     */
-    SubnetRoute<IPv4> msg_route(nlri, 0);
+    SubnetRoute<IPv4> msg_route(nlri, 0, NULL);
 
     /*
     ** Make an internal message.
