@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.16 2004/01/06 20:22:59 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.17 2004/03/18 00:35:28 pavlin Exp $
 #
 
 #
@@ -414,20 +414,6 @@ kdoc_cli()
 }
 
 #
-# fea
-#
-kdoc_fea()
-{
-    lib="fea"
-    desc="Forwarding Engine Abstraction daemon"
-    html_start_page="index.html"
-    files="fea/*.hh"
-    excludes="fea/*click*hh"
-    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto mrt cli"
-    kdocify
-}
-
-#
 # libfeaclient
 #
 kdoc_libfeaclient()
@@ -437,6 +423,20 @@ kdoc_libfeaclient()
     html_start_page="index.html"
     files="libfeaclient/*h"
     xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets"
+    kdocify
+}
+
+#
+# fea
+#
+kdoc_fea()
+{
+    lib="fea"
+    desc="Forwarding Engine Abstraction daemon"
+    html_start_page="index.html"
+    files="fea/*.hh"
+    excludes="fea/*click*hh"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto mrt cli libfeaclient"
     kdocify
 }
 
@@ -520,7 +520,7 @@ kdoc_rib()
     html_start_page="index.html"
     files="rib/*.hh"
     excludes="rib/dummy_register_server.hh rib/parser_direct_cmds.hh rib/parser_xrl_cmds.hh rib/parser.hh"
-    xref="libxorp libxorp-callback xrl-interfaces xrl-targets libproto"
+    xref="libxorp libxorp-callback xrl-interfaces xrl-targets libproto libfeaclient"
     kdocify
 }
 
@@ -568,7 +568,7 @@ kdoc_static_routes()
 
 
 KDOC_ALL_TGTS="libxorp callback libcomm libxipc libproto xrl_interfaces \
-	       xrl_targets mrt cli fea libfeaclient mld6igmp pim bgp fib2mrib \
+	       xrl_targets mrt cli libfeaclient fea mld6igmp pim bgp fib2mrib \
 	       mibs rib rip rtrmgr static_routes"
 : ${KDOC_TGTS:=${KDOC_ALL_TGTS}}
 for i in ${KDOC_TGTS} ; do
