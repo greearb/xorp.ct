@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.83 2004/03/05 18:39:42 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.84 2004/03/05 22:14:52 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1373,6 +1373,7 @@ AC_OUTPUT(
 	policy/Makefile
 	rib/Makefile
 	rip/Makefile
+	rip/tools/Makefile
 	rtrmgr/Makefile
 	rtrmgr/tools/Makefile
 	static_routes/Makefile
