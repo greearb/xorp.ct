@@ -121,9 +121,10 @@ protocols \{\\
 \>\>\>peer-port: {\it int(1..65535)}\\
 \>\>\>holdtime: {\it uint}\\
 \>\>\>disable: {\it bool}\\
-\>\>\>enable-ipv4-multicast\\
-\>\>\>enable-ipv6-unicast\\
-\>\>\>enable-ipv6-multicast\\
+\>\>\>ipv4-unicast: {\it bool}\\
+\>\>\>ipv4-multicast: {\it bool}\\
+\>\>\>ipv6-unicast: {\it bool}\\
+\>\>\>ipv6-multicast: {\it bool}\\
 \>\>\}\\
 \\
 \>\>network4 {\it IPv4}/{\it int(1..32)} \{\\
@@ -217,15 +218,22 @@ The configuration parameters are used as follows:
   a peering to be taken down temporarily without removing the
   configuration~\footnote{Note that prior to XORP Release-1.1, the {\tt
   enable} flag was used instead of {\tt disable}.}.
-\item{\tt enable-ipv4-multicast}: this specifies that BGP should
+\item{\tt ipv4-unicast}: This takes the value {\stt true} or {\stt false},
+  and specifies whether BGP should
+  negotiate multiprotocol support with this peer to allow IPv4 unicast
+  routes to be exchanged. It is enabled by default.
+\item{\tt ipv4-multicast}: This takes the value {\stt true} or {\stt false},
+  and specifies whether BGP should
   negotiate multiprotocol support with this peer to allow separate
   routes to be used for IPv4 unicast and IPv4 multicast.  Normally
   this would only be enabled if PIM-SM multicast routing is running on
   the router.
-\item{\tt enable-ipv6-unicast}: this specifies that BGP should
+\item{\tt ipv6-unicast}: This takes the value {\stt true} or {\stt false},
+  and specifies whether BGP should
   negotiate multiprotocol support with this peer to allow IPv6 unicast
   routes to be exchanged.
-\item{\tt enable-ipv6-multicast}: this specifies that BGP should
+\item{\tt ipv6-multicast}: This takes the value {\stt true} or {\stt false},
+  and specifies whether BGP should
   negotiate multiprotocol support with this peer to allow IPv6
   multicast routes to be exchanged separately from IPv6 unicast
   routes.  It is possible to enable IPv6 multicast support without
@@ -272,9 +280,13 @@ protocols \{\\
 \>\>\>next-hop: 128.16.64.4\\
 \>\>\>holdtime: 120\\
 \\
+\>\>\>/* IPv4 unicast is enabled by default  */\\
+\>\>\>ipv4-unicast: true\\
+\\
 \>\>\>/* Optionally enable other AFI/SAFI combinations */\\
-\>\>\>enable-ipv4-multicast\\
-\>\>\>enable-ipv6-unicast\\
+\>\>\>ipv4-multicast: true\\
+\>\>\>ipv6-unicast: true\\
+\>\>\>ipv6-multicast: true\\
 \>\>\}\\
 \\
 \>\>/* Originate IPv4 Routes */\\

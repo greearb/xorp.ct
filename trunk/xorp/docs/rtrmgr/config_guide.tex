@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/config_guide.tex,v 1.5 2004/07/08 23:37:42 atanu Exp $
+% $XORP: xorp/docs/rtrmgr/config_guide.tex,v 1.6 2005/03/09 22:50:38 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -345,11 +345,13 @@ protocols \{\\
 \>\>\>/* holdtime: 120 */\\
 \>\>\>/* disable: false */\\
 \\
-\>\>\>/* Optionally enable other AFI/SAFI combinations */\\
-\>\>\>/* enable-ipv4-multicast */\\
+\>\>\>/* IPv4 unicast is enabled by default */\\
+\>\>\>/* ipv4-unicast: true */\\
 \\
-\>\>\>/* enable-ipv6-unicast */\\
-\>\>\>/* enable-ipv6-multicast */\\
+\>\>\>/* Optionally enable other AFI/SAFI combinations */\\
+\>\>\>/* ipv4-multicast: true */\\
+\>\>\>/* ipv6-unicast: true */\\
+\>\>\>/* ipv6-multicast: true */\\
 \>\>\}\\
 \\
 \>\>/* Originate IPv4 Routes */\\
