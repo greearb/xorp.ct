@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.17 2002/12/09 18:28:45 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -89,4 +89,41 @@ BGPPeerList::dump_list()
     list<BGPPeer *>::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++)
 	debug_msg("%s\n", (*i)->str().c_str());
+}
+
+uint32_t 
+BGPPeerList::get_peer_list_start()
+{
+    list<BGPPeer *>::iterator i = _peers.begin();
+    _readers[_next_token] = i;
+    return _next_token++;
+}
+
+bool 
+BGPPeerList::get_peer_list_next(const uint32_t& token, 
+				IPv4& local_ip, 
+				uint32_t& local_port, 
+				IPv4& peer_ip, 
+				uint32_t& peer_port)
+{
+    //XXX the code below assumes the peer list doesn't change while
+    //we're working our way through it.
+    map <uint32_t, list<BGPPeer *>::iterator>::iterator mi;
+    mi = _readers.find(token);
+    if (mi == _readers.end())
+	return false;
+    list<BGPPeer *>::iterator i = mi->second;
+    i++;
+    if (i == _peers.end()) {
+	_readers.erase(mi);
+	return false;
+    }
+    _readers[token] = i;
+
+    BGPPeer *peer = *i;
+    local_ip = peer->peerdata()->iptuple().get_local_addr();
+    local_port = peer->peerdata()->iptuple().get_local_port();
+    peer_ip = peer->peerdata()->iptuple().get_peer_addr();
+    peer_port = peer->peerdata()->iptuple().get_peer_port();
+    return true;
 }

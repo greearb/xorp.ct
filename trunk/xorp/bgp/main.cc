@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.82 2002/12/09 18:28:42 hodson Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -156,6 +156,8 @@ BGPMain::local_config(const uint32_t& as, const IPv4& id)
 
     _plumbing->set_my_as_number(local->get_as_num());
 }
+
+
 
 /*
 ** Callback registered with the asyncio code.
@@ -363,6 +365,134 @@ BGPMain::disable_peer(const Iptuple& iptuple)
 
     return true;
 }
+
+uint32_t
+BGPMain::get_peer_list() {
+    return _peerlist->get_peer_list_start();
+}
+
+bool 
+BGPMain::get_peer_list_next(const uint32_t& token, 
+			IPv4& local_ip, 
+			uint32_t& local_port, 
+			IPv4& peer_ip, 
+			uint32_t& peer_port) {
+    return _peerlist->get_peer_list_next(token, local_ip, local_port,
+					 peer_ip, peer_port);
+}
+
+bool 
+BGPMain::get_peer_id(const Iptuple& iptuple, IPv4& peer_id) 
+{
+    BGPPeer *peer = find_peer(iptuple);
+    if (peer == NULL)
+	return false;
+    const BGPPeerData* pd = peer->peerdata();
+    peer_id = pd->get_id();
+    return true;
+}
+
+bool 
+BGPMain::get_peer_status(const Iptuple& iptuple,  
+			 uint32_t& peer_state, 
+			 uint32_t& admin_status) 
+{
+    BGPPeer *peer = find_peer(iptuple);
+    if (peer == NULL)
+	return false;
+    peer_state = peer->get_ConnectionState();
+    //XXX state stopped is only for our internal use.
+    if (peer_state == STATESTOPPED)
+	peer_state = STATEIDLE;
+
+    admin_status = 2; //XXX start - do we hold a peer for admin stopped state?
+    return true;
+}
+
+bool 
+BGPMain::get_peer_negotiated_version(const Iptuple& iptuple, 
+				     int32_t& neg_version)
+{
+    BGPPeer *peer = find_peer(iptuple);
+    if (peer == NULL)
+	return false;
+
+    if (peer->get_ConnectionState() == STATEESTABLISHED)
+	neg_version = 4; /* we only support BGP 4 */
+    else
+	neg_version = 0; /* XXX the MIB doesn't say what version
+			    should be reported when the connection
+			    isn't established */
+    return true;
+}
+
+bool 
+BGPMain::get_peer_as(const Iptuple& iptuple, uint32_t& peer_as)
+{
+    BGPPeer *peer = find_peer(iptuple);
+    if (peer == NULL)
+	return false;
+    const BGPPeerData* pd = peer->peerdata();
+
+    // XXX is it appropriate to return an extended AS number in this
+    // context?
+    peer_as = pd->get_as_num().as_extended(); 
+
+    return true;
+}
+
+bool 
+BGPMain::get_peer_msg_stats(const Iptuple& iptuple, 
+			    uint32_t& in_updates, 
+			    uint32_t& out_updates, 
+			    uint32_t& in_msgs, 
+			    uint32_t& out_msgs, 
+			    uint16_t& last_error, 
+			    uint32_t& in_update_elapsed)
+{
+    BGPPeer *peer = find_peer(iptuple);
+    if (peer == NULL)
+	return false;
+    peer->get_msg_stats(in_updates, out_updates, in_msgs, out_msgs, 
+			last_error, in_update_elapsed);
+    return true;
+}
+
+bool 
+BGPMain::get_peer_established_stats(const Iptuple& iptuple,  
+				    uint32_t& transitions, 
+				    uint32_t& established_time)
+{
+    BGPPeer *peer = find_peer(iptuple);
+    if (peer == NULL)
+	return false;
+    transitions = peer->get_established_transitions();
+    established_time = peer->get_established_time();
+    return true;
+}
+
+bool 
+BGPMain::get_peer_timer_config(const Iptuple& iptuple,
+			       uint32_t& retry_interval, 
+			       uint32_t& hold_time, 
+			       uint32_t& keep_alive, 
+			       uint32_t& hold_time_configured, 
+			       uint32_t& keep_alive_configured, 
+			       uint32_t& min_as_origination_interval)
+{
+    BGPPeer *peer = find_peer(iptuple);
+    if (peer == NULL)
+	return false;
+    const BGPPeerData* pd = peer->peerdata();
+    retry_interval = pd->get_retry_duration();
+    hold_time = pd->get_hold_duration();
+    keep_alive = pd->get_keepalive_duration();
+    hold_time_configured = pd->get_configured_hold_time();
+    keep_alive_configured = hold_time_configured/3; //XXX
+    min_as_origination_interval = 0; //XXX
+    return true;
+}
+
 
 bool
 BGPMain::register_ribname(const string& name)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/iptuple.cc,v 1.6 2002/12/09 18:28:42 hodson Exp $"
+#ident "$XORP: xorp/bgp/iptuple.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,6 +42,15 @@ Iptuple::Iptuple(const char *local_interface, uint16_t local_port,
     _local_port = htons(local_port);
 
     _peer = get_addr(peer_interface);
+    _peer_port = htons(peer_port);
+}
+
+Iptuple::Iptuple(const IPv4& local_ip,  uint16_t local_port,
+		 const IPv4& peer_ip, uint16_t peer_port)
+{
+    _local.s_addr = local_ip.addr();
+    _local_port = htons(local_port);
+    _peer.s_addr = peer_ip.addr();
     _peer_port = htons(peer_port);
 }
 

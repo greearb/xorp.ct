@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.2 2002/12/18 00:36:38 mjh Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -110,6 +110,18 @@ public:
     ** Virtual so that it can be subclassed in the plumbing test code.
     */
     virtual PeerOutputState send_update_message(const UpdatePacket& p);
+
+    uint32_t get_established_transitions() const 
+    {
+	return _established_transitions;
+    }
+    uint32_t get_established_time() const;
+    void get_msg_stats(uint32_t& in_updates, 
+		       uint32_t& out_updates, 
+		       uint32_t& in_msgs, 
+		       uint32_t& out_msgs, 
+		       uint16_t& last_error, 
+		       uint32_t& in_update_elapsed) const;
 protected:
 private:
     bool connect_to_peer();

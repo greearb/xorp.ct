@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/main.hh,v 1.2 2002/12/14 23:42:49 hodson Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -101,6 +101,38 @@ public:
      * @return true on success
      */
     bool disable_peer(const Iptuple& iptuple);
+
+    uint32_t get_peer_list();
+
+    bool get_peer_list_next(const uint32_t& token, 
+			    IPv4& local_ip, 
+			    uint32_t& local_port, 
+			    IPv4& peer_ip, 
+			    uint32_t& peer_port);
+
+    bool get_peer_id(const Iptuple& iptuple, IPv4& peer_id);
+    bool get_peer_status(const Iptuple& iptuple,  uint32_t& peer_state, 
+			 uint32_t& admin_status);
+    bool get_peer_negotiated_version(const Iptuple& iptuple, 
+				     int32_t& neg_version);
+    bool get_peer_as(const Iptuple& iptuple,   uint32_t& peer_as);
+    bool get_peer_msg_stats(const Iptuple& iptuple, 
+			    uint32_t& in_updates, 
+			    uint32_t& out_updates, 
+			    uint32_t& in_msgs, 
+			    uint32_t& out_msgs, 
+			    uint16_t& last_error, 
+			    uint32_t& in_update_elapsed);
+    bool get_peer_established_stats(const Iptuple& iptuple,  
+				    uint32_t& transitions, 
+				    uint32_t& established_time);
+    bool get_peer_timer_config(const Iptuple& iptuple,
+			       uint32_t& retry_interval, 
+			       uint32_t& hold_time, 
+			       uint32_t& keep_alive, 
+			       uint32_t& hold_time_configured, 
+			       uint32_t& keep_alive_configured, 
+			       uint32_t& min_as_origination_interval);
 
     bool register_ribname(const string& name);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.2 2002/12/14 23:42:49 hodson Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -32,6 +32,15 @@ XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
 	  _awaiting_bgpid(true),
 	  _done(false)
 {
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_bgp_version(
+				      // Output values, 
+				      uint32_t&	version)
+{
+    version = 4;
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -78,6 +87,17 @@ XrlBgpTarget::bgp_0_2_set_local_as(
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_local_as(
+				   // Output values, 
+				   uint32_t& as) 
+{
+    if(_awaiting_as)
+	return XrlCmdError::COMMAND_FAILED("BGP AS not yet configured");
+    as = _as;
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError
 XrlBgpTarget::bgp_0_2_set_bgpid(
 				// Input values, 
@@ -98,6 +118,17 @@ XrlBgpTarget::bgp_0_2_set_bgpid(
 	_awaiting_config = false;	
     }
 
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_bgpid(
+				// Output values, 
+				IPv4& id) 
+{
+    if(_awaiting_bgpid)
+	return XrlCmdError::COMMAND_FAILED("BGP ID not yet configured");
+    id = _id;
     return XrlCmdError::OKAY();
 }
 
@@ -211,6 +242,177 @@ XrlBgpTarget::bgp_0_2_set_peer_state(
 
     return XrlCmdError::OKAY();
 }
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_peer_list(
+				    // Output values, 
+				    uint32_t&	token, 
+				    IPv4&	local_ip, 
+				    uint32_t&	local_port, 
+				    IPv4&	peer_ip, 
+				    uint32_t&	peer_port, 
+				    bool&	more)
+{
+    token = _bgp.get_peer_list();
+    more = _bgp.get_peer_list_next(token, local_ip, local_port, 
+				   peer_ip, peer_port);
+    return  XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_peer_list_next(
+					 // Input values, 
+					 const uint32_t&	token, 
+					 // Output values, 
+					 IPv4&	local_ip, 
+					 uint32_t&	local_port, 
+					 IPv4&	peer_ip, 
+					 uint32_t&	peer_port, 
+					 bool&	more)
+{
+    more = _bgp.get_peer_list_next(token, local_ip, local_port, peer_ip, 
+				   peer_port);
+    return  XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_peer_id(
+				  // Input values, 
+				  const IPv4&	local_ip, 
+				  const uint32_t&	local_port, 
+				  const IPv4&	peer_ip, 
+				  const uint32_t&	peer_port, 
+				  // Output values, 
+				  IPv4&	peer_id)
+{
+    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    if (!_bgp.get_peer_id(iptuple, peer_id)) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_peer_status(
+				      // Input values, 
+				      const IPv4&	local_ip, 
+				      const uint32_t&	local_port, 
+				      const IPv4&	peer_ip, 
+				      const uint32_t&	peer_port, 
+				      // Output values, 
+				      uint32_t&	peer_state, 
+				      uint32_t&	admin_status)
+{
+    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    if (!_bgp.get_peer_status(iptuple, peer_state, admin_status)) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_peer_negotiated_version(
+						  // Input values, 
+						  const IPv4& local_ip, 
+						  const uint32_t& local_port, 
+						  const IPv4& peer_ip, 
+						  const uint32_t& peer_port, 
+						  // Output values, 
+						  int32_t& neg_version)
+{
+    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    if (!_bgp.get_peer_negotiated_version(iptuple, neg_version)) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_peer_as(
+				  // Input values, 
+				  const IPv4& local_ip, 
+				  const uint32_t& local_port, 
+				  const IPv4&	peer_ip, 
+				  const uint32_t& peer_port, 
+				  // Output values, 
+				  uint32_t& peer_as)
+{
+    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    if (!_bgp.get_peer_as(iptuple, peer_as)) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_peer_msg_stats(
+					 // Input values, 
+					 const IPv4& local_ip, 
+					 const uint32_t& local_port, 
+					 const IPv4& peer_ip, 
+					 const uint32_t& peer_port, 
+					 // Output values, 
+					 uint32_t&	in_updates, 
+					 uint32_t&	out_updates, 
+					 uint32_t&	in_msgs, 
+					 uint32_t&	out_msgs, 
+					 uint32_t&	last_error, 
+					 uint32_t&	in_update_elapsed)
+{
+    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    uint16_t last_error_short;
+    if (!_bgp.get_peer_msg_stats(iptuple, in_updates, out_updates,
+				 in_msgs, out_msgs, last_error_short, 
+				 in_update_elapsed)) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
+    last_error = last_error_short;
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_peer_established_stats(
+						 // Input values, 
+						 const IPv4& local_ip, 
+						 const uint32_t& local_port, 
+						 const IPv4& peer_ip, 
+						 const uint32_t& peer_port, 
+						 // Output values, 
+						 uint32_t& transitions, 
+						 uint32_t& established_time)
+{
+    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    if (!_bgp.get_peer_established_stats(iptuple, transitions, 
+					 established_time)) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_get_peer_timer_config(
+					    // Input values, 
+					    const IPv4&	local_ip, 
+					    const uint32_t& local_port, 
+					    const IPv4&	peer_ip, 
+					    const uint32_t& peer_port, 
+					    // Output values, 
+					    uint32_t& retry_interval, 
+					    uint32_t& hold_time, 
+					    uint32_t& keep_alive, 
+					    uint32_t& hold_time_conf, 
+					    uint32_t& keep_alive_conf, 
+					    uint32_t& min_as_origin_interval)
+{
+    Iptuple iptuple(local_ip, local_port, peer_ip, peer_port);
+    if (!_bgp.get_peer_timer_config(iptuple, retry_interval, hold_time,
+				    keep_alive, hold_time_conf,
+				    keep_alive_conf, min_as_origin_interval)) {
+	return XrlCmdError::COMMAND_FAILED();
+    }
+    return XrlCmdError::OKAY();
+}
+
 
 XrlCmdError
 XrlBgpTarget::bgp_0_2_register_rib(

@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_list.hh,v 1.8 2002/12/09 18:28:45 hodson Exp $
+// $XORP: xorp/bgp/peer_list.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_PEER_LIST_HH__
 #define __BGP_PEER_LIST_HH__
 
 #include <list>
+#include <map>
 #include "peer.hh"
 
 class BGPPeer;
@@ -33,9 +34,17 @@ public:
     void remove_peer(BGPPeer *p);
     list<BGPPeer *>& get_list() {return _peers;} 
     void dump_list();
+    uint32_t get_peer_list_start();
+    bool get_peer_list_next(const uint32_t& token, 
+			    IPv4& local_ip, 
+			    uint32_t& local_port, 
+			    IPv4& peer_ip, 
+			    uint32_t& peer_port);
 protected:
 private:
     list<BGPPeer *> _peers;
+    map <uint32_t, list<BGPPeer *>::iterator> _readers;
+    uint32_t _next_token;
 };
 
 #endif	// __BGP_PEER_LIST_HH__

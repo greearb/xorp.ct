@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.3 2002/12/18 00:36:38 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1562,4 +1562,28 @@ BGPPeer::send_netreachability(const NetLayerReachability &n)
     return send_message(bup);
 }
 
+uint32_t
+BGPPeer::get_established_time() const
+{
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return now.tv_sec - _established_time.tv_sec;
+}
 
+void 
+BGPPeer::get_msg_stats(uint32_t& in_updates, 
+		       uint32_t& out_updates, 
+		       uint32_t& in_msgs, 
+		       uint32_t& out_msgs, 
+		       uint16_t& last_error, 
+		       uint32_t& in_update_elapsed) const 
+{
+    in_updates = _in_updates;
+    out_updates = _out_updates;
+    in_msgs = _in_total_messages;
+    out_msgs = _out_total_messages;
+    memcpy(&last_error, _last_error, 2);
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    in_update_elapsed = now.tv_sec - _in_update_time.tv_sec;
+}
