@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.22 2004/11/05 21:01:55 bms Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.23 2004/11/11 07:30:33 bms Exp $"
 
 
 #include "fea_module.h"
@@ -444,10 +444,10 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     }
 
     //
-    // TODO: define default routing metric and admin distance instead of ~0
+    // TODO: define default routing metric and admin distance instead of 0xffff
     //
     fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr, if_name, if_name,
-	       ~0, ~0, xorp_route);
+	       0xffff, 0xffff, xorp_route);
     if (is_deleted)
 	fte.mark_deleted();
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.19 2004/11/05 01:43:26 bms Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.20 2004/12/08 01:41:20 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -304,7 +304,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     //
     // Get the route metric
     //
-    uint32_t route_metric = ~0;
+    uint32_t route_metric = 0xffff;
     if (rta_array[RTA_PRIORITY] != NULL) {
 	int int_priority;
 	int_priority = *(int *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_PRIORITY]));
@@ -312,10 +312,10 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     }
 
     //
-    // TODO: define default admin distance instead of ~0
+    // TODO: define default admin distance instead of 0xffff
     //
     fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr, if_name, if_name,
-	       route_metric, ~0, xorp_route);
+	       route_metric, 0xffff, xorp_route);
     if (is_deleted)
 	fte.mark_deleted();
     
