@@ -95,22 +95,22 @@ snmpd2 = @snmpd2@
 bin_PROGRAMS = 
 
 # -- Test Programs
-TESTS = 
+TESTS = test_spt
 
 # -- No-install Programs
-noinst_PROGRAMS = 
+noinst_PROGRAMS = test_spt
 
 # -- No-install Libraries
 noinst_LIBRARIES = libproto.a
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES)
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-#test_proto_SOURCES	= test_proto.cc
+test_spt_SOURCES = test_spt.cc spt.hh spt.cc
 
 # -- Library Sources
-libproto_a_SOURCES = libproto_module.h proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc
+libproto_a_SOURCES = libproto_module.h proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh spt.hh proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc spt.cc
 
 
 ################################################################
@@ -125,12 +125,17 @@ libproto_a_AR = $(AR) cru
 libproto_a_LIBADD =
 am_libproto_a_OBJECTS = proto_node_cli.$(OBJEXT) \
 	proto_register.$(OBJEXT) proto_state.$(OBJEXT) \
-	proto_unit.$(OBJEXT)
+	proto_unit.$(OBJEXT) spt.$(OBJEXT)
 libproto_a_OBJECTS = $(am_libproto_a_OBJECTS)
 bin_PROGRAMS =
-noinst_PROGRAMS =
+noinst_PROGRAMS = test_spt$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
+am_test_spt_OBJECTS = test_spt.$(OBJEXT) spt.$(OBJEXT)
+test_spt_OBJECTS = $(am_test_spt_OBJECTS)
+test_spt_LDADD = $(LDADD)
+test_spt_DEPENDENCIES = libproto.a $(top_builddir)/libxorp/libxorp.a
+test_spt_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -140,7 +145,8 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/proto_node_cli.Po \
 @AMDEP_TRUE@	$(DEPDIR)/proto_register.Po \
-@AMDEP_TRUE@	$(DEPDIR)/proto_state.Po $(DEPDIR)/proto_unit.Po
+@AMDEP_TRUE@	$(DEPDIR)/proto_state.Po $(DEPDIR)/proto_unit.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spt.Po $(DEPDIR)/test_spt.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -152,9 +158,9 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libproto_a_SOURCES)
+DIST_SOURCES = $(libproto_a_SOURCES) $(test_spt_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in TODO
-SOURCES = $(libproto_a_SOURCES)
+SOURCES = $(libproto_a_SOURCES) $(test_spt_SOURCES)
 
 all: all-am
 
@@ -202,6 +208,9 @@ clean-binPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+test_spt$(EXEEXT): $(test_spt_OBJECTS) $(test_spt_DEPENDENCIES) 
+	@rm -f test_spt$(EXEEXT)
+	$(CXXLINK) $(test_spt_LDFLAGS) $(test_spt_OBJECTS) $(test_spt_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -213,6 +222,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_register.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_state.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_unit.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_spt.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
