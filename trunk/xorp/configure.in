@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.65 2003/09/26 18:02:08 atanu Exp $
+dnl $XORP: xorp/configure.in,v 1.66 2003/09/27 05:59:04 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -523,6 +523,20 @@ AC_SEARCH_LIBS(socket, socket)
 AC_SEARCH_LIBS(inet_addr, nsl)
 AC_SEARCH_LIBS(dlopen, dl)
 AC_SEARCH_LIBS(hstrerror, resolv)
+
+dnl
+dnl Select the CLI-related library
+dnl
+CLI_CURSES_LIB="unknown"
+AC_CHECK_LIB(curses, tigetstr, [CLI_CURSES_LIB="-lcurses"], [
+  AC_CHECK_LIB(ncurses, tigetstr, [CLI_CURSES_LIB="-lncurses"], [
+    AC_CHECK_LIB(curses, tgetstr, [CLI_CURSES_LIB="-lcurses"])
+  ])
+])
+if test "${CLI_CURSES_LIB}" = "unknown" ; then
+  AC_MSG_ERROR([cannot select curses library]);
+fi
+AC_SUBST(CLI_CURSES_LIB)
 
 dnl Replace main with a function in -lc:
 dnl AC_CHECK_LIB(c, main)
