@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP$
+# $XORP: xorp/fea/test_add_route.sh,v 1.2 2003/10/16 18:23:06 pavlin Exp $
 #
 
 #
@@ -17,6 +17,12 @@
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 
 . ${srcdir}/../utils/xrl_shell_lib.sh
+
+#
+# XXX: file "xrl_fea_shell_funcs.sh" included below should have been
+# auto-generated in the built directory
+#
+. ./xrl_fea_shell_funcs.sh
 
 
 HOSTNAME=`hostname`
@@ -50,66 +56,6 @@ esac
 
 # XXX: for now the vifname is same as the ifname
 VIFNAME="${IFNAME}"
-
-#
-# XRL helper functions
-#
-# TODO: those should go somewhere else...
-#
-fea_fti_start_transaction()
-{
-    if [ $# -ne 0 ] ; then
-	echo "Usage: fea_fti_start_transaction"
-	exit 1
-    fi
-
-    XRL="finder://fea/fti/0.2/start_transaction"
-    call_xrl_wrapper -p all $XRL
-}
-
-fea_fti_commit_transaction()
-{
-    if [ $# -ne 1 ] ; then
-	echo "Usage: fea_fti_commit_transaction <tid:u32>"
-	exit 1
-    fi
-
-    XRL="finder://fea/fti/0.2/commit_transaction?tid:u32=$1"
-    call_xrl_wrapper -p all $XRL
-}
-
-fea_fti_add_entry4()
-{
-    if [ $# -ne 8 ] ; then
-	echo "Usage: fea_fti_add_entry4 <tid:u32> <dst:ipv4net> <gateway:ipv4> <ifname:txt> <vifname:txt> <metric:u32> <admin_distance:u32> <protocol_origin:txt>"
-	exit 1
-    fi
-
-    XRL="finder://fea/fti/0.2/add_entry4?tid:u32=$1&dst:ipv4net=$2&gateway:ipv4=$3&ifname:txt=$4&vifname:txt=$5&metric:u32=$6&admin_distance:u32=$7&protocol_origin:txt=$8"
-    call_xrl_wrapper -p all $XRL
-}
-
-fea_fti_delete_entry4()
-{
-    if [ $# -ne 2 ] ; then
-	echo "Usage: fea_fti_delete_entry4 <tid:u32> <dst:ipv4net>"
-	exit 1
-    fi
-
-    XRL="finder://fea/fti/0.2/delete_entry4?tid:u32=$1&dst:ipv4net=$2"
-    call_xrl_wrapper -p all $XRL
-}
-
-fea_fti_lookup_entry4()
-{
-    if [ $# -ne 1 ] ; then
-	echo "Usage: fea_fti_lookup_entry4 <dst:ipv4net>"
-	exit 1
-    fi
-
-    XRL="finder://fea/fti/0.2/lookup_entry4?dst:ipv4net=$1"
-    call_xrl_wrapper -p all $XRL
-}
 
 #
 # Test functions
