@@ -298,11 +298,19 @@ def output_target_cc(cls, tgt_name, methods):
 bool
 %s::set_command_map(XrlCmdMap* cmds)
 {
-    if (_cmds || cmds == 0)
-	return false;
-    _cmds = cmds;
-    return true;
+    if (_cmds == 0 && cmds) {
+        _cmds = cmds;
+        add_handlers();
+        return true;
+    }
+    if (_cmds && cmds == 0) {
+	remove_handlers();
+        _cmds = cmds;
+        return true;
+    }
+    return false;
 }
+
 """ % (cls, cls, cls, cls, cls)
     s += target_handler_methods(cls, tgt_name, methods)
     return s
