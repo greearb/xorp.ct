@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.19 2003/06/09 22:14:18 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.20 2003/06/19 00:44:41 hodson Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -26,6 +26,7 @@
 #include "xrl_dispatcher.hh"
 
 #include "finder_client.hh"
+#include "finder_client_observer.hh"
 #include "finder_xif.hh"
 #include "finder_tcp_messenger.hh"
 
@@ -51,15 +52,15 @@ protected:
     string _context;
 } finder_tracer;
 
-#define finder_trace(x...) 						      \
+#define finder_trace(x...)						      \
 do {									      \
     if (finder_tracer.on()) {						      \
 	string r = c_format(x);						      \
-	XLOG_INFO(c_format("%s\n", r.c_str()).c_str());	      		      \
+	XLOG_INFO(c_format("%s\n", r.c_str()).c_str());			      \
     }									      \
 } while (0)
 
-#define finder_trace_init(x...) 					      \
+#define finder_trace_init(x...)					      \
 do {									      \
     if (finder_tracer.on()) finder_tracer.set_context(c_format(x));	      \
 } while (0)
@@ -161,7 +162,7 @@ class FinderClientQuery : public FinderClientOneOffOp
 public:
     typedef FinderClient::QueryCallback QueryCallback;
     typedef FinderClient::ResolvedTable ResolvedTable;
-    
+
 public:
     FinderClientQuery(FinderClient&	   fc,
 		      const string&	   key,
@@ -213,7 +214,7 @@ public:
 	    return;
 	}
 
-	pair<ResolvedTable::iterator, bool> result = 
+	pair<ResolvedTable::iterator, bool> result =
 	    _rt.insert(std::make_pair(_key, FinderDBEntry(_key)));
 
 	if (result.second == false && result.first == _rt.end()) {
@@ -266,7 +267,7 @@ public:
 	finder_trace("ClientQuery force_failure \"%s\"", _key.c_str());
 	_qcb->dispatch(e, 0);
     }
-    
+
 protected:
     string	   _key;
     ResolvedTable& _rt;
@@ -282,7 +283,7 @@ public:
     typedef XrlPFSender::SendCallback XrlCallback;
 public:
     FinderForwardedXrl(FinderClient&		fc,
-		       const Xrl& 		xrl,
+		       const Xrl&		xrl,
 		       const XrlCallback&	xcb)
 	: FinderClientOneOffOp(fc), _xrl(xrl), _xcb(xcb)
     {
@@ -394,7 +395,7 @@ public:
 public:
     FinderClientRegisterXrl(FinderClient&	fc,
 			    LocalResolvedTable&	lrt,
-			    uint32_t	 	target_id,
+			    uint32_t		target_id,
 			    const string&	xrl,
 			    const string&	pf_name,
 			    const string&	pf_args)
@@ -441,12 +442,13 @@ class FinderClientEnableXrls : public FinderClientRepeatOp
 {
 public:
     FinderClientEnableXrls(FinderClient& fc,
-			     uint32_t        target_id,
-			     const string&   instance_name,
-			     bool	     en,
-			     bool&	     update_var)
+			   uint32_t	 target_id,
+			   const string& instance_name,
+			   bool		 en,
+			   bool&	 update_var,
+			   FinderClientObserver*& fco)
 	: FinderClientRepeatOp(fc, target_id), _iname(instance_name),
-	  _en(en), _update_var(update_var)
+	  _en(en), _update_var(update_var), _fco(fco)
     {
 	finder_trace("Constructing EnableXrls \"%s\"", _iname.c_str());
     }
@@ -470,15 +472,21 @@ public:
 	}
 	finder_trace_result("okay");
     }
+
     void en_callback(const XrlError& e)
     {
 	finder_trace_init("EnableXrls callback \"%s\"", _iname.c_str());
+
 	if (e == XrlError::OKAY()) {
 	    _update_var = _en;
 	    finder_trace_result("okay");
 	    client().notify_done(this);
+	    if (true == _en && _fco) {
+		_fco->finder_ready_event(_iname);
+	    }
 	    return;
 	}
+
 	XLOG_ERROR("Failed to enable client \"%s\": %s\n",
 		   _iname.c_str(), e.str().c_str());
 	finder_trace_result("failed");
@@ -486,9 +494,10 @@ public:
     }
 
 protected:
-    string	_iname;
-    bool	_en;
-    bool&	_update_var;
+    string		   _iname;
+    bool		   _en;
+    bool&		   _update_var;
+    FinderClientObserver*& _fco;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -530,7 +539,8 @@ uint32_t FinderClient::InstanceInfo::_s_id = 0;
 //
 
 FinderClient::FinderClient()
-    : _messenger(0), _pending_result(false), _xrls_registered(false)
+    : _messenger(0), _pending_result(false), _xrls_registered(false),
+      _observer(0)
 {
     finder_trace("Constructing FinderClient (%p)", this);
 }
@@ -625,7 +635,8 @@ FinderClient::enable_xrls(const string& instance_name)
 
     Operation op(new FinderClientEnableXrls(*this, ii->id(),
 					    ii->instance_name(), true,
-					    _xrls_registered));
+					    _xrls_registered,
+					    _observer));
     _todo_list.push_back(op);
     crank();
     return true;
@@ -635,14 +646,6 @@ void
 FinderClient::query(const string&	 key,
 		    const QueryCallback& qcb)
 {
-#if 0
-    ResolvedTable::const_iterator i = _rt.find(key);
-    if (_rt.end() != i) {
-	// Entry exists.
-	qcb->dispatch(XrlError::OKAY(), &i->second);
-	return;
-    }
-#endif
     Operation op(new FinderClientQuery(*this, key, _rt, qcb));
     _todo_list.push_back(op);
     crank();
@@ -659,16 +662,6 @@ bool
 FinderClient::query_self(const string& incoming_xrl_cmd,
 			 string&       local_xrl) const
 {
-#if 0
-    {
-	LocalResolvedTable::const_iterator i = _lrt.begin();
-	fprintf(stderr, "==> Incoming: %s\n", incoming_xrl_cmd.c_str());
-	while (i != _lrt.end()) {
-	    fprintf(stderr, " * \"%s\"\n", i->second.c_str());
-	    ++i;
-	}
-    }
-#endif /* 0 */
     LocalResolvedTable::const_iterator i = _lrt.find(incoming_xrl_cmd);
     if (_lrt.end() == i)
 	return false;
@@ -790,6 +783,8 @@ FinderClient::messenger_birth_event(FinderMessengerBase* m)
     XLOG_ASSERT(0 == _messenger);
     prepare_for_restart();
     _messenger = m;
+    if (_observer)
+	_observer->finder_connect_event();
     crank();
 }
 
@@ -799,6 +794,8 @@ FinderClient::messenger_death_event(FinderMessengerBase* m)
     finder_trace("messenger %p death\n", m);
     XLOG_ASSERT(m == _messenger);
     _messenger = 0;
+    if (_observer)
+	_observer->finder_disconnect_event();
 }
 
 void
@@ -890,4 +887,26 @@ FinderClient::dispatch_tunneled_xrl(const string& xrl_str)
     } catch (InvalidString&) {
 	return XrlCmdError::COMMAND_FAILED("Bad Xrl string");
     }
+}
+
+bool
+FinderClient::attach_observer(FinderClientObserver* fco)
+{
+    if (0 == _observer && 0 != fco) {
+	_observer = fco;
+	if (connected())
+	    _observer->finder_connect_event();
+	return true;
+    }
+    return false;
+}
+
+bool
+FinderClient::detach_observer(FinderClientObserver* fco)
+{
+    if (fco == _observer) {
+	_observer = 0;
+	return true;
+    }
+    return false;
 }

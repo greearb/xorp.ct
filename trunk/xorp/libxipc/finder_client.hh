@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.10 2003/06/01 21:37:27 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.11 2003/06/19 00:44:42 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_CLIENT_HH__
 #define __LIBXIPC_FINDER_CLIENT_HH__
@@ -27,6 +27,7 @@
 #include "xrl_pf.hh"
 
 class FinderClientOp;
+class FinderClientObserver;
 
 /**
  * A one-to-many container used by the FinderClient to store
@@ -41,7 +42,7 @@ struct FinderDBEntry
     inline const list<string>& values() const	{ return _values; }
     inline list<string>& values()		{ return _values; }
     inline void clear();
-    
+
 protected:
     string	 _key;
     list<string> _values;
@@ -65,7 +66,6 @@ public:
 /**
  * @short Class that represents clients of the Finder.
  *
-
  * The FinderClient class performs communication processing with the
  * Finder on behalf of XORP processes.  It handles XRL registration
  * and resolution requests.
@@ -81,11 +81,11 @@ public:
     typedef list<Operation> OperationQueue;
 
     class InstanceInfo;
-    
+
     typedef map<string, FinderDBEntry>	ResolvedTable;
     typedef map<string, string>		LocalResolvedTable;
     typedef vector<InstanceInfo>	InstanceList;
-    
+
 public:
     /**
      * Constructor.
@@ -99,7 +99,7 @@ public:
 
     /**
      * Register an Xrl Target with the FinderClient and place request with
-     * Finder to perform registration. The request to the Finder is 
+     * Finder to perform registration. The request to the Finder is
      * asynchronous and there is a delay between when the request is made
      * when it is satisfied.
      *
@@ -117,7 +117,7 @@ public:
 
     /**
      * Unregister Xrl Target with FinderClient and place a request with
-     * the Finder to remove registration.   The request to the Finder is 
+     * the Finder to remove registration.   The request to the Finder is
      * asynchronous and there is a delay between when the request is made
      * when it is satisfied.
      *
@@ -180,7 +180,7 @@ public:
      * @return pointer to cached entry on success, 0 otherwise.
      */
     const FinderDBEntry* query_cache(const string& xrl) const;
-    
+
     /**
      * Resolve Xrl that an Xrl Target associated with the FinderClient
      * registered.
@@ -246,7 +246,26 @@ public:
      * @return true if a connection is established with the Finder.
      */
     inline bool connected() const		{ return _messenger != 0; }
-    
+
+    /**
+     * Attach a FinderClientObserver instance to receive event notifications.
+     *
+     * @param o pointer to observer to receive notifications.
+     *
+     * @return true on success, false if an observer is already present.
+     */
+    bool attach_observer(FinderClientObserver* o);
+
+    /**
+     * Detach the FinderClientObserver instance.
+     *
+     * @param o pointer to the FinderClientObserver be removed.
+     *
+     * @return true on success, false if the FinderClientObserver
+     * is not the current observer.
+     */
+    bool detach_observer(FinderClientObserver* o);
+
 protected:
     // FinderMessengerManager interface
     void messenger_birth_event(FinderMessengerBase*);
@@ -261,7 +280,7 @@ protected:
     void uncache_xrl(const string& xrl);
     void uncache_xrls_from_target(const string& target);
     XrlCmdError dispatch_tunneled_xrl(const string& xrl);
-    
+
 protected:
     void crank();
     void prepare_for_restart();
@@ -269,7 +288,7 @@ protected:
 protected:
     inline InstanceList::iterator find_instance(const string& instance);
     inline InstanceList::const_iterator find_instance(const string& instance) const;
-    
+
 protected:
     OperationQueue	 _todo_list;
     OperationQueue	 _done_list;
@@ -278,10 +297,12 @@ protected:
     InstanceList	 _ids;
 
     XrlCmdMap		 _commands;
-    
+
     FinderMessengerBase* _messenger;
     bool		 _pending_result;
     bool		 _xrls_registered;
+
+    FinderClientObserver* _observer;
 };
 
 #endif // __LIBXIPC_FINDER_CLIENT_HH__

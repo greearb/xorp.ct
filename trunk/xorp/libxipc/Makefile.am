@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.25 2003/06/09 21:55:27 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.26 2003/06/11 23:18:44 hodson Exp $
 ##
 
 # - The library
@@ -32,12 +32,11 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 
 finder_LDADD			 = libfinder.a
-finder_LDADD		 	+= ./libxipc.a
+finder_LDADD			+= ./libxipc.a
 finder_LDADD			+= $(top_builddir)/libxorp/libxorp.a
 finder_LDADD			+= $(top_builddir)/libcomm/libcomm.a
 
 # -- Program Sources
-
 call_xrl_SOURCES		 = call_xrl.cc
 finder_SOURCES			 = finder_main.cc
 
@@ -78,12 +77,12 @@ libxipc_a_SOURCES += ipc_module.h
 libxipc_a_SOURCES += xrl_module.h
 libxipc_a_SOURCES += hmac_md5.h
 libxipc_a_SOURCES += finder_client.hh
+libxipc_a_SOURCES += finder_client_observer.hh
+libxipc_a_SOURCES += finder_client_xrl_target.hh
 libxipc_a_SOURCES += finder_constants.hh
 libxipc_a_SOURCES += finder_ipc.hh
 libxipc_a_SOURCES += finder_messenger.hh
 libxipc_a_SOURCES += finder_msgs.hh
-libxipc_a_SOURCES += finder_client.hh
-libxipc_a_SOURCES += finder_client_xrl_target.hh
 libxipc_a_SOURCES += finder_tcp_messenger.hh
 libxipc_a_SOURCES += finder_tcp.hh
 libxipc_a_SOURCES += header.hh
@@ -117,6 +116,7 @@ libxipc_a_SOURCES += hmac_md5.c
 libxipc_a_SOURCES += finder_messenger.cc
 libxipc_a_SOURCES += finder_msgs.cc
 libxipc_a_SOURCES += finder_client.cc
+libxipc_a_SOURCES += finder_client_observer.cc
 libxipc_a_SOURCES += finder_client_xrl_target.cc
 libxipc_a_SOURCES += finder_tcp.cc
 libxipc_a_SOURCES += finder_tcp_messenger.cc
@@ -144,24 +144,37 @@ libxipc_a_SOURCES += xrl_std_router.cc
 libxipc_a_SOURCES += xrl_error.cc
 libxipc_a_SOURCES += xuid.cc
 
-# -- Library Sources (libfinder)
-libfinder_a_SOURCES  = finder_base.hh
-libfinder_a_SOURCES += finder_constants.hh
-libfinder_a_SOURCES += finder.hh
-libfinder_a_SOURCES += finder_server.hh
+# -- Library Sources (libxipc - built sources)
+libxipc_a_SOURCES += common_xif.hh
+libxipc_a_SOURCES += common_xif.cc
+libxipc_a_SOURCES += finder_client_base.hh
+libxipc_a_SOURCES += finder_client_base.cc
+libxipc_a_SOURCES += finder_xif.hh
+libxipc_a_SOURCES += finder_xif.cc
 
+# -- Library Sources (libfinder)
+libfinder_a_SOURCES  = finder.hh
+libfinder_a_SOURCES += finder_constants.hh
+libfinder_a_SOURCES += finder_server.hh
 libfinder_a_SOURCES += finder_xrl_queue.hh
 libfinder_a_SOURCES += finder_xrl_target.hh
 
-libfinder_a_SOURCES += finder_base.cc
 libfinder_a_SOURCES += finder.cc
 libfinder_a_SOURCES += finder_server.cc
 libfinder_a_SOURCES += finder_xrl_queue.cc
 libfinder_a_SOURCES += finder_xrl_target.cc
 
+# -- Library Sources (libfinder - built sources)
+libfinder_a_SOURCES += finder_base.hh
+libfinder_a_SOURCES += finder_base.cc
+libfinder_a_SOURCES += finder_client_xif.hh
+libfinder_a_SOURCES += finder_client_xif.cc
+libfinder_a_SOURCES += finder_event_observer_xif.hh
+libfinder_a_SOURCES += finder_event_observer_xif.cc
+
 # magic-script:			magic-script.in
-# 	sed -e 's/whatever//' < $(srcdir)/magic-script.in > magic-script
-# 	chmod +x magic-script
+#	sed -e 's/whatever//' < $(srcdir)/magic-script.in > magic-script
+#	chmod +x magic-script
 
 
 ################################################################
@@ -172,7 +185,7 @@ libfinder_a_SOURCES += finder_xrl_target.cc
 
 INCLUDES =	-I$(top_srcdir)
 
-# -- Generated Sources used in libxipc and libfinder 
+# -- Generated Sources used in libxipc and libfinder
 # (see explanation at end of file)
 BUILT_SOURCES  = common_xif.hh
 BUILT_SOURCES += common_xif.cc
@@ -193,19 +206,6 @@ BUILT_SOURCES += test_finder_events_base.cc
 
 CLEANFILES = $(BUILT_SOURCES)
 
-libxipc_a_SOURCES += common_xif.hh
-libxipc_a_SOURCES += common_xif.cc
-libxipc_a_SOURCES += finder_client_base.hh
-libxipc_a_SOURCES += finder_client_base.cc
-libxipc_a_SOURCES += finder_xif.hh
-libxipc_a_SOURCES += finder_xif.cc
-
-libfinder_a_SOURCES += finder_base.hh
-libfinder_a_SOURCES += finder_base.cc
-libfinder_a_SOURCES += finder_client_xif.hh
-libfinder_a_SOURCES += finder_client_xif.cc
-libfinder_a_SOURCES += finder_event_observer_xif.hh
-libfinder_a_SOURCES += finder_event_observer_xif.cc
 
 ###############################################################################
 #
@@ -232,8 +232,8 @@ common_xif.%: $(top_srcdir)/xrl/interfaces/common_xif.%
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
 
-$(top_srcdir)/xrl/interfaces/common_xif.hh 				\
-$(top_srcdir)/xrl/interfaces/common_xif.cc: 				\
+$(top_srcdir)/xrl/interfaces/common_xif.hh				\
+$(top_srcdir)/xrl/interfaces/common_xif.cc:				\
     $(top_srcdir)/xrl/interfaces/common.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
@@ -279,7 +279,7 @@ $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc:		\
 #
 # Build handler bases
 #
-# NB The .xif file dependencies are specified MANUALLY for C++ Xrl Target 
+# NB The .xif file dependencies are specified MANUALLY for C++ Xrl Target
 # Base below.  These MUST be kept up to date to be useful.
 #
 ###############################################################################
@@ -322,11 +322,9 @@ test_finder_events_base.%:						\
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
 
-$(top_srcdir)/xrl/targets/test_finder_events_base.hh 			\
+$(top_srcdir)/xrl/targets/test_finder_events_base.hh			\
 $(top_srcdir)/xrl/targets/test_finder_events_base.cc:			\
     $(top_srcdir)/xrl/targets/test_finder_events.tgt			\
     $(top_srcdir)/xrl/interfaces/common.xif				\
     $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
-
-

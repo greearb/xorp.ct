@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.11 2003/06/01 21:37:28 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.12 2003/06/09 21:28:04 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -25,6 +25,7 @@
 #include "finder_server.hh"
 #include "finder_xrl_target.hh"
 #include "finder_client.hh"
+#include "finder_client_observer.hh"
 #include "finder_client_xrl_target.hh"
 #include "finder_tcp_messenger.hh"
 #include "permits.hh"
@@ -130,8 +131,57 @@ test_xrls_locally_resolve(EventLoop& e, FinderClient& fc1, list<string>& xrls)
 		lx.command().c_str(), local_xrl_command.c_str());
 
     return 0;
-} 
+}
 #endif // 0
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Test class for event notifications from FinderClient.
+//
+class TestFinderClientObserver
+    : public FinderClientObserver
+{
+public:
+    TestFinderClientObserver(const string& tgtname)
+	: _connected(false), _correct_target_ready(false),
+	  _expected_target(tgtname)
+    {
+    }
+
+    void finder_connect_event()
+    {
+	verbose_log("FinderClient connect event\n");
+	_connected = true;
+    }
+
+    void finder_disconnect_event()
+    {
+	verbose_log("FinderClient disconnect event\n");
+	_connected = false;
+    }
+
+    void finder_ready_event(const string& target_name)
+    {
+	verbose_log("FinderClient ready event \"%s\"\n", target_name.c_str());
+	_correct_target_ready = (target_name == _expected_target);
+    }
+
+    bool connected() const
+    {
+	return _connected;
+    }
+
+    bool got_correct_ready_event() const
+    {
+	return _correct_target_ready;
+    }
+
+private:
+    bool   _connected;
+    bool   _correct_target_ready;
+    string _expected_target;
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -159,6 +209,10 @@ test_main(void)
     FinderTcpAutoConnector fc1_connector(e, fc1, fc1.commands(),
 					 test_host, test_port);
 
+    string instance_name("test_target");
+    TestFinderClientObserver fco(instance_name);
+    fc1.attach_observer(&fco);
+
     //
     // Start an expiry timer
     //
@@ -175,21 +229,20 @@ test_main(void)
 	e.run();
 
     if (expired) {
-	verbose_log("failed.\n");
+	verbose_log("Failed.\n");
 	return 1;
     }
-    verbose_log("succeeded.\n");
+    verbose_log("Succeeded.\n");
 
     //
     // Register target
     //
-    string instance_name("test_target");
     verbose_log("Registering target...\n");
     if (fc1.register_xrl_target(instance_name, "experimental", 0) != true) {
-	verbose_log("failed.\n");
+	verbose_log("Failed.\n");
 	return 1;
     }
-    verbose_log("succeeded.\n");
+    verbose_log("Succeeded.\n");
 
     while (!expired)
 	e.run();
@@ -210,10 +263,10 @@ test_main(void)
 	verbose_log("Registering %s...\n", ci->c_str());
 	if (fc1.register_xrl(instance_name, *ci,
 			     "stcp", "localhost:10000") == false) {
-	    verbose_log("failed.\n");
+	    verbose_log("Failed.\n");
 	    return 1;
 	}
-	verbose_log("succeeded\n");
+	verbose_log("Succeeded\n");
     }
     fc1.enable_xrls(instance_name);
 
@@ -255,10 +308,10 @@ test_main(void)
     string instance_name2("test_client");
     verbose_log("Registering client...\n");
     if (fc2.register_xrl_target(instance_name2, "experimental", 0) != true) {
-	verbose_log("failed.\n");
+	verbose_log("Failed.\n");
 	return 1;
     }
-    verbose_log("succeeded.\n");
+    verbose_log("Succeeded.\n");
     if (fc2.enable_xrls(instance_name2) == false) {
 	verbose_log("Failed to enable xrls on test client\n");
 	return 1;
@@ -281,10 +334,10 @@ test_main(void)
 	e.run();
 
     if (expired) {
-	verbose_log("failed.\n");
+	verbose_log("Failed.\n");
 	return 1;
     }
-    verbose_log("succeeded.\n");
+    verbose_log("Succeeded.\n");
 
     verbose_log("Testing Client 2 can resolve Client 1 registrations\n");
     // Test second finder client can resolve xrls on first finder
@@ -314,7 +367,20 @@ test_main(void)
 	e.run();
 
     delete finder_box;
-    
+
+    fc1.detach_observer(&fco);
+
+    verbose_log("Checking FinderClientObserver...\n");
+    if (fco.connected()) {
+	verbose_log("Failed (incorrectly reports connected).\n");
+	return 1;
+    }
+    if (fco.got_correct_ready_event() == false) {
+	verbose_log("Failed (received incorrect ready event notification).\n");
+	return 1;
+    }
+    verbose_log("Succeeded.\n");
+
     return 0;
 }
 
@@ -361,19 +427,19 @@ main(int argc, char * const argv[])
 
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
-        switch (ch) {
-        case 'v':
-            set_verbose(true);
-            break;
-        case 'h':
-        case '?':
-        default:
-            usage(argv[0]);
-            if (ch == 'h')
-                return 0;
-            else
-                return 1;
-        }
+	switch (ch) {
+	case 'v':
+	    set_verbose(true);
+	    break;
+	case 'h':
+	case '?':
+	default:
+	    usage(argv[0]);
+	    if (ch == 'h')
+		return 0;
+	    else
+		return 1;
+	}
     }
     argc -= optind;
     argv += optind;
@@ -392,9 +458,9 @@ main(int argc, char * const argv[])
     try {
 	ret_value = test_main();
     } catch (...) {
-        // Internal error
-        xorp_print_standard_exceptions();
-        ret_value = 2;
+	// Internal error
+	xorp_print_standard_exceptions();
+	ret_value = 2;
     }
 
     //
