@@ -35,52 +35,6 @@
 #include "ospf.hh"
 #include "packet.hh"
 
-inline
-uint16_t
-extract_16(uint8_t *ptr)
-{
-    uint16_t val;
-    val = ptr[0];
-    val <<= 8;
-    val |= ptr[1];
-
-    return val;
-}
-
-inline
-void
-embed_16(uint8_t *ptr, uint16_t val)
-{
-    ptr[0] = (val >> 8) & 0xff;
-    ptr[1] = val & 0xff;
-}
-
-inline
-uint32_t
-extract_32(uint8_t *ptr)
-{
-    uint32_t val;
-    val = ptr[0];
-    val <<= 8;
-    val |= ptr[1];
-    val <<= 8;
-    val |= ptr[2];
-    val <<= 8;
-    val |= ptr[3];
-
-    return val;
-}
-
-inline
-void
-embed_32(uint8_t *ptr, uint32_t val)
-{
-    ptr[0] = (val >> 24) & 0xff;
-    ptr[1] = (val >> 16) & 0xff;
-    ptr[2] = (val >> 8) & 0xff;
-    ptr[3] = val & 0xff;
-}
-
 /**
  * XXX - Might make sense to move this into libxorp.
  *     - Rewrite this routine to not perform the intermediate copy and
@@ -551,5 +505,148 @@ HelloPacket::str() const
 	output += "\n\tNeighbour: " + (*i).str();
     }
     
+    return output;
+}
+
+
+/* Database Description packet */
+Packet *
+DataDescriptionPacket::decode(uint8_t *ptr, size_t len) throw(BadPacket)
+{
+    OspfTypes::Version version = get_version();
+
+    DataDescriptionPacket *packet = new DataDescriptionPacket(version);
+
+    size_t offset = packet->decode_standard_header(ptr, len);
+    
+    // Verify that this packet is large enough, up to but not including
+    // any neighbours.
+    if ((len - offset) < minimum_length())
+	xorp_throw(BadPacket,
+		   c_format("Packet too short %u, must be at least %u",
+			    len,
+			    offset + minimum_length()));
+
+#ifdef	DEBUG_RAW_PACKETS
+    debug_msg("\n%s", dump_packet(ptr, len).c_str());
+#endif
+
+    size_t bias;
+
+    switch(version) {
+    case OspfTypes::V2:
+	packet->set_interface_mtu(extract_16(&ptr[offset]));
+	packet->set_options(ptr[offset + 2]);
+	bias = 0;
+	break;
+    case OspfTypes::V3:
+	packet->set_options(extract_32(&ptr[offset]) & 0xffffff);
+	packet->set_interface_mtu(extract_16(&ptr[offset + 4]));
+	bias = 4;
+	break;
+    }
+
+    uint8_t flag = ptr[offset + bias + 3];
+    if (ptr[flag & 0x4])
+	set_i_bit(true);
+    else
+	set_i_bit(false);
+    if (ptr[flag & 0x2])
+	set_m_bit(true);
+    else
+	set_m_bit(false);
+    if (ptr[flag & 0x1])
+	set_ms_bit(true);
+    else
+	set_ms_bit(false);
+    set_dd_seqno(extract_32(&ptr[offset + bias + 4]));
+    size_t lsa_offset = 8 + bias;
+
+    Lsa_header lsa_header(version);
+
+    // If there is any more space in the packet extract the lsas.
+    int lsas = (len - lsa_offset) / lsa_header.length();
+
+    // XXX - Should we be checking for multiples of 20 here?
+    for(int i = 0; i < lsas; i++) {
+	packet->get_lsa_headers().
+	    push_back(lsa_header.decode(&ptr[lsa_offset +
+					     i*lsa_header.length()]));
+    }
+
+    return packet;
+}
+
+/**
+ * The caller must free this packet.
+ */
+uint8_t *
+DataDescriptionPacket::encode(size_t &len)
+{
+    size_t offset = get_standard_header_length();
+    len = offset + minimum_length() + get_lsa_headers().size() *
+	Lsa_header::length();
+
+    uint8_t *ptr = new uint8_t[len];
+    memset(ptr, 0, len);
+
+    // Put the specific Hello Packet information first as the standard
+    // header code will also add the checksum. This must be done last.
+
+    /**************************************/
+    OspfTypes::Version version = get_version();
+
+    size_t bias;
+
+    switch(version) {
+    case OspfTypes::V2:
+	embed_16(&ptr[offset], get_interface_mtu());
+	ptr[offset + 2] = get_options();
+	bias = 0;
+	break;
+    case OspfTypes::V3:
+	// Careful Options occupy 3 bytes, four bytes are written out.
+	embed_32(&ptr[offset], get_options());
+	embed_16(&ptr[offset + 4], get_interface_mtu());
+	bias = 4;
+	break;
+    }
+
+    uint8_t flag = 0;
+    if (get_i_bit())
+	flag |= 0x4;
+    if (get_m_bit())
+	flag |= 0x2;
+    if (get_ms_bit())
+	flag |= 0x1;
+    ptr[offset + bias + 3] = flag;
+
+    embed_32(&ptr[offset + bias + 4], get_dd_seqno());
+    size_t lsa_offset = 8 + bias;
+
+    list<Lsa_header> &li = get_lsa_headers();
+    list<Lsa_header>::iterator i = li.begin();
+    for(size_t index = 0; i != li.end(); i++, index += Lsa_header::length()) {
+	(*i).copy_out(&ptr[lsa_offset + index]);
+    }
+	
+    if (offset != encode_standard_header(ptr, len)) {
+	XLOG_ERROR("Encode of %s failed", str().c_str());
+	return 0;
+    }
+
+    return ptr;
+}
+
+string
+DataDescriptionPacket::str() const
+{
+    string output;
+
+    output = "Hello Packet:\n";
+    // Standard Header
+    output += standard() + "\n";
+    // Data Description Packet Specifics
+
     return output;
 }

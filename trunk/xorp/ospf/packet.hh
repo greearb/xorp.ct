@@ -19,17 +19,6 @@
 #define __OSPF_PACKET_HH__
 
 /**
- * Bad Packet exception.
- */
-class BadPacket : public XorpReasonedException
-{
-public:
-    BadPacket(const char* file, size_t line, const string init_why = "")
- 	: XorpReasonedException("BadPacket", file, line, init_why)
-    {}
-};
-
-/**
  * All packet decode routines must inherit from this interface.
  * Also provides some utility routines to perform common packet processing.
  */
@@ -240,7 +229,9 @@ class PacketDecoder {
  */
 class HelloPacket : public Packet {
  public:
-    static const size_t MINIMUM_LENGTH = 20;	// The same for OSPF V2 and V3
+    static const size_t MINIMUM_LENGTH = 20;	// The minumum length
+						// of a hello packet.
+						// The same for OSPF V2 and V3
 						// How did that happen?
 
     HelloPacket(OspfTypes::Version version)
@@ -295,7 +286,20 @@ class HelloPacket : public Packet {
 
     // Options.
     void set_options(uint32_t options) {
-	_options = options;
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    if (options > 0xff)
+		XLOG_WARNING("Attempt to set %#x in an 8 bit field",
+			     options);
+	    _options = options & 0xff;
+	    break;
+	case OspfTypes::V3:
+	    if (options  > 0xffffff)
+		XLOG_WARNING("Attempt to set %#x in a 24 bit field",
+			     options);
+	    _options = options & 0xffffff;
+	    break;
+	}
     }
 
     uint32_t get_options() const {
@@ -369,5 +373,174 @@ class HelloPacket : public Packet {
 
     list<OspfTypes::RouterID> _neighbours; // Router IDs of neighbours.
 };
+
+/**
+ * Database Description Packet
+ */
+class DataDescriptionPacket : public Packet {
+ public:
+    DataDescriptionPacket(OspfTypes::Version version)
+	: Packet(version), _interface_mtu(0), _options(0),
+	  _i_bit(false), _m_bit(false), _ms_bit(false), _DD_seqno(0)
+    {}
+
+    OspfTypes::Type get_type() const { return 2; }
+
+    size_t minimum_length() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    return 8;
+	    break;
+	case OspfTypes::V3:
+	    return 12;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    Packet *decode(uint8_t *ptr, size_t len) throw(BadPacket);
+
+    /**
+     * Encode the packet.
+     *
+     * @param len an ouput paramater that returns the length of the
+     * encoded packet.
+     * @return pointer to packet, must be free'd.
+     */
+    uint8_t *encode(size_t &len);
+
+    // Interface MTU
+    void set_interface_mtu(uint16_t mtu) {
+	_interface_mtu = mtu;
+    }
+
+    uint16_t get_interface_mtu() const {
+	return _interface_mtu;
+    }
+
+    // Options.
+    void set_options(uint32_t options) {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    if (options > 0xff)
+		XLOG_WARNING("Attempt to set %#x in an 8 bit field",
+			     options);
+	    _options = options & 0xff;
+	    break;
+	case OspfTypes::V3:
+	    if (options  > 0xffffff)
+		XLOG_WARNING("Attempt to set %#x in a 24 bit field",
+			     options);
+	    _options = options & 0xffffff;
+	    break;
+	}
+    }
+
+    uint32_t get_options() const {
+	return _options;
+    }
+
+    // Init bit.
+    void set_i_bit(bool bit) {
+	_i_bit = bit;
+    }
+
+    bool get_i_bit() const {
+	return _i_bit;
+    }
+
+    // More bit.
+    void set_m_bit(bool bit) {
+	_m_bit = bit;
+    }
+
+    bool get_m_bit() const {
+	return _m_bit;
+    }
+
+    // Master/Slave bit
+    void set_ms_bit(bool bit) {
+	_ms_bit = bit;
+    }
+
+    bool get_ms_bit() const {
+	return _ms_bit;
+    }
+    
+    // Database description sequence number.
+    void set_dd_seqno(uint32_t seqno) {
+	_DD_seqno = seqno;
+    }
+    
+    uint32_t get_dd_seqno() const {
+	return _DD_seqno;
+    }
+
+    list<Lsa_header>& get_lsa_headers() {
+	return _lsa_headers;
+    }
+    
+    /**
+     * Generate a printable representation of the packet.
+     */
+    string str() const;
+
+ private:
+    uint16_t	_interface_mtu;
+    uint32_t	_options;	// Large enough to accomodate V2 and V3 options
+    bool	_i_bit;		// The init bit.
+    bool	_m_bit;		// The more bit.
+    bool	_ms_bit;	// The Master/Slave bit.
+    uint32_t	_DD_seqno;	// Database description sequence number.
+    
+    list<Lsa_header> _lsa_headers;
+};
+
+inline
+uint16_t
+extract_16(uint8_t *ptr)
+{
+    uint16_t val;
+    val = ptr[0];
+    val <<= 8;
+    val |= ptr[1];
+
+    return val;
+}
+
+inline
+void
+embed_16(uint8_t *ptr, uint16_t val)
+{
+    ptr[0] = (val >> 8) & 0xff;
+    ptr[1] = val & 0xff;
+}
+
+inline
+uint32_t
+extract_32(uint8_t *ptr)
+{
+    uint32_t val;
+    val = ptr[0];
+    val <<= 8;
+    val |= ptr[1];
+    val <<= 8;
+    val |= ptr[2];
+    val <<= 8;
+    val |= ptr[3];
+
+    return val;
+}
+
+inline
+void
+embed_32(uint8_t *ptr, uint32_t val)
+{
+    ptr[0] = (val >> 24) & 0xff;
+    ptr[1] = (val >> 16) & 0xff;
+    ptr[2] = (val >> 8) & 0xff;
+    ptr[3] = val & 0xff;
+}
 
 #endif // __OSPF_PACKET_HH__
