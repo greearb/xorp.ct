@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.9 2003/05/14 10:32:25 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.10 2003/05/19 00:25:47 pavlin Exp $"
 
 #include "rib_module.h"
 #include "config.h"
@@ -392,7 +392,7 @@ VifManager::vifaddr4_created(const string& ifname, const string& vifname,
     }
     XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
     cb = callback(this, &VifManager::vifaddr4_done, ifname, vifname, addr);
-    _ifmgr_client.send_get_prefix4("fea", ifname, vifname, addr, cb);
+    _ifmgr_client.send_get_configured_prefix4("fea", ifname, vifname, addr, cb);
     _addrs_remaining++;
 }
 
@@ -469,7 +469,7 @@ VifManager::vifaddr6_created(const string& ifname, const string& vifname,
     }
     XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
     cb = callback(this, &VifManager::vifaddr6_done, ifname, vifname, addr);
-    _ifmgr_client.send_get_prefix6("fea", ifname, vifname, addr, cb);
+    _ifmgr_client.send_get_configured_prefix6("fea", ifname, vifname, addr, cb);
     _addrs_remaining++;
 }
 
