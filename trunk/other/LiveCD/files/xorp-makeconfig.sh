@@ -71,6 +71,12 @@ CHMOD="/bin/chmod"
 CHOWN="/usr/sbin/chown"
 
 welcome() {
+    if [ -z ${TERM} ]; then
+	TERM="cons25"; export TERM
+    else
+	echo ${TERM}
+    fi 
+    exit 0
     ${DIALOG} --title "${TITLE}" --infobox "XORP LiveCD is starting..." 6 70 
 }
 
