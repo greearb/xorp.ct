@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.6 2003/05/23 13:58:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.7 2003/05/23 16:52:05 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -124,12 +124,20 @@ IfTree::str() const
     return r;
 }
 
+//
+// Walk interfaces, vifs, and addresses and align them with the other tree:
+//  - if an item from the local tree is not in the other tree,
+//     it is deleted in the local tree
+//  - if an item from the local tree is in the other tree,
+//     its state is copied from the other tree to the local tree.
+//  - if an item from the other tree is not in the local tree, we do NOT
+//    copy it to the local tree.
+//
+// Return the aligned local tree.
+//
 IfTree&
 IfTree::align_with(const IfTree& o)
 {
-    // Walk interfaces, vifs, and addresses deleting anything that does
-    // occur in 'o' and aligning state variable to those present in 'o'
-    
     IfTree::IfMap::iterator ii;
     for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
 	const string& ifname = ii->second.ifname();
