@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.3 2004/02/14 00:08:00 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.1 2004/02/18 00:10:56 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -555,7 +555,7 @@ XrlFib2mribNode::send_rib_route_change()
     bool success = false;
 
     if (_inform_rib_queue.empty())
-	return;		// No more routes changes to send
+	return;		// No more route changes to send
 
     Fib2mribRoute& fib2mrib_route = _inform_rib_queue.front();
 

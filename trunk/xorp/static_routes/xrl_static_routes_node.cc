@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.2 2004/02/12 20:29:25 hodson Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.3 2004/02/14 00:08:00 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -555,7 +555,7 @@ XrlStaticRoutesNode::send_rib_route_change()
     bool success = false;
 
     if (_inform_rib_queue.empty())
-	return;		// No more routes changes to send
+	return;		// No more route changes to send
 
     StaticRoute& static_route = _inform_rib_queue.front();
 
