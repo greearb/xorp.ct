@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.32 2004/02/28 10:43:05 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.33 2004/03/02 00:32:32 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -681,19 +681,6 @@ public:
      * @param mrib the @ref Mrib entry to delete.
      */
     void delete_mrib_entry(const Mrib& mrib) { _pim_mrib_table.remove(mrib); }
-    
-    /**
-     * Test if an address is directly connected to one of my virtual
-     * interfaces.
-     * 
-     * Note that the virtual interface the address is directly connected to
-     * must be UP.
-     * 
-     * @param ipaddr_test the address to test.
-     * @return true if @ref ipaddr_test is directly connected to one of
-     * my virtual interfaces, otherwise false.
-     */
-    bool is_directly_connected(const IPvX& ipaddr_test) const;
     
     /**
      * Test if an address is directly connected to a specified virtual
