@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.32 2004/11/16 05:45:41 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.33 2004/11/23 22:43:44 bms Exp $
 ##
 
 # -- Real Programs
@@ -23,6 +23,7 @@ TESTS		+= test_observers
 TESTS		+= test_profile
 TESTS		+= test_ref_ptr
 TESTS		+= test_ref_trie
+TESTS		+= test_run_command
 TESTS		+= test_service
 TESTS		+= test_test_main
 TESTS		+= test_time_slice
@@ -49,6 +50,7 @@ check_PROGRAMS	+= test_observers
 check_PROGRAMS	+= test_profile
 check_PROGRAMS	+= test_ref_ptr
 check_PROGRAMS	+= test_ref_trie
+check_PROGRAMS	+= test_run_command
 check_PROGRAMS	+= test_service
 check_PROGRAMS	+= test_test_main
 check_PROGRAMS	+= test_time_slice
@@ -81,6 +83,7 @@ test_observers_SOURCES  = test_observers.cc
 test_profile_SOURCES	= test_profile.cc
 test_ref_ptr_SOURCES	= test_ref_ptr.cc
 test_ref_trie_SOURCES	= test_ref_trie.cc
+test_run_command_SOURCES = test_run_command.cc
 test_service_SOURCES	= test_service.cc
 test_test_main_SOURCES	= test_test_main.cc
 test_time_slice_SOURCES	= test_time_slice.cc
@@ -124,6 +127,7 @@ libxorp_la_SOURCES += old_trie.hh
 libxorp_la_SOURCES += popen.hh
 libxorp_la_SOURCES += profile.hh
 libxorp_la_SOURCES += ref_ptr.hh
+libxorp_la_SOURCES += run_command.hh
 libxorp_la_SOURCES += safe_callback_obj.hh
 libxorp_la_SOURCES += selector.hh
 libxorp_la_SOURCES += service.hh
@@ -159,6 +163,7 @@ libxorp_la_SOURCES += nexthop.cc
 libxorp_la_SOURCES += popen.cc
 libxorp_la_SOURCES += profile.cc
 libxorp_la_SOURCES += ref_ptr.cc
+libxorp_la_SOURCES += run_command.cc
 libxorp_la_SOURCES += safe_callback_obj.cc
 libxorp_la_SOURCES += selector.cc
 libxorp_la_SOURCES += service.cc
