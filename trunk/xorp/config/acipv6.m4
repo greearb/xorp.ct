@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.5 2002/07/29 21:27:21 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
 dnl
 
 dnl
@@ -11,7 +11,7 @@ dnl Check whether the system IPv6 stack implementation is reasonable
 dnl XXX: The check is very primitive. Add more checks as needed.
 dnl ------------------------------------
 AC_MSG_CHECKING(whether the system IPv6 stack implementation is reasonable)
-if test "${enable_ipv6}" = "no"; then
+if test "X${enable_ipv6}" = "Xno"; then
   AC_MSG_RESULT(disabled)
 else
   AC_LANG_SAVE
