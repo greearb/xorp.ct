@@ -12,10 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.5 2003/09/15 23:47:26 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.6 2004/06/10 22:41:13 hodson Exp $"
 
 #include "xrl_std_router.hh"
+#include "xrl_pf_inproc.hh"
 #include "xrl_pf_stcp.hh"
+#include "xrl_pf_sudp.hh"
 
 // ----------------------------------------------------------------------------
 // Helper methods
@@ -23,7 +25,15 @@
 static XrlPFListener*
 create_listener(EventLoop& e, XrlDispatcher* d)
 {
-    // Change type here for your protocol family of choice
+    const char* pf = getenv("XORP_PF");
+    if (pf != NULL) {
+	if (pf[0] == 'i') {
+	    return new XrlPFInProcListener(e, d);
+	}
+	if (pf[0] == 'u') {
+	    return new XrlPFSUDPListener(e, d);
+	}
+    }
     return new XrlPFSTCPListener(e, d);
 }
 
