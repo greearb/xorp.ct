@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.66 2004/05/11 01:14:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.67 2004/05/13 00:14:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -296,6 +296,8 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 void
 BGPPeer::send_notification(const NotificationPacket& p, bool error)
 {
+    debug_msg(p.str().c_str());
+
     /*
     ** We need to deal with NOTIFICATION differently from other packets -
     ** NOTIFICATION is the last packet we send on a connection, and because
