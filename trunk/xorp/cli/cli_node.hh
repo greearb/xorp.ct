@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.12 2003/12/10 21:57:50 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.14 2004/06/10 22:40:42 hodson Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -194,7 +194,7 @@ public:
      * "cd" to that level of the CLI command-tree.
      * @param is_command_processor if true, this is a processing command
      * that would be performed by @processor_name.
-     * @param reason contains failure reason if it occured.
+     * @param error_msg the error message (if error).
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -207,7 +207,23 @@ public:
 	const string&	command_cd_prompt,
 	const bool&	is_command_processor,
 	// Output values,
-	string&		reason);
+	string&		error_msg);
+
+    /**
+     * Delete a CLI command from the CLI manager.
+     * 
+     * @param processor_name the name of the module that is processing
+     * that command.
+     * @param command_name the name of the command to delete.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int delete_cli_command(
+	// Input values,
+	const string&	processor_name,
+	const string&	command_name,
+	// Output values,
+	string&		error_msg);
 
     /**
      * Process the response of a command processed by a remote node.

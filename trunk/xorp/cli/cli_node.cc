@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.20 2004/06/10 22:40:42 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.21 2005/02/27 20:46:55 pavlin Exp $"
 
 
 //
@@ -401,16 +401,16 @@ CliNode::add_cli_command(
     const string&	command_cd_prompt,
     const bool&		is_command_processor,
     // Output values,
-    string&		reason)
+    string&		error_msg)
 {
-    // Reset the return value
-    reason = "";
+    // Reset the error message
+    error_msg = "";
     
     //
     // Check the request
     //
     if (command_name.empty()) {
-	reason = "ERROR: command name is empty";
+	error_msg = "ERROR: command name is empty";
 	return (XORP_ERROR);
     }
     
@@ -437,13 +437,49 @@ CliNode::add_cli_command(
     //
     
     if (c1 == NULL) {
-	reason = c_format("Cannot install command '%s'", command_name.c_str());
+	error_msg = c_format("Cannot install command '%s'",
+			     command_name.c_str());
 	return (XORP_ERROR);
     }
     
     c1->set_global_name(command_name);
     c1->set_server_name(processor_name);
     
+    return (XORP_OK);
+}
+
+//
+// CLI delete_cli_command
+//
+int
+CliNode::delete_cli_command(
+    // Input values,
+    const string&	processor_name,
+    const string&	command_name,
+    // Output values,
+    string&		error_msg)
+{
+    // Reset the error message
+    error_msg = "";
+    
+    //
+    // Check the request
+    //
+    if (command_name.empty()) {
+	error_msg = "ERROR: command name is empty";
+	return (XORP_ERROR);
+    }
+    
+    CliCommand *c0 = cli_command_root();
+
+    if (c0->delete_command(command_name) != XORP_OK) {
+	error_msg = c_format("Cannot delete command '%s'",
+			     command_name.c_str());
+	return (XORP_ERROR);
+    }
+
+    UNUSED(processor_name);
+
     return (XORP_OK);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.22 2005/02/24 00:47:09 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.23 2005/02/27 20:46:55 pavlin Exp $"
 
 #include "cli_module.h"
 #include "libxorp/xorp.h"
@@ -330,11 +330,19 @@ XrlCliNode::cli_manager_0_1_add_cli_command(
 XrlCmdError
 XrlCliNode::cli_manager_0_1_delete_cli_command(
     // Input values, 
-    const string& , //	processor_name, 
-    const string&   //	command_name
+    const string&	processor_name, 
+    const string&	command_name
     )
 {
-    // TODO: implement it
+    string reason;
+
+    if (cli_node().delete_cli_command(processor_name,
+				      command_name,
+				      reason)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(reason);
+    }
+
     return XrlCmdError::OKAY();
 }
 
