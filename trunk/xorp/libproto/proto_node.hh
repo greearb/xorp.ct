@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.24 2004/08/02 20:19:27 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.25 2005/02/12 08:09:07 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -676,7 +676,7 @@ ProtoNode<V>::update_status()
 
 	// The startup process has completed
 	ServiceBase::set_status(SERVICE_RUNNING);
-	_node_status = PROC_READY;
+	set_node_status(PROC_READY);
 	return;
     }
 
@@ -689,8 +689,7 @@ ProtoNode<V>::update_status()
 
 	// The shutdown process has completed
 	ServiceBase::set_status(SERVICE_SHUTDOWN);
-	// Set the node status
-	_node_status = PROC_DONE;
+	set_node_status(PROC_DONE);
 	return;
     }
 
@@ -698,8 +697,7 @@ ProtoNode<V>::update_status()
     // Test if we have failed
     //
     if (ServiceBase::status() == SERVICE_FAILED) {
-	// Set the node status
-	_node_status = PROC_DONE;
+	set_node_status(PROC_DONE);
 	return;
     }
 }
