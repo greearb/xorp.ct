@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.5 2003/09/20 06:27:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.6 2003/09/22 15:44:20 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -274,20 +274,19 @@ NetlinkSocket::force_read()
 	// If this is a multipart message, it must be terminated by NLMSG_DONE
 	//
 	bool is_end_of_message = true;
-	while (last_mh_off < off) {
-	    const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	size_t new_size = off - last_mh_off;
+	const struct nlmsghdr* mh;
+	for (mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	     NLMSG_OK(mh, new_size);
+	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
 	    if (mh->nlmsg_flags & NLM_F_MULTI) {
 		is_end_of_message = false;
 		if (mh->nlmsg_type == NLMSG_DONE)
 		    is_end_of_message = true;
 	    }
-	    if (last_mh_off + mh->nlmsg_len <= off)
-		last_mh_off += mh->nlmsg_len;
-	    else
-		break;		// The last message is truncated
 	}
-	
+	last_mh_off = reinterpret_cast<size_t>(mh) - reinterpret_cast<size_t>(&message[0]);
 	if (is_end_of_message)
 	    break;
     }
@@ -345,20 +344,19 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 	// If this is a multipart message, it must be terminated by NLMSG_DONE
 	//
 	bool is_end_of_message = true;
-	while (last_mh_off < off) {
-	    const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	size_t new_size = off - last_mh_off;
+	const struct nlmsghdr* mh;
+	for (mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	     NLMSG_OK(mh, new_size);
+	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
 	    if (mh->nlmsg_flags & NLM_F_MULTI) {
 		is_end_of_message = false;
 		if (mh->nlmsg_type == NLMSG_DONE)
 		    is_end_of_message = true;
 	    }
-	    if (last_mh_off + mh->nlmsg_len <= off)
-		last_mh_off += mh->nlmsg_len;
-	    else
-		break;		// The last message is truncated
 	}
-	
+	last_mh_off = reinterpret_cast<size_t>(mh) - reinterpret_cast<size_t>(&message[0]);
 	if (is_end_of_message)
 	    break;
     }
@@ -444,20 +442,19 @@ NetlinkSocket::force_recvmsg(int flags)
 	// If this is a multipart message, it must be terminated by NLMSG_DONE
 	//
 	bool is_end_of_message = true;
-	while (last_mh_off < off) {
-	    const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	size_t new_size = off - last_mh_off;
+	const struct nlmsghdr* mh;
+	for (mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	     NLMSG_OK(mh, new_size);
+	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
 	    if (mh->nlmsg_flags & NLM_F_MULTI) {
 		is_end_of_message = false;
 		if (mh->nlmsg_type == NLMSG_DONE)
 		    is_end_of_message = true;
 	    }
-	    if (last_mh_off + mh->nlmsg_len <= off)
-		last_mh_off += mh->nlmsg_len;
-	    else
-		break;		// The last message is truncated
 	}
-	
+	last_mh_off = reinterpret_cast<size_t>(mh) - reinterpret_cast<size_t>(&message[0]);
 	if (is_end_of_message)
 	    break;
     }
