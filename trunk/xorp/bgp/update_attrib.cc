@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.18 2002/12/09 18:28:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -23,70 +23,31 @@
 #include <stdlib.h>
 #include "libxorp/debug.h"
 
-BGPUpdateAttrib::BGPUpdateAttrib(uint32_t d, uint8_t s)
-    : _net(d, s)
+BGPUpdateAttrib::BGPUpdateAttrib(const uint8_t *d)
 {
-	_data = d;
-	_size = s;
-	_byte_size = calc_byte_size(s);
+    _prefix_len = d[0];
+    uint32_t a = d[1] << 24;
+
+    if (_prefix_len > 8)
+	a |= (d[2] <<16);
+    if (_prefix_len > 16)
+	a |= (d[3] <<8 );
+    if (_prefix_len > 24)
+	a |= d[4];
+    
+    _masked_addr = IPv4(htonl(a));
 }
 
-
-BGPUpdateAttrib::BGPUpdateAttrib(const IPv4Net& p)
-    : _net(p)
+void
+BGPUpdateAttrib::copy_out(uint8_t *d) const
 {
-    //XXXX what's going on here?
-    //set_attrib((uint8_t *)p.masked_addr().addr(),(uint8_t)p.prefix_len());
-    _data = p.masked_addr().addr();
-    _size = p.prefix_len();
-    _byte_size = calc_byte_size(_size);
+    uint32_t a = ntohl(masked_addr().addr());
+    d[0] = prefix_len();
+    d[1] = (a >> 24) & 0xff;
+    if (d[0] > 8)
+	d[2] = (a >> 16) & 0xff;
+    if (d[0] > 16)
+	d[3] = (a >> 8) & 0xff;
+    if (d[0] > 24)
+	d[4] = a & 0xff;
 }
-
-const char *BGPUpdateAttrib::get_data() const
-{
-    return (const char *)&_data;
-}
-
-const uint8_t * BGPUpdateAttrib::get_size() const
-{
-    return (const uint8_t *)&_size;
-}
-
-void BGPUpdateAttrib::dump()
-{
-    //IPv4 *net = new IPv4((unsigned int)_data);
-	//printf("%s\n", cstring(*net));
-}
-
-uint8_t  BGPUpdateAttrib::get_byte_size() const
-{
-	return _byte_size;
-}
-
-void BGPUpdateAttrib::set_next(BGPUpdateAttrib* n)
-{
-	_next = n;
-}
-
-BGPUpdateAttrib* BGPUpdateAttrib::get_next() const
-{
-	return _next;
-}
-
-uint8_t BGPUpdateAttrib::calc_byte_size(uint8_t s)
-{
-	return (s+7)/8;
-}
-
-string BGPUpdateAttrib::str() const
-{
-    string s;
-    s = "Update Attribute";
-    return s;
-}
-
-
-
-
-
-

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_test.cc,v 1.8 2003/01/28 19:15:17 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_test.cc,v 1.9 2003/01/28 22:06:57 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -237,7 +237,7 @@ UpdatePacket* BGPTestPacket::create_update()
     net[0] = IPv4Net("1.2.3.4/32");
     net[1] = IPv4Net("5.6.7.8/32");
     net[2] = IPv4Net("1.2.3.4/32");
-    BGPWithdrawnRoute wdr(net[2]);
+    BGPUpdateAttrib wdr(net[2]);
 	
     AsSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
@@ -250,11 +250,11 @@ UpdatePacket* BGPTestPacket::create_update()
     AsPath p;
     p.add_segment(as_seq);
     debug_msg("sequence length : %u\n", (uint32_t)as_seq.as_size());
-    NetLayerReachability nlr_0(net[0]);
-    NetLayerReachability nlr_1(net[1]);	
-    nlr_0.dump();
-    nlr_1.dump();
-    wdr.dump();
+    BGPUpdateAttrib nlr_0(net[0]);
+    BGPUpdateAttrib nlr_1(net[1]);	
+    // nlr_0.dump();
+    // nlr_1.dump();
+    // wdr.dump();
     ASPathAttribute path_att(p);
     UpdatePacket *bup = new UpdatePacket();
     bup->add_withdrawn(wdr);

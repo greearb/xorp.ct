@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.6 2003/01/28 19:15:17 rizzo Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.7 2003/01/28 22:06:57 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -23,102 +23,63 @@ extern void dump_bytes(const uint8_t *d, size_t l);
 
 /* **************** OpenPacket *********************** */
 
-OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
-    // XXX assigning dummy value is bad practice
-    : _AutonomousSystemNumber(AsNum::AS_INVALID)
-{
-    debug_msg("OpenPacket(const uint8_t *, uint16_t) constructor called\n");
-    _Length = l;
-    _Type = MESSAGETYPEOPEN;
-
-    _OptParmLen = 0;
-    _num_parameters = 0;
-    decode(d, l);
-}
 
 OpenPacket::OpenPacket(const AsNum& as,
 			     const IPv4& bgpid,
 			     const uint16_t holdtime) :
-    _Version(BGPVERSION),
-    _AutonomousSystemNumber(as),
     _BGPIdentifier(bgpid),
-    _HoldTime(holdtime)
+    _AutonomousSystemNumber(as),
+    _HoldTime(holdtime),
+    _Version(BGPVERSION)
 {
     debug_msg("OpenPacket(BGPLocalData *d) constructor called\n");
 
-    _Length = MINOPENPACKET;
     _Type = MESSAGETYPEOPEN;
     _OptParmLen = 0;
     _num_parameters = 0;
 }
 
 const uint8_t *
-OpenPacket::encode(size_t& len) const
+OpenPacket::encode(size_t& len, uint8_t *d) const
 {
-    struct iovec io[8 + _num_parameters];
+    if (d != 0) {	// have a buffer, check length
+	// XXX this should become an exception
+        assert (len >= MINOPENPACKET + _OptParmLen);
+    }
+    len = MINOPENPACKET + _OptParmLen;
+    d = basic_encode(len, d);
 
-    uint16_t k = 0;
-    uint16_t j = 0;
-    uint16_t l = 0;
-    uint32_t m = 0;
+    d[BGP_COMMON_HEADER_LEN] = _Version;
+    _AutonomousSystemNumber.copy_out(d + BGP_COMMON_HEADER_LEN + 1);
 
-    debug_msg("Send in OpenPacket called\n");
-
-    io[0].iov_base = const_cast<char*>((const char *)Marker);
-    io[0].iov_len = MARKER_SIZE;
-
-    io[2].iov_base = const_cast<char*>((const char *)&_Type);
-    io[2].iov_len = 1;
-
-    io[3].iov_base = const_cast<char*>((const char *)&_Version);
-    io[3].iov_len = 1;
-
-    // XXX can this ever be an extended AsNum?
-    j = htons(_AutonomousSystemNumber.as());
-    io[4].iov_base = (char *)&j;
-    io[4].iov_len = 2;
-
-    l = htons(_HoldTime);
-    io[5].iov_base = (char *)&l;
-    io[5].iov_len = 2;
-
-    m = _BGPIdentifier.addr(); /*this is an IP address, and so it
-				 is already in network byte order */
-    io[6].iov_base = (char *)&m;
-    io[6].iov_len = 4;
-
-    io[7].iov_base = const_cast<char*>((const char *)&_OptParmLen);
-    io[7].iov_len = 1;
-
-    const uint8_t *buf;
-    int offset = 0;
+    d[BGP_COMMON_HEADER_LEN + 3] = (_HoldTime >> 8) & 0xff;
+    d[BGP_COMMON_HEADER_LEN + 4] = _HoldTime & 0xff;
+    _BGPIdentifier.copy_out(d + BGP_COMMON_HEADER_LEN + 5);
+    d[BGP_COMMON_HEADER_LEN + 9] = _OptParmLen;
 
     if (_num_parameters > 0)  {
+	size_t i = MINOPENPACKET;
 	list <BGPParameter*>::const_iterator pi = _parameter_list.begin();
 	while(pi != _parameter_list.end()) {
-	    io[8 + offset].iov_base = (char*)((BGPParameter *)*pi)->data();
-	    io[8 + offset].iov_len = ((BGPParameter *)*pi)->length();
-
-	    offset++;
+	    memcpy(d + i, (*pi)->data(), (*pi)->length());
+	    i += (*pi)->length();
 	    pi++;
 	}
     }
 
-    int length = _Length;
-    length = _Length + _OptParmLen;
-    k = htons(length);
-    io[1].iov_base = (char *)&k;
-    io[1].iov_len = 2;
-
-    buf = flatten(&io[0], 8 + _num_parameters, len);
-
-    return buf;
+    return d;
 }
 
-void
-OpenPacket::decode(const uint8_t *data, uint16_t /* l */) throw(CorruptMessage)
+OpenPacket::OpenPacket(const uint8_t *data, uint16_t l)
+	throw(CorruptMessage)
+    // XXX assigning dummy value is bad practice
+    : _AutonomousSystemNumber(AsNum::AS_INVALID)
 {
-    debug_msg("decode called\n");
+    debug_msg("OpenPacket(const uint8_t *, uint16_t) constructor called\n");
+    _Type = MESSAGETYPEOPEN;
+
+    _OptParmLen = 0;
+    _num_parameters = 0;
 
     ParamType param_type;
     int param_len;
@@ -128,7 +89,7 @@ OpenPacket::decode(const uint8_t *data, uint16_t /* l */) throw(CorruptMessage)
     BGPParameter *p;
     uint8_t myOptParmLen;
 
-    if (_Length < MINOPENPACKET) {
+    if (l < MINOPENPACKET) {
 	debug_msg("Open message too short\n");
 	xorp_throw(CorruptMessage, "Open message too short",
 		   MSGHEADERERR, BADMESSLEN);

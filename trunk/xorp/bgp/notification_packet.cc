@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.9 2003/01/24 19:50:10 rizzo Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.10 2003/01/26 04:06:17 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -75,18 +75,21 @@ NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
 }
 
 const uint8_t *
-NotificationPacket::encode(size_t& len) const
+NotificationPacket::encode(size_t& len, uint8_t *buf) const
 {
     debug_msg("Encode in NotificationPacket called (%d)\n", _Length);
-    len = length();
+    if (buf != 0)		// have a buffer, check length
+	assert(len >= _Length);	// XXX should become an exception
+
+    len = _Length;
 
     // allocate buffer, set length, fill up header
-    uint8_t *buf = basic_encode(len);
+    buf = basic_encode(len, buf);
     buf[BGP_COMMON_HEADER_LEN] = _error_code;
     buf[BGP_COMMON_HEADER_LEN+1] = _error_subcode;
     if (_error_data != 0)
 	memcpy(buf + MINNOTIFICATIONPACKET, _error_data,
-		length() - MINNOTIFICATIONPACKET);
+		len - MINNOTIFICATIONPACKET);
     return buf;
 }
 
@@ -274,7 +277,7 @@ NotificationPacket::operator==(const NotificationPacket& him ) const
     // common packet headers apply to both length, so only need to compare raw
     // packet length
 
-    if (_Length != him.length())
+    if (_Length != him._Length)
 	return false;
 
     if (0 != memcmp(_error_data, him.error_data(),

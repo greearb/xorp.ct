@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.9 2002/12/09 18:28:52 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -49,7 +49,7 @@ Trie::lookup(const string& net) const
     /*
     ** Look for this net in the matching update packet.
     */
-    list <NetLayerReachability>::const_iterator ni;
+    list <BGPUpdateAttrib>::const_iterator ni;
     ni = update->nlri_list().begin();
     for(; ni != update->nlri_list().end(); ni++)
 	if(ni->net() == n)
@@ -67,9 +67,9 @@ Trie::process_update_packet(const timeval& tv, const uint8_t *buf, size_t len)
     /*
     ** First process the withdraws, if any are present.
     */
-    list <BGPWithdrawnRoute>::const_iterator wi;
-    wi = update->withdrawn_list().begin();
-    for(; wi != update->withdrawn_list().end(); wi++)
+    list <BGPUpdateAttrib>::const_iterator wi;
+    wi = update->wr_list().begin();
+    for(; wi != update->wr_list().end(); wi++)
 	del(wi->net());
 
     /*
@@ -82,7 +82,7 @@ Trie::process_update_packet(const timeval& tv, const uint8_t *buf, size_t len)
     /*
     ** Now save the NLRI information.
     */
-    list <NetLayerReachability>::const_iterator ni;
+    list <BGPUpdateAttrib>::const_iterator ni;
     ni = update->nlri_list().begin();
     for(; ni != update->nlri_list().end(); ni++) {
 	/* If a previous entry exists remove it */
@@ -134,7 +134,7 @@ Trie::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
     const UpdatePacket *update = ptr->p.get(tv);
     if(0 != update) {
 	IPv4 nh;
-	list<PathAttribute*> l = update->pathattribute_list();
+	list<PathAttribute*> l = update->pa_list();
 	list<PathAttribute*>::const_iterator i;
 	for(i = l.begin(); i != l.end(); i++) {
 	    if(NEXT_HOP == (*i)->type()) {
@@ -177,7 +177,7 @@ Trie::prt(FILE *fp, const Tree *ptr, const char *st) const
     const UpdatePacket *update = ptr->p.get();
     if(0 != update) {
 	IPv4 nh;
-	list<PathAttribute*> l = update->pathattribute_list();
+	list<PathAttribute*> l = update->pa_list();
 	list<PathAttribute*>::const_iterator i;
 	for(i = l.begin(); i != l.end(); i++) {
 	    if(NEXT_HOP == (*i)->type()) {

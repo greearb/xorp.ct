@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.14 2003/01/29 00:12:34 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.13 2003/01/28 03:21:52 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -288,12 +288,11 @@ Peer::send_packet(const string& line, const vector<string>& words)
 		   c_format("Incorrect number of arguments:\n[%s]",
 			    line.c_str()));
 
-    const UpdatePacket *bgpupdate = dynamic_cast<const UpdatePacket *>
-	(Peer::packet(line, words, 3));
+    const BGPPacket *pkt = Peer::packet(line, words, 3);
 
     size_t len;
-    const uint8_t *buf = bgpupdate->encode(len);
-    delete bgpupdate;
+    const uint8_t *buf = pkt->encode(len);
+    delete pkt;
     /*
     ** Save the update message in the sent trie.
     */
@@ -304,6 +303,8 @@ Peer::send_packet(const string& line, const vector<string>& words)
     _trie_sent.process_update_packet(tp, buf, len);
 
     send_message(buf, len, ::callback(this, &Peer::callback, "update"));
+    fprintf(stderr, "done with send_pkt %p size %d\n",
+	buf, len);
 }
 
 struct mrt_header {
@@ -487,8 +488,7 @@ Peer::trie(const string& line, const vector<string>& words)
 	    /*
 	    ** Search for the AS Path in the update packet.
 	    */
-	    const list<PathAttribute*>& palist =
-		bgpupdate->pathattribute_list();
+	    const list<PathAttribute*>& palist = bgpupdate->pa_list();
 
 	    list<PathAttribute*>::const_iterator pai;
 	    const AsPath *aspath = 0;
@@ -1080,149 +1080,143 @@ Peer::packet(const string& line, const vector<string>& words, int index)
     const throw(InvalidString)
 {
     BGPPacket *pac = 0;
-    try {
-	if("notify" == words[index]) {
-	    switch(words.size() - (index + 1)) {
-	    case 1:
-		pac = new NotificationPacket(atoi(words[index + 1].c_str()));
-		break;
-	    case 2:
-		pac = new NotificationPacket(atoi(words[index + 1].c_str()),
-					     atoi(words[index + 2].c_str()));
-		break;
-	    default:
-		{
-		    int errlen = words.size() - (index + 3);
-		    if (errlen < 1)
-			xorp_throw(InvalidString,
-				   c_format("Incorrect number of arguments"
-					    " to notify:\n[%s]",
+
+  try {
+    if("notify" == words[index]) {
+	switch(words.size() - (index + 1)) {
+	case 1:
+	    pac = new NotificationPacket(atoi(words[index + 1].c_str()));
+	    break;
+	case 2:
+	    pac = new NotificationPacket(atoi(words[index + 1].c_str()),
+					    atoi(words[index + 2].c_str()));
+	    break;
+	default: {
+		int errlen = words.size() - (index + 3);
+		if (errlen < 1)
+		    xorp_throw(InvalidString,
+			       c_format("Incorrect number of arguments to notify:\n[%s]",
 					line.c_str()));
 		uint8_t buf[errlen];
 		for (int i=0; i< errlen; i++) {
 		    int value = atoi(words[index + 3 + i].c_str());
 		    if (value < 0 || value > 255)
 			xorp_throw(InvalidString,
-				   c_format("Incorrect byte value "
-					    "to notify:\n[%s]",
+				   c_format("Incorrect byte value to notify:\n[%s]",
 					    line.c_str()));
-		    
+			
 		    buf[i] = (uint8_t)value;
 		    pac = new NotificationPacket(atoi(words[index+1].c_str()),
 						 atoi(words[index+2].c_str()),
 						 buf, errlen);
 		}
-		}
 	    }
-	} else if("update" == words[index]) {
-	    size_t size = words.size();
-	    if(0 != ((size - (index + 1)) % 2))
-		xorp_throw(InvalidString,
-			   c_format("Incorrect number of arguments "
-				    "to update:\n[%s]",
-				    line.c_str()));
-
-	    UpdatePacket *bgpupdate = new UpdatePacket();
-
-	    for(size_t i = index + 1; i < size; i += 2) {
-		debug_msg("name: %s value: %s\n",
-			  words[i].c_str(),
-			  words[i + 1].c_str());
-		if("origin" == words[i]) {
-		    bgpupdate->add_pathatt(OriginAttribute(
-					   static_cast<OriginType>
-					   (atoi(words[i + 1].c_str()))));
-		} else if("aspath" == words[i]) {
-		    string aspath = words[i+1];
-		    bgpupdate->add_pathatt(ASPathAttribute(AsPath(
-							   aspath.c_str())));
-		    debug_msg("aspath: %s\n", 
-			      AsPath(aspath.c_str()).str().c_str());
-		} else if("nexthop" == words[i]) {
-		    bgpupdate->add_pathatt(IPv4NextHopAttribute(IPv4(
-							words[i+1].c_str())));
-		} else if("localpref" == words[i]) {
-		    bgpupdate->add_pathatt(LocalPrefAttribute(
-						   atoi(words[i+1].c_str())));
-		} else if("nlri" == words[i]) {
-		    bgpupdate->add_nlri(NetLayerReachability(IPv4Net(
-						       words[i+1].c_str())));
-		} else if("withdraw" == words[i]) {
-		    bgpupdate->add_withdrawn(BGPWithdrawnRoute(IPv4Net(
-							words[i+1].c_str())));
-		} else if("med" == words[i]) {
-		    bgpupdate->add_pathatt(MEDAttribute(atoi(
-							words[i+1].c_str())));
-		} else
-		    xorp_throw(InvalidString, 
-			       c_format("Illegal argument "
-					"to update: <%s>\n[%s]",
-					words[i].c_str(), line.c_str()));
-	    }
-	    pac = bgpupdate;
-	} else if("open" == words[index]) {
-	    size_t size = words.size();
-	    if(0 != ((size - (index + 1)) % 2))
-		xorp_throw(InvalidString,
-			   c_format("Incorrect number of arguments "
-				    "to open:\n[%s]",
-				    line.c_str()));
-
-	    string asnum;
-	    string bgpid;
-	    string holdtime;
-
-	    for(size_t i = index + 1; i < size; i += 2) {
-		debug_msg("name: %s value: %s\n",
-			  words[i].c_str(),
-			  words[i + 1].c_str());
-		if("asnum" == words[i]) {
-		    asnum = words[i + 1];
-		} else if("bgpid" == words[i]) {
-		    bgpid = words[i + 1];
-		} else if("holdtime" == words[i]) {
-		    holdtime = words[i + 1];
-		} else 
-		    xorp_throw(InvalidString, 
-			       c_format("Illegal argument to open: <%s>\n[%s]",
-					words[i].c_str(), line.c_str()));
-	    }
-
-	    if("" == asnum) {
-		xorp_throw(InvalidString,
-			   c_format("AS number not supplied to open:\n[%s]",
-				    line.c_str()));
-	    }
-	    if("" == bgpid) {
-		xorp_throw(InvalidString,
-			   c_format("BGP ID not supplied to open:\n[%s]",
-				    line.c_str()));
-	    }
-	    if("" == holdtime) {
-		xorp_throw(InvalidString,
-			   c_format("Holdtime not supplied to open:\n[%s]",
-				    line.c_str()));
-	    }
-	    OpenPacket *open = new OpenPacket(AsNum(
-				  static_cast<uint16_t>(atoi(asnum.c_str()))),
-					      IPv4(bgpid.c_str()),
-					      atoi(holdtime.c_str()));
-	    pac = open;
-	} else  if("keepalive" == words[index]) {
-	    pac = new KeepAlivePacket();
-	} else
+	}
+    } else if("update" == words[index]) {
+	size_t size = words.size();
+	if(0 != ((size - (index + 1)) % 2))
 	    xorp_throw(InvalidString,
-		       c_format("\"notify\" or"
-				" \"update\" or"
-				" \"open\" or"
-				" \"keepalive\" accepted"
-				" not <%s>\n[%s]",
-				words[index].c_str(), line.c_str()));
-    } catch(CorruptMessage c) {
-	xorp_throw(InvalidString, c_format("Unable to construct packet "
-					   "%s\n[%s])", c.why().c_str(),
-					   line.c_str()));
-    }
+	       c_format("Incorrect number of arguments to update:\n[%s]",
+				line.c_str()));
+
+	UpdatePacket *bgpupdate = new UpdatePacket();
+
+	for(size_t i = index + 1; i < size; i += 2) {
+	    debug_msg("name: %s value: %s\n",
+		      words[i].c_str(),
+		      words[i + 1].c_str());
+	    if("origin" == words[i]) {
+		bgpupdate->add_pathatt(OriginAttribute(static_cast<OriginType>
+				     (atoi(words[i + 1].c_str()))));
+	    } else if("aspath" == words[i]) {
+		string aspath = words[i+1];
+		bgpupdate->add_pathatt(ASPathAttribute(AsPath(
+						       aspath.c_str())));
+		debug_msg("aspath: %s\n", 
+			  AsPath(aspath.c_str()).str().c_str());
+	    } else if("nexthop" == words[i]) {
+		bgpupdate->add_pathatt(IPv4NextHopAttribute(IPv4(
+						      words[i+1].c_str())));
+	    } else if("localpref" == words[i]) {
+		bgpupdate->add_pathatt(LocalPrefAttribute(atoi(
+						      words[i+1].c_str())));
+	    } else if("nlri" == words[i]) {
+		bgpupdate->add_nlri(BGPUpdateAttrib(IPv4Net(
+						      words[i+1].c_str())));
+	    } else if("withdraw" == words[i]) {
+		bgpupdate->add_withdrawn(BGPUpdateAttrib(IPv4Net(
+						      words[i+1].c_str())));
+	    } else if("med" == words[i]) {
+		bgpupdate->add_pathatt(MEDAttribute(atoi(
+						      words[i+1].c_str())));
+	    } else
+		xorp_throw(InvalidString, 
+		       c_format("Illegal argument to update: <%s>\n[%s]",
+				words[i].c_str(), line.c_str()));
+	}
+	pac = bgpupdate;
+    } else if("open" == words[index]) {
+	size_t size = words.size();
+	if(0 != ((size - (index + 1)) % 2))
+	    xorp_throw(InvalidString,
+	       c_format("Incorrect number of arguments to update:\n[%s]",
+				line.c_str()));
+
+	string asnum;
+	string bgpid;
+	string holdtime;
+
+	for(size_t i = index + 1; i < size; i += 2) {
+	    debug_msg("name: %s value: %s\n",
+		      words[i].c_str(),
+		      words[i + 1].c_str());
+	    if("asnum" == words[i]) {
+		asnum = words[i + 1];
+	    } else if("bgpid" == words[i]) {
+		bgpid = words[i + 1];
+	    } else if("holdtime" == words[i]) {
+		holdtime = words[i + 1];
+	    } else 
+		xorp_throw(InvalidString, 
+		       c_format("Illegal argument to open: <%s>\n[%s]",
+				words[i].c_str(), line.c_str()));
+	}
+
+	if("" == asnum) {
+	    xorp_throw(InvalidString,
+	       c_format("AS number not supplied to open:\n[%s]",
+				line.c_str()));
+	}
+	if("" == bgpid) {
+	    xorp_throw(InvalidString,
+	       c_format("BGP ID not supplied to open:\n[%s]",
+				line.c_str()));
+	}
+	if("" == holdtime) {
+	    xorp_throw(InvalidString,
+	       c_format("Holdtime not supplied to open:\n[%s]",
+				line.c_str()));
+	}
+ 	OpenPacket *open = new OpenPacket(AsNum(
+				 static_cast<uint16_t>(atoi(asnum.c_str()))),
+					  IPv4(bgpid.c_str()),
+					  atoi(holdtime.c_str()));
+	pac = open;
+    } else  if("keepalive" == words[index]) {
+	pac = new KeepAlivePacket();
+    } else
+	xorp_throw(InvalidString,
+		   c_format("\"notify\" or"
+			    " \"update\" or"
+			    " \"open\" or"
+			    " \"keepalive\" accepted"
+			    " not <%s>\n[%s]",
+			    words[index].c_str(), line.c_str()));
+  } catch(CorruptMessage c) {
+       xorp_throw(InvalidString, c_format("Unable to construct packet "
+					"%s\n[%s])", c.why().c_str(),
+					line.c_str()));
+  }
 	
     return pac;
 }

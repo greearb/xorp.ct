@@ -12,13 +12,150 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.13 2003/01/29 00:38:56 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.14 2003/01/29 05:43:55 rizzo Exp $"
 
 #include "libxorp/xorp.h"
 #include "packet.hh"
 #include "path_attribute_list.hh"
 
-int test_simple_open_packet() 
+//---start---- this really was in test.hh
+
+/**
+ * A wrapper around the main() function for test programs
+ */
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/exceptions.hh"
+
+static bool s_verbose = false;
+bool verbose()                  { return s_verbose; }
+void set_verbose(bool v)        { s_verbose = v; }
+
+static int s_failures = 0;
+bool failures()                 { return s_failures; }
+void incr_failures()            { s_failures++; }
+
+//
+// printf(3)-like facility to conditionally print a message if verbosity
+// is enabled.
+//
+#define verbose_log(x...) _verbose_log(__FILE__,__LINE__, x)
+     
+#define _verbose_log(file, line, x...)                                  \
+do {                                                                    \
+    if (verbose()) {                                                    \
+        printf("From %s:%d: ", file, line);                             \
+        printf(x);                                                      \
+    }                                                                   \
+} while(0)
+
+void usage(char * const);
+int _checked_test_main(int, char *const * );
+
+// 
+// Test and print a message whether two strings are lexicographically same.
+// The strings can be either C or C++ style.
+// 
+#define verbose_match(s1, s2)                                           \
+    _verbose_match(__FILE__, __LINE__, s1, s2)
+
+bool
+_verbose_match(const char* file, int line, const string& s1, const string& s2)
+{
+    bool match = s1 == s2;
+
+    _verbose_log(file, line, "Comparing %s == %s : %s\n",
+                 s1.c_str(), s2.c_str(), match ? "OK" : "FAIL");
+    if (match == false)
+        incr_failures();      
+    return match;
+}
+
+
+//          
+// Test and print a message whether a condition is true.
+//
+// The first argument is the condition to test.
+// The second argument is a string with a brief description of the tested
+// condition.
+//
+#define verbose_assert(cond, desc)                                      \
+    _verbose_assert(__FILE__, __LINE__, cond, desc)
+
+bool
+_verbose_assert(const char* file, int line, bool cond, const string& desc)
+{
+    _verbose_log(file, line,  
+                 "Testing %s : %s\n", desc.c_str(), cond ? "OK" : "FAIL");
+    if (cond == false)
+        incr_failures();
+    return cond;
+}
+
+
+int
+main(int argc, char * const argv[])
+{
+    int ret_value = 0;
+      
+    //
+    // Initialize and start xlog
+    //
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);         // Least verbose messages
+    // XXX: verbosity of the error messages temporary increased
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+      
+    int ch;
+    while ((ch = getopt(argc, argv, "hv")) != -1) {
+        switch (ch) {
+        case 'v':
+            set_verbose(true);
+            break;
+        case 'h':  
+        case '?':
+        default:
+            usage(argv[0]);
+            xlog_stop();
+            xlog_exit();
+            if (ch == 'h')
+                return (0);
+            else
+                return (1);
+        }
+    }
+    argc -= optind;
+    argv += optind;
+    
+
+    XorpUnexpectedHandler x(xorp_unexpected_handler);
+
+    try {
+	_checked_test_main(argc, argv);
+	ret_value = failures() ? 1 : 0;
+    } catch (...) {
+	// Internal error
+	xorp_print_standard_exceptions();
+        ret_value = 2;
+    }   
+
+    //
+    // Gracefully stop and exit xlog
+    //
+    xlog_stop();
+    xlog_exit();
+
+    return (ret_value);
+}
+
+#define main(a,b) _checked_test_main(a,b)
+//---end------ this really was in test.hh
+
+int
+test_simple_open_packet() 
 {
     /* In this test we create an Open Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -69,7 +206,8 @@ int test_simple_open_packet()
     return 0;
 }
 
-int test_keepalive_packet() 
+int
+test_keepalive_packet() 
 {
     /* In this test we create an Keepalive Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -107,7 +245,8 @@ int test_keepalive_packet()
     return 0;
 }
 
-int test_notification_packets(const uint8_t *d, uint8_t ec, 
+int
+test_notification_packets(const uint8_t *d, uint8_t ec, 
 			      uint8_t esc, uint16_t l) 
 {
     /* In this test we create a Notification Packet, pretend to send it,
@@ -163,7 +302,8 @@ int test_notification_packets(const uint8_t *d, uint8_t ec,
     return 0;
 }
 
-int test_withdraw_packet(bool verbose) 
+int
+test_withdraw_packet()
 {
     /* In this test we create an Update Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -174,8 +314,8 @@ int test_withdraw_packet(bool verbose)
     UpdatePacket updatepacket;
     IPv4Net n1("1.2.3.0/24");
     IPv4Net n2("1.2.4.0/24");
-    BGPWithdrawnRoute r1(n1);
-    BGPWithdrawnRoute r2(n2);
+    BGPUpdateAttrib r1(n1);
+    BGPUpdateAttrib r2(n2);
     updatepacket.add_withdrawn(r1);
     updatepacket.add_withdrawn(r2);
     
@@ -198,17 +338,16 @@ int test_withdraw_packet(bool verbose)
 
     UpdatePacket receivedpacket(buf, plen);
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
-    list <BGPWithdrawnRoute>::const_iterator iter;
-    iter = receivedpacket.withdrawn_list().begin();
-    if (verbose)
-	printf("Withdrawn route: %s\n", iter->net().str().c_str());
+    list <BGPUpdateAttrib>::const_iterator iter;
+    iter = receivedpacket.wr_list().begin();
+    verbose_log("Withdrawn route: %s n1 %s\n",
+	iter->net().str().c_str(), n1.str().c_str());
     assert(iter->net() == n1);
     iter++;
-    if (verbose)
-	printf("Withdrawn route: %s\n", iter->net().str().c_str());
+    verbose_log("Withdrawn route: %s\n", iter->net().str().c_str());
     assert(iter->net() == n2);
     iter++;
-    assert(iter == receivedpacket.withdrawn_list().end());
+    assert(iter == receivedpacket.wr_list().end());
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
@@ -222,7 +361,8 @@ int test_withdraw_packet(bool verbose)
     return 0;
 }
 
-int test_announce_packet(bool verbose) 
+int
+test_announce_packet()
 {
     /* In this test we create an Update Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -233,8 +373,8 @@ int test_announce_packet(bool verbose)
     UpdatePacket updatepacket;
     IPv4Net n1("1.2.3.0/24");
     IPv4Net n2("1.2.4.0/24");
-    NetLayerReachability r1(n1);
-    NetLayerReachability r2(n2);
+    BGPUpdateAttrib r1(n1);
+    BGPUpdateAttrib r2(n2);
     updatepacket.add_nlri(r1);
     updatepacket.add_nlri(r2);
 
@@ -314,8 +454,7 @@ int test_announce_packet(bool verbose)
     //+ 3 bytes Atomic Aggregate
     //+ 9 bytes Aggregator
     //+ 15 bytes Community
-    if (verbose)
-	printf("len == %u\n", (uint32_t)len);
+    verbose_log("len == %u\n", (uint32_t)len);
     assert(len == 110);
 
     //check the common header
@@ -331,65 +470,63 @@ int test_announce_packet(bool verbose)
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
 
     //check there are no withdrawn routes
-    assert(receivedpacket.withdrawn_list().begin()
-	   == receivedpacket.withdrawn_list().end());
+    assert(receivedpacket.wr_list().begin()
+	   == receivedpacket.wr_list().end());
 
     //check the NLRI
-    list <NetLayerReachability>::const_iterator ni;
+    list <BGPUpdateAttrib>::const_iterator ni;
     ni = receivedpacket.nlri_list().begin();
-    if (verbose)
-	printf("NLRI: %s\n", ni->net().str().c_str());
+    verbose_log("NLRI: %s\n", ni->net().str().c_str());
     assert(ni->net() == n1);
     ni++;
-    if (verbose)
-	printf("NLRI: %s\n", ni->net().str().c_str());
+    verbose_log("NLRI: %s\n", ni->net().str().c_str());
     assert(ni->net() == n2);
     ni++;
     assert(ni == receivedpacket.nlri_list().end());
 
     //check the path attributes
-    assert(receivedpacket.pathattribute_list().size() == 8);
+    assert(receivedpacket.pa_list().size() == 8);
     list <PathAttribute*>::const_iterator pai;
-    pai = receivedpacket.pathattribute_list().begin();
-    while (pai != receivedpacket.pathattribute_list().end()) {
+    pai = receivedpacket.pa_list().begin();
+    while (pai != receivedpacket.pa_list().end()) {
 	pa = *pai;
 	switch (pa->type()) {
 	case ORIGIN: {
 	    const OriginAttribute *oa = (const OriginAttribute *)pa;
 	    assert(oa->origin() == IGP);
-	    if (verbose) printf("%s\n", pa->str().c_str());
+	    verbose_log("%s\n", pa->str().c_str());
 	    break;
 	}
 	case AS_PATH: {
 	    const ASPathAttribute *asa = (const ASPathAttribute *)pa;
 	    for (int i=1; i<=9; i++)
 		assert(asa->as_path().contains(*as[i]));
-	    if (verbose) printf("%s\n", pa->str().c_str());
+	    verbose_log("%s\n", pa->str().c_str());
 	    break;
 	}
 	case NEXT_HOP: {
 	    const NextHopAttribute<IPv4> *nha 
 		= (const NextHopAttribute<IPv4> *)pa;
 	    assert(nha->nexthop() == IPv4("10.0.0.1"));
-	    if (verbose) printf("%s\n", pa->str().c_str());
+	    verbose_log("%s\n", pa->str().c_str());
 	    break;
 	}
 	case LOCAL_PREF: {
 	    const LocalPrefAttribute *lpa = 
 		(const LocalPrefAttribute *)pa;
 	    assert(lpa->localpref() == 237);
-	    if (verbose) printf("%s\n", pa->str().c_str());
+	    verbose_log("%s\n", pa->str().c_str());
 	    break;
 	}
 	case MED: {
 	    const MEDAttribute *meda = 
 		(const MEDAttribute *)pa;
 	    assert(meda->med() == 515);
-	    if (verbose) printf("%s\n", pa->str().c_str());
+	    verbose_log("%s\n", pa->str().c_str());
 	    break;
 	}
 	case ATOMIC_AGGREGATE: {
-	    if (verbose) printf("%s\n", pa->str().c_str());
+	    verbose_log("%s\n", pa->str().c_str());
 	    break;
 	}
 	case AGGREGATOR: {
@@ -397,7 +534,7 @@ int test_announce_packet(bool verbose)
 		(const AggregatorAttribute *)pa;
 	    assert(aa->route_aggregator() == IPv4("20.20.20.2"));
 	    assert(aa->aggregator_as() == AsNum(701));
-	    if (verbose) printf("%s\n", pa->str().c_str());
+	    verbose_log("%s\n", pa->str().c_str());
 	    break;
 	}
 	case COMMUNITY: {
@@ -412,7 +549,7 @@ int test_announce_packet(bool verbose)
 	    assert(*iter == 59);
 	    ++iter;
 	    assert(iter == ca->community_set().end());
-	    if (verbose) printf("%s\n", pa->str().c_str());
+	    verbose_log("%s\n", pa->str().c_str());
 	    break;
 	}
 	default:
@@ -442,63 +579,61 @@ int test_announce_packet(bool verbose)
     return 0;
 }
 
-void sep(bool verbose) 
+void
+sep()
 {
-    if (verbose) printf("-------------------------------------------------------------------------\n");
+    if (verbose())
+	printf("-------------------------------------------------------------------------\n");
 }
 
-int main(int argc, char *argv[]) 
+void
+usage(char * const)
+{}
+
+int
+main(int /* argc */, char *const /* argv */[]) 
 {
-    int c;
-    bool verbose = false;
-    while ((c = getopt(argc, argv, "v")) != EOF) {
-	switch (c) {
-	case 'v':
-	    verbose = true;
-	}
-    }
-
-    sep(verbose);
+    sep();
     test_simple_open_packet();
-    if (verbose) printf("PASS\n\n\n");
+    verbose_log("PASS\n\n\n");
 
-    sep(verbose);
-    if (verbose) printf("Testing Open Packet with no parameters\n");
+    sep();
+    verbose_log("Testing Open Packet with no parameters\n");
     test_keepalive_packet();
-    if (verbose) printf("PASS\n\n\n");
+    verbose_log("PASS\n\n\n");
 
-    sep(verbose);
-    if (verbose) printf("Testing Notification Packet 1\n");
+    sep();
+    verbose_log("Testing Notification Packet 1\n");
     test_notification_packets(NULL, CEASE, 0, 0);
-    if (verbose) printf("PASS\n\n\n");
+    verbose_log("PASS\n\n\n");
 
-    sep(verbose);
-    if (verbose) printf("Testing Notification Packet 2\n");
+    sep();
+    verbose_log("Testing Notification Packet 2\n");
     test_notification_packets(NULL, FSMERROR, 1, 0);
-    if (verbose) printf("PASS\n\n\n");
+    verbose_log("PASS\n\n\n");
 
     
-    sep(verbose);
-    if (verbose) printf("Testing Notification Packet 2\n");
+    sep();
+    verbose_log("Testing Notification Packet 2\n");
     uint8_t edata[2];
     edata[0]=1;
     edata[1]=2;
     test_notification_packets(edata, MSGHEADERERR, 2, 2);
-    if (verbose) printf("PASS\n\n\n");
+    verbose_log("PASS\n\n\n");
 
-    sep(verbose);
-    if (verbose) printf("Testing Update Packet with only withdrawn routes\n");
-    test_withdraw_packet(verbose);
-    if (verbose) printf("PASS\n\n\n");
+    sep();
+    verbose_log("Testing Update Packet with only withdrawn routes\n");
+    test_withdraw_packet();
+    verbose_log("PASS\n\n\n");
 
-    sep(verbose);
-    if (verbose) printf("Testing Update Packet with only announced routes\n");
-    test_announce_packet(verbose);
-    if (verbose) printf("PASS\n\n\n");
+    sep();
+    verbose_log("Testing Update Packet with only announced routes\n");
+    test_announce_packet();
+    verbose_log("PASS\n\n\n");
 
-    sep(verbose);
-    if (verbose) printf("ALL TESTS PASSED\n");
-
+    sep();
+    verbose_log("ALL TESTS PASSED\n");
+    return 0;
 }
 
 //  LocalWords:  const

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.16 2003/01/27 18:04:52 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.17 2003/01/28 00:35:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -811,7 +811,7 @@ BGPPeer::event_recvupdate(const UpdatePacket *p) // EVENTRECUPDATEMESS
 	const IPv4 next_hop = peerdata()->get_next_hop_rewrite();
 	if (!next_hop.is_zero()) {
 	    list<PathAttribute*>& l = const_cast<
-		list<PathAttribute*>&>(p->pathattribute_list());
+		list<PathAttribute*>&>(p->pa_list());
 	    list<PathAttribute*>::iterator i;
 	    for (i = l.begin(); i != l.end(); i++) {
 		if (NEXT_HOP == (*i)->type()) {
@@ -871,8 +871,8 @@ BGPPeer::notify_peer_of_error(const int error, const int subcode,
 		const uint8_t *data, const size_t len)
 {
     if (!NotificationPacket::validate_error_code(error, subcode)) {
-	XLOG_FATAL("Attempt to send invalid error code %d subcode %d",
-		   error, subcode);
+	XLOG_WARNING("Attempt to send invalid error code %d subcode %d",
+		   error, subcode); // XXX make it fatal ?
     }
 
     /*
@@ -990,13 +990,13 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
     ** NEXT_HOP
     */
 
-    // if the path attributes length is 0 then no network
+    // if the path attributes list is empty then no network
     // layer reachability information should be present.
 
-    if ( p->pathattribute_list().size()==0 ) {
-	if ( p->nlri_list().size()!=0 )	{
-	    debug_msg("Zero length path attribute list and "
-		      "non-zero NLRI list\n");
+    if ( p->pa_list().empty() ) {
+	if ( p->nlri_list().empty() == false )	{
+	    debug_msg("Empty path attribute list and "
+		      "non-empty NLRI list\n");
 	    return new NotificationPacket(UPDATEMSGERR, MALATTRLIST);
 	}
     } else {
@@ -1004,7 +1004,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	bool local_pref;
 	local_pref = false;
 
-	list<PathAttribute*> l = p->pathattribute_list();
+	list<PathAttribute*> l = p->pa_list();
 	list<PathAttribute*>::const_iterator i;
 	ASPathAttribute* as_path_attr = NULL;
 	OriginAttribute* origin_attr = NULL;
@@ -1415,7 +1415,7 @@ BGPPeer::send_update_message(const UpdatePacket& p)
 }
 
 bool
-BGPPeer::send_netreachability(const NetLayerReachability &n)
+BGPPeer::send_netreachability(const BGPUpdateAttrib &n)
 {
     debug_msg("send_netreachability called\n");
     UpdatePacket bup;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.2 2003/01/17 05:51:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.3 2003/01/25 02:10:07 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -95,9 +95,9 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     // The way multiprotocol BGP works, the routes from the Withdrawn
     // Routes part of the update packet can only be IPv4 routes.  IPv6
     // withdrawn routes would be in an MP_UNREACH_NLRI attribute.
-    list <BGPWithdrawnRoute>::const_iterator wi;
-    wi = p->withdrawn_list().begin();
-    while (wi != p->withdrawn_list().end()) {
+    list <BGPUpdateAttrib>::const_iterator wi;
+    wi = p->wr_list().begin();
+    while (wi != p->wr_list().end()) {
 	_plumbing->delete_route(wi->net(), this);
 	++wi;
     }
@@ -110,8 +110,8 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     PathAttributeList<IPv4> pa_list;
 
     list <PathAttribute*>::const_iterator pai;
-    pai = p->pathattribute_list().begin();
-    while (pai != p->pathattribute_list().end()) {
+    pai = p->pa_list().begin();
+    while (pai != p->pa_list().end()) {
 	const PathAttribute* pa;
 	pa = *pai;
 	pa_list.add_path_attribute(*pa);
@@ -125,7 +125,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     // The way multiprotocol BGP works, the routes from the NLRI part
     // of the update packet can only be IPv4 routes.  IPv6 withdrawn
     // routes would be in an MP_REACH_NLRI attribute.
-    list <NetLayerReachability>::const_iterator ni;
+    list <BGPUpdateAttrib>::const_iterator ni;
     ni = p->nlri_list().begin();
     while (ni != p->nlri_list().end()) {
 	SubnetRoute<IPv4> msg_route(ni->net(), &pa_list);
@@ -164,7 +164,7 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt)
     }
 
     // did we already add the packet attribute list?
-    if (_packet->pathattribute_list().empty()) {
+    if (_packet->pa_list().empty()) {
 	debug_msg("First add on this packet\n");
 	debug_msg("SubnetRoute is %s\n", rt.str().c_str());
 	// no, so add all the path attributes
@@ -178,7 +178,7 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt)
     }
 
     // add the NLRI information.
-    NetLayerReachability nlri(rt.net());
+    BGPUpdateAttrib nlri(rt.net());
     _packet->add_nlri(nlri);
     return 0;
 }
@@ -226,7 +226,7 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt)
 	start_packet(_ibgp);
     }
 
-    BGPWithdrawnRoute wdr(rt.net());
+    BGPUpdateAttrib wdr(rt.net());
     _packet->add_withdrawn(wdr);
     return 0;
 }
@@ -249,9 +249,9 @@ PeerHandler::push_packet()
 
     // do some sanity checking
     assert(_packet != NULL);
-    int wdr = _packet->withdrawn_list().size();
+    int wdr = _packet->wr_list().size();
     int nlri = _packet->nlri_list().size();
-    int pa = _packet->pathattribute_list().size();
+    int pa = _packet->pa_list().size();
     assert( (wdr+nlri) > 0);
     if (nlri > 0) assert(pa > 0);
     _nlri_total += nlri;

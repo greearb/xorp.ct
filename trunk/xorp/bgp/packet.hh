@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.8 2003/01/26 04:06:17 pavlin Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.9 2003/01/26 17:55:48 rizzo Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -134,29 +134,24 @@ public:
     BGPPacket()					{}
     virtual ~BGPPacket()			{}
     uint8_t type() const			{ return _Type; }
-    uint16_t length() const			{ return _Length; }
     virtual string str() const = 0;
 
-    virtual const uint8_t *encode(size_t &len) const = 0;
+    virtual const uint8_t *encode(size_t &len, uint8_t *buf = 0) const = 0;
 protected:
     /*
      * Return the external representation of the packet into a buffer.
      * If the caller supplies the buffer it is its responsibility to make
      * sure that it has the correct size, otherwise the routine will
-     * allocate it with new[length()].
-     * In all cases it is responsibility of the caller to dispose
-     * of the buffer.
+     * allocate it with new uint8_t[len].
+     * It is responsibility of the caller to dispose of the buffer.
      * Note that this routine will only copy the fixed_header part.
      * The derived-class methods are in charge of filling up any
      * additional data past it.
      */
-    uint8_t *basic_encode(size_t &len, uint8_t *buf=0) const;
+    uint8_t *basic_encode(size_t len, uint8_t *buf) const;
 
-    const uint8_t *flatten(struct iovec *iov, int cnt, size_t& len) const;
     // don't allow the use of the default copy constructor
     BGPPacket(const BGPPacket& BGPPacket);
-    uint16_t _Length;  /*length is the total packet length, including
-                         the BGP common header*/
     uint8_t _Type;
 private:
 };
@@ -165,19 +160,20 @@ private:
 
 class OpenPacket : public BGPPacket {
 public:
-    OpenPacket(const uint8_t *d, uint16_t l);
+    OpenPacket(const uint8_t *d, uint16_t l)
+		throw(CorruptMessage);
     OpenPacket(const AsNum& as, const IPv4& bgpid, const uint16_t holdtime);
     ~OpenPacket()				{}
-    const uint8_t *encode(size_t& len) const;
+    const uint8_t *encode(size_t& len, uint8_t *buf = 0) const;
     string str() const;
 
-    const uint8_t Version() const { return _Version; }
-    const AsNum AutonomousSystemNumber() const {
+    const uint8_t Version() const		{ return _Version; }
+    const AsNum AutonomousSystemNumber() const	{
 	return _AutonomousSystemNumber;
     }
-    const uint16_t HoldTime() const { return _HoldTime; }
-    const IPv4 BGPIdentifier() const { return _BGPIdentifier; }
-    const uint8_t OptParmLen() const { return _OptParmLen; }
+    const uint16_t HoldTime() const		{ return _HoldTime; }
+    const IPv4 BGPIdentifier() const		{ return _BGPIdentifier; }
+    const uint8_t OptParmLen() const		{ return _OptParmLen; }
     bool operator==(const OpenPacket& him) const;
     void add_parameter(const BGPParameter *p);
 
@@ -188,16 +184,15 @@ public:
 protected:
 
 private:
-    void decode(const uint8_t *d, uint16_t l) throw(CorruptMessage);
     OpenPacket();
     // don't allow the use of the default copy constructor
     OpenPacket(const OpenPacket& OpenPacket);
 
-    uint8_t _Version;
-    AsNum _AutonomousSystemNumber;
-    IPv4 _BGPIdentifier;
-    uint16_t _HoldTime;
-    uint8_t _OptParmLen;
+    IPv4	_BGPIdentifier;
+    AsNum	_AutonomousSystemNumber;
+    uint16_t	_HoldTime;
+    uint8_t	_OptParmLen;
+    uint8_t	_Version;
 
     list <BGPParameter*> _parameter_list;
     uint8_t _num_parameters;
@@ -208,22 +203,18 @@ private:
 class UpdatePacket : public BGPPacket {
 public:
     UpdatePacket();
-    UpdatePacket(const uint8_t *d, uint16_t l);
+    UpdatePacket(const uint8_t *d, uint16_t l)
+	throw(CorruptMessage);
+
     ~UpdatePacket();
 
-    void add_withdrawn(const BGPWithdrawnRoute& wdr);
+    void add_withdrawn(const BGPUpdateAttrib& wdr);
     void add_pathatt(const PathAttribute& pa);
-    void add_nlri(const NetLayerReachability& nlri);
-    const list <BGPWithdrawnRoute>& withdrawn_list() const {
-	return _withdrawn_list;
-    }
-    const list <PathAttribute*>& pathattribute_list() const {
-	return _att_list;
-    }
-    const list <NetLayerReachability>& nlri_list() const {
-	return _nlri_list;
-    }
-    const uint8_t *encode(size_t& len) const;
+    void add_nlri(const BGPUpdateAttrib& nlri);
+    const list <BGPUpdateAttrib>& wr_list() const	{ return _wr_list; }
+    const list <PathAttribute*>& pa_list() const	{ return _pa_list; }
+    const list <BGPUpdateAttrib>& nlri_list() const	{ return _nlri_list; }
+    const uint8_t *encode(size_t& len, uint8_t *buf = 0) const;
 
     bool big_enough() const;
 
@@ -232,12 +223,11 @@ public:
 protected:
 
 private:
-    void decode(const uint8_t *d, uint16_t l) throw(CorruptMessage);
     // don't allow the use of the default copy constructor
     UpdatePacket(const UpdatePacket& UpdatePacket);
-    list <BGPWithdrawnRoute> _withdrawn_list;
-    list <PathAttribute*> _att_list;
-    list <NetLayerReachability> _nlri_list;
+    list <BGPUpdateAttrib>	_wr_list;
+    list <PathAttribute*>	_pa_list;
+    list <BGPUpdateAttrib>	_nlri_list;
 };
 
 /* **************** BGPNotificationPacket *********************** */
@@ -256,18 +246,18 @@ public:
     */
     static bool validate_error_code(const int error, const int subcode);
     const uint8_t* error_data() const { return _error_data; }
-    const uint8_t *encode(size_t &len) const;
+    const uint8_t *encode(size_t &len, uint8_t *buf = 0) const;
     string str() const;
     bool operator==(const NotificationPacket& him) const;
 protected:
 
 private:
-    // void decode() throw(InvalidPacket);
     // don't allow the use of the default copy constructor
     NotificationPacket(const NotificationPacket& Notificationpacket);
-    uint8_t _error_code;
-    uint8_t _error_subcode;
-    const uint8_t* _error_data;
+    size_t		_Length;	// total size incl. header
+    const uint8_t*	_error_data;
+    uint8_t		_error_code;
+    uint8_t		_error_subcode;
 };
 
 /**
@@ -288,16 +278,15 @@ public:
 			MSGHEADERERR, UNSPECIFIED);
 
 	_Type = MESSAGETYPEKEEPALIVE;
-	_Length = l;
     }
 
     KeepAlivePacket()					{
 	_Type = MESSAGETYPEKEEPALIVE;
-	_Length = MINKEEPALIVEPACKET;
     }
     ~KeepAlivePacket()					{}
-    const uint8_t *encode(size_t &len) const		{
-	return basic_encode(len);
+    const uint8_t *encode(size_t &len, uint8_t *buf = 0) const		{
+	len = MINKEEPALIVEPACKET;
+	return basic_encode(len, buf);
     }
     virtual string str() const		{ return "Keepalive Packet\n"; }
     bool operator==(const KeepAlivePacket&) const	{ return true; }

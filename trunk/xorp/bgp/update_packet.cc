@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.12 2003/01/29 05:43:55 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,16 +23,17 @@
 #include "libxorp/xlog.h"
 #include "packet.hh"
 
-#ifdef DEBUG_LOGGING
-inline static void dump_bytes(const uint8_t *d, size_t l)
+#if 1
+void
+dump_bytes(const uint8_t *d, size_t l)
 {
-    //    debug_msg("DEBUG_BYTES FN : %p %d\n",d,l);
-	for(u_int i=0;i<l;i++)
-	    debug_msg("%x ",*((const char *)d + i));
-	debug_msg("\n");
+        printf("DEBUG_BYTES FN : %p %d\n",d,l);
+	for (u_int i=0;i<l;i++)
+	    printf("%x ",*((const char *)d + i));
+	printf("\n");
 }
 #else
-inline static void dump_bytes(const uint8_t*, size_t) {}
+void dump_bytes(const uint8_t*, size_t) {}
 #endif
 
 /* **************** UpdatePacket *********************** */
@@ -40,32 +41,20 @@ inline static void dump_bytes(const uint8_t*, size_t) {}
 UpdatePacket::UpdatePacket()
 {
     _Type = MESSAGETYPEUPDATE;
-    //    _pathattributes = NULL;
 }
 
-UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
-{
-    debug_msg("UpdatePacket constructor called\n");
-    //    _withdrawnroutes = NULL;
-    //_pathattributes = NULL;
-    //    _networkreachability = NULL;
-    
-    _Length = l; 
-    _Type = MESSAGETYPEUPDATE;
-    decode(d, l);
-}
 
 UpdatePacket::~UpdatePacket()
 {
-    list <PathAttribute*>::iterator pai = _att_list.begin();
-    while(pai != _att_list.end()) {
+    list <PathAttribute*>::const_iterator pai = pa_list().begin();
+    while(pai != pa_list().end()) {
 	delete (*pai);
 	++pai;
     }
 }
 
 void
-UpdatePacket::add_nlri(const NetLayerReachability& nlri)
+UpdatePacket::add_nlri(const BGPUpdateAttrib& nlri)
 {
     _nlri_list.push_back(nlri);
 }
@@ -76,13 +65,13 @@ UpdatePacket::add_pathatt(const PathAttribute& pa)
     size_t l;
     PathAttribute *a = PathAttribute::create(pa.data(), pa.size(), l);
 
-    _att_list.push_back(a);
+    _pa_list.push_back(a);
 }
 
 void
-UpdatePacket::add_withdrawn(const BGPWithdrawnRoute& wdr)
+UpdatePacket::add_withdrawn(const BGPUpdateAttrib& wdr)
 {
-    _withdrawn_list.push_back(wdr);
+    _wr_list.push_back(wdr);
 }
 
 
@@ -94,259 +83,158 @@ UpdatePacket::big_enough() const
     //XXXX needs additional tests for v6
 
     //quick and dirty check
-    if (((_withdrawn_list.size() + _nlri_list.size())* 4) > 2048) {
-	debug_msg("withdrawn size = %d\n", _withdrawn_list.size());
-	debug_msg("nlri size = %d\n", _withdrawn_list.size());
+    if (((_wr_list.size() + _nlri_list.size())* 4) > 2048) {
+	debug_msg("withdrawn size = %d\n", _wr_list.size());
+	debug_msg("nlri size = %d\n", _wr_list.size());
 	return true;
     }
     return false;
 }
 
 const uint8_t *
-UpdatePacket::encode(size_t &len) const
+UpdatePacket::encode(size_t &len, uint8_t *d) const
 {
-    int size = 5 + _att_list.size() + 
-	(2*_withdrawn_list.size()) +(2*_nlri_list.size()); 
-    int position = 2; // counter only starts after marker and length have been set.
-    debug_msg("Path Att: %d Withdrawn Routes: %d Net Reach: %d size: %d\n",
-	      _att_list.size(),_withdrawn_list.size(),_nlri_list.size(), size);
-	
-    XLOG_ASSERT(0 == _nlri_list.size() || 0 != _att_list.size());
+    XLOG_ASSERT( _nlri_list.empty() ||  ! pa_list().empty());
 
-    size_t route_position = 0;
-    size_t route_size = 0;
-    size_t path_position = 0;
-    size_t path_size = 0;
-    size_t total_size = BGP_COMMON_HEADER_LEN; // Base header size	
+    list <BGPUpdateAttrib>::const_iterator uai;
+    list <PathAttribute*>::const_iterator pai;
+    size_t i, wr_len = 0, pa_len = 0, nlri_len = 0;
 
-    struct iovec io[size];
-	
-    io[0].iov_base = const_cast<char*>((const char *)Marker);
-    io[0].iov_len = MARKER_SIZE;
-	
-    // 1 is set below, since total size is currently unknown.
-	
-    io[2].iov_base = const_cast<char*>((const char *)&_Type);
-    io[2].iov_len = 1;
-    position++;
-	
-    route_position = position;
-    position++;
-       
-    list <BGPWithdrawnRoute>::const_iterator wi = _withdrawn_list.begin();
-    while (wi != _withdrawn_list.end()) {
-	assert(position < size);
-	io[position].iov_base = 
-	    (char *)(const_cast<uint8_t*>(wi->get_size()));
-	io[position].iov_len = 1;
-	position++;
-		
-	assert(position < size);
-	io[position].iov_base = const_cast<char*>(wi->get_data());
-	io[position].iov_len = wi->get_byte_size();
-	route_size += wi->get_byte_size()+1;
-	position++;
-		
-	wi++;
-    }
-	
-    total_size = total_size + route_size;
+    // compute packet length
 
-    path_position = position;
-    position++;
+    for (uai = wr_list().begin() ; uai != wr_list().end(); ++uai)
+	wr_len += uai->size();
+    for (pai = pa_list().begin() ; pai != pa_list().end(); ++pai)
+	pa_len += (*pai)->size();
+    for (uai = nlri_list().begin() ; uai != nlri_list().end(); ++uai)
+	nlri_len += uai->size();
 
-    list <PathAttribute*>::const_iterator pai = _att_list.begin();
-    while(pai != _att_list.end()) {
-	PathAttribute* pa = *pai;
-	debug_msg("Looping through path attributes\n");
-	io[position].iov_base =
-		(char *)const_cast<uint8_t *>( pa->data());
-	io[position].iov_len = pa->size();
-	path_size += pa->size();
-	position++;
-	++pai;
-    }	
-	
-    total_size = total_size + path_size;
+    size_t desired_len = MINUPDATEPACKET + wr_len + pa_len + nlri_len;
+    if (d != 0)		// XXX have a buffer, check length
+	assert(len >= desired_len);	// XXX should throw an exception
+    len = desired_len;
 
-    list <NetLayerReachability>::const_iterator ni = _nlri_list.begin();
-    while (ni != _nlri_list.end()) {
-	assert(position < size);
-	io[position].iov_base = 
-	    (char *)const_cast<uint8_t *>(ni->get_size());		
-	io[position].iov_len = 1;
-	position++;
-	assert(position < size);
-	io[position].iov_base = const_cast<char *>(ni->get_data());
-	io[position].iov_len = ni->get_byte_size();
-	position++;
-	total_size += ni->get_byte_size()+1;
-	ni++;
-    }	
-
-    if (route_size > MAXPACKETSIZE)
-	XLOG_FATAL("Bad route size in encode()");
-    uint16_t net_route_size = route_size;
-    net_route_size = htons(net_route_size);
-    io[route_position].iov_base = (char *)&net_route_size;
-    io[route_position].iov_len = 2;
-	
-    total_size = total_size + 2;
-	
-    if (path_size > MAXPACKETSIZE)
-	XLOG_FATAL("Bad path size in encode()");
-    uint16_t net_path_size = path_size;
-    net_path_size = htons(net_path_size);
-    io[path_position].iov_base = (char *)&net_path_size;
-    io[path_position].iov_len = 2;
-	
-    total_size = total_size + 2;
-	
-    if (total_size < MINPACKETSIZE || total_size > MAXPACKETSIZE) {
-	debug_msg("Throw exception packet length invalid (%d)\n",
-		  total_size);
+    if (len > MAXPACKETSIZE)	// XXX
 	XLOG_FATAL("Attempt to encode a packet that is too big");
-    }
-    uint16_t net_total_size = total_size;
-    net_total_size = htons(net_total_size);
-    io[1].iov_base = (char *)&net_total_size;
-    io[1].iov_len = 2;
-    debug_msg("size %d total_size %d\n",size,total_size);
 
-    return flatten(&io[0], size, len);
+    debug_msg("Path Att: %d Withdrawn Routes: %d Net Reach: %d length: %d\n",
+	      pa_list().size(),_wr_list.size(),_nlri_list.size(), len);
+    d = basic_encode(len, d);	// allocate buffer and fill header
+
+    // fill withdraw list length XXX (bytes ?)
+    d[BGP_COMMON_HEADER_LEN] = (wr_len >> 8) & 0xff;
+    d[BGP_COMMON_HEADER_LEN + 1] = wr_len & 0xff;
+
+    // fill withdraw list
+    i = BGP_COMMON_HEADER_LEN + 2;
+    for (uai = wr_list().begin() ; uai != wr_list().end(); ++uai) {
+	uai->copy_out(d+i);
+	i += uai->size();
+    }
+
+    // fill pathattribute length XXX (bytes ?)
+    d[i++] = (pa_len >> 8) & 0xff;
+    d[i++] = pa_len & 0xff;
+
+    // fill path attribute list
+    for (pai = pa_list().begin() ; pai != pa_list().end(); ++pai) {
+        memcpy(d+i, (*pai)->data(), (*pai)->size());
+	i += (*pai)->size();
+    }	
+
+    // fill NLRI list
+    for (uai = nlri_list().begin() ; uai != nlri_list().end(); ++uai) {
+	uai->copy_out(d+i);
+	i += uai->size();
+    }	
+    return d;
 }
 
-void
-UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
-    throw(CorruptMessage)
+UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
+	throw(CorruptMessage)
 {
-    int urlength = 0;
-    int plength = 0; // Path attributes length
-    int nlength = 0;
-
-    /* shift the data by the header length */
-    data = data + BGP_COMMON_HEADER_LEN;
-
-    urlength = ntohs((uint16_t &)(*data));
-
-    //check unreachable routes length is feasible
-    nlength = _Length - MINUPDATEPACKET;
-    if (nlength < urlength)
+    debug_msg("UpdatePacket constructor called\n");
+    _Type = MESSAGETYPEUPDATE;
+    if (l < MINUPDATEPACKET)
 	xorp_throw(CorruptMessage,
-		   c_format("Unreachable routes length is bogus %d < %d",
-			    nlength, urlength),
+		   c_format("UpdatePacket too short length %d", l),
+		   UPDATEMSGERR, ATTRLEN);
+    d += BGP_COMMON_HEADER_LEN;	// move past header
+    size_t wr_len = (d[0] << 8) + d[1];		// withdrawn length
+
+    if (MINUPDATEPACKET + wr_len > l)
+	xorp_throw(CorruptMessage,
+		   c_format("Unreachable routes length is bogus %d > %d",
+			    wr_len, l - MINUPDATEPACKET),
 		   UPDATEMSGERR, ATTRLEN);
     
-    nlength = _Length - MINUPDATEPACKET - urlength;
+    size_t pa_len = (d[wr_len+2] << 8) + d[wr_len+3];	// pathatt length
+    if (MINUPDATEPACKET + pa_len + wr_len > l)
+	xorp_throw(CorruptMessage,
+		   c_format("Pathattr length is bogus %d > %d",
+			    pa_len, l - wr_len - MINUPDATEPACKET),
+		UPDATEMSGERR, ATTRLEN);
 
-    data = data + sizeof(uint16_t); // move passed unreachable routes length field
-    size_t urrlength = 0; // Length of a single unreachable route
-    size_t bytes;
+    size_t nlri_len = l - MINUPDATEPACKET - pa_len - wr_len;
 
-    /* Start of decoding of Unreachable routes */
-    set<BGPWithdrawnRoute> withdrawn_set;
-    assert(urlength >=0);
-    while (urlength > 0) {
-	//urrlength is the number of bits of address prefix. 
-	urrlength = (uint8_t &)(*data);
-	//bytes is the number of bytes, excluding header
-	bytes = (urrlength+7)/8;  
-	//check bytes is sane.  note this is only for v4, v6 is
-	//done elsewhere
-	if ((bytes > (uint)urlength) || (bytes > 4))
-	    xorp_throw(CorruptMessage,
-		   c_format("inconsistent length %d %d", bytes, urlength),
-		   UPDATEMSGERR, ATTRLEN);
-	data++;
+    // Start of decoding of withdrawn routes.
+    // Use a set to check for duplicates.
+    d += 2;	// point to the routes.
+    set <IPv4Net> x_set;
 
-	BGPWithdrawnRoute withdrawn((uint32_t &)(*data), urrlength);
-	if (withdrawn_set.find(withdrawn) == withdrawn_set.end()) {
-	    _withdrawn_list.push_back(withdrawn);
-	} else {
-	    XLOG_WARNING(("Received duplicate " + withdrawn.str() +
+fprintf(stderr,"(1)wr_len %d pa_len %d nlri_len %d\n",
+	wr_len, pa_len, nlri_len);
+
+    while (wr_len >0 && wr_len >= BGPUpdateAttrib::size(d)) {
+	BGPUpdateAttrib wr(d);
+	wr_len -= BGPUpdateAttrib::size(d);
+	d += BGPUpdateAttrib::size(d);
+	if (x_set.find(wr.net()) == x_set.end()) {
+	    _wr_list.push_back(wr);
+	    x_set.insert(wr.net());
+	} else
+	    XLOG_WARNING(("Received duplicate " + wr.str() +
 		       " in update message\n").c_str());
-	}
-	data += bytes;
-	urlength -= (bytes + 1);
     }
-    if (urlength < 0)
+    if (wr_len != 0)
 	xorp_throw(CorruptMessage,
-		   c_format("negative length %d", urlength),
+		   c_format("leftover bytes %d", wr_len),
 		   UPDATEMSGERR, ATTRLEN);
-    /* End of decoding of Unreachable routes */
    
-    /* Start of decoding of Path Attributes */
-    plength = ntohs((uint16_t &)(*data)); 
-
-    nlength = nlength - plength; /* Remove path length from network
-				    reachability length */
-    //check path attribute length was feasible
-    if (nlength < 0)
-	xorp_throw(CorruptMessage,
-		   c_format("negative length %d", nlength),
-		   UPDATEMSGERR, ATTRLEN);
-    
-    data += 2; // move past Total Path Attributes Length field
+    // Start of decoding of Path Attributes
+    d += 2; // move past Total Path Attributes Length field
 	
-    assert(_att_list.size() == 0);
-
-    assert(plength >= 0);
-    while (plength > 0) {
+    while (pa_len > 0) {
 	size_t used = 0;
-        PathAttribute *pa = PathAttribute::create(data, plength, used);
+        PathAttribute *pa = PathAttribute::create(d, pa_len, used);
 	debug_msg("attribute size %d\n", used);
 	if (used == 0)
 	    xorp_throw(CorruptMessage,
 		   c_format("failed to read path attribute"),
 		   UPDATEMSGERR, ATTRLEN);
 
-	_att_list.push_back(pa);
-	data += used;
-	plength -= used;
+	_pa_list.push_back(pa);
+	d += used;
+	pa_len -= used;
     }
-    if (plength < 0)
-	xorp_throw(CorruptMessage,
-		   c_format("negative length %d", nlength),
-		   UPDATEMSGERR, ATTRLEN);
-    /* End of decoding of Path Attributes */
-   
-    /* Start of decoding of Network Reachability */
-    size_t nnlength = 0;
 
-    set<NetLayerReachability> nlri_set;
-    assert(nlength >= 0);
-    while (nlength > 0) {
-	nnlength = (uint8_t &)(*data);
-	bytes = (nnlength+7)/8;
-	debug_msg("bits: %d bytes: %d\n", nnlength, bytes);
-	if ((bytes > (uint)nlength) || (bytes > 4))
-	    xorp_throw(CorruptMessage,
-		       c_format("inconsistent length %d %d", bytes, nlength),
-		       UPDATEMSGERR, ATTRLEN);
-	data++;
-	nlength--;
-
-	NetLayerReachability nlri((uint32_t &)(*data), nnlength);
-	//check this isn't a duplicate NLRI
-	if (nlri_set.find(nlri) == nlri_set.end()) {
-	    nlri_set.insert(nlri);
+    // Start of decoding of Network Reachability
+    x_set.clear();
+    while (nlri_len > 0 && nlri_len >= BGPUpdateAttrib::size(d)) {
+	BGPUpdateAttrib nlri(d);
+	nlri_len -= BGPUpdateAttrib::size(d);
+	d += BGPUpdateAttrib::size(d);
+	if (x_set.find(nlri.net()) == x_set.end()) {
 	    _nlri_list.push_back(nlri);
-	} else {
-	    XLOG_WARNING(("Received duplicate " + nlri.str() +
-			   " in update message\n").c_str());
-	}
-	data += bytes;
-	nlength = nlength - bytes;
+	    x_set.insert(nlri.net());
+	} else
+	    XLOG_WARNING(("Received duplicate nlri " + nlri.str() +
+		       " in update message\n").c_str());
     }
-    if (nlength < 0)
-	xorp_throw(CorruptMessage,
-		   c_format("negative length %d", nlength),
-		   UPDATEMSGERR, ATTRLEN);
-	
     /* End of decoding of Network Reachability */
     debug_msg("No of withdrawn routes %d. No of path attributes %d. "
 		"No of networks %d.\n",
-		  _withdrawn_list.size(), _att_list.size(),
+		  _wr_list.size(), pa_list().size(),
 		  _nlri_list.size());
 }
 
@@ -356,22 +244,22 @@ UpdatePacket::str() const
     string s = "Update Packet\n";
     debug_msg("No of withdrawn routes %d. No of path attributes %d. "
 		"No of networks %d.\n",
-	      _withdrawn_list.size(), _att_list.size(),
+	      _wr_list.size(), pa_list().size(),
 	      _nlri_list.size());
 
-    list <BGPWithdrawnRoute>::const_iterator wi = _withdrawn_list.begin();
-    while (wi != _withdrawn_list.end()) {
+    list <BGPUpdateAttrib>::const_iterator wi = _wr_list.begin();
+    while (wi != _wr_list.end()) {
 	s = s + " - " + wi->str() + "\n";
 	++wi;
     }
 
-    list <PathAttribute*>::const_iterator pai = _att_list.begin();
-    while (pai != _att_list.end()) {
+    list <PathAttribute*>::const_iterator pai = pa_list().begin();
+    while (pai != pa_list().end()) {
 	s = s + " - " + (*pai)->str() + "\n";
 	++pai;
     }
     
-    list <NetLayerReachability>::const_iterator ni = _nlri_list.begin();
+    list <BGPUpdateAttrib>::const_iterator ni = _nlri_list.begin();
     while (ni != _nlri_list.end()) {
 	s = s + " - " + ni->str() + "\n";
 	++ni;
@@ -395,19 +283,19 @@ UpdatePacket::operator==(const UpdatePacket& him) const
     debug_msg("compare %s and %s", this->str().c_str(), him.str().c_str());
 
     //withdrawn routes equals
-    list <BGPWithdrawnRoute> temp_withdrawn_list(_withdrawn_list);
-    temp_withdrawn_list.sort();
-    list <BGPWithdrawnRoute> temp_withdrawn_list_him(him.withdrawn_list());
-    temp_withdrawn_list_him.sort();
+    list <BGPUpdateAttrib> temp_wr_list(_wr_list);
+    temp_wr_list.sort();
+    list <BGPUpdateAttrib> temp_wr_list_him(him.wr_list());
+    temp_wr_list_him.sort();
 
-    if (temp_withdrawn_list.size() != temp_withdrawn_list_him.size())
+    if (temp_wr_list.size() != temp_wr_list_him.size())
 	return false;
 
-    list <BGPWithdrawnRoute>::const_iterator wi = temp_withdrawn_list.begin();
-    list <BGPWithdrawnRoute>::const_iterator wi_him = 
-	temp_withdrawn_list_him.begin();
-    while (wi != temp_withdrawn_list.end() && 
-	   wi_him != temp_withdrawn_list_him.end()) {
+    list <BGPUpdateAttrib>::const_iterator wi = temp_wr_list.begin();
+    list <BGPUpdateAttrib>::const_iterator wi_him = 
+	temp_wr_list_him.begin();
+    while (wi != temp_wr_list.end() && 
+	   wi_him != temp_wr_list_him.end()) {
 	
 	if ( (*wi) == (*wi_him) )  {
 	    ++wi;
@@ -418,9 +306,9 @@ UpdatePacket::operator==(const UpdatePacket& him) const
     }
 
     //path attribute equals
-    list <PathAttribute *> temp_att_list(_att_list);
+    list <PathAttribute *> temp_att_list(pa_list());
     temp_att_list.sort(compare_path_attributes);
-    list <PathAttribute *> temp_att_list_him(him.pathattribute_list());
+    list <PathAttribute *> temp_att_list_him(him.pa_list());
     temp_att_list_him.sort(compare_path_attributes);
 
     if (temp_att_list.size() != temp_att_list_him.size())
@@ -441,16 +329,16 @@ UpdatePacket::operator==(const UpdatePacket& him) const
     }
 
     //net layer reachability equals
-    list <NetLayerReachability> temp_nlri_list(_nlri_list);
+    list <BGPUpdateAttrib> temp_nlri_list(_nlri_list);
     temp_nlri_list.sort();
-    list <NetLayerReachability> temp_nlri_list_him(him.nlri_list());
+    list <BGPUpdateAttrib> temp_nlri_list_him(him.nlri_list());
     temp_nlri_list_him.sort();
 
     if (temp_nlri_list.size() != temp_nlri_list_him.size())
 	return false;
 
-    list <NetLayerReachability>::const_iterator ni = temp_nlri_list.begin();
-    list <NetLayerReachability>::const_iterator ni_him = 
+    list <BGPUpdateAttrib>::const_iterator ni = temp_nlri_list.begin();
+    list <BGPUpdateAttrib>::const_iterator ni_him = 
 	temp_nlri_list_him.begin();
     while (ni != temp_nlri_list.end() && ni_him != temp_nlri_list_him.end()) {
 	

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.3 2002/12/20 06:42:48 mjh Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.4 2003/01/24 19:50:11 rizzo Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -123,7 +123,7 @@ public:
     /**
      * send the netreachability message, return send result.
      */
-    bool send_netreachability(const NetLayerReachability &n);
+    bool send_netreachability(const BGPUpdateAttrib &n);
     /*
     ** Virtual so that it can be subclassed in the plumbing test code.
     */

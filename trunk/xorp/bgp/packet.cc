@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet.cc,v 1.6 2003/01/24 19:50:10 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet.cc,v 1.7 2003/01/26 04:06:17 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -27,35 +27,14 @@ const uint8_t BGPPacket::Marker[MARKER_SIZE] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
 
-const uint8_t *
-BGPPacket::flatten(struct iovec *iov, const int cnt, size_t& len) const
-{
-    len = 0;
-    for (int i = 0; i < cnt; i++) {
-	debug_msg("length = %u\n",  (uint32_t)(iov + i)->iov_len);
-	len += (iov + i)->iov_len;
-    }
-
-    uint8_t *ptr = new uint8_t[len];
-
-    uint8_t *base = ptr;
-    for (int i = 0; i < cnt; i++) {
-	memcpy(base, (iov + i)->iov_base, (iov + i)->iov_len);
-	base += (iov + i)->iov_len;
-    }
-
-    return ptr;
-}
-
 uint8_t *
-BGPPacket::basic_encode(size_t &len, uint8_t *buf) const
+BGPPacket::basic_encode(size_t len, uint8_t *buf) const
 {
-    len = length();
     if (buf == 0)
 	buf = new uint8_t[len];
     memcpy(buf, Marker, MARKER_SIZE);
-    uint16_t l = htons(length());
-    memcpy(buf + MARKER_SIZE, &l, 2);
-    memcpy(buf + MARKER_SIZE + 2, &_Type, 1);
+    buf[MARKER_SIZE] = (len >> 8) & 0xff;
+    buf[MARKER_SIZE+1] = len & 0xff;
+    buf[MARKER_SIZE+2] = _Type;
     return buf;
 }
