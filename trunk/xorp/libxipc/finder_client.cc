@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.24 2004/06/10 22:41:05 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.25 2004/09/22 02:11:11 pavlin Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -163,6 +163,11 @@ public:
     typedef FinderClient::QueryCallback QueryCallback;
     typedef FinderClient::ResolvedTable ResolvedTable;
 
+private:
+    FinderClientQuery();					// Not Impl.
+    FinderClientQuery(const FinderClientQuery&);		// Not Impl.
+    FinderClientQuery& operator=(const FinderClientQuery&);	// Not Impl.
+
 public:
     FinderClientQuery(EventLoop&	   eventloop,
 		      FinderClient&	   fc,
@@ -173,11 +178,13 @@ public:
 	  _key(key), _rt(rt), _qcb(qcb)
     {
 	finder_trace("Constructing ClientQuery \"%s\"", _key.c_str());
+	_instance_count++;
     }
 
     ~FinderClientQuery()
     {
 	finder_trace("Destructing ClientQuery \"%s\"", _key.c_str());
+	_instance_count--;
     }
 
     void
@@ -189,7 +196,7 @@ public:
 	ResolvedTable::iterator rt_iter = _rt.find(_key);
 	if (rt_iter != _rt.end()) {
 	    _query_resolvable_timer = _eventloop.new_oneoff_after(
-		TimeVal::ZERO(), 
+		TimeVal::ZERO(),
 		callback(this, &FinderClientQuery::query_resolvable_callback));
 	    return;
 	}
@@ -292,15 +299,23 @@ public:
 	_qcb->dispatch(e, 0);
     }
 
+    inline static uint32_t instance_count()
+    {
+	return _instance_count;
+    }
+
 protected:
     EventLoop&	   _eventloop;
     string	   _key;
     ResolvedTable& _rt;
     QueryCallback  _qcb;
 
+    static uint32_t _instance_count;
+
 private:
     XorpTimer	   _query_resolvable_timer;
 };
+uint32_t FinderClientQuery::_instance_count;
 
 /**
  * Class that handles the forwarding of Xrl's targetted at the finder.
@@ -353,7 +368,6 @@ public:
 	finder_trace("ForwardedXrl force_failure \"%s\"", _xrl.str().c_str());
 	_xcb->dispatch(e, 0);
     }
-
 
 protected:
     Xrl		_xrl;
@@ -679,6 +693,12 @@ FinderClient::query(EventLoop&		 eventloop,
     Operation op(new FinderClientQuery(eventloop, *this, key, _rt, qcb));
     _todo_list.push_back(op);
     crank();
+}
+
+uint32_t
+FinderClient::queries_pending() const
+{
+    return FinderClientQuery::instance_count();
 }
 
 const FinderDBEntry*
