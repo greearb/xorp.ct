@@ -84,6 +84,8 @@ bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgpversion.hh
 bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgpversion.cc
 bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgppeertable.hh
 bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgppeertable.cc
+bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgp4pathattrtable.hh
+bgp4_mib_1657_so_SOURCES += bgp4_mib_1657_bgp4pathattrtable.cc
 bgp4_mib_1657_so_SOURCES += bgp4_mib_xrl_target.cc
 
 

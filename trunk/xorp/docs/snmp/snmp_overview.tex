@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/snmp/snmp_overview.tex,v 1.9 2003/06/05 08:03:27 pavlin Exp $
+% $XORP: xorp/docs/snmp/snmp_overview.tex,v 1.10 2003/06/09 20:02:22 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -288,10 +288,14 @@ which is published in RFC 1657 and you will find in
 xorp/mibs/textual/BGP4-MIB.txt.
 
 You will also have to  make your textual MIB file accessible to the Net-SNMP
-tools.  The easiest way is to copy them to /usr/local/share/snmp/mibs (this may
-be a different directory if you passed --prefix or --datadir with the
-\texttt{configure} script.  Alternative you could use the command line option -M
- or the environment variable MIBDIRS (man snmpcmd(8)) to specify another directory to look for MIB definition files.
+tools.  See the \texttt{mibs} and \texttt{mibdirs} directives in the man page
+snmp.conf(5).  One way to do this is to copy our MIB onto the default directory,
+and then set the MIBS environment variable:
+
+\begin{verbatim}
+$ cp BGP4-MIB.txt /usr/local/share/snmp/mibs
+$ export MIBS=+BGP4-MIB
+\end{verbatim}
 
 \subsection{Net-SNMP handlers}
 
@@ -337,26 +341,18 @@ bgp4\_mib\_1657\_bgpversion''.
 
 
 \begin{verbatim}
-$ mib2c -c mib2c.scalar.conf -f bgp4_mib_1657_bgpversion bgpversion
+$ mib2c -i -c mib2c.scalar.conf -f bgp4_mib_1657_bgpversion bgpversion
 writing to bgp4_mib_1657_bgpversion.h
 writing to bgp4_mib_1657_bgpversion.c
-running indent on bgp4_mib_1657_bgpversion.h
-indent: Command line: unknown parameter "-orig"
-running indent on bgp4_mib_1657_bgpversion.c
-indent: Command line: unknown parameter "-orig"
 \end{verbatim}
 
 In a similar way, if we want to generate C templates for a SNMP table we would
 use:
 
 \begin{verbatim}
-$ mib2c -c mib2c.iterate.conf -f bgp4_mib_1657_bgppeertable bgpPeerTable
+$ mib2c -i -c mib2c.iterate.conf -f bgp4_mib_1657_bgppeertable bgpPeerTable
 writing to bgp4_mib_1657_bgppeertable.h
 writing to bgp4_mib_1657_bgppeertable.c
-running indent on bgp4_mib_1657_bgppeertable.h
-indent: Command line: unknown parameter "-orig"
-running indent on bgp4_mib_1657_bgppeertable.c
-indent: Command line: unknown parameter "-orig"
 \end{verbatim}
 
 Note that although there are other conf files, only the two presented in this

@@ -15,14 +15,14 @@
 # 3) Run a RIB process.
 # 4) Run xorp "../bgp"
 # 5) Run "./test_peer -s peer1"
-# 6) Run "./test_peer -s peer2"
-# 7) Run "./coord"
-# 8) Run "snmpd"
+# 6) Run "./coord"
+# 7) Run "snmpd"
 #
 set -e
 
 # to debug 
 # set -x
+
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 BGP_SRCDIR=`(cd ${srcdir}/../../bgp ; pwd)`
 XORP_TOP_BUILDDIR=`(cd ${PWD}/../..; pwd)`
@@ -34,7 +34,7 @@ CALLXRL='../../libxipc/call_xrl -r 5 -w 20'
 configure_snmp()
 {
     # these two variables are used by the tests
-    export SNMPCONF='-c xorp -v 2c'
+    export SNMPCONF='-t 10 -c xorp -v 2c'
     export SNMPHOST=localhost:51515
 
     # the rest is to configure the snmp agent
@@ -61,8 +61,13 @@ onexit()
 
     trap '' 0 2
 
-    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=2"
-    sleep 10
+    # Unload MIB if not unloaded yet
+    if [ "X${BGP_MIB_IDX}" != "X" ]; then
+	
+	${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+	BGP_MIB_IDX=""
+    fi
+ 
     ${CALLXRL} "finder://xorp_if_mib/common/0.1/shutdown"
 
     rm -fr bgpPeerTable?.tmp
@@ -76,15 +81,10 @@ LOCALHOST=$HOST
 ID=192.150.187.78
 AS=65008
 
-# IBGP
-PORT1=10001
-PEER1_PORT=20001
-PEER1_AS=$AS
-
 # EBGP
-PORT2=10002
-PEER2_PORT=20002
-PEER2_AS=65000
+PORT1=10002
+PEER1_PORT=20002
+PEER1_AS=65000
 
 HOLDTIME=5
 
@@ -114,6 +114,25 @@ reset()
     sleep 10
 }
 
+# block until a peer ($1) returns the same status after a 2 second wait.  
+# used to detect when a peer is done sending or receiving updates
+peer_stationary_state()
+{
+    while :
+    do
+        # debug
+        status $1
+
+        a=$(status $1)
+        sleep 2
+        b=$(status $1)
+        if [ "$a" = "$b" ]
+        then
+            break
+        fi
+    done
+}
+
 #
 # This test populates the list of peers with fake peers.  Only one of the 
 # peers will be enabled.  This is because the bgpPeerTable is indexed by the 
@@ -122,8 +141,6 @@ reset()
 
 test1()
 {
-    TFILE=$1
-
     echo "TEST1 - Read the bgpPeerTable" 
 
     # Reset the peers
@@ -145,13 +162,19 @@ test1()
     # load the BGP mib
     ABS_PATH_TO_MIBS=`(cd ..;pwd)`
 
-    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" 
+    BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
+	sed -e 's/.*mib_index:u32=//'`
+	
+
+    
+ 
 
     # verify that the BGP mib is loaded
     ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
 
     echo -n getting the BGP version...
-    bgp_ver=`snmpget ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpVersion.0 | sed -e 's/BGP4-MIB::bgpVersion\.0 = STRING: //'`  
+    bgp_ver=`snmpget ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpVersion.0 | \
+	sed -e 's/BGP4-MIB::bgpVersion\.0 = STRING: //'`  
     
     if [ "${bgp_ver}" != '"4"' ]; then exit 1; fi
  
@@ -190,14 +213,77 @@ test1()
 	echo "bgpPeerInUpdateElapsedTime not changing"; exit 1 
     fi
 
+    # Unload MIB
+    sleep 10
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+    BGP_MIB_IDX=""
+    sleep 10
+
     echo OK
+
     # Reset the connection
     reset
 }
 
 
+#
+# This test populates BGP route list with bogus routes, and reads the
+# PathAttrTable 
+#
+
+test2()
+{
+    TFILE=$1
+
+    echo "TEST2 - Read the bgp4PathAttrTable" 
+
+    # Reset the peers
+    reset
+
+    # Have peer1 connect to BGP and feed it routes 
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+    
+    NOBLOCK=true coord peer1 send dump mrtd update $TFILE 5 
+
+    peer_stationary_state peer1
+
+    # load the BGP mib
+    ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+
+    BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
+	sed -e 's/.*mib_index:u32=//'` 
+	
+    # verify that the BGP mib is loaded
+    ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
+
+    echo 'walking through the values of the BGP path attributes table... '
+    snmpwalk ${SNMPCONF} ${SNMPHOST} BGP4-MIB::bgp4PathAttrTable   \
+	> bgp4PathAttrTable1.tmp
+    cat bgp4PathAttrTable1.tmp
+
+    echo 'reading the entire BGP path attr table at once... '
+    snmptable ${SNMPCONF} -CB -CH -Cf "," ${SNMPHOST} \
+	BGP4-MIB::bgp4PathAttrTable > bgp4PathAttrTable2.tmp
+    cat bgp4PathAttrTable2.tmp
+
+    echo 'bulk reading the entire BGP path attr table... '
+    snmptable ${SNMPCONF} -CH -Cf "," ${SNMPHOST} \
+	BGP4-MIB::bgp4PathAttrTable > bgp4PathAttrTable2.tmp
+    cat bgp4PathAttrTable2.tmp
+
+
+    # Unload MIB
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+    BGP_MIB_IDX=""
+
+    echo OK
+    # Reset the connection
+    reset
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1'
+TESTS='test1 test2'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
@@ -211,14 +297,15 @@ then
     if [ "$SNMPD" = "not_found" ]; then exit 1; fi
     configure_snmp
     CXRL="$CALLXRL -r 10"
-    BGP_BUILDDIR=${XORP_TOP_BUILDDIR}/bgp
-    ${XORP_TOP_BUILDDIR}/utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ${XORP_TOP_BUILDDIR}/libxipc/finder
-    ${XORP_TOP_BUILDDIR}/fea/fea_dummy   = $CXRL finder://fea/common/0.1/get_target_name
-    ${XORP_TOP_BUILDDIR}/rib/rib         = $CXRL finder://rib/common/0.1/get_target_name
-    ${BGP_BUILDDIR}/bgp = $CXRL finder://bgp/common/0.1/get_target_name
-    ${BGP_BUILDDIR}/harness/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
-    ${BGP_BUILDDIR}/harness/coord = $CXRL finder://coord/common/0.1/get_target_name
+    XTB=${XORP_TOP_BUILDDIR}
+    BH=${XTB}/bgp/harness
+    ${XTB}/utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    ${XTB}/libxipc/finder
+    ${XTB}/fea/fea_dummy     = $CXRL finder://fea/common/0.1/get_target_name
+    ${XTB}/rib/rib           = $CXRL finder://rib/common/0.1/get_target_name
+    ${XTB}/bgp/bgp           = $CXRL finder://bgp/common/0.1/get_target_name
+    ${BH}/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
+    ${BH}/coord = $CXRL finder://coord/common/0.1/get_target_name
     ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -C -c ${SNMPDCONF} -r ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status
 EOF
     trap '' 0

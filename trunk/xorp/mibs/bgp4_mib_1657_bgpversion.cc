@@ -27,7 +27,7 @@ init_bgp4_mib_1657_bgpversion (void)
 {
     static oid bgpVersion_oid[] = { 1,3,6,1,2,1,15,1, 0 };
 
-    DEBUGMSGTL((BgpMib::the_instance().name(), "Initializing\n"));
+    DEBUGMSGTL((BgpMib::the_instance().name(),"Initializing bgpVersion...\n"));
 
     netsnmp_register_read_only_instance(netsnmp_create_handler_registration
                                         ("bgpVersion",

@@ -22,6 +22,7 @@
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_1657_bgpversion.hh"
 #include "bgp4_mib_1657_bgppeertable.hh"
+#include "bgp4_mib_1657_bgp4pathattrtable.hh"
 
 
 BgpMib BgpMib::_bgp_mib;
@@ -35,6 +36,7 @@ init_bgp4_mib_1657 (void)
 
     init_bgp4_mib_1657_bgpversion();
     init_bgp4_mib_1657_bgppeertable();
+    init_bgp4_mib_1657_bgp4pathattrtable();
 
     // NOTE:  these xlog calls are required by each mib module, since the
     // runtime linker seems to reset the values of xlog.c static variables

@@ -98,14 +98,8 @@ initialize_table_bgpPeerTable(void)
     iinfo->free_loop_context_at_end = free_context;
     iinfo->free_loop_context = NULL;  // only free at end
     iinfo->free_data_context = free_context; 
-
     iinfo->table_reginfo = table_info;
 
-    /***************************************************
-     * registering the table with the master agent
-     */
-    DEBUGMSGTL((BgpMib::the_instance().name(),
-                "Registering table bgpPeerTable as a table iterator\n"));		 
     netsnmp_register_table_iterator(my_handler, iinfo);
 }
 
