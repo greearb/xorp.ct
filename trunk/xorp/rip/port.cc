@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.20 2004/02/20 06:23:57 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.21 2004/02/24 19:41:39 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -696,7 +696,6 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 			   const PacketRouteEntry<Addr>*	entries,
 			   uint32_t				n_entries)
 {
-    static IPv4 local_net("127.0.0.0");
     static IPv4 net_filter("255.0.0.0");
     static IPv4 class_e_net("240.0.0.0");
     IPv4 zero;
@@ -735,7 +734,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	    record_bad_route("multicast route", src_addr, src_port, p);
 	    continue;
 	}
-	if (masked_net == local_net) {
+	if (masked_net.is_loopback()) {
 	    record_bad_route("loopback route", src_addr, src_port, p);
 	    continue;
 	}
@@ -834,6 +833,10 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	}
 	if (masked_net.is_linklocal_unicast()) {
 	    record_bad_route("linklocal route", src_addr, src_port, p);
+	    continue;
+	}
+	if (masked_net.is_loopback()) {
+	    record_bad_route("loopback route", src_addr, src_port, p);
 	    continue;
 	}
 
