@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.3 2004/11/12 07:49:47 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.4 2004/11/23 00:53:19 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -25,6 +25,7 @@
 
 class ClickSocketObserver;
 struct ClickSocketPlumber;
+class RunCommand;
 
 /**
  * ClickSocket class opens a Click socket and forwards data arriving
@@ -270,6 +271,42 @@ private:
      */
     int  force_read_message(vector<uint8_t>& message, string& errmsg);
 
+    /**
+     * Execute the user-level Click command.
+     *
+     * @param command the command to execute.
+     * @param arguments the command arguments.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int execute_user_click_command(const string& command,
+				   const string& arguments);
+
+    /**
+     * Terminate the user-level Click command.
+     */
+    void terminate_user_click_command();
+
+    /**
+     * The callback to call when there is data on the stdandard output of the
+     * user-level Click command.
+     */
+    void user_click_command_stdout_cb(RunCommand* run_command,
+				      const string& output);
+
+    /**
+     * The callback to call when there is data on the stdandard error of the
+     * user-level Click command.
+     */
+    void user_click_command_stderr_cb(RunCommand* run_command,
+				      const string& output);
+
+    /**
+     * The callback to call when there the user-level Click command
+     * is completed.
+     */
+    void user_click_command_done_cb(RunCommand* run_command, bool success,
+				    const string& error_msg);
+
     void shutdown();
 
     ClickSocket& operator=(const ClickSocket&);		// Not implemented
@@ -313,6 +350,8 @@ private:
     IPv4	_user_click_control_address;
     uint16_t	_user_click_control_socket_port;
 
+    RunCommand*	_user_click_run_command;
+    
     friend class ClickSocketPlumber; // class that hooks observers in and out
 };
 

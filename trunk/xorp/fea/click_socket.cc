@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.5 2004/11/12 07:49:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.6 2004/11/23 00:53:19 pavlin Exp $"
 
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/run_command.hh"
 
 #include "libcomm/comm_api.h"
 
@@ -51,7 +52,8 @@ ClickSocket::ClickSocket(EventLoop& eventloop)
       _is_user_click(false),
       _user_click_command_execute_on_startup(false),
       _user_click_control_address(DEFAULT_USER_CLICK_CONTROL_ADDRESS),
-      _user_click_control_socket_port(DEFAULT_USER_CLICK_CONTROL_SOCKET_PORT)
+      _user_click_control_socket_port(DEFAULT_USER_CLICK_CONTROL_SOCKET_PORT),
+      _user_click_run_command(NULL)
 {
 
 }
@@ -76,18 +78,64 @@ ClickSocket::start()
 	    return (XORP_OK);
 
 	//
+	// Execute the Click command (if necessary)
+	//
+	if (_user_click_command_execute_on_startup) {
+	    // Compose the command and the arguments
+	    string command = _user_click_command_file;
+	    string arguments = c_format("-f %s -p %u",
+					_user_click_startup_config_file.c_str(),
+					_user_click_control_socket_port);
+	    if (! _user_click_command_extra_arguments.empty())
+		arguments += " " + _user_click_command_extra_arguments;
+
+	    if (execute_user_click_command(command, arguments) != XORP_OK) {
+		XLOG_ERROR("Could not execute the user-level Click");
+		return (XORP_ERROR);
+	    }
+	}
+
+	//
 	// Open the socket
 	//
 	struct in_addr in_addr;
 	_user_click_control_address.copy_out(in_addr);
-	_fd = comm_connect_tcp4(&in_addr,
-				htons(_user_click_control_socket_port),
-				COMM_SOCK_BLOCKING);
-	if (_fd < 0) {
+	//
+	// TODO: XXX: get rid of this hackish mechanism of waiting
+	// pre-defined amount of time until the user-level Click program
+	// starts responding.
+	//
+	TimeVal max_wait_time(1, 0);		// XXX: max wait time: 1 second
+	TimeVal curr_wait_time(0, 100000);	// XXX: 100ms
+	TimeVal total_wait_time;
+	do {
+	    //
+	    // XXX: try-and-wait a number of times up to "max_wait_time",
+	    // because the user-level Click program may not response
+	    // immediately.
+	    //
+	    TimerList::system_sleep(curr_wait_time);
+	    total_wait_time += curr_wait_time;
+	    _fd = comm_connect_tcp4(&in_addr,
+				    htons(_user_click_control_socket_port),
+				    COMM_SOCK_BLOCKING);
+	    if (_fd >= 0)
+		break;
+	    if (total_wait_time < max_wait_time) {
+		// XXX: exponentially increase the wait time
+		curr_wait_time += curr_wait_time;
+		if (total_wait_time + curr_wait_time > max_wait_time)
+		    curr_wait_time = max_wait_time - total_wait_time;
+		XLOG_WARNING("Could not open user-level Click socket: %s. "
+			     "Trying again...",
+			     strerror(errno));
+		continue;
+	    }
 	    XLOG_ERROR("Could not open user-level Click socket: %s",
 		       strerror(errno));
+	    terminate_user_click_command();
 	    return (XORP_ERROR);
-	}
+	} while (true);
 
 	//
 	// Read the expected banner
@@ -97,6 +145,7 @@ ClickSocket::start()
 	if (force_read_message(message, errmsg) != XORP_OK) {
 	    XLOG_ERROR("Could not read on startup from user-level Click "
 		       "socket: %s", errmsg.c_str());
+	    terminate_user_click_command();
 	    comm_close(_fd);
 	    _fd = -1;
 	    return (XORP_ERROR);
@@ -148,6 +197,7 @@ ClickSocket::start()
 	    break;
 
 	error_label:
+	    terminate_user_click_command();
 	    comm_close(_fd);
 	    _fd = -1;
 	    return (XORP_ERROR);
@@ -160,6 +210,7 @@ ClickSocket::start()
 				    callback(this, &ClickSocket::select_hook))
 	    == false) {
 	    XLOG_ERROR("Failed to add user-level Click socket to EventLoop");
+	    terminate_user_click_command();
 	    comm_close(_fd);
 	    _fd = -1;
 	    return (XORP_ERROR);
@@ -177,6 +228,64 @@ ClickSocket::stop()
     return (XORP_OK);
 }
 
+int
+ClickSocket::execute_user_click_command(const string& command,
+					const string& arguments)
+{
+    if (_user_click_run_command != NULL)
+	return (XORP_ERROR);	// XXX: command is already running
+
+    _user_click_run_command = new RunCommand(_eventloop, command, arguments,
+					     callback(this, &ClickSocket::user_click_command_stdout_cb),
+					     callback(this, &ClickSocket::user_click_command_stderr_cb),
+					     callback(this, &ClickSocket::user_click_command_done_cb));
+    if (_user_click_run_command->execute() != XORP_OK) {
+	delete _user_click_run_command;
+	_user_click_run_command = NULL;
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+void
+ClickSocket::terminate_user_click_command()
+{
+    if (_user_click_run_command != NULL) {
+	delete _user_click_run_command;
+	_user_click_run_command = NULL;
+    }
+}
+
+void
+ClickSocket::user_click_command_stdout_cb(RunCommand* run_command,
+					  const string& output)
+{
+    XLOG_ASSERT(_user_click_run_command == run_command);
+    XLOG_INFO("User-level Click stdout output: %s", output.c_str());
+}
+
+void
+ClickSocket::user_click_command_stderr_cb(RunCommand* run_command,
+					  const string& output)
+{
+    XLOG_ASSERT(_user_click_run_command == run_command);
+    XLOG_ERROR("User-level Click stderr output: %s", output.c_str());
+}
+
+void
+ClickSocket::user_click_command_done_cb(RunCommand* run_command, bool success,
+					const string& error_msg)
+{
+    XLOG_ASSERT(_user_click_run_command == run_command);
+    if (! success) {
+	XLOG_ERROR("User-level Click command (%s) failed: %s",
+		   run_command->command().c_str(), error_msg.c_str());
+    }
+    delete _user_click_run_command;
+    _user_click_run_command = NULL;
+}
+
 void
 ClickSocket::shutdown()
 {
@@ -187,6 +296,7 @@ ClickSocket::shutdown()
     }
 
     if (is_user_click()) {
+	terminate_user_click_command();
 	if (_fd >= 0) {
 	    //
 	    // Remove the socket from the event loop and close it
