@@ -239,11 +239,9 @@ class Lsa {
     /**
      * Encode an LSA for transmission.
      *
-     * @param len length of the encoded packet.
-     * 
-     * @return A pointer that must be delete'd.
+     * @return True on success.
      */
-//     virtual uint8_t *encode(size_t &len) = 0;
+    virtual bool encode() = 0;
 
     /**
      * Get a reference to the raw LSA
@@ -484,6 +482,8 @@ class RouterLsa : public Lsa {
     }
 
     LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+
+    bool encode();
 
     // Wildcard multicast receiver! OSPFV3 Only
     void set_w_bit(bool bit) {

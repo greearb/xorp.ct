@@ -444,3 +444,13 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 
     return Lsa::LsaRef(lsa);
 }
+
+bool
+RouterLsa::encode()
+{
+//     OspfTypes::Version version = get_version();
+
+    
+
+    return true;
+}
