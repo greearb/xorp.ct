@@ -1,6 +1,8 @@
 #
-# $XORP: xorp/pim/TODO,v 1.71 2004/03/04 03:06:17 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.72 2004/04/01 02:58:09 pavlin Exp $
 #
+
+* PIM SPEC: Replace (*,*) with (*,*,RP) inside section 4.7.2
 
 * PIM MIB SPEC:
   Look into the following emails from
