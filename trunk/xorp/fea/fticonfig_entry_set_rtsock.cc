@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.2 2003/05/14 01:13:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.3 2003/05/20 23:25:13 atanu Exp $"
 
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
 #include "fticonfig.hh"
 #include "fticonfig_entry_set.hh"
 
@@ -152,7 +153,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	else
 	    rtm->rtm_flags = RTF_GATEWAY;
     }
-    rtm->rtm_flags |= RTF_PROTO1;/* Mark this as a xorp route */
+    rtm->rtm_flags |= RTF_PROTO1;	// Mark this as a XORP route
     rtm->rtm_pid = rs.pid();
     rtm->rtm_seq = rs.seqno();
     
