@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.18 2003/09/04 02:59:19 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.19 2003/09/04 03:42:39 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -722,9 +722,9 @@ template <class A>
 void
 BGPPlumbingAF<A>::push(PeerHandler* peer_handler) 
 {
-    debug_msg("BGPPlumbingAF::push\n");
+    debug_msg("BGPPlumbingAF<%s>::push\n", typeid(A).name());
     if (_awaits_push == false) {
-	XLOG_WARNING("push when none needed");
+	XLOG_WARNING("push <%s> when none needed", typeid(A).name());
 	return;
     }
     RibInTable<A> *rib_in;
