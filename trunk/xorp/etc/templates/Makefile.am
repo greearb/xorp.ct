@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/etc/templates/Makefile.am,v 1.8 2004/06/01 20:55:45 atanu Exp $
+## $XORP: xorp/etc/templates/Makefile.am,v 1.9 2004/06/02 03:49:43 pavlin Exp $
 ##
 
 # Redefine the data installation directory
@@ -19,7 +19,7 @@ data_DATA	 += mld.cmds mld.tp
 data_DATA	 += ospf.tp
 data_DATA	 += pim.cmds pimsm4.tp
 data_DATA	 += pim6.cmds pimsm6.tp
-data_DATA	 += rib.tp
+data_DATA	 += rib.cmds rib.tp
 data_DATA	 += rip.cmds rip.tp
 data_DATA	 += ripng.tp
 data_DATA	 += snmp.tp
