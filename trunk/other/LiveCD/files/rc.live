@@ -63,6 +63,11 @@ echo "Generating /usr/local/etc under MFS"
 mount_mfs -s 32768 -c 20 -o noatime swap /usr/local/etc 2>&1
 tar -xzpf /mfs/local_etc.tgz -C / >/dev/null 2>&1
 
+echo "Generating /usr/local/xorp under MFS"
+echo "(umount /usr/local/xorp to reveal a version with debugging enabled)"
+mount_mfs -s 98304 -c 20 -o noatime swap /usr/local/xorp 2>&1
+tar -xzpf /mfs/local_xorp.tgz -C / >/dev/null 2>&1
+
 mount -t msdos /dev/fd0 /mnt/floppy 2>&1
 
 mount proc

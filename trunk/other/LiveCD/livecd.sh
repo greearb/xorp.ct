@@ -334,10 +334,20 @@ install_xorp() {
 
     dialog --title "XORP LiveCD" --infobox "Doing XORP install..." 5 60
     echo "Doing XORP install"  >> $LIVEDIR/log
+
     cd $XORPSRCDIR || aviso
     gmake install prefix=$CHROOTDIR/usr/local/xorp >> $LIVEDIR/log || aviso
     dialog --title "XORP LiveCD" --infobox "Doing XORP install... done" 5 60
+    cd $XORPSRCDIR || aviso
+    cp $LIVEDIR/files/xorp_load.py $CHROOTDIR/usr/local/xorp/bin
+    cp $LIVEDIR/files/xorp-makeconfig.sh $CHROOTDIR/usr/local/xorp/bin
+    mv $CHROOTDIR/usr/local/xorp $CHROOTDIR/usr/local/xorp-debug
 
+    cd $XORPSRCDIR || aviso
+    gmake install prefix=$CHROOTDIR/usr/local/xorp >> $LIVEDIR/log || aviso
+    cd $CHROOTDIR/usr/local/xorp
+    strip */* 2> /dev/null 1> /dev/null
+    strip */*/* 2> /dev/null 1> /dev/null
     cp $LIVEDIR/files/xorp_load.py $CHROOTDIR/usr/local/xorp/bin
     cp $LIVEDIR/files/xorp-makeconfig.sh $CHROOTDIR/usr/local/xorp/bin
 
@@ -405,6 +415,9 @@ create_iso() {
     tar cvzfp mfs/dev.tgz dev >> $LIVEDIR/log
     tar cvzfp mfs/root.tgz root >> $LIVEDIR/log
     tar cvzfp mfs/local_etc.tgz usr/local/etc >> $LIVEDIR/log
+    tar cvzfp mfs/local_xorp.tgz usr/local/xorp >> $LIVEDIR/log
+    mv usr/local/xorp usr/local/xorp-stripped >> $LIVEDIR/log
+    mv usr/local/xorp-debug usr/local/xorp >> $LIVEDIR/log
 
     # Copies all the necessary files to make a bootable CD
     cp $LIVEDIR/files/boot.catalog $CHROOTDIR/boot >> $LIVEDIR/log
@@ -413,7 +426,8 @@ create_iso() {
     # Now we make a Bootable ISO without emulating floppy 2.8 Mb boot style.
     if [ -f /usr/local/bin/mkisofs ] ; then
 
-        /usr/local/bin/mkisofs -b boot/cdboot -no-emul-boot -c boot/boot.catalog  -r -J -h -V LiveCD -o $LIVEISODIR/LiveCD.iso . >> $LIVEDIR/log || aviso
+#        /usr/local/bin/mkisofs -b boot/cdboot -no-emul-boot -c boot/boot.catalog  -r -J -h -V LiveCD -o $LIVEISODIR/LiveCD.iso . >> $LIVEDIR/log || aviso
+        /usr/local/bin/mkisofs -b boot/cdboot -no-emul-boot -c boot/boot.catalog  -l -r -V LiveCD -o $LIVEISODIR/LiveCD.iso . >> $LIVEDIR/log || aviso
 	dialog --title "XORP LiveCD" --msgbox "Creation process done." 5 60
 
     elif then
@@ -726,7 +740,6 @@ main_dialog() {
 	13)
 	rm $tempfile
 	rm $LIVEDIR/config.ok
-	rm /tmp/opcao_*
 	exit 0
 	;;
 	*) 
