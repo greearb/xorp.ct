@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/static_routes/Makefile.am,v 1.1 2004/02/12 20:11:25 pavlin Exp $
+## $XORP: xorp/static_routes/Makefile.am,v 1.2 2004/02/17 23:01:17 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -9,11 +9,11 @@ bin_PROGRAMS	 = xorp_static_routes
 # -- Test Programs and Scripts
 TESTS		 = 
 
-test_scripts		 = test_add_route.sh
+test_scripts	 = test_add_route.sh
 
 # -- No-install Programs and Scripts
 noinst_PROGRAMS  = 
-noinst_SCRIPTS		 = $(test_scripts)
+noinst_SCRIPTS	 = $(test_scripts)
 
 # -- No-install Libraries
 noinst_LIBRARIES = libstaticroutes.a
