@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.28 2003/12/05 03:17:46 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.29 2003/12/19 20:30:19 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -28,7 +28,7 @@
 #include "command_tree.hh"
 #include "util.hh"
 
-extern int booterror(const char *s);
+extern int booterror(const char *s) throw (ParseError);
 
 ConfigTreeNode::ConfigTreeNode()
     : _template(NULL),
@@ -632,7 +632,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 			_actions_pending += actions;
 			// No need to go on to delete children
 			return true;
-		    } 
+		    }
 		}
 	    } else {
 		// Check any allow commands that might prevent us
