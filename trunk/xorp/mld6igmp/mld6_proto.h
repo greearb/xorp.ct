@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.3 2003/04/16 04:53:43 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.4 2003/04/16 15:53:15 pavlin Exp $
  */
 
 
@@ -41,6 +41,7 @@
  */
 /* MLD versions definition */
 #define MLD_V1					1
+#define MLD_V2					2
 #define MLD_VERSION_MIN				MLD_V1
 #define MLD_VERSION_MAX				MLD_V1
 #define MLD_VERSION_DEFAULT			MLD_V1
@@ -108,6 +109,15 @@
 /*
  * The ASCII names of the MLD protocol control messages
  */
+#ifdef MLDV2_LISTENER_REPORT
+#define MLDV2TYPE2ASCII(t)						\
+(((t) == MLDV2_LISTENER_REPORT) ?					\
+    "MLDV2_LISTENER_REPORT"						\
+    : "MLD_type_unknown")
+#else
+#define MLDV2TYPE2ASCII(t)	"MLD_type_unknown"
+#endif
+
 #define MLDTYPE2ASCII(t)						\
 (((t) == MLD_LISTENER_QUERY) ?						\
     "MLD_LISTENER_QUERY"						\
@@ -119,7 +129,7 @@
 		"MLD_MTRACE_RESP"					\
 		: ((t) == MLD_MTRACE) ?					\
 		    "MLD_MTRACE"					\
-		    : "MLD_type_unknown")
+		    : MLDV2TYPE2ASCII(t))
 
 /*
  * Global variables

@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.2 2003/03/10 23:20:42 hodson Exp $
+ * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.3 2003/04/15 18:55:37 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_IGMP_PROTO_H__
@@ -37,6 +37,7 @@
 /* IGMP versions definition */
 #define IGMP_V1					1
 #define IGMP_V2					2
+#define IGMP_V3					3
 #define IGMP_VERSION_MIN			IGMP_V1
 #define IGMP_VERSION_MAX			IGMP_V2
 #define IGMP_VERSION_DEFAULT			IGMP_V2
@@ -124,6 +125,11 @@
 #ifndef IGMP_MTRACE
 #define IGMP_MTRACE			IGMP_MTRACE_QUERY
 #endif
+#ifndef IGMP_V3_MEMBERSHIP_REPORT
+#  ifdef IGMP_v3_HOST_MEMBERSHIP_REPORT
+#    define IGMP_V3_MEMBERSHIP_REPORT	IGMP_v3_HOST_MEMBERSHIP_REPORT
+#  endif
+#endif
 #endif /* HOST_OS_NETBSD || HOST_OS_OPENBSD */
 
 /*
@@ -133,6 +139,15 @@
 /*
  * The ASCII names of the IGMP protocol control messages
  */
+#ifdef IGMP_V3_MEMBERSHIP_REPORT
+#define IGMPV3TYPE2ASCII(t)						\
+(((t) == IGMP_V3_MEMBERSHIP_REPORT) ?					\
+    "IGMP_V3_MEMBERSHIP_REPORT"						\
+    : "IGMP_type_unknown")
+#else
+#define IGMPV3TYPE2ASCII(t)	"IGMP_type_unknown"
+#endif
+
 #define IGMPTYPE2ASCII(t)						\
 (((t) == IGMP_MEMBERSHIP_QUERY) ?					\
     "IGMP_MEMBERSHIP_QUERY"						\
@@ -150,7 +165,7 @@
 			    "IGMP_MTRACE_RESP"				\
 			    : ((t) == IGMP_MTRACE) ?			\
 				"IGMP_MTRACE"				\
-				: "IGMP_type_unknown")
+				: IGMPV3TYPE2ASCII(t))
 
 /*
  * Global variables
