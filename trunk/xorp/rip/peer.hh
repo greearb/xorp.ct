@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/peer.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
 
 #ifndef __RIP_PEER_HH__
 #define __RIP_PEER_HH__
@@ -29,40 +29,40 @@ public:
     {}
 
     /**
-     * @return the total number of packets received.
+     * Get the total number of packets received.
      */
-    inline size_t packets_recv() const	{ return _packets_recv; }
+    inline uint32_t packets_recv() const	{ return _packets_recv; }
 
     /**
      * Increment the total number of packets received.
      */
-    inline void incr_packets_recv()	{ _packets_recv++; }
+    inline void incr_packets_recv()		{ _packets_recv++; }
 
     /**
-     * @return the number of bad routes received (eg invalid metric,
+     * Get the number of bad routes received (eg invalid metric,
      * invalid address family).
      */
-    inline size_t bad_routes() const	{ return _bad_routes; }
+    inline uint32_t bad_routes() const		{ return _bad_routes; }
 
     /**
      * Increment the number of bad routes received.
      */
-    inline void incr_bad_routes()	{ _bad_routes++; }
+    inline void incr_bad_routes()		{ _bad_routes++; }
 
     /**
-     * @return the number of bad response packets received.
+     * Get the number of bad response packets received.
      */
-    inline size_t bad_packets() const	{ return _bad_packets; }
+    inline uint32_t bad_packets() const		{ return _bad_packets; }
 
     /**
      * Increment the number of bad response packets received.
      */
-    inline void incr_bad_packets()	{ _bad_packets++; }
+    inline void incr_bad_packets()		{ _bad_packets++; }
 
 protected:
-    size_t _packets_recv;
-    size_t _bad_routes;
-    size_t _bad_packets;
+    uint32_t _packets_recv;
+    uint32_t _bad_routes;
+    uint32_t _bad_packets;
 };
 
 
@@ -90,6 +90,11 @@ public:
 public:
     Peer(RipPort& p, const Addr& addr) : _port(p), _addr(addr) {}
 
+    /**
+     * Get address of Peer.
+     */
+    inline const Addr& address() const			{ return _addr; }
+    
     /**
      * Get counters associated with Peer.
      */

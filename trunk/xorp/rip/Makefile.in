@@ -81,8 +81,9 @@ LDFLAGS =
 LDADD = ./librip.a $(top_builddir)/libxorp/libxorp.a
 
 noinst_PROGRAMS = $(TESTS)
-TESTS = test_timers_update
+TESTS = test_packets test_timers_update
 
+test_packets_SOURCES = test_packets.cc
 test_timers_update_SOURCES = test_timers_update.cc
 librip_a_SOURCES = rip_module.h constants.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh route_db.hh route_entry.hh update_queue.hh port.cc route_db.cc route_entry.cc update_queue.cc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -98,6 +99,11 @@ librip_a_LIBADD =
 librip_a_OBJECTS =  port.o route_db.o route_entry.o update_queue.o
 PROGRAMS =  $(noinst_PROGRAMS)
 
+test_packets_OBJECTS =  test_packets.o
+test_packets_LDADD = $(LDADD)
+test_packets_DEPENDENCIES =  ./librip.a \
+$(top_builddir)/libxorp/libxorp.a
+test_packets_LDFLAGS = 
 test_timers_update_OBJECTS =  test_timers_update.o
 test_timers_update_LDADD = $(LDADD)
 test_timers_update_DEPENDENCIES =  ./librip.a \
@@ -122,9 +128,9 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/port.P .deps/route_db.P .deps/route_entry.P \
-.deps/test_timers_update.P .deps/update_queue.P
-SOURCES = $(librip_a_SOURCES) $(test_timers_update_SOURCES)
-OBJECTS = $(librip_a_OBJECTS) $(test_timers_update_OBJECTS)
+.deps/test_packets.P .deps/test_timers_update.P .deps/update_queue.P
+SOURCES = $(librip_a_SOURCES) $(test_packets_SOURCES) $(test_timers_update_SOURCES)
+OBJECTS = $(librip_a_OBJECTS) $(test_packets_OBJECTS) $(test_timers_update_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -175,6 +181,10 @@ clean-noinstPROGRAMS:
 distclean-noinstPROGRAMS:
 
 maintainer-clean-noinstPROGRAMS:
+
+test_packets: $(test_packets_OBJECTS) $(test_packets_DEPENDENCIES)
+	@rm -f test_packets
+	$(CXXLINK) $(test_packets_LDFLAGS) $(test_packets_OBJECTS) $(test_packets_LDADD) $(LIBS)
 
 test_timers_update: $(test_timers_update_OBJECTS) $(test_timers_update_DEPENDENCIES)
 	@rm -f test_timers_update

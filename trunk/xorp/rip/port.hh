@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/port.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -93,6 +93,64 @@ protected:
 
 
 /**
+ * @short Container of counters associated with a Port.
+ */
+struct PortCounters {
+public:
+    PortCounters() : _packets_recv(0), _bad_routes(0), _bad_packets(0),
+		     _triggered_updates(0)
+    {}
+
+    /**
+     * Get the total number of packets received.
+     */
+    inline uint32_t packets_recv() const	{ return _packets_recv; }
+
+    /**
+     * Increment the total number of packets received.
+     */
+    inline void incr_packets_recv()		{ _packets_recv++; }
+
+    /**
+     * Get the number of bad routes received (eg invalid metric,
+     * invalid address family).
+     */
+    inline uint32_t bad_routes() const		{ return _bad_routes; }
+
+    /**
+     * Increment the number of bad routes received.
+     */
+    inline void incr_bad_routes()		{ _bad_routes++; }
+
+    /**
+     * Get the number of bad response packets received.
+     */
+    inline uint32_t bad_packets() const		{ return _bad_packets; }
+
+    /**
+     * Increment the number of bad response packets received.
+     */
+    inline void incr_bad_packets()		{ _bad_packets++; }
+
+    /**
+     * Get the number of triggered updates sent.
+     */
+    inline uint32_t triggered_updates() const	{ return _triggered_updates; }
+
+    /**
+     * Increment the number of triggered updates sent.
+     */
+    inline void incr_triggered_updates() 	{ _triggered_updates++; }
+    
+protected:
+    uint32_t _packets_recv;
+    uint32_t _bad_routes;
+    uint32_t _bad_packets;
+    uint32_t _triggered_updates;
+};
+
+
+/**
  * @short Authentication Manager.
  *
  * A class completely for specialization for RIP address families that place
@@ -112,7 +170,7 @@ template<>
 struct AuthManager<IPv4>
 {
 public:
-    enum AuthType { None, ClearText, MD5 };
+    enum AuthType { None, PlainText, MD5 };
     struct InternalState;
     
 public:
@@ -206,18 +264,18 @@ public:
      * @return true if port should be advertised to other hosts, false
      * otherwise.
      */
-    inline bool advertise() const { return _advertise; }
+    inline bool advertise() const			{ return _advertise; }
 
     /**
      * Set Port advertisement status.
      * @param en true if port should be advertised, false otherwise.
      */
-    inline void set_advertise(bool en) { _advertise = en; }
+    inline void set_advertise(bool en)			{ _advertise = en; }
 
     /**
      * Get Peers associated with this Port.
      */
-    inline const PeerList& peers() const { return _peers; }
+    inline const PeerList& peers() const		{ return _peers; }
 
     /**
      * Get Peers associated with this Port.
@@ -225,8 +283,63 @@ public:
      * NB This method is a backdoor for testing purposes and should
      * not be relied upon to exist in future.
      */
-    inline PeerList& peers() { return _peers; }
+    inline PeerList& peers()				{ return _peers; }
 
+    /**
+     * Get counters associated with Port.
+     */
+    inline const PortCounters& counters() const		{ return _counters; }
+
+    /**
+     * Get Peer identified by address.
+     *
+     * @return pointer to Peer on success, 0 otherwise.
+     */
+    const Peer<A>* peer(const Addr& addr) const;
+    
+protected:
+    /**
+     *  Get counters associated with Port.
+     */
+    inline PortCounters& counters()			{ return _counters; }
+
+    /**
+     * Get Peer identified by address.
+     * @return pointer to Peer on success, 0 otherwise.
+     */
+    Peer<A>* peer(const Addr& addr);
+
+    /**
+     * Create Peer.
+     * @return pointer to Peer if created, 0 on failure or peer already exists.
+     */
+    Peer<A>* create_peer(const Addr& addr);
+
+    /**
+     * Record packet arrival.  Updates port and peer counters.
+     */
+    void record_packet(Peer<A>* p);
+
+    /**
+     * Record bad packet.
+     *
+     * @param why reason packet marked 
+     */
+    void record_bad_packet(const string&	why,
+			   const Addr&		addr,
+			   uint16_t 		port,
+			   Peer<A>* 		p);
+
+    /**
+     * Parse request message.
+     *
+     * @param rip_request
+     */
+    void parse_request(const Addr&	src_addr,
+		       uint16_t		src_port,
+		       const uint8_t*	rip_request,
+		       size_t		rip_request_bytes);
+    
 protected:
     /**
      * Send completion notification.  Called by PortIO instance when a
@@ -259,7 +372,7 @@ protected:
      * @param en the enabled status of the I/O system.
      */
     void port_io_enabled_change(bool en);
-    
+
 protected:
     PortManagerBase<A>&	_pm;
     PeerList		_peers;			// Peers on Port
@@ -270,7 +383,8 @@ protected:
     RipHorizon		_horizon;		// Port Horizon type
     bool		_advertise;		// Advertise IO port
 
-    PortTimerConstants _constants;		// Port related timer constants
+    PortTimerConstants	_constants;		// Port related timer constants
+    PortCounters	_counters;		// Packet counters
 };
 
 
