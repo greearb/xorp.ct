@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.2 2002/12/13 22:32:01 rizzo Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.3 2003/01/28 03:21:52 rizzo Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
@@ -48,17 +48,24 @@ public:
     static const uint16_t AS_INVALID = 0;	// XXX IANA-reserved
     static const uint16_t AS_TRAN = 23456;	// IANA
 
-    AsNum(); // unimplemented
-
     /**
      * Constructor.
      * @param value the value to assign to this AS number.
      */
-    AsNum(const uint32_t value) : _as(value)			{
+    explicit AsNum(const uint32_t value) : _as(value)	{
 	// XXX remove when we support 32-bit AS
 	assert(value < 0xffff);
     }
  
+    explicit AsNum(const uint16_t value) : _as(value)	{}
+
+    /**
+     * construct from a 2-byte buffer in memory
+     */
+    explicit AsNum(const uint8_t *d)			{
+	_as = (d[0] << 8) + d[1];
+    }
+
     /**
      * Get the non-extended AS number value.
      * 
@@ -74,7 +81,16 @@ public:
      * @return the extended AS number value.
      */
     uint32_t as32() const				{ return _as; }
-    
+
+    /**
+     * copy the 16-bit value into a 2-byte memory buffer
+     */
+    void copy_out(uint8_t *d) const			{
+	uint16_t x = as();
+	d[0] = (x >> 8) & 0xff;
+	d[1] = x & 0xff;
+    }
+
     /**
      * Test if this is an extended AS number.
      * 
@@ -110,5 +126,9 @@ public:
     
 private:
     uint32_t _as;		// The value of the AS number
+
+    AsNum(); // forbidden
+    AsNum(int); // forbidden
+
 };
 #endif // __LIBXORP_ASNUM_HH__

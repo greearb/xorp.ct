@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.9 2003/01/28 01:11:36 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.10 2003/01/28 03:21:52 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -50,7 +50,7 @@ AsSegment::decode(const uint8_t *d)
 
     d += 2;	// skip header, d points to the raw data now.
     for (size_t i = 0; i < n; d += 2, i++)
-	add_as((d[0] << 8) + d[1]);
+	add_as(AsNum(d));
 }
 
 /**

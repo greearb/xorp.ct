@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.4 2002/12/15 04:09:29 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.5 2003/01/17 06:20:14 mjh Exp $"
 
 #include "fcntl.h"
 
@@ -52,7 +52,7 @@ PlumbingTest::test1()
     local_data.set_as_num(my_AS_number());
 
     BGPPeerData *peer_data1 = new BGPPeerData();
-    peer_data1->set_as_num((uint16_t)666);
+    peer_data1->set_as_num(AsNum((uint16_t)666));
     peer_data1->set_internal_peer(true);
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
 
@@ -63,7 +63,7 @@ PlumbingTest::test1()
     printf("Peering Added.\n");
 
     BGPPeerData *peer_data2 = new BGPPeerData();;
-    peer_data2->set_as_num((uint16_t)667);
+    peer_data2->set_as_num(AsNum((uint16_t)667));
     peer_data1->set_internal_peer(true);
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);
  
@@ -80,7 +80,7 @@ PlumbingTest::test1()
     AsPath as_path;
     AsSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
-    as_seq.add_as((uint16_t)666);
+    as_seq.add_as(AsNum((uint16_t)666));
     as_path.add_segment(as_seq);
     ASPathAttribute aspathatt(as_path);
     printf("****>%s<****\n", aspathatt.str().c_str());
@@ -257,7 +257,7 @@ PlumbingTest::test2()
     local_data.set_as_num(my_AS_number());
 
     BGPPeerData *peer_data1 = new BGPPeerData();
-    peer_data1->set_as_num((uint16_t)666);
+    peer_data1->set_as_num(AsNum((uint16_t)666));
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
 
     printf("Adding Peering 1\n");
@@ -276,7 +276,7 @@ PlumbingTest::test2()
     AsPath as_path;
     AsSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
-    as_seq.add_as((uint16_t)666);
+    as_seq.add_as(AsNum((uint16_t)666));
     as_path.add_segment(as_seq);
     ASPathAttribute aspathatt(as_path);
     printf("****>%s<****\n", aspathatt.str().c_str());
@@ -307,7 +307,7 @@ PlumbingTest::test2()
     ** 3. Add another peer (peer2).
     */
     BGPPeerData *peer_data2 = new BGPPeerData();;
-    peer_data2->set_as_num((uint16_t)667);
+    peer_data2->set_as_num(AsNum((uint16_t)667));
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);
  
     printf("Adding Peering 2\n");

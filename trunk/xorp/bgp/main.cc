@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.9 2003/01/28 00:35:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.10 2003/01/28 03:21:52 rizzo Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -165,7 +165,7 @@ BGPMain::local_config(const uint32_t& as, const IPv4& id)
     /* XXX
     ** Only deal with two bytes AS numbers for the time being.
     */
-    local->set_as_num(static_cast<uint16_t>(as));
+    local->set_as_num(AsNum(as));
     local->set_id(id);
 
     _plumbing->set_my_as_number(local->get_as_num());

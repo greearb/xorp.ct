@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.4 2003/01/24 19:50:10 rizzo Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.5 2003/01/24 22:14:44 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -140,7 +140,7 @@ OpenPacket::decode(const uint8_t *data, uint16_t /* l */) throw(CorruptMessage)
     _Version = (uint8_t &)(*data);
 
     data++;
-    _AutonomousSystemNumber = ntohs((uint16_t &)(*data));
+    _AutonomousSystemNumber = AsNum(data);
     data += 2;
 
     _HoldTime = ntohs((uint16_t &)(*data));
