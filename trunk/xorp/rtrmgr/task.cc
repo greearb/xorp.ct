@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.40 2004/11/03 00:23:53 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.41 2004/12/11 21:29:58 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -751,69 +751,66 @@ TaskXrlItem::execute_done(const XrlError& err, XrlArgs* xrl_args)
 
     debug_msg("TaskXrlItem::execute_done\n");
 
-    if (err != XrlError::OKAY()) {
-	// XXX: handle XRL errors here
-	if ((err == XrlError::NO_FINDER())
-	    || (err == XrlError::SEND_FAILED())
-	    || (err == XrlError::NO_SUCH_METHOD())) {
-	    //
+    switch (err.error_code()) {
+    case OKAY:
+	break;
+
+    case BAD_ARGS:
+    case COMMAND_FAILED:
+	// Non-fatal error for the target - typically this is
+	// because the user entered bad information - we can't
+	// change the target configuration to what the user
+	// specified, but this doesn't mean the target is fatally
+	// wounded.
+	fatal = false;
+	break;
+
+    case NO_FINDER:
+    case SEND_FAILED:
+	// The error was a fatal one for the target - we now
+	// consider the target to be fatally wounded.
+	XLOG_ERROR("%s", err.str().c_str());
+	fatal = true;
+	break;
+
+    case REPLY_TIMED_OUT:
+    case RESOLVE_FAILED:
+    case SEND_FAILED_TRANSIENT:
+	// REPLY_TIMED_OUT shouldn't happen on a reliable
+	// transport, but at this point we don't know for sure
+	// which Xrls are reliable and while are unreliable, so
+	// best handle this as if it were packet loss.
+	//
+	// RESOLVE_FAILED shouldn't happen if the startup
+	// validation has done it's job correctly, but just in case
+	// we'll be lenient and give it ten more seconds to be
+	// functioning before we declare it dead.
+	// TODO: get rid of the hard-coded value of "10" below.
+	if (_resend_counter > 10) {
+	    // Give up.
 	    // The error was a fatal one for the target - we now
 	    // consider the target to be fatally wounded.
-	    //
 	    XLOG_ERROR("%s", err.str().c_str());
 	    fatal = true;
-	} else if ((err == XrlError::COMMAND_FAILED())
-		   || (err == XrlError::BAD_ARGS())) {
-	    //
-	    // Non-fatal error for the target - typically this is
-	    // because the user entered bad information - we can't
-	    // change the target configuration to what the user
-	    // specified, but this doesn't mean the target is fatally
-	    // wounded.
-	    //
-	    fatal = false;
-	} else if ((err == XrlError::REPLY_TIMED_OUT())
-		   || (err == XrlError::RESOLVE_FAILED())) {
-	    //
-	    // REPLY_TIMED_OUT shouldn't happen on a reliable
-	    // transport, but at this point we don't know for sure
-	    // which Xrls are reliable and while are unreliable, so
-	    // best handle this as if it were packet loss.
-	    //
-	    // RESOLVE_FAILED shouldn't happen if the startup
-	    // validation has done it's job correctly, but just in case
-	    // we'll be lenient and give it ten more seconds to be
-	    // functioning before we declare it dead.
-	    //
-	    // TODO: get rid of the hard-coded value of "10" below.
-	    if (_resend_counter > 10) {
-		// Give up.
-		// The error was a fatal one for the target - we now
-		// consider the target to be fatally wounded.
-		XLOG_ERROR("%s", err.str().c_str());
-		fatal = true;
-	    } else {
-		// Re-send the Xrl after a short delay.
-		_resend_counter++;
-		// TODO: get rid of the hard-coded value of "1000" below.
-		_resend_timer = _task.eventloop().new_oneoff_after_ms(1000,
-					callback(this, &TaskXrlItem::resend));
-		return;
-	    }
-	} else if (err == XrlError::INTERNAL_ERROR()) {
-	    //
-	    // Something bad happened but it's not clear what.  Don't
-	    // consider these to be fatal errors, but they may well
-	    // prove to be so.  XXX revisit this issue when we've more
-	    // experience with XRL errors.
-	    //
-	    XLOG_ERROR("%s", err.str().c_str());
-	    fatal = false;
 	} else {
-	    // We intended to explicitly handle all errors above, so if
-	    // we got here there's an error type we didn't know about.
-	    XLOG_UNREACHABLE();
+	    // Re-send the Xrl after a short delay.
+	    // TODO: get rid of the hard-coded value of "1000" below.
+	    _resend_counter++;
+	    _resend_timer = _task.eventloop().new_oneoff_after_ms(1000,
+				callback(this, &TaskXrlItem::resend));
+	    return;
 	}
+	break;
+
+    case INTERNAL_ERROR:
+    case NO_SUCH_METHOD:
+	// Something bad happened but it's not clear what.  Don't
+	// consider these to be fatal errors, but they may well
+	// prove to be so.  XXX revisit this issue when we've more
+	// experience with XRL errors.
+	XLOG_ERROR("%s", err.str().c_str());
+	fatal = false;
+	break;
     }
 
     if (!_xrl_callback.is_empty())
