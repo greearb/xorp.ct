@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/safe_callback_obj.hh,v 1.2 2004/02/13 06:06:56 hodson Exp $
+// $XORP: xorp/libxorp/safe_callback_obj.hh,v 1.3 2004/06/10 22:41:18 hodson Exp $
 
 #ifndef __LIBXORP_SAFE_CALLBACK_OBJ_HH__
 #define __LIBXORP_SAFE_CALLBACK_OBJ_HH__
@@ -25,7 +25,7 @@ struct SafeCallbackBase;
 /**
  * @short Base class for objects that are callback safe.
  *
- * Objects that wish to be callback safe shout be derived from this
+ * Objects that wish to be callback safe should be derived from this
  * class.  The class works in conjunction with SafeCallbackBase and
  * between them implement callback and callback-object tracking.  When
  * a CallbackSafeObject is destructed it informs all the callbacks that
