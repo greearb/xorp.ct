@@ -1,0 +1,14 @@
+show host date {
+     %command: "date" %help: HELP;
+     %tag: HELP "Show host current date" ;
+}
+
+show host name {
+     %command: "hostname" %help: HELP;
+     %tag: HELP "Show host name" ;
+}
+
+show host os {
+     %command: "uname -a" %help: HELP;
+     %tag: HELP "Show host operating system details" ;
+}
