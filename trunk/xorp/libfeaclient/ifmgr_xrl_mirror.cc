@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.11 2004/11/05 03:54:11 bms Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.12 2004/12/09 07:54:36 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -881,10 +881,15 @@ IfMgrXrlMirror::startup()
     if (status() != READY)
 	return false;
 
-    _rtr = new IfMgrXrlMirrorRouter(_e, CLSNAME, _finder_host, _finder_port);
-    _xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
-    _rtr->attach(this);
-    _xrl_tgt->attach(this);
+    if (_rtr == NULL) {
+	_rtr = new IfMgrXrlMirrorRouter(_e, CLSNAME, _finder_host,
+					_finder_port);
+	_rtr->attach(this);
+    }
+    if (_xrl_tgt == NULL) {
+	_xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
+	_xrl_tgt->attach(this);
+    }
     set_status(STARTING, "Initializing Xrl Router.");
 
     return true;
