@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.12 2003/09/02 22:50:11 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.13 2003/09/10 21:38:55 pavlin Exp $
 #
 
 * Implement RFC 3590 "Source Address Selection for the
@@ -51,8 +51,6 @@
 * Mld6igmpVif->_proto_flags setting with MLD6IGMP_VIF_QUERIER bitset
   should be done by a member function.
 
-* Add xlog_stop() to libxorp.
-
 * Initialize/setup mld6igmp_vif::vif_index() and vif_name();
 
 * All the JOIN/PRUNE routing notification should happen when
@@ -69,7 +67,7 @@
   Currently, the program will crash (XLOG_UNREACHABLE()).
 
 * mld6igmp_recv() should decode the first 4/8 octets and pass
-the rest to igmp_process() and mld6_process()
+  the rest to igmp_process() and mld6_process()
 
 * Add igmp_api.h
 
