@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.26 2003/09/18 19:08:00 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.27 2003/09/26 21:34:34 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -421,12 +421,9 @@ XrlPFSTCPListener::response_pending() const
 /**
  * @short Sender state for tracking Xrl's forwarded by TCP.
  *
- * At some point this class should be re-factored:
- *
- * (1) to have accessors/modifiers rather than public member variables
- *
- * (2) to hold rendered Xrl in wire format rather than as an Xrl since
- * the existing scheme requires additional copy operations.
+ * At some point this class should be re-factored to hold rendered Xrl
+ * in wire format rather than as an Xrl since the existing scheme
+ * requires additional copy operations.
  */
 struct RequestState {
 public:
@@ -434,11 +431,14 @@ public:
 
 public:
     RequestState(XrlPFSTCPSender* p,
-		 uint32_t	  seqno,
+		 uint32_t	  sn,
 		 const Xrl&	  x,
 		 const Callback&  cb)
-	: _p(p), _sn(seqno), _x(x), _cb(cb)
-    {}
+	: _p(p), _sn(sn), _x(x), _cb(cb)
+    {
+	debug_msg("RequestState (%p - seqno %u)\n", this, sn);
+	debug_msg("RequestState Xrl = %s\n", x.str().c_str());
+    }
 
     inline bool		    has_seqno(uint32_t n) const { return _sn == n; }
     inline XrlPFSTCPSender* parent() const		{ return _p; }
@@ -448,7 +448,7 @@ public:
 
     ~RequestState()
     {
-	debug_msg("~RequestState (%p - seqno %d)\n", this, seqno());
+	debug_msg("~RequestState (%p - seqno %u)\n", this, seqno());
     }
 
 private:
@@ -468,18 +468,19 @@ private:
 
 XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
     throw (XrlPFConstructorError)
-    : XrlPFSender(e, addr_slash_port),
-    _fd(-1),
-    _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS)
+    : XrlPFSender(e, addr_slash_port), _fd(-1),
+      _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS)
 {
     _fd = create_connected_ip_socket(TCP, addr_slash_port);
+    debug_msg("stcp sender (%p) fd = %d\n", this, _fd);
     if (_fd <= 0) {
+	debug_msg("failed to connect to %s\n", addr_slash_port);
 	xorp_throw(XrlPFConstructorError,
 		   c_format("Could not connect to %s\n", addr_slash_port));
     }
-    debug_msg("stcp sender fd = %d\n", _fd);
 
     if (fcntl(_fd, F_SETFL, fcntl(_fd, F_GETFL) | O_NONBLOCK) < 0) {
+	debug_msg("failed to go non-blocking.\n");
         close(_fd);
 	xorp_throw(XrlPFConstructorError,
 		   c_format("Failed to set fd non-blocking: %s\n",
@@ -507,6 +508,7 @@ XrlPFSTCPSender::~XrlPFSTCPSender()
     _reader = 0;
     delete _writer;
     _writer = 0;
+    _fd = -1;
     debug_msg("~XrlPFSTCPSender (%p)\n", this);
 }
 
@@ -515,23 +517,33 @@ XrlPFSTCPSender::die(const char* reason)
 {
     debug_msg("Sender dying (fd = %d) reason: %s\n", _fd, reason);
 
-    XLOG_ERROR("XrlPFSTCPSender died: %s", reason);
+    XLOG_ASSERT(_fd > 0);
+
+    // XLOG_ERROR("XrlPFSTCPSender died: %s", reason);
 
     stop_keepalives();
 
+    _reader->flush_buffers();
     delete _reader;
     _reader = 0;
 
+    _writer->flush_buffers();
     delete _writer;
     _writer = 0;
 
     close(_fd);
     _fd = -1;
 
+    // Detach all callbacks before attempting to invoke them.
+    // Otherwise destructor may get called when we're still going through
+    // the lists of callbacks.
     list<ref_ptr<RequestState> > tmp_sent;
     tmp_sent.splice(tmp_sent.begin(), _requests_sent);
-    debug_msg("Sent requests outstanding = %d\n", (int)tmp_sent.size());
 
+    list<ref_ptr<RequestState> > tmp_pending;
+    tmp_pending.splice(tmp_pending.begin(), _requests_pending);
+
+    debug_msg("Sent requests outstanding = %d\n", (int)tmp_sent.size());
     while (tmp_sent.empty() == false) {
 	ref_ptr<RequestState>& rp = tmp_sent.front();
 	if (rp->cb().is_empty() == false)
@@ -539,10 +551,7 @@ XrlPFSTCPSender::die(const char* reason)
 	tmp_sent.pop_front();
     }
 
-    list<ref_ptr<RequestState> > tmp_pending;
-    tmp_pending.splice(tmp_pending.begin(), _requests_pending);
     debug_msg("Pending requests outstanding= %d\n", (int)tmp_pending.size());
-
     while (tmp_pending.empty() == false) {
 	ref_ptr<RequestState>& rp = tmp_pending.front();
 	if (rp->cb().is_empty() == false)
