@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.13 2003/06/26 21:38:54 jcardona Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.14 2003/07/08 01:51:37 jcardona Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -530,6 +530,18 @@ public:
 	}
     }
 
+    /**
+     * Set root node associated with iterator to the root node of the
+     * trie.  Needed whilst trie iterators have concept of root nodes
+     * find methods return iterators with root bound to key and
+     * means they can never continue iteration beyond of root.
+     *
+     * @return iterator with non-restricted root node.
+     */
+    iterator unbind_root(iterator i) const	{
+	return iterator(i.cur(), _root->k());
+    }
+    
     /**
      * given a key, returns an iterator to the entry with the
      * longest matching prefix.
