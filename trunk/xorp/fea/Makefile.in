@@ -95,12 +95,12 @@ bindir = $(prefix)/$(subdir)
 # -- Real Programs
 bin_PROGRAMS = xorp_fea xorp_fea_dummy
 
-# -- Test Programs and scripts
+# -- Test Programs and Scripts
 TESTS = test_rawsock4 test_ifmanager_transaction
 
 test_scripts = test_add_route.sh test_config_interface.sh
 
-# -- No-install Programs
+# -- No-install Programs and Scripts
 noinst_PROGRAMS = demo_fea_ifmgr_client test_mfea test_rawsock4 test_ifmanager_transaction
 noinst_SCRIPTS = $(test_scripts)
 
@@ -761,6 +761,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 # Test scripts dependency
 test_add_route.sh: $(top_builddir)/fea/xrl_fea_shell_funcs.sh
 test_config_interface.sh: $(top_builddir)/fea/xrl_fea_shell_funcs.sh
+
+# XRL wrapper scripts dependency
 $(top_builddir)/fea/xrl_fea_shell_funcs.sh:				\
     $(top_srcdir)/xrl/targets/fea.xrls					\
     $(top_srcdir)/utils/xrl_wrappers_generator.sh
