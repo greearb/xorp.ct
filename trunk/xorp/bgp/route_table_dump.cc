@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.2 2002/12/14 23:15:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.3 2002/12/17 22:06:05 mjh Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -200,7 +200,7 @@ DumpTable<A>::initiate_background_dump()
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
-				     &DumpTable<A>::dump_next_route));
+				     &DumpTable<A>::do_next_route_dump));
 }
 
 template<class A>
@@ -223,7 +223,7 @@ DumpTable<A>::suspend_dump()
 
 template<class A>
 void
-DumpTable<A>::dump_next_route() 
+DumpTable<A>::do_next_route_dump() 
 {
     if (_output_busy) {
 	cp(17);
@@ -236,7 +236,7 @@ DumpTable<A>::dump_next_route()
     // process any queue that built up
     while(_parent->get_next_message(this) == true) {
 	cp(18);
-	debug_msg("DumpTable<A>::dump_next_route processed queued message\n");
+	debug_msg("DumpTable<A>::do_next_route_dump processed queued message\n");
 	if (_output_busy) {
 	    cp(19);
 	    return;
@@ -296,7 +296,7 @@ DumpTable<A>::dump_next_route()
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
-				     &DumpTable<A>::dump_next_route));
+				     &DumpTable<A>::do_next_route_dump));
 }
 
 template<class A>
@@ -319,7 +319,7 @@ DumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
 	    cp(33);
 	    _output_busy = false;
 	    fprintf(stderr, "Dump: output went idle so dump next\n");
-	    dump_next_route();
+	    do_next_route_dump();
 	} else {
 	    cp(34);
 	    _output_busy = busy;
