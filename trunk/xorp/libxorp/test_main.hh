@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_main.hh,v 1.3 2003/07/02 20:39:28 atanu Exp $"
+// $XORP: xorp/libxorp/test_main.hh,v 1.4 2003/07/03 00:10:28 atanu Exp $
+
+#ifndef __LIBXORP_TEST_MAIN_HH__
+#define __LIBXORP_TEST_MAIN_HH__
 
 #include <string>
 #include <list>
@@ -405,3 +408,4 @@ private:
 	string _value;
     };
 };
+#endif // __LIBXORP_TEST_MAIN_HH__
