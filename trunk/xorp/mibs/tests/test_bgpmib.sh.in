@@ -28,12 +28,12 @@ if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 BGP_SRCDIR=`(cd ${srcdir}/../../bgp ; pwd)`
 XORP_TOP_BUILDDIR=`(cd ${PWD}/../..; pwd)`
 
-CALLXRL='../../libxipc/call_xrl -r 5 -w 20'
+CALLXRL='../../libxipc/call_xrl -r 50 -w 20'
 . ${BGP_SRCDIR}/harness/xrl_shell_funcs.sh ""
 . ${BGP_SRCDIR}/xrl_shell_funcs.sh ""
 
 # uncomment next line to use mpatrol
-# MPATROL='/usr/local/bin/mpatrol -I --dynamic'
+# MPATROL='/usr/local/bin/mpatrol --leak-table --dynamic'
 
 MPATROL=${MPATROL:-""}
 
@@ -438,7 +438,7 @@ then
     if [ "$SNMPD" = "not_found" ]; then exit 1; fi
     SNMPTRAPD=`echo ${SNMPD} | sed -e 's/snmpd/snmptrapd/'`
     configure_snmp
-    CXRL="$CALLXRL -r 10"
+    CXRL="$CALLXRL"
     XTB=${XORP_TOP_BUILDDIR}
     BH=${XTB}/bgp/harness
     ${XTB}/utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
@@ -448,7 +448,7 @@ then
     ${XTB}/bgp/xorp_bgp       = $CXRL finder://bgp/common/0.1/get_target_name
     ${BH}/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
     ${BH}/coord = $CXRL finder://coord/common/0.1/get_target_name
-    ${MPATROL} ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -C -c ${SNMPDCONF} -r ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status
+    ${MPATROL} ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -C -c ${SNMPDCONF} -r -I -memory_freebsd2 ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status
     ${SNMPTRAPD} -f -o ${SNMPTRAPLOG} ${SNMPTRAPHOST}
 EOF
     trap '' 0
