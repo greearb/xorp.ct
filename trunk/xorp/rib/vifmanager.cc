@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.8 2003/03/21 01:25:14 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.9 2003/05/14 10:32:25 pavlin Exp $"
 
 #include "rib_module.h"
 #include "config.h"
@@ -45,9 +45,6 @@ VifManager::~VifManager()
     map <string, Vif*>::iterator i;
     for (i = _vifs_by_name.begin(); i != _vifs_by_name.end(); ++i) {
 	delete i->second;
-    }
-    for (i = _vifs_by_name.begin(); i != _vifs_by_name.end(); ++i) {
-	_vifs_by_name.erase(i);
     }
 }
 
@@ -362,6 +359,7 @@ VifManager::vif_deleted(const string& ifname, const string& vifname)
 	// now process the deletion...
 	string err;
 	_rib_manager->delete_vif(vifname, err);
+	delete vif;
     } else {
 	XLOG_ERROR("vif_deleted: vif %s not found", vifname.c_str());
     }
