@@ -101,7 +101,7 @@ bin_PROGRAMS = xorp_rib
 TESTS = test_rib_direct.sh test_rib_xrls.sh test_redist test_register test_deletion
 
 # -- No-install Programs
-noinst_PROGRAMS = add_route main_routemap test_register test_register_xrls test_rib_direct test_rib_xrls test_redist test_deletion
+noinst_PROGRAMS = add_route main_routemap test_deletion test_redist test_register test_register_xrls test_rib_direct test_rib_xrls
 
 # -- No-install Libraries
 noinst_LIBRARIES = librib.a libribxrl.a
@@ -110,26 +110,14 @@ noinst_LIBRARIES = librib.a libribxrl.a
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libredist4xif.a $(top_builddir)/xrl/interfaces/libredist6xif.a $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a $(top_builddir)/xrl/interfaces/libpolicyredist4xif.a $(top_builddir)/xrl/interfaces/libpolicyredist6xif.a $(top_builddir)/xrl/interfaces/libprofileclientxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
+xorp_rib_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh main_rib.cc rib_manager.cc xrl_target.cc
+xorp_rib_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libribbase.a
+
 add_route_SOURCES = add_route.cc
 add_route_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a
 
 main_routemap_SOURCES = rib_module.h protocol.hh route.hh routemap.hh main_routemap.cc routemap.cc
 main_routemap_LDADD = $(LDADD)
-
-xorp_rib_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh main_rib.cc rib_manager.cc xrl_target.cc
-xorp_rib_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libribbase.a
-
-test_rib_direct_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh protocol.hh register_server.hh rib.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_direct.cc
-test_rib_direct_LDADD = $(LDADD)
-
-test_rib_xrls_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_xrls.cc xrl_target.cc
-test_rib_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a
-
-test_register_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh protocol.hh register_server.hh rib.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc test_register.cc
-test_register_LDADD = $(LDADD)
-
-test_register_xrls_SOURCES = rib_module.h parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh rib_manager.cc test_register_xrls.cc xrl_target.cc
-test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/targets/libribclientbase.a
 
 test_deletion_SOURCES = rib_module.h rt_tab_base.hh rt_tab_expect.hh rt_tab_origin.hh protocol.hh route.hh rt_tab_expect.cc test_deletion.cc
 test_deletion_LDADD = $(LDADD)
@@ -137,8 +125,20 @@ test_deletion_LDADD = $(LDADD)
 test_redist_SOURCES = test_redist.cc
 test_redist_LDADD = ./librib.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
 
+test_register_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh protocol.hh register_server.hh rib.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc test_register.cc
+test_register_LDADD = $(LDADD)
+
+test_register_xrls_SOURCES = rib_module.h parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh rib_manager.cc test_register_xrls.cc xrl_target.cc
+test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/targets/libribclientbase.a
+
+test_rib_direct_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh protocol.hh register_server.hh rib.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_direct.cc
+test_rib_direct_LDADD = $(LDADD)
+
+test_rib_xrls_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_xrls.cc xrl_target.cc
+test_rib_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a
+
 # -- Library Sources
-librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh profile_vars.hh protocol.cc register_server.cc rib.cc rib_varrw.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_pol_conn.cc rt_tab_pol_redist.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc profile_vars.cc
+librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh profile_vars.hh profile_vars.cc protocol.cc register_server.cc rib.cc rib_varrw.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_pol_conn.cc rt_tab_pol_redist.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
 
 libribxrl_a_SOURCES = redist_xrl.hh redist_xrl.cc
 
@@ -156,14 +156,14 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 librib_a_AR = $(AR) cru
 librib_a_LIBADD =
-am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
-	rib.$(OBJEXT) rib_varrw.$(OBJEXT) rt_tab_base.$(OBJEXT) \
-	rt_tab_deletion.$(OBJEXT) rt_tab_extint.$(OBJEXT) \
-	rt_tab_log.$(OBJEXT) rt_tab_merged.$(OBJEXT) \
-	rt_tab_origin.$(OBJEXT) rt_tab_pol_conn.$(OBJEXT) \
-	rt_tab_pol_redist.$(OBJEXT) rt_tab_redist.$(OBJEXT) \
-	rt_tab_register.$(OBJEXT) vifmanager.$(OBJEXT) \
-	profile_vars.$(OBJEXT)
+am_librib_a_OBJECTS = profile_vars.$(OBJEXT) protocol.$(OBJEXT) \
+	register_server.$(OBJEXT) rib.$(OBJEXT) rib_varrw.$(OBJEXT) \
+	rt_tab_base.$(OBJEXT) rt_tab_deletion.$(OBJEXT) \
+	rt_tab_extint.$(OBJEXT) rt_tab_log.$(OBJEXT) \
+	rt_tab_merged.$(OBJEXT) rt_tab_origin.$(OBJEXT) \
+	rt_tab_pol_conn.$(OBJEXT) rt_tab_pol_redist.$(OBJEXT) \
+	rt_tab_redist.$(OBJEXT) rt_tab_register.$(OBJEXT) \
+	vifmanager.$(OBJEXT)
 librib_a_OBJECTS = $(am_librib_a_OBJECTS)
 libribxrl_a_AR = $(AR) cru
 libribxrl_a_LIBADD =
@@ -171,9 +171,9 @@ am_libribxrl_a_OBJECTS = redist_xrl.$(OBJEXT)
 libribxrl_a_OBJECTS = $(am_libribxrl_a_OBJECTS)
 bin_PROGRAMS = xorp_rib$(EXEEXT)
 noinst_PROGRAMS = add_route$(EXEEXT) main_routemap$(EXEEXT) \
+	test_deletion$(EXEEXT) test_redist$(EXEEXT) \
 	test_register$(EXEEXT) test_register_xrls$(EXEEXT) \
-	test_rib_direct$(EXEEXT) test_rib_xrls$(EXEEXT) \
-	test_redist$(EXEEXT) test_deletion$(EXEEXT)
+	test_rib_direct$(EXEEXT) test_rib_xrls$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_add_route_OBJECTS = add_route.$(OBJEXT)
