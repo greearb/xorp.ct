@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.10 2003/05/10 00:06:38 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.11 2003/05/15 23:10:30 pavlin Exp $
 ##
 
 
@@ -31,6 +31,7 @@ fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
 fea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
 ### MFEA XRL libraries
+fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 fea_LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
 fea_LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
 fea_LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.a
@@ -55,6 +56,7 @@ fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
 fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
 ### MFEA XRL libraries
+fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
 fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
 fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.a
@@ -119,6 +121,7 @@ libfea_a_SOURCES	+= xrl_fti.hh
 libfea_a_SOURCES	+= xrl_ifmanager.hh
 libfea_a_SOURCES	+= xrl_ifupdate.hh
 libfea_a_SOURCES	+= xrl_mfea_node.hh
+libfea_a_SOURCES	+= xrl_mfea_vif_manager.hh
 libfea_a_SOURCES	+= xrl_rawsock4.hh
 libfea_a_SOURCES	+= xrl_target.hh
 
@@ -182,6 +185,7 @@ libfea_a_SOURCES	+= xrl_fti.cc
 libfea_a_SOURCES	+= xrl_ifmanager.cc
 libfea_a_SOURCES	+= xrl_ifupdate.cc
 libfea_a_SOURCES	+= xrl_mfea_node.cc
+libfea_a_SOURCES	+= xrl_mfea_vif_manager.cc
 libfea_a_SOURCES	+= xrl_rawsock4.cc
 libfea_a_SOURCES	+= xrl_target.cc
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.1 2003/05/15 23:10:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.2 2003/05/18 03:19:57 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -2477,6 +2477,11 @@ XrlMfeaNode::mfea_0_1_start_mfea()
 	string msg = c_format("Failed to start MFEA");
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
+
+    if (_xrl_mfea_vif_manager.start() != XORP_OK) {
+	string msg = c_format("Failed to start XRL MFEA Vif Manager");
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
     
     return XrlCmdError::OKAY();
 }
@@ -2484,10 +2489,22 @@ XrlMfeaNode::mfea_0_1_start_mfea()
 XrlCmdError
 XrlMfeaNode::mfea_0_1_stop_mfea()
 {
-    if (stop_mfea() != XORP_OK) {
-	string msg = c_format("Failed to stop MFEA");
-	return XrlCmdError::COMMAND_FAILED(msg);
+    bool is_error = false;
+    string msg;
+    
+    if (_xrl_mfea_vif_manager.stop() != XORP_OK) {
+	msg = c_format("Failed to stop XRL MFEA Vif Manager");
+	is_error = true;
     }
+    
+    if (stop_mfea() != XORP_OK) {
+	if (! is_error)
+	    msg = c_format("Failed to stop MFEA");
+	is_error = true;
+    }
+    
+    if (is_error)
+	return XrlCmdError::COMMAND_FAILED(msg);
     
     return XrlCmdError::OKAY();
 }

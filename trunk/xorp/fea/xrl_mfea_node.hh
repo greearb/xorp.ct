@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.1 2003/05/15 23:10:32 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.2 2003/05/18 03:19:57 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -32,6 +32,7 @@
 #include "xrl/interfaces/cli_manager_xif.hh"
 #include "mfea_node.hh"
 #include "mfea_node_cli.hh"
+#include "xrl_mfea_vif_manager.hh"
 
 
 class EventLoop;
@@ -53,9 +54,14 @@ public:
 	  XrlCommonV0p1Client(xrl_router),
 	  XrlMfeaClientV0p1Client(xrl_router),
 	  XrlCliManagerV0p1Client(xrl_router),
-	  MfeaNodeCli(*static_cast<MfeaNode *>(this))
+	  MfeaNodeCli(*static_cast<MfeaNode *>(this)),
+	  _xrl_mfea_vif_manager(*this, eventloop, xrl_router)
 	{ }
-    virtual ~XrlMfeaNode() { MfeaNode::stop(); MfeaNodeCli::stop(); }
+    virtual ~XrlMfeaNode() {
+	_xrl_mfea_vif_manager.stop();
+	MfeaNode::stop();
+	MfeaNodeCli::stop();
+    }
     
     //
     // XrlMfeaNode front-end interface
@@ -726,6 +732,8 @@ private:
     }
     
     int family() const { return (MfeaNode::family()); }
+    
+    XrlMfeaVifManager	_xrl_mfea_vif_manager;	// The XRL Vif manager
 };
 
 #endif // __FEA_XRL_MFEA_NODE_HH__

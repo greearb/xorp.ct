@@ -97,16 +97,16 @@ noinst_LIBRARIES = libfea.a
 # -- Program Sources
 
 fea_SOURCES = fea.cc
-fea_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+fea_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 fea_dummy_SOURCES = fea_dummy.cc
-fea_dummy_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+fea_dummy_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 test_ifmanager_transaction_SOURCES = test_ifmanager_transaction.cc iftree.cc
 test_ifmanager_transaction_LDADD = $(top_builddir)/libxorp/libxorp.a
 
 test_rawsock4_SOURCES = test_rawsock4.cc rawsock4.cc
 test_rawsock4_LDADD = $(top_builddir)/libxorp/libxorp.a
-libfea_a_SOURCES = fea_module.h mfea_module.h fte.hh fti.hh fti_transaction.hh fticonfig.hh fticonfig_entry_get.hh fticonfig_entry_observer.hh fticonfig_entry_set.hh fticonfig_table_get.hh fticonfig_table_observer.hh fticonfig_table_set.hh ifconfig.hh ifconfig_get.hh ifconfig_observer.hh ifconfig_set.hh ifmanager.hh ifmanager_transaction.hh iftree.hh kernel_utils.hh mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh mfea_vif.hh netlink_socket.hh netlink_socket_utils.hh rawsock4.hh routing_socket.hh routing_socket_utils.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh xrl_mfea_node.hh xrl_rawsock4.hh xrl_target.hh fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc fticonfig_entry_get_dummy.cc fticonfig_entry_get_netlink.cc fticonfig_entry_get_rtsock.cc fticonfig_entry_observer.cc fticonfig_entry_observer_dummy.cc fticonfig_entry_observer_rtsock.cc fticonfig_entry_parse_nlm.cc fticonfig_entry_parse_rtm.cc fticonfig_entry_set.cc fticonfig_entry_set_dummy.cc fticonfig_entry_set_rtsock.cc fticonfig_table_get.cc fticonfig_table_get_dummy.cc fticonfig_table_get_netlink.cc fticonfig_table_get_sysctl.cc fticonfig_table_observer.cc fticonfig_table_observer_dummy.cc fticonfig_table_observer_rtsock.cc fticonfig_table_parse_nlm.cc fticonfig_table_parse_rtm.cc fticonfig_table_set.cc fticonfig_table_set_dummy.cc fticonfig_table_set_rtsock.cc ifconfig.cc ifconfig_get.cc ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc ifconfig_get_sysctl.cc ifconfig_observer.cc ifconfig_observer_dummy.cc ifconfig_observer_rtsock.cc ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc ifconfig_parse_rtm.cc ifconfig_set.cc ifconfig_set_dummy.cc ifconfig_set_ioctl.cc ifmanager_transaction.cc iftree.cc mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc mfea_proto_comm.cc mfea_vif.cc netlink_socket.cc netlink_socket_utils.cc rawsock4.cc routing_socket.cc routing_socket_utils.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc xrl_mfea_node.cc xrl_rawsock4.cc xrl_target.cc
+libfea_a_SOURCES = fea_module.h mfea_module.h fte.hh fti.hh fti_transaction.hh fticonfig.hh fticonfig_entry_get.hh fticonfig_entry_observer.hh fticonfig_entry_set.hh fticonfig_table_get.hh fticonfig_table_observer.hh fticonfig_table_set.hh ifconfig.hh ifconfig_get.hh ifconfig_observer.hh ifconfig_set.hh ifmanager.hh ifmanager_transaction.hh iftree.hh kernel_utils.hh mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh mfea_vif.hh netlink_socket.hh netlink_socket_utils.hh rawsock4.hh routing_socket.hh routing_socket_utils.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh xrl_mfea_node.hh xrl_mfea_vif_manager.hh xrl_rawsock4.hh xrl_target.hh fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc fticonfig_entry_get_dummy.cc fticonfig_entry_get_netlink.cc fticonfig_entry_get_rtsock.cc fticonfig_entry_observer.cc fticonfig_entry_observer_dummy.cc fticonfig_entry_observer_rtsock.cc fticonfig_entry_parse_nlm.cc fticonfig_entry_parse_rtm.cc fticonfig_entry_set.cc fticonfig_entry_set_dummy.cc fticonfig_entry_set_rtsock.cc fticonfig_table_get.cc fticonfig_table_get_dummy.cc fticonfig_table_get_netlink.cc fticonfig_table_get_sysctl.cc fticonfig_table_observer.cc fticonfig_table_observer_dummy.cc fticonfig_table_observer_rtsock.cc fticonfig_table_parse_nlm.cc fticonfig_table_parse_rtm.cc fticonfig_table_set.cc fticonfig_table_set_dummy.cc fticonfig_table_set_rtsock.cc ifconfig.cc ifconfig_get.cc ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc ifconfig_get_sysctl.cc ifconfig_observer.cc ifconfig_observer_dummy.cc ifconfig_observer_rtsock.cc ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc ifconfig_parse_rtm.cc ifconfig_set.cc ifconfig_set_dummy.cc ifconfig_set_ioctl.cc ifmanager_transaction.cc iftree.cc mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc mfea_proto_comm.cc mfea_vif.cc netlink_socket.cc netlink_socket_utils.cc rawsock4.cc routing_socket.cc routing_socket_utils.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc xrl_mfea_node.cc xrl_mfea_vif_manager.cc xrl_rawsock4.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = test_xrls.sh
@@ -147,7 +147,7 @@ iftree.o mfea_config.o mfea_dataflow.o mfea_mrouter.o mfea_node.o \
 mfea_node_cli.o mfea_proto_comm.o mfea_vif.o netlink_socket.o \
 netlink_socket_utils.o rawsock4.o routing_socket.o \
 routing_socket_utils.o xrl_fti.o xrl_ifmanager.o xrl_ifupdate.o \
-xrl_mfea_node.o xrl_rawsock4.o xrl_target.o
+xrl_mfea_node.o xrl_mfea_vif_manager.o xrl_rawsock4.o xrl_target.o
 PROGRAMS =  $(bin_PROGRAMS)
 
 fea_OBJECTS =  fea.o
@@ -155,6 +155,7 @@ fea_DEPENDENCIES =  libfea.a \
 $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
 $(top_builddir)/xrl/interfaces/libfearawpktclient.a \
 $(top_builddir)/xrl/targets/libfeabase.a \
+$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 $(top_builddir)/xrl/interfaces/libclimanagerxif.a \
 $(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
 $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a \
@@ -169,6 +170,7 @@ fea_dummy_DEPENDENCIES =  libfea.a \
 $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
 $(top_builddir)/xrl/interfaces/libfearawpktclient.a \
 $(top_builddir)/xrl/targets/libfeabase.a \
+$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 $(top_builddir)/xrl/interfaces/libclimanagerxif.a \
 $(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
 $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a \
@@ -238,7 +240,8 @@ DEP_FILES =  .deps/demo_fea_ifmgr_client.P .deps/fea.P .deps/fea_dummy.P \
 .deps/routing_socket.P .deps/routing_socket_utils.P \
 .deps/test_ifmanager_transaction.P .deps/test_rawsock4.P \
 .deps/xrl_fti.P .deps/xrl_ifmanager.P .deps/xrl_ifupdate.P \
-.deps/xrl_mfea_node.P .deps/xrl_rawsock4.P .deps/xrl_target.P
+.deps/xrl_mfea_node.P .deps/xrl_mfea_vif_manager.P .deps/xrl_rawsock4.P \
+.deps/xrl_target.P
 SOURCES = $(libfea_a_SOURCES) $(fea_SOURCES) $(fea_dummy_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(test_rawsock4_SOURCES) $(test_ifmanager_transaction_SOURCES)
 OBJECTS = $(libfea_a_OBJECTS) $(fea_OBJECTS) $(fea_dummy_OBJECTS) $(demo_fea_ifmgr_client_OBJECTS) $(test_rawsock4_OBJECTS) $(test_ifmanager_transaction_OBJECTS)
 
