@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.20 2003/10/24 20:51:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.21 2003/10/28 19:36:27 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -98,9 +98,12 @@ XrlMfeaVifManager::start()
 int
 XrlMfeaVifManager::stop()
 {
+    if (is_down())
+	return (XORP_OK);
+
     if (! is_up())
-        return (XORP_ERROR);
-    
+	return (XORP_ERROR);
+
     clean_out_old_state();
     
     ProtoState::stop();
