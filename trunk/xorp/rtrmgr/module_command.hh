@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.12 2003/11/21 20:11:32 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.13 2003/12/02 09:38:55 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -33,8 +33,6 @@ public:
 
     void add_action(const list<string>& action,
 		    const XRLdb& xrldb) throw (ParseError);
-    // void set_path(const string& path);
-    // void set_depends(const string& depends);
     // int execute(TaskManager& taskmgr) const;
     Validation* startup_validation(TaskManager& taskmgr) const;
     Validation* ready_validation(TaskManager& taskmgr) const;
@@ -56,7 +54,8 @@ protected:
     // void exec_complete(const XrlError& err, XrlArgs* xrl_args);
 
     void action_complete(const XrlError& err, XrlArgs* xrl_args,
-			 ConfigTreeNode *ctn, Action *action, string cmd);
+			 ConfigTreeNode *ctn, Action *action,
+			 string cmd) const;
 
 private:
     TemplateTree&	_tt;

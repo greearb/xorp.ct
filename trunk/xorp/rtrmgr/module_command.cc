@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.20 2003/11/22 00:15:07 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.21 2003/12/02 09:38:55 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -25,7 +25,7 @@
 #include "template_tree.hh"
 #include "template_tree_node.hh"
 #include "task.hh"
-#include "parse_error.hh"
+#include "rtrmgr_error.hh"
 
 ModuleCommand::ModuleCommand(TemplateTree& template_tree,
 			     TemplateTreeNode& template_tree_node,
@@ -246,7 +246,7 @@ ModuleCommand::start_transaction(ConfigTreeNode& ctn,
     if (_startcommit == NULL)
 	return XORP_OK;
 
-    XrlRouter::XrlCallback cb = callback(const_cast<ModuleCommand*>(this),
+    XrlRouter::XrlCallback cb = callback(this,
 					 &ModuleCommand::action_complete,
 					 &ctn, _startcommit,
 					 string("start transaction"));
@@ -263,7 +263,7 @@ ModuleCommand::end_transaction(ConfigTreeNode& ctn,
     if (_endcommit == NULL)
 	return XORP_OK;
 
-    XrlRouter::XrlCallback cb = callback(const_cast<ModuleCommand*>(this),
+    XrlRouter::XrlCallback cb = callback(this,
 					 &ModuleCommand::action_complete,
 					 &ctn, _endcommit,
 					 string("end transaction"));
@@ -310,60 +310,61 @@ ModuleCommand::action_complete(const XrlError& err,
 			       XrlArgs* xrl_args,
 			       ConfigTreeNode *ctn,
 			       Action* action,
-			       string cmd)
+			       string cmd) const
 {
     debug_msg("ModuleCommand::action_complete\n");
 
-    if (err == XrlError::OKAY()) {
-	// XXX does this make sense?
-	if (! xrl_args->empty()) {
-	    debug_msg("ARGS: %s\n", xrl_args->str().c_str());
-
-	    list<string> spec_args;
-	    XrlAction* xa = dynamic_cast<XrlAction*>(action);
-	    XLOG_ASSERT(xa != NULL);
-	    string s = xa->xrl_return_spec();
-	    while (true) {
-		string::size_type start = s.find("&");
-		if (start == string::npos) {
-		    spec_args.push_back(s);
-		    break;
-		}
-		spec_args.push_back(s.substr(0, start));
-		debug_msg("spec_args: %s\n", s.substr(0, start).c_str());
-		s = s.substr(start+1, s.size()-(start+1));
-	    }
-	    list<string>::const_iterator iter;
-	    for (iter = spec_args.begin(); iter != spec_args.end(); ++iter) {
-		string::size_type eq = iter->find("=");
-		if (eq == string::npos) {
-		    continue;
-		} else {
-		    XrlAtom atom(iter->substr(0, eq).c_str());
-		    debug_msg("atom name=%s\n", atom.name().c_str());
-		    string varname = iter->substr(eq + 1,
-						  iter->size() - (eq + 1));
-		    debug_msg("varname=%s\n", varname.c_str());
-		    XrlAtom returned_atom;
-		    try {
-			returned_atom = xrl_args->item(atom.name());
-		    } catch (XrlArgs::XrlAtomNotFound& x) {
-			// XXX
-			XLOG_UNFINISHED();
-		    }
-		    string value = returned_atom.value();
-		    debug_msg("found atom = %s\n",
-			      returned_atom.str().c_str());
-		    debug_msg("found value = %s\n", value.c_str());
-		    ctn->set_variable(varname, value);
-		}
-	    }
-	}
-	return;
-    } else {
+    if (err != XrlError::OKAY()) {
 	UNUSED(cmd);
 	// There was an error.  There's nothing we can so here - errors
 	// are handled in the TaskManager.
 	return;
+    }
+
+    if (xrl_args->empty())
+	return;
+
+    //
+    // Handle the XRL arguments
+    //
+    debug_msg("ARGS: %s\n", xrl_args->str().c_str());
+
+    // Create a list with the return arguments
+    list<string> spec_args;
+    XrlAction* xa = dynamic_cast<XrlAction*>(action);
+    XLOG_ASSERT(xa != NULL);
+    string s = xa->xrl_return_spec();
+    while (true) {
+	string::size_type start = s.find("&");
+	if (start == string::npos) {
+	    spec_args.push_back(s);
+	    break;
+	}
+	spec_args.push_back(s.substr(0, start));
+	debug_msg("spec_args: %s\n", s.substr(0, start).c_str());
+	s = s.substr(start + 1, s.size() - (start + 1));
+    }
+
+    list<string>::const_iterator iter;
+    for (iter = spec_args.begin(); iter != spec_args.end(); ++iter) {
+	string::size_type eq = iter->find("=");
+	if (eq == string::npos)
+	    continue;
+
+	XrlAtom atom(iter->substr(0, eq).c_str());
+	debug_msg("atom name=%s\n", atom.name().c_str());
+	string varname = iter->substr(eq + 1, iter->size() - (eq + 1));
+	debug_msg("varname=%s\n", varname.c_str());
+	XrlAtom returned_atom;
+	try {
+	    returned_atom = xrl_args->item(atom.name());
+	} catch (const XrlArgs::XrlAtomNotFound& x) {
+	    // TODO: XXX: IMPLEMENT IT!!
+	    XLOG_UNFINISHED();
+	}
+	string value = returned_atom.value();
+	debug_msg("found atom = %s\n", returned_atom.str().c_str());
+	debug_msg("found value = %s\n", value.c_str());
+	ctn->set_variable(varname, value);
     }
 }
