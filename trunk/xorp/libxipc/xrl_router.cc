@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.38 2004/05/28 05:00:35 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.39 2004/06/10 22:41:13 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -372,6 +372,7 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
 {
     list<XrlRouterDispatchState*>::iterator i;
     i = find(_dsl.begin(), _dsl.end(), ds);
+    XLOG_ASSERT(i == _dsl.begin());
     _dsl.erase(i);
 
     if (e == XrlError::OKAY()) {
@@ -485,7 +486,7 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
     //
     DispatchState *ds = new XrlRouterDispatchState(xrl, xcb);
     _dsl.push_back(ds);
-    _fc->query(xrl_no_args,
+    _fc->query(eventloop(), xrl_no_args,
 	       callback(this, &XrlRouter::resolve_callback, ds));
 
     return true;
