@@ -12,12 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.1 2003/09/24 16:16:08 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.2 2003/09/25 00:54:10 hodson Exp $"
+
+// #define DEBUG_LOGGING 
+#define DEBUG_PRINT_FUNCTION_NAME 
 
 #include <list>
 #include <string>
 
 #include "rtrmgr_module.h"
+#include "libxorp/debug.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "util.hh"
@@ -46,6 +50,8 @@ split(const string& s, char ch)
 string
 find_exec_path_name(const char *progname)
 {
+    debug_msg("%s\n", progname);
+
     XLOG_ASSERT(strlen(progname) <= MAXPATHLEN);
 
     //
@@ -53,6 +59,7 @@ find_exec_path_name(const char *progname)
     //
     const char* p = strrchr(progname, '/');
     if (p) {
+	debug_msg("%s\n",  string(progname, p).c_str());
 	return string(progname, p);
     }
 
@@ -83,12 +90,16 @@ find_exec_path_name(const char *progname)
 static string
 xorp_real_path(const string& path)
 {
+    debug_msg("path: %s\n", path.c_str());
+
     char rp[MAXPATHLEN + 1];
     const char* prp = realpath(path.c_str(), rp);
     if (prp) {
+	debug_msg("return %s\n", prp);
 	return string(prp);
     }
     XLOG_WARNING("realpath(%s) failed.", path.c_str());
+    debug_msg("return %s\n", path.c_str());
     return path;
 }
 
@@ -106,11 +117,19 @@ xorp_path_init(const char* argv0)
     string current_root = find_exec_path_name(argv0) + "/..";
     current_root = xorp_real_path(current_root);
 
+    debug_msg("current_root: %s\n", current_root.c_str());
+
     string build_root = xorp_real_path(XORP_BUILD_ROOT);
+    debug_msg("build_root:   %s\n", build_root.c_str());
     if (current_root == build_root) {
 	s_bin_root = build_root;
 	s_cfg_root = xorp_real_path(XORP_SRC_ROOT);
 	s_boot_file = s_cfg_root + "/rtrmgr/config.boot";
+
+	debug_msg("s_bin_root:   %s\n", s_bin_root.c_str());
+	debug_msg("s_cfg_root:   %s\n", s_cfg_root.c_str());
+	debug_msg("s_boot_file:  %s\n", s_boot_file.c_str());
+
 	return;
     }
 
@@ -118,6 +137,10 @@ xorp_path_init(const char* argv0)
     s_bin_root = install_root;
     s_cfg_root = install_root;
     s_boot_file = s_cfg_root + "/config.boot";
+
+    debug_msg("s_bin_root:   %s\n", s_bin_root.c_str());
+    debug_msg("s_cfg_root:   %s\n", s_cfg_root.c_str());
+    debug_msg("s_boot_file:  %s\n", s_boot_file.c_str());
 }
 
 const string&
