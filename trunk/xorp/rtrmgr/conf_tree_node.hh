@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.20 2004/05/28 18:26:26 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.21 2004/05/28 22:27:56 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -114,7 +114,7 @@ public:
     bool set_variable(const string& varname, string& value);
 
 protected:
-    void split_up_varname(const string& varname,
+    bool split_up_varname(const string& varname,
 			  list<string>& var_parts) const;
     string join_up_varname(const list<string>& var_parts) const;
     enum VarType { NONE, NODE_VALUE, NAMED, TEMPLATE_DEFAULT };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.45 2004/05/31 08:18:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.46 2004/06/04 22:12:03 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -1232,7 +1232,9 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
 	list<string> var_parts;
 
 	XLOG_ASSERT(varname_node != NULL);
-	split_up_varname(varname, var_parts);
+	if (split_up_varname(varname, var_parts) == false) {
+	    return false;
+	}
 	value = varname_node->named_value(var_parts.back());
 	return true;
     }
@@ -1253,8 +1255,16 @@ bool
 ConfigTreeNode::expand_expression(const string& expression,
 				  string& value) const
 {
-    if ((expression[0] != '`') || (expression[expression.size() - 1] != '`'))
+    // Expect string of form: "`" opchar + name + "`"
+    // and the only definition of opchar supported is "~".
+    //
+    if (expression.size() < 4) {
 	return false;
+    }
+    if (expression[0] != '`' ||
+	expression[expression.size() - 1] != '`') {
+	return false;
+    }
 
     // Trim the back-quotes
     string tmp_expr = expression.substr(1, expression.size() - 2);
@@ -1310,7 +1320,9 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
     }
 
     list<string> var_parts;
-    split_up_varname(varname, var_parts);
+    if (split_up_varname(varname, var_parts) == false) {
+	return NULL;
+    }
 
     if (var_parts.back() == "DEFAULT") {
 	// XXX: use the template tree to get the default value
@@ -1442,15 +1454,17 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     return NULL;
 }
 
-void
+bool
 ConfigTreeNode::split_up_varname(const string& varname, 
 				 list<string>& var_parts) const
 {
     debug_msg("split up varname >%s<\n", varname.c_str());
 
-    XLOG_ASSERT(varname[0] == '$');
-    XLOG_ASSERT(varname[1] == '(');
-    XLOG_ASSERT(varname[varname.size() - 1] == ')');
+    if (varname.size() < 4 || varname[0] != '$'
+	|| varname[1] != '(' || varname[varname.size() - 1] != ')') {
+	XLOG_ERROR("Bad variable name: %s", varname.c_str());
+	return false;
+    }
 
     string trimmed = varname.substr(2, varname.size() - 3);
     var_parts = split(trimmed, '.');
@@ -1464,6 +1478,7 @@ ConfigTreeNode::split_up_varname(const string& varname,
 	debug_output += "\n";
 	debug_msg("%s", debug_output.c_str());
     }
+    return true;
 }
 
 string
@@ -1566,7 +1581,9 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
 	{
 	    list<string> var_parts;
 
-	    split_up_varname(varname, var_parts);
+	    if (split_up_varname(varname, var_parts) == false) {
+		return false;
+	    }
 	    node->set_named_value(var_parts.back(), value);
 	    return true;
 	}
@@ -1581,7 +1598,9 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
     // can set a named variable.
     //
     list<string> var_parts;
-    split_up_varname(varname, var_parts);
+    if (split_up_varname(varname, var_parts) == false) {
+	return false;
+    }
     list<string>::iterator iter;
     for (iter = var_parts.begin(); iter != var_parts.end(); ++iter) {
 	debug_msg("VP: %s\n", iter->c_str());
@@ -1602,7 +1621,9 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
 	    XLOG_UNREACHABLE();
 	    break;
 	case NODE_VALUE:
-	    split_up_varname(varname, var_parts);
+	    if (split_up_varname(varname, var_parts) == false) {
+		return false;
+	    }
 	    node->set_named_value(var_parts.back(), value);
 	    return true;
 	case NAMED:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.26 2004/05/28 18:26:26 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.27 2004/05/28 22:27:57 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -28,24 +28,23 @@
 #include "task.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
+#include "util.hh"
 #include "xrldb.hh"
 
 
 static string
 strip_quotes(const string& command, const string& value) throw (ParseError)
 {
-    string tmp_value = value;
-    if (tmp_value[0] == '"') {
-	// Strip the quotes
-	if (tmp_value[tmp_value.length() - 1] != '"') {
-	    string errmsg = c_format("subcommand %s has invalid argument: %s",
-				     command.c_str(), value.c_str());
-	    xorp_throw(ParseError, errmsg);
-	}
-	tmp_value = tmp_value.substr(1, tmp_value.length() - 2);
+    size_t old_size = value.size();
+    string tmp_value = unquote(value);
+
+    if (tmp_value.size() != old_size && tmp_value.size() != old_size - 2) {
+	string errmsg = c_format("subcommand %s has invalid argument: %s",
+				 command.c_str(), value.c_str());
+	xorp_throw(ParseError, errmsg);
     }
 
-    if (tmp_value.empty()) {
+    if (unquote(tmp_value).empty()) {
 	string errmsg = c_format("subcommand %s has empty argument",
 				 command.c_str());
 	xorp_throw(ParseError, errmsg);

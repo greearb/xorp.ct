@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.23 2004/06/02 01:23:53 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.24 2004/06/02 03:57:32 pavlin Exp $"
 
 
 #include <glob.h>
@@ -598,6 +598,10 @@ OpCommandList::find_executable_filename(const string& command_filename,
     const
 {
     struct stat statbuf;
+
+    if (command_filename.size() == 0) {
+	return false;
+    }
 
     if (command_filename[0] == '/') {
 	// Absolute path name

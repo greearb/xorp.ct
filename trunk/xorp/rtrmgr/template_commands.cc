@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.43 2004/05/28 22:27:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.44 2004/06/04 11:38:11 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -177,9 +177,15 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
     bool request_done = false;
     size_t seg_count = 0;
     while (xrl_parts.empty() == false) {
+	if (xrl_parts.front().size() == 0) {
+	    xrl_parts.pop_front();
+	    continue;
+	}
+
 	string segment = xrl_parts.front();
 	debug_msg("segment: %s\n", segment.c_str());
 	string orig_segment = segment;
+
 	if (orig_segment[0] == '\n') {
 	    // Strip the magic "\n" off
 	    if (seg_count == 0)
