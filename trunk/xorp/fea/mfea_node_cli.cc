@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.8 2004/05/15 23:58:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.9 2004/06/10 22:40:55 hodson Exp $"
 
 
 //
@@ -171,10 +171,17 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 		group_range = IPvXNet(IPvX(argv[0].c_str()),
 				      IPvX::addr_bitlen(family()));
 	    } catch (InvalidString) {
-		cli_print(c_format("ERROR: Invalid group range: %s\n",
+		cli_print(c_format("ERROR: Invalid group range address: %s\n",
 				   argv[0].c_str()));
 		return (XORP_ERROR);
+	    } catch (InvalidNetmaskLength) {
+		XLOG_UNREACHABLE();
+		return (XORP_ERROR);
 	    }
+	} catch (InvalidNetmaskLength) {
+	    cli_print(c_format("ERROR: Invalid group range netmask length: %s\n",
+			       argv[0].c_str()));
+	    return (XORP_ERROR);
 	}
 	if (! group_range.is_multicast()) {
 	    cli_print(c_format("ERROR: Group range is not multicast: %s\n",
