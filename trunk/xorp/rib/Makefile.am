@@ -27,10 +27,11 @@ noinst_PROGRAMS += test_redist
 noinst_PROGRAMS	+= test_deletion
 
 # -- No-install Libraries
-noinst_LIBRARIES	 = librib.a
+noinst_LIBRARIES	 = librib.a libribxrl.a
 
 # -- Libraries and library flags to link the binary programs
 LDADD			 = $(noinst_LIBRARIES)
+LDADD			+= ./librib.a
 LDADD			+= $(top_builddir)/xrl/interfaces/libftixif.a
 LDADD			+= $(top_builddir)/libxipc/libfinder.a
 LDADD			+= $(top_builddir)/libxipc/libxipc.a
@@ -230,6 +231,9 @@ librib_a_SOURCES	+= rt_tab_origin.cc
 librib_a_SOURCES	+= rt_tab_redist.cc
 librib_a_SOURCES	+= rt_tab_register.cc
 librib_a_SOURCES	+= vifmanager.cc
+
+libribxrl_a_SOURCES	 = redist_xrl.hh
+libribxrl_a_SOURCES	+= redist_xrl.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = commands

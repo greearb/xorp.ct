@@ -102,10 +102,10 @@ TESTS = test_rib_direct.sh test_rib_xrls.sh test_redist test_register test_delet
 noinst_PROGRAMS = main_routemap test_register test_register_xrls test_rib_client test_rib_direct test_rib_xrls test_redist test_deletion
 
 # -- No-install Libraries
-noinst_LIBRARIES = librib.a
+noinst_LIBRARIES = librib.a libribxrl.a
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
+LDADD = $(noinst_LIBRARIES) ./librib.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 
 # -- Program Sources
 main_routemap_SOURCES = rib_module.h protocol.hh route.hh routemap.hh main_routemap.cc routemap.cc
@@ -138,6 +138,8 @@ test_redist_LDADD = ./librib.a $(top_builddir)/libxorp/libxorp.a
 # -- Library Sources
 librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_client.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
 
+libribxrl_a_SOURCES = redist_xrl.hh redist_xrl.cc
+
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = commands test_rib_direct.sh.in test_rib_xrls.sh.in xrl_shell_funcs.sh
 
@@ -160,6 +162,10 @@ am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
 	rt_tab_redist.$(OBJEXT) rt_tab_register.$(OBJEXT) \
 	vifmanager.$(OBJEXT)
 librib_a_OBJECTS = $(am_librib_a_OBJECTS)
+libribxrl_a_AR = $(AR) cru
+libribxrl_a_LIBADD =
+am_libribxrl_a_OBJECTS = redist_xrl.$(OBJEXT)
+libribxrl_a_OBJECTS = $(am_libribxrl_a_OBJECTS)
 bin_PROGRAMS = xorp_rib$(EXEEXT)
 noinst_PROGRAMS = main_routemap$(EXEEXT) test_register$(EXEEXT) \
 	test_register_xrls$(EXEEXT) test_rib_client$(EXEEXT) \
@@ -169,7 +175,7 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_main_routemap_OBJECTS = main_routemap.$(OBJEXT) routemap.$(OBJEXT)
 main_routemap_OBJECTS = $(am_main_routemap_OBJECTS)
-main_routemap_DEPENDENCIES = librib.a \
+main_routemap_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -183,7 +189,7 @@ main_routemap_LDFLAGS =
 am_test_deletion_OBJECTS = rt_tab_expect.$(OBJEXT) \
 	test_deletion.$(OBJEXT)
 test_deletion_OBJECTS = $(am_test_deletion_OBJECTS)
-test_deletion_DEPENDENCIES = librib.a \
+test_deletion_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -201,7 +207,7 @@ test_redist_LDFLAGS =
 am_test_register_OBJECTS = dummy_register_server.$(OBJEXT) \
 	dummy_rib_manager.$(OBJEXT) test_register.$(OBJEXT)
 test_register_OBJECTS = $(am_test_register_OBJECTS)
-test_register_DEPENDENCIES = librib.a \
+test_register_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -215,7 +221,7 @@ test_register_LDFLAGS =
 am_test_register_xrls_OBJECTS = rib_manager.$(OBJEXT) \
 	test_register_xrls.$(OBJEXT) xrl_target.$(OBJEXT)
 test_register_xrls_OBJECTS = $(am_test_register_xrls_OBJECTS)
-test_register_xrls_DEPENDENCIES = librib.a \
+test_register_xrls_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -231,7 +237,7 @@ test_register_xrls_DEPENDENCIES = librib.a \
 test_register_xrls_LDFLAGS =
 am_test_rib_client_OBJECTS = test_rib_client.$(OBJEXT)
 test_rib_client_OBJECTS = $(am_test_rib_client_OBJECTS)
-test_rib_client_DEPENDENCIES = librib.a \
+test_rib_client_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -246,7 +252,7 @@ am_test_rib_direct_OBJECTS = dummy_register_server.$(OBJEXT) \
 	dummy_rib_manager.$(OBJEXT) parser.$(OBJEXT) \
 	test_rib_direct.$(OBJEXT)
 test_rib_direct_OBJECTS = $(am_test_rib_direct_OBJECTS)
-test_rib_direct_DEPENDENCIES = librib.a \
+test_rib_direct_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -261,7 +267,7 @@ am_test_rib_xrls_OBJECTS = dummy_register_server.$(OBJEXT) \
 	dummy_rib_manager.$(OBJEXT) parser.$(OBJEXT) \
 	test_rib_xrls.$(OBJEXT) xrl_target.$(OBJEXT)
 test_rib_xrls_OBJECTS = $(am_test_rib_xrls_OBJECTS)
-test_rib_xrls_DEPENDENCIES = librib.a \
+test_rib_xrls_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -277,7 +283,7 @@ test_rib_xrls_LDFLAGS =
 am_xorp_rib_OBJECTS = main_rib.$(OBJEXT) rib_manager.$(OBJEXT) \
 	xrl_target.$(OBJEXT)
 xorp_rib_OBJECTS = $(am_xorp_rib_OBJECTS)
-xorp_rib_DEPENDENCIES = librib.a \
+xorp_rib_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -300,6 +306,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/dummy_rib_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/main_rib.Po $(DEPDIR)/main_routemap.Po \
 @AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/protocol.Po \
+@AMDEP_TRUE@	$(DEPDIR)/redist_xrl.Po \
 @AMDEP_TRUE@	$(DEPDIR)/register_server.Po $(DEPDIR)/rib.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rib_client.Po $(DEPDIR)/rib_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/routemap.Po $(DEPDIR)/rt_tab_base.Po \
@@ -329,13 +336,14 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(librib_a_SOURCES) $(main_routemap_SOURCES) \
-	$(test_deletion_SOURCES) $(test_redist_SOURCES) \
-	$(test_register_SOURCES) $(test_register_xrls_SOURCES) \
-	$(test_rib_client_SOURCES) $(test_rib_direct_SOURCES) \
-	$(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
+DIST_SOURCES = $(librib_a_SOURCES) $(libribxrl_a_SOURCES) \
+	$(main_routemap_SOURCES) $(test_deletion_SOURCES) \
+	$(test_redist_SOURCES) $(test_register_SOURCES) \
+	$(test_register_xrls_SOURCES) $(test_rib_client_SOURCES) \
+	$(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) \
+	$(xorp_rib_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(librib_a_SOURCES) $(main_routemap_SOURCES) $(test_deletion_SOURCES) $(test_redist_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_client_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
+SOURCES = $(librib_a_SOURCES) $(libribxrl_a_SOURCES) $(main_routemap_SOURCES) $(test_deletion_SOURCES) $(test_redist_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_client_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
 
 all: all-am
 
@@ -357,6 +365,10 @@ librib.a: $(librib_a_OBJECTS) $(librib_a_DEPENDENCIES)
 	-rm -f librib.a
 	$(librib_a_AR) librib.a $(librib_a_OBJECTS) $(librib_a_LIBADD)
 	$(RANLIB) librib.a
+libribxrl.a: $(libribxrl_a_OBJECTS) $(libribxrl_a_DEPENDENCIES) 
+	-rm -f libribxrl.a
+	$(libribxrl_a_AR) libribxrl.a $(libribxrl_a_OBJECTS) $(libribxrl_a_LIBADD)
+	$(RANLIB) libribxrl.a
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -423,6 +435,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_routemap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/protocol.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist_xrl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_client.Po@am__quote@
