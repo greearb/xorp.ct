@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.4 2003/03/10 23:20:13 hodson Exp $"
+#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.5 2003/05/13 00:36:24 hodson Exp $"
 
 //
 // This program is a simple example of what is required to be an interface
@@ -75,6 +75,12 @@ public:
 	UNUSED(desc);
 	status_no = PROC_READY;
 	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError common_0_1_shutdown()
+    {
+	//XXX should this one be used?
+	return XrlCmdError::COMMAND_FAILED();
     }
     
     XrlCmdError fea_ifmgr_client_0_1_interface_update(
