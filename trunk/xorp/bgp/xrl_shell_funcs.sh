@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.2 2003/01/26 06:15:53 atanu Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.3 2003/05/29 23:34:02 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -77,54 +77,6 @@ shutdown()
 {
     echo -n "shutdown" $*
     $CALLXRL "finder://bgp/common/0.1/shutdown"
-}
-
-# Parse a old style config and convert it to using XRL's
-
-bgp_xrl()
-{
-	cat $1 |
-	while read line
-	do
-		#echo $line
-		case $line in
-		\#*)
-			#echo "Comments: " $line
-			;;
-		SERVER*)
-			#echo "Server: " $line
-			set $line;shift
-			LOCALHOST=$1
-			PORT=$2
-			;;
-		LOCAL*)
-			#echo "Server: " $line
-			set $line;shift
-			AS=$1
-			ID=$2
-			VERSION=$3
-			HOLDTIME=$4
-			local_config $LOCALHOST $PORT $AS $ID $VERSION $HOLDTIME
-			;;
-		PEER*)
-			#echo "Server: " $line
-			set $line;shift
-			PEER=$1
-			PEER_PORT=$2
-			PEER_AS=$3
-			NEXT_HOP=$4
-			add_peer $PEER $PEER_AS $PEER_PORT $NEXT_HOP
-			enable_peer $PEER $PEER_AS
-			;;
-		ROUTE*)
-			#echo "Route: " $line
-			echo "Sorry: not dealing with adding routes" >&2
-			;;
-		*)
-			#echo "Unknown: " $line
-			;;
-		esac
-	done
 }
 
 time_wait_seconds()
