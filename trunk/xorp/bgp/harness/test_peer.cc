@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.20 2004/04/15 16:13:30 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.21 2004/05/16 00:26:24 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -792,7 +792,7 @@ main(int argc, char **argv)
     xlog_start();
 
     int c;
-    const char *finder_host = FINDER_DEFAULT_HOST.str().c_str();
+    string finder_host = FINDER_DEFAULT_HOST.str();
     const char *server = SERVER;
     bool verbose = false;
     bool trace = false;
@@ -818,7 +818,7 @@ main(int argc, char **argv)
 
     try {
 	EventLoop eventloop;
-	XrlStdRouter router(eventloop, server, finder_host);
+	XrlStdRouter router(eventloop, server, finder_host.c_str());
 	TestPeer test_peer(eventloop, router, server, verbose);
 	XrlTestPeerTarget xrl_target(&router, test_peer, trace);
 

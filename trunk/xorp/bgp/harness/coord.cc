@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.14 2003/09/16 18:13:46 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.15 2004/05/16 00:26:23 pavlin Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -247,7 +247,7 @@ main(int argc, char **argv)
     xlog_start();
 
     int c;
-    const char *finder_host = FINDER_DEFAULT_HOST.str().c_str();
+    string finder_host = FINDER_DEFAULT_HOST.str();
     const char *server = SERVER;
 
     while((c = getopt (argc, argv, "h:")) != EOF) {
@@ -262,7 +262,7 @@ main(int argc, char **argv)
 
     try {
 	EventLoop eventloop;
-	XrlStdRouter router(eventloop, server, finder_host);
+	XrlStdRouter router(eventloop, server, finder_host.c_str());
 	Command com(eventloop, router);
 	Coord coord(eventloop, com);
 	XrlCoordTarget xrl_target(&router, coord);
