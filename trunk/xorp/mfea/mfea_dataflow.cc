@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.3 2003/03/10 23:20:38 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.4 2003/03/30 03:50:43 pavlin Exp $"
 
 
 //
@@ -46,7 +46,6 @@
 //
 // Local functions prototypes
 //
-static void	mfea_dfe_measurement_timer_timeout(void *data_pointer);
 
 
 MfeaDft::MfeaDft(MfeaNode& mfea_node)
@@ -285,6 +284,12 @@ MfeaDfe::mfea_dft() const
     return (_mfea_dfe_lookup.mfea_dft());
 }
 
+EventLoop&
+MfeaDfe::event_loop() const
+{
+    return (mfea_dft().mfea_node().event_loop());
+}
+
 int
 MfeaDfe::family() const
 {
@@ -444,10 +449,11 @@ MfeaDfe::test_sg_count()
 void
 MfeaDfe::start_measurement()
 {
-    _measurement_timer.start(_measurement_interval.sec(),
-			     _measurement_interval.usec(),
-			     mfea_dfe_measurement_timer_timeout,
-			     this);
+    _measurement_timer =
+	event_loop().new_oneoff_after(_measurement_interval,
+				      callback(this,
+					       &MfeaDfe::measurement_timer_timeout));
+    
     // XXX: for simulation purpose, replace gettimeofday() with NOW()
     struct timeval current_time;
     gettimeofday(&current_time, NULL);
@@ -519,16 +525,14 @@ MfeaDfe::measured_bytes() const
     return (result.bytecnt());
 }
 
-static void
-mfea_dfe_measurement_timer_timeout(void *data_pointer)
+void
+MfeaDfe::measurement_timer_timeout()
 {
-    MfeaDfe *mfea_dfe = (MfeaDfe *)data_pointer;
-    
-    if (mfea_dfe->test_sg_count()) {
+    if (test_sg_count()) {
 	// Time to deliver a signal
-	mfea_dfe->dataflow_signal_send();
+	dataflow_signal_send();
     }
     
     // Restart the measurements
-    mfea_dfe->start_measurement();
+    start_measurement();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.8 2003/03/17 23:24:29 pavlin Exp $"
+#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.9 2003/03/18 02:44:35 pavlin Exp $"
 
 
 //
@@ -29,7 +29,6 @@
 #include "libxorp/exceptions.hh"
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
-#include "mrt/timer.hh"
 #include "cli/xrl_cli_node.hh"
 #include "mfea/xrl_mfea_node.hh"
 
@@ -157,7 +156,6 @@ main(int argc, char *argv[])
 	// Init stuff
 	//
 	EventLoop event_loop;
-	timers_init();
 	
 	//
 	// Finder
@@ -246,7 +244,6 @@ main(int argc, char *argv[])
 	
 	// Main loop
 	for (;;) {
-	    xorp_schedule_mtimer(event_loop);
 	    event_loop.run();
 	}
 	

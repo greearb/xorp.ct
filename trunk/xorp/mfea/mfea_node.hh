@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_node.hh,v 1.4 2003/03/18 02:44:34 pavlin Exp $
+// $XORP: xorp/mfea/mfea_node.hh,v 1.5 2003/03/30 03:50:44 pavlin Exp $
 
 
 #ifndef __MFEA_MFEA_NODE_HH__
@@ -936,15 +936,6 @@ public:
     int reset_mrib_table_default_metric();
     
     /**
-     * Get a reference to the timer for periodic update of the local
-     * MRIB table (@ref MribTable) from the kernel.
-     * 
-     * @return a reference to the timer for periodic update of the local
-     * MRIB table (@ref MribTable) from the kernel.
-     */
-    Timer&	mrib_table_read_timer() { return (_mrib_table_read_timer); }
-    
-    /**
      * Get a copy of the kernel MRIB (@ref Mrib) information.
      * 
      * @param mrib_table a pointer to the routing table array composed
@@ -996,7 +987,8 @@ public:
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
     
 private:
-    // Private functions
+    // Private methods
+    void mrib_table_read_timer_timeout();
     
     // Private state
     vector<UnixComm *>	_unix_comms;	// The set of active UnixComm entries
@@ -1008,7 +1000,7 @@ private:
     ConfigParam<uint32_t> _mrib_table_default_metric;
 #define MRIB_TABLE_READ_PERIOD_SEC 10
 #define MRIB_TABLE_READ_PERIOD_USEC 0
-    Timer	_mrib_table_read_timer;	// Timer to (re)read the MRIB table
+    XorpTimer	_mrib_table_read_timer;	// Timer to (re)read the MRIB table
     MfeaDft	_mfea_dft;		// The dataflow monitoring table
     
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_dataflow.hh,v 1.3 2003/03/10 23:20:38 hodson Exp $
+// $XORP: xorp/mfea/mfea_dataflow.hh,v 1.4 2003/03/30 03:50:44 pavlin Exp $
 
 
 #ifndef __MFEA_MFEA_DATAFLOW_HH__
@@ -26,9 +26,9 @@
 
 #include <list>
 
+#include "libxorp/timer.hh"
 #include "libproto/proto_unit.hh"
 #include "mrt/mrt.hh"
-#include "mrt/timer.hh"
 #include "mfea_unix_comm.hh"
 
 
@@ -318,6 +318,13 @@ public:
     MfeaDft& mfea_dft() const;
     
     /**
+     * Get a reference to the @ref EventLoop.
+     * 
+     * @return a reference to the @ref EventLoop.
+     */
+    EventLoop& event_loop() const;
+    
+    /**
      * Get the address family.
      * 
      * @return the address family (e.g., AF_INET or AF_INET6
@@ -487,6 +494,9 @@ public:
     
     
 private:
+    // Private methods
+    void measurement_timer_timeout();
+    
     // Private state
     MfeaDfeLookup& _mfea_dfe_lookup;  // The Mfea dataflow lookup entry (yuck!)
     TimeVal	_threshold_interval;	// The threshold interval
@@ -506,7 +516,7 @@ private:
     bool	_is_bootstrap_completed;
     
     TimeVal	_measurement_interval;	// Interval between two measurements
-    Timer	_measurement_timer;	// Timer to perform measurements
+    XorpTimer	_measurement_timer;	// Timer to perform measurements
     
     // Time when current measurement window has started
     // XXX: used for debug purpose only

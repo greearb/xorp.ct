@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.5 2003/03/18 02:44:34 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.6 2003/03/30 03:50:44 pavlin Exp $"
 
 
 //
@@ -50,7 +50,6 @@
 //
 // Local functions prototypes
 //
-static void mrib_table_read_timer_timeout(void *data_pointer);
 
 
 /**
@@ -140,9 +139,9 @@ MfeaNode::start(void)
     
     // Start the timer to read immediately the MRIB table
     mrib_table().clear();
-    mrib_table_read_timer().start(0, 0,
-				  mrib_table_read_timer_timeout,
-				  this);
+    _mrib_table_read_timer =
+	event_loop().new_oneoff_after(TimeVal(0,0),
+				      callback(this, &MfeaNode::mrib_table_read_timer_timeout));
     
     return (XORP_OK);
 }
@@ -171,7 +170,7 @@ MfeaNode::stop(void)
     }
     
     // Clear the MRIB table
-    mrib_table_read_timer().cancel();
+    _mrib_table_read_timer.unschedule();
     mrib_table().clear();
     
     if (ProtoNode<MfeaVif>::stop() < 0)
@@ -1812,16 +1811,14 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 }
 
 /**
- * mrib_table_read_timer_timeout:
- * @data_pointer: The #MfeaNode to apply this timeout handler to.
+ * MfeaNode::mrib_table_read_timer_timeout:
  * 
  * Timeout handler to read the MRIB table.
  **/
-static void
-mrib_table_read_timer_timeout(void *data_pointer)
+void
+MfeaNode::mrib_table_read_timer_timeout()
 {
-    MfeaNode *mfea_node = (MfeaNode *)data_pointer;
-    MribTable new_mrib_table(mfea_node->family());
+    MribTable new_mrib_table(family());
     MribTable::iterator iter;
     bool is_changed = false;
     
@@ -1830,7 +1827,7 @@ mrib_table_read_timer_timeout(void *data_pointer)
     //
     do {
 	Mrib *new_mrib_array = NULL;
-	int new_mrib_array_size = mfea_node->get_mrib_table(&new_mrib_array);
+	int new_mrib_array_size = get_mrib_table(&new_mrib_array);
 	
 	if (new_mrib_array_size > 0) {
 	    for (int i = 0; i < new_mrib_array_size; i++) {
@@ -1844,15 +1841,15 @@ mrib_table_read_timer_timeout(void *data_pointer)
     //
     // Delete the entries that have disappeared
     //
-    for (iter = mfea_node->mrib_table().begin();
-	 iter != mfea_node->mrib_table().end();
+    for (iter = mrib_table().begin();
+	 iter != mrib_table().end();
 	 ++iter) {
 	Mrib *mrib = *iter;
 	if (mrib == NULL)
 	    continue;
 	Mrib *new_mrib = new_mrib_table.find_exact(mrib->dest_prefix());
 	if ((new_mrib == NULL) || (*new_mrib != *mrib)) {
-	    mfea_node->send_delete_mrib(*mrib);
+	    send_delete_mrib(*mrib);
 	    is_changed = true;
 	}
     }
@@ -1866,9 +1863,9 @@ mrib_table_read_timer_timeout(void *data_pointer)
 	Mrib *new_mrib = *iter;
 	if (new_mrib == NULL)
 	    continue;
-	Mrib *mrib = mfea_node->mrib_table().find_exact(new_mrib->dest_prefix());
+	Mrib *mrib = mrib_table().find_exact(new_mrib->dest_prefix());
 	if ((mrib == NULL) || (*new_mrib != *mrib)) {
-	    mfea_node->send_add_mrib(*new_mrib);
+	    send_add_mrib(*new_mrib);
 	    is_changed = true;
 	}
     }
@@ -1877,7 +1874,7 @@ mrib_table_read_timer_timeout(void *data_pointer)
     // Replace the table if changed
     //
     if (is_changed) {
-	mfea_node->mrib_table().clear();
+	mrib_table().clear();
 	
 	for (iter = new_mrib_table.begin();
 	     iter != new_mrib_table.end();
@@ -1885,17 +1882,18 @@ mrib_table_read_timer_timeout(void *data_pointer)
 	    Mrib *new_mrib = *iter;
 	    if (new_mrib == NULL)
 		continue;
-	    mfea_node->mrib_table().insert(*new_mrib);
+	    mrib_table().insert(*new_mrib);
 	}
 	
-	mfea_node->send_set_mrib_done();
+	send_set_mrib_done();
     }
     
     //
     // Start again the timer
     //
-    mfea_node->mrib_table_read_timer().start(MRIB_TABLE_READ_PERIOD_SEC,
-					     MRIB_TABLE_READ_PERIOD_USEC,
-					     mrib_table_read_timer_timeout,
-					     mfea_node);
+    _mrib_table_read_timer =
+	event_loop().new_oneoff_after(TimeVal(MRIB_TABLE_READ_PERIOD_SEC,
+					      MRIB_TABLE_READ_PERIOD_USEC),
+				      callback(this,
+					       &MfeaNode::mrib_table_read_timer_timeout));
 }
