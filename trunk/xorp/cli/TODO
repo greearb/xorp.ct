@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/cli/TODO,v 1.4 2003/08/27 23:19:02 pavlin Exp $
+# $XORP: xorp/cli/TODO,v 1.5 2003/11/06 20:55:21 pavlin Exp $
 #
 
 * Currently, the functions of 'j' and 'k' in page mode are:
@@ -46,8 +46,6 @@
   do not match
 
 * Change/fix pop_token() to return an error when no pair of quotations found
-
-* Add support to handle longer lines when paging
 
 * Check if the cli_client->_buffer_line magic indeed works if the
   very last cli_printf() doesn't have '\n' at the end.
