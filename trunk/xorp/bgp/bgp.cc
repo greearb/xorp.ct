@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.43 2004/12/05 16:14:34 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.44 2004/12/05 22:23:53 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -565,8 +565,12 @@ bool
 BGPMain::get_peer_id(const Iptuple& iptuple, IPv4& peer_id)
 {
     BGPPeer *peer = find_peer(iptuple);
-    if (peer == NULL)
+
+    if (0 == peer) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
 	return false;
+    }
+
     peer_id = peer->peerdata()->id();
     return true;
 }
@@ -577,8 +581,12 @@ BGPMain::get_peer_status(const Iptuple& iptuple,
 			 uint32_t& admin_status)
 {
     BGPPeer *peer = find_peer(iptuple);
-    if (peer == NULL)
+
+    if (0 == peer) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
 	return false;
+    }
+
     peer_state = peer->state();
     //XXX state stopped is only for our internal use.
     if (peer_state == STATESTOPPED)
@@ -593,8 +601,11 @@ BGPMain::get_peer_negotiated_version(const Iptuple& iptuple,
 				     int32_t& neg_version)
 {
     BGPPeer *peer = find_peer(iptuple);
-    if (peer == NULL)
+
+    if (0 == peer) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
 	return false;
+    }
 
     if (peer->state() == STATEESTABLISHED)
 	neg_version = 4; /* we only support BGP 4 */
@@ -609,8 +620,12 @@ bool
 BGPMain::get_peer_as(const Iptuple& iptuple, uint32_t& peer_as)
 {
     BGPPeer *peer = find_peer(iptuple);
-    if (peer == NULL)
+
+    if (0 == peer) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
 	return false;
+    }
+
     const BGPPeerData* pd = peer->peerdata();
 
     // XXX is it appropriate to return an extended AS number in this
@@ -630,8 +645,12 @@ BGPMain::get_peer_msg_stats(const Iptuple& iptuple,
 			    uint32_t& in_update_elapsed)
 {
     BGPPeer *peer = find_peer(iptuple);
-    if (peer == NULL)
+
+    if (0 == peer) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
 	return false;
+    }
+
     peer->get_msg_stats(in_updates, out_updates, in_msgs, out_msgs,
 			last_error, in_update_elapsed);
     return true;
@@ -643,8 +662,12 @@ BGPMain::get_peer_established_stats(const Iptuple& iptuple,
 				    uint32_t& established_time)
 {
     BGPPeer *peer = find_peer(iptuple);
-    if (peer == NULL)
+
+    if (0 == peer) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
 	return false;
+    }
+
     transitions = peer->get_established_transitions();
     established_time = peer->get_established_time();
     return true;
@@ -661,8 +684,12 @@ BGPMain::get_peer_timer_config(const Iptuple& iptuple,
 			       uint32_t& min_route_adv_interval)
 {
     BGPPeer *peer = find_peer(iptuple);
-    if (peer == NULL)
+
+    if (0 == peer) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
 	return false;
+    }
+
     const BGPPeerData* pd = peer->peerdata();
     retry_interval = (pd->get_retry_duration() / 1000);
     hold_time = (pd->get_hold_duration() / 1000);
