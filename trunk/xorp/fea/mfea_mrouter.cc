@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.8 2003/08/05 05:44:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.9 2003/08/07 01:07:28 pavlin Exp $"
 
 
 //
@@ -263,6 +263,9 @@ MfeaMrouter::open_mrouter_socket()
     if (_mrouter_socket >= 0)
 	return (_mrouter_socket);
     
+    if (kernel_mrouter_ipproto() < 0)
+	return (XORP_ERROR);
+    
     //
     // XXX: if we have already IGMP or ICMPV6 socket, then reuse it
     //
@@ -369,6 +372,9 @@ int
 MfeaMrouter::close_mrouter_socket()
 {
     if (_mrouter_socket < 0)
+	return (XORP_ERROR);
+    
+    if (kernel_mrouter_ipproto() < 0)
 	return (XORP_ERROR);
     
     //
