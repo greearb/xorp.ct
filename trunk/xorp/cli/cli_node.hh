@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.1.1.1 2002/12/11 23:55:52 hodson Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.2 2003/01/16 19:28:57 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -102,19 +102,19 @@ public:
      * This method can be called more than once to add a number of
      * subnet addresses.
      * 
-     * @param ipvxnet the subnet address to add.
+     * @param subnet_addr the subnet address to add.
      */
-    void	add_enable_cli_access_from_subnet(const IPvXNet& ipvxnet);
+    void	add_enable_cli_access_from_subnet(const IPvXNet& subnet_addr);
     
     /**
      * Delete a subnet address from the list of subnet addresses enabled for
      * CLI access.
      * 
-     * @param ipvxnet the subnet address to delete.
+     * @param subnet_addr the subnet address to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR (e.g., if the subnet
      * address was not added before).
      */
-    int		delete_enable_cli_access_from_subnet(const IPvXNet& ipvxnet);
+    int		delete_enable_cli_access_from_subnet(const IPvXNet& subnet_addr);
     
     /**
      * Add a subnet address to the list of subnet addresses disabled for
@@ -123,19 +123,19 @@ public:
      * This method can be called more than once to add a number of
      * subnet addresses.
      * 
-     * @param ipvxnet the subnet address to add.
+     * @param subnet_addr the subnet address to add.
      */
-    void	add_disable_cli_access_from_subnet(const IPvXNet& ipvxnet);
+    void	add_disable_cli_access_from_subnet(const IPvXNet& subnet_addr);
     
     /**
      * Delete a subnet address from the list of subnet addresses disabled for
      * CLI access.
      * 
-     * @param ipvxnet the subnet address to delete.
+     * @param subnet_addr the subnet address to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR (e.g., if the subnet
      * address was not added before).
      */
-    int		delete_disable_cli_access_from_subnet(const IPvXNet& ipvxnet);
+    int		delete_disable_cli_access_from_subnet(const IPvXNet& subnet_addr);
     
     /**
      * Get the @ref CliCommand entry for the CLI root command.

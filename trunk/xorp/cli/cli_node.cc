@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.63 2002/12/09 18:28:53 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.1.1.1 2002/12/11 23:55:52 hodson Exp $"
 
 
 //
@@ -140,7 +140,7 @@ CliNode::stop(void)
 
 /**
  * CliNode::add_enable_cli_access_from_subnet:
- * @ipvxnet: The subnet address to add.
+ * @subnet_addr: The subnet address to add.
  * 
  * Add a subnet address to the list of subnet addresses enabled for
  * CLI access.
@@ -148,7 +148,7 @@ CliNode::stop(void)
  * subnet addresses.
  **/
 void
-CliNode::add_enable_cli_access_from_subnet(const IPvXNet& ipvxnet)
+CliNode::add_enable_cli_access_from_subnet(const IPvXNet& subnet_addr)
 {
     list<IPvXNet>::iterator iter;
     
@@ -157,16 +157,16 @@ CliNode::add_enable_cli_access_from_subnet(const IPvXNet& ipvxnet)
 	 iter != _enable_cli_access_subnet_list.end();
 	 ++iter) {
 	const IPvXNet& tmp_ipvxnet = *iter;
-	if (tmp_ipvxnet == ipvxnet)
+	if (tmp_ipvxnet == subnet_addr)
 	    return;		// Subnet address already added
     }
     
-    _enable_cli_access_subnet_list.push_back(ipvxnet);
+    _enable_cli_access_subnet_list.push_back(subnet_addr);
 }
 
 /**
  * CliNode::delete_enable_cli_access_from_subnet:
- * @ipvxnet: The subnet address to delete.
+ * @subnet_addr: The subnet address to delete.
  * 
  * Delete a subnet address from the list of subnet addresses enabled for
  * CLI access.
@@ -174,7 +174,7 @@ CliNode::add_enable_cli_access_from_subnet(const IPvXNet& ipvxnet)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-CliNode::delete_enable_cli_access_from_subnet(const IPvXNet& ipvxnet)
+CliNode::delete_enable_cli_access_from_subnet(const IPvXNet& subnet_addr)
 {
     list<IPvXNet>::iterator iter;
     
@@ -183,7 +183,7 @@ CliNode::delete_enable_cli_access_from_subnet(const IPvXNet& ipvxnet)
 	 iter != _enable_cli_access_subnet_list.end();
 	 ++iter) {
 	const IPvXNet& tmp_ipvxnet = *iter;
-	if (tmp_ipvxnet == ipvxnet) {
+	if (tmp_ipvxnet == subnet_addr) {
 	    _enable_cli_access_subnet_list.erase(iter);
 	    return (XORP_OK);	// Entry erased
 	}
@@ -194,7 +194,7 @@ CliNode::delete_enable_cli_access_from_subnet(const IPvXNet& ipvxnet)
 
 /**
  * CliNode::add_disable_cli_access_from_subnet:
- * @ipvxnet: The subnet address to add.
+ * @subnet_addr: The subnet address to add.
  * 
  * Add a subnet address to the list of subnet addresses disabled for
  * CLI access.
@@ -202,7 +202,7 @@ CliNode::delete_enable_cli_access_from_subnet(const IPvXNet& ipvxnet)
  * subnet addresses.
  **/
 void
-CliNode::add_disable_cli_access_from_subnet(const IPvXNet& ipvxnet)
+CliNode::add_disable_cli_access_from_subnet(const IPvXNet& subnet_addr)
 {
     list<IPvXNet>::iterator iter;
     
@@ -211,16 +211,16 @@ CliNode::add_disable_cli_access_from_subnet(const IPvXNet& ipvxnet)
 	 iter != _disable_cli_access_subnet_list.end();
 	 ++iter) {
 	const IPvXNet& tmp_ipvxnet = *iter;
-	if (tmp_ipvxnet == ipvxnet)
+	if (tmp_ipvxnet == subnet_addr)
 	    return;		// Subnet address already added
     }
     
-    _disable_cli_access_subnet_list.push_back(ipvxnet);
+    _disable_cli_access_subnet_list.push_back(subnet_addr);
 }
 
 /**
  * CliNode::delete_disable_cli_access_from_subnet:
- * @ipvxnet: The subnet address to delete.
+ * @subnet_addr: The subnet address to delete.
  * 
  * Delete a subnet address from the list of subnet addresses disabled for
  * CLI access.
@@ -228,7 +228,7 @@ CliNode::add_disable_cli_access_from_subnet(const IPvXNet& ipvxnet)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-CliNode::delete_disable_cli_access_from_subnet(const IPvXNet& ipvxnet)
+CliNode::delete_disable_cli_access_from_subnet(const IPvXNet& subnet_addr)
 {
     list<IPvXNet>::iterator iter;
     
@@ -237,7 +237,7 @@ CliNode::delete_disable_cli_access_from_subnet(const IPvXNet& ipvxnet)
 	 iter != _disable_cli_access_subnet_list.end();
 	 ++iter) {
 	const IPvXNet& tmp_ipvxnet = *iter;
-	if (tmp_ipvxnet == ipvxnet) {
+	if (tmp_ipvxnet == subnet_addr) {
 	    _disable_cli_access_subnet_list.erase(iter);
 	    return (XORP_OK);	// Entry erased
 	}
