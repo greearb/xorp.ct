@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.27 2004/06/10 22:41:30 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.28 2004/08/13 23:24:03 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -964,7 +964,8 @@ PimMre::recompute_set_keepalive_timer_sg()
 	//        set KeepaliveTimer(S,G) to Keepalive_Period
 	//
 	if ((rpf_interface_s() == pim_mfc->iif_vif_index())
-	    && is_joined_state()) {
+	    && is_joined_state()
+	    && inherited_olist_sg().any()) {
 	    should_set_keepalive_timer_sg = true;
 	    break;
 	}
