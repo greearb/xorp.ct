@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.15 2003/10/14 22:39:46 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.1 2004/02/12 20:11:25 pavlin Exp $"
 
 
 //
@@ -41,13 +41,13 @@ StaticRoutesNode::StaticRoutesNode(EventLoop& eventloop)
     //
     // Set the node status
     //
-    _node_status = PROC_READY;
+    _node_status = PROC_STARTUP;
 }
 
 StaticRoutesNode::~StaticRoutesNode()
 {
     if ((ServiceBase::status() != SHUTDOWN)
-	|| (ServiceBase::status() != FAILED)) {
+	&& (ServiceBase::status() != FAILED)) {
 	shutdown();
     }
 }
@@ -65,7 +65,7 @@ StaticRoutesNode::startup()
     //
     // Set the node status
     //
-    _node_status = PROC_READY;
+    _node_status = PROC_STARTUP;
 
     //
     // Startup the interface manager
@@ -146,6 +146,7 @@ StaticRoutesNode::update_status()
 
 	// The startup process has completed
 	ServiceBase::set_status(RUNNING);
+	_node_status = PROC_READY;
 	return;
     }
 
@@ -198,24 +199,25 @@ StaticRoutesNode::node_status(string& reason_msg)
 	XLOG_UNREACHABLE();
 	break;
     case PROC_STARTUP:
-	// Waiting for unknown reason
-	XLOG_UNREACHABLE();
+	// Get the message about the startup progress
+	reason_msg = c_format("Waiting for %d startup events",
+			      _startup_requests_n);
 	break;
     case PROC_NOT_READY:
-	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
-	XLOG_UNFINISHED();
+	// XXX: this state is unused
+	XLOG_UNREACHABLE();
 	break;
     case PROC_READY:
 	reason_msg = c_format("Node is READY");
 	break;
     case PROC_SHUTDOWN:
 	// Get the message about the shutdown progress
-	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
-	XLOG_UNFINISHED();
+	reason_msg = c_format("Waiting for %d shutdown events",
+			      _shutdown_requests_n);
 	break;
     case PROC_FAILED:
-	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
-	XLOG_UNFINISHED();
+	// XXX: this state is unused
+	XLOG_UNREACHABLE();
 	break;
     case PROC_DONE:
 	// Process has completed operation

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.1 2004/02/12 20:11:26 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.2 2004/02/12 20:29:25 hodson Exp $"
 
 #include "static_routes_module.h"
 
@@ -70,6 +70,7 @@ XrlStaticRoutesNode::shutdown()
 void
 XrlStaticRoutesNode::ifmgr_startup()
 {
+    // TODO: XXX: we should startup the ifmgr only if it hasn't started yet
     StaticRoutesNode::incr_startup_requests_n();
 
     _ifmgr.startup();
@@ -95,9 +96,10 @@ XrlStaticRoutesNode::ifmgr_shutdown()
 void
 XrlStaticRoutesNode::rib_register_startup()
 {
-    // XXX: increment twice (once for IPv4 and once for IPv6)
-    StaticRoutesNode::incr_startup_requests_n();
-    StaticRoutesNode::incr_startup_requests_n();
+    if (! _is_rib_igp_table4_registered)
+	StaticRoutesNode::incr_startup_requests_n();
+    if (! _is_rib_igp_table6_registered)
+	StaticRoutesNode::incr_startup_requests_n();
 
     send_rib_registration();
 }
@@ -105,9 +107,10 @@ XrlStaticRoutesNode::rib_register_startup()
 void
 XrlStaticRoutesNode::rib_register_shutdown()
 {
-    // XXX: increment twice (once for IPv4 and once for IPv6)
-    StaticRoutesNode::incr_shutdown_requests_n();
-    StaticRoutesNode::incr_shutdown_requests_n();
+    if (_is_rib_igp_table4_registered)
+	StaticRoutesNode::incr_shutdown_requests_n();
+    if (_is_rib_igp_table6_registered)
+	StaticRoutesNode::incr_shutdown_requests_n();
 
     send_rib_deregistration();
 }
@@ -349,8 +352,9 @@ XrlStaticRoutesNode::common_0_1_get_status(
 XrlCmdError
 XrlStaticRoutesNode::common_0_1_shutdown()
 {
-    // TODO: XXX: PAVPAVPAV: implement it!!
-    return XrlCmdError::COMMAND_FAILED();
+    StaticRoutesNode::shutdown();
+
+    return XrlCmdError::OKAY();
 }
 
 /**
@@ -365,7 +369,7 @@ XrlStaticRoutesNode::static_routes_0_1_enable_static_routes(
 {
     UNUSED(enable);
 
-    XLOG_UNFINISHED();
+    // XLOG_UNFINISHED();
 
     return XrlCmdError::OKAY();
 }
@@ -373,7 +377,7 @@ XrlStaticRoutesNode::static_routes_0_1_enable_static_routes(
 XrlCmdError
 XrlStaticRoutesNode::static_routes_0_1_start_static_routes()
 {
-    XLOG_UNFINISHED();
+    // XLOG_UNFINISHED();
 
     return XrlCmdError::OKAY();
 }
@@ -548,12 +552,21 @@ XrlStaticRoutesNode::inform_rib_route_change(const StaticRoute& static_route)
 void
 XrlStaticRoutesNode::send_rib_route_change()
 {
-    bool success;
+    bool success = false;
 
     if (_inform_rib_queue.empty())
 	return;		// No more routes changes to send
 
     StaticRoute& static_route = _inform_rib_queue.front();
+
+    //
+    // Check whether we have already registered with the RIB
+    //
+    if (static_route.is_ipv4() && (! _is_rib_igp_table4_registered))
+	goto error_label;
+
+    if (static_route.is_ipv6() && (! _is_rib_igp_table6_registered))
+	goto error_label;
 
     //
     // Send the appropriate XRL
@@ -632,6 +645,7 @@ XrlStaticRoutesNode::send_rib_route_change()
     if (success)
 	return;		// OK
 
+ error_label:
     //
     // If an error, then start a timer to try again
     // TODO: XXX: the timer value is hardcoded here!!
@@ -650,7 +664,6 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
 	send_rib_route_change();
 	return;
     }
-
 
     //
     // If an error, then start a timer to try again
