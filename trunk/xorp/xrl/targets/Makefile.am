@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.21 2004/02/12 20:02:43 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.22 2004/02/17 19:47:09 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -19,6 +19,7 @@ tgt_files		+= coord.tgt
 tgt_files		+= demo_fea_ifmgr_client.tgt
 tgt_files		+= fea.tgt
 tgt_files		+= fea_ifmgr_mirror.tgt
+tgt_files		+= fib2mrib.tgt
 tgt_files		+= finder.tgt
 tgt_files		+= finder_client.tgt
 tgt_files		+= mfea.tgt
@@ -56,6 +57,7 @@ noinst_LIBRARIES	+= libcoordbase.a
 noinst_LIBRARIES	+= libdemofeaifmgrclientbase.a
 noinst_LIBRARIES	+= libfeabase.a
 noinst_LIBRARIES	+= libfeaifmgrmirrorbase.a
+noinst_LIBRARIES	+= libfib2mribbase.a
 noinst_LIBRARIES	+= libfinderbase.a
 noinst_LIBRARIES	+= libfinderclientbase.a
 noinst_LIBRARIES	+= libmfeabase.a
@@ -128,6 +130,12 @@ $(srcdir)/fea_ifmgr_mirror_base.hh $(srcdir)/fea_ifmgr_mirror_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/fea_ifmgr_mirror.xif
 
+# Fib2mrib
+libfib2mribbase_a_SOURCES = fib2mrib_base.hh fib2mrib_base.cc
+$(srcdir)/fib2mrib_base.hh $(srcdir)/fib2mrib_base.cc:			\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fib2mrib.xif
+
 #
 # FINDER
 #
@@ -198,6 +206,7 @@ $(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
 libripbase_a_SOURCES = rip_base.hh rip_base.cc
 $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/rip.xif				\
 		$(INTERFACES_DIR)/socket4_user.xif
 
@@ -205,6 +214,7 @@ $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 libripngbase_a_SOURCES = ripng_base.hh ripng_base.cc
 $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/ripng.xif
 
 # RTRMGR

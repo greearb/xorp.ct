@@ -1,0 +1,7 @@
+/* $XORP: xorp/xrl/targets/static_routes.tgt,v 1.1 2004/02/12 20:02:44 pavlin Exp $ */
+
+#include "common.xif"
+#include "fib2mrib.xif"
+
+target fib2mrib implements	common/0.1,				\
+				fib2mrib/0.1
