@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.9 2005/01/31 23:59:12 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.10 2005/02/27 20:46:55 pavlin Exp $"
 
 
 //
@@ -169,8 +169,8 @@ CliNode::cli_show_log_user(const string& 	, // server_name
 	TimeVal start_time_tv = tmp_cli_client->cli_session_start_time();
 	string start_time;
 	{
-	    size_t maxlen = sizeof("999999999/99/99 99/99/99.999999999 ");
-	    char buf[maxlen];
+	    char buf[sizeof("999999999/99/99 99/99/99.999999999 ")];
+	    size_t maxlen = sizeof(buf);
 	    time_t time_clock = start_time_tv.sec();
 	    struct tm *local_time = localtime(&time_clock);
 	    if (strftime(buf, sizeof(buf), "%Y/%m/%d %H:%M:%S", local_time)
