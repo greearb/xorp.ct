@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.14 2003/10/02 16:55:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.15 2003/10/03 00:14:39 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -183,6 +183,11 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	}
 
 	//
+	// Set the physical interface index for the interface
+	//
+	fi->set_pif_index(if_index);
+
+	//
 	// Get the flags
 	//
 	int flags = ifm->ifm_flags;
@@ -297,7 +302,12 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
     ifc.map_ifindex(if_index, if_name);
     it.add_if(if_name);
     IfTreeInterface& fi = it.get_if(if_name)->second;
-    
+
+    //
+    // Set the physical interface index for the interface
+    //
+    fi.set_pif_index(if_index);
+
     //
     // Get the MAC address
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.8 2003/10/02 16:52:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.9 2003/10/03 00:14:39 pavlin Exp $"
 
 #define PROC_LINUX_FILE_V4 "/proc/net/dev"
 #define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
@@ -345,7 +345,12 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
 	ifc.map_ifindex(if_index, alias_if_name);
 	it.add_if(alias_if_name);
 	IfTreeInterface& fi = it.get_if(alias_if_name)->second;
-	
+
+	//
+	// Set the physical interface index for the interface
+	//
+	fi.set_pif_index(if_index);
+
 	//
 	// Get the MAC address
 	//

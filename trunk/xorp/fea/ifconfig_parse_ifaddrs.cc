@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.16 2003/10/02 16:53:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.17 2003/10/03 00:14:39 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -157,6 +157,11 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 	ifc().map_ifindex(if_index, alias_if_name);
 	it.add_if(alias_if_name);
 	IfTreeInterface& fi = it.get_if(alias_if_name)->second;
+
+	//
+	// Set the physical interface index for the interface
+	//
+	fi.set_pif_index(if_index);
 
 	//
 	// Get the MAC address

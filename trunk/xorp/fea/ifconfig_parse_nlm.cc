@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.5 2003/10/02 16:55:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.6 2003/10/03 00:14:39 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -199,7 +199,12 @@ nlm_newlink_to_fea_cfg(IfConfig& ifc, IfTree& it,
     ifc.map_ifindex(if_index, if_name);
     it.add_if(if_name);
     IfTreeInterface& fi = it.get_if(if_name)->second;
-    
+
+    //
+    // Set the physical interface index for the interface
+    //
+    fi.set_pif_index(if_index);
+
     //
     // Get the MAC address
     //
