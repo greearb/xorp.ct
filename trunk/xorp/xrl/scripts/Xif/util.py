@@ -75,7 +75,7 @@ def caps_cpp_classname(s):
         digit = (string.find(string.digits, l) >= 0);
         if (digit):
             apply_cap = 1
-        elif (string.find(string.ascii_letters, l) < 0):
+        elif (string.find(string.letters, l) < 0):
             apply_cap = 1
             l = ''
         elif (apply_cap):
