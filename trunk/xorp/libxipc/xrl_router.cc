@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.25 2003/06/20 18:55:58 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.26 2003/06/26 00:26:17 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -149,7 +149,7 @@ XrlRouter::initialize(const char* class_name,
 				      finder_addr, finder_port);
 
     _instance_name = mk_instance_name(_e, class_name);
-
+    _fc->attach_observer(this);
     if (_fc->register_xrl_target(_instance_name, class_name, this) == false) {
 	XLOG_FATAL("Failed to register target %s\n", class_name);
     }
@@ -186,13 +186,14 @@ XrlRouter::XrlRouter(EventLoop&  e,
 
 XrlRouter::~XrlRouter()
 {
+    _fc->detach_observer(this);
     _fac->set_enabled(false);
 
     while (_senders.empty() == false) {
 	delete _senders.front();
 	_senders.pop_front();
     }
-    
+
     while (_dsl.empty() == false) {
 	delete _dsl.front();
 	_dsl.pop_front();
