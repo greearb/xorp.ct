@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.8 2003/11/06 18:57:50 pavlin Exp $
+% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.9 2004/06/23 02:40:26 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -44,7 +44,7 @@ Version 1.0}
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{June 24, 2004}
+\date{July 8, 2004}
 
 \maketitle
 
@@ -275,7 +275,7 @@ PIM-SM needs to interact with the MFEA module for the following:
 
   \item Obtain information about existing interfaces on a router.
 
-  \item Note that as of (June 2004), the MRIB information is
+  \item Note that as of (July 2004), the MRIB information is
   not obtained anymore from the MFEA, but from the RIB.
 
 \end{itemize}
@@ -304,7 +304,7 @@ performance, the PIM encapsulation should be done in the kernel, and
 then we need a signaling mechanism between the kernel and the user
 process managing the kernel multicast forwarding entries. That mechanism
 would deal with installing the appropriate information needed by kernel-level
-Register encapsulation. Currently (June 2004), only few systems (\eg
+Register encapsulation. Currently (July 2004), only few systems (\eg
 FreeBSD-5.2, FreeBSD-4.9 and later, and DragonFlyBSD) do support such
 kernel-level encapsulation.
 
@@ -347,7 +347,7 @@ membership for group 224.0.1.20 on interface vif0''.
 Note that control packets used for multicast debugging such as MRINFO or
 multicast traceroute use IGMP as the network protocol. Hence, if such
 messages are received by the MLD/IGMP module, the appropriate
-information should be sent to the PIM module. Currently (November 2003),
+information should be sent to the PIM module. Currently (July 2004),
 the handling of such messages is not implemented yet.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -357,7 +357,7 @@ The PIM module needs to interact with the RIB module to obtain the MRIB
 information, and to keep track if there is any change.
 
 Note that previously the MRIB information was received from the MFEA.
-As of June 2004 the MRIB is received from the RIB instead.
+As of July 2004 the MRIB is received from the RIB instead.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interaction between the FEA and FIB2MRIB modules}
@@ -419,7 +419,7 @@ as URIB or MRIB entries to the RIB module.
   \item November 6, 2003: Bump-up the version to 0.5, and the date;
   minor edits.
 
-  \item June 22, 2004: Status updated; added information about the FIB2MRIB
+  \item July 8, 2004: Status updated; added information about the FIB2MRIB
   and StaticRoutes modules. Bump-up the version to 1.0, and the date.
 
 \end{itemize}

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/fea/fea.tex,v 1.9 2003/11/06 23:38:10 hodson Exp $
+% $XORP: xorp/docs/fea/fea.tex,v 1.10 2004/06/24 04:34:07 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -44,7 +44,7 @@ Version 1.0}
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{June 24, 2004}
+\date{July 8, 2004}
 
 \maketitle
 
@@ -376,7 +376,7 @@ XORP processes to send and receive raw packets on particular interfaces.
 This is an essential function since in a XORP router the forwarding
 plane may reside on a different machine to the routing processes, it
 may be distributed across several machines, or may have custom network
-interfaces that require special programming.  Currently (June 2004),
+interfaces that require special programming.  Currently (July 2004),
 only the sending and receiving of raw IPv4 packets is implemented.
 Support for IPv6 will be available in future and should follow a
 similar design pattern to the raw IPv4 packet handling.
@@ -391,7 +391,7 @@ and filters attached to parse raw packets as they are received.  The
 associated with the active raw socket.  The filters are each notified
 when a raw packet is received on the raw socket.  The
 XrlRawSocket4Manager allows other XORP processes to receive packets
-via XRL on the basis on filter conditions.  Currently (June 2004),
+via XRL on the basis on filter conditions.  Currently (July 2004),
 the only implemented filter is the {\tt XrlVifInputFilter} which
 allows processes to receive raw packets on the basis of the receiving
 VIF.  In principle, filters could be written to match on any field
@@ -456,7 +456,7 @@ using the following mechanisms:
 
 \end{itemize}
 
-In other words, currently (June 2004) the {\tt fea} supports FreeBSD,
+In other words, currently (July 2004) the {\tt fea} supports FreeBSD,
 NetBSD, OpenBSD, and Linux (see file {\tt \$XORP/BUILD\_NOTES}
 about the specific OS versions the FEA has been tested on).
 The {\tt fea\_dummy} is a substitute FEA and may be
