@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.11 2003/08/07 00:35:38 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.1 2004/02/12 20:11:26 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -230,6 +230,13 @@ public:
      * @return the node status (see @ref ProcessStatus).
      */
     ProcessStatus	node_status(string& reason_msg);
+
+    /**
+     * Test if the node processing is done.
+     * 
+     * @return true if the node processing is done, otherwise false.
+     */
+    bool	is_done() const { return (_node_status == PROC_DONE); }
 
     /**
      * Add a static IPv4 route.
