@@ -34,8 +34,13 @@ public:
     /**
      * Constructor
      */
-    EventLoop() {}
-    
+    EventLoop();
+
+    /**
+     * Destructor.
+     */
+    ~EventLoop();
+
     /**
      * Invoke all pending callbacks relating to XorpTimer and file
      * descriptor activity.  This function may block if there are no
@@ -67,7 +72,7 @@ public:
         static int count = 0;
 	count += n;
 	printf("count = %d\n", n);
-     	return true;  
+     	return true;
      }
 
      int main() {
@@ -83,7 +88,7 @@ public:
 		e.run(); // process events
 	}
      }
-     * </pre> 
+     * </pre>
      */
     void run();
 
@@ -101,99 +106,99 @@ public:
 
     /**
      * Add a new one-off timer to the EventLoop.
-     * 
+     *
      * @param when the absolute time when the timer expires.
      * @param ocb callback object that is invoked when timer expires.
-     * @return a @ref XorpTimer object that must be assigned to remain 
+     * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
-    XorpTimer new_oneoff_at(const TimeVal& when, 
+    XorpTimer new_oneoff_at(const TimeVal& when,
 			    const OneoffTimerCallback& ocb);
 
     /**
      * Add a new one-off timer to the EventLoop.
-     * 
+     *
      * @param wait the relative time when the timer expires.
      * @param ocb callback object that is invoked when timer expires.
-     * @return a @ref XorpTimer object that must be assigned to remain 
+     * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
-    XorpTimer new_oneoff_after(const TimeVal& wait, 
+    XorpTimer new_oneoff_after(const TimeVal& wait,
 			       const OneoffTimerCallback& ocb);
 
     /**
      * Add a new one-off timer to the EventLoop.
-     * 
+     *
      * @param ms the relative time in milliseconds when the timer expires.
      * @param ocb callback object that is invoked when timer expires.
-     * @return a @ref XorpTimer object that must be assigned to remain 
+     * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
     XorpTimer new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb);
 
     /**
      * Add periodic timer to the EventLoop.
-     * 
+     *
      * @param ms the period in milliseconds when the timer expires.
-     * 
+     *
      * @param pcb user callback object that is invoked when timer expires.
      * If the callback returns false the periodic XorpTimer is unscheduled.
-     * 
-     * @return a @ref XorpTimer object that must be assigned to remain 
+     *
+     * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
     XorpTimer new_periodic(int ms, const PeriodicTimerCallback& pcb);
 
     /**
      * Add a flag setting timer to the EventLoop.
-     * 
+     *
      * @param when the absolute time when the timer expires.
-     * 
+     *
      * @param flag_ptr pointer to a boolean variable that is set to
      * false when this function is called and will be set to true when
      * the @ref XorpTimer expires.
-     * 
-     * @return a @ref XorpTimer object that must be assigned to remain 
+     *
+     * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
     XorpTimer set_flag_at(const TimeVal& when, bool* flag_ptr);
 
     /**
      * Add a flag setting timer to the EventLoop.
-     * 
+     *
      * @param wait the relative time when the timer expires.
-     * 
+     *
      * @param flag_ptr pointer to a boolean variable that is set to
      * false when this function is called and will be set to true when
      * the @ref XorpTimer expires.
-     * 
-     * @return a @ref XorpTimer object that must be assigned to remain 
+     *
+     * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
     XorpTimer set_flag_after(const TimeVal& wait, bool* flag_ptr);
-    
+
     /**
      * Add a flag setting timer to the EventLoop.
-     * 
+     *
      * @param ms the relative time in millisecond when the timer expires.
-     * 
+     *
      * @param flag_ptr pointer to a boolean variable that is set to
      * false when this function is called and will be set to true when
      * the @ref XorpTimer expires.
-     * 
-     * @return a @ref XorpTimer object that must be assigned to remain 
+     *
+     * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
     XorpTimer set_flag_after_ms(int ms, bool* flag_ptr);
 
     /**
      * Create a custom timer associated with the EventLoop.
-     * 
+     *
      * The @ref XorpTimer object created needs to be explicitly
      * scheduled with the available @ref XorpTimer methods.
-     * 
+     *
      * @param cb user callback object that is invoked when timer expires.
-     * @return a @ref XorpTimer object that must be assigned to remain 
+     * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
     XorpTimer new_timer(const BasicTimerCallback& cb);
@@ -202,30 +207,30 @@ public:
      * Add a file descriptor and callback to be invoked when
      * descriptor is ready for input or output.  A SelectorMask
      * determines what type of I/O event will cause the callback to be
-     * invoked.  
-     * 
+     * invoked.
+     *
      * Only one callback may be associated with each event
      * type, e.g. one callback for read pending, one callback for
      * write pending.
-     * 
+     *
      * If multiple event types in are associated with the same
      * callback, the callback is only invoked once, but the mask
      * argument passed to the callback shows multiple event types.
-     * 
-     * @param fd the file descriptor.  
+     *
+     * @param fd the file descriptor.
      * @param mask the @ref SelectorMask of the event types to that
-     * will invoke hook.  
-     * @param cb object to be invoked when file descriptor has I/O 
+     * will invoke hook.
+     * @param cb object to be invoked when file descriptor has I/O
      * pending.
-     * @return true on success.  
+     * @return true on success.
      */
-    inline bool EventLoop::add_selector(int fd, 
+    inline bool EventLoop::add_selector(int fd,
 					SelectorMask mask,
 					const SelectorCallback& cb);
 
     /**
      * Remove hooks associated with file descriptor.
-     * 
+     *
      * @param fd the file descriptor.
      * @param event_mask mask of event types to clear.
      */
@@ -255,7 +260,7 @@ public:
 private:
     EventLoop(const EventLoop&);		// not implemented
     EventLoop& operator=(const EventLoop&);	// not implemented
-    
+
 private:
     TimerList    _timer_list;
     SelectorList _selector_list;
@@ -277,7 +282,7 @@ EventLoop::new_oneoff_at(const TimeVal& tv, const OneoffTimerCallback& ocb)
 }
 
 inline XorpTimer
-EventLoop::new_oneoff_after(const TimeVal&	       wait, 
+EventLoop::new_oneoff_after(const TimeVal&	       wait,
 			    const OneoffTimerCallback& ocb)
 {
     return _timer_list.new_oneoff_after(wait, ocb);
@@ -315,7 +320,7 @@ EventLoop::set_flag_after_ms(int ms, bool *flag_ptr)
 
 inline bool
 EventLoop::add_selector(int			fd,
-			SelectorMask		mask, 
+			SelectorMask		mask,
 			const SelectorCallback&	cb)
 {
     return _selector_list.add_selector(fd, mask, cb);
@@ -345,7 +350,7 @@ EventLoop::timer_list_length() const
 }
 
 inline void
-EventLoop::current_time(TimeVal& t) const 
+EventLoop::current_time(TimeVal& t) const
 {
     _timer_list.current_time(t);
 }

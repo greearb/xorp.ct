@@ -20,16 +20,45 @@
 #include "xlog.h"
 #include "debug.h"
 
+//
+// Number of EventLoop instances.
+//
+static int instance_count = 0;
+
+//
+// Last call to EventLoop::run.  0 is a special value that indicates
+// EventLoop::run has not been called.
+//
+static time_t last_ev_run;
+
+EventLoop::EventLoop()
+{
+    instance_count++;
+    XLOG_ASSERT(instance_count == 1);
+    last_ev_run = 0;
+}
+
+EventLoop::~EventLoop()
+{
+    instance_count--;
+    XLOG_ASSERT(instance_count == 0);
+}
+
 void
 EventLoop::run()
 {
     const time_t MAX_ALLOWED = 2;
-    static time_t last = time(0);
-    static bool warned = false;
-    time_t diff = time(0) - last;
-    if (!warned && (diff > MAX_ALLOWED)) {
+    static time_t last_warned;
+
+    if (last_ev_run == 0)
+	last_ev_run = time(0);
+
+    time_t now = time(0);
+    time_t diff = now - last_ev_run;
+
+    if (now - last_warned > 0 && (diff > MAX_ALLOWED)) {
 	XLOG_WARNING("%d seconds between calls to EventLoop::run", (int)diff);
-	warned = true;
+	last_warned = now;
     }
 
     TimeVal t;
@@ -37,5 +66,5 @@ EventLoop::run()
     _selector_list.select(&t);
     _timer_list.run();
 
-    last = time(0);
+    last_ev_run = time(0);
 }
