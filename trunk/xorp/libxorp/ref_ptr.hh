@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.13 2004/10/28 23:24:34 atanu Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.14 2004/10/28 23:28:08 pavlin Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -465,7 +465,7 @@ public:
      * @return true if reference pointer refers to a null object.
      */
     inline bool is_empty() const {
-	return _M_counter < 0;
+	return _M_counter < 0 || 0 == get();
     }
 
     /**
