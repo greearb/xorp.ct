@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.3 2003/05/18 23:16:06 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.4 2003/05/20 17:33:58 pavlin Exp $"
 
 #include <functional>
 #include <string>
@@ -42,9 +42,7 @@ VifAddr::VifAddr(const IPvX& ipvx_addr, const IPvXNet& ipvxnet_subnet_addr,
 bool
 VifAddr::is_same_subnet(const IPvXNet& ipvxnet) const
 {
-    IPvX masked_addr(_addr.mask_by_prefix(ipvxnet.prefix_len()));
-    
-    return (ipvxnet.masked_addr() == masked_addr);
+    return (_subnet_addr == ipvxnet);
 }
 
 bool
@@ -281,7 +279,7 @@ Vif::is_same_subnet(const IPvXNet& ipvxnet) const
 {
     list<VifAddr>::const_iterator iter;
     
-    if (is_pim_register())
+    if (is_pim_register() || is_p2p())
 	return (false);
     
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
@@ -298,7 +296,7 @@ Vif::is_same_subnet(const IPvX& ipvx_addr) const
 {
     list<VifAddr>::const_iterator iter;
     
-    if (is_pim_register())
+    if (is_pim_register() || is_p2p())
 	return (false);
     
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
@@ -311,29 +309,19 @@ Vif::is_same_subnet(const IPvX& ipvx_addr) const
 }
 
 bool
-Vif::is_directly_connected(const IPvX& ipvx_addr) const
+Vif::is_same_p2p(const IPvX& ipvx_addr) const
 {
     list<VifAddr>::const_iterator iter;
     
-    if (is_pim_register())
+    if (is_pim_register() || (! is_p2p()))
 	return (false);
     
-    if (! is_p2p())
-	return (is_same_subnet(ipvx_addr));
-    
-    //
-    // Point-to-point vif. Check whether @ipvx_addr is mine, or
-    // the peer address.
-    //
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	const VifAddr& tmp_vif_addr = *iter;
-	
-	if (tmp_vif_addr.is_same_addr(ipvx_addr)
-	    || (tmp_vif_addr.peer_addr() == ipvx_addr)) {
+	if ((iter)->is_same_addr(ipvx_addr)
+	    || ((iter)->peer_addr() == ipvx_addr)) {
 	    return (true);
 	}
     }
     
     return (false);
 }
-

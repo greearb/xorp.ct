@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.3 2003/03/10 23:20:37 hodson Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.4 2003/05/18 23:16:06 pavlin Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -470,13 +470,14 @@ public:
     bool is_same_subnet(const IPvX& ipvx_addr) const;
     
     /**
-     * Test if a given address is directly connected to this vif.
+     * Test if a given address belongs to the same point-to-point link
+     * as this vif.
      * 
      * @param ipvx_addr the address to test against.
-     * @return true if @ref ipvx_addr is directly connected to this vif,
-     * otherwise false.
+     * @return true if @ref ipvx_addr belongs to the same point-to-point link
+     * as this vif, otherwise false.
      */
-    bool is_directly_connected(const IPvX& ipvx_addr) const;
+    bool is_same_p2p(const IPvX& ipvx_addr) const;
     
 private:
     string	_name;		// The vif name
