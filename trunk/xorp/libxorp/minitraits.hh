@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/minitraits.hh,v 1.1 2003/01/21 19:27:29 mjh Exp $
+// $XORP: xorp/libxorp/minitraits.hh,v 1.2 2003/03/10 23:20:34 hodson Exp $
 
 #ifndef __LIBXORP_MINITRAITS_HH__
 #define __LIBXORP_MINITRAITS_HH__
@@ -26,16 +26,41 @@
  */
 template <typename T>
 class MiniTraits {
-    template <class U> 
+    template <class U>
     struct UnConst {
 	typedef U Result;
     };
-    template <class U> 
+    template <class U>
     struct UnConst <const U> {
         typedef U Result;
     };
 public:
     typedef typename UnConst<T>::Result NonConst;
+};
+
+/**
+ * @short Class to determine if two types are base and derived.
+ *
+ * This class tests whether a pointer for type B is useable as pointer
+ * to type D.  Typically, this implies that B is a base for D.  It may also
+ * imply that B is void, or B and D are the same type.
+ *
+ * How this works? Overloaded definition of function X::f().  The
+ * first of which takes a const B* pointer as an argument and returns
+ * are char.  The second of which takes a ... and returns a double.
+ * sizeof is used to determine the size of the return type that would
+ * used if the code were executed.  Thus, if B and D are compatible
+ * pointer types then sizeof(X::f()) for both of them is sizeof(char).
+ */
+template <typename B, typename D>
+class BaseAndDerived {
+    struct X {
+	static char f(const B*);
+	static double f(...);
+    };
+
+public:
+    static const bool True = ( sizeof(X::f((D*)0)) == sizeof(X::f((B*)0)) );
 };
 
 #endif // __LIBXORP_MINITRAITS_HH__
