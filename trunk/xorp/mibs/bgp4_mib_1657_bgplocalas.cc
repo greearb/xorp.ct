@@ -89,7 +89,7 @@ get_bgpLocalAs(netsnmp_mib_handler * handler,
 {
     DEBUGMSGTL((BgpMib::the_instance().name(), "get_bgpLocalAs called\n"));
     BgpMib& bgp_mib = BgpMib::the_instance();
-    BgpMib::CB0 cb_localas;
+    BgpMib::GetBgpVersionCB cb_localas;
     netsnmp_delegated_cache* req_cache = netsnmp_create_delegated_cache
 	(handler, reginfo, reqinfo, requests, NULL);
     cb_localas = callback(get_local_as_done, req_cache);

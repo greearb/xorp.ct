@@ -91,7 +91,7 @@ get_bgpVersion(netsnmp_mib_handler * handler,
 {
     DEBUGMSGTL((BgpMib::the_instance().name(), "get_bgpVersion called\n"));
     BgpMib& bgp_mib = BgpMib::the_instance();
-    BgpMib::CB0 cb_version;
+    BgpMib::GetBgpVersionCB cb_version;
     netsnmp_delegated_cache* req_cache = netsnmp_create_delegated_cache
 	(handler, reginfo, reqinfo, requests, NULL);
     cb_version = callback(get_bgp_version_done, req_cache);
