@@ -65,7 +65,6 @@ target_alias = @target_alias@
 target_triplet = @target@
 AR = @AR@
 CC = @CC@
-CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 GMAKE = @GMAKE@
@@ -81,6 +80,8 @@ PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
 
 noinst_LIBRARIES = librip.a
 LDFLAGS = 

@@ -67,7 +67,6 @@ target_alias = @target_alias@
 target_triplet = @target@
 AR = @AR@
 CC = @CC@
-CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 GMAKE = @GMAKE@
@@ -83,6 +82,8 @@ PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 net_snmp_found = @net_snmp_found@
+snmpd = @snmpd@
+snmpd2 = @snmpd2@
 
 noinst_LIBRARIES = libxorp.a
 TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_ref_ptr test_ref_trie test_test_main test_time_slice test_timer test_timeval test_trie  test_types test_vif 

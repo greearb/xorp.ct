@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.29 2003/05/16 00:04:43 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.30 2003/05/20 01:16:51 jcardona Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -171,12 +171,27 @@ AC_ARG_WITH(openssl,
 	[ xr_openssl_prefix="$withval" ]
 )
 
+dnl ----------------------------
+dnl --with-path-to-snmpd
+dnl ----------------------------
+AC_ARG_WITH(path-to-snmpd, [ --with-path-to-snmpd     Path to the snmpd executable],
+	    [snmpd=${withval}/snmpd;], [snmpd="not_found";] )
+
+dnl ----------------------------
+dnl --with-path-to-net-snmp-src
+dnl ----------------------------
+AC_ARG_WITH(path-to-net-snmp-src, 
+	    [ --with-path-to-snmpd     Path to the net-snmpd source tree],
+	    [path_to_net_snmp_src=${withval};], [path_to_net_snmp_src="no";] )
+
+
+
+
 dnl ---------------------------------------------------------------------------
 dnl Compiler probing
 dnl ---------------------------------------------------------------------------
 
 AC_PROG_CC
-AC_PROG_CPP
 
 AC_PROG_CXX
 AC_PROG_CXXCPP
@@ -345,12 +360,27 @@ if test "${net_snmp_found}" = "true" ;  then
 	fi
     )
     if test ${ac_cv_net_snmp_usable} != "yes" ; then
-	echo "net-snmp version too old.  MIB modules will not be built" 
+	AC_MSG_WARN("net-snmp version too old.  MIB modules will not be built") 
     fi
 else
-    echo "net-snmp not found.  MIB modules will not be built"
+    AC_MSG_WARN("net-snmp not found.  MIB modules will not be built")
 fi
+
 AC_SUBST(MIBS)
+
+if test ${snmpd} = "not_found" ; then
+    AC_PATH_PROG(snmpd, snmpd, "not_found", /usr/sbin)
+fi
+
+if test ${snmpd} = "not_found" ; then
+    echo "checking again for snmpd in another directory"
+    AC_PATH_PROG(snmpd2, snmpd, "not_found", /usr/local/sbin)
+    snmpd=$snmpd2
+fi
+
+if test ${snmpd} = "not_found" ; then
+    AC_MSG_WARN("snmpd not found:  snmp test scripts will not work")
+fi
 
 dnl ---------------------------------------------------------------------------
 dnl Check for libraries
@@ -1136,10 +1166,12 @@ AC_OUTPUT(
 	xrl/interfaces/Makefile
 	xrl/targets/Makefile
 	xrl/tests/Makefile
-	libxipc/test_xrl_parser.sh,
+	libxipc/test_xrl_parser.sh
+	mibs/tests/test_bgpmib.sh,
 , 
 	echo timestamp > stamp-h
 	chmod a+x libxipc/test_xrl_parser.sh
+	chmod a+x mibs/tests/test_bgpmib.sh
 )
 
 

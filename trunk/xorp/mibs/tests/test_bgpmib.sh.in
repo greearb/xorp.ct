@@ -184,8 +184,8 @@ then
     . ../snmpconfig/snmpenv.sh
     LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${XORP}/mibs
     export LD_LIBRARY_PATH
-    SNMPD=`which snmpd`
-    if [ "xxx$SNMPD" == "xxx" ]; then exit 1; fi
+    SNMPD=@snmpd@
+    if [ "$SNMPD" == "not_found" ]; then exit 1; fi
 
     CXRL="$CALLXRL -r 10"
     PTH="${PATH_TO_BGP}/harness"
