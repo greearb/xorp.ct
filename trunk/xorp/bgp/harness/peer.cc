@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.45 2003/09/19 04:45:37 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.46 2003/09/19 22:07:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1397,7 +1397,7 @@ public:
 	vector<string> v;
 	tokenize(line, v, ",");
 
-	_data = new uint8_t [_size];
+	_data = new uint8_t [v.size()];
 	for(size_t i = 0; i < v.size(); i++) {
 	    _data[i] = strtol(v[i].c_str(), 0, 0);
 // 	    fprintf(stderr, "%#x ", _data[i]);
