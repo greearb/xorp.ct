@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.26 2004/05/15 15:12:17 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.27 2004/06/10 22:40:36 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -53,7 +53,7 @@ test_decision(TestInfo& /*info*/)
 	new BGPPeerData(iptuple2, AsNum(1), IPv4("2.0.0.2"), 30);
     // start off with both being IBGP
     peer_data2->set_internal_peer(true);
-    peer_data2->set_id("2.0.0.0");
+    peer_data2->set_id("2.0.0.1");
     BGPPeer peer2(&localdata, peer_data2, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 
@@ -62,7 +62,7 @@ test_decision(TestInfo& /*info*/)
 	new BGPPeerData(iptuple2, AsNum(1), IPv4("2.0.0.3"), 30);
     // start off with both being IBGP
     peer_data3->set_internal_peer(true);
-    peer_data3->set_id("2.0.0.0");
+    peer_data3->set_id("2.0.0.3");
     BGPPeer peer3(&localdata, peer_data3, NULL, &bgpmain);
     PeerHandler handler3("test3", &peer3, NULL, NULL);
 

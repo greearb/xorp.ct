@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.26 2004/05/15 15:12:15 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.27 2004/06/10 22:40:34 hodson Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -48,7 +48,9 @@ DecisionTable<A>::add_parent(BGPRouteTable<A> *new_parent,
     }
     PeerTableInfo<A> *pti = new PeerTableInfo<A>(new_parent, peer_handler, genid);
     _parents[new_parent] = pti;
-    _rev_parents[peer_handler] = pti;
+    XLOG_ASSERT(_sorted_parents.find(peer_handler->id()) 
+		== _sorted_parents.end());
+    _sorted_parents[peer_handler->id()] = pti;
     return 0;
 }
 
@@ -61,7 +63,7 @@ DecisionTable<A>::remove_parent(BGPRouteTable<A> *ex_parent) {
     PeerTableInfo<A> *pti = i->second;
     const PeerHandler* peer = pti->peer_handler();
     _parents.erase(i);
-    _rev_parents.erase(_rev_parents.find(const_cast<PeerHandler*>(peer)));
+    _sorted_parents.erase(_sorted_parents.find(peer->id()));
     delete pti;
     return 0;
 }
@@ -1092,9 +1094,9 @@ template<class A>
 bool
 DecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
     const PeerHandler* peer = dump_iter.current_peer();
-    typename map<PeerHandler*, PeerTableInfo<A>* >::const_iterator i;
-    i = _rev_parents.find(const_cast<PeerHandler*>(peer));
-    XLOG_ASSERT(i != _rev_parents.end());
+    typename map<IPv4, PeerTableInfo<A>* >::const_iterator i;
+    i = _sorted_parents.find(peer->id());
+    XLOG_ASSERT(i != _sorted_parents.end());
     return i->second->route_table()->dump_next_route(dump_iter);
 }
 
@@ -1111,9 +1113,9 @@ template<class A>
 void
 DecisionTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 {
-    typename map<BGPRouteTable<A>*, PeerTableInfo<A>* >::const_iterator i;
-    for (i = _parents.begin(); i != _parents.end(); i++) {
-	i->first->igp_nexthop_changed(bgp_nexthop);
+    typename map<IPv4, PeerTableInfo<A>* >::const_iterator i;
+    for (i = _sorted_parents.begin(); i != _sorted_parents.end(); i++) {
+	i->second->route_table()->igp_nexthop_changed(bgp_nexthop);
     }
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.14 2004/06/10 22:40:34 hodson Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.15 2004/06/12 15:02:27 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -165,7 +165,7 @@ private:
 		    list<RouteData<A> >& alternatives) const;
     RouteData<A>* find_winner(list<RouteData<A> >& alternatives) const;
     map<BGPRouteTable<A>*, PeerTableInfo<A>* > _parents;
-    map<PeerHandler*, PeerTableInfo<A>* > _rev_parents;
+    map<IPv4, PeerTableInfo<A>* > _sorted_parents;
 
     NextHopResolver<A>& _next_hop_resolver;
 };
