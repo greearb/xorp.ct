@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.3 2003/05/16 19:23:17 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.4 2003/08/05 05:36:26 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -154,7 +154,7 @@ public:
      * @param ttl the desired IP TTL (a.k.a. hop-limit in IPv6) value.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		set_mcast_ttl(int ttl);
+    int		set_multicast_ttl(int ttl);
     
     /**
      * Set/reset the "Multicast Loop" flag on the protocol socket.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.8 2003/08/07 01:07:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.9 2003/09/16 01:15:52 pavlin Exp $"
 
 
 //
@@ -435,7 +435,7 @@ ProtoComm::recv_pktinfo(bool enable_bool)
 
 
 /**
- * ProtoComm::set_mcast_ttl:
+ * ProtoComm::set_multicast_ttl:
  * @ttl: The desired IP TTL (a.k.a. hop-limit in IPv6) value.
  * 
  * Set the default TTL (or hop-limit in IPv6) for the outgoing multicast
@@ -444,7 +444,7 @@ ProtoComm::recv_pktinfo(bool enable_bool)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::set_mcast_ttl(int ttl)
+ProtoComm::set_multicast_ttl(int ttl)
 {
     switch (family()) {
     case AF_INET:
@@ -464,7 +464,7 @@ ProtoComm::set_mcast_ttl(int ttl)
     case AF_INET6:
     {
 #ifndef HAVE_IPV6_MULTICAST
-		XLOG_ERROR("set_mcast_ttl() failed: "
+		XLOG_ERROR("set_multicast_ttl() failed: "
 			   "IPv6 multicast not supported");
 		return (XORP_ERROR);
 #else
@@ -836,7 +836,7 @@ ProtoComm::open_proto_socket()
 	return (XORP_ERROR);
     }
     // Restrict multicast TTL
-    if (set_mcast_ttl(MINTTL) < 0) {
+    if (set_multicast_ttl(MINTTL) < 0) {
 	close_proto_socket();
 	return (XORP_ERROR);
     }
