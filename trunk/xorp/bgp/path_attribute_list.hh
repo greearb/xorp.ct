@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute_list.hh,v 1.3 2003/01/26 01:22:37 mjh Exp $
+// $XORP: xorp/bgp/path_attribute_list.hh,v 1.4 2003/01/26 17:22:00 rizzo Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_LIST_HH__
 #define __BGP_PATH_ATTRIBUTE_LIST_HH__
@@ -61,8 +61,8 @@ public:
     }
 
     const list<PathAttribute*>& att_list() const {
-	debug_msg("PathAttributeList:att_list(): size = %d\n",
-		_att_list.size());
+	debug_msg("PathAttributeList:att_list(): size = %u\n",
+		  (uint32_t)_att_list.size());
 	return _att_list;
     }
 
