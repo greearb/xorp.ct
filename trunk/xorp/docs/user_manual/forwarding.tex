@@ -158,7 +158,7 @@ plumbing \{\\
 \item{\stt mfea6}: this delimits the part of the router configuration
   related to multicast forwarding of IPv6 packets.  The possible
   parameters are the same as for {\stt mfea4}, but affect IPv6
-  forwarding rather than IPv4 fprwarding.
+  forwarding rather than IPv4 forwarding.
 \end{description}
 
 
@@ -232,16 +232,24 @@ information about MFEA IPv4 dataflow filters:
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xx\=\kill
+xx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=xxxxx\=xx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=xx\=\kill
 Xorp> \textbf{show mfea dataflow}\\
-\\
-TBD\\
-\\
+Group                              \>\>\>\>Source\\
+224.0.1.20                         \>\>\>\>10.2.0.1\\
+\>Measured(Start|Packets|Bytes)\>Type\>Thresh(Interval|Packets|Bytes)\>\>Remain\\
+\>1091667269.982158|0|?        \><= \>\>210.0|0|?                \>\>202.434319\\
+\>1091667269.984406|?|0        \>>= \>\>100.0|?|102400           \>\>92.436567
 \end{tabbing}
 \end{alltt}
 \end{minipage}
 }
 \vspace{0.1in}
+
+Note that the above information is shown only if the filters are kept at
+user-space. If the filters are kept at kernel-space (\eg in case of UNIX
+system with advanced multicast API support), then currently xorpsh
+cannot be used to show the information. In that case, the appropriate system
+command should be used instead (e.g., the UNIX {\stt netstat -gn} command).
 
 The {\stt show mfea interface} command can be used to display
 information about MFEA IPv4 interfaces:
@@ -251,11 +259,12 @@ information about MFEA IPv4 interfaces:
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xx\=\kill
+xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxx\=\kill
 Xorp> \textbf{show mfea interface}\\
-\\
-TBD\\
-\\
+Interface \>State  \>Vif/PifIndex \>Addr       \>Flags\\
+dc0       \>UP     \>0/6          \>10.4.0.1   \>MULTICAST BROADCAST KERN\_UP\\
+dc2       \>UP     \>1/8          \>10.3.0.2   \>MULTICAST BROADCAST KERN\_UP\\
+register\_vif \>UP \>2/6          \>10.4.0.1   \>PIM\_REGISTER KERN\_UP
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -270,11 +279,12 @@ information about MFEA IPv4 interface addresses:
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xx\=\kill
+xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxx\kill
 Xorp> \textbf{show mfea interface address}\\
-\\
-TBD\\
-\\
+Interface  \>Addr          \>Subnet           \>Broadcast     \>P2Paddr\\
+dc0        \>10.4.0.1      \>10.4.0.0/24      \>10.4.0.255    \>0.0.0.0\\
+dc2        \>10.3.0.2      \>10.3.0.0/24      \>10.3.0.255    \>0.0.0.0\\
+register\_vif \>10.4.0.1   \>10.4.0.1/32      \>10.4.0.1      \>0.0.0.0
 \end{tabbing}
 \end{alltt}
 \end{minipage}
