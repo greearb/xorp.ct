@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.3 2003/08/07 01:07:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.4 2004/02/29 21:35:32 pavlin Exp $"
 
 
 //
@@ -98,77 +98,83 @@ MfeaVif::MfeaVif(MfeaNode& mfea_node, const MfeaVif& mfea_vif)
  **/
 MfeaVif::~MfeaVif()
 {
-    stop();
+    string error_msg;
+
+    stop(error_msg);
 }
 
 /**
  * MfeaVif::start:
- * @: 
+ * @error_msg: The error message (if error).
  * 
  * Start MFEA a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaVif::start()
+MfeaVif::start(string& error_msg)
 {
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (! is_underlying_vif_up())
+    if (! is_underlying_vif_up()) {
+	error_msg = "underlying vif is not UP";
 	return (XORP_ERROR);
-    
-    if (ProtoUnit::start() < 0)
-	return (XORP_ERROR);
-    
+    }
+
     //
     // Install in the kernel only if the vif is of the appropriate type:
     // multicast-capable (loopback excluded), or PIM Register vif.
     //
     if (! ((is_multicast_capable() && (! is_loopback()))
 	   || is_pim_register())) {
+	error_msg = "the interface is not multicast capable";
 	return (XORP_ERROR);
     }
 
-    if (mfea_node().add_multicast_vif(vif_index()) < 0)
+    if (ProtoUnit::start() < 0) {
+	error_msg = "internal error";
 	return (XORP_ERROR);
+    }
+    
+    if (mfea_node().add_multicast_vif(vif_index()) < 0) {
+	error_msg = "cannot add the multicast vif to the kernel";
+	return (XORP_ERROR);
+    }
 
     return (XORP_OK);
 }
 
 /**
  * MfeaVif::stop:
- * @: 
+ * @error_msg: The error message (if error).
  * 
  * Stop MFEA on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaVif::stop()
+MfeaVif::stop(string& error_msg)
 {
     if (is_down())
 	return (XORP_OK);
 
-    if (! (is_up() || is_pending_up() || is_pending_down()))
-	return (XORP_ERROR);
-
-    leave_all_multicast_groups();
-
-    if (ProtoUnit::stop() < 0)
-	return (XORP_ERROR);
-
-    //
-    // Remove from the kernel only if the vif is of the appropriate type:
-    // multicast-capable (loopback excluded), or PIM Register vif.
-    //
-    if (! ((is_multicast_capable() && (! is_loopback()))
-	   || is_pim_register())) {
+    if (! (is_up() || is_pending_up() || is_pending_down())) {
+	error_msg = "the vif state is not UP or PENDING_UP or PENDING_DOWN";
 	return (XORP_ERROR);
     }
 
-    if (mfea_node().delete_multicast_vif(vif_index()) < 0)
+    leave_all_multicast_groups();
+
+    if (ProtoUnit::stop() < 0) {
+	error_msg = "internal error";
 	return (XORP_ERROR);
+    }
+
+    if (mfea_node().delete_multicast_vif(vif_index()) < 0) {
+	error_msg = "cannot delete the multicast vif from the kernel";
+	return (XORP_ERROR);
+    }
 
     return (XORP_OK);
 }
@@ -208,8 +214,9 @@ MfeaVif::start_protocol(const string& module_instance_name,
     // TODO: should we implicitly start the vif? Maybe no, because is bad
     // semantics...?
 #if 0
+    string error_msg;
     if (! is_up())
-	start();	// XXX: start the vif
+	start(error_msg);	// XXX: start the vif
 #endif // 0
     
     return (XORP_OK);
@@ -255,8 +262,9 @@ MfeaVif::stop_protocol(const string& module_instance_name,
 	}
     }
     
+    string error_msg;
     if (is_up() && do_stop)
-	stop();		// Stop the vif
+	stop(error_msg);		// Stop the vif
 #endif // 0
     
     return (XORP_OK);
