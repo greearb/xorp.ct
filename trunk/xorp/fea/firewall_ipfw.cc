@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.cc,v 1.7 2004/09/17 07:52:03 pavlin Exp $
+// $XORP: xorp/fea/firewall_ipfw.cc,v 1.8 2004/09/21 21:31:02 pavlin Exp $
 
 #include "fea/fea_module.h"
 
@@ -75,7 +75,7 @@ IpfwFwProvider::IpfwFwProvider(FirewallManager& m)
 IpfwFwProvider::~IpfwFwProvider()
 {
 #ifdef HAVE_FIREWALL_IPFW
-	// XXX: Should we get rid of XORP rules on shutdown?
+	// XXX: Should we remove loaded XORP rules from IPFW?
 
 	if (_s != -1)
 		::close(_s);
@@ -96,7 +96,7 @@ IpfwFwProvider::get_enabled() const
 	int	ret = sysctlbyname("net.inet.ip.fw.enable",
 	    &ipfw_enabled, &ipfw_enabled_size, NULL, 0);
 
-	// If we could not retrieve the sysctl, then assume ipfw is disabled.
+	// If we could not retrieve the sysctl, then assume IPFW is disabled.
 	if (ret == -1)
 		return (false);
 
@@ -161,31 +161,21 @@ int
 IpfwFwProvider::add_rule4(FwRule4& rule)
 {
 #ifdef HAVE_FIREWALL_IPFW
-	// Map provider-private rule tag to an IPFW rule number.
-	// XXX: If we can't cast to our underlying derived representation,
-	// then this cast will throw an exception.
 	IpfwFwRule4* prule = dynamic_cast<IpfwFwRule4*>(&rule);
-	UNUSED(prule);
 
-	struct ip_fw	ipfwrule;
-	memset(&ipfwrule, 0, sizeof(struct ip_fw));
-
-	if (alloc_ipfw_rule(ipfwrule) != XORP_OK)
+	int ruleno = alloc_ruleno();
+	if (ruleno == 0)
 		return (XORP_ERROR);
 
-	// Cache the assigned IPFW rule number in the derived FwRule.
-	//prule->set_index(ipfwrule.fw_number);
+	prule->_index = ruleno;
+	//prule->_ip_fw.idx = ruleno;
 
-	// Convert XORP intermediate representation to IPFW representation.
-	xorp_rule4_to_ipfw1(rule, ipfwrule);
-
-	// It's the FwManager's responsibility to add this rule to
-	// any table it's meant to belong to; it may already have
-	// been added when we were called.
+	// .. rule was converted to ipfw format when table ownership
+	// was taken?
 
 	// Attempt to add the converted rule to the kernel.
-	socklen_t	i = sizeof(ipfwrule);
-	int	r = ::getsockopt(_s, IPPROTO_IP, IP_FW_ADD, &ipfwrule, &i);
+	socklen_t	i = sizeof(prule->_ipfw);
+	int	r = ::getsockopt(_s, IPPROTO_IP, IP_FW_ADD, &prule->_ipfw, &i);
 
 	return (r == -1 ? XORP_ERROR : XORP_OK);
 #else
@@ -194,20 +184,14 @@ IpfwFwProvider::add_rule4(FwRule4& rule)
 #endif
 }
 
+//
+// Propagate a delete down to the provider level.
+//
 int
 IpfwFwProvider::delete_rule4(FwRule4& rule)
 {
 #ifdef HAVE_FIREWALL_IPFW
-	struct ip_fw	ipfwrule;
-	memset(&ipfwrule, 0, sizeof(ipfwrule));
-
-#if 0
-	// Map provider-private rule tag to an IPFW rule number.
-	// XXX: If we can't cast to our underlying derived representation,
-	// then this cast will throw an exception.
 	IpfwFwRule4* prule = dynamic_cast<IpfwFwRule4*>(&rule);
-	//ipfwrule.fw_number = prule->get_index();
-#endif
 
 	// XXX: Mark as deleted. It's the FwManager's responsibility
 	// to actually remove it from the XORP table.
@@ -219,12 +203,12 @@ IpfwFwProvider::delete_rule4(FwRule4& rule)
 	// next-free marker. If there are, never mind. Whilst this
 	// mapping scheme of XORP->IPFW table space is not the
 	// smartest, it is very simple to implement.
-	if (ipfwrule.fw_number >= _ipfw_next_free_idx)
+	if (new_rule._ipfw.fw_number >= _ipfw_next_free_idx)
 #endif
 
 	// Actually attempt to remove the rule from the kernel.
-	int	ret = ::setsockopt(_s, IPPROTO_IP, IP_FW_DEL, &ipfwrule,
-	    sizeof(ipfwrule));
+	int	ret = ::setsockopt(_s, IPPROTO_IP, IP_FW_DEL, &prule->_ipfw,
+	    sizeof(prule->_ipfw));
 
 	return (ret != 0 ? XORP_ERROR : XORP_OK);
 #else
@@ -278,120 +262,23 @@ IpfwFwProvider::get_ipfw_static_rule_count()
 
 #ifdef HAVE_FIREWALL_IPFW
 //
-// Private helper method: map the representation of a XORP firewall rule
-// into an IPFW firewall rule representation before the kernel sees it.
-//
-// This requires that all members except rule_number are zeroed first
-// or else the result may be undefined.
-//
-// XXX: move this to IpfwFwRule?
-//
-int
-IpfwFwProvider::xorp_rule4_to_ipfw1(FwRule4& rule,
-    struct ip_fw& ipfwrule) const
-{
-	FwRule4* prule = &rule;		// XXX!
-
-	// ifname is always specified (as for 'via' ipfw syntax).
-	// vifname is silently ignored and discarded.
-	union ip_fw_if	ifu;
-
-	IpfwFwProvider::ifname_to_ifu(prule->ifname(), ifu);
-	ipfwrule.fw_out_if = ipfwrule.fw_in_if = ifu;
-	ipfwrule.fw_flg |= (IP_FW_F_IIFNAME | IP_FW_F_OIFNAME);
-
-	// Fill out the source/destination network addresses and mask.
-	prule->src().masked_addr().copy_out(ipfwrule.fw_src);
-	prule->src().netmask().copy_out(ipfwrule.fw_smsk);
-	prule->dst().masked_addr().copy_out(ipfwrule.fw_dst);
-	prule->dst().netmask().copy_out(ipfwrule.fw_dmsk);
-
-	//
-	// Fill out the protocol field.
-	//
-	switch (prule->proto()) {
-	case FwRule4::IP_PROTO_ANY:
-		// IPFW uses IPPROTO_IP as a wildcard.  We use IP_PROTO_ANY.
-		ipfwrule.fw_prot = IPPROTO_IP;
-		break;
-
-	case IPPROTO_TCP:
-	case IPPROTO_UDP:
-	{
-		//
-		// Fill out the source port and destination port.
-		//
-		// We've already zeroed out the rule structure, so 0 is the
-		// wildcard; we need only do this if people specified ports.
-		//
-		// Both the source and destination port specifications share
-		// space in the ipfw rule representation to keep size down,
-		// so we have to take heed of this when setting port numbers.
-		//
-		int	nports = 0;	// Number of ports in the array
-
-		if (prule->sport() != FwRule4::PORT_ANY) {
-			ipfwrule.fw_uar.fw_pts[nports++] = prule->sport();
-			IP_FW_SETNSRCP(&ipfwrule, 1);
-		}
-
-		if (prule->dport() != FwRule4::PORT_ANY) {
-			ipfwrule.fw_uar.fw_pts[nports++] = prule->dport();
-			IP_FW_SETNDSTP(&ipfwrule, 1);
-		}
-
-		ipfwrule.fw_prot = prule->proto();
-		break;
-	}
-
-	default:
-		ipfwrule.fw_prot = prule->proto();
-		break;
-	}
-
-	//
-	// Convert XORP action to IPFW action. IPFW allows multiple
-	// actions coalesced into the same rule with certain restrictions.
-	// XORP only allows a single action per rule.
-	// 'pass' in XORP means 'accept' to IPFW.
-	// 'drop' in XORP means 'deny' to IPFW.
-	// 'none' in XORP means 'count' to IPFW.
-	//
-	switch (prule->action()) {
-	case FwRule4::ACTION_PASS:
-		ipfwrule.fw_flg |= IP_FW_F_ACCEPT;
-		break;
-	case FwRule4::ACTION_DROP:
-		ipfwrule.fw_flg |= IP_FW_F_DENY;
-		break;
-	case FwRule4::ACTION_NONE:
-		ipfwrule.fw_flg |= IP_FW_F_COUNT;
-		break;
-	default:
-		return (XORP_ERROR);
-	}
-
-	return (XORP_OK);
-}
-
-//
 // Allocate an IPFW rule number for a XORP rule which is about to be added.
-// The ipfwrule.fw_number member will be set accordingly.
+// Return 0 if unsuccessful. Any non-zero value is a rule index.
 //
-int
-IpfwFwProvider::alloc_ipfw_rule(struct ip_fw& ipfwrule)
+uint16_t
+IpfwFwProvider::alloc_ruleno()
 {
 	// Check if our slice of the IPFW table is full.
 	if (_ipfw_next_free_idx >= _ipfw_xorp_end_idx)
-		return (XORP_ERROR);
+		return (0);
 
-	ipfwrule.fw_number = _ipfw_next_free_idx++;
-
-	return (XORP_OK);
+	return (_ipfw_next_free_idx++);
 }
 
-int
-IpfwFwProvider::ifname_to_ifu(const string& ifname, union ip_fw_if& ifu)
+// Private helper method: Convert an ifname string to an ip_fw_if
+// union embedded in an IPFW rule.
+static int
+ifname_to_ifu(const string& ifname, union ip_fw_if& ifu)
 {
 	int	pos = ifname.find_first_of("0123456789");
 	if (pos >= FW_IFNLEN)
@@ -403,7 +290,7 @@ IpfwFwProvider::ifname_to_ifu(const string& ifname, union ip_fw_if& ifu)
 
 	ifu.fu_via_if.unit = atoi(s_unit.c_str());
 	strlcpy(ifu.fu_via_if.name, s_driver.c_str(),
-	    sizeof(ifu.fu_via_if.name)); // XXX unchecked
+	    sizeof(ifu.fu_via_if.name));	// XXX unchecked
 
 	return (XORP_OK);
 }
@@ -424,8 +311,86 @@ template <>
 static void
 convert_to_ipfw(IpfwFwRule<IPv4>& new_rule, const FwRule<IPv4>& old_rule)
 {
-	UNUSED(new_rule);
-	UNUSED(old_rule);
+	new_rule = old_rule;	// XXX: Will this do shallow assignment
+				// correctly of base class fields?
+
+	// ifname is always specified (as for 'via' ipfw syntax).
+	// vifname is silently ignored and discarded.
+	union ip_fw_if	ifu;
+
+	ifname_to_ifu(new_rule.ifname(), ifu);
+
+	new_rule._ipfw.fw_out_if = new_rule._ipfw.fw_in_if = ifu;
+	new_rule._ipfw.fw_flg |= (IP_FW_F_IIFNAME | IP_FW_F_OIFNAME);
+
+	// Fill out the source/destination network addresses and mask.
+	new_rule.src().masked_addr().copy_out(new_rule._ipfw.fw_src);
+	new_rule.src().netmask().copy_out(new_rule._ipfw.fw_smsk);
+	new_rule.dst().masked_addr().copy_out(new_rule._ipfw.fw_dst);
+	new_rule.dst().netmask().copy_out(new_rule._ipfw.fw_dmsk);
+
+	//
+	// Fill out the protocol field.
+	//
+	switch (new_rule.proto()) {
+	case FwRule4::IP_PROTO_ANY:
+		// IPFW uses IPPROTO_IP as a wildcard.  We use IP_PROTO_ANY.
+		new_rule._ipfw.fw_prot = IPPROTO_IP;
+		break;
+
+	case IPPROTO_TCP:
+	case IPPROTO_UDP:
+	{
+		//
+		// Fill out the source port and destination port.
+		//
+		// We've already zeroed out the rule structure, so 0 is the
+		// wildcard; we need only do this if people specified ports.
+		//
+		// Both the source and destination port specifications share
+		// space in the ipfw rule representation to keep size down,
+		// so we have to take heed of this when setting port numbers.
+		//
+		int	nports = 0;	// Number of ports in the array
+
+		if (new_rule.sport() != FwRule4::PORT_ANY) {
+			new_rule._ipfw.fw_uar.fw_pts[nports++] = new_rule.sport();
+			IP_FW_SETNSRCP(&new_rule._ipfw, 1);
+		}
+
+		if (new_rule.dport() != FwRule4::PORT_ANY) {
+			new_rule._ipfw.fw_uar.fw_pts[nports++] = new_rule.dport();
+			IP_FW_SETNDSTP(&new_rule._ipfw, 1);
+		}
+
+		new_rule._ipfw.fw_prot = new_rule.proto();
+		break;
+	}
+
+	default:
+		new_rule._ipfw.fw_prot = new_rule.proto();
+		break;
+	}
+
+	//
+	// Convert XORP action to IPFW action. IPFW allows multiple
+	// actions coalesced into the same rule with certain restrictions.
+	// XORP only allows a single action per rule.
+	// 'pass' in XORP means 'accept' to IPFW.
+	// 'drop' in XORP means 'deny' to IPFW.
+	// 'none' in XORP means 'count' to IPFW.
+	//
+	switch (new_rule.action()) {
+	case FwRule4::ACTION_PASS:
+		new_rule._ipfw.fw_flg |= IP_FW_F_ACCEPT;
+		break;
+	case FwRule4::ACTION_DROP:
+		new_rule._ipfw.fw_flg |= IP_FW_F_DENY;
+		break;
+	case FwRule4::ACTION_NONE:
+		new_rule._ipfw.fw_flg |= IP_FW_F_COUNT;
+		break;
+	}
 }
 
 template <>

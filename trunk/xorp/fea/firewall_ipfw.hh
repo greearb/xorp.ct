@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.hh,v 1.9 2004/09/17 08:10:43 pavlin Exp $
+// $XORP: xorp/fea/firewall_ipfw.hh,v 1.10 2004/09/21 21:31:03 pavlin Exp $
 
 #ifndef	__FEA_FIREWALL_IPFW_HH__
 #define __FEA_FIREWALL_IPFW_HH__
@@ -38,10 +38,13 @@ protected:
 public:
 	IpfwFwRule(const FwRule<N>&);	// permit copy/new from an FwRule
 	~IpfwFwRule() {}		// destructor ALWAYS public
-protected:
 #ifdef HAVE_FIREWALL_IPFW
-	uint32_t	_idx;	// index, if already assigned
+protected:
+	uint32_t	_index;	// index, if already assigned
 	struct ip_fw	_ipfw;	// IPFW-specific data
+
+	friend void convert_to_ipfw<>(IpfwFwRule<N>& new_rule,
+	    const FwRule<N>& old_rule);
 #endif
 };
 
@@ -62,6 +65,7 @@ template <typename N>
 IpfwFwRule<N>::IpfwFwRule<N>(const FwRule<N>& old_rule)
 {
 #ifdef HAVE_FIREWALL_IPFW
+	memset(&_ipfw, 0, sizeof(_ipfw));
 	convert_to_ipfw(*this, old_rule);
 #else
 	UNUSED(old_rule);
@@ -165,16 +169,9 @@ private:
 	int	_ipfw_xorp_end_idx;	// End of XORP-managed range;
 
 private:
-	// Helper function to convert a XORP rule representation into an
-	// IPFW one, in preparation for adding it to IPFW's table.
-	int xorp_rule4_to_ipfw1(FwRule4& rule, struct ip_fw& ipfwrule) const;
+	// Helper function to allocate a slot in the IPFW table.
+	uint16_t alloc_ruleno();
 
-	// Helper function to allocate a slot in the IPWF table.
-	int alloc_ipfw_rule(struct ip_fw& ipfwrule);
-
-	// Helper function to convert an interface name 'driverNNN' to
-	// the ip_fw_if structure which IPFW wants.
-	static int ifname_to_ifu(const string& ifname, union ip_fw_if& ifu);
 #endif // HAVE_FIREWALL_IPFW
 };
 
