@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.14 2004/10/28 23:28:08 pavlin Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.15 2004/10/29 01:00:51 atanu Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -130,10 +130,10 @@ public:
      * when the reference count reaches zero.
      */
     ref_ptr(_Tp* __p = 0)
-        : _M_ptr(__p), _M_counter(0)
+        : _M_ptr(__p), _M_index(0)
     {
 	if (_M_ptr)
-	    _M_counter = ref_counter_pool::instance().new_counter();
+	    _M_index = ref_counter_pool::instance().new_counter();
     }
 
     /**
@@ -143,7 +143,7 @@ public:
      * associated with object by 1.
      */
     ref_ptr(const ref_ptr& __r)
-        : _M_ptr(0), _M_counter(-1) {
+        : _M_ptr(0), _M_index(-1) {
         ref(&__r);
     }
 
@@ -215,7 +215,7 @@ public:
      * @return true if reference pointer represents only reference to object.
      */
     inline bool is_only() const {
-	return ref_counter_pool::instance().count(_M_counter) == 1;
+	return ref_counter_pool::instance().count(_M_index) == 1;
     }
 
     /**
@@ -223,7 +223,7 @@ public:
      * @return true if there are at least n references to object.
      */
     bool at_least(int32_t n) const {
-	return ref_counter_pool::instance().count(_M_counter) >= n;
+	return ref_counter_pool::instance().count(_M_index) >= n;
     }
 
     /**
@@ -237,28 +237,25 @@ public:
 
     inline operator const_ref_ptr()
     {
-	const_ref_ptr crp(get(), /*_M_counter*/ counter());
+	const_ref_ptr crp(get(), _M_index);
 	return crp;
     }
 
-    ref_ptr(_Tp* data, int32_t counter) : _M_ptr(data), _M_counter(counter)
+    ref_ptr(_Tp* data, int32_t index) : _M_ptr(data), _M_index(index)
     {
-	ref_counter_pool::instance().incr_counter(_M_counter);
+	ref_counter_pool::instance().incr_counter(_M_index);
     }
 
 protected:
-    inline int32_t counter() const {
-	return _M_counter;
-    }
 
     /**
      * Add reference.
      */
     void ref(const ref_ptr* __r) const {
 	_M_ptr = __r->_M_ptr;
-	_M_counter = __r->_M_counter;
+	_M_index = __r->_M_index;
 	if (_M_ptr) {
-	    ref_counter_pool::instance().incr_counter(_M_counter);
+	    ref_counter_pool::instance().incr_counter(_M_index);
 	}
     }
 
@@ -267,22 +264,22 @@ protected:
      */
     void unref() const {
 	if (_M_ptr &&
-	    ref_counter_pool::instance().decr_counter(_M_counter) == 0) {
+	    ref_counter_pool::instance().decr_counter(_M_index) == 0) {
 	    delete _M_ptr;
 	}
 	_M_ptr = 0;
     }
 
     mutable _Tp*    _M_ptr;
-    mutable int32_t _M_counter;	// index in ref_counter_pool
+    mutable int32_t _M_index;	// index in ref_counter_pool
 };
 
 #if 0
 template <typename _Tp>
 ref_ptr<const _Tp>::ref_ptr(const ref_ptr<_Tp>& __r)
-	: _M_ptr(0), _M_counter(_r->_M_counter)
+	: _M_ptr(0), _M_index(_r->_M_index)
 {
-    ref_counter_pool::instance().incr_counter(_M_counter);
+    ref_counter_pool::instance().incr_counter(_M_index);
 }
 #endif
 
@@ -393,7 +390,7 @@ public:
      * when the reference count reaches zero.
      */
     cref_ptr(_Tp* __p = 0)
-        : _M_counter(cref_counter_pool::instance().new_counter(__p))
+        : _M_index(cref_counter_pool::instance().new_counter(__p))
 	{}
 
     /**
@@ -403,7 +400,7 @@ public:
      * associated with object by 1.
      */
     cref_ptr(const cref_ptr& __r)
-        : _M_counter(-1) {
+        : _M_index(-1) {
         ref(&__r);
     }
 
@@ -436,7 +433,7 @@ public:
      */
     inline _Tp* get() const {
 	return reinterpret_cast<_Tp*>
-	    (cref_counter_pool::instance().data(_M_counter));
+	    (cref_counter_pool::instance().data(_M_index));
     }
 
     /**
@@ -465,14 +462,14 @@ public:
      * @return true if reference pointer refers to a null object.
      */
     inline bool is_empty() const {
-	return _M_counter < 0 || 0 == get();
+	return _M_index < 0 || 0 == get();
     }
 
     /**
      * @return true if reference pointer represents only reference to object.
      */
     inline bool is_only() const {
-	return cref_counter_pool::instance().count(_M_counter) == 1;
+	return cref_counter_pool::instance().count(_M_index) == 1;
     }
 
     /**
@@ -480,7 +477,7 @@ public:
      * @return true if there are at least n references to object.
      */
     bool at_least(int32_t n) const {
-	return cref_counter_pool::instance().count(_M_counter) >= n;
+	return cref_counter_pool::instance().count(_M_index) >= n;
     }
 
     /**
@@ -497,22 +494,22 @@ private:
      * Add reference.
      */
     void ref(const cref_ptr* __r) const {
-	_M_counter = __r->_M_counter;
-	cref_counter_pool::instance().incr_counter(_M_counter);
+	_M_index = __r->_M_index;
+	cref_counter_pool::instance().incr_counter(_M_index);
     }
 
     /**
      * Remove reference.
      */
     void unref() const {
-	if (_M_counter >= 0 &&
-	    cref_counter_pool::instance().decr_counter(_M_counter) == 0) {
+	if (_M_index >= 0 &&
+	    cref_counter_pool::instance().decr_counter(_M_index) == 0) {
 	    delete get();
-	    _M_counter = -1;
+	    _M_index = -1;
 	}
     }
 
-    mutable int32_t _M_counter;	// index in cref_counter_pool
+    mutable int32_t _M_index;	// index in cref_counter_pool
 };
 
 #endif // __LIBXORP_REF_PTR_HH__
