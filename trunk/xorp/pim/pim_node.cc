@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.51 2004/08/02 20:46:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.52 2004/08/06 00:35:10 pavlin Exp $"
 
 
 //
@@ -388,18 +388,26 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
 						 pim_vif->vif_index());
 
     //
-    // Update the primary and domain-wide addresses
+    // Update and check the primary and domain-wide addresses
     //
-    if (pim_vif->addr_ptr() != NULL) {
+    do {
 	if (pim_vif->update_primary_and_domain_wide_address(error_msg)
-	    != XORP_OK) {
-	    XLOG_ERROR("Error updating primary and domain-wide addresses "
-		       "for vif %s: %s",
-		       pim_vif->name().c_str(),
-		       error_msg.c_str());
-	    return (XORP_ERROR);
+	    == XORP_OK) {
+	    break;
 	}
-    }
+	if (pim_vif->addr_ptr() == NULL) {
+	    // XXX: don't print an error if the vif has no addresses
+	    break;
+	}
+	if (pim_vif->is_loopback()) {
+	    // XXX: don't print an error if this is a loopback interface
+	    break;
+	}
+	XLOG_ERROR("Error updating primary and domain-wide addresses "
+		   "for vif %s: %s",
+		   pim_vif->name().c_str(), error_msg.c_str());
+	return (XORP_ERROR);
+    } while (false);
 
     XLOG_INFO("New vif: %s", pim_vif->str().c_str());
     
@@ -597,16 +605,26 @@ PimNode::add_vif_addr(const string& vif_name,
     }
 
     //
-    // Update the primary and domain-wide addresses
+    // Update and check the primary and domain-wide addresses
     //
-    if (pim_vif->update_primary_and_domain_wide_address(error_msg)
-	!= XORP_OK) {
+    do {
+	if (pim_vif->update_primary_and_domain_wide_address(error_msg)
+	    == XORP_OK) {
+	    break;
+	}
+	if (! (pim_vif->is_up() || pim_vif->is_pending_up())) {
+	    // XXX: print an error only if the interface is UP or PENDING_UP
+	    break;
+	}
+	if (pim_vif->is_loopback()) {
+	    // XXX: don't print an error if this is a loopback interface
+	    break;
+	}
 	XLOG_ERROR("Error updating primary and domain-wide addresses "
 		   "for vif %s: %s",
-		   pim_vif->name().c_str(),
-		   error_msg.c_str());
+		   pim_vif->name().c_str(), error_msg.c_str());
 	return (XORP_ERROR);
-    }
+    } while (false);
 
     //
     // Spec:
@@ -672,16 +690,24 @@ PimNode::delete_vif_addr(const string& vif_name,
     // Update the primary and domain-wide addresses.
     // If the vif has no more primary or a domain-wide address, then stop it.
     //
-    pim_vif->update_primary_and_domain_wide_address(error_msg);
-    if (pim_vif->is_up()) {
-	// Check the primary and domain-wide addresses
-	if ((pim_vif->primary_addr() == IPvX::ZERO(family()))
-	    || (pim_vif->domain_wide_addr() == IPvX::ZERO(family()))) {
-	    XLOG_ERROR("Cannot update primary and domain-wide addresses: %s",
-		       error_msg.c_str());
-	    pim_vif->stop(error_msg);
+    do {
+	if (pim_vif->update_primary_and_domain_wide_address(error_msg)
+	    == XORP_OK) {
+	    break;
 	}
-    }
+	if (! (pim_vif->is_up() || pim_vif->is_pending_up())) {
+	    // XXX: don't do anything if the interface is not UP or PENDING_UP
+	    break;
+	}
+	if (pim_vif->is_loopback()) {
+	    // XXX: don't do anything if this is a loopback interface
+	    break;
+	}
+	XLOG_ERROR("Error updating primary and domain-wide addresses "
+		   "for vif %s: %s",
+		   pim_vif->name().c_str(), error_msg.c_str());
+	pim_vif->stop(error_msg);
+    } while (false);
 
     //
     // Spec:
