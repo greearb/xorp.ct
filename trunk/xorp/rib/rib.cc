@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.33 2004/06/10 22:41:38 hodson Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.34 2004/06/30 02:07:09 atanu Exp $"
 
 #include "rib_module.h"
 
@@ -1254,12 +1254,12 @@ void
 RIB<A>::print_rib() const
 {
 #ifdef DEBUG_LOGGING
-    typename map<string, RouteTable<A>* >::const_iterator pair;
+    typename list<RouteTable<A>* >::const_iterator pair;
     pair = _tables.begin();
     // XXX: this is printf not debug_msg for a reason.
     printf("==============================================================\n");
     while (pair != _tables.end()) {
-	RouteTable<A>* rt = pair->second;
+	RouteTable<A>* rt = *pair;
 	printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
 	printf(rt->str().c_str());
 	rt = rt->next_table();
