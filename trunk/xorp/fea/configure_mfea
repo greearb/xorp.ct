@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mfea/configure_mfea,v 1.9 2003/05/31 17:43:00 pavlin Exp $
+# $XORP: xorp/fea/configure_mfea,v 1.1 2003/06/03 21:54:42 pavlin Exp $
 #
 
 #
@@ -11,17 +11,21 @@
 MODULE_NAME="MFEA"
 HOSTNAME=`hostname`
 
-CLI_TARGET="CLI"
-MFEA_TARGET="MFEA_4"
-
-. ../cli/xrl_cli_shell_funcs.sh
-. ../fea/xrl_mfea_shell_funcs.sh
-
 echo "Configuring ${MODULE_NAME} on ${HOSTNAME}..."
+
 
 ###############################################################
 # USER CONFIGURATION BEGIN
 ###############################################################
+
+#
+# The IP version. It must be either IPV4 or IPV6
+#
+IP_VERSION=IPV4
+#IP_VERSION=IPV6
+
+. ../cli/xrl_cli_shell_funcs.sh
+. ../fea/xrl_mfea_shell_funcs.sh
 
 #
 # Select the vifs to enable
@@ -97,9 +101,11 @@ fi
 # Configure CLI
 #
 for subnet in ${CLI_ENABLE_SUBNETS}; do
+	# XXX: for now, the CLI access is always over IPv4
 	cli_add_enable_cli_access_from_subnet4 ${subnet}
 done
 for subnet in ${CLI_DISABLE_SUBNETS}; do
+	# XXX: for now, the CLI access is always over IPv4
 	cli_add_disable_cli_access_from_subnet4 ${subnet}
 done
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mfea/xrl_mfea_shell_funcs.sh,v 1.6 2003/06/03 18:52:18 pavlin Exp $
+# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.1 2003/06/03 21:54:42 pavlin Exp $
 #
 
 #
@@ -10,8 +10,22 @@
 
 . ../utils/xrl_shell_lib.sh
 
+#
 # Conditionally set the target name
-MFEA_TARGET=${MFEA_TARGET:="MFEA_4"}
+#
+IP_VERSION=${IP_VERSION:?"IP_VERSION undefined. Must be defined to either IPV4 or IPV6"}
+case "${IP_VERSION}" in
+	IPV4)
+		MFEA_TARGET=${MFEA_TARGET:="MFEA_4"}
+		;;
+	IPV6)
+		MFEA_TARGET=${MFEA_TARGET:="MFEA_6"}
+		;;
+	*)
+		echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
+		exit 1
+esac
+
 
 mfea_enable_vif()
 {
