@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.19 2004/09/07 20:45:10 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.20 2004/10/13 06:03:28 pavlin Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -77,7 +77,7 @@ split_inproc_address(const char* address,
 	if (*p == '\0') {
 	    // unexpected end of input
 	    return false;
-	} else if (*p == '/') {
+	} else if (*p == ':') {
 	    break;
 	}
 	p++;
@@ -126,6 +126,7 @@ XrlPFInProcSender::XrlPFInProcSender(EventLoop& e, const char* address)
 	xorp_throw(XrlPFConstructorError, "Bad process id");
     }
     _listener_no = iid;
+    _depth = new uint32_t(0);
 }
 
 XrlPFInProcSender::~XrlPFInProcSender()
@@ -138,32 +139,61 @@ XrlPFInProcSender::send(const Xrl&		x,
 {
     XrlPFInProcListener *l = get_inproc_listener(_listener_no);
 
-    if (l == NULL) {
-	debug_msg("XrlPFInProcSender::send() no listener (id %d)\n",
-		  _listener_no);
-	if (direct_call) {
+    // Check stack depth.  This is a bit adhoc, but the issue is that
+    // the inproc makes the dispatch and invokes the callback in this
+    // send function.  There is zero delay.  So code that sends one
+    // XRL from the callback of another in a long chains may end up
+    // exhausting the stack.  We use depth as a counter.  And there's
+    // the final subtlety that one of those callback may delete the
+    // sender so we can't access member variables directly after the
+    // callback returns, but we can access a reference pointer if we
+    // have a reference!!!
+    ref_ptr<uint32_t> depth = _depth;
+
+    *depth = *depth + 1;
+    if (*depth > 1) {
+	if (direct_call == true) {
+	    *depth = *depth - 1;
 	    return false;
 	} else {
+	    cb->dispatch(XrlError(SEND_FAILED, "RESOURCES!"), 0);
+	    *depth = *depth - 1;
+	    return true;
+	}
+    }
+
+    if (l == NULL) {
+	if (direct_call) {
+	    *depth = *depth - 1;
+	    return false;
+	} else {
+	    debug_msg("XrlPFInProcSender::send() no listener (id %d)\n",
+		      _listener_no);
 	    cb->dispatch(XrlError::SEND_FAILED(), 0);
+	    *depth = *depth - 1;
 	    return true;
 	}
     }
 
     const XrlDispatcher *d = l->dispatcher();
     if (d == NULL) {
-	debug_msg("XrlPFInProcSender::send() no dispatcher (id %d)\n",
-		  _listener_no);
 	if (direct_call) {
+	    *depth = *depth - 1;
 	    return false;
 	} else {
+	    debug_msg("XrlPFInProcSender::send() no dispatcher (id %d)\n",
+		      _listener_no);
 	    cb->dispatch(XrlError::SEND_FAILED(), 0);
-	    return true;
 	}
+	*depth = *depth - 1;
+	return true;
     }
 
     XrlArgs reply;
     const XrlError e = d->dispatch_xrl(x.command(), x.args(), reply);
     cb->dispatch(e, (e == XrlError::OKAY()) ? &reply : 0);
+
+    *depth = *depth - 1;
     return true;
 }
 
@@ -221,13 +251,7 @@ XrlPFInProcListener::XrlPFInProcListener(EventLoop& e, XrlDispatcher* xr)
 {
     _instance_no = _next_instance_no ++;
 
-    _address = this_host();
-
-    char buffer[256];
-    snprintf(buffer, sizeof(buffer) / sizeof(buffer[0]),
-	     "/%d.%d", getpid(), _instance_no);
-    _address += buffer;
-
+    _address = this_host() + c_format(":%d.%d", getpid(), _instance_no);
     add_inproc_listener(_instance_no, this);
 }
 

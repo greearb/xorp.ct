@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.13 2004/06/10 22:41:12 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.14 2004/10/13 06:03:28 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_INPROC_HH__
 #define __LIBXIPC_XRL_PF_INPROC_HH__
@@ -34,11 +34,11 @@ public:
     bool response_pending() const;
 
 private:
-    string _address;
-    uint32_t _instance_no;
+    string		_address;
+    uint32_t		_instance_no;
 
-    static const char* _protocol;
-    static uint32_t _next_instance_no;
+    static const char*	_protocol;
+    static uint32_t	_next_instance_no;
 };
 
 class XrlPFInProcSender : public XrlPFSender {
@@ -61,8 +61,9 @@ public:
     bool alive() const;
 
 private:
-    static const char* _protocol;
-    uint32_t _listener_no;
+    static const char*	_protocol;
+    uint32_t		_listener_no;
+    ref_ptr<uint32_t>	_depth;
 };
 
 #endif // __LIBXIPC_XRL_PF_INPROC_HH__
