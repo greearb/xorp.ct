@@ -1,6 +1,12 @@
 #
-# $XORP: xorp/pim/TODO,v 1.29 2003/03/25 08:10:00 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.30 2003/04/08 19:35:11 pavlin Exp $
 #
+
+* BSR SPEC+IMPL+TESTSUITE:
+  Make sure that Mark's email to PIM Mailing list "Re: [pim] PIM BSR Draft"
+  on May 8, 2003 is specified in the spec, implemented and tested.
+  Also, read other emails on the subject, and probably incorporate the
+  solutions into the spec.
 
 * BSR SPEC:
   Add/describe in each non-BSR a timer per Cand-RP that is based
