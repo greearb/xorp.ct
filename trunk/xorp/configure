@@ -1650,15 +1650,16 @@ INSTALL_STRIP_PROGRAM="\${SHELL} \$(install_sh) -c -s"
 
 
 
+test "$prefix" = NONE && prefix="${ac_default_prefix}"
 
 cat >>confdefs.h <<_ACEOF
-#define XORP_ROOT "${ac_default_prefix}"
+#define XORP_ROOT "${prefix}"
 _ACEOF
 
 
 
 cat >>confdefs.h <<_ACEOF
-#define XORP_INSTALL_ROOT "${ac_default_prefix}"
+#define XORP_INSTALL_ROOT "${prefix}"
 _ACEOF
 
 

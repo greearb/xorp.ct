@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.95 2004/06/15 20:35:36 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.96 2004/06/15 21:25:27 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -43,10 +43,11 @@ dnl
 dnl Change the default installation prefix
 dnl
 AC_PREFIX_DEFAULT(/usr/local/xorp)
-AC_DEFINE_UNQUOTED(XORP_ROOT, "${ac_default_prefix}",
+test "$prefix" = NONE && prefix="${ac_default_prefix}"
+AC_DEFINE_UNQUOTED(XORP_ROOT, "${prefix}",
 		   [Define the path to the root of the XORP installation])
 
-AC_DEFINE_UNQUOTED(XORP_INSTALL_ROOT, "${ac_default_prefix}",
+AC_DEFINE_UNQUOTED(XORP_INSTALL_ROOT, "${prefix}",
 		   [Define the path to the root of the XORP installation])
 
 AC_DEFINE_UNQUOTED(XORP_BUILD_ROOT, "${PWD}",
