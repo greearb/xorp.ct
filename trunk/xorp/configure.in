@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.24 2003/04/16 08:05:08 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.25 2003/04/16 19:20:20 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -28,9 +28,8 @@ AC_PREREQ(2.13)
 
 AC_INIT(libxorp/xorp.h)
 AC_CONFIG_AUX_DIR(config)
-AC_CONFIG_SUBDIRS(cli/libtecla)
 AC_CANONICAL_SYSTEM
-AC_CANONICAL_HOST
+AC_CONFIG_SUBDIRS(cli/libtecla)
 AM_INIT_AUTOMAKE(xorp, 0.2)
 AM_CONFIG_HEADER(config.h)
 
@@ -228,7 +227,7 @@ AC_PROG_RANLIB
 AC_CHECK_TOOL(AR, ar)
 
 AC_CHECK_TOOL(GMAKE, gmake, :)
-if test "X${ac_cv_prog_GMAKE}" != "Xgmake" ; then
+if test "X${GMAKE}" != "Xgmake" ; then
    echo "The default XORP build process requires GNU make installed."
    exit
 fi
