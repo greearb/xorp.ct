@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# $XORP: other/testbed/tools/xtreset.py,v 1.8 2002/10/04 02:53:02 atanu Exp $
+# $XORP: other/testbed/tools/xtreset.py,v 1.1.1.1 2002/12/11 23:55:14 hodson Exp $
 
 import os
 import getopt
@@ -15,8 +15,6 @@ All configuration is hardcoded in here.
 
 APCMIBLOC="-M /usr/local/xorp/mibs:/usr/local/share/snmp/mibs/ -m PowerNet-MIB"
 
-# Currently not used may make sense to just switch back to a dictionary
-# at some point.
 dict = { "xorp0" : \
            [APCMIBLOC, "xorppwr1", "public", "private", "sPDUOutletCtl.1"],
          "xorp1" : \
