@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_vif.hh,v 1.2 2003/06/02 02:03:32 pavlin Exp $
+// $XORP: xorp/fea/mfea_vif.hh,v 1.3 2004/03/01 10:01:59 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_VIF_HH__
@@ -235,6 +235,17 @@ public:
 private:
     // Private functions
     MfeaNode&	mfea_node() const	{ return (_mfea_node);		}
+
+    /**
+     * Get the string with the flags about the vif status.
+     * 
+     * TODO: temporary here. Should go to the Vif class after the Vif
+     * class starts using the Proto class.
+     * 
+     * @return the C++ style string with the flags about the vif status
+     * (e.g., UP/DOWN/DISABLED, etc).
+     */
+    string	flags_string() const;
     
     // Private state
     MfeaNode&	_mfea_node;		// The MFEA node I belong to

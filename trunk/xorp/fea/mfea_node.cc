@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.25 2004/04/05 03:11:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.26 2004/04/09 06:12:49 pavlin Exp $"
 
 
 //
@@ -77,13 +77,13 @@
 MfeaNode::MfeaNode(int family, xorp_module_id module_id,
 		   EventLoop& eventloop, FtiConfig& ftic)
     : ProtoNode<MfeaVif>(family, module_id, eventloop),
-    _mfea_mrouter(*this),
-    _mrib_table(family),
-    _mrib_table_default_metric_preference(MRIB_TABLE_DEFAULT_METRIC_PREFERENCE),
-    _mrib_table_default_metric(MRIB_TABLE_DEFAULT_METRIC),
-    _mfea_dft(*this),
-    _is_log_trace(true),		// XXX: default to print trace logs
-    _ftic(ftic)
+      _mfea_mrouter(*this),
+      _mrib_table(family),
+      _mrib_table_default_metric_preference(MRIB_TABLE_DEFAULT_METRIC_PREFERENCE),
+      _mrib_table_default_metric(MRIB_TABLE_DEFAULT_METRIC),
+      _mfea_dft(*this),
+      _is_log_trace(true),		// XXX: default to print trace logs
+      _ftic(ftic)
 {
     XLOG_ASSERT(module_id == XORP_MODULE_MFEA);
     
@@ -96,10 +96,14 @@ MfeaNode::MfeaNode(int family, xorp_module_id module_id,
 	_proto_comms[i] = NULL;
 
     //
-    // Set the node status.
-    // XXX: note that we don't really need to wait for FEA, hence we are READY.
+    // Set the node status
     //
-    ProtoNode<MfeaVif>::set_node_status(PROC_READY);
+    ProtoNode<MfeaVif>::set_node_status(PROC_STARTUP);
+
+    //
+    // Set myself as an observer when the node status changes
+    //
+    set_observer(this);
 }
 
 /**
@@ -111,6 +115,11 @@ MfeaNode::MfeaNode(int family, xorp_module_id module_id,
  **/
 MfeaNode::~MfeaNode()
 {
+    //
+    // Unset myself as an observer when the node status changes
+    //
+    unset_observer(this);
+
     stop();
     
     delete_all_vifs();
@@ -128,6 +137,10 @@ MfeaNode::~MfeaNode()
  * @: 
  * 
  * Start the MFEA.
+ * TODO: This function should not start the operation on the
+ * interfaces. The interfaces must be activated separately.
+ * After the startup operations are completed,
+ * MfeaNode::final_start() is called to complete the job.
  * 
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
@@ -137,15 +150,12 @@ MfeaNode::start()
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (ProtoNode<MfeaVif>::start() < 0)
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
+    if (ProtoNode<MfeaVif>::pending_start() < 0)
 	return (XORP_ERROR);
 
-    //
-    // Set the node status.
-    // XXX: note that we don't really need to wait for FEA, hence we are READY.
-    //
-    ProtoNode<MfeaVif>::set_node_status(PROC_READY);
-    
     // Start the MfeaMrouter
     _mfea_mrouter.start();
     
@@ -156,15 +166,45 @@ MfeaNode::start()
 	}
     }
     
+    //
+    // Set the node status
+    //
+    ProtoNode<MfeaVif>::set_node_status(PROC_STARTUP);
+    update_status();
+
+    return (XORP_OK);
+}
+
+/**
+ * MfeaNode::final_start:
+ * @: 
+ * 
+ * Completely start the node operation.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+MfeaNode::final_start()
+{
+#if 0	// TODO: XXX: PAVPAVPAV
+    if (! is_pending_up())
+	return (XORP_ERROR);
+#endif
+
+    if (ProtoNode<MfeaVif>::start() < 0) {
+	ProtoNode<MfeaVif>::stop();
+	return (XORP_ERROR);
+    }
+
     // Start the mfea_vifs
     start_all_vifs();
-    
+
     // Start the timer to read immediately the MRIB table
     mrib_table().clear();
-    _mrib_table_read_timer =
-	eventloop().new_oneoff_after(TimeVal(0,0),
-				     callback(this, &MfeaNode::mrib_table_read_timer_timeout));
-    
+    _mrib_table_read_timer = eventloop().new_oneoff_after(
+	TimeVal(0,0),
+	callback(this, &MfeaNode::mrib_table_read_timer_timeout));
+
     return (XORP_OK);
 }
 
@@ -172,20 +212,31 @@ MfeaNode::start()
  * MfeaNode::stop:
  * @: 
  * 
- * Stop the MFEA.
+ * Gracefully stop the MFEA.
+ * XXX: This function, unlike start(), will stop the MFEA
+ * operation on all interfaces.
+ * XXX: After the cleanup is completed,
+ * MfeaNode::final_stop() is called to complete the job.
+ * XXX: If this method is called one-after-another, the second one
+ * will force calling immediately MfeaNode::final_stop() to quickly
+ * finish the job. TODO: is this a desired semantic?
+ * XXX: This function, unlike start(), will stop the MFEA
+ * operation on all interfaces.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 MfeaNode::stop()
 {
-    if (is_down()) {
-	ProtoNode<MfeaVif>::set_node_status(PROC_DONE);
+    if (is_down())
 	return (XORP_OK);
-    }
 
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
+
+    //
+    // Perform misc. MFEA-specific stop operations
+    //
     
     // Stop the vifs
     stop_all_vifs();
@@ -203,13 +254,34 @@ MfeaNode::stop()
     _mrib_table_read_timer.unschedule();
     mrib_table().clear();
     
-    if (ProtoNode<MfeaVif>::stop() < 0)
+    if (ProtoNode<MfeaVif>::pending_stop() < 0)
 	return (XORP_ERROR);
 
     //
     // Set the node status
     //
-    ProtoNode<MfeaVif>::set_node_status(PROC_DONE);
+    ProtoNode<MfeaVif>::set_node_status(PROC_SHUTDOWN);
+    update_status();
+
+    return (XORP_OK);
+}
+
+/**
+ * MfeaNode::final_stop:
+ * @: 
+ * 
+ * Completely stop the MFEA operation.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+MfeaNode::final_stop()
+{
+    if (! (is_up() || is_pending_up() || is_pending_down()))
+	return (XORP_ERROR);
+
+    if (ProtoUnit::stop() < 0)
+	return (XORP_ERROR);
 
     return (XORP_OK);
 }
@@ -255,57 +327,36 @@ MfeaNode::has_pending_down_units(string& reason_msg)
     return (false);
 }
 
-/**
- * MfeaNode::node_status:
- * @reason_msg: return-by-reference string that contains human-readable
- * information about the status.
- * 
- * Get the node status (see @ref ProcessStatus).
- * 
- * Return value: The node status (see @ref ProcessStatus).
- **/
-ProcessStatus
-MfeaNode::node_status(string& reason_msg)
+void
+MfeaNode::status_change(ServiceBase*  service,
+			ServiceStatus old_status,
+			ServiceStatus new_status)
 {
-    ProcessStatus status = ProtoNode<MfeaVif>::node_status();
-    
-    // Set the return message with the reason
-    reason_msg = "";
-    switch (status) {
-    case PROC_NULL:
-	// Can't be running and in this state
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_STARTUP:
-	// Waiting for unknown reason
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_NOT_READY:
-	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
-	XLOG_UNFINISHED();
-	break;
-    case PROC_READY:
-	reason_msg = c_format("Node is READY (running status %s)",
-			      ProtoState::state_string());
-	break;
-    case PROC_SHUTDOWN:
-	// Get the message about the shutdown progress
-	has_pending_down_units(reason_msg);
-	break;
-    case PROC_FAILED:
-	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
-	XLOG_UNFINISHED();
-	break;
-    case PROC_DONE:
-	// Process has completed operation
-	break;
-    default:
-	// Unknown status
-	XLOG_UNREACHABLE();
-	break;
+    XLOG_ASSERT(this == service);
+
+    if ((old_status == STARTING) && (new_status == RUNNING)) {
+	// The startup process has completed
+	if (final_start() < 0) {
+	    XLOG_ERROR("Cannot complete the startup process; "
+		       "current state is %s",
+		       ProtoNode<MfeaVif>::state_string());
+	    return;
+	}
+	ProtoNode<MfeaVif>::set_node_status(PROC_READY);
+	return;
     }
-    
-    return (status);
+
+    if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	// The shutdown process has completed
+	final_stop();
+	// Set the node status
+	ProtoNode<MfeaVif>::set_node_status(PROC_DONE);
+	return;
+    }
+
+    //
+    // TODO: check if there was an error
+    //
 }
 
 /**
@@ -2101,6 +2152,7 @@ MfeaNode::get_mrib_table(vector<Mrib* >& mrib_table)
 	for (iter = fte_list6.begin(); iter != fte_list6.end(); ++iter) {
 	    Fte6& fte = *iter;
 	    Mrib* mrib = new Mrib(family());
+	    mrib_table[mrib_table_n++] = mrib;
 	    MfeaVif *mfea_vif = NULL;
 	    mrib->set_dest_prefix(IPvXNet(fte.net()));
 	    mrib->set_metric_preference(mrib_table_default_metric_preference().get());

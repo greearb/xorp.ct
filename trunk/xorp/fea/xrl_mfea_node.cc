@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.22 2004/03/18 00:43:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.23 2004/04/10 07:50:10 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -31,93 +31,307 @@
 //
 // XrlMfeaNode front-end interface
 //
+XrlMfeaNode::XrlMfeaNode(int family,
+			 xorp_module_id module_id,
+			 EventLoop& eventloop,
+			 XrlRouter* xrl_router,
+			 FtiConfig& ftic)
+    : MfeaNode(family, module_id, eventloop, ftic),
+      XrlMfeaTargetBase(xrl_router),
+      MfeaNodeCli(*static_cast<MfeaNode *>(this)),
+      _class_name(xrl_router->class_name()),
+      _instance_name(xrl_router->instance_name()),
+      _xrl_mfea_vif_manager(*this, eventloop, xrl_router),
+      _xrl_mfea_client_client(xrl_router),
+      _xrl_cli_manager_client(xrl_router)
+{
+
+}
+
+XrlMfeaNode::~XrlMfeaNode()
+{
+    MfeaNodeCli::stop();
+    _xrl_mfea_vif_manager.stop();
+    MfeaNode::stop();
+}
+
+bool
+XrlMfeaNode::startup()
+{
+    if (MfeaNode::start() < 0)
+	return false;
+
+    return true;
+}
+
+bool
+XrlMfeaNode::shutdown()
+{
+    if (MfeaNode::stop() < 0)
+	return false;
+
+    return true;
+}
+
 int
 XrlMfeaNode::enable_cli()
 {
-    int ret_code = XORP_OK;
-    
     MfeaNodeCli::enable();
     
-    return (ret_code);
+    return (XORP_OK);
 }
 
 int
 XrlMfeaNode::disable_cli()
 {
-    int ret_code = XORP_OK;
-    
     MfeaNodeCli::disable();
     
-    return (ret_code);
+    return (XORP_OK);
 }
 
 int
 XrlMfeaNode::start_cli()
 {
-    int ret_code = XORP_OK;
-    
     if (MfeaNodeCli::start() < 0)
-	ret_code = XORP_ERROR;
+	return (XORP_ERROR);
     
-    return (ret_code);
+    return (XORP_OK);
 }
 
 int
 XrlMfeaNode::stop_cli()
 {
-    int ret_code = XORP_OK;
-    
     if (MfeaNodeCli::stop() < 0)
-	ret_code = XORP_ERROR;
+	return (XORP_ERROR);
     
-    return (ret_code);
+    return (XORP_OK);
 }
 
 int
 XrlMfeaNode::enable_mfea()
 {
-    int ret_code = XORP_OK;
-    
     MfeaNode::enable();
     
-    return (ret_code);
+    return (XORP_OK);
 }
 
 int
 XrlMfeaNode::disable_mfea()
 {
-    int ret_code = XORP_OK;
-    
     MfeaNode::disable();
     
-    return (ret_code);
+    return (XORP_OK);
 }
 
 int
 XrlMfeaNode::start_mfea()
 {
-    int ret_code = XORP_OK;
-    
     if (MfeaNode::start() < 0)
-	ret_code = XORP_ERROR;
+	return (XORP_ERROR);
     
-    return (ret_code);
+    return (XORP_OK);
 }
 
 int
 XrlMfeaNode::stop_mfea()
 {
-    int ret_code = XORP_OK;
-    
     if (MfeaNode::stop() < 0)
-	ret_code = XORP_ERROR;
+	return (XORP_ERROR);
     
-    return (ret_code);
+    return (XORP_OK);
 }
 
 //
 // Protocol node methods
 //
+
+/**
+ * XrlMfeaNode::send_add_mrib:
+ * @dst_module_instance name: The name of the protocol instance-destination
+ * of the message.
+ * @dst_module_id: The #xorp_module_id of the protocol-destination of the
+ * message.
+ * @mrib: The #Mrib entry to add.
+ * 
+ * Add a MRIB entry to an user-level protocol.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
+			   xorp_module_id dst_module_id,
+			   const Mrib& mrib)
+{
+    _send_add_delete_mrib_queue.push_back(SendAddDeleteMrib(
+					      dst_module_instance_name,
+					      dst_module_id,
+					      mrib,
+					      true));
+    // If the queue was empty before, start sending the changes
+    if (_send_add_delete_mrib_queue.size() == 1) {
+	send_add_delete_mrib();
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * XrlMfeaNode::send_delete_mrib:
+ * @dst_module_instance name: The name of the protocol instance-destination
+ * of the message.
+ * @dst_module_id: The #xorp_module_id of the protocol-destination of the
+ * message.
+ * @mrib: The #Mrib entry to delete.
+ * 
+ * Delete a MRIB entry from an user-level protocol.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
+			      xorp_module_id dst_module_id,
+			      const Mrib& mrib)
+{
+    _send_add_delete_mrib_queue.push_back(SendAddDeleteMrib(
+					      dst_module_instance_name,
+					      dst_module_id,
+					      mrib,
+					      false));
+    // If the queue was empty before, start sending the changes
+    if (_send_add_delete_mrib_queue.size() == 1) {
+	send_add_delete_mrib();
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * XrlMfeaNode::send_set_mrib_done:
+ * @dst_module_instance name: The name of the protocol instance-destination
+ * of the message.
+ * @dst_module_id: The #xorp_module_id of the protocol-destination of the
+ * message.
+ * 
+ * Complete add/delete MRIB transaction.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+XrlMfeaNode::send_set_mrib_done(const string& dst_module_instance_name,
+				xorp_module_id dst_module_id)
+{
+    _send_add_delete_mrib_queue.push_back(SendAddDeleteMrib(
+					      dst_module_instance_name,
+					      dst_module_id,
+					      family()));
+    // If the queue was empty before, start sending the changes
+    if (_send_add_delete_mrib_queue.size() == 1) {
+	send_add_delete_mrib();
+    }
+
+    return (XORP_OK);
+}
+
+void
+XrlMfeaNode::send_add_delete_mrib()
+{
+    bool success = false;
+    MfeaVif *mfea_vif = NULL;
+    string vif_name;
+
+    if (_send_add_delete_mrib_queue.empty())
+	return;			// No more changes
+
+    const SendAddDeleteMrib& add_delete_mrib = _send_add_delete_mrib_queue.front();
+    const Mrib& mrib = add_delete_mrib.mrib();
+    bool is_add = add_delete_mrib.is_add();
+
+    mfea_vif = MfeaNode::vif_find_by_vif_index(mrib.next_hop_vif_index());
+    if (mfea_vif != NULL)
+	vif_name = mfea_vif->name();
+
+    if (add_delete_mrib.is_done()) {
+	// Signal that we are done with add/delete of MRIB entries
+	success = _xrl_mfea_client_client.send_set_mrib_done(
+	    add_delete_mrib.dst_module_instance_name().c_str(),
+	    my_xrl_target_name(),
+	    callback(this, &XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb));
+
+    } else {
+	if (is_add) {
+	    // Add MRIB entry
+	    if (MfeaNode::is_ipv4()) {
+		success = _xrl_mfea_client_client.send_add_mrib4(
+		    add_delete_mrib.dst_module_instance_name().c_str(),
+		    my_xrl_target_name(),
+		    mrib.dest_prefix().get_ipv4net(),
+		    mrib.next_hop_router_addr().get_ipv4(),
+		    vif_name,
+		    mrib.next_hop_vif_index(),
+		    mrib.metric_preference(),
+		    mrib.metric(),
+		    callback(this, &XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb));
+	    }
+	    if (MfeaNode::is_ipv6()) {
+		success = _xrl_mfea_client_client.send_add_mrib6(
+		    add_delete_mrib.dst_module_instance_name().c_str(),
+		    my_xrl_target_name(),
+		    mrib.dest_prefix().get_ipv6net(),
+		    mrib.next_hop_router_addr().get_ipv6(),
+		    vif_name,
+		    mrib.next_hop_vif_index(),
+		    mrib.metric_preference(),
+		    mrib.metric(),
+		    callback(this, &XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb));
+	    }
+	} else {
+	    // Delete MRIB entry
+	    if (MfeaNode::is_ipv4()) {
+		success = _xrl_mfea_client_client.send_delete_mrib4(
+		    add_delete_mrib.dst_module_instance_name().c_str(),
+		    my_xrl_target_name(),
+		    mrib.dest_prefix().get_ipv4net(),
+		    callback(this, &XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb));
+	    }
+	    if (MfeaNode::is_ipv6()) {
+		success = _xrl_mfea_client_client.send_delete_mrib6(
+		    add_delete_mrib.dst_module_instance_name().c_str(),
+		    my_xrl_target_name(),
+		    mrib.dest_prefix().get_ipv6net(),
+		    callback(this, &XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb));
+	    }
+	}
+    }
+    
+    if (! success) {
+        //
+        // If an error, then start a timer to try again
+        // TODO: XXX: the timer value is hardcoded here!!
+        //
+	_send_add_delete_mrib_queue_timer = MfeaNode::eventloop().new_oneoff_after(
+	    TimeVal(1, 0),
+	    callback(this, &XrlMfeaNode::send_add_delete_mrib));
+    }
+}
+
+void
+XrlMfeaNode::mfea_client_client_send_add_delete_mrib_cb(const XrlError& xrl_error)
+{
+    // If success, then send the next change
+    if (xrl_error == XrlError::OKAY()) {
+	_send_add_delete_mrib_queue.pop_front();
+	send_add_delete_mrib();
+	return;
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // TODO: XXX: the timer value is hardcoded here!!
+    //
+    _send_add_delete_mrib_queue_timer = MfeaNode::eventloop().new_oneoff_after(
+        TimeVal(1, 0),
+	callback(this, &XrlMfeaNode::send_add_delete_mrib));
+}
 
 /**
  * XrlMfeaNode::proto_send:
@@ -184,7 +398,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 		ip_tos,
 		router_alert_bool,
 		snd_vector,
-		callback(this, &XrlMfeaNode::xrl_result_recv_protocol_message));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb));
 	    break;
 	}
 	
@@ -202,7 +416,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 		ip_tos,
 		router_alert_bool,
 		snd_vector,
-		callback(this, &XrlMfeaNode::xrl_result_recv_protocol_message));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb));
 	    break;
 	}
 	
@@ -214,7 +428,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 }
 
 void
-XrlMfeaNode::xrl_result_recv_protocol_message(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to send a data message to a protocol: %s",
@@ -287,7 +501,7 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 		src.get_ipv4(),
 		dst.get_ipv4(),
 		snd_vector,
-		callback(this, &XrlMfeaNode::xrl_result_recv_kernel_signal_message));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb));
 	    break;
 	}
 	
@@ -303,7 +517,7 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 		src.get_ipv6(),
 		dst.get_ipv6(),
 		snd_vector,
-		callback(this, &XrlMfeaNode::xrl_result_recv_kernel_signal_message));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb));
 	    break;
 	}
 	
@@ -314,139 +528,13 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
     return (XORP_OK);
 }
 
-/**
- * XrlMfeaNode::send_add_mrib:
- * @dst_module_instance name: The name of the protocol instance-destination
- * of the message.
- * @dst_module_id: The #xorp_module_id of the protocol-destination of the
- * message.
- * @mrib: The #Mrib entry to add.
- * 
- * Add a MRIB entry to an user-level protocol.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
-			   xorp_module_id ,	// dst_module_id,
-			   const Mrib& mrib)
-{
-    string vif_name;
-    Vif *vif = MfeaNode::vif_find_by_vif_index(mrib.next_hop_vif_index());
-    
-    if (vif != NULL)
-	vif_name = vif->name();
-    
-    do {
-	if (MfeaNode::is_ipv4()) {
-	    _xrl_mfea_client_client.send_add_mrib4(
-		dst_module_instance_name.c_str(),
-		my_xrl_target_name(),
-		mrib.dest_prefix().get_ipv4net(),
-		mrib.next_hop_router_addr().get_ipv4(),
-		vif_name,
-		mrib.next_hop_vif_index(),
-		mrib.metric_preference(),
-		mrib.metric(),
-		callback(this, &XrlMfeaNode::xrl_result_add_mrib));
-	    break;
-	}
-
-	if (MfeaNode::is_ipv6()) {
-	    _xrl_mfea_client_client.send_add_mrib6(
-		dst_module_instance_name.c_str(),
-		my_xrl_target_name(),
-		mrib.dest_prefix().get_ipv6net(),
-		mrib.next_hop_router_addr().get_ipv6(),
-		vif_name,
-		mrib.next_hop_vif_index(),
-		mrib.metric_preference(),
-	    mrib.metric(),
-		callback(this, &XrlMfeaNode::xrl_result_add_mrib));
-	    break;
-	}
-
-	XLOG_UNREACHABLE();
-	break;
-    } while (false);
-
-    return (XORP_OK);
-}
-
-/**
- * XrlMfeaNode::send_delete_mrib:
- * @dst_module_instance name: The name of the protocol instance-destination
- * of the message.
- * @dst_module_id: The #xorp_module_id of the protocol-destination of the
- * message.
- * @mrib: The #Mrib entry to delete.
- * 
- * Delete a MRIB entry from an user-level protocol.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
-			      xorp_module_id ,	// dst_module_id,
-			      const Mrib& mrib)
-{
-    do {
-	if (MfeaNode::is_ipv4()) {
-	    _xrl_mfea_client_client.send_delete_mrib4(
-		dst_module_instance_name.c_str(),
-		my_xrl_target_name(),
-		mrib.dest_prefix().get_ipv4net(),
-		callback(this, &XrlMfeaNode::xrl_result_delete_mrib));
-	    break;
-	}
-
-	if (MfeaNode::is_ipv6()) {
-	    _xrl_mfea_client_client.send_delete_mrib6(
-		dst_module_instance_name.c_str(),
-		my_xrl_target_name(),
-		mrib.dest_prefix().get_ipv6net(),
-		callback(this, &XrlMfeaNode::xrl_result_delete_mrib));
-	    break;
-	}
-
-	XLOG_UNREACHABLE();
-	break;
-    } while (false);
-
-    return (XORP_OK);
-}
-
-/**
- * XrlMfeaNode::send_set_mrib_done:
- * @dst_module_instance name: The name of the protocol instance-destination
- * of the message.
- * @dst_module_id: The #xorp_module_id of the protocol-destination of the
- * message.
- * 
- * Complete add/delete MRIB transaction.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-XrlMfeaNode::send_set_mrib_done(const string& dst_module_instance_name,
-				xorp_module_id	// dst_module_id
-    )
-{
-    _xrl_mfea_client_client.send_set_mrib_done(
-	    dst_module_instance_name.c_str(),
-	    my_xrl_target_name(),
-	    callback(this, &XrlMfeaNode::xrl_result_set_mrib_done));
-    
-    return (XORP_OK);
-}
-
 //
 // Misc. callback functions for setup a vif.
 // TODO: those are almost identical, and should be replaced by a single
 // function.
 //
 void
-XrlMfeaNode::xrl_result_recv_kernel_signal_message(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to send a kernel signal message to a protocol: %s",
@@ -476,7 +564,7 @@ XrlMfeaNode::send_add_config_vif(const string& dst_module_instance_name,
 	dst_module_instance_name.c_str(),
 	vif_name,
 	vif_index,
-	callback(this, &XrlMfeaNode::xrl_result_new_vif));
+	callback(this, &XrlMfeaNode::mfea_client_client_send_new_vif_cb));
     
     return (XORP_OK);
 }
@@ -499,7 +587,7 @@ XrlMfeaNode::send_delete_config_vif(const string& dst_module_instance_name,
     _xrl_mfea_client_client.send_delete_vif(
 	dst_module_instance_name.c_str(),
 	vif_name,
-	callback(this, &XrlMfeaNode::xrl_result_delete_vif));
+	callback(this, &XrlMfeaNode::mfea_client_client_send_delete_vif_cb));
     
     return (XORP_OK);
 }
@@ -536,7 +624,7 @@ XrlMfeaNode::send_add_config_vif_addr(const string& dst_module_instance_name,
 		subnet.get_ipv4net(),
 		broadcast.get_ipv4(),
 		peer.get_ipv4(),
-		callback(this, &XrlMfeaNode::xrl_result_add_vif_addr));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_add_vif_addr_cb));
 	    break;
 	}
 	
@@ -548,7 +636,7 @@ XrlMfeaNode::send_add_config_vif_addr(const string& dst_module_instance_name,
 		subnet.get_ipv6net(),
 		broadcast.get_ipv6(),
 		peer.get_ipv6(),
-		callback(this, &XrlMfeaNode::xrl_result_add_vif_addr));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_add_vif_addr_cb));
 	    break;
 	}
 	
@@ -582,7 +670,7 @@ XrlMfeaNode::send_delete_config_vif_addr(const string& dst_module_instance_name,
 		dst_module_instance_name.c_str(),
 		vif_name,
 		addr.get_ipv4(),
-		callback(this, &XrlMfeaNode::xrl_result_delete_vif_addr));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_delete_vif_addr_cb));
 	    break;
 	}
 	
@@ -591,7 +679,7 @@ XrlMfeaNode::send_delete_config_vif_addr(const string& dst_module_instance_name,
 		dst_module_instance_name.c_str(),
 		vif_name,
 		addr.get_ipv6(),
-		callback(this, &XrlMfeaNode::xrl_result_delete_vif_addr));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_delete_vif_addr_cb));
 	    break;
 	}
 	
@@ -638,7 +726,7 @@ XrlMfeaNode::send_set_config_vif_flags(const string& dst_module_instance_name,
 	is_multicast,
 	is_broadcast,
 	is_up,
-	callback(this, &XrlMfeaNode::xrl_result_set_vif_flags));
+	callback(this, &XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb));
     
     return (XORP_OK);
 }
@@ -659,13 +747,13 @@ XrlMfeaNode::send_set_config_all_vifs_done(const string& dst_module_instance_nam
 {
     _xrl_mfea_client_client.send_set_all_vifs_done(
 	dst_module_instance_name.c_str(),
-	callback(this, &XrlMfeaNode::xrl_result_set_all_vifs_done));
+	callback(this, &XrlMfeaNode::mfea_client_client_send_set_all_vifs_done_cb));
     
     return (XORP_OK);
 }
 
 void
-XrlMfeaNode::xrl_result_new_vif(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_new_vif_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to send new vif info to a protocol: %s",
@@ -674,7 +762,7 @@ XrlMfeaNode::xrl_result_new_vif(const XrlError& xrl_error)
     }
 }
 void
-XrlMfeaNode::xrl_result_delete_vif(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_delete_vif_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to send delete_vif to a protocol: %s",
@@ -683,7 +771,7 @@ XrlMfeaNode::xrl_result_delete_vif(const XrlError& xrl_error)
     }
 }
 void
-XrlMfeaNode::xrl_result_add_vif_addr(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_add_vif_addr_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to send new vif address to a protocol: %s",
@@ -692,7 +780,7 @@ XrlMfeaNode::xrl_result_add_vif_addr(const XrlError& xrl_error)
     }
 }
 void
-XrlMfeaNode::xrl_result_delete_vif_addr(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_delete_vif_addr_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to send delete vif address to a protocol: %s",
@@ -701,7 +789,7 @@ XrlMfeaNode::xrl_result_delete_vif_addr(const XrlError& xrl_error)
     }
 }
 void
-XrlMfeaNode::xrl_result_set_vif_flags(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to send new vif flags to a protocol: %s",
@@ -711,7 +799,7 @@ XrlMfeaNode::xrl_result_set_vif_flags(const XrlError& xrl_error)
 }
 
 void
-XrlMfeaNode::xrl_result_set_all_vifs_done(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_set_all_vifs_done_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to send set_all_vifs_done to a protocol: %s",
@@ -757,7 +845,7 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 		is_threshold_in_bytes,
 		is_geq_upcall,
 		is_leq_upcall,
-		callback(this, &XrlMfeaNode::xrl_result_recv_dataflow_signal));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_dataflow_signal_cb));
 	    break;
 	}
 	
@@ -779,7 +867,7 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 		is_threshold_in_bytes,
 		is_geq_upcall,
 		is_leq_upcall,
-		callback(this, &XrlMfeaNode::xrl_result_recv_dataflow_signal));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_dataflow_signal_cb));
 	    break;
 	}
 	
@@ -791,7 +879,7 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 }
 
 void
-XrlMfeaNode::xrl_result_recv_dataflow_signal(const XrlError& xrl_error)
+XrlMfeaNode::mfea_client_client_send_recv_dataflow_signal_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to send recv_dataflow_signal to a protocol: %s",
@@ -819,13 +907,13 @@ XrlMfeaNode::add_cli_command_to_cli_manager(const char *command_name,
 	is_command_cd,
 	string(command_cd_prompt),
 	is_command_processor,
-	callback(this, &XrlMfeaNode::xrl_result_add_cli_command));
+	callback(this, &XrlMfeaNode::cli_manager_client_send_add_cli_command_cb));
     
     return (XORP_OK);
 }
 
 void
-XrlMfeaNode::xrl_result_add_cli_command(const XrlError& xrl_error)
+XrlMfeaNode::cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to add a command to CLI manager: %s",
@@ -841,13 +929,13 @@ XrlMfeaNode::delete_cli_command_from_cli_manager(const char *command_name)
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
-	callback(this, &XrlMfeaNode::xrl_result_delete_cli_command));
+	callback(this, &XrlMfeaNode::cli_manager_client_send_delete_cli_command_cb));
     
     return (XORP_OK);
 }
 
 void
-XrlMfeaNode::xrl_result_delete_cli_command(const XrlError& xrl_error)
+XrlMfeaNode::cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error)
 {
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to delete a command from CLI manager: %s",
@@ -1009,7 +1097,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
 	    mfea_vif->vif_index(),
-	    callback(this, &XrlMfeaNode::xrl_result_new_vif));
+	    callback(this, &XrlMfeaNode::mfea_client_client_send_new_vif_cb));
 	list<VifAddr>::const_iterator iter;
 	for (iter = mfea_vif->addr_list().begin();
 	     iter != mfea_vif->addr_list().end();
@@ -1022,7 +1110,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 		vif_addr.subnet_addr().get_ipv4net(),
 		vif_addr.broadcast_addr().get_ipv4(),
 		vif_addr.peer_addr().get_ipv4(),
-		callback(this, &XrlMfeaNode::xrl_result_add_vif_addr));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_add_vif_addr_cb));
 	}
 	_xrl_mfea_client_client.send_set_vif_flags(
 	    xrl_sender_name.c_str(),
@@ -1033,13 +1121,13 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	    mfea_vif->is_multicast_capable(),
 	    mfea_vif->is_broadcast_capable(),
 	    mfea_vif->is_underlying_vif_up(),
-	    callback(this, &XrlMfeaNode::xrl_result_set_vif_flags));
+	    callback(this, &XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb));
     }
     
     // We are done with the vifs
     _xrl_mfea_client_client.send_set_all_vifs_done(
 	xrl_sender_name.c_str(),
-	callback(this, &XrlMfeaNode::xrl_result_set_all_vifs_done));
+	callback(this, &XrlMfeaNode::mfea_client_client_send_set_all_vifs_done_cb));
     
     //
     // Success
@@ -1094,7 +1182,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
 	    mfea_vif->vif_index(),
-	    callback(this, &XrlMfeaNode::xrl_result_new_vif));
+	    callback(this, &XrlMfeaNode::mfea_client_client_send_new_vif_cb));
 	list<VifAddr>::const_iterator iter;
 	for (iter = mfea_vif->addr_list().begin();
 	     iter != mfea_vif->addr_list().end();
@@ -1107,7 +1195,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 		vif_addr.subnet_addr().get_ipv6net(),
 		vif_addr.broadcast_addr().get_ipv6(),
 		vif_addr.peer_addr().get_ipv6(),
-		callback(this, &XrlMfeaNode::xrl_result_add_vif_addr));
+		callback(this, &XrlMfeaNode::mfea_client_client_send_add_vif_addr_cb));
 	}
 	_xrl_mfea_client_client.send_set_vif_flags(
 	    xrl_sender_name.c_str(),
@@ -1118,13 +1206,13 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	    mfea_vif->is_multicast_capable(),
 	    mfea_vif->is_broadcast_capable(),
 	    mfea_vif->is_underlying_vif_up(),
-	    callback(this, &XrlMfeaNode::xrl_result_set_vif_flags));
+	    callback(this, &XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb));
     }
     
     // We are done with the vifs
     _xrl_mfea_client_client.send_set_all_vifs_done(
 	xrl_sender_name.c_str(),
-	callback(this, &XrlMfeaNode::xrl_result_set_all_vifs_done));
+	callback(this, &XrlMfeaNode::mfea_client_client_send_set_all_vifs_done_cb));
     
     //
     // Success
@@ -1495,47 +1583,13 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 		vif_name = vif->name();
 	    is_sent = true;
 
-	    do {
-		if (MfeaNode::is_ipv4()) {
-		    _xrl_mfea_client_client.send_add_mrib4(
-			xrl_sender_name.c_str(),
-			my_xrl_target_name(),
-			mrib->dest_prefix().get_ipv4net(),
-			mrib->next_hop_router_addr().get_ipv4(),
-			vif_name,
-			mrib->next_hop_vif_index(),
-			mrib->metric_preference(),
-			mrib->metric(),
-			callback(this, &XrlMfeaNode::xrl_result_add_mrib));
-		    break;
-		}
-
-		if (MfeaNode::is_ipv6()) {
-		    _xrl_mfea_client_client.send_add_mrib6(
-			xrl_sender_name.c_str(),
-			my_xrl_target_name(),
-			mrib->dest_prefix().get_ipv6net(),
-			mrib->next_hop_router_addr().get_ipv6(),
-			vif_name,
-			mrib->next_hop_vif_index(),
-			mrib->metric_preference(),
-			mrib->metric(),
-			callback(this, &XrlMfeaNode::xrl_result_add_mrib));
-		    break;
-		}
-
-		XLOG_UNREACHABLE();
-		break;
-	    } while (false);
+	    send_add_mrib(xrl_sender_name, src_module_id, *mrib);
 	}
 	//
 	// Done
 	//
 	if (is_sent) {
-	    _xrl_mfea_client_client.send_set_mrib_done(
-		xrl_sender_name.c_str(),
-		my_xrl_target_name(),
-		callback(this, &XrlMfeaNode::xrl_result_set_mrib_done));
+	    send_set_mrib_done(xrl_sender_name, src_module_id);
 	}
     }
     
@@ -1543,36 +1597,6 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
     // Success
     //
     return XrlCmdError::OKAY();
-}
-
-void
-XrlMfeaNode::xrl_result_add_mrib(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send add_mrib() message to a protocol: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
-void
-XrlMfeaNode::xrl_result_delete_mrib(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send delete_mrib() message to a protocol: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
-}
-
-void
-XrlMfeaNode::xrl_result_set_mrib_done(const XrlError& xrl_error)
-{
-    if (xrl_error != XrlError::OKAY()) {
-	XLOG_ERROR("Failed to send set_mrib_done() message to a protocol: %s",
-		   xrl_error.str().c_str());
-	return;
-    }
 }
 
 XrlCmdError

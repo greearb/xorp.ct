@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.15 2003/12/06 00:10:01 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.16 2004/04/01 12:22:06 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -58,7 +58,7 @@ class FtiConfig;	// TODO: XXX: PAVPAVPAV: temporary here!!
  * There should be one node per MFEA instance. There should be
  * one instance per address family.
  */
-class MfeaNode : public ProtoNode<MfeaVif> {
+class MfeaNode : public ProtoNode<MfeaVif>, public ServiceChangeObserverBase {
 public:
     /**
      * Constructor for a given address family, module ID, and event loop.
@@ -83,6 +83,8 @@ public:
     /**
      * Start the node operation.
      * 
+     * After the startup operations are completed,
+     * @ref MfeaNode::final_start() is called to complete the job.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start();
@@ -95,6 +97,26 @@ public:
     int		stop();
 
     /**
+     * Completely start the node operation.
+     * 
+     * This method should be called after @ref MfeaNode::start()
+     * to complete the job.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		final_start();
+
+    /**
+     * Completely stop the node operation.
+     * 
+     * This method should be called after @ref MfeaNode::stop()
+     * to complete the job.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		final_stop();
+
+    /**
      * Test if there is an unit that is in PENDING_DOWN state.
      * 
      * @param reason_msg return-by-reference string that contains
@@ -104,16 +126,7 @@ public:
      * otherwise false.
      */
     bool	has_pending_down_units(string& reason_msg);
-    
-    /**
-     * Get the node status (see @ref ProcessStatus).
-     * 
-     * @param reason_msg return-by-reference string that contains
-     * human-readable information about the status.
-     * @return the node status (see @ref ProcessStatus).
-     */
-    ProcessStatus	node_status(string& reason_msg);
-    
+
     /**
      * Test if the underlying system supports IPv4 multicast routing.
      * 
@@ -1278,7 +1291,17 @@ public:
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
 
 private:
-    // Private methods
+    /**
+     * A method invoked when the status of a service changes.
+     * 
+     * @param service the service whose status has changed.
+     * @param old_status the old status.
+     * @param new_status the new status.
+     */
+    void status_change(ServiceBase*  service,
+		       ServiceStatus old_status,
+		       ServiceStatus new_status);
+
     void mrib_table_read_timer_timeout();
     int add_pim_register_vif();
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.11 2004/03/18 00:43:36 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.12 2004/04/10 07:50:10 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -44,21 +44,26 @@ class XrlMfeaNode : public MfeaNode,
 		    public MfeaNodeCli {
 public:
     // TODO: XXX: PAVPAVPAV: remove the ftic argument
-    XrlMfeaNode(int family, xorp_module_id module_id,
-		EventLoop& eventloop, XrlRouter* xrl_router,
-		FtiConfig& ftic)
-	: MfeaNode(family, module_id, eventloop, ftic),
-	  XrlMfeaTargetBase(xrl_router),
-	  MfeaNodeCli(*static_cast<MfeaNode *>(this)),
-	  _xrl_mfea_vif_manager(*this, eventloop, xrl_router),
-	  _xrl_cli_manager_client(xrl_router),
-	  _xrl_mfea_client_client(xrl_router)
-    { }
-    virtual ~XrlMfeaNode() {
-	_xrl_mfea_vif_manager.stop();
-	MfeaNode::stop();
-	MfeaNodeCli::stop();
-    }
+    XrlMfeaNode(int family,
+		xorp_module_id module_id,
+		EventLoop& eventloop,
+		XrlRouter* xrl_router,
+		FtiConfig& ftic);
+    virtual ~XrlMfeaNode();
+
+    /**
+     * Startup the node operation.
+     *
+     * @return true on success, false on failure.
+     */
+    bool	startup();
+
+    /**
+     * Shutdown the node operation.
+     *
+     * @return true on success, false on failure.
+     */
+    bool	shutdown();
     
     //
     // XrlMfeaNode front-end interface
@@ -74,198 +79,6 @@ public:
     
     
 protected:
-    //
-    // Protocol node methods
-    //
-    int	proto_send(const string& dst_module_instance_name,
-		   xorp_module_id dst_module_id,
-		   uint16_t vif_index,
-		   const IPvX& src, const IPvX& dst,
-		   int ip_ttl, int ip_tos, bool router_alert_bool,
-		   const uint8_t * sndbuf, size_t sndlen);
-    //
-    // XXX: xrl_result_recv_protocol_message() in fact
-    // is the callback when proto_send() calls send_recv_protocol_message()
-    // so the destination protocol will receive a protocol message.
-    // Sigh, the 'recv' part in the name is rather confusing, but that
-    // is in the name of consistency between the XRL calling function
-    // and the return result callback...
-    //
-    void xrl_result_recv_protocol_message(const XrlError& xrl_error);
-    int signal_message_send(const string& dst_module_instance_name,
-			    xorp_module_id dst_module_id,
-			    int message_type,
-			    uint16_t vif_index,
-			    const IPvX& src, const IPvX& dst,
-			    const uint8_t *rcvbuf, size_t rcvlen);
-    
-    //
-    // Methods for sending MRIB information
-    //
-    int	send_add_mrib(const string& dst_module_instance_name,
-		      xorp_module_id dst_module_id,
-		      const Mrib& mrib);
-    int	send_delete_mrib(const string& dst_module_instance_name,
-			 xorp_module_id dst_module_id,
-			 const Mrib& mrib);
-    int	send_set_mrib_done(const string& dst_module_instance_name,
-			   xorp_module_id dst_module_id);
-    
-    //
-    // XXX: xrl_result_recv_kernel_signal_message() in fact
-    // is the callback when signal_message_send() calls
-    // send_recv_kernel_signal_message()
-    // so the destination protocol will receive a kernel message.
-    // Sigh, the 'recv' part in the name is rather confusing, but that
-    // is in the name of consistency between the XRL calling function
-    // and the return result callback...
-    //
-    void xrl_result_recv_kernel_signal_message(const XrlError& xrl_error);
-
-    /**
-     * Send to a client to add a configured vif.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @param vif_name the name of the vif to add.
-     * @param vif_index the vif index of the vif to add.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_add_config_vif(const string& dst_module_instance_name,
-			    xorp_module_id dst_module_id,
-			    const string& vif_name,
-			    uint16_t vif_index);
-    
-    /**
-     * Send to a client to delete a configured vif.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @param vif_name the name of the vif to delete.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_delete_config_vif(const string& dst_module_instance_name,
-			       xorp_module_id dst_module_id,
-			       const string& vif_name);
-    
-    /**
-     * Send to a client to add an address to a configured vif.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @param vif_name the name of the vif.
-     * @param addr the address to add.
-     * @param subnet the subnet address to add.
-     * @param broadcast the broadcast address to add.
-     * @param peer the peer address to add.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_add_config_vif_addr(const string& dst_module_instance_name,
-				 xorp_module_id dst_module_id,
-				 const string& vif_name,
-				 const IPvX& addr,
-				 const IPvXNet& subnet,
-				 const IPvX& broadcast,
-				 const IPvX& peer);
-    
-    /**
-     * Send to a client to delete an address from a configured vif.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @param vif_name the name of the vif.
-     * @param addr the address to delete.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_delete_config_vif_addr(const string& dst_module_instance_name,
-				    xorp_module_id dst_module_id,
-				    const string& vif_name,
-				    const IPvX& addr);
-    
-    /**
-     * Send to a client to set the vif flags to a configured vif.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @param vif_name the name of the vif.
-     * @param is_pim_register true if the vif is a PIM Register interface.
-     * @param is_p2p true if the vif is point-to-point interface.
-     * @param is_loopback true if the vif is a loopback interface.
-     * @param is_multicast true if the vif is multicast capable.
-     * @param is_broadcast true if the vif is broadcast capable.
-     * @param is_up true if the underlying vif is UP.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_set_config_vif_flags(const string& dst_module_instance_name,
-				  xorp_module_id dst_module_id,
-				  const string& vif_name,
-				  bool is_pim_register,
-				  bool is_p2p,
-				  bool is_loopback,
-				  bool is_multicast,
-				  bool is_broadcast,
-				  bool is_up);
-    
-    /**
-     * Send to a client to complete the set of vif configuration changes.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_set_config_all_vifs_done(const string& dst_module_instance_name,
-				      xorp_module_id dst_module_id);
-    
-    void xrl_result_new_vif(const XrlError& xrl_error);
-    void xrl_result_delete_vif(const XrlError& xrl_error);
-    void xrl_result_add_vif_addr(const XrlError& xrl_error);
-    void xrl_result_delete_vif_addr(const XrlError& xrl_error);
-    void xrl_result_set_vif_flags(const XrlError& xrl_error);
-    void xrl_result_set_all_vifs_done(const XrlError& xrl_error);
-    
-    int dataflow_signal_send(const string& dst_module_instance_name,
-			     xorp_module_id dst_module_id,
-			     const IPvX& source_addr,
-			     const IPvX& group_addr,
-			     uint32_t threshold_interval_sec,
-			     uint32_t threshold_interval_usec,
-			     uint32_t measured_interval_sec,
-			     uint32_t measured_interval_usec,
-			     uint32_t threshold_packets,
-			     uint32_t threshold_bytes,
-			     uint32_t measured_packets,
-			     uint32_t measured_bytes,
-			     bool is_threshold_in_packets,
-			     bool is_threshold_in_bytes,
-			     bool is_geq_upcall,
-			     bool is_leq_upcall);
-    
-    void xrl_result_recv_dataflow_signal(const XrlError& xrl_error);
-    
-    //
-    // Protocol node CLI methods
-    //
-    int add_cli_command_to_cli_manager(const char *command_name,
-				       const char *command_help,
-				       bool is_command_cd,
-				       const char *command_cd_prompt,
-				       bool is_command_processor);
-    void xrl_result_add_cli_command(const XrlError& xrl_error);
-    int delete_cli_command_from_cli_manager(const char *command_name);
-    void xrl_result_delete_cli_command(const XrlError& xrl_error);
-    
     //
     // XRL target methods
     //
@@ -473,10 +286,6 @@ protected:
 	const string&	protocol_name, 
 	const uint32_t&	protocol_id, 
 	const bool&	is_allow);
-    
-    void xrl_result_add_mrib(const XrlError& xrl_error);
-    void xrl_result_delete_mrib(const XrlError& xrl_error);
-    void xrl_result_set_mrib_done(const XrlError& xrl_error);
     
     /**
      *  Join/leave a multicast group.
@@ -865,18 +674,256 @@ protected:
 	const uint32_t&	event);
 
     XrlCmdError fea_ifmgr_client_0_1_updates_completed();
-    
+
 private:
+    
+    //
+    // Protocol node methods
+    //
+
+    //
+    // Methods for sending MRIB information
+    //
+    int	send_add_mrib(const string& dst_module_instance_name,
+		      xorp_module_id dst_module_id,
+		      const Mrib& mrib);
+    int	send_delete_mrib(const string& dst_module_instance_name,
+			 xorp_module_id dst_module_id,
+			 const Mrib& mrib);
+    int	send_set_mrib_done(const string& dst_module_instance_name,
+			   xorp_module_id dst_module_id);
+    void send_add_delete_mrib();
+    void mfea_client_client_send_add_delete_mrib_cb(const XrlError& xrl_error);
+
+    //
+    // XXX: mfea_client_client_send_recv_kernel_signal_message_cb() in fact
+    // is the callback when signal_message_send() calls
+    // send_recv_kernel_signal_message()
+    // so the destination protocol will receive a kernel message.
+    // Sigh, the 'recv' part in the name is rather confusing, but that
+    // is in the name of consistency between the XRL calling function
+    // and the return result callback...
+    //
+    void mfea_client_client_send_recv_kernel_signal_message_cb(const XrlError& xrl_error);
+
+    /**
+     * Send to a client to add a configured vif.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @param vif_name the name of the vif to add.
+     * @param vif_index the vif index of the vif to add.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int	send_add_config_vif(const string& dst_module_instance_name,
+			    xorp_module_id dst_module_id,
+			    const string& vif_name,
+			    uint16_t vif_index);
+    
+    /**
+     * Send to a client to delete a configured vif.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @param vif_name the name of the vif to delete.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int	send_delete_config_vif(const string& dst_module_instance_name,
+			       xorp_module_id dst_module_id,
+			       const string& vif_name);
+    
+    /**
+     * Send to a client to add an address to a configured vif.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @param vif_name the name of the vif.
+     * @param addr the address to add.
+     * @param subnet the subnet address to add.
+     * @param broadcast the broadcast address to add.
+     * @param peer the peer address to add.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int	send_add_config_vif_addr(const string& dst_module_instance_name,
+				 xorp_module_id dst_module_id,
+				 const string& vif_name,
+				 const IPvX& addr,
+				 const IPvXNet& subnet,
+				 const IPvX& broadcast,
+				 const IPvX& peer);
+    
+    /**
+     * Send to a client to delete an address from a configured vif.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @param vif_name the name of the vif.
+     * @param addr the address to delete.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int	send_delete_config_vif_addr(const string& dst_module_instance_name,
+				    xorp_module_id dst_module_id,
+				    const string& vif_name,
+				    const IPvX& addr);
+    
+    /**
+     * Send to a client to set the vif flags to a configured vif.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @param vif_name the name of the vif.
+     * @param is_pim_register true if the vif is a PIM Register interface.
+     * @param is_p2p true if the vif is point-to-point interface.
+     * @param is_loopback true if the vif is a loopback interface.
+     * @param is_multicast true if the vif is multicast capable.
+     * @param is_broadcast true if the vif is broadcast capable.
+     * @param is_up true if the underlying vif is UP.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int	send_set_config_vif_flags(const string& dst_module_instance_name,
+				  xorp_module_id dst_module_id,
+				  const string& vif_name,
+				  bool is_pim_register,
+				  bool is_p2p,
+				  bool is_loopback,
+				  bool is_multicast,
+				  bool is_broadcast,
+				  bool is_up);
+    
+    /**
+     * Send to a client to complete the set of vif configuration changes.
+     * 
+     * @param dst_module_instance_name the name of the protocol
+     * instance-destination of the message.
+     * @param dst_module_id the module ID of the protocol-destination
+     * of the message.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int	send_set_config_all_vifs_done(const string& dst_module_instance_name,
+				      xorp_module_id dst_module_id);
+    
+    void mfea_client_client_send_new_vif_cb(const XrlError& xrl_error);
+    void mfea_client_client_send_delete_vif_cb(const XrlError& xrl_error);
+    void mfea_client_client_send_add_vif_addr_cb(const XrlError& xrl_error);
+    void mfea_client_client_send_delete_vif_addr_cb(const XrlError& xrl_error);
+    void mfea_client_client_send_set_vif_flags_cb(const XrlError& xrl_error);
+    void mfea_client_client_send_set_all_vifs_done_cb(const XrlError& xrl_error);
+    
+    int dataflow_signal_send(const string& dst_module_instance_name,
+			     xorp_module_id dst_module_id,
+			     const IPvX& source_addr,
+			     const IPvX& group_addr,
+			     uint32_t threshold_interval_sec,
+			     uint32_t threshold_interval_usec,
+			     uint32_t measured_interval_sec,
+			     uint32_t measured_interval_usec,
+			     uint32_t threshold_packets,
+			     uint32_t threshold_bytes,
+			     uint32_t measured_packets,
+			     uint32_t measured_bytes,
+			     bool is_threshold_in_packets,
+			     bool is_threshold_in_bytes,
+			     bool is_geq_upcall,
+			     bool is_leq_upcall);
+    
+    void mfea_client_client_send_recv_dataflow_signal_cb(const XrlError& xrl_error);
+
+    int	proto_send(const string& dst_module_instance_name,
+		   xorp_module_id dst_module_id,
+		   uint16_t vif_index,
+		   const IPvX& src, const IPvX& dst,
+		   int ip_ttl, int ip_tos, bool router_alert_bool,
+		   const uint8_t* sndbuf, size_t sndlen);
+    //
+    // XXX: mfea_client_client_send_recv_protocol_message_cb() in fact
+    // is the callback when proto_send() calls send_recv_protocol_message()
+    // so the destination protocol will receive a protocol message.
+    // Sigh, the 'recv' part in the name is rather confusing, but that
+    // is in the name of consistency between the XRL calling function
+    // and the return result callback...
+    //
+    void mfea_client_client_send_recv_protocol_message_cb(const XrlError& xrl_error);
+    int signal_message_send(const string& dst_module_instance_name,
+			    xorp_module_id dst_module_id,
+			    int message_type,
+			    uint16_t vif_index,
+			    const IPvX& src, const IPvX& dst,
+			    const uint8_t *rcvbuf, size_t rcvlen);
+    
+    //
+    // Protocol node CLI methods
+    //
+    int add_cli_command_to_cli_manager(const char *command_name,
+				       const char *command_help,
+				       bool is_command_cd,
+				       const char *command_cd_prompt,
+				       bool is_command_processor);
+    void cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error);
+    int delete_cli_command_from_cli_manager(const char *command_name);
+    void cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error);
+    
     const string& my_xrl_target_name() {
 	return XrlMfeaTargetBase::name();
     }
     
     int family() const { return (MfeaNode::family()); }
-    
-    XrlMfeaVifManager	_xrl_mfea_vif_manager;	// The XRL Vif manager
 
-    XrlCliManagerV0p1Client _xrl_cli_manager_client;
-    XrlMfeaClientV0p1Client _xrl_mfea_client_client;
+    /**
+     * Class for handling the queue of sending Add/Delete MRIB requests
+     */
+    class SendAddDeleteMrib {
+    public:
+	SendAddDeleteMrib(const string& dst_module_instance_name,
+			  xorp_module_id dst_module_id,
+			  const Mrib& mrib,
+			  bool is_add)
+	    : _dst_module_instance_name(dst_module_instance_name),
+	      _dst_module_id(dst_module_id),
+	      _mrib(mrib),
+	      _is_add(is_add),
+	      _is_done(false) {}
+	SendAddDeleteMrib(const string& dst_module_instance_name,
+			  xorp_module_id dst_module_id,
+			  int family)
+	    : _dst_module_instance_name(dst_module_instance_name),
+	      _dst_module_id(dst_module_id),
+	      _mrib(family),
+	      _is_add(false),
+	      _is_done(true) {}
+	const string& dst_module_instance_name() const { return _dst_module_instance_name; }
+	xorp_module_id dst_module_id() const { return _dst_module_id; }
+	const Mrib& mrib() const { return _mrib; }
+	bool is_add() const { return _is_add; }
+	bool is_done() const { return _is_done; }
+
+    private:
+	string		_dst_module_instance_name;
+	xorp_module_id	_dst_module_id;
+	Mrib		_mrib;
+	bool		_is_add;
+	bool		_is_done;
+    };
+
+    const string		_class_name;
+    const string		_instance_name;
+
+    XrlMfeaVifManager		_xrl_mfea_vif_manager;	// The XRL Vif manager
+
+    XrlMfeaClientV0p1Client	_xrl_mfea_client_client;
+    XrlCliManagerV0p1Client	_xrl_cli_manager_client;
+
+    list<SendAddDeleteMrib>	_send_add_delete_mrib_queue;
+    XorpTimer			_send_add_delete_mrib_queue_timer;
 };
 
 #endif // __FEA_XRL_MFEA_NODE_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.4 2004/02/29 21:35:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.5 2004/03/01 10:01:41 pavlin Exp $"
 
 
 //
@@ -107,7 +107,7 @@ MfeaVif::~MfeaVif()
  * MfeaVif::start:
  * @error_msg: The error message (if error).
  * 
- * Start MFEA a single virtual interface.
+ * Start MFEA on a single virtual interface.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -174,6 +174,19 @@ MfeaVif::stop(string& error_msg)
     if (mfea_node().delete_multicast_vif(vif_index()) < 0) {
 	error_msg = "cannot delete the multicast vif from the kernel";
 	return (XORP_ERROR);
+    }
+
+    XLOG_INFO("STOPPED %s%s",
+	      this->str().c_str(), flags_string().c_str());
+
+    //
+    // Test if time to completely stop the MfeaNode itself because
+    // of this vif
+    //
+    string dummy_string;
+    if (mfea_node().is_pending_down()
+	&& (! mfea_node().has_pending_down_units(dummy_string))) {
+	mfea_node().final_stop();
     }
 
     return (XORP_OK);
@@ -446,3 +459,29 @@ MfeaVif::JoinedGroups::has_multicast_group(const IPvX& group) const
 	    != _joined_multicast_groups.end());
 }
 
+// TODO: temporary here. Should go to the Vif class after the Vif
+// class starts using the Proto class
+string
+MfeaVif::flags_string() const
+{
+    string flags;
+    
+    if (is_up())
+	flags += " UP";
+    if (is_down())
+	flags += " DOWN";
+    if (is_pending_up())
+	flags += " PENDING_UP";
+    if (is_pending_down())
+	flags += " PENDING_DOWN";
+    if (is_ipv4())
+	flags += " IPv4";
+    if (is_ipv6())
+	flags += " IPv6";
+    if (is_enabled())
+	flags += " ENABLED";
+    if (is_disabled())
+	flags += " DISABLED";
+    
+    return (flags);
+}

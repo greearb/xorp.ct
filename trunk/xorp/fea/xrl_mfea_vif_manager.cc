@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.28 2004/04/05 05:38:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.29 2004/04/10 07:50:37 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -324,14 +324,14 @@ XrlMfeaVifManager::clean_out_old_state()
     // registrations left over from previous incarnations of the RIB.
     //
     XorpCallback1<void, const XrlError&>::RefPtr cb;
-    cb = callback(this, &XrlMfeaVifManager::xrl_result_unregister_system_interfaces_client);
+    cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_unregister_system_interfaces_client_cb);
     _ifmgr_client.send_unregister_system_interfaces_client(
 	_fea_target_name.c_str(),
 	_xrl_router.name(), cb);
 }
 
 void
-XrlMfeaVifManager::xrl_result_unregister_system_interfaces_client(const XrlError& e)
+XrlMfeaVifManager::ifmgr_client_send_unregister_system_interfaces_client_cb(const XrlError& e)
 {
     UNUSED(e);
     
@@ -349,13 +349,13 @@ void
 XrlMfeaVifManager::register_if_spy()
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
-    cb = callback(this, &XrlMfeaVifManager::xrl_result_register_system_interfaces_client);
+    cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_register_system_interfaces_client_cb);
     _ifmgr_client.send_register_system_interfaces_client(_fea_target_name.c_str(),
 							 _xrl_router.name(), cb);
 }
 
 void
-XrlMfeaVifManager::xrl_result_register_system_interfaces_client(const XrlError& e)
+XrlMfeaVifManager::ifmgr_client_send_register_system_interfaces_client_cb(const XrlError& e)
 {
     if (_no_fea) {
 	_state = READY;
@@ -369,7 +369,7 @@ XrlMfeaVifManager::xrl_result_register_system_interfaces_client(const XrlError& 
 	// all interfaces.
 	//
 	XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_interface_names);
+	cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_interface_names_cb);
 	_ifmgr_client.send_get_system_interface_names(_fea_target_name.c_str(),
 						      cb);
 	return;
@@ -393,7 +393,7 @@ XrlMfeaVifManager::xrl_result_register_system_interfaces_client(const XrlError& 
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_interface_names(
+XrlMfeaVifManager::ifmgr_client_send_get_system_interface_names_cb(
     const XrlError& e,
     const XrlAtomList* alist)
 {
@@ -408,9 +408,9 @@ XrlMfeaVifManager::xrl_result_get_system_interface_names(
 	    debug_msg("got interface name: %s\n", ifname.c_str());
 	    
 	    XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
-	    cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_vif_names, ifname);
+	    cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_vif_names_cb, ifname);
 	    _ifmgr_client.send_get_system_vif_names(_fea_target_name.c_str(),
-						 ifname, cb);
+						    ifname, cb);
 	    _interfaces_remaining++;
 	}
 	update_state();
@@ -423,7 +423,7 @@ XrlMfeaVifManager::xrl_result_get_system_interface_names(
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_vif_names(
+XrlMfeaVifManager::ifmgr_client_send_get_system_vif_names_cb(
     const XrlError& e,
     const XrlAtomList* alist,
     string ifname)
@@ -461,10 +461,11 @@ XrlMfeaVifManager::xrl_result_get_system_vif_names(
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_vif_pif_index(const XrlError& e,
-						    const uint32_t* pif_index,
-						    string ifname,
-						    string vifname)
+XrlMfeaVifManager::ifmgr_client_send_get_system_vif_pif_index_cb(
+    const XrlError& e,
+    const uint32_t* pif_index,
+    string ifname,
+    string vifname)
 {
     if (_vifs_remaining == 0) {
 	// Unexpected response
@@ -505,14 +506,15 @@ XrlMfeaVifManager::xrl_result_get_system_vif_pif_index(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_vif_flags(const XrlError& e,
-						   const bool* enabled,
-						   const bool* broadcast,
-						   const bool* loopback,
-						   const bool* point_to_point,
-						   const bool* multicast,
-						   string ifname,
-						   string vifname)
+XrlMfeaVifManager::ifmgr_client_send_get_system_vif_flags_cb(
+    const XrlError& e,
+    const bool* enabled,
+    const bool* broadcast,
+    const bool* loopback,
+    const bool* point_to_point,
+    const bool* multicast,
+    string ifname,
+    string vifname)
 {
     if (_vifs_remaining == 0) {
 	// Unexpected response
@@ -557,7 +559,7 @@ XrlMfeaVifManager::xrl_result_get_system_vif_flags(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_vif_addresses4(
+XrlMfeaVifManager::ifmgr_client_send_get_system_vif_addresses4_cb(
     const XrlError& e,
     const XrlAtomList* alist,
     string ifname,
@@ -599,7 +601,7 @@ XrlMfeaVifManager::xrl_result_get_system_vif_addresses4(
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_vif_addresses6(
+XrlMfeaVifManager::ifmgr_client_send_get_system_vif_addresses6_cb(
     const XrlError& e,
     const XrlAtomList* alist,
     string ifname,
@@ -822,7 +824,7 @@ XrlMfeaVifManager::vif_created(const string& ifname, const string& vifname)
     {
 	// Get the pif_index
 	XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_vif_pif_index,
+	cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_vif_pif_index_cb,
 		      ifname, vifname);
 	_ifmgr_client.send_get_system_vif_pif_index(_fea_target_name.c_str(),
 						    ifname, vifname, cb);
@@ -833,7 +835,7 @@ XrlMfeaVifManager::vif_created(const string& ifname, const string& vifname)
 	// Get the vif flags
 	XorpCallback6<void, const XrlError&, const bool*, const bool*,
 	    const bool*, const bool*, const bool*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_vif_flags,
+	cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_vif_flags_cb,
 		      ifname, vifname);
 	_ifmgr_client.send_get_system_vif_flags(_fea_target_name.c_str(),
 						ifname, vifname, cb);
@@ -843,7 +845,7 @@ XrlMfeaVifManager::vif_created(const string& ifname, const string& vifname)
     XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
     switch (family()) {
     case AF_INET:
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_vif_addresses4,
+	cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_vif_addresses4_cb,
 		      ifname, vifname);
 	_ifmgr_client.send_get_system_vif_addresses4(_fea_target_name.c_str(),
 						     ifname,
@@ -853,7 +855,7 @@ XrlMfeaVifManager::vif_created(const string& ifname, const string& vifname)
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_vif_addresses6,
+	cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_vif_addresses6_cb,
 		      ifname, vifname);
 	_ifmgr_client.send_get_system_vif_addresses6(_fea_target_name.c_str(),
 						     ifname,
@@ -887,7 +889,7 @@ XrlMfeaVifManager::vifaddr4_created(const string& ifname,
 	// Get the address flags
 	XorpCallback6<void, const XrlError&, const bool*, const bool*,
 	    const bool*, const bool*, const bool*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_address_flags4,
+	cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_address_flags4_cb,
 		      ifname, vifname, addr);
 	_ifmgr_client.send_get_system_address_flags4(_fea_target_name.c_str(),
 						     ifname, vifname, addr, cb);
@@ -897,7 +899,7 @@ XrlMfeaVifManager::vifaddr4_created(const string& ifname,
     {
 	// Get the prefix length
 	XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_prefix4,
+	cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_prefix4_cb,
 		      ifname, vifname, addr);
 	_ifmgr_client.send_get_system_prefix4(_fea_target_name.c_str(), ifname,
 					      vifname, addr, cb);
@@ -922,7 +924,7 @@ XrlMfeaVifManager::vifaddr6_created(const string& ifname,
 	// Get the address flags
 	XorpCallback5<void, const XrlError&, const bool*,
 	    const bool*, const bool*, const bool*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_address_flags6,
+	cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_address_flags6_cb,
 		      ifname, vifname, addr);
 	_ifmgr_client.send_get_system_address_flags6(_fea_target_name.c_str(),
 						     ifname, vifname, addr, cb);
@@ -932,7 +934,7 @@ XrlMfeaVifManager::vifaddr6_created(const string& ifname,
     {
 	// Get the prefix length
 	XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_prefix6,
+	cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_prefix6_cb,
 		      ifname, vifname, addr);
 	_ifmgr_client.send_get_system_prefix6(_fea_target_name.c_str(), ifname,
 					      vifname, addr, cb);
@@ -941,15 +943,16 @@ XrlMfeaVifManager::vifaddr6_created(const string& ifname,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_address_flags4(const XrlError& e,
-							const bool* enabled,
-							const bool* broadcast,
-							const bool* loopback,
-							const bool* point_to_point,
-							const bool* multicast,
-							string ifname,
-							string vifname,
-							IPv4 addr)
+XrlMfeaVifManager::ifmgr_client_send_get_system_address_flags4_cb(
+    const XrlError& e,
+    const bool* enabled,
+    const bool* broadcast,
+    const bool* loopback,
+    const bool* point_to_point,
+    const bool* multicast,
+    string ifname,
+    string vifname,
+    IPv4 addr)
 {
     // If unexpected address family response, then silently ignore it
     if (family() != AF_INET)
@@ -976,7 +979,7 @@ XrlMfeaVifManager::xrl_result_get_system_address_flags4(const XrlError& e,
 	if (*broadcast) {
 	    // Get the broadcast address
 	    XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
-	    cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_broadcast4,
+	    cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_broadcast4_cb,
 			  ifname, vifname, addr);
 	    _ifmgr_client.send_get_system_broadcast4(_fea_target_name.c_str(),
 						     ifname, vifname, addr, cb);
@@ -986,7 +989,7 @@ XrlMfeaVifManager::xrl_result_get_system_address_flags4(const XrlError& e,
 	if (*point_to_point) {
 	    // Get the endpoint address
 	    XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
-	    cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_endpoint4,
+	    cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_endpoint4_cb,
 			  ifname, vifname, addr);
 	    _ifmgr_client.send_get_system_endpoint4(_fea_target_name.c_str(),
 						    ifname, vifname, addr, cb);
@@ -1014,14 +1017,15 @@ XrlMfeaVifManager::xrl_result_get_system_address_flags4(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_address_flags6(const XrlError& e,
-							const bool* enabled,
-							const bool* loopback,
-							const bool* point_to_point,
-							const bool* multicast,
-							string ifname,
-							string vifname,
-							IPv6 addr)
+XrlMfeaVifManager::ifmgr_client_send_get_system_address_flags6_cb(
+    const XrlError& e,
+    const bool* enabled,
+    const bool* loopback,
+    const bool* point_to_point,
+    const bool* multicast,
+    string ifname,
+    string vifname,
+    IPv6 addr)
 {
     // If unexpected address family response, then silently ignore it
 #ifdef HAVE_IPV6
@@ -1057,7 +1061,7 @@ XrlMfeaVifManager::xrl_result_get_system_address_flags6(const XrlError& e,
 	if (*point_to_point) {
 	    // Get the endpoint address
 	    XorpCallback2<void, const XrlError&, const IPv6*>::RefPtr cb;
-	    cb = callback(this, &XrlMfeaVifManager::xrl_result_get_system_endpoint6,
+	    cb = callback(this, &XrlMfeaVifManager::ifmgr_client_send_get_system_endpoint6_cb,
 			  ifname, vifname, addr);
 	    _ifmgr_client.send_get_system_endpoint6(_fea_target_name.c_str(),
 						    ifname, vifname, addr, cb);
@@ -1085,11 +1089,12 @@ XrlMfeaVifManager::xrl_result_get_system_address_flags6(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_prefix4(const XrlError& e,
-						 const uint32_t* prefix_len,
-						 string ifname,
-						 string vifname,
-						 IPv4 addr)
+XrlMfeaVifManager::ifmgr_client_send_get_system_prefix4_cb(
+    const XrlError& e,
+    const uint32_t* prefix_len,
+    string ifname,
+    string vifname,
+    IPv4 addr)
 {
     // If unexpected address family response, then silently ignore it
     if (family() != AF_INET)
@@ -1140,11 +1145,12 @@ XrlMfeaVifManager::xrl_result_get_system_prefix4(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_prefix6(const XrlError& e,
-						 const uint32_t* prefix_len,
-						 string ifname,
-						 string vifname,
-						 IPv6 addr)
+XrlMfeaVifManager::ifmgr_client_send_get_system_prefix6_cb(
+    const XrlError& e,
+    const uint32_t* prefix_len,
+    string ifname,
+    string vifname,
+    IPv6 addr)
 {
     // If unexpected address family response, then silently ignore it
 #ifdef HAVE_IPV6
@@ -1199,11 +1205,12 @@ XrlMfeaVifManager::xrl_result_get_system_prefix6(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_broadcast4(const XrlError& e,
-						    const IPv4* broadcast,
-						    string ifname,
-						    string vifname,
-						    IPv4 addr)
+XrlMfeaVifManager::ifmgr_client_send_get_system_broadcast4_cb(
+    const XrlError& e,
+    const IPv4* broadcast,
+    string ifname,
+    string vifname,
+    IPv4 addr)
 {
     // If unexpected address family response, then silently ignore it
     if (family() != AF_INET)
@@ -1254,11 +1261,12 @@ XrlMfeaVifManager::xrl_result_get_system_broadcast4(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_endpoint4(const XrlError& e,
-						   const IPv4* endpoint,
-						   string ifname,
-						   string vifname,
-						   IPv4 addr)
+XrlMfeaVifManager::ifmgr_client_send_get_system_endpoint4_cb(
+    const XrlError& e,
+    const IPv4* endpoint,
+    string ifname,
+    string vifname,
+    IPv4 addr)
 {
     // If unexpected address family response, then silently ignore it
     if (family() != AF_INET)
@@ -1309,11 +1317,12 @@ XrlMfeaVifManager::xrl_result_get_system_endpoint4(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_system_endpoint6(const XrlError& e,
-						   const IPv6* endpoint,
-						   string ifname,
-						   string vifname,
-						   IPv6 addr)
+XrlMfeaVifManager::ifmgr_client_send_get_system_endpoint6_cb(
+    const XrlError& e,
+    const IPv6* endpoint,
+    string ifname,
+    string vifname,
+    IPv6 addr)
 {
     // If unexpected address family response, then silently ignore it
 #ifdef HAVE_IPV6
