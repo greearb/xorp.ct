@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.2 2003/01/07 04:31:28 hodson Exp $
 
 #ifndef __LINXORP_ASYNCIO_HH__
 #define __LINXORP_ASYNCIO_HH__
@@ -112,13 +112,12 @@ protected:
 	int fl = fcntl(fd, F_GETFL);
 	assert(fl & O_NONBLOCK);
     }
-    virtual ~AsyncFileOperator() {}
+    virtual ~AsyncFileOperator();
 
     EventLoop&		_event_loop;
     int			_fd;
     bool		_running;
 };
-
 
 /**
  * @short Read asynchronously from a file.

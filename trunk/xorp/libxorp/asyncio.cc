@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.2 2003/01/26 04:06:21 pavlin Exp $"
 
 #include <signal.h>
 
@@ -39,6 +39,12 @@ is_pseudo_error(const char* name, int fd, int error_num)
 	return true;
     }
     return false;
+}
+
+// ----------------------------------------------------------------------------
+AsyncFileOperator::~AsyncFileOperator()
+{
+    _fd = -9999;
 }
 
 // ----------------------------------------------------------------------------
