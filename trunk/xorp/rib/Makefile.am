@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.31 2004/09/28 00:38:13 atanu Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.32 2004/09/28 03:52:32 atanu Exp $
 ##
 
 SUBDIRS = . tools
@@ -223,6 +223,7 @@ librib_a_SOURCES	+= rt_tab_redist.hh
 librib_a_SOURCES	+= rt_tab_register.hh
 librib_a_SOURCES	+= vifmanager.hh
 librib_a_SOURCES	+= xrl_target.hh
+librib_a_SOURCES	+= profile_vars.hh
 librib_a_SOURCES	+= protocol.cc
 librib_a_SOURCES	+= register_server.cc
 librib_a_SOURCES	+= rib.cc
@@ -238,6 +239,7 @@ librib_a_SOURCES	+= rt_tab_pol_redist.cc
 librib_a_SOURCES	+= rt_tab_redist.cc
 librib_a_SOURCES	+= rt_tab_register.cc
 librib_a_SOURCES	+= vifmanager.cc
+librib_a_SOURCES	+= profile_vars.cc
 
 libribxrl_a_SOURCES	 = redist_xrl.hh
 libribxrl_a_SOURCES	+= redist_xrl.cc

@@ -138,7 +138,7 @@ add_route_SOURCES = add_route.cc
 add_route_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a
 
 # -- Library Sources
-librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_varrw.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_pol_conn.cc rt_tab_pol_redist.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
+librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh profile_vars.hh protocol.cc register_server.cc rib.cc rib_varrw.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_pol_conn.cc rt_tab_pol_redist.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc profile_vars.cc
 
 libribxrl_a_SOURCES = redist_xrl.hh redist_xrl.cc
 
@@ -162,7 +162,8 @@ am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
 	rt_tab_log.$(OBJEXT) rt_tab_merged.$(OBJEXT) \
 	rt_tab_origin.$(OBJEXT) rt_tab_pol_conn.$(OBJEXT) \
 	rt_tab_pol_redist.$(OBJEXT) rt_tab_redist.$(OBJEXT) \
-	rt_tab_register.$(OBJEXT) vifmanager.$(OBJEXT)
+	rt_tab_register.$(OBJEXT) vifmanager.$(OBJEXT) \
+	profile_vars.$(OBJEXT)
 librib_a_OBJECTS = $(am_librib_a_OBJECTS)
 libribxrl_a_AR = $(AR) cru
 libribxrl_a_LIBADD =
@@ -400,8 +401,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/dummy_register_server.Po \
 @AMDEP_TRUE@	$(DEPDIR)/dummy_rib_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/main_rib.Po $(DEPDIR)/main_routemap.Po \
-@AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/protocol.Po \
-@AMDEP_TRUE@	$(DEPDIR)/redist_xrl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/profile_vars.Po \
+@AMDEP_TRUE@	$(DEPDIR)/protocol.Po $(DEPDIR)/redist_xrl.Po \
 @AMDEP_TRUE@	$(DEPDIR)/register_server.Po $(DEPDIR)/rib.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rib_manager.Po $(DEPDIR)/rib_varrw.Po \
 @AMDEP_TRUE@	$(DEPDIR)/routemap.Po $(DEPDIR)/rt_tab_base.Po \
@@ -536,6 +537,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_rib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_routemap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile_vars.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/protocol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist_xrl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_server.Po@am__quote@
