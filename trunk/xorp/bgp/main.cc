@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.30 2003/08/27 01:29:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.31 2003/08/27 22:36:31 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -43,6 +43,19 @@ BGPMain::BGPMain()
     _peerlist = new BGPPeerList();
     _xrl_router = new XrlStdRouter(eventloop(), "bgp");
     _xrl_target = new XrlBgpTarget(_xrl_router, *this);
+
+    {
+	bool timed_out = false;
+	XorpTimer t = eventloop().set_flag_after_ms(10000, &timed_out);
+	while (_xrl_router->ready() == false) {
+	    eventloop().run();
+	}
+
+	if (timed_out) {
+	    XLOG_ERROR("XrlRouter did not become ready.  No Finder?\n");
+	}
+    }
+
     _rib_ipc_handler = new RibIpcHandler(_xrl_router, eventloop(), *this);
     _plumbing = new BGPPlumbing(_xrl_router, _rib_ipc_handler,
 				eventloop(), *this);
@@ -72,7 +85,7 @@ BGPMain::~BGPMain()
     while (_peerlist->not_all_idle()
 	   || eventloop().timer_list_length() > 1) {
 	    eventloop().run();
-	    XLOG_INFO("EVENT: peerlist %d timers %u", 
+	    XLOG_INFO("EVENT: peerlist %d timers %u",
 		      _peerlist->not_all_idle(),
 		      (uint32_t)eventloop().timer_list_length());
     }
@@ -100,7 +113,7 @@ BGPMain::~BGPMain()
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting Xrl Target\n");
     delete _xrl_target;
-    
+
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting xrl_router\n");
     delete _xrl_router;
@@ -398,7 +411,7 @@ BGPMain::disable_peer(const Iptuple& iptuple)
     return true;
 }
 
-bool 
+bool
 BGPMain::next_hop_rewrite_filter(const Iptuple& iptuple, const IPv4& next_hop)
 {
     BGPPeer *peer = find_peer(iptuple);
@@ -419,18 +432,18 @@ BGPMain::get_peer_list_start(uint32_t& token) {
     return _peerlist->get_peer_list_start(token);
 }
 
-bool 
-BGPMain::get_peer_list_next(const uint32_t& token, 
-			IPv4& local_ip, 
-			uint32_t& local_port, 
-			IPv4& peer_ip, 
+bool
+BGPMain::get_peer_list_next(const uint32_t& token,
+			IPv4& local_ip,
+			uint32_t& local_port,
+			IPv4& peer_ip,
 			uint32_t& peer_port) {
     return _peerlist->get_peer_list_next(token, local_ip, local_port,
 					 peer_ip, peer_port);
 }
 
-bool 
-BGPMain::get_peer_id(const Iptuple& iptuple, IPv4& peer_id) 
+bool
+BGPMain::get_peer_id(const Iptuple& iptuple, IPv4& peer_id)
 {
     BGPPeer *peer = find_peer(iptuple);
     if (peer == NULL)
@@ -439,10 +452,10 @@ BGPMain::get_peer_id(const Iptuple& iptuple, IPv4& peer_id)
     return true;
 }
 
-bool 
-BGPMain::get_peer_status(const Iptuple& iptuple,  
-			 uint32_t& peer_state, 
-			 uint32_t& admin_status) 
+bool
+BGPMain::get_peer_status(const Iptuple& iptuple,
+			 uint32_t& peer_state,
+			 uint32_t& admin_status)
 {
     BGPPeer *peer = find_peer(iptuple);
     if (peer == NULL)
@@ -456,8 +469,8 @@ BGPMain::get_peer_status(const Iptuple& iptuple,
     return true;
 }
 
-bool 
-BGPMain::get_peer_negotiated_version(const Iptuple& iptuple, 
+bool
+BGPMain::get_peer_negotiated_version(const Iptuple& iptuple,
 				     int32_t& neg_version)
 {
     BGPPeer *peer = find_peer(iptuple);
@@ -473,7 +486,7 @@ BGPMain::get_peer_negotiated_version(const Iptuple& iptuple,
     return true;
 }
 
-bool 
+bool
 BGPMain::get_peer_as(const Iptuple& iptuple, uint32_t& peer_as)
 {
     BGPPeer *peer = find_peer(iptuple);
@@ -483,31 +496,31 @@ BGPMain::get_peer_as(const Iptuple& iptuple, uint32_t& peer_as)
 
     // XXX is it appropriate to return an extended AS number in this
     // context?
-    peer_as = pd->as().as32(); 
+    peer_as = pd->as().as32();
 
     return true;
 }
 
-bool 
-BGPMain::get_peer_msg_stats(const Iptuple& iptuple, 
-			    uint32_t& in_updates, 
-			    uint32_t& out_updates, 
-			    uint32_t& in_msgs, 
-			    uint32_t& out_msgs, 
-			    uint16_t& last_error, 
+bool
+BGPMain::get_peer_msg_stats(const Iptuple& iptuple,
+			    uint32_t& in_updates,
+			    uint32_t& out_updates,
+			    uint32_t& in_msgs,
+			    uint32_t& out_msgs,
+			    uint16_t& last_error,
 			    uint32_t& in_update_elapsed)
 {
     BGPPeer *peer = find_peer(iptuple);
     if (peer == NULL)
 	return false;
-    peer->get_msg_stats(in_updates, out_updates, in_msgs, out_msgs, 
+    peer->get_msg_stats(in_updates, out_updates, in_msgs, out_msgs,
 			last_error, in_update_elapsed);
     return true;
 }
 
-bool 
-BGPMain::get_peer_established_stats(const Iptuple& iptuple,  
-				    uint32_t& transitions, 
+bool
+BGPMain::get_peer_established_stats(const Iptuple& iptuple,
+				    uint32_t& transitions,
 				    uint32_t& established_time)
 {
     BGPPeer *peer = find_peer(iptuple);
@@ -518,13 +531,13 @@ BGPMain::get_peer_established_stats(const Iptuple& iptuple,
     return true;
 }
 
-bool 
+bool
 BGPMain::get_peer_timer_config(const Iptuple& iptuple,
-			       uint32_t& retry_interval, 
-			       uint32_t& hold_time, 
-			       uint32_t& keep_alive, 
-			       uint32_t& hold_time_configured, 
-			       uint32_t& keep_alive_configured, 
+			       uint32_t& retry_interval,
+			       uint32_t& hold_time,
+			       uint32_t& keep_alive,
+			       uint32_t& hold_time_configured,
+			       uint32_t& keep_alive_configured,
 			       uint32_t& min_as_origination_interval,
 			       uint32_t& min_route_adv_interval)
 {
@@ -688,26 +701,26 @@ BGPMain::get_route_list_start4(uint32_t& token)
     return true;
 }
 
-bool 
+bool
 BGPMain::get_route_list_start6(uint32_t& token)
 {
     token = _plumbing->create_ipv6_route_table_reader();
     return true;
 }
-    
+
 template <class A>
-void 
-BGPMain::extract_attributes(// Input values, 
-			    const PathAttributeList<A>& attributes, 
-			    // Output values, 
-			    uint32_t& origin, 
-			    vector<uint8_t>& aspath, 
-			    A& nexthop, 
-			    int32_t& med, 
-			    int32_t& localpref, 
-			    int32_t& atomic_agg, 
-			    vector<uint8_t>& aggregator, 
-			    int32_t& calc_localpref, 
+void
+BGPMain::extract_attributes(// Input values,
+			    const PathAttributeList<A>& attributes,
+			    // Output values,
+			    uint32_t& origin,
+			    vector<uint8_t>& aspath,
+			    A& nexthop,
+			    int32_t& med,
+			    int32_t& localpref,
+			    int32_t& atomic_agg,
+			    vector<uint8_t>& aggregator,
+			    int32_t& calc_localpref,
 			    vector<uint8_t>& attr_unknown)
 {
     origin = attributes.origin();
@@ -719,26 +732,26 @@ BGPMain::extract_attributes(// Input values,
 	med = (int32_t)med_att->med();
 	if (med < 0) {
 	    med = 0x7ffffff;
-	    XLOG_WARNING("MED truncated in MIB from %u to %u\n", 
+	    XLOG_WARNING("MED truncated in MIB from %u to %u\n",
 			 med_att->med(), med);
 	}
     } else {
 	med = -1;
     }
-	
-    const LocalPrefAttribute* local_pref_att 
+
+    const LocalPrefAttribute* local_pref_att
 	= attributes.local_pref_att();
     if (local_pref_att) {
 	localpref = (int32_t)local_pref_att->localpref();
 	if (localpref < 0) {
 	    localpref = 0x7ffffff;
-	    XLOG_WARNING("LOCAL_PREF truncated in MIB from %u to %u\n", 
+	    XLOG_WARNING("LOCAL_PREF truncated in MIB from %u to %u\n",
 			 local_pref_att->localpref(), localpref);
 	}
     } else {
 	localpref = -1;
     }
-	
+
     if (attributes.atomic_aggregate_att())
 	atomic_agg = 2;
     else
@@ -760,50 +773,50 @@ BGPMain::extract_attributes(// Input values,
 
 #if 0
 template
-void 
-BGPMain::extract_attributes(// Input values, 
-			    const PathAttributeList<IPv4>& attributes, 
-			    // Output values, 
-			    uint32_t& origin, 
-			    vector<uint8_t>& aspath, 
-			    IPv4& nexthop, 
-			    int32_t& med, 
-			    int32_t& localpref, 
-			    int32_t& atomic_agg, 
-			    vector<uint8_t>& aggregator, 
-			    int32_t& calc_localpref, 
+void
+BGPMain::extract_attributes(// Input values,
+			    const PathAttributeList<IPv4>& attributes,
+			    // Output values,
+			    uint32_t& origin,
+			    vector<uint8_t>& aspath,
+			    IPv4& nexthop,
+			    int32_t& med,
+			    int32_t& localpref,
+			    int32_t& atomic_agg,
+			    vector<uint8_t>& aggregator,
+			    int32_t& calc_localpref,
 			    vector<uint8_t>& attr_unknown);
 template
-void 
-BGPMain::extract_attributes(// Input values, 
-			    const PathAttributeList<IPv6>& attributes, 
-			    // Output values, 
-			    uint32_t& origin, 
-			    vector<uint8_t>& aspath, 
-			    IPv6& nexthop, 
-			    int32_t& med, 
-			    int32_t& localpref, 
-			    int32_t& atomic_agg, 
-			    vector<uint8_t>& aggregator, 
-			    int32_t& calc_localpref, 
+void
+BGPMain::extract_attributes(// Input values,
+			    const PathAttributeList<IPv6>& attributes,
+			    // Output values,
+			    uint32_t& origin,
+			    vector<uint8_t>& aspath,
+			    IPv6& nexthop,
+			    int32_t& med,
+			    int32_t& localpref,
+			    int32_t& atomic_agg,
+			    vector<uint8_t>& aggregator,
+			    int32_t& calc_localpref,
 			    vector<uint8_t>& attr_unknown);
 #endif
 
-bool 
+bool
 BGPMain::get_route_list_next4(
-			      // Input values, 
-			      const uint32_t& token, 
-			      // Output values, 
-			      IPv4&	peer_id, 
-			      IPv4Net& net, 
-			      uint32_t& origin, 
-			      vector<uint8_t>& aspath, 
-			      IPv4& nexthop, 
-			      int32_t& med, 
-			      int32_t& localpref, 
-			      int32_t& atomic_agg, 
-			      vector<uint8_t>& aggregator, 
-			      int32_t& calc_localpref, 
+			      // Input values,
+			      const uint32_t& token,
+			      // Output values,
+			      IPv4&	peer_id,
+			      IPv4Net& net,
+			      uint32_t& origin,
+			      vector<uint8_t>& aspath,
+			      IPv4& nexthop,
+			      int32_t& med,
+			      int32_t& localpref,
+			      int32_t& atomic_agg,
+			      vector<uint8_t>& aggregator,
+			      int32_t& calc_localpref,
 			      vector<uint8_t>& attr_unknown,
 			      bool& best)
 {
@@ -819,21 +832,21 @@ BGPMain::get_route_list_next4(
     return false;
 }
 
-bool 
+bool
 BGPMain::get_route_list_next6(
-			      // Input values, 
-			      const uint32_t& token, 
-			      // Output values, 
-			      IPv4&	peer_id, 
-			      IPv6Net& net, 
-			      uint32_t& origin, 
-			      vector<uint8_t>& aspath, 
-			      IPv6& nexthop, 
-			      int32_t& med, 
-			      int32_t& localpref, 
-			      int32_t& atomic_agg, 
-			      vector<uint8_t>& aggregator, 
-			      int32_t& calc_localpref, 
+			      // Input values,
+			      const uint32_t& token,
+			      // Output values,
+			      IPv4&	peer_id,
+			      IPv6Net& net,
+			      uint32_t& origin,
+			      vector<uint8_t>& aspath,
+			      IPv6& nexthop,
+			      int32_t& med,
+			      int32_t& localpref,
+			      int32_t& atomic_agg,
+			      vector<uint8_t>& aggregator,
+			      int32_t& calc_localpref,
 			      vector<uint8_t>& attr_unknown,
 			      bool& best)
 {

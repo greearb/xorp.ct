@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.14 2003/06/26 19:41:48 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.15 2003/06/27 22:08:54 atanu Exp $"
 
-// #define DEBUG_LOGGING 
-#define DEBUG_PRINT_FUNCTION_NAME 
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp/bgp_module.h"
 #include "config.h"
@@ -49,7 +49,7 @@ XrlTestPeerTarget::XrlTestPeerTarget(XrlRouter *r, TestPeer& test_peer,
     debug_msg("\n");
 }
 
-XrlCmdError 
+XrlCmdError
 XrlTestPeerTarget::common_0_1_get_target_name(string& name)
 {
     debug_msg("\n");
@@ -58,7 +58,7 @@ XrlTestPeerTarget::common_0_1_get_target_name(string& name)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlTestPeerTarget::common_0_1_get_version(string& version)
 {
     debug_msg("\n");
@@ -68,7 +68,7 @@ XrlTestPeerTarget::common_0_1_get_version(string& version)
 }
 
 XrlCmdError
-XrlTestPeerTarget::common_0_1_get_status(// Output values, 
+XrlTestPeerTarget::common_0_1_get_status(// Output values,
 					 uint32_t& status,
 					 string& reason)
 {
@@ -90,7 +90,7 @@ XrlTestPeerTarget::common_0_1_shutdown()
 }
 
 
-XrlCmdError 
+XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_register(const string& coordinator,
 					  const uint32_t& genid)
 {
@@ -105,7 +105,7 @@ XrlTestPeerTarget::test_peer_0_1_register(const string& coordinator,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_packetisation(const string& protocol)
 {
     debug_msg("\n");
@@ -113,14 +113,14 @@ XrlTestPeerTarget::test_peer_0_1_packetisation(const string& protocol)
     if(_trace)
 	printf("packetisation(%s)\n", protocol.c_str());
 
-    if(!_test_peer.packetisation(protocol)) 
+    if(!_test_peer.packetisation(protocol))
 	return XrlCmdError::COMMAND_FAILED(c_format("Unsupported protocol %s",
 					     protocol.c_str()));
 
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_connect(const string&	host,
 					 const uint32_t&  port)
 {
@@ -154,7 +154,7 @@ XrlTestPeerTarget::test_peer_0_1_listen(const string& address,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_send(const vector<uint8_t>& data)
 {
     debug_msg("\n");
@@ -171,7 +171,7 @@ XrlTestPeerTarget::test_peer_0_1_send(const vector<uint8_t>& data)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_disconnect()
 {
     debug_msg("\n");
@@ -187,7 +187,7 @@ XrlTestPeerTarget::test_peer_0_1_disconnect()
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_reset()
 {
     debug_msg("\n");
@@ -200,7 +200,7 @@ XrlTestPeerTarget::test_peer_0_1_reset()
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlTestPeerTarget::test_peer_0_1_terminate()
 {
     debug_msg("\n");
@@ -223,8 +223,8 @@ TestPeer::TestPeer(EventLoop& eventloop, XrlRouter& xrlrouter,
 		   const char *server, bool verbose)
     : _eventloop(eventloop), _xrlrouter(xrlrouter), _server(server),
       _verbose(verbose),
-     _done(false),  
-      _s(UNCONNECTED), _async_writer(0), _listen(UNCONNECTED), 
+     _done(false),
+      _s(UNCONNECTED), _async_writer(0), _listen(UNCONNECTED),
       _bgp(false),
       _flying(0),
      _bgp_bytes(0)
@@ -236,8 +236,8 @@ TestPeer::~TestPeer()
     delete _async_writer;
 }
 
-bool 
-TestPeer::done() 
+bool
+TestPeer::done()
 {
     return _done;
 }
@@ -258,7 +258,7 @@ TestPeer::register_genid(const uint32_t& genid)
     _genid = genid;
 }
 
-bool 
+bool
 TestPeer::packetisation(const string& protocol)
 {
     debug_msg("\n");
@@ -324,7 +324,7 @@ TestPeer::connect(const string& host, const uint32_t& port,
 	XLOG_WARNING("Failed to add socket %d to eventloop", s);
 	return false;
     }
-   
+
    /*
    ** Set up the async writer.
    */
@@ -370,7 +370,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	::close(s);
 	error_string = e.why();
 	return false;
-    } 
+    }
 
     int opt = 1;
     if(-1 == ::setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
@@ -384,7 +384,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	error_string = c_format("Bind failed: %s", strerror(errno));
 	return false;
     }
-    
+
     if(-1 == ::listen(s, 1)) {
 	::close(s);
 	error_string = c_format("Bind failed: %s", strerror(errno));
@@ -399,7 +399,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
     _listen = s;
-    
+
     return true;
 }
 
@@ -458,7 +458,7 @@ TestPeer::zap(int& fd, const char *msg)
     debug_msg("%s = %d\n", msg, fd);
     if(UNCONNECTED == fd)
 	return true;
-    
+
     int tempfd = fd;
     fd = UNCONNECTED;
 
@@ -559,7 +559,7 @@ TestPeer::connect_attempt(int fd, SelectorMask m)
 	XLOG_WARNING("Failed to add socket %d to eventloop", connfd);
 	return;
     }
-   
+
    /*
    ** Set up the async writer.
    */
@@ -640,7 +640,7 @@ TestPeer::receive(int fd, SelectorMask m)
 	_eventloop.remove_selector(fd);
 	return;
     }
-    
+
     _bgp_bytes += len;
 
     if(_bgp_bytes >= BGP_COMMON_HEADER_LEN) {
@@ -657,7 +657,7 @@ TestPeer::receive(int fd, SelectorMask m)
 	if(length == _bgp_bytes) {
 	    datain(GOOD, _bgp_buf, _bgp_bytes);
 	    _bgp_bytes = 0;
-	}	    
+	}
     }
 }
 
@@ -698,7 +698,7 @@ TestPeer::queue_data(status st, uint8_t *ptr, size_t len, string error)
 {
     Queued q;
     TimeVal tv;
-    
+
     _eventloop.current_time(tv);
     q.secs = tv.sec();
     q.micro = tv.usec();
@@ -729,7 +729,7 @@ TestPeer::sendit()
     _xrl_queue.pop();
 
     XrlDatainV0p1Client datain(&_xrlrouter);
-    
+
     debug_msg("%u\n", (uint32_t)q.v.size());
     XLOG_ASSERT(q.len == q.v.size());
 
@@ -777,7 +777,7 @@ usage(char *name)
     exit(-1);
 }
 
-int 
+int
 main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -798,7 +798,7 @@ main(int argc, char **argv)
     bool trace = false;
 
     while((c = getopt (argc, argv, "h:s:vt")) != EOF) {
-	switch(c) {  
+	switch(c) {
 	case 'h':
 	    finder_host = optarg;
 	    break;
@@ -815,12 +815,22 @@ main(int argc, char **argv)
 	    usage(argv[0]);
 	}
     }
-   
+
     try {
 	EventLoop eventloop;
 	XrlStdRouter router(eventloop, server, finder_host);
 	TestPeer test_peer(eventloop, router, server, verbose);
 	XrlTestPeerTarget xrl_target(&router, test_peer, trace);
+
+	bool timed_out = false;
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (router.ready() == false) {
+	    eventloop.run();
+	}
+	if (timed_out) {
+	    XLOG_ERROR("XrlRouter did not become ready.  No Finder?\n");
+	    return -1;
+	}
 
 	while(!test_peer.done()) {
 	    eventloop.run();
