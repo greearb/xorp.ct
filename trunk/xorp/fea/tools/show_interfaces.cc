@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.9 2005/01/27 01:38:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.10 2005/02/12 08:09:05 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -20,19 +20,19 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
-
-#include "libxipc/xrl_std_router.hh"
+#include "libxorp/eventloop.hh"
 
 #include "show_interfaces.hh"
 
-InterfaceMonitor::InterfaceMonitor(XrlRouter& xrl_router,
-				   EventLoop& eventloop,
-				   const string& fea_target)
-    : ServiceBase("ShowInterfaces"),
-      _xrl_router(xrl_router),
+InterfaceMonitor::InterfaceMonitor(EventLoop&		eventloop,
+				   const string&	class_name,
+				   const string&	finder_hostname,
+				   uint16_t		finder_port,
+				   const string&	fea_target)
+    : ServiceBase(class_name),
       _eventloop(eventloop),
-      _ifmgr(eventloop, fea_target.c_str(), xrl_router.finder_address(),
-	     xrl_router.finder_port()),
+      _ifmgr(eventloop, fea_target.c_str(), finder_hostname.c_str(),
+	     finder_port),
       _startup_requests_n(0),
       _shutdown_requests_n(0)
 {
@@ -454,23 +454,19 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-interface_monitor_main(const char* finder_hostname, uint16_t finder_port,
+interface_monitor_main(const string& finder_hostname, uint16_t finder_port,
 		       const string& print_iface_name)
 {
-    string process;
-    process = c_format("interface_monitor<%d>", getpid());
+    string process_name;
+    process_name = c_format("interface_monitor<%d>", getpid());
 
     //
     // Init stuff
     //
     EventLoop eventloop;
 
-    XrlStdRouter xrl_std_router(eventloop, process.c_str(),
-				finder_hostname, finder_port);
-    xrl_std_router.finalize();
-    InterfaceMonitor ifmon(xrl_std_router, eventloop, "fea");
-
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router);
+    InterfaceMonitor ifmon(eventloop, process_name, finder_hostname,
+			   finder_port, "fea");
 
     //
     // Startup
@@ -492,14 +488,8 @@ interface_monitor_main(const char* finder_hostname, uint16_t finder_port,
     // Shutdown
     //
     ifmon.shutdown();
-    while (ifmon.status() == SERVICE_SHUTTING_DOWN) {
-	eventloop.run();
-    }
-
-    //
-    // Wait for all pending XRL operations
-    //
-    while (xrl_std_router.pending()) {
+    while ((ifmon.status() != SERVICE_SHUTDOWN)
+	   && (ifmon.status() != SERVICE_FAILED)) {
 	eventloop.run();
     }
 }
@@ -577,7 +567,7 @@ main(int argc, char* const argv[])
     // Run everything
     //
     try {
-	interface_monitor_main(finder_hostname.c_str(), finder_port,
+	interface_monitor_main(finder_hostname, finder_port,
 			       print_iface_name);
     } catch(...) {
 	xorp_catch_standard_exceptions();

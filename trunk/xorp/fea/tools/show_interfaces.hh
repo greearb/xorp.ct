@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/tools/show_interfaces.hh,v 1.2 2004/05/21 22:14:26 pavlin Exp $
+// $XORP: xorp/fea/tools/show_interfaces.hh,v 1.3 2004/06/10 22:41:00 hodson Exp $
 
 #ifndef __FEA_TOOLS_SHOW_INTERFACES_HH__
 #define __FEA_TOOLS_SHOW_INTERFACES_HH__
@@ -24,7 +24,6 @@
 
 
 class EventLoop;
-class XrlRouter;
 
 
 class InterfaceMonitor : public IfMgrHintObserver,
@@ -34,12 +33,17 @@ public:
     /**
      * InterfaceMonitor constructor
      *
-     * @param xrl_router this process's XRL router.
      * @param eventloop this process's EventLoop.
+     * @param class_name the XRL class name of this target.
+     * @param finder_hostname the finder's host name.
+     * @param finder_port the finder's port.
      * @param fea_target the FEA target name.
      */
-    InterfaceMonitor(XrlRouter& xrl_router, EventLoop& eventloop,
-		     const string& fea_target);
+    InterfaceMonitor(EventLoop&		eventloop,
+		     const string&	class_name,
+		     const string&	finder_hostname,
+		     uint16_t		finder_port,
+		     const string&	fea_target);
 
     /**
      * InterfaceMonitor destructor
@@ -123,7 +127,6 @@ private:
      */
     bool ifmgr_shutdown();
 
-    XrlRouter&		_xrl_router;
     EventLoop&		_eventloop;
 
     IfMgrXrlMirror	_ifmgr;
