@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.28 2003/08/13 07:34:47 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.29 2003/08/16 18:05:12 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -843,6 +843,30 @@ protected:
 	uint32_t&	metric, 
 	uint32_t&	admin_distance, 
 	string&		protocol_origin);
+
+    /**
+     *  Test if the underlying system supports IPv4.
+     *  
+     *  Note: this is a dummy method that doesn't apply to this target.
+     *  
+     *  @param result true if the underlying system supports IPv4, otherwise
+     *  false.
+     */
+    XrlCmdError fti_0_2_have_ipv4(
+	// Output values, 
+	bool&	result);
+
+    /**
+     *  Test if the underlying system supports IPv6.
+     *  
+     *  Note: this is a dummy method that doesn't apply to this target.
+     *  
+     *  @param result true if the underlying system supports IPv6, otherwise
+     *  false.
+     */
+    XrlCmdError fti_0_2_have_ipv6(
+	// Output values, 
+	bool&	result);
 
     /**
      *  Test whether the IPv4 unicast forwarding engine is enabled or disabled

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.37 2003/08/14 01:21:04 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.38 2003/08/16 18:05:12 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2462,6 +2462,26 @@ XrlPimNode::fti_0_2_lookup_entry6(
     // Success
     //
     return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::fti_0_2_have_ipv4(
+    // Output values, 
+    bool&	result)
+{
+    result = false;
+    
+    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
+}
+
+XrlCmdError
+XrlPimNode::fti_0_2_have_ipv6(
+    // Output values, 
+    bool&	result)
+{
+    result = false;
+    
+    return XrlCmdError::COMMAND_FAILED("XRL not applicable for this target");
 }
 
 XrlCmdError
