@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.24 2004/04/29 23:35:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.25 2004/05/06 20:22:07 pavlin Exp $"
 
 
 //
@@ -265,7 +265,7 @@ Mld6igmpNode::has_pending_down_units(string& reason_msg)
 	if (mld6igmp_vif->is_pending_down()) {
 	    reason_msg = c_format("Vif %s is in state %s",
 				  mld6igmp_vif->name().c_str(),
-				  mld6igmp_vif->state_string());
+				  mld6igmp_vif->state_str().c_str());
 	    return (true);
 	}
     }
@@ -291,7 +291,7 @@ Mld6igmpNode::status_change(ServiceBase*  service,
 	if (final_start() < 0) {
 	    XLOG_ERROR("Cannot complete the startup process; "
 		       "current state is %s",
-		       ProtoNode<Mld6igmpVif>::state_string());
+		       ProtoNode<Mld6igmpVif>::state_str().c_str());
 	    return;
 	}
 	ProtoNode<Mld6igmpVif>::set_node_status(PROC_READY);

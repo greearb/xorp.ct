@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_state.cc,v 1.2 2003/11/05 21:47:02 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_state.cc,v 1.3 2004/04/29 23:23:54 pavlin Exp $"
 
 
 //
@@ -164,8 +164,8 @@ ProtoState::disable()
     _flags &= ~XORP_ENABLED;
 }
 
-const char *
-ProtoState::state_string() const
+string
+ProtoState::state_str() const
 {
     if (is_disabled())
 	return ("DISABLED");

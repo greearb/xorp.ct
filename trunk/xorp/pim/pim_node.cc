@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.42 2004/05/04 00:14:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.43 2004/05/06 20:22:07 pavlin Exp $"
 
 
 //
@@ -304,7 +304,7 @@ PimNode::has_pending_down_units(string& reason_msg)
 	if (pim_vif->is_pending_down()) {
 	    reason_msg = c_format("Vif %s is in state %s: remaining %u tasks",
 				  pim_vif->name().c_str(),
-				  pim_vif->state_string(),
+				  pim_vif->state_str().c_str(),
 				  (uint32_t)pim_vif->usage_by_pim_mre_task());
 	    return (true);
 	}
@@ -332,7 +332,7 @@ PimNode::status_change(ServiceBase*  service,
 	if (final_start() < 0) {
 	    XLOG_ERROR("Cannot complete the startup process; "
 		       "current state is %s",
-		       ProtoNode<PimVif>::state_string());
+		       ProtoNode<PimVif>::state_str().c_str());
 	    return;
 	}
 	ProtoNode<PimVif>::set_node_status(PROC_READY);

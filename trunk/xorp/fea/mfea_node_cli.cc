@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.6 2004/03/27 23:31:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.7 2004/04/05 03:14:09 pavlin Exp $"
 
 
 //
@@ -359,7 +359,7 @@ MfeaNodeCli::cli_show_mfea_interface(const vector<string>& argv)
 			     mfea_vif->pif_index());
 	cli_print(c_format("%-12s %-8s %12s %-15s %-1s\n",
 			   mfea_vif->name().c_str(),
-			   mfea_vif->state_string(),
+			   mfea_vif->state_str().c_str(),
 			   dd.c_str(),
 			   (iter != mfea_vif->addr_list().end())?
 			   cstring((*iter).addr()): "",

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_state.hh,v 1.1 2003/03/19 23:38:22 pavlin Exp $
+// $XORP: xorp/libproto/proto_state.hh,v 1.2 2004/04/29 23:23:54 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_STATE_HH__
@@ -171,9 +171,9 @@ public:
      * The state string is one of the following:
      *   "DISABLED", "DOWN", "UP", "PENDING_UP", "PENDING_DOWN", "UNKNOWN"
      * 
-     * @return C-style string with the state of the unit.
+     * @return string with the state of the unit.
      */
-    const char	*state_string() const;
+    string	state_str() const;
     
 private:
     /**

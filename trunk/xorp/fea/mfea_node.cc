@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.29 2004/05/06 20:14:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.30 2004/05/06 21:48:37 pavlin Exp $"
 
 
 //
@@ -325,7 +325,7 @@ MfeaNode::has_pending_down_units(string& reason_msg)
 	if (mfea_vif->is_pending_down()) {
 	    reason_msg = c_format("Vif %s is in state %s",
 				  mfea_vif->name().c_str(),
-				  mfea_vif->state_string());
+				  mfea_vif->state_str().c_str());
 	    return (true);
 	}
     }
@@ -351,7 +351,7 @@ MfeaNode::status_change(ServiceBase*  service,
 	    if (final_start() < 0) {
 		XLOG_ERROR("Cannot complete the startup process; "
 			   "current state is %s",
-			   ProtoNode<MfeaVif>::state_string());
+			   ProtoNode<MfeaVif>::state_str().c_str());
 		return;
 	    }
 	    ProtoNode<MfeaVif>::set_node_status(PROC_READY);

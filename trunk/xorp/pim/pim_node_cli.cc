@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.25 2004/03/27 23:31:11 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.26 2004/04/05 03:14:09 pavlin Exp $"
 
 
 //
@@ -622,7 +622,7 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
 	    continue;
 	cli_print(c_format("%-12s %-8s %-6s %1d %-8s %8d %-15s %9d\n",
 			   pim_vif->name().c_str(),
-			   pim_vif->state_string(),
+			   pim_vif->state_str().c_str(),
 			   pim_vif->proto_is_pimsm()? "Sparse" : "Dense",
 			   pim_vif->proto_version(),
 			   // TODO: should we print "only P2P" if P2P link?
