@@ -1,8 +1,5 @@
 %!PS-Adobe-2.0 EPSF-2.0
-%%Title: snmp_fig2.fig
-%%Creator: fig2dev Version 3.2 Patchlevel 4
-%%CreationDate: Wed May 28 16:39:15 2003
-%%For: javier@dhcp98.icir.org (javier)
+%%Title: figs/snmp_fig2.fig
 %%BoundingBox: 0 0 465 249
 %%Magnification: 1.0000
 %%EndComments
@@ -92,17 +89,14 @@ $F2psBegin
 %
 % 
 % here starts figure with depth 50
-% Polyline
-7.500 slw
-n 4995 1200 m 4800 1200 4800 1755 195 arcto 4 {pop} repeat
-  4800 1950 6630 1950 195 arcto 4 {pop} repeat
-  6825 1950 6825 1395 195 arcto 4 {pop} repeat
-  6825 1200 4995 1200 195 arcto 4 {pop} repeat
- cp gs col0 s gr 
+/Times-Roman ff 180.00 scf sf
+6075 2325 m
+gs 1 -1 sc (load_mib) col0 sh gr
 /Times-Roman ff 180.00 scf sf
 5175 1650 m
 gs 1 -1 sc (XORP  finder) col0 sh gr
 % Arc
+7.500 slw
 gs  clippath
 3711 4096 m 3732 4152 l 3873 4098 l 3751 4113 l 3852 4042 l cp
 eoclip
@@ -287,9 +281,12 @@ n 8175 1950 m
 
 % arrowhead
 n 6964 1582 m 6841 1579 l 6948 1640 l  col0 s
-/Times-Roman ff 180.00 scf sf
-6075 2325 m
-gs 1 -1 sc (load_mib) col0 sh gr
+% Polyline
+n 4995 1200 m 4800 1200 4800 1755 195 arcto 4 {pop} repeat
+  4800 1950 6630 1950 195 arcto 4 {pop} repeat
+  6825 1950 6825 1395 195 arcto 4 {pop} repeat
+  6825 1200 4995 1200 195 arcto 4 {pop} repeat
+ cp gs col0 s gr 
 % here ends figure;
 $F2psEnd
 rs
