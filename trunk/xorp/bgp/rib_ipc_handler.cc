@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.14 2003/05/23 00:02:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.15 2003/06/11 23:08:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -20,7 +20,8 @@
 // XXX - As soon as this works remove the define and make the code unconditonal
 #define FLOW_CONTROL
 
-#define MAX_ERR_RETRIES 30
+// Give every XRL in flight the opportnity to timeout
+#define MAX_ERR_RETRIES FLYING_LIMIT
 
 #include "bgp_module.h"
 #include "rib_ipc_handler.hh"
@@ -367,7 +368,7 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, const IPNet<A>& net,
     q.net = net;
     q.nexthop = nexthop;
 
-    _xrl_queue.push(q);
+    _xrl_queue.push_back(q);
 
     sendit();
 }
@@ -386,7 +387,7 @@ XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, const IPNet<A>& net)
     q.ibgp = ibgp;
     q.net = net;
 
-    _xrl_queue.push(q);
+    _xrl_queue.push_back(q);
 
     sendit();
 }
@@ -398,9 +399,9 @@ XrlQueue<A>::busy()
     return 0 != _flying;
 }
 
-template<>
+template<class A>
 void
-XrlQueue<IPv4>::sendit()
+XrlQueue<A>::sendit()
 {
     debug_msg("queue length %u\n", (uint32_t)_xrl_queue.size());
 
@@ -415,54 +416,46 @@ XrlQueue<IPv4>::sendit()
 	return;
     }
 
-    Queued q = _xrl_queue.front();
+    if (_xrl_queue.size() <= _flying)
+	return;
 
+    typename deque <XrlQueue<A>::Queued>::const_iterator qi;
+    size_t i = 0;
+
+    for (qi = _xrl_queue.begin(); qi != _xrl_queue.end(); qi++, i++)
+	if (i == _flying)
+	    break;
+
+    XLOG_ASSERT(qi != _xrl_queue.end());
+
+    Queued q = *qi;
     XrlRibV0p1Client rib(_xrl_router);
-
     const char *bgp = q.ibgp ? "ibgp" : "ebgp";
+    bool sent = sendit_spec(q, rib, bgp);
 
-    if(q.add) {
-	debug_msg("adding route from %s peer to rib\n", bgp);
-	rib.send_add_route4(q.ribname.c_str(),
-			    bgp,
-			    true, false,
-			    q.net, q.nexthop, /*metric*/0, 
-			    ::callback(this, &XrlQueue::callback,
-				       "add_route"));
-    } else {
-	debug_msg("deleting route from %s peer to rib\n", bgp);
-	rib.send_delete_route4(q.ribname.c_str(),
-			       bgp,
-			       true, false,
-			       q.net,
-			       ::callback(this, &XrlQueue::callback,
-					  "delete_route"));
+    if (sent) {
+	_flying++;
+	return;
     }
-    _flying++;
+
+    // We expect that the send may fail if the socket buffer is full.
+    // It should therefore be the case that we have some route
+    // adds/deletes in flight. If _flying is zero then something
+    // unexpected has happended. We have no outstanding sends and
+    // still its gone to poo.
+
+    XLOG_ASSERT(0 != _flying);
 }
 
 template<>
-void
-XrlQueue<IPv6>::sendit()
+bool
+XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 {
-    if(_flying >= FLYING_LIMIT)
-	return;
-
-    if(_xrl_queue.empty()) {
-// 	debug_msg("Output no longer busy\n");
-// 	_rib_ipc_handler->output_no_longer_busy();
-	return;
-    }
-
-    Queued q = _xrl_queue.front();
-
-    XrlRibV0p1Client rib(_xrl_router);
-
-    const char *bgp = q.ibgp ? "ibgp" : "ebgp";
+    bool sent;
 
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
-	rib.send_add_route6(q.ribname.c_str(),
+	sent = rib.send_add_route4(q.ribname.c_str(),
 			    bgp,
 			    true, false,
 			    q.net, q.nexthop, /*metric*/0, 
@@ -470,14 +463,42 @@ XrlQueue<IPv6>::sendit()
 				       "add_route"));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
-	rib.send_delete_route6(q.ribname.c_str(),
+	sent = rib.send_delete_route4(q.ribname.c_str(),
 			       bgp,
 			       true, false,
 			       q.net,
 			       ::callback(this, &XrlQueue::callback,
 					  "delete_route"));
     }
-    _flying++;
+
+    return sent;
+}
+
+template<>
+bool
+XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
+{
+    bool sent;
+
+    if(q.add) {
+	debug_msg("adding route from %s peer to rib\n", bgp);
+	sent = rib.send_add_route6(q.ribname.c_str(),
+			    bgp,
+			    true, false,
+			    q.net, q.nexthop, /*metric*/0, 
+			    ::callback(this, &XrlQueue::callback,
+				       "add_route"));
+    } else {
+	debug_msg("deleting route from %s peer to rib\n", bgp);
+	sent = rib.send_delete_route6(q.ribname.c_str(),
+			       bgp,
+			       true, false,
+			       q.net,
+			       ::callback(this, &XrlQueue::callback,
+					  "delete_route"));
+    }
+
+    return sent;
 }
 
 template<class A>
@@ -492,8 +513,17 @@ XrlQueue<A>::callback(const XrlError& error, const char *comment)
 	_errors = 0;
 	_synchronous_mode = false;
 	_previously_succeeded = true;
-	_xrl_queue.pop();
+	_xrl_queue.pop_front();
 	sendit();
+	break;
+
+    case REPLY_TIMED_OUT:
+	// We shouldn't really be using a reliable transport where
+	// this error cannot happen. But it has so lets retry if we can.
+	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
+	_errors++;
+	_synchronous_mode = true;
+	delayed_send(1000);
 	break;
 
     case RESOLVE_FAILED:
@@ -508,6 +538,7 @@ XrlQueue<A>::callback(const XrlError& error, const char *comment)
 	}
 	/* FALLTHROUGH */
     case SEND_FAILED:
+    case SEND_FAILED_TRANSIENT:
     case NO_FINDER:
     case NO_SUCH_METHOD:
 	if (_previously_succeeded) {
@@ -526,12 +557,7 @@ XrlQueue<A>::callback(const XrlError& error, const char *comment)
     case BAD_ARGS:
     case COMMAND_FAILED:
     case INTERNAL_ERROR:
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//XXX need to handle other errors correctly
-	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
-	//XXX to be replaced with exit in production code
-	XLOG_UNFINISHED();
+	XLOG_FATAL("callback: %s %s",  comment, error.str().c_str());
 	break;
     }
 
@@ -547,7 +573,7 @@ XrlQueue<A>::callback(const XrlError& error, const char *comment)
 
 	//Clean up the queue - we can no longer handle these requests.
 	while (!_xrl_queue.empty()) {
-	    _xrl_queue.pop();
+	    _xrl_queue.pop_front();
 	}
     }
 }

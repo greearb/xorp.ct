@@ -12,12 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.7 2003/05/08 21:27:01 mjh Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.8 2003/05/08 23:45:11 mjh Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
 
-#include <queue>
+#include <deque>
 
 #include "peer_handler.hh"
 #include "plumbing.hh"
@@ -52,9 +52,10 @@ private:
 	A nexthop;
     };
 
-    queue <Queued> _xrl_queue;
-    static const int FLYING_LIMIT = 1;// XRL's allowed in flight at one time.
-    int _flying; //XRLs currently in flight
+    deque <Queued> _xrl_queue;
+    static const size_t FLYING_LIMIT = 100;// XRL's allowed in flight
+					   // at one time.
+    size_t _flying; //XRLs currently in flight
     bool _previously_succeeded; //true if we've previously been
                                 //successful in communicating with the RIB.
     bool _synchronous_mode; //true if we've seen an error and dropped
@@ -64,7 +65,21 @@ private:
     bool _interface_failed; //we've seen a fatal error
     XorpTimer _delayed_send_timer; //used to resend after a certain delay.
 
+    /**
+     * Start the transimission of XRLs to tbe RIB.
+     */
     void sendit();
+
+    /**
+     * The specialised method called by sendit to deal with IPv4/IPv6.
+     *
+     * @param q the queued command.
+     * @param rib XRL handle to RIB
+     * @param bgp "ibgp" or "ebgp".
+     * @return True if the add/delete was queued.
+     */
+    bool sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp);
+
     void delayed_send(uint32_t delay_ms);
     EventLoop& eventloop() {return _rib_ipc_handler->eventloop();}
 
