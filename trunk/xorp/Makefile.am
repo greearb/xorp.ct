@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/Makefile.am,v 1.14 2004/02/18 00:14:02 pavlin Exp $
+## $XORP: xorp/Makefile.am,v 1.15 2004/06/10 16:14:41 hodson Exp $
 ##
 
 # --- Options
@@ -12,10 +12,10 @@ SUBDIRS	 = libxorp libcomm libxipc libproto mrt xrl libfeaclient
 SUBDIRS += cli policy utils
 
 # --- Dual Libraries/Applications (directory ordering should not matter)
-SUBDIRS	+= fea rib
+SUBDIRS	+= fea fib2mrib mld6igmp rib
 
 # --- Applications (directory ordering should not matter)
-SUBDIRS += bgp fib2mrib mld6igmp pim rip rtrmgr static_routes
+SUBDIRS += bgp pim rip rtrmgr static_routes
 
 # --- Other (directory ordering should not matter)
 SUBDIRS += etc contrib
