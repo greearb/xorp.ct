@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.11 2004/05/21 19:32:41 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.12 2004/05/21 19:34:12 pavlin Exp $
 #
 
 #
@@ -48,6 +48,18 @@ case ${HOSTNAME} in
     IFNAME="fxp3"
     MAC="00:02:b3:10:e3:e7"
     TEST_MAC="00:02:b3:10:e3:e8"
+    PIF_INDEX="5"
+    VIF_FLAG_BROADCAST="true"
+    VIF_FLAG_LOOPBACK="false"
+    VIF_FLAG_POINT_TO_POINT="false"
+    VIF_FLAG_MULTICAST="true"
+    ;;
+
+    xorp3)
+    HAVE_IPV6="true"
+    IFNAME="fxp3"
+    MAC="00:02:b3:10:e2:ed"
+    TEST_MAC="00:02:b3:10:e2:ee"
     PIF_INDEX="5"
     VIF_FLAG_BROADCAST="true"
     VIF_FLAG_LOOPBACK="false"
@@ -875,7 +887,9 @@ test_get_vif_pif_index()
 	return 1
     fi
     fea_ifmgr_create_interface ${tid} ${IFNAME}
+    fea_ifmgr_set_interface_enabled ${tid} ${IFNAME} true
     fea_ifmgr_create_vif ${tid} ${IFNAME} ${VIFNAME}
+    fea_ifmgr_set_vif_enabled ${tid} ${IFNAME} ${VIFNAME} true
     fea_ifmgr_commit_transaction ${tid}
 
     _xrl_result=`fea_ifmgr_get_configured_vif_pif_index ${IFNAME} ${VIFNAME} 2>&1`
