@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.15 2003/04/23 20:50:49 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.16 2003/05/09 19:36:17 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__

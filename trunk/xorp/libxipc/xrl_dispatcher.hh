@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libxipc/xrl_dispatcher.hh,v 1.1 2003/05/09 19:36:16 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_DISPATCHER_HH__
 #define __LIBXIPC_XRL_DISPATCHER_HH__

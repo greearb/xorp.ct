@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.17 2003/04/23 20:50:49 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.18 2003/05/09 19:36:17 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"

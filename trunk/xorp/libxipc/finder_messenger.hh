@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_messenger.hh,v 1.7 2003/04/22 23:27:18 hodson Exp $
+// $XORP: xorp/libxipc/finder_messenger.hh,v 1.8 2003/05/09 19:36:15 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_MESSENGER_HH__
 #define __LIBXIPC_FINDER_MESSENGER_HH__

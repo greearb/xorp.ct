@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.17 2003/05/07 21:58:09 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.18 2003/05/09 19:36:14 hodson Exp $
 ##
 
 # - The library
