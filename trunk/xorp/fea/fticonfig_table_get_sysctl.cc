@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.1 2003/05/02 07:50:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.2 2003/05/14 01:13:41 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -93,6 +93,9 @@ FtiConfigTableGetSysctl::get_table4(list<Fte4>& fte_list)
 bool
 FtiConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
 {
+#ifndef HAVE_IPV6
+    return false;
+#else
     list<FteX> ftex_list;
     
     // Get the table
@@ -110,6 +113,7 @@ FtiConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
     }
     
     return true;
+#endif // HAVE_IPV6
 }
 
 #ifndef HAVE_SYSCTL_NET_RT_DUMP
