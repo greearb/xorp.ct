@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/utils/Makefile.am,v 1.9 2003/10/17 01:44:28 hodson Exp $
+## $XORP: xorp/utils/Makefile.am,v 1.10 2003/10/23 00:20:42 pavlin Exp $
 ##
 
 SUBDIRS = . @FLOWER_MALLOC@
@@ -14,11 +14,8 @@ TESTS		 =
 # -- No-install Programs
 noinst_PROGRAMS	 = runit
 
-# -- No-install Libraries
-noinst_LIBRARIES =
-
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LIBRARIES)
+LDADD		 =
 
 # -- Program Sources
 runit_SOURCES	      = runit.cc

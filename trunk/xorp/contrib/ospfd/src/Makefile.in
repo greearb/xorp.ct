@@ -63,18 +63,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -90,11 +95,11 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-noinst_LIBRARIES = libospfd.a
+noinst_LTLIBRARIES = libospfd.la
 
 AM_CPPFLAGS = -I$(srcdir)/../@OSPFD_OS@
 
-libospfd_a_SOURCES = arch.h avl.h config.h dbage.h globals.h ifcfsm.h igmp.h ip.h iterator.h lsa.h lsalist.h lshdr.h mcache.h monitor.h mospf.h nbrfsm.h opqlsa.h ospf.h ospfinc.h pat.h phyint.h priq.h rte.h spfarea.h spfifc.h spflog.h spfnbr.h spfparam.h spfpkt.h spftype.h spfutil.h stack.h system.h timer.h tlv.h asbrlsa.C asexlsa.C avl.C cksum.C config.C dbage.C grplsa.C helper.C hostmode.C ifcfsm.C lsa.C lsalist.C lsdb.C monitor.C mospf.C nbrfsm.C netlsa.C opqlsa.C ospf.C pat.C phyint.C priq.C restart.C rte.C rtrlsa.C spfack.C spfarea.C spfcalc.C spfdd.C spfhello.C spfvl.C spfifc.C spflood.C spfnbr.C spforig.C spfutil.C summlsa.C timer.C tlv.C
+libospfd_la_SOURCES = arch.h avl.h config.h dbage.h globals.h ifcfsm.h igmp.h ip.h iterator.h lsa.h lsalist.h lshdr.h mcache.h monitor.h mospf.h nbrfsm.h opqlsa.h ospf.h ospfinc.h pat.h phyint.h priq.h rte.h spfarea.h spfifc.h spflog.h spfnbr.h spfparam.h spfpkt.h spftype.h spfutil.h stack.h system.h timer.h tlv.h asbrlsa.C asexlsa.C avl.C cksum.C config.C dbage.C grplsa.C helper.C hostmode.C ifcfsm.C lsa.C lsalist.C lsdb.C monitor.C mospf.C nbrfsm.C netlsa.C opqlsa.C ospf.C pat.C phyint.C priq.C restart.C rte.C rtrlsa.C spfack.C spfarea.C spfcalc.C spfdd.C spfhello.C spfvl.C spfifc.C spflood.C spfnbr.C spforig.C spfutil.C summlsa.C timer.C tlv.C
 
 
 ################################################################
@@ -103,23 +108,18 @@ subdir = contrib/ospfd/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 
-libospfd_a_AR = $(AR) cru
-libospfd_a_LIBADD =
-am_libospfd_a_OBJECTS = asbrlsa.$(OBJEXT) asexlsa.$(OBJEXT) \
-	avl.$(OBJEXT) cksum.$(OBJEXT) config.$(OBJEXT) dbage.$(OBJEXT) \
-	grplsa.$(OBJEXT) helper.$(OBJEXT) hostmode.$(OBJEXT) \
-	ifcfsm.$(OBJEXT) lsa.$(OBJEXT) lsalist.$(OBJEXT) lsdb.$(OBJEXT) \
-	monitor.$(OBJEXT) mospf.$(OBJEXT) nbrfsm.$(OBJEXT) \
-	netlsa.$(OBJEXT) opqlsa.$(OBJEXT) ospf.$(OBJEXT) pat.$(OBJEXT) \
-	phyint.$(OBJEXT) priq.$(OBJEXT) restart.$(OBJEXT) rte.$(OBJEXT) \
-	rtrlsa.$(OBJEXT) spfack.$(OBJEXT) spfarea.$(OBJEXT) \
-	spfcalc.$(OBJEXT) spfdd.$(OBJEXT) spfhello.$(OBJEXT) \
-	spfvl.$(OBJEXT) spfifc.$(OBJEXT) spflood.$(OBJEXT) \
-	spfnbr.$(OBJEXT) spforig.$(OBJEXT) spfutil.$(OBJEXT) \
-	summlsa.$(OBJEXT) timer.$(OBJEXT) tlv.$(OBJEXT)
-libospfd_a_OBJECTS = $(am_libospfd_a_OBJECTS)
+libospfd_la_LDFLAGS =
+libospfd_la_LIBADD =
+am_libospfd_la_OBJECTS = asbrlsa.lo asexlsa.lo avl.lo cksum.lo config.lo \
+	dbage.lo grplsa.lo helper.lo hostmode.lo ifcfsm.lo lsa.lo \
+	lsalist.lo lsdb.lo monitor.lo mospf.lo nbrfsm.lo netlsa.lo \
+	opqlsa.lo ospf.lo pat.lo phyint.lo priq.lo restart.lo rte.lo \
+	rtrlsa.lo spfack.lo spfarea.lo spfcalc.lo spfdd.lo spfhello.lo \
+	spfvl.lo spfifc.lo spflood.lo spfnbr.lo spforig.lo spfutil.lo \
+	summlsa.lo timer.lo tlv.lo
+libospfd_la_OBJECTS = $(am_libospfd_la_OBJECTS)
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -127,45 +127,60 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/asbrlsa.Po $(DEPDIR)/asexlsa.Po \
-@AMDEP_TRUE@	$(DEPDIR)/avl.Po $(DEPDIR)/cksum.Po \
-@AMDEP_TRUE@	$(DEPDIR)/config.Po $(DEPDIR)/dbage.Po \
-@AMDEP_TRUE@	$(DEPDIR)/grplsa.Po $(DEPDIR)/helper.Po \
-@AMDEP_TRUE@	$(DEPDIR)/hostmode.Po $(DEPDIR)/ifcfsm.Po \
-@AMDEP_TRUE@	$(DEPDIR)/lsa.Po $(DEPDIR)/lsalist.Po \
-@AMDEP_TRUE@	$(DEPDIR)/lsdb.Po $(DEPDIR)/monitor.Po \
-@AMDEP_TRUE@	$(DEPDIR)/mospf.Po $(DEPDIR)/nbrfsm.Po \
-@AMDEP_TRUE@	$(DEPDIR)/netlsa.Po $(DEPDIR)/opqlsa.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ospf.Po $(DEPDIR)/pat.Po \
-@AMDEP_TRUE@	$(DEPDIR)/phyint.Po $(DEPDIR)/priq.Po \
-@AMDEP_TRUE@	$(DEPDIR)/restart.Po $(DEPDIR)/rte.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rtrlsa.Po $(DEPDIR)/spfack.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spfarea.Po $(DEPDIR)/spfcalc.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spfdd.Po $(DEPDIR)/spfhello.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spfifc.Po $(DEPDIR)/spflood.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spfnbr.Po $(DEPDIR)/spforig.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spfutil.Po $(DEPDIR)/spfvl.Po \
-@AMDEP_TRUE@	$(DEPDIR)/summlsa.Po $(DEPDIR)/timer.Po \
-@AMDEP_TRUE@	$(DEPDIR)/tlv.Po
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/asbrlsa.Plo $(DEPDIR)/asexlsa.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/avl.Plo $(DEPDIR)/cksum.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/config.Plo $(DEPDIR)/dbage.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/grplsa.Plo $(DEPDIR)/helper.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/hostmode.Plo $(DEPDIR)/ifcfsm.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/lsa.Plo $(DEPDIR)/lsalist.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/lsdb.Plo $(DEPDIR)/monitor.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mospf.Plo $(DEPDIR)/nbrfsm.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/netlsa.Plo $(DEPDIR)/opqlsa.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/ospf.Plo $(DEPDIR)/pat.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/phyint.Plo $(DEPDIR)/priq.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/restart.Plo $(DEPDIR)/rte.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rtrlsa.Plo $(DEPDIR)/spfack.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/spfarea.Plo $(DEPDIR)/spfcalc.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/spfdd.Plo $(DEPDIR)/spfhello.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/spfifc.Plo $(DEPDIR)/spflood.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/spfnbr.Plo $(DEPDIR)/spforig.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/spfutil.Plo $(DEPDIR)/spfvl.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/summlsa.Plo $(DEPDIR)/timer.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/tlv.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libospfd_a_SOURCES)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libospfd_la_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libospfd_a_SOURCES)
+SOURCES = $(libospfd_la_SOURCES)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .C .o .obj
+.SUFFIXES: .C .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  contrib/ospfd/src/Makefile
@@ -174,14 +189,10 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libospfd.a: $(libospfd_a_OBJECTS) $(libospfd_a_DEPENDENCIES) 
-	-rm -f libospfd.a
-	$(libospfd_a_AR) libospfd.a $(libospfd_a_OBJECTS) $(libospfd_a_LIBADD)
-	$(RANLIB) libospfd.a
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+libospfd.la: $(libospfd_la_OBJECTS) $(libospfd_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libospfd_la_LDFLAGS) $(libospfd_la_OBJECTS) $(libospfd_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -189,45 +200,45 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/asbrlsa.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/asexlsa.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/avl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cksum.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/config.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dbage.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/grplsa.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/helper.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hostmode.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifcfsm.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsa.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsalist.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsdb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/monitor.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mospf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/nbrfsm.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/netlsa.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/opqlsa.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pat.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/phyint.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/priq.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/restart.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rte.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrlsa.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfack.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfarea.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfcalc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfdd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfhello.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfifc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spflood.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfnbr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spforig.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfutil.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfvl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/summlsa.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/timer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/tlv.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/asbrlsa.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/asexlsa.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/avl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cksum.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/config.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dbage.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/grplsa.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/helper.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hostmode.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifcfsm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsa.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsalist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsdb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/monitor.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mospf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/nbrfsm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/netlsa.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/opqlsa.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pat.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/phyint.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/priq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/restart.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rte.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rtrlsa.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfack.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfarea.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfcalc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfdd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfhello.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfifc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spflood.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfnbr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spforig.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfutil.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spfvl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/summlsa.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/timer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/tlv.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -243,6 +254,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.C.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -301,7 +318,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(LTLIBRARIES)
 
 installdirs:
 
@@ -330,12 +347,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
+clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
+	mostlyclean-am
 
 distclean: distclean-am
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -361,19 +379,21 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-am clean clean-generic \
-	clean-noinstLIBRARIES distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
+	clean-libtool clean-noinstLTLIBRARIES distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am info \
+	info-am install install-am install-data install-data-am \
+	install-exec install-exec-am install-info install-info-am \
+	install-man install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool tags uninstall uninstall-am \
 	uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

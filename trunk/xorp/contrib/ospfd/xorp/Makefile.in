@@ -63,18 +63,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -102,12 +107,12 @@ TESTS =
 noinst_PROGRAMS = ospfd_mon ospfd_browser
 
 # -- No-install Libraries
-noinst_LIBRARIES = 
+noinst_LTLIBRARIES = 
 
 AM_CPPFLAGS = -I$(top_builddir) -I$(srcdir)/../src
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(top_builddir)/contrib/ospfd/src/libospfd.a $(top_builddir)/xrl/targets/libospfbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(top_builddir)/contrib/ospfd/src/libospfd.la $(top_builddir)/xrl/targets/libospfbase.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 xorp_ospf_SOURCES = ospf_module.h ospfd_xorp.h os-instance.h tcppkt.h xrl_target.h  ospfd_xorp.C os-instance.C tcppkt.C system.C xrl_target.C
@@ -125,7 +130,7 @@ subdir = contrib/ospfd/xorp
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 
 bin_PROGRAMS = xorp_ospf$(EXEEXT)
 noinst_PROGRAMS = ospfd_mon$(EXEEXT) ospfd_browser$(EXEEXT)
@@ -136,34 +141,34 @@ am_ospfd_browser_OBJECTS = tcppkt.$(OBJEXT) lsa_prn.$(OBJEXT) \
 ospfd_browser_OBJECTS = $(am_ospfd_browser_OBJECTS)
 ospfd_browser_LDADD = $(LDADD)
 ospfd_browser_DEPENDENCIES = \
-	$(top_builddir)/contrib/ospfd/src/libospfd.a \
-	$(top_builddir)/xrl/targets/libospfbase.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+	$(top_builddir)/contrib/ospfd/src/libospfd.la \
+	$(top_builddir)/xrl/targets/libospfbase.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 ospfd_browser_LDFLAGS =
 am_ospfd_mon_OBJECTS = tcppkt.$(OBJEXT) lsa_prn.$(OBJEXT) \
 	ospfd_mon.$(OBJEXT)
 ospfd_mon_OBJECTS = $(am_ospfd_mon_OBJECTS)
 ospfd_mon_LDADD = $(LDADD)
-ospfd_mon_DEPENDENCIES = $(top_builddir)/contrib/ospfd/src/libospfd.a \
-	$(top_builddir)/xrl/targets/libospfbase.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+ospfd_mon_DEPENDENCIES = $(top_builddir)/contrib/ospfd/src/libospfd.la \
+	$(top_builddir)/xrl/targets/libospfbase.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 ospfd_mon_LDFLAGS =
 am_xorp_ospf_OBJECTS = ospfd_xorp.$(OBJEXT) os-instance.$(OBJEXT) \
 	tcppkt.$(OBJEXT) system.$(OBJEXT) xrl_target.$(OBJEXT)
 xorp_ospf_OBJECTS = $(am_xorp_ospf_OBJECTS)
 xorp_ospf_LDADD = $(LDADD)
-xorp_ospf_DEPENDENCIES = $(top_builddir)/contrib/ospfd/src/libospfd.a \
-	$(top_builddir)/xrl/targets/libospfbase.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+xorp_ospf_DEPENDENCIES = $(top_builddir)/contrib/ospfd/src/libospfd.la \
+	$(top_builddir)/xrl/targets/libospfbase.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 xorp_ospf_LDFLAGS =
 
 DEFS = @DEFS@
@@ -178,15 +183,21 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/tcppkt.Po $(DEPDIR)/xrl_target.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(ospfd_browser_SOURCES) $(ospfd_mon_SOURCES) \
 	$(xorp_ospf_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
@@ -195,7 +206,16 @@ SOURCES = $(ospfd_browser_SOURCES) $(ospfd_mon_SOURCES) $(xorp_ospf_SOURCES)
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .C .o .obj
+.SUFFIXES: .C .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  contrib/ospfd/xorp/Makefile
@@ -204,20 +224,19 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
+	     || test -f $$p1 \
 	  ; then \
 	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
 	  else :; fi; \
 	done
 
@@ -273,6 +292,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.C.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -387,7 +412,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 
 installdirs:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -417,13 +442,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -449,21 +474,23 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am info \
+	info-am install install-am install-binPROGRAMS install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+	mostlyclean-generic mostlyclean-libtool tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

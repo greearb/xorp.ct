@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/test/Makefile.am,v 1.1 2004/09/17 13:49:00 abittau Exp $
+## $XORP: xorp/policy/test/Makefile.am,v 1.2 2004/09/17 19:42:03 pavlin Exp $
 ##
 
 # -- Test Programs
@@ -23,11 +23,11 @@ compilepolicy_SOURCES		+= lex.yy_compile_policy.cc
 compilepolicy_SOURCES		+= yacc.yy_compile_policy.cc
 compilepolicy_SOURCES		+= yacc.yy_compile_policy.cc.h
 
-compilepolicy_LDADD		 = ../libpolicy.a
-compilepolicy_LDADD		+= ../common/libpolicycommon.a
-compilepolicy_LDADD		+= $(top_builddir)/libxipc/libxipc.a
-compilepolicy_LDADD		+= $(top_builddir)/libcomm/libcomm.a
-compilepolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.a
+compilepolicy_LDADD		 = ../libpolicy.la
+compilepolicy_LDADD		+= ../common/libpolicycommon.la
+compilepolicy_LDADD		+= $(top_builddir)/libxipc/libxipc.la
+compilepolicy_LDADD		+= $(top_builddir)/libcomm/libcomm.la
+compilepolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 
 
@@ -37,9 +37,9 @@ execpolicy_SOURCES		+= file_varrw.hh
 
 execpolicy_SOURCES		+= file_varrw.cc
 
-execpolicy_LDADD		 = ../backend/libpolicybackend.a
-execpolicy_LDADD		+= $(top_builddir)/libxipc/libxipc.a
-execpolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.a
+execpolicy_LDADD		 = ../backend/libpolicybackend.la
+execpolicy_LDADD		+= $(top_builddir)/libxipc/libxipc.la
+execpolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 
 ################################################################

@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.43 2004/11/08 22:32:41 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.44 2004/11/10 00:37:55 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -57,43 +57,43 @@ datadir = $(prefix)/$(subdir)
 data_DATA		 = $(xrls_files)
 
 # Add your target's library here
-noinst_LIBRARIES	 = libbgpbase.a
-noinst_LIBRARIES	+= libbgp4mibbase.a
-noinst_LIBRARIES	+= libclibase.a
-noinst_LIBRARIES	+= libcoordbase.a
-noinst_LIBRARIES	+= libdemofeaifmgrclientbase.a
-noinst_LIBRARIES	+= libfeabase.a
-noinst_LIBRARIES	+= libfeaifmgrmirrorbase.a
-noinst_LIBRARIES	+= libfib2mribbase.a
-noinst_LIBRARIES	+= libfinderbase.a
-noinst_LIBRARIES	+= libfinderclientbase.a
-noinst_LIBRARIES	+= libfirewallbase.a
-noinst_LIBRARIES	+= libmfeabase.a
-noinst_LIBRARIES	+= libmld6igmpbase.a
-noinst_LIBRARIES	+= libospfbase.a
-noinst_LIBRARIES	+= libpimbase.a
-noinst_LIBRARIES	+= libpolicybase.a
-noinst_LIBRARIES	+= libprofileclientbase.a
-noinst_LIBRARIES	+= libribbase.a
-noinst_LIBRARIES	+= libribclientbase.a
-noinst_LIBRARIES	+= libripbase.a
-noinst_LIBRARIES	+= libripngbase.a
-noinst_LIBRARIES	+= librtrmgrbase.a
-noinst_LIBRARIES	+= libshowroutesbase.a
-noinst_LIBRARIES	+= libsocketserverbase.a
-noinst_LIBRARIES	+= libstaticroutesbase.a
-noinst_LIBRARIES	+= libtestbase.a
-noinst_LIBRARIES	+= libtestfeaifmgrmirrorbase.a
-noinst_LIBRARIES	+= libtestfindereventsbase.a
-noinst_LIBRARIES	+= libtestpeerbase.a
-noinst_LIBRARIES	+= libtestsocket4.a
-noinst_LIBRARIES	+= libtestsocket6.a
-noinst_LIBRARIES	+= libtestxrlsbase.a
-noinst_LIBRARIES	+= libxorpifmibbase.a
-noinst_LIBRARIES	+= libxorpshbase.a
+noinst_LTLIBRARIES	 = libbgpbase.la
+noinst_LTLIBRARIES	+= libbgp4mibbase.la
+noinst_LTLIBRARIES	+= libclibase.la
+noinst_LTLIBRARIES	+= libcoordbase.la
+noinst_LTLIBRARIES	+= libdemofeaifmgrclientbase.la
+noinst_LTLIBRARIES	+= libfeabase.la
+noinst_LTLIBRARIES	+= libfeaifmgrmirrorbase.la
+noinst_LTLIBRARIES	+= libfib2mribbase.la
+noinst_LTLIBRARIES	+= libfinderbase.la
+noinst_LTLIBRARIES	+= libfinderclientbase.la
+noinst_LTLIBRARIES	+= libfirewallbase.la
+noinst_LTLIBRARIES	+= libmfeabase.la
+noinst_LTLIBRARIES	+= libmld6igmpbase.la
+noinst_LTLIBRARIES	+= libospfbase.la
+noinst_LTLIBRARIES	+= libpimbase.la
+noinst_LTLIBRARIES	+= libpolicybase.la
+noinst_LTLIBRARIES	+= libprofileclientbase.la
+noinst_LTLIBRARIES	+= libribbase.la
+noinst_LTLIBRARIES	+= libribclientbase.la
+noinst_LTLIBRARIES	+= libripbase.la
+noinst_LTLIBRARIES	+= libripngbase.la
+noinst_LTLIBRARIES	+= librtrmgrbase.la
+noinst_LTLIBRARIES	+= libshowroutesbase.la
+noinst_LTLIBRARIES	+= libsocketserverbase.la
+noinst_LTLIBRARIES	+= libstaticroutesbase.la
+noinst_LTLIBRARIES	+= libtestbase.la
+noinst_LTLIBRARIES	+= libtestfeaifmgrmirrorbase.la
+noinst_LTLIBRARIES	+= libtestfindereventsbase.la
+noinst_LTLIBRARIES	+= libtestpeerbase.la
+noinst_LTLIBRARIES	+= libtestsocket4.la
+noinst_LTLIBRARIES	+= libtestsocket6.la
+noinst_LTLIBRARIES	+= libtestxrlsbase.la
+noinst_LTLIBRARIES	+= libxorpifmibbase.la
+noinst_LTLIBRARIES	+= libxorpshbase.la
 
 # BGP
-libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
+libbgpbase_la_SOURCES = bgp_base.hh bgp_base.cc
 $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/bgp.xif				\
@@ -105,26 +105,26 @@ $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
 		$(INTERFACES_DIR)/rib_client.xif
 
 # BGP4MIB
-libbgp4mibbase_a_SOURCES = bgp4_mib_base.hh bgp4_mib_base.cc
+libbgp4mibbase_la_SOURCES = bgp4_mib_base.hh bgp4_mib_base.cc
 $(srcdir)/bgp4_mib_base.hh $(srcdir)/bgp4_mib_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/bgp_mib_traps.xif
 
 # CLI
-libclibase_a_SOURCES = cli_base.hh cli_base.cc
+libclibase_la_SOURCES = cli_base.hh cli_base.cc
 $(srcdir)/cli_base.hh $(srcdir)/cli_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/cli_manager.xif
 
 # COORD
-libcoordbase_a_SOURCES = coord_base.hh coord_base.cc
+libcoordbase_la_SOURCES = coord_base.hh coord_base.cc
 $(srcdir)/coord_base.hh $(srcdir)/coord_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/coord.xif				\
 		$(INTERFACES_DIR)/datain.xif
 
 # Demo FEA ifmgr client
-libdemofeaifmgrclientbase_a_SOURCES = demo_fea_ifmgr_client_base.hh	\
+libdemofeaifmgrclientbase_la_SOURCES = demo_fea_ifmgr_client_base.hh	\
 				      demo_fea_ifmgr_client_base.cc
 
 $(srcdir)/demo_fea_ifmgr_client_base.hh					\
@@ -133,7 +133,7 @@ $(srcdir)/demo_fea_ifmgr_client_base.cc:				\
 		$(INTERFACES_DIR)/fea_ifmgr_client.xif
 
 # FEA
-libfeabase_a_SOURCES = fea_base.hh fea_base.cc
+libfeabase_la_SOURCES = fea_base.hh fea_base.cc
 $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/fea_click.xif				\
@@ -149,14 +149,14 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/profile.xif
 
 # FEA IfMgr Mirror
-libfeaifmgrmirrorbase_a_SOURCES = fea_ifmgr_mirror_base.hh		\
+libfeaifmgrmirrorbase_la_SOURCES = fea_ifmgr_mirror_base.hh		\
 				  fea_ifmgr_mirror_base.cc
 $(srcdir)/fea_ifmgr_mirror_base.hh $(srcdir)/fea_ifmgr_mirror_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/fea_ifmgr_mirror.xif
 
 # Fib2mrib
-libfib2mribbase_a_SOURCES = fib2mrib_base.hh fib2mrib_base.cc
+libfib2mribbase_la_SOURCES = fib2mrib_base.hh fib2mrib_base.cc
 $(srcdir)/fib2mrib_base.hh $(srcdir)/fib2mrib_base.cc:			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/fea_fib_client.xif 			\
@@ -168,7 +168,7 @@ $(srcdir)/fib2mrib_base.hh $(srcdir)/fib2mrib_base.cc:			\
 # If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
 # too.
 #
-libfinderbase_a_SOURCES = finder_base.hh finder_base.cc
+libfinderbase_la_SOURCES = finder_base.hh finder_base.cc
 $(srcdir)/finder_base.hh $(srcdir)/finder_base.cc : 			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder.xif				\
@@ -180,26 +180,26 @@ $(srcdir)/finder_base.hh $(srcdir)/finder_base.cc : 			\
 # If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
 # too.
 #
-libfinderclientbase_a_SOURCES = finder_client_base.hh finder_client_base.cc
+libfinderclientbase_la_SOURCES = finder_client_base.hh finder_client_base.cc
 $(srcdir)/finder_client_base.hh $(srcdir)/finder_client_base.cc: 	\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder_client.xif
 
 # FIREWALL (FEA)
-libfirewallbase_a_SOURCES = firewall_base.hh firewall_base.cc
+libfirewallbase_la_SOURCES = firewall_base.hh firewall_base.cc
 $(srcdir)/firewall_base.hh $(srcdir)/firewall_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/firewall.xif
 
 # MFEA
-libmfeabase_a_SOURCES = mfea_base.hh mfea_base.cc
+libmfeabase_la_SOURCES = mfea_base.hh mfea_base.cc
 $(srcdir)/mfea_base.hh $(srcdir)/mfea_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
 		$(INTERFACES_DIR)/mfea.xif
 
 # MLD6IGMP
-libmld6igmpbase_a_SOURCES = mld6igmp_base.hh mld6igmp_base.cc
+libmld6igmpbase_la_SOURCES = mld6igmp_base.hh mld6igmp_base.cc
 $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif 			\
@@ -207,13 +207,13 @@ $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/mld6igmp.xif
 
 # OSPF
-libospfbase_a_SOURCES = ospf_base.hh ospf_base.cc
+libospfbase_la_SOURCES = ospf_base.hh ospf_base.cc
 $(srcdir)/ospf_base.hh $(srcdir)/ospf_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/ospf.xif
 
 # PIM
-libpimbase_a_SOURCES = pim_base.hh pim_base.cc
+libpimbase_la_SOURCES = pim_base.hh pim_base.cc
 $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
@@ -224,20 +224,20 @@ $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/pim.xif
 
 # Policy manager
-libpolicybase_a_SOURCES = policy_base.hh policy_base.cc
+libpolicybase_la_SOURCES = policy_base.hh policy_base.cc
 $(srcdir)/policy_base.hh $(srcdir)/policy_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/policy.xif
 
 # Profiler
-libprofileclientbase_a_SOURCES = profiler_base.hh profiler_base.cc
+libprofileclientbase_la_SOURCES = profiler_base.hh profiler_base.cc
 $(srcdir)/profiler_base.hh $(srcdir)/profiler_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/profile_client.xif
 
 # RIB
-libribbase_a_SOURCES = rib_base.hh rib_base.cc
+libribbase_la_SOURCES = rib_base.hh rib_base.cc
 $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
@@ -246,12 +246,12 @@ $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/profile.xif
 
 # RIB client
-libribclientbase_a_SOURCES = ribclient_base.hh ribclient_base.cc
+libribclientbase_la_SOURCES = ribclient_base.hh ribclient_base.cc
 $(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
 		$(INTERFACES_DIR)/rib_client.xif
 
 # RIP
-libripbase_a_SOURCES = rip_base.hh rip_base.cc
+libripbase_la_SOURCES = rip_base.hh rip_base.cc
 $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
@@ -262,7 +262,7 @@ $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 		$(INTERFACES_DIR)/socket4_user.xif
 
 # RIP NG
-libripngbase_a_SOURCES = ripng_base.hh ripng_base.cc
+libripngbase_la_SOURCES = ripng_base.hh ripng_base.cc
 $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
@@ -273,12 +273,12 @@ $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/socket6_user.xif
 
 # RTRMGR
-librtrmgrbase_a_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
+librtrmgrbase_la_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
 $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr.xif
 
-libshowroutesbase_a_SOURCES = show_routes_base.hh show_routes_base.cc
+libshowroutesbase_la_SOURCES = show_routes_base.hh show_routes_base.cc
 $(srcdir)/show_routes_base.hh $(srcdir)/show_routes_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
@@ -286,8 +286,8 @@ $(srcdir)/show_routes_base.hh $(srcdir)/show_routes_base.cc:		\
 		$(INTERFACES_DIR)/redist6.xif
 
 # SOCKET SERVER
-libsocketserverbase_a_SOURCES  = socket_server_base.hh			\
-libsocketserverbase_a_SOURCES += socket_server_base.cc
+libsocketserverbase_la_SOURCES  = socket_server_base.hh			\
+libsocketserverbase_la_SOURCES += socket_server_base.cc
 $(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
@@ -295,15 +295,15 @@ $(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
 		$(INTERFACES_DIR)/socket6.xif
 
 # StaticRoutes
-libstaticroutesbase_a_SOURCES = static_routes_base.hh static_routes_base.cc
+libstaticroutesbase_la_SOURCES = static_routes_base.hh static_routes_base.cc
 $(srcdir)/static_routes_base.hh $(srcdir)/static_routes_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/static_routes.xif
 
 # TEST FEA IFMGR MIRROR
-libtestfeaifmgrmirrorbase_a_SOURCES  = test_fea_ifmgr_mirror_base.hh
-libtestfeaifmgrmirrorbase_a_SOURCES += test_fea_ifmgr_mirror_base.cc
+libtestfeaifmgrmirrorbase_la_SOURCES  = test_fea_ifmgr_mirror_base.hh
+libtestfeaifmgrmirrorbase_la_SOURCES += test_fea_ifmgr_mirror_base.cc
 $(srcdir)/test_fea_ifmgr_mirror_base.hh					\
 $(srcdir)/test_fea_ifmgr_mirror_base.cc:				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif
@@ -314,26 +314,26 @@ $(srcdir)/test_fea_ifmgr_mirror_base.cc:				\
 # If you edit the dependencies here, please up ${XORPSRC}/libxipc/Makefile.am
 # too.
 #
-libtestfindereventsbase_a_SOURCES  = test_finder_events_base.hh
-libtestfindereventsbase_a_SOURCES += test_finder_events_base.cc
+libtestfindereventsbase_la_SOURCES  = test_finder_events_base.hh
+libtestfindereventsbase_la_SOURCES += test_finder_events_base.cc
 $(srcdir)/test_finder_events_base.hh $(srcdir)/test_finder_events_base.hh: \
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif
 
 # TEST PEER
-libtestpeerbase_a_SOURCES = test_peer_base.hh test_peer_base.cc
+libtestpeerbase_la_SOURCES = test_peer_base.hh test_peer_base.cc
 $(srcdir)/test_peer_base.hh $(srcdir)/test_peer_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
 
 # TEST SOCKET4
-libtestsocket4_a_SOURCES = test_socket4_base.hh test_socket4_base.cc
+libtestsocket4_la_SOURCES = test_socket4_base.hh test_socket4_base.cc
 $(srcdir)/test_socket4_base.hh $(srcdir)/test_socket4_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/socket4_user.xif
 
 # TEST SOCKET6
-libtestsocket6_a_SOURCES = test_socket6_base.hh test_socket6_base.cc
+libtestsocket6_la_SOURCES = test_socket6_base.hh test_socket6_base.cc
 $(srcdir)/test_socket6_base.hh $(srcdir)/test_socket6_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/socket6_user.xif
@@ -341,26 +341,26 @@ $(srcdir)/test_socket6_base.hh $(srcdir)/test_socket6_base.cc:		\
 #
 # TEST XRLS
 #
-libtestxrlsbase_a_SOURCES = test_xrls_base.hh test_xrls_base.cc
+libtestxrlsbase_la_SOURCES = test_xrls_base.hh test_xrls_base.cc
 $(srcdir)/test_xrls_base.hh $(srcdir)/test_xrls_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_xrls.xif
 
 # XORP IF MIB
-libxorpifmibbase_a_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc
+libxorpifmibbase_la_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc
 $(srcdir)/xorp_if_mib_base.hh $(srcdir)/xorp_if_mib_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/xorp_if_mib.xif
 
 # XORPSH
-libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
+libxorpshbase_la_SOURCES = xorpsh_base.hh xorpsh_base.cc
 $(srcdir)/xorpsh_base.hh $(srcdir)/xorpsh_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr_client.xif
 
 # Add your target's library sources like this:
 # Test target
-libtestbase_a_SOURCES = test_base.hh test_base.cc
+libtestbase_la_SOURCES = test_base.hh test_base.cc
 # This is a hack to rebuild files here when interfaces implemented by
 # rib target are touched.  It largely duplicates information inside rib.tgt
 $(srcdir)/test_base.hh $(srcdir)/test_base.cc:				\

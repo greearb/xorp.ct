@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.28 2004/10/06 20:32:53 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.29 2004/10/13 05:48:49 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -59,10 +59,10 @@ noinst_PROGRAMS	+= test_vif
 noinst_PROGRAMS	+= test_profile
 
 # -- No-install Libraries
-noinst_LIBRARIES = libxorp.a
+noinst_LTLIBRARIES = libxorp.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LIBRARIES)
+LDADD		 = $(noinst_LTLIBRARIES)
 
 # -- Program Sources
 test_asyncio_SOURCES	= test_asyncio.cc
@@ -91,80 +91,80 @@ test_vif_SOURCES	= test_vif.cc
 test_profile_SOURCES	= test_profile.cc
 
 # -- Library Sources
-libxorp_a_SOURCES  = libxorp_module.h
-libxorp_a_SOURCES += debug.h
-libxorp_a_SOURCES += ether_compat.h
-libxorp_a_SOURCES += xlog.h
-libxorp_a_SOURCES += xorp.h
-libxorp_a_SOURCES += utility.h
+libxorp_la_SOURCES  = libxorp_module.h
+libxorp_la_SOURCES += debug.h
+libxorp_la_SOURCES += ether_compat.h
+libxorp_la_SOURCES += xlog.h
+libxorp_la_SOURCES += xorp.h
+libxorp_la_SOURCES += utility.h
 
-libxorp_a_SOURCES += asnum.hh
-libxorp_a_SOURCES += asyncio.hh
-libxorp_a_SOURCES += buffer.hh
-libxorp_a_SOURCES += buffered_asyncio.hh
-libxorp_a_SOURCES += c_format.hh
-libxorp_a_SOURCES += callback.hh
-libxorp_a_SOURCES += callback_nodebug.hh
-libxorp_a_SOURCES += callback_debug.hh
-libxorp_a_SOURCES += clock.hh
-libxorp_a_SOURCES += config_param.hh
-libxorp_a_SOURCES += eventloop.hh
-libxorp_a_SOURCES += exceptions.hh
-libxorp_a_SOURCES += heap.hh
-libxorp_a_SOURCES += ipnet.hh
-libxorp_a_SOURCES += ipv4.hh
-libxorp_a_SOURCES += ipv4net.hh
-libxorp_a_SOURCES += ipv6.hh
-libxorp_a_SOURCES += ipv6net.hh
-libxorp_a_SOURCES += ipvx.hh
-libxorp_a_SOURCES += ipvxnet.hh
-libxorp_a_SOURCES += mac.hh
-libxorp_a_SOURCES += nexthop.hh
-libxorp_a_SOURCES += old_trie.hh
-libxorp_a_SOURCES += ref_ptr.hh
-libxorp_a_SOURCES += safe_callback_obj.hh
-libxorp_a_SOURCES += selector.hh
-libxorp_a_SOURCES += service.hh
-libxorp_a_SOURCES += time_slice.hh
-libxorp_a_SOURCES += timespent.hh
-libxorp_a_SOURCES += timer.hh
-libxorp_a_SOURCES += timeval.hh
-libxorp_a_SOURCES += token.hh
-libxorp_a_SOURCES += tokenize.hh
-libxorp_a_SOURCES += transaction.hh
-libxorp_a_SOURCES += trie.hh
-libxorp_a_SOURCES += utils.hh
-libxorp_a_SOURCES += vif.hh
-libxorp_a_SOURCES += profile.hh
+libxorp_la_SOURCES += asnum.hh
+libxorp_la_SOURCES += asyncio.hh
+libxorp_la_SOURCES += buffer.hh
+libxorp_la_SOURCES += buffered_asyncio.hh
+libxorp_la_SOURCES += c_format.hh
+libxorp_la_SOURCES += callback.hh
+libxorp_la_SOURCES += callback_nodebug.hh
+libxorp_la_SOURCES += callback_debug.hh
+libxorp_la_SOURCES += clock.hh
+libxorp_la_SOURCES += config_param.hh
+libxorp_la_SOURCES += eventloop.hh
+libxorp_la_SOURCES += exceptions.hh
+libxorp_la_SOURCES += heap.hh
+libxorp_la_SOURCES += ipnet.hh
+libxorp_la_SOURCES += ipv4.hh
+libxorp_la_SOURCES += ipv4net.hh
+libxorp_la_SOURCES += ipv6.hh
+libxorp_la_SOURCES += ipv6net.hh
+libxorp_la_SOURCES += ipvx.hh
+libxorp_la_SOURCES += ipvxnet.hh
+libxorp_la_SOURCES += mac.hh
+libxorp_la_SOURCES += nexthop.hh
+libxorp_la_SOURCES += old_trie.hh
+libxorp_la_SOURCES += ref_ptr.hh
+libxorp_la_SOURCES += safe_callback_obj.hh
+libxorp_la_SOURCES += selector.hh
+libxorp_la_SOURCES += service.hh
+libxorp_la_SOURCES += time_slice.hh
+libxorp_la_SOURCES += timespent.hh
+libxorp_la_SOURCES += timer.hh
+libxorp_la_SOURCES += timeval.hh
+libxorp_la_SOURCES += token.hh
+libxorp_la_SOURCES += tokenize.hh
+libxorp_la_SOURCES += transaction.hh
+libxorp_la_SOURCES += trie.hh
+libxorp_la_SOURCES += utils.hh
+libxorp_la_SOURCES += vif.hh
+libxorp_la_SOURCES += profile.hh
 
-libxorp_a_SOURCES += debug.c
-# libxorp_a_SOURCES += ether_compat.c
-libxorp_a_SOURCES += utility.c
-libxorp_a_SOURCES += xlog.c
+libxorp_la_SOURCES += debug.c
+# libxorp_la_SOURCES += ether_compat.c
+libxorp_la_SOURCES += utility.c
+libxorp_la_SOURCES += xlog.c
 
-libxorp_a_SOURCES += asyncio.cc
-libxorp_a_SOURCES += buffered_asyncio.cc
-libxorp_a_SOURCES += c_format.cc
-libxorp_a_SOURCES += callback.cc
-libxorp_a_SOURCES += clock.cc
-libxorp_a_SOURCES += eventloop.cc
-libxorp_a_SOURCES += exceptions.cc
-libxorp_a_SOURCES += heap.cc
-libxorp_a_SOURCES += ipv4.cc
-libxorp_a_SOURCES += ipv6.cc
-libxorp_a_SOURCES += ipvx.cc
-libxorp_a_SOURCES += mac.cc
-libxorp_a_SOURCES += nexthop.cc
-libxorp_a_SOURCES += ref_ptr.cc
-libxorp_a_SOURCES += safe_callback_obj.cc
-libxorp_a_SOURCES += selector.cc
-libxorp_a_SOURCES += service.cc
-libxorp_a_SOURCES += time_slice.cc
-libxorp_a_SOURCES += timer.cc
-libxorp_a_SOURCES += token.cc
-libxorp_a_SOURCES += transaction.cc
-libxorp_a_SOURCES += vif.cc
-libxorp_a_SOURCES += profile.cc
+libxorp_la_SOURCES += asyncio.cc
+libxorp_la_SOURCES += buffered_asyncio.cc
+libxorp_la_SOURCES += c_format.cc
+libxorp_la_SOURCES += callback.cc
+libxorp_la_SOURCES += clock.cc
+libxorp_la_SOURCES += eventloop.cc
+libxorp_la_SOURCES += exceptions.cc
+libxorp_la_SOURCES += heap.cc
+libxorp_la_SOURCES += ipv4.cc
+libxorp_la_SOURCES += ipv6.cc
+libxorp_la_SOURCES += ipvx.cc
+libxorp_la_SOURCES += mac.cc
+libxorp_la_SOURCES += nexthop.cc
+libxorp_la_SOURCES += ref_ptr.cc
+libxorp_la_SOURCES += safe_callback_obj.cc
+libxorp_la_SOURCES += selector.cc
+libxorp_la_SOURCES += service.cc
+libxorp_la_SOURCES += time_slice.cc
+libxorp_la_SOURCES += timer.cc
+libxorp_la_SOURCES += token.cc
+libxorp_la_SOURCES += transaction.cc
+libxorp_la_SOURCES += vif.cc
+libxorp_la_SOURCES += profile.cc
 
 BUILT_SOURCES	   = callback_nodebug.hh callback_debug.hh
 

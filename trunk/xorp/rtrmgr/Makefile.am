@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.31 2004/09/21 18:13:42 atanu Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.32 2004/09/21 22:09:59 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -16,14 +16,11 @@ noinst_PROGRAMS	 = test_templates
 noinst_PROGRAMS	+= test_sample_config
 noinst_PROGRAMS	+= test_module_manager
 
-# -- No-install Libraries
-noinst_LIBRARIES =
-
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(top_builddir)/libxipc/libfinder.a
-LDADD		+= $(top_builddir)/libxipc/libxipc.a
-LDADD		+= $(top_builddir)/libcomm/libcomm.a
-LDADD		+= $(top_builddir)/libxorp/libxorp.a
+LDADD		 = $(top_builddir)/libxipc/libfinder.la
+LDADD		+= $(top_builddir)/libxipc/libxipc.la
+LDADD		+= $(top_builddir)/libcomm/libcomm.la
+LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 
@@ -76,8 +73,8 @@ xorp_rtrmgr_SOURCES	+= xrldb.cc
 xorp_rtrmgr_SOURCES	+= y.boot_tab.cc
 xorp_rtrmgr_SOURCES	+= y.tplt_tab.cc
 
-xorp_rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.a
-xorp_rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a
+xorp_rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.la
+xorp_rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.la
 xorp_rtrmgr_LDADD	+= $(LDADD)
 
 #
@@ -142,12 +139,12 @@ xorpsh_SOURCES	+= y.boot_tab.cc
 xorpsh_SOURCES	+= y.opcmd_tab.cc
 xorpsh_SOURCES	+= y.tplt_tab.cc
 
-xorpsh_LDADD	 = $(top_builddir)/cli/libcli.a
-xorpsh_LDADD	+= $(top_builddir)/libproto/libproto.a
+xorpsh_LDADD	 = $(top_builddir)/cli/libcli.la
+xorpsh_LDADD	+= $(top_builddir)/libproto/libproto.la
 xorpsh_LDADD	+= $(top_builddir)/cli/libtecla/libtecla.a
 xorpsh_LDADD	+= @CLI_CURSES_LIB@
-xorpsh_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgrxif.a
-xorpsh_LDADD	+= $(top_builddir)/xrl/targets/libxorpshbase.a
+xorpsh_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgrxif.la
+xorpsh_LDADD	+= $(top_builddir)/xrl/targets/libxorpshbase.la
 xorpsh_LDADD	+= $(LDADD)
 
 #
@@ -155,8 +152,8 @@ xorpsh_LDADD	+= $(LDADD)
 #
 xorp_profiler_SOURCES	 = profiler.cc
 
-xorp_profiler_LDADD	 = $(top_builddir)/xrl/interfaces/libprofilexif.a
-xorp_profiler_LDADD	+= $(top_builddir)/xrl/targets/libprofileclientbase.a
+xorp_profiler_LDADD	 = $(top_builddir)/xrl/interfaces/libprofilexif.la
+xorp_profiler_LDADD	+= $(top_builddir)/xrl/targets/libprofileclientbase.la
 xorp_profiler_LDADD	+= $(LDADD)
 
 #

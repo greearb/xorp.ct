@@ -65,18 +65,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -101,17 +106,17 @@ TESTS =
 noinst_PROGRAMS = test_mrt test_mrib
 
 # -- No-install Libraries
-noinst_LIBRARIES = libmrt.a
+noinst_LTLIBRARIES = libmrt.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 test_mrt_SOURCES = test_mrt.cc
 test_mrib_SOURCES = test_mrib.cc
 
 # -- Library Sources
-libmrt_a_SOURCES = mrt_module.h buffer.h inet_cksum.h max_vifs.h multicast_defs.h netstream_access.h random.h mifset.hh mrt.hh mrib_table.hh buffer.c inet_cksum.c random.c mifset.cc mrib_table.cc
+libmrt_la_SOURCES = mrt_module.h buffer.h inet_cksum.h max_vifs.h multicast_defs.h netstream_access.h random.h mifset.hh mrt.hh mrib_table.hh buffer.c inet_cksum.c random.c mifset.cc mrib_table.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = include
@@ -123,13 +128,13 @@ subdir = mrt
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 
-libmrt_a_AR = $(AR) cru
-libmrt_a_LIBADD =
-am_libmrt_a_OBJECTS = buffer.$(OBJEXT) inet_cksum.$(OBJEXT) \
-	random.$(OBJEXT) mifset.$(OBJEXT) mrib_table.$(OBJEXT)
-libmrt_a_OBJECTS = $(am_libmrt_a_OBJECTS)
+libmrt_la_LDFLAGS =
+libmrt_la_LIBADD =
+am_libmrt_la_OBJECTS = buffer.lo inet_cksum.lo random.lo mifset.lo \
+	mrib_table.lo
+libmrt_la_OBJECTS = $(am_libmrt_la_OBJECTS)
 bin_PROGRAMS =
 noinst_PROGRAMS = test_mrt$(EXEEXT) test_mrib$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
@@ -137,12 +142,12 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_test_mrib_OBJECTS = test_mrib.$(OBJEXT)
 test_mrib_OBJECTS = $(am_test_mrib_OBJECTS)
 test_mrib_LDADD = $(LDADD)
-test_mrib_DEPENDENCIES = libmrt.a $(top_builddir)/libxorp/libxorp.a
+test_mrib_DEPENDENCIES = libmrt.la $(top_builddir)/libxorp/libxorp.la
 test_mrib_LDFLAGS =
 am_test_mrt_OBJECTS = test_mrt.$(OBJEXT)
 test_mrt_OBJECTS = $(am_test_mrt_OBJECTS)
 test_mrt_LDADD = $(LDADD)
-test_mrt_DEPENDENCIES = libmrt.a $(top_builddir)/libxorp/libxorp.a
+test_mrt_DEPENDENCIES = libmrt.la $(top_builddir)/libxorp/libxorp.la
 test_mrt_LDFLAGS =
 
 DEFS = @DEFS@
@@ -151,30 +156,45 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/buffer.Po $(DEPDIR)/inet_cksum.Po \
-@AMDEP_TRUE@	$(DEPDIR)/mifset.Po $(DEPDIR)/mrib_table.Po \
-@AMDEP_TRUE@	$(DEPDIR)/random.Po $(DEPDIR)/test_mrib.Po \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/buffer.Plo $(DEPDIR)/inet_cksum.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mifset.Plo $(DEPDIR)/mrib_table.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/random.Plo $(DEPDIR)/test_mrib.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_mrt.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
-DIST_SOURCES = $(libmrt_a_SOURCES) $(test_mrib_SOURCES) \
+DIST_SOURCES = $(libmrt_la_SOURCES) $(test_mrib_SOURCES) \
 	$(test_mrt_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in TODO
-SOURCES = $(libmrt_a_SOURCES) $(test_mrib_SOURCES) $(test_mrt_SOURCES)
+SOURCES = $(libmrt_la_SOURCES) $(test_mrib_SOURCES) $(test_mrt_SOURCES)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cc .o .obj
+.SUFFIXES: .c .cc .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  mrt/Makefile
@@ -183,24 +203,21 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libmrt.a: $(libmrt_a_OBJECTS) $(libmrt_a_DEPENDENCIES) 
-	-rm -f libmrt.a
-	$(libmrt_a_AR) libmrt.a $(libmrt_a_OBJECTS) $(libmrt_a_LIBADD)
-	$(RANLIB) libmrt.a
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+libmrt.la: $(libmrt_la_OBJECTS) $(libmrt_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libmrt_la_LDFLAGS) $(libmrt_la_OBJECTS) $(libmrt_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
+	     || test -f $$p1 \
 	  ; then \
 	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
 	  else :; fi; \
 	done
 
@@ -230,11 +247,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/buffer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/inet_cksum.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mifset.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mrib_table.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/random.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/buffer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/inet_cksum.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mifset.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mrib_table.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/random.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_mrib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_mrt.Po@am__quote@
 
@@ -252,6 +269,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(COMPILE) -c `cygpath -w $<`
+
+.c.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CCDEPMODE = @CCDEPMODE@
 
 .cc.o:
@@ -265,6 +288,12 @@ CCDEPMODE = @CCDEPMODE@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -379,7 +408,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 
 installdirs:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -409,13 +438,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -441,21 +470,23 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am info \
+	info-am install install-am install-binPROGRAMS install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+	mostlyclean-generic mostlyclean-libtool tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

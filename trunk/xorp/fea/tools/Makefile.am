@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/tools/Makefile.am,v 1.6 2003/08/01 02:11:51 pavlin Exp $
+## $XORP: xorp/fea/tools/Makefile.am,v 1.1 2004/05/21 08:08:03 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -16,20 +16,20 @@ TESTS		 =
 noinst_PROGRAMS  = 
 
 # -- No-install Libraries
-noinst_LIBRARIES = 
+noinst_LTLIBRARIES = 
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(top_builddir)/libxipc/libxipc.a
-LDADD		+= $(top_builddir)/libcomm/libcomm.a
-LDADD		+= $(top_builddir)/libxorp/libxorp.a
+LDADD		 = $(top_builddir)/libxipc/libxipc.la
+LDADD		+= $(top_builddir)/libcomm/libcomm.la
+LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 show_interfaces_SOURCES	 = show_interfaces.hh
 show_interfaces_SOURCES	+= show_interfaces.cc
-show_interfaces_LDADD	 = $(top_builddir)/libfeaclient/libfeaclient.a
-show_interfaces_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
-show_interfaces_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
-show_interfaces_LDADD	+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
+show_interfaces_LDADD	 = $(top_builddir)/libfeaclient/libfeaclient.la
+show_interfaces_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+show_interfaces_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+show_interfaces_LDADD	+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 show_interfaces_LDADD	+= $(LDADD)
 
 # -- Library Sources

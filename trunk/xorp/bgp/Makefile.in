@@ -63,18 +63,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -107,11 +112,11 @@ TESTS = test_packet aspath_test test_packet_coding isolation_tests test_peer_dat
 # -- No-install Programs
 noinst_PROGRAMS = test_packet test_plumbing update_test aspath_test test_packet_coding isolation_tests test_peer_data
 
-# -- No-install Libraries
-noinst_LIBRARIES = libbgp.a
+# -- No-install Libtool Libraries
+noinst_LTLIBRARIES = libbgp.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a $(top_builddir)/xrl/interfaces/libprofileclientxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = libbgp.la $(top_builddir)/xrl/targets/libbgpbase.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 xorp_bgp_SOURCES = bgp.cc bgp.hh main.cc
@@ -119,7 +124,7 @@ xorp_bgp_SOURCES = bgp.cc bgp.hh main.cc
 test_packet_SOURCES = test_test.hh test_packet.cc
 
 test_plumbing_SOURCES = test_plumbing.hh test_plumbing.cc bgp.hh bgp.cc
-test_plumbing_DEPENDENCIES = libbgp.a
+test_plumbing_DEPENDENCIES = libbgp.la
 
 aspath_test_SOURCES = aspath_test.cc
 test_packet_coding_SOURCES = test_packet_coding.cc
@@ -130,7 +135,7 @@ isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc test_filte
 test_peer_data_SOURCES = test_peer_data.cc
 
 # -- Library Sources
-libbgp_a_SOURCES = bgp_module.h aspath.hh attribute_manager.hh bgp_trie.hh bgp_varrw.hh dump_iterators.hh exceptions.hh internal_message.hh iptuple.hh local_data.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh process_watch.hh profile_vars.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_policy.hh route_table_policy_im.hh route_table_policy_sm.hh route_table_ribin.hh route_table_ribout.hh route_table_reader.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh xrl_target.hh aspath.cc attribute_manager.cc bgp_trie.cc bgp_varrw.cc dump_iterators.cc internal_message.cc iptuple.cc local_data.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc process_watch.cc profile_vars.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_policy.cc route_table_policy_im.cc route_table_policy_sm.cc route_table_ribin.cc route_table_ribout.cc route_table_reader.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc xrl_target.cc
+libbgp_la_SOURCES = bgp_module.h aspath.hh attribute_manager.hh bgp_trie.hh bgp_varrw.hh dump_iterators.hh exceptions.hh internal_message.hh iptuple.hh local_data.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh process_watch.hh profile_vars.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_policy.hh route_table_policy_im.hh route_table_policy_sm.hh route_table_ribin.hh route_table_ribout.hh route_table_reader.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh xrl_target.hh aspath.cc attribute_manager.cc bgp_trie.cc bgp_varrw.cc dump_iterators.cc internal_message.cc iptuple.cc local_data.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc process_watch.cc profile_vars.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_policy.cc route_table_policy_im.cc route_table_policy_sm.cc route_table_ribin.cc route_table_ribout.cc route_table_reader.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = BUGS configs configure_bgp.sh docs run_tests test_cache.reference test_decision.reference test_deletion.reference test_dump.reference test_fanout.reference test_filter.reference test_nhlookup.reference test_ribin.reference test_ribout.reference xrl_shell_funcs.sh
@@ -142,30 +147,25 @@ subdir = bgp
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 
-libbgp_a_AR = $(AR) cru
-libbgp_a_LIBADD =
-am_libbgp_a_OBJECTS = aspath.$(OBJEXT) attribute_manager.$(OBJEXT) \
-	bgp_trie.$(OBJEXT) bgp_varrw.$(OBJEXT) dump_iterators.$(OBJEXT) \
-	internal_message.$(OBJEXT) iptuple.$(OBJEXT) \
-	local_data.$(OBJEXT) next_hop_resolver.$(OBJEXT) \
-	notification_packet.$(OBJEXT) open_packet.$(OBJEXT) \
-	packet.$(OBJEXT) parameter.$(OBJEXT) path_attribute.$(OBJEXT) \
-	peer.$(OBJEXT) peer_data.$(OBJEXT) peer_handler.$(OBJEXT) \
-	peer_list.$(OBJEXT) plumbing.$(OBJEXT) process_watch.$(OBJEXT) \
-	profile_vars.$(OBJEXT) rib_ipc_handler.$(OBJEXT) \
-	route_queue.$(OBJEXT) route_table_base.$(OBJEXT) \
-	route_table_cache.$(OBJEXT) route_table_decision.$(OBJEXT) \
-	route_table_deletion.$(OBJEXT) route_table_dump.$(OBJEXT) \
-	route_table_fanout.$(OBJEXT) route_table_filter.$(OBJEXT) \
-	route_table_nhlookup.$(OBJEXT) route_table_policy.$(OBJEXT) \
-	route_table_policy_im.$(OBJEXT) route_table_policy_sm.$(OBJEXT) \
-	route_table_ribin.$(OBJEXT) route_table_ribout.$(OBJEXT) \
-	route_table_reader.$(OBJEXT) socket.$(OBJEXT) \
-	subnet_route.$(OBJEXT) update_attrib.$(OBJEXT) \
-	update_packet.$(OBJEXT) xrl_target.$(OBJEXT)
-libbgp_a_OBJECTS = $(am_libbgp_a_OBJECTS)
+libbgp_la_LDFLAGS =
+libbgp_la_LIBADD =
+am_libbgp_la_OBJECTS = aspath.lo attribute_manager.lo bgp_trie.lo \
+	bgp_varrw.lo dump_iterators.lo internal_message.lo iptuple.lo \
+	local_data.lo next_hop_resolver.lo notification_packet.lo \
+	open_packet.lo packet.lo parameter.lo path_attribute.lo peer.lo \
+	peer_data.lo peer_handler.lo peer_list.lo plumbing.lo \
+	process_watch.lo profile_vars.lo rib_ipc_handler.lo \
+	route_queue.lo route_table_base.lo route_table_cache.lo \
+	route_table_decision.lo route_table_deletion.lo \
+	route_table_dump.lo route_table_fanout.lo route_table_filter.lo \
+	route_table_nhlookup.lo route_table_policy.lo \
+	route_table_policy_im.lo route_table_policy_sm.lo \
+	route_table_ribin.lo route_table_ribout.lo \
+	route_table_reader.lo socket.lo subnet_route.lo \
+	update_attrib.lo update_packet.lo xrl_target.lo
+libbgp_la_OBJECTS = $(am_libbgp_la_OBJECTS)
 bin_PROGRAMS = xorp_bgp$(EXEEXT)
 noinst_PROGRAMS = test_packet$(EXEEXT) test_plumbing$(EXEEXT) \
 	update_test$(EXEEXT) aspath_test$(EXEEXT) \
@@ -176,16 +176,16 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_aspath_test_OBJECTS = aspath_test.$(OBJEXT)
 aspath_test_OBJECTS = $(am_aspath_test_OBJECTS)
 aspath_test_LDADD = $(LDADD)
-aspath_test_DEPENDENCIES = libbgp.a \
-	$(top_builddir)/xrl/targets/libbgpbase.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+aspath_test_DEPENDENCIES = libbgp.la \
+	$(top_builddir)/xrl/targets/libbgpbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 aspath_test_LDFLAGS =
 am_isolation_tests_OBJECTS = test_main.$(OBJEXT) test_ribin.$(OBJEXT) \
 	test_deletion.$(OBJEXT) test_filter.$(OBJEXT) \
@@ -197,58 +197,58 @@ am_isolation_tests_OBJECTS = test_main.$(OBJEXT) test_ribin.$(OBJEXT) \
 	peer_handler_debug.$(OBJEXT) test_subnet_route.$(OBJEXT)
 isolation_tests_OBJECTS = $(am_isolation_tests_OBJECTS)
 isolation_tests_LDADD = $(LDADD)
-isolation_tests_DEPENDENCIES = libbgp.a \
-	$(top_builddir)/xrl/targets/libbgpbase.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+isolation_tests_DEPENDENCIES = libbgp.la \
+	$(top_builddir)/xrl/targets/libbgpbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 isolation_tests_LDFLAGS =
 am_test_packet_OBJECTS = test_packet.$(OBJEXT)
 test_packet_OBJECTS = $(am_test_packet_OBJECTS)
 test_packet_LDADD = $(LDADD)
-test_packet_DEPENDENCIES = libbgp.a \
-	$(top_builddir)/xrl/targets/libbgpbase.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_packet_DEPENDENCIES = libbgp.la \
+	$(top_builddir)/xrl/targets/libbgpbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_packet_LDFLAGS =
 am_test_packet_coding_OBJECTS = test_packet_coding.$(OBJEXT)
 test_packet_coding_OBJECTS = $(am_test_packet_coding_OBJECTS)
 test_packet_coding_LDADD = $(LDADD)
-test_packet_coding_DEPENDENCIES = libbgp.a \
-	$(top_builddir)/xrl/targets/libbgpbase.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_packet_coding_DEPENDENCIES = libbgp.la \
+	$(top_builddir)/xrl/targets/libbgpbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_packet_coding_LDFLAGS =
 am_test_peer_data_OBJECTS = test_peer_data.$(OBJEXT)
 test_peer_data_OBJECTS = $(am_test_peer_data_OBJECTS)
 test_peer_data_LDADD = $(LDADD)
-test_peer_data_DEPENDENCIES = libbgp.a \
-	$(top_builddir)/xrl/targets/libbgpbase.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_peer_data_DEPENDENCIES = libbgp.la \
+	$(top_builddir)/xrl/targets/libbgpbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_peer_data_LDFLAGS =
 am_test_plumbing_OBJECTS = test_plumbing.$(OBJEXT) bgp.$(OBJEXT)
 test_plumbing_OBJECTS = $(am_test_plumbing_OBJECTS)
@@ -257,30 +257,30 @@ test_plumbing_LDFLAGS =
 am_update_test_OBJECTS = update_test.$(OBJEXT)
 update_test_OBJECTS = $(am_update_test_OBJECTS)
 update_test_LDADD = $(LDADD)
-update_test_DEPENDENCIES = libbgp.a \
-	$(top_builddir)/xrl/targets/libbgpbase.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+update_test_DEPENDENCIES = libbgp.la \
+	$(top_builddir)/xrl/targets/libbgpbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 update_test_LDFLAGS =
 am_xorp_bgp_OBJECTS = bgp.$(OBJEXT) main.$(OBJEXT)
 xorp_bgp_OBJECTS = $(am_xorp_bgp_OBJECTS)
 xorp_bgp_LDADD = $(LDADD)
-xorp_bgp_DEPENDENCIES = libbgp.a \
-	$(top_builddir)/xrl/targets/libbgpbase.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+xorp_bgp_DEPENDENCIES = libbgp.la \
+	$(top_builddir)/xrl/targets/libbgpbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 xorp_bgp_LDFLAGS =
 
 DEFS = @DEFS@
@@ -289,43 +289,43 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/aspath.Po $(DEPDIR)/aspath_test.Po \
-@AMDEP_TRUE@	$(DEPDIR)/attribute_manager.Po $(DEPDIR)/bgp.Po \
-@AMDEP_TRUE@	$(DEPDIR)/bgp_trie.Po $(DEPDIR)/bgp_varrw.Po \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/aspath.Plo $(DEPDIR)/aspath_test.Po \
+@AMDEP_TRUE@	$(DEPDIR)/attribute_manager.Plo $(DEPDIR)/bgp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/bgp_trie.Plo $(DEPDIR)/bgp_varrw.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/dummy_main.Po \
 @AMDEP_TRUE@	$(DEPDIR)/dummy_next_hop_resolver.Po \
-@AMDEP_TRUE@	$(DEPDIR)/dump_iterators.Po \
-@AMDEP_TRUE@	$(DEPDIR)/internal_message.Po $(DEPDIR)/iptuple.Po \
-@AMDEP_TRUE@	$(DEPDIR)/local_data.Po $(DEPDIR)/main.Po \
-@AMDEP_TRUE@	$(DEPDIR)/next_hop_resolver.Po \
-@AMDEP_TRUE@	$(DEPDIR)/notification_packet.Po \
-@AMDEP_TRUE@	$(DEPDIR)/open_packet.Po $(DEPDIR)/packet.Po \
-@AMDEP_TRUE@	$(DEPDIR)/parameter.Po $(DEPDIR)/path_attribute.Po \
-@AMDEP_TRUE@	$(DEPDIR)/peer.Po $(DEPDIR)/peer_data.Po \
-@AMDEP_TRUE@	$(DEPDIR)/peer_handler.Po \
+@AMDEP_TRUE@	$(DEPDIR)/dump_iterators.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/internal_message.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/iptuple.Plo $(DEPDIR)/local_data.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/main.Po $(DEPDIR)/next_hop_resolver.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/notification_packet.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/open_packet.Plo $(DEPDIR)/packet.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/parameter.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/path_attribute.Plo $(DEPDIR)/peer.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/peer_data.Plo $(DEPDIR)/peer_handler.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/peer_handler_debug.Po \
-@AMDEP_TRUE@	$(DEPDIR)/peer_list.Po $(DEPDIR)/plumbing.Po \
-@AMDEP_TRUE@	$(DEPDIR)/process_watch.Po \
-@AMDEP_TRUE@	$(DEPDIR)/profile_vars.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rib_ipc_handler.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_queue.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_base.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_cache.Po \
+@AMDEP_TRUE@	$(DEPDIR)/peer_list.Plo $(DEPDIR)/plumbing.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/process_watch.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/profile_vars.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rib_ipc_handler.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_queue.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_base.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_cache.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/route_table_debug.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_decision.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_deletion.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_dump.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_fanout.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_filter.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_nhlookup.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_policy.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_policy_im.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_policy_sm.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_reader.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_ribin.Po \
-@AMDEP_TRUE@	$(DEPDIR)/route_table_ribout.Po $(DEPDIR)/socket.Po \
-@AMDEP_TRUE@	$(DEPDIR)/subnet_route.Po $(DEPDIR)/test_cache.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_decision.Po \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_decision.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_deletion.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_dump.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_fanout.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_filter.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_nhlookup.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_policy.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_policy_im.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_policy_sm.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_reader.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_ribin.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/route_table_ribout.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/socket.Plo $(DEPDIR)/subnet_route.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/test_cache.Po $(DEPDIR)/test_decision.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_deletion.Po $(DEPDIR)/test_dump.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_fanout.Po $(DEPDIR)/test_filter.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_main.Po \
@@ -336,21 +336,27 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_plumbing.Po $(DEPDIR)/test_ribin.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_ribout.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_subnet_route.Po \
-@AMDEP_TRUE@	$(DEPDIR)/update_attrib.Po \
-@AMDEP_TRUE@	$(DEPDIR)/update_packet.Po $(DEPDIR)/update_test.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_target.Po
+@AMDEP_TRUE@	$(DEPDIR)/update_attrib.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/update_packet.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/update_test.Po $(DEPDIR)/xrl_target.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) \
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libbgp_la_SOURCES) $(aspath_test_SOURCES) \
 	$(isolation_tests_SOURCES) $(test_packet_SOURCES) \
 	$(test_packet_coding_SOURCES) $(test_peer_data_SOURCES) \
 	$(test_plumbing_SOURCES) $(update_test_SOURCES) \
@@ -362,12 +368,21 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) $(isolation_tests_SOURCES) $(test_packet_SOURCES) $(test_packet_coding_SOURCES) $(test_peer_data_SOURCES) $(test_plumbing_SOURCES) $(update_test_SOURCES) $(xorp_bgp_SOURCES)
+SOURCES = $(libbgp_la_SOURCES) $(aspath_test_SOURCES) $(isolation_tests_SOURCES) $(test_packet_SOURCES) $(test_packet_coding_SOURCES) $(test_peer_data_SOURCES) $(test_plumbing_SOURCES) $(update_test_SOURCES) $(xorp_bgp_SOURCES)
 
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .cc .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  bgp/Makefile
@@ -376,24 +391,21 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libbgp.a: $(libbgp_a_OBJECTS) $(libbgp_a_DEPENDENCIES) 
-	-rm -f libbgp.a
-	$(libbgp_a_AR) libbgp.a $(libbgp_a_OBJECTS) $(libbgp_a_LIBADD)
-	$(RANLIB) libbgp.a
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+libbgp.la: $(libbgp_la_OBJECTS) $(libbgp_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libbgp_la_LDFLAGS) $(libbgp_la_OBJECTS) $(libbgp_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
+	     || test -f $$p1 \
 	  ; then \
 	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
 	  else :; fi; \
 	done
 
@@ -441,52 +453,52 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/aspath.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/aspath.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/aspath_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/attribute_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/attribute_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_trie.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_varrw.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_trie.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bgp_varrw.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_next_hop_resolver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dump_iterators.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/internal_message.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/iptuple.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/local_data.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dump_iterators.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/internal_message.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/iptuple.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/local_data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/next_hop_resolver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/notification_packet.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/open_packet.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parameter.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/path_attribute.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_data.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_handler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/next_hop_resolver.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/notification_packet.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/open_packet.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parameter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/path_attribute.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_data.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_handler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_handler_debug.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_list.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/plumbing.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/process_watch.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile_vars.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_ipc_handler.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_queue.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_base.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_cache.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_list.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/plumbing.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/process_watch.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile_vars.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_ipc_handler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_queue.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_base.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_debug.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_decision.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_deletion.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_dump.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_fanout.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_filter.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_nhlookup.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_policy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_policy_im.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_policy_sm.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_reader.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_ribin.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_ribout.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/subnet_route.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_decision.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_deletion.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_dump.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_fanout.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_filter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_nhlookup.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_policy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_policy_im.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_policy_sm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_reader.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_ribin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route_table_ribout.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/socket.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/subnet_route.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_decision.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_deletion.Po@am__quote@
@@ -503,10 +515,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ribin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ribout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_subnet_route.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_attrib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_packet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_attrib.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_packet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -522,6 +534,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -709,7 +727,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 installdirs: installdirs-recursive
 installdirs-am:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -739,13 +757,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-recursive
 
@@ -771,28 +789,29 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-recursive
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS clean-recursive distclean \
-	distclean-compile distclean-depend distclean-generic \
-	distclean-recursive distclean-tags distdir dvi dvi-am \
-	dvi-recursive info info-am info-recursive install install-am \
-	install-binPROGRAMS install-data install-data-am \
+	clean clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS clean-recursive \
+	distclean distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-recursive distclean-tags distdir \
+	dvi dvi-am dvi-recursive info info-am info-recursive install \
+	install-am install-binPROGRAMS install-data install-data-am \
 	install-data-recursive install-exec install-exec-am \
 	install-exec-recursive install-info install-info-am \
 	install-info-recursive install-man install-recursive \
 	install-strip installcheck installcheck-am installdirs \
 	installdirs-am installdirs-recursive maintainer-clean \
 	maintainer-clean-generic maintainer-clean-recursive mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-recursive \
-	tags tags-recursive uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	mostlyclean-recursive tags tags-recursive uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-info-recursive uninstall-recursive
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

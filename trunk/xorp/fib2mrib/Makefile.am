@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fib2mrib/Makefile.am,v 1.4 2004/04/15 13:17:36 pavlin Exp $
+## $XORP: xorp/fib2mrib/Makefile.am,v 1.5 2004/06/02 18:28:16 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -19,36 +19,36 @@ noinst_PROGRAMS  =
 noinst_SCRIPTS	 = $(test_scripts)
 
 # -- No-install Libraries
-noinst_LIBRARIES = libfib2mrib.a
+noinst_LTLIBRARIES = libfib2mrib.la
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS		 = 
-LDADD		 = $(noinst_LIBRARIES)
+LDADD		 = $(noinst_LTLIBRARIES)
 ### XRL libraries
-LDADD		+= $(top_builddir)/xrl/targets/libfib2mribbase.a
+LDADD		+= $(top_builddir)/xrl/targets/libfib2mribbase.la
 ### XORP misc libraries
-LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libftixif.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibxif.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
-LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
-LDADD		+= $(top_builddir)/libxipc/libxipc.a
-LDADD		+= $(top_builddir)/libcomm/libcomm.a
-LDADD		+= $(top_builddir)/libxorp/libxorp.a
+LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libftixif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+LDADD		+= $(top_builddir)/libxipc/libxipc.la
+LDADD		+= $(top_builddir)/libcomm/libcomm.la
+LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 xorp_fib2mrib_SOURCES		 = xorp_fib2mrib.cc
 
 # -- Library Sources
-libfib2mrib_a_SOURCES		 = fib2mrib_module.h
-libfib2mrib_a_SOURCES		+= fib2mrib_node.hh
-libfib2mrib_a_SOURCES		+= xrl_fib2mrib_node.hh
+libfib2mrib_la_SOURCES		 = fib2mrib_module.h
+libfib2mrib_la_SOURCES		+= fib2mrib_node.hh
+libfib2mrib_la_SOURCES		+= xrl_fib2mrib_node.hh
 
-libfib2mrib_a_SOURCES		+= fib2mrib_node.cc
-libfib2mrib_a_SOURCES		+= xrl_fib2mrib_node.cc
+libfib2mrib_la_SOURCES		+= fib2mrib_node.cc
+libfib2mrib_la_SOURCES		+= xrl_fib2mrib_node.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = command_fib2mrib

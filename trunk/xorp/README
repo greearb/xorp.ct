@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.26 2004/06/21 22:46:37 pavlin Exp $
+# $XORP: xorp/README,v 1.27 2004/09/15 18:39:52 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -60,11 +60,13 @@ Supported platforms:
     - gmake (GNU make) version 3.79.1
     - autoconf version 2.53
     - automake version 1.5
+    - libtool version 1.3.4
     - flex version 2.5.4
     - yacc version default one that comes with the above OS
 
   * Linux RedHat-7.3 (kernel 2.4-20) with:
     - gcc/g++ version 2.96 (default)
+    - libtool version 1.4
 
 See ${XORP}/BUILD_NOTES for the list of additional platforms this
 release of XORP may compile or work on.

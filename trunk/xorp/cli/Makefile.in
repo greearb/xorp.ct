@@ -65,18 +65,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -94,9 +99,6 @@ snmpd2 = @snmpd2@
 
 SUBDIRS = libtecla . tools
 
-# -- Real Programs
-bin_PROGRAMS = 
-
 # -- Test Programs
 TESTS = 
 
@@ -104,18 +106,18 @@ TESTS =
 noinst_PROGRAMS = test_cli
 
 # -- No-install Libraries
-noinst_LIBRARIES = libcli.a
+noinst_LTLIBRARIES = libcli.la
 
 # -- Libraries and library flags to link the binary programs
 ### CLI libraries
 ### XORP misc libraries
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.la $(top_builddir)/xrl/targets/libclibase.la $(top_builddir)/libproto/libproto.la $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 test_cli_SOURCES = test_cli.cc
 
 # -- Library Sources
-libcli_a_SOURCES = cli_module.h cli_client.hh cli_command.hh cli_command_pipe.hh cli_node.hh cli_private.hh xrl_cli_node.hh cli_client.cc cli_command.cc cli_command_pipe.cc cli_node.cc cli_node_internal_commands.cc cli_node_net.cc xrl_cli_node.cc
+libcli_la_SOURCES = cli_module.h cli_client.hh cli_command.hh cli_command_pipe.hh cli_node.hh cli_private.hh xrl_cli_node.hh cli_client.cc cli_command.cc cli_command_pipe.cc cli_node.cc cli_node_internal_commands.cc cli_node_net.cc xrl_cli_node.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = libtecla
@@ -127,30 +129,29 @@ subdir = cli
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 
-libcli_a_AR = $(AR) cru
-libcli_a_LIBADD =
-am_libcli_a_OBJECTS = cli_client.$(OBJEXT) cli_command.$(OBJEXT) \
-	cli_command_pipe.$(OBJEXT) cli_node.$(OBJEXT) \
-	cli_node_internal_commands.$(OBJEXT) cli_node_net.$(OBJEXT) \
-	xrl_cli_node.$(OBJEXT)
-libcli_a_OBJECTS = $(am_libcli_a_OBJECTS)
-bin_PROGRAMS =
+libcli_la_LDFLAGS =
+libcli_la_LIBADD =
+am_libcli_la_OBJECTS = cli_client.lo cli_command.lo cli_command_pipe.lo \
+	cli_node.lo cli_node_internal_commands.lo cli_node_net.lo \
+	xrl_cli_node.lo
+libcli_la_OBJECTS = $(am_libcli_la_OBJECTS)
 noinst_PROGRAMS = test_cli$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+PROGRAMS = $(noinst_PROGRAMS)
 
 am_test_cli_OBJECTS = test_cli.$(OBJEXT)
 test_cli_OBJECTS = $(am_test_cli_OBJECTS)
 test_cli_LDADD = $(LDADD)
-test_cli_DEPENDENCIES = libcli.a $(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
-	$(top_builddir)/xrl/targets/libclibase.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_cli_DEPENDENCIES = libcli.la \
+	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
+	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_cli_LDFLAGS =
 
 DEFS = @DEFS@
@@ -159,23 +160,31 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/cli_client.Po $(DEPDIR)/cli_command.Po \
-@AMDEP_TRUE@	$(DEPDIR)/cli_command_pipe.Po $(DEPDIR)/cli_node.Po \
-@AMDEP_TRUE@	$(DEPDIR)/cli_node_internal_commands.Po \
-@AMDEP_TRUE@	$(DEPDIR)/cli_node_net.Po $(DEPDIR)/test_cli.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_cli_node.Po
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/cli_client.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/cli_command.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/cli_command_pipe.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/cli_node.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/cli_node_internal_commands.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/cli_node_net.Plo $(DEPDIR)/test_cli.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_cli_node.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libcli_a_SOURCES) $(test_cli_SOURCES)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libcli_la_SOURCES) $(test_cli_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -183,12 +192,21 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libcli_a_SOURCES) $(test_cli_SOURCES)
+SOURCES = $(libcli_la_SOURCES) $(test_cli_SOURCES)
 
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .cc .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  cli/Makefile
@@ -197,37 +215,10 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libcli.a: $(libcli_a_OBJECTS) $(libcli_a_DEPENDENCIES) 
-	-rm -f libcli.a
-	$(libcli_a_AR) libcli.a $(libcli_a_OBJECTS) $(libcli_a_LIBADD)
-	$(RANLIB) libcli.a
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	  ; then \
-	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
-	  else :; fi; \
-	done
-
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(bindir)/$$f; \
-	done
-
-clean-binPROGRAMS:
-	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+libcli.la: $(libcli_la_OBJECTS) $(libcli_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libcli_la_LDFLAGS) $(libcli_la_OBJECTS) $(libcli_la_LIBADD) $(LIBS)
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
@@ -241,14 +232,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_command.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_command_pipe.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_node.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_node_internal_commands.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_node_net.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_client.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_command.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_command_pipe.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_node.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_node_internal_commands.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/cli_node_net.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_cli.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_cli_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_cli_node.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -264,6 +255,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -451,10 +448,9 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 installdirs: installdirs-recursive
 installdirs-am:
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
 
 install: install-recursive
 install-exec: install-exec-recursive
@@ -481,13 +477,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
 	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-recursive
 
@@ -499,7 +495,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am:
 
 install-info: install-info-recursive
 
@@ -513,28 +509,28 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-recursive
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
-uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+uninstall-am: uninstall-info-am
 
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean clean-generic clean-libtool clean-noinstLTLIBRARIES \
 	clean-noinstPROGRAMS clean-recursive distclean \
 	distclean-compile distclean-depend distclean-generic \
-	distclean-recursive distclean-tags distdir dvi dvi-am \
-	dvi-recursive info info-am info-recursive install install-am \
-	install-binPROGRAMS install-data install-data-am \
-	install-data-recursive install-exec install-exec-am \
-	install-exec-recursive install-info install-info-am \
-	install-info-recursive install-man install-recursive \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am installdirs-recursive maintainer-clean \
-	maintainer-clean-generic maintainer-clean-recursive mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-recursive \
-	tags tags-recursive uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am \
+	distclean-libtool distclean-recursive distclean-tags distdir \
+	dvi dvi-am dvi-recursive info info-am info-recursive install \
+	install-am install-data install-data-am install-data-recursive \
+	install-exec install-exec-am install-exec-recursive \
+	install-info install-info-am install-info-recursive install-man \
+	install-recursive install-strip installcheck installcheck-am \
+	installdirs installdirs-am installdirs-recursive \
+	maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
+	tags tags-recursive uninstall uninstall-am uninstall-info-am \
 	uninstall-info-recursive uninstall-recursive
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mibs/snmpdscripts/Makefile.am,v 1.1 2003/08/01 23:38:57 pavlin Exp $
+## $XORP: xorp/mibs/snmpdscripts/Makefile.am,v 1.2 2003/08/27 01:35:05 jcardona Exp $
 ##
 
 # Redefine the bin installation directory
@@ -20,10 +20,10 @@ TESTS		 =
 noinst_PROGRAMS	 = 
 
 # -- No-install Libraries
-noinst_LIBRARIES = 
+noinst_LTLIBRARIES = 
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LIBRARIES)
+LDADD		 = $(noinst_LTLIBRARIES)
 
 # -- Program Sources
 

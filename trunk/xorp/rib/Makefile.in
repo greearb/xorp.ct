@@ -61,18 +61,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -104,17 +109,17 @@ TESTS = test_rib_direct.sh test_rib_xrls.sh test_redist test_register test_delet
 noinst_PROGRAMS = add_route main_routemap test_deletion test_redist test_register test_register_xrls test_rib_direct test_rib_xrls
 
 # -- No-install Libraries
-noinst_LIBRARIES = librib.a libribxrl.a
+noinst_LTLIBRARIES = librib.la libribxrl.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libredist4xif.a $(top_builddir)/xrl/interfaces/libredist6xif.a $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a $(top_builddir)/xrl/interfaces/libpolicyredist4xif.a $(top_builddir)/xrl/interfaces/libpolicyredist6xif.a $(top_builddir)/xrl/interfaces/libprofileclientxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/interfaces/libftixif.la $(top_builddir)/xrl/interfaces/libribclientxif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libredist4xif.la $(top_builddir)/xrl/interfaces/libredist6xif.la $(top_builddir)/xrl/interfaces/libredisttransaction4xif.la $(top_builddir)/xrl/interfaces/libredisttransaction6xif.la $(top_builddir)/xrl/interfaces/libpolicyredist4xif.la $(top_builddir)/xrl/interfaces/libpolicyredist6xif.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/xrl/targets/libribbase.la $(top_builddir)/libxipc/libfinder.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libproto/libproto.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 xorp_rib_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh main_rib.cc
 xorp_rib_LDADD = $(LDADD)
 
 add_route_SOURCES = add_route.cc
-add_route_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a
+add_route_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.la
 
 main_routemap_SOURCES = rib_module.h protocol.hh route.hh routemap.hh main_routemap.cc routemap.cc
 main_routemap_LDADD = $(LDADD)
@@ -123,24 +128,24 @@ test_deletion_SOURCES = rib_module.h rt_tab_base.hh rt_tab_expect.hh rt_tab_orig
 test_deletion_LDADD = $(LDADD)
 
 test_redist_SOURCES = test_redist.cc
-test_redist_LDADD = ./librib.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+test_redist_LDADD = ./librib.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libxorp/libxorp.la
 
 test_register_SOURCES = rib_module.h dummy_register_server.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc test_register.cc
 test_register_LDADD = $(LDADD)
 
 test_register_xrls_SOURCES = rib_module.h parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh test_register_xrls.cc
-test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribclientbase.a
+test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/targets/libribclientbase.la
 
 test_rib_direct_SOURCES = rib_module.h dummy_register_server.hh parser.hh parser_direct_cmds.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc parser.cc test_rib_direct.cc
 test_rib_direct_LDADD = $(LDADD)
 
 test_rib_xrls_SOURCES = rib_module.h dummy_register_server.hh parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc parser.cc test_rib_xrls.cc
-test_rib_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a
+test_rib_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.la
 
 # -- Library Sources
-librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh profile_vars.hh profile_vars.cc protocol.cc register_server.cc rib.cc rib_manager.cc rib_varrw.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_pol_conn.cc rt_tab_pol_redist.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc xrl_target.cc
+librib_la_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_manager.hh rib_varrw.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_pol_conn.hh rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh profile_vars.hh profile_vars.cc protocol.cc register_server.cc rib.cc rib_manager.cc rib_varrw.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_pol_conn.cc rt_tab_pol_redist.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc xrl_target.cc
 
-libribxrl_a_SOURCES = redist_xrl.hh redist_xrl.cc
+libribxrl_la_SOURCES = redist_xrl.hh redist_xrl.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = commands test_rib_direct.sh.in test_rib_xrls.sh.in xrl_shell_funcs.sh
@@ -152,24 +157,21 @@ subdir = rib
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 
-librib_a_AR = $(AR) cru
-librib_a_LIBADD =
-am_librib_a_OBJECTS = profile_vars.$(OBJEXT) protocol.$(OBJEXT) \
-	register_server.$(OBJEXT) rib.$(OBJEXT) rib_manager.$(OBJEXT) \
-	rib_varrw.$(OBJEXT) rt_tab_base.$(OBJEXT) \
-	rt_tab_deletion.$(OBJEXT) rt_tab_extint.$(OBJEXT) \
-	rt_tab_log.$(OBJEXT) rt_tab_merged.$(OBJEXT) \
-	rt_tab_origin.$(OBJEXT) rt_tab_pol_conn.$(OBJEXT) \
-	rt_tab_pol_redist.$(OBJEXT) rt_tab_redist.$(OBJEXT) \
-	rt_tab_register.$(OBJEXT) vifmanager.$(OBJEXT) \
-	xrl_target.$(OBJEXT)
-librib_a_OBJECTS = $(am_librib_a_OBJECTS)
-libribxrl_a_AR = $(AR) cru
-libribxrl_a_LIBADD =
-am_libribxrl_a_OBJECTS = redist_xrl.$(OBJEXT)
-libribxrl_a_OBJECTS = $(am_libribxrl_a_OBJECTS)
+librib_la_LDFLAGS =
+librib_la_LIBADD =
+am_librib_la_OBJECTS = profile_vars.lo protocol.lo register_server.lo \
+	rib.lo rib_manager.lo rib_varrw.lo rt_tab_base.lo \
+	rt_tab_deletion.lo rt_tab_extint.lo rt_tab_log.lo \
+	rt_tab_merged.lo rt_tab_origin.lo rt_tab_pol_conn.lo \
+	rt_tab_pol_redist.lo rt_tab_redist.lo rt_tab_register.lo \
+	vifmanager.lo xrl_target.lo
+librib_la_OBJECTS = $(am_librib_la_OBJECTS)
+libribxrl_la_LDFLAGS =
+libribxrl_la_LIBADD =
+am_libribxrl_la_OBJECTS = redist_xrl.lo
+libribxrl_la_OBJECTS = $(am_libribxrl_la_OBJECTS)
 bin_PROGRAMS = xorp_rib$(EXEEXT)
 noinst_PROGRAMS = add_route$(EXEEXT) main_routemap$(EXEEXT) \
 	test_deletion$(EXEEXT) test_redist$(EXEEXT) \
@@ -179,218 +181,218 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_add_route_OBJECTS = add_route.$(OBJEXT)
 add_route_OBJECTS = $(am_add_route_OBJECTS)
-add_route_DEPENDENCIES = librib.a libribxrl.a \
-	$(top_builddir)/libfeaclient/libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/xrl/targets/libribbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a
+add_route_DEPENDENCIES = librib.la libribxrl.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libftixif.la \
+	$(top_builddir)/xrl/interfaces/libribclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libribbase.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la
 add_route_LDFLAGS =
 am_main_routemap_OBJECTS = main_routemap.$(OBJEXT) routemap.$(OBJEXT)
 main_routemap_OBJECTS = $(am_main_routemap_OBJECTS)
-main_routemap_DEPENDENCIES = librib.a libribxrl.a \
-	$(top_builddir)/libfeaclient/libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/xrl/targets/libribbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a
+main_routemap_DEPENDENCIES = librib.la libribxrl.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libftixif.la \
+	$(top_builddir)/xrl/interfaces/libribclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libribbase.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxorp/libxorp.la
 main_routemap_LDFLAGS =
 am_test_deletion_OBJECTS = rt_tab_expect.$(OBJEXT) \
 	test_deletion.$(OBJEXT)
 test_deletion_OBJECTS = $(am_test_deletion_OBJECTS)
-test_deletion_DEPENDENCIES = librib.a libribxrl.a \
-	$(top_builddir)/libfeaclient/libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/xrl/targets/libribbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_deletion_DEPENDENCIES = librib.la libribxrl.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libftixif.la \
+	$(top_builddir)/xrl/interfaces/libribclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libribbase.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_deletion_LDFLAGS =
 am_test_redist_OBJECTS = test_redist.$(OBJEXT)
 test_redist_OBJECTS = $(am_test_redist_OBJECTS)
-test_redist_DEPENDENCIES = ./librib.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_redist_DEPENDENCIES = ./librib.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_redist_LDFLAGS =
 am_test_register_OBJECTS = dummy_register_server.$(OBJEXT) \
 	test_register.$(OBJEXT)
 test_register_OBJECTS = $(am_test_register_OBJECTS)
-test_register_DEPENDENCIES = librib.a libribxrl.a \
-	$(top_builddir)/libfeaclient/libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/xrl/targets/libribbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_register_DEPENDENCIES = librib.la libribxrl.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libftixif.la \
+	$(top_builddir)/xrl/interfaces/libribclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libribbase.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_register_LDFLAGS =
 am_test_register_xrls_OBJECTS = test_register_xrls.$(OBJEXT)
 test_register_xrls_OBJECTS = $(am_test_register_xrls_OBJECTS)
-test_register_xrls_DEPENDENCIES = librib.a libribxrl.a \
-	$(top_builddir)/libfeaclient/libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/xrl/targets/libribbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/xrl/targets/libribclientbase.a
+test_register_xrls_DEPENDENCIES = librib.la libribxrl.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libftixif.la \
+	$(top_builddir)/xrl/interfaces/libribclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libribbase.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/targets/libribclientbase.la
 test_register_xrls_LDFLAGS =
 am_test_rib_direct_OBJECTS = dummy_register_server.$(OBJEXT) \
 	parser.$(OBJEXT) test_rib_direct.$(OBJEXT)
 test_rib_direct_OBJECTS = $(am_test_rib_direct_OBJECTS)
-test_rib_direct_DEPENDENCIES = librib.a libribxrl.a \
-	$(top_builddir)/libfeaclient/libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/xrl/targets/libribbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_rib_direct_DEPENDENCIES = librib.la libribxrl.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libftixif.la \
+	$(top_builddir)/xrl/interfaces/libribclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libribbase.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_rib_direct_LDFLAGS =
 am_test_rib_xrls_OBJECTS = dummy_register_server.$(OBJEXT) \
 	parser.$(OBJEXT) test_rib_xrls.$(OBJEXT)
 test_rib_xrls_OBJECTS = $(am_test_rib_xrls_OBJECTS)
-test_rib_xrls_DEPENDENCIES = librib.a libribxrl.a \
-	$(top_builddir)/libfeaclient/libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/xrl/targets/libribbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a
+test_rib_xrls_DEPENDENCIES = librib.la libribxrl.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libftixif.la \
+	$(top_builddir)/xrl/interfaces/libribclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libribbase.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la
 test_rib_xrls_LDFLAGS =
 am_xorp_rib_OBJECTS = main_rib.$(OBJEXT)
 xorp_rib_OBJECTS = $(am_xorp_rib_OBJECTS)
-xorp_rib_DEPENDENCIES = librib.a libribxrl.a \
-	$(top_builddir)/libfeaclient/libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/xrl/targets/libribbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/policy/backend/libpolicybackend.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a
+xorp_rib_DEPENDENCIES = librib.la libribxrl.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libftixif.la \
+	$(top_builddir)/xrl/interfaces/libribclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libribbase.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxorp/libxorp.la
 xorp_rib_LDFLAGS =
 
 DEFS = @DEFS@
@@ -402,38 +404,45 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/add_route.Po \
 @AMDEP_TRUE@	$(DEPDIR)/dummy_register_server.Po \
 @AMDEP_TRUE@	$(DEPDIR)/main_rib.Po $(DEPDIR)/main_routemap.Po \
-@AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/profile_vars.Po \
-@AMDEP_TRUE@	$(DEPDIR)/protocol.Po $(DEPDIR)/redist_xrl.Po \
-@AMDEP_TRUE@	$(DEPDIR)/register_server.Po $(DEPDIR)/rib.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rib_manager.Po $(DEPDIR)/rib_varrw.Po \
-@AMDEP_TRUE@	$(DEPDIR)/routemap.Po $(DEPDIR)/rt_tab_base.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_deletion.Po \
+@AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/profile_vars.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/protocol.Plo $(DEPDIR)/redist_xrl.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/register_server.Plo $(DEPDIR)/rib.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rib_manager.Plo $(DEPDIR)/rib_varrw.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/routemap.Po $(DEPDIR)/rt_tab_base.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_deletion.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_expect.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_extint.Po $(DEPDIR)/rt_tab_log.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_merged.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_origin.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_pol_conn.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_pol_redist.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_redist.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_register.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_extint.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_log.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_merged.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_origin.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_pol_conn.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_pol_redist.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_redist.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_register.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/test_deletion.Po $(DEPDIR)/test_redist.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_register.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_register_xrls.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_rib_direct.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_rib_xrls.Po $(DEPDIR)/vifmanager.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_target.Po
+@AMDEP_TRUE@	$(DEPDIR)/test_rib_xrls.Po $(DEPDIR)/vifmanager.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_target.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(librib_a_SOURCES) $(libribxrl_a_SOURCES) \
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(librib_la_SOURCES) $(libribxrl_la_SOURCES) \
 	$(add_route_SOURCES) $(main_routemap_SOURCES) \
 	$(test_deletion_SOURCES) $(test_redist_SOURCES) \
 	$(test_register_SOURCES) $(test_register_xrls_SOURCES) \
@@ -446,12 +455,21 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(librib_a_SOURCES) $(libribxrl_a_SOURCES) $(add_route_SOURCES) $(main_routemap_SOURCES) $(test_deletion_SOURCES) $(test_redist_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
+SOURCES = $(librib_la_SOURCES) $(libribxrl_la_SOURCES) $(add_route_SOURCES) $(main_routemap_SOURCES) $(test_deletion_SOURCES) $(test_redist_SOURCES) $(test_register_SOURCES) $(test_register_xrls_SOURCES) $(test_rib_direct_SOURCES) $(test_rib_xrls_SOURCES) $(xorp_rib_SOURCES)
 
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .cc .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  rib/Makefile
@@ -460,28 +478,23 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-librib.a: $(librib_a_OBJECTS) $(librib_a_DEPENDENCIES) 
-	-rm -f librib.a
-	$(librib_a_AR) librib.a $(librib_a_OBJECTS) $(librib_a_LIBADD)
-	$(RANLIB) librib.a
-libribxrl.a: $(libribxrl_a_OBJECTS) $(libribxrl_a_DEPENDENCIES) 
-	-rm -f libribxrl.a
-	$(libribxrl_a_AR) libribxrl.a $(libribxrl_a_OBJECTS) $(libribxrl_a_LIBADD)
-	$(RANLIB) libribxrl.a
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+librib.la: $(librib_la_OBJECTS) $(librib_la_DEPENDENCIES) 
+	$(CXXLINK)  $(librib_la_LDFLAGS) $(librib_la_OBJECTS) $(librib_la_LIBADD) $(LIBS)
+libribxrl.la: $(libribxrl_la_OBJECTS) $(libribxrl_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libribxrl_la_LDFLAGS) $(libribxrl_la_OBJECTS) $(libribxrl_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
+	     || test -f $$p1 \
 	  ; then \
 	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
 	  else :; fi; \
 	done
 
@@ -537,33 +550,33 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_rib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_routemap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parser.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile_vars.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/protocol.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist_xrl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_server.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_varrw.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile_vars.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/protocol.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/redist_xrl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_server.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_varrw.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/routemap.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_base.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_deletion.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_base.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_deletion.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_expect.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_extint.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_log.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_merged.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_origin.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_pol_conn.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_pol_redist.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_redist.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_register.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_extint.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_log.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_merged.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_origin.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_pol_conn.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_pol_redist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_redist.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_register.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_deletion.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_redist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_register.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_register_xrls.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rib_direct.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rib_xrls.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vifmanager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vifmanager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -579,6 +592,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -766,7 +785,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 installdirs: installdirs-recursive
 installdirs-am:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -796,13 +815,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-recursive
 
@@ -828,28 +847,29 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-recursive
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS clean-recursive distclean \
-	distclean-compile distclean-depend distclean-generic \
-	distclean-recursive distclean-tags distdir dvi dvi-am \
-	dvi-recursive info info-am info-recursive install install-am \
-	install-binPROGRAMS install-data install-data-am \
+	clean clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS clean-recursive \
+	distclean distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-recursive distclean-tags distdir \
+	dvi dvi-am dvi-recursive info info-am info-recursive install \
+	install-am install-binPROGRAMS install-data install-data-am \
 	install-data-recursive install-exec install-exec-am \
 	install-exec-recursive install-info install-info-am \
 	install-info-recursive install-man install-recursive \
 	install-strip installcheck installcheck-am installdirs \
 	installdirs-am installdirs-recursive maintainer-clean \
 	maintainer-clean-generic maintainer-clean-recursive mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-recursive \
-	tags tags-recursive uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	mostlyclean-recursive tags tags-recursive uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-info-recursive uninstall-recursive
 
 

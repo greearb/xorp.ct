@@ -63,18 +63,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -100,16 +105,16 @@ SUBDIRS = common backend . test
 bin_PROGRAMS = xorp_policy
 
 # -- No-install Libraries
-noinst_LIBRARIES = libpolicy.a
+noinst_LTLIBRARIES = libpolicy.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) ./common/libpolicycommon.a $(top_builddir)/xrl/targets/libpolicybase.a $(top_builddir)/xrl/interfaces/libpolicybackendxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LTLIBRARIES) ./common/libpolicycommon.la $(top_builddir)/xrl/targets/libpolicybase.la $(top_builddir)/xrl/interfaces/libpolicybackendxif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # XORP Policy process
 xorp_policy_SOURCES = xorp_policy.cc policy_target.hh policy_target.cc
 
 # Policy library
-libpolicy_a_SOURCES = policy_module.h code.hh code_generator.hh code_list.hh configuration.hh dependancy.hh export_code_generator.hh filter_manager.hh filter_manager_base.hh node.hh node_base.hh parser.hh policy_list.hh policy_map.hh policy_parser.hh policy_statement.hh process_watch.hh process_watch_base.hh pw_notifier.hh semantic_varrw.hh set_map.hh source_match_code_generator.hh term.hh var_map.hh visitor.hh visitor_semantic.hh visitor_setdep.hh xrl_target.hh code.cc code_generator.cc code_list.cc configuration.cc export_code_generator.cc filter_manager.cc parser.cc policy_list.cc policy_map.cc policy_statement.cc process_watch.cc semantic_varrw.cc set_map.cc source_match_code_generator.cc term.cc var_map.cc visitor_semantic.cc visitor_setdep.cc xrl_target.cc yacc.yy_policy_parser.h yacc.yy_policy_parser.cc lex.yy_policy_parser.cc
+libpolicy_la_SOURCES = policy_module.h code.hh code_generator.hh code_list.hh configuration.hh dependancy.hh export_code_generator.hh filter_manager.hh filter_manager_base.hh node.hh node_base.hh parser.hh policy_list.hh policy_map.hh policy_parser.hh policy_statement.hh process_watch.hh process_watch_base.hh pw_notifier.hh semantic_varrw.hh set_map.hh source_match_code_generator.hh term.hh var_map.hh visitor.hh visitor_semantic.hh visitor_setdep.hh xrl_target.hh code.cc code_generator.cc code_list.cc configuration.cc export_code_generator.cc filter_manager.cc parser.cc policy_list.cc policy_map.cc policy_statement.cc process_watch.cc semantic_varrw.cc set_map.cc source_match_code_generator.cc term.cc var_map.cc visitor_semantic.cc visitor_setdep.cc xrl_target.cc yacc.yy_policy_parser.h yacc.yy_policy_parser.cc lex.yy_policy_parser.cc
 
 
 ################################################################
@@ -118,35 +123,32 @@ subdir = policy
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 
-libpolicy_a_AR = $(AR) cru
-libpolicy_a_LIBADD =
-am_libpolicy_a_OBJECTS = code.$(OBJEXT) code_generator.$(OBJEXT) \
-	code_list.$(OBJEXT) configuration.$(OBJEXT) \
-	export_code_generator.$(OBJEXT) filter_manager.$(OBJEXT) \
-	parser.$(OBJEXT) policy_list.$(OBJEXT) policy_map.$(OBJEXT) \
-	policy_statement.$(OBJEXT) process_watch.$(OBJEXT) \
-	semantic_varrw.$(OBJEXT) set_map.$(OBJEXT) \
-	source_match_code_generator.$(OBJEXT) term.$(OBJEXT) \
-	var_map.$(OBJEXT) visitor_semantic.$(OBJEXT) \
-	visitor_setdep.$(OBJEXT) xrl_target.$(OBJEXT) \
-	yacc.yy_policy_parser.$(OBJEXT) lex.yy_policy_parser.$(OBJEXT)
-libpolicy_a_OBJECTS = $(am_libpolicy_a_OBJECTS)
+libpolicy_la_LDFLAGS =
+libpolicy_la_LIBADD =
+am_libpolicy_la_OBJECTS = code.lo code_generator.lo code_list.lo \
+	configuration.lo export_code_generator.lo filter_manager.lo \
+	parser.lo policy_list.lo policy_map.lo policy_statement.lo \
+	process_watch.lo semantic_varrw.lo set_map.lo \
+	source_match_code_generator.lo term.lo var_map.lo \
+	visitor_semantic.lo visitor_setdep.lo xrl_target.lo \
+	yacc.yy_policy_parser.lo lex.yy_policy_parser.lo
+libpolicy_la_OBJECTS = $(am_libpolicy_la_OBJECTS)
 bin_PROGRAMS = xorp_policy$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_xorp_policy_OBJECTS = xorp_policy.$(OBJEXT) policy_target.$(OBJEXT)
 xorp_policy_OBJECTS = $(am_xorp_policy_OBJECTS)
 xorp_policy_LDADD = $(LDADD)
-xorp_policy_DEPENDENCIES = libpolicy.a ./common/libpolicycommon.a \
-	$(top_builddir)/xrl/targets/libpolicybase.a \
-	$(top_builddir)/xrl/interfaces/libpolicybackendxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libribxif.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+xorp_policy_DEPENDENCIES = libpolicy.la ./common/libpolicycommon.la \
+	$(top_builddir)/xrl/targets/libpolicybase.la \
+	$(top_builddir)/xrl/interfaces/libpolicybackendxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 xorp_policy_LDFLAGS =
 
 DEFS = @DEFS@
@@ -155,35 +157,41 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/code.Po $(DEPDIR)/code_generator.Po \
-@AMDEP_TRUE@	$(DEPDIR)/code_list.Po $(DEPDIR)/configuration.Po \
-@AMDEP_TRUE@	$(DEPDIR)/export_code_generator.Po \
-@AMDEP_TRUE@	$(DEPDIR)/filter_manager.Po \
-@AMDEP_TRUE@	$(DEPDIR)/lex.yy_policy_parser.Po \
-@AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/policy_list.Po \
-@AMDEP_TRUE@	$(DEPDIR)/policy_map.Po \
-@AMDEP_TRUE@	$(DEPDIR)/policy_statement.Po \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/code.Plo $(DEPDIR)/code_generator.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/code_list.Plo $(DEPDIR)/configuration.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/export_code_generator.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/filter_manager.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/lex.yy_policy_parser.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/parser.Plo $(DEPDIR)/policy_list.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/policy_map.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/policy_statement.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/policy_target.Po \
-@AMDEP_TRUE@	$(DEPDIR)/process_watch.Po \
-@AMDEP_TRUE@	$(DEPDIR)/semantic_varrw.Po $(DEPDIR)/set_map.Po \
-@AMDEP_TRUE@	$(DEPDIR)/source_match_code_generator.Po \
-@AMDEP_TRUE@	$(DEPDIR)/term.Po $(DEPDIR)/var_map.Po \
-@AMDEP_TRUE@	$(DEPDIR)/visitor_semantic.Po \
-@AMDEP_TRUE@	$(DEPDIR)/visitor_setdep.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xorp_policy.Po $(DEPDIR)/xrl_target.Po \
-@AMDEP_TRUE@	$(DEPDIR)/yacc.yy_policy_parser.Po
+@AMDEP_TRUE@	$(DEPDIR)/process_watch.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/semantic_varrw.Plo $(DEPDIR)/set_map.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/source_match_code_generator.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/term.Plo $(DEPDIR)/var_map.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/visitor_semantic.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/visitor_setdep.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_policy.Po $(DEPDIR)/xrl_target.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/yacc.yy_policy_parser.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libpolicy_a_SOURCES) $(xorp_policy_SOURCES)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libpolicy_la_SOURCES) $(xorp_policy_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -191,12 +199,21 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = Makefile.am Makefile.in
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libpolicy_a_SOURCES) $(xorp_policy_SOURCES)
+SOURCES = $(libpolicy_la_SOURCES) $(xorp_policy_SOURCES)
 
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .cc .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  policy/Makefile
@@ -205,24 +222,21 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libpolicy.a: $(libpolicy_a_OBJECTS) $(libpolicy_a_DEPENDENCIES) 
-	-rm -f libpolicy.a
-	$(libpolicy_a_AR) libpolicy.a $(libpolicy_a_OBJECTS) $(libpolicy_a_LIBADD)
-	$(RANLIB) libpolicy.a
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+libpolicy.la: $(libpolicy_la_OBJECTS) $(libpolicy_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libpolicy_la_LDFLAGS) $(libpolicy_la_OBJECTS) $(libpolicy_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
+	     || test -f $$p1 \
 	  ; then \
 	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
 	  else :; fi; \
 	done
 
@@ -246,29 +260,29 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/code.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/code_generator.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/code_list.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/configuration.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/export_code_generator.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/filter_manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lex.yy_policy_parser.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parser.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_list.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_map.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_statement.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/code.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/code_generator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/code_list.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/configuration.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/export_code_generator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/filter_manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lex.yy_policy_parser.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parser.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_list.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_map.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_statement.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_target.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/process_watch.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/semantic_varrw.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/set_map.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/source_match_code_generator.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/term.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/var_map.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/visitor_semantic.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/visitor_setdep.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/process_watch.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/semantic_varrw.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/set_map.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/source_match_code_generator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/term.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/var_map.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/visitor_semantic.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/visitor_setdep.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_policy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/yacc.yy_policy_parser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/yacc.yy_policy_parser.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -284,6 +298,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -415,7 +435,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 installdirs: installdirs-recursive
 installdirs-am:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -445,13 +465,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-recursive
 
@@ -477,16 +497,18 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-recursive
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-am clean \
-	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-recursive distclean distclean-compile distclean-depend \
-	distclean-generic distclean-recursive distclean-tags distdir \
+	clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-recursive distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-recursive distclean-tags distdir \
 	dvi dvi-am dvi-recursive info info-am info-recursive install \
 	install-am install-binPROGRAMS install-data install-data-am \
 	install-data-recursive install-exec install-exec-am \
@@ -495,9 +517,9 @@ uninstall-info: uninstall-info-recursive
 	install-strip installcheck installcheck-am installdirs \
 	installdirs-am installdirs-recursive maintainer-clean \
 	maintainer-clean-generic maintainer-clean-recursive mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-recursive \
-	tags tags-recursive uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	mostlyclean-recursive tags tags-recursive uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am \
 	uninstall-info-recursive uninstall-recursive
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.19 2004/05/04 00:14:46 pavlin Exp $
+## $XORP: xorp/cli/tools/Makefile.am,v 1.1 2004/05/05 05:10:24 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -16,10 +16,10 @@ TESTS		 =
 noinst_PROGRAMS  =
 
 # -- Libraries and library flags to link the binary programs
-send_cli_processor_xrl_LDADD	 = $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
-send_cli_processor_xrl_LDADD	+= $(top_builddir)/libxipc/libxipc.a
-send_cli_processor_xrl_LDADD	+= $(top_builddir)/libcomm/libcomm.a
-send_cli_processor_xrl_LDADD	+= $(top_builddir)/libxorp/libxorp.a
+send_cli_processor_xrl_LDADD	 = $(top_builddir)/xrl/interfaces/libcliprocessorxif.la
+send_cli_processor_xrl_LDADD	+= $(top_builddir)/libxipc/libxipc.la
+send_cli_processor_xrl_LDADD	+= $(top_builddir)/libcomm/libcomm.la
+send_cli_processor_xrl_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 send_cli_processor_xrl_SOURCES	 = send_cli_processor_xrl.cc

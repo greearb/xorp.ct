@@ -65,18 +65,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -101,10 +106,10 @@ TESTS = test_asyncio test_callback test_config_param test_heap test_ipnet test_i
 noinst_PROGRAMS = test_asyncio test_callback test_config_param test_heap test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie test_service test_test_main test_time_slice test_timer test_timeval test_trie test_types test_vif test_profile
 
 # -- No-install Libraries
-noinst_LIBRARIES = libxorp.a
+noinst_LTLIBRARIES = libxorp.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES)
+LDADD = $(noinst_LTLIBRARIES)
 
 # -- Program Sources
 test_asyncio_SOURCES = test_asyncio.cc
@@ -133,8 +138,8 @@ test_vif_SOURCES = test_vif.cc
 test_profile_SOURCES = test_profile.cc
 
 # -- Library Sources
-# libxorp_a_SOURCES += ether_compat.c
-libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh buffered_asyncio.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh clock.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh profile.hh debug.c utility.c xlog.c asyncio.cc buffered_asyncio.cc c_format.cc callback.cc clock.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc profile.cc
+# libxorp_la_SOURCES += ether_compat.c
+libxorp_la_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh buffered_asyncio.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh clock.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh profile.hh debug.c utility.c xlog.c asyncio.cc buffered_asyncio.cc c_format.cc callback.cc clock.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc profile.cc
 
 BUILT_SOURCES = callback_nodebug.hh callback_debug.hh
 
@@ -148,20 +153,17 @@ subdir = libxorp
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 
-libxorp_a_AR = $(AR) cru
-libxorp_a_LIBADD =
-am_libxorp_a_OBJECTS = debug.$(OBJEXT) utility.$(OBJEXT) xlog.$(OBJEXT) \
-	asyncio.$(OBJEXT) buffered_asyncio.$(OBJEXT) c_format.$(OBJEXT) \
-	callback.$(OBJEXT) clock.$(OBJEXT) eventloop.$(OBJEXT) \
-	exceptions.$(OBJEXT) heap.$(OBJEXT) ipv4.$(OBJEXT) \
-	ipv6.$(OBJEXT) ipvx.$(OBJEXT) mac.$(OBJEXT) nexthop.$(OBJEXT) \
-	ref_ptr.$(OBJEXT) safe_callback_obj.$(OBJEXT) \
-	selector.$(OBJEXT) service.$(OBJEXT) time_slice.$(OBJEXT) \
-	timer.$(OBJEXT) token.$(OBJEXT) transaction.$(OBJEXT) \
-	vif.$(OBJEXT) profile.$(OBJEXT)
-libxorp_a_OBJECTS = $(am_libxorp_a_OBJECTS)
+libxorp_la_LDFLAGS =
+libxorp_la_LIBADD =
+am_libxorp_la_OBJECTS = debug.lo utility.lo xlog.lo asyncio.lo \
+	buffered_asyncio.lo c_format.lo callback.lo clock.lo \
+	eventloop.lo exceptions.lo heap.lo ipv4.lo ipv6.lo ipvx.lo \
+	mac.lo nexthop.lo ref_ptr.lo safe_callback_obj.lo selector.lo \
+	service.lo time_slice.lo timer.lo token.lo transaction.lo \
+	vif.lo profile.lo
+libxorp_la_OBJECTS = $(am_libxorp_la_OBJECTS)
 bin_PROGRAMS =
 noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
 	test_config_param$(EXEEXT) test_heap$(EXEEXT) \
@@ -178,122 +180,122 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_test_asyncio_OBJECTS = test_asyncio.$(OBJEXT)
 test_asyncio_OBJECTS = $(am_test_asyncio_OBJECTS)
 test_asyncio_LDADD = $(LDADD)
-test_asyncio_DEPENDENCIES = libxorp.a
+test_asyncio_DEPENDENCIES = libxorp.la
 test_asyncio_LDFLAGS =
 am_test_callback_OBJECTS = test_callback.$(OBJEXT)
 test_callback_OBJECTS = $(am_test_callback_OBJECTS)
 test_callback_LDADD = $(LDADD)
-test_callback_DEPENDENCIES = libxorp.a
+test_callback_DEPENDENCIES = libxorp.la
 test_callback_LDFLAGS =
 am_test_config_param_OBJECTS = test_config_param.$(OBJEXT)
 test_config_param_OBJECTS = $(am_test_config_param_OBJECTS)
 test_config_param_LDADD = $(LDADD)
-test_config_param_DEPENDENCIES = libxorp.a
+test_config_param_DEPENDENCIES = libxorp.la
 test_config_param_LDFLAGS =
 am_test_heap_OBJECTS = test_heap.$(OBJEXT)
 test_heap_OBJECTS = $(am_test_heap_OBJECTS)
 test_heap_LDADD = $(LDADD)
-test_heap_DEPENDENCIES = libxorp.a
+test_heap_DEPENDENCIES = libxorp.la
 test_heap_LDFLAGS =
 am_test_ipnet_OBJECTS = test_ipnet.$(OBJEXT)
 test_ipnet_OBJECTS = $(am_test_ipnet_OBJECTS)
 test_ipnet_LDADD = $(LDADD)
-test_ipnet_DEPENDENCIES = libxorp.a
+test_ipnet_DEPENDENCIES = libxorp.la
 test_ipnet_LDFLAGS =
 am_test_ipv4_OBJECTS = test_ipv4.$(OBJEXT)
 test_ipv4_OBJECTS = $(am_test_ipv4_OBJECTS)
 test_ipv4_LDADD = $(LDADD)
-test_ipv4_DEPENDENCIES = libxorp.a
+test_ipv4_DEPENDENCIES = libxorp.la
 test_ipv4_LDFLAGS =
 am_test_ipv4net_OBJECTS = test_ipv4net.$(OBJEXT)
 test_ipv4net_OBJECTS = $(am_test_ipv4net_OBJECTS)
 test_ipv4net_LDADD = $(LDADD)
-test_ipv4net_DEPENDENCIES = libxorp.a
+test_ipv4net_DEPENDENCIES = libxorp.la
 test_ipv4net_LDFLAGS =
 am_test_ipv6_OBJECTS = test_ipv6.$(OBJEXT)
 test_ipv6_OBJECTS = $(am_test_ipv6_OBJECTS)
 test_ipv6_LDADD = $(LDADD)
-test_ipv6_DEPENDENCIES = libxorp.a
+test_ipv6_DEPENDENCIES = libxorp.la
 test_ipv6_LDFLAGS =
 am_test_ipv6net_OBJECTS = test_ipv6net.$(OBJEXT)
 test_ipv6net_OBJECTS = $(am_test_ipv6net_OBJECTS)
 test_ipv6net_LDADD = $(LDADD)
-test_ipv6net_DEPENDENCIES = libxorp.a
+test_ipv6net_DEPENDENCIES = libxorp.la
 test_ipv6net_LDFLAGS =
 am_test_ipvx_OBJECTS = test_ipvx.$(OBJEXT)
 test_ipvx_OBJECTS = $(am_test_ipvx_OBJECTS)
 test_ipvx_LDADD = $(LDADD)
-test_ipvx_DEPENDENCIES = libxorp.a
+test_ipvx_DEPENDENCIES = libxorp.la
 test_ipvx_LDFLAGS =
 am_test_ipvxnet_OBJECTS = test_ipvxnet.$(OBJEXT)
 test_ipvxnet_OBJECTS = $(am_test_ipvxnet_OBJECTS)
 test_ipvxnet_LDADD = $(LDADD)
-test_ipvxnet_DEPENDENCIES = libxorp.a
+test_ipvxnet_DEPENDENCIES = libxorp.la
 test_ipvxnet_LDFLAGS =
 am_test_mac_OBJECTS = test_mac.$(OBJEXT)
 test_mac_OBJECTS = $(am_test_mac_OBJECTS)
 test_mac_LDADD = $(LDADD)
-test_mac_DEPENDENCIES = libxorp.a
+test_mac_DEPENDENCIES = libxorp.la
 test_mac_LDFLAGS =
 am_test_observers_OBJECTS = test_observers.$(OBJEXT)
 test_observers_OBJECTS = $(am_test_observers_OBJECTS)
 test_observers_LDADD = $(LDADD)
-test_observers_DEPENDENCIES = libxorp.a
+test_observers_DEPENDENCIES = libxorp.la
 test_observers_LDFLAGS =
 am_test_profile_OBJECTS = test_profile.$(OBJEXT)
 test_profile_OBJECTS = $(am_test_profile_OBJECTS)
 test_profile_LDADD = $(LDADD)
-test_profile_DEPENDENCIES = libxorp.a
+test_profile_DEPENDENCIES = libxorp.la
 test_profile_LDFLAGS =
 am_test_ref_ptr_OBJECTS = test_ref_ptr.$(OBJEXT)
 test_ref_ptr_OBJECTS = $(am_test_ref_ptr_OBJECTS)
 test_ref_ptr_LDADD = $(LDADD)
-test_ref_ptr_DEPENDENCIES = libxorp.a
+test_ref_ptr_DEPENDENCIES = libxorp.la
 test_ref_ptr_LDFLAGS =
 am_test_ref_trie_OBJECTS = test_ref_trie.$(OBJEXT)
 test_ref_trie_OBJECTS = $(am_test_ref_trie_OBJECTS)
 test_ref_trie_LDADD = $(LDADD)
-test_ref_trie_DEPENDENCIES = libxorp.a
+test_ref_trie_DEPENDENCIES = libxorp.la
 test_ref_trie_LDFLAGS =
 am_test_service_OBJECTS = test_service.$(OBJEXT)
 test_service_OBJECTS = $(am_test_service_OBJECTS)
 test_service_LDADD = $(LDADD)
-test_service_DEPENDENCIES = libxorp.a
+test_service_DEPENDENCIES = libxorp.la
 test_service_LDFLAGS =
 am_test_test_main_OBJECTS = test_test_main.$(OBJEXT)
 test_test_main_OBJECTS = $(am_test_test_main_OBJECTS)
 test_test_main_LDADD = $(LDADD)
-test_test_main_DEPENDENCIES = libxorp.a
+test_test_main_DEPENDENCIES = libxorp.la
 test_test_main_LDFLAGS =
 am_test_time_slice_OBJECTS = test_time_slice.$(OBJEXT)
 test_time_slice_OBJECTS = $(am_test_time_slice_OBJECTS)
 test_time_slice_LDADD = $(LDADD)
-test_time_slice_DEPENDENCIES = libxorp.a
+test_time_slice_DEPENDENCIES = libxorp.la
 test_time_slice_LDFLAGS =
 am_test_timer_OBJECTS = test_timer.$(OBJEXT)
 test_timer_OBJECTS = $(am_test_timer_OBJECTS)
 test_timer_LDADD = $(LDADD)
-test_timer_DEPENDENCIES = libxorp.a
+test_timer_DEPENDENCIES = libxorp.la
 test_timer_LDFLAGS =
 am_test_timeval_OBJECTS = test_timeval.$(OBJEXT)
 test_timeval_OBJECTS = $(am_test_timeval_OBJECTS)
 test_timeval_LDADD = $(LDADD)
-test_timeval_DEPENDENCIES = libxorp.a
+test_timeval_DEPENDENCIES = libxorp.la
 test_timeval_LDFLAGS =
 am_test_trie_OBJECTS = test_trie.$(OBJEXT)
 test_trie_OBJECTS = $(am_test_trie_OBJECTS)
 test_trie_LDADD = $(LDADD)
-test_trie_DEPENDENCIES = libxorp.a
+test_trie_DEPENDENCIES = libxorp.la
 test_trie_LDFLAGS =
 am_test_types_OBJECTS = test_types.$(OBJEXT)
 test_types_OBJECTS = $(am_test_types_OBJECTS)
 test_types_LDADD = $(LDADD)
-test_types_DEPENDENCIES = libxorp.a
+test_types_DEPENDENCIES = libxorp.la
 test_types_LDFLAGS =
 am_test_vif_OBJECTS = test_vif.$(OBJEXT)
 test_vif_OBJECTS = $(am_test_vif_OBJECTS)
 test_vif_LDADD = $(LDADD)
-test_vif_DEPENDENCIES = libxorp.a
+test_vif_DEPENDENCIES = libxorp.la
 test_vif_LDFLAGS =
 
 DEFS = @DEFS@
@@ -302,16 +304,17 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/asyncio.Po \
-@AMDEP_TRUE@	$(DEPDIR)/buffered_asyncio.Po $(DEPDIR)/c_format.Po \
-@AMDEP_TRUE@	$(DEPDIR)/callback.Po $(DEPDIR)/clock.Po \
-@AMDEP_TRUE@	$(DEPDIR)/debug.Po $(DEPDIR)/eventloop.Po \
-@AMDEP_TRUE@	$(DEPDIR)/exceptions.Po $(DEPDIR)/heap.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ipv4.Po $(DEPDIR)/ipv6.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ipvx.Po $(DEPDIR)/mac.Po \
-@AMDEP_TRUE@	$(DEPDIR)/nexthop.Po $(DEPDIR)/profile.Po \
-@AMDEP_TRUE@	$(DEPDIR)/ref_ptr.Po $(DEPDIR)/safe_callback_obj.Po \
-@AMDEP_TRUE@	$(DEPDIR)/selector.Po $(DEPDIR)/service.Po \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/asyncio.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/buffered_asyncio.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/c_format.Plo $(DEPDIR)/callback.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/clock.Plo $(DEPDIR)/debug.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/eventloop.Plo $(DEPDIR)/exceptions.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/heap.Plo $(DEPDIR)/ipv4.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/ipv6.Plo $(DEPDIR)/ipvx.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mac.Plo $(DEPDIR)/nexthop.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/profile.Plo $(DEPDIR)/ref_ptr.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/safe_callback_obj.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/selector.Plo $(DEPDIR)/service.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/test_asyncio.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_callback.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_config_param.Po \
@@ -327,22 +330,28 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_time_slice.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_timer.Po $(DEPDIR)/test_timeval.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_trie.Po $(DEPDIR)/test_types.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_vif.Po $(DEPDIR)/time_slice.Po \
-@AMDEP_TRUE@	$(DEPDIR)/timer.Po $(DEPDIR)/token.Po \
-@AMDEP_TRUE@	$(DEPDIR)/transaction.Po $(DEPDIR)/utility.Po \
-@AMDEP_TRUE@	$(DEPDIR)/vif.Po $(DEPDIR)/xlog.Po
+@AMDEP_TRUE@	$(DEPDIR)/test_vif.Po $(DEPDIR)/time_slice.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/timer.Plo $(DEPDIR)/token.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/transaction.Plo $(DEPDIR)/utility.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/vif.Plo $(DEPDIR)/xlog.Plo
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
-DIST_SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) \
+DIST_SOURCES = $(libxorp_la_SOURCES) $(test_asyncio_SOURCES) \
 	$(test_callback_SOURCES) $(test_config_param_SOURCES) \
 	$(test_heap_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) \
 	$(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) \
@@ -355,13 +364,22 @@ DIST_SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) \
 	$(test_timeval_SOURCES) $(test_trie_SOURCES) \
 	$(test_types_SOURCES) $(test_vif_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_heap_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_observers_SOURCES) $(test_profile_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_service_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
+SOURCES = $(libxorp_la_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_heap_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_observers_SOURCES) $(test_profile_SOURCES) $(test_ref_ptr_SOURCES) $(test_ref_trie_SOURCES) $(test_service_SOURCES) $(test_test_main_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_timeval_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cc .o .obj
+.SUFFIXES: .c .cc .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  libxorp/Makefile
@@ -370,24 +388,21 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libxorp.a: $(libxorp_a_OBJECTS) $(libxorp_a_DEPENDENCIES) 
-	-rm -f libxorp.a
-	$(libxorp_a_AR) libxorp.a $(libxorp_a_OBJECTS) $(libxorp_a_LIBADD)
-	$(RANLIB) libxorp.a
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+libxorp.la: $(libxorp_la_OBJECTS) $(libxorp_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libxorp_la_LDFLAGS) $(libxorp_la_OBJECTS) $(libxorp_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
+	     || test -f $$p1 \
 	  ; then \
 	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
 	  else :; fi; \
 	done
 
@@ -483,25 +498,25 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/asyncio.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/buffered_asyncio.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/c_format.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/callback.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/clock.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/debug.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/eventloop.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/exceptions.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/heap.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ipv4.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ipv6.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ipvx.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mac.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/nexthop.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ref_ptr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/safe_callback_obj.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/selector.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/service.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/asyncio.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/buffered_asyncio.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/c_format.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/callback.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/clock.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/debug.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/eventloop.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/exceptions.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/heap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ipv4.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ipv6.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ipvx.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mac.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/nexthop.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ref_ptr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/safe_callback_obj.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/selector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/service.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_asyncio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_callback.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_config_param.Po@am__quote@
@@ -526,13 +541,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_trie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_types.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_vif.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/time_slice.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/timer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/token.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/transaction.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/utility.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vif.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xlog.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/time_slice.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/timer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/token.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/transaction.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/utility.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vif.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xlog.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -548,6 +563,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(COMPILE) -c `cygpath -w $<`
+
+.c.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CCDEPMODE = @CCDEPMODE@
 
 .cc.o:
@@ -561,6 +582,12 @@ CCDEPMODE = @CCDEPMODE@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -675,7 +702,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 
 installdirs:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -706,13 +733,13 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -738,21 +765,23 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am info \
+	info-am install install-am install-binPROGRAMS install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+	mostlyclean-generic mostlyclean-libtool tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 
 # If this code is commented out, please upgrade to python2.0 or above.

@@ -70,18 +70,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -122,21 +127,25 @@ TESTS_ENVIRONMENT = LD_LIBRARY_PATH="$(top_builddir)/mibs"
 # -- Compiler and pre compiler flags
 AM_CPPFLAGS = `net-snmp-config --cflags` 
 
+
 # -- Libraries and library flags to link the binary programs
+libnetsnmpxorp_so_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libxorp/libxorp.la $(top_builddir)/libcomm/libcomm.la
 
 # -Wl,--no-whole-archive must appear after the libraries, and that does not fit
 # into the standard Automake link model.  This is why we must use the LINK
 # directive
+# XXX: Depend on *.la for now; rework this to use libtool later.
 libnetsnmpxorp_so_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
-    $(LDFLAGS) -shared -fPIC -fpic -Wl,--whole-archive -o $@               \
-    $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a    \
-    $(top_builddir)/libcomm/libcomm.a -Wl,--no-whole-archive
+    $(LDFLAGS) -shared -fPIC -fpic -Wl,--whole-archive -o $@		   \
+    $(top_builddir)/libxipc/libxipc.a \
+    $(top_builddir)/libxorp/libxorp.a \
+    $(top_builddir)/libcomm/libcomm.a \
+    -Wl,--no-whole-archive
 
-libnetsnmpxorp_so_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.a  $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 
-test_xorpevents_LDADD = $(top_builddir)/libxipc/libfinder.a -lnetsnmpxorp -L${top_builddir}/mibs
+test_xorpevents_LDADD = $(top_builddir)/libxipc/libfinder.la -lnetsnmpxorp -L${top_builddir}/mibs
 
-bgp4_mib_1657_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs -lbgp4mibbase -L$(top_builddir)/xrl/targets $(top_builddir)/xrl/interfaces/libbgpxif.a
+bgp4_mib_1657_so_LDADD = -lnetsnmpxorp -L${top_builddir}/mibs -lbgp4mibbase -L$(top_builddir)/xrl/targets $(top_builddir)/xrl/interfaces/libbgpxif.la
 bgp4_mib_1657_so_LDFLAGS = -shared -fPIC -fpic 
 bgp4_mib_1657_so_DEPENDENCIES = libnetsnmpxorp.so
 
@@ -192,7 +201,7 @@ am_ospf_mib_1850_so_OBJECTS = ospf_mib_1850.$(OBJEXT)
 ospf_mib_1850_so_OBJECTS = $(am_ospf_mib_1850_so_OBJECTS)
 am_test_xorpevents_OBJECTS = test_xorpevents.$(OBJEXT)
 test_xorpevents_OBJECTS = $(am_test_xorpevents_OBJECTS)
-test_xorpevents_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a
+test_xorpevents_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.la
 test_xorpevents_LDFLAGS =
 am_xorp_if_mib_module_so_OBJECTS = xorp_if_mib_module.$(OBJEXT) \
 	xorp_if_mib_xrl_target.$(OBJEXT)
@@ -218,15 +227,21 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/xorpevents.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(bgp4_mib_1657_so_SOURCES) $(libnetsnmpxorp_so_SOURCES) \
 	$(ospf_mib_1850_so_SOURCES) $(test_xorpevents_SOURCES) \
 	$(xorp_if_mib_module_so_SOURCES)
@@ -242,7 +257,16 @@ SOURCES = $(bgp4_mib_1657_so_SOURCES) $(libnetsnmpxorp_so_SOURCES) $(ospf_mib_18
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .cc .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  mibs/Makefile
@@ -259,10 +283,11 @@ install-pkglibPROGRAMS: $(pkglib_PROGRAMS)
 	@list='$(pkglib_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
+	     || test -f $$p1 \
 	  ; then \
 	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$f; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(pkglibdir)/$$f; \
 	  else :; fi; \
 	done
 
@@ -325,6 +350,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -542,13 +573,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-noinstPROGRAMS clean-pkglibPROGRAMS \
-	mostlyclean-am
+clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
+	clean-pkglibPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-recursive
 
@@ -574,16 +605,18 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-recursive
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-info-am uninstall-pkglibPROGRAMS
 
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-generic clean-noinstPROGRAMS clean-pkglibPROGRAMS \
-	clean-recursive distclean distclean-compile distclean-depend \
-	distclean-generic distclean-recursive distclean-tags distdir \
+	clean clean-generic clean-libtool clean-noinstPROGRAMS \
+	clean-pkglibPROGRAMS clean-recursive distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-recursive distclean-tags distdir \
 	dvi dvi-am dvi-recursive info info-am info-recursive install \
 	install-am install-data install-data-am install-data-recursive \
 	install-exec install-exec-am install-exec-recursive \
@@ -592,8 +625,8 @@ uninstall-info: uninstall-info-recursive
 	installcheck installcheck-am installdirs installdirs-am \
 	installdirs-recursive maintainer-clean maintainer-clean-generic \
 	maintainer-clean-recursive mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-recursive tags tags-recursive \
-	uninstall uninstall-am uninstall-info-am \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
+	tags tags-recursive uninstall uninstall-am uninstall-info-am \
 	uninstall-info-recursive uninstall-pkglibPROGRAMS \
 	uninstall-recursive
 

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/harness/Makefile.am,v 1.13 2003/09/10 03:19:26 atanu Exp $
+## $XORP: xorp/bgp/harness/Makefile.am,v 1.14 2003/10/21 23:18:13 atanu Exp $
 ##
 
 # -- Real Programs
@@ -23,18 +23,18 @@ noinst_PROGRAMS	+= test_peer
 noinst_PROGRAMS	+= test_trie
 
 # -- No-install Libraries
-noinst_LIBRARIES =
+noinst_LTLIBRARIES =
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LIBRARIES)
-LDADD		+= $(top_builddir)/bgp/libbgp.a
-LDADD		+= $(top_builddir)/libxipc/libxipc.a
-LDADD		+= $(top_builddir)/libcomm/libcomm.a
-LDADD		+= $(top_builddir)/libxorp/libxorp.a
-LDADD		+= $(top_builddir)/xrl/targets/libtestpeerbase.a
-LDADD		+= $(top_builddir)/xrl/targets/libcoordbase.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libtestpeerxif.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libdatainxif.a
+LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		+= $(top_builddir)/bgp/libbgp.la
+LDADD		+= $(top_builddir)/libxipc/libxipc.la
+LDADD		+= $(top_builddir)/libcomm/libcomm.la
+LDADD		+= $(top_builddir)/libxorp/libxorp.la
+LDADD		+= $(top_builddir)/xrl/targets/libtestpeerbase.la
+LDADD		+= $(top_builddir)/xrl/targets/libcoordbase.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libtestpeerxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libdatainxif.la
 
 # -- Program Sources
 test_peer_SOURCES = bgppp.hh test_peer.hh bgppp.cc test_peer.cc

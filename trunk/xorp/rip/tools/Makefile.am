@@ -14,30 +14,30 @@ noinst_SCRIPTS			 = $(tool_scripts)
 show_stats_SOURCES		 = show_stats.cc
 show_stats_SOURCES		+= common.cc
 show_stats_SOURCES		+= common.hh
-show_stats_LDADD		 = $(top_builddir)/xrl/interfaces/libripxif.a
-show_stats_LDADD		+= $(top_builddir)/xrl/interfaces/libripngxif.a
+show_stats_LDADD		 = $(top_builddir)/xrl/interfaces/libripxif.la
+show_stats_LDADD		+= $(top_builddir)/xrl/interfaces/libripngxif.la
 show_stats_LDADD		+= $(LDADD)
 
 show_peer_stats_SOURCES	 	 = show_peer_stats.cc
 show_peer_stats_SOURCES		+= common.cc
 show_peer_stats_SOURCES		+= common.hh
-show_peer_stats_LDADD	 	 = $(top_builddir)/xrl/interfaces/libripxif.a
-show_peer_stats_LDADD		+= $(top_builddir)/xrl/interfaces/libripngxif.a
+show_peer_stats_LDADD	 	 = $(top_builddir)/xrl/interfaces/libripxif.la
+show_peer_stats_LDADD		+= $(top_builddir)/xrl/interfaces/libripngxif.la
 show_peer_stats_LDADD		+= $(LDADD)
 
 rip_announcer_SOURCES		 = rip_announcer.cc
-rip_announcer_LDADD		 = $(top_builddir)/rip/librip.a
-rip_announcer_LDADD		+= $(top_builddir)/libcomm/libcomm.a
-rip_announcer_LDADD		+= $(top_builddir)/libxorp/libxorp.a
+rip_announcer_LDADD		 = $(top_builddir)/rip/librip.la
+rip_announcer_LDADD		+= $(top_builddir)/libcomm/libcomm.la
+rip_announcer_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 ripng_announcer_SOURCES		 = ripng_announcer.cc
-ripng_announcer_LDADD		 = $(top_builddir)/rip/libripng.a
-ripng_announcer_LDADD		+= $(top_builddir)/libcomm/libcomm.a
-ripng_announcer_LDADD		+= $(top_builddir)/libxorp/libxorp.a
+ripng_announcer_LDADD		 = $(top_builddir)/rip/libripng.la
+ripng_announcer_LDADD		+= $(top_builddir)/libcomm/libcomm.la
+ripng_announcer_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
-LDADD				 = $(top_builddir)/libxipc/libxipc.a
-LDADD				+= $(top_builddir)/libcomm/libcomm.a
-LDADD				+= $(top_builddir)/libxorp/libxorp.a
+LDADD				 = $(top_builddir)/libxipc/libxipc.la
+LDADD				+= $(top_builddir)/libcomm/libcomm.la
+LDADD				+= $(top_builddir)/libxorp/libxorp.la
 
 ################################################################
 ##

@@ -8,43 +8,43 @@ CPPFLAGS = -I. -I../src -I/usr/local/include
 CXXFLAGS = -O -g -Wall -Woverloaded-virtual -Wcast-qual -Wuninitialized
 CFLAGS = -O -g -Wall -Woverloaded-virtual -Wcast-qual -Wuninitialized
 
-OBJS	= asbrlsa.o \
-	  asexlsa.o \
-	  avl.o \
-	  cksum.o \
-	  config.o \
-	  dbage.o \
-	  grplsa.o \
-	  hostmode.o \
-	  ifcfsm.o \
-	  lsa.o \
-	  lsalist.o \
-	  lsdb.o \
-	  monitor.o \
-	  mospf.o \
-	  nbrfsm.o \
-	  netlsa.o \
-	  opqlsa.o \
-	  ospf.o \
-	  pat.o \
-	  phyint.o \
-	  priq.o \
-	  rte.o \
-	  rtrlsa.o \
-	  spfack.o \
-	  spfarea.o \
-	  spfcalc.o \
-	  spfdd.o \
-	  spfhello.o \
-	  spfifc.o \
-	  spflood.o \
-	  spfnbr.o \
-	  spforig.o \
-	  spfutil.o \
-	  spfvl.o \
-	  summlsa.o \
-	  timer.o \
-	  md5c.o
+OBJS	= asbrlsa.lo \
+	  asexlsa.lo \
+	  avl.lo \
+	  cksum.lo \
+	  config.lo \
+	  dbage.lo \
+	  grplsa.lo \
+	  hostmode.lo \
+	  ifcfsm.lo \
+	  lsa.lo \
+	  lsalist.lo \
+	  lsdb.lo \
+	  monitor.lo \
+	  mospf.lo \
+	  nbrfsm.lo \
+	  netlsa.lo \
+	  opqlsa.lo \
+	  ospf.lo \
+	  pat.lo \
+	  phyint.lo \
+	  priq.lo \
+	  rte.lo \
+	  rtrlsa.lo \
+	  spfack.lo \
+	  spfarea.lo \
+	  spfcalc.lo \
+	  spfdd.lo \
+	  spfhello.lo \
+	  spfifc.lo \
+	  spflood.lo \
+	  spfnbr.lo \
+	  spforig.lo \
+	  spfutil.lo \
+	  spfvl.lo \
+	  summlsa.lo \
+	  timer.lo \
+	  md5c.lo
 
 install: ospfd ospfd_mon ospfd_browser
 	install ospfd ${INSTALL_DIR}

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/contrib/ospfd/xorp/Makefile.am,v 1.8 2003/08/01 02:11:49 pavlin Exp $
+## $XORP: xorp/contrib/ospfd/xorp/Makefile.am,v 1.9 2004/06/10 16:54:47 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -17,17 +17,17 @@ noinst_PROGRAMS	 = ospfd_mon
 noinst_PROGRAMS	+= ospfd_browser
 
 # -- No-install Libraries
-noinst_LIBRARIES = 
+noinst_LTLIBRARIES = 
 
 AM_CPPFLAGS  = -I$(top_builddir) -I$(srcdir)/../src
 
 # -- Libraries and library flags to link the binary programs
-LDADD	     = $(top_builddir)/contrib/ospfd/src/libospfd.a
-LDADD	    += $(top_builddir)/xrl/targets/libospfbase.a
-LDADD	    += $(top_builddir)/xrl/interfaces/libribxif.a
-LDADD	    += $(top_builddir)/libxipc/libxipc.a
-LDADD	    += $(top_builddir)/libcomm/libcomm.a
-LDADD	    += $(top_builddir)/libxorp/libxorp.a
+LDADD	     = $(top_builddir)/contrib/ospfd/src/libospfd.la
+LDADD	    += $(top_builddir)/xrl/targets/libospfbase.la
+LDADD	    += $(top_builddir)/xrl/interfaces/libribxif.la
+LDADD	    += $(top_builddir)/libxipc/libxipc.la
+LDADD	    += $(top_builddir)/libcomm/libcomm.la
+LDADD	    += $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 xorp_ospf_SOURCES  = ospf_module.h

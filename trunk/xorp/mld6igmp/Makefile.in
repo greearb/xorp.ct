@@ -63,18 +63,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -102,28 +107,28 @@ TESTS =
 noinst_PROGRAMS = test_mld6igmp
 
 # -- No-install Libraries
-noinst_LIBRARIES = libmld6igmp.a
+noinst_LTLIBRARIES = libmld6igmp.la
 
 # -- Libraries and library flags to link the binary programs
 ### MLD6IGMP libraries
-#LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
+#LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
 ### MFEA libraries
 # FEA-specific begin
 # FEA-specific end
 ### MRT libraries
 ### CLI libraries
 ### XORP misc libraries
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a $(top_builddir)/xrl/targets/libmld6igmpbase.a $(top_builddir)/fea/libfea.a $(top_builddir)/xrl/interfaces/libfeafibclientxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libmfeaxif.la $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la $(top_builddir)/xrl/targets/libmld6igmpbase.la $(top_builddir)/fea/libfea.la $(top_builddir)/xrl/interfaces/libfeafibclientxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la $(top_builddir)/xrl/interfaces/libfearawpktclient.la $(top_builddir)/xrl/targets/libfeabase.la $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la $(top_builddir)/xrl/interfaces/libclimanagerxif.la $(top_builddir)/xrl/interfaces/libmfeaclientxif.la $(top_builddir)/xrl/targets/libmfeabase.la $(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.la $(top_builddir)/xrl/targets/libclibase.la $(top_builddir)/libproto/libproto.la $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 xorp_igmp_SOURCES = xorp_igmp.cc
 xorp_mld_SOURCES = xorp_mld.cc
 
 test_mld6igmp_SOURCES = test_mld6igmp.cc
-test_mld6igmp_LDADD = $(LDADD) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4userxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/xrl/interfaces/libsocket6userxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libprofileclientxif.a $(top_builddir)/xrl/targets/libsocketserverbase.a $(top_builddir)/libxorp/libxorp.a
+test_mld6igmp_LDADD = $(LDADD) $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
-libmld6igmp_a_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h mld6igmp_member_query.hh mld6igmp_node.hh mld6igmp_node_cli.hh mld6igmp_private.hh mld6igmp_vif.hh xrl_mld6igmp_node.hh igmp_proto.cc mld6_proto.cc mld6igmp_config.cc mld6igmp_member_query.cc mld6igmp_node.cc mld6igmp_node_cli.cc mld6igmp_proto.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
+libmld6igmp_la_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h mld6igmp_member_query.hh mld6igmp_node.hh mld6igmp_node_cli.hh mld6igmp_private.hh mld6igmp_vif.hh xrl_mld6igmp_node.hh igmp_proto.cc mld6_proto.cc mld6igmp_config.cc mld6igmp_member_query.cc mld6igmp_node.cc mld6igmp_node_cli.cc mld6igmp_proto.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = configure_mld6igmp docs xrl_mld6igmp_shell_funcs.sh
@@ -135,108 +140,107 @@ subdir = mld6igmp
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 
-libmld6igmp_a_AR = $(AR) cru
-libmld6igmp_a_LIBADD =
-am_libmld6igmp_a_OBJECTS = igmp_proto.$(OBJEXT) mld6_proto.$(OBJEXT) \
-	mld6igmp_config.$(OBJEXT) mld6igmp_member_query.$(OBJEXT) \
-	mld6igmp_node.$(OBJEXT) mld6igmp_node_cli.$(OBJEXT) \
-	mld6igmp_proto.$(OBJEXT) mld6igmp_vif.$(OBJEXT) \
-	xrl_mld6igmp_node.$(OBJEXT)
-libmld6igmp_a_OBJECTS = $(am_libmld6igmp_a_OBJECTS)
+libmld6igmp_la_LDFLAGS =
+libmld6igmp_la_LIBADD =
+am_libmld6igmp_la_OBJECTS = igmp_proto.lo mld6_proto.lo \
+	mld6igmp_config.lo mld6igmp_member_query.lo mld6igmp_node.lo \
+	mld6igmp_node_cli.lo mld6igmp_proto.lo mld6igmp_vif.lo \
+	xrl_mld6igmp_node.lo
+libmld6igmp_la_OBJECTS = $(am_libmld6igmp_la_OBJECTS)
 bin_PROGRAMS = xorp_igmp$(EXEEXT) xorp_mld$(EXEEXT)
 noinst_PROGRAMS = test_mld6igmp$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_test_mld6igmp_OBJECTS = test_mld6igmp.$(OBJEXT)
 test_mld6igmp_OBJECTS = $(am_test_mld6igmp_OBJECTS)
-test_mld6igmp_DEPENDENCIES = libmld6igmp.a \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.a \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.a \
-	$(top_builddir)/fea/libfea.a \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
-	$(top_builddir)/xrl/targets/libfeabase.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
-	$(top_builddir)/xrl/targets/libmfeabase.a \
-	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
+test_mld6igmp_DEPENDENCIES = libmld6igmp.la \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
+	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
+	$(top_builddir)/fea/libfea.la \
+	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.la \
+	$(top_builddir)/xrl/targets/libfeabase.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
+	$(top_builddir)/xrl/targets/libmfeabase.la \
+	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
 	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
-	$(top_builddir)/xrl/targets/libclibase.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/libfeaclient/libfeaclient.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.a \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.a \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.a \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.a \
-	$(top_builddir)/xrl/targets/libsocketserverbase.a \
-	$(top_builddir)/libxorp/libxorp.a
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
+	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libsocketserverbase.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_mld6igmp_LDFLAGS =
 am_xorp_igmp_OBJECTS = xorp_igmp.$(OBJEXT)
 xorp_igmp_OBJECTS = $(am_xorp_igmp_OBJECTS)
 xorp_igmp_LDADD = $(LDADD)
-xorp_igmp_DEPENDENCIES = libmld6igmp.a \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.a \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.a \
-	$(top_builddir)/fea/libfea.a \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
-	$(top_builddir)/xrl/targets/libfeabase.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
-	$(top_builddir)/xrl/targets/libmfeabase.a \
-	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
+xorp_igmp_DEPENDENCIES = libmld6igmp.la \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
+	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
+	$(top_builddir)/fea/libfea.la \
+	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.la \
+	$(top_builddir)/xrl/targets/libfeabase.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
+	$(top_builddir)/xrl/targets/libmfeabase.la \
+	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
 	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
-	$(top_builddir)/xrl/targets/libclibase.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
+	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 xorp_igmp_LDFLAGS =
 am_xorp_mld_OBJECTS = xorp_mld.$(OBJEXT)
 xorp_mld_OBJECTS = $(am_xorp_mld_OBJECTS)
 xorp_mld_LDADD = $(LDADD)
-xorp_mld_DEPENDENCIES = libmld6igmp.a \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.a \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.a \
-	$(top_builddir)/fea/libfea.a \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
-	$(top_builddir)/xrl/targets/libfeabase.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
-	$(top_builddir)/xrl/targets/libmfeabase.a \
-	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
+xorp_mld_DEPENDENCIES = libmld6igmp.la \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
+	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
+	$(top_builddir)/fea/libfea.la \
+	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.la \
+	$(top_builddir)/xrl/targets/libfeabase.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
+	$(top_builddir)/xrl/targets/libmfeabase.la \
+	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
 	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
-	$(top_builddir)/xrl/targets/libclibase.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
+	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 xorp_mld_LDFLAGS =
 
 DEFS = @DEFS@
@@ -245,36 +249,52 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/igmp_proto.Po $(DEPDIR)/mld6_proto.Po \
-@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_config.Po \
-@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_member_query.Po \
-@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_node.Po \
-@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_node_cli.Po \
-@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_proto.Po \
-@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_vif.Po \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/igmp_proto.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mld6_proto.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_config.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_member_query.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_node.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_node_cli.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_proto.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_vif.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/test_mld6igmp.Po $(DEPDIR)/xorp_igmp.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xorp_mld.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_mld6igmp_node.Po
+@AMDEP_TRUE@	$(DEPDIR)/xrl_mld6igmp_node.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libmld6igmp_a_SOURCES) $(test_mld6igmp_SOURCES) \
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libmld6igmp_la_SOURCES) $(test_mld6igmp_SOURCES) \
 	$(xorp_igmp_SOURCES) $(xorp_mld_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libmld6igmp_a_SOURCES) $(test_mld6igmp_SOURCES) $(xorp_igmp_SOURCES) $(xorp_mld_SOURCES)
+SOURCES = $(libmld6igmp_la_SOURCES) $(test_mld6igmp_SOURCES) $(xorp_igmp_SOURCES) $(xorp_mld_SOURCES)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .cc .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  mld6igmp/Makefile
@@ -283,24 +303,21 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libmld6igmp.a: $(libmld6igmp_a_OBJECTS) $(libmld6igmp_a_DEPENDENCIES) 
-	-rm -f libmld6igmp.a
-	$(libmld6igmp_a_AR) libmld6igmp.a $(libmld6igmp_a_OBJECTS) $(libmld6igmp_a_LIBADD)
-	$(RANLIB) libmld6igmp.a
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+libmld6igmp.la: $(libmld6igmp_la_OBJECTS) $(libmld6igmp_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libmld6igmp_la_LDFLAGS) $(libmld6igmp_la_OBJECTS) $(libmld6igmp_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
+	     || test -f $$p1 \
 	  ; then \
 	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
 	  else :; fi; \
 	done
 
@@ -333,18 +350,18 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/igmp_proto.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6_proto.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_config.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_member_query.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_node.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_node_cli.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_proto.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_vif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/igmp_proto.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6_proto.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_config.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_member_query.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_node.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_node_cli.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_proto.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_vif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_mld6igmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_igmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_mld.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_mld6igmp_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_mld6igmp_node.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -360,6 +377,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -474,7 +497,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 
 installdirs:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -504,13 +527,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -536,21 +559,23 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	clean-binPROGRAMS clean-generic clean-libtool \
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am info \
+	info-am install install-am install-binPROGRAMS install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+	mostlyclean-generic mostlyclean-libtool tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

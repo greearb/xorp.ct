@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.122 2004/11/08 21:14:27 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.123 2004/11/10 00:48:13 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -62,11 +62,12 @@ AC_DEFINE_UNQUOTED(XORP_SRC_ROOT, "`cd ${srcdir} && echo ${PWD}`",
 AM_MAINTAINER_MODE
 
 dnl ----------------------------
-dnl XXX: libtool options
+dnl libtool options
 dnl ----------------------------
-dnl AC_DISABLED_STATIC
-dnl AC_DISABLE_SHARED
-dnl AC_PROG_LIBTOOL
+AC_DISABLE_SHARED
+AC_DISABLE_FAST_INSTALL
+AC_PROG_LIBTOOL
+AC_SUBST(LIBTOOL_DEPS)
 
 
 dnl ----------------------------
@@ -284,10 +285,7 @@ if test "${xorp_cv_cpp_gnu_va_args}" = "yes" ; then
 fi
 
 AC_PROG_INSTALL
-dnl XXX: AUTOMAKE
-dnl AM_PROG_LIBTOOL
 AC_PROG_LN_S
-AC_PROG_RANLIB
 
 AC_CHECK_TOOL(AR, ar)
 

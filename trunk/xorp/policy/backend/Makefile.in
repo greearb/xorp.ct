@@ -65,18 +65,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -92,13 +97,13 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-noinst_LIBRARIES = libpolicybackend.a
+noinst_LTLIBRARIES = libpolicybackend.la
 
 # Backend policy library
-libpolicybackend_a_SOURCES = instr_visitor.hh instruction.hh instruction_base.hh iv_exec.hh policy_backend_parser.hh policy_filter.hh policy_filters.hh policy_instr.hh policy_redist_map.hh policytags.hh set_manager.hh single_varrw.hh term_instr.hh iv_exec.cc policy_filter.cc policy_filters.cc policy_redist_map.cc policytags.cc set_manager.cc single_varrw.cc lex.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.h
+libpolicybackend_la_SOURCES = instr_visitor.hh instruction.hh instruction_base.hh iv_exec.hh policy_backend_parser.hh policy_filter.hh policy_filters.hh policy_instr.hh policy_redist_map.hh policytags.hh set_manager.hh single_varrw.hh term_instr.hh iv_exec.cc policy_filter.cc policy_filters.cc policy_redist_map.cc policytags.cc set_manager.cc single_varrw.cc lex.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.h
 
 # XXX find a way to link libpolicycommon
-libpolicybackend_a_LIBADD = ../common/dispatcher.o ../common/elem_set.o ../common/element.o ../common/element_factory.o ../common/filter.o ../common/policy_utils.o ../common/register_elements.o ../common/register_operations.o
+libpolicybackend_la_LIBADD = ../common/dispatcher.lo ../common/elem_set.lo ../common/element.lo ../common/element_factory.lo ../common/filter.lo ../common/policy_utils.lo ../common/register_elements.lo ../common/register_operations.lo
 
 
 ################################################################
@@ -107,21 +112,19 @@ subdir = policy/backend
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 
-libpolicybackend_a_AR = $(AR) cru
-libpolicybackend_a_DEPENDENCIES = ../common/dispatcher.o \
-	../common/elem_set.o ../common/element.o \
-	../common/element_factory.o ../common/filter.o \
-	../common/policy_utils.o ../common/register_elements.o \
-	../common/register_operations.o
-am_libpolicybackend_a_OBJECTS = iv_exec.$(OBJEXT) \
-	policy_filter.$(OBJEXT) policy_filters.$(OBJEXT) \
-	policy_redist_map.$(OBJEXT) policytags.$(OBJEXT) \
-	set_manager.$(OBJEXT) single_varrw.$(OBJEXT) \
-	lex.yy_policy_backend_parser.$(OBJEXT) \
-	yacc.yy_policy_backend_parser.$(OBJEXT)
-libpolicybackend_a_OBJECTS = $(am_libpolicybackend_a_OBJECTS)
+libpolicybackend_la_LDFLAGS =
+libpolicybackend_la_DEPENDENCIES = ../common/dispatcher.lo \
+	../common/elem_set.lo ../common/element.lo \
+	../common/element_factory.lo ../common/filter.lo \
+	../common/policy_utils.lo ../common/register_elements.lo \
+	../common/register_operations.lo
+am_libpolicybackend_la_OBJECTS = iv_exec.lo policy_filter.lo \
+	policy_filters.lo policy_redist_map.lo policytags.lo \
+	set_manager.lo single_varrw.lo lex.yy_policy_backend_parser.lo \
+	yacc.yy_policy_backend_parser.lo
+libpolicybackend_la_OBJECTS = $(am_libpolicybackend_la_OBJECTS)
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -129,33 +132,48 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/iv_exec.Po \
-@AMDEP_TRUE@	$(DEPDIR)/lex.yy_policy_backend_parser.Po \
-@AMDEP_TRUE@	$(DEPDIR)/policy_filter.Po \
-@AMDEP_TRUE@	$(DEPDIR)/policy_filters.Po \
-@AMDEP_TRUE@	$(DEPDIR)/policy_redist_map.Po \
-@AMDEP_TRUE@	$(DEPDIR)/policytags.Po $(DEPDIR)/set_manager.Po \
-@AMDEP_TRUE@	$(DEPDIR)/single_varrw.Po \
-@AMDEP_TRUE@	$(DEPDIR)/yacc.yy_policy_backend_parser.Po
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/iv_exec.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/lex.yy_policy_backend_parser.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/policy_filter.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/policy_filters.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/policy_redist_map.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/policytags.Plo $(DEPDIR)/set_manager.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/single_varrw.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/yacc.yy_policy_backend_parser.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libpolicybackend_a_SOURCES)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libpolicybackend_la_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libpolicybackend_a_SOURCES)
+SOURCES = $(libpolicybackend_la_SOURCES)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .cc .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  policy/backend/Makefile
@@ -164,14 +182,10 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
 
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libpolicybackend.a: $(libpolicybackend_a_OBJECTS) $(libpolicybackend_a_DEPENDENCIES) 
-	-rm -f libpolicybackend.a
-	$(libpolicybackend_a_AR) libpolicybackend.a $(libpolicybackend_a_OBJECTS) $(libpolicybackend_a_LIBADD)
-	$(RANLIB) libpolicybackend.a
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+libpolicybackend.la: $(libpolicybackend_la_OBJECTS) $(libpolicybackend_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libpolicybackend_la_LDFLAGS) $(libpolicybackend_la_OBJECTS) $(libpolicybackend_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -179,15 +193,15 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/iv_exec.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lex.yy_policy_backend_parser.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_filter.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_filters.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_redist_map.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policytags.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/set_manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/single_varrw.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/yacc.yy_policy_backend_parser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/iv_exec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lex.yy_policy_backend_parser.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_filter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_filters.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_redist_map.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policytags.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/set_manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/single_varrw.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/yacc.yy_policy_backend_parser.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -203,6 +217,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -261,7 +281,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(LTLIBRARIES)
 
 installdirs:
 
@@ -290,12 +310,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
+clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
+	mostlyclean-am
 
 distclean: distclean-am
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -321,19 +342,21 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-am clean clean-generic \
-	clean-noinstLIBRARIES distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
+	clean-libtool clean-noinstLTLIBRARIES distclean \
+	distclean-compile distclean-depend distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am info \
+	info-am install install-am install-data install-data-am \
+	install-exec install-exec-am install-info install-info-am \
+	install-man install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool tags uninstall uninstall-am \
 	uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

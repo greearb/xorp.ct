@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/tests/Makefile.am,v 1.5 2003/07/30 23:43:32 pavlin Exp $
+## $XORP: xorp/xrl/tests/Makefile.am,v 1.6 2003/08/01 02:11:52 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -13,19 +13,19 @@ TESTS		 = test_generated
 noinst_PROGRAMS	 = test_generated
 
 # -- No-install Libraries
-noinst_LIBRARIES = 
+noinst_LTLIBRARIES =
 
 test_generated_SOURCES  = test_generated.cc
 test_generated_SOURCES += test_tgt.hh test_tgt.cc
 test_generated_SOURCES += test_xifs.hh test_xifs.cc
 
-test_generated_LDADD    = $(top_builddir)/xrl/interfaces/libcommonxif.a
-test_generated_LDADD   += $(top_builddir)/xrl/interfaces/libtestxif.a
-test_generated_LDADD   += $(top_builddir)/xrl/targets/libtestbase.a
-test_generated_LDADD   += $(top_builddir)/libxipc/libfinder.a
-test_generated_LDADD   += $(top_builddir)/libxipc/libxipc.a
-test_generated_LDADD   += $(top_builddir)/libcomm/libcomm.a
-test_generated_LDADD   += $(top_builddir)/libxorp/libxorp.a
+test_generated_LDADD    = $(top_builddir)/xrl/interfaces/libcommonxif.la
+test_generated_LDADD   += $(top_builddir)/xrl/interfaces/libtestxif.la
+test_generated_LDADD   += $(top_builddir)/xrl/targets/libtestbase.la
+test_generated_LDADD   += $(top_builddir)/libxipc/libfinder.la
+test_generated_LDADD   += $(top_builddir)/libxipc/libxipc.la
+test_generated_LDADD   += $(top_builddir)/libcomm/libcomm.la
+test_generated_LDADD   += $(top_builddir)/libxorp/libxorp.la
 
 
 ################################################################

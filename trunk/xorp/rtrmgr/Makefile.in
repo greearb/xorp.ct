@@ -65,18 +65,23 @@ target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
 AR = @AR@
+AS = @AS@
 AWK = @AWK@
 CC = @CC@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
 FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OSPFD = @OSPFD@
 OSPFD_OS = @OSPFD_OS@
@@ -100,11 +105,8 @@ TESTS = test_templates test_sample_config test_module_manager
 # -- No-install Programs
 noinst_PROGRAMS = test_templates test_sample_config test_module_manager
 
-# -- No-install Libraries
-noinst_LIBRARIES = 
-
 # -- Libraries and library flags to link the binary programs
-LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 
@@ -113,7 +115,7 @@ LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(
 #
 xorp_rtrmgr_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh master_conf_tree.hh module_commands.hh module_manager.hh path_segment.hh randomness.hh rtrmgr_error.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh userdb.hh util.hh xorp_client.hh xrl_rtrmgr_interface.hh xrldb.hh conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc main_rtrmgr.cc master_conf_tree.cc module_command.cc module_manager.cc randomness.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_xrl.cc userdb.cc util.cc xorp_client.cc xrl_rtrmgr_interface.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
 
-xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a $(LDADD)
+xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.la $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.la $(LDADD)
 
 #
 # xorpsh
@@ -123,14 +125,14 @@ xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a $(top_builddir)/
 # XXX: unexpanded_xrl shouldn't really be needed
 xorpsh_SOURCES = rtrmgr_module.h y.boot_tab.h y.opcmd_tab.h y.tplt_tab.h cli.hh command_tree.hh conf_tree.hh conf_tree_node.hh module_command.hh module_manager.hh op_commands.hh path_segment.hh popen.hh rtrmgr_error.hh slave_conf_tree.hh slave_conf_tree_node.hh slave_module_manager.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xorpsh_main.hh xrl_xorpsh_interface.hh xrldb.hh cli.cc command_tree.cc conf_tree.cc conf_tree_node.cc lex.boot.cc lex.opcmd.cc lex.tplt.cc module_command.cc op_commands.cc popen.cc slave_conf_tree.cc slave_conf_tree_node.cc slave_module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_xrl.cc util.cc xorp_client.cc xorpsh_main.cc xrl_xorpsh_interface.cc xrldb.cc y.boot_tab.cc y.opcmd_tab.cc y.tplt_tab.cc
 
-xorpsh_LDADD = $(top_builddir)/cli/libcli.a $(top_builddir)/libproto/libproto.a $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/librtrmgrxif.a $(top_builddir)/xrl/targets/libxorpshbase.a $(LDADD)
+xorpsh_LDADD = $(top_builddir)/cli/libcli.la $(top_builddir)/libproto/libproto.la $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/librtrmgrxif.la $(top_builddir)/xrl/targets/libxorpshbase.la $(LDADD)
 
 #
 # xorp_profiler
 #
 xorp_profiler_SOURCES = profiler.cc
 
-xorp_profiler_LDADD = $(top_builddir)/xrl/interfaces/libprofilexif.a $(top_builddir)/xrl/targets/libprofileclientbase.a $(LDADD)
+xorp_profiler_LDADD = $(top_builddir)/xrl/interfaces/libprofilexif.la $(top_builddir)/xrl/targets/libprofileclientbase.la $(LDADD)
 
 #
 # test_templates
@@ -165,8 +167,6 @@ subdir = rtrmgr
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
-
 bin_PROGRAMS = xorp_rtrmgr$(EXEEXT) xorpsh$(EXEEXT) \
 	xorp_profiler$(EXEEXT)
 noinst_PROGRAMS = test_templates$(EXEEXT) test_sample_config$(EXEEXT) \
@@ -182,10 +182,10 @@ am_test_module_manager_OBJECTS = conf_tree.$(OBJEXT) \
 	unexpanded_xrl.$(OBJEXT) util.$(OBJEXT) xorp_client.$(OBJEXT) \
 	xrldb.$(OBJEXT) y.boot_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
 test_module_manager_OBJECTS = $(am_test_module_manager_OBJECTS)
-test_module_manager_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_module_manager_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_module_manager_LDFLAGS =
 am_test_sample_config_OBJECTS = command_tree.$(OBJEXT) \
 	conf_tree.$(OBJEXT) conf_tree_node.$(OBJEXT) lex.boot.$(OBJEXT) \
@@ -197,10 +197,10 @@ am_test_sample_config_OBJECTS = command_tree.$(OBJEXT) \
 	util.$(OBJEXT) xorp_client.$(OBJEXT) xrldb.$(OBJEXT) \
 	y.boot_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
 test_sample_config_OBJECTS = $(am_test_sample_config_OBJECTS)
-test_sample_config_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_sample_config_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_sample_config_LDFLAGS =
 am_test_templates_OBJECTS = command_tree.$(OBJEXT) conf_tree.$(OBJEXT) \
 	conf_tree_node.$(OBJEXT) lex.boot.$(OBJEXT) lex.tplt.$(OBJEXT) \
@@ -211,20 +211,20 @@ am_test_templates_OBJECTS = command_tree.$(OBJEXT) conf_tree.$(OBJEXT) \
 	unexpanded_xrl.$(OBJEXT) util.$(OBJEXT) xorp_client.$(OBJEXT) \
 	xrldb.$(OBJEXT) y.boot_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
 test_templates_OBJECTS = $(am_test_templates_OBJECTS)
-test_templates_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+test_templates_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_templates_LDFLAGS =
 am_xorp_profiler_OBJECTS = profiler.$(OBJEXT)
 xorp_profiler_OBJECTS = $(am_xorp_profiler_OBJECTS)
 xorp_profiler_DEPENDENCIES = \
-	$(top_builddir)/xrl/interfaces/libprofilexif.a \
-	$(top_builddir)/xrl/targets/libprofileclientbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+	$(top_builddir)/xrl/interfaces/libprofilexif.la \
+	$(top_builddir)/xrl/targets/libprofileclientbase.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 xorp_profiler_LDFLAGS =
 am_xorp_rtrmgr_OBJECTS = conf_tree.$(OBJEXT) conf_tree_node.$(OBJEXT) \
 	lex.boot.$(OBJEXT) lex.tplt.$(OBJEXT) main_rtrmgr.$(OBJEXT) \
@@ -236,12 +236,12 @@ am_xorp_rtrmgr_OBJECTS = conf_tree.$(OBJEXT) conf_tree_node.$(OBJEXT) \
 	xrl_rtrmgr_interface.$(OBJEXT) xrldb.$(OBJEXT) \
 	y.boot_tab.$(OBJEXT) y.tplt_tab.$(OBJEXT)
 xorp_rtrmgr_OBJECTS = $(am_xorp_rtrmgr_OBJECTS)
-xorp_rtrmgr_DEPENDENCIES = $(top_builddir)/xrl/targets/librtrmgrbase.a \
-	$(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+xorp_rtrmgr_DEPENDENCIES = $(top_builddir)/xrl/targets/librtrmgrbase.la \
+	$(top_builddir)/xrl/interfaces/librtrmgr_clientxif.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 xorp_rtrmgr_LDFLAGS =
 am_xorpsh_OBJECTS = cli.$(OBJEXT) command_tree.$(OBJEXT) \
 	conf_tree.$(OBJEXT) conf_tree_node.$(OBJEXT) lex.boot.$(OBJEXT) \
@@ -255,15 +255,15 @@ am_xorpsh_OBJECTS = cli.$(OBJEXT) command_tree.$(OBJEXT) \
 	xrldb.$(OBJEXT) y.boot_tab.$(OBJEXT) y.opcmd_tab.$(OBJEXT) \
 	y.tplt_tab.$(OBJEXT)
 xorpsh_OBJECTS = $(am_xorpsh_OBJECTS)
-xorpsh_DEPENDENCIES = $(top_builddir)/cli/libcli.a \
-	$(top_builddir)/libproto/libproto.a \
+xorpsh_DEPENDENCIES = $(top_builddir)/cli/libcli.la \
+	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/librtrmgrxif.a \
-	$(top_builddir)/xrl/targets/libxorpshbase.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+	$(top_builddir)/xrl/interfaces/librtrmgrxif.la \
+	$(top_builddir)/xrl/targets/libxorpshbase.la \
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 xorpsh_LDFLAGS =
 
 DEFS = @DEFS@
@@ -299,15 +299,21 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/y.opcmd_tab.Po $(DEPDIR)/y.tplt_tab.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(test_module_manager_SOURCES) \
 	$(test_sample_config_SOURCES) $(test_templates_SOURCES) \
 	$(xorp_profiler_SOURCES) $(xorp_rtrmgr_SOURCES) \
@@ -318,7 +324,16 @@ SOURCES = $(test_module_manager_SOURCES) $(test_sample_config_SOURCES) $(test_te
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .cc .lo .o .obj
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  rtrmgr/Makefile
@@ -326,21 +341,17 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
 	  CONFIG_FILES=$(subdir)/$@ $(SHELL) ./config.status
-
-AR = ar
-
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  if test -f $$p \
+	     || test -f $$p1 \
 	  ; then \
 	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
+	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
 	  else :; fi; \
 	done
 
@@ -433,6 +444,12 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
@@ -547,7 +564,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS)
+all-am: Makefile $(PROGRAMS)
 
 installdirs:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
@@ -577,13 +594,13 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+clean-am: clean-binPROGRAMS clean-generic clean-libtool \
 	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 
 distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-tags
+	distclean-generic distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -609,20 +626,22 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-binPROGRAMS clean-generic clean-libtool \
 	clean-noinstPROGRAMS distclean distclean-compile \
-	distclean-depend distclean-generic distclean-tags distdir dvi \
-	dvi-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
+	distclean-depend distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am info info-am install \
+	install-am install-binPROGRAMS install-data install-data-am \
+	install-exec install-exec-am install-info install-info-am \
+	install-man install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool tags uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am
 
 

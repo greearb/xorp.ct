@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.36 2004/10/15 02:43:33 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.37 2004/10/15 04:24:13 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -15,8 +15,8 @@ sbindir = $(prefix)/bin
 bin_PROGRAMS	= xorp_finder
 sbin_PROGRAMS	= call_xrl
 
-# -- No-install Libraries
-noinst_LIBRARIES = libxipc.a libfinder.a
+# -- No-install Libtool Libraries
+noinst_LTLIBRARIES = libxipc.la libfinder.la
 
 # -- Test Programs and scripts (order of increasing complexity)
 test_programs  = test_xrl_error test_xrl test_xrl_atom test_xrl_args
@@ -37,15 +37,15 @@ noinst_PROGRAMS = $(test_programs) $(test_extra_programs)
 noinst_SCRIPTS = $(test_scripts)
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = ./libfinder.a
-LDADD		+= ./libxipc.a
-LDADD		+= $(top_builddir)/libxorp/libxorp.a
-LDADD		+= $(top_builddir)/libcomm/libcomm.a
+LDADD		 = ./libfinder.la
+LDADD		+= ./libxipc.la
+LDADD		+= $(top_builddir)/libxorp/libxorp.la
+LDADD		+= $(top_builddir)/libcomm/libcomm.la
 
-xorp_finder_LDADD		 = libfinder.a
-xorp_finder_LDADD		+= ./libxipc.a
-xorp_finder_LDADD		+= $(top_builddir)/libxorp/libxorp.a
-xorp_finder_LDADD		+= $(top_builddir)/libcomm/libcomm.a
+xorp_finder_LDADD		 = libfinder.la
+xorp_finder_LDADD		+= ./libxipc.la
+xorp_finder_LDADD		+= $(top_builddir)/libxorp/libxorp.la
+xorp_finder_LDADD		+= $(top_builddir)/libcomm/libcomm.la
 
 # -- Program Sources
 call_xrl_SOURCES		 = call_xrl.cc
@@ -67,20 +67,20 @@ test_xrl_parser_SOURCES		 = test_xrl_parser.cc
 test_xrl_error_SOURCES		 = test_xrl_error.cc
 
 test_xrl_router_SOURCES		 = test_xrl_router.cc
-test_xrl_router_LDADD		 = libfinder.a $(LDADD)
+test_xrl_router_LDADD		 = libfinder.la $(LDADD)
 
 test_finder_SOURCES		 = test_finder.cc
-test_finder_LDADD		 = libfinder.a $(LDADD)
+test_finder_LDADD		 = libfinder.la $(LDADD)
 
 test_finder_events_SOURCES	 = test_finder_events.cc
 test_finder_events_SOURCES	+= test_finder_events_base.hh
 test_finder_events_SOURCES	+= test_finder_events_base.cc
 test_finder_events_SOURCES	+= finder_event_notifier_xif.hh
 test_finder_events_SOURCES	+= finder_event_notifier_xif.cc
-test_finder_events_LDADD	 = libfinder.a $(LDADD)
+test_finder_events_LDADD	 = libfinder.la $(LDADD)
 
 test_finder_to_SOURCES		 = test_finder_to.cc
-test_finder_to_LDADD		 = libfinder.a $(LDADD)
+test_finder_to_LDADD		 = libfinder.la $(LDADD)
 
 test_xrl_receiver_SOURCES	 = test_xrl_receiver.cc
 test_xrl_receiver_SOURCES	+= test_xrls_base.hh
@@ -94,108 +94,108 @@ test_xrl_sender_SOURCES		+= test_xrls_base.hh
 test_xrl_sender_SOURCES		+= test_xrls_base.cc
 
 # -- Library Sources (libxipc)
-libxipc_a_SOURCES  = finder_module.h
-libxipc_a_SOURCES += hmac_md5.h
-libxipc_a_SOURCES += ipc_module.h
-libxipc_a_SOURCES += xrl_module.h
-libxipc_a_SOURCES += finder_client.hh
-libxipc_a_SOURCES += finder_client_observer.hh
-libxipc_a_SOURCES += finder_client_xrl_target.hh
-libxipc_a_SOURCES += finder_constants.hh
-libxipc_a_SOURCES += finder_ipc.hh
-libxipc_a_SOURCES += finder_messenger.hh
-libxipc_a_SOURCES += finder_msgs.hh
-libxipc_a_SOURCES += finder_tcp.hh
-libxipc_a_SOURCES += finder_tcp_messenger.hh
-libxipc_a_SOURCES += header.hh
-libxipc_a_SOURCES += hmac.hh
-libxipc_a_SOURCES += permits.hh
-libxipc_a_SOURCES += sockutil.hh
-libxipc_a_SOURCES += xrl.hh
-libxipc_a_SOURCES += xrl_args.hh
-libxipc_a_SOURCES += xrl_atom.hh
-libxipc_a_SOURCES += xrl_atom_encoding.hh
-libxipc_a_SOURCES += xrl_atom_list.hh
-libxipc_a_SOURCES += xrl_cmd_map.hh
-libxipc_a_SOURCES += xrl_dispatcher.hh
-libxipc_a_SOURCES += xrl_error.hh
-libxipc_a_SOURCES += xrl_parser.hh
-libxipc_a_SOURCES += xrl_parser_input.hh
-libxipc_a_SOURCES += xrl_pf.hh
-libxipc_a_SOURCES += xrl_pf_factory.hh
-libxipc_a_SOURCES += xrl_pf_inproc.hh
-libxipc_a_SOURCES += xrl_pf_kill.hh
-libxipc_a_SOURCES += xrl_pf_stcp.hh
-libxipc_a_SOURCES += xrl_pf_stcp_ph.hh
-libxipc_a_SOURCES += xrl_pf_sudp.hh
-libxipc_a_SOURCES += xrl_router.hh
-libxipc_a_SOURCES += xrl_sender.hh
-libxipc_a_SOURCES += xrl_std_router.hh
-libxipc_a_SOURCES += xrl_tokens.hh
-libxipc_a_SOURCES += xuid.hh
+libxipc_la_SOURCES  = finder_module.h
+libxipc_la_SOURCES += hmac_md5.h
+libxipc_la_SOURCES += ipc_module.h
+libxipc_la_SOURCES += xrl_module.h
+libxipc_la_SOURCES += finder_client.hh
+libxipc_la_SOURCES += finder_client_observer.hh
+libxipc_la_SOURCES += finder_client_xrl_target.hh
+libxipc_la_SOURCES += finder_constants.hh
+libxipc_la_SOURCES += finder_ipc.hh
+libxipc_la_SOURCES += finder_messenger.hh
+libxipc_la_SOURCES += finder_msgs.hh
+libxipc_la_SOURCES += finder_tcp.hh
+libxipc_la_SOURCES += finder_tcp_messenger.hh
+libxipc_la_SOURCES += header.hh
+libxipc_la_SOURCES += hmac.hh
+libxipc_la_SOURCES += permits.hh
+libxipc_la_SOURCES += sockutil.hh
+libxipc_la_SOURCES += xrl.hh
+libxipc_la_SOURCES += xrl_args.hh
+libxipc_la_SOURCES += xrl_atom.hh
+libxipc_la_SOURCES += xrl_atom_encoding.hh
+libxipc_la_SOURCES += xrl_atom_list.hh
+libxipc_la_SOURCES += xrl_cmd_map.hh
+libxipc_la_SOURCES += xrl_dispatcher.hh
+libxipc_la_SOURCES += xrl_error.hh
+libxipc_la_SOURCES += xrl_parser.hh
+libxipc_la_SOURCES += xrl_parser_input.hh
+libxipc_la_SOURCES += xrl_pf.hh
+libxipc_la_SOURCES += xrl_pf_factory.hh
+libxipc_la_SOURCES += xrl_pf_inproc.hh
+libxipc_la_SOURCES += xrl_pf_kill.hh
+libxipc_la_SOURCES += xrl_pf_stcp.hh
+libxipc_la_SOURCES += xrl_pf_stcp_ph.hh
+libxipc_la_SOURCES += xrl_pf_sudp.hh
+libxipc_la_SOURCES += xrl_router.hh
+libxipc_la_SOURCES += xrl_sender.hh
+libxipc_la_SOURCES += xrl_std_router.hh
+libxipc_la_SOURCES += xrl_tokens.hh
+libxipc_la_SOURCES += xuid.hh
 
-libxipc_a_SOURCES += hmac_md5.c
+libxipc_la_SOURCES += hmac_md5.c
 
-libxipc_a_SOURCES += finder_client.cc
-libxipc_a_SOURCES += finder_client_observer.cc
-libxipc_a_SOURCES += finder_client_xrl_target.cc
-libxipc_a_SOURCES += finder_messenger.cc
-libxipc_a_SOURCES += finder_msgs.cc
-libxipc_a_SOURCES += finder_tcp.cc
-libxipc_a_SOURCES += finder_tcp_messenger.cc
-libxipc_a_SOURCES += header.cc
-libxipc_a_SOURCES += hmac.cc
-libxipc_a_SOURCES += permits.cc
-libxipc_a_SOURCES += sockutil.cc
-libxipc_a_SOURCES += xrl.cc
-libxipc_a_SOURCES += xrl_args.cc
-libxipc_a_SOURCES += xrl_atom.cc
-libxipc_a_SOURCES += xrl_atom_encoding.cc
-libxipc_a_SOURCES += xrl_atom_list.cc
-libxipc_a_SOURCES += xrl_cmd_map.cc
-libxipc_a_SOURCES += xrl_dispatcher.cc
-libxipc_a_SOURCES += xrl_error.cc
-libxipc_a_SOURCES += xrl_parser.cc
-libxipc_a_SOURCES += xrl_parser_input.cc
-libxipc_a_SOURCES += xrl_pf.cc
-libxipc_a_SOURCES += xrl_pf_factory.cc
-libxipc_a_SOURCES += xrl_pf_inproc.cc
-libxipc_a_SOURCES += xrl_pf_kill.cc
-libxipc_a_SOURCES += xrl_pf_stcp.cc
-libxipc_a_SOURCES += xrl_pf_stcp_ph.cc
-libxipc_a_SOURCES += xrl_pf_sudp.cc
-libxipc_a_SOURCES += xrl_router.cc
-libxipc_a_SOURCES += xrl_std_router.cc
-libxipc_a_SOURCES += xrl_tokens.cc
-libxipc_a_SOURCES += xuid.cc
+libxipc_la_SOURCES += finder_client.cc
+libxipc_la_SOURCES += finder_client_observer.cc
+libxipc_la_SOURCES += finder_client_xrl_target.cc
+libxipc_la_SOURCES += finder_messenger.cc
+libxipc_la_SOURCES += finder_msgs.cc
+libxipc_la_SOURCES += finder_tcp.cc
+libxipc_la_SOURCES += finder_tcp_messenger.cc
+libxipc_la_SOURCES += header.cc
+libxipc_la_SOURCES += hmac.cc
+libxipc_la_SOURCES += permits.cc
+libxipc_la_SOURCES += sockutil.cc
+libxipc_la_SOURCES += xrl.cc
+libxipc_la_SOURCES += xrl_args.cc
+libxipc_la_SOURCES += xrl_atom.cc
+libxipc_la_SOURCES += xrl_atom_encoding.cc
+libxipc_la_SOURCES += xrl_atom_list.cc
+libxipc_la_SOURCES += xrl_cmd_map.cc
+libxipc_la_SOURCES += xrl_dispatcher.cc
+libxipc_la_SOURCES += xrl_error.cc
+libxipc_la_SOURCES += xrl_parser.cc
+libxipc_la_SOURCES += xrl_parser_input.cc
+libxipc_la_SOURCES += xrl_pf.cc
+libxipc_la_SOURCES += xrl_pf_factory.cc
+libxipc_la_SOURCES += xrl_pf_inproc.cc
+libxipc_la_SOURCES += xrl_pf_kill.cc
+libxipc_la_SOURCES += xrl_pf_stcp.cc
+libxipc_la_SOURCES += xrl_pf_stcp_ph.cc
+libxipc_la_SOURCES += xrl_pf_sudp.cc
+libxipc_la_SOURCES += xrl_router.cc
+libxipc_la_SOURCES += xrl_std_router.cc
+libxipc_la_SOURCES += xrl_tokens.cc
+libxipc_la_SOURCES += xuid.cc
 
 # -- Library Sources (libxipc - built sources)
-libxipc_a_SOURCES += common_xif.hh
-libxipc_a_SOURCES += common_xif.cc
-libxipc_a_SOURCES += finder_client_base.hh
-libxipc_a_SOURCES += finder_client_base.cc
-libxipc_a_SOURCES += finder_xif.hh
-libxipc_a_SOURCES += finder_xif.cc
+libxipc_la_SOURCES += common_xif.hh
+libxipc_la_SOURCES += common_xif.cc
+libxipc_la_SOURCES += finder_client_base.hh
+libxipc_la_SOURCES += finder_client_base.cc
+libxipc_la_SOURCES += finder_xif.hh
+libxipc_la_SOURCES += finder_xif.cc
 
 # -- Library Sources (libfinder)
-libfinder_a_SOURCES  = finder.hh
-libfinder_a_SOURCES += finder_constants.hh
-libfinder_a_SOURCES += finder_server.hh
-libfinder_a_SOURCES += finder_xrl_queue.hh
-libfinder_a_SOURCES += finder_xrl_target.hh
+libfinder_la_SOURCES  = finder.hh
+libfinder_la_SOURCES += finder_constants.hh
+libfinder_la_SOURCES += finder_server.hh
+libfinder_la_SOURCES += finder_xrl_queue.hh
+libfinder_la_SOURCES += finder_xrl_target.hh
 
-libfinder_a_SOURCES += finder.cc
-libfinder_a_SOURCES += finder_server.cc
-libfinder_a_SOURCES += finder_xrl_queue.cc
-libfinder_a_SOURCES += finder_xrl_target.cc
+libfinder_la_SOURCES += finder.cc
+libfinder_la_SOURCES += finder_server.cc
+libfinder_la_SOURCES += finder_xrl_queue.cc
+libfinder_la_SOURCES += finder_xrl_target.cc
 
 # -- Library Sources (libfinder - built sources)
-libfinder_a_SOURCES += finder_base.hh
-libfinder_a_SOURCES += finder_base.cc
-libfinder_a_SOURCES += finder_client_xif.hh
-libfinder_a_SOURCES += finder_client_xif.cc
-libfinder_a_SOURCES += finder_event_observer_xif.hh
-libfinder_a_SOURCES += finder_event_observer_xif.cc
+libfinder_la_SOURCES += finder_base.hh
+libfinder_la_SOURCES += finder_base.cc
+libfinder_la_SOURCES += finder_client_xif.hh
+libfinder_la_SOURCES += finder_client_xif.cc
+libfinder_la_SOURCES += finder_event_observer_xif.hh
+libfinder_la_SOURCES += finder_event_observer_xif.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = bench_ipc.awk

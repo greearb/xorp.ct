@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/static_routes/Makefile.am,v 1.6 2004/09/17 13:58:23 abittau Exp $
+## $XORP: xorp/static_routes/Makefile.am,v 1.7 2004/09/17 19:44:16 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -19,36 +19,36 @@ noinst_PROGRAMS  =
 noinst_SCRIPTS	 = $(test_scripts)
 
 # -- No-install Libraries
-noinst_LIBRARIES = libstaticroutes.a
+noinst_LTLIBRARIES = libstaticroutes.la
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS		 = 
-LDADD		 = $(noinst_LIBRARIES)
+LDADD		 = $(noinst_LTLIBRARIES)
 ### XRL libraries
-LDADD		+= $(top_builddir)/xrl/targets/libstaticroutesbase.a
+LDADD		+= $(top_builddir)/xrl/targets/libstaticroutesbase.la
 ### XORP misc libraries
-LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
-LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
-LDADD		+= $(top_builddir)/libxipc/libxipc.a
-LDADD		+= $(top_builddir)/libcomm/libcomm.a
-LDADD		+= $(top_builddir)/libxorp/libxorp.a
-LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.a
+LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+LDADD		+= $(top_builddir)/libxipc/libxipc.la
+LDADD		+= $(top_builddir)/libcomm/libcomm.la
+LDADD		+= $(top_builddir)/libxorp/libxorp.la
+LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
 
 # -- Program Sources
 xorp_static_routes_SOURCES = xorp_static_routes.cc
 
 # -- Library Sources
-libstaticroutes_a_SOURCES	 = static_routes_module.h
-libstaticroutes_a_SOURCES	+= static_routes_node.hh
-libstaticroutes_a_SOURCES	+= static_routes_varrw.hh
-libstaticroutes_a_SOURCES	+= xrl_static_routes_node.hh
+libstaticroutes_la_SOURCES	 = static_routes_module.h
+libstaticroutes_la_SOURCES	+= static_routes_node.hh
+libstaticroutes_la_SOURCES	+= static_routes_varrw.hh
+libstaticroutes_la_SOURCES	+= xrl_static_routes_node.hh
 
-libstaticroutes_a_SOURCES	+= static_routes_node.cc
-libstaticroutes_a_SOURCES	+= static_routes_varrw.cc
-libstaticroutes_a_SOURCES	+= xrl_static_routes_node.cc
+libstaticroutes_la_SOURCES	+= static_routes_node.cc
+libstaticroutes_la_SOURCES	+= static_routes_varrw.cc
+libstaticroutes_la_SOURCES	+= xrl_static_routes_node.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = command_static_routes
