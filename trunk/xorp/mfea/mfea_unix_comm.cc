@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.3 2003/02/14 23:55:18 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.4 2003/03/10 23:20:39 hodson Exp $"
 
 
 //
@@ -206,6 +206,7 @@ UnixComm::start(void)
 	    // whether the underlying address has changed).
 	    //
 	    IPvX pim_register_vif_addr(IPvX::ZERO(family()));
+	    uint16_t pif_index = 0;
 	    for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
 		MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(i);
 		if (mfea_vif == NULL)
@@ -222,6 +223,7 @@ UnixComm::start(void)
 		    continue;
 		// Found appropriate local address.
 		pim_register_vif_addr = *(mfea_vif->addr_ptr());
+		pif_index = mfea_vif->pif_index();
 		break;
 	    }
 	    if (pim_register_vif_addr != IPvX::ZERO(family())) {
@@ -230,6 +232,7 @@ UnixComm::start(void)
 		// TODO: XXX: the Register vif name is hardcoded here!
 		MfeaVif register_vif(mfea_node(), Vif("register_vif"));
 		register_vif.set_vif_index(vif_index);
+		register_vif.set_pif_index(pif_index);
 		register_vif.set_underlying_vif_up(true); // XXX: 'true' to allow creation
 		register_vif.set_pim_register(true);
 		register_vif.add_address(pim_register_vif_addr,
@@ -802,20 +805,13 @@ UnixComm::recv_pktinfo(bool enable_bool)
 	// Traffic class value
 	//
 #ifdef IPV6_RECVTCLASS
-	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6__RECVTCLASS,
+	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_RECVTCLASS,
 		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
-	    XLOG_ERROR("setsockopt(IPV6__RECVTCLASS, %u) failed: %s",
+	    XLOG_ERROR("setsockopt(IPV6_RECVTCLASS, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
 	}
-#else
-	{
-	    XLOG_ERROR("setsockopt(IPV6_IPV6_RECVTCLASS, %u) failed: %s",
-		       bool_flag,
-		       "not supported by the system");
-	    return (XORP_ERROR);
-	}
-#endif // ! IPV6_RECVTCLASS
+#endif // IPV6_RECVTCLASS
     }
     break;
 #endif // HAVE_IPV6
@@ -2473,7 +2469,11 @@ UnixComm::open_proto_socket(void)
 	    ICMP6_FILTER_SETPASS(ICMP6_MEMBERSHIP_QUERY, &filter);
 	    ICMP6_FILTER_SETPASS(ICMP6_MEMBERSHIP_REPORT, &filter);
 	    ICMP6_FILTER_SETPASS(ICMP6_MEMBERSHIP_REDUCTION, &filter);
+	    ICMP6_FILTER_SETPASS(MLD6_MTRACE_RESP, &filter);
 	    ICMP6_FILTER_SETPASS(MLD6_MTRACE, &filter);
+#ifdef MLDV2_LISTENER_REPORT
+	    ICMP6_FILTER_SETPASS(MLD6V2_LISTENER_REPORT, &filter);
+#endif
 	    if (setsockopt(_proto_socket, _ipproto, ICMP6_FILTER,
 			   (void *)&filter, sizeof(filter)) < 0) {
 		close_proto_socket();
@@ -3001,6 +3001,7 @@ UnixComm::proto_socket_write(uint16_t vif_index,
 	}
 	break;
 #ifdef HAVE_IPV6
+    case AF_INET6:
 	// Assign the TTL
 	if (ip_ttl < 0) {
 	    if (router_alert_bool)
@@ -3019,7 +3020,7 @@ UnixComm::proto_socket_write(uint16_t vif_index,
 	    }
 	}
 	break;
-#endif
+#endif // HAVE_IPV6
     default:
 	XLOG_ASSERT(false);
 	return (XORP_ERROR);
@@ -3128,8 +3129,10 @@ UnixComm::proto_socket_write(uint16_t vif_index,
 	    ctllen += hbhlen;
 #endif // ! HAVE_RFC2292BIS
 	}
-	// Space for IPV6_TCLASS 
+	// Space for IPV6_TCLASS
+#ifdef IPV6_TCLASS 
 	ctllen += CMSG_SPACE(sizeof(int));
+#endif
 	// Space for IPV6_HOPLIMIT
 	ctllen += CMSG_SPACE(sizeof(int));
 	XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);   // XXX
@@ -3214,7 +3217,7 @@ UnixComm::proto_socket_write(uint16_t vif_index,
 	cmsgp->cmsg_level = IPPROTO_IPV6;
 	cmsgp->cmsg_type = IPV6_TCLASS;
 	*(int *)(CMSG_DATA(cmsgp)) = ip_tos;
-#endif
+#endif // IPV6_TCLASS
 	
 	//
 	// Now hook the data
