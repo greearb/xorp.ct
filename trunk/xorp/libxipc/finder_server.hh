@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_server.hh,v 1.7 2003/04/23 20:50:48 hodson Exp $
+// $XORP: xorp/libxipc/finder_server.hh,v 1.8 2003/04/24 19:32:47 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_SERVER_HH__
 #define __LIBXIPC_FINDER_SERVER_HH__
@@ -35,29 +35,36 @@ class FinderServer {
 public:
     FinderServer(EventLoop& e)
     {
-	IPv4 	 bind_addr = IPv4(if_get_preferred());
-	uint16_t bind_port = FINDER_NG_TCP_DEFAULT_PORT;
+	_addr = IPv4(if_get_preferred());
+	_port = FINDER_NG_TCP_DEFAULT_PORT;
 	_f = new Finder(e);
-	_ft = new FinderTcpListener(e, *_f, _f->commands(),
-				      bind_addr, bind_port);
+	_ft = new FinderTcpListener(e, *_f, _f->commands(), _addr, _port);
 	_fxt = new FinderXrlTarget(*_f);
-	add_permitted_host(bind_addr);
+	add_permitted_host(_addr);
 	add_permitted_host(IPv4("127.0.0.1"));
     }
+
     ~FinderServer()
     {
 	delete _fxt;
 	delete _ft;
 	delete _f;
     }
+
     inline uint32_t connection_count() const
     {
 	return _f ? _f->messengers() : 0;
     }
+
+    inline IPv4 addr() const		{ return _addr; }
+    inline uint16_t port() const	{ return _port; }
+
 protected:
-    Finder*	       _f;
-    FinderTcpListener* _ft;
-    FinderXrlTarget*   _fxt; 
+    Finder*		_f;
+    FinderTcpListener*	_ft;
+    FinderXrlTarget*	_fxt;
+    IPv4		_addr;
+    uint16_t		_port;
 };
 
 #endif // __LIBXIPC_FINDER_SERVER_HH__
