@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.21 2004/05/28 22:34:43 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.22 2004/06/04 23:36:23 pavlin Exp $
 #
 
 Urgent
@@ -61,6 +61,9 @@ Other
    Restart code is broken, currently exits because of an Xrl failure
    when xorp_rtrmgr goes away.  Want to stick around, announce absence
    of xorp_rtrmgr and gracefully re-connect when it restarts.
+
+ - Add support for commenting-out large blocks of user config files even
+   if those files may contain /* ... */ comments inside.
 
 Non-Urgent
 ==========
