@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.12 2003/05/15 03:47:00 pavlin Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.13 2003/05/31 23:14:15 mjh Exp $"
 
 #include <sysexits.h>
 
@@ -43,12 +43,25 @@ main (int /* argc */, char *argv[])
 	//
 	EventLoop eventloop;
 	XrlStdRouter xrl_std_router_rib(eventloop, "rib");
-	
+
 	//
 	// The RIB manager
 	//
 	RibManager rib_manager(eventloop, xrl_std_router_rib);
 	rib_manager.enable();
+
+	{
+	    bool timed_out = false;
+	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	    while (xrl_std_router_rib.ready() == false && timed_out == false) {
+		eventloop.run();
+	    }
+
+	    if (xrl_std_router_rib.ready() == false && timed_out) {
+		XLOG_FATAL("XrlRouter did not become ready. No Finder?\n");
+	    }
+	}
+
 	// Add the FEA as a RIB client
 	rib_manager.add_rib_client("fea", AF_INET, true, false);
 	rib_manager.add_rib_client("fea", AF_INET6, true, false);
