@@ -258,6 +258,11 @@ class Lsa {
     Lsa_header& get_header() {return _header; }
 
     /**
+     * Generate a printable representation of the LSA.
+     */
+    virtual string str() const = 0;
+
+    /**
      * Add the LSA type bindings.
      */
 //     void install_type(LsaType type, Lsa *lsa); 
