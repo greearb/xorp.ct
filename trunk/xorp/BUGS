@@ -1,0 +1,49 @@
+Bug ID: 000001
+Submitted by: mjh
+Situation: running xorp (off Adam's live CD), with BGP up and running.
+           Type to xorpsh in config mode:
+           "delete protocols"
+Result: xorpsh crash.
+Bugfix assigned to:  UNASSIGNED
+
+
+
+Bug ID: 000002
+Submitted by: mjh
+Situation: type "quit" to xorpsh in operational mode.
+Result: xorpsh doesn't quit
+Bugfix assigned to:  UNASSIGNED
+
+
+
+Bug ID: 000003
+Submitted by: mjh
+Situation: entering a new BGP config in xorpsh.
+           "edit protocols bgp"
+           "peer {"    
+Result: creates a peer with the peer host called "{".  This is incorrect 
+        syntax and should really be rejected.
+Bugfix assigned to:  UNASSIGNED
+
+
+
+Bug ID: 000004
+Submitted by: mjh
+Situation: almost anywhere in xorpsh, type "help <something>" where
+     something is the command you'd like help with.  Eg "help save" in
+     configuration mode.
+Result: "syntax error, expecting."
+Bugfix assigned to:  UNASSIGNED
+
+
+
+Bug ID: 000005
+Submitted by: mjh
+Situation: running xorp (off Adam's live CD), with BGP up and running.
+           Type to xorpsh in config mode:
+             "delete protocols bgp"
+             "commit"
+Result: command hangs, requiring ^C to interrupt the command.  After ^C, 
+        rtrmgr has exited (probably crashed).
+Bugfix assigned to:  UNASSIGNED
+
