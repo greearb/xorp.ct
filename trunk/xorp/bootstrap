@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.2 2003/04/15 18:09:58 hodson Exp $
+# $XORP: xorp/bootstrap,v 1.3 2003/04/15 18:52:37 pavlin Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
@@ -65,22 +65,44 @@ run()
 
 check_necessary $0
 
+#
+# Cleanup
+#
 run rm -f config.cache
-run rm -f aclocal.m4		# XXX: temporary (2001/09/11)
+run rm -f aclocal.m4
 
+#
+# If necessary, use "-I DIR" again to add more directories to search list
+# for .m4 files.
+#
 run aclocal -I config --output=config/aclocal.m4
 
-# XXX: we don't use flag --force because with it libtoolize always overwrites
-# our config.guess and config.sub files, even though our version is newer.
-run libtoolize --automake --copy # --force
+#
+# XXX: we don't use flag --force because with it libtoolize always
+# overwrites our config.guess and config.sub files, even though our
+# version is probably newer.
+#
+run libtoolize --automake --copy
 
+#
+# If we are using newer version of autoconf/autoheader (e.g., autoconf-2.5*),
+# add the new flag "--include=config".
+#
 run autoheader
 
-# XXX: in case of non-GNU 'make', we must use 'automake -i'
-# XXX: we must use 'automake -i' before distributing the source code!!!
+#
+# XXX: in case of non-GNU 'make', we must use flag "-i".
+# XXX: we may have to use "-i" before distributing the source code (?)
 # run automake -i --add-missing --copy 
-
+#
 run automake --add-missing --copy
+
+#
+# If we are using newer version of autoconf (e.g., autoconf-2.5*),
+# use the new flag "--include=config" instead of "-l config".
+# If necessary, use it again to add more directories to search list
+# for .m4 files.
+#
 run autoconf -l config
 
 exit 0
