@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_error.hh,v 1.6 2003/03/16 08:20:32 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_error.hh,v 1.7 2003/04/23 00:28:38 hodson Exp $
 
 #ifndef	__LIBXIPC_XRL_ERROR_HH__
 #define __LIBXIPC_XRL_ERROR_HH__
@@ -145,6 +145,7 @@ protected:
     string	     _note;
 };
 
+
 /**
  * Error codes for user callbacks.
  * These are a subset of @ref XrlError
@@ -158,6 +159,7 @@ public:
      * error.
      */
     inline static const XrlCmdError OKAY() { return XrlError::OKAY(); }
+
     /**
      * Return value when the method arguments are incorrect.
      */
@@ -165,6 +167,7 @@ public:
     {
 	return XrlError(XrlError::BAD_ARGS().error_code(), reason);
     }
+
     /**
      * Return value when the method could not be execute.
      */
@@ -181,13 +184,24 @@ public:
     /**
      * @return string containing representation of command error.
      */
-    inline string str() const {
+    inline string str() const
+    {
 	return string("XrlCmdError ") + _xrl_error.str();
     }
+
+    /**
+     * @return the unique identifer number associated with error.
+     */
+    inline uint32_t error_code() const
+    {
+	return _xrl_error.error_code();
+    }
+
     /**
      * @return note associated with origin of error (i.e., the reason).
      */
-    inline string note() const {
+    inline string note() const
+    {
 	return _xrl_error.note();
     }
 private:
@@ -195,11 +209,20 @@ private:
     const XrlError _xrl_error;
 };
 
+
+/**
+ * Test for equality between a pair of XrlError instances.  The test
+ * only examines the error codes associated with each instance.
+ */
 inline bool operator==(const XrlError& e1, const XrlError& e2)
 {
     return e1.error_code() == e2.error_code();
 }
 
+/**
+ * Test for inequality between a pair of XrlError instances.  The test
+ * only examines the error codes associated with each instance.
+ */
 inline bool operator!=(const XrlError& e1, const XrlError& e2)
 {
     return e1.error_code() != e2.error_code();
