@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/config_param.hh,v 1.3 2003/02/26 00:14:13 pavlin Exp $
+// $XORP: xorp/libxorp/config_param.hh,v 1.4 2003/03/10 23:20:31 hodson Exp $
 
 #ifndef __LIBXORP_CONFIG_PARAM_HH__
 #define __LIBXORP_CONFIG_PARAM_HH__
@@ -37,7 +37,7 @@ public:
      * Create a configurable parameter, and initialize its initial
      * and current value.
      * 
-     * @param value the initial and currant value to initialize the
+     * @param value the initial and current value to initialize the
      * parameter to.
      */
     explicit ConfigParam(const T& value)
