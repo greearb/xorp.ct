@@ -8660,6 +8660,25 @@ gl_reset_line(GetLine *gl)
  */
   gl->ntotal = 0;
   gl->line[0] = '\0';
+#if 0	/* TODO: do we need those? */
+  gl->number = -1;
+  gl->endline = 0;
+  gl->vi.command = 0;
+  gl->vi.undo.line[0] = '\0';
+  gl->vi.undo.ntotal = 0;
+  gl->vi.undo.buff_curpos = 0;
+  gl->vi.repeat.fn = 0;
+  gl->last_signal = -1;
+#endif /* 0 */
+
+/*
+ * Forget any previous recall session.
+ */
+  gl->preload_id = 0;
+/*
+ * Recall the next oldest line in the history list.
+ */
+  _glh_current_line(gl->glh, gl->line, gl->linelen);
 /*
  * Move the terminal cursor to just after the prompt.
  */
