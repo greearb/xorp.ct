@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.40 2005/03/18 03:46:09 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.41 2005/03/18 18:41:21 atanu Exp $
 #
 
 #
@@ -167,6 +167,22 @@ bgp_peer_unchanged()
 	    break
 	fi
     done
+}
+
+delay()
+{
+    # XXX - decrementing the counter to zero generates an error?
+    # So count down to one
+    echo "Sleeping for $1 seconds"
+    let counter=$1+1
+    while [ $counter != 1 ]
+    do
+	sleep 1
+	let counter=counter-1
+	echo -e " $counter      \r\c"
+    done
+
+    return 0
 }
 
 test1()
@@ -769,16 +785,20 @@ test15()
 
     # Check all the sent packets and verify that they arrived at peer3
     XRLS=${TMPDIR}/xrls.$EXT
+    echo "Building lookup list in $XRLS"
     cat $SENT | python $srcdir/lookup.py --peer peer3 \
 					 --trie recv \
 					 --add 65008 > $XRLS
+    echo "Performing lookup"					 
     $CALLXRL -f $XRLS
 
     # Check all the received packets and verify that they were sent by peer1
     XRLS=${TMPDIR}/xrls.$EXT
+    echo "Building lookup list in $XRLS"
     cat $RECV | python $srcdir/lookup.py --peer peer1 \
 					 --trie sent \
 					 --remove 65008 > $XRLS
+    echo "Performing lookup"					 
     $CALLXRL -f $XRLS
 
     # Make sure that the peer1 connection is still established
@@ -835,16 +855,20 @@ test16()
 
     # Check all the sent packets and verify that they arrived at peer1
     XRLS=${TMPDIR}/xrls.$EXT
+    echo "Building lookup list in $XRLS"
     cat $SENT | python $srcdir/lookup.py --peer peer1 \
 					 --trie recv > $XRLS
+    echo "Performing lookup"					 
     $CALLXRL -f $XRLS
 
 
     # Check all the received packets and verify that they were sent by peer2
     XRLS=${TMPDIR}/xrls.$EXT
+    echo "Building lookup list in $XRLS"
     cat $RECV | python $srcdir/lookup.py --peer peer2 \
 					 --trie sent \
 					 --remove 65008 > $XRLS
+    echo "Performing lookup"					 
     $CALLXRL -f $XRLS
 
     # Make sure that the peer1 connection is still established
@@ -854,7 +878,128 @@ test16()
     rm -f $SENT $RECV $XRLS
 }
 
-TESTS_NOT_FIXED='test10 test11 test12'
+test17()
+{
+    echo "TEST17:"
+    echo "      1) Run test15 thrice" 
+
+    test15 $*
+    test15 $*
+    test15 $*
+}
+
+test_work_in_progress()
+{
+    TFILE=$1
+
+    echo "TEST:"
+    echo "      1) Start injecting a saved feed (peer1 I-BGP) - $TFILE" 
+    echo "      2) Wait until the whole feed has been sent" 
+    echo "      3) Bring up a second peering (peer3 E-BGP)"
+    echo "      4) Verify all sent packets arrived"
+    echo "      5) Verify all received packets were sent"
+
+    # Reset the peers
+    reset
+
+    # Establish the EBGP peering.
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
+    coord peer1 assert established
+
+    # Save the traffic that we send on peer1
+    SENT=${TMPDIR}/peer1_sent.text.$EXT
+    rm -f $SENT
+    coord peer1 dump sent text ipv4 traffic $SENT
+
+    # send in the saved file
+    UPDATES=
+    NOBLOCK=true coord peer1 send dump mrtd update $TFILE $UPDATES
+
+    # Wait for the whole feed to be sent it may not all have arrived at BGP
+    bgp_peer_unchanged peer1
+
+    # XXXX
+    # Put a big delay here if you want all the packets to have been processed
+    # by BGP.
+
+    for i in 1 2
+    do
+	# Drop receive peering the first time round we are not connected
+	coord peer3 disconnect
+
+	# Save the traffic that we receive on peer3 useful for debugging
+	RECV=${TMPDIR}/peer3_recv.text.$EXT
+	rm -f $RECV
+	coord peer3 dump recv text ipv4 traffic $RECV
+
+	# Bring up a second peering and wait for all the updates to arrive
+	coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.103
+
+	# Wait for the whole feed to be received
+	bgp_peer_unchanged peer3
+
+	# Check all the sent packets and verify that they arrived at peer3
+	XRLS=${TMPDIR}/xrls.$EXT
+	cat $SENT | python $srcdir/lookup.py --peer peer3 \
+					 --trie recv \
+					 --add 65008 > $XRLS
+	$CALLXRL -f $XRLS
+
+	# Check all the received packets and verify that they were sent by peer1
+	XRLS=${TMPDIR}/xrls.$EXT
+	cat $RECV | python $srcdir/lookup.py --peer peer1 \
+					 --trie sent \
+					 --remove 65008 > $XRLS
+	$CALLXRL -f $XRLS
+
+	# Make sure that the peer1 connection is still established
+	coord peer1 assert established
+	coord peer3 assert established
+    done
+
+    # Stop saving received packets
+    coord peer3 dump recv text ipv4 traffic
+
+    for i in 1 2 3 4 5 6 7 8 9 10
+    do
+	# drop feed peering
+	coord peer1 disconnect
+
+	# Establish the EBGP peering.
+	coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
+	coord peer1 assert established
+
+	# Save the traffic that we send on peer1
+	SENT=${TMPDIR}/peer1_sent.text.$EXT
+	rm -f $SENT
+	coord peer1 dump sent text ipv4 traffic $SENT
+
+	# send in the saved file
+	UPDATES=
+	NOBLOCK=true coord peer1 send dump mrtd update $TFILE $UPDATES
+
+	# Wait for the whole feed to be sent it may not all have arrived at BGP
+	bgp_peer_unchanged peer1
+
+	# Wait for the whole feed to be received
+	bgp_peer_unchanged peer3
+
+	# Check all the sent packets and verify that they arrived at peer3
+	XRLS=${TMPDIR}/xrls.$EXT
+	cat $SENT | python $srcdir/lookup.py --peer peer3 \
+					 --trie recv \
+					 --add 65008 > $XRLS
+	$CALLXRL -f $XRLS
+
+	# Make sure that the peer1 connection is still established
+	coord peer1 assert established
+	coord peer3 assert established
+    done
+
+    rm -f $SENT $RECV $XRLS
+}
+
+TESTS_NOT_FIXED='test10 test11 test12 test17'
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test13 test14
     test15 test16'
 
