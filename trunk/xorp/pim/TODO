@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.52 2003/07/07 22:15:07 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.53 2003/07/12 01:18:04 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -699,26 +699,14 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
    desire to receive traffic from S.
 
 * IMPL: Unite INPUT_STATE_MRIB_RP_CHANGED and INPUT_STATE_MRIB_S_CHANGED ??
-
-* IMPL: make sure that add_pim_mre() and delete_pim_mre() are called
-  as appropriate.
-
-* IMPL: why create_flags to pim_mre_find() is not 0 for (*,*,RP) Prune?
-  (See PimJpHeader::mrt_commit())
-  Similar for other J/P messages that have no impact if no PimMre state
-  existed.
+  (XXX: not need for this??)
 
 * IMPL: when updating an (S,G,rpt) entry with a new RP or MRIB to the RP,
   (re)use the (*,G) information instead of computing the new info
   for each (S,G,rpt) entry for that (*,G) entry.
 
-* IMPL: scheduling a number of tasks at the same time
-  may result in CPU starvation if the number of tasks is too large,
-  because all of the tasks would have to be processed once before
-  giving-up the CPU.
-
 * IMPL: PAVPAVPAV: get rid of the INPUT_STATE_RPFP_*_CHANGED
-  input changes.
+  input changes. (XXX: not need for this??)
 
 * IMPL: PAVPAVPAV: CHeck whether for all PimMreTask operations
   that require vif_index, we can compute the required
@@ -727,20 +715,14 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 * IMPL: when removing a PimNbr, make sure it is not in use anymore
   by any PimMre or other entry.
 
-* IMPL: Remove the following input actions in PimMreTrackState, because
-  they are not used?
-  INPUT_STATE_RECEIVE_PRUNE_RP
-  INPUT_STATE_RECEIVE_PRUNE_SG_RPT
-
 * SPEC: When the RP changes, then it could be that
   both events occur for the upstream (*,G) state machine:
   "JoinDesired(*,G) -> False"
   and MRIB.next_hop(RP(G)) changed.
   In that case, does it matter in what order the actions are performed?
   
-* IMPL: make sure that PimMre::recompute_mrib_next_hop_s_changed() is used.
-
 * IMPL: Unite in PimMreTrackState MRIB_NEXT_HOP_RP with MRIB_NEXT_HOP_RP_G
+  (XXX: not need for this??)
 
 * SPEC: fix the definition for "acceptable metric" for (*,G) to
   be rpt_assert_metric(*,G,I) instead of my_assert_metric(S,G,I)
@@ -755,25 +737,6 @@ Wed May 29 21:02:59 JST 2002  suz@crl.hitachi.co.jp
         algorithm bugs for P2P connected routes and static interface
         routes (reported from pekkas@netcore.fi)
 
-
-* IMPL: track state dependency for setting MFC in the kernel:
-  "On receipt on a data from S to G on interface iif:"
-bool
-PimMre::recompute_inherited_olist_sg()
-{
-    // TODO: XXX: PAVPAVPAV: incomplete! CHECK THE SPEC for other dependencies:
-    // - "On receipt on a data from S to G on interface iif:"
-    // - packet_arrives_on_rp_tunnel( pkt )
-    // - The Packet forwarding rules simplification for PIM-SSM-only router
-    
-    return (recompute_is_join_desired_sg());
-}
-
-* IMPL: Do we want the following input state for tracking dependency?
-  input_state_rpfp_nbr_wc_changed(actions_t& actions)
-  It seems that this should be "track_state_*" instead.
-  Similar for the other input_state_rpfp_nbr_*
-
 * SPEC: Why there is no entry for RPF'(S,G,rpt) changed for the
   Upstream (S,G,rpt) state machine?
 
@@ -786,10 +749,6 @@ PimMre::recompute_inherited_olist_sg()
   In particular, make sure that (*,G) or (*,*,RP(G)) Joined state is
   the right one before attempting to set the (S,G,rpt) state.
 
-* IMPL: OUTPUT_STATE_ASSERT_RECEIVE_JOIN_RP is not really used, because
-  the (*,*,RP) Join action is exactly same as the (*,G) Join action.
-  Therefore, maybe delete it?
-
 * SPEC+IMPL: if an Assert is received for (S,G) or (*,G) we have
   state for, then just silently ignore it?
   However, make sure that an (S,G) is created if it is
@@ -799,31 +758,15 @@ PimMre::recompute_inherited_olist_sg()
   regarding (S,G) Assert Message State Machine) should be
   moved to the security section.
 
-* SPEC: All AssertWinner related comparison such as
+* SPEC+IMPL: All AssertWinner related comparison such as
   "AssertWinner(*,G,I) == me"
   should replace "me" with "my_ip_address(I)".
 
-* IMPL: All AssertWinner related comparison such as
+* SPEC+IMPL: All AssertWinner related comparison such as
   "AssertWinner(*,G,I) == me"
   should replace "me" with "my_ip_address(I)", and
   should use as appropriate to "track_dependency"
   PimMre::with track_dependency_my_ip_address()
-
-* IMPL: Get rid of the following method:
-PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
-
-* IMPL: Do we want to add to track_dependency the following macro
-  in "4.5.8.  (S,G,rpt) Periodic Messages" :
-
-  "include a Prune(S,G,rpt) in the compound Join/Prune message:"
-  if( SPTbit(S,G) == TRUE ) {
-      # Note: If receiving (S,G) on the SPT, we only prune off the
-      # shared tree if the rpf neighbors differ.
-    ...
-
-
-* IMPL: implement track_dependency for:
-  packet_arrives_on_rp_tunnel( pkt )
 
 * SPEC: change
     "# note that this should not happen if the lower layer is working"
@@ -832,50 +775,18 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
 
 * SPEC: Change everywhere Could-Register to CouldRegister(S,G)
 
-* IMPL: Implement the following from section 4.2.2 re. Update_SPTbit(S,G,iif)
-   "Additionally a router sets SPTbit(S,G) to TRUE when it receives an
-   Assert(S,G) on RPF_interface(S)."
-
-* Add method PimMre::recompute_update_sptbit_sg() or sth. like that
-  and call it when appropriate. Also, add similar methods for
-  other macros recomputation.
-
-* IMPL: Make sure that when implementing "Data Packet Forwarding Rules",
-  the implementation of the
-  "On receipt on (of?) a data from S to G on interface iif:"
-   considers the track_dependency_*() as well.
-
-* IMPL: rename PimMre::assert_winner_state() and assert_loser_state()
-  to i_am_assert_winner_state() and i_am_assert_loser_state() ??
-
 * SPEC: Update_SPTbit() definition:
     // TODO: XXX: PAVPAVPAV: SPEC: what about if no (S,G,rpt) entry?? 
 
 * SPEC: what about sending Assert based on an (S,G,rpt) or
   (S,G) that is pending SPT switch?
 
-* IMPL:  // TODO: XXX: PAVPAVPAV: recompute_assert_receiver_join_wc()
-      // should be called on all (*,G) entries for this (*,*,RP) entry!!
-
 * IMPL: Do we want to create methods that take care of (S,G,rpt) entries
   when both the MRIB(S) and MRIB(RP) change at the same time?
 
-* Change the RpTable apply/commit to be similar to the PimMribTable:
-  when add RPs, put them on an separate list, then when call
-  commit(), the newly added RPs are really put to the main RP table.
-  Similarly, the apply_rp_changes() would only take care of
-  applying changes to the PimMre entries because of the RP changes.
-
-* When using an iterator for all (S,G) or (S,G,rpt) entries for a group,
-  make sure that no entry is added/deleted in the middle, and/or that
-  even if added/deleted, the loop would be OK.
-
-* Make the set of neighbors (per PimVif) a <map> instead of <list>.
+* IMPL: Make the set of neighbors (per PimVif) a <map> instead of <list>.
   Needed if the number of neighbors become quite large, so the
   neighbor lookup will become much faster.
-
-* IMPL: make sure that Override_Interval(I) and
-  J/P_Override_Iterval(I) are not mixed up!!
 
 * SPEC+IMPL
   SPEC: The unicast routing may show one MRIB address, but the upstream
@@ -885,7 +796,7 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
   is destined to the primary IP address of that interface, but to
   any address.
 
-* IMPL:
+* SPEC+IMPL:
   When an interface goes down or changes IP address, a Hello message with
   a zero Hold Time should be sent immediately (with the old IP address if
   the IP address changed).  This will cause PIM neighbors to remove this
@@ -897,21 +808,11 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
   message with the holdtime of 0. However, taking interface DOWN 
   may send Prune messages, so need to be careful here...
 
-
-* IMPL: If a (*,G) or (*,*,RP) PimMre entry is deleted, make sure that
-  all pointers to it from corresponding (S,G), (S,G,rpt), (*,G) entries
-  are deleted (the last one only for (*,*,RP)
-
 * IMPL: In PimVif::start(), add a timer for add_protocol_mld6igmp(), so if
   the PIM vif registration with MLD6IGMP fails, try again after some
   period of time. Similar repeated trying should be done for
   other registrations as well (e.g. with MFEA). Similar TODO applies
   for other modules (e.g., MLD6IGMP).
-
-* IMPL: Make the initiation add/delete_protocol from PIM to MLD6IGMP
-  part of PimNode, and then implement the particular interface inside
-  xrl_pim_node.cc. 
-  The add/delete_protocol would be called when pim_vif.start() or stop().
 
 * IMPL: Check if multicast add_vif on Linux and Solaris allow
   VIF_REGISTER to have any address (e.g., 127.0.0.2). If allowed,
@@ -925,10 +826,6 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
 * IMPL: Check whether KAME's pim6sd RP hash computation that uses CRC
   in a complicated way is same result as the XOR that is specified
   in the spec.
-
-* IMPL: Print warning messages when ignoring a control message.
-
-* IMPL+TEST: Test Bootstrap fragmentation sending and receiving
 
 * SPEC:
   If the Elected BSR is a neighbor, and that neighbor expired,
@@ -944,18 +841,14 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
 * IMPL+SPEC: Can an intermediate router that forwards a Bootstrap message
   fragment it to fit the max. size on the outgoing link?
 
-* If there is a scope boundary for some group range, it must
+* IMPL+SPEC: If there is a scope boundary for some group range, it must
   be a scope boundary (in case of IPv4) for 239.255.0.0/16
   (the IPv4 Local Scope).
 
-* IMPL: There is some inconsistency between "show igmp interface"
-  and "show pim interfaces" commands: the command name,
-  as well as the command output.
-
 * IMPL: Implement RFC 1256 (Router Solicitation)
 
-* IMPL: When the BSR collects all cand. RPs for a prefix, if their number is
-  larger than 255, distribute only the best 255 prefixes.
+* IMPL+SPEC: When the BSR collects all cand. RPs for a prefix, if their number
+  is larger than 255, distribute only the best 255 RPs.
 
 * IMPL+SPEC: take care of the SZ Timer in the BSR spec: unclear when set,
   what means "always running", etc. See page 8 and 9 of the spec.
@@ -973,9 +866,6 @@ this experimental RFC.
 
 * IMPL+SPEC: What if the "Hash Mask len" is different for different prefixes
   in the Bootstrap message? Any issues if different??
-
-* IMPL: Settle the logistics for start()/stop()/enable()/disable() and
-  syncronize the implementation for all modules to use it.
 
 * TODO (kernel and PIM-SM impl):
 > One limitation with using this option is, it won't allow fragmentation
