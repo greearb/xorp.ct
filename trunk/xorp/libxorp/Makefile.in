@@ -735,10 +735,10 @@ xlog.o: xlog.c
 # If this code is commented out, please upgrade to python2.0 or above.
 
 @PY_BUILD@callback_nodebug.hh: callback-gen.py
-@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -b 6 -l 13 > $(srcdir)/callback_nodebug.hh
+@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -b 6 -l 15 > $(srcdir)/callback_nodebug.hh
 
 @PY_BUILD@callback_debug.hh: callback-gen.py
-@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -d -b 6 -l 13 > $(srcdir)/callback_debug.hh
+@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -d -b 6 -l 15 > $(srcdir)/callback_debug.hh
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
