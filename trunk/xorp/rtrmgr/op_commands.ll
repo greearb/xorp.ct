@@ -34,6 +34,11 @@
 	return COLON;
 	}
 
+\<[a-zA-Z0-9\-_ \t]*\>	{
+	opcmdlval = strdup(opcmdtext);
+	return WILDCARD;
+        }
+
 "%module"	{
 	return CMD_MODULE;
 	}

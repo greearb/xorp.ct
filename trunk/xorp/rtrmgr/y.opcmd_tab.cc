@@ -71,66 +71,67 @@ static int yygrowstack();
 #define CMD_OPT_PARAMETER 264
 #define CMD_TAG 265
 #define VARIABLE 266
-#define LITERAL 267
-#define STRING 268
-#define SYNTAX_ERROR 269
+#define WILDCARD 267
+#define LITERAL 268
+#define STRING 269
+#define SYNTAX_ERROR 270
 const short opcmdlhs[] = {                                        -1,
-    0,    0,    0,    1,    4,    4,    6,    6,    3,    7,
-    5,    8,   10,    9,    9,   11,   11,   11,   11,   12,
-   13,   14,   15,   16,   16,    2,
+    0,    0,    0,    1,    4,    4,    6,    6,    6,    3,
+    7,    8,    5,    9,   11,   10,   10,   12,   12,   12,
+   12,   13,   14,   15,   16,   17,   17,    2,
 };
 const short opcmdlen[] = {                                         2,
     0,    2,    1,    3,    0,    2,    1,    1,    1,    1,
-    3,    1,    1,    1,    2,    1,    1,    1,    1,    4,
-    5,    5,    5,    3,    3,    1,
+    1,    1,    3,    1,    1,    1,    2,    1,    1,    1,
+    1,    4,    5,    5,    5,    3,    3,    1,
 };
 const short opcmddefred[] = {                                      0,
-    9,   26,    0,    0,    3,    0,    2,   10,    7,    0,
-    0,    8,   12,    4,    0,    6,    0,    0,    0,    0,
-    0,    0,   16,   17,   18,   19,    0,    0,    0,    0,
-   13,   11,   15,    0,    0,    0,    0,   20,    0,    0,
-    0,    0,    0,   21,   22,   23,   24,   25,
+   10,   28,    0,    0,    3,    0,    2,   11,   12,    7,
+    0,    0,    8,    9,   14,    4,    0,    6,    0,    0,
+    0,    0,    0,    0,   18,   19,   20,   21,    0,    0,
+    0,    0,   15,   13,   17,    0,    0,    0,    0,   22,
+    0,    0,    0,    0,    0,   23,   24,   25,   26,   27,
 };
 const short opcmddgoto[] = {                                       3,
-    4,    5,    6,   10,   14,   11,   12,   15,   21,   32,
-   22,   23,   24,   25,   26,   40,
+    4,    5,    6,   11,   16,   12,   13,   14,   17,   23,
+   34,   24,   25,   26,   27,   28,   42,
 };
-const short opcmdsindex[] = {                                   -259,
-    0,    0,    0, -259,    0, -265,    0,    0,    0, -248,
- -265,    0,    0,    0, -258,    0, -247, -246, -245, -244,
- -241, -258,    0,    0,    0,    0, -249, -243, -242, -240,
-    0,    0,    0, -239, -235, -235, -238,    0, -237, -230,
- -228, -227, -256,    0,    0,    0,    0,    0,
+const short opcmdsindex[] = {                                   -258,
+    0,    0,    0, -258,    0, -259,    0,    0,    0,    0,
+ -254, -259,    0,    0,    0,    0, -260,    0, -249, -245,
+ -244, -243, -240, -260,    0,    0,    0,    0, -248, -250,
+ -247, -242,    0,    0,    0, -238, -239, -239, -246,    0,
+ -235, -232, -231, -230, -255,    0,    0,    0,    0,    0,
 };
-const short opcmdrindex[] = {                                     19,
-    0,    0,    0,   19,    0, -236,    0,    0,    0,    0,
- -236,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0, -234,    0,    0,    0,    0,    0,    0,    0,    0,
+const short opcmdrindex[] = {                                     30,
+    0,    0,    0,   30,    0, -226,    0,    0,    0,    0,
+    0, -226,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0, -225,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 };
-const short opcmdgindex[] = {                                     18,
-    0,    0,   -6,   22,    0,    0,    0,    0,   12,    0,
-    0,    0,    0,    0,    0,   -1,
+const short opcmdgindex[] = {                                     28,
+    0,    0,   -6,   22,    0,    0,    0,    0,    0,   11,
+    0,    0,    0,    0,    0,    0,   -2,
 };
-#define YYTABLESIZE 35
-const short opcmdtable[] = {                                       9,
-    8,    1,   17,   18,    9,   19,   20,    1,   13,    2,
-   47,   48,   27,   28,   29,   30,   31,   34,    1,   38,
-    5,    7,   43,   14,   35,   36,   37,   39,   44,   42,
-   45,   46,   16,   33,   41,
+#define YYTABLESIZE 36
+const short opcmdtable[] = {                                      10,
+   19,   20,   15,   21,   22,   10,    8,    9,    1,    1,
+   29,    2,   49,   50,   30,   31,   32,   33,   37,   36,
+   40,   38,   44,   41,   45,   39,   46,   47,   48,    1,
+    5,    7,   16,   18,   35,   43,
 };
 const short opcmdcheck[] = {                                       6,
-  266,  267,  261,  262,   11,  264,  265,  267,  257,  269,
-  267,  268,  260,  260,  260,  260,  258,  267,    0,  259,
-  257,    4,  260,  258,  268,  268,  267,  263,  259,  268,
-  259,  259,   11,   22,   36,
+  261,  262,  257,  264,  265,   12,  266,  267,  268,  268,
+  260,  270,  268,  269,  260,  260,  260,  258,  269,  268,
+  259,  269,  269,  263,  260,  268,  259,  259,  259,    0,
+  257,    4,  258,   12,   24,   38,
 };
 #define YYFINAL 3
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 269
+#define YYMAXTOKEN 270
 #if YYDEBUG
 const char * const opcmdname[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -141,7 +142,7 @@ const char * const opcmdname[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"UPLEVEL","DOWNLEVEL","END",
 "COLON","CMD_MODULE","CMD_COMMAND","CMD_HELP","CMD_OPT_PARAMETER","CMD_TAG",
-"VARIABLE","LITERAL","STRING","SYNTAX_ERROR",
+"VARIABLE","WILDCARD","LITERAL","STRING","SYNTAX_ERROR",
 };
 const char * const opcmdrule[] = {
 "$accept : input",
@@ -153,8 +154,10 @@ const char * const opcmdrule[] = {
 "word_or_variable_list : word_or_variable word_or_variable_list",
 "word_or_variable : word",
 "word_or_variable : variable",
+"word_or_variable : wildcard",
 "word : LITERAL",
 "variable : VARIABLE",
+"wildcard : WILDCARD",
 "specification : startspec attributes endspec",
 "startspec : UPLEVEL",
 "endspec : DOWNLEVEL",
@@ -203,7 +206,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 110 "op_commands.yy"
+#line 115 "op_commands.yy"
 
 extern "C" int opcmdparse();
 extern int opcmdlex();
@@ -597,7 +600,7 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 601 "y.opcmd_tab.c"
+#line 604 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -793,74 +796,78 @@ yyreduce:
     switch (yyn)
     {
 case 4:
-#line 41 "op_commands.yy"
+#line 42 "op_commands.yy"
 { }
 break;
 case 6:
-#line 45 "op_commands.yy"
+#line 46 "op_commands.yy"
 { }
-break;
-case 9:
-#line 52 "op_commands.yy"
-{ append_path_word(yyvsp[0]); }
 break;
 case 10:
-#line 55 "op_commands.yy"
-{ append_path_variable(yyvsp[0]); }
+#line 54 "op_commands.yy"
+{ append_path_word(yyvsp[0]); }
 break;
 case 11:
-#line 58 "op_commands.yy"
-{ }
+#line 57 "op_commands.yy"
+{ append_path_variable(yyvsp[0]); }
 break;
 case 12:
-#line 61 "op_commands.yy"
-{ push_path(); }
+#line 60 "op_commands.yy"
+{ append_path_word(yyvsp[0]); }
 break;
 case 13:
-#line 64 "op_commands.yy"
+#line 63 "op_commands.yy"
+{ }
+break;
+case 14:
+#line 66 "op_commands.yy"
+{ push_path(); }
+break;
+case 15:
+#line 69 "op_commands.yy"
 { pop_path(); }
 break;
-case 20:
-#line 77 "op_commands.yy"
+case 22:
+#line 82 "op_commands.yy"
 {
 				add_cmd_module(yyvsp[-1]);
 			}
 break;
-case 21:
-#line 82 "op_commands.yy"
+case 23:
+#line 87 "op_commands.yy"
 {
 				add_cmd_command(yyvsp[-2]);
 			}
 break;
-case 22:
-#line 87 "op_commands.yy"
+case 24:
+#line 92 "op_commands.yy"
 {
 				add_cmd_opt_parameter(yyvsp[-2]);
 			}
 break;
-case 23:
-#line 92 "op_commands.yy"
+case 25:
+#line 97 "op_commands.yy"
 {
 				add_cmd_tag(yyvsp[-2], yyvsp[-1]);
 			}
 break;
-case 24:
-#line 97 "op_commands.yy"
+case 26:
+#line 102 "op_commands.yy"
 {
 				add_cmd_help_tag(yyvsp[0]);
 			}
 break;
-case 25:
-#line 100 "op_commands.yy"
+case 27:
+#line 105 "op_commands.yy"
 {
 				add_cmd_help_string(yyvsp[0]);
 			}
 break;
-case 26:
-#line 105 "op_commands.yy"
+case 28:
+#line 110 "op_commands.yy"
 { opcmderror("syntax error"); }
 break;
-#line 864 "y.opcmd_tab.c"
+#line 871 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -26,6 +26,7 @@
 %token CMD_OPT_PARAMETER
 %token CMD_TAG
 %token VARIABLE
+%token WILDCARD
 %token LITERAL
 %token STRING
 %token SYNTAX_ERROR
@@ -47,12 +48,16 @@ word_or_variable_list:	/* empty */
 
 word_or_variable:	word
 			| variable
+			| wildcard
 			;
 
 word:			LITERAL { append_path_word($1); }
 			;
 
 variable:		VARIABLE { append_path_variable($1); }
+			;
+
+wildcard:		WILDCARD { append_path_word($1); }
 			;
 
 specification:		startspec attributes endspec { }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.53 2004/06/12 00:37:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.54 2004/06/12 01:38:48 pavlin Exp $"
 
 #include <pwd.h>
 
@@ -2583,6 +2583,7 @@ RouterCLI::op_mode_func(const string& ,
     string full_command = command_global_name;
     list<string> path_segments;
 
+    printf("full_command: %s\n", full_command.c_str());
     path_segments = split(command_global_name, ' ');
     for (size_t i = 0; i < argv.size(); i++) {
 	if (argv[i] == "|")

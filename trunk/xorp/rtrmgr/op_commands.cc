@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.31 2004/06/12 01:34:11 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.32 2004/06/12 03:53:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -431,6 +431,8 @@ OpCommand::command_match(const list<string>& path_parts,
 	    }
 	    if (ok == false)
 		return false;
+	} else if ((*us)[0] == '<') {
+	    /* any single word matches a wildcard */
 	} else if (*them != *us) {
 	    return false;
 	}
