@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.11 2004/12/01 03:48:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.12 2004/12/03 21:30:07 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -632,7 +632,16 @@ IfConfigSetClick::execute_click_config_generator(string& errmsg)
 	return (XORP_ERROR);
     }
 
+    //
+    // Re-generate the XORP fea/click configuration and
+    // pass it to the Click config generator.
+    //
+    // TODO: XXX: the internal re-generation is a temporary solution
+    // that should go away after the xorpsh takes over the functionality
+    // of calling the Click config generator.
+    //
     string xorp_config = regenerate_xorp_iftree_config();
+    xorp_config += regenerate_xorp_fea_click_config();
 
     // Create a temporary file
     char tmp_filename[1024] = "/tmp/xorp_fea_click.XXXXXXXX";
@@ -778,6 +787,9 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
     IfTreeVif::V4Map::const_iterator ai4;
     IfTreeVif::V6Map::const_iterator ai6;
 
+    //
+    // Configuration section: "interfaces{}"
+    //
     preamble = "";
     config += preamble + c_format("interfaces {\n");
     for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
@@ -855,6 +867,55 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 	preamble = "    ";
 	config += preamble + c_format("}\n");
     }
+    preamble = "";
+    config += preamble + c_format("}\n");
+
+    return (config);
+}
+
+string
+IfConfigSetClick::regenerate_xorp_fea_click_config() const
+{
+    string config, preamble;
+
+    //
+    // Configuration section: "fea{}"
+    //
+    // XXX: note that we write only a partial configuration: those
+    // that is related to enabling/disabling kernel or user-level Click.
+    //
+    preamble = "";
+    config += preamble + c_format("fea {\n");
+    do {
+	preamble = "    ";
+	config += preamble + c_format("click {\n");
+	do {
+	    preamble = "\t";
+	    config += preamble + c_format("enabled: %s\n",
+					  ClickSocket::is_enabled() ?
+					  "true" : "false");
+	    do {
+		config += preamble + c_format("kernel-click {\n");
+		preamble = "\t    ";
+		config += preamble + c_format("enabled: %s\n",
+					      ClickSocket::is_kernel_click() ?
+					      "true" : "false");
+		preamble = "\t";
+		config += preamble + c_format("}\n");
+	    } while (false);
+	    do {
+		config += preamble + c_format("user-click {\n");
+		preamble = "\t    ";
+		config += preamble + c_format("enabled: %s\n",
+					      ClickSocket::is_user_click() ?
+					      "true" : "false");
+		preamble = "\t";
+		config += preamble + c_format("}\n");
+	    } while (false);
+	} while (false);
+	preamble = "    ";
+	config += preamble + c_format("}\n");
+    } while (false);
     preamble = "";
     config += preamble + c_format("}\n");
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.24 2004/11/30 20:10:03 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.25 2004/12/01 03:28:11 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -630,6 +630,7 @@ private:
 					const string& error_msg);
     int write_generated_config(const string& config, string& errmsg);
     string regenerate_xorp_iftree_config() const;
+    string regenerate_xorp_fea_click_config() const;
 
     /**
      * Generate the next-hop to port mapping.
