@@ -17,9 +17,9 @@
 /*
  * Portions of this software have one or more of the following copyrights, and
  * are subject to the license below. The relevant source files are clearly
- * marked; they refer to this file using the phrase ``the Xorp LICENSE file''.
+ * marked; they refer to this file using the phrase ``the XORP LICENSE file''.
  *
- * (c) 2001-2003 International Computer Science Institute
+ * Copyright (c) 2001-2003 International Computer Science Institute
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
