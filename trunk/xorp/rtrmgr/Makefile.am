@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.16 2003/07/30 23:43:32 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.17 2003/08/01 02:11:51 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -20,7 +20,7 @@ noinst_PROGRAMS	+= test_sample_config
 noinst_PROGRAMS	+= test_module_manager
 
 # -- No-install Libraries
-noinst_LIBRARIES = 
+noinst_LIBRARIES =
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(top_builddir)/libxipc/libfinder.a
@@ -31,6 +31,7 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.a
 # -- Program Sources
 xorp_rtrmgr_SOURCES	 = rtrmgr_module.h
 xorp_rtrmgr_SOURCES	+= version.h
+xorp_rtrmgr_SOURCES	+= util.hh
 xorp_rtrmgr_SOURCES	+= y.tplt_tab.cc
 xorp_rtrmgr_SOURCES	+= lex.tplt.cc
 xorp_rtrmgr_SOURCES	+= y.boot_tab.cc
@@ -47,19 +48,20 @@ xorp_rtrmgr_SOURCES	+= master_conf_tree.cc
 xorp_rtrmgr_SOURCES	+= module_manager.cc
 xorp_rtrmgr_SOURCES	+= xorp_client.cc
 xorp_rtrmgr_SOURCES	+= xrldb.cc
-xorp_rtrmgr_SOURCES	+= split.cc
 xorp_rtrmgr_SOURCES	+= userdb.cc
+xorp_rtrmgr_SOURCES	+= util.cc
 xorp_rtrmgr_SOURCES	+= xrl_rtrmgr_interface.cc
 xorp_rtrmgr_SOURCES	+= randomness.cc
 xorp_rtrmgr_SOURCES	+= unexpanded_xrl.cc
 xorp_rtrmgr_SOURCES	+= task.cc
 
-xorp_rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.a 
-xorp_rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a 
-xorp_rtrmgr_LDADD	+= $(LDADD) 
+xorp_rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.a
+xorp_rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a
+xorp_rtrmgr_LDADD	+= $(LDADD)
 
 xorpsh_SOURCES	 = rtrmgr_module.h
 xorpsh_SOURCES	+= version.h
+xorpsh_SOURCES	+= util.hh
 xorpsh_SOURCES	+= xorpsh_main.cc
 xorpsh_SOURCES	+= y.tplt_tab.cc
 xorpsh_SOURCES	+= lex.tplt.cc
@@ -75,7 +77,7 @@ xorpsh_SOURCES	+= conf_tree_node.cc
 xorpsh_SOURCES	+= slave_conf_tree_node.cc
 xorpsh_SOURCES	+= conf_tree.cc
 #slave_module_manager really shouldn't be needed
-xorpsh_SOURCES	+= slave_module_manager.cc 
+xorpsh_SOURCES	+= slave_module_manager.cc
 xorpsh_SOURCES	+= slave_conf_tree.cc
 xorpsh_SOURCES	+= xorp_client.cc
 xorpsh_SOURCES	+= xrldb.cc
@@ -83,12 +85,13 @@ xorpsh_SOURCES	+= cli.cc
 xorpsh_SOURCES	+= command_tree.cc
 xorpsh_SOURCES	+= op_commands.cc
 xorpsh_SOURCES	+= popen.cc
-xorpsh_SOURCES	+= split.cc
-xorpsh_SOURCES	+= xrl_xorpsh_interface.cc
-#unexpanded_xrl shouldn't really be needed
-xorpsh_SOURCES	+= unexpanded_xrl.cc
 #task.cc shouldn't really be needed
 xorpsh_SOURCES  += task.cc
+#unexpanded_xrl shouldn't really be needed
+xorpsh_SOURCES	+= unexpanded_xrl.cc
+xorpsh_SOURCES	+= util.cc
+
+xorpsh_SOURCES	+= xrl_xorpsh_interface.cc
 
 xorpsh_LDADD	= $(top_builddir)/cli/libcli.a
 xorpsh_LDADD	+= $(top_builddir)/libproto/libproto.a
@@ -111,7 +114,7 @@ test_templates_SOURCES	+= conf_tree_node.cc
 test_templates_SOURCES	+= command_tree.cc
 test_templates_SOURCES	+= xorp_client.cc
 test_templates_SOURCES	+= module_manager.cc
-test_templates_SOURCES	+= split.cc
+test_templates_SOURCES	+= util.cc
 test_templates_SOURCES	+= task.cc
 test_templates_LDADD 	 = $(LDADD)
 
@@ -133,7 +136,7 @@ test_sample_config_SOURCES	+= master_conf_tree.cc
 test_sample_config_SOURCES	+= command_tree.cc
 test_sample_config_SOURCES	+= xorp_client.cc
 test_sample_config_SOURCES	+= module_manager.cc
-test_sample_config_SOURCES	+= split.cc
+test_sample_config_SOURCES	+= util.cc
 test_sample_config_SOURCES	+= task.cc
 test_sample_config_LDADD 	 = $(LDADD)
 
@@ -150,7 +153,7 @@ test_module_manager_SOURCES	+= conf_tree_node.cc
 #test_module_manager_SOURCES	+= conf_tree.cc
 test_module_manager_SOURCES	+= xorp_client.cc
 test_module_manager_SOURCES	+= module_manager.cc
-test_module_manager_SOURCES	+= split.cc
+test_module_manager_SOURCES	+= util.cc
 test_module_manager_SOURCES	+= task.cc
 test_module_manager_LDADD 	 = $(LDADD)
 
@@ -171,7 +174,7 @@ EXTRA_DIST	 += fea.boot
 
 INCLUDES =	-I$(top_srcdir)
 
-################################################################ 
+################################################################
 ## Yes, this isn't portable, but the portable way in the automake
 ## documentation doesn't work for multiple scanners in one binary.
 ## Automake sucks.
@@ -199,7 +202,7 @@ yacc:	.yacc_generated_files
 $(srcdir)/lex.tplt.cc: $(srcdir)/template.ll $(srcdir)/y.tplt_tab.cc
 	( cd $(srcdir); \
 	flex -Ptplt -olex.tplt.cc template.ll )
- 
+
 $(srcdir)/lex.boot.cc: $(srcdir)/boot.ll $(srcdir)/y.boot_tab.cc
 	( cd $(srcdir); \
 	flex -Pboot -olex.boot.cc boot.ll )

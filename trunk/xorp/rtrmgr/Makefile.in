@@ -109,25 +109,25 @@ noinst_LIBRARIES =
 LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-xorp_rtrmgr_SOURCES = rtrmgr_module.h version.h y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc main_rtrmgr.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc module_manager.cc xorp_client.cc xrldb.cc split.cc userdb.cc xrl_rtrmgr_interface.cc randomness.cc unexpanded_xrl.cc task.cc
+xorp_rtrmgr_SOURCES = rtrmgr_module.h version.h util.hh y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc main_rtrmgr.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc module_manager.cc xorp_client.cc xrldb.cc userdb.cc util.cc xrl_rtrmgr_interface.cc randomness.cc unexpanded_xrl.cc task.cc
 
-xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a  $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a  $(LDADD) 
+xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a $(LDADD)
 
 #slave_module_manager really shouldn't be needed
-#unexpanded_xrl shouldn't really be needed
 #task.cc shouldn't really be needed
-xorpsh_SOURCES = rtrmgr_module.h version.h xorpsh_main.cc y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc y.opcmd_tab.cc lex.opcmd.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc conf_tree_node.cc slave_conf_tree_node.cc conf_tree.cc slave_module_manager.cc  slave_conf_tree.cc xorp_client.cc xrldb.cc cli.cc command_tree.cc op_commands.cc popen.cc split.cc xrl_xorpsh_interface.cc unexpanded_xrl.cc task.cc
+#unexpanded_xrl shouldn't really be needed
+xorpsh_SOURCES = rtrmgr_module.h version.h util.hh xorpsh_main.cc y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc y.opcmd_tab.cc lex.opcmd.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc conf_tree_node.cc slave_conf_tree_node.cc conf_tree.cc slave_module_manager.cc slave_conf_tree.cc xorp_client.cc xrldb.cc cli.cc command_tree.cc op_commands.cc popen.cc task.cc unexpanded_xrl.cc util.cc xrl_xorpsh_interface.cc
 
 xorpsh_LDADD = $(top_builddir)/cli/libcli.a $(top_builddir)/libproto/libproto.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/librtrmgrxif.a $(top_builddir)/xrl/targets/libxorpshbase.a $(LDADD)
 
-test_templates_SOURCES = test_templates.cc y.tplt_tab.cc lex.tplt.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc command_tree.cc xorp_client.cc module_manager.cc split.cc task.cc
+test_templates_SOURCES = test_templates.cc y.tplt_tab.cc lex.tplt.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc command_tree.cc xorp_client.cc module_manager.cc util.cc task.cc
 test_templates_LDADD = $(LDADD)
 
-test_sample_config_SOURCES = test_sample_config.cc y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc command_tree.cc xorp_client.cc module_manager.cc split.cc task.cc
+test_sample_config_SOURCES = test_sample_config.cc y.tplt_tab.cc lex.tplt.cc y.boot_tab.cc lex.boot.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc conf_tree.cc master_conf_tree_node.cc master_conf_tree.cc command_tree.cc xorp_client.cc module_manager.cc util.cc task.cc
 test_sample_config_LDADD = $(LDADD)
 
 #test_module_manager_SOURCES	+= conf_tree.cc
-test_module_manager_SOURCES = test_module_manager.cc y.tplt_tab.cc lex.tplt.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc xorp_client.cc module_manager.cc split.cc task.cc
+test_module_manager_SOURCES = test_module_manager.cc y.tplt_tab.cc lex.tplt.cc template_tree.cc template_tree_node.cc template_commands.cc module_command.cc xrldb.cc unexpanded_xrl.cc conf_tree_node.cc xorp_client.cc module_manager.cc util.cc task.cc
 test_module_manager_LDADD = $(LDADD)
 
 # -- Library Sources
@@ -154,7 +154,7 @@ am_test_module_manager_OBJECTS = test_module_manager.$(OBJEXT) \
 	template_tree_node.$(OBJEXT) template_commands.$(OBJEXT) \
 	module_command.$(OBJEXT) xrldb.$(OBJEXT) \
 	unexpanded_xrl.$(OBJEXT) conf_tree_node.$(OBJEXT) \
-	xorp_client.$(OBJEXT) module_manager.$(OBJEXT) split.$(OBJEXT) \
+	xorp_client.$(OBJEXT) module_manager.$(OBJEXT) util.$(OBJEXT) \
 	task.$(OBJEXT)
 test_module_manager_OBJECTS = $(am_test_module_manager_OBJECTS)
 test_module_manager_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
@@ -170,7 +170,7 @@ am_test_sample_config_OBJECTS = test_sample_config.$(OBJEXT) \
 	unexpanded_xrl.$(OBJEXT) conf_tree_node.$(OBJEXT) \
 	conf_tree.$(OBJEXT) master_conf_tree_node.$(OBJEXT) \
 	master_conf_tree.$(OBJEXT) command_tree.$(OBJEXT) \
-	xorp_client.$(OBJEXT) module_manager.$(OBJEXT) split.$(OBJEXT) \
+	xorp_client.$(OBJEXT) module_manager.$(OBJEXT) util.$(OBJEXT) \
 	task.$(OBJEXT)
 test_sample_config_OBJECTS = $(am_test_sample_config_OBJECTS)
 test_sample_config_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
@@ -184,7 +184,7 @@ am_test_templates_OBJECTS = test_templates.$(OBJEXT) \
 	module_command.$(OBJEXT) xrldb.$(OBJEXT) \
 	unexpanded_xrl.$(OBJEXT) conf_tree_node.$(OBJEXT) \
 	command_tree.$(OBJEXT) xorp_client.$(OBJEXT) \
-	module_manager.$(OBJEXT) split.$(OBJEXT) task.$(OBJEXT)
+	module_manager.$(OBJEXT) util.$(OBJEXT) task.$(OBJEXT)
 test_templates_OBJECTS = $(am_test_templates_OBJECTS)
 test_templates_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
@@ -198,7 +198,7 @@ am_xorp_rtrmgr_OBJECTS = y.tplt_tab.$(OBJEXT) lex.tplt.$(OBJEXT) \
 	conf_tree_node.$(OBJEXT) conf_tree.$(OBJEXT) \
 	master_conf_tree_node.$(OBJEXT) master_conf_tree.$(OBJEXT) \
 	module_manager.$(OBJEXT) xorp_client.$(OBJEXT) xrldb.$(OBJEXT) \
-	split.$(OBJEXT) userdb.$(OBJEXT) xrl_rtrmgr_interface.$(OBJEXT) \
+	userdb.$(OBJEXT) util.$(OBJEXT) xrl_rtrmgr_interface.$(OBJEXT) \
 	randomness.$(OBJEXT) unexpanded_xrl.$(OBJEXT) task.$(OBJEXT)
 xorp_rtrmgr_OBJECTS = $(am_xorp_rtrmgr_OBJECTS)
 xorp_rtrmgr_DEPENDENCIES = $(top_builddir)/xrl/targets/librtrmgrbase.a \
@@ -217,8 +217,8 @@ am_xorpsh_OBJECTS = xorpsh_main.$(OBJEXT) y.tplt_tab.$(OBJEXT) \
 	conf_tree.$(OBJEXT) slave_module_manager.$(OBJEXT) \
 	slave_conf_tree.$(OBJEXT) xorp_client.$(OBJEXT) xrldb.$(OBJEXT) \
 	cli.$(OBJEXT) command_tree.$(OBJEXT) op_commands.$(OBJEXT) \
-	popen.$(OBJEXT) split.$(OBJEXT) xrl_xorpsh_interface.$(OBJEXT) \
-	unexpanded_xrl.$(OBJEXT) task.$(OBJEXT)
+	popen.$(OBJEXT) task.$(OBJEXT) unexpanded_xrl.$(OBJEXT) \
+	util.$(OBJEXT) xrl_xorpsh_interface.$(OBJEXT)
 xorpsh_OBJECTS = $(am_xorpsh_OBJECTS)
 xorpsh_DEPENDENCIES = $(top_builddir)/cli/libcli.a \
 	$(top_builddir)/libproto/libproto.a \
@@ -249,8 +249,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/randomness.Po \
 @AMDEP_TRUE@	$(DEPDIR)/slave_conf_tree.Po \
 @AMDEP_TRUE@	$(DEPDIR)/slave_conf_tree_node.Po \
-@AMDEP_TRUE@	$(DEPDIR)/slave_module_manager.Po \
-@AMDEP_TRUE@	$(DEPDIR)/split.Po $(DEPDIR)/task.Po \
+@AMDEP_TRUE@	$(DEPDIR)/slave_module_manager.Po $(DEPDIR)/task.Po \
 @AMDEP_TRUE@	$(DEPDIR)/template_commands.Po \
 @AMDEP_TRUE@	$(DEPDIR)/template_tree.Po \
 @AMDEP_TRUE@	$(DEPDIR)/template_tree_node.Po \
@@ -258,7 +257,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_sample_config.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_templates.Po \
 @AMDEP_TRUE@	$(DEPDIR)/unexpanded_xrl.Po $(DEPDIR)/userdb.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xorp_client.Po $(DEPDIR)/xorpsh_main.Po \
+@AMDEP_TRUE@	$(DEPDIR)/util.Po $(DEPDIR)/xorp_client.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorpsh_main.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_rtrmgr_interface.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_xorpsh_interface.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrldb.Po $(DEPDIR)/y.boot_tab.Po \
@@ -368,7 +368,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/slave_conf_tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/slave_conf_tree_node.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/slave_module_manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/split.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/task.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_commands.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_tree.Po@am__quote@
@@ -378,6 +377,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_templates.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/unexpanded_xrl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/userdb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorpsh_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_rtrmgr_interface.Po@am__quote@
@@ -675,7 +675,7 @@ uninstall-info: uninstall-info-recursive
 	uninstall-info-recursive uninstall-recursive
 
 
-################################################################ 
+################################################################
 
 yacc:	.yacc_generated_files
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.12 2003/09/11 23:00:49 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.13 2003/09/12 00:50:57 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -23,7 +23,6 @@
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
 
-
 #include "template_tree_node.hh"
 #include "template_commands.hh"
 #include "template_tree.hh"
@@ -31,6 +30,7 @@
 #include "slave_conf_tree.hh"
 #include "cli.hh"
 #include "xorpsh_main.hh"
+#include "util.hh"
 
 //
 // Defaults
@@ -44,107 +44,11 @@ string	default_xrl_dir			= DEFAULT_XRL_DIR;
 
 static bool running;
 
-static void
-signal_handler(int signal_value)
-{
-    switch (signal_value) {
-    case SIGINT:
-	// Ignore Ctrl-C: it is used by the CLI to interrupt a command.
-	break;
-    default:
-	// XXX: anything else we have intercepted will terminate us.
-	running = false;
-	break;
-    }
-}
+static void signal_handler(int signal_value);
+static void exit_handler(CliClient*);
 
-static void
-exit_handler(CliClient*)
-{
-    running = false;
-}
-
-void
-usage(char *name)
-{
-    fprintf(stderr,
-	"usage: %s [-t cfg_dir] [-x xrl_dir]\n",
-	    name);
-    fprintf(stderr, "options:\n");
-
-    fprintf(stderr,
-	    "\t-t cfg_dir	specify config directory	[ %s ]\n",
-	    default_config_template_dir.c_str());
-
-    fprintf(stderr,
-	    "\t-x xrl_dir	specify xrl directory		[ %s ]\n",
-	    default_xrl_dir.c_str());
-
-    exit(-1);
-}
-
-//
-// Return the directory path name (without the trailing '/') to the
-// executable program "progname".
-// If the path wasn't found, the return string is empty.
-//
-string
-find_exec_path_name(const char *progname)
-{
-    char *b, *p;
-
-    // Check if we have already specified a path to the program
-    do {
-	char max_path[MAXPATHLEN + 1];
-
-	strncpy(max_path, progname,  sizeof(max_path) - 1);
-	max_path[sizeof(max_path) - 1] = '\0';
-
-	p = strrchr(max_path, '/');
-	if ( p != NULL) {
-	    // We have specified a path to the program; return that path
-	    *p = '\0';
-	    while (max_path[strlen(max_path) - 1] == '/')
-		max_path[strlen(max_path) - 1] = '\0';
-	    return (string(max_path));
-	}
-    } while (false);
-
-    //
-    // Go through the PATH environment variable and find the program location
-    //
-    char* exec_path = getenv("PATH");
-    if (exec_path == NULL)
-	return (string(""));
-
-    char buff[strlen(exec_path)];
-    strncpy(buff, exec_path, sizeof(buff) - 1);
-    buff[sizeof(buff) - 1] = '\0';
-
-    b = buff;
-    do {
-	if ((b == NULL) || (*b == '\0'))
-	    break;
-
-	// Cut-off the next directory name
-	p = strchr(b, ':');
-	if (p != NULL) {
-	    *p = '\0';
-	    p++;
-	}
-	while (b[strlen(b) - 1] == '/')
-	    b[strlen(b) - 1] = '\0';
-	string prefix_name = string(b);
-	string abs_progname = prefix_name + string("/") + string(progname);
-
-	if (access(abs_progname.c_str(), X_OK) == 0) {
-	    return (prefix_name);	// Found
-	}
-	b = p;
-    } while (true);
-
-    return (string(""));
-}
+// ----------------------------------------------------------------------------
+// XorpShell implementation
 
 XorpShell::XorpShell(const string& IPCname,
 		     const string& xorp_root_dir,
@@ -174,7 +78,6 @@ XorpShell::XorpShell(const string& IPCname,
 #if DEBUG_STARTUP
     _tt->display_tree();
 #endif
-
 
     // read the router operational template files
     try {
@@ -496,6 +399,54 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
     _router_cli->notify_user(alert, true);
 }
 
+void
+XorpShell::get_rtrmgr_pid(PID_CALLBACK cb)
+{
+    _rtrmgr_client.send_get_pid("rtrmgr", cb);
+}
+
+// ----------------------------------------------------------------------------
+// main() and it's helpers
+
+static void
+signal_handler(int signal_value)
+{
+    switch (signal_value) {
+    case SIGINT:
+	// Ignore Ctrl-C: it is used by the CLI to interrupt a command.
+	break;
+    default:
+	// XXX: anything else we have intercepted will terminate us.
+	running = false;
+	break;
+    }
+}
+
+static void
+exit_handler(CliClient*)
+{
+    running = false;
+}
+
+void
+usage(char *name)
+{
+    fprintf(stderr,
+	"usage: %s [-t cfg_dir] [-x xrl_dir]\n",
+	    name);
+    fprintf(stderr, "options:\n");
+
+    fprintf(stderr,
+	    "\t-t cfg_dir	specify config directory	[ %s ]\n",
+	    default_config_template_dir.c_str());
+
+    fprintf(stderr,
+	    "\t-x xrl_dir	specify xrl directory		[ %s ]\n",
+	    default_xrl_dir.c_str());
+
+    exit(-1);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -510,7 +461,6 @@ main(int argc, char *argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-
 
     //
     // Get the root of the tree
@@ -602,8 +552,3 @@ main(int argc, char *argv[])
     return 0;
 }
 
-void
-XorpShell::get_rtrmgr_pid(PID_CALLBACK cb)
-{
-    _rtrmgr_client.send_get_pid("rtrmgr", cb);
-}

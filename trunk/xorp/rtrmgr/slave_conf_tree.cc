@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.5 2003/05/03 21:26:46 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.6 2003/05/04 06:25:20 mjh Exp $"
 
 #define DEBUG_COMMIT
 #include "rtrmgr_module.h"
@@ -22,7 +22,7 @@
 #include "slave_conf_tree.hh"
 #include "slave_conf_tree_node.hh"
 #include "cli.hh"
-#include "split.hh"
+#include "util.hh"
 
 extern int booterror(const char *s);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.4 2003/03/10 23:21:00 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.5 2003/08/01 23:07:29 pavlin Exp $"
 
 #include <glob.h>
 #include <sys/types.h>
@@ -23,7 +23,7 @@
 #include "op_commands.hh"
 #include "y.opcmd_tab.h"
 #include "cli.hh"
-#include "split.hh"
+#include "util.hh"
 #include "popen.hh"
 
 extern int init_opcmd_parser(const char *, OpCommandList *o);

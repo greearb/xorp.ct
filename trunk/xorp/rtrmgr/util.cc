@@ -12,14 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/split.cc,v 1.2 2003/01/17 18:42:05 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/split.cc,v 1.3 2003/03/10 23:21:01 hodson Exp $"
+
+#include <list>
+#include <string>
 
 #include "rtrmgr_module.h"
-#include "config.h"
 #include "libxorp/xorp.h"
-#include <list>
+#include "libxorp/xlog.h"
+#include "util.hh"
 
-list<string> split(const string& s, char ch) {
+list<string>
+split(const string& s, char ch)
+{
     list <string> parts;
     string s2 = s;
     size_t ix;
@@ -34,3 +39,39 @@ list<string> split(const string& s, char ch) {
     return parts;
 }
 
+string
+find_exec_path_name(const char *progname)
+{
+    XLOG_ASSERT(strlen(progname) <= MAXPATHLEN);
+
+    //
+    // Look for trailing slash in progname
+    //
+    const char* p = strrchr(progname, '/');
+    if (p) {
+	return string(progname, p);
+    }
+
+    //
+    // Go through the PATH environment variable and find the program location
+    //
+    string slash_progname("/");
+    slash_progname += progname;
+    const char* s = getenv("PATH");
+    while (s != NULL && *s != '\0') {
+	const char* e = strchr(s, ':');
+	string path;
+	if (e) {
+	    path = string(s, e);
+	    s = e + 1;
+	} else {
+	    path = string(s);
+	    s = NULL;
+	}
+	string complete_path = path + slash_progname;
+	if (access(complete_path.c_str(), X_OK) == 0) {
+	    return path;
+	}
+    }
+    return string("");
+}

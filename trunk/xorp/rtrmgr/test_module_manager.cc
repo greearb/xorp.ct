@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.6 2003/05/03 21:26:47 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.7 2003/08/01 23:07:29 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
 #include "template_tree.hh"
 #include "module_manager.hh"
-#include "split.hh"
+#include "util.hh"
 
 static bool waiting = false;
 static bool run_success = false;

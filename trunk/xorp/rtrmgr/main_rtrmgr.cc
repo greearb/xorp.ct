@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.27 2003/09/16 09:35:17 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.28 2003/09/16 18:13:48 pavlin Exp $"
 
 #include <signal.h>
 
@@ -41,6 +41,7 @@
 #include "xrl_rtrmgr_interface.hh"
 #include "randomness.hh"
 #include "main_rtrmgr.hh"
+#include "util.hh"
 
 //
 // Defaults
@@ -115,69 +116,6 @@ valid_interface(const IPv4& addr)
         return true;
 
     return false;
-}
-
-//
-// Return the directory path name (without the trailing '/') to the
-// executable program "progname".
-// If the path wasn't found, the return string is empty.
-//
-string
-find_exec_path_name(const char *progname)
-{
-    char *b, *p;
-
-    // Check if we have already specified a path to the program
-    do {
-	char max_path[MAXPATHLEN + 1];
-
-	strncpy(max_path, progname,  sizeof(max_path) - 1);
-	max_path[sizeof(max_path) - 1] = '\0';
-
-	p = strrchr(max_path, '/');
-	if ( p != NULL) {
-	    // We have specified a path to the program; return that path
-	    *p = '\0';
-	    while (max_path[strlen(max_path) - 1] == '/')
-		max_path[strlen(max_path) - 1] = '\0';
-	    return (string(max_path));
-	}
-    } while (false);
-
-    //
-    // Go through the PATH environment variable and find the program location
-    //
-    char* exec_path = getenv("PATH");
-    if (exec_path == NULL)
-	return (string(""));
-
-    char buff[strlen(exec_path)];
-    strncpy(buff, exec_path, sizeof(buff) - 1);
-    buff[sizeof(buff) - 1] = '\0';
-
-    b = buff;
-    do {
-	if ((b == NULL) || (*b == '\0'))
-	    break;
-
-	// Cut-off the next directory name
-	p = strchr(b, ':');
-	if (p != NULL) {
-	    *p = '\0';
-	    p++;
-	}
-	while (b[strlen(b) - 1] == '/')
-	    b[strlen(b) - 1] = '\0';
-	string prefix_name = string(b);
-	string abs_progname = prefix_name + string("/") + string(progname);
-
-	if (access(abs_progname.c_str(), X_OK) == 0) {
-	    return (prefix_name);	// Found
-	}
-	b = p;
-    } while (true);
-
-    return (string(""));
 }
 
 int
@@ -375,12 +313,12 @@ main(int argc, char* const argv[])
 	{
 	    // Wait until the XrlRouter becomes ready
 	    bool timed_out = false;
-	    
+
 	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
 	    while (xrl_router.ready() == false && timed_out == false) {
 		eventloop.run();
 	    }
-	    
+
 	    if (xrl_router.ready() == false) {
 		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	    }
@@ -392,7 +330,7 @@ main(int argc, char* const argv[])
 	// For now we ignore that possibility...
 	//
 	xrt.set_conf_tree(ct);
-	
+
 	// For testing purposes, rtrmgr can terminate itself after some time.
 	XorpTimer quit_timer;
 	if (quit_time > 0) {

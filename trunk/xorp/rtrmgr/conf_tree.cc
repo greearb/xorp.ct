@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.4 2003/04/23 22:52:06 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.5 2003/05/23 00:02:08 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -20,7 +20,7 @@
 #include "template_commands.hh"
 #include "template_tree.hh"
 #include "conf_tree.hh"
-#include "split.hh"
+#include "util.hh"
 
 extern int init_bootfile_parser(const char *configuration,
 				const char *filename, ConfigTree *c);
