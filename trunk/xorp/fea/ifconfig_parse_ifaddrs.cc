@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.14 2003/09/30 03:07:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.15 2003/09/30 18:27:02 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -79,7 +79,8 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 	// Get the interface name
 	//
 	char tmp_if_name[IFNAMSIZ+1];
-	strncpy(tmp_if_name, ifa->ifa_name, sizeof(tmp_if_name));
+	strncpy(tmp_if_name, ifa->ifa_name, sizeof(tmp_if_name) - 1);
+	tmp_if_name[sizeof(tmp_if_name) - 1] = '\0';
 	char* cptr;
 	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) {
 	    // Replace colon with null. Needed because in Solaris and Linux
@@ -119,7 +120,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 		struct ifreq ifridx;
 		memset(&ifridx, 0, sizeof(ifridx));
 		strncpy(ifridx.ifr_name, if_name.c_str(),
-			sizeof(ifridx.ifr_name));
+			sizeof(ifridx.ifr_name) - 1);
 	    
 		s = socket(AF_INET, SOCK_DGRAM, 0);
 		if (s < 0) {
@@ -187,7 +188,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 		struct ifreq ifridx;
 		memset(&ifridx, 0, sizeof(ifridx));
 		strncpy(ifridx.ifr_name, if_name.c_str(),
-			sizeof(ifridx.ifr_name));
+			sizeof(ifridx.ifr_name) - 1);
 	    
 		s = socket(AF_INET, SOCK_DGRAM, 0);
 		if (s < 0) {
@@ -238,7 +239,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 		struct ifreq ifridx;
 		memset(&ifridx, 0, sizeof(ifridx));
 		strncpy(ifridx.ifr_name, if_name.c_str(),
-			sizeof(ifridx.ifr_name));
+			sizeof(ifridx.ifr_name) - 1);
 	    
 		s = socket(AF_INET, SOCK_DGRAM, 0);
 		if (s < 0) {

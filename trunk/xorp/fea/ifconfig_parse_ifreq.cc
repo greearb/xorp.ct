@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.14 2003/09/30 03:07:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.15 2003/09/30 18:27:02 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -100,7 +100,8 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	// Get the interface name
 	//
 	char tmp_if_name[IFNAMSIZ+1];
-	strncpy(tmp_if_name, ifreq->ifr_name, sizeof(tmp_if_name));
+	strncpy(tmp_if_name, ifreq->ifr_name, sizeof(tmp_if_name) - 1);
+	tmp_if_name[sizeof(tmp_if_name) - 1] = '\0';
 	char* cptr;
 	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) {
 	    // Replace colon with null. Needed because in Solaris and Linux
@@ -130,7 +131,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		
 		memset(&ifridx, 0, sizeof(ifridx));
 		strncpy(ifridx.ifr_name, if_name.c_str(),
-			sizeof(ifridx.ifr_name));
+			sizeof(ifridx.ifr_name) - 1);
 		if (ioctl(sock(family), SIOCGIFINDEX, &ifridx) < 0) {
 		    XLOG_ERROR("ioctl(SIOCGIFINDEX) for interface %s failed: %s",
 			       if_name.c_str(), strerror(errno));
@@ -299,7 +300,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 #ifdef SIOCGIFADDR
 		memset(&ifrcopy, 0, sizeof(ifrcopy));
 		strncpy(ifrcopy.ifr_name, if_name.c_str(),
-			sizeof(ifrcopy.ifr_name));
+			sizeof(ifrcopy.ifr_name) - 1);
 		ifrcopy.ifr_addr.sa_family = family;
 		if (ioctl(sock(family), SIOCGIFADDR, &ifrcopy) < 0) {
 		    // XXX: the interface probably has no address. Ignore.
@@ -319,7 +320,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		
 		memset(&ifrcopy6, 0, sizeof(ifrcopy6));
 		strncpy(ifrcopy6.ifr_name, if_name.c_str(),
-			sizeof(ifrcopy6.ifr_name));
+			sizeof(ifrcopy6.ifr_name) - 1);
 		ifrcopy6.ifr_ifru.ifru_addr.sin6_family = family;
 		if (ioctl(sock(family), SIOCGIFADDR_IN6, &ifrcopy6) < 0) {
 		    XLOG_ERROR("ioctl(SIOCGIFADDR_IN6) failed: %s",

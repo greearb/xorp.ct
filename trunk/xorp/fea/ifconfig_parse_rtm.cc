@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.12 2003/09/30 03:07:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.13 2003/09/30 18:27:02 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -261,7 +261,8 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 		XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
 	    }
 	    memset(&ifridx, 0, sizeof(ifridx));
-	    strncpy(ifridx.ifr_name, if_name.c_str(), sizeof(ifridx.ifr_name));
+	    strncpy(ifridx.ifr_name, if_name.c_str(),
+		    sizeof(ifridx.ifr_name) - 1);
 	    if (ioctl(s, SIOCGIFINDEX, &ifridx) < 0) {
 		XLOG_ERROR("ioctl(SIOCGIFINDEX) for interface %s failed: %s",
 			   ifridx.ifr_name, strerror(errno));
@@ -314,7 +315,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	    struct ifreq ifridx;
 	    memset(&ifridx, 0, sizeof(ifridx));
 	    strncpy(ifridx.ifr_name, if_name.c_str(),
-		    sizeof(ifridx.ifr_name));
+		    sizeof(ifridx.ifr_name) - 1);
 	    
 	    s = socket(AF_INET, SOCK_DGRAM, 0);
 	    if (s < 0) {
@@ -537,7 +538,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	    }
 	    memset(&ifrcopy6, 0, sizeof(ifrcopy6));
 	    strncpy(ifrcopy6.ifr_name, if_name.c_str(),
-		    sizeof(ifrcopy6.ifr_name));
+		    sizeof(ifrcopy6.ifr_name) - 1);
 	    a.copy_out(ifrcopy6.ifr_addr);
 	    if (ioctl(s, SIOCGIFAFLAG_IN6, &ifrcopy6) < 0) {
 		XLOG_ERROR("ioctl(SIOCGIFAFLAG_IN6) for interface %s failed: %s",

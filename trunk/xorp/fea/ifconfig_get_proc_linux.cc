@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.6 2003/09/30 03:07:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.7 2003/09/30 18:27:01 pavlin Exp $"
 
 #define PROC_LINUX_FILE_V4 "/proc/net/dev"
 #define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
@@ -248,7 +248,7 @@ if_fetch_linux_v4(IfConfig& ifc, IfTree& it)
 	}
 	
 	memset(&ifreq, 0, sizeof(ifreq));
-	strncpy(ifreq.ifr_name, ifname, sizeof(ifreq.ifr_name));
+	strncpy(ifreq.ifr_name, ifname, sizeof(ifreq.ifr_name) - 1);
 	ifc.ifc_get_ioctl().parse_buffer_ifreq(
 	    it, AF_INET,
 	    reinterpret_cast<const uint8_t *>(&ifreq), sizeof(ifreq));
@@ -315,7 +315,8 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
 	// Get the interface name
 	//
 	char tmp_if_name[IFNAMSIZ+1];
-	strncpy(tmp_if_name, devname, sizeof(tmp_if_name));
+	strncpy(tmp_if_name, devname, sizeof(tmp_if_name) - 1);
+	tmp_if_name[sizeof(tmp_if_name) - 1] = '\0';
 	char *cptr;
 	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) {
 	    // Replace colon with null. Needed because in Solaris and Linux
@@ -351,7 +352,8 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
 	do {
 #ifdef SIOCGIFHWADDR
 	    memset(&ifreq, 0, sizeof(ifreq));
-	    strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name));
+	    strncpy(ifreq.ifr_name, if_name.c_str(),
+		    sizeof(ifreq.ifr_name) - 1);
 	    if (ioctl(sock, SIOCGIFHWADDR, &ifreq) < 0) {
 		XLOG_ERROR("ioctl(SIOCGIFHWADDR) for interface %s failed: %s",
 			   if_name.c_str(), strerror(errno));
@@ -372,7 +374,7 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
 	//
 	int mtu = 0;
 	memset(&ifreq, 0, sizeof(ifreq));
-	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name));
+	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
 	if (ioctl(sock, SIOCGIFMTU, &ifreq) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGIFMTU) for interface %s failed: %s",
 		       if_name.c_str(), strerror(errno));
@@ -388,7 +390,7 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it)
 	int flags = 0;
 	// int flags6 = dad_status;
 	memset(&ifreq, 0, sizeof(ifreq));
-	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name));
+	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
 	if (ioctl(sock, SIOCGIFFLAGS, &ifreq) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGIFFLAGS) for interface %s failed: %s",
 		       if_name.c_str(), strerror(errno));
