@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xorp_mld6igmp.cc,v 1.1 2003/09/30 16:12:06 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xorp_mld6igmp.cc,v 1.2 2003/12/20 00:02:27 pavlin Exp $"
 
 
 //
@@ -171,8 +171,12 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port)
 					  xorp_module_name(AF_INET,
 							   XORP_MODULE_MLD6IGMP),
 					  finder_hostname, finder_port);
-    XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET, XORP_MODULE_MLD6IGMP,
-				       eventloop, &xrl_std_router_mld6igmp4);
+    XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET,
+				       XORP_MODULE_MLD6IGMP,
+				       eventloop,
+				       &xrl_std_router_mld6igmp4,
+				       xorp_module_name(AF_INET,
+							XORP_MODULE_MFEA));
     {
 	// Wait until the XrlRouter becomes ready
 	bool timed_out = false;
@@ -192,8 +196,12 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port)
 					  xorp_module_name(AF_INET6,
 							   XORP_MODULE_MLD6IGMP),
 					  finder_hostname, finder_port);
-    XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6, XORP_MODULE_MLD6IGMP,
-				       eventloop, &xrl_std_router_mld6igmp6);
+    XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6,
+				       XORP_MODULE_MLD6IGMP,
+				       eventloop,
+				       &xrl_std_router_mld6igmp6,
+				       xorp_module_name(AF_INET6,
+							XORP_MODULE_MFEA));
     {
 	// Wait until the XrlRouter becomes ready
 	bool timed_out = false;

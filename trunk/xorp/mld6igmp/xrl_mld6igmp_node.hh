@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.20 2003/12/20 01:43:35 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.21 2004/03/18 00:45:32 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -41,16 +41,26 @@ class XrlMld6igmpNode : public Mld6igmpNode,
 			public XrlMld6igmpTargetBase,
 			public Mld6igmpNodeCli {
 public:
-    XrlMld6igmpNode(int family, xorp_module_id module_id, 
-		    EventLoop& eventloop, XrlRouter* xrl_router)
-	: Mld6igmpNode(family, module_id, eventloop),
-	  XrlMld6igmpTargetBase(xrl_router),
-	  Mld6igmpNodeCli(*static_cast<Mld6igmpNode *>(this)),
-	  _xrl_cli_manager_client(xrl_router),
-	  _xrl_mfea_client(xrl_router),
-	  _xrl_mld6igmp_client_client(xrl_router)
-    { }
-    virtual ~XrlMld6igmpNode() { Mld6igmpNode::stop(); Mld6igmpNodeCli::stop(); }
+    XrlMld6igmpNode(int family,
+		    xorp_module_id module_id, 
+		    EventLoop& eventloop,
+		    XrlRouter* xrl_router,
+		    const string& mfea_target);
+    virtual ~XrlMld6igmpNode();
+
+    /**
+     * Startup the node operation.
+     *
+     * @return true on success, false on failure.
+     */
+    bool	startup();
+
+    /**
+     * Shutdown the node operation.
+     *
+     * @return true on success, false on failure.
+     */
+    bool	shutdown();
     
     //
     // XrlMld6igmpNode front-end interface
@@ -66,64 +76,6 @@ public:
     
     
 protected:
-    //
-    // Protocol node methods
-    //
-    void xrl_result_add_protocol_mfea(const XrlError& xrl_error);
-    void xrl_result_allow_signal_messages(const XrlError& xrl_error);
-    void xrl_result_delete_protocol_mfea(const XrlError& xrl_error);
-    
-    int	proto_send(const string& dst_module_instance_name,
-		   xorp_module_id dst_module_id,
-		   uint16_t vif_index,
-		   const IPvX& src, const IPvX& dst,
-		   int ip_ttl, int ip_tos, bool router_alert_bool,
-		   const uint8_t * sndbuf, size_t sndlen);
-    void xrl_result_send_protocol_message(const XrlError& xrl_error);
-    
-    int start_protocol_kernel();
-    int stop_protocol_kernel();
-    
-    int start_protocol_kernel_vif(uint16_t vif_index);
-    void xrl_result_start_protocol_kernel_vif(const XrlError& xrl_error);
-
-    int stop_protocol_kernel_vif(uint16_t vif_index);
-    void xrl_result_stop_protocol_kernel_vif(const XrlError& xrl_error);
-    
-    int join_multicast_group(uint16_t vif_index,
-			     const IPvX& multicast_group);
-    void xrl_result_join_multicast_group(const XrlError& xrl_error);
-    
-    int leave_multicast_group(uint16_t vif_index,
-			      const IPvX& multicast_group);
-    void xrl_result_leave_multicast_group(const XrlError& xrl_error);
-    
-    int send_add_membership(const string& dst_module_instance_name,
-			    xorp_module_id dst_module_id,
-			    uint16_t vif_index,
-			    const IPvX& source,
-			    const IPvX& group);
-    void xrl_result_send_add_membership(const XrlError& xrl_error);
-
-    int send_delete_membership(const string& dst_module_instance_name,
-			       xorp_module_id dst_module_id,
-			       uint16_t vif_index,
-			       const IPvX& source,
-			       const IPvX& group);
-    void xrl_result_send_delete_membership(const XrlError& xrl_error);
-    
-    //
-    // Protocol node CLI methods
-    //
-    int add_cli_command_to_cli_manager(const char *command_name,
-				       const char *command_help,
-				       bool is_command_cd,
-				       const char *command_cd_prompt,
-				       bool is_command_processor);
-    void xrl_result_add_cli_command(const XrlError& xrl_error);
-    int delete_cli_command_from_cli_manager(const char *command_name);
-    void xrl_result_delete_cli_command(const XrlError& xrl_error);
-    
     //
     // XRL target methods
     //
@@ -353,7 +305,6 @@ protected:
 	const vector<uint8_t>&	protocol_message);
     
     /**
-     *  
      *  Receive a kernel signal message from the MFEA.
      *  
      *  @param xrl_sender_name the XRL name of the originator of this XRL.
@@ -656,17 +607,139 @@ protected:
 	const string&	vif_name, 
 	const uint32_t&	vif_index);
     
-    
 private:
+
+    void mfea_register_startup();
+    void mfea_register_shutdown();
+
+    void send_mfea_registration();
+    void mfea_client_send_add_protocol_cb(const XrlError& xrl_error);
+    void send_mfea_deregistration();
+    void mfea_client_send_delete_protocol_cb(const XrlError& xrl_error);
+
+    //
+    // Protocol node methods
+    //
+    int start_protocol_kernel_vif(uint16_t vif_index);
+    int stop_protocol_kernel_vif(uint16_t vif_index);
+    void send_start_stop_protocol_kernel_vif();
+    void mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& xrl_error);
+
+    int join_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
+    int leave_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
+    void send_join_leave_multicast_group();
+    void mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error);
+    
+    int send_add_membership(const string& dst_module_instance_name,
+			    xorp_module_id dst_module_id,
+			    uint16_t vif_index,
+			    const IPvX& source,
+			    const IPvX& group);
+
+    int send_delete_membership(const string& dst_module_instance_name,
+			       xorp_module_id dst_module_id,
+			       uint16_t vif_index,
+			       const IPvX& source,
+			       const IPvX& group);
+    void send_add_delete_membership();
+    void mld6igmp_client_send_add_delete_membership_cb(const XrlError& xrl_error);
+    
+    int	proto_send(const string& dst_module_instance_name,
+		   xorp_module_id dst_module_id,
+		   uint16_t vif_index,
+		   const IPvX& src, const IPvX& dst,
+		   int ip_ttl, int ip_tos, bool router_alert_bool,
+		   const uint8_t* sndbuf, size_t sndlen);
+    void mfea_client_send_protocol_message_cb(const XrlError& xrl_error);
+    
+    //
+    // Protocol node CLI methods
+    //
+    int add_cli_command_to_cli_manager(const char *command_name,
+				       const char *command_help,
+				       bool is_command_cd,
+				       const char *command_cd_prompt,
+				       bool is_command_processor);
+    void cli_manager_client_send_add_cli_command_cb(const XrlError& xrl_error);
+    int delete_cli_command_from_cli_manager(const char *command_name);
+    void cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error);
+
     const string& my_xrl_target_name() {
 	return XrlMld6igmpTargetBase::name();
     }
     
     int family() const { return (Mld6igmpNode::family()); }
 
-    XrlCliManagerV0p1Client	_xrl_cli_manager_client;
+    /**
+     * Class for handling the queue of Join/Leave multicast group requests
+     */
+    class JoinLeaveMulticastGroup {
+    public:
+	JoinLeaveMulticastGroup(uint16_t vif_index,
+				const IPvX& multicast_group,
+				bool is_join)
+	    : _vif_index(vif_index),
+	      _multicast_group(multicast_group),
+	      _is_join(is_join) {}
+	uint16_t vif_index() const { return _vif_index; }
+	const IPvX& multicast_group() const { return _multicast_group; }
+	bool is_join() const { return _is_join; }
+
+    private:
+	uint16_t	_vif_index;
+	IPvX		_multicast_group;
+	bool		_is_join;
+    };
+
+    /**
+     * Class for handling the queue of sending Add/Delete membership requests
+     */
+    class SendAddDeleteMembership {
+    public:
+	SendAddDeleteMembership(const string& dst_module_instance_name,
+				xorp_module_id dst_module_id,
+				uint16_t vif_index,
+				const IPvX& source,
+				const IPvX& group,
+				bool is_add)
+	    : _dst_module_instance_name(dst_module_instance_name),
+	      _dst_module_id(dst_module_id),
+	      _vif_index(vif_index),
+	      _source(source),
+	      _group(group),
+	      _is_add(is_add) {}
+	const string& dst_module_instance_name() const { return _dst_module_instance_name; }
+	xorp_module_id dst_module_id() const { return _dst_module_id; }
+	uint16_t vif_index() const { return _vif_index; }
+	const IPvX& source() const { return _source; }
+	const IPvX& group() const { return _group; }
+	bool is_add() const { return _is_add; }
+
+    private:
+	string		_dst_module_instance_name;
+	xorp_module_id	_dst_module_id;
+	uint16_t	_vif_index;
+	IPvX		_source;
+	IPvX		_group;
+	bool		_is_add;
+    };
+
+    const string		_class_name;
+    const string		_instance_name;
+
     XrlMfeaV0p1Client		_xrl_mfea_client;
     XrlMld6igmpClientV0p1Client	_xrl_mld6igmp_client_client;
+    XrlCliManagerV0p1Client	_xrl_cli_manager_client;
+    const string		_mfea_target;
+    bool			_is_mfea_add_protocol_registered;
+    XorpTimer			_mfea_registration_timer;
+
+    list<pair<uint16_t, bool> >	_start_stop_protocol_kernel_vif_queue;
+    XorpTimer			_start_stop_protocol_kernel_vif_queue_timer;
+    list<JoinLeaveMulticastGroup> _join_leave_multicast_group_queue;
+    XorpTimer			_join_leave_multicast_group_queue_timer;
+    list<SendAddDeleteMembership> _send_add_delete_membership_queue;
+    XorpTimer			_send_add_delete_membership_queue_timer;
 };
 
 #endif // __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.11 2003/08/07 00:35:38 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.12 2003/10/14 22:39:46 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -50,7 +50,7 @@ class Mld6igmpVif;
  * There should be one node per MLD or IGMP instance. There should be
  * one instance per address family.
  */
-class Mld6igmpNode : public ProtoNode<Mld6igmpVif> {
+class Mld6igmpNode : public ProtoNode<Mld6igmpVif>, public ServiceChangeObserverBase {
 public:
     /**
      * Constructor for a given address family, module ID, and event loop.
@@ -71,6 +71,8 @@ public:
     /**
      * Start the node operation.
      * 
+     * After the startup operations are completed,
+     * @ref Mld6igmpNode::final_start() is called to complete the job.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start();
@@ -82,14 +84,26 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
-    
+
     /**
-     * Test if waiting to complete registration with the MFEA.
+     * Completely start the node operation.
      * 
-     * @return true if waiting to complete registration with the MFEA,
-     * otherwise false.
+     * This method should be called after @ref Mld6igmpNode::start()
+     * to complete the job.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool is_waiting_for_mfea_startup() const;
+    int		final_start();
+
+    /**
+     * Completely stop the node operation.
+     * 
+     * This method should be called after @ref Mld6igmpNode::stop()
+     * to complete the job.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		final_stop();
     
     /**
      * Test if there is an unit that is in PENDING_DOWN state.
@@ -101,15 +115,6 @@ public:
      * otherwise false.
      */
     bool	has_pending_down_units(string& reason_msg);
-    
-    /**
-     * Get the node status (see @ref ProcessStatus).
-     * 
-     * @param reason_msg return-by-reference string that contains
-     * human-readable information about the status.
-     * @return the node status (see @ref ProcessStatus).
-     */
-    ProcessStatus	node_status(string& reason_msg);
     
     /**
      * Install a new MLD/IGMP vif.
@@ -349,26 +354,6 @@ public:
 	) { XLOG_UNREACHABLE(); return (XORP_ERROR); }
     
     /**
-     * Start the protocol with the kernel.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start_protocol_kernel() = 0;
-
-    /**
-     * Stop the protocol with the kernel.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop_protocol_kernel() = 0;
-    
-    /**
      * Start a protocol vif with the kernel.
      * 
      * This is a pure virtual function, and it must be implemented
@@ -587,13 +572,34 @@ public:
      */
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
     
-    //
-    // Status-related methods
-    //
-    void incr_waiting_for_mfea_startup_events();
-    void decr_waiting_for_mfea_startup_events();
-    
 private:
+    /**
+     * A method invoked when the status of a service changes.
+     * 
+     * @param service the service whose status has changed.
+     * @param old_status the old status.
+     * @param new_status the new status.
+     */
+    void status_change(ServiceBase*  service,
+		       ServiceStatus old_status,
+		       ServiceStatus new_status);
+
+    /**
+     * Initiate registration with the MFEA.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void mfea_register_startup() = 0;
+
+    /**
+     * Initiate de-registration with the MFEA.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void mfea_register_shutdown() = 0;
+
     buffer_t	*_buffer_recv;		// Buffer for receiving messages
     
     //

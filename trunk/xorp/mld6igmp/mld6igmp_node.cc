@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.22 2004/03/01 10:02:41 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.23 2004/04/05 03:18:30 pavlin Exp $"
 
 
 //
@@ -63,7 +63,7 @@
 Mld6igmpNode::Mld6igmpNode(int family, xorp_module_id module_id,
 			   EventLoop& eventloop)
     : ProtoNode<Mld6igmpVif>(family, module_id, eventloop),
-    _is_log_trace(true)			// XXX: default to print trace logs
+      _is_log_trace(true)		// XXX: default to print trace logs
 {
     XLOG_ASSERT(module_id == XORP_MODULE_MLD6IGMP);
     if (module_id != XORP_MODULE_MLD6IGMP) {
@@ -72,13 +72,16 @@ Mld6igmpNode::Mld6igmpNode(int family, xorp_module_id module_id,
     }
     
     _buffer_recv = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
-    
+
     //
-    // Set the node status.
-    // XXX: note that we don't really need to wait for MFEA,
-    // hence we are READY.
+    // Set the node status
     //
-    ProtoNode<Mld6igmpVif>::set_node_status(PROC_READY);
+    ProtoNode<Mld6igmpVif>::set_node_status(PROC_STARTUP);
+
+    //
+    // Set myself as an observer when the node status changes
+    //
+    set_observer(this);
 }
 
 /**
@@ -90,6 +93,11 @@ Mld6igmpNode::Mld6igmpNode(int family, xorp_module_id module_id,
  **/
 Mld6igmpNode::~Mld6igmpNode()
 {
+    //
+    // Unset myself as an observer when the node status changes
+    //
+    unset_observer(this);
+
     stop();
     
     delete_all_vifs();
@@ -104,6 +112,8 @@ Mld6igmpNode::~Mld6igmpNode()
  * Start the MLD or IGMP protocol.
  * TODO: This function should not start the protocol operation on the
  * interfaces. The interfaces must be activated separately.
+ * After the startup operations are completed,
+ * Mld6igmpNode::final_start() is called to complete the job.
  * 
  * Return value: %XORP_OK on success, otherwize %XORP_ERROR.
  **/
@@ -113,28 +123,47 @@ Mld6igmpNode::start()
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (ProtoNode<Mld6igmpVif>::start() < 0)
+    if (ProtoNode<Mld6igmpVif>::pending_start() < 0)
 	return (XORP_ERROR);
-    
+
     //
-    // Set the node status.
-    // XXX: note that we don't really need to wait for MFEA,
-    // hence we are READY.
+    // Register with the MFEA
     //
-    ProtoNode<Mld6igmpVif>::set_node_status(PROC_READY);
-    
+    mfea_register_startup();
+
     //
-    // Start the protocol with the kernel
+    // Set the node status
     //
-    if (start_protocol_kernel() != XORP_OK) {
-	XLOG_ERROR("Error starting protocol with the kernel");
+    ProtoNode<Mld6igmpVif>::set_node_status(PROC_STARTUP);
+    update_status();
+
+    return (XORP_OK);
+}
+
+/**
+ * Mld6igmpNode::final_start:
+ * @: 
+ * 
+ * Complete the start-up of the MLD/IGMP protocol.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+Mld6igmpNode::final_start()
+{
+#if 0	// TODO: XXX: PAVPAVPAV
+    if (! is_pending_up())
+	return (XORP_ERROR);
+#endif
+
+    if (ProtoNode<Mld6igmpVif>::start() < 0) {
 	ProtoNode<Mld6igmpVif>::stop();
 	return (XORP_ERROR);
     }
-    
+
     // Start the mld6igmp_vifs
     start_all_vifs();
-    
+
     return (XORP_OK);
 }
 
@@ -142,7 +171,14 @@ Mld6igmpNode::start()
  * Mld6igmpNode::stop:
  * @: 
  * 
- * Stop the MLD or IGMP protocol.
+ * Gracefully stop the MLD or IGMP protocol.
+ * XXX: This function, unlike start(), will stop the protocol
+ * operation on all interfaces.
+ * XXX: After the cleanup is completed,
+ * Mld6igmpNode::final_stop() is called to complete the job.
+ * XXX: If this method is called one-after-another, the second one
+ * will force calling immediately Mld6igmpNode::final_stop() to quickly
+ * finish the job. TODO: is this a desired semantic?
  * XXX: This function, unlike start(), will stop the protocol
  * operation on all interfaces.
  * 
@@ -151,10 +187,8 @@ Mld6igmpNode::start()
 int
 Mld6igmpNode::stop()
 {
-    if (is_down()) {
-	ProtoNode<Mld6igmpVif>::set_node_status(PROC_DONE);
+    if (is_down())
 	return (XORP_OK);
-    }
 
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
@@ -167,56 +201,41 @@ Mld6igmpNode::stop()
     // Stop the vifs
     stop_all_vifs();
     
-    //
-    // Stop the protocol with the kernel
-    //
-    if (stop_protocol_kernel() != XORP_OK) {
-	XLOG_ERROR("Error stopping protocol with the kernel. Ignored.");
-    }
-    
-    if (ProtoNode<Mld6igmpVif>::stop() < 0)
+    if (ProtoNode<Mld6igmpVif>::pending_stop() < 0)
 	return (XORP_ERROR);
+
+    //
+    // De-register with the MFEA
+    //
+    mfea_register_shutdown();
 
     //
     // Set the node status
     //
-    ProtoNode<Mld6igmpVif>::set_node_status(PROC_DONE);
+    ProtoNode<Mld6igmpVif>::set_node_status(PROC_SHUTDOWN);
+    update_status();
 
     return (XORP_OK);
 }
 
 /**
- * Mld6igmpNode::is_waiting_for_mfea_startup:
+ * Mld6igmpNode::final_stop:
  * @: 
  * 
- * Test if waiting to complete registration with the MFEA.
+ * Completely stop the MLD/IGMP protocol.
  * 
- * Return value: True if waiting to complete registration with the MFEA,
- * otherwise false.
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
-bool
-Mld6igmpNode::is_waiting_for_mfea_startup() const
+int
+Mld6igmpNode::final_stop()
 {
-    return (_waiting_for_mfea_startup_events != 0);
-}
+    if (! (is_up() || is_pending_up() || is_pending_down()))
+	return (XORP_ERROR);
 
-void
-Mld6igmpNode::incr_waiting_for_mfea_startup_events()
-{
-    _waiting_for_mfea_startup_events++;
-}
+    if (ProtoUnit::stop() < 0)
+	return (XORP_ERROR);
 
-void
-Mld6igmpNode::decr_waiting_for_mfea_startup_events()
-{
-    XLOG_ASSERT(_waiting_for_mfea_startup_events > 0);
-    _waiting_for_mfea_startup_events--;
-    
-    if (_waiting_for_mfea_startup_events == 0) {
-	// If startup waiting is over, set node status to NOT_READY
-	if (ProtoNode<Mld6igmpVif>::node_status() == PROC_STARTUP)
-	    ProtoNode<Mld6igmpVif>::set_node_status(PROC_NOT_READY);
-    }
+    return (XORP_OK);
 }
 
 /**
@@ -260,61 +279,36 @@ Mld6igmpNode::has_pending_down_units(string& reason_msg)
     return (false);
 }
 
-/**
- * Mld6igmpNode::node_status:
- * @reason_msg: return-by-reference string that contains human-readable
- * information about the status.
- * 
- * Get the node status (see @ref ProcessStatus).
- * 
- * Return value: The node status (see @ref ProcessStatus).
- **/
-ProcessStatus
-Mld6igmpNode::node_status(string& reason_msg)
+void
+Mld6igmpNode::status_change(ServiceBase*  service,
+			    ServiceStatus old_status,
+			    ServiceStatus new_status)
 {
-    ProcessStatus status = ProtoNode<Mld6igmpVif>::node_status();
-    
-    // Set the return message with the reason
-    reason_msg = "";
-    switch (status) {
-    case PROC_NULL:
-	// Can't be running and in this state
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_STARTUP:
-	if (is_waiting_for_mfea_startup()) {
-	    reason_msg = "Waiting for MFEA startup";
-	    break;
+    XLOG_ASSERT(this == service);
+
+    if ((old_status == STARTING) && (new_status == RUNNING)) {
+	// The startup process has completed
+	if (final_start() < 0) {
+	    XLOG_ERROR("Cannot complete the startup process; "
+		       "current state is %s",
+		       ProtoNode<Mld6igmpVif>::state_string());
+	    return;
 	}
-	// Waiting for unknown reason
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_NOT_READY:
-	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
-	XLOG_UNFINISHED();
-	break;
-    case PROC_READY:
-	reason_msg = c_format("Node is READY (running status %s)",
-			      ProtoState::state_string());
-	break;
-    case PROC_SHUTDOWN:
-	// Get the message about the shutdown progress
-	has_pending_down_units(reason_msg);
-	break;
-    case PROC_FAILED:
-	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
-	XLOG_UNFINISHED();
-	break;
-    case PROC_DONE:
-	// Process has completed operation
-	break;
-    default:
-	// Unknown status
-	XLOG_UNREACHABLE();
-	break;
+	ProtoNode<Mld6igmpVif>::set_node_status(PROC_READY);
+	return;
     }
-    
-    return (status);
+
+    if ((old_status == SHUTTING_DOWN) && (new_status == SHUTDOWN)) {
+	// The shutdown process has completed
+	final_stop();
+	// Set the node status
+	ProtoNode<Mld6igmpVif>::set_node_status(PROC_DONE);
+	return;
+    }
+
+    //
+    // TODO: check if there was an error
+    //
 }
 
 /**
