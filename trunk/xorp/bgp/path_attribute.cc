@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.34 2003/09/05 01:54:20 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.35 2003/09/11 03:15:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -673,11 +673,11 @@ MPReachNLRIAttribute<A>::str() const
     string s = c_format("Multiprotocol Reachable NLRI AFI = %d SAFI = %d\n",
 			_afi, _safi);
     s += c_format("   - Next Hop Attribute %s\n", nexthop().str().c_str());
-    s += c_format("   - Link Local Next Hop Attribute %s\n",
+    s += c_format("   - Link Local Next Hop Attribute %s",
 		  link_local_nexthop().str().c_str());
     typename list<IPNet<A> >::const_iterator i = nlri_list().begin();
     for(; i != nlri_list().end(); i++)
-	s += c_format("   - Nlri %s", i->str().c_str());
+	s += c_format("\n   - Nlri %s", i->str().c_str());
     return s;
 }
 
