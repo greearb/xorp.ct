@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.10 2003/08/12 15:10:16 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.11 2003/08/12 15:49:23 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -374,11 +374,117 @@ interface pim/0.1 {
 	send_test_cand_rp_adv
 
 	/**
-	 * Statistics-related counters and values
+	 * Retrieve information about all PIM neighbors.
+	 * 
+	 * @param nbrs_number the number of PIM neighbors
+	 * @param vifs the list of vif names for all neighbors
+	 * (one vif name per neighbor).
+	 * @param addreesses the list of addresses of all neighbors
+	 * (one IPv4 or IPv6 address per neighbor).
+	 * @param pim_versions the list of PIM protocol versions for all
+	 * neighbors (one number per neighbor).
+	 * @param dr_priorities the list of DR priorities of all neighbors
+	 * (one number per neighbor).
+	 * @param holdtimes the list of configured holdtimes (in seconds)
+	 * of all neighbors (one number per neighbor).
+	 * @param timeouts the list of timeout values (in seconds)
+	 * of all neighbors (one number per neighbor).
+	 * @param uptimes the list of uptime values (in seconds)
+	 * of all neighbors (one number per neighbor).
+	 */
+	pimstat_neighbors4		-> nbrs_number:u32		\
+					& vifs:list			\
+					& addresses:list		\
+					& pim_versions:list		\
+					& dr_priorities:list		\
+					& holdtimes:list		\
+					& timeouts:list			\
+					& uptimes:list
+	pimstat_neighbors6		-> nbrs_number:u32		\
+					& vifs:list			\
+					& addresses:list		\
+					& pim_versions:list		\
+					& dr_priorities:list		\
+					& holdtimes:list		\
+					& timeouts:list			\
+					& uptimes:list
+
+	/**
+	 * Retrieve information about PIM interfaces.
+	 * 
+	 * @param vif_name the name of the vif to retrieve information about.
+	 * @param pim_version the PIM protocol version on that vif.
+	 * @param is_dr true if this router is the DR for the subnet
+	 * the vif is connected to.
+	 * @param dr_priority the DR priority configured on that vif.
+	 * @param dr_address the address of the DR for the subnet
+	 * the vif is connected to.
+	 * @param pim_nbrs_number the number of PIM neighbors on the subnet
+	 * the vif is connected to.
+	 */
+	pimstat_interface4		? vif_name:txt			\
+					-> pim_version:u32		\
+					& is_dr:bool			\
+					& dr_priority:u32		\
+					& dr_address:ipv4		\
+					& pim_nbrs_number:u32
+	pimstat_interface6		? vif_name:txt			\
+					-> pim_version:u32		\
+					& is_dr:bool			\
+					& dr_priority:u32		\
+					& dr_address:ipv6		\
+					& pim_nbrs_number:u32
+
+	/**
+	 * Retrieve information about the RP-Set.
+	 * 
+	 * @param rps_number the number of RPs in the RP-Set.
+	 * @param addresses the list of addresses of all RPs
+	 * (one IPv4 or IPv6 address per RP).
+	 * @param types the list of textual description about the origin
+	 * of each RP (one keyword per RP: "bootstrap", "static" or "unknown").
+	 * @param priorities the list of RP priorities of all RPs
+	 * (one number per RP).
+	 * @param holdtimes the list of configured holdtimes (in seconds)
+	 * of all RPs (one number per RP).
+	 * @param timeouts the list of timeout values (in seconds)
+	 * of all RPs (one number per RP).
+	 * @param group_prefixes the list of all group prefixes
+	 * (one network IPv4Net or IPv6Net address per RP).
+	 * Note that if an RP is configured for more than one group prefixes,
+	 * there will be a number of entries for that RP: one per group prefix.
+	 */
+	pimstat_rps4			-> rps_number:u32		\
+					& addresses:list		\
+					& types:list			\
+					& priorities:list		\
+					& holdtimes:list		\
+					& timeouts:list			\
+					& group_prefixes:list
+
+	pimstat_rps6			-> rps_number:u32		\
+					& addresses:list		\
+					& types:list			\
+					& priorities:list		\
+					& holdtimes:list		\
+					& timeouts:list			\
+					& group_prefixes:list
+
+	/**
+	 * Clear all statistics
 	 */
 	clear_pim_statistics
+	
+	/**
+	 * Clear all statistics on a specific interface.
+	 * 
+	 * @param vif_name the interface to clear the statistics of.
+	 */
 	clear_pim_statistics_per_vif	? vif_name:txt
 
+	/**
+	 * Statistics-related counters and values
+	 */
 	pimstat_hello_messages_received			-> value:u32
 	pimstat_hello_messages_sent			-> value:u32
 	pimstat_hello_messages_rx_errors		-> value:u32
