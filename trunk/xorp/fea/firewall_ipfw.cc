@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.cc,v 1.8 2004/09/21 21:31:02 pavlin Exp $
+// $XORP: xorp/fea/firewall_ipfw.cc,v 1.9 2004/09/23 12:15:56 bms Exp $
 
 #include "fea/fea_module.h"
 
@@ -249,8 +249,8 @@ IpfwFwProvider::get_num_system_rules4() const
 int
 IpfwFwProvider::get_ipfw_static_rule_count()
 {
-	uint32_t	ipfw_rulecount = 0;
-	uint32_t	ipfw_rulecount_size = sizeof(ipfw_rulecount);
+	size_t	ipfw_rulecount = 0;
+	size_t	ipfw_rulecount_size = sizeof(ipfw_rulecount);
 
 	int	ret = sysctlbyname("net.inet.ip.fw.static_count",
 	    &ipfw_rulecount, &ipfw_rulecount_size, NULL, 0);
