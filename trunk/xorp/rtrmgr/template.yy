@@ -172,7 +172,10 @@ cmd_list:	cmd
 		| cmd_list LISTNEXT cmd
 		;
 
-cmd:		LITERAL list_of_cmd_strings {
+cmd:		list_of_cmd_strings {
+			end_cmd();
+		}
+		| LITERAL list_of_cmd_strings {
 			prepend_cmd($1);
 			end_cmd();
 		}
