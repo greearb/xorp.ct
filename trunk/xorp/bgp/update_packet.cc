@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.24 2003/10/23 09:41:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.25 2003/10/25 00:27:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -186,10 +186,10 @@ UpdatePacket::mpreach_ipv6(Safi safi) const
     case SAFI_UNICAST:
 	return _mpreach_ipv6_unicast;
     case SAFI_MULTICAST:
-	return _mpreach_ipv6_unicast;
+	return _mpreach_ipv6_multicast;
     }
 
-    XLOG_FATAL("Can't get here");
+    XLOG_UNREACHABLE();
 
     return 0;
 }
@@ -201,10 +201,10 @@ UpdatePacket::mpunreach_ipv6(Safi safi) const
     case SAFI_UNICAST:
 	return _mpunreach_ipv6_unicast;
     case SAFI_MULTICAST:
-	return _mpunreach_ipv6_unicast;
+	return _mpunreach_ipv6_multicast;
     }
 
-    XLOG_FATAL("Can't get here");
+    XLOG_UNREACHABLE();
 
     return 0;
 }
