@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.84 2004/03/05 22:14:52 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.85 2004/03/11 00:04:51 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -264,7 +264,7 @@ dnl CPP GNU variable arguments
 dnl ----------------------------
 
 AC_CACHE_CHECK(
-	"whether preprocessor supports GNU style variable argument macros",
+	[whether preprocessor supports GNU style variable argument macros],
 	xorp_cv_cpp_gnu_va_args,
 	AC_TRY_CPP(
 		[
@@ -288,7 +288,7 @@ AC_PROG_RANLIB
 
 AC_CHECK_TOOL(AR, ar)
 
-AC_CACHE_CHECK(if default make is GNU make, xorp_cv_default_gmake,
+AC_CACHE_CHECK([if default make is GNU make], xorp_cv_default_gmake,
 		  if (make -version) < /dev/null > /dev/null 2>&1 ; then
 		    DEFAULT_GMAKE="yes"
 		  else
@@ -299,7 +299,7 @@ AC_CACHE_CHECK(if default make is GNU make, xorp_cv_default_gmake,
 AC_CHECK_PROGS(PYTHON, python2.2 python2 python, "NO_PYTHON")
 if test "${PYTHON}" != "NO_PYTHON" ; then
   AC_CACHE_CHECK(
-    "python version 2.0 or above", xorp_python_good,
+    [python version 2.0 or above], xorp_python_good,
     changequote(<<,>>)dnl
     PY_VERSION=`$PYTHON -c 'import sys; print sys.version[[:3]]' | tr -cd '[[:digit:]]'`
     changequote([,])dnl
@@ -333,7 +333,7 @@ if test "${xr_openssl_prefix}" = "" ; then
 # User has not specified an OpenSSL prefix, may be in cache, otherwise take
 # a guess
     AC_CACHE_CHECK(
-	"OpenSSL installation prefix",
+	[OpenSSL installation prefix],
 	xr_cv_openssl_prefix,
 	[
 	    # Prefer base install over local install, assume base if not found
@@ -354,7 +354,7 @@ elif test "${xr_openssl_prefix}" != "${xr_cv_openssl_prefix}"; then
 
     # This cache check is doomed to fail because we unset variable,
     # but use it for consistent looking output.
-    AC_CACHE_CHECK("OpenSSL installation prefix",
+    AC_CACHE_CHECK([OpenSSL installation prefix],
 		   xr_cv_openssl_prefix,
 		   xr_cv_openssl_prefix="${xr_openssl_prefix}")
 fi
@@ -390,7 +390,7 @@ if test "${net_snmp_found}" = "true";  then
     net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.`
     net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.`
     net_snmp_rev=`echo $net_snmp_v | cut -f 3 -d.`
-    AC_CACHE_CHECK(if net-snmp version equal or newer than 5.0.6,
+    AC_CACHE_CHECK([if net-snmp version equal or newer than 5.0.6],
     ac_cv_net_snmp_usable,
 	net_snmp_too_old=false
 	if test "5" -gt $net_snmp_maj ; then
@@ -428,7 +428,7 @@ fi
 
 snmpd_valid="no"
 if test "${snmpd}" = "not_found" ; then
-    AC_MSG_WARN("snmpd not found:  snmp test scripts will not work")
+    AC_MSG_WARN(snmpd not found:  snmp test scripts will not work)
 elif test "${snmpd}" = "skip_check"; then
     AC_MSG_CHECKING(if snmpd can be started)
     AC_MSG_RESULT(skipped)
@@ -490,7 +490,7 @@ while test "${net_snmp_found}" = "true"; do
     NETSNMPCFLAGS=`net-snmp-config --cflags`
     # Darwin 7.0.0 / OS X 10.3 on ppc gives ppc and i386 arch flags which
     # the default compiler cannot compile.
-    XR_CHECK_CFLAG(${NETSNMPCFLAGS}, ,snmpd_valid=no)
+    XR_CHECK_CFLAG(${NETSNMPCFLAGS}, , snmpd_valid=no)
     if test "${snmpd_valid}" = "no" ; then
 	echo "-------------------------------------------------------------   "
 	echo "'net-snmp-config --cflags' gave invalid invalid cflags!         "
@@ -500,7 +500,7 @@ while test "${net_snmp_found}" = "true"; do
 
     oldCPPFLAGS=${CPPFLAGS}
     CPPFLAGS=${NETSNMPCFLAGS}
-    AC_CHECK_HEADERS([net-snmp/library/container.h],net_snmp_container_bug=no,
+    AC_CHECK_HEADERS([net-snmp/library/container.h], net_snmp_container_bug=no,
         net_snmp_container_bug=yes,
         [
         #include <net-snmp/net-snmp-config.h>
@@ -1184,7 +1184,7 @@ dnl OSPFD check - only builds on linux and freebsd and uses coarse grained os
 dnl check
 dnl ---------------------------------------------------------------------------
 
-AC_CACHE_CHECK(ospfd platform, xorp_cv_ospfd_os,
+AC_CACHE_CHECK([ospfd platform], xorp_cv_ospfd_os,
 [
     case "${host_os}" in
 	freebsd* )

@@ -3397,8 +3397,8 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
-echo "$as_me:$LINENO: checking \"whether preprocessor supports GNU style variable argument macros\"" >&5
-echo $ECHO_N "checking \"whether preprocessor supports GNU style variable argument macros\"... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether preprocessor supports GNU style variable argument macros" >&5
+echo $ECHO_N "checking whether preprocessor supports GNU style variable argument macros... $ECHO_C" >&6
 if test "${xorp_cv_cpp_gnu_va_args+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
@@ -3754,8 +3754,8 @@ done
 test -n "$PYTHON" || PYTHON=""NO_PYTHON""
 
 if test "${PYTHON}" != "NO_PYTHON" ; then
-  echo "$as_me:$LINENO: checking \"python version 2.0 or above\"" >&5
-echo $ECHO_N "checking \"python version 2.0 or above\"... $ECHO_C" >&6
+  echo "$as_me:$LINENO: checking python version 2.0 or above" >&5
+echo $ECHO_N "checking python version 2.0 or above... $ECHO_C" >&6
 if test "${xorp_python_good+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
@@ -3789,8 +3789,8 @@ fail_openssl()
 if test "${xr_openssl_prefix}" = "" ; then
 # User has not specified an OpenSSL prefix, may be in cache, otherwise take
 # a guess
-    echo "$as_me:$LINENO: checking \"OpenSSL installation prefix\"" >&5
-echo $ECHO_N "checking \"OpenSSL installation prefix\"... $ECHO_C" >&6
+    echo "$as_me:$LINENO: checking OpenSSL installation prefix" >&5
+echo $ECHO_N "checking OpenSSL installation prefix... $ECHO_C" >&6
 if test "${xr_cv_openssl_prefix+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
@@ -3816,8 +3816,8 @@ elif test "${xr_openssl_prefix}" != "${xr_cv_openssl_prefix}"; then
 
     # This cache check is doomed to fail because we unset variable,
     # but use it for consistent looking output.
-    echo "$as_me:$LINENO: checking \"OpenSSL installation prefix\"" >&5
-echo $ECHO_N "checking \"OpenSSL installation prefix\"... $ECHO_C" >&6
+    echo "$as_me:$LINENO: checking OpenSSL installation prefix" >&5
+echo $ECHO_N "checking OpenSSL installation prefix... $ECHO_C" >&6
 if test "${xr_cv_openssl_prefix+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
@@ -4382,8 +4382,8 @@ fi
 
 snmpd_valid="no"
 if test "${snmpd}" = "not_found" ; then
-    { echo "$as_me:$LINENO: WARNING: \"snmpd not found:  snmp test scripts will not work\"" >&5
-echo "$as_me: WARNING: \"snmpd not found:  snmp test scripts will not work\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: snmpd not found:  snmp test scripts will not work" >&5
+echo "$as_me: WARNING: snmpd not found:  snmp test scripts will not work" >&2;}
 elif test "${snmpd}" = "skip_check"; then
     echo "$as_me:$LINENO: checking if snmpd can be started" >&5
 echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
