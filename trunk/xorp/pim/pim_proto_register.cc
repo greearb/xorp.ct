@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.7 2003/07/12 01:14:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.8 2003/08/12 15:11:37 pavlin Exp $"
 
 
 //
@@ -454,6 +454,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    - sizeof(uint32_t);
 	break;
     }
+    
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -468,6 +469,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	break;
     }
 #endif // HAVE_IPV6
+    
     default:
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);

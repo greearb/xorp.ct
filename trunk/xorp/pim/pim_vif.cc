@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.24 2003/08/13 22:13:36 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.25 2003/08/14 01:16:35 pavlin Exp $"
 
 
 //
@@ -493,10 +493,12 @@ PimVif::pim_send(const IPvX& dst,
     //
     switch (message_type) {
     case PIM_REGISTER:
-	// If PIM Register, copy the TOS from the inner header
+	//
+	// If PIM Register, then copy the TOS from the inner header
 	// to the outer header. Strictly speaking, we need to do it
 	// only for Registers with data (i.e., not for Null Registers),
 	// but for simplicity we do it for Null Registers as well.
+	//
 	switch (family()) {
 	case AF_INET:
 	{
@@ -507,6 +509,7 @@ PimVif::pim_send(const IPvX& dst,
 	    ip_tos = ip4_header.ip_tos;
 	    break;
 	}
+	
 #ifdef HAVE_IPV6
 	case AF_INET6:
 	{
@@ -519,10 +522,12 @@ PimVif::pim_send(const IPvX& dst,
 	    break;
 	}
 #endif // HAVE_IPV6
+	
 	default:
 	    XLOG_UNREACHABLE();
 	    return (XORP_ERROR);
 	}
+	
     default:
 	break;
     }
