@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.17 2003/12/19 23:57:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.18 2004/01/15 19:12:23 hodson Exp $"
 
 #include "fea_module.h"
 
@@ -27,9 +27,11 @@
 #include "fticonfig.hh"
 #include "ifmanager.hh"
 #include "ifconfig.hh"
+#include "ifconfig_addr_table.hh"
 #include "libfeaclient_bridge.hh"
 #include "xrl_ifupdate.hh"
 #include "xrl_mfea_node.hh"
+#include "xrl_socket_server.hh"
 #include "xrl_target.hh"
 
 static const char* xrl_entity = "fea";
@@ -92,7 +94,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     //
 
     //
-    // 1. FtiConfig
+    // FtiConfig
     //
     FtiConfig fticonfig(eventloop);
     if (is_dummy)
@@ -100,7 +102,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     fticonfig.start();
 
     //
-    // 2. Interface Configurator and reporters
+    // Interface Configurator and reporters
     //
     XrlIfConfigUpdateReporter xrl_ifc_reporter(xrl_std_router_fea);
     LibFeaClientBridge        lfc_bridge(xrl_std_router_fea);
@@ -117,7 +119,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     ifconfig.start();
 
     //
-    // 3. Interface manager
+    // Interface manager
     //
     InterfaceManager ifm(ifconfig);
 
@@ -129,14 +131,26 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     lfc_bridge.set_iftree(&iftree);
 
     //
-    // 4. Raw Socket TODO
+    // Raw Socket TODO
     //
 
     //
-    // 5. XRL Target
+    // Xrl Socket Server and related components
     //
-    XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea, fticonfig, ifm,
-				xrl_ifc_reporter, 0, &lfc_bridge);
+    IfConfigAddressTable ifc_addr_table(iftree);
+    ifc_repl.add_reporter(&ifc_addr_table);
+    XrlSocketServer xss(eventloop,
+			ifc_addr_table,
+			xrl_std_router_fea.finder_address(),
+			xrl_std_router_fea.finder_port());
+    xss.startup();
+
+    //
+    // XRL Target
+    //
+    XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea,
+				fticonfig, ifm, xrl_ifc_reporter,
+				0, &lfc_bridge, &xss);
     {
 	// Wait until the XrlRouter becomes ready
 	bool timed_out = false;
@@ -242,6 +256,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	if (xrl_fea_target.done())
 	    break;
     }
+    xss.shutdown();
 
     while (xrl_std_router_fea.pending()
 	  || xrl_std_router_cli4.pending()

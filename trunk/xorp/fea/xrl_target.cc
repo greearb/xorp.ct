@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.33 2003/12/17 00:04:49 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.34 2004/01/15 19:12:23 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -31,6 +31,7 @@
 #include "libfeaclient_bridge.hh"
 #include "xrl_ifupdate.hh"
 #include "xrl_rawsock4.hh"
+#include "xrl_socket_server.hh"
 #include "xrl_target.hh"
 
 XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
@@ -39,9 +40,10 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
 			   InterfaceManager&	 	ifmgr,
 			   XrlIfConfigUpdateReporter&	xifcur,
 			   XrlRawSocket4Manager*	xrsm,
-			   LibFeaClientBridge*		lfcb)
+			   LibFeaClientBridge*		lfcb,
+			   XrlSocketServer*		xss)
     : XrlFeaTargetBase(&r), _xftm(e, ftic), _xifmgr(e, ifmgr),
-      _xifcur(xifcur), _xrsm(xrsm), _lfcb(lfcb), _done(false)
+      _xifcur(xifcur), _xrsm(xrsm), _lfcb(lfcb), _xss(xss), _done(false)
 {
 }
 
@@ -1574,7 +1576,16 @@ XrlFeaTarget::socket4_locator_0_1_find_socket_server_for_addr(
 							      string&	  svr
 							      )
 {
+    // If we had multiple socket servers we'd look for the right one
+    // to use.  At the present time we only have one so this is the
+    // one to return
+    if (_xss == 0) {
+	return XrlCmdError::COMMAND_FAILED("Socket Server is not present.");
+    }
+    if (_xss->status() != RUNNING) {
+	return XrlCmdError::COMMAND_FAILED("Socket Server not running.");
+    }
     UNUSED(addr);
-    UNUSED(svr);
-    return XrlCmdError::COMMAND_FAILED("Not supported.");
+    svr = _xss->instance_name();
+    return XrlCmdError::OKAY();
 }
