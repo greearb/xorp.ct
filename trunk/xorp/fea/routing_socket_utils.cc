@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.18 2004/10/26 00:55:06 bms Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.19 2004/10/26 00:58:55 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -367,12 +367,13 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 
 #ifdef notyet
     //
-    // Test whether this route is a discard route
+    // Test whether this route is a discard route.
     // XXX: Currently RTF_REJECT is assumed to mean the same thing.
     //
-    bool is_discard = false;
-    if (rtm->rtm_flags & (RTF_BLACKHOLE|RTF_REJECT))
-	is_discard = true;
+    if (rtm->rtm_flags & (RTF_BLACKHOLE|RTF_REJECT)) {
+	/* code to force the fea's idea of nexthop to point to the
+	 * discard interface */ ;
+    }
 #endif
 
     //
@@ -410,7 +411,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     // TODO: define default routing metric and admin distance instead of ~0
     //
     fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr, if_name, if_name,
-	       ~0, ~0, xorp_route /*, is_discard*/);
+	       ~0, ~0, xorp_route);
     if (is_deleted)
 	fte.mark_deleted();
     

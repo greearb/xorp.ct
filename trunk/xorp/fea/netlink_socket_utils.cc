@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.16 2004/10/26 01:09:56 bms Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.17 2004/10/26 01:23:50 bms Exp $"
 
 
 #include "fea_module.h"
@@ -190,11 +190,11 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
     //
     // Interpret notifications about discard routes from the
     // kernel correctly.
+    // XXX: Don't forget to point them at the soft discard interface.
     //
-    bool is_discard = false;
     if ((rtmsg->rtm_type == RTN_BLACKHOLE) ||
 	(rtmsg->rtm_type == RTN_PROHIBIT))
-	    is_discard = true;
+	    /* set nexthop to be the blackhole interface */ ;
 #endif
     if (rtmsg->rtm_type == RTN_UNREACHABLE) {
 	// Ignore "destination unreachable" notifications.
@@ -290,7 +290,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
     // TODO: define default admin distance instead of ~0
     //
     fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr, if_name, if_name,
-	       route_metric, ~0, xorp_route /*, is_discard*/);
+	       route_metric, ~0, xorp_route);
     if (is_deleted)
 	fte.mark_deleted();
     
