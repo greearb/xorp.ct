@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.6 2003/03/10 20:24:04 pavlin Exp $
+# $XORP: xorp/README,v 1.7 2003/03/10 20:40:46 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -215,6 +215,7 @@ In the long-term, we plan to add:
 
 The core team currently consists of:
 
+  * Fred Bauer
   * Javier Cardona
   * Atanu Ghosh
   * Adam Greenhalgh
