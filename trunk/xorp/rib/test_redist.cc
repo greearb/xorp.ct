@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_redist.cc,v 1.1 2004/04/23 19:31:01 hodson Exp $"
+#ident "$XORP: xorp/rib/test_redist.cc,v 1.2 2004/04/26 21:41:10 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -71,9 +71,9 @@ do {									\
 
 
 template <typename A>
-class TestOutput : public RedistributorOutput<A> {
+class TestOutput : public RedistOutput<A> {
 public:
-    typedef RedistributorOutput<A>		Base;
+    typedef RedistOutput<A>			Base;
     typedef typename RedistTable<A>::RouteIndex	RouteIndex;
 
     static const IPNet<A>			ANY_NET;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.13 2004/04/16 02:24:14 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.14 2004/04/23 19:31:01 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -23,17 +23,19 @@
 #include "rt_tab_redist.hh"
 #include "rt_tab_origin.hh"
 
+#include "redist_policy.hh"
+
 // ----------------------------------------------------------------------------
-// RedistributorOutput<A>
+// RedistOutput<A>
 
 template <typename A>
-RedistributorOutput<A>::RedistributorOutput(Redistributor<A>* r)
+RedistOutput<A>::RedistOutput(Redistributor<A>* r)
     : _r(r)
 {
 }
 
 template <typename A>
-RedistributorOutput<A>::~RedistributorOutput()
+RedistOutput<A>::~RedistOutput()
 {
 }
 
@@ -47,8 +49,8 @@ const IPNet<A> Redistributor<A>::NO_LAST_NET(A::ALL_ONES(), A::ADDR_BITLEN);
 template <typename A>
 Redistributor<A>::Redistributor(EventLoop& 	e,
 				const string& 	n)
-    : _e(e), _name(n), _table(0), _output(0), _rei(this), _oei(this),
-      _dumping(false), _blocked(false)
+    : _e(e), _name(n), _table(0), _output(0), _policy(0),
+      _rei(this), _oei(this), _dumping(false), _blocked(false)
 {
 }
 
@@ -56,6 +58,7 @@ template <typename A>
 Redistributor<A>::~Redistributor()
 {
     delete _output;
+    delete _policy;
 }
 
 template <typename A>
@@ -83,13 +86,32 @@ Redistributor<A>::set_redist_table(RedistTable<A>* rt)
 
 template <typename A>
 void
-Redistributor<A>::set_output(RedistributorOutput<A>* o)
+Redistributor<A>::set_output(RedistOutput<A>* o)
 {
+    if (_output)
+	delete _output;
+
     _output = o;
     _blocked = false;
     if (_output) {
 	start_dump();
     }
+}
+
+template <typename A>
+void
+Redistributor<A>::set_policy(RedistPolicy<A>* rpo)
+{
+    if (_policy)
+	delete _policy;
+    _policy = rpo;
+}
+
+template <typename A>
+bool
+Redistributor<A>::policy_accepts(const IPRouteEntry<A>& ipr) const
+{
+    return (_policy == 0) || _policy->accept(ipr);
 }
 
 template <typename A>
@@ -356,7 +378,8 @@ RedistTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
     while (i != _outputs.end()) {
 	Redistributor<A>* r = *i;
 	i++;	// XXX for safety increment iterator before prodding output
-	r->redist_event().did_add(route);
+	if (r->policy_accepts(route))
+	    r->redist_event().did_add(route);
     }
 
     return XORP_OK;
@@ -381,7 +404,8 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* route,
     while (i != _outputs.end()) {
 	Redistributor<A>* r = *i;
 	i++;	// XXX for safety increment iterator before prodding output
-	r->redist_event().will_delete(*route);
+	if (r->policy_accepts(*route))
+	    r->redist_event().will_delete(*route);
     }
 
     _rt_index.erase(rci);
@@ -391,7 +415,8 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* route,
     while (i != _outputs.end()) {
 	Redistributor<A>* r = *i;
 	i++;	// XXX for safety increment iterator before prodding output
-	r->redist_event().did_delete(*route);
+	if (r->policy_accepts(*route))
+	    r->redist_event().did_delete(*route);
     }
 
     return XORP_OK;
@@ -459,8 +484,8 @@ RedistTable<A>::str() const
 // ----------------------------------------------------------------------------
 // Instantiations
 
-template class RedistributorOutput<IPv4>;
-template class RedistributorOutput<IPv6>;
+template class RedistOutput<IPv4>;
+template class RedistOutput<IPv6>;
 
 template class Redistributor<IPv4>;
 template class Redistributor<IPv6>;

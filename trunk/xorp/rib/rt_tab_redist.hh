@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_redist.hh,v 1.7 2004/04/16 02:24:14 hodson Exp $
+// $XORP: xorp/rib/rt_tab_redist.hh,v 1.8 2004/04/23 19:31:01 hodson Exp $
 
 #ifndef __RIB_RT_TAB_REDIST_HH__
 #define __RIB_RT_TAB_REDIST_HH__
@@ -23,7 +23,10 @@ template <typename A>
 class Redistributor;
 
 template <typename A>
-class RedistributorOutput;
+class RedistOutput;
+
+template <typename A>
+class RedistPolicy;
 
 /**
  * Comparitor to allow nets to be stored in a sorted container.
@@ -119,12 +122,12 @@ protected:
 
 /**
  * Controller class that takes routes from RedistTable and passes them
- * on via RedistributorOutput.
+ * on via RedistOutput.
  *
  * Instances of this class are constructed when one routing protocol
  * requests route distribution from another.  Instances walk the
  * routes available in the RedistTable route index, resolve them, and
- * announce them via the RedistributorOutput.  Future updates received
+ * announce them via the RedistOutput.  Future updates received
  * from the RedistTable are propagated via the Redistributor instances
  * associated with it.
  */
@@ -149,13 +152,13 @@ public:
     };
 
     class OutputEventInterface {
-	// Methods only available to RedistributorOutput.  These are
+	// Methods only available to RedistOutput.  These are
 	// events it can tell us about.
 	void low_water();
 	void high_water();
 	void fatal_error();
 
-	friend class RedistributorOutput<A>;
+	friend class RedistOutput<A>;
 	friend class Redistributor<A>;
 
     public:
@@ -173,7 +176,31 @@ public:
 
     void set_redist_table(RedistTable<A>* rt);
 
-    void set_output(RedistributorOutput<A>* output);
+    /**
+     * Bind RedistOutput to Redistributor instance.  The output
+     * should be dynamically allocated with new.  When a new
+     * redistributor output is set, the existing output is removed via
+     * delete.  The RedistOutput is deleted by the
+     * Redistributor when the Redistributor is destructed.
+     */
+    void set_output(RedistOutput<A>* output);
+
+    /**
+     * Bind policy object to Redistributor instance.  The policy
+     * should be dynamically allocated with new.  When a new policy is
+     * set, the existing policy is removed via delete.  The policy is
+     * deleted by the Redistributor when the Redistributor is
+     * destructed.
+     */
+    void set_policy(RedistPolicy<A>* policy);
+
+    /**
+     * Determine if policy accepts updates to route.
+     *
+     * @return true if associated property accepts update to route or
+     * if no policy is enforced, false otherwise.
+     */
+    bool policy_accepts(const IPRouteEntry<A>& ipr) const;
 
     /**
      * Method available to instances of RedistTable to announce events
@@ -182,14 +209,14 @@ public:
     inline RedistEventInterface& redist_event()		{ return _rei; }
 
     /**
-     * Method available to instances of RedistributorOutput to
+     * Method available to instances of RedistOutput to
      * announce transport events to the Redistributor instance.
      */
     inline OutputEventInterface& output_event()		{ return _oei; }
 
     /**
      * Indicate dump status.  When Redistributor is first connected it dumps
-     * existing routes to it's RedistributorOutput.
+     * existing routes to it's RedistOutput.
      *
      * @return true if route dump is in process, false if route dump is
      * either not started or finished.
@@ -210,7 +237,7 @@ private:
 
     inline const IPNet<A>& last_dumped_net() const	{ return _last_net; }
     inline RedistTable<A>* redist_table()		{ return _table; }
-    inline RedistributorOutput<A>* output()		{ return _output; }
+    inline RedistOutput<A>* output()			{ return _output; }
 
 private:
     // The following are not implemented
@@ -226,7 +253,8 @@ private:
     EventLoop&			_e;
     string			_name;
     RedistTable<A>*		_table;
-    RedistributorOutput<A>*	_output;
+    RedistOutput<A>*		_output;
+    RedistPolicy<A>*		_policy;
 
     RedistEventInterface	_rei;
     OutputEventInterface	_oei;
@@ -245,11 +273,11 @@ private:
  * Base class for propagaing output of route add and delete messages.
  */
 template <typename A>
-class RedistributorOutput
+class RedistOutput
 {
 public:
-    RedistributorOutput(Redistributor<A>* r);
-    virtual ~RedistributorOutput();
+    RedistOutput(Redistributor<A>* r);
+    virtual ~RedistOutput();
 
     virtual void add_route(const IPRouteEntry<A>& ipr)		= 0;
     virtual void delete_route(const IPRouteEntry<A>& ipr)	= 0;
@@ -261,8 +289,8 @@ protected:
 
 private:
     // The following are not implemented
-    RedistributorOutput(const RedistributorOutput<A>&);
-    RedistributorOutput<A>& operator=(const RedistributorOutput<A>&);
+    RedistOutput(const RedistOutput<A>&);
+    RedistOutput<A>& operator=(const RedistOutput<A>&);
 
 private:
     Redistributor<A>* _r;
