@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.12 2003/11/04 23:38:04 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.13 2004/01/09 00:15:55 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -34,18 +34,37 @@
 #include "system.hh"
 
 // ----------------------------------------------------------------------------
-// PortTimerConstants Implementation
+// Address Family specific Port methods
 
-PortTimerConstants::PortTimerConstants()
-    : _expiry_secs(DEFAULT_EXPIRY_SECS),
-      _deletion_secs(DEFAULT_DELETION_SECS),
-      _triggered_update_min_wait_secs(DEFAULT_TRIGGERED_UPDATE_MIN_WAIT_SECS),
-      _triggered_update_max_wait_secs(DEFAULT_TRIGGERED_UPDATE_MAX_WAIT_SECS),
-      _interpacket_msecs(DEFAULT_INTERPACKET_DELAY_MS),
-      _interquery_msecs(DEFAULT_INTERQUERY_GAP_MS)
+PortAFSpecState<IPv4>::PortAFSpecState()
 {
+    set_auth_handler(new NullAuthHandler());
 }
 
+PortAFSpecState<IPv4>::~PortAFSpecState()
+{
+    delete auth_handler();
+}
+
+AuthHandlerBase*
+PortAFSpecState<IPv4>::set_auth_handler(AuthHandlerBase* new_handler)
+{
+    AuthHandlerBase* old_handler = _ah;
+    _ah = new_handler;
+    return old_handler;
+}
+
+const AuthHandlerBase*
+PortAFSpecState<IPv4>::auth_handler() const
+{
+    return _ah;
+}
+
+AuthHandlerBase*
+PortAFSpecState<IPv4>::auth_handler()
+{
+    return _ah;
+}
 
 // ----------------------------------------------------------------------------
 // Generic Port<A> Implementation
@@ -53,7 +72,6 @@ PortTimerConstants::PortTimerConstants()
 template <typename A>
 Port<A>::Port(PortManagerBase<A>& pm)
     :  _pm(pm),
-       _en(false),
        _cost(1),
        _horizon(SPLIT_POISON_REVERSE),
        _advertise(false),
@@ -80,8 +98,10 @@ Port<A>::create_peer(const Addr& addr)
     if (peer(addr) == 0) {
 	Peer<A>* peer = new Peer<A>(*this, addr);
 	_peers.push_back(peer);
+	start_peer_gc_timer();
 	return peer;
     }
+
     return 0;
 }
 
@@ -111,6 +131,73 @@ Port<A>::peer(const Addr& addr) const
 	++i;
     }
     return 0;
+}
+
+template <typename A>
+void
+Port<A>::start_request_table_timer()
+{
+    EventLoop& e = _pm.eventloop();
+    _rt_timer = e.new_periodic(constants().table_request_period_secs() * 1000,
+			       callback(this,
+					&Port<A>::request_table_timeout));
+}
+
+template <typename A>
+void
+Port<A>::stop_request_table_timer()
+{
+    _rt_timer.unschedule();
+}
+
+template <typename A>
+bool
+Port<A>::request_table_timeout()
+{
+    if (_peers.empty() == false)
+	return false;
+
+    RipPacket<A>* pkt = new RipPacket<A>(RIP_AF_CONSTANTS<A>::IP_GROUP(),
+					 RIP_AF_CONSTANTS<A>::IP_PORT);
+
+    RequestTablePacketAssembler<A> rtpa(*this);
+    if (rtpa.prepare(pkt) == true) {
+	_packet_queue->enqueue_packet(pkt);
+	counters().incr_table_requests_sent();
+    } else {
+	XLOG_ERROR("Failed to assemble table request.\n");
+	delete pkt;
+    }
+    push_packets();
+    fprintf(stderr, "Sending Request.\n");
+    return true;
+}
+
+template <typename A>
+void
+Port<A>::start_peer_gc_timer()
+{
+    XLOG_ASSERT(_peers.empty() == false);
+
+    EventLoop& e = _pm.eventloop();
+    _gc_timer = e.new_periodic(4000,
+			       callback(this, &Port<A>::peer_gc_timeout));
+}
+
+template <typename A>
+bool
+Port<A>::peer_gc_timeout()
+{
+    PeerList::iterator i = _peers.begin();
+    while (i != _peers.end()) {
+	Peer<A>* pp = *i;
+	if (pp->route_count() == 0) {
+	    _peers.erase(++i);
+	} else {
+	    i++;
+	}
+    }
+    return _peers.empty() == false;
 }
 
 template <typename A>
@@ -244,7 +331,7 @@ void
 Port<A>::port_io_send_completion(bool success)
 {
     if (success == false) {
-	XLOG_ERROR("Send failed");
+	XLOG_ERROR("Send failed\n");
     }
 
     const RipPacket<A>* head = _packet_queue->head();
@@ -255,8 +342,13 @@ Port<A>::port_io_send_completion(bool success)
 
 template <typename A>
 void
-Port<A>::port_io_enabled_change(bool)
+Port<A>::port_io_enabled_change(bool en)
 {
+    if (en) {
+	start_request_table_timer();
+    } else {
+	stop_request_table_timer();
+    }
 }
 
 template <typename A>
@@ -301,6 +393,11 @@ Port<A>::parse_request(const Addr&			src_addr,
 
     if (queries_blocked())
 	return;
+
+
+    // XXXX
+    // NEED TO DISTINGUISH BETWEEN FULL TABLE QUERIES AND ROUTE QUERIES
+    // XXXX
 
     //
     // Answer query

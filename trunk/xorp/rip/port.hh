@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.12 2003/08/01 16:32:54 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.13 2004/01/09 00:15:55 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -25,6 +25,27 @@
 #include "constants.hh"
 #include "port_io.hh"
 
+//
+// Forward declarations
+//
+class AuthHandlerBase;
+
+template <typename A>
+class PortManagerBase;
+
+template <typename A>
+class Peer;
+
+template <typename A>
+class PacketQueue;
+
+template <typename A>
+class RouteEntry;
+
+template <typename A>
+class PacketRouteEntry;
+
+
 /**
  * @short Container of timer constants associated with a RIP port.
  */
@@ -34,56 +55,69 @@ public:
      * Initialize contants with default values from RIPv2 spec.  The values
      * are defined in constants.hh.
      */
-    PortTimerConstants();
+    inline PortTimerConstants();
 
     /**
      * Set the route expiration time.
      * @param t the expiration time in seconds.
      */
-    inline void		set_expiry_secs(uint32_t t);
+    inline void set_expiry_secs(uint32_t t);
 
     /**
      * Get the route route expiration time.
      * @return expiry time in seconds.
      */
-    inline uint32_t	expiry_secs() const;
+    inline uint32_t expiry_secs() const;
 
     /**
      * Set the route deletion time.
      * @param t the deletion time in seconds (must be >= 1).
      * @return true on success, false if t == 0.
      */
-    inline bool		set_deletion_secs(uint32_t t);
+    inline bool set_deletion_secs(uint32_t t);
 
     /**
      * Get the route deletion time.
      * @return deletion time in seconds.
      */
-    inline uint32_t	deletion_secs() const;
+    inline uint32_t deletion_secs() const;
+
+    /**
+     * Set request packet transmission period.  Request packets are only
+     * sent when there are no peers associated with a port.
+     * @param t inter-packet interval in seconds.
+     */
+    inline void set_table_request_period_secs(uint32_t t);
+
+    /**
+     * Set request packet transmission period.
+     * @return inter-packet interval in seconds.
+     */
+    inline uint32_t table_request_period_secs() const;
 
     /**
      * Set the lower bound of the triggered update interval.
      * @param t the lower bound of the triggered update interval in seconds.
      */
-    inline void		set_triggered_update_min_wait_secs(uint32_t t);
+    inline void set_triggered_update_min_wait_secs(uint32_t t);
 
     /**
      * Get the lower bound of the triggered update interval.
      * @return the lower bound of the triggered update interval in seconds.
      */
-    inline uint32_t	triggered_update_min_wait_secs() const;
+    inline uint32_t triggered_update_min_wait_secs() const;
 
     /**
      * Set the upper bound of the triggered update interval.
      * @param t the upper bound of the triggered update interval in seconds.
      */
-    inline void		set_triggered_update_max_wait_secs(uint32_t t);
+    inline void set_triggered_update_max_wait_secs(uint32_t t);
 
     /**
      * Get the upper bound of the triggered update interval.
      * @return the upper bound of the triggered update interval in seconds.
      */
-    inline uint32_t	triggered_update_max_wait_secs() const;
+    inline uint32_t triggered_update_max_wait_secs() const;
 
     /**
      * Set the interpacket packet delay.
@@ -92,20 +126,20 @@ public:
      * @return true on success, false if t is greater than
      * MAXIMUM_INTERPACKET_DELAY_MS.
      */
-    inline bool		set_interpacket_delay_ms(uint32_t t);
+    inline bool	set_interpacket_delay_ms(uint32_t t);
 
     /**
      * Get the interpacket packet delay in milliseconds.
      */
-    inline uint32_t	interpacket_delay_ms() const;
+    inline uint32_t interpacket_delay_ms() const;
 
     /**
      * Set the interquery gap.  This is the minimum temporal gap between
-     * route request packets that query specific routes.  Fast arriving
-     * queries are ignored.
+     * route request packets that query specific routes.  Queries arriving
+     * at a faster rate are ignored.
      * @param t the interquery delay in milliseconds.
      */
-    inline void		set_interquery_delay_ms(uint32_t t);
+    inline void	set_interquery_delay_ms(uint32_t t);
 
     /**
      * Get the interquery gap.  This is the minimum temporal gap between
@@ -113,11 +147,12 @@ public:
      * queries are ignored.
      * @return the interquery delay in milliseconds.
      */
-    inline uint32_t	interquery_delay_ms() const;
+    inline uint32_t interquery_delay_ms() const;
 
 protected:
     uint32_t _expiry_secs;
     uint32_t _deletion_secs;
+    uint32_t _table_request_secs;
     uint32_t _triggered_update_min_wait_secs;
     uint32_t _triggered_update_max_wait_secs;
     uint32_t _interpacket_msecs;
@@ -131,7 +166,7 @@ protected:
 struct PortCounters {
 public:
     PortCounters() : _packets_recv(0), _bad_routes(0), _bad_packets(0),
-		     _triggered_updates(0)
+		     _tr_sent(0), _tr_recv(), _triggered_updates(0)
     {}
 
     /**
@@ -175,10 +210,32 @@ public:
      */
     inline void incr_triggered_updates() 	{ _triggered_updates++; }
 
+    /**
+     * Get the number of table requests sent.
+     */
+    inline uint32_t table_requests_sent() const	{ return _tr_sent; }
+
+    /**
+     * Increment the number of table requests updates sent.
+     */
+    inline void incr_table_requests_sent() 	{ _tr_sent++; }
+
+    /**
+     * Get the number of table requests received.
+     */
+    inline uint32_t table_requests_recv() const	{ return _tr_recv; }
+
+    /**
+     * Increment the number of table requests updates received.
+     */
+    inline void incr_table_requests_recv() 	{ _tr_recv++; }
+
 protected:
     uint32_t _packets_recv;
     uint32_t _bad_routes;
     uint32_t _bad_packets;
+    uint32_t _tr_sent;			// table requests sent
+    uint32_t _tr_recv;			// table requests received
     uint32_t _triggered_updates;
 };
 
@@ -193,10 +250,11 @@ template <typename A>
 class PortAFSpecState
 {};
 
-class AuthHandlerBase;
-
 /**
  * @short IPv4 specialized Port state.
+ *
+ * This class holds authentication handler state which is IPv4
+ * specific data for a RIP Port.
  */
 template <>
 class PortAFSpecState<IPv4>
@@ -206,43 +264,37 @@ private:
 
 public:
     /**
+     * Constructor.
+     *
+     * Instantiates authentication handler as a @ref NullAuthHandler.
+     */
+    PortAFSpecState();
+
+    /**
+     * Destructor.
+     *
+     * Deletes authentication handler if non-null.
+     */
+    ~PortAFSpecState();
+
+    /**
      * Set authentication handler.
      *
-     * @param h handler to be used.
+     * @param h authentication handler to be used.
      * @return pointer to former handler.
      */
-    inline AuthHandlerBase* set_auth_handler(AuthHandlerBase* h);
+    AuthHandlerBase* set_auth_handler(AuthHandlerBase* h);
 
     /**
      * Get authentication handler.
      */
-    inline const AuthHandlerBase* auth_handler() const;
+    const AuthHandlerBase* auth_handler() const;
 
     /**
      * Get authentication handler.
      */
-    inline AuthHandlerBase* auth_handler();
+    AuthHandlerBase* auth_handler();
 };
-
-inline AuthHandlerBase*
-PortAFSpecState<IPv4>::set_auth_handler(AuthHandlerBase* new_handler)
-{
-    AuthHandlerBase* old_handler = _ah;
-    _ah = new_handler;
-    return old_handler;
-}
-
-const AuthHandlerBase*
-PortAFSpecState<IPv4>::auth_handler() const
-{
-    return _ah;
-}
-
-AuthHandlerBase*
-PortAFSpecState<IPv4>::auth_handler()
-{
-    return _ah;
-}
 
 
 /**
@@ -261,43 +313,16 @@ public:
      * Get the maximum number of route entries placed in each RIPng response
      * packet.
      */
-    inline uint32_t max_entries_per_packet() const;
+    inline uint32_t max_entries_per_packet() const	{ return _mepp; }
 
     /**
      * Set the maximum number of route entries placed in each RIPng response
      * packet.
      */
-    inline void	    set_max_entries_per_packet(uint32_t n);
+    inline void set_max_entries_per_packet(uint32_t n)	{ _mepp = n; }
 };
 
-uint32_t
-PortAFSpecState<IPv6>::max_entries_per_packet() const
-{
-    return _mepp;
-}
-
-inline void
-PortAFSpecState<IPv6>::set_max_entries_per_packet(uint32_t n)
-{
-    _mepp = n;
-}
-
 
-template <typename A>
-class PortManagerBase;
-
-template <typename A>
-class Peer;
-
-template <typename A>
-class PacketQueue;
-
-template <typename A>
-class RouteEntry;
-
-template <typename A>
-class PacketRouteEntry;
-
 /**
  * @short RIP Port
  *
@@ -342,16 +367,6 @@ public:
      * state that only has meaning within the IP address family.
      */
     inline const PortAFSpecState<A>& af_state() const	{ return _af_state; }
-
-    /**
-     * Set enabled state.
-     */
-    void set_enabled(bool en);
-
-    /**
-     * Get enabled state.
-     */
-    inline bool enabled() const				{ return _en; }
 
     /**
      * Get cost metric associated with Port.
@@ -454,6 +469,36 @@ public:
 
 protected:
     /**
+     * Start request table timer.  When there are no peers, this
+     * schedules the periodic transmission of request table packets.
+     */
+    void start_request_table_timer();
+
+    /**
+     * Stop request table timer.
+     */
+    void stop_request_table_timer();
+
+    /**
+     * Send request packet if there are no peers.
+     * @return true if packet sent, false if no packet sent.
+     */
+    bool request_table_timeout();
+
+    /**
+     * Start periodic timer to garbage collect peers.  Timer
+     * deschedules itself when no peers exist.
+     */
+    void start_peer_gc_timer();
+
+    /**
+     * Poll peers and remove those with no routes.
+     * return true if peers still exist, false otherwise.
+     */
+    bool peer_gc_timeout();
+
+protected:
+    /**
      *  Get counters associated with Port.
      */
     inline PortCounters& counters()			{ return _counters; }
@@ -480,7 +525,7 @@ protected:
      *
      * @param why reason packet marked
      */
-    void record_bad_packet(const string&	why,
+    void record_bad_packet(const string& 	why,
 			   const Addr&		addr,
 			   uint16_t 		port,
 			   Peer<A>* 		p);
@@ -574,11 +619,12 @@ protected:
 
     PeerList		_peers;			// Peers on Port
 
+    XorpTimer		_rt_timer;		// Request table timer
+    XorpTimer		_gc_timer;		// Peer garbage collection
     XorpTimer		_us_timer;		// Unsolicited update timer
     XorpTimer		_tu_timer;		// Triggered update timer
     XorpTimer		_query_blocked_timer;	// Rate limiting on queries
 
-    bool		_en;			// Enabled state
     uint32_t		_cost;			// Cost metric of port
     RipHorizon		_horizon;		// Port Horizon type
     bool		_advertise;		// Advertise IO port
@@ -593,6 +639,17 @@ protected:
 
 // ----------------------------------------------------------------------------
 // Inline PortTimerConstants accessor and modifiers.
+
+PortTimerConstants::PortTimerConstants()
+    : _expiry_secs(DEFAULT_EXPIRY_SECS),
+      _deletion_secs(DEFAULT_DELETION_SECS),
+      _table_request_secs(DEFAULT_TABLE_REQUEST_SECS),
+      _triggered_update_min_wait_secs(DEFAULT_TRIGGERED_UPDATE_MIN_WAIT_SECS),
+      _triggered_update_max_wait_secs(DEFAULT_TRIGGERED_UPDATE_MAX_WAIT_SECS),
+      _interpacket_msecs(DEFAULT_INTERPACKET_DELAY_MS),
+      _interquery_msecs(DEFAULT_INTERQUERY_GAP_MS)
+{
+}
 
 inline void
 PortTimerConstants::set_expiry_secs(uint32_t t)
@@ -619,6 +676,18 @@ inline uint32_t
 PortTimerConstants::deletion_secs() const
 {
     return _deletion_secs;
+}
+
+inline void
+PortTimerConstants::set_table_request_period_secs(uint32_t t)
+{
+    _table_request_secs = t;
+}
+
+inline uint32_t
+PortTimerConstants::table_request_period_secs() const
+{
+    return _table_request_secs;
 }
 
 inline void
