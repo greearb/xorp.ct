@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.6 2004/05/28 23:12:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.7 2004/06/01 04:49:05 pavlin Exp $ */
 
 protocols {
     pimsm6 {
@@ -176,7 +176,7 @@ protocols {
 	}
 
 	switch-to-spt-threshold {
-	    %activate: xrl "$(pimsm6.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=$(@.enable)&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
+	    %activate: xrl "$(pimsm6.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=$(@.enabled)&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
 	    %delete: xrl "$(pimsm6.targetname)/pim/0.1/reset_switch_to_spt_threshold";
 
 	    enabled {
