@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.9 2004/06/10 22:41:01 hodson Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.10 2004/11/03 21:37:09 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -522,40 +522,20 @@ private:
     virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
 
     /**
-     * Initiate startup of the interface manager.
+     * Initiate registration with the FEA.
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
-     *
-     * @return true on success, false on failure.
      */
-    virtual bool ifmgr_startup() = 0;
+    virtual void fea_register_startup() = 0;
 
     /**
-     * Initiate shutdown of the interface manager.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     *
-     * @return true on success, false on failure.
-     */
-    virtual bool ifmgr_shutdown() = 0;
-
-    /**
-     * Initiate registration as an FEA FIB client.
+     * Initiate de-registration with the FEA.
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
      */
-    virtual void fea_fib_client_register_startup() = 0;
-
-    /**
-     * Initiate de-registration as an FEA FIB client.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     */
-    virtual void fea_fib_client_register_shutdown() = 0;
+    virtual void fea_register_shutdown() = 0;
 
     /**
      * Initiate registration with the RIB.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xorp_fib2mrib.cc,v 1.5 2004/06/10 22:41:01 hodson Exp $"
+#ident "$XORP: xorp/fib2mrib/xorp_fib2mrib.cc,v 1.6 2004/12/09 07:54:35 pavlin Exp $"
 
 
 //
@@ -28,8 +28,6 @@
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
-
-#include "libxipc/xrl_std_router.hh"
 
 #include "xrl_fib2mrib_node.hh"
 
@@ -83,7 +81,7 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-fib2mrib_main(const char* finder_hostname, uint16_t finder_port)
+fib2mrib_main(const string& finder_hostname, uint16_t finder_port)
 {
     //
     // Init stuff
@@ -93,16 +91,15 @@ fib2mrib_main(const char* finder_hostname, uint16_t finder_port)
     //
     // Fib2mrib node
     //
-    XrlStdRouter xrl_std_router_fib2mrib(
-	eventloop,
-	"fib2mrib",
-	finder_hostname, finder_port);
     XrlFib2mribNode xrl_fib2mrib_node(
 	eventloop,
-	&xrl_std_router_fib2mrib,
+	"fib2mrib",
+	finder_hostname,
+	finder_port,
+	"finder",
 	"fea",
 	"rib");
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fib2mrib);
+    wait_until_xrl_router_is_ready(eventloop, xrl_fib2mrib_node.xrl_router());
 
     // Startup
     xrl_fib2mrib_node.startup();
@@ -177,7 +174,7 @@ main(int argc, char *argv[])
     // Run everything
     //
     try {
-	fib2mrib_main(finder_hostname.c_str(), finder_port);
+	fib2mrib_main(finder_hostname, finder_port);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }

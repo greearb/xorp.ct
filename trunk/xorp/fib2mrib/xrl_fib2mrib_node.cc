@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.16 2004/11/18 14:25:28 bms Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.17 2005/02/03 06:51:48 bms Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -22,35 +22,49 @@
 #include "libxorp/ipvx.hh"
 #include "libxorp/status_codes.h"
 
-#include "libxipc/xrl_router.hh"
-
 #include "fib2mrib_node.hh"
 #include "xrl_fib2mrib_node.hh"
 
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 
-XrlFib2mribNode::XrlFib2mribNode(EventLoop& eventloop,
-				 XrlRouter* xrl_router,
-				 const string& fea_target,
-				 const string& rib_target)
+const TimeVal XrlFib2mribNode::RETRY_TIMEVAL = TimeVal(1, 0);
+
+XrlFib2mribNode::XrlFib2mribNode(EventLoop&	eventloop,
+				 const string&	class_name,
+				 const string&	finder_hostname,
+				 uint16_t	finder_port,
+				 const string&	finder_target,
+				 const string&	fea_target,
+				 const string&	rib_target)
     : Fib2mribNode(eventloop),
-      XrlFib2mribTargetBase(xrl_router),
-      _xrl_router(xrl_router),
-      _class_name(xrl_router->class_name()),
-      _instance_name(xrl_router->instance_name()),
-      _xrl_fea_fti_client(xrl_router),
-      _xrl_fea_fib_client(xrl_router),
-      _xrl_rib_client(xrl_router),
+      XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+		   finder_port),
+      XrlFib2mribTargetBase(&xrl_router()),
+      _class_name(xrl_router().class_name()),
+      _instance_name(xrl_router().instance_name()),
+      _xrl_fea_fti_client(&xrl_router()),
+      _xrl_fea_fib_client(&xrl_router()),
+      _xrl_rib_client(&xrl_router()),
+      _finder_target(finder_target),
       _fea_target(fea_target),
       _rib_target(rib_target),
-      _ifmgr(eventloop, fea_target.c_str(), xrl_router->finder_address(),
-	     xrl_router->finder_port()),
+      _ifmgr(eventloop, fea_target.c_str(), xrl_router().finder_address(),
+	     xrl_router().finder_port()),
+      _xrl_finder_client(&xrl_router()),
+      _is_fea_alive(false),
+      _is_fea_registered(false),
+      _is_fea_registering(false),
+      _is_fea_deregistering(false),
       _is_fea_have_ipv4_tested(false),
       _is_fea_have_ipv6_tested(false),
       _fea_have_ipv4(false),
       _fea_have_ipv6(false),
       _is_fea_fib_client4_registered(false),
       _is_fea_fib_client6_registered(false),
+      _is_rib_alive(false),
+      _is_rib_registered(false),
+      _is_rib_registering(false),
+      _is_rib_deregistering(false),
       _is_rib_igp_table4_registered(false),
       _is_rib_igp_table6_registered(false)
 {
@@ -69,15 +83,6 @@ XrlFib2mribNode::~XrlFib2mribNode()
 bool
 XrlFib2mribNode::startup()
 {
-    XrlFinderEventNotifierV0p1Client finder(_xrl_router);
-    XrlFinderEventNotifierV0p1Client::RegisterClassEventInterestCB cb =
-	::callback(this, &XrlFib2mribNode::finder_interest_callback);
-
-    finder.send_register_class_event_interest("finder",
-	_xrl_router->instance_name(), _fea_target, cb);
-    finder.send_register_class_event_interest("finder",
-	_xrl_router->instance_name(), _rib_target, cb);
-
     return Fib2mribNode::startup();
 }
 
@@ -87,101 +92,319 @@ XrlFib2mribNode::shutdown()
     return Fib2mribNode::shutdown();
 }
 
+//
+// Finder-related events
+//
 void
-XrlFib2mribNode::finder_interest_callback(const XrlError& error)
+XrlFib2mribNode::finder_disconnect_event()
 {
-    if (error != XrlError::OKAY())
-	XLOG_ERROR("callback: %s",  error.str().c_str());
+    XLOG_ERROR("Finder disconnect event. Exiting immediately...");
+
+    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::update_status();
 }
 
-bool
-XrlFib2mribNode::ifmgr_startup()
+//
+// Register with the FEA
+//
+void
+XrlFib2mribNode::fea_register_startup()
 {
-    bool ret_value;
+    bool success;
 
-    // TODO: XXX: we should startup the ifmgr only if it hasn't started yet
-    Fib2mribNode::incr_startup_requests_n();
+    _fea_register_startup_timer.unschedule();
+    _fea_register_shutdown_timer.unschedule();
 
-    ret_value = _ifmgr.startup();
+    if (_is_fea_registered)
+	return;		// Already registered
+
+    if (! _is_fea_registering) {
+	Fib2mribNode::incr_startup_requests_n();	// XXX: for the ifmgr
+
+	if (! _is_fea_fib_client4_registered)
+	    Fib2mribNode::incr_startup_requests_n();
+	if (! _is_fea_fib_client6_registered)
+	    Fib2mribNode::incr_startup_requests_n();
+
+	_is_fea_registering = true;
+    }
 
     //
-    // XXX: when the startup is completed, IfMgrHintObserver::tree_complete()
+    // Register interest in the FEA with the Finder
+    //
+    success = _xrl_finder_client.send_register_class_event_interest(
+	_finder_target.c_str(), _instance_name, _fea_target,
+	callback(this, &XrlFib2mribNode::finder_register_interest_fea_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_fea_register_startup_timer =
+	    Fib2mribNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::fea_register_startup));
+	return;
+    }
+}
+
+void
+XrlFib2mribNode::finder_register_interest_fea_cb(
+    const XrlError& xrl_error)
+{
+    // If success, then the FEA birth event will startup the ifmgr
+    if (xrl_error == XrlError::OKAY()) {
+	_is_fea_registering = false;
+	_is_fea_registered = true;
+	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot register interest in finder events: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
+    //
+    if (! _fea_register_startup_timer.scheduled()) {
+	_fea_register_startup_timer =
+	    Fib2mribNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::fea_register_startup));
+    }
+}
+
+//
+// De-register with the FEA
+//
+void
+XrlFib2mribNode::fea_register_shutdown()
+{
+    bool success;
+
+    _fea_register_startup_timer.unschedule();
+    _fea_register_shutdown_timer.unschedule();
+
+    if (! _is_fea_alive)
+	return;		// The FEA is not there anymore
+
+    if (! _is_fea_registered)
+	return;		// Not registered
+
+    if (! _is_fea_deregistering) {
+	Fib2mribNode::incr_shutdown_requests_n();	// XXX: for the ifmgr
+
+	if (_is_fea_fib_client4_registered)
+	    Fib2mribNode::incr_shutdown_requests_n();
+	if (_is_fea_fib_client6_registered)
+	    Fib2mribNode::incr_shutdown_requests_n();
+
+	_is_fea_deregistering = true;
+    }
+
+    //
+    // De-register interest in the FEA with the Finder
+    //
+    success = _xrl_finder_client.send_deregister_class_event_interest(
+	_finder_target.c_str(), _instance_name, _fea_target,
+	callback(this, &XrlFib2mribNode::finder_deregister_interest_fea_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_fea_register_shutdown_timer =
+	    Fib2mribNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::fea_register_shutdown));
+	return;
+    }
+
+    //
+    // XXX: when the shutdown is completed, Fib2mribNode::status_change()
     // will be called.
     //
+    _ifmgr.shutdown();
 
-    return ret_value;
-}
-
-bool
-XrlFib2mribNode::ifmgr_shutdown()
-{
-    bool ret_value;
-
-    Fib2mribNode::incr_shutdown_requests_n();
-
-    ret_value = _ifmgr.shutdown();
-
-    //
-    // XXX: when the shutdown is completed, StaticRoutesNode::status_change()
-    // will be called.
-    //
-
-    return ret_value;
+    send_fea_delete_fib_client();
 }
 
 void
-XrlFib2mribNode::fea_fib_client_register_startup()
+XrlFib2mribNode::finder_deregister_interest_fea_cb(
+    const XrlError& xrl_error)
 {
-    if (! _is_fea_fib_client4_registered)
-	Fib2mribNode::incr_startup_requests_n();
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_fea_deregistering = false;
+	_is_fea_registered = false;
+	return;
+    }
 
-    if (! _is_fea_fib_client6_registered)
-	Fib2mribNode::incr_startup_requests_n();
+    // TODO: retry de-registration if this was a transport error
+    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	       "Will give up.",
+	       xrl_error.str().c_str());
 
-    send_fea_fib_client_registration();
+    _is_fea_deregistering = false;
+    _is_fea_registered = false;
+
+    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::update_status();
 }
 
-void
-XrlFib2mribNode::fea_fib_client_register_shutdown()
-{
-    if (_is_fea_fib_client4_registered)
-	Fib2mribNode::incr_shutdown_requests_n();
-
-    if (_is_fea_fib_client6_registered)
-	Fib2mribNode::incr_shutdown_requests_n();
-
-    send_fea_fib_client_deregistration();
-}
-
+//
+// Register with the RIB
+//
 void
 XrlFib2mribNode::rib_register_startup()
 {
-    if (! _is_rib_igp_table4_registered)
-	Fib2mribNode::incr_startup_requests_n();
+    bool success;
 
-    if (! _is_rib_igp_table6_registered)
-	Fib2mribNode::incr_startup_requests_n();
+    _rib_register_startup_timer.unschedule();
+    _rib_register_shutdown_timer.unschedule();
 
-    send_rib_registration();
+    if (_is_rib_registered)
+	return;		// Already registered
+
+    if (! _is_rib_registering) {
+	if (! _is_rib_igp_table4_registered)
+	    Fib2mribNode::incr_startup_requests_n();
+	if (! _is_rib_igp_table6_registered)
+	    Fib2mribNode::incr_startup_requests_n();
+
+	_is_rib_registering = true;
+    }
+
+    //
+    // Register interest in the RIB with the Finder
+    //
+    success = _xrl_finder_client.send_register_class_event_interest(
+	_finder_target.c_str(), _instance_name, _rib_target,
+	callback(this, &XrlFib2mribNode::finder_register_interest_rib_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_rib_register_startup_timer =
+	    Fib2mribNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::rib_register_startup));
+	return;
+    }
 }
 
 void
+XrlFib2mribNode::finder_register_interest_rib_cb(
+    const XrlError& xrl_error)
+{
+    // If success, then add the RIB tables
+    if (xrl_error == XrlError::OKAY()) {
+	_is_rib_registering = false;
+	_is_rib_registered = true;
+	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot register interest in finder events: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
+    //
+    if (! _rib_register_startup_timer.scheduled()) {
+	_rib_register_startup_timer =
+	    Fib2mribNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::rib_register_startup));
+    }
+}
+
+//
+// De-register with the RIB
+//
+void
 XrlFib2mribNode::rib_register_shutdown()
 {
-    if (_is_rib_igp_table4_registered)
-	Fib2mribNode::incr_shutdown_requests_n();
+    bool success;
 
-    if (_is_rib_igp_table6_registered)
-	Fib2mribNode::incr_shutdown_requests_n();
+    _rib_register_startup_timer.unschedule();
+    _rib_register_shutdown_timer.unschedule();
 
-    send_rib_deregistration();
+    if (! _is_rib_alive)
+	return;		// The RIB is not there anymore
+
+    if (! _is_rib_registered)
+	return;		// Not registered
+
+    if (! _is_rib_deregistering) {
+	if (_is_rib_igp_table4_registered)
+	    Fib2mribNode::incr_shutdown_requests_n();
+	if (_is_rib_igp_table6_registered)
+	    Fib2mribNode::incr_shutdown_requests_n();
+
+	_is_rib_deregistering = true;
+    }
+
+    //
+    // De-register interest in the RIB with the Finder
+    //
+    success = _xrl_finder_client.send_deregister_class_event_interest(
+	_finder_target.c_str(), _instance_name, _rib_target,
+	callback(this, &XrlFib2mribNode::finder_deregister_interest_rib_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_rib_register_shutdown_timer =
+	    Fib2mribNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::rib_register_shutdown));
+	return;
+    }
+
+    send_rib_delete_tables();
+}
+
+void
+XrlFib2mribNode::finder_deregister_interest_rib_cb(
+    const XrlError& xrl_error)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_rib_deregistering = false;
+	_is_rib_registered = false;
+	return;
+    }
+
+    // TODO: retry de-registration if this was a transport error
+    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	       "Will give up.",
+	       xrl_error.str().c_str());
+
+    _is_rib_deregistering = false;
+    _is_rib_registered = false;
+
+    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::update_status();
 }
 
 //
 // Register as an FEA FIB client
 //
 void
-XrlFib2mribNode::send_fea_fib_client_registration()
+XrlFib2mribNode::send_fea_add_fib_client()
 {
     bool success = true;
 
@@ -246,12 +469,12 @@ XrlFib2mribNode::send_fea_fib_client_registration()
     if (! success) {
 	//
 	// If an error, then start a timer to try again.
-	// TODO: XXX: the timer value is hardcoded here!!
 	//
     start_timer_label:
-	_fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+	_fea_fib_client_registration_timer =
+	    Fib2mribNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
     }
 }
 
@@ -263,7 +486,7 @@ XrlFib2mribNode::fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
     if (xrl_error == XrlError::OKAY()) {
 	_is_fea_have_ipv4_tested = true;
 	_fea_have_ipv4 = *result;
-	send_fea_fib_client_registration();
+	send_fea_add_fib_client();
 	// XXX: if the underying system doesn't support IPv4, then we are done
 	if (! _fea_have_ipv4)
 	    Fib2mribNode::decr_startup_requests_n();
@@ -282,13 +505,13 @@ XrlFib2mribNode::fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
     //
     // If an error, then start a timer to try again
     // (unless the timer is already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_fea_fib_client_registration_timer.scheduled())
 	return;
-    _fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+    _fea_fib_client_registration_timer =
+	Fib2mribNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
 }
 
 void
@@ -299,7 +522,7 @@ XrlFib2mribNode::fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
     if (xrl_error == XrlError::OKAY()) {
 	_is_fea_have_ipv6_tested = true;
 	_fea_have_ipv6 = *result;
-	send_fea_fib_client_registration();
+	send_fea_add_fib_client();
 	// XXX: if the underying system doesn't support IPv6, then we are done
 	if (! _fea_have_ipv6)
 	    Fib2mribNode::decr_startup_requests_n();
@@ -318,13 +541,13 @@ XrlFib2mribNode::fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
     //
     // If an error, then start a timer to try again
     // (unless the timer is already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_fea_fib_client_registration_timer.scheduled())
 	return;
-    _fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+    _fea_fib_client_registration_timer =
+	Fib2mribNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
 }
 
 void
@@ -333,7 +556,7 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_erro
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_fea_fib_client4_registered = true;
-	send_fea_fib_client_registration();
+	send_fea_add_fib_client();
 	Fib2mribNode::decr_startup_requests_n();
 	return;
     }
@@ -349,13 +572,13 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_erro
     //
     // If an error, then start a timer to try again
     // (unless the timer is already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_fea_fib_client_registration_timer.scheduled())
 	return;
-    _fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+    _fea_fib_client_registration_timer =
+	Fib2mribNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
 }
 
 void
@@ -364,7 +587,7 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_erro
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_fea_fib_client6_registered = true;
-	send_fea_fib_client_registration();
+	send_fea_add_fib_client();
 	Fib2mribNode::decr_startup_requests_n();
 	return;
     }
@@ -380,20 +603,20 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_erro
     //
     // If an error, then start a timer to try again
     // (unless the timer is already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_fea_fib_client_registration_timer.scheduled())
 	return;
-    _fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+    _fea_fib_client_registration_timer =
+	Fib2mribNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
 }
 
 //
 // De-register as an FEA FIB client
 //
 void
-XrlFib2mribNode::send_fea_fib_client_deregistration()
+XrlFib2mribNode::send_fea_delete_fib_client()
 {
     bool success = true;
 
@@ -472,10 +695,10 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_e
 }
 
 //
-// Register with the RIB
+// Add tables with the RIB
 //
 void
-XrlFib2mribNode::send_rib_registration()
+XrlFib2mribNode::send_rib_add_tables()
 {
     bool success = true;
 
@@ -514,12 +737,12 @@ XrlFib2mribNode::send_rib_registration()
     if (! success) {
 	//
 	// If an error, then start a timer to try again.
-	// TODO: XXX: the timer value is hardcoded here!!
 	//
     start_timer_label:
-	_rib_igp_table_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlFib2mribNode::send_rib_registration));
+	_rib_igp_table_registration_timer =
+	    Fib2mribNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_rib_add_tables));
     }
 }
 
@@ -529,7 +752,7 @@ XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_rib_igp_table4_registered = true;
-	send_rib_registration();
+	send_rib_add_tables();
 	Fib2mribNode::decr_startup_requests_n();
 	return;
     }
@@ -545,13 +768,13 @@ XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
     //
     // If an error, then start a timer to try again
     // (unless the timer is already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_rib_igp_table_registration_timer.scheduled())
 	return;
-    _rib_igp_table_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlFib2mribNode::send_rib_registration));
+    _rib_igp_table_registration_timer =
+	Fib2mribNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::send_rib_add_tables));
 }
 
 void
@@ -560,7 +783,7 @@ XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_rib_igp_table6_registered = true;
-	send_rib_registration();
+	send_rib_add_tables();
 	Fib2mribNode::decr_startup_requests_n();
 	return;
     }
@@ -576,20 +799,20 @@ XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
     //
     // If an error, then start a timer to try again
     // (unless the timer is already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_rib_igp_table_registration_timer.scheduled())
 	return;
-    _rib_igp_table_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlFib2mribNode::send_rib_registration));
+    _rib_igp_table_registration_timer =
+	Fib2mribNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlFib2mribNode::send_rib_add_tables));
 }
 
 //
-// De-register with the RIB
+// Delete tables with the RIB
 //
 void
-XrlFib2mribNode::send_rib_deregistration()
+XrlFib2mribNode::send_rib_delete_tables()
 {
     bool success = true;
 
@@ -736,9 +959,26 @@ XrlFib2mribNode::finder_event_observer_0_1_xrl_target_birth(
     const string&	target_class,
     const string&	target_instance)
 {
+    if (target_class == _fea_target) {
+	//
+	// XXX: when the startup is completed,
+	// IfMgrHintObserver::tree_complete() will be called.
+	//
+	_is_fea_alive = true;
+	if (_ifmgr.startup() != true) {
+	    Fib2mribNode::ServiceBase::set_status(FAILED);
+	    Fib2mribNode::update_status();
+	} else {
+	    send_fea_add_fib_client();
+	}
+    }
+
+    if (target_class == _rib_target) {
+	_is_rib_alive = true;
+	send_rib_add_tables();
+    }
 
     return XrlCmdError::OKAY();
-    UNUSED(target_class);
     UNUSED(target_instance);
 }
 
@@ -752,13 +992,26 @@ XrlFib2mribNode::finder_event_observer_0_1_xrl_target_death(
     const string&	target_instance)
 {
 
-    if ((_fea_target == target_class) || (_rib_target == target_class)) {
-	XLOG_ERROR("FEA or RIB died, exiting.");
-	Fib2mribNode::shutdown();
+    bool do_shutdown = false;
+
+    if (_fea_target == target_class) {
+	XLOG_ERROR("FEA (instance %s) has died, shutting down.",
+		   target_instance.c_str());
+	_is_fea_alive = false;
+	do_shutdown = true;
     }
 
+    if (_rib_target == target_class) {
+	XLOG_ERROR("RIB (instance %s) has died, shutting down.",
+		   target_instance.c_str());
+	_is_rib_alive = false;
+	do_shutdown = true;
+    }
+
+    if (do_shutdown)
+	Fib2mribNode::shutdown();
+
     return XrlCmdError::OKAY();
-    UNUSED(target_instance);
 }
 
 /**
@@ -1252,7 +1505,6 @@ XrlFib2mribNode::send_rib_route_change()
     if (! success) {
 	//
 	// If an error, then start a timer to try again.
-	// TODO: XXX: the timer value is hardcoded here!!
 	//
 	XLOG_ERROR("Failed to %s route for %s with the RIB. "
 		   "Will try again.",
@@ -1262,7 +1514,7 @@ XrlFib2mribNode::send_rib_route_change()
 		   fib2mrib_route.network().str().c_str());
     start_timer_label:
 	_inform_rib_queue_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlFib2mribNode::send_rib_route_change));
     }
 }
@@ -1290,11 +1542,10 @@ XrlFib2mribNode::send_rib_route_change_cb(const XrlError& xrl_error)
     //
     // If an error, then start a timer to try again
     // (unless the timer is already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_inform_rib_queue_timer.scheduled())
 	return;
     _inform_rib_queue_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
+	RETRY_TIMEVAL,
 	callback(this, &XrlFib2mribNode::send_rib_route_change));
 }

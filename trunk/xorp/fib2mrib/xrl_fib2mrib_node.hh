@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.9 2004/11/05 04:29:24 bms Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.10 2005/02/03 06:51:48 bms Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -22,8 +22,11 @@
 // Fib2mrib XRL-aware node definition.
 //
 
+#include "libxipc/xrl_std_router.hh"
+
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/fti_xif.hh"
 #include "xrl/interfaces/fea_fib_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
@@ -32,18 +35,20 @@
 #include "fib2mrib_node.hh"
 
 
-class XrlRouter;
-
 //
 // The top-level class that wraps-up everything together under one roof
 //
 class XrlFib2mribNode : public Fib2mribNode,
+			public XrlStdRouter,
 			public XrlFib2mribTargetBase {
 public:
-    XrlFib2mribNode(EventLoop& eventloop,
-		    XrlRouter* xrl_router,
-		    const string& fea_target,
-		    const string& rib_target);
+    XrlFib2mribNode(EventLoop&		eventloop,
+		    const string&	class_name,
+		    const string&	finder_hostname,
+		    uint16_t		finder_port,
+		    const string&	finder_target,
+		    const string&	fea_target,
+		    const string&	rib_target);
     ~XrlFib2mribNode();
 
     /**
@@ -61,9 +66,11 @@ public:
     bool	shutdown();
 
     /**
-     * Callback for process birth/death events.
+     * Get a reference to the XrlRouter instance.
+     *
+     * @return a reference to the XrlRouter (@ref XrlRouter) instance.
      */
-    void	finder_interest_callback(const XrlError& error);
+    XrlRouter&	xrl_router() { return *this; }
 
 protected:
     //
@@ -259,17 +266,44 @@ protected:
 	const bool&	enable);
 
 private:
-
-    bool ifmgr_startup();
-    bool ifmgr_shutdown();
-
-    const ServiceBase* ifmgr_mirror_service_base() const { return dynamic_cast<const ServiceBase*>(&_ifmgr); }
+    const ServiceBase* ifmgr_mirror_service_base() const {
+	return dynamic_cast<const ServiceBase*>(&_ifmgr);
+    }
     const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
-    void fea_fib_client_register_startup();
-    void fea_fib_client_register_shutdown();
+    /**
+     * Called when Finder disconnect occurs.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_disconnect_event();
+
+    void fea_register_startup();
+    void finder_register_interest_fea_cb(const XrlError& xrl_error);
+    void fea_register_shutdown();
+    void finder_deregister_interest_fea_cb(const XrlError& xrl_error);
+
+    void send_fea_add_fib_client();
+    void fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
+					  const bool* result);
+    void fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
+					  const bool* result);
+    void fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_error);
+    void fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_error);
+    void send_fea_delete_fib_client();
+    void fea_fib_client_send_delete_fib_client4_cb(const XrlError& xrl_error);
+    void fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_error);
+
     void rib_register_startup();
+    void finder_register_interest_rib_cb(const XrlError& xrl_error);
     void rib_register_shutdown();
+    void finder_deregister_interest_rib_cb(const XrlError& xrl_error);
+    void send_rib_add_tables();
+    void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
+    void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
+    void send_rib_delete_tables();
+    void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
+    void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
 
     /**
      * Inform the RIB about a route change.
@@ -288,40 +322,33 @@ private:
     void send_rib_route_change();
     void send_rib_route_change_cb(const XrlError& xrl_error);
 
-    void send_fea_fib_client_registration();
-    void fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
-					  const bool* result);
-    void fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
-					  const bool* result);
-    void fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_error);
-    void fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_error);
-    void send_fea_fib_client_deregistration();
-    void fea_fib_client_send_delete_fib_client4_cb(const XrlError& xrl_error);
-    void fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_error);
-
-    void send_rib_registration();
-    void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
-    void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
-    void send_rib_deregistration();
-    void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
-    void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
-
     const string& my_xrl_target_name() {
 	return XrlFib2mribTargetBase::name();
     }
 
-    XrlRouter*		_xrl_router;
     const string	_class_name;
     const string	_instance_name;
     XrlFtiV0p2Client	_xrl_fea_fti_client;
     XrlFeaFibV0p1Client	_xrl_fea_fib_client;
     XrlRibV0p1Client	_xrl_rib_client;
+    const string	_finder_target;
     const string	_fea_target;
     const string	_rib_target;
-    IfMgrXrlMirror	_ifmgr;
 
+    IfMgrXrlMirror	_ifmgr;
     list<Fib2mribRoute>	_inform_rib_queue;
     XorpTimer		_inform_rib_queue_timer;
+    XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
+
+    static const TimeVal RETRY_TIMEVAL;
+
+    bool		_is_fea_alive;
+    bool		_is_fea_registered;
+    bool		_is_fea_registering;
+    bool		_is_fea_deregistering;
+    XorpTimer		_fea_register_startup_timer;
+    XorpTimer		_fea_register_shutdown_timer;
+
     bool		_is_fea_have_ipv4_tested;
     bool		_is_fea_have_ipv6_tested;
     bool		_fea_have_ipv4;
@@ -329,8 +356,15 @@ private:
     bool		_is_fea_fib_client4_registered;
     bool		_is_fea_fib_client6_registered;
     XorpTimer		_fea_fib_client_registration_timer;
+
+    bool		_is_rib_alive;
+    bool		_is_rib_registered;
+    bool		_is_rib_registering;
+    bool		_is_rib_deregistering;
     bool		_is_rib_igp_table4_registered;
     bool		_is_rib_igp_table6_registered;
+    XorpTimer		_rib_register_startup_timer;
+    XorpTimer		_rib_register_shutdown_timer;
     XorpTimer		_rib_igp_table_registration_timer;
 };
 

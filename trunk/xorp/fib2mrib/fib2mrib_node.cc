@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.13 2004/11/03 21:40:21 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.14 2005/02/01 01:06:09 pavlin Exp $"
 
 
 //
@@ -75,17 +75,9 @@ Fib2mribNode::startup()
     _node_status = PROC_STARTUP;
 
     //
-    // Startup the interface manager
+    // Register with the FEA
     //
-    if (ifmgr_startup() != true) {
-	ServiceBase::set_status(FAILED);
-	return false;
-    }
-
-    //
-    // Register as an FEA FIB client
-    //
-    fea_fib_client_register_startup();
+    fea_register_startup();
 
     //
     // Register with the RIB
@@ -102,12 +94,18 @@ Fib2mribNode::shutdown()
     // We cannot shutdown if our status is SHUTDOWN or FAILED.
     //
     if ((ServiceBase::status() == SHUTDOWN)
+	|| (ServiceBase::status() == SHUTTING_DOWN)
 	|| (ServiceBase::status() == FAILED)) {
 	return true;
     }
 
-    if (ServiceBase::status() != RUNNING)
+    if ((ServiceBase::status() != RUNNING)
+	&& (ServiceBase::status() != STARTING)
+	&& (ServiceBase::status() != PAUSING)
+	&& (ServiceBase::status() != PAUSED)
+	&& (ServiceBase::status() != RESUMING)) {
 	return false;
+    }
 
     //
     // Transition to SHUTDOWN occurs when all transient shutdown operations
@@ -122,22 +120,19 @@ Fib2mribNode::shutdown()
     rib_register_shutdown();
 
     //
-    // De-register with as an FEA FIB client
+    // De-register with the FEA
     //
-    fea_fib_client_register_shutdown();
-
-    //
-    // Shutdown the interface manager
-    //
-    if (ifmgr_shutdown() != true) {
-	ServiceBase::set_status(FAILED);
-	return false;
-    }
+    fea_register_shutdown();
 
     //
     // Set the node status
     //
     _node_status = PROC_SHUTDOWN;
+
+    //
+    // Update the node status
+    //
+    update_status();
 
     return true;
 }
