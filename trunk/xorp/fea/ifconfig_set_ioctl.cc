@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.32 2004/12/01 03:28:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.33 2004/12/08 01:41:19 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -709,8 +709,9 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
 	error_msg = c_format("%s", strerror(errno));
 	return (XORP_ERROR);
     }
+    return (XORP_OK);
 
-#endif // SIOCAIFADDR
+#else // ! SIOCAIFADDR
 
     //
     // Set a new address
@@ -749,6 +750,7 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
 	}
     }
     return (XORP_OK);
+#endif // ! SIOCAIFADDR
 }
 
 /**
@@ -816,7 +818,7 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
     }
     return (XORP_OK);
 
-#else // !SIOCAIFADDR_IN6
+#else // ! SIOCAIFADDR_IN6
 
     //
     // Set a new address
@@ -949,7 +951,7 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 	}
 	return (XORP_OK);
 
-#else // !SIOCDIFADDR_IN6
+#else // ! SIOCDIFADDR_IN6
 	//
 	// XXX: Linux uses a weird struct in6_ifreq to do this, and this
 	// name clashes with the KAME in6_ifreq.
