@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.7 2003/03/14 02:52:53 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.8 2003/03/14 03:13:47 pavlin Exp $"
 
 
 //
@@ -453,10 +453,15 @@ Mld6igmpVif::igmp_membership_report_recv(const IPvX& src,
     igmp_message_version = IGMP_V2;
     if (message_type == IGMP_V1_MEMBERSHIP_REPORT) {
 	igmp_message_version = IGMP_V1;
-	if (_proto_flags & MLD6IGMP_VIF_QUERIER) {
-	    member_query->_igmpv1_host_present_timer.start_semaphore(
-		IGMP_GROUP_MEMBERSHIP_INTERVAL, 0);
-	}
+	//
+	// XXX: start the v1 host timer even if I am not querier.
+	// The non-querier state diagram in RFC 2236 is incomplete,
+	// and inconsistent with the text in Section 5.
+	// Indeed, RFC 3376 (IGMPv3) also doesn't specify that the
+	// corresponding timer has to be started only for queriers.
+	//
+	member_query->_igmpv1_host_present_timer.start_semaphore(
+	    IGMP_GROUP_MEMBERSHIP_INTERVAL, 0);
     }
     
     return (XORP_OK);
