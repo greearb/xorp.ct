@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.60 2004/11/10 22:50:14 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.61 2005/01/31 21:48:48 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -184,7 +184,7 @@ RibIpcHandler::start_packet(bool ibgp)
 int 
 RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
-    debug_msg("RibIpcHandler::add_route(IPv4) %x\n", (u_int)(&rt));
+    debug_msg("RibIpcHandler::add_route(IPv4) %p\n", &rt);
 
     if (_ribname.empty())
 	return 0;
@@ -234,7 +234,7 @@ RibIpcHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
 int 
 RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
-    debug_msg("RibIpcHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
+    debug_msg("RibIpcHandler::delete_route(IPv4) %p\n", &rt);
 
     if (_ribname.empty())
 	return 0;

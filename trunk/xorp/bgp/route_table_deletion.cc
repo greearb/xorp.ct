@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.17 2004/05/30 10:24:26 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.18 2004/06/10 22:40:34 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -49,8 +49,8 @@ int
 DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller)
 {
-    debug_msg("DeletionTable<A>::add_route %x on %s\n",
-	      (u_int)(&rtmsg), this->tablename().c_str());
+    debug_msg("DeletionTable<A>::add_route %p on %s\n",
+	      &rtmsg, this->tablename().c_str());
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
 
@@ -97,8 +97,8 @@ DeletionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 				const InternalMessage<A> &new_rtmsg,
 				BGPRouteTable<A> *caller)
 {
-    debug_msg("DeletionTable<A>::replace_route %x -> %x on %s\n",
-	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), this->tablename().c_str());
+    debug_msg("DeletionTable<A>::replace_route %p -> %p on %s\n",
+	      &old_rtmsg, &new_rtmsg, this->tablename().c_str());
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(old_rtmsg.net() == new_rtmsg.net());
@@ -134,8 +134,8 @@ int
 DeletionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			       BGPRouteTable<A> *caller)
 {
-    debug_msg("DeletionTable<A>::delete_route %x on %s\n",
-	      (u_int)(&rtmsg), this->tablename().c_str());
+    debug_msg("DeletionTable<A>::delete_route %p on %s\n",
+	      &rtmsg, this->tablename().c_str());
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     // we should never see a delete for a net that's in the deletion cache

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.10 2004/09/17 13:50:55 abittau Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.11 2004/09/21 18:05:08 atanu Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -98,8 +98,7 @@ PlumbingTest::test1()
 
     InternalMessage<IPv4> *rtm1;
     rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
-    printf("Adding Route 1 from peerhandler %x\n", 
-	   (u_int)(&dummy_peerhandler1));
+    printf("Adding Route 1 from peerhandler %p\n", &dummy_peerhandler1);
     add_route(*rtm1, &dummy_peerhandler1);
     printf("4 ****>%s<****\n", aspathatt.str().c_str());
     printf("Add done\n");
@@ -299,8 +298,7 @@ PlumbingTest::test2()
 
     InternalMessage<IPv4> *rtm1;
     rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
-    printf("Adding Route 1 from peerhandler %x\n", 
-	   (u_int)(&dummy_peerhandler1));
+    printf("Adding Route 1 from peerhandler %p\n", &dummy_peerhandler1);
     add_route(*rtm1, &dummy_peerhandler1);
     delete rtm1;
     route1->unref();

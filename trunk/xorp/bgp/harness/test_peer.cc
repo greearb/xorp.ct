@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.28 2004/12/09 07:54:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.29 2005/02/01 10:28:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -520,7 +520,7 @@ TestPeer::send_complete(AsyncFileWriter::Event ev, const uint8_t *buf,
 	break;
     case AsyncFileOperator::FLUSHING:
 	debug_msg("event: flushing\n");
-	debug_msg("Freeing Buffer for sent packet: %x\n", (uint)buf);
+	debug_msg("Freeing Buffer for sent packet: %p\n", buf);
 	delete[] buf;
 	break;
     case AsyncFileOperator::ERROR_CHECK_ERRNO:

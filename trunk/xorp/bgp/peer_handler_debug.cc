@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.6 2004/03/24 19:14:04 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.7 2004/06/10 22:40:32 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -43,7 +43,7 @@ DebugPeerHandler::start_packet(bool ibgp)
 int 
 DebugPeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi) 
 {
-    debug_msg("DebugPeerHandler::add_route(IPv4) %x\n", (u_int)(&rt));
+    debug_msg("DebugPeerHandler::add_route(IPv4) %p\n", &rt);
     fprintf(_ofile, "[PEER: ADD_ROUTE]\n");
     fprintf(_ofile, "%s\n", rt.str().c_str());
     return 0;
@@ -88,7 +88,7 @@ DebugPeerHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
 int 
 DebugPeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi)
 {
-    debug_msg("DebugPeerHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
+    debug_msg("DebugPeerHandler::delete_route(IPv4) %p\n", &rt);
     fprintf(_ofile, "[PEER: DELETE_ROUTE]\n");
     fprintf(_ofile, "%s\n", rt.str().c_str());
     return 0;

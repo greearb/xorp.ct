@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.30 2004/12/23 18:57:22 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.31 2005/01/31 22:04:16 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -111,8 +111,8 @@ DumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 			    const InternalMessage<A> &new_rtmsg,
 			    BGPRouteTable<A> *caller) 
 {
-    debug_msg("%s::replace_route %x -> %x\n",
-	      this->tablename().c_str(), (u_int)(&old_rtmsg), (u_int)(&new_rtmsg));
+    debug_msg("%s::replace_route %p -> %p\n",
+	      this->tablename().c_str(), &old_rtmsg, &new_rtmsg);
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(old_rtmsg.net() == new_rtmsg.net());
@@ -198,8 +198,8 @@ int
 DumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			   BGPRouteTable<A> *caller) 
 {
-    debug_msg("%s::delete_route %x\n",
-	      this->tablename().c_str(), (u_int)(&rtmsg));
+    debug_msg("%s::delete_route %p\n",
+	      this->tablename().c_str(), &rtmsg);
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
 

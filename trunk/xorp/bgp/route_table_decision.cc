@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.31 2005/03/01 02:43:45 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.32 2005/03/01 22:47:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -41,7 +41,7 @@ int
 DecisionTable<A>::add_parent(BGPRouteTable<A> *new_parent,
 			     PeerHandler *peer_handler,
 			     uint32_t genid) {
-    debug_msg("DecisionTable<A>::add_parent: %x\n", (u_int)new_parent);
+    debug_msg("DecisionTable<A>::add_parent: %p\n", new_parent);
     if (_parents.find(new_parent)!=_parents.end()) {
 	//the parent is already in the set
 	return -1;
@@ -57,7 +57,7 @@ DecisionTable<A>::add_parent(BGPRouteTable<A> *new_parent,
 template<class A>
 int
 DecisionTable<A>::remove_parent(BGPRouteTable<A> *ex_parent) {
-    debug_msg("DecisionTable<A>::remove_parent: %x\n", (u_int)ex_parent);
+    debug_msg("DecisionTable<A>::remove_parent: %p\n", ex_parent);
     typename map<BGPRouteTable<A>*, PeerTableInfo<A>* >::iterator i;
     i = _parents.find(ex_parent);
     PeerTableInfo<A> *pti = i->second;

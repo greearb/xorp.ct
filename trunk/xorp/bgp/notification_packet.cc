@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.17 2004/06/10 22:40:30 hodson Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.18 2005/01/31 19:29:47 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -29,8 +29,8 @@ NotificationPacket::NotificationPacket(uint8_t		ec,
 				       const uint8_t*	ed,
 				       size_t		elen)
 {
-    debug_msg("Error code %d sub code %d data %#x len %u\n", ec, esc,
-	      (int)ed, XORP_UINT_CAST(elen));
+    debug_msg("Error code %d sub code %d data %p len %u\n", ec, esc,
+	      ed, XORP_UINT_CAST(elen));
 
     if (elen == 0)
 	ed = 0;
@@ -55,7 +55,7 @@ NotificationPacket::NotificationPacket(uint8_t		ec,
 NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
     throw(InvalidPacket)
 {
-    debug_msg("Data %#x len %d\n", (int)d, l);
+    debug_msg("Data %p len %d\n", d, l);
     if (l < MINNOTIFICATIONPACKET)
 	xorp_throw(InvalidPacket, "Truncated Notification Message");
 

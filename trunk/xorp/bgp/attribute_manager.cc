@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.6 2004/06/10 22:40:28 hodson Exp $"
+#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.7 2004/11/03 22:30:02 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -44,14 +44,14 @@ AttributeManager<A>::add_attribute_list(
     if (i == _attribute_lists.end()) {
 	new_att->clone_data();
 	_attribute_lists.insert(new_att);
-	debug_msg("ATMgr: Inserting new attribute %x\n",
-	       (u_int)(new_att->attribute()));
+	debug_msg("ATMgr: Inserting new attribute %p\n",
+		  new_att->attribute());
 	return new_att->attribute();
     } else {
 	(*i)->increase();
 	delete new_att;
-	debug_msg("** (+) ref count for %x now %d\n",
-	       (u_int)((*i)->attribute()), (*i)->references());
+	debug_msg("** (+) ref count for %p now %d\n",
+		  (*i)->attribute(), (*i)->references());
 	return (*i)->attribute();
     }
     debug_msg("done\n");
@@ -71,8 +71,8 @@ AttributeManager<A>::delete_attribute_list(
     assert(i != _attribute_lists.end());
     delete del_att;
     (*i)->decrease();
-    debug_msg("** (-) ref count for %x now %d\n",
-	   (u_int)((*i)->attribute()), (*i)->references());
+    debug_msg("** (-) ref count for %p now %d\n",
+	      (*i)->attribute(), (*i)->references());
     if ((*i)->references() == 0) {
 	del_att = (*i);
 	_attribute_lists.erase(i);

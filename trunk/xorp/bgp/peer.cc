@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.85 2004/12/17 08:35:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.86 2005/01/31 19:59:52 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -251,7 +251,7 @@ BGPPeer::send_message(const BGPPacket& p)
     ** This buffer is dynamically allocated and should be freed.
     */
     buf = (const uint8_t *)p.encode(ccnt);
-    debug_msg("Buffer for sent packet is %x\n", (uint)buf);
+    debug_msg("Buffer for sent packet is %p\n", buf);
 
 
     /*
@@ -298,7 +298,7 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 	/*drop through to next case*/
     case SocketClient::FLUSHING:
 	debug_msg("event: flushing\n");
-	debug_msg("Freeing Buffer for sent packet: %x\n", (uint)buf);
+	debug_msg("Freeing Buffer for sent packet: %p\n", buf);
 	delete[] buf;
 	TIMESPENT_CHECK();
 	break;
@@ -344,7 +344,7 @@ BGPPeer::send_notification(const NotificationPacket& p, bool error)
      * This buffer is dynamically allocated and should be freed.
      */
     const uint8_t *buf = (const uint8_t *)p.encode(ccnt);
-    debug_msg("Buffer for sent packet is %x\n", (uint)buf);
+    debug_msg("Buffer for sent packet is %p\n", buf);
 
     /*
     ** This write is async. So we can't free the data now,

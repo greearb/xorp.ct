@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.13 2004/06/10 22:40:36 hodson Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.14 2004/09/17 13:50:55 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -25,7 +25,7 @@ template<class A> AttributeManager<A> SubnetRoute<A>::_att_mgr;
 template<class A>
 SubnetRoute<A>::SubnetRoute(const SubnetRoute<A>& route_to_clone) 
 {
-    debug_msg("SubnetRoute constructor1 giving %x\n", (uint)this);
+    debug_msg("SubnetRoute constructor1 giving %p\n", this);
     //note that we need an explicit constructor here, rather than
     //relying in C++ for the default constructor, or we get the
     //reference counts wrong in the attribute manager
@@ -56,7 +56,7 @@ SubnetRoute<A>::SubnetRoute(const IPNet<A> &n,
 			       const PathAttributeList<A>* atts,
 			       const SubnetRoute<A>* parent_route)
     : _net(n), _parent_route(parent_route) {
-    debug_msg("SubnetRoute constructor2 giving %x\n", (uint)this);
+    debug_msg("SubnetRoute constructor2 giving %p\n", this);
     //the attribute manager handles memory management, and ensuring
     //that only one copy of each attribute list is ever stored
     _attributes = _att_mgr.add_attribute_list(atts);
@@ -81,7 +81,7 @@ SubnetRoute<A>::SubnetRoute(const IPNet<A> &n,
 			       const SubnetRoute<A>* parent_route,
 			       uint32_t igp_metric)
     : _net(n), _parent_route(parent_route) {
-    debug_msg("SubnetRoute constructor3 giving %x\n", (uint)this);
+    debug_msg("SubnetRoute constructor3 giving %p\n", this);
     //the attribute manager handles memory management, and ensuring
     //that only one copy of each attribute list is ever stored
     _attributes = _att_mgr.add_attribute_list(atts);
@@ -113,7 +113,7 @@ SubnetRoute<A>::operator==(const SubnetRoute<A>& them) const {
 
 template<class A>
 SubnetRoute<A>::~SubnetRoute() {
-    debug_msg("SubnetRoute destructor called for %x\n", (uint)this);
+    debug_msg("SubnetRoute destructor called for %p\n", this);
     _att_mgr.delete_attribute_list(_attributes);
 
     assert(refcount() == 0);

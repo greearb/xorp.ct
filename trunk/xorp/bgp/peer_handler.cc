@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.35 2004/06/10 22:40:32 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.36 2004/12/15 04:44:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -404,7 +404,7 @@ PeerHandler::start_packet(bool ibgp)
 int
 PeerHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
-    debug_msg("PeerHandler::add_route(IPv4) %x\n", (u_int)(&rt));
+    debug_msg("PeerHandler::add_route(IPv4) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
 
     // Check this peer wants this NLRI
@@ -527,7 +527,7 @@ PeerHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
 int
 PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, Safi safi)
 {
-    debug_msg("PeerHandler::delete_route(IPv4) %x\n", (u_int)(&rt));
+    debug_msg("PeerHandler::delete_route(IPv4) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
 
     // Check this peer wants this NLRI

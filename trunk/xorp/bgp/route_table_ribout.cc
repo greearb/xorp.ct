@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.21 2005/03/01 22:47:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.22 2005/03/02 01:31:43 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -159,8 +159,8 @@ RibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 			      const InternalMessage<A> &new_rtmsg,
 			      BGPRouteTable<A> *caller) 
 {
-    debug_msg("%s::replace_route %x %x\n", this->tablename().c_str(),
-	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg));
+    debug_msg("%s::replace_route %p %p\n", this->tablename().c_str(),
+	      &old_rtmsg, &new_rtmsg);
     XLOG_ASSERT(old_rtmsg.push() == false);
 
     delete_route(old_rtmsg, caller);
@@ -295,8 +295,8 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 		}
 	    }
 	}
-	debug_msg("%d elements with attr %x moved to tmp queue\n", ctr,
-		  (u_int)attributes);
+	debug_msg("%d elements with attr %p moved to tmp queue\n", ctr,
+		  attributes);
 	print_queue(tmp_queue);
 
 	// at this point we pass the tmp_queue to the output BGP

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.22 2004/06/10 22:40:35 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.23 2004/09/17 13:50:54 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -163,8 +163,8 @@ NexthopRewriteFilter<A>::filter(const InternalMessage<A> *rtmsg,
     // policy needs this
     propagate_flags(*(rtmsg->route()),*new_route);
 
-    debug_msg("NexthopRewriteFilter: new route: %x with attributes %x\n",
-	   (uint)new_route, (uint)(new_route->attributes()));
+    debug_msg("NexthopRewriteFilter: new route: %p with attributes %p\n",
+	      new_route, new_route->attributes());
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());

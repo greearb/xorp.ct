@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.59 2005/01/31 20:58:49 pavlin Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.60 2005/01/31 21:07:54 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -624,15 +624,15 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler)
     typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
-	XLOG_FATAL("BGPPlumbingAF<IPv%u,%s>::stop_peering: peer %#x not found",
+	XLOG_FATAL("BGPPlumbingAF<IPv%u,%s>::stop_peering: peer %p not found",
 		   XORP_UINT_CAST(A::ip_version()),
 		   pretty_string_safi(_master.safi()),
-		   (u_int)peer_handler);
+		   peer_handler);
     rt = iter->second;
     prevrt = rt;
     while (rt != _fanout_table) {
-	debug_msg("rt=%x (%s), _fanout_table=%x\n", 
-	       (u_int)rt, rt->tablename().c_str(), (u_int)_fanout_table);
+	debug_msg("rt=%p (%s), _fanout_table=%p\n", 
+		  rt, rt->tablename().c_str(), _fanout_table);
 	if (rt->type() == CACHE_TABLE)
 	    ((CacheTable<A>*)rt)->flush_cache();
 	prevrt = rt;
@@ -697,13 +697,13 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
     typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
-	XLOG_FATAL("BGPPlumbingAF<A>::peering_came_up: peer %#x not found",
-		(u_int)peer_handler);
+	XLOG_FATAL("BGPPlumbingAF<A>::peering_came_up: peer %p not found",
+		   peer_handler);
     rt = iter->second;
     prevrt = rt;
     while (rt != NULL) {
-	debug_msg("rt=%x (%s), _fanout_table=%x\n", 
-	       (u_int)rt, rt->tablename().c_str(), (u_int)_fanout_table);
+	debug_msg("rt=%p (%s), _fanout_table=%p\n", 
+		  rt, rt->tablename().c_str(), _fanout_table);
 	prevrt = rt;
 	rt = rt->parent();
     }
@@ -780,8 +780,8 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler)
     typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end())
-	XLOG_FATAL("BGPPlumbingAF<A>::drop_peering: peer %#x not found",
-		(u_int)peer_handler);
+	XLOG_FATAL("BGPPlumbingAF<A>::drop_peering: peer %p not found",
+		   peer_handler);
 
     iter = _out_map.find(peer_handler);
     rt = iter->second;
