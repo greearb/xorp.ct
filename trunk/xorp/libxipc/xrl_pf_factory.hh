@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_factory.hh,v 1.1 2002/12/14 23:43:01 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_factory.hh,v 1.2 2002/12/19 01:29:13 hodson Exp $
 
 #ifndef __XRLPF_FACTORY_HH__
 #define __XRLPF_FACTORY_HH__
 
+#include "xrl_error.hh"
 #include "xrl_pf.hh"
 
 class XrlPFSenderFactory {

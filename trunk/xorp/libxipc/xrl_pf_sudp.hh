@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.2 2002/12/18 22:54:30 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.3 2002/12/19 01:29:14 hodson Exp $
 
 #ifndef __XRLPF_SUDP_HH__
 #define __XRLPF_SUDP_HH__
@@ -24,7 +24,7 @@
 
 class XrlPFSUDPListener : public XrlPFListener {
 public:
-    XrlPFSUDPListener(EventLoop& e, XrlCmdMap* m = 0)
+    XrlPFSUDPListener(EventLoop& e, XrlCmdDispatcher* xr = 0)
 	throw (XrlPFConstructorError);
     ~XrlPFSUDPListener();
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.5 2003/01/26 04:06:20 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.6 2003/02/25 19:52:01 hodson Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -30,6 +30,7 @@
 
 #include "xrl_error.hh"
 #include "xrl_pf_inproc.hh"
+#include "xrl_router.hh"
 
 // ----------------------------------------------------------------------------
 // InProc is "intra-process" - a minimalist and simple direct call transport
@@ -181,8 +182,9 @@ remove_inproc_listener(uint32_t instance_no)
 
 uint32_t XrlPFInProcListener::_next_instance_no;
 
-XrlPFInProcListener::XrlPFInProcListener(EventLoop& e, XrlCmdMap* m)
-    throw (XrlPFConstructorError) : XrlPFListener(e, m)
+XrlPFInProcListener::XrlPFInProcListener(EventLoop& e, XrlCmdDispatcher* xr)
+    throw (XrlPFConstructorError)
+    : XrlPFListener(e, xr)
 {
     _instance_no = _next_instance_no ++;
 
@@ -204,11 +206,7 @@ XrlPFInProcListener::~XrlPFInProcListener()
 const XrlError
 XrlPFInProcListener::dispatch(const Xrl& request, XrlArgs& reply)
 {
-    assert(_cmd_map != 0);
-
-    const XrlCmdEntry *c = _cmd_map->get_handler(request.command().c_str());
-    if (c == 0)
-	return XrlError::NO_SUCH_METHOD();
-
-    return c->callback->dispatch(request, &reply);
+    const XrlCmdDispatcher* xr = dispatcher();
+    assert(xr != 0);
+    return xr->dispatch_xrl(request, reply);
 }

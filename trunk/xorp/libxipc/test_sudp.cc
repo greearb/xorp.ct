@@ -12,12 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_sudp.cc,v 1.3 2002/12/18 22:54:30 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_sudp.cc,v 1.4 2002/12/19 01:29:10 hodson Exp $"
 
-#include <stdio.h>
+#include <map>
+
 #include "xrl_module.h"
 #include "libxorp/xlog.h"
+
+#include "xrl_error.hh"
 #include "xrl_pf_sudp.hh"
+#include "xrl_router.hh"
 
 static bool g_trace = false;
 #define trace(args...) if (g_trace) printf(args)
@@ -156,13 +160,13 @@ run_test()
 {
     EventLoop event_loop;
 
-    XrlCmdMap cmd_map;
-    cmd_map.add_handler("hello", callback(hello_recv_handler));
-    cmd_map.add_handler("get_int32", callback(int32_recv_handler));
-    cmd_map.add_handler("no_execute",
+    XrlCmdDispatcher cmd_dispatcher("tester");
+    cmd_dispatcher.add_handler("hello", callback(hello_recv_handler));
+    cmd_dispatcher.add_handler("get_int32", callback(int32_recv_handler));
+    cmd_dispatcher.add_handler("no_execute",
 			callback(no_execute_recv_handler, NOISE));
 
-    XrlPFSUDPListener listener(event_loop, &cmd_map);
+    XrlPFSUDPListener listener(event_loop, &cmd_dispatcher);
 
     trace("listener address: %s\n", listener.address());
 

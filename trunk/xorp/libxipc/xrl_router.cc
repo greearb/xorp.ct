@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.5 2003/01/10 00:30:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.6 2003/02/04 23:59:06 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
 #include "libxorp/callback.hh"
 #include "libxorp/xlog.h"
 
+#include "xrl_error.hh"
 #include "xrl_router.hh"
 #include "xrl_pf.hh"
 #include "xrl_pf_factory.hh"
@@ -208,7 +209,7 @@ XrlRouter::add_listener(XrlPFListener* pfl)
 	debug_msg("Registered with finder mapping %s to %s",
 		  name().c_str(), protocol_colon_address.c_str());
 	_listeners.push_back(pfl);
-	pfl->set_command_map(this);
+	pfl->set_dispatcher(this);
 	return true;
     } else {
 	debug_msg("Failed to register finder mapping %s to %s",
@@ -217,11 +218,13 @@ XrlRouter::add_listener(XrlPFListener* pfl)
     }
 }
 
-
-
-
-
-
-
-
-
+XrlError
+XrlCmdDispatcher::dispatch_xrl(const Xrl& xrl, XrlArgs& response) const
+{
+    const XrlCmdEntry *c = get_handler(xrl.command().c_str());
+    if (c) {
+	return c->callback->dispatch(xrl, &response);	
+    }
+    debug_msg("No handler for %s\n", xrl.command().c_str());
+    return XrlError::NO_SUCH_METHOD();
+}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.7 2003/01/26 04:06:21 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.8 2003/02/25 19:52:01 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -31,8 +31,10 @@
 
 #include "sockutil.hh"
 #include "header.hh"
+#include "xrl_error.hh"
 #include "xrl_pf_stcp.hh"
 #include "xrl_pf_stcp_ph.hh"
+#include "xrl_router.hh"
 
 static const string STCP_PROTOCOL_NAME ("stcp");
 static const string STCP_PROTOCOL ("stcp/1.0");
@@ -228,16 +230,12 @@ STCPRequestHandler::dispatch_request(uint32_t seqno, const char* xrl_c_str)
     XrlError e;
     XrlArgs response;
 
+    const XrlCmdDispatcher* xr = _parent.dispatcher();
+    assert(xr != 0);
+    
     try {
 	Xrl xrl(xrl_c_str);
-	const XrlCmdMap& cm = _parent.command_map();
-	const XrlCmdEntry* ce = cm.get_handler(xrl.command().c_str());
-	if (ce) {
-	    e = ce->callback->dispatch(xrl, &response);
-	} else {
-	    e = XrlError::NO_SUCH_METHOD();
-	}
-	debug_msg("Request dispatch returned %s\n", e.str().c_str());
+	e = xr->dispatch_xrl(xrl, response);
     } catch (const InvalidString&) {
 	e = XrlError::CORRUPT_XRL();
     }
@@ -332,9 +330,9 @@ STCPRequestHandler::die(const char *reason)
 // Simple TCP Listener - creates TCPRequestHandlers for each incoming
 // connection.
 
-XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlCmdMap* m, uint16_t port)
+XrlPFSTCPListener::XrlPFSTCPListener(EventLoop& e, XrlCmdDispatcher* x, uint16_t port)
     throw (XrlPFConstructorError)
-    : XrlPFListener(e, m), _fd(-1), _address_slash_port() {
+    : XrlPFListener(e, x), _fd(-1), _address_slash_port() {
 
     if ((_fd = create_listening_ip_socket(TCP, port)) < 1) {
 	xorp_throw(XrlPFConstructorError, strerror(errno));

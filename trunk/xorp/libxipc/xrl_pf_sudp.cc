@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.6 2003/01/26 04:06:21 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.7 2003/02/25 19:52:01 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,6 +40,7 @@
 #include "header.hh"
 #include "xrl_error.hh"
 #include "xrl_pf_sudp.hh"
+#include "xrl_router.hh"
 #include "sockutil.hh"
 
 // ----------------------------------------------------------------------------
@@ -327,9 +328,9 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 // ----------------------------------------------------------------------------
 // XrlPFUDPListener
 
-XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlCmdMap* m)
+XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlCmdDispatcher* xr)
     throw (XrlPFConstructorError)
-    : XrlPFListener(e, m)
+    : XrlPFListener(e, xr)
 {
     debug_msg("XrlPFSUDPListener\n");
     if ((_fd = create_listening_ip_socket(UDP)) < 0) {
@@ -404,18 +405,14 @@ XrlPFSUDPListener::recv(int fd, SelectorMask m)
 }
 
 const XrlError
-XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& response)
+XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& reply)
 {
-    assert(_cmd_map != NULL);
+    const XrlCmdDispatcher* d = dispatcher();
+    assert(d != 0);
+
     try {
 	Xrl x(rbuf);
-	const XrlCmdEntry *c = _cmd_map->get_handler(x.command().c_str());
-	if (c == NULL) {
-	    debug_msg("No handler for %s invoked from %s\n",
-		      x.command().c_str(), rbuf);
-	    return XrlError::NO_SUCH_METHOD();
-	}
-	return c->callback->dispatch(x, &response);
+	return d->dispatch_xrl(x, reply);
     } catch (InvalidString& e) {
 	debug_msg("Invalid string - failed to dispatch %s\n", rbuf);
     }

@@ -12,17 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.4 2002/12/19 01:29:10 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.5 2003/01/17 22:19:29 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
 */
 
-#include <stdio.h>
 #include "xrl_module.h"
+
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#include "xrl_error.hh"
 #include "xrl_pf_stcp.hh"
+#include "xrl_router.hh"
 
 static bool g_trace = false;
 #define tracef(args...) \
@@ -179,13 +182,13 @@ run_test()
 {
     EventLoop event_loop;
 
-    XrlCmdMap cmd_map;
-    cmd_map.add_handler("hello", callback(hello_recv_handler));
-    cmd_map.add_handler("get_int32", callback(int32_recv_handler));
-    cmd_map.add_handler("no_execute",
+    XrlCmdDispatcher cmd_dispatcher("tester");
+    cmd_dispatcher.add_handler("hello", callback(hello_recv_handler));
+    cmd_dispatcher.add_handler("get_int32", callback(int32_recv_handler));
+    cmd_dispatcher.add_handler("no_execute",
 			callback(no_execute_recv_handler, NOISE));
 
-    XrlPFSTCPListener listener(event_loop, &cmd_map);
+    XrlPFSTCPListener listener(event_loop, &cmd_dispatcher);
     XrlPFSTCPSender s(event_loop, listener.address());
     s.set_keepalive_ms(2500);
 

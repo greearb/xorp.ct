@@ -29,6 +29,13 @@
 
 class DispatchState;
 
+class XrlCmdDispatcher : public XrlCmdMap {
+public:
+    XrlCmdDispatcher(const char* entity_name) : XrlCmdMap(entity_name)
+    {}
+    XrlError dispatch_xrl(const Xrl& xrl, XrlArgs& ret_vals) const;
+};
+
 /**
  * @short XRL transmission and reception point.
  *
@@ -37,7 +44,7 @@ class DispatchState;
  * XrlRouter objects.  In this case each XrlRouter object corresponds
  * to an independent entity within the process.
  */
-class XrlRouter : public XrlCmdMap, public XrlSender {
+class XrlRouter : public XrlCmdDispatcher, public XrlSender {
 public:
     /**
      * Constructor for when the Finder is running on the local host.
@@ -47,8 +54,8 @@ public:
      * @param entity_name the name this router will register with the Finder.
      */
     XrlRouter(EventLoop& event_loop, const char* entity_name)
-	: XrlCmdMap(entity_name), _event_loop(event_loop), _fc(event_loop),
-	_sends_pending(0), _finder_lookups_pending(0) {}
+	: XrlCmdDispatcher(entity_name), _event_loop(event_loop),
+	  _fc(event_loop), _sends_pending(0), _finder_lookups_pending(0) {}
 
     /**
      * Constructor for when the Finder is running on another host on
@@ -62,9 +69,9 @@ public:
     XrlRouter(EventLoop& event_loop,
 	      const char* entity_name,
 	      const char* finder_address)
-	: XrlCmdMap(entity_name), _event_loop(event_loop),
-	_fc(event_loop, finder_address),
-	_sends_pending(0), _finder_lookups_pending(0) {}
+	: XrlCmdDispatcher(entity_name), _event_loop(event_loop),
+	  _fc(event_loop, finder_address),
+	  _sends_pending(0), _finder_lookups_pending(0) {}
 
     /**
      * Constructor for when the Finder is running on another host on
@@ -79,7 +86,7 @@ public:
     XrlRouter(EventLoop& event_loop,
 	      const char* entity_name,
 	      const char* finder_address, uint16_t finder_port)
-	: XrlCmdMap(entity_name), _event_loop(event_loop),
+	: XrlCmdDispatcher(entity_name), _event_loop(event_loop),
 	_fc(event_loop, finder_address, finder_port),
 	_sends_pending(0), _finder_lookups_pending(0) {}
 

@@ -13,11 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.1 2002/12/14 23:43:01 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.2 2002/12/19 01:29:13 hodson Exp $"
 
 #include "config.h"
 
 #include <string>
+#include <map>
 
 #include "xrl_module.h"
 #include "xrl_pf_factory.hh"

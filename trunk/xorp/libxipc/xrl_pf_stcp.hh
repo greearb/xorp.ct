@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.3 2002/12/19 01:29:14 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.4 2003/01/17 00:49:12 hodson Exp $
 
 #ifndef __XRLPF_STCP_HH__
 #define __XRLPF_STCP_HH__
@@ -46,7 +46,7 @@ struct RequestState {
 
 class XrlPFSTCPListener : public XrlPFListener {
 public:
-    XrlPFSTCPListener(EventLoop& e, XrlCmdMap* m = 0, uint16_t port = 0)
+    XrlPFSTCPListener(EventLoop& e, XrlCmdDispatcher* xr = 0, uint16_t port = 0)
 	throw (XrlPFConstructorError);
     ~XrlPFSTCPListener();
 

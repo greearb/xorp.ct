@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.6 2003/01/17 00:49:12 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.7 2003/02/25 19:52:01 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -21,7 +21,6 @@
 
 #include <string>
 #include "xrl.hh"
-#include "xrl_cmd_map.hh"
 #include "xuid.hh"
 
 #include "libxorp/eventloop.hh"
@@ -36,21 +35,19 @@ public:
     {}
 };
 
+class XrlCmdDispatcher;
+
 class XrlPFListener {
 public:
-    XrlPFListener(EventLoop& e, XrlCmdMap* m = 0)
-	: _event_loop(e), _cmd_map(m) {}
+    XrlPFListener(EventLoop& e, XrlCmdDispatcher* d = 0)
+	: _event_loop(e), _dispatcher(d) {}
     virtual ~XrlPFListener() {}
     virtual const char*	address() const = 0;
     virtual const char*	protocol() const = 0;
 
-    // set_command_map adds table of request handlers.  Fails and
-    // returns false if already assigned, true otherwise.
-    bool  set_command_map(XrlCmdMap* m);
-    const XrlCmdMap& command_map() const {
-	if (_cmd_map == 0) abort();
-	return *_cmd_map;
-    }
+    inline bool set_dispatcher(XrlCmdDispatcher* d);
+    inline const XrlCmdDispatcher* dispatcher() const { return _dispatcher; }
+
     EventLoop& event_loop() const { return _event_loop; }
 
     struct Reply {
@@ -64,7 +61,7 @@ public:
     };
 protected:
     EventLoop& _event_loop;
-    const XrlCmdMap* _cmd_map;
+    const XrlCmdDispatcher* _dispatcher;
 };
 
 // ----------------------------------------------------------------------------
@@ -108,10 +105,10 @@ protected:
 // Inline XrlPFListener Methods
 
 inline bool
-XrlPFListener::set_command_map(XrlCmdMap *m)
+XrlPFListener::set_dispatcher(XrlCmdDispatcher* d)
 {
-    if (_cmd_map == 0) {
-	_cmd_map = m;
+    if (_dispatcher == 0) {
+	_dispatcher = d;
 	return true;
     }
     return false;
