@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.4 2003/03/10 23:20:39 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.5 2003/03/13 09:00:59 pavlin Exp $"
 
 
 //
@@ -742,7 +742,8 @@ UnixComm::ip_hdr_include(bool enable_bool)
  * Enable/disable receiving information about some of the fields
  * in the IP header on the protocol socket.
  * If enabled, values such as interface index, destination address and
- * IP TTL (a.k.a. hop-limit in IPv6) will be received as well.
+ * IP TTL (a.k.a. hop-limit in IPv6), and hop-by-hop options will be
+ * received as well.
  * XXX: used only for IPv6. In IPv4 we don't have this; the whole IP
  * packet is passed to the application listening on a raw socket.
  * 
@@ -812,6 +813,25 @@ UnixComm::recv_pktinfo(bool enable_bool)
 	    return (XORP_ERROR);
 	}
 #endif // IPV6_RECVTCLASS
+	
+	//
+	// Hop-by-hop options
+	//
+#ifdef IPV6_RECVHOPOPTS
+	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_RECVHOPOPTS,
+		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
+	    XLOG_ERROR("setsockopt(IPV6_RECVHOPOPTS, %u) failed: %s",
+		       bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#else
+	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_HOPOPTS,
+		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
+	    XLOG_ERROR("setsockopt(IPV6_HOPOPTS, %u) failed: %s",
+		       bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#endif // ! IPV6_RECVHOPOPTS
     }
     break;
 #endif // HAVE_IPV6
@@ -2589,8 +2609,8 @@ int
 UnixComm::proto_socket_read(void)
 {
     int		nbytes;
-    int		iphdrlen = 0;
-    int		ipdatalen = 0;
+    int		ip_hdr_len = 0;
+    int		ip_data_len = 0;
     IPvX	src(family());
     IPvX	dst(family());
     int		ip_ttl = -1;		// a.k.a. Hop-Limit in IPv6
@@ -2694,12 +2714,11 @@ UnixComm::proto_socket_read(void)
     // Input check.
     // Get source and destination address, IP TTL (a.k.a. hop-limit),
     // and (eventually) interface address (IPv6 only).
-    // TODO: check whether Router Alert option has been received.
     switch (family()) {
     case AF_INET:
     {
 	struct ip *ip;
-	struct cmsghdr *cm;
+	struct cmsghdr *cmsgp;
 	bool is_datalen_error = false;
 	
 	// Input check
@@ -2710,36 +2729,35 @@ UnixComm::proto_socket_read(void)
 			 nbytes, (uint32_t)sizeof(*ip));
 	    return (XORP_ERROR);
 	}
-	// TODO: check for Router Alert option
 	src.copy_in(_from4);
 	dst.copy_in(ip->ip_dst);
 	ip_ttl = ip->ip_ttl;
 	ip_tos = ip->ip_tos;
 	
-	iphdrlen  = ip->ip_hl << 2;
+	ip_hdr_len  = ip->ip_hl << 2;
 #ifdef IPV4_RAW_INPUT_IS_RAW
-	ipdatalen = ntohs(ip->ip_len) - iphdrlen;
+	ip_data_len = ntohs(ip->ip_len) - ip_hdr_len;
 #else
-	ipdatalen = ip->ip_len;
+	ip_data_len = ip->ip_len;
 #endif // ! IPV4_RAW_INPUT_IS_RAW
 	// Check length
 	is_datalen_error = false;
 	do {
-	    if (iphdrlen + ipdatalen == nbytes) {
+	    if (ip_hdr_len + ip_data_len == nbytes) {
 		is_datalen_error = false;
 		break;		// OK
 	    }
-	    if (nbytes < iphdrlen) {
+	    if (nbytes < ip_hdr_len) {
 		is_datalen_error = true;
 		break;
 	    }
 	    if (ip->ip_p == IPPROTO_PIM) {
 		struct pim *pim;
-		if (nbytes < iphdrlen + PIM_REG_MINLEN) {
+		if (nbytes < ip_hdr_len + PIM_REG_MINLEN) {
 		    is_datalen_error = true;
 		    break;
 		}
-		pim = (struct pim *)((uint8_t *)ip + iphdrlen);
+		pim = (struct pim *)((uint8_t *)ip + ip_hdr_len);
 		if (PIM_VT_T(pim->pim_vt) != PIM_REGISTER) {
 		    is_datalen_error = true;
 		    break;
@@ -2758,23 +2776,23 @@ UnixComm::proto_socket_read(void)
 		       "RX packet size from %s to %s with %d bytes instead of "
 		       "hdr+datalen=%d+%d=%d",
 		       cstring(src), cstring(dst), nbytes,
-		       iphdrlen, ipdatalen, iphdrlen+ipdatalen);
+		       ip_hdr_len, ip_data_len, ip_hdr_len + ip_data_len);
 	    return (XORP_ERROR);
 	}
 	
-	for (cm = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
-	     cm != NULL;
-	     cm = (struct cmsghdr *)CMSG_NXTHDR(&_rcvmh, cm)) {
-	    if (cm->cmsg_level != IPPROTO_IP)
+	for (cmsgp = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
+	     cmsgp != NULL;
+	     cmsgp = (struct cmsghdr *)CMSG_NXTHDR(&_rcvmh, cmsgp)) {
+	    if (cmsgp->cmsg_level != IPPROTO_IP)
 		continue;
-	    switch (cm->cmsg_type) {
+	    switch (cmsgp->cmsg_type) {
 #ifdef IP_RECVIF
 	    case IP_RECVIF:
 	    {
 		struct sockaddr_dl *sdl = NULL;
-		if (cm->cmsg_len != CMSG_LEN(sizeof(struct sockaddr_dl)))
+		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(struct sockaddr_dl)))
 		    continue;
-		sdl = (struct sockaddr_dl *)CMSG_DATA(cm);
+		sdl = (struct sockaddr_dl *)CMSG_DATA(cmsgp);
 		pif_index = sdl->sdl_index;
 		break;
 	    }
@@ -2784,15 +2802,39 @@ UnixComm::proto_socket_read(void)
 	    }
 	}
 	
+	//
+	// Check for Router Alert option
+	//
+	do {
+	    uint8_t *option_p = (uint8_t *)(ip + 1);
+	    uint8_t option_value, option_len;
+	    uint32_t test_ip_options_len = ip_hdr_len - sizeof(*ip);
+	    while (test_ip_options_len) {
+		if (test_ip_options_len < 4)
+		    break;
+		option_value = *option_p;
+		option_len = *(option_p + 1);
+		if (test_ip_options_len < option_len)
+		    break;
+		if ((option_value == IPOPT_RA) && (option_len == 4)) {
+		    router_alert_bool = true;
+		    break;
+		}
+		test_ip_options_len -= option_len;
+		option_p += option_len;
+	    }
+	    
+	    break;
+	} while (false);
+	
 	break;
     }
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
-	struct cmsghdr *cm;
+	struct cmsghdr *cmsgp;
 	struct in6_pktinfo *pi = NULL;
 	
-	// TODO: check for Router Alert option
 	src.copy_in(_from6);
 	if (_rcvmh.msg_flags & MSG_CTRUNC) {
 	    XLOG_ERROR("proto_socket_read() failed: "
@@ -2810,28 +2852,75 @@ UnixComm::proto_socket_read(void)
 	    return (XORP_ERROR);
 	}
 	
-	for (cm = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
-	     cm != NULL;
-	     cm = (struct cmsghdr *)CMSG_NXTHDR(&_rcvmh, cm)) {
-	    if (cm->cmsg_level != IPPROTO_IPV6)
+	//
+	// Get pif_index, hop limit, Router Alert option, etc.
+	//
+	for (cmsgp = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
+	     cmsgp != NULL;
+	     cmsgp = (struct cmsghdr *)CMSG_NXTHDR(&_rcvmh, cmsgp)) {
+	    if (cmsgp->cmsg_level != IPPROTO_IPV6)
 		continue;
-	    switch (cm->cmsg_type) {
+	    switch (cmsgp->cmsg_type) {
 	    case IPV6_PKTINFO:
-		if (cm->cmsg_len != CMSG_LEN(sizeof(struct in6_pktinfo)))
+		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(struct in6_pktinfo)))
 		    continue;
-		pi = (struct in6_pktinfo *)CMSG_DATA(cm);
+		pi = (struct in6_pktinfo *)CMSG_DATA(cmsgp);
 		pif_index = pi->ipi6_ifindex;
 		dst.copy_in(pi->ipi6_addr);
 		break;
 	    case IPV6_HOPLIMIT:
-		if (cm->cmsg_len != CMSG_LEN(sizeof(int)))
+		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(int)))
 		    continue;
-		ip_ttl = *((int *)CMSG_DATA(cm));
+		ip_ttl = *((int *)CMSG_DATA(cmsgp));
+		break;
+	    case IPV6_HOPOPTS:
+		{
+		    //
+		    // Check for Router Alert option
+		    //
+#ifdef HAVE_RFC2292BIS
+		    {
+			struct ip6_hbh *ext;
+			int currentlen;
+			u_int8_t type;
+			size_t extlen, len;
+			void *databuf;
+			
+			ext = (struct ip6_hbh *)CMSG_DATA(cmsgp);
+			extlen = (ext->ip6h_len + 1) * 8;
+			currentlen = 0;
+			while (true) {
+			    currentlen = inet6_opt_next(ext, extlen,
+							currentlen,
+							&type, &len, &databuf);
+			    if (currentlen == -1)
+				break;
+			    if (type == IP6OPT_ROUTER_ALERT) {
+				router_alert_bool = true;
+				break;
+			    }
+			}
+		    }
+#else // ! HAVE_RFC2292BIS (i.e., the old advanced API)
+		    {
+			uint8_t  *tptr = NULL;
+			while (inet6_option_next(cmsgp, &tptr) == 0) {
+			    if (*tptr == IP6OPT_ROUTER_ALERT) {
+				router_alert_bool = true;
+				break;
+			    }
+			}
+		    }
+#endif // ! HAVE_RFC2292BIS
+		    
+		}
+		
 		break;
 #ifdef IPV6_TCLASS
-		if (cm->cmsg_len != CMSG_LEN(sizeof(int)))
+	    case IPV6_TCLASS:
+		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(int)))
 		    continue;
-		ip_tos = *((int *)CMSG_DATA(cm));
+		ip_tos = *((int *)CMSG_DATA(cmsgp));
 		break;
 #endif // IPV6_TCLASS
 	    default:
@@ -2839,8 +2928,9 @@ UnixComm::proto_socket_read(void)
 	    }
 	}
 	
-	iphdrlen = 0;
-	ipdatalen = nbytes;
+	ip_hdr_len = 0;
+	ip_data_len = nbytes;
+	
 	break;
     }
 #endif // HAVE_IPV6
@@ -2931,7 +3021,7 @@ UnixComm::proto_socket_read(void)
     if (mfea_node().unix_comm_recv(module_id(),
 				   mfea_vif->vif_index(),
 				   src, dst, ip_ttl, ip_tos, router_alert_bool,
-				   _rcvbuf0 + iphdrlen, nbytes - iphdrlen)
+				   _rcvbuf0 + ip_hdr_len, nbytes - ip_hdr_len)
 	== XORP_OK) {
 	return (XORP_OK);
     }
@@ -3026,23 +3116,18 @@ UnixComm::proto_socket_write(uint16_t vif_index,
 	return (XORP_ERROR);
     }
     
-    
+    //
     // Setup the IP header (including the Router Alert option, if specified)
     // In case of IPv4, the IP header and the data are specified as
     // two entries to the sndiov[] scatter/gatter array.
     // In case of IPv6, the IP header information is specified as
     // ancillary data.
+    //
     switch (family()) {
     case AF_INET:
 	ip = (struct ip *)_sndbuf0;
 	if (router_alert_bool) {
 	    // Include the Router Alert option
-#ifndef IPTOS_PREC_INTERNETCONTROL
-#define IPTOS_PREC_INTERNETCONTROL	0xc0
-#endif
-#ifndef IPOPT_RA
-#define IPOPT_RA			148	/* 0x94 */
-#endif
 	    ip_option	= htonl((IPOPT_RA << 24) | (0x04 << 16));
 	    ip_option_p	= (uint32_t *)(ip + 1);
 	    *ip_option_p = ip_option;
@@ -3208,6 +3293,7 @@ UnixComm::proto_socket_write(uint16_t vif_index,
 	cmsgp->cmsg_level = IPPROTO_IPV6;
 	cmsgp->cmsg_type = IPV6_HOPLIMIT;
 	*(int *)(CMSG_DATA(cmsgp)) = ip_ttl;
+	cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 	
 	//
 	// Set the TOS
@@ -3217,6 +3303,7 @@ UnixComm::proto_socket_write(uint16_t vif_index,
 	cmsgp->cmsg_level = IPPROTO_IPV6;
 	cmsgp->cmsg_type = IPV6_TCLASS;
 	*(int *)(CMSG_DATA(cmsgp)) = ip_tos;
+	cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 #endif // IPV6_TCLASS
 	
 	//

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_comm.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+// $XORP: xorp/mfea/mfea_unix_comm.hh,v 1.2 2003/03/10 23:20:40 hodson Exp $
 
 
 #ifndef __MFEA_MFEA_UNIX_COMM_HH__
@@ -525,7 +525,8 @@ public:
      * in the IP header on the protocol socket.
      * 
      * If enabled, values such as interface index, destination address and
-     * IP TTL (a.k.a. hop-limit in IPv6) will be received as well.
+     * IP TTL (a.k.a. hop-limit in IPv6), and hop-by-hop options will be
+     * received as well.
      * Note: used only for IPv6. In IPv4 we don't have this; the whole IP
      *  packet is passed to the application listening on a raw socket.
      * 
@@ -963,6 +964,15 @@ private:
     struct sockaddr_in6 _from6;	// The source addr of recvmsg() msg (IPv6)
     struct sockaddr_in6 _to6;	// The dest.  addr of sendmsg() msg (IPv6)
 #endif
+    
+    // IPv4 Router Alert stuff
+#ifndef IPTOS_PREC_INTERNETCONTROL
+#define IPTOS_PREC_INTERNETCONTROL	0xc0
+#endif
+#ifndef IPOPT_RA
+#define IPOPT_RA			148	/* 0x94 */
+#endif
+    
     // IPv6 Router Alert stuff
 #ifdef HAVE_IPV6
 #ifndef IP6OPT_ROUTER_ALERT	// XXX: for compatibility with older systems
