@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.20 2004/05/06 20:21:08 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.21 2004/05/06 23:09:46 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -85,14 +85,16 @@ test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
 test_pim_LDADD	+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
 
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket4userxif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket4xif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libredist4xif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket6userxif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket6xif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libredist6xif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
-test_pim_LDADD	 += $(top_builddir)/xrl/targets/libsocketserverbase.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredist4xif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredist6xif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
+test_pim_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.a
 
 # -- Library Sources
 libpim_a_SOURCES  = pim_module.h
