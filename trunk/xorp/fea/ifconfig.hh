@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.17 2003/10/09 00:11:02 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.18 2003/10/14 01:36:26 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -160,7 +160,7 @@ public:
     void   report_updates(const IfTree& it, bool is_all_interfaces_reportee);
 
     void map_ifindex(uint32_t if_index, const string& ifname);
-    void unmap_ifindex(uint32_t if_index);    
+    void unmap_ifindex(uint32_t if_index);
     const char* get_ifname(uint32_t if_index);
     uint32_t get_ifindex(const string& ifname);
 

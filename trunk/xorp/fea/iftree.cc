@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.17 2003/10/05 19:07:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.18 2003/10/11 22:08:18 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -205,7 +205,7 @@ IfTree::align_with(const IfTree& o, bool do_finalize_state)
     // Pass over and remove items marked for deletion
     if (do_finalize_state)
 	finalize_state();
-    
+
     return *this;
 }
 
@@ -225,33 +225,33 @@ IfTree::ignore_duplicates(const IfTree& o)
     for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
 	IfTreeInterface& i = ii->second;
 	IfTree::IfMap::const_iterator oi = o.get_if(i.ifname());
-	
+
 	if (oi == o.ifs().end())
 	    continue;
 	if ((i.state() == CREATED) || (i.state() == CHANGED)) {
 	    if (i.is_same_state(oi->second))
 		i.mark(NO_CHANGE);
 	}
-	
+
 	IfTreeInterface::VifMap::iterator vi;
 	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
 	    IfTreeVif& v = vi->second;
 	    IfTreeInterface::VifMap::const_iterator ov
 		= oi->second.get_vif(v.vifname());
-	    
+
 	    if (ov == oi->second.vifs().end())
 		continue;
 	    if ((v.state() == CREATED) || (v.state() == CHANGED)) {
 		if (v.is_same_state(ov->second))
 		    v.mark(NO_CHANGE);
 	    }
-	    
+
 	    IfTreeVif::V4Map::iterator ai4;
 	    for (ai4 = v.v4addrs().begin(); ai4 != v.v4addrs().end(); ++ai4) {
 		IfTreeAddr4& a4 = ai4->second;
 		IfTreeVif::V4Map::const_iterator oa4 =
 		    ov->second.get_addr(a4.addr());
-		
+
 		if (oa4 == ov->second.v4addrs().end())
 		    continue;
 		if ((a4.state() == CREATED) || (a4.state() == CHANGED)) {
@@ -265,7 +265,7 @@ IfTree::ignore_duplicates(const IfTree& o)
 		IfTreeAddr6& a6 = ai6->second;
 		IfTreeVif::V6Map::const_iterator oa6 =
 		    ov->second.get_addr(a6.addr());
-		
+
 		if (oa6 == ov->second.v6addrs().end())
 		    continue;
 		if ((a6.state() == CREATED) || (a6.state() == CHANGED)) {
@@ -275,7 +275,7 @@ IfTree::ignore_duplicates(const IfTree& o)
 	    }
 	}
     }
-    
+
     return *this;
 }
 

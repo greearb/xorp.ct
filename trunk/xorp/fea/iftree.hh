@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.14 2003/10/05 19:07:15 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.15 2003/10/11 22:08:18 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -79,6 +79,7 @@ public:
     virtual void finalize_state() = 0;
 
     string str() const;
+
 protected:
     inline static uint32_t bits(State st) {
 	uint32_t c;
@@ -179,24 +180,24 @@ public:
      * @return modified configuration structure.
      */
     IfTree& align_with(const IfTree& user_config, bool do_finalize_state);
-    
+
     /**
      * Delete interfaces labelled as ready for deletion, call finalize_state()
      * on remaining interfaces, and set state to NO_CHANGE.
      */
     void finalize_state();
-    
+
     /**
      * Walk interfaces, vifs, and addresses and ignore state that is duplicated
      * in the other tree:
      * - if an item from the local tree is marked as CREATED or CHANGED,
      *   and exactly same item is on the other tree, it is marked as NO_CHANGE
-     * 
+     *
      * @param o the other tree.
      * @return return the result local tree.
      */
     IfTree& ignore_duplicates(const IfTree& o);
-    
+
     /**
      * @return string representation of IfTree.
      */
@@ -278,10 +279,10 @@ public:
 	set_mac(o.mac());
 	set_if_flags(o.if_flags());
     }
-    
+
     /**
      * Test if the interface-specific internal state is same.
-     * 
+     *
      * @param o the IfTreeInterface to compare against.
      * @return true if the interface-specific internal state is same.
      */
@@ -293,7 +294,7 @@ public:
 		&& (mac() == o.mac())
 		&& (if_flags() == o.if_flags()));
     }
-    
+
     void finalize_state();
 
     string str() const;
@@ -403,7 +404,7 @@ public:
 
     /**
      * Test if the vif-specific internal state is same.
-     * 
+     *
      * @param o the IfTreeVif to compare against.
      * @return true if the vif-specific internal state is same.
      */
