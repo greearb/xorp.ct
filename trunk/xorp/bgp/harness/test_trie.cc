@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.6 2003/09/11 03:50:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.7 2003/09/11 03:57:12 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,25 +25,83 @@
 #include "trie.hh"
 
 #include <map>
+#include <vector>
+
+template <class A>
+struct ltstr {
+    bool operator()(IPNet<A> s1, IPNet<A> s2) const {
+// 	printf("ltstr: %s %s %d\n",
+// 	       s1.str().c_str(), s2.str().c_str(), s1 < s2);
+	return s1 < s2;
+    }
+};
+
+template <class A>
+class Nmap {
+public:
+//     typedef map<IPNet<A>, A> nmap;
+    typedef map<IPNet<A>, A, ltstr<A> > nmap;
+};
+
+typedef vector<const UpdatePacket *> Ulist;
 
 /*
-** 
+** Walk the trie and verify that all the networks in the trie are the expected.
+**
+** XXX - We should also check that the nexthops are good. They are in
+** the map after all.
 */
 template <class A>
 void
 tree_walker(const UpdatePacket *p, const IPNet<A>& net, const TimeVal&,
-	    TestInfo info, map<IPNet<A>, A> nlri)
+	    TestInfo info, typename Nmap<A>::nmap nlri)
 {
     DOUT(info) << info.test_name() << endl <<
 	p->str() <<
 	"net: " << net.str() << "" << endl;
 
-    typename map<IPNet<A>, A>::const_iterator i;
-    for(i = nlri.begin(); i != nlri.end(); i++)
+    typename Nmap<A>::nmap::const_iterator i;
+    for(i = nlri.begin(); i != nlri.end(); i++) {
+	DOUT(info) << info.test_name() << " " << (*i).first.str() << endl;
 	if(net == (*i).first)
 	    return;
+    }
 
     XLOG_FATAL("Net: %s not found in map", net.str().c_str());
+}
+
+/*
+** Used to verify that a trie is empty. If this function is called
+** something is amiss.
+*/
+template <class A>
+void
+tree_walker_empty(const UpdatePacket *p, const IPNet<A>& net, const TimeVal&,
+		  TestInfo info)
+{
+    DOUT(info) << info.test_name() << endl <<
+	p->str() <<
+	"net: " << net.str() << "" << endl;
+
+    XLOG_FATAL("There should be no entries in this trie\n %s:%s",
+	       p->str().c_str(), net.str().c_str());
+}
+
+template <class A>
+void
+replay_walker(const UpdatePacket *p, const TimeVal&, TestInfo info,
+	      size_t *pos, Ulist ulist)
+{
+    DOUT(info) << info.test_name() << " " << (*pos) << endl << p->str();
+
+    if(ulist.size() <= *pos)
+	XLOG_FATAL("vector limit exceeded: %d %d", ulist.size(), *pos);
+
+    if(*p != *ulist[*pos])
+	XLOG_FATAL("%s NOT EQUAL TO %s", p->str().c_str(),
+		   ulist[*pos]->str().c_str());
+
+    (*pos)++;
 }
 
 template <class A> void add_nlri(UpdatePacket *p, IPNet<A> net);
@@ -186,6 +244,11 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     Trie trie;
 
     /*
+    ** Verify that the trie is empty.
+    */
+    trie.tree_walk_table(callback(tree_walker_empty<A>, info));
+
+    /*
     ** The trie should be empty make sure that a lookup fails.
     */
     const UpdatePacket *p = trie.lookup(net.str());
@@ -235,7 +298,7 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     /*
     ** Walk the trie and check that the net is there.
     */
-    map<IPNet<A>, A> nlri;
+    typename Nmap<A>::nmap nlri;
     nlri[net] = nexthop;
     trie.tree_walk_table(callback(tree_walker<A>, info, nlri));
 
@@ -250,7 +313,7 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     trie.process_update_packet(tv, data, len);
 
     /*
-    ** Check that the trie is now empty.
+    ** Check that the net has been removed from the trie.
     */
     p = trie.lookup(net.str());
     if(0 != p) {
@@ -262,10 +325,196 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     delete bgpupdate;	// Free up the packet.
     
     /*
-    ** Print the trie.
+    ** Verify that the trie is empty.
     */
-//     printf("printing routing table:\n");
-//     trie.save_routing_table(stdout);
+    trie.tree_walk_table(callback(tree_walker_empty<A>, info));
+
+    return true;
+}
+
+template <class A>
+bool
+test_replay(TestInfo& info, A nexthop, IPNet<A> net)
+{
+    DOUT(info) << info.test_name() << endl;
+
+    Trie trie;
+
+    /*
+    ** Verify that the trie is empty.
+    */
+    trie.tree_walk_table(callback(tree_walker_empty<A>, info));
+
+    /*
+    ** The trie should be empty make sure that a lookup fails.
+    */
+    const UpdatePacket *p = trie.lookup(net.str());
+    if(0 != p) {
+	DOUT(info) << "lookup suceeded in empty trie!!!\n" << p->str() << endl;
+	return false;
+    }
+
+    UpdatePacket *packet_nlri, *packet_w1, *packet_w2;
+    const uint8_t *data_nlri, *data_w1, *data_w2;
+    size_t len_nlri, len_w1, len_w2;
+
+    /*
+    ** Create an update packet with two NLRIs.
+    */
+    packet_nlri = new UpdatePacket();
+    add_nlri<A>(packet_nlri, net);
+    IPNet<A> net2 = ++net;--net;
+    add_nlri<A>(packet_nlri, net2);
+
+    /*
+    ** Add an origin, aspath and next hop to keep it legal.
+    */
+    packet_nlri->add_pathatt(OriginAttribute(IGP));
+    packet_nlri->add_pathatt(ASPathAttribute(AsPath("1,2,3")));
+    add_nexthop<A>(packet_nlri, nexthop);
+
+    /*
+    ** Pass to the trie.
+    */
+    TimeVal tv;
+    data_nlri = packet_nlri->encode(len_nlri);
+    trie.process_update_packet(tv, data_nlri, len_nlri);
+
+    /*
+    ** Verify that net is in the trie.
+    */
+    p = trie.lookup(net.str());
+
+    if(0 == p) {
+	DOUT(info) << "lookup of " << net.str() << " failed\n";
+	return false;
+    }
+
+    if(*packet_nlri != *p) {
+	DOUT(info) << endl << packet_nlri->str() << 
+	    "NOT EQUAL TO\n" << p->str() << endl;
+	return false;
+    }
+
+    /*
+    ** Verify that net2 is in the trie.
+    */
+    p = trie.lookup(net2.str());
+
+    if(0 == p) {
+	DOUT(info) << "lookup of " << net2.str() << " failed\n";
+	return false;
+    }
+
+    if(*packet_nlri != *p) {
+	DOUT(info) << endl << packet_nlri->str() << 
+	    "NOT EQUAL TO\n" << p->str() << endl;
+	return false;
+    }
+
+    /*
+    ** Walk the trie and check that both nets are there.
+    */
+    typename Nmap<A>::nmap nlri;
+    nlri[net] = nexthop;
+    nlri[net2] = nexthop;
+    trie.tree_walk_table(callback(tree_walker<A>, info, nlri));
+
+    /*
+    ** Generate a withdraw to remove one entry from the trie.
+    */
+    packet_w1 = new UpdatePacket();
+    withdraw_nlri<A>(packet_w1, net);
+    data_w1 = packet_w1->encode(len_w1);
+    trie.process_update_packet(tv, data_w1, len_w1);
+
+    /*
+    ** Check that net is no longer in the trie.
+    */
+    p = trie.lookup(net.str());
+    if(0 != p) {
+	DOUT(info) << "lookup suceeded in empty trie!!!\n" << p->str() << endl;
+	return false;
+    }
+
+    /*
+    ** Now check the replay code.
+    */
+    size_t pos = 0;
+    Ulist ulist;
+    ulist.push_back(packet_nlri);
+    ulist.push_back(packet_w1);
+    DOUT(info) << "0\t" << ulist[0]->str() << endl;
+    DOUT(info) << "1\t" << ulist[1]->str() << endl;
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist));
+
+    /*
+    ** Build another withdraw to remove the net2. This should empty
+    ** the trie.
+    */
+    packet_w2 = new UpdatePacket();
+    withdraw_nlri<A>(packet_w2, net2);
+    data_w2 = packet_w2->encode(len_w2);
+    trie.process_update_packet(tv, data_w2, len_w2);
+
+    /* XXX
+    ** Now this is a bummer at this point the replay code should not
+    ** return anything. But as an artifact of the implementation we
+    ** will return the now redundant withdraws.
+    */
+    pos = 0;
+    ulist.clear();
+    ulist.push_back(packet_w1);
+    ulist.push_back(packet_w2);
+    DOUT(info) << "0\t" << ulist[0]->str() << endl;
+    DOUT(info) << "1\t" << ulist[1]->str() << endl;
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist));
+
+    /*
+    ** Push the update packet with the two nlris back in.
+    */
+    trie.process_update_packet(tv, data_nlri, len_nlri);
+
+    /*
+    ** Check the replay code. It should now only contain the most
+    ** recent  update.
+    */
+    pos = 0;
+    ulist.clear();
+    ulist.push_back(packet_nlri);
+    DOUT(info) << "0\t" << ulist[0]->str() << endl;
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist));
+
+    /*
+    ** Empty out the trie.
+    */
+    trie.process_update_packet(tv, data_w1, len_w1);
+    trie.process_update_packet(tv, data_w2, len_w2);
+
+    /* XXX
+    ** Now this is a bummer at this point the replay code should not
+    ** return anything. But as an artifact of the implementation we
+    ** will return the now redundant withdraws.
+    */
+    pos = 0;
+    ulist.clear();
+    ulist.push_back(packet_w1);
+    ulist.push_back(packet_w2);
+    DOUT(info) << "0\t" << ulist[0]->str() << endl;
+    DOUT(info) << "1\t" << ulist[1]->str() << endl;
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist));
+
+    /*
+    ** Verify that the trie is empty.
+    */
+    trie.tree_walk_table(callback(tree_walker_empty<A>, info));
+
+    delete [] data_nlri;
+    delete packet_nlri;
+    delete [] data_w1;
+    delete packet_w1;
+    delete [] data_w2;
+    delete packet_w2;
 
     return true;
 }
@@ -299,6 +548,10 @@ main(int argc, char** argv)
 	    {"single_ipv4", callback(test_single_update<IPv4>,
 				     nexthop1_ipv4, net1_ipv4)},
   	    {"single_ipv6", callback(test_single_update<IPv6>,
+				     nexthop1_ipv6, net1_ipv6)},
+	    {"replay_ipv4", callback(test_replay<IPv4>,
+				     nexthop1_ipv4, net1_ipv4)},
+	    {"replay_ipv6", callback(test_replay<IPv6>,
 				     nexthop1_ipv6, net1_ipv6)},
 	};
 
