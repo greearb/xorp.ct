@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.38 2003/08/25 23:01:34 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.39 2003/08/27 02:10:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1419,13 +1419,6 @@ BGPPeer::set_state(FSMState s, bool error)
 						       _last_error[0],
 						       _last_error[1]);
 	 inline void trap_callback(const XrlError& error, const char *comment);
-
-	 /*
-	 ** The simplest way to generate an error string with the last
-	 ** error is to generate a notification packet and use its
-	 ** str() method.
-	 */
-	 NotificationPacket pac(_last_error[0], _last_error[1]);
 	 if (STATEESTABLISHED == _state && STATEESTABLISHED != previous_state){
 	    snmp.send_send_bgp_established_trap(m->bgp_mib_name().c_str(),
 						last_error,_state,
