@@ -1,19 +1,23 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.2 2003/01/23 11:14:24 pavlin Exp $
 #
 
 #
 # Send configuration commands to a running PIM process.
 #
 
+MODULE_NAME="IGMP"
+HOSTNAME=`hostname`
+
+CLI_TARGET="CLI"
+MFEA_TARGET="MFEA_4"
+MLD6IGMP_TARGET="IGMP"
+
 . ../cli/xrl_cli_shell_funcs.sh
 . ../mfea/xrl_mfea_shell_funcs.sh
 . ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
-
-MODULE_NAME="IGMP"
-HOSTNAME=`hostname`
 
 echo "Configuring $MODULE_NAME on $HOSTNAME..."
 
