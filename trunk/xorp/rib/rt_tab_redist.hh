@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_redist.hh,v 1.5 2004/04/01 19:31:21 hodson Exp $
+// $XORP: xorp/rib/rt_tab_redist.hh,v 1.6 2004/04/16 02:21:58 hodson Exp $
 
 #ifndef __RIB_RT_TAB_REDIST_HH__
 #define __RIB_RT_TAB_REDIST_HH__
