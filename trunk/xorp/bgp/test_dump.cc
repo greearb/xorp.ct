@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.32 2004/05/07 20:48:47 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.33 2004/05/08 13:05:43 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -1556,6 +1556,684 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
 
     //================================================================
+    // Test15: new route during dump, after peer has been dumped
+    //================================================================
+    //take peer3 down
+    //    printf("TEST 15\n");
+    fanout_table->remove_next_table(debug_table3);
+    ribin_table3->ribin_peering_went_down();
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 15");
+    debug_table1->write_comment("ADD AFTER PEER HAS BEEN DUMPED");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 3 UP");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->add_next_table(debug_table3, &handler3);
+    debug_table3->set_parent(fanout_table);
+    ribin_table3->ribin_peering_came_up();
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SINGLE STEP EVENT LOOP");
+    debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
+    bgpmain.eventloop().run();
+    debug_table1->write_comment("STEP AGAIN (MOVES TO DUMPING NEXT PEER)");
+    bgpmain.eventloop().run();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT NOT RECEIVED BY PEER 3 YET");
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("RUN EVENT LOOP TO COMPLETION");
+    debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
+
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 1");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 1");
+    debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2 & 3");
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    //    printf("TEST 15 END\n");
+
+    //================================================================
+    // Test16: new route during dump, after peer with no routes has been dumped
+    //================================================================
+    //take peer3 down
+    //    printf("TEST 16\n");
+    fanout_table->remove_next_table(debug_table3);
+    ribin_table3->ribin_peering_went_down();
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 16");
+    debug_table1->write_comment("ADD AFTER PEER WITH NO ROUTES HAS BEEN DUMPED");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 3 UP");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->add_next_table(debug_table3, &handler3);
+    debug_table3->set_parent(fanout_table);
+    ribin_table3->ribin_peering_came_up();
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SINGLE STEP EVENT LOOP");
+    debug_table1->write_comment("NO ROUTES IN 1st PEER (MOVES TO DUMPING NEXT PEER)");
+    bgpmain.eventloop().run();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT NOT RECEIVED BY PEER 3 YET");
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("RUN EVENT LOOP TO COMPLETION");
+    debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
+
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 1");
+    debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2 & 3");
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    //    printf("TEST 16 END\n");
+
+    //================================================================
+    // Test17: new route during dump on a new peer
+    //================================================================
+    //    printf("TEST 17\n");
+    //take peer3 down
+    fanout_table->remove_next_table(debug_table3);
+    ribin_table3->ribin_peering_went_down();
+
+    //take peer1 down
+    fanout_table->remove_next_table(debug_table1);
+    ribin_table1->ribin_peering_went_down();
+
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 17");
+    debug_table1->write_comment("ADD ON NEW PEER DURING DUMP");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    debug_table1->write_comment("EXPECT RECEIVED BY NOONE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 3 UP");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->add_next_table(debug_table3, &handler3);
+    debug_table3->set_parent(fanout_table);
+    ribin_table3->ribin_peering_came_up();
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 1 UP");
+    debug_table1->write_comment("NO NEED TO DUMP TO THIS PEER FOR THIS TEST");
+    fanout_table->add_next_table(debug_table1, &handler1);
+    debug_table1->set_parent(fanout_table);
+    ribin_table1->ribin_peering_came_up();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT NOT RECEIVED BY PEER 3 YET");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("RUN EVENT LOOP TO COMPLETION");
+    debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
+
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 1");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    //    printf("TEST 17 END\n");
+
+    //================================================================
+    // Test18: new route during dump on a new peer
+    //================================================================
+    //    printf("TEST 18\n");
+    //take peer3 down
+    fanout_table->remove_next_table(debug_table3);
+    ribin_table3->ribin_peering_went_down();
+
+
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 18");
+    debug_table1->write_comment("ADD ON NEW PEER DURING DUMP");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT NOT RECEIVED BY PEER 3 YET");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    debug_table1->write_comment("EXPECT RECEIVED BY NOONE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    //take peer1 down
+    debug_table1->write_comment("TAKE PEER 1 DOWN");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->remove_next_table(debug_table1);
+    ribin_table1->ribin_peering_went_down();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 3 UP");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->add_next_table(debug_table3, &handler3);
+    debug_table3->set_parent(fanout_table);
+    ribin_table3->ribin_peering_came_up();
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 1 UP");
+    debug_table1->write_comment("NO NEED TO DUMP TO THIS PEER FOR THIS TEST");
+    fanout_table->add_next_table(debug_table1, &handler1);
+    debug_table1->set_parent(fanout_table);
+    ribin_table1->ribin_peering_came_up();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("RUN EVENT LOOP TO COMPLETION");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 NOT RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
+
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    //    printf("TEST 18 END\n");
+
+    //================================================================
+    // Test19: delete during dump on a peer dump table doesn't know about
+    //================================================================
+    //    printf("TEST 19\n");
+    //take peer3 down
+    fanout_table->remove_next_table(debug_table3);
+    ribin_table3->ribin_peering_went_down();
+
+
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 19");
+    debug_table1->write_comment("DELETE ON PEER THAT DUMP TABLE DOESNT KNOW ABOUT");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    //take peer1 down
+    debug_table1->write_comment("TAKE PEER 1 DOWN");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->remove_next_table(debug_table1);
+    ribin_table1->ribin_peering_went_down();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 1 UP");
+    debug_table1->write_comment("NO NEED TO DUMP TO THIS PEER FOR THIS TEST");
+    fanout_table->add_next_table(debug_table1, &handler1);
+    debug_table1->set_parent(fanout_table);
+    ribin_table1->ribin_peering_came_up();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 3 UP");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->add_next_table(debug_table3, &handler3);
+    debug_table3->set_parent(fanout_table);
+    ribin_table3->ribin_peering_came_up();
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("RUN EVENT LOOP TO COMPLETION");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 NOT RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 NOT RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
+
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    //    printf("TEST 19 END\n");
+
+    //================================================================
+    // Test20: delete during dump on a peer dump table doesn't know about
+    //================================================================
+    //    printf("TEST 20\n");
+    //take peer3 down
+    fanout_table->remove_next_table(debug_table3);
+    ribin_table3->ribin_peering_went_down();
+
+
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 20");
+    debug_table1->write_comment("DELETE ON PEER THAT DUMP TABLE DOESNT KNOW ABOUT");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net4, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    //take peer1 down
+    debug_table1->write_comment("TAKE PEER 1 DOWN");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->remove_next_table(debug_table1);
+    ribin_table1->ribin_peering_went_down();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 1 UP");
+    debug_table1->write_comment("NO NEED TO DUMP TO THIS PEER FOR THIS TEST");
+    fanout_table->add_next_table(debug_table1, &handler1);
+    debug_table1->set_parent(fanout_table);
+    ribin_table1->ribin_peering_came_up();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 3 UP");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->add_next_table(debug_table3, &handler3);
+    debug_table3->set_parent(fanout_table);
+    ribin_table3->ribin_peering_came_up();
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("RUN EVENT LOOP TO COMPLETION");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 NOT RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 NOT RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.4.0/24 NOT RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3");
+
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 1");
+    debug_table1->write_comment("EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 2 & 3");
+    sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    //    printf("TEST 20 END\n");
+
+    //================================================================
+    // Test21: add on new rib, after dump went down halfway through 
+    // dumping old rib
+    //================================================================
+    //    printf("TEST 21\n");
+    //take peer3 down
+    fanout_table->remove_next_table(debug_table3);
+    ribin_table3->ribin_peering_went_down();
+
+
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 21");
+    debug_table1->write_comment("ADD ON NEW VERSION OF HALF-DUMPED PEER");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    debug_table1->write_comment("EXPECT RECEIVED BY PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 3 UP");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->add_next_table(debug_table3, &handler3);
+    debug_table3->set_parent(fanout_table);
+    ribin_table3->ribin_peering_came_up();
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("STEP EVENT LOOP ONCE TO DUMP ONE ROUTE");
+    debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
+    bgpmain.eventloop().run();
+
+    debug_table1->write_separator();
+    //take peer1 down
+    debug_table1->write_comment("TAKE PEER 1 DOWN");
+    debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
+    fanout_table->remove_next_table(debug_table1);
+    ribin_table1->ribin_peering_went_down();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("BRING PEER 1 UP");
+    debug_table1->write_comment("NO NEED TO DUMP TO THIS PEER FOR THIS TEST");
+    fanout_table->add_next_table(debug_table1, &handler1);
+    debug_table1->set_parent(fanout_table);
+    ribin_table1->ribin_peering_came_up();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->write_comment("EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("RUN EVENT LOOP TO COMPLETION");
+    debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3");
+    debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 2");
+    debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
+    debug_table1->write_comment("EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3");
+
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
+
+    //delete the routes
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 2");
+    debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("DELETING FROM PEER 1");
+    debug_table1->write_comment("EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 2 & 3");
+    sr1 = new SubnetRoute<IPv4>(net5, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table1->write_separator();
+    //    printf("TEST 21 END\n");
+
+    //================================================================
 
     debug_table1->write_comment("SHUTDOWN AND CLEAN UP");
     delete decision_table;
@@ -1582,7 +2260,7 @@ test_dump(TestInfo& /*info*/)
 	fclose(file);
 	return false;
    }
-#define BUFSIZE 60000
+#define BUFSIZE 100000
     char testout[BUFSIZE];
     memset(testout, 0, BUFSIZE);
     int bytes1 = fread(testout, 1, BUFSIZE, file);

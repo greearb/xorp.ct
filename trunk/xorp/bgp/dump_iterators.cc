@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.15 2004/05/07 20:48:47 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.16 2004/05/08 13:05:42 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -412,7 +412,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 
 		    /*the peer had gone down when we were in the
                       middle of dumping it */
-		    if (genid == dpi->genid()) {
+		    if (genid <= dpi->genid()) {
 			cp(16);
 			PeerDumpState<A>* tmp = &(*dpi);
 			UNUSED(tmp);
@@ -452,15 +452,15 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 			    XLOG_UNREACHABLE();
 			}
 		    }
-		    cp(22); //TEST CASE MISSING
-		    assert(genid != dpi->genid());
+		    cp(22);
+		    assert(genid > dpi->genid());
 		    /* the change comes from a later rib version
 		       than the one we partially dumped */
 		    debug_msg("change comes from later genid\n");
 		    return true;
 		}
 	    }
-	    cp(23); //TEST CASE MISSING
+	    cp(23);
 	    /* the peer didn't go down in mid dump */
 	    debug_msg("peer didn't go down in mid dump\n");
 
@@ -468,15 +468,15 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	       case this is older */
 	    for (dpi = _dumped_peers.begin();
 		 dpi != _dumped_peers.end(); dpi++) {
-		cp(24); //TEST CASE MISSING
+		cp(24);
 		if (origin_peer == dpi->peer_handler()) {
-		    cp(25); //TEST CASE MISSING
+		    cp(25);
 		    if (genid >= dpi->genid()) {
-			cp(26); //TEST CASE MISSING
+			cp(26);
 			// it's a new change, so it's valid
 			return true;
 		    } else {
-			cp(27); //TEST CASE MISSING
+			cp(27);
 			// change must have come from a DeletionTable
 			XLOG_ASSERT(op != RTQUEUE_OP_REPLACE_NEW);
 			XLOG_ASSERT(op != RTQUEUE_OP_ADD);
@@ -484,19 +484,19 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 		    }
 		}
 	    }
-	    cp(28); //TEST CASE MISSING
+	    cp(28);
 	    /* We don't have this peer in the _dumped_peers list. We
 	       must have not dumped any routes from it */
 	    switch (op) {
 	    case RTQUEUE_OP_DELETE:
 	    case RTQUEUE_OP_REPLACE_OLD:
-		cp(29); //TEST CASE MISSING
+		cp(29);
 		/* if we didn't dump any routes from it, a delete
 		   cannot be valid */
 		return false;
 	    case RTQUEUE_OP_REPLACE_NEW:
 	    case RTQUEUE_OP_ADD:
-		cp(30); //TEST CASE MISSING
+		cp(30); 
 		/* if we didn't dump any routes from it, an add must
 		   be valid */
 		/* make sure we keep track of the genid this time */
@@ -505,9 +505,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	    default:
 		XLOG_UNREACHABLE();
 	    }
-	    
-	    cp(31); //TEST CASE MISSING
-	    return true;
+	    XLOG_UNREACHABLE();
 	}
     }
     cp(32);
@@ -529,18 +527,18 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 
     typename list <PeerDumpState<A> >::const_iterator npi;
     for (npi = _new_peers.begin(); npi != _new_peers.end(); npi++) {
-	cp(36); //TEST CASE MISSING
+	cp(36);
 	if (npi->peer_handler() == origin_peer) {
-	    cp(37); //TEST CASE MISSING
+	    cp(37);
 	    //It is a new peer.  Check the GenID in case this came
 	    //from a DeletionTable on this peer.
-	    if (npi->genid() >= genid) {
-		cp(38); //TEST CASE MISSING
+	    if (genid >= npi->genid()) {
+		cp(38);
 		// the route change is not from before the peer came up
 		return true;
 	    } else {
-		cp(39); //TEST CASE MISSING
-		// it must be from a DeletionTable, so it's 
+		cp(39);
+		// it must be from a DeletionTable, so it cannot be an add 
 		XLOG_ASSERT(op != RTQUEUE_OP_REPLACE_NEW);
 		XLOG_ASSERT(op != RTQUEUE_OP_ADD);
 		return false;
