@@ -1,4 +1,4 @@
-# $XORP: other/testbed/tools/xtvars.py,v 1.7 2002/03/12 18:27:50 atanu Exp $
+# $XORP: other/testbed/tools/xtvars.py,v 1.1.1.1 2002/12/11 23:55:14 hodson Exp $
 
 # Configuration variables
 
@@ -10,7 +10,7 @@ KERNEL_DIR="/tmp/"
 
 # Live configuration
 HOST="xorpc.icir.org"
-CONF="/home/xorpc/u2/freebsd.usr/local/xorp/config.xml"
+CONF="/home/xorpc/u2/freebsd.usr/local/xorp/testbed/config.xml"
 SWITCH_CONF="/usr/xorpc/local/tftpboot/current.conf"
 KERNEL_DIR="/home/xorpc/u2/freebsd.kernels/"
 
