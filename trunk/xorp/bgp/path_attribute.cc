@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.16 2003/02/06 04:19:22 rizzo Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.17 2003/02/08 07:30:23 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -646,12 +646,12 @@ PathAttributeList<A>::
 
 template<class A>
 PathAttributeList<A>::PathAttributeList<A>(const PathAttributeList<A>& palist)
+	: list <PathAttribute *>()
 {
     _nexthop_att = NULL;
     _aspath_att = NULL;
     _origin_att = NULL;
-    const_iterator i = palist._att_list.begin();
-    for ( ; i != palist._att_list.end() ; ++i)
+    for (const_iterator i = palist.begin(); i != palist.end() ; ++i)
 	add_path_attribute(**i);
     rehash();
 }
@@ -660,7 +660,7 @@ template<class A>
 PathAttributeList<A>::~PathAttributeList<A>()
 {
     debug_msg("++ ~PathAttributeList delete:\n%s\n", str().c_str());
-    for (const_iterator i = _att_list.begin(); i != _att_list.end() ; ++i)
+    for (const_iterator i = begin(); i != end() ; ++i)
 	delete (*i);
 }
 
@@ -689,17 +689,17 @@ PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
     }
     // Keep the list sorted
     debug_msg("++ add_path_attribute %s\n", att.str().c_str());
-    if (!_att_list.empty()) {
+    if (!empty()) {
 	iterator i;
-	for (i = _att_list.begin(); i != _att_list.end(); i++)
+	for (i = begin(); i != end(); i++)
 	    if ( *(*i) > *a) {
-		_att_list.insert(i, a);
+		insert(i, a);
 		memset(_hash, 0, 16);
 		return;
 	    }
     }
     // list empty, or tail insertion:
-    _att_list.push_back(a);
+    push_back(a);
     memset(_hash, 0, 16);
 }
 
@@ -708,7 +708,7 @@ string
 PathAttributeList<A>::str() const
 {
     string s;
-    for (const_iterator i = _att_list.begin(); i != _att_list.end() ; ++i)
+    for (const_iterator i = begin(); i != end() ; ++i)
 	s += (*i)->str() + "\n";
     return s;
 }
@@ -719,7 +719,7 @@ PathAttributeList<A>::rehash()
 {
     MD5_CTX context;
     MD5Init(&context);
-    for (const_iterator i = _att_list.begin(); i != _att_list.end(); i++)
+    for (const_iterator i = begin(); i != end(); i++)
 	(*i)->add_hash(&context);
     MD5Final(_hash, &context);
 }
@@ -737,23 +737,23 @@ operator< (const PathAttributeList<A> &him) const
         return true;
     if ((*(him._nexthop_att)) < (*_nexthop_att))
         return false;
-    if (_att_list.size() < him._att_list.size())
+    if (size() < him.size())
         return true;
-    if (him._att_list.size() < _att_list.size())
+    if (him.size() < size())
         return false;
 
     //    return (memcmp(_hash, him.hash(), 16) < 0);
-    const_iterator my_i = _att_list.begin();
-    const_iterator his_i = him.att_list().begin();
+    const_iterator my_i = begin();
+    const_iterator his_i = him.begin();
     for (;;) {
 	// are they equal.
-	if ((my_i == _att_list.end()) && (his_i == him.att_list().end())) {
+	if ((my_i == end()) && (his_i == him.end())) {
 	    return false;
 	}
-	if (my_i == _att_list.end()) {
+	if (my_i == end()) {
 	    return true;
 	}
-	if (his_i == him.att_list().end()) {
+	if (his_i == him.end()) {
 	    return false;
 	}
 	if ((**my_i) < (**his_i)) {
@@ -805,11 +805,11 @@ PathAttributeList<A>::replace_attribute(PathAttribute* new_att)
     debug_msg("Replace attribute\n");
     debug_msg("Before: \n%s\n", str().c_str());
     debug_msg("New Att: %s\n", new_att->str().c_str());
-    for (iterator i = _att_list.begin(); i != _att_list.end() ; ++i)
+    for (iterator i = begin(); i != end() ; ++i)
 	if ((*i)->type() == type) {
-	    _att_list.insert(i, new_att);
+	    insert(i, new_att);
 	    delete (*i);
-	    _att_list.erase(i);
+	    erase(i);
 	    debug_msg("After: \n%s\n", str().c_str());
 	    memset(_hash, 0, 16);
 	    return;
@@ -837,10 +837,10 @@ PathAttributeList<A>::remove_attribute_by_type(PathAttType type)
 {
     // we only remove the first instance of an attribute with matching type
     iterator i;
-    for (i = _att_list.begin(); i != _att_list.end(); i++) {
+    for (i = begin(); i != end(); i++) {
 	if ((*i)->type() == type) {
 	    delete *i;
-	    _att_list.erase(i);
+	    erase(i);
 	    memset(_hash, 0, 16);
 	    return;
 	}
@@ -852,7 +852,7 @@ const PathAttribute*
 PathAttributeList<A>::find_attribute_by_type(PathAttType type) const
 {
     const_iterator i;
-    for (i = _att_list.begin(); i != _att_list.end(); i++)
+    for (i = begin(); i != end(); i++)
 	if ((*i)->type() == type)
 	    return *i;
     return NULL;

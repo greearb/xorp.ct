@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.9 2003/02/07 05:53:06 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.10 2003/02/08 01:32:58 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -169,9 +169,9 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt)
 	debug_msg("First add on this packet\n");
 	debug_msg("SubnetRoute is %s\n", rt.str().c_str());
 	// no, so add all the path attributes
-	list <PathAttribute*>::const_iterator pai;
-	pai = rt.attributes()->att_list().begin();
-	while (pai != rt.attributes()->att_list().end()) {
+	PathAttributeList<IPv4>::const_iterator pai;
+	pai = rt.attributes()->begin();
+	while (pai != rt.attributes()->end()) {
 	    debug_msg("Adding attribute\n");
 	    _packet->add_pathatt(**pai);
 	    ++pai;

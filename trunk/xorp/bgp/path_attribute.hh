@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.9 2003/02/06 04:19:22 rizzo Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.10 2003/02/08 07:30:23 rizzo Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -396,8 +396,7 @@ private:
  * class member (e.g. _aspath_att ...) for ease of use.
  */
 template<class A>
-class PathAttributeList
-{
+class PathAttributeList : public list <PathAttribute*> {
 public:
     typedef list<PathAttribute*>::const_iterator const_iterator;
     typedef list<PathAttribute*>::iterator iterator;
@@ -422,12 +421,6 @@ public:
     const uint8_t* hash() const			{
 	assert_rehash();
 	return _hash;
-    }
-
-    const list<PathAttribute*>& att_list() const {
- 	debug_msg("PathAttributeList:att_list(): size = %u\n",
-		(uint32_t)_att_list.size());
-	return _att_list;
     }
 
     // complete() is true when all the mandatory attributes are present
@@ -461,8 +454,6 @@ private:
     NextHopAttribute<A> *	_nexthop_att;
     ASPathAttribute *		_aspath_att;
     OriginAttribute *		_origin_att;
-
-    list <PathAttribute*>	_att_list;
 
     uint8_t			_hash[16];	// used for fast comparisons
 };

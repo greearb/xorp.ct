@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.17 2003/02/07 05:53:06 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.18 2003/02/08 06:53:33 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -46,11 +46,6 @@ UpdatePacket::UpdatePacket()
 
 UpdatePacket::~UpdatePacket()
 {
-    list <PathAttribute*>::const_iterator pai = pa_list().begin();
-    while(pai != pa_list().end()) {
-	delete (*pai);
-	++pai;
-    }
 }
 
 void

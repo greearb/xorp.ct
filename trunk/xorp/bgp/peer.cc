@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.26 2003/02/05 23:01:51 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.27 2003/02/06 04:19:22 rizzo Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -806,9 +806,9 @@ BGPPeer::event_recvupdate(const UpdatePacket *p) // EVENTRECUPDATEMESS
 	// XXX - Temporary hack until we get programmable filters.
 	const IPv4 next_hop = peerdata()->get_next_hop_rewrite();
 	if (!next_hop.is_zero()) {
-	    list<PathAttribute*>& l = const_cast<
-		list<PathAttribute*>&>(p->pa_list());
-	    list<PathAttribute*>::iterator i;
+	    PathAttributeList<IPv4>& l = const_cast<
+		PathAttributeList<IPv4>&>(p->pa_list());
+	    PathAttributeList<IPv4>::iterator i;
 	    for (i = l.begin(); i != l.end(); i++) {
 		if (NEXT_HOP == (*i)->type()) {
  		    delete (*i);
