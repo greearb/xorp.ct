@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.24 2002/12/09 09:43:58 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $
 ##
 
 # -- Real Programs
@@ -9,6 +9,10 @@ bin_PROGRAMS	 = rtrmgr xorpsh
 
 # -- Test Programs
 #bin_PROGRAMS	+=
+
+TESTS		 = test_templates
+
+noinst_PROGRAMS = $(TESTS)
 
 EXTRA_DIST	 = config.template config.boot
 
@@ -47,7 +51,7 @@ rtrmgr_LDADD	+= $(top_builddir)/xrl/targets/librtrmgrbase.a
 rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a 
 
 xorpsh_SOURCES	 = rtrmgr_module.h
-rtrmgr_SOURCES	+= version.h
+xorpsh_SOURCES	+= version.h
 xorpsh_SOURCES	+= xorpsh_main.cc
 xorpsh_SOURCES	+= y.tplt_tab.cc
 xorpsh_SOURCES	+= lex.tplt.cc
@@ -83,6 +87,22 @@ xorpsh_LDADD	+= $(top_builddir)/libcomm/libcomm.a
 xorpsh_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgrxif.a
 xorpsh_LDADD	+= $(top_builddir)/xrl/targets/libxorpshbase.a
 xorpsh_LDADD	+= $(LDADD)
+
+test_templates_SOURCES	 = test_templates.cc
+test_templates_SOURCES	+= y.tplt_tab.cc
+test_templates_SOURCES	+= lex.tplt.cc
+test_templates_SOURCES	+= template_tree.cc
+test_templates_SOURCES	+= template_tree_node.cc
+test_templates_SOURCES	+= template_commands.cc
+test_templates_SOURCES	+= xrldb.cc
+test_templates_SOURCES	+= unexpanded_xrl.cc
+test_templates_SOURCES	+= conf_tree_node.cc
+test_templates_SOURCES	+= command_tree.cc
+test_templates_SOURCES	+= xorp_client.cc
+test_templates_SOURCES	+= module_manager.cc
+test_templates_SOURCES	+= split.cc
+test_templates_LDADD 	 = $(LDADD)
+
 # -- Library Sources
 
 # -- Extra files and directories to add to the distribution
