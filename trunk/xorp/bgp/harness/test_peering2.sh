@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.38 2005/03/10 01:58:58 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.39 2005/03/16 02:07:37 atanu Exp $
 #
 
 #
@@ -17,7 +17,8 @@
 # 4) Run xorp "../xorp_bgp"
 # 5) Run "./test_peer -s peer1"
 # 6) Run "./test_peer -s peer2"
-# 7) Run "./coord"
+# 7) Run "./test_peer -s peer3"
+# 8) Run "./coord"
 #
 set -e
 
@@ -57,9 +58,18 @@ PORT2=10002
 PEER2_PORT=20002
 PEER2_AS=65000
 
+# EBGP
+PORT3=10003
+PEER3_PORT=20003
+PEER3_AS=65003
+
 HOLDTIME=5
 
-TRAFFIC_FILES="${srcdir}/../../../data/bgp/icsi1.mrtd"
+TRAFFIC_DIR="${srcdir}/../../../data/bgp"
+TRAFFIC_FILES="${TRAFFIC_DIR}/icsi1.mrtd"
+
+TMPDIR=${TMPDIR:-/tmp}
+EXT=${LOGNAME:-unknown}
 
 configure_bgp()
 {
@@ -77,6 +87,11 @@ configure_bgp()
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT $PEER2_AS $NEXT_HOP $HOLDTIME
     enable_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT
+
+    PEER=$HOST
+    NEXT_HOP=192.150.187.78
+    add_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT $PEER3_AS $NEXT_HOP $HOLDTIME
+    enable_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT
 }
 
 wait_for_peerdown()
@@ -105,6 +120,9 @@ reset()
     coord target $HOST $PORT2
     coord initialise attach peer2
 
+    coord target $HOST $PORT3
+    coord initialise attach peer3
+
     bgp_not_established
 
     while pending | grep true
@@ -124,7 +142,7 @@ reset()
 
 bgp_not_established()
 {
-    for i in peer1 peer2
+    for i in peer1 peer2 peer3
     do
 	status $i
 	while status $i | grep established
@@ -704,7 +722,139 @@ test14()
     reset
 }
 
-TESTS_NOT_FIXED='test10 test11 test12'
+test15()
+{
+    TFILE=$1
+
+    echo "TEST15:"
+    echo "      1) Start injecting a saved feed (peer1 I-BGP) - $TFILE" 
+    echo "      2) Wait until the whole feed has been sent" 
+    echo "      3) Bring up a second peering (peer3 E-BGP)"
+    echo "      4) Verify all sent packets arrived"
+    echo "      5) Verify all received packets were sent"
+
+    # Reset the peers
+    reset
+
+    # Establish the EBGP peering.
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
+    coord peer1 assert established
+
+    # Save the traffic that we send on peer1
+    SENT=${TMPDIR}/peer1_sent.text.$EXT
+    rm -f $SENT
+    coord peer1 dump sent text ipv4 traffic $SENT
+
+    # send in the saved file
+    UPDATES=
+    NOBLOCK=true coord peer1 send dump mrtd update $TFILE $UPDATES
+
+    # Wait for the whole feed to be sent it may not all have arrived at BGP
+    bgp_peer_unchanged peer1
+
+    # XXXX
+    # Put a big delay here if you want all the packets to have been processed
+    # by BGP.
+
+    # Save the traffic that we receive on peer3 useful for debugging
+    RECV=${TMPDIR}/peer3_recv.text.$EXT
+    rm -f $RECV
+    coord peer3 dump recv text ipv4 traffic $RECV
+
+    # Bring up a second peering and wait for all the updates to arrive
+    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.103
+
+    # Wait for the whole feed to be received
+    bgp_peer_unchanged peer3
+
+    # Check all the sent packets and verify that they arrived at peer3
+    XRLS=${TMPDIR}/xrls.$EXT
+    cat $SENT | python $srcdir/lookup.py --peer peer3 \
+					 --trie recv \
+					 --add 65008 > $XRLS
+    $CALLXRL -f $XRLS
+
+    # Check all the received packets and verify that they were sent by peer1
+    XRLS=${TMPDIR}/xrls.$EXT
+    cat $RECV | python $srcdir/lookup.py --peer peer1 \
+					 --trie sent \
+					 --remove 65008 > $XRLS
+    $CALLXRL -f $XRLS
+
+    # Make sure that the peer1 connection is still established
+    coord peer1 assert established
+    coord peer3 assert established
+
+    rm -f $SENT $RECV $XRLS
+}
+
+test16()
+{
+    TFILE=$1
+
+    echo "TEST16:"
+    echo "      1) Start injecting a saved feed (peer2 E-BGP) - $TFILE" 
+    echo "      2) Wait until the whole feed has been sent" 
+    echo "      3) Bring up a second peering (peer1 I-BGP) "
+    echo "      4) Verify all sent packets arrived"
+    echo "      5) Verify all received packets were sent"
+
+    # Reset the peers
+    reset
+
+    # Establish the EBGP peering.
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
+    coord peer2 assert established
+
+    # Save the traffic that we send on peer2
+    SENT=${TMPDIR}/peer2_sent.text.$EXT
+    rm -f $SENT
+    coord peer2 dump sent text ipv4 traffic $SENT
+
+    # send in the saved file
+    UPDATES=
+    NOBLOCK=true coord peer2 send dump mrtd update $TFILE $UPDATES
+
+    # Wait for the whole feed to be sent it may not all have arrived at BGP
+    bgp_peer_unchanged peer2
+
+    # XXXX
+    # Put a big delay here if you want all the packets to have been processed
+    # by BGP.
+
+    # Save the traffic that we receive on peer1 useful for debugging
+    RECV=${TMPDIR}/peer1_recv.text.$EXT
+    rm -f $RECV
+    coord peer1 dump recv text ipv4 traffic $RECV
+
+    # Bring up a second peering and wait for all the updates to arrive
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
+
+    # Wait for the whole feed to arrive
+    bgp_peer_unchanged peer1
+
+    # Check all the sent packets and verify that they arrived at peer1
+    XRLS=${TMPDIR}/xrls.$EXT
+    cat $SENT | python $srcdir/lookup.py --peer peer1 \
+					 --trie recv > $XRLS
+    $CALLXRL -f $XRLS
+
+
+    # Check all the received packets and verify that they were sent by peer2
+    XRLS=${TMPDIR}/xrls.$EXT
+    cat $RECV | python $srcdir/lookup.py --peer peer2 \
+					 --trie sent \
+					 --remove 65008 > $XRLS
+    $CALLXRL -f $XRLS
+
+    # Make sure that the peer1 connection is still established
+    coord peer1 assert established
+    coord peer2 assert established
+
+    rm -f $SENT $RECV $XRLS
+}
+
+TESTS_NOT_FIXED='test10 test11 test12 test15 test16'
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test13 test14'
 
 # Include command line
@@ -720,6 +870,7 @@ CXRL="$CALLXRL -r 10"
     ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
     ./test_peer -s peer1      = $CXRL finder://peer1/common/0.1/get_target_name
     ./test_peer -s peer2      = $CXRL finder://peer1/common/0.1/get_target_name
+    ./test_peer -s peer3      = $CXRL finder://peer1/common/0.1/get_target_name
     ./coord                   = $CXRL finder://coord/common/0.1/get_target_name
 EOF
     trap '' 0
