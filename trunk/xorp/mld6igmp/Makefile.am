@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.15 2004/01/15 19:14:15 hodson Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.16 2004/01/16 19:24:26 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -63,6 +63,8 @@ test_mld6igmp_LDADD	+= $(top_builddir)/libfeaclient/libfeaclient.a
 test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
 test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
+test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.a
+test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
 test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_mld6igmp_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.a
 
