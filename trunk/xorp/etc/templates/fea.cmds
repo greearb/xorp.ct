@@ -1,12 +1,12 @@
 show interface $(interfaces.interface.*) {
-	%command: show_interfaces;
+	%command: rtrmgr/tools/show_interfaces;
 	%module: fea;
 	%opt_parameter: brief;
 	%opt_parameter: detail;
 	%opt_parameter: extensive;
 }
 show vif $(interfaces.interface.*.vif.*) {
-	%command: /sbin/ifconfig;
+	%command: rtrmgr/tools/show_interfaces;
 	%module: fea;
 	%opt_parameter: brief;
 	%opt_parameter: detail;
