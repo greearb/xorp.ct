@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.25 2004/03/24 19:34:31 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.26 2004/04/01 19:54:06 mjh Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -187,6 +187,12 @@ public:
     //in the Fanout Table.
     const IPv4& id() const		{ return _fake_id; }
 
+    /**
+     * This is the handler that deals with originating routes.
+     *
+     * @return true
+     */
+    virtual bool originate_route_handler() const {return true;}
 private:
     bool unregister_rib();
 
