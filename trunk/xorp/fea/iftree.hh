@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.21 2004/09/15 19:27:18 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.22 2004/09/15 19:29:52 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -70,6 +70,10 @@ public:
     }
     inline bool is_marked(State st) const	{ return st == _st; }
 
+    inline void set_soft(bool en)	{ _soft = en; }
+
+    inline bool is_soft() const		{ return _soft; }
+
     /**
      * Virtual method to be implemented to flush out state associated
      * objects, ie if an object is marked CREATED or CHANGED it should be
@@ -89,6 +93,7 @@ protected:
     }
 
     State _st;
+    bool  _soft;
 };
 
 
@@ -240,6 +245,10 @@ public:
 
     inline void set_mac(const Mac& mac)	{ _mac = mac; mark(CHANGED); }
 
+    inline bool discard() const		{ return _discard; }
+
+    inline void set_discard(bool discard) { _discard = discard; mark(CHANGED); }
+
     /**
      * Get the system-specific interface flags.
      *
@@ -307,6 +316,7 @@ protected:
     const string _ifname;
     uint16_t	 _pif_index;
     bool 	 _enabled;
+    bool	 _discard;
     uint32_t 	 _mtu;
     Mac 	 _mac;
     uint32_t	 _if_flags;	// The system-specific interface flags
