@@ -342,8 +342,7 @@ sub readCxxLine
 
 		$line =~ s,/\*.*?\*/,,g;
 		$line =~ s,//.*$,,g;
-
-		if( $line =~ /^\s*#\w+/ ) {
+		if( $line =~ /^\s*#\s*\w+/ ) {
 			while( $line =~ m,\\\s*$, ) {
 				$line = <INPUT>;
 			}
