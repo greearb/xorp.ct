@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.cc,v 1.1 2004/08/31 17:47:28 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.cc,v 1.2 2004/09/03 20:52:30 bms Exp $
+
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
@@ -24,6 +26,7 @@
 
 #include <sys/socket.h>
 #include <sys/sockio.h>
+#include <sys/sysctl.h>
 
 #include <net/if.h>
 #include <netinet/in_systm.h>
@@ -35,7 +38,7 @@
 #include <netinet/tcp.h>
 
 #include "fea/firewall.hh"
-#include "fea/ipfw_fw_provider.hh"
+#include "fea/firewall_ipfw.hh"
 
 //
 // IPFW support
@@ -74,7 +77,7 @@ IpfwFwProvider::~IpfwFwProvider()
 	// XXX: Should we get rid of XORP rules on shutdown?
 
 	if (_s != -1)
-		::close(s);
+		::close(_s);
 #endif /* HAVE_FIREWALL_IPFW */
 }
 
@@ -87,9 +90,10 @@ IpfwFwProvider::get_enabled() const
 {
 #ifdef HAVE_FIREWALL_IPFW
 	uint32_t	ipfw_enabled = 0;
+	size_t		ipfw_enabled_size = sizeof(ipfw_enabled);
 
 	int	ret = sysctlbyname("net.inet.ip.fw.enable",
-	    &ipfw_enabled, sizeof(ipfw_enabled), NULL, 0);
+	    &ipfw_enabled, &ipfw_enabled_size, NULL, 0);
 
 	// If we could not retrieve the sysctl, then assume ipfw is disabled.
 	if (ret == -1)
@@ -122,72 +126,64 @@ IpfwFwProvider::set_enabled(bool enabled)
 #endif /* HAVE_FIREWALL_IPFW */
 }
 
-const string&
-IpfwFwProvider::get_provider_name() const
-{
-	return ("ipfw");
-}
-
-const string&
-IpfwFwProvider::get_provider_version() const
-{
-	return ("0.1");
-}
-
 //
 // IPv4 firewall provider interface
 //
 
 int
-IpfwFwProvider::add_rule4(FwRule* rule)
+IpfwFwProvider::add_rule4(FwRule4& rule)
 {
 #ifdef HAVE_FIREWALL_IPFW
 	// Map provider-private rule tag to an IPFW rule number.
 	// XXX: If we can't cast to our underlying derived representation,
 	// then this cast will throw an exception.
-	IpfwFwRule* prule = dynamic_cast<IpfwFwRule*>(rule);
+	IpfwFwRule4* prule = dynamic_cast<IpfwFwRule4*>(&rule);
+	UNUSED(prule);
 
 	struct ip_fw	ipfwrule;
 	memset(&ipfwrule, 0, sizeof(struct ip_fw));
 
-	if (alloc_ipfw_rule(ipfw_rule) != XORP_OK)
+	if (alloc_ipfw_rule(ipfwrule) != XORP_OK)
 		return (XORP_ERROR);
 
 	// Cache the assigned IPFW rule number in the derived FwRule.
-	prule->set_index(ipfwrule.fw_number);
+	//prule->set_index(ipfwrule.fw_number);
 
 	// Convert XORP intermediate representation to IPFW representation.
-	xorp_rule4_to_ipfw1(prule, ipfwrule);
+	xorp_rule4_to_ipfw1(rule, ipfwrule);
 
 	// It's the FwManager's responsibility to add this rule to
 	// any table it's meant to belong to; it may already have
 	// been added when we were called.
 
 	// Attempt to add the converted rule to the kernel.
-	int	i = sizeof(ipfwrule);
+	socklen_t	i = sizeof(ipfwrule);
 	int	r = ::getsockopt(_s, IPPROTO_IP, IP_FW_ADD, &ipfwrule, &i);
 
 	return (r == -1 ? XORP_ERROR : XORP_OK);
+#else
+	return (XORP_ERROR);
+#endif
 }
 
 int
-IpfwFwProvider::delete_rule4(FwRule* rule)
+IpfwFwProvider::delete_rule4(FwRule4& rule)
 {
 #ifdef HAVE_FIREWALL_IPFW
 	struct ip_fw	ipfwrule;
 	memset(&ipfwrule, 0, sizeof(ipfwrule));
 
-#if 1
+#if 0
 	// Map provider-private rule tag to an IPFW rule number.
 	// XXX: If we can't cast to our underlying derived representation,
 	// then this cast will throw an exception.
-	IpfwFwRule* prule = dynamic_cast<IpfwFwRule*>(rule);
-	ipfwrule.fw_number = prule->get_index();
+	IpfwFwRule4* prule = dynamic_cast<IpfwFwRule4*>(&rule);
+	//ipfwrule.fw_number = prule->get_index();
 #endif
 
 	// XXX: Mark as deleted. It's the FwManager's responsibility
 	// to actually remove it from the XORP table.
-	rule->mark_deleted();
+	rule.mark_deleted();
 
 #if 0
 	// XXX: Check to see if there are any rules after this one
@@ -199,47 +195,58 @@ IpfwFwProvider::delete_rule4(FwRule* rule)
 #endif
 
 	// Actually attempt to remove the rule from the kernel.
-	int	ret = ::setsockopt(s, IPPROTO_IP, IP_FW_DEL, &ipfwrule,
+	int	ret = ::setsockopt(_s, IPPROTO_IP, IP_FW_DEL, &ipfwrule,
 	    sizeof(ipfwrule));
 
 	return (ret != 0 ? XORP_ERROR : XORP_OK);
+#else
+	return (XORP_ERROR);
+#endif
 }
 
 //
 // Get number of XORP rules actually installed in system tables
 //
-int
+uint32_t
 IpfwFwProvider::get_num_xorp_rules4() const
 {
 	// XXX: I'm a bit lost right now. How do we go about doing this?
+	return (0);
 }
 
 //
 // Get total number of rules installed in system tables.
 //
-int
+uint32_t
 IpfwFwProvider::get_num_system_rules4() const
 {
 #ifdef HAVE_FIREWALL_IPFW
 	uint32_t ipfw_rulecount =
 	    IpfwFwProvider::get_ipfw_static_rule_count();
 	return (ipfw_rulecount);
+#else
+	return (0);
+#endif
 }
 
 //
 // Private helper method: retrieve static rule count from kernel.
 //
-static int
-IpfwFwProvider::get_ipfw_static_rule_count() const
+int
+IpfwFwProvider::get_ipfw_static_rule_count()
 {
 #ifdef HAVE_FIREWALL_IPFW
 	uint32_t	ipfw_rulecount = 0;
+	uint32_t	ipfw_rulecount_size = sizeof(ipfw_rulecount);
 
 	int	ret = sysctlbyname("net.inet.ip.fw.static_count",
-	    &ipfw_rulecount, sizeof(ipfw_rulecount), NULL, 0);
+	    &ipfw_rulecount, &ipfw_rulecount_size, NULL, 0);
 
 	// Return -1 on error, otherwise, return the rule count.
 	return (ret != -1 ? ipfw_rulecount : ret);
+#else
+	return (0);
+#endif
 }
 
 #ifdef HAVE_FIREWALL_IPFW
@@ -251,9 +258,11 @@ IpfwFwProvider::get_ipfw_static_rule_count() const
 // or else the result may be undefined.
 //
 int
-IpfwFwProvider::xorp_rule4_to_ipfw1(const IpfwFwRule* prule,
-    struct ip_fw& ipfwrule)
+IpfwFwProvider::xorp_rule4_to_ipfw1(FwRule4& rule,
+    struct ip_fw& ipfwrule) const
 {
+	FwRule4* prule = &rule;		// XXX!
+
 	// ifname is always specified (as for 'via' ipfw syntax).
 	// vifname is silently ignored and discarded.
 	union ip_fw_if	ifu;
@@ -263,22 +272,23 @@ IpfwFwProvider::xorp_rule4_to_ipfw1(const IpfwFwRule* prule,
 	ipfwrule.fw_flg |= (IP_FW_F_IIFNAME | IP_FW_F_OIFNAME);
 
 	// Fill out the source/destination network addresses and mask.
-	prule->src().masked_addr().copy_out(ipfwrule.fw_src.s_addr);
-	prule->src().netmask().copy_out(ipfwrule.fw_smsk.s_addr);
-	prule->dst().masked_addr().copy_out(ipfwrule.fw_dst.s_addr);
-	prule->dst().netmask().copy_out(ipfwrule.fw_dmsk.s_addr);
+	prule->src().masked_addr().copy_out(ipfwrule.fw_src);
+	prule->src().netmask().copy_out(ipfwrule.fw_smsk);
+	prule->dst().masked_addr().copy_out(ipfwrule.fw_dst);
+	prule->dst().netmask().copy_out(ipfwrule.fw_dmsk);
 
 	//
 	// Fill out the protocol field.
 	//
 	switch (prule->proto()) {
-	case FwProvider::IP_PROTO_ANY:
+	case FwRule4::IP_PROTO_ANY:
 		// IPFW uses IPPROTO_IP as a wildcard.  We use IP_PROTO_ANY.
 		ipfwrule.fw_prot = IPPROTO_IP;
 		break;
 
 	case IPPROTO_TCP:
 	case IPPROTO_UDP:
+	{
 		//
 		// Fill out the source port and destination port.
 		//
@@ -291,16 +301,19 @@ IpfwFwProvider::xorp_rule4_to_ipfw1(const IpfwFwRule* prule,
 		//
 		int	nports = 0;	// Number of ports in the array
 
-		if (prule->sport() != FwProvider::PORT_ANY) {
-			fw_uar.fw_pts[nports++] = prule->sport();
+		if (prule->sport() != FwRule4::PORT_ANY) {
+			ipfwrule.fw_uar.fw_pts[nports++] = prule->sport();
 			IP_FW_SETNSRCP(&ipfwrule, 1);
 		}
 
-		if (prule->dport() != FwProvider::PORT_ANY) {
-			fw_uar.fw_pts[nports++] = prule->dport();
+		if (prule->dport() != FwRule4::PORT_ANY) {
+			ipfwrule.fw_uar.fw_pts[nports++] = prule->dport();
 			IP_FW_SETNDSTP(&ipfwrule, 1);
 		}
-		/* FALLTHROUGH */
+
+		ipfwrule.fw_prot = prule->proto();
+		break;
+	}
 
 	default:
 		ipfwrule.fw_prot = prule->proto();
@@ -316,14 +329,14 @@ IpfwFwProvider::xorp_rule4_to_ipfw1(const IpfwFwRule* prule,
 	// 'none' in XORP means 'count' to IPFW.
 	//
 	switch (prule->action()) {
-	case ACTION_PASS:
+	case FwRule4::ACTION_PASS:
 		ipfwrule.fw_flg |= IP_FW_F_ACCEPT;
 		break;
-	case ACTION_DROP:
-		ipfwrule->fw_flg |= IP_FW_F_DENY;
+	case FwRule4::ACTION_DROP:
+		ipfwrule.fw_flg |= IP_FW_F_DENY;
 		break;
-	case ACTION_NONE:
-		ipfwrule->fw_flg |= IP_FW_F_COUNT;
+	case FwRule4::ACTION_NONE:
+		ipfwrule.fw_flg |= IP_FW_F_COUNT;
 		break;
 	default:
 		return (XORP_ERROR);
@@ -348,7 +361,7 @@ IpfwFwProvider::alloc_ipfw_rule(struct ip_fw& ipfwrule)
 	return (XORP_OK);
 }
 
-static int
+int
 IpfwFwProvider::ifname_to_ifu(const string& ifname, union ip_fw_if& ifu)
 {
 	int	pos = ifname.find_first_of("0123456789");

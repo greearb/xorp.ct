@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipf.cc,v 1.1 2004/08/31 17:47:28 bms Exp $
+// $XORP: xorp/fea/firewall_ipf.cc,v 1.2 2004/09/03 20:52:30 bms Exp $
+
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
@@ -21,9 +23,6 @@
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv6net.hh"
 #include "libxorp/ipvxnet.hh"
-
-#include "fea/fw_provider.hh"
-#include "fea/ipf_fw_provider.hh"
 
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -39,6 +38,16 @@
 #ifdef HAVE_FIREWALL_IPF
 #include <netinet/ip_compat.h>
 #include <netinet/ip_fil.h>
+#endif
+
+#include <fcntl.h>
+#include <unistd.h>
+
+#include "fea/firewall.hh"
+#include "fea/firewall_ipf.hh"
+
+#ifdef HAVE_FIREWALL_IPF
+static int xorp_rule4_to_ipf(IpfFwRule4* prule, frentry_t& ipfrule);
 #endif
 
 /***************************************************************************/
@@ -59,7 +68,7 @@ IpfFwProvider::IpfFwProvider(FirewallManager& m)
 	// Probe for IPF by attempting to open the platform's
 	// default IPF device.
 	//
-	_fd = ::open(_ipfname, O_RDWR);
+	_fd = ::open(_ipfname.c_str(), O_RDWR);
 	if (_fd == -1)
 		throw InvalidFwProvider();
 
@@ -123,24 +132,12 @@ IpfFwProvider::set_enabled(bool enabled)
 #endif // HAVE_FIREWALL_IPF
 }
 
-const string&
-IpfFwProvider::get_provider_name() const
-{
-	return ("ipf");
-}
-
-const string&
-IpfFwProvider::get_provider_version() const
-{
-	return ("0.1");
-}
-
 //
 // IPv4 firewall provider interface
 //
 
 int
-IpfFwProvider::add_rule4(FwRule& rule)
+IpfFwProvider::add_rule4(FwRule4& rule)
 {
 #ifdef HAVE_FIREWALL_IPF
 	frentry_t ipfrule;
@@ -151,7 +148,7 @@ IpfFwProvider::add_rule4(FwRule& rule)
 	// XXX: what about a managed range hack?
 
 	// Convert from intermediate representation to IPF rule format
-	xorp_rule4_to_ipf(rule, ipfrule);
+	xorp_rule4_to_ipf(dynamic_cast<IpfFwRule4*>(&rule), ipfrule);
 
 	// Add it to ipf's in-kernel list; SIOCADDFR actually wants a
 	// pointer-to-pointer-to-frentry.
@@ -166,15 +163,16 @@ IpfFwProvider::add_rule4(FwRule& rule)
 }
 
 int
-IpfFwProvider::delete_rule4(FwRule& rule)
+IpfFwProvider::delete_rule4(FwRule4& rule)
 {
 #ifdef HAVE_FIREWALL_IPF
 	frentry_t ipfrule;
 	memset(&ipfrule, 0, sizeof(ipfrule));
 
 	// XXX ... what does ipf expect here?
+	UNUSED(rule);
 
-	if (::ioctl(_fd, SIOCDELFR, &pipfrule) == -1)
+	if (::ioctl(_fd, SIOCDELFR, &ipfrule) == -1)
 		return (XORP_ERROR);
 
 	return (XORP_OK);
@@ -183,33 +181,13 @@ IpfFwProvider::delete_rule4(FwRule& rule)
 #endif // HAVE_FIREWALL_IPF
 }
 
-//
-// Get number of XORP rules actually installed in system tables
-//
-int
-IpfFwProvider::get_num_xorp_rules4() const
-{
-	// XXX: I'm a bit lost right now. How do we go about doing this?
-	return (0);
-}
-
-//
-// Get total number of rules installed in system tables.
-//
-int
-IpfFwProvider::get_num_system_rules4() const
-{
-	// Don't immediately see a way of doing this w/o retrieving
-	// entire list.
-}
-
 /***************************************************************************/
 
 #ifdef HAVE_FIREWALL_IPF
 
 // Assume ipfrule has been zeroed first (or else results are undefined)
 static int
-IpfFwProvider::xorp_rule4_to_ipf(IpfFwRule* prule, frentry_t& ipfrule)
+xorp_rule4_to_ipf(IpfFwRule4* prule, frentry_t& ipfrule)
 {
 	// Match IPv4 only.
 	ipfrule.fr_ip.fi_v = 4;
@@ -217,7 +195,7 @@ IpfFwProvider::xorp_rule4_to_ipf(IpfFwRule* prule, frentry_t& ipfrule)
 
 	// ifname is copied, vifname is discarded.
 	// XXX: is strlcpy() available in the build environment?
-	(void)strlcpy(ipfrule.fr_ifname, prule->ifname().c_str(), IFNAMSIZ);
+	(void)::strlcpy(ipfrule.fr_ifname, prule->ifname().c_str(), IFNAMSIZ);
 
 	// XXX: ipf *requires* that a rule be tied to *either* the input
 	// or the output side of an interface. Therefore in order to
@@ -227,46 +205,46 @@ IpfFwProvider::xorp_rule4_to_ipf(IpfFwRule* prule, frentry_t& ipfrule)
 	ipfrule.fr_flags |= FR_INQUE;
 
 	// Fill out the source/destination network addresses and mask.
-	prule->src().masked_addr().copy_out(ipfrule.fr_ip.fi_saddr);
-	prule->src().netmask().copy_out(ipfrule.fr_mip.fi_saddr);
-	prule->dst().masked_addr().copy_out(ipfrule.fr_ip.fi_daddr);
-	prule->dst().netmask().copy_out(ipfrule.fr_mip.fi_daddr);
+	prule->src().masked_addr().copy_out(ipfrule.fr_ip.fi_src.in4);
+	prule->src().netmask().copy_out(ipfrule.fr_mip.fi_src.in4);
+	prule->dst().masked_addr().copy_out(ipfrule.fr_ip.fi_dst.in4);
+	prule->dst().netmask().copy_out(ipfrule.fr_mip.fi_dst.in4);
 
 	// Protocol. Wildcard processing is done by masking.
-	if (prule.proto() == FwProvider::IP_PROTO_ANY) {
+	if (prule->proto() == FwRule4::IP_PROTO_ANY) {
 		ipfrule.fr_proto = 0x0;
 		ipfrule.fr_mip.fi_p = 0x0;	// Wildcard: mask off all bits
 	} else {
-		ipfrule.fr_proto = prule.proto();
+		ipfrule.fr_proto = prule->proto();
 		ipfrule.fr_mip.fi_p = 0xFF;	// Match proto field exactly
 	}
 
 	// Port.
-	if (prule.proto() == IPPROTO_TCP || prule.proto() == IPPROTO_UDP) {
-		if (prule.sport() == FwProvider::PORT_ANY) {
-			ipfrule.fr_scomp = FR_NONE;
+	if (prule->proto() == IPPROTO_TCP || prule->proto() == IPPROTO_UDP) {
+		if (prule->sport() == FwRule4::PORT_ANY) {
+			ipfrule.fr_scmp = FR_NONE;
 		} else {
-			ipfrule.fr_scomp = FR_EQUAL;
-			ipfrule.fr_sport = prule.sport();
+			ipfrule.fr_scmp = FR_EQUAL;
+			ipfrule.fr_sport = prule->sport();
 		}
 
-		if (prule.dport() == FwProvider::PORT_ANY) {
-			ipfrule.fr_dcomp = FR_NONE;
+		if (prule->dport() == FwRule4::PORT_ANY) {
+			ipfrule.fr_dcmp = FR_NONE;
 		} else {
-			ipfrule.fr_dcomp = FR_EQUAL;
-			ipfrule.fr_dport = prule.dport();
+			ipfrule.fr_dcmp = FR_EQUAL;
+			ipfrule.fr_dport = prule->dport();
 		}
 	}
 
 	// Action.
 	switch (prule->action()) {
-	case ACTION_PASS:
+	case FwRule4::ACTION_PASS:
 		ipfrule.fr_flags |= FR_PASS;
 		break;
-	case ACTION_DROP:
+	case FwRule4::ACTION_DROP:
 		ipfrule.fr_flags |= FR_BLOCK;
 		break;
-	case ACTION_NONE:
+	case FwRule4::ACTION_NONE:
 		ipfrule.fr_flags |= FR_LOG;
 		break;
 	default:
