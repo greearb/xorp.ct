@@ -12,8 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.48 2004/06/10 22:41:51 hodson Exp $"
-
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.50 2004/08/12 07:16:43 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -507,8 +506,8 @@ ConfigTreeNode::find_all_modules(set<string>& all_modules) const
     }
 }
 
-const ConfigTreeNode*
-ConfigTreeNode::find_config_module(const string& module_name) const
+ConfigTreeNode*
+ConfigTreeNode::find_config_module(const string& module_name)
 {
     if (module_name.empty())
 	return (NULL);
@@ -522,7 +521,7 @@ ConfigTreeNode::find_config_module(const string& module_name) const
     // Check all children nodes
     list<ConfigTreeNode*>::const_iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	const ConfigTreeNode* ctn = (*iter)->find_config_module(module_name);
+	ConfigTreeNode* ctn = (*iter)->find_config_module(module_name);
 	if (ctn != NULL)
 	    return (ctn);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.31 2004/05/28 22:27:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.32 2004/06/10 22:41:52 hodson Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -87,8 +87,10 @@ child_handler(int x)
 	}
 	module_pids.erase(pid_iter);
     } else if (WIFSIGNALED(child_wait_status)) {
-	debug_msg("process was killed with signal %d\n",
-	       WTERMSIG(child_wait_status));
+	int sig = WTERMSIG(child_wait_status);
+
+	debug_msg("process was killed with signal %d\n", sig);
+
 	//
 	// Set the status for all appropriate modules, and at the same
 	// time delete the entries from the "module_paths" multimap.
@@ -163,7 +165,7 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
 	return;
     }
 
-    XLOG_INFO("Terminating module: %s\n", _name.c_str());
+    XLOG_INFO("Terminating module: %s", _name.c_str());
 
     //
     // Find whether this is the last module running within this process
@@ -209,8 +211,7 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
     //
     // We need to kill the process
     //
-    XLOG_INFO("Killing module: %s (pid = %d)\n",
-	      _name.c_str(), _pid);
+    XLOG_INFO("Killing module: %s (pid = %d)", _name.c_str(), _pid);
     new_status(MODULE_SHUTTING_DOWN);
     kill(_pid, SIGTERM);
 
@@ -284,8 +285,7 @@ Module::set_execution_path(const string& path)
 	// Add the XORP root path to the front
 	_path = _mmgr.xorp_root_dir() + "/" + path;
     }
-    XLOG_TRACE(_verbose, "New module: %s (%s)\n",
-	       _name.c_str(), _path.c_str());
+    XLOG_TRACE(_verbose, "New module: %s (%s)", _name.c_str(), _path.c_str());
 
     if (_path[0] != '/') {
 	// we're going to call glob, but don't want to allow wildcard expansion
@@ -353,7 +353,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 {
     bool is_process_running = false;
 
-    XLOG_INFO("Running module: %s (%s)\n", _name.c_str(), _path.c_str());
+    XLOG_INFO("Running module: %s (%s)", _name.c_str(), _path.c_str());
 
     _do_exec = do_exec;
 
@@ -398,7 +398,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 	    //set userid as required.
 	    if (_userid != NO_SETUID_ON_EXEC) {
 		if (setuid(_userid) != 0) {
-		    XLOG_ERROR("Failed to setuid(%d) on exec\n", _userid);
+		    XLOG_ERROR("Failed to setuid(%d) on exec", _userid);
 		    exit(1);
 		}
 	    }
@@ -407,7 +407,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 	    setsid();
 	    if (_argv.empty()) {
 		if (execl(_expath.c_str(), _expath.c_str(), NULL) < 0) {
-		    XLOG_ERROR("Execution of %s failed\n", _expath.c_str());
+		    XLOG_ERROR("Execution of %s failed", _expath.c_str());
 		    exit(1);
 		}
 	    } else {
@@ -420,7 +420,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 		argv[i] = NULL;
 		
 		if (execv(_expath.c_str(),const_cast<char*const*>(argv)) < 0) {
-		    XLOG_ERROR("Execution of %s failed\n", _expath.c_str());
+		    XLOG_ERROR("Execution of %s failed", _expath.c_str());
 		    exit(1);
 		}
 	    }
@@ -465,7 +465,7 @@ Module::module_run_done(bool success)
 void
 Module::set_stalled()
 {
-    XLOG_INFO("Module stalled: %s\n", _name.c_str());
+    XLOG_INFO("Module stalled: %s", _name.c_str());
 
     new_status(MODULE_STALLED);
 }
@@ -473,7 +473,7 @@ Module::set_stalled()
 void
 Module::normal_exit()
 {
-    XLOG_INFO("Module normal exit: %s\n", _name.c_str());
+    XLOG_INFO("Module normal exit: %s", _name.c_str());
 
     new_status(MODULE_NOT_STARTED);
     _pid = 0;
@@ -482,7 +482,7 @@ Module::normal_exit()
 void
 Module::abnormal_exit(int child_wait_status)
 {
-    XLOG_INFO("Module abnormal exit: %s status:%d\n",
+    XLOG_INFO("Module abnormal exit: %s status:%d",
 	      _name.c_str(), child_wait_status);
 
     new_status(MODULE_FAILED);
@@ -494,12 +494,12 @@ Module::killed()
 {
     if (_status == MODULE_SHUTTING_DOWN) {
 	// It may have been shutting down already, in which case this is OK.
-	XLOG_INFO("Module killed during shutdown: %s\n",
+	XLOG_INFO("Module killed during shutdown: %s",
 		  _name.c_str());
 	new_status(MODULE_NOT_STARTED);
     } else {
 	// We don't know why it was killed.
-	XLOG_INFO("Module abnormally killed: %s\n", _name.c_str());
+	XLOG_INFO("Module abnormally killed: %s", _name.c_str());
 	new_status(MODULE_FAILED);
     }
     _pid = 0;
@@ -556,7 +556,7 @@ ModuleManager::new_module(const string& module_name, const string& path)
 	    return false;
 	return true;
     } else {
-	XLOG_TRACE(_verbose, "Module %s already exists\n",
+	XLOG_TRACE(_verbose, "Module %s already exists",
 		   module_name.c_str());
 	return true;
     }
