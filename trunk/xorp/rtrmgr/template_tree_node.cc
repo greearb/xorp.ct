@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.30 2004/12/12 18:53:16 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.31 2005/01/10 02:58:18 mjh Exp $"
 
 
 #include <glob.h>
@@ -44,7 +44,8 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
       _varname(varname),
       _has_default(false),
       _is_tag(false),
-      _verbose(template_tree.verbose())
+      _verbose(template_tree.verbose()),
+      _is_deprecated(false)
 {
     if (_parent != NULL) {
 	_parent->add_child(this);
@@ -103,6 +104,8 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	}
     } else if (cmd == "%help") {
 	// Nothing to do - the work is done by add_action
+    } else if (cmd == "%deprecated") {
+	// Nothing to do - the work is done by add_action
     } else if ((cmd == "%create")
 	       || (cmd == "%activate")
 	       || (cmd == "%update")
@@ -125,7 +128,7 @@ TemplateTreeNode::add_cmd(const string& cmd)
     } else {
 	string err = "Invalid command \"" + cmd + "\"\n";
 	err += "Valid commands are %create, %delete, %set, %unset, %get, ";
-	err += "%default, %modinfo, %activate, %update, %allow, %allow-range, %mandatory\n";
+	err += "%default, %modinfo, %activate, %update, %allow, %allow-range, %mandatory, %deprecated\n";
 	xorp_throw(ParseError, err);
     }
 }
@@ -169,7 +172,7 @@ TemplateTreeNode::add_action(const string& cmd,
 	if (action_list.size() == 2) {
 	    list<string>::const_iterator li = action_list.begin();
 	    li++;
-	    //trim off quotes if present
+	    // Trim off quotes if present
 	    string help = unquote(*li);
 	    if (action_list.front() == "short") {
 		_help = help;
@@ -182,8 +185,23 @@ TemplateTreeNode::add_action(const string& cmd,
 				    + "or \"long\" expectted").c_str());
 	    }
 	} else {
-	    //XXX really should say why it's bad.
+	    // XXX really should say why it's bad.
 	    XLOG_WARNING("Bad help specification in template file ignored\n");
+	}
+    } else if (cmd == "%deprecated") {
+	if (action_list.size() == 1) {
+	    list<string>::const_iterator li = action_list.begin();
+	    // Trim off quotes if present
+	    string reason = unquote(*li);
+	    _is_deprecated = true;
+	    _deprecated_reason = reason;
+	    if ((_parent != NULL) && (_parent->is_tag())) {
+		_parent->set_deprecated(true);
+		_parent->set_deprecated_reason(reason);
+	    }
+	} else {
+	    // XXX really should say why it's bad.
+	    XLOG_WARNING("Bad %%deprecated specification in template file ignored\n");
 	}
     } else if (cmd == "%mandatory") {
 	// Add all new mandatory variables
@@ -577,6 +595,10 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 				     size_t depth) const
 {
     bool instantiated = false;
+
+    // XXX: ignore deprecated subtrees
+    if (is_deprecated())
+	    return false;
 
     debug_msg("TTN:check_command_tree %s type %s depth %u\n",
 	      _segname.c_str(), typestr().c_str(), (uint32_t)depth);

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.7 2004/12/22 23:34:05 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.8 2005/01/10 02:58:18 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -113,6 +113,12 @@ MasterConfigTreeNode::command_status_callback(const Command* cmd, bool success)
 void
 MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 {
+    if (_template_tree_node != NULL) {
+	// XXX: ignore deprecated subtrees
+	if (_template_tree_node->is_deprecated())
+	    return;
+    }
+
     if ((_template_tree_node != NULL)
 	&& (!_existence_committed || !_value_committed)) {
 	const BaseCommand *base_cmd = NULL;
@@ -179,6 +185,12 @@ MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 void
 MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
 {
+    if (_template_tree_node != NULL) {
+	// XXX: ignore deprecated subtrees
+	if (_template_tree_node->is_deprecated())
+	    return;
+    }
+
     if ((_template_tree_node != NULL) && (!_deleted)) {
 	const BaseCommand *base_cmd;
 	const Command *cmd;
@@ -226,6 +238,12 @@ MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
 void
 MasterConfigTreeNode::find_all_modules(set<string>& all_modules) const
 {
+    if (_template_tree_node != NULL) {
+	// XXX: ignore deprecated subtrees
+	if (_template_tree_node->is_deprecated())
+	    return;
+    }
+
     if (_template_tree_node != NULL) {
 	const BaseCommand *base_cmd = NULL;
 	const Command *cmd = NULL;
@@ -317,6 +335,12 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	debug_msg("_existence_committed == false\n");
     if (_value_committed == false)
 	debug_msg("_value_committed == false\n");
+
+    if (_template_tree_node != NULL) {
+	// XXX: ignore deprecated subtrees
+	if (_template_tree_node->is_deprecated())
+	    return success;
+    }
 
     // Don't bother to recurse if no child node has any changes to commit.
     // Calling this every time is rather inefficient, but for the

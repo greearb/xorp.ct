@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.15 2004/12/11 21:29:58 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.16 2004/12/18 02:08:12 mjh Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -103,12 +103,18 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 
     debug_msg("build_command_tree depth=%d\n", depth);
 
+    if (_template_tree_node != NULL) {
+	// XXX: ignore deprecated subtrees
+	if (_template_tree_node->is_deprecated())
+	    return false;
+    }
+
     if (_deleted) {
 	debug_msg("Node %s is deleted\n", _path.c_str());
 	return false;
     }
 
-    if (depth > 0) {	
+    if (depth > 0) {
 	XLOG_ASSERT(_template_tree_node != NULL);
 	cmd_tree.push(_segname);
 	if (include_intermediates 
@@ -175,7 +181,7 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
     // If we haven't already added the children of the template node,
     // we need to consider whether they can add to the command tree too.
     //
-    if ((_template_tree_node != NULL)  && include_templates) {
+    if ((_template_tree_node != NULL) && include_templates) {
 	list<TemplateTreeNode*>::const_iterator ttn_iter;
 	for (ttn_iter = _template_tree_node->children().begin();
 	     ttn_iter != _template_tree_node->children().end();

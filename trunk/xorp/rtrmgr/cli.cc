@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.59 2004/12/18 02:08:11 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.60 2004/12/30 11:13:08 mjh Exp $"
 
 #include <pwd.h>
 
@@ -1012,6 +1012,10 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 
     list<TemplateTreeNode*>::const_iterator tti;
     for (tti = ttn->children().begin(); tti != ttn->children().end(); ++tti) {
+	// XXX: ignore deprecated subtrees
+	 if ((*tti)->is_deprecated())
+	     continue;
+
 	// We don't need to consider this child if it's already added
 	if (existing_children.find((*tti)->segname())
 	    != existing_children.end()) {
@@ -1273,6 +1277,10 @@ RouterCLI::add_text_entry_commands(CliCommand* com0)
     for (tti = ttn->children().begin(); tti != ttn->children().end(); ++tti) {
 	 CliCommand* com;
 	 string subpath;
+
+	// XXX: ignore deprecated subtrees
+	 if ((*tti)->is_deprecated())
+	     continue;
 
 	 if (pathstr().empty())
 	     subpath = (*tti)->segname();
@@ -1738,6 +1746,9 @@ RouterCLI::text_entry_func(const string& ,
 	    for (iter = tag_ttn->children().begin();
 		 iter != tag_ttn->children().end();
 		 ++iter) {
+		// XXX: ignore deprecated subtrees
+		if ((*iter)->is_deprecated())
+		    continue;
 		if ((*iter)->type_match(argv[0])) {
 		    data_ttn = (*iter);
 		    break;
@@ -2055,6 +2066,9 @@ RouterCLI::text_entry_func(const string& ,
 		for (tti = ttn->children().begin();
 		     tti != ttn->children().end();
 		     ++tti) {
+		    // XXX: ignore deprecated subtrees
+		    if ((*tti)->is_deprecated())
+			continue;
 		    if ((*tti)->type_match(value)) {
 			data_ttn = (*tti);
 			break;
@@ -2274,10 +2288,13 @@ RouterCLI::text_entry_children_func(const string& path,
     const TemplateTreeNode *ttn = template_tree()->find_node(path_segments);
     is_executable = true;
     can_pipe = false;
-    if (ttn != NULL) {
+    if (ttn != NULL && (! ttn->is_deprecated())) {
 	list<TemplateTreeNode*>::const_iterator tti;
 	for (tti = ttn->children().begin(); tti != ttn->children().end(); 
 	     ++tti) {
+	    // XXX: ignore deprecated subtrees
+	    if ((*tti)->is_deprecated())
+		continue;
 	    string help;
 	    help = (*tti)->help();
 	    string subpath;
@@ -2460,7 +2477,6 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
     //
     // We don't execute commands until a commit is received
     //
-    // string result = config_tree()->execute_node_command(ctn, "%set");
     _changes_made = true;
 
     string result = "OK";

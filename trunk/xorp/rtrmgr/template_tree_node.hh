@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.19 2004/12/11 21:29:59 mjh Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.20 2005/01/10 02:58:18 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -111,6 +111,11 @@ public:
 
     int child_number() const { return _child_number;}
 
+    bool is_deprecated() const { return _is_deprecated; }
+    void set_deprecated(bool v) { _is_deprecated = v; }
+    const string& deprecated_reason() const { return _deprecated_reason; }
+    void set_deprecated_reason(const string& v) { _deprecated_reason = v; }
+
 protected:
     void add_child(TemplateTreeNode* child);
 
@@ -154,6 +159,8 @@ private:
     int _child_number;
 
     bool		_verbose;	 // Set to true if output is verbose
+    bool		_is_deprecated;	// True if node's usage is deprecated
+    string		_deprecated_reason; // The reason for deprecation
 };
 
 class UIntTemplate : public TemplateTreeNode {

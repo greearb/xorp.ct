@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.57 2004/12/18 02:08:11 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.58 2005/01/10 02:58:18 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -374,6 +374,18 @@ bool
 ConfigTreeNode::check_config_tree(string& result) const
 {
     list<ConfigTreeNode *>::const_iterator iter;
+
+    //
+    // Check that the node is not deprecated
+    //
+    if (_template_tree_node != NULL) {
+	if (_template_tree_node->is_deprecated()) {
+	    result = c_format("Node \"%s\" is deprecated: %s\n",
+			      _path.c_str(),
+			      _template_tree_node->deprecated_reason().c_str());
+	    return false;
+	}
+    }
 
     //
     // Check that all mandatory child nodes are configured in place
