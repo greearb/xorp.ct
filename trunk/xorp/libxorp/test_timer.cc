@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.7 2004/06/10 22:41:21 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.8 2004/10/08 18:49:15 pavlin Exp $"
 
 //
 // demo program to test timers and event loops (and show
@@ -132,7 +132,7 @@ alarm_signalhandler(int sig)
 
 //
 // Test that recursively generating callbacks after time zero
-// doesn't block the execution inside the internal timer look forever.
+// doesn't block the execution inside the internal timer loop forever.
 //
 static void
 test_zero_timer(EventLoop& eventloop)
