@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.4 2002/12/19 22:28:44 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.5 2003/01/24 01:19:30 atanu Exp $
 #
 
 #
@@ -12,12 +12,13 @@
 #
 # Preconditons
 # 1) Run a finder process
-# 2) Run xorp "../rib/rib"
-# 3) Run xorp "../bgp"
-# 4) Run "./test_peer -s peer1"
-# 5) Run "./test_peer -s peer2"
-# 6) Run "./test_peer -s peer3"
-# 7) Run "./coord"
+# 2) Run "../fea/fea_dummy"
+# 3) Run xorp "../rib/rib"
+# 4) Run xorp "../bgp"
+# 5) Run "./test_peer -s peer1"
+# 6) Run "./test_peer -s peer2"
+# 7) Run "./test_peer -s peer3"
+# 8) Run "./coord"
 #
 # Peers 1 and 2 are E-BGP Peer 3 is I-BGP
 #
@@ -590,6 +591,7 @@ then
 CXRL="$CALLXRL -r 10"
    ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ../../libxipc/finder
+    ../../fea/fea_dummy   = $CXRL finder://fea/common/0.1/get_target_name
     ../../rib/rib         = $CXRL finder://rib/common/0.1/get_target_name
     ../bgp                = $CXRL finder://bgp/common/0.1/get_target_name
     ./test_peer -s peer1  = $CXRL finder://peer1/common/0.1/get_target_name
