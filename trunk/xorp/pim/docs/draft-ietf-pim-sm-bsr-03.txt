@@ -1,10 +1,10 @@
 Internet Engineering Task Force                                   PIM WG
 INTERNET-DRAFT                                          Bill Fenner/AT&T
-draft-ietf-pim-sm-bsr-01.txt                          Mark Handley/ACIRI
+draft-ietf-pim-sm-bsr-03.txt                           Mark Handley/ICIR
                                                   Roger Kermode/Motorola
                                                   David Thaler/Microsoft
-                                                            20 July 2001
-                                                   Expires: January 2002
+                                                        25 February 2003
+                                                    Expires: August 2003
 
 
           Bootstrap Router (BSR) Mechanism for PIM Sparse Mode
@@ -42,17 +42,16 @@ pim@catarina.usc.edu.
      for Protocol Independent Multicast - Sparse Mode (PIM-SM).
      BSR is one way that a PIM-SM router can learn the set of
      group-to-RP mappings required in order to function.  The
-     mechanism is dynamic, largely self-configuring, and robust to
 
 
 
 Fenner/Handley/Kermode/Thaler                                   [Page 1]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
+     mechanism is dynamic, largely self-configuring, and robust to
      router failure.
-
 
 
 
@@ -104,48 +103,48 @@ INTERNET-DRAFT            Expires: January 2002                July 2001
 
 Fenner/Handley/Kermode/Thaler                                   [Page 2]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
                            Table of Contents
 
 
      1. Introduction. . . . . . . . . . . . . . . . . . . . . .   4
-      1.1. Overview of Bootstrap and RP Discovery for
-      Global Scope. . . . . . . . . . . . . . . . . . . . . . .   4
-      1.2. Administratively Scoped Multicast and BSR. . . . . .   5
-     2. BSR State and Timers. . . . . . . . . . . . . . . . . .   6
+      1.1. General Overview and Background. . . . . . . . . . .   4
+      1.2. Overview of Bootstrap and RP Discovery for
+      Global Scope. . . . . . . . . . . . . . . . . . . . . . .   7
+      1.3. Administratively Scoped Multicast and BSR. . . . . .   7
+     2. BSR State and Timers. . . . . . . . . . . . . . . . . .   9
      3. Bootstrap Router Election and RP-Set
-     Distribution . . . . . . . . . . . . . . . . . . . . . . .   8
-      3.1. Sending Candidate-RP-Advertisements. . . . . . . . .  15
-      3.2. Creating the RP-Set at the BSR . . . . . . . . . . .  16
-      3.3. Forwarding Bootstrap Messages. . . . . . . . . . . .  17
-      3.4. Receiving and Using the RP-Set . . . . . . . . . . .  17
-     4. Message Formats . . . . . . . . . . . . . . . . . . . .  17
-      4.1. Bootstrap Message Format . . . . . . . . . . . . . .  19
-       4.1.1. Semantic Fragmentation of BSMs. . . . . . . . . .  23
-      4.2. Candidate-RP-Advertisement Format. . . . . . . . . .  25
-     5. Default Values for Timers . . . . . . . . . . . . . . .  26
-     6. Security Considerations . . . . . . . . . . . . . . . .  27
-      6.1. Possible Threats . . . . . . . . . . . . . . . . . .  27
-      6.2. Limiting Third-Party DoS Attacks . . . . . . . . . .  28
-      6.3. BS Message Security. . . . . . . . . . . . . . . . .  28
-      6.4. C-RP-Advertisement Security. . . . . . . . . . . . .  30
-      6.5. Denial of Service using IPsec. . . . . . . . . . . .  30
-     7. Authors' Addresses. . . . . . . . . . . . . . . . . . .  31
-     8. References. . . . . . . . . . . . . . . . . . . . . . .  32
-     9. Acknowledgments . . . . . . . . . . . . . . . . . . . .  32
+     Distribution . . . . . . . . . . . . . . . . . . . . . . .  10
+      3.1. Sending Candidate-RP-Advertisements. . . . . . . . .  18
+      3.2. Creating the RP-Set at the BSR . . . . . . . . . . .  19
+      3.3. Forwarding Bootstrap Messages. . . . . . . . . . . .  20
+      3.4. Receiving and Using the RP-Set . . . . . . . . . . .  21
+     4. Message Formats . . . . . . . . . . . . . . . . . . . .  21
+      4.1. Bootstrap Message Format . . . . . . . . . . . . . .  23
+       4.1.1. Semantic Fragmentation of BSMs. . . . . . . . . .  26
+      4.2. Candidate-RP-Advertisement Format. . . . . . . . . .  28
+     5. Default Values for Timers . . . . . . . . . . . . . . .  29
+     6. Security Considerations . . . . . . . . . . . . . . . .  30
+      6.1. Possible Threats . . . . . . . . . . . . . . . . . .  30
+      6.2. Limiting Third-Party DoS Attacks . . . . . . . . . .  31
+      6.3. BS Message Security. . . . . . . . . . . . . . . . .  31
+      6.4. C-RP-Advertisement Security. . . . . . . . . . . . .  33
+      6.5. Denial of Service using IPsec. . . . . . . . . . . .  33
+     7. Authors' Addresses. . . . . . . . . . . . . . . . . . .  34
+     8. References. . . . . . . . . . . . . . . . . . . . . . .  35
+     9. Acknowledgments . . . . . . . . . . . . . . . . . . . .  35
 
 
 
+                            List of Figures
 
 
-
-
-
-
-
-
+     Figure 1. Per-Scope-Zone State-machine for a candi-
+     date BSR . . . . . . . . . . . . . . . . . . . . . . . . .  10
+     Figure 2. Per-Scope-Zone State-machine for a router
+     not configured as C-BSR. . . . . . . . . . . . . . . . . .  12
 
 
 
@@ -160,13 +159,14 @@ INTERNET-DRAFT            Expires: January 2002                July 2001
 
 Fenner/Handley/Kermode/Thaler                                   [Page 3]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 1.  Introduction
 
 Note: this document assumes familiarity with the workings of Protocol
-Independent Multicast - Sparse Mode, as defined in [1].
+Independent Multicast - Sparse Mode, as defined in [3], and with
+Administratively Scoped Multicast, as described in [6].
 
 For correct operation, every PIM Sparse-mode router within a PIM domain
 must be able to map a particular global-scope multicast group address to
@@ -194,9 +194,143 @@ This document provides an updated specification of the BSR mechanism
 from RFC 2362, and also extends it to cope with administratively scoped
 region boundaries.
 
+1.1.  General Overview and Background
+
+Every PIM-SM multicast group needs to be associated with the IP address
+of a Rendezvous-Point (RP).  When a new multicast sender starts sending,
+its local Designated Router (DR) will encapsulate these data packets in
+a PIM Register message and send them to the RP for that multicast group.
+When a new multicast receiver joins, its local DR will send a PIM Join
+message towards the RP for that multicast group.  When any PIM router
+sends a (*,G) Join message, it needs to know which is the next how
+router towards the RP for G to send the message to.  Also when a PIM
+router is forwarding data packets using (*,G) state, it needs to know
+which is the correct incoming interface for packets destined for G, as
+it needs to reject any packets that arrive on other interfaces.  Thus it
+is important for all the PIM routers in a domain to be able to map each
+multicast group to the correct RP address.
 
 
-1.1.  Overview of Bootstrap and RP Discovery for Global Scope
+
+
+Fenner/Handley/Kermode/Thaler                     Section 1.1.  [Page 4]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
+There are a number of ways that group-to-RP mapping can be done; the
+simplest solution is for all the routers in the domain to be configured
+with the same information.  However, static configuration generally
+doesn't scale well, and also does not dynamically adapt to route around
+router or link failures.  The mechanism specified in this document is
+known as the PIM BootStrap Router mechanism, or BSR for short, and
+provides a dynamic, adaptive mechanism to distribute group-to-RP mapping
+information rapidly throughout a domain.
+
+Before we discuss the BSR mechanism itself, we should understand the
+rules a PIM-SM router will apply to the mapping information.
+Irrespective of how it obtains the mapping information, a PIM-SM router
+will have a mapping table containing multiple entries, each of which has
+the following form:
+
+o Multicast group range, expressed as an address and prefix length.
+
+o RP Priority.
+
+o IP address of RP.
+
+In general, these mapping entries may overlap in arbitrary ways; a
+particular multicast group may be covered by multiple mapping entries.
+When this is the case, the router chooses only one of the entries by
+applying a deterministic algorithm (specified in the PIM-SM protocol
+specification) so that all routers in the domain make the same choice of
+entry and hence apply the same group-to-RP mapping.
+
+The BSR mechanism provides a way in which viable group-to-RP mappings
+can be created and distributed to all the PIM-SM routers in a domain.
+It is adaptive, in that if an RP becomes unreachable, this will be
+detected and the mapping tables will be modified so that the unreachable
+RP is no longer used, and the new tables will be rapidly distributed
+throughout the domain.
+
+The general idea behind the BSR-mechanism is that some of the PIM
+routers within a PIM domain are configured to be potential RPs for the
+domain.  These are known as candidate-RPs (C-RPs).  A subset of the C-
+RPs will eventually be used as the actual RPs for the domain.  In
+addition, some of the PIM routers in the domain are configured as
+candidate bootstrap routers (C-BSRs).  One of these C-BSRs will be
+elected to serve as the bootstrap router (BSR) for the domain, and all
+the PIM routers in the domain will learn the result of this election
+through Bootstrap messages.  The C-RPs will them report their candidacy
+to the elected BSR, which will choose a subset of the C-RPs to form the
+actual set of RPs to the used.  This RP-Set will then be distributed out
+to all the routers in the domain through Bootstrap messages.
+
+
+
+
+Fenner/Handley/Kermode/Thaler                     Section 1.1.  [Page 5]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
+The mechanism is complicated slightly by the presence of
+administratively-scoped multicast regions within the PIM-SM domain.  An
+admin-scope region is a convex connected set of PIM routers surrounded
+by an admin-scope boundary.  The boundary specifies a range of multicast
+addresses that will not be forwarded into or out of the scoped region.
+This complicates BSR because we do not want a PIM router within the
+scoped region to use an RP outside the scoped region (or vice-versa).
+Thus we need to modify the basic mechanism to ensure that this doesn't
+happen - this is done by electing a BSR for every admin-scope region
+within a PIM domain, and also a global BSR for the whole PIM domain.  C-
+RPs typically register multiple times; once to the BSR of every admin
+scope zone the C-RP is in.  For the remainder of this overview we will
+ignore admin-scope regions, and concentrate on the global BSR and its
+role.  Within each scope zone, the BSR for that zone acts in a similar
+manner to how the global BSR acts for the whole domain.
+
+There are four basic phases to the BSR mechanism (although in practice
+all phases may by occurring simultaneously):
+
+1.   BSR election.  Each Candidate-BSR originates bootstrap messages
+     (BSMs).  Every BSM contains a BSR priority field.  Routers within
+     the domain flood the BSMs throughout the domain.  A C-BSR that
+     hears about a higher-priority C-BSR than itself then suppresses its
+     sending of further BSMs for some period of time.  The single
+     remaining C-BSR becomes the elected BSR, and its BSMs inform all
+     the other routers in the domain that it is the elected BSR.
+
+2.   C-RP advertisement.  Each Candidate-RP within a domain sends
+     periodic Candidate-RP-Advertisement (C-RP-Adv) messages to the
+     elected BSR.  In this way, the BSR learns about possible RPs that
+     are currently up and reachable.
+
+3.   C-RP-Set Formation.  The BSR selects a subset of the C-RPs that it
+     has heard C-RP-Adv messages from to form the RP-Set.  In general it
+     should do this in such a way that the RP-Set is neither too large
+     to inform all the routers in the domain about, nor too small so
+     that load is overly concentrated on some RPs.  It should also
+     attempt to produce an RP-Set that does not change frequently.
+
+4.   RP-Set Flooding.  In future bootstrap messages, the BSR includes
+     the RP-Set information.  As bootstrap messages are flooded rapidly
+     through the domain, this ensures that the RP-Set rapidly reaches
+     all the routers in the domain.  BSMs are originated periodically to
+     ensure consistency after failure restoration.
+
+In the following sections we discuss more details about BSR for global
+scope and for admin scoping, before specifying the protocol starting in
+section 2.
+
+
+
+Fenner/Handley/Kermode/Thaler                     Section 1.1.  [Page 6]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
+1.2.  Overview of Bootstrap and RP Discovery for Global Scope
 
 A small set of routers from a domain are configured as candidate
 bootstrap routers (C-BSRs) and, through a simple election mechanism, a
@@ -211,23 +345,15 @@ the group prefix(es) for which the candidacy is advertised. The BSR then
 includes a set of these Candidate-RPs (the RP-Set), along with their
 corresponding group prefixes, in Bootstrap messages it periodically
 originates.  Bootstrap messages are distributed hop-by-hop throughout
-
-
-
-Fenner/Handley/Kermode/Thaler                     Section 1.1.  [Page 4]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
 the domain.
 
 All the PIM routers in the domain receive and store Bootstrap messages
 originated by the BSR.  When a DR receives an indication of local
-membership (typically from IGMP [3] or MLD [4]) or a data packet from a
+membership (typically from IGMP [4] or MLD [1]) or a data packet from a
 directly connected host, for a group for which it has no forwarding
 state, the DR uses a hash function to map the group address to one of
 the C-RPs from the RP-Set whose group-prefix includes the group (see
-[1]). The DR then sends a Join message towards that RP if the local host
+[3]). The DR then sends a Join message towards that RP if the local host
 joined the group, or it Register-encapsulates and unicasts the data
 packet to the RP if the local host sent a packet to the group.
 
@@ -248,10 +374,18 @@ time will be on the order of the region's round-trip time and the
 bootstrap router timeout value.
 
 
-1.2.  Administratively Scoped Multicast and BSR
+1.3.  Administratively Scoped Multicast and BSR
 
 Administratively Scoped IP Multicast, as defined in RFC 2365, permits a
 network provider to configure scope boundaries at multicast routers.
+
+
+
+Fenner/Handley/Kermode/Thaler                     Section 1.3.  [Page 7]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
 Such a scope boundary consists of a range of multicast addresses
 (expressed as an address and mask) that the router will not forward
 across the boundary.  For correct operation, such a scope zone border
@@ -267,14 +401,6 @@ Admin scope zone boundaries must be configured at the Zone Border
 Routers (ZBRs), as they need to filter PIM Join messages that might
 inadvertently cross the border due to error conditions.  In addition, at
 least one C-BSR within the admin scope zone must be configured to be a
-
-
-
-Fenner/Handley/Kermode/Thaler                     Section 1.2.  [Page 5]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
 C-BSR for the admin scope zone's address range.
 
 A separate BSR election will then take place (using bootstrap messages)
@@ -308,6 +434,14 @@ to serve as an RP.
 
 All PIM routers within a PIM bootstrap domain where admin scope ranges
 are in use must be capable of receiving bootstrap messages and storing
+
+
+
+Fenner/Handley/Kermode/Thaler                     Section 1.3.  [Page 8]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
 the winning BSR and RPset for all admin scope zones that apply.  Thus
 PIM routers that only implement RFC 2362 (which only allows one BSR per
 domain) cannot be used in PIM domains where admin scope zones are
@@ -322,14 +456,6 @@ to the state needed for PIM-SM operation:
      At all routers:
 
           List of Active Scope Zones
-
-
-
-
-Fenner/Handley/Kermode/Thaler                       Section 2.  [Page 6]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
 
           Per Scope Zone:
 
@@ -365,6 +491,13 @@ in section 3.4.
 
 The following timers are also required:
 
+
+
+Fenner/Handley/Kermode/Thaler                       Section 2.  [Page 9]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
      At the Bootstrap Router only:
 
           Per Scope Zone (Z):
@@ -378,15 +511,6 @@ The following timers are also required:
           C-RP Advertisement Timer: CRPT
 
 
-
-
-
-
-Fenner/Handley/Kermode/Thaler                       Section 2.  [Page 7]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
 3.  Bootstrap Router Election and RP-Set Distribution
 
 For simplicity, bootstrap messages (BSMs) are used in both the BSR
@@ -398,19 +522,42 @@ zone.  The per-scope-zone state-machine for a C-BSR is given below,
 followed by the state-machine for a router that is not configured to be
 a C-BSR.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 10]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
 Per-Scope-Zone Candidate-BSR State Machine
 
 
-                 +-----------------------------------+
-                 | Figures omitted from text version |
-                 +-----------------------------------+
-
-
-       Figure 1: Per-Scope-Zone State-machine for a candidate BSR
-
-
-In tabular form this state machine is:
-
+Figure 1: Per-Scope-Zone State-machine for a candidate BSR in tabular form
 
 +-----------------------------------------------------------------------+
 |                         When in C-BSR state                           |
@@ -426,21 +573,6 @@ In tabular form this state machine is:
 |            |  Set BS Timer     |  rand_override    |  rand_override   |
 |            |  to BS Timeout    |                   |                  |
 +------------+-------------------+-------------------+------------------+
-
-
-
-
-
-
-
-
-
-
-
-
-Fenner/Handley/Kermode/Thaler                       Section 3.  [Page 8]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
 
 
 +-----------------------------------------------------------------------+
@@ -470,6 +602,14 @@ INTERNET-DRAFT            Expires: January 2002                July 2001
 |             |  to BS Timeout    |                  |                  |
 +-------------+-------------------+------------------+------------------+
 A candidate-BSR may be in one of three states for a particular scope
+
+
+
+Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 11]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
 zone:
 
 Candidate-BSR (C-BSR)
@@ -490,33 +630,47 @@ Elected-BSR (E-BSR)
 On startup, the initial state for this configured scope zone is
 "Pending-BSR"; the BS Timer is initialized to the BS Timeout value.
 
-
-
-
-
-Fenner/Handley/Kermode/Thaler                       Section 3.  [Page 9]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
 In addition to the three states, there is one timer:
 
 o The bootstrap timer (BS Timer) - that is used to time out old
   bootstrap router information, and used in the election process to
   terminate P-BSR state.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 12]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
 Per-Scope-Zone State-machine for Non-Candidate-BSR Routers
 
 
-                 +-----------------------------------+
-                 | Figures omitted from text version |
-                 +-----------------------------------+
-
-
-Figure 2: Per-Scope-Zone State-machine for a router not configured as C-BSR
-
-In tabular form this state machine is:
-
+Figure 2: Per-Scope-Zone State-machine for a router not configured as C-
+                          BSR in tabular form
 
 +-----------------------------------------------------------------------+
 |                        When in No Info state                          |
@@ -543,18 +697,6 @@ In tabular form this state machine is:
 +---------------+-----------------------------+-------------------------+
 
 
-
-
-
-
-
-
-
-Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 10]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
 +-----------------------------------------------------------------------+
 |         When in Accept Preferred state                                |
 +------------+-------------------+-------------------+------------------+
@@ -572,6 +714,14 @@ A router that is not a candidate-BSR may be in one of three states:
 
 No Info
      The router has no information about this scope zone.  This state
+
+
+
+Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 13]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
      does not apply if the router is configured to know about this scope
      zone, or for the global scope zone.  When in this state, no state
      information is held and no timers run that refer to this scope
@@ -604,17 +754,29 @@ o The bootstrap timer (BS Timer) - that is used to time out old
 o The scope zone timer (SZ Timer) - that is used to time out the scope
   zone itself if BS messages specifying this scope zone stop arriving.
 
-
-
-Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 11]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
 Bootstrap Message Processing Checks
 
 When a bootstrap message is received, the following initial checks must
 be performed:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 14]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
 
 if ( (DirectlyConnected(BSM.src_ip_address) == FALSE)
      OR (we have no Hello state for BSM.src_ip_address)) {
@@ -659,19 +821,19 @@ following transition events are defined:
           A bootstrap message is received from a BSR that has greater
           than or equal weight than the current BSR.  In a router is in
           P-BSR state, then it uses its own weight as that of the
-
-
-
-Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 12]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
           current BSR.
 
           The weighting for a BSR is the concatenation in fixed-
           precision unsigned arithmetic of the BSR priority field from
           the bootstrap message and the IP address of the BSR from the
+
+
+
+Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 15]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
           bootstrap message (with the BSR priority taking the most-
           significant bits and the IP address taking the least
           significant bits).
@@ -714,18 +876,19 @@ the following values:
           where myPriority is the Candidate-BSR's configured priority,
           and bestPriority equals:
 
-
-
-
-
-Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 13]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
           bestPriority = Max(storedPriority, myPriority)
 
-          and AddrDelay is given by the following:
+          and AddrDelay is given by the following for IPv4:
+
+
+
+
+
+
+Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 16]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
 
           if ( bestPriority == myPriority) {
               AddrDelay = log_2(storedAddr - myAddr) / 16
@@ -733,29 +896,64 @@ INTERNET-DRAFT            Expires: January 2002                July 2001
               AddrDelay = 2 - (myAddr / 2^31)
           }
 
+          and AddrDelay is given by the following for IPv6:
+
+          if ( bestPriority == myPriority) {
+              AddrDelay = log_2(storedAddr - myAddr) / 64
+          } else {
+              AddrDelay = 2 - (myAddr / 2^127)
+          }
+
 
           where myAddr is the Candidate-BSR's address, storedAddr is the
           stored BSR's address, and storedPriority is the stored BSR's
           priority.
 
-     SZ Period
+     SZ Timeout
           The interval after which a router will time out an Admin Scope
           zone that it has dynamically learned.  The interval MUST be
           larger than the BS Timeout.  The default value is ten times
-          the BS Timeout, which is 1500 seconds.
+          the BS Timeout, which is 1300 seconds.
 
 In addition to setting the timers, the following actions may be
 triggered by state-changes in the state-machines:
 
      Forward BSM
-          The bootstrap message is forwarded out of all multicast-
-          capable interfaces, except the interface it was received on,
-          or where this would cause the BSM to cross an admin-scope
+          A bootstrap message that passes the Bootstrap Message
+          Processing Checks is forwarded out of all interfaces with PIM
+          neighbors (including the interface it is received on), except
+          where this would cause the BSM to cross an admin-scope
           boundary for the scope zone indicated in the message.  The
           source IP address of the message is the forwarding router's IP
           address on the interface the message is being forwarded from,
           the destination address is ALL-PIM-ROUTERS, and the TTL of the
           message is set to 1.
+
+          As an optimation, a router MAY choose not to forward a BSM out
+          of the interface the message was received on if that interface
+          is a point-to-point interface.  On interfaces with multiple
+          PIM neighbors, a router MUST forward an accepted BSM onto the
+          interface that BSM was received on, but if the number of PIM
+          neighbors on that interface is large, it MAY delay forwarding
+          a BSM onto that interface by a small randomized interval to
+          prevent message implosion.
+
+
+
+
+Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 17]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
+          Rationale: A BSM needs to be forwarded onto the interface the
+          message was received on (in addition to the other interfaces)
+          because the routers on a LAN may not have consistent routing
+          information.  If three routers on a LAN and A, B, and C, and
+          at router B RPF(BSR)==A and at router C RPF(BSR)==B, then
+          router A originally forwards the BSM onto the LAN, but router
+          C will only accept it when router B re-forwards the message
+          onto the LAN.
 
      Originate BSM
           A new bootstrap message is constructed by the BSR, giving the
@@ -771,14 +969,6 @@ triggered by state-changes in the state-machines:
      Store RP Set
           The RP-Set from the received bootstrap message is stored and
           used by the router to decide the RP for each group that the
-
-
-
-Fenner/Handley/Kermode/Thaler                      Section 3.  [Page 14]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
           router has state for.  Storing this RP Set may cause other
           state-transitions to occur in the router.  The BSR's IP
           address and priority from the received bootstrap message are
@@ -804,6 +994,14 @@ If the C-RP is a ZBR for an admin scope zone, then the Admin Scope bit
 MUST be set in the C-RP-Adv messages it sends for that scope zone;
 otherwise this bit MUST NOT be set.  This information is currently only
 used for logging purposes by the BSR, but might allow for future
+
+
+
+Fenner/Handley/Kermode/Thaler                    Section 3.1.  [Page 18]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
 extensions of the protocol.
 
 The interval for sending these messages is subject to local
@@ -826,13 +1024,6 @@ the BSR for each scope for which it is currently serving as an RP; the
 HoldTime in this C-RP-Adv message should be zero.  The BSR will then
 immediately time out the C-RP and generate a new BSR message removing
 the shut down RP from the RPset.
-
-
-
-
-Fenner/Handley/Kermode/Thaler                    Section 3.1.  [Page 15]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
 
 
 3.2.  Creating the RP-Set at the BSR
@@ -859,6 +1050,14 @@ information:
           The C-RP-Expiry Timer is used to time out the state associated
           with a C-RP when the BSR fails to receive C-RP-Advertisements
           from it.  The expiry timer is initialized to the HoldTime from
+
+
+
+Fenner/Handley/Kermode/Thaler                    Section 3.2.  [Page 19]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
           the RP's C-RP-Adv, and is reset to the HoldTime whenever a C-
           RP-Adv is received from that C-RP.
 
@@ -883,14 +1082,6 @@ is included in the "RP-HoldTime" field.  The format of the Bootstrap
 message allows `semantic fragmentation', if the length of the original
 Bootstrap message exceeds the packet maximum boundaries. However, we
 recommend against configuring a large number of routers as C-RPs, to
-
-
-
-Fenner/Handley/Kermode/Thaler                    Section 3.2.  [Page 16]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
 reduce the semantic fragmentation required.
 
 When an elected BSR is being shut down, it should immediately originate
@@ -914,6 +1105,15 @@ address on the interface the message is being forwarded from.  Bootstrap
 messages are always originated or forwarded with an IP TTL value of 1.
 
 
+
+
+
+
+Fenner/Handley/Kermode/Thaler                    Section 3.3.  [Page 20]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
 3.4.  Receiving and Using the RP-Set
 
 When a router receives and stores a new RP-Set, it checks if each of the
@@ -933,23 +1133,14 @@ the new RP.
 
 4.  Message Formats
 
-BSR messages are PIM messages, as defined in [1]. The values of the PIM
+BSR messages are PIM messages, as defined in [3]. The values of the PIM
 message Type field for BSR messages are:
 
 4    Bootstrap Message
 
-
-
-
-
-Fenner/Handley/Kermode/Thaler                      Section 4.  [Page 17]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
 8    Candidate-RP-Advertisement
 
-In this section we use the following terms defined in the PIM-SM [1]:
+In this section we use the following terms defined in the PIM-SM [3]:
 
 o    Encoded-Unicast format
 
@@ -972,6 +1163,13 @@ Addr Family
      The PIM address family of the `Unicast Address' field of this
      address.
 
+
+
+Fenner/Handley/Kermode/Thaler                      Section 4.  [Page 21]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
      Values of 0-127 are as assigned by the IANA for Internet Address
      Families in [5]. Values 128-250 are reserved to be assigned by the
      IANA for PIM-specific Address Families.  Values 251 though 255 are
@@ -990,18 +1188,6 @@ Unicast Address
 
 
 Encoded-Group address
-
-
-
-
-
-
-
-
-Fenner/Handley/Kermode/Thaler                      Section 4.  [Page 18]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
 
 Encoded-Group addresses take the following format:
 
@@ -1031,6 +1217,15 @@ Admin Scope [Z]one
      administratively scoped range.
 
 
+
+
+
+
+Fenner/Handley/Kermode/Thaler                      Section 4.  [Page 22]
+
+INTERNET-DRAFT            Expires: August 2003             February 2003
+
+
 Mask Len
      The Mask length field is 8 bits. The value is the number of
      contiguous one bits left justified used as a mask which, combined
@@ -1051,14 +1246,6 @@ Group multicast Address
 
 A bootstrap message is divided up into `semantic fragments' if the
 original message exceeds the maximum packet size boundaries.  Basically,
-
-
-
-Fenner/Handley/Kermode/Thaler                    Section 4.1.  [Page 19]
-
-INTERNET-DRAFT            Expires: January 2002                July 2001
-
-
 a single bootstrap message can be sent as multiple packets (semantic
 fragments), so long as the fragment tags of all the packets comprising
 the message is the same.
@@ -1090,29 +1277,9 @@ The format of a single `fragment' is given below:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Fenner/Handley/Kermode/Thaler                    Section 4.1.  [Page 20]
+Fenner/Handley/Kermode/Thaler                    Section 4.1.  [Page 23]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
  0                   1                   2                   3
@@ -1166,9 +1333,9 @@ INTERNET-DRAFT            Expires: January 2002                July 2001
 
 
 
-Fenner/Handley/Kermode/Thaler                    Section 4.1.  [Page 21]
+Fenner/Handley/Kermode/Thaler                    Section 4.1.  [Page 24]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 |             RP Address m (Encoded-Unicast format)             |
@@ -1178,9 +1345,9 @@ INTERNET-DRAFT            Expires: January 2002                July 2001
 
 
 PIM Version, Reserved, Checksum
-     Described in [1].
+     Described in [3].
 
-Type PIM Message Type.  Value is 8 for a Bootstrap Message.
+Type PIM Message Type.  Value is 4 for a Bootstrap Message.
 
 
 Fragment Tag
@@ -1205,11 +1372,11 @@ BSR priority
 
 Unicast BSR Address
      The address of the bootstrap router for the domain.  The format for
-     this address is given in the Encoded-Unicast address in [1].
+     this address is given in the Encoded-Unicast address in [3].
 
 Group Address 1..n
      The group prefix (address and mask) with which the Candidate RPs
-     are associated.  Format described in [1]. In a fragment containing
+     are associated.  Format described in [3]. In a fragment containing
      admin scope ranges, the first group address in the fragment MUST be
      the group range for the entire admin scope range, and this MUST
      have the Admin Scope bit set.  This is the case even if there are
@@ -1222,9 +1389,9 @@ Group Address 1..n
 
 
 
-Fenner/Handley/Kermode/Thaler                    Section 4.1.  [Page 22]
+Fenner/Handley/Kermode/Thaler                    Section 4.1.  [Page 25]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 RP Count 1..n
@@ -1247,7 +1414,7 @@ Frag RP Cnt 1..m
 RP address 1..m
      The address of the Candidate RPs, for the corresponding group
      prefix.  The format for these addresses is given in the Encoded-
-     Unicast address in [1].
+     Unicast address in [3].
 
 RP1..m Holdtime
      The Holdtime for the corresponding RP.  This field is copied from
@@ -1278,9 +1445,9 @@ o    The BSM includes information about more than one admin scope zone.
 
 
 
-Fenner/Handley/Kermode/Thaler                  Section 4.1.1.  [Page 23]
+Fenner/Handley/Kermode/Thaler                  Section 4.1.1.  [Page 26]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 Let us initially consider only the former case; the packet would be too
@@ -1334,9 +1501,9 @@ frequently.
 
 
 
-Fenner/Handley/Kermode/Thaler                  Section 4.1.1.  [Page 24]
+Fenner/Handley/Kermode/Thaler                  Section 4.1.1.  [Page 27]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 4.2.  Candidate-RP-Advertisement Format
@@ -1364,9 +1531,9 @@ the BSR.
 
 
 PIM Version, Reserved, Checksum
-     Described in [1].
+     Described in [3].
 
-Type PIM Message Type.  Value is 4 for a Candidate-RP-Advertisement
+Type PIM Message Type.  Value is 8 for a Candidate-RP-Advertisement
      Message.
 
 
@@ -1390,9 +1557,9 @@ Priority
 
 
 
-Fenner/Handley/Kermode/Thaler                    Section 4.2.  [Page 25]
+Fenner/Handley/Kermode/Thaler                    Section 4.2.  [Page 28]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 Holdtime
@@ -1403,11 +1570,11 @@ Holdtime
 RP Address
      The address of the interface to advertise as a Candidate RP.  The
      format for this address is given in the Encoded-Unicast address in
-     [1].
+     [3].
 
 Group Address-1..n
      The group prefixes for which the C-RP is advertising.  Format
-     described in Encoded-Group-Address in [1].
+     described in Encoded-Group-Address in [3].
 
 5.  Default Values for Timers
 
@@ -1446,9 +1613,9 @@ specified in a C-RP-Adv message should be set to (2.5 * C-RP-Adv-Period
 
 
 
-Fenner/Handley/Kermode/Thaler                      Section 5.  [Page 26]
+Fenner/Handley/Kermode/Thaler                      Section 5.  [Page 29]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 ).
@@ -1468,15 +1635,15 @@ Timer Name: C-RP Advertisement Timer (CRPT)
 Timer Name: Scope Zone Expiry Timer (SZT(Z))
 
 
-+------------------------------------+--------------+-------------------+
-|Value Name      Value   Explanation |              |                   |
-+------------------------------------+--------------+-------------------+
-|SZ Timeout                          |1500 seconds  |Interval after     |
-|                                    |              |which a scope zone |
-|                                    |              |will be timed out  |
-|                                    |              |if the state is    |
-|                                    |              |not refreshed      |
-+------------------------------------+--------------+-------------------+
++------------------------------------+--------------+--------------------+
+|Value Name      Value   Explanation |              |                    |
++------------------------------------+--------------+--------------------+
+|SZ Timeout                          | 1300 seconds | Interval after     |
+|                                    |              | which a scope zone |
+|                                    |              | will be timed out  |
+|                                    |              | if the state is    |
+|                                    |              | not refreshed      |
++------------------------------------+--------------+--------------------+
 
 
 6.  Security Considerations
@@ -1502,9 +1669,9 @@ o    Registering with the BSR as a C-RP, and then not forwarding
 
 
 
-Fenner/Handley/Kermode/Thaler                    Section 6.1.  [Page 27]
+Fenner/Handley/Kermode/Thaler                    Section 6.1.  [Page 30]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 Traffic can be diverted to a place where it can be monitored by both of
@@ -1527,7 +1694,7 @@ limit the transmission of future Register packets to that RP for a short
 period of time.
 
 As this does not affect interoperability, the precise details are left
-to the implementator to decide.  However we note that a router
+to the implementor to decide.  However we note that a router
 implementing such rate limiting must only do so if the ICMP packet
 correctly echoes part of a Register packet that was sent to the RP.  If
 this check were not made, then simply sending ICMP Unreachable packets
@@ -1558,9 +1725,9 @@ Messages must be an immediate PIM neighbor.  There is however a small
 
 
 
-Fenner/Handley/Kermode/Thaler                    Section 6.3.  [Page 28]
+Fenner/Handley/Kermode/Thaler                    Section 6.3.  [Page 31]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 window of time after a reboot where a PIM router will accept a bad BS
@@ -1603,7 +1770,7 @@ log communication attempts from any host that do not pass the
 authentication check.  When all the PIM routers are under the same
 administrative control, this authentication may use a configured shared
 secret.  The securing of interactions between PIM neighbors is discussed
-in more detail in the Security Considerations section of [1], and so we
+in more detail in the Security Considerations section of [3], and so we
 do not discuss the details further here.  The same security mechanisms
 than can be used to secure PIM Join, Prune and Assert messages should
 also be used to secure BS messages.
@@ -1614,9 +1781,9 @@ also be used to secure BS messages.
 
 
 
-Fenner/Handley/Kermode/Thaler                    Section 6.3.  [Page 29]
+Fenner/Handley/Kermode/Thaler                    Section 6.3.  [Page 32]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 6.4.  C-RP-Advertisement Security
@@ -1651,7 +1818,7 @@ for PIM Register messages between a DR and the relevant RP, except that
 there will normally be fewer C-RPs in a domain than there are DRs, so
 key management is a little simpler.  We do not describe the details of
 this process further here, but refer to the Security Considerations
-section of [1]. Note that the use of cryptographic security for C-RP-
+section of [3]. Note that the use of cryptographic security for C-RP-
 Advs does not remove the need for the non-cryptographic mechanisms, as
 explained below.
 
@@ -1670,9 +1837,9 @@ option before the IPsec AH is checked.  Thus the remaining vulnerability
 
 
 
-Fenner/Handley/Kermode/Thaler                    Section 6.5.  [Page 30]
+Fenner/Handley/Kermode/Thaler                    Section 6.5.  [Page 33]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 primarily exists for hosts on multi-access subnets containing more than
@@ -1700,10 +1867,10 @@ other activity on the destination router, such as unicast routing.
 
 
      Mark Handley
-     ACIRI/ICSI
+     ICIR/ICSI
      1947 Center St, Suite 600
      Berkeley, CA 94708
-     mjh@aciri.org
+     mjh@icir.org
 
 
      Roger Kermode
@@ -1718,7 +1885,7 @@ other activity on the destination router, such as unicast routing.
      Microsoft Corporation
      One Microsoft Way
      Redmond, WA 98052
-     dthaler@Exchange.Microsoft.com
+     dthaler@Microsoft.com
 
 
 
@@ -1726,30 +1893,33 @@ other activity on the destination router, such as unicast routing.
 
 
 
-Fenner/Handley/Kermode/Thaler                      Section 7.  [Page 31]
+Fenner/Handley/Kermode/Thaler                      Section 7.  [Page 34]
 
-INTERNET-DRAFT            Expires: January 2002                July 2001
+INTERNET-DRAFT            Expires: August 2003             February 2003
 
 
 8.  References
 
-[1] W. Fenner, M. Handley, H. Holbrook, I. Kouvelas, "Protocol
-     Independent Multicast - Sparse Mode (PIM-SM): Protocol
-     Specification (Revised)", Internet Draft draft-ietf-pim-sm-
-     v2-new-03.ps
+[1] S. Deering , W. Fenner , B. Haberman, "Multicast Listener Discovery
+     (MLD) for IPv6", RFC 2710, Oct 1999.
 
 [2] D. Estrin et al., "Protocol Independent Multicast - Sparse Mode
      (PIM-SM): Protocol Specification", RFC 2362, June 1998 (now
      obsolete).
 
-[3] W. Fenner, "Internet Group Management Protocol, Version 2", RFC
-     2236, Nov 1997.
+[3] W. Fenner, M. Handley, H. Holbrook, I. Kouvelas, "Protocol
+     Independent Multicast - Sparse Mode (PIM-SM): Protocol
+     Specification (Revised)", Internet Draft draft-ietf-pim-sm-
+     v2-new-05.ps
 
-[4] S. Deering , W. Fenner , B. Haberman, "Multicast Listener Discovery
-     (MLD) for IPv6", RFC 2710, Oct 1999.
+[4] W. Fenner, "Internet Group Management Protocol, Version 2", RFC
+     2236, Nov 1997.
 
 [5] IANA, "Address Family Numbers", linked from
      http://www.iana.org/numbers.html
+
+[6] D. Meyer, "Administratively Scoped IP Multicast", RFC 2365, Jul
+     1998.
 
 9.  Acknowledgments
 
@@ -1779,7 +1949,4 @@ Holbrook.  This BSR specification draws heavily on text from RFC 2362.
 
 
 
-
-
-
-Fenner/Handley/Kermode/Thaler                      Section 9.  [Page 32]
+Fenner/Handley/Kermode/Thaler                      Section 9.  [Page 35]

@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
-%%Creator: groff version 1.16.1
-%%CreationDate: Fri Jul 20 11:38:32 2001
+%%Creator: groff version 1.17.2
+%%CreationDate: Tue Feb 25 22:13:25 2003
 %%DocumentNeededResources: font Courier-Bold
 %%+ font Times-Bold
 %%+ font Times-Roman
@@ -8,13 +8,13 @@
 %%+ font Courier
 %%DocumentSuppliedResources: file non-c-bsr.ps
 %%+ file c-bsr.ps
-%%+ procset grops 1.16 1
-%%Pages: 24
+%%+ procset grops 1.17 2
+%%Pages: 27
 %%PageOrder: Ascend
 %%Orientation: Portrait
 %%EndComments
 %%BeginProlog
-%%BeginResource: procset grops 1.16 1
+%%BeginResource: procset grops 1.17 2
 /setpacking where{
 pop
 currentpacking
@@ -212,11 +212,11 @@ def/PL 792 def/LS false def/ENC0[/asciicircum/asciitilde/Scaron/Zcaron
 BP
 %%EndPageSetup
 /F0 10/Courier-Bold@0 SF(Internet Engineering Task Force)72 85 Q(PIM WG)
-209.999 E 245.999(INTERNET-DRAFT Bill)72 98 R(Fenner/AT&T)6 E 155.999
-(draft-ietf-pim-sm-bsr-01.ps Mark)72 111 R(Handley/ACIRI)6 E
+209.999 E 245.999(INTERNET-DRAFT Bill)72 98 R(Fenner/AT&T)6 E 161.999
+(draft-ietf-pim-sm-bsr-03.ps Mark)72 111 R(Handley/ICIR)6 E
 (Roger Kermode/Motorola)371.999 124 Q(David Thaler/Microsoft)371.999 137
-Q(20 July 2001)431.999 150 Q(Expires: January 2002)377.999 163 Q/F1 14
-/Times-Bold@0 SF(Bootstrap Router \(BSR\) Mechanism f)112.615 188 Q
+Q(25 February 2003)407.999 150 Q(Expires: August 2003)383.999 163 Q/F1
+14/Times-Bold@0 SF(Bootstrap Router \(BSR\) Mechanism f)112.615 188 Q
 (or PIM Sparse Mode)-.35 E/F2 11/Times-Bold@0 SF
 (Status of this Document)72 233 Q/F3 11/Times-Roman@0 SF(This document \
 is an Internet-Draft and is in full conformance with all pro)72 249.6 Q
@@ -252,55 +252,61 @@ E(mechanism is dynamic, lar)97 538.2 Q(gely self-con\214guring, and rob)
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 13/Times-Bold@0 SF -1.196
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 13/Times-Bold@0 SF -1.196
 (Ta)239.126 85 S(ble of Contents)1.196 E/F2 10/Times-Roman@0 SF
 (1. Introduction)97 123 Q F0 11(......................)3.56 G F2(3)11.5
-E(1.1. Ov)107 135 Q(ervie)-.15 E 2.5(wo)-.25 G 2.5(fB)-2.5 G
-(ootstrap and RP Disco)-2.5 E -.15(ve)-.15 G(ry for Global Scope).15 E
-F0 11(.......)4.71 G F2(3)11.5 E(1.2. Administrati)107 147 Q -.15(ve)
--.25 G(ly Scoped Multicast and BSR).15 E F0 11(...........)8.81 G F2(4)
-11.5 E(2. BSR State and T)97 159 Q(imers)-.35 E F0 11
-(...................)5.43 G F2(5)11.5 E
-(3. Bootstrap Router Election and RP-Set Distrib)97 171 Q(ution)-.2 E F0
-11(...........)1.39 G F2(5)11.5 E(3.1. Sending Candidate-RP-Adv)107 183
-Q(ertisements)-.15 E F0 11(.............)1.91 G F2(12)6.5 E
-(3.2. Creating the RP-Set at the BSR)107 195 Q F0 11(...............)
-5.91 G F2(12)6.5 E(3.3. F)107 207 Q(orw)-.15 E
-(arding Bootstrap Messages)-.1 E F0 11(...............)2.57 G F2(13)6.5
-E(3.4. Recei)107 219 Q(ving and Using the RP-Set)-.25 E F0 11
-(...............)2.56 G F2(13)6.5 E(4. Message F)97 231 Q(ormats)-.15 E
-F0 11(....................)10.38 G F2(14)6.5 E(4.1. Bootstrap Message F)
-107 243 Q(ormat)-.15 E F0 11(................)10.38 G F2(15)6.5 E
-(4.1.1. Semantic Fragmentation of BSMs)117 255 Q F0 11(.............)
-5.36 G F2(18)6.5 E(4.2. Candidate-RP-Adv)107 267 Q(ertisement F)-.15 E
-(ormat)-.15 E F0 11(.............)9.84 G F2(19)6.5 E(5. Def)97 279 Q
+E(1.1. General Ov)107 135 Q(ervie)-.15 E 2.5(wa)-.25 G(nd Background)
+-2.5 E F0 11(..............)4 G F2(3)11.5 E(1.2. Ov)107 147 Q(ervie)-.15
+E 2.5(wo)-.25 G 2.5(fB)-2.5 G(ootstrap and RP Disco)-2.5 E -.15(ve)-.15
+G(ry for Global Scope).15 E F0 11(.......)4.71 G F2(5)11.5 E
+(1.3. Administrati)107 159 Q -.15(ve)-.25 G(ly Scoped Multicast and BSR)
+.15 E F0 11(...........)8.81 G F2(5)11.5 E(2. BSR State and T)97 171 Q
+(imers)-.35 E F0 11(...................)5.43 G F2(6)11.5 E
+(3. Bootstrap Router Election and RP-Set Distrib)97 183 Q(ution)-.2 E F0
+11(...........)1.39 G F2(7)11.5 E(3.1. Sending Candidate-RP-Adv)107 195
+Q(ertisements)-.15 E F0 11(.............)1.91 G F2(15)6.5 E
+(3.2. Creating the RP-Set at the BSR)107 207 Q F0 11(...............)
+5.91 G F2(15)6.5 E(3.3. F)107 219 Q(orw)-.15 E
+(arding Bootstrap Messages)-.1 E F0 11(...............)2.57 G F2(16)6.5
+E(3.4. Recei)107 231 Q(ving and Using the RP-Set)-.25 E F0 11
+(...............)2.56 G F2(16)6.5 E(4. Message F)97 243 Q(ormats)-.15 E
+F0 11(....................)10.38 G F2(17)6.5 E(4.1. Bootstrap Message F)
+107 255 Q(ormat)-.15 E F0 11(................)10.38 G F2(18)6.5 E
+(4.1.1. Semantic Fragmentation of BSMs)117 267 Q F0 11(.............)
+5.36 G F2(21)6.5 E(4.2. Candidate-RP-Adv)107 279 Q(ertisement F)-.15 E
+(ormat)-.15 E F0 11(.............)9.84 G F2(22)6.5 E(5. Def)97 291 Q
 (ault V)-.1 E(alues for T)-1.11 E(imers)-.35 E F0 11(..................)
-4.31 G F2(20)6.5 E(6. Security Considerations)97 291 Q F0 11
-(..................)12.17 G F2(21)6.5 E(6.1. Possible Threats)107 303 Q
-F0 11(...................)10.92 G F2(21)6.5 E(6.2. Limiting Third-P)107
-315 Q(arty DoS Attacks)-.15 E F0 11(..............)8.15 G F2(21)6.5 E
-(6.3. BS Message Security)107 327 Q F0 11(..................)4.95 G F2
-(21)6.5 E(6.4. C-RP-Adv)107 339 Q(ertisement Security)-.15 E F0 11
-(...............)11.63 G F2(22)6.5 E(6.5. Denial of Service using IPsec)
-107 351 Q F0 11(...............)13.44 G F2(23)6.5 E
-(7. Authors' Addresses)97 363 Q F0 11(....................)1.35 G F2(23)
-6.5 E(8. References)97 375 Q F0 11(......................)8.58 G F2(24)
-6.5 E(9. Ackno)97 387 Q(wledgments)-.25 E F0 11(....................)
-5.76 G F2(24)6.5 E F0(Fenner/Handle)72 769 Q(y/K)-.165 E 246.265
-(ermode/Thaler [P)-.275 F(age 2])-.165 E EP
+4.31 G F2(23)6.5 E(6. Security Considerations)97 303 Q F0 11
+(..................)12.17 G F2(24)6.5 E(6.1. Possible Threats)107 315 Q
+F0 11(...................)10.92 G F2(24)6.5 E(6.2. Limiting Third-P)107
+327 Q(arty DoS Attacks)-.15 E F0 11(..............)8.15 G F2(24)6.5 E
+(6.3. BS Message Security)107 339 Q F0 11(..................)4.95 G F2
+(24)6.5 E(6.4. C-RP-Adv)107 351 Q(ertisement Security)-.15 E F0 11
+(...............)11.63 G F2(25)6.5 E(6.5. Denial of Service using IPsec)
+107 363 Q F0 11(...............)13.44 G F2(26)6.5 E
+(7. Authors' Addresses)97 375 Q F0 11(....................)1.35 G F2(26)
+6.5 E(8. References)97 387 Q F0 11(......................)8.58 G F2(27)
+6.5 E(9. Ackno)97 399 Q(wledgments)-.25 E F0 11(....................)
+5.76 G F2(27)6.5 E F1(List of Figur)247.674 451 Q(es)-.234 E F2
+(Figure 1. Per)97 489 Q(-Scope-Zone State-machine for a candidate BSR)
+-.2 E F0 11(........)9.08 G F2(7)11.5 E(Figure 2. Per)97 501 Q
+(-Scope-Zone State-machine for a router not con\214gured as C-BSR)-.2 E
+F0 11(...)10.89 G F2(10)6.5 E F0(Fenner/Handle)72 769 Q(y/K)-.165 E
+246.265(ermode/Thaler [P)-.275 F(age 2])-.165 E EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 11/Times-Bold@0 SF(1.)72 85
-Q/F2 14/Times-Bold@0 SF(Intr)5.5 E(oduction)-.252 E F0
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 11/Times-Bold@0 SF(1.)72
+85 Q/F2 14/Times-Bold@0 SF(Intr)5.5 E(oduction)-.252 E F0
 (Note: this document assumes f)72 101.6 Q(amiliarity with the w)-.11 E
 (orkings of Protocol Independent Multicast -)-.11 E
-(Sparse Mode, as de\214ned in [1].)72 114.6 Q -.165(Fo)72 131.2 S 2.75
-(rc).165 G(orrect operation, e)-2.75 E -.165(ve)-.275 G
-(ry PIM Sparse-mode router within a PIM domain must be able to map a)
+(Sparse Mode, as de\214ned in [3], and with Administrati)72 114.6 Q
+-.165(ve)-.275 G(ly Scoped Multicast, as described in [6].).165 E -.165
+(Fo)72 131.2 S 2.75(rc).165 G(orrect operation, e)-2.75 E -.165(ve)-.275
+G(ry PIM Sparse-mode router within a PIM domain must be able to map a)
 .165 E(particular global-scope multicast group address to the same RP)72
 144.2 Q 5.5(.I)-1.221 G 2.75(ft)-5.5 G(his is not the case then black)
 -2.75 E(holes may appear)72 157.2 Q 2.75(,w)-.44 G(here some recei)-2.75
@@ -332,197 +338,352 @@ hin the same scope re)-.11 E(gion map a)-.165 E
 (vides an updated speci\214cation of the BSR mechanism from)-.165 E
 (RFC 2362, and also e)72 346.4 Q(xtends it to cope with administrati)
 -.165 E -.165(ve)-.275 G(ly scoped re).165 E(gion boundaries.)-.165 E F1
-(1.1.)72 398.4 Q/F3 13/Times-Bold@0 SF(Ov)5.5 E(er)-.13 E
-(view of Bootstrap and RP Disco)-.13 E -.13(ve)-.13 G(ry f).13 E
-(or Global Scope)-.325 E F0 2.75(As)72 415 S(mall set of routers from a\
- domain are con\214gured as candidate bootstrap routers \(C-BSRs\) and,)
--2.75 E(through a simple election mechanism, a single BSR is selected f\
-or that domain. A set of routers)72 428 Q(within a domain are also con\
-\214gured as candidate RPs \(C-RPs\); typically these will be the same)
-72 441 Q(routers that are con\214gured as C-BSRs.)72 454 Q
-(Candidate RPs periodically unicast Candidate-RP-)5.5 E(Adv)72 467 Q
-(ertisement messages \(C-RP-Advs\) to the BSR of that domain, adv)-.165
-E(ertising their willingness to)-.165 E(be an RP)72 480 Q 2.75(.AC)
--1.221 G(-RP-Adv message includes the address of the adv)-2.75 E
-(ertising C-RP)-.165 E 2.75(,a)-1.221 G 2.75(sw)-2.75 G(ell as an)-2.75
-E(optional list of group addresses and a mask length \214elds, indicati\
-ng the group pre\214x\(es\) for which)72 493 Q(the candidac)72 506 Q
-2.75(yi)-.165 G 2.75(sa)-2.75 G(dv)-2.75 E(ertised. The BSR then includ\
-es a set of these Candidate-RPs \(the RP-Set\),)-.165 E
-(along with their corresponding group pre\214x)72 519 Q
-(es, in Bootstrap messages it periodically originates.)-.165 E
-(Bootstrap messages are distrib)72 532 Q
-(uted hop-by-hop throughout the domain.)-.22 E
-(All the PIM routers in the domain recei)72 558 Q .33 -.165(ve a)-.275 H
-(nd store Bootstrap messages originated by the BSR.).165 E
-(When a DR recei)72 571 Q -.165(ve)-.275 G 2.75(sa).165 G 2.75(ni)-2.75
-G(ndication of local membership \(typically from IGMP [3] or MLD [4]\) \
-or)-2.75 E 2.75(ad)72 584 S(ata pack)-2.75 E(et from a directly connect\
-ed host, for a group for which it has no forw)-.11 E(arding state, the)
--.11 E(DR uses a hash function to map the group address to one of the C\
--RPs from the RP-Set whose)72 597 Q(group-pre\214x includes the group \
-\(see [1]\). The DR then sends a Join message to)72 610 Q -.11(wa)-.275
-G(rds that RP if).11 E(the local host joined the group, or it Re)72 623
-Q(gister)-.165 E(-encapsulates and unicasts the data pack)-.22 E
-(et to the RP)-.11 E(if the local host sent a pack)72 636 Q
-(et to the group.)-.11 E 2.75(AB)72 662 S(ootstrap message indicates li)
--2.75 E -.165(ve)-.275 G(ness of the RPs included therein.).165 E
-(If an RP is included in the)5.5 E(message, then it is tagged as `up' a\
-t the routers; RPs not included in the message are remo)72 675 Q -.165
-(ve)-.165 G(d).165 E(from the list of RPs o)72 688 Q -.165(ve)-.165 G
-2.75(rw).165 G(hich the hash algorithm acts. Each router continues to u\
-se the contents)-2.75 E(of the most recently recei)72 701 Q -.165(ve)
--.275 G 2.75(dB).165 G
-(ootstrap message from the BSR until it accepts a ne)-2.75 E 2.75(wB)
--.275 G(ootstrap)-2.75 E(message.)72 714 Q(Fenner/Handle)72 769 Q(y/K)
+(1.1.)72 372.4 Q/F3 13/Times-Bold@0 SF(General Ov)5.5 E(er)-.13 E
+(view and Backgr)-.13 E(ound)-.234 E F0(Ev)72 389 Q(ery PIM-SM multicas\
+t group needs to be associated with the IP address of a Rendezv)-.165 E
+(ous-Point)-.22 E 2.75(\(RP\). When)72 402 R 2.75(an)2.75 G .55 -.275
+(ew m)-2.75 H(ulticast sender starts sending, its local Designated Rout\
+er \(DR\) will).275 E(encapsulate these data pack)72 415 Q
+(ets in a PIM Re)-.11 E(gister message and send them to the RP for that)
+-.165 E(multicast group.)72 428 Q(When a ne)5.5 E 2.75(wm)-.275 G
+(ulticast recei)-2.75 E -.165(ve)-.275 G 2.75(rj).165 G
+(oins, its local DR will send a PIM Join message)-2.75 E(to)72 441 Q
+-.11(wa)-.275 G(rds the RP for that multicast group.).11 E(When an)5.5 E
+2.75(yP)-.165 G(IM router sends a \(*,G\) Join message, it)-2.75 E
+(needs to kno)72 454 Q 2.75(ww)-.275 G(hich is the ne)-2.75 E(xt ho)
+-.165 E 2.75(wr)-.275 G(outer to)-2.75 E -.11(wa)-.275 G
+(rds the RP for G to send the message to.).11 E(Also)5.5 E
+(when a PIM router is forw)72 467 Q(arding data pack)-.11 E
+(ets using \(*,G\) state, it needs to kno)-.11 E 2.75(ww)-.275 G
+(hich is the)-2.75 E(correct incoming interf)72 480 Q(ace for pack)-.11
+E(ets destined for G, as it needs to reject an)-.11 E 2.75(yp)-.165 G
+(ack)-2.75 E(ets that arri)-.11 E -.165(ve)-.275 G(on other interf)72
+493 Q 2.75(aces. Thus)-.11 F
+(it is important for all the PIM routers in a domain to be able to map)
+2.75 E(each multicast group to the correct RP address.)72 506 Q
+(There are a number of w)72 532 Q
+(ays that group-to-RP mapping can be done; the simplest solution is for)
+-.11 E(all the routers in the domain to be con\214gured with the same i\
+nformation.)72 545 Q(Ho)5.5 E(we)-.275 E -.165(ve)-.275 G .88 -.44(r, s)
+.165 H(tatic).44 E(con\214guration generally doesn')72 558 Q 2.75(ts)
+-.198 G(cale well, and also does not dynamically adapt to route around)
+-2.75 E(router or link f)72 571 Q 2.75(ailures. The)-.11 F
+(mechanism speci\214ed in this document is kno)2.75 E
+(wn as the PIM BootStrap)-.275 E
+(Router mechanism, or BSR for short, and pro)72 584 Q
+(vides a dynamic, adapti)-.165 E .33 -.165(ve m)-.275 H
+(echanism to distrib).165 E(ute)-.22 E
+(group-to-RP mapping information rapidly throughout a domain.)72 597 Q(\
+Before we discuss the BSR mechanism itself, we should understand the ru\
+les a PIM-SM router)72 623 Q(will apply to the mapping information.)72
+636 Q(Irrespecti)5.5 E .33 -.165(ve o)-.275 H 2.75(fh).165 G .55 -.275
+(ow i)-2.75 H 2.75(to).275 G(btains the mapping information, a)-2.75 E
+(PIM-SM router will ha)72 649 Q .33 -.165(ve a m)-.22 H
+(apping table containing multiple entries, each of which has the).165 E
+(follo)72 662 Q(wing form:)-.275 E 7.15<834d>72 678.6 S
+(ulticast group range, e)-7.15 E
+(xpressed as an address and pre\214x length.)-.165 E 7.15<8352>72 695.2
+S 2.75(PP)-7.15 G(riority)-2.75 E(.)-.715 E 7.15<8349>72 711.8 S 2.75
+(Pa)-7.15 G(ddress of RP)-2.75 E(.)-1.221 E(Fenner/Handle)72 769 Q(y/K)
 -.165 E 188.515(ermode/Thaler Section)-.275 F 2.75(1.1. [P)2.75 F
 (age 3])-.165 E EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E(If a PIM domain becomes partit\
-ioned, each area separated from the old BSR will elect its o)72 85 Q(wn)
--.275 E(BSR, which will distrib)72 98 Q
-(ute an RP-Set containing RPs that are reachable within that partition.)
--.22 E(When the partition heals, another election will occur automatica\
-lly and only one of the BSRs will)72 111 Q
-(continue to send out Bootstrap messages. As is e)72 124 Q
-(xpected at the time of a partition or healing,)-.165 E
-(some disruption in pack)72 137 Q(et deli)-.11 E -.165(ve)-.275 G
-(ry may occur).165 E 2.75(.T)-.605 G
-(his time will be on the order of the re)-2.75 E(gion')-.165 E(s)-.605 E
-(round-trip time and the bootstrap router timeout v)72 150 Q(alue.)-.275
-E/F1 11/Times-Bold@0 SF(1.2.)72 189 Q/F2 13/Times-Bold@0 SF
-(Administrati)5.5 E -.13(ve)-.13 G(ly Scoped Multicast and BSR).13 E F0
-(Administrati)72 205.6 Q -.165(ve)-.275 G
-(ly Scoped IP Multicast, as de\214ned in RFC 2365, permits a netw).165 E
-(ork pro)-.11 E(vider to)-.165 E
-(con\214gure scope boundaries at multicast routers.)72 218.6 Q
-(Such a scope boundary consists of a range of)5.5 E
-(multicast addresses \(e)72 231.6 Q
-(xpressed as an address and mask\) that the router will not forw)-.165 E
-(ard across the)-.11 E(boundary)72 244.6 Q 5.5(.F)-.715 G(or correct op\
-eration, such a scope zone border must be complete and con)-5.665 E
--.165(vex)-.44 G 5.5(.B).165 G 2.75(yt)-5.5 G(his)-2.75 E(we mean that \
-there must be no path from inside the scoped zone to outside it that do\
-es not pass)72 257.6 Q(through a con\214gured scope border router)72
-270.6 Q 2.75(,a)-.44 G(nd that the multicast capable path between an)
--2.75 E(y)-.165 E(arbitrary pair of multicast routers in the scope zone\
- must remain in the zone.)72 283.6 Q -.165(Fo)72 309.6 S 2.75(rP).165 G
-(IM-SM using BSR to function correctly with admin scoping, there must b\
-e a BSR and at)-2.75 E(least one C-RP within e)72 322.6 Q -.165(ve)-.275
-G(ry admin scope re).165 E 2.75(gion. Admin)-.165 F
-(scope zone boundaries must be)2.75 E
-(con\214gured at the Zone Border Routers \(ZBRs\), as the)72 335.6 Q
-2.75(yn)-.165 G(eed to \214lter PIM Join messages that)-2.75 E
-(might inadv)72 348.6 Q
-(ertently cross the border due to error conditions.)-.165 E
-(In addition, at least one C-BSR)5.5 E(within the admin scope zone must\
- be con\214gured to be a C-BSR for the admin scope zone')72 361.6 Q(s)
--.605 E(address range.)72 374.6 Q 2.75(As)72 400.6 S
-(eparate BSR election will then tak)-2.75 E 2.75(ep)-.11 G
-(lace \(using bootstrap messages\) for e)-2.75 E -.165(ve)-.275 G
-(ry admin scope).165 E(range \(plus one for the global range\).)72 413.6
-Q(Admin scope ranges are identi\214ed in the bootstrap message)5.5 E
-(because the group range is mark)72 426.6 Q
-(ed \(using the "Admin Scope" bit, pre)-.11 E(viously a "Reserv)-.275 E
-(ed" bit\) to)-.165 E(indicate that this is an administrati)72 439.6 Q
-.33 -.165(ve s)-.275 H
-(cope range, and not just a range that a particular set of RPs).165 E
-(are con\214gured to handle.)72 452.6 Q
-(Such admin scoped bootstrap message pack)72 478.6 Q
-(ets are \215ooded in the normal w)-.11 E(ay)-.11 E 2.75(,b)-.715 G
-(ut will not be)-2.97 E(forw)72 491.6 Q(arded by another ZBR across the\
- boundary for that scope zone \(see Section 3.3 for the)-.11 E
-(speci\214cs of this\).)72 504.6 Q 1.76 -.88(We d)72 530.6 T 2.75(on).88
-G(ot require that C-RPs within the scope zone be con\214gured to kno)
--2.75 E 2.75(wa)-.275 G(bout the scope zone,)-2.75 E(as the)72 543.6 Q
-2.75(yc)-.165 G(an learn of its e)-2.75 E
-(xistence from bootstrap messages.)-.165 E(Ho)5.5 E(we)-.275 E -.165(ve)
--.275 G .88 -.44(r, w).165 H 2.75(er).44 G(ecommend that router)-2.75 E
--.165(ve)72 556.6 S(ndors implement con\214guration options that allo)
-.165 E 2.75(waC)-.275 G(-RP to be con\214gured to be a C-RP for)-2.75 E
-(global scope only)72 569.6 Q 2.75(,f)-.715 G
-(or one of more admin scopes only)-2.75 E 2.75(,o)-.715 G 2.75(rf)-2.75
-G(or all scopes, both global and admin)-2.75 E 2.75(scoped. W)72 582.6 R
-2.75(ea)-.88 G(lso recommend that the def)-2.75 E
-(ault be that a C-RP is a C-RP for all scopes, both global)-.11 E
-(and admin scoped.)72 595.6 Q
-(Unless con\214gured otherwise, C-RPs disco)72 621.6 Q -.165(ve)-.165 G
-2.75(rt).165 G(he e)-2.75 E
-(xistence of the admin scope zone and its group)-.165 E
-(range from recei)72 634.6 Q
-(ving a bootstrap message from the scope zone')-.275 E 2.75(se)-.605 G
-(lected BSR containing the)-2.75 E(scope zone')72 647.6 Q 2.75(sg)-.605
-G(roup-range, mark)-2.75 E(ed using the "Admin Scope" bit.)-.11 E 2.75
-(AC)5.5 G(-RP stores each elected)-2.75 E(BSR')72 660.6 Q 2.75(sa)-.605
-G(ddress and the admin scope range contained in its bootstrap message.)
--2.75 E(It separately)5.5 E(unicasts Candidate-RP-Adv)72 673.6 Q
-(ertisement messages to the appropriate BSR for e)-.165 E -.165(ve)-.275
-G(ry admin scope).165 E(range within which it is willing to serv)72
-686.6 Q 2.75(ea)-.165 G 2.75(sa)-2.75 G 2.75(nR)-2.75 G -1.221(P.)-2.75
-G(All PIM routers within a PIM bootstrap domain where admin scope range\
-s are in use must be)72 712.6 Q(capable of recei)72 725.6 Q(ving bootst\
-rap messages and storing the winning BSR and RPset for all admin)-.275 E
-(Fenner/Handle)72 769 Q(y/K)-.165 E 188.515(ermode/Thaler Section)-.275
-F 2.75(1.2. [P)2.75 F(age 4])-.165 E EP
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E
+(In general, these mapping entries may o)72 85 Q -.165(ve)-.165 G
+(rlap in arbitrary w).165 E(ays; a particular multicast group may)-.11 E
+(be co)72 98 Q -.165(ve)-.165 G(red by multiple mapping entries.).165 E
+(When this is the case, the router chooses only one of the)5.5 E(entrie\
+s by applying a deterministic algorithm \(speci\214ed in the PIM-SM pro\
+tocol speci\214cation\) so)72 111 Q(that all routers in the domain mak)
+72 124 Q 2.75(et)-.11 G
+(he same choice of entry and hence apply the same group-to-)-2.75 E
+(RP mapping.)72 137 Q(The BSR mechanism pro)72 153.6 Q(vides a w)-.165 E
+(ay in which viable group-to-RP mappings can be created and)-.11 E
+(distrib)72 166.6 Q(uted to all the PIM-SM routers in a domain.)-.22 E
+(It is adapti)5.5 E -.165(ve)-.275 G 2.75(,i).165 G 2.75(nt)-2.75 G
+(hat if an RP becomes)-2.75 E(unreachable, this will be detected and th\
+e mapping tables will be modi\214ed so that the unreachable)72 179.6 Q
+(RP is no longer used, and the ne)72 192.6 Q 2.75(wt)-.275 G
+(ables will be rapidly distrib)-2.75 E(uted throughout the domain.)-.22
+E(The general idea behind the BSR-mechanism is that some of the PIM rou\
+ters within a PIM)72 209.2 Q
+(domain are con\214gured to be potential RPs for the domain.)72 222.2 Q
+(These are kno)5.5 E(wn as candidate-RPs \(C-)-.275 E 2.75(RPs\). A)72
+235.2 R(subset of the C-RPs will e)2.75 E -.165(ve)-.275 G
+(ntually be used as the actual RPs for the domain.).165 E(In)5.5 E(addi\
+tion, some of the PIM routers in the domain are con\214gured as candida\
+te bootstrap routers \(C-)72 248.2 Q 2.75(BSRs\). One)72 261.2 R
+(of these C-BSRs will be elected to serv)2.75 E 2.75(ea)-.165 G 2.75(st)
+-2.75 G(he bootstrap router \(BSR\) for the)-2.75 E(domain, and all the\
+ PIM routers in the domain will learn the result of this election throu\
+gh)72 274.2 Q(Bootstrap messages.)72 287.2 Q
+(The C-RPs will them report their candidac)5.5 E 2.75(yt)-.165 G 2.75
+(ot)-2.75 G(he elected BSR, which will)-2.75 E(choose a subset of the C\
+-RPs to form the actual set of RPs to the used.)72 300.2 Q
+(This RP-Set will then be)5.5 E(distrib)72 313.2 Q
+(uted out to all the routers in the domain through Bootstrap messages.)
+-.22 E
+(The mechanism is complicated slightly by the presence of administrati)
+72 329.8 Q -.165(ve)-.275 G(ly-scoped multicast).165 E(re)72 342.8 Q
+(gions within the PIM-SM domain.)-.165 E(An admin-scope re)5.5 E
+(gion is a con)-.165 E .33 -.165(vex c)-.44 H(onnected set of PIM).165 E
+(routers surrounded by an admin-scope boundary)72 355.8 Q 5.5(.T)-.715 G
+(he boundary speci\214es a range of multicast)-5.5 E
+(addresses that will not be forw)72 368.8 Q
+(arded into or out of the scoped re)-.11 E 2.75(gion. This)-.165 F
+(complicates BSR)2.75 E(because we do not w)72 381.8 Q
+(ant a PIM router within the scoped re)-.11 E
+(gion to use an RP outside the scoped)-.165 E(re)72 394.8 Q
+(gion \(or vice-v)-.165 E 2.75(ersa\). Thus)-.165 F
+(we need to modify the basic mechanism to ensure that this doesn')2.75 E
+(t)-.198 E(happen - this is done by electing a BSR for e)72 407.8 Q
+-.165(ve)-.275 G(ry admin-scope re).165 E(gion within a PIM domain, and)
+-.165 E(also a global BSR for the whole PIM domain.)72 420.8 Q
+(C-RPs typically re)5.5 E(gister multiple times; once to)-.165 E
+(the BSR of e)72 433.8 Q -.165(ve)-.275 G
+(ry admin scope zone the C-RP is in.).165 E -.165(Fo)5.5 G 2.75(rt).165
+G(he remainder of this o)-2.75 E -.165(ve)-.165 G(rvie).165 E 2.75(ww)
+-.275 G 2.75(ew)-2.75 G(ill)-2.75 E(ignore admin-scope re)72 446.8 Q
+(gions, and concentrate on the global BSR and its role.)-.165 E -.44(Wi)
+5.5 G(thin each scope).44 E
+(zone, the BSR for that zone acts in a similar manner to ho)72 459.8 Q
+2.75(wt)-.275 G(he global BSR acts for the whole)-2.75 E(domain.)72
+472.8 Q(There are four basic phases to the BSR mechanism \(although in \
+practice all phases may by)72 489.4 Q(occurring simultaneously\):)72
+502.4 Q/F1 11/Times-Bold@0 SF(1.)72 519 Q F0(BSR election.)16.75 E
+(Each Candidate-BSR originates bootstrap messages \(BSMs\).)5.5 E(Ev)5.5
+E(ery BSM)-.165 E(contains a BSR priority \214eld.)97 532 Q
+(Routers within the domain \215ood the BSMs throughout the)5.5 E 2.75
+(domain. A)97 545 R(C-BSR that hears about a higher)2.75 E
+(-priority C-BSR than itself then suppresses its)-.22 E
+(sending of further BSMs for some period of time.)97 558 Q
+(The single remaining C-BSR becomes)5.5 E(the elected BSR, and its BSMs\
+ inform all the other routers in the domain that it is the)97 571 Q
+(elected BSR.)97 584 Q F1(2.)72 600.6 Q F0(C-RP adv)16.75 E 2.75
+(ertisement. Each)-.165 F
+(Candidate-RP within a domain sends periodic Candidate-RP-)2.75 E(Adv)97
+613.6 Q(ertisement \(C-RP-Adv\) messages to the elected BSR.)-.165 E
+(In this w)5.5 E(ay)-.11 E 2.75(,t)-.715 G(he BSR learns about)-2.75 E
+(possible RPs that are currently up and reachable.)97 626.6 Q F1(3.)72
+643.2 Q F0(C-RP-Set F)16.75 E 2.75(ormation. The)-.165 F
+(BSR selects a subset of the C-RPs that it has heard C-RP-Adv)2.75 E
+(messages from to form the RP-Set.)97 656.2 Q
+(In general it should do this in such a w)5.5 E(ay that the RP-)-.11 E
+(Set is neither too lar)97 669.2 Q(ge to inform all the routers in the \
+domain about, nor too small so that)-.198 E(load is o)97 682.2 Q -.165
+(ve)-.165 G(rly concentrated on some RPs.).165 E
+(It should also attempt to produce an RP-Set that)5.5 E
+(does not change frequently)97 695.2 Q(.)-.715 E F1(4.)72 711.8 Q F0
+(RP-Set Flooding.)16.75 E
+(In future bootstrap messages, the BSR includes the RP-Set information.)
+5.5 E(As bootstrap messages are \215ooded rapidly through the domain, t\
+his ensures that the RP-Set)97 724.8 Q(Fenner/Handle)72 769 Q(y/K)-.165
+E 188.515(ermode/Thaler Section)-.275 F 2.75(1.1. [P)2.75 F(age 4])-.165
+E EP
 %%Page: 5 5
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E(scope zones that apply)72 85 Q
-5.5(.T)-.715 G
-(hus PIM routers that only implement RFC 2362 \(which only allo)-5.5 E
-(ws one)-.275 E(BSR per domain\) cannot be used in PIM domains where ad\
-min scope zones are con\214gured.)72 98 Q/F1 11/Times-Bold@0 SF(2.)72
-137 Q/F2 14/Times-Bold@0 SF(BSR State and T)5.5 E(imers)-.252 E F0 2.75
-(AP)72 153.6 S(IM-SM router implementing BSR holds the follo)-2.75 E
-(wing state in addition to the state needed for)-.275 E
-(PIM-SM operation:)72 166.6 Q/F3 11/Times-Italic@0 SF(At all r)97 183.2
-Q(outer)-.495 E(s:)-.11 E F1(List of Acti)122 199.8 Q .22 -.11(ve S)-.11
-H(cope Zones).11 E F0(Per Scope Zone:)122 216.4 Q F1(Bootstrap State:)
-147 233 Q F0 7.15<8342>172 249.6 S(ootstrap Router')-7.15 E 2.75(sI)
--.605 G 2.75(PA)-2.75 G(ddress)-2.75 E 7.15<8342>172 266.2 S
-(SR Priority)-7.15 E 7.15<8342>172 282.8 S(ootstrap T)-7.15 E
-(imer \(BST\))-.385 E 7.15<834c>172 299.4 S
-(ist of Scope Group-Ranges for this BSR)-7.15 E F1(RP Set)122 316 Q F3
-(At a Candidate BSR:)97 332.6 Q F0(Per Scope Zone:)122 349.2 Q 7.15
-<834d>147 365.8 S 2.75(ys)-7.15 G(tate: One of ")-2.75 E F1
-(Candidate-BSR)A F0(", ")A F1 -.22(Pe)C(nding-BSR).22 E F0(", ")A F1
-(Elected-BSR)A F0(")A F3(At a r)97 382.4 Q
-(outer that is not a Candidate BSR:)-.495 E F0(Per Scope Zone:)122 399 Q
-(My state: One of ")147 415.6 Q F1(Accept Any)A F0(", ")A F1(Accept Pr)A
-(eferr)-.198 E(ed)-.198 E F0(")A F1(Scope-Zone Expiry T)147 432.2 Q
-(imer: SZT\(Z\))-.198 E F0(Bootstrap state is described in section 3, a\
-nd the RP Set is described in section 3.4.)72 448.8 Q(The follo)72 474.8
-Q(wing timers are also required:)-.275 E(At the Bootstrap Router only:)
-97 491.4 Q(Per Scope Zone \(Z\):)122 508 Q(Per Candidate RP \(C\):)147
-524.6 Q F1(C-RP Expiry T)172 541.2 Q(imer: CET\(C,Z\))-.198 E F0
-(At the C-RPs only:)97 557.8 Q F1(C-RP Adv)122 574.4 Q(ertisement T)-.11
-E(imer: CRPT)-.198 E(3.)72 613.4 Q F2
-(Bootstrap Router Election and RP-Set Distrib)5.5 E(ution)-.28 E F0
--.165(Fo)72 630 S 2.75(rs).165 G(implicity)-2.75 E 2.75(,b)-.715 G(oots\
-trap messages \(BSMs\) are used in both the BSR election and the RP-Set)
--2.75 E(distrib)72 643 Q(ution mechanisms.)-.22 E(The state-machine for\
- bootstrap messages depends on whether or not a router has been con\214\
-gured)72 659.6 Q(to be a Candidate-BSR for a particular scope zone.)72
-672.6 Q(The per)5.5 E(-scope-zone state-machine for a C-)-.22 E
-(BSR is gi)72 685.6 Q -.165(ve)-.275 G 2.75(nb).165 G(elo)-2.75 E 1.43
--.715(w, f)-.275 H(ollo).715 E(wed by the state-machine for a router th\
-at is not con\214gured to be a C-)-.275 E(BSR.)72 698.6 Q(Fenner/Handle)
-72 769 Q(y/K)-.165 E 196.765(ermode/Thaler Section)-.275 F 2.75(3. [P)
-2.75 F(age 5])-.165 E EP
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E
+(rapidly reaches all the routers in the domain.)97 85 Q
+(BSMs are originated periodically to ensure)5.5 E(consistenc)97 98 Q
+2.75(ya)-.165 G(fter f)-2.75 E(ailure restoration.)-.11 E(In the follo)
+72 114.6 Q(wing sections we discuss more details about BSR for global s\
+cope and for admin)-.275 E
+(scoping, before specifying the protocol starting in section 2.)72 127.6
+Q/F1 11/Times-Bold@0 SF(1.2.)72 153.6 Q/F2 13/Times-Bold@0 SF(Ov)5.5 E
+(er)-.13 E(view of Bootstrap and RP Disco)-.13 E -.13(ve)-.13 G(ry f).13
+E(or Global Scope)-.325 E F0 2.75(As)72 170.2 S(mall set of routers fro\
+m a domain are con\214gured as candidate bootstrap routers \(C-BSRs\) a\
+nd,)-2.75 E(through a simple election mechanism, a single BSR is select\
+ed for that domain. A set of routers)72 183.2 Q(within a domain are als\
+o con\214gured as candidate RPs \(C-RPs\); typically these will be the \
+same)72 196.2 Q(routers that are con\214gured as C-BSRs.)72 209.2 Q
+(Candidate RPs periodically unicast Candidate-RP-)5.5 E(Adv)72 222.2 Q
+(ertisement messages \(C-RP-Advs\) to the BSR of that domain, adv)-.165
+E(ertising their willingness to)-.165 E(be an RP)72 235.2 Q 2.75(.AC)
+-1.221 G(-RP-Adv message includes the address of the adv)-2.75 E
+(ertising C-RP)-.165 E 2.75(,a)-1.221 G 2.75(sw)-2.75 G(ell as an)-2.75
+E(optional list of group addresses and a mask length \214elds, indicati\
+ng the group pre\214x\(es\) for which)72 248.2 Q(the candidac)72 261.2 Q
+2.75(yi)-.165 G 2.75(sa)-2.75 G(dv)-2.75 E(ertised. The BSR then includ\
+es a set of these Candidate-RPs \(the RP-Set\),)-.165 E
+(along with their corresponding group pre\214x)72 274.2 Q
+(es, in Bootstrap messages it periodically originates.)-.165 E
+(Bootstrap messages are distrib)72 287.2 Q
+(uted hop-by-hop throughout the domain.)-.22 E
+(All the PIM routers in the domain recei)72 313.2 Q .33 -.165(ve a)-.275
+H(nd store Bootstrap messages originated by the BSR.).165 E
+(When a DR recei)72 326.2 Q -.165(ve)-.275 G 2.75(sa).165 G 2.75(ni)
+-2.75 G(ndication of local membership \(typically from IGMP [4] or MLD \
+[1]\) or)-2.75 E 2.75(ad)72 339.2 S(ata pack)-2.75 E(et from a directly\
+ connected host, for a group for which it has no forw)-.11 E
+(arding state, the)-.11 E(DR uses a hash function to map the group addr\
+ess to one of the C-RPs from the RP-Set whose)72 352.2 Q(group-pre\214x\
+ includes the group \(see [3]\). The DR then sends a Join message to)72
+365.2 Q -.11(wa)-.275 G(rds that RP if).11 E
+(the local host joined the group, or it Re)72 378.2 Q(gister)-.165 E
+(-encapsulates and unicasts the data pack)-.22 E(et to the RP)-.11 E
+(if the local host sent a pack)72 391.2 Q(et to the group.)-.11 E 2.75
+(AB)72 417.2 S(ootstrap message indicates li)-2.75 E -.165(ve)-.275 G
+(ness of the RPs included therein.).165 E(If an RP is included in the)
+5.5 E(message, then it is tagged as `up' at the routers; RPs not includ\
+ed in the message are remo)72 430.2 Q -.165(ve)-.165 G(d).165 E
+(from the list of RPs o)72 443.2 Q -.165(ve)-.165 G 2.75(rw).165 G(hich\
+ the hash algorithm acts. Each router continues to use the contents)
+-2.75 E(of the most recently recei)72 456.2 Q -.165(ve)-.275 G 2.75(dB)
+.165 G(ootstrap message from the BSR until it accepts a ne)-2.75 E 2.75
+(wB)-.275 G(ootstrap)-2.75 E(message.)72 469.2 Q(If a PIM domain become\
+s partitioned, each area separated from the old BSR will elect its o)72
+495.2 Q(wn)-.275 E(BSR, which will distrib)72 508.2 Q
+(ute an RP-Set containing RPs that are reachable within that partition.)
+-.22 E(When the partition heals, another election will occur automatica\
+lly and only one of the BSRs will)72 521.2 Q
+(continue to send out Bootstrap messages. As is e)72 534.2 Q
+(xpected at the time of a partition or healing,)-.165 E
+(some disruption in pack)72 547.2 Q(et deli)-.11 E -.165(ve)-.275 G
+(ry may occur).165 E 2.75(.T)-.605 G
+(his time will be on the order of the re)-2.75 E(gion')-.165 E(s)-.605 E
+(round-trip time and the bootstrap router timeout v)72 560.2 Q(alue.)
+-.275 E F1(1.3.)72 599.2 Q F2(Administrati)5.5 E -.13(ve)-.13 G
+(ly Scoped Multicast and BSR).13 E F0(Administrati)72 615.8 Q -.165(ve)
+-.275 G
+(ly Scoped IP Multicast, as de\214ned in RFC 2365, permits a netw).165 E
+(ork pro)-.11 E(vider to)-.165 E
+(con\214gure scope boundaries at multicast routers.)72 628.8 Q
+(Such a scope boundary consists of a range of)5.5 E
+(multicast addresses \(e)72 641.8 Q
+(xpressed as an address and mask\) that the router will not forw)-.165 E
+(ard across the)-.11 E(boundary)72 654.8 Q 5.5(.F)-.715 G(or correct op\
+eration, such a scope zone border must be complete and con)-5.665 E
+-.165(vex)-.44 G 5.5(.B).165 G 2.75(yt)-5.5 G(his)-2.75 E(we mean that \
+there must be no path from inside the scoped zone to outside it that do\
+es not pass)72 667.8 Q(through a con\214gured scope border router)72
+680.8 Q 2.75(,a)-.44 G(nd that the multicast capable path between an)
+-2.75 E(y)-.165 E(arbitrary pair of multicast routers in the scope zone\
+ must remain in the zone.)72 693.8 Q -.165(Fo)72 719.8 S 2.75(rP).165 G
+(IM-SM using BSR to function correctly with admin scoping, there must b\
+e a BSR and at)-2.75 E(Fenner/Handle)72 769 Q(y/K)-.165 E 188.515
+(ermode/Thaler Section)-.275 F 2.75(1.3. [P)2.75 F(age 5])-.165 E EP
 %%Page: 6 6
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 11/Times-Bold@0 SF -.22(Pe)
-72 85 S -.407(r-).22 G(Scope-Zone Candidate-BSR State Machine).407 E 48
-307 432 480 -252.9 281 72 360.5 PBEGIN
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E(least one C-RP within e)72
+85 Q -.165(ve)-.275 G(ry admin scope re).165 E 2.75(gion. Admin)-.165 F
+(scope zone boundaries must be)2.75 E
+(con\214gured at the Zone Border Routers \(ZBRs\), as the)72 98 Q 2.75
+(yn)-.165 G(eed to \214lter PIM Join messages that)-2.75 E(might inadv)
+72 111 Q(ertently cross the border due to error conditions.)-.165 E
+(In addition, at least one C-BSR)5.5 E(within the admin scope zone must\
+ be con\214gured to be a C-BSR for the admin scope zone')72 124 Q(s)
+-.605 E(address range.)72 137 Q 2.75(As)72 163 S
+(eparate BSR election will then tak)-2.75 E 2.75(ep)-.11 G
+(lace \(using bootstrap messages\) for e)-2.75 E -.165(ve)-.275 G
+(ry admin scope).165 E(range \(plus one for the global range\).)72 176 Q
+(Admin scope ranges are identi\214ed in the bootstrap message)5.5 E
+(because the group range is mark)72 189 Q
+(ed \(using the "Admin Scope" bit, pre)-.11 E(viously a "Reserv)-.275 E
+(ed" bit\) to)-.165 E(indicate that this is an administrati)72 202 Q .33
+-.165(ve s)-.275 H
+(cope range, and not just a range that a particular set of RPs).165 E
+(are con\214gured to handle.)72 215 Q
+(Such admin scoped bootstrap message pack)72 241 Q
+(ets are \215ooded in the normal w)-.11 E(ay)-.11 E 2.75(,b)-.715 G
+(ut will not be)-2.97 E(forw)72 254 Q(arded by another ZBR across the b\
+oundary for that scope zone \(see Section 3.3 for the)-.11 E
+(speci\214cs of this\).)72 267 Q 1.76 -.88(We d)72 293 T 2.75(on).88 G
+(ot require that C-RPs within the scope zone be con\214gured to kno)
+-2.75 E 2.75(wa)-.275 G(bout the scope zone,)-2.75 E(as the)72 306 Q
+2.75(yc)-.165 G(an learn of its e)-2.75 E
+(xistence from bootstrap messages.)-.165 E(Ho)5.5 E(we)-.275 E -.165(ve)
+-.275 G .88 -.44(r, w).165 H 2.75(er).44 G(ecommend that router)-2.75 E
+-.165(ve)72 319 S(ndors implement con\214guration options that allo).165
+E 2.75(waC)-.275 G(-RP to be con\214gured to be a C-RP for)-2.75 E
+(global scope only)72 332 Q 2.75(,f)-.715 G
+(or one of more admin scopes only)-2.75 E 2.75(,o)-.715 G 2.75(rf)-2.75
+G(or all scopes, both global and admin)-2.75 E 2.75(scoped. W)72 345 R
+2.75(ea)-.88 G(lso recommend that the def)-2.75 E
+(ault be that a C-RP is a C-RP for all scopes, both global)-.11 E
+(and admin scoped.)72 358 Q(Unless con\214gured otherwise, C-RPs disco)
+72 384 Q -.165(ve)-.165 G 2.75(rt).165 G(he e)-2.75 E
+(xistence of the admin scope zone and its group)-.165 E
+(range from recei)72 397 Q
+(ving a bootstrap message from the scope zone')-.275 E 2.75(se)-.605 G
+(lected BSR containing the)-2.75 E(scope zone')72 410 Q 2.75(sg)-.605 G
+(roup-range, mark)-2.75 E(ed using the "Admin Scope" bit.)-.11 E 2.75
+(AC)5.5 G(-RP stores each elected)-2.75 E(BSR')72 423 Q 2.75(sa)-.605 G
+(ddress and the admin scope range contained in its bootstrap message.)
+-2.75 E(It separately)5.5 E(unicasts Candidate-RP-Adv)72 436 Q
+(ertisement messages to the appropriate BSR for e)-.165 E -.165(ve)-.275
+G(ry admin scope).165 E(range within which it is willing to serv)72 449
+Q 2.75(ea)-.165 G 2.75(sa)-2.75 G 2.75(nR)-2.75 G -1.221(P.)-2.75 G(All\
+ PIM routers within a PIM bootstrap domain where admin scope ranges are\
+ in use must be)72 475 Q(capable of recei)72 488 Q(ving bootstrap messa\
+ges and storing the winning BSR and RPset for all admin)-.275 E
+(scope zones that apply)72 501 Q 5.5(.T)-.715 G
+(hus PIM routers that only implement RFC 2362 \(which only allo)-5.5 E
+(ws one)-.275 E(BSR per domain\) cannot be used in PIM domains where ad\
+min scope zones are con\214gured.)72 514 Q/F1 11/Times-Bold@0 SF(2.)72
+553 Q/F2 14/Times-Bold@0 SF(BSR State and T)5.5 E(imers)-.252 E F0 2.75
+(AP)72 569.6 S(IM-SM router implementing BSR holds the follo)-2.75 E
+(wing state in addition to the state needed for)-.275 E
+(PIM-SM operation:)72 582.6 Q/F3 11/Times-Italic@0 SF(At all r)97 599.2
+Q(outer)-.495 E(s:)-.11 E F1(List of Acti)122 615.8 Q .22 -.11(ve S)-.11
+H(cope Zones).11 E F0(Per Scope Zone:)122 632.4 Q F1(Bootstrap State:)
+147 649 Q F0 7.15<8342>172 665.6 S(ootstrap Router')-7.15 E 2.75(sI)
+-.605 G 2.75(PA)-2.75 G(ddress)-2.75 E 7.15<8342>172 682.2 S
+(SR Priority)-7.15 E 7.15<8342>172 698.8 S(ootstrap T)-7.15 E
+(imer \(BST\))-.385 E(Fenner/Handle)72 769 Q(y/K)-.165 E 196.765
+(ermode/Thaler Section)-.275 F 2.75(2. [P)2.75 F(age 6])-.165 E EP
+%%Page: 7 7
+%%BeginPageSetup
+BP
+%%EndPageSetup
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E 7.15<834c>172 85 S
+(ist of Scope Group-Ranges for this BSR)-7.15 E/F1 11/Times-Bold@0 SF
+(RP Set)122 101.6 Q/F2 11/Times-Italic@0 SF(At a Candidate BSR:)97 118.2
+Q F0(Per Scope Zone:)122 134.8 Q 7.15<834d>147 151.4 S 2.75(ys)-7.15 G
+(tate: One of ")-2.75 E F1(Candidate-BSR)A F0(", ")A F1 -.22(Pe)C
+(nding-BSR).22 E F0(", ")A F1(Elected-BSR)A F0(")A F2(At a r)97 168 Q
+(outer that is not a Candidate BSR:)-.495 E F0(Per Scope Zone:)122 184.6
+Q(My state: One of ")147 201.2 Q F1(Accept Any)A F0(", ")A F1(Accept Pr)
+A(eferr)-.198 E(ed)-.198 E F0(")A F1(Scope-Zone Expiry T)147 217.8 Q
+(imer: SZT\(Z\))-.198 E F0(Bootstrap state is described in section 3, a\
+nd the RP Set is described in section 3.4.)72 234.4 Q(The follo)72 260.4
+Q(wing timers are also required:)-.275 E(At the Bootstrap Router only:)
+97 277 Q(Per Scope Zone \(Z\):)122 293.6 Q(Per Candidate RP \(C\):)147
+310.2 Q F1(C-RP Expiry T)172 326.8 Q(imer: CET\(C,Z\))-.198 E F0
+(At the C-RPs only:)97 343.4 Q F1(C-RP Adv)122 360 Q(ertisement T)-.11 E
+(imer: CRPT)-.198 E(3.)72 399 Q/F3 14/Times-Bold@0 SF
+(Bootstrap Router Election and RP-Set Distrib)5.5 E(ution)-.28 E F0
+-.165(Fo)72 415.6 S 2.75(rs).165 G(implicity)-2.75 E 2.75(,b)-.715 G(oo\
+tstrap messages \(BSMs\) are used in both the BSR election and the RP-S\
+et)-2.75 E(distrib)72 428.6 Q(ution mechanisms.)-.22 E(The state-machin\
+e for bootstrap messages depends on whether or not a router has been co\
+n\214gured)72 445.2 Q
+(to be a Candidate-BSR for a particular scope zone.)72 458.2 Q(The per)
+5.5 E(-scope-zone state-machine for a C-)-.22 E(BSR is gi)72 471.2 Q
+-.165(ve)-.275 G 2.75(nb).165 G(elo)-2.75 E 1.43 -.715(w, f)-.275 H
+(ollo).715 E(wed by the state-machine for a router that is not con\214g\
+ured to be a C-)-.275 E(BSR.)72 484.2 Q(Fenner/Handle)72 769 Q(y/K)-.165
+E 196.765(ermode/Thaler Section)-.275 F 2.75(3. [P)2.75 F(age 7])-.165 E
+EP
+%%Page: 8 8
+%%BeginPageSetup
+BP
+%%EndPageSetup
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 11/Times-Bold@0 SF -.22
+(Pe)72 85 S -.407(r-).22 G(Scope-Zone Candidate-BSR State Machine).407 E
+48 307 396 480 -231.825 281 108 339.425 PBEGIN
 %%BeginDocument: c-bsr.ps
 %%Creator: idraw
 %%DocumentFonts: Helvetica
@@ -1440,95 +1601,102 @@ showpage
 
 end
 %%EndDocument
-end PEND(Figur)144.191 399.5 Q 2.75(e1)-.198 G 2.75(:P)-2.75 G(er)-2.97
-E(-Scope-Zone State-machine f)-.407 E(or a candidate BSR)-.275 E F0
-(In tab)72 422.1 Q(ular form this state machine is:)-.22 E .44 LW
-503.996 445.85 72 445.85 DL F1(When in C-BSR state)237.733 456.1 Q
-503.996 460.85 72 460.85 DL(Ev)85.192 471.1 Q(ent)-.11 E F0(Recei)
-173.271 471.1 Q .33 -.165(ve P)-.275 H(referred).165 E(BSM)173.271 484.1
-Q(BS T)291.508 471.1 Q(imer Expires)-.385 E(Recei)410.141 471.1 Q .33
--.165(ve n)-.275 H(on-).165 E(preferred BSM)410.141 484.1 Q
-(from Elected BSR)410.141 497.1 Q 503.996 501.85 72 501.85 DL
-(-> C-BSR state)173.271 512.1 Q(-> P-BSR state)291.508 512.1 Q
-(-> P-BSR state)410.141 512.1 Q F1(Action)85.192 538.1 Q F0 -.165(Fo)
-173.271 525.1 S(rw).165 E(ard BSM;)-.11 E(Store RP Set; Set)173.271
-538.1 Q(BS T)173.271 551.1 Q(imer to BS)-.385 E -.385(Ti)173.271 564.1 S
-(meout).385 E(Set BS T)291.508 525.1 Q(imer to)-.385 E(rand_o)291.508
-538.1 Q -.165(ve)-.165 G(rride).165 E(Set BS T)410.141 525.1 Q(imer to)
--.385 E(rand_o)410.141 538.1 Q -.165(ve)-.165 G(rride).165 E 503.996
-568.85 72 568.85 DL 503.996 460.85 503.996 568.85 DL 390.353 460.85
-390.353 568.85 DL 271.72 460.85 271.72 568.85 DL 152.483 460.85 152.483
-568.85 DL 154.483 460.85 154.483 568.85 DL 503.996 445.85 503.996 568.85
-DL 72 445.85 72 568.85 DL 503.991 593.85 72 593.85 DL F1
-(When in P-BSR state)184.183 604.1 Q 503.991 608.85 72 608.85 DL(Ev)
-86.01 619.1 Q(ent)-.11 E F0(Recei)181.917 619.1 Q .33 -.165(ve P)-.275 H
-(referred).165 E(BSM)181.917 632.1 Q(BS T)302.608 619.1 Q(imer Expires)
--.385 E(Recei)423.695 619.1 Q .33 -.165(ve N)-.275 H(on-).165 E
-(preferred BSM)423.695 632.1 Q 503.991 636.85 72 636.85 DL
-(-> C-BSR state)181.917 647.1 Q(-> E-BSR state)302.608 647.1 Q
-(-> P-BSR state)423.695 647.1 Q F1(Action)86.01 673.1 Q F0 -.165(Fo)
-181.917 660.1 S(rw).165 E(ard BSM;)-.11 E(Store RP Set; Set)181.917
-673.1 Q(BS T)181.917 686.1 Q(imer to BS)-.385 E -.385(Ti)181.917 699.1 S
-(meout).385 E(Originate BSM;)302.608 660.1 Q(Set BS T)302.608 673.1 Q
-(imer to)-.385 E(BS Period)302.608 686.1 Q 503.991 703.85 72 703.85 DL
-503.991 608.85 503.991 703.85 DL 402.68 608.85 402.68 703.85 DL 281.593
-608.85 281.593 703.85 DL 159.902 608.85 159.902 703.85 DL 161.902 608.85
-161.902 703.85 DL 503.991 593.85 503.991 703.85 DL 72 593.85 72 703.85
-DL(Fenner/Handle)72 769 Q(y/K)-.165 E 196.765(ermode/Thaler Section)
--.275 F 2.75(3. [P)2.75 F(age 6])-.165 E EP
-%%Page: 7 7
+end PEND(Figur)162.191 378.425 Q 2.75(e1)-.198 G 2.75(:P)-2.75 G(er)
+-2.97 E(-Scope-Zone State-machine f)-.407 E(or a candidate BSR)-.275 E
+F0(Fenner/Handle)72 769 Q(y/K)-.165 E 196.765(ermode/Thaler Section)
+-.275 F 2.75(3. [P)2.75 F(age 8])-.165 E EP
+%%Page: 9 9
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E .44 LW 503.998 76.75 72 76.75
-DL/F1 11/Times-Bold@0 SF(When in E-BSR state)182.258 87 Q 503.998 91.75
-72 91.75 DL(Ev)85.58 102 Q(ent)-.11 E F0(Recei)180.402 102 Q .33 -.165
-(ve P)-.275 H(referred).165 E(BSM)180.402 115 Q(BS T)299.803 102 Q
-(imer Expires)-.385 E(Recei)419.6 102 Q .33 -.165(ve N)-.275 H(on-).165
-E(preferred BSM)419.6 115 Q 503.998 119.75 72 119.75 DL(-> C-BSR state)
-180.402 130 Q(-> E-BSR state)299.803 130 Q(-> E-BSR state)419.6 130 Q F1
-(Action)85.58 156 Q F0 -.165(Fo)180.402 143 S(rw).165 E(ard BSM;)-.11 E
-(Store RP Set; Set)180.402 156 Q(BS T)180.402 169 Q(imer to BS)-.385 E
--.385(Ti)180.402 182 S(meout).385 E(Originate BSM;)299.803 143 Q
-(Set BS T)299.803 156 Q(imer to)-.385 E(BS Period)299.803 169 Q
-(Originate BSM;)419.6 143 Q(Set BS T)419.6 156 Q(imer to)-.385 E
-(BS Period)419.6 169 Q 503.998 186.75 72 186.75 DL 503.998 91.75 503.998
-186.75 DL 399.23 91.75 399.23 186.75 DL 279.433 91.75 279.433 186.75 DL
-159.032 91.75 159.032 186.75 DL 161.032 91.75 161.032 186.75 DL 503.998
-76.75 503.998 186.75 DL 72 76.75 72 186.75 DL 2.75(Ac)72 201 S(andidate\
--BSR may be in one of three states for a particular scope zone:)-2.75 E
-F1(Candidate-BSR \(C-BSR\))72 217.6 Q F0
-(The router is a candidate to be the BSR for the scope zone, b)97 230.6
-Q(ut currently another router is)-.22 E(the preferred BSR.)97 243.6 Q F1
--.22(Pe)72 260.2 S(nding-BSR \(P-BSR\)).22 E F0
-(The router is a candidate to be the BSR for the scope zone.)97 273.2 Q
-(Currently no other router is the)5.5 E(preferred BSR, b)97 286.2 Q
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E(Per)72 85 Q
+(-Scope-Zone State-machine for a candidate BSR in tab)-.22 E(ular form:)
+-.22 E .44 LW 503.996 95.75 72 95.75 DL/F1 11/Times-Bold@0 SF
+(When in C-BSR state)237.733 106 Q 503.996 110.75 72 110.75 DL(Ev)85.192
+121 Q(ent)-.11 E F0(Recei)173.271 121 Q .33 -.165(ve P)-.275 H(referred)
+.165 E(BSM)173.271 134 Q(BS T)291.508 121 Q(imer Expires)-.385 E(Recei)
+410.141 121 Q .33 -.165(ve n)-.275 H(on-).165 E(preferred BSM)410.141
+134 Q(from Elected BSR)410.141 147 Q 503.996 151.75 72 151.75 DL
+(-> C-BSR state)173.271 162 Q(-> P-BSR state)291.508 162 Q
+(-> P-BSR state)410.141 162 Q F1(Action)85.192 188 Q F0 -.165(Fo)173.271
+175 S(rw).165 E(ard BSM;)-.11 E(Store RP Set; Set)173.271 188 Q(BS T)
+173.271 201 Q(imer to BS)-.385 E -.385(Ti)173.271 214 S(meout).385 E
+(Set BS T)291.508 175 Q(imer to)-.385 E(rand_o)291.508 188 Q -.165(ve)
+-.165 G(rride).165 E(Set BS T)410.141 175 Q(imer to)-.385 E(rand_o)
+410.141 188 Q -.165(ve)-.165 G(rride).165 E 503.996 218.75 72 218.75 DL
+503.996 110.75 503.996 218.75 DL 390.353 110.75 390.353 218.75 DL 271.72
+110.75 271.72 218.75 DL 152.483 110.75 152.483 218.75 DL 154.483 110.75
+154.483 218.75 DL 503.996 95.75 503.996 218.75 DL 72 95.75 72 218.75 DL
+503.991 243.75 72 243.75 DL F1(When in P-BSR state)184.183 254 Q 503.991
+258.75 72 258.75 DL(Ev)86.01 269 Q(ent)-.11 E F0(Recei)181.917 269 Q .33
+-.165(ve P)-.275 H(referred).165 E(BSM)181.917 282 Q(BS T)302.608 269 Q
+(imer Expires)-.385 E(Recei)423.695 269 Q .33 -.165(ve N)-.275 H(on-)
+.165 E(preferred BSM)423.695 282 Q 503.991 286.75 72 286.75 DL
+(-> C-BSR state)181.917 297 Q(-> E-BSR state)302.608 297 Q
+(-> P-BSR state)423.695 297 Q F1(Action)86.01 323 Q F0 -.165(Fo)181.917
+310 S(rw).165 E(ard BSM;)-.11 E(Store RP Set; Set)181.917 323 Q(BS T)
+181.917 336 Q(imer to BS)-.385 E -.385(Ti)181.917 349 S(meout).385 E
+(Originate BSM;)302.608 310 Q(Set BS T)302.608 323 Q(imer to)-.385 E
+(BS Period)302.608 336 Q 503.991 353.75 72 353.75 DL 503.991 258.75
+503.991 353.75 DL 402.68 258.75 402.68 353.75 DL 281.593 258.75 281.593
+353.75 DL 159.902 258.75 159.902 353.75 DL 161.902 258.75 161.902 353.75
+DL 503.991 243.75 503.991 353.75 DL 72 243.75 72 353.75 DL 503.998
+378.75 72 378.75 DL F1(When in E-BSR state)182.258 389 Q 503.998 393.75
+72 393.75 DL(Ev)85.58 404 Q(ent)-.11 E F0(Recei)180.402 404 Q .33 -.165
+(ve P)-.275 H(referred).165 E(BSM)180.402 417 Q(BS T)299.803 404 Q
+(imer Expires)-.385 E(Recei)419.6 404 Q .33 -.165(ve N)-.275 H(on-).165
+E(preferred BSM)419.6 417 Q 503.998 421.75 72 421.75 DL(-> C-BSR state)
+180.402 432 Q(-> E-BSR state)299.803 432 Q(-> E-BSR state)419.6 432 Q F1
+(Action)85.58 458 Q F0 -.165(Fo)180.402 445 S(rw).165 E(ard BSM;)-.11 E
+(Store RP Set; Set)180.402 458 Q(BS T)180.402 471 Q(imer to BS)-.385 E
+-.385(Ti)180.402 484 S(meout).385 E(Originate BSM;)299.803 445 Q
+(Set BS T)299.803 458 Q(imer to)-.385 E(BS Period)299.803 471 Q
+(Originate BSM;)419.6 445 Q(Set BS T)419.6 458 Q(imer to)-.385 E
+(BS Period)419.6 471 Q 503.998 488.75 72 488.75 DL 503.998 393.75
+503.998 488.75 DL 399.23 393.75 399.23 488.75 DL 279.433 393.75 279.433
+488.75 DL 159.032 393.75 159.032 488.75 DL 161.032 393.75 161.032 488.75
+DL 503.998 378.75 503.998 488.75 DL 72 378.75 72 488.75 DL 2.75(Ac)72
+503 S(andidate-BSR may be in one of three states for a particular scope\
+ zone:)-2.75 E F1(Candidate-BSR \(C-BSR\))72 519.6 Q F0
+(The router is a candidate to be the BSR for the scope zone, b)97 532.6
+Q(ut currently another router is)-.22 E(the preferred BSR.)97 545.6 Q F1
+-.22(Pe)72 562.2 S(nding-BSR \(P-BSR\)).22 E F0
+(The router is a candidate to be the BSR for the scope zone.)97 575.2 Q
+(Currently no other router is the)5.5 E(preferred BSR, b)97 588.2 Q
 (ut this router is not yet the BSR.)-.22 E -.165(Fo)5.5 G 2.75(rc).165 G
 (omparisons with incoming BS)-2.75 E
-(messages, the router treats itself as the BSR.)97 299.2 Q
+(messages, the router treats itself as the BSR.)97 601.2 Q
 (This is a temporary state that pre)5.5 E -.165(ve)-.275 G(nts rapid)
-.165 E(thrashing of the choice of BSR during BSR election.)97 312.2 Q F1
-(Elected-BSR \(E-BSR\))72 328.8 Q F0(The router is the elected bootstra\
-p router for the scope zone and it must perform all the BSR)97 341.8 Q
-(functions.)97 354.8 Q(On startup, the initial state for this con\214gu\
-red scope zone is "Pending-BSR"; the BS T)72 371.4 Q(imer is)-.385 E
-(initialized to the BS T)72 384.4 Q(imeout v)-.385 E(alue.)-.275 E
-(In addition to the three states, there is one timer:)72 401 Q 7.15
-<8354>72 417.6 S(he bootstrap timer \(BS T)-7.15 E(imer\) - that is use\
-d to time out old bootstrap router information, and)-.385 E
-(used in the election process to terminate P-BSR state.)83 430.6 Q
+.165 E(thrashing of the choice of BSR during BSR election.)97 614.2 Q F1
+(Elected-BSR \(E-BSR\))72 630.8 Q F0(The router is the elected bootstra\
+p router for the scope zone and it must perform all the BSR)97 643.8 Q
+(functions.)97 656.8 Q(On startup, the initial state for this con\214gu\
+red scope zone is "Pending-BSR"; the BS T)72 673.4 Q(imer is)-.385 E
+(initialized to the BS T)72 686.4 Q(imeout v)-.385 E(alue.)-.275 E
+(In addition to the three states, there is one timer:)72 703 Q
 (Fenner/Handle)72 769 Q(y/K)-.165 E 196.765(ermode/Thaler Section)-.275
-F 2.75(3. [P)2.75 F(age 7])-.165 E EP
-%%Page: 8 8
+F 2.75(3. [P)2.75 F(age 9])-.165 E EP
+%%Page: 10 10
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 11/Times-Bold@0 SF -.22(Pe)
-72 85 S -.407(r-).22 G(Scope-Zone State-machine f).407 E
-(or Non-Candidate-BSR Routers)-.275 E 113 417 432 468 -205.846 223 72
-313.446 PBEGIN
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E 7.15<8354>72 85 S
+(he bootstrap timer \(BS T)-7.15 E(imer\) - that is used to time out ol\
+d bootstrap router information, and)-.385 E
+(used in the election process to terminate P-BSR state.)83 98 Q
+(Fenner/Handle)72 769 Q(y/K)-.165 E 191.265(ermode/Thaler Section)-.275
+F 2.75(3. [P)2.75 F(age 10])-.165 E EP
+%%Page: 11 11
+%%BeginPageSetup
+BP
+%%EndPageSetup
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 11/Times-Bold@0 SF -.22
+(Pe)72 85 S -.407(r-).22 G(Scope-Zone State-machine f).407 E
+(or Non-Candidate-BSR Routers)-.275 E 113 417 396 468 -188.692 223 108
+296.292 PBEGIN
 %%BeginDocument: non-c-bsr.ps
 %%Creator: idraw
 %%DocumentFonts: Helvetica
@@ -2336,457 +2504,491 @@ showpage
 
 end
 %%EndDocument
-end PEND(Figur)104.828 352.446 Q 2.75(e2)-.198 G 2.75(:P)-2.75 G(er)
+end PEND(Figur)122.828 335.292 Q 2.75(e2)-.198 G 2.75(:P)-2.75 G(er)
 -2.97 E(-Scope-Zone State-machine f)-.407 E(or a r)-.275 E
-(outer not con\214gur)-.198 E(ed as C-BSR)-.198 E F0(In tab)72 371.446 Q
-(ular form this state machine is:)-.22 E .44 LW 503.996 395.196 72
-395.196 DL F1(When in No Inf)236.496 405.446 Q 2.75(os)-.275 G(tate)
--2.75 E 503.996 410.196 72 410.196 DL(Ev)115.585 420.446 Q(ent)-.11 E F0
-(Recei)134.528 E .33 -.165(ve B)-.275 H(SM for unkno).165 E
-(wn Admin Scope)-.275 E 503.996 425.196 72 425.196 DL(-> AP State)
-277.503 435.446 Q -.165(Fo)277.503 448.446 S(rw).165 E
-(ard BSM; Store RP-Set;)-.11 E(Set BS T)277.503 461.446 Q(imer to BS T)
--.385 E(imeout;)-.385 E(Set SZ T)277.503 474.446 Q(imer to SZ T)-.385 E
-(imeout)-.385 E F1(Action)115.585 454.946 Q 503.996 479.196 72 479.196
-DL 503.996 410.196 503.996 479.196 DL 212.125 410.196 212.125 479.196 DL
-503.996 395.196 503.996 479.196 DL 72 395.196 72 479.196 DL 504 504.196
-72 504.196 DL(When in Accept Any state)226.895 514.446 Q 504 519.196 72
-519.196 DL(Ev)97.939 529.446 Q(ent)-.11 E F0(Recei)81.59 E .33 -.165
-(ve B)-.275 H(SM).165 E(SZ T)392.536 529.446 Q(imer Expires)-.385 E 504
-534.196 72 534.196 DL(-> AP State)206.919 544.446 Q(-> No Info state)
-134.192 E F1(Action)97.939 563.946 Q F0 -.165(Fo)206.919 557.446 S(rw)
-.165 E(ard BSM; Store)-.11 E(RP-Set; Set BS T)206.919 570.446 Q(imer to)
--.385 E(BS T)206.919 583.446 Q(imeout)-.385 E(cancel timers; clear)
-392.536 557.446 Q(state)392.536 570.446 Q 504 588.196 72 588.196 DL
-353.627 519.196 353.627 588.196 DL 168.01 519.196 168.01 588.196 DL 504
-504.196 504 588.196 DL 72 504.196 72 588.196 DL(Fenner/Handle)72 769 Q
-(y/K)-.165 E 196.765(ermode/Thaler Section)-.275 F 2.75(3. [P)2.75 F
-(age 8])-.165 E EP
-%%Page: 9 9
-%%BeginPageSetup
-BP
-%%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E .44 LW 503.995 76.75 72 76.75
-DL/F1 11/Times-Bold@0 SF(When in Accept Pr)157.267 87 Q(eferr)-.198 E
-(ed state)-.198 E 503.995 91.75 72 91.75 DL(Ev)87.705 102 Q(ent)-.11 E
-F0(Recei)170.056 102 Q .33 -.165(ve P)-.275 H(referred).165 E(BSM)
-170.056 115 Q(BS T)295.832 102 Q(imer Expires)-.385 E(Recei)422.004 102
-Q .33 -.165(ve N)-.275 H(on-).165 E(preferred BSM)422.004 115 Q 503.995
-119.75 72 119.75 DL(-> AP State)170.056 130 Q(-> AA State)74.351 E
-(-> AP State)72.921 E F1(Action)87.705 156 Q F0 -.165(Fo)170.056 143 S
-(rw).165 E(ard BSM;)-.11 E(Store RP-Set; Set)170.056 156 Q(BS T)170.056
-169 Q(imer to BS)-.385 E -.385(Ti)170.056 182 S(meout).385 E 503.995
-186.75 72 186.75 DL 503.995 91.75 503.995 186.75 DL 398.446 91.75
-398.446 186.75 DL 272.274 91.75 272.274 186.75 DL 146.498 91.75 146.498
-186.75 DL 503.995 76.75 503.995 186.75 DL 72 76.75 72 186.75 DL 2.75(Ar)
-72 214 S
+(outer not con\214gur)-.198 E(ed as C-BSR)-.198 E F0(Per)72 357.892 Q(-\
+Scope-Zone State-machine for a router not con\214gured as C-BSR in tab)
+-.22 E(ular form:)-.22 E .44 LW 503.996 368.642 72 368.642 DL F1
+(When in No Inf)236.496 378.892 Q 2.75(os)-.275 G(tate)-2.75 E 503.996
+383.642 72 383.642 DL(Ev)115.585 393.892 Q(ent)-.11 E F0(Recei)134.528 E
+.33 -.165(ve B)-.275 H(SM for unkno).165 E(wn Admin Scope)-.275 E
+503.996 398.642 72 398.642 DL(-> AP State)277.503 408.892 Q -.165(Fo)
+277.503 421.892 S(rw).165 E(ard BSM; Store RP-Set;)-.11 E(Set BS T)
+277.503 434.892 Q(imer to BS T)-.385 E(imeout;)-.385 E(Set SZ T)277.503
+447.892 Q(imer to SZ T)-.385 E(imeout)-.385 E F1(Action)115.585 428.392
+Q 503.996 452.642 72 452.642 DL 503.996 383.642 503.996 452.642 DL
+212.125 383.642 212.125 452.642 DL 503.996 368.642 503.996 452.642 DL 72
+368.642 72 452.642 DL 504 477.642 72 477.642 DL
+(When in Accept Any state)226.895 487.892 Q 504 492.642 72 492.642 DL
+(Ev)97.939 502.892 Q(ent)-.11 E F0(Recei)81.59 E .33 -.165(ve B)-.275 H
+(SM).165 E(SZ T)392.536 502.892 Q(imer Expires)-.385 E 504 507.642 72
+507.642 DL(-> AP State)206.919 517.892 Q(-> No Info state)134.192 E F1
+(Action)97.939 537.392 Q F0 -.165(Fo)206.919 530.892 S(rw).165 E
+(ard BSM; Store)-.11 E(RP-Set; Set BS T)206.919 543.892 Q(imer to)-.385
+E(BS T)206.919 556.892 Q(imeout)-.385 E(cancel timers; clear)392.536
+530.892 Q(state)392.536 543.892 Q 504 561.642 72 561.642 DL 353.627
+492.642 353.627 561.642 DL 168.01 492.642 168.01 561.642 DL 504 477.642
+504 561.642 DL 72 477.642 72 561.642 DL 503.995 586.642 72 586.642 DL F1
+(When in Accept Pr)157.267 596.892 Q(eferr)-.198 E(ed state)-.198 E
+503.995 601.642 72 601.642 DL(Ev)87.705 611.892 Q(ent)-.11 E F0(Recei)
+170.056 611.892 Q .33 -.165(ve P)-.275 H(referred).165 E(BSM)170.056
+624.892 Q(BS T)295.832 611.892 Q(imer Expires)-.385 E(Recei)422.004
+611.892 Q .33 -.165(ve N)-.275 H(on-).165 E(preferred BSM)422.004
+624.892 Q 503.995 629.642 72 629.642 DL(-> AP State)170.056 639.892 Q
+(-> AA State)74.351 E(-> AP State)72.921 E F1(Action)87.705 665.892 Q F0
+-.165(Fo)170.056 652.892 S(rw).165 E(ard BSM;)-.11 E(Store RP-Set; Set)
+170.056 665.892 Q(BS T)170.056 678.892 Q(imer to BS)-.385 E -.385(Ti)
+170.056 691.892 S(meout).385 E 503.995 696.642 72 696.642 DL 503.995
+601.642 503.995 696.642 DL 398.446 601.642 398.446 696.642 DL 272.274
+601.642 272.274 696.642 DL 146.498 601.642 146.498 696.642 DL 503.995
+586.642 503.995 696.642 DL 72 586.642 72 696.642 DL 2.75(Ar)72 723.892 S
 (outer that is not a candidate-BSR may be in one of three states:)-2.75
-E F1(No Inf)72 230.6 Q(o)-.275 E F0
-(The router has no information about this scope zone.)97 243.6 Q
-(This state does not apply if the router)5.5 E(is con\214gured to kno)97
-256.6 Q 2.75(wa)-.275 G
-(bout this scope zone, or for the global scope zone.)-2.75 E
-(When in this)5.5 E(state, no state information is held and no timers r\
-un that refer to this scope zone.)97 269.6 Q F1(Accept Any \(AA\))72
-286.2 Q F0(The router does not kno)97 299.2 Q 2.75(wo)-.275 G 2.75(fa)
--2.75 G 2.75(na)-2.75 G(cti)-2.75 E .33 -.165(ve B)-.275 H
-(SR, and will accept the \214rst bootstrap message it).165 E(sees as gi)
-97 312.2 Q(ving the ne)-.275 E 2.75(wB)-.275 G(SR')-2.75 E 2.75(si)-.605
-G(dentity and the RP-Set.)-2.75 E(If the router has an RP-Set cached)5.5
-E(from an obsolete bootstrap message, it continues to use it.)97 325.2 Q
-F1(Accept Pr)72 341.8 Q(eferr)-.198 E(ed \(AP\))-.198 E F0
-(The router kno)97 354.8 Q
-(ws the identity of the current BSR, and is using the RP-Set pro)-.275 E
-(vided by that)-.165 E 2.75(BSR. Only)97 367.8 R(bootstrap messages fro\
-m that BSR or from a C-BSR with higher weight than)2.75 E
-(the current BSR will be accepted.)97 380.8 Q
-(On startup, the initial state for this scope zone is "Accept An)72
-397.4 Q(y" for routers that kno)-.165 E 2.75(wa)-.275 G(bout this)-2.75
-E(scope zone, either through con\214guration or because the scope zone \
-is the global scope which)72 410.4 Q(al)72 423.4 Q -.11(wa)-.11 G(ys e)
-.11 E(xists; the SZ T)-.165 E(imer is considered to be al)-.385 E -.11
-(wa)-.11 G(ys running for such scope zones.).11 E -.165(Fo)5.5 G 2.75
-(rr).165 G(outers)-2.75 E(that do not kno)72 436.4 Q 2.75(wa)-.275 G(bo\
-ut a particular scope zone, the initial state is No Info; no timers e)
--2.75 E(xist for the)-.165 E(scope zone.)72 449.4 Q
-(In addition to the three states, there are tw)72 466 Q 2.75(ot)-.11 G
-(imers:)-2.75 E 7.15<8354>72 482.6 S(he bootstrap timer \(BS T)-7.15 E
-(imer\) - that is used to time out old bootstrap router information.)
--.385 E 7.15<8354>72 499.2 S(he scope zone timer \(SZ T)-7.15 E
-(imer\) - that is used to time out the scope zone itself if BS messages)
--.385 E(specifying this scope zone stop arri)83 512.2 Q(ving.)-.275 E F1
-(Bootstrap Message Pr)72 538.2 Q(ocessing Checks)-.198 E F0
-(When a bootstrap message is recei)72 554.8 Q -.165(ve)-.275 G
-(d, the follo).165 E(wing initial checks must be performed:)-.275 E
-(Fenner/Handle)72 769 Q(y/K)-.165 E 196.765(ermode/Thaler Section)-.275
-F 2.75(3. [P)2.75 F(age 9])-.165 E EP
-%%Page: 10 10
-%%BeginPageSetup
-BP
-%%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 11/Courier@0 SF
-(if \( \(DirectlyConnected\(BSM.src_ip_address\) == FALSE\))72 85 Q
-(OR \(we have no Hello state for BSM.src_ip_address\)\) {)105 98 Q
-(drop the BS message silently)85.2 111 Q(})72 124 Q
-(if \(BSM.dst_ip_address == ALL-PIM-ROUTERS group\) {)72 137 Q
-(if \( BSM.src_ip_address != RPF_neighbor\(BSM.BSR_ip_address\) \) {)
-85.2 150 Q(drop the BS message silently)105 163 Q(})85.2 176 Q 6.6(}e)72
-189 S(lse if \(BSM.dst_ip_address is one of my addresses\) {)-6.6 E
-(if \( \(Any previous BSM for this scope has been accepted\) {)85.2 202
-Q(#)105 215 Q F0(the pack)A(et w)-.11 E(as unicast, b)-.11 E(ut this w)
--.22 E(asn')-.11 E(t)-.198 E F1(#)105 228 Q F0 2.75(aq)C
-(uick refresh on startup)-2.75 E F1(drop the BS message silently)105 241
-Q(})85.2 254 Q 6.6(}e)72 267 S(lse {)-6.6 E
-(drop the BS message silently)85.2 280 Q(})72 293 Q
-(if \(the interface the message arrived on is an Admin Scope)72 306 Q
-(border for the BSM.first_group_address\) {)98.4 319 Q
-(drop the BS message silently)85.2 332 Q(})72 345 Q F0(Basically)72 364
-Q 2.75(,t)-.715 G(he pack)-2.75 E(et must ha)-.11 E .33 -.165(ve c)-.22
-H(ome from a directly connected neighbor for which we ha).165 E -.165
-(ve)-.22 G(acti)72 377 Q .33 -.165(ve H)-.275 H(ello state.).165 E
-(It must ha)5.5 E .33 -.165(ve b)-.22 H(een sent to the ALL-PIM-R).165 E
-(OUTERS group by the correct)-.44 E(upstream router to)72 390 Q -.11(wa)
--.275 G
-(rds the BSR that originated the BS message, or the router must ha).11 E
-.33 -.165(ve n)-.22 H 2.75(oB).165 G(SR)-2.75 E
-(state \(it just restarted\) and ha)72 403 Q .33 -.165(ve r)-.22 H(ecei)
-.165 E -.165(ve)-.275 G 2.75(dt).165 G(he BS message by unicast.)-2.75 E
-(In addition it must not ha)5.5 E -.165(ve)-.22 G(arri)72 416 Q -.165
-(ve)-.275 G 2.75(do).165 G 2.75(na)-2.75 G 2.75(ni)-2.75 G(nterf)-2.75 E
-(ace that is a con\214gured admin scope border for the \214rst group ad\
-dress)-.11 E(contained in the BS message.)72 429 Q/F2 11/Times-Bold@0 SF
-(BS State-machine T)72 458.6 Q(ransition Ev)-.814 E(ents)-.11 E F0
-(If the bootstrap message passes the initial checks abo)72 475.2 Q .33
--.165(ve w)-.165 H(ithout being discarded, then it may).165 E
-(cause a state transition e)72 488.2 Q -.165(ve)-.275 G
-(nt in one of the abo).165 E .33 -.165(ve s)-.165 H 2.75
-(tate-machines. F).165 F(or both candidate and non-)-.165 E
-(candidate BSRs, the follo)72 501.2 Q(wing transition e)-.275 E -.165
-(ve)-.275 G(nts are de\214ned:).165 E F2(Recei)97 517.8 Q .22 -.11(ve P)
--.11 H -.198(re).11 G(ferr).198 E(ed BSM)-.198 E F0 2.75(Ab)122 530.8 S
-(ootstrap message is recei)-2.75 E -.165(ve)-.275 G 2.75(df).165 G
-(rom a BSR that has greater than or equal weight than)-2.75 E
-(the current BSR.)122 543.8 Q
-(In a router is in P-BSR state, then it uses its o)5.5 E
-(wn weight as that of)-.275 E(the current BSR.)122 556.8 Q
-(The weighting for a BSR is the concatenation in \214x)122 582.8 Q
-(ed-precision unsigned arithmetic)-.165 E(of the BSR priority \214eld f\
-rom the bootstrap message and the IP address of the BSR)122 595.8 Q(fro\
-m the bootstrap message \(with the BSR priority taking the most-signi\
-\214cant bits and)122 608.8 Q
-(the IP address taking the least signi\214cant bits\).)122 621.8 Q F2
-(Recei)97 638.4 Q .22 -.11(ve B)-.11 H(SM).11 E F0 2.75(Ab)122 651.4 S
-(ootstrap message is recei)-2.75 E -.165(ve)-.275 G(d, re).165 E -.055
-(ga)-.165 G(rdless of BSR weight.).055 E 2.75(An)72 664.4 S
-(on-candidate BSM also has the follo)-2.75 E(wing transition e)-.275 E
--.165(ve)-.275 G(nt de\214ned:).165 E F2(Recei)97 681 Q .22 -.11(ve B)
--.11 H(SM f).11 E(or unkno)-.275 E(wn Admin Scope)-.11 E F0(As "Recei)
-122 694 Q .33 -.165(ve B)-.275 H(SM", e).165 E
-(xcept that the admin scope zone indicated in the BSM w)-.165 E(as not)
--.11 E(pre)122 707 Q(viously kno)-.275 E(wn at this router)-.275 E(.)
--.605 E(Fenner/Handle)72 769 Q(y/K)-.165 E 191.265
-(ermode/Thaler Section)-.275 F 2.75(3. [P)2.75 F(age 10])-.165 E EP
-%%Page: 11 11
-%%BeginPageSetup
-BP
-%%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 11/Times-Bold@0 SF
-(BS State-machine Actions)72 85 Q F0(The state-machines specify actions\
- that include setting the BS timer to the follo)72 101.6 Q(wing v)-.275
-E(alues:)-.275 E F1(BS P)97 118.2 Q(eriod)-.22 E F0(The periodic interv)
-122 131.2 Q(al with which bootstrap messages are normally sent.)-.275 E
-(The def)5.5 E(ault)-.11 E -.275(va)122 144.2 S(lue is 60 seconds.).275
-E F1(BS T)97 160.8 Q(imeout)-.198 E F0(The interv)122 173.8 Q(al after \
-which bootstrap router state is timed out if no bootstrap message)-.275
-E(from that router has been heard.)122 186.8 Q(The def)5.5 E(ault v)-.11
-E(alue is 2 times the BS Period plus 10)-.275 E
-(seconds, which is 130 seconds.)122 199.8 Q F1(Randomized Ov)97 216.4 Q
-(erride Inter)-.11 E -.11(va)-.11 G(l).11 E F0(The randomized interv)122
-229.4 Q(al during which a router a)-.275 E -.22(vo)-.22 G
-(ids sending a bootstrap message).22 E(while it w)122 242.4 Q
-(aits to see if another router has a higher bootstrap weight.)-.11 E
-(This interv)5.5 E(al is to)-.275 E(reduce control message o)122 255.4 Q
--.165(ve)-.165 G(rhead during BSR election.).165 E(The follo)5.5 E
-(wing pseudocode is)-.275 E(proposed as an ef)122 268.4 Q
-(\214cient implementation of this "randomized" v)-.275 E(alue:)-.275 E
-/F2 11/Courier@0 SF
-(Delay = 5 + 2 * log_2\(1 + bestPriority - myPriority\))122 287.4 Q 6.6
-(+A)174.8 300.4 S(ddrDelay)-6.6 E F0(where)122 323 Q F2(myPriority)2.75
-E F0(is the Candidate-BSR')2.75 E 2.75(sc)-.605 G(on\214gured priority)
--2.75 E 2.75(,a)-.715 G(nd)-2.75 E F2(bestPriority)122 336 Q F0(equals:)
-2.75 E F2(bestPriority = Max\(storedPriority, myPriority\))122 355 Q F0
-(and)122 374 Q F2(AddrDelay)2.75 E F0(is gi)2.75 E -.165(ve)-.275 G 2.75
-(nb).165 G 2.75(yt)-2.75 G(he follo)-2.75 E(wing:)-.275 E F2
-(if \( bestPriority == myPriority\) {)122 393 Q
-(AddrDelay = log_2\(storedAddr - myAddr\) / 16)148.4 406 Q 6.6(}e)122
-419 S(lse {)-6.6 E(AddrDelay = 2 - \(myAddr / 2^31\))148.4 432 Q(})122
-445 Q F0(where)122 467.6 Q F2(myAddr)2.75 E F0(is the Candidate-BSR')
-2.75 E 2.75(sa)-.605 G(ddress,)-2.75 E F2(storedAddr)2.75 E F0
-(is the stored BSR')2.75 E(s)-.605 E(address, and)122 480.6 Q F2
-(storedPriority)2.75 E F0(is the stored BSR')2.75 E 2.75(sp)-.605 G
-(riority)-2.75 E(.)-.715 E F1(SZ P)97 497.2 Q(eriod)-.22 E F0
-(The interv)122 510.2 Q
-(al after which a router will time out an Admin Scope zone that it has)
--.275 E(dynamically learned.)122 523.2 Q(The interv)5.5 E
-(al MUST be lar)-.275 E(ger than the BS T)-.198 E 2.75(imeout. The)-.385
-F(def)2.75 E(ault)-.11 E -.275(va)122 536.2 S(lue is ten times the BS T)
-.275 E(imeout, which is 1500 seconds.)-.385 E
-(In addition to setting the timers, the follo)72 552.8 Q
-(wing actions may be triggered by state-changes in the)-.275 E
-(state-machines:)72 565.8 Q F1 -.275(Fo)97 582.4 S(rward BSM).275 E F0
-(The bootstrap message is forw)122 595.4 Q
-(arded out of all multicast-capable interf)-.11 E(aces, e)-.11 E
-(xcept the)-.165 E(interf)122 608.4 Q(ace it w)-.11 E(as recei)-.11 E
--.165(ve)-.275 G 2.75(do).165 G(n, or where this w)-2.75 E
-(ould cause the BSM to cross an admin-)-.11 E
-(scope boundary for the scope zone indicated in the message.)122 621.4 Q
-(The source IP address of)5.5 E(the message is the forw)122 634.4 Q
-(arding router')-.11 E 2.75(sI)-.605 G 2.75(Pa)-2.75 G
-(ddress on the interf)-2.75 E(ace the message is being)-.11 E(forw)122
-647.4 Q(arded from, the destination address is ALL-PIM-R)-.11 E
-(OUTERS, and the TTL of the)-.44 E(message is set to 1.)122 660.4 Q F1
-(Originate BSM)97 677 Q F0 2.75(An)122 690 S .55 -.275(ew b)-2.75 H
-(ootstrap message is constructed by the BSR, gi).275 E(ving the BSR')
--.275 E 2.75(sa)-.605 G(ddress and)-2.75 E(BSR priority)122 703 Q 2.75
-(,a)-.715 G(nd containing the BSR')-2.75 E 2.75(sc)-.605 G
-(hosen RP-Set.)-2.75 E(The message is forw)5.5 E(arded out)-.11 E
-(of all multicast-capable interf)122 716 Q(aces, e)-.11 E
-(xcept where this w)-.165 E(ould cause the BSM to cross an)-.11 E
-(Fenner/Handle)72 769 Q(y/K)-.165 E 191.265(ermode/Thaler Section)-.275
+E(Fenner/Handle)72 769 Q(y/K)-.165 E 191.265(ermode/Thaler Section)-.275
 F 2.75(3. [P)2.75 F(age 11])-.165 E EP
 %%Page: 12 12
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E
-(admin-scope boundary for the scope zone indicated in the message.)122
-85 Q(The IP source)5.5 E
-(address of the message is the originating router')122 98 Q 2.75(sI)
--.605 G 2.75(Pa)-2.75 G(ddress on the interf)-2.75 E(ace the)-.11 E
-(message is being forw)122 111 Q
-(arded from, the destination address is ALL-PIM-R)-.11 E(OUTERS,)-.44 E
-(and the TTL of the message is set to 1.)122 124 Q/F1 11/Times-Bold@0 SF
-(Stor)97 140.6 Q 2.75(eR)-.198 G 2.75(PS)-2.75 G(et)-2.75 E F0
-(The RP-Set from the recei)122 153.6 Q -.165(ve)-.275 G 2.75(db).165 G
-(ootstrap message is stored and used by the router to)-2.75 E
-(decide the RP for each group that the router has state for)122 166.6 Q
-5.5(.S)-.605 G(toring this RP Set may)-5.5 E
-(cause other state-transitions to occur in the router)122 179.6 Q 5.5
-(.T)-.605 G(he BSR')-5.5 E 2.75(sI)-.605 G 2.75(Pa)-2.75 G
-(ddress and priority)-2.75 E(from the recei)122 192.6 Q -.165(ve)-.275 G
-2.75(db).165 G
-(ootstrap message are also stored to be used to decide if future)-2.75 E
-(bootstrap messages are preferred.)122 205.6 Q(In addition to the abo)72
-222.2 Q .33 -.165(ve s)-.165 H
-(tate-machine actions, a DR also unicasts a stored cop).165 E 2.75(yo)
--.11 G 2.75(ft)-2.75 G(he Bootstrap)-2.75 E(message to each ne)72 235.2
-Q 2.75(wP)-.275 G(IM neighbor)-2.75 E 2.75(,i)-.44 G
-(.e., after the DR recei)-2.75 E -.165(ve)-.275 G 2.75(st).165 G
-(he neighbor')-2.75 E 2.75<738c>-.605 G(rst Hello message,)-2.75 E
-(and sends a Hello message in response.)72 248.2 Q(It does so e)5.5 E
--.165(ve)-.275 G 2.75(ni).165 G 2.75(ft)-2.75 G(he ne)-2.75 E 2.75(wn)
--.275 G(eighbor becomes the DR.)-2.75 E F1(3.1.)72 274.2 Q/F2 13
-/Times-Bold@0 SF(Sending Candidate-RP-Adv)5.5 E(ertisements)-.13 E F0
-(Ev)72 290.8 Q(ery C-RP periodically unicasts a C-RP-Adv to the BSR for\
- that scope zone to inform the BSR)-.165 E(of the C-RP')72 303.8 Q 2.75
-(sw)-.605 G(illingness to function as an RP)-2.75 E 5.5(.U)-1.221 G
-(nless con\214gured otherwise, it does this for)-5.5 E -2.365 -.275
-(ev e)72 316.8 T(ry Admin Scope zone for which it has state, and for th\
-e global scope zone.).275 E(If the same router)5.5 E(is the BSR for mor\
-e than one scope zone, the C-RP-Adv for these scope zones MA)72 329.8 Q
-2.75(Yb)-1.155 G 2.75(ec)-2.75 G(ombined)-2.75 E(into a single message.)
-72 342.8 Q(If the C-RP is a ZBR for an admin scope zone, then the Admin\
- Scope bit MUST be set in the C-)72 368.8 Q(RP-Adv messages it sends fo\
-r that scope zone; otherwise this bit MUST NO)72 381.8 Q 2.75(Tb)-.44 G
-2.75(es)-2.75 G 2.75(et. This)-2.75 F
-(information is currently only used for logging purposes by the BSR, b)
-72 394.8 Q(ut might allo)-.22 E 2.75(wf)-.275 G(or future)-2.75 E -.165
-(ex)72 407.8 S(tensions of the protocol.).165 E(The interv)72 433.8 Q(a\
-l for sending these messages is subject to local con\214guration at the\
- C-RP)-.275 E 2.75(,b)-1.221 G(ut must be)-2.97 E
-(smaller than the HoldT)72 446.8 Q(ime in the C-RP-Adv)-.385 E(.)-.715 E
-2.75(AC)72 472.8 S(andidate-RP-Adv)-2.75 E(ertisement carries a list of\
- group address and group mask \214eld pairs.)-.165 E(This)5.5 E
-(enables the C-RP router to restrict the adv)72 485.8 Q
-(ertisement to certain pre\214x)-.165 E(es or scopes of groups.)-.165 E
-(If)5.5 E(the C-RP becomes an RP)72 498.8 Q 2.75(,i)-1.221 G 2.75(tm)
--2.75 G(ay enforce this scope acceptance when recei)-2.75 E(ving Re)
--.275 E(gisters or)-.165 E(Join/Prune messages.)72 511.8 Q(The C-RP pri\
-ority \214eld determines which C-RPs get selected by the BSR to be in t\
-he RP Set.)72 537.8 Q(Note that a v)72 550.8 Q
-(alue of zero is the highest possible priority)-.275 E 5.5(.C)-.715 G
-(-RPs should by def)-5.5 E(ault send C-RP-Adv)-.11 E
-(messages with the `Priority' \214eld set to 192.)72 563.8 Q
-(When a C-RP is being shut do)72 589.8 Q
-(wn, it SHOULD immediately send a C-RP-Adv to the BSR for)-.275 E
-(each scope for which it is currently serving as an RP; the HoldT)72
-602.8 Q(ime in this C-RP-Adv message)-.385 E(should be zero.)72 615.8 Q
-(The BSR will then immediately time out the C-RP and generate a ne)5.5 E
-2.75(wB)-.275 G(SR)-2.75 E(message remo)72 628.8 Q(ving the shut do)
--.165 E(wn RP from the RPset.)-.275 E F1(3.2.)72 667.8 Q F2(Cr)5.5 E
-(eating the RP-Set at the BSR)-.234 E F0(Upon recei)72 684.4 Q
-(ving a C-RP-Adv)-.275 E 2.75(,i)-.715 G 2.75(ft)-2.75 G
-(he router is not the elected BSR, it silently ignores the message.)
--2.75 E(If the router is the BSR, then it adds the RP address to its lo\
-cal pool of candidate RPs.)72 701 Q -.165(Fo)5.5 G 2.75(re).165 G(ach)
--2.75 E(C-RP)72 714 Q 2.75(,t)-1.221 G(he BSR holds the follo)-2.75 E
-(wing information:)-.275 E(Fenner/Handle)72 769 Q(y/K)-.165 E 183.015
-(ermode/Thaler Section)-.275 F 2.75(3.2. [P)2.75 F(age 12])-.165 E EP
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 11/Times-Bold@0 SF
+(No Inf)72 85 Q(o)-.275 E F0
+(The router has no information about this scope zone.)97 98 Q
+(This state does not apply if the router)5.5 E(is con\214gured to kno)97
+111 Q 2.75(wa)-.275 G
+(bout this scope zone, or for the global scope zone.)-2.75 E
+(When in this)5.5 E(state, no state information is held and no timers r\
+un that refer to this scope zone.)97 124 Q F1(Accept Any \(AA\))72 140.6
+Q F0(The router does not kno)97 153.6 Q 2.75(wo)-.275 G 2.75(fa)-2.75 G
+2.75(na)-2.75 G(cti)-2.75 E .33 -.165(ve B)-.275 H
+(SR, and will accept the \214rst bootstrap message it).165 E(sees as gi)
+97 166.6 Q(ving the ne)-.275 E 2.75(wB)-.275 G(SR')-2.75 E 2.75(si)-.605
+G(dentity and the RP-Set.)-2.75 E(If the router has an RP-Set cached)5.5
+E(from an obsolete bootstrap message, it continues to use it.)97 179.6 Q
+F1(Accept Pr)72 196.2 Q(eferr)-.198 E(ed \(AP\))-.198 E F0
+(The router kno)97 209.2 Q
+(ws the identity of the current BSR, and is using the RP-Set pro)-.275 E
+(vided by that)-.165 E 2.75(BSR. Only)97 222.2 R(bootstrap messages fro\
+m that BSR or from a C-BSR with higher weight than)2.75 E
+(the current BSR will be accepted.)97 235.2 Q
+(On startup, the initial state for this scope zone is "Accept An)72
+251.8 Q(y" for routers that kno)-.165 E 2.75(wa)-.275 G(bout this)-2.75
+E(scope zone, either through con\214guration or because the scope zone \
+is the global scope which)72 264.8 Q(al)72 277.8 Q -.11(wa)-.11 G(ys e)
+.11 E(xists; the SZ T)-.165 E(imer is considered to be al)-.385 E -.11
+(wa)-.11 G(ys running for such scope zones.).11 E -.165(Fo)5.5 G 2.75
+(rr).165 G(outers)-2.75 E(that do not kno)72 290.8 Q 2.75(wa)-.275 G(bo\
+ut a particular scope zone, the initial state is No Info; no timers e)
+-2.75 E(xist for the)-.165 E(scope zone.)72 303.8 Q
+(In addition to the three states, there are tw)72 320.4 Q 2.75(ot)-.11 G
+(imers:)-2.75 E 7.15<8354>72 337 S(he bootstrap timer \(BS T)-7.15 E
+(imer\) - that is used to time out old bootstrap router information.)
+-.385 E 7.15<8354>72 353.6 S(he scope zone timer \(SZ T)-7.15 E
+(imer\) - that is used to time out the scope zone itself if BS messages)
+-.385 E(specifying this scope zone stop arri)83 366.6 Q(ving.)-.275 E F1
+(Bootstrap Message Pr)72 392.6 Q(ocessing Checks)-.198 E F0
+(When a bootstrap message is recei)72 409.2 Q -.165(ve)-.275 G
+(d, the follo).165 E(wing initial checks must be performed:)-.275 E/F2
+11/Courier@0 SF
+(if \( \(DirectlyConnected\(BSM.src_ip_address\) == FALSE\))72 428.2 Q
+(OR \(we have no Hello state for BSM.src_ip_address\)\) {)105 441.2 Q
+(drop the BS message silently)85.2 454.2 Q(})72 467.2 Q
+(if \(BSM.dst_ip_address == ALL-PIM-ROUTERS group\) {)72 480.2 Q
+(if \( BSM.src_ip_address != RPF_neighbor\(BSM.BSR_ip_address\) \) {)
+85.2 493.2 Q(drop the BS message silently)105 506.2 Q(})85.2 519.2 Q 6.6
+(}e)72 532.2 S(lse if \(BSM.dst_ip_address is one of my addresses\) {)
+-6.6 E(if \( \(Any previous BSM for this scope has been accepted\) {)
+85.2 545.2 Q(#)105 558.2 Q F0(the pack)A(et w)-.11 E(as unicast, b)-.11
+E(ut this w)-.22 E(asn')-.11 E(t)-.198 E F2(#)105 571.2 Q F0 2.75(aq)C
+(uick refresh on startup)-2.75 E F2(drop the BS message silently)105
+584.2 Q(})85.2 597.2 Q 6.6(}e)72 610.2 S(lse {)-6.6 E
+(drop the BS message silently)85.2 623.2 Q(})72 636.2 Q
+(if \(the interface the message arrived on is an Admin Scope)72 649.2 Q
+(border for the BSM.first_group_address\) {)98.4 662.2 Q
+(drop the BS message silently)85.2 675.2 Q(})72 688.2 Q F0(Basically)72
+707.2 Q 2.75(,t)-.715 G(he pack)-2.75 E(et must ha)-.11 E .33 -.165
+(ve c)-.22 H(ome from a directly connected neighbor for which we ha).165
+E -.165(ve)-.22 G(acti)72 720.2 Q .33 -.165(ve H)-.275 H(ello state.)
+.165 E(It must ha)5.5 E .33 -.165(ve b)-.22 H(een sent to the ALL-PIM-R)
+.165 E(OUTERS group by the correct)-.44 E(Fenner/Handle)72 769 Q(y/K)
+-.165 E 191.265(ermode/Thaler Section)-.275 F 2.75(3. [P)2.75 F(age 12])
+-.165 E EP
 %%Page: 13 13
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 11/Times-Bold@0 SF(IP addr)
-97 85 Q(ess)-.198 E F0(The IP address of the C-RP)122 98 Q(.)-1.221 E F1
-(Gr)97 114.6 Q(oup Pr)-.198 E(e\214x and Mask list)-.198 E F0
-(The list of group pre\214x)122 127.6 Q
-(es and group masks from the C-RP adv)-.165 E(ertisement.)-.165 E F1
-(HoldT)97 144.2 Q(ime)-.198 E F0(The HoldT)122 157.2 Q
-(ime from the C-RP-Adv message.)-.385 E
-(This is included later in the RP-set)5.5 E
-(information in the Bootstrap Message.)122 170.2 Q F1(C-RP Expiry T)97
-186.8 Q(imer)-.198 E F0(The C-RP-Expiry T)122 199.8 Q
-(imer is used to time out the state associated with a C-RP when the)
--.385 E(BSR f)122 212.8 Q(ails to recei)-.11 E .33 -.165(ve C)-.275 H
-(-RP-Adv).165 E(ertisements from it.)-.165 E(The e)5.5 E
-(xpiry timer is initialized to)-.165 E(the HoldT)122 225.8 Q
-(ime from the RP')-.385 E 2.75(sC)-.605 G(-RP-Adv)-2.75 E 2.75(,a)-.715
-G(nd is reset to the HoldT)-2.75 E(ime whene)-.385 E -.165(ve)-.275 G
-2.75(raC).165 G(-)-2.75 E(RP-Adv is recei)122 238.8 Q -.165(ve)-.275 G
-2.75(df).165 G(rom that C-RP)-2.75 E(.)-1.221 E F1(C-RP Priority)97
-255.4 Q F0(The C-RP Priority is used to determine the subset of possibl\
-e RPs to use in the RP-)122 268.4 Q(Set. Smaller v)122 281.4 Q
-(alues are deemed to be of higher priority than lar)-.275 E(ge ones.)
--.198 E(When the C-RP Expiry T)72 298 Q(imer e)-.385 E
-(xpires, the C-RP is remo)-.165 E -.165(ve)-.165 G 2.75(df).165 G
-(rom the pool of a)-2.75 E -.275(va)-.22 G(ilable C-RPs.).275 E(The BSR\
- uses the pool of C-RPs to construct the RP-Set which is included in Bo\
-otstrap Messages)72 314.6 Q
-(and sent to all the routers in the PIM domain.)72 327.6 Q
-(The BSR may apply a local polic)5.5 E 2.75(yt)-.165 G 2.75(ol)-2.75 G
-(imit the)-2.75 E
-(number of Candidate RPs included in the Bootstrap message.)72 340.6 Q
-(The BSR may o)5.5 E -.165(ve)-.165 G(rride the pre\214x).165 E(indicat\
-ed in a C-RP-Adv unless the `Priority' \214eld from the C-RP-Adv is les\
-s than 128.)72 353.6 Q(The Bootstrap message is subdi)72 370.2 Q
-(vided into sets of {group-pre\214x, RP- Count, RP-addresses}.)-.275 E
--.165(Fo)5.5 G(r).165 E(each RP-address, the corresponding HoldT)72
-383.2 Q(ime is included in the "RP-HoldT)-.385 E(ime" \214eld.)-.385 E
-(The)5.5 E(format of the Bootstrap message allo)72 396.2 Q
-(ws `semantic fragmentation', if the length of the original)-.275 E
-(Bootstrap message e)72 409.2 Q(xceeds the pack)-.165 E
-(et maximum boundaries. Ho)-.11 E(we)-.275 E -.165(ve)-.275 G .88 -.44
-(r, w).165 H 2.75(er).44 G(ecommend ag)-2.75 E(ainst)-.055 E
-(con\214guring a lar)72 422.2 Q(ge number of routers as C-RPs, to reduc\
-e the semantic fragmentation required.)-.198 E
-(When an elected BSR is being shut do)72 438.8 Q
-(wn, it should immediately originate a Bootstrap message)-.275 E
-(listing its current RP set, b)72 451.8 Q
-(ut with the BSR priority \214eld set to the lo)-.22 E(west priority v)
--.275 E(alue possible.)-.275 E(This will cause the election of a ne)72
-464.8 Q 2.75(wB)-.275 G(SR to happen more quickly)-2.75 E(.)-.715 E F1
-(3.3.)72 503.8 Q/F2 13/Times-Bold@0 SF -.325(Fo)5.5 G
-(rwarding Bootstrap Messages).325 E F0
-(Bootstrap messages originate at the BSR, and are hop-by-hop forw)72
-520.4 Q(arded by intermediate routers)-.11 E(if the)72 533.4 Q 2.75(yp)
--.165 G(ass the Bootstrap Message Processing Check.)-2.75 E
-(Bootstrap messages are multicast to the)5.5 E -.88(`A)72 546.4 S
-(LL-PIM-R).88 E(OUTERS' group.)-.44 E(When a BS message is forw)5.5 E
-(arded, it is forw)-.11 E(arded out of e)-.11 E -.165(ve)-.275 G(ry).165
-E(multicast-capable interf)72 559.4 Q(ace which has PIM neighbors \(e)
--.11 E(xcluding the one o)-.165 E -.165(ve)-.165 G 2.75(rw).165 G
-(hich the message)-2.75 E -.11(wa)72 572.4 S 2.75(sr).11 G(ecei)-2.75 E
--.165(ve)-.275 G 2.75(d\). The).165 F -.165(ex)2.75 G
-(ception to this is if the interf).165 E(ace is an administrati)-.11 E
-.33 -.165(ve s)-.275 H(cope boundary for the).165 E(admin scope zone in\
-dicated in the \214rst group address in the BS message pack)72 585.4 Q
-2.75(et. The)-.11 F(IP source)2.75 E
-(address on the bootstrap message should be set to the forw)72 598.4 Q
-(arding router')-.11 E 2.75(sI)-.605 G 2.75(Pa)-2.75 G(ddress on the)
--2.75 E(interf)72 611.4 Q(ace the message is being forw)-.11 E
-(arded from.)-.11 E(Bootstrap messages are al)5.5 E -.11(wa)-.11 G
-(ys originated or).11 E(forw)72 624.4 Q(arded with an IP TTL v)-.11 E
-(alue of 1.)-.275 E F1(3.4.)72 663.4 Q F2(Recei)5.5 E
-(ving and Using the RP-Set)-.13 E F0(When a router recei)72 680 Q -.165
-(ve)-.275 G 2.75(sa).165 G(nd stores a ne)-2.75 E 2.75(wR)-.275 G
-(P-Set, it checks if each of the RPs referred to by)-2.75 E -.165(ex)72
-693 S(isting state \(i.e., by \(*,G\), \(*,*,RP\), or \(S,G,rpt\) entri\
-es\) is in the ne).165 E 2.75(wR)-.275 G(P-Set.)-2.75 E
-(If an RP is not in the ne)72 709.6 Q 2.75(wR)-.275 G
-(P-Set, that RP is considered unreachable and the hash algorithm \(see)
--2.75 E(PIM-SM speci\214cation\) is re-performed for each group with lo\
-cally acti)72 722.6 Q .33 -.165(ve s)-.275 H(tate that pre).165 E
-(viously)-.275 E(Fenner/Handle)72 769 Q(y/K)-.165 E 183.015
-(ermode/Thaler Section)-.275 F 2.75(3.4. [P)2.75 F(age 13])-.165 E EP
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E(upstream router to)72 85 Q
+-.11(wa)-.275 G
+(rds the BSR that originated the BS message, or the router must ha).11 E
+.33 -.165(ve n)-.22 H 2.75(oB).165 G(SR)-2.75 E
+(state \(it just restarted\) and ha)72 98 Q .33 -.165(ve r)-.22 H(ecei)
+.165 E -.165(ve)-.275 G 2.75(dt).165 G(he BS message by unicast.)-2.75 E
+(In addition it must not ha)5.5 E -.165(ve)-.22 G(arri)72 111 Q -.165
+(ve)-.275 G 2.75(do).165 G 2.75(na)-2.75 G 2.75(ni)-2.75 G(nterf)-2.75 E
+(ace that is a con\214gured admin scope border for the \214rst group ad\
+dress)-.11 E(contained in the BS message.)72 124 Q/F1 11/Times-Bold@0 SF
+(BS State-machine T)72 153.6 Q(ransition Ev)-.814 E(ents)-.11 E F0
+(If the bootstrap message passes the initial checks abo)72 170.2 Q .33
+-.165(ve w)-.165 H(ithout being discarded, then it may).165 E
+(cause a state transition e)72 183.2 Q -.165(ve)-.275 G
+(nt in one of the abo).165 E .33 -.165(ve s)-.165 H 2.75
+(tate-machines. F).165 F(or both candidate and non-)-.165 E
+(candidate BSRs, the follo)72 196.2 Q(wing transition e)-.275 E -.165
+(ve)-.275 G(nts are de\214ned:).165 E F1(Recei)97 212.8 Q .22 -.11(ve P)
+-.11 H -.198(re).11 G(ferr).198 E(ed BSM)-.198 E F0 2.75(Ab)122 225.8 S
+(ootstrap message is recei)-2.75 E -.165(ve)-.275 G 2.75(df).165 G
+(rom a BSR that has greater than or equal weight than)-2.75 E
+(the current BSR.)122 238.8 Q
+(In a router is in P-BSR state, then it uses its o)5.5 E
+(wn weight as that of)-.275 E(the current BSR.)122 251.8 Q
+(The weighting for a BSR is the concatenation in \214x)122 277.8 Q
+(ed-precision unsigned arithmetic)-.165 E(of the BSR priority \214eld f\
+rom the bootstrap message and the IP address of the BSR)122 290.8 Q(fro\
+m the bootstrap message \(with the BSR priority taking the most-signi\
+\214cant bits and)122 303.8 Q
+(the IP address taking the least signi\214cant bits\).)122 316.8 Q F1
+(Recei)97 333.4 Q .22 -.11(ve B)-.11 H(SM).11 E F0 2.75(Ab)122 346.4 S
+(ootstrap message is recei)-2.75 E -.165(ve)-.275 G(d, re).165 E -.055
+(ga)-.165 G(rdless of BSR weight.).055 E 2.75(An)72 359.4 S
+(on-candidate BSM also has the follo)-2.75 E(wing transition e)-.275 E
+-.165(ve)-.275 G(nt de\214ned:).165 E F1(Recei)97 376 Q .22 -.11(ve B)
+-.11 H(SM f).11 E(or unkno)-.275 E(wn Admin Scope)-.11 E F0(As "Recei)
+122 389 Q .33 -.165(ve B)-.275 H(SM", e).165 E
+(xcept that the admin scope zone indicated in the BSM w)-.165 E(as not)
+-.11 E(pre)122 402 Q(viously kno)-.275 E(wn at this router)-.275 E(.)
+-.605 E F1(BS State-machine Actions)72 428 Q F0(The state-machines spec\
+ify actions that include setting the BS timer to the follo)72 444.6 Q
+(wing v)-.275 E(alues:)-.275 E F1(BS P)97 461.2 Q(eriod)-.22 E F0
+(The periodic interv)122 474.2 Q
+(al with which bootstrap messages are normally sent.)-.275 E(The def)5.5
+E(ault)-.11 E -.275(va)122 487.2 S(lue is 60 seconds.).275 E F1(BS T)97
+503.8 Q(imeout)-.198 E F0(The interv)122 516.8 Q(al after which bootstr\
+ap router state is timed out if no bootstrap message)-.275 E
+(from that router has been heard.)122 529.8 Q(The def)5.5 E(ault v)-.11
+E(alue is 2 times the BS Period plus 10)-.275 E
+(seconds, which is 130 seconds.)122 542.8 Q F1(Randomized Ov)97 559.4 Q
+(erride Inter)-.11 E -.11(va)-.11 G(l).11 E F0(The randomized interv)122
+572.4 Q(al during which a router a)-.275 E -.22(vo)-.22 G
+(ids sending a bootstrap message).22 E(while it w)122 585.4 Q
+(aits to see if another router has a higher bootstrap weight.)-.11 E
+(This interv)5.5 E(al is to)-.275 E(reduce control message o)122 598.4 Q
+-.165(ve)-.165 G(rhead during BSR election.).165 E(The follo)5.5 E
+(wing pseudocode is)-.275 E(proposed as an ef)122 611.4 Q
+(\214cient implementation of this "randomized" v)-.275 E(alue:)-.275 E
+/F2 11/Courier@0 SF
+(Delay = 5 + 2 * log_2\(1 + bestPriority - myPriority\))122 630.4 Q 6.6
+(+A)174.8 643.4 S(ddrDelay)-6.6 E F0(where)122 666 Q F2(myPriority)2.75
+E F0(is the Candidate-BSR')2.75 E 2.75(sc)-.605 G(on\214gured priority)
+-2.75 E 2.75(,a)-.715 G(nd)-2.75 E F2(bestPriority)122 679 Q F0(equals:)
+2.75 E F2(bestPriority = Max\(storedPriority, myPriority\))122 698 Q F0
+(and)122 717 Q F2(AddrDelay)2.75 E F0(is gi)2.75 E -.165(ve)-.275 G 2.75
+(nb).165 G 2.75(yt)-2.75 G(he follo)-2.75 E(wing for IPv4:)-.275 E
+(Fenner/Handle)72 769 Q(y/K)-.165 E 191.265(ermode/Thaler Section)-.275
+F 2.75(3. [P)2.75 F(age 13])-.165 E EP
 %%Page: 14 14
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E(hashed to that RP)72 85 Q 2.75
-(.T)-1.221 G(his will cause those groups to be distrib)-2.75 E
-(uted among the remaining RPs.)-.22 E(If the ne)72 101.6 Q 2.75(wR)-.275
-G(P-Set contains a RP that w)-2.75 E(as not pre)-.11 E
-(viously in the RP-Set, the hash v)-.275 E(alue of the ne)-.275 E(w)
--.275 E(RP is calculated for each group co)72 114.6 Q -.165(ve)-.165 G
-(red by the ne).165 E 2.75(wC)-.275 G(-RP')-2.75 E 2.75(sG)-.605 G 2.75
-(roup-pre\214x. An)-2.75 F 2.75(yg)-.165 G(roup for which)-2.75 E
-(the ne)72 127.6 Q 2.75(wR)-.275 G(P')-2.75 E 2.75(sh)-.605 G(ash v)
--2.75 E(alue is greater than hash v)-.275 E(alue of the group')-.275 E
-2.75(sp)-.605 G(re)-2.75 E(vious RP is switched o)-.275 E -.165(ve)-.165
-G 2.75(rt).165 G(o)-2.75 E(the ne)72 140.6 Q 2.75(wR)-.275 G -1.221(P.)
--2.75 G/F1 11/Times-Bold@0 SF(4.)72 166.6 Q/F2 14/Times-Bold@0 SF
-(Message F)5.5 E(ormats)-.35 E F0
-(BSR messages are PIM messages, as de\214ned in [1]. The v)72 183.2 Q
-(alues of the PIM message T)-.275 E(ype \214eld for)-.88 E
-(BSR messages are:)72 196.2 Q 19.5(4B)72 212.8 S(ootstrap Message)-19.5
-E 19.5(8C)72 229.4 S(andidate-RP-Adv)-19.5 E(ertisement)-.165 E
-(In this section we use the follo)72 246 Q
-(wing terms de\214ned in the PIM-SM [1]:)-.275 E 21.15<8345>72 262.6 S
-(ncoded-Unicast format)-21.15 E 21.15<8345>72 279.2 S
-(ncoded-Group format)-21.15 E 1.76 -.88(We r)72 295.8 T
-(epeat these here to aid readability).88 E(.)-.715 E F1
-(Encoded-Unicast addr)72 321.8 Q(ess)-.198 E F0
-(An Encoded-Unicast address tak)72 338.4 Q(es the follo)-.11 E
-(wing format:)-.275 E/F3 11/Courier@0 SF 125.4(0123)78.6 357.4 S 6.6
-(01234567890123456789012345678901)78.6 370.4 S
-(+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+)72
-383.4 Q 13.2(|A)72 396.4 S(ddr Family)-13.2 E 6.6(|E)13.2 G
-(ncoding Type |)-6.6 E(Unicast Address)33 E
-(+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+...)72 409.4 Q F1
-(Addr F)72 432 Q(amily)-.275 E F0(The PIM address f)97 445 Q
-(amily of the `Unicast Address' \214eld of this address.)-.11 E -1.221
-(Va)97 461.6 S(lues of 0-127 are as assigned by the IAN)1.221 E 2.75(Af)
--.385 G(or Internet Address F)-2.75 E(amilies in [5]. V)-.165 E(alues)
--1.221 E(128-250 are reserv)97 474.6 Q(ed to be assigned by the IAN)
--.165 E 2.75(Af)-.385 G(or PIM-speci\214c Address F)-2.75 E(amilies.)
--.165 E -1.221(Va)97 487.6 S(lues 251 though 255 are designated for pri)
-1.221 E -.275(va)-.275 G(te use.).275 E
-(As there is no assignment authority)5.5 E
-(for this space, collisions should be e)97 500.6 Q(xpected.)-.165 E F1
-(Encoding T)72 517.2 Q(ype)-.814 E F0
-(The type of encoding used within a speci\214c Address F)97 530.2 Q
-(amily)-.165 E 5.5(.T)-.715 G(he v)-5.5 E(alue `0' is reserv)-.275 E
-(ed for)-.165 E(this \214eld, and represents the nati)97 543.2 Q .33
--.165(ve e)-.275 H(ncoding of the Address F).165 E(amily)-.165 E(.)-.715
-E F1(Unicast Addr)72 572.8 Q(ess)-.198 E F0
-(The unicast address as represented by the gi)97 585.8 Q -.165(ve)-.275
-G 2.75(nA).165 G(ddress F)-2.75 E(amily and Encoding T)-.165 E(ype.)-.88
-E F1(Encoded-Gr)72 624.8 Q(oup addr)-.198 E(ess)-.198 E F0
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 11/Courier@0 SF
+(if \( bestPriority == myPriority\) {)122 85 Q
+(AddrDelay = log_2\(storedAddr - myAddr\) / 16)148.4 98 Q 6.6(}e)122 111
+S(lse {)-6.6 E(AddrDelay = 2 - \(myAddr / 2^31\))148.4 124 Q(})122 137 Q
+F0(and)122 156 Q F1(AddrDelay)2.75 E F0(is gi)2.75 E -.165(ve)-.275 G
+2.75(nb).165 G 2.75(yt)-2.75 G(he follo)-2.75 E(wing for IPv6:)-.275 E
+F1(if \( bestPriority == myPriority\) {)122 175 Q
+(AddrDelay = log_2\(storedAddr - myAddr\) / 64)148.4 188 Q 6.6(}e)122
+201 S(lse {)-6.6 E(AddrDelay = 2 - \(myAddr / 2^127\))148.4 214 Q(})122
+227 Q F0(where)122 249.6 Q F1(myAddr)2.75 E F0(is the Candidate-BSR')
+2.75 E 2.75(sa)-.605 G(ddress,)-2.75 E F1(storedAddr)2.75 E F0
+(is the stored BSR')2.75 E(s)-.605 E(address, and)122 262.6 Q F1
+(storedPriority)2.75 E F0(is the stored BSR')2.75 E 2.75(sp)-.605 G
+(riority)-2.75 E(.)-.715 E/F2 11/Times-Bold@0 SF(SZ T)97 279.2 Q(imeout)
+-.198 E F0(The interv)122 292.2 Q
+(al after which a router will time out an Admin Scope zone that it has)
+-.275 E(dynamically learned.)122 305.2 Q(The interv)5.5 E
+(al MUST be lar)-.275 E(ger than the BS T)-.198 E 2.75(imeout. The)-.385
+F(def)2.75 E(ault)-.11 E -.275(va)122 318.2 S(lue is ten times the BS T)
+.275 E(imeout, which is 1300 seconds.)-.385 E
+(In addition to setting the timers, the follo)72 334.8 Q
+(wing actions may be triggered by state-changes in the)-.275 E
+(state-machines:)72 347.8 Q F2 -.275(Fo)97 364.4 S(rward BSM).275 E F0
+2.75(Ab)122 377.4 S(ootstrap message that passes the Bootstrap Message \
+Processing Checks is)-2.75 E(forw)122 390.4 Q(arded out of all interf)
+-.11 E(aces with PIM neighbors \(including the interf)-.11 E(ace it is)
+-.11 E(recei)122 403.4 Q -.165(ve)-.275 G 2.75(do).165 G(n\), e)-2.75 E
+(xcept where this w)-.165 E(ould cause the BSM to cross an admin-scope)
+-.11 E(boundary for the scope zone indicated in the message.)122 416.4 Q
+(The source IP address of the)5.5 E(message is the forw)122 429.4 Q
+(arding router')-.11 E 2.75(sI)-.605 G 2.75(Pa)-2.75 G
+(ddress on the interf)-2.75 E(ace the message is being)-.11 E(forw)122
+442.4 Q(arded from, the destination address is ALL-PIM-R)-.11 E
+(OUTERS, and the TTL of the)-.44 E(message is set to 1.)122 455.4 Q
+(As an optimation, a router MA)122 481.4 Q 2.75(Yc)-1.155 G
+(hoose not to forw)-2.75 E(ard a BSM out of the interf)-.11 E(ace the)
+-.11 E(message w)122 494.4 Q(as recei)-.11 E -.165(ve)-.275 G 2.75(do)
+.165 G 2.75(ni)-2.75 G 2.75(ft)-2.75 G(hat interf)-2.75 E
+(ace is a point-to-point interf)-.11 E 2.75(ace. On)-.11 F(interf)2.75 E
+(aces)-.11 E(with multiple PIM neighbors, a router MUST forw)122 507.4 Q
+(ard an accepted BSM onto the)-.11 E(interf)122 520.4 Q(ace that BSM w)
+-.11 E(as recei)-.11 E -.165(ve)-.275 G 2.75(do).165 G(n, b)-2.75 E
+(ut if the number of PIM neighbors on that)-.22 E(interf)122 533.4 Q
+(ace is lar)-.11 E(ge, it MA)-.198 E 2.75(Yd)-1.155 G(elay forw)-2.75 E
+(arding a BSM onto that interf)-.11 E(ace by a small)-.11 E
+(randomized interv)122 546.4 Q(al to pre)-.275 E -.165(ve)-.275 G
+(nt message implosion.).165 E/F3 11/Times-Italic@0 SF
+(Rationale: A BSM needs to be forwar)122 572.4 Q
+(ded onto the interface the messa)-.407 E .22 -.11(ge w)-.11 H(as r).11
+E(eceived)-.407 E
+(on \(in addition to the other interfaces\) because the r)122 585.4 Q
+(outer)-.495 E 2.75(so)-.11 G 2.75(naL)-2.75 G(AN may not have)-2.75 E
+(consistent r)122 598.4 Q(outing information.)-.495 E(If thr)5.5 E(ee r)
+-.407 E(outer)-.495 E 2.75(so)-.11 G 2.75(naL)-2.75 G
+(AN and A, B, and C, and at)-2.75 E -.495(ro)122 611.4 S
+(uter B RPF\(BSR\)==A and at r).495 E(outer C RPF\(BSR\)==B, then r)
+-.495 E(outer A originally)-.495 E(forwar)122 624.4 Q
+(ds the BSM onto the LAN, b)-.407 E(ut r)-.22 E
+(outer C will only accept it when r)-.495 E(outer B r)-.495 E(e-)-.407 E
+(forwar)122 637.4 Q(ds the messa)-.407 E .22 -.11(ge o)-.11 H
+(nto the LAN.).11 E F2(Originate BSM)97 654 Q F0 2.75(An)122 667 S .55
+-.275(ew b)-2.75 H(ootstrap message is constructed by the BSR, gi).275 E
+(ving the BSR')-.275 E 2.75(sa)-.605 G(ddress and)-2.75 E(BSR priority)
+122 680 Q 2.75(,a)-.715 G(nd containing the BSR')-2.75 E 2.75(sc)-.605 G
+(hosen RP-Set.)-2.75 E(The message is forw)5.5 E(arded out)-.11 E
+(of all multicast-capable interf)122 693 Q(aces, e)-.11 E
+(xcept where this w)-.165 E(ould cause the BSM to cross an)-.11 E
+(admin-scope boundary for the scope zone indicated in the message.)122
+706 Q(The IP source)5.5 E
+(address of the message is the originating router')122 719 Q 2.75(sI)
+-.605 G 2.75(Pa)-2.75 G(ddress on the interf)-2.75 E(ace the)-.11 E
 (Fenner/Handle)72 769 Q(y/K)-.165 E 191.265(ermode/Thaler Section)-.275
-F 2.75(4. [P)2.75 F(age 14])-.165 E EP
+F 2.75(3. [P)2.75 F(age 14])-.165 E EP
 %%Page: 15 15
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E(Encoded-Group addresses tak)72
-85 Q 2.75(et)-.11 G(he follo)-2.75 E(wing format:)-.275 E/F1 11
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E(message is being forw)122 85
+Q(arded from, the destination address is ALL-PIM-R)-.11 E(OUTERS,)-.44 E
+(and the TTL of the message is set to 1.)122 98 Q/F1 11/Times-Bold@0 SF
+(Stor)97 114.6 Q 2.75(eR)-.198 G 2.75(PS)-2.75 G(et)-2.75 E F0
+(The RP-Set from the recei)122 127.6 Q -.165(ve)-.275 G 2.75(db).165 G
+(ootstrap message is stored and used by the router to)-2.75 E
+(decide the RP for each group that the router has state for)122 140.6 Q
+5.5(.S)-.605 G(toring this RP Set may)-5.5 E
+(cause other state-transitions to occur in the router)122 153.6 Q 5.5
+(.T)-.605 G(he BSR')-5.5 E 2.75(sI)-.605 G 2.75(Pa)-2.75 G
+(ddress and priority)-2.75 E(from the recei)122 166.6 Q -.165(ve)-.275 G
+2.75(db).165 G
+(ootstrap message are also stored to be used to decide if future)-2.75 E
+(bootstrap messages are preferred.)122 179.6 Q(In addition to the abo)72
+196.2 Q .33 -.165(ve s)-.165 H
+(tate-machine actions, a DR also unicasts a stored cop).165 E 2.75(yo)
+-.11 G 2.75(ft)-2.75 G(he Bootstrap)-2.75 E(message to each ne)72 209.2
+Q 2.75(wP)-.275 G(IM neighbor)-2.75 E 2.75(,i)-.44 G
+(.e., after the DR recei)-2.75 E -.165(ve)-.275 G 2.75(st).165 G
+(he neighbor')-2.75 E 2.75<738c>-.605 G(rst Hello message,)-2.75 E
+(and sends a Hello message in response.)72 222.2 Q(It does so e)5.5 E
+-.165(ve)-.275 G 2.75(ni).165 G 2.75(ft)-2.75 G(he ne)-2.75 E 2.75(wn)
+-.275 G(eighbor becomes the DR.)-2.75 E F1(3.1.)72 248.2 Q/F2 13
+/Times-Bold@0 SF(Sending Candidate-RP-Adv)5.5 E(ertisements)-.13 E F0
+(Ev)72 264.8 Q(ery C-RP periodically unicasts a C-RP-Adv to the BSR for\
+ that scope zone to inform the BSR)-.165 E(of the C-RP')72 277.8 Q 2.75
+(sw)-.605 G(illingness to function as an RP)-2.75 E 5.5(.U)-1.221 G
+(nless con\214gured otherwise, it does this for)-5.5 E -2.365 -.275
+(ev e)72 290.8 T(ry Admin Scope zone for which it has state, and for th\
+e global scope zone.).275 E(If the same router)5.5 E(is the BSR for mor\
+e than one scope zone, the C-RP-Adv for these scope zones MA)72 303.8 Q
+2.75(Yb)-1.155 G 2.75(ec)-2.75 G(ombined)-2.75 E(into a single message.)
+72 316.8 Q(If the C-RP is a ZBR for an admin scope zone, then the Admin\
+ Scope bit MUST be set in the C-)72 342.8 Q(RP-Adv messages it sends fo\
+r that scope zone; otherwise this bit MUST NO)72 355.8 Q 2.75(Tb)-.44 G
+2.75(es)-2.75 G 2.75(et. This)-2.75 F
+(information is currently only used for logging purposes by the BSR, b)
+72 368.8 Q(ut might allo)-.22 E 2.75(wf)-.275 G(or future)-2.75 E -.165
+(ex)72 381.8 S(tensions of the protocol.).165 E(The interv)72 407.8 Q(a\
+l for sending these messages is subject to local con\214guration at the\
+ C-RP)-.275 E 2.75(,b)-1.221 G(ut must be)-2.97 E
+(smaller than the HoldT)72 420.8 Q(ime in the C-RP-Adv)-.385 E(.)-.715 E
+2.75(AC)72 446.8 S(andidate-RP-Adv)-2.75 E(ertisement carries a list of\
+ group address and group mask \214eld pairs.)-.165 E(This)5.5 E
+(enables the C-RP router to restrict the adv)72 459.8 Q
+(ertisement to certain pre\214x)-.165 E(es or scopes of groups.)-.165 E
+(If)5.5 E(the C-RP becomes an RP)72 472.8 Q 2.75(,i)-1.221 G 2.75(tm)
+-2.75 G(ay enforce this scope acceptance when recei)-2.75 E(ving Re)
+-.275 E(gisters or)-.165 E(Join/Prune messages.)72 485.8 Q(The C-RP pri\
+ority \214eld determines which C-RPs get selected by the BSR to be in t\
+he RP Set.)72 511.8 Q(Note that a v)72 524.8 Q
+(alue of zero is the highest possible priority)-.275 E 5.5(.C)-.715 G
+(-RPs should by def)-5.5 E(ault send C-RP-Adv)-.11 E
+(messages with the `Priority' \214eld set to 192.)72 537.8 Q
+(When a C-RP is being shut do)72 563.8 Q
+(wn, it SHOULD immediately send a C-RP-Adv to the BSR for)-.275 E
+(each scope for which it is currently serving as an RP; the HoldT)72
+576.8 Q(ime in this C-RP-Adv message)-.385 E(should be zero.)72 589.8 Q
+(The BSR will then immediately time out the C-RP and generate a ne)5.5 E
+2.75(wB)-.275 G(SR)-2.75 E(message remo)72 602.8 Q(ving the shut do)
+-.165 E(wn RP from the RPset.)-.275 E F1(3.2.)72 641.8 Q F2(Cr)5.5 E
+(eating the RP-Set at the BSR)-.234 E F0(Upon recei)72 658.4 Q
+(ving a C-RP-Adv)-.275 E 2.75(,i)-.715 G 2.75(ft)-2.75 G
+(he router is not the elected BSR, it silently ignores the message.)
+-2.75 E(If the router is the BSR, then it adds the RP address to its lo\
+cal pool of candidate RPs.)72 675 Q -.165(Fo)5.5 G 2.75(re).165 G(ach)
+-2.75 E(C-RP)72 688 Q 2.75(,t)-1.221 G(he BSR holds the follo)-2.75 E
+(wing information:)-.275 E F1(IP addr)97 704.6 Q(ess)-.198 E F0
+(The IP address of the C-RP)122 717.6 Q(.)-1.221 E(Fenner/Handle)72 769
+Q(y/K)-.165 E 183.015(ermode/Thaler Section)-.275 F 2.75(3.2. [P)2.75 F
+(age 15])-.165 E EP
+%%Page: 16 16
+%%BeginPageSetup
+BP
+%%EndPageSetup
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 11/Times-Bold@0 SF(Gr)97
+85 Q(oup Pr)-.198 E(e\214x and Mask list)-.198 E F0
+(The list of group pre\214x)122 98 Q
+(es and group masks from the C-RP adv)-.165 E(ertisement.)-.165 E F1
+(HoldT)97 114.6 Q(ime)-.198 E F0(The HoldT)122 127.6 Q
+(ime from the C-RP-Adv message.)-.385 E
+(This is included later in the RP-set)5.5 E
+(information in the Bootstrap Message.)122 140.6 Q F1(C-RP Expiry T)97
+157.2 Q(imer)-.198 E F0(The C-RP-Expiry T)122 170.2 Q
+(imer is used to time out the state associated with a C-RP when the)
+-.385 E(BSR f)122 183.2 Q(ails to recei)-.11 E .33 -.165(ve C)-.275 H
+(-RP-Adv).165 E(ertisements from it.)-.165 E(The e)5.5 E
+(xpiry timer is initialized to)-.165 E(the HoldT)122 196.2 Q
+(ime from the RP')-.385 E 2.75(sC)-.605 G(-RP-Adv)-2.75 E 2.75(,a)-.715
+G(nd is reset to the HoldT)-2.75 E(ime whene)-.385 E -.165(ve)-.275 G
+2.75(raC).165 G(-)-2.75 E(RP-Adv is recei)122 209.2 Q -.165(ve)-.275 G
+2.75(df).165 G(rom that C-RP)-2.75 E(.)-1.221 E F1(C-RP Priority)97
+225.8 Q F0(The C-RP Priority is used to determine the subset of possibl\
+e RPs to use in the RP-)122 238.8 Q(Set. Smaller v)122 251.8 Q
+(alues are deemed to be of higher priority than lar)-.275 E(ge ones.)
+-.198 E(When the C-RP Expiry T)72 268.4 Q(imer e)-.385 E
+(xpires, the C-RP is remo)-.165 E -.165(ve)-.165 G 2.75(df).165 G
+(rom the pool of a)-2.75 E -.275(va)-.22 G(ilable C-RPs.).275 E(The BSR\
+ uses the pool of C-RPs to construct the RP-Set which is included in Bo\
+otstrap Messages)72 285 Q
+(and sent to all the routers in the PIM domain.)72 298 Q
+(The BSR may apply a local polic)5.5 E 2.75(yt)-.165 G 2.75(ol)-2.75 G
+(imit the)-2.75 E
+(number of Candidate RPs included in the Bootstrap message.)72 311 Q
+(The BSR may o)5.5 E -.165(ve)-.165 G(rride the pre\214x).165 E(indicat\
+ed in a C-RP-Adv unless the `Priority' \214eld from the C-RP-Adv is les\
+s than 128.)72 324 Q(The Bootstrap message is subdi)72 340.6 Q
+(vided into sets of {group-pre\214x, RP- Count, RP-addresses}.)-.275 E
+-.165(Fo)5.5 G(r).165 E(each RP-address, the corresponding HoldT)72
+353.6 Q(ime is included in the "RP-HoldT)-.385 E(ime" \214eld.)-.385 E
+(The)5.5 E(format of the Bootstrap message allo)72 366.6 Q
+(ws `semantic fragmentation', if the length of the original)-.275 E
+(Bootstrap message e)72 379.6 Q(xceeds the pack)-.165 E
+(et maximum boundaries. Ho)-.11 E(we)-.275 E -.165(ve)-.275 G .88 -.44
+(r, w).165 H 2.75(er).44 G(ecommend ag)-2.75 E(ainst)-.055 E
+(con\214guring a lar)72 392.6 Q(ge number of routers as C-RPs, to reduc\
+e the semantic fragmentation required.)-.198 E
+(When an elected BSR is being shut do)72 409.2 Q
+(wn, it should immediately originate a Bootstrap message)-.275 E
+(listing its current RP set, b)72 422.2 Q
+(ut with the BSR priority \214eld set to the lo)-.22 E(west priority v)
+-.275 E(alue possible.)-.275 E(This will cause the election of a ne)72
+435.2 Q 2.75(wB)-.275 G(SR to happen more quickly)-2.75 E(.)-.715 E F1
+(3.3.)72 474.2 Q/F2 13/Times-Bold@0 SF -.325(Fo)5.5 G
+(rwarding Bootstrap Messages).325 E F0
+(Bootstrap messages originate at the BSR, and are hop-by-hop forw)72
+490.8 Q(arded by intermediate routers)-.11 E(if the)72 503.8 Q 2.75(yp)
+-.165 G(ass the Bootstrap Message Processing Check.)-2.75 E
+(Bootstrap messages are multicast to the)5.5 E -.88(`A)72 516.8 S
+(LL-PIM-R).88 E(OUTERS' group.)-.44 E(When a BS message is forw)5.5 E
+(arded, it is forw)-.11 E(arded out of e)-.11 E -.165(ve)-.275 G(ry).165
+E(multicast-capable interf)72 529.8 Q(ace which has PIM neighbors \(e)
+-.11 E(xcluding the one o)-.165 E -.165(ve)-.165 G 2.75(rw).165 G
+(hich the message)-2.75 E -.11(wa)72 542.8 S 2.75(sr).11 G(ecei)-2.75 E
+-.165(ve)-.275 G 2.75(d\). The).165 F -.165(ex)2.75 G
+(ception to this is if the interf).165 E(ace is an administrati)-.11 E
+.33 -.165(ve s)-.275 H(cope boundary for the).165 E(admin scope zone in\
+dicated in the \214rst group address in the BS message pack)72 555.8 Q
+2.75(et. The)-.11 F(IP source)2.75 E
+(address on the bootstrap message should be set to the forw)72 568.8 Q
+(arding router')-.11 E 2.75(sI)-.605 G 2.75(Pa)-2.75 G(ddress on the)
+-2.75 E(interf)72 581.8 Q(ace the message is being forw)-.11 E
+(arded from.)-.11 E(Bootstrap messages are al)5.5 E -.11(wa)-.11 G
+(ys originated or).11 E(forw)72 594.8 Q(arded with an IP TTL v)-.11 E
+(alue of 1.)-.275 E F1(3.4.)72 633.8 Q F2(Recei)5.5 E
+(ving and Using the RP-Set)-.13 E F0(When a router recei)72 650.4 Q
+-.165(ve)-.275 G 2.75(sa).165 G(nd stores a ne)-2.75 E 2.75(wR)-.275 G
+(P-Set, it checks if each of the RPs referred to by)-2.75 E -.165(ex)72
+663.4 S(isting state \(i.e., by \(*,G\), \(*,*,RP\), or \(S,G,rpt\) ent\
+ries\) is in the ne).165 E 2.75(wR)-.275 G(P-Set.)-2.75 E
+(If an RP is not in the ne)72 680 Q 2.75(wR)-.275 G
+(P-Set, that RP is considered unreachable and the hash algorithm \(see)
+-2.75 E(PIM-SM speci\214cation\) is re-performed for each group with lo\
+cally acti)72 693 Q .33 -.165(ve s)-.275 H(tate that pre).165 E(viously)
+-.275 E(hashed to that RP)72 706 Q 2.75(.T)-1.221 G
+(his will cause those groups to be distrib)-2.75 E
+(uted among the remaining RPs.)-.22 E(Fenner/Handle)72 769 Q(y/K)-.165 E
+183.015(ermode/Thaler Section)-.275 F 2.75(3.4. [P)2.75 F(age 16])-.165
+E EP
+%%Page: 17 17
+%%BeginPageSetup
+BP
+%%EndPageSetup
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E(If the ne)72 85 Q 2.75(wR)
+-.275 G(P-Set contains a RP that w)-2.75 E(as not pre)-.11 E
+(viously in the RP-Set, the hash v)-.275 E(alue of the ne)-.275 E(w)
+-.275 E(RP is calculated for each group co)72 98 Q -.165(ve)-.165 G
+(red by the ne).165 E 2.75(wC)-.275 G(-RP')-2.75 E 2.75(sG)-.605 G 2.75
+(roup-pre\214x. An)-2.75 F 2.75(yg)-.165 G(roup for which)-2.75 E
+(the ne)72 111 Q 2.75(wR)-.275 G(P')-2.75 E 2.75(sh)-.605 G(ash v)-2.75
+E(alue is greater than hash v)-.275 E(alue of the group')-.275 E 2.75
+(sp)-.605 G(re)-2.75 E(vious RP is switched o)-.275 E -.165(ve)-.165 G
+2.75(rt).165 G(o)-2.75 E(the ne)72 124 Q 2.75(wR)-.275 G -1.221(P.)-2.75
+G/F1 11/Times-Bold@0 SF(4.)72 150 Q/F2 14/Times-Bold@0 SF(Message F)5.5
+E(ormats)-.35 E F0
+(BSR messages are PIM messages, as de\214ned in [3]. The v)72 166.6 Q
+(alues of the PIM message T)-.275 E(ype \214eld for)-.88 E
+(BSR messages are:)72 179.6 Q 19.5(4B)72 196.2 S(ootstrap Message)-19.5
+E 19.5(8C)72 212.8 S(andidate-RP-Adv)-19.5 E(ertisement)-.165 E
+(In this section we use the follo)72 229.4 Q
+(wing terms de\214ned in the PIM-SM [3]:)-.275 E 21.15<8345>72 246 S
+(ncoded-Unicast format)-21.15 E 21.15<8345>72 262.6 S
+(ncoded-Group format)-21.15 E 1.76 -.88(We r)72 279.2 T
+(epeat these here to aid readability).88 E(.)-.715 E F1
+(Encoded-Unicast addr)72 305.2 Q(ess)-.198 E F0
+(An Encoded-Unicast address tak)72 321.8 Q(es the follo)-.11 E
+(wing format:)-.275 E/F3 11/Courier@0 SF 125.4(0123)78.6 340.8 S 6.6
+(01234567890123456789012345678901)78.6 353.8 S
+(+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+)72
+366.8 Q 13.2(|A)72 379.8 S(ddr Family)-13.2 E 6.6(|E)13.2 G
+(ncoding Type |)-6.6 E(Unicast Address)33 E
+(+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+...)72 392.8 Q F1
+(Addr F)72 415.4 Q(amily)-.275 E F0(The PIM address f)97 428.4 Q
+(amily of the `Unicast Address' \214eld of this address.)-.11 E -1.221
+(Va)97 445 S(lues of 0-127 are as assigned by the IAN)1.221 E 2.75(Af)
+-.385 G(or Internet Address F)-2.75 E(amilies in [5]. V)-.165 E(alues)
+-1.221 E(128-250 are reserv)97 458 Q(ed to be assigned by the IAN)-.165
+E 2.75(Af)-.385 G(or PIM-speci\214c Address F)-2.75 E(amilies.)-.165 E
+-1.221(Va)97 471 S(lues 251 though 255 are designated for pri)1.221 E
+-.275(va)-.275 G(te use.).275 E(As there is no assignment authority)5.5
+E(for this space, collisions should be e)97 484 Q(xpected.)-.165 E F1
+(Encoding T)72 500.6 Q(ype)-.814 E F0
+(The type of encoding used within a speci\214c Address F)97 513.6 Q
+(amily)-.165 E 5.5(.T)-.715 G(he v)-5.5 E(alue `0' is reserv)-.275 E
+(ed for)-.165 E(this \214eld, and represents the nati)97 526.6 Q .33
+-.165(ve e)-.275 H(ncoding of the Address F).165 E(amily)-.165 E(.)-.715
+E F1(Unicast Addr)72 556.2 Q(ess)-.198 E F0
+(The unicast address as represented by the gi)97 569.2 Q -.165(ve)-.275
+G 2.75(nA).165 G(ddress F)-2.75 E(amily and Encoding T)-.165 E(ype.)-.88
+E F1(Encoded-Gr)72 608.2 Q(oup addr)-.198 E(ess)-.198 E F0
+(Fenner/Handle)72 769 Q(y/K)-.165 E 191.265(ermode/Thaler Section)-.275
+F 2.75(4. [P)2.75 F(age 17])-.165 E EP
+%%Page: 18 18
+%%BeginPageSetup
+BP
+%%EndPageSetup
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E(Encoded-Group addresses tak)
+72 85 Q 2.75(et)-.11 G(he follo)-2.75 E(wing format:)-.275 E/F1 11
 /Courier@0 SF 125.4(0123)78.6 104 S 6.6
 (01234567890123456789012345678901)78.6 117 S
 (+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+)72
@@ -2834,15 +3036,15 @@ ope zone, each)72 642.2 Q(dif)72 655.2 Q(ferent scope zone MUST occup)
 (rse the).165 E(admin scope boundary)72 681.2 Q(.)-.715 E
 (The format of a single `fragment' is gi)72 707.2 Q -.165(ve)-.275 G
 2.75(nb).165 G(elo)-2.75 E(w:)-.275 E(Fenner/Handle)72 769 Q(y/K)-.165 E
-183.015(ermode/Thaler Section)-.275 F 2.75(4.1. [P)2.75 F(age 15])-.165
+183.015(ermode/Thaler Section)-.275 F 2.75(4.1. [P)2.75 F(age 18])-.165
 E EP
-%%Page: 16 16
+%%Page: 19 19
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 11/Courier@0 SF 125.4(0123)
-78.6 85 S 6.6(01234567890123456789012345678901)78.6 98 S
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 11/Courier@0 SF 125.4
+(0123)78.6 85 S 6.6(01234567890123456789012345678901)78.6 98 S
 (+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+)72
 111 Q(|PIM Ver| Type)72 124 Q 19.8(|R)13.2 G 19.8(eserved |)-19.8 F 72.6
 (Checksum |)72.6 F
@@ -2908,20 +3110,20 @@ BP
 (ddress m \(Encoded-Unicast format\))-6.6 E(|)85.8 E
 (+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+)72
 722 Q F0(Fenner/Handle)72 769 Q(y/K)-.165 E 183.015
-(ermode/Thaler Section)-.275 F 2.75(4.1. [P)2.75 F(age 16])-.165 E EP
-%%Page: 17 17
+(ermode/Thaler Section)-.275 F 2.75(4.1. [P)2.75 F(age 19])-.165 E EP
+%%Page: 20 20
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 11/Courier@0 SF 66(|R)72 85
-S(Pm Holdtime)-66 E 6.6(|R)59.4 G(Pm Priority)-6.6 E 19.8(|R)13.2 G 19.8
-(eserved |)-19.8 F
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 11/Courier@0 SF 66(|R)72
+85 S(Pm Holdtime)-66 E 6.6(|R)59.4 G(Pm Priority)-6.6 E 19.8(|R)13.2 G
+19.8(eserved |)-19.8 F
 (+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+)72 98
 Q/F2 11/Times-Bold@0 SF(PIM V)72 120.6 Q(ersion, Reser)-1.1 E -.11(ve)
--.11 G(d, Checksum).11 E F0(Described in [1].)97 133.6 Q F2 -.814(Ty)72
+-.11 G(d, Checksum).11 E F0(Described in [3].)97 133.6 Q F2 -.814(Ty)72
 150.2 S(pe).814 E F0(PIM Message T)97 163.2 Q 2.75(ype. V)-.88 F
-(alue is 8 for a Bootstrap Message.)-1.221 E F2(Fragment T)72 192.8 Q
+(alue is 4 for a Bootstrap Message.)-1.221 E F2(Fragment T)72 192.8 Q
 (ag)-1.012 E F0 2.75(Ar)97 205.8 S(andomly generated number)-2.75 E 2.75
 (,a)-.44 G(cts to distinguish the fragments belonging to dif)-2.75 E
 (ferent)-.275 E(Bootstrap messages; fragments belonging to same Bootstr\
@@ -2939,10 +3141,10 @@ ity is 255 \(the higher the better\), whereas the highest RP Priority \
 (wer the better\).)-.275 E F2(Unicast BSR Addr)72 398.6 Q(ess)-.198 E F0
 (The address of the bootstrap router for the domain.)97 411.6 Q
 (The format for this address is gi)5.5 E -.165(ve)-.275 G 2.75(ni).165 G
-(n)-2.75 E(the Encoded-Unicast address in [1].)97 424.6 Q F2(Gr)72 441.2
+(n)-2.75 E(the Encoded-Unicast address in [3].)97 424.6 Q F2(Gr)72 441.2
 Q(oup Addr)-.198 E(ess 1..n)-.198 E F0(The group pre\214x \(address and\
  mask\) with which the Candidate RPs are associated.)97 454.2 Q -.165
-(Fo)5.5 G(rmat).165 E(described in [1]. In a fragment containing admin \
+(Fo)5.5 G(rmat).165 E(described in [3]. In a fragment containing admin \
 scope ranges, the \214rst group address in the)97 467.2 Q(fragment MUST\
  be the group range for the entire admin scope range, and this MUST ha)
 97 480.2 Q -.165(ve)-.22 G(the Admin Scope bit set.)97 493.2 Q
@@ -2970,15 +3172,15 @@ included in this fragment of the Bootstrap message,)97 656.4 Q
 (RP addr)72 712 Q(ess 1..m)-.198 E F0(The address of the Candidate RPs,\
  for the corresponding group pre\214x.)97 725 Q(The format for these)5.5
 E(Fenner/Handle)72 769 Q(y/K)-.165 E 183.015(ermode/Thaler Section)-.275
-F 2.75(4.1. [P)2.75 F(age 17])-.165 E EP
-%%Page: 18 18
+F 2.75(4.1. [P)2.75 F(age 20])-.165 E EP
+%%Page: 21 21
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E(addresses is gi)97 85 Q -.165
-(ve)-.275 G 2.75(ni).165 G 2.75(nt)-2.75 G
-(he Encoded-Unicast address in [1].)-2.75 E/F1 11/Times-Bold@0 SF
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E(addresses is gi)97 85 Q
+-.165(ve)-.275 G 2.75(ni).165 G 2.75(nt)-2.75 G
+(he Encoded-Unicast address in [3].)-2.75 E/F1 11/Times-Bold@0 SF
 (RP1..m Holdtime)72 101.6 Q F0(The Holdtime for the corresponding RP)97
 114.6 Q 5.5(.T)-1.221 G
 (his \214eld is copied from the `Holdtime' \214eld of)-5.5 E
@@ -3069,14 +3271,14 @@ F(general, the information for each admin scope range is independent of\
 (one admin scope range, then the procedure abo)72 719 Q .33 -.165(ve a)
 -.165 H(lso applies to BSMs that are fragmented due to).165 E
 (Fenner/Handle)72 769 Q(y/K)-.165 E 174.765(ermode/Thaler Section)-.275
-F 2.75(4.1.1. [P)2.75 F(age 18])-.165 E EP
-%%Page: 19 19
+F 2.75(4.1.1. [P)2.75 F(age 21])-.165 E EP
+%%Page: 22 22
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E(admin scoping.)72 85 Q(Ho)5.5 E
-(we)-.275 E -.165(ve)-.275 G .88 -.44(r, t).165 H 2.75(ot).44 G
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E(admin scoping.)72 85 Q(Ho)
+5.5 E(we)-.275 E -.165(ve)-.275 G .88 -.44(r, t).165 H 2.75(ot).44 G
 (ime out all the state for an entire admin scope zone requires w)-2.75 E
 (aiting)-.11 E(SZ T)72 98 Q(imeout rather than BS T)-.385 E
 (imeout, as admin scope zones are not e)-.385 E(xpected to come and go)
@@ -3105,9 +3307,9 @@ E(|)85.8 E
 E(|)85.8 E
 (+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+)72
 380.6 Q F1(PIM V)72 403.2 Q(ersion, Reser)-1.1 E -.11(ve)-.11 G
-(d, Checksum).11 E F0(Described in [1].)97 416.2 Q F1 -.814(Ty)72 432.8
+(d, Checksum).11 E F0(Described in [3].)97 416.2 Q F1 -.814(Ty)72 432.8
 S(pe).814 E F0(PIM Message T)97 445.8 Q 2.75(ype. V)-.88 F
-(alue is 4 for a Candidate-RP-Adv)-1.221 E(ertisement Message.)-.165 E
+(alue is 8 for a Candidate-RP-Adv)-1.221 E(ertisement Message.)-.165 E
 F1(Pr)72 475.4 Q(e\214x Cnt)-.198 E F0(The number of encoded group addr\
 esses included in the message; indicating the group)97 488.4 Q(pre\214x)
 97 501.4 Q(es for which the C-RP is adv)-.165 E
@@ -3128,18 +3330,18 @@ nd corresponding)97 596 Q(Encoded-Group Address.)97 609 Q F1(Holdtime)72
 (The address of the interf)97 707.2 Q(ace to adv)-.11 E
 (ertise as a Candidate RP)-.165 E 5.5(.T)-1.221 G
 (he format for this address is)-5.5 E(gi)97 720.2 Q -.165(ve)-.275 G
-2.75(ni).165 G 2.75(nt)-2.75 G(he Encoded-Unicast address in [1].)-2.75
+2.75(ni).165 G 2.75(nt)-2.75 G(he Encoded-Unicast address in [3].)-2.75
 E(Fenner/Handle)72 769 Q(y/K)-.165 E 183.015(ermode/Thaler Section)-.275
-F 2.75(4.2. [P)2.75 F(age 19])-.165 E EP
-%%Page: 20 20
+F 2.75(4.2. [P)2.75 F(age 22])-.165 E EP
+%%Page: 23 23
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 11/Times-Bold@0 SF(Gr)72 85
-Q(oup Addr)-.198 E(ess-1..n)-.198 E F0(The group pre\214x)97 98 Q
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 11/Times-Bold@0 SF(Gr)72
+85 Q(oup Addr)-.198 E(ess-1..n)-.198 E F0(The group pre\214x)97 98 Q
 (es for which the C-RP is adv)-.165 E 2.75(ertising. F)-.165 F
-(ormat described in Encoded-Group-)-.165 E(Address in [1].)97 111 Q F1
+(ormat described in Encoded-Group-)-.165 E(Address in [3].)97 111 Q F1
 (5.)72 137 Q/F2 14/Times-Bold@0 SF(Default V)5.5 E(alues f)-1.288 E
 (or T)-.35 E(imers)-.252 E F1 -.198(Ti)72 163 S(mer Name: Bootstrap T)
 .198 E(imer \(BST\))-.198 E .44 LW 503.996 177.35 72 177.35 DL -1.012
@@ -3181,22 +3383,22 @@ E(to \(2.5 * C-RP-Adv-Period \).)72 434.8 Q F1 -.198(Ti)72 460.8 S
 (mer Name: Scope Zone Expiry T).198 E(imer \(SZT\(Z\)\))-.198 E 503.998
 587.75 72 587.75 DL -1.012(Va)85.308 598 S(lue Name)1.012 E -1.012(Va)
 16.5 G 5.5(lue Explanation)1.012 F 503.998 602.75 72 602.75 DL 503.998
-604.75 72 604.75 DL F0(SZ T)85.308 615 Q 150.122(imeout 1500)-.385 F
+604.75 72 604.75 DL F0(SZ T)85.308 615 Q 150.122(imeout 1300)-.385 F
 (seconds)2.75 E(Interv)390.161 615 Q(al after which a)-.275 E
 (scope zone will be)390.161 628 Q(timed out if the state is)390.161 641
 Q(not refreshed)390.161 654 Q 503.998 658.75 72 658.75 DL 370.199 587.75
 370.199 658.75 DL 270.699 587.75 270.699 658.75 DL 503.998 587.75
 503.998 658.75 DL 72 587.75 72 658.75 DL(Fenner/Handle)72 769 Q(y/K)
--.165 E 191.265(ermode/Thaler Section)-.275 F 2.75(5. [P)2.75 F(age 20])
+-.165 E 191.265(ermode/Thaler Section)-.275 F 2.75(5. [P)2.75 F(age 23])
 -.165 E EP
-%%Page: 21 21
+%%Page: 24 24
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E/F1 11/Times-Bold@0 SF(6.)72 85
-Q/F2 14/Times-Bold@0 SF(Security Considerations)5.5 E F1(6.1.)72 111 Q
-/F3 13/Times-Bold@0 SF -.26(Po)5.5 G(ssible Thr).26 E(eats)-.234 E F0
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E/F1 11/Times-Bold@0 SF(6.)72
+85 Q/F2 14/Times-Bold@0 SF(Security Considerations)5.5 E F1(6.1.)72 111
+Q/F3 13/Times-Bold@0 SF -.26(Po)5.5 G(ssible Thr).26 E(eats)-.234 E F0
 (Threats af)72 127.6 Q
 (fecting the PIM BSR mechanism are primarily of tw)-.275 E 2.75(of)-.11
 G(orms: denial of service attacks,)-2.75 E(and traf)72 140.6 Q(\214c di)
@@ -3238,10 +3440,10 @@ Q F3(Limiting Third-P)5.5 E(arty DoS Attacks)-.13 E F0
 (Re)72 383.2 Q(gister pack)-.165 E
 (ets to that RP for a short period of time.)-.11 E(As this does not af)
 72 399.8 Q(fect interoperability)-.275 E 2.75(,t)-.715 G
-(he precise details are left to the implementator to decide.)-2.75 E(Ho)
-72 412.8 Q(we)-.275 E -.165(ve)-.275 G 2.75(rw).165 G 2.75(en)-2.75 G(o\
-te that a router implementing such rate limiting must only do so if the\
- ICMP)-2.75 E(pack)72 425.8 Q(et correctly echoes part of a Re)-.11 E
+(he precise details are left to the implementor to decide.)-2.75 E(Ho)72
+412.8 Q(we)-.275 E -.165(ve)-.275 G 2.75(rw).165 G 2.75(en)-2.75 G(ote \
+that a router implementing such rate limiting must only do so if the IC\
+MP)-2.75 E(pack)72 425.8 Q(et correctly echoes part of a Re)-.11 E
 (gister pack)-.165 E(et that w)-.11 E(as sent to the RP)-.11 E 5.5(.I)
 -1.221 G 2.75(ft)-5.5 G(his check were not)-2.75 E
 (made, then simply sending ICMP Unreachable pack)72 438.8 Q
@@ -3285,16 +3487,17 @@ E 2.75(ab)72 683.6 S(ad BS Message unicast from an immediate neighbor)
 .165 E(pre)72 722.6 Q -.165(ve)-.275 G(nt pack).165 E(ets entering the \
 PIM domain with IP source addresses that are infrastructure)-.11 E
 (Fenner/Handle)72 769 Q(y/K)-.165 E 183.015(ermode/Thaler Section)-.275
-F 2.75(6.3. [P)2.75 F(age 21])-.165 E EP
-%%Page: 22 22
+F 2.75(6.3. [P)2.75 F(age 24])-.165 E EP
+%%Page: 25 25
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E(addresses in the PIM domain.)72
-85 Q(The principle threat to BS Message security comes from hosts withi\
-n the PIM domain that)72 101.6 Q(attempt to sub)72 114.6 Q -.165(ve)
--.165 G(rt the BSR mechanism.).165 E(The)5.5 E 2.75(ym)-.165 G
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E
+(addresses in the PIM domain.)72 85 Q(The principle threat to BS Messag\
+e security comes from hosts within the PIM domain that)72 101.6 Q
+(attempt to sub)72 114.6 Q -.165(ve)-.165 G(rt the BSR mechanism.).165 E
+(The)5.5 E 2.75(ym)-.165 G
 (ay be able to do this by sending PIM messages to)-2.75 E
 (their local router)72 127.6 Q 2.75(,o)-.44 G 2.75(rb)-2.75 G 2.75(yu)
 -2.75 G
@@ -3331,7 +3534,7 @@ mmend)72 333.4 Q(that IPsec AH is used to protect communication between\
 E .33 -.165(ve c)-.275 H(ontrol, this).165 E
 (authentication may use a con\214gured shared secret.)72 385.4 Q
 (The securing of interactions between PIM)5.5 E(neighbors is discussed \
-in more detail in the Security Considerations section of [1], and so we\
+in more detail in the Security Considerations section of [3], and so we\
  do)72 398.4 Q(not discuss the details further here.)72 411.4 Q
 (The same security mechanisms than can be used to secure)5.5 E(PIM Join\
 , Prune and Assert messages should also be used to secure BS messages.)
@@ -3377,17 +3580,17 @@ trusted, the)2.75 E(router can at least check that the source MA)72
 (there will normally be fe)72 721.2 Q
 (wer C-RPs in a domain than there are DRs, so k)-.275 E .33 -.165(ey m)
 -.11 H(anagement is a little).165 E(Fenner/Handle)72 769 Q(y/K)-.165 E
-183.015(ermode/Thaler Section)-.275 F 2.75(6.4. [P)2.75 F(age 22])-.165
+183.015(ermode/Thaler Section)-.275 F 2.75(6.4. [P)2.75 F(age 25])-.165
 E EP
-%%Page: 23 23
+%%Page: 26 26
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E(simpler)72 85 Q 5.5(.W)-.605 G
-2.75(ed)-6.38 G 2.75(on)-2.75 G
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E(simpler)72 85 Q 5.5(.W)-.605
+G 2.75(ed)-6.38 G 2.75(on)-2.75 G
 (ot describe the details of this process further here, b)-2.75 E
-(ut refer to the Security)-.22 E(Considerations section of [1]. Note th\
+(ut refer to the Security)-.22 E(Considerations section of [3]. Note th\
 at the use of cryptographic security for C-RP-Advs does not)72 98 Q
 (remo)72 111 Q .33 -.165(ve t)-.165 H
 (he need for the non-cryptographic mechanisms, as e).165 E
@@ -3436,57 +3639,59 @@ G(nt attacks on PIM from af).165 E(fecting other acti)-.275 E
 -1.221(AT)108 436.2 S(&T Labs - Research)1.221 E(75 W)108 449.2 Q(illo)
 -.44 E 2.75(wR)-.275 G(oad)-2.75 E(Menlo P)108 462.2 Q(ark, CA 94025)
 -.165 E(fenner@research.att.com)108 475.2 Q(Mark Handle)108 500.2 Q(y)
--.165 E -.44(AC)108 513.2 S(IRI/ICSI).44 E(1947 Center St, Suite 600)108
-526.2 Q(Berk)108 539.2 Q(ele)-.11 E 1.43 -.715(y, C)-.165 H 2.75(A9).715
-G(4708)-2.75 E(mjh@aciri.or)108 552.2 Q(g)-.198 E(Roger K)108 577.2 Q
-(ermode)-.275 E(Motorola Australian Research Centre)108 590.2 Q(Lock)108
-603.2 Q(ed Bag 5028)-.11 E(Botan)108 616.2 Q 5.5(yN)-.165 G 2.75
-(SW 1455,)-5.5 F(Australia)108 629.2 Q(Roger)108 642.2 Q(.K)-.605 E
+-.165 E(ICIR/ICSI)108 513.2 Q(1947 Center St, Suite 600)108 526.2 Q
+(Berk)108 539.2 Q(ele)-.11 E 1.43 -.715(y, C)-.165 H 2.75(A9).715 G
+(4708)-2.75 E(mjh@icir)108 552.2 Q(.or)-.605 E(g)-.198 E(Roger K)108
+577.2 Q(ermode)-.275 E(Motorola Australian Research Centre)108 590.2 Q
+(Lock)108 603.2 Q(ed Bag 5028)-.11 E(Botan)108 616.2 Q 5.5(yN)-.165 G
+2.75(SW 1455,)-5.5 F(Australia)108 629.2 Q(Roger)108 642.2 Q(.K)-.605 E
 (ermode@motorola.com)-.275 E(Fenner/Handle)72 769 Q(y/K)-.165 E 191.265
-(ermode/Thaler Section)-.275 F 2.75(7. [P)2.75 F(age 23])-.165 E EP
-%%Page: 24 24
+(ermode/Thaler Section)-.275 F 2.75(7. [P)2.75 F(age 26])-.165 E EP
+%%Page: 27 27
 %%BeginPageSetup
 BP
 %%EndPageSetup
-/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 71.587(-DRAFT Expires:)-1.012 F
-(January 2002)2.75 E(July 2001)123.726 E(Da)108 85 Q(vid Thaler)-.22 E
-(Microsoft Corporation)108 98 Q(One Microsoft W)108 111 Q(ay)-.88 E
+/F0 11/Times-Roman@0 SF(INTERNET)72 49 Q 72.802(-DRAFT Expires:)-1.012 F
+(August 2003)2.75 E(February 2003)103.569 E(Da)108 85 Q(vid Thaler)-.22
+E(Microsoft Corporation)108 98 Q(One Microsoft W)108 111 Q(ay)-.88 E
 (Redmond, W)108 124 Q 2.75(A9)-1.32 G(8052)-2.75 E
-(dthaler@Exchange.Microsoft.com)108 137 Q/F1 11/Times-Bold@0 SF(8.)72
-182 Q/F2 14/Times-Bold@0 SF(Refer)5.5 E(ences)-.252 E F0([1] W)72 198.6
-Q 2.75(.F)-1.012 G(enner)-2.75 E 2.75(,M)-.44 G 2.75(.H)-2.75 G(andle)
--2.75 E 1.43 -.715(y, H)-.165 H 2.75(.H).715 G(olbrook, I. K)-2.75 E
-(ouv)-.385 E(elas, "Protocol Independent Multicast - Sparse)-.165 E
-(Mode \(PIM-SM\): Protocol Speci\214cation \(Re)97 211.6 Q
-(vised\)", Internet Draft draft-ietf-pim-sm-)-.275 E(v2-ne)97 224.6 Q
-(w-03.ps)-.275 E([2] D. Estrin et al., "Protocol Independent Multicast \
-- Sparse Mode \(PIM-SM\): Protocol)72 241.2 Q
-(Speci\214cation", RFC 2362, June 1998 \(no)97 254.2 Q 2.75(wo)-.275 G
-(bsolete\).)-2.75 E([3] W)72 270.8 Q 2.75(.F)-1.012 G(enner)-2.75 E 2.75
+(dthaler@Microsoft.com)108 137 Q/F1 11/Times-Bold@0 SF(8.)72 182 Q/F2 14
+/Times-Bold@0 SF(Refer)5.5 E(ences)-.252 E F0([1] S. Deering , W)72
+198.6 Q 2.75(.F)-1.012 G(enner , B. Haberman, "Multicast Listener Disco)
+-2.75 E -.165(ve)-.165 G(ry \(MLD\) for IPv6", RFC).165 E
+(2710, Oct 1999.)97 211.6 Q([2] D. Estrin et al., "Protocol Independent\
+ Multicast - Sparse Mode \(PIM-SM\): Protocol)72 228.2 Q
+(Speci\214cation", RFC 2362, June 1998 \(no)97 241.2 Q 2.75(wo)-.275 G
+(bsolete\).)-2.75 E([3] W)72 257.8 Q 2.75(.F)-1.012 G(enner)-2.75 E 2.75
+(,M)-.44 G 2.75(.H)-2.75 G(andle)-2.75 E 1.43 -.715(y, H)-.165 H 2.75
+(.H).715 G(olbrook, I. K)-2.75 E(ouv)-.385 E
+(elas, "Protocol Independent Multicast - Sparse)-.165 E
+(Mode \(PIM-SM\): Protocol Speci\214cation \(Re)97 270.8 Q
+(vised\)", Internet Draft draft-ietf-pim-sm-)-.275 E(v2-ne)97 283.8 Q
+(w-05.ps)-.275 E([4] W)72 300.4 Q 2.75(.F)-1.012 G(enner)-2.75 E 2.75
 (,")-.44 G(Internet Group Management Protocol, V)-2.75 E
-(ersion 2", RFC 2236, No)-1.221 E 2.75(v1)-.165 G(997.)-2.75 E
-([4] S. Deering , W)72 287.4 Q 2.75(.F)-1.012 G
-(enner , B. Haberman, "Multicast Listener Disco)-2.75 E -.165(ve)-.165 G
-(ry \(MLD\) for IPv6", RFC).165 E(2710, Oct 1999.)97 300.4 Q([5] IAN)72
-317 Q(A, "Address F)-.385 E(amily Numbers", link)-.165 E
-(ed from http://www)-.11 E(.iana.or)-.715 E(g/numbers.html)-.198 E F1
-(9.)72 343 Q F2(Ackno)5.5 E(wledgments)-.14 E F0(PIM-SM w)72 359.6 Q
+(ersion 2", RFC 2236, No)-1.221 E 2.75(v1)-.165 G(997.)-2.75 E([5] IAN)
+72 317 Q(A, "Address F)-.385 E(amily Numbers", link)-.165 E
+(ed from http://www)-.11 E(.iana.or)-.715 E(g/numbers.html)-.198 E
+([6] D. Me)72 333.6 Q(yer)-.165 E 2.75(,")-.44 G(Administrati)-2.75 E
+-.165(ve)-.275 G(ly Scoped IP Multicast", RFC 2365, Jul 1998.).165 E F1
+(9.)72 359.6 Q F2(Ackno)5.5 E(wledgments)-.14 E F0(PIM-SM w)72 376.2 Q
 (as designed o)-.11 E -.165(ve)-.165 G 2.75(rm).165 G(an)-2.75 E 2.75
 (yy)-.165 G(ears by a lar)-2.75 E
 (ge group of people, including ideas from Deborah)-.198 E
-(Estrin, Dino F)72 372.6 Q(arinacci, Ahmed Helmy)-.165 E 2.75(,S)-.715 G
+(Estrin, Dino F)72 389.2 Q(arinacci, Ahmed Helmy)-.165 E 2.75(,S)-.715 G
 (te)-2.75 E .33 -.165(ve D)-.275 H(eering, V).165 E
-(an Jacobson, C. Liu, Puneet Sharma,)-1.221 E(Liming W)72 385.6 Q(ei, T)
+(an Jacobson, C. Liu, Puneet Sharma,)-1.221 E(Liming W)72 402.2 Q(ei, T)
 -.88 E(om Pusateri, T)-.88 E(on)-.88 E 2.75(yB)-.165 G
 (allardie, Scott Brim, Jon Cro)-2.75 E(wcroft, P)-.275 E
 (aul Francis, Joel)-.165 E
-(Halpern, Horst Hodel, Polly Huang, Stephen Ostro)72 398.6 Q
-(wski, Lixia Zhang, Girish Chandranmenon,)-.275 E -.165(Pa)72 411.6 S
+(Halpern, Horst Hodel, Polly Huang, Stephen Ostro)72 415.2 Q
+(wski, Lixia Zhang, Girish Chandranmenon,)-.275 E -.165(Pa)72 428.2 S
 (vlin Radosla)-.055 E -2.475 -.22(vo v)-.22 H 2.75(,J)-.495 G
 (ohn Zwiebel, Isidor K)-2.75 E(ouv)-.385 E(elas and Hugh Holbrook.)-.165
-E(This BSR speci\214cation)5.5 E(dra)72 424.6 Q(ws hea)-.165 E
+E(This BSR speci\214cation)5.5 E(dra)72 441.2 Q(ws hea)-.165 E
 (vily on te)-.22 E(xt from RFC 2362.)-.165 E(Fenner/Handle)72 769 Q(y/K)
--.165 E 191.265(ermode/Thaler Section)-.275 F 2.75(9. [P)2.75 F(age 24])
+-.165 E 191.265(ermode/Thaler Section)-.275 F 2.75(9. [P)2.75 F(age 27])
 -.165 E EP
 %%Trailer
 end
