@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.1.1.1 2002/12/11 23:55:55 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.2 2003/03/07 02:39:47 pavlin Exp $
 #
 
 #
@@ -424,6 +424,17 @@ desc="Routing Information Base daemon"
 html_start_page="index.html"
 files="rib/*.hh"
 excludes="rib/dummy_register_server.hh rib/parser_direct_cmds.hh rib/parser_xrl_cmds.hh rib/parser.hh"
+xref="libxorp libxorp-callback"
+kdocify
+
+#
+# rip
+#
+lib="rip"
+desc="Routing Information Protocol"
+html_start_page="index.html"
+files="rip/*.hh"
+excludes=""
 xref="libxorp libxorp-callback"
 kdocify
 
