@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.4 2002/12/17 22:06:06 mjh Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.5 2003/01/16 23:18:58 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -33,8 +33,8 @@ public:
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
 
-    void peering_went_down();
-    void peering_came_up();
+    void ribin_peering_went_down();
+    void ribin_peering_came_up();
 
     /*replace_route doesn't make sense for a RibIn because it's the
       RibIn that decides whether this is an add or a replace*/

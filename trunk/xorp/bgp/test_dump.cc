@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.3 2002/12/16 04:05:14 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.4 2002/12/17 22:06:07 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -245,8 +245,7 @@ int main(int, char** argv) {
     //================================================================
     //take peer3 down
     fanout_table->remove_next_table(debug_table3);
-    //fanout_table->peering_went_down(&handler3);
-    ribin_table3->peering_went_down();
+    ribin_table3->ribin_peering_went_down();
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 2");
     debug_table1->write_comment("SIMPLE DUMP TO PEER 3");
@@ -273,7 +272,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("BRING PEER 3 UP");
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
-    ribin_table3->peering_came_up();
+    ribin_table3->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table3);
 
     debug_table1->write_separator();
@@ -308,8 +307,7 @@ int main(int, char** argv) {
     //================================================================
     //take peer3 down
     fanout_table->remove_next_table(debug_table3);
-    //fanout_table->peering_went_down(&handler3);
-    ribin_table3->peering_went_down();
+    ribin_table3->ribin_peering_went_down();
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 3");
     debug_table1->write_comment("SIMPLE DUMP TO PEER 3");
@@ -354,7 +352,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("BRING PEER 3 UP");
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
-    ribin_table3->peering_came_up();
+    ribin_table3->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table3);
 
     debug_table1->write_separator();
@@ -408,8 +406,7 @@ int main(int, char** argv) {
     //================================================================
     //take peer3 down
     fanout_table->remove_next_table(debug_table3);
-    //fanout_table->peering_went_down(&handler3);
-    ribin_table3->peering_went_down();
+    ribin_table3->ribin_peering_went_down();
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 4");
     debug_table1->write_comment("SIMPLE DUMP TO PEER 3, PEER 2 GOES DOWN");
@@ -454,14 +451,13 @@ int main(int, char** argv) {
     debug_table1->write_comment("BRING PEER 3 UP");
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
-    ribin_table3->peering_came_up();
+    ribin_table3->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table3);
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
     fanout_table->remove_next_table(debug_table2);
-    //fanout_table->peering_went_down(&handler2);
-    ribin_table2->peering_went_down();
+    ribin_table2->ribin_peering_went_down();
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
@@ -492,7 +488,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("BRING PEER 2 UP");
     fanout_table->add_next_table(debug_table2, &handler2);
     debug_table2->set_parent(fanout_table);
-    ribin_table2->peering_came_up();
+    ribin_table2->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table2);
     while (eventloop->timers_pending()) {
 	eventloop->run();
@@ -504,8 +500,7 @@ int main(int, char** argv) {
     //================================================================
     //take peer3 down
     fanout_table->remove_next_table(debug_table3);
-    //fanout_table->peering_went_down(&handler3);
-    ribin_table3->peering_went_down();
+    ribin_table3->ribin_peering_went_down();
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 5");
     debug_table1->write_comment("DUMP TO PEER 3, PEER 2 GOES DOWN DURING P2 DUMP");
@@ -544,7 +539,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("BRING PEER 3 UP");
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
-    ribin_table3->peering_came_up();
+    ribin_table3->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table3);
 
     debug_table1->write_separator();
@@ -560,8 +555,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
     fanout_table->remove_next_table(debug_table2);
-    //fanout_table->peering_went_down(&handler2);
-    ribin_table2->peering_went_down();
+    ribin_table2->ribin_peering_went_down();
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
@@ -588,7 +582,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("EXPECT NO CHANGE");
     fanout_table->add_next_table(debug_table2, &handler2);
     debug_table2->set_parent(fanout_table);
-    ribin_table2->peering_came_up();
+    ribin_table2->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table2);
     while (eventloop->timers_pending()) {
 	eventloop->run();
@@ -601,8 +595,7 @@ int main(int, char** argv) {
     //================================================================
     //take peer3 down
     fanout_table->remove_next_table(debug_table3);
-    //fanout_table->peering_went_down(&handler3);
-    ribin_table3->peering_went_down();
+    ribin_table3->ribin_peering_went_down();
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 6");
     debug_table1->write_comment("DUMP TO PEER 3, PEER 1 GOES DOWN");
@@ -632,15 +625,14 @@ int main(int, char** argv) {
     debug_table1->write_comment("EXPECT NO IMMEDIATE CHANGE");
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
-    ribin_table3->peering_came_up();
+    ribin_table3->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table3);
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 1 GOES DOWN");
     debug_table1->write_comment("EXPECT NO IMMEDIATE CHANGE");
     fanout_table->remove_next_table(debug_table1);
-    //fanout_table->peering_went_down(&handler1);
-    ribin_table1->peering_went_down();
+    ribin_table1->ribin_peering_went_down();
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
@@ -666,7 +658,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("EXPECT NO CHANGE");
     fanout_table->add_next_table(debug_table1, &handler1);
     debug_table1->set_parent(fanout_table);
-    ribin_table1->peering_came_up();
+    ribin_table1->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table1);
     while (eventloop->timers_pending()) {
 	eventloop->run();
@@ -680,8 +672,7 @@ int main(int, char** argv) {
     //================================================================
     //take peer3 down
     fanout_table->remove_next_table(debug_table3);
-    //fanout_table->peering_went_down(&handler3);
-    ribin_table3->peering_went_down();
+    ribin_table3->ribin_peering_went_down();
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 7");
     debug_table1->write_comment("DUMP TO PEER 3, PEER 2 GOES DOWN BETWEEN P1 AND P2 DUMPS");
@@ -720,7 +711,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("BRING PEER 3 UP");
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
-    ribin_table3->peering_came_up();
+    ribin_table3->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table3);
 
     debug_table1->write_separator();
@@ -731,8 +722,7 @@ int main(int, char** argv) {
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
     fanout_table->remove_next_table(debug_table2);
-    //fanout_table->peering_went_down(&handler2);
-    ribin_table2->peering_went_down();
+    ribin_table2->ribin_peering_went_down();
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
@@ -758,7 +748,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("EXPECT NO CHANGE");
     fanout_table->add_next_table(debug_table2, &handler2);
     debug_table2->set_parent(fanout_table);
-    ribin_table2->peering_came_up();
+    ribin_table2->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table2);
     while (eventloop->timers_pending()) {
 	eventloop->run();
@@ -772,8 +762,7 @@ int main(int, char** argv) {
     //================================================================
     //take peer3 down
     fanout_table->remove_next_table(debug_table3);
-    //fanout_table->peering_went_down(&handler3);
-    ribin_table3->peering_went_down();
+    ribin_table3->ribin_peering_went_down();
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 8");
     debug_table1->write_comment("DUMP TO PEER 3, PEER 2 GOES DOWN BEFORE P1 DUMP");
@@ -812,14 +801,13 @@ int main(int, char** argv) {
     debug_table1->write_comment("BRING PEER 3 UP");
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
-    ribin_table3->peering_came_up();
+    ribin_table3->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table3);
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
     fanout_table->remove_next_table(debug_table2);
-    //fanout_table->peering_went_down(&handler2);
-    ribin_table2->peering_went_down();
+    ribin_table2->ribin_peering_went_down();
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
@@ -846,7 +834,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("EXPECT NO CHANGE");
     fanout_table->add_next_table(debug_table2, &handler2);
     debug_table2->set_parent(fanout_table);
-    ribin_table2->peering_came_up();
+    ribin_table2->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table2);
     while (eventloop->timers_pending()) {
 	eventloop->run();
@@ -859,8 +847,7 @@ int main(int, char** argv) {
     //================================================================
     //take peer3 down
     fanout_table->remove_next_table(debug_table3);
-    //fanout_table->peering_went_down(&handler3);
-    ribin_table3->peering_went_down();
+    ribin_table3->ribin_peering_went_down();
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 9");
     debug_table1->write_comment("DUMP TO PEER 3, P1 AND P2 GO DOWN BEFORE FIRST DUMP");
@@ -899,20 +886,18 @@ int main(int, char** argv) {
     debug_table1->write_comment("BRING PEER 3 UP");
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
-    ribin_table3->peering_came_up();
+    ribin_table3->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table3);
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
     fanout_table->remove_next_table(debug_table2);
-    //fanout_table->peering_went_down(&handler2);
-    ribin_table2->peering_went_down();
+    ribin_table2->ribin_peering_went_down();
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 1 GOES DOWN");
     fanout_table->remove_next_table(debug_table1);
-    //fanout_table->peering_went_down(&handler2);
-    ribin_table1->peering_went_down();
+    ribin_table1->ribin_peering_went_down();
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
@@ -926,7 +911,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("EXPECT NO CHANGE");
     fanout_table->add_next_table(debug_table2, &handler2);
     debug_table2->set_parent(fanout_table);
-    ribin_table2->peering_came_up();
+    ribin_table2->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table2);
     while (eventloop->timers_pending()) {
 	eventloop->run();
@@ -937,7 +922,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("EXPECT NO CHANGE");
     fanout_table->add_next_table(debug_table1, &handler1);
     debug_table1->set_parent(fanout_table);
-    ribin_table1->peering_came_up();
+    ribin_table1->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table1);
     while (eventloop->timers_pending()) {
 	eventloop->run();
@@ -950,8 +935,7 @@ int main(int, char** argv) {
     //================================================================
     //take peer3 down
     fanout_table->remove_next_table(debug_table3);
-    //fanout_table->peering_went_down(&handler3);
-    ribin_table3->peering_went_down();
+    ribin_table3->ribin_peering_went_down();
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 10");
     debug_table1->write_comment("DUMP TO PEER 3, SEND NEW ROUTES");
@@ -990,7 +974,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("BRING PEER 3 UP");
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
-    ribin_table3->peering_came_up();
+    ribin_table3->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table3);
 
     debug_table1->write_separator();
@@ -1126,8 +1110,7 @@ int main(int, char** argv) {
     //================================================================
     //take peer3 down
     fanout_table->remove_next_table(debug_table3);
-    //fanout_table->peering_went_down(&handler3);
-    ribin_table3->peering_went_down();
+    ribin_table3->ribin_peering_went_down();
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 11");
     debug_table1->write_comment("DUMP TO PEER 3, REPLACE ROUTES");
@@ -1166,7 +1149,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("BRING PEER 3 UP");
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
-    ribin_table3->peering_came_up();
+    ribin_table3->ribin_peering_came_up();
     fanout_table->dump_entire_table(debug_table3);
 
     debug_table1->write_separator();

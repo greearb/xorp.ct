@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.3 2002/12/16 04:05:14 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.4 2002/12/17 22:06:07 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -127,7 +127,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -137,7 +137,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
     debug_table->write_separator();
 
     //================================================================
@@ -174,7 +174,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -184,7 +184,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
     debug_table->write_separator();
 
     //================================================================
@@ -221,7 +221,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -231,7 +231,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
     debug_table->write_separator();
 
     //================================================================
@@ -276,7 +276,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -286,7 +286,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
     debug_table->write_separator();
 
     //================================================================
@@ -299,7 +299,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -309,7 +309,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -361,11 +361,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
@@ -391,11 +391,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -405,7 +405,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     //================================================================
     //Test7: trivial add and peering goes down
@@ -451,11 +451,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
@@ -481,11 +481,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -495,7 +495,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     //================================================================
     //Test8: 
@@ -541,11 +541,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
@@ -571,11 +571,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -585,7 +585,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     //================================================================
     //Test9: 
@@ -615,11 +615,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
@@ -645,11 +645,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -659,7 +659,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     //================================================================
     //Test10: 
@@ -679,11 +679,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
@@ -695,11 +695,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -709,7 +709,7 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING COMES UP");
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
 
     //================================================================
 

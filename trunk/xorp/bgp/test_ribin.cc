@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.4 2002/12/16 04:05:14 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.5 2002/12/17 22:06:07 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -213,7 +213,7 @@ int main(int, char** argv) {
 
     debug_table->write_comment("NOW DROP THE PEERING");
 
-    ribin->peering_went_down();
+    ribin->ribin_peering_went_down();
     while (eventloop->timers_pending()) {
 	eventloop->run();
     }
@@ -223,7 +223,7 @@ int main(int, char** argv) {
     //================================================================
     //Test4: trivial add two routes, then do a route dump
     //================================================================
-    ribin->peering_came_up();
+    ribin->ribin_peering_came_up();
     //add a route
     debug_table->write_comment("TEST 4");
     palist1 =

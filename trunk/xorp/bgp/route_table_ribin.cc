@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.4 2002/12/17 22:06:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.5 2003/01/16 23:18:58 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -44,7 +44,7 @@ RibInTable<A>::~RibInTable()
 
 template<class A>
 void
-RibInTable<A>::peering_went_down()
+RibInTable<A>::ribin_peering_went_down()
 {
     _peer_is_up = false;
 
@@ -75,7 +75,7 @@ RibInTable<A>::peering_went_down()
 
 template<class A>
 void
-RibInTable<A>::peering_came_up()
+RibInTable<A>::ribin_peering_came_up()
 {
     _peer_is_up = true;
     _genid++;

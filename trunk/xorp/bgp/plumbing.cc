@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.4 2002/12/17 22:06:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.5 2003/01/16 23:18:57 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -423,7 +423,7 @@ BGPPlumbingAF<A>::peering_went_down(PeerHandler* peer_handler) {
     RibInTable<A> *rib_in;
     rib_in = iter->second;
     //peering went down will be propagated downstream by the RIB-In.
-    rib_in->peering_went_down();
+    rib_in->ribin_peering_went_down();
 
     //stop_peering shuts down and disconnects the output branch for this peer
     stop_peering(peer_handler);
@@ -470,7 +470,7 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler) {
 		   peer_handler);
     RibInTable<A> *rib_in;
     rib_in = iter2->second;
-    rib_in->peering_came_up();
+    rib_in->ribin_peering_came_up();
 
     _fanout_table->dump_entire_table(filter_out);
     if(_awaits_push)
