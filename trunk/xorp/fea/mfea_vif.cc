@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.2 2003/05/16 19:23:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.3 2003/08/07 01:07:28 pavlin Exp $"
 
 
 //
@@ -112,6 +112,9 @@ MfeaVif::~MfeaVif()
 int
 MfeaVif::start()
 {
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
     if (! is_underlying_vif_up())
 	return (XORP_ERROR);
     
@@ -122,14 +125,15 @@ MfeaVif::start()
     // Install in the kernel only if the vif is of the appropriate type:
     // multicast-capable (loopback excluded), or PIM Register vif.
     //
-    if ((is_multicast_capable() && (! is_loopback()))
-	|| is_pim_register()) {
-	if (mfea_node().add_multicast_vif(vif_index()) < 0)
-	    return (XORP_ERROR);
-	return (XORP_OK);
+    if (! ((is_multicast_capable() && (! is_loopback()))
+	   || is_pim_register())) {
+	return (XORP_ERROR);
     }
-    
-    return (XORP_ERROR);
+
+    if (mfea_node().add_multicast_vif(vif_index()) < 0)
+	return (XORP_ERROR);
+
+    return (XORP_OK);
 }
 
 /**
@@ -143,18 +147,30 @@ MfeaVif::start()
 int
 MfeaVif::stop()
 {
-    int ret_value = XORP_OK;
-    
+    if (is_down())
+	return (XORP_OK);
+
+    if (! (is_up() || is_pending_up() || is_pending_down()))
+	return (XORP_ERROR);
+
     leave_all_multicast_groups();
-    
+
     if (ProtoUnit::stop() < 0)
 	return (XORP_ERROR);
-    
-    // Remove from the kernel only if the vif is of the appropriate type
-    if (is_multicast_capable() && (! is_loopback()))
-	ret_value = mfea_node().delete_multicast_vif(vif_index());
-    
-    return (ret_value);
+
+    //
+    // Remove from the kernel only if the vif is of the appropriate type:
+    // multicast-capable (loopback excluded), or PIM Register vif.
+    //
+    if (! ((is_multicast_capable() && (! is_loopback()))
+	   || is_pim_register())) {
+	return (XORP_ERROR);
+    }
+
+    if (mfea_node().delete_multicast_vif(vif_index()) < 0)
+	return (XORP_ERROR);
+
+    return (XORP_OK);
 }
 
 /**
