@@ -13,10 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/profile_vars.hh,v 1.1 2004/10/02 04:09:16 atanu Exp $
 
-#ifndef __FEA_TO_TEMPLATE_HH__
-#define __FEA_TO_TEMPLATE_HH__
+#ifndef __FEA_PROFILE_VARS_HH__
+#define __FEA_PROFILE_VARS_HH__
 
 /**
  * Profile variables
@@ -27,4 +27,4 @@ const string profile_route_out = "route_out";
 
 void initialize_profiling_variables(Profile& p);
 
-#endif // __FEA_TO_TEMPLATE_HH__
+#endif // __FEA_PROFILE_VARS_HH__
