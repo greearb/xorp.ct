@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.3 2003/07/09 00:11:02 hodson Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.4 2003/07/11 22:10:59 hodson Exp $"
 
 #include "config.h"
 #include <map>
@@ -254,7 +254,9 @@ RouteWalker<A>::next_route()
 		   "state.");
 	return 0;
     }
-    _pos++;
+    if (++_pos == _route_db.routes().end()) {
+	return 0;
+    }
     return _pos->second.get();
 }
 
@@ -265,6 +267,9 @@ RouteWalker<A>::current_route()
     if (state() != RUNNING) {
 	XLOG_ERROR("Calling RouteWalker::next_route() whilst not in RUNNING "
 		   "state.");
+	return 0;
+    }
+    if (_pos == _route_db.routes().end()) {
 	return 0;
     }
     return _pos->second.get();
