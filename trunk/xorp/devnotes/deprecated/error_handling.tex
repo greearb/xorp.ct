@@ -75,10 +75,10 @@ returned; instead RESOLVE\_FAILED will be returned, and should be
 treated as an error in the normal way.
 
 Since the Finder has no way of knowing what the appropriate end of
-it's initialization period is, it may be able to use the RouterManger
+its initialization period is, it may be able to use the RouterManger
 to tell it all of the processes it should expect to hear from.  The
 Finder could then infer the end of the initialization period when each
-process has registered it's mappings.  The entering of mappings into
+process has registered its mappings.  The entering of mappings into
 the Finder by client processes may need modifying so that initial
 mappings are done in one transaction to facilitate the end of
 initialization detection.
