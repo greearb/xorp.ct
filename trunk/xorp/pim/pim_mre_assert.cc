@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.19 2003/06/12 03:01:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.20 2003/06/13 01:49:08 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -740,7 +740,7 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
     }
     set_i_am_assert_winner_state(vif_index);
     goto a1;
-
+    
  a1:
     //  * Send Assert(*,G)
     pim_vif->pim_assert_mre_send(this, assert_source_addr);
@@ -807,21 +807,18 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
     return (XORP_OK);
 }
 
-// Note: applies only for (*,G) and (S,G)
+// Note: applies for all entries
 const Mifset&
 PimMre::could_assert_wc() const
 {
     static Mifset mifs;
     uint16_t vif_index;
     
-    if (! (is_wc() || is_sg())) {
-	mifs.reset();
-	return (mifs);
-    }
-    
     mifs = joins_rp();
-    mifs |= joins_wc();
-    mifs |= pim_include_wc();
+    if (is_wc() || is_sg() || is_sg_rpt()) {
+	mifs |= joins_wc();
+	mifs |= pim_include_wc();
+    }
     
     vif_index = rpf_interface_rp();
     if (vif_index != Vif::VIF_INDEX_INVALID)
@@ -895,7 +892,7 @@ PimMre::process_could_assert_wc(uint16_t vif_index, bool new_value)
     return (true);
 }
 
-// Note: applies only for (S,G)
+// Note: applies only for (S,G) and (S,G,rpt)
 const Mifset&
 PimMre::could_assert_sg() const
 {
@@ -904,9 +901,19 @@ PimMre::could_assert_sg() const
     PimMre *pim_mre_sg_rpt;
     uint16_t vif_index;
     
-    if (! is_sg()) {
+    if (! (is_sg() || is_sg_rpt())) {
 	mifs.reset();
 	return (mifs);
+    }
+    
+    if (is_sg_rpt()) {
+	PimMre *pim_mre_sg = sg_entry();
+	if (pim_mre_sg == NULL) {
+	    // XXX: if no (S,G) entry, then SPTbit(S,G) is false, hence reset
+	    mifs.reset();
+	    return (mifs);
+	}
+	return (pim_mre_sg->could_assert_sg());
     }
     
     if (! is_spt()) {		// XXX: SPTbit(S,G) must be true
