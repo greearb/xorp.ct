@@ -207,6 +207,120 @@ CACHEMISS is signaled to the appropriate multicast routing process.
 In this way, as data packets arrive, they cause both the FEA and the
 kernel's multicast forwarding state to be re-instantiated.
 
+\section*{XRL Error Handling}
+Interprocess communication in XORP is achieved using XRLs. In this
+section we will consider what should be done when an XRL call fails
+due to a communication error.
+
+All XRL calls will ultimately get a response. In the normal case the
+response returns the status of the call (good or bad). In addition to
+error responses produced by the application, the XRL library can also
+return the following error responses:
+\begin{itemize}
+\item NO\_FINDER
+\item RESOLVE\_FAILED
+\item SEND\_FAILED
+\item REPLY\_TIMED\_OUT
+\end{itemize}
+From an application point or view, the first three errors are
+equivalent: the XRL was not communicated to the destination.  We will
+discuss these below using the generic term {\em XRL send failure}.
+
+However, its not clear what can be inferred from a timeout
+response. The reasons for a timeout can be: the peer has died, peer is
+slow to respond, the network cable has been removed. As in all network
+communications when a timeout occurs we don't know if the last
+unacknowledged XRL request was received and processed by the peer.
+
+If the timeout has occurred because the peer has died we will receive
+notification of this explicitly and will deal with it as specified in
+section \ref{pfailure}.  Thus an XRL transport error SHOULD NOT be
+taken as an indication that the peer is dead.  If an application cares
+that the peer has died or restarted, it SHOULD register with the
+finder to receive notifications of process restarts.  This a process
+SHOULD assume that an XRL transport problem will be transient until it
+receives an explicit confirmation that the destination has failed. 
+
+XRLs can be sent over unreliable transports such as UDP or reliable
+transports such as TCP. The type of transport that should be used will
+be specified when defining the interface. In the case of reliable
+transport, the errors above should generally not occur, but in any
+event we need general rules about how to handle them should something
+fail in an unexpectedly way.
+
+In addition, the way the application uses an XRL interface can by
+pipelined or non-pipelined.  In the pipelined case, multiple requests
+can be outstanding simultaneously; in the non-pipelined case at most
+one request can be outstanding at a time.
+
+It is useful for us to categorise XRL interfaces along these two axes:
+reliable/unreliable and pipelined/non-pilelined.
+
+\subsubsection*{Unreliable, Non-pipelined}
+
+If an XRL send failure occurs, the sending application MAY choose to
+retransmit the XRL, or ignore the failure as it sees fit.  
+
+In an XRL timeout occurs, the sending application MAY also choose to
+retransmit the XRL, or ignore the failure as it sees fit.  However, if
+the application chooses to re-send the XRL, the interface MUST be
+written in such a way that if this XRL had previously been received,
+this will not cause a further failure.
+
+\subsubsection*{Reliable, Non-pipelined}
+
+If an XRL send failure occurs, the sending application SHOULD
+retransmit the XRL.  In an XRL timeout occurs the sending application
+SHOULD also retransmit the XRL.  Further requests using this interface
+MUST be queued until the XRL has successfully been received.
+
+The interface should be written in such a way that if this XRL had
+previously been received, this will not cause a further failure.
+
+An alternative strategy is possible.  If the XRL in question changes
+state at the receiving application, the interface may also support a
+query mechanism.  If the XRL fails with a timeout, the sending
+application may opt not to blindly re-transmit the XRL, but instead
+send a query (retransmitted as necessary) to determine whether the
+state at the remote system is as it would be if the XRL had been
+received.  Only if it the query indicates that the state was not
+received would the original XRL be retransmitted.
+
+This alternative is more complicated, and so it should only be
+prefered when the consequences of receiving the same XRL twice
+outweight the additional complexity.
+
+\subsubsection*{Unreliable, Pipelined}
+
+The same issues apply as with unreliable, non-pipelined, but the
+situation is more complicated.  An interface that uses unreliable
+transport and pipelining is one that explicitly permits loss and {\em
+re-ordering} of requests.  It is up to the application to choose
+whether to retransmit XRLs that return XRL send failed or timeout, but
+the application must only do so if it is certain that the re-ordering
+caused by retransmission will not be a problem.
+
+\subsubsection*{Reliable, Pipelined}
+
+Reliable, pipelined interfaces are the most difficult in which to
+handle XRL errors.  Three issues need to be considered:
+\begin{itemize}
+\item The XRL that failed due to a transport error may be followed by
+pipelined XRLs that succeeded.
+\item The XRL that failed due to a transport error may be followed by
+pipelined XRLs that failed at the application level due to the state
+caused by the first failed XRL not being instantiated.
+\item If a failed XRL was followed by pipelined XRLs that succeeded,
+retransmitting that XRL will cause a re-ordering that might leave the
+destination in a different state than it would be if the XRLs had
+arrived in order.
+\end{itemize}
+To avoid all these problems we require that a reliable XRL transport
+fail to deliver all subsequent XRLs in the pipeline if a single XRL
+fails.  Thus the reliable pipelined interface falls back to a
+reliable, non-pipelined interface after a failure.  A subsequent XRL
+that succeeds then permits pipelined operation to resume.
+
 \bibliographystyle{plain}
 \bibliography{xorp}
 \end{document}
