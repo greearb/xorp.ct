@@ -94,10 +94,10 @@ snmpd2 = @snmpd2@
 bin_PROGRAMS = 
 
 # -- Test Programs
-TESTS = 
+TESTS = test_flower_malloc.sh
 
 # -- No-install Programs
-noinst_PROGRAMS = runit
+noinst_PROGRAMS = runit flower_malloc.so test_flower_malloc
 
 # -- No-install Libraries
 noinst_LIBRARIES = 
@@ -107,9 +107,13 @@ LDADD = $(noinst_LIBRARIES)
 
 # -- Program Sources
 runit_SOURCES = runit.cc
+flower_malloc_so_SOURCES = flower_malloc.c
+flower_malloc_so_CFLAGS = -fpic -fPIC
+flower_malloc_so_LDFLAGS = -shared -fPIC -fpic 
+test_flower_malloc_SOURCES = test_flower_malloc.c
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = bogon-be-gone.sed bogon-be-gone.sh ndbg xorpc.sh xrl_shell_lib.sh
+EXTRA_DIST = bogon-be-gone.sed bogon-be-gone.sh ndbg xorpc.sh xrl_shell_lib.sh FlowerCheck
 
 
 ################################################################
@@ -121,14 +125,24 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
 bin_PROGRAMS =
-noinst_PROGRAMS = runit$(EXEEXT)
+noinst_PROGRAMS = runit$(EXEEXT) flower_malloc.so$(EXEEXT) \
+	test_flower_malloc$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
+am_flower_malloc_so_OBJECTS = flower_malloc_so-flower_malloc.$(OBJEXT)
+flower_malloc_so_OBJECTS = $(am_flower_malloc_so_OBJECTS)
+flower_malloc_so_LDADD = $(LDADD)
+flower_malloc_so_DEPENDENCIES =
 am_runit_OBJECTS = runit.$(OBJEXT)
 runit_OBJECTS = $(am_runit_OBJECTS)
 runit_LDADD = $(LDADD)
 runit_DEPENDENCIES =
 runit_LDFLAGS =
+am_test_flower_malloc_OBJECTS = test_flower_malloc.$(OBJEXT)
+test_flower_malloc_OBJECTS = $(am_test_flower_malloc_OBJECTS)
+test_flower_malloc_LDADD = $(LDADD)
+test_flower_malloc_DEPENDENCIES =
+test_flower_malloc_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -136,21 +150,28 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/runit.Po
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/flower_malloc_so-flower_malloc.Po \
+@AMDEP_TRUE@	$(DEPDIR)/runit.Po $(DEPDIR)/test_flower_malloc.Po
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+CFLAGS = @CFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 CXXFLAGS = @CXXFLAGS@
-DIST_SOURCES = $(runit_SOURCES)
+DIST_SOURCES = $(flower_malloc_so_SOURCES) $(runit_SOURCES) \
+	$(test_flower_malloc_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(runit_SOURCES)
+SOURCES = $(flower_malloc_so_SOURCES) $(runit_SOURCES) $(test_flower_malloc_SOURCES)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .c .cc .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  utils/Makefile
@@ -189,9 +210,16 @@ clean-binPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+flower_malloc_so-flower_malloc.$(OBJEXT): flower_malloc.c
+flower_malloc.so$(EXEEXT): $(flower_malloc_so_OBJECTS) $(flower_malloc_so_DEPENDENCIES) 
+	@rm -f flower_malloc.so$(EXEEXT)
+	$(LINK) $(flower_malloc_so_LDFLAGS) $(flower_malloc_so_OBJECTS) $(flower_malloc_so_LDADD) $(LIBS)
 runit$(EXEEXT): $(runit_OBJECTS) $(runit_DEPENDENCIES) 
 	@rm -f runit$(EXEEXT)
 	$(CXXLINK) $(runit_LDFLAGS) $(runit_OBJECTS) $(runit_LDADD) $(LIBS)
+test_flower_malloc$(EXEEXT): $(test_flower_malloc_OBJECTS) $(test_flower_malloc_DEPENDENCIES) 
+	@rm -f test_flower_malloc$(EXEEXT)
+	$(LINK) $(test_flower_malloc_LDFLAGS) $(test_flower_malloc_OBJECTS) $(test_flower_malloc_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -199,10 +227,37 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/flower_malloc_so-flower_malloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/runit.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_flower_malloc.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
+
+.c.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `test -f $< || echo '$(srcdir)/'`$<
+
+.c.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `cygpath -w $<`
+
+flower_malloc_so-flower_malloc.o: flower_malloc.c
+@AMDEP_TRUE@	source='flower_malloc.c' object='flower_malloc_so-flower_malloc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/flower_malloc_so-flower_malloc.Po' tmpdepfile='$(DEPDIR)/flower_malloc_so-flower_malloc.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(flower_malloc_so_CFLAGS) $(CFLAGS) -c -o flower_malloc_so-flower_malloc.o `test -f flower_malloc.c || echo '$(srcdir)/'`flower_malloc.c
+
+flower_malloc_so-flower_malloc.obj: flower_malloc.c
+@AMDEP_TRUE@	source='flower_malloc.c' object='flower_malloc_so-flower_malloc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/flower_malloc_so-flower_malloc.Po' tmpdepfile='$(DEPDIR)/flower_malloc_so-flower_malloc.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(flower_malloc_so_CFLAGS) $(CFLAGS) -c -o flower_malloc_so-flower_malloc.obj `cygpath -w flower_malloc.c`
+CCDEPMODE = @CCDEPMODE@
 
 .cc.o:
 @AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
