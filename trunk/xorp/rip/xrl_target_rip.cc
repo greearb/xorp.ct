@@ -39,7 +39,7 @@ XrlRipTarget::XrlRipTarget(EventLoop&			el,
 			   System<IPv4>&		rip_system)
     : XrlRipTargetBase(&xr), _e(el)
 {
-    _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, xrm, should_exit,rip_system);
+    _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, xrm, should_exit, rip_system);
 }
 
 XrlRipTarget::~XrlRipTarget()
@@ -632,7 +632,7 @@ XrlCmdError
 XrlRipTarget::policy_backend_0_1_configure(const uint32_t& filter,
 					   const string& conf) 
 {
-    return _ct->policy_backend_0_1_configure(filter,conf);
+    return _ct->policy_backend_0_1_configure(filter, conf);
 }					   
 
 XrlCmdError
@@ -655,8 +655,8 @@ XrlRipTarget::policy_redist4_0_1_add_route4(const IPv4Net&	network,
 				            const uint32_t&	metric,
     				            const XrlAtomList&  policytags) 
 {
-    return _ct->policy_redistx_0_1_add_routex(network,unicast,multicast,nexthop,
-					      metric, policytags);
+    return _ct->policy_redistx_0_1_add_routex(network, unicast, multicast,
+					      nexthop, metric, policytags);
 }
 
 XrlCmdError 
@@ -664,5 +664,5 @@ XrlRipTarget::policy_redist4_0_1_delete_route4(const IPv4Net&  network,
 					       const bool&     unicast,
 					       const bool&     multicast)
 {					       
-    return _ct->policy_redistx_0_1_delete_routex(network,unicast,multicast);
+    return _ct->policy_redistx_0_1_delete_routex(network, unicast, multicast);
 }

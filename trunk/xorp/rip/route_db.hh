@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.15 2004/09/17 13:57:15 abittau Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.16 2004/09/17 20:02:27 pavlin Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -165,7 +165,8 @@ public:
     void push_routes();
 
     /**
-     * Do policy filtering
+     * Do policy filtering.
+     *
      * @param r route to filter.
      * @return true if route was accepted, false otherwise.
      */
@@ -191,8 +192,9 @@ protected:
     PolicyFilters&	_policy_filters;
 
 
-    // Rib routes are not "readvertised", so consider if a rib route loses, and
-    // then the winning route expires... we will have no route for that
+    //
+    // RIB routes are not "readvertised", so consider if a rib route loses,
+    // and then the winning route expires... we will have no route for that
     // destination... while we should.
     //
     // Also need to be able to re-filter original routes

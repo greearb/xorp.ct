@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.16 2004/09/17 13:57:15 abittau Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.17 2004/09/17 20:02:27 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,6 +23,7 @@
 
 #include "rip_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
@@ -32,7 +33,6 @@
 #include "constants.hh"
 #include "route_db.hh"
 #include "update_queue.hh"
-
 #include "rip_varrw.hh"
 
 // ----------------------------------------------------------------------------
@@ -54,8 +54,9 @@ NetCmp<A>::operator() (const IPNet<A>& l, const IPNet<A>& r) const
 // RouteDB
 
 template <typename A>
-RouteDB<A>::RouteDB(EventLoop& e, PolicyFilters& pfs) : _eventloop(e),
-							_policy_filters(pfs)
+RouteDB<A>::RouteDB(EventLoop& e, PolicyFilters& pfs)
+    : _eventloop(e),
+      _policy_filters(pfs)
 {
     _uq = new UpdateQueue<A>();
 }
@@ -65,9 +66,8 @@ RouteDB<A>::~RouteDB()
 {
     _routes.erase(_routes.begin(), _routes.end());
 
-    for(typename RouteContainerNoRef::iterator i = _rib_routes.begin();
+    for (typename RouteContainerNoRef::iterator i = _rib_routes.begin();
 	i != _rib_routes.end(); ++i) {
-    
 	delete (*i).second;
     }	
     
@@ -86,22 +86,24 @@ RouteDB<A>::delete_route(Route* r)
 	return;
     }
 
-    // check if we have rib routes to replace the delete route
-    // XXX: might be more correct to do all this in expire route
+    //
+    // Check if we have rib routes to replace the delete route.
+    // XXX: might be more correct to do all this in expire route.
+    //
     typename RouteContainerNoRef::iterator iter = _rib_routes.find(r->net());
   
     _routes.erase(i);
 
     // add possible rib route
-    if(iter != _rib_routes.end()) {
+    if (iter != _rib_routes.end()) {
         r = iter->second;
 
 	debug_msg("[RIP] Deleted route, but re-added from RIB routes: %s\n",
 		  r->net().str().c_str());
 
-        update_route(r->net(),r->nexthop(),r->cost(),r->tag(),_rib_origin,r->policytags());
+        update_route(r->net(), r->nexthop(), r->cost(), r->tag(), _rib_origin,
+		     r->policytags());
     }
-
 }
 
 template <typename A>
@@ -122,7 +124,7 @@ void
 RouteDB<A>::expire_route(Route* r)
 {
     if (false == update_route(r->net(), r->nexthop(), RIP_INFINITY, r->tag(),
-			      r->origin(),r->policytags())) {
+			      r->origin(), r->policytags())) {
 	XLOG_ERROR("Expire route failed.");
     }
 }
@@ -144,45 +146,46 @@ RouteDB<A>::set_expiry_timer(Route* r)
 
 template <typename A>
 bool
-RouteDB<A>::do_filtering(Route* r) {
-try {
-    RIPVarRW<A> varrw(*r);
+RouteDB<A>::do_filtering(Route* r)
+{
+    try {
+	RIPVarRW<A> varrw(*r);
 
-    ostringstream trace;
+	ostringstream trace;
 
-    debug_msg("[RIP] Running import filter on route %s\n",
-	      r->net().str().c_str());
+	debug_msg("[RIP] Running import filter on route %s\n",
+		  r->net().str().c_str());
 
-    bool accepted = _policy_filters.run_filter(filter::IMPORT,
-					       varrw, &trace);
+	bool accepted = _policy_filters.run_filter(filter::IMPORT,
+						   varrw, &trace);
 
-    debug_msg("[RIP] Filter trace:\n%s\nDone.. Accepted: %d\n",
-	      trace.str().c_str(),accepted);
+	debug_msg("[RIP] Filter trace:\n%s\nDone.. Accepted: %d\n",
+		  trace.str().c_str(),accepted);
 
-    // clear trace
-    trace.str("");
+	// clear trace
+	trace.str("");
 
-    if(!accepted)
-	return false;
-
-
-    RIPVarRW<A> varrw2(*r);
+	if (!accepted)
+	    return false;
 
 
-    debug_msg("[RIP] Running source match filter on route %s\n",
-	      r->net().str().c_str());
-    _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH,
-			       varrw2, &trace);
+	RIPVarRW<A> varrw2(*r);
 
 
-    debug_msg("[RIP] Filter trace:\n%s\nDone..\n",
-	      trace.str().c_str());
+	debug_msg("[RIP] Running source match filter on route %s\n",
+		  r->net().str().c_str());
+	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH,
+				   varrw2, &trace);
 
-    return true;
-} catch(const PolicyException& e) {
-    XLOG_FATAL("PolicyException: %s",e.str().c_str());
-    abort(); // FIXME
-}
+
+	debug_msg("[RIP] Filter trace:\n%s\nDone..\n",
+		  trace.str().c_str());
+
+	return true;
+    } catch(const PolicyException& e) {
+	XLOG_FATAL("PolicyException: %s",e.str().c_str());
+	XLOG_UNFINISHED();
+    }
 }
 
 template <typename A>
@@ -238,7 +241,7 @@ RouteDB<A>::update_route(const Net&	    net,
 	    bool accepted = do_filtering(r);
 	    r->set_filtered(!accepted);
 
-	    if(!accepted)
+	    if (!accepted)
 		return false;
 
 	    _uq->push_back(r);
@@ -255,15 +258,15 @@ RouteDB<A>::update_route(const Net&	    net,
 	bool accepted = do_filtering(r);
 	r->set_filtered(!accepted);
 
-	if(accepted)
+	if (accepted)
 	    updated = true;
     } else {
 	r = i->second.get();
     }
 
     RouteEntryOrigin<A>* no_origin = NULL;
-    RouteEntry<A>* new_route = new RouteEntry<A>(r->net(),nexthop,
-						 cost,no_origin,tag,
+    RouteEntry<A>* new_route = new RouteEntry<A>(r->net(), nexthop,
+						 cost, no_origin, tag,
 						 policytags);
     // XXX: lost origin
     bool accepted = do_filtering(new_route);
@@ -290,28 +293,25 @@ RouteDB<A>::update_route(const Net&	    net,
 	debug_msg("[RIP] Was filtered: %d, Accepted: %d\n",
 		  was_filtered, accepted);
 	
-	if(accepted) {
-	    if(was_filtered)
+	if (accepted) {
+	    if (was_filtered) {
 		updated = true;
-	    else {
+	    } else {
 	    }
-	}
-	else {
-	    if(was_filtered) {
+	} else {
+	    if (was_filtered) {
 		return false;
-	    }
-	    else {
-		if(cost != RIP_INFINITY) {
+	    } else {
+		if (cost != RIP_INFINITY) {
 		    expire_route(r);
 		    return true;
 		}    
 //		delete_route(r);
 	    }
 	}
-    } 
-    // route from other origin
-    else {
-	if(!accepted) {
+    } else {
+	// route from other origin
+	if (!accepted) {
 	    delete new_route;
 	    return false;
 	}
@@ -504,28 +504,28 @@ RouteWalker<A>::reset()
 
 
 /*
- * XXX: ok... we need to delete all the routes we got... as we do not store original
- * routes.
+ * XXX: ok... we need to delete all the routes we got... as we
+ * do not store original routes.
  * all we can do is re-add rib routes.
  * and wait for "real rip peers" to readvertise...
  * we can probably send out a request to get the advertisements though...
- *
  */
 template <typename A>
 void
-RouteDB<A>::push_routes() {
+RouteDB<A>::push_routes()
+{
     debug_msg("[RIP] Push routes\n");
 
-    for(typename RouteContainer::iterator i = _routes.begin();
+    for (typename RouteContainer::iterator i = _routes.begin();
 	i != _routes.end(); ++i) {
 	Route* r = (*i).second.get();
 
 	debug_msg("[RIP] route: %s, filtered: %d\n",
 		  r->net().str().c_str(), r->filtered());
-	
-	if(!r->filtered()) 
+
+	if (!r->filtered())
 	    expire_route(r);
-	
+
 //	delete_route(r);
     }	
 
@@ -534,47 +534,48 @@ RouteDB<A>::push_routes() {
 
     debug_msg("[RIP] Pushing the RIB routes we have\n");
    
-    for(typename RouteContainerNoRef::iterator i = _rib_routes.begin();
+    for (typename RouteContainerNoRef::iterator i = _rib_routes.begin();
 	i != _rib_routes.end(); ++i) {
 
 	Route* r = (*i).second;
 
 	debug_msg("[RIP] Pushing RIB route %s\n", r->net().str().c_str());
 	
-	update_route(r->net(),r->nexthop(),r->cost(),r->tag(),
-		     _rib_origin,r->policytags());
-    }	
+	update_route(r->net(), r->nexthop(), r->cost(), r->tag(),
+		     _rib_origin, r->policytags());
+    }
 }
 
 template <typename A>
 void
 RouteDB<A>::add_rib_route(const Net& net, const Addr& nexthop, uint32_t cost,
 			  uint32_t tag, RouteOrigin* origin,
-			  const PolicyTags& policytags) {
-  
+			  const PolicyTags& policytags)
+{
     debug_msg("[RIP] adding RIB route %s\n",net.str().c_str());
   
     _rib_origin = origin;
          
     typename RouteContainerNoRef::iterator i = _rib_routes.find(net);
 
-    if(i != _rib_routes.end()) {
+    if (i != _rib_routes.end()) {
 	Route* prev = (*i).second;
 	delete prev;
     }
-    
-    // XXX: we are cheating here null origin... so we don't get
-    // association
+
+    //
+    // XXX: We are cheating here NULL origin so we don't get association.
+    //
     RouteOrigin* no_origin = NULL;
-    Route* r = new Route(net, nexthop, cost, no_origin, tag,policytags);
-        
+    Route* r = new Route(net, nexthop, cost, no_origin, tag, policytags);
+
     _rib_routes[net] = r;
-}			  
+}
 
 template <typename A>
 void
-RouteDB<A>::delete_rib_route(const Net& net) {
-
+RouteDB<A>::delete_rib_route(const Net& net)
+{
     debug_msg("[RIP] deleting RIB route %s\n",net.str().c_str());
 
     typename RouteContainerNoRef::iterator i = _rib_routes.find(net);

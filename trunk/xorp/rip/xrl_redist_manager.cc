@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.4 2004/06/10 22:41:48 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.5 2004/09/17 13:57:16 abittau Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -369,12 +369,9 @@ bool
 XrlRedistManager<A>::startup()
 {
     if (status() == READY) {
-	
 	// XXX: hack to get policy route redist
 	RouteRedistributor<A>* rr =
-	    new RouteRedistributor<A>(_rdb,
-				      "policy",
-				      0,0);
+	    new RouteRedistributor<A>(_rdb, "policy", 0,0);
 	_redists.push_back(rr);
 	
 	set_status(RUNNING);

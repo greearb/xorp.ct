@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_table.cc,v 1.10 2004/09/17 13:57:14 abittau Exp $"
+#ident "$XORP: xorp/rip/output_table.cc,v 1.11 2004/09/17 20:02:27 pavlin Exp $"
 
 #include "output_table.hh"
 #include "packet_assembly.hh"
@@ -38,10 +38,12 @@ OutputTable<A>::output_packet()
     const RouteEntry<A>* r = 0;
     for (r = _rw.current_route(); r != 0; r = _rw.next_route()) {
 
+	//
 	// We may either "drop the packet..."
 	// or set cost to infinity...
 	// or depending on poison-reverse / horizon settings
-	if(r->filtered()) {
+	//
+	if (r->filtered()) {
 	    continue;
 	}    
 
@@ -52,11 +54,12 @@ OutputTable<A>::output_packet()
 	}
 
 	RouteEntryOrigin<A>* origin = NULL; // XXX
-	RouteEntry<A>* copy = new RouteEntry<A>(r->net(),p.first,p.second,
-					        origin,r->tag(),r->policytags());
+	RouteEntry<A>* copy = new RouteEntry<A>(r->net(), p.first, p.second,
+					        origin, r->tag(),
+						r->policytags());
 	
 	bool accepted = do_filtering(copy);
-	if(!accepted) {
+	if (!accepted) {
 	    delete copy;
 	    continue;
 	}

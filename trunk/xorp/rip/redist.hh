@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/redist.hh,v 1.3 2004/06/10 22:41:45 hodson Exp $
+// $XORP: xorp/rip/redist.hh,v 1.4 2004/09/17 13:57:15 abittau Exp $
 
 #ifndef __RIP_ROUTE_REDIST_HH__
 #define __RIP_ROUTE_REDIST_HH__
@@ -90,7 +90,7 @@ public:
      *
      * @param net network described by route.
      * @param nexthop router capable of forwarding route.
-     * @param policytags policy-tags associated with route
+     * @param policytags policy-tags associated with route.
      *
      * @return true on success, false if route could not be added to
      *         the RouteDatabase.  Failure may occur if route already exists
@@ -104,7 +104,7 @@ public:
      *
      * @param net network described by route.
      * @param nexthop router capable of forwarding route.
-     * @param policytags policy-tags associated with route
+     * @param policytags policy-tags associated with route.
      *
      * @return true on success, false if route could not be added to
      *         the RouteDatabase.  Failure may occur if route already exists

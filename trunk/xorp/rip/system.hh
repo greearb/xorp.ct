@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/system.hh,v 1.6 2004/06/10 22:41:46 hodson Exp $
+// $XORP: xorp/rip/system.hh,v 1.7 2004/09/17 13:57:15 abittau Exp $
 
 #ifndef __RIP_SYSTEM_HH__
 #define __RIP_SYSTEM_HH__
@@ -83,7 +83,7 @@ public:
     inline const PortManager* port_manager() const	{ return _pm; }
 
     /**
-     * Configure a policy filter
+     * Configure a policy filter.
      *
      * @param filter id of filter to configure.
      * @param conf configuration of filter.
@@ -119,14 +119,15 @@ protected:
 
 protected:
     EventLoop&		_e;
-    
-    // There should be only one instatiation per process
-    // rip uses separate processes for v4,v6 so we are ok.
+
+    //
+    // There should be only one instatiation per process.
+    // RIP uses separate processes for IPv4 and IPv6 so we are ok.
+    //
     PolicyFilters	_policy_filters;
-    
+
     RouteDatabase	_rtdb;
     PortManager*	_pm;
-
 };
 
 // ----------------------------------------------------------------------------

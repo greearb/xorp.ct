@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_entry.cc,v 1.8 2004/06/10 22:41:46 hodson Exp $"
+#ident "$XORP: xorp/rip/route_entry.cc,v 1.9 2004/09/17 13:57:15 abittau Exp $"
 
 #include "rip_module.h"
 
@@ -125,7 +125,8 @@ RouteEntry<A>::set_tag(uint16_t tag)
 
 template <typename A>
 bool
-RouteEntry<A>::set_policytags(const PolicyTags& ptags) {
+RouteEntry<A>::set_policytags(const PolicyTags& ptags)
+{
     if (ptags != _policytags) {
 	_policytags = ptags;
 	return true;

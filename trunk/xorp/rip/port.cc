@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.36 2004/08/24 22:19:56 atanu Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.37 2004/09/17 13:57:14 abittau Exp $"
 
 #include "rip_module.h"
 
@@ -568,7 +568,7 @@ Port<A>::kill_peer_routes()
 	for (ri = routes.begin(); ri != routes.end(); ++ri) {
 	    const RouteEntry<A>* r = *ri;
 	    rdb.update_route(r->net(), r->nexthop(), RIP_INFINITY, r->tag(),
-			     p,r->policytags());
+			     p, r->policytags());
 	}
 	pli++;
     }
@@ -960,7 +960,7 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 
     // ALL_ONES is used as a magic value to indicate no nexthop has been set.
     IPv6 nh = IPv6::ALL_ONES();
-    for(uint32_t i = 0; i < n_entries; i++) {
+    for (uint32_t i = 0; i < n_entries; i++) {
 	if (entries[i].is_nexthop()) {
 	    nh = entries[i].nexthop();
 	    if (nh == IPv6::ZERO()) {

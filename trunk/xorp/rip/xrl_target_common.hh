@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.15 2004/06/21 18:06:04 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.16 2004/09/17 13:57:16 abittau Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -1288,7 +1288,7 @@ XrlRipCommonTarget<A>::policy_backend_0_1_configure(const uint32_t& filter,
 						    const string& conf)
 {
     try {
-	_rip_system.configure_filter(filter,conf);
+	_rip_system.configure_filter(filter, conf);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
 					   e.str());
@@ -1328,7 +1328,7 @@ XrlRipCommonTarget<A>::policy_redistx_0_1_add_routex(const IPNet<A>&	net,
 {
     UNUSED(unicast);
     UNUSED(multicast);
-    _xrm.add_route("policy",net,nexthop,metric,0,policytags);
+    _xrm.add_route("policy", net, nexthop, metric, 0, policytags);
     return XrlCmdError::OKAY();
 }
 
@@ -1340,7 +1340,7 @@ XrlRipCommonTarget<A>::policy_redistx_0_1_delete_routex(const IPNet<A>&	net,
 {
     UNUSED(unicast);
     UNUSED(multicast);
-    _xrm.delete_route("policy",net);
+    _xrm.delete_route("policy", net);
     return XrlCmdError::OKAY();
 }
 #endif // __RIPX_XRL_TARGET_COMMON_HH__

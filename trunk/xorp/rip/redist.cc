@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/redist.cc,v 1.4 2004/06/10 22:41:45 hodson Exp $"
+#ident "$XORP: xorp/rip/redist.cc,v 1.5 2004/09/17 13:57:15 abittau Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -72,7 +72,7 @@ bool
 RouteRedistributor<A>::add_route(const Net&  net, const Addr& nexthop,
 				 const PolicyTags& policytags)
 {
-    _route_db.add_rib_route(net,nexthop,_cost,_tag,_rt_origin,policytags);
+    _route_db.add_rib_route(net, nexthop, _cost, _tag, _rt_origin, policytags);
     return _route_db.update_route(net, nexthop, _cost, _tag, _rt_origin,
 				  policytags);
 }
@@ -85,7 +85,7 @@ RouteRedistributor<A>::add_route(const Net&  	net,
 				 uint16_t 	tag,
 				 const PolicyTags& policytags)
 {
-    _route_db.add_rib_route(net,nexthop,cost,tag,_rt_origin,policytags);
+    _route_db.add_rib_route(net, nexthop, cost, tag, _rt_origin, policytags);
     return _route_db.update_route(net, nexthop, cost, tag, _rt_origin,
 				  policytags);
 }
@@ -162,7 +162,7 @@ RouteRedistributor<A>::withdraw_batch()
 	if (r->origin() == _rt_origin) {
 	    _route_db.update_route(r->net(), r->nexthop(),
 				   RIP_INFINITY, r->tag(),
-				   _rt_origin,r->policytags());
+				   _rt_origin, r->policytags());
 	}
 	r = _wdrawer->next_route();
 

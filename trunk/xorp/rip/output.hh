@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/output.hh,v 1.5 2004/09/17 13:57:14 abittau Exp $
+// $XORP: xorp/rip/output.hh,v 1.6 2004/09/17 20:02:27 pavlin Exp $
 
 #ifndef __RIP_OUTPUT_HH__
 #define __RIP_OUTPUT_HH__
@@ -21,12 +21,14 @@
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
+
 #include "policy/backend/policy_filters.hh"
+
 #include "port.hh"
 #include "system.hh"
-
 #include "rip_varrw.hh"
 
 template <typename A>
@@ -121,7 +123,7 @@ protected:
     /**
      * Policy filters the route.
      *
-     * @param r route to filter
+     * @param r route to filter.
      * @return true if the route was accepted, false otherwise.
      */
     bool do_filtering(RouteEntry<A>* r);
@@ -139,7 +141,7 @@ protected:
     XorpTimer		_op_timer;  // Timer invoking output_packet()
     uint32_t		_pkts_out;  // Packets sent
 
-    PolicyFilters&	_policy_filters;    // Global policy filters.
+    PolicyFilters&	_policy_filters;	// Global policy filters
 };
 
 template <typename A>
@@ -186,27 +188,28 @@ OutputBase<A>::interpacket_gap_ms() const
 
 template <typename A>
 bool
-OutputBase<A>::do_filtering(RouteEntry<A>* route) {
-try {
-    RIPVarRW<A> varrw(*route);
+OutputBase<A>::do_filtering(RouteEntry<A>* route)
+{
+    try {
+	RIPVarRW<A> varrw(*route);
 
-    ostringstream trace;
+	ostringstream trace;
 
-    debug_msg("[RIP] Running export filter on route: %s\n",
-	      route->net().str().c_str());
+	debug_msg("[RIP] Running export filter on route: %s\n",
+		  route->net().str().c_str());
 
-    bool accepted = _policy_filters.run_filter(filter::EXPORT,
-					       varrw,
-					       &trace);
+	bool accepted = _policy_filters.run_filter(filter::EXPORT,
+						   varrw,
+						   &trace);
 
-    debug_msg("[RIP] Export filter trace:\n%s\nDone. Accepted = %d\n",
-	      trace.str().c_str(),accepted);
-	      
-    return accepted;
-} catch(const PolicyException& e ){
-    XLOG_FATAL("PolicyException: %s",e.str().c_str());
-    abort(); // FIXME
-}
+	debug_msg("[RIP] Export filter trace:\n%s\nDone. Accepted = %d\n",
+		  trace.str().c_str(), accepted);
+
+	return accepted;
+    } catch(const PolicyException& e) {
+	XLOG_FATAL("PolicyException: %s", e.str().c_str());
+	XLOG_UNFINISHED();
+    }
 }
 
 #endif // __RIP_OUTPUT_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.6 2004/06/10 22:41:46 hodson Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.7 2004/09/17 13:57:15 abittau Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -160,7 +160,7 @@ public:
     inline const XorpTimer& timer() const 	{ return _timer; }
 
     /**
-     * @return policy-tags associated with route
+     * @return policy-tags associated with route.
      */
     const PolicyTags& policytags() const	{ return _policytags; }
 
@@ -174,20 +174,20 @@ public:
     /**
      * @return true if route was rejected by policy filter.
      */
-    const bool filtered() const			{ return _filtered; }
+    bool filtered() const			{ return _filtered; }
     /**
      * Set if route is accepted or rejected.
      *
      * @param v true if route is filtered
      */
     void set_filtered(bool v)			{ _filtered = v;    }
-   
+
 private:
     friend class RouteEntryRef<A>;
     inline void ref()				{ _ref_cnt++; }
     inline uint16_t unref()			{ return --_ref_cnt; }
     inline uint16_t ref_cnt() const		{ return _ref_cnt; }
-    
+
 protected:
     RouteEntry(const RouteEntry&);			// Not implemented.
     RouteEntry& operator=(const RouteEntry&);		// Not implemented.
@@ -208,7 +208,6 @@ protected:
     
     PolicyTags	_policytags;
     bool	_filtered;
-
 };
 
 
