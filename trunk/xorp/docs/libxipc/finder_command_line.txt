@@ -1,0 +1,14 @@
+Since knowledge of how to contact the Finder is a necessary bootstrap
+mechanism, each process should accept a command line argument to
+specify the host and port to be used to contact the Finder.
+
+Unless there are objections let's go with:
+
+	-F <host>:<port>
+
+and reserve:
+
+	-K <key>
+
+for the future use of secure transport protocols.
+
