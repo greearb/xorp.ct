@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.4 2003/01/18 04:02:29 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.5 2003/01/18 05:32:04 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -72,9 +72,24 @@ BGPPeerList::add_peer(BGPPeer *p)
 void
 BGPPeerList::remove_peer(BGPPeer *p)
 {
+    //Before we remove a peer from the peer list, we need to check
+    //whether there are any readers that point to this peer.  As the
+    //number of readers is unlikely to be large, and this is not a
+    //really frequest operation, we don't mind iterating through the
+    //whole map of readers.
+    map <uint32_t, list<BGPPeer *>::iterator>::iterator mi;
+    for (mi = _readers.begin(); mi != _readers.end(); mi++) {
+	list<BGPPeer *>::iterator pli = mi->second;
+	if (*pli == p) {
+	    pli++;
+	    _readers[mi->first] = pli;
+	}
+    }
+
+    //Now it's safe to do the deletion.
     list<BGPPeer *>::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++)
-	if(p != *i) {
+	if(p == *i) {
 	    delete p;
 	    _peers.erase(i);
 	    return;
@@ -109,20 +124,26 @@ BGPPeerList::get_peer_list_next(const uint32_t& token,
 				IPv4& peer_ip, 
 				uint32_t& peer_port)
 {
-    //XXX the code below assumes the peer list doesn't change while
-    //we're working our way through it.
     map <uint32_t, list<BGPPeer *>::iterator>::iterator mi;
     mi = _readers.find(token);
     if (mi == _readers.end())
 	return false;
     list<BGPPeer *>::iterator i = mi->second;
-    BGPPeer *peer = *i;
-    local_ip = peer->peerdata()->iptuple().get_local_addr();
-    local_port = htons(peer->peerdata()->iptuple().get_local_port());
-    peer_ip = peer->peerdata()->iptuple().get_peer_addr();
-    peer_port = htons(peer->peerdata()->iptuple().get_peer_port());
-
-    i++;
+    if (i == _peers.end()) {
+	//this can happen only if the iterator pointed to the last
+	//peer, and it was deleted since we were last here.
+	local_ip = IPv4("0.0.0.0");
+	local_port = 0;
+	peer_ip = IPv4("0.0.0.0");
+	peer_port = 0;
+    } else {
+	BGPPeer *peer = *i;
+	local_ip = peer->peerdata()->iptuple().get_local_addr();
+	local_port = htons(peer->peerdata()->iptuple().get_local_port());
+	peer_ip = peer->peerdata()->iptuple().get_peer_addr();
+	peer_port = htons(peer->peerdata()->iptuple().get_peer_port());
+	i++;
+    }
     if (i == _peers.end()) {
 	_readers.erase(mi);
 	return false;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_peer.hh,v 1.3 2003/01/18 04:02:29 mjh Exp $
+// $XORP: xorp/bgp/tools/print_peer.hh,v 1.4 2003/01/18 05:32:04 mjh Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -27,7 +27,7 @@
 
 class PrintPeers : public XrlBgpV0p2Client {
 public:
-    PrintPeers(bool verbose);
+    PrintPeers(bool verbose, int interval);
     void get_peer_list_start();
     void get_peer_list_start_done(const XrlError& e, 
 				  const uint32_t* token, 
@@ -70,6 +70,7 @@ public:
 				    const uint32_t* keep_alive_conf, 
 				    const uint32_t* min_as_origination_interval);
     void do_verbose_peer_print();
+    string time_units(uint32_t s) const;
     
 private:
     EventLoop _eventloop;
@@ -78,6 +79,8 @@ private:
     uint32_t _token;
     bool _done;
     uint32_t _count;
+    bool _prev_no_bgp;
+    bool _prev_no_peers;
 
     //temporary storage while we retrieve peer data.
     bool _more; //after this one, are there more peers to retrieve

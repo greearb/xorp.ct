@@ -12,18 +12,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.2 2003/01/18 04:02:29 mjh Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.3 2003/01/18 05:32:04 mjh Exp $"
 
 #include "print_peer.hh"
 
-PrintPeers::PrintPeers(bool verbose) 
+PrintPeers::PrintPeers(bool verbose, int interval) 
     : XrlBgpV0p2Client(&_xrl_rtr), 
-    _eventloop(), _xrl_rtr(_eventloop, "print_peers"), _verbose(verbose),
-    _token(0), _done(false), _count(0)
+    _eventloop(), _xrl_rtr(_eventloop, "print_peers"), _verbose(verbose)
 {
-    get_peer_list_start();
-    while (_done == false) {
-	_eventloop.run();
+    _prev_no_bgp = false;
+    _prev_no_peers = false;
+    while (interval > 0) {
+	_done = false;
+	_token = 0;
+	_count = 0;
+	get_peer_list_start();
+	while (_done == false) {
+	    _eventloop.run();
+	}
+	sleep(interval);
     }
 }
 
@@ -41,14 +48,23 @@ PrintPeers::get_peer_list_start_done(const XrlError& e,
 				     const bool* more) 
 {
     if (e != XrlError::OKAY()) {
-	fprintf(stderr, "Failed to get peer list start\n");
+	//fprintf(stderr, "Failed to get peer list start\n");
+	if (_prev_no_bgp == false)
+	    printf("\n\nNo BGP Exists\n");
+	_prev_no_bgp = true;
 	_done = true;
 	return;
     }
+    _prev_no_bgp = false;
     if (*more == false) {
+	if (_prev_no_peers == false)
+	    printf("\n\nNo Peerings Exist\n");
+	_prev_no_peers = true;
 	_done = true;
 	return;
     }
+    printf("\n\n");
+    _prev_no_peers = false;
 
     _token = *token;
     get_peer_list_next();
@@ -76,6 +92,13 @@ PrintPeers::get_peer_list_next_done(const XrlError& e,
 	_done = true;
 	return;
     }
+    if (local_port == 0 && peer_port == 0) {
+	//this is an error condition where the last peer was deleted
+	//before we could list it.
+	_done = true;
+	return;
+    }
+	
     _count++;
     printf("Peer %d: local %s/%d remote %s/%d\n", _count,
 	   local_ip->str().c_str(), *local_port,
@@ -149,7 +172,7 @@ PrintPeers::get_peer_id_done(const XrlError& e,
 			     const IPv4* peer_id)
 {
     if (e != XrlError::OKAY()) {
-	printf("Failed to retrieve verbose data (%s)\n", e.str().c_str());
+	//printf("Failed to retrieve verbose data (%s)\n", e.str().c_str());
 	if (_more)
 	    get_peer_list_next();
 	return;
@@ -166,7 +189,7 @@ PrintPeers::get_peer_status_done(const XrlError& e,
 				 const uint32_t* admin_status)
 {
     if (e != XrlError::OKAY()) {
-	printf("Failed to retrieve verbose data\n");
+	//printf("Failed to retrieve verbose data\n");
 	if (_more)
 	    get_peer_list_next();
 	return;
@@ -183,7 +206,7 @@ PrintPeers::get_peer_negotiated_version_done(const XrlError& e,
 					     const int32_t* neg_version)
 {
     if (e != XrlError::OKAY()) {
-	printf("Failed to retrieve verbose data\n");
+	//printf("Failed to retrieve verbose data\n");
 	if (_more)
 	    get_peer_list_next();
 	return;
@@ -199,7 +222,7 @@ PrintPeers::get_peer_as_done(const XrlError& e,
 			     const uint32_t* peer_as)
 {
     if (e != XrlError::OKAY()) {
-	printf("Failed to retrieve verbose data\n");
+	//printf("Failed to retrieve verbose data\n");
 	if (_more)
 	    get_peer_list_next();
 	return;
@@ -220,7 +243,7 @@ PrintPeers::get_peer_msg_stats_done(const XrlError& e,
 				    const uint32_t* in_update_elapsed)
 {
     if (e != XrlError::OKAY()) {
-	printf("Failed to retrieve verbose data\n");
+	//printf("Failed to retrieve verbose data\n");
 	if (_more)
 	    get_peer_list_next();
 	return;
@@ -242,7 +265,7 @@ PrintPeers::get_peer_established_stats_done(const XrlError& e,
 					    const uint32_t* established_time)
 {
     if (e != XrlError::OKAY()) {
-	printf("Failed to retrieve verbose data\n");
+	//printf("Failed to retrieve verbose data\n");
 	if (_more)
 	    get_peer_list_next();
 	return;
@@ -278,6 +301,16 @@ PrintPeers::get_peer_timer_config_done(const XrlError& e,
     _received++;
     if (_received == 7)
 	do_verbose_peer_print();
+}
+
+string
+PrintPeers::time_units(uint32_t secs) const {
+    string s;
+    if (secs == 1)
+	s = "1 second";
+    else
+	s = c_format("%d seconds", secs);
+    return s;
 }
 
 void 
@@ -323,23 +356,34 @@ PrintPeers::do_verbose_peer_print()
 	printf("UNKNOWN (THIS SHOULDN'T HAPPEN)\n");
     }
 
-    printf("  Negotiated BGP Version: %d\n", _negotiated_version);
+    if (_peer_state == 6)
+	printf("  Negotiated BGP Version: %d\n", _negotiated_version);
+    else
+	printf("  Negotiated BGP Version: n/a\n");
     printf("  Peer AS Number: %d\n", _peer_as);
     printf("  Updates Received: %d,  Updates Sent: %d\n",
 	   _in_updates, _out_updates);
     printf("  Messages Received: %d,  Messages Sent: %d\n",
 	   _in_msgs, _out_msgs);
-    printf("  Time since last received update: %d seconds\n",
-	   _in_update_elapsed);
+    printf("  Time since last received update: %s\n",
+	   time_units(_in_update_elapsed).c_str());
     printf("  Number of transitions to ESTABLISHED: %d\n",
 	   _transitions);
-    printf("  Time since last transition to ESTABLISHED: %d seconds\n",
-	   _established_time);
-    printf("  Retry Interval: %d secs\n  Hold Time: %d secs,  Keep Alive Time: %d secs\n",
-	   _retry_interval, _hold_time, _keep_alive);
-    printf("  Configured Hold Time: %d secs,  Configured Keep Alive Time: %d secs\n", _hold_time_conf, _keep_alive_conf);
-    printf("  Minimum AS Origination Interval: %d secs\n", 
-	   _min_as_origination_interval);
+    printf("  Time since last transition to ESTABLISHED: %s\n",
+	   time_units(_established_time).c_str());
+    printf("  Retry Interval: %s\n", time_units(_retry_interval).c_str());
+    if (_peer_state == 6) {
+	printf("  Hold Time: %s,  Keep Alive Time: %s\n",
+	       time_units(_hold_time).c_str(), 
+	       time_units(_keep_alive).c_str());
+    } else {
+	printf("  Hold Time: n/a,  Keep Alive Time: n/a\n");
+    }
+    printf("  Configured Hold Time: %s,  Configured Keep Alive Time: %s\n", 
+	   time_units(_hold_time_conf).c_str(), 
+	   time_units(_keep_alive_conf).c_str());
+    printf("  Minimum AS Origination Interval: %s\n", 
+	   time_units(_min_as_origination_interval).c_str());
     if (_more) {
 	printf("\n");
 	get_peer_list_next();
@@ -352,7 +396,7 @@ PrintPeers::do_verbose_peer_print()
 void usage()
 {
     fprintf(stderr,
-	    "Usage: print_peer [-v]\n"
+	    "Usage: print_peer [-v] [-i <repeat_interval>]\n"
 	    "where -v enables verbose output.\n");
 }
 
@@ -371,11 +415,15 @@ int main(int argc, char **argv)
     xlog_start();
 
     bool verbose = false;
-    char c;
-    while ((c = getopt(argc, argv, "v")) != -1) {
+    int c;
+    int interval = -1;
+    while ((c = getopt(argc, argv, "i:v")) != -1) {
 	switch (c) {
 	case 'v':
 	    verbose = true;
+	    break;
+	case 'i':
+	    interval = atoi(optarg);
 	    break;
 	default:
 	    usage();
@@ -383,7 +431,7 @@ int main(int argc, char **argv)
 	}
     }
     try {
-	PrintPeers peer_printer(verbose);
+	PrintPeers peer_printer(verbose, interval);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
