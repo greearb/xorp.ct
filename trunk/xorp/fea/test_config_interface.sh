@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.6 2003/10/24 02:10:29 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.7 2003/10/24 02:20:35 pavlin Exp $
 #
 
 #
@@ -60,6 +60,18 @@ case ${HOSTNAME} in
 	MAC="00:04:5A:49:5D:11"
 	TEST_MAC="0:4:5a:49:5d:12"
 	PIF_INDEX="5"
+	VIF_FLAG_BROADCAST="true"
+	VIF_FLAG_LOOPBACK="false"
+	VIF_FLAG_POINT_TO_POINT="false"
+	VIF_FLAG_MULTICAST="true"
+	HAVE_IPV6="false"
+	;;
+
+	carp.icir.org)
+	IFNAME="eth1"
+	MAC="00:01:02:71:1B:48"
+	TEST_MAC="0:1:2:71:1b:49"
+	PIF_INDEX="3"
 	VIF_FLAG_BROADCAST="true"
 	VIF_FLAG_LOOPBACK="false"
 	VIF_FLAG_POINT_TO_POINT="false"
