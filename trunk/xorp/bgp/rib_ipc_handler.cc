@@ -435,11 +435,6 @@ XrlQueue<A>::start()
 	if (sent) {
 	    _flying++;
 	    _xrl_queue.pop_front();
-	    // XXX
-	    // This return is here temporarily to allow the regression
-	    // tests to succeed.
-	    // XXX
-// 	    return;
  	    continue;
 	}
 
