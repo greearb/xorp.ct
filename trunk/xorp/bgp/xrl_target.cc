@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.2 2002/12/14 23:42:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.3 2002/12/20 06:42:48 mjh Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -244,18 +244,12 @@ XrlBgpTarget::bgp_0_2_set_peer_state(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_peer_list(
-				    // Output values, 
-				    uint32_t&	token, 
-				    IPv4&	local_ip, 
-				    uint32_t&	local_port, 
-				    IPv4&	peer_ip, 
-				    uint32_t&	peer_port, 
-				    bool&	more)
+XrlBgpTarget::bgp_0_2_get_peer_list_start(
+					  // Output values, 
+					  uint32_t& token,
+					  bool&	more)
 {
-    token = _bgp.get_peer_list();
-    more = _bgp.get_peer_list_next(token, local_ip, local_port, 
-				   peer_ip, peer_port);
+    more = _bgp.get_peer_list_start(token);
     return  XrlCmdError::OKAY();
 }
 

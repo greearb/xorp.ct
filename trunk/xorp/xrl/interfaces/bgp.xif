@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.2 2002/12/20 06:42:48 mjh Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -142,12 +142,8 @@ interface bgp/0.2 {
 	 * @param more returned to indicate whether there are more list items 
 	 * remaining.
 	 */	
-	get_peer_list -> \
+	get_peer_list_start -> \
 		token:u32 \
-		& local_ip:ipv4 \
-		& local_port:u32 \
-		& peer_ip:ipv4 \
-		& peer_port:u32 \
 		& more:bool 
 
 	/**

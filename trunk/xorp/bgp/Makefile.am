@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.3 2002/12/18 03:06:06 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.4 2002/12/18 04:10:41 atanu Exp $
 ##
 
 # -- Subdirectories
-SUBDIRS = . harness
+SUBDIRS = . harness tools
 
 # -- Real Programs
 bin_PROGRAMS	 = bgp
