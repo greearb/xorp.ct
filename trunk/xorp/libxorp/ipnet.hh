@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.4 2003/03/10 23:20:32 hodson Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.5 2003/04/18 04:52:08 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -182,7 +182,14 @@ public:
      * this subnet.
      */
     inline size_t overlap(const IPNet& other) const;
-    
+
+    /**
+     * Get the address family.
+     * 
+     * @return the address family of this address.
+     */
+    inline int af() { return _masked_addr.af(); }
+
     /**
      * Get the base address.
      * 

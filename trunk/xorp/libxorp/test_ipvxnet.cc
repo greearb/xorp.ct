@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.3 2003/03/10 23:20:35 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.4 2003/04/18 04:52:09 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -546,6 +546,12 @@ test_ipvxnet_address_const()
 {
     IPvXNet ipnet4_a("12.34.0.0/16");
     IPvXNet ipnet6_a("1234:5678::/32");
+    
+    //
+    // Test the address family.
+    //
+    verbose_assert(ipnet4_a.af() == AF_INET, "af()");
+    verbose_assert(ipnet6_a.af() == AF_INET6, "af()");
     
     //
     // Get the base address: IPv4.
