@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.4 2004/04/05 09:19:14 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.5 2004/04/05 09:32:24 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -805,13 +805,42 @@ XrlFib2mribNode::inform_rib_route_change(const Fib2mribRoute& fib2mrib_route)
     }
 }
 
+/**
+ * Cancel a pending request to inform the RIB about a route change.
+ *
+ * @param fib2mrib_route the route with the request that would be canceled.
+ */
+void
+XrlFib2mribNode::cancel_rib_route_change(const Fib2mribRoute& fib2mrib_route)
+{
+    list<Fib2mribRoute>::iterator iter;
+
+    for (iter = _inform_rib_queue.begin();
+	 iter != _inform_rib_queue.end();
+	 ++iter) {
+	Fib2mribRoute& tmp_fib2mrib_route = *iter;
+	if (tmp_fib2mrib_route == fib2mrib_route)
+	    tmp_fib2mrib_route.set_ignored(true);
+    }
+}
+
 void
 XrlFib2mribNode::send_rib_route_change()
 {
     bool success = false;
 
-    if (_inform_rib_queue.empty())
-	return;		// No more route changes to send
+    do {
+	// Pop-up all routes that are to be ignored
+	if (_inform_rib_queue.empty())
+	    return;		// No more route changes to send
+
+	Fib2mribRoute& tmp_fib2mrib_route = _inform_rib_queue.front();
+	if (tmp_fib2mrib_route.is_ignored()) {
+	    _inform_rib_queue.pop_front();
+	    continue;
+	}
+	break;
+    } while (true);
 
     Fib2mribRoute& fib2mrib_route = _inform_rib_queue.front();
 
