@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.40 2003/09/30 18:27:06 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.1 2004/02/12 20:11:26 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -137,7 +137,7 @@ XrlStaticRoutesNode::send_rib_registration()
 	}
     }
 
-    if (! _is_rib_igp_table4_registered) {
+    if (! _is_rib_igp_table6_registered) {
 	bool success6;
 	success6 = _xrl_rib_client.send_add_igp_table6(
 	    _rib_target.c_str(),
