@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.26 2003/08/14 03:12:12 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.27 2003/08/14 07:47:06 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -844,6 +844,15 @@ PathAttribute::str() const
     case COMMUNITY:
 	s += "COMMUNITY";
 	break;
+
+    case MP_REACH_NLRI:
+	s += "MP_REACH_NLRI";
+	break;
+
+    case MP_UNREACH_NLRI:
+	s += "MP_UNREACH_NLRI";
+	break;
+
     default:
 	s += c_format("UNKNOWN(%d)", type());
     }
