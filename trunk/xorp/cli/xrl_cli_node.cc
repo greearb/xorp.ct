@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.13 2003/12/20 01:43:33 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.15 2004/03/18 00:38:47 pavlin Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -334,13 +334,19 @@ XrlCliNode::recv_process_command_output(const XrlError& xrl_error,
 					const uint32_t *cli_session_id,
 					const string *command_output)
 {
-    if (xrl_error != XrlError::OKAY())
+    if (xrl_error == XrlError::OKAY()) {
+	cli_node().recv_process_command_output(processor_name,
+					       cli_term_name,
+					       cli_session_id,
+					       command_output);
 	return;
-    
-    cli_node().recv_process_command_output(processor_name,
-					   cli_term_name,
-					   cli_session_id,
-					   command_output);
-    
-    return;
+    }
+
+    //
+    // TODO: if the command failed because of transport error,
+    // then we should retransmit it
+    //
+    XLOG_ERROR("Failed to process a command with \"%s\": %s",
+	       processor_name->c_str(),
+	       xrl_error.str().c_str());
 }
