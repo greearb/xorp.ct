@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.15 2004/12/17 00:19:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.16 2004/12/17 05:48:07 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -263,10 +263,17 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
     //
     // Write the configuration
     //
-    string config = c_format("%s %s %d\n",
-			     fte.net().str().c_str(),
-			     fte.nexthop().str().c_str(),
-			     port);
+    string config;
+    if (fte.is_connected_route()) {
+	config = c_format("%s %d\n",
+			  fte.net().str().c_str(),
+			  port);
+    } else {
+	config = c_format("%s %s %d\n",
+			  fte.net().str().c_str(),
+			  fte.nexthop().str().c_str(),
+			  port);
+    }
     string element = "_xorp_rt";
     string handler = "add";
     string error_msg;
@@ -343,10 +350,17 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
     //
     // Write the configuration
     //
-    string config = c_format("%s %s %d\n",
-			     fte.net().str().c_str(),
-			     fte.nexthop().str().c_str(),
-			     port);
+    string config;
+    if (fte.is_connected_route()) {
+	config = c_format("%s %d\n",
+			  fte.net().str().c_str(),
+			  port);
+    } else {
+	config = c_format("%s %s %d\n",
+			  fte.net().str().c_str(),
+			  fte.nexthop().str().c_str(),
+			  port);
+    }
     string element = "_xorp_rt";
     string handler = "remove";
     string error_msg;
