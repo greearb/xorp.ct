@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.68 2004/05/13 00:39:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.69 2004/05/13 18:49:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -284,9 +284,11 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 	delete[] buf;
 	break;
     case SocketClient::ERROR:
+	// The most likely cause of an error is that the peer closed
+	// the connection.
 	debug_msg("event: error\n");
 	/* Don't free the message here we'll get it in the flush */
-	XLOG_ERROR("Writing buffer failed: %s",  strerror(errno));
+	// XLOG_ERROR("Writing buffer failed: %s",  strerror(errno));
 	// _SocketClient->disconnect();
 	event_closed();
 	// XLOG_ASSERT(!is_connected());
