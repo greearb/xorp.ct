@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.42 2004/09/28 08:10:27 atanu Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.43 2004/10/01 22:47:35 atanu Exp $"
 
 #include "rib_module.h"
 
@@ -92,38 +92,62 @@ bool
 RibManager::status_updater()
 {
     ProcessStatus s = PROC_READY;
-    string reason;
+    string reason = "Ready";
+    bool ret = true;
 
     //
     // Check the VifManager's status
     //
     ServiceStatus vif_mgr_status = _vif_manager.status();
     switch (vif_mgr_status) {
+    case READY:
+	break;
     case STARTING:
 	s = PROC_NOT_READY;
 	reason = "VifManager starting";
 	break;
     case RUNNING:
 	break;
+    case PAUSING:
+	s = PROC_NOT_READY;
+	reason = "VifManager pausing";
+	break;
+    case PAUSED:
+	s = PROC_NOT_READY;
+	reason = "VifManager paused";
+	break;
+    case RESUMING:
+	s = PROC_NOT_READY;
+	reason = "VifManager resuming";
+	break;
+    case SHUTTING_DOWN:
+	s = PROC_NOT_READY;
+	reason = "VifManager shutting down";
+	break;
+    case SHUTDOWN:
+	s = PROC_DONE;
+	reason = "VifManager Shutdown";
+       break;
     case FAILED:
 	// VifManager failed: set process state to failed.
 	// TODO: XXX: Should we exit here, or wait to be restarted?
-	_status_code = PROC_FAILED;
-	_status_reason = "VifManager Failed";
-	return false;
-    default:
-	// TODO: XXX: PAVPAVPAV: more cases may need to be added
+	s = PROC_FAILED;
+	reason = "VifManager Failed";
+	ret = false;
+	break;
+    case ALL:
+	XLOG_UNREACHABLE();
 	break;
     }
 
     //
-    // SHUTDOWN state is persistent unless there's a failure.
+    // PROC_SHUTDOWN and PROC_DOWN states are persistent unless
+    // there's a failure.
     //
-    if (_status_code != PROC_SHUTDOWN) {
-	_status_code = s;
-	_status_reason = "Ready";
-    }
-    return true;
+    _status_code = s;
+    _status_reason = reason;
+
+    return ret;
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.22 2004/06/10 22:41:37 hodson Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.23 2004/07/24 01:01:51 pavlin Exp $"
 
 #include <sysexits.h>
 
@@ -75,7 +75,7 @@ main (int /* argc */, char* argv[])
 	// Main loop
 	//
 	string reason;
-	while (rib_manager.status(reason) != PROC_SHUTDOWN) {
+	while (rib_manager.status(reason) != PROC_DONE) {
 	    eventloop.run();
 	}
     } catch (...) {

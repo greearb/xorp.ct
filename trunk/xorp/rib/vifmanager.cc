@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.33 2004/06/11 21:17:17 hodson Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.34 2004/11/05 03:19:26 bms Exp $"
 
 #include "rib_module.h"
 
@@ -164,9 +164,10 @@ VifManager::stop()
 int
 VifManager::final_stop()
 {
+#if	0
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
-
+#endif
     if (ProtoState::stop() < 0)
 	return (XORP_ERROR);
 
