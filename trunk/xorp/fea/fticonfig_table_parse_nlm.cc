@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.2 2003/05/14 01:13:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.3 2003/09/20 00:42:31 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -62,15 +62,15 @@ FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
     
     for (nlh = reinterpret_cast<const struct nlmsghdr*>(buf);
 	 NLMSG_OK(nlh, buf_bytes);
-	 nlh = NLMSG_NEXT(nlh, buf_bytes)) {
-	caddr_t nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
+	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buf_bytes)) {
+	caddr_t nlmsg_data = reinterpret_cast<caddr_t>(NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh)));
 	
 	switch (nlh->nlmsg_type) {
 	case NLMSG_ERROR:
 	{
 	    const struct nlmsgerr* err;
 	    
-	    err = reinterpret_data<const struct nlmsgerr*>(nlmsg_data);
+	    err = reinterpret_cast<const struct nlmsgerr*>(nlmsg_data);
 	    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(*err))) {
 		XLOG_ERROR("AF_NETLINK nlmsgerr length error");
 		break;
@@ -94,7 +94,7 @@ FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 	case RTM_NEWROUTE:
 	{
 	    const struct rtmsg* rtmsg;
-	    int rta_len = RTM_PAYLOAD(nlh->nlmsg_len);
+	    int rta_len = RTM_PAYLOAD(nlh);
 	    
 	    if (rta_len < 0) {
 		XLOG_ERROR("AF_NETLINK rtmsg length error");
@@ -120,7 +120,7 @@ FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 	
 	default:
 	    debug_msg("Unhandled type %s(%d) (%d bytes)\n",
-		      NlmUtils::nlm_msg_type(nlh->nlmmsg_type).c_str(),
+		      NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
 		      nlh->nlmsg_type, nlh->nlmsg_len);
 	}
     }
