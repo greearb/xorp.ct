@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.9 2004/03/20 18:03:59 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.10 2004/04/02 00:27:57 mjh Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -326,14 +326,16 @@ XrlPortManager<A>::deliver_packet(const string& 		sockid,
     typename PortManagerBase<A>::PortList::iterator i;
 
     debug_msg("Packet on %s from %s/%u %u bytes\n",
-	      sockid.c_str(), src_addr.str().c_str(), src_port, pdata.size());
+	      sockid.c_str(), src_addr.str().c_str(), src_port,
+	      static_cast<uint32_t>(pdata.size()));
 
     i = find_if(pl.begin(), pl.end(),
 		is_port_for<A>(&sockid, &src_addr, &_ifm));
 
     if (i == this->ports().end()) {
 	debug_msg("Discarding packet %s/%u %u bytes\n",
-		  src_addr.str().c_str(), src_port, pdata.size());
+		  src_addr.str().c_str(), src_port,
+		  static_cast<uint32_t>(pdata.size()));
 	return false;
     }
     Port<A>* p = *i;

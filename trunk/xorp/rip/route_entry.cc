@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_entry.cc,v 1.5 2004/02/20 01:22:04 hodson Exp $"
+#ident "$XORP: xorp/rip/route_entry.cc,v 1.6 2004/04/02 00:27:56 mjh Exp $"
 
 #include "rip_module.h"
 
@@ -196,10 +196,10 @@ RouteEntryOrigin<A>::dissociate(Route* r)
 }
 
 template <typename A>
-size_t
+uint32_t
 RouteEntryOrigin<A>::route_count() const
 {
-    return _rtstore->routes.size();
+    return static_cast<uint32_t>(_rtstore->routes.size());
 }
 
 template <typename A>

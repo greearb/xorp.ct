@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.3 2003/07/11 17:53:16 hodson Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.4 2003/07/16 05:03:34 hodson Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -273,7 +273,7 @@ public:
     /**
      * @return number of routes associated with this RouteEntryOrigin.
      */
-    size_t route_count() const;
+    uint32_t route_count() const;
 
     /**
      * Dump associated routes into a vector (debugging use only).
