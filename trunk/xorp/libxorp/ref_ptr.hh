@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.12 2004/10/28 15:59:08 atanu Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.13 2004/10/28 23:24:34 atanu Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -179,7 +179,7 @@ public:
     }
 
     /**
-     * Dereference pointer to refence counted object.
+     * Dereference pointer to reference counted object.
      * @return pointer to object.
      */
     inline _Tp* operator->() const {
@@ -187,7 +187,7 @@ public:
     }
 
     /**
-     * Dereference pointer to refence counted object.
+     * Dereference pointer to reference counted object.
      * @return pointer to object.
      */
     inline _Tp* get() const {
@@ -446,7 +446,7 @@ public:
     inline _Tp& operator*() const { return *(get()); }
 
     /**
-     * Dereference pointer to refence counted object.
+     * Dereference pointer to reference counted object.
      * @return pointer to object.
      */
     inline _Tp* operator->() const { return get(); }
