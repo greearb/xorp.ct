@@ -18,7 +18,6 @@
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "libxorp/status_codes.h"
-#include "version.h"
 #include "rib_module.h"
 #include "xrl_target.hh"
 #include "rt_tab_register.hh"
@@ -35,9 +34,9 @@ XrlRibTarget::common_0_1_get_target_name(string& name)
 }
 
 XrlCmdError
-XrlRibTarget::common_0_1_get_version(string& version)
+XrlRibTarget::common_0_1_get_version(string& v)
 {
-    version = RIB_VERSION;
+    v = string(version());
     return XrlCmdError::OKAY();
 }
 
