@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.4 2004/01/16 19:05:43 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.7 2004/02/19 04:33:12 hodson Exp $"
 
 #include "fea_module.h"
 
@@ -1033,6 +1033,7 @@ XrlSocketServer::socket4_0_1_get_socket_option(const string&	/* sockid */,
 // ----------------------------------------------------------------------------
 // socket6/0.1 implementation
 
+#ifdef HAVE_IPV6
 static bool
 valid_addr_port(const AddressTableBase&	atable,
 		const IPv6&		addr,
@@ -1049,6 +1050,9 @@ valid_addr_port(const AddressTableBase&	atable,
     }
     return true;
 }
+#else	// HAVE_IPV6
+static const char* NO_IPV6_MSG = "IPv6 is not available on host";
+#endif	// HAVE_IPV6
 
 XrlCmdError
 XrlSocketServer::socket6_0_1_tcp_open_and_bind(const string&	creator,
@@ -1056,6 +1060,7 @@ XrlSocketServer::socket6_0_1_tcp_open_and_bind(const string&	creator,
 					       const uint32_t&	local_port,
 					       string&		sockid)
 {
+#ifdef HAVE_IPV6
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
@@ -1080,6 +1085,13 @@ XrlSocketServer::socket6_0_1_tcp_open_and_bind(const string&	creator,
     sockid = _v6sockets.back()->sockid();
 
     return XrlCmdError::OKAY();
+#else
+    UNUSED(creator);
+    UNUSED(local_addr);
+    UNUSED(local_port);
+    sockid = "";
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif
 }
 
 XrlCmdError
@@ -1088,6 +1100,7 @@ XrlSocketServer::socket6_0_1_udp_open_and_bind(const string&	creator,
 					       const uint32_t&	local_port,
 					       string&		sockid)
 {
+#ifdef HAVE_IPV6
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
@@ -1113,6 +1126,13 @@ XrlSocketServer::socket6_0_1_udp_open_and_bind(const string&	creator,
     sockid = _v6sockets.back()->sockid();
 
     return XrlCmdError::OKAY();
+#else
+    UNUSED(creator);
+    UNUSED(local_addr);
+    UNUSED(local_port);
+    sockid = "";
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif
 }
 
 XrlCmdError
@@ -1124,6 +1144,7 @@ XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
 						const bool&	reuse,
 						string&		sockid)
 {
+#ifdef HAVE_IPV6
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
@@ -1167,6 +1188,16 @@ XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
     sockid = _v6sockets.back()->sockid();
 
     return XrlCmdError::OKAY();
+#else
+    UNUSED(creator);
+    UNUSED(local_addr);
+    UNUSED(local_port);
+    UNUSED(mcast_addr);
+    UNUSED(ttl);
+    UNUSED(reuse);
+    sockid = "";
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif
 }
 
 XrlCmdError
@@ -1179,6 +1210,7 @@ XrlSocketServer::socket6_0_1_tcp_open_bind_connect(
     string&		sockid
     )
 {
+#ifdef HAVE_IPV6
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
@@ -1212,6 +1244,15 @@ XrlSocketServer::socket6_0_1_tcp_open_bind_connect(
     sockid = _v6sockets.back()->sockid();
 
     return XrlCmdError::OKAY();
+#else
+    UNUSED(creator);
+    UNUSED(local_addr);
+    UNUSED(local_port);
+    UNUSED(remote_addr);
+    UNUSED(remote_port);
+    sockid = "";
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif
 }
 
 XrlCmdError
@@ -1224,6 +1265,7 @@ XrlSocketServer::socket6_0_1_udp_open_bind_connect(
     string&		sockid
     )
 {
+#ifdef HAVE_IPV6
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
@@ -1254,6 +1296,15 @@ XrlSocketServer::socket6_0_1_udp_open_bind_connect(
     sockid = _v6sockets.back()->sockid();
 
     return XrlCmdError::OKAY();
+#else
+    UNUSED(creator);
+    UNUSED(local_addr);
+    UNUSED(local_port);
+    UNUSED(remote_addr);
+    UNUSED(remote_port);
+    sockid = "";
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif
 }
 
 XrlCmdError
@@ -1277,6 +1328,7 @@ XrlCmdError
 XrlSocketServer::socket6_0_1_tcp_listen(const string&	sockid,
 					const uint32_t&	backlog)
 {
+#ifdef HAVE_IPV6
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
@@ -1292,8 +1344,12 @@ XrlSocketServer::socket6_0_1_tcp_listen(const string&	sockid,
 	}
     }
     return XrlCmdError::COMMAND_FAILED("Socket not found");
+#else
+    UNUSED(sockid);
+    UNUSED(backlog);
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif
 }
-
 
 XrlCmdError
 XrlSocketServer::socket6_0_1_send(
@@ -1473,10 +1529,14 @@ XrlSocketServer::socket6_0_1_set_socket_option(const string&	/* sockid */,
 					       const string&	/* optname */,
 					       const uint32_t&	/* optval */)
 {
+#ifdef HAVE_IPV6
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     return XrlCmdError::COMMAND_FAILED("Not implemented");
+#else
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif
 }
 
 XrlCmdError
@@ -1484,10 +1544,14 @@ XrlSocketServer::socket6_0_1_get_socket_option(const string&	/* sockid */,
 					       const string&	/* optname */,
 					       uint32_t&	/* optval */)
 {
+#ifdef HAVE_IPV6
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     return XrlCmdError::COMMAND_FAILED("Not implemented");
+#else
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif
 }
 
 
