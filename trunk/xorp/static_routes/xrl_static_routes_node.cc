@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.7 2004/04/10 20:03:52 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.8 2004/04/22 01:14:30 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -168,17 +168,15 @@ XrlStaticRoutesNode::send_rib_registration()
 	}
     }
 
-    if (success)
-	return;		// OK
-
-    //
-    // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
-    //
-    _rib_igp_table_registration_timer
-	= StaticRoutesNode::eventloop().new_oneoff_after(
+    if (! success) {
+	//
+	// If an error, then start a timer to try again
+	// TODO: XXX: the timer value is hardcoded here!!
+	//
+	_rib_igp_table_registration_timer = StaticRoutesNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlStaticRoutesNode::send_rib_registration));
+    }
 }
 
 void
@@ -198,10 +196,9 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error
     //
     if (_rib_igp_table_registration_timer.scheduled())
 	return;
-    _rib_igp_table_registration_timer
-	= StaticRoutesNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlStaticRoutesNode::send_rib_registration));
+    _rib_igp_table_registration_timer = StaticRoutesNode::eventloop().new_oneoff_after(
+	TimeVal(1, 0),
+	callback(this, &XrlStaticRoutesNode::send_rib_registration));
 }
 
 void
@@ -221,10 +218,9 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error
     //
     if (_rib_igp_table_registration_timer.scheduled())
 	return;
-    _rib_igp_table_registration_timer
-	= StaticRoutesNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlStaticRoutesNode::send_rib_registration));
+    _rib_igp_table_registration_timer = StaticRoutesNode::eventloop().new_oneoff_after(
+	TimeVal(1, 0),
+	callback(this, &XrlStaticRoutesNode::send_rib_registration));
 }
 
 //
@@ -269,11 +265,10 @@ XrlStaticRoutesNode::send_rib_deregistration()
 	}
     }
 
-    if (success)
-	return;		// OK
-
-    StaticRoutesNode::set_status(FAILED);
-    StaticRoutesNode::update_status();
+    if (! success) {
+	StaticRoutesNode::set_status(FAILED);
+	StaticRoutesNode::update_status();
+    }
 }
 
 void
@@ -854,17 +849,16 @@ XrlStaticRoutesNode::send_rib_route_change()
 	}
     }
 
-    if (success)
-	return;		// OK
-
- error_label:
-    //
-    // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
-    //
-    _inform_rib_queue_timer = StaticRoutesNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlStaticRoutesNode::send_rib_route_change));
+    if (! success) {
+    error_label:
+	//
+	// If an error, then start a timer to try again
+	// TODO: XXX: the timer value is hardcoded here!!
+	//
+	_inform_rib_queue_timer = StaticRoutesNode::eventloop().new_oneoff_after(
+	    TimeVal(1, 0),
+	    callback(this, &XrlStaticRoutesNode::send_rib_route_change));
+    }
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.4 2004/04/10 20:03:51 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.5 2004/04/22 01:14:30 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -45,7 +45,7 @@ public:
     ~XrlStaticRoutesNode();
 
     /**
-     * Start the node operation.
+     * Startup the node operation.
      *
      * @return true on success, false on failure.
      */
