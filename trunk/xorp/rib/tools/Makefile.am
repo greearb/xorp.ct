@@ -1,3 +1,8 @@
+## Process this file with automake to produce Makefile.in.
+##
+## $XORP$
+##
+
 bindir = $(prefix)/$(subdir)
 
 bin_PROGRAMS			 = show_routes
