@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.20 2003/06/03 18:40:50 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.21 2003/06/09 23:38:40 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -23,31 +23,37 @@
 
 #define MAX_STATUS_RETRIES 30
 
+
+// ----------------------------------------------------------------------------
+// DelayValidation implementation
 DelayValidation::DelayValidation(EventLoop& eventloop, uint32_t ms)
     : _eventloop(eventloop), _delay_in_ms(ms)
 {
 }
 
-void DelayValidation::validate(CallBack cb) 
+void
+DelayValidation::validate(CallBack cb)
 {
     _cb = cb;
     _timer = _eventloop.new_oneoff_after_ms(_delay_in_ms,
                  callback(this, &DelayValidation::timer_expired));
 }
 
-void DelayValidation::timer_expired() 
+void
+DelayValidation::timer_expired()
 {
     _cb->dispatch(true);
 }
 
+
+// ----------------------------------------------------------------------------
+// XrlStatusValidation implementation
 
-XrlStatusValidation::XrlStatusValidation(const string& target, 
-					     TaskManager& taskmgr)
-    : _target(target), _task_manager(taskmgr), 
-    _retries(0)
+XrlStatusValidation::XrlStatusValidation(const string& target,
+					 TaskManager& taskmgr)
+    : _target(target), _task_manager(taskmgr),_retries(0)
 {
 }
-
 
 EventLoop&
 XrlStatusValidation::eventloop()
@@ -55,7 +61,7 @@ XrlStatusValidation::eventloop()
     return _task_manager.eventloop();
 }
 
-void 
+void
 XrlStatusValidation::validate(CallBack cb)
 {
     _cb = cb;
@@ -72,13 +78,13 @@ XrlStatusValidation::validate(CallBack cb)
 	//exercise most of the same machinery, but we want to ensure
 	//that the xrl_done response gets the right arguments even
 	//though we're not going to call the XRL
-	_retry_timer = 
+	_retry_timer =
 	    eventloop().new_oneoff_after_ms(1000,
                 callback(this, &XrlStatusValidation::dummy_response));
     }
 }
 
-void 
+void
 XrlStatusValidation::dummy_response()
 {
     XrlError e = XrlError::OKAY();
@@ -94,9 +100,8 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
     if (e == XrlError::OKAY()) {
 	try {
 	    ProcessStatus status;
-	    status = (ProcessStatus)(xrlargs->get_uint32("status"));
-	    string reason;
-	    reason = xrlargs->get_string("reason");
+	    status = static_cast<ProcessStatus>(xrlargs->get_uint32("status"));
+	    string reason(xrlargs->get_string("reason"));
 	    handle_status_response(status, reason);
 	    return;
 	} catch (XrlArgs::XrlAtomNotFound) {
@@ -111,9 +116,9 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
     } else if (e == XrlError::NO_SUCH_METHOD()) {
 	//The template file must have been wrong - the target doesn't
 	//support the common interface
-	XLOG_ERROR(("Target " + _target + 
+	XLOG_ERROR(("Target " + _target +
 		    " doesn't support get_status\n").c_str());
-	
+
 	//Just return true and hope everything's OK
 	_cb->dispatch(true);
     } else if ((e == XrlError::RESOLVE_FAILED())
@@ -127,31 +132,35 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 	if (_retries > MAX_STATUS_RETRIES) {
 	    _cb->dispatch(false);
 	}
-	_retry_timer = 
+	_retry_timer =
 	    eventloop().new_oneoff_after_ms(1000,
                  callback(this, &StatusReadyValidation::validate, _cb));
     } else {
-	XLOG_ERROR(("Error while validating process " 
+	XLOG_ERROR(("Error while validating process "
 		    + _target + "\n").c_str());
 	XLOG_WARNING("Continuing anyway, cross your fingers...\n");
 	_cb->dispatch(true);
     }
 }
 
-StatusReadyValidation::StatusReadyValidation(const string& target, 
+
+// ----------------------------------------------------------------------------
+// StatusReadyValidation implementation
+
+StatusReadyValidation::StatusReadyValidation(const string& target,
 					     TaskManager& taskmgr)
     : XrlStatusValidation(target, taskmgr)
 {
 }
 
-void 
+void
 StatusReadyValidation::handle_status_response(ProcessStatus status,
-					      const string& reason) 
+					      const string& reason)
 {
     switch (status) {
     case PROC_NULL:
 	//this is not a valid responses.
-	XLOG_ERROR(("Bad status response; reason: " 
+	XLOG_ERROR(("Bad status response; reason: "
 		    + reason + "\n").c_str());
 	_cb->dispatch(false);
 	return;
@@ -162,9 +171,9 @@ StatusReadyValidation::handle_status_response(ProcessStatus status,
     case PROC_STARTUP:
     case PROC_NOT_READY:
 	//got a valid response saying we should wait.
-	_retry_timer = 
+	_retry_timer =
 	    eventloop().new_oneoff_after_ms(1000,
-                callback((XrlStatusValidation*)this, 
+                callback((XrlStatusValidation*)this,
 			 &XrlStatusValidation::validate,_cb));
 	return;
     case PROC_READY:
@@ -175,20 +184,24 @@ StatusReadyValidation::handle_status_response(ProcessStatus status,
     XLOG_UNREACHABLE();
 }
 
-StatusConfigMeValidation::StatusConfigMeValidation(const string& target, 
+
+// ----------------------------------------------------------------------------
+// StatusConfigMeValidation implementation
+
+StatusConfigMeValidation::StatusConfigMeValidation(const string& target,
 						   TaskManager& taskmgr)
     : XrlStatusValidation(target, taskmgr)
 {
 }
 
-void 
+void
 StatusConfigMeValidation::handle_status_response(ProcessStatus status,
-						 const string& reason) 
+						 const string& reason)
 {
     switch (status) {
     case PROC_NULL:
 	//this is not a valid responses.
-	XLOG_ERROR(("Bad status response; reason: " 
+	XLOG_ERROR(("Bad status response; reason: "
 		    + reason + "\n").c_str());
 	_cb->dispatch(false);
 	return;
@@ -198,9 +211,9 @@ StatusConfigMeValidation::handle_status_response(ProcessStatus status,
 	return;
     case PROC_STARTUP:
 	//got a valid response saying we should wait.
-	_retry_timer = 
+	_retry_timer =
 	    eventloop().new_oneoff_after_ms(1000,
-                callback((XrlStatusValidation*)this, 
+                callback((XrlStatusValidation*)this,
 			 &XrlStatusValidation::validate,_cb));
 	return;
     case PROC_NOT_READY:
@@ -212,21 +225,23 @@ StatusConfigMeValidation::handle_status_response(ProcessStatus status,
     XLOG_UNREACHABLE();
 }
 
+// ----------------------------------------------------------------------------
+// StatusShutdownValidation implementation
 
-StatusShutdownValidation::StatusShutdownValidation(const string& target, 
+StatusShutdownValidation::StatusShutdownValidation(const string& target,
 						   TaskManager& taskmgr)
     : XrlStatusValidation(target, taskmgr)
 {
 }
 
-void 
+void
 StatusShutdownValidation::handle_status_response(ProcessStatus status,
-						 const string& reason) 
+						 const string& reason)
 {
     switch (status) {
     case PROC_NULL:
 	//this is not a valid responses.
-	XLOG_ERROR(("Bad status response; reason: " 
+	XLOG_ERROR(("Bad status response; reason: "
 		    + reason + "\n").c_str());
 	_cb->dispatch(false);
 	return;
@@ -240,9 +255,9 @@ StatusShutdownValidation::handle_status_response(ProcessStatus status,
 	return;
     case PROC_SHUTDOWN:
 	//got a valid response saying we should wait.
-	_retry_timer = 
+	_retry_timer =
 	    eventloop().new_oneoff_after_ms(1000,
-                callback((XrlStatusValidation*)this, 
+                callback((XrlStatusValidation*)this,
 			 &XrlStatusValidation::validate,_cb));
 	return;
     }
@@ -255,9 +270,8 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
     if (e == XrlError::OKAY()) {
 	try {
 	    ProcessStatus status;
-	    status = (ProcessStatus)(xrlargs->get_uint32("status"));
-	    string reason;
-	    reason = xrlargs->get_string("reason");
+	    status = static_cast<ProcessStatus>(xrlargs->get_uint32("status"));
+	    string reason(xrlargs->get_string("reason"));
 	    handle_status_response(status, reason);
 	    return;
 	} catch (XrlArgs::XrlAtomNotFound) {
@@ -272,7 +286,7 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
     } else if (e == XrlError::NO_SUCH_METHOD()) {
 	//The template file must have been wrong - the target doesn't
 	//support the common interface
-	XLOG_ERROR(("Target " + _target + 
+	XLOG_ERROR(("Target " + _target +
 		    " doesn't support get_status\n").c_str());
 	//return false, and we can shut it down using kill
 	_cb->dispatch(false);
@@ -284,18 +298,21 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 	//return false, and we can shut it down using kill
 	_cb->dispatch(false);
     } else {
-	XLOG_ERROR(("Error while validating process " 
+	XLOG_ERROR(("Error while validating process "
 		    + _target + "\n").c_str());
 	//return false, and we can shut it down using kill
 	_cb->dispatch(false);
     }
 }
 
-Shutdown::Shutdown(const string& modname, TaskManager& taskmgr) 
-    : _modname(modname), _task_manager(taskmgr) 
+
+// ----------------------------------------------------------------------------
+// Shutdown implementation
+
+Shutdown::Shutdown(const string& modname, TaskManager& taskmgr)
+    : _modname(modname), _task_manager(taskmgr)
 {
 }
-
 
 EventLoop&
 Shutdown::eventloop() const
@@ -303,12 +320,16 @@ Shutdown::eventloop() const
     return _task_manager.eventloop();
 }
 
-XrlShutdown::XrlShutdown(const string& modname, TaskManager& taskmgr) 
+
+// ----------------------------------------------------------------------------
+// XrlShutdown implementation
+
+XrlShutdown::XrlShutdown(const string& modname, TaskManager& taskmgr)
     : Shutdown(modname, taskmgr)
 {
 }
 
-void 
+void
 XrlShutdown::shutdown(CallBack cb)
 {
     _cb = cb;
@@ -324,15 +345,15 @@ XrlShutdown::shutdown(CallBack cb)
 	//exercise most of the same machinery, but we want to ensure
 	//that the xrl_done response gets the right arguments even
 	//though we're not going to call the XRL
-	printf("XRL: dummy call to %s common/0.1/shutdown\n", 
+	printf("XRL: dummy call to %s common/0.1/shutdown\n",
 	       _modname.c_str());
-	_dummy_timer = 
+	_dummy_timer =
 	    eventloop().new_oneoff_after_ms(1000,
                 callback(this, &XrlShutdown::dummy_response));
     }
 }
 
-void 
+void
 XrlShutdown::dummy_response()
 {
     XrlError e = XrlError::OKAY();
@@ -340,7 +361,7 @@ XrlShutdown::dummy_response()
     shutdown_done(e, &a);
 }
 
-void 
+void
 XrlShutdown::shutdown_done(const XrlError& err, XrlArgs* xrlargs)
 {
     UNUSED(xrlargs);
@@ -354,26 +375,29 @@ XrlShutdown::shutdown_done(const XrlError& err, XrlArgs* xrlargs)
     }
 }
 
+
+// ----------------------------------------------------------------------------
+// TaskXrlItem implementation
 
 TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
-			 const XrlRouter::XrlCallback& cb, Task& task) 
+			 const XrlRouter::XrlCallback& cb, Task& task)
     : _unexpanded_xrl(uxrl), _xrl_callback(cb), _task(task), _resend_counter(0)
 {
 }
 
 TaskXrlItem::TaskXrlItem(const TaskXrlItem& them)
-    : _unexpanded_xrl(them._unexpanded_xrl), 
-    _xrl_callback(them._xrl_callback), 
+    : _unexpanded_xrl(them._unexpanded_xrl),
+    _xrl_callback(them._xrl_callback),
     _task(them._task)
 {
 }
 
-bool 
+bool
 TaskXrlItem::execute(string& errmsg)
 {
     printf("TaskXrlItem::execute\n");
     printf("  %s\n", _unexpanded_xrl.str().c_str());
-    Xrl *xrl = _unexpanded_xrl.expand();
+    Xrl* xrl = _unexpanded_xrl.expand();
     if (xrl == NULL) {
 	errmsg = "Failed to expand XRL " + _unexpanded_xrl.str();
 	return false;
@@ -388,7 +412,7 @@ TaskXrlItem::execute(string& errmsg)
     _task.xorp_client().
 	send_now(*xrl, callback(this,
 				&TaskXrlItem::execute_done),
-		 xrl_return_spec, 
+		 xrl_return_spec,
 		 _task.do_exec());
     return true;
 }
@@ -408,7 +432,7 @@ TaskXrlItem::unschedule()
 void
 TaskXrlItem::resend()
 {
-    Xrl *xrl = _unexpanded_xrl.expand();
+    Xrl* xrl = _unexpanded_xrl.expand();
     if (xrl == NULL) {
 	//this can't happen in a resend, because we already succeeded
 	//in the orginal send
@@ -420,13 +444,13 @@ TaskXrlItem::resend()
     _task.xorp_client().
 	send_now(*xrl, callback(this,
 				&TaskXrlItem::execute_done),
-		 xrl_return_spec, 
+		 xrl_return_spec,
 		 _task.do_exec());
 }
 
 void
-TaskXrlItem::execute_done(const XrlError& err, 
-			  XrlArgs* xrlargs) 
+TaskXrlItem::execute_done(const XrlError& err,
+			  XrlArgs* xrlargs)
 {
     bool fatal = false;
     printf("TaskXrlItem::execute_done\n");
@@ -497,14 +521,15 @@ TaskXrlItem::execute_done(const XrlError& err,
     _task.xrl_done(success, fatal, errmsg);
 }
 
+
+// ----------------------------------------------------------------------------
+// Task implementation
 
-
-
-Task::Task(const string& name, TaskManager& taskmgr) 
+Task::Task(const string& name, TaskManager& taskmgr)
     : _name(name), _taskmgr(taskmgr),
-      _start_module(false), _stop_module(false), 
-      _start_validation(NULL), _ready_validation(NULL), 
-      _shutdown_validation(NULL), _shutdown_method(NULL), 
+      _start_module(false), _stop_module(false),
+      _start_validation(NULL), _ready_validation(NULL),
+      _shutdown_validation(NULL), _shutdown_method(NULL),
       _config_done(false)
 {
 }
@@ -521,9 +546,9 @@ Task::~Task()
 	delete _shutdown_method;
 }
 
-void 
+void
 Task::start_module(const string& modname,
-		   Validation *validation)
+		   Validation* validation)
 {
     assert(_start_module == false);
     assert(_stop_module == false);
@@ -532,10 +557,10 @@ Task::start_module(const string& modname,
     _start_validation = validation;
 }
 
-void 
+void
 Task::shutdown_module(const string& modname,
-		      Validation *validation, 
-		      Shutdown *shutdown)
+		      Validation* validation,
+		      Shutdown* shutdown)
 {
     assert(_start_module == false);
     assert(_stop_module == false);
@@ -568,20 +593,20 @@ Task::run(CallBack cb)
 }
 
 void
-Task::step1_start() 
+Task::step1_start()
 {
     printf("step1 (%s)\n", _modname.c_str());
     if (_start_module) {
 	_taskmgr.module_manager()
-	    .start_module(_modname, do_exec(), 
-			   callback(this, &Task::step1_done));
+	    .start_module(_modname, do_exec(),
+			  callback(this, &Task::step1_done));
     } else {
 	step2_wait();
     }
 }
 
 void
-Task::step1_done(bool success) 
+Task::step1_done(bool success)
 {
     printf("step1_done (%s)\n", _modname.c_str());
     if (success)
@@ -602,7 +627,7 @@ Task::step2_wait()
 }
 
 void
-Task::step2_done(bool success) 
+Task::step2_done(bool success)
 {
     printf("step2_done (%s)\n", _modname.c_str());
     if (success)
@@ -611,7 +636,7 @@ Task::step2_done(bool success)
 	task_fail("Can't validate start of process " + _modname, true);
 }
 
-void 
+void
 Task::step3_config()
 {
     printf("step3 (%s)\n", _modname.c_str());
@@ -637,12 +662,12 @@ Task::step3_config()
 		return;
 	    }
 	}
-    
+
     }
 }
 
 void
-Task::xrl_done(bool success, bool fatal, string errmsg) 
+Task::xrl_done(bool success, bool fatal, string errmsg)
 {
     printf("xrl_done (%s)\n", _modname.c_str());
     if (success) {
@@ -666,12 +691,12 @@ Task::step4_wait()
 }
 
 void
-Task::step4_done(bool success) 
+Task::step4_done(bool success)
 {
     if (success) {
 	step5_stop();
     } else {
-	task_fail("Reconfig of process " + _modname + 
+	task_fail("Reconfig of process " + _modname +
 		  " caused process to fail.", true);
     }
 }
@@ -692,7 +717,7 @@ Task::step5_stop()
 }
 
 void
-Task::step5_done(bool success) 
+Task::step5_done(bool success)
 {
     printf("step5_done (%s)\n", _modname.c_str());
     if (success) {
@@ -705,7 +730,7 @@ Task::step5_done(bool success)
 }
 
 void
-Task::step6_wait() 
+Task::step6_wait()
 {
     printf("step6 (%s)\n", _modname.c_str());
     if (_stop_module && (_shutdown_validation != NULL)) {
@@ -716,7 +741,7 @@ Task::step6_wait()
 }
 
 void
-Task::step6_done(bool success) 
+Task::step6_done(bool success)
 {
     printf("step6_done (%s)\n", _modname.c_str());
     if (success) {
@@ -730,7 +755,7 @@ Task::step6_done(bool success)
     }
 }
 
-void 
+void
 Task::step7_report()
 {
     printf("step7 (%s)\n", _modname.c_str());
@@ -739,7 +764,7 @@ Task::step7_report()
 }
 
 void
-Task::task_fail(string errmsg, bool fatal) 
+Task::task_fail(string errmsg, bool fatal)
 {
     debug_msg((errmsg + "\n").c_str());
     if (fatal) {
@@ -750,14 +775,14 @@ Task::task_fail(string errmsg, bool fatal)
     _task_complete_cb->dispatch(false, errmsg);
 }
 
-bool 
-Task::do_exec() const 
+bool
+Task::do_exec() const
 {
     return _taskmgr.do_exec();
 }
 
-XorpClient& 
-Task::xorp_client() const 
+XorpClient&
+Task::xorp_client() const
 {
     return _taskmgr.xorp_client();
 }
@@ -768,10 +793,14 @@ Task::eventloop() const
     return _taskmgr.eventloop();
 }
 
-TaskManager::TaskManager(ModuleManager &mmgr, XorpClient& xclient,
+
+// ----------------------------------------------------------------------------
+// TaskManager implementation
+
+TaskManager::TaskManager(ModuleManager& mmgr, XorpClient& xclient,
 			 bool global_do_exec)
-    : _module_manager(mmgr), _xorp_client(xclient), 
-    _global_do_exec(global_do_exec)
+    : _module_manager(mmgr), _xorp_client(xclient),
+      _global_do_exec(global_do_exec)
 {
 }
 
@@ -780,13 +809,15 @@ TaskManager::~TaskManager()
     reset();
 }
 
-void 
-TaskManager::set_do_exec(bool do_exec) {
+void
+TaskManager::set_do_exec(bool do_exec)
+{
     _current_do_exec = do_exec && _global_do_exec;
 }
 
-void 
-TaskManager::reset() {
+void
+TaskManager::reset()
+{
     while (!_tasks.empty()) {
 	delete _tasks.begin()->second;
 	_tasks.erase(_tasks.begin());
@@ -818,16 +849,16 @@ TaskManager::add_module(const ModuleCommand& module_command)
 	}
     }
 
-    Validation *validation = module_command.startup_validation(*this);
+    Validation* validation = module_command.startup_validation(*this);
     find_task(modname).start_module(modname, validation);
-    
+
     _module_commands[modname] = &module_command;
     return XORP_OK;
 }
 
-void 
-TaskManager::add_xrl(const string& modname, const UnexpandedXrl& xrl, 
-		     XrlRouter::XrlCallback& cb) 
+void
+TaskManager::add_xrl(const string& modname, const UnexpandedXrl& xrl,
+		     XrlRouter::XrlCallback& cb)
 {
     Task& t(find_task(modname));
     t.add_xrl(xrl, cb);
@@ -839,19 +870,19 @@ TaskManager::add_xrl(const string& modname, const UnexpandedXrl& xrl,
     t.set_ready_validation(_module_commands[modname]->ready_validation(*this));
 }
 
-void 
-TaskManager::shutdown_module(const string& modname) 
+void
+TaskManager::shutdown_module(const string& modname)
 {
     Task& t(find_task(modname));
     XLOG_ASSERT(_module_commands.find(modname) != _module_commands.end());
-    t.shutdown_module(modname, 
+    t.shutdown_module(modname,
 		      _module_commands[modname]->shutdown_validation(*this),
 		      _module_commands[modname]->shutdown_method(*this));
     _shutdown_order.push_front(&t);
 }
 
 void
-TaskManager::run(CallBack cb) 
+TaskManager::run(CallBack cb)
 {
     printf("TaskManager::run, tasks (old order): ");
     list <Task*>::const_iterator i;
@@ -869,14 +900,14 @@ TaskManager::run(CallBack cb)
     run_task();
 }
 
-void 
-TaskManager::reorder_tasks() 
+void
+TaskManager::reorder_tasks()
 {
     //we re-order the task list so that process shutdowns (which are
     //irreversable) occur last.
     list <Task*> configs;
     while (!_tasklist.empty()) {
-	Task *t = _tasklist.front();
+	Task* t = _tasklist.front();
 	if (t->will_shutdown_module()) {
 	    //we already have a list of the correct order to shutdown
 	    //modules in _shutdown_order
@@ -892,15 +923,15 @@ TaskManager::reorder_tasks()
 	configs.pop_front();
     }
     list <Task*>::const_iterator i;
-    for (i = _shutdown_order.begin(); 
+    for (i = _shutdown_order.begin();
 	 i != _shutdown_order.end();
 	 i++) {
 	_tasklist.push_back(*i);
     }
 }
 
-void 
-TaskManager::run_task() 
+void
+TaskManager::run_task()
 {
     printf("TaskManager::run_task()\n");
     if (_tasklist.empty()) {
@@ -911,8 +942,8 @@ TaskManager::run_task()
     _tasklist.front()->run(callback(this, &TaskManager::task_done));
 }
 
-void 
-TaskManager::task_done(bool success, string errmsg) 
+void
+TaskManager::task_done(bool success, string errmsg)
 {
     printf("TaskManager::task_done\n");
     if (!success) {
@@ -933,12 +964,12 @@ TaskManager::fail_tasklist_initialization(const string& errmsg)
     return;
 }
 
-Task& 
+Task&
 TaskManager::find_task(const string& modname)
 {
     map<string, Task*>::iterator i;
     i = _tasks.find(modname);
-    if(i == _tasks.end()) {
+    if (i == _tasks.end()) {
 	//The task didn't exist, so we create one.  This is only valid
 	//if we've already started the module.
 	XLOG_ASSERT(_module_commands.find(modname) != _module_commands.end());
@@ -958,7 +989,7 @@ TaskManager::find_task(const string& modname)
 }
 
 void
-TaskManager::kill_process(const string& modname) 
+TaskManager::kill_process(const string& modname)
 {
     //XXX We really should try to restart the failed process, but for
     //now we'll just kill it.
@@ -967,14 +998,7 @@ TaskManager::kill_process(const string& modname)
 }
 
 EventLoop&
-TaskManager::eventloop() const 
+TaskManager::eventloop() const
 {
     return _module_manager.eventloop();
 }
-
-
-
-
-
-
-
