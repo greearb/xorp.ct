@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.11 2003/09/04 03:13:30 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.12 2003/09/05 01:57:54 atanu Exp $
 #
 
 #
@@ -711,7 +711,7 @@ test23()
 
     PACKET="packet update
 	origin 1
-	aspath $PEER3_AS
+	aspath 1,2,(3,4,5),6,(7,8),9
 	nexthop6 20:20:20:20:20:20:20:20
 	nlri6 2000::/3
         localpref 100"
