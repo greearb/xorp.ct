@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.18 2003/02/08 06:53:33 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.19 2003/02/08 09:16:41 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -207,7 +207,7 @@ UpdatePacket::str() const
 	      (uint32_t)_wr_list.size(), (uint32_t)pa_list().size(),
 	      (uint32_t)_nlri_list.size());
 
-    s += _wr_list.str();
+    s += _wr_list.str("Withdrawn");
 
     list <PathAttribute*>::const_iterator pai = pa_list().begin();
     while (pai != pa_list().end()) {
@@ -215,7 +215,7 @@ UpdatePacket::str() const
 	++pai;
     }
     
-    s += _nlri_list.str();
+    s += _nlri_list.str("Nlri");
     return s;
 }
 

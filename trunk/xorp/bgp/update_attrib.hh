@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/update_attrib.hh,v 1.4 2003/02/07 05:53:06 rizzo Exp $
+// $XORP: xorp/bgp/update_attrib.hh,v 1.5 2003/02/26 00:14:58 pavlin Exp $
 
 #ifndef __BGP_UPDATE_ATTRIB_HH__
 #define __BGP_UPDATE_ATTRIB_HH__
@@ -77,8 +77,8 @@ public:
 	return (IPv4Net &)(*this);
     }
 
-    virtual string str() const				{
-	return "Update Attribute";
+    string str(string nlri_or_withdraw) const				{
+	return nlri_or_withdraw + " " + net().str();
     }
 
 protected:
@@ -95,7 +95,7 @@ public:
     uint8_t *encode(size_t &l, uint8_t *buf = 0) const;
     void decode(const uint8_t *d, size_t len)
 	throw(CorruptMessage);
-    string str() const;
+    string str(string) const;
 
     // XXX this needs to be fixed, we do not want to sort all the times.
     bool operator== (const BGPUpdateAttribList& other)	{

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.3 2003/02/07 05:53:06 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.4 2003/02/14 05:37:18 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -108,8 +108,9 @@ BGPUpdateAttribList::decode(const uint8_t *d, size_t len)
             push_back(wr);
             x_set.insert(wr.net());
         } else
-            XLOG_WARNING(("Received duplicate " + wr.str() +
-                       " in update message\n").c_str());
+            XLOG_WARNING(("Received duplicate " +
+			  wr.str("nlri or withdraw") +
+			  " in update message\n").c_str());
     }
     if (len != 0)
         xorp_throw(CorruptMessage,
@@ -118,10 +119,10 @@ BGPUpdateAttribList::decode(const uint8_t *d, size_t len)
 }
 
 string
-BGPUpdateAttribList::str() const
+BGPUpdateAttribList::str(string nlri_or_withdraw) const
 {
     string s = "";
     for (const_iterator i = begin(); i != end(); ++i)
-        s += " - " + i->str() + "\n";
+        s += " - " + i->str(nlri_or_withdraw) + "\n";
     return s;
 }
