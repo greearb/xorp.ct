@@ -28,7 +28,7 @@
 //
 // TODO: XrlCliProcessorV1p0Client should NOT be a base class. Temp. solution..
 //
-class XrlCliNode : public XrlCliTargetBase, public XrlCliProcessorV0p1Client {
+class XrlCliNode : public XrlCliTargetBase {
 public:
     XrlCliNode(XrlRouter* xrl_router, CliNode& cli_node);
     virtual ~XrlCliNode() {}
@@ -204,7 +204,8 @@ private:
     CliNode&	cli_node() const { return (_cli_node); }
     
     CliNode&	_cli_node;
-    
+
+    XrlCliProcessorV0p1Client _xrl_cli_processor_client;
 };
 
 #endif // __CLI_XRL_CLI_NODE_HH__

@@ -22,14 +22,13 @@
 
 
 XrlCliNode::XrlCliNode(XrlRouter* xrl_router, CliNode& cli_node)
-	: XrlCliTargetBase(xrl_router),
-	  XrlCliProcessorV0p1Client(xrl_router),
-	  _cli_node(cli_node)
+    : XrlCliTargetBase(xrl_router),
+      _cli_node(cli_node),
+      _xrl_cli_processor_client(xrl_router)
 {
-    _cli_node.set_send_process_command_callback(callback(this,
-							 &XrlCliNode::send_process_command));
+    _cli_node.set_send_process_command_callback(
+	callback(this, &XrlCliNode::send_process_command));
 }
-
 
 //
 // XrlCliNode front-end interface
@@ -313,7 +312,7 @@ XrlCliNode::send_process_command(const string& target,
     //
     // Send the request
     //
-    XrlCliProcessorV0p1Client::send_process_command(
+    _xrl_cli_processor_client.send_process_command(
 	target.c_str(),
 	processor_name,
 	cli_term_name,
