@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.40 2003/11/06 20:49:21 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.41 2003/11/06 21:11:57 atanu Exp $
 #
 
 		XORP RELEASE NOTES
@@ -55,6 +55,8 @@ Release 0.5 (2003/??/??)
     - Supports multiprotocol IPv6.
 
     - The code for multicast SAFI is enabled but is untested.
+
+    - MED processing is now deterministic.
 
     - A memory leak exists.
 
