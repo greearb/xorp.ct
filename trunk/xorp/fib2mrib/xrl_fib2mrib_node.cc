@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.19 2005/02/11 04:21:40 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.20 2005/02/12 08:09:06 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -24,8 +24,6 @@
 
 #include "fib2mrib_node.hh"
 #include "xrl_fib2mrib_node.hh"
-
-#include "xrl/interfaces/finder_event_notifier_xif.hh"
 
 const TimeVal XrlFib2mribNode::RETRY_TIMEVAL = TimeVal(1, 0);
 
@@ -951,7 +949,11 @@ XrlFib2mribNode::common_0_1_shutdown()
 }
 
 /**
- *  Handle finder process birth events
+ *  Announce target birth to observer.
+ *
+ *  @param target_class the target class name.
+ *
+ *  @param target_instance the target instance name.
  */
 XrlCmdError
 XrlFib2mribNode::finder_event_observer_0_1_xrl_target_birth(
@@ -983,7 +985,11 @@ XrlFib2mribNode::finder_event_observer_0_1_xrl_target_birth(
 }
 
 /**
- *  Handle finder process death events
+ *  Announce target death to observer.
+ *
+ *  @param target_class the target class name.
+ *
+ *  @param target_instance the target instance name.
  */
 XrlCmdError
 XrlFib2mribNode::finder_event_observer_0_1_xrl_target_death(
