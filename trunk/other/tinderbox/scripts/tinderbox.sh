@@ -1,132 +1,161 @@
 #!/bin/sh 
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.1.1.1 2002/12/11 23:55:14 hodson Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.2 2002/12/13 20:26:07 hodson Exp $
 
 CONFIG="$(dirname $0)/config"
-. $CONFIG
+. ${CONFIG}
 
-post_log()
+filter_and_post_log()
 {
+    local subject toaddr errfile filtfile msgfile
+
+    subject="$1: $2"
+    toaddr="$3"
+    errfile="$4"
+
     # File containing filtered error log
-    FILTFILE=${ERRFILE}.filt
+    filtfile=${errfile}.filt
 
     # File containing email message
-    MSGFILE=${ERRFILE}.mail.msg
+    msgfile=${errfile}.mail.msg
 
-    cat ${ERRFILE} | awk -f ${SCRIPTSDIR}/filter-error.awk > ${FILTFILE}
-    SUBJECT="$1: $2"
-    TOADDR="$3"
+    cat ${errfile} | awk -f ${SCRIPTSDIR}/filter-error.awk > ${filtfile}
 
-    cat ${SCRIPTSDIR}/boilerplate ${FILTFILE} | 			      \
-      sed -e "s/@To@/${TOADDR}/"					      \
+    cat ${SCRIPTSDIR}/boilerplate ${filtfile} | 			      \
+      sed -e "s/@To@/${toaddr}/"					      \
 	  -e "s/@From@/${FROMADDR}/"					      \
 	  -e "s/@ReplyTo@/${REPLYTOADDR}/"				      \
-	  -e "s/@Subject@/${SUBJECT}/"					      \
-      > ${MSGFILE}
-    ${POST} $MSGFILE
+	  -e "s/@Subject@/${subject}/"					      \
+      > ${msgfile}
+    ${POST} ${msgfile}
 
-    rm -f ${FILTFILE} ${MSGFILE}
+#    rm -f ${filtfile} ${msgfile}
 }
 
 #
-# init_log_header <file> <host>
+# init_log_header
+#
+# arguments should be obvious...
 #
 init_log_header()
 {
-    local HEADER RHOST NOW SINFO CINFO
-    HEADER=$1
-    RHOST=$2
-    NOW=`date "+%Y-%m-%d %H:%M:%S %Z"`
-    SINFO=`ssh -n ${RHOST} 'uname -s -r'`
-    CINFO=`ssh -n ${RHOST} 'gcc -v 2>&1' | grep 'version'`
-    cat >${HEADER} <<EOF
+    local outfile cfg host env dir now sinfo 
+    outfile="$1"
+    cfg="$2"
+    host="$3"
+    env="$4"
+    dir="$5"
+    now=`date "+%Y-%m-%d %H:%M:%S %Z"`
+    sinfo=`ssh -n ${host} 'uname -s -r'`
+    cat >${outfile} <<EOF
 -------------------------------------------------------------------------------
-Remote build on: ${RHOST}
-Start time:	 ${NOW}
-System Info:	 ${SINFO}
-Compiler Info:	 ${CINFO}
+Configuration:		${cfg}
+Host:			${host}
+Environment:		${env}
+Build directory:	${dir}
+Start time:		${now}
+System Info:		${sinfo}
 -------------------------------------------------------------------------------
 
 EOF
 }
 
+#
+# extoll - send success message 
+#
+# $1 = Host message relevant to
+# $2 = Subject
+# $3 = log file
+#
 extoll()
 {
-    post_log "$1" "$2" "${REPORTOKADDR}"
+    filter_and_post_log "$1" "$2" "${REPORTOKADDR}" "${3}"
 }
 
+#
+# harp - send fail message 
+#
+# $1 = Host message relevant to
+# $2 = Subject
+# $3 = log file
+#
 harp()
 {
-    post_log "$1" "$2" "${REPORTBADADDR}"
-}
-
-scp_path_host() {
-    echo $1 | sed 's/\([A-z0-9]*\)\..*/\1/'
-}
-
-scp_path_directory()
-{
-    echo $1 | sed 's/.*://'
+    filter_and_post_log "$1" "$2" "${REPORTBADADDR}" "${3}"
 }
 
 run_tinderbox() {
     #
     # Copy and build latest code on tinderbox machines
     #
-    for i in $REMOTEHOSTS ; do
-	RHOST=`scp_path_host $i`
-	DIR=`scp_path_directory $i`
-	ERRFILE="${ROOTDIR}/${RHOST}"
-	HEADER="${ERRFILE}.header"
+    for cfg in ${TINDERBOX_CONFIGS} ; do
+	eval cfg_host=\$host_$cfg
+	eval cfg_home=\$home_$cfg
+	eval cfg_env=\$env_$cfg
 
-	if [ "${DIR}" = "${RHOST}" -o -z "${DIR}" ] ; then
-	    DIR="."
-	fi
+	errfile="${LOGDIR}/${cfg_host}-${cfg}"
+	header="${errfile}.header"
 
-	echo "Remote copy ${RHOST} ${DIR}" > ${ERRFILE}
-	${SCRIPTSDIR}/remote_xorp_copy.sh ${RHOST} ${DIR} >>${ERRFILE} 2>&1
-	if [ $? -ne 0 ] ; then
-	    harp "$HOSTNAME" "remote copy failed to ${RHOST}"
+	cat /dev/null > ${errfile}
+	if [ -z "${cfg_host}" ] ; then
+	    echo "Configuration \"$cfg\" has no host." > ${errfile}
+
+	    harp "${cfg}" "Misconfiguration" "${errfile}"
 	    continue
 	fi
 
-	init_log_header ${HEADER} ${RHOST}
-
-	cp ${HEADER} ${ERRFILE}
-	ssh -n ${RHOST} ${DIR}/scripts/build_xorp.sh >>${ERRFILE} 2>&1
-	if [ $? -ne 0 ] ; then
-	    harp ${RHOST} "remote build failed"
+	if [ -z "${cfg_home}" ] ; then
+	    echo "Configuration \"$cfg\" has no directory." > ${errfile}
+	    harp "${cfg}" "Misconfiguration" "${err_file}"
 	    continue
 	fi
 
-	cp ${HEADER} ${ERRFILE}
-	ssh -n ${RHOST} ${DIR}/scripts/build_xorp.sh check >>${ERRFILE} 2>&1
+	echo "Remote copy ${cfg_host} ${cfg_home}" > ${errfile}
+	${SCRIPTSDIR}/remote_xorp_copy.sh ${cfg_host} ${cfg_home} >>${errfile} 2>&1
 	if [ $? -ne 0 ] ; then
-	    harp ${RHOST} "remote check failed"
+	    harp "${HOSTNAME}" "remote copy failed to ${cfg_host}" "${errfile}"
 	    continue
 	fi
 
-	echo "No problems to report" > ${ERRFILE}
-	extoll "${RHOST}" "build and test good"
+	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home}" 
+
+	cp ${header} ${errfile}
+	ssh -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh" >>${errfile} 2>&1
+	if [ $? -ne 0 ] ; then
+	    harp ${cfg} "remote build failed" "${errfile}"
+	    continue
+	fi
+
+	cp ${header} ${errfile}
+	ssh -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${errfile} 2>&1
+	if [ $? -ne 0 ] ; then
+	    harp ${cfg} "remote check failed" "${errfile}"
+	    continue
+	fi
+
+	cp ${header} ${errfile}
+	echo "No problems to report." >> ${errfile}
+	extoll "${cfg}" "build and test good" "${errfile}"
     done
 }
 
 checkout() {
+    local errfile
+    errfile="$1"
+
+    cat /dev/null > ${errfile}
+
     #
     # Checkout latest code
     #
-    ${SCRIPTSDIR}/co_xorp.sh >${ERRFILE} 2>&1
+    ${SCRIPTSDIR}/co_xorp.sh >${errfile} 2>&1
     if [ $? -ne 0 ] ; then
-	harp "$LOCALHOST: checkout failed"
+	harp "$LOCALHOST: checkout failed" "${errfile}"
 	exit
     fi
 }
 
-ERRFILE=${ROOTDIR}/`scp_path_host $LOCALHOST`
-if [ ! -f ${ERRFILE} ] ; then
-    cat /dev/null > ${ERRFILE}
-fi
-
-checkout
+mkdir -p ${LOGDIR}
+checkout "${LOGDIR}/checkout.log"
 run_tinderbox
 
