@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.6 2003/05/31 07:34:32 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.7 2003/05/31 15:22:32 pavlin Exp $
 dnl
 
 dnl
@@ -45,6 +45,66 @@ main()
   AC_LANG_RESTORE
 fi
 
+dnl ----------------------------
+dnl Check whether the system IPv6 stack supports IPv6 multicast.
+dnl ----------------------------
+AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <netinet/in.h>
+],
+[
+int dummy = 0;
+
+/* Dummy integer values that must be defined in some of the header files */
+dummy += IPV6_MULTICAST_HOPS;
+dummy += IPV6_MULTICAST_LOOP;
+dummy += IPV6_MULTICAST_IF;
+dummy += IPV6_JOIN_GROUP;
+dummy += IPV6_LEAVE_GROUP;
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_IPV6_MULTICAST, 1, [Define to 1 if you have IPv6 multicast])],
+ AC_MSG_RESULT(no))
+
+dnl ----------------------------
+dnl Check whether the system IPv6 stack supports IPv6 multicast routing.
+dnl ----------------------------
+AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast routing)
+dnl XXX: <net/if_var.h> and <netinet/in_var.h> may not be available on Linux
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#include <net/if_var.h>
+#include <netinet/in.h>
+#include <netinet/in_var.h>
+#include <netinet6/ip6_mroute.h>
+],
+[
+int dummy = 0;
+
+/* Dummy values that must be defined in some of the header files */
+dummy += IPPROTO_ICMPV6;
+dummy += MRT6_INIT;
+dummy += MRT6_ADD_MIF;
+dummy += MRT6_DEL_MIF;
+dummy += MRT6_ADD_MFC;
+dummy += MRT6_DEL_MFC;
+dummy += MRT6MSG_NOCACHE;
+dummy += MRT6MSG_WRONGMIF;
+dummy += MRT6MSG_WHOLEPKT;
+    
+#ifndef SIOCGETSGCNT_IN6
+#error "Missing SIOCGETSGCNT_IN6"
+#endif
+#ifndef SIOCGETMIFCNT_IN6
+#error "Missing SIOCGETMIFCNT_IN6"
+#endif
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_IPV6_MULTICAST_ROUTING, 1, [Define to 1 if you have IPv6 multicast routing])],
+ AC_MSG_RESULT(no))
 
 dnl ------------------------------------
 dnl Check if the newer (post-RFC2292) IPv6 advanced API is supported
