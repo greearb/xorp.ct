@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.18 2004/05/15 15:12:17 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.19 2004/06/10 22:40:36 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -214,12 +214,10 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	XLOG_UNREACHABLE();
 
 	// if it does, then here's how to handle it:
-	typename list<const RouteQueueEntry<A>*>::iterator i2 = i;
-	i++;
-	_queue.erase(i2);
+	i = _queue.erase(i);
 	XLOG_ASSERT((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
-	_queue.erase(i);
 	delete *i;
+	_queue.erase(i);
 
 	entry = new RouteQueueEntry<A>(queued_entry->route(),
 				       RTQUEUE_OP_DELETE);
