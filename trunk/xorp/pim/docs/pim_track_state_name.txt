@@ -8,7 +8,6 @@ Input = INPUT_STATE_RP_CHANGED
         OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_WC                              (*,G)
-        OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC                          (*,G)
         OUTPUT_STATE_RP_SG                                            (S,G)
         OUTPUT_STATE_RP_SG_RPT                                    (S,G,rpt)
         OUTPUT_STATE_MRIB_RP_SG                                       (S,G)
@@ -37,7 +36,6 @@ Input = INPUT_STATE_MRIB_RP_CHANGED
         OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_WC                       (*,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_WC                              (*,G)
-        OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC                          (*,G)
         OUTPUT_STATE_MRIB_RP_SG                                       (S,G)
         OUTPUT_STATE_MRIB_RP_SG_RPT                               (S,G,rpt)
         OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
@@ -65,7 +63,6 @@ Input = INPUT_STATE_MRIB_S_CHANGED
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
-        OUTPUT_STATE_ASSERT_RPF_INTERFACE_SG                          (S,G)
         OUTPUT_STATE_CHECK_SWITCH_TO_SPT_SG                           (S,G)
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
 
@@ -276,6 +273,12 @@ Input = INPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID_CHANGED
 
 Input = INPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID_CHANGED
         OUTPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID                      (S,G)
+
+Input = INPUT_STATE_ASSERT_RPF_INTERFACE_WC_CHANGED
+        OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC                          (*,G)
+
+Input = INPUT_STATE_ASSERT_RPF_INTERFACE_SG_CHANGED
+        OUTPUT_STATE_ASSERT_RPF_INTERFACE_SG                          (S,G)
 
 Input = INPUT_STATE_I_AM_DR
         OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)

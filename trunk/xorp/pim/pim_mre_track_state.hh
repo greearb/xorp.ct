@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.5 2003/01/30 01:43:46 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.6 2003/02/07 05:16:06 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_TRACK_STATE_HH__
@@ -95,22 +95,24 @@ public:
 	INPUT_STATE_ASSERT_STATE_SG,			// 31
 	INPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID_CHANGED,// 32
 	INPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID_CHANGED,// 33
-	INPUT_STATE_I_AM_DR,				// 34
-	INPUT_STATE_MY_IP_ADDRESS,			// 35
-	INPUT_STATE_MY_IP_SUBNET_ADDRESS,		// 36
-	INPUT_STATE_IS_SWITCH_TO_SPT_DESIRED_SG,	// 37
-	INPUT_STATE_KEEPALIVE_TIMER_SG,			// 38
-	INPUT_STATE_SPTBIT_SG,				// 39
-	INPUT_STATE_IN_START_VIF,			// 40
-	INPUT_STATE_IN_STOP_VIF,			// 41
-	INPUT_STATE_IN_ADD_PIM_MRE_RP,			// 42
-	INPUT_STATE_IN_ADD_PIM_MRE_WC,			// 43
-	INPUT_STATE_IN_ADD_PIM_MRE_SG,			// 44
-	INPUT_STATE_IN_ADD_PIM_MRE_SG_RPT,		// 45
-	INPUT_STATE_IN_REMOVE_PIM_MRE_RP,		// 46
-	INPUT_STATE_IN_REMOVE_PIM_MRE_WC,		// 47
-	INPUT_STATE_IN_REMOVE_PIM_MRE_SG,		// 48
-	INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT,		// 49
+	INPUT_STATE_ASSERT_RPF_INTERFACE_WC_CHANGED,	// 34
+	INPUT_STATE_ASSERT_RPF_INTERFACE_SG_CHANGED,	// 35
+	INPUT_STATE_I_AM_DR,				// 36
+	INPUT_STATE_MY_IP_ADDRESS,			// 37
+	INPUT_STATE_MY_IP_SUBNET_ADDRESS,		// 38
+	INPUT_STATE_IS_SWITCH_TO_SPT_DESIRED_SG,	// 39
+	INPUT_STATE_KEEPALIVE_TIMER_SG,			// 40
+	INPUT_STATE_SPTBIT_SG,				// 41
+	INPUT_STATE_IN_START_VIF,			// 42
+	INPUT_STATE_IN_STOP_VIF,			// 43
+	INPUT_STATE_IN_ADD_PIM_MRE_RP,			// 44
+	INPUT_STATE_IN_ADD_PIM_MRE_WC,			// 45
+	INPUT_STATE_IN_ADD_PIM_MRE_SG,			// 46
+	INPUT_STATE_IN_ADD_PIM_MRE_SG_RPT,		// 47
+	INPUT_STATE_IN_REMOVE_PIM_MRE_RP,		// 48
+	INPUT_STATE_IN_REMOVE_PIM_MRE_WC,		// 49
+	INPUT_STATE_IN_REMOVE_PIM_MRE_SG,		// 50
+	INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT,		// 51
 	INPUT_STATE_MAX
     };
     //
@@ -232,6 +234,8 @@ public:
     void	input_state_assert_state_sg(list<PimMreAction> action_list);
     void	input_state_assert_winner_nbr_wc_gen_id_changed(list<PimMreAction> action_list);
     void	input_state_assert_winner_nbr_sg_gen_id_changed(list<PimMreAction> action_list);
+    void	input_state_assert_rpf_interface_wc_changed(list<PimMreAction> action_list);
+    void	input_state_assert_rpf_interface_sg_changed(list<PimMreAction> action_list);
     void	input_state_i_am_dr(list<PimMreAction> action_list);
     void	input_state_my_ip_address(list<PimMreAction> action_list);
     void	input_state_my_ip_subnet_address(list<PimMreAction> action_list);

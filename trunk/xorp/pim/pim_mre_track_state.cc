@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.7 2003/02/06 04:33:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.8 2003/02/07 05:16:06 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -467,22 +467,24 @@ do {									\
     INPUT_NAME(INPUT_STATE_ASSERT_STATE_SG);			// 31
     INPUT_NAME(INPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID_CHANGED);// 32
     INPUT_NAME(INPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID_CHANGED);// 33
-    INPUT_NAME(INPUT_STATE_I_AM_DR);				// 34
-    INPUT_NAME(INPUT_STATE_MY_IP_ADDRESS);			// 35
-    INPUT_NAME(INPUT_STATE_MY_IP_SUBNET_ADDRESS);		// 36
-    INPUT_NAME(INPUT_STATE_IS_SWITCH_TO_SPT_DESIRED_SG);	// 37
-    INPUT_NAME(INPUT_STATE_KEEPALIVE_TIMER_SG);			// 38
-    INPUT_NAME(INPUT_STATE_SPTBIT_SG);				// 39
-    INPUT_NAME(INPUT_STATE_IN_START_VIF);			// 40
-    INPUT_NAME(INPUT_STATE_IN_STOP_VIF);			// 41
-    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_RP);			// 42
-    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_WC);			// 43
-    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_SG);			// 44
-    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_SG_RPT);		// 45
-    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_RP);		// 46
-    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_WC);		// 47
-    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG);		// 48
-    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT);		// 49
+    INPUT_NAME(INPUT_STATE_ASSERT_RPF_INTERFACE_WC_CHANGED);	// 34
+    INPUT_NAME(INPUT_STATE_ASSERT_RPF_INTERFACE_SG_CHANGED);	// 35
+    INPUT_NAME(INPUT_STATE_I_AM_DR);				// 36
+    INPUT_NAME(INPUT_STATE_MY_IP_ADDRESS);			// 37
+    INPUT_NAME(INPUT_STATE_MY_IP_SUBNET_ADDRESS);		// 38
+    INPUT_NAME(INPUT_STATE_IS_SWITCH_TO_SPT_DESIRED_SG);	// 39
+    INPUT_NAME(INPUT_STATE_KEEPALIVE_TIMER_SG);			// 40
+    INPUT_NAME(INPUT_STATE_SPTBIT_SG);				// 41
+    INPUT_NAME(INPUT_STATE_IN_START_VIF);			// 42
+    INPUT_NAME(INPUT_STATE_IN_STOP_VIF);			// 43
+    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_RP);			// 44
+    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_WC);			// 45
+    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_SG);			// 46
+    INPUT_NAME(INPUT_STATE_IN_ADD_PIM_MRE_SG_RPT);		// 47
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_RP);		// 48
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_WC);		// 49
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG);		// 50
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT);		// 51
     
     OUTPUT_NAME(OUTPUT_STATE_RP_WC);				// 0
     OUTPUT_NAME(OUTPUT_STATE_RP_SG);				// 1
@@ -879,6 +881,18 @@ void
 PimMreTrackState::input_state_assert_winner_nbr_wc_gen_id_changed(list<PimMreAction> action_list)
 {
     add_action_list(INPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID_CHANGED, action_list);
+}
+
+void
+PimMreTrackState::input_state_assert_rpf_interface_wc_changed(list<PimMreAction> action_list)
+{
+    add_action_list(INPUT_STATE_ASSERT_RPF_INTERFACE_WC_CHANGED, action_list);
+}
+
+void
+PimMreTrackState::input_state_assert_rpf_interface_sg_changed(list<PimMreAction> action_list)
+{
+    add_action_list(INPUT_STATE_ASSERT_RPF_INTERFACE_SG_CHANGED, action_list);
 }
 
 void
@@ -2837,7 +2851,7 @@ PimMreTrackState::track_state_assert_rpf_interface_sg(list<PimMreAction> action_
 {
     action_list = output_state_assert_rpf_interface_sg(action_list);
     
-    track_state_rpf_interface_s(action_list);
+    input_state_assert_rpf_interface_sg_changed(action_list);
 }
 
 void
@@ -2845,7 +2859,7 @@ PimMreTrackState::track_state_assert_rpf_interface_wc(list<PimMreAction> action_
 {
     action_list = output_state_assert_rpf_interface_wc(action_list);
     
-    track_state_rpf_interface_rp(action_list);
+    input_state_assert_rpf_interface_wc_changed(action_list);
 }
 
 void
@@ -3402,23 +3416,14 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_RPF_INTERFACE_SG:	// 25
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.recompute_assert_rpf_interface_sg(vif_index);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.recompute_assert_rpf_interface_sg(i);
-	}
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+	pim_mre.recompute_assert_rpf_interface_sg(vif_index);
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_RPF_INTERFACE_WC:	// 26
-	if (vif_index != Vif::VIF_INDEX_INVALID) {
-	    pim_mre.recompute_assert_rpf_interface_wc(vif_index);
-	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
-    	    for (i = 0; i < maxvifs; i++)
-		pim_mre.recompute_assert_rpf_interface_wc(i);
-	}
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+	pim_mre.recompute_assert_rpf_interface_wc(vif_index);
+	break;
 	break;
 	
     case PimMreTrackState::OUTPUT_STATE_ASSERT_RECEIVE_JOIN_SG:		// 27

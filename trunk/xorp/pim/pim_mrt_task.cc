@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.5 2003/02/07 05:16:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.6 2003/02/07 05:58:00 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -341,6 +341,46 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_addr_arg(pim_nbr_addr);
+	
+	add_task(pim_mre_task);
+	schedule_task(pim_mre_task);
+    } while (false);
+}
+
+void
+PimMrt::add_task_assert_rpf_interface_wc(uint16_t old_rpf_interface_rp,
+					 const IPvX& group_addr)
+{
+    PimMreTask *pim_mre_task;
+    
+    do {
+	// Schedule the (*,G)-related changes
+	pim_mre_task
+	    = new PimMreTask(*this,
+			     PimMreTrackState::INPUT_STATE_ASSERT_RPF_INTERFACE_WC_CHANGED);
+	pim_mre_task->set_group_addr_wc(group_addr);
+	pim_mre_task->set_vif_index(old_rpf_interface_rp);
+	
+	add_task(pim_mre_task);
+	schedule_task(pim_mre_task);
+    } while (false);
+}
+
+void
+PimMrt::add_task_assert_rpf_interface_sg(uint16_t old_rpf_interface_s,
+					 const IPvX& source_addr,
+					 const IPvX& group_addr)
+{
+    PimMreTask *pim_mre_task;
+    
+    do {
+	// Schedule the (S,G)-related changes
+	pim_mre_task
+	    = new PimMreTask(*this,
+			     PimMreTrackState::INPUT_STATE_ASSERT_RPF_INTERFACE_SG_CHANGED);
+	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
+	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
+	pim_mre_task->set_vif_index(old_rpf_interface_s);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.9 2003/01/30 02:36:16 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.10 2003/01/31 02:50:22 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -504,6 +504,7 @@ PimMre::recompute_mrib_rp_wc()
 {
     Mrib *old_mrib_rp = mrib_rp();
     Mrib *new_mrib_rp;
+    uint16_t old_rpf_interface_rp, new_rpf_interface_rp;
     
     if (! is_wc())
 	return;
@@ -513,7 +514,22 @@ PimMre::recompute_mrib_rp_wc()
     if (old_mrib_rp == new_mrib_rp)
 	return;		// Nothing changed
     
+    // Compute the old and new RPF_interface(RP(G))
+    if (old_mrib_rp != NULL)
+	old_rpf_interface_rp = old_mrib_rp->next_hop_vif_index();
+    else
+	old_rpf_interface_rp = Vif::VIF_INDEX_INVALID;
+    if (new_mrib_rp != NULL)
+	new_rpf_interface_rp = new_mrib_rp->next_hop_vif_index();
+    else
+	new_rpf_interface_rp = Vif::VIF_INDEX_INVALID;
+    
     set_mrib_rp(new_mrib_rp);
+    
+    if (old_rpf_interface_rp != new_rpf_interface_rp) {
+	pim_mrt().add_task_assert_rpf_interface_wc(old_rpf_interface_rp,
+						   group_addr());
+    }
 }
 
 // Used by (S,G)
@@ -558,6 +574,7 @@ PimMre::recompute_mrib_s_sg()
 {
     Mrib *old_mrib_s = mrib_s();
     Mrib *new_mrib_s;
+    uint16_t old_rpf_interface_s, new_rpf_interface_s;
     
     if (! is_sg())
 	return;
@@ -566,8 +583,24 @@ PimMre::recompute_mrib_s_sg()
     
     if (old_mrib_s == new_mrib_s)
 	return;		// Nothing changed
+
+    // Compute the old and new RPF_interface(S)
+    if (old_mrib_s != NULL)
+	old_rpf_interface_s = old_mrib_s->next_hop_vif_index();
+    else
+	old_rpf_interface_s = Vif::VIF_INDEX_INVALID;
+    if (new_mrib_s != NULL)
+	new_rpf_interface_s = new_mrib_s->next_hop_vif_index();
+    else
+	new_rpf_interface_s = Vif::VIF_INDEX_INVALID;
     
     set_mrib_s(new_mrib_s);
+    
+    if (old_rpf_interface_s != new_rpf_interface_s) {
+	pim_mrt().add_task_assert_rpf_interface_sg(old_rpf_interface_s,
+						   source_addr(),
+						   group_addr());
+    }
 }
 
 // Used by (S,G,rpt)

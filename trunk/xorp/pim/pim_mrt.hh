@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrt.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
+// $XORP: xorp/pim/pim_mrt.hh,v 1.2 2002/12/17 10:03:46 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRT_HH__
@@ -201,6 +201,11 @@ public:
 				  const IPvX& pim_nbr_addr);
     void add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 					 const IPvX& pim_nbr_addr);
+    void add_task_assert_rpf_interface_wc(uint16_t old_rpf_interface_rp,
+					  const IPvX& group_addr);
+    void add_task_assert_rpf_interface_sg(uint16_t old_rpf_interface_s,
+					  const IPvX& source_addr,
+					  const IPvX& group_addr);
     void add_task_receive_join_rp(uint16_t vif_index, const IPvX& rp_addr);
     void add_task_receive_join_wc(uint16_t vif_index, const IPvX& group_addr);
     void add_task_receive_join_sg(uint16_t vif_index, const IPvX& source_addr,
