@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.22 2002/12/04 00:11:39 hodson Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $ */
 
 interfaces {
   interface @: text {
@@ -15,6 +15,7 @@ interfaces {
         multicast-capable: bool;
         point-to-point: bool;
         loopback: bool;
+	disable: toggle = false;
       }
       address @: ipv6 {
         prefix-length: uint;
@@ -22,6 +23,7 @@ interfaces {
         multicast-capable: bool;
         point-to-point: bool;
         loopback: bool;
+	disable: toggle = false;
       }
     }
   }
@@ -60,6 +62,10 @@ interfaces {
 	%create: xrl "fea/ifmgr/0.1/create_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
 	%delete: xrl "fea/ifmgr/0.1/delete_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
 	%list: xrl "fea/ifmgr/0.1/get_configured_vif_addresses4?ifname:txt=$(interface.@)&vif:txt->addresses:list";
+        disable {
+          %set: xrl "fea/ifmgr/0.1/set_address_enabled4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&enabled:bool=`~$(@)`";
+/*        %get: xrl "fea/ifmgr/0.1/get_address_enabled4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool=`~$(@)`"; */
+        }
 	prefix-length {
 	  %set: xrl "fea/ifmgr/0.1/set_prefix4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&prefix:u32=$(@)"; 
 	  %get: xrl "fea/ifmgr/0.1/get_prefix4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->prefix:u32"; 
@@ -86,6 +92,10 @@ interfaces {
 	%create: xrl "fea/ifmgr/0.1/create_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
 	%delete: xrl "fea/ifmgr/0.1/delete_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
 	%list: xrl "fea/ifmgr/0.1/get_configured_vif_addresses6?ifname:txt=$(interface.@)&vif:txt->addresses:list";
+        disable {
+          %set: xrl "fea/ifmgr/0.1/set_address_enabled4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&enabled:bool=`~$(@)`";
+/*        %get: xrl "fea/ifmgr/0.1/get_address_enabled4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool=`~$(@)`"; */
+        }
 	prefix-length {
 	  %set: xrl "fea/ifmgr/0.1/set_prefix6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&prefix:u32=$(@)"; 
 	  %get: xrl "fea/ifmgr/0.1/get_prefix6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->prefix:u32"; 
