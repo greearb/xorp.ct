@@ -775,6 +775,7 @@ $(srcdir)/demo_fea_ifmgr_client_base.cc:				\
 		$(INTERFACES_DIR)/fea_ifmgr_client.xif
 $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fea_fib.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif		\
 		$(INTERFACES_DIR)/fti.xif				\

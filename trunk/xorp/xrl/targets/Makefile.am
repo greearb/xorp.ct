@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.25 2004/02/19 18:29:22 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.26 2004/02/26 22:46:49 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -120,6 +120,7 @@ $(srcdir)/demo_fea_ifmgr_client_base.cc:				\
 libfeabase_a_SOURCES = fea_base.hh fea_base.cc
 $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fea_fib.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif		\
 		$(INTERFACES_DIR)/fti.xif				\
