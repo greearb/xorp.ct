@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.27 2004/08/17 02:20:09 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.28 2004/09/01 18:18:31 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -406,6 +406,8 @@ public:
     IfConfigErrorReporterBase() : _error_cnt(0) {}
     virtual ~IfConfigErrorReporterBase() {}
 
+    virtual void config_error(const string& error_msg) = 0;
+
     virtual void interface_error(const string& ifname,
 				 const string& error_msg) = 0;
 
@@ -468,6 +470,8 @@ private:
 class IfConfigErrorReporter : public IfConfigErrorReporterBase {
 public:
     IfConfigErrorReporter();
+
+    void config_error(const string& error_msg);
 
     void interface_error(const string& ifname,
 			 const string& error_msg);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.15 2004/09/09 19:05:05 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.16 2004/09/11 01:28:18 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -60,7 +60,83 @@ public:
 
 protected:
     /**
-     * Set the interface MAC address.
+     * Start the configuration.
+     *
+     * @param errmsg the error message (if an error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_begin(string& errmsg) = 0;
+
+    /**
+     * Complete the configuration.
+     *
+     * @param errmsg the error message (if an error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_end(string& errmsg) = 0;
+
+    /**
+     * Add an interface.
+     *
+     * @param ifname the interface name.
+     * @param if_index the interface index.
+     * @param errmsg the error message (if an error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int add_interface(const string& ifname,
+			      uint16_t if_index,
+			      string& errmsg) = 0;
+
+    /**
+     * Add a vif.
+     *
+     * @param ifname the interface name.
+     * @param vifname the vif name.
+     * @param if_index the interface index.
+     * @param errmsg the error message (if an error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int add_vif(const string& ifname,
+			const string& vifname,
+			uint16_t if_index,
+			string& errmsg) = 0;
+
+    /**
+     * Configure an interface.
+     *
+     * @param ifname the interface name.
+     * @param if_index the interface index.
+     * @param flags the flags to set on the interface.
+     * @param is_up if true, the interface is UP, otherwise is DOWN.
+     * @param errmsg the error message (if an error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_interface(const string& ifname,
+				 uint16_t if_index,
+				 uint32_t flags,
+				 bool is_up,
+				 string& errmsg) = 0;
+
+    /**
+     * Configure a vif.
+     *
+     * @param ifname the interface name.
+     * @param vifname the vif name.
+     * @param if_index the interface index.
+     * @param flags the flags to set on the vif.
+     * @param is_up if true, the vif is UP, otherwise is DOWN.
+     * @param errmsg the error message (if an error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_vif(const string& ifname,
+			   const string& vifname,
+			   uint16_t if_index,
+			   uint32_t flags,
+			   bool is_up,
+			   string& errmsg) = 0;
+
+    /**
+     * Set the MAC address of an interface.
      *
      * @param ifname the interface name.
      * @param if_index the interface index.
@@ -74,7 +150,7 @@ protected:
 					  string& errmsg) = 0;
 
     /**
-     * Set the interface MTU address.
+     * Set the MTU of an interface.
      *
      * @param ifname the interface name.
      * @param if_index the interface index.
@@ -88,35 +164,21 @@ protected:
 				  string& errmsg) = 0;
 
     /**
-     * Set the interface flags.
+     * Add an address to a vif.
      *
      * @param ifname the interface name.
-     * @param if_index the interface index.
-     * @param flags the flags to set.
-     * @param is_up if true, the interface is set to UP.
-     * @param errmsg the error message (if an error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int set_interface_flags(const string& ifname,
-				    uint16_t if_index,
-				    uint32_t flags,
-				    bool is_up,
-				    string& errmsg) = 0;
-
-    /**
-     * Set an address on an interface.
-     *
-     * @param ifname the interface name.
+     * @param vifname the vif name.
      * @param if_index the interface index.
      * @param is_broadcast true if @ref dst_or_bcast is a broadcast address.
      * @param is_p2p true if dst_or_bcast is a destination/peer address.
-     * @param addr the address to set.
+     * @param addr the address to add.
      * @param dst_or_bcast the broadcast or the destination/peer address.
      * @param prefix_len the prefix length of the subnet mask.
      * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int set_vif_address(const string& ifname,
+    virtual int add_vif_address(const string& ifname,
+				const string& vifname,
 				uint16_t if_index,
 				bool is_broadcast,
 				bool is_p2p,
@@ -126,9 +188,10 @@ protected:
 				string& errmsg) = 0;
 
     /**
-     * Delete an address from an interface. 
+     * Delete an address from a vif. 
      * 
      * @param ifname the interface name.
+     * @param vifname the vif name.
      * @param if_index the interface index.
      * @param addr the address to delete.
      * @param prefix_len the prefix length of the subnet mask.
@@ -136,6 +199,7 @@ protected:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_vif_address(const string& ifname,
+				   const string& vifname,
 				   uint16_t if_index,
 				   const IPvX& addr,
 				   uint32_t prefix_len,
@@ -146,8 +210,12 @@ protected:
     bool	_is_running;
 
 private:
-    void push_interface(const IfTreeInterface& i);
-    void push_vif(const IfTreeInterface& i, const IfTreeVif& v);
+    void push_iftree_begin();
+    void push_iftree_end();
+    void push_interface_begin(const IfTreeInterface& i);
+    void push_interface_end(const IfTreeInterface& i);
+    void push_vif_begin(const IfTreeInterface& i, const IfTreeVif& v);
+    void push_vif_end(const IfTreeInterface& i, const IfTreeVif& v);
     void push_vif_address(const IfTreeInterface& i, const IfTreeVif& v,
 			  const IfTreeAddr4& a);
     void push_vif_address(const IfTreeInterface& i, const IfTreeVif& v,
@@ -184,23 +252,36 @@ public:
     virtual bool push_config(const IfTree& config);
 
 private:
+    virtual int config_begin(string& errmsg);
+    virtual int config_end(string& errmsg);
+    virtual int add_interface(const string& ifname,
+			      uint16_t if_index,
+			      string& errmsg);
+    virtual int add_vif(const string& vifname,
+			const string& vifname,
+			uint16_t if_index,
+			string& errmsg);
+    virtual int config_interface(const string& ifname,
+				 uint16_t if_index,
+				 uint32_t flags,
+				 bool is_up,
+				 string& errmsg);
+    virtual int config_vif(const string& ifname,
+			   const string& vifname,
+			   uint16_t if_index,
+			   uint32_t flags,
+			   bool is_up,
+			   string& errmsg);
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
 					  const struct ether_addr& ether_addr,
 					  string& errmsg);
-
     virtual int set_interface_mtu(const string& ifname,
 				  uint16_t if_index,
 				  uint32_t mtu,
 				  string& errmsg);
-
-    virtual int set_interface_flags(const string& ifname,
-				    uint16_t if_index,
-				    uint32_t flags,
-				    bool is_up,
-				    string& errmsg);
-
-    virtual int set_vif_address(const string& ifname,
+    virtual int add_vif_address(const string& ifname,
+				const string& vifname,
 				uint16_t if_index,
 				bool is_broadcast,
 				bool is_p2p,
@@ -208,8 +289,8 @@ private:
 				const IPvX& dst_or_bcast,
 				uint32_t prefix_len,
 				string& errmsg);
-
     virtual int delete_vif_address(const string& ifname,
+				   const string& vifname,
 				   uint16_t if_index,
 				   const IPvX& addr,
 				   uint32_t prefix_len,
@@ -236,23 +317,36 @@ public:
     virtual int stop();
     
 private:
+    virtual int config_begin(string& errmsg);
+    virtual int config_end(string& errmsg);
+    virtual int add_interface(const string& ifname,
+			      uint16_t if_index,
+			      string& errmsg);
+    virtual int add_vif(const string& vifname,
+			const string& vifname,
+			uint16_t if_index,
+			string& errmsg);
+    virtual int config_interface(const string& ifname,
+				 uint16_t if_index,
+				 uint32_t flags,
+				 bool is_up,
+				 string& errmsg);
+    virtual int config_vif(const string& ifname,
+			   const string& vifname,
+			   uint16_t if_index,
+			   uint32_t flags,
+			   bool is_up,
+			   string& errmsg);
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
 					  const struct ether_addr& ether_addr,
 					  string& errmsg);
-
     virtual int set_interface_mtu(const string& ifname,
 				  uint16_t if_index,
 				  uint32_t mtu,
 				  string& errmsg);
-
-    virtual int set_interface_flags(const string& ifname,
-				    uint16_t if_index,
-				    uint32_t flags,
-				    bool is_up,
-				    string& errmsg);
-
-    virtual int set_vif_address(const string& ifname,
+    virtual int add_vif_address(const string& ifname,
+				const string& vifname,
 				uint16_t if_index,
 				bool is_broadcast,
 				bool is_p2p,
@@ -260,14 +354,15 @@ private:
 				const IPvX& dst_or_bcast,
 				uint32_t prefix_len,
 				string& errmsg);
-
     virtual int delete_vif_address(const string& ifname,
+				   const string& vifname,
 				   uint16_t if_index,
 				   const IPvX& addr,
 				   uint32_t prefix_len,
 				   string& errmsg);
 
-    virtual int set_vif_address4(const string& ifname,
+    virtual int add_vif_address4(const string& ifname,
+				 const string& vifname,
 				 uint16_t if_index,
 				 bool is_broadcast,
 				 bool is_p2p,
@@ -275,8 +370,8 @@ private:
 				 const IPvX& dst_or_bcast,
 				 uint32_t prefix_len,
 				 string& errmsg);
-
-    virtual int set_vif_address6(const string& ifname,
+    virtual int add_vif_address6(const string& ifname,
+				 const string& vifname,
 				 uint16_t if_index,
 				 bool is_p2p,
 				 const IPvX& addr,
@@ -310,23 +405,36 @@ public:
     virtual int stop();
 
 private:
+    virtual int config_begin(string& errmsg);
+    virtual int config_end(string& errmsg);
+    virtual int add_interface(const string& ifname,
+			      uint16_t if_index,
+			      string& errmsg);
+    virtual int add_vif(const string& vifname,
+			const string& vifname,
+			uint16_t if_index,
+			string& errmsg);
+    virtual int config_interface(const string& ifname,
+				 uint16_t if_index,
+				 uint32_t flags,
+				 bool is_up,
+				 string& errmsg);
+    virtual int config_vif(const string& ifname,
+			   const string& vifname,
+			   uint16_t if_index,
+			   uint32_t flags,
+			   bool is_up,
+			   string& errmsg);
     virtual int set_interface_mac_address(const string& ifname,
 					  uint16_t if_index,
 					  const struct ether_addr& ether_addr,
 					  string& errmsg);
-
     virtual int set_interface_mtu(const string& ifname,
 				  uint16_t if_index,
 				  uint32_t mtu,
 				  string& errmsg);
-
-    virtual int set_interface_flags(const string& ifname,
-				    uint16_t if_index,
-				    uint32_t flags,
-				    bool is_up,
-				    string& errmsg);
-
-    virtual int set_vif_address(const string& ifname,
+    virtual int add_vif_address(const string& ifname,
+				const string& vifname,
 				uint16_t if_index,
 				bool is_broadcast,
 				bool is_p2p,
@@ -334,8 +442,8 @@ private:
 				const IPvX& dst_or_bcast,
 				uint32_t prefix_len,
 				string& errmsg);
-
     virtual int delete_vif_address(const string& ifname,
+				   const string& vifname,
 				   uint16_t if_index,
 				   const IPvX& addr,
 				   uint32_t prefix_len,

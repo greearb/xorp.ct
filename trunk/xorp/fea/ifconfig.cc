@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.28 2004/08/18 23:00:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.29 2004/09/01 18:20:28 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -669,6 +669,13 @@ IfConfigUpdateReplicator::updates_completed(bool	system)
 IfConfigErrorReporter::IfConfigErrorReporter()
 {
 
+}
+
+void
+IfConfigErrorReporter::config_error(const string& error_msg)
+{
+    string preamble(c_format("Config error: "));
+    log_error(preamble + error_msg);
 }
 
 void
