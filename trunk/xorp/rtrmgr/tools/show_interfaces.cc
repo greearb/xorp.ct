@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.7 2003/09/25 17:00:43 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.8 2003/09/25 18:47:37 hodson Exp $"
 
 #include "rtrmgr/rtrmgr_module.h"
 #include "config.h"
@@ -557,7 +557,7 @@ InterfaceMonitor::print_results() const
 	bool prev = false;
 	if (vif->is_underlying_vif_up()) {
 	    if (prev) printf(",");
-	    printf("ENABLES");
+	    printf("ENABLED");
 	    prev = true;
 	}
 	if (vif->is_broadcast_capable()) {
