@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_packets.cc,v 1.4 2003/06/05 02:11:21 atanu Exp $"
+#ident "$XORP: xorp/rip/test_packets.cc,v 1.5 2004/02/20 21:19:11 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -97,7 +97,7 @@ test_main()
 	    return 1;
 	}
     }
-    
+
     //
     // Test RIPv2 Route Entry
     //
@@ -127,7 +127,7 @@ test_main()
 		return 1;
 	    }
 	}
-	
+
 	if (pre->addr_family() != PacketRouteEntry<IPv4>::ADDR_FAMILY) {
 	    verbose_log("Bad address family accessor\n");
 	    return 1;
@@ -228,6 +228,7 @@ test_main()
 	    verbose_log("bad key id accessor\n");
 	    return 1;
 	} else if (pre->auth_bytes() != 0x08) {
+
 	    verbose_log("bad auth bytes accessor\n");
 	    return 1;
 	} else if (pre->seqno() != 0x12345678) {
@@ -235,14 +236,14 @@ test_main()
 	    return 1;
 	}
     }
-    
+
     return 0;
 }
 
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -258,7 +259,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -313,7 +314,7 @@ main(int argc, char* const argv[])
         xorp_print_standard_exceptions();
         rval = 2;
     }
-    
+
     //
     // Gracefully stop and exit xlog
     //

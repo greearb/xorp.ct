@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.8 2004/02/20 06:29:57 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.9 2004/02/20 21:19:11 hodson Exp $"
 
 #include <set>
 
@@ -450,7 +450,7 @@ public:
 	}
 
 	bool timeout = false;
-	XorpTimer tot = _e.set_flag_after_ms(3000, &timeout);
+	XorpTimer tot = _e.set_flag_after_ms(30000, &timeout);
 	ou.start();
 
 	while (ou.running() && timeout == false) {
@@ -640,8 +640,10 @@ main(int argc, char* const argv[])
     int rval = 0;
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	rval = run_all_test_cases<IPv4>();
-	//	rval |= run_all_test_cases<IPv6>();
+	rval |= run_all_test_cases<IPv6>();
+	// rval = run_all_test_cases<IPv4>();
+
+
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();

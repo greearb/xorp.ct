@@ -328,7 +328,7 @@ template <>
 inline bool
 ResponsePacketAssembler<IPv6>::packet_full() const
 {
-    return (_sp_state.max_entries() - _pos) >= 2;
+    return (_sp_state.max_entries() - _pos) <= 2;
 }
 
 template <>
