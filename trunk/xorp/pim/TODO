@@ -1,6 +1,13 @@
 #
-# $XORP: xorp/pim/TODO,v 1.154 2002/12/09 14:14:16 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
 #
+
+* IMPL+SPEC: Rename tracking_support to tracking_support_disabled
+  Also, the explanation for the T bit in the LAN Prune Delay (Hello Option)
+  must be more specific.
+
+* IMPL: Make sure that t_joinsuppress is used as appropriate instead
+  of t_suppress
 
 * IMPL: The subnets that are allowed for access CLI should not be hard-coded,
   but should be configurable: PIM, CLI, MFEA, MLD6IGMP.
