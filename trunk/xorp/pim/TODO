@@ -1,7 +1,17 @@
 #
-# $XORP: xorp/pim/TODO,v 1.78 2005/01/28 03:34:19 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.79 2005/03/13 02:13:03 pavlin Exp $
 #
 
+* IMPL:
+  All startup or shutdown scheduled XRLs must go to the same
+  task queue to preserve the order.
+  For example, currently during a graceful shutdown,
+  even though the "stop_kernel_vif" events are scheduled before the
+  "delete_protocol" event/XRL. However, because the "delete_protocol"
+  event/XRL is not added to a queue, the "delete_protocol" XRL
+  may be sent to the MFEA before all "stop_kernel_vif" XRLs
+  are transmitted. The same problem applies for IGMP/MLD as well.
+ 
 * IMPL:
   Get rid of the gcc-ism declaration of an array with non-const
   size inside pim_proto_register.cc. Currently, this includes:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.70 2005/03/16 21:54:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.71 2005/03/17 18:49:59 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -465,10 +465,10 @@ XrlPimNode::finder_deregister_interest_mfea_cb(const XrlError& xrl_error)
 }
 
 //
-// Add protocol with the MFEA
+// Add/delete protocol with the MFEA
 //
 void
-XrlPimNode::send_mfea_add_protocol()
+XrlPimNode::send_mfea_add_delete_protocol()
 {
     bool success = true;
 
@@ -485,48 +485,85 @@ XrlPimNode::send_mfea_add_protocol()
     XLOG_ASSERT(entry != NULL);
 
     bool is_add = entry->is_add();
-    XLOG_ASSERT(is_add == true);
 
-    //
-    // Register the protocol with the MFEA
-    //
-    if (! _is_mfea_add_protocol_registered) {
-	if (PimNode::is_ipv4()) {
-	    success = _xrl_mfea_client.send_add_protocol4(
-		_mfea_target.c_str(),
-		my_xrl_target_name(),
-		string(PimNode::module_name()),
-		PimNode::module_id(),
-		callback(this, &XrlPimNode::mfea_client_send_add_protocol_cb));
-	    if (success)
-		return;
+    if (is_add) {
+	//
+	// Register the protocol with the MFEA
+	//
+	if (! _is_mfea_add_protocol_registered) {
+	    if (PimNode::is_ipv4()) {
+		success = _xrl_mfea_client.send_add_protocol4(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    string(PimNode::module_name()),
+		    PimNode::module_id(),
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_protocol_cb));
+		if (success)
+		    return;
+	    }
+
+	    if (PimNode::is_ipv6()) {
+		success = _xrl_mfea_client.send_add_protocol6(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    string(PimNode::module_name()),
+		    PimNode::module_id(),
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_protocol_cb));
+		if (success)
+		    return;
+	    }
 	}
+    } else {
+	//
+	// De-register the protocol with the MFEA
+	//
+	if (_is_mfea_add_protocol_registered) {
+	    if (PimNode::is_ipv4()) {
+		bool success4;
+		success4 = _xrl_mfea_client.send_delete_protocol4(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    string(PimNode::module_name()),
+		    PimNode::module_id(),
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_protocol_cb));
+		if (success4 != true)
+		    success = false;
+	    }
 
-	if (PimNode::is_ipv6()) {
-	    success = _xrl_mfea_client.send_add_protocol6(
-		_mfea_target.c_str(),
-		my_xrl_target_name(),
-		string(PimNode::module_name()),
-		PimNode::module_id(),
-		callback(this, &XrlPimNode::mfea_client_send_add_protocol_cb));
-	    if (success)
-		return;
+	    if (PimNode::is_ipv6()) {
+		bool success6;
+		success6 = _xrl_mfea_client.send_delete_protocol6(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    string(PimNode::module_name()),
+		    PimNode::module_id(),
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_protocol_cb));
+		if (success6 != true)
+		    success = false;
+	    }
 	}
     }
 
     if (! success) {
-	//
-	// If an error, then start a timer to try again
-	//
-	XLOG_ERROR("Failed to add protocol with the MFEA. "
-		   "Will try again.");
-	retry_xrl_task();
-	return;
+	if (is_add) {
+	    //
+	    // If an error, then start a timer to try again
+	    //
+	    XLOG_ERROR("Failed to add protocol with the MFEA. "
+		       "Will try again.");
+	    retry_xrl_task();
+	    return;
+	} else {
+	    XLOG_ERROR("Failed to delete protocol with the MFEA. "
+		       "Will give up.");
+	    PimNode::set_status(SERVICE_FAILED);
+	    PimNode::update_status();
+	}
     }
 }
 
 void
-XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
+XrlPimNode::mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_error)
 {
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     MfeaAddDeleteProtocol* entry;
@@ -535,15 +572,20 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
     XLOG_ASSERT(entry != NULL);
 
     bool is_add = entry->is_add();
-    XLOG_ASSERT(is_add == true);
 
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
 	// If success, then send the next change
 	//
-	_is_mfea_add_protocol_registered = true;
-	PimNode::decr_startup_requests_n();
+	if (is_add) {
+	    _is_mfea_add_protocol_registered = true;
+	    PimNode::decr_startup_requests_n();
+	} else {
+	    _is_mfea_add_protocol_registered = false;
+	    _is_mfea_allow_signal_messages_registered = false;
+	    PimNode::decr_shutdown_requests_n();
+	}
 	pop_xrl_task();
 	send_xrl_task();
 	break;
@@ -553,7 +595,8 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot add protocol with the MFEA: %s",
+	XLOG_FATAL("Cannot %s protocol with the MFEA: %s",
+		   (is_add)? "add" : "delete",
 		   xrl_error.str().c_str());
 	break;
 
@@ -566,7 +609,15 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
-	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	if (is_add) {
+	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	} else {
+	    _is_mfea_add_protocol_registered = false;
+	    _is_mfea_allow_signal_messages_registered = false;
+	    PimNode::decr_shutdown_requests_n();
+	    pop_xrl_task();
+	    send_xrl_task();
+	}
 	break;
 
     case BAD_ARGS:
@@ -586,8 +637,9 @@ XrlPimNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
 	// If a transient error, then start a timer to try again
 	// (unless the timer is already running).
 	//
-	XLOG_ERROR("Failed to add protocol with the MFEA: %s. "
+	XLOG_ERROR("Failed to %s protocol with the MFEA: %s. "
 		   "Will try again.",
+		   (is_add)? "add" : "delete",
 		   xrl_error.str().c_str());
 	retry_xrl_task();
 	break;
@@ -699,140 +751,6 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
 	// (unless the timer is already running).
 	//
 	XLOG_ERROR("Failed to allow signal messages with the MFEA: %s. "
-		   "Will try again.",
-		   xrl_error.str().c_str());
-	retry_xrl_task();
-	break;
-    }
-}
-
-//
-// Delete protocol with the MFEA
-//
-void
-XrlPimNode::send_mfea_delete_protocol()
-{
-    bool success = true;
-
-    if (! _is_finder_alive)
-	return;		// The Finder is dead
-
-    if (_xrl_tasks_queue.empty())
-	return;		// No more changes
-
-    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
-    MfeaAddDeleteProtocol* entry;
-
-    entry = dynamic_cast<MfeaAddDeleteProtocol*>(xrl_task_base);
-    XLOG_ASSERT(entry != NULL);
-
-    bool is_add = entry->is_add();
-    XLOG_ASSERT(is_add == false);
-
-    //
-    // De-register the protocol with the MFEA
-    //
-    if (_is_mfea_add_protocol_registered) {
-	if (PimNode::is_ipv4()) {
-	    bool success4;
-	    success4 = _xrl_mfea_client.send_delete_protocol4(
-		_mfea_target.c_str(),
-		my_xrl_target_name(),
-		string(PimNode::module_name()),
-		PimNode::module_id(),
-		callback(this, &XrlPimNode::mfea_client_send_delete_protocol_cb));
-	    if (success4 != true)
-		success = false;
-	}
-
-	if (PimNode::is_ipv6()) {
-	    bool success6;
-	    success6 = _xrl_mfea_client.send_delete_protocol6(
-		_mfea_target.c_str(),
-		my_xrl_target_name(),
-		string(PimNode::module_name()),
-		PimNode::module_id(),
-		callback(this, &XrlPimNode::mfea_client_send_delete_protocol_cb));
-	    if (success6 != true)
-		success = false;
-	}
-    }
-
-    if (! success) {
-	XLOG_ERROR("Failed to delete protocol with the MFEA. "
-		   "Will give up.");
-	PimNode::set_status(SERVICE_FAILED);
-	PimNode::update_status();
-    }
-}
-
-void
-XrlPimNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
-{
-    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
-    MfeaAddDeleteProtocol* entry;
-
-    entry = dynamic_cast<MfeaAddDeleteProtocol*>(xrl_task_base);
-    XLOG_ASSERT(entry != NULL);
-
-    bool is_add = entry->is_add();
-    XLOG_ASSERT(is_add == false);
-
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then send the next change
-	//
-	_is_mfea_add_protocol_registered = false;
-	_is_mfea_allow_signal_messages_registered = false;
-	PimNode::decr_shutdown_requests_n();
-	pop_xrl_task();
-	send_xrl_task();
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot delete protocol with the MFEA: %s",
-		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	_is_mfea_add_protocol_registered = false;
-	_is_mfea_allow_signal_messages_registered = false;
-	PimNode::decr_shutdown_requests_n();
-	pop_xrl_task();
-	send_xrl_task();
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	XLOG_ERROR("Failed to delete protocol with the MFEA: %s. "
 		   "Will try again.",
 		   xrl_error.str().c_str());
 	retry_xrl_task();

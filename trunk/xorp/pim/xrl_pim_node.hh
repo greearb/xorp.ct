@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.48 2005/02/23 17:37:37 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.49 2005/03/17 18:49:59 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -2139,12 +2139,10 @@ private:
     void mfea_register_shutdown();
     void finder_deregister_interest_mfea_cb(const XrlError& xrl_error);
 
-    void send_mfea_add_protocol();
-    void mfea_client_send_add_protocol_cb(const XrlError& xrl_error);
+    void send_mfea_add_delete_protocol();
+    void mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_error);
     void send_mfea_allow_signal_messages();
     void mfea_client_send_allow_signal_messages_cb(const XrlError& xrl_error);
-    void send_mfea_delete_protocol();
-    void mfea_client_send_delete_protocol_cb(const XrlError& xrl_error);
 
     void rib_register_startup();
     void finder_register_interest_rib_cb(const XrlError& xrl_error);
@@ -2430,7 +2428,6 @@ private:
     private:
 	uint16_t	_vif_index;
 	bool		_is_start;
-
     };
 
     class MfeaAddDeleteProtocol : public XrlTaskBase {
@@ -2441,10 +2438,7 @@ private:
 
 	bool		is_add() const { return _is_add; }
 	void		dispatch() {
-	    if (is_add())
-		_xrl_pim_node.send_mfea_add_protocol();
-	    else
-		_xrl_pim_node.send_mfea_delete_protocol();
+	    _xrl_pim_node.send_mfea_add_delete_protocol();
 	}
 
     private:
@@ -2461,7 +2455,6 @@ private:
 	}
 
     private:
-	bool		_is_add;
     };
 
     EventLoop&			_eventloop;
