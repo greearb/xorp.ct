@@ -24,11 +24,26 @@
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_1657_bgp4pathattrtable.hh"
 
-#undef USE_DMALLOC
+#ifdef USE_MPATROL
+// relevant declarations from mpatrol.h
+extern "C" {
+void __mp_clearleaktable(void);
+int __mp_startleaktable(void);
+int __mp_stopleaktable(void);
+void __mp_leaktable(size_t, int, unsigned char);
+int __mp_printf(const char *, ...);
+}
+#endif /* USE_MPATROL */
 
-#ifdef USE_DMALLOC
-#include <dmalloc.h>
-#endif
+
+#define MP_LT_ALLOCATED 0
+#define MP_LT_FREED     1
+#define MP_LT_UNFREED   2
+
+#define MP_LT_COUNTS    1
+#define MP_LT_BOTTOM    2
+
+
 
 // Local classes and typedefs
 class UpdateManager
@@ -59,7 +74,7 @@ static void get_v4_route_list_next_done(const XrlError& e, const IPv4* peer_id,
     const IPv4Net*, const uint32_t *, const vector<uint8_t>*, const IPv4*,
     const int32_t*, const int32_t*, const int32_t*, const vector<uint8_t>*,
     const int32_t*, const vector<uint8_t>*, const bool* valid);
-static void free_old_routes (void *, void *); 
+static void find_old_routes (void *, void *); 
 static uint32_t rows_are_equal(bgp4PathAttrTable_context * lr, 
     bgp4PathAttrTable_context * rr);
 static void bgp4PathAttrTable_delete_row(bgp4PathAttrTable_context * ctx);
@@ -116,25 +131,24 @@ static void local_route_table_update()
 	}
 	case UpdateManager::CLEANING:
 	{
+	    bgp4PathAttrTable_context * row;
 	    DEBUGMSGTL((BgpMib::the_instance().name(),
 		"removing old routes from bgp4PathAttrTable...\n"));
 	    DEBUGMSGTL((BgpMib::the_instance().name(),
 		"local table size: %d old_routes stack: %d\n", 
 		CONTAINER_SIZE(cb.container), update.old_routes.size()));
-	    CONTAINER_FOR_EACH(cb.container, free_old_routes, NULL);
+	    CONTAINER_FOR_EACH(cb.container, find_old_routes, NULL);
 	    while (update.old_routes.size()) {  
 		DEBUGMSGTL((BgpMib::the_instance().name(),
 		    "update.old_routes.size() = %d\n", 
 		    update.old_routes.size()));
+	        row = (bgp4PathAttrTable_context*) 
+		    CONTAINER_FIND(cb.container, &update.old_routes.top());	
 		CONTAINER_REMOVE(cb.container,&update.old_routes.top());
+		bgp4PathAttrTable_delete_row(row);
 		update.old_routes.pop();
 	    }
 	    update.status = UpdateManager::RESTING;
-#ifdef USE_DMALLOC
-	    static unsigned long dmalloc_mark_1 = dmalloc_mark();
-	    dmalloc_message("dump allocated pointers\n");
-	    dmalloc_log_changed(dmalloc_mark_1, 1, 0, 1);
-#endif
 	    // schedule next update
 	    *pLocalUpdateTimer = eventloop.new_oneoff_after_ms (
 	    	UPDATE_REST_INTERVAL_ms, tcb);
@@ -158,6 +172,10 @@ init_bgp4_mib_1657_bgp4pathattrtable(void)
     pLocalUpdateTimer = new XorpTimer;
     tcb = callback(local_route_table_update);
     *pLocalUpdateTimer = eventloop.new_oneoff_after_ms(0, tcb);
+#ifdef USE_MPATROL
+    __mp_clearleaktable();
+    __mp_startleaktable();
+#endif /* USE_MPATROL */
 }
 
 /*********************************************************************
@@ -173,9 +191,15 @@ deinit_bgp4_mib_1657_bgp4pathattrtable(void)
 	delete pLocalUpdateTimer;
 	pLocalUpdateTimer = NULL;
     }
-#ifdef USE_DMALLOC
-    dmalloc_shutdown();
-#endif
+#ifdef USE_MPATROL
+    __mp_stopleaktable();
+    __mp_leaktable(0, MP_LT_ALLOCATED, MP_LT_BOTTOM);
+    __mp_printf("\n");
+    __mp_leaktable(0, MP_LT_FREED, MP_LT_COUNTS);
+    __mp_printf("\n");
+    __mp_leaktable(0, MP_LT_UNFREED, 0);
+    __mp_printf("\n");
+#endif /* USE_MPATROL */
 }
 
 /*********************************************************************
@@ -199,13 +223,11 @@ initialize_table_bgp4PathAttrTable(void)
     /** create the table structure itself */
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    /* if your table is read only, it's easiest to change the
-       HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
     my_handler = netsnmp_create_handler_registration("bgp4PathAttrTable",
                                              netsnmp_table_array_helper_handler,
                                              bgp4PathAttrTable_oid,
                                              bgp4PathAttrTable_oid_len,
-                                             HANDLER_CAN_RWRITE);
+                                             HANDLER_CAN_RONLY);
             
     if (!my_handler || !table_info) {
         snmp_log(LOG_ERR, "malloc failed in "
@@ -403,6 +425,7 @@ bgp4PathAttrTable_delete_row(bgp4PathAttrTable_context * ctx)
 {
     if (NULL == ctx) return;
     free(ctx->index.oids);
+    ctx->index.oids = NULL;
     if (ctx->bgp4PathAttrASPathSegment) free(ctx->bgp4PathAttrASPathSegment);
     if (ctx->bgp4PathAttrUnknown) free(ctx->bgp4PathAttrUnknown);
     free(ctx);
@@ -629,8 +652,8 @@ get_v4_route_list_next_done(const XrlError& e,
 	    local_row->update_signature = update.list_token;
 	    bgp4PathAttrTable_delete_row(row);
 	} else {
-	    bgp4PathAttrTable_delete_row(local_row);
 	    CONTAINER_REMOVE(cb.container, &index);
+	    bgp4PathAttrTable_delete_row(local_row);
 	    CONTAINER_INSERT(cb.container, row);
 	    DEBUGMSGTL((BgpMib::the_instance().name(),
 		"updating %s route to local table\n", 
@@ -645,7 +668,7 @@ get_v4_route_list_next_done(const XrlError& e,
     
 
     // Done with this row, request next
-    local_route_table_update();
+    *pLocalUpdateTimer = eventloop.new_oneoff_after_ms (0, tcb);
 }
 
 /****************************************************************************
@@ -657,12 +680,27 @@ get_v4_route_list_next_done(const XrlError& e,
 static uint32_t
 rows_are_equal(bgp4PathAttrTable_context * lr, bgp4PathAttrTable_context * rr)
 {
+    if (lr->bgp4PathAttrASPathSegmentLen == rr->bgp4PathAttrASPathSegmentLen) {
+	if (lr->bgp4PathAttrASPathSegmentLen)
+	    if (memcmp(lr->bgp4PathAttrASPathSegment, 
+		rr->bgp4PathAttrASPathSegment,
+                lr->bgp4PathAttrASPathSegmentLen))
+		return 0;
+    }
+    else return 0;
+	
+    if (lr->bgp4PathAttrUnknownLen == rr->bgp4PathAttrUnknownLen) {
+	if (lr->bgp4PathAttrUnknownLen)
+	    if (memcmp(lr->bgp4PathAttrUnknown, rr->bgp4PathAttrUnknown,
+                lr->bgp4PathAttrUnknownLen))
+		return 0;
+    }
+    else return 0;
+    
     return ((lr->bgp4PathAttrPeer == rr->bgp4PathAttrPeer) &&
 	(lr->bgp4PathAttrIpAddrPrefixLen == rr->bgp4PathAttrIpAddrPrefixLen) &&
 	(lr->bgp4PathAttrIpAddrPrefix == rr->bgp4PathAttrIpAddrPrefix) &&
 	(lr->bgp4PathAttrOrigin == rr->bgp4PathAttrOrigin) &&
-	(!memcmp(lr->bgp4PathAttrASPathSegment, rr->bgp4PathAttrASPathSegment,
-		 lr->bgp4PathAttrASPathSegmentLen)) &&
 	(lr->bgp4PathAttrNextHop == rr->bgp4PathAttrNextHop) &&
 	(lr->bgp4PathAttrMultiExitDisc == rr->bgp4PathAttrMultiExitDisc) &&
 	(lr->bgp4PathAttrLocalPref == rr->bgp4PathAttrLocalPref) &&
@@ -670,24 +708,19 @@ rows_are_equal(bgp4PathAttrTable_context * lr, bgp4PathAttrTable_context * rr)
 	(lr->bgp4PathAttrAggregatorAS == rr->bgp4PathAttrAggregatorAS) &&
 	(lr->bgp4PathAttrAggregatorAddr == rr->bgp4PathAttrAggregatorAddr) &&
 	(lr->bgp4PathAttrCalcLocalPref == rr->bgp4PathAttrCalcLocalPref) &&
-	(lr->bgp4PathAttrBest == rr->bgp4PathAttrBest) &&
-	(!memcmp(lr->bgp4PathAttrUnknown, rr->bgp4PathAttrUnknown,
-		 lr->bgp4PathAttrUnknownLen))); 
+	(lr->bgp4PathAttrBest == rr->bgp4PathAttrBest));
 }
 
 /****************************************************************************
- * free_old_routes - free old routes from the local table
+ * find_old_routes - find the routes that must be removed from local table
  *
  * This function compares the signature on the row, with the one from the most
- * recent update, and deletes the row if they don't match
+ * recent update, and in case of mismatch, it stores the row's index in the
+ * update stack for later deletion. 
  *
- * NOTE: Ideally in this function we would like to free the old route and the
- * entry for it in the container class, but then the function would not be
- * callable from a FOR_EACH loop.  So we free the old route, but we store the
- * container entries for later deletion.
  */ 
 static void 
-free_old_routes (void * r, void *) 
+find_old_routes (void * r, void *) 
 {
     bgp4PathAttrTable_context* row = 
 	static_cast<bgp4PathAttrTable_context*>(r);
@@ -696,7 +729,6 @@ free_old_routes (void * r, void *)
         DEBUGMSGTL((BgpMib::the_instance().name(),
 	    "removing %#010x from table\n", row->bgp4PathAttrIpAddrPrefix));
 	update.old_routes.push(row->index); 
-	bgp4PathAttrTable_delete_row(row);
     }
 }
 
@@ -717,3 +749,4 @@ static u_char * stl_vector_to_char(const vector<uint8_t>* v,unsigned long& len)
 	memcpy(char_array, &(*v)[0], len);
     return char_array;
 }
+
