@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.8 2003/04/22 23:27:20 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.9 2003/04/23 00:52:50 pavlin Exp $"
 
 
 //
@@ -1050,23 +1050,23 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 		rcvlen -= sizeof(bw_upcall);
 		from += sizeof(bw_upcall);
 		
-		src.copy_in(bw_upcall.bw_upcall_src);
-		dst.copy_in(bw_upcall.bw_upcall_dst);
+		src.copy_in(bw_upcall.bu_src);
+		dst.copy_in(bw_upcall.bu_dst);
 		is_threshold_in_packets
-		    = bw_upcall.bw_upcall_flags & BW_UPCALL_UNIT_PACKETS;
+		    = bw_upcall.bu_flags & BW_UPCALL_UNIT_PACKETS;
 		is_threshold_in_bytes
-		    = bw_upcall.bw_upcall_flags & BW_UPCALL_UNIT_BYTES;
-		is_geq_upcall = bw_upcall.bw_upcall_flags & BW_UPCALL_GEQ;
-		is_leq_upcall = bw_upcall.bw_upcall_flags & BW_UPCALL_LEQ;
+		    = bw_upcall.bu_flags & BW_UPCALL_UNIT_BYTES;
+		is_geq_upcall = bw_upcall.bu_flags & BW_UPCALL_GEQ;
+		is_leq_upcall = bw_upcall.bu_flags & BW_UPCALL_LEQ;
 		signal_dataflow_message_recv(
 		    src,
 		    dst,
-		    bw_upcall.bw_upcall_threshold_interval,
-		    bw_upcall.bw_upcall_measured_interval,
-		    bw_upcall.bw_upcall_threshold_packets,
-		    bw_upcall.bw_upcall_threshold_bytes,
-		    bw_upcall.bw_upcall_measured_packets,
-		    bw_upcall.bw_upcall_measured_bytes,
+		    TimeVal(bw_upcall.bu_threshold.b_time),
+		    TimeVal(bw_upcall.bu_measured.b_time),
+		    bw_upcall.bu_threshold.b_packets,
+		    bw_upcall.bu_threshold.b_bytes,
+		    bw_upcall.bu_measured.b_packets,
+		    bw_upcall.bu_measured.b_bytes,
 		    is_threshold_in_packets,
 		    is_threshold_in_bytes,
 		    is_geq_upcall,
@@ -1090,23 +1090,23 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 		rcvlen -= sizeof(bw_upcall);
 		from += sizeof(bw_upcall);
 		
-		src.copy_in(bw_upcall.bw6_upcall_src);
-		dst.copy_in(bw_upcall.bw6_upcall_dsr);
+		src.copy_in(bw_upcall.bu6_src);
+		dst.copy_in(bw_upcall.bu6_dsr);
 		is_threshold_in_packets
-		    = bw_upcall.bw6_upcall_flags & BW_UPCALL_UNIT_PACKETS;
+		    = bw_upcall.bu6_flags & BW_UPCALL_UNIT_PACKETS;
 		is_threshold_in_bytes
-		    = bw_upcall.bw6_upcall_flags & BW_UPCALL_UNIT_BYTES;
-		is_geq_upcall = bw_upcall.bw6_upcall_flags & BW_UPCALL_GEQ;
-		is_leq_upcall = bw_upcall.bw6_upcall_flags & BW_UPCALL_LEQ;
+		    = bw_upcall.bu6_flags & BW_UPCALL_UNIT_BYTES;
+		is_geq_upcall = bw_upcall.bu6_flags & BW_UPCALL_GEQ;
+		is_leq_upcall = bw_upcall.bu6_flags & BW_UPCALL_LEQ;
 		signal_dataflow_message_recv(
 		    src,
 		    dst,
-		    bw_upcall.bw6_upcall_threshold_interval,
-		    bw_upcall.bw6_upcall_measured_interval,
-		    bw_upcall.bw6_upcall_threshold_packets,
-		    bw_upcall.bw6_upcall_threshold_bytes,
-		    bw_upcall.bw6_upcall_measured_packets,
-		    bw_upcall.bw6_upcall_measured_bytes,
+		    TimeVal(bw_upcall.bu6_threshold.b_time),
+		    TimeVal(bw_upcall.bu6_measured.b_time),
+		    bw_upcall.bu6_threshold.b_packets,
+		    bw_upcall.bu6_threshold.b_bytes,
+		    bw_upcall.bu6_measured.b_packets,
+		    bw_upcall.bu6_measured.b_bytes,
 		    is_threshold_in_packets,
 		    is_threshold_in_bytes,
 		    is_geq_upcall,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.13 2003/04/22 23:27:20 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.14 2003/04/23 00:52:50 pavlin Exp $"
 
 
 //
@@ -1811,22 +1811,22 @@ UnixComm::add_bw_upcall(const IPvX& source, const IPvX& group,
 	// Set the argument
 	//
 	memset(&bw_upcall, 0, sizeof(bw_upcall));
-	source.copy_out(bw_upcall.bw_upcall_src);
-	group.copy_out(bw_upcall.bw_upcall_dst);
-	threshold_interval.copy_out(bw_upcall.bw_upcall_threshold_interval);
-	bw_upcall.bw_upcall_threshold_packets = threshold_packets;
-	bw_upcall.bw_upcall_threshold_bytes = threshold_bytes;
+	source.copy_out(bw_upcall.bu_src);
+	group.copy_out(bw_upcall.bu_dst);
+	threshold_interval.copy_out(bw_upcall.bu_threshold.b_time);
+	bw_upcall.bu_threshold.b_packets = threshold_packets;
+	bw_upcall.bu_threshold.b_bytes = threshold_bytes;
 	if (is_threshold_in_packets)
-	    bw_upcall.bw_upcall_flags |= BW_UPCALL_UNIT_PACKETS;
+	    bw_upcall.bu_flags |= BW_UPCALL_UNIT_PACKETS;
 	if (is_threshold_in_bytes)
-	    bw_upcall.bw_upcall_flags |= BW_UPCALL_UNIT_BYTES;
+	    bw_upcall.bu_flags |= BW_UPCALL_UNIT_BYTES;
 	do {
 	    if (is_geq_upcall) {
-		bw_upcall.bw_upcall_flags |= BW_UPCALL_GEQ;
+		bw_upcall.bu_flags |= BW_UPCALL_GEQ;
 		break;
 	    }
 	    if (is_leq_upcall) {
-		bw_upcall.bw_upcall_flags |= BW_UPCALL_LEQ;
+		bw_upcall.bu_flags |= BW_UPCALL_LEQ;
 		break;
 	    }
 	    return (XORP_ERROR);
@@ -1851,22 +1851,22 @@ UnixComm::add_bw_upcall(const IPvX& source, const IPvX& group,
 	// Set the argument
 	//
 	memset(&bw_upcall, 0, sizeof(bw_upcall));
-	source.copy_out(bw_upcall.bw6_upcall_src);
-	group.copy_out(bw_upcall.bw6_upcall_dst);
-	threshold_interval.copy_out(bw_upcall.bw6_upcall_threshold_interval);
-	bw_upcall.bw6_upcall_threshold_packets = threshold_packets;
-	bw_upcall.bw6_upcall_threshold_bytes = threshold_bytes;
+	source.copy_out(bw_upcall.bu6_src);
+	group.copy_out(bw_upcall.bu6_dst);
+	threshold_interval.copy_out(bw_upcall.bu6_threshold.b_time);
+	bw_upcall.bu6_threshold.b_packets = threshold_packets;
+	bw_upcall.bu6_threshold.b_bytes = threshold_bytes;
 	if (is_threshold_in_packets)
-	    bw_upcall.bw6_upcall_flags |= BW_UPCALL_UNIT_PACKETS;
+	    bw_upcall.bu6_flags |= BW_UPCALL_UNIT_PACKETS;
 	if (is_threshold_in_bytes)
-	    bw_upcall.bw6_upcall_flags |= BW_UPCALL_UNIT_BYTES;
+	    bw_upcall.bu6_flags |= BW_UPCALL_UNIT_BYTES;
 	do {
 	    if (is_geq_upcall) {
-		bw_upcall.bw6_upcall_flags |= BW_UPCALL_GEQ;
+		bw_upcall.bu6_flags |= BW_UPCALL_GEQ;
 		break;
 	    }
 	    if (is_leq_upcall) {
-		bw_upcall.bw6_upcall_flags |= BW_UPCALL_LEQ;
+		bw_upcall.bu6_flags |= BW_UPCALL_LEQ;
 		break;
 	    }
 	    return (XORP_ERROR);
@@ -1952,22 +1952,22 @@ UnixComm::delete_bw_upcall(const IPvX& source, const IPvX& group,
 	// Set the argument
 	//
 	memset(&bw_upcall, 0, sizeof(bw_upcall));
-	source.copy_out(bw_upcall.bw_upcall_src);
-	group.copy_out(bw_upcall.bw_upcall_dst);
-	threshold_interval.copy_out(bw_upcall.bw_upcall_threshold_interval);
-	bw_upcall.bw_upcall_threshold_packets = threshold_packets;
-	bw_upcall.bw_upcall_threshold_bytes = threshold_bytes;
+	source.copy_out(bw_upcall.bu_src);
+	group.copy_out(bw_upcall.bu_dst);
+	threshold_interval.copy_out(bw_upcall.bu_threshold.b_time);
+	bw_upcall.bu_threshold.b_packets = threshold_packets;
+	bw_upcall.bu_threshold.b_bytes = threshold_bytes;
 	if (is_threshold_in_packets)
-	    bw_upcall.bw_upcall_flags |= BW_UPCALL_UNIT_PACKETS;
+	    bw_upcall.bu_flags |= BW_UPCALL_UNIT_PACKETS;
 	if (is_threshold_in_bytes)
-	    bw_upcall.bw_upcall_flags |= BW_UPCALL_UNIT_BYTES;
+	    bw_upcall.bu_flags |= BW_UPCALL_UNIT_BYTES;
 	do {
 	    if (is_geq_upcall) {
-		bw_upcall.bw_upcall_flags |= BW_UPCALL_GEQ;
+		bw_upcall.bu_flags |= BW_UPCALL_GEQ;
 		break;
 	    }
 	    if (is_leq_upcall) {
-		bw_upcall.bw_upcall_flags |= BW_UPCALL_LEQ;
+		bw_upcall.bu_flags |= BW_UPCALL_LEQ;
 		break;
 	    }
 	    return (XORP_ERROR);
@@ -1992,22 +1992,22 @@ UnixComm::delete_bw_upcall(const IPvX& source, const IPvX& group,
 	// Set the argument
 	//
 	memset(&bw_upcall, 0, sizeof(bw_upcall));
-	source.copy_out(bw_upcall.bw6_upcall_src);
-	group.copy_out(bw_upcall.bw6_upcall_dst);
-	threshold_interval.copy_out(bw_upcall.bw6_upcall_threshold_interval);
-	bw_upcall.bw6_upcall_threshold_packets = threshold_packets;
-	bw_upcall.bw6_upcall_threshold_bytes = threshold_bytes;
+	source.copy_out(bw_upcall.bu6_src);
+	group.copy_out(bw_upcall.bu6_dst);
+	threshold_interval.copy_out(bw_upcall.bu6_threshold.b_time);
+	bw_upcall.bu6_threshold.b_packets = threshold_packets;
+	bw_upcall.bu6_threshold.b_bytes = threshold_bytes;
 	if (is_threshold_in_packets)
-	    bw_upcall.bw6_upcall_flags |= BW_UPCALL_UNIT_PACKETS;
+	    bw_upcall.bu6_flags |= BW_UPCALL_UNIT_PACKETS;
 	if (is_threshold_in_bytes)
-	    bw_upcall.bw6_upcall_flags |= BW_UPCALL_UNIT_BYTES;
+	    bw_upcall.bu6_flags |= BW_UPCALL_UNIT_BYTES;
 	do {
 	    if (is_geq_upcall) {
-		bw_upcall.bw6_upcall_flags |= BW_UPCALL_GEQ;
+		bw_upcall.bu6_flags |= BW_UPCALL_GEQ;
 		break;
 	    }
 	    if (is_leq_upcall) {
-		bw_upcall.bw6_upcall_flags |= BW_UPCALL_LEQ;
+		bw_upcall.bu6_flags |= BW_UPCALL_LEQ;
 		break;
 	    }
 	    return (XORP_ERROR);
@@ -2077,9 +2077,9 @@ UnixComm::delete_all_bw_upcall(const IPvX& source, const IPvX& group)
 	// Set the argument
 	//
 	memset(&bw_upcall, 0, sizeof(bw_upcall));
-	source.copy_out(bw_upcall.bw_upcall_src);
-	group.copy_out(bw_upcall.bw_upcall_dst);
-	bw_upcall.bw_upcall_flags |= BW_UPCALL_DELETE_ALL;
+	source.copy_out(bw_upcall.bu_src);
+	group.copy_out(bw_upcall.bu_dst);
+	bw_upcall.bu_flags |= BW_UPCALL_DELETE_ALL;
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_BW_UPCALL,
 		       (void *)&bw_upcall, sizeof(bw_upcall)) < 0) {
@@ -2100,9 +2100,9 @@ UnixComm::delete_all_bw_upcall(const IPvX& source, const IPvX& group)
 	// Set the argument
 	//
 	memset(&bw_upcall, 0, sizeof(bw_upcall));
-	source.copy_out(bw_upcall.bw6_upcall_src);
-	group.copy_out(bw_upcall.bw6_upcall_dst);
-	bw_upcall.bw6_upcall_flags |= BW_UPCALL_DELETE_ALL;
+	source.copy_out(bw_upcall.bu6_src);
+	group.copy_out(bw_upcall.bu6_dst);
+	bw_upcall.bu6_flags |= BW_UPCALL_DELETE_ALL;
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT6_DEL_BW_UPCALL,
 		       (void *)&bw_upcall, sizeof(bw_upcall)) < 0) {
