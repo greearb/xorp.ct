@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.29 2003/12/19 20:30:19 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.30 2004/01/05 23:38:06 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -508,7 +508,7 @@ ConfigTreeNode::find_config_module(const string& module_name) const
 }
 
 bool
-ConfigTreeNode::verify_configuration(string& result) const
+ConfigTreeNode::check_config_tree(string& result) const
 {
     list<ConfigTreeNode *>::const_iterator iter;
 
@@ -541,7 +541,7 @@ ConfigTreeNode::verify_configuration(string& result) const
     //
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	ConfigTreeNode* ctn = *iter;
-	if (ctn->verify_configuration(result) != true)
+	if (ctn->check_config_tree(result) != true)
 	    return false;
     }
 
