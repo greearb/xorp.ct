@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.11 2003/01/31 20:51:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.12 2003/01/31 21:01:55 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -2272,7 +2272,7 @@ pim_mre_override_timer_timeout(void *data_pointer)
 		     cstring(pim_mre->group_addr()));
     } else if (pim_nbr != pim_nbr_rpfp_nbr_wc) {
 	// RPF'(S,G,rpt) != RPF'(*,G)
-	// Ignore. TODO: it is unclear what exactly the spec suggests
+	// Ignore.
 	goto return_label;
     } else {
 	// RPF'(S,G,rpt) == RPF'(*,G)
