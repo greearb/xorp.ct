@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.8 2003/11/07 00:00:11 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.9 2004/02/26 13:21:39 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -53,8 +53,17 @@ is are already running.  However, the binary program ``test_mfea''
 already contains it as well, therefore it is sufficient to start only
 this program (as a root).
 
+First, make sure that IP forwarding is enabled.
+ - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
+      sysctl net.inet.ip.forwarding=1
+      sysctl net.inet6.ip6.forwarding=1
+
+ - In case of Linux run as a root (for IPv4):
+      echo 1 > /proc/sys/net/ipv4/ip_forward
+   Note that currently Linux doesn't support IPv6 multicast routing.
+
 After ``test_mfea'' is started, the MFEA is disabled by default. To
-start it, and to configure its operation, run script ``configure_mfea''.
+start it, and to configure its operation, run script ``./configure_mfea''.
 Note that it MUST be run from the ``$XORP/fea'' directory.
 To run MFEA in IPv6 mode, then run ``./configure_mfea -6'' instead.
 
@@ -69,8 +78,8 @@ it for each router:
 	ENABLE_VIFS="dc1 dc2 dc4"
 	;;
 
-   Alternatively, you can predefine variable ENABLE_VIFS in your shell
-   environment.
+ - All configuration variables described above can be predefined in your
+   shell environment instead.
 
  - By default, ``test_mfea'' will log all protocol-related messages.
    To disable them, comment-out the following variables:
@@ -96,9 +105,12 @@ it for each router:
 
    Currently, the CLI supports primarily "show" commands. For example,
    "show mfea interface" will show the list of all interfaces known to
-   the MFEA and their status. At each moment you can press <TAB> for the
-   list of existing commands at each level, and a brief description
-   of them. Command-line editing is similar to tcsh: e.g., Ctrl-A and
+   the MFEA and their status. All MFEA commands start with "show mfea"
+   or "show mfea6" for IPv4 and IPv6 respectively. At each moment you
+   can press <TAB> for the list of existing commands at each level,
+   and a brief description of them. Pressing '?' after a command has
+   similar function.
+   Command-line editing is similar to tcsh: e.g., Ctrl-A and
    Ctrl-E to go to the beginning or end of the current line, Ctrl-A
    to kill the remaining part of the current line, etc.
    To exit, press Ctrl-D when you are on a new empty line.
@@ -129,6 +141,3 @@ the following systems:
 
  * {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5 and FreeBSD-4.7).
  * Lunux OS (tested only on Red Hat Linux 7.2 with kernel 2.4.18)
-
-However, even though IPv6 support is implemented, it has not been tested yet.
-

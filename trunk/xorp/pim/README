@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.17 2004/03/02 00:46:34 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.18 2004/03/03 18:34:21 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -39,8 +39,8 @@ program (as a root).
 
 First, make sure that IP forwarding is enabled.
  - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
-     sysctl net.inet.ip.forwarding=1
-     sysctl net.inet6.ip6.forwarding=1
+      sysctl net.inet.ip.forwarding=1
+      sysctl net.inet6.ip6.forwarding=1
 
  - In case of Linux run as a root (for IPv4):
       echo 1 > /proc/sys/net/ipv4/ip_forward
@@ -93,9 +93,8 @@ it for each router:
 	ALTERNATIVE_SUBNET4="dc1 10.3.0.0/16 dc2 10.4.0.0/16"
 	ALTERNATIVE_SUBNET6=""
 
- - All configuration variables described above (ENABLE_VIFS, CAND_BSR_VIF,
-   CAND_RP_VIF, STATIC_RPS4, STATIC_RPS6, ALTERNATIVE_SUBNET4, and
-   ALTERNATIVE_SUBNET6) can be predefined in your shell environment instead.
+ - All configuration variables described above can be predefined in your
+   shell environment instead.
 
  - By default, ``./test_pim'' will log all protocol-related messages.
    To disable them, comment-out the following variables:
@@ -123,9 +122,11 @@ it for each router:
 
    Currently, the CLI supports primarily "show" commands. For example,
    "show pim interface" will show the list of all interfaces known to
-   PIM and their status. At each moment you can press <TAB> for the
-   list of existing commands at each level, and a brief description
-   of them. Pressing '?' after a command has similar function.
+   PIM and their status. All PIM-SM CLI commands start with "show pim"
+   or "show pim6" for IPv4 and IPv6 respectively. At each moment you
+   can press <TAB> for the list of existing commands at each level,
+   and a brief description of them. Pressing '?' after a command has
+   similar function.
    Command-line editing is similar to tcsh: e.g., Ctrl-A and
    Ctrl-E to go to the beginning or end of the current line, Ctrl-A
    to kill the remaining part of the current line, etc.
@@ -173,5 +174,3 @@ Many detailed tests have been performed so far
 (see the "XORP PIM-SM Test Suite" document in ${XORP}/docs/pim_testsute/ or
 http://www.xorp.org/releases/current/docs/index.html), and the code appears
 to be spec-compliant and robust, but no guarantees it is bug-free of course.
-Further, even though IPv6 support for PIM-SM has been implemented as well,
-it has not been tested yet.
