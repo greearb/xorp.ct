@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.7 2003/02/26 19:59:39 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.8 2003/02/27 03:11:05 pavlin Exp $"
 
 
 //
@@ -980,17 +980,20 @@ PimBsr::send_test_bootstrap_by_dest(const string& vif_name,
 {
     PimVif *pim_vif = pim_node().vif_find_by_name(vif_name);
     int ret_value = XORP_ERROR;
-    list<BsrZone *>::iterator bsr_iter;
+    list<BsrZone *>::iterator bsr_zone_iter;
     
     if (pim_vif == NULL) {
 	ret_value = XORP_ERROR;
 	goto ret_label;
     }
     
-    for (bsr_iter = _test_bsr_zone_list.begin();
-	 bsr_iter != _test_bsr_zone_list.end();
-	 ++bsr_iter) {
-	BsrZone *bsr_zone = *bsr_iter;
+    //
+    // Send the Bootstrap messages
+    //
+    for (bsr_zone_iter = _test_bsr_zone_list.begin();
+	 bsr_zone_iter != _test_bsr_zone_list.end();
+	 ++bsr_zone_iter) {
+	BsrZone *bsr_zone = *bsr_zone_iter;
 	if (pim_vif->pim_bootstrap_send(dest_addr, *bsr_zone)
 	    < 0) {
 	    ret_value = XORP_ERROR;
@@ -1010,7 +1013,34 @@ PimBsr::send_test_cand_rp_adv()
 {
     PimVif *pim_vif = NULL;
     int ret_value = XORP_ERROR;
-    list<BsrZone *>::iterator bsr_iter;
+    list<BsrZone *>::iterator bsr_zone_iter;
+    
+    //
+    // Check that all Cand-RP addresses are mine
+    //
+    for (bsr_zone_iter = _test_bsr_zone_list.begin();
+	 bsr_zone_iter != _test_bsr_zone_list.end();
+	 ++bsr_zone_iter) {
+	BsrZone *bsr_zone = *bsr_zone_iter;
+	
+	list<BsrGroupPrefix *>::const_iterator bsr_group_prefix_iter;
+	for (bsr_group_prefix_iter = bsr_zone->bsr_group_prefix_list().begin();
+	     bsr_group_prefix_iter != bsr_zone->bsr_group_prefix_list().end();
+	     ++bsr_group_prefix_iter) {
+	    BsrGroupPrefix *bsr_group_prefix = *bsr_group_prefix_iter;
+	    
+	    list<BsrRp *>::const_iterator bsr_rp_iter;
+	    for (bsr_rp_iter = bsr_group_prefix->rp_list().begin();
+		 bsr_rp_iter != bsr_group_prefix->rp_list().end();
+		 ++bsr_rp_iter) {
+		BsrRp *bsr_rp = *bsr_rp_iter;
+		if (! pim_node().is_my_addr(bsr_rp->rp_addr())) {
+		    ret_value = XORP_ERROR;
+		    goto ret_label;
+		}
+	    }
+	}
+    }
     
     //
     // Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
@@ -1029,10 +1059,13 @@ PimBsr::send_test_cand_rp_adv()
 	goto ret_label;
     }
     
-    for (bsr_iter = _test_bsr_zone_list.begin();
-	 bsr_iter != _test_bsr_zone_list.end();
-	 ++bsr_iter) {
-	BsrZone *bsr_zone = *bsr_iter;
+    //
+    // Send the Cand-RP-Adv messages
+    //
+    for (bsr_zone_iter = _test_bsr_zone_list.begin();
+	 bsr_zone_iter != _test_bsr_zone_list.end();
+	 ++bsr_zone_iter) {
+	BsrZone *bsr_zone = *bsr_zone_iter;
 	if (pim_vif->pim_cand_rp_adv_send(bsr_zone->bsr_addr(), *bsr_zone)
 	    < 0) {
 	    ret_value = XORP_ERROR;
