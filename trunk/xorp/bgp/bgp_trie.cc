@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.2 2003/01/16 23:18:57 pavlin Exp $"
 
 #include "bgp_trie.hh"
 
@@ -114,5 +114,3 @@ BgpTrie<A>::erase(const IPNet& net)
 
 template class BgpTrie<IPv4>;
 template class BgpTrie<IPv6>;
-
-
