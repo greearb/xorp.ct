@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.11 2003/11/22 00:17:55 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.12 2003/12/02 09:38:57 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -32,41 +32,51 @@ ModuleManager::ModuleManager(EventLoop& eventloop)
     UNUSED(eventloop);
 }
 
-bool ModuleManager::new_module(const string& name, const string& path) 
+bool ModuleManager::new_module(const string& module_name, const string& path) 
 {
-    UNUSED(name);
+    UNUSED(module_name);
     UNUSED(path);
     return true;
 }
 
 int 
-ModuleManager::start_module(const string& name, bool do_exec, 
+ModuleManager::start_module(const string& module_name, bool do_exec, 
 			  XorpCallback1<void, bool>::RefPtr cb)
 {
-    UNUSED(name);
+    UNUSED(module_name);
     UNUSED(do_exec);
     UNUSED(cb);
     return XORP_OK;
 }
 
 int 
-ModuleManager::kill_module(const string& name, XorpCallback0<void>::RefPtr cb)
+ModuleManager::kill_module(const string& module_name,
+			   XorpCallback0<void>::RefPtr cb)
 {
-    UNUSED(name);
+    UNUSED(module_name);
     UNUSED(cb);
     return XORP_OK;
 }
 
-bool 
-ModuleManager::module_exists(const string& name) const
+int
+ModuleManager::module_shutdown_completed(const string& module_name,
+					 bool success)
 {
-    UNUSED(name);
+    UNUSED(module_name);
+    UNUSED(success);
+    return XORP_OK;
+}
+
+bool 
+ModuleManager::module_exists(const string& module_name) const
+{
+    UNUSED(module_name);
     return false;
 }
 
 bool 
-ModuleManager::module_has_started(const string& name) const
+ModuleManager::module_has_started(const string& module_name) const
 {
-    UNUSED(name);
+    UNUSED(module_name);
     return false;
 }
