@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.7 2004/06/10 22:41:00 hodson Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.8 2004/12/09 07:54:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -454,7 +454,7 @@ interface_monitor_main(const char* finder_hostname, uint16_t finder_port,
 		       const string& print_iface_name)
 {
     string process;
-    process = c_format("interface_monitor%d", getpid());
+    process = c_format("interface_monitor<%d>", getpid());
 
     //
     // Init stuff
