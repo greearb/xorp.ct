@@ -21,7 +21,7 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 #include "rt_tab_origin.hh"
-#include "rt_tab_debug.hh"
+#include "rt_tab_expect.hh"
 
 int
 main (int /* argc */, char *argv[])
@@ -38,7 +38,7 @@ main (int /* argc */, char *argv[])
     xlog_start();
     EventLoop eventloop;
     OriginTable<IPv4> ot("origin", 1, IGP, eventloop);
-    DebugTable<IPv4> dt("debug", &ot);
+    ExpectTable<IPv4> dt("expect", &ot);
 
     Vif vif1("vif1");
     Vif vif2("vif2");
@@ -113,7 +113,7 @@ main (int /* argc */, char *argv[])
     eventloop.run();
     assert(dt.parent()->type() == DELETION_TABLE);
     eventloop.run();
-    
+
     assert(dt.parent()->type() == ORIGIN_TABLE);
 
     dt.expect_delete(route3);
