@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.23 2003/07/04 00:10:54 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.24 2003/07/17 00:28:32 pavlin Exp $
 #
 
 #
@@ -156,8 +156,9 @@ test1()
 
     # Reset the connection
     reset
-
     
+    uptime;echo "NOTE: Ocassionally we fail to make a connection. See the comment in the reset function"
+
     # Establish the new connection.
     coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
     coord peer2 assert established
