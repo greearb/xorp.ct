@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.8 2003/04/15 17:50:18 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.9 2003/05/15 14:52:09 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -700,7 +700,7 @@ XrlAtom::unpack_name(const uint8_t* buffer, size_t buffer_bytes)
 	return 0;
     }
     sz = (buffer[0] << 8) | buffer[1];
-    if (buffer_bytes < sz) {
+    if (buffer_bytes < sizeof(sz) + sz) {
 	return 0;
     }
     const char* s = reinterpret_cast<const char*>(buffer + sizeof(sz));
@@ -834,10 +834,20 @@ XrlAtom::unpack_mac(const uint8_t* buffer, size_t buffer_bytes)
     memcpy(&len, buffer, sizeof(len));
     len = ntohl(len);
     if (buffer_bytes < (len + sizeof(len))) {
+	_mac = 0;
 	return 0;
     }
-    const char *text = reinterpret_cast<const char*>(buffer + sizeof(len));
-    _mac = new Mac(string(text, len));
+    const char* text = reinterpret_cast<const char*>(buffer + sizeof(len));
+    try {
+	_mac = new Mac(string(text, len));
+    }
+    catch (const InvalidString&) {
+	_mac = 0;
+	return 0;
+    }
+    catch (...) {
+	abort();
+    }
     return sizeof(len) + len;
 }
 
@@ -863,6 +873,7 @@ XrlAtom::unpack_text(const uint8_t* buffer, size_t buffer_bytes)
     memcpy(&len, buffer, sizeof(len));
     len = ntohl(len);
     if (buffer_bytes < (len + sizeof(len))) {
+	_text = 0;
 	return 0;
     }
     const char *text = reinterpret_cast<const char*>(buffer + sizeof(len));
@@ -895,15 +906,26 @@ XrlAtom::unpack_list(const uint8_t* buffer, size_t buffer_bytes)
     size_t used = 0;
     size_t nelem;
 
+    if (buffer_bytes < sizeof(nelem)) {
+	return 0;
+    }
+
     memcpy(&nelem, buffer, sizeof(nelem));
+    nelem = ntohl(nelem);
     used += sizeof(nelem);
 
     _list = new XrlAtomList;
 
-    nelem = ntohl(nelem);
     for (size_t i = 0; i < nelem; i++) {
 	XrlAtom tmp;
-	used += tmp.unpack(buffer + used, buffer_bytes - used);
+	size_t unpacked = tmp.unpack(buffer + used, buffer_bytes - used);
+	if (unpacked == 0) {
+	    // Failed to unpack item
+	    delete _list;
+	    _list = 0;
+	    return 0;
+	}
+	used += unpacked;
 	assert(used <= buffer_bytes);
 	_list->append(tmp);
     }
@@ -932,7 +954,7 @@ XrlAtom::unpack_binary(const uint8_t* buffer, size_t buffer_bytes)
     memcpy(&len, buffer, sizeof(len));
     len = ntohl(len);
     if (buffer_bytes < (len + sizeof(len))) {
-	abort();
+	_binary = 0;
 	return 0;
     }
     _binary = new vector<uint8_t>(buffer + sizeof(len),
@@ -1018,6 +1040,10 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
     if (header & NAME_PRESENT) {
 	try {
 	    size_t used = unpack_name(buffer + unpacked, buffer_bytes - unpacked);
+	    if (used == 0) {
+		debug_msg("Invalid name\n");
+		return 0;
+	    }
 	    unpacked += used;
 	} catch (const XrlAtom::BadName& bn) {
 	    debug_msg("Unpacking failed:\n%s\n", bn.str().c_str());
@@ -1033,11 +1059,16 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 	_type = XrlAtomType(t);
 	_have_data = true;
 
+	debug_msg("Unpacked %u remain %u\n",
+		  static_cast<uint32_t>(unpacked),
+		  static_cast<uint32_t>(buffer_bytes));
+
 	// Check size for fixed width packed types.
 	if (packed_bytes_fixed() && buffer_bytes < packed_bytes()) {
 	    debug_msg("Insufficient space (%u < %u) for type %d\n",
-		      (uint32_t)(buffer_bytes - unpacked),
-		      (uint32_t)packed_bytes(), _type);
+		      static_cast<uint32_t>(buffer_bytes),
+		      static_cast<uint32_t>(packed_bytes()), _type);
+	    _have_data = false;
 	    return 0;
 	}
 
@@ -1083,9 +1114,11 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 
 	if (used == 0) {
 	    debug_msg("Blow! Data unpacking failed\n");
+	    _have_data = 0;
 	    return 0;
 	}
 	unpacked += used;
+	assert(unpacked == packed_bytes());
     }
     return unpacked;
 }
