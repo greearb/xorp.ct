@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.119 2004/10/15 09:16:10 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.120 2004/10/16 10:58:43 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1523,7 +1523,7 @@ if test "${GCC}" = "yes" ; then
 	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
 	XR_TRY_ADD_CFLAGS($CPARANOIDFLAGS)
 	XR_TRY_ADD_CXXFLAGS($CXXPARANOIDFLAGS)
-	XR_TRY_ADD_CXXFLAGS("-ftemplate-depth-20")
+	XR_TRY_ADD_CXXFLAGS("-ftemplate-depth-22")
 
 	dnl
 	dnl Try to add the -pipe option, which can significantly speed up
