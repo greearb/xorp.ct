@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.8 2003/07/16 18:40:26 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.9 2003/07/21 18:04:56 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -35,6 +35,10 @@ class PacketRouteEntry;
 template <typename A>
 class RouteWalker;
 
+/**
+ * @short A network comparitor class for the purposes of ordering
+ * networks in sorted containers.
+ */
 template <typename A>
 struct NetCmp {
     typedef IPNet<A> Net;
