@@ -89,6 +89,7 @@ mount_fd() {
 }
 
 start() {
+        /bin/sh /usr/local/xorp/bin/xorp-makeconfig.sh
 	echo "Loading XORP config"
        	mount_fd
 
