@@ -1,4 +1,4 @@
-# $XORP: other/testbed/config/config9.xt,v 1.1 2004/05/10 21:48:54 atanu Exp $
+# $XORP: other/testbed/config/config9.xt,v 1.2 2004/05/10 21:50:38 atanu Exp $
 #
 # Surround a XORP (xorp12) router with a bunch of testbed hosts. 
 #
@@ -26,6 +26,6 @@ router = xorp12
 # A star around the router xorp12
 vlan[net 172.16.0.1/24] = xorp12.t0[172.16.0.1], xorp0.t0[172.16.0.2]
 vlan[net 172.16.1.1/24] = xorp12.t1[172.16.1.1], xorp1.t1[172.16.1.2]
-vlan[net 172.16.2.1/24] = xorp12.t2[172.16.2.1], xorp2.t2[172.16.2.2]
-vlan[net 172.16.3.1/24] = xorp12.t3[172.16.3.1], xorp3.t3[172.16.3.2]
+vlan[net 172.16.2.1/24] = xorp12.t2[172.16.2.1], xorp6.t2[172.16.2.2]
+vlan[net 172.16.3.1/24] = xorp12.t3[172.16.3.1], xorp7.t3[172.16.3.2]
 
