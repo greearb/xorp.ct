@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.14 2002/12/09 18:28:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -30,7 +30,7 @@
 
 
 int main(int, char** argv) {
-    //stuff needed to create an eventloop
+    // stuff needed to create an eventloop
     xlog_init(argv[0], NULL);
     xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
     xlog_add_default_output();
@@ -40,27 +40,30 @@ int main(int, char** argv) {
     LocalData localdata;
 
     Iptuple iptuple1("3.0.0.127", 179, "2.0.0.1", 179);
-    BGPPeerData peer_data1(iptuple1, AsNum((uint16_t)1), IPv4("2.0.0.1"), 30);
-    //start off with both being IBGP
-    peer_data1.set_internal_peer(true);
-    peer_data1.set_id("2.0.0.0");
-    BGPPeer peer1(&localdata, &peer_data1, NULL, &bgpmain);
+    BGPPeerData *peer_data1 =
+	new BGPPeerData(iptuple1, AsNum((uint16_t)1), IPv4("2.0.0.1"), 30);
+    // start off with both being IBGP
+    peer_data1->set_internal_peer(true);
+    peer_data1->set_id("2.0.0.0");
+    BGPPeer peer1(&localdata, peer_data1, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL);
 
     Iptuple iptuple2("3.0.0.127", 179, "2.0.0.2", 179);
-    BGPPeerData peer_data2(iptuple2, AsNum((uint16_t)1), IPv4("2.0.0.2"), 30);
-    //start off with both being IBGP
-    peer_data2.set_internal_peer(true);
-    peer_data2.set_id("2.0.0.0");
-    BGPPeer peer2(&localdata, &peer_data2, NULL, &bgpmain);
+    BGPPeerData *peer_data2 =
+	new BGPPeerData(iptuple2, AsNum((uint16_t)1), IPv4("2.0.0.2"), 30);
+    // start off with both being IBGP
+    peer_data2->set_internal_peer(true);
+    peer_data2->set_id("2.0.0.0");
+    BGPPeer peer2(&localdata, peer_data2, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL);
 
     Iptuple iptuple3("3.0.0.127", 179, "2.0.0.3", 179);
-    BGPPeerData peer_data3(iptuple2, AsNum((uint16_t)1), IPv4("2.0.0.3"), 30);
-    //start off with both being IBGP
-    peer_data3.set_internal_peer(true);
-    peer_data3.set_id("2.0.0.0");
-    BGPPeer peer3(&localdata, &peer_data3, NULL, &bgpmain);
+    BGPPeerData *peer_data3 =
+	new BGPPeerData(iptuple2, AsNum((uint16_t)1), IPv4("2.0.0.3"), 30);
+    // start off with both being IBGP
+    peer_data3->set_internal_peer(true);
+    peer_data3->set_id("2.0.0.0");
+    BGPPeer peer3(&localdata, peer_data3, NULL, &bgpmain);
     PeerHandler handler3("test3", &peer3, NULL);
 
     DummyNextHopResolver<IPv4> next_hop_resolver;
@@ -90,7 +93,7 @@ int main(int, char** argv) {
     debug_table->set_output_file("/tmp/test_decision");
     debug_table->set_canned_response(ADD_USED);
 
-    //create a load of attributes 
+    // create a load of attributes
     IPNet<IPv4> net1("1.0.1.0/24");
     IPNet<IPv4> net2("1.0.2.0/24");
     //    IPNet<IPv4> net2("1.0.2.0/24");
@@ -150,16 +153,15 @@ int main(int, char** argv) {
     PathAttributeList<IPv4>* palist5;
     PathAttributeList<IPv4>* palist6;
 
-    //create a subnet route
+    // create a subnet route
     SubnetRoute<IPv4> *sr1, *sr2;
     InternalMessage<IPv4>* msg;
     UNUSED(sr2);
     UNUSED(net2);
-
-    //================================================================
-    //Test1: trivial add and delete
-    //================================================================
-    //add a route
+    // ================================================================
+    // Test1: trivial add and delete
+    // ================================================================
+    // add a route
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 1");
     debug_table->write_comment("ADD AND DELETE");
@@ -174,7 +176,7 @@ int main(int, char** argv) {
     ribin_table1->push(NULL);
     debug_table->write_separator();
 
-    //delete the route
+    // delete the route
     sr1 = new SubnetRoute<IPv4>(net1, palist1);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin_table1->delete_route(*msg, NULL);
@@ -184,10 +186,10 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test2: identical add from two peers
-    //================================================================
-    //add a route
+    // ================================================================
+    // Test2: identical add from two peers
+    // ================================================================
+    // add a route
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 2");
     debug_table->write_comment("IDENTICAL ADD FROM TWO PEERS");
@@ -228,10 +230,10 @@ int main(int, char** argv) {
     delete msg;
 
     debug_table->write_separator();
-    //================================================================
-    //Test2B: identical add from two peers
-    //================================================================
-    //add a route
+    // ================================================================
+    // Test2B: identical add from two peers
+    // ================================================================
+    // add a route
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 2B");
     debug_table->write_comment("IDENTICAL ADD FROM TWO PEERS");
@@ -272,12 +274,12 @@ int main(int, char** argv) {
     delete msg;
 
     debug_table->write_separator();
-    //================================================================
-    //Test2C: identical add from two peers
-    //================================================================
-    //add a route
-    peer_data1.set_id("101.0.0.0");
-    peer_data2.set_id("100.0.0.0");
+    // ================================================================
+    // Test2C: identical add from two peers
+    // ================================================================
+    // add a route
+    peer_data1->set_id("101.0.0.0");
+    peer_data2->set_id("100.0.0.0");
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 2C");
     debug_table->write_comment("IDENTICAL ADD FROM TWO PEERS");
@@ -319,10 +321,10 @@ int main(int, char** argv) {
     delete msg;
 
     debug_table->write_separator();
-    //================================================================
-    //Test2D: identical add from two peers
-    //================================================================
-    //add a route
+    // ================================================================
+    // Test2D: identical add from two peers
+    // ================================================================
+    // add a route
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 2D");
     debug_table->write_comment("IDENTICAL ADD FROM TWO PEERS");
@@ -364,10 +366,10 @@ int main(int, char** argv) {
     delete msg;
 
     debug_table->write_separator();
-    //================================================================
-    //Test3: decision by AS path length
-    //================================================================
-    //add a route
+    // ================================================================
+    // Test3: decision by AS path length
+    // ================================================================
+    // add a route
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 3");
     debug_table->write_comment("TEST OF DIFFERENT AS PATH LENGTHS");
@@ -407,10 +409,10 @@ int main(int, char** argv) {
     delete msg;
 
     debug_table->write_separator();
-    //================================================================
-    //Test3b: decision by AS path length
-    //================================================================
-    //add a route
+    // ================================================================
+    // Test3b: decision by AS path length
+    // ================================================================
+    // add a route
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 3B");
     debug_table->write_comment("TEST OF DIFFERENT AS PATH LENGTHS");
@@ -450,9 +452,9 @@ int main(int, char** argv) {
     delete msg;
 
     debug_table->write_separator();
-    //================================================================
-    //Test4: decision by LocalPref
-    //================================================================
+    // ================================================================
+    // Test4: decision by LocalPref
+    // ================================================================
     palist4 =
 	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
     palist4->add_path_attribute(LocalPrefAttribute(200));
@@ -498,9 +500,9 @@ int main(int, char** argv) {
     delete msg;
 
     debug_table->write_separator();
-    //================================================================
-    //Test4b: decision by LocalPref
-    //================================================================
+    // ================================================================
+    // Test4b: decision by LocalPref
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 4B");
     debug_table->write_comment("TEST OF LOCALPREF");
@@ -542,9 +544,9 @@ int main(int, char** argv) {
     delete palist4;
 
     debug_table->write_separator();
-    //================================================================
-    //Test5: decision by MED
-    //================================================================
+    // ================================================================
+    // Test5: decision by MED
+    // ================================================================
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
     palist4->add_path_attribute(LocalPrefAttribute(100));
     palist4->add_path_attribute(MEDAttribute(100));
@@ -595,9 +597,9 @@ int main(int, char** argv) {
     delete msg;
 
     debug_table->write_separator();
-    //================================================================
-    //Test5B: decision by MED
-    //================================================================
+    // ================================================================
+    // Test5B: decision by MED
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 5B");
     debug_table->write_comment("TEST OF MED");
@@ -639,9 +641,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test5C: decision by MED
-    //================================================================
+    // ================================================================
+    // Test5C: decision by MED
+    // ================================================================
     palist5->remove_attribute_by_type(MED);
     palist5->rehash();
     debug_table->write_comment("******************************************");
@@ -685,9 +687,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test5D: decision by MED
-    //================================================================
+    // ================================================================
+    // Test5D: decision by MED
+    // ================================================================
     palist5->remove_attribute_by_type(MED);
     palist5->rehash();
     debug_table->write_comment("******************************************");
@@ -733,15 +735,15 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test5E: decision by MED
-    //================================================================
+    // ================================================================
+    // Test5E: decision by MED
+    // ================================================================
 
-    //AS paths are the same length, but different paths.
-    //MEDs are different (peer 1 has better MED), but shouldn't be compared.
-    //peer 2 should win on BGP ID test.
-    peer_data1.set_id("101.0.0.0");
-    peer_data2.set_id("100.0.0.0");
+    // AS paths are the same length, but different paths.
+    // MEDs are different (peer 1 has better MED), but shouldn't be compared.
+    // peer 2 should win on BGP ID test.
+    peer_data1->set_id("101.0.0.0");
+    peer_data2->set_id("100.0.0.0");
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
     palist4->add_path_attribute(LocalPrefAttribute(100));
     palist4->add_path_attribute(MEDAttribute(100));
@@ -794,14 +796,14 @@ int main(int, char** argv) {
     delete palist5;
     debug_table->write_separator();
 
-    //================================================================
-    //Test6: decision by Origin
-    //================================================================
+    // ================================================================
+    // Test6: decision by Origin
+    // ================================================================
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, egp_origin_att);
     palist4->add_path_attribute(LocalPrefAttribute(100));
     palist4->rehash();
 
-    palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, 
+    palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt1,
 					  incomplete_origin_att);
     palist5->add_path_attribute(LocalPrefAttribute(100));
     palist5->rehash();
@@ -872,14 +874,14 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test6B: decision by Origin
-    //================================================================
+    // ================================================================
+    // Test6B: decision by Origin
+    // ================================================================
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, egp_origin_att);
     palist4->add_path_attribute(LocalPrefAttribute(100));
     palist4->rehash();
 
-    palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, 
+    palist5 = new PathAttributeList<IPv4>(nhatt1, aspathatt1,
 					  incomplete_origin_att);
     palist5->add_path_attribute(LocalPrefAttribute(100));
     palist5->rehash();
@@ -951,9 +953,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test7: decision by IGP distance
-    //================================================================
+    // ================================================================
+    // Test7: decision by IGP distance
+    // ================================================================
     next_hop_resolver.unset_nexthop_metric(nexthop1);
     next_hop_resolver.unset_nexthop_metric(nexthop3);
     next_hop_resolver.set_nexthop_metric(nexthop1, 100);
@@ -999,9 +1001,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test7B: decision by IGP distance
-    //================================================================
+    // ================================================================
+    // Test7B: decision by IGP distance
+    // ================================================================
     next_hop_resolver.unset_nexthop_metric(nexthop1);
     next_hop_resolver.unset_nexthop_metric(nexthop3);
     next_hop_resolver.set_nexthop_metric(nexthop1, 200);
@@ -1047,9 +1049,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test7C: decision by IGP distance
-    //================================================================
+    // ================================================================
+    // Test7C: decision by IGP distance
+    // ================================================================
     next_hop_resolver.unset_nexthop_metric(nexthop1);
     next_hop_resolver.unset_nexthop_metric(nexthop3);
     next_hop_resolver.set_nexthop_metric(nexthop1, 100);
@@ -1095,9 +1097,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test7D: decision by IGP distance
-    //================================================================
+    // ================================================================
+    // Test7D: decision by IGP distance
+    // ================================================================
     next_hop_resolver.unset_nexthop_metric(nexthop1);
     next_hop_resolver.set_nexthop_metric(nexthop3, 100);
     debug_table->write_comment("******************************************");
@@ -1142,9 +1144,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test7E: decision by IGP distance
-    //================================================================
+    // ================================================================
+    // Test7E: decision by IGP distance
+    // ================================================================
     next_hop_resolver.unset_nexthop_metric(nexthop3);
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 7E");
@@ -1188,9 +1190,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test8A: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test8A: test of replace_route
+    // ================================================================
     next_hop_resolver.set_nexthop_metric(nexthop1, 27);
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 8A");
@@ -1225,9 +1227,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test8B: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test8B: test of replace_route
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 8B");
     debug_table->write_comment("TEST OF REPLACE_ROUTE");
@@ -1261,9 +1263,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test8C: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test8C: test of replace_route
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 8C");
     debug_table->write_comment("TEST OF REPLACE_ROUTE");
@@ -1297,9 +1299,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test8D: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test8D: test of replace_route
+    // ================================================================
     next_hop_resolver.unset_nexthop_metric(nexthop2);
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 8D");
@@ -1334,9 +1336,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test9A: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test9A: test of replace_route
+    // ================================================================
     next_hop_resolver.set_nexthop_metric(nexthop2, 27);
     next_hop_resolver.set_nexthop_metric(nexthop3, 27);
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
@@ -1399,9 +1401,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test9B: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test9B: test of replace_route
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 9B");
     debug_table->write_comment("TEST OF REPLACE_ROUTE");
@@ -1454,9 +1456,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test9C: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test9C: test of replace_route
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 9C");
     debug_table->write_comment("TEST OF REPLACE_ROUTE");
@@ -1509,9 +1511,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test9D: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test9D: test of replace_route
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 9D");
     debug_table->write_comment("TEST OF REPLACE_ROUTE");
@@ -1564,9 +1566,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test9E: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test9E: test of replace_route
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 9E");
     debug_table->write_comment("TEST OF REPLACE_ROUTE");
@@ -1619,9 +1621,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test 10A: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test 10A: test of replace_route
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 10A");
     debug_table->write_comment("TEST OF REPLACE_ROUTE");
@@ -1644,7 +1646,7 @@ int main(int, char** argv) {
     ribin_table2->add_route(*msg, NULL);
     delete sr1;
     delete msg;
-    
+
     debug_table->write_separator();
     debug_table->write_comment(("NEXTHOP " + nexthop3.str() +
 				" BECOMES UNRESOLVABLE").c_str());
@@ -1675,9 +1677,9 @@ int main(int, char** argv) {
     debug_table->write_separator();
     next_hop_resolver.set_nexthop_metric(nexthop3, 27);
 
-    //================================================================
-    //Test 10B: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test 10B: test of replace_route
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 10B");
     debug_table->write_comment("TEST OF REPLACE_ROUTE");
@@ -1700,7 +1702,7 @@ int main(int, char** argv) {
     ribin_table2->add_route(*msg, NULL);
     delete sr1;
     delete msg;
-    
+
     debug_table->write_separator();
     debug_table->write_comment(("NEXTHOP " + nexthop2.str() +
 				" BECOMES UNRESOLVABLE").c_str());
@@ -1731,9 +1733,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test 10C: test of replace_route
-    //================================================================
+    // ================================================================
+    // Test 10C: test of replace_route
+    // ================================================================
     next_hop_resolver.set_nexthop_metric(nexthop2, 27);
     next_hop_resolver.unset_nexthop_metric(nexthop3);
     debug_table->write_comment("******************************************");
@@ -1758,7 +1760,7 @@ int main(int, char** argv) {
     ribin_table2->add_route(*msg, NULL);
     delete sr1;
     delete msg;
-    
+
     debug_table->write_separator();
     debug_table->write_comment(("NEXTHOP " + nexthop3.str() +
 				" BECOMES RESOLVABLE").c_str());
@@ -1792,9 +1794,9 @@ int main(int, char** argv) {
     delete palist5;
     delete palist6;
 
-    //================================================================
-    //Test 11A: test of routes becoming resolvable
-    //================================================================
+    // ================================================================
+    // Test 11A: test of routes becoming resolvable
+    // ================================================================
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
     palist4->add_path_attribute(LocalPrefAttribute(100));
     palist4->rehash();
@@ -1809,7 +1811,7 @@ int main(int, char** argv) {
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 11A");
     debug_table->write_comment("TEST OF ROUTES BECOMING RESOLVABLE");
-    debug_table->write_comment("PEER 1,2 NOT RESOLVABLE, PEER1 BECOMES RESOLVABLE");
+    debug_table->write_comment("PEER 1, 2 NOT RESOLVABLE, PEER1 BECOMES RESOLVABLE");
 
     debug_table->write_separator();
     debug_table->write_comment("SENDING FROM PEER 1");
@@ -1828,7 +1830,7 @@ int main(int, char** argv) {
     ribin_table2->add_route(*msg, NULL);
     delete sr1;
     delete msg;
-    
+
     debug_table->write_separator();
     debug_table->write_comment(("NEXTHOP " + nexthop2.str() +
 				" BECOMES RESOLVABLE").c_str());
@@ -1862,9 +1864,9 @@ int main(int, char** argv) {
     delete palist4;
     delete palist5;
     delete palist6;
-    //================================================================
-    //Test 11B: test of routes becoming resolvable
-    //================================================================
+    // ================================================================
+    // Test 11B: test of routes becoming resolvable
+    // ================================================================
     palist4 = new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
     palist4->add_path_attribute(LocalPrefAttribute(100));
     palist4->rehash();
@@ -1880,7 +1882,7 @@ int main(int, char** argv) {
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 11B");
     debug_table->write_comment("TEST OF ROUTES BECOMING RESOLVABLE");
-    debug_table->write_comment("PEER 1,2 NOT RESOLVABLE, BOTH BECOME RESOLVABLE SIMULTANEOUSLY");
+    debug_table->write_comment("PEER 1, 2 NOT RESOLVABLE, BOTH BECOME RESOLVABLE SIMULTANEOUSLY");
 
     debug_table->write_separator();
     debug_table->write_comment("SENDING FROM PEER 1");
@@ -1899,7 +1901,7 @@ int main(int, char** argv) {
     ribin_table2->add_route(*msg, NULL);
     delete sr1;
     delete msg;
-    
+
     debug_table->write_separator();
     debug_table->write_comment(("NEXTHOP " + nexthop1.str() +
 				" BECOMES RESOLVABLE").c_str());
@@ -1930,14 +1932,14 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test 11C: test of routes becoming unresolvable
-    //================================================================
+    // ================================================================
+    // Test 11C: test of routes becoming unresolvable
+    // ================================================================
 
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 11C");
     debug_table->write_comment("TEST OF ROUTES BECOMING UNRESOLVABLE");
-    debug_table->write_comment("PEER 1,2 RESOLVABLE, BOTH BECOME UNRESOLVABLE SIMULTANEOUSLY");
+    debug_table->write_comment("PEER 1, 2 RESOLVABLE, BOTH BECOME UNRESOLVABLE SIMULTANEOUSLY");
 
     debug_table->write_separator();
     debug_table->write_comment("SENDING FROM PEER 1");
@@ -1956,7 +1958,7 @@ int main(int, char** argv) {
     ribin_table2->add_route(*msg, NULL);
     delete sr1;
     delete msg;
-    
+
     debug_table->write_separator();
     debug_table->write_comment(("NEXTHOP " + nexthop1.str() +
 				" BECOMES UNRESOLVABLE").c_str());
@@ -1987,9 +1989,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test 12: test with three peers
-    //================================================================
+    // ================================================================
+    // Test 12: test with three peers
+    // ================================================================
     next_hop_resolver.set_nexthop_metric(nexthop1, 27);
     next_hop_resolver.set_nexthop_metric(nexthop2, 27);
     next_hop_resolver.set_nexthop_metric(nexthop3, 27);
@@ -2014,7 +2016,7 @@ int main(int, char** argv) {
     ribin_table2->add_route(*msg, NULL);
     delete sr1;
     delete msg;
-    
+
     debug_table->write_separator();
     debug_table->write_comment("SENDING FROM PEER 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist6);
@@ -2023,7 +2025,7 @@ int main(int, char** argv) {
     ribin_table3->add_route(*msg, NULL);
     delete sr1;
     delete msg;
-    
+
     debug_table->write_separator();
     debug_table->write_comment("DELETION FROM PEER 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist6);
@@ -2053,15 +2055,15 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test 13: decision of IBGP vs EBGP
-    //================================================================
+    // ================================================================
+    // Test 13: decision of IBGP vs EBGP
+    // ================================================================
     next_hop_resolver.unset_nexthop_metric(nexthop1);
     next_hop_resolver.unset_nexthop_metric(nexthop3);
     next_hop_resolver.set_nexthop_metric(nexthop1, 200);
     next_hop_resolver.set_nexthop_metric(nexthop3, 100);
-    peer_data2.set_internal_peer(false);
-    peer_data2.set_as_num(AsNum((uint16_t)9));
+    peer_data2->set_internal_peer(false);
+    peer_data2->set_as_num(AsNum((uint16_t)9));
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 13");
     debug_table->write_comment("TEST OF IBGP vs EBGP");
@@ -2105,9 +2107,9 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test 13B: decision of IBGP vs EBGP
-    //================================================================
+    // ================================================================
+    // Test 13B: decision of IBGP vs EBGP
+    // ================================================================
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 13B");
     debug_table->write_comment("TEST OF IBGP vs EBGP");
@@ -2154,16 +2156,20 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
+    // ================================================================
 
     debug_table->write_comment("SHUTDOWN AND CLEAN UP");
     delete decision_table;
     delete debug_table;
     delete ribin_table1;
     delete ribin_table2;
+    delete ribin_table3;
     delete palist1;
     delete palist2;
     delete palist3;
+    delete palist4;
+    delete palist5;
+    delete palist6;
 
     FILE *file = fopen("/tmp/test_decision", "r");
     if (file == NULL) {
@@ -2181,7 +2187,7 @@ int main(int, char** argv) {
 	exit(1);
     }
     fclose(file);
-    
+
     file = fopen("test_decision.reference", "r");
     if (file == NULL) {
 	fprintf(stderr, "Failed to read test_decision.reference\n");
@@ -2197,15 +2203,15 @@ int main(int, char** argv) {
 	exit(1);
     }
     fclose(file);
-    
-    if ((bytes1 != bytes2) || (memcmp(testout, refout, bytes1)!= 0)) {
+
+    if ((bytes1 != bytes2) || (memcmp(testout, refout, bytes1) != 0)) {
 	fprintf(stderr, "Output in /tmp/test_decision doesn't match reference output\n");
 	fprintf(stderr, "TEST FAILED\n");
 	exit(1);
-	
+
     }
     unlink("/tmp/test_decision");
-    exit(0);
 }
+
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.39 2002/12/09 18:28:48 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -191,7 +191,6 @@ LocalPrefInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
 			   bool &modified) const
 {
     debug_msg("local preference insertion filter\n");
-
     //Form a new path attribute list containing the new AS path
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
     LocalPrefAttribute local_pref_att(_default_local_pref);
@@ -311,6 +310,7 @@ BGPFilterTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     if (filtered_msg != &rtmsg) {
 	//We created a modified message, so now we need to free it.
+	//Don't delete the route, as it will be stored by the recipient
 	delete filtered_msg;
     }
     return result;

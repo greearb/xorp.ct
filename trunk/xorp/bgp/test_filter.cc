@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.2 2002/12/14 05:31:55 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -30,7 +30,7 @@
 
 
 int main(int, char** argv) {
-    //stuff needed to create an eventloop
+    // stuff needed to create an eventloop
     xlog_init(argv[0], NULL);
     xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
     xlog_add_default_output();
@@ -43,9 +43,9 @@ int main(int, char** argv) {
     BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL);
 
-    //Trivial plumbing. We're not testing the RibInTable here, so
-    //mostly we'll just inject directly into the FilterTable, but we
-    //need an RibInTable here to test lookup_route.
+    // Trivial plumbing. We're not testing the RibInTable here, so
+    // mostly we'll just inject directly into the FilterTable, but we
+    // need an RibInTable here to test lookup_route.
     BGPRibInTable<IPv4> *ribin_table
 	= new BGPRibInTable<IPv4>("RIB-in", &handler1);
     BGPFilterTable<IPv4> *filter_table
@@ -57,10 +57,10 @@ int main(int, char** argv) {
     debug_table->set_output_file("/tmp/test_filter");
     debug_table->set_canned_response(ADD_USED);
 
-    //Add a filter that drops routes with AS 5 in their path
+    // Add a filter that drops routes with AS 5 in their path
     filter_table->add_simple_AS_filter(AsNum(((uint16_t)5)));
 
-    //create a load of attributes 
+    // create a load of attributes
     IPNet<IPv4> net1("1.0.1.0/24");
     //    IPNet<IPv4> net2("1.0.2.0/24");
 
@@ -102,33 +102,35 @@ int main(int, char** argv) {
     PathAttributeList<IPv4>* palist3 =
 	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
 
-    //create a subnet route
+    // create a subnet route
     SubnetRoute<IPv4> *sr1, *sr2;
-    sr1 = new SubnetRoute<IPv4>(net1, palist1);
 
-    //================================================================
-    //Test1: trivial add and delete
-    //================================================================
-    //add a route
+    InternalMessage<IPv4>* msg;
+
+    // ================================================================
+    // Test1: trivial add and delete
+    // ================================================================
+    // add a route
     debug_table->write_comment("TEST 1");
     debug_table->write_comment("ADD AND DELETE UNFILTERED");
-    InternalMessage<IPv4>* msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     filter_table->add_route(*msg, ribin_table);
 
     debug_table->write_separator();
 
-    //delete the route
+    // delete the route
     filter_table->delete_route(*msg, ribin_table);
 
     debug_table->write_separator();
     delete sr1;
     delete msg;
 
-    //================================================================
-    //Test1b: trivial add and delete, AS filtered
-    //================================================================
-    //add a route
-    //create a subnet route
+    // ================================================================
+    // Test1b: trivial add and delete, AS filtered
+    // ================================================================
+    // add a route
+    // create a subnet route
     debug_table->write_comment("TEST 1a");
     debug_table->write_comment("ADD AND DELETE FILTERING");
     debug_table->write_comment("ADD, FILTERED");
@@ -139,17 +141,17 @@ int main(int, char** argv) {
     debug_table->write_separator();
     debug_table->write_comment("DELETE, FILTERED");
 
-    //delete the route
+    // delete the route
     filter_table->delete_route(*msg, ribin_table);
 
     debug_table->write_separator();
     delete sr1;
     delete msg;
 
-    //================================================================
-    //Test2: trivial replace
-    //================================================================
-    //add a route
+    // ================================================================
+    // Test2: trivial replace
+    // ================================================================
+    // add a route
     debug_table->write_comment("TEST 2");
     sr1 = new SubnetRoute<IPv4>(net1, palist1);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
@@ -165,11 +167,11 @@ int main(int, char** argv) {
     delete msg2;
     delete sr1;
     delete sr2;
-    
-    //================================================================
-    //Test2b: trivial replace, original route filtered
-    //================================================================
-    //add a route
+
+    // ================================================================
+    // Test2b: trivial replace, original route filtered
+    // ================================================================
+    // add a route
     debug_table->write_comment("TEST 2a");
     sr1 = new SubnetRoute<IPv4>(net1, palist2);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
@@ -185,11 +187,11 @@ int main(int, char** argv) {
     delete msg2;
     delete sr1;
     delete sr2;
-    
-    //================================================================
-    //Test2c: trivial replace, new route filtered
-    //================================================================
-    //add a route
+
+    // ================================================================
+    // Test2c: trivial replace, new route filtered
+    // ================================================================
+    // add a route
     debug_table->write_comment("TEST 2b");
     sr1 = new SubnetRoute<IPv4>(net1, palist1);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
@@ -205,11 +207,11 @@ int main(int, char** argv) {
     delete msg2;
     delete sr1;
     delete sr2;
-    
-    //================================================================
-    //Test2c: trivial replace, both routes filtered
-    //================================================================
-    //add a route
+
+    // ================================================================
+    // Test2c: trivial replace, both routes filtered
+    // ================================================================
+    // add a route
     debug_table->write_comment("TEST 2c");
     sr1 = new SubnetRoute<IPv4>(net1, palist2);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
@@ -225,11 +227,11 @@ int main(int, char** argv) {
     delete sr1;
     delete sr2;
     debug_table->write_separator();
-    
-    //================================================================
-    //Test3: route dump
-    //================================================================
-    //add a route
+
+    // ================================================================
+    // Test3: route dump
+    // ================================================================
+    // add a route
     debug_table->write_comment("TEST 3");
     sr1 = new SubnetRoute<IPv4>(net1, palist1);
 
@@ -240,10 +242,10 @@ int main(int, char** argv) {
     delete msg;
 
     debug_table->write_separator();
-    //================================================================
-    //Test3a: route dump, filtered
-    //================================================================
-    //add a route
+    // ================================================================
+    // Test3a: route dump, filtered
+    // ================================================================
+    // add a route
     debug_table->write_comment("TEST 3a");
     sr1 = new SubnetRoute<IPv4>(net1, palist2);
 
@@ -254,10 +256,10 @@ int main(int, char** argv) {
     delete msg;
 
     debug_table->write_separator();
-    //================================================================
-    //Test4: trivial route lookup
-    //================================================================
-    //add a route
+    // ================================================================
+    // Test4: trivial route lookup
+    // ================================================================
+    // add a route
     debug_table->write_comment("TEST 4");
     debug_table->write_comment("ADD, LOOKUP AND DELETE UNFILTERED");
     sr1 = new SubnetRoute<IPv4>(net1, palist1);
@@ -277,7 +279,7 @@ int main(int, char** argv) {
     debug_table->write_comment("TEST SUCCESSFUL");
     debug_table->write_separator();
 
-    //delete the route
+    // delete the route
     sr1 = new SubnetRoute<IPv4>(net1, palist1);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin_table->delete_route(*msg, NULL);
@@ -285,10 +287,10 @@ int main(int, char** argv) {
     delete msg;
     debug_table->write_separator();
 
-    //================================================================
-    //Test4a: trivial route lookup, filtered
-    //================================================================
-    //add a route
+    // ================================================================
+    // Test4a: trivial route lookup, filtered
+    // ================================================================
+    // add a route
     debug_table->write_comment("TEST 4a");
     debug_table->write_comment("ADD, LOOKUP AND DELETE FILTERED");
     sr1 = new SubnetRoute<IPv4>(net1, palist2);
@@ -301,13 +303,13 @@ int main(int, char** argv) {
     debug_table->write_separator();
     debug_table->write_comment("LOOKUP ROUTE");
     found_route = filter_table->lookup_route(net1);
-    //route should not be found because it was filtered
+    // route should not be found because it was filtered
     assert(found_route == NULL);
 
     debug_table->write_comment("TEST SUCCESSFUL");
     debug_table->write_separator();
 
-    //delete the route
+    // delete the route
     sr1 = new SubnetRoute<IPv4>(net1, palist2);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("DELETE, SHOULD BE FILTERED");
@@ -317,11 +319,11 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //================================================================
-    //Test5: add and delete with a local_pref_insertion filter
-    //================================================================
+    // ================================================================
+    // Test5: add and delete with a local_pref_insertion filter
+    // ================================================================
     filter_table->add_localpref_insertion_filter(100);
-    //add a route
+    // add a route
     debug_table->write_comment("TEST 5");
     debug_table->write_comment("ADD AND DELETE");
     sr1 = new SubnetRoute<IPv4>(net1, palist1);
@@ -330,14 +332,13 @@ int main(int, char** argv) {
 
     debug_table->write_separator();
 
-    //delete the route
+    // delete the route
     filter_table->delete_route(*msg, ribin_table);
 
     debug_table->write_separator();
     delete sr1;
     delete msg;
-
-    //================================================================
+    // ================================================================
 
     debug_table->write_comment("SHUTDOWN AND CLEAN UP");
     delete ribin_table;
@@ -363,7 +364,7 @@ int main(int, char** argv) {
 	exit(1);
     }
     fclose(file);
-    
+
     file = fopen("test_filter.reference", "r");
     if (file == NULL) {
 	fprintf(stderr, "Failed to read test_filter.reference\n");
@@ -379,12 +380,12 @@ int main(int, char** argv) {
 	exit(1);
     }
     fclose(file);
-    
-    if ((bytes1 != bytes2) || (memcmp(testout, refout, bytes1)!= 0)) {
+
+    if ((bytes1 != bytes2) || (memcmp(testout, refout, bytes1) != 0)) {
 	fprintf(stderr, "Output in /tmp/test_filter doesn't match reference output\n");
 	fprintf(stderr, "TEST FAILED\n");
 	exit(1);
-	
+
     }
     unlink("/tmp/test_filter");
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.41 2002/12/09 18:28:47 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -129,14 +129,6 @@ BGPCacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	Trie<A, const SubnetRoute<A> >::iterator iter;
 	iter = _route_table.lookup_node(net);
 	if (iter == _route_table.end()) {
-#if 0
-	    //Got a changed route that was not cached.  This can occur on
-	    //after the Peer goes down, because the Input Cache is
-	    //explicitly flushed.  Downstream will expect to receive
-	    //unchanged routes, so we simply clear the changed flag.
-	    assert(old_rtmsg.from_previous_peering());
-	    old_rtmsg.clear_changed();
-#endif
 	    //We don't flush the cache, so this should not happen
 	    abort();
 	} else {
@@ -251,18 +243,6 @@ BGPCacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     }
 
     if (rtmsg.changed()) {
-#if 0
-	//Got a changed route that was not cached.  This can occur on
-	//after the Peer goes down, because the Input Cache is
-	//explicitly flushed.  Downstream will expect to receive
-	//unchanged routes, so we simply clear the changed flag.
-	if (rtmsg.from_previous_peering())
-	    rtmsg.clear_changed();
-	else {
-	    //this must be a coding error in BGP.
-	    abort();
-	}
-#endif
 	//we don't flush the cache, so this should simply never happen.
 	abort();
     }

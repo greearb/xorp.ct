@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.13 2002/12/09 18:28:47 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -52,6 +52,9 @@ BGPDebugTable<A>::add_route(const InternalMessage<A> &rtmsg,
     fprintf(_ofile, "%s\n", rtmsg.route()->str().c_str());
     fflush(_ofile);
 
+    if (rtmsg.changed()) {
+	rtmsg.inactivate();
+    }
     return _canned_response;
 }
 
@@ -75,6 +78,13 @@ BGPDebugTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	fprintf(_ofile, "PUSH flag is set\n");
     fprintf(_ofile, "%s\n", new_rtmsg.route()->str().c_str());
     fflush(_ofile);
+
+    if (new_rtmsg.changed()) {
+	new_rtmsg.inactivate();
+    }
+    if (old_rtmsg.changed()) {
+	old_rtmsg.inactivate();
+    }
     return _canned_response;
 }
 
@@ -92,6 +102,10 @@ BGPDebugTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	fprintf(_ofile, "PUSH flag is set\n");
     fprintf(_ofile, "%s\n", rtmsg.route()->str().c_str());
     fflush(_ofile);
+
+    if (rtmsg.changed()) {
+	rtmsg.inactivate();
+    }
     return 0;
 }
 
@@ -116,6 +130,9 @@ BGPDebugTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     fprintf(_ofile, "[DUMP]\n");
     fprintf(_ofile, "%s\n", rtmsg.route()->str().c_str());
     fflush(_ofile);
+    if (rtmsg.changed()) {
+	rtmsg.inactivate();
+    }
     return 0;
 }
 

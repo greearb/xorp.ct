@@ -1769,7 +1769,7 @@ Local Preference Attribute - 200
 [comment] ******************************************
 [comment] TEST 11A
 [comment] TEST OF ROUTES BECOMING RESOLVABLE
-[comment] PEER 1,2 NOT RESOLVABLE, PEER1 BECOMES RESOLVABLE
+[comment] PEER 1, 2 NOT RESOLVABLE, PEER1 BECOMES RESOLVABLE
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [separator]-------------------------------------
@@ -1804,7 +1804,7 @@ Local Preference Attribute - 200
 [comment] ******************************************
 [comment] TEST 11B
 [comment] TEST OF ROUTES BECOMING RESOLVABLE
-[comment] PEER 1,2 NOT RESOLVABLE, BOTH BECOME RESOLVABLE SIMULTANEOUSLY
+[comment] PEER 1, 2 NOT RESOLVABLE, BOTH BECOME RESOLVABLE SIMULTANEOUSLY
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [separator]-------------------------------------
@@ -1877,7 +1877,7 @@ Local Preference Attribute - 200
 [comment] ******************************************
 [comment] TEST 11C
 [comment] TEST OF ROUTES BECOMING UNRESOLVABLE
-[comment] PEER 1,2 RESOLVABLE, BOTH BECOME UNRESOLVABLE SIMULTANEOUSLY
+[comment] PEER 1, 2 RESOLVABLE, BOTH BECOME UNRESOLVABLE SIMULTANEOUSLY
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]

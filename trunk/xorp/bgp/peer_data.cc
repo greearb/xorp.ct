@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -37,6 +37,8 @@ BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
 
     set_retry_duration(2 * 60 * 1000);	// Connect retry time.
 
+    assert(_negotiated_parameters.begin() == _negotiated_parameters.end());
+
     // we support routing of IPv4 unicast
     // add_sent_parameter( new BGPMultiProtocolCapability( AFI_IPV4 , SAFI_NLRI_UNICAST ) );
     // we support route refresh
@@ -46,7 +48,6 @@ BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
 
 BGPPeerData::~BGPPeerData()
 {
-    debug_msg("BGPPeerData destructor called\n");
     list <const BGPParameter*>::iterator iter;
     iter = _negotiated_parameters.begin();
     while (iter != _negotiated_parameters.end()) {
