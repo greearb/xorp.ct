@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.44 2004/09/28 04:14:33 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.45 2004/09/28 08:11:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -320,9 +320,14 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 				 const uint32_t& metric,
 				 const XrlAtomList& policytags)
 {
-    debug_msg("#### XRL: ADD ROUTE net %s, nexthop: %s\n",
-	      network.str().c_str(), nexthop.str().c_str());
-
+    debug_msg("add_route4 protocol: %s unicast: %s multicast: %s network %s "
+	      "nexthop %s metric %u\n", protocol.c_str(),
+	      unicast ? "true" : "false",
+	      multicast ? "true" : "false",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      metric);
+ 
     if (_rib_manager->profile().enabled(profile_route_ribin))
 	_rib_manager->profile().
 	    log(profile_route_ribin,
@@ -458,8 +463,13 @@ XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
 				    const bool&		multicast,
 				    const IPv4Net&	network)
 {
-    debug_msg("#### XRL: DELETE ROUTE net %s\n",
+    debug_msg("delete_route4 protocol: %s unicast: %s multicast: %s "
+	      "network %s\n",
+	      protocol.c_str(),
+	      unicast ? "true" : "false",
+	      multicast ? "true" : "false",
 	      network.str().c_str());
+
     if (_rib_manager->profile().enabled(profile_route_ribin))
 	_rib_manager->profile().
 	    log(profile_route_ribin,
