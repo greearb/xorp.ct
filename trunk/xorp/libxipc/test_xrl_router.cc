@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.5 2003/03/04 23:41:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.6 2003/03/06 01:19:22 hodson Exp $"
 
 #include <stdlib.h>
 
@@ -21,6 +21,7 @@
 #include "xrl_router.hh"
 #include "xrl_pf_sudp.hh"
 #include "xrl_args.hh"
+#include "finder_server.hh"
 
 #ifndef UNUSED
 #define UNUSED(x) (x) = (x)
@@ -94,7 +95,7 @@ got_integer(const XrlError&	e,
 
 #ifdef ORIGINAL_FINDER
 
-#include "finder_server.hh"
+
 
 #else
 
@@ -126,16 +127,7 @@ test_main()
 
 #else
 
-    IPv4 	bind_addr = IPv4(if_get_preferred());
-    uint16_t	bind_port = FINDER_NG_TCP_DEFAULT_PORT;
-
-    FinderNG*		 finder = new FinderNG;
-    FinderNGTcpListener	 finder_tcp4_source(event_loop,
-					    *finder, finder->commands(),
-					    bind_addr, bind_port);
-    FinderNGXrlTarget 	 finder_xrl_target(*finder);
-
-    add_permitted_host(bind_addr);
+    FinderNGServer* finder = new FinderNGServer(event_loop);
 
 #endif // ORIGINAL_FINDER
     

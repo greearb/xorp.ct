@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.4 2003/02/27 02:03:28 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.5 2003/03/04 23:41:23 hodson Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -26,17 +26,19 @@
 #include "finder_tcp_messenger.hh"
 
 FinderTcpMessenger::FinderTcpMessenger(EventLoop&		e,
-				       FinderMessengerManager&	mm,
+				       FinderMessengerManager*	mm,
 				       int			fd,
 				       XrlCmdMap&		cmds)
     : FinderMessengerBase(e, mm, cmds), FinderTcpBase(e, fd)
 {
-    manager().messenger_birth_event(this);
+    if (manager())
+	manager()->messenger_birth_event(this);
 }
 
 FinderTcpMessenger::~FinderTcpMessenger()
 {
-    manager().messenger_death_event(this);
+    if (manager())
+	manager()->messenger_death_event(this);
     drain_queue();
 }
 
@@ -195,7 +197,8 @@ FinderTcpMessenger::write_event(int 		errval,
 void
 FinderTcpMessenger::close_event()
 {
-    manager().messenger_stopped_event(this);
+    if (manager())
+	manager()->messenger_stopped_event(this);
 }
 
 void
@@ -229,7 +232,7 @@ bool
 FinderNGTcpListener::connection_event(int fd)
 {
     FinderTcpMessenger* m =
-	new FinderTcpMessenger(event_loop(), _mm, fd, _cmds);
+	new FinderTcpMessenger(event_loop(), &_mm, fd, _cmds);
     // Check if manager has taken responsibility for messenger and clean up if
     // not.
     if (_mm.manages(m) == false)
@@ -262,7 +265,7 @@ FinderNGTcpConnector::connect(FinderTcpMessenger*& created_messenger)
 	return errno;
     }
 
-    created_messenger = new FinderTcpMessenger(_e, _mm, fd, _cmds);
+    created_messenger = new FinderTcpMessenger(_e, &_mm, fd, _cmds);
     debug_msg("Created messenger %p\n", created_messenger);
     return 0;
 }

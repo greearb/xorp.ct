@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.7 2003/03/07 02:14:08 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.8 2003/03/07 07:03:22 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -433,13 +433,15 @@ protected:
 FinderNGClient::FinderNGClient()
     : _messenger(0), _pending_result(false) 
 {
+    finder_trace("Constructing FinderNGClient (%p)", this);
 }
 
 FinderNGClient::~FinderNGClient()
 {
+    finder_trace("Destructing FinderNGClient (%p)", this);
     if (_messenger) {
+	_messenger->unhook_manager();
 	delete _messenger;
-	_messenger = 0;
     }
 }
 
@@ -636,7 +638,7 @@ FinderNGClient::prepare_for_restart()
 void
 FinderNGClient::messenger_birth_event(FinderMessengerBase* m)
 {
-    debug_msg("messenger %p birth\n", m);    
+    finder_trace("messenger %p birth\n", m);    
     XLOG_ASSERT(0 == _messenger);
     prepare_for_restart();
     _messenger = m;
@@ -646,7 +648,7 @@ FinderNGClient::messenger_birth_event(FinderMessengerBase* m)
 void
 FinderNGClient::messenger_death_event(FinderMessengerBase* m)
 {
-    debug_msg("messenger %p death\n", m);
+    finder_trace("messenger %p death\n", m);
     XLOG_ASSERT(m == _messenger);
     _messenger = 0;
 }

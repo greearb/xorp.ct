@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.3 2003/02/24 19:39:20 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.4 2003/03/04 23:41:23 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
@@ -30,7 +30,7 @@ class FinderTcpMessenger
 {
 public:
     FinderTcpMessenger(EventLoop&		e,
-		       FinderMessengerManager&	mm,
+		       FinderMessengerManager*	mm,
 		       int			fd,
 		       XrlCmdMap&		cmds);
 

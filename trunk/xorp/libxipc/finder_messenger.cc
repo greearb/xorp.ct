@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_messenger.cc,v 1.3 2003/02/24 19:39:18 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_messenger.cc,v 1.4 2003/03/04 23:41:22 hodson Exp $"
 
 #include "finder_module.h"
 #include "finder_messenger.hh"
@@ -21,7 +21,7 @@
 #include "libxorp/xlog.h"
 
 FinderMessengerBase::FinderMessengerBase(EventLoop&		 e,
-					 FinderMessengerManager& fmm,
+					 FinderMessengerManager* fmm,
 					 XrlCmdMap& 		 cmds)
     : _event_loop(e), _manager(fmm), _cmds(cmds)
 {
@@ -87,7 +87,8 @@ FinderMessengerBase::dispatch_xrl(uint32_t seqno, const Xrl& xrl)
     }
 
     // Announce we're about to dispatch an xrl
-    _manager.messenger_active_event(this);
+    if (manager())
+	manager()->messenger_active_event(this);
     
     XrlArgs reply_args;
     XrlError e = ce->callback->dispatch(xrl, &reply_args);
@@ -98,5 +99,12 @@ FinderMessengerBase::dispatch_xrl(uint32_t seqno, const Xrl& xrl)
     }
 
     // Announce we've dispatched xrl
-    _manager.messenger_inactive_event(this);
+    if (manager())
+	manager()->messenger_inactive_event(this);
+}
+
+void
+FinderMessengerBase::unhook_manager()
+{
+    _manager = 0;
 }

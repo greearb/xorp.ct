@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_messenger.hh,v 1.2 2003/01/28 00:42:23 hodson Exp $
+// $XORP: xorp/libxipc/finder_messenger.hh,v 1.3 2003/02/24 19:39:18 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_MESSENGER__
 #define __LIBXIPC_FINDER_MESSENGER__
@@ -78,18 +78,19 @@ public:
 
 public:
     FinderMessengerBase(EventLoop& e,
-			FinderMessengerManager& fmm,
+			FinderMessengerManager* fmm,
 			XrlCmdMap& cmds);
     
     virtual ~FinderMessengerBase();
 
     virtual bool send(const Xrl& xrl, const SendCallback& scb) = 0;
-
     virtual bool pending() const = 0;
 
     inline XrlCmdMap& command_map();
-
     inline EventLoop& event_loop();
+
+    void unhook_manager();
+    FinderMessengerManager* manager();
     
 protected:
     /**
@@ -110,8 +111,6 @@ protected:
 
     void response_timeout(uint32_t seqno);
 
-    inline FinderMessengerManager& manager();
-    
 private:
     struct ResponseState {
 	ResponseState(uint32_t		   seqno,
@@ -135,7 +134,7 @@ private:
 
 private:
     EventLoop&				_event_loop;
-    FinderMessengerManager&		_manager;
+    FinderMessengerManager*		_manager;
     SeqNoResponseMap		 	_expected_responses;
     XrlCmdMap&			 	_cmds;
 };
@@ -156,7 +155,7 @@ FinderMessengerBase::event_loop()
     return _event_loop;
 }
 
-inline FinderMessengerManager&
+inline FinderMessengerManager*
 FinderMessengerBase::manager()
 {
     return _manager;
