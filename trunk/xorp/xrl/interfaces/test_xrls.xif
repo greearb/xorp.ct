@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/test_xrls.xif,v 1.1 2004/09/22 01:49:37 pavlin Exp $ */
 
 /*
  * Test XRLs XRL interface.
@@ -26,4 +26,6 @@ interface test_xrls/0.1 {
 			& data7:mac					\
 			& data8:txt					\
 			& data9:binary
+
+	add_xrlX	? data:list
 }
