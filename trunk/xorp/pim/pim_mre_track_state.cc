@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.22 2003/09/25 02:15:33 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.23 2004/02/22 03:54:13 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -2631,9 +2631,8 @@ PimMreTrackState::track_state_monitoring_switch_to_spt_desired_mfc(list<PimMreAc
 void
 PimMreTrackState::track_state_monitoring_switch_to_spt_desired_sg(list<PimMreAction> action_list)
 {
-    // XXX: the RP-based SPT switch is not in the spec
+    // XXX: the RP-based SPT switch
     track_state_rp_mfc(action_list);
-    track_state_inherited_olist_sg(action_list);
     
     // The last-hop router SPT switch (as described in the spec)
     track_state_pim_include_wc(action_list);

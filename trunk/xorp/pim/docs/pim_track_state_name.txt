@@ -139,7 +139,6 @@ Input = INPUT_STATE_RECEIVE_PRUNE_WC
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
-        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
 
 Input = INPUT_STATE_RECEIVE_PRUNE_SG
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
@@ -147,7 +146,6 @@ Input = INPUT_STATE_RECEIVE_PRUNE_SG
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
-        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
 
 Input = INPUT_STATE_RECEIVE_PRUNE_SG_RPT
 
@@ -171,7 +169,6 @@ Input = INPUT_STATE_DOWNSTREAM_JP_STATE_RP
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
-        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
 
 Input = INPUT_STATE_DOWNSTREAM_JP_STATE_WC
         OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
@@ -186,7 +183,6 @@ Input = INPUT_STATE_DOWNSTREAM_JP_STATE_WC
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
-        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
 
 Input = INPUT_STATE_DOWNSTREAM_JP_STATE_SG
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
@@ -194,7 +190,6 @@ Input = INPUT_STATE_DOWNSTREAM_JP_STATE_SG
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
-        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
 
 Input = INPUT_STATE_DOWNSTREAM_JP_STATE_SG_RPT
         OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
@@ -205,7 +200,6 @@ Input = INPUT_STATE_DOWNSTREAM_JP_STATE_SG_RPT
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
-        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
 
 Input = INPUT_STATE_UPSTREAM_JP_STATE_SG
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
@@ -345,7 +339,6 @@ Input = INPUT_STATE_SPTBIT_SG
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
-        OUTPUT_STATE_MONITORING_SWITCH_TO_SPT_DESIRED_MFC             (MFC)
 
 Input = INPUT_STATE_IN_START_VIF
         OUTPUT_STATE_OUT_START_VIF_RP                              (*,*,RP)
