@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.1 2003/05/02 07:50:48 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.2 2003/06/02 23:20:17 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -50,57 +50,78 @@ public:
      */
     int stop();
 
-    // NetlinkSocket may fail to open netlink socket during construction.
+    /**
+     * Test if the netlink socket is open.
+     * 
+     * This method is needed because NetlinkSocket may fail to open
+     * netlink socket during construction.
+     * 
+     * @return true if the netlink socket is open, otherwise false.
+     */
     inline bool is_open() const { return _fd >= 0; }
 
     /**
-     * Write data to netlink socket.  Update sequence number associated
-     * with netlink socket.
+     * Write data to netlink socket.
+     * 
+     * This method also updates the sequence number associated with
+     * this netlink socket.
+     * 
+     * @return the number of bytes which were written, or -1 if error.
      */
     ssize_t write(const void* data, size_t nbytes);
 
     /**
-     * Sendto data on netlink socket.  Update sequence number associated
-     * with netlink socket.
+     * Sendto data on netlink socket.
+     * 
+     * This method also updates the sequence number associated with
+     * this netlink socket.
+     * 
+     * @return the number of bytes which were written, or -1 if error.
      */
     ssize_t sendto(const void* data, size_t nbytes, int flags,
 		   const struct sockaddr* to, socklen_t tolen);
     
     /**
-     * Get sequence number for next message written into kernel.
-     * Sequence number is derived of the instance number of the netlink
-     * socket and a 16bit counter.
+     * Get the sequence number for next message written into the kernel.
+     * 
+     * The sequence number is derived from the instance number of this netlink
+     * socket and a 16-bit counter.
+     * 
+     * @return the sequence number for the next message written into the
+     * kernel.
      */
     inline uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
 
     /**
      * Get cached process identifier value.
+     * 
+     * @return the cached process identifier value.
      */
     inline pid_t pid() const { return _pid; }
 
     /**
-     * Force socket to read data - usually performed after writing
-     * a request that the kernel will answer, eg after writing a route
-     * lookup.
-     *
+     * Force socket to read data.
+     * 
+     * This usually is performed after writing a request that the
+     * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
      */
     void force_read();
 
     /**
-     * Force socket to recvfrom data - usually performed after writing
-     * a sendto() request that the kernel will answer, eg after writing a route
-     * lookup.
-     *
+     * Force socket to recvfrom data.
+     * 
+     * This usually is performed after writing a sendto() request that the
+     * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
      */
     void force_recvfrom(int flags, struct sockaddr* from, socklen_t* fromlen);
 
     /**
-     * Force socket to recvmsg data - usually performed after writing
-     * a sendto() request that the kernel will answer, eg after writing a route
-     * lookup.
-     *
+     * Force socket to recvmsg data.
+     * 
+     * This usually is performed after writing a senmsg() request that the
+     * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
      */
     void force_recvmsg(int flags);
@@ -120,10 +141,8 @@ private:
     NetlinkSocket& operator=(const NetlinkSocket&);	// Not implemented
     NetlinkSocket(const NetlinkSocket&);		// Not implemented
 
-private:
     static const size_t NLSOCK_BYTES = 8*1024; // Guess at largest sock message
 
-private:
     EventLoop&	 _e;
     int		 _fd;
     ObserverList _ol;
