@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.39 2003/12/19 07:39:10 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.40 2003/12/19 20:16:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -405,6 +405,13 @@ template<class A>
 void
 XrlQueue<A>::start()
 {
+    // If we are currently busy don't attempt to send any more XRLs.
+    if (busy())
+	return;
+
+    // Now there are no outstanding XRLs try and send as many of the queued
+    // route commands as possible as possible.
+
     for(;;) {
 	debug_msg("queue length %u\n", (uint32_t)_xrl_queue.size());
 
