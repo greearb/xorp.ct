@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.17 2004/03/01 19:53:57 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.18 2004/03/02 18:02:34 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -385,6 +385,14 @@ protected:
 			   const Addr&		addr,
 			   uint16_t 		port,
 			   Peer<A>* 		p);
+
+    /**
+     * Record bad authentication packet.
+     */
+    void record_bad_auth_packet(const string&	why,
+				const Addr&	addr,
+				uint16_t 	port,
+				Peer<A>* 	p);
 
     /**
      * Record bad route.

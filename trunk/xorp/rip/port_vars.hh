@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_vars.hh,v 1.2 2004/02/14 00:28:22 hodson Exp $
+// $XORP: xorp/rip/port_vars.hh,v 1.3 2004/03/02 18:02:34 hodson Exp $
 
 #ifndef __RIP_PORT_VARS_HH__
 #define __RIP_PORT_VARS_HH__
@@ -25,8 +25,9 @@
 struct PortCounters {
 public:
     PortCounters() : _packets_recv(0), _bad_routes(0), _bad_packets(0),
-		     _tr_sent(0), _tr_recv(), _triggered_updates(0),
-		     _unsol_updates(0), _nr_req_recv(0)
+		     _bad_auth_packets(0), _tr_sent(0), _tr_recv(),
+		     _triggered_updates(0), _unsol_updates(0), _nr_req_recv(0),
+		     _nr_updates(0)
     {}
 
     /**
@@ -59,6 +60,16 @@ public:
      * Increment the number of bad response packets received.
      */
     inline void incr_bad_packets()		{ _bad_packets++; }
+
+    /**
+     * Get the number of authentication failing packets received.
+     */
+    inline uint32_t bad_auth_packets() const	{ return _bad_auth_packets; }
+
+    /**
+     * Increment the number of bad authentication packets received.
+     */
+    inline void incr_bad_auth_packets()		{ _bad_auth_packets++; }
 
     /**
      * Get the number of triggered updates sent.
@@ -110,15 +121,27 @@ public:
      */
     inline void incr_non_rip_requests_recv() { _nr_req_recv++; }
 
+    /**
+     * Get number of non-RIP update packets sent.
+     */
+    inline uint32_t non_rip_updates_sent() const { return _nr_updates; }
+
+    /**
+     * Increment the number of non-RIP request packets received.
+     */
+    inline void incr_non_rip_updates_sent() { _nr_updates++; }
+
 protected:
     uint32_t _packets_recv;
     uint32_t _bad_routes;
     uint32_t _bad_packets;
+    uint32_t _bad_auth_packets;
     uint32_t _tr_sent;
     uint32_t _tr_recv;
     uint32_t _triggered_updates;
     uint32_t _unsol_updates;
     uint32_t _nr_req_recv;
+    uint32_t _nr_updates;
 };
 
 

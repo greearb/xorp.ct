@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.24 2004/03/01 19:53:57 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.25 2004/03/02 18:02:34 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -377,6 +377,23 @@ Port<A>::record_bad_packet(const string& why,
 
 template <typename A>
 void
+Port<A>::record_bad_auth_packet(const string&	why,
+				const Addr&	host,
+				uint16_t	port,
+				Peer<A>*	p)
+{
+    XLOG_INFO("RIP port %s/%s/%s authentication failed %s:%u - %s\n",
+	      _pio->ifname().c_str(), _pio->vifname().c_str(),
+	      _pio->address().str().c_str(), host.str().c_str(), port,
+	      why.c_str());
+    counters().incr_bad_auth_packets();
+    if (p) {
+	p->counters().incr_bad_auth_packets();
+    }
+}
+
+template <typename A>
+void
 Port<A>::record_bad_route(const string&	why,
 			  const Addr&	host,
 			  uint16_t	port,
@@ -663,6 +680,7 @@ Port<A>::parse_request(const Addr&			src_addr,
 	}
 	if (rpa.packet_finish() == true) {
 	    _packet_queue->enqueue_packet(pkt);
+	    counters().incr_non_rip_updates_sent();
 	} else {
 	    delete pkt;
 	    break;
@@ -749,7 +767,7 @@ Port<A>::port_io_receive(const A&	src_address,
 	string cause = c_format("packet failed authentication (%s): %s",
 				af_state().auth_handler()->name(),
 				af_state().auth_handler()->error().c_str());
-	record_bad_packet(cause, src_address, src_port, p);
+	record_bad_auth_packet(cause, src_address, src_port, p);
 	return;
     }
 

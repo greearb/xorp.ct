@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/peer.hh,v 1.2 2003/04/11 22:00:18 hodson Exp $
+// $XORP: xorp/rip/peer.hh,v 1.3 2003/07/09 00:11:02 hodson Exp $
 
 #ifndef __RIP_PEER_HH__
 #define __RIP_PEER_HH__
@@ -25,7 +25,8 @@
  */
 struct PeerCounters {
 public:
-    PeerCounters() : _packets_recv(0), _bad_routes(0), _bad_packets(0)
+    PeerCounters() : _packets_recv(0), _bad_routes(0), _bad_packets(0),
+		     _bad_auth_packets(0)
     {}
 
     /**
@@ -59,10 +60,21 @@ public:
      */
     inline void incr_bad_packets()		{ _bad_packets++; }
 
+    /**
+     * Get the number of bad authentication packets received.
+     */
+    inline uint32_t bad_auth_packets() const	{ return _bad_auth_packets; }
+
+    /**
+     * Increment the number of bad authentication packets received.
+     */
+    inline void incr_bad_auth_packets()		{ _bad_auth_packets++; }
+
 protected:
     uint32_t _packets_recv;
     uint32_t _bad_routes;
     uint32_t _bad_packets;
+    uint32_t _bad_auth_packets;
 };
 
 
