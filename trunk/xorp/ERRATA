@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.9 2004/06/18 22:35:21 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.10 2004/06/21 23:43:39 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -7,9 +7,6 @@
   ALL:
     - Parallel building (e.g., "gmake -j 4") may fail on multi-CPU machines.
       The simplest work-around is to rerun gmake or not to use the -j flag.
-
-    - Some of the design documentation in ${XORP}/docs/ hasn't been updated
-      for this release candidate. This will be fixed for XORP Release 1.0.
 
   LIBXORP:
     - No known issues.
@@ -56,9 +53,53 @@
       vif status as DOWN, and its status cannot be changed to UP.
       The problem is caused by a mismatch between how the enable/disable
       state is handled by the rtrmgr and by the MFEA module itself.
-      This will be fixed for XORP Release 1.1
+      This will be fixed for XORP Release-1.1.
       Currently, there is no work-around except that restarting the
       rtrmgr with all enabled interfaces again.
+
+    - On Linux with kernel 2.6 (e.g., RedHat FC2 with kernel 2.6.5-1.358),
+      some of the tests may fail (with or without an error message),
+      but no coredump image. Some of those failures can be contributed
+      to a kernel problem. E.g., running "dmesg can show kernel
+      "Oops" messages like:
+
+Unable to handle kernel NULL pointer dereference at virtual address 00000000
+ printing eip:
+02235532
+*pde = 00000000
+Oops: 0000 [#15]
+CPU:    0
+EIP:    0060:[<02235532>]    Not tainted
+EFLAGS: 00010202   (2.6.5-1.358) 
+EIP is at __dev_get_by_index+0x14/0x2b
+eax: 022db854   ebx: 1ae7aef8   ecx: 00000001   edx: 00000000
+esi: 00000000   edi: 00008910   ebp: fee43e9c   esp: 1ae7aef0
+ds: 007b   es: 007b   ss: 0068
+Process test_finder_eve (pid: 2026, threadinfo=1ae7a000 task=1406d7b0)
+Stack: 022365c7 00000000 009caffc 009cc780 0969ef28 fee43edc 00000001 009cc780 
+       0969ef28 fee43ed8 00008910 00000000 00008910 fee43e9c 02236e50 fee43e9c 
+       07aa4e00 3530355b 5d303637 00000000 0227a55b 021536b6 022cfa00 00000001 
+Call Trace:
+ [<022365c7>] dev_ifname+0x30/0x66
+ [<02236e50>] dev_ioctl+0x83/0x283
+ [<0227a55b>] unix_create1+0xef/0xf7
+ [<021536b6>] alloc_inode+0xf9/0x175
+ [<0227c090>] unix_ioctl+0x72/0x7b
+ [<022301a5>] sock_ioctl+0x268/0x280
+ [<0223054f>] sys_socket+0x2a/0x3d
+ [<0214ea0e>] sys_ioctl+0x1f2/0x224
+
+Code: 0f 18 02 90 2d 34 01 00 00 39 48 34 74 08 85 d2 89 d0 75 ea 
+
+      This appears to be a kernel bug triggered by ioctl(SIOCGIFNAME)
+      which itself is called by if_indextoname(3). Currently, there
+      is no known solution of the problem except to use a kernel that does
+      not have the problem (at this stage it is not known whether all
+      2.6 Linux kernels are affected or only specific versions).
+      It seems that a very similar problem has been reported to the
+      Linux kernel developers, but the problem is still unsolved:
+
+      https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=121697
 
   RIB: 
     - If an interface address is deleted, the RIB may trigger the following
@@ -86,10 +127,11 @@
     - Once BGP selects a route it is taking too long to install it in
       the kernel.
 
-    - The RIB bug above where deleting an existing route can fail is sometimes
-      triggered by BGP. When BGP receives the deletion failure error
-      from the RIB it considers this to be a fatal error and
-      exits. This problem will be fixed before the XORP 1.0 Release.
+    - If the RIB bug above (failure to delete an existing route) is
+      triggered by BGP, then the deletion failure error received by
+      BGP from the RIB is considered by BGP as a fatal error.
+      This is not a BGP problem, but a RIB problem that will be fixed
+      after the XORP Release-1.0.
 
   STATIC_ROUTES:
     - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
@@ -115,7 +157,7 @@
       vif status as DOWN, and its status cannot be changed to UP.
       The problem is caused by a mismatch between how the enable/disable
       state is handled by the rtrmgr and by the MLD/IGMP module itself.
-      This will be fixed for XORP Release 1.1
+      This will be fixed for XORP Release-1.1.
       Currently, there is no work-around except that restarting the
       rtrmgr with all enabled interfaces again.
 
@@ -148,9 +190,17 @@
       vif status as DOWN, and its status cannot be changed to UP.
       The problem is caused by a mismatch between how the enable/disable
       state is handled by the rtrmgr and by the PIM-SM module itself.
-      This will be fixed for XORP Release 1.1
+      This will be fixed for XORP Release-1.1.
       Currently, there is no work-around except that restarting the
       rtrmgr with all enabled interfaces again.
+
+    - Very late in the release process a problem was found with scheduling
+      the internal PIM-SM tasks for state dependency tracking. The result of
+      it is that if the router is heavy loaded and if it has lots of multicast
+      routing state, then any change that affects many multicast routing
+      entries (e.g., MRIB changes, etc) in some cases may result in incorrect
+      recomputation of the result multicast routing state. This problem
+      will be fixed in the CVS repository right after the XORP Release-1.0.
 
   FIB2MRIB:
     - If the FEA or RIB exit unexpected, then STATIC_ROUTES may start
@@ -160,6 +210,12 @@
     - No known issues.
 
   SNMP:
-    - net-snmp-5.1.* may have problems with some of its header files, hence
-      the XORP SNMP support won't be compiled if those problems exist.
-      Instead, use an earlier net-snmp version from the 5.0.x branch.
+    - On some versions of Linux, there are some bugs in net-snmp versions
+      5.0.8 and 5.0.9, which prevent dynamic loading from working.
+      See http://www.xorp.org/snmp.html for links to the net-snmp patches
+      that solve the problems.
+
+    - Version 5.1 of net-snmp requires a simple modification, otherwise
+      XORP will fail to compile.
+      See http://www.xorp.org/snmp.html for a link to the net-snmp patch
+      that solves the problems.
