@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.19 2004/06/10 22:41:12 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.20 2004/10/13 06:03:29 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -85,7 +85,7 @@ public:
     inline uint32_t keepalive_ms() const	{ return _keepalive_ms; }
 
 private:
-    void die(const char* reason);
+    void die(const char* reason, bool verbose = true);
 
     void update_writer(AsyncFileWriter::Event	e,
 		       const uint8_t*		buffer,

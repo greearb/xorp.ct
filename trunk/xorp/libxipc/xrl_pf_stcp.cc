@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.37 2004/11/07 18:23:14 atanu Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.38 2004/12/18 03:48:52 atanu Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -621,11 +621,12 @@ XrlPFSTCPSender::~XrlPFSTCPSender()
 }
 
 void
-XrlPFSTCPSender::die(const char* reason)
+XrlPFSTCPSender::die(const char* reason, bool verbose)
 {
     XLOG_ASSERT(_fd > 0);
 
-    XLOG_ERROR("XrlPFSTCPSender died: %s", reason);
+    if (verbose)
+	XLOG_ERROR("XrlPFSTCPSender died: %s", reason);
     stop_keepalives();
 
     delete _reader;
@@ -777,7 +778,7 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     }
 
     if (ev == BufferedAsyncReader::END_OF_FILE) {
-	die("end of file");
+	die("end of file", false);
 	return;
     }
 
