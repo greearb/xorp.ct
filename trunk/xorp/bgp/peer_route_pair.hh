@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_route_pair.hh,v 1.11 2005/03/20 09:45:18 mjh Exp $
+// $XORP: xorp/bgp/peer_route_pair.hh,v 1.12 2005/03/25 02:52:44 pavlin Exp $
 
 #ifndef __BGP_PEER_ROUTE_PAIR_HH__
 #define __BGP_PEER_ROUTE_PAIR_HH__
@@ -20,6 +20,7 @@
 #include <sys/time.h>
 #include <list>
 #include "libxorp/xlog.h"
+#include "libxorp/timer.hh"
 
 template<class A>
 class RouteQueueEntry;
@@ -40,7 +41,7 @@ public:
 	_is_ready = true;
 	_has_queued_data = false;
 	_waiting_for_get = false;
-	gettimeofday(&_wakeup_sent, 0);
+	TimerList::system_gettimeofday(&_wakeup_sent);
     }
     PeerTableInfo(const PeerTableInfo& other) {
 	_route_table = other._route_table;
@@ -53,8 +54,10 @@ public:
 	    _posn = other._posn;
 	}
 	_waiting_for_get = other._waiting_for_get;
-	_wakeup_sent.tv_sec = other._wakeup_sent.tv_sec;
-	_wakeup_sent.tv_usec = other._wakeup_sent.tv_usec;
+	_wakeup_sent = other._wakeup_sent;
+    }
+    ~PeerTableInfo() {
+	_wakeup_sent = TimeVal::ZERO();
     }
 
     BGPRouteTable<A> *route_table() const {
@@ -96,18 +99,21 @@ public:
 	    _waiting_for_get = false;
     }
     void wakeup_sent() {
-	timeval now;
-	gettimeofday(&now, 0);
+	TimeVal now;
+	TimerList::system_gettimeofday(&now);
 	if (_waiting_for_get) {
-	    if ((now.tv_sec - _wakeup_sent.tv_sec) > 1200) {
+	    if ((now.sec() - _wakeup_sent.sec()) > 1200) {
 		/* we sent a wakeup 20 minutes ago, and the peer still
 		   hasn't requested the data - something must have
 		   gone badly wrong */
-		XLOG_FATAL("Peer seems to have permanently locked up\n");
+		string s = "Peer seems to have permanently locked up\n";
+		s += "Time now: " + now.str() + 
+		    ", time then: " + _wakeup_sent.str() + "\n";
+		XLOG_FATAL(s.c_str());
 	    }
 	} else {
-	    _wakeup_sent.tv_sec = now.tv_sec;
-	    _wakeup_sent.tv_usec = now.tv_usec;
+	    XLOG_ASSERT(_wakeup_sent != TimeVal::ZERO());
+	    _wakeup_sent = now;
 	    _waiting_for_get = true;
 	}
     }
@@ -139,7 +145,7 @@ private:
       queue.  This only has meaning if _has_queued_data is true */
 
     bool _waiting_for_get;
-    timeval _wakeup_sent;
+    TimeVal _wakeup_sent;
 };
 
 #endif // __BGP_PEER_ROUTE_PAIR_HH__
