@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.12 2003/09/05 02:41:03 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.13 2003/10/03 00:26:59 atanu Exp $"
 
-// #define DEBUG_LOGGING
+//#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
@@ -136,31 +136,45 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     }
     debug_msg("route resolvable\n");
 
+#if 0
     const SubnetRoute<A> *old_winner;
     const PeerHandler* old_winners_peer;
     BGPRouteTable<A>* old_winners_parent;
     
     find_previous_winner(caller, rtmsg.net(), old_winner, old_winners_peer, 
 			 old_winners_parent);
+#endif
+    RouteData<A>* old_winner_p;
+    list<RouteData<A> > alternatives;
+    old_winner_p = find_alternative_routes(caller, rtmsg.net(), alternatives);
+    
 
     bool new_is_best = false;
-    if (old_winner == NULL) {
+    if (old_winner_p == NULL) {
 	cp(6);
 	new_is_best = true;
-    } else if (route_is_better(old_winner, old_winners_peer,
-			       rtmsg.route(), rtmsg.origin_peer())) {
-	cp(7);
-	new_is_best = true;
-	//propagate a delete_route to clear out the old state.
-	InternalMessage<A> old_rt_msg(old_winner, old_winners_peer, 
-				      GENID_UNKNOWN);
-	_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
+    } else {
+	//preserve old_winner because route_wins may delete the original
+	RouteData<A> old_winner(*old_winner_p);
+	if (route_wins(rtmsg.route(), rtmsg.origin_peer(), alternatives)) {
+	    cp(7);
+	    new_is_best = true;
+	    //propagate a delete_route to clear out the old state.
+	    InternalMessage<A> old_rt_msg(old_winner.route(), 
+					  old_winner.peer_handler(), 
+					  GENID_UNKNOWN);
+	    _next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
 
-	//inform the RibIn the route is no longer being used.
-	old_winners_parent->route_used(old_winner, false);
+#if 0	    
+	    //inform the RibIn the route is no longer being used.
+	    old_winners_parent->route_used(old_winner, false);
 
-	//the old winner is no longer the winner
-	old_winner->set_is_not_winner();
+	    //the old winner is no longer the winner
+	    old_winner->set_is_not_winner();
+#endif
+	    //the old winner is no longer the winner
+	    old_winner.set_is_not_winner();
+	}
     }
     if (new_is_best) {
 	cp(8);
@@ -200,50 +214,24 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     	return delete_route(old_rtmsg, caller);
     }
 
-    const SubnetRoute<A>* old_winner;
-    const PeerHandler* old_winners_peer;
-    BGPRouteTable<A>* old_winners_parent;
-
-    find_previous_winner(caller, new_rtmsg.net(), old_winner, 
-			 old_winners_peer, old_winners_parent);
+    list <RouteData<A> > alternatives;
+    RouteData<A>* old_winner 
+	= find_alternative_routes(caller, old_rtmsg.net(), alternatives);
+    if (old_winner) {
+	//preserve this, because the original old_winner's data will
+	//be clobbered by route_wins.
+	old_winner = new RouteData<A>(*old_winner);
+    }
     
     bool old_won, new_won;
 
     old_won = old_rtmsg.route()->is_winner();
-    if (old_won) {
-	//we're replacing the previous winner
-	assert(old_winner == NULL);
-	if (route_is_better(old_rtmsg.route(), old_rtmsg.origin_peer(),
-			    new_rtmsg.route(), new_rtmsg.origin_peer())) {
-	    cp(13);
-	    // The route is better, so no need to look for
-	    // any alternative route.
-	} else {
-	    //The route is the same or worse
-	    if (route_is_better(new_rtmsg.route(), new_rtmsg.origin_peer(),
-				old_rtmsg.route(), old_rtmsg.origin_peer())) {
-		//The route got worse.  We need to see if anyone else can win.
-		cp(140);
-		old_winner = lookup_route(caller, new_rtmsg.net(), 
-					  old_winners_peer, 
-					  old_winners_parent);
-	    } else {
-		cp(141);
-		//It's neither better or worse.
-		//No need to look for any alternative.
-	    }
-	}
-    } else {
-	cp(15);
-    }
 
-    if (old_winner == NULL) {
-	cp(16);
+    if (route_wins(new_rtmsg.route(), new_rtmsg.origin_peer(),
+		   alternatives)) {
 	new_won = true;
     } else {
-	cp(17);
-	new_won = route_is_better(old_winner, old_winners_peer,
-				  new_rtmsg.route(), new_rtmsg.origin_peer());
+	new_won = false;
     }
 
     //keep track of changes in winner
@@ -271,6 +259,8 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	cp(20);
 	debug_msg("case 1\n");
 	//case 1: neither the old or new version won.
+	if (old_winner)
+	    delete old_winner;
 	return ADD_UNUSED;
     } else if ((old_won == true) && (new_won == true)) {
 	cp(21);
@@ -283,15 +273,17 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	debug_msg("case 3\n");
 	//case 3: this peer won before, but now it loses,
 	_next_table->delete_route(old_rtmsg, (BGPRouteTable<A>*)this);
-	
-	assert(old_winner != NULL);
-	InternalMessage<A> alt_rtmsg(old_winner, old_winners_peer,
+	find_alternative_routes(caller, old_rtmsg.net(), alternatives);
+	RouteData<A>* new_winner = find_winner(alternatives);
+	assert(new_winner != NULL);
+	InternalMessage<A> alt_rtmsg(new_winner->route(), 
+				     new_winner->peer_handler(),
 				     GENID_UNKNOWN);
 	result = _next_table->add_route(alt_rtmsg, 
 					(BGPRouteTable<A>*)this);
 	//inform the RibIn the route is now being used.
-	old_winner->set_is_winner(igp_distance(old_winner->nexthop()));
-	old_winners_parent->route_used(old_winner, true);
+	new_winner->set_is_winner(igp_distance(new_winner->route()
+					       ->nexthop()));
     } else {
 	cp(23);
 	//case 4: this peer lost before, but now it wins,
@@ -301,17 +293,21 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	//routes were resolvable
 	if(old_winner != NULL) {
 	    cp(24);
-	    InternalMessage<A> alt_rtmsg(old_winner, old_winners_peer, 
+	    InternalMessage<A> alt_rtmsg(old_winner->route(), 
+					 old_winner->peer_handler(), 
 					 GENID_UNKNOWN);
 	    _next_table->delete_route(alt_rtmsg, 
 				      (BGPRouteTable<A>*)this);
 	    //inform the RibIn the route is no longer being used.
-	    old_winners_parent->route_used(old_winner, false);
+	    old_winner->set_is_not_winner();
 	} else {
 	    cp(25);
 	}
 	result = _next_table->add_route(new_rtmsg, (BGPRouteTable<A>*)this);
     }
+
+    if (old_winner)
+	delete old_winner;
 
     if (result == ADD_USED || result == ADD_UNUSED) {
 	cp(26);
@@ -428,122 +424,60 @@ DecisionTable<A>::lookup_route(const BGPRouteTable<A>* ignore_parent,
 			       const PeerHandler*& best_routes_peer,
 			       BGPRouteTable<A>*& best_routes_parent) const
 {
-    const SubnetRoute<A>* best_route, *found_route;
-    best_routes_peer = NULL;
-    best_route = NULL;
-    typename map<BGPRouteTable<A>*, PeerHandler * >::const_iterator i;
-    best_routes_parent = NULL;
-    for (i = _parents.begin(); i!=_parents.end(); i++) {
-	cp(35);
-	if (i->first == ignore_parent) {
-	    cp(36);
-	    continue;
-	}
-	found_route = i->first->lookup_route(net);
-	if (found_route != NULL) {
-	    cp(37);
-	    if (best_route == NULL) {
-		cp(38);
-		if (found_route->is_winner() || 
-		    resolvable(found_route->nexthop())) {
-		    cp(39);
-		    best_route = found_route;
-		    best_routes_peer = i->second;
-		    best_routes_parent = i->first;
-		}
-	    } else {
-		cp(40);
-		//note that it is possible that
-		//found_route->is_winner() is true, but the route
-		//would not win the route_is_better test because the
-		//IGP metrics have changed, but the change has not yet
-		//been propagated.  In this case we must go with the
-		//route that has is_winner()==true, because as far as
-		//decision is concerned, the IGP metric change hasn't
-		//occured yet.
-		if (found_route->is_winner()) {
-		    cp(41);
-		    best_route = found_route;
-		    best_routes_peer = i->second;
-		    best_routes_parent = i->first;
-		} else {
-		    cp(42);
-		    if (resolvable(found_route->nexthop())) {
-			cp(43);
-			if (route_is_better(best_route, best_routes_peer,
-					    found_route, i->second)) {
-			    cp(44);
-			    best_route = found_route;
-			    best_routes_peer = i->second;
-			    best_routes_parent = i->first;
-			}
-		    }
-		}
-		//if the route has the winner bit set, we don't need to go further
-		if (best_route->is_winner())
-		    cp(45);
-		return best_route;
-	    }
-	}
+    list <RouteData<A> > alternatives;
+    RouteData<A>* winner
+	= find_alternative_routes(ignore_parent, net, alternatives);
+    if (winner == NULL  && !alternatives.empty()) {
+	winner = find_winner(alternatives);
     }
-    cp(46);
-    return best_route;
+    if (winner != NULL) {
+	best_routes_peer = winner->peer_handler();
+	best_routes_parent = winner->parent_table();
+	return winner->route();
+    }
+    return NULL;
 }
 
 template<class A>
 const SubnetRoute<A>*
 DecisionTable<A>::lookup_route(const IPNet<A> &net) const
 {
-    const SubnetRoute<A>* winner;
-    const PeerHandler* winners_peer;
-    BGPRouteTable<A>* winners_parent;
-    find_previous_winner(NULL, net, winner, winners_peer, winners_parent);
-    return winner;
+    list <RouteData<A> > alternatives;
+    RouteData<A>* winner = find_alternative_routes(NULL, net, alternatives);
+    if (winner == NULL)
+	return NULL;
+    else
+	return winner->route();
 }
 
+
 template<class A>
-bool
-DecisionTable<A>::find_previous_winner(BGPRouteTable<A> *caller,
-				       const IPNet<A>& net,
-				       const SubnetRoute<A>*& winner,
-				       const PeerHandler*& winners_peer,
-				       BGPRouteTable<A>*& winners_parent
-				       ) const {
+RouteData<A>*
+DecisionTable<A>::find_alternative_routes(
+    const BGPRouteTable<A> *caller,
+    const IPNet<A>& net,
+    list <RouteData<A> >& alternatives) const 
+{
+    RouteData<A>* previous_winner = NULL;
     typename map<BGPRouteTable<A>*, PeerHandler * >::const_iterator i;
-    winner = NULL;
-    winners_peer = NULL;
-    winners_parent = NULL;
-    bool found_any_route = false;
     const SubnetRoute<A>* found_route;
     for (i = _parents.begin();  i != _parents.end();  i++) {
 	//We don't need to lookup the route in the parent that the new
 	//route came from - if this route replaced an earlier route
 	//from the same parent we'd see it as a replace, not an add
-	cp(47);
  	if (i->first != caller) {
-	    cp(48);
 	    found_route = i->first->lookup_route(net);
 	    if (found_route != NULL) {
-		cp(49);
-		found_any_route = true;
+		alternatives.push_back(RouteData<A>(found_route, 
+						    i->first, i->second));
 		if (found_route->is_winner()) {
-		    cp(50);
-		    winner = found_route;
-		    winners_parent = i->first;
-		    winners_peer = i->second;
-		    break;
-		} else {
-		    cp(51);
+		    assert(previous_winner == NULL);
+		    previous_winner = &(alternatives.back());
 		}
-	    } else {
-		cp(52);
 	    }
- 	} else {
-	    cp(53);
 	}
     }
-    cp(54);
-    return found_any_route;
+    return previous_winner;
 }
 
 template<class A>
@@ -644,12 +578,11 @@ DecisionTable<A>::igp_distance(const A nexthop) const
 */
 template<class A>
 bool 
-DecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
-				  const PeerHandler *our_peer,
-				  const SubnetRoute<A> *test_route,
-				  const PeerHandler *test_peer) const
+DecisionTable<A>::route_wins(const SubnetRoute<A> *test_route,
+			     const PeerHandler *test_peer,
+			     list<RouteData<A> >& alternatives) const
 {
-    debug_msg("in route_is_better\n");
+    typename list<RouteData<A> >::iterator i;
 
     /* The spec seems pretty odd.  In our architecture, it seems
        reasonable to do phase 2 before phase 1, because if a route
@@ -661,36 +594,45 @@ DecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
     ** Check if routes resolve.
     */
     bool test_resolvable = resolvable(test_route->nexthop());
-    bool our_resolvable = resolvable(our_route->nexthop());
 
     /*We should never even call route_is_better if the test_route
       isn't resolvable */
     assert(test_resolvable);
 
-    /* If our route isn't resolvable, the test route wins */
-    if (!our_resolvable) {
-	cp(63);
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	if (!resolvable(i->route()->nexthop())) {
+	    i = alternatives.erase(i);
+	} else {
+	    i++;
+	}
+    }
+    
+    /* If there are no resolvable alternatives, the test route wins */
+    if (alternatives.empty()) {
 	return true;
     }
-    /* By this point, both routes are resolvable */
-    assert(our_resolvable && test_resolvable);
+
+    /* By this point, all remaining routes are resolvable */
 
     /* 
     ** Phase 1: Calculation of degree of preference.
     */
-    int our_pref = local_pref(our_route, our_peer);
     int test_pref = local_pref(test_route, test_peer);
-
-    if(test_pref > our_pref) {
-	cp(64);
-	return true;
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	int lp = local_pref(i->route(), i->peer_handler());
+	assert(lp >= 0);
+	//prefer higher preference
+	if (lp < test_pref) {
+	    i = alternatives.erase(i);
+	} else if (lp > test_pref) {
+	    return false;
+	} else {
+	    i++;
+	}
     }
-    if(test_pref < our_pref) {
-	debug_msg("%d vs %d\n", test_pref, our_pref);
-	debug_msg("test route: %s\n", 
-		  test_route->str().c_str());
-	cp(65);
-	return false;
+
+    if(alternatives.empty()) {
+	return true;
     }
 
     /*
@@ -708,21 +650,26 @@ DecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
     */
     int test_aspath_length = test_route->attributes()->
 	aspath().path_length();
-    int our_aspath_length = our_route->attributes()->
-	aspath().path_length();
-    debug_msg("%s length %d\n", our_route->attributes()->
-	      aspath().str().c_str(), our_aspath_length);
     debug_msg("%s length %d\n", test_route->attributes()->
 	      aspath().str().c_str(), test_aspath_length);
-    
-    if(test_aspath_length < our_aspath_length) {
-	cp(66);
-	return true;
+
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	int len = i->route()->attributes()->aspath().path_length();
+	assert(len >= 0);
+	//prefer shortest path
+	if (len > test_aspath_length) {
+	    i = alternatives.erase(i);
+	} else if (len < test_aspath_length) {
+	    return false;
+	} else {
+	    i++;
+	}
     }
 
-    if(test_aspath_length > our_aspath_length) {
-	cp(67);
-	return false;
+    
+    if(alternatives.empty()) {
+	cp(66);
+	return true;
     }
 
     debug_msg("origin test\n");
@@ -730,106 +677,164 @@ DecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
     ** Lowest origin value.
     */
     int test_origin = test_route->attributes()->origin();
-    int our_origin = our_route->attributes()->origin();
-
-    if(test_origin < our_origin) {
-	cp(68);
-	return true;
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	int origin = i->route()->attributes()->origin();
+	//prefer lower origin
+	if (origin > test_origin) {
+	    i = alternatives.erase(i);
+	} else if (origin < test_origin) {
+	    return false;
+	} else {
+	    i++;
+	}
     }
 
-    if(test_origin > our_origin) {
-	cp(69);
-	return false;
+    if(alternatives.empty()) {
+	return true;
     }
 
     debug_msg("MED test\n");
     /*
     ** Compare meds if both routes came from the same neighbour AS.
     */
-    AsNum test_asnum(test_route->attributes()->aspath().first_asnum());
-    AsNum our_asnum(our_route->attributes()->aspath().first_asnum());
 
-    //Sanity checking.  If either of these conditions is hit, then the
+    AsNum test_asnum(test_route->attributes()->aspath().first_asnum());
+    int test_med = med(test_route);
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	AsNum asnum = (i->route()->attributes()->aspath().first_asnum());
+	int alt_med = med(i->route());
+	if (test_asnum == asnum) {
+	    //prefer lower MED
+	    if (test_med < alt_med) {
+		i = alternatives.erase(i);
+	    } else if (test_med > alt_med) {
+		return false;
+	    } else {
+		i++;
+	    }
+	} else {
+	    i++;
+	}
+    }
+
+    if(alternatives.empty()) {
+	return true;
+    }
+
+    //remove any other routes from consideration if they come from the
+    //same AS as another route, and loses on MED to that other route.
+    typename list <RouteData<A> >::iterator j;
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	AsNum asnum1 = (i->route()->attributes()->aspath().first_asnum());
+	int med1 = med(i->route());
+	bool del_i = false;
+	for (j=alternatives.begin(); j!=alternatives.end();) {
+	    bool del_j = false;
+	    if (i != j) {
+		AsNum asnum2 
+		    = (j->route()->attributes()->aspath().first_asnum());
+		int med2 = med(j->route());
+		if (asnum1 == asnum2) {
+		    if (med1 < med2) {
+			i = alternatives.erase(i);
+			del_i = true;
+			break;
+		    } else if (med1 > med2) {
+			j = alternatives.erase(j);
+			del_j = true;
+		    }
+		} 
+	    }
+	    //move to the next j if we didn't already do it using erase
+	    if (del_j == false) {
+		j++;
+	    }
+	}	
+	//move to the next i if we didn't already do it using erase
+	if (del_i == false) {
+	    i++;
+	}
+    }
+
+    if(alternatives.empty()) {
+	//the loop above can't remove the last alternative
+	XLOG_UNREACHABLE();
+    }
+
+
+    //Sanity checking.  If this conditions is hit, then the
     //input sanity checks haven't done their job.
     if (!test_peer->ibgp() && (test_asnum != test_peer->AS_number()))
 	XLOG_FATAL("AS Path %s received from EBGP peer with AS %s\n",
 		   test_route->attributes()->aspath().str().c_str(),
 		   test_peer->AS_number().str().c_str());
-    if (!our_peer->ibgp() && (our_asnum != our_peer->AS_number()))
-	XLOG_FATAL("AS Path %s received from EBGP peer with AS %s\n",
-		   our_route->attributes()->aspath().str().c_str(),
-		   our_peer->AS_number().str().c_str());
-
-    if(test_asnum == our_asnum) {
-	int test_med = med(test_route);
-	int our_med = med(our_route);
-
-	if(test_med < our_med) {
-	    cp(70);
-	    return true;
-	}
-
-	if(test_med > our_med) {
-	    cp(71);
-	    return false;
-	}
-	cp(72);
-    } else {
-	cp(73);
-    }
     
     debug_msg("EBGP vs IBGP test\n");
     /*
     ** Prefer routes from external peers over internal peers.
     */
-    if(test_peer->ibgp() != our_peer->ibgp()) {
-	cp(74);
-	if(!test_peer->ibgp()) {
-	    cp(75);
-	    return true;
-	} else {
-	    cp(76);
+    bool test_ibgp = test_peer->ibgp();
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	bool ibgp = i->peer_handler()->ibgp();
+	if ((!test_ibgp) && ibgp) {
+	    //test route is external, alternative is internal
+	    i = alternatives.erase(i);
+	} else if (test_ibgp && !ibgp) {
+	    //test route is internal, alternative is external
 	    return false;
+	} else {
+	    i++;
 	}
-    } else {
-	cp(77);
     }
+
+    if (alternatives.empty()) {
+	return true;
+    }
+
 
     debug_msg("IGP distance test\n");
     /*
     ** Compare IGP distances.
     */
     int test_igp_distance = igp_distance(test_route->nexthop());
-    int our_igp_distance = igp_distance(our_route->nexthop());
-    debug_msg("%d vs %d\n", our_igp_distance, test_igp_distance);
-    if(test_igp_distance < our_igp_distance) {
-	cp(78);
+    for (i=alternatives.begin(); i!=alternatives.end(); ) {
+	int igp_dist = igp_distance(i->route()->nexthop());
+	//prefer lower IGP distance
+	if (test_igp_distance < igp_dist) {
+	    i = alternatives.erase(i);
+	} else if (test_igp_distance > igp_dist) {
+	    return false;
+	} else {
+	    i++;
+	}
+    }
+
+    if (alternatives.empty()) {
 	return true;
     }
-    if(our_igp_distance < test_igp_distance) {
-	cp(79);
-	return false;
-    }
+
 
     debug_msg("BGP ID test\n");
     /*
     ** Choose the route from the neighbour with the lowest BGP ID.
     */
     IPv4 test_id = test_peer->id();
-    IPv4 our_id = our_peer->id();
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	IPv4 id = i->peer_handler()->id();
+	//prefer lower ID distance
+	if (test_id < id) {
+	    i = alternatives.erase(i);
+	} else if (test_id > id) {
+	    return false;
+	} else {
+	    i++;
+	}
+    }
 
-    debug_msg("testing BGP ID: %s vs %s\n",
-	test_id.str().c_str(), our_id.str().c_str());
-
-    if(test_id < our_id) {
-	cp(80);
+    if (alternatives.empty()) {
 	return true;
     }
 
-    if(test_id > our_id) {
-	cp(81);
-	return false;
-    }
 
     debug_msg("neighbour addr test\n");
     /*
@@ -837,20 +842,298 @@ DecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
     ** address.
     */
     int test_address = test_peer->neighbour_address();
-    int our_address = our_peer->neighbour_address();
-
-    if(test_address < our_address) {
-	cp(82);
-	return true;
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	int address = i->peer_handler()->neighbour_address();
+	//prefer lower address
+	if (test_address < address) {
+	    i = alternatives.erase(i);
+	} else if (test_address > address) {
+	    return false;
+	} else {
+	    i++;
+	}
     }
 
-    if(test_address > our_address) {
-	cp(83);
-	return false;
+    if (alternatives.empty()) {
+	return true;
     }
 
     //We can get here if we compare two identically rated routes.  
     return false;
+}
+
+/*
+** The main decision process.
+**
+** return true if test_route is better than current_route.
+**        resolved is set to true if the winning route resolves.
+*/
+template<class A>
+RouteData<A>*
+DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
+{
+    typename list<RouteData<A> >::iterator i;
+
+    /* The spec seems pretty odd.  In our architecture, it seems
+       reasonable to do phase 2 before phase 1, because if a route
+       isn't resolvable we don't want to consider it */
+
+    /*
+    ** Phase 2: Route Selection.  */
+    /*
+    ** Check if routes resolve.
+    */
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	if (!resolvable(i->route()->nexthop())) {
+	    i = alternatives.erase(i);
+	} else {
+	    i++;
+	}
+    }
+    
+    /* If there are no resolvable alternatives, no-one wins */
+    if (alternatives.empty()) {
+	return NULL;
+    }
+    if (alternatives.size()==1) {
+	return &(alternatives.front());
+    }
+
+    /* By this point, all remaining routes are resolvable */
+
+    /* 
+    ** Phase 1: Calculation of degree of preference.
+    */
+    int test_pref = local_pref(alternatives.front().route(), 
+			       alternatives.front().peer_handler());
+    i = alternatives.begin(); i++;
+    while(i!=alternatives.end()) {
+	int lp = local_pref(i->route(), i->peer_handler());
+	assert(lp >= 0);
+	//prefer higher preference
+	if (lp < test_pref) {
+	    i = alternatives.erase(i);
+	} else if (lp > test_pref) {
+	    test_pref = lp;
+	    alternatives.pop_front();
+	    i++;
+	} else {
+	    i++;
+	}
+    }
+
+    if (alternatives.size()==1) {
+	return &(alternatives.front());
+    }
+	  
+
+    /*
+    ** If we got here the preferences for both routes are the same.
+    */
+
+    /*
+    ** Here we are crappy tie breaking.
+    */
+    
+    debug_msg("tie breaking\n");
+    debug_msg("AS path test\n");
+    /*
+    ** Shortest AS path length.
+    */
+    int test_aspath_length = alternatives.front().route()->attributes()->
+	aspath().path_length();
+
+    i = alternatives.begin(); i++;
+    while(i!=alternatives.end()) {
+	int len = i->route()->attributes()->aspath().path_length();
+	assert(len >= 0);
+	//prefer shortest path
+	if (len > test_aspath_length) {
+	    i = alternatives.erase(i);
+	} else if (len < test_aspath_length) {
+	    test_aspath_length = len;
+	    alternatives.pop_front();
+	} else {
+	    i++;
+	}
+    }
+
+    
+    if (alternatives.size()==1) {
+	return &(alternatives.front());
+    }
+
+    debug_msg("origin test\n");
+    /*
+    ** Lowest origin value.
+    */
+    int test_origin = alternatives.front().route()->attributes()->origin();
+    i = alternatives.begin(); i++;
+    while(i!=alternatives.end()) {
+	int origin = i->route()->attributes()->origin();
+	//prefer lower origin
+	if (origin > test_origin) {
+	    i = alternatives.erase(i);
+	} else if (origin < test_origin) {
+	    test_origin = origin;
+	    alternatives.pop_front();
+	    i++;
+	} else {
+	    i++;
+	}
+    }
+
+    if (alternatives.size()==1) {
+	return &(alternatives.front());
+    }
+
+    debug_msg("MED test\n");
+    /*
+    ** Compare meds if both routes came from the same neighbour AS.
+    */
+    typename list <RouteData<A> >::iterator j;
+    for (i=alternatives.begin(); i!=alternatives.end();) {
+	AsNum asnum1 = (i->route()->attributes()->aspath().first_asnum());
+	int med1 = med(i->route());
+	bool del_i = false;
+	for (j=alternatives.begin(); j!=alternatives.end();) {
+	    bool del_j = false;
+	    if (i != j) {
+		AsNum asnum2 
+		    = (j->route()->attributes()->aspath().first_asnum());
+		int med2 = med(j->route());
+		if (asnum1 == asnum2) {
+		    if (med1 < med2) {
+			i = alternatives.erase(i);
+			del_i = true;
+			break;
+		    } else if (med1 > med2) {
+			j = alternatives.erase(j);
+			del_j = true;
+		    }
+		} 
+	    }
+	    //move to the next j if we didn't already do it using erase
+	    if (del_j == false) {
+		j++;
+	    }
+	}	
+	//move to the next i if we didn't already do it using erase
+	if (del_i == false) {
+	    i++;
+	}
+    }
+
+    if (alternatives.size()==1) {
+	return &(alternatives.front());
+    }
+
+
+    debug_msg("EBGP vs IBGP test\n");
+    /*
+    ** Prefer routes from external peers over internal peers.
+    */
+    bool test_ibgp = alternatives.front().peer_handler()->ibgp();
+    i = alternatives.begin(); i++;
+    while(i!=alternatives.end()) {
+	bool ibgp = i->peer_handler()->ibgp();
+	if ((!test_ibgp) && ibgp) {
+	    //test route is external, alternative is internal
+	    i = alternatives.erase(i);
+	} else if (test_ibgp && !ibgp) {
+	    //test route is internal, alternative is external
+	    alternatives.pop_front();
+	    test_ibgp = ibgp;
+	    i++;
+	} else {
+	    i++;
+	}
+    }
+
+    if (alternatives.size()==1) {
+	return &(alternatives.front());
+    }
+
+
+    debug_msg("IGP distance test\n");
+    /*
+    ** Compare IGP distances.
+    */
+    int test_igp_distance = igp_distance(alternatives.front().route()->nexthop());
+    i = alternatives.begin(); i++;
+    while(i!=alternatives.end()) {
+	int igp_dist = igp_distance(i->route()->nexthop());
+	//prefer lower IGP distance
+	if (test_igp_distance < igp_dist) {
+	    i = alternatives.erase(i);
+	} else if (test_igp_distance > igp_dist) {
+	    alternatives.pop_front();
+	    test_igp_distance = igp_dist;
+	    i++;
+	} else {
+	    i++;
+	}
+    }
+
+    if (alternatives.size()==1) {
+	return &(alternatives.front());
+    }
+
+
+    debug_msg("BGP ID test\n");
+    /*
+    ** Choose the route from the neighbour with the lowest BGP ID.
+    */
+    IPv4 test_id = alternatives.front().peer_handler()->id();
+    i = alternatives.begin(); i++;
+    while(i!=alternatives.end()) {
+	IPv4 id = i->peer_handler()->id();
+	//prefer lower ID distance
+	if (test_id < id) {
+	    i = alternatives.erase(i);
+	} else if (test_id > id) {
+	    alternatives.pop_front();
+	    test_id = id;
+	    i++;
+	} else {
+	    i++;
+	}
+    }
+
+    if (alternatives.size()==1) {
+	return &(alternatives.front());
+    }
+
+
+    debug_msg("neighbour addr test\n");
+    /*
+    ** Choose the route from the neighbour with the lowest neighbour
+    ** address.
+    */
+    int test_address = alternatives.front().peer_handler()
+	->neighbour_address();
+    i = alternatives.begin(); i++;
+    while(i!=alternatives.end()) {
+	int address = i->peer_handler()->neighbour_address();
+	//prefer lower address
+	if (test_address < address) {
+	    i = alternatives.erase(i);
+	} else if (test_address > address) {
+	    alternatives.pop_front();
+	    test_address = address;
+	    i++;
+	} else {
+	    i++;
+	}
+    }
+
+    if (alternatives.empty()) {
+	XLOG_UNREACHABLE();
+    }
+    
+    //We can get here with more than one route if we compare two
+    //identically rated routes.  Just choose one.
+    return &(alternatives.front());
 }
 
 template<class A>

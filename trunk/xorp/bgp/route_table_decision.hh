@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.6 2003/05/29 17:59:08 pavlin Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.7 2003/08/04 21:58:58 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -21,6 +21,39 @@
 #include "route_table_base.hh"
 #include "peer_handler.hh"
 #include "next_hop_resolver.hh"
+
+template<class A>
+class RouteData {
+public:
+    RouteData(const SubnetRoute<A>* route, 
+	      BGPRouteTable<A>* parent_table,
+	      PeerHandler* peer_handler) 
+	: _route(route), _parent_table(parent_table), 
+	  _peer_handler(peer_handler) {}
+
+    inline void set_is_not_winner() {
+	_parent_table->route_used(_route, false);
+	_route->set_is_not_winner();
+    }
+    inline void set_is_winner(int igp_distance) {
+	_parent_table->route_used(_route, true);
+	_route->set_is_winner(igp_distance);
+    }
+    inline const SubnetRoute<A>* route() const {
+	return _route;
+    }
+    inline  PeerHandler* peer_handler() const {
+	return _peer_handler;
+    }
+    inline BGPRouteTable<A>* parent_table() const {
+	return _parent_table;
+    }
+private:
+    const SubnetRoute<A>* _route;
+    BGPRouteTable<A>* _parent_table;
+    PeerHandler* _peer_handler;
+    
+};
 
 template<class A>
 class DecisionTable : public BGPRouteTable<A>  {
@@ -79,20 +112,19 @@ private:
 				       BGPRouteTable<A>*& best_routes_parent
 				       ) const;
 
-    bool find_previous_winner(BGPRouteTable<A> *caller,
-			      const IPNet<A>& net,
-			      const SubnetRoute<A>*& best_route,
-			      const PeerHandler*& best_routes_peer,
-			      BGPRouteTable<A>*& best_routes_parent) const;
+    RouteData<A>* 
+        find_alternative_routes(const BGPRouteTable<A> *caller,
+				const IPNet<A>& net,
+				list <RouteData<A> >& alternatives) const;
     uint32_t local_pref(const SubnetRoute<A> *route, const PeerHandler *peer)
 	const;
     uint32_t med(const SubnetRoute<A> *route) const;
     bool resolvable(const A) const;
     uint32_t igp_distance(const A) const;
-    bool route_is_better(const SubnetRoute<A> *our_route,
-			 const PeerHandler *out_peer,
-			 const SubnetRoute<A> *test_route,
-			 const PeerHandler *test_peer) const;
+    bool route_wins(const SubnetRoute<A> *test_route,
+		    const PeerHandler *test_peer,
+		    list<RouteData<A> >& alternatives) const;
+    RouteData<A>* find_winner(list<RouteData<A> >& alternatives) const;
     map<BGPRouteTable<A>*, PeerHandler* > _parents;
 
     NextHopResolver<A>& _next_hop_resolver;
