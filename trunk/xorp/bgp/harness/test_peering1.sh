@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.12 2003/09/05 01:57:54 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.13 2003/09/05 02:44:44 atanu Exp $
 #
 
 #
@@ -192,7 +192,8 @@ test4()
 	aspath 1,2,(3,4,5),6,(7,8),9
 	nexthop 20.20.20.20 
 	nlri 10.10.10.0/24
-	nlri 20.20.20.20/24'
+	nlri 20.20.20.20/24
+        localpref 100'
 
     reset
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
@@ -289,7 +290,10 @@ test8()
 
 test9()
 {
-    echo "TEST9 - Send an update packet as an IBGP peer with no local pref"
+    echo "TEST9:"
+    echo "	1) Send an update packet as an IBGP peer with no local pref"
+    echo "	2) This is not an error. Our BGP emits a warning"
+
     PACKET='packet update
 	origin 1
 	aspath 1
@@ -311,7 +315,10 @@ test9()
 
 test10()
 {
-    echo "TEST10 - Send an update packet as an EBGP peer with local pref"
+    echo "TEST10:"
+    echo "	1) Send an update packet as an EBGP peer with local pref"
+    echo "	2) This is not an error. Our BGP emits a warning"
+
     PACKET="packet update
 	origin 1
 	aspath $PEER2_AS
@@ -338,13 +345,14 @@ test10()
 
 test11()
 {
-    echo "TEST11 - Send an update packet with only withdrawn routes"
+    echo "TEST11:"
+    echo "	1) Send an update packet with two NLRIs"
+    echo "	2) Then send an update packet to withdraw both NLRIs"
 
     PACKET_1="packet update
 	origin 1
 	aspath $PEER2_AS
 	nexthop 20.20.20.20
-	localpref 100
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -402,7 +410,10 @@ test12()
 
 test13()
 {
-    echo "TEST13 - Send an update packet on an IBGP peer with no local pref twice"
+    echo "TEST13:"
+    echo "	1) Send an update packet on an IBGP peer with no local pref twice"
+    echo "	2) This is not an error. Our BGP emits a warnings"
+
     PACKET='packet update
 	origin 1
 	aspath 1
@@ -519,7 +530,6 @@ test17()
 	origin 1
 	aspath $PEER2_AS
 	nexthop 20.20.20.20
-	localpref 100
 	nlri 30.30.30.0/24
 	nlri 30.30.30.0/24"
 
