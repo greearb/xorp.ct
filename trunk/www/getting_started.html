@@ -1,4 +1,4 @@
-<!-- $XORP: www/getting_started.html,v 1.1 2004/04/21 17:25:21 mjh Exp $ -->
+<!-- $XORP: www/getting_started.html,v 1.2 2004/04/21 18:30:46 atanu Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -97,7 +97,7 @@ width="100%" bgcolor="#b0b0b0">
 </TD</TR>
 <TR><TD bgcolor="#ffffff">
 <P>
-XORP should be fairly portable.  At the present time, XORP the main
+XORP should be fairly portable.  At the present time, the main
 development platforms for XORP are FreeBSD and Linux.  XORP should run
 on all recent versions of FreeBSD (as of April 2004, we recommend
 FreeBSD 4.9) and on most versions of Linux with a 2.4.x kernel.  
@@ -134,8 +134,9 @@ hour depending on your CPU speed and the version of the compiler
 you're using.  Much of this is spent compiling the validation tests,
 which are always built by default.
 <P>
-To compile XORP, you will need gmake installed. This is the default on
-Linux but not on FreeBSD.
+To compile XORP, you will need <a
+href="http://www.gnu.org/software/make/make.html">gmake</a>
+installed. This is the default on Linux but not on FreeBSD.
 <P>
 Assuming you have a checked out copy of the XORP source, you should be
 able to compile XORP by typing (in the top-level XORP source directory
@@ -170,8 +171,8 @@ directory, type:
 # gmake check
 </PRE>
 This will run all the internal validation tests for all the XORP
-modules.  This is a rather lengthy procedure, but it's a good idea to
-be sure that everything is working.  
+modules.  This is a rather lengthy procedure (nearly an hour), but
+it's a good idea to be sure that everything is working.
 <P>
 The debugging output can sometimes be a little excessive, but what
 you're looking for is lines like:
@@ -183,7 +184,7 @@ Hopefully you won't see any lines like:
 <pre>
 FAIL: test_peering1.sh
 </pre>
-Which indicates a particular validation test failed.  
+which indicates a particular validation test failed.  
 <P>
 There can be warnings such as:
 <pre>
@@ -217,14 +218,17 @@ will be in the rtrmgr subdirectory.
 <P>
 xorp_rtrmgr will expect to find a configuration file in the same
 directory it is started from.  By default this configuration file is
-called <B>config.boot</B>.  You can specify a different filename using
-the -b command line flag.  The -n "no execute" flag will cause
-xorp_rtrmgr to startup and pretend the router is operating normally,
-but to not actually start any processes.  This can be used to check
-configuration files.  
+called <B>config.boot</B>.  There's a sample config.boot file in the
+rtrmgr directory - please <B>do not</B> use this without tailoring the
+IP addresses, interfaces and routing protocols to match your local
+network environment.  You can specify a different filename for the
+configuration file using the -b command line flag.  The -n "no
+execute" flag will cause xorp_rtrmgr to startup and pretend the router
+is operating normally, but to not actually start any processes.  This
+can be used to check configuration files.
 <P>
 Typically xorp_rtrmgr must be run as root.  This is because it starts
-up all processes that need privileged access to insert routes into
+up processes that need privileged access to insert routes into
 the forwarding path in the kernel.
 <P>
 If you are using the live CD, then xorp_rtrmgr should start by default
@@ -282,9 +286,9 @@ that you have a compatible C++ compiler.  All recent versions of gcc
 should work, but we don't yet know about other compilers.
 <P>
 The goal is for all of the system dependencies to be in the Forwarding
-Engine Abstraction process.  To port XORP to a new platform, either an
+Engine Abstraction (FEA) process.  To port XORP to a new platform, either an
 existing FEA must be ported to that platform, or a new bottom end to
-FEA will need to be written.  FreeBSD and Linux use different bottom
+the FEA will need to be written.  FreeBSD and Linux use different bottom
 ends to the FEA.
 <P>
 The libxipc XRL IPC library may need work to port, but this should not
