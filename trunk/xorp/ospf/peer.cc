@@ -15,3 +15,36 @@
 
 #ident "$XORP$"
 
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
+
+#include "config.h"
+#include <map>
+#include <list>
+#include <set>
+
+#include "ospf_module.h"
+
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/callback.hh"
+
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+
+#include "ospf.hh"
+#include "peer.hh"
+
+template <typename A>
+bool
+Peer<A>::remove_area(OspfTypes::AreaID area)
+{
+    debug_msg("Area %s\n", area.str().c_str());
+    XLOG_UNFINISHED();
+    
+    return true;
+}
+
+template class Peer<IPv4>;
+template class Peer<IPv6>;
+

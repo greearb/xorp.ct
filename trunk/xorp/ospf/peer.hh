@@ -40,20 +40,33 @@ class Peer {
  public:
 
     Peer(Ospf<A>& ospf, OspfTypes::LinkType linktype, OspfTypes::AreaID area)
-	: _ospf(ospf), _linktype(linktype)
+	: _ospf(ospf), _linktype(linktype), _running(false);
     {
 	_area.push_back(area);
     }
 
     /**
-     * True if:
-     * 	1) Administratively enabled.
-     *  2) The interface/link is configured.
-     * Used by clients of this class to determine if it is legal to 
-     * transmit packets.
+     * Add another Area for this peer to be in, should only be allowed
+     * for OSPFv3.
      */
-    bool running();
-    
+    bool add_area(OspfTypes::AreaID area);
+
+    /**
+     * This area is being removed.
+     *
+     * @return true if this peer is no longer associated with any
+     * areas. Allowing the caller to delete this peer.
+     */
+    bool remove_area(OspfTypes::AreaID area);
+
+    void set_state(bool state) {
+	_running = state;
+    }
+
+    bool get_state() const {
+	return _running;
+    }
+
     /**
      * Used by external and internal entities to transmit packets.
      */
@@ -67,7 +80,10 @@ class Peer {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     OspfTypes::LinkType _linktype;	// Type of this link.
-    list<OspfTypes::AreaID> _area;	// Area: That is represented.
+
+    list<OspfTypes::AreaID> _area;	// Areas we 
+
+    bool _running;			// True if the peer is up and running
 
     // In order to maintain the requirement for an interpacket gap,
     // all outgoing packets are appended to this queue. Then they are
