@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.2 2002/12/16 03:08:20 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -158,12 +158,11 @@ BGPDecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	old_winners_parent->route_used(old_winner, false);
 
 	//the old winner is no longer the winner
-	old_winner->set_winner(false);
+	old_winner->set_is_not_winner();
     }
     if (new_is_best) {
 	cp(8);
-	rtmsg.route()->set_winner(true);
-	rtmsg.set_igp_metric(igp_distance(rtmsg.route()->nexthop()));
+	rtmsg.route()->set_is_winner(igp_distance(rtmsg.route()->nexthop()));
 
 	int result;
 	result = _next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -250,12 +249,13 @@ BGPDecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	//do old before new, because it's possible they're the same route
 	if (old_winner != NULL) {
 	    cp(18);
-	    old_winner->set_winner(false);
+	    old_winner->set_is_not_winner();
 	} else {
 	    cp(19);
-	    old_rtmsg.route()->set_winner(false);
+	    old_rtmsg.route()->set_is_not_winner();
 	}
-	new_rtmsg.route()->set_winner(true);
+	new_rtmsg.route()
+	    ->set_is_winner(igp_distance(new_rtmsg.route()->nexthop()));
     }
 
     int result = ADD_USED;
@@ -285,11 +285,10 @@ BGPDecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	assert(old_winner != NULL);
 	InternalMessage<A> alt_rtmsg(old_winner, old_winners_peer,
 				     GENID_UNKNOWN);
-	alt_rtmsg.set_igp_metric(igp_distance(old_winner->nexthop()));
 	result = _next_table->add_route(alt_rtmsg, 
 					(BGPRouteTable<A>*)this);
 	//inform the RibIn the route is now being used.
-	old_winner->set_winner(true);
+	old_winner->set_is_winner(igp_distance(old_winner->nexthop()));
 	old_winners_parent->route_used(old_winner, true);
     } else {
 	cp(23);
@@ -309,7 +308,6 @@ BGPDecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	} else {
 	    cp(25);
 	}
-	new_rtmsg.set_igp_metric(igp_distance(new_rtmsg.route()->nexthop()));
 	result = _next_table->add_route(new_rtmsg, (BGPRouteTable<A>*)this);
     }
 
@@ -342,7 +340,7 @@ BGPDecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     }
 
     //it's being deleted, so it's no longer the winner
-    rtmsg.route()->set_winner(false);
+    rtmsg.route()->set_is_not_winner();
 
     const SubnetRoute<A>* best_route;
     const PeerHandler *best_routes_peer;
@@ -358,7 +356,7 @@ BGPDecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	assert(best_route->is_winner() == false);
 
 	//it is now the new winner
-	best_route->set_winner(true);
+	best_route->set_is_winner(igp_distance(best_route->nexthop()));
     }
 
     //propagate the delete downstream.
@@ -384,7 +382,6 @@ BGPDecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 				     peer_handler,
 				     GENID_UNKNOWN);
 	int add_result;
-	alt_rtmsg.set_igp_metric(igp_distance(best_route->nexthop()));
 	add_result = _next_table->add_route(alt_rtmsg, 
 					    (BGPRouteTable<A>*)this);
 	if (add_result == ADD_USED) {
@@ -875,7 +872,6 @@ BGPDecisionTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> */*caller*/,
 			     const PeerHandler *peer) {
     XLOG_ASSERT(_next_table != NULL);
-    rtmsg.set_igp_metric(igp_distance(rtmsg.route()->nexthop()));
     return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, peer);
 }
 

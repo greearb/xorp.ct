@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.2 2002/12/14 21:25:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.3 2002/12/16 03:08:21 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -49,8 +49,6 @@ BGPRouteFilter<A>::propagate_flags(const InternalMessage<A> *rtmsg,
 	new_rtmsg->set_push();
     if (rtmsg->from_previous_peering())
 	new_rtmsg->set_from_previous_peering();
-    if (rtmsg->has_igp_metric())
-	new_rtmsg->set_igp_metric(rtmsg->igp_metric());
 }
 
 /*************************************************************************/
@@ -100,7 +98,9 @@ ASPrependFilter<A>::filter(const InternalMessage<A> *rtmsg,
     palist.rehash();
     
     //Create a new route message with the new path attribute list
-    SubnetRoute<A> *new_route = new SubnetRoute<A>(rtmsg->net(), &palist);
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->igp_metric());
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());
@@ -136,7 +136,10 @@ NexthopRewriteFilter<A>::filter(const InternalMessage<A> *rtmsg,
     palist.rehash();
     
     //Create a new route message with the new path attribute list
-    SubnetRoute<A> *new_route = new SubnetRoute<A>(rtmsg->net(), &palist);
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->igp_metric());
+
     debug_msg("NexthopRewriteFilter: new route: %x with attributes %x\n",
 	   (uint)new_route, (uint)(new_route->attributes()));
     InternalMessage<A> *new_rtmsg = 
@@ -205,7 +208,10 @@ LocalPrefInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
     palist.rehash();
     
     //Create a new route message with the new path attribute list
-    SubnetRoute<A> *new_route = new SubnetRoute<A>(rtmsg->net(), &palist);
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->igp_metric());
+
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());
@@ -246,7 +252,10 @@ LocalPrefRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
     palist.rehash();
     
     //Create a new route message with the new path attribute list
-    SubnetRoute<A> *new_route = new SubnetRoute<A>(rtmsg->net(), &palist);
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->igp_metric());
+
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());
@@ -279,17 +288,21 @@ MEDInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
 {
     debug_msg("MED insertion filter\n");
     debug_msg("Route: %s\n", rtmsg->route()->str().c_str());
-    if (!rtmsg->has_igp_metric()) 
-	return rtmsg;
+
+    //XXX theoretically unsafe test for debugging purposes
+    assert(rtmsg->route()->igp_metric() != 0xffffffff);
 
     //Form a new path attribute list containing the new MED attribute
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
-    MEDAttribute med_att(rtmsg->igp_metric());
+    MEDAttribute med_att(rtmsg->route()->igp_metric());
     palist.add_path_attribute(med_att);
     palist.rehash();
     
     //Create a new route message with the new path attribute list
-    SubnetRoute<A> *new_route = new SubnetRoute<A>(rtmsg->net(), &palist);
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->igp_metric());
+
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());
@@ -330,7 +343,10 @@ MEDRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
     palist.rehash();
     
     //Create a new route message with the new path attribute list
-    SubnetRoute<A> *new_route = new SubnetRoute<A>(rtmsg->net(), &palist);
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist, 
+			     rtmsg->route()->igp_metric());
+
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.22 2002/12/09 18:28:49 hodson Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -34,6 +34,9 @@ public:
     SubnetRoute(const SubnetRoute<A>& route_to_clone);
     SubnetRoute(const IPNet<A> &net, 
 		const PathAttributeList<A> *attributes);
+    SubnetRoute(const IPNet<A> &net, 
+		const PathAttributeList<A> *attributes,
+		uint32_t igp_metric);
     ~SubnetRoute();
     bool operator==(const SubnetRoute<A>& them) const;
     const IPNet<A>& net() const {return _net;}
@@ -48,7 +51,8 @@ public:
        caching means that they may not do the right thing anywhere
        else */
     bool is_winner() const {return (_flags & SRF_WINNER) != 0;}
-    void set_winner(bool winner) const;
+    void set_is_winner(uint32_t igp_metric) const;
+    void set_is_not_winner() const;
 
     bool is_filtered() const {return (_flags & SRF_FILTERED) != 0;}
     void set_filtered(bool filtered) const;
@@ -57,6 +61,7 @@ public:
     int number_of_managed_atts() const {
 	return _att_mgr.number_of_managed_atts();
     }
+    uint32_t igp_metric() const {return _igp_metric;}
 protected:
 private:
     static AttributeManager<A> _att_mgr;
@@ -75,6 +80,11 @@ private:
        Currently this is only used for RIB-IN routes that are filtered
        in the inbound filter bank */
     mutable uint32_t _flags;
+
+    /* If the route is a winner (SRF_WINNER is set), then
+       DecisionTable will fill in the IGP metric that was used in
+       deciding the route was a winner */
+    mutable uint32_t _igp_metric;
 };
 
 #endif // __BGP_SUBNET_ROUTE_HH__

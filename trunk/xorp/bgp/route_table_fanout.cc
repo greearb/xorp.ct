@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.2 2002/12/14 21:25:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.3 2002/12/16 03:08:20 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -346,8 +346,6 @@ BGPFanoutTable<A>::add_to_queue(RouteQueueOp operation,
     queue_entry = new RouteQueueEntry<A>(rtmsg.route(), operation);
     queue_entry->set_origin_peer(rtmsg.origin_peer());
     queue_entry->set_genid(rtmsg.genid());
-    if (rtmsg.has_igp_metric())
-	queue_entry->set_igp_metric(rtmsg.igp_metric());
     _output_queue.push_back(queue_entry);
     set_queue_positions(queued_peers);
 
@@ -380,8 +378,6 @@ BGPFanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
 					 RTQUEUE_OP_REPLACE_NEW);
     queue_entry->set_origin_peer(new_rtmsg.origin_peer());
     queue_entry->set_genid(new_rtmsg.genid());
-    if (new_rtmsg.has_igp_metric())
-	queue_entry->set_igp_metric(new_rtmsg.igp_metric());
     _output_queue.push_back(queue_entry);
 
 
@@ -474,8 +470,6 @@ BGPFanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	InternalMessage<A> rtmsg((*queue_ptr)->route(),
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
-	if ((*queue_ptr)->has_igp_metric())
-	    rtmsg.set_igp_metric((*queue_ptr)->igp_metric());
 	next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
 	break;
     }
@@ -499,8 +493,6 @@ BGPFanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	InternalMessage<A> new_rtmsg((*queue_ptr)->route(),
 				     (*queue_ptr)->origin_peer(),
 				     (*queue_ptr)->genid());
-	if ((*queue_ptr)->has_igp_metric())
-	    new_rtmsg.set_igp_metric((*queue_ptr)->igp_metric());
 	next_table->replace_route(old_rtmsg, new_rtmsg,
 				  (BGPRouteTable<A>*)this);
 	skipped = 2;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.18 2002/12/09 18:28:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 #include "bgp_module.h"
 #include "subnet_route.hh"
@@ -37,6 +37,7 @@ SubnetRoute<A>::SubnetRoute<A>(const SubnetRoute<A>& route_to_clone)
     _attributes = _att_mgr.add_attribute_list(atts);
 
     _flags = route_to_clone._flags;
+    _igp_metric = route_to_clone._igp_metric;
 }
 
 template<class A>
@@ -54,6 +55,26 @@ SubnetRoute<A>::SubnetRoute<A>(const IPNet<A> &n,
     //should default to true if we don't know for sure that a route is
     //not used as this is always safe, if somewhat inefficient.
     _flags |= SRF_IN_USE;
+    _igp_metric = 0xffffffff;
+}
+
+template<class A>
+SubnetRoute<A>::SubnetRoute<A>(const IPNet<A> &n, 
+			       const PathAttributeList<A>* atts,
+			       uint32_t igp_metric)
+    : _net(n) {
+    debug_msg("SubnetRoute constructor3 giving %x\n", (uint)this);
+    //the attribute manager handles memory management, and ensuring
+    //that only one copy of each attribute list is ever stored
+    _attributes = _att_mgr.add_attribute_list(atts);
+
+    _flags = 0;
+    //the in_use flag is set to false so reduce the work we have to
+    //re-do when we have to touch all the routes in a route_table.  It
+    //should default to true if we don't know for sure that a route is
+    //not used as this is always safe, if somewhat inefficient.
+    _flags |= SRF_IN_USE;
+    _igp_metric = igp_metric;
 }
 
 template<class A>
@@ -75,20 +96,15 @@ SubnetRoute<A>::~SubnetRoute<A>() {
 
 template<class A>
 void 
-SubnetRoute<A>::set_winner(bool winner) const {
-    if (winner) {
-	_flags |= SRF_WINNER;
-    } else {
-	_flags &= ~SRF_WINNER;
-    }
-#ifdef DEBUG_FLAGS
-    printf("set_winner: %p = ", this);
-    if (winner)
-	printf("true");
-    else 
-	printf("false");
-    printf("\n%s\n", str().c_str());
-#endif
+SubnetRoute<A>::set_is_winner(uint32_t igp_metric) const {
+    _flags |= SRF_WINNER;
+    _igp_metric = igp_metric;
+}
+
+template<class A>
+void 
+SubnetRoute<A>::set_is_not_winner() const {
+    _flags &= ~SRF_WINNER;
 }
 
 template<class A>
