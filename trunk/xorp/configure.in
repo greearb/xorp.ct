@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.17 2003/04/12 01:22:57 jcardona Exp $
+dnl $XORP: xorp/configure.in,v 1.18 2003/04/12 01:34:51 jcardona Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -325,7 +325,7 @@ AC_HEADER_STDC
 dnl
 dnl Check for misc. header files
 dnl
-AC_CHECK_HEADERS(sys/ioctl.h sys/sysctl.h sys/filio.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h)
+AC_CHECK_HEADERS(sys/ioctl.h sys/sysctl.h sys/filio.h net/if_types.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h)
 
 dnl
 dnl XXX ether_addr is defined in sys/ethernet.h or net/ethernet.h
