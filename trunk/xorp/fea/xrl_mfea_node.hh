@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.20 2005/02/18 00:39:59 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.21 2005/02/23 17:37:36 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -633,11 +633,6 @@ protected:
 	const bool&	enable);
 
 private:
-    const ServiceBase* ifmgr_mirror_service_base() const {
-	return dynamic_cast<const ServiceBase*>(&_ifmgr);
-    }
-    const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
-
     /**
      * Called when Finder connection is established.
      *
@@ -652,6 +647,11 @@ private:
      */
     virtual void finder_disconnect_event();
 
+    const ServiceBase* ifmgr_mirror_service_base() const {
+	return dynamic_cast<const ServiceBase*>(&_ifmgr);
+    }
+    const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
+
     void fea_register_startup();
     void finder_register_interest_fea_cb(const XrlError& xrl_error);
     void fea_register_shutdown();
@@ -660,7 +660,28 @@ private:
     //
     // Protocol node methods
     //
+    int	proto_send(const string& dst_module_instance_name,
+		   xorp_module_id dst_module_id,
+		   uint16_t vif_index,
+		   const IPvX& src, const IPvX& dst,
+		   int ip_ttl, int ip_tos, bool is_router_alert,
+		   const uint8_t* sndbuf, size_t sndlen);
+    //
+    // XXX: mfea_client_client_send_recv_protocol_message_cb() in fact
+    // is the callback when proto_send() calls send_recv_protocol_message()
+    // so the destination protocol will receive a protocol message.
+    // Sigh, the 'recv' part in the name is rather confusing, but that
+    // is in the name of consistency between the XRL calling function
+    // and the return result callback...
+    //
+    void mfea_client_client_send_recv_protocol_message_cb(const XrlError& xrl_error);
 
+    int signal_message_send(const string& dst_module_instance_name,
+			    xorp_module_id dst_module_id,
+			    int message_type,
+			    uint16_t vif_index,
+			    const IPvX& src, const IPvX& dst,
+			    const uint8_t *rcvbuf, size_t rcvlen);
     //
     // XXX: mfea_client_client_send_recv_kernel_signal_message_cb() in fact
     // is the callback when signal_message_send() calls
@@ -671,6 +692,25 @@ private:
     // and the return result callback...
     //
     void mfea_client_client_send_recv_kernel_signal_message_cb(const XrlError& xrl_error);
+
+    int dataflow_signal_send(const string& dst_module_instance_name,
+			     xorp_module_id dst_module_id,
+			     const IPvX& source_addr,
+			     const IPvX& group_addr,
+			     uint32_t threshold_interval_sec,
+			     uint32_t threshold_interval_usec,
+			     uint32_t measured_interval_sec,
+			     uint32_t measured_interval_usec,
+			     uint32_t threshold_packets,
+			     uint32_t threshold_bytes,
+			     uint32_t measured_packets,
+			     uint32_t measured_bytes,
+			     bool is_threshold_in_packets,
+			     bool is_threshold_in_bytes,
+			     bool is_geq_upcall,
+			     bool is_leq_upcall);
+    
+    void mfea_client_client_send_recv_dataflow_signal_cb(const XrlError& xrl_error);
 
     /**
      * Send a message to a client to add a configured vif.
@@ -785,47 +825,6 @@ private:
     void mfea_client_client_send_delete_vif_addr_cb(const XrlError& xrl_error);
     void mfea_client_client_send_set_vif_flags_cb(const XrlError& xrl_error);
     void mfea_client_client_send_set_all_vifs_done_cb(const XrlError& xrl_error);
-    
-    int dataflow_signal_send(const string& dst_module_instance_name,
-			     xorp_module_id dst_module_id,
-			     const IPvX& source_addr,
-			     const IPvX& group_addr,
-			     uint32_t threshold_interval_sec,
-			     uint32_t threshold_interval_usec,
-			     uint32_t measured_interval_sec,
-			     uint32_t measured_interval_usec,
-			     uint32_t threshold_packets,
-			     uint32_t threshold_bytes,
-			     uint32_t measured_packets,
-			     uint32_t measured_bytes,
-			     bool is_threshold_in_packets,
-			     bool is_threshold_in_bytes,
-			     bool is_geq_upcall,
-			     bool is_leq_upcall);
-    
-    void mfea_client_client_send_recv_dataflow_signal_cb(const XrlError& xrl_error);
-
-    int	proto_send(const string& dst_module_instance_name,
-		   xorp_module_id dst_module_id,
-		   uint16_t vif_index,
-		   const IPvX& src, const IPvX& dst,
-		   int ip_ttl, int ip_tos, bool router_alert_bool,
-		   const uint8_t* sndbuf, size_t sndlen);
-    //
-    // XXX: mfea_client_client_send_recv_protocol_message_cb() in fact
-    // is the callback when proto_send() calls send_recv_protocol_message()
-    // so the destination protocol will receive a protocol message.
-    // Sigh, the 'recv' part in the name is rather confusing, but that
-    // is in the name of consistency between the XRL calling function
-    // and the return result callback...
-    //
-    void mfea_client_client_send_recv_protocol_message_cb(const XrlError& xrl_error);
-    int signal_message_send(const string& dst_module_instance_name,
-			    xorp_module_id dst_module_id,
-			    int message_type,
-			    uint16_t vif_index,
-			    const IPvX& src, const IPvX& dst,
-			    const uint8_t *rcvbuf, size_t rcvlen);
     
     //
     // Protocol node CLI methods
