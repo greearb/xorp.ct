@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.5 2003/11/06 22:32:15 atanu Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.6 2003/11/08 00:56:17 hodson Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -121,3 +121,6 @@ gmake check
   * Parallel building (e.g., "gmake -j 4") may fail on multi-CPU machines.
     The simplest work-around is to rerun gmake or not to use the -j flag.
 
+  * net-snmp-5.1.* may have problems with some of its header files, hence
+    the XORP SNMP support won't be compiled if those problems exist.
+    Instead, use an earlier net-snmp version from the 5.0.x branch.
