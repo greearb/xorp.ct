@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_osdep.hh,v 1.3 2003/03/10 23:20:41 hodson Exp $
+// $XORP: xorp/mfea/mfea_unix_osdep.hh,v 1.4 2003/04/10 03:12:03 pavlin Exp $
 
 #ifndef __MFEA_MFEA_UNIX_OSDEP_HH__
 #define __MFEA_MFEA_UNIX_OSDEP_HH__
@@ -29,6 +29,10 @@
 #include "config.h"
 
 #include <sys/time.h>
+
+#ifdef HAVE_NETINET_ICMP6_H
+#include <netinet/icmp6.h>
+#endif
 
 #include "mrt/include/ip_mroute.h"
 
@@ -204,6 +208,36 @@ do {									\
 #ifndef IPPROTO_PIM
 #define IPPROTO_PIM		103	// Protocol Independent Multicast
 #endif
+
+#ifdef HAVE_IPV6
+#ifndef MLD_LISTENER_QUERY
+#define MLD_LISTENER_QUERY		MLD6_LISTENER_QUERY
+#endif
+#ifndef MLD_LISTENER_REPORT
+#define MLD_LISTENER_REPORT		MLD6_LISTENER_REPORT
+#endif
+#ifndef MLD_LISTENER_DONE
+#define MLD_LISTENER_DONE		MLD6_LISTENER_DONE
+#endif
+#ifndef MLD_MTRACE_RESP
+#define MLD_MTRACE_RESP			MLD6_MTRACE_RESP
+#endif
+#ifndef MLD_MTRACE
+#define MLD_MTRACE			MLD6_MTRACE
+#endif
+#ifndef MLDV2_LISTENER_REPORT
+#  ifdef MLD6V2_LISTENER_REPORT
+#    define MLDV2_LISTENER_REPORT	MLD6V2_LISTENER_REPORT
+#  endif
+#endif
+#ifndef MLD_MINLEN
+#  ifdef HAVE_MLD_HDR
+#    define MLD_MINLEN	(sizeof(struct mld_hdr))
+#  else
+#    define MLD_MINLEN	(sizeof(struct mld6_hdr))
+#  endif
+#endif /* ! MLD_MINLEN */
+#endif // HAVE_IPV6
 
 //
 // Test if the kernel multicast signal message types are consistent
