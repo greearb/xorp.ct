@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.13 2003/12/02 09:39:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.14 2003/12/04 20:21:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -112,7 +112,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     if (strchr(clientname.c_str(), '/') != NULL) {
 	string err = c_format("Illegal character in clientname: %s", 
 			      clientname.c_str());
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
 
     //
@@ -127,7 +127,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     if (file == NULL) {
 	string err = c_format("Failed to create temporary file: %s",
 			      filename.c_str());
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     umask(oldmode);
 
@@ -135,7 +135,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     if (user == NULL) {
 	unlink(filename.c_str());
 	string err = c_format("User ID %d not found", user_id);
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
 
     newuser = new UserInstance(user->user_id(), user->username());
@@ -154,19 +154,19 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 	unlink(filename.c_str());
 	string err = c_format("Failed to write to temporary file: %s",
 			      filename.c_str());
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     if (fchown(fileno(file), user_id, (gid_t)-1) != 0) {
 	unlink(filename.c_str());
 	string err = c_format("Failed to chown temporary file %s to user_id %u",
 			      filename.c_str(), user_id);
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     if (fclose(file) != 0) {
 	unlink(filename.c_str());
 	string err = c_format("Failed to close temporary file: %s",
 			      filename.c_str());
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
 
     return XrlCmdError::OKAY();
@@ -177,7 +177,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_unregister_client(const string& token)
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     multimap<uint32_t, UserInstance*>::iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
@@ -207,14 +207,14 @@ XrlRtrmgrInterface::rtrmgr_0_1_authenticate_client(
     user = find_user_instance(user_id, clientname);
     if (user == NULL) {
 	string err = "User Instance not found - did login time out?";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     if (token == user->authtoken()) {
 	user->set_authenticated(true);
 	return XrlCmdError::OKAY();
     } else {
 	string err = "Bad authtoken";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
 }
 
@@ -228,12 +228,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
 
     if (!verify_token(token)) {
 	response = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(response);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
 	response = "You do not have permission for this operation.";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(response);
     }
     printf("user %d entering config mode\n", user_id);
     if (exclusive)
@@ -276,7 +276,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_leave_config_mode(
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     printf("user %d leaving config mode\n", get_user_id_from_token(token));
     multimap<uint32_t, UserInstance*>::iterator iter;
@@ -287,7 +287,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_leave_config_mode(
 	}
     }
     string err = "User was not in config mode.";
-    return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+    return XrlCmdError::COMMAND_FAILED(err);
 }
 
 XrlCmdError
@@ -299,12 +299,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_config_users(
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     uid_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
 	string err = "You do not have permission to view the config mode users.";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     multimap<uint32_t, UserInstance*>::const_iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
@@ -322,7 +322,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_running_config(
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     config = _conf_tree->show_tree();
     return XrlCmdError::OKAY();
@@ -338,16 +338,16 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     if (_config_locked == false) {
 	string err = "Cannot commit config changes without locking the config";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     uid_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
 	string err = "You do not have permission for this operation.";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     // XXX: TBD
     printf("\nXRL got config change: deltas: \n%s\nend deltas\ndeletions:\n%s\nend deletions\n",
@@ -357,12 +357,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
     if (_conf_tree->apply_deltas(user_id, deltas, 
 				 /* provisional change */ true,
 				 response) == false) {
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(response);
     }
     if (_conf_tree->apply_deletions(user_id, deletions, 
 				    /* provisional change */ true,
 				    response) == false) {
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(response);
     }
     // Add nodes providing default values.  Note: they shouldn't be
     // needed, but adding them here acts as a safety mechanism against
@@ -374,6 +374,10 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 		  user_id, string(target), string(deltas), string(deletions));
 
     _conf_tree->commit_changes_pass1(cb);
+    if (_conf_tree->config_failed()) {
+	string err = _conf_tree->config_failed_msg();
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
     return XrlCmdError::OKAY();
 }
 
@@ -474,12 +478,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
 
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
 	string err = "You do not have permission to lock the configuration.";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     if (_config_locked) {
 	// Can't return COMMAND_FAILED and return the lock holder
@@ -510,13 +514,13 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_config(
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     if (_config_locked) {
 	uint32_t user_id = get_user_id_from_token(token);
 	if (user_id != _lock_holder) {
 	    string err = c_format("Config not held by USER_ID %d.", user_id);
-	    return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	    return XrlCmdError::COMMAND_FAILED(err);
 	}
 	_config_locked = false;
 	_lock_timer.unschedule();
@@ -524,7 +528,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_config(
 	return XrlCmdError::OKAY();
     } else {
 	string err = "Config not locked.";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
 }
 
@@ -540,12 +544,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_node(
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config")==false) {
 	string err = "You do not have permission to lock the configuration.";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     if (user_id == (uint32_t)-1) {
 	// Shouldn't be possible as we already checked the token
@@ -563,7 +567,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_node(
 {
     if (!verify_token(token)) {
 	string err = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (user_id == (uint32_t)-1) {
@@ -576,7 +580,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_node(
 	return XrlCmdError::OKAY();
     } else {
 	string err = "Unlock failed.";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(err);
+	return XrlCmdError::COMMAND_FAILED(err);
     }
 }
 
@@ -589,12 +593,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_save_config(// Input values:
 
     if (!verify_token(token)) {
 	response = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(response);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config")==false) {
 	response = "You do not have permission to save the configuration.";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(response);
     }
     if (_config_locked) {
 	string holder = _userdb.find_user_by_user_id(_lock_holder)->username();
@@ -621,12 +625,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
 
     if (!verify_token(token)) {
 	response = "AUTH_FAIL";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(response);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
 	response = "You do not have permission to reload the configuration.";
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(response);
     }
     if (_config_locked) {
 	string holder = 
@@ -648,8 +652,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
 	printf("here1: success\n");
 	response = "";
 	_conf_tree->commit_changes_pass1(cb);
+	if (_conf_tree->config_failed()) {
+	    string err = _conf_tree->config_failed_msg();
+	    return XrlCmdError::COMMAND_FAILED(err);
+	}
     } else {
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(response);
     }
     return XrlCmdError::OKAY();
 }
