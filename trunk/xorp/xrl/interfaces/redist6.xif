@@ -1,3 +1,10 @@
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.16 2004/03/02 00:29:45 pavlin Exp $ */
+
+/*
+ * RIB routes redistribution XRL interface.
+ */
+
+
 interface redist6/0.1 {
 
 	/**
