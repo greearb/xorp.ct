@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.7 2004/12/01 03:28:06 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.8 2004/12/02 02:37:47 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -76,12 +76,9 @@ public:
      * Specify the list of kernel Click modules to load on startup if
      * installing kernel-level Click on startup is enabled.
      *
-     * The file names of the kernel modules are separated by colon.
-     *
-     * @param v the list of kernel Click modules (separated by colon) to
-     * load.
+     * @param v the list of kernel Click modules to load.
      */
-    void set_kernel_click_modules(const string& v) {
+    void set_kernel_click_modules(const list<string>& v) {
 	_kernel_click_modules = v;
     }
 
@@ -386,7 +383,7 @@ private:
 
     string	_click_config_generator_file;
     bool	_kernel_click_install_on_startup;
-    string	_kernel_click_modules;
+    list<string> _kernel_click_modules;
     string	_kernel_click_mount_directory;
     string	_user_click_command_file;
     string	_user_click_command_extra_arguments;

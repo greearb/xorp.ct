@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.62 2004/11/29 09:36:27 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.63 2004/12/02 02:37:48 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -265,11 +265,32 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_modules(
     // Input values,
     const string&	modules)
 {
+    list<string> modules_list;
+
     IfConfig& ifc = _xifmgr.ifconfig();
     FtiConfig& ftic = _xftm.ftic();
 
-    ifc.set_kernel_click_modules(modules);
-    ftic.set_kernel_click_modules(modules);
+    //
+    // Split the string with the names of the modules (separated by colon)
+    //
+    string modules_tmp = modules;
+    string::size_type colon;
+    string name;
+    do {
+	if (modules_tmp.empty())
+	    break;
+	colon = modules_tmp.find(':');
+	name = modules_tmp.substr(0, colon);
+	if (colon != string::npos)
+	    modules_tmp = modules_tmp.substr(colon + 1);
+	else
+	    modules_tmp.erase();
+	if (! name.empty())
+	    modules_list.push_back(name);
+    } while (true);
+
+    ifc.set_kernel_click_modules(modules_list);
+    ftic.set_kernel_click_modules(modules_list);
 
     return XrlCmdError::OKAY();
 }
