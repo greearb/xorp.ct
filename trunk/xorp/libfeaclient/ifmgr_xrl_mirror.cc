@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.4 2003/10/23 22:31:22 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.5 2004/01/12 22:11:26 hodson Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -831,9 +831,10 @@ static const char* CLSNAME = "ifmgr_mirror";
 const char* IfMgrXrlMirror::DEFAULT_REGISTRATION_TARGET = "ifmgr_mirror";
 
 IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
+			       const char*	rtarget,
 			       IPv4		finder_host,
-			       uint16_t		finder_port,
-			       const char*	rtarget)
+			       uint16_t		finder_port)
+
     : ServiceBase("FEA Interface Mirror"),
       _e(e), _finder_host(finder_host), _finder_port(finder_port),
       _dispatcher(_iftree), _rtarget(rtarget), _rtr(0), _xrl_tgt(0)

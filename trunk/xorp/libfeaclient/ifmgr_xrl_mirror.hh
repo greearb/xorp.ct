@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.2 2003/10/23 22:31:22 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.3 2003/11/06 17:14:47 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -102,15 +102,16 @@ public:
      * Constructor
      *
      * @param eventloop to use for events.
-     * @param finder_host address to route finder messages to.
-     * @param finder_port port to direct finder messages to.
      * @param reg_tgt name of Xrl class or target to supply interface
      *                configuration updates.
+     * @param finder_host address to route finder messages to.
+     * @param finder_port port to direct finder messages to.
      */
     IfMgrXrlMirror(EventLoop&	e,
+		   const char*	reg_tgt     = DEFAULT_REGISTRATION_TARGET,
 		   IPv4		finder_host = FINDER_DEFAULT_HOST,
-		   uint16_t	finder_port = FINDER_DEFAULT_PORT,
-		   const char*	reg_tgt     = DEFAULT_REGISTRATION_TARGET);
+		   uint16_t	finder_port = FINDER_DEFAULT_PORT);
+
     ~IfMgrXrlMirror();
 
     /**
