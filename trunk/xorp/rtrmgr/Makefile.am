@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.41 2004/12/07 10:33:10 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.42 2004/12/11 21:29:56 mjh Exp $
 ##
 
 # -- Real Programs
@@ -34,9 +34,11 @@ xorp_rtrmgr_SOURCES	+= y.tplt_tab.h
 xorp_rtrmgr_SOURCES	+= command_tree.hh
 xorp_rtrmgr_SOURCES	+= conf_tree.hh
 xorp_rtrmgr_SOURCES	+= conf_tree_node.hh
-xorp_rtrmgr_SOURCES	+= master_conf_tree_node.hh
 xorp_rtrmgr_SOURCES	+= generic_module_manager.hh
 xorp_rtrmgr_SOURCES	+= master_conf_tree.hh
+xorp_rtrmgr_SOURCES	+= master_conf_tree_node.hh
+xorp_rtrmgr_SOURCES	+= master_template_tree.hh
+xorp_rtrmgr_SOURCES	+= master_template_tree_node.hh
 xorp_rtrmgr_SOURCES	+= module_commands.hh
 xorp_rtrmgr_SOURCES	+= module_manager.hh
 xorp_rtrmgr_SOURCES	+= path_segment.hh
@@ -46,9 +48,7 @@ xorp_rtrmgr_SOURCES	+= task.hh
 xorp_rtrmgr_SOURCES	+= template_base_command.hh
 xorp_rtrmgr_SOURCES	+= template_commands.hh
 xorp_rtrmgr_SOURCES	+= template_tree.hh
-xorp_rtrmgr_SOURCES	+= master_template_tree.hh
 xorp_rtrmgr_SOURCES	+= template_tree_node.hh
-xorp_rtrmgr_SOURCES	+= master_template_tree_node.hh
 xorp_rtrmgr_SOURCES	+= unexpanded_xrl.hh
 xorp_rtrmgr_SOURCES	+= userdb.hh
 xorp_rtrmgr_SOURCES	+= util.hh
@@ -58,12 +58,14 @@ xorp_rtrmgr_SOURCES	+= xrldb.hh
 
 xorp_rtrmgr_SOURCES	+= conf_tree.cc
 xorp_rtrmgr_SOURCES	+= conf_tree_node.cc
-xorp_rtrmgr_SOURCES	+= master_conf_tree_node.cc
 xorp_rtrmgr_SOURCES	+= generic_module_manager.cc
 xorp_rtrmgr_SOURCES	+= lex.boot.cc
 xorp_rtrmgr_SOURCES	+= lex.tplt.cc
 xorp_rtrmgr_SOURCES	+= main_rtrmgr.cc
 xorp_rtrmgr_SOURCES	+= master_conf_tree.cc
+xorp_rtrmgr_SOURCES	+= master_conf_tree_node.cc
+xorp_rtrmgr_SOURCES	+= master_template_tree.cc
+xorp_rtrmgr_SOURCES	+= master_template_tree_node.cc
 xorp_rtrmgr_SOURCES	+= module_command.cc
 xorp_rtrmgr_SOURCES	+= module_manager.cc
 xorp_rtrmgr_SOURCES	+= randomness.cc
@@ -71,9 +73,7 @@ xorp_rtrmgr_SOURCES	+= task.cc
 xorp_rtrmgr_SOURCES	+= template_base_command.cc
 xorp_rtrmgr_SOURCES	+= template_commands.cc
 xorp_rtrmgr_SOURCES	+= template_tree.cc
-xorp_rtrmgr_SOURCES	+= master_template_tree.cc
 xorp_rtrmgr_SOURCES	+= template_tree_node.cc
-xorp_rtrmgr_SOURCES	+= master_template_tree_node.cc
 xorp_rtrmgr_SOURCES	+= unexpanded_xrl.cc
 xorp_rtrmgr_SOURCES	+= userdb.cc
 xorp_rtrmgr_SOURCES	+= util.cc
