@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.58 2005/01/10 02:58:18 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.59 2005/01/19 00:08:10 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -383,6 +383,24 @@ ConfigTreeNode::check_config_tree(string& result) const
 	    result = c_format("Node \"%s\" is deprecated: %s\n",
 			      _path.c_str(),
 			      _template_tree_node->deprecated_reason().c_str());
+	    return false;
+	}
+    }
+    //
+    // An early check that the child nodes are not deprecated.
+    // Note: we need to check the child nodes before the check for
+    // mandatory children so we will print a better error message
+    // if, say, a mandatory child node has been renamed and the old
+    // one has been deprecated.
+    //
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	const TemplateTreeNode* ttn = (*iter)->template_tree_node();
+	if (ttn == NULL)
+	    continue;
+	if (ttn->is_deprecated()) {
+	    result = c_format("Node \"%s\" is deprecated: %s\n",
+			      (*iter)->path().c_str(),
+			      ttn->deprecated_reason().c_str());
 	    return false;
 	}
     }
