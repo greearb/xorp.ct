@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.9 2004/11/23 22:43:43 bms Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.10 2004/12/17 01:07:33 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -38,6 +38,8 @@ libproto_la_SOURCES	+= proto_state.cc
 libproto_la_SOURCES	+= proto_unit.cc
 libproto_la_SOURCES	+= spt.cc
 
+# -- Extra files and directories to add to the distribution
+EXTRA_DIST		 = spt_graph1
 
 ################################################################
 ##
