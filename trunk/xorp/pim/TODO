@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.48 2003/06/28 02:38:00 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.49 2003/07/01 01:02:36 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -1051,16 +1051,6 @@ for the kernel patches as well.
 
 * Page 44 and 46 inconsistency re. the actions when JoinDesired(S,G)->false
   starting from state Joined()
-
-* PimVif::pim_mrt() and PimMre::pim_mrt() should be consistent about the
-  return result: either a pointer or a reference.
-
-* Call when appropriate
-  PimMre::rp_register_sg_changed()
-
-* PimMre::rp_addr() should return a reference to an IPvX address, not a
-  pointer to an IPvX address. If the RP address is not known, return
-  a reference to a dummy IPvX zero address.
 
 * Implement adding PIM Register tunnel
 
