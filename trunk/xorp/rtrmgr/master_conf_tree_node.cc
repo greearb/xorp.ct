@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.54 2004/09/17 19:42:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.4 2004/12/11 21:29:57 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -32,10 +32,14 @@
 extern int booterror(const char *s) throw (ParseError);
 
 MasterConfigTreeNode::MasterConfigTreeNode(bool verbose)
-    : ConfigTreeNode(verbose),
+    : ConfigTreeNode(verbose)
+#if 0
+    // TODO: temporary commented-out. See the comments at the end
+    // of the MasterConfigTreeNode declaration.
       _actions_pending(0),
       _actions_succeeded(true),
-      _cmd_that_failed(NULL)      
+      _cmd_that_failed(NULL)
+#endif
 {
 
 }
@@ -46,18 +50,26 @@ MasterConfigTreeNode::MasterConfigTreeNode(const string& nodename,
 			       MasterConfigTreeNode* parent,
 			       uid_t user_id,
 			       bool verbose)
-    : ConfigTreeNode(nodename, path, ttn, parent, user_id, verbose),
+    : ConfigTreeNode(nodename, path, ttn, parent, user_id, verbose)
+#if 0
+    // TODO: temporary commented-out. See the comments at the end
+    // of the MasterConfigTreeNode declaration.
       _actions_pending(0),
       _actions_succeeded(true),
       _cmd_that_failed(NULL)
+#endif
 {
 }
 
 MasterConfigTreeNode::MasterConfigTreeNode(const MasterConfigTreeNode& ctn)
-    : ConfigTreeNode(ctn),
+    : ConfigTreeNode(ctn)
+#if 0
+    // TODO: temporary commented-out. See the comments at the end
+    // of the MasterConfigTreeNode declaration.
       _actions_pending(0),
       _actions_succeeded(true),
       _cmd_that_failed(NULL)
+#endif
 {
 }
 

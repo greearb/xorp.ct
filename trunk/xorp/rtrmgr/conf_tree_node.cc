@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.54 2004/09/17 19:42:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.55 2004/12/11 21:29:56 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -42,8 +42,14 @@ ConfigTreeNode::ConfigTreeNode(bool verbose)
       _existence_committed(false),
       _value_committed(false),
       _on_parent_path(false),
-      _verbose(verbose)
-
+      _verbose(verbose),
+#if 1
+    // TODO: temporary here. See the comments at the end
+    // of the MasterConfigTreeNode declaration.
+      _actions_pending(0),
+      _actions_succeeded(true),
+      _cmd_that_failed(NULL)
+#endif
 {
 }
 
@@ -65,7 +71,14 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
       _existence_committed(false),
       _value_committed(false),
       _on_parent_path(false),
-      _verbose(verbose)
+      _verbose(verbose),
+#if 1
+    // TODO: temporary here. See the comments at the end
+    // of the MasterConfigTreeNode declaration.
+      _actions_pending(0),
+      _actions_succeeded(true),
+      _cmd_that_failed(NULL)
+#endif
 {
     TimerList::system_gettimeofday(&_modification_time);
     parent->add_child(this);
@@ -87,7 +100,14 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _existence_committed(ctn._existence_committed),
       _value_committed(ctn._value_committed),
       _on_parent_path(false),
-      _verbose(ctn._verbose)
+      _verbose(ctn._verbose),
+#if 1
+    // TODO: temporary here. See the comments at the end
+    // of the MasterConfigTreeNode declaration.
+      _actions_pending(0),
+      _actions_succeeded(true),
+      _cmd_that_failed(NULL)
+#endif
 {
 }
 
