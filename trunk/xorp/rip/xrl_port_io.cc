@@ -148,7 +148,10 @@ void
 XrlPortIO<A>::shutdown()
 {
     _pending = true;
+
+    set_enabled(false);
     set_status(SHUTTING_DOWN);
+
     if (request_socket_close() == false) {
 	set_status(SHUTDOWN);
     }
