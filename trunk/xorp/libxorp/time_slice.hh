@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/time_slice.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+// $XORP: xorp/libxorp/time_slice.hh,v 1.2 2003/03/10 23:20:36 hodson Exp $
 
 
 #ifndef __LIBXORP_TIME_SLICE_HH__
@@ -92,10 +92,10 @@ public:
     inline bool is_expired();
     
 private:
-    struct timeval	_time_slice_limit;	// The time slice to measure
+    TimeVal		_time_slice_limit;	// The time slice to measure
     const size_t	_test_iter_frequency;	// The frequency of measuring
     
-    struct timeval	_time_slice_start;	// When the time slice started
+    TimeVal		_time_slice_start;	// When the time slice started
     size_t		_remain_iter;		// Remaning iterations to
 						// check the time
 };
@@ -106,21 +106,20 @@ private:
 inline bool
 TimeSlice::is_expired()
 {
+    struct timeval current_time;
+    
     if (--_remain_iter)
 	return (false);		// Don't test the time yet
-    
-    struct timeval time_slice_end, time_slice_sub;
     
     _remain_iter = _test_iter_frequency;
     
     // Test if the time slice has expired
-    gettimeofday(&time_slice_end, NULL);
-    time_slice_sub = time_slice_end - _time_slice_limit;
-    if (time_slice_sub < _time_slice_start)
+    gettimeofday(&current_time, NULL);
+    if (TimeVal(current_time) - _time_slice_limit < _time_slice_start)
 	return (false);		// The time slice has not expired
     
     // The time slice has expired
-    _time_slice_start = time_slice_end;
+    _time_slice_start.copy_in(current_time);
     return (true);
 }
 

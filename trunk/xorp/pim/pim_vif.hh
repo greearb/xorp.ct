@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.10 2003/03/13 00:27:33 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.11 2003/03/27 00:19:03 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -282,14 +282,14 @@ public:
     
     bool	is_lan_delay_enabled() const;
     // Link-related time intervals
-    const struct timeval& vif_propagation_delay() const;
-    const struct timeval& vif_override_interval() const;
+    const TimeVal& vif_propagation_delay() const;
+    const TimeVal& vif_override_interval() const;
     bool	is_lan_suppression_state_enabled() const;
-    const struct timeval& upstream_join_timer_t_suppressed() const;
-    const struct timeval& upstream_join_timer_t_override() const;
+    const TimeVal& upstream_join_timer_t_suppressed() const;
+    const TimeVal& upstream_join_timer_t_override() const;
     
     // Misc. functions
-    const struct timeval& jp_override_interval() const;
+    const TimeVal& jp_override_interval() const;
     list<PimNbr *>& pim_nbrs() { return (_pim_nbrs); }
     int		pim_nbrs_number() const { return (_pim_nbrs.size()); }
     bool	i_am_dr() const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mifset.cc,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $"
+#ident "$XORP: xorp/mrt/mifset.cc,v 1.2 2003/03/10 23:20:44 hodson Exp $"
 
 
 //
@@ -72,10 +72,13 @@ MifsetTimers::cancel_mif_timer(size_t vif_index)
 }
 
 uint32_t
-MifsetTimers::mif_timer_remain(size_t vif_index,
-			       struct timeval& timeval_diff) const
+MifsetTimers::mif_timer_remain(size_t vif_index, TimeVal& tv_diff) const
 {
-    return (_mifset_timers[vif_index].left_timeval(&timeval_diff));
+    struct timeval timeval_tmp;
+    
+    _mifset_timers[vif_index].left_timeval(&timeval_tmp);
+    tv_diff.copy_in(timeval_tmp);
+    return tv_diff.sec();
 }
 
 void

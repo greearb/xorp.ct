@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.4 2003/02/07 23:11:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.5 2003/03/10 23:20:48 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -281,8 +281,8 @@ PimMre::receive_register_stop()
     if (! is_sg())
 	return;
     
-    struct timeval register_stop_timeval;
-    struct timeval register_probe_timeval;
+    TimeVal register_stop_tv;
+    TimeVal register_probe_tv;
     
     if (is_register_noinfo_state())
 	goto register_noinfo_state_label;
@@ -307,13 +307,12 @@ PimMre::receive_register_stop()
     // Remove reg tunnel
     remove_register_tunnel();
     // Set Register-Stop timer
-    TIMEVAL_SET(&register_stop_timeval,
-		PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
-    TIMEVAL_RANDOM(&register_stop_timeval, 0.5);
-    TIMEVAL_SET(&register_probe_timeval, PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
-    TIMEVAL_DECR(&register_stop_timeval, &register_probe_timeval);
-    register_stop_timer().start(TIMEVAL_SEC(&register_stop_timeval),
-				TIMEVAL_USEC(&register_stop_timeval),
+    register_stop_tv.set(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
+    register_stop_tv.randomize_uniform(0.5);
+    register_probe_tv.set(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
+    register_stop_tv -= register_probe_tv;
+    register_stop_timer().start(register_stop_tv.sec(),
+				register_stop_tv.usec(),
 				pim_mre_register_stop_timeout, this);
     return;
     
@@ -322,13 +321,12 @@ PimMre::receive_register_stop()
     // Register JoinPending state -> Register Prune state
     set_register_prune_state();
     // Set Register-Stop timer
-    TIMEVAL_SET(&register_stop_timeval,
-		PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
-    TIMEVAL_RANDOM(&register_stop_timeval, 0.5);
-    TIMEVAL_SET(&register_probe_timeval, PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
-    TIMEVAL_DECR(&register_stop_timeval, &register_probe_timeval);
-    register_stop_timer().start(TIMEVAL_SEC(&register_stop_timeval),
-				TIMEVAL_USEC(&register_stop_timeval),
+    register_stop_tv.set(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
+    register_stop_tv.randomize_uniform(0.5);
+    register_probe_tv.set(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
+    register_stop_tv -= register_probe_tv;
+    register_stop_timer().start(register_stop_tv.sec(),
+				register_stop_tv.usec(),
 				pim_mre_register_stop_timeout, this);
     return;
     

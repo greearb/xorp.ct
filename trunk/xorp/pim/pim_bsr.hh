@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.5 2003/03/04 03:35:56 pavlin Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.6 2003/03/10 23:20:47 hodson Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -218,10 +218,9 @@ public:
     bool	i_am_bsr() const;
     bool	is_new_bsr_preferred(const BsrZone& bsr_zone) const;
     bool	is_new_bsr_same_priority(const BsrZone& bsr_zone) const;
-    void	randomized_override_interval(const IPvX& my_addr,
-					     uint8_t my_priority,
-					     struct timeval *result_timeval) const;
-
+    struct TimeVal randomized_override_interval(const IPvX& my_addr,
+					     uint8_t my_priority) const;
+    
     bool	is_bsm_forward() const { return (_is_bsm_forward); }
     void	set_bsm_forward(bool v) { _is_bsm_forward = v; }
     bool	is_bsm_originate() const { return (_is_bsm_originate); }

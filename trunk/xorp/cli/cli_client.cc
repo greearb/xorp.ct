@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.2 2003/03/10 23:20:11 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.3 2003/03/28 12:41:28 pavlin Exp $"
 
 
 //
@@ -108,8 +108,8 @@ CliClient::CliClient(CliNode& init_cli_node, int fd)
     set_cli_session_user_name("unknown_user");
     set_cli_session_term_name("unknown_terminal");
     set_cli_session_session_id(~0);	// XXX: ~0 has no particular meaning
-    set_cli_session_start_time(mk_timeval(0, 0));
-    set_cli_session_stop_time(mk_timeval(0, 0));
+    set_cli_session_start_time(TimeVal(0, 0));
+    set_cli_session_stop_time(TimeVal(0, 0));
     set_is_cli_session_active(false);
     
     //

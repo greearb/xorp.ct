@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.15 2003/03/06 10:47:31 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.16 2003/03/10 23:20:46 hodson Exp $"
 
 
 //
@@ -1139,20 +1139,24 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone)
     
     // Conditionally set the Bootstrap timer
     if (bsr_zone.const_bsr_timer().is_set()) {
-	struct timeval left_timeval;
-	bsr_zone.const_bsr_timer().left_timeval(&left_timeval);
-	_bsr_timer.start(TIMEVAL_SEC(&left_timeval),
-			 TIMEVAL_USEC(&left_timeval),
+	TimeVal left_tv;
+	struct timeval timeval_tmp;
+	bsr_zone.const_bsr_timer().left_timeval(&timeval_tmp);
+	left_tv.copy_in(timeval_tmp);
+	_bsr_timer.start(left_tv.sec(),
+			 left_tv.usec(),
 			 bsr_zone_bsr_timer_timeout,
 			 this);
     }
     
     // Conditionally set the Scone-Zone Expiry timer
     if (bsr_zone.const_scope_zone_expiry_timer().is_set()) {
-	struct timeval left_timeval;
-	bsr_zone.const_scope_zone_expiry_timer().left_timeval(&left_timeval);
-	_scope_zone_expiry_timer.start(TIMEVAL_SEC(&left_timeval),
-				       TIMEVAL_USEC(&left_timeval),
+	TimeVal left_tv;
+	struct timeval timeval_tmp;
+	bsr_zone.const_scope_zone_expiry_timer().left_timeval(&timeval_tmp);
+	left_tv.copy_in(timeval_tmp);
+	_scope_zone_expiry_timer.start(left_tv.sec(),
+				       left_tv.usec(),
 				       bsr_zone_scope_zone_expiry_timer_timeout,
 				       this);
     }
@@ -1740,11 +1744,10 @@ BsrZone::process_candidate_bsr(const BsrZone& bsr_zone)
 	_bsr_addr = bsr_zone.bsr_addr();
 	_bsr_priority = bsr_zone.bsr_priority();
 	// Set BS Timer to rand_override
-	struct timeval rand_override;
-	randomized_override_interval(_my_bsr_addr, _my_bsr_priority,
-				     &rand_override);
-	_bsr_timer.start(TIMEVAL_SEC(&rand_override),
-			 TIMEVAL_USEC(&rand_override),
+	TimeVal rand_override = randomized_override_interval(_my_bsr_addr,
+							     _my_bsr_priority);
+	_bsr_timer.start(rand_override.sec(),
+			 rand_override.usec(),
 			 bsr_zone_bsr_timer_timeout,
 			  this);
 	return (false);
@@ -1943,10 +1946,9 @@ BsrZone::is_new_bsr_same_priority(const BsrZone& bsr_zone) const
     return (false);
 }
 
-void
+struct TimeVal
 BsrZone::randomized_override_interval(const IPvX& my_addr,
-				      uint8_t my_priority,
-				      struct timeval *result_timeval) const
+				      uint8_t my_priority) const
 {
     double addr_delay, delay;
     uint8_t best_priority = max(bsr_priority(), my_priority);
@@ -1993,13 +1995,7 @@ BsrZone::randomized_override_interval(const IPvX& my_addr,
 	+ 2*(log((double)(1 + priority_diff))/log((double)2.0))	// log2()
 	+ addr_delay;
     
-    if (result_timeval != NULL) {
-	uint32_t sec, usec;
-	
-	sec = (uint32_t)delay;
-	usec = (uint32_t)((delay - sec)*1000000);
-	TIMEVAL_SET(result_timeval, sec, usec);
-    }
+    return (TimeVal(delay));
 }
 
 //
@@ -2039,16 +2035,18 @@ bsr_zone_bsr_timer_timeout(void *data_pointer)
     // -> P-BSR state
     bsr_zone.set_bsr_zone_state(BsrZone::STATE_PENDING_BSR);
     // Set BS Timer to rand_override
-    struct timeval rand_override;
-    bsr_zone.randomized_override_interval(bsr_zone.my_bsr_addr(),
-					  bsr_zone.my_bsr_priority(),
-					  &rand_override);
-    bsr_zone.bsr_timer().start(TIMEVAL_SEC(&rand_override),
-			       TIMEVAL_USEC(&rand_override),
-			       bsr_zone_bsr_timer_timeout,
-			       &bsr_zone);
-    
-    return;
+    {
+	TimeVal rand_override;
+	rand_override =
+	    bsr_zone.randomized_override_interval(bsr_zone.my_bsr_addr(),
+						  bsr_zone.my_bsr_priority());
+	bsr_zone.bsr_timer().start(rand_override.sec(),
+				   rand_override.usec(),
+				   bsr_zone_bsr_timer_timeout,
+				   &bsr_zone);
+	
+	return;
+    }
     
  bsr_zone_state_pending_bsr_label:
     // Pending BSR state
@@ -2363,10 +2361,12 @@ BsrGroupPrefix::BsrGroupPrefix(BsrZone& bsr_zone,
 
     // Conditionally set the timer to remove this group prefix
     if (bsr_group_prefix.const_bsr_group_prefix_remove_timer().is_set()) {
-	struct timeval left_timeval;
-	bsr_group_prefix.const_bsr_group_prefix_remove_timer().left_timeval(&left_timeval);
-	_bsr_group_prefix_remove_timer.start(TIMEVAL_SEC(&left_timeval),
-					     TIMEVAL_USEC(&left_timeval),
+	TimeVal left_tv;
+	struct timeval timeval_tmp;
+	bsr_group_prefix.const_bsr_group_prefix_remove_timer().left_timeval(&timeval_tmp);
+	left_tv.copy_in(timeval_tmp);
+	_bsr_group_prefix_remove_timer.start(left_tv.sec(),
+					     left_tv.usec(),
 					     bsr_group_prefix_remove_timer_timeout,
 					     this);
     }
@@ -2519,10 +2519,12 @@ BsrRp::BsrRp(BsrGroupPrefix& bsr_group_prefix, const BsrRp& bsr_rp)
 {
     // Conditionally set the Cand-RP Expiry timer
     if (bsr_rp.const_candidate_rp_expiry_timer().is_set()) {
-	struct timeval left_timeval;
-	bsr_rp.const_candidate_rp_expiry_timer().left_timeval(&left_timeval);
-	_candidate_rp_expiry_timer.start(TIMEVAL_SEC(&left_timeval),
-					 TIMEVAL_USEC(&left_timeval),
+	TimeVal left_tv;
+	struct timeval timeval_tmp;
+	bsr_rp.const_candidate_rp_expiry_timer().left_timeval(&timeval_tmp);
+	left_tv.copy_in(timeval_tmp);
+	_candidate_rp_expiry_timer.start(left_tv.sec(),
+					 left_tv.usec(),
 					 bsr_rp_candidate_rp_expiry_timer_timeout,
 					 this);
     }

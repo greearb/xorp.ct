@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.9 2003/03/14 03:38:11 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.10 2003/03/14 07:52:51 pavlin Exp $"
 
 
 //
@@ -359,18 +359,20 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
 	    
 	    // Group found
 	    uint32_t sec, usec;
-	    struct timeval received_resp_timeval;
-	    struct timeval left_resp_timeval;
+	    TimeVal received_resp_timeval;
+	    TimeVal left_resp_timeval;
 	    
 	    sec = (IGMP_LAST_MEMBER_QUERY_COUNT * max_resp_time)
 		/ IGMP_TIMER_SCALE;
 	    usec = (IGMP_LAST_MEMBER_QUERY_COUNT * max_resp_time)
 		% IGMP_TIMER_SCALE;
 	    usec *= (1000000 / IGMP_TIMER_SCALE); // microseconds
-	    TIMEVAL_SET(&received_resp_timeval, sec, usec);
-	    member_query->_member_query_timer.left_timeval(&left_resp_timeval);
+	    received_resp_timeval.set(sec, usec);
+	    struct timeval timeval_tmp;
+	    member_query->_member_query_timer.left_timeval(&timeval_tmp);
+	    left_resp_timeval.copy_in(timeval_tmp);
 	    
-	    if (TIMEVAL_CMP(&left_resp_timeval, &received_resp_timeval, >)) {
+	    if (left_resp_timeval > received_resp_timeval) {
 		member_query->_member_query_timer.start(
 		    sec, usec, igmp_member_query_timeout, member_query);
 	    }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.18 2003/02/09 03:40:13 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.19 2003/03/10 23:20:47 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1632,10 +1632,10 @@ mifset_timer_timeout(void *data_pointer)
 uint16_t
 PimMre::mifset_timer_remain(MifsetTimers& mifset_timers, uint16_t vif_index)
 {
-    struct timeval timeval;
+    TimeVal tv;
     
     // TODO: the return value should be <= 65535
-    return (mifset_timers.mif_timer_remain(vif_index, timeval));
+    return (mifset_timers.mif_timer_remain(vif_index, tv));
 }
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)

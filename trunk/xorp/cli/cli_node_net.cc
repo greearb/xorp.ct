@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.5 2003/03/12 10:32:51 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.6 2003/03/27 01:51:58 hodson Exp $"
 
 
 //
@@ -225,7 +225,7 @@ CliNode::add_connection(int client_socket)
 	    delete_connection(cli_client);
 	    return (NULL);
 	}
-	cli_client->set_cli_session_start_time(tv);
+	cli_client->set_cli_session_start_time(TimeVal(tv));
     }
     cli_client->set_is_cli_session_active(true);
     

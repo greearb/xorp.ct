@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.2 2003/02/05 23:23:13 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.3 2003/03/10 23:20:38 hodson Exp $"
 
 
 //
@@ -68,7 +68,7 @@ MfeaDft::family() const
 
 int
 MfeaDft::add_entry(const IPvX& source, const IPvX& group,
-		   const struct timeval& threshold_interval,
+		   const TimeVal& threshold_interval,
 		   uint32_t threshold_packets,
 		   uint32_t threshold_bytes,
 		   bool is_threshold_in_packets,
@@ -127,7 +127,7 @@ MfeaDft::add_entry(const IPvX& source, const IPvX& group,
 
 int
 MfeaDft::delete_entry(const IPvX& source, const IPvX& group,
-		      const struct timeval& threshold_interval,
+		      const TimeVal& threshold_interval,
 		      uint32_t threshold_packets,
 		      uint32_t threshold_bytes,
 		      bool is_threshold_in_packets,
@@ -211,7 +211,7 @@ MfeaDfeLookup::family() const
 }
 
 MfeaDfe *
-MfeaDfeLookup::find(const struct timeval& threshold_interval,
+MfeaDfeLookup::find(const TimeVal& threshold_interval,
 		    uint32_t threshold_packets,
 		    uint32_t threshold_bytes,
 		    bool is_threshold_in_packets,
@@ -251,7 +251,7 @@ MfeaDfeLookup::remove(MfeaDfe *mfea_dfe)
 }
 
 MfeaDfe::MfeaDfe(MfeaDfeLookup& mfea_dfe_lookup,
-		 const struct timeval& threshold_interval,
+		 const TimeVal& threshold_interval,
 		 uint32_t threshold_packets,
 		 uint32_t threshold_bytes,
 		 bool is_threshold_in_packets,
@@ -269,10 +269,9 @@ MfeaDfe::MfeaDfe(MfeaDfeLookup& mfea_dfe_lookup,
 {
     _delta_sg_count_index = 0;
     _is_bootstrap_completed = false;
-    TIMEVAL_DIV(&_threshold_interval, MFEA_DATAFLOW_TEST_FREQUENCY,
-		&_measurement_interval);
+    _measurement_interval = _threshold_interval / MFEA_DATAFLOW_TEST_FREQUENCY;
     for (size_t i = 0; i < sizeof(_start_time)/sizeof(_start_time[0]); i++)
-	TIMEVAL_CLEAR(&_start_time[i]);
+	_start_time[i].clear();
 }
 
 MfeaDfe::~MfeaDfe()
@@ -300,12 +299,12 @@ MfeaDfe::is_valid() const
     
     return ((_is_threshold_in_packets || _is_threshold_in_bytes)
 	    && (_is_geq_upcall ^ _is_leq_upcall)
-	    && (_threshold_interval >= mk_timeval(min_sec, min_usec))
+	    && (_threshold_interval >= TimeVal(min_sec, min_usec))
 	    && _last_sg_count.is_valid());
 }
 
 bool
-MfeaDfe::is_same(const struct timeval& threshold_interval_test,
+MfeaDfe::is_same(const TimeVal& threshold_interval_test,
 		 uint32_t threshold_packets_test,
 		 uint32_t threshold_bytes_test,
 		 bool is_threshold_in_packets_test,
@@ -445,12 +444,14 @@ MfeaDfe::test_sg_count()
 void
 MfeaDfe::start_measurement()
 {
-    _measurement_timer.start(TIMEVAL_SEC(&_measurement_interval),
-			     TIMEVAL_USEC(&_measurement_interval),
+    _measurement_timer.start(_measurement_interval.sec(),
+			     _measurement_interval.usec(),
 			     mfea_dfe_measurement_timer_timeout,
 			     this);
-    // XXX: for simulation purpose, replace gettimeofday() with NOW() 
-    gettimeofday(&_start_time[_delta_sg_count_index], NULL);
+    // XXX: for simulation purpose, replace gettimeofday() with NOW()
+    struct timeval current_time;
+    gettimeofday(&current_time, NULL);
+    _start_time[_delta_sg_count_index].copy_in(current_time);
 }
 
 void
@@ -473,7 +474,7 @@ MfeaDfe::dataflow_signal_send()
 	_is_leq_upcall);
 }
 
-const struct timeval&
+const TimeVal&
 MfeaDfe::start_time() const
 {
     if (! _is_bootstrap_completed)

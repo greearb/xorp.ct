@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_dataflow.hh,v 1.2 2003/02/05 23:23:13 pavlin Exp $
+// $XORP: xorp/mfea/mfea_dataflow.hh,v 1.3 2003/03/10 23:20:38 hodson Exp $
 
 
 #ifndef __MFEA_MFEA_DATAFLOW_HH__
@@ -100,7 +100,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_entry(const IPvX& source, const IPvX& group,
-			  const struct timeval& threshold_interval,
+			  const TimeVal& threshold_interval,
 			  uint32_t threshold_packets,
 			  uint32_t threshold_bytes,
 			  bool is_threshold_in_packets,
@@ -130,7 +130,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_entry(const IPvX& source, const IPvX& group,
-			     const struct timeval& threshold_interval,
+			     const TimeVal& threshold_interval,
 			     uint32_t threshold_packets,
 			     uint32_t threshold_bytes,
 			     bool is_threshold_in_packets,
@@ -215,7 +215,7 @@ public:
      * @return the corresponding @ref MfeaDfe dataflow entry on success,
      * otherwise NULL.
      */
-    MfeaDfe	*find(const struct timeval& threshold_interval,
+    MfeaDfe	*find(const TimeVal& threshold_interval,
 		      uint32_t threshold_packets,
 		      uint32_t threshold_bytes,
 		      bool is_threshold_in_packets,
@@ -287,7 +287,7 @@ public:
      * @param is_leq_upcall if true, the operation for comparison is "<=".
      */
     MfeaDfe(MfeaDfeLookup& mfea_dfe_lookup,
-	    const struct timeval& threshold_interval,
+	    const TimeVal& threshold_interval,
 	    uint32_t threshold_packets,
 	    uint32_t threshold_bytes,
 	    bool is_threshold_in_packets,
@@ -372,7 +372,7 @@ public:
      * @return true if the information contained within this @ref MfeaDfe
      * entry is same as the specified information, otherwise false.
      */
-    bool is_same(const struct timeval& threshold_interval_test,
+    bool is_same(const TimeVal& threshold_interval_test,
 		 uint32_t threshold_packets_test,
 		 uint32_t threshold_bytes_test,
 		 bool is_threshold_in_packets_test,
@@ -418,10 +418,8 @@ public:
      * 
      * @return the threshold interval for this dataflow entry.
      */
-    const struct timeval& threshold_interval() const {
-	return (_threshold_interval);
-    }
-
+    const TimeVal& threshold_interval() const { return (_threshold_interval); }
+    
     /**
      * Get the threshold packets.
      * 
@@ -469,7 +467,7 @@ public:
      * 
      * @return the start time for the most recent measurement interval window.
      */
-    const struct timeval& start_time() const;
+    const TimeVal& start_time() const;
     
     /**
      * Get the number of packets measured in the most recent interval window.
@@ -491,7 +489,7 @@ public:
 private:
     // Private state
     MfeaDfeLookup& _mfea_dfe_lookup;  // The Mfea dataflow lookup entry (yuck!)
-    struct timeval _threshold_interval; // The threshold interval
+    TimeVal	_threshold_interval;	// The threshold interval
     uint32_t	_threshold_packets;	// The threshold value (in packets)
     uint32_t	_threshold_bytes;	// The threshold value (in bytes)
     bool	_is_threshold_in_packets; // If true, _threshold_packets is
@@ -507,12 +505,12 @@ private:
     size_t	_delta_sg_count_index; // Index into next '_delta_sg_count'
     bool	_is_bootstrap_completed;
     
-    struct timeval _measurement_interval; // Interval between two measurements
+    TimeVal	_measurement_interval;	// Interval between two measurements
     Timer	_measurement_timer;	// Timer to perform measurements
     
     // Time when current measurement window has started
     // XXX: used for debug purpose only
-    struct timeval _start_time[MFEA_DATAFLOW_TEST_FREQUENCY];
+    TimeVal	_start_time[MFEA_DATAFLOW_TEST_FREQUENCY];
 };
 
 

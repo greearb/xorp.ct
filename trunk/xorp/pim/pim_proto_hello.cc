@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.4 2003/02/25 01:38:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.5 2003/03/10 23:20:52 hodson Exp $"
 
 
 //
@@ -464,12 +464,11 @@ PimVif::hello_timer_start(uint32_t sec, uint32_t usec)
 void
 PimVif::hello_timer_start_random(uint32_t sec, uint32_t usec)
 {
-    struct timeval tv;
+    TimeVal tv(sec, usec);
     
-    TIMEVAL_SET(&tv, sec, usec);
-    TIMEVAL_DIV(&tv, 2, &tv);
-    _hello_timer.start_random(TIMEVAL_SEC(&tv),
-			      TIMEVAL_USEC(&tv),
+    tv = tv / 2;
+    _hello_timer.start_random(tv.sec(),
+			      tv.usec(),
 			      pim_hello_send_timeout,
 			      this,
 			      1.0);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_comm.hh,v 1.4 2003/03/18 02:44:35 pavlin Exp $
+// $XORP: xorp/mfea/mfea_unix_comm.hh,v 1.5 2003/03/27 01:51:59 hodson Exp $
 
 
 #ifndef __MFEA_MFEA_UNIX_COMM_HH__
@@ -684,7 +684,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_bw_upcall(const IPvX& source, const IPvX& group,
-			      const struct timeval& threshold_interval,
+			      const TimeVal& threshold_interval,
 			      uint32_t threshold_packets,
 			      uint32_t threshold_bytes,
 			      bool is_threshold_in_packets,
@@ -714,7 +714,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_bw_upcall(const IPvX& source, const IPvX& group,
-				 const struct timeval& threshold_interval,
+				 const TimeVal& threshold_interval,
 				 uint32_t threshold_packets,
 				 uint32_t threshold_bytes,
 				 bool is_threshold_in_packets,

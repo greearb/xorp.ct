@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.5 2003/03/28 00:42:49 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.7 2003/03/28 12:34:20 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -180,26 +180,46 @@ public:
      * @return the TimeVal value after the substraction of @ref other.
      */
     inline TimeVal operator-(const TimeVal& other) const;
-    
+
     /**
-     * Division Operator
+     * Multiplication Operator for integer operand
      * 
-     * @param n the integer value used in dividing the value of this object
-     * with. 
-     * @return the TimeVal value of dividing the value of this object
-     * by @ref n.
-     */
-    inline TimeVal operator/(int n) const;
-    
-    /**
-     * Multiplication Operator
-     * 
-     * @param n the integer value used in multiplying the value of this object
-     * with.
+     * @param n the integer value used in multiplying the value of this
+     * object with.
      * @return the TimeVal value of multiplying the value of this object
      * by @ref n.
      */
     inline TimeVal operator*(int n) const;
+
+    /**
+     * Multiplication Operator for double float operand
+     * 
+     * @param d the double float value used in multiplying the value of this
+     * object with.
+     * @return the TimeVal value of multiplying the value of this object
+     * by @ref d.
+     */
+    inline TimeVal operator*(const double& d) const;
+    
+    /**
+     * Division Operator for integer operand
+     * 
+     * @param n the integer value used in dividing the value of this
+     * object with. 
+     * @return the TimeVal value of dividing the value of this object
+     * by @ref n.
+     */
+    inline TimeVal operator/(int n) const;
+
+    /**
+     * Division Operator for double-float operand
+     * 
+     * @param d the double-float value used in dividing the value of this
+     * object with. 
+     * @return the TimeVal value of dividing the value of this object
+     * by @ref d.
+     */
+    inline TimeVal operator/(const double& d) const;
     
 private:
     uint32_t _sec;		// The number of seconds
@@ -321,12 +341,6 @@ TimeVal::operator-(const TimeVal& other) const
 }
 
 inline TimeVal
-TimeVal::operator/(int n) const
-{
-    return TimeVal(_sec / n, ((_sec % n) * ONE_MILLION + _usec) / n);
-}
-
-inline TimeVal
 TimeVal::operator*(int n) const
 {
     uint32_t tmp_sec, tmp_usec;
@@ -335,6 +349,24 @@ TimeVal::operator*(int n) const
     tmp_sec = _sec * n + tmp_usec / ONE_MILLION;
     tmp_usec %= ONE_MILLION;
     return TimeVal(tmp_sec, tmp_usec);
+}
+
+inline TimeVal
+TimeVal::operator*(const double& d) const
+{
+    return TimeVal(get_double() * d);
+}
+
+inline TimeVal
+TimeVal::operator/(int n) const
+{
+    return TimeVal(_sec / n, ((_sec % n) * ONE_MILLION + _usec) / n);
+}
+
+inline TimeVal
+TimeVal::operator/(const double& d) const
+{
+    return TimeVal(get_double() / d);
 }
 
 

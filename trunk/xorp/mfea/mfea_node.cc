@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.4 2003/03/10 23:20:39 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.5 2003/03/18 02:44:34 pavlin Exp $"
 
 
 //
@@ -1190,8 +1190,8 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
  **/
 int
 MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
-				       const struct timeval& threshold_interval,
-				       const struct timeval& measured_interval,
+				       const TimeVal& threshold_interval,
+				       const TimeVal& measured_interval,
 				       uint32_t threshold_packets,
 				       uint32_t threshold_bytes,
 				       uint32_t measured_packets,
@@ -1232,10 +1232,10 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
 				 dst_module_id,
 				 source,
 				 group,
-				 TIMEVAL_SEC(&threshold_interval),
-				 TIMEVAL_USEC(&threshold_interval),
-				 TIMEVAL_SEC(&measured_interval),
-				 TIMEVAL_USEC(&measured_interval),
+				 threshold_interval.sec(),
+				 threshold_interval.usec(),
+				 measured_interval.sec(),
+				 measured_interval.usec(),
 				 threshold_packets,
 				 threshold_bytes,
 				 measured_packets,
@@ -1484,7 +1484,7 @@ MfeaNode::delete_mfc(const string& , // module_instance_name,
 int
 MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
 			       const IPvX& source, const IPvX& group,
-			       const struct timeval& threshold_interval,
+			       const TimeVal& threshold_interval,
 			       uint32_t threshold_packets,
 			       uint32_t threshold_bytes,
 			       bool is_threshold_in_packets,
@@ -1564,7 +1564,7 @@ MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
 int
 MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
 				  const IPvX& source, const IPvX& group,
-				  const struct timeval& threshold_interval,
+				  const TimeVal& threshold_interval,
 				  uint32_t threshold_packets,
 				  uint32_t threshold_bytes,
 				  bool is_threshold_in_packets,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.4 2003/02/14 23:55:18 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.5 2003/03/10 23:20:39 hodson Exp $"
 
 
 //
@@ -151,10 +151,12 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
     MfeaDft::const_gs_iterator iter_dft, iter_begin_dft, iter_end_dft;
     iter_begin_dft = mfea_node().mfea_dft().group_by_prefix_begin(group_range);
     iter_end_dft = mfea_node().mfea_dft().group_by_prefix_end(group_range);
-    struct timeval now;
+    struct timeval current_time;
+    TimeVal now;
     
     // XXX: for simulation purpose, replace gettimeofday() with NOW()
-    gettimeofday(&now, NULL);
+    gettimeofday(&current_time, NULL);
+    now.copy_in(current_time);
     
     for (iter_dft = iter_begin_dft; iter_dft != iter_end_dft; ++iter_dft) {
 	MfeaDfeLookup *mfea_dfe_lookup = iter_dft->second;
@@ -175,7 +177,7 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	    char s1[256], s2[256];
 	    char measured_s[256], type_s[256], thresh_s[256], remain_s[256];
 	    MfeaDfe *mfea_dfe = *iter;
-	    struct timeval start_time, threshold_interval, end, delta;
+	    TimeVal start_time, threshold_interval, end, delta;
 	    
 	    start_time = mfea_dfe->start_time();
 	    threshold_interval = mfea_dfe->threshold_interval();
@@ -190,8 +192,8 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	    else
 		sprintf(s2, "?");
 	    sprintf(measured_s, "%u.%u|%s|%s",
-		    (uint32_t)start_time.tv_sec,
-		    (uint32_t)start_time.tv_usec,
+		    (uint32_t)start_time.sec(),
+		    (uint32_t)start_time.usec(),
 		    s1, s2);
 	    
 	    // The entry type
@@ -210,21 +212,21 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	    else
 		sprintf(s2, "?");
 	    sprintf(thresh_s, "%u.%u|%s|%s",
-		    (uint32_t)threshold_interval.tv_sec,
-		    (uint32_t)threshold_interval.tv_usec,
+		    (uint32_t)threshold_interval.sec(),
+		    (uint32_t)threshold_interval.usec(),
 		    s1, s2);
 	    
 	    // Remaining time
-	    TIMEVAL_ADD(&start_time, &threshold_interval, &end);
-	    if (TIMEVAL_CMP(&now, &end, <=)) {
-		TIMEVAL_SUB(&end, &now, &delta);
+	    end = start_time + threshold_interval;
+	    if (now <= end) {
+		delta = end - now;
 		sprintf(remain_s, "%u.%u",
-			(uint32_t)delta.tv_sec, (uint32_t)delta.tv_usec);
+			(uint32_t)delta.sec(), (uint32_t)delta.usec());
 	    } else {
 		// Negative time
-		TIMEVAL_SUB(&now, &end, &delta);
+		delta = now - end;
 		sprintf(remain_s, "-%u.%u",
-			(uint32_t)delta.tv_sec, (uint32_t)delta.tv_usec);
+			(uint32_t)delta.sec(), (uint32_t)delta.usec());
 	    }
 	    
 	    cli_print(c_format("    %-30s%-5s%-30s%7s\n",

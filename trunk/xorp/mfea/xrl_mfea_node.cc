@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.9 2003/03/25 01:21:46 pavlin Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.10 2003/03/25 06:55:07 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -1997,8 +1997,8 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor4(
     if (MfeaNode::add_dataflow_monitor(xrl_sender_name,
 				       IPvX(source_address),
 				       IPvX(group_address),
-				       mk_timeval(threshold_interval_sec,
-						  threshold_interval_usec),
+				       TimeVal(threshold_interval_sec,
+					       threshold_interval_usec),
 				       threshold_packets,
 				       threshold_bytes,
 				       is_threshold_in_packets,
@@ -2058,8 +2058,8 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor6(
     if (MfeaNode::add_dataflow_monitor(xrl_sender_name,
 				       IPvX(source_address),
 				       IPvX(group_address),
-				       mk_timeval(threshold_interval_sec,
-						  threshold_interval_usec),
+				       TimeVal(threshold_interval_sec,
+					       threshold_interval_usec),
 				       threshold_packets,
 				       threshold_bytes,
 				       is_threshold_in_packets,
@@ -2115,8 +2115,8 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor4(
     if (MfeaNode::delete_dataflow_monitor(xrl_sender_name,
 					  IPvX(source_address),
 					  IPvX(group_address),
-					  mk_timeval(threshold_interval_sec,
-						     threshold_interval_usec),
+					  TimeVal(threshold_interval_sec,
+						  threshold_interval_usec),
 					  threshold_packets,
 					  threshold_bytes,
 					  is_threshold_in_packets,
@@ -2176,8 +2176,8 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor6(
     if (MfeaNode::delete_dataflow_monitor(xrl_sender_name,
 					  IPvX(source_address),
 					  IPvX(group_address),
-					  mk_timeval(threshold_interval_sec,
-						     threshold_interval_usec),
+					  TimeVal(threshold_interval_sec,
+						  threshold_interval_usec),
 					  threshold_packets,
 					  threshold_bytes,
 					  is_threshold_in_packets,

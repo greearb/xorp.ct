@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.6 2003/03/10 23:20:53 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.7 2003/03/13 00:27:33 pavlin Exp $"
 
 
 //
@@ -1142,19 +1142,17 @@ PimVif::is_lan_delay_enabled() const
     return (true);
 }
 
-const struct timeval&
+const TimeVal&
 PimVif::vif_propagation_delay() const
 {
-    static struct timeval timeval;
+    static TimeVal tv;
     uint16_t delay;
     
     // XXX: lan_delay is in milliseconds
-    TIMEVAL_SET(&timeval,
-		_lan_delay.get() / 1000,
-		(_lan_delay.get() % 1000) * 1000);
+    tv.set(_lan_delay.get() / 1000, (_lan_delay.get() % 1000) * 1000);
     
     if (! is_lan_delay_enabled())
-	return (timeval);
+	return (tv);
     
     delay = 0;
     list<PimNbr *>::const_iterator iter;
@@ -1165,23 +1163,23 @@ PimVif::vif_propagation_delay() const
     }
     
     // XXX: delay is in milliseconds
-    TIMEVAL_SET(&timeval, delay / 1000, (delay % 1000) * 1000);
+    tv.set(delay / 1000, (delay % 1000) * 1000);
     
-    return (timeval);
+    return (tv);
 }
 
-const struct timeval&
+const TimeVal&
 PimVif::vif_override_interval() const
 {
-    static struct timeval timeval;
+    static TimeVal tv;
     uint16_t delay;
     
     // XXX: override_interval is in milliseconds
-    TIMEVAL_SET(&timeval, _override_interval.get() / 1000,
-		(_override_interval.get() % 1000) * 1000);
+    tv.set(_override_interval.get() / 1000,
+	   (_override_interval.get() % 1000) * 1000);
     
     if (! is_lan_delay_enabled())
-	return (timeval);
+	return (tv);
     
     delay = 0;
     list<PimNbr *>::const_iterator iter;
@@ -1192,9 +1190,9 @@ PimVif::vif_override_interval() const
     }
     
     // XXX: delay is in milliseconds
-    TIMEVAL_SET(&timeval, delay / 1000, (delay % 1000) * 1000);
+    tv.set(delay / 1000, (delay % 1000) * 1000);
     
-    return (timeval);
+    return (tv);
 }
 
 bool
@@ -1219,10 +1217,10 @@ PimVif::is_lan_suppression_state_enabled() const
 // t_suppressed = rand(1.1 * t_periodic, 1.4 * t_periodic) when
 //			Suppression_Enabled(I) is true, 0 otherwise
 //
-const struct timeval&
+const TimeVal&
 PimVif::upstream_join_timer_t_suppressed() const
 {
-    static struct timeval timeval;
+    static TimeVal tv;
     double random_factor
 	= (PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MAX
 	   - PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MIN) / 2;
@@ -1231,49 +1229,48 @@ PimVif::upstream_join_timer_t_suppressed() const
 	   + PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MIN) / 2;
     
     if (is_lan_suppression_state_enabled()) {
-	TIMEVAL_SET(&timeval, _join_prune_period.get(), 0);
-	TIMEVAL_MUL(&timeval, base_ratio, &timeval);
-	TIMEVAL_RANDOM(&timeval, random_factor);
+	tv.set(_join_prune_period.get(), 0);
+	tv = tv * base_ratio;
+	tv.randomize_uniform(random_factor);
     } else {
-	TIMEVAL_CLEAR(&timeval);
+	tv.clear();
     }
     
-    return (timeval);
+    return (tv);
 }
 
 //
 // Compute the randomized 't_override' interval value for Upstream Join Timer:
 // t_override = rand(0, Override_Interval(I))
 //
-const struct timeval&
+const struct TimeVal&
 PimVif::upstream_join_timer_t_override() const
 {
-    static struct timeval timeval;
+    static TimeVal tv;
     
-    // XXX: explicitly assign the value to 'timeval' every time this method
-    // is called, because 'timeval' is static.
-    timeval = vif_override_interval();
+    // XXX: explicitly assign the value to 'tv' every time this method
+    // is called, because 'tv' is static.
+    tv = vif_override_interval();
     
     // Randomize
-    TIMEVAL_DIV(&timeval, 2, &timeval);
-    TIMEVAL_RANDOM(&timeval, 1.0);
+    tv = tv / 2;
+    tv.randomize_uniform(1.0);
     
-    return (timeval);
+    return (tv);
 }
 
 // Return the J/P Override Interval
-const struct timeval&
+const TimeVal&
 PimVif::jp_override_interval() const
 {
-    static struct timeval timeval;
-    struct timeval res1;
-    struct timeval res2;
+    static TimeVal tv;
+    TimeVal res1, res2;
     
     res1 = vif_propagation_delay();
     res2 = vif_override_interval();
-    TIMEVAL_ADD(&res1, &res2, &timeval);
+    tv = res1 + res2;
     
-    return (timeval);
+    return (tv);
 }
 
 /**

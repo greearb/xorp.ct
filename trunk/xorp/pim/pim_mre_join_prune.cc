@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.14 2003/02/07 23:11:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.15 2003/03/10 23:20:48 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -549,10 +549,10 @@ PimMre::receive_prune_rp(uint16_t vif_index, uint16_t holdtime)
     if (pim_vif == NULL)
 	return;
     if (pim_vif->pim_nbrs_number() > 1) {
-	struct timeval timeval = pim_vif->jp_override_interval();
+	TimeVal tv = pim_vif->jp_override_interval();
 	// TODO: make sure usec resolution works!!
 	mifset_timer_start(_downstream_prune_pending_timers, vif_index,
-			   TIMEVAL_SEC(&timeval), TIMEVAL_USEC(&timeval),
+			   tv.sec(), tv.usec(),
 			   &PimMre::downstream_prune_pending_timer_timeout_rp);
     } else {
 	// XXX: force to expire now
@@ -635,10 +635,10 @@ PimMre::receive_prune_wc(uint16_t vif_index, uint16_t holdtime)
     if (pim_vif == NULL)
 	return;
     if (pim_vif->pim_nbrs_number() > 1) {
-	struct timeval timeval = pim_vif->jp_override_interval();
+	TimeVal tv = pim_vif->jp_override_interval();
 	// TODO: make sure usec resolution works!!
 	mifset_timer_start(_downstream_prune_pending_timers, vif_index,
-			   TIMEVAL_SEC(&timeval), TIMEVAL_USEC(&timeval),
+			   tv.sec(), tv.usec(),
 			   &PimMre::downstream_prune_pending_timer_timeout_wc);
     } else {
 	// XXX: force to expire now
@@ -721,10 +721,10 @@ PimMre::receive_prune_sg(uint16_t vif_index, uint16_t holdtime)
     if (pim_vif == NULL)
 	return;
     if (pim_vif->pim_nbrs_number() > 1) {
-	struct timeval timeval = pim_vif->jp_override_interval();
+	TimeVal tv = pim_vif->jp_override_interval();
 	// TODO: make sure usec resolution works!!
 	mifset_timer_start(_downstream_prune_pending_timers, vif_index,
-			   TIMEVAL_SEC(&timeval), TIMEVAL_USEC(&timeval),
+			   tv.sec(), tv.usec(),
 			   &PimMre::downstream_prune_pending_timer_timeout_sg);
     } else {
 	// XXX: force to expire now
@@ -848,10 +848,10 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     mifset_timer_start(_downstream_expiry_timers, vif_index, holdtime, 0,
 		       &PimMre::downstream_expiry_timer_timeout_sg_rpt);
     if (pim_vif->pim_nbrs_number() > 1) {
-	struct timeval timeval = pim_vif->jp_override_interval();
+	TimeVal tv = pim_vif->jp_override_interval();
 	// TODO: make sure usec resolution works!!
 	mifset_timer_start(_downstream_prune_pending_timers, vif_index,
-			   TIMEVAL_SEC(&timeval), TIMEVAL_USEC(&timeval),
+			   tv.sec(), tv.usec(),
 			   &PimMre::downstream_prune_pending_timer_timeout_sg_rpt);
     } else {
 	// XXX: force to expire now
@@ -1176,19 +1176,21 @@ PimMre::rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
     
     // `target_nbr_addr' is MRIB.next_hop(RP)
     // Increase Join Timer to t_joinsuppress
-    struct timeval t_suppressed, t_joinsuppress, timeval_left;
+    TimeVal t_suppressed, t_joinsuppress, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_suppressed = pim_vif->upstream_join_timer_t_suppressed();
-    TIMEVAL_SET(&t_joinsuppress, holdtime, 0);
-    if (TIMEVAL_CMP(&t_suppressed, &t_joinsuppress, < ))
-	TIMEVAL_COPY(&t_suppressed, &t_joinsuppress);
-    join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_joinsuppress, < )) {
+    t_joinsuppress.set(holdtime, 0);
+    if (t_suppressed < t_joinsuppress)
+	t_joinsuppress = t_suppressed;
+    struct timeval timeval_tmp;
+    join_timer().left_timeval(&timeval_tmp);
+    tv_left.copy_in(timeval_tmp);
+    if (tv_left < t_joinsuppress) {
 	// Restart the timer with `t_joinsuppress'
-	join_timer().start(TIMEVAL_SEC(&t_joinsuppress),
-			   TIMEVAL_USEC(&t_joinsuppress),
+	join_timer().start(t_joinsuppress.sec(),
+			   t_joinsuppress.usec(),
 			   pim_mre_join_timer_timeout, this);
     }
 }
@@ -1221,16 +1223,18 @@ PimMre::rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
     
     // `target_nbr_addr' is MRIB.next_hop(RP)
     // Restart JoinTimer if it is larger than t_override
-    struct timeval t_override, timeval_left;
+    TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_override, > )) {
+    struct timeval timeval_tmp;
+    join_timer().left_timeval(&timeval_tmp);
+    tv_left.copy_in(timeval_tmp);
+    if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(TIMEVAL_SEC(&t_override),
-			   TIMEVAL_USEC(&t_override),
+	join_timer().start(t_override.sec(),
+			   t_override.usec(),
 			   pim_mre_join_timer_timeout, this);
     }
     
@@ -1265,19 +1269,21 @@ PimMre::wc_see_join_wc(uint16_t vif_index, uint16_t holdtime,
     
     // `target_nbr_addr' is RPF'(*,G)
     // Increase Join Timer to t_joinsuppress
-    struct timeval t_suppressed, t_joinsuppress, timeval_left;
+    TimeVal t_suppressed, t_joinsuppress, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_suppressed = pim_vif->upstream_join_timer_t_suppressed();
-    TIMEVAL_SET(&t_joinsuppress, holdtime, 0);
-    if (TIMEVAL_CMP(&t_suppressed, &t_joinsuppress, < ))
-	TIMEVAL_COPY(&t_suppressed, &t_joinsuppress);
-    join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_joinsuppress, < )) {
+    t_joinsuppress.set(holdtime, 0);
+    if (t_suppressed < t_joinsuppress)
+	t_joinsuppress = t_suppressed;
+    struct timeval timeval_tmp;
+    join_timer().left_timeval(&timeval_tmp);
+    tv_left.copy_in(timeval_tmp);
+    if (tv_left < t_joinsuppress) {
 	// Restart the timer with `t_joinsuppress'
-	join_timer().start(TIMEVAL_SEC(&t_joinsuppress),
-			   TIMEVAL_USEC(&t_joinsuppress),
+	join_timer().start(t_joinsuppress.sec(),
+			   t_joinsuppress.usec(),
 			   pim_mre_join_timer_timeout, this);
     }
 }
@@ -1310,16 +1316,18 @@ PimMre::wc_see_prune_wc(uint16_t vif_index, uint16_t holdtime,
     
     // `target_nbr_addr' is RPF'(*,G)
     // Restart JoinTimer if it is larger than t_override
-    struct timeval t_override, timeval_left;
+    TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_override, > )) {
+    struct timeval timeval_tmp;
+    join_timer().left_timeval(&timeval_tmp);
+    tv_left.copy_in(timeval_tmp);
+    if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(TIMEVAL_SEC(&t_override),
-			   TIMEVAL_USEC(&t_override),
+	join_timer().start(t_override.sec(),
+			   t_override.usec(),
 			   pim_mre_join_timer_timeout, this);
     }
     
@@ -1354,19 +1362,21 @@ PimMre::sg_see_join_sg(uint16_t vif_index, uint16_t holdtime,
     
     // `target_nbr_addr' is RPF'(S,G)
     // Increase Join Timer to t_joinsuppress
-    struct timeval t_suppressed, t_joinsuppress, timeval_left;
+    TimeVal t_suppressed, t_joinsuppress, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_suppressed = pim_vif->upstream_join_timer_t_suppressed();
-    TIMEVAL_SET(&t_joinsuppress, holdtime, 0);
-    if (TIMEVAL_CMP(&t_suppressed, &t_joinsuppress, < ))
-	TIMEVAL_COPY(&t_suppressed, &t_joinsuppress);
-    join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_joinsuppress, < )) {
+    t_joinsuppress.set(holdtime, 0);
+    if (t_suppressed < t_joinsuppress)
+	t_joinsuppress = t_suppressed;
+    struct timeval timeval_tmp;
+    join_timer().left_timeval(&timeval_tmp);
+    tv_left.copy_in(timeval_tmp);
+    if (tv_left < t_joinsuppress) {
 	// Restart the timer with `t_joinsuppress'
-	join_timer().start(TIMEVAL_SEC(&t_joinsuppress),
-			   TIMEVAL_USEC(&t_joinsuppress),
+	join_timer().start(t_joinsuppress.sec(),
+			   t_joinsuppress.usec(),
 			   pim_mre_join_timer_timeout, this);
     }
 }
@@ -1399,16 +1409,18 @@ PimMre::sg_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
     
     // `target_nbr_addr' is RPF'(S,G)
     // Restart JoinTimer if it is larger than t_override
-    struct timeval t_override, timeval_left;
+    TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_override, > )) {
+    struct timeval timeval_tmp;
+    join_timer().left_timeval(&timeval_tmp);
+    tv_left.copy_in(timeval_tmp);
+    if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(TIMEVAL_SEC(&t_override),
-			   TIMEVAL_USEC(&t_override),
+	join_timer().start(t_override.sec(),
+			   t_override.usec(),
 			   pim_mre_join_timer_timeout, this);
     }
     
@@ -1442,16 +1454,18 @@ PimMre::sg_see_prune_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
     
     // `target_nbr_addr' is RPF'(S,G)
     // Restart JoinTimer if it is larger than t_override
-    struct timeval t_override, timeval_left;
+    TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_override, > )) {
+    struct timeval timeval_tmp;
+    join_timer().left_timeval(&timeval_tmp);
+    tv_left.copy_in(timeval_tmp);
+    if (tv_left >  t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(TIMEVAL_SEC(&t_override),
-			   TIMEVAL_USEC(&t_override),
+	join_timer().start(t_override.sec(),
+			   t_override.usec(),
 			   pim_mre_join_timer_timeout, this);
     }
 }
@@ -1484,16 +1498,18 @@ PimMre::sg_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     
     // `target_nbr_addr' is RPF'(S,G)
     // Restart JoinTimer if it is larger than t_override
-    struct timeval t_override, timeval_left;
+    TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
-    join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_override, > )) {
+    struct timeval timeval_tmp;
+    join_timer().left_timeval(&timeval_tmp);
+    tv_left.copy_in(timeval_tmp);
+    if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	join_timer().start(TIMEVAL_SEC(&t_override),
-			   TIMEVAL_USEC(&t_override),
+	join_timer().start(t_override.sec(),
+			   t_override.usec(),
 			   pim_mre_join_timer_timeout, this);
     }
     
@@ -1563,19 +1579,21 @@ PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     
     // `target_nbr_addr' is RPF'(S,G)
     // Restart OverrideTimer if it is larger than t_override
-    struct timeval t_override, timeval_left;
+    TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
+    struct timeval timeval_tmp;
     if (override_timer().is_set())
-	override_timer().left_timeval(&timeval_left);
+	override_timer().left_timeval(&timeval_tmp);
     else
-	TIMEVAL_SET(&timeval_left, FOREVER, 0);
-    if (TIMEVAL_CMP(&timeval_left, &t_override, > )) {
+	TIMEVAL_SET(&timeval_tmp, FOREVER, 0);
+    tv_left.copy_in(timeval_tmp);
+    if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	override_timer().start(TIMEVAL_SEC(&t_override),
-			       TIMEVAL_USEC(&t_override),
+	override_timer().start(t_override.sec(),
+			       t_override.usec(),
 			       pim_mre_override_timer_timeout, this);
     }
     
@@ -1610,19 +1628,21 @@ PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
     
     // `target_nbr_addr' is RPF'(S,G)
     // Restart OverrideTimer if it is larger than t_override
-    struct timeval t_override, timeval_left;
+    TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
+    struct timeval timeval_tmp;
     if (override_timer().is_set())
-	override_timer().left_timeval(&timeval_left);
+	override_timer().left_timeval(&timeval_tmp);
     else
-	TIMEVAL_SET(&timeval_left, FOREVER, 0);
-    if (TIMEVAL_CMP(&timeval_left, &t_override, > )) {
+	TIMEVAL_SET(&timeval_tmp, FOREVER, 0);
+    tv_left.copy_in(timeval_tmp);
+    if (tv_left > t_override) {
 	// Restart the timer with `t_override'
-	override_timer().start(TIMEVAL_SEC(&t_override),
-			       TIMEVAL_USEC(&t_override),
+	override_timer().start(t_override.sec(),
+			       t_override.usec(),
 			       pim_mre_override_timer_timeout, this);
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mifset.hh,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
+// $XORP: xorp/mrt/mifset.hh,v 1.2 2003/03/10 23:20:45 hodson Exp $
 
 
 #ifndef __MRT_MIFSET_HH__
@@ -25,12 +25,12 @@
 
 
 #include <sys/types.h>
-#include <sys/time.h>
 
 #include <bitset>
 
 #include "max_vifs.h"
 #include "timer.hh"
+#include "libxorp/timeval.hh"
 
 
 
@@ -84,13 +84,13 @@ public:
      * 
      * @param vif_index the index of the virtual interface to compute the
      * expiration time of its timer.
-     * @param timeval_diff the timeval structure to store the result. Note that
-     * if the timer is not set, the timeval structure will be reset to
+     * @param tv_diff the timeval structure to store the result. Note that
+     * if the timer is not set, the @ref TimeVal will be reset to
      * (0, 0); i.e., zero seconds and zero microseconds.
      * @return the number of seconds until the timer expire. Note that
      * if the timer is not set, the return value is 0 (zero seconds).
      */
-    uint32_t	mif_timer_remain(size_t vif_index, struct timeval& timeval_diff) const;
+    uint32_t	mif_timer_remain(size_t vif_index, TimeVal& tv_diff) const;
     
     /**
      * Set the timer

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.2 2003/01/16 19:28:56 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.3 2003/03/10 23:20:11 hodson Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -152,19 +152,19 @@ public:
     /**
      * Get the start time for this connection.
      * 
-     * @return a reference to struct timeval with the starting time for
+     * @return a reference to @ref TimeVal with the starting time for
      * this connection.
      */
-    const struct timeval& cli_session_start_time() const {
+    const TimeVal& cli_session_start_time() const {
 	return (_cli_session_start_time);
     }
     /**
      * Get the stop time for this connection.
      * 
-     * @return a reference to struct timeval with the end time for
+     * @return a reference to @ref TimeVal with the end time for
      * this connection.
      */
-    const struct timeval& cli_session_stop_time() const {
+    const TimeVal& cli_session_stop_time() const {
 	return (_cli_session_stop_time);
     }
     
@@ -219,7 +219,7 @@ public:
      * 
      * @param v the start time for this connection.
      */
-    void	set_cli_session_start_time(const struct timeval& v) {
+    void	set_cli_session_start_time(const TimeVal& v) {
 	_cli_session_start_time = v;
     }
     
@@ -228,7 +228,7 @@ public:
      * 
      * @param v the stop time for this connection.
      */
-    void	set_cli_session_stop_time(const struct timeval& v) {
+    void	set_cli_session_stop_time(const TimeVal& v) {
 	_cli_session_stop_time = v;
     }
     
@@ -475,8 +475,8 @@ private:
     string	_cli_session_user_name;
     string	_cli_session_term_name;
     IPvX	_cli_session_from_address;
-    struct timeval _cli_session_start_time;
-    struct timeval _cli_session_stop_time;
+    TimeVal	_cli_session_start_time;
+    TimeVal	_cli_session_stop_time;
     bool	_is_cli_session_active;
     uint32_t	_cli_session_session_id;	// The unique session ID.
     
