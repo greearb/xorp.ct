@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.33 2003/09/02 23:16:42 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.34 2003/09/03 00:26:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1332,7 +1332,7 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	MPUNReachNLRIAttribute<IPv6> mpipv6_withdraw;
 
 	for(size_t i = index + 1; i < size; i += 2) {
-	    debug_msg("name: %s value: %s\n",
+	    debug_msg("name: %s value: <%s>\n",
 		      words[i].c_str(),
 		      words[i + 1].c_str());
 	    if("origin" == words[i]) {
@@ -1356,7 +1356,7 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 		bgpupdate->add_nlri(BGPUpdateAttrib(IPv4Net(
 						      words[i+1].c_str())));
 	    } else if("nlri6" == words[i]) {
-		mpipv6_nlri.add_nlri(IPv6Net(words[i+1].c_str()));
+		mpipv6_nlri.add_nlri(words[i+1].c_str());
 	    } else if("withdraw" == words[i]) {
 		bgpupdate->add_withdrawn(BGPUpdateAttrib(IPv4Net(
 						      words[i+1].c_str())));
@@ -1372,10 +1372,14 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 		       c_format("Illegal argument to update: <%s>\n[%s]",
 				words[i].c_str(), line.c_str()));
 	}
-	if(!mpipv6_nlri.nlri_list().empty())
+	if(!mpipv6_nlri.nlri_list().empty()) {
+ 	    mpipv6_nlri.encode();
 	    bgpupdate->add_pathatt(mpipv6_nlri);
-	if(!mpipv6_withdraw.wr_list().empty())
+	}
+	if(!mpipv6_withdraw.wr_list().empty()) {
+	    mpipv6_withdraw.encode();
 	    bgpupdate->add_pathatt(mpipv6_withdraw);
+	}
 
 	pac = bgpupdate;
     } else if("open" == words[index]) {
@@ -1441,5 +1445,7 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 					line.c_str()));
   }
 	
-    return pac;
+  debug_msg("%s\n", pac->str().c_str());
+  
+  return pac;
 }
