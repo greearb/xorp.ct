@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.18 2003/12/10 22:21:32 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.19 2004/02/24 23:50:03 pavlin Exp $"
 
 
 //
@@ -505,8 +505,13 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
     if ((node_vif_addr != NULL) && (*node_vif_addr == vif_addr))
 	return (XORP_OK);		// Already have this address
 
-    // XXX: stop the vif if some of its addresses will change
-    mld6igmp_vif->stop();
+    //
+    // TODO: If an interface changes its primary IP address, then
+    // we should do something about it.
+    //
+    // However, by adding or updating an existing address we cannot
+    // change a valid primary address, hence we do nothing here.
+    //
     
     if (node_vif_addr != NULL) {
 	// Update the address
@@ -547,8 +552,15 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
 	return (XORP_ERROR);
     }
 
-    // XXX: stop the vif if some of its addresses will change
-    mld6igmp_vif->stop();
+    //
+    // TODO: If an interface changes its primary IP address, then
+    // we should do something about it.
+    //
+    if (mld6igmp_vif->is_up()) {
+	if (mld6igmp_vif->primary_addr() == addr) {
+	    // TODO: do something. Maybe stop the vif now?
+	}
+    }
 
     VifAddr vif_addr = *tmp_vif_addr;	// Get a copy
     if (mld6igmp_vif->delete_address(addr) != XORP_OK) {
@@ -559,6 +571,18 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
     XLOG_INFO("Deleted address on vif %s: %s",
 	      mld6igmp_vif->name().c_str(), vif_addr.str().c_str());
     
+    //
+    // Update the primary address
+    // If the vif has no more primary address, then stop it.
+    //
+    mld6igmp_vif->update_primary_address();
+    if (mld6igmp_vif->is_up()) {
+	// Check the primary address
+	if (mld6igmp_vif->primary_addr() == IPvX::ZERO(family())) {
+	    mld6igmp_vif->stop();
+	}
+    }
+
     return (XORP_OK);
 }
 
