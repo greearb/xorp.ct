@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.7 2003/08/15 23:58:36 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.8 2003/09/12 23:44:45 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -372,6 +372,7 @@ private:
     //
     FtiConfigEntrySetDummy	_ftic_entry_set_dummy;
     FtiConfigEntrySetRtsock	_ftic_entry_set_rtsock;
+    FtiConfigEntrySetNetlink	_ftic_entry_set_netlink;
     
     //
     // The mechanisms to observe single-entry information change about the
@@ -400,6 +401,7 @@ private:
     //
     FtiConfigTableSetDummy	_ftic_table_set_dummy;
     FtiConfigTableSetRtsock	_ftic_table_set_rtsock;
+    FtiConfigTableSetNetlink	_ftic_table_set_netlink;
     
     //
     // The mechanisms to observe the whole-table information change about the

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.3 2003/05/10 00:06:39 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.4 2003/05/14 01:13:40 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -46,7 +46,7 @@ public:
     
     /**
      * Stop operation.
-     * 
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop() = 0;
@@ -160,14 +160,14 @@ public:
 
     /**
      * Start operation.
-     * 
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int start();
     
     /**
      * Stop operation.
-     * 
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
@@ -222,14 +222,14 @@ public:
 
     /**
      * Start operation.
-     * 
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int start();
-    
+
     /**
      * Stop operation.
-     * 
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
@@ -272,11 +272,101 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool delete_entry6(const Fte6& fte);
-    
+
 private:
     bool add_entry(const FteX& fte);
     bool delete_entry(const FteX& fte);
-    
+};
+
+class FtiConfigEntrySetNetlink : public FtiConfigEntrySet,
+				 public NetlinkSocket4,
+				 public NetlinkSocket6,
+				 public NetlinkSocketObserver {
+public:
+    FtiConfigEntrySetNetlink(FtiConfig& ftic);
+    virtual ~FtiConfigEntrySetNetlink();
+
+    /**
+     * Start operation.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+
+    /**
+     * Stop operation.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+
+    /**
+     * Add a single routing entry.  Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to add.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool add_entry4(const Fte4& fte);
+
+    /**
+     * Delete a single routing entry. Must be with a configuration interval.
+     *
+     * @param fte the entry to delete. Only destination and netmask are used.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_entry4(const Fte4& fte);
+
+    /**
+     * Add a single routing entry. Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to add.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool add_entry6(const Fte6& fte);
+
+    /**
+     * Delete a single routing entry.  Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to delete. Only destination and netmask are used.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_entry6(const Fte6& fte);
+
+    /**
+     * Data has pop-up.
+     * 
+     * @param data the buffer with the data.
+     * @param nbytes the number of bytes in the @ref data buffer.
+     */
+    virtual void nlsock_data(const uint8_t* data, size_t nbytes);
+
+private:
+    bool add_entry(const FteX& fte);
+    bool delete_entry(const FteX& fte);
+
+    /**
+     * Check that a previous netlink request has succeeded.
+     * 
+     * @param ns the NetlinkSocket to use for reading data.
+     * @param seqno the sequence nomer of the netlink request to check for.
+     * @param reason the human-readable reason for any failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		check_netlink_request(NetlinkSocket& ns, uint32_t seqno,
+				      string& reason);
+
+    bool	    _cache_valid;	// Cache data arrived.
+    uint32_t	    _cache_seqno;	// Seqno of netlink socket data to
+					// cache so route lookup via netlink
+					// socket can appear synchronous.
+    vector<uint8_t> _cache_data;	// Cached netlink socket data.
 };
 
 #endif // __FEA_FTICONFIG_ENTRY_SET_HH__

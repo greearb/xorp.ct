@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.21 2003/09/30 20:41:20 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.22 2003/10/09 00:11:01 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -171,6 +171,7 @@ libfea_a_SOURCES	+= fticonfig_entry_parse_nlm.cc
 libfea_a_SOURCES	+= fticonfig_entry_parse_rtm.cc
 libfea_a_SOURCES	+= fticonfig_entry_set.cc
 libfea_a_SOURCES	+= fticonfig_entry_set_dummy.cc
+libfea_a_SOURCES	+= fticonfig_entry_set_netlink.cc
 libfea_a_SOURCES	+= fticonfig_entry_set_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_table_get.cc
 libfea_a_SOURCES	+= fticonfig_table_get_dummy.cc
@@ -183,6 +184,7 @@ libfea_a_SOURCES	+= fticonfig_table_parse_nlm.cc
 libfea_a_SOURCES	+= fticonfig_table_parse_rtm.cc
 libfea_a_SOURCES	+= fticonfig_table_set.cc
 libfea_a_SOURCES	+= fticonfig_table_set_dummy.cc
+libfea_a_SOURCES	+= fticonfig_table_set_netlink.cc
 libfea_a_SOURCES	+= fticonfig_table_set_rtsock.cc
 libfea_a_SOURCES	+= ifconfig.cc
 libfea_a_SOURCES	+= ifconfig_get.cc

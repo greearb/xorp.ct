@@ -269,4 +269,63 @@ private:
     
 };
 
+class FtiConfigTableSetNetlink : public FtiConfigTableSet {
+public:
+    FtiConfigTableSetNetlink(FtiConfig& ftic);
+    virtual ~FtiConfigTableSetNetlink();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+    
+    /**
+     * Set the unicast forwarding table.
+     *
+     * @param fte_list the list with all entries to install into
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool set_table4(const list<Fte4>& fte_list);
+
+    /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_all_entries4();
+
+    /**
+     * Set the unicast forwarding table.
+     *
+     * @param fte_list the list with all entries to install into
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool set_table6(const list<Fte6>& fte_list);
+    
+    /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_all_entries6();
+    
+private:
+    
+};
+
 #endif // __FEA_FTICONFIG_TABLE_SET_HH__
