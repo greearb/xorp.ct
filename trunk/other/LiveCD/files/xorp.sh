@@ -88,7 +88,17 @@ mount_fd() {
       	fi
 }
 
+rebuild_passwd_db() {
+    echo "Rebuilding password database"
+    if [ -e /etc/master.passwd ]; then
+        if [ -x /usr/sbin/pwd_mkdb ]; then
+	    /usr/sbin/pwd_mkdb -p -d /etc /etc/master.passwd
+	fi
+    fi
+}
+
 start_services() {
+    echo "Starting services"
     if [ -r /etc/defaults/rc.conf ]; then
         . /etc/defaults/rc.conf
         source_rc_confs
@@ -112,7 +122,7 @@ start() {
 	echo "Loading XORP config"
        	mount_fd
 
-	echo "Starting services"
+	rebuild_passwd_db
 	start_services
 
 	echo "Starting XORP router manager process"
