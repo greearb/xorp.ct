@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.4 2004/09/24 01:55:37 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.5 2004/09/24 22:46:30 pavlin Exp $"
 
 
 //
@@ -47,38 +47,38 @@
 // Use the definitions below to change the sender's behavior.
 //
 // Note that if both sender and receiver are compiled within same binary,
-// (e.g., if SINGLE_BINARY below is defined), then there is no need
-// to start "./test_xrl_receiver".
+// (e.g., if COMPILE_SINGLE_BINARY below is defined to 1), then there is
+// no need to start "./test_xrl_receiver".
 //
 
 //
-// Define to compile both sender and receiver within a single binary
+// Define to 1 to compile both sender and receiver within a single binary
 //
-// #define SINGLE_BINARY
+#define COMPILE_SINGLE_BINARY		0
 
 //
 // Define the maximum number of XRLs to send into a batch, and the
 // XRL pipe size.
 //
-#define MAX_XRL_ID	100000		// 100000
-#define XRL_PIPE_SIZE	100000		// 100000
+#define MAX_XRL_ID			100000		// 100000
+#define XRL_PIPE_SIZE			100000		// 100000
 
 //
-// If defined, then send short XRLs, otherwise send long XRLs.
+// Define to 1 to send short XRLs, otherwise send long XRLs.
 //
-#define SEND_SHORT_XRL
+#define SEND_SHORT_XRL			1
 
 //
 // Define the size of the string and vector arguments in the long XRLs.
 // Note that those are used only if we are sending long XRLs.
 //
-#define MY_STRING_SIZE 1024		// 1024
-#define MY_VECTOR_SIZE 4096		// 4096
+#define MY_STRING_SIZE			1024		// 1024
+#define MY_VECTOR_SIZE			4096		// 4096
 
 //
-// Define to enable debug output
+// Define to 1 to enable printing of debug output
 //
-// #define PRINT_DEBUG
+#define PRINT_DEBUG			0
 
 //
 // Define the sending method
@@ -86,7 +86,13 @@
 #define SEND_METHOD_PIPELINE		1
 #define SEND_METHOD_NO_PIPELINE		2
 #define SEND_METHOD_START_PIPELINE	3
-#define SEND_METHOD			SEND_METHOD_PIPELINE
+#define SEND_METHOD			SEND_METHOD_START_PIPELINE
+
+//
+// Define to 1 to exit after end of transmission
+//
+#define SEND_DO_EXIT			0
+#define RECEIVE_DO_EXIT			0
 
 //
 // Local functions prototypes
@@ -123,14 +129,14 @@ public:
     inline bool done() const { return _done; }
 
     inline void print_xrl_sent() const {
-#ifdef PRINT_DEBUG
+#if PRINT_DEBUG
 	if (! (_next_xrl_send_id % 10000))
 	    printf("Sending %u\n", (uint32_t)_next_xrl_send_id);
 #endif // PRINT_DEBUG
     }
 
     inline void print_xrl_received() const {
-#ifdef PRINT_DEBUG
+#if PRINT_DEBUG
 	printf(".");
 	if (! (_next_xrl_recv_id % 10000))
 	    printf("Receiving %u\n", (uint32_t)_next_xrl_recv_id);
@@ -144,7 +150,14 @@ public:
 	_done = false;
     }
 
-    void start_transmission() {
+    void
+    start_transmission() {
+	_start_transmission_timer = _eventloop.new_oneoff_after(
+		TimeVal(1, 0),
+		callback(this, &TestSender::start_transmission_process));
+    }
+
+    void start_transmission_process() {
 	bool success;
 	clear();
 
@@ -153,9 +166,7 @@ public:
 	    callback(this, &TestSender::start_transmission_cb));
 	if (success != true) {
 	    printf("start_transmission() failure\n");
-	    _start_transmission_timer = _eventloop.new_oneoff_after(
-		TimeVal(0, 0),
-		callback(this, &TestSender::start_transmission));
+	    start_transmission();
 	    return;
 	}
     }
@@ -163,7 +174,7 @@ public:
 private:
 
     bool transmit_xrl_next() {
-#ifdef SEND_SHORT_XRL
+#if SEND_SHORT_XRL
 	return _test_xrls_client.send_add_xrl0(
 	    _receiver_target.c_str(),
 	    callback(this, &TestSender::send_next_cb));
@@ -184,7 +195,7 @@ private:
     }
 
     bool transmit_xrl_next_pipeline() {
-#ifdef SEND_SHORT_XRL
+#if SEND_SHORT_XRL
 	return _test_xrls_client.send_add_xrl0(
 	    _receiver_target.c_str(),
 	    callback(this, &TestSender::send_next_pipeline_cb));
@@ -287,7 +298,7 @@ private:
 		_next_xrl_send_id++;
 		continue;
 	    }
-	    printf("send_next_pipeline() failure\n");
+	    // printf("send_next_pipeline() failure\n");
 	} while (true);
     }
 
@@ -332,8 +343,11 @@ private:
 		       xrl_error.str().c_str());
 	}
 	start_transmission();
+#if SEND_DO_EXIT
+	if (_exit_timer.scheduled() == false)
+	    _exit_timer = _eventloop.set_flag_after_ms(60000, &_done);
+#endif
 	return;
-	_done = true;
     }
 
     EventLoop&			_eventloop;
@@ -342,6 +356,7 @@ private:
 
     XorpTimer			_start_transmission_timer;
     XorpTimer			_end_transmission_timer;
+    XorpTimer			_exit_timer;
     size_t			_max_xrl_id;
     size_t			_next_xrl_send_id;
     size_t			_next_xrl_recv_id;
@@ -373,7 +388,7 @@ public:
     inline bool done() const { return _done; }
 
     inline void print_xrl_received() const {
-#ifdef PRINT_DEBUG
+#if PRINT_DEBUG
     	printf(".");
 	if (! (_received_xrls % 10000))
 	    printf("Received %u\n", (uint32_t)_received_xrls);
@@ -497,23 +512,20 @@ private:
 	printf("Received %u XRLs; delta_time = %s secs; speed = %f XRLs/s\n",
 	       (uint32_t)_received_xrls, delta_time.str().c_str(), speed);
 
-#if 0	// XXX: if enabled, then exit after all XRLs have been received.
-	_done_timer = _eventloop.new_oneoff_after(TimeVal(3, 0),
-						  callback(this, &TestReceiver::done_cb));
+#if RECEIVE_DO_EXIT
+	// XXX: if enabled, then exit after all XRLs have been received.
+	if (_exit_timer.scheduled() == false)
+	    _exit_timer = _eventloop.set_flag_after_ms(60000, &_done);
 #endif
 
 	return;
-    }
-
-    void done_cb() {
-	_done = true;
     }
 
     EventLoop&	_eventloop;
     TimeVal	_start_time;
     TimeVal	_end_time;
     size_t	_received_xrls;
-    XorpTimer	_done_timer;
+    XorpTimer	_exit_timer;
     bool	_done;
 };
 
@@ -581,7 +593,7 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
     //
     // Receiver
     //
-#ifdef SINGLE_BINARY
+#if COMPILE_SINGLE_BINARY
     XrlStdRouter xrl_std_router_test_receiver(eventloop, "test_xrl_receiver",
 					      finder_hostname, finder_port);
     TestReceiver test_receiver(eventloop, &xrl_std_router_test_receiver);
@@ -596,7 +608,7 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
     //
     // Run everything
     //
-#ifdef SINGLE_BINARY
+#if COMPILE_SINGLE_BINARY
     while (! (test_sender.done() && test_receiver.done())) {
 	eventloop.run();
     }
