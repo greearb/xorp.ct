@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.63 2004/05/05 18:37:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.64 2004/05/05 18:53:43 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -140,7 +140,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    event_recvupdate(&pac);
 	    TIMESPENT_CHECK();
 	    if(TIMESPENT_OVERLIMIT()) {
-		XLOG_WARNING("Processing packet took longer than %d"
+		XLOG_WARNING("Processing packet took longer than %d second\n"
 			     "%s\n", TIMESPENT_LIMIT, pac.str().c_str());
 	    }
 	    break;
