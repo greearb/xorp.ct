@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.5 2003/06/02 23:20:16 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.6 2003/06/05 02:39:36 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -176,8 +176,7 @@ private:
 
 class FtiConfigTableGetNetlink : public FtiConfigTableGet,
 				 public NetlinkSocket4,
-				 public NetlinkSocket6,
-				 public NetlinkSocketObserver {
+				 public NetlinkSocket6 {
 public:
     FtiConfigTableGetNetlink(FtiConfig& ftic);
     virtual ~FtiConfigTableGetNetlink();
@@ -196,14 +195,6 @@ public:
      */
     virtual int stop();
 
-    /**
-     * Data has pop-up.
-     * 
-     * @param data the buffer with the data.
-     * @param nbytes the number of bytes in the @ref data buffer.
-     */
-    virtual void nlsock_data(const uint8_t* data, size_t nbytes);
-    
     /**
      * Obtain the unicast forwarding table.
      *
@@ -226,12 +217,8 @@ public:
     
 private:
     bool get_table(int family, list<FteX>& fte_list);
-    
-    bool	    _cache_valid;	// Cache data arrived.
-    uint32_t	    _cache_seqno;	// Seqno of netlink socket data to
-					// cache so table fetch via netlink
-					// socket can appear synchronous.
-    vector<uint8_t> _cache_data;	// Cached netlink socket data.
+
+    NetlinkSocketReader	_ns_reader;
 };
 
 #endif // __FEA_FTICONFIG_TABLE_GET_HH__

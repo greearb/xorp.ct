@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.4 2003/10/12 02:43:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.5 2003/10/12 22:05:53 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -52,9 +52,7 @@ IfConfigSetNetlink::IfConfigSetNetlink(IfConfig& ifc)
     : IfConfigSet(ifc),
       NetlinkSocket4(ifc.eventloop()),
       NetlinkSocket6(ifc.eventloop()),
-      NetlinkSocketObserver(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this),
-      _cache_valid(false),
-      _cache_seqno(0)
+      _ns_reader(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
     register_ifc();
@@ -209,12 +207,6 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     return (XORP_ERROR);
 }
 
-void
-IfConfigSetNetlink::nlsock_data(const uint8_t* , size_t )
-{
-    
-}
-
 #else // HAVE_NETLINK_SOCKETS
 
 int
@@ -283,7 +275,8 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
 			  strerror(errno));
 	return (XORP_ERROR);
     }
-    if (check_netlink_request(ns4, nlh->nlmsg_seq, reason) < 0) {
+    if (NlmUtils::check_netlink_request(_ns_reader, ns4, nlh->nlmsg_seq,
+					reason) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -391,7 +384,8 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
 			  strerror(errno));
 	return (XORP_ERROR);
     }
-    if (check_netlink_request(ns4, nlh->nlmsg_seq, reason) < 0) {
+    if (NlmUtils::check_netlink_request(_ns_reader, ns4, nlh->nlmsg_seq,
+					reason) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -483,7 +477,8 @@ IfConfigSetNetlink::set_interface_flags(const string& ifname,
 			  strerror(errno));
 	return (XORP_ERROR);
     }
-    if (check_netlink_request(ns4, nlh->nlmsg_seq, reason) < 0) {
+    if (NlmUtils::check_netlink_request(_ns_reader, ns4, nlh->nlmsg_seq,
+					reason) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -630,7 +625,8 @@ IfConfigSetNetlink::set_vif_address(const string& ifname,
 			  strerror(errno));
 	return (XORP_ERROR);
     }
-    if (check_netlink_request(*ns_ptr, nlh->nlmsg_seq, reason) < 0) {
+    if (NlmUtils::check_netlink_request(_ns_reader, *ns_ptr, nlh->nlmsg_seq,
+					reason) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -725,142 +721,11 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 			  strerror(errno));
 	return (XORP_ERROR);
     }
-    if (check_netlink_request(*ns_ptr, nlh->nlmsg_seq, reason) < 0) {
+    if (NlmUtils::check_netlink_request(_ns_reader, *ns_ptr, nlh->nlmsg_seq,
+					reason) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
-}
-
-/**
- * Check that a previous netlink request has succeeded.
- * 
- * @param ns the NetlinkSocket to use for reading data.
- * @param seqno the sequence nomer of the netlink request to check for.
- * @param reason the human-readable reason for any failure.
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-IfConfigSetNetlink::check_netlink_request(NetlinkSocket& ns, uint32_t seqno,
-					  string& reason)
-{
-    struct sockaddr_nl		snl;
-    socklen_t			snl_len;
-    const struct nlmsghdr*	nlh;
-    size_t buf_bytes;
-
-    // Set the socket
-    memset(&snl, 0, sizeof(snl));
-    snl.nl_family = AF_NETLINK;
-    snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
-    snl.nl_groups = 0;
-
-    //
-    // We expect kernel to give us something back.  Force read until
-    // data ripples up via nlsock_data() that corresponds to expected
-    // sequence number and process id.
-    //
-    _cache_seqno = seqno;
-    _cache_valid = false;
-    while (_cache_valid == false) {
-	ns.force_recvfrom(0, reinterpret_cast<struct sockaddr*>(&snl),
-			  &snl_len);
-    }
-
-    buf_bytes = _cache_data.size();
-    for (nlh = reinterpret_cast<const struct nlmsghdr*>(&_cache_data[0]);
-	 NLMSG_OK(nlh, buf_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buf_bytes)) {
-	caddr_t nlmsg_data = reinterpret_cast<caddr_t>(NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh)));
-	
-	switch (nlh->nlmsg_type) {
-	case NLMSG_ERROR:
-	{
-	    const struct nlmsgerr* err;
-
-	    err = reinterpret_cast<const struct nlmsgerr*>(nlmsg_data);
-	    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(*err))) {
-		reason = "AF_NETLINK nlmsgerr length error";
-		return (XORP_ERROR);
-	    }
-	    if (err->error == 0)
-		return (XORP_OK);	// No error
-	    errno = -err->error;
-	    reason = c_format("AF_NETLINK NLMSG_ERROR message: %s",
-			      strerror(errno));
-	    return (XORP_ERROR);
-	}
-	break;
-	
-	case NLMSG_DONE:
-	{
-	    // End-of-message, and no ACK was received: error.
-	    reason = "No ACK was received";
-	    return (XORP_ERROR);
-	}
-	break;
-	
-	case NLMSG_NOOP:
-	    break;
-
-	default:
-	    debug_msg("Unhandled type %s(%d) (%d bytes)\n",
-		      NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
-		      nlh->nlmsg_type, nlh->nlmsg_len);
-	    break;
-	}
-    }
-
-    reason = "No ACK was received";
-    return (XORP_ERROR);		// No ACK was received: error.
-}
-
-/**
- * Receive data from the netlink socket.
- *
- * Note that this method is called asynchronously when the netlink socket
- * has data to receive, therefore it should never be called directly by
- * anything else except the netlink socket facility itself.
- * 
- * @param data the buffer with the received data.
- * @param nbytes the number of bytes in the @param data buffer.
- */
-void
-IfConfigSetNetlink::nlsock_data(const uint8_t* data, size_t nbytes)
-{
-    NetlinkSocket4& ns4 = *this;	// XXX: needed only to get the pid
-    
-    //
-    // Copy data that has been requested to be cached by setting _cache_seqno.
-    //
-    size_t d = 0, off = 0;
-    pid_t my_pid = ns4.pid();
-    
-    UNUSED(my_pid);	// XXX: (see below)
-    
-    _cache_data.resize(nbytes);
-    
-    while (d < nbytes) {
-	const struct nlmsghdr* nlh = reinterpret_cast<const struct nlmsghdr*>(data + d);
-	if (nlh->nlmsg_seq == _cache_seqno) {
-	    //
-	    // TODO: XXX: here we should add the following check as well:
-	    //       ((pid_t)nlh->nlmsg_pid == my_pid)
-	    // However, it appears that on return Linux doesn't fill-in
-	    // nlh->nlmsg_pid to our pid (e.g., it may be set to 0xffffefff).
-	    // Unfortunately, Linux's netlink(7) is not helpful on the
-	    // subject, hence we ignore this additional test.
-	    //
-	    
-#if 0	    // TODO: XXX: PAVPAVPAV: remove this assert?
-	    XLOG_ASSERT(_cache_valid == false); // Do not overwrite cache data
-#endif
-	    XLOG_ASSERT(nbytes - d >= nlh->nlmsg_len);
-	    memcpy(&_cache_data[off], nlh, nlh->nlmsg_len);
-	    off += nlh->nlmsg_len;
-	    _cache_valid = true;
-	}
-	d += nlh->nlmsg_len;
-    }
 }
 
 #endif // HAVE_NETLINK_SOCKETS

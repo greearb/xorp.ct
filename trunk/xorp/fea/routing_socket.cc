@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.2 2003/08/06 01:19:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.3 2003/09/20 00:35:46 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -39,36 +39,6 @@ pid_t RoutingSocket::_pid = getpid();
 // Routing Sockets communication with the kernel
 //
 
-#ifndef HAVE_ROUTING_SOCKETS
-
-RoutingSocket::RoutingSocket(EventLoop& e)
-    : _e(e),
-      _fd(-1),
-      _seqno(0),
-      _instance_no(_instance_cnt++)
-{
-    
-}
-
-RoutingSocket::~RoutingSocket()
-{
-    
-}
-
-int
-RoutingSocket::start(int )
-{
-    return (XORP_ERROR);
-}
-
-int
-RoutingSocket::stop()
-{
-    return (XORP_ERROR);
-}
-
-#else // HAVE_ROUTING_SOCKETS
-
 RoutingSocket::RoutingSocket(EventLoop& e)
     : _e(e),
       _fd(-1),
@@ -83,6 +53,30 @@ RoutingSocket::~RoutingSocket()
     stop();
     XLOG_ASSERT(_ol.empty());
 }
+
+#ifndef HAVE_ROUTING_SOCKETS
+
+int
+RoutingSocket::start(int )
+{
+    XLOG_UNREACHABLE();
+    return (XORP_ERROR);
+}
+
+int
+RoutingSocket::stop()
+{
+    XLOG_UNREACHABLE();
+    return (XORP_ERROR);
+}
+
+void
+RoutingSocket::force_read()
+{
+    XLOG_UNREACHABLE();
+}
+
+#else // HAVE_ROUTING_SOCKETS
 
 int
 RoutingSocket::start(int af)
@@ -146,10 +140,23 @@ RoutingSocket::write(const void* data, size_t nbytes)
 void
 RoutingSocket::force_read()
 {
-    ssize_t got = 0;
+    vector<uint8_t> message;
+    vector<uint8_t> buffer(RTSOCK_BYTES);
+    size_t off = 0;
+    size_t last_mh_off = 0;
     
     for ( ; ; ) {
-	got = read(_fd, _buffer, RTSOCK_BYTES);
+	ssize_t got;
+	// Find how much data is queued in the first message
+	do {
+	    got = recv(_fd, &buffer[0], buffer.size(),
+		       MSG_DONTWAIT | MSG_PEEK);
+	    if ((got < 0) || (got < (ssize_t)buffer.size()))
+		break;		// The buffer is big enough
+	    buffer.resize(buffer.size() + RTSOCK_BYTES);
+	} while (true);
+	
+	got = read(_fd, &buffer[0], buffer.size());
 	if (got < 0) {
 	    if (errno == EINTR)
 		continue;
@@ -157,6 +164,10 @@ RoutingSocket::force_read()
 	    shutdown();
 	    return;
 	}
+	message.resize(message.size() + got);
+	memcpy(&message[off], &buffer[0], got);
+	off += got;
+
 	//
 	// XXX: all messages received on routing sockets must start
 	// with the the following three fields:
@@ -169,28 +180,36 @@ RoutingSocket::force_read()
 	// Hence, the minimum length of a received message is:
 	//  sizeof(u_short) + 2 * sizeof(u_char)
 	//
-	if (got < (ssize_t)(sizeof(u_short) + 2 * sizeof(u_char))) {
+	if ((off - last_mh_off)
+	    < (ssize_t)(sizeof(u_short) + 2 * sizeof(u_char))) {
 	    XLOG_ERROR("Routing socket read failed: message truncated: "
 		       "received %d bytes instead of (at least) %u bytes",
 		       got, (uint32_t)(sizeof(u_short) + 2 * sizeof(u_char)));
 	    shutdown();
 	    return;
 	}
-	
+
+	//
+	// XXX: the routing sockets don't use multipart messages, hence
+	// this should be the end of the message.
+	//
+
 	//
 	// Received message (probably) OK
 	//
-	const struct if_msghdr* mh = reinterpret_cast<const struct if_msghdr*>(_buffer);
-	XLOG_ASSERT(mh->ifm_msglen <= RTSOCK_BYTES);
+	const struct if_msghdr* mh = reinterpret_cast<const struct if_msghdr*>(&message[0]);
+	XLOG_ASSERT(mh->ifm_msglen == message.size());
 	XLOG_ASSERT(mh->ifm_msglen == got);
+	last_mh_off = off;
 	break;
     }
-    
+    XLOG_ASSERT(last_mh_off == message.size());
+
     //
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->rtsock_data(_buffer, got);
+	(*i)->rtsock_data(&message[0], message.size());
     }
 }
 
@@ -250,3 +269,76 @@ RoutingSocketObserver::routing_socket()
     return _rs;
 }
 
+RoutingSocketReader::RoutingSocketReader(RoutingSocket& rs)
+    : RoutingSocketObserver(rs),
+      _rs(rs),
+      _cache_valid(false),
+      _cache_seqno(0)
+{
+
+}
+
+RoutingSocketReader::~RoutingSocketReader()
+{
+
+}
+
+/**
+ * Force the reader to receive data from the specified routing socket.
+ *
+ * @param rs the routing socket to receive the data from.
+ * @param seqno the sequence number of the data to receive.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+RoutingSocketReader::receive_data(RoutingSocket& rs, uint32_t seqno)
+{
+    _cache_seqno = seqno;
+    _cache_valid = false;
+    while (_cache_valid == false) {
+	rs.force_read();
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * Receive data from the routing socket.
+ *
+ * Note that this method is called asynchronously when the routing socket
+ * has data to receive, therefore it should never be called directly by
+ * anything else except the routing socket facility itself.
+ *
+ * @param data the buffer with the received data.
+ * @param nbytes the number of bytes in the @param data buffer.
+ */
+void
+RoutingSocketReader::rtsock_data(const uint8_t* data, size_t nbytes)
+{
+#ifndef HAVE_ROUTING_SOCKETS
+    UNUSED(data);
+    UNUSED(nbytes);
+
+    XLOG_UNREACHABLE();
+
+#else // HAVE_ROUTING_SOCKETS
+    size_t d = 0, off = 0;
+    pid_t my_pid = _rs.pid();
+
+    //
+    // Copy data that has been requested to be cached by setting _cache_seqno
+    //
+    _cache_data.resize(nbytes);
+    while (d < nbytes) {
+	const struct rt_msghdr* rh = reinterpret_cast<const struct rt_msghdr*>(data + d);
+	if ((rh->rtm_pid == my_pid)
+	    && (rh->rtm_seq == (signed)_cache_seqno)) {
+	    XLOG_ASSERT(nbytes - d >= rh->rtm_msglen);
+	    memcpy(&_cache_data[off], rh, rh->rtm_msglen);
+	    off += rh->rtm_msglen;
+	    _cache_valid = true;
+	}
+	d += rh->rtm_msglen;
+    }
+#endif // HAVE_ROUTING_SOCKETS
+}

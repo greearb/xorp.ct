@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.7 2003/08/21 23:47:54 fred Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.8 2003/09/22 05:45:57 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -200,44 +200,30 @@ private:
 
 class IfConfigGetNetlink : public IfConfigGet,
 			   public NetlinkSocket4,
-			   public NetlinkSocket6,
-			   public NetlinkSocketObserver {
+			   public NetlinkSocket6 {
 public:
     IfConfigGetNetlink(IfConfig& ifc);
     virtual ~IfConfigGetNetlink();
-    
+
     /**
      * Start operation.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int start();
-    
+
     /**
      * Stop operation.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
-    
+
     virtual bool read_config(IfTree& it);
     virtual bool pull_config(IfTree& config);
-    
-    /**
-     * Data has pop-up.
-     * 
-     * @param data the buffer with the data.
-     * @param nbytes the number of bytes in the @ref data buffer.
-     */
-    virtual void nlsock_data(const uint8_t* data, size_t nbytes);
-    
+
 private:
-    
-    bool	    _cache_valid;	// Cache data arrived.
-    uint32_t	    _cache_seqno;	// Seqno of netlink socket data to
-					// cache so route lookup via netlink
-					// socket can appear synchronous.
-    vector<uint8_t> _cache_data;	// Cached netlink socket data.
+    NetlinkSocketReader	_ns_reader;
 };
 
 #endif // __FEA_IFCONFIG_GET_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.6 2003/06/02 23:20:16 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.7 2003/06/05 02:39:36 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -170,8 +170,7 @@ private:
 };
 
 class FtiConfigEntryGetRtsock : public FtiConfigEntryGet,
-				public RoutingSocket,
-				public RoutingSocketObserver {
+				public RoutingSocket {
 public:
     FtiConfigEntryGetRtsock(FtiConfig& ftic);
     virtual ~FtiConfigEntryGetRtsock();
@@ -191,14 +190,6 @@ public:
     virtual int stop();
 
     /**
-     * Data has pop-up.
-     * 
-     * @param data the buffer with the data.
-     * @param nbytes the number of bytes in the @ref data buffer.
-     */
-    virtual void rtsock_data(const uint8_t* data, size_t nbytes);
-    
-    /**
      * Lookup a route.
      *
      * @param dst host address to resolve.
@@ -259,17 +250,12 @@ private:
      */
     virtual bool lookup_entry(const IPvXNet& dst, FteX& fte);
 
-    bool	    _cache_valid;	// Cache data arrived.
-    uint32_t	    _cache_seqno;	// Seqno of routing socket data to
-					// cache so route lookup via routing
-					// socket can appear synchronous.
-    vector<uint8_t> _cache_data;	// Cached routing socket data route.
+    RoutingSocketReader _rs_reader;
 };
 
 class FtiConfigEntryGetNetlink : public FtiConfigEntryGet,
 				 public NetlinkSocket4,
-				 public NetlinkSocket6,
-				 public NetlinkSocketObserver {
+				 public NetlinkSocket6 {
 public:
     FtiConfigEntryGetNetlink(FtiConfig& ftic);
     virtual ~FtiConfigEntryGetNetlink();
@@ -289,14 +275,6 @@ public:
     virtual int stop();
 
     /**
-     * Data has pop-up.
-     * 
-     * @param data the buffer with the data.
-     * @param nbytes the number of bytes in the @ref data buffer.
-     */
-    virtual void nlsock_data(const uint8_t* data, size_t nbytes);
-    
-    /**
      * Lookup a route.
      *
      * @param dst host address to resolve.
@@ -357,11 +335,7 @@ private:
      */
     virtual bool lookup_entry(const IPvXNet& dst, FteX& fte);
 
-    bool	    _cache_valid;	// Cache data arrived.
-    uint32_t	    _cache_seqno;	// Seqno of netlink socket data to
-					// cache so route lookup via netlink
-					// socket can appear synchronous.
-    vector<uint8_t> _cache_data;	// Cached netlink socket data.
+    NetlinkSocketReader	_ns_reader;
 };
 
 #endif // __FEA_FTICONFIG_ENTRY_GET_HH__

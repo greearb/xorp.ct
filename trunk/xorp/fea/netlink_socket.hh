@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.3 2003/09/20 00:31:29 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.4 2003/09/22 15:44:20 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -131,7 +131,7 @@ public:
 private:
     /**
      * Read data available for NetlinkSocket and invoke
-     * NetlinkSocketObserver::nlsock_data on all observers of netlink
+     * NetlinkSocketObserver::nlsock_data() on all observers of netlink
      * socket.
      */
     void select_hook(int fd, SelectorMask sm);
@@ -195,15 +195,17 @@ public:
 class NetlinkSocketObserver {
 public:
     NetlinkSocketObserver(NetlinkSocket4& ns4, NetlinkSocket6& ns6);
-
     virtual ~NetlinkSocketObserver();
 
     /**
-     * Method called when the observed netlink socket has data to be
-     * parsed.
+     * Receive data from the netlink socket.
      *
-     * @param data pointer to data.
-     * @param nbytes number of bytes available.
+     * Note that this method is called asynchronously when the netlink socket
+     * has data to receive, therefore it should never be called directly by
+     * anything else except the netlink socket facility itself.
+     *
+     * @param data the buffer with the received data.
+     * @param nbytes the number of bytes in the @param data buffer.
      */
     virtual void nlsock_data(const uint8_t* data, size_t nbytes) = 0;
 
@@ -220,6 +222,74 @@ public:
 private:
     NetlinkSocket4& _ns4;
     NetlinkSocket6& _ns6;
+};
+
+class NetlinkSocketReader : public NetlinkSocketObserver {
+public:
+    NetlinkSocketReader(NetlinkSocket4& ns4, NetlinkSocket6& ns6);
+    virtual ~NetlinkSocketReader();
+
+    /**
+     * Force the reader to receive data from the IPv4 netlink socket.
+     *
+     * @param seqno the sequence number of the data to receive.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int receive_data4(uint32_t seqno);
+
+    /**
+     * Force the reader to receive data from the IPv6 netlink socket.
+     *
+     * @param seqno the sequence number of the data to receive.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int receive_data6(uint32_t seqno);
+
+    /**
+     * Force the reader to receive data from the specified netlink socket.
+     *
+     * @param ns the netlink socket to receive the data from.
+     * @param seqno the sequence number of the data to receive.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int receive_data(NetlinkSocket& ns, uint32_t seqno);
+
+    /**
+     * Get the buffer with the data that was received.
+     *
+     * @return a pointer to the beginning of the buffer with the data that
+     * was received.
+     */
+    const uint8_t* buffer() const { return (&_cache_data[0]); }
+
+    /**
+     * Get the size of the buffer with the data that was received.
+     * 
+     * @return the size of the buffer with the data that was received.
+     */
+    const size_t   buffer_size() const { return (_cache_data.size()); }
+
+    /**
+     * Receive data from the netlink socket.
+     *
+     * Note that this method is called asynchronously when the netlink socket
+     * has data to receive, therefore it should never be called directly by
+     * anything else except the netlink socket facility itself.
+     *
+     * @param data the buffer with the received data.
+     * @param nbytes the number of bytes in the @param data buffer.
+     */
+    virtual void nlsock_data(const uint8_t* data, size_t nbytes);
+
+private:
+    NetlinkSocket4& _ns4;
+    NetlinkSocket6& _ns6;
+
+    bool	    _cache_valid;	// Cache data arrived.
+    uint32_t	    _cache_seqno;	// Seqno of netlink socket data to
+					// cache so reading via netlink
+					// socket can appear synchronous.
+    vector<uint8_t> _cache_data;	// Cached netlink socket data.
 };
 
 #endif // __FEA_NETLINK_SOCKET_HH__

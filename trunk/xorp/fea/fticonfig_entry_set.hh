@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.4 2003/05/14 01:13:40 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.5 2003/10/13 02:23:19 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -280,8 +280,7 @@ private:
 
 class FtiConfigEntrySetNetlink : public FtiConfigEntrySet,
 				 public NetlinkSocket4,
-				 public NetlinkSocket6,
-				 public NetlinkSocketObserver {
+				 public NetlinkSocket6 {
 public:
     FtiConfigEntrySetNetlink(FtiConfig& ftic);
     virtual ~FtiConfigEntrySetNetlink();
@@ -339,34 +338,11 @@ public:
      */
     virtual bool delete_entry6(const Fte6& fte);
 
-    /**
-     * Data has pop-up.
-     * 
-     * @param data the buffer with the data.
-     * @param nbytes the number of bytes in the @ref data buffer.
-     */
-    virtual void nlsock_data(const uint8_t* data, size_t nbytes);
-
 private:
     bool add_entry(const FteX& fte);
     bool delete_entry(const FteX& fte);
 
-    /**
-     * Check that a previous netlink request has succeeded.
-     * 
-     * @param ns the NetlinkSocket to use for reading data.
-     * @param seqno the sequence nomer of the netlink request to check for.
-     * @param reason the human-readable reason for any failure.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		check_netlink_request(NetlinkSocket& ns, uint32_t seqno,
-				      string& reason);
-
-    bool	    _cache_valid;	// Cache data arrived.
-    uint32_t	    _cache_seqno;	// Seqno of netlink socket data to
-					// cache so route lookup via netlink
-					// socket can appear synchronous.
-    vector<uint8_t> _cache_data;	// Cached netlink socket data.
+    NetlinkSocketReader _ns_reader;
 };
 
 #endif // __FEA_FTICONFIG_ENTRY_SET_HH__

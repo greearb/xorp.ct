@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.4 2003/09/20 00:41:02 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.5 2003/10/12 22:13:47 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
@@ -28,6 +28,9 @@
 #if defined(RTPROT_UNSPEC) && !defined(RTPROT_XORP)
 #define RTPROT_XORP 14
 #endif
+
+class NetlinkSocket;
+class NetlinkSocketReader;
 
 /**
  * @short Helper class for various NETLINK-format related utilities.
@@ -65,6 +68,20 @@ public:
      */
     static bool	nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg,
 				   int rta_len);
+
+    /**
+     * Check that a previous netlink request has succeeded.
+     *
+     * @param ns_reader the NetlinkSocketReader to use for reading data.
+     * @param ns the NetlinkSocket to use for reading data.
+     * @param seqno the sequence nomer of the netlink request to check for.
+     * @param reason the human-readable reason for any failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    static int check_netlink_request(NetlinkSocketReader& ns_reader,
+				     NetlinkSocket& ns,
+				     uint32_t seqno,
+				     string& reason);
 };
 
 #endif // __FEA_NETLINK_SOCKET_UTILS_HH__

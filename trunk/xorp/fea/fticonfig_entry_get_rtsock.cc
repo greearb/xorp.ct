@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.8 2003/09/20 07:00:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.9 2003/10/13 02:05:45 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -36,9 +36,7 @@
 FtiConfigEntryGetRtsock::FtiConfigEntryGetRtsock(FtiConfig& ftic)
     : FtiConfigEntryGet(ftic),
       RoutingSocket(ftic.eventloop()),
-      RoutingSocketObserver(*(RoutingSocket *)this),
-      _cache_valid(false),
-      _cache_seqno(0)
+      _rs_reader(*(RoutingSocket *)this)
 {
 #ifdef HAVE_ROUTING_SOCKETS
     register_ftic();
@@ -167,12 +165,6 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& , FteX& )
     return false;
 }
 
-void
-FtiConfigEntryGetRtsock::rtsock_data(const uint8_t* , size_t )
-{
-    
-}
-
 #else // HAVE_ROUTING_SOCKETS
 
 /**
@@ -188,7 +180,7 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     char		buffer[buffer_size];
-    struct rt_msghdr	*rtm, *rtm_answer;
+    struct rt_msghdr	*rtm;
     struct sockaddr_in	*sin;
     RoutingSocket&	rs = *this;
     
@@ -235,21 +227,16 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
 	XLOG_ERROR("error writing to routing socket: %s", strerror(errno));
 	return false;
     }
-    
+
     //
-    // We expect kernel to give us something back.  Force read until
-    // data ripples up via rtsock_data() that corresponds to expected
-    // sequence number and process id.
+    // Force to receive data from the kernel, and then parse it
     //
-    _cache_seqno = rtm->rtm_seq;
-    _cache_valid = false;
-    while (_cache_valid == false) {
-	rs.force_read();
+    _rs_reader.receive_data(rs, rtm->rtm_seq);
+    if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size())
+	!= true) {
+	return (false);
     }
-    rtm_answer = reinterpret_cast<struct rt_msghdr*>(&_cache_data[0]);
-    XLOG_ASSERT(rtm_answer->rtm_type == RTM_GET);
-    
-    return (parse_buffer_rtm(fte, &_cache_data[0], _cache_data.size()));
+    return (true);
 }
 
 /**
@@ -265,7 +252,7 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     char		buffer[buffer_size];
-    struct rt_msghdr	*rtm, *rtm_answer;
+    struct rt_msghdr	*rtm;
     struct sockaddr_in	*sin;
     RoutingSocket&	rs = *this;
     
@@ -334,56 +321,14 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
     }
     
     //
-    // We expect kernel to give us something back.  Force read until
-    // data ripples up via rtsock_data() that corresponds to expected
-    // sequence number and process id.
+    // Force to receive data from the kernel, and then parse it
     //
-    _cache_seqno = rtm->rtm_seq;
-    _cache_valid = false;
-    while (_cache_valid == false) {
-	rs.force_read();
+    _rs_reader.receive_data(rs, rtm->rtm_seq);
+    if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size())
+	!= true) {
+	return (false);
     }
-    rtm_answer = reinterpret_cast<struct rt_msghdr*>(&_cache_data[0]);
-    XLOG_ASSERT(rtm_answer->rtm_type == RTM_GET);
-    
-    return (parse_buffer_rtm(fte, &_cache_data[0], _cache_data.size()));
+    return (true);
 }
 
-/**
- * Receive data from the routing socket.
- *
- * Note that this method is called asynchronously when the routing socket
- * has data to receive, therefore it should never be called directly by
- * anything else except the routing socket facility itself.
- * 
- * @param data the buffer with the received data.
- * @param nbytes the number of bytes in the @param data buffer.
- */
-void
-FtiConfigEntryGetRtsock::rtsock_data(const uint8_t* data, size_t nbytes)
-{
-    RoutingSocket& rs = *this;
-    
-    //
-    // Copy data that has been requested to be cached by setting _cache_seqno.
-    //
-    size_t d = 0;
-    pid_t my_pid = rs.pid();
-    
-    while (d < nbytes) {
-	const struct rt_msghdr* rh = reinterpret_cast<const struct rt_msghdr*>(data + d);
-	if ((rh->rtm_pid == my_pid)
-	    && (rh->rtm_seq == (signed)_cache_seqno)) {
-#if 0	    // TODO: XXX: PAVPAVPAV: remove this assert?
-	    XLOG_ASSERT(_cache_valid == false); // Do not overwrite cache data
-#endif
-	    XLOG_ASSERT(nbytes - d >= rh->rtm_msglen);
-	    _cache_data.resize(rh->rtm_msglen);
-	    memcpy(&_cache_data[0], rh, rh->rtm_msglen);
-	    _cache_valid = true;
-	    return;
-	}
-	d += rh->rtm_msglen;
-    }
-}
 #endif // HAVE_ROUTING_SOCKETS

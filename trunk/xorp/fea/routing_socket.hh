@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket.hh,v 1.1 2003/05/02 07:50:48 pavlin Exp $
+// $XORP: xorp/fea/routing_socket.hh,v 1.2 2003/09/20 00:32:11 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_HH__
 #define __FEA_ROUTING_SOCKET_HH__
@@ -102,7 +102,7 @@ public:
 private:
     /**
      * Read data available for RoutingSocket and invoke
-     * RoutingSocketObserver::rtsock_data on all observers of routing
+     * RoutingSocketObserver::rtsock_data() on all observers of routing
      * socket.
      */
     void select_hook(int fd, SelectorMask sm);
@@ -113,7 +113,7 @@ private:
     RoutingSocket(const RoutingSocket&);		// Not implemented
 
 private:
-    static const size_t RTSOCK_BYTES = 8*1024; // Guess at largest sock message
+    static const size_t RTSOCK_BYTES = 8*1024; // Initial guess at msg size
 
 private:
     EventLoop&	 _e;
@@ -122,8 +122,6 @@ private:
 
     uint16_t 	 _seqno;	// Seqno of next write()
     uint16_t	 _instance_no;  // Instance number of this routing socket
-
-    uint8_t	 _buffer[RTSOCK_BYTES];
 
     static uint16_t _instance_cnt;
     static pid_t    _pid;
@@ -138,11 +136,14 @@ public:
     virtual ~RoutingSocketObserver();
 
     /**
-     * Method called when the observed routing socket has data to be
-     * parsed.
+     * Receive data from the routing socket.
      *
-     * @param data pointer to data.
-     * @param nbytes number of bytes available.
+     * Note that this method is called asynchronously when the routing socket
+     * has data to receive, therefore it should never be called directly by
+     * anything else except the routing socket facility itself.
+     *
+     * @param data the buffer with the received data.
+     * @param nbytes the number of bytes in the @param data buffer.
      */
     virtual void rtsock_data(const uint8_t* data, size_t nbytes) = 0;
 
@@ -153,6 +154,57 @@ public:
 
 private:
     RoutingSocket& _rs;
+};
+
+class RoutingSocketReader : public RoutingSocketObserver {
+public:
+    RoutingSocketReader(RoutingSocket& rs);
+    virtual ~RoutingSocketReader();
+
+    /**
+     * Force the reader to receive data from the specified routing socket.
+     *
+     * @param rs the routing socket to receive the data from.
+     * @param seqno the sequence number of the data to receive.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int receive_data(RoutingSocket& rs, uint32_t seqno);
+
+    /**
+     * Get the buffer with the data that was received.
+     *
+     * @return a pointer to the beginning of the buffer with the data that
+     * was received.
+     */
+    const uint8_t* buffer() const { return (&_cache_data[0]); }
+
+    /**
+     * Get the size of the buffer with the data that was received.
+     * 
+     * @return the size of the buffer with the data that was received.
+     */
+    const size_t   buffer_size() const { return (_cache_data.size()); }
+
+    /**
+     * Receive data from the routing socket.
+     *
+     * Note that this method is called asynchronously when the routing socket
+     * has data to receive, therefore it should never be called directly by
+     * anything else except the routing socket facility itself.
+     *
+     * @param data the buffer with the received data.
+     * @param nbytes the number of bytes in the @param data buffer.
+     */
+    virtual void rtsock_data(const uint8_t* data, size_t nbytes);
+
+private:
+    RoutingSocket&  _rs;
+
+    bool	    _cache_valid;	// Cache data arrived.
+    uint32_t	    _cache_seqno;	// Seqno of routing socket data to
+					// cache so reading via routing
+					// socket can appear synchronous.
+    vector<uint8_t> _cache_data;	// Cached routing socket data.
 };
 
 #endif // __FEA_ROUTING_SOCKET_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.10 2003/10/13 02:05:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.11 2003/10/13 02:17:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -43,9 +43,7 @@ FtiConfigTableGetNetlink::FtiConfigTableGetNetlink(FtiConfig& ftic)
     : FtiConfigTableGet(ftic),
       NetlinkSocket4(ftic.eventloop()),
       NetlinkSocket6(ftic.eventloop()),
-      NetlinkSocketObserver(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this),
-      _cache_valid(false),
-      _cache_seqno(0)
+      _ns_reader(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
     register_ftic();
@@ -151,12 +149,6 @@ FtiConfigTableGetNetlink::get_table(int , list<FteX>& )
     return false;
 }
 
-void
-FtiConfigTableGetNetlink::nlsock_data(const uint8_t* , size_t )
-{
-    
-}
-
 #else // HAVE_NETLINK_SOCKETS
 
 bool
@@ -218,68 +210,17 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
 		   strerror(errno));
 	return false;
     }
-    
-    //
-    // We expect kernel to give us something back.  Force read until
-    // data ripples up via nlsock_data() that corresponds to expected
-    // sequence number and process id.
-    //
-    _cache_seqno = nlh->nlmsg_seq;
-    _cache_valid = false;
-    while (_cache_valid == false) {
-	ns_ptr->force_recvmsg(0);
-    }
-    return (parse_buffer_nlm(family, fte_list, &_cache_data[0],
-			     _cache_data.size()));
-}
 
-/**
- * Receive data from the netlink socket.
- *
- * Note that this method is called asynchronously when the netlink socket
- * has data to receive, therefore it should never be called directly by
- * anything else except the netlink socket facility itself.
- * 
- * @param data the buffer with the received data.
- * @param nbytes the number of bytes in the @param data buffer.
- */
-void
-FtiConfigTableGetNetlink::nlsock_data(const uint8_t* data, size_t nbytes)
-{
-    NetlinkSocket4& ns4 = *this;	// XXX: needed only to get the pid
-    
     //
-    // Copy data that has been requested to be cached by setting _cache_seqno.
+    // Force to receive data from the kernel, and then parse it
     //
-    size_t d = 0, off = 0;
-    pid_t my_pid = ns4.pid();
-    
-    UNUSED(my_pid);	// XXX: (see below)
-    
-    _cache_data.resize(nbytes);
-    
-    while (d < nbytes) {
-	const struct nlmsghdr* nlh = reinterpret_cast<const struct nlmsghdr *>(data + d);
-	if (nlh->nlmsg_seq == _cache_seqno) {
-	    //
-	    // TODO: XXX: here we should add the following check as well:
-	    //       ((pid_t)nlh->nlmsg_pid == my_pid)
-	    // However, it appears that on return Linux doesn't fill-in
-	    // nlh->nlmsg_pid to our pid (e.g., it may be set to 0xffffefff).
-	    // Unfortunately, Linux's netlink(7) is not helpful on the
-	    // subject, hence we ignore this additional test.
-	    //
-	    
-#if 0	    // TODO: XXX: PAVPAVPAV: remove this assert?
-	    XLOG_ASSERT(_cache_valid == false); // Do not overwrite cache data
-#endif
-	    XLOG_ASSERT(nbytes - d >= nlh->nlmsg_len);
-	    memcpy(&_cache_data[off], nlh, nlh->nlmsg_len);
-	    off += nlh->nlmsg_len;
-	    _cache_valid = true;
-	}
-	d += nlh->nlmsg_len;
+    _ns_reader.receive_data(*ns_ptr, nlh->nlmsg_seq);
+    if (parse_buffer_nlm(family, fte_list, _ns_reader.buffer(),
+			 _ns_reader.buffer_size())
+	!= true) {
+	return (false);
     }
+    return (true);
 }
 
 #endif // HAVE_NETLINK_SOCKETS

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.7 2003/10/01 22:49:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.8 2003/10/12 22:15:58 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -33,6 +33,7 @@
 #endif
 
 #include "kernel_utils.hh"
+#include "netlink_socket.hh"
 #include "netlink_socket_utils.hh"
 
 //
@@ -279,6 +280,77 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
 	       route_metric, admin_distance, xorp_route);
     
     return true;
+}
+
+/**
+ * Check that a previous netlink request has succeeded.
+ *
+ * @param ns_reader the NetlinkSocketReader to use for reading data.
+ * @param ns the NetlinkSocket to use for reading data.
+ * @param seqno the sequence nomer of the netlink request to check for.
+ * @param reason the human-readable reason for any failure.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
+				NetlinkSocket& ns,
+				uint32_t seqno,
+				string& reason)
+{
+    size_t buf_bytes;
+    const struct nlmsghdr* nlh;
+
+    //
+    // Force to receive data from the kernel, and then parse it
+    //
+    ns_reader.receive_data(ns, seqno);
+
+    buf_bytes = ns_reader.buffer_size();
+    for (nlh = reinterpret_cast<const struct nlmsghdr*>(ns_reader.buffer());
+	 NLMSG_OK(nlh, buf_bytes);
+	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buf_bytes)) {
+	caddr_t nlmsg_data = reinterpret_cast<caddr_t>(NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh)));
+	
+	switch (nlh->nlmsg_type) {
+	case NLMSG_ERROR:
+	{
+	    const struct nlmsgerr* err;
+
+	    err = reinterpret_cast<const struct nlmsgerr*>(nlmsg_data);
+	    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(*err))) {
+		reason = "AF_NETLINK nlmsgerr length error";
+		return (XORP_ERROR);
+	    }
+	    if (err->error == 0)
+		return (XORP_OK);	// No error
+	    errno = -err->error;
+	    reason = c_format("AF_NETLINK NLMSG_ERROR message: %s",
+			      strerror(errno));
+	    return (XORP_ERROR);
+	}
+	break;
+	
+	case NLMSG_DONE:
+	{
+	    // End-of-message, and no ACK was received: error.
+	    reason = "No ACK was received";
+	    return (XORP_ERROR);
+	}
+	break;
+
+	case NLMSG_NOOP:
+	    break;
+
+	default:
+	    debug_msg("Unhandled type %s(%d) (%d bytes)\n",
+		      NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
+		      nlh->nlmsg_type, nlh->nlmsg_len);
+	    break;
+	}
+    }
+
+    reason = "No ACK was received";
+    return (XORP_ERROR);		// No ACK was received: error.
 }
 
 #endif // HAVE_NETLINK_SOCKETS

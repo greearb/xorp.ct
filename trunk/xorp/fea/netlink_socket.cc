@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.7 2003/09/22 16:56:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.8 2003/10/01 22:49:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -47,36 +47,6 @@ pid_t NetlinkSocket::_pid = getpid();
 // Netlink Sockets (see netlink(7)) communication with the kernel
 //
 
-#ifndef HAVE_NETLINK_SOCKETS
-
-NetlinkSocket::NetlinkSocket(EventLoop& e)
-    : _e(e),
-      _fd(-1),
-      _seqno(0),
-      _instance_no(_instance_cnt++)
-{
-    
-}
-
-NetlinkSocket::~NetlinkSocket()
-{
-    
-}
-
-int
-NetlinkSocket::start(int )
-{
-    return (XORP_ERROR);
-}
-
-int
-NetlinkSocket::stop()
-{
-    return (XORP_ERROR);
-}
-
-#else // HAVE_NETLINK_SOCKETS
-
 NetlinkSocket::NetlinkSocket(EventLoop& e)
     : _e(e),
       _fd(-1),
@@ -91,6 +61,30 @@ NetlinkSocket::~NetlinkSocket()
     stop();
     XLOG_ASSERT(_ol.empty());
 }
+
+#ifndef HAVE_NETLINK_SOCKETS
+
+int
+NetlinkSocket::start(int )
+{
+    XLOG_UNREACHABLE();
+    return (XORP_ERROR);
+}
+
+int
+NetlinkSocket::stop()
+{
+    XLOG_UNREACHABLE();
+    return (XORP_ERROR);
+}
+
+void
+NetlinkSocket::force_read()
+{
+    XLOG_UNREACHABLE();
+}
+
+#else // HAVE_NETLINK_SOCKETS
 
 int
 NetlinkSocket::start(int af)
@@ -534,3 +528,123 @@ NetlinkSocketObserver::netlink_socket6()
     return _ns6;
 }
 
+NetlinkSocketReader::NetlinkSocketReader(NetlinkSocket4& ns4,
+					 NetlinkSocket6& ns6)
+    : NetlinkSocketObserver(ns4, ns6),
+      _ns4(ns4),
+      _ns6(ns6),
+      _cache_valid(false),
+      _cache_seqno(0)
+{
+
+}
+
+NetlinkSocketReader::~NetlinkSocketReader()
+{
+
+}
+
+/**
+ * Force the reader to receive data from the IPv4 netlink socket.
+ *
+ * @param seqno the sequence number of the data to receive.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+NetlinkSocketReader::receive_data4(uint32_t seqno)
+{
+    _cache_seqno = seqno;
+    _cache_valid = false;
+    while (_cache_valid == false) {
+	_ns4.force_read();
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * Force the reader to receive data from the IPv6 netlink socket.
+ *
+ * @param seqno the sequence number of the data to receive.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+NetlinkSocketReader::receive_data6(uint32_t seqno)
+{
+    _cache_seqno = seqno;
+    _cache_valid = false;
+    while (_cache_valid == false) {
+	_ns6.force_read();
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * Force the reader to receive data from the specified netlink socket.
+ *
+ * @param ns the netlink socket to receive the data from.
+ * @param seqno the sequence number of the data to receive.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno)
+{
+    _cache_seqno = seqno;
+    _cache_valid = false;
+    while (_cache_valid == false) {
+	ns.force_read();
+    }
+
+    return (XORP_OK);
+}
+
+/**
+ * Receive data from the netlink socket.
+ *
+ * Note that this method is called asynchronously when the netlink socket
+ * has data to receive, therefore it should never be called directly by
+ * anything else except the netlink socket facility itself.
+ *
+ * @param data the buffer with the received data.
+ * @param nbytes the number of bytes in the @param data buffer.
+ */
+void
+NetlinkSocketReader::nlsock_data(const uint8_t* data, size_t nbytes)
+{
+#ifndef HAVE_NETLINK_SOCKETS
+    UNUSED(data);
+    UNUSED(nbytes);
+
+    XLOG_UNREACHABLE();
+
+#else // HAVE_NETLINK_SOCKETS
+
+    size_t d = 0, off = 0;
+    // XXX: we don't use the pid (see below why).
+    // pid_t my_pid = _ns4.pid();
+
+    //
+    // Copy data that has been requested to be cached by setting _cache_seqno
+    //
+    _cache_data.resize(nbytes);
+    while (d < nbytes) {
+	const struct nlmsghdr* nlh = reinterpret_cast<const struct nlmsghdr*>(data + d);
+	if (nlh->nlmsg_seq == _cache_seqno) {
+	    //
+	    // TODO: XXX: here we should add the following check as well:
+	    //       ((pid_t)nlh->nlmsg_pid == my_pid)
+	    // However, it appears that on return Linux doesn't fill-in
+	    // nlh->nlmsg_pid to our pid (e.g., it may be set to 0xffffefff).
+	    // Unfortunately, Linux's netlink(7) is not helpful on the
+	    // subject, hence we ignore this additional test.
+	    //
+	    XLOG_ASSERT(nbytes - d >= nlh->nlmsg_len);
+	    memcpy(&_cache_data[off], nlh, nlh->nlmsg_len);
+	    off += nlh->nlmsg_len;
+	    _cache_valid = true;
+	}
+	d += nlh->nlmsg_len;
+    }
+#endif // HAVE_NETLINK_SOCKETS
+}

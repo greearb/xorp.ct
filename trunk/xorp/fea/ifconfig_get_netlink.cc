@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.2 2003/10/01 22:49:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.3 2003/10/03 00:10:23 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -44,9 +44,7 @@ IfConfigGetNetlink::IfConfigGetNetlink(IfConfig& ifc)
     : IfConfigGet(ifc),
       NetlinkSocket4(ifc.eventloop()),
       NetlinkSocket6(ifc.eventloop()),
-      NetlinkSocketObserver(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this),
-      _cache_valid(false),
-      _cache_seqno(0)
+      _ns_reader(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
     register_ifc();
@@ -106,22 +104,15 @@ IfConfigGetNetlink::read_config(IfTree& )
     return false;
 }
 
-void
-IfConfigGetNetlink::nlsock_data(const uint8_t* , size_t )
-{
-    
-}
-
 #else // HAVE_NETLINK_SOCKETS
 
 bool
 IfConfigGetNetlink::read_config(IfTree& it)
 {
-#define IFIBUFSIZE (sizeof(struct nlmsghdr) + sizeof(struct ifinfomsg) + sizeof(struct ifaddrmsg) + 512)
-    char		ifibuf[IFIBUFSIZE];
-    struct nlmsghdr	*nlh, *nlh_answer;
+    static const size_t	buffer_size = sizeof(struct nlmsghdr) + sizeof(struct ifinfomsg) + sizeof(struct ifaddrmsg) + 512;
+    char		buffer[buffer_size];
+    struct nlmsghdr	*nlh;
     struct sockaddr_nl	snl;
-    socklen_t		snl_len;
     struct ifinfomsg	*ifinfomsg;
     struct ifaddrmsg	*ifaddrmsg;
     NetlinkSocket4&	ns4 = *this;
@@ -146,8 +137,8 @@ IfConfigGetNetlink::read_config(IfTree& it)
     //
     // Set the request for network interfaces
     //
-    memset(ifibuf, 0, sizeof(ifibuf));
-    nlh = reinterpret_cast<struct nlmsghdr*>(ifibuf);
+    memset(buffer, 0, sizeof(buffer));
+    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
     nlh->nlmsg_type = RTM_GETLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
@@ -160,7 +151,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
     ifinfomsg->ifi_flags = 0;
     ifinfomsg->ifi_change = 0xffffffff;
     
-    if (ns4.sendto(ifibuf, nlh->nlmsg_len, 0,
+    if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
 		   reinterpret_cast<struct sockaddr*>(&snl),
 		   sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
@@ -168,22 +159,16 @@ IfConfigGetNetlink::read_config(IfTree& it)
 		   strerror(errno));
 	return false;
     }
-    
+
     //
-    // We expect kernel to give us something back.  Force read until
-    // data ripples up via nlsock_data() that corresponds to expected
-    // sequence number and process id.
+    // Force to receive data from the kernel, and then parse it
     //
-    _cache_seqno = nlh->nlmsg_seq;
-    _cache_valid = false;
-    while (_cache_valid == false) {
-	ns4.force_recvfrom(0, reinterpret_cast<struct sockaddr*>(&snl),
-			   &snl_len);
-    }
-    nlh_answer = reinterpret_cast<struct nlmsghdr*>(&_cache_data[0]);
-    if (parse_buffer_nlm(it, &_cache_data[0], _cache_data.size()) != true)
+    _ns_reader.receive_data4(nlh->nlmsg_seq);
+    if (parse_buffer_nlm(it, _ns_reader.buffer(), _ns_reader.buffer_size())
+	!= true) {
 	return (false);
-    
+    }
+
     //
     // Create a list with the interface indexes
     //
@@ -215,8 +200,8 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	//
 	// Set the request for IPv4 addresses
 	//
-	memset(ifibuf, 0, sizeof(ifibuf));
-	nlh = reinterpret_cast<struct nlmsghdr*>(ifibuf);
+	memset(buffer, 0, sizeof(buffer));
+	nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
 	nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
 	nlh->nlmsg_type = RTM_GETADDR;
 	nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
@@ -229,7 +214,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	ifaddrmsg->ifa_scope = 0;
 	ifaddrmsg->ifa_index = if_index;
 	
-	if (ns4.sendto(ifibuf, nlh->nlmsg_len, 0,
+	if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl),
 		       sizeof(snl))
 	    != (ssize_t)nlh->nlmsg_len) {
@@ -237,28 +222,22 @@ IfConfigGetNetlink::read_config(IfTree& it)
 		       strerror(errno));
 	    return false;
 	}
-	
+
 	//
-	// We expect kernel to give us something back.  Force read until
-	// data ripples up via nlsock_data() that corresponds to expected
-	// sequence number and process id.
+	// Force to receive data from the kernel, and then parse it
 	//
-	_cache_seqno = nlh->nlmsg_seq;
-	_cache_valid = false;
-	while (_cache_valid == false) {
-	    ns4.force_recvfrom(0, reinterpret_cast<struct sockaddr*>(&snl),
-			       &snl_len);
-	}
-	nlh_answer = reinterpret_cast<struct nlmsghdr*>(&_cache_data[0]);
-	if (parse_buffer_nlm(it, &_cache_data[0], _cache_data.size()) != true)
+	_ns_reader.receive_data4(nlh->nlmsg_seq);
+	if (parse_buffer_nlm(it, _ns_reader.buffer(), _ns_reader.buffer_size())
+	    != true) {
 	    return (false);
+	}
 
 #ifdef HAVE_IPV6
 	//
 	// Set the request for IPv6 addresses
 	//
-	memset(ifibuf, 0, sizeof(ifibuf));
-	nlh = reinterpret_cast<struct nlmsghdr*>(ifibuf);
+	memset(buffer, 0, sizeof(buffer));
+	nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
 	nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
 	nlh->nlmsg_type = RTM_GETADDR;
 	nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
@@ -271,7 +250,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	ifaddrmsg->ifa_scope = 0;
 	ifaddrmsg->ifa_index = if_index;
 	
-	if (ns6.sendto(ifibuf, nlh->nlmsg_len, 0,
+	if (ns6.sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl),
 		       sizeof(snl))
 	    != (ssize_t)nlh->nlmsg_len) {
@@ -279,74 +258,19 @@ IfConfigGetNetlink::read_config(IfTree& it)
 		       strerror(errno));
 	    return false;
 	}
-	
+
 	//
-	// We expect kernel to give us something back.  Force read until
-	// data ripples up via nlsock_data() that corresponds to expected
-	// sequence number and process id.
+	// Force to receive data from the kernel, and then parse it
 	//
-	_cache_seqno = nlh->nlmsg_seq;
-	_cache_valid = false;
-	while (_cache_valid == false) {
-	    ns6.force_recvfrom(0, reinterpret_cast<struct sockaddr*>(&snl),
-			       &snl_len);
-	}
-	nlh_answer = reinterpret_cast<struct nlmsghdr*>(&_cache_data[0]);
-	if (parse_buffer_nlm(it, &_cache_data[0], _cache_data.size()) != true)
+	_ns_reader.receive_data6(nlh->nlmsg_seq);
+	if (parse_buffer_nlm(it, _ns_reader.buffer(), _ns_reader.buffer_size())
+	    != true) {
 	    return (false);
+	}
 #endif // HAVE_IPV6
     }
     
     return (true);
 }
     
-/**
- * Receive data from the netlink socket.
- *
- * Note that this method is called asynchronously when the netlink socket
- * has data to receive, therefore it should never be called directly by
- * anything else except the netlink socket facility itself.
- * 
- * @param data the buffer with the received data.
- * @param nbytes the number of bytes in the @param data buffer.
- */
-void
-IfConfigGetNetlink::nlsock_data(const uint8_t* data, size_t nbytes)
-{
-    NetlinkSocket4& ns4 = *this;	// XXX: needed only to get the pid
-    
-    //
-    // Copy data that has been requested to be cached by setting _cache_seqno.
-    //
-    size_t d = 0, off = 0;
-    pid_t my_pid = ns4.pid();
-    
-    UNUSED(my_pid);	// XXX: (see below)
-    
-    _cache_data.resize(nbytes);
-    
-    while (d < nbytes) {
-	const struct nlmsghdr* nlh = reinterpret_cast<const struct nlmsghdr*>(data + d);
-	if (nlh->nlmsg_seq == _cache_seqno) {
-	    //
-	    // TODO: XXX: here we should add the following check as well:
-	    //       ((pid_t)nlh->nlmsg_pid == my_pid)
-	    // However, it appears that on return Linux doesn't fill-in
-	    // nlh->nlmsg_pid to our pid (e.g., it may be set to 0xffffefff).
-	    // Unfortunately, Linux's netlink(7) is not helpful on the
-	    // subject, hence we ignore this additional test.
-	    //
-	    
-#if 0	    // TODO: XXX: PAVPAVPAV: remove this assert?
-	    XLOG_ASSERT(_cache_valid == false); // Do not overwrite cache data
-#endif
-	    XLOG_ASSERT(nbytes - d >= nlh->nlmsg_len);
-	    memcpy(&_cache_data[off], nlh, nlh->nlmsg_len);
-	    off += nlh->nlmsg_len;
-	    _cache_valid = true;
-	}
-	d += nlh->nlmsg_len;
-    }
-}
-
 #endif // HAVE_NETLINK_SOCKETS
