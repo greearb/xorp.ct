@@ -3,7 +3,7 @@
 #include "y.opcmd_tab.h"
 %}
 	int opcmd_linenum = 1;
-	extern void* opcmdlval;
+	extern char* opcmdlval;
 %option noyywrap
 %option nounput
 %x comment

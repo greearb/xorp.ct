@@ -4,7 +4,7 @@
 #define SBUFSIZE 1024
 %}
 	int boot_linenum = 1;
-	extern void* bootlval;
+	extern char* bootlval;
 	char stringbuf[SBUFSIZE + 1];
 %option noyywrap
 %option nounput

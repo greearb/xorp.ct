@@ -3,7 +3,7 @@
 #include "y.tplt_tab.h"
 %}
 	int tplt_linenum = 1;
-	extern void* tpltlval;
+	extern char* tpltlval;
 %option noyywrap
 %option nounput
 %x comment
