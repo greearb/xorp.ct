@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.12 2003/08/28 15:07:01 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.13 2003/10/17 00:58:27 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -84,10 +84,10 @@ the login shell is csh or tcsh):
 		(set the definition for Release tag to $ReleaseTag as
 		defined later)
 	      - Edit/update www/index.html
-		(modify all references to the most recent version and
-		its release date, add an item to "Project News", etc)
-	      - Add a news item to news.html
+		Modify all references to the most recent version and
+		its release date, add an item to "Project News", etc.
 		If necessary, remove short-cuts for old news items.
+	      - Add a news item to news.html
 	      - If necessary, update www/license.html to add a new
 		copyright year
 
