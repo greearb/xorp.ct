@@ -1,6 +1,18 @@
 #
-# $XORP: xorp/fea/TODO,v 1.11 2003/09/11 23:44:37 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.12 2003/09/20 00:14:03 pavlin Exp $
 #
+
+* Check ioctl(SIOCGETTUNNEL) usage from Linux net-tools from USAGI's
+  distribution (which returns "struct ip_tunnel_parm"),
+  and ioctl(SIOCGETTUNNEL6) which returns "struct ip6_tunnel_parm".
+  The source/destination addresses are in
+  iptunnel.iph.saddr/iptunnel.iph.daddr
+  and ip6tunnel.git_ip6h.ip6_src/ip6tunnel.git_ip6h.ip6_dst
+  respectively.
+
+  First, check whether the existing methods on Linux already
+  take care of tunnels, and only if they don't then call the above
+  two ioctls as appropriate.
 
 * Check whether a returned MAC addresses of an interface is an
   Ethernet address before attempting to assign it as an Ethernet
