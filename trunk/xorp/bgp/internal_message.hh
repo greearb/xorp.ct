@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001,2002 International Computer Science Institute
+// Copyright (c) 2001-2003 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/internal_message.hh,v 1.2 2002/12/16 03:08:20 mjh Exp $
+// $XORP: xorp/bgp/internal_message.hh,v 1.3 2003/02/07 05:35:37 mjh Exp $
 
 #ifndef __BGP_INTERNAL_MESSAGES_HH__
 #define __BGP_INTERNAL_MESSAGES_HH__

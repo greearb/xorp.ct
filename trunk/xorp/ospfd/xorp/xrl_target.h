@@ -1,6 +1,6 @@
 // -*- mode: c++ ; c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t-*-
 
-// Copyright (c) 2001,2002 International Computer Science Institute
+// Copyright (c) 2001-2003 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospfd/xorp/xrl_target.h,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
+// $XORP: xorp/ospfd/xorp/xrl_target.h,v 1.2 2002/12/14 23:43:09 hodson Exp $
 
 #ifndef __XORP_OSPF_XORP_XRL_TARGET_HH__
 #define __XORP_OSPF_XORP_XRL_TARGET_HH__

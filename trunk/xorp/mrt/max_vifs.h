@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001,2002 International Computer Science Institute
+ * Copyright (c) 2001-2003 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/max_vifs.h,v 1.8 2002/12/09 18:29:21 hodson Exp $
+ * $XORP: xorp/mrt/max_vifs.h,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
  */
 
 #ifndef __MRT_MAX_VIFS_H__

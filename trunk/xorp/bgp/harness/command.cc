@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001,2002 International Computer Science Institute
+// Copyright (c) 2001-2003 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.3 2003/01/26 04:06:18 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.4 2003/01/30 04:46:04 pavlin Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001,2002 International Computer Science Institute
+// Copyright (c) 2001-2003 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.5 2003/01/30 04:06:33 mjh Exp $
+// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.6 2003/02/08 01:32:59 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 #define __BGP_ROUTE_TABLE_NHLOOKUP_HH__

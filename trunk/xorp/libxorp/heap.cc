@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001,2002 International Computer Science Institute
+// Copyright (c) 2001-2003 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.2 2003/03/06 23:11:55 atanu Exp $"
 
 #include <strings.h>
 #include "libxorp_module.h"

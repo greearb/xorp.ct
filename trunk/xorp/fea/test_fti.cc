@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001,2002 International Computer Science Institute
+// Copyright (c) 2001-2003 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fti.cc,v 1.37 2002/12/09 18:29:00 hodson Exp $"
+#ident "$XORP: xorp/fea/test_fti.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
 
 #include <list>
 

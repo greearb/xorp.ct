@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001,2002 International Computer Science Institute
+// Copyright (c) 2001-2003 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.2 2002/12/14 23:43:10 hodson Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.3 2003/03/10 20:26:47 mjh Exp $"
 
 #include "urib_module.h"
 #include "libxorp/xorp.h"

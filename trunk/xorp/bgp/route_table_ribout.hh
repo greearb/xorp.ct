@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001,2002 International Computer Science Institute
+// Copyright (c) 2001-2003 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribout.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+// $XORP: xorp/bgp/route_table_ribout.hh,v 1.2 2002/12/17 22:06:06 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
