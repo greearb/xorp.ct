@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser_input.cc,v 1.3 2003/01/20 23:08:04 greenhal Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser_input.cc,v 1.4 2003/03/10 23:20:27 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 #include "xrl_parser_input.hh"
@@ -146,26 +146,43 @@ XrlParserFileInput::path_open_input(const char* filename)
     throw (XrlParserInputException)
 {
     // XXX We could check for recursive includes here
+    
+    if (filename == 0)
+	return 0;
 
-    for (list<string>::const_iterator pi = _path.begin();
-	 pi != _path.end(); pi++) {
-	const string& path = *pi;
-
-	if (path.size() == 0)
-	    continue;
-
-	string path_file;
-	if (path[path.size() - 1] == '/') {
-	    path_file = path + filename;
-	} else {
-	    path_file = path + "/" + filename;
-	}
-
-	ifstream* pif = new ifstream(path_file.c_str());
+    if (filename[0] == '/') {
+	//
+	// Filename begins with a slash so assume it is absolute.
+	//
+	ifstream* pif = new ifstream(filename);
 	if (pif->good()) {
 	    return pif;
 	}
 	delete pif;
+    } else {
+	//
+	// Filename does not begin with a slash so assume it is relative.
+	//
+	for (list<string>::const_iterator pi = _path.begin();
+	     pi != _path.end(); pi++) {
+	    const string& path = *pi;
+
+	    if (path.size() == 0)
+		continue;
+
+	    string path_file;
+	    if (path[path.size() - 1] == '/') {
+		path_file = path + filename;
+	    } else {
+		path_file = path + "/" + filename;
+	    }
+
+	    ifstream* pif = new ifstream(path_file.c_str());
+	    if (pif->good()) {
+		return pif;
+	    }
+	    delete pif;
+	}
     }
     xorp_throw(XrlParserInputException, c_format("Could not open \"%s\": %s",
 					  filename, strerror(errno)));
