@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mfea/xrl_shell_lib.sh,v 1.5 2002/08/03 00:22:23 pavlin Exp $
+# $XORP: xorp/mfea/xrl_shell_lib.sh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
 #
 
 #
@@ -290,19 +290,11 @@ call_xrl()
     fi
     
     XRL="$1"
-    
-    if [ $# -lt 2 ] ; then
-	# Just call the XRL and don't check any result
-	XRL_RESULT=`$CALLXRL $XRL`
-	print_xrl_result $XRL_RESULT $PRINT_LIST_XRL_VARIABLE_XRL_TYPE
-	echo "DONE"
-	return
-    fi
-    
-    # Need to test the return result
+    # Note: the values below may be empty
     XRL_VARIABLE_XRL_TYPE="$2"
     TEST_OPERATOR="$3"
     TEST_VALUE="$4"
+    
     # Initialize the iterator
     if [ "$MAX_REPEAT_NUMBER" -eq 0 ] ; then
 	_iter=-1
@@ -311,8 +303,12 @@ call_xrl()
     fi
     while [ true ] ; do
 	XRL_RESULT=`"$CALLXRL" "$XRL"`
-	test_xrl_result "$XRL_RESULT" "$XRL_VARIABLE_XRL_TYPE" "$TEST_OPERATOR" "$TEST_VALUE"
-	if [ $? -eq 0 ] ; then
+	ret_value=$?
+	if [ $ret_value -eq 0 -a X$TEST_OPERATOR != X -a X$TEST_VALUE != X ] ; then
+	    test_xrl_result "$XRL_RESULT" "$XRL_VARIABLE_XRL_TYPE" "$TEST_OPERATOR" "$TEST_VALUE"
+	    ret_value=$?
+	fi
+	if [ $ret_value -eq 0 ] ; then
 	    print_xrl_result $XRL_RESULT $PRINT_LIST_XRL_VARIABLE_XRL_TYPE
 	    echo "OK"
 	    break;
