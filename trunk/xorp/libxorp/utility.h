@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.2 2003/03/10 23:20:37 hodson Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.3 2003/05/21 02:53:30 pavlin Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -44,5 +44,25 @@
 
 #define ADD_POINTER(pointer, size, type)				\
 	((type)(((uint8_t *)(pointer)) + (size)))
+
+/*
+ * Various ctype(3) wrappers that work properly even if the value of the int
+ * argument is not representable as an unsigned char and doesn't have the
+ * value of EOF.
+ */
+int xorp_isalnum(int c);
+int xorp_isalpha(int c);
+int xorp_isblank(int c);
+int xorp_iscntrl(int c);
+int xorp_isdigit(int c);
+int xorp_isgraph(int c);
+int xorp_islower(int c);
+int xorp_isprint(int c);
+int xorp_ispunct(int c);
+int xorp_isspace(int c);
+int xorp_isupper(int c);
+int xorp_isxdigit(int c);
+int xorp_tolower(int c);
+int xorp_toupper(int c);
 
 #endif /* __LIBXORP_UTILITY_H__ */

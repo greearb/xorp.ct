@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.13 2003/08/01 02:11:48 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.14 2003/10/10 18:50:34 hodson Exp $
 ##
 
 # -- Real Programs
@@ -125,6 +125,7 @@ libxorp_a_SOURCES += utils.hh
 libxorp_a_SOURCES += vif.hh
 
 libxorp_a_SOURCES += debug.c
+libxorp_a_SOURCES += utility.c
 libxorp_a_SOURCES += xlog.c
 
 libxorp_a_SOURCES += asyncio.cc

@@ -131,7 +131,7 @@ test_types_SOURCES = test_types.cc
 test_vif_SOURCES = test_vif.cc
 
 # -- Library Sources
-libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh selector.hh service.hh time_slice.hh timer.hh timeval.hh token.hh transaction.hh trie.hh utils.hh vif.hh debug.c xlog.c asyncio.cc c_format.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
+libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh selector.hh service.hh time_slice.hh timer.hh timeval.hh token.hh transaction.hh trie.hh utils.hh vif.hh debug.c utility.c xlog.c asyncio.cc c_format.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
 
 BUILT_SOURCES = callback.hh
 
@@ -149,13 +149,13 @@ LIBRARIES = $(noinst_LIBRARIES)
 
 libxorp_a_AR = $(AR) cru
 libxorp_a_LIBADD =
-am_libxorp_a_OBJECTS = debug.$(OBJEXT) xlog.$(OBJEXT) asyncio.$(OBJEXT) \
-	c_format.$(OBJEXT) eventloop.$(OBJEXT) exceptions.$(OBJEXT) \
-	heap.$(OBJEXT) ipv4.$(OBJEXT) ipv6.$(OBJEXT) ipvx.$(OBJEXT) \
-	mac.$(OBJEXT) nexthop.$(OBJEXT) ref_ptr.$(OBJEXT) \
-	selector.$(OBJEXT) service.$(OBJEXT) time_slice.$(OBJEXT) \
-	timer.$(OBJEXT) token.$(OBJEXT) transaction.$(OBJEXT) \
-	vif.$(OBJEXT)
+am_libxorp_a_OBJECTS = debug.$(OBJEXT) utility.$(OBJEXT) xlog.$(OBJEXT) \
+	asyncio.$(OBJEXT) c_format.$(OBJEXT) eventloop.$(OBJEXT) \
+	exceptions.$(OBJEXT) heap.$(OBJEXT) ipv4.$(OBJEXT) \
+	ipv6.$(OBJEXT) ipvx.$(OBJEXT) mac.$(OBJEXT) nexthop.$(OBJEXT) \
+	ref_ptr.$(OBJEXT) selector.$(OBJEXT) service.$(OBJEXT) \
+	time_slice.$(OBJEXT) timer.$(OBJEXT) token.$(OBJEXT) \
+	transaction.$(OBJEXT) vif.$(OBJEXT)
 libxorp_a_OBJECTS = $(am_libxorp_a_OBJECTS)
 bin_PROGRAMS =
 noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
@@ -310,8 +310,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_trie.Po $(DEPDIR)/test_types.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_vif.Po $(DEPDIR)/time_slice.Po \
 @AMDEP_TRUE@	$(DEPDIR)/timer.Po $(DEPDIR)/token.Po \
-@AMDEP_TRUE@	$(DEPDIR)/transaction.Po $(DEPDIR)/vif.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xlog.Po
+@AMDEP_TRUE@	$(DEPDIR)/transaction.Po $(DEPDIR)/utility.Po \
+@AMDEP_TRUE@	$(DEPDIR)/vif.Po $(DEPDIR)/xlog.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -497,6 +497,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/token.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/transaction.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/utility.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xlog.Po@am__quote@
 
