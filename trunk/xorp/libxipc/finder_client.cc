@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.5 2003/03/05 18:19:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.6 2003/03/06 01:18:57 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -25,6 +25,43 @@
 #include "finder_tcp_messenger.hh"
 
 static const char* finder = "finder";
+
+static class TraceFinder {
+public:
+    TraceFinder() {
+	_do_trace = !(getenv("FINDERCLIENTTRACE") == 0);
+    }
+    inline bool on() const { return _do_trace; }
+    operator bool() { return _do_trace; }
+    inline void set_context(const string& s) { _context = s; }
+    inline const string& context() const { return _context; }
+protected:
+    bool _do_trace;
+    string _context;
+} finder_tracer;
+
+#define finder_trace(x...) 						      \
+do {									      \
+    if (finder_tracer.on()) {						      \
+	string r = c_format(x);						      \
+	XLOG_INFO(c_format("%s\n", r.c_str()).c_str());	      		      \
+    }									      \
+} while (0)
+
+
+#define finder_trace_init(x...) 					      \
+do {									      \
+    if (finder_tracer.on()) finder_tracer.set_context(c_format(x));	      \
+} while (0)
+
+#define finder_trace_result(x...)					      \
+do {									      \
+    if (finder_tracer.on()) {						      \
+	string r = c_format(x);						      \
+	XLOG_INFO(c_format("%s -> %s\n",				      \
+		  finder_tracer.context().c_str(), r.c_str()).c_str());	      \
+    }									      \
+} while(0)
 
 /**
  * Base class for operations to be executed by FinderNGClient.
@@ -88,11 +125,19 @@ public:
 			ResolvedTable&	rt,
 			const QueryCallback& qcb)
 	: FinderNGClientOneOffOp(fc), _key(key), _rt(rt), _qcb(qcb)
-    {}
+    {
+	finder_trace("Constructing ClientQuery \"%s\"", _key.c_str());
+    }
 
+    ~FinderNGClientQuery()
+    {
+	finder_trace("Destructing ClientQuery \"%s\"", _key.c_str());
+    }
+    
     void
     execute(FinderMessengerBase* m)
     {
+	finder_trace_init("executing ClientQuery \"%s\"", _key.c_str());
 	XrlFinderV0p1Client cl(m);
 	if (!cl.send_resolve_xrl(
 			 finder, _key, 
@@ -100,17 +145,21 @@ public:
 		) {
 	    _qcb->dispatch(XrlError::SEND_FAILED(), 0);
 	    XLOG_ERROR("Failed on send_resolve_xrl");
+	    finder_trace_result("failed (send)");
 	    client().notify_failed(this);
 	    return;
 	}
+	finder_trace_result("okay");
     }
 
     void
     query_callback(const XrlError& e, const XrlAtomList* al)
     {
+	finder_trace_init("ClientQuery callback \"%s\"", _key.c_str());
 	if (e != XrlError::OKAY()) {
-	    _qcb->dispatch(e, 0);
-	    debug_msg("Query failed\n");
+	    finder_trace_result("failed (%s) -> RESOLVE_FAILED",
+				e.str().c_str());
+	    _qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
 	    client().notify_failed(this);
 	    return;
 	}
@@ -123,6 +172,7 @@ public:
 	    XLOG_ERROR("Failed to add entry for %s to resolve table.\n",
 		       _key.c_str());
 	    _qcb->dispatch(XrlError::FAILED_UNKNOWN(), 0); // :-(
+	    finder_trace_result("failed (unknown)");
 	    client().notify_failed(this);
 	    return;
 	}
@@ -143,22 +193,26 @@ public:
 		rt_entry->second.values().push_back(al->get(i).text());
 	    } catch (const XrlAtom::NoData&) {
 		_rt.erase(rt_entry);
-		_qcb->dispatch(XrlError::CORRUPT_RESPONSE(), 0);
+		_qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
+		finder_trace_result("failed (corrupt response)");
 		client().notify_done(this);
 		return;
 	    } catch (const XrlAtom::WrongType&) {
 		_rt.erase(rt_entry);
-		_qcb->dispatch(XrlError::CORRUPT_RESPONSE(), 0);
+		_qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
+		finder_trace_result("failed (corrupt response)");
 		client().notify_done(this);
 		return;
 	    }
 	}
 	_qcb->dispatch(e, &rt_entry->second);
+	finder_trace_result("okay");
 	client().notify_done(this);
     }
 
     void force_failure(const XrlError& e)
     {
+	finder_trace("ClientQuery force_failure \"%s\"", _key.c_str());
 	_qcb->dispatch(e, 0);
     }
     
@@ -179,30 +233,43 @@ public:
 			 const Xrl& 		xrl,
 			 const XrlCallback&	xcb)
 	: FinderNGClientOneOffOp(fc), _xrl(xrl), _xcb(xcb)
-    {}
+    {
+	finder_trace("Constructing ForwardedXrl \"%s\"", _xrl.str().c_str());
+    }
 
+    ~FinderNGForwardedXrl()
+    {
+	finder_trace("Destructing ForwardedXrl \"%s\"", _xrl.str().c_str());
+    }
+    
     void
     execute(FinderMessengerBase* m)
     {
+	finder_trace_init("executing ForwardedXrl \"%s\"", _xrl.str().c_str());
 	if (m->send(_xrl,
 		    callback(this, &FinderNGForwardedXrl::execute_callback))) {
+	    finder_trace_result("okay");
 	    return;
 	}
 	_xcb->dispatch(XrlError::SEND_FAILED(), _xrl, 0);
 	XLOG_ERROR("Failed to send forwarded Xrl to Finder.");
 	client().notify_failed(this);
+	finder_trace_result("failed (send)");
 	return;
     }
 
     void
     execute_callback(const XrlError& e, XrlArgs* args)
     {
+	finder_trace_init("ForwardedXrl callback \"%s\"", _xrl.str().c_str());
 	_xcb->dispatch(e, _xrl, args);
 	client().notify_done(this);
+	finder_trace_result("%s", e.str().c_str());
     }
 
     void force_failure(const XrlError& e)
     {
+	finder_trace("ForwardedXrl force_failure \"%s\"", _xrl.str().c_str());
 	_xcb->dispatch(e, _xrl, 0);
     }
 
@@ -595,7 +662,7 @@ FinderNGClient::messenger_inactive_event(FinderMessengerBase* m)
 void
 FinderNGClient::messenger_stopped_event(FinderMessengerBase* m)
 {
-    debug_msg("messenger %p stopped\n", m);
+    debug_msg("messenger %p stopped (closing connecting)\n", m);
     XLOG_ASSERT(m == _messenger);
     //    delete _messenger;
     //    _messenger = 0;
