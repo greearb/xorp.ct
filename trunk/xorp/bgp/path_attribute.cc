@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.23 2003/08/06 17:52:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.24 2003/08/06 20:53:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -118,6 +118,10 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
 	pa = new CommunityAttribute(d);
 	break;
          
+    case MP_REACH_NLRI:
+	pa = new MPReachNLRIAttribute<IPv6>(d);
+	break;
+	
     default:
 	pa = new UnknownAttribute(d);
 	break;
@@ -579,6 +583,77 @@ CommunityAttribute::add_community(uint32_t community)
     _communities.insert(community);
     _size += 4;
     encode();
+}
+
+/**
+ * Multiprotocol Reachable NLRI - MP_REACH_NLRI (Type Code 14):
+ *
+ *  This is an optional non-transitive attribute that can be used for the
+ *  following purposes:
+ *
+ *    (a) to advertise a feasible route to a peer
+ *
+ *    (b) to permit a router to advertise the Network Layer address of
+ *    the router that should be used as the next hop to the destinations
+ *    listed in the Network Layer Reachability Information field of the
+ *    MP_NLRI attribute.
+ *
+ *    (c) to allow a given router to report some or all of the
+ *    Subnetwork Points of Attachment (SNPAs) that exist within the
+ *    local system
+ */
+
+template <class A>
+MPReachNLRIAttribute<A>::MPReachNLRIAttribute<A>(const uint8_t* d)
+    throw(CorruptMessage)
+    : PathAttribute(d)
+{
+    if (!optional() || !transitive())
+	xorp_throw(CorruptMessage,
+		   "Bad Flags in Multiprotocol Reachable NLRI attribute",
+		   UPDATEMSGERR, ATTRFLAGS);
+
+    const uint8_t *data = payload(d);
+
+    _afi = *data++;
+
+    _safi = *data++;
+    _safi |= *data++;
+
+    /*
+    ** Next Hop
+    */
+    if (*data++ != A::addr_size())
+	xorp_throw(CorruptMessage,
+	   "BAD Next Hop size in Multiprotocol Reachable NLRI attribute",
+		   UPDATEMSGERR, ATTRFLAGS);
+    
+    _next_hop.copy_in(data);
+    data += A::addr_size();
+
+    /*
+    ** SNPA
+    */
+    
+
+
+//     for (size_t l = _size; l >= 4;  d += 4, l -= 4) {
+// 	uint32_t value;
+// 	memcpy(&value, d, 4);
+// 	_communities.insert(ntohl(value));
+//     }
+    // encode();
+
+    _size = length(d);
+    _data = new uint8_t[wire_size()];
+    memcpy(_data, d, wire_size());
+}
+
+template <class A>
+string
+MPReachNLRIAttribute<A>::str() const
+{
+    return "Multiprotocol Reachable NLRI";
 }
 
 /**

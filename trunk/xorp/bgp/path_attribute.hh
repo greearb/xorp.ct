@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.16 2003/08/06 17:52:55 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.17 2003/08/07 22:33:16 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -382,6 +382,24 @@ protected:
 private:
     void encode();
     set <uint32_t> _communities;
+};
+
+template <class A>
+class MPReachNLRIAttribute : public PathAttribute
+{
+public:
+    MPReachNLRIAttribute(const uint8_t* d) throw(CorruptMessage);
+    string str() const;
+
+    const A& nexthop() const			{ return _next_hop; }
+protected:
+private:
+    uint8_t _afi;		// Address Family Identifier.
+    uint16_t _safi;		// Subsequent Address Family Identifier.
+    
+    A _next_hop;		// Next Hop.
+    list<A> _snpa;		// Subnetwork point of attachment.
+    list<A> _nlri;		// Network level reachability information.
 };
 
 class UnknownAttribute : public PathAttribute
