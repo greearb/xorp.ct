@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.11 2003/03/10 23:20:04 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.12 2003/05/15 16:37:54 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -735,7 +735,7 @@ FanoutTable<A>::print_queue()
 #ifdef DEBUG_LOGGING
     // leave this as printf please - mjh
     printf("Fanout Table rate control queue:\n");
-    list <const RouteQueueEntry<A>*>::iterator i;
+    typename list <const RouteQueueEntry<A>*>::iterator i;
     int ctr = 0;
     for (i = _output_queue.begin(); i != _output_queue.end(); i++) {
 	ctr++;

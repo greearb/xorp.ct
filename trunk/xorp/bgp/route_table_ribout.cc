@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.8 2003/03/10 23:20:05 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.9 2003/05/15 16:37:54 hodson Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -78,7 +78,7 @@ RibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue)
 {
 #ifdef DEBUG_LOGGING
     debug_msg("Output Queue:\n");
-    list<const RouteQueueEntry<A>*>::const_iterator i;
+    typename list<const RouteQueueEntry<A>*>::const_iterator i;
     i = queue.begin();
     while (i != queue.end()) {
 	string s;
