@@ -52,6 +52,9 @@
 /* Define to 1 if you have the <ifaddrs.h> header file. */
 #undef HAVE_IFADDRS_H
 
+/* Define to 1 if your struct ifreq has field ifr_ifindex */
+#undef HAVE_IFR_IFINDEX
+
 /* Define to 1 if you have the `if_indextoname' function. */
 #undef HAVE_IF_INDEXTONAME
 

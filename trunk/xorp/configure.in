@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.61 2003/09/13 02:40:56 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.62 2003/09/24 18:17:48 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -721,6 +721,25 @@ int sun_len = sizeof(sockaddr_un.sun_len);
 [AC_MSG_RESULT(yes)
  AC_DEFINE(HAVE_SUN_LEN, 1,
 		[Define to 1 if your struct sockaddr_un has field sun_len])],
+ AC_MSG_RESULT(no))
+
+dnl ----------------------------
+dnl Check for ifr_ifindex in ifreq
+dnl ----------------------------
+
+AC_MSG_CHECKING(whether struct ifreq has field ifr_ifindex)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+],
+[
+static struct ifreq ifreq;
+int i = sizeof(ifreq.ifr_ifindex);
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_IFR_IFINDEX, 1,
+		[Define to 1 if your struct ifreq has field ifr_ifindex])],
  AC_MSG_RESULT(no))
 
 dnl ----------------------------
