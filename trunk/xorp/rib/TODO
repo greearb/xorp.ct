@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rib/TODO,v 1.4 2003/03/20 04:29:22 pavlin Exp $
+# $XORP: xorp/rib/TODO,v 1.5 2003/07/03 07:01:12 pavlin Exp $
 #
 
 RIB To Do List
@@ -40,3 +40,5 @@ the same route.
 14. Rething the logic computing whether a route is directly connected
     (e.g., when we use Vif::is_same_subnet() or Vif::is_same_p2p()):
     if vif is down, then the route is NOT directly connected?
+
+15. Make test_rib_client.cc work properly
