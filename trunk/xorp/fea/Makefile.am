@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.43 2004/10/21 00:44:21 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.44 2004/10/22 23:08:28 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -226,6 +226,7 @@ libfea_a_SOURCES	+= firewall_ipfw.cc
 libfea_a_SOURCES	+= fti_transaction.cc
 libfea_a_SOURCES	+= fticonfig.cc
 libfea_a_SOURCES	+= fticonfig_entry_get.cc
+libfea_a_SOURCES	+= fticonfig_entry_get_click.cc
 libfea_a_SOURCES	+= fticonfig_entry_get_dummy.cc
 libfea_a_SOURCES	+= fticonfig_entry_get_netlink.cc
 libfea_a_SOURCES	+= fticonfig_entry_get_rtsock.cc
@@ -236,10 +237,12 @@ libfea_a_SOURCES	+= fticonfig_entry_observer_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_entry_parse_nlm.cc
 libfea_a_SOURCES	+= fticonfig_entry_parse_rtm.cc
 libfea_a_SOURCES	+= fticonfig_entry_set.cc
+libfea_a_SOURCES	+= fticonfig_entry_set_click.cc
 libfea_a_SOURCES	+= fticonfig_entry_set_dummy.cc
 libfea_a_SOURCES	+= fticonfig_entry_set_netlink.cc
 libfea_a_SOURCES	+= fticonfig_entry_set_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_table_get.cc
+libfea_a_SOURCES	+= fticonfig_table_get_click.cc
 libfea_a_SOURCES	+= fticonfig_table_get_dummy.cc
 libfea_a_SOURCES	+= fticonfig_table_get_netlink.cc
 libfea_a_SOURCES	+= fticonfig_table_get_sysctl.cc
@@ -250,6 +253,7 @@ libfea_a_SOURCES	+= fticonfig_table_observer_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_table_parse_nlm.cc
 libfea_a_SOURCES	+= fticonfig_table_parse_rtm.cc
 libfea_a_SOURCES	+= fticonfig_table_set.cc
+libfea_a_SOURCES	+= fticonfig_table_set_click.cc
 libfea_a_SOURCES	+= fticonfig_table_set_dummy.cc
 libfea_a_SOURCES	+= fticonfig_table_set_netlink.cc
 libfea_a_SOURCES	+= fticonfig_table_set_rtsock.cc

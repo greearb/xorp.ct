@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.12 2004/08/17 02:20:07 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.13 2004/10/21 00:10:25 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -22,6 +22,8 @@
 #include "libxorp/ipvx.hh"
 
 #include "fte.hh"
+#include "click_socket.hh"
+#include "netlink_socket.hh"
 
 
 class IPv4;
@@ -262,6 +264,52 @@ private:
     bool get_table(int family, list<FteX>& fte_list);
 
     NetlinkSocketReader	_ns_reader;
+};
+
+class FtiConfigTableGetClick : public FtiConfigTableGet,
+			       public ClickSocket {
+public:
+    FtiConfigTableGetClick(FtiConfig& ftic);
+    virtual ~FtiConfigTableGetClick();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+
+    /**
+     * Obtain the unicast forwarding table.
+     *
+     * @param fte_list the return-by-reference list with all entries in
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool get_table4(list<Fte4>& fte_list);
+
+    /**
+     * Obtain the unicast forwarding table.
+     *
+     * @param fte_list the return-by-reference list with all entries in
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool get_table6(list<Fte6>& fte_list);
+    
+private:
+    bool get_table(int family, list<FteX>& fte_list);
+
+    ClickSocketReader	_cs_reader;
 };
 
 #endif // __FEA_FTICONFIG_TABLE_GET_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.9 2004/08/17 02:20:07 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.10 2004/10/21 00:10:24 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -22,6 +22,7 @@
 #include "libxorp/ipvx.hh"
 
 #include "fte.hh"
+#include "click_socket.hh"
 #include "netlink_socket.hh"
 #include "routing_socket.hh"
 
@@ -352,6 +353,72 @@ private:
     bool delete_entry(const FteX& fte);
 
     NetlinkSocketReader _ns_reader;
+};
+
+class FtiConfigEntrySetClick : public FtiConfigEntrySet,
+			       public ClickSocket {
+public:
+    FtiConfigEntrySetClick(FtiConfig& ftic);
+    virtual ~FtiConfigEntrySetClick();
+
+    /**
+     * Start operation.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+
+    /**
+     * Stop operation.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+
+    /**
+     * Add a single routing entry.  Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to add.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool add_entry4(const Fte4& fte);
+
+    /**
+     * Delete a single routing entry. Must be with a configuration interval.
+     *
+     * @param fte the entry to delete. Only destination and netmask are used.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_entry4(const Fte4& fte);
+
+    /**
+     * Add a single routing entry. Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to add.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool add_entry6(const Fte6& fte);
+
+    /**
+     * Delete a single routing entry.  Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to delete. Only destination and netmask are used.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_entry6(const Fte6& fte);
+
+private:
+    bool add_entry(const FteX& fte);
+    bool delete_entry(const FteX& fte);
+
+    ClickSocketReader _cs_reader;
 };
 
 #endif // __FEA_FTICONFIG_ENTRY_SET_HH__

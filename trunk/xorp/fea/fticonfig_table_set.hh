@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.9 2004/08/17 02:20:08 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.10 2004/10/21 00:10:25 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_SET_HH__
 #define __FEA_FTICONFIG_TABLE_SET_HH__
@@ -22,6 +22,7 @@
 #include "libxorp/ipvx.hh"
 
 #include "fte.hh"
+#include "click_socket.hh"
 #include "netlink_socket.hh"
 #include "routing_socket.hh"
 
@@ -282,6 +283,65 @@ class FtiConfigTableSetNetlink : public FtiConfigTableSet {
 public:
     FtiConfigTableSetNetlink(FtiConfig& ftic);
     virtual ~FtiConfigTableSetNetlink();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+    
+    /**
+     * Set the unicast forwarding table.
+     *
+     * @param fte_list the list with all entries to install into
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool set_table4(const list<Fte4>& fte_list);
+
+    /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_all_entries4();
+
+    /**
+     * Set the unicast forwarding table.
+     *
+     * @param fte_list the list with all entries to install into
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool set_table6(const list<Fte6>& fte_list);
+    
+    /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_all_entries6();
+    
+private:
+    
+};
+
+class FtiConfigTableSetClick : public FtiConfigTableSet {
+public:
+    FtiConfigTableSetClick(FtiConfig& ftic);
+    virtual ~FtiConfigTableSetClick();
 
     /**
      * Start operation.

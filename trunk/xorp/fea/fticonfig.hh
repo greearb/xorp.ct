@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.20 2004/10/25 23:27:56 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.21 2004/10/26 01:03:43 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -428,6 +428,14 @@ private:
     FtiConfigEntryGetDummy	_ftic_entry_get_dummy;
     FtiConfigEntryGetRtsock	_ftic_entry_get_rtsock;
     FtiConfigEntryGetNetlink	_ftic_entry_get_netlink;
+
+    //
+    // The secondary mechanisms to get single-entry information
+    // from the unicast forwarding table.
+    //
+    // XXX: Ordering is not important.
+    //
+    FtiConfigEntryGetClick	_ftic_entry_get_click;
     
     //
     // The primary mechanisms to set single-entry information
@@ -439,6 +447,14 @@ private:
     FtiConfigEntrySetDummy	_ftic_entry_set_dummy;
     FtiConfigEntrySetRtsock	_ftic_entry_set_rtsock;
     FtiConfigEntrySetNetlink	_ftic_entry_set_netlink;
+
+    //
+    // The secondary mechanisms to set single-entry information
+    // into the unicast forwarding table.
+    //
+    // XXX: Ordering is not important.
+    //
+    FtiConfigEntrySetClick	_ftic_entry_set_click;
     
     //
     // The primary mechanisms to observe single-entry information change
@@ -466,6 +482,14 @@ private:
     FtiConfigTableGetNetlink	_ftic_table_get_netlink;
     
     //
+    // The secondary mechanisms to get the whole table information
+    // from the unicast forwarding table.
+    //
+    // XXX: Ordering is not important.
+    //
+    FtiConfigTableGetClick	_ftic_table_get_click;
+
+    //
     // The primary mechanisms to set the whole table information
     // into the unicast forwarding table.
     //
@@ -475,6 +499,14 @@ private:
     FtiConfigTableSetDummy	_ftic_table_set_dummy;
     FtiConfigTableSetRtsock	_ftic_table_set_rtsock;
     FtiConfigTableSetNetlink	_ftic_table_set_netlink;
+
+    //
+    // The secondary mechanisms to set the whole table information
+    // into the unicast forwarding table.
+    //
+    // XXX: Ordering is not important.
+    //
+    FtiConfigTableSetClick	_ftic_table_set_click;
     
     //
     // The primary mechanisms to observe the whole-table information change
