@@ -1,5 +1,5 @@
 --- GENERIC	Mon Apr 28 04:41:46 2003
-+++ LIVECD	Wed May 26 02:30:00 2004
++++ LIVECD	Fri May 28 01:48:15 2004
 @@ -22,7 +22,7 @@
  cpu		I486_CPU
  cpu		I586_CPU
@@ -107,7 +107,7 @@
  
  # The `bpf' pseudo-device enables the Berkeley Packet Filter.
  # Be aware of the administrative consequences of enabling this!
-@@ -255,17 +263,36 @@
+@@ -255,17 +263,38 @@
  device		ugen		# Generic
  device		uhid		# "Human Interface Devices"
  device		ukbd		# Keyboard
@@ -135,6 +135,8 @@
 +options         TCP_DROP_SYNFIN         #drop TCP packets with SYN+FIN
 +options         ICMP_BANDLIM
 +options         DUMMYNET
++options         DEVICE_POLLING
++options         HZ=1000
 +#
 +options         USER_LDT
 +options         VESA
