@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.9 2002/12/11 19:09:53 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.1.1.1 2002/12/11 23:55:55 hodson Exp $
 #
 
 #
@@ -303,18 +303,7 @@ desc="XORP callback routines"
 html_start_page="index.html"
 files="libxorp/callback.hh" 
 excludes=""
-xref="$xref libxorp"
-kdocify
-
-#
-# libxipc
-#
-lib="libxipc"
-desc="XORP interprocess communication library"
-html_start_page="index.html"
-files="libxipc/*.h libxipc/*.hh"
-excludes=""
-xref="$xref libxorp-callback"
+xref="libxorp"
 kdocify
 
 #
@@ -325,7 +314,18 @@ desc="Socket library"
 html_start_page="all-globals.html"
 files="libcomm/*.h libcomm/*.hh"
 excludes=""
-xref="$xref libxipc"
+xref="libxorp libxorp-callback"
+kdocify
+
+#
+# libxipc
+#
+lib="libxipc"
+desc="XORP interprocess communication library"
+html_start_page="index.html"
+files="libxipc/*.h libxipc/*.hh"
+excludes=""
+xref="libxorp libxorp-callback libcomm"
 kdocify
 
 #
@@ -336,7 +336,7 @@ desc="Protocol Node library used by XORP multicast processes"
 html_start_page="index.html"
 files="libproto/*.h libproto/*.hh"
 excludes=""
-xref="$xref libcomm"
+xref="libxorp libxorp-callback libcomm libxipc"
 kdocify
 
 #
@@ -347,7 +347,7 @@ desc="Multicast Routing Table library"
 html_start_page="index.html"
 files="mrt/*.h mrt/*.hh"
 excludes=""
-xref="$xref libproto"
+xref="libxorp"
 kdocify
 
 #
@@ -358,7 +358,7 @@ desc="Command Line Interface library"
 html_start_page="index.html"
 files="cli/*.h cli/*.hh"
 excludes=""
-xref="$xref mrt"
+xref="libxorp libxorp-callback libcomm libxipc libproto"
 kdocify
 
 #
@@ -369,7 +369,7 @@ desc="Multicast Forwarding Engine Abstraction daemon"
 html_start_page="index.html"
 files="mfea/*.h mfea/*.hh"
 excludes=""
-xref="$xref cli"
+xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli"
 kdocify
 
 #
@@ -380,7 +380,7 @@ desc="Multicast Listener Discovery daemon"
 html_start_page="index.html"
 files="mld6igmp/*.h mld6igmp/*.hh"
 excludes=""
-xref="$xref mfea"
+xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli mfea"
 kdocify
 
 #
@@ -391,7 +391,7 @@ desc="Protocol Independent Multicast (PIM) daemon"
 html_start_page="index.html"
 files="pim/*.h pim/*.hh"
 excludes=""
-xref="$xref mld6igmp"
+xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli mfea mld6igmp"
 kdocify
 
 #
@@ -402,7 +402,7 @@ desc="Forwarding Engine Abstraction daemon"
 html_start_page="index.html"
 files="fea/*.hh"
 excludes="fea/*click*hh"
-xref="$xref"
+xref="libxorp libxorp-callback libcomm libxipc"
 kdocify
 
 #
@@ -413,7 +413,7 @@ desc="BGP4 daemon"
 html_start_page="index.html"
 files="bgp/*.hh"
 excludes="bgp/*test*h"
-xref=""
+xref="libxorp libxorp-callback libcomm libxipc"
 kdocify
 
 #
@@ -424,7 +424,7 @@ desc="Routing Information Base daemon"
 html_start_page="index.html"
 files="rib/*.hh"
 excludes="rib/dummy_register_server.hh rib/parser_direct_cmds.hh rib/parser_xrl_cmds.hh rib/parser.hh"
-xref=""
+xref="libxorp libxorp-callback"
 kdocify
 
 #
