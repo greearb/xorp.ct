@@ -4214,7 +4214,6 @@ fi
 
 
 
-net_snmp_found=false
 if test "${snmp}" = "yes"; then
     # Extract the first word of "net-snmp-config", so it can be a program name with args.
 set dummy net-snmp-config; ac_word=$2
@@ -4240,6 +4239,7 @@ do
 done
 done
 
+  test -z "$ac_cv_prog_net_snmp_found" && ac_cv_prog_net_snmp_found=""false""
 fi
 fi
 net_snmp_found=$ac_cv_prog_net_snmp_found

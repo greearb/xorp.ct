@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.106 2004/08/22 00:16:05 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.107 2004/08/25 21:36:13 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -382,9 +382,8 @@ dnl ---------------------------------------------------------------------------
 dnl SNMP
 dnl ---------------------------------------------------------------------------
 
-net_snmp_found=false
 if test "${snmp}" = "yes"; then
-    AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true")
+    AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true", "false")
 else
     net_snmp_found="skip_check"
     snmpd="skip_check"
