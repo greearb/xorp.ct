@@ -12,6 +12,8 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
+// $XORP$
+
 #ifndef __LIBXIPC_XRL_PF_KILL_HH__
 #define __LIBXIPC_XRL_PF_KILL_HH__
 
