@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.43 2004/09/28 03:52:33 atanu Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.44 2004/09/28 04:14:33 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -31,7 +31,7 @@
 #include "rt_tab_register.hh"
 #include "rib_manager.hh"
 #include "vifmanager.hh"
-
+#include "profile_vars.hh"
 
 XrlCmdError
 XrlRibTarget::common_0_1_get_target_name(string& name)
@@ -322,6 +322,12 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 {
     debug_msg("#### XRL: ADD ROUTE net %s, nexthop: %s\n",
 	      network.str().c_str(), nexthop.str().c_str());
+
+    if (_rib_manager->profile().enabled(profile_route_ribin))
+	_rib_manager->profile().
+	    log(profile_route_ribin,
+		c_format("add %s", network.str().c_str()));
+    
     if (unicast &&
 	_urib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
 	!= XORP_OK) {
@@ -352,6 +358,11 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 				 const uint32_t& metric,
 				 const XrlAtomList& policytags)
 {
+    if (_rib_manager->profile().enabled(profile_route_ribin))
+	_rib_manager->profile().
+	    log(profile_route_ribin,
+		c_format("add %s", network.str().c_str()));
+
     if (unicast &&
 	_urib6.add_route(protocol, network, nexthop, "", "", metric,
 			 policytags)
@@ -384,6 +395,11 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
 				     const uint32_t&	metric,
 				     const XrlAtomList& policytags)
 {
+    if (_rib_manager->profile().enabled(profile_route_ribin))
+	_rib_manager->profile().
+	    log(profile_route_ribin,
+		c_format("replace %s", network.str().c_str()));
+
     if (unicast &&
 	_urib4.replace_route(protocol, network, nexthop, "", "",
 					metric, policytags)
@@ -412,6 +428,11 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
 				     const uint32_t&	metric,
 				     const XrlAtomList& policytags)
 {
+    if (_rib_manager->profile().enabled(profile_route_ribin))
+	_rib_manager->profile().
+	    log(profile_route_ribin,
+		c_format("replace %s", network.str().c_str()));
+
     if (unicast &&
 	_urib6.replace_route(protocol, network, nexthop, "", "", metric,
 			     policytags)
@@ -439,6 +460,11 @@ XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
 {
     debug_msg("#### XRL: DELETE ROUTE net %s\n",
 	      network.str().c_str());
+    if (_rib_manager->profile().enabled(profile_route_ribin))
+	_rib_manager->profile().
+	    log(profile_route_ribin,
+		c_format("delete %s", network.str().c_str()));
+
     if (unicast && _urib4.delete_route(protocol, network) != XORP_OK) {
 	string err = "Could not delete IPv4 route from unicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
@@ -458,6 +484,11 @@ XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
 				    const bool&		multicast,
 				    const IPv6Net&	network)
 {
+    if (_rib_manager->profile().enabled(profile_route_ribin))
+	_rib_manager->profile().
+	    log(profile_route_ribin,
+		c_format("delete %s", network.str().c_str()));
+
     if (unicast && _urib6.delete_route(protocol, network) != XORP_OK) {
 	string err = "Could not delete IPv6 route from unicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
