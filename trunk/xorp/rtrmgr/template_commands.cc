@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.45 2004/06/09 03:14:14 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.46 2004/06/10 22:41:54 hodson Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -31,6 +31,7 @@
 #include "util.hh"
 #include "xrldb.hh"
 
+#include "libxipc/xrl_atom_encoding.hh"
 
 Action::Action(TemplateTreeNode& template_tree_node,
 	       const list<string>& action)
@@ -524,6 +525,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	if (segment[0] == '`') {
 	    expand_done = tn.expand_expression(segment, expanded_var);
 	    if (expand_done) {
+	    	expanded_var = xrlatom_encode_value(expanded_var);
 		word += unquote(expanded_var);
 	    } else {
 		// Error
@@ -535,6 +537,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	} else if (segment[0] == '$') {
 	    expand_done = tn.expand_variable(segment, expanded_var);
 	    if (expand_done) {
+	    	expanded_var = xrlatom_encode_value(expanded_var);
 		word += unquote(expanded_var);
 	    } else {
 		// Error
