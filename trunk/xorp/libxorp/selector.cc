@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.11 2003/04/06 04:13:21 jcardona Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.12 2003/04/08 18:37:53 jcardona Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -143,10 +143,12 @@ SelectorList::add_selector(int			   fd,
 	return -1; 
     }
 
+    bool resize = false;
     if (fd >= _maxfd) {
 	_maxfd = fd;
-	if ((size_t)fd >= _selector_entries.capacity()) {
+	if ((size_t)fd >= _selector_entries.size()) {
 	    _selector_entries.resize(fd + 32);
+	    resize = true;
 	}
     }
 
