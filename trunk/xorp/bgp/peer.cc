@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.45 2003/09/05 01:37:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.46 2003/09/16 21:00:26 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1265,7 +1265,7 @@ BGPPeer::start_keepalive_timer()
 {
     uint32_t duration = _peerdata->get_keepalive_duration();
     debug_msg("KeepAlive timer started with duration %d %ld\n",
-	      duration, time(0));
+	      duration, (long int)time(0));
 
     if (duration > 0)
 	_timer_keep_alive = _mainprocess->eventloop().
@@ -1287,7 +1287,7 @@ BGPPeer::start_stopped_timer()
     /* XXX - Only allow 10 seconds in the stopped state */
     const int delay = 10 * 1000;
     debug_msg("Stopped timer started with duration %d ms %ld\n", delay,
-	      time(0));
+	      (long int)time(0));
 
     _timer_stopped = _mainprocess->eventloop().
 	new_oneoff_after_ms(delay, callback(this, &BGPPeer::hook_stopped));
