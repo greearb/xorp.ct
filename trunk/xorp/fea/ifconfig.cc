@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.17 2003/10/14 01:36:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.18 2003/10/28 19:52:50 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -369,12 +369,12 @@ IfConfigUpdateReplicator::remove_reporter(IfConfigUpdateReporterBase* rp)
 void
 IfConfigUpdateReplicator::interface_update(const string& ifname,
 					   const Update& update,
-					   bool		 all)
+					   bool		 system)
 {
     list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
     while (i != _reporters.end()) {
 	IfConfigUpdateReporterBase*& r = *i;
-	r->interface_update(ifname, update, all);
+	r->interface_update(ifname, update, system);
 	++i;
     }
 }
@@ -383,12 +383,12 @@ void
 IfConfigUpdateReplicator::vif_update(const string& ifname,
 				     const string& vifname,
 				     const Update& update,
-				     bool	   all)
+				     bool	   system)
 {
     list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
     while (i != _reporters.end()) {
 	IfConfigUpdateReporterBase*& r = *i;
-	r->vif_update(ifname, vifname, update, all);
+	r->vif_update(ifname, vifname, update, system);
 	++i;
     }
 }
@@ -398,12 +398,12 @@ IfConfigUpdateReplicator::vifaddr4_update(const string& ifname,
 					  const string& vifname,
 					  const IPv4&   addr,
 					  const Update& update,
-					  bool		all)
+					  bool		system)
 {
     list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
     while (i != _reporters.end()) {
 	IfConfigUpdateReporterBase*& r = *i;
-	r->vifaddr4_update(ifname, vifname, addr, update, all);
+	r->vifaddr4_update(ifname, vifname, addr, update, system);
 	++i;
     }
 }
@@ -413,12 +413,12 @@ IfConfigUpdateReplicator::vifaddr6_update(const string& ifname,
 					  const string& vifname,
 					  const IPv6&   addr,
 					  const Update& update,
-					  bool		all)
+					  bool		system)
 {
     list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
     while (i != _reporters.end()) {
 	IfConfigUpdateReporterBase*& r = *i;
-	r->vifaddr6_update(ifname, vifname, addr, update, all);
+	r->vifaddr6_update(ifname, vifname, addr, update, system);
 	++i;
     }
 }
