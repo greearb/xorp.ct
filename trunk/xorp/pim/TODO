@@ -1,11 +1,17 @@
 #
-# $XORP: xorp/pim/TODO,v 1.13 2003/01/30 03:35:49 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.14 2003/01/30 19:29:54 pavlin Exp $
 #
 
-* Move PimMre assert-related methods from pim_mre.cc to pim_mre_assert.cc, etc.
-  If necessary, do something similar for Join/Prune messages, etc.
+* TEST: Test Section 4.9, the last case of Part J:
+  Prune override behavior in NotPruned(S,G,rpt) state when
+  RPF'(S,G,rpt) -> RPF'(*,G) (in case of (*,*,RP) Joins).
+  Testing this scenario is pending spec-related clarification about
+  changing RPF'(S,G,rpt) with (S,G)Asserts.
 
-* Modify the "pim show join" CLI output NOT to print (S,G) and (S,G,rpt)
+* IMPL: PimMre assert-related methods from pim_mre.cc to pim_mre_assert.cc,
+  etc. If necessary, do something similar for Join/Prune messages, etc.
+
+* IMPL: Modify the "pim show join" CLI output NOT to print (S,G) and (S,G,rpt)
   specific state for (*,*,RP) and (*,G) state. If necessary, modify
   the (S,G) and (S,G,rpt) output NOT to print (*,*,RP) and (*,G)
   specific state.
