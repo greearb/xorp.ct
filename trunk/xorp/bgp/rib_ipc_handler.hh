@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.29 2004/05/21 03:02:43 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.30 2004/06/10 22:40:33 hodson Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -31,8 +31,8 @@ class EventLoop;
 template <class A>
 class XrlQueue {
 public:
-    XrlQueue(RibIpcHandler *rib_ipc_handler, XrlStdRouter *xrl_router,
-	     BGPMain *_bgp);
+    XrlQueue(RibIpcHandler &rib_ipc_handler, XrlStdRouter &xrl_router,
+	     BGPMain &_bgp);
 
     void queue_add_route(string ribname, bool ibgp, Safi, const IPNet<A>& net,
 			 const A& nexthop);
@@ -45,9 +45,9 @@ private:
     static const size_t WINDOW = 1;	// Maximum number of XRLs
 					// allowed in flight.
 
-    RibIpcHandler *_rib_ipc_handler;
-    XrlStdRouter *_xrl_router;
-    BGPMain *_bgp;
+    RibIpcHandler &_rib_ipc_handler;
+    XrlStdRouter &_xrl_router;
+    BGPMain &_bgp;
 
     struct Queued {
 	bool add;
@@ -95,7 +95,7 @@ private:
 
 class RibIpcHandler : public PeerHandler {
 public:
-    RibIpcHandler(XrlStdRouter *xrl_router, BGPMain& bgp);
+    RibIpcHandler(XrlStdRouter& xrl_router, BGPMain& bgp);
 
     ~RibIpcHandler();
 
@@ -205,7 +205,7 @@ private:
     bool unregister_rib();
 
     string _ribname;
-    XrlStdRouter *_xrl_router;
+    XrlStdRouter& _xrl_router;
 
     bool _ibgp; //did the current update message originate in IBGP?
 

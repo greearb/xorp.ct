@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.52 2004/05/21 03:02:43 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.53 2004/06/10 22:40:33 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,12 +25,12 @@
 #include "bgp.hh"
 #include "rib_ipc_handler.hh"
 
-RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, BGPMain& bgp) 
+RibIpcHandler::RibIpcHandler(XrlStdRouter& xrl_router, BGPMain& bgp) 
     : PeerHandler("RIBIpcHandler", NULL, NULL, NULL), 
       _ribname(""),
       _xrl_router(xrl_router),
-      _v4_queue(this, xrl_router, &bgp),
-      _v6_queue(this, xrl_router, &bgp),
+      _v4_queue(*this, xrl_router, bgp),
+      _v6_queue(*this, xrl_router, bgp),
       _fake_id((unsigned int)0)
 {
 }
@@ -70,15 +70,15 @@ RibIpcHandler::register_ribname(const string& r)
 
     _ribname = r;
 
-    XrlRibV0p1Client rib(_xrl_router);
+    XrlRibV0p1Client rib(&_xrl_router);
     //create our tables
     //ebgp - v4
     //name - "ebgp"
     //unicast - true
     //multicast - true
     rib.send_add_egp_table4(_ribname.c_str(),
-		"ebgp", _xrl_router->class_name(),
-                 _xrl_router->instance_name(), true, true,
+		"ebgp", _xrl_router.class_name(),
+                 _xrl_router.instance_name(), true, true,
                  callback(this, 
 			  &RibIpcHandler::rib_command_done,"add_table"));
     //ibgp - v4
@@ -86,8 +86,8 @@ RibIpcHandler::register_ribname(const string& r)
     //unicast - true
     //multicast - true
     rib.send_add_egp_table4(_ribname.c_str(),
-		"ibgp", _xrl_router->class_name(),
-                _xrl_router->instance_name(), true, true,
+		"ibgp", _xrl_router.class_name(),
+                _xrl_router.instance_name(), true, true,
 		callback(this, 
 			 &RibIpcHandler::rib_command_done,"add_table"));
 
@@ -97,8 +97,8 @@ RibIpcHandler::register_ribname(const string& r)
     //unicast - true
     //multicast - true
     rib.send_add_egp_table6(_ribname.c_str(),
-                "ebgp",  _xrl_router->class_name(),
-                _xrl_router->instance_name(), true, true,
+                "ebgp",  _xrl_router.class_name(),
+                _xrl_router.instance_name(), true, true,
 		callback(this, 
  		         &RibIpcHandler::rib_command_done,"add_table"));
     //ibgp - v6
@@ -106,8 +106,8 @@ RibIpcHandler::register_ribname(const string& r)
     //unicast - true
     //multicast - true
     rib.send_add_egp_table6(_ribname.c_str(),
-		"ibgp", _xrl_router->class_name(),
-                _xrl_router->instance_name(), true, true,
+		"ibgp", _xrl_router.class_name(),
+                _xrl_router.instance_name(), true, true,
 		callback(this,
 			 &RibIpcHandler::rib_command_done,"add_table"));
 
@@ -117,7 +117,7 @@ RibIpcHandler::register_ribname(const string& r)
 bool
 RibIpcHandler::unregister_rib()
 {
-    XrlRibV0p1Client rib(_xrl_router);
+    XrlRibV0p1Client rib(&_xrl_router);
     
     //delete our tables
     //ebgp - v4
@@ -125,8 +125,8 @@ RibIpcHandler::unregister_rib()
     //unicast - true
     //multicast - true
     rib.send_delete_egp_table4(_ribname.c_str(),
-			       "ebgp", _xrl_router->class_name(),
-                               _xrl_router->instance_name(),
+			       "ebgp", _xrl_router.class_name(),
+                               _xrl_router.instance_name(),
 			       true, true,
 			       callback(this,
 					&RibIpcHandler::rib_command_done,
@@ -136,8 +136,8 @@ RibIpcHandler::unregister_rib()
     //unicast - true
     //multicast - true
     rib.send_delete_egp_table4(_ribname.c_str(),
-			       "ibgp", _xrl_router->class_name(),
-                               _xrl_router->instance_name(), 
+			       "ibgp", _xrl_router.class_name(),
+                               _xrl_router.instance_name(), 
 			       true, true,
 			       callback(this,
 					&RibIpcHandler::rib_command_done,
@@ -149,8 +149,8 @@ RibIpcHandler::unregister_rib()
     //unicast - true
     //multicast - true
     rib.send_delete_egp_table6(_ribname.c_str(),
- 			       "ebgp", _xrl_router->class_name(),
-                               _xrl_router->instance_name(), 
+ 			       "ebgp", _xrl_router.class_name(),
+                               _xrl_router.instance_name(), 
 			       true, true,
  			       callback(this,
  				  	&RibIpcHandler::rib_command_done,
@@ -161,8 +161,8 @@ RibIpcHandler::unregister_rib()
     //unicast - true
     //multicast - true
     rib.send_delete_egp_table6(_ribname.c_str(),
- 			       "ibgp", _xrl_router->class_name(),
-                               _xrl_router->instance_name(), 
+ 			       "ibgp", _xrl_router.class_name(),
+                               _xrl_router.instance_name(), 
 			       true, true,
  			       callback(this,
  					&RibIpcHandler::rib_command_done,
@@ -440,8 +440,8 @@ RibIpcHandler::withdraw_route(const IPv6Net& nlri, const bool& unicast,
 }
 
 template<class A>
-XrlQueue<A>::XrlQueue(RibIpcHandler *rib_ipc_handler,
-		      XrlStdRouter *xrl_router, BGPMain *bgp)
+XrlQueue<A>::XrlQueue(RibIpcHandler& rib_ipc_handler,
+		      XrlStdRouter& xrl_router, BGPMain& bgp)
     : _rib_ipc_handler(rib_ipc_handler),
       _xrl_router(xrl_router), _bgp(bgp),
       _flying(0)
@@ -452,7 +452,7 @@ template<class A>
 EventLoop& 
 XrlQueue<A>::eventloop() const 
 { 
-    return _rib_ipc_handler->eventloop(); 
+    return _rib_ipc_handler.eventloop(); 
 }
 
 template<class A>
@@ -534,7 +534,7 @@ XrlQueue<A>::start()
 	if(_xrl_queue.empty()) {
 	    debug_msg("Output no longer busy\n");
 #if	0
-	    _rib_ipc_handler->output_no_longer_busy();
+	    _rib_ipc_handler.output_no_longer_busy();
 #endif
 	    return;
 	}
@@ -588,7 +588,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
 	break;
     }
 
-    XrlRibV0p1Client rib(_xrl_router);
+    XrlRibV0p1Client rib(&_xrl_router);
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
 	sent = rib.send_add_route4(q.ribname.c_str(),
@@ -628,7 +628,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
 	break;
     }
 
-    XrlRibV0p1Client rib(_xrl_router);
+    XrlRibV0p1Client rib(&_xrl_router);
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
 	sent = rib.send_add_route6(q.ribname.c_str(),
@@ -678,7 +678,7 @@ XrlQueue<A>::route_command_done(const XrlError& error,
     case NO_FINDER:
 	// XXX - Temporarily code dump if this condition occurs.
 	XLOG_FATAL("NO FINDER");
-	_bgp->finder_death(__FILE__, __LINE__);
+	_bgp.finder_death(__FILE__, __LINE__);
 	break;
 
     case BAD_ARGS:
