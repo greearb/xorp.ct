@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.27 2004/12/08 23:19:36 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.28 2004/12/10 22:50:40 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -368,7 +368,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_config_users(
 	if (!user->is_a_zombie()) {
 	    users.append(XrlAtom(user->user_id()));
 	} else {
-	    printf("user %d is a zombie\n", user->user_id());
+	    XLOG_WARNING("user %d is a zombie\n", user->user_id());
 	}
     }
     return XrlCmdError::OKAY();
