@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.4 2002/12/09 10:59:38 pavlin Exp $
+# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 #
 
 #
@@ -17,8 +17,8 @@
 
 set -e
 
-. ../xrl_shell_funcs.sh ""
 . ./xrl_shell_funcs.sh ""
+. ../xrl_shell_funcs.sh ""
 
 onexit()
 {

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.2 2003/01/29 01:39:45 atanu Exp $
 #
 
 #
@@ -19,8 +19,8 @@
 
 set -e
 
-. ../xrl_shell_funcs.sh ""
 . ./xrl_shell_funcs.sh ""
+. ../xrl_shell_funcs.sh ""
 
 onexit()
 {

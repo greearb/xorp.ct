@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.2 2002/12/13 18:46:54 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.3 2002/12/16 03:08:21 mjh Exp $
 #
 
 #
@@ -36,8 +36,8 @@ onexit()
 
 trap onexit 0 2
 
-. ../xrl_shell_funcs.sh ""
 . ./xrl_shell_funcs.sh ""
+. ../xrl_shell_funcs.sh ""
 . ../../rib/xrl_shell_funcs.sh ""
 
 HOST=localhost
