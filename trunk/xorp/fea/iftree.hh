@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.17 2004/04/06 07:13:06 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.18 2004/04/12 01:59:01 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -172,11 +172,13 @@ public:
      * exists after the config push.  We can't just copy the h/w config since
      * the user config is restricted to configuration set by the user.
      * The alignment works as follows:
-     * - if an item from the local tree is not in the other tree,
+     * - If the item in the local tree is "disabled", then the state is not
+     *   modified. Otherwise, the rules below are applied.
+     * - If an item from the local tree is not in the other tree,
      *   it is marked as deleted in the local tree.
-     * - if an item from the local tree is in the other tree,
+     * - If an item from the local tree is in the other tree,
      *   its state is copied from the other tree to the local tree.
-     * - if an item from the other tree is not in the local tree, we do NOT
+     * - If an item from the other tree is not in the local tree, we do NOT
      *   copy it to the local tree.
      *
      * @param other the configuration tree to align state with.

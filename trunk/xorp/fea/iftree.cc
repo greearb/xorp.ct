@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.20 2004/04/06 07:13:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.21 2004/04/12 01:59:01 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -262,11 +262,13 @@ IfTree::str() const
 
 //
 // Walk interfaces, vifs, and addresses and align them with the other tree:
-//  - if an item from the local tree is not in the other tree,
+//  - If the item in the local tree is "disabled", then the state is not
+//    modified. Otherwise, the rules below are applied.
+//  - If an item from the local tree is not in the other tree,
 //    it is marked as deleted in the local tree.
-//  - if an item from the local tree is in the other tree,
+//  - If an item from the local tree is in the other tree,
 //    its state is copied from the other tree to the local tree.
-//  - if an item from the other tree is not in the local tree, we do NOT
+//  - If an item from the other tree is not in the local tree, we do NOT
 //    copy it to the local tree.
 //
 // Return the aligned local tree.
@@ -276,6 +278,8 @@ IfTree::align_with(const IfTree& o)
 {
     IfTree::IfMap::iterator ii;
     for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
+	if (! ii->second.enabled())
+	    continue;		// XXX: don't do anything to disabled state
 	const string& ifname = ii->second.ifname();
 	IfTree::IfMap::const_iterator oi = o.get_if(ifname);
 	if (oi == o.ifs().end()) {
@@ -290,6 +294,8 @@ IfTree::align_with(const IfTree& o)
 	IfTreeInterface::VifMap::iterator vi;
 	for (vi = ii->second.vifs().begin();
 	     vi != ii->second.vifs().end(); ++vi) {
+	    if (! vi->second.enabled())
+		continue;	// XXX: don't do anything to disabled state
 	    const string& vifname = vi->second.vifname();
 	    IfTreeInterface::VifMap::const_iterator ov =
 		oi->second.get_vif(vifname);
@@ -304,6 +310,8 @@ IfTree::align_with(const IfTree& o)
 	    IfTreeVif::V4Map::iterator ai4;
 	    for (ai4 = vi->second.v4addrs().begin();
 		 ai4 != vi->second.v4addrs().end(); ++ai4) {
+		if (! ai4->second.enabled())
+		    continue;	// XXX: don't do anything to disabled state
 		IfTreeVif::V4Map::const_iterator oa4 =
 		    ov->second.get_addr(ai4->second.addr());
 		if (oa4 == ov->second.v4addrs().end()) {
@@ -317,6 +325,8 @@ IfTree::align_with(const IfTree& o)
 	    IfTreeVif::V6Map::iterator ai6;
 	    for (ai6 = vi->second.v6addrs().begin();
 		 ai6 != vi->second.v6addrs().end(); ++ai6) {
+		if (! ai6->second.enabled())
+		    continue;	// XXX: don't do anything to disabled state
 		IfTreeVif::V6Map::const_iterator oa6 =
 		    ov->second.get_addr(ai6->second.addr());
 		if (oa6 == ov->second.v6addrs().end()) {
