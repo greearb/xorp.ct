@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.12 2005/03/17 04:18:23 atanu Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.13 2005/03/25 02:53:28 pavlin Exp $"
 
 #include "config.h"
 
@@ -83,6 +83,8 @@ x_comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
 			   (void *)&desired_bufsize, sizeof(desired_bufsize))
 		< 0) {
 		desired_bufsize -= delta;
+		if (desired_bufsize <= 0)
+		    break;
 	    } else {
 		if (delta < 1024)
 		    break;
@@ -133,6 +135,8 @@ x_comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
 			   (void *)&desired_bufsize, sizeof(desired_bufsize))
 		< 0) {
 		desired_bufsize -= delta;
+		if (desired_bufsize <= 0)
+		    break;
 	    } else {
 		if (delta < 1024)
 		    break;

@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.10 2004/09/02 02:34:40 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.11 2004/09/02 18:44:43 pavlin Exp $"
 
 
 /*
@@ -949,6 +949,8 @@ comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
 			   (void *)&desired_bufsize, sizeof(desired_bufsize))
 		< 0) {
 		desired_bufsize -= delta;
+		if (desired_bufsize <= 0)
+		    break;
 	    } else {
 		if (delta < 1024)
 		    break;
@@ -999,6 +1001,8 @@ comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
 			   (void *)&desired_bufsize, sizeof(desired_bufsize))
 		< 0) {
 		desired_bufsize -= delta;
+		if (desired_bufsize <= 0)
+		    break;
 	    } else {
 		if (delta < 1024)
 		    break;
