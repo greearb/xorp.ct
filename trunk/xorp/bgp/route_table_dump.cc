@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.29 2004/11/27 23:35:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.30 2004/12/23 18:57:22 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -80,9 +80,10 @@ DumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
 					 RTQUEUE_OP_ADD)) {
 	cp(2);
 #ifdef AUDIT_ENABLE
-	add_audit(c_format("%s::add_route peer:%p/%d net:%s valid",
+	add_audit(c_format("%s::add_route peer:%p/%u net:%s valid",
 			   this->tablename().c_str(),
-			   rtmsg.origin_peer(), rtmsg.genid(),
+			   rtmsg.origin_peer(),
+			   XORP_UINT_CAST(rtmsg.genid()),
 			   rtmsg.net().str().c_str()));
 #endif
 	return this->_next_table->add_route(rtmsg,
@@ -90,9 +91,10 @@ DumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
     } else {
 	cp(3);
 #ifdef AUDIT_ENABLE
-	add_audit(c_format("%s::add_route peer:%p/%d net:%s not valid",
+	add_audit(c_format("%s::add_route peer:%p/%u net:%s not valid",
 			   this->tablename().c_str(),
-			   rtmsg.origin_peer(), rtmsg.genid(),
+			   rtmsg.origin_peer(),
+			   XORP_UINT_CAST(rtmsg.genid()),
 			   rtmsg.net().str().c_str()));
 #endif
 	return ADD_UNUSED;
@@ -129,10 +131,12 @@ DumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 					 RTQUEUE_OP_REPLACE_NEW);
 
 #ifdef AUDIT_ENABLE
-    add_audit(c_format("%s::replace_route old_peer:%p/%d new_peer:%p/%d net:%s ov:%d nv:%d",
+    add_audit(c_format("%s::replace_route old_peer:%p/%u new_peer:%p/%u net:%s ov:%d nv:%d",
 		       this->tablename().c_str(),
-		       old_rtmsg.origin_peer(), old_rtmsg.genid(),
-		       new_rtmsg.origin_peer(), new_rtmsg.genid(),
+		       old_rtmsg.origin_peer(),
+		       XORP_UINT_CAST(old_rtmsg.genid()),
+		       new_rtmsg.origin_peer(),
+		       XORP_UINT_CAST(new_rtmsg.genid()),
 		       new_rtmsg.net().str().c_str(), old_is_valid, new_is_valid));
 #endif
 		       
@@ -171,9 +175,10 @@ DumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     debug_msg("Route_dump: %s %s\n", this->tablename().c_str(),
 	      rtmsg.net().str().c_str());
 #ifdef AUDIT_ENABLE
-    add_audit(c_format("%s:route_dump peer:%p/%d net:%s valid",
+    add_audit(c_format("%s:route_dump peer:%p/%u net:%s valid",
 		       this->tablename().c_str(),
-		       rtmsg.origin_peer(), rtmsg.genid(),
+		       rtmsg.origin_peer(),
+		       XORP_UINT_CAST(rtmsg.genid()),
 		       rtmsg.net().str().c_str()));
 #endif
     /* turn the route_dump into a route_add */
@@ -204,18 +209,20 @@ DumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 					 RTQUEUE_OP_DELETE)) {
 	cp(10);
 #ifdef AUDIT_ENABLE
-	add_audit(c_format("%s::add_route peer:%p/%d net:%s valid",
+	add_audit(c_format("%s::add_route peer:%p/%u net:%s valid",
 			   this->tablename().c_str(),
-			   rtmsg.origin_peer(), rtmsg.genid(),
+			   rtmsg.origin_peer(),
+			   XORP_UINT_CAST(rtmsg.genid()),
 			   rtmsg.net().str().c_str()));
 #endif
 	return this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
     } else {
 	cp(11);
 #ifdef AUDIT_ENABLE
-	add_audit(c_format("%s::add_route peer:%p/%d net:%s not valid",
+	add_audit(c_format("%s::add_route peer:%p/%u net:%s not valid",
 			   this->tablename().c_str(),
-			   rtmsg.origin_peer(), rtmsg.genid(),
+			   rtmsg.origin_peer(),
+			   XORP_UINT_CAST(rtmsg.genid()),
 			   rtmsg.net().str().c_str()));
 #endif
 	return 0;
@@ -451,10 +458,9 @@ template <class A>
 void
 DumpTable<A>::peering_is_down(const PeerHandler *peer, uint32_t genid)
 {
-    debug_msg("\n         %s\n peer: %p genid: %d\n",
+    debug_msg("\n         %s\n peer: %p genid: %u\n",
 	      this->tablename().c_str(),
-	      peer,
-	      genid);
+	      peer, XORP_UINT_CAST(genid));
 
     if (peer != _peer) {
 	//we only care about peers other than our own one - we won't
@@ -468,10 +474,10 @@ void
 DumpTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 				BGPRouteTable<A> *caller) 
 {
-    debug_msg("\n         %s\n caller: %s\n peer: %p genid: %d\n",
+    debug_msg("\n         %s\n caller: %s\n peer: %p genid: %u\n",
 	      this->tablename().c_str(),
 	      caller->tablename().c_str(),
-	      peer, genid);
+	      peer, XORP_UINT_CAST(genid));
 
     cp(37);
     XLOG_ASSERT(this->_parent == caller);
@@ -489,10 +495,10 @@ void
 DumpTable<A>::peering_down_complete(const PeerHandler *peer, uint32_t genid,
 				    BGPRouteTable<A> *caller) 
 {
-    debug_msg("\n         %s\n caller: %s\n peer: %p genid: %d\n",
+    debug_msg("\n         %s\n caller: %s\n peer: %p genid: %u\n",
 	      this->tablename().c_str(),
 	      caller->tablename().c_str(),
-	      peer, genid);
+	      peer, XORP_UINT_CAST(genid));
 
     cp(38);
     XLOG_ASSERT(this->_parent == caller);
@@ -526,10 +532,10 @@ void
 DumpTable<A>::peering_came_up(const PeerHandler *peer, uint32_t genid,
 			      BGPRouteTable<A> *caller) 
 {
-    debug_msg("\n         %s\n caller: %s\n peer: %p genid: %d\n",
+    debug_msg("\n         %s\n caller: %s\n peer: %p genid: %u\n",
 	      this->tablename().c_str(),
 	      caller->tablename().c_str(),
-	      peer, genid);
+	      peer, XORP_UINT_CAST(genid));
 
     XLOG_ASSERT(this->_parent == caller);
     XLOG_ASSERT(this->_next_table != NULL);
