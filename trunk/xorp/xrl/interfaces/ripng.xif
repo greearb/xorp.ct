@@ -316,13 +316,18 @@ interface ripng/0.1 {
 
     /**
      * Get counters associated with peer of interface / vif /address.
+     *
+     * @param counter_descriptions textual descriptions of counters.
+     * @param counter_values values associated with counters.
+     * @param peer_last_active is the number of seconds since TimeVal(0,0).
      */
      get_peer_counters			? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv6			\
 					& peer:ipv6			\
 					-> counter_descriptions:list	\
-					&  counter_values:list
+					&  counter_values:list		\
+					&  peer_last_active:u32
 
     /**
      * Add a static route.
