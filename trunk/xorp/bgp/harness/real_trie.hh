@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/real_trie.hh,v 1.2 2003/09/10 10:17:17 atanu Exp $
+// $XORP: xorp/bgp/harness/real_trie.hh,v 1.3 2003/09/10 10:28:21 atanu Exp $
 
 #ifndef __BGP_HARNESS_REAL_TRIE_HH_
 #define __BGP_HARNESS_REAL_TRIE_HH_
@@ -38,12 +38,12 @@ public:
 	tree_walk_table(tw, &_head, A::ZERO(), 0, topbit);
     };
 
-    bool insert(const IPv4Net& net, TriePayload& p);
+    bool insert(const IPNet<A>& net, TriePayload& p);
     bool insert(A address, size_t mask_length, TriePayload& p);
     void del() {
 	del(&_head);
     }
-    bool del(const IPv4Net& net);
+    bool del(const IPNet<A>& net);
     bool del(A address, size_t mask_length);
     TriePayload find(const IPNet<A>& net) const;
     TriePayload find(A address, size_t mask_length) const;
@@ -114,7 +114,7 @@ RealTrie<A>::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
 
 template <class A>
 bool
-RealTrie<A>::insert(const IPv4Net& net, TriePayload& p)
+RealTrie<A>::insert(const IPNet<A>& net, TriePayload& p)
 {
     return insert(net.masked_addr(), net.prefix_len(), p);
 }
@@ -183,7 +183,7 @@ RealTrie<A>::del(Tree *ptr)
 
 template <class A>
 bool
-RealTrie<A>::del(const IPv4Net& net)
+RealTrie<A>::del(const IPNet<A>& net)
 {
     return del(net.masked_addr(), net.prefix_len());
 }
