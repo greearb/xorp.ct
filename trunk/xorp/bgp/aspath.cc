@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.2 2002/12/13 22:38:53 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.3 2002/12/14 00:21:01 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -239,6 +239,22 @@ AsPath::AsPath(const char *as_path) throw(InvalidString)
 	xorp_throw(InvalidString,
 		       c_format("Unterminated AsSet: %s", path.c_str()));
     debug_msg("end of AsPath()\n");
+}
+
+/**
+ * populate an AsPath from the received data representation
+ */
+void
+AsPath::decode(const uint8_t *d, size_t l)
+{
+    while (l > 0) {		// grab segments
+	int len = 2 + d[1]*2;	// XXX length in bytes for 16bit AS's
+
+	AsSegment s(d);
+	add_segment(s);
+	d += len;
+	l -= len;
+    }
 }
 
 void

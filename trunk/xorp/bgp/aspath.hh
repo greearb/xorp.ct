@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.2 2002/12/13 22:38:53 rizzo Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -30,12 +30,18 @@
 /**
  * This file contains the classes to manipulate AS segments/lists/paths
  *
- * An AS_PATH is made of a list of segments, AS_SET or AS_SEQUENCE.
+ * An AS_PATH is made of a list of segments, each segment being
+ * an AS_SET or an AS_SEQUENCE.
  * Logically, you can think an AS_SEQUENCE as a list of AsNum,
  * and an AS_SET as an unordered set of AsNum; the path would then be
- * made of alternate AS_SET and AS_SEQUECEs. However, the max number
+ * made of alternate AS_SET and AS_SEQUENCEs. However, the max number
  * of elements in an AS_SEQUENCE is 255, so you might need to split a
  * sequence into multiple ones.
+ *
+ * The external representation of AS_SET or AS_SEQUENCE is:
+ *   1 byte:	segment type
+ *   1 byte:	number of element in the segment
+ *   n entries:	the ASnumbers in the segment, 2 or 4 bytes each
  *
  * In terms of internal representation, it might be more efficient
  * useful to store segments as either an AS_SET, or a sequence of size 1,
@@ -193,6 +199,11 @@ public:
     AsPath(const char *as_path) throw(InvalidString);
 
     /**
+     * construct from received data
+     */
+    AsPath(const uint8_t* d, size_t len)		{ decode(d, len); }
+
+    /**
      * Copy constructor
      */
     AsPath(const AsPath &a) : _segments(a._segments), 
@@ -245,6 +256,11 @@ public:
     bool operator<(const AsPath& him) const;
 
 private:
+    /**
+     * populate an AsPath from received data
+     */
+    void decode(const uint8_t *d, size_t len);
+
     /**
      * internal representation
      */
