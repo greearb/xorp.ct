@@ -335,7 +335,18 @@ install_xorp() {
     dialog --title "XORP LiveCD" --infobox "Doing XORP install..." 5 60
     echo "Doing XORP install"  >> $LIVEDIR/log
 
+    # We want both stripped and non-stripped binaries on the CD.
+    #
+    # 1. we install to /usr/local/xorp.
+    # 2. we move /usr/local/xorp to /usr/local/xorp-debug to keep it safe
+    # 3. we install again to /usr/local/xorp
+    # 4. we strip and the binaries in /usr/local/xorp
+    # 5. we tar up /usr/local/xorp to be mounted from a MFS.
+    # 6. we delete /usr/local/xorp which contained the stripped binaries
+    # 7. we move /usr/local/xorp-debug back to /usr/local/xorp
+
     cd $XORPSRCDIR || aviso
+    rm -rf $CHROOTDIR/usr/local/xorp
     gmake install prefix=$CHROOTDIR/usr/local/xorp >> $LIVEDIR/log || aviso
     dialog --title "XORP LiveCD" --infobox "Doing XORP install... done" 5 60
     cd $XORPSRCDIR || aviso
@@ -344,12 +355,18 @@ install_xorp() {
     mv $CHROOTDIR/usr/local/xorp $CHROOTDIR/usr/local/xorp-debug
 
     cd $XORPSRCDIR || aviso
+    rm -rf $CHROOTDIR/usr/local/xorp
     gmake install prefix=$CHROOTDIR/usr/local/xorp >> $LIVEDIR/log || aviso
     cd $CHROOTDIR/usr/local/xorp
     strip */* 2> /dev/null 1> /dev/null
     strip */*/* 2> /dev/null 1> /dev/null
     cp $LIVEDIR/files/xorp_load.py $CHROOTDIR/usr/local/xorp/bin
     cp $LIVEDIR/files/xorp-makeconfig.sh $CHROOTDIR/usr/local/xorp/bin
+
+    cd $CHROOTDIR
+    tar cvzfp mfs/local_xorp.tgz usr/local/xorp >> $LIVEDIR/log
+    rm -rf usr/local/xorp
+    mv usr/local/xorp-debug usr/local/xorp >> $LIVEDIR/log
 
 # Tells the user that this process was done.
     dialog --title "XORP LiveCD" --msgbox "XORP binaries, templates, and XIF files were installed in $CHROOTDIR" 5 60
@@ -415,9 +432,6 @@ create_iso() {
     tar cvzfp mfs/dev.tgz dev >> $LIVEDIR/log
     tar cvzfp mfs/root.tgz root >> $LIVEDIR/log
     tar cvzfp mfs/local_etc.tgz usr/local/etc >> $LIVEDIR/log
-    tar cvzfp mfs/local_xorp.tgz usr/local/xorp >> $LIVEDIR/log
-    mv usr/local/xorp usr/local/xorp-stripped >> $LIVEDIR/log
-    mv usr/local/xorp-debug usr/local/xorp >> $LIVEDIR/log
 
     # Copies all the necessary files to make a bootable CD
     cp $LIVEDIR/files/boot.catalog $CHROOTDIR/boot >> $LIVEDIR/log
@@ -461,7 +475,7 @@ create_iso() {
 # Burns the CD Image.
 burn_cd() {
 
-    burncd -f $CDRW -s 8 -e data $LIVEISODIR/LiveCD.iso fixate >> $LIVEDIR/log || aviso
+    burncd -f $CDRW -s 2 -e data $LIVEISODIR/LiveCD.iso fixate >> $LIVEDIR/log || aviso
     dialog --title "XORP LiveCD" --msgbox "Burning process done." 5 60
 
     done_f="[*]"
