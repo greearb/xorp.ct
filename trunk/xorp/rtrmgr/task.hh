@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.26 2004/05/28 22:27:58 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.27 2004/06/10 22:41:54 hodson Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -28,7 +28,7 @@
 #include "unexpanded_xrl.hh"
 
 
-class ConfigTree;
+class MasterConfigTree;
 class ModuleCommand;
 class ModuleManager;
 class Task;
@@ -296,7 +296,8 @@ class TaskManager {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 
 public:
-    TaskManager::TaskManager(ConfigTree& config_tree, ModuleManager& mmgr,
+    TaskManager::TaskManager(MasterConfigTree& config_tree, 
+			     ModuleManager& mmgr,
 			     XorpClient& xclient, bool global_do_exec,
 			     bool verbose);
     ~TaskManager();
@@ -310,7 +311,7 @@ public:
     void run(CallBack cb);
     XorpClient& xorp_client() const { return _xorp_client; }
     ModuleManager& module_manager() const { return _module_manager; }
-    ConfigTree& config_tree() const { return _config_tree; }
+    MasterConfigTree& config_tree() const { return _config_tree; }
     bool do_exec() const { return _current_do_exec; }
     bool verbose() const { return _verbose; }
     EventLoop& eventloop() const;
@@ -349,7 +350,7 @@ private:
     Task& find_task(const string& module_name);
     void null_callback();
 
-    ConfigTree&		_config_tree;
+    MasterConfigTree&   _config_tree;
     ModuleManager&	_module_manager;
     XorpClient&		_xorp_client;
     bool		_global_do_exec; // Set to false if we're never going

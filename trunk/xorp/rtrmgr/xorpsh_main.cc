@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.33 2004/12/08 23:19:01 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.34 2004/12/11 13:36:02 mjh Exp $"
 
 
 #include <sys/types.h>
@@ -73,6 +73,21 @@ wait_for_xrlrouter_ready(EventLoop& eventloop, XrlRouter& xrl_router)
     return true;
 }
 
+// the following two functions are an ugly hack to cause the C code in
+// the parser to call methods on the right version of the TemplateTree
+
+void add_cmd_adaptor(char *cmd, TemplateTree* tt)
+{
+    tt->add_cmd(cmd);
+}
+
+
+void add_cmd_action_adaptor(const string& cmd, 
+			    const list<string>& action, TemplateTree* tt)
+{
+    tt->add_cmd_action(cmd, action);
+}
+
 // ----------------------------------------------------------------------------
 // XorpShell implementation
 
@@ -86,7 +101,7 @@ XorpShell::XorpShell(const string& IPCname,
       _xclient(_eventloop, _xrlrouter),
       _rtrmgr_client(&_xrlrouter),
       _xorpsh_interface(&_xrlrouter, *this),
-      _mmgr(_eventloop),
+      _mmgr(_eventloop, verbose),
       _tt(NULL),
       _ct(NULL),
       _ocl(NULL),
@@ -113,11 +128,10 @@ XorpShell::XorpShell(const string& IPCname,
 	       _verbose ? "true" : "false");
 
     // Read the router config template files
-    try {
-	_tt = new TemplateTree(xorp_root_dir, config_template_dir,
-			       xrl_targets_dir, _verbose);
-    } catch (const InitError& e) {
-	xorp_throw(InitError, e.why());
+    string errmsg;
+    _tt = new TemplateTree(xorp_root_dir, _verbose);
+    if (!_tt->load_template_tree(config_template_dir, errmsg)) {
+	xorp_throw(InitError, errmsg);
     }
 
     debug_msg("%s", _tt->tree_str().c_str());
@@ -453,6 +467,12 @@ XorpShell::module_status_change(const string& modname,
     UNUSED(status);
     debug_msg("Module status change: %s status %d\n",
 	      modname.c_str(), (int)status);
+    GenericModule *module = _mmgr.find_module(modname);
+    if (module == NULL) {
+	
+    } else {
+	module->new_status(status);
+    }
 }
 
 

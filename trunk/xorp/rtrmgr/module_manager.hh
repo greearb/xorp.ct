@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.27 2004/12/08 22:47:27 mjh Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.28 2004/12/11 13:36:02 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -56,9 +56,9 @@ public:
     void terminate_with_prejudice(XorpCallback0<void>::RefPtr cb);
     ModuleManager& module_manager() const { return _mmgr; }
     string str() const;
+    void new_status(ModuleStatus new_status);
 
 private:
-    void new_status(ModuleStatus new_status);
 
     ModuleManager& _mmgr;
     string	_path;		// relative path

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.39 2004/06/11 00:53:46 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.40 2004/11/03 00:23:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,7 +23,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "conf_tree.hh"
+#include "master_conf_tree.hh"
 #include "module_command.hh"
 #include "module_manager.hh"
 #include "task.hh"
@@ -92,7 +92,7 @@ XrlStatusValidation::validate(CallBack cb)
 	Xrl* xrl = NULL;
 	do {
 	    // Try to expand using the configuration tree
-	    const ConfigTreeNode* ctn;
+	    const MasterConfigTreeNode* ctn;
 	    ctn = _task_manager.config_tree().find_config_module(_module_name);
 	    if (ctn != NULL) {
 		if (_xrl_action.expand_xrl_variables(*ctn, xrl_request,
@@ -451,7 +451,7 @@ XrlStartup::startup(CallBack cb)
 	Xrl* xrl = NULL;
 	do {
 	    // Try to expand using the configuration tree
-	    const ConfigTreeNode* ctn;
+	    const MasterConfigTreeNode* ctn;
 	    ctn = _task_manager.config_tree().find_config_module(_module_name);
 	    if (ctn != NULL) {
 		if (_xrl_action.expand_xrl_variables(*ctn, xrl_request,
@@ -575,7 +575,7 @@ XrlShutdown::shutdown(CallBack cb)
 	Xrl* xrl = NULL;
 	do {
 	    // Try to expand using the configuration tree
-	    const ConfigTreeNode* ctn;
+	    const MasterConfigTreeNode* ctn;
 	    ctn = _task_manager.config_tree().find_config_module(_module_name);
 	    if (ctn != NULL) {
 		if (_xrl_action.expand_xrl_variables(*ctn, xrl_request,
@@ -1204,7 +1204,7 @@ Task::eventloop() const
 // ----------------------------------------------------------------------------
 // TaskManager implementation
 
-TaskManager::TaskManager(ConfigTree& config_tree, ModuleManager& mmgr,
+TaskManager::TaskManager(MasterConfigTree& config_tree, ModuleManager& mmgr,
 			 XorpClient& xclient, bool global_do_exec,
 			 bool verbose)
     : _config_tree(config_tree),

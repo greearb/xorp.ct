@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.13 2004/06/07 18:50:04 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.14 2004/06/10 22:41:53 hodson Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -265,7 +265,7 @@ SlaveConfigTreeNode::check_allowed_value(string& errmsg) const
     if (_template_tree_node == NULL)
 	return true;
 
-    const Command* c = _template_tree_node->const_command("%allow");
+    const BaseCommand* c = _template_tree_node->const_command("%allow");
     if (c == NULL) {
 	c = _template_tree_node->const_command("%allow-range");
     }
@@ -286,4 +286,51 @@ SlaveConfigTreeNode::check_allowed_value(string& errmsg) const
     }
     return true;
 }
+
+
+void 
+SlaveConfigTreeNode::finalize_commit()
+{
+    debug_msg("SlaveConfigTreeNode::finalize_commit %s\n",
+	      _segname.c_str());
+
+    if (_deleted) {
+	debug_msg("node deleted\n");
+
+	//
+	// Delete the entire subtree. We expect a deleted node here
+	// to have previously had its existence committed
+	// (_existence_committed == true) but its non-existence not
+	// previously committed (_value_committed == false)
+	//
+	XLOG_ASSERT(_existence_committed);
+	XLOG_ASSERT(!_value_committed);  
+	delete_subtree_silently();
+	// No point in going further
+	return;
+    }
+    if ((_existence_committed == false) || (_value_committed == false)) {
+	debug_msg("node finalized\n");
+
+	_existence_committed = true;
+	_value_committed = true;
+	_committed_value = _value;
+	_committed_user_id = _user_id;
+	_committed_modification_time = _modification_time;
+    }
+
+    //
+    // Note: finalize_commit may delete the child, so we need to be
+    // careful the iterator stays valid.
+    //
+    list<ConfigTreeNode *>::iterator iter, prev_iter;
+    iter = _children.begin(); 
+    while (iter != _children.end()) {
+	prev_iter = iter;
+	++iter;
+	SlaveConfigTreeNode *child = (SlaveConfigTreeNode*)(*prev_iter);
+	child->finalize_commit();
+    }
+}
+
 

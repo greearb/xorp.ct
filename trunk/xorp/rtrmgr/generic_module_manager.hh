@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.3 2004/12/08 22:47:27 mjh Exp $
+// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.4 2004/12/11 13:36:01 mjh Exp $
 
 #ifndef __RTRMGR_GENERIC_MODULE_MANAGER_HH__
 #define __RTRMGR_GENERIC_MODULE_MANAGER_HH__
@@ -60,11 +60,10 @@ public:
     virtual string str() const;
     inline ModuleStatus status() const { return _status; }
     inline const string& name() const { return _name; }
-
+    virtual void new_status(ModuleStatus new_status);
 protected:
     string	_name;
     ModuleStatus _status;
-    virtual void new_status(ModuleStatus new_status);
 
 private:
     
@@ -74,10 +73,13 @@ private:
 class GenericModuleManager {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
-    GenericModuleManager(EventLoop& eventloop);
+    GenericModuleManager(EventLoop& eventloop, bool verbose);
     virtual ~GenericModuleManager() {};
 
+#if 0
     virtual bool new_module(const string& module_name, const string& path);
+#endif
+    void new_module(const string& module_name);
     virtual int start_module(const string& module_name, bool do_exec, 
 		   XorpCallback1<void, bool>::RefPtr cb);
     virtual int kill_module(const string& module_name, XorpCallback0<void>::RefPtr cb);
@@ -87,13 +89,14 @@ public:
     virtual int shell_execute(uid_t userid, const vector<string>& argv, 
 			      GenericModuleManager::CallBack cb, bool do_exec);
     EventLoop& eventloop() { return _eventloop; }
-
-protected:
-    EventLoop&	_eventloop;
     GenericModule* find_module(const string& module_name);
     const GenericModule* const_find_module(const string& module_name) const;
 
+protected:
+    bool store_new_module(GenericModule *module);
+    EventLoop&	_eventloop;
     map<string, GenericModule *> _modules;
+    bool	_verbose;	// Set to true if output is verbose
 private:
 };
 

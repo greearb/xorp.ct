@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.6 2004/05/28 22:27:58 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.7 2004/06/10 22:41:53 hodson Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
 #define __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
@@ -55,6 +55,8 @@ public:
     inline SlaveConfigTreeNode* parent() {
 	return (SlaveConfigTreeNode*)_parent;
     }
+
+    void finalize_commit();
 
 protected:
     bool build_command_tree(CommandTree& cmdtree, 

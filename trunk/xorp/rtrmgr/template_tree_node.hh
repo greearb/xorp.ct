@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.17 2004/06/08 19:06:27 hodson Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.18 2004/06/10 22:41:55 hodson Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -45,7 +45,7 @@ enum TTNodeType {
     NODE_MACADDR	= 9
 };
 
-class Command;
+class BaseCommand;
 class CommandTree;
 class TemplateTree;
 
@@ -56,9 +56,8 @@ public:
     virtual ~TemplateTreeNode();
 
     virtual TTNodeType type() const { return NODE_VOID; }
-    void add_cmd(const string& cmd, TemplateTree& tt) throw (ParseError);
-    void add_action(const string& cmd, const list<string>& action_list,
-		    const XRLdb& xrldb);
+    void add_cmd(const string& cmd) throw (ParseError);
+    void add_action(const string& cmd, const list<string>& action_list);
 
     map<string, string> create_variable_map(const list<string>& segments) const;
 
@@ -66,8 +65,8 @@ public:
     virtual string typestr() const { return string("void"); }
     virtual string default_str() const { return string(""); }
     virtual bool type_match(const string& s) const;
-    Command* command(const string& cmd_name);
-    const Command* const_command(const string& cmd_name) const;
+    BaseCommand* command(const string& cmd_name);
+    const BaseCommand* const_command(const string& cmd_name) const;
     set<string> commands() const;
     string varname() const { return _varname; }
     void set_tag() { _is_tag = true; }
@@ -82,7 +81,9 @@ public:
     const string& segname() const { return _segname; }
     string path() const;
 
+#if 0
     bool check_template_tree(string& errmsg) const;
+#endif
     bool check_command_tree(const list<string>& commands, 
 			    bool include_intermediates, size_t depth) const;
     bool has_default() const { return _has_default; }
@@ -115,6 +116,10 @@ protected:
     void set_has_default() { _has_default = true; }
     bool name_is_variable() const;
 
+    map<string, BaseCommand *> _cmd_map;
+    TemplateTreeNode*	_parent;
+    list<TemplateTreeNode*> _children;
+
 private:
     bool split_up_varname(const string& varname,
 			  list<string>& var_parts) const;
@@ -122,8 +127,6 @@ private:
     const TemplateTreeNode* find_child_varname_node(const list<string>& var_parts) const;
 
     TemplateTree&	_template_tree;
-    TemplateTreeNode*	_parent;
-    list<TemplateTreeNode*> _children;
 
     string _module_name;
     string _default_target_name;
@@ -143,8 +146,6 @@ private:
     // The CLI help information associated with this node.
     string _help;
     string _help_long;
-
-    map<string, Command *> _cmd_map;
 
     list<string>	_mandatory_children;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.25 2004/08/19 00:20:19 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.26 2004/08/19 02:00:20 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -24,8 +24,7 @@
 #include <vector>
 
 #include <sys/time.h>
-
-#include "task.hh"
+#include "libxorp/timeval.hh"
 
 
 class Command;
@@ -33,6 +32,7 @@ class CommandTree;
 class RouterCLI;
 class TaskManager;
 class TemplateTreeNode;
+
 
 class ConfigTreeNode {
 public:
@@ -51,7 +51,6 @@ public:
     void set_value(const string& value, uid_t user_id);
     void mark_subtree_as_committed();
     void mark_subtree_as_uncommitted();
-    void command_status_callback(const Command* cmd, bool success);
 
     bool merge_deltas(uid_t user_id,
 		      const ConfigTreeNode& delta_node, 
@@ -60,19 +59,10 @@ public:
 
     bool merge_deletions(uid_t user_id, const ConfigTreeNode& deletion_node, 
 			 bool provisional_change, string& response);
-    void find_changed_modules(set<string>& changed_modules) const;
-    void find_active_modules(set<string>& active_modules) const;
-    void find_all_modules(set<string>& all_modules) const;
     ConfigTreeNode* find_config_module(const string& module_name);
 
     bool check_config_tree(string& result) const;
 
-    void initialize_commit();
-    bool commit_changes(TaskManager& task_manager, bool do_commit,
-			int depth, int last_depth, string& result,
-			bool& needs_update);
-    bool check_commit_status(string& response) const;
-    void finalize_commit();
     string discard_changes(int depth, int last_depth);
     int type() const;
     bool is_root_node() const { return (_parent == NULL); }
@@ -85,8 +75,6 @@ public:
     string typestr() const;
     const string& segname() const { return _segname; }
     const string& value() const;
-    const string& named_value(const string& varname) const;
-    void set_named_value(const string& varname, const string& value);
     uid_t user_id() const { return _user_id; }
     void set_existence_committed(bool v) { _existence_committed = v; }
     bool existence_committed() const { return _existence_committed; }
@@ -109,11 +97,14 @@ public:
     void retain_common_nodes(const ConfigTreeNode& them);
     ConfigTreeNode* find_node(list<string>& path);
     string subtree_str() const;
+
     bool expand_variable(const string& varname, string& value) const;
     bool expand_expression(const string& expression, string& value) const;
     void expand_varname_to_matchlist(const vector<string>& v, size_t depth,
 				     list<string>& matches) const;
     bool set_variable(const string& varname, string& value);
+    const string& named_value(const string& varname) const;
+    void set_named_value(const string& varname, const string& value);
 
 protected:
     bool split_up_varname(const string& varname,
@@ -127,6 +118,7 @@ protected:
 					     VarType& type);
     ConfigTreeNode* find_child_varname_node(const list<string>& var_parts,
 					    VarType& type);
+
 
     const TemplateTreeNode* _template_tree_node;
     bool _deleted;	// Indicates node has been deleted, but commit has not 
@@ -149,11 +141,6 @@ protected:
     bool _existence_committed;	// Do we need to run %create commands
     bool _value_committed;	// Do we need to run %set commands
 
-    int _actions_pending;	// Needed to track how many response callbacks
-				// callbacks we expect during a commit
-    bool _actions_succeeded;	// Did any action fail during the commit?
-    const Command* _cmd_that_failed;
-
     // Variables contains the explicit variables set on this node
     map<string, string> _variables;
 
@@ -161,7 +148,7 @@ protected:
     // we came from
     bool _on_parent_path;
 
-    bool _verbose;		// Set to true if output is verbose
+    bool _verbose;
 
 private:
 };

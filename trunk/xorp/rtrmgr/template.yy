@@ -9,6 +9,9 @@
 
 #include "template_tree_node.hh"
 #include "template_tree.hh"
+extern void add_cmd_adaptor(char *cmd, TemplateTree* tt);
+extern void add_cmd_action_adaptor(const string& cmd, 
+			    const list<string>& action, TemplateTree* tt);
 
 /* XXX: sigh, the -p flag to yacc should do this for us */
 #define yystacksize tpltstacksize
@@ -293,7 +296,7 @@ add_cmd(char *cmd)
 {
     lastsymbol = cmd;
 
-    tt->add_cmd(cmd);
+    add_cmd_adaptor(cmd, tt);
     current_cmd = cmd;
     free(cmd);
     cmd_list.clear();
@@ -320,7 +323,7 @@ prepend_cmd(char *s)
 static void
 end_cmd()
 {
-    tt->add_cmd_action(current_cmd, cmd_list);
+    add_cmd_action_adaptor(current_cmd, cmd_list, tt);
     cmd_list.clear();
 }
 

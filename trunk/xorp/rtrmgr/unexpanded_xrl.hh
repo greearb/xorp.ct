@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/unexpanded_xrl.hh,v 1.7 2004/05/28 22:27:59 pavlin Exp $
+// $XORP: xorp/rtrmgr/unexpanded_xrl.hh,v 1.8 2004/06/10 22:41:55 hodson Exp $
 
 #ifndef __RTRMGR_UNEXPANDED_XRL_HH__
 #define __RTRMGR_UNEXPANDED_XRL_HH__
@@ -22,7 +22,7 @@
 #include "libxipc/xrl_pf_sudp.hh"
 
 
-class ConfigTreeNode;
+class MasterConfigTreeNode;
 class XrlAction;
 
 //
@@ -34,7 +34,7 @@ class XrlAction;
 
 class UnexpandedXrl {
 public:
-    UnexpandedXrl(const ConfigTreeNode& node, const XrlAction& action);
+    UnexpandedXrl(const MasterConfigTreeNode& node, const XrlAction& action);
     ~UnexpandedXrl();
 
     /**
@@ -57,7 +57,7 @@ public:
     string str() const;
 
 private:
-    const ConfigTreeNode& _node;
+    const MasterConfigTreeNode& _node;
     const XrlAction& _action;
 
     // _xrl is mutable because expanding the XRL doesn't conceptually

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.21 2004/05/28 22:27:59 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.22 2004/06/10 22:41:54 hodson Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -24,12 +24,11 @@
 
 #include "libxorp/callback.hh"
 
-#include "conf_tree_node.hh"
+#include "template_base_command.hh"
+#include "master_conf_tree_node.hh"
 #include "rtrmgr_error.hh"
 
 
-class TemplateTree;
-class TemplateTreeNode;
 class XorpClient;
 class XRLdb;
 
@@ -56,7 +55,7 @@ public:
     XrlAction(TemplateTreeNode& template_tree_node, const list<string>& action,
 	      const XRLdb& xrldb) throw (ParseError);
 
-    int execute(const ConfigTreeNode& ctn, TaskManager& task_manager,
+    int execute(const MasterConfigTreeNode& ctn, TaskManager& task_manager,
 		XrlRouter::XrlCallback cb) const;
     template<class TreeNode> int expand_xrl_variables(const TreeNode& tn,
 						      string& result,
@@ -74,70 +73,23 @@ private:
     string		_response;
 };
 
-class Command {
+class Command : public BaseCommand {
 public:
     Command(TemplateTreeNode& template_tree_node, const string& cmd_name);
     virtual ~Command();
 
     void add_action(const list<string>& action, const XRLdb& xrldb);
-    int execute(ConfigTreeNode& ctn, TaskManager& task_manager) const;
+    int execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const;
     void action_complete(const XrlError& err, XrlArgs* xrl_args,
-			 ConfigTreeNode* ctn) const;
+			 MasterConfigTreeNode* ctn) const;
     set<string> affected_xrl_modules() const;
     bool affects_module(const string& module) const;
     virtual string str() const;
-    TemplateTreeNode& template_tree_node() { return _template_tree_node; }
     bool check_referred_variables(string& errmsg) const;
 
 protected:
-    string		_cmd_name;
     list<Action*>	_actions;
-
-private:
-    TemplateTreeNode&	_template_tree_node;
 };
 
-class AllowCommand : public Command {
-public:
-    AllowCommand(TemplateTreeNode& template_tree_node, const string& cmd_name);
-
-    virtual void add_action(const list<string>& action) throw (ParseError) = 0;
-    virtual bool verify_variable_value(const ConfigTreeNode& ctn,
-				       string&		     errmsg) const = 0;
-    virtual string str() const = 0;
-};
-
-class AllowOptionsCommand : public AllowCommand {
-public:
-    AllowOptionsCommand(TemplateTreeNode&	template_tree_node,
-			const string&		cmd_name);
-
-    virtual void add_action(const list<string>& action) throw (ParseError);
-    virtual bool verify_variable_value(const ConfigTreeNode& 	ctn,
-				       string&			errmsg) const;
-
-    virtual string str() const;
-
-private:
-    string		_varname;
-    list<string>	_allowed_values;
-};
-
-class AllowRangeCommand : public AllowCommand {
-public:
-    AllowRangeCommand(TemplateTreeNode&	template_tree_node,
-		      const string&	cmd_name);
-
-    virtual void add_action(const list<string>& action) throw (ParseError);
-    virtual bool verify_variable_value(const ConfigTreeNode& 	ctn,
-				       string&			errmsg) const;
-
-    virtual string str() const;
-
-private:
-    string		_varname;
-    int32_t		_lower;
-    int32_t		_upper;
-};
 
 #endif // __RTRMGR_TEMPLATE_COMMANDS_HH__

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.40 2004/12/06 01:15:58 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.41 2004/12/07 10:33:10 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -34,6 +34,7 @@ xorp_rtrmgr_SOURCES	+= y.tplt_tab.h
 xorp_rtrmgr_SOURCES	+= command_tree.hh
 xorp_rtrmgr_SOURCES	+= conf_tree.hh
 xorp_rtrmgr_SOURCES	+= conf_tree_node.hh
+xorp_rtrmgr_SOURCES	+= master_conf_tree_node.hh
 xorp_rtrmgr_SOURCES	+= generic_module_manager.hh
 xorp_rtrmgr_SOURCES	+= master_conf_tree.hh
 xorp_rtrmgr_SOURCES	+= module_commands.hh
@@ -42,9 +43,12 @@ xorp_rtrmgr_SOURCES	+= path_segment.hh
 xorp_rtrmgr_SOURCES	+= randomness.hh
 xorp_rtrmgr_SOURCES	+= rtrmgr_error.hh
 xorp_rtrmgr_SOURCES	+= task.hh
+xorp_rtrmgr_SOURCES	+= template_base_command.hh
 xorp_rtrmgr_SOURCES	+= template_commands.hh
 xorp_rtrmgr_SOURCES	+= template_tree.hh
+xorp_rtrmgr_SOURCES	+= master_template_tree.hh
 xorp_rtrmgr_SOURCES	+= template_tree_node.hh
+xorp_rtrmgr_SOURCES	+= master_template_tree_node.hh
 xorp_rtrmgr_SOURCES	+= unexpanded_xrl.hh
 xorp_rtrmgr_SOURCES	+= userdb.hh
 xorp_rtrmgr_SOURCES	+= util.hh
@@ -54,6 +58,7 @@ xorp_rtrmgr_SOURCES	+= xrldb.hh
 
 xorp_rtrmgr_SOURCES	+= conf_tree.cc
 xorp_rtrmgr_SOURCES	+= conf_tree_node.cc
+xorp_rtrmgr_SOURCES	+= master_conf_tree_node.cc
 xorp_rtrmgr_SOURCES	+= generic_module_manager.cc
 xorp_rtrmgr_SOURCES	+= lex.boot.cc
 xorp_rtrmgr_SOURCES	+= lex.tplt.cc
@@ -63,9 +68,12 @@ xorp_rtrmgr_SOURCES	+= module_command.cc
 xorp_rtrmgr_SOURCES	+= module_manager.cc
 xorp_rtrmgr_SOURCES	+= randomness.cc
 xorp_rtrmgr_SOURCES	+= task.cc
+xorp_rtrmgr_SOURCES	+= template_base_command.cc
 xorp_rtrmgr_SOURCES	+= template_commands.cc
 xorp_rtrmgr_SOURCES	+= template_tree.cc
+xorp_rtrmgr_SOURCES	+= master_template_tree.cc
 xorp_rtrmgr_SOURCES	+= template_tree_node.cc
+xorp_rtrmgr_SOURCES	+= master_template_tree_node.cc
 xorp_rtrmgr_SOURCES	+= unexpanded_xrl.cc
 xorp_rtrmgr_SOURCES	+= userdb.cc
 xorp_rtrmgr_SOURCES	+= util.cc
@@ -92,24 +100,18 @@ xorpsh_SOURCES	+= command_tree.hh
 xorpsh_SOURCES	+= conf_tree.hh
 xorpsh_SOURCES	+= conf_tree_node.hh
 xorpsh_SOURCES	+= generic_module_manager.hh
-xorpsh_SOURCES	+= module_command.hh
-xorpsh_SOURCES	+= module_manager.hh
 xorpsh_SOURCES	+= op_commands.hh
 xorpsh_SOURCES	+= path_segment.hh
 xorpsh_SOURCES	+= rtrmgr_error.hh
 xorpsh_SOURCES	+= slave_conf_tree.hh
 xorpsh_SOURCES	+= slave_conf_tree_node.hh
-xorpsh_SOURCES	+= slave_module_manager.hh
-xorpsh_SOURCES	+= task.hh
-xorpsh_SOURCES	+= template_commands.hh
+xorpsh_SOURCES	+= template_base_commands.hh
 xorpsh_SOURCES	+= template_tree.hh
 xorpsh_SOURCES	+= template_tree_node.hh
-xorpsh_SOURCES	+= unexpanded_xrl.hh
 xorpsh_SOURCES	+= util.hh
 xorpsh_SOURCES	+= xorp_client.hh
 xorpsh_SOURCES	+= xorpsh_main.hh
 xorpsh_SOURCES	+= xrl_xorpsh_interface.hh
-xorpsh_SOURCES	+= xrldb.hh
 
 xorpsh_SOURCES	+= cli.cc
 xorpsh_SOURCES	+= command_tree.cc
@@ -119,23 +121,16 @@ xorpsh_SOURCES	+= generic_module_manager.cc
 xorpsh_SOURCES	+= lex.boot.cc
 xorpsh_SOURCES	+= lex.opcmd.cc
 xorpsh_SOURCES	+= lex.tplt.cc
-xorpsh_SOURCES	+= module_command.cc
 xorpsh_SOURCES	+= op_commands.cc
 xorpsh_SOURCES	+= slave_conf_tree.cc
 xorpsh_SOURCES	+= slave_conf_tree_node.cc
-xorpsh_SOURCES	+= slave_module_manager.cc
-# XXX: task.cc shouldn't really be needed
-xorpsh_SOURCES  += task.cc
-xorpsh_SOURCES	+= template_commands.cc
+xorpsh_SOURCES	+= template_base_command.cc
 xorpsh_SOURCES	+= template_tree.cc
 xorpsh_SOURCES	+= template_tree_node.cc
-# XXX: unexpanded_xrl shouldn't really be needed
-xorpsh_SOURCES	+= unexpanded_xrl.cc
 xorpsh_SOURCES	+= util.cc
 xorpsh_SOURCES	+= xorp_client.cc
 xorpsh_SOURCES	+= xorpsh_main.cc
 xorpsh_SOURCES	+= xrl_xorpsh_interface.cc
-xorpsh_SOURCES	+= xrldb.cc
 xorpsh_SOURCES	+= y.boot_tab.cc
 xorpsh_SOURCES	+= y.opcmd_tab.cc
 xorpsh_SOURCES	+= y.tplt_tab.cc

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.14 2004/06/10 22:41:51 hodson Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.15 2004/08/19 00:20:19 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -48,8 +48,8 @@ public:
     list<string> path_as_segments() const;
     const TemplateTreeNode* 
         find_template(const list<string>& path_segments) const;
-    ConfigTreeNode& root_node() { return _root_node; }
-    const ConfigTreeNode& const_root_node() const { return _root_node; }
+    inline ConfigTreeNode& root_node() { return _root_node; }
+    inline const ConfigTreeNode& const_root_node() const { return _root_node; }
     ConfigTreeNode* find_node(const list<string>& path);
     ConfigTreeNode* find_config_module(const string& module_name);
     string show_subtree(const list<string>& path_segments) const;
@@ -62,12 +62,13 @@ public:
     bool apply_deletions(uid_t user_id, const string& deletions, 
 			 bool provisional_change, string& response);
 
-    void expand_varname_to_matchlist(const string& varname, 
-    				     list<string>& matches) const;
     void retain_different_nodes(const ConfigTree& them,
 				bool retain_changed_values);
     void retain_common_nodes(const ConfigTree& them);
     void add_default_children();
+
+    void expand_varname_to_matchlist(const string& varname, 
+    				     list<string>& matches) const;
 
 protected:
     string path_as_string(const list<string>& path_segments) const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.23 2004/06/07 20:33:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.24 2004/06/10 22:41:54 hodson Exp $"
 
 
 #include <glob.h>
@@ -36,14 +36,16 @@ extern void complete_template_parser();
 extern void parse_template() throw (ParseError);
 
 TemplateTree::TemplateTree(const string& xorp_root_dir,
-			   const string& config_template_dir,
-			   const string& xrl_targets_dir,
 			   bool verbose) throw (InitError)
-    : _xrldb(xrl_targets_dir, verbose),
-      _xorp_root_dir(xorp_root_dir),
+    : _xorp_root_dir(xorp_root_dir),
       _verbose(verbose)
 {
-    string errmsg;
+}
+
+bool 
+TemplateTree::load_template_tree(const string& config_template_dir,
+				 string& errmsg)
+{
     list<string> files;
 
     _root_node = new TemplateTreeNode(*this, NULL, "", "");
@@ -53,13 +55,13 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     if (stat(config_template_dir.c_str(), &dirdata) < 0) {
 	errmsg = c_format("Error reading config directory %s: %s",
 			  config_template_dir.c_str(), strerror(errno));
-	xorp_throw(InitError, errmsg);
+	return false;
     }
 
     if ((dirdata.st_mode & S_IFDIR) == 0) {
 	errmsg = c_format("Error reading config directory %s: not a directory",
 			  config_template_dir.c_str());
-	xorp_throw(InitError, errmsg);
+	return false;
     }
 
     // TODO: file suffix is hardcoded here!
@@ -69,49 +71,63 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
 	globfree(&pglob);
 	errmsg = c_format("Failed to find config files in %s",
 			  config_template_dir.c_str());
-	xorp_throw(InitError, errmsg);
+	return false;
     }
 
     if (pglob.gl_pathc == 0) {
 	globfree(&pglob);
 	errmsg = c_format("Failed to find any template files in %s",
 			  config_template_dir.c_str());
-	xorp_throw(InitError, errmsg);
+	return false;
     }
 
     for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
 	debug_msg("Loading template file %s\n", pglob.gl_pathv[i]);
-	if (init_template_parser(pglob.gl_pathv[i], this) < 0) {
+	if (!parse_file(string(pglob.gl_pathv[i]), 
+			config_template_dir,errmsg)) {
 	    globfree(&pglob);
-	    complete_template_parser();
-	    errmsg = c_format("Failed to open template file: %s",
-			      config_template_dir.c_str());
-	    xorp_throw(InitError, errmsg);
+	    return false;
 	}
-	try {
-	    parse_template();
-	} catch (const ParseError& pe) {
-	    globfree(&pglob);
-	    complete_template_parser();
-	    xorp_throw(InitError, pe.why());
-	}
-	if (_path_segments.size() != 0) {
-	    globfree(&pglob);
-	    complete_template_parser();
-	    errmsg = c_format("File %s is not terminated properly",
-			      pglob.gl_pathv[i]);
-	    xorp_throw(InitError, errmsg);
-	}
-	complete_template_parser();
     }
 
     globfree(&pglob);
 
+#if 0
     // Verify the template tree
     if (_root_node->check_template_tree(errmsg) != true) {
 	xorp_throw(InitError, errmsg.c_str());
     }
+#endif
+    return true;
 }
+
+bool 
+TemplateTree::parse_file(const string& filename, 
+			 const string& config_template_dir, string& errmsg) 
+{
+    if (init_template_parser(filename.c_str(), this) < 0) {
+	complete_template_parser();
+	errmsg = c_format("Failed to open template file: %s",
+			      config_template_dir.c_str());
+	return false;
+    }
+    try {
+	parse_template();
+    } catch (const ParseError& pe) {
+	complete_template_parser();
+	errmsg = pe.why();
+	return false;
+    }
+    if (_path_segments.size() != 0) {
+	complete_template_parser();
+	errmsg = c_format("File %s is not terminated properly", 
+			  filename.c_str());
+	return false;
+    }
+    complete_template_parser();
+    return true;
+}
+
 
 TemplateTree::~TemplateTree()
 {
@@ -371,13 +387,13 @@ TemplateTree::find_node(const list<string>& path_segments) const
 void
 TemplateTree::add_cmd(char* cmd)
 {
-    _current_node->add_cmd(string(cmd), *this);
+    _current_node->add_cmd(string(cmd));
 }
 
 void
 TemplateTree::add_cmd_action(const string& cmd, const list<string>& action)
 {
-    _current_node->add_action(cmd, action, _xrldb);
+    _current_node->add_action(cmd, action);
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.28 2004/06/09 03:14:13 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.29 2004/06/10 22:41:52 hodson Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -28,6 +28,7 @@
 #include "task.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
+#include "master_conf_tree_node.hh"
 #include "util.hh"
 #include "xrldb.hh"
 
@@ -303,7 +304,7 @@ ModuleCommand::shutdown_method(TaskManager& taskmgr) const
 }
 
 int
-ModuleCommand::start_transaction(ConfigTreeNode& ctn,
+ModuleCommand::start_transaction(MasterConfigTreeNode& ctn,
 				 TaskManager& task_manager) const
 {
     if (_start_commit == NULL)
@@ -320,7 +321,7 @@ ModuleCommand::start_transaction(ConfigTreeNode& ctn,
 }
 
 int
-ModuleCommand::end_transaction(ConfigTreeNode& ctn,
+ModuleCommand::end_transaction(MasterConfigTreeNode& ctn,
 			       TaskManager& task_manager) const
 {
     if (_end_commit == NULL)
@@ -371,7 +372,7 @@ ModuleCommand::exec_complete(const XrlError& /* err */,
 void
 ModuleCommand::action_complete(const XrlError& err,
 			       XrlArgs* xrl_args,
-			       ConfigTreeNode *ctn,
+			       MasterConfigTreeNode *ctn,
 			       Action* action,
 			       string cmd) const
 {

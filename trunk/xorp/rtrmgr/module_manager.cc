@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.37 2004/12/08 22:47:27 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.38 2004/12/11 13:36:01 mjh Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -577,7 +577,7 @@ Module::str() const
 
 ModuleManager::ModuleManager(EventLoop& eventloop, bool do_restart,
 			     bool verbose, const string& xorp_root_dir)
-    : GenericModuleManager(eventloop),
+    : GenericModuleManager(eventloop, verbose),
       _do_restart(do_restart),
       _verbose(verbose),
       _xorp_root_dir(xorp_root_dir),
@@ -594,21 +594,11 @@ bool
 ModuleManager::new_module(const string& module_name, const string& path)
 {
     debug_msg("ModuleManager::new_module %s\n", module_name.c_str());
-
-    map<string, GenericModule*>::iterator found_mod;
-    found_mod = _modules.find(module_name);
-    if (found_mod == _modules.end()) {
-	Module* new_module;
-	new_module = new Module(*this, module_name, _verbose);
-	_modules[module_name] = new_module;
-	if (new_module->set_execution_path(path) != XORP_OK)
-	    return false;
-	return true;
-    } else {
-	XLOG_TRACE(_verbose, "Module %s already exists",
-		   module_name.c_str());
-	return true;
-    }
+    Module* module = new Module(*this, module_name, _verbose);
+    store_new_module(module);
+    if (module->set_execution_path(path) != XORP_OK)
+	return false;
+    return true;
 }
 
 int

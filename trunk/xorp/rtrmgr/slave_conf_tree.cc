@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.21 2004/06/10 22:41:53 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.22 2004/08/12 07:16:43 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -137,7 +137,6 @@ SlaveConfigTree::commit_phase2(const XrlError& e, const bool* locked,
 
     XLOG_TRACE(_verbose, "deletions = >>>\n%s<<<\n", deletions.c_str());
 
-    _root_node.initialize_commit();
     xorpsh->commit_changes(deltas, deletions,
 			   callback(this, &SlaveConfigTree::commit_phase3, cb,
 				    xorpsh),
@@ -188,7 +187,7 @@ SlaveConfigTree::commit_phase5(const XrlError& /* e */,
     XLOG_TRACE(_verbose, "commit_phase5\n");
 
     if (success) {
-	_root_node.finalize_commit();
+	root_node().finalize_commit();
 	cb->dispatch(true, "");
     } else {
 	cb->dispatch(false, _commit_errmsg);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.53 2004/12/06 01:15:58 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.54 2004/12/09 07:54:42 pavlin Exp $"
 
 #include <signal.h>
 
@@ -41,8 +41,8 @@
 #include "rtrmgr_error.hh"
 #include "task.hh"
 #include "template_commands.hh"
-#include "template_tree.hh"
-#include "template_tree_node.hh"
+#include "master_template_tree.hh"
+#include "master_template_tree_node.hh"
 #include "userdb.hh"
 #include "util.hh"
 #include "xrl_rtrmgr_interface.hh"
@@ -140,6 +140,22 @@ valid_interface(const IPv4& addr)
     return false;
 }
 
+// the following two functions are an ugly hack to cause the C code in
+// the parser to call methods on the right version of the TemplateTree
+
+void add_cmd_adaptor(char *cmd, TemplateTree* tt)
+{
+    ((MasterTemplateTree*)tt)->add_cmd(cmd);
+}
+
+
+void add_cmd_action_adaptor(const string& cmd, 
+			    const list<string>& action, TemplateTree* tt)
+{
+    ((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
+}
+
+
 Rtrmgr::Rtrmgr(const string& template_dir, 
 	       const string& xrl_targets_dir,
 	       const string& boot_file,
@@ -169,6 +185,7 @@ int
 Rtrmgr::run()
 {
     int errcode = 0;
+    string errmsg;
 
     running = true;
 
@@ -210,15 +227,27 @@ Rtrmgr::run()
     XLOG_TRACE(_verbose, "Print verbose information  := %s\n",
 	       _verbose ? "true" : "false");
 
+
+    XRLdb* xrldb = NULL;
+    try {
+	xrldb = new XRLdb(_xrl_targets_dir, _verbose);
+    } catch (const InitError& e) {
+	XLOG_ERROR("Shutting down due to an init error: %s", e.why().c_str());
+	return (1);
+    }
+
     //
     // Read the router config template files
     //
-    TemplateTree* tt = NULL;
-    try {
-	tt = new TemplateTree(xorp_config_root_dir(), _template_dir,
-			      _xrl_targets_dir, _verbose);
-    } catch (const InitError& e) {
-	XLOG_ERROR("Shutting down due to an init error: %s", e.why().c_str());
+    MasterTemplateTree* tt;
+    tt = new MasterTemplateTree(xorp_config_root_dir(),
+				*xrldb, _verbose);
+    if (!tt->load_template_tree(_template_dir, errmsg)) {
+	XLOG_ERROR("Shutting down due to an init error: %s", errmsg.c_str());
+	return (1);
+    }
+    if (!tt->check_template_tree(errmsg)) {
+	XLOG_ERROR("Shutting down due to an init error: %s", errmsg.c_str());
 	return (1);
     }
     debug_msg("%s", tt->tree_str().c_str());
@@ -339,6 +368,9 @@ Rtrmgr::run()
 
     // Delete the template tree
     delete tt;
+
+    // Delete the XRLdb
+    delete xrldb;
 
     // Shutdown the finder
     delete fs;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.21 2004/06/10 22:41:51 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.22 2004/08/19 00:20:19 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -433,6 +433,20 @@ ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
 }
 
 void
+ConfigTree::retain_different_nodes(const ConfigTree& them,
+				   bool retain_changed_values)
+{
+    _root_node.retain_different_nodes(them.const_root_node(),
+				      retain_changed_values);
+}
+
+void
+ConfigTree::retain_common_nodes(const ConfigTree& them)
+{
+    _root_node.retain_common_nodes(them.const_root_node());
+}
+
+void
 ConfigTree::expand_varname_to_matchlist(const string& varname,
 				      list<string>& matches) const
 {
@@ -453,16 +467,3 @@ ConfigTree::expand_varname_to_matchlist(const string& varname,
     _root_node.expand_varname_to_matchlist(v, 0, matches);
 }
 
-void
-ConfigTree::retain_different_nodes(const ConfigTree& them,
-				   bool retain_changed_values)
-{
-    _root_node.retain_different_nodes(them.const_root_node(),
-				      retain_changed_values);
-}
-
-void
-ConfigTree::retain_common_nodes(const ConfigTree& them)
-{
-    _root_node.retain_common_nodes(them.const_root_node());
-}

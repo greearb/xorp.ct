@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/generic_module_manager.cc,v 1.1 2004/12/06 00:31:42 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/generic_module_manager.cc,v 1.2 2004/12/11 13:36:01 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -38,9 +38,6 @@ GenericModule::~GenericModule()
 void
 GenericModule::new_status(ModuleStatus new_status)
 {
-    if (new_status == _status)
-	return;
-
     _status = new_status;
 }
 
@@ -65,16 +62,42 @@ GenericModule::str() const
 //
 
 
-GenericModuleManager::GenericModuleManager(EventLoop& eventloop) 
-    : _eventloop(eventloop)
+GenericModuleManager::GenericModuleManager(EventLoop& eventloop, bool verbose) 
+    : _eventloop(eventloop), _verbose(verbose)
 {
 }
 
+#if 0
 bool GenericModuleManager::new_module(const string& module_name, const string& path) 
 {
     UNUSED(module_name);
     UNUSED(path);
     return true;
+}
+#endif
+
+void
+GenericModuleManager::new_module(const string& module_name)
+{
+    debug_msg("ModuleManager::new_module %s\n", module_name.c_str());
+    GenericModule* module = new GenericModule(module_name);
+    store_new_module(module);
+}
+
+bool
+GenericModuleManager::store_new_module(GenericModule *module)
+{
+    map<string, GenericModule*>::iterator found_mod;
+    found_mod = _modules.find(module->name());
+    if (found_mod == _modules.end()) {
+	_modules[module->name()] = module;
+	return true;
+    } else {
+	XLOG_TRACE(_verbose, "Module %s already exists",
+		   module->name().c_str());
+	delete module;
+	return false;
+    }
 }
 
 int 

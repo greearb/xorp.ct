@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.27 2004/06/10 22:41:54 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.28 2004/08/12 07:16:43 pavlin Exp $"
 
 
 #include <glob.h>
@@ -36,8 +36,8 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
 				   TemplateTreeNode* parent,
 				   const string& path,
 				   const string& varname)
-    : _template_tree(template_tree),
-      _parent(parent),
+    : _parent(parent),
+      _template_tree(template_tree),
       _module_name(""),
       _default_target_name(""),
       _segname(path),
@@ -60,7 +60,7 @@ TemplateTreeNode::~TemplateTreeNode()
 	_children.pop_front();
     }
 
-    map<string, Command *>::iterator iter1, iter2;
+    map<string, BaseCommand *>::iterator iter1, iter2;
     iter1 = _cmd_map.begin();
     while (iter1 != _cmd_map.end()) {
 	iter2 = iter1;
@@ -77,18 +77,14 @@ TemplateTreeNode::add_child(TemplateTreeNode* child)
 }
 
 void
-TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
+TemplateTreeNode::add_cmd(const string& cmd)
     throw (ParseError)
 {
-    Command* command;
-    map<string, Command*>::iterator iter;
+    BaseCommand* command;
+    map<string, BaseCommand*>::iterator iter;
 
     if (cmd == "%modinfo") {
-	iter = _cmd_map.find("%modinfo");
-	if (iter == _cmd_map.end()) {
-	    command = new ModuleCommand(tt, *this, cmd);
-	    _cmd_map[cmd] = command;
-	}
+	// only the MasterTemplateTree cares about this
     } else if (cmd == "%allow") {
 	// If the command already exists, no need to create it again.
 	// The command action will simply be added to the existing command.
@@ -117,7 +113,9 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
 	// If the command already exists, no need to create it again.
 	// The command action will simply be added to the existing command.
 	if (_cmd_map.find(cmd) == _cmd_map.end()) {
-	    command = new Command(*this, cmd);
+	    // we just create a placeholder here - if we were a master
+	    // template tree node we'd create a real command.
+	    command = new BaseCommand(*this, cmd);
 	    _cmd_map[cmd] = command;
 	}
     } else if (cmd == "%mandatory") {
@@ -134,7 +132,7 @@ set<string>
 TemplateTreeNode::commands() const
 {
     set<string> cmds;
-    map<string, Command *>::const_iterator iter;
+    map<string, BaseCommand *>::const_iterator iter;
 
     for (iter = _cmd_map.begin(); iter != _cmd_map.end(); ++iter) {
 	cmds.insert(iter->first);
@@ -144,19 +142,13 @@ TemplateTreeNode::commands() const
 
 void
 TemplateTreeNode::add_action(const string& cmd,
-			     const list<string>& action_list,
-			     const XRLdb& xrldb)
+			     const list<string>& action_list)
 {
-    Command* command;
-    map<string, Command*>::iterator iter;
+    BaseCommand* command;
+    map<string, BaseCommand*>::iterator iter;
 
     if (cmd == "%modinfo") {
-	iter = _cmd_map.find("%modinfo");
-	XLOG_ASSERT(iter != _cmd_map.end());
-	command = iter->second;
-	ModuleCommand* module_command = dynamic_cast<ModuleCommand*>(command);
-	XLOG_ASSERT(module_command != NULL);
-	module_command->add_action(action_list, xrldb);
+	// only the Master tree cares about this
     } else if (cmd == "%allow") {
 	iter = _cmd_map.find("%allow");
 	XLOG_ASSERT(iter != _cmd_map.end());
@@ -204,10 +196,7 @@ TemplateTreeNode::add_action(const string& cmd,
 	    }
 	}
     } else {
-	iter = _cmd_map.find(cmd);
-	XLOG_ASSERT(iter != _cmd_map.end());
-	command = iter->second;
-	command->add_action(action_list, xrldb);
+	// the master tree will deal with these
     }
 }
 
@@ -253,7 +242,7 @@ TemplateTreeNode::str() const
 	tmp += " = " + default_str();
     }
     if (!_cmd_map.empty()) {
-	map<string, Command*>::const_iterator rpair;
+	map<string, BaseCommand*>::const_iterator rpair;
 	rpair = _cmd_map.begin();
 	while (rpair != _cmd_map.end()) {
 	    tmp += "\n    " + rpair->second->str();
@@ -284,10 +273,10 @@ TemplateTreeNode::type_match(const string& ) const
     return true;
 }
 
-Command*
+BaseCommand*
 TemplateTreeNode::command(const string& cmd_name)
 {
-    map<string, Command *>::iterator iter;
+    map<string, BaseCommand *>::iterator iter;
 
     iter = _cmd_map.find(cmd_name);
     if (iter == _cmd_map.end())
@@ -295,10 +284,10 @@ TemplateTreeNode::command(const string& cmd_name)
     return iter->second;
 }
 
-const Command*
+const BaseCommand*
 TemplateTreeNode::const_command(const string& cmd_name) const
 {
-    map<string, Command *>::const_iterator iter;
+    map<string, BaseCommand *>::const_iterator iter;
 
     iter = _cmd_map.find(cmd_name);
     if (iter == _cmd_map.end())
@@ -545,6 +534,7 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts) const
     return NULL;
 }
 
+#if 0
 bool
 TemplateTreeNode::check_template_tree(string& errmsg) const
 {
@@ -555,11 +545,14 @@ TemplateTreeNode::check_template_tree(string& errmsg) const
     //
     // Check whether all referred variable names are valid
     //
-    map<string, Command *>::const_iterator iter1;
+    map<string, BaseCommand *>::const_iterator iter1;
     for (iter1 = _cmd_map.begin(); iter1 != _cmd_map.end(); ++iter1) {
-	const Command* command = iter1->second;
-	if (! command->check_referred_variables(errmsg))
-	    return false;
+	const Command* command;
+	command = dynamic_cast<Command*>(iter1->second);
+	if (command) {
+	    if (! command->check_referred_variables(errmsg))
+		return false;
+	}
     }
 
     //
@@ -574,6 +567,7 @@ TemplateTreeNode::check_template_tree(string& errmsg) const
 
     return true;
 }
+#endif
 
 bool
 TemplateTreeNode::check_command_tree(const list<string>& cmd_names,

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.53 2004/09/17 14:09:02 abittau Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.54 2004/09/17 19:42:57 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -41,9 +41,6 @@ ConfigTreeNode::ConfigTreeNode(bool verbose)
       _committed_modification_time(TimeVal::ZERO()),
       _existence_committed(false),
       _value_committed(false),
-      _actions_pending(0),
-      _actions_succeeded(true),
-      _cmd_that_failed(NULL),
       _on_parent_path(false),
       _verbose(verbose)
 
@@ -67,9 +64,6 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
       _committed_modification_time(TimeVal::ZERO()),
       _existence_committed(false),
       _value_committed(false),
-      _actions_pending(0),
-      _actions_succeeded(true),
-      _cmd_that_failed(NULL),
       _on_parent_path(false),
       _verbose(verbose)
 {
@@ -92,9 +86,6 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _committed_modification_time(ctn._committed_modification_time),
       _existence_committed(ctn._existence_committed),
       _value_committed(ctn._value_committed),
-      _actions_pending(0),
-      _actions_succeeded(true),
-      _cmd_that_failed(NULL),
       _on_parent_path(false),
       _verbose(ctn._verbose)
 {
@@ -221,22 +212,6 @@ ConfigTreeNode::set_value(const string &value, uid_t user_id)
     TimerList::system_gettimeofday(&_modification_time);
 }
 
-void
-ConfigTreeNode::command_status_callback(const Command* cmd, bool success)
-{
-    debug_msg("command_status_callback node %s cmd %s\n",
-	      _segname.c_str(), cmd->str().c_str());
-    debug_msg("actions_pending = %d\n", _actions_pending);
-
-    XLOG_ASSERT(_actions_pending > 0);
-
-    if (_actions_succeeded && (success == false)) {
-	_actions_succeeded = false;
-	_cmd_that_failed = cmd;
-    }
-    _actions_pending--;
-}
-
 bool
 ConfigTreeNode::merge_deltas(uid_t user_id,
 			     const ConfigTreeNode& delta_node, 
@@ -269,9 +244,12 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		    _modification_time = delta_node.modification_time();
 		    _value_committed = true;
 		}
+#if 0
+XXXXXXX to be copied to MasterConfigTreeNode
 		_actions_pending = 0;
 		_actions_succeeded = true;
 		_cmd_that_failed = NULL;
+#endif
 	    }
 	}
     }
@@ -368,144 +346,6 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
     return true;
 }
 
-void
-ConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
-{
-    if ((_template_tree_node != NULL)
-	&& (!_existence_committed || !_value_committed)) {
-	const Command *cmd = NULL;
-	set<string> modules;
-	set<string>::const_iterator iter;
-
-	if (_deleted) {
-	    cmd = _template_tree_node->const_command("%delete");
-	    if (cmd == NULL) {
-		// No need to go to children
-		return;
-	    }
-	    modules = cmd->affected_xrl_modules();
-
-	    for (iter = modules.begin(); iter != modules.end(); ++iter)
-		changed_modules.insert(*iter);
-	    return;
-	}
-
-	if (!_existence_committed) {
-	    if (! _template_tree_node->module_name().empty())
-		changed_modules.insert(_template_tree_node->module_name());
-	    cmd = _template_tree_node->const_command("%create");
-	    if (cmd != NULL) {
-		modules = cmd->affected_xrl_modules();
-		for (iter = modules.begin(); iter != modules.end(); ++iter)
-		    changed_modules.insert(*iter);
-	    }
-	    cmd = _template_tree_node->const_command("%activate");
-	    if (cmd != NULL) {
-		modules = cmd->affected_xrl_modules();
-		for (iter = modules.begin(); iter != modules.end(); ++iter)
-		    changed_modules.insert(*iter);
-	    }
-	} else if (!_value_committed) {
-	    cmd = _template_tree_node->const_command("%set");
-	    if (cmd != NULL) {
-		modules = cmd->affected_xrl_modules();
-		for (iter = modules.begin(); iter != modules.end(); ++iter)
-		    changed_modules.insert(*iter);
-	    }
-	    cmd = _template_tree_node->const_command("%update");
-	    if (cmd != NULL) {
-		modules = cmd->affected_xrl_modules();
-		for (iter = modules.begin(); iter != modules.end(); ++iter)
-		    changed_modules.insert(*iter);
-	    }
-	}
-    }
-
-    list<ConfigTreeNode*>::const_iterator li;
-    for (li = _children.begin(); li != _children.end(); ++li) {
-	(*li)->find_changed_modules(changed_modules);
-    }
-}
-
-void
-ConfigTreeNode::find_active_modules(set<string>& active_modules) const
-{
-    if ((_template_tree_node != NULL) && (!_deleted)) {
-	const Command *cmd;
-	set<string> modules;
-	set<string>::const_iterator iter;
-
-	cmd = _template_tree_node->const_command("%create");
-	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
-	    for (iter = modules.begin(); iter != modules.end(); ++iter)
-		active_modules.insert(*iter);
-	}
-	cmd = _template_tree_node->const_command("%activate");
-	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
-	    for (iter = modules.begin(); iter != modules.end(); ++iter)
-		active_modules.insert(*iter);
-	}
-	cmd = _template_tree_node->const_command("%update");
-	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
-	    for (iter = modules.begin(); iter != modules.end(); ++iter)
-		active_modules.insert(*iter);
-	}
-	cmd = _template_tree_node->const_command("%set");
-	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
-	    for (iter = modules.begin(); iter != modules.end(); ++iter)
-		active_modules.insert(*iter);
-	}
-    }
-    if (!_deleted) {
-	list<ConfigTreeNode*>::const_iterator li;
-	for (li = _children.begin(); li != _children.end(); ++li) {
-	    (*li)->find_active_modules(active_modules);
-	}
-    }
-}
-
-void
-ConfigTreeNode::find_all_modules(set<string>& all_modules) const
-{
-    if (_template_tree_node != NULL) {
-	const Command *cmd;
-	set<string> modules;
-	set<string>::const_iterator iter;
-
-	cmd = _template_tree_node->const_command("%create");
-	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
-	    for (iter = modules.begin(); iter != modules.end(); ++iter)
-		all_modules.insert(*iter);
-	}
-	cmd = _template_tree_node->const_command("%activate");
-	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
-	    for (iter = modules.begin(); iter != modules.end(); ++iter)
-		all_modules.insert(*iter);
-	}
-	cmd = _template_tree_node->const_command("%update");
-	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
-	    for (iter = modules.begin(); iter != modules.end(); ++iter)
-		all_modules.insert(*iter);
-	}
-	cmd = _template_tree_node->const_command("%set");
-	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
-	    for (iter = modules.begin(); iter != modules.end(); ++iter)
-		all_modules.insert(*iter);
-	}
-    }
-    list<ConfigTreeNode*>::const_iterator li;
-    for (li = _children.begin(); li != _children.end(); ++li) {
-	(*li)->find_all_modules(all_modules);
-    }
-}
 
 ConfigTreeNode*
 ConfigTreeNode::find_config_module(const string& module_name)
@@ -571,326 +411,6 @@ ConfigTreeNode::check_config_tree(string& result) const
     return true;
 }
 
-void 
-ConfigTreeNode::initialize_commit()
-{
-    //
-    // We don't need to initialize anything, but we're paranoid, so we
-    // verify everything's OK first.
-    //
-    XLOG_ASSERT(_actions_pending == 0);
-    XLOG_ASSERT(_actions_succeeded == true);
-
-    list<ConfigTreeNode *>::iterator iter;
-    for (iter = _children.begin(); iter != _children.end(); ++iter)
-	(*iter)->initialize_commit();
-}
-
-bool
-ConfigTreeNode::commit_changes(TaskManager& task_manager,
-			       bool do_commit,
-			       int depth, int last_depth,
-			       string& result,
-			       bool& needs_update)
-{
-    bool success = true;
-    const Command *cmd = NULL;
-    bool changes_made = false;
-
-    debug_msg("*****COMMIT CHANGES node >%s< >%s<\n",
-	      _path.c_str(), _value.c_str());
-    if (do_commit)
-	debug_msg("do_commit\n");
-    if (_existence_committed == false)
-	debug_msg("_existence_committed == false\n");
-    if (_value_committed == false)
-	debug_msg("_value_committed == false\n");
-
-    // The root node has a NULL template
-    if (_template_tree_node != NULL) {
-	// Do we have to start any modules to implement this functionality
-	cmd = _template_tree_node->const_command("%modinfo");
-	const ModuleCommand* modcmd = dynamic_cast<const ModuleCommand*>(cmd);
-	if (modcmd != NULL) {
-	    if (modcmd->start_transaction(*this, task_manager) != XORP_OK) {
-		result = "Start Transaction failed for module "
-		    + modcmd->module_name() + "\n";
-		return false;
-	    }
-	}
-	if ((_existence_committed == false || _value_committed == false)) {
-	    debug_msg("we have changes to handle\n");
-	    // First handle deletions
-	    if (_deleted) {
-		if (do_commit == false) {
-		    // No point in checking further
-		    return true;
-		} else {
-		    //
-		    // We expect a deleted node here to have previously
-		    // had its existence committed.
-		    // (_existence_committed == true) but its
-		    // non-existence not previously committed
-		    // (_value_committed == false)
-		    //
-		    XLOG_ASSERT(_existence_committed);
-		    XLOG_ASSERT(!_value_committed);  
-		    cmd = _template_tree_node->const_command("%delete");
-		    if (cmd != NULL) {
-			int actions = cmd->execute(*this, task_manager);
-			if (actions < 0) {
-			    // Bad stuff happenned
-			    // XXX now what?
-			    result = "Something went wrong.\n";
-			    result += "The problem was with \"" + path() + "\"\n";
-			    result += "WARNING: Partially commited changes exist\n";
-			    XLOG_WARNING("%s\n", result.c_str());
-			    return false;
-			}
-			_actions_pending += actions;
-			// No need to go on to delete children
-			return true;
-		    }
-		}
-	    } else {
-		// Check any %allow commands that might prevent us
-		// going any further
-		cmd = _template_tree_node->const_command("%allow");
-		if (cmd == NULL) {
-		    // Try allow-range
-		    cmd = _template_tree_node->const_command("%allow-range");
-		}
-		if (cmd != NULL) {
-		    const AllowCommand* allow_cmd;
-		    debug_msg("found ALLOW command: %s\n",
-			      cmd->str().c_str());
-		    allow_cmd = dynamic_cast<const AllowCommand*>(cmd);
-		    XLOG_ASSERT(allow_cmd != NULL);
-		    string errmsg;
-		    if (allow_cmd->verify_variable_value(*this, errmsg)
-			!= true) {
-			//
-			// Commit_changes should always be run first
-			// with do_commit not set, so there can be no
-			// Allow command errors.
-			//
-			// XLOG_ASSERT(do_commit == false);
-			result = c_format("Bad value for \"%s\": %s; ",
-					  path().c_str(), errmsg.c_str());
-			result += "No changes have been committed. ";
-			result += "Correct this error and try again.";
-			XLOG_WARNING("%s\n", result.c_str());
-			return false;
-		    }
-		}
-
-		//
-		// Next, we run any "create" or "set" commands.
-		// Note that if there is no "create" command, then we run
-		// the "set" command instead.
-		//
-		cmd = NULL;
-		if (_existence_committed == false)
-		    cmd = _template_tree_node->const_command("%create");
-		if (cmd == NULL)
-		    cmd = _template_tree_node->const_command("%set");
-		if (cmd == NULL) {
-		    debug_msg("no appropriate command found\n");
-		} else {
-		    debug_msg("found commands: %s\n",
-			      cmd->str().c_str());
-		    int actions = cmd->execute(*this, task_manager);
-		    if (actions < 0) {
-			result = "Parameter error for \"" + path() + "\"\n";
-			result += "No changes have been committed.\n";
-			result += "Correct this error and try again.\n";
-			XLOG_WARNING("%s\n", result.c_str());
-			return false;
-		    }
-		    _actions_pending += actions;
-		}
-	    }
-	}
-    }
-
-    list<ConfigTreeNode *>::iterator iter, prev_iter;
-    iter = _children.begin();
-    if (changes_made)
-	last_depth = depth;
-    while (iter != _children.end()) {
-	prev_iter = iter;
-	++iter;
-	debug_msg("  child: %s\n", (*prev_iter)->path().c_str());
-	string child_response;
-	success = (*prev_iter)->commit_changes(task_manager, do_commit,
-					       depth + 1, last_depth, 
-					       child_response,
-					       needs_update);
-	result += child_response;
-	if (success == false) {
-	    return false;
-	}
-    }
-
-    //
-    // Take care of %activate and %update commands on the way back out.
-    //
-    do {
-	if (_deleted)
-	    break;
-	if (_template_tree_node == NULL)
-	    break;
-
-	// The %activate command
-	if (_existence_committed == false) {
-	    cmd = _template_tree_node->const_command("%activate");
-	    if (cmd != NULL) {
-		debug_msg("found commands: %s\n", cmd->str().c_str());
-		int actions = cmd->execute(*this, task_manager);
-		if (actions < 0) {
-		    result = "Parameter error for \"" + path() + "\"\n";
-		    result += "No changes have been committed.\n";
-		    result += "Correct this error and try again.\n";
-		    XLOG_WARNING("%s\n", result.c_str());
-		    return false;
-		}
-		_actions_pending += actions;
-	    }
-	    break;
-	}
-
-	// The %update command
-	if (needs_update || (_value_committed == false)) {
-	    cmd = _template_tree_node->const_command("%update");
-	    if (cmd == NULL) {
-		if (_value_committed == false)
-		    needs_update = true;
-	    } else {
-		debug_msg("found commands: %s\n", cmd->str().c_str());
-		needs_update = false;
-		int actions = cmd->execute(*this, task_manager);
-		if (actions < 0) {
-		    result = "Parameter error for \"" + path() + "\"\n";
-		    result += "No changes have been committed.\n";
-		    result += "Correct this error and try again.\n";
-		    XLOG_WARNING("%s\n", result.c_str());
-		    return false;
-		}
-		_actions_pending += actions;
-	    }
-	    break;
-	}
-
-	break;
-    } while (false);
-
-    if (_template_tree_node != NULL) {
-	cmd = _template_tree_node->const_command("%modinfo");
-	if (cmd != NULL) {
-	    const ModuleCommand* modcmd
-		= dynamic_cast<const ModuleCommand*>(cmd);
-	    if (modcmd != NULL) {
-		if (modcmd->end_transaction(*this, task_manager) != XORP_OK) {
-		    result = "End Transaction failed for module "
-			+ modcmd->module_name() + "\n";
-		    return false;
-		}
-	    }
-	}
-    }
-
-    debug_msg("Result: %s\n", result.c_str());
-    debug_msg("COMMIT, leaving node >%s<\n", _path.c_str());
-    debug_msg("final node %s actions_pending = %d\n",
-	      _segname.c_str(), _actions_pending);
-
-    return success;
-}
-
-bool 
-ConfigTreeNode::check_commit_status(string& response) const
-{
-    debug_msg("ConfigTreeNode::check_commit_status %s\n",
-	      _segname.c_str());
-
-    if ((_existence_committed == false) || (_value_committed == false)) {
-	XLOG_ASSERT(_actions_pending == 0);
-	if (_actions_succeeded == false) {
-	    response = "WARNING: Commit Failed\n";
-	    response += "  Error in " + _cmd_that_failed->str() + 
-		" command for " + _path + "\n";
-	    response += "  State may be partially committed - suggest reverting to previous state\n";
-	    return false;
-	}
-	if (_deleted) {
-	    const Command* cmd = _template_tree_node->const_command("%delete");
-	    if (cmd != NULL) {
-		//
-		// No need to check the children if we succeeded in
-		// deleting this node.
-		//
-		return true;
-	    }
-	}
-    }
-
-    list<ConfigTreeNode *>::const_iterator iter;
-    bool result = true;
-    for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	debug_msg("  child: %s\n", (*iter)->path().c_str());
-	result = (*iter)->check_commit_status(response);
-	if (result == false)
-	    return false;
-    }
-
-    return result;
-}
-
-void 
-ConfigTreeNode::finalize_commit()
-{
-    debug_msg("ConfigTreeNode::finalize_commit %s\n",
-	      _segname.c_str());
-
-    if (_deleted) {
-	debug_msg("node deleted\n");
-
-	//
-	// Delete the entire subtree. We expect a deleted node here
-	// to have previously had its existence committed
-	// (_existence_committed == true) but its non-existence not
-	// previously committed (_value_committed == false)
-	//
-	XLOG_ASSERT(_existence_committed);
-	XLOG_ASSERT(!_value_committed);  
-	delete_subtree_silently();
-	// No point in going further
-	return;
-    }
-    if ((_existence_committed == false) || (_value_committed == false)) {
-	debug_msg("node finalized\n");
-
-	XLOG_ASSERT(_actions_pending == 0);
-	XLOG_ASSERT(_actions_succeeded);
-	_existence_committed = true;
-	_value_committed = true;
-	_committed_value = _value;
-	_committed_user_id = _user_id;
-	_committed_modification_time = _modification_time;
-    }
-
-    //
-    // Note: finalize_commit may delete the child, so we need to be
-    // careful the iterator stays valid.
-    //
-    list<ConfigTreeNode *>::iterator iter, prev_iter;
-    iter = _children.begin(); 
-    while (iter != _children.end()) {
-	prev_iter = iter;
-	++iter;
-	(*prev_iter)->finalize_commit();
-    }
-}
 
 string
 ConfigTreeNode::discard_changes(int depth, int last_depth)
@@ -1161,7 +681,10 @@ ConfigTreeNode::mark_subtree_for_deletion(uid_t user_id)
     TimerList::system_gettimeofday(&_modification_time);
     _deleted = true;
     _value_committed = false;
+#if 0
+XXXXX to be copied to MasterConfigTreeNode??
     _actions_succeeded = true;
+#endif
 }
 
 void
@@ -1280,18 +803,97 @@ ConfigTreeNode::find_node(list<string>& path)
     return NULL;
 }
 
-const string&
-ConfigTreeNode::named_value(const string& varname) const
-{
-    map<string, string>::const_iterator iter;
-
-    iter = _variables.find(varname);
-    XLOG_ASSERT(iter != _variables.end());
-    return iter->second;
-}
 
 bool
-ConfigTreeNode::expand_variable(const string& varname, string& value) const
+ConfigTreeNode::retain_different_nodes(const ConfigTreeNode& them,
+				       bool retain_value_changed)
+{
+    list<ConfigTreeNode*>::iterator my_iter;
+    list<ConfigTreeNode*>::const_iterator their_iter;
+    bool retained_children = false;
+
+    XLOG_ASSERT(_segname == them.segname());
+
+    for (my_iter = _children.begin(); my_iter != _children.end(); ) {
+	bool retain_child = true;
+	ConfigTreeNode *my_child = *my_iter;
+
+	// Be careful not to invalidate the iterator when we remove children
+	++my_iter;
+
+	for (their_iter = them.const_children().begin();
+	     their_iter != them.const_children().end();
+	     ++their_iter) {
+	    ConfigTreeNode* their_child = *their_iter;
+	    // Are the nodes the same?
+	    if ((*my_child) == (*their_child)) {
+		if (!my_child->retain_different_nodes(*their_child,
+						      retain_value_changed)) {
+		    retain_child = false;
+		}
+		break;
+	    }
+	    // Are the nodes the same leaf node, but with a changed value
+	    if (!retain_value_changed 
+		&& my_child->is_leaf() && their_child->is_leaf() 
+		&& (my_child->segname() == their_child->segname())) {
+		retain_child = false;
+		break;
+	    }
+	}
+	if (retain_child == false) {
+	    remove_child(my_child);
+	    delete my_child;
+	} else {
+	    retained_children = true;
+	}
+    }
+    return retained_children;
+}
+
+void
+ConfigTreeNode::retain_common_nodes(const ConfigTreeNode& them)
+{
+    list<ConfigTreeNode*>::iterator my_iter;
+    list<ConfigTreeNode*>::const_iterator their_iter;
+    bool retained_children = false;
+
+    XLOG_ASSERT(_segname == them.segname());
+
+    for (my_iter = _children.begin(); my_iter != _children.end(); ) {
+	bool retain_child = false;
+	ConfigTreeNode *my_child = *my_iter;
+
+	// Be careful not to invalidate the iterator when we remove children
+	++my_iter;
+
+	for (their_iter = them.const_children().begin();
+	     their_iter != them.const_children().end();
+	     ++their_iter) {
+	    ConfigTreeNode* their_child = *their_iter;
+	    if ((*my_child) == (*their_child)) {
+		my_child->retain_common_nodes(*their_child);
+		retain_child = true;
+		retained_children = true;
+		break;
+	    }
+	}
+	if (retain_child == false) {
+	    remove_child(my_child);
+	    delete my_child;
+	}
+    }
+    if (_parent != NULL && retained_children == false && is_tag()) {
+	_parent->remove_child(this);
+	delete this;
+	return;
+    }
+}
+
+
+bool
+ConfigTreeNode::expand_variable(const string& varname, 
+				      string& value) const
 {
 
     VarType type = NONE;
@@ -1335,7 +937,7 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
 
 bool
 ConfigTreeNode::expand_expression(const string& expression,
-				  string& value) const
+					string& value) const
 {
     // Expect string of form: "`" opchar + name + "`"
     // and the only definition of opchar supported is "~".
@@ -1384,8 +986,8 @@ ConfigTreeNode::find_const_varname_node(const string& varname,
     // We need both const and non-const versions of find_varname_node,
     // but don't want to write it all twice.
     //
-    return (const_cast<ConfigTreeNode*>(this))->find_varname_node(varname,
-								  type);
+    return (const_cast<ConfigTreeNode*>(this))
+	->find_varname_node(varname, type);
 }
 
 ConfigTreeNode*
@@ -1464,7 +1066,9 @@ ConfigTreeNode::find_parent_varname_node(const list<string>& var_parts,
 	}
     }
     _on_parent_path = true;
-    ConfigTreeNode *found = _parent->find_parent_varname_node(var_parts, type);
+    ConfigTreeNode *parent, *found;
+    parent = (ConfigTreeNode*)_parent;
+    found = parent->find_parent_varname_node(var_parts, type);
     _on_parent_path = false;
     return found;
 }
@@ -1524,10 +1128,11 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     // The name might refer to a child of ours
     list<string> child_var_parts = var_parts;
     child_var_parts.pop_front();
-    ConfigTreeNode* found_child;
+    ConfigTreeNode *found_child, *child;
     list<ConfigTreeNode *>::iterator ci;
     for (ci = _children.begin(); ci != _children.end(); ++ci) {
-	found_child = (*ci)->find_child_varname_node(child_var_parts, type);
+	child = (ConfigTreeNode*)(*ci);
+	found_child = child->find_child_varname_node(child_var_parts, type);
 	if (found_child != NULL)
 	    return found_child;
     }
@@ -1538,7 +1143,7 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
 
 bool
 ConfigTreeNode::split_up_varname(const string& varname, 
-				 list<string>& var_parts) const
+				       list<string>& var_parts) const
 {
     debug_msg("split up varname >%s<\n", varname.c_str());
 
@@ -1582,8 +1187,8 @@ ConfigTreeNode::join_up_varname(const list<string>& var_parts) const
 
 void
 ConfigTreeNode::expand_varname_to_matchlist(const vector<string>& parts,
-					    size_t part,
-					    list<string>& matches) const
+						  size_t part,
+						  list<string>& matches) const
 {
     bool ok = false;
 
@@ -1627,7 +1232,8 @@ ConfigTreeNode::expand_varname_to_matchlist(const vector<string>& parts,
     //
     list<ConfigTreeNode*>::const_iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	(*iter)->expand_varname_to_matchlist(parts, part + 1, matches);
+	ConfigTreeNode *child = (ConfigTreeNode*)(*iter);
+	child->expand_varname_to_matchlist(parts, part + 1, matches);
     }
 }
 
@@ -1737,88 +1343,14 @@ ConfigTreeNode::set_named_value(const string& varname, const string& value)
     _variables[varname] = value;
 }
 
-bool
-ConfigTreeNode::retain_different_nodes(const ConfigTreeNode& them,
-				       bool retain_value_changed)
+
+const string&
+ConfigTreeNode::named_value(const string& varname) const
 {
-    list<ConfigTreeNode*>::iterator my_iter;
-    list<ConfigTreeNode*>::const_iterator their_iter;
-    bool retained_children = false;
+    map<string, string>::const_iterator iter;
 
-    XLOG_ASSERT(_segname == them.segname());
-
-    for (my_iter = _children.begin(); my_iter != _children.end(); ) {
-	bool retain_child = true;
-	ConfigTreeNode *my_child = *my_iter;
-
-	// Be careful not to invalidate the iterator when we remove children
-	++my_iter;
-
-	for (their_iter = them.const_children().begin();
-	     their_iter != them.const_children().end();
-	     ++their_iter) {
-	    ConfigTreeNode* their_child = *their_iter;
-	    // Are the nodes the same?
-	    if ((*my_child) == (*their_child)) {
-		if (!my_child->retain_different_nodes(*their_child,
-						      retain_value_changed)) {
-		    retain_child = false;
-		}
-		break;
-	    }
-	    // Are the nodes the same leaf node, but with a changed value
-	    if (!retain_value_changed 
-		&& my_child->is_leaf() && their_child->is_leaf() 
-		&& (my_child->segname() == their_child->segname())) {
-		retain_child = false;
-		break;
-	    }
-	}
-	if (retain_child == false) {
-	    remove_child(my_child);
-	    delete my_child;
-	} else {
-	    retained_children = true;
-	}
-    }
-    return retained_children;
+    iter = _variables.find(varname);
+    XLOG_ASSERT(iter != _variables.end());
+    return iter->second;
 }
 
-void
-ConfigTreeNode::retain_common_nodes(const ConfigTreeNode& them)
-{
-    list<ConfigTreeNode*>::iterator my_iter;
-    list<ConfigTreeNode*>::const_iterator their_iter;
-    bool retained_children = false;
-
-    XLOG_ASSERT(_segname == them.segname());
-
-    for (my_iter = _children.begin(); my_iter != _children.end(); ) {
-	bool retain_child = false;
-	ConfigTreeNode *my_child = *my_iter;
-
-	// Be careful not to invalidate the iterator when we remove children
-	++my_iter;
-
-	for (their_iter = them.const_children().begin();
-	     their_iter != them.const_children().end();
-	     ++their_iter) {
-	    ConfigTreeNode* their_child = *their_iter;
-	    if ((*my_child) == (*their_child)) {
-		my_child->retain_common_nodes(*their_child);
-		retain_child = true;
-		retained_children = true;
-		break;
-	    }
-	}
-	if (retain_child == false) {
-	    remove_child(my_child);
-	    delete my_child;
-	}
-    }
-    if (_parent != NULL && retained_children == false && is_tag()) {
-	_parent->remove_child(this);
-	delete this;
-	return;
-    }
-}

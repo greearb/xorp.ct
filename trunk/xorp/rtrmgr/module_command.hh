@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.18 2004/05/28 22:27:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.19 2004/06/10 22:41:52 hodson Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -24,6 +24,7 @@
 class TaskManager;
 class TemplateTreeNode;
 class Validation;
+class MasterConfigTreeNode;
 
 class ModuleCommand : public Command {
 public:
@@ -47,9 +48,9 @@ public:
     const string& module_name() const { return _module_name; }
     const string& module_exec_path() const { return _module_exec_path; }
     const list<string>& depends() const { return _depends; }
-    int start_transaction(ConfigTreeNode& ctn,
+    int start_transaction(MasterConfigTreeNode& ctn,
 			  TaskManager& task_manager) const;
-    int end_transaction(ConfigTreeNode& ctn,
+    int end_transaction(MasterConfigTreeNode& ctn,
 			TaskManager& task_manager) const;
     string str() const;
 
@@ -57,7 +58,7 @@ protected:
     // void exec_complete(const XrlError& err, XrlArgs* xrl_args);
 
     void action_complete(const XrlError& err, XrlArgs* xrl_args,
-			 ConfigTreeNode *ctn, Action *action,
+			 MasterConfigTreeNode *ctn, Action *action,
 			 string cmd) const;
 
 private:

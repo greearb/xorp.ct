@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.22 2004/06/10 22:41:52 hodson Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.23 2004/12/08 22:47:27 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -23,6 +23,7 @@
 #include <set>
 
 #include "conf_tree.hh"
+#include "master_conf_tree_node.hh"
 #include "rtrmgr_error.hh"
 #include "task.hh"
 
@@ -30,12 +31,13 @@
 class CommandTree;
 class ConfTemplate;
 class RouterCLI;
+class MasterTemplateTree;
 
 class MasterConfigTree : public ConfigTree {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 
 public:
-    MasterConfigTree(const string& config_file, TemplateTree* tt,
+    MasterConfigTree(const string& config_file, MasterTemplateTree* tt,
 		     ModuleManager& mmgr, XorpClient& xclient,
 		     bool global_do_exec, bool verbose) throw (InitError);
 
@@ -71,6 +73,20 @@ public:
     ModuleManager& module_manager() const {
 	return _task_manager.module_manager();
     }
+
+    inline MasterConfigTreeNode& root_node() const {
+	return (MasterConfigTreeNode&)_root_node;
+    }
+    inline const MasterConfigTreeNode& const_root_node() const {
+	return (const MasterConfigTreeNode&)_root_node;
+    }
+    inline MasterConfigTreeNode* find_node(const list<string>& path) {
+	return (MasterConfigTreeNode*)(ConfigTree::find_node(path));
+    }
+    inline MasterConfigTreeNode* find_config_module(const string& module_name){
+	return (MasterConfigTreeNode*)(ConfigTree::find_config_module(module_name));
+    }
+    
 
 private:
     void diff_configs(const ConfigTree& new_tree, ConfigTree& delta_tree,

@@ -54,11 +54,14 @@ static int yygrowstack();
 
 #include "template_tree_node.hh"
 #include "template_tree.hh"
+extern void add_cmd_adaptor(char *cmd, TemplateTree* tt);
+extern void add_cmd_action_adaptor(const string& cmd, 
+			    const list<string>& action, TemplateTree* tt);
 
 /* XXX: sigh, the -p flag to yacc should do this for us */
 #define yystacksize tpltstacksize
 #define yysslim tpltsslim
-#line 62 "y.tplt_tab.c"
+#line 65 "y.tplt_tab.c"
 #define YYERRCODE 256
 #define UPLEVEL 257
 #define DOWNLEVEL 258
@@ -290,7 +293,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 230 "template.yy"
+#line 233 "template.yy"
 
 extern char *lstr;
 extern char *vstr;
@@ -357,7 +360,7 @@ add_cmd(char *cmd)
 {
     lastsymbol = cmd;
 
-    tt->add_cmd(cmd);
+    add_cmd_adaptor(cmd, tt);
     current_cmd = cmd;
     free(cmd);
     cmd_list.clear();
@@ -384,7 +387,7 @@ prepend_cmd(char *s)
 static void
 end_cmd()
 {
-    tt->add_cmd_action(current_cmd, cmd_list);
+    add_cmd_action_adaptor(current_cmd, cmd_list, tt);
     cmd_list.clear();
 }
 
@@ -429,7 +432,7 @@ parse_template() throw (ParseError)
     if (tpltparse() != 0)
 	tplterror("unknown error");
 }
-#line 433 "y.tplt_tab.c"
+#line 436 "y.tplt_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -625,170 +628,170 @@ yyreduce:
     switch (yyn)
     {
 case 5:
-#line 60 "template.yy"
+#line 63 "template.yy"
 { push_path(); }
 break;
 case 6:
-#line 61 "template.yy"
+#line 64 "template.yy"
 { push_path(); }
 break;
 case 7:
-#line 64 "template.yy"
+#line 67 "template.yy"
 {
 			extend_path(yyvsp[-1], true);
 			extend_path(yyvsp[0], false);
 		}
 break;
 case 8:
-#line 68 "template.yy"
+#line 71 "template.yy"
 {
 			extend_path(yyvsp[-3], true);
 			extend_path(yyvsp[-2], false);
 		}
 break;
 case 9:
-#line 74 "template.yy"
+#line 77 "template.yy"
 { extend_path(yyvsp[0], false); }
 break;
 case 10:
-#line 75 "template.yy"
+#line 78 "template.yy"
 { extend_path(yyvsp[0], false); }
 break;
 case 12:
-#line 79 "template.yy"
+#line 82 "template.yy"
 { tplt_type = NODE_TEXT; }
 break;
 case 13:
-#line 80 "template.yy"
+#line 83 "template.yy"
 { tplt_type = NODE_INT; }
 break;
 case 14:
-#line 81 "template.yy"
+#line 84 "template.yy"
 { tplt_type = NODE_UINT; }
 break;
 case 15:
-#line 82 "template.yy"
+#line 85 "template.yy"
 { tplt_type = NODE_BOOL; }
 break;
 case 16:
-#line 83 "template.yy"
+#line 86 "template.yy"
 { tplt_type = NODE_TOGGLE; }
 break;
 case 17:
-#line 84 "template.yy"
+#line 87 "template.yy"
 { tplt_type = NODE_IPV4; }
 break;
 case 18:
-#line 85 "template.yy"
+#line 88 "template.yy"
 { tplt_type = NODE_IPV4NET; }
 break;
 case 19:
-#line 86 "template.yy"
+#line 89 "template.yy"
 { tplt_type = NODE_IPV6; }
 break;
 case 20:
-#line 87 "template.yy"
+#line 90 "template.yy"
 { tplt_type = NODE_IPV6NET; }
 break;
 case 21:
-#line 88 "template.yy"
+#line 91 "template.yy"
 { tplt_type = NODE_MACADDR; }
 break;
 case 22:
-#line 91 "template.yy"
+#line 94 "template.yy"
 {
 			tplt_type = NODE_TEXT;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 23:
-#line 95 "template.yy"
+#line 98 "template.yy"
 {
 			tplt_type = NODE_INT;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 24:
-#line 99 "template.yy"
+#line 102 "template.yy"
 {
 			tplt_type = NODE_UINT;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 25:
-#line 103 "template.yy"
+#line 106 "template.yy"
 {
 			tplt_type = NODE_BOOL;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 26:
-#line 107 "template.yy"
+#line 110 "template.yy"
 {
 			tplt_type = NODE_TOGGLE;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 27:
-#line 111 "template.yy"
+#line 114 "template.yy"
 {
 			tplt_type = NODE_IPV4;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 28:
-#line 115 "template.yy"
+#line 118 "template.yy"
 {
 			tplt_type = NODE_IPV4NET;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 29:
-#line 119 "template.yy"
+#line 122 "template.yy"
 {
 			tplt_type = NODE_IPV6;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 30:
-#line 123 "template.yy"
+#line 126 "template.yy"
 {
 			tplt_type = NODE_IPV6NET;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 31:
-#line 127 "template.yy"
+#line 130 "template.yy"
 {
 			tplt_type = NODE_MACADDR;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 32:
-#line 133 "template.yy"
+#line 136 "template.yy"
 { pop_path(); }
 break;
 case 40:
-#line 149 "template.yy"
-{ terminal(yyvsp[-3]); }
-break;
-case 41:
 #line 152 "template.yy"
 { terminal(yyvsp[-3]); }
 break;
+case 41:
+#line 155 "template.yy"
+{ terminal(yyvsp[-3]); }
+break;
 case 46:
-#line 165 "template.yy"
+#line 168 "template.yy"
 { add_cmd(yyvsp[0]); }
 break;
 case 49:
-#line 172 "template.yy"
+#line 175 "template.yy"
 {
 			prepend_cmd(yyvsp[-1]);
 			end_cmd();
 		}
 break;
 case 50:
-#line 176 "template.yy"
+#line 179 "template.yy"
 {
 			append_cmd(yyvsp[-3]);
 			append_cmd(yyvsp[-2]);
@@ -798,7 +801,7 @@ case 50:
 		}
 break;
 case 51:
-#line 183 "template.yy"
+#line 186 "template.yy"
 { /* e.g.: set FOOBAR ipv4 */
 			append_cmd(yyvsp[-2]);
 			append_cmd(yyvsp[-1]);
@@ -807,7 +810,7 @@ case 51:
 		}
 break;
 case 52:
-#line 189 "template.yy"
+#line 192 "template.yy"
 {
 			append_cmd(yyvsp[-1]);
 			append_cmd(yyvsp[0]);
@@ -815,7 +818,7 @@ case 52:
 		}
 break;
 case 53:
-#line 194 "template.yy"
+#line 197 "template.yy"
 {
 			append_cmd(yyvsp[-2]);
 			append_cmd(yyvsp[-1]);
@@ -824,45 +827,45 @@ case 53:
 		}
 break;
 case 54:
-#line 200 "template.yy"
+#line 203 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 			end_cmd();
 		}
 break;
 case 55:
-#line 204 "template.yy"
+#line 207 "template.yy"
 {
 			prepend_cmd(yyvsp[-1]);
 			end_cmd();
 		}
 break;
 case 56:
-#line 208 "template.yy"
+#line 211 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 			end_cmd();
 		}
 break;
 case 57:
-#line 215 "template.yy"
-{
-			append_cmd(yyvsp[0]);
-		}
-break;
-case 58:
 #line 218 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 		}
 break;
+case 58:
+#line 221 "template.yy"
+{
+			append_cmd(yyvsp[0]);
+		}
+break;
 case 59:
-#line 223 "template.yy"
+#line 226 "template.yy"
 {
 			tplterror("syntax error");
 		}
 break;
-#line 866 "y.tplt_tab.c"
+#line 869 "y.tplt_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

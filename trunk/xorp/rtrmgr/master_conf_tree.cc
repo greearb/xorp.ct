@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.39 2004/11/01 21:48:02 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.40 2004/11/05 03:30:12 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -28,8 +28,8 @@
 #include "module_command.hh"
 #include "rtrmgr_error.hh"
 #include "template_commands.hh"
-#include "template_tree.hh"
-#include "template_tree_node.hh"
+#include "master_template_tree.hh"
+#include "master_template_tree_node.hh"
 #include "util.hh"
 
 
@@ -38,7 +38,7 @@
  *************************************************************************/
 
 MasterConfigTree::MasterConfigTree(const string& config_file,
-				   TemplateTree* tt,
+				   MasterTemplateTree* tt,
 				   ModuleManager& mmgr,
 				   XorpClient& xclient,
 				   bool global_do_exec,
@@ -169,7 +169,7 @@ MasterConfigTree::find_changed_modules() const
     debug_msg("Find changed modules\n");
 
     set<string> changed_modules;
-    _root_node.find_changed_modules(changed_modules);
+    root_node().find_changed_modules(changed_modules);
 
     list<string> ordered_modules;
     order_module_list(changed_modules, ordered_modules);
@@ -183,7 +183,7 @@ MasterConfigTree::find_active_modules() const
     debug_msg("Find active modules\n");
 
     set<string> active_modules;
-    _root_node.find_active_modules(active_modules);
+    root_node().find_active_modules(active_modules);
 
     list<string> ordered_modules;
     order_module_list(active_modules, ordered_modules);
@@ -200,13 +200,13 @@ MasterConfigTree::find_inactive_modules() const
     list<string> ordered_all_modules;
 
     debug_msg("All modules:\n");
-    _root_node.find_all_modules(all_modules);
+    root_node().find_all_modules(all_modules);
     order_module_list(all_modules, ordered_all_modules);
 
     set<string> active_modules;
     list<string> ordered_active_modules;
     debug_msg("Active modules:\n");
-    _root_node.find_active_modules(active_modules);
+    root_node().find_active_modules(active_modules);
     order_module_list(active_modules, ordered_active_modules);
 
     // Remove things that are common to both lists
@@ -409,9 +409,9 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
     _task_manager.set_do_exec(false);
     _commit_cb = cb;
 
-    _root_node.initialize_commit();
+    root_node().initialize_commit();
 
-    if (_root_node.check_config_tree(result) == false) {
+    if (root_node().check_config_tree(result) == false) {
 	// Something went wrong - return the error message.
 	_commit_in_progress = false;
 	cb->dispatch(false, result);
@@ -430,7 +430,7 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
     }
 
     bool needs_update = false;
-    if (_root_node.commit_changes(_task_manager,
+    if (root_node().commit_changes(_task_manager,
 				  /* do_commit = */ false,
 				  0, 0,
 				  result,
@@ -475,7 +475,7 @@ MasterConfigTree::commit_changes_pass2()
 
     _commit_in_progress = true;
 
-    if (_root_node.check_config_tree(result) == false) {
+    if (root_node().check_config_tree(result) == false) {
 	XLOG_ERROR("Commit failed in deciding startups");
 	_commit_in_progress = false;
 	_commit_cb->dispatch(false, result);
@@ -493,7 +493,7 @@ MasterConfigTree::commit_changes_pass2()
     _task_manager.reset();
     _task_manager.set_do_exec(true);
 
-    _root_node.initialize_commit();
+    root_node().initialize_commit();
     // Sort the changes in order of module dependencies
     for (iter = changed_modules.begin();
 	 iter != changed_modules.end();
@@ -507,7 +507,7 @@ MasterConfigTree::commit_changes_pass2()
     }
 
     bool needs_update = false;
-    if (!_root_node.commit_changes(_task_manager,
+    if (!root_node().commit_changes(_task_manager,
 				   /* do_commit = */ true,
 				   0, 0,
 				   result,
@@ -547,12 +547,12 @@ bool
 MasterConfigTree::check_commit_status(string& result)
 {
     debug_msg("check_commit_status\n");
-    bool success = _root_node.check_commit_status(result);
+    bool success = root_node().check_commit_status(result);
 
     if (success) {
 	// If the commit was successful, clear all the temporary state.
 	debug_msg("commit was successful, finalizing...\n");
-	_root_node.finalize_commit();
+	root_node().finalize_commit();
 	debug_msg("finalizing done\n");
     }
     return success;
@@ -563,7 +563,7 @@ MasterConfigTree::discard_changes()
 {
     debug_msg("##############################################################\n");
     debug_msg("MasterConfigTree::discard_changes\n");
-    string result = _root_node.discard_changes(0, 0);
+    string result = root_node().discard_changes(0, 0);
     debug_msg("##############################################################\n");
     return result;
 }
@@ -590,8 +590,8 @@ MasterConfigTree::mark_subtree_for_deletion(const list<string>& path_segments,
 void
 MasterConfigTree::delete_entire_config()
 {
-    _root_node.mark_subtree_for_deletion(0);
-    _root_node.undelete();
+    root_node().mark_subtree_for_deletion(0);
+    root_node().undelete();
 
     // We don't need a verification pass - this isn't allowed to fail.
     commit_changes_pass2();
@@ -885,13 +885,13 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     diff_configs(new_tree, delta_tree, deletion_tree);
 
     string response;
-    if (! _root_node.merge_deltas(user_id, delta_tree.const_root_node(),
+    if (! root_node().merge_deltas(user_id, delta_tree.const_root_node(),
 				  /* provisional change */ true, response)) {
 	discard_changes();
 	errmsg = response;
 	return false;
     }
-    if (! _root_node.merge_deletions(user_id, deletion_tree.const_root_node(),
+    if (! root_node().merge_deletions(user_id, deletion_tree.const_root_node(),
 				     /* provisional change */ true,
 				     response)) {
 	discard_changes();
@@ -972,3 +972,5 @@ MasterConfigTree::module_shutdown(const string& module_name,
 }
 
 #endif // 0
+
+
