@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.14 2003/08/07 01:07:58 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.15 2003/08/07 02:41:44 pavlin Exp $"
 
 
 //
@@ -61,22 +61,23 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
       _querier_addr(mld6igmp_node.family()),		// XXX: ANY
       _dummy_flag(false)
 {
+    XLOG_ASSERT(proto_is_igmp() || proto_is_mld6());
+    
     //
     // TODO: when more things become classes, most of this init should go away
     _buffer_send = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     _proto_flags = 0;
     _startup_query_count = 0;
-    
+
     // Set the protocol version
     if (proto_is_igmp()) {
 	set_proto_version_default(IGMP_VERSION_DEFAULT);
-    } else {
-#ifdef HAVE_IPV6
-	set_proto_version_default(MLD_VERSION_DEFAULT);
-#else
-	XLOG_UNREACHABLE();
-#endif
     }
+#ifdef HAVE_IPV6
+    if (proto_is_mld6()) {
+	set_proto_version_default(MLD_VERSION_DEFAULT);
+    }
+#endif
     set_proto_version(proto_version_default());
 }
 
@@ -227,8 +228,9 @@ Mld6igmpVif::start()
 	    mld6igmp_node().eventloop().new_oneoff_after(
 		TimeVal(IGMP_STARTUP_QUERY_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
-    } else {
+    }
 #ifdef HAVE_IPV6
+    if (proto_is_mld6()) {
 	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
 		      (MLD_QUERY_RESPONSE_INTERVAL * MLD_TIMER_SCALE),
@@ -238,8 +240,8 @@ Mld6igmpVif::start()
 	    mld6igmp_node().eventloop().new_oneoff_after(
 		TimeVal(MLD_STARTUP_QUERY_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
-#endif // HAVE_IPV6
     }
+#endif // HAVE_IPV6
     
     return (XORP_OK);
 }
