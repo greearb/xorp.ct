@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.28 2004/03/07 20:11:19 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.29 2004/03/08 15:51:29 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -267,7 +267,25 @@ For example:\n\
 \n\
 See also: \"load\".";
 
-    _help_long_c["set"] = "Set the value of a parameter";
+    _help_long_c["set"] = "\
+The \"set\" command allows you to set or change configuration parameters. \n\
+For example, if the configuration contained:\n\
+\n\
+   protocols {\n\
+       bgp {\n\
+          peer 10.0.0.1 {\n\
+             as 65001 \n\
+          }\n\
+   }\n\
+\n\
+Then typing \"set protocols bgp peer 10.0.0.1 as 65002\" would change \n\
+the AS number of the BGP peer from 65001 to 65002.  Only parameters \n\
+(leaves in the configuration tree) can be set using the \"set\" \n\
+command.  New parts of the configuration tree such as a new BGP peer \n\
+are created by directly typing them in configuration mode.\n\
+\n\
+See also \"edit\".";
+
     _help_long_c["show"] = "Show the value of a parameter";
 
     _help_long_c["top"] = "\
