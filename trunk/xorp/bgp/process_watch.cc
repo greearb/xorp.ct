@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/process_watch.cc,v 1.1 2003/06/17 06:44:51 atanu Exp $"
+#ident "$XORP: xorp/bgp/process_watch.cc,v 1.2 2003/06/17 16:57:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
+#include "libxorp/exceptions.hh"
+#include "exceptions.hh"
 #include "process_watch.hh"
 
 ProcessWatch::ProcessWatch(XrlStdRouter *xrl_router, EventLoop& eventloop,
@@ -81,8 +83,7 @@ ProcessWatch::death(const string& target_class, const string& target_instance)
 void
 ProcessWatch::finder_death() const
 {
-    XLOG_ERROR("The finder died");
-    ::exit(-1);
+    xorp_throw(NoFinder, "");
 }
 
 bool

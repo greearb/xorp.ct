@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/exceptions.hh,v 1.2 2003/01/26 20:51:17 pavlin Exp $
+// $XORP: xorp/bgp/exceptions.hh,v 1.3 2003/03/10 23:19:58 hodson Exp $
 
 #ifndef __BGP_EXCEPTIONS_HH__
 #define __BGP_EXCEPTIONS_HH__
@@ -69,4 +69,12 @@ private:
     const uint8_t *	_data;
     const size_t	_len;
 };
+
+class NoFinder : public XorpReasonedException {
+public:
+    NoFinder(const char* file, size_t line, const string init_why = "")
+ 	: XorpReasonedException("NoFinder", file, line, init_why)
+    {}
+};
+
 #endif // __BGP_EXCEPTIONS_HH__
