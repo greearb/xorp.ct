@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.10 2003/04/01 23:47:22 pavlin Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.11 2003/04/02 00:36:44 mjh Exp $
 #
 
 Priority:
@@ -155,7 +155,9 @@ Longer Term tasks
 
 ================================ Next Release ================================
 * Next release (xorp-0.3): May 15, 2003
-  - ??
+  - Open CVSWEB for public
+  - Add a wishlist of tasks that other people may choose to do
+  - Add a pointer from the web page to xorp/RELEASE_NOTES
 
 ================================ Next Stable Release =========================
 * Next stable release (xorp-1.0): ?? ??, 200?
