@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.18 2004/11/11 07:48:21 bms Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.19 2004/11/30 20:08:08 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -432,16 +432,6 @@ public:
     virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
 private:
-    /**
-     * Lookup a route by destination address.
-     *
-     * @param dst host address to resolve.
-     * @param fte return-by-reference forwarding table entry.
-     *
-     * @return true on success, otherwise false.
-     */
-    virtual bool lookup_route_by_dest(const IPvX& dst, FteX& fte);
-
     ClickSocketReader	_cs_reader;
 };
 
