@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.5 2004/02/28 04:38:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.6 2004/06/10 22:40:57 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -382,8 +382,8 @@ main(int argc, char* const* argv)
     IPv4 dst, src;
     switch (argc) {
     case 0:
-	src = IPv4("127.0.0.1");
-	dst = IPv4("127.0.0.1");
+	src = IPv4::LOOPBACK();
+	dst = IPv4::LOOPBACK();
 	break;
     case 1:
 	{

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.5 2004/06/10 22:40:57 hodson Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.6 2004/09/02 03:16:00 pavlin Exp $"
 
 #include <sysexits.h>
 
@@ -532,12 +532,10 @@ remove_address(TestAddressTable* ta, IPv4 addr)
 int
 test_main(IPv4 finder_host, uint16_t finder_port)
 {
-    const IPv4 localhost("127.0.0.1");
-
     EventLoop e;
     TestAddressTable tat;
 
-    tat.add_address(localhost);
+    tat.add_address(IPv4::LOOPBACK());
 
     vector<XorpTimer> ev;	// Vector for timed events
     bool eflag(false);		// Error flag set by timed events
@@ -568,7 +566,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(1500,
 				       callback(bind_test_socket, &udp1,
-						localhost, uint16_t(5000),
+						IPv4::LOOPBACK(), uint16_t(5000),
 						&eflag)));
 
     //
@@ -582,7 +580,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(2500,
 				       callback(bind_test_socket, &udp2,
-						localhost, uint16_t(5001),
+						IPv4::LOOPBACK(), uint16_t(5001),
 						&eflag)));
 
     //
@@ -590,7 +588,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     //
     ev.push_back(e.new_oneoff_after_ms(3000,
 				       callback(start_sending, &udp2,
-						localhost, uint16_t(5000))));
+						IPv4::LOOPBACK(), uint16_t(5000))));
 
     ev.push_back(e.new_oneoff_after_ms(10000,
 				       callback(stop_sending, &udp2)));
@@ -600,7 +598,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     //
     ev.push_back(e.new_oneoff_after_ms(10000,
 				       callback(start_sending, &udp1,
-						localhost, uint16_t(5001))));
+						IPv4::LOOPBACK(), uint16_t(5001))));
 
     ev.push_back(e.new_oneoff_after_ms(12000,
 				       callback(stop_sending, &udp1)));
@@ -646,12 +644,12 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 						false, &eflag)));
 
     //
-    // Invalidate localhost, which should cause udp2 to be closed by
+    // Invalidate IPv4::LOOPBACK(), which should cause udp2 to be closed by
     // server.
     //
     ev.push_back(e.new_oneoff_after_ms(15000,
 				       callback(remove_address,
-						&tat, localhost)));
+						&tat, IPv4::LOOPBACK())));
 
     //
     // Check udp2 is closed.

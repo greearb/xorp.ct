@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.1 2004/10/21 00:44:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.2 2004/10/21 07:30:03 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -35,7 +35,7 @@
 uint16_t ClickSocket::_instance_cnt = 0;
 pid_t ClickSocket::_pid = getpid();
 
-const IPv4 ClickSocket::DEFAULT_USER_CLICK_CONTROL_ADDRESS = IPv4("127.0.0.1");
+const IPv4 ClickSocket::DEFAULT_USER_CLICK_CONTROL_ADDRESS = IPv4::LOOPBACK();
 
 //
 // Click Sockets communication with Click
