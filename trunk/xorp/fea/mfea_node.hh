@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.16 2004/04/01 12:22:06 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.17 2004/04/29 23:32:19 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -28,8 +28,12 @@
 
 #include "libxorp/ipvx.hh"
 #include "libxorp/config_param.hh"
+
 #include "libproto/proto_node.hh"
 #include "libproto/proto_register.hh"
+
+#include "libfeaclient/ifmgr_xrl_mirror.hh"
+
 #include "mrt/mrib_table.hh"
 #include "mrt/mifset.hh"
 #include "mfea_dataflow.hh"
@@ -58,7 +62,9 @@ class FtiConfig;	// TODO: XXX: PAVPAVPAV: temporary here!!
  * There should be one node per MFEA instance. There should be
  * one instance per address family.
  */
-class MfeaNode : public ProtoNode<MfeaVif>, public ServiceChangeObserverBase {
+class MfeaNode : public ProtoNode<MfeaVif>,
+		 public IfMgrHintObserver,
+		 public ServiceChangeObserverBase {
 public:
     /**
      * Constructor for a given address family, module ID, and event loop.
@@ -1290,6 +1296,13 @@ public:
      */
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
 
+protected:
+    //
+    // IfMgrHintObserver methods
+    //
+    void tree_complete();
+    void updates_made();
+
 private:
     /**
      * A method invoked when the status of a service changes.
@@ -1301,6 +1314,47 @@ private:
     void status_change(ServiceBase*  service,
 		       ServiceStatus old_status,
 		       ServiceStatus new_status);
+
+    /**
+     * Get a reference to the service base of the interface manager.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @return a reference to the service base of the interface manager.
+     */
+    virtual const ServiceBase* ifmgr_mirror_service_base() const = 0;
+
+    /**
+     * Get a reference to the interface manager tree.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @return a reference to the interface manager tree.
+     */
+    virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
+
+    /**
+     * Initiate startup of the interface manager.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @return true on success, false on failure.
+     */
+    virtual bool ifmgr_startup() = 0;
+
+    /**
+     * Initiate shutdown of the interface manager.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @return true on success, false on failure.
+     */
+    virtual bool ifmgr_shutdown() = 0;
+
 
     void mrib_table_read_timer_timeout();
     int add_pim_register_vif();
@@ -1327,7 +1381,12 @@ private:
     ProtoRegister	_proto_register;
     ProtoRegister	_kernel_signal_messages_register;
     ProtoRegister	_mrib_messages_register;
-    
+
+    //
+    // A local copy with the interface state information
+    //
+    IfMgrIfTree		_iftree;
+
     //
     // Debug and test-related state
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.12 2004/04/10 07:50:10 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.13 2004/04/29 23:32:20 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -25,13 +25,15 @@
 #include <string>
 
 #include "libxorp/xlog.h"
+
 #include "libxipc/xrl_router.hh"
+
 #include "xrl/targets/mfea_base.hh"
 #include "xrl/interfaces/mfea_client_xif.hh"
 #include "xrl/interfaces/cli_manager_xif.hh"
+
 #include "mfea_node.hh"
 #include "mfea_node_cli.hh"
-#include "xrl_mfea_vif_manager.hh"
 
 
 class EventLoop;
@@ -48,6 +50,7 @@ public:
 		xorp_module_id module_id,
 		EventLoop& eventloop,
 		XrlRouter* xrl_router,
+		const string& fea_target,
 		FtiConfig& ftic);
     virtual ~XrlMfeaNode();
 
@@ -647,36 +650,14 @@ protected:
 
     XrlCmdError mfea_0_1_reset_mrib_table_default_metric();
 
-
-    XrlCmdError fea_ifmgr_client_0_1_interface_update(
-	// Input values, 
-	const string&	ifname, 
-	const uint32_t&	event);
-
-    XrlCmdError fea_ifmgr_client_0_1_vif_update(
-	// Input values, 
-	const string&	ifname, 
-	const string&	vifname, 
-	const uint32_t&	event);
-
-    XrlCmdError fea_ifmgr_client_0_1_vifaddr4_update(
-	// Input values, 
-	const string&	ifname, 
-	const string&	vifname, 
-	const IPv4&	addr, 
-	const uint32_t&	event);
-
-    XrlCmdError fea_ifmgr_client_0_1_vifaddr6_update(
-	// Input values, 
-	const string&	ifname, 
-	const string&	vifname, 
-	const IPv6&	addr, 
-	const uint32_t&	event);
-
-    XrlCmdError fea_ifmgr_client_0_1_updates_completed();
-
 private:
-    
+
+    bool ifmgr_startup();
+    bool ifmgr_shutdown();
+
+    const ServiceBase* ifmgr_mirror_service_base() const { return dynamic_cast<const ServiceBase*>(&_ifmgr); }
+    const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
+
     //
     // Protocol node methods
     //
@@ -916,8 +897,9 @@ private:
 
     const string		_class_name;
     const string		_instance_name;
+    const string		_fea_target;
 
-    XrlMfeaVifManager		_xrl_mfea_vif_manager;	// The XRL Vif manager
+    IfMgrXrlMirror		_ifmgr;
 
     XrlMfeaClientV0p1Client	_xrl_mfea_client_client;
     XrlCliManagerV0p1Client	_xrl_cli_manager_client;

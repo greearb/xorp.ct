@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.5 2004/02/26 08:47:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.6 2004/04/29 23:32:19 pavlin Exp $"
 
 
 //
@@ -37,9 +37,19 @@
 #include "fticonfig.hh"
 #include "ifmanager.hh"
 #include "ifconfig.hh"
+#include "ifconfig_addr_table.hh"
+#include "libfeaclient_bridge.hh"
 #include "xrl_ifupdate.hh"
 #include "xrl_mfea_node.hh"
+#include "xrl_socket_server.hh"
 #include "xrl_target.hh"
+
+
+#ifndef FEA_DUMMY
+static bool is_dummy = false;
+#else
+static bool is_dummy = true;
+#endif
 
 
 //
@@ -146,35 +156,65 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
     XrlStdRouter xrl_std_router_fea(eventloop,
 				    xorp_module_name(AF_INET, XORP_MODULE_FEA),
 				    finder_hostname, finder_port);
+
     //
-    // 1. FtiConfig
+    // FtiConfig
     //
     FtiConfig fticonfig(eventloop);
+    if (is_dummy)
+	fticonfig.set_dummy();
     fticonfig.start();
 
     //
-    // 2. Interface Configurator and reporters
+    // Interface Configurator and reporters
     //
-    XrlIfConfigUpdateReporter ifreporter(xrl_std_router_fea);
-    IfConfigErrorReporter iferr;
+    XrlIfConfigUpdateReporter xrl_ifc_reporter(xrl_std_router_fea);
+    LibFeaClientBridge        lfc_bridge(xrl_std_router_fea);
 
-    IfConfig ifconfig(eventloop, ifreporter, iferr);
+    IfConfigUpdateReplicator ifc_repl;
+    ifc_repl.add_reporter(&xrl_ifc_reporter);
+    ifc_repl.add_reporter(&lfc_bridge);
+
+    IfConfigErrorReporter if_err;
+
+    IfConfig ifconfig(eventloop, ifc_repl, if_err);
+    if (is_dummy)
+	ifconfig.set_dummy();
     ifconfig.start();
 
     //
-    // 3. Interface manager
+    // Interface manager
     //
     InterfaceManager ifm(ifconfig);
 
     //
-    // 4. Raw Socket TODO
+    // Hook IfTree of interface manager into libfeaclient
+    // so it can read config to determine deltas
+    //
+    const IfTree& iftree = ifm.iftree();
+    lfc_bridge.set_iftree(&iftree);
+
+    //
+    // Raw Socket TODO
     //
 
     //
-    // 5. XRL Target
+    // Xrl Socket Server and related components
     //
-    XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea, fticonfig,
-				ifm, ifreporter, 0);
+    IfConfigAddressTable ifc_addr_table(iftree);
+    ifc_repl.add_reporter(&ifc_addr_table);
+    XrlSocketServer xss(eventloop,
+			ifc_addr_table,
+			xrl_std_router_fea.finder_address(),
+			xrl_std_router_fea.finder_port());
+    xss.startup();
+
+    //
+    // XRL Target
+    //
+    XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea,
+				fticonfig, ifm, xrl_ifc_reporter,
+				0, &lfc_bridge, &xss);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
 
     //
@@ -188,6 +228,7 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
 			       XORP_MODULE_MFEA,
 			       eventloop,
 			       &xrl_std_router_mfea4,
+			       xorp_module_name(AF_INET, XORP_MODULE_FEA),
 			       fticonfig);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea4);
 
@@ -199,6 +240,7 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
     XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA,
 			       eventloop,
 			       &xrl_std_router_mfea6,
+			       xorp_module_name(AF_INET6, XORP_MODULE_FEA),
 			       fticonfig);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea6);
 #endif // HAVE_IPV6

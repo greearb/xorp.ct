@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.22 2004/05/04 00:08:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.23 2004/05/05 06:21:18 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -34,12 +34,14 @@
 #include "xrl_socket_server.hh"
 #include "xrl_target.hh"
 
+
 static const char* xrl_entity = "fea";
 #ifndef FEA_DUMMY
 static bool is_dummy = false;
 #else
 static bool is_dummy = true;
 #endif
+
 
 /**
  * Print the program usage.
@@ -196,7 +198,9 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 						       XORP_MODULE_MFEA),
 				      finder_hostname, finder_port);
     XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA, eventloop,
-			       &xrl_std_router_mfea4, fticonfig);
+			       &xrl_std_router_mfea4,
+			       xorp_module_name(AF_INET, XORP_MODULE_FEA),
+			       fticonfig);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea4);
 
 #ifdef HAVE_IPV6_MULTICAST
@@ -205,7 +209,9 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 						       XORP_MODULE_MFEA),
 				      finder_hostname, finder_port);
     XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA, eventloop,
-			       &xrl_std_router_mfea6, fticonfig);
+			       &xrl_std_router_mfea6,
+			       xorp_module_name(AF_INET6, XORP_MODULE_FEA),
+			       fticonfig);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea6);
 #endif // HAVE_IPV6_MULTICAST
 
