@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.2 2003/05/29 21:17:15 mjh Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.3 2003/06/01 21:37:28 hodson Exp $"
 
 #include <list>
 #include <vector>
@@ -423,13 +423,17 @@ assert_xrl_target_count(list<AnXrlTarget*>* store,
 //
 
 static int
-test_main()
+test_main(IPv4 finder_addr, uint16_t finder_port, bool use_internal_finder)
 {
     EventLoop e;
-    IPv4      test_host(FINDER_DEFAULT_HOST);
-    uint16_t  test_port = 16600;
 
-    FinderServer f(e, test_port, test_host);
+    FinderServer* fs = 0;
+    if (use_internal_finder) {
+	fs = new FinderServer(e, finder_port, finder_addr);
+    } else {
+	verbose_log("Using external Finder\n");
+    }
+
     FinderEventObserverPackage* pfeo = 0;
 
     list<AnXrlTarget*> tgt_store;
@@ -451,7 +455,7 @@ test_main()
     // Create observer, clean up observer
     //
 
-    SPACED_EVENT(create_observer, &e, &pfeo, test_host, test_port);
+    SPACED_EVENT(create_observer, &e, &pfeo, finder_addr, finder_port);
 
     SPACED_EVENT(assert_observer_ready, &pfeo);
 
@@ -474,7 +478,7 @@ test_main()
     // observables, spawn an observable, clean it up, repeat over,
     // over then clean up observer.
     //
-    SPACED_EVENT(create_observer, &e, &pfeo, test_host, test_port);
+    SPACED_EVENT(create_observer, &e, &pfeo, finder_addr, finder_port);
 
     SPACED_EVENT(assert_observer_ready, &pfeo);
 
@@ -483,16 +487,19 @@ test_main()
     SPACED_EVENT(assert_observer_watching,&pfeo, "class_a");
 
     for (uint32_t i = 0; i < burst_cnt; i++) {
-	SPACED_EVENT(create_xrl_target, &e, test_host, test_port,
+	SPACED_EVENT(create_xrl_target, &e, finder_addr, finder_port,
 		     "class_a", &tgt_store);
 
-	SPACED_EVENT(assert_observer_class_instance_count, &pfeo, "class_a", 1u);
+	SPACED_EVENT(assert_observer_class_instance_count,
+		     &pfeo, "class_a", 1u);
+
 	SPACED_EVENT(remove_oldest_xrl_target, &tgt_store);
 
-	SPACED_EVENT(assert_observer_class_instance_count, &pfeo, "class_a", 0u);
+	SPACED_EVENT(assert_observer_class_instance_count,
+		     &pfeo, "class_a", 0u);
     }
 
-    SPACED_EVENT(create_xrl_target, &e, test_host, test_port,
+    SPACED_EVENT(create_xrl_target, &e, finder_addr, finder_port,
 			  "class_b", &tgt_store);
 
     SPACED_EVENT(assert_observer_class_instance_count, &pfeo, "class_b", 0u);
@@ -513,7 +520,7 @@ test_main()
     // Start an observer, spawn a group of observables, clean up
     // group of observables, clean up observer.
     //
-    SPACED_EVENT(create_observer, &e, &pfeo, test_host, test_port);
+    SPACED_EVENT(create_observer, &e, &pfeo, finder_addr, finder_port);
 
     SPACED_EVENT(assert_observer_ready, &pfeo);
 
@@ -522,7 +529,7 @@ test_main()
     SPACED_EVENT(assert_observer_watching,&pfeo, "class_a");
 
     for (uint32_t i = 1; i <= burst_cnt; i++) {
-	SPACED_EVENT(create_xrl_target, &e, test_host, test_port,
+	SPACED_EVENT(create_xrl_target, &e, finder_addr, finder_port,
 		     "class_a", &tgt_store);
 
 	SPACED_EVENT(assert_observer_class_instance_count, &pfeo,
@@ -554,11 +561,11 @@ test_main()
     //
 
     for (uint32_t i = 1; i <= burst_cnt; i++) {
-	SPACED_EVENT(create_xrl_target, &e, test_host, test_port,
+	SPACED_EVENT(create_xrl_target, &e, finder_addr, finder_port,
 		     "class_a", &tgt_store);
     }
 
-    SPACED_EVENT(create_observer, &e, &pfeo, test_host, test_port);
+    SPACED_EVENT(create_observer, &e, &pfeo, finder_addr, finder_port);
 
     SPACED_EVENT(assert_observer_ready, &pfeo);
 
@@ -574,7 +581,7 @@ test_main()
     SPACED_EVENT(assert_observer_watching,&pfeo, "class_b");
 
     for (uint32_t i = 1; i <= burst_cnt; i++) {
-	SPACED_EVENT(create_xrl_target, &e, test_host, test_port,
+	SPACED_EVENT(create_xrl_target, &e, finder_addr, finder_port,
 		     "class_b", &tgt_store);
     }
 
@@ -598,6 +605,7 @@ test_main()
     while (end_flag == false) {
 	e.run();
     }
+    if (fs) delete fs;
     return 0;
 }
 
@@ -632,20 +640,69 @@ static void
 usage(const char* progname)
 {
     print_program_info(stderr);
-    fprintf(stderr, "usage: %s [-v] [-h]\n", progname);
+    fprintf(stderr, "usage: %s [-F <host>[:port]] [-v] [-h]\n", progname);
+    fprintf(stderr, "       -F          : specify arguments for an external Finder instance\n");
     fprintf(stderr, "       -h          : usage (this message)\n");
     fprintf(stderr, "       -v          : verbose output\n");
 }
 
+
+static bool
+parse_finder_arg(const char* host_colon_port,
+		 IPv4&	     finder_addr,
+		 uint16_t&   finder_port)
+{
+    string finder_host;
+
+    const char* p = strstr(host_colon_port, ":");
+
+    if (p) {
+	finder_host = string(host_colon_port, p);
+	finder_port = atoi(p + 1);
+	if (finder_port == 0) {
+	    fprintf(stderr, "Invalid port \"%s\"\n", p + 1);
+	    return false;
+	}
+    } else {
+	finder_host = string(host_colon_port);
+	finder_port = FINDER_DEFAULT_PORT;
+    }
+
+    try {
+	finder_addr = IPv4(finder_host.c_str());
+    } catch (const InvalidString& ) {
+	// host string may need resolving
+	in_addr ia;
+	if (address_lookup(finder_host, ia) == false) {
+	    fprintf(stderr, "Invalid host \"%s\"\n", finder_host.c_str());
+	    return false;
+	}
+	finder_addr.copy_in(ia);
+    }
+    return true;
+}
+
+
 int
 main(int argc, char * const argv[])
 {
     int ret_value = 0;
     const char* const argv0 = argv[0];
 
+    IPv4 finder_addr = FINDER_DEFAULT_HOST;
+    uint16_t finder_port = 16600;	// over-ridden for external finder
+    bool use_internal_finder = true;
+
     int ch;
-    while ((ch = getopt(argc, argv, "hv")) != -1) {
+    while ((ch = getopt(argc, argv, "F:hv")) != -1) {
         switch (ch) {
+	case 'F':
+	    if (parse_finder_arg(optarg, finder_addr, finder_port) == false) {
+		usage(argv[0]);
+		return 1;
+	    }
+	    use_internal_finder = false;
+	    break;
         case 'v':
             set_verbose(true);
             break;
@@ -674,7 +731,7 @@ main(int argc, char * const argv[])
 
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	ret_value = test_main();
+	ret_value = test_main(finder_addr, finder_port, use_internal_finder);
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();
