@@ -1,19 +1,22 @@
-/* $XORP: xorp/etc/templates/rib.tp,v 1.12 2004/05/18 01:06:48 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rib.tp,v 1.13 2004/05/18 07:11:07 pavlin Exp $ */
 
 plumbing {
     rib {
-	targetname: txt = "rib";
+	targetname:	txt = "rib";
     }
 }
 
 plumbing {
     rib {
-	%modinfo: provides rib;
-	%modinfo: depends fea;
-	%modinfo: path "rib/xorp_rib";
-	%modinfo: default_targetname "rib";
-	%modinfo: status_method xrl "$(rib.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: shutdown_method xrl "$(rib.targetname)/common/0.1/shutdown";
+	%help:		short		"Configure the Routing Information Base module";
+	%modinfo:	provides	rib;
+	%modinfo:	depends		fea;
+	%modinfo:	path		"rib/xorp_rib";
+	%modinfo:	default_targetname "rib";
+	%modinfo:	status_method	xrl "$(rib.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdown_method xrl "$(rib.targetname)/common/0.1/shutdown";
+
+	%mandatory:	targetname;
 
 	targetname {
 	    %set:;

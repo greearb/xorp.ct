@@ -1,21 +1,21 @@
-/* $XORP: xorp/etc/templates/mfea4.tp,v 1.5 2004/05/28 23:12:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea4.tp,v 1.6 2004/06/01 04:49:04 pavlin Exp $ */
 
 plumbing {
     mfea4 {
-	targetname: txt = "MFEA_4";
-	enabled: bool = true;
+	targetname:		txt = "MFEA_4";
+	enabled:		bool = true;
+
+	interface @: txt {
+	    vif @: txt {
+		enabled:	bool = true;
+	    }
+	}
 
 	traceoptions {
 	    flag {
 		all {
-		    enabled: bool = false;
+		    enabled:	bool = false;
 		}
-	    }
-	}
-
-	interface @: txt {
-	    vif @: txt {
-		enabled: bool = true;
 	    }
 	}
     }
@@ -23,45 +23,54 @@ plumbing {
 
 plumbing {
     mfea4 {
-	%modinfo: provides		mfea4;
-	%modinfo: depends		fea;
-	%modinfo: path			"fea/xorp_fea";
-	%modinfo: default_targetname	"mfea";
-	%modinfo: status_method		xrl "$(mfea4.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: startup_method	xrl "$(mfea4.targetname)/mfea/0.1/start_mfea";
-	%modinfo: shutdown_method	xrl "$(mfea4.targetname)/common/0.1/shutdown";
+	%help:		short		"Configure the IPv4 Multicast Forwarding Engine Abstraction";
+	%modinfo:	provides	mfea4;
+	%modinfo:	depends		fea;
+	%modinfo:	path		"fea/xorp_fea";
+	%modinfo:	default_targetname "mfea";
+	%modinfo:	status_method	xrl "$(mfea4.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	startup_method	xrl "$(mfea4.targetname)/mfea/0.1/start_mfea";
+	%modinfo:	shutdown_method	xrl "$(mfea4.targetname)/common/0.1/shutdown";
 
-	%mandatory: targetname;
+	%mandatory:	targetname;
 
-	%activate: xrl "$(mfea4.targetname)/mfea/0.1/start_mfea";
+	%activate:	xrl "$(mfea4.targetname)/mfea/0.1/start_mfea";
 
 	targetname {
 	    %set:;
 	}
 
 	enabled {
+	    %help:	short "Enable the IPv4 MFEA";
 	    %create:;
-	    %set: xrl "$(mfea4.targetname)/mfea/0.1/enable_mfea?enable:bool=$(@)";
-	    %delete: xrl "$(mfea4.targetname)/mfea/0.1/enable_mfea?enable:bool=$(DEFAULT)";
+	    %set:	xrl "$(mfea4.targetname)/mfea/0.1/enable_mfea?enable:bool=$(@)";
+	    %delete:	xrl "$(mfea4.targetname)/mfea/0.1/enable_mfea?enable:bool=$(DEFAULT)";
 	}
 
-	traceoptions {
-	    flag {
-		all {
-		    enabled {
-			%set: xrl "$(mfea4.targetname)/mfea/0.1/log_trace_all?enable:bool=$(@)";
-		    }
+	interface @ {
+	    %help:	short "Configure IPv4 MFEA on a network interface";
+	    vif @ {
+		%help:	short "Configure IPv4 MFEA on a virtual interface";
+		%activate: xrl "$(mfea4.targetname)/mfea/0.1/start_vif?vif_name:txt=$(vif.@)";
+
+		enabled {
+		    %help:	short "Enable IPv4 MFEA on an interface";
+		    %set:	xrl "$(mfea4.targetname)/mfea/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %delete:	xrl "$(mfea4.targetname)/mfea/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
 		}
 	    }
 	}
 
-	interface @ {
-	    vif @ {
-		%activate: xrl "$(mfea4.targetname)/mfea/0.1/start_vif?vif_name:txt=$(vif.@)";
-
-		enabled {
-		    %set: xrl "$(mfea4.targetname)/mfea/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
-		    %delete: xrl "$(mfea4.targetname)/mfea/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+	traceoptions {
+	    %help:	short "Configure the tracing options";
+	    flag {
+		%help:	short "Configure the tracing operation to perform";
+		all {
+		    %help:	short "Configure all tracing operations";
+		    enabled {
+			%help:	short "Enable all tracing operations";
+			%set:	xrl "$(mfea4.targetname)/mfea/0.1/log_trace_all?enable:bool=$(@)";
+		    }
 		}
 	    }
 	}

@@ -1,111 +1,125 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.5 2004/05/18 07:11:08 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.6 2004/05/28 23:12:26 pavlin Exp $ */
 
 protocols {
     static {
-	targetname: txt = "static_routes";
-	enabled: bool = true;
+	targetname:		txt = "static_routes";
+	enabled:		bool = true;
 
 	route4 @: ipv4net {
-	    nexthop:ipv4;
-	    metric:u32 = 1;		/* Default metric of 1 */
+	    nexthop:		ipv4;
+	    metric:		u32 = 1;
 	}
 
 	route6 @: ipv6net {
-	    nexthop:ipv6;
-	    metric:u32 = 1;		/* Default metric of 1 */
+	    nexthop:		ipv6;
+	    metric:		u32 = 1;
 	}
 
 	mrib-route4 @: ipv4net {
-	    nexthop:ipv4;
-	    metric:u32 = 1;		/* Default metric of 1 */
+	    nexthop:		ipv4;
+	    metric:		u32 = 1;
 	}
 
 	mrib-route6 @: ipv6net {
-	    nexthop:ipv6;
-	    metric:u32 = 1;		/* Default metric of 1 */
+	    nexthop:		ipv6;
+	    metric:		u32 = 1;
 	}
     }
 }
 
 protocols {
     static {
-	%modinfo: provides		static_routes;
-	%modinfo: depends		rib;
-	%modinfo: path			"static_routes/xorp_static_routes";
-	%modinfo: default_targetname	"static_routes";
-	%modinfo: status_method		xrl "$(static.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: shutdown_method	xrl "$(static.targetname)/common/0.1/shutdown";
+	%help:		short	"Configure static routes";
+	%modinfo:	provides	static_routes;
+	%modinfo:	depends		rib;
+	%modinfo:	path		"static_routes/xorp_static_routes";
+	%modinfo:	default_targetname "static_routes";
+	%modinfo:	status_method	xrl "$(static.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdown_method	xrl "$(static.targetname)/common/0.1/shutdown";
 
-	%mandatory: targetname;
+	%mandatory:	targetname;
 
-	%activate: xrl "$(static.targetname)/static_routes/0.1/start_static_routes";
+	%activate:	xrl "$(static.targetname)/static_routes/0.1/start_static_routes";
 
 	targetname {
 	    %set:;
 	}
 
 	enabled {
+	    %help:	short "Enable the static routes";
 	    %create:;
-	    %set: xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=$(@)";
-	    %delete: xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=$(DEFAULT)";
+	    %set:	xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=$(@)";
+	    %delete:	xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=$(DEFAULT)";
 	}
 
 	route4 @: ipv4net {
-	    %mandatory: nexthop;
+	    %help:	short "Configure an IPv4 static route";
+	    %mandatory:	nexthop;
 
-	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
-	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)";
+	    %activate:	xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
+	    %delete:	xrl "$(static.targetname)/static_routes/0.1/delete_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)";
 
 	    nexthop {
+		%help:	short "Configure the next-hop router";
 		%set:;
 	    }
 
 	    metric {
+		%help:	short "Configure the routing metric";
 		%set:;
 	    }
 	}
 
 	route6 @: ipv6net {
-	    %mandatory: nexthop;
+	    %help:	short "Configure an IPv6 static route";
+	    %mandatory:	nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)";
 
 	    nexthop {
+		%help:	short "Configure the next-hop router";
 		%set:;
 	    }
 
 	    metric {
+		%help:	short "Configure the routing metric";
 		%set:;
 	    }
 	}
 
 	mrib-route4 @: ipv4net {
-	    %mandatory: nexthop;
+	    %help:	short "Configure a multicast-specific IPv4 static route";
+	    %mandatory:	nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=$(@.nexthop)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)";
 
 	    nexthop {
+		%help:	short "Configure the next-hop router";
 		%set:;
 	    }
 
 	    metric {
+		%help:	short "Configure the routing metric";
 		%set:;
 	    }
 	}
 
 	mrib-route6 @: ipv6net {
+	    %help:	short "Configure a multicast-specific IPv4 static route";
 	    %mandatory: nexthop;
 
 	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.nexthop)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)";
 
 	    nexthop {
+		%help:	short "Configure the next-hop router";
 		%set:;
 	    }
 
 	    metric {
+		%help:	short "Configure the routing metric";
 		%set:;
 	    }
 	}

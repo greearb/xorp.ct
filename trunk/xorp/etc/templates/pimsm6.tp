@@ -1,13 +1,13 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.7 2004/06/01 04:49:05 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.8 2004/06/01 04:54:57 pavlin Exp $ */
 
 protocols {
     pimsm6 {
-	targetname: txt = "PIMSM_6";
-	enabled: bool = true;
+	targetname:			txt = "PIMSM_6";
+	enabled:			bool = true;
 
 	interface @: txt {
 	    vif @: txt {
-		enabled: bool = true;
+		enabled:		bool = true;
 		alternative-subnet @: ipv6net {
 		}
 	    }
@@ -16,44 +16,44 @@ protocols {
 	static-rps {
 	    rp @: ipv6 {
 		group-prefix @: ipv6net {
-		    rp-priority: u32 = 192;
-		    hash-mask-len: u32 = 126;
+		    rp-priority:	u32 = 192;
+		    hash-mask-len:	u32 = 126;
 		}
 	    }
 	}
 
 	bootstrap {
-	    enabled: bool = true;
+	    enabled:			bool = true;
 
 	    cand-bsr {
 		scope-zone @: ipv6net {
-		    is-scope-zone: bool = false;
+		    is-scope-zone:	bool = false;
 		    cand-bsr-by-vif-name: txt;
-		    bsr-priority: u32 = 1;
-		    hash-mask-len: u32 = 126;
+		    bsr-priority:	u32 = 1;
+		    hash-mask-len:	u32 = 126;
 		}
 	    }
 
 	    cand-rp {
 		group-prefix @: ipv6net {
-		    is-scope-zone: bool = false;
+		    is-scope-zone:	bool = false;
 		    cand-rp-by-vif-name: txt;
-		    rp-priority: u32 = 192;
-		    rp-holdtime: u32 = 150;
+		    rp-priority:	u32 = 192;
+		    rp-holdtime:	u32 = 150;
 		}
 	    }
 	}
 
 	switch-to-spt-threshold {
-	    enabled: bool = false;
-	    interval-sec: u32 = 0;
-	    bytes: u32 = 0;
+	    enabled:			bool = false;
+	    interval-sec:		u32 = 0;
+	    bytes:			u32 = 0;
 	}
 
 	traceoptions {
 	    flag {
 		all {
-		    enabled: bool = false;
+		    enabled:		bool = false;
 		}
 	    }
 	}
@@ -62,55 +62,66 @@ protocols {
 
 protocols {
     pimsm6 {
-	%modinfo: provides		pimsm6;
-	%modinfo: depends		mfea6;
-	%modinfo: depends		mld;
-	%modinfo: depends		rib;
-	%modinfo: path			"pim/xorp_pimsm6";
-	%modinfo: default_targetname	"pim";
-	%modinfo: status_method		xrl "$(pimsm6.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: startup_method	xrl "$(pimsm6.targetname)/pim/0.1/start_pim";
-	%modinfo: shutdown_method	xrl "$(pimsm6.targetname)/common/0.1/shutdown";
+	%help:		short		"Configure the IPv6 PIM-SM protocol";
+	%modinfo:	provides	pimsm6;
+	%modinfo:	depends		mfea6;
+	%modinfo:	depends		mld;
+	%modinfo:	depends		rib;
+	%modinfo:	path		"pim/xorp_pimsm6";
+	%modinfo:	default_targetname "pim";
+	%modinfo:	status_method	xrl "$(pimsm6.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	startup_method	xrl "$(pimsm6.targetname)/pim/0.1/start_pim";
+	%modinfo:	shutdown_method	xrl "$(pimsm6.targetname)/common/0.1/shutdown";
 
-	%mandatory: targetname;
+	%mandatory:	targetname;
 
 	targetname {
 	    %set:;
 	}
 
 	enabled {
+	    %help:	short "Enable the IPv6 PIM-SM protocol";
 	    %create:;
-	    %set: xrl "$(pimsm6.targetname)/pim/0.1/enable_pim?enable:bool=$(@)";
-	    %delete: xrl "$(pimsm6.targetname)/pim/0.1/enable_pim?enable:bool=$(DEFAULT)";
+	    %set:	xrl "$(pimsm6.targetname)/pim/0.1/enable_pim?enable:bool=$(@)";
+	    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/enable_pim?enable:bool=$(DEFAULT)";
 	}
 
 	interface @ {
+	    %help:	short "Configure IPv6 PIM-SM on a network interface";
 	    vif @ {
+		%help:	short "Configure IPv6 PIM-SM on a virtual interface";
 		%activate: xrl "$(pimsm6.targetname)/pim/0.1/start_vif?vif_name:txt=$(vif.@)";
 
 		enabled {
-		    %set: xrl "$(pimsm6.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
-		    %delete: xrl "$(pimsm6.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		    %help:	short "Enable IPv6 PIM-SM on an interface";
+		    %set:	xrl "$(pimsm6.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
 		}
 
 		alternative-subnet @ {
-		    %set: xrl "$(pimsm6.targetname)/pim/0.1/add_alternative_subnet6?vif_name:txt=$(vif.@)&subnet:ipv6net=$(alternative-subnet.@)";
-		    %delete: xrl "$(pimsm6.targetname)/pim/0.1/delete_alternative_subnet6?vif_name:txt=$(vif.@)&subnet:ipv6net=$(alternative-subnet.@)";
+		    %help:	short "Fake a subnet to appear directly-connected";
+		    %set:	xrl "$(pimsm6.targetname)/pim/0.1/add_alternative_subnet6?vif_name:txt=$(vif.@)&subnet:ipv6net=$(alternative-subnet.@)";
+		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/delete_alternative_subnet6?vif_name:txt=$(vif.@)&subnet:ipv6net=$(alternative-subnet.@)";
 		}
 	    }
 	}
 
 	static-rps {
-	    %activate: xrl "$(pimsm6.targetname)/pim/0.1/config_static_rp_done";
+	    %help:	short "Configure the set of static RPs";
+	    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/config_static_rp_done";
 	    rp @ {
+		%help:	short "Configure a static RP";
 		group-prefix @ {
-		    %activate: xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(@.rp-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
+		    %help:	short "Configure the group prefix address covered by the RP";
+		    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(@.rp-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 
 		    rp-priority {
+			%help:	short "Configure the RP priority";
 			%set:;
 		    }
 
 		    hash-mask-len {
+			%help:	short "Configure the hash mask length for the has function";
 			%set:;
 		    }
 		}
@@ -118,57 +129,71 @@ protocols {
 	}
 
 	bootstrap {
-	    %activate: xrl "$(pimsm6.targetname)/pim/0.1/start_bsr";
+	    %help:	short "Configure the IPv6 Bootstrap mechanism";
+	    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/start_bsr";
 
 	    enabled {
+		%help:	short "Enable the IPv6 Bootstrap mechanism";
 		%create: xrl "$(pimsm6.targetname)/pim/0.1/enable_bsr?enable:bool=$(@)";
-		%set: xrl "$(pimsm6.targetname)/pim/0.1/enable_bsr?enable:bool=$(@)";
+		%set:	xrl "$(pimsm6.targetname)/pim/0.1/enable_bsr?enable:bool=$(@)";
 		%delete: xrl "$(pimsm6.targetname)/pim/0.1/enable_bsr?enable:bool=$(DEFAULT)";
 	    }
 
 	    cand-bsr {
+		%help:	short "Configure this router as a Candidate-BSR";
 		scope-zone @ {
+		    %help:	short "Configure a scope zone in this Candidate-BSR";
 		    %mandatory: cand-bsr-by-vif-name;
 
-		    %activate: xrl "$(pimsm6.targetname)/pim/0.1/add_config_cand_bsr_by_vif_name6?scope_zone_id:ipv6net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
+		    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_cand_bsr_by_vif_name6?scope_zone_id:ipv6net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 
 		    is-scope-zone {
+			%help:	short "Flag to indicate a scoped or global zone";
 			%set:;
 		    }
 
 		    cand-bsr-by-vif-name {
+			%help:	short "Specify the virtual interface with the address of the Candidate-BSR";
 			%set:;
 		    }
 
 		    bsr-priority {
+			%help:	short "Configure the Candidate-BSR priority";
 			%set:;
 		    }
 
 		    hash-mask-len {
+			%help:	short "Configure the hash mask length for the has function";
 			%set:;
 		    }
 		}
 	    }
 
 	    cand-rp {
+		%help:	short "Configure this router as a Candidate-RP";
 		group-prefix @ {
-		    %mandatory: cand-rp-by-vif-name;
+		    %help:	short "Configure a scope zone in this Candidate-RP";
+		    %mandatory:	cand-rp-by-vif-name;
 
 		    %activate: xrl "$(pimsm6.targetname)/pim/0.1/add_config_cand_rp_by_vif_name6?group_prefix:ipv6net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&rp_priority:u32=$(@.rp-priority)&rp_holdtime:u32=$(@.rp-holdtime)";
 
 		    is-scope-zone {
+			%help:	short "Flag to indicate a scoped or global zone";
 			%set:;
 		    }
 
 		    cand-rp-by-vif-name {
+			%help:	short "Specify the virtual interface with the address of the Candidate-RP";
 			%set:;
 		    }
 
 		    rp-priority {
+			%help:	short "Configure the Candidate-RP priority";
 			%set:;
 		    }
 
 		    rp-holdtime {
+			%help:	short "Configure the Candidate-RP holdtime";
 			%set:;
 		    }
 		}
@@ -176,27 +201,35 @@ protocols {
 	}
 
 	switch-to-spt-threshold {
-	    %activate: xrl "$(pimsm6.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=$(@.enabled)&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
+	    %help:	short "Configure the shortest-path switch threshold";
+	    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=$(@.enabled)&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
 	    %delete: xrl "$(pimsm6.targetname)/pim/0.1/reset_switch_to_spt_threshold";
 
 	    enabled {
+		%help:	short "Enable the shortest-path switching";
 		%set:;
 	    }
 
 	    interval-sec {
+		%help:	short "Configure the frequency of measuring the bandwidth threshold (in seconds)";
 		%set:;
 	    }
 
 	    bytes {
+		%help:	short "Configure the bandwidth threshold (in bytes) per interval-sec";
 		%set:;
 	    }
 	}
 
 	traceoptions {
+	    %help:	short "Configure the tracing options";
 	    flag {
+		%help:	short "Configure the tracing operation to perform";
 		all {
+		    %help:	short	"Configure all tracing operations";
 		    enabled {
-			%set: xrl "$(pimsm6.targetname)/pim/0.1/log_trace_all?enable:bool=$(@)";
+			%help:	short	"Enable all tracing operations";
+			%set:	xrl "$(pimsm6.targetname)/pim/0.1/log_trace_all?enable:bool=$(@)";
 		    }
 		}
 	    }

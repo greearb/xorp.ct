@@ -1,33 +1,35 @@
-/* $XORP: xorp/etc/templates/fib2mrib.tp,v 1.3 2004/05/18 07:11:06 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fib2mrib.tp,v 1.4 2004/05/28 23:12:26 pavlin Exp $ */
 
 protocols {
     fib2mrib {
-	targetname: txt = "fib2mrib";
-	enabled: bool = true;
+	targetname:	txt = "fib2mrib";
+	enabled:	bool = true;
     }
 }
 
 protocols {
     fib2mrib {
-	%modinfo: provides		fib2mrib;
-	%modinfo: depends		rib;
-	%modinfo: path			"fib2mrib/xorp_fib2mrib";
-	%modinfo: default_targetname	"fib2mrib";
-	%modinfo: status_method		xrl "$(fib2mrib.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo: shutdown_method	xrl "$(fib2mrib.targetname)/common/0.1/shutdown";
+	%help:		short		"Configure the FIB2MRIB module";
+	%modinfo:	provides	fib2mrib;
+	%modinfo:	depends		rib;
+	%modinfo:	path		"fib2mrib/xorp_fib2mrib";
+	%modinfo:	default_targetname "fib2mrib";
+	%modinfo:	status_method	xrl "$(fib2mrib.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdown_method	xrl "$(fib2mrib.targetname)/common/0.1/shutdown";
 
-	%mandatory: targetname;
+	%mandatory:	targetname;
 
-	%activate: xrl "$(fib2mrib.targetname)/fib2mrib/0.1/start_fib2mrib";
+	%activate:	xrl "$(fib2mrib.targetname)/fib2mrib/0.1/start_fib2mrib";
 
 	targetname {
 	    %set:;
 	}
 
 	enabled {
+	    %help:	short "Enable the FIB2MRIB module";
 	    %create:;
-	    %set: xrl "$(fib2mrib.targetname)/fib2mrib/0.1/enable_fib2mrib?enable:bool=$(@)";
-	    %delete: xrl "$(fib2mrib.targetname)/fib2mrib/0.1/enable_fib2mrib?enable:bool=$(DEFAULT)";
+	    %set:	xrl "$(fib2mrib.targetname)/fib2mrib/0.1/enable_fib2mrib?enable:bool=$(@)";
+	    %delete:	xrl "$(fib2mrib.targetname)/fib2mrib/0.1/enable_fib2mrib?enable:bool=$(DEFAULT)";
 	}
     }
 }

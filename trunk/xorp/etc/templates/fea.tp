@@ -1,28 +1,33 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.21 2004/05/16 07:15:16 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.22 2004/05/18 01:06:47 pavlin Exp $ */
 
 fea {
-    targetname: txt = "fea";
+    targetname:			txt = "fea";
     enable-unicast-forwarding4: bool;
     enable-unicast-forwarding6: bool;
 }
 
 fea {
-    %modinfo: provides fea;
-    %modinfo: depends interfaces;
-    %modinfo: path "fea/xorp_fea";
-    %modinfo: default_targetname "fea";
+    %help:	short		"Configure the Forwarding Engine Abstraction";
+    %modinfo:	provides	fea;
+    %modinfo:	depends		interfaces;
+    %modinfo:	path		"fea/xorp_fea";
+    %modinfo:	default_targetname "fea";
+
+    %mandatory:	targetname;
 
     targetname {
 	%create:;
     }
 
     enable-unicast-forwarding4 {
-	%set: xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=$(@)";
-	%delete: xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(DEFAULT)`";
+	%help:		short "Enable IPv4 unicast forwarding";
+	%set:		xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=$(@)";
+	%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(DEFAULT)`";
     }
 
     enable-unicast-forwarding6 {
-	%set: xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=$(@)";
-	%delete: xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(DEFAULT)`";
+	%help:		short "Enable IPv6 unicast forwarding";
+	%set:		xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=$(@)";
+	%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(DEFAULT)`";
     }
 }
