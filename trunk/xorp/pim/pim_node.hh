@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.42 2005/03/14 19:08:50 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.43 2005/03/15 00:30:19 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -100,9 +100,6 @@ public:
      * state with neighbors.
      * After the multicast routing entries cleanup is completed,
      * @ref PimNode::final_stop() is called internally to complete the job.
-     * If this method is called one-after-another, the second one
-     * will force calling immediately @ref PimNode::final_stop() to quickly
-     * finish the job.
      * This method, unlike start(), will stop the protocol
      * operation on all interfaces.
      * 
@@ -247,16 +244,14 @@ public:
     /**
      * Start PIM on all enabled interfaces.
      * 
-     * @return the number of virtual interfaces PIM was started on,
-     * or XORP_ERROR if error occured.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start_all_vifs();
     
     /**
      * Stop PIM on all interfaces it was running on.
      * 
-     * @return he number of virtual interfaces PIM was stopped on,
-     * or XORP_ERROR if error occured.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop_all_vifs();
     

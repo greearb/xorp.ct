@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.63 2005/03/14 19:08:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.64 2005/03/15 00:30:20 pavlin Exp $"
 
 
 //
@@ -161,6 +161,9 @@ PimNode::~PimNode()
 int
 PimNode::start()
 {
+    if (! is_enabled())
+	return (XORP_OK);
+
     //
     // Test the service status
     //
@@ -222,11 +225,9 @@ PimNode::final_start()
     // Start the pim_vifs
     start_all_vifs();
     
-    // Start the BSR module only if we are enabled to run the BSR mechanism
-    if (_pim_bsr.is_enabled()) {
-	if (_pim_bsr.start() < 0)
-	    return (XORP_ERROR);
-    }
+    // Start the BSR module
+    if (_pim_bsr.start() < 0)
+	return (XORP_ERROR);
 
     return (XORP_OK);
 }
@@ -241,9 +242,6 @@ PimNode::final_start()
  * state with neighbors.
  * XXX: After the multicast routing entries cleanup is completed,
  * PimNode::final_stop() is called to complete the job.
- * XXX: If this method is called one-after-another, the second one
- * will force calling immediately PimNode::final_stop() to quickly
- * finish the job. TODO: is this a desired semantic?
  * XXX: This function, unlike start(), will stop the protocol
  * operation on all interfaces.
  * 
@@ -267,7 +265,10 @@ PimNode::stop()
 	&& (ServiceBase::status() != SERVICE_RESUMING)) {
 	return (XORP_ERROR);
     }
-    
+
+    if (ProtoNode<PimVif>::pending_stop() < 0)
+	return (XORP_ERROR);
+
     //
     // Perform misc. PIM-specific stop operations
     //
@@ -276,9 +277,6 @@ PimNode::stop()
     // Stop the vifs
     stop_all_vifs();
     
-    if (ProtoNode<PimVif>::pending_stop() < 0)
-	return (XORP_ERROR);
-
     //
     // Set the node status
     //
@@ -744,8 +742,6 @@ PimNode::enable_vif(const string& vif_name, string& error_msg)
     
     pim_vif->enable();
     
-    XLOG_INFO("Enabled vif: %s", vif_name.c_str());
-    
     return (XORP_OK);
 }
 
@@ -770,8 +766,6 @@ PimNode::disable_vif(const string& vif_name, string& error_msg)
     }
     
     pim_vif->disable();
-    
-    XLOG_INFO("Disabled vif: %s", vif_name.c_str());
     
     return (XORP_OK);
 }
@@ -803,8 +797,6 @@ PimNode::start_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("Started vif: %s", vif_name.c_str());
-    
     return (XORP_OK);
 }
 
@@ -835,8 +827,6 @@ PimNode::stop_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("Stopped vif: %s", vif_name.c_str());
-    
     return (XORP_OK);
 }
 
@@ -846,31 +836,24 @@ PimNode::stop_vif(const string& vif_name, string& error_msg)
  * 
  * Start PIM on all enabled interfaces.
  * 
- * Return value: The number of virtual interfaces PIM was started on,
- * or %XORP_ERROR if error occured.
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 PimNode::start_all_vifs()
 {
-    int n = 0;
     vector<PimVif *>::iterator iter;
     string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	PimVif *pim_vif = (*iter);
 	if (pim_vif == NULL)
 	    continue;
-	if (! pim_vif->is_enabled())
-	    continue;
-	if (pim_vif->start(error_msg) != XORP_OK) {
-	    XLOG_ERROR("Cannot start vif %s: %s",
-		       pim_vif->name().c_str(), error_msg.c_str());
-	} else {
-	    n++;
-	}
+	if (start_vif(pim_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (n);
+    return (ret_value);
 }
 
 /**
@@ -879,29 +862,24 @@ PimNode::start_all_vifs()
  * 
  * Stop PIM on all interfaces it was running on.
  * 
- * Return value: The number of virtual interfaces PIM was stopped on,
- * or %XORP_ERROR if error occured.
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 PimNode::stop_all_vifs()
 {
-    int n = 0;
     vector<PimVif *>::iterator iter;
     string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	PimVif *pim_vif = (*iter);
 	if (pim_vif == NULL)
 	    continue;
-	if (pim_vif->stop(error_msg) != XORP_OK) {
-	    XLOG_ERROR("Cannot stop vif %s: %s",
-		       pim_vif->name().c_str(), error_msg.c_str());
-	} else {
-	    n++;
-	}
+	if (stop_vif(pim_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (n);
+    return (ret_value);
 }
 
 /**
@@ -916,15 +894,18 @@ int
 PimNode::enable_all_vifs()
 {
     vector<PimVif *>::iterator iter;
+    string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	PimVif *pim_vif = (*iter);
 	if (pim_vif == NULL)
 	    continue;
-	pim_vif->enable();
+	if (enable_vif(pim_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return (ret_value);
 }
 
 /**
@@ -939,17 +920,18 @@ int
 PimNode::disable_all_vifs()
 {
     vector<PimVif *>::iterator iter;
-    
-    stop_all_vifs();
+    string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	PimVif *pim_vif = (*iter);
 	if (pim_vif == NULL)
 	    continue;
-	pim_vif->disable();
+	if (disable_vif(pim_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return (ret_value);
 }
 
 /**
@@ -1014,15 +996,17 @@ PimNode::vif_shutdown_completed(const string& vif_name)
 	    return;
     }
 
-    //
-    // De-register with the RIB
-    //
-    rib_register_shutdown();
+    if (ServiceBase::status() == SERVICE_SHUTTING_DOWN) {
+	//
+	// De-register with the RIB
+	//
+	rib_register_shutdown();
 
-    //
-    // De-register with the MFEA
-    //
-    mfea_register_shutdown();
+	//
+	// De-register with the MFEA
+	//
+	mfea_register_shutdown();
+    }
 
     UNUSED(vif_name);
 }
