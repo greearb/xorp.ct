@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_header.cc,v 1.3 2003/03/10 23:20:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_header.cc,v 1.4 2004/06/10 22:41:08 hodson Exp $"
 
 #include <string>
 #include <stdio.h>
@@ -29,7 +29,7 @@ run_test()
     const string src_text = "containing some text";
     w.add("a string", src_text);
 
-    const int src_int = 3;
+    const int32_t src_int = 3;
     w.add("an int", src_int);
 
     const double src_double = 4.33;
@@ -39,7 +39,7 @@ run_test()
     {
 	HeaderReader r(wsrep);
 	string s;
-	int i;
+	int32_t i;
 	double d;
 
 	r.get("a string", s).get("an int", i).get("a double", d);
