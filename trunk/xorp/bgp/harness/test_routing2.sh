@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.1 2003/10/21 04:30:06 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.2 2003/10/21 20:20:53 mjh Exp $
 #
 
 #
@@ -396,8 +396,83 @@ test3()
     delete_igp_table4 is-is isis isis true false
 }
 
-TESTS_NOT_FIXED='test2'
-TESTS='test1 test3 test1_ipv6'
+test4()
+{
+    echo "TEST4 - Test for deterministic MEDs same as test3 except for the oder of route arrival R1,R3,R2"
+
+    #  Route	ASPATH		MED 	IGP DISTANCE
+    #  1	1,2,3		10	10
+    #  2	1,2,3		5	30
+    #  3	4,5,6		20	20
+
+    # Route 3 should always be the winner regardless of the order of arrival
+    # of the routes.
+
+    config_peers
+
+    # Configure IGP routes in the RIB as if IS-IS is running.
+    # This allows us to test varying IGP distances.
+    add_igp_table4 is-is isis isis true false
+
+    add_route4 is-is true false $NH1/24 $GW1 10
+    add_route4 is-is true false $NH2/24 $GW2 30
+    add_route4 is-is true false $NH3/24 $GW3 20
+
+    # Route 1
+    coord peer1 send packet update \
+	origin 2 \
+	aspath "1,2,3" \
+	med 10 \
+	nexthop $NH1 \
+	localpref 100 \
+	nlri 10.10.10.10/24 \
+	nlri 20.20.20.20/24
+
+    # Route 3
+    coord peer3 send packet update \
+	origin 2 \
+	aspath "4,5,6" \
+	med 20 \
+	nexthop $NH3 \
+	localpref 100 \
+	nlri 10.10.10.10/24 \
+	nlri 20.20.20.20/24
+
+    # Route 2
+    coord peer2 send packet update \
+	origin 2 \
+	aspath "1,2,3" \
+	med 5 \
+	nexthop $NH2 \
+	localpref 100 \
+	nlri 10.10.10.10/24 \
+	nlri 20.20.20.20/24
+
+    result=$(lookup_route4 10.10.10.10 true false)
+    echo $result
+
+    OIFS=$IFS
+    IFS='='
+    set $result
+    result=$2
+    IFS=$OIFS
+
+    if [ $result != $GW3 ]
+    then
+	echo "Gateway is $result should be $GW3"
+	return 1
+    fi
+
+    # Remove IGP state from the RIB
+    delete_route4 is-is true false $NH1/24
+    delete_route4 is-is true false $NH2/24
+    delete_route4 is-is true false $NH3/24
+
+    delete_igp_table4 is-is isis isis true false
+}
+
+TESTS_NOT_FIXED='test2 test4'
+TESTS='test1 test1_ipv6 test3'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
