@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.12 2003/04/23 22:52:07 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.13 2003/05/02 09:00:01 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_VARIABLES
@@ -397,11 +397,8 @@ ConfigTreeNode::initialize_commit() {
 }
 
 bool
-ConfigTreeNode::commit_changes(ModuleManager& mm, 
-			       string module,
-			       XorpClient& xclient, 
-			       uint tid,
-			       bool do_exec, bool do_commit, 
+ConfigTreeNode::commit_changes(TaskManager& task_manager,
+			       bool do_commit, 
 			       int depth, int last_depth,
 			       string& result) {
     bool success = true;
@@ -427,13 +424,10 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 	cmd = _template->const_command("%modinfo");
 	const ModuleCommand* modcmd 
 	    = dynamic_cast<const ModuleCommand*>(cmd);
-	if (modcmd != NULL 
-	    && (modcmd->name() == module)) {
-	    if (modcmd->start_transaction(*this, xclient, tid,
-					  do_exec, 
-					  do_commit) != XORP_OK) {
+	if (modcmd != NULL) {
+	    if (modcmd->start_transaction(*this, task_manager) != XORP_OK) {
 		result = "Start Transaction failed for module "
-		    + module + "\n";
+		    + modcmd->name() + "\n";
 		return false;
 	    }
 	}
@@ -455,10 +449,9 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 		    assert(_existence_committed);
 		    assert(!_value_committed);  
 		    cmd = _template->const_command("%delete");
-		    if (cmd != NULL && cmd->affects_module(module)) {
+		    if (cmd != NULL) {
 			int actions = 
-			    cmd->execute(*this, xclient, tid,
-					 do_exec);
+			    cmd->execute(*this, task_manager);
 			if (actions < 0) {
 			    //bad stuff happenned
 			    //XXX now what?
@@ -503,9 +496,9 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 
 		//next, we run any "create" or "set" commands
 		cmd = _template->const_command("%create");
-		if (cmd == NULL || !cmd->affects_module(module))
+		if (cmd == NULL)
 		    cmd = _template->const_command("%set");
-		if (cmd == NULL || !cmd->affects_module(module)) {
+		if (cmd == NULL) {
 #ifdef DEBUG_COMMIT
 		    printf("no appropriate command found\n");
 #endif
@@ -513,37 +506,18 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 #ifdef DEBUG_COMMIT
 		    printf("found commands: %s\n", cmd->s().c_str());
 #endif
-		    if (do_commit == false) {
-			int actions = 
-			    cmd->execute(*this, xclient, tid,
-					 /*do_exec = */false);
-			if (actions < 0) {
-			    result = "Parameter error for \"" + path() + "\"\n";
-			    result += "No changes have been committed.\n";
-			    result += "Correct this error and try again.\n";
+		    int actions = 
+			cmd->execute(*this, task_manager);
+		    if (actions < 0) {
+			result = "Parameter error for \"" + path() + "\"\n";
+			result += "No changes have been committed.\n";
+			result += "Correct this error and try again.\n";
 #ifdef DEBUG_COMMIT
-			    printf("%s\n", result.c_str());
+			printf("%s\n", result.c_str());
 #endif
-			    return false;
-			}
-			_actions_pending += actions;
-		    } else {
-			int actions = 
-			    cmd->execute(*this, xclient, tid,
-					 do_exec);
-			if (actions < 0) {
-			    //bad stuff happenned
-			    //XXX now what?
-			    result = "Something went wrong.\n";
-			    result += "The problem was with \"" + path() + "\"\n";
-			    result += "WARNING: Partially commited changes exist\n";
-#ifdef DEBUG_COMMIT
-			    printf("%s\n", result.c_str());
-#endif
-			    return false;
-			}
-			_actions_pending += actions;
+			return false;
 		    }
+		    _actions_pending += actions;
 		}
 	    }
 	}
@@ -562,8 +536,7 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 #endif
 	string child_response;
 	success =
-	    (*previter)->commit_changes(mm, module, xclient, tid, 
-					do_exec, do_commit,
+	    (*previter)->commit_changes(task_manager, do_commit,
 					depth+1, last_depth, 
 					child_response);
 	result += child_response;
@@ -577,40 +550,22 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 	if (_template != NULL) {
 	    //finally, on the way back out, we run the %activate commands
 	    cmd = _template->const_command("%activate");
-	    if (cmd != NULL && cmd->affects_module(module)) {
+	    if (cmd != NULL) {
 #ifdef DEBUG_COMMIT
 		printf("found commands: %s\n", cmd->s().c_str());
 #endif
-		if (do_commit == false) {
-		    int actions = 
-			cmd->execute(*this, xclient, tid, /*do_exec = */false);
-		    if (actions < 0) {
-			result = "Parameter error for \"" + path() + "\"\n";
-			result += "No changes have been committed.\n";
-			result += "Correct this error and try again.\n";
+		int actions = 
+		    cmd->execute(*this, task_manager);
+		if (actions < 0) {
+		    result = "Parameter error for \"" + path() + "\"\n";
+		    result += "No changes have been committed.\n";
+		    result += "Correct this error and try again.\n";
 #ifdef DEBUG_COMMIT
-			printf("%s\n", result.c_str());
+		    printf("%s\n", result.c_str());
 #endif
-			return false;
-		    }
-		    _actions_pending += actions;
-		} else {
-		    int actions = 
-			cmd->execute(*this, 
-				     xclient, tid, do_exec);
-		    if (actions < 0) {
-			//bad stuff happenned
-			//XXX now what?
-			result = "Something went wrong.\n";
-			result += "The problem was with \"" + path() + "\"\n";
-			result += "WARNING: Partially commited changes exist\n";
-#ifdef DEBUG_COMMIT
-			printf("%s\n", result.c_str());
-#endif
-			return false;
-		    }
-		    _actions_pending += actions;
+		    return false;
 		}
+		_actions_pending += actions;
 	    }
 	}
     }
@@ -619,12 +574,10 @@ ConfigTreeNode::commit_changes(ModuleManager& mm,
 	if (cmd != NULL) {
 	    const ModuleCommand* modcmd 
 		= dynamic_cast<const ModuleCommand*>(cmd);
-	    if (modcmd != NULL && (modcmd->name() == module)) {
-		if (modcmd->end_transaction(*this, xclient, tid,
-					    do_exec, 
-					    do_commit) != XORP_OK) {
+	    if (modcmd != NULL) {
+		if (modcmd->end_transaction(*this, task_manager) != XORP_OK) {
 		    result = "End Transaction failed for module "
-			+ module + "\n";
+			+ modcmd->name() + "\n";
 		    return false;
 		}
 	    }

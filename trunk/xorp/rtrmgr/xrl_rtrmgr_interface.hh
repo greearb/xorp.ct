@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.3 2003/04/22 19:42:19 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.4 2003/04/23 04:24:37 mjh Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -30,6 +30,7 @@ class MasterConfigTree;
 class RandomGen;
 
 class XrlRtrmgrInterface : public XrlRtrmgrTargetBase {
+    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
     XrlRtrmgrInterface(XrlRouter& r, UserDB& db, MasterConfigTree& ct,
 		       EventLoop& eventloop, RandomGen& randgen);
@@ -90,8 +91,7 @@ public:
 	const string& deltas,
 	const string& deletions);
 
-    void apply_config_change_done(int status,
-				  const string& response,
+    void apply_config_change_done(bool success, string errmsg,
 				  uid_t user_id,
 				  string target,
 				  string deltas,

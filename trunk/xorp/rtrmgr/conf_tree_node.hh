@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.5 2003/04/23 04:24:35 mjh Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.6 2003/04/23 22:52:07 mjh Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -24,8 +24,7 @@
 #include <sys/time.h>
 #include "config.h"
 #include "libxorp/xorp.h"
-#include "module_manager.hh"
-#include "xorp_client.hh"
+#include "task.hh"
 
 class RouterCLI;
 class CommandTree;
@@ -60,10 +59,8 @@ public:
 			 string& response);
     void find_changed_modules(set <string>& changed_modules) const;
     void initialize_commit();
-    bool commit_changes(ModuleManager &mm, string module,
-			XorpClient &xclient, 
-			uint tid, 
-			bool do_exec, bool do_commit,
+    bool commit_changes(TaskManager& task_manager,
+			bool do_commit,
 			int depth, int last_depth,
 			string& result);
     bool check_commit_status(string &response) const;

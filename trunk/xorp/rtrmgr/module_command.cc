@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.18 2003/04/25 03:39:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.1 2003/05/02 09:00:01 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -110,12 +110,12 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 }
 
 int 
-ModuleCommand::execute(TaskManager& taskmgr,
-		       bool do_commit) const {
+ModuleCommand::execute(TaskManager& taskmgr) const 
+{
+#if 0
     debug_msg("ModuleCommand::execute %s (do_exec %d, do_commit %d)\n",
 	      _modname.c_str(), taskmgr.do_exec(), do_commit);
     if (do_commit) {
-#if 0
 	debug_msg("do_commit == true\n");
 	//OK, we're actually going to do the commit
 	//find or create the module in the module manager
@@ -143,23 +143,23 @@ ModuleCommand::execute(TaskManager& taskmgr,
 	    debug_msg("Send Xrl okay %d\n", r2 == XORP_OK);
 	}
 	return r;
-#endif
-	//XXX need to add a validation here
-	return taskmgr.add_module(_modname, _modpath, NULL);
     } else {
 	//this is just the verification pass, if this is successful
 	//then a commit pass will occur.
 	return XORP_OK;
     }
+#endif
+    //XXX need to add a validation here
+    return taskmgr.add_module(_modname, _modpath, NULL);
 }
 
 int 
 ModuleCommand::start_transaction(ConfigTreeNode& ctn,
-				 XorpClient& xclient,  uint tid, 
-				 bool do_exec, 
-				 bool do_commit) const {
-    if (_startcommit == NULL || do_commit == false)
+				 TaskManager& task_manager) const 
+{
+    if (_startcommit == NULL)
 	return XORP_OK;
+#if 0
     debug_msg("\n\n****! start_transaction on %s \n", ctn.segname().c_str());
     XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
 				    &ModuleCommand::action_complete,
@@ -167,31 +167,52 @@ ModuleCommand::start_transaction(ConfigTreeNode& ctn,
 				    string("end transaction"));
     XrlAction *xa = dynamic_cast<XrlAction*>(_startcommit);
     if (xa != NULL) {
-	return xa->execute(ctn, xclient, tid, do_exec, cb);
+	return xa->execute(ctn, task_manager, cb);
     } 
     abort();
+#endif
+    XrlRouter::XrlCallback cb 
+	= callback(const_cast<ModuleCommand*>(this),
+		   &ModuleCommand::action_complete,
+		   &ctn, _startcommit,
+		   string("start transaction"));
+    XrlAction *xa = dynamic_cast<XrlAction*>(_startcommit);
+    assert(xa != NULL);
+
+    return xa->execute(ctn, task_manager, cb);
 }
 
 int 
 ModuleCommand::end_transaction(ConfigTreeNode& ctn,
-			       XorpClient& xclient,  uint tid, 
-			       bool do_exec, 
-			       bool do_commit) const {
-    if (_endcommit == NULL || do_commit == false)
+			       TaskManager& task_manager) const 
+{
+    if (_endcommit == NULL)
 	return XORP_OK;
+#if 0
     XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
 				    &ModuleCommand::action_complete,
 				    &ctn, _endcommit,
 				    string("end transaction"));
     XrlAction *xa = dynamic_cast<XrlAction*>(_endcommit);
     if (xa != NULL) {
-	return xa->execute(ctn, xclient, tid, do_exec, cb);
+	return xa->execute(ctn, task_manager, cb);
     } 
     abort();
+#endif
+    XrlRouter::XrlCallback cb 
+	= callback(const_cast<ModuleCommand*>(this),
+		   &ModuleCommand::action_complete,
+		   &ctn, _startcommit,
+		   string("start transaction"));
+    XrlAction *xa = dynamic_cast<XrlAction*>(_startcommit);
+    assert(xa != NULL);
+
+    return xa->execute(ctn, task_manager, cb);
 }
 
 string
-ModuleCommand::str() const {
+ModuleCommand::str() const 
+{
     string tmp;
     tmp= "ModuleCommand: provides: " + _modname + "\n";
     tmp+="               path: " + _modpath + "\n";
@@ -212,7 +233,8 @@ ModuleCommand::execute_completed() const
 
 void 
 ModuleCommand::exec_complete(const XrlError& /*err*/, 
-			     XrlArgs*) {
+			     XrlArgs*) 
+{
     debug_msg("ModuleCommand::exec_complete\n");
     _execute_done = true;
 #ifdef NOTDEF
@@ -230,7 +252,8 @@ ModuleCommand::action_complete(const XrlError& err,
 			       XrlArgs* args,
 			       ConfigTreeNode *ctn,
 			       Action* action,
-			       string cmd) {
+			       string cmd) 
+{
     debug_msg("ModuleCommand::action_complete\n");
     if (err == XrlError::OKAY()) {
 	//XXX does this make sense?

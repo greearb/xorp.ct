@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.10 2003/04/24 23:43:48 mjh Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.1 2003/05/02 09:00:01 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -29,8 +29,7 @@ public:
 		    const XRLdb& xrldb) throw (ParseError);
     //    void set_path(const string &path);
     //    void set_depends(const string &depends);
-    int  execute(TaskManager& taskmgr,
-		 bool do_commit) const;
+    int  execute(TaskManager& taskmgr) const;
 
     bool execute_completed() const;
     
@@ -38,11 +37,9 @@ public:
     const string& path() const {return _modpath;}
     const list <string>& depends() const {return _depends;}
     int start_transaction(ConfigTreeNode& ctn,
-			  XorpClient& xclient,  uint tid, 
-			  bool do_exec, bool do_commit) const;
+			  TaskManager& task_manager) const;
     int end_transaction(ConfigTreeNode& ctn,
-			XorpClient& xclient,  uint tid, 
-			bool do_exec, bool do_commit) const;
+			TaskManager& task_manager) const;
     string str() const;
 
 protected:

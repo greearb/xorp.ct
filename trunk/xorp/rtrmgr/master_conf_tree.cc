@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.7 2003/04/23 04:24:35 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.8 2003/05/02 09:00:01 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,8 +33,8 @@ extern string booterrormsg(const char *s);
  *************************************************************************/
 
 MasterConfigTree::MasterConfigTree(const string& conffile, TemplateTree *tt, 
-				   TaskManager &taskmgr) 
-    : ConfigTree(tt), _taskmgr(taskmgr)
+				   TaskManager &task_manager) 
+    : ConfigTree(tt), _task_manager(task_manager)
 {
     string configuration;
     string errmsg;
@@ -98,6 +98,7 @@ bool MasterConfigTree::parse(const string& configuration,
 }
 
 void MasterConfigTree::execute() {
+#if 0
     printf("##############################################################\n");
     printf("MasterConfigTree::execute\n");
     list <string> changed_modules = find_changed_modules();
@@ -117,16 +118,20 @@ void MasterConfigTree::execute() {
 	if (!module_config_start(*i, /*do_commit = */true, result)) {
 	    XLOG_FATAL(result.c_str());
 	}
-	if (!_root_node.commit_changes(module_manager(), *i, 
-				       xorp_client(), tid,
-				       do_exec(), /*_do_commit=*/true,
-				       0, 0, result)) {
-	    XLOG_FATAL(("Initialization Failed\n" + result).c_str());
-	}
+    }
+
+    if (!_root_node.commit_changes(_task_manager,
+				   /*_do_commit=*/true,
+				   0, 0, result)) {
+	XLOG_FATAL(("Initialization Failed\n" + result).c_str());
+    }
+
+    for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
 	if (!module_config_done(*i, /*do_commit = */true, result)) {
 	    XLOG_FATAL(result.c_str());
 	}
     }
+
     try {
 	xorp_client()
 	    .end_transaction(tid, callback(this, 
@@ -135,10 +140,13 @@ void MasterConfigTree::execute() {
 	XLOG_FATAL(uvar.str().c_str());
     }
     printf("##############################################################\n");
+#endif
+    _commit_cb = callback(this, &MasterConfigTree::config_done);
+    commit_changes_pass2();
 }
 
-void MasterConfigTree::config_done(int status, const string& errmsg) {
-    if (status == XORP_ERROR) {
+void MasterConfigTree::config_done(bool success, string errmsg) {
+    if (!success) {
 	//XXXX find out what happened....
 	XLOG_FATAL(("Startup failed\n" + errmsg).c_str());
     }
@@ -273,9 +281,8 @@ MasterConfigTree::find_changed_modules() const {
     return ordered_modules;
 }
 
-bool
-MasterConfigTree::commit_changes(string &result,
-				 XorpBatch::CommitCallback cb) {
+void
+MasterConfigTree::commit_changes_pass1(CallBack cb) {
     printf("##############################################################\n");
     printf("MasterConfigTree::commit_changes\n");
 
@@ -290,63 +297,111 @@ MasterConfigTree::commit_changes(string &result,
     /* Two passes: the first checks for errors.  If no errors are
        found, attempt the actual commit */
 
+    /*******************************************************************/
+    /* Pass 1: check for errors without actually doing anything        */
+    /*******************************************************************/
 
-    uint tid;
-    tid = xorp_client().begin_transaction();
+    _task_manager.reset();
+    _task_manager.set_do_exec(false);
+    _commit_cb = cb;
+    string result;
+
     _root_node.initialize_commit();
     //sort the changes in order of module dependencies
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
-	if (!module_config_start(*i, /*do_commit = */false, result)) {
-	    return false;
-	}
-	if (_root_node.commit_changes(module_manager(), *i,
-				      xorp_client(), tid, 
-				      do_exec(), 
-				      /*do_commit = */false, 
-				      0, 0, 
-				      result) == false) {
-	    //something went wrong - return the error message.
-	    return false;
-	}
-	if (!module_config_done(*i, /*do_commit = */false, result)) {
-	    return false;
+	if (!module_config_start(*i, result)) {
+	    cb->dispatch(false, result);
+	    return;
 	}
     }
-    XorpBatch::CommitCallback empty_cb;
+
+    if (_root_node.commit_changes(_task_manager,
+				  /*do_commit = */false, 
+				  0, 0, 
+				  result) == false) {
+	//something went wrong - return the error message.
+	cb->dispatch(false, result);
+	return;
+    }
+
+    for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
+	if (!module_config_done(*i, result)) {
+	    cb->dispatch(false, result);
+	    return;
+	}
+    }
+    
     try {
-	xorp_client().end_transaction(tid, empty_cb);
+	_task_manager.run(callback(this, 
+				   &MasterConfigTree::commit_pass1_done));
     } catch (UnexpandedVariable& uvar) {
 	//ignore this?
 	//XXX
     }
+}
 
-    tid = xorp_client().begin_transaction();
+void 
+MasterConfigTree::commit_pass1_done(bool success, string result) {
+    if (success)
+	commit_changes_pass2();
+    else {
+	XLOG_WARNING(("Commit pass 1 failed: " + result).c_str());
+	_commit_cb->dispatch(false, result);
+    }
+}
+
+void
+MasterConfigTree::commit_changes_pass2() {
+    /*******************************************************************/
+    /* Pass 2: implement the changes                                   */
+    /*******************************************************************/
+
+    list <string> changed_modules = find_changed_modules();
+    list <string>::const_iterator i;
+
+    _task_manager.reset();
+    _task_manager.set_do_exec(true);
+
     _root_node.initialize_commit();
-    result = "";
+    string result;
     //sort the changes in order of module dependencies
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
-	if (!module_config_start(*i, /*do_commit = */false, result)) {
-	    return false;
-	}
-	if (!_root_node.commit_changes(module_manager(), *i,
-				       xorp_client(), tid,
-				       do_exec(), 
-				       /*do_commit = */true, 
-				       0, 0, result)) {
-	    //abort the commit
-	    return false;
-	}
-	if (!module_config_done(*i, /*do_commit = */false, result)) {
-	    return false;
+	if (!module_config_start(*i, result)) {
+	    _commit_cb->dispatch(false, result);
+	    return;
 	}
     }
+	
+
+    if (!_root_node.commit_changes(_task_manager,
+				   /*do_commit = */true, 
+				   0, 0, result)) {
+	//abort the commit
+	_commit_cb->dispatch(false, result);
+	return;
+    }
+
+    for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
+	if (!module_config_done(*i, result)) {
+	    _commit_cb->dispatch(false, result);
+	    return;
+	}
+    }
+
     try {
-	xorp_client().end_transaction(tid, cb);
+	_task_manager.run(callback(this, 
+				   &MasterConfigTree::commit_pass2_done));
     } catch (UnexpandedVariable& uvar) {
 	result = uvar.str();
-	return false;
+	_commit_cb->dispatch(false, result);
+	return;
     }
-    return true;
+    return;
+}
+
+void 
+MasterConfigTree::commit_pass2_done(bool success, string result) {
+    _commit_cb->dispatch(success, result);
 }
 
 bool MasterConfigTree::check_commit_status(string &result) {
@@ -684,7 +739,6 @@ MasterConfigTree::diff_configs(const ConfigTree& new_tree,
 
 bool
 MasterConfigTree::module_config_start(const string& module_name,
-				      bool do_commit, 
 				      string& result)
 {
     ModuleCommand *cmd = _template_tree->find_module(module_name);
@@ -692,13 +746,12 @@ MasterConfigTree::module_config_start(const string& module_name,
 	result = "Module " + module_name + " is not registered with the TemplateTree, but is needed to satisfy a dependency\n";
 	return false;
     }
-    cmd->execute(_taskmgr, do_commit);
+    cmd->execute(_task_manager);
     return true;
 }
 
 bool
 MasterConfigTree::module_config_done(const string& module_name,
-				     bool do_commit,
 				     string& result)
 {
     ModuleCommand *cmd = _template_tree->find_module(module_name);
@@ -708,7 +761,6 @@ MasterConfigTree::module_config_done(const string& module_name,
     }
     //XXX this is where we might stop a module if it were no longer needed.
     //TBD
-    UNUSED(do_commit);
     return true;
 }
 

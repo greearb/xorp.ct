@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.3 2003/05/02 04:53:34 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.4 2003/05/02 09:00:01 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -101,14 +101,18 @@ private:
 class TaskManager {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
-    TaskManager::TaskManager(ModuleManager &mmgr, XorpClient &xclient,
-			     bool do_exec);
+    TaskManager::TaskManager(ModuleManager &mmgr, XorpClient &xclient, 
+			     bool global_do_exec);
+    void set_do_exec(bool do_exec);
+    void reset();
     int add_module(const string& modname, const string& modpath,
 		   Validation *validation);
+    void add_xrl(const string& modname, const UnexpandedXrl& xrl, 
+		 XrlRouter::XrlCallback& cb);
     void run(CallBack cb);
     XorpClient& xorp_client() const {return _xorp_client;}
     ModuleManager& module_manager() const {return _module_manager;}
-    bool do_exec() const {return _do_exec;}
+    bool do_exec() const {return _current_do_exec;}
 private:
     void run_task();
     void task_done(bool success, string errmsg);
@@ -117,7 +121,9 @@ private:
 
     ModuleManager& _module_manager;
     XorpClient& _xorp_client;
-    bool _do_exec;
+    bool _global_do_exec; //false if we're never going to execute
+                          //anything because we're in a debug mode
+    bool _current_do_exec;
     map <string, Task*> _tasks;
     CallBack _completion_cb;
 };

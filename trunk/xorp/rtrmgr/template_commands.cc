@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.18 2003/04/25 03:39:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.19 2003/05/02 09:00:01 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -393,8 +393,8 @@ Action::execute(const ConfigTreeNode& ctn,
 
 int
 XrlAction::execute(const ConfigTreeNode& ctn,
-		   XorpClient& xclient,  uint tid,
-		   bool do_exec, XCCommandCallback cb) const {
+		   TaskManager& task_manager, 
+		   XrlRouter::XrlCallback cb) const {
 
     //first, go back through and merge all the separate words in the
     //command back together.
@@ -446,8 +446,10 @@ XrlAction::execute(const ConfigTreeNode& ctn,
 	debug_msg("CALL XRL: %s\n", xrlstr.c_str());
 
 	UnexpandedXrl x(&ctn, this);
-	result = xclient.send_xrl(tid, x, cb, do_exec);
+	//	result = xclient.send_xrl(tid, x, cb, do_exec);
+	task_manager.add_xrl(affected_module(), x, cb);
 	debug_msg("result = %d\n", result);
+	result = XORP_OK;
     } else {
 	fprintf(stderr, "Bad command: %s\n", args[0].c_str());
 	return (XORP_ERROR);
@@ -553,14 +555,14 @@ Command::add_action(const list <string>& action, const XRLdb& xrldb) {
 
 int
 Command::execute(ConfigTreeNode& ctn,
-		 XorpClient& xclient, uint tid, bool do_exec) const {
+		 TaskManager& task_manager) const {
     int result = 0;
     int actions = 0;
     list <Action*>::const_iterator i;
     for (i= _actions.begin(); i != _actions.end(); i++) {
 	const XrlAction *xa = dynamic_cast<const XrlAction*>(*i);
 	if (xa!=NULL) {
-	    result = xa->execute(ctn, xclient, tid, do_exec,
+	    result = xa->execute(ctn, task_manager,
 				 callback(const_cast<Command*>(this), 
 					  &Command::action_complete, &ctn));
 	} else {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.3 2003/05/02 04:53:34 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.4 2003/05/02 09:00:01 mjh Exp $"
 
 #include "task.hh"
 #include "module_manager.hh"
@@ -246,10 +246,24 @@ Task::xorp_client() const
     return _taskmgr.xorp_client();
 }
 
-TaskManager::TaskManager(ModuleManager &mmgr, XorpClient& xclient, 
-			 bool do_exec)
-    : _module_manager(mmgr), _xorp_client(xclient), _do_exec(do_exec)
+TaskManager::TaskManager(ModuleManager &mmgr, XorpClient& xclient,
+			 bool global_do_exec)
+    : _module_manager(mmgr), _xorp_client(xclient), 
+    _global_do_exec(global_do_exec)
 {
+}
+
+void 
+TaskManager::set_do_exec(bool do_exec) {
+    _current_do_exec = do_exec && _global_do_exec;
+}
+
+void 
+TaskManager::reset() {
+    while (!_tasks.empty()) {
+	delete _tasks.begin()->second;
+	_tasks.erase(_tasks.begin());
+    }
 }
 
 int
@@ -275,6 +289,13 @@ TaskManager::add_module(const string& modname, const string& modpath,
     return XORP_OK;
 }
 
+void 
+TaskManager::add_xrl(const string& modname, const UnexpandedXrl& xrl, 
+		     XrlRouter::XrlCallback& cb) 
+{
+    find_task(modname).add_xrl(xrl, cb);
+}
+
 void
 TaskManager::run(CallBack cb) 
 {
@@ -297,10 +318,7 @@ TaskManager::task_done(bool success, string errmsg)
 {
     if (!success) {
 	_completion_cb->dispatch(false, errmsg);
-	while (!_tasks.empty()) {
-	    delete _tasks.begin()->second;
-	    _tasks.erase(_tasks.begin());
-	}
+	reset();
 	return;
     }
     delete _tasks.begin()->second;
@@ -312,10 +330,7 @@ void
 TaskManager::fail_tasklist_initialization(const string& errmsg)
 {
     XLOG_ERROR((errmsg + "\n").c_str());
-    while (!_tasks.empty()) {
-	delete _tasks.begin()->second;
-	_tasks.erase(_tasks.begin());
-    }
+    reset();
     return;
 }
 

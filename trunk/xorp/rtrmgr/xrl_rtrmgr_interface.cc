@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.4 2003/04/22 19:42:19 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.5 2003/04/23 04:24:37 mjh Exp $"
 
 #include <sys/stat.h>
 #include "rtrmgr_module.h"
@@ -326,43 +326,39 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
     //a client that forgets to add them.
     _conf_tree.add_default_children();
 
-    XorpBatch::CommitCallback cb;
+    CallBack cb;
     cb = callback(this, &XrlRtrmgrInterface::apply_config_change_done,
 		  user_id, string(target), string(deltas), string(deletions));
 
-    if (_conf_tree.commit_changes(response, cb) == false) {
-	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
-    }
+    _conf_tree.commit_changes_pass1(cb);
     return XrlCmdError::OKAY();
 }
 
 void 
-XrlRtrmgrInterface::apply_config_change_done(int status, 
-					     const string& response, 
+XrlRtrmgrInterface::apply_config_change_done(bool success,
+					     string errmsg, 
 					     uid_t user_id,
 					     string target,
 					     string deltas,
 					     string deletions) {
     printf("XRI apply_config_change_done:\n  status:%d\n  response: %s\n  target: %s\n",
-	   status, response.c_str(), target.c_str());
+	   success, errmsg.c_str(), target.c_str());
 
-    string errmsg;
-    if (status == XORP_OK) {
+    if (success) {
 	//check everything really worked, and finalize the commit
 	if (_conf_tree.check_commit_status(errmsg) == false) {
 	    printf("check commit status indicates failure: >%s<\n",
 		   errmsg.c_str());
-	    status = XORP_ERROR;
+	    success = false;;
 	}
     }  else {
-	printf("request failed: >%s<\n", response.c_str());
-	errmsg = response;
+	printf("request failed: >%s<\n", errmsg.c_str());
     }
 
     GENERIC_CALLBACK cb1;
     cb1 = callback(this, &XrlRtrmgrInterface::apply_config_change_done_cb);
 
-    if (status == XORP_OK) {
+    if (success) {
 	//send the changes to all the clients, including the client
 	//that originally sent them
 	multimap <uint32_t, UserInstance*>::iterator i;
@@ -593,15 +589,13 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
     string deltas, deletions; //these are filled in by load_from_file
     if (_conf_tree.load_from_file(filename, user_id, 
 				   response, deltas, deletions)) {
-	XorpBatch::CommitCallback cb;
+	CallBack cb;
 	cb = callback(this, &XrlRtrmgrInterface::apply_config_change_done,
 		      user_id, string(target), 
 		      string(deltas), string(deletions));
 	printf("here1: success\n");
 	response = "";
-	if (_conf_tree.commit_changes(response, cb) == false) {
-	    return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
-	}
+	_conf_tree.commit_changes_pass1(cb);
     } else {
 	return XrlCmdError::XrlCmdError::COMMAND_FAILED(response);
     }
