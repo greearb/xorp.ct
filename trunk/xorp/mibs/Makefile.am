@@ -112,3 +112,5 @@ xorp_if_mib_module_so_SOURCES += xorp_if_mib_xrl_target.hh
 ##
 
 INCLUDES =      -I$(top_srcdir)
+
+.NOTPARALLEL:
