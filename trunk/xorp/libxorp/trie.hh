@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.8 2003/03/15 02:37:59 pavlin Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.9 2003/04/01 18:38:53 hodson Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -184,19 +184,19 @@ public:
 
     TrieNode *next(const Key &root) {
 	TrieNode *n = this;
-
-	n->dump("next");
 	do {
+	    if (n->_up == NULL)
+		return NULL;		// cannot backtrack, finished
 	    bool was_left_child = n->is_left();
 	    n = n->_up;
-	    if (n == NULL)			// cannot backtrack,
-		return NULL;		// we are done.
 	    // backtrack one level, then explore the leftmost path
 	    // on the right branch if not done already.
-	    if (was_left_child && n->_right)
+	    if (was_left_child && n->_right) {
 		n = n->_right->leftmost();
-	    if (!root.contains(n->_k))	// backtrack past root ?
+	    } else if (n->_k == root) {
+		// We were right child and parent is root, we're done.
 		return NULL;
+	    }
 	} while (n->has_payload() == false);	// found a good node.
 	return n;
     }
