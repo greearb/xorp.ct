@@ -37,7 +37,7 @@ oldincludedir = /usr/include
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
-top_builddir = ../..
+top_builddir = ../../..
 
 ACLOCAL = @ACLOCAL@
 AUTOCONF = @AUTOCONF@
@@ -121,8 +121,8 @@ DOCS = xorp
 
 # -- Document Sources
 xorp_LATEX = xorp.tex
-xorp_FIGURES = ../papers/hotnets_2002_talk/processes3.ps
-subdir = docs/slides
+xorp_FIGURES = $(top_srcdir)/docs/papers/hotnets_2002_talk/processes3.ps
+subdir = docs/slides/status_2004_02
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
@@ -139,7 +139,7 @@ all: all-am
 .SUFFIXES: .tex .bbl .dvi .ps .pdf .fig .ps .eps
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/docs/mk/Makefile.doc.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  docs/slides/Makefile
+	  $(AUTOMAKE) --gnu  docs/slides/status_2004_02/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
@@ -151,7 +151,7 @@ TAGS:
 
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
-top_distdir = ../..
+top_distdir = ../../..
 distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 
 distdir: $(DISTFILES)

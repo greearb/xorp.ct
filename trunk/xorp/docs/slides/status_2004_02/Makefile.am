@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/docs/test_harness/Makefile.am,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+## $XORP: xorp/docs/slides/status_2004_02/Makefile.am,v 1.1 2004/02/19 05:56:34 atanu Exp $
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am
@@ -10,7 +10,7 @@ DOCS			= xorp
 
 # -- Document Sources
 xorp_LATEX	= xorp.tex
-xorp_FIGURES	= ../papers/hotnets_2002_talk/processes3.ps
+xorp_FIGURES	= $(top_srcdir)/docs/papers/hotnets_2002_talk/processes3.ps
 
 
 ################################################################
