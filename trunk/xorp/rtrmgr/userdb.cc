@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.2 2003/03/10 23:21:03 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.3 2003/12/02 09:38:59 pavlin Exp $"
 
 #include <sys/types.h>
 #include <grp.h>
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "userdb.hh"
 #include <pwd.h>
-
 User::User(uint32_t user_id, const string& username)
     : _user_id(user_id),
       _username(username)
@@ -96,6 +96,9 @@ UserDB::add_user(uint32_t user_id, const string& username)
 	User* newuser = new User(user_id, username);
 	struct group* grp = getgrnam("xorp");
 	if (grp != NULL) {
+#ifdef DEBUG_USERDB
+	    printf("group xorp exists, id=%d\n", grp->gr_gid);
+#endif
 	    char **gr_mem = grp->gr_mem;
 	    while (*gr_mem != NULL) {
 #ifdef DEBUG_USERDB
@@ -107,6 +110,8 @@ UserDB::add_user(uint32_t user_id, const string& username)
 		}
 		gr_mem++;
 	    }
+	} else {
+	    XLOG_ERROR("Group \"xorp\" does not exist on this system.");
 	}
 	_users[user_id] = newuser;
 	return newuser;

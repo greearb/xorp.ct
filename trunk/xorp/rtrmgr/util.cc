@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.4 2003/11/17 19:34:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.5 2003/12/02 09:38:59 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -100,7 +100,7 @@ xorp_real_path(const string& path)
 	debug_msg("return %s\n", prp);
 	return string(prp);
     }
-    XLOG_WARNING("realpath(%s) failed.", path.c_str());
+    //XLOG_WARNING("realpath(%s) failed.", path.c_str());
     debug_msg("return %s\n", path.c_str());
     return path;
 }
