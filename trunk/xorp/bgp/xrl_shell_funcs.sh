@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.8 2004/05/13 18:43:33 atanu Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.9 2004/08/06 01:41:17 bms Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -39,7 +39,7 @@ set_parameter()
     echo -n "set_parameter" $*
 #    $CALLXRL "finder://bgp/bgp/0.2/set_parameter?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4&parameter:txt=$5"
 
-    $CALLXRL "finder://bgp/bgp/0.2/set_parameter?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4&parameter:txt=$5"
+    $CALLXRL "finder://bgp/bgp/0.2/set_parameter?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4&parameter:txt=$5&toggle:bool=$6"
 }
 
 disable_peer()
