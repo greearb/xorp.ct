@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.2 2003/05/10 00:06:39 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.3 2003/05/14 01:13:41 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -51,14 +51,6 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop() = 0;
-    
-    /**
-     * Receive data.
-     * 
-     * @param data the buffer with the data.
-     * @param n_bytes the number of bytes in the @param data buffer.
-     */
-    virtual void receive_data(const uint8_t* data, size_t n_bytes) = 0;
     
     /**
      * Obtain the unicast forwarding table.
@@ -115,14 +107,6 @@ public:
     virtual int stop();
     
     /**
-     * Receive data.
-     * 
-     * @param data the buffer with the data.
-     * @param n_bytes the number of bytes in the @param data buffer.
-     */
-    virtual void receive_data(const uint8_t* data, size_t n_bytes);
-    
-    /**
      * Obtain the unicast forwarding table.
      *
      * @param fte_list the return-by-reference list with all entries in
@@ -164,14 +148,6 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
-    
-    /**
-     * Receive data.
-     * 
-     * @param data the buffer with the data.
-     * @param n_bytes the number of bytes in the @param data buffer.
-     */
-    virtual void receive_data(const uint8_t* data, size_t n_bytes);
     
     /**
      * Obtain the unicast forwarding table.
@@ -223,17 +199,9 @@ public:
      * Data has pop-up.
      * 
      * @param data the buffer with the data.
-     * @param n_bytes the number of bytes in the @param data buffer.
+     * @param nbytes the number of bytes in the @param data buffer.
      */
-    virtual void nlsock_data(const uint8_t* data, size_t n_bytes);
-    
-    /**
-     * Receive data.
-     * 
-     * @param data the buffer with the data.
-     * @param n_bytes the number of bytes in the @param data buffer.
-     */
-    virtual void receive_data(const uint8_t* data, size_t n_bytes);
+    virtual void nlsock_data(const uint8_t* data, size_t nbytes);
     
     /**
      * Obtain the unicast forwarding table.

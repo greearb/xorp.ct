@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.4 2003/05/14 01:13:42 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.5 2003/05/23 23:27:03 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -51,17 +51,16 @@ public:
     virtual int stop() = 0;
 
     virtual bool pull_config(IfTree& config) = 0;
-    virtual void receive_data(const uint8_t* data, size_t n_bytes) = 0;
     
     static string iff_flags(uint32_t flags);
     int sock(int family);
-    
-protected:
+
     bool parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap);
     bool parse_buffer_rtm(IfTree& it, const uint8_t *buf, size_t buf_bytes);
     bool parse_buffer_ifreq(IfTree& it, int family, const uint8_t *buf,
 			    size_t buf_bytes);
     
+protected:
     int	_s4;
     int _s6;
     
@@ -89,7 +88,6 @@ public:
     virtual int stop();
     
     virtual bool pull_config(IfTree& config);
-    virtual void receive_data(const uint8_t* data, size_t n_bytes);
     
 private:
     
@@ -115,7 +113,6 @@ public:
     virtual int stop();
     
     virtual bool pull_config(IfTree& config);
-    virtual void receive_data(const uint8_t* data, size_t n_bytes);
     
     virtual bool read_config(IfTree& it);
     
@@ -145,8 +142,6 @@ public:
     virtual bool pull_config(IfTree& config);
     virtual bool read_config(IfTree& it);
     
-    virtual void receive_data(const uint8_t* data, size_t n_bytes);
-    
 private:
     
 };
@@ -172,8 +167,6 @@ public:
     
     virtual bool read_config(IfTree& it);
     virtual bool pull_config(IfTree& config);
-    
-    virtual void receive_data(const uint8_t* data, size_t n_bytes);
     
 private:
 };

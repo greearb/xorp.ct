@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.2 2003/05/02 23:21:38 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_observer.hh,v 1.3 2003/05/10 00:06:41 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_OBSERVER_HH__
 #define __FEA_IFCONFIG_OBSERVER_HH__
@@ -48,6 +48,14 @@ public:
      */
     virtual int stop() = 0;
     
+    /**
+     * Receive data from the underlying system.
+     * 
+     * @param data the buffer with the received data.
+     * @param nbytes the number of bytes in the data buffer @param data.
+     */
+    virtual void receive_data(const uint8_t* data, size_t nbytes) = 0;
+    
 private:
     IfConfig&	_ifc;
 };
@@ -70,6 +78,14 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
+
+    /**
+     * Receive data from the underlying system.
+     * 
+     * @param data the buffer with the received data.
+     * @param nbytes the number of bytes in the data buffer @param data.
+     */
+    virtual void receive_data(const uint8_t* data, size_t nbytes);
     
 private:
     
@@ -95,6 +111,14 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop();
+
+    /**
+     * Receive data from the underlying system.
+     * 
+     * @param data the buffer with the received data.
+     * @param nbytes the number of bytes in the data buffer @param data.
+     */
+    virtual void receive_data(const uint8_t* data, size_t nbytes);
     
     void rtsock_data(const uint8_t* data, size_t nbytes);
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer_rtsock.cc,v 1.1 2003/05/02 23:21:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_observer_dummy.cc,v 1.1 2003/05/10 00:06:40 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -62,4 +62,12 @@ FtiConfigTableObserverDummy::stop()
     // TODO: XXX: PAVPAVPAV: implement it!
     
     return (XORP_OK);
+}
+
+void
+FtiConfigTableObserverDummy::receive_data(const uint8_t* data, size_t nbytes)
+{
+    // TODO: use it if needed
+    UNUSED(data);
+    UNUSED(nbytes);
 }

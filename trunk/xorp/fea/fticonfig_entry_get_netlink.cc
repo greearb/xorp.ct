@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.2 2003/05/14 01:13:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.3 2003/05/22 01:05:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -68,14 +68,6 @@ int
 FtiConfigEntryGetNetlink::stop()
 {
     return (NetlinkSocket::stop());
-}
-
-void
-FtiConfigEntryGetNetlink::receive_data(const uint8_t* data, size_t n_bytes)
-{
-    // TODO: use it?
-    UNUSED(data);
-    UNUSED(n_bytes);
 }
 
 /**

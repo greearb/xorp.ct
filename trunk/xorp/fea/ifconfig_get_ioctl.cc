@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.3 2003/05/23 19:48:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.4 2003/05/23 23:35:00 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -90,27 +90,6 @@ bool
 IfConfigGetIoctl::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
-}
-
-void
-IfConfigGetIoctl::receive_data(const uint8_t* data, size_t n_bytes)
-{
-    if (parse_buffer_ifreq(ifc().live_config(), AF_INET, data, n_bytes) != true)
-	return;
-
-#ifdef HAVE_IPV6
-    if (parse_buffer_ifreq(ifc().live_config(), AF_INET6, data, n_bytes) != true)
-	return;
-#endif
-    
-    debug_msg("Start configuration read:\n");
-    debug_msg_indent(4);
-    debug_msg("%s\n", ifc().live_config().str().c_str());
-    debug_msg_indent(0);
-    debug_msg("\nEnd configuration read.\n");
-    
-    ifc().report_updates(ifc().live_config(), true);
-    ifc().live_config().finalize_state();
 }
 
 #ifndef HAVE_IOCTL_SIOCGIFCONF

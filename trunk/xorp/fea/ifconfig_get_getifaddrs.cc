@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_getifaddrs.cc,v 1.2 2003/05/14 01:13:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_getifaddrs.cc,v 1.3 2003/05/23 23:35:00 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -58,34 +58,6 @@ int
 IfConfigGetGetifaddrs::stop()
 {
     return (XORP_OK);
-}
-
-void
-IfConfigGetGetifaddrs::receive_data(const uint8_t* data, size_t n_bytes)
-{
-    // TODO: temporary here
-    if (parse_buffer_rtm(ifc().live_config(), data, n_bytes) != true)
-	return;
-#if 0 // TODO: temporary disabled
-    //
-    // XXX: we don't receive the data asynchronously, hence we pull-out
-    // everything.
-    //
-    if (pull_config(ifc().live_config()) != true)
-	return;
-#endif
-    
-    debug_msg("Start configuration read:\n");
-    debug_msg_indent(4);
-    debug_msg("%s\n", ifc().live_config().str().c_str());
-    debug_msg_indent(0);
-    debug_msg("\nEnd configuration read.\n");
-    
-    ifc().report_updates(ifc().live_config(), true);
-    ifc().live_config().finalize_state();
-    
-    UNUSED(data);
-    UNUSED(n_bytes);
 }
 
 bool
