@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.31 2004/09/08 08:34:10 bms Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.32 2004/09/10 02:17:07 bms Exp $"
 
 #include "fea_module.h"
 
@@ -168,7 +168,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
    //
    FirewallManager firewall;
    XrlStdRouter xrl_std_router_firewall(eventloop, "firewall",
-       finder_hostname, finder_port);
+				finder_hostname, finder_port);
    XrlFirewallTarget xrl_firewall_target(&xrl_std_router_firewall, firewall);
    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_firewall);
 
