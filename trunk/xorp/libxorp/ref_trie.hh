@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.12 2003/07/26 07:46:32 jcardona Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.13 2003/07/28 23:37:50 jcardona Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -563,7 +563,7 @@ public:
 	_root = x._root;
 
 	// need to increment before decrement, as the decrement might
-	// cause deleetion, which would be bad if the old Node was the
+	// cause deletion, which would be bad if the old Node was the
 	// same as the new Node.
 	if (_cur)
 	    _cur->incr_refcount();
