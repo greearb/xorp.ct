@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/debug.h,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+ * $XORP: xorp/libxorp/debug.h,v 1.2 2003/03/10 23:20:31 hodson Exp $
  */
 
 #ifndef __LIBXORP_DEBUG_H__
@@ -42,9 +42,9 @@
  *
  * About this file
  * ---------------
- * 	
+ *
  * There is some additional unpleasantness in this header for
- * `configure' related magic.  
+ * `configure' related magic.
  *
  * The macro CPP_SUPPORTS_VA_ARGS is defined by `configure' tests if the
  * C preprocessor supports macros with variable length arguments.  We
@@ -54,12 +54,12 @@
  *
  * The macro DEBUG_PRINT_FUNCTION_NAME is intended to be defined as
  * the result of a `configure' command line option for people who like
- * this feature.  
+ * this feature.
  */
 
 /*
  * The following defines and notes we defined __printfike if it does not
- * already exist.  The expansion of this macro uses a gcc extension to 
+ * already exist.  The expansion of this macro uses a gcc extension to
  * check format strings.
  */
 #ifndef __printflike
@@ -85,11 +85,11 @@
 #	ifdef DEBUG_PRINT_FUNCTION_NAME
 #	    define debug_msg(args...)					\
 			_xdebug_msg_long(__FILE__,__LINE__,__FUNCTION__,args)
-#	else 
+#	else
 #	    define debug_msg(args...)     				\
 			_xdebug_msg_long(__FILE__,__LINE__,0,args)
 #	endif
-#   else  
+#   else
 #	ifdef DEBUG_PRINT_FUNCTION_NAME
 #	    define debug_msg						\
 		_xdebug_entry(__FILE__,__LINE__,__FUNCTION__),		\
@@ -102,14 +102,14 @@
 #
 #   define debug_msg_indent(n) _xdebug_set_indent(n)
 #
-#else 
+#else
 #    ifdef __cplusplus
 
 /* This cruft and the ensuing version of debug_msg mean that the debug enabled
  * and disabled versions of debug_msg have similar sematics, ie both are
  * likely to be broken or neither is broken following a change.  However,
  * this comes at non-zero cost so an NDEBUG build would probably want to
- * define debug_msg to be empty (enabling optimization may not stop 
+ * define debug_msg to be empty (enabling optimization may not stop
  * calls to c_str() in format arguments).
  */
 inline void swallow_args(const char*) {}
@@ -145,10 +145,10 @@ inline void
 check_args(const char*, ...) {}
 
 #define debug_msg(args...) 						      \
-do { 									      \
+if (0) { 								      \
     check_args(args);							      \
     swallow_args(args);							      \
-} while(0)
+}
 
 #    else
 #	ifdef CPP_SUPPORTS_GNU_VA_ARGS
@@ -158,16 +158,16 @@ do { 									      \
 #	endif
 #    endif
 #
-#    define debug_msg_indent(x) 
+#    define debug_msg_indent(x)
 #
-#endif 
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Function for systems with variable argument macros */
-void	_xdebug_msg_long(const char* file, int line, const char* fn, 
+void	_xdebug_msg_long(const char* file, int line, const char* fn,
 			 const char* format, ...) __printflike(4, 5);
 
 /* Functions for systems without variable argument macros */
