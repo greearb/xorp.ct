@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.22 2003/10/03 18:02:22 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.23 2003/11/22 00:17:15 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -31,7 +31,8 @@
 #include "template_commands.hh"
 
 
-static map<pid_t, Module*> module_pids;
+static map<pid_t, string> module_pids;
+static multimap<string, Module*> module_paths;
 
 static void
 child_handler(int x)
@@ -39,24 +40,83 @@ child_handler(int x)
     printf("child_handler: %d\n", x);
     pid_t pid;
     int child_wait_status;
+    map<pid_t, string>::iterator pid_iter;
+    multimap<string, Module*>::iterator path_iter, path_iter_next;
 
-    pid = wait(&child_wait_status);
+    pid = waitpid(-1, &child_wait_status, WUNTRACED);
     printf("pid=%d, wait status=%d\n", pid, child_wait_status);
 
+    XLOG_ASSERT(pid > 0);
+    pid_iter = module_pids.find(pid);
+    XLOG_ASSERT(pid_iter != module_pids.end());
+
     if (WIFEXITED(child_wait_status)) {
-	printf("process exited normally with value %d\n",
+	printf("process exited with value %d\n",
 	       WEXITSTATUS(child_wait_status));
-	if (child_wait_status == 0)
-	    module_pids[pid]->normal_exit();
-	else
-	    module_pids[pid]->abnormal_exit(child_wait_status);
+	//
+	// Set the status for all appropriate modules, and at the same
+	// time delete the entries from the "module_paths" multimap.
+	//
+	path_iter = module_paths.find(module_pids[pid]);
+	XLOG_ASSERT(path_iter != module_paths.end());
+	if (WEXITSTATUS(child_wait_status) == 0) {
+	    while (path_iter != module_paths.end()) {
+		path_iter_next = path_iter;
+		++path_iter_next;
+		if (path_iter->first != module_pids[pid])
+		    break;
+		Module* module = path_iter->second;
+		module->normal_exit();
+		module_paths.erase(path_iter);
+		path_iter = path_iter_next;
+	    }
+	} else {
+	    while (path_iter != module_paths.end()) {
+		path_iter_next = path_iter;
+		++path_iter_next;
+		if (path_iter->first != module_pids[pid])
+		    break;
+		Module* module = path_iter->second;
+		module->abnormal_exit(child_wait_status);
+		module_paths.erase(path_iter);
+		path_iter = path_iter_next;
+	    }
+	}
+	module_pids.erase(pid_iter);
     } else if (WIFSIGNALED(child_wait_status)) {
 	printf("process was killed with signal %d\n",
 	       WTERMSIG(child_wait_status));
-	module_pids[pid]->killed();
+	//
+	// Set the status for all appropriate modules, and at the same
+	// time delete the entries from the "module_paths" multimap.
+	//
+	path_iter = module_paths.find(module_pids[pid]);
+	XLOG_ASSERT(path_iter != module_paths.end());
+	while (path_iter != module_paths.end()) {
+	    path_iter_next = path_iter;
+	    ++path_iter_next;
+	    if (path_iter->first != module_pids[pid])
+		break;
+	    Module* module = path_iter->second;
+	    module->killed();
+	    module_paths.erase(path_iter);
+	    path_iter = path_iter_next;
+	}
+	module_pids.erase(pid_iter);
     } else if (WIFSTOPPED(child_wait_status)) {
 	printf("process stopped\n");
-	module_pids[pid]->set_stalled();
+	//
+	// Set the status for all appropriate modules.
+	//
+	path_iter = module_paths.find(module_pids[pid]);
+	XLOG_ASSERT(path_iter != module_paths.end());
+	while (path_iter != module_paths.end()) {
+	    if (path_iter->first != module_pids[pid])
+		break;
+	    Module* module = path_iter->second;
+	    module->set_stalled();
+	    ++path_iter;
+	}
     } else {
 	XLOG_UNREACHABLE();
     }
@@ -95,12 +155,53 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
     }
 
     if (_status == MODULE_FAILED) {
-	_status = MODULE_NOT_STARTED;
+	new_status(MODULE_NOT_STARTED);
 	cb->dispatch();
 	return;
     }
 
-    printf("sending kill\n");
+    //
+    // Find whether this is the last module running within this process
+    //
+    map<pid_t, string>::iterator pid_iter;
+    multimap<string, Module*>::iterator path_iter;
+    XLOG_ASSERT(_pid != 0);
+    pid_iter = module_pids.find(_pid);
+    XLOG_ASSERT(pid_iter != module_pids.end());
+    XLOG_ASSERT(pid_iter->second == _expath);
+    path_iter = module_paths.find(_expath);
+    XLOG_ASSERT(path_iter != module_paths.end());
+    bool is_last_module = false;
+    do {
+	++path_iter;
+	if (path_iter == module_paths.end()) {
+	    is_last_module = true;
+	    break;
+	}
+	if (path_iter->first != _expath) {
+	    is_last_module = true;
+	    break;
+	}
+    } while (false);
+
+    if (! is_last_module) {
+	// Not the last module within this process, hence we are done
+	for (path_iter = module_paths.begin();
+	     path_iter != module_paths.end();
+	     ++path_iter) {
+	    if (path_iter->second == this) {
+		break;
+	    }
+	}
+	XLOG_ASSERT(path_iter != module_paths.end());
+	module_paths.erase(path_iter);
+	new_status(MODULE_NOT_STARTED);
+	_pid = 0;
+	cb->dispatch();
+	return;
+    }
+
+    printf("sending kill to pid %d\n", _pid);
     // We need to kill the process
     new_status(MODULE_SHUTTING_DOWN);
     kill(_pid, SIGTERM);
@@ -112,22 +213,48 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
 void
 Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
 {
+    map<pid_t, string>::iterator pid_iter;
+    multimap<string, Module*>::iterator path_iter;
+
     printf("terminate_with_prejudice\n");
 
-    if (_status == MODULE_FAILED) {
-	_status = MODULE_NOT_STARTED;
-	cb->dispatch();
-	return;
-    }
     if (_status == MODULE_NOT_STARTED) {
 	cb->dispatch();
+	_pid = 0;
 	return;
     }
+
+    if (_status == MODULE_FAILED) {
+	new_status(MODULE_NOT_STARTED);
+	_pid = 0;
+	cb->dispatch();
+	return;
+    }
+
+    // Remove the module from the multimap with all running modules
+    for (path_iter = module_paths.begin();
+	 path_iter != module_paths.end();
+	 ++path_iter) {
+	if (path_iter->second == this) {
+	    break;
+	}
+    }
+    XLOG_ASSERT(path_iter != module_paths.end());
+    module_paths.erase(path_iter);
+    // XXX: this must be the last module for same path
+    XLOG_ASSERT(module_paths.find(_expath) == module_paths.end());
+
+    // Remove from the map with all pids
+    XLOG_ASSERT(_pid != 0);
+    pid_iter = module_pids.find(_pid);
+    XLOG_ASSERT(pid_iter != module_pids.end());
+    module_pids.erase(pid_iter);
 
     printf("sending kill -9\n");
     // If it still hasn't exited, kill it properly.
     kill(_pid, SIGKILL);
-    _status = MODULE_NOT_STARTED;
+    new_status(MODULE_NOT_STARTED);
+    _pid = 0;
 
     // We'll give it a couple more seconds to really go away
     _shutdown_timer = _mmgr.eventloop().new_oneoff_after_ms(2000, cb);
@@ -136,14 +263,18 @@ Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
 int
 Module::set_execution_path(const string& path)
 {
-    if ((path.size() >= 1) && (path[0] == '~')) {
+    if (path.empty()) {
+	// The path is missing.
+	return XORP_ERROR;
+    }
+
+    if (path[0] == '~') {
 	// The path to the module starts from the user home directory
 	_path = path;
     } else {
 	// Add the XORP root path to the front
 	_path = _mmgr.xorp_root_dir() + "/" + path;
     }
-    struct stat sb;
     if (_verbose) {
 	printf("**********************************************************\n");
 	printf("new module: %s path: %s\n", _name.c_str(), _path.c_str());
@@ -173,6 +304,7 @@ Module::set_execution_path(const string& path)
 	_expath = _path;
     }
 
+    struct stat sb;
     if (stat(_expath.c_str(), &sb) < 0) {
 	string err = _expath + ": ";
 	switch (errno) {
@@ -200,6 +332,8 @@ Module::set_execution_path(const string& path)
 int
 Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 {
+    bool is_process_running = false;
+
     if (_verbose) {
 	printf("**********************************************************\n");
 	printf("running module: %s path: %s\n", _name.c_str(), _path.c_str());
@@ -212,19 +346,56 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 	return XORP_OK;
     }
 
-    signal(SIGCHLD, child_handler);
-    _pid = fork();
-    if (_pid == 0) {
-	// Detach from the controlling terminal.
-	setsid();
-	if (execl(_expath.c_str(), _expath.c_str(), NULL) < 0) {
-	    fprintf(stderr, "Execution of %s failed\n", _expath.c_str());
-	    exit(-1);
+    // Check if a process with the same path is running already
+    multimap<string, Module*>::iterator path_iter;
+    path_iter = module_paths.find(_expath);
+    if (path_iter != module_paths.end()) {
+	// The process with same path name is already running. Add this
+	// module to the set of modules corresponding to that process.
+	// However, first verify that this module is not yet in this set.
+	for ( ; path_iter != module_paths.end(); ++path_iter) {
+	    if (path_iter->first != _expath)
+		break;
+	    XLOG_ASSERT(path_iter->second != this);
 	}
+	// Find the pid of the running process
+	XLOG_ASSERT(_pid == 0);
+	map<pid_t, string>::iterator pid_iter;
+	for (pid_iter = module_pids.begin();
+	     pid_iter != module_pids.end();
+	     ++pid_iter) {
+	    if (pid_iter->second == _expath) {
+		_pid = pid_iter->first;
+		break;
+	    }
+	}
+	XLOG_ASSERT(_pid != 0);
+	is_process_running = true;
     }
-    if (_verbose)
-	printf("New module has PID %d\n", _pid);
-    module_pids[_pid] = this;
+
+    if (! is_process_running) {
+	// We need to start a new process
+	signal(SIGCHLD, child_handler);
+	_pid = fork();
+	if (_pid == 0) {
+	    // Detach from the controlling terminal.
+	    setsid();
+	    if (execl(_expath.c_str(), _expath.c_str(), NULL) < 0) {
+		fprintf(stderr, "Execution of %s failed\n", _expath.c_str());
+		exit(-1);
+	    }
+	}
+	if (_verbose)
+	    printf("New module has PID %d\n", _pid);
+
+	// Insert the new process in the map of processes
+	XLOG_ASSERT(module_pids.find(_pid) == module_pids.end());
+	module_pids[_pid] = _expath;
+    }
+
+    // Insert the new module in the multimap of modules
+    module_paths.insert(make_pair(_expath, this));
+
     new_status(MODULE_STARTUP);
     cb->dispatch(true);
     return XORP_OK;
@@ -268,6 +439,7 @@ Module::normal_exit()
 	printf("Module normal exit: %s\n", _name.c_str());
 
     new_status(MODULE_NOT_STARTED);
+    _pid = 0;
 }
 
 void
@@ -278,6 +450,7 @@ Module::abnormal_exit(int child_wait_status)
 	       _name.c_str(), child_wait_status);
 
     new_status(MODULE_FAILED);
+    _pid = 0;
 }
 
 void
@@ -294,6 +467,7 @@ Module::killed()
 	    printf("Module abnormally killed: %s\n", _name.c_str());
 	new_status(MODULE_FAILED);
     }
+    _pid = 0;
 }
 
 void
@@ -358,7 +532,7 @@ int
 ModuleManager::start_module(const string&name, bool do_exec,
 			    XorpCallback1<void, bool>::RefPtr cb)
 {
-    Module* m =  find_module(name);
+    Module* m = find_module(name);
 
     XLOG_ASSERT(m != NULL);
     return m->run(do_exec, cb);
@@ -367,7 +541,7 @@ ModuleManager::start_module(const string&name, bool do_exec,
 int
 ModuleManager::kill_module(const string&name, XorpCallback0<void>::RefPtr cb)
 {
-    Module* m =  find_module(name);
+    Module* m = find_module(name);
 
     XLOG_ASSERT(m != NULL);
     m->terminate(cb);
