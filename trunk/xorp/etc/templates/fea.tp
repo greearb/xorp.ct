@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.3 2003/03/14 23:49:10 hodson Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.4 2003/04/11 22:26:08 pavlin Exp $ */
 
 interfaces {
   interface @: text {
@@ -32,7 +32,7 @@ interfaces {
 interfaces {
   %modinfo: provides fea;
   %modinfo: path "../fea/fea";
-  %modinfo: ready xrl "fea/common/0.1/get_version->version:txt";
+  %modinfo: statusmethod xrl;
   %modinfo: startcommit xrl "fea/ifmgr/0.1/start_transaction->tid:u32=$(interfaces.TID)";
   %modinfo: endcommit xrl "fea/ifmgr/0.1/commit_transaction?tid:u32=$(interfaces.TID)";
   interface @: text {
