@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.17 2002/12/11 23:04:41 pavlin Exp $
+# $XORP: xorp/README,v 1.1.1.1 2002/12/11 23:55:48 hodson Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -67,7 +67,7 @@ Supported platforms:
 Currently, XORP implements the following protocols:
 
   * BGP4:
-   - TODO: list which RRFs and/or I-Ds are implemented.
+   - draft-ietf-idr-bgp4-18.txt
 
   * PIM-SM:
     - draft-ietf-pim-sm-v2-new-05.{ps,txt} (without SSM).
@@ -226,7 +226,7 @@ The core team currently consists of:
   * Sponsors (in chronological order, oldest first):
     - AT&T funding (through ICIR)
     - Intel Corporation
-    - NSF grant (TODO: add grant number).
+    - NSF grant (NSF/ANI 12954).
   * Martin C. Shepherd for the libtecla library (used by the CLI).
 
 8. Additional information
