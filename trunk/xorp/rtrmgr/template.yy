@@ -5,52 +5,56 @@
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
 #include "template_tree.hh"
-/* #define DEBUG_TEMPLATE_PARSER */
-/* XXX: sigh - -p flag to yacc should do this for us */
+/* XXX: sigh, the -p flag to yacc should do this for us */
 #define yystacksize tpltstacksize
 #define yysslim tpltsslim
 %}
 
-%token STRING
-%token COMMAND
 %token UPLEVEL
 %token DOWNLEVEL
+%token END
 %left COLON
 %left ASSIGN_DEFAULT
-%token END
-%token LITERAL
-%token SLASH
-%token VARIABLE
-%token VARDEF
 %token LISTNEXT
 %token RETURN
-%token TEXT
-%token UINT
-%token INT
-%token BOOL
-%token TOGGLE
-%token MACADDR
-%token IPV4
-%token IPV4PREFIX
-%token IPV6
-%token IPV6PREFIX
-%token INTEGER
-%token BOOL_INITIALIZER
-%token IPV4_INITIALIZER
-%token IPV4PREFIX_INITIALIZER
-%token IPV6_INITIALIZER
-%token IPV6PREFIX_INITIALIZER
-%token MACADDR_INITIALIZER
+%token TEXT_TYPE
+%token INT_TYPE
+%token UINT_TYPE
+%token BOOL_TYPE
+%token TOGGLE_TYPE
+%token IPV4_TYPE
+%token IPV4PREFIX_TYPE
+%token IPV6_TYPE
+%token IPV6PREFIX_TYPE
+%token MACADDR_TYPE
+%token BOOL_VALUE
+%token INTEGER_VALUE
+%token IPV4_VALUE
+%token IPV4PREFIX_VALUE
+%token IPV6_VALUE
+%token IPV6PREFIX_VALUE
+%token MACADDR_VALUE
+%token VARDEF
+%token COMMAND
+%token VARIABLE
+%token LITERAL
+%token STRING
+%token SYNTAX_ERROR
 
 
 %%
+
 input:		/* empty */
 		| definition input
+		| syntax_error
+		;
 
 definition:	nodename nodegroup
+		;
 
 nodename:	literals { push_path(); }
 		| named_literal { push_path(); }
+		;
 
 named_literal:	LITERAL VARDEF {
 			extend_path($1, true);
@@ -60,87 +64,102 @@ named_literal:	LITERAL VARDEF {
 			extend_path($1, true);
 			extend_path($2, false);
 		}
+		;
 
 literals:	LITERAL { extend_path($1, false); }
 		| literals LITERAL { extend_path($2, false); }
 		| literals named_literal
+		;
 
-type:		TEXT { tplt_type = NODE_TEXT; }
-		| UINT { tplt_type = NODE_UINT; }
-		| INT { tplt_type = NODE_INT; }
-		| BOOL { tplt_type = NODE_BOOL; }
-		| TOGGLE { tplt_type = NODE_TOGGLE; }
-		| IPV4 { tplt_type = NODE_IPV4; }
-		| IPV4PREFIX { tplt_type = NODE_IPV4PREFIX; }
-		| IPV6 { tplt_type = NODE_IPV6; }
-		| IPV6PREFIX { tplt_type = NODE_IPV6PREFIX; }
-		| MACADDR { tplt_type = NODE_MACADDR; }
+type:		TEXT_TYPE { tplt_type = NODE_TEXT; }
+		| INT_TYPE { tplt_type = NODE_INT; }
+		| UINT_TYPE { tplt_type = NODE_UINT; }
+		| BOOL_TYPE { tplt_type = NODE_BOOL; }
+		| TOGGLE_TYPE { tplt_type = NODE_TOGGLE; }
+		| IPV4_TYPE { tplt_type = NODE_IPV4; }
+		| IPV4PREFIX_TYPE { tplt_type = NODE_IPV4PREFIX; }
+		| IPV6_TYPE { tplt_type = NODE_IPV6; }
+		| IPV6PREFIX_TYPE { tplt_type = NODE_IPV6PREFIX; }
+		| MACADDR_TYPE { tplt_type = NODE_MACADDR; }
+		;
 
-init_type:	TEXT ASSIGN_DEFAULT STRING {
+init_type:	TEXT_TYPE ASSIGN_DEFAULT STRING {
 			tplt_type = NODE_TEXT;
 			tplt_initializer = $3;
 		}
-		| UINT ASSIGN_DEFAULT INTEGER {
-			tplt_type = NODE_UINT;
-			tplt_initializer = $3;
-		}
-		| INT ASSIGN_DEFAULT INTEGER {
+		| INT_TYPE ASSIGN_DEFAULT INTEGER_VALUE {
 			tplt_type = NODE_INT;
 			tplt_initializer = $3;
 		}
-		| BOOL ASSIGN_DEFAULT BOOL_INITIALIZER {
+		| UINT_TYPE ASSIGN_DEFAULT INTEGER_VALUE {
+			tplt_type = NODE_UINT;
+			tplt_initializer = $3;
+		}
+		| BOOL_TYPE ASSIGN_DEFAULT BOOL_VALUE {
 			tplt_type = NODE_BOOL;
 			tplt_initializer = $3;
 		}
-		| TOGGLE ASSIGN_DEFAULT BOOL_INITIALIZER {
+		| TOGGLE_TYPE ASSIGN_DEFAULT BOOL_VALUE {
 			tplt_type = NODE_TOGGLE;
 			tplt_initializer = $3;
 		}
-		| IPV4 ASSIGN_DEFAULT IPV4_INITIALIZER {
+		| IPV4_TYPE ASSIGN_DEFAULT IPV4_VALUE {
 			tplt_type = NODE_IPV4;
 			tplt_initializer = $3;
 		}
-		| IPV4PREFIX ASSIGN_DEFAULT IPV4PREFIX_INITIALIZER {
+		| IPV4PREFIX_TYPE ASSIGN_DEFAULT IPV4PREFIX_VALUE {
 			tplt_type = NODE_IPV4PREFIX;
 			tplt_initializer = $3;
 		}
-		| IPV6 ASSIGN_DEFAULT IPV6_INITIALIZER {
+		| IPV6_TYPE ASSIGN_DEFAULT IPV6_VALUE {
 			tplt_type = NODE_IPV6;
 			tplt_initializer = $3;
 		}
-		| IPV6PREFIX ASSIGN_DEFAULT IPV6PREFIX_INITIALIZER {
+		| IPV6PREFIX_TYPE ASSIGN_DEFAULT IPV6PREFIX_VALUE {
 			tplt_type = NODE_IPV6PREFIX;
 			tplt_initializer = $3;
 		}
-		| MACADDR ASSIGN_DEFAULT MACADDR_INITIALIZER {
+		| MACADDR_TYPE ASSIGN_DEFAULT MACADDR_VALUE {
 			tplt_type = NODE_MACADDR;
 			tplt_initializer = $3;
 		}
+		;
 
 nodegroup:	UPLEVEL statements DOWNLEVEL { pop_path(); }
+		;
 
 statements:	/* empty string */
 		| statement statements
+		;
 
 statement:	terminal | command | definition
+		;
 
 terminal:	default_terminal | regular_terminal
+		;
 
 regular_terminal:	LITERAL COLON type END { terminal($1); }
+		;
 
 default_terminal:	LITERAL COLON init_type END { terminal($1); }
+		;
 
 command:	cmd_val
 		| cmd_default
+		;
 
 cmd_val:	command_name COLON cmd_list END
+		;
 
 cmd_default:	command_name COLON END
+		;
 
 command_name:	COMMAND { add_cmd($1); }
+		;
 
 cmd_list:	cmd
 		| cmd_list LISTNEXT cmd
+		;
 
 cmd:		LITERAL list_of_cmd_strings {
 			prepend_cmd($1);
@@ -149,11 +168,11 @@ cmd:		LITERAL list_of_cmd_strings {
 		| LITERAL STRING RETURN STRING {
 			append_cmd($1);
 			append_cmd($2);
-			append_cmd(strdup("return"));
+			append_cmd($3);
 			append_cmd($4);
 			end_cmd();
 		}
-		| LITERAL VARIABLE type { /* eg: set FOOBAR ipv4 */
+		| LITERAL VARIABLE type { /* e.g.: set FOOBAR ipv4 */
 			append_cmd($1);
 			append_cmd($2);
 			append_cmd($3);
@@ -181,6 +200,7 @@ cmd:		LITERAL list_of_cmd_strings {
 		| LITERAL {
 			append_cmd($1);
 		}
+		;
 
 list_of_cmd_strings:
 		STRING {
@@ -189,6 +209,13 @@ list_of_cmd_strings:
 		| STRING list_of_cmd_strings {
 			prepend_cmd($1);
 		}
+		;
+
+syntax_error:	SYNTAX_ERROR {
+			tplterror("syntax error");
+		}
+		;
+
 
 %%
 
@@ -198,51 +225,39 @@ extern char *cstr;
 extern char *sstr;
 extern char *istr;
 extern FILE *tpltin;
-extern int linenum;
-static int tplt_type;
-static char *tplt_initializer;
-static const char *tplt_filename;
-static char lastsymbol[256];
-
-#define MAXSTACK 20
-#define MAXPATH 256
-/* static string cmd_str; */
-static string current_cmd;
-/* static string path_hold; */
-static list<string> cmd_list;
-static TemplateTree* tt;
+extern int tplt_linenum;
 extern "C" int tpltparse();
 extern int tpltlex();
 
-void
-tplterror(const char *s)
-{
-    printf("\n ERROR [Template File: %s line %d]: %s\n",
-	tplt_filename, linenum, s);
-    printf("\n Last symbol parsed was %s\n", lastsymbol);
-    exit(1);
-}
+static TemplateTree* tt = NULL;
+static string tplt_filename;
+static string lastsymbol;
+static int tplt_type;
+static char *tplt_initializer = NULL;
+static string current_cmd;
+static list<string> cmd_list;
+
 
 static void
 extend_path(char *segment, bool is_tag)
 {
-    strncpy(lastsymbol, segment, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = segment;
 
     string segname;
     segname = segment;
     tt->extend_path(segname, is_tag);
-    /* free(segment); */
-    /* printf("\n>>> extend path: %s\n", path); */
+    free(segment);
 }
 
 static void
 push_path()
 {
-    /* printf("\n>>>PUSH: %s\n", path); */
     tt->push_path(tplt_type, tplt_initializer);
     tplt_type = NODE_VOID;
-    tplt_initializer = NULL;
+    if (tplt_initializer != NULL) {
+	free(tplt_initializer);
+	tplt_initializer = NULL;
+    }
 }
 
 static void
@@ -250,8 +265,10 @@ pop_path()
 {
     tt->pop_path();
     tplt_type = NODE_VOID;
-    tplt_initializer = NULL;
-    /* printf("\n>>>POP: %s\n", path); */
+    if (tplt_initializer != NULL) {
+	free(tplt_initializer);
+	tplt_initializer = NULL;
+    }
 }
 
 static void
@@ -265,8 +282,7 @@ terminal(char *segment)
 static void
 add_cmd(char *cmd)
 {
-    strncpy(lastsymbol, cmd, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = cmd;
 
     tt->add_cmd(cmd);
     current_cmd = cmd;
@@ -277,59 +293,45 @@ add_cmd(char *cmd)
 static void
 append_cmd(char *s)
 {
-    strncpy(lastsymbol, s, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = s;
 
     cmd_list.push_back(string(s));
-
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("cmd_str now >");
-    list<string>::const_iterator iter;
-    for (iter = cmd_list.begin(); iter != cmd_list.end(); ++iter) {
-	printf("%s ", iter->c_str());
-    }
-    printf("\n");
-#endif /* DEBUG_TEMPLATE_PARSER */
-
     free(s);
 }
 
 static void
 prepend_cmd(char *s)
 {
-    strncpy(lastsymbol, s, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = s;
 
     cmd_list.push_front(string(s));
-
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("cmd_str now >");
-    list<string>::const_iterator iter;
-    for (iter = cmd_list.begin(); iter != cmd_list.end(); ++iter) {
-	printf("%s ", iter->c_str());
-    }
-    printf("\n");
-#endif /* DEBUG_TEMPLATE_PARSER */
-
     free(s);
 }
 
 static void
 end_cmd()
 {
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("end_cmd\n");
-#endif
-
     tt->add_cmd_action(current_cmd, cmd_list);
     cmd_list.clear();
 }
 
+void
+tplterror(const char *s) throw (ParseError)
+{
+    string errmsg;
+
+    errmsg = c_format("PARSE ERROR [Template File: %s line %d]: %s",
+		      tplt_filename.c_str(), tplt_linenum, s);
+    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
+
+    xorp_throw(ParseError, errmsg);
+}
+
 int
-init_template_parser (const char *filename, TemplateTree *c)
+init_template_parser(const char *filename, TemplateTree *c)
 {
     tt = c;
-    linenum = 1;
+    tplt_linenum = 1;
 
     tpltin = fopen(filename, "r");
     if (tpltin == NULL)
@@ -341,9 +343,9 @@ init_template_parser (const char *filename, TemplateTree *c)
     return 0;
 }
 
-int
-parse_template()
+void
+parse_template() throw (ParseError)
 {
-    tpltparse();
-    return 0;
+    if (tpltparse() != 0)
+	tplterror("unknown error");
 }
