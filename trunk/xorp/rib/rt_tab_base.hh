@@ -12,22 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.11 2004/02/11 08:48:47 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.12 2004/03/25 01:45:09 hodson Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
 
-#include <map>
-
 #include "libxorp/xorp.h"
-#include "libxorp/xlog.h"
-#include "libxorp/ipv4net.hh"
-#include "libxorp/ipv4.hh"
 
 #include "route.hh"
 #include "protocol.hh"
 #include "libxorp/trie.hh"
-
 
 enum TableType {
     ORIGIN_TABLE	= 1 << 0,
