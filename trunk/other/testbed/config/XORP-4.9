@@ -1,4 +1,4 @@
-#
+# $XORP$
 # GENERIC -- Generic kernel configuration file for FreeBSD/i386
 #
 # For more information on this file, please read the handbook section on
@@ -22,10 +22,11 @@ cpu		I386_CPU
 cpu		I486_CPU
 cpu		I586_CPU
 cpu		I686_CPU
-ident		GENERIC
+ident		XORP
 maxusers	0
 
-#makeoptions	DEBUG=-g		#Build kernel with gdb(1) debug symbols
+# XORP
+makeoptions	DEBUG=-g		#Build kernel with gdb(1) debug symbols
 
 options 	MATH_EMULATE		#Support for x87 emulation
 options 	INET			#InterNETworking
@@ -66,6 +67,32 @@ options 	AHD_REG_PRETTY_PRINT	# Print register bitfields in debug
 
 # To support HyperThreading, HTT is needed in addition to SMP and APIC_IO
 #options 	HTT			# HyperThreading Technology
+
+# XORP
+options		IPFIREWALL
+options		DUMMYNET
+# Needed to get diskless booting working
+options		IPFIREWALL_DEFAULT_TO_ACCEPT
+options		MROUTING
+options		PIM
+options		TCPDEBUG
+
+# Added by Atanu http://etherboot.sourceforge.net/doc/html/freebsd.html
+# Kernel BOOTP support  
+options         BOOTP           # Use BOOTP to obtain IP address/hostname
+options         BOOTP_NFSROOT   # NFS mount root filesystem using BOOTP info
+options         BOOTP_NFSV3     # Use NFS v3 to NFS mount root
+options         BOOTP_COMPAT    # Workaround for broken bootp daemons.
+#options                BOOTP_WIRED_TO=fxp0
+options         DDB             # Debugging
+#
+# If using GDB remote mode to debug the kernel, there's a non-standard
+# extension to the remote protocol that can be used to use the serial
+# port as both the debugging port and the system console.  It's non-
+# standard and you're on your own if you enable it.  See also the
+# "remotechat" variables in the FreeBSD specific version of gdb.
+#
+options         GDB_REMOTE_CHAT
 
 device		isa
 device		eisa
@@ -169,7 +196,9 @@ device		pcic0	at isa? irq 0 port 0x3e0 iomem 0xd0000
 device		pcic1	at isa? irq 0 port 0x3e2 iomem 0xd4000 disable
 
 # Serial (COM) ports
-device		sio0	at isa? port IO_COM1 flags 0x10 irq 4
+# XORP:  Enable a serial console.
+device		sio0	at isa? port IO_COM1 flags 0x30 irq 4
+#device		sio0	at isa? port IO_COM1 flags 0x10 irq 4
 device		sio1	at isa? port IO_COM2 irq 3
 device		sio2	at isa? disable port IO_COM3 irq 5
 device		sio3	at isa? disable port IO_COM4 irq 9
@@ -269,3 +298,36 @@ device		kue		# Kawasaki LSI USB ethernet
 device		firewire	# FireWire bus code
 device		sbp		# SCSI over FireWire (Requires scbus and da)
 device		fwe		# Ethernet over FireWire (non-standard!)
+
+# XORP
+options         HZ=1000
+options         NMBCLUSTERS=8192
+#options                CLK_USE_I8254_CALIBRATION
+#options                CLK_USE_TSC_CALIBRATION
+
+
+# XORP
+# This allows you to actually store this configuration file into
+# the kernel binary itself, where it may be later read by saying:
+#    strings -n 3 /kernel | sed -n 's/^___//p' > MYKERNEL
+#
+options         INCLUDE_CONFIG_FILE     # Include this file in kernel
+
+# XORP: need to disable SMP in order to enable device polling.
+# DEVICE_POLLING adds support for mixed interrupt-polling handling
+# of network device drivers, which has significant benefits in terms
+# of robustness to overloads and responsivity, as well as permitting
+# accurate scheduling of the CPU time between kernel network processing
+# and other activities. The drawback is a moderate (up to 1/HZ seconds)
+# potential increase in response times.
+# It is strongly recommended to use HZ=1000 or 2000 with DEVICE_POLLING
+# to achieve smoother behaviour.
+# Additionally, you can enable/disable polling at runtime with the
+# sysctl variable kern.polling.enable (defaults off), and select
+# the CPU fraction reserved to userland with the sysctl variable
+# kern.polling.user_frac (default 50, range 0..100).
+#
+# Only the "dc" "fxp" and "sis" devices support this mode of operation at
+# the time of this writing.
+ 
+options         DEVICE_POLLING
