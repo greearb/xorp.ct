@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.21 2004/03/27 23:28:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.22 2004/04/10 07:54:49 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -160,6 +160,12 @@ IfConfig::push_config(const IfTree& config)
 {
     if (_ifc_set == NULL)
 	return false;
+
+    //
+    // XXX: explicitly pull the current config so we can align
+    // the new config with the current config.
+    //
+    pull_config();
     return (_ifc_set->push_config(config));
 }
 
