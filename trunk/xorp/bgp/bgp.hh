@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.24 2004/05/11 00:44:35 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.25 2004/05/15 18:31:38 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -409,7 +409,7 @@ private:
     void connect_attempt(int fd, SelectorMask m,
 			 struct in_addr laddr, uint16_t lport);
 
-    template <class A>
+    template <typename A>
     void extract_attributes(// Input values, 
 			    const PathAttributeList<A>& attributes, 
 			    // Output values, 
@@ -511,10 +511,12 @@ BGPMain::get_route_list_start(uint32_t& token,
 				 const bool& unicast,
 				 const bool& multicast)
 {
+    A dummy;
+
     if (unicast) {
-	token = _plumbing_unicast->create_route_table_reader<A>();
+	token = _plumbing_unicast->create_route_table_reader(dummy);
     } else if (multicast) {
-	token = _plumbing_multicast->create_route_table_reader<A>();
+	token = _plumbing_multicast->create_route_table_reader(dummy);
     } else {
 	XLOG_ERROR("Must specify at least one of unicast or multicast");
 	return false;
@@ -525,7 +527,7 @@ BGPMain::get_route_list_start(uint32_t& token,
     return true;
 }
 
-template <class A>
+template <typename A>
 void
 BGPMain::extract_attributes(// Input values,
 			    const PathAttributeList<A>& attributes,
@@ -613,6 +615,8 @@ BGPMain::get_route_list_next(
     uint32_t internal_token, global_token;
     internal_token = global_token = token;
 
+    A dummy;
+
     if (!get_token_table<A>().lookup(internal_token, unicast, multicast))
 	return false;
 
@@ -638,7 +642,7 @@ BGPMain::get_route_list_next(
 	get_token_table<A>().erase(global_token);
 	if (multicast) {
 	    internal_token =
-		_plumbing_multicast->create_route_table_reader<A>();
+		_plumbing_multicast->create_route_table_reader(dummy);
 	    global_token = get_token_table<A>().
 		create(internal_token, false, true);
 	}

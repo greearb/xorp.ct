@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.49 2004/05/15 15:12:15 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.50 2004/05/15 18:31:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -190,14 +190,14 @@ BGPPlumbing::output_no_longer_busy(PeerHandler *peer_handler)
 
 template<>
 uint32_t 
-BGPPlumbing::create_route_table_reader<IPv4>() 
+BGPPlumbing::create_route_table_reader<IPv4>(IPv4 /*dummy*/) 
 {
     return plumbing_ipv4().create_route_table_reader();
 }
 
 template<>
 uint32_t 
-BGPPlumbing::create_route_table_reader<IPv6>()
+BGPPlumbing::create_route_table_reader<IPv6>(IPv6 /*dummy*/)
 {
     return plumbing_ipv6().create_route_table_reader();
 }
