@@ -42,9 +42,9 @@ To run the client-side scripts in this directory
   communicate with the agent.  They rely on file snmp.conf to provide valid 
   default values for the SNMP version to use, the user, community and 
   security level.  If your agent was configured with the default security user
-  suggested in the previous section, you should copy the snmp.conf found in this
-  directory to ~/.snmp/snmp.conf.  Otherwise you'll have to create your own
-  snmp.conf so it matches your settings.  
+  suggested in the previous section, you should copy the snmp.conf found in
+  this directory to ~/.snmp/snmp.conf.  Otherwise you'll have to create your
+  own snmp.conf so it matches your settings.  
   
 
 - You must make XORP textual mib files (xorp/mibs/textual/*.txt) accessible to

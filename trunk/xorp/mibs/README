@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mibs/README,v 1.1 2003/06/06 18:31:28 jcardona Exp $
+# $XORP: xorp/mibs/README,v 1.2 2003/06/06 19:05:01 jcardona Exp $
 #
 
 MIB modules for Net-SNMP
@@ -22,17 +22,33 @@ Startup
 In normal operation, the SNMP agent would be started by the XORP router manager
 process, not directly from the command line.  
 
-For testing and debugging purposes, the SNMP agent can be manually started.  The
-proper sequence is:
+For testing and debugging purposes, the SNMP agent can be manually started.
+The proper sequence is:
 
-    - Start the finder + other protocol processes (currently only bgp supported)
-    - Start /usr/local/sbin/snmpd
-    - Load xorp_if_mib_module (you may use the scripts provided in snmpdscripts,
-	or follow the instructions in snmpdscripts/README to have snmpd load
-	it when it starts)
-    - Load other protocol MIB modules (currently only bgp4_mib_1657.so)
-	(for this you can use the same methods as the step before, or the Xrl
-	methods you will find in xorp/xrl/interfaces/xorp_if_mib.xif)
+    - Start the finder + other protocol processes (currently only bgp
+      supported)
+
+    - cd into snmpdscripts and execute ./dbg_startsnmp.sh.  This script starts
+      the snmptrapd and snmpd processes, and loads the xorp_if_mib mib module
+      that allows Xrl communication with snmpd.  Note that this script will
+      execute in the foreground, so you'll need another terminal to continue.
+
+    - Verify that both processes are running by examining snmpd.log and
+      snmptrapd.log, and that xorp_if_mib is loaded by executing
+      snmpscripts/dbg_dlmiblist.sh
+    
+    - cd into snmpdsxripts and execute 
+
+	$ ./dbg_loadmib.sh bgp4_mib_1657 2
+      
+      This will load that mib in the second row of the dynamically loaded mibs
+      table. 
+
+    - access the mib using Net-SNMP command line tools.  Look at
+      snmpdscripts/dbg_config.sh for the appropriate configuration options.
+
+	$ snmpget -v 2c -c Xorp localhost:51515 bgpVersion.0
+	BGP4-MIB::bgpVersion.0 = STRING: "4"
        
 Documentation
 =============
@@ -49,13 +65,19 @@ Run gmake check in this directory.
 Status
 ======
 
-The MIB development framework is complete except for SNMP trap support.
+The MIB development framework is complete.
 
-Currenly we have partially implemented BGP4-MIB (RFC 1657), more specifically,
-the scalar bgpVersion and the table bgpPeerTable.
+Currenly we have fully implemented BGP4-MIB (RFC 1657).
  
 Known problems
 ==============
 
 Terminating snmpd (v 5.0.8) with XORP modules still loaded causes a core dump in FreeBSD.  
+
+If you are using FreeBSD/gcc2.95.4, you may see a memory leak in snmpd after
+the BGP4-MIB module is loaded.  This seems to be related to the STL default
+allocator.  To avoid it, use a newer compiler (we tested gcc3.2) or disable STL
+memory aggregation by modifying _MAX_BYTES to be 0 (instead of 128) and
+_NFREELISTS to be 16 (instead of _MAX_BYTES/_ALIGN) in
+/usr/include/g++/stl_alloc.h
 

@@ -30,4 +30,4 @@ echo "Loading module $1 from ${MOD_FILENAME}..."
 
 
 echo "The module $1 should appear loaded in position $2"
-snmptable -v 2c -c ${SNMP_DBG_COMMUNITY} localhost:${SNMPD_PORT} UCD-DLMOD-MIB::dlmodTable
+./dbg_dlmiblist.sh
