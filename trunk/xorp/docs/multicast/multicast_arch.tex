@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.4 2002/12/11 10:19:33 pavlin Exp $
+% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.1.1.1 2002/12/11 23:55:56 hodson Exp $
 %
 
 \documentclass[11pt]{article}
@@ -37,13 +37,13 @@
 
 \title{XORP Multicast Routing Design Architecture \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 6, 2003}
 
 \maketitle
 
@@ -57,18 +57,18 @@ Version 0.1}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Overview}
 
-This document provides an overview of the XORP multicast architecture.
-Routing Daemon. It is intended to provide a starting point for software
+This document provides an overview of the XORP multicast routing
+architecture.  It is intended to provide a starting point for software
 developers who wish to modify the multicast-related software.
 
-XORP multicast architecture consists of user-level software
+The XORP multicast architecture consists of user-level software
 implementation of multicast routing protocols such as PIM-SM and IGMP.
 This document provides an overview of the interaction among them,
 as well as the interaction with the underlying multicast forwarding
 engine and other parts of the system.
 
-Similar to the other parts of the XORP architecture, the multicast
-architecture is also based on modularity and abstraction.
+As with the other parts of the XORP architecture, the multicast
+architecture is based on modularity and abstraction.
 In particular, there is one process per protocol, and each process
 typically communicates with other processes by using XRLs, the XORP
 inter-process communication mechanism~\cite{xorp:xrl}.
@@ -104,7 +104,7 @@ Acronyms used in this document:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Protocol Abstraction}
 
-Similar to the rest of the XORP architecture, XORP multicast routing
+As with the rest of the XORP architecture, the XORP multicast routing
 architecture is designed such that each of the implemented protocols
 can be used for both real-world routing and for network simulations.  A
 simulation can be composed of several (UNIX) processes, one per
@@ -160,7 +160,8 @@ with each other.
 \section{MLD6/IGMP Daemon/Library}
 
 Because a physical interface is owned by a single multicast routing
-protocol, then we can have MLD6/IGMP running as a library on each of the
+protocol, then we can have MLD6/IGMP running as a library linked with
+a multicast routing protocol on each of the
 interfaces owned by that protocol. This solution may not work only if
 there are more than one protocols that need membership information on an
 interface.
@@ -171,7 +172,7 @@ information to all interested parties. This will allow reporting this
 information to more than one protocols per interface (in case we need
 so).
 
-Separating IGMP/MLD6 from the router code has the advantage of reducing
+Separating IGMP/MLD6 from the routing code has the advantage of reducing
 dependency and better robustness; \eg if the MLD6/IGMP code crashes, it
 will not crash the routing protocol as well. Further, when it comes to
 upgrade (\eg from IGMPv2 to IGMPv3), if we are running MLD6/IGMP as a
@@ -191,7 +192,7 @@ routers in real-world operation.
   \end{center}
 \end{figure}
 
-Figure~\ref{fig:mcast_modules_interaction} shows the interaction among
+Figure~\ref{fig:mcast_modules_interaction} shows the interactions between
 the multicast-related modules. Those interactions are:
 
 \begin{itemize}
@@ -222,7 +223,8 @@ PIM-SM needs to interact with the MFEA module for the following:
 
 \begin{itemize}
 
-  \item Send and receive PIM control messages.
+  \item Send PIM control packets to other PIM routers, and receive PIM
+  control packets from them.
 
   \item Start/stop the multicast forwarding engine.
 
@@ -261,7 +263,7 @@ the appropriate update to PIM. In addition, the MFEA creates the
 appropriate state to send and receive PIM control messages. After the
 PIM module receives the network interface information, it instructs the
 MFEA to start PIM operation on selected interfaces. After that the PIM
-module can send and receive PIM control messages on those interfaces.
+module can send and receive PIM control packets on those interfaces.
 Also, it it can send requests to the MFEA to add or modify multicast
 forwarding entries in the kernel.
 
@@ -312,7 +314,7 @@ receive PIM control messages on those interfaces.
 
 PIM-SM needs to interact with the MLD/IGMP module to receive multicast
 membership information about local members. On startup, the PIM module
-registers with the MLD/IGMP module by expressing interest tracking
+registers with the MLD/IGMP module by expressing interest in tracking
 multicast membership on selected network interfaces. After that, if
 the multicast membership on any of the selected interfaces changes, the
 MLD/IGMP module informs the PIM module about the change: \eg ``add
