@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.12 2003/01/29 05:43:55 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.13 2003/01/29 20:32:33 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -181,9 +181,6 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
     // Use a set to check for duplicates.
     d += 2;	// point to the routes.
     set <IPv4Net> x_set;
-
-fprintf(stderr,"(1)wr_len %d pa_len %d nlri_len %d\n",
-	wr_len, pa_len, nlri_len);
 
     while (wr_len >0 && wr_len >= BGPUpdateAttrib::size(d)) {
 	BGPUpdateAttrib wr(d);

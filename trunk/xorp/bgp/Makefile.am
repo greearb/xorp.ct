@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.7 2003/01/25 08:34:18 pavlin Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.8 2003/01/26 17:55:48 rizzo Exp $
 ##
 
 # -- Subdirectories
@@ -119,7 +119,6 @@ libbgp_a_SOURCES += exceptions.hh
 libbgp_a_SOURCES += internal_message.hh
 libbgp_a_SOURCES += iptuple.hh
 libbgp_a_SOURCES += local_data.hh
-libbgp_a_SOURCES += net_layer_reachability.hh
 libbgp_a_SOURCES += next_hop_resolver.hh
 libbgp_a_SOURCES += packet.hh
 libbgp_a_SOURCES += parameter.hh
@@ -147,7 +146,6 @@ libbgp_a_SOURCES += socket.hh
 libbgp_a_SOURCES += subnet_route.hh
 libbgp_a_SOURCES += timer_const.hh
 libbgp_a_SOURCES += update_attrib.hh
-libbgp_a_SOURCES += withdrawn_route.hh
 libbgp_a_SOURCES += xrl_target.hh
 
 libbgp_a_SOURCES += md5.c
@@ -157,9 +155,7 @@ libbgp_a_SOURCES += bgp_trie.cc
 libbgp_a_SOURCES += dump_iterators.cc
 libbgp_a_SOURCES += internal_message.cc
 libbgp_a_SOURCES += iptuple.cc
-libbgp_a_SOURCES += keepalive_packet.cc
 libbgp_a_SOURCES += local_data.cc
-libbgp_a_SOURCES += net_layer_reachability.cc
 libbgp_a_SOURCES += next_hop_resolver.cc
 libbgp_a_SOURCES += notification_packet.cc
 libbgp_a_SOURCES += open_packet.cc
@@ -189,7 +185,6 @@ libbgp_a_SOURCES += socket.cc
 libbgp_a_SOURCES += subnet_route.cc
 libbgp_a_SOURCES += update_attrib.cc
 libbgp_a_SOURCES += update_packet.cc
-libbgp_a_SOURCES += withdrawn_route.cc
 libbgp_a_SOURCES += xrl_target.cc
 
 # -- Extra files and directories to add to the distribution

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.3 2003/01/25 02:10:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.4 2003/01/29 20:32:32 rizzo Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -21,7 +21,6 @@
 #include "peer_handler.hh"
 #include "plumbing.hh"
 #include "packet.hh"
-#include "withdrawn_route.hh"
 #include "main.hh"
 
 PeerHandler::PeerHandler(const string &init_peername,

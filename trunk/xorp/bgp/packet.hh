@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.9 2003/01/26 17:55:48 rizzo Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.10 2003/01/29 20:32:32 rizzo Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -37,8 +37,6 @@
 #include "peer_data.hh"
 #include "path_attribute.hh"
 #include "update_attrib.hh"
-#include "withdrawn_route.hh"
-#include "net_layer_reachability.hh"
 
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv4.hh"
