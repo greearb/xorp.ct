@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.5 2004/03/02 17:37:21 atanu Exp $"
+#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.6 2004/03/04 02:35:52 atanu Exp $"
+
+#include "libxorp_module.h"
 
 #include "xorp.h"
 #include "ipv4net.hh"
