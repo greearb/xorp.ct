@@ -1,6 +1,12 @@
 #
-# $XORP: xorp/pim/TODO,v 1.77 2004/06/24 19:34:39 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.78 2005/01/28 03:34:19 pavlin Exp $
 #
+
+* IMPL:
+  Get rid of the gcc-ism declaration of an array with non-const
+  size inside pim_proto_register.cc. Currently, this includes:
+    uint8_t frag_buf[rcvlen];	// The buffer for the fragments
+    uint8_t first_frag[mtu];
 
 * IMPL:
   If a PIM Hello message is received and it contains an unrecognized
