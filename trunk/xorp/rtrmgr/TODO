@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.27 2005/01/13 00:49:41 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.28 2005/02/10 04:12:14 pavlin Exp $
 #
 
 Urgent
@@ -81,6 +81,10 @@ General
         as a result xorpsh fails to start up.
         Consider checking for it in configure.in and shipping
         our own if we can't find it on the system.
+ - Get rid of the gcc-ism of declaring a C array with non-const size
+   inside module_manager.cc :
+		//convert argv from strings to char*
+		const char* argv[_argv.size() + 1];
  
 Configure Mode
 
