@@ -196,7 +196,7 @@ void examine_report()
     } while (assig != EOF);
     for (i = 0; i < LINES_IN_REF_REPORT; i++)
 	if ( ! ref_report[i][5] ) {
-	    fprintf(stderr, "This line not found in the report:\n", path);
+	    fprintf(stderr, "This line not found in the report:\n");
 	    fprintf(stderr, "%u/%u   %u/%u   %u\n", ref_report[i][0],
 		ref_report[i][1], ref_report[i][2],  ref_report[i][3],  
 		ref_report[i][4]);
@@ -235,7 +235,7 @@ int main(void)
     /* paquitodrivera(CLEANUP); */
     /* milesdavis(CLEANUP); */
     ornette(CLEANUP); 
-    printf("\n", i);
+    printf("\n");
 #ifndef INTERACTIVE_EXECUTION    
     raise(SIGUSR2);    /* generate flower_malloc report */
     examine_report();
