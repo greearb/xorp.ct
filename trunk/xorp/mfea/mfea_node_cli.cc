@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.7 2003/04/02 02:53:52 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_node_cli.cc,v 1.8 2003/04/02 22:49:12 pavlin Exp $"
 
 
 //
@@ -171,8 +171,8 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	for (iter = mfea_dfe_lookup->mfea_dfe_list().begin();
 	     iter != mfea_dfe_lookup->mfea_dfe_list().end();
 	     ++iter) {
-	    char s1[256], s2[256];
-	    char measured_s[256], type_s[256], thresh_s[256], remain_s[256];
+	    string s1, s2;
+	    string measured_s, type_s, thresh_s, remain_s;
 	    MfeaDfe *mfea_dfe = *iter;
 	    TimeVal start_time, threshold_interval, end, delta;
 	    
@@ -181,53 +181,56 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	    
 	    // The measured values
 	    if (mfea_dfe->is_threshold_in_packets())
-		sprintf(s1, "%u", (uint32_t)mfea_dfe->measured_packets());
+		s1 = c_format("%u", (uint32_t)mfea_dfe->measured_packets());
 	    else
-		sprintf(s1, "?");
+		s1 = "?";
 	    if (mfea_dfe->is_threshold_in_bytes())
-		sprintf(s2, "%u", (uint32_t)mfea_dfe->measured_bytes());
+		s2 = c_format("%u", (uint32_t)mfea_dfe->measured_bytes());
 	    else
-		sprintf(s2, "?");
-	    sprintf(measured_s, "%u.%u|%s|%s",
-		    (uint32_t)start_time.sec(),
-		    (uint32_t)start_time.usec(),
-		    s1, s2);
+		s2 = "?";
+	    measured_s = c_format("%u.%u|%s|%s",
+				  (uint32_t)start_time.sec(),
+				  (uint32_t)start_time.usec(),
+				  s1.c_str(), s2.c_str());
 	    
 	    // The entry type
-	    sprintf(type_s, "%-3s",
-		    mfea_dfe->is_geq_upcall()? ">="
-		    : mfea_dfe->is_leq_upcall()? "<="
-		    : "?");
+	    type_s = c_format("%-3s",
+			      mfea_dfe->is_geq_upcall()? ">="
+			      : mfea_dfe->is_leq_upcall()? "<="
+			      : "?");
 	    
 	    // The threshold values
 	    if (mfea_dfe->is_threshold_in_packets())
-		sprintf(s1, "%u", mfea_dfe->threshold_packets());
+		s1 = c_format("%u", mfea_dfe->threshold_packets());
 	    else
-		sprintf(s1, "?");
+		s1 = "?";
 	    if (mfea_dfe->is_threshold_in_bytes())
-		sprintf(s2, "%u", mfea_dfe->threshold_bytes());
+		s2 = c_format("%u", mfea_dfe->threshold_bytes());
 	    else
-		sprintf(s2, "?");
-	    sprintf(thresh_s, "%u.%u|%s|%s",
-		    (uint32_t)threshold_interval.sec(),
-		    (uint32_t)threshold_interval.usec(),
-		    s1, s2);
+		s2 = "?";
+	    thresh_s = c_format("%u.%u|%s|%s",
+				(uint32_t)threshold_interval.sec(),
+				(uint32_t)threshold_interval.usec(),
+				s1.c_str(), s2.c_str());
 	    
 	    // Remaining time
 	    end = start_time + threshold_interval;
 	    if (now <= end) {
 		delta = end - now;
-		sprintf(remain_s, "%u.%u",
-			(uint32_t)delta.sec(), (uint32_t)delta.usec());
+		remain_s = c_format("%u.%u",
+				    (uint32_t)delta.sec(), 
+				    (uint32_t)delta.usec());
 	    } else {
 		// Negative time
 		delta = now - end;
-		sprintf(remain_s, "-%u.%u",
-			(uint32_t)delta.sec(), (uint32_t)delta.usec());
+		remain_s = c_format("-%u.%u",
+				    (uint32_t)delta.sec(), 
+				    (uint32_t)delta.usec());
 	    }
 	    
 	    cli_print(c_format("    %-30s%-5s%-30s%7s\n",
-			       measured_s, type_s, thresh_s, remain_s));
+			       measured_s.c_str(), type_s.c_str(), 
+			       thresh_s.c_str(), remain_s.c_str()));
 	}
     }
     
