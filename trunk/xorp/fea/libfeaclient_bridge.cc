@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.6 2004/03/24 20:02:46 atanu Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.7 2004/04/10 07:58:32 pavlin Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -42,7 +42,7 @@ update_name(IfConfigUpdateReporterBase::Update u)
     case IfConfigUpdateReporterBase::DELETED:
 	return "Deletion";
     case IfConfigUpdateReporterBase::CHANGED:
-	;					// FALLTHROUGH
+	break;					// FALLTHROUGH
     }
     return "Change";
 }
@@ -112,14 +112,14 @@ LibFeaClientBridge::interface_update(const string& ifname,
     switch (update) {
     case CREATED:
 	_rm->push(new IfMgrIfAdd(ifname));
-	return;
+	break;					// FALLTHROUGH
 
     case DELETED:
 	_rm->push(new IfMgrIfRemove(ifname));
 	return;
 
     case CHANGED:
-	;					// FALLTHROUGH
+	break;					// FALLTHROUGH
     }
 
     //
@@ -173,14 +173,14 @@ LibFeaClientBridge::vif_update(const string& ifname,
     switch (update) {
     case CREATED:
 	_rm->push(new IfMgrVifAdd(ifname, vifname));
-	return;
+	break;					// FALLTHROUGH
 
     case DELETED:
 	_rm->push(new IfMgrVifRemove(ifname, vifname));
 	return;
 
     case CHANGED:
-	;					// FALLTHROUGH
+	break;					// FALLTHROUGH
     }
 
     //
@@ -252,14 +252,14 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
     switch (update) {
     case CREATED:
 	_rm->push(new IfMgrIPv4Add(ifname, vifname, addr));
-	return;
+	break;					// FALLTHROUGH
 
     case DELETED:
 	_rm->push(new IfMgrIPv4Remove(ifname, vifname, addr));
 	return;
 
     case CHANGED:
-	;					// FALLTHROUGH
+	break;					// FALLTHROUGH
     }
 
     //
@@ -351,14 +351,14 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
     switch (update) {
     case CREATED:
 	_rm->push(new IfMgrIPv6Add(ifname, vifname, addr));
-	return;
+	break; 					// FALLTHROUGH
 
     case DELETED:
 	_rm->push(new IfMgrIPv6Remove(ifname, vifname, addr));
 	return;
 
     case CHANGED:
-	; 					// FALLTHROUGH
+	break; 					// FALLTHROUGH
     }
 
     //
