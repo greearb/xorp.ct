@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.6 2003/01/26 06:15:54 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.7 2003/02/22 02:12:01 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -255,7 +255,7 @@ interface bgp/0.2 {
 		& keep_alive:u32 \
 		& hold_time_conf:u32 \
 		& keep_alive_conf:u32 \
-		& min_as_orginiation_interval:u32 \
+		& min_as_orgination_interval:u32 \
 		& min_route_adv_interval:u32 
 
 	/**
