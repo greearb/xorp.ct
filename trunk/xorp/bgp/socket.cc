@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.5 2003/03/10 23:20:05 hodson Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.6 2003/04/22 19:20:19 mjh Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -402,7 +402,8 @@ SocketClient::connect_socket(int sock, struct in_addr raddr, uint16_t port,
     if(-1 == ::connect(sock, reinterpret_cast<struct sockaddr *>(&servername), 
 		      sizeof(servername))) {
 
-	XLOG_ERROR("Connect failed: %s", strerror(errno));
+ 	debug_msg("Connect failed: %s\n", strerror(errno));
+// 	XLOG_ERROR("Connect failed: %s", strerror(errno));
 
 	/*
 	** This endpoint is now screwed so shut it.
