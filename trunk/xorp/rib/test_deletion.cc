@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_deletion.cc,v 1.5 2004/02/11 08:48:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_deletion.cc,v 1.6 2004/06/10 22:41:42 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -26,7 +26,7 @@
 
 
 int
-main (int /* argc */, char* argv[])
+main(int /* argc */, char* argv[])
 {
     //
     // Initialize and start xlog
@@ -48,10 +48,10 @@ main (int /* argc */, char* argv[])
     Protocol protocol("test", IGP, 0);
     IPv4Net net1("10.0.1.0/24");
     IPv4Net net2("10.0.2.0/24");
-    UNUSED(net2);
 
     IPRouteEntry<IPv4> route1(net1, &vif1, &nh1, protocol, 100);
     IPRouteEntry<IPv4> route2(net2, &vif1, &nh1, protocol, 100);
+
     dt.expect_add(route1);
     dt.expect_add(route2);
 
@@ -82,11 +82,11 @@ main (int /* argc */, char* argv[])
 
     // Validate that a deletion table got added
     XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
-    eventloop.run();
-    eventloop.run();
-    eventloop.run();
-
-    XLOG_ASSERT(dt.parent()->type() == ORIGIN_TABLE);
+    while (dt.parent()->type() != ORIGIN_TABLE) {
+	XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
+	eventloop.run();
+    }
+    XLOG_ASSERT(dt.expected_route_changes().empty());
 
     printf("-------------------------------------------------------\n");
 
@@ -112,10 +112,13 @@ main (int /* argc */, char* argv[])
     ot.add_route(route3);
 
     dt.expect_delete(route2);
+
     XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
-    eventloop.run();
-    XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
-    eventloop.run();
+    while (dt.parent()->type() != ORIGIN_TABLE) {
+	XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
+	eventloop.run();
+    }
+    XLOG_ASSERT(dt.expected_route_changes().empty());
 
     XLOG_ASSERT(dt.parent()->type() == ORIGIN_TABLE);
 
