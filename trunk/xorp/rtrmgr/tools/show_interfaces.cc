@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.6 2003/05/19 06:43:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.7 2003/09/25 17:00:43 hodson Exp $"
 
 #include "rtrmgr/rtrmgr_module.h"
 #include "config.h"
@@ -21,9 +21,9 @@
 
 #include "show_interfaces.hh"
 
-InterfaceMonitor::InterfaceMonitor(XrlRouter& xrl_rtr, EventLoop& eventloop)
-    : _xrl_rtr(xrl_rtr), _eventloop(eventloop),
-      _ifmgr_client(&xrl_rtr)
+InterfaceMonitor::InterfaceMonitor(XrlRouter& xrl_rtr,
+				   EventLoop& eventloop)
+    : _xrl_rtr(xrl_rtr), _eventloop(eventloop), _ifmgr_client(&xrl_rtr)
 {
     _state = INITIALIZING;
     _register_retry_counter = 0;
@@ -57,7 +57,11 @@ InterfaceMonitor::clean_out_old_state()
     // registrations left over from previous incarnations of the RIB
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(this, &InterfaceMonitor::clean_out_old_state_done);
-    _ifmgr_client.send_unregister_client("fea", _xrl_rtr.name(), cb);
+    if (_ifmgr_client.send_unregister_client("fea", _xrl_rtr.name(), cb)
+	== false) {
+	XLOG_ERROR("Failed to unregister fea client");
+	_state = FAILED;
+    }
 }
 
 void
@@ -77,7 +81,11 @@ InterfaceMonitor::register_if_spy()
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(this, &InterfaceMonitor::register_if_spy_done);
-    _ifmgr_client.send_register_client("fea", _xrl_rtr.name(), cb);
+    if (_ifmgr_client.send_register_client("fea", _xrl_rtr.name(), cb)
+	== false) {
+	XLOG_ERROR("Failed to register fea client");
+	_state = FAILED;
+    }
 }
 
 void
@@ -89,7 +97,11 @@ InterfaceMonitor::register_if_spy_done(const XrlError& e)
 	// configured interfaces.
 	XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
 	cb = callback(this, &InterfaceMonitor::interface_names_done);
-	_ifmgr_client.send_get_configured_interface_names("fea", cb);
+	if (_ifmgr_client.send_get_configured_interface_names("fea", cb)
+	    == false) {
+	    XLOG_ERROR("Failed to request interface names");
+	    _state = FAILED;
+	}
 	return;
     }
 
@@ -98,7 +110,7 @@ InterfaceMonitor::register_if_spy_done(const XrlError& e)
     // still can't register, give up.  It's a higher level issue as to
     // whether failing to register is a fatal error.
     if (e == XrlError::RESOLVE_FAILED() && (_register_retry_counter < 5)) {
-	XLOG_ERROR("Register Interface Spy: RESOLVE_FAILED\n");
+	XLOG_WARNING("Register Interface Spy: RESOLVE_FAILED");
 	_register_retry_counter++;
 	OneoffTimerCallback cb;
 	cb = callback(this, &InterfaceMonitor::register_if_spy);
@@ -106,11 +118,12 @@ InterfaceMonitor::register_if_spy_done(const XrlError& e)
 	return;
     }
     _state = FAILED;
-    XLOG_ERROR("Register Interface Spy: Permanent Error\n");
+    XLOG_ERROR("Register Interface Spy: Permanent Error");
 }
 
 void
-InterfaceMonitor::interface_names_done(const XrlError& e, const XrlAtomList* alist)
+InterfaceMonitor::interface_names_done(const XrlError&	  e,
+				       const XrlAtomList* alist)
 {
     debug_msg("interface_names_done\n");
     if (e == XrlError::OKAY()) {
@@ -124,18 +137,23 @@ InterfaceMonitor::interface_names_done(const XrlError& e, const XrlAtomList* ali
 		const XrlAtomList*>::RefPtr cb;
 	    debug_msg("got interface name: %s\n", ifname.c_str());
 	    cb = callback(this, &InterfaceMonitor::vif_names_done, ifname);
-	    _ifmgr_client.send_get_configured_vif_names("fea", ifname, cb);
+	    if (_ifmgr_client.send_get_configured_vif_names("fea", ifname, cb)
+		== false) {
+		XLOG_ERROR("Failed to request vif names");
+		_state = FAILED;
+	    }
 	    _interfaces_remaining++;
 	}
 	return;
     }
     _state = FAILED;
-    XLOG_ERROR("Get Interface Names: Permanent Error\n");
+    XLOG_ERROR("Get Interface Names: Permanent Error");
 }
 
 void
-InterfaceMonitor::vif_names_done(const XrlError& e, const XrlAtomList* alist,
-				 string ifname)
+InterfaceMonitor::vif_names_done(const XrlError&    e,
+				 const XrlAtomList* alist,
+				 string		    ifname)
 {
     debug_msg("vif_names_done\n");
     UNUSED(ifname);
@@ -151,8 +169,14 @@ InterfaceMonitor::vif_names_done(const XrlError& e, const XrlAtomList* alist,
 		const XrlAtomList*>::RefPtr cb;
 	    cb = callback(this, &InterfaceMonitor::get_all_vifaddr4_done,
 			  ifname, vifname);
-	    _ifmgr_client.send_get_configured_vif_addresses4("fea", ifname,
-							     vifname, cb);
+	    if (_ifmgr_client.send_get_configured_vif_addresses4("fea",
+								 ifname,
+								 vifname,
+								 cb)
+		== false) {
+		XLOG_ERROR("Failed to request IPv4 addresses");
+		_state = FAILED;
+	    }
 	    _vifs_remaining++;
 	}
 	_interfaces_remaining--;
@@ -160,21 +184,22 @@ InterfaceMonitor::vif_names_done(const XrlError& e, const XrlAtomList* alist,
 	// perhaps the interface went away.
 	_interfaces_remaining--;
     } else {
+	XLOG_ERROR("Get VIF Names: Permanent Error");
 	_state = FAILED;
-	XLOG_ERROR("Get VIF Names: Permanent Error\n");
 	return;
     }
-    if (_interfaces_remaining == 0
-	&& _vifs_remaining == 0
-	&& _addrs_remaining == 0
-	&& _flags_remaining == 0) {
+    if (_interfaces_remaining == 0 && _vifs_remaining == 0 &&
+	_addrs_remaining == 0 && _flags_remaining == 0) {
 	_state = READY;
     }
 }
 
 void
-InterfaceMonitor::get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* alist,
-					string ifname, string vifname)
+InterfaceMonitor::get_all_vifaddr4_done(const XrlError&    e,
+					const XrlAtomList* alist,
+					string	 	   ifname,
+					string		   vifname)
+
 {
     if (e == XrlError::OKAY()) {
 	for (u_int i = 0; i < alist->size(); i++) {
@@ -185,8 +210,13 @@ InterfaceMonitor::get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* al
 		const bool*, const bool*, const bool*, const bool*>::RefPtr cb;
 	    cb = callback(this, &InterfaceMonitor::get_flags4_done,
 			  ifname, vifname, addr);
-	    _ifmgr_client.send_get_all_address_flags4("fea", ifname, vifname,
-						      addr, cb);
+	    if (_ifmgr_client.send_get_all_address_flags4("fea", ifname,
+							  vifname, addr, cb)
+		== false) {
+		XLOG_ERROR("Failed to request interface flags");
+		_state = FAILED;
+		return;
+	    }
 	    _flags_remaining++;
 	}
 	_vifs_remaining--;
@@ -194,8 +224,8 @@ InterfaceMonitor::get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* al
 	// perhaps the vif went away?
 	_vifs_remaining--;
     } else {
+	XLOG_ERROR("Get VIF Names: Permanent Error");
 	_state = FAILED;
-	XLOG_ERROR("Get VIF Names: Permanent Error\n");
 	return;
     }
 
@@ -209,12 +239,14 @@ InterfaceMonitor::get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* al
 
 void
 InterfaceMonitor::get_flags4_done(const XrlError& e,
-				  const bool *enabled,
-				  const bool *broadcast,
-				  const bool *loopback,
-				  const bool *point_to_point,
-				  const bool *multicast,
-				  string ifname, string vifname, IPv4 addr)
+				  const bool*	  enabled,
+				  const bool*	  broadcast,
+				  const bool*	  loopback,
+				  const bool*	  point_to_point,
+				  const bool*	  multicast,
+				  string	  ifname,
+				  string	  vifname,
+				  IPv4		  addr)
 {
     UNUSED(addr);
     UNUSED(ifname);
@@ -237,7 +269,7 @@ InterfaceMonitor::get_flags4_done(const XrlError& e,
 	_flags_remaining--;
     } else {
 	_state = FAILED;
-	XLOG_ERROR("Get VIF Flahs: Permanent Error\n");
+	XLOG_ERROR("Get VIF Flags: Permanent Error");
 	return;
     }
 
@@ -248,8 +280,6 @@ InterfaceMonitor::get_flags4_done(const XrlError& e,
 	_state = READY;
     }
 }
-
-
 
 void
 InterfaceMonitor::interface_update(const string& ifname,
@@ -360,7 +390,7 @@ InterfaceMonitor::vif_deleted(const string& ifname, const string& vifname)
 	// now process the deletion...
 	// XXX
     } else {
-	XLOG_ERROR(("vif_deleted: vif " + vifname + " not found\n").c_str());
+	XLOG_ERROR("vif_deleted: vif %s not found.", vifname.c_str());
     }
 }
 
@@ -369,8 +399,7 @@ InterfaceMonitor::vif_created(const string& ifname, const string& vifname)
 {
     debug_msg("vif_created: %s\n", vifname.c_str());
     if (_vifs_by_name.find(vifname) != _vifs_by_name.end()) {
-	XLOG_ERROR(("vif_created: vif " + vifname +
-		    " already exists\n").c_str());
+	XLOG_ERROR("vif_created: vif %s already exists.", vifname.c_str());
 	return;
     }
     Vif *vif = new Vif(vifname, ifname);
@@ -382,17 +411,21 @@ InterfaceMonitor::vif_created(const string& ifname, const string& vifname)
 }
 
 void
-InterfaceMonitor::vifaddr4_created(const string& ifname, const string& vifname,
-				   const IPv4& addr)
+InterfaceMonitor::vifaddr4_created(const string& ifn,
+				   const string& vifn,
+				   const IPv4&   addr)
 {
-    if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
-	XLOG_ERROR(("vifaddr4_created on unknown vif: " + vifname +
-		    "\n").c_str());
+    if (_vifs_by_name.find(vifn) == _vifs_by_name.end()) {
+	XLOG_ERROR("vifaddr4_created on unknown vif: %s", vifn.c_str());
 	return;
     }
     XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
-    cb = callback(this, &InterfaceMonitor::vifaddr4_done, ifname, vifname, addr);
-    _ifmgr_client.send_get_configured_prefix4("fea", ifname, vifname, addr, cb);
+    cb = callback(this, &InterfaceMonitor::vifaddr4_done, ifn, vifn, addr);
+    if (_ifmgr_client.send_get_configured_prefix4("fea", ifn, vifn, addr, cb)
+	== false) {
+	XLOG_ERROR("Failed to send address prefix request");
+	_state = FAILED;
+    }
     _addrs_remaining++;
 }
 
@@ -416,51 +449,51 @@ InterfaceMonitor::vifaddr4_done(const XrlError& e, const uint32_t* prefix_len,
 	vif->add_address(addr, IPvXNet(addr, *prefix_len),
 			 IPvX("0.0.0.0"), IPvX("0.0.0.0"));
 	_addrs_remaining--;
-    } else if (e!=XrlError::COMMAND_FAILED()) {
+    } else if (e != XrlError::COMMAND_FAILED()) {
 	_addrs_remaining--;
     } else {
-	XLOG_ERROR(("Failed to get prefix_len for address "
-		    + addr.str() + "\n").c_str());
+	XLOG_ERROR("Failed to get prefix_len for address %s.",
+		   addr.str().c_str());
 	_addrs_remaining--;
     }
 
-    if (_interfaces_remaining == 0
-	&& _vifs_remaining == 0
-	&& _addrs_remaining == 0
-	&& _flags_remaining == 0
-	&& _state == INITIALIZING) {
+    if (_interfaces_remaining == 0 && _vifs_remaining == 0 &&
+	_addrs_remaining == 0 && _flags_remaining == 0 &&
+	_state == INITIALIZING) {
 	_state = READY;
     }
 }
 
-
 void
-InterfaceMonitor::vifaddr4_deleted(const string& ifname, const string& vifname,
-				   const IPv4& addr)
+InterfaceMonitor::vifaddr4_deleted(const string& ifname,
+				   const string& vifname,
+				   const IPv4&	 addr)
 {
     UNUSED(ifname);
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
-	XLOG_ERROR(("vifaddr4_deleted on unknown vif: " + vifname +
-		    "\n").c_str());
+	XLOG_ERROR("vifaddr4_deleted on unknown vif: %s", vifname.c_str());
 	return;
     }
     Vif* vif = _vifs_by_name[vifname];
     vif->delete_address(addr);
-
 }
 
 void
-InterfaceMonitor::vifaddr6_created(const string& ifname, const string& vifname,
-				   const IPv6& addr)
+InterfaceMonitor::vifaddr6_created(const string& ifn,
+				   const string& vifn,
+				   const IPv6&   addr)
 {
-    if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
-	XLOG_ERROR(("vifaddr6_created on unknown vif: " + vifname +
-		    "\n").c_str());
+    if (_vifs_by_name.find(vifn) == _vifs_by_name.end()) {
+	XLOG_ERROR("vifaddr6_created on unknown vif: %s",  vifn.c_str());
 	return;
     }
     XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
-    cb = callback(this, &InterfaceMonitor::vifaddr6_done, ifname, vifname, addr);
-    _ifmgr_client.send_get_configured_prefix6("fea", ifname, vifname, addr, cb);
+    cb = callback(this, &InterfaceMonitor::vifaddr6_done, ifn, vifn, addr);
+    if (_ifmgr_client.send_get_configured_prefix6("fea", ifn, vifn, addr, cb)
+	== false) {
+	XLOG_ERROR("Failed to send address prefix request");
+	_state = FAILED;
+    }
     _addrs_remaining++;
 }
 
@@ -484,32 +517,29 @@ InterfaceMonitor::vifaddr6_done(const XrlError& e, const uint32_t* prefix_len,
 	vif->add_address(addr, IPvXNet(addr, *prefix_len),
 			 IPvX("0.0.0.0"), IPvX("0.0.0.0"));
 	_addrs_remaining--;
-    } else if (e!=XrlError::COMMAND_FAILED()) {
+    } else if (e != XrlError::COMMAND_FAILED()) {
 	_addrs_remaining--;
     } else {
-	XLOG_ERROR(("Failed to get prefix_len for address "
-		    + addr.str() + "\n").c_str());
+	XLOG_ERROR("Failed to get prefix_len for address %s.",
+		   addr.str().c_str());
 	_addrs_remaining--;
     }
 
-    if (_interfaces_remaining == 0
-	&& _vifs_remaining == 0
-	&& _addrs_remaining == 0
-	&& _flags_remaining == 0
+    if (_interfaces_remaining == 0 && _vifs_remaining == 0 &&
+	_addrs_remaining == 0 && _flags_remaining == 0
 	&& _state == INITIALIZING) {
 	_state = READY;
     }
 }
 
-
 void
-InterfaceMonitor::vifaddr6_deleted(const string& ifname, const string& vifname,
-				   const IPv6& addr)
+InterfaceMonitor::vifaddr6_deleted(const string& ifname,
+				   const string& vifname,
+				   const IPv6&   addr)
 {
     UNUSED(ifname);
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
-	XLOG_ERROR(("vifaddr6_deleted on unknown vif: " + vifname +
-		    "\n").c_str());
+	XLOG_ERROR("vifaddr6_deleted on unknown vif: %s", vifname.c_str());
 	return;
     }
     Vif* vif = _vifs_by_name[vifname];
@@ -517,7 +547,8 @@ InterfaceMonitor::vifaddr6_deleted(const string& ifname, const string& vifname,
 
 }
 
-void InterfaceMonitor::print_results() const
+void
+InterfaceMonitor::print_results() const
 {
     map<string, Vif*>::const_iterator i;
     for (i = _vifs_by_name.begin(); i != _vifs_by_name.end(); i++) {
@@ -578,7 +609,8 @@ void InterfaceMonitor::print_results() const
     }
 }
 
-int main(int argc, char** argv)
+int
+main(int argc, char* const argv[])
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     //
@@ -598,10 +630,12 @@ int main(int argc, char** argv)
     process = c_format("interface_monitor%d", getpid());
     try {
 	XrlRouter xrl_rtr(eventloop, process.c_str());
+
 	InterfaceMonitor ifmon(xrl_rtr, eventloop);
 
 	bool timed_out = false;
 	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	xrl_rtr.finalize();
 	while (xrl_rtr.ready() == false) {
 	    eventloop.run();
 	}
