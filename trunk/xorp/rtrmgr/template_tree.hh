@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.9 2003/12/02 09:38:58 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.10 2004/01/05 23:45:04 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -29,7 +29,7 @@
 #include "xorp_client.hh"
 #include "xrldb.hh"
 #include "path_segment.hh"
-#include "parse_error.hh"
+#include "rtrmgr_error.hh"
 
 class ModuleCommand;
 class TemplateTreeNode;
@@ -38,7 +38,7 @@ class TemplateTree {
 public:
     TemplateTree(const string& xorp_root_dir,
 		 const string& config_template_dir,
-		 const string& xrl_dir);
+		 const string& xrl_dir)  throw (InitError);
     ~TemplateTree();
 
     void extend_path(const string& segment, bool is_tag);

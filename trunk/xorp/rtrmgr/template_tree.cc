@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.13 2003/12/02 09:38:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.14 2004/01/05 23:45:04 pavlin Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -25,15 +25,13 @@
 #include "conf_tree_node.hh"
 #include "util.hh"
 
-// #define DEBUG_TEMPLATE_PARSER
 
 extern int init_template_parser(const char* filename, TemplateTree* c);
-extern int parse_template();
-extern void tplterror(const char* s);
+extern void parse_template() throw (ParseError);
 
 TemplateTree::TemplateTree(const string& xorp_root_dir,
 			   const string& config_template_dir,
-			   const string& xrl_dir)
+			   const string& xrl_dir) throw (InitError)
     : _xrldb(xrl_dir),
       _xorp_root_dir(xorp_root_dir)
 {
@@ -86,20 +84,26 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
 	}
 	try {
 	    parse_template();
-	} catch (ParseError &pe) {
-	    tplterror(pe.why().c_str());
+	} catch (const ParseError& pe) {
 	    globfree(&pglob);
-	    exit(1);
+	    xorp_throw(InitError, pe.why());
 	}
 	if (_path_segments.size() != 0) {
-	    fprintf(stderr, "Error: file %s is not terminated properly\n",
-		    pglob.gl_pathv[i]);
 	    globfree(&pglob);
-	    exit(1);
+	    string errmsg;
+	    errmsg = c_format("Error: file %s is not terminated properly",
+			      pglob.gl_pathv[i]);
+	    xorp_throw(InitError, errmsg);
 	}
     }
 
     globfree(&pglob);
+
+    // Verify the template tree
+    string errmsg;
+    if (_root_node->check_template_tree(errmsg) != true) {
+	xorp_throw(InitError, errmsg.c_str());
+    }
 }
 
 TemplateTree::~TemplateTree()
@@ -118,10 +122,6 @@ TemplateTree::display_tree()
 void
 TemplateTree::extend_path(const string& segment, bool is_tag)
 {
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("extend_path %s\n", segment.c_str());
-#endif
-
     _path_segments.push_back(PathSegment(segment, is_tag));
 }
 
@@ -134,18 +134,10 @@ TemplateTree::pop_path() throw (ParseError)
 
     size_t segments_to_pop = _segment_lengths.front();
 
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("pop_path: %d\n", segments_to_pop);
-#endif
-
     _segment_lengths.pop_front();
     for (size_t i = 0; i < segments_to_pop; i++) {
 	_current_node = _current_node->parent();
     }
-
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("popped to %s\n", _current_node->path().c_str());
-#endif
 }
 
 string
@@ -212,13 +204,10 @@ TemplateTree::new_node(TemplateTreeNode* parent,
 void
 TemplateTree::push_path(int type, char* cinit)
 {
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("push_path\n");
-#endif
-
     list<PathSegment>::const_iterator iter;
     iter = _path_segments.begin();
     size_t len = _path_segments.size();
+
     if (len > 0) {
 	for (size_t i = 0; i < len - 1; i++) {
 	    // Add all except the last segment
@@ -239,10 +228,6 @@ TemplateTree::add_untyped_node(const string& segment, bool is_tag)
     throw (ParseError)
 {
     TemplateTreeNode* found = NULL;
-
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("add_untyped_node: segment=%s\n", segment.c_str());
-#endif
 
     list<TemplateTreeNode*>::const_iterator iter;
     iter = _current_node->children().begin();
@@ -278,12 +263,8 @@ TemplateTree::add_untyped_node(const string& segment, bool is_tag)
 void
 TemplateTree::add_node(const string& segment, int type, char* cinit)
 {
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("add_node: segment=%s type: %d\n", segment.c_str(), type);
-    printf("cn=%p\n", _current_node);
-#endif
-
     string varname = _path_segments.back().segname();
+
     if (varname == "@") {
 	if (_current_node->is_tag()) {
 	    // Parent node is a tag
@@ -324,14 +305,8 @@ TemplateTree::add_node(const string& segment, int type, char* cinit)
     }
     if (found != NULL) {
 	_current_node = found;
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf("add_node: found %s type: %d\n", found->path().c_str(), type);
-#endif
     } else {
 	found = new_node(_current_node, segment, varname, type, initializer);
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf("add_node: %s type: %d\n", found->path().c_str(), type);
-#endif
 	_current_node = found;
     }
 }
@@ -350,10 +325,6 @@ TemplateTree::find_node(const list<string>& path_segments)
 	for (ti = ttn->children().begin(); ti != ttn->children().end(); ++ti) {
 	    if ((*ti)->segname() == *iter) {
 		matches.push_back(*ti);
-#ifdef DEBUG_TEMPLATE_PARSER
-		printf("matched: %s type %d\n", (*ti)->path().c_str(),
-		       (*ti)->type());
-#endif
 	    }
 	}
 	if (matches.size() == 1) {
@@ -383,9 +354,6 @@ TemplateTree::find_node(const list<string>& path_segments)
 	    return NULL;
 	}
 	ttn = matches.front();
-#ifdef DEBUG_TEMPLATE_PARSER
-	printf("matched: %s type: %d\n", ttn->path().c_str(), ttn->type());
-#endif
     }
     return ttn;
 }
