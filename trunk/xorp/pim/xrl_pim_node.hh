@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.33 2003/12/16 23:40:46 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.34 2004/01/05 20:40:50 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1447,6 +1447,41 @@ protected:
 	const uint32_t&	bytes);
 
     XrlCmdError pim_0_1_reset_switch_to_spt_threshold();
+
+    /**
+     *  Add or delete an alternative subnet on a PIM vif. An alternative subnet
+     *  is used to make incoming traffic with a non-local source address appear
+     *  as it is coming from a local subnet. Note: add alternative subnets with
+     *  extreme care, only if you know what you are really doing!
+     *
+     *  @param vif_name the name of the vif to add or delete an alternative
+     *  subnet.
+     *
+     *  @param subnet the subnet address to add or delete.
+     */
+    XrlCmdError pim_0_1_add_alternative_subnet4(
+	// Input values,
+	const string&	vif_name,
+	const IPv4Net&	subnet);
+
+    XrlCmdError pim_0_1_add_alternative_subnet6(
+	// Input values,
+	const string&	vif_name,
+	const IPv6Net&	subnet);
+
+    XrlCmdError pim_0_1_delete_alternative_subnet4(
+	// Input values,
+	const string&	vif_name,
+	const IPv4Net&	subnet);
+
+    XrlCmdError pim_0_1_delete_alternative_subnet6(
+	// Input values,
+	const string&	vif_name,
+	const IPv6Net&	subnet);
+
+    XrlCmdError pim_0_1_remove_all_alternative_subnets(
+	// Input values,
+	const string&	vif_name);
 
     /**
      *  Enable/disable the PIM trace log for all operations.

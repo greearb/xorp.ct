@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.25 2004/02/25 02:43:57 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.26 2004/03/01 09:17:18 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -336,7 +336,11 @@ public:
     void	add_pim_nbr(PimNbr *pim_nbr);
     int		delete_pim_nbr(PimNbr *pim_nbr);
     void	delete_pim_nbr_from_nbr_list(PimNbr *pim_nbr);
-    
+    const list<IPvXNet>& alternative_subnet_list() const { return _alternative_subnet_list; }
+    void add_alternative_subnet(const IPvXNet& subnet);
+    void delete_alternative_subnet(const IPvXNet& subnet);
+    void remove_all_alternative_subnets();
+
     // Usage-related functions
     size_t	usage_by_pim_mre_task() const { return (_usage_by_pim_mre_task); }
     void	incr_usage_by_pim_mre_task();
@@ -491,7 +495,7 @@ private:
     void delete_send_unicast_bootstrap_nbr_list() {
 	_send_unicast_bootstrap_nbr_list.clear();
     }
-    
+
     bool should_send_pim_hello() const { return (_should_send_pim_hello); }
     void set_should_send_pim_hello(bool v) { _should_send_pim_hello = v; }
     
@@ -514,7 +518,11 @@ private:
     list<IPvX>	_send_unicast_bootstrap_nbr_list; // List of new nbrs to
 						  // unicast to them the
 						  // Bootstrap message.
-    
+
+    // The alternative subnets on a vif. Used to make incoming traffic with a
+    // non-local source address to appear as it is coming from a local subnet.
+    list<IPvXNet> _alternative_subnet_list;
+
     //
     // Hello-related configuration parameters
     //

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.28 2004/02/27 07:47:50 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.29 2004/03/01 22:35:04 pavlin Exp $
 #
 
 #
@@ -63,6 +63,8 @@ if [ ! -z "$ENABLE_VIFS" ] ; then
 	echo "  CAND_RP_VIF=${CAND_RP_VIF}"
 	echo "  STATIC_RPS4=${STATIC_RPS4}"
 	echo "  STATIC_RPS6=${STATIC_RPS6}"
+	echo "  ALTERNATIVE_SUBNETS4=${ALTERNATIVE_SUBNETS4}"
+	echo "  ALTERNATIVE_SUBNETS6=${ALTERNATIVE_SUBNETS6}"
 else
     case ${HOSTNAME} in
 	xorp1)
@@ -75,6 +77,8 @@ else
 	STATIC_RPS4="10.3.0.1"
 	STATIC_RPS4=""
 	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
 	;;
 
 	xorp2)
@@ -87,6 +91,8 @@ else
 	STATIC_RPS4="10.3.0.1"
 	STATIC_RPS4=""
 	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
 	;;
 
 	xorp3)
@@ -100,6 +106,8 @@ else
 	STATIC_RPS4="10.3.0.1"
 	STATIC_RPS4=""
 	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
 	;;
 
 	xorp4)
@@ -112,6 +120,8 @@ else
 	STATIC_RPS4="10.2.0.1"
 	STATIC_RPS4=""
 	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
 	;;
 
 	xorp6)
@@ -123,6 +133,8 @@ else
 	STATIC_RPS4="10.2.0.1"
 	STATIC_RPS4=""
 	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
 	;;
 
 	xorp8.icir.org)
@@ -131,6 +143,8 @@ else
 	CAND_RP_VIF=""
 	STATIC_RPS4=""
 	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
 	;;
 
 	possum.icir.org)
@@ -141,6 +155,8 @@ else
 	CAND_RP_VIF=""
 	STATIC_RPS4=""
 	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
 	;;
 
 	koala.icir.org)
@@ -149,6 +165,8 @@ else
 	CAND_RP_VIF="eth0"
 	STATIC_RPS4=""
 	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
 	;;
 
 	oreo.icir.org)
@@ -157,6 +175,8 @@ else
 	CAND_RP_VIF="wi0"
 	STATIC_RPS4=""
 	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
 	;;
 	
 	pie)
@@ -165,6 +185,8 @@ else
 	CAND_RP_VIF="en1"
 	STATIC_RPS4=""
 	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
 	;;
 
 	*)
@@ -334,6 +356,38 @@ pim_start_pim
 # Wait to get the list of vifs
 #
 pim_is_vif_setup_completed
+
+#
+# Add the alternative subnets
+#
+if [ "${ALTERNATIVE_SUBNETS4}" != "" -a "${IP_VERSION}" = "IPV4" ] ; then
+	vif=""
+	subnet=""
+	i=0;
+	for iter in ${ALTERNATIVE_SUBNETS4}; do
+		i=$(($i+1))
+		if [ $(($i%2)) = 1 ] ; then
+			vif=${iter}
+		else
+			subnet=${iter}
+			pim_add_alternative_subnet4 ${vif} ${subnet}
+		fi
+	done
+fi
+if [ "${ALTERNATIVE_SUBNETS6}" != "" -a "${IP_VERSION}" = "IPV6" ] ; then
+	vif=""
+	subnet=""
+	i=0;
+	for iter in ${ALTERNATIVE_SUBNETS6}; do
+		i=$(($i+1))
+		if [ $(($i%2)) = 1 ] ; then
+			vif=${iter}
+		else
+			subnet=${iter}
+			pim_add_alternative_subnet6 ${vif} ${subnet}
+		fi
+	done
+fi
 
 #
 # Enable and start PIM vifs

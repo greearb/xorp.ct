@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.32 2004/03/01 09:17:18 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.33 2004/03/01 10:05:22 pavlin Exp $"
 
 
 //
@@ -1729,6 +1729,58 @@ PimVif::decr_usage_by_pim_mre_task()
 	    final_stop(error_msg);
 	}
     }
+}
+
+void
+PimVif::add_alternative_subnet(const IPvXNet& subnet)
+{
+    list<IPvXNet>::iterator iter;
+
+    iter = find(_alternative_subnet_list.begin(),
+		_alternative_subnet_list.end(),
+		subnet);
+    if (iter != _alternative_subnet_list.end())
+	return;		// Already added
+
+    _alternative_subnet_list.push_back(subnet);
+
+    //
+    // Add the tasks to take care of the PimMre processing
+    //
+    pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
+}
+
+void
+PimVif::delete_alternative_subnet(const IPvXNet& subnet)
+{
+    list<IPvXNet>::iterator iter;
+
+    iter = find(_alternative_subnet_list.begin(),
+		_alternative_subnet_list.end(),
+		subnet);
+    if (iter == _alternative_subnet_list.end())
+	return;		// No such subnet
+
+    _alternative_subnet_list.erase(iter);
+
+    //
+    // Add the tasks to take care of the PimMre processing
+    //
+    pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
+}
+
+void
+PimVif::remove_all_alternative_subnets()
+{
+    if (_alternative_subnet_list.empty())
+	return;		// No alternative subnets to remove
+
+    _alternative_subnet_list.clear();
+
+    //
+    // Add the tasks to take care of the PimMre processing
+    //
+    pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
 }
 
 // TODO: temporary here. Should go to the Vif class after the Vif

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.22 2003/09/30 18:42:40 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.23 2004/02/22 03:22:44 pavlin Exp $"
 
 
 //
@@ -1571,6 +1571,82 @@ PimNode::config_static_rp_done(string& error_msg)
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+    
+    return (XORP_OK);
+}
+
+//
+// Add an alternative subnet on a PIM vif.
+//
+// An alternative subnet is used to make incoming traffic with a non-local
+// source address appear as it is coming from a local subnet.
+// Note: add alternative subnets with extreme care, only if you know what
+// you are really doing!
+//
+// Return: %XORP_OK on success, otherwise %XORP_ERROR.
+//
+int
+PimNode::add_alternative_subnet(const string& vif_name,
+				const IPvXNet& subnet,
+				string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot add alternative subnet to vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    pim_vif->add_alternative_subnet(subnet);
+    
+    return (XORP_OK);
+}
+
+//
+// Delete an alternative subnet on a PIM vif.
+//
+// Return: %XORP_OK on success, otherwise %XORP_ERROR.
+//
+int
+PimNode::delete_alternative_subnet(const string& vif_name,
+				   const IPvXNet& subnet,
+				   string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot delete alternative subnet from vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    pim_vif->delete_alternative_subnet(subnet);
+    
+    return (XORP_OK);
+}
+
+//
+// Remove all alternative subnets on a PIM vif.
+//
+// Return: %XORP_OK on success, otherwise %XORP_ERROR.
+//
+int
+PimNode::remove_all_alternative_subnets(const string& vif_name,
+					string& error_msg)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot remove all alternative subnets from vif %s: "
+			     "no such vif",
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    
+    pim_vif->remove_all_alternative_subnets();
     
     return (XORP_OK);
 }

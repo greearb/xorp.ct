@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.43 2004/01/05 20:40:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.44 2004/02/22 04:26:43 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -3931,6 +3931,86 @@ XrlPimNode::pim_0_1_reset_switch_to_spt_threshold()
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_alternative_subnet4(
+    // Input values,
+    const string&	vif_name,
+    const IPv4Net&	subnet)
+{
+    string error_msg;
+
+    if (PimNode::add_alternative_subnet(vif_name, IPvXNet(subnet), error_msg)
+	< 0) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_add_alternative_subnet6(
+    // Input values,
+    const string&	vif_name,
+    const IPv6Net&	subnet)
+{
+    string error_msg;
+
+    if (PimNode::add_alternative_subnet(vif_name, IPvXNet(subnet), error_msg)
+	< 0) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_delete_alternative_subnet4(
+    // Input values,
+    const string&	vif_name,
+    const IPv4Net&	subnet)
+{
+    string error_msg;
+
+    if (PimNode::delete_alternative_subnet(vif_name, IPvXNet(subnet),
+					   error_msg)
+	< 0) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_delete_alternative_subnet6(
+    // Input values,
+    const string&	vif_name,
+    const IPv6Net&	subnet)
+{
+    string error_msg;
+
+    if (PimNode::delete_alternative_subnet(vif_name, IPvXNet(subnet),
+					   error_msg)
+	< 0) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_remove_all_alternative_subnets(
+    // Input values,
+    const string&	vif_name)
+{
+    string error_msg;
+
+    if (PimNode::remove_all_alternative_subnets(vif_name, error_msg) < 0) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     return XrlCmdError::OKAY();
 }
 

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.14 2004/02/26 13:21:39 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.15 2004/03/01 22:47:18 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -67,9 +67,19 @@ it for each router:
 	STATIC_RPS4="10.2.0.1 10.4.0.2"
 	STATIC_RPS6=""
 
+ - If you want to add an "alternative (sub)net" to a network interface,
+   e.g., if you want to make incoming traffic with a non-local source address
+   to appear as it is coming from a local subnet, then create a list
+   of tuples "<virtual interface name> <subnet address>".
+   [ Note: add alternative subnets with extreme care, only if you know what
+   you are really doing! ]
+   Example:
+	ALTERNATIVE_SUBNET4="dc1 10.3.0.0/16 dc2 10.4.0.0/16"
+	ALTERNATIVE_SUBNET6=""
+
  - All configuration variables described above (ENABLE_VIFS, CAND_BSR_VIF,
-   CAND_RP_VIF, STATIC_RPS4, and STATIC_RPS6) can be predefined in your
-   shell environment instead.
+   CAND_RP_VIF, STATIC_RPS4, STATIC_RPS6, ALTERNATIVE_SUBNET4, and
+   ALTERNATIVE_SUBNET6) can be predefined in your shell environment instead.
 
  - By default, ``./test_pim'' will log all protocol-related messages.
    To disable them, comment-out the following variables:

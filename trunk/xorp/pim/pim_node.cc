@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.36 2004/02/29 22:59:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.37 2004/03/01 09:17:18 pavlin Exp $"
 
 
 //
@@ -1362,6 +1362,21 @@ PimNode::is_directly_connected(const PimVif& pim_vif,
     if (! pim_vif.is_up())
 	return (false);
 
+    //
+    // Test the alternative subnets
+    //
+    list<IPvXNet>::const_iterator iter;
+    for (iter = pim_vif.alternative_subnet_list().begin();
+	 iter != pim_vif.alternative_subnet_list().end();
+	 ++iter) {
+	const IPvXNet& ipvxnet = *iter;
+	if (ipvxnet.contains(ipaddr_test))
+	    return true;
+    }
+
+    //
+    // Test the same subnet addresses, or the P2P addresses
+    //
     return (pim_vif.is_same_subnet(ipaddr_test)
 	    || pim_vif.is_same_p2p(ipaddr_test));
 }

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.21 2003/12/16 23:40:46 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.22 2004/01/05 20:40:51 pavlin Exp $
 #
 
 #
@@ -1114,6 +1114,80 @@ pim_reset_switch_to_spt_threshold()
     echo "pim_reset_switch_to_spt_threshold" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_switch_to_spt_threshold"
     XRL_ARGS=""
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+pim_add_alternative_subnet4()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_add_alternative_subnet4 <vif_name:txt> <subnet:ipv4net>"
+	exit 1
+    fi
+    vif_name=$1
+    subnet=$2
+    
+    echo "pim_add_alternative_subnet4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_alternative_subnet4"
+    XRL_ARGS="?vif_name:txt=$vif_name&subnet:ipv4net=$subnet"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+pim_add_alternative_subnet6()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_add_alternative_subnet6 <vif_name:txt> <subnet:ipv6net>"
+	exit 1
+    fi
+    vif_name=$1
+    subnet=$2
+    
+    echo "pim_add_alternative_subnet6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/add_alternative_subnet6"
+    XRL_ARGS="?vif_name:txt=$vif_name&subnet:ipv6net=$subnet"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+pim_delete_alternative_subnet4()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_delete_alternative_subnet4 <vif_name:txt> <subnet:ipv4net>"
+	exit 1
+    fi
+    vif_name=$1
+    subnet=$2
+    
+    echo "pim_delete_alternative_subnet4" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/delete_alternative_subnet4"
+    XRL_ARGS="?vif_name:txt=$vif_name&subnet:ipv4net=$subnet"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+pim_delete_alternative_subnet6()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_delete_alternative_subnet6 <vif_name:txt> <subnet:ipv6net>"
+	exit 1
+    fi
+    vif_name=$1
+    subnet=$2
+    
+    echo "pim_delete_alternative_subnet6" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/delete_alternative_subnet6"
+    XRL_ARGS="?vif_name:txt=$vif_name&subnet:ipv6net=$subnet"
+    call_xrl_wrapper $XRL$XRL_ARGS
+}
+
+pim_remove_all_alternative_subnets()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_remove_all_alternative_subnets <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pim_remove_all_alternative_subnets" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/remove_all_alternative_subnets"
+    XRL_ARGS="?vif_name:txt=$vif_name"
     call_xrl_wrapper $XRL$XRL_ARGS
 }
 

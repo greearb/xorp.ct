@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.31 2004/02/26 15:38:47 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.32 2004/02/28 10:43:05 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -1005,6 +1005,15 @@ public:
 					const IPvX& rp_addr,
 					string& error_msg);
     int		config_static_rp_done(string& error_msg);
+
+    int		add_alternative_subnet(const string& vif_name,
+				       const IPvXNet& subnet,
+				       string& error_msg);
+    int		delete_alternative_subnet(const string& vif_name,
+					  const IPvXNet& subnet,
+					  string& error_msg);
+    int		remove_all_alternative_subnets(const string& vif_name,
+					       string& error_msg);
     
     //
     // Debug-related methods
