@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.6 2003/06/02 23:20:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.7 2003/09/20 00:37:26 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -226,7 +226,7 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     struct rtmsg	*rtmsg;
     struct rtattr	*rtattr;
     int			rta_len;
-    NetlinkSocket*	ns_ptr = NULL;
+    NetlinkSocket	*ns_ptr = NULL;
     int			family = dst.af();
     
     // Zero the return information
@@ -266,13 +266,13 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     
     // Set the request
     memset(rtmbuf, 0, sizeof(rtmbuf));
-    nlh = (struct nlmsghdr *)rtmbuf;
+    nlh = reinterpret_cast<struct nlmsghdr*>(rtmbuf);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtmsg));
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST;
     nlh->nlmsg_seq = ns_ptr->seqno();
     nlh->nlmsg_pid = ns_ptr->pid();
-    rtmsg = (struct rtmsg *)NLMSG_DATA(nlh);
+    rtmsg = reinterpret_cast<struct rtmsg*>(NLMSG_DATA(nlh));
     rtmsg->rtm_family = family;
     rtmsg->rtm_dst_len = IPvX::addr_bitlen(family);
     // Add the 'ipaddr' address as an attribute
@@ -282,10 +282,10 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
 		   sizeof(rtmbuf), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
 	return false;
     }
-    rtattr = (struct rtattr *)(((uint8_t *)nlh) + NLMSG_ALIGN(nlh->nlmsg_len));
+    rtattr = reinterpret_cast<struct rtattr*>(((uint8_t *)nlh) + NLMSG_ALIGN(nlh->nlmsg_len));
     rtattr->rta_type = RTA_DST;
     rtattr->rta_len = rta_len;
-    dst.copy_out((uint8_t *)RTA_DATA(rtattr));
+    dst.copy_out(reinterpret_cast<uint8_t*>(RTA_DATA(rtattr)));
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     rtmsg->rtm_tos = 0;			// XXX: what is this TOS?
     rtmsg->rtm_table = RT_TABLE_UNSPEC; // Routing table ID
@@ -294,8 +294,10 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     rtmsg->rtm_type  = RTN_UNSPEC;
     rtmsg->rtm_flags = 0;
     
-    if (ns_ptr->sendto(rtmbuf, nlh->nlmsg_len, 0, (struct sockaddr *)&snl,
-		       sizeof(snl)) != (ssize_t)nlh->nlmsg_len) {
+    if (ns_ptr->sendto(rtmbuf, nlh->nlmsg_len, 0,
+		       reinterpret_cast<struct sockaddr*>(&snl),
+		       sizeof(snl))
+	!= (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("error writing to netlink socket: %s",
 		   strerror(errno));
 	return false;
@@ -309,9 +311,10 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     _cache_seqno = nlh->nlmsg_seq;
     _cache_valid = false;
     while (_cache_valid == false) {
-	ns_ptr->force_recvfrom(0, (struct sockaddr *)&snl, &snl_len);
+	ns_ptr->force_recvfrom(0, reinterpret_cast<struct sockaddr*>(&snl),
+			       &snl_len);
     }
-    nlh_answer = (struct nlmsghdr *)(&_cache_data[0]);
+    nlh_answer = reinterpret_cast<struct nlmsghdr*>(&_cache_data[0]);
     XLOG_ASSERT(nlh_answer->nlmsg_type == RTM_NEWROUTE);
     return (parse_buffer_nlm(fte, &_cache_data[0], _cache_data.size()));
 }

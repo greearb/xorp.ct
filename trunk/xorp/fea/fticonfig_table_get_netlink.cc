@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.6 2003/06/02 23:20:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.7 2003/09/20 00:37:51 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -161,7 +161,7 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     struct nlmsghdr	*nlh;
     struct sockaddr_nl	snl;
     struct rtgenmsg	*rtgenmsg;
-    NetlinkSocket*	ns_ptr = NULL;
+    NetlinkSocket	*ns_ptr = NULL;
     
     // Get the pointer to the NetlinkSocket
     switch(family) {
@@ -196,16 +196,17 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     
     // Set the request
     memset(rtmbuf, 0, sizeof(rtmbuf));
-    nlh = (struct nlmsghdr *)rtmbuf;
+    nlh = reinterpret_cast<struct nlmsghdr*>(rtmbuf);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtgenmsg));
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
     nlh->nlmsg_seq = ns_ptr->seqno();
     nlh->nlmsg_pid = ns_ptr->pid();
-    rtgenmsg = (struct rtgenmsg *)NLMSG_DATA(nlh);
+    rtgenmsg = reinterpret_cast<struct rtgenmsg*>(NLMSG_DATA(nlh));
     rtgenmsg->rtgen_family = family;
     
-    if (ns_ptr->sendto(rtmbuf, nlh->nlmsg_len, 0, (struct sockaddr *)&snl,
+    if (ns_ptr->sendto(rtmbuf, nlh->nlmsg_len, 0,
+		       reinterpret_cast<struct sockaddr*>(&snl),
 		       sizeof(snl)) != (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("error writing to netlink socket: %s",
 		   strerror(errno));
@@ -252,7 +253,7 @@ FtiConfigTableGetNetlink::nlsock_data(const uint8_t* data, size_t nbytes)
     _cache_data.resize(nbytes);
     
     while (d < nbytes) {
-	const nlmsghdr* nlh = reinterpret_cast<const nlmsghdr*>(data + d);
+	const struct nlmsghdr* nlh = reinterpret_cast<const struct nlmsghdr *>(data + d);
 	if (nlh->nlmsg_seq == _cache_seqno) {
 	    //
 	    // TODO: XXX: here we should add the following check as well:
