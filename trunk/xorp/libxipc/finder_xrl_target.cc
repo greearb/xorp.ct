@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.4 2003/03/04 23:41:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.5 2003/03/05 02:01:50 hodson Exp $"
 
 #include "libxorp/debug.h"
 
@@ -256,9 +256,15 @@ FinderNGXrlTarget::finder_0_1_get_xrl_targets(XrlAtomList& xal)
     list<string> tgts;
 
     _finder.fill_target_list(tgts);
+
+    // Special case, add finder itself to list
+    tgts.push_back("finder");
+    tgts.sort();
+
     for (list<string>::const_iterator i = tgts.begin(); i != tgts.end(); i++) {
 	xal.append(XrlAtom(*i));
     }
+
     return XrlCmdError::OKAY();
 }
 
@@ -268,7 +274,15 @@ FinderNGXrlTarget::finder_0_1_get_xrls_registered_by(const string& tgt,
 {
     list<string> xrls;
 
-    if (_finder.fill_targets_xrl_list(tgt, xrls) == false) {
+    // Special case, finder request
+    if (tgt == "finder") {
+	list<string> cmds;
+	_finder.commands().get_command_names(cmds);
+	// Turn command names into Xrls
+	for (list<string>::iterator i = cmds.begin(); i != cmds.end(); i++) {
+	    xrls.push_back(Xrl("finder", *i).str());
+	}
+    } else if (_finder.fill_targets_xrl_list(tgt, xrls) == false) {
 	return
 	    XrlCmdError::COMMAND_FAILED
 	    (c_format("No such target \"%s\"", tgt.c_str()));
