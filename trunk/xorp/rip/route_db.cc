@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.1 2003/04/10 00:27:43 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -30,7 +30,7 @@
 template <typename A>
 RouteDB<A>::RouteDB(EventLoop& e) : _eventloop(e)
 {
-    _oq = new UpdateQueue<A>();
+    _uq = new UpdateQueue<A>();
 }
 
 template <typename A>
@@ -38,7 +38,7 @@ RouteDB<A>::~RouteDB()
 {
     _routes.delete_all_nodes();
     XLOG_ASSERT(_routes.route_count() == 0);
-    delete _oq;
+    delete _uq;
 }
 
 template <typename A>
@@ -109,7 +109,7 @@ RouteDB<A>::update_route(const Net&	net,
     if (cost > RIP_INFINITY) {
 	cost = RIP_INFINITY;
     }
-    
+
     RouteOrigin* o = static_cast<RouteOrigin*>(peer);
 
     //
@@ -123,8 +123,8 @@ RouteDB<A>::update_route(const Net&	net,
 	}
 	DBRouteEntry dre(new Route(net, nexthop, cost, o, tag));
 	set_expiry_timer(dre.get());
-	_routes.insert(net, dre);	
-	_oq->push_back(dre);
+	_routes.insert(net, dre);
+	_uq->push_back(dre);
 	return true;
     } else {
 	bool updated = false;
@@ -147,11 +147,11 @@ RouteDB<A>::update_route(const Net&	net,
 	    updated = true;
 	}
 	if (updated) {
-	    _oq->push_back(i.payload());
+	    _uq->push_back(i.payload());
 	}
 	return updated;
     }
-    
+
     return false;
 }
 
@@ -165,6 +165,20 @@ RouteDB<A>::dump_routes(vector<ConstDBRouteEntry>& routes)
 	    routes.push_back(i.payload());
 	++i;
     }
+}
+
+template <typename A>
+UpdateQueue<A>&
+RouteDB<A>::update_queue()
+{
+    return *_uq;
+}
+
+template <typename A>
+const UpdateQueue<A>&
+RouteDB<A>::update_queue() const
+{
+    return *_uq;
 }
 
 template class RouteDB<IPv4>;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.2 2003/04/23 17:06:49 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -65,6 +65,7 @@ public:
 		      uint32_t	   cost,
 		      uint32_t	   tag,
 		      RipPeer*	   peer);
+
     /**
      * Flatten routing table representation from Trie to Vector.
      *
@@ -84,9 +85,8 @@ public:
      */
     bool resolve_and_reference(const Net& net, ConstDBRouteEntry& cdbe);
 
-    
-    
     UpdateQueue<A>& update_queue();
+    const UpdateQueue<A>& update_queue() const;
 
 protected:
     RouteDB(const RouteDB&);			// not implemented
@@ -101,7 +101,7 @@ protected:
 protected:
     EventLoop&		_eventloop;
     RouteTrie		_routes;
-    UpdateQueue<A>*	_oq;
+    UpdateQueue<A>*	_uq;
 };
 
 #endif // __RIP_ROUTE_DB_HH__
