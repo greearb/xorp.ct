@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/profile.hh,v 1.3 2004/09/28 00:43:23 atanu Exp $
+// $XORP: xorp/libxorp/profile.hh,v 1.4 2005/03/25 02:53:43 pavlin Exp $
 
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
@@ -161,14 +161,14 @@ class Profile {
     /**
      * Enable tracing.
      *
-     * @parameter profile variable.
+     * @param profile variable.
      */
     void enable(const string& pname)
 	throw(PVariableUnknown,PVariableLocked);
     
     /**
      * Disable tracing.
-     * @parameter profile variable.
+     * @param profile variable.
      */
     void disable(const string& pname) throw(PVariableUnknown);
 
