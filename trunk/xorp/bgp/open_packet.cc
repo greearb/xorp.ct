@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.13 2003/09/25 04:06:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.14 2003/09/27 03:42:20 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -22,7 +22,6 @@
 extern void dump_bytes(const uint8_t *d, size_t l);
 
 /* **************** OpenPacket *********************** */
-
 
 OpenPacket::OpenPacket(const AsNum& as, const IPv4& id,
 		const uint16_t holdtime) :
@@ -163,54 +162,6 @@ OpenPacket::operator==(const OpenPacket& him) const
 void
 OpenPacket::add_parameter(const BGPParameter *p)
 {
-    BGPParameter *parameter;
-
-    debug_msg("Open packet add_parameter called\n");
-
-    switch (p->type()) {
-	case PARAMTYPEAUTH:
-	    parameter = new BGPAuthParameter((const BGPAuthParameter&)*p);
-	    break;
-	case PARAMTYPECAP: {
-	    const BGPCapParameter* cparam =
-		static_cast<const BGPCapParameter*>(p);
-	    switch (cparam->cap_code())	{
-	    case CAPABILITYMULTIPROTOCOL:
-		parameter =
-	 new BGPMultiProtocolCapability((const BGPMultiProtocolCapability&)*p);
-		break;
-	    case CAPABILITYREFRESHOLD:
-		// need to look at this further.....
-		// what do we do about the old capability
-		XLOG_UNFINISHED();
-		break;
-	    case CAPABILITYREFRESH:
-		parameter =
-		    new BGPRefreshCapability((const BGPRefreshCapability&)*p);
-		break;
-	    case CAPABILITYMULTIROUTE:
-		parameter =
-	       new BGPMultiRouteCapability((const BGPMultiRouteCapability&)*p);
-		break;
-	    case CAPABILITYUNKNOWN:
-		parameter =
-		    new BGPUnknownCapability((const BGPUnknownCapability&)*p);
-		break;
-	    default:
-		XLOG_FATAL("Don't understand parameter type %d and "
-			   "capability code %d.\n",
-			   p->type(), cparam->cap_code());
-	    }
-	}
-	    break;
-    default:
-	// unknown parameter type
-	XLOG_UNREACHABLE();
-    }
-
-    _parameter_list.push_back(ref_ptr<const BGPParameter>(parameter));
-    // p.dump_contents();
-    // TODO add bounds checking
-
+    _parameter_list.push_back(p);
     _OptParmLen = _OptParmLen + p->length();
 }
