@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.20 2003/12/19 01:31:09 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.21 2003/12/19 01:50:19 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -47,8 +47,6 @@ private:
     XrlStdRouter *_xrl_router;
     BGPMain *_bgp;
 
-    uint32_t _id;
-
     struct Queued {
 	bool add;
 	string ribname;
@@ -56,7 +54,6 @@ private:
 	Safi safi;
 	IPNet<A> net;
 	A nexthop;
-	uint32_t id;
 	string comment;
     };
 
@@ -82,9 +79,7 @@ private:
 
     inline EventLoop& eventloop() { return _rib_ipc_handler->eventloop(); }
 
-    void route_command_done(const XrlError& error,
-			    uint32_t sequence, 
-			    const char *comment);
+    void route_command_done(const XrlError& error, const char *comment);
 };
 
 /*

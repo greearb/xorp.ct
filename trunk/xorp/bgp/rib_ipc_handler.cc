@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.36 2003/12/19 01:50:19 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.37 2003/12/19 01:54:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -357,7 +357,6 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
     q.safi = safi;
     q.net = net;
     q.nexthop = nexthop;
-    q.id = _id++;
     q.comment = 
 	c_format("add_route: ribname %s %s safi %d net %s nexthop %s",
 		 ribname.c_str(),
@@ -383,7 +382,6 @@ XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, Safi safi,
     q.ibgp = ibgp;
     q.safi = safi;
     q.net = net;
-    q.id = _id++;
     q.comment = 
 	c_format("delete_route: ribname %s %s safi %d net %s",
 		 ribname.c_str(),
@@ -478,7 +476,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 			    unicast, multicast,
 			    q.net, q.nexthop, /*metric*/0, 
 			    callback(this, &XrlQueue::route_command_done,
-				     q.id, q.comment.c_str()));
+				     q.comment.c_str()));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	sent = rib.send_delete_route4(q.ribname.c_str(),
@@ -487,7 +485,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 				      q.net,
 				      ::callback(this,
 						 &XrlQueue::route_command_done,
-						 q.id, q.comment.c_str()));
+						 q.comment.c_str()));
     }
 
     return sent;
@@ -517,7 +515,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 			    unicast, multicast,
 			    q.net, q.nexthop, /*metric*/0, 
 			    callback(this, &XrlQueue::route_command_done,
-				     q.id, q.comment.c_str()));
+				     q.comment.c_str()));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	sent = rib.send_delete_route6(q.ribname.c_str(),
@@ -525,7 +523,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 			       unicast, multicast,
 			       q.net,
 			       callback(this, &XrlQueue::route_command_done,
-					q.id, q.comment.c_str()));
+					q.comment.c_str()));
     }
 
     return sent;
@@ -534,33 +532,15 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 template<class A>
 void
 XrlQueue<A>::route_command_done(const XrlError& error,
-				uint32_t	sequence, 
-				const char*	comment)
+				const char* comment)
 {
     _flying--;
-    debug_msg("callback %d %s %s\n", sequence, comment, error.str().c_str());
+    debug_msg("callback %s %s\n", comment, error.str().c_str());
 
     switch (error.error_code()) {
     case OKAY:
-	{
-	Queued q = _xrl_queue.front();
-	if (q.id == sequence) {
-	    _xrl_queue.pop_front();
-	} else {
-	    typename deque <XrlQueue<A>::Queued>::iterator qi;
-
-	    bool found = false;
-	    for (qi = _xrl_queue.begin(); qi != _xrl_queue.end(); qi++)
-		if ((*qi).id == sequence) {
- 		    _xrl_queue.erase(qi);
-		    found = true;
-		    break;
-		}
-	    XLOG_ASSERT(found);
-	}
-
+	_xrl_queue.pop_front();
 	sendit();
-	}
 	break;
 
     case REPLY_TIMED_OUT:
