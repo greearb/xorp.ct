@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.11 2004/12/03 21:30:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.12 2004/12/08 01:41:18 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -46,7 +46,6 @@ const string ClickSocket::CLICK_FILE_SYSTEM_TYPE = "click";
 uint16_t ClickSocket::_instance_cnt = 0;
 pid_t ClickSocket::_pid = getpid();
 
-const IPv4 ClickSocket::DEFAULT_USER_CLICK_CONTROL_ADDRESS = IPv4::LOOPBACK();
 const TimeVal ClickSocket::USER_CLICK_STARTUP_MAX_WAIT_TIME = TimeVal(1, 0);
 
 //
@@ -63,7 +62,7 @@ ClickSocket::ClickSocket(EventLoop& eventloop)
       _is_user_click(false),
       _kernel_click_install_on_startup(false),
       _user_click_command_execute_on_startup(false),
-      _user_click_control_address(DEFAULT_USER_CLICK_CONTROL_ADDRESS),
+      _user_click_control_address(DEFAULT_USER_CLICK_CONTROL_ADDRESS()),
       _user_click_control_socket_port(DEFAULT_USER_CLICK_CONTROL_SOCKET_PORT),
       _user_click_run_command(NULL)
 {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.11 2004/12/03 21:30:07 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.12 2004/12/08 01:41:18 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -424,7 +424,9 @@ private:
 private:
     static const size_t CLSOCK_BYTES = 8*1024; // Initial guess at msg size
 
-    static const IPv4 DEFAULT_USER_CLICK_CONTROL_ADDRESS;
+    static inline const IPv4 DEFAULT_USER_CLICK_CONTROL_ADDRESS() {
+	return (IPv4::LOOPBACK());
+    }
     static const uint16_t DEFAULT_USER_CLICK_CONTROL_SOCKET_PORT = 13000;
     static const int CLICK_MAJOR_VERSION = 1;
     static const int CLICK_MINOR_VERSION = 1;
