@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/permits.cc,v 1.1 2003/02/25 18:58:50 hodson Exp $"
 
 #include "permits.hh"
 
@@ -61,7 +61,7 @@ add_permitted_net(const IPv6Net& net)
     return false;
 }
 
-bool is_host_permitted(const IPv4& host)
+bool host_is_permitted(const IPv4& host)
 {
     if (find(ipv4_hosts.begin(), ipv4_hosts.end(), host) != ipv4_hosts.end()) {
 	return true;
@@ -76,7 +76,7 @@ bool is_host_permitted(const IPv4& host)
     return false;
 }
 
-bool is_host_permitted(const IPv6& host)
+bool host_is_permitted(const IPv6& host)
 {
     if (find(ipv6_hosts.begin(), ipv6_hosts.end(), host) != ipv6_hosts.end()) {
 	return true;
@@ -95,3 +95,27 @@ const IPv4Hosts& permitted_ipv4_hosts()	{ return ipv4_hosts; }
 const IPv4Nets&	 permitted_ipv4_nets()	{ return ipv4_nets; }
 const IPv6Hosts& permitted_ipv6_hosts()	{ return ipv6_hosts; }
 const IPv6Nets&	 permitted_ipv6_nets()	{ return ipv6_nets; }
+
+void
+clear_permitted_ip4_hosts()
+{
+    ipv4_hosts.clear();
+}
+
+void
+clear_permitted_ip6_hosts()
+{
+    ipv6_hosts.clear();
+}
+
+void
+clear_permitted_ip4_nets()
+{
+    ipv4_nets.clear();
+}
+
+void
+clear_permitted_ip6_nets()
+{
+    ipv6_nets.clear();
+}

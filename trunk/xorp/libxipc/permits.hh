@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libxipc/permits.hh,v 1.1 2003/02/25 18:58:50 hodson Exp $
 
 #ifndef __LIBXIPC_PERMITS_HH__
 #define __LIBXIPC_PERMITS_HH__
@@ -58,14 +58,14 @@ bool add_permitted_net(const IPv6Net& net);
  * @param host address to be test amongst permitted IPv4 hosts and nets.
  * @return true if host is permitted.
  */
-bool is_host_permitted(const IPv4& host);
+bool host_is_permitted(const IPv4& host);
 
 /**
  * Test if host is permitted.
  * @param host address to be test amongst permitted IPv6 hosts and nets.
  * @return true if host is permitted.
  */
-bool is_host_permitted(const IPv6& host);
+bool host_is_permitted(const IPv6& host);
 
 /**
  * Get list of permitted IPv4 hosts.
@@ -86,5 +86,26 @@ const IPv6Hosts& permitted_ipv6_hosts();
  * Get list of permitted IPv6 nets.
  */
 const IPv6Nets& permitted_ipv6_nets();
+
+/**
+ * Clear all IPv4 host related permissions.
+ */
+void clear_permitted_ipv4_hosts();
+
+/**
+ * Clear all IPv6 host related permissions.
+ */
+void clear_permitted_ipv6_hosts();
+
+/**
+ * Clear all IPv4 net related permissions.
+ */
+void clear_permitted_ipv4_nets();
+
+/**
+ * Clear all IPv6 net related permissions.
+ */
+void clear_permitted_ipv6_nets();
+
 
 #endif // __LIBXIPC_PERMITS_HH__
