@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.1 2003/05/15 23:10:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.2 2003/05/19 00:27:17 pavlin Exp $"
 
 
 //
@@ -207,6 +207,84 @@ MfeaNode::add_vif(const Vif& vif, string& err)
     }
     
     XLOG_INFO("New vif: %s", mfea_vif->str().c_str());
+    
+    // XXX: add PIM Register vif (if needed)
+    add_pim_register_vif();
+    
+    return (XORP_OK);
+}
+
+/**
+ * MfeaNode::add_pim_register_vif:
+ * 
+ * Install a new MFEA PIM Register vif (if needed).
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+MfeaNode::add_pim_register_vif()
+{
+    //
+    // Test first whether we have already PIM Register vif
+    //
+    for (uint16_t i = 0; i < maxvifs(); i++) {
+	MfeaVif *mfea_vif = vif_find_by_vif_index(i);
+	if (mfea_vif == NULL)
+	    continue;
+	if (mfea_vif->is_pim_register())
+	    return (XORP_OK);		// Found: OK
+    }
+    
+    //
+    // Create the PIM Register vif if there is a valid IP address
+    //
+    // TODO: check with Linux, Solaris, etc, if we can
+    // use 127.0.0.2 or ::2 as a PIM Register vif address, and use that
+    // address instead (otherwise we may always have to keep track
+    // whether the underlying address has changed).
+    //
+    IPvX pim_register_vif_addr(IPvX::ZERO(family()));
+    uint16_t pif_index = 0;
+    for (uint16_t i = 0; i < maxvifs(); i++) {
+	MfeaVif *mfea_vif = vif_find_by_vif_index(i);
+	if (mfea_vif == NULL)
+	    continue;
+	if (! mfea_vif->is_underlying_vif_up())
+	    continue;
+	if (mfea_vif->addr_ptr() == NULL)
+	    continue;
+	if (mfea_vif->is_pim_register())
+	    continue;
+	if (mfea_vif->is_loopback())
+	    continue;
+	if (! mfea_vif->is_multicast_capable())
+	    continue;
+	// Found appropriate local address.
+	pim_register_vif_addr = *(mfea_vif->addr_ptr());
+	pif_index = mfea_vif->pif_index();
+	break;
+    }
+    if (pim_register_vif_addr != IPvX::ZERO(family())) {
+	// Add the Register vif
+	uint16_t vif_index = find_unused_vif_index();
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+	// TODO: XXX: the Register vif name is hardcoded here!
+	MfeaVif register_vif(*this, Vif("register_vif"));
+	register_vif.set_vif_index(vif_index);
+	register_vif.set_pif_index(pif_index);
+	register_vif.set_underlying_vif_up(true); // XXX: 'true' to allow creation
+	register_vif.set_pim_register(true);
+	register_vif.add_address(pim_register_vif_addr,
+				 IPvXNet(pim_register_vif_addr,
+					 pim_register_vif_addr.addr_bitlen()),
+				 pim_register_vif_addr,
+				 IPvX::ZERO(family()));
+	string err;
+	if (add_vif(register_vif, err) < 0) {
+	    XLOG_ERROR("Cannot add Register vif: %s", err.c_str());
+	    return (XORP_ERROR);
+	}
+    }
     
     return (XORP_OK);
 }
