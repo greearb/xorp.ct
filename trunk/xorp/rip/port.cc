@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.26 2004/03/02 19:48:22 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.27 2004/03/03 21:16:10 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -138,9 +138,8 @@ template <typename A>
 Peer<A>*
 Port<A>::peer(const Addr& addr)
 {
-    typename PeerList::iterator i = i = find_if(_peers.begin(), _peers.end(),
-						peer_has_address<A>(addr));
-
+    typename PeerList::iterator i = find_if(_peers.begin(), _peers.end(),
+					    peer_has_address<A>(addr));
     return (i == _peers.end()) ? 0 : *i;
 }
 
@@ -148,9 +147,8 @@ template <typename A>
 const Peer<A>*
 Port<A>::peer(const Addr& addr) const
 {
-    typename PeerList::const_iterator i  = find_if(_peers.begin(),
-						   _peers.end(),
-						   peer_has_address<A>(addr));
+    typename PeerList::const_iterator i = find_if(_peers.begin(), _peers.end(),
+						  peer_has_address<A>(addr));
     return (i == _peers.end()) ? 0 : *i;
 }
 
