@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libfeaclient/xrl_ifmgr_mirror.cc,v 1.1 2003/08/26 19:04:39 hodson Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -265,7 +265,7 @@ XrlIfMgrMirrorTarget::common_0_1_get_status(uint32_t& status,
     // Nothing to do.  Expect container application will get this call
     // at the appropriate level.
     status = uint32_t(PROC_READY);
-    reason.clear();
+    reason.erase();
 
     return XrlCmdError::OKAY();
 }
