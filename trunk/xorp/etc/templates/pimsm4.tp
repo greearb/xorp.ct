@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.9 2004/06/04 04:47:05 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.10 2004/06/07 18:16:26 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -8,6 +8,7 @@ protocols {
 	interface @: txt {
 	    vif @: txt {
 		enabled:		bool = true;
+		dr-priority:		u32 = 1;
 		alternative-subnet @: ipv4net {
 		}
 	    }
@@ -99,6 +100,13 @@ protocols {
 		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
 		}
 
+		dr-priority {
+		    %help:	short "Set the Designated Router election priority";
+		    %create:	xrl "$(pimsm4.targetname)/pim/0.1/set_vif_dr_priority?vif_name:txt=$(vif.@)&dr_priority:u32=$(@)";
+		    %set:	xrl "$(pimsm4.targetname)/pim/0.1/set_vif_dr_priority?vif_name:txt=$(vif.@)&dr_priority:u32=$(@)";
+		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/set_vif_dr_priority?vif_name:txt=$(vif.@)&dr_priority:u32=$(DEFAULT)";
+		}
+
 		alternative-subnet @ {
 		    %help:	short "Fake a subnet to appear directly-connected";
 		    %set:	xrl "$(pimsm4.targetname)/pim/0.1/add_alternative_subnet4?vif_name:txt=$(vif.@)&subnet:ipv4net=$(alternative-subnet.@)";
@@ -118,11 +126,13 @@ protocols {
 
 		    rp-priority {
 			%help:	short "Configure the RP priority";
+			%allow-range: $(@) "0" "255";
 			%set:;
 		    }
 
 		    hash-mask-len {
 			%help:	short "Configure the hash mask length for the has function";
+			%allow-range: $(@) "4" "32";
 			%set:;
 		    }
 		}
@@ -160,11 +170,13 @@ protocols {
 
 		    bsr-priority {
 			%help:	short "Configure the Candidate-BSR priority";
+			%allow-range: $(@) "0" "255";
 			%set:;
 		    }
 
 		    hash-mask-len {
 			%help:	short "Configure the hash mask length for the has function";
+			%allow-range: $(@) "4" "32";
 			%set:;
 		    }
 		}
@@ -190,11 +202,13 @@ protocols {
 
 		    rp-priority {
 			%help:	short "Configure the Candidate-RP priority";
+			%allow-range: $(@) "0" "255";
 			%set:;
 		    }
 
 		    rp-holdtime {
 			%help:	short "Configure the Candidate-RP holdtime";
+			%allow-range: $(@) "0" "65535";
 			%set:;
 		    }
 		}
