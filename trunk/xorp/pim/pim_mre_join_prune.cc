@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.10 2003/01/23 05:01:27 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.11 2003/01/31 20:51:58 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -2262,7 +2262,7 @@ pim_mre_override_timer_timeout(void *data_pointer)
     // NotPruned state
     // Send Join(S,G,rpt) to RPF'(S,G,rpt)
     pim_nbr = pim_mre->rpfp_nbr_sg_rpt();
-    pim_nbr_rpfp_nbr_wc = rpfp_nbr_wc();
+    pim_nbr_rpfp_nbr_wc = pim_mre->rpfp_nbr_wc();
     if (pim_nbr == NULL) {
 	XLOG_WARNING("Join(S,G,rpt) = true: "
 		     "upstream RPT neighbor for RP %s for "
