@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/harness/real_trie.hh,v 1.1 2003/09/10 03:19:26 atanu Exp $
 
 #ifndef __BGP_HARNESS_REAL_TRIE_HH_
 #define __BGP_HARNESS_REAL_TRIE_HH_
@@ -32,27 +32,22 @@ public:
 			  const TimeVal&>::RefPtr TreeWalker;
 
     void tree_walk_table(const TreeWalker& tw) const {
-	tree_walk_table(tw, &_head, "");
+	A topbit;
+	++topbit;
+	topbit = topbit << A::addr_bitlen() - 1;
+	tree_walk_table(tw, &_head, A::ZERO(), 0, topbit);
     };
 
-//     void print(FILE *fp) const;
-//     void prt(FILE *fp) const {
-// 	prt(fp, _head, "");
-//     };
-    string bit_string_to_subnet(const char *st) const;
     bool insert(const IPv4Net& net, TriePayload& p);
     bool insert(A address, size_t mask_length, TriePayload& p);
-//     bool insert(uint32_t address, int mask_length, TriePayload& p);
     void del() {
 	del(&_head);
     }
     bool del(const IPv4Net& net);
-    bool del(uint32_t address, int mask_length);
+    bool del(A address, size_t mask_length);
     TriePayload find(const IPNet<A>& net) const;
     TriePayload find(A address, size_t mask_length) const;
     TriePayload find(const A& address) const;
-//     TriePayload find(uint32_t address, const int mask_length) const;
-//     TriePayload find(uint32_t address) const;
 private:
     struct Tree {
 	Tree *ptrs[2];
@@ -63,11 +58,10 @@ private:
 	}
     };
 
-    void tree_walk_table(const TreeWalker&, const Tree *ptr, const char *st)
-	const;
-    void prt(FILE *fp, const Tree *ptr, const char *st) const;
+    void tree_walk_table(const TreeWalker&, const Tree *ptr, 
+			 A address, size_t prefix_length, A orbit) const;
     void del(Tree *ptr);
-    bool del(Tree *ptr, uint32_t address, int mask_length);
+    bool del(Tree *ptr, A address, size_t mask_length);
     
     bool _debug;
     bool _pretty;
@@ -75,28 +69,25 @@ private:
     Tree _head;
 };
 
-const uint32_t topbit = 0x80000000;
-
-#define speak debug_msg
-#define	newline	"\n"
-
 template <class A>
-RealTrie<A>::~RealTrie() {
+RealTrie<A>::~RealTrie()
+{
     del(&_head);
 }
 
 template <class A>
 bool
-RealTrie<A>::empty() const {
+RealTrie<A>::empty() const
+{
     return (0 ==_head.ptrs[0]) && (0 ==_head.ptrs[1]);
 }
 
 template <class A>
 void
 RealTrie<A>::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
-			     const char *st) const
+			     A address, size_t prefix_length, A orbit) const
 {
-    char result[1024];
+    debug_msg("Enter: %s/%d\n", address.str().c_str(), prefix_length);
 
     if(0 == ptr) {
 	return;
@@ -105,98 +96,24 @@ RealTrie<A>::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
     TimeVal tv;
     const UpdatePacket *update = ptr->p.get(tv);
     if(0 != update) {
-#if	0
-	IPv4 nh;
-	list<PathAttribute*> l = update->pa_list();
-	list<PathAttribute*>::const_iterator i;
-	for(i = l.begin(); i != l.end(); i++) {
-	    if(NEXT_HOP == (*i)->type()) {
- 		IPv4NextHopAttribute *nha = 
- 		    dynamic_cast<IPv4NextHopAttribute *>(*i);
-		nh = nha->nexthop();
-	    }
-	    
-	}
-#endif
-	const IPNet<A> net = IPNet<A>(bit_string_to_subnet(st).c_str());
-	tw->dispatch(update, net, tv);
-#if	0
-	fprintf(fp, "%ssummary %s %s %s\n",  update->str().c_str(), st,
-		bit_string_to_subnet(st).c_str(), nh.str().c_str());
-#endif
+ 	debug_msg("Found %s/%d\n", address.str().c_str(), prefix_length);
+	tw->dispatch(update, IPNet<A>(address, prefix_length), tv);
     }
 
-    sprintf(result, "%s0", st);
-    tree_walk_table(tw, ptr->ptrs[0], result);
+    ++prefix_length;
+    A save_orbit = orbit;
+    orbit = orbit >> 1;
 
-    sprintf(result, "%s1", st);
-    tree_walk_table(tw, ptr->ptrs[1], result);
-}
+    tree_walk_table(tw, ptr->ptrs[0], address, prefix_length, orbit);
 
-// template <class A>
-// void
-// RealTrie<A>::print(FILE *fp) const
-// {
-//     prt(fp, &_head, "");
-// }
-
-// template <class A>
-// void
-// RealTrie<A>::prt(FILE *fp, const Tree *ptr, const char *st) const
-// {
-//     char result[1024];
-
-//     if(0 == ptr) {
-// 	return;
-//     }
-
-//     const UpdatePacket *update = ptr->p.get();
-//     if(0 != update) {
-// 	IPv4 nh;
-// 	list<PathAttribute*> l = update->pa_list();
-// 	list<PathAttribute*>::const_iterator i;
-// 	for(i = l.begin(); i != l.end(); i++) {
-// 	    if(NEXT_HOP == (*i)->type()) {
-//  		IPv4NextHopAttribute *nha = 
-//  		    dynamic_cast<IPv4NextHopAttribute *>(*i);
-// 		nh = nha->nexthop();
-// 	    }
-	    
-// 	}
-// 	fprintf(fp, "%ssummary %s %s %s\n",  update->str().c_str(), st,
-// 		bit_string_to_subnet(st).c_str(), nh.str().c_str());
-//     }
-
-//     sprintf(result, "%s0", st);
-//     prt(fp, ptr->ptrs[0], result);
-
-//     sprintf(result, "%s1", st);
-//     prt(fp, ptr->ptrs[1], result);
-// }
-
-template <class A>
-string
-RealTrie<A>::bit_string_to_subnet(const char *st) const
-{
-    int len = strlen(st);
-    int val = 0;
-    for(int i = 0; i < len; i++) {
-	val <<= 1;
-	if('1' == st[i])
-	    val |= 1;
-    }
-    val <<= 32 - len;
-    struct in_addr in;
-    in.s_addr = htonl(val);
-
-    return c_format("%s/%d", inet_ntoa(in), len);
+    address = address | save_orbit;
+    tree_walk_table(tw, ptr->ptrs[1], address, prefix_length, orbit);
 }
 
 template <class A>
 bool
 RealTrie<A>::insert(const IPv4Net& net, TriePayload& p)
 {
-//     return insert(ntohl(net.masked_addr().addr()), net.prefix_len(), p);
     return insert(net.masked_addr(), net.prefix_len(), p);
 }
 
@@ -207,16 +124,12 @@ RealTrie<A>::insert(A address, size_t mask_length, TriePayload& p)
     debug_msg("%s/%d\n", address.str().c_str(), mask_length);
 #ifdef	PARANOIA
     if(0 == p.get()) {
-	speak("insert: Attempt to store an invalid entry"
-	      newline);
+	debug_msg("insert: Attempt to store an invalid entry\n");
 	return false;
     }
 #endif
     Tree *ptr = &_head;
     for(size_t i = 0; i < mask_length; i++) {
-// 	int index = (address & topbit) == topbit;
-// 	address <<= 1;
-
 	int index;
 	if(address.bits(A::addr_bitlen() - 1, 1))
 	    index = 1;
@@ -232,8 +145,7 @@ RealTrie<A>::insert(A address, size_t mask_length, TriePayload& p)
 	    ptr->ptrs[index] = new Tree();
 	    if(0 == ptr->ptrs[index]) {
 		if(_debug)
-		    speak("insert: new failed"
-			  newline);
+		    debug_msg("insert: new failed\n");
 		return false;
 	    }
 	}
@@ -242,7 +154,7 @@ RealTrie<A>::insert(A address, size_t mask_length, TriePayload& p)
     }
 
     if(0 != ptr->p.get()) {
-	speak("insert: value already assigned" newline);
+	debug_msg("insert: value already assigned\n");
 	return false;
     }
 
@@ -250,47 +162,6 @@ RealTrie<A>::insert(A address, size_t mask_length, TriePayload& p)
 
     return true;
 }
-
-#if	0
-template <class A>
-bool
-RealTrie<A>::insert(uint32_t address, int mask_length, TriePayload& p)
-{
-#ifdef	PARANOIA
-    if(0 == p.get()) {
-	speak("insert: Attempt to store an invalid entry"
-	      newline);
-	return false;
-    }
-#endif
-    Tree *ptr = &_head;
-    for(int i = 0; i < mask_length; i++) {
-	int index = (address & topbit) == topbit;
-	address <<= 1;
-
-	if(0 == ptr->ptrs[index]) {
-	    ptr->ptrs[index] = new Tree();
-	    if(0 == ptr->ptrs[index]) {
-		if(_debug)
-		    speak("insert: new failed"
-			  newline);
-		return false;
-	    }
-	}
-
-	ptr = ptr->ptrs[index];
-    }
-
-    if(0 != ptr->p.get()) {
-	speak("insert: value already assigned" newline);
-	return false;
-    }
-
-    ptr->p = p;
-
-    return true;
-}
-#endif
 
 template <class A>
 void
@@ -310,37 +181,41 @@ template <class A>
 bool
 RealTrie<A>::del(const IPv4Net& net)
 {
-    return del(ntohl(net.masked_addr().addr()), net.prefix_len());
+    return del(net.masked_addr(), net.prefix_len());
 }
 
 template <class A>
 bool
-RealTrie<A>::del(uint32_t address, int mask_length)
+RealTrie<A>::del(A address, size_t mask_length)
 {
     return del(&_head, address, mask_length);
 }
 
 template <class A>
 bool
-RealTrie<A>::del(Tree *ptr, uint32_t address, int mask_length)
+RealTrie<A>::del(Tree *ptr, A address, size_t mask_length)
 {
     if((0 == ptr) && (0 != mask_length)) {
 	if(_debug)
-	    speak("del:1 not in table" newline);
+	    debug_msg("del:1 not in table\n");
 	return false;
     }
-    int index = (address & topbit) == topbit;
-    address <<= 1;
+    int index;
+    if(address.bits(A::addr_bitlen() - 1, 1))
+	index = 1;
+    else
+	index = 0;
+    address = address << 1;
 
     if(0 == mask_length) {
 	if(0 == ptr) {
 	    if(_debug)
-		speak("del:1 zero pointer" newline);
+		debug_msg("del:1 zero pointer\n");
 	    return false;
 	}
 	if(0 == ptr->p.get()) {
 	    if(_debug)
-		speak("del:2 not in table" newline);
+		debug_msg("del:2 not in table\n");
 	    return false;
 	}
 	ptr->p = TriePayload();	// Invalidate this entry.
@@ -349,7 +224,7 @@ RealTrie<A>::del(Tree *ptr, uint32_t address, int mask_length)
 
     if(0 == ptr) {
 	if(_debug)
-	    speak("del:2 zero pointer" newline);
+	    debug_msg("del:2 zero pointer\n");
 	return false;
     }
 
@@ -359,7 +234,7 @@ RealTrie<A>::del(Tree *ptr, uint32_t address, int mask_length)
 
     if(0 == next) {
 	if(_debug)
-	    speak("del: no next pointer" newline);
+	    debug_msg("del: no next pointer\n");
 	return false;
     }
 
@@ -376,7 +251,6 @@ template <class A>
 TriePayload 
 RealTrie<A>::find(const IPNet<A>& net) const
 {
-//     return find(ntohl(net.masked_addr().addr()), net.prefix_len());
     return find(net.masked_addr(), net.prefix_len());
 }
 
@@ -387,16 +261,10 @@ RealTrie<A>::find(A address, size_t mask_length) const
     const Tree *ptr = &_head;
     Tree *next;
 
-//     struct in_addr in;
-//     in.s_addr = htonl(address);
     debug_msg("find: %s/%d\n", address.str().c_str(), mask_length);
-    speak("find: %s/%d\n", address.str().c_str(), mask_length);
 
     // The loop should not require bounding. Defensive
     for(size_t i = 0; i <= A::addr_bitlen(); i++) {
-// 	int index = (address & topbit) == topbit;
-// 	address <<= 1;
-
 	int index;
 	if(address.bits(A::addr_bitlen() - 1, 1))
 	    index = 1;
@@ -405,83 +273,18 @@ RealTrie<A>::find(A address, size_t mask_length) const
 	address = address << 1;
 
 	if(_pretty)
-	    speak("%d", index);
+	    debug_msg("%d", index);
 	TriePayload p = ptr->p;
 	if(mask_length == i)
 	    return p;
 	if(0 == (next = ptr->ptrs[index])) {
 	    if(_pretty)
-		speak("" newline);
+		debug_msg("\n");
 	    return TriePayload();
 	}
 	ptr = next;
     }
-    speak("find: should never happen" newline);
+    debug_msg("find: should never happen\n");
     return TriePayload();
 }
-
-#if	0
-template <class A>
-TriePayload
-RealTrie<A>::find(uint32_t address, const int mask_length) const
-{
-    const Tree *ptr = &_head;
-    Tree *next;
-
-    struct in_addr in;
-    in.s_addr = htonl(address);
-    debug_msg("find: %#x %s/%d\n", address, inet_ntoa(in), mask_length);
-    speak("find: %#x %s/%d\n", address, inet_ntoa(in), mask_length);
-
-    // The loop should not require bounding. Defensive
-    for(int i = 0; i <= 32; i++) {
-	int index = (address & topbit) == topbit;
-	address <<= 1;
-
-	if(_pretty)
-	    speak("%d", index);
-	TriePayload p = ptr->p;
-	if(mask_length == i)
-	    return p;
-	if(0 == (next = ptr->ptrs[index])) {
-	    if(_pretty)
-		speak("" newline);
-	    return TriePayload();
-	}
-	ptr = next;
-    }
-    speak("find: should never happen" newline);
-    return TriePayload();
-}
-
-template <class A>
-TriePayload
-RealTrie<A>::find(uint32_t address) const
-{
-    const Tree *ptr = &_head;
-    Tree *next;
-
-    struct in_addr in;
-    in.s_addr = htonl(address);
-    debug_msg("find: %#x %s\n", address, inet_ntoa(in));
-
-    // The loop should not require bounding. Defensive
-    for(int i = 0; i <= 32; i++) {
-	int index = (address & topbit) == topbit;
-	address <<= 1;
-
-	if(_pretty)
-	    speak("%d", index);
-	TriePayload p = ptr->p;
-	if(0 == (next = ptr->ptrs[index])) {
-	    if(_pretty)
-		speak("" newline);
-	    return p;
-	}
-	ptr = next;
-    }
-    speak("find: should never happen" newline);
-    return TriePayload();
-}
-#endif
 #endif // __BGP_HARNESS_REAL_TRIE_HH_
