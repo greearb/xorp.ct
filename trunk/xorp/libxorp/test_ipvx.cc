@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.6 2003/09/30 03:07:59 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.7 2003/09/30 18:27:04 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -936,7 +936,19 @@ test_ipvx_address_type()
     verbose_assert(IPvX("224.1.2.3").is_multicast(), "is_multicast()");
     
     verbose_assert(IPvX("ff00::1").is_multicast(), "is_multicast()");
-    
+
+
+    //
+    // Test if this address is a valid link-local unicast address.
+    //
+    verbose_assert(IPvX("12.34.56.78").is_linklocal_unicast() == false,
+		       "is_linklocal_unicast()");
+
+    verbose_assert(IPvX("fe80::2").is_linklocal_unicast(),
+		   "is_linklocal_unicast()");
+    verbose_assert(IPvX("ff02::2").is_linklocal_unicast() == false,
+		   "is_linklocal_unicast()");
+
     //
     // Test if this address is a valid node-local multicast address.
     //
