@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.13 2003/10/03 00:26:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.14 2003/10/18 15:18:44 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -735,11 +735,11 @@ DecisionTable<A>::route_wins(const SubnetRoute<A> *test_route,
 		    = (j->route()->attributes()->aspath().first_asnum());
 		int med2 = med(j->route());
 		if (asnum1 == asnum2) {
-		    if (med1 < med2) {
+		    if (med1 > med2) {
 			i = alternatives.erase(i);
 			del_i = true;
 			break;
-		    } else if (med1 > med2) {
+		    } else if (med1 < med2) {
 			j = alternatives.erase(j);
 			del_j = true;
 		    }
@@ -1003,11 +1003,11 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
 		    = (j->route()->attributes()->aspath().first_asnum());
 		int med2 = med(j->route());
 		if (asnum1 == asnum2) {
-		    if (med1 < med2) {
+		    if (med1 > med2) {
 			i = alternatives.erase(i);
 			del_i = true;
 			break;
-		    } else if (med1 > med2) {
+		    } else if (med1 < med2) {
 			j = alternatives.erase(j);
 			del_j = true;
 		    }
