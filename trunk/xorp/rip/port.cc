@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.5 2003/06/05 02:11:21 atanu Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.6 2003/07/09 00:11:02 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -231,7 +231,9 @@ Port<A>::Port(PortManagerBase<A>& pm)
        _en(false),
        _cost(1),
        _horizon(SPLIT_POISON_REVERSE),
-      _advertise(false)
+       _advertise(false),
+       _adv_def_rt(false),
+       _acc_def_rt(false)
 {
     _packet_queue = new PortPacketQueue<A>(*this);
 }
@@ -296,7 +298,6 @@ Port<A>::record_packet(Peer<A>* p)
     }
 }
 
-
 template <typename A>
 void
 Port<A>::record_bad_packet(const string& why,
@@ -316,6 +317,23 @@ Port<A>::record_bad_packet(const string& why,
 
 template <typename A>
 void
+Port<A>::record_bad_route(const string&	why,
+			  const Addr&	host,
+			  uint16_t	port,
+			  Peer<A>*	p)
+{
+    XLOG_INFO("RIP port %s/%s/%s received bad route from %s:%u - %s\n",
+	      _pio->ifname().c_str(), _pio->vifname().c_str(),
+	      _pio->address().str().c_str(), host.str().c_str(), port,
+	      why.c_str());
+    counters().incr_bad_routes();
+    if (p) {
+	p->counters().incr_bad_routes();
+    }
+}
+
+template <typename A>
+void
 Port<A>::port_io_send_completion(const uint8_t*	/* rip_packet */,
 				 bool		/* success */)
 {
@@ -325,6 +343,20 @@ template <typename A>
 void
 Port<A>::port_io_enabled_change(bool)
 {
+}
+
+template <typename A>
+void
+Port<A>::set_advertise_default_route(bool en)
+{
+    _adv_def_rt = en;
+}
+
+template <typename A>
+void
+Port<A>::set_accept_default_route(bool en)
+{
+    _acc_def_rt = en;
 }
 
 // ----------------------------------------------------------------------------
@@ -357,6 +389,93 @@ AuthManager<IPv4>::auth_handler()
 
 template <>
 void
+Port<IPv4>::parse_request(const Addr&			/* src_addr */,
+			  uint16_t			/* src_port */,
+			  const PacketRouteEntry<IPv4>*	/* entries */,
+			  uint32_t			/* n_entries */)
+{
+}
+
+template <>
+void
+Port<IPv4>::parse_response(const Addr&				src_addr,
+			   uint16_t				src_port,
+			   const PacketRouteEntry<IPv4>*	entries,
+			   uint32_t				n_entries)
+{
+    static IPv4 local_net("127.0.0.0");
+    static IPv4 net_filter("255.0.0.0");
+    static IPv4 class_e_net("240.0.0.0");
+    IPv4 zero;
+
+    Peer<IPv4>* p = peer(src_addr);
+    if (p == 0)
+	p = create_peer(src_addr);
+
+    RouteDB<IPv4>& rdb = _pm.system().route_db();
+
+    for (uint32_t i = 0; i < n_entries; i++) {
+	if (entries[i].addr_family() != AF_INET) {
+	    record_bad_route("bad inet family", src_addr, src_port, p);
+	    continue;
+	}
+
+	uint16_t metric = entries[i].metric();
+	if (metric > RIP_INFINITY) {
+	    record_bad_route("bad metric", src_addr, src_port, p);
+	    continue;
+	}
+
+	IPv4Net net = entries[i].net();
+	IPv4	masked_net = net.masked_addr() & net_filter;
+	if (masked_net.is_multicast()) {
+	    record_bad_route("multicast route", src_addr, src_port, p);
+	    continue;
+	}
+	if (masked_net == local_net) {
+	    record_bad_route("loopback route", src_addr, src_port, p);
+	    continue;
+	}
+	if (masked_net >= class_e_net) {
+	    record_bad_route("experimental route", src_addr, src_port, p);
+	    continue;
+	}
+	if (masked_net == zero) {
+	    if (net.prefix_len() != 0) {
+		record_bad_route("net 0", src_addr, src_port, p);
+		continue;
+	    } else if (accept_default_route() == false) {
+		record_bad_route("default route", src_addr, src_port, p);
+		continue;
+	    }
+	}
+
+	//
+	// XXX review
+	// Should we check nh is visible to us here or not?
+	//
+	IPv4 nh = entries[i].nexthop();
+	if (nh == zero) {
+	    nh = src_addr;
+	}
+
+	metric += metric + cost();
+	if (metric > RIP_INFINITY) {
+	    metric = RIP_INFINITY;
+	}
+
+	//
+	// XXX review
+	// Want to do anything with tag?
+	//
+	uint16_t tag = entries[i].tag();
+
+	rdb.update_route(net, nh, metric, tag, p);
+    }
+}
+
+template <>
+void
 Port<IPv4>::port_io_receive(const IPv4&		src_address,
 			    uint16_t 		src_port,
 			    const uint8_t*	rip_packet,
@@ -371,7 +490,7 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
     if (rip_packet_bytes < RIPv2_MIN_PACKET_BYTES) {
 	record_bad_packet(c_format("Packet size less than minimum (%u < %u)",
 				   uint32_t(rip_packet_bytes),
-			  static_cast<uint32_t>(RIPv2_MIN_PACKET_BYTES)),
+				   uint32_t(RIPv2_MIN_PACKET_BYTES)),
 			  src_address, src_port, p);
 	return;
     }
@@ -434,11 +553,11 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
 	return;
     }
 
-    if (src_port == RIP_PORT) {
-
+    if (src_port == RIP_PORT && ph->command == RipPacketHeader::RESPONSE) {
+	parse_response(src_address, src_port, entries, n_entries);
     } else {
-	// Expecting an unsolicited query
-
+	XLOG_ASSERT(ph->command == RipPacketHeader::REQUEST);
+	parse_request(src_address, src_port, entries, n_entries);
     }
 }
 

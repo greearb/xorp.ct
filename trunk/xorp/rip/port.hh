@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.6 2003/07/09 03:14:37 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.7 2003/07/09 22:29:07 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -248,12 +248,12 @@ public:
     /**
      * Get timer constants in use for routes received on this port.
      */
-    inline PortTimerConstants& constants() { return _constants; }
+    inline PortTimerConstants& constants()		{ return _constants; }
 
     /**
      * Get timer constants in use for routes received on this port.
      */
-    inline const PortTimerConstants& constants() const { return _constants; }
+    inline const PortTimerConstants& constants() const	{ return _constants; }
 
     /**
      * Set enabled state.
@@ -291,13 +291,38 @@ public:
      * @return true if port should be advertised to other hosts, false
      * otherwise.
      */
-    inline bool advertise() const			{ return _advertise; }
+    bool advertise() const				{ return _advertise; }
 
     /**
      * Set Port advertisement status.
      * @param en true if port should be advertised, false otherwise.
      */
     inline void set_advertise(bool en)			{ _advertise = en; }
+
+    /**
+     * Include default route in RIP response messages.
+     * @return true if default route is advertised.
+     */
+    inline bool advertise_default_route() const		{ return _adv_def_rt; }
+
+    /**
+     * Configure whether default route is advertised in RIP response
+     * messages.
+     * @param en true if default route should be advertised.
+     */
+    void set_advertise_default_route(bool en);
+
+    /**
+     * Accept default route if found in RIP response messages.
+     * @return true if default route should be accepted.
+     */
+    inline bool accept_default_route() const		{ return _acc_def_rt; }
+
+    /**
+     * Accept default route if found in RIP response messages.
+     * @param en true if default route should be accepted.
+     */
+    void set_accept_default_route(bool en);
 
     /**
      * Get Peers associated with this Port.
@@ -373,14 +398,30 @@ protected:
 			   Peer<A>* 		p);
 
     /**
-     * Parse request message.
+     * Record bad route.
      *
-     * @param rip_request
+     * @param why reason packet marked
      */
-    void parse_request(const Addr&	src_addr,
-		       uint16_t		src_port,
-		       const uint8_t*	rip_request,
-		       size_t		rip_request_bytes);
+    void record_bad_route(const string&	why,
+			  const Addr&	src,
+			  uint16_t	port,
+			  Peer<A>* 	p);
+
+    /**
+     * Parse request message.
+     */
+    void parse_request(const Addr&		  src_addr,
+		       uint16_t			  src_port,
+		       const PacketRouteEntry<A>* entries,
+		       uint32_t			  n_entries);
+
+    /**
+     * Parse response message.
+     */
+    void parse_response(const Addr&		   src_addr,
+			uint16_t		   src_port,
+			const PacketRouteEntry<A>* entries,
+			uint32_t		   n_entries);
 
 protected:
     /**
@@ -428,6 +469,8 @@ protected:
     uint32_t		_cost;			// Cost metric of peer
     RipHorizon		_horizon;		// Port Horizon type
     bool		_advertise;		// Advertise IO port
+    bool		_adv_def_rt;		// Advertise default route
+    bool		_acc_def_rt;		// Accept default route
 
     PortPacketQueue<A>*	_packet_queue;		// Outbound packet queue
     PortTimerConstants	_constants;		// Port related timer constants
