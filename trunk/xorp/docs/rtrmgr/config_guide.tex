@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/config_guide.tex,v 1.3 2004/06/25 00:31:42 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/config_guide.tex,v 1.4 2004/06/25 02:44:26 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -46,7 +46,7 @@ Version 1.0}
          Berkeley, CA 94704, USA                        \\
          {\it feedback@xorp.org}
 }
-\date{June 24, 2004}
+\date{July 8, 2004}
 
 %\twocolumn
 \begin{document}
@@ -81,7 +81,7 @@ The configuration information can be provided in one of the two ways:
 A mixture of both methods is permissible. For example,
 a configuration file can also be loaded from within the xorpsh.
 
-At very minimum, a router's interfaces must be configured (see
+At the very least, a router's interfaces must be configured (see
 Section~\ref{sec:network_interfaces}). Typically, the FEA needs to be
 configured (\eg to enable unicast forwarding); the FEA configuration is
 described in Section~\ref{sec:fea}. All protocol configuration is
@@ -148,7 +148,7 @@ that there is no mismatch in the {\tt address}, {\tt prefix-length} and
 If the {\tt default-system-config} statement is used, it
 instructs the FEA that the interface should be configured by using
 the existing interface information from the underlying system.
-In that case, the {\tt vif} and {\tt address} sections must not be
+In which case, the {\tt vif} and {\tt address} sections must not be
 configured.
 
 \section{Forwarding Engine Abstraction}
