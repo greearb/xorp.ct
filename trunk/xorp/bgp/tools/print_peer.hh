@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+// $XORP: xorp/bgp/tools/print_peer.hh,v 1.1 2003/01/17 18:01:02 mjh Exp $
 
-#ifndef __PRINT_PEER_HH__
-#define __PRINT_PEER_HH__
+#ifndef __BGP_TOOLS_PRINT_PEER_HH__
+#define __BGP_TOOLS_PRINT_PEER_HH__
 
 #include "bgptools_module.h"
 #include "config.h"
@@ -35,4 +35,4 @@ private:
     bool _verbose;
 };
 
-#endif // __PRINT_PEER_HH__
+#endif // __BGP_TOOLS_PRINT_PEER_HH__
