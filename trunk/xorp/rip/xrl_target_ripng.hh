@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.1 2004/02/17 19:47:09 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.1 2004/02/19 20:15:42 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -33,7 +33,7 @@ public:
 		   XrlProcessSpy& 		xps,
 		   XrlPortManager<IPv6>&	xpm,
 		   bool& 			should_exit);
-    ~XrlRipTarget();
+    ~XrlRipngTarget();
 
     void set_status(ProcessStatus ps, const string& annotation = "");
 
