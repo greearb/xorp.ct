@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.23 2003/09/04 18:03:25 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.24 2003/09/05 00:39:13 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -423,9 +423,8 @@ public:
 
     string str() const;
 
-    const A& nexthop() const		{ return _nexthop_att.nexthop(); }
-    void set_nexthop(const A& nexthop)	{ _nexthop_att.set_nexthop(nexthop); }
-    NextHopAttribute<A> *nexthop_att() { return &_nexthop_att;}
+    const A& nexthop() const		{ return _nexthop; }
+    void set_nexthop(const A& nexthop)	{ _nexthop = nexthop; }
 
     void add_nlri(const IPNet<A>& nlri) {_nlri.push_back(nlri); }
     const list<IPNet<A> >& nlri_list() const { return _nlri;}
@@ -443,10 +442,7 @@ private:
     uint16_t _afi;		// Address Family Identifier.
     uint8_t _safi;		// Subsequent Address Family Identifier.
     
-    NextHopAttribute<A> _nexthop_att;	// Place the nexthop value in
-					// a NextHopAttribute so that
-					// we can return a pointer to
-					// a path attribute when required.
+    A _nexthop;			// Next Hop.
 //     list<A> _snpa;		// Subnetwork point of attachment.
     list<IPNet<A> > _nlri;	// Network level reachability information.
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.31 2003/09/04 18:03:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.32 2003/09/05 00:39:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -551,8 +551,7 @@ MPReachNLRIAttribute<IPv6>::encode()
 
 template <>
 MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute()
-    : PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI),
-      _nexthop_att(IPv6::ZERO())
+    : PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI)
 {
     _afi = AFI_IPV6;
     _safi = SAFI_NLRI_UNICAST;
@@ -571,8 +570,7 @@ MPReachNLRIAttribute<A>::clone() const
 template <>
 MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
-    : PathAttribute(d),
-      _nexthop_att(IPv6::ZERO())
+    : PathAttribute(d)
 {
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,
