@@ -1,6 +1,10 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.8 2003/06/06 08:44:48 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.9 2003/07/05 19:43:18 pavlin Exp $
 #
+
+* Implement graceful stopping of node and/or a vif. I.e., perform
+  protocol-related operations to inform other nodes that
+  this node/vif is stopping operations (if there are such operations).
 
 * Add vif manager config similar to PIM.
 
