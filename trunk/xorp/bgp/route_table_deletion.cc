@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.8 2003/03/10 23:20:04 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.9 2003/04/22 19:20:18 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -87,7 +87,7 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	return _next_table->replace_route(old_rt_msg, rtmsg,
 					  (BGPRouteTable<A>*)this);
     }
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 template<class A>

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.7 2003/05/10 23:23:03 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.8 2003/05/10 23:29:22 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -177,7 +177,7 @@ RouterCLI::is_config_mode() const {
     case CLI_MODE_TEXTENTRY:
 	return true;
     }
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 void
@@ -362,9 +362,7 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 		add_command((*cmd_iter)->name().c_str(), "help");
 	}
 	if (com == NULL) {
-	    fprintf(stderr, "add_command %s failed\n", 
-		    (*cmd_iter)->name().c_str());
-	    abort();
+	    XLOG_FATAL("add_command %s failed\n", (*cmd_iter)->name().c_str());
 	} else {
 	    com->set_global_name(subpath.c_str());
 	}
@@ -400,9 +398,8 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 	    com = current_cli_node.
 		add_command((*cmd_iter)->name().c_str(), "help", cb);
 	    if (com == NULL) {
-		fprintf(stderr, "AI: add_command %s failed\n", 
-			(*cmd_iter)->name().c_str());
-		abort();
+		XLOG_FATAL("AI: add_command %s failed\n", 
+			   (*cmd_iter)->name().c_str());
 	    } else {
 		com->set_global_name(subpath.c_str());
 	    }
@@ -436,9 +433,8 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 		com = current_cli_node.
 		    add_command((*tti)->segname().c_str(), "help", cb);
 		if (com == NULL) {
-		    fprintf(stderr, "AI: add_command %s for template failed\n", 
-			    (*tti)->segname().c_str());
-		    abort();
+		    XLOG_FATAL("AI: add_command %s for template failed\n", 
+			       (*tti)->segname().c_str());
 		} else {
 		    com->set_global_name(subpath.c_str());
 		}
@@ -686,7 +682,7 @@ RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users) {
 	    }
 	    catch (XrlAtom::WrongType wt) {
 		//this had better not happen
-		abort();
+		XLOG_FATAL("Internal Error");
 	    }
 	}
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.6 2003/03/16 07:18:59 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.7 2003/05/14 10:32:25 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -129,9 +129,8 @@ int ExtIntTable<A>::add_route(const IPRouteEntry<A>& route,
 	    }
 	}
     } else {
-	fprintf(stderr, "ExtIntTable::add_route called from a class that "
-		"isn't a component of this override table\n");
-	abort();
+	XLOG_FATAL("ExtIntTable::add_route called from a class that "
+		   "isn't a component of this override table\n");
     }
     return 0;
 }
@@ -253,7 +252,8 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A> *route,
 
 
     } else {
-	abort();
+	XLOG_FATAL("ExtIntTable::delete_route called from a class that "
+		   "isn't a component of this override table\n");
     }
     return 0;
 }
@@ -639,7 +639,7 @@ ExtIntTable<A>::replumb(RouteTable<A> *old_parent,
 	_int_table = new_parent;
     } else {
 	// shouldn't be possible
-	abort();
+	XLOG_UNREACHABLE();
     }
 }
 

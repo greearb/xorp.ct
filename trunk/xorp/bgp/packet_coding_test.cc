@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.19 2003/02/08 09:16:40 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.20 2003/03/10 23:20:00 hodson Exp $"
 
 #include "libxorp/xorp.h"
 #include "packet.hh"
@@ -552,9 +552,7 @@ test_announce_packet()
 	    break;
 	}
 	default:
-	    fprintf(stderr, "Received PathAttribute type: %d\n",
-		    pa->type());
-	    abort();
+	    XLOG_FATAL("Received PathAttribute type: %d\n", pa->type());
 	}
 	++pai;
     }

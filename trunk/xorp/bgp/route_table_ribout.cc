@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.9 2003/05/15 16:37:54 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.10 2003/05/15 19:21:36 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -49,14 +49,6 @@ RibOutTable<A>::RibOutTable(string table_name,
     _peer = peer;
     _peer_busy = false;
     _upstream_queue_exists = false;
-#ifdef UNNECESSARY
-    if (_parent->type() != CACHE_TABLE) {
-	fprintf(stderr, "Misconfiguration: a RibOutTable MUST be immediately \
-preceded by a CacheTable to store routes that were modified by the final \
-filterbank\n");
-	abort();
-    }
-#endif
 }
 
 template<class A>
@@ -116,7 +108,7 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	      (u_int)(&rtmsg), rtmsg.net().str().c_str());
     debug_msg("on %s\n", _tablename.c_str());
     print_queue(_queue);
-    if (caller != _parent) abort();
+    assert(caller == _parent);
 
     // check the queue to see if there's a matching delete - if so we
     // can replace the delete with an add.
@@ -163,8 +155,7 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	_queue.erase(i);
 	delete queued_entry;
     } else if (queued_entry->op() == RTQUEUE_OP_ADD) {
-	XLOG_ERROR("RibOut: add_route called for a subnet already in the output queue\n");
-	abort();
+	XLOG_FATAL("RibOut: add_route called for a subnet already in the output queue\n");
     }
 
     // handle push
@@ -200,7 +191,7 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	      (u_int)(rtmsg.route()));
     debug_msg("Attribute: %x\n", (u_int)(rtmsg.route()->attributes()));
     print_queue(_queue);
-    if (caller != _parent) abort();
+    assert(caller == _parent);
 
     // check the queue to see if there's a matching entry.
 
@@ -221,17 +212,17 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	_queue.push_back(entry);
     } else if (queued_entry->op() == RTQUEUE_OP_ADD) {
 	// XXX this probably shouldn't happen.
-	abort();
+	XLOG_UNREACHABLE();
 
 	// if it does, then here's how to handle it:
 	_queue.erase(i);
 	delete queued_entry;
     } else if (queued_entry->op() == RTQUEUE_OP_DELETE) {
 	// This should not happen.
-	abort();
+	XLOG_UNREACHABLE();
     } else if (queued_entry->op() == RTQUEUE_OP_REPLACE_OLD) {
 	// XXX this probably shouldn't happen.
-	abort();
+	XLOG_UNREACHABLE();
 
 	// if it does, then here's how to handle it:
 	typename list<const RouteQueueEntry<A>*>::iterator i2 = i;
@@ -260,7 +251,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 {
     debug_msg("%s\n", _tablename.c_str());
     debug_msg("RibOutTable<%s>::push\n", TypeName<A>::get());
-    if (caller != _parent) abort();
+    assert(caller == _parent);
     // In push, we need to collect together all the SubnetRoutes that
     // have the same Path Attributes, and send them together in an
     // Update message.  We repeatedly do this until the queue is empty.
@@ -347,7 +338,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 		delete old_queue_entry;
 		delete (*i);
 	    } else {
-		abort();
+		XLOG_UNREACHABLE();
 	    }
 	    ++i;
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.7 2003/03/10 23:20:00 hodson Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.8 2003/05/15 16:12:18 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -80,7 +80,7 @@ BGPParameter::clone() const
 		((const BGPMultiProtocolCapability&)(*this));
 	    break;
 	case CAPABILITYREFRESHOLD:
-	    abort();
+	    XLOG_UNFINISHED();
 	    break;
 	case CAPABILITYREFRESH:
 	    clone = new BGPRefreshCapability\
@@ -91,12 +91,12 @@ BGPParameter::clone() const
 		((const BGPMultiRouteCapability&)(*this));
 	    break;
 	default:
-	    abort();
+	    XLOG_UNREACHABLE();
 	}
 	break;
     }
     default:
-	abort();
+	XLOG_UNREACHABLE();
     }
     return clone;
 }
@@ -109,7 +109,7 @@ BGPAuthParameter::BGPAuthParameter()
     _type = PARAMTYPEAUTH;
     _length = 255; /* no idea really*/
     _data = new uint8_t[_length];
-    abort();
+    XLOG_UNFINISHED();
 }
 
 BGPAuthParameter::BGPAuthParameter(uint8_t l, const uint8_t* d)
@@ -157,7 +157,7 @@ BGPAuthParameter::decode()
     _type = PARAMTYPEAUTH;
     // Plus any authentication related decoding.
     // XXX TBD
-    abort();
+    XLOG_UNFINISHED();
 }
 
 void
@@ -254,7 +254,6 @@ BGPRefreshCapability::decode()
     if (_cap_length > 0) {
 	debug_msg("Throw exception\n");
 	xorp_throw(CorruptMessage, c_format("Refresh Capability length %d is greater than zero.", _cap_length), OPENMSGERROR, UNSPECIFIED);
-	abort();
     }
 
 }
@@ -508,8 +507,7 @@ BGPUnknownCapability::encode() const
     _data[2] = CAPABILITYUNKNOWN;
     */
     // should never do this
-    debug_msg("we shouldn't ever send an unknown capability\n");
-    // abort();
+    XLOG_FATAL("we shouldn't ever send an unknown capability\n");
 }
 
 BGPParameter *

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.3 2003/01/31 23:39:40 mjh Exp $"
+#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.4 2003/03/10 23:19:57 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -68,10 +68,7 @@ AttributeManager<A>::delete_attribute_list(
 	      del_att->attribute());
     typedef typename set<StoredAttributeList<A>*>::iterator Iter;
     Iter i = _attribute_lists.find(del_att);
-    if (i == _attribute_lists.end()) {
-	// WTF happened here?
-	abort();
-    }
+    assert(i != _attribute_lists.end());
     delete del_att;
     (*i)->decrease();
     debug_msg("** (-) ref count for %x now %d\n",

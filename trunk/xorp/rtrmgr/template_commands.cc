@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.21 2003/05/03 21:26:47 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.22 2003/05/04 06:25:21 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -188,8 +188,7 @@ void
 XrlAction::check_xrl_is_valid(list<string> action, const XRLdb& xrldb) 
     const throw (ParseError)
 {
-    if (action.front()!= "xrl")
-	abort();
+    XLOG_ASSERT(action.front() == "xrl");
     action.pop_front();
     string xrlstr =  action.front();
     debug_msg("checking XRL: %s\n", xrlstr.c_str());
@@ -340,9 +339,7 @@ Action::execute(const ConfigTreeNode& ctn,
 		else
 		    word += expanded_var;
 	    } else {
-		fdebug_msg(stderr, "FATAL ERROR: failed to expand variable %s associated with node \"%s\"\n", segment.c_str(), ctn.segname().c_str());
-		//exit(1);
-		abort();
+		XLOG_FATAL("failed to expand variable %s associated with node \"%s\"\n", segment.c_str(), ctn.segname().c_str());
 	    }
 	} else {
 	    word += segment;

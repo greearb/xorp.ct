@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_next_hop_resolver.cc,v 1.5 2003/04/02 20:34:38 mjh Exp $"
+#ident "$XORP: xorp/bgp/dummy_next_hop_resolver.cc,v 1.6 2003/04/22 23:27:14 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -60,7 +60,7 @@ DummyNextHopResolver<A>::set_nexthop_metric(const A nexthop,
     typename map <A, uint32_t>::const_iterator i;
     i = _metrics.find(nexthop);
     if (i != _metrics.end()) {
-	abort();
+	XLOG_FATAL("Can't find nexthop's metric\n");
     }
     _metrics[nexthop] = metric;
 }
@@ -71,8 +71,7 @@ DummyNextHopResolver<A>::unset_nexthop_metric(const A nexthop) {
     typename map <A, uint32_t>::iterator i;
     i = _metrics.find(nexthop);
     if (i == _metrics.end()) {
-	fprintf(stderr, "Can't unset nexthop %s\n", nexthop.str().c_str());
-	abort();
+	XLOG_FATAL("Can't unset nexthop %s\n", nexthop.str().c_str());
     }
     _metrics.erase(i);
 }

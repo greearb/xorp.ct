@@ -12,14 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.5 2003/04/16 08:05:09 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.6 2003/04/22 19:42:17 mjh Exp $"
 
 #include "config.h"
 
 #include <fcntl.h>
 #include <openssl/md5.h>
 
+#include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 
 #include "randomness.hh"
@@ -301,7 +303,7 @@ void RandomGen::get_random_bytes(size_t len, uint8_t *buf) {
     if (_urandom_exists) {
 	FILE *file = fopen("/dev/urandom", "r");    
 	if (file == NULL) {
-	    abort();
+	    XLOG_FATAL("Failed to open /dev/urandom");
 	} else {
 	    size_t bytes_read = fread(buf, 1, len, file);
 	    if (bytes_read < len) {
@@ -316,7 +318,7 @@ void RandomGen::get_random_bytes(size_t len, uint8_t *buf) {
     if (_random_exists) {
 	FILE *file = fopen("/dev/random", "r");    
 	if (file == NULL) {
-	    abort();
+	    XLOG_FATAL("Failed to open /dev/random");
 	} else {
 	    fcntl(fileno(file), F_SETFD, O_NONBLOCK);
 	    size_t bytes_read = fread(buf, 1, len, file);

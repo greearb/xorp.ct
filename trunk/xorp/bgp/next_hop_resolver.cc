@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.15 2003/05/08 23:45:10 mjh Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.16 2003/05/14 09:32:47 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -963,7 +963,7 @@ NextHopRibRequest<A>::send_next_request() {
 	deregister_interest(rd->base_addr(), rd->prefix_len());
 	return;
     }
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 template<class A>

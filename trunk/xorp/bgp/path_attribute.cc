@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.19 2003/03/10 23:20:01 hodson Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.20 2003/04/16 08:05:08 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -765,7 +765,7 @@ operator< (const PathAttributeList<A> &him) const
 	my_i++;
 	his_i++;
     }
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 template<class A>
@@ -814,7 +814,7 @@ PathAttributeList<A>::replace_attribute(PathAttribute* new_att)
 	    memset(_hash, 0, 16);
 	    return;
 	}
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 template<class A>

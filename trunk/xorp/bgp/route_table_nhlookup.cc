@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.5 2003/02/08 01:32:59 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.6 2003/03/10 23:20:05 hodson Exp $"
 
 #include "route_table_nhlookup.hh"
 
@@ -325,8 +325,7 @@ NhLookupTable<A>::lookup_route(const IPNet<A> &net) const
 	// for it yet, so we act as though we only know the old answer
 	return mqe->deleted_route();
     }
-    // can't get here
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 template <class A>

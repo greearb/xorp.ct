@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.15 2003/05/03 21:26:46 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.16 2003/05/04 06:25:20 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -53,8 +53,7 @@ static void childhandler(int x)
 	printf("process stopped\n");
 	module_pids[pid]->set_stalled();
     } else {
-	//how did we get here?
-	abort();
+	XLOG_UNREACHABLE();
     }
 }
 

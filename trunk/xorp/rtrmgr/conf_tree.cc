@@ -12,9 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.3 2003/04/23 04:24:34 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.4 2003/04/23 22:52:06 mjh Exp $"
 
 #include "rtrmgr_module.h"
+#include "libxorp/xlog.h"
 #include "template_tree_node.hh"
 #include "template_commands.hh"
 #include "template_tree.hh"
@@ -188,8 +189,7 @@ ConfigTree::terminal_value(char *value, int type) {
     string path(current_path_as_string());
     string svalue(value);
     ConfigTreeNode *ctn = _current_node;
-    if (ctn == NULL)
-	abort();
+    XLOG_ASSERT(ctn != NULL);
     
     /*special case for bool types to avoid needing to type "true"*/
     if (svalue == "" && (type == NODE_VOID)) {
@@ -260,8 +260,8 @@ ConfigTree::terminal_value(char *value, int type) {
 	    }
 	    break;
 	default: 
-	    fprintf(stderr, "Unexpected type %d received\n", ctn->type());
-	    abort();
+	    //Did we forget to add a new type?
+	    XLOG_FATAL("Unexpected type %d received\n", ctn->type());
 	}
     } else if (ctn->type() != type) {
 	string err = "\"" + path + "\" has type " + ctn->typestr() + 

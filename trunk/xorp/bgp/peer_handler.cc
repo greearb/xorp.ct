@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.12 2003/03/10 23:20:01 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.13 2003/04/22 19:20:17 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -189,7 +189,7 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt)
 {
     debug_msg("PeerHandler::add_route(IPv6) %p\n", &rt);
     assert(_packet != NULL);
-    abort();
+    XLOG_UNFINISHED();
     UNUSED(rt);
     return 0;
 }
@@ -238,7 +238,7 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt)
     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
     assert(_packet != NULL);
     UNUSED(rt);
-    abort();
+    XLOG_UNFINISHED();
     return 0;
 }
 

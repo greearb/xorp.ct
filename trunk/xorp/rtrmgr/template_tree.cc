@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.2 2003/03/10 23:21:02 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.3 2003/04/22 23:43:02 mjh Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
+#include "libxorp/xlog.h"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
 #include "template_commands.hh"
@@ -184,7 +185,7 @@ TemplateTree::new_node(TemplateTreeNode* parent,
 	t = new MacaddrTemplate(parent, path, varname, initializer);
 	break;
     default:
-	abort();
+	XLOG_UNREACHABLE();
     }
     return t;
 }
@@ -260,7 +261,7 @@ TemplateTree::add_node(const string& segment, int type, char* cinit) {
 	    varname = _current_node->segname() + "." + "@";
 	} else {
 	    //what happened here?
-	    abort();
+	    XLOG_UNREACHABLE();
 	}
     }
     if (varname.empty() || varname[0]!='$') {
@@ -284,7 +285,7 @@ TemplateTree::add_node(const string& segment, int type, char* cinit) {
 		|| (type == NODE_VOID) || ((*i)->type() == NODE_VOID)) {
 		if (found != NULL) {
 		    //I don't think this can happen
-		    abort();
+		    XLOG_UNREACHABLE();
 		}
 		found = *i;
 	    }
@@ -332,7 +333,7 @@ TemplateTree::find_node(const list<string>& segs) {
 	if (matches.size()>1) {
 	    //this shouldn't be possible
 	    fprintf(stderr, "Multiple match at node %s\n", (*i).c_str());
-	    abort();
+	    XLOG_UNREACHABLE();
 	}
 	
 	//there's no exact name match, so we're probably looking for a

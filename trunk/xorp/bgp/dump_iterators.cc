@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.3 2003/01/31 23:39:40 mjh Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.4 2003/03/10 23:19:58 hodson Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -250,7 +250,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 		if (origin_peer == dpi->peer_handler()) {
 		    if (dpi->genid() == 0) {
 			// should no longer happen
-			abort();
+			XLOG_UNREACHABLE();
 		    }
 
 		    /*the peer had gone down when we were in the
@@ -282,10 +282,10 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 			    /* this would be if we'd got an add for the
 			       same genid as when the peering went down -
 			       doesn't make much sense */
-			    abort();
+			    XLOG_UNREACHABLE();
 			default:
 			    // shouldn't get anything else
-			    abort();
+			    XLOG_UNREACHABLE();
 			}
 		    }
 		    assert(genid != dpi->genid());

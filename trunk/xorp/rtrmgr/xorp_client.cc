@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.12 2003/05/03 21:26:47 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.13 2003/05/04 06:25:21 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -105,7 +105,7 @@ XorpClient::fake_return_args(const string& xrl_return_spec) {
 	}
 	switch (atom.type()) {
 	case xrlatom_no_type:
-	    abort();
+	    XLOG_UNREACHABLE();
 	case xrlatom_int32:
 	    xargs.add(XrlAtom(atom.name().c_str(), (int32_t)0) );
 	    break;
@@ -127,8 +127,7 @@ XorpClient::fake_return_args(const string& xrl_return_spec) {
 	case xrlatom_list:
 	case xrlatom_boolean:
 	case xrlatom_binary:
-	    //XXX TBD
-	    abort();
+	    XLOG_UNFINISHED();
 	    break;
 	}
     }

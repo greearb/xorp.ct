@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.15 2003/05/03 21:26:46 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.16 2003/05/04 06:25:20 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_VARIABLES
@@ -147,7 +147,7 @@ ConfigTreeNode::remove_child(ConfigTreeNode *child) {
 	}
     }
 
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 void
@@ -745,7 +745,7 @@ ConfigTreeNode::value() const {
 	return _value;
     } else if (is_tag()) {
 	//we should never ask a tag for its value
-	abort();
+	XLOG_UNREACHABLE();
     } else {
 	return _segname;
     }
@@ -957,7 +957,7 @@ ConfigTreeNode::find_node(list <string>& path) {
 	    }
 	} else {
 	    //we must have screwed up
-	    abort();
+	    XLOG_UNREACHABLE();
 	}
     }
 	
@@ -1025,7 +1025,7 @@ ConfigTreeNode::expand_variable(const string& varname,
     switch (type) {
     case NONE:
 	//this can't happen
-	abort();
+	XLOG_UNREACHABLE();
     case NODE_VALUE:
 	value = varname_node->value();
 	return true;
@@ -1049,10 +1049,10 @@ ConfigTreeNode::expand_variable(const string& varname,
 	    }
 	}
 	//this can't happen 
-	abort();
+	XLOG_UNREACHABLE();
     }
     }
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 const ConfigTreeNode* 
@@ -1296,7 +1296,7 @@ bool ConfigTreeNode::set_variable(const string& varname, string& value) {
 	switch (type) {
 	case NONE:
 	    //this can't happen
-	    abort();
+	    XLOG_UNREACHABLE();
 	case NODE_VALUE: 
 	    err = "Attempt to set variable \"" + varname 
 		+ "\" which is the name of a configuration node\n";
@@ -1336,7 +1336,7 @@ bool ConfigTreeNode::set_variable(const string& varname, string& value) {
 	switch (type) {
 	case NONE:
 	    //this can't happen
-	    abort();
+	    XLOG_UNREACHABLE();
 	case NODE_VALUE:
 	    split_up_varname(varname, var_parts);
 	    node->set_named_value(var_parts.back(), value);

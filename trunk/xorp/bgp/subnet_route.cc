@@ -12,9 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.6 2003/02/08 01:32:59 mjh Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.7 2003/03/10 23:20:06 hodson Exp $"
 
 #include "bgp_module.h"
+#include "libxorp/xlog.h"
 #include "subnet_route.hh"
 
 
@@ -127,8 +128,7 @@ template<class A>
 void 
 SubnetRoute<A>::unref() const {
     if ((_flags & SRF_DELETED) != 0) {
-	fprintf(stderr, "SubnetRoute %p: multiple unref's\n", this);
-	abort();
+	XLOG_FATAL("SubnetRoute %p: multiple unref's\n", this);
     }
     
     if (refcount() == 0) 

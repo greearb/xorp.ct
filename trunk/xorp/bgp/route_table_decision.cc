@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.9 2003/02/08 09:16:41 rizzo Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.10 2003/03/10 23:20:04 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -120,8 +120,7 @@ template<class A>
 int
 DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    BGPRouteTable<A> *caller) {
-    if (_parents.find(caller)==_parents.end())
-	abort();
+    assert(_parents.find(caller) != _parents.end());
 
     debug_msg("DT:add_route %s\n", rtmsg.route()->str().c_str());
 
@@ -330,8 +329,8 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     debug_msg("delete route: %s\n",
 	      rtmsg.route()->str().c_str());
-    if (_parents.find(caller)==_parents.end()) abort();
-    if (_next_table == NULL) abort();
+    assert(_parents.find(caller) != _parents.end());
+    assert(_next_table != NULL);
 
     if (rtmsg.route()->is_winner() == false) {
 	cp(28);
@@ -403,8 +402,8 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 template<class A>
 int
 DecisionTable<A>::push(BGPRouteTable<A> *caller) {
-    if (_parents.find(caller)==_parents.end())
-	abort();
+    assert(_parents.find(caller) != _parents.end());
+
     cp(34);
     if (_next_table != NULL)
 	return _next_table->push((BGPRouteTable<A>*)this);
@@ -862,7 +861,7 @@ DecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
     //we found no matching peer
     //this shouldn't happen because when a peer goes down, the dump
     //iterator should move on to other peers
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 template<class A>

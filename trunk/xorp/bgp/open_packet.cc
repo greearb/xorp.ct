@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.10 2003/01/30 04:11:55 pavlin Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.11 2003/03/10 23:20:00 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -182,7 +182,7 @@ OpenPacket::add_parameter(const BGPParameter *p)
 	    case CAPABILITYREFRESHOLD:
 		// need to look at this further.....
 		// what do we do about the old capability
-		abort();
+		XLOG_UNFINISHED();
 		break;
 	    case CAPABILITYREFRESH:
 		parameter =
@@ -197,16 +197,15 @@ OpenPacket::add_parameter(const BGPParameter *p)
 		    new BGPUnknownCapability((const BGPUnknownCapability&)*p);
 		break;
 	    default:
-		debug_msg("Don't understand parameter type %d and "
-			  "capability code %d.\n",
-			  p->type(), cparam->cap_code());
-		abort();
+		XLOG_FATAL("Don't understand parameter type %d and "
+			   "capability code %d.\n",
+			   p->type(), cparam->cap_code());
 	    }
 	}
 	    break;
     default:
 	// unknown parameter type
-	abort();
+	XLOG_UNREACHABLE();
     }
 
     _parameter_list.push_back(parameter);

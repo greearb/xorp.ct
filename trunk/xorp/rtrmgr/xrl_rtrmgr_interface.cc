@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.7 2003/05/04 06:25:21 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.8 2003/05/07 23:15:17 mjh Exp $"
 
 #define DEBUG_LOGGING
 #include <sys/stat.h>
@@ -172,7 +172,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_unregister_client(const string& token) {
 	}
     }
     //this cannot happen, because the token wouldn't have verified
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 XrlCmdError
@@ -240,7 +240,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
 	    return XrlCmdError::OKAY();
 	}
     }
-    abort();
+    XLOG_UNREACHABLE();
 }
 
 XrlCmdError 
@@ -515,7 +515,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_node(
     }
     if (user_id == (uint32_t)-1) {
 	//shouldn't be possible as we already checked the token
-	abort();
+	XLOG_UNREACHABLE();
     }
     success = _conf_tree.lock_node(node, user_id, timeout, holder);
     return XrlCmdError::OKAY();
@@ -533,7 +533,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_node(
     uint32_t user_id = get_user_id_from_token(token);
     if (user_id == (uint32_t)-1) {
 	//shouldn't be possible as we already checked the token
-	abort();
+	XLOG_UNREACHABLE();
     }
     bool success;
     success = _conf_tree.unlock_node(node, user_id);

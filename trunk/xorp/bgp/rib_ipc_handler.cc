@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.12 2003/04/22 19:20:18 mjh Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.13 2003/05/08 21:27:00 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -518,7 +518,7 @@ XrlQueue<A>::callback(const XrlError& error, const char *comment)
 	//XXX need to handle other errors correctly
 	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
 	//XXX to be replaced with exit in production code
-	abort();
+	XLOG_UNFINISHED();
     }
 
     if (_errors >= MAX_ERR_RETRIES) {

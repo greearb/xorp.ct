@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.5 2003/02/08 01:32:58 mjh Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.6 2003/03/10 23:19:57 hodson Exp $"
 
 #include "bgp_trie.hh"
 
@@ -86,8 +86,7 @@ BgpTrie<A>::erase(const IPNet& net)
 {
     // unlink the node from the _pathmap chain
     iterator iter = _trie.lookup_node(net);
-    if (iter == _trie.end())
-	abort();	// it should be there!
+    assert(iter != _trie.end());
     const ChainedSubnetRoute *found = &(iter.payload());
     assert(iter.key() == net);
     assert(found->net() == net);

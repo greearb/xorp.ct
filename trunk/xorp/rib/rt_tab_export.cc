@@ -12,9 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.9 2003/03/20 04:29:22 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.10 2003/05/08 05:51:27 mjh Exp $"
 
 #include "rib_module.h"
+#include "libxorp/xlog.h"
 #include "rib_client.hh"
 #include "rt_tab_export.hh"
 
@@ -33,8 +34,7 @@ ExportTable<A>::ExportTable<A>(const string&	 tablename,
 
     // plumb ourselves into the table graph
     if (_parent != NULL) {
-	if (_parent->next_table() != NULL)
-	    abort();
+	XLOG_ASSERT(_parent->next_table() == NULL);
 
 	_parent->set_next_table(this);
     }
@@ -50,8 +50,7 @@ int
 ExportTable<A>::add_route(const IPRouteEntry<A>& route,
 			  RouteTable<A> *caller) 
 {
-    if (caller != _parent)
-	abort();
+    XLOG_ASSERT(caller == _parent);
 
     if (route.protocol().name() == "connected") {
 	printf("Add route called for connected route\n");
@@ -77,8 +76,8 @@ int
 ExportTable<A>::delete_route(const IPRouteEntry<A> *route,
 			     RouteTable<A> *caller) 
 {
-    if (caller != _parent)
-	abort();
+    XLOG_ASSERT(caller == _parent);
+
     if (route->protocol().name() == "connected") {
 	printf("Delete route called for connected route\n");
 	return 0;
@@ -129,7 +128,7 @@ ExportTable<A>::replumb(RouteTable<A> *old_parent,
 	_parent = new_parent;
     } else {
 	// shouldn't be possible
-	abort();
+	XLOG_UNREACHABLE();
     }
 }
 

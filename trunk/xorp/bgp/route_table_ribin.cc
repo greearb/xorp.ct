@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.11 2003/03/10 23:20:05 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.12 2003/04/22 19:20:19 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -250,7 +250,7 @@ RibInTable<A>::route_used(const SubnetRoute<A>* used_route, bool in_use)
 	return;
     const SubnetRoute<A> *rt;
     rt = lookup_route(used_route->net());
-    if (rt == NULL) abort();
+    assert(rt != NULL);
     rt->set_in_use(in_use);
 }
 

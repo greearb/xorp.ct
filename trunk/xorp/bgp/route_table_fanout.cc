@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.12 2003/05/15 16:37:54 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.13 2003/05/15 19:18:56 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -76,9 +76,8 @@ FanoutTable<A>::remove_next_table(BGPRouteTable<A> *ex_next_table)
     iter = _next_tables.find(ex_next_table);
     if (iter == _next_tables.end()) {
 	// the next_table is not already in the set
-	debug_msg("FanoutTable<A>::remove_next_table\
+	XLOG_FATAL("FanoutTable<A>::remove_next_table\
  attempt to delete a table that doesn't exist\n");
-	abort();
     }
     skip_entire_queue(ex_next_table);
     if (ex_next_table->type() == DUMP_TABLE) {
@@ -99,7 +98,7 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
     debug_msg("FanoutTable::add_route %x\n",
 	      (u_int)(&rtmsg));
 
-    if (caller != _parent) abort();
+    assert(caller == _parent);
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
@@ -198,7 +197,7 @@ int
 FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller) 
 {
-    if (caller != _parent) abort();
+    assert(caller == _parent);
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
@@ -232,7 +231,7 @@ FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			   BGPRouteTable<A> *caller,
 			   const PeerHandler *dump_peer) 
 {
-    if (caller != _parent) abort();
+    assert(caller == _parent);
     BGPRouteTable<A> *dump_child;
     typename map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
@@ -255,7 +254,7 @@ int
 FanoutTable<A>::push(BGPRouteTable<A> *caller) 
 {
     debug_msg("Push\n");
-    if (caller != _parent) abort();
+    assert(caller == _parent);
     list <PeerRoutePair<A>*> queued_peers;
     typename map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {

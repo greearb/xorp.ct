@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.11 2003/02/09 03:35:28 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.12 2003/03/10 23:20:03 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -130,7 +130,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	iter = _route_table.lookup_node(net);
 	if (iter == _route_table.end()) {
 	    //We don't flush the cache, so this should not happen
-	    abort();
+	    XLOG_UNREACHABLE();
 	} else {
 	    // Preserve the route.  Taking a reference will prevent
 	    // the route being immediately deleted when it's erased
@@ -248,13 +248,10 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	return result;
     }
 
-    if (rtmsg.changed()) {
-	//we don't flush the cache, so this should simply never happen.
-	abort();
-    }
+    //we don't flush the cache, so this should simply never happen.
+    assert(!rtmsg.changed());
 
     //If we get here, route was not cached and was not modified.
-
     return _next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 }
 

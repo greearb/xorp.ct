@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.9 2003/05/09 23:47:47 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.10 2003/05/10 00:01:48 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -127,7 +127,7 @@ StatusReadyValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 	}
     } else if (e == XrlError::NO_FINDER()) {
 	//We're in trouble now! This shouldn't be able to happen.
-	abort();
+	XLOG_UNREACHABLE();
     } else if (e == XrlError::NO_SUCH_METHOD()) {
 	//The template file must have been wrong - the target doesn't
 	//support the common interface
@@ -202,7 +202,7 @@ TaskXrlItem::execute_done(const XrlError& err,
     printf("TaskXrlItem::execute_done\n");
     if (err != XrlError::OKAY()) {
 	//XXXX handle XRL errors here
-	abort();
+	XLOG_UNFINISHED();
     }
 
     if (!_xrl_callback.is_empty())
@@ -323,7 +323,6 @@ Task::step3()
 	printf("step3: execute\n");
 	if (_xrls.front().execute(errmsg) == false) {
 	    XLOG_WARNING("Failed to execute XRL: %s\n", errmsg.c_str());
-	    abort();
 	    task_fail(errmsg);
 	    return;
 	}

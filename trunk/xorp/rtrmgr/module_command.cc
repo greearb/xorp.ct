@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.4 2003/05/09 23:47:47 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.5 2003/05/19 21:27:05 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
+#include "libxorp/xlog.h"
 #include "module_command.hh"
 #include "xrldb.hh"
 #include "template_tree.hh"
@@ -166,18 +167,6 @@ ModuleCommand::start_transaction(ConfigTreeNode& ctn,
 {
     if (_startcommit == NULL)
 	return XORP_OK;
-#if 0
-    debug_msg("\n\n****! start_transaction on %s \n", ctn.segname().c_str());
-    XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
-				    &ModuleCommand::action_complete,
-				    &ctn, _startcommit,
-				    string("end transaction"));
-    XrlAction *xa = dynamic_cast<XrlAction*>(_startcommit);
-    if (xa != NULL) {
-	return xa->execute(ctn, task_manager, cb);
-    } 
-    abort();
-#endif
     XrlRouter::XrlCallback cb 
 	= callback(const_cast<ModuleCommand*>(this),
 		   &ModuleCommand::action_complete,
@@ -195,17 +184,6 @@ ModuleCommand::end_transaction(ConfigTreeNode& ctn,
 {
     if (_endcommit == NULL)
 	return XORP_OK;
-#if 0
-    XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
-				    &ModuleCommand::action_complete,
-				    &ctn, _endcommit,
-				    string("end transaction"));
-    XrlAction *xa = dynamic_cast<XrlAction*>(_endcommit);
-    if (xa != NULL) {
-	return xa->execute(ctn, task_manager, cb);
-    } 
-    abort();
-#endif
     XrlRouter::XrlCallback cb 
 	= callback(const_cast<ModuleCommand*>(this),
 		   &ModuleCommand::action_complete,
@@ -295,7 +273,7 @@ ModuleCommand::action_complete(const XrlError& err,
 			returned_atom = args->item(atom.name());
 		    } catch (XrlArgs::XrlAtomNotFound& x) {
 			//XXX
-			abort();
+			XLOG_UNFINISHED();
 		    }
 		    string value = returned_atom.value();
 		    debug_msg("found atom = %s\n", returned_atom.str().c_str());
@@ -308,33 +286,43 @@ ModuleCommand::action_complete(const XrlError& err,
     } else if (err == XrlError::BAD_ARGS()) {
 	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
 	//XXX 
+	XLOG_UNFINISHED();
     } else if (err == XrlError::COMMAND_FAILED()) {
 	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
 	//XXX 
+	XLOG_UNFINISHED();
     } else if (err == XrlError::RESOLVE_FAILED()) {
 	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
+	XLOG_UNFINISHED();
     } else if (err == XrlError::NO_FINDER()) {
 	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
 	//XXX 
+	XLOG_UNFINISHED();
     } else if (err == XrlError::SEND_FAILED()) {
 	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());
 	//XXX 
+	XLOG_UNFINISHED();
     } else if (err == XrlError::REPLY_TIMED_OUT()) {
 	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
+	XLOG_UNFINISHED();
     } else if (err == XrlError::NO_SUCH_METHOD()) {
 	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
+	XLOG_UNFINISHED();
     } else if (err == XrlError::INTERNAL_ERROR()) {
 	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
+	XLOG_UNFINISHED();
     } else if (err == XrlError::SYSCALL_FAILED()) {
 	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
+	XLOG_UNFINISHED();
     } else if (err == XrlError::FAILED_UNKNOWN()) {
 	fprintf(stderr, "%s: %s\n", err.str().c_str(), cmd.c_str());	
 	//XXX 
+	XLOG_UNFINISHED();
     }
-    abort();
+    XLOG_UNREACHABLE();
 }
