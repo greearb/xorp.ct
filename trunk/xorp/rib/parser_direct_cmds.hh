@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.15 2004/11/02 22:52:14 bms Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.16 2004/11/02 23:39:38 bms Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -44,9 +44,9 @@ public:
     int execute() {
 	cout << "RouteAddCommand::execute " << _tablename << " ";
 	cout << _net.str() << " " << _nexthop.str() << " "
-	     << c_format("%d", _metric) << "\n";
+	     << c_format("%u", XORP_UINT_CAST(_metric)) << "\n";
 	return _rib.add_route(_tablename, _net, _nexthop, "", "",
-			      (uint32_t)_metric, PolicyTags());
+			      _metric, PolicyTags());
     }
 private:
     RIB<IPv4>& _rib;
@@ -59,9 +59,9 @@ public:
     int execute() {
 	cout << "RouteVifAddCommand::execute " << _tablename << " ";
 	cout << _net.str() << " " << _vifname << " " << _nexthop.str() << " "
-	     << c_format("%d", _metric) << "\n";
+	     << c_format("%u", XORP_UINT_CAST(_metric)) << "\n";
 	return _rib.add_route(_tablename, _net, _nexthop, "", _vifname,
-			      (uint32_t)_metric, PolicyTags());
+			      _metric, PolicyTags());
     }
 private:
     RIB<IPv4>& _rib;
@@ -89,7 +89,7 @@ public:
 	     << " " << _lookupaddr.str()
 	     << " " << _ifname
 	     << " " << _nexthop.str()
-	     << " " << c_format("%d", _metric)
+	     << " " << c_format("%u", XORP_UINT_CAST(_metric))
 	     << "\n";
 
 	RibVerifyType verifytype;
@@ -109,7 +109,7 @@ public:
 	}
 
 	int dummy = _rib.verify_route(_lookupaddr, _ifname, _nexthop,
-				      (uint32_t)_metric, verifytype);
+				      _metric, verifytype);
 	if (dummy != XORP_OK) {
 	    cerr << "RouteVerify Failed!\n";
 #ifndef TESTING_INTERACTIVELY

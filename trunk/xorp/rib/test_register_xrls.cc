@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.32 2004/12/09 07:54:40 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.33 2005/02/01 07:47:27 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -272,8 +272,9 @@ register_done(const XrlError& e,
 	IPv4Net net(*base_addr, *prefix_len);
 	XLOG_ASSERT(net == expected_net);
 	if (*metric != expected_metric) {
-	    fprintf(stderr, "Expected metric %d, got %d\n",
-		    expected_metric, *metric);
+	    fprintf(stderr, "Expected metric %u, got %u\n",
+		    XORP_UINT_CAST(expected_metric),
+		    XORP_UINT_CAST(*metric));
 	    abort();
 	}
 	XLOG_ASSERT(*nexthop == expected_nexthop);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.14 2004/06/10 22:41:41 hodson Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.15 2005/02/10 01:21:14 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
@@ -53,7 +53,7 @@ public:
      * @param protocol_type the routing protocol type (@ref ProtocolType).
      * @param eventloop the main event loop.
      */
-    OriginTable(const string& tablename, int admin_distance,
+    OriginTable(const string& tablename, uint32_t admin_distance,
 		ProtocolType protocol_type, EventLoop& eventloop);
 
     /**
@@ -138,7 +138,7 @@ public:
     /**
      * @return the default administrative distance for this OriginTable
      */
-    int admin_distance() const		{ return _admin_distance; }
+    uint32_t admin_distance() const	{ return _admin_distance; }
 
     /**
      * @return the routing protocol type (@ref ProtocolType).
@@ -177,7 +177,7 @@ public:
     inline const RouteContainer& route_container() const;
 
 private:
-    int		 	_admin_distance;	// 0 .. 255
+    uint32_t		_admin_distance;	// 0 .. 255
     ProtocolType 	_protocol_type;	// IGP or EGP
     EventLoop&   	_eventloop;
     RouteContainer*	_ip_route_table;

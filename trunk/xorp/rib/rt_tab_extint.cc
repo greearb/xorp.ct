@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.21 2004/11/03 22:19:13 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.22 2005/03/03 07:42:43 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -606,16 +606,16 @@ ExtIntTable<A>::lookup_route(const A& addr) const
     }
 
     // Retain only the routes with the lowest admin_distance
-    int lowest_ad = 0xffff;
+    uint32_t lowest_admin_distance = 0xffff;
     for (iter = found.begin(); iter != found.end(); ++iter) {
-	if ((*iter)->admin_distance() < lowest_ad) {
-	    lowest_ad = (*iter)->admin_distance();
+	if ((*iter)->admin_distance() < lowest_admin_distance) {
+	    lowest_admin_distance = (*iter)->admin_distance();
 	}
     }
     for (iter = found.begin(); iter != found.end(); ) {
 	iter2 = iter;
 	++iter2;
-	if ((*iter)->admin_distance() > lowest_ad) {
+	if ((*iter)->admin_distance() > lowest_admin_distance) {
 	    found.erase(iter);
 	}
 	iter = iter2;

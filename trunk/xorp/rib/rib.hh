@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.29 2004/11/03 22:18:01 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.30 2005/02/10 01:21:13 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -153,7 +153,7 @@ public:
     int new_origin_table(const string&	tablename,
 			 const string&	target_class,
 			 const string&	target_instance,
-			 int		admin_distance,
+			 uint32_t	admin_distance,
 			 ProtocolType	protocol_type);
 
     /**
@@ -578,7 +578,7 @@ private:
      * in lower case.  Eg "ospf", "ibgp", etc.
      * @return the admin distance.
      */
-    inline int admin_distance(const string& protocol_name);
+    inline uint32_t admin_distance(const string& protocol_name);
 
     /**
      * Find the virtual interface associated with one of this router's
@@ -656,7 +656,7 @@ protected:
     map<string, Protocol* >		_protocols;
     map<string, OriginTable<A>* >	_routing_protocol_instances;
     map<string, Vif>			_vifs;
-    map<string, int>			_admin_distances;
+    map<string, uint32_t>		_admin_distances;
     map<A, IPExternalNextHop<A> >	_external_nexthops;
     map<A, IPPeerNextHop<A> >		_peer_nexthops;
 };

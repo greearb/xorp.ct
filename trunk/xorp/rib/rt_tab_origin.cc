@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.17 2004/06/10 22:41:41 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.18 2004/06/30 01:09:39 atanu Exp $"
 
 #include "rib_module.h"
 
@@ -26,17 +26,17 @@
 // A = Address Type. E.g., IPv4 or IPv6
 //
 template<class A>
-OriginTable<A>::OriginTable(const string& tablename,
-			       int admin_distance,
-			       ProtocolType protocol_type,
-			       EventLoop& eventloop)
+OriginTable<A>::OriginTable(const string&	tablename,
+			    uint32_t		admin_distance,
+			    ProtocolType	protocol_type,
+			    EventLoop&		eventloop)
     : RouteTable<A>(tablename),
       _admin_distance(admin_distance),
       _protocol_type(protocol_type),
       _eventloop(eventloop),
       _gen(0)
 {
-    XLOG_ASSERT(admin_distance >= 0 && admin_distance <= 255);
+    XLOG_ASSERT(admin_distance <= 255);
     XLOG_ASSERT((protocol_type == IGP) || (protocol_type == EGP));
 
     _ip_route_table = new Trie<A, const IPRouteEntry<A>* >();
@@ -199,8 +199,8 @@ OriginTable<A>::lookup_route(const A& addr) const
 {
     debug_msg("------------------\nlookup_route in table %s\n",
 	this->tablename().c_str());
-    debug_msg("OriginTable (%d): Looking up route for addr %s\n",
-	   _admin_distance, addr.str().c_str());
+    debug_msg("OriginTable (%u): Looking up route for addr %s\n",
+	      XORP_UINT_CAST(_admin_distance), addr.str().c_str());
 
     typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->find(addr);
