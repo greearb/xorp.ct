@@ -69,8 +69,6 @@ def copyAllFilesIn(manifest):
 
 def copyFileOut(fe):
   shutil.copyfile(fe.destination,fe.source);
-  os.chown(fe.source,pwd.getpwnam(fe.owner).pw_uid,grp.getgrnam(fe.group).gr_gid);
-  os.chmod(fe.source,0755);
   print "copied out file " + fe.destination + "."
 
 # Copy all files out
