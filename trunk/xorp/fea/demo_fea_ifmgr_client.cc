@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.3 2003/01/28 00:37:52 hodson Exp $"
+#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.4 2003/03/10 23:20:13 hodson Exp $"
 
 //
 // This program is a simple example of what is required to be an interface
@@ -25,6 +25,7 @@
 
 #include "fea_module.h"
 #include "libxorp/xlog.h"
+#include "libxorp/status_codes.h"
 #include "libxorp/exceptions.hh"
 
 #include "libxipc/xrl_std_router.hh"
@@ -69,6 +70,13 @@ public:
 	return XrlCmdError::OKAY();
     }
 
+    XrlCmdError common_0_1_get_status(uint32_t& status_no, string& desc)
+    {
+	UNUSED(desc);
+	status_no = PROC_READY;
+	return XrlCmdError::OKAY();
+    }
+    
     XrlCmdError fea_ifmgr_client_0_1_interface_update(
 	// Input values,
 	const string&	ifname,
