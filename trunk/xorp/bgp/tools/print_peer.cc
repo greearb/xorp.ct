@@ -12,16 +12,30 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.8 2003/02/22 23:57:13 mjh Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.9 2003/03/10 23:20:10 hodson Exp $"
 
 #include "print_peer.hh"
 
 PrintPeers::PrintPeers(bool verbose, int interval) 
     : XrlBgpV0p2Client(&_xrl_rtr), 
-    _eventloop(), _xrl_rtr(_eventloop, "print_peers"), _verbose(verbose)
+    _xrl_rtr(_eventloop, "print_peers"), _verbose(verbose)
 {
     _prev_no_bgp = false;
     _prev_no_peers = false;
+
+    // Wait for the finder to become ready.
+    {
+	bool timed_out = false;
+	XorpTimer t = _eventloop.set_flag_after_ms(10000, &timed_out);
+	while (_xrl_rtr.connected() == false && timed_out == false) {
+	    _eventloop.run();
+	}
+
+	if (_xrl_rtr.connected() == false) {
+	    XLOG_WARNING("XrlRouter did not become ready. No Finder?");
+	}
+    }
+
     for (;;) {
 	_done = false;
 	_token = 0;

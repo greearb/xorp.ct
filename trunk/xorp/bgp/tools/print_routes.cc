@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.5 2003/03/10 23:20:10 hodson Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.6 2003/07/25 02:12:24 atanu Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -22,10 +22,24 @@
 
 PrintRoutes::PrintRoutes(detail_t verbose, int interval) 
     : XrlBgpV0p2Client(&_xrl_rtr), 
-    _eventloop(), _xrl_rtr(_eventloop, "print_routes"), _verbose(verbose)
+    _xrl_rtr(_eventloop, "print_routes"), _verbose(verbose)
 {
     _prev_no_bgp = false;
     _prev_no_routes = false;
+
+    // Wait for the finder to become ready.
+    {
+	bool timed_out = false;
+	XorpTimer t = _eventloop.set_flag_after_ms(10000, &timed_out);
+	while (_xrl_rtr.connected() == false && timed_out == false) {
+	    _eventloop.run();
+	}
+
+	if (_xrl_rtr.connected() == false) {
+	    XLOG_WARNING("XrlRouter did not become ready. No Finder?");
+	}
+    }
+
     for (;;) {
 	_done = false;
 	_token = 0;
