@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.36 2003/10/15 04:17:29 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.37 2003/11/06 19:08:51 atanu Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,16 +9,30 @@ This file contains XORP release notes (most recent releases first).
 Release 0.5 (2003/??/??)
 ========================
   ALL:
-    - 
+    - New library libfeaclient to simplify interface configuration
+      replication and event reception.
 
   LIBXORP:
-    - 
+    - Addition of ServiceBase class (service.hh) for asynchronous
+      process components that might provide a service.  The
+      ServiceBase contains status information, (e.g. starting,
+      running, shutting down, shutdown) and methods for triggering
+      status changes (e.g.start, shutdown).  It also provides an
+      interface for observers to be notified of state changes.
+
 
   LIBXIPC:
-    - 
+    - Minor refactoring and code clean-up.
+    - Fixes to XrlAtom binary marshalling methods and test code for
+      checking this functionality in future.
+
+  LIBFEACLIENT:
+    - Added to project.  Provides interface configuration tree
+      mirroring and update event notification.  Intended to unify how
+      this data is replicated between processes.
 
   XRL:
-    - 
+    - kdoc generation nits.
 
   RTRMGR:
     - Fix the process name of a started proces to be the same
@@ -51,7 +65,9 @@ Release 0.5 (2003/??/??)
     - 
 
   RIP:
-    - 
+    - Code added to talk to FEA and RIB.  To become functional it
+      still requires the ability to send packets and receive UDP
+      packets through the FEA (work in progress).
 
 Release 0.4 (2003/08/28)
 ========================
