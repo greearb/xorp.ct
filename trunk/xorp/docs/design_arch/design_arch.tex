@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.3 2003/03/08 00:23:17 pavlin Exp $
+% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.4 2003/06/03 23:51:26 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Design Overview \\
 \vspace{1ex}
-Version 0.2}
+Version 0.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 10, 2003}
+\date{June 5, 2003}
 
 \maketitle
 
@@ -105,8 +105,8 @@ example:
 \section{Functionality}
 
 XORP is designed to support both IPv4 and IPv6. However, even though
-most of the code is written to support both, as of Release 0.2
-(March 2003) only IPv4 has been tested.
+most of the code is written to support both, as of Release 0.3
+(Mune 2003) only IPv4 has been tested.
 
 Below is our initial target list of protocols and features to be
 supported by XORP. Those in bold are already implemented or supported
@@ -127,9 +127,9 @@ yet.
 \subsubsection*{Multicast Routing Protocols}
 
 \begin{itemize}
-  \item {\bf PIM-SM}, PIM-SSM, Bidir-PIM (IPv4 and IPv6)
-  \item {\bf IGMPv1, v2}, v3 (IPv4 only)
-  \item {\bf MLDv1}, v2 (IPv6 only)
+  \item {\bf PIM-SM}, PIM-SSM, Bidir-PIM ({\bf IPv4} and IPv6)
+  \item {\bf IGMPv1, v2}, v3 ({\bf IPv4 only})
+  \item {\bf MLDv1}, v2 ({\bf IPv6 only})
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -235,7 +235,7 @@ software can choose to use it in different ways.
 The FEA provides a platform independent interface to the basic routing
 and network interface management functionality.
 For example, get or set information about network interfaces, install or
-modify unicast forwarding entries, etc.
+modify unicast forwarding entries, multicast routing support, etc.
 
 If the router is distributed, in the sense that some
 Forwarding Engines (FEs) are not in the same chassis as the control
@@ -248,9 +248,9 @@ from the user-level XORP processes; therefore by using the common API
 provided by the FEA we can greatly simplify the rest of the XORP
 components.
 
-Note that in release 0.2 (March 2003), the multicast-related
-functionalities are separated from the unicast-based functionalities
-in the MFEA (Multicast Forwarding Engine Abstraction).
+Note that the multicast-related functionalities are logically separated from
+the unicast-based functionalities in the MFEA (Multicast Forwarding Engine
+Abstraction), though the MFEA is part of the FEA process.
 
 For more information about the FEA see \cite{xorp:fea}.
 For more information about the MFEA see \cite{xorp:mfea}.
@@ -297,7 +297,7 @@ For more information about the RIB see \cite{xorp:rib}.
 
 This is the BGP routing daemon. It implements IPv4 and IPv6 unicast
 routing in a single process, as well as MBGP for both IPv4 and IPv6
-multicast RIBs for multicast routing purpose.  As of Release 0.2, only
+multicast RIBs for multicast routing purpose.  As of Release 0.3, only
 IPv4 is working, but most of the support for IPv6 is present.
 
 For more information about the XORP BGP implementation, see \cite{xorp:bgp}.
@@ -317,8 +317,8 @@ OSPF implementation to support both IPv4 and IPv6.
 \subsubsection{RIP}
 
 This is the RIP routing daemon. Similarly to OSPF, the IPv4 and IPv6
-daemons will be separate.  Work on our RIP implementation is only just
-beginning.
+daemons will be separate.
+As of June 2003, the RIP implementation is work in progress.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{MLD/IGMP}
@@ -388,7 +388,8 @@ For more information about the IPC finder and XRLs see
 This is the SNMP management process. It is used for SNMP access to the
 router. For example, it can be used to translate SNMP requests into XRL
 requests. Internally, SNMP will communicate with the other processes
-using XRLs.  As of March 2003, work on SNMP is only just beginning.
+using XRLs.
+As of June 2003, the SNMP implementation is work in progress.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -402,6 +403,7 @@ using XRLs.  As of March 2003, work on SNMP is only just beginning.
   \item December 11, 2002: Version 0.1 completed.
   \item March 10, 2003: Updated to match XORP version 0.2 release code;
   cleanup.
+  \item June 5, 2003: Updated to match XORP version 0.3 release code.
 
 \end{itemize}
 
