@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.62 2003/12/01 04:45:56 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.63 2003/12/02 08:15:50 pavlin Exp $
 #
 
 * IMPL: If a PimVif interface fails to start/stop/etc, then
@@ -446,7 +446,7 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   with holdtime=0 for all configurations that use the address of that PimVif.
 
 * IMPL: in all comments should rename "function" to "method".
-  This applies also for CLI, CLI2, MFEA, MLD6IGMP, LIBPROTO
+  This applies also for CLI, MFEA, MLD6IGMP, LIBPROTO
 
 * IMPL and SPEC:
   When computing JoinDesired (is_join_desired_), should we return
