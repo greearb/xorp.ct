@@ -75,7 +75,7 @@ OSPFD_OS = @OSPFD_OS@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
-SUBDIRS = bgp design_arch fea libxipc libxorp mfea mld6igmp multicast pim pim_testsuite rib rtrmgr test_harness
+SUBDIRS = bgp design_arch fea libxipc libxorp mfea mld6igmp multicast pim pim_testsuite rib rtrmgr snmp  test_harness
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = kdoc mk papers tex
