@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.8 2004/05/07 02:52:18 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.9 2004/06/10 22:41:01 hodson Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -98,7 +98,7 @@ public:
      * @return true if the left-hand operand is numerically same as the
      * right-hand operand.
      */
-    bool operator==(const Fib2mribRoute& other) {
+    bool operator==(const Fib2mribRoute& other) const {
 	return ((_network == other.network())
 		&& (_nexthop == other.nexthop())
 		&& (_ifname == other.ifname())
