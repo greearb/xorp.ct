@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.43 2005/03/02 01:29:51 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.44 2005/03/03 07:29:24 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -325,8 +325,7 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	      rtmsg.str().c_str());
     
     XLOG_ASSERT(caller == this->_parent);
-    // If this route is being deleted it may no longer resolve.
-//     XLOG_ASSERT(rtmsg.route()->nexthop_resolved());
+    XLOG_ASSERT(rtmsg.route()->nexthop_resolved());
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
