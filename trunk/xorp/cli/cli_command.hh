@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.32 2002/12/09 18:28:53 hodson Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -286,7 +286,7 @@ protected:
     }
     
 private:
-    friend CliClient;
+    friend class CliClient;
     const char *name() const { return (_name.c_str()); }
     const char *cd_prompt() { return (_cd_prompt.c_str()); }
     

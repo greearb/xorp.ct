@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.60 2002/12/09 18:28:53 hodson Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.1.1.1 2002/12/11 23:55:52 hodson Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -320,7 +320,7 @@ public:
     }
     
 private:
-    friend CliClient;
+    friend class CliClient;
     
     //
     // Internal CLI commands

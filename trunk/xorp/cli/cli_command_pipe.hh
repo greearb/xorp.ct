@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command_pipe.hh,v 1.12 2002/12/09 18:28:53 hodson Exp $
+// $XORP: xorp/cli/cli_command_pipe.hh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_PIPE_HH__
@@ -70,7 +70,7 @@ public:
     virtual ~CliPipe();
     
 private:
-    friend CliClient;
+    friend class CliClient;
     
     bool is_invalid() { return (_pipe_type == CLI_PIPE_MAX); }
     void add_pipe_arg(const char *v) { _pipe_args_list.push_back(v); }
