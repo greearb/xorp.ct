@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.41 2004/10/13 06:03:29 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.42 2004/12/09 07:54:38 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -444,7 +444,10 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
     trace_xrl("Resolving xrl:", xrl);
 
     if (_fc->connected() == false) {
-	user_cb->dispatch(XrlError::NO_FINDER(), 0);
+#if	0
+ 	user_cb->dispatch(XrlError::NO_FINDER(), 0);
+#endif
+	XLOG_ERROR("NO FINDER");
 	return false;
     }
 
@@ -464,13 +467,15 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
 	if (_fc->forward_finder_xrl(xrl, xcb)) {
 	    return true;
 	}
+#if	0
 #ifdef USE_XRL_CALLBACK_CHECKER
 	cb_checker.process_callback(XrlError::NO_FINDER(), 0,
 				    cb_checker.last_seqno());
 #else
-	user_cb->dispatch(XrlError::NO_FINDER(), 0);
+ 	user_cb->dispatch(XrlError::NO_FINDER(), 0);
 #endif
-	fprintf(stderr, "NO FINDER");
+#endif
+	XLOG_ERROR("NO FINDER");
 	return false;
     }
 
