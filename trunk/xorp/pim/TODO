@@ -1,6 +1,11 @@
 #
-# $XORP: xorp/pim/TODO,v 1.2 2002/12/20 00:37:38 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.3 2003/01/06 20:28:45 pavlin Exp $
 #
+
+* IMPL+SPEC+TESTSUTE: if the MRIB.next_hop(RP) changes, should
+  we send first the (*,*,RP) Join first, or the (*,*,RP) Prune first?
+  The description in the text is different from the figure and the table.
+  Same fix is needed for (*,G) and (S,G)
 
 * IMPL: Make sure that t_joinsuppress is used as appropriate instead
   of t_suppress
