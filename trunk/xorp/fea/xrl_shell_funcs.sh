@@ -167,6 +167,18 @@ delete_address4()
     $CALLXRL "finder://fea/ifmgr/0.1/delete_address4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4"
 }
 
+enable_address4()
+{
+    echo -n "enable_address4" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/set_address_enabled4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&enabled:bool=true"
+}
+
+disable_address4()
+{
+    echo -n "disable_address4" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/set_address_enabled4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&enabled:bool=false"
+}
+
 set_prefix4()
 {
     echo -n "set_prefix4" $*
@@ -213,6 +225,18 @@ delete_address6()
 {
     echo -n "delete_address6" $*
     $CALLXRL "finder://fea/ifmgr/0.1/delete_address6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4"
+}
+
+enable_address6()
+{
+    echo -n "enable_address6" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/set_address_enabled6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4&enabled:bool=true"
+}
+
+disable_address6()
+{
+    echo -n "disable_address6" $*
+    $CALLXRL "finder://fea/ifmgr/0.1/set_address_enabled6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4&enabled:bool=false"
 }
 
 set_prefix6()
