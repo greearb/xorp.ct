@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.2 2003/01/29 05:43:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.3 2003/02/06 00:51:06 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -315,7 +315,25 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 		   && (pim_mre->inherited_olist_sg_rpt_forward().test(
 		       iif_vif_index))) {
 	    // send Assert(*,G) on iif_vif_index
-	    pim_mre->wrong_iif_data_arrived_wc(pim_vif, src);
+	    PimMre *pim_mre_wc = NULL;
+	    bool is_new_entry = false;
+	    
+	    do {
+		if (pim_mre->is_wc()) {
+		    pim_mre_wc = pim_mre;
+		    break;
+		}
+		pim_mre_wc = pim_mre->wc_entry();
+		break;
+	    } while (false);
+	    if (pim_mre_wc == NULL) {
+		pim_mre_wc = pim_mre_find(src, dst,  PIM_MRE_WC,  PIM_MRE_WC);
+		is_new_entry = true;
+	    }
+	    XLOG_ASSERT(pim_mre_wc != NULL);
+	    pim_mre_wc->wrong_iif_data_arrived_wc(pim_vif, src);
+	    if (is_new_entry)
+		pim_mre_wc->entry_try_remove();
 	}
 	return;		// TODO: XXX: PAVPAVPAV: not in the spec (yet)
     }
