@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libcomm/test_comm.c,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libcomm/test_comm.c,v 1.2 2003/03/10 23:20:20 hodson Exp $"
 
 
 /*
@@ -70,7 +70,7 @@ main(int argc, char *argv[])
     /*
      * Initialize the multicast address
      */
-    inet_aton("224.0.1.20", &mcast_addr);
+    mcast_addr.s_addr = inet_addr("224.0.1.20");
     
     /*
      * Init the `comm' library
