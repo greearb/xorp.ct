@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.4 2003/03/07 22:03:59 pavlin Exp $
+% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.22 2003/06/03 23:50:23 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -48,13 +48,13 @@
 
 \title{Error Handling in XORP \\
 \vspace{1ex}
-Version 0.2}
+Version 0.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 10, 2003}
+\date{June 5, 2003}
 
 \maketitle
 
@@ -199,8 +199,8 @@ Process fails   &                 &          &      &      &      &         &   
                 &                 & Unicast  &      &      &      &         &      &      &      & Wait    \\
                 &                 & Routes   &      &      &      &         &      &      &      &         \\
                 &                 & Exit     &      &      &      &         &      &      &      &         \\\hline
-FEA             &  Restart        & /        & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & -       \\\hline
-MFEA            &  Restart        & -        & /    & -    & Exit & Exit    & -    & -    & -    & -       \\\hline
+FEA(*)          &  Restart        & /        & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & -       \\\hline
+MFEA(*)         &  Restart        & -        & /    & -    & Exit & Exit    & -    & -    & -    & -       \\\hline
 RIB             &  Restart        & Withdraw & /    & -    & Exit & Exit    & Exit & Exit & Exit & -       \\
                 &                 & All      &      &      & (G)  & (G)     & (G)  & (G)  & (G)  &         \\
                 &                 & Unicast  &      &      &      &         &      &      &      &         \\
@@ -218,6 +218,7 @@ OSPF            &  Restart        & -        & -    & -    & -    & -       & - 
 \xorpsh         &  Restart        & -        & -    & -    & -    & -       & -    & -    & -    & /       \\\hline
 \end{tabular}
 \end{center}
+{\small Note(*): Typically, the MFEA would be part of the FEA process}
 \caption{\label{failure_table}Action to take on detecting process failure}
 \end{table}
 
@@ -247,7 +248,7 @@ the FEA should withdraw all routes that the RIB has sent to it.
 \subsubsection{MFEA - Multicast Forwarding Engine Abstraction}
 
 The MFEA is multicast analogue to the unicast FEA. If should be noted
-that the MFEA and FEA are currently being merged.
+that typically the MFEA would be part of the FEA process.
 
 Similar to the FEA, on restart or exit the MFEA should remove all
 multicast forwarding entries that were installed in the kernel. Note
@@ -284,7 +285,7 @@ If the FEA/MFEA process exits then this process should exit.
 %%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{PIM}
 
-If the RIB or FEA/MFEA exits then this process should exit.
+If the RIB or the FEA/MFEA process exits then this process should exit.
 
 %%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{BGP}
