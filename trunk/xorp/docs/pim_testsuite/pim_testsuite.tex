@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.10 2003/02/11 09:16:39 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.11 2003/02/11 09:49:40 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -156,7 +156,7 @@ reference, taken or calculated from the PIM-SM spec.
 %
 \newcommand{\PimsmBSPeriod}{60 sec}			% BS_Period
 \newcommand{\PimsmBSTimeout}{130 sec}			% BS_Timeout
-\newcommand{\PimsmRandOverride}{rand(0, 5.0) sec}	% rand_override
+\newcommand{\PimsmRandOverride}{weighted\_rand(5.0, 23.0) sec} % rand_override
 \newcommand{\PimsmCRPTimeout}{150 sec}			% C-RP_Timeout
 \newcommand{\PimsmCRPAdvPeriod}{60 sec}			% C-RP-Adv_Period
 \newcommand{\PimsmSZTimeout}{1500 sec}			% SZ_Timeout
@@ -191,7 +191,7 @@ reference, taken or calculated from the PIM-SM spec.
 \begin{tabular}{ll}
 \verb=BS_Period=		& 60 sec	\\
 \verb=BS_Timeout=		& 130 sec	\\
-\verb=rand_override=		& rand(0, 5.0) sec \\
+\verb=rand_override=		& weighted\_rand(5.0, 23.0) sec \\
 \verb=C-RP_Timeout=		& 150 sec	\\
 \verb=C-RP-Adv_Period=		& 60 sec	\\
 \verb=SZ_Timeout=		& 1500 sec
@@ -1432,6 +1432,8 @@ that Rx1 is a receiver, and S1 is a sender, both for group 224.0.1.20.
 \begin{verbatim}
 Xorp> show pim bootstrap
 Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Expiring zones:
 BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
 Configured zones:
 BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
@@ -10749,17 +10751,29 @@ None.
 \chapter{Bootstrap Mechanism}
 
 \para{Scope:}
-TODO
+Test sending and receiving of PIM Bootstrap and Candidate-RP-Advertisement
+messages.
 
 \para{Overview:}
-TODO
+The Bootstrap mechanism is one of the mechanisms that can be used
+to set the group-to-RP mapping in the PIM-SM routers in a domain.
+Typically, a small set of routers within a domain are configured as Candidate
+Bootstrap routers (C-BSRs). A single BSR is elected for that domain through a
+simple election mechanism. A set of routers within a domain are also
+configured as Candidate RPs (C-RPs); candidate RPs advertise their willingness
+to be RPs by periodically unicasting Candidate-RP-Advertisement messages
+(C-RP-Advs) to the BSR for that domain. The BSR includes a set of these C-RPs
+(the RP-Set) in the Bootstrap messages (BSMs) it originates periodically. The
+Bootstrap messages are distributed hop-by-hop through the domain, and are used
+to elect the BSR for that domain, as well as to distribute the RP-Set to all
+PIM-SM routers within that domain.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\section{Single BSR Election}
+\section{Candidate BSR State Machine}
 
 \para{Purpose:}
-Test the Bootstrap self-election on a single router.
+Test the per-scope-zone state machine for a candidate BSR.
 
 \para{References:}
 \begin{itemize}
@@ -10767,63 +10781,821 @@ Test the Bootstrap self-election on a single router.
 \end{itemize}
 
 \para{Discussion:}
-A candidate-BSR must be able to elect itself as the
-Bootstrap router if there are no other candidate-BSRs. The time to complete
-the election is \verb=BS_Timeout= ({\PimsmBSTimeout}).
+Candidate BSRs originate Bootstrap messages which contain information such as
+BSR-priority and BSR-address of the candidate BSRs. This information is used
+to elect a single BSR per scope-zone per domain. The elected BSR then
+periodically originates a Bootstrap message that contains the RP-Set. If a
+candidate BSR has not received the Bootstrap message from the elected BSR for
+some amount of time, then the elected BSR is timed-out, and that candidate BSR
+originates its own Bootstrap message which will be used by other candidate
+BSRs to elect a new BSR for that scope-zone and domain.
 
 \para{Test Setup:}
-Connect the RUT according to Figure~\ref{fig:single_bsr_election}.
-Configure the RUT as a Cand-BSR.
+Connect the RUT, TR1, TR2, TR3, and TR4 according to
+Figure~\ref{fig:pim_test_6_1_candidate_bsr_state_machine}.
+Enable PIM-SM on the RUT, TR1, TR2, TR3, and TR4. Configure the RUT
+as a Cand-BSR for non-scoped zone 224.0.0.0/4 with default BSR
+priority of 1, unless stated otherwise.
 
 \begin{figure}[htbp]
   \begin{center}
-    \includegraphics[scale=0.8]{figs/pim_test_6_1_single_bsr_election}
-    \caption{Single BSR election test setup}
-    \label{fig:single_bsr_election}
+    \includegraphics[scale=0.8]{figs/pim_test_6_1_candidate_bsr_state_machine}
+    \caption{Candidate BSR state machine test setup}
+    \label{fig:pim_test_6_1_candidate_bsr_state_machine}
   \end{center}
 \end{figure}
 
 \para{Procedure:}
+
+\subpara{Part A: Receive preferred BSM in Pending BSR state.}
+
 \begin{enumerate}
 
-  \item Start the RUT.
+  \item Start the RUT and TR1, and start observing the Bootstrap messages
+  transmitted on LAN1.
 
-  \item Check immediately the BSR status on the RUT. Initially the RUT should
-        be the BSR in Pending state:
+  \item Check the BSR status in the RUT.
 
-\begin{verbatim}
-Xorp> show pim bootstrap
-Active zones:
-BSR              Pri LocalAddress     Pri State            Timeout
-10.3.0.1           1 10.3.0.1           1 Pending               11
-Configured zones:
-BSR              Pri LocalAddress     Pri State            Timeout
-10.3.0.1           1 10.3.0.1           1 Init                  -1
-\end{verbatim}
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 10, Cand-RP set composed of TR1 as an RP for 226.0.0.0/8,
+  and send it on LAN1.
 
-  \item After \verb=BS_Timeout= ({\PimsmBSTimeout}), the RUT must become the
-        elected BSR:
-
-\begin{verbatim}
-Xorp> show pim bootstrap
-Active zones:
-BSR              Pri LocalAddress     Pri State            Timeout
-10.3.0.1           1 10.3.0.1           1 Elected               59
-Configured zones:
-BSR              Pri LocalAddress     Pri State            Timeout
-10.3.0.1           1 10.3.0.1           1 Init                  -1
-\end{verbatim}
+  \item Right after the RUT receives the Bootstrap message, check the BSR
+  status, and the RP-Set in the RUT.
 
 \end{enumerate}
 
+\subpara{Part B: BS timer expires in Pending BSR state.}
+
+\begin{enumerate}
+
+  \item Configure the RUT as a Candidate-RP for 226.0.0.0/8.
+
+  \item Start the RUT and TR1, and start observing the Bootstrap messages
+  transmitted on LAN1.
+
+  \item Check the BSR status in the RUT.
+
+  \item Wait for up to \verb=BS_Timeout= ({\PimsmBSTimeout}) until the BS
+  Timer in the RUT expires.
+
+  \item After the BS Timer in the RUT expires, check the BSR status, and the
+  RP-Set in the RUT.
+
+\end{enumerate}
+
+\subpara{Part C: Receive non-preferred BSM in Pending BSR state.}
+
+The setup is same as in Part A, except that the BSR priority of the Bootstrap
+message originated by TR1 is 0 instead of 10.
+
+\subpara{Part D: Receive preferred BSM in Candidate BSR state.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, and TR2, and start observing the Bootstrap messages
+  transmitted on LAN1 and LAN2.
+
+  \item Check the BSR status in the RUT.
+
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 10, Cand-RP set composed of TR1 as an RP for 226.0.0.0/8,
+  and send it on LAN1.
+
+  \item Right after the RUT receives the Bootstrap message, check the BSR
+  status, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR2 with the BSR address set to TR2,
+  BSR priority of 20, Cand-RP set composed of TR2 as an RP for 226.0.0.0/8,
+  and send it on LAN2.
+
+  \item Right after the RUT receives the Bootstrap message, check the BSR
+  status, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR2 with the BSR address set to TR2,
+  BSR priority of 25, Cand-RP set composed of TR2 as an RP for 226.0.0.0/8,
+  and send it on LAN2. However, the Fragment Tag for this message should be
+  different from the Fragment Tag for the previous Bootstrap message.
+
+  \item Right after the RUT receives the Bootstrap message, check the BSR
+  status, and the RP-Set in the RUT.
+
+\end{enumerate}
+
+\subpara{Part E: BS Timer expires in Candidate BSR state.}
+
+\begin{enumerate}
+
+  \item Start the RUT and TR1, and start observing the Bootstrap messages
+  transmitted on LAN1.
+
+  \item Check the BSR status in the RUT.
+
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 10, Cand-RP set composed of TR1 as an RP for 226.0.0.0/8,
+  and send it on LAN1.
+
+  \item Right after the RUT receives the Bootstrap message, check the BSR
+  status, and the RP-Set in the RUT.
+
+  \item Wait for up to \verb=BS_Timeout= ({\PimsmBSTimeout}) until the BS
+  Timer in the RUT expires.
+
+  \item After the BS Timer in the RUT expires, check the BSR status, and the
+  RP-Set in the RUT.
+
+  \item Wait for up to \verb=rand_override= ({\PimsmRandOverride}) until the BS
+  Timer in the RUT expires.
+
+  \item After the BS Timer in the RUT expires, check the BSR status, and the
+  RP-Set in the RUT.
+
+\end{enumerate}
+
+\subpara{Part F: Receive non-preferred BSM from elected BSR in Candidate BSR
+state.}
+
+\begin{enumerate}
+
+  \item Start the RUT and TR1, and start observing the Bootstrap messages
+  transmitted on LAN1.
+
+  \item Check the BSR status in the RUT.
+
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 10, Cand-RP set composed of TR1 as an RP for 226.0.0.0/8,
+  and send it on LAN1.
+
+  \item Right after the RUT receives the Bootstrap message, check the BSR
+  status, and the RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 5, Cand-RP set composed of TR1 as an RP for 226.0.0.0/8,
+  and send it on LAN1. However, the Fragment Tag for this message should be
+  different from the Fragment Tag for the previous Bootstrap message.
+
+  \item Right after the RUT receives the Bootstrap message, check the BSR
+  status, and the RP-Set in the RUT.
+
+  \item Wait for up to \verb=rand_override= ({\PimsmRandOverride}) until the BS
+  Timer in the RUT expires.
+
+  \item After the BS Timer in the RUT expires, check the BSR status, and the
+  RP-Set in the RUT.
+
+\end{enumerate}
+
+\subpara{Part G: Receive preferred BSM in Elected BSR state.}
+
+\begin{enumerate}
+
+  \item Configure the RUT as a Candidate-RP for 226.0.0.0/8.
+
+  \item Start the RUT and TR1, and start observing the Bootstrap messages
+  transmitted on LAN1.
+
+  \item Check the BSR status in the RUT.
+
+  \item Wait for up to \verb=BS_Timeout= ({\PimsmBSTimeout}) until the BS
+  Timer in the RUT expires.
+
+  \item After the BS Timer in the RUT expires, check the BSR status, and the
+  RP-Set in the RUT.
+
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 10, Cand-RP set composed of TR1 as an RP for 226.0.0.0/8,
+  and send it on LAN1.
+
+  \item Right after the RUT receives the Bootstrap message, check the BSR
+  status, and the RP-Set in the RUT.
+
+\end{enumerate}
+
+\subpara{Part H: BS Timer expires in Elected BSR state.}
+
+\begin{enumerate}
+
+  \item Configure the RUT as a Candidate-RP for 226.0.0.0/8.
+
+  \item Start the RUT and TR1, and start observing the Bootstrap messages
+  transmitted on LAN1.
+
+  \item Check the BSR status in the RUT.
+
+  \item Wait for up to \verb=BS_Timeout= ({\PimsmBSTimeout}) until the BS
+  Timer in the RUT expires.
+
+  \item After the BS Timer in the RUT expires, check the BSR status, and the
+  RP-Set in the RUT.
+
+  \item Wait for up to \verb=BS_Period= ({\PimsmBSPeriod}) until the BS
+  Timer in the RUT expires.
+
+  \item After the BS Timer in the RUT expires, check the BSR status, and the
+  RP-Set in the RUT.
+
+\end{enumerate}
+
+\subpara{Part I: Receive non-preferred BSM in Elected BSR state.}
+
+The setup is same as in Part G, except that the BSR priority of the Bootstrap
+message originated by TR1 is 0 instead of 10.
 
 \para{Observable Results:}
-TODO
+
+\subpara{Part A:}
+
+\begin{itemize}
+
+  \item Right after the RUT is started, its BSR state machine should be in
+  Pending state:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+0.0.0.0            0 10.2.0.1           1 Pending               84        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  \item After the RUT receives the Bootstrap message, it should forward it
+        back on LAN1. Its BSR state machine
+        should be in Candidate BSR state, and the elected BSR should be TR1.
+        The BS Timer in the RUT should be set to \verb=BS_Timeout=
+        ({\PimsmBSTimeout}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.6.0.1          10 10.2.0.1           1 Candidate            127        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should contain TR1 as the RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     145 226.0.0.0/8        10.6.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part B:}
+
+\begin{itemize}
+
+  \item Right after the RUT is started, its BSR state machine should be in
+  Pending state:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+0.0.0.0            0 10.2.0.1           1 Pending               83        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  \item After the BS Timer in the RUT expires, it should store itself in the
+        RP-Set, and should originate a Bootstrap message on LAN1.
+        Its BSR state machine should be in Elected BSR state, and the elected
+        BSR should be the RUT.
+        The BS Timer in the RUT should be set to \verb=BS_Period=
+        ({\PimsmBSPeriod}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Elected               58        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should contain the RUT as the RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.2.0.1         192      -1 226.0.0.0/8        10.2.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.2.0.1         192      -1 226.0.0.0/8        10.2.0.1                  42
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part C:}
+
+\begin{itemize}
+
+  \item Right after the RUT is started, its BSR state machine should be in
+  Pending state:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+0.0.0.0            0 10.2.0.1           1 Pending               85        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  \item After the RUT receives the Bootstrap message, it should silently
+        ignore it.
+        Its BSR state machine should continue to be in Pending BSR state:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+0.0.0.0            0 10.2.0.1           1 Pending               71        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set not be modified:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part D:}
+
+\begin{itemize}
+
+  \item Right after the RUT is started, its BSR state machine should be in
+  Pending state:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+0.0.0.0            0 10.2.0.1           1 Pending              152        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  \item After the RUT receives the first Bootstrap message, it should forward
+        it on LAN2, and back on LAN1. Its BSR state machine
+        should be in Candidate BSR state, and the elected BSR should be TR1.
+        The BS Timer in the RUT should be set to \verb=BS_Timeout=
+        ({\PimsmBSTimeout}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.6.0.1          10 10.2.0.1           1 Candidate            128        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should contain TR1 as the RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     144 226.0.0.0/8        10.6.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  \item After the RUT receives the second Bootstrap message, it should forward
+        it on LAN1, and back on LAN2. Its BSR state machine
+        should continue be in Candidate BSR state, but the elected BSR should
+        be TR2.
+        The BS Timer in the RUT should be set to \verb=BS_Timeout=
+        ({\PimsmBSTimeout}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1          20 10.2.0.1           1 Candidate            128        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should contain TR2 as the RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.3.0.1         192     145 226.0.0.0/8        10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  \item After the RUT receives the third Bootstrap message, it should forward
+        it on LAN1, and back on LAN2. Its BSR state machine
+        should continue be in Candidate BSR state, and the elected BSR should
+        continue be TR2.
+        The BS Timer in the RUT should be set to \verb=BS_Timeout=
+        ({\PimsmBSTimeout}). However, the BSR priority should be updated to 25:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.3.0.1          25 10.2.0.1           1 Candidate            128        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should continue to contain TR2 as the RP for
+  226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.3.0.1         192     143 226.0.0.0/8        10.3.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part E:}
+
+\begin{itemize}
+
+  \item Right after the RUT is started, its BSR state machine should be in
+  Pending state:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+0.0.0.0            0 10.2.0.1           1 Pending               98        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  \item After the RUT receives the first Bootstrap message, it should forward
+        it on LAN2, and back on LAN1. Its BSR state machine
+        should be in Candidate BSR state, and the elected BSR should be TR1.
+        The BS Timer in the RUT should be set to \verb=BS_Timeout=
+        ({\PimsmBSTimeout}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.6.0.1          10 10.2.0.1           1 Candidate            127        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should contain TR1 as the RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     145 226.0.0.0/8        10.6.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  \item After up to \verb=BS_Timeout= ({\PimsmBSTimeout}) the BS Timer in the
+  RUT should expire.
+
+  \item After the BS Timer in the RUT expires, the BSR state machine should be
+  in Pending BSR, and the BS Timer should be set to \verb=rand_override=
+  ({\PimsmRandOverride}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.6.0.1          10 10.2.0.1           1 Pending               13        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should still contain TR1 as the RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192      17 226.0.0.0/8        10.6.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  \item After up to \verb=rand_override= ({\PimsmRandOverride}) the BS Timer
+  in the RUT should expire.
+
+  \item After the BS Timer in the RUT expires, the BSR state machine should be
+  in Elected BSR state, the RUT should originate a Bootstrap message on LAN1,
+  and the elected BSR should be the RUT itself.
+  The BS Timer in the RUT should be set to \verb=BS_Period=
+  ({\PimsmBSPeriod}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Elected               57        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.6.0.1          10 10.2.0.1           1 Elected                0        -1
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should still contain TR1 as the RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192       2 226.0.0.0/8        10.6.0.1                  -1
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part F:}
+
+The results should be same as in Part E, except that the transition
+of the BSR state machine of the RUT from Candidate BSR state to
+Pending BSR state should be triggered by the second Bootstrap message
+originated by TR1.
+
+\subpara{Part G:}
+
+\begin{itemize}
+
+  \item Right after the RUT is started, its BSR state machine should be in
+  Pending state:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+0.0.0.0            0 10.2.0.1           1 Pending              160        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  \item After up to \verb=BS_Timeout= ({\PimsmBSTimeout}) the BS Timer
+  in the RUT should expire.
+
+  \item After the BS Timer in the RUT expires, the BSR state machine should be
+  in Elected BSR state, the RUT should originate a Bootstrap message on LAN1,
+  and the elected BSR should be the RUT itself.
+  The BS Timer in the RUT should be set to \verb=BS_Period=
+  ({\PimsmBSPeriod}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Elected               57        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should contain the RUT as the RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.2.0.1         192      -1 226.0.0.0/8        10.2.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.2.0.1         192      -1 226.0.0.0/8        10.2.0.1                  20
+\end{verbatim}
+
+  \item After the RUT receives the Bootstrap message, it should forward
+        it on LAN1. Its BSR state machine
+        should be in Candidate BSR state, and the elected BSR should be TR1.
+        The BS Timer in the RUT should be set to \verb=BS_Timeout=
+        ({\PimsmBSTimeout}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.6.0.1          10 10.2.0.1           1 Candidate            126        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should contain TR1 as the RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     142 226.0.0.0/8        10.6.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.2.0.1         192      -1 226.0.0.0/8        10.2.0.1                  52
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part H:}
+
+\begin{itemize}
+
+  \item Right after the RUT is started, its BSR state machine should be in
+  Pending state:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+0.0.0.0            0 10.2.0.1           1 Pending               88        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  \item After up to \verb=BS_Timeout= ({\PimsmBSTimeout}) the BS Timer
+  in the RUT should expire.
+
+  \item After the BS Timer in the RUT expires, the BSR state machine should be
+  in Elected BSR state, the RUT should originate a Bootstrap message on LAN1,
+  and the elected BSR should be the RUT itself.
+  The BS Timer in the RUT should be set to \verb=BS_Period=
+  ({\PimsmBSPeriod}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Elected               58        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should contain the RUT as the RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.2.0.1         192      -1 226.0.0.0/8        10.2.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.2.0.1         192      -1 226.0.0.0/8        10.2.0.1                  24
+\end{verbatim}
+
+  \item After \verb=BS_Period= ({\PimsmBSPeriod}) the BS Timer
+  in the RUT should expire.
+
+  \item After the BS Timer in the RUT expires, the BSR state machine should
+  continue to be in Elected BSR state, the RUT should originate a Bootstrap
+  message on LAN1, and the elected BSR should be the RUT itself.
+  The BS Timer in the RUT should be set to \verb=BS_Period=
+  ({\PimsmBSPeriod}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Elected               55        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set should continue to contain the RUT as the RP for
+  226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.2.0.1         192      -1 226.0.0.0/8        10.2.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.2.0.1         192      -1 226.0.0.0/8        10.2.0.1                  25
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part I:}
+
+The results should be same as in Part H, except that the same actions that
+were triggered when the RUT is in Elected BSR state and the BS Timer expired,
+in this part those actions should be triggered when the RUT receives the
+Bootstrap message originated by TR1.
 
 \para{Possible Problems:}
-The RUT might become the BSR earlier than \verb=BS_Timeout= ({\PimsmBSTimeout})
-if the implementation uses a shorter timeout interval on startup (\eg
-if it has tuned for fast start-up).
+The RUT might become the BSR earlier or later than \verb=BS_Timeout=
+({\PimsmBSTimeout}) if the implementation uses shorter or longer timeout
+interval on startup (\eg if it has tuned for fast start-up, or if it uses a
+randomized timeout interval).
+In Part E, if the Cand-RP holdtime of TR1 is too short, TR1 may expire from
+the RP-Set before the BSR state machine of RUT transitions to Pending BSR or
+Elected BSR state.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
@@ -10941,6 +11713,8 @@ Cand-BSR or a Cand-RP.
 Xorp> show pim bootstrap
 Active zones:
 BSR              Pri LocalAddress     Pri State            Timeout
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
 Configured zones:
 BSR              Pri LocalAddress     Pri State            Timeout
 
@@ -10965,6 +11739,8 @@ Xorp> show pim bootstrap
 Active zones:
 BSR              Pri LocalAddress     Pri State            Timeout
 10.3.0.1           1 0.0.0.0            0 AcceptPreferred      122
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
 Configured zones:
 BSR              Pri LocalAddress     Pri State            Timeout
 
@@ -11020,6 +11796,8 @@ Xorp> show pim bootstrap
 Active zones:
 BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
 10.3.0.1           1 0.0.0.0            0 AcceptAny              0      1369
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
 Configured zones:
 BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
 
@@ -11035,6 +11813,8 @@ Group           Source          RP              Flags
 \begin{verbatim}
 Xorp> show pim bootstrap
 Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Expiring zones:
 BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
 Configured zones:
 BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
