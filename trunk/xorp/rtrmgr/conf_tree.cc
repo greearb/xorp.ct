@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.11 2003/11/20 06:49:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.12 2003/11/20 20:31:38 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -27,7 +27,7 @@
 extern int init_bootfile_parser(const char* configuration,
 				const char* filename, ConfigTree* c);
 extern int parse_bootfile();
-extern int booterror(const char* s);
+extern int booterror(const char* s) throw (ParseError);
 
 /*************************************************************************
  * Config File class
@@ -66,7 +66,7 @@ void ConfigTree::add_default_children()
 }
 
 TemplateTreeNode*
-ConfigTree::find_template(const list<string>& path_segments) throw (ParseError)
+ConfigTree::find_template(const list<string>& path_segments)
 {
     TemplateTreeNode *ttn;
 
@@ -162,7 +162,7 @@ ConfigTree::push_path()
 }
 
 void
-ConfigTree::add_node(const string& segment)
+ConfigTree::add_node(const string& segment) throw (ParseError)
 {
     list<ConfigTreeNode*>::const_iterator iter;
     ConfigTreeNode *found = NULL;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.7 2003/11/20 06:37:38 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.8 2003/11/20 06:49:56 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -41,11 +41,10 @@ public:
     void push_path();
     void extend_path(const string& segment);
     void pop_path();
-    void add_node(const string& nodename);
+    void add_node(const string& nodename) throw (ParseError);
     void terminal_value(char* value, int type);
     list<string> path_as_segments() const;
-    TemplateTreeNode* find_template(const list<string>& path_segments)
-	throw (ParseError);
+    TemplateTreeNode* find_template(const list<string>& path_segments);
     ConfigTreeNode& root_node() { return _root_node; }
     const ConfigTreeNode& const_root_node() const { return _root_node; }
     ConfigTreeNode* find_node(const list<string>& path);
