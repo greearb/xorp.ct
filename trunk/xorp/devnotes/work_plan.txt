@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/work_plan.txt,v 1.19 2003/06/11 00:02:11 pavlin Exp $
+# $XORP: xorp/devnotes/work_plan.txt,v 1.20 2003/07/01 22:20:52 pavlin Exp $
 #
 
 Priority:
@@ -211,6 +211,7 @@ Immediate Tasks                                       Priority Who
   (see xorp/docs/libxipc/finder_command_line.txt)
 * Add tasks/projects to the web page wishlist		L	Everyone
   (for other people)
+* Add "gmake install" support				L	PR
 
 ================================ Next-Next Release ===========================
 * Next-next release (xorp-0.5): ?? ??, 200?
