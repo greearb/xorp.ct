@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_queue.hh,v 1.4 2002/12/16 21:48:33 mjh Exp $
+// $XORP: xorp/bgp/route_queue.hh,v 1.5 2003/02/07 05:35:37 mjh Exp $
 
 #ifndef __BGP_ROUTE_QUEUE_HH__
 #define __BGP_ROUTE_QUEUE_HH__
@@ -32,12 +32,9 @@ typedef enum ribout_queue_op {
 template<class A>
 class RouteQueueEntry {
 public:
-    /**
-     * XXX should change arguments to use &rt ?
-     */
-    RouteQueueEntry(const SubnetRoute<A>* rt, RouteQueueOp op) {
+    RouteQueueEntry(const SubnetRoute<A>& rt, RouteQueueOp op) {
 	_op = op;
-	_route = new SubnetRoute<A>(*rt);
+	_route = new SubnetRoute<A>(rt);
 	_origin_peer = 0;
     }
 

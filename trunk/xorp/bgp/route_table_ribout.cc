@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.3 2002/12/17 22:06:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.4 2003/01/16 23:18:59 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -122,18 +122,19 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
     RouteQueueEntry<A>* entry;
     if (queued_entry == NULL) {
 	// just add the route to the queue.
-	entry = new RouteQueueEntry<A>(rtmsg.route(), RTQUEUE_OP_ADD);
+	entry = new RouteQueueEntry<A>(*(rtmsg.route()), RTQUEUE_OP_ADD);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
     } else if (queued_entry->op() == RTQUEUE_OP_DELETE) {
 	// There was a delete in the queue.  The delete must become a replace.
 	debug_msg("removing delete entry from output queue to become replace\n");
 	_queue.erase(i);
-	entry = new RouteQueueEntry<A>(queued_entry->route(),
+	entry = new RouteQueueEntry<A>(*(queued_entry->route()),
 				       RTQUEUE_OP_REPLACE_OLD);
 	entry->set_origin_peer(queued_entry->origin_peer());
 	_queue.push_back(entry);
-	entry = new RouteQueueEntry<A>(rtmsg.route(), RTQUEUE_OP_REPLACE_NEW);
+	entry = new RouteQueueEntry<A>(*(rtmsg.route()), 
+				       RTQUEUE_OP_REPLACE_NEW);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
 	delete queued_entry;
@@ -143,7 +144,8 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	i++;
 	queued_entry = *i;
 	assert(queued_entry->op() == RTQUEUE_OP_REPLACE_NEW);
-	entry = new RouteQueueEntry<A>(rtmsg.route(), RTQUEUE_OP_REPLACE_NEW);
+	entry = new RouteQueueEntry<A>(*(rtmsg.route()), 
+				       RTQUEUE_OP_REPLACE_NEW);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.insert(i, entry);
 	_queue.erase(i);
@@ -202,7 +204,7 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     RouteQueueEntry<A>* entry;
     if (queued_entry == NULL) {
 	// add the route delete operation to the queue.
-	entry = new RouteQueueEntry<A>(rtmsg.route(), RTQUEUE_OP_DELETE);
+	entry = new RouteQueueEntry<A>(*(rtmsg.route()), RTQUEUE_OP_DELETE);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
     } else if (queued_entry->op() == RTQUEUE_OP_ADD) {
@@ -227,7 +229,7 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	_queue.erase(i);
 	delete *i;
 
-	entry = new RouteQueueEntry<A>(queued_entry->route(),
+	entry = new RouteQueueEntry<A>(*(queued_entry->route()),
 				       RTQUEUE_OP_DELETE);
 	entry->set_origin_peer(queued_entry->origin_peer());
 	_queue.push_back(entry);

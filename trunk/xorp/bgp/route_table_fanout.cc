@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.6 2003/01/16 23:18:58 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.7 2003/01/26 04:06:18 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -343,7 +343,7 @@ FanoutTable<A>::add_to_queue(RouteQueueOp operation,
     debug_msg("FanoutTable<A>::add_to_queue, op=%d, net=%s\n", 
 	      operation, rtmsg.net().str().c_str());
     RouteQueueEntry<A> *queue_entry;
-    queue_entry = new RouteQueueEntry<A>(rtmsg.route(), operation);
+    queue_entry = new RouteQueueEntry<A>(*(rtmsg.route()), operation);
     queue_entry->set_origin_peer(rtmsg.origin_peer());
     queue_entry->set_genid(rtmsg.genid());
     _output_queue.push_back(queue_entry);
@@ -365,7 +365,7 @@ FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
     // replace entails two queue entries, but they're always paired up
     // in the order OLD then NEW
     RouteQueueEntry<A> *queue_entry;
-    queue_entry = new RouteQueueEntry<A>(old_rtmsg.route(),
+    queue_entry = new RouteQueueEntry<A>(*(old_rtmsg.route()),
 					 RTQUEUE_OP_REPLACE_OLD);
     queue_entry->set_origin_peer(old_rtmsg.origin_peer());
     queue_entry->set_genid(old_rtmsg.genid());
@@ -374,7 +374,7 @@ FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
     // set queue positions now, before we add the second queue entry
     set_queue_positions(queued_peers);
 
-    queue_entry = new RouteQueueEntry<A>(new_rtmsg.route(),
+    queue_entry = new RouteQueueEntry<A>(*(new_rtmsg.route()),
 					 RTQUEUE_OP_REPLACE_NEW);
     queue_entry->set_origin_peer(new_rtmsg.origin_peer());
     queue_entry->set_genid(new_rtmsg.genid());
