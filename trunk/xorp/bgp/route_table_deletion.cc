@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.5 2003/02/07 05:35:37 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.6 2003/02/07 18:35:44 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -67,8 +67,10 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     	assert(existing_route->net() == rtmsg.net());
 
-	// preserve the information
-	SubnetRoute<A>* route_copy = new SubnetRoute<A>(*existing_route);
+	// Preserve the route.  Taking a reference will prevent the
+	// route being deleted when it's erased from the Trie.
+	// Deletion will occur when the reference goes out of scope.
+	SubnetRouteConstRef<A> route_reference(existing_route);
 
 	// delete from the Trie
 	if ((_del_sweep->second->net() == rtmsg.net()) &&
@@ -80,13 +82,10 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	_route_table->erase(rtmsg.net());
 
 	// propogate downstream
-	InternalMessage<A> old_rt_msg(route_copy, _peer, _genid);
+	InternalMessage<A> old_rt_msg(existing_route, _peer, _genid);
 	old_rt_msg.set_from_previous_peering();
-	int result;
-	result = _next_table->replace_route(old_rt_msg, rtmsg,
+	return _next_table->replace_route(old_rt_msg, rtmsg,
 					  (BGPRouteTable<A>*)this);
-	route_copy->unref();
-	return result;
     }
     abort();
 }
@@ -227,17 +226,19 @@ DeletionTable<A>::delete_next_chain()
     while (1) {
 	// preserve the information
 	next_rt = chained_rt->next();
-	SubnetRoute<A>* route_copy = new SubnetRoute<A>(*chained_rt);
+	// Preserve the route.  Taking a reference will prevent the
+	// route being deleted when it's erased from the Trie.
+	// Deletion will occur when the reference goes out of scope.
+	SubnetRouteConstRef<A> route_reference(chained_rt);
 
 	// delete from the Trie
 	_route_table->erase(chained_rt->net());
 
 	// propagate downstream
-	InternalMessage<A> rt_msg(route_copy, _peer, _genid);
+	InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
 	rt_msg.set_from_previous_peering();
 	if (_next_table != NULL)
 	    _next_table->delete_route(rt_msg, (BGPRouteTable<A>*)this);
-	route_copy->unref();
 	_deleted++;
 	if (chained_rt == first_rt) {
 	    debug_msg("end of chain\n");

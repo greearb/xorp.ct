@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.8 2003/02/07 22:55:20 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.9 2003/02/08 01:32:58 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -119,7 +119,8 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     IPNet<A> net = old_rtmsg.net();
     assert(net == new_rtmsg.net());
 
-    SubnetRoute<A> *old_route_copy = NULL;
+    const SubnetRoute<A> *old_route = NULL;
+    SubnetRouteConstRef<A> *old_route_reference = NULL;
     const InternalMessage<A> *old_rtmsg_ptr = &old_rtmsg;
     int result = ADD_USED;
 
@@ -132,16 +133,14 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	    //We don't flush the cache, so this should not happen
 	    abort();
 	} else {
-	    //preserve the information
-	    old_route_copy = new SubnetRoute<A>(iter.payload());
+	    // Preserve the route.  Taking a reference will prevent
+	    // the route being immediately deleted when it's erased
+	    // from the Trie.  Deletion will occur later when the
+	    // reference is deleted.
+	    old_route = &(iter.payload());
+	    old_route_reference = new SubnetRouteConstRef<A>(old_route);
 
-	    //set the parent route of the copy to one that still
-	    //exists, because the parent_route pointer of our cached
-	    //version is probably now invalid.
-	    old_route_copy->
-		set_parent_route(old_rtmsg.route()->parent_route());
-
-	    old_rtmsg_ptr = new InternalMessage<A>(old_route_copy,
+	    old_rtmsg_ptr = new InternalMessage<A>(old_route,
 						   old_rtmsg.origin_peer(),
 						   old_rtmsg.genid());
 
@@ -198,8 +197,9 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     if (old_rtmsg_ptr != &old_rtmsg) {
 	delete old_rtmsg_ptr;
-	assert(old_route_copy != NULL);
-	old_route_copy->unref();
+	assert(old_route != NULL);
+	assert(old_route_reference != NULL);
+	delete old_route_reference;
     }
 
     return result;
@@ -223,18 +223,16 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     if (iter != _route_table.end()) {
 	const SubnetRoute<A> *existing_route = &(iter.payload());
 	debug_msg("Found cached route: %s\n", existing_route->str().c_str());
-	//preserve the information
-	SubnetRoute<A>* route_copy = new SubnetRoute<A>(*existing_route);
 
-	//set the copy's parent route to one that still exists, because
-	//the parent_route pointer of our cached version is
-	//probably now invalid
-	route_copy->set_parent_route(rtmsg.route()->parent_route());
+	// Preserve the route.  Taking a reference will prevent the
+	// route being deleted when it's erased from the Trie.
+	// Deletion will occur when the reference goes out of scope.
+	SubnetRouteConstRef<A> route_reference(existing_route);
 
 	//delete it from our cache trie 
 	_route_table.erase(net);
 
-	InternalMessage<A> old_rt_msg(route_copy,
+	InternalMessage<A> old_rt_msg(existing_route,
 				      rtmsg.origin_peer(),
 				      rtmsg.genid());
 	if (rtmsg.push()) old_rt_msg.set_push();
@@ -249,7 +247,6 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	    //Free the route from the message.
 	    rtmsg.inactivate();
 	}
-	route_copy->unref();
 	return result;
     }
 
