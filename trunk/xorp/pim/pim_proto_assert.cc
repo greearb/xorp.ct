@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.5 2003/01/26 04:06:24 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.6 2003/01/29 05:44:00 pavlin Exp $"
 
 
 //
@@ -137,6 +137,7 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 			   uint32_t group_masklen, AssertMetric *assert_metric)
 {
     PimMre	*pim_mre_sg, *pim_mre_wc;
+    int ret_value;
     
     if (group_masklen != IPvX::addr_bitlen(family())) {
 	XLOG_WARNING("RX %s from %s to %s: "
@@ -179,7 +180,12 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 		       cstring(assert_group_addr));
 	    return (XORP_ERROR);
 	}
-	return (pim_mre_wc->assert_process(this, assert_metric));
+	
+	ret_value = pim_mre_wc->assert_process(this, assert_metric);
+	// Try to remove the entry in case we don't need it
+	pim_mre_wc->entry_try_remove();
+	
+	return (ret_value);
     }
     
     //
@@ -194,7 +200,11 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 	return (XORP_ERROR);
     }
     
-    return (pim_mre_sg->assert_process(this, assert_metric));
+    ret_value = pim_mre_sg->assert_process(this, assert_metric);
+    // Try to remove the entry in case we don't need it.
+    pim_mre_sg->entry_try_remove();
+    
+    return (ret_value);
     
     UNUSED(pim_nbr);
 }
