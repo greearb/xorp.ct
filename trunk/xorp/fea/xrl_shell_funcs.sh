@@ -363,6 +363,12 @@ lookup_entry4()
     $CALLXRL "finder://fea/fti/0.2/lookup_entry4?dst:ipv4net=$1"
 }
 
+terminate()
+{
+    echo -n "terminate" $*
+    $CALLXRL "finder://fea/fea/0.1/terminate"
+}
+
 validate_xrls()
 {
 #
