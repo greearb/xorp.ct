@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.1 2004/11/25 03:23:29 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.2 2004/11/29 03:26:40 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -215,7 +215,7 @@ test_execute_invalid_command()
     //
     RunCommand run_command(eventloop,
 			   "/no/such/command",
-			   "--no-such-flags",
+			   "-no-such-flags -more-bogus-flags",
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
 			   callback(test_run_command,
@@ -267,7 +267,7 @@ test_execute_invalid_arguments()
     //
     RunCommand run_command(eventloop,
 			   "/bin/sleep",
-			   "--no-such-flags",
+			   "-no-such-flags -more-bogus-flags",
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
 			   callback(test_run_command,
