@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.58 2004/09/23 08:38:54 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.59 2004/10/04 07:48:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -65,12 +65,12 @@ RibIpcHandler::register_ribname(const string& r)
     if (_ribname == r)
 	return true;
 
-    if (r.empty()) {
-	_ribname.erase();
-	return unregister_rib();
-    }
-
+    string previous_ribname = _ribname;
     _ribname = r;
+
+    if (r.empty()) {
+	return unregister_rib(previous_ribname);
+    }
 
     XrlRibV0p1Client rib(&_xrl_router);
     //create our tables
@@ -117,7 +117,7 @@ RibIpcHandler::register_ribname(const string& r)
 }
 
 bool
-RibIpcHandler::unregister_rib()
+RibIpcHandler::unregister_rib(string ribname)
 {
     XrlRibV0p1Client rib(&_xrl_router);
     
@@ -126,7 +126,7 @@ RibIpcHandler::unregister_rib()
     //name - "ebgp"
     //unicast - true
     //multicast - true
-    rib.send_delete_egp_table4(_ribname.c_str(),
+    rib.send_delete_egp_table4(ribname.c_str(),
 			       "ebgp", _xrl_router.class_name(),
                                _xrl_router.instance_name(),
 			       true, true,
@@ -137,7 +137,7 @@ RibIpcHandler::unregister_rib()
     //name - "ibgp"
     //unicast - true
     //multicast - true
-    rib.send_delete_egp_table4(_ribname.c_str(),
+    rib.send_delete_egp_table4(ribname.c_str(),
 			       "ibgp", _xrl_router.class_name(),
                                _xrl_router.instance_name(), 
 			       true, true,
@@ -150,7 +150,7 @@ RibIpcHandler::unregister_rib()
     //name - "ebgp"
     //unicast - true
     //multicast - true
-    rib.send_delete_egp_table6(_ribname.c_str(),
+    rib.send_delete_egp_table6(ribname.c_str(),
  			       "ebgp", _xrl_router.class_name(),
                                _xrl_router.instance_name(), 
 			       true, true,
@@ -162,7 +162,7 @@ RibIpcHandler::unregister_rib()
     //name - "ibgp"
     //unicast - true
     //multicast - true
-    rib.send_delete_egp_table6(_ribname.c_str(),
+    rib.send_delete_egp_table6(ribname.c_str(),
  			       "ibgp", _xrl_router.class_name(),
                                _xrl_router.instance_name(), 
 			       true, true,
