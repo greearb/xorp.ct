@@ -6,7 +6,7 @@ finder_port=17777
 #
 # Start finder
 #
-../libxipc/xorp_finder &
+../libxipc/xorp_finder -p ${finder_port} &
 finder_pid=$!
 
 #
