@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.5 2003/05/09 20:58:22 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.6 2003/05/13 00:21:03 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -28,6 +28,7 @@ noinst_LIBRARIES += librtrmgrbase.a
 noinst_LIBRARIES += libtestbase.a
 noinst_LIBRARIES += libtestpeerbase.a
 noinst_LIBRARIES += libxorpshbase.a
+noinst_LIBRARIES += libbgp4mibbase.a
 
 # BGP
 libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
@@ -116,6 +117,10 @@ test_peer_base.hh: $(INTERFACES_DIR)/common.xif				\
 libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
 xorpsh_base.hh:	$(INTERFACES_DIR)/common.xif				\
 	$(INTERFACES_DIR)/rtrmgr_client.xif
+
+# BGP4MIB
+libbgp4mibbase_a_SOURCES = bgp4_mib_base.hh bgp4_mib_base.cc
+bgp4_mib_base.hh: $(INTERFACES_DIR)/common.xif
 
 # Add your target's library sources like this:
 # Test target

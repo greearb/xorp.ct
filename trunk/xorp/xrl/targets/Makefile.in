@@ -83,7 +83,7 @@ VERSION = @VERSION@
 net_snmp_found = @net_snmp_found@
 
 INTERFACES_DIR = $(top_srcdir)/xrl/interfaces
-noinst_LIBRARIES = libbgpbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestpeerbase.a libxorpshbase.a
+noinst_LIBRARIES = libbgpbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestpeerbase.a libxorpshbase.a libbgp4mibbase.a
 
 # BGP
 libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
@@ -133,6 +133,9 @@ libtestpeerbase_a_SOURCES = test_peer_base.hh test_peer_base.cc
 
 # XORPSH
 libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
+
+# BGP4MIB
+libbgp4mibbase_a_SOURCES = bgp4_mib_base.hh bgp4_mib_base.cc
 
 # Add your target's library sources like this:
 # Test target
@@ -192,6 +195,8 @@ libtestpeerbase_a_LIBADD =
 libtestpeerbase_a_OBJECTS =  test_peer_base.o
 libxorpshbase_a_LIBADD = 
 libxorpshbase_a_OBJECTS =  xorpsh_base.o
+libbgp4mibbase_a_LIBADD = 
+libbgp4mibbase_a_OBJECTS =  bgp4_mib_base.o
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -207,14 +212,14 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/bgp_base.P .deps/cli_base.P .deps/coord_base.P \
-.deps/demo_fea_ifmgr_client_base.P .deps/fea_base.P .deps/finder_base.P \
-.deps/finder_client_base.P .deps/mfea_base.P .deps/mld6igmp_base.P \
-.deps/ospf_base.P .deps/pim_base.P .deps/rib_base.P \
-.deps/ribclient_base.P .deps/rtrmgr_base.P .deps/test_base.P \
-.deps/test_peer_base.P .deps/xorpsh_base.P
-SOURCES = $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
-OBJECTS = $(libbgpbase_a_OBJECTS) $(libclibase_a_OBJECTS) $(libcoordbase_a_OBJECTS) $(libdemofeaifmgrclientbase_a_OBJECTS) $(libfeabase_a_OBJECTS) $(libfinderbase_a_OBJECTS) $(libfinderclientbase_a_OBJECTS) $(libmfeabase_a_OBJECTS) $(libmld6igmpbase_a_OBJECTS) $(libospfbase_a_OBJECTS) $(libpimbase_a_OBJECTS) $(libribbase_a_OBJECTS) $(libribclientbase_a_OBJECTS) $(librtrmgrbase_a_OBJECTS) $(libtestbase_a_OBJECTS) $(libtestpeerbase_a_OBJECTS) $(libxorpshbase_a_OBJECTS)
+DEP_FILES =  .deps/bgp4_mib_base.P .deps/bgp_base.P .deps/cli_base.P \
+.deps/coord_base.P .deps/demo_fea_ifmgr_client_base.P .deps/fea_base.P \
+.deps/finder_base.P .deps/finder_client_base.P .deps/mfea_base.P \
+.deps/mld6igmp_base.P .deps/ospf_base.P .deps/pim_base.P \
+.deps/rib_base.P .deps/ribclient_base.P .deps/rtrmgr_base.P \
+.deps/test_base.P .deps/test_peer_base.P .deps/xorpsh_base.P
+SOURCES = $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpshbase_a_SOURCES) $(libbgp4mibbase_a_SOURCES)
+OBJECTS = $(libbgpbase_a_OBJECTS) $(libclibase_a_OBJECTS) $(libcoordbase_a_OBJECTS) $(libdemofeaifmgrclientbase_a_OBJECTS) $(libfeabase_a_OBJECTS) $(libfinderbase_a_OBJECTS) $(libfinderclientbase_a_OBJECTS) $(libmfeabase_a_OBJECTS) $(libmld6igmpbase_a_OBJECTS) $(libospfbase_a_OBJECTS) $(libpimbase_a_OBJECTS) $(libribbase_a_OBJECTS) $(libribclientbase_a_OBJECTS) $(librtrmgrbase_a_OBJECTS) $(libtestbase_a_OBJECTS) $(libtestpeerbase_a_OBJECTS) $(libxorpshbase_a_OBJECTS) $(libbgp4mibbase_a_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -336,6 +341,11 @@ libxorpshbase.a: $(libxorpshbase_a_OBJECTS) $(libxorpshbase_a_DEPENDENCIES)
 	-rm -f libxorpshbase.a
 	$(AR) cru libxorpshbase.a $(libxorpshbase_a_OBJECTS) $(libxorpshbase_a_LIBADD)
 	$(RANLIB) libxorpshbase.a
+
+libbgp4mibbase.a: $(libbgp4mibbase_a_OBJECTS) $(libbgp4mibbase_a_DEPENDENCIES)
+	-rm -f libbgp4mibbase.a
+	$(AR) cru libbgp4mibbase.a $(libbgp4mibbase_a_OBJECTS) $(libbgp4mibbase_a_LIBADD)
+	$(RANLIB) libbgp4mibbase.a
 .cc.o:
 	$(CXXCOMPILE) -c $<
 
@@ -550,6 +560,7 @@ test_peer_base.hh: $(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
 xorpsh_base.hh:	$(INTERFACES_DIR)/common.xif				\
 	$(INTERFACES_DIR)/rtrmgr_client.xif
+bgp4_mib_base.hh: $(INTERFACES_DIR)/common.xif
 # This is a hack to rebuild files here when interfaces implemented by
 # rib target are touched.  It largely duplicates information inside rib.tgt
 test_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/test.xif
