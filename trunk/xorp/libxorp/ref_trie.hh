@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.1 2003/01/21 01:11:07 mjh Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.2 2003/01/21 03:52:32 mjh Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -24,6 +24,7 @@
 //#define DEBUG_LOGGING
 
 #include "debug.h"
+#include "minitraits.hh"
 
 #define NODE_DELETED 0x8000
 #define NODE_REFS_MASK 0x7fff
@@ -34,28 +35,6 @@
  * The template should be invoked with two classes, the basetype "A"
  * for the search Key (which is a subnet, IPNet<A>), and the Payload.
  */
-
-/**
- * @short Class to determine subset of type traits.
- *
- * This class can be use to determine the non-const form of a type.
- * It is a temporary fix for g++ 2.96 (Redhat) which has problems
- * tracking const pointer types in templates.
- */
-template <typename T>
-class MiniTraits {
-    template <class U> 
-    struct UnConst {
-	typedef U Result;
-    };
-    template <class U> 
-    struct UnConst <const U> {
-        typedef U Result;
-    };
-public:
-    typedef typename UnConst<T>::Result NonConst;
-};
-
 
 /**
  * @short RefTrieNode definition
