@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.13 2003/04/29 22:53:11 pavlin Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.14 2003/05/07 23:42:41 pavlin Exp $
 #
 
 Priority:
@@ -37,7 +37,7 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.3:
-* Handle errors as specified in the error doc		H	MH
+* Handle errors as specified in the error doc		Done(?)	MH
 * Support for pipelining of requests to FEA		H(BUG!)	AG
 
 For 0.x:
@@ -54,7 +54,7 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.3:
-* Correct behaviour on error + tests			H	AG + MH
+* Correct behaviour on error + tests			Done	AG + MH
 * Integration tests 					Done	AG
 * Finish Kdoc'ing BGP                                   M	as needed
 
@@ -93,10 +93,10 @@ For 0.3:
 * Finish PIM testing (manual)				Done	PR  < 1 month
 * Testing of IGMPv1,2 (manual)				Done	PR  1 weeks
 * FEA and MFEA merging					H	PR  2w - 1m
-* Commit PIM patches to FreeBSD				H       PR+LR Jan 2003
 * Finish Kdoc'ing PIM, MLD6IGMP, MFEA			M	PR  background
 
 For 0.x:
+* Commit PIM patches to FreeBSD				H       PR+LR June 2003
 * RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
 * Integration of PIM/MLD/MFEA and RTRMGR		M	PR  2 weeks
 * Framework for regression tests for multicast		H-M	PR+other 1 m
@@ -116,7 +116,7 @@ Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.3:
 * Isolation test suite				     PartlyDone	MH
-* Refactoring						H	MH
+* Refactoring						Done	MH
 
 For 0.x:
 * Add target name and instance				H	MH+PR
@@ -151,7 +151,7 @@ Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.3:
 * Document mib development framework			M	JC  < 1 week
-* Sample MIB handling (BGP peers, etc)			H	JC
+* Sample MIB handling (BGP peers, etc)			AlmostDone JC
 
 * Writing autoconf tests for Net-SNMP			Done	JC    2 weeks
 * Write module to make snmpd responsive to XORP events  Done	JC    2 weeks
@@ -162,10 +162,14 @@ For 0.3:
 ================================ Next Release ================================
 * Next release (xorp-0.3): May 29, 2003
   - Add second CVSWEB for public (DONE)
-  - Write a wishlist of tasks/projects that other people may choose to do
+  - Write a Web page wishlist of tasks/projects that other people may choose
+    to do (Everyone):
+    - MIBS implementation (each protocol, etc)
   - Add a pointer from the web page to xorp/RELEASE_NOTES (PR)
   - Finder supports target failure registration/notification requests
   - Defer Finder notifications handling for release-0.4
+  - Code semi-freeze: May 23, 2003
+  - RUN ALL SOFTWARE!!!
 
 ================================ Next Stable Release =========================
 * Next stable release (xorp-1.0): ?? ??, 200?
