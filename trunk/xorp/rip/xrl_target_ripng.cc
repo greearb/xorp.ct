@@ -24,136 +24,135 @@
 #include "system.hh"
 #include "xrl_process_spy.hh"
 #include "xrl_port_manager.hh"
-#include "xrl_target_rip.hh"
+#include "xrl_target_ripng.hh"
 #include "xrl_target_common.hh"
 
-XrlRipTarget::XrlRipTarget(XrlRouter&			xr,
-			   XrlProcessSpy&		xps,
-			   XrlPortManager<IPv4>& 	xpm,
-			   bool&			should_exit)
-    : XrlRipTargetBase(&xr)
+XrlRipngTarget::XrlRipngTarget(XrlRouter&		xr,
+			       XrlProcessSpy&		xps,
+			       XrlPortManager<IPv6>& 	xpm,
+			       bool&			should_exit)
+    : XrlRipngTargetBase(&xr)
 {
-    _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, should_exit);
+    _ct = new XrlRipCommonTarget<IPv6>(xps, xpm, should_exit);
 }
 
-XrlRipTarget::~XrlRipTarget()
+XrlRipngTarget::~XrlRipngTarget()
 {
     delete _ct;
 }
 
 XrlCmdError
-XrlRipTarget::common_0_1_get_target_name(string& n)
+XrlRipngTarget::common_0_1_get_target_name(string& n)
 {
     n = name();
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlRipTarget::common_0_1_get_version(string& v)
+XrlRipngTarget::common_0_1_get_version(string& v)
 {
     v = string(version());
     return XrlCmdError::OKAY();
 }
 
 void
-XrlRipTarget::set_status(ProcessStatus status, const string& note)
+XrlRipngTarget::set_status(ProcessStatus status, const string& note)
 {
     _ct->set_status(status, note);
 }
 
 XrlCmdError
-XrlRipTarget::common_0_1_get_status(uint32_t& status,
-				    string&   reason)
+XrlRipngTarget::common_0_1_get_status(uint32_t& status, string& reason)
 {
     return _ct->common_0_1_get_status(status, reason);
 }
 
 XrlCmdError
-XrlRipTarget::common_0_1_shutdown()
+XrlRipngTarget::common_0_1_shutdown()
 {
     return _ct->common_0_1_shutdown();
 }
 
 XrlCmdError
-XrlRipTarget::finder_event_observer_0_1_xrl_target_birth(const string& cname,
-							 const string& iname)
+XrlRipngTarget::finder_event_observer_0_1_xrl_target_birth(const string& cname,
+							   const string& iname)
 {
     return _ct->finder_event_observer_0_1_xrl_target_birth(cname, iname);
 }
 
 XrlCmdError
-XrlRipTarget::finder_event_observer_0_1_xrl_target_death(const string& cname,
-							 const string& iname)
+XrlRipngTarget::finder_event_observer_0_1_xrl_target_death(const string& cname,
+							   const string& iname)
 {
     return _ct->finder_event_observer_0_1_xrl_target_death(cname, iname);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_add_rip_address(const string& ifn,
-				      const string& vifn,
-				      const IPv4&   addr)
+XrlRipngTarget::rip_0_1_add_rip_address(const string& ifn,
+					const string& vifn,
+					const IPv6&   addr)
 {
     return _ct->ripx_0_1_add_rip_address(ifn, vifn, addr);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_remove_rip_address(const string& ifn,
-					 const string& vifn,
-					 const IPv4&   addr)
+XrlRipngTarget::rip_0_1_remove_rip_address(const string& ifn,
+					   const string& vifn,
+					   const IPv6&   addr)
 {
     return _ct->ripx_0_1_remove_rip_address(ifn, vifn, addr);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_rip_address_enabled(const string& ifn,
-					      const string& vifn,
-					      const IPv4&   a,
-					      const bool&   en)
+XrlRipngTarget::rip_0_1_set_rip_address_enabled(const string&	ifn,
+						const string&	vifn,
+						const IPv6&	a,
+						const bool&	en)
 {
     return _ct->ripx_0_1_set_rip_address_enabled(ifn, vifn, a, en);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_rip_address_enabled(const string& ifn,
-					  const string& vifn,
-					  const IPv4&   a,
-					  bool&		en)
+XrlRipngTarget::rip_0_1_rip_address_enabled(const string&	ifn,
+					    const string&	vifn,
+					    const IPv6&		a,
+					    bool&		en)
 {
     return _ct->ripx_0_1_rip_address_enabled(ifn, vifn, a, en);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_cost(const string&	ifn,
-			       const string&	vifn,
-			       const IPv4&	a,
-			       const uint32_t&	cost)
+XrlRipngTarget::rip_0_1_set_cost(const string&		ifn,
+				 const string&		vifn,
+				 const IPv6&		a,
+				 const uint32_t&	cost)
 {
     return _ct->ripx_0_1_set_cost(ifn, vifn, a, cost);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_cost(const string&	ifn,
-			   const string&	vifn,
-			   const IPv4&		a,
-			   uint32_t&		cost)
+XrlRipngTarget::rip_0_1_cost(const string&	ifn,
+			     const string&	vifn,
+			     const IPv6&	a,
+			     uint32_t&		cost)
 {
     return _ct->ripx_0_1_cost(ifn, vifn, a, cost);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_horizon(const string&	ifn,
-				  const string&	vifn,
-				  const IPv4&	a,
-				  const string&	horizon)
+XrlRipngTarget::rip_0_1_set_horizon(const string&	ifn,
+				    const string&	vifn,
+				    const IPv6&		a,
+				    const string&	horizon)
 {
     return _ct->ripx_0_1_set_horizon(ifn, vifn, a, horizon);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_horizon(const string&	ifn,
-			      const string&	vifn,
-			      const IPv4&	a,
-			      string&		horizon)
+XrlRipngTarget::rip_0_1_horizon(const string&	ifn,
+				const string&	vifn,
+				const IPv6&	a,
+				string&		horizon)
 {
     return _ct->ripx_0_1_horizon(ifn, vifn, a, horizon);
 }
@@ -161,10 +160,10 @@ XrlRipTarget::rip_0_1_horizon(const string&	ifn,
 
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_route_expiry_seconds(
+XrlRipngTarget::rip_0_1_set_route_expiry_seconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						const uint32_t&	t
 						)
 {
@@ -172,10 +171,10 @@ XrlRipTarget::rip_0_1_set_route_expiry_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_route_expiry_seconds(
+XrlRipngTarget::rip_0_1_route_expiry_seconds(
 					     const string&	ifn,
 					     const string&	vifn,
-					     const IPv4&	a,
+					     const IPv6&	a,
 					     uint32_t&		t
 					     )
 {
@@ -183,10 +182,10 @@ XrlRipTarget::rip_0_1_route_expiry_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_route_deletion_seconds(
+XrlRipngTarget::rip_0_1_set_route_deletion_seconds(
 					const string&	ifn,
 					const string&	vifn,
-					const IPv4&	a,
+					const IPv6&	a,
 					const uint32_t&	t
 					)
 {
@@ -194,19 +193,19 @@ XrlRipTarget::rip_0_1_set_route_deletion_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_route_deletion_seconds(const string&	ifn,
-					     const string&	vifn,
-					     const IPv4&	a,
-					     uint32_t&		t)
+XrlRipngTarget::rip_0_1_route_deletion_seconds(const string&	ifn,
+					       const string&	vifn,
+					       const IPv6&	a,
+					       uint32_t&	t)
 {
     return _ct->ripx_0_1_route_deletion_seconds(ifn, vifn, a, t);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_table_request_seconds(
+XrlRipngTarget::rip_0_1_set_table_request_seconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						const uint32_t&	t
 						)
 {
@@ -214,19 +213,19 @@ XrlRipTarget::rip_0_1_set_table_request_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_table_request_seconds(const string&	ifn,
-					    const string&	vifn,
-					    const IPv4&		a,
-					    uint32_t&		t)
+XrlRipngTarget::rip_0_1_table_request_seconds(const string&	ifn,
+					      const string&	vifn,
+					      const IPv6&	a,
+					      uint32_t&		t)
 {
     return _ct->ripx_0_1_table_request_seconds(ifn, vifn, a, t);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_unsolicited_response_min_seconds(
+XrlRipngTarget::rip_0_1_set_unsolicited_response_min_seconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						const uint32_t& t
 						)
 {
@@ -234,10 +233,10 @@ XrlRipTarget::rip_0_1_set_unsolicited_response_min_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_unsolicited_response_min_seconds(
+XrlRipngTarget::rip_0_1_unsolicited_response_min_seconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						uint32_t&	t
 						)
 {
@@ -245,10 +244,10 @@ XrlRipTarget::rip_0_1_unsolicited_response_min_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_unsolicited_response_max_seconds(
+XrlRipngTarget::rip_0_1_set_unsolicited_response_max_seconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						const uint32_t& t
 						)
 {
@@ -256,10 +255,10 @@ XrlRipTarget::rip_0_1_set_unsolicited_response_max_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_unsolicited_response_max_seconds(
+XrlRipngTarget::rip_0_1_unsolicited_response_max_seconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						uint32_t&	t
 						)
 {
@@ -267,10 +266,10 @@ XrlRipTarget::rip_0_1_unsolicited_response_max_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_triggered_update_min_seconds(
+XrlRipngTarget::rip_0_1_set_triggered_update_min_seconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						const uint32_t&	t
 						)
 {
@@ -278,10 +277,10 @@ XrlRipTarget::rip_0_1_set_triggered_update_min_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_triggered_update_min_seconds(
+XrlRipngTarget::rip_0_1_triggered_update_min_seconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						uint32_t&	t
 						)
 {
@@ -289,10 +288,10 @@ XrlRipTarget::rip_0_1_triggered_update_min_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_triggered_update_max_seconds(
+XrlRipngTarget::rip_0_1_set_triggered_update_max_seconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						const uint32_t&	t
 						)
 {
@@ -300,10 +299,10 @@ XrlRipTarget::rip_0_1_set_triggered_update_max_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_triggered_update_max_seconds(
+XrlRipngTarget::rip_0_1_triggered_update_max_seconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						uint32_t&	t
 						)
 {
@@ -311,10 +310,10 @@ XrlRipTarget::rip_0_1_triggered_update_max_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_interpacket_delay_milliseconds(
+XrlRipngTarget::rip_0_1_set_interpacket_delay_milliseconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						const uint32_t&	t
 						)
 {
@@ -322,10 +321,10 @@ XrlRipTarget::rip_0_1_set_interpacket_delay_milliseconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_interpacket_delay_milliseconds(
+XrlRipngTarget::rip_0_1_interpacket_delay_milliseconds(
 						const string&	ifn,
 						const string&	vifn,
-						const IPv4&	a,
+						const IPv6&	a,
 						uint32_t&	t
 						)
 {
@@ -333,32 +332,32 @@ XrlRipTarget::rip_0_1_interpacket_delay_milliseconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_rip_address_status(const string&	ifn,
-					 const string&	vifn,
-					 const IPv4&	a,
-					 string&	status)
+XrlRipngTarget::rip_0_1_rip_address_status(const string&	ifn,
+					   const string&	vifn,
+					   const IPv6&		a,
+					   string&		status)
 {
     return _ct->ripx_0_1_rip_address_status(ifn, vifn, a, status);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_add_static_route(const IPv4Net& 	network,
-				       const IPv4& 	nexthop,
-				       const uint32_t& 	cost)
+XrlRipngTarget::rip_0_1_add_static_route(const IPv6Net& 	network,
+					 const IPv6& 		nexthop,
+					 const uint32_t& 	cost)
 {
     return _ct->ripx_0_1_add_static_route(network, nexthop, cost);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_delete_static_route(const IPv4Net& network)
+XrlRipngTarget::rip_0_1_delete_static_route(const IPv6Net& network)
 {
     return _ct->ripx_0_1_delete_static_route(network);
 }
 
 XrlCmdError
-XrlRipTarget::socket4_user_0_1_recv_event(
+XrlRipngTarget::socket6_user_0_1_recv_event(
 					const string&		sockid,
-					const IPv4&		src_host,
+					const IPv6&		src_host,
 					const uint32_t&		src_port,
 					const vector<uint8_t>&	pdata
 					)
@@ -367,8 +366,8 @@ XrlRipTarget::socket4_user_0_1_recv_event(
 }
 
 XrlCmdError
-XrlRipTarget::socket4_user_0_1_connect_event(const string&	sockid,
-					     const IPv4&	src_host,
+XrlRipngTarget::socket6_user_0_1_connect_event(const string&	sockid,
+					     const IPv6&	src_host,
 					     const uint32_t&	src_port,
 					     const string&	new_sockid,
 					     bool&		accept)
@@ -381,16 +380,16 @@ XrlRipTarget::socket4_user_0_1_connect_event(const string&	sockid,
 }
 
 XrlCmdError
-XrlRipTarget::socket4_user_0_1_error_event(const string&	sockid,
-					   const string& 	reason,
-					   const bool&		fatal)
+XrlRipngTarget::socket6_user_0_1_error_event(const string&	sockid,
+					     const string& 	reason,
+					     const bool&	fatal)
 {
     return _ct->socketx_user_0_1_error_event(sockid, reason, fatal);
 }
 
 XrlCmdError
-XrlRipTarget::socket4_user_0_1_close_event(const string&	sockid,
-					   const string&	reason)
+XrlRipngTarget::socket6_user_0_1_close_event(const string&	sockid,
+					     const string&	reason)
 {
     return _ct->socketx_user_0_1_close_event(sockid, reason);
 }

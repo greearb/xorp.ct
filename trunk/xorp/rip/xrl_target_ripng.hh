@@ -14,11 +14,11 @@
 
 // $XORP: xorp/rip/xrl_target_rip.hh,v 1.1 2004/02/17 19:47:09 hodson Exp $
 
-#ifndef __RIP_XRL_TARGET_RIP_HH__
-#define __RIP_XRL_TARGET_RIP_HH__
+#ifndef __RIP_XRL_TARGET_RIPNG_HH__
+#define __RIP_XRL_TARGET_RIPNG_HH__
 
 #include "libxorp/status_codes.h"
-#include "xrl/targets/rip_base.hh"
+#include "xrl/targets/ripng_base.hh"
 
 class XrlRouter;
 class XrlProcessSpy;
@@ -27,12 +27,12 @@ template<typename A> class System;
 template<typename A> class XrlPortManager;
 template<typename A> class XrlRipCommonTarget;
 
-class XrlRipTarget : public XrlRipTargetBase {
+class XrlRipngTarget : public XrlRipngTargetBase {
 public:
-    XrlRipTarget(XrlRouter& 		xr,
-		 XrlProcessSpy& 	xps,
-		 XrlPortManager<IPv4>&	xpm,
-		 bool& 			should_exit);
+    XrlRipngTarget(XrlRouter& 			xr,
+		   XrlProcessSpy& 		xps,
+		   XrlPortManager<IPv6>&	xpm,
+		   bool& 			should_exit);
     ~XrlRipTarget();
 
     void set_status(ProcessStatus ps, const string& annotation = "");
@@ -53,172 +53,172 @@ public:
     XrlCmdError
     rip_0_1_add_rip_address(const string&	ifname,
 			    const string&	vifname,
-			    const IPv4&		addr);
+			    const IPv6&		addr);
 
     XrlCmdError
     rip_0_1_remove_rip_address(const string&	ifname,
 			       const string&	vifname,
-			       const IPv4&	addr);
+			       const IPv6&	addr);
 
     XrlCmdError
     rip_0_1_set_rip_address_enabled(const string&	ifname,
 				    const string&	vifname,
-				    const IPv4&		addr,
+				    const IPv6&		addr,
 				    const bool&		enabled);
 
     XrlCmdError
     rip_0_1_rip_address_enabled(const string&	ifname,
 				const string&	vifname,
-				const IPv4&	addr,
+				const IPv6&	addr,
 				bool&		enabled);
 
     XrlCmdError rip_0_1_set_cost(const string&		ifname,
 				 const string&		vifname,
-				 const IPv4&		addr,
+				 const IPv6&		addr,
 				 const uint32_t&	cost);
 
     XrlCmdError rip_0_1_cost(const string&	ifname,
 			     const string&	vifname,
-			     const IPv4&	addr,
+			     const IPv6&	addr,
 			     uint32_t&		cost);
 
     XrlCmdError rip_0_1_set_horizon(const string&	ifname,
 				    const string&	vifname,
-				    const IPv4&		addr,
+				    const IPv6&		addr,
 				    const string&	horizon);
 
     XrlCmdError rip_0_1_horizon(const string&	ifname,
 				const string&	vifname,
-				const IPv4&	addr,
+				const IPv6&	addr,
 				string&		horizon);
 
     XrlCmdError
     rip_0_1_set_route_expiry_seconds(const string&	ifname,
 				     const string&	vifname,
-				     const IPv4&	addr,
+				     const IPv6&	addr,
 				     const uint32_t&	t_secs);
 
     XrlCmdError
     rip_0_1_route_expiry_seconds(const string&	ifname,
 				 const string&	vifname,
-				 const IPv4&	addr,
+				 const IPv6&	addr,
 				 uint32_t&	t_secs);
 
     XrlCmdError
     rip_0_1_set_route_deletion_seconds(const string&	ifname,
 				       const string&	vifname,
-				       const IPv4&	addr,
+				       const IPv6&	addr,
 				       const uint32_t&	t_secs);
 
     XrlCmdError
     rip_0_1_route_deletion_seconds(const string&	ifname,
 				   const string&	vifname,
-				   const IPv4&		addr,
+				   const IPv6&		addr,
 				   uint32_t&		t_secs);
 
     XrlCmdError
     rip_0_1_set_table_request_seconds(const string&	ifname,
 				      const string&	vifname,
-				      const IPv4&	addr,
+				      const IPv6&	addr,
 				      const uint32_t&	t_secs);
 
     XrlCmdError
     rip_0_1_table_request_seconds(const string&		ifname,
 				  const string&		vifname,
-				  const IPv4&		addr,
+				  const IPv6&		addr,
 				  uint32_t&		t_secs);
 
     XrlCmdError
     rip_0_1_set_unsolicited_response_min_seconds(const string&	ifname,
 						 const string&	vifname,
-						 const IPv4&	addr,
+						 const IPv6&	addr,
 						 const uint32_t& t_secs);
 
     XrlCmdError
     rip_0_1_unsolicited_response_min_seconds(const string&	ifname,
 					     const string&	vifname,
-					     const IPv4&	addr,
+					     const IPv6&	addr,
 					     uint32_t&		t_secs);
 
     XrlCmdError
     rip_0_1_set_unsolicited_response_max_seconds(const string&	ifname,
 						 const string&	vifname,
-						 const IPv4&	addr,
+						 const IPv6&	addr,
 						 const uint32_t& t_secs);
 
     XrlCmdError
     rip_0_1_unsolicited_response_max_seconds(const string&	ifname,
 					     const string&	vifname,
-					     const IPv4&	addr,
+					     const IPv6&	addr,
 					     uint32_t&		t_secs);
 
     XrlCmdError
     rip_0_1_set_triggered_update_min_seconds(const string&	ifname,
 					     const string&	vifname,
-					     const IPv4&	addr,
+					     const IPv6&	addr,
 					     const uint32_t&	t_secs);
 
     XrlCmdError
     rip_0_1_triggered_update_min_seconds(const string&	ifname,
 					 const string&	vifname,
-					 const IPv4&	addr,
+					 const IPv6&	addr,
 					 uint32_t&	t_secs);
 
     XrlCmdError
     rip_0_1_set_triggered_update_max_seconds(const string&	ifname,
 					     const string&	vifname,
-					     const IPv4&	addr,
+					     const IPv6&	addr,
 					     const uint32_t&	t_secs);
 
     XrlCmdError
     rip_0_1_triggered_update_max_seconds(const string&	ifname,
 					 const string&	vifname,
-					 const IPv4&	addr,
+					 const IPv6&	addr,
 					 uint32_t&	t_secs);
 
     XrlCmdError
     rip_0_1_set_interpacket_delay_milliseconds(const string&	ifname,
 					       const string&	vifname,
-					       const IPv4&	addr,
+					       const IPv6&	addr,
 					       const uint32_t&	t_msecs);
 
     XrlCmdError
     rip_0_1_interpacket_delay_milliseconds(const string&	ifname,
 					   const string&	vifname,
-					   const IPv4&		addr,
+					   const IPv6&		addr,
 					   uint32_t&		t_msecs);
 
     XrlCmdError rip_0_1_rip_address_status(const string&	ifname,
 					   const string&	vifname,
-					   const IPv4&		addr,
+					   const IPv6&		addr,
 					   string&		status);
 
-    XrlCmdError rip_0_1_add_static_route(const IPv4Net& 	network,
-					 const IPv4& 		nexthop,
+    XrlCmdError rip_0_1_add_static_route(const IPv6Net& 	network,
+					 const IPv6& 		nexthop,
 					 const uint32_t& 	cost);
 
-    XrlCmdError rip_0_1_delete_static_route(const IPv4Net& 	network);
+    XrlCmdError rip_0_1_delete_static_route(const IPv6Net& 	network);
 
-    XrlCmdError socket4_user_0_1_recv_event(const string&	sockid,
-					    const IPv4&		src_host,
+    XrlCmdError socket6_user_0_1_recv_event(const string&	sockid,
+					    const IPv6&		src_host,
 					    const uint32_t&	src_port,
 					    const vector<uint8_t>& pdata);
 
-    XrlCmdError socket4_user_0_1_connect_event(const string&	sockid,
-					       const IPv4&	src_host,
+    XrlCmdError socket6_user_0_1_connect_event(const string&	sockid,
+					       const IPv6&	src_host,
 					       const uint32_t&	src_port,
 					       const string&	new_sockid,
 					       bool&		accept);
 
-    XrlCmdError socket4_user_0_1_error_event(const string&	sockid,
+    XrlCmdError socket6_user_0_1_error_event(const string&	sockid,
 					     const string& 	reason,
 					     const bool&	fatal);
 
-    XrlCmdError socket4_user_0_1_close_event(const string&	sockid,
+    XrlCmdError socket6_user_0_1_close_event(const string&	sockid,
 					     const string&	reason);
 
 protected:
-    XrlRipCommonTarget<IPv4>* _ct;
+    XrlRipCommonTarget<IPv6>* _ct;
 };
 
-#endif // __RIP_XRL_TARGET_RIP_HH__
+#endif // __RIP_XRL_TARGET_RIPNG_HH__
