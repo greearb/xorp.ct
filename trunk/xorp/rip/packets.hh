@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.15 2004/06/10 22:41:44 hodson Exp $
+// $XORP: xorp/rip/packets.hh,v 1.16 2005/01/07 03:07:36 atanu Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -205,7 +205,7 @@ PacketRouteEntry<IPv4>::initialize_table_request()
  * The PlaintextPacketRouteEntry4 may appear as the first route entry
  * in a RIPv2 packet.  It has the same size as an @ref
  * PacketRouteEntry<IPv4>. The address family has the special value
- * 0xffff which imples authentication.  The authentication type is
+ * 0xffff which implies authentication.  The authentication type is
  * overlaid in the route tag field and takes the special value 2.
  *
  * All items in the route entry are stored in network order.  The
@@ -242,7 +242,7 @@ public:
  * The MD5PacketRouteEntry4 may appear as the first route entry
  * in a RIPv2 packet.  It has the same size as an @ref
  * PacketRouteEntry<IPv4>. The address family has the special value
- * 0xffff which imples authentication.  The authentication type is
+ * 0xffff which implies authentication.  The authentication type is
  * overlaid in the route tag field and takes the special value 3.  With
  * MD5 the authentication data appears after the remaining route entries.
  * Details are disclosed in RFC2082.
