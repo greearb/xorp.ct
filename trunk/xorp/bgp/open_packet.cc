@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.15 2003/09/27 08:34:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.16 2003/10/03 00:26:59 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -161,7 +161,7 @@ OpenPacket::operator==(const OpenPacket& him) const
 }
 
 void
-OpenPacket::add_parameter(const BGPParameter *p)
+OpenPacket::add_parameter(const ParameterNode& p)
 {
     _parameter_list.push_back(p);
     _OptParmLen = _OptParmLen + p->length();
