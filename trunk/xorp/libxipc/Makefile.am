@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.29 2003/07/31 21:59:39 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.30 2003/09/26 21:34:34 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -25,7 +25,8 @@ test_programs += test_lemming test_xrl_router
 test_programs += test_finder_tcp test_finder_messenger test_finder_msgs
 test_programs += test_finder test_finder_events
 
-test_extra_programs = test_xrl_parser test_finder_to
+test_extra_programs  = test_xrl_parser test_finder_to
+test_extra_programs += test_xrl_receiver test_xrl_sender
 
 test_scripts = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
 
@@ -80,6 +81,14 @@ test_finder_events_LDADD	 = libfinder.a $(LDADD)
 
 test_finder_to_SOURCES		 = test_finder_to.cc
 test_finder_to_LDADD		 = libfinder.a $(LDADD)
+
+test_xrl_receiver_SOURCES	 = test_xrl_receiver.cc
+test_xrl_receiver_LDADD		 = $(top_builddir)/xrl/targets/libtestxrlsbase.a
+test_xrl_receiver_LDADD		+= $(LDADD)
+
+test_xrl_sender_SOURCES		 = test_xrl_sender.cc
+test_xrl_sender_LDADD		 = $(top_builddir)/xrl/interfaces/libtestxrlsxif.a
+test_xrl_sender_LDADD		+= $(LDADD)
 
 # -- Library Sources (libxipc)
 libxipc_a_SOURCES  = finder_module.h

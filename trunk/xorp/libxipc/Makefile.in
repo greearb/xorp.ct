@@ -106,7 +106,7 @@ noinst_LIBRARIES = libxipc.a libfinder.a
 # -- Test Programs and scripts (order of increasing complexity)
 test_programs = test_xrl_error test_xrl test_xrl_atom test_xrl_args test_header test_inproc test_sudp test_stcp test_lemming test_xrl_router test_finder_tcp test_finder_messenger test_finder_msgs test_finder test_finder_events
 
-test_extra_programs = test_xrl_parser test_finder_to
+test_extra_programs = test_xrl_parser test_finder_to test_xrl_receiver test_xrl_sender
 
 test_scripts = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
 
@@ -151,6 +151,12 @@ test_finder_events_LDADD = libfinder.a $(LDADD)
 
 test_finder_to_SOURCES = test_finder_to.cc
 test_finder_to_LDADD = libfinder.a $(LDADD)
+
+test_xrl_receiver_SOURCES = test_xrl_receiver.cc
+test_xrl_receiver_LDADD = $(top_builddir)/xrl/targets/libtestxrlsbase.a $(LDADD)
+
+test_xrl_sender_SOURCES = test_xrl_sender.cc
+test_xrl_sender_LDADD = $(top_builddir)/xrl/interfaces/libtestxrlsxif.a $(LDADD)
 
 # -- Library Sources (libxipc)
 
@@ -216,7 +222,8 @@ noinst_PROGRAMS = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
 	test_xrl_router$(EXEEXT) test_finder_tcp$(EXEEXT) \
 	test_finder_messenger$(EXEEXT) test_finder_msgs$(EXEEXT) \
 	test_finder$(EXEEXT) test_finder_events$(EXEEXT) \
-	test_xrl_parser$(EXEEXT) test_finder_to$(EXEEXT)
+	test_xrl_parser$(EXEEXT) test_finder_to$(EXEEXT) \
+	test_xrl_receiver$(EXEEXT) test_xrl_sender$(EXEEXT)
 sbin_PROGRAMS = call_xrl$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS) $(sbin_PROGRAMS)
 
@@ -338,12 +345,26 @@ test_xrl_parser_DEPENDENCIES = ./libfinder.a ./libxipc.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/libcomm/libcomm.a
 test_xrl_parser_LDFLAGS =
+am_test_xrl_receiver_OBJECTS = test_xrl_receiver.$(OBJEXT)
+test_xrl_receiver_OBJECTS = $(am_test_xrl_receiver_OBJECTS)
+test_xrl_receiver_DEPENDENCIES = \
+	$(top_builddir)/xrl/targets/libtestxrlsbase.a ./libfinder.a \
+	./libxipc.a $(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_xrl_receiver_LDFLAGS =
 am_test_xrl_router_OBJECTS = test_xrl_router.$(OBJEXT)
 test_xrl_router_OBJECTS = $(am_test_xrl_router_OBJECTS)
 test_xrl_router_DEPENDENCIES = libfinder.a ./libfinder.a ./libxipc.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/libcomm/libcomm.a
 test_xrl_router_LDFLAGS =
+am_test_xrl_sender_OBJECTS = test_xrl_sender.$(OBJEXT)
+test_xrl_sender_OBJECTS = $(am_test_xrl_sender_OBJECTS)
+test_xrl_sender_DEPENDENCIES = \
+	$(top_builddir)/xrl/interfaces/libtestxrlsxif.a ./libfinder.a \
+	./libxipc.a $(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libcomm/libcomm.a
+test_xrl_sender_LDFLAGS =
 am_xorp_finder_OBJECTS = finder_main.$(OBJEXT)
 xorp_finder_OBJECTS = $(am_xorp_finder_OBJECTS)
 xorp_finder_DEPENDENCIES = libfinder.a ./libxipc.a \
@@ -392,7 +413,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_atom.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_error.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_parser.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_xrl_router.Po $(DEPDIR)/xrl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl_receiver.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl_router.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl_sender.Po $(DEPDIR)/xrl.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_args.Po $(DEPDIR)/xrl_atom.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_atom_encoding.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_atom_list.Po $(DEPDIR)/xrl_cmd_map.Po \
@@ -425,9 +448,10 @@ DIST_SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) \
 	$(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) \
 	$(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) \
 	$(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) \
-	$(test_xrl_router_SOURCES) $(xorp_finder_SOURCES)
+	$(test_xrl_receiver_SOURCES) $(test_xrl_router_SOURCES) \
+	$(test_xrl_sender_SOURCES) $(xorp_finder_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) $(call_xrl_SOURCES) $(test_finder_SOURCES) $(test_finder_events_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) $(test_finder_to_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) $(test_xrl_router_SOURCES) $(xorp_finder_SOURCES)
+SOURCES = $(libfinder_a_SOURCES) $(libxipc_a_SOURCES) $(call_xrl_SOURCES) $(test_finder_SOURCES) $(test_finder_events_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) $(test_finder_to_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) $(test_xrl_receiver_SOURCES) $(test_xrl_router_SOURCES) $(test_xrl_sender_SOURCES) $(xorp_finder_SOURCES)
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -554,9 +578,15 @@ test_xrl_error$(EXEEXT): $(test_xrl_error_OBJECTS) $(test_xrl_error_DEPENDENCIES
 test_xrl_parser$(EXEEXT): $(test_xrl_parser_OBJECTS) $(test_xrl_parser_DEPENDENCIES) 
 	@rm -f test_xrl_parser$(EXEEXT)
 	$(CXXLINK) $(test_xrl_parser_LDFLAGS) $(test_xrl_parser_OBJECTS) $(test_xrl_parser_LDADD) $(LIBS)
+test_xrl_receiver$(EXEEXT): $(test_xrl_receiver_OBJECTS) $(test_xrl_receiver_DEPENDENCIES) 
+	@rm -f test_xrl_receiver$(EXEEXT)
+	$(CXXLINK) $(test_xrl_receiver_LDFLAGS) $(test_xrl_receiver_OBJECTS) $(test_xrl_receiver_LDADD) $(LIBS)
 test_xrl_router$(EXEEXT): $(test_xrl_router_OBJECTS) $(test_xrl_router_DEPENDENCIES) 
 	@rm -f test_xrl_router$(EXEEXT)
 	$(CXXLINK) $(test_xrl_router_LDFLAGS) $(test_xrl_router_OBJECTS) $(test_xrl_router_LDADD) $(LIBS)
+test_xrl_sender$(EXEEXT): $(test_xrl_sender_OBJECTS) $(test_xrl_sender_DEPENDENCIES) 
+	@rm -f test_xrl_sender$(EXEEXT)
+	$(CXXLINK) $(test_xrl_sender_LDFLAGS) $(test_xrl_sender_OBJECTS) $(test_xrl_sender_LDADD) $(LIBS)
 xorp_finder$(EXEEXT): $(xorp_finder_OBJECTS) $(xorp_finder_DEPENDENCIES) 
 	@rm -f xorp_finder$(EXEEXT)
 	$(CXXLINK) $(xorp_finder_LDFLAGS) $(xorp_finder_OBJECTS) $(xorp_finder_LDADD) $(LIBS)
@@ -609,7 +639,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_atom.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_parser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_receiver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_router.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_sender.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_args.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_atom.Po@am__quote@
