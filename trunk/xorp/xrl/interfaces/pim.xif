@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.17 2002/12/08 11:02:38 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -204,6 +204,8 @@ interface pim/0.1 {
 	 * (in milliseconds).
 	 * @param override_interval the Override_Interval in the
 	 * LAN Prune Delay option (in milliseconds).
+	 * @param is_tracking_support_disabled if true, the T-bit in the
+	 * LAN Prune Delay option is set.
 	 * @param accept_nohello_neighbors if true, accept neighbors that
 	 * didn't send a Hello message first.
 	 * @param join_prune_period the period between Join/Prune messages.
@@ -266,6 +268,14 @@ interface pim/0.1 {
 					-> fail:bool & reason:txt
 	reset_vif_override_interval	? vif_name:txt			\
 					-> fail:bool & reason:txt
+	get_vif_is_tracking_support_disabled ? vif_name:txt		\
+					-> is_tracking_support_disabled:bool \
+					& fail:bool & reason:txt
+	set_vif_is_tracking_support_disabled ? vif_name:txt		\
+					& is_tracking_support_disabled:bool \
+					-> fail:bool & reason:txt
+	reset_vif_is_tracking_support_disabled ? vif_name:txt		\
+					-> fail:bool & reason:txt
 	get_vif_accept_nohello_neighbors ? vif_name:txt			\
 					-> accept_nohello_neighbors:bool \
 					& fail:bool & reason:txt
@@ -287,22 +297,6 @@ interface pim/0.1 {
 	 * Test-related methods: add Join/Prune entries, and send them
 	 * to a neighbor.
 	 *
-	 * @param vif_name the name of the vif to configure.
-	 * @param proto_version the protocol version.
-	 * @param hello_triggered_delay the Triggered_Hello_Delay (in seconds).
-	 * @param hello_period the Hello_Period periodic interval for Hello
-	 * messages (in seconds).
-	 * @param hello_holdtime the Holdtime in the Holdtime option
-	 * (in seconds).
-	 * @param dr_priority the DR Priority in the DR Priority
-	 * option (larger is better).
-	 * @param lan_delay the LAN Delay in the LAN Prune Delay option
-	 * (in milliseconds).
-	 * @param override_interval the Override_Interval in the
-	 * LAN Prune Delay option (in milliseconds).
-	 * @param accept_nohello_neighbors if true, accept neighbors that
-	 * didn't send a Hello message first.
-	 * @param join_prune_period the period between Join/Prune messages.
 	 * @param fail true if failure has occured.
 	 * @param reason contains failure reason if it occured.
 	 */

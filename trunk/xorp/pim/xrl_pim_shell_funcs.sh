@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.20 2002/12/08 11:02:37 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
 #
 
 #
@@ -822,6 +822,49 @@ pim_reset_vif_override_interval()
     
     echo "pim_reset_vif_override_interval" $*
     XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_override_interval"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_get_vif_is_tracking_support_disabled()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_get_vif_is_tracking_support_disabled <vif_name>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pim_get_vif_is_tracking_support_disabled" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/get_vif_is_tracking_support_disabled"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p is_tracking_support_disabled:bool $XRL$XRL_ARGS
+}
+
+pim_set_vif_is_tracking_support_disabled()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: pim_set_vif_is_tracking_support_disabled <vif_name> <is_tracking_support_disabled>"
+	exit 1
+    fi
+    vif_name=$1
+    is_tracking_support_disabled=$2
+    
+    echo "pim_set_vif_is_tracking_support_disalbed" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/set_vif_is_tracking_support_disabled"
+    XRL_ARGS="?vif_name:txt=$vif_name&is_tracking_support_disabled:bool=$is_tracking_support_disabled"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+pim_reset_vif_is_tracking_support_disabled()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: pim_reset_vif_is_tracking_support_disabled <vif_name>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "pim_reset_vif_is_tracking_support_disabled" $*
+    XRL="finder://$PIM_TARGET/pim/0.1/reset_vif_is_tracking_support_disabled"
     XRL_ARGS="?vif_name:txt=$vif_name"
     call_xrl $XRL$XRL_ARGS fail:bool = false
 }

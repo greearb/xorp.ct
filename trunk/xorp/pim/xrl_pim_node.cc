@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.65 2002/12/09 18:29:31 hodson Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -3340,6 +3340,67 @@ XrlPimNode::pim_0_1_reset_vif_override_interval(
     string&		reason)
 {
     if (PimNode::reset_vif_override_interval(vif_name) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_get_vif_is_tracking_support_disabled(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		is_tracking_support_disabled, 
+    bool&		fail, 
+    string&		reason)
+{
+    PimVif *pim_vif = PimNode::vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL) {
+	fail = true;
+    } else {
+	is_tracking_support_disabled = pim_vif->is_tracking_support_disabled().get();
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_set_vif_is_tracking_support_disabled(
+    // Input values, 
+    const string&	vif_name, 
+    const bool&		is_tracking_support_disabled, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::set_vif_is_tracking_support_disabled(vif_name,
+						      is_tracking_support_disabled)
+	< 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPimNode::pim_0_1_reset_vif_is_tracking_support_disabled(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (PimNode::reset_vif_is_tracking_support_disabled(vif_name) < 0) {
 	fail = true;
     } else {
 	fail = false;

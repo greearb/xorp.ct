@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.2 2003/01/06 20:28:45 pavlin Exp $"
 
 
 //
@@ -75,6 +75,9 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
       _override_interval(LAN_OVERRIDE_INTERVAL_MSEC_DEFAULT,
 			 callback(this,
 				  &PimVif::set_override_interval_callback)),
+      _is_tracking_support_disabled(false,
+				    callback(this,
+					     &PimVif::set_is_tracking_support_disabled_callback)),
       _accept_nohello_neighbors(false),
       _join_prune_period(PIM_JOIN_PRUNE_PERIOD_DEFAULT,
 			 callback(this,
@@ -154,6 +157,7 @@ PimVif::set_default_config()
     dr_priority().reset();
     lan_delay().reset();
     override_interval().reset();
+    is_tracking_support_disabled().reset();
     accept_nohello_neighbors().reset();
     
     // Join/Prune-related parameters

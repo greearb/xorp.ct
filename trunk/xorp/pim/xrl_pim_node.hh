@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.50 2002/12/09 18:29:31 hodson Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1317,6 +1317,29 @@ protected:
 	string&	reason);
 
     XrlCmdError pim_0_1_reset_vif_override_interval(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_get_vif_is_tracking_support_disabled(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	bool&	is_tracking_support_disabled, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_set_vif_is_tracking_support_disabled(
+	// Input values, 
+	const string&	vif_name, 
+	const bool&	is_tracking_support_disabled, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError pim_0_1_reset_vif_is_tracking_support_disabled(
 	// Input values, 
 	const string&	vif_name, 
 	// Output values, 

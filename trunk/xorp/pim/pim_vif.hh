@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.2 2003/01/06 20:28:45 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -229,6 +229,7 @@ public:
     ConfigParam<uint32_t>& dr_priority() { return (_dr_priority); }
     ConfigParam<uint16_t>& lan_delay() { return (_lan_delay); }
     ConfigParam<uint16_t>& override_interval() { return (_override_interval); }
+    ConfigParam<bool>& is_tracking_support_disabled() { return (_is_tracking_support_disabled); }
     ConfigParam<bool>& accept_nohello_neighbors() { return (_accept_nohello_neighbors); }
     
     //
@@ -332,13 +333,14 @@ private:
     }
     void	set_lan_delay_callback(uint16_t v) {
 	_pim_nbr_me.set_lan_delay(v);
-	_pim_nbr_me.set_is_tracking_support_disabled(true);
 	_pim_nbr_me.set_is_lan_prune_delay_present(true);
     }
     void	set_override_interval_callback(uint16_t v) {
 	_pim_nbr_me.set_override_interval(v);
-	_pim_nbr_me.set_is_tracking_support_disabled(true);
 	_pim_nbr_me.set_is_lan_prune_delay_present(true);
+    }
+    void	set_is_tracking_support_disabled_callback(bool v) {
+	_pim_nbr_me.set_is_tracking_support_disabled(v);
     }
     void	set_join_prune_period_callback(uint16_t v) {
 	_join_prune_holdtime.set(
@@ -395,6 +397,7 @@ private:
     ConfigParam<uint32_t> _dr_priority;		// The DR Priority
     ConfigParam<uint16_t> _lan_delay;		// The LAN Delay
     ConfigParam<uint16_t> _override_interval;	// The Override_Interval
+    ConfigParam<bool>	  _is_tracking_support_disabled; // The T-bit
     ConfigParam<bool>	  _accept_nohello_neighbors; // If true, accept
 						// neighbors that didn't send
 						// a Hello message first

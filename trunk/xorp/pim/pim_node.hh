@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.65 2002/12/09 18:29:28 hodson Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -764,6 +764,9 @@ public:
     int		set_vif_override_interval(const string&	vif_name,
 					  uint16_t override_interval);
     int		reset_vif_override_interval(const string& vif_name);
+    int		set_vif_is_tracking_support_disabled(const string& vif_name,
+						     bool is_tracking_support_disabled);
+    int		reset_vif_is_tracking_support_disabled(const string& vif_name);
     int		set_vif_accept_nohello_neighbors(const string& vif_name,
 						 bool accept_nohello_neighbors);
     int		reset_vif_accept_nohello_neighbors(const string& vif_name);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.17 2002/12/09 18:29:25 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $"
 
 
 //
@@ -249,6 +249,39 @@ PimNode::reset_vif_override_interval(const string& vif_name)
 	return (XORP_ERROR);
     
     pim_vif->override_interval().reset();
+    
+    // Send immediately a Hello message with the new value
+    pim_vif->pim_hello_send();
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::set_vif_is_tracking_support_disabled(const string& vif_name,
+					      bool is_tracking_support_disabled)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL)
+	return (XORP_ERROR);
+    
+    pim_vif->is_tracking_support_disabled().set(is_tracking_support_disabled);
+    
+    // Send immediately a Hello message with the new value
+    pim_vif->pim_hello_send();
+    
+    return (XORP_OK);
+}
+
+int
+PimNode::reset_vif_is_tracking_support_disabled(const string& vif_name)
+{
+    PimVif *pim_vif = vif_find_by_name(vif_name);
+    
+    if (pim_vif == NULL)
+	return (XORP_ERROR);
+    
+    pim_vif->is_tracking_support_disabled().reset();
     
     // Send immediately a Hello message with the new value
     pim_vif->pim_hello_send();
