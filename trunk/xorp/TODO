@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.7 2004/10/15 09:16:11 bms Exp $
+# $XORP: xorp/TODO,v 1.8 2004/11/05 03:09:48 bms Exp $
 #
 
 * Standardize the version string format return by the
@@ -21,3 +21,5 @@
 * Consolidate the way we render bools as strings, i.e. make the use
   of bool2str() vs truefalse() vs explicit tertiary operator consistent
   and settle on one only if possible.
+
+ * Libtoolize flower_malloc.
