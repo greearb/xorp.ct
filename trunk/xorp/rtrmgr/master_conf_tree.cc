@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.2 2003/02/22 07:14:32 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -118,24 +118,16 @@ void MasterConfigTree::execute() {
     //configure the modules in the order of their dependencies
     _root_node.initialize_commit();
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
+	if (!module_config_start(*i, tid, /*no_commit = */false, result)) {
+	    XLOG_FATAL(result.c_str());
+	}
 	if (!_root_node.commit_changes(_module_manager, *i, _xclient, tid,
 				       _no_execute, /*_no_commit=*/false,
 				       0, 0, result)) {
-	    string err = "Initialization Failed\n" + result;
-	    XLOG_FATAL(err.c_str());
+	    XLOG_FATAL(("Initialization Failed\n" + result).c_str());
 	}
-
-	if (!_module_manager->find_module(*i)) {
-	    //No config tree node contained a %modinfo command for
-	    //this module, so the ModuleManager is unaware of this
-	    //node.  However, it's needed to satisfy dependencies, so
-	    //we still need to ensure it gets started.
-	    printf("Module %s needs special startup treatment\n",
-		   (*i).c_str());
-	    if (!explicit_module_startup(*i, tid, result)) {
-		string err = "Initialization Failed\n" + result;
-		XLOG_FATAL(err.c_str());
-	    }
+	if (!module_config_done(*i, tid, /*no_commit = */false, result)) {
+	    XLOG_FATAL(result.c_str());
 	}
     }
     try {
@@ -304,6 +296,9 @@ MasterConfigTree::commit_changes(string &result,
     _root_node.initialize_commit();
     //sort the changes in order of module dependencies
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
+	if (!module_config_start(*i, tid, /*no_commit = */true, result)) {
+	    return false;
+	}
 	if (_root_node.commit_changes(_module_manager, *i,
 				      _xclient, tid, 
 				      _no_execute, 
@@ -311,6 +306,9 @@ MasterConfigTree::commit_changes(string &result,
 				      0, 0, 
 				      result) == false) {
 	    //something went wrong - return the error message.
+	    return false;
+	}
+	if (!module_config_done(*i, tid, /*no_commit = */true, result)) {
 	    return false;
 	}
     }
@@ -327,29 +325,19 @@ MasterConfigTree::commit_changes(string &result,
     result = "";
     //sort the changes in order of module dependencies
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
-	bool success = 
-	    _root_node.commit_changes(_module_manager, *i,
-				      _xclient, tid,
-				      _no_execute, 
-				      /*no_commit = */false, 
-				      0, 0, result);
-	printf("##############################################################\n");
-	if (success == false) {
+	if (!module_config_start(*i, tid, /*no_commit = */true, result)) {
+	    return false;
+	}
+	if (!_root_node.commit_changes(_module_manager, *i,
+				       _xclient, tid,
+				       _no_execute, 
+				       /*no_commit = */false, 
+				       0, 0, result)) {
 	    //abort the commit
 	    return false;
 	}
-
-	if (!_module_manager->find_module(*i)) {
-	    //No config tree node contained a %modinfo command for
-	    //this module, so the ModuleManager is unaware of this
-	    //node.  However, it's needed to satisfy dependencies, so
-	    //we still need to ensure it gets started.
-	    printf("Module %s needs special startup treatment\n",
-		   (*i).c_str());
-	    if (!explicit_module_startup(*i, tid, result)) {
-		string err = "Initialization Failed\n" + result;
-		XLOG_FATAL(err.c_str());
-	    }
+	if (!module_config_done(*i, tid, /*no_commit = */true, result)) {
+	    return false;
 	}
     }
     try {
@@ -696,8 +684,9 @@ MasterConfigTree::diff_configs(const ConfigTree& new_tree,
 }
 
 bool
-MasterConfigTree::explicit_module_startup(const string& module_name,
-					  uint tid, string& result)
+MasterConfigTree::module_config_start(const string& module_name,
+				      uint tid, bool no_commit, 
+				      string& result)
 {
     ModuleCommand *cmd = _template_tree->find_module(module_name);
     if (cmd == NULL) {
@@ -705,6 +694,24 @@ MasterConfigTree::explicit_module_startup(const string& module_name,
 	return false;
     }
     cmd->execute(_xclient, tid, _module_manager, 
-		 _no_execute, false);
+		 _no_execute, no_commit);
     return true;
 }
+
+bool
+MasterConfigTree::module_config_done(const string& module_name,
+				     uint tid, bool no_commit,
+				     string& result)
+{
+    ModuleCommand *cmd = _template_tree->find_module(module_name);
+    if (cmd == NULL) {
+	result = "Module " + module_name + " is not registered with the TemplateTree, but is needed to satisfy a dependency\n";
+	return false;
+    }
+    //XXX this is where we might stop a module if it were no longer needed.
+    //TBD
+    UNUSED(tid);
+    UNUSED(no_commit);
+    return true;
+}
+

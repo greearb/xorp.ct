@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.2 2003/02/22 07:14:33 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -52,7 +52,6 @@ public:
 			bool no_execute, bool no_commit) const;
     void failed();
     bool is_running() const {return _running;}
-    bool is_starting() const {return _starting;}
     string str() const;
 private:
     int do_transaction(XrlAction* xa, XorpClient* _xclient, uint tid, 
@@ -60,7 +59,6 @@ private:
     string _name;
     string _path; //relative path
     string _expath; //absolute path
-    bool _starting; //indicates not yet running, but queued to be run.
     bool _running;
     pid_t _pid;
     int _status;

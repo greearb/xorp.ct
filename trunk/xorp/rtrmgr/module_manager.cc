@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.2 2003/02/22 07:14:33 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <sys/types.h>
@@ -53,7 +53,6 @@ Module::Module(const ModuleCommand* cmd)
 int Module::set_execution_path(const string &path) {
     _path = path;
     _running = false;
-    _starting = false;
     _pid = 0;
     struct stat sb;
     printf("**********************************************************\n");
@@ -247,14 +246,6 @@ ModuleManager::module_running(const string &name) const {
     if (module == NULL)
 	return false;
     return (module->is_running());
-}
-
-bool
-ModuleManager::module_starting(const string &name) const {
-    const Module *module = const_find_module(name);
-    if (module == NULL)
-	return false;
-    return (module->is_starting());
 }
 
 Module*
