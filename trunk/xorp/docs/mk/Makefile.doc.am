@@ -1,6 +1,6 @@
 ## Include this file into Makefile.am that is used to generate documentation
 ##
-## # $XORP: xorp/docs/mk/Makefile.doc.am,v 1.8 2002/12/10 02:14:21 pavlin Exp $
+## # $XORP: xorp/docs/mk/Makefile.doc.am,v 1.1.1.1 2002/12/11 23:55:56 hodson Exp $
 ##
 
 
@@ -14,6 +14,8 @@ $(DOCS): %: %.dvi
 DOCS_LATEX=$(DOCS:%=%_LATEX)
 DOCS_FIGURES=$(DOCS:%=%_FIGURES)
 DOCS_BBL=$(DOCS:%=%_BBL)
+
+PSANON=sed -f $(top_srcdir)/utils/fig2dev-ps-anon.sed
 
 #
 # The files to remove with ``gmake clean''
@@ -96,7 +98,7 @@ $(DOCS_BBL): %_BBL: %_LATEX
 
 #
 # If any of the *.fig files is newer than the corresponding *.ps or *.eps,
-#  then run fig2dev to (re)create that file.
+# then run fig2dev to (re)create that file.
 #
 $(DOCS_FIGURES):
 	@dep_files="$($(subst -,_,$@))"; \
@@ -107,7 +109,7 @@ $(DOCS_FIGURES):
 		fig_src=$$file_prefix.fig; \
 		if [ -f $$fig_src ] ; then \
 			if [ ! $$fig_src -ot $$i ] ; then \
-				fig2dev -Leps $$fig_src $$i; \
+				fig2dev -Leps $$fig_src | $(PSANON) > $$i; \
 			fi; \
 		fi; \
 	done; \
@@ -118,7 +120,7 @@ $(DOCS_FIGURES):
 		fig_src=$$file_prefix.fig; \
 		if [ -f $$fig_src ] ; then \
 			if [ ! $$fig_src -ot $$i ] ; then \
-				fig2dev -z Letter -Lps $$fig_src $$i; \
+				fig2dev -z Letter -Lps $$fig_src | $(PSANON) >$$i; \
 			fi; \
 		fi; \
 	done
@@ -141,7 +143,7 @@ SUFFIXES = .tex .bbl .dvi .ps .pdf .fig .ps .eps
 .ps.pdf:
 	ps2pdf $< $@
 .fig.ps:
-	fig2dev -z Letter -Lps $< $@
+	fig2dev -z Letter -Lps $< | $(PSANON) > $@
 .fig.eps:
-	fig2dev -Leps $< $@
+	fig2dev -Leps $< | $(PSANON) > $@
 

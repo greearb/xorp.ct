@@ -93,6 +93,8 @@ DOCS_LATEX = $(DOCS:%=%_LATEX)
 DOCS_FIGURES = $(DOCS:%=%_FIGURES)
 DOCS_BBL = $(DOCS:%=%_BBL)
 
+PSANON = sed -f $(top_srcdir)/utils/fig2dev-ps-anon.sed
+
 #
 # The files to remove with ``gmake clean''
 # TODO: don't remove *.foo; instead consider DOCS_LATEX to select the files
@@ -303,7 +305,7 @@ $(DOCS_BBL): %_BBL: %_LATEX
 
 #
 # If any of the *.fig files is newer than the corresponding *.ps or *.eps,
-#  then run fig2dev to (re)create that file.
+# then run fig2dev to (re)create that file.
 #
 $(DOCS_FIGURES):
 	@dep_files="$($(subst -,_,$@))"; \
@@ -314,7 +316,7 @@ $(DOCS_FIGURES):
 		fig_src=$$file_prefix.fig; \
 		if [ -f $$fig_src ] ; then \
 			if [ ! $$fig_src -ot $$i ] ; then \
-				fig2dev -Leps $$fig_src $$i; \
+				fig2dev -Leps $$fig_src | $(PSANON) > $$i; \
 			fi; \
 		fi; \
 	done; \
@@ -325,7 +327,7 @@ $(DOCS_FIGURES):
 		fig_src=$$file_prefix.fig; \
 		if [ -f $$fig_src ] ; then \
 			if [ ! $$fig_src -ot $$i ] ; then \
-				fig2dev -z Letter -Lps $$fig_src $$i; \
+				fig2dev -z Letter -Lps $$fig_src | $(PSANON) >$$i; \
 			fi; \
 		fi; \
 	done
@@ -343,9 +345,9 @@ $(DOCS_LATEX):
 .ps.pdf:
 	ps2pdf $< $@
 .fig.ps:
-	fig2dev -z Letter -Lps $< $@
+	fig2dev -z Letter -Lps $< | $(PSANON) > $@
 .fig.eps:
-	fig2dev -Leps $< $@
+	fig2dev -Leps $< | $(PSANON) > $@
 
 ################################################################
 
