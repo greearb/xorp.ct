@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.21 2004/11/05 00:48:32 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.22 2004/12/01 03:28:08 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -83,9 +83,7 @@ FtiConfigEntrySetRtsock::stop(string& error_msg)
 bool
 FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    FteX ftex(fte);
     
     return (add_entry(ftex));
 }
@@ -93,9 +91,7 @@ FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
 bool
 FtiConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    FteX ftex(fte);
     
     return (delete_entry(ftex));
 }
@@ -103,9 +99,7 @@ FtiConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
 bool
 FtiConfigEntrySetRtsock::add_entry6(const Fte6& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    FteX ftex(fte);
     
     return (add_entry(ftex));
 }
@@ -113,9 +107,7 @@ FtiConfigEntrySetRtsock::add_entry6(const Fte6& fte)
 bool
 FtiConfigEntrySetRtsock::delete_entry6(const Fte6& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    FteX ftex(fte);
     
     return (delete_entry(ftex));
 }
@@ -162,6 +154,9 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	}
 	break;
     } while (false);
+    
+    if (fte.is_connected_route())
+	return true;	// XXX: don't add/remove directly-connected routes
     
     //
     // Set the request
@@ -268,6 +263,9 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 	}
 	break;
     } while (false);
+
+    if (fte.is_connected_route())
+	return true;	// XXX: don't add/remove directly-connected routes
     
     //
     // Set the request

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fte.hh,v 1.13 2004/11/11 07:45:08 bms Exp $
+// $XORP: xorp/fea/fte.hh,v 1.14 2004/12/10 10:22:58 pavlin Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -128,6 +128,124 @@ private:
 
 typedef Fte<IPv4, IPv4Net> Fte4;
 typedef Fte<IPv6, IPv6Net> Fte6;
-typedef Fte<IPvX, IPvXNet> FteX;
+typedef Fte<IPvX, IPvXNet> BaseFteX;
+
+class FteX : public BaseFteX {
+public:
+    /**
+     * Constructor
+     *
+     * @param net the network address.
+     * @param nexthop the next-hop router address.
+     * @param ifname the interface name.
+     * @param vifname the virtual interface name.
+     * @param metric the route metric.
+     * @param admin_distance the route admin distance.
+     * @param xorp_route true if this is a XORP route.
+     */
+    FteX(const IPvXNet&	net,
+	 const IPvX&	nexthop,
+	 const string&	ifname,
+	 const string&	vifname,
+	 uint32_t	metric,
+	 uint32_t	admin_distance,
+	 bool		xorp_route)
+	: BaseFteX(net,
+		   nexthop,
+		   ifname,
+		   vifname,
+		   metric,
+		   admin_distance,
+		   xorp_route) {}
+
+    /**
+     * Constructor for a specified address family.
+     */
+    explicit FteX(int family) : BaseFteX(family) {}
+
+    /**
+     * Copy constructor for Fte4 entry.
+     */
+    FteX(const Fte4& fte4)
+	: BaseFteX(IPvXNet(fte4.net()),
+		   IPvX(fte4.nexthop()),
+		   fte4.ifname(),
+		   fte4.vifname(),
+		   fte4.metric(),
+		   fte4.admin_distance(),
+		   fte4.xorp_route()) {
+	if (fte4.is_deleted())
+	    mark_deleted();
+	if (fte4.is_unresolved())
+	    mark_unresolved();
+	if (fte4.is_connected_route())
+	    mark_connected_route();
+    }
+
+    /**
+     * Copy constructor for Fte6 entry.
+     */
+    FteX(const Fte6& fte6)
+	: BaseFteX(IPvXNet(fte6.net()),
+		   IPvX(fte6.nexthop()),
+		   fte6.ifname(),
+		   fte6.vifname(),
+		   fte6.metric(),
+		   fte6.admin_distance(),
+		   fte6.xorp_route()) {
+	if (fte6.is_deleted())
+	    mark_deleted();
+	if (fte6.is_unresolved())
+	    mark_unresolved();
+	if (fte6.is_connected_route())
+	    mark_connected_route();
+    }
+
+    /**
+     * Get an Fte4 entry.
+     *
+     * @return the corresponding Fte4 entry.
+     */
+    inline Fte4 get_fte4() const throw (InvalidCast)
+    {
+	Fte4 fte4(net().get_ipv4net(),
+		  nexthop().get_ipv4(),
+		  ifname(),
+		  vifname(),
+		  metric(),
+		  admin_distance(),
+		  xorp_route());
+	if (is_deleted())
+	    fte4.mark_deleted();
+	if (is_unresolved())
+	    fte4.mark_unresolved();
+	if (is_connected_route())
+	    fte4.mark_connected_route();
+	return fte4;
+    }
+
+    /**
+     * Get an Fte6 entry.
+     *
+     * @return the corresponding Fte6 entry.
+     */
+    inline Fte6 get_fte6() const throw (InvalidCast)
+    {
+	Fte6 fte6(net().get_ipv6net(),
+		  nexthop().get_ipv6(),
+		  ifname(),
+		  vifname(),
+		  metric(),
+		  admin_distance(),
+		  xorp_route());
+	if (is_deleted())
+	    fte6.mark_deleted();
+	if (is_unresolved())
+	    fte6.mark_unresolved();
+	if (is_connected_route())
+	    fte6.mark_connected_route();
+	return fte6;
+    }
+};
 
 #endif	// __FEA_FTE_HH__

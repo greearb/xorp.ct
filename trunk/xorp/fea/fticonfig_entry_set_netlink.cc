@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.17 2004/12/01 03:28:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.18 2004/12/08 01:41:18 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -124,9 +124,7 @@ FtiConfigEntrySetNetlink::stop(string& error_msg)
 bool
 FtiConfigEntrySetNetlink::add_entry4(const Fte4& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    FteX ftex(fte);
     
     return (add_entry(ftex));
 }
@@ -134,9 +132,7 @@ FtiConfigEntrySetNetlink::add_entry4(const Fte4& fte)
 bool
 FtiConfigEntrySetNetlink::delete_entry4(const Fte4& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    FteX ftex(fte);
     
     return (delete_entry(ftex));
 }
@@ -144,9 +140,7 @@ FtiConfigEntrySetNetlink::delete_entry4(const Fte4& fte)
 bool
 FtiConfigEntrySetNetlink::add_entry6(const Fte6& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    FteX ftex(fte);
     
     return (add_entry(ftex));
 }
@@ -154,9 +148,7 @@ FtiConfigEntrySetNetlink::add_entry6(const Fte6& fte)
 bool
 FtiConfigEntrySetNetlink::delete_entry6(const Fte6& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    FteX ftex(fte);
     
     return (delete_entry(ftex));
 }
@@ -209,6 +201,9 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	}
 	break;
     } while (false);
+
+    if (fte.is_connected_route())
+	return true;	// XXX: don't add/remove directly-connected routes
 
     memset(buffer, 0, sizeof(buffer));
 
@@ -398,6 +393,9 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	}
 	break;
     } while (false);
+
+    if (fte.is_connected_route())
+	return true;	// XXX: don't add/remove directly-connected routes
 
     memset(buffer, 0, sizeof(buffer));
 

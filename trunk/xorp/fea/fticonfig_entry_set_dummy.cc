@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_dummy.cc,v 1.6 2004/09/01 18:12:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_dummy.cc,v 1.7 2004/12/01 03:28:08 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -83,6 +83,9 @@ FtiConfigEntrySetDummy::add_entry4(const Fte4& fte)
 {
     if (in_configuration() == false)
 	return false;
+
+    if (fte.is_connected_route())
+	;	// XXX: accept directly-connected routes
     
     int rc = ftic().trie4().route_count();
     XLOG_ASSERT(rc >= 0);
@@ -101,6 +104,9 @@ FtiConfigEntrySetDummy::delete_entry4(const Fte4& fte)
 {
     if (in_configuration() == false)
 	return false;
+
+    if (fte.is_connected_route())
+	;	// XXX: accept directly-connected routes
     
     Trie4::iterator ti = ftic().trie4().find(fte.net());
     if (ti == ftic().trie4().end())
@@ -115,6 +121,9 @@ FtiConfigEntrySetDummy::add_entry6(const Fte6& fte)
 {
     if (in_configuration() == false)
 	return false;
+
+    if (fte.is_connected_route())
+	;	// XXX: accept directly-connected routes
     
     int rc = ftic().trie6().route_count();
     XLOG_ASSERT(rc >= 0);
@@ -133,6 +142,9 @@ FtiConfigEntrySetDummy::delete_entry6(const Fte6& fte)
 {
     if (in_configuration() == false)
 	return false;
+
+    if (fte.is_connected_route())
+	;	// XXX: accept directly-connected routes
     
     Trie6::iterator ti = ftic().trie6().find(fte.net());
     if (ti == ftic().trie6().end())

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer.cc,v 1.7 2004/10/21 00:10:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_observer.cc,v 1.8 2004/11/11 07:48:22 bms Exp $"
 
 
 #include "fea_module.h"
@@ -117,33 +117,13 @@ FtiConfigTableObserver::propagate_fib_changes(const list<FteX>& fte_list)
 	const FteX& ftex = *ftex_iter;
 	if (ftex.net().is_ipv4()) {
 	    // IPv4 entry
-	    Fte4 fte4 = Fte4(ftex.net().get_ipv4net(),
-			     ftex.nexthop().get_ipv4(),
-			     ftex.ifname(),
-			     ftex.vifname(),
-			     ftex.metric(),
-			     ftex.admin_distance(),
-			     ftex.xorp_route());
-	    if (ftex.is_deleted())
-		fte4.mark_deleted();
-	    if (ftex.is_unresolved())
-		fte4.mark_unresolved();
+	    Fte4 fte4 = ftex.get_fte4();
 	    fte_list4.push_back(fte4);
 	}
 
 	if (ftex.net().is_ipv6()) {
 	    // IPv6 entry
-	    Fte6 fte6 = Fte6(ftex.net().get_ipv6net(),
-			     ftex.nexthop().get_ipv6(),
-			     ftex.ifname(),
-			     ftex.vifname(),
-			     ftex.metric(),
-			     ftex.admin_distance(),
-			     ftex.xorp_route());
-	    if (ftex.is_deleted())
-		fte6.mark_deleted();
-	    if (ftex.is_unresolved())
-		fte6.mark_unresolved();
+	    Fte6 fte6 = ftex.get_fte6();
 	    fte_list6.push_back(fte6);
 	}
     }

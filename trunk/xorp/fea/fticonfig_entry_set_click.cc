@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.10 2004/12/03 21:30:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.11 2004/12/08 01:41:18 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -103,9 +103,10 @@ FtiConfigEntrySetClick::add_entry4(const Fte4& fte)
 {
     bool ret_value;
 
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    if (fte.is_connected_route())
+	;	// XXX: accept directly-connected routes
+
+    FteX ftex(fte);
     
     ret_value = add_entry(ftex);
 
@@ -129,9 +130,10 @@ FtiConfigEntrySetClick::delete_entry4(const Fte4& fte)
 {
     bool ret_value;
 
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    if (fte.is_connected_route())
+	;	// XXX: accept directly-connected routes
+
+    FteX ftex(fte);
     
     ret_value = delete_entry(ftex);
 
@@ -153,9 +155,10 @@ FtiConfigEntrySetClick::add_entry6(const Fte6& fte)
 {
     bool ret_value;
 
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    if (fte.is_connected_route())
+	;	// XXX: accept directly-connected routes
+
+    FteX ftex(fte);
     
     ret_value = add_entry(ftex);
 
@@ -179,9 +182,10 @@ FtiConfigEntrySetClick::delete_entry6(const Fte6& fte)
 {
     bool ret_value;
 
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
-	      fte.vifname(), fte.metric(), fte.admin_distance(),
-	      fte.xorp_route());
+    if (fte.is_connected_route())
+	;	// XXX: accept directly-connected routes
+
+    FteX ftex(fte);
     
     ret_value = delete_entry(ftex);
 
