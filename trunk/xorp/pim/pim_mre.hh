@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.7 2003/01/22 19:12:54 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.8 2003/01/23 05:01:27 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -219,6 +219,8 @@ public:
     void	recompute_rpfp_nbr_sg_gen_id_changed();
     // (S,G,rpt)-related upstream changes
     void	recompute_rpfp_nbr_sg_rpt_changed();
+    // (S,G,rpt)-related upstream changes (recomputed via (S,G) to (S,G,rpt))
+    void	recompute_rpfp_nbr_sg_rpt_sg_changed();
     //
     PimNbr	*_mrib_next_hop_rp;	// Applies only for (*,*,RP) and (*,G)
     PimNbr	*_mrib_next_hop_s;	// Applies only for (S,G)
@@ -377,7 +379,7 @@ public:
     bool	recompute_is_join_desired_sg();
     // Note: applies only for (S,G,rpt)
     bool	recompute_is_prune_desired_sg_rpt();
-    // Note: applies only for (S,G)
+    // Note: applies only for (S,G) (recomputed via (S,G) to (S,G,rpt))
     bool	recompute_is_prune_desired_sg_rpt_sg();
     // Note: applies only for (S,G,rpt)
     bool	recompute_is_rpt_join_desired_g();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.4 2003/01/17 23:07:39 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.5 2003/01/22 19:12:54 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -1243,4 +1243,52 @@ PimMre::recompute_rpfp_nbr_sg_rpt_changed()
 			       TIMEVAL_USEC(&t_override),
 			       pim_mre_override_timer_timeout, this);
     }
+}
+
+//
+// RPF'(S,G,rpt) has changes (recomputed via (S,G) state)
+// Take the appropriate action.
+//  XXX: action needed only if RPF'(S,G,rpt) has become equal to RPF'(*,G)
+// Note: applies only for (S,G)
+//
+void
+PimMre::recompute_rpfp_nbr_sg_rpt_sg_changed()
+{
+    PimMre *pim_mre_sg_rpt;
+    
+    if (! is_sg())
+	return;
+    
+    pim_mre_sg_rpt = sg_rpt_entry();
+    
+    //
+    // Try to recompute if RPF'(S,G,rpt) has changed indirectly through the
+    // (S,G,rpt) routing entry (if exists).
+    //
+    if (pim_mre_sg_rpt != NULL) {
+	pim_mre_sg_rpt->recompute_rpfp_nbr_sg_rpt_sg_changed();
+	return;
+    }
+    
+    //
+    // The (S,G,rpt) routing entry doesn't exist, hence create it
+    // and then use it to recompute if RPF'(S,G,rpt) has changed
+    pim_mre_sg_rpt = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+					    PIM_MRE_SG_RPT, PIM_MRE_SG_RPT);
+    if (pim_mre_sg_rpt == NULL) {
+	XLOG_ASSERT(false);
+	XLOG_ERROR("INTERNAL PimMrt ERROR: "
+		   "cannot create entry for (%s,%s) create_flags = %#x",
+		   cstring(source_addr()), cstring(group_addr()),
+		   PIM_MRE_SG_RPT);
+	return;
+    }
+    
+    pim_mre_sg_rpt->recompute_rpfp_nbr_sg_rpt_sg_changed();
+    
+    //
+    // Try to remove the (S,G,rpt) entry that was just created (in cas
+    // it is not needed).
+    //
+    pim_mre_sg_rpt->entry_try_remove();
 }
