@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.20 2003/11/05 07:25:33 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.21 2003/11/11 02:03:56 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -91,18 +91,17 @@ BGPMain::~BGPMain()
     debug_msg("Stopping All Peers\n");
     _peerlist->all_stop();
 
-    /*
-    ** NOTE: We allow one timer to be pending. The timer is in the xrl_router.
-    */
     debug_msg("-------------------------------------------\n");
     debug_msg("Waiting for all peers to go to idle\n");
-    while (_peerlist->not_all_idle()
-	   || eventloop().timer_list_length() > 1) {
+    while (_peerlist->not_all_idle() || _rib_ipc_handler->busy()) {
 	eventloop().run();
-	XLOG_INFO("EVENT: peerlist %d timers %u",
-		  _peerlist->not_all_idle(),
-		  (uint32_t)eventloop().timer_list_length());
     }
+    /*
+    ** NOTE: We expect one timer to be pending. The timer is in the xrl_router.
+    */
+    if (eventloop().timer_list_length() > 1)
+	XLOG_INFO("EVENT: timers %u",
+		  static_cast<uint32_t>(eventloop().timer_list_length()));
 
     /*
     ** Force the table de-registration from the RIB. Otherwise the

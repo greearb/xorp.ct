@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.16 2003/10/30 08:06:51 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.17 2003/11/04 02:27:19 mjh Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -132,6 +132,14 @@ public:
 	_plumbing_unicast = plumbing_unicast;
 	_plumbing_multicast = plumbing_multicast;
     }
+
+    /**
+     * @return true if routes are being sent to the RIB.
+     */
+    bool busy() {
+	return _v4_queue.busy() || _v4_queue.busy();
+    }
+
     /*
     ** Insert fake static route into routing table.
     */
