@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packet_entries.hh,v 1.6 2003/07/21 18:05:55 hodson Exp $
+// $XORP: xorp/rip/packets.hh,v 1.7 2003/08/01 04:08:12 hodson Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -582,9 +582,8 @@ template <typename A>
 void
 RipPacket<A>::set_max_entries(uint32_t max_entries)
 {
-    _data.reserve(sizeof(PacketRouteEntry<A>) * max_entries +
-		  sizeof(RipPacketHeader));
-    _data.resize(max_entries);
+    _data.resize(sizeof(PacketRouteEntry<A>) * max_entries
+		 + sizeof(RipPacketHeader));
     _max_entries = max_entries;
 }
 
