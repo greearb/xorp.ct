@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.11 2003/11/18 23:03:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.12 2003/12/02 09:38:58 pavlin Exp $"
 
 #include <signal.h>
 
@@ -32,7 +32,7 @@
 #include "master_conf_tree.hh"
 #include "module_manager.hh"
 #include "task.hh"
-#include "main_rtrmgr.hh"
+#include "rtrmgr_error.hh"
 
 //
 // Defaults
@@ -54,7 +54,6 @@ int
 main(int argc, char* const argv[])
 {
     UNUSED(argc);
-    int errcode = 0;
 
     //
     // Initialize and start xlog
@@ -71,15 +70,20 @@ main(int argc, char* const argv[])
     const string& config_boot = default_config_boot;
 
     // Read the router config template files
-    TemplateTree *tt;
+    TemplateTree *tt = NULL;
     try {
 	tt = new TemplateTree(default_xorp_root_dir, config_template_dir,
 			      xrl_dir);
-    } catch (const XorpException&) {
-	xorp_unexpected_handler();
-	fprintf(stderr, "test_sample_config: failed to load template file\n");
+    } catch (const InitError& e) {
+	fprintf(stderr, "test_sample_config: template tree init error: %s\n",
+		e.why().c_str());
 	fprintf(stderr, "test_sample_config: TEST FAILED\n");
-	return -1;
+	exit(1);
+    } catch (...) {
+	xorp_unexpected_handler();
+	fprintf(stderr, "test_sample_config: unexpected error\n");
+	fprintf(stderr, "test_sample_config: TEST FAILED\n");
+	exit(1);
     }
 
     // Initialize the event loop
@@ -91,6 +95,7 @@ main(int argc, char* const argv[])
     // Start the module manager
     ModuleManager mmgr(eventloop, /* verbose = */ false,
 		       default_xorp_root_dir);
+
     try {
 	// Initialize the IPC mechanism
 	XrlStdRouter xrl_router(eventloop, "rtrmgr-test", fs.addr(),
@@ -102,11 +107,16 @@ main(int argc, char* const argv[])
 	// required, and initialize them.
 	//
 	MasterConfigTree ct(config_boot, tt, mmgr, xclient, false);
-    } catch (InitError& e) {
-	xorp_print_standard_exceptions();
-	fprintf(stderr, "test_sample_config: failed to load config file\n");
+    } catch (const InitError& e) {
+	fprintf(stderr, "test_sample_config: config tree init error: %s\n",
+		e.why().c_str());
 	fprintf(stderr, "test_sample_config: TEST FAILED\n");
-	return -1;
+	exit(1);
+    } catch (...) {
+	xorp_unexpected_handler();
+	fprintf(stderr, "test_sample_config: unexpected error\n");
+	fprintf(stderr, "test_sample_config: TEST FAILED\n");
+	exit(1);
     }
 
     mmgr.shutdown();
@@ -122,5 +132,5 @@ main(int argc, char* const argv[])
     xlog_stop();
     xlog_exit();
 
-    return (errcode);
+    exit(0);
 }

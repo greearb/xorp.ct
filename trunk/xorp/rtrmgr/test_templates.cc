@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.6 2003/08/02 16:10:13 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.7 2003/12/02 09:38:58 pavlin Exp $"
 
 #include <signal.h>
 
@@ -30,7 +30,7 @@
 #include "template_tree.hh"
 #include "userdb.hh"
 #include "xrl_rtrmgr_interface.hh"
-#include "main_rtrmgr.hh"
+#include "rtrmgr_error.hh"
 
 //
 // Defaults
@@ -93,15 +93,24 @@ main(int argc, char* const argv[])
     }
 
     // Read the router config template files
-    TemplateTree *tt;
+    TemplateTree *tt = NULL;
     try {
 	tt = new TemplateTree(default_xorp_root_dir, config_template_dir,
 			      xrl_dir);
-	tt->display_tree();
-	delete tt;
-    } catch (const XorpException&) {
-	printf("caught exception\n");
+    } catch (const InitError& e) {
+	fprintf(stderr, "test_templates: template tree init error: %s\n",
+		e.why().c_str());
+	fprintf(stderr, "test_templates: TEST FAILED\n");
+	exit(1);
+    } catch (...) {
 	xorp_unexpected_handler();
+	fprintf(stderr, "test_templates: unexpected error\n");
+	fprintf(stderr, "test_templates: TEST FAILED\n");
+	exit(1);
     }
+
+    tt->display_tree();
+    delete tt;
+
     return (0);
 }
