@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.8 2003/06/05 21:44:49 jcardona Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.9 2003/06/05 22:31:41 hodson Exp $
 #
 
 		XORP RELEASE NOTES
@@ -16,6 +16,8 @@ Release 0.3 (2003/??/??)
     - Purge of abort() calls.  Replacement by XLOG_UNFINISHED and
       XLOG_UNREACHABLE.
 
+    - Change to autoconf-2.53 and automake-1.5 as standard autotool versions.
+
   LIBXORP:
     - Allocation without construction bug fixed in SelectorList code.  Fixes
       potential for junk values and sanity checking when the number of active
@@ -28,6 +30,9 @@ Release 0.3 (2003/??/??)
 
     - Explicitly disable copy constructor and assignment operator for
       EventLoop.
+
+    - Replacement of traditional struct timeval with TimeVal class.  TimeVal
+      comes with constructors and numerous helper methods.
 
   LIBXIPC:
     - Removal of 0.1 release Finder code and compatability shims that allowed
@@ -63,9 +68,9 @@ Release 0.3 (2003/??/??)
 
     - More consistent handling of defaults on send and receive sides of Finder.
 
-    - Assorted minor clean-ups.
-
     - Fix xrl_parser_input.cc handling of absolute file names.
+
+    - Assorted minor clean-ups.
 
   XRL:
     - Addition of get_status and shutdown methods to the common interface.
