@@ -89,9 +89,6 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-net_snmp_found = @net_snmp_found@
-snmpd = @snmpd@
-snmpd2 = @snmpd2@
 
 
 # Redefine the bin installation directory

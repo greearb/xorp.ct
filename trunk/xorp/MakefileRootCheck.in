@@ -97,9 +97,6 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-net_snmp_found = @net_snmp_found@
-snmpd = @snmpd@
-snmpd2 = @snmpd2@
 
 AUTOMAKE_OPTIONS = foreign
 ETAGS_ARGS = --c++
@@ -288,7 +285,7 @@ GZIP_ENV = --best
 distdir: $(DISTFILES)
 	-chmod -R a+w $(distdir) >/dev/null 2>&1; rm -rf $(distdir)
 	mkdir $(distdir)
-	$(mkinstalldirs) $(distdir)/config $(distdir)/mibs/snmpdscripts $(distdir)/mibs/tests
+	$(mkinstalldirs) $(distdir)/config
 	@for file in $(DISTFILES); do \
 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
 	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \

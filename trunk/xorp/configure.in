@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.124 2004/11/12 02:44:27 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.125 2004/11/12 02:52:54 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -210,31 +210,19 @@ AC_ARG_WITH(openssl,
 )
 
 dnl ----------------------------
-dnl --with-path-to-snmpd
-dnl ----------------------------
-AC_ARG_WITH(path-to-snmpd,
-	[  --with-path-to-snmpd=DIR         specify path to the snmpd executable],
-	[snmpd=${withval}/snmpd;], [snmpd="not_found";]
-)
-
-dnl ----------------------------
-dnl --with-path-to-net-snmp-src
-dnl ----------------------------
-AC_ARG_WITH(path-to-net-snmp-src,
-	[  --with-path-to-net-snmpd-src=DIR specify path to the net-snmpd source tree],
-	[path_to_net_snmp_src=${withval};], [path_to_net_snmp_src="no";]
-)
-
-dnl ----------------------------
-dnl --without-snmp
+dnl --with-snmp
 dnl ----------------------------
 AC_ARG_WITH(snmp,
-	[  --without-snmp                   do not build XORP MIBs for Net-SNMP],
-	[snmp="no";], [snmp="yes";]
+	[  --with-snmp                   build XORP MIBs for Net-SNMP],
+	 [ snmp="yes";
+	   MIBS="mibs";
+	   AC_CONFIG_SUBDIRS(mibs)
+	 ],
+	 [ snmp="no";
+	   MIBS="";
+	 ]
 )
-
-
-
+AC_SUBST(MIBS)
 
 dnl ---------------------------------------------------------------------------
 dnl Compiler probing
@@ -376,199 +364,6 @@ dnl ---------------------------------------------------------------------------
 dnl Check for programs
 dnl ---------------------------------------------------------------------------
 
-dnl ---------------------------------------------------------------------------
-dnl SNMP
-dnl ---------------------------------------------------------------------------
-
-if test "${snmp}" = "yes"; then
-    AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true", "false")
-else
-    net_snmp_found="skip_check"
-    snmpd="skip_check"
-fi
-
-if test "${net_snmp_found}" = "true";  then
-    net_snmp_v=`net-snmp-config --version`
-    net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.`
-    net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.`
-    net_snmp_rev=`echo $net_snmp_v | cut -f 3 -d.`
-    dnl
-    dnl XXX: if the revision number is missing, then give it value of 0
-    dnl
-    if test "${net_snmp_rev}" = ""; then
-	net_snmp_rev=0
-    fi
-    AC_CACHE_CHECK([if net-snmp version equal or newer than 5.0.6],
-    ac_cv_net_snmp_usable,
-	net_snmp_too_old=true
-	while test "${net_snmp_too_old}" = "true"; do
-	    if test "${net_snmp_maj}" -lt "5" ; then
-		break;
-	    fi
-	    if test "${net_snmp_maj}" -gt "5" ; then
-		net_snmp_too_old=false
-		break;
-	    fi
-	    if test "${net_snmp_min}" -lt "0" ; then
-		break;
-	    fi
-	    if test "${net_snmp_min}" -gt "0" ; then
-		net_snmp_too_old=false
-		break;
-	    fi
-	    if test "${net_snmp_rev}" -lt "6" ; then
-		break;
-	    fi
-	    if test "${net_snmp_rev}" -gt "6" ; then
-		net_snmp_too_old=false
-		break;
-	    fi
-	    net_snmp_too_old=false
-	    break;
-	done
-	if test "${net_snmp_too_old}" != "true"; then
-	    ac_cv_net_snmp_usable=yes
-	else
-	    ac_cv_net_snmp_usable=no
-	    snmpd="skip_check"
-	fi
-    )
-    if test "${ac_cv_net_snmp_usable}" != "yes" ; then
-	AC_MSG_WARN(net-snmp version too old)
-    fi
-elif test "${net_snmp_found}" = "false"; then
-    AC_MSG_WARN(Net-SNMP not found! MIB modules will not be built)
-    snmpd="skip_check"
-fi
-
-
-if test "${snmpd}" = "not_found"; then
-    AC_PATH_PROG(snmpd, snmpd, "not_found", /usr/local/sbin)
-fi
-
-if test "${snmpd}" = "not_found";  then
-    echo "checking again for snmpd in another directory"
-    AC_PATH_PROG(snmpd2, snmpd, "not_found", /usr/sbin)
-    snmpd=$snmpd2
-fi
-
-snmpd_valid="no"
-if test "${snmpd}" = "not_found" ; then
-    AC_MSG_WARN(snmpd not found:  snmp test scripts will not work)
-elif test "${snmpd}" = "skip_check"; then
-    AC_MSG_CHECKING(if snmpd can be started)
-    AC_MSG_RESULT(skipped)
-else
-    AC_MSG_CHECKING(if snmpd can be started)
-    # use the dlmod directive to see if the agent was compiled with dynamic
-    # MIB support.  dummy MIB modules will only generate warnings
-    echo 'dlmod dummy doubledummy' > conftestsnmp.conf
-    test_ports='51510 51520 51530 51540 51550'
-    snmpd_base_args="-f -r -l conftestsnmp.log -c conftestsnmp.conf"
-    # On Linux snmpd seems to need the "-p" flag.
-    for args in "" "-p"
-    do
-	for p in ${test_ports}
-	do
-		${snmpd} ${snmpd_base_args} ${args} udp:localhost:$p&
-		pid=$!
-		sleep 3
-		if ps -p ${pid} > /dev/null
-		then
-			kill ${pid}
-			snmpd_valid="yes"
-			break 2
-		fi
-	done
-    done
-    if test "${snmpd_valid}" = "yes" ; then
-	# Verify that dlmod directive was recognized
-	if ( grep -i -e 'Unknown.*token.*dlmod' conftestsnmp.log ); then
-	    echo "-------------------------------------------------------------"
-	    echo "It looks like your Net-SNMP agent was not compiled with      "
-	    echo "support for shared libraries.  This is option is enabled by  "
-	    echo "default if your platform supports it.  You may try to recom- "
-	    echo "compile Net-SNMP with the option --enable-shared.            "
-            echo "If you are running Linux and Net-SNMP v 5.0.8 you may have   "
-	    echo -n "to apply this patch: "
-	    echo "http://sf.net/tracker/index.php?func=detail&aid=708409&group_id=12694&atid=112694"
-	    echo ""
-            echo "For Linux and Net-SNMP v 5.0.9 the patch is:"
-	    echo "http://sourceforge.net/tracker/index.php?func=detail&aid=905573&group_id=12694&atid=456380"
-	    echo ""
-	    echo "If you don't know how to resolve the problem and do not want to "
-	    echo "see this message again, run ./configure --without-snmp          "
-	    echo "-------------------------------------------------------------"
-	    snmpd_valid="no"
-	fi
-        AC_MSG_RESULT(yes)
-    else
-        AC_MSG_RESULT(no)
-        echo "-------------------------------------------------------------   "
-        echo "Unable to start snmpd. This is the snmpd log file:              "
-	echo
-	cat conftestsnmp.log
-	echo ""
-	echo "If you don't know how to resolve the problem and do not want to "
-	echo "see this message again, run ./configure --without-snmp          "
-        echo "-------------------------------------------------------------   "
-    fi
-fi
-
-oldCPPFLAGS=${CPPFLAGS}
-while test "${net_snmp_found}" = "true"; do
-    NETSNMPCFLAGS=`net-snmp-config --cflags`
-    # Darwin 7.0.0 / OS X 10.3 on ppc gives ppc and i386 arch flags which
-    # the default compiler cannot compile.
-    XR_CHECK_CFLAG(${NETSNMPCFLAGS}, snmpd_flags_valid=yes, snmpd_flags_valid=no)
-    if test "${snmpd_flags_valid}" = "no" ; then
-	echo "-------------------------------------------------------------   "
-	echo "'net-snmp-config --cflags' gave invalid cflags!                 "
-	echo "-------------------------------------------------------------   "
-	snmpd_valid=no
-	break
-    fi
-
-    CPPFLAGS=${NETSNMPCFLAGS}
-    AC_CHECK_HEADERS([net-snmp/agent/net-snmp-agent-includes.h],
-	net_snmp_agent_includes_bug=no,
-        net_snmp_agent_includes_bug=yes,
-        [
-        #include <net-snmp/net-snmp-config.h>
-        #include <net-snmp/net-snmp-includes.h>
-        ]
-    )
-    if test "${net_snmp_agent_includes_bug}" = "yes" ; then
-	AC_MSG_WARN(File <net-snmp/agent/net-snmp-agent-includes.h> does not appear usable)
-	snmpd_valid=no
-	break
-    fi
-    AC_CHECK_HEADERS([net-snmp/library/container.h],
-	net_snmp_container_bug=no,
-        net_snmp_container_bug=yes,
-        [
-        #include <net-snmp/net-snmp-config.h>
-        #include <net-snmp/net-snmp-includes.h>
-        #include <net-snmp/agent/net-snmp-agent-includes.h>
-        ]
-    )
-    if test "${net_snmp_container_bug}" = "yes" ; then
-	AC_MSG_WARN(File <net-snmp/library/container.h> does not appear usable)
-	snmpd_valid=no
-	break
-    fi
-    break
-done
-CPPFLAGS=${oldCPPFLAGS}
-
-if test "${snmpd_valid}" = "yes" ; then
-    MIBS="mibs"
-else
-    AC_MSG_WARN(XORP MIBs will not be built)
-    MIBS=""
-fi
-
-AC_SUBST(MIBS)
 
 dnl ---------------------------------------------------------------------------
 dnl Check for libraries
@@ -1618,9 +1413,6 @@ AC_OUTPUT(
 	libproto/Makefile
 	libxipc/Makefile
 	libxorp/Makefile
-	mibs/Makefile
-	mibs/snmpdscripts/Makefile
-        mibs/tests/Makefile
 	mld6igmp/Makefile
 	mrt/Makefile
 	pim/Makefile
@@ -1640,12 +1432,8 @@ AC_OUTPUT(
 	xrl/interfaces/Makefile
 	xrl/targets/Makefile
 	xrl/tests/Makefile
-	mibs/tests/test_bgpmib.sh
-	mibs/snmpdscripts/startsnmp
 ,
 	echo timestamp > stamp-h
-	chmod a+x mibs/tests/test_bgpmib.sh
-	chmod a+x mibs/snmpdscripts/startsnmp
 )
 
 

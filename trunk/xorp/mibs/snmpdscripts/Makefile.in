@@ -36,7 +36,7 @@ oldincludedir = /usr/include
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
-top_builddir = ../..
+top_builddir = ..
 
 ACLOCAL = @ACLOCAL@
 AUTOCONF = @AUTOCONF@
@@ -62,30 +62,22 @@ host_triplet = @host@
 target_alias = @target_alias@
 target_triplet = @target@
 AMTAR = @AMTAR@
-AR = @AR@
 AS = @AS@
 AWK = @AWK@
 CC = @CC@
-CLI_CURSES_LIB = @CLI_CURSES_LIB@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
-FLOWER_MALLOC = @FLOWER_MALLOC@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LIBTOOL = @LIBTOOL@
-LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
-OSPFD = @OSPFD@
-OSPFD_OS = @OSPFD_OS@
 PACKAGE = @PACKAGE@
-PYTHON = @PYTHON@
-PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 am__include = @am__include@
@@ -121,9 +113,8 @@ EXTRA_DIST = README getbgppeertable getbgpversion snmp.conf startsnmp.in stopsnm
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
-subdir = mibs/snmpdscripts
+subdir = snmpdscripts
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = startsnmp
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 
@@ -149,7 +140,7 @@ distclean-libtool:
 	-rm -f libtool
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  mibs/snmpdscripts/Makefile
+	  $(AUTOMAKE) --gnu  snmpdscripts/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \
@@ -269,7 +260,7 @@ check-TESTS: $(TESTS)
 
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
-top_distdir = ../..
+top_distdir = ..
 distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 
 distdir: $(DISTFILES)
