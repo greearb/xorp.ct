@@ -1,9 +1,9 @@
 #
-# $XORP: xorp/pim/README,v 1.6 2003/04/29 18:30:36 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.7 2003/06/05 08:44:37 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
-============================================
+==================================================================
 
 This directory contains the XORP implementation of the PIM-SM protocol.
 
@@ -107,11 +107,11 @@ it for each router:
 Documentation
 =============
 
-The MFEA architecture is described in:
-	$(XORP)/docs/pim
+The PIM-SM design architecture and code structure are described in:
+	$(XORP)/docs/pim/
 
 The programming documentation is in:
-	$(XORP)/docs/kdoc/html/pim
+	$(XORP)/docs/kdoc/html/pim/
 
 Testing
 =======
@@ -126,7 +126,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (June 6, 2003), the PIM-SM implementation is based
+Currently (June 2003), the PIM-SM implementation is based
 on the specification in the following documents:
 
  * draft-ietf-pim-sm-v2-new-05.{ps,txt} (The core PIM-SM specification).
