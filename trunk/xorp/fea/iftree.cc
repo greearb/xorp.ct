@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.14 2003/08/22 04:23:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.15 2003/09/30 03:07:57 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -277,7 +277,7 @@ IfTree::ignore_duplicates(const IfTree& o)
 /* IfTreeInterface code */
 
 IfTreeInterface::IfTreeInterface(const string& ifname)
-    : IfTreeItem(), _ifname(ifname), _enabled(false), _mtu(0)
+    : IfTreeItem(), _ifname(ifname), _enabled(false), _mtu(0), _if_flags(0)
 {}
 
 bool
@@ -327,9 +327,11 @@ string
 IfTreeInterface::str() const
 {
     return c_format("Interface %s { enabled := %s } "
-		    "{ mtu := %d } { mac := %s }",
+		    "{ mtu := %u } { mac := %s } { flags := %u }",
 		    _ifname.c_str(), true_false(_enabled), _mtu,
-		    _mac.str().c_str()) + string(" ") + IfTreeItem::str();
+		    _mac.str().c_str(), _if_flags)
+	+ string(" ")
+	+ IfTreeItem::str();
 }
 
 /* ------------------------------------------------------------------------- */
@@ -489,7 +491,7 @@ IfTreeAddr4::str() const
     string r = c_format("V4Addr %s { enabled := %s } { broadcast := %s } "
 			"{ loopback := %s } { point_to_point := %s } "
 			"{ multicast := %s } "
-			"{ prefix_len := %d }",
+			"{ prefix_len := %u }",
 			_addr.str().c_str(), true_false(_enabled),
 			true_false(_broadcast), true_false(_loopback),
 			true_false(_point_to_point), true_false(_multicast),
@@ -543,7 +545,7 @@ IfTreeAddr6::str() const
     string r = c_format("V6Addr %s { enabled := %s } "
 			"{ loopback := %s } { point_to_point := %s } "
 			"{ multicast := %s } "
-			"{ prefix_len := %d }",
+			"{ prefix_len := %u }",
 			_addr.str().c_str(), true_false(_enabled),
 			true_false(_loopback),
 			true_false(_point_to_point), true_false(_multicast),

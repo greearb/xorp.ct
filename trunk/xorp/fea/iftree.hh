@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.11 2003/08/22 04:23:03 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.12 2003/09/30 03:07:57 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -227,6 +227,27 @@ public:
 
     inline void set_mac(const Mac& mac)	{ _mac = mac; mark(CHANGED); }
 
+    /**
+     * Get the system-specific interface flags.
+     *
+     * Typically, this value is read from the underlying system, and is
+     * used only for internal purpose.
+     *
+     * @return the system-specific interface flags.
+     */
+    inline uint32_t if_flags() const	{ return _if_flags; }
+
+    /**
+     * Store the system-specific interface flags.
+     *
+     * Typically, this value is read from the underlying system, and is
+     * used only for internal purpose.
+     *
+     * @param if_flags the value of the system-specific interface flags to
+     * store.
+     */
+    inline void set_if_flags(uint32_t if_flags) { _if_flags = if_flags; mark(CHANGED); }
+
     inline const VifMap& vifs() const	{ return _vifs; }
     inline VifMap& vifs()		{ return _vifs; }
 
@@ -246,6 +267,7 @@ public:
 	set_enabled(o.enabled());
 	set_mtu(o.mtu());
 	set_mac(o.mac());
+	set_if_flags(o.if_flags());
     }
     
     /**
@@ -258,7 +280,8 @@ public:
     {
 	return ((enabled() == o.enabled())
 		&& (mtu() == o.mtu())
-		&& (mac() == o.mac()));
+		&& (mac() == o.mac())
+		&& (if_flags() == o.if_flags()));
     }
     
     void finalize_state();
@@ -270,6 +293,7 @@ protected:
     bool 	 _enabled;
     uint32_t 	 _mtu;
     Mac 	 _mac;
+    uint32_t	 _if_flags;	// The system-specific interface flags
     VifMap	 _vifs;
 };
 
