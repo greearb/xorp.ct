@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.52 2003/10/28 21:01:37 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.53 2003/10/28 22:44:43 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -387,10 +387,7 @@ BGPPeer::event_start()			// EVENTBGPSTART
 	// Initalise resources
 	start_connect_retry_timer();
 	set_state(STATECONNECT);
-	if (connect_to_peer())
-	    event_open();		// Event = EVENTBGPTRANOPEN
-	else
-	    event_openfail();		// Event = EVENTBGPCONNOPENFAIL
+	connect_to_peer(callback(this, &BGPPeer:: connect_to_peer_complete));
 	break;
 
     // in all other cases, remain in the same state
@@ -593,10 +590,7 @@ BGPPeer::event_connexp()			// EVENTCONNTIMEEXP
 	    set_state(STATECONNECT);
 	}
 	// Initiate a transport Connection
-	if (connect_to_peer())
-	    event_open();		// Event = EVENTBGPTRANOPEN
-	else
-	    event_openfail();		// Event = EVENTBGPCONNOPENFAIL
+	connect_to_peer(callback(this, &BGPPeer:: connect_to_peer_complete));
 	break;
 
     /*

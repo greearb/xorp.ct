@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.3 2003/04/22 19:20:20 mjh Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.4 2003/09/24 02:16:07 atanu Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -95,7 +95,9 @@ public:
     SocketClient(int s, EventLoop& e);
     ~SocketClient();
 
-    bool connect();
+    typedef XorpCallback1<void, bool>::RefPtr ConnectCallback;
+
+    void connect(ConnectCallback cb);
     void connected(int s);
     void flush_transmit_queue();
     void stop_reader() {async_remove_reader();}
@@ -137,8 +139,9 @@ public:
     bool still_reading();
 protected:
 private:
-    bool connect_socket(int sock, struct in_addr raddr, uint16_t port,
-			struct in_addr laddr);
+    void connect_socket(int sock, struct in_addr raddr, uint16_t port,
+			struct in_addr laddr, ConnectCallback cb);
+    void connect_socket_complete(int fd, SelectorMask m, ConnectCallback cb);
     void async_add(int sock);
     void async_remove();
     void async_remove_reader();

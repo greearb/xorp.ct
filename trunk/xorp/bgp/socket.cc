@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.8 2003/09/24 02:16:07 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.9 2003/12/10 19:03:32 atanu Exp $"
 
 // #define DEBUG_LOGGING 
-// #define DEBUG_PRINT_FUNCTION_NAME 
+#define DEBUG_PRINT_FUNCTION_NAME 
 
 #include <fcntl.h>
 
@@ -97,8 +97,8 @@ Socket::create_socket()
 
 void
 Socket::init_sockaddr(struct sockaddr_in *name, 
-			       struct in_addr addr,
-			       uint16_t port)
+		      struct in_addr addr,
+		      uint16_t port)
 {
     debug_msg("addr %s port %d len = %u\n", inet_ntoa(addr), ntohs(port),
 	      (uint32_t)sizeof(*name));
@@ -168,8 +168,8 @@ SocketClient::disconnect()
     _disconnecting = false;
 }
 
-bool
-SocketClient::connect()
+void
+SocketClient::connect(ConnectCallback cb)
 {
     debug_msg("SocketClient connecting to remote Peer %s\n",
 	      get_remote_host());
@@ -178,7 +178,7 @@ SocketClient::connect()
 
     create_socket();
     return connect_socket(get_sock(), get_remote_addr(), get_remote_port(),
-			  get_local_addr());
+			  get_local_addr(), cb);
 }
 
 void
@@ -383,9 +383,9 @@ SocketClient::output_queue_size() const {
 
 /* **************** BGPSocketClient - PRIVATE METHODS *********************** */
 
-bool
+void
 SocketClient::connect_socket(int sock, struct in_addr raddr, uint16_t port,
-			     struct in_addr laddr)
+			     struct in_addr laddr, ConnectCallback cb)
 {
     struct sockaddr_in local;
     debug_msg("laddr %s\n", inet_ntoa(laddr));
@@ -401,36 +401,116 @@ SocketClient::connect_socket(int sock, struct in_addr raddr, uint16_t port,
 	*/
 	close_socket();
 
-	return false;
+	cb->dispatch(false);
+
+	return;
     }
 
     struct sockaddr_in servername;
     debug_msg("raddr %s port %d\n", inet_ntoa(raddr), ntohs(port));
     init_sockaddr(&servername, raddr, port);
 
-    if(-1 == ::connect(sock, reinterpret_cast<struct sockaddr *>(&servername), 
-		      sizeof(servername))) {
-
- 	debug_msg("Connect failed: %s\n", strerror(errno));
-// 	XLOG_ERROR("Connect failed: %s", strerror(errno));
-
-	/*
-	** This endpoint is now screwed so shut it.
-	*/
-	close_socket();
-
-	return false;
+    if (!eventloop().
+       add_selector(sock,
+		    SEL_ALL,
+		    callback(this,
+			     &SocketClient::connect_socket_complete,
+			     cb))) {
+	XLOG_ERROR("Failed to add socket %d to eventloop", sock);
     }
-    debug_msg("socket connected (fd %d)\n", sock);
-    async_add(sock);
 
-    return true;
+    if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
+        XLOG_FATAL("Failed to go non-blocking: %s", strerror(errno));
+    }
+
+    // Given the file descriptor is now non-blocking we would expect a
+    // in progress error.
+
+    if (-1 == ::connect(sock,
+			reinterpret_cast<struct sockaddr *>(&servername), 
+			sizeof(servername))) {
+
+	if (EINPROGRESS == errno)
+	    return;
+
+	debug_msg("Connect failed: %s raddr %s port %d\n",
+		  strerror(errno), inet_ntoa(raddr), ntohs(port));
+//  	XLOG_ERROR("Connect failed: %s raddr %s port %d",
+// 		   strerror(errno), inet_ntoa(raddr), ntohs(port));
+    }
+
+    // Its possible that the connection completed immediately, this
+    // happens in the loopback case.
+    connect_socket_complete(sock, SEL_ALL, cb);
+}
+
+void
+SocketClient::connect_socket_complete(int sock, SelectorMask m,
+				      ConnectCallback cb)
+{
+    debug_msg("connect socket complete %d %d\n", sock, m);
+
+    eventloop().remove_selector(sock);
+
+    struct sockaddr_in sin;
+    socklen_t len = sizeof(sin);
+    int error;
+
+    /*
+    ** Try a number of different methods to discover if the connection
+    ** has suceeded.
+    */
+
+    // Did the connection succeed?
+    if (read(sock, 0, 0) != 0) {
+	debug_msg("connect failed (read) %d\n", sock);
+	goto failed;
+    }
+
+    // Did the connection succeed?
+    memset(reinterpret_cast<void *>(&sin), 0, sizeof(sin));
+    len = sizeof(sin);
+    if (1 == getpeername(sock,
+			 reinterpret_cast<struct sockaddr *>(&sin), &len)) {
+	debug_msg("connect failed (geetpeername) %d\n", sock);
+	goto failed;
+    }
+    
+    if (0 == sin.sin_port) {
+	debug_msg("connect failed (sin_port) %d\n", sock);
+	goto failed;
+    }
+
+    if (0 == sin.sin_addr.s_addr) {
+	debug_msg("connect failed (sin_addr) %d\n", sock);
+	goto failed;
+    }
+
+    // Did the connection succeed?
+    len = sizeof(error);
+    if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0) {
+	debug_msg("connect failed (getsockopt) %d\n", sock);
+	goto failed;
+    }
+
+    debug_msg("connect suceeded %d\n", sock);
+
+    async_add(sock);
+    cb->dispatch(true);
+    return;
+
+ failed:
+//  	XLOG_ERROR("Connect failed: raddr %s port %d",
+// 		   inet_ntoa(get_remote_addr()), ntohs(get_remote_port()));
+
+	close_socket();
+	cb->dispatch(false);
 }
 
 void 
 SocketClient::async_add(int sock)
 {
-    if(fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
+    if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
         XLOG_FATAL("Failed to go non-blocking: %s", strerror(errno));
     }
 

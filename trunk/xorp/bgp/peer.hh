@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.8 2003/04/28 18:13:03 jcardona Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.9 2003/04/28 22:05:08 jcardona Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -144,7 +144,16 @@ private:
 
     friend class BGPPeerList;
 
-    bool connect_to_peer()		{ return _SocketClient->connect(); }
+    void connect_to_peer(SocketClient::ConnectCallback cb) {
+	_SocketClient->connect(cb);
+    }
+    void connect_to_peer_complete(bool success) {
+	if (success)
+	    event_open();		// Event = EVENTBGPTRANOPEN
+	else
+	    event_openfail();		// Event = EVENTBGPCONNOPENFAIL
+    }
+
     void send_notification(const NotificationPacket& p, bool error = true) {
 	send_notification(&p, error);
     }
