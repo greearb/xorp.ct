@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.7 2004/05/13 07:13:27 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.8 2004/05/14 20:45:57 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -413,7 +413,9 @@ class AddTransactionRoute : public AddRoute<A> {
 public:
     AddTransactionRoute(RedistTransactionXrlOutput<A>* parent,
 			const IPRouteEntry<A>& ipr)
-	: AddRoute<A>(parent, ipr) {}
+	: AddRoute<A>(parent, ipr) {
+	parent->incr_transaction_size();
+    }
     virtual bool dispatch(XrlRouter& xrl_router);
 };
 
@@ -422,7 +424,9 @@ class DeleteTransactionRoute : public DeleteRoute<A> {
 public:
     DeleteTransactionRoute(RedistTransactionXrlOutput<A>* parent,
 			   const IPRouteEntry<A>& ipr)
-	: DeleteRoute<A>(parent, ipr) {}
+	: DeleteRoute<A>(parent, ipr) {
+	parent->incr_transaction_size();
+    }
     virtual bool dispatch(XrlRouter& xrl_router);
 };
 
@@ -430,7 +434,9 @@ template <typename A>
 class StartTransaction : public RedistXrlTask<A> {
 public:
     StartTransaction(RedistTransactionXrlOutput<A>* parent)
-	: RedistXrlTask<A>(parent) {}
+	: RedistXrlTask<A>(parent) {
+	parent->reset_transaction_size();
+    }
     virtual bool dispatch(XrlRouter&  xrl_router);
     void dispatch_complete(const XrlError& xe, const uint32_t* tid);
 };
@@ -438,23 +444,23 @@ public:
 template <typename A>
 class CommitTransaction : public RedistXrlTask<A> {
 public:
-    CommitTransaction(RedistTransactionXrlOutput<A>* parent, uint32_t tid)
-	: RedistXrlTask<A>(parent), _tid(tid) {}
+    CommitTransaction(RedistTransactionXrlOutput<A>* parent)
+	: RedistXrlTask<A>(parent) {
+	parent->reset_transaction_size();
+    }
     virtual bool dispatch(XrlRouter&  xrl_router);
     void dispatch_complete(const XrlError& xe);
-private:
-    uint32_t _tid;
 };
 
 template <typename A>
 class AbortTransaction : public RedistXrlTask<A> {
 public:
-    AbortTransaction(RedistTransactionXrlOutput<A>* parent, uint32_t tid)
-	: RedistXrlTask<A>(parent), _tid(tid) {}
+    AbortTransaction(RedistTransactionXrlOutput<A>* parent)
+	: RedistXrlTask<A>(parent) {
+	parent->reset_transaction_size();
+    }
     virtual bool dispatch(XrlRouter&  xrl_router);
     void dispatch_complete(const XrlError& xe);
-private:
-    uint32_t _tid;
 };
 
 
@@ -636,6 +642,8 @@ CommitTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
     RedistTransactionXrlOutput<IPv4>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
 
+    uint32_t tid = p->tid();
+
     p->set_tid(0);	// XXX: reset the tid
     p->set_transaction_in_progress(false);
     p->set_transaction_in_error(false);
@@ -643,7 +651,7 @@ CommitTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
     XrlRedistTransaction4V0p1Client cl(&xrl_router);
     return cl.send_commit_transaction(
 	p->xrl_target_name().c_str(),
-	_tid,
+	tid,
 	callback(this, &CommitTransaction<IPv4>::dispatch_complete));
 }
 
@@ -654,6 +662,8 @@ CommitTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
 
+    uint32_t tid = p->tid();
+
     p->set_tid(0);	// XXX: reset the tid
     p->set_transaction_in_progress(false);
     p->set_transaction_in_error(false);
@@ -661,7 +671,7 @@ CommitTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
     XrlRedistTransaction6V0p1Client cl(&xrl_router);
     return cl.send_commit_transaction(
 	p->xrl_target_name().c_str(),
-	_tid,
+	tid,
 	callback(this, &CommitTransaction<IPv6>::dispatch_complete));
 }
 
@@ -695,6 +705,8 @@ AbortTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
     RedistTransactionXrlOutput<IPv4>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv4>*>(this->parent());
 
+    uint32_t tid = p->tid();
+
     p->set_tid(0);	// XXX: reset the tid
     p->set_transaction_in_progress(false);
     p->set_transaction_in_error(false);
@@ -702,7 +714,7 @@ AbortTransaction<IPv4>::dispatch(XrlRouter& xrl_router)
     XrlRedistTransaction4V0p1Client cl(&xrl_router);
     return cl.send_abort_transaction(
 	p->xrl_target_name().c_str(),
-	_tid,
+	tid,
 	callback(this, &AbortTransaction<IPv4>::dispatch_complete));
 }
 
@@ -713,6 +725,8 @@ AbortTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
 
+    uint32_t tid = p->tid();
+
     p->set_tid(0);	// XXX: reset the tid
     p->set_transaction_in_progress(false);
     p->set_transaction_in_error(false);
@@ -720,7 +734,7 @@ AbortTransaction<IPv6>::dispatch(XrlRouter& xrl_router)
     XrlRedistTransaction6V0p1Client cl(&xrl_router);
     return cl.send_abort_transaction(
 	p->xrl_target_name().c_str(),
-	_tid,
+	tid,
 	callback(this, &AbortTransaction<IPv6>::dispatch_complete));
 }
 
@@ -759,7 +773,8 @@ RedistTransactionXrlOutput<A>::RedistTransactionXrlOutput(
 			 xrl_target_name, cookie),
       _tid(0),
       _transaction_in_progress(false),
-      _transaction_in_error(false)
+      _transaction_in_error(false),
+      _transaction_size(0)
 {
 }
 
@@ -767,32 +782,46 @@ template <typename A>
 void
 RedistTransactionXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
 {
-    bool did_start_transaction = false;
+    bool no_running_tasks = (this->task_count() == 0);
 
-    if (! transaction_in_progress()) {
+    if (this->transaction_size() == 0)
+	this->enqueue_task(new StartTransaction<A>(this));
+
+    //
+    // If the accumulated transaction size is too large, commit the
+    // current transaction and start a new one.
+    //
+    if (this->transaction_size() >= MAX_TRANSACTION_SIZE) {
+	enqueue_task(new CommitTransaction<A>(this));
 	enqueue_task(new StartTransaction<A>(this));
-	did_start_transaction = true;
     }
+
     enqueue_task(new AddTransactionRoute<A>(this, ipr));
-    if (did_start_transaction && (this->task_count() == 2)) {
+    if (no_running_tasks)
 	start_running_tasks();
-    }
 }
 
 template <typename A>
 void
 RedistTransactionXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
 {
-    bool did_start_transaction = false;
+    bool no_running_tasks = (this->task_count() == 0);
 
-    if (! transaction_in_progress()) {
+    if (this->transaction_size() == 0)
 	enqueue_task(new StartTransaction<A>(this));
-	did_start_transaction = true;
+
+    //
+    // If the accumulated transaction size is too large, commit the
+    // current transaction and start a new one.
+    //
+    if (this->transaction_size() >= MAX_TRANSACTION_SIZE) {
+	enqueue_task(new CommitTransaction<A>(this));
+	enqueue_task(new StartTransaction<A>(this));
     }
+
     enqueue_task(new DeleteTransactionRoute<A>(this, ipr));
-    if (did_start_transaction && (this->task_count() == 2)) {
-	this->start_running_tasks();
-    }
+    if (no_running_tasks)
+	start_running_tasks();
 }
 
 template <typename A>
@@ -819,7 +848,7 @@ RedistTransactionXrlOutput<A>::task_completed(Task* task)
 	// If transaction in progress, and this is the last add/delete,
 	// then send "commit transaction".
 	//
-	enqueue_task(new CommitTransaction<A>(this, _tid));
+	enqueue_task(new CommitTransaction<A>(this));
 	this->start_next_task();
 	return;
     }

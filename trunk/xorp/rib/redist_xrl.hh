@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/redist_xrl.hh,v 1.2 2004/05/12 08:28:50 pavlin Exp $
+// $XORP: xorp/rib/redist_xrl.hh,v 1.3 2004/05/14 20:45:57 pavlin Exp $
 
 #ifndef __RIB_REDIST_XRL_HH__
 #define __RIB_REDIST_XRL_HH__
@@ -123,13 +123,21 @@ public:
     inline bool transaction_in_error() const;
     inline void set_transaction_in_error(bool v);
 
+    // The size of the transaction that is build-in-progress
+    inline size_t transaction_size() const { return _transaction_size; }
+    inline void reset_transaction_size() { _transaction_size = 0; }
+    inline void incr_transaction_size() { _transaction_size++; }
+    
+    static const size_t MAX_TRANSACTION_SIZE	 = 100;
+
 protected:
     void start_running_tasks();
 
 protected:
-    uint32_t	_tid;
+    uint32_t	_tid;			// Send-in-progress transaction ID
     bool	_transaction_in_progress;
     bool	_transaction_in_error;
+    size_t	_transaction_size;	// Build-in-progress transaction size
 };
 
 
