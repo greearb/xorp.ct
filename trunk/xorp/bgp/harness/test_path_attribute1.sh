@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.2 2003/08/06 18:30:44 atanu Exp $
+# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.3 2003/10/30 04:37:44 atanu Exp $
 #
 
 #
@@ -113,10 +113,10 @@ test1()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
     coord peer1 assert established
 
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101
     coord peer2 assert established
 
-    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.100
+    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
     coord peer3 assert established
 
     ASPATH="$PEER1_AS,1,2,(3,4,5),6,(7,8),9"
@@ -175,10 +175,10 @@ test2()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
     coord peer1 assert established
 
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101
     coord peer2 assert established
 
-    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.100
+    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
     coord peer3 assert established
 
     ASPATH="$PEER1_AS,1,2,(3,4,5),6,(7,8),9"
@@ -241,10 +241,10 @@ test3()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
     coord peer1 assert established
 
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101
     coord peer2 assert established
 
-    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.100
+    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
     coord peer3 assert established
 
     ASPATH="$PEER1_AS,1,2,(3,4,5),6,(7,8),9"

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.31 2003/10/30 04:39:27 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.32 2003/10/31 02:46:03 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -292,7 +292,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (const string& ribname,
     FilterTable<A> *filter_out =
 	new FilterTable<A>(ribname + "IpcChannelOutputFilter",
 			     _fanout_table, _next_hop_resolver);
-    _fanout_table->add_next_table(filter_out,NULL);
+    _fanout_table->add_next_table(filter_out, _master.rib_handler());
     _tables.insert(filter_out);
 
     CacheTable<A> *cache_out =

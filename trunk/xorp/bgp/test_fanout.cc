@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.16 2003/09/16 21:00:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.17 2003/10/11 03:17:57 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -39,9 +39,23 @@ test_fanout(TestInfo& /*info*/)
     BGPMain bgpmain;
     //    EventLoop* eventloop = bgpmain.eventloop();
     LocalData localdata;
-    BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
+    Iptuple tuple1("127.0.0.1", 179, "10.0.0.1", 179);
+    Iptuple tuple2("127.0.0.1", 179, "10.0.0.2", 179);
+    Iptuple tuple3("127.0.0.1", 179, "10.0.0.3", 179);
+
+    BGPPeerData* pd1 
+	= new BGPPeerData(tuple1, AsNum(1), IPv4("10.0.0.1"), 30);
+    pd1->set_id(IPv4("10.0.0.1"));
+    BGPPeerData* pd2
+	= new BGPPeerData(tuple2, AsNum(1), IPv4("10.0.0.2"), 30);
+    pd2->set_id(IPv4("10.0.0.2"));
+    BGPPeerData* pd3
+	= new BGPPeerData(tuple3, AsNum(1), IPv4("10.0.0.3"), 30);
+    pd3->set_id(IPv4("10.0.0.3"));
+
+    BGPPeer peer1(&localdata, pd1, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL, NULL);
-    BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
+    BGPPeer peer2(&localdata, pd2, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 
     FanoutTable<IPv4> *fanout_table
@@ -326,7 +340,7 @@ test_fanout(TestInfo& /*info*/)
     //================================================================
     //add a route
     //set output state on both peers to be busy
-    BGPPeer peer3(&localdata, NULL, NULL, &bgpmain);
+    BGPPeer peer3(&localdata, pd3, NULL, &bgpmain);
     PeerHandler handler3("test3", &peer3, NULL, NULL);
 
     DebugTable<IPv4>* debug_table3

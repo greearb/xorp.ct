@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.21 2003/10/11 03:17:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.22 2003/10/30 20:29:27 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -45,7 +45,7 @@ test_dump(TestInfo& /*info*/)
 	= new BGPPeerData(iptuple1, AsNum(1), IPv4("2.0.0.1"), 30);
     //start off with both being IBGP
     peer_data1->set_internal_peer(true);
-    peer_data1->set_id("2.0.0.0");
+    peer_data1->set_id("2.0.0.1");
     BGPPeer peer1(&localdata, peer_data1, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL, NULL);
 
@@ -54,16 +54,16 @@ test_dump(TestInfo& /*info*/)
 	= new BGPPeerData(iptuple2, AsNum(1), IPv4("2.0.0.2"), 30);
     //start off with both being IBGP
     peer_data2->set_internal_peer(true);
-    peer_data2->set_id("2.0.0.0");
+    peer_data2->set_id("2.0.0.2");
     BGPPeer peer2(&localdata, peer_data2, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 
     Iptuple iptuple3("3.0.0.127", 179, "2.0.0.3", 179);
     BGPPeerData *peer_data3
-	= new BGPPeerData(iptuple2, AsNum(1), IPv4("2.0.0.3"), 30);
+	= new BGPPeerData(iptuple3, AsNum(1), IPv4("2.0.0.3"), 30);
     //start off with both being IBGP
     peer_data3->set_internal_peer(true);
-    peer_data3->set_id("2.0.0.0");
+    peer_data3->set_id("2.0.0.3");
     BGPPeer peer3(&localdata, peer_data3, NULL, &bgpmain);
     PeerHandler handler3("test3", &peer3, NULL, NULL);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.4 2003/05/29 17:59:08 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -22,7 +22,72 @@
 #include "peer_route_pair.hh"
 #include "route_queue.hh"
 
+#define NEWMAP
+
 template<class A> class DumpTable;
+
+template<class A>
+class NextTableMapIterator {
+public:
+    NextTableMapIterator() {};
+#ifdef NEWMAP
+    NextTableMapIterator(const typename map<uint32_t, PeerRoutePair<A>*>::iterator& iter) {
+	_iter = iter;
+    }
+    BGPRouteTable<A>* first() {
+	return _iter->second->route_table();
+    }
+    PeerRoutePair<A>& second() {
+	return *(_iter->second);
+    }
+#else
+    NextTableMapIterator(const typename map <BGPRouteTable<A>*, PeerRoutePair<A>*>::iterator& iter) {
+	_iter = iter;
+    }
+    BGPRouteTable<A>* first() {
+	return _iter->first;
+    }
+    PeerRoutePair<A>& second() {
+	return *(_iter->second);
+    }
+#endif
+    inline void operator ++(int) {
+	_iter++;
+    }
+    inline bool operator==(const NextTableMapIterator& them) const {
+	return _iter == them._iter;
+    }
+private:
+#ifdef NEWMAP
+    typename map <uint32_t, PeerRoutePair<A>*>::iterator _iter;
+#else
+    typename map <BGPRouteTable<A>*, PeerRoutePair<A>*>::iterator _iter;
+#endif
+};
+
+/**
+ * NextTableMap behaves more or less like a map between a
+   BGPRouteTable<A>* and a const PeerHandler*, but it gives
+   deterministic ordering semantics so our test suites aren't
+   dependent on the memory allocator.  This class basically hides the
+   complexity of maintaining two parallel data structures from the
+   main FanoutTable code */
+
+template<class A> 
+class NextTableMap  {
+public:
+    typedef NextTableMapIterator<A> iterator;
+    NextTableMap() {};
+    void insert(BGPRouteTable<A> *next_table,
+		const PeerHandler *ph);
+    void erase(iterator& iter);
+    iterator find(BGPRouteTable<A> *next_table);
+    iterator begin();
+    iterator end();
+private:
+    map<BGPRouteTable<A> *, PeerRoutePair<A>* > _next_tables;
+    map<uint32_t, PeerRoutePair<A>* > _next_table_order;
+};
 
 template<class A>
 class FanoutTable : public BGPRouteTable<A>  {
@@ -76,7 +141,8 @@ private:
 
     void add_dump_table(DumpTable<A> *dump_table); 
     void remove_dump_table(DumpTable<A> *dump_table);
-    map<BGPRouteTable<A> *, PeerRoutePair<A> > _next_tables;
+    //    map<BGPRouteTable<A> *, PeerRoutePair<A> > _next_tables;
+    NextTableMap<A> _next_tables;
 
     list <const RouteQueueEntry<A>*> _output_queue;
     set <DumpTable<A>*> _dump_tables;

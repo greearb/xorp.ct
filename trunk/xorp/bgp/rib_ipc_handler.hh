@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.15 2003/10/23 03:10:05 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.16 2003/10/30 08:06:51 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -158,6 +158,11 @@ public:
      * true otherwise 
      */
     bool status(string& reason) const;
+
+    //fake a zero IP address so the RIB IPC handler gets listed first
+    //in the Fanout Table.
+    const IPv4& id() const		{ return _fake_id; }
+
 private:
     bool unregister_rib();
 
@@ -172,6 +177,7 @@ private:
 
     XrlQueue<IPv4> _v4_queue;
     XrlQueue<IPv6> _v6_queue;
+    IPv4 _fake_id;
 };
 
 #endif // __BGP_RIB_IPC_HANDLER_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.5 2003/10/14 01:54:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.6 2003/10/23 03:10:06 atanu Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -46,14 +46,16 @@ PlumbingTest::run_tests()
 bool
 PlumbingTest::test1() 
 {
-    Iptuple iptuple;
+    Iptuple iptuple1("127.0.0.1", 179, "1.0.0.1", 179);
+    Iptuple iptuple2("127.0.0.1", 179, "1.0.0.2", 179);
     IPv4 nh;
 
     LocalData local_data;
     local_data.set_as(my_AS_number());
 
-    BGPPeerData *peer_data1 = new BGPPeerData(iptuple, AsNum(666), nh, 0);
+    BGPPeerData *peer_data1 = new BGPPeerData(iptuple1, AsNum(666), nh, 0);
 //     peer_data1->set_as(AsNum(666));
+    peer_data1->set_id("1.0.0.1");
     peer_data1->set_internal_peer(true);
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
 
@@ -63,9 +65,10 @@ PlumbingTest::test1()
     //add_peering(&dummy_peerhandler1);
     printf("Peering Added.\n");
 
-    BGPPeerData *peer_data2 = new BGPPeerData(iptuple, AsNum(667), nh, 0);
+    BGPPeerData *peer_data2 = new BGPPeerData(iptuple2, AsNum(667), nh, 0);
 //     peer_data2->set_as(AsNum(667));
-    peer_data1->set_internal_peer(true);
+    peer_data2->set_id("1.0.0.2");
+    peer_data2->set_internal_peer(true);
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);
  
     printf("Adding Peering 2\n");
@@ -254,14 +257,16 @@ PlumbingTest::test2()
     /*
     ** 1. Create a single peer (peer1).
     */
-    Iptuple iptuple;
+    Iptuple iptuple1("127.0.0.1", 179, "1.0.0.1", 179);
+    Iptuple iptuple2("127.0.0.1", 179, "1.0.0.2", 179);
     IPv4 nh;
 
     LocalData local_data;
     local_data.set_as(my_AS_number());
 
-    BGPPeerData *peer_data1 = new BGPPeerData(iptuple, AsNum(666), nh, 0);
+    BGPPeerData *peer_data1 = new BGPPeerData(iptuple1, AsNum(666), nh, 0);
 //     peer_data1->set_as(AsNum(666));
+    peer_data1->set_id("1.0.0.1");
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
 
     printf("Adding Peering 1\n");
@@ -310,7 +315,8 @@ PlumbingTest::test2()
     /*
     ** 3. Add another peer (peer2).
     */
-    BGPPeerData *peer_data2 = new BGPPeerData(iptuple, AsNum(667), nh, 0);;
+    BGPPeerData *peer_data2 = new BGPPeerData(iptuple2, AsNum(667), nh, 0);
+    peer_data2->set_id("1.0.0.2");
 //     peer_data2->set_as(AsNum(667));
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);
  

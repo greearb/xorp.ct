@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.8 2003/06/11 23:22:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.9 2003/06/12 02:16:19 atanu Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -249,6 +249,8 @@ DumpTable<A>::do_next_route_dump()
 	}
     };
 
+    assert(_output_busy == false);
+
     // if we get here, the output is not busy and there's no queue of
     // changes upstream of us, so it's time to do more of the route
     // dump...
@@ -260,7 +262,7 @@ DumpTable<A>::do_next_route_dump()
 	    // go into final wait state
 	    _waiting_for_deletion_completion = true;
 	    // re-enable normal flow control
-	    _parent->output_state(_output_busy, this);
+	    _parent->output_state(/*busy == false*/false, this);
 	} else {
 	    cp(22);
 	    unplumb_self();
@@ -283,7 +285,7 @@ DumpTable<A>::do_next_route_dump()
 		// go into final wait state
 		_waiting_for_deletion_completion = true;
 		// re-enable normal flow control
-		_parent->output_state(_output_busy, this);
+		_parent->output_state(/*busy == false*/false, this);
 	    } else {
 		cp(28);
 		unplumb_self();

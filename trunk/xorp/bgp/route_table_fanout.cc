@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.14 2003/05/23 00:02:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.15 2003/10/23 10:49:22 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -41,6 +41,95 @@ TypeName<IPv6>::get()
 {
     return "IPv6";
 }
+
+
+template<class A> 
+void 
+NextTableMap<A>::insert(BGPRouteTable<A> *next_table,
+		     const PeerHandler *ph) {
+    PeerRoutePair<A>* pair =
+	new PeerRoutePair<A>(next_table, ph);
+    _next_tables[next_table] = pair;
+
+    //we have to choose a sort order so our results are repeatable
+    //across different platforms.  we arbitrarily choose to sort on
+    //BGP ID because it should be unique.
+
+    //check we don't have two peers with the same address
+    XLOG_ASSERT(_next_table_order.find(ph->id().addr())
+		== _next_table_order.end());
+
+    _next_table_order[ph->id().addr()] = pair;
+}
+
+template<class A> 
+void 
+NextTableMap<A>::erase(iterator& iter) {
+#ifdef NEWMAP
+    PeerRoutePair<A>* pair = &(iter.second());
+    typename map<BGPRouteTable<A> *, PeerRoutePair<A>* >::iterator i;
+    i = _next_tables.find(pair->route_table());
+    XLOG_ASSERT(i != _next_tables.end());
+    _next_tables.erase(i);
+
+    typename map <uint32_t, PeerRoutePair<A>* >::iterator j;
+    j = _next_table_order.find(i->second->peer_handler()
+			      ->id().addr());
+    //if it's in _next_table, it must be in _next_table_order too.
+    XLOG_ASSERT(j != _next_table_order.end());
+    XLOG_ASSERT(j->second == pair);
+    _next_table_order.erase(j);
+    delete pair;
+#else
+    typename map<BGPRouteTable<A> *, PeerRoutePair<A>* >::iterator i;
+    BGPRouteTable<A>* t = iter.first();
+    i = _next_tables.find(t);
+    assert(i != _next_tables.end());
+    delete i->second;
+    _next_tables.erase(i);
+#endif
+}
+
+template<class A> 
+typename NextTableMap<A>::iterator 
+NextTableMap<A>::find(BGPRouteTable<A> *next_table) {
+#ifdef NEWMAP
+    typename map<BGPRouteTable<A> *, PeerRoutePair<A>* >::iterator i;
+    i = _next_tables.find(next_table);
+    if (i == _next_tables.end())
+	return end();
+    typename map <uint32_t, PeerRoutePair<A>* >::iterator j;
+    j = _next_table_order.find(i->second->peer_handler()
+			      ->id().addr());
+    //if it's in _next_table, it must be in _next_table_order too.
+    XLOG_ASSERT(j != _next_table_order.end());
+    return iterator(j);
+#else
+    return iterator(_next_tables.find(next_table));
+#endif
+}
+
+template<class A> 
+typename NextTableMap<A>::iterator 
+NextTableMap<A>::begin() {
+#ifdef NEWMAP
+    return iterator(_next_table_order.begin());
+#else
+    return iterator(_next_tables.begin());
+#endif
+}
+
+template<class A> 
+typename NextTableMap<A>::iterator 
+NextTableMap<A>::end() {
+#ifdef NEWMAP
+    return iterator(_next_table_order.end());
+#else
+    return iterator(_next_tables.end());
+#endif
+};
+
+
 template<class A>
 FanoutTable<A>::FanoutTable(string table_name,
 			    BGPRouteTable<A> *init_parent)
@@ -62,8 +151,7 @@ FanoutTable<A>::add_next_table(BGPRouteTable<A> *new_next_table,
 	// the next_table is already in the set
 	return -1;
     }
-    PeerRoutePair<A> next_peer_table(new_next_table, ph);
-    _next_tables.insert(make_pair(new_next_table, next_peer_table));
+    _next_tables.insert(new_next_table, ph);
     return 0;
 }
 
@@ -72,7 +160,7 @@ template<class A>
 int
 FanoutTable<A>::remove_next_table(BGPRouteTable<A> *ex_next_table) 
 {
-    typename map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator iter;
+    typename NextTableMap<A>::iterator iter;
     iter = _next_tables.find(ex_next_table);
     if (iter == _next_tables.end()) {
 	// the next_table is not already in the set
@@ -102,30 +190,29 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
-    typedef typename map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator Iter;
-    Iter i = _next_tables.begin();
+    typename NextTableMap<A>::iterator i = _next_tables.begin();
     int result = ADD_USED, r;
     list <PeerRoutePair<A>*> queued_peers;
     while (i != _next_tables.end()) {
-	const PeerHandler *next_peer = i->second.peer_handler();
+	const PeerHandler *next_peer = i.second().peer_handler();
 	if (origin_peer == next_peer) {
 	    // don't send the route back to the peer it came from
 	    debug_msg("FanoutTable<%s>::add_route %x.\n  Don't send back to %s\n",
 		      TypeName<A>::get(),
-		      (u_int)(&rtmsg), (i->first)->tablename().c_str());
+		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 	} else {
 	    debug_msg("FanoutTable<%s>::add_route %x to %s\n",
 		      TypeName<A>::get(),
-		      (u_int)(&rtmsg), (i->first)->tablename().c_str());
+		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 
-	    if (i->second.busy()) {
+	    if (i.second().busy()) {
 		debug_msg("Fanout: queuing route, queue len is %u\n",
 			  (uint32_t)queued_peers.size());
-		queued_peers.push_back(&(i->second));
+		queued_peers.push_back(&(i.second()));
 		r = ADD_USED;
 	    } else {
 		debug_msg("Fanout: passing route on\n");
-		r = i->first->add_route(rtmsg, (BGPRouteTable<A>*)this);
+		r = i.first()->add_route(rtmsg, (BGPRouteTable<A>*)this);
 	    }
 
 	    // we don't bother to return ADD_UNUSED or ADD_FILTERED,
@@ -135,7 +222,7 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	    if (r != ADD_USED && r != ADD_UNUSED && r != ADD_FILTERED)
 		result = r;
 	}
-	++i;
+	i++;
     }
     if (queued_peers.empty() == false)
 	add_to_queue(RTQUEUE_OP_ADD, rtmsg, queued_peers);
@@ -159,24 +246,24 @@ FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     int result = ADD_USED, r;
     list <PeerRoutePair<A>*> queued_peers;
-    typename map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator i;
+    typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
-	const PeerHandler *next_peer = i->second.peer_handler();
+	const PeerHandler *next_peer = i.second().peer_handler();
 	if (origin_peer == next_peer) {
 	    // don't send the route back to the peer it came from
 	} else {
 	    debug_msg("FanoutTable<%s>::replace_route %x -> %x to %s\n",
 		      TypeName<A>::get(),
 		      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg),
-		      (i->first)->tablename().c_str());
+		      (i.first())->tablename().c_str());
 
-	    if (i->second.busy()) {
+	    if (i.second().busy()) {
 		debug_msg("queueing replace_route\n");
-		queued_peers.push_back(&(i->second));
+		queued_peers.push_back(&(i.second()));
 		r = ADD_USED;
 	    } else {
 		debug_msg("not queuing replace_route\n");
-		r = i->first->replace_route(old_rtmsg, new_rtmsg,
+		r = i.first()->replace_route(old_rtmsg, new_rtmsg,
 					    (BGPRouteTable<A>*)this);
 	    }
 
@@ -202,21 +289,21 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
     list <PeerRoutePair<A>*> queued_peers;
-    typename map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator i;
+    typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
-	const PeerHandler *next_peer = i->second.peer_handler();
+	const PeerHandler *next_peer = i.second().peer_handler();
 	if (origin_peer == next_peer) {
 	    debug_msg("FanoutTable<%s>::delete_route %x.\n  Don't send back to %s\n",
 		      TypeName<A>::get(),
-		      (u_int)(&rtmsg), (i->first)->tablename().c_str());
+		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
 	} else {
 	    debug_msg("FanoutTable<%s>::delete_route %x to %s\n",
 		      TypeName<A>::get(),
-		      (u_int)(&rtmsg), (i->first)->tablename().c_str());
-	    if (i->second.busy()) {
-		queued_peers.push_back(&(i->second));
+		      (u_int)(&rtmsg), (i.first())->tablename().c_str());
+	    if (i.second().busy()) {
+		queued_peers.push_back(&(i.second()));
 	    } else {
-		i->first->delete_route(rtmsg, (BGPRouteTable<A>*)this);
+		i.first()->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 	    }
 	}
     }
@@ -233,14 +320,14 @@ FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 {
     assert(caller == _parent);
     BGPRouteTable<A> *dump_child;
-    typename map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator i;
+    typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
-	if (i->second.peer_handler() == dump_peer) {
-	    dump_child = i->first;
+	if (i.second().peer_handler() == dump_peer) {
+	    dump_child = i.first();
 	    break;
 	}
     }
-    assert(i->second.busy());
+    assert(i.second().busy());
 
     int result;
     result = dump_child->route_dump(rtmsg, (BGPRouteTable<A>*)this, dump_peer);
@@ -256,15 +343,15 @@ FanoutTable<A>::push(BGPRouteTable<A> *caller)
     debug_msg("Push\n");
     assert(caller == _parent);
     list <PeerRoutePair<A>*> queued_peers;
-    typename map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator i;
+    typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
 	// a push needs to go to all peers because an add may cause a
 	// delete (or vice versa) of a route that originated from a
 	// different peer.
-	if (i->second.busy()) {
-	    queued_peers.push_back(&(i->second));
+	if (i.second().busy()) {
+	    queued_peers.push_back(&(i.second()));
 	} else {
-	    i->first->push((BGPRouteTable<A>*)this);
+	    i.first()->push((BGPRouteTable<A>*)this);
 	}
     }
 
@@ -314,14 +401,14 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to)
 {
     assert(child_to_dump_to->type() != DUMP_TABLE);
 
-    typename map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator i;
+    typename NextTableMap<A>::iterator i;
     PeerRoutePair<A> *peer_info = NULL;
     list <const PeerHandler*> peer_list;
     for (i = _next_tables.begin(); i != _next_tables.end(); i++) {
-	if (i->second.peer_handler() != NULL)
-	    peer_list.push_back(i->second.peer_handler());
-	if (i->first == child_to_dump_to)
-	    peer_info = &(i->second);
+	if (i.second().peer_handler() != NULL)
+	    peer_list.push_back(i.second().peer_handler());
+	if (i.first() == child_to_dump_to)
+	    peer_info = &(i.second());
     }
     XLOG_ASSERT(peer_info != NULL);
     const PeerHandler *peer_handler = peer_info->peer_handler();
@@ -335,7 +422,16 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to)
     child_to_dump_to->set_parent(dump_table);
     remove_next_table(child_to_dump_to);
     add_next_table(dump_table, peer_handler);
+
+    //find the new peer_info (we just deleted the old one)
+    peer_info = NULL;
+    for (i = _next_tables.begin(); i != _next_tables.end(); i++) {
+	if (i.first() == dump_table)
+	    peer_info = &(i.second());
+    }
+    XLOG_ASSERT(peer_info != NULL);
     peer_info->set_busy(true);
+
     add_dump_table(dump_table);
 
     dump_table->initiate_background_dump();
@@ -433,11 +529,11 @@ template<class A>
 void
 FanoutTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) 
 {
-    typename map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator i;
+    typename NextTableMap<A>::iterator i;
     i = _next_tables.find(next_table);
     XLOG_ASSERT(i != _next_tables.end());
 
-    PeerRoutePair<A> *peer_info = &(i->second);
+    PeerRoutePair<A> *peer_info = &(i.second());
 
     if (busy)
 	debug_msg("Fanout: Peer output state is BUSY\n");
@@ -457,11 +553,11 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 {
     debug_msg("FanoutTable<A>::get_next_message: %p\n", next_table);
     print_queue();
-    typename map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator i;
+    typename NextTableMap<A>::iterator i;
     i = _next_tables.find(next_table);
     XLOG_ASSERT(i != _next_tables.end());
 
-    PeerRoutePair<A> *peer_info = &(i->second);
+    PeerRoutePair<A> *peer_info = &(i.second());
     if (peer_info->has_queued_data() == false) {
 	debug_msg("no data queued\n");
 	return false;
@@ -565,20 +661,20 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     /* now we have to deal with freeing up the head of the queue if
        no-one else needs it now*/
     while(discard_possible) {
-	typename map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator nti;
+	typename NextTableMap<A>::iterator nti;
 	// iterating on a map isn't very efficient, but the map
 	// shouldn't be all that large
 	bool discard = true;
 	for (nti = _next_tables.begin(); nti != _next_tables.end(); nti++) {
-	    if (nti->second.has_queued_data()) {
+	    if (nti.second().has_queued_data()) {
 		// if someone still references the queue head, we can't
 		// discard.
-		if (nti->second.queue_position() == _output_queue.begin())
+		if (nti.second().queue_position() == _output_queue.begin())
 		    discard = false;
 		// if we're considering popping the first two entries,
 		// we need to check no-one needs the second one either
 		if (skipped == 2 &&
-		    nti->second.queue_position() == (_output_queue.begin())++ )
+		    nti.second().queue_position() == (_output_queue.begin())++ )
 		    discard = false;
 	    }
 	}
@@ -605,11 +701,11 @@ template<class A>
 void
 FanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table) 
 {
-    typename map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator i;
+    typename NextTableMap<A>::iterator i;
     i = _next_tables.find(next_table);
     XLOG_ASSERT(i != _next_tables.end());
 
-    PeerRoutePair<A> *peer_info = &(i->second);
+    PeerRoutePair<A> *peer_info = &(i.second());
     if (peer_info->has_queued_data() == false)
 	return;
 
@@ -665,20 +761,20 @@ FanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table)
 	/* now we have to deal with freeing up the head of the queue if
 	   no-one else needs it now*/
 	while (discard_possible) {
-	    typename map<BGPRouteTable<A> *, PeerRoutePair<A> >::iterator nti;
+	    typename NextTableMap<A>::iterator nti;
 	    // iterating on a map isn't very efficient, but the map
 	    // shouldn't be all that large
 	    bool discard = true;
 	    for (nti = _next_tables.begin(); nti != _next_tables.end(); nti++) {
-		if (nti->second.has_queued_data()) {
+		if (nti.second().has_queued_data()) {
 		    // if someone still references the queue head, we can't
 		    // discard.
-		    if (nti->second.queue_position() == _output_queue.begin())
+		    if (nti.second().queue_position() == _output_queue.begin())
 			discard = false;
 		    // if we're considering popping the first two entries,
 		    // we need to check no-one needs the second one either
 		    if (skipped == 2 &&
-			(nti->second.queue_position() 
+			(nti.second().queue_position() 
 			 == (_output_queue.begin())++ ))
 			discard = false;
 		}
@@ -706,9 +802,9 @@ FanoutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 				  BGPRouteTable<A> *caller) 
 {
     XLOG_ASSERT(_parent == caller);
-    typename map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator i;
+    typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
-	i->first->peering_went_down(peer, genid, (BGPRouteTable<A>*)this);
+	i.first()->peering_went_down(peer, genid, (BGPRouteTable<A>*)this);
     }
 }
 
@@ -719,9 +815,14 @@ FanoutTable<A>::peering_down_complete(const PeerHandler *peer,
 				      BGPRouteTable<A> *caller) 
 {
     XLOG_ASSERT(_parent == caller);
-    typename map<BGPRouteTable<A>*, PeerRoutePair<A> >::iterator i;
-    for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
-	i->first->peering_down_complete(peer, genid, (BGPRouteTable<A>*)this);
+    typename NextTableMap<A>::iterator i;
+    for (i = _next_tables.begin();  i != _next_tables.end(); ) {
+	BGPRouteTable<A>* next_table = i.first();
+	//move the iterator on now, as peering_down_complete may cause
+	//a dump table to unplumb itself.
+	i++;
+	next_table->peering_down_complete(peer, genid, 
+					  (BGPRouteTable<A>*)this);
     }
 }
 
