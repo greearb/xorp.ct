@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.15 2004/09/09 18:54:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.16 2004/10/26 01:09:56 bms Exp $"
 
 
 #include "fea_module.h"
@@ -188,19 +188,18 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
     }
 #ifdef notyet
     //
-    // Interpret notifications about blackhole routes from the
+    // Interpret notifications about discard routes from the
     // kernel correctly.
     //
     bool is_discard = false;
     if ((rtmsg->rtm_type == RTN_BLACKHOLE) ||
-	(rtmsg->rtm_type == RTN_UNREACHABLE))
+	(rtmsg->rtm_type == RTN_PROHIBIT))
 	    is_discard = true;
-#else
+#endif
     if (rtmsg->rtm_type == RTN_UNREACHABLE) {
-	// Ignore unreachable destinations
+	// Ignore "destination unreachable" notifications.
 	return false;
     }
-#endif
     if (rtmsg->rtm_type != RTN_UNICAST) {
 	XLOG_ERROR("nlm_get_to_fte_cfg() failed: "
 		   "wrong AF_NETLINK route type: %d instead of %d",
