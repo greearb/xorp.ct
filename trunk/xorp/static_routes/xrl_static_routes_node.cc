@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.10 2004/05/06 19:32:04 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.11 2004/05/07 01:59:48 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -173,7 +173,7 @@ XrlStaticRoutesNode::send_rib_registration()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again
+	// If an error, then start a timer to try again.
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
 	_rib_igp_table_registration_timer = StaticRoutesNode::eventloop().new_oneoff_after(
@@ -873,7 +873,7 @@ XrlStaticRoutesNode::send_rib_route_change()
     if (! success) {
     error_label:
 	//
-	// If an error, then start a timer to try again
+	// If an error, then start a timer to try again.
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
 	_inform_rib_queue_timer = StaticRoutesNode::eventloop().new_oneoff_after(
