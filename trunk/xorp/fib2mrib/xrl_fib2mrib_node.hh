@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.10 2005/02/03 06:51:48 bms Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.11 2005/02/11 02:57:27 pavlin Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -264,6 +264,32 @@ protected:
     XrlCmdError fib2mrib_0_1_enable_log_trace_all(
 	// Input values,
 	const bool&	enable);
+
+    /**
+     * Configure a policy filter.
+     *
+     * @param filter Id of filter to configure.
+     * @param conf Configuration of filter.
+     */
+    XrlCmdError policy_backend_0_1_configure(
+        // Input values,
+        const uint32_t& filter,
+        const string&   conf);
+
+    /**
+     * Reset a policy filter.
+     *
+     * @param filter Id of filter to reset.
+     */
+    XrlCmdError policy_backend_0_1_reset(
+        // Input values,
+        const uint32_t& filter);
+
+    /**
+     * Push routes through policy filters for re-filtering.
+     */
+    XrlCmdError policy_backend_0_1_push_routes();
+
 
 private:
     const ServiceBase* ifmgr_mirror_service_base() const {

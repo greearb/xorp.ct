@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fib2mrib/Makefile.am,v 1.5 2004/06/02 18:28:16 pavlin Exp $
+## $XORP: xorp/fib2mrib/Makefile.am,v 1.6 2004/11/12 02:44:41 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -27,6 +27,7 @@ LDADD		 = $(noinst_LTLIBRARIES)
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/targets/libfib2mribbase.la
 ### XORP misc libraries
+LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
 LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
@@ -45,9 +46,11 @@ xorp_fib2mrib_SOURCES		 = xorp_fib2mrib.cc
 # -- Library Sources
 libfib2mrib_la_SOURCES		 = fib2mrib_module.h
 libfib2mrib_la_SOURCES		+= fib2mrib_node.hh
+libfib2mrib_la_SOURCES		+= fib2mrib_varrw.hh
 libfib2mrib_la_SOURCES		+= xrl_fib2mrib_node.hh
 
 libfib2mrib_la_SOURCES		+= fib2mrib_node.cc
+libfib2mrib_la_SOURCES		+= fib2mrib_varrw.cc
 libfib2mrib_la_SOURCES		+= xrl_fib2mrib_node.cc
 
 # -- Extra files and directories to add to the distribution

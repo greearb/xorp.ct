@@ -113,13 +113,13 @@ noinst_LTLIBRARIES = libfib2mrib.la
 LDFLAGS = 
 ### XRL libraries
 ### XORP misc libraries
-LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/targets/libfib2mribbase.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/interfaces/libftixif.la $(top_builddir)/xrl/interfaces/libfeafibxif.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
+LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/targets/libfib2mribbase.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/interfaces/libftixif.la $(top_builddir)/xrl/interfaces/libfeafibxif.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 xorp_fib2mrib_SOURCES = xorp_fib2mrib.cc
 
 # -- Library Sources
-libfib2mrib_la_SOURCES = fib2mrib_module.h fib2mrib_node.hh xrl_fib2mrib_node.hh fib2mrib_node.cc xrl_fib2mrib_node.cc
+libfib2mrib_la_SOURCES = fib2mrib_module.h fib2mrib_node.hh fib2mrib_varrw.hh xrl_fib2mrib_node.hh fib2mrib_node.cc fib2mrib_varrw.cc xrl_fib2mrib_node.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = command_fib2mrib
@@ -135,7 +135,8 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 
 libfib2mrib_la_LDFLAGS =
 libfib2mrib_la_LIBADD =
-am_libfib2mrib_la_OBJECTS = fib2mrib_node.lo xrl_fib2mrib_node.lo
+am_libfib2mrib_la_OBJECTS = fib2mrib_node.lo fib2mrib_varrw.lo \
+	xrl_fib2mrib_node.lo
 libfib2mrib_la_OBJECTS = $(am_libfib2mrib_la_OBJECTS)
 bin_PROGRAMS = xorp_fib2mrib$(EXEEXT)
 noinst_PROGRAMS =
@@ -146,6 +147,7 @@ xorp_fib2mrib_OBJECTS = $(am_xorp_fib2mrib_OBJECTS)
 xorp_fib2mrib_LDADD = $(LDADD)
 xorp_fib2mrib_DEPENDENCIES = libfib2mrib.la \
 	$(top_builddir)/xrl/targets/libfib2mribbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
@@ -167,6 +169,7 @@ CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/fib2mrib_node.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/fib2mrib_varrw.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/xorp_fib2mrib.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_fib2mrib_node.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -253,6 +256,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fib2mrib_node.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fib2mrib_varrw.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_fib2mrib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_fib2mrib_node.Plo@am__quote@
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.17 2005/02/03 06:51:48 bms Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.18 2005/02/11 02:57:27 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -1360,7 +1360,7 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.ifname(),
 		    fib2mrib_route.vifname(),
 		    fib2mrib_route.metric(),
-		    XrlAtomList(),		// XXX: no policy
+		    fib2mrib_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1373,7 +1373,7 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.network().get_ipv4net(),
 		    fib2mrib_route.nexthop().get_ipv4(),
 		    fib2mrib_route.metric(),
-		    XrlAtomList(),		// XXX: no policy
+		    fib2mrib_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1391,7 +1391,7 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.ifname(),
 		    fib2mrib_route.vifname(),
 		    fib2mrib_route.metric(),
-		    XrlAtomList(),		// XXX: no policy
+		    fib2mrib_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1404,7 +1404,7 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.network().get_ipv6net(),
 		    fib2mrib_route.nexthop().get_ipv6(),
 		    fib2mrib_route.metric(),
-		    XrlAtomList(),		// XXX: no policy
+		    fib2mrib_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1425,7 +1425,7 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.ifname(),
 		    fib2mrib_route.vifname(),
 		    fib2mrib_route.metric(),
-		    XrlAtomList(),		// XXX: no policy
+		    fib2mrib_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1438,7 +1438,7 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.network().get_ipv4net(),
 		    fib2mrib_route.nexthop().get_ipv4(),
 		    fib2mrib_route.metric(),
-		    XrlAtomList(),		// XXX: no policy
+		    fib2mrib_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1456,7 +1456,7 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.ifname(),
 		    fib2mrib_route.vifname(),
 		    fib2mrib_route.metric(),
-		    XrlAtomList(),		// XXX: no policy
+		    fib2mrib_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1469,7 +1469,7 @@ XrlFib2mribNode::send_rib_route_change()
 		    fib2mrib_route.network().get_ipv6net(),
 		    fib2mrib_route.nexthop().get_ipv6(),
 		    fib2mrib_route.metric(),
-		    XrlAtomList(),		// XXX: no policy
+		    fib2mrib_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -1548,4 +1548,37 @@ XrlFib2mribNode::send_rib_route_change_cb(const XrlError& xrl_error)
     _inform_rib_queue_timer = Fib2mribNode::eventloop().new_oneoff_after(
 	RETRY_TIMEVAL,
 	callback(this, &XrlFib2mribNode::send_rib_route_change));
+}
+
+XrlCmdError
+XrlFib2mribNode::policy_backend_0_1_configure(const uint32_t& filter,
+					      const string& conf)
+{
+    try {
+	Fib2mribNode::configure_filter(filter, conf);
+    } catch(const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+					   e.str());
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFib2mribNode::policy_backend_0_1_reset(const uint32_t& filter)
+{
+    try {
+	Fib2mribNode::reset_filter(filter);
+    } catch(const PolicyException& e) {
+	// Will never happen... but for the future...
+	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " + e.str());
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFib2mribNode::policy_backend_0_1_push_routes()
+{
+    Fib2mribNode::push_routes(); 
+    return XrlCmdError::OKAY();
 }

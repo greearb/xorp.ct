@@ -12,12 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.14 2005/02/01 01:06:09 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.15 2005/02/11 02:57:27 pavlin Exp $"
 
 
 //
 // Fib2mrib node implementation.
 //
+
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 
 #include "fib2mrib_module.h"
@@ -28,6 +31,7 @@
 #include "libxorp/ipvx.hh"
 
 #include "fib2mrib_node.hh"
+#include "fib2mrib_varrw.hh"
 
 
 Fib2mribNode::Fib2mribNode(EventLoop& eventloop)
@@ -679,22 +683,28 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Add the route
     //
-    _fib2mrib_routes.insert(make_pair(fib2mrib_route.network(),
-				      fib2mrib_route));
+    iter = _fib2mrib_routes.insert(make_pair(fib2mrib_route.network(),
+					     fib2mrib_route));
 
     //
-    // Inform the RIB about the change
+    // Do policy filtering
     //
-    if (fib2mrib_route.is_interface_route()) {
-	const IfMgrVifAtom* vif_atom;
-	vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
-				    fib2mrib_route.vifname());
-	if ((vif_atom != NULL) && (vif_atom->enabled()))
-	    inform_rib_route_change(fib2mrib_route);
-    } else {
-	if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
-	    inform_rib_route_change(fib2mrib_route);
-    }
+    Fib2mribRoute& added_route = iter->second;
+
+    //
+    // We do not want to modify original route, so we may re-filter routes on
+    // filter configuration changes. Hence, copy route.
+    //
+    Fib2mribRoute route_copy = added_route;
+
+    bool accepted = do_filtering(route_copy);
+
+    // Tag the original route as filtered or not
+    added_route.set_filtered(!accepted);
+
+    // Inform RIB about the possibly modified route if it was accepted 
+    if (accepted)
+	inform_rib(route_copy);
 
     return XORP_OK;
 }
@@ -711,7 +721,7 @@ int
 Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
 			    string& error_msg)
 {
-    bool is_route_replaced = false;
+    Fib2mribRoute* route_to_replace_ptr = NULL;
 
     //
     // Check the entry
@@ -754,36 +764,57 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
 	}
 
 	//
-	// Route found. Overwrite its value.
+	// Route found.
 	//
-	tmp_route = fib2mrib_route;
-	is_route_replaced = true;
+	route_to_replace_ptr = &tmp_route;
 	break;
     }
 
-    if (! is_route_replaced) {
+    if (route_to_replace_ptr == NULL) {
 	//
 	// No route found with the same ifname and vifname.
 	// Update the first route for the same subnet.
 	//
 	Fib2mribRoute& tmp_route = iter->second;
 
-	tmp_route = fib2mrib_route;
+	route_to_replace_ptr = &tmp_route;
     }
 
     //
-    // Inform the RIB about the change
+    // Overwrite the route's value.
     //
-    if (fib2mrib_route.is_interface_route()) {
-	const IfMgrVifAtom* vif_atom;
-	vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
-				    fib2mrib_route.vifname());
-	if ((vif_atom != NULL) && (vif_atom->enabled()))
-	    inform_rib_route_change(fib2mrib_route);
-    } else {
-	if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
-	    inform_rib_route_change(fib2mrib_route);
-    }
+    do {
+	XLOG_ASSERT(route_to_replace_ptr != NULL);
+	Fib2mribRoute& tmp_route = *route_to_replace_ptr;
+
+	bool was_filtered = tmp_route.is_filtered();
+	tmp_route = fib2mrib_route;
+
+	// Do policy filtering
+	Fib2mribRoute route_copy = fib2mrib_route;
+	bool accepted = do_filtering(route_copy);
+	tmp_route.set_filtered(!accepted);
+
+	// Decide what to do
+	if (accepted) {
+	    if (was_filtered) {
+		route_copy.set_add_route();
+	    } else {
+	    }
+	} else {
+	    if (was_filtered) {
+		return XORP_OK;
+	    } else {
+		route_copy.set_delete_route();
+	    }
+	}
+	
+	//
+	// Inform the RIB about the change
+	//
+	inform_rib(route_copy);
+
+    } while (false);
 
     return XORP_OK;
 }
@@ -866,19 +897,14 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     copy_route.set_delete_route();
     _fib2mrib_routes.erase(iter2);
 
+    // If the route is filtered, then RIB doesn't know about it.
+    if (copy_route.is_filtered())
+	return XORP_OK;
+
     //
     // Inform the RIB about the change
     //
-    if (copy_route.is_interface_route()) {
-	const IfMgrVifAtom* vif_atom;
-	vif_atom = _iftree.find_vif(copy_route.ifname(),
-				    copy_route.vifname());
-	if ((vif_atom != NULL) && (vif_atom->enabled()))
-	    inform_rib_route_change(copy_route);
-    } else {
-	if (is_directly_connected(_iftree, copy_route.nexthop()))
-	    inform_rib_route_change(copy_route);
-    }
+    inform_rib(copy_route);
 
     return XORP_OK;
 }
@@ -895,4 +921,121 @@ Fib2mribRoute::is_valid_entry(string& error_msg) const
     UNUSED(error_msg);
 
     return true;
+}
+
+void
+Fib2mribNode::configure_filter(const uint32_t& filter, const string& conf)
+{
+    _policy_filters.configure(filter, conf);
+}
+
+void
+Fib2mribNode::reset_filter(const uint32_t& filter) {
+    _policy_filters.reset(filter);
+}
+
+void
+Fib2mribNode::push_routes()
+{
+    multimap<IPvXNet, Fib2mribRoute>::iterator iter;
+
+    // XXX: not a background task
+    for (iter = _fib2mrib_routes.begin(); iter != _fib2mrib_routes.end();
+	 ++iter) {
+	Fib2mribRoute& orig_route = iter->second;
+	bool was_filtered = orig_route.is_filtered();
+	
+	Fib2mribRoute copy_route = orig_route;
+	bool accepted = do_filtering(copy_route);
+
+	debug_msg("[FIB2MRIB] Push route: %s, was filtered: %d, accepted %d\n",
+		  orig_route.network().str().c_str(),
+		  was_filtered, accepted);
+
+	orig_route.set_filtered(!accepted);
+
+	if (accepted) {
+	    if (was_filtered) {
+		copy_route.set_add_route();
+	    } else {
+		copy_route.set_replace_route();
+	    }
+	} else {
+	    // not accepted
+	    if (was_filtered) {
+		continue;
+	    } else {
+		copy_route.set_delete_route();
+	    }
+	}
+
+	inform_rib(copy_route);
+    }
+}
+
+void
+Fib2mribNode::inform_rib(const Fib2mribRoute& route)
+{
+    //
+    // Inform the RIB about the change
+    //
+    if (route.is_interface_route()) {
+	const IfMgrVifAtom* vif_atom;
+	vif_atom = _iftree.find_vif(route.ifname(), route.vifname());
+	if ((vif_atom != NULL) && (vif_atom->enabled()))
+	    inform_rib_route_change(route);
+    } else {
+	if (is_directly_connected(_iftree, route.nexthop()))
+	    inform_rib_route_change(route);
+    }
+}
+
+bool
+Fib2mribNode::do_filtering(Fib2mribRoute& route)
+{
+    try {
+	ostringstream trace;
+
+	Fib2mribVarRW varrw(route);
+
+	// Import filtering
+	bool accepted;
+
+	debug_msg("[FIB2MRIB] Running filter: %s on route: %s\n",
+		  filter::filter2str(filter::IMPORT).c_str(),
+		  route.network().str().c_str());
+	accepted = _policy_filters.run_filter(filter::IMPORT, varrw, &trace);
+
+	debug_msg("[FIB2MRIB] filter trace:\n%s\nEnd of trace.\n",
+		  trace.str().c_str());
+
+	// clear trace
+	trace.str("");
+
+	route.set_filtered(!accepted);
+
+	// Route Rejected 
+	if (!accepted) 
+	    return accepted;
+
+	Fib2mribVarRW varrw2(route);
+
+	// Export source-match filtering
+	debug_msg("[FIB2MRIB] Running filter: %s on route: %s\n",
+		  filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
+		  route.network().str().c_str());
+
+	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH,
+				   varrw2, &trace);
+
+	debug_msg("[FIB2MRIB] filter trace:\n%s\nEnd of trace.\n",
+		  trace.str().c_str());
+
+	return accepted;
+    } catch(const PolicyException& e) {
+	XLOG_FATAL("PolicyException: %s", e.str().c_str());
+
+	// FIXME: What do we do ?
+	XLOG_UNFINISHED();
+    }
 }
