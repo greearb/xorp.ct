@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.49 2003/07/01 01:02:36 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.50 2003/07/01 23:58:22 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -71,9 +71,6 @@
   the action is A5, and move to NI state (this applies for both
   the (S,G) and (*,G) Assert state machine).
 
-* IMPL: if the interface address changes, add a task to recompute all
-  PimMre::set_directly_connected_s().
-
 * SPEC+IMPL: Take care of the
   (*,*,RP) Joins and AssertTrackingDesired(S,G,I) problem.
    In the AssertTrackingDesired(S,G,I) definition,
@@ -118,17 +115,6 @@ probably should be replaced with
   This state is useless/harmless, and will be deleted after the downstream
   pruned state timeout. However, is this acceptable, or shall we avoid
   the temporary creation of such state?
-
-* IMPL:
-  If an interface to a directly-connected source is DOWN, but there is
-  an alternative route to a source, is this source directly-connected
-  or non-directly-connected? Maybe the answer is the latter one??
-  In that case, fix the implementation: 
-  - Add PimMreTrackState::track_state_is_directly_connected_s()
-    to the function body inside PimMreTrackState::track_state_in_start_vif()
-    and PimMreTrackState::track_state_in_stop_vif()
-  - Fix Vif::is_same_subnet() and/or Vif::is_directly_connected()
-    to ignore interfaces that are DOWN??
 
 * SPEC+IMPL:
   When accepting an unicast Bootstrap message, should accept
@@ -1053,9 +1039,6 @@ for the kernel patches as well.
   starting from state Joined()
 
 * Implement adding PIM Register tunnel
-
-* If PIM vif interface added/changed/deleted,
-  recompute is_directly_connected_s();
 
 * IMPL: When "wrong iif" signal arrives, if it is not on one of
   our oifs, and if we don't care about it,
