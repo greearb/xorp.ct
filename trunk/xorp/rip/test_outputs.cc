@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.10 2004/02/21 00:34:05 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.11 2004/02/21 00:36:10 hodson Exp $"
 
 #include <set>
 
@@ -106,11 +106,11 @@ public:
     SpoofPort(PortManagerBase<A>& pm, A addr) : Port<A>(pm)
     {
 	_peers.push_back(new Peer<A>(*this, addr));
-	verbose_log("Constructing SpoofPort instance\n");
+	// verbose_log("Constructing SpoofPort instance\n");
     }
     ~SpoofPort()
     {
-	verbose_log("Destructing SpoofPort instance\n");
+	// verbose_log("Destructing SpoofPort instance\n");
 	while (_peers.empty() == false) {
 	    delete _peers.front();
 	    _peers.pop_front();
@@ -221,7 +221,73 @@ public:
 };
 
 
-//----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// Response Reader - Really needed for IPv6, but IPv4 is trivial
+
+template <typename A>
+struct ResponseReader {
+    ResponseReader(const RipPacket<A>* rp) : _rp(rp), _pe(0)
+    {
+	if (_rp->header()->command != RipPacketHeader::RESPONSE) {
+	    verbose_log("Bad packet!\n");
+	    _pe = ~0;
+	}
+    }
+
+    bool get(IPNet<A>& n, A& nh, uint32_t& cost, uint32_t& tag);
+
+    inline uint32_t packet_entry() const		{ return _pe; }
+protected:
+    const RipPacket<A>* _rp;
+    uint32_t		_pe; 	// Current packet entry
+    A			_nh6;	// IPv6 only next hop
+};
+
+template <>
+bool
+ResponseReader<IPv4>::get(IPNet<IPv4>& 	n,
+			  IPv4& 	nh,
+			  uint32_t& 	cost,
+			  uint32_t& 	tag)
+{
+    const PacketRouteEntry<IPv4>* pre = _rp->route_entry(_pe);
+    if (pre == 0)
+	return false;
+    n 	 = pre->net();
+    nh 	 = pre->nexthop();
+    cost = pre->metric();
+    tag  = pre->tag();
+    _pe++;
+    return true;
+}
+
+template <>
+bool
+ResponseReader<IPv6>::get(IPNet<IPv6>& 	n,
+			  IPv6& 	nh,
+			  uint32_t& 	cost,
+			  uint32_t& 	tag)
+{
+    for (;;) {
+	const PacketRouteEntry<IPv6>* pre = _rp->route_entry(_pe);
+	if (pre == 0)
+	    return false;
+	if (pre->is_nexthop()) {
+	    _nh6 = pre->nexthop();
+	    _pe++;
+	    continue;
+	}
+	nh   = _nh6;
+	n    = pre->net();
+	cost = pre->metric();
+	tag  = pre->tag();
+	_pe++;
+	return true;
+    }
+}
+
+
+//-----------------------------------------------------------------------------
 // Horizon checkers
 
 template <typename A>
@@ -265,20 +331,25 @@ public:
 
     bool valid_response(const RipPacket<A>* p)
     {
-	for (uint32_t i = 0; i < p->max_entries(); i++) {
-	    _total_routes_seen++;
+	IPNet<A> n;
+	A	 nh;
+	uint32_t cost;
+	uint32_t tag;
 
-	    if (_tpn.find(p->route_entry(i)->net()) != _tpn.end()) {
+	ResponseReader<A> rr(p);
+	while (rr.get(n, nh, cost, tag) == true) {
+	    _total_routes_seen++;
+	    if (_tpn.find(n) != _tpn.end()) {
 		_test_peer_routes_seen++;
-	    } else if (_opn.find(p->route_entry(i)->net()) != _opn.end()) {
+	    } else if (_opn.find(n) != _opn.end()) {
 		// No-op
 	    } else {
 		// Not a test peer net and not an other peer net
 		// ==> it's bogus
-		verbose_log("Failed Processing entry %d / %d %s cost %d\n",
-			    i, p->max_entries(),
-			    p->route_entry(i)->net().str().c_str(),
-			    p->route_entry(i)->metric());
+		verbose_log("Failed Processing entry %d / %d %s cost %u\n",
+			    rr.packet_entry(), p->max_entries(),
+			    n.str().c_str(),
+			    cost);
 		return false;
 	    }
 	}
@@ -307,15 +378,20 @@ public:
 
     bool valid_response(const RipPacket<A>* p)
     {
-	for (uint32_t i = 0; i < p->max_entries(); i++) {
+	IPNet<A> n;
+	A	 nh;
+	uint32_t cost;
+	uint32_t tag;
+
+	ResponseReader<A> rr(p);
+	while (rr.get(n, nh, cost, tag) == true) {
 	    _total_routes_seen++;
-	    if (_opn.find(p->route_entry(i)->net()) == _opn.end()) {
+	    if (_opn.find(n) == _opn.end()) {
 		verbose_log("Saw own or alien route with split horizon\n");
 		// ==> it's bogus
-		verbose_log("Failed Processing entry %d / %d %s cost %d\n",
-			    i, p->max_entries(),
-			    p->route_entry(i)->net().str().c_str(),
-			    p->route_entry(i)->metric());
+		verbose_log("Failed Processing entry %d / %d %s cost %u\n",
+			    rr.packet_entry(), p->max_entries(),
+			    n.str().c_str(), cost);
 		return false;
 	    }
 	}
@@ -345,21 +421,25 @@ public:
 
     bool valid_response(const RipPacket<A>* p)
     {
-	for (uint32_t i = 0; i < p->max_entries(); i++) {
+	IPNet<A> n;
+	A	 nh;
+	uint32_t cost;
+	uint32_t tag;
+
+	ResponseReader<A> rr(p);
+	while (rr.get(n, nh, cost, tag) == true) {
 	    _total_routes_seen++;
 
-	    if (_tpn.find(p->route_entry(i)->net()) != _tpn.end() &&
-		p->route_entry(i)->metric() == RIP_INFINITY) {
+	    if (_tpn.find(n) != _tpn.end() && cost == RIP_INFINITY) {
 		_test_peer_routes_seen++;
-	    } else if (_opn.find(p->route_entry(i)->net()) != _opn.end()) {
+	    } else if (_opn.find(n) != _opn.end()) {
 		// No-op
 	    } else {
 		// Not a test peer net and not an other peer net
 		// ==> it's bogus
-		verbose_log("Failed Processing entry %d / %d %s cost %d\n",
-			    i, p->max_entries(),
-			    p->route_entry(i)->net().str().c_str(),
-			    p->route_entry(i)->metric());
+		verbose_log("Failed Processing entry %d / %d %s cost %u\n",
+			    rr.packet_entry(), p->max_entries(),
+			    n.str().c_str(), cost);
 		return false;
 	    }
 	}
@@ -450,7 +530,7 @@ public:
 	}
 
 	bool timeout = false;
-	XorpTimer tot = _e.set_flag_after_ms(30000, &timeout);
+	XorpTimer tot = _e.set_flag_after_ms(10000, &timeout);
 	ou.start();
 
 	while (ou.running() && timeout == false) {
@@ -640,10 +720,8 @@ main(int argc, char* const argv[])
     int rval = 0;
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	//	rval |= run_all_test_cases<IPv6>();
-	rval = run_all_test_cases<IPv4>();
-
-
+	rval |= run_all_test_cases<IPv4>();
+	rval |= run_all_test_cases<IPv6>();
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();
