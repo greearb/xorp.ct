@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.34 2004/08/13 00:55:16 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.35 2004/08/25 06:23:52 pavlin Exp $
 #
 
 #
@@ -174,6 +174,22 @@ else
 	CAND_BSR_VIF="wi0"
 	CAND_RP_VIF="wi0"
 	STATIC_RPS4=""
+	STATIC_RPS6=""
+	ALTERNATIVE_SUBNETS4=""
+	ALTERNATIVE_SUBNETS6=""
+	;;
+
+	carp.icir.org)
+	ENABLE_VIFS="xl0 tun0 lo0"
+	ENABLE_VIFS="xl0 tun0"
+	ENABLE_VIFS="xl0"
+	CAND_BSR_VIF="xl0"
+	CAND_RP_VIF="xl0"
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
+	STATIC_RPS4="10.3.0.1"
+	#STATIC_RPS4="172.16.1.36"
+	#STATIC_RPS4=""
 	STATIC_RPS6=""
 	ALTERNATIVE_SUBNETS4=""
 	ALTERNATIVE_SUBNETS6=""
