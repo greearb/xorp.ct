@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.8 2003/08/12 15:11:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.9 2003/09/30 18:27:05 pavlin Exp $"
 
 
 //
@@ -527,7 +527,9 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
     XLOG_ERROR("TX %s from %s to %s: "
 	       "invalid address family error = %d",
 	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
-	       cstring(addr()), cstring(dst_addr),
+	       dst_addr.is_multicast() ?
+	       cstring(primary_addr()) : cstring(domain_wide_addr()),
+	       cstring(dst_addr),
 	       family());
     return (XORP_ERROR);
     
@@ -536,7 +538,9 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
-	       cstring(addr()), cstring(dst_addr));
+	       dst_addr.is_multicast() ?
+	       cstring(primary_addr()) : cstring(domain_wide_addr()),
+	       cstring(dst_addr));
     return (XORP_ERROR);
 }
 
@@ -602,7 +606,9 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& dst_addr,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "invalid address family error = %d",
 	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
-	       cstring(addr()), cstring(dst_addr),
+	       dst_addr.is_multicast() ?
+	       cstring(primary_addr()) : cstring(domain_wide_addr()),
+	       cstring(dst_addr),
 	       family());
     return (NULL);
     
@@ -611,6 +617,8 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& dst_addr,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
-	       cstring(addr()), cstring(dst_addr));
+	       dst_addr.is_multicast() ?
+	       cstring(primary_addr()) : cstring(domain_wide_addr()),
+	       cstring(dst_addr));
     return (NULL);
 }

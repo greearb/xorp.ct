@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_graft.cc,v 1.2 2003/03/10 23:20:52 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_graft.cc,v 1.3 2003/05/21 05:32:55 pavlin Exp $"
 
 
 //
@@ -85,7 +85,7 @@ PimVif::pim_graft_recv(PimNbr *pim_nbr,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_GRAFT_ACK),
-	       cstring(addr()), cstring(src));
+	       cstring(domain_wide_addr()), cstring(src));
     return (XORP_ERROR);
 }
 
@@ -105,6 +105,8 @@ PimVif::pim_graft_send(const IPvX& dst, buffer_t *buffer)
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_GRAFT),
-	       cstring(addr()), cstring(dst));
+	       dst.is_multicast() ?
+	       cstring(primary_addr()) : cstring(domain_wide_addr()),
+	       cstring(dst));
 }
 #endif /* 0 */
