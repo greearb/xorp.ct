@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.5 2003/03/31 16:10:17 hodson Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.6 2003/05/07 21:58:10 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -20,7 +20,13 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libmld6igmpbase.a
 ### MFEA libraries
-LDADD		+= $(top_builddir)/mfea/libmfea.a
+LDADD		+= $(top_builddir)/fea/libfea.a
+# FEA-specific begin
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
+LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+# FEA-specific end
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
 #LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a

@@ -102,11 +102,13 @@ noinst_LIBRARIES = libmld6igmp.a
 #LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
 #LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 ### MFEA libraries
+# FEA-specific begin
+# FEA-specific end
 #LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 ### MRT libraries
 ### CLI libraries
 ### XORP misc libraries
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a $(top_builddir)/xrl/targets/libmld6igmpbase.a $(top_builddir)/mfea/libmfea.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/interfaces/libcommonxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a $(top_builddir)/xrl/targets/libmld6igmpbase.a $(top_builddir)/fea/libfea.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/interfaces/libcommonxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 test_mld6igmp_SOURCES = test_mld6igmp.cc
@@ -144,7 +146,11 @@ test_mld6igmp_DEPENDENCIES = libmld6igmp.a \
 	$(top_builddir)/xrl/interfaces/libmfeaxif.a \
 	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a \
 	$(top_builddir)/xrl/targets/libmld6igmpbase.a \
-	$(top_builddir)/mfea/libmfea.a \
+	$(top_builddir)/fea/libfea.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
+	$(top_builddir)/xrl/targets/libfeabase.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
 	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
 	$(top_builddir)/xrl/targets/libmfeabase.a \
