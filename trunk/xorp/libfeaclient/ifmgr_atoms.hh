@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.3 2003/08/26 19:04:38 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.4 2003/08/27 22:31:03 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -50,7 +50,7 @@ public:
     /**
      * Clear all interface state.
      */
-    inline void clear()					{ _ifs.clear(); }
+    inline void clear();
 
     /**
      * Find interface.
@@ -342,6 +342,16 @@ protected:
 
     IPv6	_oaddr;
 };
+
+
+// ----------------------------------------------------------------------------
+// Inline IfMgrIfTree methods
+
+inline void
+IfMgrIfTree::clear()
+{
+    _ifs.clear();
+}
 
 
 // ----------------------------------------------------------------------------
