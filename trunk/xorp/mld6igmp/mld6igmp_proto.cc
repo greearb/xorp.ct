@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.8 2004/02/22 03:13:20 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.9 2004/02/24 21:02:00 pavlin Exp $"
 
 
 //
@@ -115,10 +115,10 @@ Mld6igmpVif::query_timer_timeout()
 {
     IPvX ipaddr_zero(family());			// XXX: ANY
     int query_interval;
-    
+
     if (!(_proto_flags & MLD6IGMP_VIF_QUERIER))
 	return;		// I am not the querier anymore. Ignore.
-    
+
     if (proto_is_igmp()) {
 	// Send a general membership query
 	mld6igmp_send(primary_addr(),
@@ -133,8 +133,14 @@ Mld6igmpVif::query_timer_timeout()
 	    query_interval = IGMP_STARTUP_QUERY_INTERVAL;
 	else
 	    query_interval = IGMP_QUERY_INTERVAL;
+
+	_query_timer =
+	    mld6igmp_node().eventloop().new_oneoff_after(
+	        TimeVal(query_interval, 0),
+		callback(this, &Mld6igmpVif::query_timer_timeout)
+		);
     }
-    
+
 #if HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	// Send a general membership query
@@ -150,11 +156,11 @@ Mld6igmpVif::query_timer_timeout()
 	    query_interval = MLD_STARTUP_QUERY_INTERVAL;
 	else
 	    query_interval = MLD_QUERY_INTERVAL;
+
+	_query_timer =
+	    mld6igmp_node().eventloop().new_oneoff_after(
+		TimeVal(query_interval, 0),
+		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
-    
-    _query_timer =
-	mld6igmp_node().eventloop().new_oneoff_after(
-	    TimeVal(query_interval, 0),
-	    callback(this, &Mld6igmpVif::query_timer_timeout));
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.36 2004/01/14 21:36:07 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.37 2004/02/26 16:02:49 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -466,11 +466,11 @@ XrlAction::execute(const ConfigTreeNode& ctn,
 
 	UnexpandedXrl uxrl(ctn, *this);
 	task_manager.add_xrl(affected_module(), uxrl, cb);
-	debug_msg("result = %d\n", result);
 	result = XORP_OK;
+	debug_msg("result = %d\n", result);
     } else {
 	fprintf(stderr, "Bad command: %s\n", args[0].c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     return result;
 }

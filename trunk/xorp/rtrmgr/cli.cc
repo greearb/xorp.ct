@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.25 2004/02/27 18:32:45 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.26 2004/02/27 21:21:02 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -1284,7 +1284,8 @@ RouterCLI::text_entry_func(const string& ,
     }
 
     SlaveConfigTreeNode* ctn = config_tree()->find_node(path_segments);
-    const TemplateTreeNode *tag_ttn, *data_ttn;
+    const TemplateTreeNode* tag_ttn  = 0;
+    const TemplateTreeNode* data_ttn = 0;
     bool create_needed = false;
     string nodename;
 

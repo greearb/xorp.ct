@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.16 2004/02/06 22:44:12 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.17 2004/02/11 08:48:50 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -466,10 +466,10 @@ RegisterTable<A>::notify_route_changed(
     typename Trie<A, RouteRegister<A>* >::iterator trie_iter,
     const IPRouteEntry<A>& changed_route)
 {
-    list<string> module_names = trie_iter.payload()->module_names();
-    NextHop* nexthop = changed_route.nexthop();
+    list<string> module_names	= trie_iter.payload()->module_names();
+    NextHop* nexthop		= changed_route.nexthop();
+    bool resolves		= false;;
     A nexthop_addr;
-    bool resolves;
 
     switch (nexthop->type()) {
     case GENERIC_NEXTHOP:
@@ -485,7 +485,7 @@ RegisterTable<A>::notify_route_changed(
 	resolves = false;
 	break;
     }
-    if (resolves == false) {
+    if (false == resolves) {
 	notify_invalidated(trie_iter);
     } else {
 	uint32_t metric = changed_route.metric();

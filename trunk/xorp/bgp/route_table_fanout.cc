@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.24 2004/02/25 16:44:49 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.25 2004/03/04 03:50:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -352,7 +352,7 @@ FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			   const PeerHandler *dump_peer) 
 {
     XLOG_ASSERT(caller == _parent);
-    BGPRouteTable<A> *dump_child;
+    BGPRouteTable<A> *dump_child = 0;
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
 	if (i.second().peer_handler() == dump_peer) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.55 2003/12/12 23:18:03 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.56 2004/02/20 04:38:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1446,33 +1446,23 @@ BGPPeer::str()
 const char *
 BGPPeer::pretty_print_state(FSMState s)
 {
-    const char *str;
-
     switch (s) {
     case STATEIDLE:
-	str = "IDLE(1)";
-	break;
+	return "IDLE(1)";
     case STATECONNECT:
-	str = "CONNECT(2)";
-	break;
+	return "CONNECT(2)";
     case STATEACTIVE:
-	str = "ACTIVE(3)";
-	break;
+	return "ACTIVE(3)";
     case STATEOPENSENT:
-	str = "OPENSENT(4)";
-	break;
+	return "OPENSENT(4)";
     case STATEOPENCONFIRM:
-	str = "OPENCONFIRM(5)";
-	break;
+	return "OPENCONFIRM(5)";
     case STATEESTABLISHED:
-	str = "ESTABLISHED(6)";
-	break;
+	return "ESTABLISHED(6)";
     case STATESTOPPED:
-	str = "STOPPED(7)";
-	break;
+	return "STOPPED(7)";
     }
-
-    return str;
+    return "ERROR";
 }
 
 void

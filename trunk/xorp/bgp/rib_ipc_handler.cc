@@ -51,22 +51,17 @@ RibIpcHandler::~RibIpcHandler()
 bool
 RibIpcHandler::register_ribname(const string& r)
 {
-    if(_ribname == r)
+    if (_ribname == r)
 	return true;
 
-    bool res;
-    if("" == r) {
-	res = unregister_rib();
+    if ("" == r) {
+	_ribname.erase();
+	return unregister_rib();
     }
 
     _ribname = r;
 
-    if("" == r) {
-	return res;
-    }
-
     XrlRibV0p1Client rib(_xrl_router);
-    
     //create our tables
     //ebgp - v4
     //name - "ebgp"

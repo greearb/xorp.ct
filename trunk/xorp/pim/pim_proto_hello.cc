@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.13 2004/02/22 04:12:21 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.14 2004/02/24 21:04:54 pavlin Exp $"
 
 
 //
@@ -109,12 +109,12 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
     bool	genid_rcvd = false;
     bool	is_genid_changed = false;
     uint16_t	option_type, option_length, option_length_spec;
-    uint16_t	holdtime;
-    uint16_t	lan_delay;
-    uint16_t	lan_prune_delay_tbit;
-    uint16_t	override_interval;
-    uint32_t	dr_priority;
-    uint32_t	genid;
+    uint16_t	holdtime = 0;
+    uint16_t	lan_delay = 0;
+    uint16_t	lan_prune_delay_tbit = 0;
+    uint16_t	override_interval = 0;
+    uint32_t	dr_priority = 0;
+    uint32_t	genid = 0;
     bool	new_nbr_flag = false;
     list<IPvX>	secondary_addr_list;
     list<IPvX>::iterator addr_list_iter;
