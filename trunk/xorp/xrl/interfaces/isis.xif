@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/isis.xif,v 1.1 2003/07/18 01:59:15 atanu Exp $ */
 
 /*
 ** IS-IS protocol XRL interface.
@@ -58,6 +58,92 @@ interface isis/0.1 {
 			      hello_interval:u32 \
 			      hold_time_multiplier:u32 \
 	                      prioriy:u32      
+
+	/**
+	 * Add interface address
+	 *
+	 * Interface addresses that will be advertised by the
+	 * LSPs. Don't expect this to work if the interface/vif pair
+	 * has not been configured.
+	 *
+	 * @param ifname Interface name.
+	 * @param ifname vif Vif name.
+	 * @param address Interface address
+	 */
+	add_interface_address_v4 ? ifname:txt \
+			      vif:txt \
+		              address:ipv4 
+
+	/**
+	 * Delete interface address
+	 *
+	 * Interface addresses that will be advertised by the
+	 * LSPs. 
+	 *	 *
+	 * @param ifname Interface name.
+	 * @param ifname vif Vif name.
+	 * @param address Interface address
+	 */
+	delete_interface_address_v4 ? ifname:txt \
+			      vif:txt \
+		              address:ipv4 
+
+	/**
+	 * Add interface address
+	 *
+	 * Interface addresses that will be advertised by the
+	 * LSPs. Don't expect this to work if the interface/vif pair
+	 * has not been configured.
+	 *
+	 * @param ifname Interface name.
+	 * @param ifname vif Vif name.
+	 * @param address Interface address
+	 */
+	add_interface_address_v6 ? ifname:txt \
+			      vif:txt \
+		              address:ipv6
+
+	/**
+	 * Delete interface address
+	 *
+	 * Interface addresses that will be advertised by the
+	 * LSPs. 
+	 *
+	 * @param ifname Interface name.
+	 * @param ifname vif Vif name.
+	 * @param address Interface address
+	 */
+	 delete_interface_address_v6 ? ifname:txt \
+			      vif:txt \
+		              address:ipv6
+
+	/*
+	 * Add reachability information.
+	 *
+	 * @param network
+	 */
+         add_nlri_v4 ? address:ipv4net
+		
+	/*
+	 * Delete reachability information.
+	 *
+	 * @param network
+	 */
+         add_nlri_v4 ? address:ipv4net
+
+	/*
+	 * Add reachability information.
+	 *
+	 * @param network
+	 */
+        add_nlri_v6 ? address:ipv6net
+		
+	/*
+	 * Delete reachability information.
+	 *
+	 * @param network
+	 */
+         add_nlri_v6 ? address:ipv6net
 
 	/**
          * Interpacket Gap.
