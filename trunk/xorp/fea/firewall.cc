@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/firewall.cc,v 1.1 2004/09/14 15:08:22 bms Exp $"
 
 #include "fea_module.h"
 
@@ -72,7 +72,7 @@ FirewallManager::set_fw_provider(const char* name)
 	// Tell the provider to take ownership of the table, so that
 	// it can maintain provider-specific state for each firewall
 	// rule.
-	//_fwp->take_table_ownership();
+	_fwp->take_table_ownership();
 
 	return (XORP_OK);
 }
