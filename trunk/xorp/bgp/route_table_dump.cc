@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.28 2004/06/10 22:40:34 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.29 2004/11/27 23:35:32 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -208,8 +208,8 @@ DumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 			   this->tablename().c_str(),
 			   rtmsg.origin_peer(), rtmsg.genid(),
 			   rtmsg.net().str().c_str()));
-	return this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 #endif
+	return this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
     } else {
 	cp(11);
 #ifdef AUDIT_ENABLE
