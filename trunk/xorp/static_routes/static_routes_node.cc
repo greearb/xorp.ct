@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.11 2004/05/06 19:32:04 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.12 2004/06/10 22:41:57 hodson Exp $"
 
 
 //
@@ -744,7 +744,7 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
     }
 
     //
-    // Coudn't find the route to replace
+    // Couldn't find the route to replace
     //
     error_msg = c_format("Cannot replace %s route for %s: "
 			 "no such route",
@@ -813,7 +813,7 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
     }
 
     //
-    // Coudn't find the route to delete
+    // Couldn't find the route to delete
     //
     error_msg = c_format("Cannot delete %s route for %s: "
 			 "no such route",
