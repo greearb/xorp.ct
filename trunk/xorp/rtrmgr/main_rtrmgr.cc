@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.5 2003/03/11 01:02:59 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.6 2003/04/02 22:58:58 hodson Exp $"
 
 #include <signal.h>
 
@@ -34,8 +34,6 @@
 #include "xrl_rtrmgr_interface.hh"
 #include "randomness.hh"
 #include "main_rtrmgr.hh"
-
-typedef FinderNGServer TestFinderServer;
 
 //
 // Defaults
@@ -147,7 +145,7 @@ main(int argc, char* const argv[])
     randgen.add_event_loop(&event_loop);
 
     /* Finder Server */
-    TestFinderServer fs(event_loop);
+    FinderNGServer fs(event_loop);
 
     //start the module manager
     ModuleManager mmgr(&event_loop);

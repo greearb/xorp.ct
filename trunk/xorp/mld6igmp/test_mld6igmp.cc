@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.11 2003/03/31 03:46:48 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.12 2003/04/02 22:58:57 hodson Exp $"
 
 
 //
@@ -45,7 +45,6 @@
 //
 // Local structures/classes, typedefs and macros
 //
-typedef FinderNGServer TestFinderServer;
 
 // XXX: set to 1 for IPv4, or set to 0 for IPv6
 #define DO_IPV4 1
@@ -158,8 +157,12 @@ main(int argc, char *argv[])
 	//
 	// Finder
 	//
-	TestFinderServer *finder = NULL;
-	finder = new TestFinderServer(event_loop);
+	FinderNGServer *finder = NULL;
+	try {
+	    finder = new FinderNGServer(event_loop);
+	} catch (const InvalidPort&) {
+	    XLOG_FATAL("Could not start in-process Finder");
+	}
 	
 	//
 	// CLI

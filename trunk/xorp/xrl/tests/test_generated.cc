@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.4 2003/03/10 23:21:04 hodson Exp $"
+#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.5 2003/04/02 22:58:58 hodson Exp $"
 
 #include <iostream>
 
@@ -29,8 +29,6 @@
 #include "test_xifs.hh"
 #include "test_tgt.hh"
 
-typedef FinderNGServer TestFinderServer;
-
 static const char* g_tgt_name = "test_tgt";
 static const char* g_clnt_name = "test_clnt";
 
@@ -38,7 +36,7 @@ static void
 run_test()
 {
     EventLoop e;
-    TestFinderServer finder(e);
+    FinderNGServer finder(e);
 
     // Configure target for test    
     XrlStdRouter tgt_router(e, g_tgt_name); 
