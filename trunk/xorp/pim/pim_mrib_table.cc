@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.7 2004/07/14 16:59:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.8 2004/07/28 05:12:17 pavlin Exp $"
 
 //
 // PIM Multicast Routing Information Base Table implementation.
@@ -20,8 +20,10 @@
 
 
 #include "pim_module.h"
-#include "pim_private.hh"
-
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
 #include "libxorp/time_slice.hh"
 
 #include "pim_mre.hh"

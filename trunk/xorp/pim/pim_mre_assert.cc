@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.27 2004/02/22 03:34:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.28 2004/06/10 22:41:30 hodson Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -20,7 +20,11 @@
 
 
 #include "pim_module.h"
-#include "pim_private.hh"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
+
 #include "pim_mre.hh"
 #include "pim_mrt.hh"
 #include "pim_node.hh"

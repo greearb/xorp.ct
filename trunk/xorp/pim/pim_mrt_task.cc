@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.15 2004/06/10 22:41:32 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.16 2004/07/17 00:18:16 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -20,7 +20,11 @@
 
 
 #include "pim_module.h"
-#include "pim_private.hh"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
+
 #include "pim_mfc.hh"
 #include "pim_mre_task.hh"
 #include "pim_mrt.hh"

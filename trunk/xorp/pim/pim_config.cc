@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.24 2004/03/02 00:32:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.25 2004/06/10 22:41:30 hodson Exp $"
 
 
 //
@@ -21,7 +21,11 @@
 
 
 #include "pim_module.h"
-#include "pim_private.hh"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
+
 #include "mrt/random.h"
 
 #include "pim_node.hh"

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.33 2005/02/14 20:17:50 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.34 2005/02/19 02:55:14 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -124,7 +124,6 @@ libpim_la_SOURCES += pim_mrt.hh
 libpim_la_SOURCES += pim_nbr.hh
 libpim_la_SOURCES += pim_node.hh
 libpim_la_SOURCES += pim_node_cli.hh
-libpim_la_SOURCES += pim_private.hh
 libpim_la_SOURCES += pim_proto_assert.hh
 libpim_la_SOURCES += pim_proto_join_prune_message.hh
 libpim_la_SOURCES += pim_rp.hh
