@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.45 2005/03/04 03:51:20 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.46 2005/03/18 08:15:03 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -402,6 +402,7 @@ FanoutTable<A>::wakeup_downstream(list <PeerTableInfo<A>*>& queued_peers)
     for (i = queued_peers.begin(); i != queued_peers.end(); i++) {
 	if ((*i)->is_ready()) {
 	    (*i)->route_table()->wakeup();
+	    (*i)->wakeup_sent();
 	}
     }
 }
@@ -597,6 +598,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     XLOG_ASSERT(i != _next_tables.end());
 
     PeerTableInfo<A> *peer_info = &(i.second());
+    peer_info->received_get();
     if (peer_info->has_queued_data() == false) {
 	debug_msg("no data queued\n");
 	peer_info->set_is_ready();
@@ -747,6 +749,7 @@ FanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table)
     XLOG_ASSERT(i != _next_tables.end());
 
     PeerTableInfo<A> *peer_info = &(i.second());
+    peer_info->peer_reset();
     if (peer_info->has_queued_data() == false)
 	return;
 

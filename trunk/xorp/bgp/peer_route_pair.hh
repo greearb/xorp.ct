@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_route_pair.hh,v 1.8 2004/11/05 01:35:23 pavlin Exp $
+// $XORP: xorp/bgp/peer_route_pair.hh,v 1.9 2005/03/18 08:15:02 mjh Exp $
 
 #ifndef __BGP_PEER_ROUTE_PAIR_HH__
 #define __BGP_PEER_ROUTE_PAIR_HH__
 
+#include <sys/time.h>
 #include <list>
+#include "libxorp/xlog.h"
 
 template<class A>
 class RouteQueueEntry;
@@ -79,6 +81,36 @@ public:
 	return _posn;
     }
 
+    // The following two functions are here to do a sanity check.  If
+    // we sent a wakeup to a peer more than 20 minutes ago, and still
+    // haven't received a get_next_message, then something has failed
+    // badly, and we need to dump a core and diagnose what it is that
+    // happened.
+    void received_get() {
+	if (_waiting_for_get)
+	    _waiting_for_get = false;
+    }
+    void wakeup_sent() {
+	timeval now;
+	gettimeofday(&now, 0);
+	if (_waiting_for_get) {
+	    if ((now.tv_sec - _wakeup_sent.tv_sec) > 1200) {
+		/* we sent a wakeup 20 minutes ago, and the peer still
+		   hasn't requested the data - something must have
+		   gone badly wrong */
+		XLOG_FATAL("Peer seems to have permanently locked up\n");
+	    }
+	} else {
+	    _wakeup_sent.tv_sec = now.tv_sec;
+	    _wakeup_sent.tv_usec = now.tv_usec;
+	    _waiting_for_get = true;
+	}
+    }
+    
+    void peer_reset() {
+	_waiting_for_get = false;
+    }
+
 private:
     BGPRouteTable<A> *_route_table; //the next table after
                                           //the fanout table
@@ -100,6 +132,9 @@ private:
     typename list<const RouteQueueEntry<A>*>::iterator _posn; 
     /*the next item of data to send to this peer in the fanout table
       queue.  This only has meaning if _has_queued_data is true */
+
+    bool _waiting_for_get;
+    timeval _wakeup_sent;
 };
 
 #endif // __BGP_PEER_ROUTE_PAIR_HH__
