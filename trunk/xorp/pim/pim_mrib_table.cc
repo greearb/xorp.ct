@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.6 2004/06/10 22:41:31 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.7 2004/07/14 16:59:50 pavlin Exp $"
 
 //
 // PIM Multicast Routing Information Base Table implementation.
@@ -124,6 +124,13 @@ PimMribTable::add_pending_remove(uint32_t tid, const Mrib& mrib)
     MribTable::add_pending_remove(tid, mrib);
 
     delete_unresolved_prefix(mrib.dest_prefix());
+}
+
+void
+PimMribTable::add_pending_remove_all_entries(uint32_t tid)
+{
+    add_modified_prefix(IPvXNet(IPvX::ZERO(family()), 0));
+    MribTable::add_pending_remove_all_entries(tid);
 }
 
 void

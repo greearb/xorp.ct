@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrib_table.hh,v 1.6 2004/05/17 23:50:09 pavlin Exp $
+// $XORP: xorp/pim/pim_mrib_table.hh,v 1.7 2004/06/10 22:41:31 hodson Exp $
 
 
 #ifndef __PIM_PIM_MRIB_TABLE_HH__
@@ -127,6 +127,13 @@ public:
      * @param mrib the MRIB entry to remove.
      */
     void	add_pending_remove(uint32_t tid, const Mrib& mrib);
+
+    /**
+     * Remove all MRIB entries from the MRIB table.
+     * 
+     * @param tid the transaction ID.
+     */
+    void	add_pending_remove_all_entries(uint32_t tid);
 
     /**
      * Commit all pending MRIB entries to the MRIB table.
