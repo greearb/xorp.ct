@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.15 2003/11/06 01:21:38 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.17 2004/03/05 18:41:18 hodson Exp $
 ##
 
 # -- Real Programs
@@ -98,6 +98,8 @@ libxorp_a_SOURCES += asyncio.hh
 libxorp_a_SOURCES += buffer.hh
 libxorp_a_SOURCES += c_format.hh
 libxorp_a_SOURCES += callback.hh
+libxorp_a_SOURCES += callback_nodebug.hh
+libxorp_a_SOURCES += callback_debug.hh
 libxorp_a_SOURCES += config_param.hh
 libxorp_a_SOURCES += eventloop.hh
 libxorp_a_SOURCES += exceptions.hh
@@ -150,11 +152,10 @@ libxorp_a_SOURCES += token.cc
 libxorp_a_SOURCES += transaction.cc
 libxorp_a_SOURCES += vif.cc
 
-BUILT_SOURCES	   = callback.hh
+BUILT_SOURCES	   = callback_nodebug.hh callback_debug.hh
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST	   = callback-gen.py
-
+EXTRA_DIST	   = callback_gen.py
 
 ################################################################
 ##
@@ -172,6 +173,8 @@ xlog.o: xlog.c
 
 # If this code is commented out, please upgrade to python2.0 or above.
 
-@PY_BUILD@callback.hh: callback-gen.py ../config.h
-@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py $(CALLBACK_GEN_FLAGS) -b 6 -l 13 > $(srcdir)/callback.hh
+@PY_BUILD@callback_nodebug.hh: callback-gen.py
+@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -b 6 -l 13 > $(srcdir)/$@
 
+@PY_BUILD@callback_debug.hh: callback-gen.py
+@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -d -b 6 -l 13 > $(srcdir)/$@
