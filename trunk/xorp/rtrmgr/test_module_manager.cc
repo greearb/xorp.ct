@@ -12,16 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.1 2003/04/24 23:43:48 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.2 2003/04/25 02:59:04 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "template_tree.hh"
 #include "module_manager.hh"
 #include "split.hh"
-
-
-static const char* default_config_template_dir = "../etc/templates";
-static const char* default_xrl_dir 	       = "../xrl/targets";
 
 static bool waiting = false;
 static bool run_success = false;
@@ -42,17 +38,6 @@ main(int argc, char* const argv[])
     xlog_add_default_output();
     xlog_start();
 
-    //read the router config template files
-    TemplateTree *tt;
-    try {
-	tt = new TemplateTree(default_config_template_dir, default_xrl_dir);
-    } catch (const XorpException&) {
-	xorp_unexpected_handler();
-	fprintf(stderr, "test_sample_config: failed to load template file\n");
-	fprintf(stderr, "test_sample_config: TEST FAILED\n");
-	return -1;
-    }
-
     //initialize the event loop
     EventLoop eventloop; 
 
@@ -60,8 +45,8 @@ main(int argc, char* const argv[])
     ModuleManager mmgr(eventloop, /*verbose = */true);
     mmgr.new_module("finder", "../libxipc/finder");
 
-    if (mmgr.module_starting("finder") == true
-	|| mmgr.module_running("finder") == true) {
+    if (mmgr.module_has_started("finder") == true) {
+	fprintf(stderr, "Incorrect initialization state for new module\n");
 	mmgr.shutdown();
 	return -1;
     }
@@ -72,7 +57,7 @@ main(int argc, char* const argv[])
     mmgr.run_module("finder", true, cb);
 
     printf("Verifying finder starting\n");
-    if (mmgr.module_starting("finder") != true) {
+    if (mmgr.module_has_started("finder") != true) {
 	mmgr.shutdown();
 	return -1;
     }

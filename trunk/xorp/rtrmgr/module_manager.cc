@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.8 2003/04/24 23:43:47 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.9 2003/04/25 02:59:04 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <sys/types.h>
@@ -36,22 +36,31 @@ static void childhandler(int x) {
     printf("pid=%d, status=%d\n", pid, status);
     if (WIFEXITED(status)) {
 	printf("process exited normally with value %d\n", WEXITSTATUS(status));
+	if (status == 0)
+	    module_pids[pid]->normal_exit();
+	else
+	    module_pids[pid]->abnormal_exit(status);
     } else if (WIFSIGNALED(status)) {
 	printf("process was killed with signal %d\n", WTERMSIG(status));
+	module_pids[pid]->killed();
     } else if (WIFSTOPPED(status)) {
 	printf("process stopped\n");
+	module_pids[pid]->set_stalled();
+    } else {
+	//how did we get here?
+	abort();
     }
-    module_pids[pid]->failed();
 }
 
 Module::Module(const string& name, bool verbose)
-    : _name(name), _verbose(verbose)
+    : _name(name), 
+    _pid(0),
+    _status(MODULE_NOT_STARTED),
+    _verbose(verbose) 
 {}
 
 int Module::set_execution_path(const string &path) {
     _path = path;
-    _running = false;
-    _pid = 0;
     struct stat sb;
     if (_verbose) {
 	printf("**********************************************************\n");
@@ -153,7 +162,6 @@ void Module::module_run_done(bool success) {
     if (_status == MODULE_STARTUP) {
 	_status = MODULE_INITIALIZING;
     }
-    _running = true;
 }
 
 Module::~Module() {
@@ -162,7 +170,7 @@ Module::~Module() {
     if (!_do_exec)
 	return;
     if (_status != MODULE_FAILED) {
-	_status = MODULE_SHUTDOWN;
+	_status = MODULE_SHUTTING_DOWN;
 	kill(_pid, SIGTERM);
     }
 
@@ -178,23 +186,46 @@ Module::~Module() {
 }
 
 void
-Module::failed() {
+Module::set_stalled() {
     if (_verbose)
-	printf("Module failed: %s status:%d\n", _name.c_str(), _status);
-    if (_status == MODULE_STARTUP || _status == MODULE_SHUTDOWN) {
-	_status = MODULE_FAILED;
-	return;
-    }
+	printf("Module stalled: %s\n", _name.c_str());
+    _status = MODULE_STALLED;
+}
+
+void
+Module::normal_exit() {
+    if (_verbose)
+	printf("Module normal exit: %s\n", _name.c_str());
+    _status = MODULE_NOT_STARTED;
+}
+
+void
+Module::abnormal_exit(int status) {
+    if (_verbose)
+	printf("Module abnormal exit: %s status:%d\n", _name.c_str(), status);
     _status = MODULE_FAILED;
-    if (_verbose)
-	printf("need to restart module %s\n", _name.c_str());
+}
+
+void
+Module::killed() {
+    if (_status == MODULE_SHUTTING_DOWN) {
+	//it may have been shutting down already, in which case this is OK.
+	if (_verbose)
+	    printf("Module killed during shutdown: %s\n", _name.c_str());
+	_status = MODULE_NOT_STARTED;
+    } else {
+	//we don't know why it was killed.
+	if (_verbose)
+	    printf("Module abnormally killed: %s\n", _name.c_str());
+	_status = MODULE_FAILED;
+    }
 }
 
 
 string
 Module::str() const {
     string s = "Module " + _name + ", path " + _path + "\n";
-    if (_running)
+    if (_status != MODULE_NOT_STARTED && _status != MODULE_FAILED)
 	s += c_format("Module is running, pid=%d\n", _pid);
     else
 	s += "Module is not running\n";
@@ -239,19 +270,19 @@ ModuleManager::run_module(const string&name, bool do_exec,
 }
 
 bool
-ModuleManager::module_running(const string &name) const {
+ModuleManager::module_is_running(const string &name) const {
     const Module *module = const_find_module(name);
     if (module == NULL)
 	return false;
-    return (module->is_running());
+    return (module->status() == MODULE_RUNNING);
 }
 
 bool
-ModuleManager::module_starting(const string &name) const {
+ModuleManager::module_has_started(const string &name) const {
     const Module *module = const_find_module(name);
     if (module == NULL)
 	return false;
-    return (module->is_starting());
+    return (module->status() != MODULE_NOT_STARTED);
 }
 
 Module*
@@ -295,4 +326,7 @@ ModuleManager::shutdown() {
 	_modules.erase(prev);
     }
 }
+
+
+
 
