@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.121 2004/11/03 22:23:54 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.122 2004/11/08 21:14:27 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1532,6 +1532,10 @@ if test "${GCC}" = "yes" ; then
 	dnl	 appears to be problematic, because if it is enabled we cannot
 	dnl	 use statements like "vfprintf(stderr, fmt, ap);" where "fmt"
 	dnl	 is a variable (e.g., defined as "const char *").
+	dnl
+	dnl XXX: For extra debugging, the following g++ flag may be enabled
+	dnl	 and added to CXXFLAGS:
+	dnl	 -D_GLIBCXX_DEBUG
 	dnl
 	CPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs"
 	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
