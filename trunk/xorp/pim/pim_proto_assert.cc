@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.7 2003/01/30 03:40:13 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.8 2003/02/10 01:22:01 pavlin Exp $"
 
 
 //
@@ -325,7 +325,7 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
 	return (XORP_ERROR);
     
     // Prepare the Assert data
-    if (pim_mre->is_sg() && pim_mre->is_spt()) {
+    if (pim_mre->is_sg()) {
 	assert_source_addr = pim_mre->source_addr();
     } else {
 	rp_addr_ptr = pim_mre->rp_addr_ptr();
@@ -333,10 +333,7 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
 	    assert_source_addr = *rp_addr_ptr;
     }
     assert_group_addr  = pim_mre->group_addr();
-    if (pim_mre->is_sg() && pim_mre->is_spt())
-	rpt_bit = false;
-    else
-	rpt_bit = true;
+    rpt_bit = true;
     metric_preference = PIM_ASSERT_MAX_METRIC_PREFERENCE;
     metric = PIM_ASSERT_MAX_METRIC;
     
