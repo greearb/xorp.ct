@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.18 2004/06/10 22:41:55 hodson Exp $
+// $XORP: xorp/rtrmgr/master_template_tree_node.hh,v 1.1 2004/12/11 21:29:57 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_MASTER_TEMPLATE_TREE_NODE_HH__
@@ -43,4 +43,4 @@ private:
 };
 
 
-#endif // __RTRMGR_TEMPLATE_TREE_NODE_HH__
+#endif // __RTRMGR_MASTER_TEMPLATE_TREE_NODE_HH__
