@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_dummy.cc,v 1.14 2003/09/16 18:13:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.16 2003/12/10 22:37:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -99,7 +99,6 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	fticonfig.set_dummy();
     fticonfig.start();
 
-
     //
     // 2. Interface Configurator and reporters
     //
@@ -128,7 +127,6 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     //
     const IfTree& iftree = ifm.iftree();
     lfc_bridge.set_iftree(&iftree);
-
 
     //
     // 4. Raw Socket TODO
@@ -224,22 +222,38 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     //
     // Main loop
     //
-    while (! xrl_fea_target.done()) {
-	eventloop.run();
+    while (true) {
+	while (! xrl_fea_target.done()) {
+	    eventloop.run();
+	}
+	//
+	// Gracefully stop the FEA
+	//
+	// TODO: this may not work if we depend on reading asynchronously
+	// data from sockets. To fix this, we need to run the eventloop
+	// until we get all the data we need. Tricky...
+	ifconfig.stop();
+	fticonfig.stop();
+
+	string reason;
+	while (! xrl_mfea_node4.MfeaNode::is_down()) {
+	    eventloop.run();
+	}
+
+	if (xrl_fea_target.done())
+	    break;
     }
 
-    //
-    // Gracefully stop
-    // TODO: this may not work if we depend on reading asynchronously
-    // data from sockets. To fix this, we need to run the eventloop
-    // until we get all the data we need. Tricky...
-    //
-    // TODO: take care of the MFEA as well.
-    // xrl_mfea_node4.stop();
-    ifconfig.stop();
-    fticonfig.stop();
+    while (xrl_std_router_fea.pending()
+	  || xrl_std_router_cli4.pending()
+	  || xrl_std_router_mfea4.pending()
+#ifdef HAVE_IPV6_MULTICAST
+	  || xrl_std_router_mfea6.pending()
+#endif
+	) {
+	eventloop.run();
+    }
 }
-
 
 int
 main(int argc, char *argv[])
