@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.45 2004/09/28 08:11:10 atanu Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.46 2004/10/04 22:26:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -329,9 +329,14 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 	      metric);
  
     if (_rib_manager->profile().enabled(profile_route_ribin))
-	_rib_manager->profile().
-	    log(profile_route_ribin,
-		c_format("add %s", network.str().c_str()));
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("add %s %s%s %s %s %u",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str(),
+					     nexthop.str().c_str(),
+					     metric));
     
     if (unicast &&
 	_urib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
@@ -364,9 +369,14 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 				 const XrlAtomList& policytags)
 {
     if (_rib_manager->profile().enabled(profile_route_ribin))
-	_rib_manager->profile().
-	    log(profile_route_ribin,
-		c_format("add %s", network.str().c_str()));
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("add %s %s%s %s %s %u",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str(),
+					     nexthop.str().c_str(),
+					     metric));
 
     if (unicast &&
 	_urib6.add_route(protocol, network, nexthop, "", "", metric,
@@ -401,9 +411,14 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
 				     const XrlAtomList& policytags)
 {
     if (_rib_manager->profile().enabled(profile_route_ribin))
-	_rib_manager->profile().
-	    log(profile_route_ribin,
-		c_format("replace %s", network.str().c_str()));
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("replace %s %s%s %s %s %u",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str(),
+					     nexthop.str().c_str(),
+					     metric));
 
     if (unicast &&
 	_urib4.replace_route(protocol, network, nexthop, "", "",
@@ -434,9 +449,14 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
 				     const XrlAtomList& policytags)
 {
     if (_rib_manager->profile().enabled(profile_route_ribin))
-	_rib_manager->profile().
-	    log(profile_route_ribin,
-		c_format("replace %s", network.str().c_str()));
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("replace %s %s%s %s %s %u",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str(),
+					     nexthop.str().c_str(),
+					     metric));
 
     if (unicast &&
 	_urib6.replace_route(protocol, network, nexthop, "", "", metric,
@@ -471,9 +491,12 @@ XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
 	      network.str().c_str());
 
     if (_rib_manager->profile().enabled(profile_route_ribin))
-	_rib_manager->profile().
-	    log(profile_route_ribin,
-		c_format("delete %s", network.str().c_str()));
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("delete %s %s%s %s",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str()));
 
     if (unicast && _urib4.delete_route(protocol, network) != XORP_OK) {
 	string err = "Could not delete IPv4 route from unicast RIB";
@@ -495,9 +518,12 @@ XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
 				    const IPv6Net&	network)
 {
     if (_rib_manager->profile().enabled(profile_route_ribin))
-	_rib_manager->profile().
-	    log(profile_route_ribin,
-		c_format("delete %s", network.str().c_str()));
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("delete %s %s%s %s",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str()));
 
     if (unicast && _urib6.delete_route(protocol, network) != XORP_OK) {
 	string err = "Could not delete IPv6 route from unicast RIB";
