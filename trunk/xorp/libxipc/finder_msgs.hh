@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_msgs.hh,v 1.1 2003/01/21 18:51:36 hodson Exp $
+// $XORP: xorp/libxipc/finder_msgs.hh,v 1.2 2003/02/26 19:46:03 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_MSGS_HH__
 #define __LIBXIPC_FINDER_MSGS_HH__
@@ -144,10 +144,10 @@ public:
      * Constructor for received Xrl messages.
      * Attempts to extract Xrl from data.
      *
-     * @throw BadFinderMessageFormat when bad packet data received.
-     * @throw WrongFinderMessageType if message is not a Finder Xrl message.
-     * @throw InvalidString if the data within the Xrl Message could not be
-     *        rendered as an Xrl.
+     * @throws BadFinderMessageFormat when bad packet data received.
+     * @throws WrongFinderMessageType if message is not a Finder Xrl message.
+     * @throws InvalidString if the data within the Xrl Message could not be
+     *         rendered as an Xrl.
      */
     ParsedFinderXrlMessage(const char* data)
 	throw (BadFinderMessageFormat, WrongFinderMessageType, InvalidString);
@@ -169,11 +169,11 @@ public:
      * Constructor for received Xrl Response messages.
      * Attempts to extract Xrl Reponse from data.
      *
-     * @throw BadFinderMessageFormat when bad packet data received.
-     * @throw WrongFinderMessageType if message is not a Finder Xrl Response
-     *        Message.
-     * @throw InvalidString if the data within the Xrl Response
-     *        message could not be rendered as an Xrl.
+     * @throws BadFinderMessageFormat when bad packet data received.
+     * @throws WrongFinderMessageType if message is not a Finder Xrl Response
+     *         Message.
+     * @throws InvalidString if the data within the Xrl Response
+     *         message could not be rendered as an Xrl.
      */
     ParsedFinderXrlResponse(const char* data)
 	throw (BadFinderMessageFormat, WrongFinderMessageType, InvalidString);
