@@ -41,14 +41,14 @@ Ospf<A>::Ospf(OspfTypes::Version version, IO* io)
 	_packet_decoder.
 	    register_decoder(new DataDescriptionPacket(OspfTypes::V2));
 	_packet_decoder.
-	    register_decoder(new  LinkStateRequestPacket(OspfTypes::V2));
+	    register_decoder(new LinkStateRequestPacket(OspfTypes::V2));
 	break;
     case OspfTypes::V3:
 	_packet_decoder.register_decoder(new HelloPacket(OspfTypes::V3));
 	_packet_decoder.
 	    register_decoder(new DataDescriptionPacket(OspfTypes::V3));
 	_packet_decoder.
-	    register_decoder(new  LinkStateRequestPacket(OspfTypes::V3));
+	    register_decoder(new LinkStateRequestPacket(OspfTypes::V3));
 	break;
     }
 
