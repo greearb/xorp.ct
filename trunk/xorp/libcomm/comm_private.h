@@ -31,7 +31,7 @@
  */
 
 /*
- *  $XORP: xorp/libcomm/comm_private.h,v 1.5 2002/12/09 11:33:47 pavlin Exp $
+ *  $XORP: xorp/libcomm/comm_private.h,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
  */
 
 #ifndef __LIBCOMM_COMM_PRIVATE_H__
@@ -65,6 +65,16 @@
  * Global functions prototypes
  */
 __BEGIN_DECLS
+
+/**
+ * Report IPv6 method invoked when IPv6 support is not present.  An
+ * error message is output via XLOG_ERROR.  This function is variadic
+ * so it can be used to remove unused variable warnings in non-IPv6
+ * code as well as log the error.
+ *
+ * @param method ipv6 specific method to report.
+ */
+void comm_sock_no_ipv6(const char* method, ...);
 
 __END_DECLS
 

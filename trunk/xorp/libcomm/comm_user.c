@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.2 2003/03/12 22:46:02 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.5 2004/03/04 07:55:14 pavlin Exp $"
 
 
 /*
@@ -90,6 +90,32 @@ comm_init(void)
     init_flag = true;
 
     return (XORP_OK);
+}
+
+/**
+ * comm_ipv4_present:
+ *
+ * Return value: %XORP_OK if IPv4 support present, otherwise %XORP_ERROR
+ */
+int
+comm_ipv4_present(void)
+{
+    return XORP_OK;
+}
+
+/**
+ * comm_ipv6_present:
+ *
+ * Return value: %XORP_OK if IPv6 support present, otherwise %XORP_ERROR
+ */
+int
+comm_ipv6_present(void)
+{
+#ifdef HAVE_IPV6
+    return XORP_OK;
+#else
+    return XORP_ERROR;
+#endif /* HAVE_IPV6 */
 }
 
 /**
@@ -184,7 +210,6 @@ comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port)
     return (sock);
 }
 
-#ifdef HAVE_IPV6
 /**
  * comm_bind_tcp6:
  * @my_addr: The local IPv6 address to bind to (in network order).
@@ -198,6 +223,7 @@ comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port)
 int
 comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port)
 {
+#ifdef HAVE_IPV6
     int sock;
 
     comm_init();
@@ -216,8 +242,12 @@ comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port)
     }
 
     return (sock);
-}
+#else
+    comm_sock_no_ipv6("comm_bind_tcp6", my_addr, my_port);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
+
 
 /**
  * comm_bind_udp4:
@@ -244,7 +274,7 @@ comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port)
     return (sock);
 }
 
-#ifdef HAVE_IPV6
+
 /**
  * comm_bind_udp6:
  * @my_addr: The local IPv6 address to bind to (in network order).
@@ -258,6 +288,7 @@ comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port)
 int
 comm_bind_udp6(const struct in6_addr *my_addr, unsigned short my_port)
 {
+#ifdef HAVE_IPV6
     int sock;
 
     comm_init();
@@ -268,8 +299,12 @@ comm_bind_udp6(const struct in6_addr *my_addr, unsigned short my_port)
 	return (XORP_ERROR);
 
     return (sock);
-}
+#else
+    comm_sock_no_ipv6("comm_bind_udp6", my_addr, my_port);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
+
 
 /**
  * comm_bind_join_udp4:
@@ -323,7 +358,6 @@ comm_bind_join_udp4(const struct in_addr *mcast_addr,
     return (sock);
 }
 
-#ifdef HAVE_IPV6
 /**
  * comm_bind_join_udp6:
  * @mcast_addr: The multicast address to join.
@@ -353,6 +387,7 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 		    unsigned short my_port,
 		    bool reuse_flag)
 {
+#ifdef HAVE_IPV6
     int sock;
 
     comm_init();
@@ -374,8 +409,12 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 	return (XORP_ERROR);
 
     return (sock);
-}
+#else
+    comm_sock_no_ipv6("comm_bind_join_udp6",
+		      mcast_addr, join_if_index, my_port, reuse_flag);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
 
 /**
  * comm_connect_tcp4:
@@ -405,7 +444,6 @@ comm_connect_tcp4(const struct in_addr *remote_addr,
     return (sock);
 }
 
-#ifdef HAVE_IPV6
 /**
  * comm_connect_tcp6:
  * @remote_addr: The remote address to connect to.
@@ -422,6 +460,7 @@ int
 comm_connect_tcp6(const struct in6_addr *remote_addr,
 		  unsigned short remote_port)
 {
+#ifdef HAVE_IPV6
     int sock;
 
     comm_init();
@@ -432,8 +471,11 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
 	return (XORP_ERROR);
 
     return (sock);
-}
+#else
+    comm_sock_no_ipv6("comm_connect_tcp6", remote_addr, remote_port);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
 
 /**
  * comm_connect_udp4:
@@ -460,7 +502,6 @@ comm_connect_udp4(const struct in_addr *remote_addr,
     return (sock);
 }
 
-#ifdef HAVE_IPV6
 /**
  * comm_connect_udp6:
  * @remote_addr: The remote address to connect to.
@@ -474,6 +515,7 @@ int
 comm_connect_udp6(const struct in6_addr *remote_addr,
 		  unsigned short remote_port)
 {
+#ifdef HAVE_IPV6
     int sock;
 
     comm_init();
@@ -484,8 +526,11 @@ comm_connect_udp6(const struct in6_addr *remote_addr,
 	return (XORP_ERROR);
 
     return (sock);
-}
+#else
+    comm_sock_no_ipv6("comm_connect_udp6", remote_addr, remote_port);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
 
 /**
  * comm_connect_udp4:
@@ -520,7 +565,6 @@ comm_bind_connect_udp4(const struct in_addr *local_addr,
     return (sock);
 }
 
-#ifdef HAVE_IPV6
 /**
  * comm_connect_udp6:
  * @local_addr: The local address to bind to.
@@ -540,6 +584,7 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
 		       const struct in6_addr *remote_addr,
 		       unsigned short remote_port)
 {
+#ifdef HAVE_IPV6
     int sock;
 
     comm_init();
@@ -552,5 +597,10 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
 	return (XORP_ERROR);
 
     return (sock);
-}
+#else
+    comm_sock_no_ipv6("comm_bind_connect_udp6",
+		      local_addr, local_port, remote_addr, remote_port);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
+

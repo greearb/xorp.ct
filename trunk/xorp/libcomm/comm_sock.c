@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.5 2004/03/04 07:54:20 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.6 2004/03/18 23:59:56 hodson Exp $"
 
 
 /*
@@ -66,7 +66,6 @@
 /*
  * Local functions prototypes
  */
-
 
 /**
  * comm_sock_open:
@@ -180,7 +179,6 @@ comm_sock_bind4(int sock, const struct in_addr *my_addr,
     return (XORP_OK);
 }
 
-#ifdef HAVE_IPV6
 /**
  * comm_sock_bind6:
  * @sock: The socket to bind.
@@ -196,6 +194,7 @@ int
 comm_sock_bind6(int sock, const struct in6_addr *my_addr,
 		unsigned short my_port)
 {
+#ifdef HAVE_IPV6
     int family;
     struct sockaddr_in6 sin6_addr;
 
@@ -234,8 +233,11 @@ comm_sock_bind6(int sock, const struct in6_addr *my_addr,
     }
 
     return (XORP_OK);
-}
+#else
+    comm_sock_no_ipv6("comm_sock_bind6", sock, my_addr, my_port);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
 
 /**
  * comm_sock_join4:
@@ -291,7 +293,6 @@ comm_sock_join4(int sock, const struct in_addr *mcast_addr,
     return (XORP_OK);
 }
 
-#ifdef HAVE_IPV6
 /**
  * comm_sock_join6:
  * @sock: The socket to join the group.
@@ -307,6 +308,7 @@ int
 comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 		unsigned int my_ifindex)
 {
+#ifdef HAVE_IPV6
     int family;
     struct ipv6_mreq imr6;	/* the multicast join address */
 
@@ -333,8 +335,11 @@ comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
     }
 
     return (XORP_OK);
-}
+#else
+    comm_sock_no_ipv6("comm_sock_join6", sock, mcast_addr, my_ifindex);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
 
 /**
  * comm_sock_leave4:
@@ -390,7 +395,6 @@ comm_sock_leave4(int sock, const struct in_addr *mcast_addr,
     return (XORP_OK);
 }
 
-#ifdef HAVE_IPV6
 /**
  * comm_sock_leave6:
  * @sock: The socket to leave the group.
@@ -406,6 +410,7 @@ int
 comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
 		unsigned int my_ifindex)
 {
+#ifdef HAVE_IPV6
     int family;
     struct ipv6_mreq imr6;	/* the multicast leave address */
 
@@ -432,9 +437,11 @@ comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
     }
 
     return (XORP_OK);
-}
-
+#else
+    comm_sock_no_ipv6("comm_sock_leave6", sock, mcast_addr, my_ifindex);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
 
 /**
  * comm_sock_connect4:
@@ -489,7 +496,6 @@ comm_sock_connect4(int sock, const struct in_addr *remote_addr,
     return (XORP_OK);
 }
 
-#ifdef HAVE_IPV6
 /**
  * comm_sock_connect6:
  * @sock: The socket to use to connect.
@@ -508,6 +514,7 @@ int
 comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
 		   unsigned short remote_port)
 {
+#ifdef HAVE_IPV6
     int family;
     struct sockaddr_in6 sin6_addr;
 
@@ -547,8 +554,12 @@ comm_sock_connect6(int sock, const struct in6_addr *remote_addr,
 #endif /* 0/1 */
 
     return (XORP_OK);
-}
+#else
+    comm_sock_no_ipv6("comm_sock_connect6", sock, remote_addr, remote_port);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
+
 
 /**
  * comm_sock_accept:
@@ -728,8 +739,7 @@ comm_set_loopback(int sock, int val)
     }
 #endif /* HAVE_IPV6 */
     default:
-	assert(false);
-	XLOG_ERROR("Error %s setsockopt IP_MULTICAST_LOOP/IPV6_MULTICAST_LOOP "
+	XLOG_FATAL("Error %s setsockopt IP_MULTICAST_LOOP/IPV6_MULTICAST_LOOP "
 		   "on socket %d: invalid family = %d",
 		   (val)? "set": "reset", sock, family);
 	return (XORP_ERROR);
@@ -780,7 +790,9 @@ comm_set_ttl(int sock, int val)
     }
 #endif /* HAVE_IPV6 */
     default:
-	assert(false);
+	XLOG_FATAL("Error %s setsockopt IP_MULTICAST_TTL/IPV6_MULTICAST_HOPS "
+		   "on socket %d: invalid family = %d",
+		   (val)? "set": "reset", sock, family);
 	return (XORP_ERROR);
     }
 
@@ -824,7 +836,6 @@ comm_set_iface4(int sock, const struct in_addr *in_addr)
     return (XORP_OK);
 }
 
-#ifdef HAVE_IPV6
 /**
  * comm_set_iface6:
  * @sock: The socket whose default multicast interface to set.
@@ -839,6 +850,7 @@ comm_set_iface4(int sock, const struct in_addr *in_addr)
 int
 comm_set_iface6(int sock, u_int ifindex)
 {
+#ifdef HAVE_IPV6
     int family = socket2family(sock);
 
     if (family != AF_INET6) {
@@ -855,8 +867,12 @@ comm_set_iface6(int sock, u_int ifindex)
     }
 
     return (XORP_OK);
-}
+#else
+    comm_sock_no_ipv6("comm_set_iface6", sock, ifindex);
+    return (XORP_ERROR);
 #endif /* HAVE_IPV6 */
+}
+
 
 /**
  * comm_sock_set_sndbuf:
@@ -988,4 +1004,17 @@ socket2family(int sock)
     }
 
     return (un.sa.sa_family);
+}
+
+
+/**
+ * comm_sock_no_ipv6:
+ *
+ * Log an error when an IPv6 specific method is called when IPv6 is
+ * not preset.
+ **/
+void
+comm_sock_no_ipv6(const char* method, ...)
+{
+    XLOG_ERROR("%s: IPv6 support not present.", method);
 }

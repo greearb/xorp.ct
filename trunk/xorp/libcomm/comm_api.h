@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.5 2004/03/04 07:55:42 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.6 2004/03/18 23:59:55 hodson Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -98,6 +98,20 @@ __BEGIN_DECLS
 extern int	comm_init(void);
 
 /**
+ * Indicate presence of IPv4 support.
+ *
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_ipv4_present(void);
+
+/**
+ * Indicate presence of IPv6 support.
+ *
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_ipv6_present(void);
+
+/**
  * Open a TCP socket.
  *
  * @param family the address family.
@@ -132,7 +146,6 @@ extern int	comm_close(int sock);
 extern int	comm_bind_tcp4(const struct in_addr *my_addr,
 			       unsigned short my_port);
 
-#ifdef HAVE_IPV6
 /**
  * Open an IPv6 TCP socket and bind it to a local address and a port.
  *
@@ -143,7 +156,6 @@ extern int	comm_bind_tcp4(const struct in_addr *my_addr,
  */
 extern int	comm_bind_tcp6(const struct in6_addr *my_addr,
 			       unsigned short my_port);
-#endif /* HAVE_IPV6 */
 
 /**
  * Open an IPv4 UDP socket and bind it to a local address and a port.
@@ -156,7 +168,6 @@ extern int	comm_bind_tcp6(const struct in6_addr *my_addr,
 extern int	comm_bind_udp4(const struct in_addr *my_addr,
 			       unsigned short my_port);
 
-#ifdef HAVE_IPV6
 /**
  * Open an IPv6 UDP socket and bind it to a local address and a port.
  *
@@ -167,7 +178,6 @@ extern int	comm_bind_udp4(const struct in_addr *my_addr,
  */
 extern int	comm_bind_udp6(const struct in6_addr *my_addr,
 			       unsigned short my_port);
-#endif /* HAVE_IPV6 */
 
 /**
  * Open an IPv4 UDP socket on an interface, bind it to a port,
@@ -199,7 +209,6 @@ extern int	comm_bind_join_udp4(const struct in_addr *mcast_addr,
 				    unsigned short my_port,
 				    bool reuse_flag);
 
-#ifdef HAVE_IPV6
 /**
  * Open an IPv6 UDP socket on an interface, bind it to a port,
  * and join a multicast group.
@@ -229,7 +238,6 @@ extern int	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 				    unsigned int join_if_index,
 				    unsigned short my_port,
 				    bool reuse_flag);
-#endif /* HAVE_IPV6 */
 
 /**
  * Open an IPv4 TCP socket, and connect it to a remote address and port.
@@ -244,7 +252,6 @@ extern int	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 extern int	comm_connect_tcp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port);
 
-#ifdef HAVE_IPV6
 /**
  * Open an IPv6 TCP socket, and connect it to a remote address and port.
  *
@@ -258,7 +265,6 @@ extern int	comm_connect_tcp4(const struct in_addr *remote_addr,
  */
 extern int	comm_connect_tcp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port);
-#endif /* HAVE_IPV6 */
 
 /**
  * Open an IPv4 UDP socket, and connect it to a remote address and port.
@@ -270,7 +276,6 @@ extern int	comm_connect_tcp6(const struct in6_addr *remote_addr,
 extern int	comm_connect_udp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port);
 
-#ifdef HAVE_IPV6
 /**
  * Open an IPv6 UDP socket, and connect it to a remote address and port.
  *
@@ -280,7 +285,6 @@ extern int	comm_connect_udp4(const struct in_addr *remote_addr,
  */
 extern int	comm_connect_udp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port);
-#endif /* HAVE_IPV6 */
 
 /**
  * Open an IPv4 UDP socket, bind it to a local address and a port,
@@ -298,7 +302,6 @@ extern int	comm_bind_connect_udp4(const struct in_addr *local_addr,
 				       const struct in_addr *remote_addr,
 				       unsigned short remote_port);
 
-#ifdef HAVE_IPV6
 /**
  * Open an IPv6 UDP socket, bind it to a local address and a port,
  * and connect it to a remote address and port.
@@ -314,7 +317,6 @@ extern int	comm_bind_connect_udp6(const struct in6_addr *local_addr,
 				       unsigned short local_port,
 				       const struct in6_addr *remote_addr,
 				       unsigned short remote_port);
-#endif /* HAVE_IPV6 */
 
 
 /*
@@ -347,7 +349,6 @@ extern int	comm_sock_open(int domain, int type, int protocol);
 extern int	comm_sock_bind4(int sock, const struct in_addr *my_addr,
 				unsigned short my_port);
 
-#ifdef HAVE_IPV6
 /**
  * Bind an IPv6 socket to an address and a port.
  *
@@ -359,7 +360,6 @@ extern int	comm_sock_bind4(int sock, const struct in_addr *my_addr,
  */
 extern int	comm_sock_bind6(int sock, const struct in6_addr *my_addr,
 				unsigned short my_port);
-#endif /* HAVE_IPV6 */
 
 /**
  * Join an IPv4 multicast group on a socket (and an interface).
@@ -373,7 +373,6 @@ extern int	comm_sock_bind6(int sock, const struct in6_addr *my_addr,
 extern int	comm_sock_join4(int sock, const struct in_addr *mcast_addr,
 				const struct in_addr *my_addr);
 
-#ifdef HAVE_IPV6
 /**
  * Join an IPv6 multicast group on a socket (and an interface).
  *
@@ -385,7 +384,6 @@ extern int	comm_sock_join4(int sock, const struct in_addr *mcast_addr,
  */
 extern int	comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 				unsigned int my_ifindex);
-#endif
 
 /**
  * Leave an IPv4 multicast group on a socket (and an interface).
@@ -399,7 +397,6 @@ extern int	comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 extern int	comm_sock_leave4(int sock, const struct in_addr *mcast_addr,
 				 const struct in_addr *my_addr);
 
-#ifdef HAVE_IPV6
 /**
  * Leave an IPv6 multicast group on a socket (and an interface).
  *
@@ -411,7 +408,6 @@ extern int	comm_sock_leave4(int sock, const struct in_addr *mcast_addr,
  */
 extern int	comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
 				 unsigned int my_ifindex);
-#endif /* HAVE_IPV6 */
 
 /**
  * Connect to a remote IPv4 address.
@@ -429,7 +425,6 @@ extern int	comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
 extern int	comm_sock_connect4(int sock, const struct in_addr *remote_addr,
 				   unsigned short remote_port);
 
-#ifdef HAVE_IPV6
 /**
  * Connect to a remote IPv6 address.
  *
@@ -446,7 +441,6 @@ extern int	comm_sock_connect4(int sock, const struct in_addr *remote_addr,
 extern int	comm_sock_connect6(int sock,
 				   const struct in6_addr *remote_addr,
 				   unsigned short remote_port);
-#endif /* HAVE_IPV6 */
 
 /**
  * Accept a connection on a listening socket.
@@ -524,7 +518,6 @@ extern int	comm_set_ttl(int sock, int val);
  */
 extern int	comm_set_iface4(int sock, const struct in_addr *in_addr);
 
-#ifdef HAVE_IPV6
 /**
  * Set default interface for IPv6 outgoing multicast on a socket.
  *
@@ -535,7 +528,6 @@ extern int	comm_set_iface4(int sock, const struct in_addr *in_addr);
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_set_iface6(int sock, u_int ifindex);
-#endif /* HAVE_IPV6 */
 
 /**
  * Set the sending buffer size of a socket.
