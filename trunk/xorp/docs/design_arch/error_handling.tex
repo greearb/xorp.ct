@@ -1,3 +1,7 @@
+%
+% $XORP: xorp/docs/pim/pim_arch.tex,v 1.3 2003/03/07 22:03:26 pavlin Exp $
+%
+
 \documentclass[11pt]{article}
 \usepackage{xspace}
 \usepackage{times}
@@ -12,6 +16,10 @@
 \newcommand{\cm} {{\em CM}\@\xspace}
 \newcommand{\xrl} {{\em XRL}\@\xspace}
 \newcommand{\rtrmgr} {{\em rtrmgr}\@\xspace}
+
+\newcommand{\etc}{\emph{etc.}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
 
 \textwidth 6.5in
 \topmargin 0.0in
@@ -210,6 +218,22 @@ the FEA should withdraw all routes that the RIB has sent to it.
 
 The MFEA is multicast analogue to the unicast FEA. If should be noted
 that the MFEA and FEA are currently being merged.
+
+Similar to the FEA, on restart or exit the MFEA should remove all
+multicast forwarding entries that were installed in the kernel. Note
+that the MFEA does not contain copy of the multicast forwarding entries
+that were installed in the kernel, therefore it should utilize a
+mechanism that removes all multicast forwarding entries at once. E.g, in
+case of UNIX-based systems, closing the multicast routing socket will
+automatically remove all entries.
+
+If the multicast routing process that has installed the
+multicast forwarding entries exits, then the MFEA should remove all
+multicast forwarding entries from the kernel. Currently, PIM is the only
+multicast routing process. In the future, XORP multicast routing
+architecture may contain a special coordinator among all multicast
+routing protocol instances. If that coordinator exits, the MFEA should
+remove all multicast forwarding entries from the kernel.
 
 \subsubsection{RIB - Routing Information Base}
 
