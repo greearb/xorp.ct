@@ -2,9 +2,34 @@
 
 \section{Terminology and Concepts}
 
-forwardin engine, fea, unicast, multicast, v4, v6
+The forwarding engine is that part of a router that receives packets
+and forwards then from one interface to another.  In the case of XORP,
+the forwarding engine may be the kernel forwarding path on Linux or
+FreeBSD, or it may reside in external forwarding hardware.  
 
+On any particular router, it might be desirable to enable or disable
+different parts of the forwarding functionality.  For example, a
+router might only be intended to forward IPv6 packets but not IPv4
+packets, or it might be intended to forward unicast packets but not
+multicast packets.    Thus XORP provides the ability to enable and
+configure various forwarding functionality.
+
+In XORP, the term ``{\stt fea}'' refers to {\it Forwarding Engine
+Abstraction} and the term ``{\stt mfea}'' refers to {\it Multicast
+Forwarding Engine Abstraction}.  The term abstraction here refers to a
+high-level configuration interface that should be the same
+irrespective of whether the forwarding engine is provided in software
+in the operating system kernel or in external forwarding hardware.
+
+\newpage
 \section{Configuration of the Forwarding Engine}
+
+On a XORP router, forwarding functionality must be explicitly enabled
+or no packets will be forwarded.  Forwarding can be separately enabled
+for unicast and multicast, and for IPv4 and IPv6.  In addition,
+multicast interfaces/vifs need to be explicitly enabled individually,
+and certain special-purpose forwarding functionality can also be
+enabled for multicast.
 
 \subsection{Configuration Syntax}
 \vspace{0.1in}
@@ -14,7 +39,7 @@ forwardin engine, fea, unicast, multicast, v4, v6
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 fea \{\\
-\>targetname: {\it txt}
+\>targetname: {\it txt}\\
 \>enable-unicast-forwarding4: {\it bool}\\
 \>enable-unicast-forwarding6: {\it bool}\\
 \}
@@ -52,8 +77,10 @@ plumbing \{\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>traceoptions \{\\
-\>\>\>flag all \{\\
-\>\>\>\>enabled: {\it bool}\\
+\>\>\>flag \{\\
+\>\>\>\>all \{\\
+\>\>\>\>\>enabled: {\it bool}\\
+\>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\
 \>\}\\
@@ -63,6 +90,77 @@ plumbing \{\\
 \end{minipage}
 }
 \vspace{0.1in}
+
+\begin{description}
+\item{\stt fea}: this delimits the configuration for the unicast
+  forwarding engine functionality. 
+
+  The following unicast forwarding engine parameters can be configured:
+\begin{description}
+\item{\tt targetname} this is the name for this instance of the
+  forwarding engine abstraction.  It defaults to ``{\stt fea}'', and
+  it is strongly recommended that this default is {\it not} overridden
+  under normal usage scenarios.
+\item{\stt enable-unicast-forwarding4}: this takes the value {\stt
+  true} or {\stt false}, and determines whether the router will
+  forward unicast IPv4 packets.
+\item{\stt enable-unicast-forwarding6}: this takes the value {\stt
+  true} or {\stt false}, and determines whether the router will
+  forward unicast IPv4 packets.
+\end{description}
+\item{\stt plumbing}: this delimits a part of the router configuration
+  used for the plumbing together of packet forwarding functionality.
+  Multicast forwarding configuration must be part of this grouping.
+\item{\stt mfea4}: this delimits the part of the router configuration
+  related to multicast forwarding of IPv4 packets.
+
+  The following multicast forwarding parameters can be configured:
+\begin{description}
+\item{\stt enabled}: this takes the value {\stt true} or {\stt false},
+  and enables or disables all IPv4 multicast forwarding on the router.
+  The default is {\stt true}.
+\item{\stt interface}: this specifies an interface to be used for
+  multicast IPv4 forwarding.  Each interface to be used for multicast
+  forwarding needs to be explicitly listed.
+
+  In addition to the normal network interfaces, a special-purpose
+  interface called {\stt register\_vif} needs to be configured for
+  PIM-SM (see Chapter \ref{pimsm}) to be able to send
+  register-encapsulated packets to the PIM Rendezvous Point.  PIM-SM
+  will not work correctly unless this is configured.  The {\stt
+  register\_vif} interface must be configured with a vif also called
+  {\stt register\_vif}.
+\item{\stt vif}: this specifies a vif to be used for multicast IPv4
+  forwarding.  Each vif to be used for multicast forwarding needs to
+  be explicitly listed.
+
+  Each vif can take the following parameter:
+\begin{description}
+\item{\stt enabled}: this takes the value {\stt true} or {\stt false},
+  and enables or disables multicast forwarding on this vif.
+  The default is {\stt true}.
+\end{description}
+\end{description}
+\item{\stt traceoptions}: this directive delimits the configuration of
+  debugging and tracing options for multicast forwarding.
+\begin{description}
+\item{\stt flag}: this directive is used to specify which tracing
+  options are enabled.  Possible parameters are:
+\begin{description}
+\item{\stt all}: this directive specifies that all tracing
+  options should be enabled.  Possible parameters are:
+\begin{description}
+\item{\stt enabled}: this takes the value {\stt true} or {\stt false},
+  and enables or disables tracing. The default is {\stt true}.
+\end{description}
+\end{description}
+\end{description}
+\item{\stt mfea6}: this delimits the part of the router configuration
+  related to multicast forwarding of IPv6 packets.  The possible
+  parameters are the same as for {\stt mfea4}, but affect IPv6
+  forwarding rather than IPv4 fprwarding.
+\end{description}
+
 
 \subsection{Example Configurations}
 \vspace{0.1in}
@@ -109,19 +207,83 @@ plumbing \{\\
 \>\>\>\>enabled: true\\
 \>\>\>\}\\
 \>\>\}\\
-\>\>traceoptions \{\\
-\>\>\>flag all \{\\
-\>\>\>\>enabled: true\\
-\>\>\>\}\\
-\>\>\}\\
 \>\}\\
 \}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
 }
+
 \vspace{0.1in}
+The configuration above enables unicast IPv4 forwarding, but disables
+IPv6 unicast forwarding.
+
+In addition it enables multicast forwarding for IPv4 and IPv6 on
+interface/vif {\stt dc0/dc0}, and enables the register vif for use by
+PIM SM multicast routing.
 
 \section{Monitoring the Forwarding Engine}
 
-op-mode commands
+The {\stt show mfea dataflow} command can be used to display
+information about MFEA IPv4 dataflow filters:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xx\=\kill
+Xorp> \textbf{show mfea dataflow}\\
+\\
+TBD\\
+\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The {\stt show mfea interface} command can be used to display
+information about MFEA IPv4 interfaces:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xx\=\kill
+Xorp> \textbf{show mfea interface}\\
+\\
+TBD\\
+\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The {\stt show mfea interface address} command can be used to display
+information about MFEA IPv4 interface addresses:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xx\=\kill
+Xorp> \textbf{show mfea interface address}\\
+\\
+TBD\\
+\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+The equivalent commands for IPv6 multicast forwarding are:
+\begin{description}
+\item{\stt show mfea6 dataflow}
+\item{\stt show mfea6 interface}
+\item{\stt show mfea6 interface address}
+\end{description}
+\vspace{0.1in}
