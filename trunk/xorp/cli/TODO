@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/cli/TODO,v 1.6 2004/03/03 01:21:32 pavlin Exp $
+# $XORP: xorp/cli/TODO,v 1.7 2004/06/22 01:32:25 pavlin Exp $
 #
 
 * Update libtecla to the lastest version (currently, 1.6, while
@@ -34,8 +34,6 @@
 
 * When asking for help '?' or <Tab> on a command that supports optional
   arguments, print those optional arguments as well.
-
-* Add CliNode::delete_command()
 
 * cli_command->name() for the root command is empty string.
   When printing error with cli_command->name(), use '' around the command
