@@ -1,0 +1,134 @@
+<!-- $XORP: www/news.html,v 1.15 2004/04/19 22:18:35 hodson Exp $ -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<HEAD>
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<TITLE>XORP FAQ</TITLE>
+</HEAD>
+<BODY BGCOLOR="white">
+<p>
+<img src="xorp2.png" alt="XORP logo">
+<h2>XORP FAQ</h2>
+
+<h3>General</h3>
+
+<ol>
+
+  <li><a href="#procon">What are the pros and cons of XORP?</a>
+
+  <li><a href="#existing">There are plenty of vendors with modular
+  routing software so why is XORP interesting?</a>
+
+  <li><a href="#competition">Is XORP in competition with the
+  commerical router vendors?</a>
+
+  <li><a href="#impact">What is the impact on the router market of open
+  source routing platforms?</a>
+
+</ol>
+
+
+<hr size="2" noshade>
+<h3>General</h3>
+
+<ol>
+  <li><b><a name="#procon">What are the pros and cons of XORP?</a></b>
+
+  <p>Pros:
+    <ul>
+
+      <li> The code code is open source (under a BSD-like license).
+      People can freely use it, customize it, make their own product
+      out of it, etc.
+
+      <li> The code runs on commodity PC hardware and operating
+      systems.
+
+      <li> The modular design and separation of functional entities into
+      distinct processes means that failure of one component does not cause
+      the whole router to fail or malfunction.
+
+      <li> The modular design enables future integration with hardware
+      forwarding planes.
+
+      <li> XORP components communicate with a flexible IPC scheme.
+      Components can run within a single host or be distributed across
+      multiple hosts.  There is scope for building a distributed
+      router from low-cost PC hardware.
+
+    </ul>
+
+  <p>Cons:
+    <ul>
+
+      <li> Software forwarding plane limits forwarding rate.
+
+      <li> The number of hardware and software features are much less
+      than the commercial vendors.
+
+      <li> Support options do not exist like the big vendors.  The
+      project core does not have the resources to provide this level
+      of support.  If a company wants to commercialize XORP, this
+      would be one area of differentiation for the commerical product.
+
+    </ul>
+    </li>
+    <br>
+
+    <li><b><a name="existing">There are plenty of vendors with modular
+    routing software so why is XORP interesting?</a></b>
+
+      <p> There are plenty of reasonably priced router/routing-switch
+          options.  However, you have no control over the software
+          they run.  If there's a problem, you are at the mercy of the
+          vendor to get a fix.  Unless you are a major corporation,
+          you may find it hard to get any action.  With XORP and other
+          open source open source routing platforms you have the
+          source code, you can find and fix problems yourself, and you
+          can add features you want.
+
+      <p> If you don't like working with code yourself, you can submit
+          XORP bug reports in a public forum.  Since no developer
+          likes outstanding bug reports this puts pressure on the
+          developers to fix issues and also shows areas where people
+          might usefully contribute effort.
+  </li>
+
+  <li><b><a name="competition">Is XORP in competition with the
+  commerical router vendors?</a></b>
+
+     <p> XORP is primarily a research project.  We're not competing
+         with router vendors, we're interested in facilitating routing
+         research - providing researchers with a platform where they
+         can try out routing ideas.  The code is open source since
+         it's hard to help the research community without providing
+         the source code.
+  </li>
+
+  <li><b><a name="impact">What is the impact on the router market of open
+  source routing platforms?</a></b>
+
+     <p> XORP (and other open source routers) may eat into the router
+         market at the edges - there is potential to provide cheap and
+         reasonably performing edge boxes.  It may also find a home in
+         logging and analysis products since there is code that speaks
+         assorted protocols - it's not much work to change from
+         protocol speaker to protocol reporter.  This is one area
+         where other open source routing products find themselves used
+         in large enterprises and with ISPs today.
+  </li>
+</ol>
+
+<hr>
+<address>feedback&#64;xorp&#46;org</address>
+<!-- Created: Tue Dec 10 16:03:16 PST 2002 -->
+<!-- hhmts start -->
+<small>
+Last modified: $Date$.
+</small>
+<!-- hhmts end -->
+
+  </body>
+</html>
+
