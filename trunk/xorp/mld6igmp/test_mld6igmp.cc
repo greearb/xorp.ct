@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.35 2004/11/05 02:35:33 bms Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.36 2004/11/30 07:30:20 bms Exp $"
 
 
 //
@@ -108,10 +108,12 @@ static void
 mld6igmp_main(const char* finder_hostname, uint16_t finder_port,
 	      bool start_finder)
 {
+    string error_msg;
+    EventLoop eventloop;
+
     //
     // Init stuff
     //
-    EventLoop eventloop;
 
     //
     // Start our own finder
@@ -168,7 +170,9 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port,
     IfConfig ifconfig(eventloop, ifc_repl, if_err, nexthop_port_mapper);
     if (is_dummy)
 	ifconfig.set_dummy();
-    ifconfig.start();
+    if (ifconfig.start(error_msg) != XORP_OK) {
+	XLOG_FATAL("Cannot start IfConfig: %s", error_msg.c_str());
+    }
 
     //
     // Interface manager
@@ -188,7 +192,9 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port,
     FtiConfig fticonfig(eventloop, profile, ifm.iftree(), nexthop_port_mapper);
     if (is_dummy)
 	fticonfig.set_dummy();
-    fticonfig.start();
+    if (fticonfig.start(error_msg) != XORP_OK) {
+	XLOG_FATAL("Cannot start FtiConfig: %s", error_msg.c_str());
+    }
 
     //
     // Raw Socket TODO
