@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.2 2002/12/14 21:25:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.3 2002/12/16 03:08:21 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
+#include <pwd.h>
 #include "libxorp/selector.hh"
 #include "libxorp/xlog.h"
 
@@ -35,6 +36,9 @@ int main(int, char** argv) {
     xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
     xlog_add_default_output();
     xlog_start();
+    struct passwd *pwd = getpwuid(getuid());
+    string filename = "/tmp/test_nhlookup.";
+    filename += pwd->pw_name;
     BGPMain bgpmain;
     EventLoop* eventloop = bgpmain.get_eventloop();
     LocalData localdata;
@@ -90,7 +94,7 @@ int main(int, char** argv) {
     ribin_table3->set_next_table(decision_table);
     decision_table->add_parent(ribin_table3, &handler3);
 
-    debug_table->set_output_file("/tmp/test_decision");
+    debug_table->set_output_file(filename);
     debug_table->set_canned_response(ADD_USED);
 
     // create a load of attributes
@@ -2203,9 +2207,9 @@ int main(int, char** argv) {
     delete palist5;
     delete palist6;
 
-    FILE *file = fopen("/tmp/test_decision", "r");
+    FILE *file = fopen(filename.c_str(), "r");
     if (file == NULL) {
-	fprintf(stderr, "Failed to read /tmp/test_decision\n");
+	fprintf(stderr, "Failed to read %s\n", filename.c_str());
 	fprintf(stderr, "TEST FAILED\n");
 	exit(1);
    }
@@ -2237,12 +2241,13 @@ int main(int, char** argv) {
     fclose(file);
 
     if ((bytes1 != bytes2) || (memcmp(testout, refout, bytes1) != 0)) {
-	fprintf(stderr, "Output in /tmp/test_decision doesn't match reference output\n");
+	fprintf(stderr, "Output in %s doesn't match reference output\n",
+		filename.c_str());
 	fprintf(stderr, "TEST FAILED\n");
 	exit(1);
 
     }
-    unlink("/tmp/test_decision");
+    unlink(filename.c_str());
 }
 
 
