@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.2 2003/01/26 04:06:21 pavlin Exp $"
 
 #include "xorp.h"
 #include "mac.hh"
@@ -65,6 +65,9 @@ EtherMac::EtherMac(const Mac& m) throw (BadMac)
 
 EtherMac::EtherMac(const ether_addr& ea) throw (BadMac)
 {
+    // XXX: we need to const_cast the ether_ntoa() argument,
+    // because in some OS (e.g., MacOS X 10.2.3) the ether_ntoa(3)
+    // declaration is broken.
     const char* a = ether_ntoa(const_cast<struct ether_addr *>(&ea));
     if (a) {
 	set_rep(a);
