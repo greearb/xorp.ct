@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.5 2003/02/11 22:06:25 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.6 2003/03/10 23:20:04 hodson Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -24,7 +24,7 @@
 template<class A>
 DebugTable<A>::DebugTable(string table_name,  
 			  BGPRouteTable<A> *parent_table) 
-    : BGPRouteTable<A>("DebugTable-" + table_name)
+    : BGPRouteTable<A>("DebugTable-" + table_name, SAFI_UNICAST)
 {
     _parent = parent_table;
     _print_tablename = false;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.17 2003/10/03 00:26:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.18 2003/11/05 20:25:20 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,8 +25,11 @@
 #include "bgp.hh"
 
 template<class A>
-RibInTable<A>::RibInTable(string table_name, const PeerHandler *peer)
-    : BGPRouteTable<A>("RibInTable-" + table_name), _peer(peer)
+RibInTable<A>::RibInTable(string table_name,
+			  Safi safi,
+			  const PeerHandler *peer)
+    : 	BGPRouteTable<A>("RibInTable-" + table_name, safi),
+	_peer(peer)
 {
     _route_table = new BgpTrie<A>;
     _peer_is_up = true;
@@ -62,7 +65,8 @@ RibInTable<A>::ribin_peering_went_down()
     string tablename = "Deleted" + _tablename;
 
     DeletionTable<A>* deletion_table =
-	new DeletionTable<A>(tablename, _route_table, _peer, _genid, this);
+	new DeletionTable<A>(tablename, safi(), _route_table, _peer, _genid,
+			     this);
 
     _route_table = new BgpTrie<A>;
 

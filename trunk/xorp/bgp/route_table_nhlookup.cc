@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.8 2003/07/31 23:37:13 jcardona Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.9 2003/10/23 04:10:24 atanu Exp $"
 
 #include "bgp_module.h"
 #include "route_table_nhlookup.hh"
@@ -85,9 +85,10 @@ MessageQueueEntry<A>::str() const
 
 template <class A>
 NhLookupTable<A>::NhLookupTable(string tablename,
+				Safi safi,
 				NextHopResolver<A>* next_hop_resolver,
 				BGPRouteTable<A> *parent)
-    : BGPRouteTable<A>(tablename)
+    : BGPRouteTable<A>(tablename, safi)
 {
     _parent = parent;
     _next_hop_resolver = next_hop_resolver;

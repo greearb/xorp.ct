@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.21 2003/09/16 21:00:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.22 2003/10/11 03:17:57 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -49,9 +49,10 @@ test_filter(TestInfo& /*info*/)
     // mostly we'll just inject directly into the FilterTable, but we
     // need an RibInTable here to test lookup_route.
     RibInTable<IPv4> *ribin_table
-	= new RibInTable<IPv4>("RIB-in", &handler1);
+	= new RibInTable<IPv4>("RIB-in", SAFI_UNICAST, &handler1);
     FilterTable<IPv4> *filter_table
-	= new FilterTable<IPv4>("FILTER", ribin_table, next_hop_resolver);
+	= new FilterTable<IPv4>("FILTER", SAFI_UNICAST, ribin_table,
+				next_hop_resolver);
     ribin_table->set_next_table(filter_table);
     DebugTable<IPv4>* debug_table
 	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)filter_table);

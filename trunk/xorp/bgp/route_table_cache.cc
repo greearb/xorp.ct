@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.14 2003/07/31 23:37:13 jcardona Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.15 2003/10/31 02:57:21 atanu Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -24,8 +24,9 @@
 
 template<class A>
 CacheTable<A>::CacheTable(string table_name,  
-			  BGPRouteTable<A> *parent_table) 
-    : BGPRouteTable<A>("CacheTable-" + table_name)
+			  Safi safi,
+			  BGPRouteTable<A> *parent_table)
+    : BGPRouteTable<A>("CacheTable-" + table_name, safi)
 {
     _parent = parent_table;
 }

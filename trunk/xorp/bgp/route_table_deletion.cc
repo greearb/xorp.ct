@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.9 2003/04/22 19:20:18 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.10 2003/05/23 00:02:06 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -24,11 +24,12 @@
 
 template<class A>
 DeletionTable<A>::DeletionTable(string table_name,
+				Safi safi,
 				BgpTrie<A>* route_table,
 				const PeerHandler *peer,
 				uint32_t genid,
 				BGPRouteTable<A> *parent_table)
-    : BGPRouteTable<A>("DeletionTable-" + table_name)
+    : BGPRouteTable<A>("DeletionTable-" + table_name, safi)
 {
     _parent = parent_table;
     _genid = genid;

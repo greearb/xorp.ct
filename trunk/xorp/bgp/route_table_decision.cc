@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.18 2003/10/25 20:40:14 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.19 2003/11/04 19:27:46 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -30,8 +30,9 @@
 
 template<class A>
 DecisionTable<A>::DecisionTable(string table_name, 
-				NextHopResolver<A>& next_hop_resolver) 
-    : BGPRouteTable<A>("DecisionTable" + table_name),
+				Safi safi,
+				NextHopResolver<A>& next_hop_resolver)
+    : BGPRouteTable<A>("DecisionTable" + table_name, safi),
     _next_hop_resolver(next_hop_resolver)
 {
     cp(1);

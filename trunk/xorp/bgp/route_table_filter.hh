@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.5 2003/05/29 17:59:08 pavlin Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.6 2003/08/06 17:52:55 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -143,8 +143,10 @@ private:
 template<class A>
 class FilterTable : public BGPRouteTable<A>  {
 public:
-    FilterTable(string tablename, BGPRouteTable<A> *parent, 
-		   NextHopResolver<A>& next_hop_resolver);
+    FilterTable(string tablename,
+		Safi safi,
+		BGPRouteTable<A> *parent, 
+		NextHopResolver<A>& next_hop_resolver);
     ~FilterTable();
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);

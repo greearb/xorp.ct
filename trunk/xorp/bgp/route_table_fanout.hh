@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.6 2003/11/04 18:20:58 mjh Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.7 2003/11/04 19:19:34 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -93,7 +93,7 @@ private:
 template<class A>
 class FanoutTable : public BGPRouteTable<A>  {
 public:
-    FanoutTable(string tablename, BGPRouteTable<A> *parent);
+    FanoutTable(string tablename, Safi safi, BGPRouteTable<A> *parent);
     int add_next_table(BGPRouteTable<A> *next_table,
 		       const PeerHandler *ph);
     int remove_next_table(BGPRouteTable<A> *next_table);
@@ -113,7 +113,7 @@ public:
     RouteTableType type() const {return FANOUT_TABLE;}
     string str() const;
 
-    int dump_entire_table(BGPRouteTable<A> *child_to_dump_to);
+    int dump_entire_table(BGPRouteTable<A> *child_to_dump_to, Safi safi);
 #ifdef NOTDEF
     void peering_went_down(const PeerHandler* peer_handler);
 #endif

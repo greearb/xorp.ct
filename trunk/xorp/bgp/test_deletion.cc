@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.17 2003/09/16 21:00:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.18 2003/10/11 03:17:57 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -44,7 +44,7 @@ test_deletion(TestInfo& /*info*/)
 
     //trivial plumbing
     RibInTable<IPv4> *ribin 
-	= new RibInTable<IPv4>("RIB-IN", &handler1);
+	= new RibInTable<IPv4>("RIB-IN", SAFI_UNICAST, &handler1);
     DebugTable<IPv4>* debug_table
 	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)ribin);
     ribin->set_next_table(debug_table);

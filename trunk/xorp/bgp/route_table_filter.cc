@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.14 2003/09/16 21:00:26 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.15 2003/11/05 20:25:20 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -414,9 +414,10 @@ UnknownFilter<A>::filter(const InternalMessage<A> *rtmsg,
 
 template<class A>
 FilterTable<A>::FilterTable(string table_name,  
-				  BGPRouteTable<A> *parent_table,
-				  NextHopResolver<A>& next_hop_resolver) 
-    : BGPRouteTable<A>("FilterTable-" + table_name),
+			    Safi safi,
+			    BGPRouteTable<A> *parent_table,
+			    NextHopResolver<A>& next_hop_resolver)
+    : BGPRouteTable<A>("FilterTable-" + table_name, safi),
     _next_hop_resolver(next_hop_resolver)
 {
     _parent = parent_table;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_base.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_base.cc,v 1.2 2003/03/10 23:20:03 hodson Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/debug.h"
@@ -29,9 +29,9 @@ template<> const char* TypeName<IPv4>::get() { return "IPv4"; }
 template<> const char* TypeName<IPv6>::get() { return "IPv6"; }
 
 template<class A>
-BGPRouteTable<A>::BGPRouteTable(string table_name) 
+BGPRouteTable<A>::BGPRouteTable(string table_name, Safi safi) :
+    _tablename(table_name), _safi(safi)
 {
-    _tablename = table_name;
     _next_table = NULL;
     debug_msg("Creating table %s for %s\n", _tablename.c_str(), 
 	      TypeName<A>::get());

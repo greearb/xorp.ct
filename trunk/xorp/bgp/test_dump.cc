@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.22 2003/10/30 20:29:27 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.23 2003/11/04 02:27:20 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -70,33 +70,33 @@ test_dump(TestInfo& /*info*/)
     DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop(), bgpmain);
 
     DecisionTable<IPv4> *decision_table
-	= new DecisionTable<IPv4>("DECISION", next_hop_resolver);
+	= new DecisionTable<IPv4>("DECISION", SAFI_UNICAST, next_hop_resolver);
 
     RibInTable<IPv4>* ribin_table1
-	= new RibInTable<IPv4>("RIB-IN1", &handler1);
+	= new RibInTable<IPv4>("RIB-IN1", SAFI_UNICAST, &handler1);
 
     //In principle the cache shouldn't be needed, but ribin can't be
     //directly followed by decision because the dump_table calls
     //set_parent on the next table, and decision table doesn't support
     //set_parent because it is the only table with multiple parents.
     CacheTable<IPv4>* cache_table1
-	= new CacheTable<IPv4>("Cache1", ribin_table1);
+	= new CacheTable<IPv4>("Cache1", SAFI_UNICAST, ribin_table1);
     ribin_table1->set_next_table(cache_table1);
     cache_table1->set_next_table(decision_table);
 
     RibInTable<IPv4>* ribin_table2
-	= new RibInTable<IPv4>("RIB-IN2", &handler2);
+	= new RibInTable<IPv4>("RIB-IN2", SAFI_UNICAST, &handler2);
 
     CacheTable<IPv4>* cache_table2
-	= new CacheTable<IPv4>("Cache2", ribin_table2);
+	= new CacheTable<IPv4>("Cache2", SAFI_UNICAST, ribin_table2);
     ribin_table2->set_next_table(cache_table2);
     cache_table2->set_next_table(decision_table);
 
     RibInTable<IPv4>* ribin_table3
-	= new RibInTable<IPv4>("RIB-IN3", &handler3);
+	= new RibInTable<IPv4>("RIB-IN3", SAFI_UNICAST, &handler3);
 
     CacheTable<IPv4>* cache_table3
-	= new CacheTable<IPv4>("Cache3", ribin_table3);
+	= new CacheTable<IPv4>("Cache3", SAFI_UNICAST, ribin_table3);
     ribin_table3->set_next_table(cache_table3);
     cache_table3->set_next_table(decision_table);
 
@@ -105,7 +105,7 @@ test_dump(TestInfo& /*info*/)
     decision_table->add_parent(cache_table3, &handler3);
 
     FanoutTable<IPv4> *fanout_table
-	= new FanoutTable<IPv4>("FANOUT", decision_table);
+	= new FanoutTable<IPv4>("FANOUT", SAFI_UNICAST, decision_table);
     decision_table->set_next_table(fanout_table);
 
     DebugTable<IPv4>* debug_table1
@@ -270,7 +270,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table3);
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST);
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
@@ -350,7 +350,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table3);
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST);
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
@@ -449,7 +449,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table3);
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST);
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
@@ -486,7 +486,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table2, &handler2);
     debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table2);
+    fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST);
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
@@ -537,7 +537,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table3);
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST);
 
     debug_table1->write_separator();
     debug_table1->write_comment("ONE EVENT RUN");
@@ -580,7 +580,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table2, &handler2);
     debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table2);
+    fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST);
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
@@ -623,7 +623,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table3);
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST);
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 1 GOES DOWN");
@@ -656,7 +656,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table1, &handler1);
     debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table1);
+    fanout_table->dump_entire_table(debug_table1, SAFI_UNICAST);
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
@@ -709,7 +709,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table3);
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST);
 
     debug_table1->write_separator();
     debug_table1->write_comment("ONE EVENT RUN");
@@ -746,7 +746,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table2, &handler2);
     debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table2);
+    fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST);
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
@@ -799,7 +799,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table3);
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST);
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
@@ -832,7 +832,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table2, &handler2);
     debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table2);
+    fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST);
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
@@ -884,7 +884,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table3);
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST);
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
@@ -909,7 +909,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table2, &handler2);
     debug_table2->set_parent(fanout_table);
     ribin_table2->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table2);
+    fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST);
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
@@ -920,7 +920,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table1, &handler1);
     debug_table1->set_parent(fanout_table);
     ribin_table1->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table1);
+    fanout_table->dump_entire_table(debug_table1, SAFI_UNICAST);
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
@@ -972,7 +972,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table3);
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST);
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
@@ -1147,7 +1147,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->add_next_table(debug_table3, &handler3);
     debug_table3->set_parent(fanout_table);
     ribin_table3->ribin_peering_came_up();
-    fanout_table->dump_entire_table(debug_table3);
+    fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST);
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");

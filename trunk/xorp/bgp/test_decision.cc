@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.22 2003/10/11 03:17:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.23 2003/10/25 13:23:07 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -69,24 +69,24 @@ test_decision(TestInfo& /*info*/)
     DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop(), bgpmain);
 
     DecisionTable<IPv4> *decision_table
-	= new DecisionTable<IPv4>("DECISION", next_hop_resolver);
+	= new DecisionTable<IPv4>("DECISION", SAFI_UNICAST, next_hop_resolver);
 
     DebugTable<IPv4>* debug_table
 	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)decision_table);
     decision_table->set_next_table(debug_table);
 
     RibInTable<IPv4>* ribin_table1
-	= new RibInTable<IPv4>("RIB-IN1", &handler1);
+	= new RibInTable<IPv4>("RIB-IN1", SAFI_UNICAST, &handler1);
     ribin_table1->set_next_table(decision_table);
     decision_table->add_parent(ribin_table1, &handler1);
 
     RibInTable<IPv4>* ribin_table2
-	= new RibInTable<IPv4>("RIB-IN2", &handler2);
+	= new RibInTable<IPv4>("RIB-IN2", SAFI_UNICAST, &handler2);
     ribin_table2->set_next_table(decision_table);
     decision_table->add_parent(ribin_table2, &handler2);
 
     RibInTable<IPv4>* ribin_table3
-	= new RibInTable<IPv4>("RIB-IN3", &handler3);
+	= new RibInTable<IPv4>("RIB-IN3", SAFI_UNICAST, &handler3);
     ribin_table3->set_next_table(decision_table);
     decision_table->add_parent(ribin_table3, &handler3);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_base.hh,v 1.3 2003/05/29 17:59:07 pavlin Exp $
+// $XORP: xorp/bgp/route_table_base.hh,v 1.4 2003/08/04 21:58:58 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_BASE_HH__
 #define __BGP_ROUTE_TABLE_BASE_HH__
@@ -48,7 +48,7 @@ enum RouteTableType {
 template<class A>
 class BGPRouteTable {
 public:
-    BGPRouteTable(string tablename);
+    BGPRouteTable(string tablename, Safi safi);
     virtual ~BGPRouteTable();
     virtual int add_route(const InternalMessage<A> &rtmsg, 
 			  BGPRouteTable<A> *caller) = 0;
@@ -98,9 +98,12 @@ public:
 				   BGPRouteTable<A> *caller);
     virtual void peering_down_complete(const PeerHandler *peer, uint32_t genid,
 				       BGPRouteTable<A> *caller);
+
+    Safi safi() const {return _safi; }
 protected:
     BGPRouteTable<A> *_next_table, *_parent;
     string _tablename;
+    const Safi _safi;
 };
 
 #endif // __BGP_ROUTE_TABLE_BASE_HH__

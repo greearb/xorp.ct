@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.18 2003/11/04 18:20:58 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.19 2003/11/04 19:19:34 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -157,8 +157,9 @@ NextTableMap<A>::end() {
 
 template<class A>
 FanoutTable<A>::FanoutTable(string table_name,
+			    Safi safi,
 			    BGPRouteTable<A> *init_parent)
-    : BGPRouteTable<A>("FanoutTable-" + table_name)
+    : BGPRouteTable<A>("FanoutTable-" + table_name, safi)
 {
     _parent = init_parent;
 }
@@ -422,7 +423,8 @@ FanoutTable<A>::remove_dump_table(DumpTable<A> *dump_table)
 
 template<class A>
 int
-FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to) 
+FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
+				  Safi safi)
 {
     assert(child_to_dump_to->type() != DUMP_TABLE);
 
@@ -441,7 +443,7 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to)
     string tablename = string("DumpTable") + TypeName<A>::get();
     DumpTable<A>* dump_table =
 	new DumpTable<A>(tablename, peer_handler, peer_list,
-			    (BGPRouteTable<A>*)this);
+			 (BGPRouteTable<A>*)this, safi);
 
     dump_table->set_next_table(child_to_dump_to);
     child_to_dump_to->set_parent(dump_table);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.17 2003/10/11 03:17:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.18 2003/11/04 02:27:20 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -59,7 +59,7 @@ test_fanout(TestInfo& /*info*/)
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 
     FanoutTable<IPv4> *fanout_table
-	= new FanoutTable<IPv4>("FANOUT", NULL);
+	= new FanoutTable<IPv4>("FANOUT", SAFI_UNICAST, NULL);
 
     DebugTable<IPv4>* debug_table1
 	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)fanout_table);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.6 2003/05/29 17:59:08 pavlin Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.7 2004/02/12 07:00:49 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -29,7 +29,8 @@ public:
     DumpTable(string tablename,
 	      const PeerHandler *peer,
 	      const list <const PeerHandler*>& peer_list,
-	      BGPRouteTable<A> *parent);
+	      BGPRouteTable<A> *parent,
+	      Safi safi);
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,

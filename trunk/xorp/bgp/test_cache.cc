@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.16 2003/09/16 21:00:26 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.17 2003/10/11 03:17:56 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -45,7 +45,7 @@ test_cache(TestInfo& /*info*/)
 
     // trivial plumbing
     CacheTable<IPv4> *cache_table
-	= new CacheTable<IPv4>("CACHE", NULL);
+	= new CacheTable<IPv4>("CACHE", SAFI_UNICAST, NULL);
     DebugTable<IPv4>* debug_table
 	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)cache_table);
     cache_table->set_next_table(debug_table);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.12 2003/05/29 17:59:09 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.13 2003/10/23 03:10:06 atanu Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -41,10 +41,10 @@ TypeName<IPv6>::get()
 
 template<class A>
 RibOutTable<A>::RibOutTable(string table_name,
-			    BGPRouteTable<A> *init_parent,
 			    Safi safi,
+			    BGPRouteTable<A> *init_parent,
 			    PeerHandler *peer)
-    : BGPRouteTable<A>("RibOutTable-" + table_name), _safi(safi)
+    : BGPRouteTable<A>("RibOutTable-" + table_name, safi)
 {
     _parent = init_parent;
     _peer = peer;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.20 2003/09/16 21:00:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.21 2003/10/11 03:17:57 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -73,7 +73,8 @@ test_nhlookup(TestInfo& /*info*/)
 
     //trivial plumbing
     NhLookupTable<IPv4> *nhlookup_table
-	= new NhLookupTable<IPv4>("NHLOOKUP", &nh_resolver, NULL);
+	= new NhLookupTable<IPv4>("NHLOOKUP", SAFI_UNICAST, 
+				  &nh_resolver, NULL);
     DebugTable<IPv4>* debug_table
 	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)nhlookup_table);
     nhlookup_table->set_next_table(debug_table);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.15 2003/09/27 01:21:09 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.17 2004/02/20 23:26:34 hodson Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -34,7 +34,7 @@ template<class A>
 class DummyNhLookupTable : public NhLookupTable<A> {
 public:
     DummyNhLookupTable(TestInfo& info, NextHopResolver<A> *nexthop_resolver) :
-	NhLookupTable<A>("tablename", nexthop_resolver, 0),
+	NhLookupTable<A>("tablename", SAFI_UNICAST, nexthop_resolver, 0),
 	_done(false), _info(info)
     {
     }
@@ -62,7 +62,7 @@ template<class A>
 class DummyDecisionTable : public DecisionTable<A> {
 public:
     DummyDecisionTable(TestInfo& info, NextHopResolver<A>& nexthop_resolver) :
-	DecisionTable<A>("tablename", nexthop_resolver),
+	DecisionTable<A>("tablename", SAFI_UNICAST, nexthop_resolver),
 	_done(false), _info(info)
     {
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.6 2003/05/29 17:59:08 pavlin Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.7 2003/07/31 23:37:13 jcardona Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -43,7 +43,7 @@ RefTrieNode<IPv6, const SubnetRoute<IPv6> >
 template<class A>
 class CacheTable : public BGPRouteTable<A>  {
 public:
-    CacheTable(string tablename, BGPRouteTable<A> *parent);
+    CacheTable(string tablename, Safi safi, BGPRouteTable<A> *parent);
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,

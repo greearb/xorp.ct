@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.37 2004/02/12 18:42:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.38 2004/02/12 19:34:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -252,12 +252,15 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (const string& ribname,
      */
 
     _decision_table = 
-	new DecisionTable<A>(ribname + "DecisionTable", _next_hop_resolver);
+	new DecisionTable<A>(ribname + "DecisionTable",
+			     _master.safi(),
+			     _next_hop_resolver);
     _next_hop_resolver.add_decision(_decision_table);
 
     _fanout_table = 
 	new FanoutTable<A>(ribname + "FanoutTable", 
-			      _decision_table);
+			   _master.safi(),
+			   _decision_table);
     _decision_table->set_next_table(_fanout_table);
 
     /*
@@ -266,17 +269,21 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (const string& ribname,
     
     _ipc_rib_in_table =
 	new RibInTable<A>(_ribname + "IpcRibInTable",
-			     _master.rib_handler());
+			  _master.safi(),
+			  _master.rib_handler());
     _in_map[_master.rib_handler()] = _ipc_rib_in_table;
 
     FilterTable<A>* filter_in =
 	new FilterTable<A>(_ribname + "IpcChannelInputFilter",
-			      _ipc_rib_in_table, _next_hop_resolver);
+			   _master.safi(),
+			   _ipc_rib_in_table,
+			   _next_hop_resolver);
     _ipc_rib_in_table->set_next_table(filter_in);
     
     CacheTable<A>* cache_in = 
 	new CacheTable<A>(_ribname + "IpcChannelInputCache",
-			     filter_in);
+			  _master.safi(),
+			  filter_in);
     filter_in->set_next_table(cache_in);
 
     cache_in->set_next_table(_decision_table);
@@ -291,19 +298,24 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (const string& ribname,
 
     FilterTable<A> *filter_out =
 	new FilterTable<A>(ribname + "IpcChannelOutputFilter",
-			     _fanout_table, _next_hop_resolver);
+			   _master.safi(),
+			   _fanout_table,
+			   _next_hop_resolver);
     _fanout_table->add_next_table(filter_out, _master.rib_handler());
     _tables.insert(filter_out);
 
     CacheTable<A> *cache_out =
 	new CacheTable<A>(ribname + "IpcChannelOutputCache",
-			     filter_out);
+			  _master.safi(),
+			  filter_out);
     filter_out->set_next_table(cache_out);
     _tables.insert(cache_out);
 
     _ipc_rib_out_table =
 	new RibOutTable<A>(ribname + "IpcRibOutTable",
-			   cache_out, master.safi(), _master.rib_handler());
+			   _master.safi(),
+			   cache_out,
+			   _master.rib_handler());
     _out_map[_master.rib_handler()] = _ipc_rib_out_table;
     cache_out->set_next_table(_ipc_rib_out_table);
     
@@ -353,22 +365,29 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
      */
     
     RibInTable<A>* rib_in =
-	new RibInTable<A>(_ribname + "RibIn" + peername, peer_handler);
+	new RibInTable<A>(_ribname + "RibIn" + peername,
+			  _master.safi(),
+			  peer_handler);
     _in_map[peer_handler] = rib_in;
 
     FilterTable<A>* filter_in =
 	new FilterTable<A>(_ribname + "PeerInputFilter" + peername,
-			      rib_in, _next_hop_resolver);
+			   _master.safi(),
+			   rib_in,
+			   _next_hop_resolver);
     rib_in->set_next_table(filter_in);
     
     CacheTable<A>* cache_in = 
-	new CacheTable<A>(_ribname + "PeerInputCache" + peername, filter_in);
+	new CacheTable<A>(_ribname + "PeerInputCache" + peername,
+			  _master.safi(),
+			  filter_in);
     filter_in->set_next_table(cache_in);
 
     NhLookupTable<A> *nexthop_in =
 	new NhLookupTable<A>(_ribname + "NhLookup" + peername,
-				&_next_hop_resolver,
-				cache_in);
+			     _master.safi(),
+			     &_next_hop_resolver,
+			     cache_in);
     cache_in->set_next_table(nexthop_in);
 
     nexthop_in->set_next_table(_decision_table);
@@ -384,16 +403,22 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     
     FilterTable<A>* filter_out =
 	new FilterTable<A>(_ribname + "PeerOutputFilter" + peername,
-			      _fanout_table, _next_hop_resolver);
+			   _master.safi(),
+			   _fanout_table,
+			   _next_hop_resolver);
     _fanout_table->add_next_table(filter_out, peer_handler);
     
     CacheTable<A>* cache_out = 
-	new CacheTable<A>(_ribname + "PeerOutputCache" + peername, filter_out);
+	new CacheTable<A>(_ribname + "PeerOutputCache" + peername,
+			  _master.safi(),
+			  filter_out);
     filter_out->set_next_table(cache_out);
 
     RibOutTable<A>* rib_out =
 	new RibOutTable<A>(_ribname + "RibOut" + peername,
-			      cache_out, _master.safi(), peer_handler);
+			   _master.safi(),
+			   cache_out,
+			   peer_handler);
     cache_out->set_next_table(rib_out);
     _out_map[peer_handler] = rib_out;
     _reverse_out_map[rib_out] = peer_handler;
@@ -650,7 +675,7 @@ BGPPlumbingAF<A>::dump_entire_table(FilterTable<A> *filter_out)
 {
     debug_msg("BGPPlumbingAF<IPv%u>::dump_entire_table\n", A::ip_version());
 
-    _fanout_table->dump_entire_table(filter_out);
+    _fanout_table->dump_entire_table(filter_out, _master.safi());
 
     DumpTable<A> *dump_table =
 	dynamic_cast<DumpTable<A> *>(filter_out->parent());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_deletion.hh,v 1.8 2003/08/04 21:58:58 pavlin Exp $
+// $XORP: xorp/bgp/route_table_deletion.hh,v 1.9 2004/02/12 07:00:49 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DELETION_HH__
 #define __BGP_ROUTE_TABLE_DELETION_HH__
@@ -27,6 +27,7 @@ template<class A>
 class DeletionTable : public BGPRouteTable<A>  {
 public:
     DeletionTable(string tablename,
+		  Safi safi,
 		  BgpTrie<A>* route_table,
 		  const PeerHandler *peer,
 		  uint32_t genid,
