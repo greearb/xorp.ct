@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.6 2004/06/02 22:52:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.7 2004/06/10 22:40:49 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -102,7 +102,7 @@ FtiConfigEntrySetNetlink::stop()
 bool
 FtiConfigEntrySetNetlink::add_entry4(const Fte4& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
+    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
@@ -112,7 +112,7 @@ FtiConfigEntrySetNetlink::add_entry4(const Fte4& fte)
 bool
 FtiConfigEntrySetNetlink::delete_entry4(const Fte4& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
+    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
@@ -122,7 +122,7 @@ FtiConfigEntrySetNetlink::delete_entry4(const Fte4& fte)
 bool
 FtiConfigEntrySetNetlink::add_entry6(const Fte6& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
+    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
@@ -132,7 +132,7 @@ FtiConfigEntrySetNetlink::add_entry6(const Fte6& fte)
 bool
 FtiConfigEntrySetNetlink::delete_entry6(const Fte6& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
+    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
@@ -170,8 +170,8 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     uint16_t		if_index = 0;
 
     debug_msg("add_entry "
-	      "(network = %s gateway = %s)",
-	      fte.net().str().c_str(), fte.gateway().str().c_str());
+	      "(network = %s nexthop = %s)",
+	      fte.net().str().c_str(), fte.nexthop().str().c_str());
 
     memset(buffer, 0, sizeof(buffer));
 
@@ -235,9 +235,9 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     fte.net().masked_addr().copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    // Add the gateway address as an attribute
-    if (fte.gateway() != IPvX::ZERO(family)) {
-	rta_len = RTA_LENGTH(fte.gateway().addr_size());
+    // Add the nexthop address as an attribute
+    if (fte.nexthop() != IPvX::ZERO(family)) {
+	rta_len = RTA_LENGTH(fte.nexthop().addr_size());
 	if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	    XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
 		       sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
@@ -246,7 +246,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	rtattr->rta_type = RTA_GATEWAY;
 	rtattr->rta_len = rta_len;
 	data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
-	fte.gateway().copy_out(data);
+	fte.nexthop().copy_out(data);
 	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     }
 
@@ -327,8 +327,8 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     int			family = fte.net().af();
 
     debug_msg("delete_entry "
-	      "(network = %s gateway = %s)",
-	      fte.net().str().c_str(), fte.gateway().str().c_str());
+	      "(network = %s nexthop = %s)",
+	      fte.net().str().c_str(), fte.nexthop().str().c_str());
 
     memset(buffer, 0, sizeof(buffer));
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fea.cc,v 1.8 2004/05/17 19:30:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_fea.cc,v 1.9 2004/06/10 22:40:57 hodson Exp $"
 
 /* TODO: XXX: THIS CODE NEEDS UPDATING AS XRL INTERFACE HAS CHANGED */
 
@@ -143,7 +143,7 @@ read_entry(const XrlError& e, XrlRouter& xrlrouter,
     try {
 #define getter(ret, name) current = name;fte.ret = response->get_ipv4(name)
 	getter(dst, "dst");
-	getter(gateway, "gateway");
+	getter(nexthop, "nexthop");
 	getter(netmask, "netmask");
 #undef getter
 	current = "ifname"; fte.ifname = response->get_string(current);
@@ -327,14 +327,14 @@ print_routing_table(const char *host)
  * @param host where the finder is
  * @param tt transaction type Fti::SYNC or Fti::ASYNC
  * @param dst destination address
- * @param gateway gateway to which packets should be sent
+ * @param nexthop the next-hop router to which packets should be sent
  * @param netmask netmask associated with the destination address
  * @param ifname interface through which the packets should leave
  *
  * @return true on a success
  */
 bool
-add(const char *host, Fti::TransactionType tt, char *dst, char *gateway,
+add(const char *host, Fti::TransactionType tt, char *dst, char *nexthop,
     char *netmask, char *ifname)
 {
     EventLoop eventloop;
@@ -356,7 +356,7 @@ add(const char *host, Fti::TransactionType tt, char *dst, char *gateway,
     Xrl xadd(server, "add_entry_old");
     xadd.args().
 	add_ipv4("dst", dst).
-	add_ipv4("gateway", gateway).
+	add_ipv4("nexthop", nexthop).
 	add_ipv4("netmask", netmask).
  	add_string("ifname", ifname);
     rc.xrl(xadd);
@@ -501,7 +501,7 @@ usage(char *name)
 "(routing table)\t -r\n"
 "(remote host)\t -h\n"
 "(trans type)\t -t sync|async\n"
-"(add)\t\t -a <dst> <gateway> <netmask> <interface>\n"
+"(add)\t\t -a <dst> <nexthop> <netmask> <interface>\n"
 "(delete)\t -d <dst> <netmask> \n"
 "(interface)\t -i create_interface le0 | -i delete_interface le0"
 #if	LATER

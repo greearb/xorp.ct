@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.13 2004/06/02 22:52:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.14 2004/06/10 22:40:49 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -73,7 +73,7 @@ FtiConfigEntrySetRtsock::stop()
 bool
 FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
+    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
@@ -83,7 +83,7 @@ FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
 bool
 FtiConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
+    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
@@ -93,7 +93,7 @@ FtiConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
 bool
 FtiConfigEntrySetRtsock::add_entry6(const Fte6& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
+    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
@@ -103,7 +103,7 @@ FtiConfigEntrySetRtsock::add_entry6(const Fte6& fte)
 bool
 FtiConfigEntrySetRtsock::delete_entry6(const Fte6& fte)
 {
-    FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
+    FteX ftex(IPvXNet(fte.net()), IPvX(fte.nexthop()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance(),
 	      fte.xorp_route());
     
@@ -130,7 +130,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     char		buffer[buffer_size];
     struct rt_msghdr	*rtm;
-    struct sockaddr_in	*sin_dst, *sin_gateway, *sin_netmask;
+    struct sockaddr_in	*sin_dst, *sin_nexthop, *sin_netmask;
     RoutingSocket&	rs = *this;
     int			family = fte.net().af();
     
@@ -144,18 +144,18 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     case AF_INET:
 	rtm->rtm_msglen = sizeof(*rtm) + 3 * sizeof(struct sockaddr_in);
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
-	sin_gateway = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in),
+	sin_nexthop = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in),
 				  struct sockaddr_in *);
-	sin_netmask = ADD_POINTER(sin_gateway, sizeof(struct sockaddr_in),
+	sin_netmask = ADD_POINTER(sin_nexthop, sizeof(struct sockaddr_in),
 				  struct sockaddr_in *);
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
 	rtm->rtm_msglen = sizeof(*rtm) + 3 * sizeof(struct sockaddr_in6);
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
-	sin_gateway = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in6),
+	sin_nexthop = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in6),
 				  struct sockaddr_in *);
-	sin_netmask = ADD_POINTER(sin_gateway, sizeof(struct sockaddr_in6),
+	sin_netmask = ADD_POINTER(sin_nexthop, sizeof(struct sockaddr_in6),
 				  struct sockaddr_in *);
 	break;
 #endif // HAVE_IPV6
@@ -169,20 +169,20 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     rtm->rtm_addrs = (RTA_DST | RTA_GATEWAY | RTA_NETMASK);
     if (fte.is_host_route())
 	rtm->rtm_flags |= RTF_HOST;
-    if (fte.gateway() != IPvX::ZERO(family))
+    if (fte.nexthop() != IPvX::ZERO(family))
 	rtm->rtm_flags |= RTF_GATEWAY;
     rtm->rtm_flags |= RTF_PROTO1;	// XXX: mark this as a XORP route
     rtm->rtm_flags |= RTF_UP;		// XXX: mark this route as UP
     rtm->rtm_pid = rs.pid();
     rtm->rtm_seq = rs.seqno();
 
-    // Copy the destination, the gateway, and the netmask addresses
+    // Copy the destination, the nexthop, and the netmask addresses
     fte.net().masked_addr().copy_out(*sin_dst);
-    fte.gateway().copy_out(*sin_gateway);
-    if (fte.gateway() == IPvX::ZERO(family)) {
+    fte.nexthop().copy_out(*sin_nexthop);
+    if (fte.nexthop() == IPvX::ZERO(family)) {
 	// TODO: XXX: PAVPAVPAV: set the interface index, etc:
-	// gateway_dl.sdl_family = AF_LINK;
-	// gateway_dl.sdl_index = ifindex(fte.vifname());
+	// nexthop_dl.sdl_family = AF_LINK;
+	// nexthop_dl.sdl_index = ifindex(fte.vifname());
     }
     fte.net().netmask().copy_out(*sin_netmask);
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.16 2003/10/30 07:22:50 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.17 2004/07/29 23:46:36 pavlin Exp $
 #
 
 #
@@ -52,16 +52,16 @@ case ${HOSTNAME} in
     xorp1)
     HAVE_IPV6="false"
     IFNAME="dc2"
-    GATEWAY4="10.8.0.2"
-    GATEWAY6="fe80:aaaa::1111"
+    NEXTHOP4="10.8.0.2"
+    NEXTHOP6="fe80:aaaa::1111"
     # TODO: IPv6 is temporary disabled
     ;;
 
     xorp4)
     HAVE_IPV6="false"
     IFNAME="eth6"
-    GATEWAY4="10.8.0.1"
-    GATEWAY6="fe80:aaaa::1111"
+    NEXTHOP4="10.8.0.1"
+    NEXTHOP6="fe80:aaaa::1111"
     ;;
 
     carp | carp.icir.org)
@@ -92,8 +92,8 @@ case ${HOSTNAME} in
 	;;
     esac
 
-    GATEWAY4="172.16.0.1"
-    GATEWAY6="fe80:aaaa::1111"
+    NEXTHOP4="172.16.0.1"
+    NEXTHOP6="fe80:aaaa::1111"
     ;;
 
     *)
@@ -422,21 +422,21 @@ test_enable_disable_unicast_forwarding6()
     done
 }
 
-config_cleanup_gateway4()
+config_cleanup_nexthop4()
 {
-    local _xrl_result _ret_value _gateway
+    local _xrl_result _ret_value _nexthop
 
-    echo "INFO: Cleanup gateway (if any) for destination ${DEST4}"
+    echo "INFO: Cleanup nexthop (if any) for destination ${DEST4}"
 
     # Lookup the entry
-    _gateway=""
+    _nexthop=""
     _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
-	_gateway=`get_xrl_variable_value "${_xrl_result}" gateway:ipv4`
+	_nexthop=`get_xrl_variable_value "${_xrl_result}" nexthop:ipv4`
     fi
-    if [ "${_gateway}" = "" ] ; then
-	# No gateway to delete for destination ${DEST4}"
+    if [ "${_nexthop}" = "" ] ; then
+	# No nexthop to delete for destination ${DEST4}"
 	return 0
     else
 	tid=`get_xrl_variable_value \`fea_redist_transaction4_start_transaction\` tid:u32`
@@ -449,21 +449,21 @@ config_cleanup_gateway4()
     fi
 }
 
-config_cleanup_gateway6()
+config_cleanup_nexthop6()
 {
-    local _xrl_result _ret_value _gateway
+    local _xrl_result _ret_value _nexthop
 
-    echo "INFO: Cleanup gateway (if any) for destination ${DEST6}"
+    echo "INFO: Cleanup nexthop (if any) for destination ${DEST6}"
 
     # Lookup the entry
-    _gateway=""
+    _nexthop=""
     _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
-	_gateway=`get_xrl_variable_value "${_xrl_result}" gateway:ipv6`
+	_nexthop=`get_xrl_variable_value "${_xrl_result}" nexthop:ipv6`
     fi
-    if [ "${_gateway}" = "" ] ; then
-	# No gateway to delete for destination ${DEST6}"
+    if [ "${_nexthop}" = "" ] ; then
+	# No nexthop to delete for destination ${DEST6}"
 	return 0
     else
 	tid=`get_xrl_variable_value \`fea_redist_transaction6_start_transaction\` tid:u32`
@@ -478,36 +478,36 @@ config_cleanup_gateway6()
 
 subtest_add_route4()
 {
-    echo "SUBTEST: Add ${GATEWAY4} as gateway for destination ${DEST4}"
+    echo "SUBTEST: Add ${NEXTHOP4} as nexthop for destination ${DEST4}"
 
     tid=`get_xrl_variable_value \`fea_redist_transaction4_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_redist_transaction4_add_route ${tid} ${DEST4} ${GATEWAY4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction4_add_route ${tid} ${DEST4} ${NEXTHOP4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
     fea_redist_transaction4_commit_transaction ${tid}
 }
 
 subtest_add_route6()
 {
-    echo "SUBTEST: Add ${GATEWAY6} as gateway for destination ${DEST6}"
+    echo "SUBTEST: Add ${NEXTHOP6} as nexthop for destination ${DEST6}"
 
     tid=`get_xrl_variable_value \`fea_redist_transaction6_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_redist_transaction6_add_route ${tid} ${DEST6} ${GATEWAY6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction6_add_route ${tid} ${DEST6} ${NEXTHOP6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
     fea_redist_transaction6_commit_transaction ${tid}
 }
 
 subtest_lookup_entry4()
 {
-    local _xrl_result _ret_value _gateway _ifname _vifname _metric
+    local _xrl_result _ret_value _nexthop _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
-    echo "SUBTEST: Lookup gateway for destination ${DEST4}"
+    echo "SUBTEST: Lookup nexthop for destination ${DEST4}"
 
     _xrl_result=`fea_fti_lookup_entry4 ${DEST4} 2>&1`
     _ret_value=$?
@@ -516,7 +516,7 @@ subtest_lookup_entry4()
 	echo "${_xrl_result}"
 	return ${_ret_value}
     fi
-    _gateway=`get_xrl_variable_value ${_xrl_result} gateway:ipv4`
+    _nexthop=`get_xrl_variable_value ${_xrl_result} nexthop:ipv4`
     _ifname=`get_xrl_variable_value ${_xrl_result} ifname:txt`
     _vifname=`get_xrl_variable_value ${_xrl_result} vifname:txt`
     _metric=`get_xrl_variable_value ${_xrl_result} metric:u32`
@@ -526,8 +526,8 @@ subtest_lookup_entry4()
     #
     # Check the result
     #
-    if [ "${_gateway}" != "${GATEWAY4}" ] ; then
-	echo "ERROR: gateway is ${_gateway}; expecting ${GATEWAY4}"
+    if [ "${_nexthop}" != "${NEXTHOP4}" ] ; then
+	echo "ERROR: nexthop is ${_nexthop}; expecting ${NEXTHOP4}"
 	return 1
     fi
 
@@ -564,10 +564,10 @@ subtest_lookup_entry4()
 
 subtest_lookup_entry6()
 {
-    local _xrl_result _ret_value _gateway _ifname _vifname _metric
+    local _xrl_result _ret_value _nexthop _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
-    echo "SUBTEST: Lookup gateway for destination ${DEST6}"
+    echo "SUBTEST: Lookup nexthop for destination ${DEST6}"
 
     _xrl_result=`fea_fti_lookup_entry6 ${DEST6} 2>&1`
     _ret_value=$?
@@ -576,7 +576,7 @@ subtest_lookup_entry6()
 	echo "${_xrl_result}"
 	return ${_ret_value}
     fi
-    _gateway=`get_xrl_variable_value ${_xrl_result} gateway:ipv6`
+    _nexthop=`get_xrl_variable_value ${_xrl_result} nexthop:ipv6`
     _ifname=`get_xrl_variable_value ${_xrl_result} ifname:txt`
     _vifname=`get_xrl_variable_value ${_xrl_result} vifname:txt`
     _metric=`get_xrl_variable_value ${_xrl_result} metric:u32`
@@ -586,8 +586,8 @@ subtest_lookup_entry6()
     #
     # Check the result
     #
-    if [ "${_gateway}" != "${GATEWAY6}" ] ; then
-	echo "ERROR: gateway is ${_gateway}; expecting ${GATEWAY6}"
+    if [ "${_nexthop}" != "${NEXTHOP6}" ] ; then
+	echo "ERROR: nexthop is ${_nexthop}; expecting ${NEXTHOP6}"
 	return 1
     fi
 
@@ -624,7 +624,7 @@ subtest_lookup_entry6()
 
 subtest_lookup_route4()
 {
-    local _xrl_result _ret_value _gateway _ifname _vifname _metric
+    local _xrl_result _ret_value _nexthop _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
     echo "SUBTEST: Lookup route for destination ${DEST_HOST4}"
@@ -636,7 +636,7 @@ subtest_lookup_route4()
 	echo "${_xrl_result}"
 	return ${_ret_value}
     fi
-    _gateway=`get_xrl_variable_value ${_xrl_result} gateway:ipv4`
+    _nexthop=`get_xrl_variable_value ${_xrl_result} nexthop:ipv4`
     _ifname=`get_xrl_variable_value ${_xrl_result} ifname:txt`
     _vifname=`get_xrl_variable_value ${_xrl_result} vifname:txt`
     _metric=`get_xrl_variable_value ${_xrl_result} metric:u32`
@@ -646,8 +646,8 @@ subtest_lookup_route4()
     #
     # Check the result
     #
-    if [ "${_gateway}" != "${GATEWAY4}" ] ; then
-	echo "ERROR: gateway is ${_gateway}; expecting ${GATEWAY4}"
+    if [ "${_nexthop}" != "${NEXTHOP4}" ] ; then
+	echo "ERROR: nexthop is ${_nexthop}; expecting ${NEXTHOP4}"
 	return 1
     fi
 
@@ -684,7 +684,7 @@ subtest_lookup_route4()
 
 subtest_lookup_route6()
 {
-    local _xrl_result _ret_value _gateway _ifname _vifname _metric
+    local _xrl_result _ret_value _nexthop _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
     echo "SUBTEST: Lookup route for destination ${DEST_HOST6}"
@@ -696,7 +696,7 @@ subtest_lookup_route6()
 	echo "${_xrl_result}"
 	return ${_ret_value}
     fi
-    _gateway=`get_xrl_variable_value ${_xrl_result} gateway:ipv6`
+    _nexthop=`get_xrl_variable_value ${_xrl_result} nexthop:ipv6`
     _ifname=`get_xrl_variable_value ${_xrl_result} ifname:txt`
     _vifname=`get_xrl_variable_value ${_xrl_result} vifname:txt`
     _metric=`get_xrl_variable_value ${_xrl_result} metric:u32`
@@ -706,8 +706,8 @@ subtest_lookup_route6()
     #
     # Check the result
     #
-    if [ "${_gateway}" != "${GATEWAY6}" ] ; then
-	echo "ERROR: gateway is ${_gateway}; expecting ${GATEWAY6}"
+    if [ "${_nexthop}" != "${NEXTHOP6}" ] ; then
+	echo "ERROR: nexthop is ${_nexthop}; expecting ${NEXTHOP6}"
 	return 1
     fi
 
@@ -744,7 +744,7 @@ subtest_lookup_route6()
 
 subtest_delete_route4()
 {
-    echo "SUBTEST: Delete the gateway for destination ${DEST4}"
+    echo "SUBTEST: Delete the nexthop for destination ${DEST4}"
 
     tid=`get_xrl_variable_value \`fea_redist_transaction4_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -757,7 +757,7 @@ subtest_delete_route4()
 
 subtest_delete_route6()
 {
-    echo "SUBTEST: Delete the gateway for destination ${DEST6}"
+    echo "SUBTEST: Delete the nexthop for destination ${DEST6}"
 
     tid=`get_xrl_variable_value \`fea_redist_transaction6_start_transaction\` tid:u32`
     if [ "${tid}" = "" ] ; then
@@ -869,7 +869,7 @@ test_add_delete_unicast_forwarding_entry4()
     echo "TEST: Add/delete IPv4 unicast forwarding entry"
 
     _subtests=""
-    _subtests="${_subtests} config_cleanup_gateway4"
+    _subtests="${_subtests} config_cleanup_nexthop4"
     _subtests="${_subtests} subtest_add_route4"
     _subtests="${_subtests} subtest_lookup_entry4"
     _subtests="${_subtests} subtest_lookup_route4"
@@ -895,7 +895,7 @@ test_add_delete_unicast_forwarding_entry6()
     echo "TEST: Add/delete IPv6 unicast forwarding entry"
 
     _subtests=""
-    _subtests="${_subtests} config_cleanup_gateway6"
+    _subtests="${_subtests} config_cleanup_nexthop6"
     _subtests="${_subtests} subtest_add_route6"
     _subtests="${_subtests} subtest_lookup_entry6"
     _subtests="${_subtests} subtest_lookup_route6"
@@ -924,8 +924,8 @@ test_delete_all_routes4()
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_redist_transaction4_add_route ${tid} ${DEST4} ${GATEWAY4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
-    fea_redist_transaction4_add_route ${tid} ${DEST4_2} ${GATEWAY4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction4_add_route ${tid} ${DEST4} ${NEXTHOP4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction4_add_route ${tid} ${DEST4_2} ${NEXTHOP4} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
     fea_redist_transaction4_commit_transaction ${tid}
 
     # Check that the routes were installed
@@ -980,8 +980,8 @@ test_delete_all_routes6()
 	echo "ERROR: cannot start transaction: cannot get transaction ID"
 	return 1
     fi
-    fea_redist_transaction6_add_route ${tid} ${DEST6} ${GATEWAY6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
-    fea_redist_transaction6_add_route ${tid} ${DEST6_2} ${GATEWAY6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction6_add_route ${tid} ${DEST6} ${NEXTHOP6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
+    fea_redist_transaction6_add_route ${tid} ${DEST6_2} ${NEXTHOP6} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${COOKIE} ${PROTOCOL_ORIGIN}
     fea_redist_transaction6_commit_transaction ${tid}
 
     # Check that the routes were installed

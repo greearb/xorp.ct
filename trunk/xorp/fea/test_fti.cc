@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/fea/test_fti.cc,v 1.5 2004/06/10 22:40:57 hodson Exp $"
 
 #include <list>
 
@@ -31,7 +31,7 @@ void
 pp_fte(Fte4& fte)
 {
  	printf("dst = %-16s", fte.net().str().c_str());
- 	printf("gateway = %-16s ", fte.gateway().str().c_str());
+ 	printf("nexthop = %-16s ", fte.nexthop().str().c_str());
 	printf("if = %s", fte.vifname().c_str());
 	printf("\n");
 }
@@ -82,7 +82,7 @@ print_routing_table(Fti *fti)
 }
 
 int
-add(Fti* fti, char *network, char *gateway, char *ifname)
+add(Fti* fti, char *network, char *nexthop, char *ifname)
 {
     IPv4Net n;
     try {
@@ -94,9 +94,9 @@ add(Fti* fti, char *network, char *gateway, char *ifname)
 
     IPv4 g;
     try {
-	g = IPv4(gateway);
+	g = IPv4(nexthop);
     } catch (const InvalidString& ) {
-	XLOG_ERROR("Bad gateway: %s, expected xx.xx.xx.xx", gateway);
+	XLOG_ERROR("Bad nexthop: %s, expected xx.xx.xx.xx", nexthop);
 	return -1;
     }
 
@@ -270,7 +270,7 @@ usage(char *name)
     fprintf (stderr,
 "usage: %s [\n"
 "(routing table)\t -r\n"
-"(add)\t\t -a <network> <gateway> <interface>\n"
+"(add)\t\t -a <network> <nexthop> <interface>\n"
 "(delete)\t -d <network> \n"
 "(zap)\t\t -z\n"
 "(lookup)\t -l <dst>\n"

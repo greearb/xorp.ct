@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.15 2004/06/04 02:34:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.16 2004/06/10 22:40:56 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -279,7 +279,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
     u_short if_index = rtm->rtm_index;
     string if_name;
-    int family = fte.gateway().af();
+    int family = fte.nexthop().af();
     bool is_family_match = false;
     bool is_deleted = false;
     
@@ -305,7 +305,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     RtmUtils::get_rta_sockaddr(rtm->rtm_addrs, sa, rti_info);
     
     IPvX dst_addr(family);
-    IPvX gateway_addr(family);
+    IPvX nexthop_addr(family);
     int dst_mask_len = 0;
     
     //
@@ -320,17 +320,17 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     }
     
     //
-    // Get the gateway
+    // Get the next-hop router address
     //
     if ( (sa = rti_info[RTAX_GATEWAY]) != NULL) {
 	if (sa->sa_family == family) {
-	    gateway_addr.copy_in(*rti_info[RTAX_GATEWAY]);
-	    gateway_addr = kernel_ipvx_adjust(gateway_addr);
+	    nexthop_addr.copy_in(*rti_info[RTAX_GATEWAY]);
+	    nexthop_addr = kernel_ipvx_adjust(nexthop_addr);
 	    is_family_match = true;
 	}
     }
     if ((rtm->rtm_flags & RTF_LLINFO)
-	&& (gateway_addr == IPvX::ZERO(family))) {
+	&& (nexthop_addr == IPvX::ZERO(family))) {
 	// Link-local entry (could be the broadcast address as well)
 	bool not_bcast_addr = true;
 #ifdef RTF_BROADCAST
@@ -338,7 +338,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 	    not_bcast_addr = false;
 #endif
 	if (not_bcast_addr)
-	    gateway_addr = dst_addr;
+	    nexthop_addr = dst_addr;
     }
     if (! is_family_match)
 	return false;
@@ -399,7 +399,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
     //
     // TODO: define default routing metric and admin distance instead of ~0
     //
-    fte = FteX(IPvXNet(dst_addr, dst_mask_len), gateway_addr, if_name, if_name,
+    fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr, if_name, if_name,
 	       ~0, ~0, xorp_route);
     if (is_deleted)
 	fte.mark_deleted();

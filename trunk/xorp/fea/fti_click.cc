@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/fea/fti_click.cc,v 1.5 2004/06/10 22:40:46 hodson Exp $"
 
 #include <unistd.h>
 #include <cstdio>
@@ -96,7 +96,7 @@ bool FtiClick::add_entry4(const Fte4& fte)
     snprintf(sport, 1024, "%d", port);
 
     string request = _tid + string("\n") + fte.net().str() +
-	string(" ") + fte.gateway().str() +
+	string(" ") + fte.nexthop().str() +
 	string(" ") + string(sport) + string("\n");
 
     return write("add_entry", request);
@@ -157,14 +157,14 @@ FtiClick::lookup_route4(IPv4 addr, Fte4& fte)
     **
     ** 128.16.64.16    0.0.0.0/0       18.26.4.1       1
     */
-    static char dst[10240], netmask[10240], gateway[10240];
+    static char dst[10240], netmask[10240], nexthop[10240];
     int port;
-    fscanf(fp, "%s %s %s %d", dst, netmask, gateway, &port);
+    fscanf(fp, "%s %s %s %d", dst, netmask, nexthop, &port);
 
     const char* ptr = strchr(netmask, '/');
     assert(ptr != 0);
 
-    fte = Fte4(IPv4Net(netmask), IPv4(gateway), port_to_ifname(port));
+    fte = Fte4(IPv4Net(netmask), IPv4(nexthop), port_to_ifname(port));
 
     if (!close(&fp, "lookup_route"))
 	return false;
@@ -238,12 +238,12 @@ FtiClick::make_routing_list(list<Fte4>& rt)
 	**
 	** 10.0.4.255/32   255.255.255.255 192.150.187.1  0
 	*/
-	char dst[10240], netmask[10240], gateway[10240];
+	char dst[10240], netmask[10240], nexthop[10240];
 	int port;
-	sscanf(line, "%s %s %s %d", dst, netmask, gateway, &port);
+	sscanf(line, "%s %s %s %d", dst, netmask, nexthop, &port);
 
 	rt.push_back(
-	    Fte4(IPv4Net(netmask), IPv4(gateway), port_to_ifname(port))
+	    Fte4(IPv4Net(netmask), IPv4(nexthop), port_to_ifname(port))
 	    );
     }
 

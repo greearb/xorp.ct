@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.37 2004/06/17 23:22:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.38 2004/07/28 03:03:23 pavlin Exp $"
 
 
 //
@@ -2501,7 +2501,7 @@ MfeaNode::get_mrib_table(vector<Mrib* >& mrib_table)
 	    mrib->set_dest_prefix(IPvXNet(fte.net()));
 	    mrib->set_metric_preference(mrib_table_default_metric_preference().get());
 	    mrib->set_metric(mrib_table_default_metric().get());
-	    mrib->set_next_hop_router_addr(IPvX(fte.gateway()));
+	    mrib->set_next_hop_router_addr(IPvX(fte.nexthop()));
 
 	    // Set the vif index
 	    mfea_vif = vif_find_by_name(fte.vifname());
@@ -2535,7 +2535,7 @@ MfeaNode::get_mrib_table(vector<Mrib* >& mrib_table)
 	    mrib->set_dest_prefix(IPvXNet(fte.net()));
 	    mrib->set_metric_preference(mrib_table_default_metric_preference().get());
 	    mrib->set_metric(mrib_table_default_metric().get());
-	    mrib->set_next_hop_router_addr(IPvX(fte.gateway()));
+	    mrib->set_next_hop_router_addr(IPvX(fte.nexthop()));
 
 	    // Set the vif index
 	    mfea_vif = vif_find_by_name(fte.vifname());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.45 2004/07/29 23:46:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.46 2004/08/03 03:01:06 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1347,7 +1347,7 @@ XrlFeaTarget::fti_0_2_lookup_route4(
 	const IPv4&	dst,
 	// Output values,
 	IPv4Net&	netmask,
-	IPv4&		gateway,
+	IPv4&		nexthop,
 	string&		ifname,
 	string&		vifname,
 	uint32_t&	metric,
@@ -1360,7 +1360,7 @@ XrlFeaTarget::fti_0_2_lookup_route4(
     Fte4 fte;
     if (_xftm.ftic().lookup_route4(dst, fte) == true) {
 	netmask = fte.net();
-	gateway = fte.gateway();
+	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
 	// TODO: set the values of metric, admin_distance and protocol_origin
@@ -1379,7 +1379,7 @@ XrlFeaTarget::fti_0_2_lookup_route6(
 	const IPv6&	dst,
 	// Output values,
 	IPv6Net&	netmask,
-	IPv6&		gateway,
+	IPv6&		nexthop,
 	string&		ifname,
 	string&		vifname,
 	uint32_t&	metric,
@@ -1392,7 +1392,7 @@ XrlFeaTarget::fti_0_2_lookup_route6(
     Fte6 fte;
     if (_xftm.ftic().lookup_route6(dst, fte) == true) {
 	netmask = fte.net();
-	gateway = fte.gateway();
+	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
 	// TODO: set the values of metric, admin_distance and protocol_origin
@@ -1410,7 +1410,7 @@ XrlFeaTarget::fti_0_2_lookup_entry4(
 	// Input values,
 	const IPv4Net&	dst,
 	// Output values,
-	IPv4&		gateway,
+	IPv4&		nexthop,
 	string&		ifname,
 	string&		vifname,
 	uint32_t&	metric,
@@ -1422,7 +1422,7 @@ XrlFeaTarget::fti_0_2_lookup_entry4(
 
     Fte4 fte;
     if (_xftm.ftic().lookup_entry4(dst, fte)) {
-	gateway = fte.gateway();
+	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
 	// TODO: set the values of metric, admin_distance and protocol_origin
@@ -1440,7 +1440,7 @@ XrlFeaTarget::fti_0_2_lookup_entry6(
 	// Input values,
 	const IPv6Net&	dst,
 	// Output values,
-	IPv6&		gateway,
+	IPv6&		nexthop,
 	string&		ifname,
 	string&		vifname,
 	uint32_t&	metric,
@@ -1452,7 +1452,7 @@ XrlFeaTarget::fti_0_2_lookup_entry6(
 
     Fte6 fte;
     if (_xftm.ftic().lookup_entry6(dst, fte)) {
-	gateway = fte.gateway();
+	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
 	// TODO: set the values of metric, admin_distance and protocol_origin

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.8 2004/05/07 02:06:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.9 2004/06/10 22:40:57 hodson Exp $"
 
 #include "xrl_fti.hh"
 
@@ -206,7 +206,7 @@ XrlFtiTransactionManager::send_fib_client_add_route(const string& target_name,
     success = _xrl_fea_fib_client.send_add_route4(
 	target_name.c_str(),
 	fte.net(),
-	fte.gateway(),
+	fte.nexthop(),
 	fte.ifname(),
 	fte.vifname(),
 	fte.metric(),
@@ -232,7 +232,7 @@ XrlFtiTransactionManager::send_fib_client_add_route(const string& target_name,
     success = _xrl_fea_fib_client.send_add_route6(
 	target_name.c_str(),
 	fte.net(),
-	fte.gateway(),
+	fte.nexthop(),
 	fte.ifname(),
 	fte.vifname(),
 	fte.metric(),

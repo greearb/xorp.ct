@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fte.hh,v 1.8 2004/03/18 13:07:06 pavlin Exp $
+// $XORP: xorp/fea/fte.hh,v 1.9 2004/06/10 22:40:46 hodson Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -35,23 +35,23 @@ template<typename A, typename N>
 class Fte {
 public:
     Fte() { zero(); }
-    explicit Fte(int family) : _net(family), _gateway(family) { zero(); }
+    explicit Fte(int family) : _net(family), _nexthop(family) { zero(); }
     Fte(const N&	net,
-	const A&	gateway,
+	const A&	nexthop,
 	const string&	ifname,
 	const string&	vifname,
 	uint32_t	metric,
 	uint32_t	admin_distance,
 	bool		xorp_route)
-	: _net(net), _gateway(gateway), _ifname(ifname), _vifname(vifname),
+	: _net(net), _nexthop(nexthop), _ifname(ifname), _vifname(vifname),
 	  _metric(metric), _admin_distance(admin_distance),
 	  _xorp_route(xorp_route), _is_deleted(false) {}
     Fte(const N& net)
-	: _net(net), _gateway(A::ZERO(net.af())),
+	: _net(net), _nexthop(A::ZERO(net.af())),
 	  _metric(0), _admin_distance(0), _xorp_route(false) {}
 
     const N&	net() const		{ return _net; }
-    const A&	gateway() const 	{ return _gateway; }
+    const A&	nexthop() const 	{ return _nexthop; }
     const string& ifname() const	{ return _ifname; }
     const string& vifname() const	{ return _vifname; }
     uint32_t	metric() const		{ return _metric; }
@@ -65,7 +65,7 @@ public:
      */
     void zero() {
 	_net = N(A::ZERO(_net.af()), 0);
-	_gateway = A::ZERO(_gateway.af());
+	_nexthop = A::ZERO(_nexthop.af());
 	_ifname.erase();
 	_vifname.erase();
 	_metric = 0;
@@ -84,14 +84,14 @@ public:
     /**
      * @return A string representation of the entry.
      *
-     * dst = 127.0.0.1 gateway = 127.0.0.1 netmask = 255.255.255.255 if = lo0
+     * dst = 127.0.0.1 nexthop = 127.0.0.1 netmask = 255.255.255.255 if = lo0
      * metric = 10 admin_distance = 20
      */
     string str() const {
-	return c_format("net = %s gateway = %s ifname = %s vifname = %s "
+	return c_format("net = %s nexthop = %s ifname = %s vifname = %s "
 			"metric = %u admin_distance = %u xorp_route = %s "
 			"is_deleted = %s",
-			_net.str().c_str(), _gateway.str().c_str(),
+			_net.str().c_str(), _nexthop.str().c_str(),
 			_ifname.c_str(), _vifname.c_str(),
 			_metric, _admin_distance,
 			_xorp_route ? "true" : "false",
@@ -100,7 +100,7 @@ public:
 
 private:
     N		_net;			// Network
-    A		_gateway;		// Gateway address
+    A		_nexthop;		// Nexthop address
     string	_ifname;		// Interface name
     string	_vifname;		// Virtual interface name
     uint32_t	_metric;		// Route metric

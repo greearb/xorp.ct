@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_transaction.hh,v 1.4 2003/05/02 07:50:43 pavlin Exp $
+// $XORP: xorp/fea/fti_transaction.hh,v 1.6 2004/06/10 22:40:46 hodson Exp $
 
 #ifndef __FEA_FTI_TRANSACTION_HH__
 #define __FEA_FTI_TRANSACTION_HH__
@@ -50,13 +50,13 @@ class FtiAddEntry4 : public FtiTransactionOperation {
 public:
     FtiAddEntry4(FtiConfig&	ftic,
 		 const IPv4Net&	net,
-		 const IPv4&	gateway,
+		 const IPv4&	nexthop,
 		 const string&	ifname,
 		 const string&	vifname,
 		 uint32_t	metric,
 		 uint32_t	admin_distance,
 		 bool		xorp_route = true)
-	: FtiTransactionOperation(ftic), _fte(net, gateway, ifname, vifname,
+	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
 					      metric, admin_distance,
 					      xorp_route) {}
 
@@ -106,13 +106,13 @@ class FtiAddEntry6 : public FtiTransactionOperation {
 public:
     FtiAddEntry6(FtiConfig&	ftic,
 		 const IPv6Net&	net,
-		 const IPv6&	gateway,
+		 const IPv6&	nexthop,
 		 const string&  ifname,
 		 const string&	vifname,
 		 uint32_t	metric,
 		 uint32_t	admin_distance,
 		 bool		xorp_route = true)
-	: FtiTransactionOperation(ftic), _fte(net, gateway, ifname, vifname,
+	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
 					      metric, admin_distance,
 					      xorp_route) {}
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.8 2004/06/02 22:52:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.9 2004/06/10 22:40:50 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -81,7 +81,7 @@ FtiConfigTableGetSysctl::get_table4(list<Fte4>& fte_list)
     for (iter = ftex_list.begin(); iter != ftex_list.end(); ++iter) {
 	FteX& ftex = *iter;
 	fte_list.push_back(Fte4(ftex.net().get_ipv4net(),
-				ftex.gateway().get_ipv4(),
+				ftex.nexthop().get_ipv4(),
 				ftex.ifname(), ftex.vifname(),
 				ftex.metric(), ftex.admin_distance(),
 				ftex.xorp_route()));
@@ -109,7 +109,7 @@ FtiConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
     for (iter = ftex_list.begin(); iter != ftex_list.end(); ++iter) {
 	FteX& ftex = *iter;
 	fte_list.push_back(Fte6(ftex.net().get_ipv6net(),
-				ftex.gateway().get_ipv6(),
+				ftex.nexthop().get_ipv6(),
 				ftex.ifname(), ftex.vifname(),
 				ftex.metric(), ftex.admin_distance(),
 				ftex.xorp_route()));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.33 2004/07/29 23:46:37 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.34 2004/08/03 03:01:07 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -574,7 +574,7 @@ public:
 	const IPv4&	host,
 	// Output values,
 	IPv4Net&	netmask,
-	IPv4&		gateway,
+	IPv4&		nexthop,
 	string&		ifname,
 	string&		vifname,
 	uint32_t&	metric,
@@ -586,7 +586,7 @@ public:
 	const IPv6&	host,
 	// Output values,
 	IPv6Net&	netmask,
-	IPv6&		gateway,
+	IPv6&		nexthop,
 	string&		ifname,
 	string&		vifname,
 	uint32_t&	metric,
@@ -597,7 +597,7 @@ public:
 	// Input values,
 	const IPv4Net&	dst,
 	// Output values,
-	IPv4&		gateway,
+	IPv4&		nexthop,
 	string&		ifname,
 	string&		vifname,
 	uint32_t&	metric,
@@ -608,7 +608,7 @@ public:
 	// Input values,
 	const IPv6Net&	dst,
 	// Output values,
-	IPv6&		gateway,
+	IPv6&		nexthop,
 	string&		ifname,
 	string&		vifname,
 	uint32_t&	metric,

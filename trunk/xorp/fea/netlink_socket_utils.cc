@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.12 2004/04/01 18:21:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.13 2004/06/10 22:40:56 hodson Exp $"
 
 
 #include "fea_module.h"
@@ -167,7 +167,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
     const struct rtattr *rta_array[RTA_MAX + 1];
     int if_index;
     string if_name;
-    int family = fte.gateway().af();
+    int family = fte.nexthop().af();
     bool is_deleted = false;
     
     // Reset the result
@@ -177,7 +177,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
     if (nlh->nlmsg_type == RTM_DELROUTE)
 	is_deleted = true;
 
-    IPvX gateway_addr(family);
+    IPvX nexthop_addr(family);
     IPvX dst_addr(family);
     int dst_mask_len = 0;
     
@@ -222,10 +222,10 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
     }
     
     //
-    // Get the gateway
+    // Get the next-hop router address
     //
     if (rta_array[RTA_GATEWAY] != NULL) {
-	gateway_addr.copy_in(family, (uint8_t *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_GATEWAY])));
+	nexthop_addr.copy_in(family, (uint8_t *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_GATEWAY])));
     }
     
     //
@@ -279,7 +279,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
     //
     // TODO: define default admin distance instead of ~0
     //
-    fte = FteX(IPvXNet(dst_addr, dst_mask_len), gateway_addr, if_name, if_name,
+    fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr, if_name, if_name,
 	       route_metric, ~0, xorp_route);
     if (is_deleted)
 	fte.mark_deleted();
