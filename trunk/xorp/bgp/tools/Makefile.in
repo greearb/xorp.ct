@@ -80,7 +80,7 @@ RANLIB = @RANLIB@
 RIP = @RIP@
 RIP_OS = @RIP_OS@
 
-bin_PROGRAMS = print_peers
+bin_PROGRAMS = print_peers print_routes
 
 noinst_PROGRAMS = 
 noinst_LIBRARIES = 
@@ -91,6 +91,9 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxipc/libxipc.a $(top_builddir)/li
 
 # -- Program Sources
 print_peers_SOURCES = print_peer.cc
+
+print_routes_SOURCES = print_routes.cc 
+print_routes_LDADD = $(LDADD) $(top_builddir)/bgp/libbgp.a
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -108,6 +111,11 @@ print_peers_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
 $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/xrl/interfaces/libbgpxif.a
 print_peers_LDFLAGS = 
+print_routes_OBJECTS =  print_routes.o
+print_routes_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
+$(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/xrl/interfaces/libbgpxif.a $(top_builddir)/bgp/libbgp.a
+print_routes_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -122,9 +130,9 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/print_peer.P
-SOURCES = $(print_peers_SOURCES)
-OBJECTS = $(print_peers_OBJECTS)
+DEP_FILES =  .deps/print_peer.P .deps/print_routes.P
+SOURCES = $(print_peers_SOURCES) $(print_routes_SOURCES)
+OBJECTS = $(print_peers_OBJECTS) $(print_routes_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -199,6 +207,10 @@ maintainer-clean-compile:
 print_peers: $(print_peers_OBJECTS) $(print_peers_DEPENDENCIES)
 	@rm -f print_peers
 	$(CXXLINK) $(print_peers_LDFLAGS) $(print_peers_OBJECTS) $(print_peers_LDADD) $(LIBS)
+
+print_routes: $(print_routes_OBJECTS) $(print_routes_DEPENDENCIES)
+	@rm -f print_routes
+	$(CXXLINK) $(print_routes_LDFLAGS) $(print_routes_OBJECTS) $(print_routes_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
 
