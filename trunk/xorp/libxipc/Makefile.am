@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.23 2003/06/01 21:37:26 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.24 2003/06/02 17:20:38 hodson Exp $
 ##
 
 # - The library
@@ -18,7 +18,7 @@ test_programs += test_finder test_finder_events
 
 test_extra_programs = test_xrl_parser test_finder_to
 
-test_scripts = test_xrl_parser.sh test_finder_deaths.sh
+test_scripts = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
 
 TESTS = $(test_programs) $(test_scripts)
 
