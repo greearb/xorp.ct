@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_rtread_sysctl.cc,v 1.5 2003/04/10 03:12:03 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_rtread_sysctl.cc,v 1.6 2003/04/15 18:55:37 pavlin Exp $"
 
 
 //
@@ -212,10 +212,12 @@ UnixComm::get_mrib_table_osdep(Mrib *return_mrib_table[])
 		    IPvX router_addr(family());
 		    router_addr.copy_in(*(struct sockaddr_in *)sa);
 		    mrib->set_next_hop_router_addr(router_addr);
-		    mfea_vif = mfea_node().vif_find_direct(mrib->next_hop_router_addr());
-		    if (mfea_vif != NULL) {
+		    mfea_vif = mfea_node().vif_find_same_subnet_or_p2p(mrib->next_hop_router_addr());
+		    if ((mfea_vif != NULL)
+			&& (mfea_vif->is_underlying_vif_up())) {
 			mrib->set_next_hop_vif_index(mfea_vif->vif_index());
 		    } else {
+			mfea_vif = NULL;
 			XLOG_ERROR("sysctl(NET_RT_DUMP) failed: "
 				   "cannot find interface toward next-hop router %s",
 				   cstring(mrib->next_hop_router_addr()));
@@ -231,10 +233,11 @@ UnixComm::get_mrib_table_osdep(Mrib *return_mrib_table[])
 #endif
 	    if (not_bcast_addr)
 		mrib->set_next_hop_router_addr(mrib->dest_prefix().masked_addr());
-	    mfea_vif = mfea_node().vif_find_direct(mrib->next_hop_router_addr());
-	    if (mfea_vif != NULL) {
+	    mfea_vif = mfea_node().vif_find_same_subnet_or_p2p(mrib->next_hop_router_addr());
+	    if ((mfea_vif != NULL) && (mfea_vif->is_underlying_vif_up())) {
 		mrib->set_next_hop_vif_index(mfea_vif->vif_index());
 	    } else {
+		mfea_vif = NULL;
 		XLOG_ERROR("sysctl(NET_RT_DUMP) failed: "
 			   "cannot find interface toward next-hop router %s",
 			   cstring(mrib->next_hop_router_addr()));
@@ -256,9 +259,11 @@ UnixComm::get_mrib_table_osdep(Mrib *return_mrib_table[])
 #if 1	// TODO: remove?
 	// The very last resource. Try (again) whether it is a LAN addr.
 	if (mrib->next_hop_vif_index() >= mfea_node().maxvifs()) {
-	    mfea_vif = mfea_node().vif_find_direct(mrib->dest_prefix().masked_addr());
-	    if (mfea_vif != NULL) {
+	    mfea_vif = mfea_node().vif_find_same_subnet_or_p2p(mrib->dest_prefix().masked_addr());
+	    if ((mfea_vif != NULL) && mfea_vif_is_underlying_vif_up()) {
 		mrib->set_next_hop_vif_index(mfea_vif->vif_index());
+	    } else {
+		mfea_vif = NULL;
 	    }
 	}
 #endif // 1/0

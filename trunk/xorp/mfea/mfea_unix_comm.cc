@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.16 2003/05/19 00:18:40 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_comm.cc,v 1.17 2003/05/21 05:32:51 pavlin Exp $"
 
 
 //
@@ -2975,7 +2975,7 @@ UnixComm::proto_socket_read(int fd, SelectorMask mask)
 	
 	if (dst.is_multicast()) {
 	    // TODO: use VIF_LOCAL_DISABLE flag
-	    mfea_vif = mfea_node().vif_find_direct(src);
+	    mfea_vif = mfea_node().vif_find_same_subnet_or_p2p(src);
 	} else {
 	    mfea_vif = mfea_node().vif_find_by_addr(dst);
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_mrib_netlink.cc,v 1.4 2003/02/08 09:42:12 pavlin Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_mrib_netlink.cc,v 1.5 2003/03/10 23:20:40 hodson Exp $"
 
 
 //
@@ -190,11 +190,13 @@ UnixComm::get_mrib_osdep(const IPvX& dest_addr, Mrib& mrib)
 	return (XORP_ERROR);
     
     // Check if the lookup address is one of my own interfaces or a neighbor
-    mfea_vif = mfea_node().vif_find_direct(dest_addr);
-    if (mfea_vif != NULL) {
+    mfea_vif = mfea_node().vif_find_same_subnet_op_p2p(dest_addr);
+    if ((mfea_vif != NULL) && (mfea_vif->is_underlying_vif_up())) {
 	mrib.set_next_hop_router_addr(dest_addr);
 	mrib.set_next_hop_vif_index(mfea_vif->vif_index());
 	return (XORP_OK);
+    } else {
+	mfea_vif = NULL;
     }
     
     // Set the request. First the socket, then the request itself.
@@ -294,13 +296,15 @@ UnixComm::get_mrib_osdep(const IPvX& dest_addr, Mrib& mrib)
     // rtmsg check
     mfea_vif = NULL;
     if (rtmsg->rtm_type == RTN_LOCAL) {
-	// XXX: weird, we already called vif_find_direct(). Anyway...
-	mfea_vif = mfea_node().vif_find_direct(dest_addr);
-	if (mfea_vif != NULL) {
+	// XXX: weird, we already called vif_find_same_subnet_or_p2p().
+	// Anyway...
+	mfea_vif = mfea_node().vif_find_same_subnet_or_p2p(dest_addr);
+	if ((mfea_vif != NULL) && (mfea_vif->is_underlying_vif_up())) {
 	    mrib.set_next_hop_router_addr(dest_addr);
 	    mrib.set_next_hop_vif_index(mfea_vif->vif_index());
 	    return (XORP_OK);
 	}
+	mfea_vif = NULL;
 	XLOG_ERROR("get_mrib(AF_NETLINK) failed: "
 		   "cannot find the vif for local interface route to %s",
 		   cstring(mrib.dest_prefix()));

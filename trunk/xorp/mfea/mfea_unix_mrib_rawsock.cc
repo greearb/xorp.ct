@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_mrib_rawsock.cc,v 1.5 2003/03/10 23:20:41 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_mrib_rawsock.cc,v 1.6 2003/05/21 05:32:52 pavlin Exp $"
 
 
 //
@@ -134,11 +134,13 @@ UnixComm::get_mrib_osdep(const IPvX& dest_addr, Mrib& mrib)
 	return (XORP_ERROR);
     
     // Check if the lookup address is one of my own interfaces or a neighbor
-    mfea_vif = mfea_node().vif_find_direct(dest_addr);
-    if (mfea_vif != NULL) {
+    mfea_vif = mfea_node().vif_find_same_subnet_or_p2p(dest_addr);
+    if ((mfea_vif != NULL) && (mfea_vif->is_underlying_vif_up())) {
 	mrib.set_next_hop_router_addr(dest_addr);
 	mrib.set_next_hop_vif_index(mfea_vif->vif_index());
 	return (XORP_OK);
+    } else {
+	mfea_vif = NULL;
     }
     
     memset(rtmbuf, 0, sizeof(rtmbuf));
@@ -228,7 +230,9 @@ UnixComm::get_mrib_osdep(const IPvX& dest_addr, Mrib& mrib)
 	}
 	if (mfea_vif == NULL) {
 	    // XXX: this shoudn't happen, but who knows...
-	    mfea_vif = mfea_node().vif_find_direct(dest_addr);
+	    mfea_vif = mfea_node().vif_find_same_subnet_or_p2p(dest_addr);
+	    if ((mfea_vif != NULL) && (! mfea_vif->is_underlying_vif_up()))
+		mfea_vif = NULL;
 	}
     }
     
