@@ -54,6 +54,8 @@ public:
 
     const XrlCmdEntry* get_handler(uint32_t index) const;
 
+    void get_command_names(list<string>& names) const;
+    
     /**
      * Mark command map as finished.
      */

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_cmd_map.cc,v 1.5 2003/03/04 23:41:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_cmd_map.cc,v 1.6 2003/03/05 19:35:58 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -72,6 +72,15 @@ uint32_t
 XrlCmdMap::count_handlers() const
 {
     return _cmd_map.size();
+}
+
+void
+XrlCmdMap::get_command_names(list<string>& out) const
+{
+    CmdMap::const_iterator ci;
+    for (ci = _cmd_map.begin(); ci != _cmd_map.end(); ++ci) {
+	out.push_back(ci->first);
+    }
 }
 
 void
