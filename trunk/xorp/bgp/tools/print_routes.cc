@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.1 2003/02/03 23:40:28 mjh Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.2 2003/02/04 20:08:37 mjh Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -36,7 +36,15 @@ PrintRoutes::PrintRoutes(bool verbose, int interval)
 	}
 	if (interval <= 0)
 	    break;
-	sleep(interval);
+
+	//delay before next call
+	XorpCallback0<void>::RefPtr cb 
+	    = callback(this, &PrintRoutes::timer_expired);
+	_done = false;
+	_timer = _eventloop.new_oneoff_after_ms(interval*1000, cb);
+	while (_done == false) {
+	    _eventloop.run();
+	}
     }
 }
 
@@ -61,9 +69,10 @@ PrintRoutes::get_v4_route_list_start_done(const XrlError& e,
 	return;
     }
     _prev_no_bgp = false;
-
-    printf("\nPrefix            Nexthop          Peer             AS Path");
-    printf("\n------            -------          ----             -------\n");
+    printf("\n\nStatus Codes: * valid route, > best route\n");
+    printf("Origin Codes: i IGP, e EGP, ? incomplete\n\n");
+    printf("   Prefix            Nexthop          Peer              AS Path\n");
+    printf("   ------            -------          ----              -------\n");
 	   
     _token = *token;
     for (int i = 0; i < MAX_REQUESTS; i++) {
@@ -110,9 +119,25 @@ PrintRoutes::get_v4_route_list_next_done(const XrlError& e,
 	return;
     }
     _count++;
-    //    for (int i=0; i< aspath->size
+
+    //XXX this should be used to indicate a route is valid
+    printf("*");
+
+    uint8_t best = (*best_and_origin)>>16;
+    switch (best) {
+    case 1:
+	printf(" ");
+	break;
+    case 2:
+	printf(">");
+	break;
+    default:
+	printf("?");
+    }
+
     AsPath asp((const uint8_t*)(&((*aspath)[0])), aspath->size());
-    printf("%-16s  %-15s  %-15s  %s ", net->str().c_str(), 
+
+    printf(" %-16s  %-15s  %-15s  %s ", net->str().c_str(), 
 	   nexthop->str().c_str(),
 	   peer_id->str().c_str(),
 	   asp.short_str().c_str());
