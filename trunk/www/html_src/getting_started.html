@@ -222,26 +222,26 @@ interfaces ("vif"s). In the majority of cases the interface name and vif
 name will be identical and will map to the name given to the interface
 by the operating system. A virtual interface is configured with the address
 or addresses that should be used. At each level in the configuration
-hierarchy ("interface", "vif" and "address") it is necessary to enable
-this part of the configuration.
+hierarchy ("interface", "vif" and "address") this part of the configuration
+is implicitly enabled.
 
 <PRE>
 interfaces {
     interface dc0 {
 	description: "data interface"
-	enabled: true
+	disable: false
 	/* default-system-config */
 	vif dc0 {
-	    enabled: true
+	    disable: false
 	    address 10.10.10.10 {
 		prefix-length: 24
 		broadcast: 10.10.10.255
-		enabled: true
+		disable: false
 	    }
 /*
 	    address 10:10:10:10:10:10:10:10 {
 		prefix-length: 64
-		enabled: true
+		disable: false
 	    }
 */
 	}
@@ -249,6 +249,10 @@ interfaces {
 }
 </PRE>
 
+<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+instead of "disable".
+
+<P>
 We recommend that you select the interfaces that you want to use on
 your system and configure them as above. If you are configuring an
 interface that is currently being used by the the system make sure
@@ -266,13 +270,23 @@ protocol family.
 
 <PRE>
 fea {
-    enable-unicast-forwarding4: true
-    /* enable-unicast-forwarding6: true */
+    unicast-forwarding4 {
+        disable: false
+    }
+
+    unicast-forwarding6 {
+        disable: false
+    }
 }
 </PRE>
 
-If IPv4 forwarding is required you will require the configuration
+If IPv4 and IPv6 forwarding are required you will require the configuration
 above.
+
+<P><U>Note</U>: Prior to XORP Release 1.1, the "enable-unicast-forwarding4"
+and "enable-unicast-forwarding6" flags were used instead to enable or disable
+the IPv4 and IPv6 forwarding.
+
 <P>
 Now that we have configured the interfaces and enabled forwarding we
 need to configure some routing protocols.
@@ -319,7 +333,7 @@ Static routes can be redistributed through the RIP protocol using RIP's
 
 In order to run RIP it is sufficient to specify the "interface"s, "vif"s
 and "address"es on which RIP is enabled. Remember that each "address"
-must be explicitly enabled.
+must be explicitly configured.
 
 <P>
 If you wish to announce routes then it is necessary to "export" the
@@ -351,7 +365,7 @@ protocols {
 	interface dc0 {
 	    vif dc0 {
 		address 10.10.10.10 {
-		    enabled: true
+		    disable: false
 		}
 	    }
 	}
@@ -359,6 +373,9 @@ protocols {
     }
 }
 </PRE>
+
+<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+instead of "disable".
 
 <H4>Border Gateway Protocol</H4>
 
@@ -385,7 +402,7 @@ protocols {
 	    peer-port: 179
 */
 	    /* holdtime: 120 */
-	    /* enabled: true */
+	    /* disable: false */
 
 	    /* Optionally enable other AFI/SAFI combinations */
 	    /* enable-ipv4-multicast */
@@ -415,6 +432,10 @@ protocols {
 }
 </PRE>
 
+<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+instead of "disable".
+
+<P>
 Currently BGP is not able to "export" routes from other routing
 protocols such as "static". It is however possible to originate routes
 using network statements such as in the above example.
@@ -425,28 +446,28 @@ using network statements such as in the above example.
 The MFEA must be configured if the XORP router is to be used for multicast
 routing. The MFEA for IPv4 and IPv6 are configured separately.
 <P>
-In the configuration we must explicitly enable the entity itself, and
+In the configuration we must explicitly configure the entity itself, and
 each "vif". The "traceoptions" section is used to explicitly enable
 log information that can be used for debugging purpose.
 
 <PRE>
 plumbing {
     mfea4 {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 	    }
 	}
 	interface register_vif {
 	    vif register_vif {
 		/* Note: this vif should be always enabled */
-		enabled: true
+		disable: false
 	    }
 	}
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
@@ -454,27 +475,31 @@ plumbing {
 
 plumbing {
     mfea6 {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 	    }
 	}
 	interface register_vif {
 	    vif register_vif {
 		/* Note: this vif should be always enabled */
-		enabled: true
+		disable: false
 	    }
 	}
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
 }
 </PRE>
 
+<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+instead of "disable".
+
+<P>
 Note that the interface/vif named "register_vif" is special.
 If PIM-SM is configured, then "register_vif" must be enabled
 in the MFEA.
@@ -488,22 +513,22 @@ therefore it should be enabled. IGMP and MLD are configured separately:
 IGMP is used for tracking IPv4 multicast members; MLD is used for tracking
 IPv6 multicast members.
 <P>
-In the configuration we must explicitly enable each entity and
+In the configuration we must explicitly configure each entity and
 each "vif". The "traceoptions" section is used to explicitly enable
 log information that can be used for debugging purpose.
 
 <PRE>
 protocols {
     igmp {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 	    }
 	}
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
@@ -511,36 +536,39 @@ protocols {
 
 protocols {
     mld {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 	    }
 	}
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
 }
 </PRE>
 
+<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+instead of "disable".
+
 <H4>Protocol Independent Multicast - Sparse Mode</H4>
 
 PIM-SM should be configured if the XORP router is to be used for
 multicast routing in PIM-SM domain. PIM-SM for IPv4 and IPv6 are
 configured separately. At minimum, the entity itself and the
-virtual interfaces should be enabled, and the mechanism for obtaining
+virtual interfaces should be configured, as well as the mechanism for obtaining
 the Candidate-RP set (either the Bootstrap mechanism, or a static-RP set).
 
 <PRE>
 protocols {
     pimsm4 {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 		/* dr-priority: 1 */
 		/* alternative-subnet 10.40.0.0/16 */
 	    }
@@ -548,7 +576,7 @@ protocols {
 	interface register_vif {
 	    vif register_vif {
 		/* Note: this vif should be always enabled */
-		enabled: true
+		disable: false
 	    }
 	}
 
@@ -562,7 +590,7 @@ protocols {
 	}
 
 	bootstrap {
-	    enabled: true
+	    disable: false
 	    cand-bsr {
 		scope-zone 224.0.0.0/4 {
 		    /* is-scope-zone: false */
@@ -584,14 +612,14 @@ protocols {
 
 	switch-to-spt-threshold {
 	    /* approx. 1K bytes/s (10Kbps) threshold */
-	    enabled: true
+	    disable: false
 	    interval-sec: 100
 	    bytes: 102400
 	}
 
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
@@ -599,10 +627,10 @@ protocols {
 
 protocols {
     pimsm6 {
-	enabled: true
+	disable: false
 	interface dc0 {
 	    vif dc0 {
-		enabled: true
+		disable: false
 		/* dr-priority: 1 */
 		/* alternative-subnet 40:40:40:40::/64 */
 	    }
@@ -610,7 +638,7 @@ protocols {
 	interface register_vif {
 	    vif register_vif {
 		/* Note: this vif should be always enabled */
-		enabled: true
+		disable: false
 	    }
 	}
 
@@ -624,7 +652,7 @@ protocols {
 	}
 
 	bootstrap {
-	    enabled: true
+	    disable: false
 	    cand-bsr {
 		scope-zone ff00::/8 {
 		    /* is-scope-zone: false */
@@ -646,20 +674,24 @@ protocols {
 
 	switch-to-spt-threshold {
 	    /* approx. 1K bytes/s (10Kbps) threshold */
-	    enabled: true
+	    disable: false
 	    interval-sec: 100
 	    bytes: 102400
 	}
 
 	traceoptions {
 	    flag all {
-		enabled: true
+		disable: false
 	    }
 	}
     }
 }
 </PRE>
 
+<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+instead of "disable".
+
+<P>
 A number of parameters have default values, therefore
 they don't have to be configured (those parameters are commented-out
 in the above sample configuration).
@@ -739,14 +771,14 @@ information from the underlying system (via the FEA), and to propagate
 it to the MRIB, so it can be used by multicast routing protocols
 such as PIM-SM. Typically, it is needed only if the unicast routing
 protocols (if any) on that router do not inject routes into the MRIB.
-Note that FIB2MRIB is disabled by default, therefore if it is needed
-it must be explicitly enabled.
 
 <PRE>
 protocols {
     fib2mrib {
-	enabled: true
+	disable: false
     }
 }
 </PRE>
 
+<p><u>Note</u>: Prior to XORP Release 1.1, the "enabled" flag was used
+instead of "disable".
