@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.7 2003/04/22 19:20:19 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.8 2003/06/11 23:22:57 atanu Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -342,7 +342,7 @@ DumpTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	return _parent->get_next_message(this);
     } else {
 	cp(36);
-	fprintf(stderr, "Dump: get_next_message\n");
+	debug_msg("Dump: get_next_message\n");
 	/* get_next_message is normally used so that the RibOut can cause
 	   the fanout table queue to drain clocked by transmit complete
 	   interrupts.  But with a dump table, it's not the RibOut that
