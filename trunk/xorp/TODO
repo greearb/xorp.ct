@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.4 2003/12/03 20:44:27 pavlin Exp $
+# $XORP: xorp/TODO,v 1.5 2004/06/08 22:52:59 pavlin Exp $
 #
 
 * Standardize the version string format return by the
@@ -23,5 +23,3 @@
 
 * Fix all file names.
   E.g. all names non-capital letters + numbers, and use underscores.
-
-* Add MD5 checksums for release tarballs.
