@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.13 2004/10/26 00:20:06 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.14 2004/11/05 00:48:18 bms Exp $"
 
 
 #include "fea_module.h"
@@ -442,6 +442,14 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
     fte.net().masked_addr().copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
+
+    // When deleting a route which points to a discard interface,
+    // pass the correct route type to the kernel.
+    IfTree& it = ftic().iftree();
+    IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
+    XLOG_ASSERT(ii != it.ifs().end());
+    if (ii->second.discard())
+	rtmsg->rtm_type = RTN_BLACKHOLE;
 
     string errmsg;
     if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
