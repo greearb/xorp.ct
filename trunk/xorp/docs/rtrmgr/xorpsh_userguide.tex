@@ -1,16 +1,38 @@
+%
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.21 2004/06/09 22:33:47 pavlin Exp $
+%
+
 \documentclass[11pt]{article}
-\usepackage{graphicx}
+
+%\usepackage[dvips]{changebar}
+
+\usepackage{subfigure}
+\usepackage{fullpage}
+\usepackage{setspace}
 \usepackage{times}
+\usepackage{latexsym}
+\usepackage{psfig}
+\usepackage{graphicx}
 \usepackage{xspace}
+\usepackage{color}
+\usepackage{amsmath}
 \usepackage{alltt}
 \usepackage{stmaryrd}
-\textwidth 6.5in
-\topmargin 0.0in
-\textheight 8.5in
-\headheight 0in
-\headsep 0in
-\oddsidemargin 0in
-\parskip 0in
+%\usepackage[dvipdf]{graphics}
+%\usepackage[dvips]{graphicx}
+%\usepackage{xorp}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\etc}{\emph{etc.}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+%\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+\newcommand{\comment}[1]{}
+
+% Changebar stuff
+% \newenvironment{colorcode}{\color{blue}}{}
+% \renewcommand{\cbstart}{\begin{colorcode}}
+% \renewcommand{\cbend}{\end{colorcode}}
 
 %\newcommand{\xorpsh}{\textsc{xorpsh}}
 \newcommand{\xorpsh}{{\sf\small xorpsh}\xspace}
@@ -18,16 +40,18 @@
 \title{XORP Command Line Interface User Guide\\
 Part 1: Command Structure \\
 \vspace{1ex}
-Version 1.0-RC}
+Version 1.0}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{November 6, 2003}
+\date{June 24, 2004}
+
 %\twocolumn
 \begin{document}
-\maketitle                            
+\maketitle
+
 \section{Introduction}
 To interact with a XORP router using the command line interface (CLI),
 a user runs \xorpsh.  This allows configuration of the router and
