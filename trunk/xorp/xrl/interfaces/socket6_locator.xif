@@ -1,0 +1,17 @@
+/**
+ * Interface for entity to help find suitable Xrl Target for creating
+ * a socket through the socket6/0.1 interface.
+ *
+ * This interface exists because the FEA may be distributed across
+ * multiple machines.  In this case there may be multiple Xrl Targets
+ * implementing the socket6/0.1 interface.  A process needs to be able
+ * to find the right Xrl Target to create the socket upon.
+ */
+interface socket6_locator/0.1 {
+    /**
+     * Find suitable socket serving Xrl Target for a particular
+     * interface address.
+     */
+    find_socket_server_for_addr	? local_addr:ipv6			\
+				-> xrl_target:txt
+}

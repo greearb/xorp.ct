@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_cmds.cc,v 1.1 2003/12/17 00:04:49 hodson Exp $"
 
 #include "fea_module.h"
 
@@ -26,6 +26,7 @@
 #include "xrl_socket_server.hh"
 
 #include "xrl/interfaces/socket4_user_xif.hh"
+#include "xrl/interfaces/socket6_user_xif.hh"
 
 XrlSocketCommandBase::XrlSocketCommandBase(const string& target)
     : _t(target)
@@ -37,24 +38,39 @@ XrlSocketCommandBase::~XrlSocketCommandBase()
 }
 
 // ----------------------------------------------------------------------------
-// Socket4UserSendRecvEvent
+// SocketUserSendRecvEvent
 
+template <>
 bool
-Socket4UserSendRecvEvent::execute(XrlSender&			xs,
-				  const CommandCallback&	cb)
+SocketUserSendRecvEvent<IPv4>::execute(XrlSender&		xs,
+				       const CommandCallback&	cb)
 {
     XrlSocket4UserV0p1Client c(&xs);
     return c.send_recv_event(target(),
 			     _sockid, _src_host, _src_port, _data, cb);
 }
 
+template <>
+bool
+SocketUserSendRecvEvent<IPv6>::execute(XrlSender&		xs,
+				       const CommandCallback&	cb)
+{
+    XrlSocket6UserV0p1Client c(&xs);
+    return c.send_recv_event(target(),
+			     _sockid, _src_host, _src_port, _data, cb);
+}
+
+template <typename A>
 string
-Socket4UserSendRecvEvent::str() const
+SocketUserSendRecvEvent<A>::str() const
 {
     return c_format("SendRecvEvent(%s, %s, %u, %d bytes)",
 		    _sockid.c_str(), _src_host.str().c_str(), _src_port,
 		    static_cast<int>(_data.size()));
 }
+
+template class SocketUserSendRecvEvent<IPv4>;
+template class SocketUserSendRecvEvent<IPv6>;
 
 // ----------------------------------------------------------------------------
 // Socket4UserSendConnectEvent
@@ -66,37 +82,66 @@ Socket4UserSendRecvEvent::str() const
 // ----------------------------------------------------------------------------
 // Socket4UserSendErrorEvent
 
+template <>
 bool
-Socket4UserSendErrorEvent::execute(XrlSender&			xs,
-				   const CommandCallback&	cb)
+SocketUserSendErrorEvent<IPv4>::execute(XrlSender&		xs,
+					const CommandCallback&	cb)
 {
     XrlSocket4UserV0p1Client c(&xs);
     return c.send_error_event(target(), _sockid, _error, _fatal, cb);
 }
 
+template <>
+bool
+SocketUserSendErrorEvent<IPv6>::execute(XrlSender&		xs,
+					const CommandCallback&	cb)
+{
+    XrlSocket6UserV0p1Client c(&xs);
+    return c.send_error_event(target(), _sockid, _error, _fatal, cb);
+}
+
+template <typename A>
 string
-Socket4UserSendErrorEvent::str() const
+SocketUserSendErrorEvent<A>::str() const
 {
     return c_format("SendErrorEvent(%s, \"%s\", fatal = %d)",
 		    _sockid.c_str(), _error.c_str(), _fatal);
 }
 
-// ----------------------------------------------------------------------------
-// Socket4UserSendCloseEvent
+template class SocketUserSendErrorEvent<IPv4>;
+template class SocketUserSendErrorEvent<IPv6>;
 
+// ----------------------------------------------------------------------------
+// SocketUserSendCloseEvent
+
+template <>
 bool
-Socket4UserSendCloseEvent::execute(XrlSender& xs, const CommandCallback& cb)
+SocketUserSendCloseEvent<IPv4>::execute(XrlSender&		xs,
+					const CommandCallback&	cb)
 {
     XrlSocket4UserV0p1Client c(&xs);
     return c.send_close_event(target(), _sockid, _reason, cb);
 }
 
+template <>
+bool
+SocketUserSendCloseEvent<IPv6>::execute(XrlSender&		xs,
+					const CommandCallback&	cb)
+{
+    XrlSocket6UserV0p1Client c(&xs);
+    return c.send_close_event(target(), _sockid, _reason, cb);
+}
+
+template <typename A>
 string
-Socket4UserSendCloseEvent::str() const
+SocketUserSendCloseEvent<A>::str() const
 {
     return c_format("SendCloseEvent(%s, \"%s\")",
 		    _sockid.c_str(), _reason.c_str());
 }
+
+template class SocketUserSendCloseEvent<IPv4>;
+template class SocketUserSendCloseEvent<IPv6>;
 
 
 // ----------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.30 2003/12/17 00:04:48 hodson Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.31 2004/01/15 19:12:22 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -57,6 +57,8 @@ xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 ### socket server libraries and related
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6userxif.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libsocketserverbase.a
 ### XORP misc libraries
@@ -68,8 +70,6 @@ xorp_fea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 # -- Sources and Linkage for xorp_fea_dummy
 xorp_fea_dummy_SOURCES	 = fea_dummy.cc
 xorp_fea_dummy_LDADD	 = $(noinst_LIBRARIES)
-
-
 
 ### FEA XRL libraries
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
@@ -94,6 +94,8 @@ xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 ### socket server libraries and releated
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.a
 ### XORP misc libraries
@@ -130,6 +132,8 @@ test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 ### socket server libraries and releated
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6userxif.a
+test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6xif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libsocketserverbase.a
 ### XORP misc libraries
@@ -159,6 +163,8 @@ test_xrl_sockets4_udp_SOURCES += xrl_socket_server.cc
 
 test_xrl_sockets4_udp_LDADD    = $(top_builddir)/xrl/interfaces/libsocket4userxif.a
 test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/interfaces/libsocket4xif.a
+test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/interfaces/libsocket6userxif.a
+test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/interfaces/libsocket6xif.a
 test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/targets/libsocketserverbase.a
 test_xrl_sockets4_udp_LDADD   += $(top_builddir)/xrl/targets/libtestsocket4.a

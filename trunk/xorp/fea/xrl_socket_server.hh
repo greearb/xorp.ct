@@ -155,6 +155,73 @@ public:
 					      const string&	optname,
 					      uint32_t&		optval);
 
+    XrlCmdError socket6_0_1_tcp_open_and_bind(const string&	creator,
+					      const IPv6&	local_addr,
+					      const uint32_t&	local_port,
+					      string&		sockid);
+
+    XrlCmdError socket6_0_1_udp_open_and_bind(const string&	creator,
+					      const IPv6&	local_addr,
+					      const uint32_t&	local_port,
+					      string&		sockid);
+
+    XrlCmdError socket6_0_1_udp_open_bind_join(const string&	creator,
+					       const IPv6&	local_addr,
+					       const uint32_t&	local_port,
+					       const IPv6&	mcast_addr,
+					       const uint32_t&	ttl,
+					       const bool&	reuse,
+					       string&		sockid);
+
+    XrlCmdError socket6_0_1_tcp_open_bind_connect(const string&	creator,
+						  const IPv6&	local_addr,
+						  const uint32_t& local_port,
+						  const IPv6&	remote_addr,
+						  const uint32_t& remote_port,
+						  string&	sockid);
+
+    XrlCmdError socket6_0_1_udp_open_bind_connect(const string&	creator,
+						  const IPv6&	local_addr,
+						  const uint32_t& local_port,
+						  const IPv6&	remote_addr,
+						  const uint32_t& remote_port,
+						  string&	sockid);
+
+    XrlCmdError socket6_0_1_close(const string& sockid);
+
+    XrlCmdError socket6_0_1_tcp_listen(const string&	sockid,
+				       const uint32_t&	backlog);
+
+    XrlCmdError socket6_0_1_send(const string&		sockid,
+				 const vector<uint8_t>&	data);
+
+    XrlCmdError socket6_0_1_send_with_flags(const string&	sockid,
+					    const vector<uint8_t>& data,
+					    const bool&		out_of_band,
+					    const bool&		end_of_record,
+					    const bool&		end_of_file);
+
+    XrlCmdError socket6_0_1_send_to(const string&		sockid,
+				    const IPv6&			remote_addr,
+				    const uint32_t&		remote_port,
+				    const vector<uint8_t>&	data);
+
+    XrlCmdError socket6_0_1_send_to_with_flags(const string&	sockid,
+					       const IPv6&	remote_addr,
+					       const uint32_t&	remote_port,
+					       const vector<uint8_t>&	data,
+					       const bool&	out_of_band,
+					       const bool&	end_of_record,
+					       const bool&	end_of_file);
+
+    XrlCmdError socket6_0_1_set_socket_option(const string&	sockid,
+					      const string&	optname,
+					      const uint32_t&	optval);
+
+    XrlCmdError socket6_0_1_get_socket_option(const string&	sockid,
+					      const string&	optname,
+					      uint32_t&		optval);
+
     const string& instance_name() const;
 
     void xrl_router_ready(const string& tgtname);
@@ -245,6 +312,9 @@ protected:
 	RemoteSocket(const RemoteSocket& rs);
 	RemoteSocket& operator=(const RemoteSocket& rs);
     };
+
+    void push_socket(const ref_ptr<RemoteSocket<IPv4> >& s);
+    void push_socket(const ref_ptr<RemoteSocket<IPv6> >& s);
 
 protected:
     typedef list<ref_ptr<RemoteSocket<IPv4> > > V4Sockets;

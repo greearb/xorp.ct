@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.34 2004/01/15 19:12:23 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.35 2004/01/16 19:06:32 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1573,6 +1573,26 @@ XrlFeaTarget::raw_packet_0_1_unregister_vif_receiver(
 XrlCmdError
 XrlFeaTarget::socket4_locator_0_1_find_socket_server_for_addr(
 							      const IPv4& addr,
+							      string&	  svr
+							      )
+{
+    // If we had multiple socket servers we'd look for the right one
+    // to use.  At the present time we only have one so this is the
+    // one to return
+    if (_xss == 0) {
+	return XrlCmdError::COMMAND_FAILED("Socket Server is not present.");
+    }
+    if (_xss->status() != RUNNING) {
+	return XrlCmdError::COMMAND_FAILED("Socket Server not running.");
+    }
+    UNUSED(addr);
+    svr = _xss->instance_name();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_locator_0_1_find_socket_server_for_addr(
+							      const IPv6& addr,
 							      string&	  svr
 							      )
 {

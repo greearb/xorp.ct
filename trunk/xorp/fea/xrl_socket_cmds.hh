@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/fea/xrl_socket_cmds.hh,v 1.1 2003/12/17 00:04:49 hodson Exp $
 
 #ifndef __FEA_XRL_SOCKET_CMDS_HH__
 #define __FEA_XRL_SOCKET_CMDS_HH__
@@ -21,6 +21,7 @@
 #include <list>
 
 #include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
 
 class XrlSocketServer;
 class XrlSender;
@@ -42,12 +43,13 @@ protected:
     string _t;
 };
 
-class Socket4UserSendRecvEvent : public XrlSocketCommandBase {
+template <typename A>
+class SocketUserSendRecvEvent : public XrlSocketCommandBase {
 public:
-    inline Socket4UserSendRecvEvent(const string& tgt, const string& sockid)
+    inline SocketUserSendRecvEvent(const string& tgt, const string& sockid)
 	: XrlSocketCommandBase(tgt), _sockid(sockid), _src_port(0xffffffff)
     {}
-    inline void set_source_host(IPv4 host)		{ _src_host = host; }
+    inline void set_source_host(const A& host)		{ _src_host = host; }
     inline void set_source_port(uint16_t port)		{ _src_port = port; }
     inline vector<uint8_t>& data()			{ return _data; }
     inline const vector<uint8_t>& data() const		{ return _data; }
@@ -57,19 +59,20 @@ public:
 
 private:
     string		_sockid;
-    IPv4		_src_host;
+    A			_src_host;
     uint32_t		_src_port;
     vector<uint8_t>	_data;
 };
 
-class Socket4UserSendConnectEvent : public XrlSocketCommandBase {
+template <typename A>
+class SocketUserSendConnectEvent : public XrlSocketCommandBase {
 public:
-    inline Socket4UserSendConnectEvent(XrlSocketServer* ss,
-				       const string&	tgt,
-				       const string&	sockid,
-				       IPv4		host,
-				       uint16_t		port,
-				       const string&	new_sockid)
+    inline SocketUserSendConnectEvent(XrlSocketServer* ss,
+				      const string&	tgt,
+				      const string&	sockid,
+				      const A&		host,
+				      uint16_t		port,
+				      const string&	new_sockid)
 	: XrlSocketCommandBase(tgt), _ss(ss), _sockid(sockid),
 	  _src_host(host), _src_port(port), _new_sockid(new_sockid)
     {}
@@ -80,17 +83,18 @@ public:
 private:
     XrlSocketServer*	_ss;
     string		_sockid;
-    IPv4		_src_host;
+    A			_src_host;
     uint32_t		_src_port;
     string		_new_sockid;
 };
 
-class Socket4UserSendErrorEvent : public XrlSocketCommandBase {
+template <typename A>
+class SocketUserSendErrorEvent : public XrlSocketCommandBase {
 public:
-    inline Socket4UserSendErrorEvent(const string&	tgt,
-				     const string&	sockid,
-				     const string&	error,
-				     bool		fatal)
+    inline SocketUserSendErrorEvent(const string&	tgt,
+				    const string&	sockid,
+				    const string&	error,
+				    bool		fatal)
 	: XrlSocketCommandBase(tgt), _sockid(sockid),
 	  _error(error), _fatal(fatal)
     {}
@@ -103,11 +107,12 @@ private:
     bool	_fatal;
 };
 
-class Socket4UserSendCloseEvent : public XrlSocketCommandBase {
+template <typename A>
+class SocketUserSendCloseEvent : public XrlSocketCommandBase {
 public:
-    inline Socket4UserSendCloseEvent(const string&	tgt,
-				     const string&	sockid,
-				     const string&	reason)
+    inline SocketUserSendCloseEvent(const string&	tgt,
+				    const string&	sockid,
+				    const string&	reason)
 	: XrlSocketCommandBase(tgt), _sockid(sockid), _reason(reason)
     {}
     bool execute(XrlSender& xs, const CommandCallback& cb);

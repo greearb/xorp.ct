@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.22 2004/02/17 19:47:09 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.23 2004/02/17 23:33:56 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -37,6 +37,7 @@ tgt_files		+= test_fea_ifmgr_mirror.tgt
 tgt_files		+= test_finder_events.tgt
 tgt_files		+= test_peer.tgt
 tgt_files		+= test_socket4.tgt
+tgt_files		+= test_socket6.tgt
 tgt_files		+= xorp_if_mib.tgt
 tgt_files		+= xorpsh.tgt
 
@@ -76,6 +77,7 @@ noinst_LIBRARIES	+= libtestfeaifmgrmirrorbase.a
 noinst_LIBRARIES	+= libtestfindereventsbase.a
 noinst_LIBRARIES	+= libtestpeerbase.a
 noinst_LIBRARIES	+= libtestsocket4.a
+noinst_LIBRARIES	+= libtestsocket6.a
 noinst_LIBRARIES	+= libxorpifmibbase.a
 noinst_LIBRARIES	+= libxorpshbase.a
 
@@ -121,7 +123,8 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif		\
 		$(INTERFACES_DIR)/fti.xif				\
 		$(INTERFACES_DIR)/fea_rawpkt.xif			\
-		$(INTERFACES_DIR)/socket4_locator.xif
+		$(INTERFACES_DIR)/socket4_locator.xif			\
+		$(INTERFACES_DIR)/socket6_locator.xif
 
 # FEA IfMgr Mirror
 libfeaifmgrmirrorbase_a_SOURCES = fea_ifmgr_mirror_base.hh		\
@@ -214,8 +217,8 @@ $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 libripngbase_a_SOURCES = ripng_base.hh ripng_base.cc
 $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/finder_event_observer.xif		\
-		$(INTERFACES_DIR)/ripng.xif
+		$(INTERFACES_DIR)/ripng.xif				\
+		$(INTERFACES_DIR)/socket6_user.xif
 
 # RTRMGR
 librtrmgrbase_a_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
@@ -229,7 +232,8 @@ libsocketserverbase_a_SOURCES += socket_server_base.cc
 $(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
-		$(INTERFACES_DIR)/socket4.xif
+		$(INTERFACES_DIR)/socket4.xif				\
+		$(INTERFACES_DIR)/socket6.xif
 
 # StaticRoutes
 libstaticroutesbase_a_SOURCES = static_routes_base.hh static_routes_base.cc
@@ -267,6 +271,12 @@ libtestsocket4_a_SOURCES = test_socket4_base.hh test_socket4_base.cc
 $(srcdir)/test_socket4_base.hh $(srcdir)/test_socket4_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/socket4_user.xif
+
+# TEST SOCKET6
+libtestsocket6_a_SOURCES = test_socket6_base.hh test_socket6_base.cc
+$(srcdir)/test_socket6_base.hh $(srcdir)/test_socket6_base.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/socket6_user.xif
 
 # XORP IF MIB
 libxorpifmibbase_a_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc

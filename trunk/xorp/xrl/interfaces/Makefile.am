@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.13 2004/02/12 20:02:43 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.14 2004/02/17 23:25:10 pavlin Exp $
 ##
 
 ###############################################################################
@@ -141,6 +141,18 @@ libsocket4locatorxif_a_SOURCES = socket4_locator_xif.hh socket4_locator_xif.cc
 # IPv4 Socket User Interface
 noinst_LIBRARIES += libsocket4userxif.a
 libsocket4userxif_a_SOURCES = socket4_user_xif.hh socket4_user_xif.cc
+
+# IPv6 Socket Interface
+noinst_LIBRARIES += libsocket6xif.a
+libsocket6xif_a_SOURCES = socket6_xif.hh socket6_xif.cc
+
+# IPv6 Socket Locator Interface
+noinst_LIBRARIES += libsocket6locatorxif.a
+libsocket6locatorxif_a_SOURCES = socket6_locator_xif.hh socket6_locator_xif.cc
+
+# IPv6 Socket User Interface
+noinst_LIBRARIES += libsocket6userxif.a
+libsocket6userxif_a_SOURCES = socket6_user_xif.hh socket6_user_xif.cc
 
 # StaticRoutes Interface
 noinst_LIBRARIES += libstaticroutesxif.a

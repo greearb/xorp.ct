@@ -16,6 +16,7 @@
 
 #include "fea_module.h"
 
+#include "config.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/status_codes.h"
@@ -64,6 +65,34 @@ public:
 private:
     XrlSocketServer* _p;
 };
+
+
+// ----------------------------------------------------------------------------
+// Utility methods
+
+/**
+ * Extract IP port from sockaddr.
+ */
+template <typename A>
+inline uint16_t sockaddr_ip_port(const sockaddr& sa);
+
+template <>
+inline uint16_t
+sockaddr_ip_port<IPv4>(const sockaddr& sa)
+{
+    XLOG_ASSERT(sa.sa_family == IPv4::af());
+    const sockaddr_in& sin = reinterpret_cast<const sockaddr_in&>(sa);
+    return ntohs(sin.sin_port);
+}
+
+template <>
+inline uint16_t
+sockaddr_ip_port<IPv6>(const sockaddr& sa)
+{
+    XLOG_ASSERT(sa.sa_family == IPv6::af());
+    const sockaddr_in6& sin6 = reinterpret_cast<const sockaddr_in6&>(sa);
+    return ntohs(sin6.sin6_port);
+}
 
 
 // ----------------------------------------------------------------------------
@@ -280,37 +309,32 @@ XrlSocketServer::RemoteSocket<A>::data_sel_cb(int fd, SelectorMask)
     // Create command.  We use buffer associated with this command type
     // to read data into (to avoid a copy).
     //
-    Socket4UserSendRecvEvent* cmd =
-	new Socket4UserSendRecvEvent(owner().tgt_name(), sockid());
+    SocketUserSendRecvEvent<A>* cmd =
+	new SocketUserSendRecvEvent<A>(owner().tgt_name(), sockid());
 
     struct sockaddr sa;
     socklen_t sa_len = sizeof(sa);
 
     // XXX buffer is overprovisioned for normal case and size hard-coded...
     // It get's resized a little later on to amount of data read.
-    cmd->data().resize(8000);
+    cmd->data().resize(64000);
     ssize_t rsz = recvfrom(fd, &cmd->data()[0], cmd->data().size(), 0,
 			   &sa, &sa_len);
 
     if (rsz < 0) {
 	delete cmd;
 	ref_ptr<XrlSocketCommandBase> ecmd = new
-	    Socket4UserSendErrorEvent(owner().tgt_name(),
-				      sockid(), strerror(errno), false);
+	    SocketUserSendErrorEvent<IPv4>(owner().tgt_name(),
+					   sockid(), strerror(errno), false);
 	owner().enqueue(ecmd);
 	return;
     }
 
     cmd->data().resize(rsz);
 
-    XLOG_ASSERT(sa.sa_family == AF_INET);
-    const sockaddr_in& sin = reinterpret_cast<const sockaddr_in&>(sa);
-
-    IPv4 	src_addr(sin);
-    uint16_t 	src_port(ntohs(sin.sin_port));
-
-    cmd->set_source_host(src_addr);
-    cmd->set_source_port(src_port);
+    XLOG_ASSERT(sa.sa_family == A::af());
+    cmd->set_source_host(sa);
+    cmd->set_source_port(sockaddr_ip_port<A>(sa));
 
     owner().enqueue(cmd);
 }
@@ -328,6 +352,7 @@ XrlSocketServer::RemoteSocket<A>::set_connect_recv_enable(bool en)
     }
 }
 
+
 template <typename A>
 void
 XrlSocketServer::RemoteSocket<A>::connect_sel_cb(int fd, SelectorMask)
@@ -339,22 +364,21 @@ XrlSocketServer::RemoteSocket<A>::connect_sel_cb(int fd, SelectorMask)
     int afd = accept(_fd, sa, &sa_len);
     if (afd < 0) {
 	ref_ptr<XrlSocketCommandBase*> ecmd = new
-	    Socket4UserSendErrorEvent(owner()->tgt_name(),
-				      sockid(), strerror(errno), false);
+	    SocketUserSendErrorEvent<A>(owner()->tgt_name(),
+					sockid(), strerror(errno), false);
 	owner().enqueue(ecmd);
 	return;
     }
 
-    XLOG_ASSERT(sa.sa_family == AF_INET);
-    const sockaddr_in& sin = reinterpret_cast<const sockaddr_in&>(sa);
-    uint16_t sin_port = ntohs(sin.sin_port);
+    XLOG_ASSERT(sa.sa_family == A::af());
 
-    _ss._v4sockets.push_back(new RemoteSocket<IPv4>(_ss, owner(), afd, sin));
+    _ss.push_socket(new RemoteSocket<A>(_ss, owner(), afd, sa));
 
     ref_ptr<XrlSocketCommandBase*> cmd =
-	new Socket4UserSendConnectEvent(&_ss, _owner.tgt_name(),
-					_sockid, sin, sin_port,
-					_v4sockets.back()->sockid());
+	new SocketUserSendConnectEvent<A>(&_ss, _owner.tgt_name(),
+					  _sockid, sa,
+					  sockaddr_ip_port<A>(sa),
+					  _v4sockets.back()->sockid());
     owner().enqueue(cmd);
 }
 
@@ -398,6 +422,18 @@ XrlSocketServer::reject_connection(const string& sockid)
 	    return;
 	}
     }
+}
+
+void
+XrlSocketServer::push_socket(const ref_ptr<RemoteSocket<IPv4> >& rs)
+{
+    _v4sockets.push_back(rs);
+}
+
+void
+XrlSocketServer::push_socket(const ref_ptr<RemoteSocket<IPv6> >& rs)
+{
+    _v6sockets.push_back(rs);
 }
 
 // ----------------------------------------------------------------------------
@@ -995,20 +1031,483 @@ XrlSocketServer::socket4_0_1_get_socket_option(const string&	/* sockid */,
 
 
 // ----------------------------------------------------------------------------
+// socket6/0.1 implementation
+
+static bool
+valid_addr_port(const AddressTableBase&	atable,
+		const IPv6&		addr,
+		const uint32_t&		port,
+		string&			err)
+{
+    if (atable.address_valid(addr) == false) {
+	err = "Invalid Address.";
+	return false;
+    }
+    if (port > 0xffff) {
+	err = "Port out of range.";
+	return false;
+    }
+    return true;
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_tcp_open_and_bind(const string&	creator,
+					       const IPv6&	local_addr,
+					       const uint32_t&	local_port,
+					       string&		sockid)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    string err;
+    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    in6_addr ia;
+    local_addr.copy_out(ia);
+    int fd = comm_bind_tcp6(&ia, htons(local_port));
+    if (fd <= 0) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    RemoteSocketOwner* rso = find_or_create_owner(creator);
+    if (rso == 0) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Could not create owner");
+    }
+    _v6sockets.push_back(new RemoteSocket<IPv6>(*this, *rso, fd, local_addr));
+    sockid = _v6sockets.back()->sockid();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_udp_open_and_bind(const string&	creator,
+					       const IPv6&	local_addr,
+					       const uint32_t&	local_port,
+					       string&		sockid)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    string err;
+    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    in6_addr ia;
+    local_addr.copy_out(ia);
+    int fd = comm_bind_udp6(&ia, htons(local_port));
+    if (fd <= 0) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    RemoteSocketOwner* rso = find_or_create_owner(creator);
+    if (rso == 0) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Could not create owner");
+    }
+    _v6sockets.push_back(new RemoteSocket<IPv6>(*this, *rso, fd, local_addr));
+    _v6sockets.back()->set_data_recv_enable(true);
+    sockid = _v6sockets.back()->sockid();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
+						const IPv6&	local_addr,
+						const uint32_t&	local_port,
+						const IPv6&	mcast_addr,
+						const uint32_t&	ttl,
+						const bool&	reuse,
+						string&		sockid)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    string err;
+    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    uint32_t pif_index = _atable.address_pif_index(local_addr);
+    if (pif_index == 0) {
+	return XrlCmdError::COMMAND_FAILED("Could not find interface index "
+					   "associated with address.");
+    }
+
+    in6_addr grp;
+    mcast_addr.copy_out(grp);
+
+    int fd = comm_bind_join_udp6(&grp, pif_index, htons(local_port), reuse);
+    if (fd <= 0) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+    if (comm_set_iface6(fd, pif_index) != XORP_OK) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Setting interface.");
+    }
+    if (comm_set_ttl(fd, ttl) != XORP_OK) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Setting TTL failed.");
+    }
+    if (comm_set_loopback(fd, 0) != XORP_OK) {
+	XLOG_WARNING("Could not turn off loopback.");
+    }
+
+    RemoteSocketOwner* rso = find_or_create_owner(creator);
+    if (rso == 0) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Could not create owner.");
+    }
+    _v6sockets.push_back(new RemoteSocket<IPv6>(*this, *rso, fd, local_addr));
+    _v6sockets.back()->set_data_recv_enable(true);
+    sockid = _v6sockets.back()->sockid();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_tcp_open_bind_connect(
+    const string&	creator,
+    const IPv6&		local_addr,
+    const uint32_t&	local_port,
+    const IPv6&		remote_addr,
+    const uint32_t&	remote_port,
+    string&		sockid
+    )
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    string err;
+    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    in6_addr ia;
+    local_addr.copy_out(ia);
+
+    int fd = comm_bind_tcp6(&ia, htons(local_port));
+    if (fd <= 0) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    in6_addr ra;
+    remote_addr.copy_out(ra);
+    if (comm_sock_connect6(fd, &ra, htons(remote_port)) != XORP_OK) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Connect failed.");
+    }
+
+    RemoteSocketOwner* rso = find_or_create_owner(creator);
+    if (rso == 0) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Could not create owner");
+    }
+    _v6sockets.push_back(new RemoteSocket<IPv6>(*this, *rso, fd, local_addr));
+    _v6sockets.back()->set_data_recv_enable(true);
+    sockid = _v6sockets.back()->sockid();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_udp_open_bind_connect(
+    const string&	creator,
+    const IPv6&		local_addr,
+    const uint32_t& 	local_port,
+    const IPv6&		remote_addr,
+    const uint32_t&	remote_port,
+    string&		sockid
+    )
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    string err;
+    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    in6_addr ia;
+    local_addr.copy_out(ia);
+
+    in6_addr ra;
+    remote_addr.copy_out(ra);
+
+    int fd = comm_bind_connect_udp6(&ia, htons(local_port),
+				    &ra, htons(remote_port));
+    if (fd <= 0) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    RemoteSocketOwner* rso = find_or_create_owner(creator);
+    if (rso == 0) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Could not create owner");
+    }
+    _v6sockets.push_back(new RemoteSocket<IPv6>(*this, *rso, fd, local_addr));
+    _v6sockets.back()->set_data_recv_enable(true);
+    sockid = _v6sockets.back()->sockid();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_close(const string& sockid)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    V6Sockets::iterator i6;
+    for (i6 = _v6sockets.begin(); i6 != _v6sockets.end(); ++i6) {
+	RemoteSocket<IPv6>* rs = i6->get();
+	if (rs->sockid() == sockid) {
+	    _v6sockets.erase(i6);
+	    return XrlCmdError::OKAY();
+	}
+    }
+    return XrlCmdError::COMMAND_FAILED("Socket not found");
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_tcp_listen(const string&	sockid,
+					const uint32_t&	backlog)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    V6Sockets::const_iterator ci;
+    for (ci = _v6sockets.begin(); ci != _v6sockets.end(); ++ci) {
+	RemoteSocket<IPv6>* rs = ci->get();
+	if (rs->sockid() == sockid) {
+	    int x = listen(rs->fd(), backlog);
+	    if (x == 0) {
+		return XrlCmdError::OKAY();
+	    }
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    }
+    return XrlCmdError::COMMAND_FAILED("Socket not found");
+}
+
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_send(
+    const string&		sockid,
+    const vector<uint8_t>&	data
+    )
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    V6Sockets::const_iterator ci;
+    for (ci = _v6sockets.begin(); ci != _v6sockets.end(); ++ci) {
+	RemoteSocket<IPv6>* rs = ci->get();
+	if (rs->sockid() == sockid) {
+	    int out = send(rs->fd(), &data[0], data.size(), 0);
+	    if (out == (int)data.size()) {
+		return XrlCmdError::OKAY();
+	    }
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    }
+    return XrlCmdError::COMMAND_FAILED("Socket not found");
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_send_with_flags(
+    const string&		sockid,
+    const vector<uint8_t>& 	data,
+    const bool&			out_of_band,
+    const bool&			end_of_record,
+    const bool&			end_of_file
+    )
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    V6Sockets::const_iterator ci;
+    for (ci = _v6sockets.begin(); ci != _v6sockets.end(); ++ci) {
+	RemoteSocket<IPv6>* rs = ci->get();
+	if (rs->sockid() != sockid)
+	    continue;
+
+	int flags = 0;
+#ifdef MSG_OOB
+	if (out_of_band)
+	    flags |= MSG_OOB;
+#else
+	if (out_of_band)
+	    XLOG_WARNING("sendto with end_of_record, "
+			 "but platform has no MSG_OOB\n");
+#endif
+
+#ifdef MSG_EOR
+	if (end_of_record)
+	    flags |= MSG_EOR;
+#else
+	if (end_of_file)
+	    XLOG_WARNING("sendto with end_of_record, "
+			 "but platform has no MSG_EOR\n");
+#endif
+
+#ifdef MSG_EOF
+	if (end_of_file)
+	    flags |= MSG_EOF;
+#else
+	if (end_of_file)
+	    XLOG_WARNING("sendto with end_of_file, "
+			 "but platform has no MSG_EOF\n");
+#endif
+
+	int out = send(rs->fd(), &data[0], data.size(), flags);
+	if (out == (int)data.size()) {
+	    return XrlCmdError::OKAY();
+	}
+	return XrlCmdError::COMMAND_FAILED(strerror(errno));
+    }
+    return XrlCmdError::COMMAND_FAILED("Socket not found");
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_send_to(const string&		sockid,
+				     const IPv6&		remote_addr,
+				     const uint32_t&		remote_port,
+				     const vector<uint8_t>&	data)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    V6Sockets::const_iterator ci;
+    for (ci = _v6sockets.begin(); ci != _v6sockets.end(); ++ci) {
+	RemoteSocket<IPv6>* rs = ci->get();
+	if (rs->sockid() == sockid) {
+	    sockaddr_in6 sai;
+	    remote_addr.copy_out(sai);
+	    if (remote_port > 0xffff) {
+		return XrlCmdError::COMMAND_FAILED("Port out of range.");
+	    }
+	    sai.sin6_port = htons(remote_port);
+	    int out = sendto(rs->fd(), &data[0], data.size(), 0,
+			     reinterpret_cast<const sockaddr*>(&sai),
+			     sizeof(sai));
+
+	    if (out == (int)data.size()) {
+		return XrlCmdError::OKAY();
+	    }
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    }
+    return XrlCmdError::COMMAND_FAILED("Socket not found");
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_send_to_with_flags(const string&	sockid,
+						const IPv6&	remote_addr,
+						const uint32_t&	remote_port,
+						const vector<uint8_t>&	data,
+						const bool&	out_of_band,
+						const bool&	end_of_record,
+						const bool&	end_of_file)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    V6Sockets::const_iterator ci;
+    for (ci = _v6sockets.begin(); ci != _v6sockets.end(); ++ci) {
+	RemoteSocket<IPv6>* rs = ci->get();
+	if (rs->sockid() != sockid)
+	    continue;
+
+	sockaddr_in6 sai;
+	remote_addr.copy_out(sai);
+	if (remote_port > 0xffff) {
+	    return XrlCmdError::COMMAND_FAILED("Port out of range.");
+	}
+	sai.sin6_port = htons(static_cast<uint16_t>(remote_port));
+
+	int flags = 0;
+#ifdef MSG_OOB
+	if (out_of_band)
+	    flags |= MSG_OOB;
+#else
+	if (out_of_band)
+	    XLOG_WARNING("sendto with end_of_record, "
+			 "but platform has no MSG_OOB\n");
+#endif
+
+#ifdef MSG_EOR
+	if (end_of_record)
+	    flags |= MSG_EOR;
+#else
+	if (end_of_file)
+	    XLOG_WARNING("sendto with end_of_record, "
+			 "but platform has no MSG_EOR\n");
+#endif
+
+#ifdef MSG_EOF
+	if (end_of_file)
+	    flags |= MSG_EOF;
+#else
+	if (end_of_file)
+	    XLOG_WARNING("sendto with end_of_file, "
+			 "but platform has no MSG_EOF\n");
+#endif
+	int out = sendto(rs->fd(), &data[0], data.size(), flags,
+			 reinterpret_cast<const sockaddr*>(&sai),
+			 sizeof(sai));
+	if (out == (int)data.size()) {
+	    return XrlCmdError::OKAY();
+	}
+	return XrlCmdError::COMMAND_FAILED(strerror(errno));
+    }
+    return XrlCmdError::COMMAND_FAILED("Socket not found");
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_set_socket_option(const string&	/* sockid */,
+					       const string&	/* optname */,
+					       const uint32_t&	/* optval */)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    return XrlCmdError::COMMAND_FAILED("Not implemented");
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_get_socket_option(const string&	/* sockid */,
+					       const string&	/* optname */,
+					       uint32_t&	/* optval */)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    return XrlCmdError::COMMAND_FAILED("Not implemented");
+}
+
+
+// ----------------------------------------------------------------------------
 // XrlSocketServer AddressTableEventObserver methods
 
 void
 XrlSocketServer::invalidate_address(const IPv4& addr, const string& why)
 {
+    // This code is copied to:
+    // 			invalidate_address(const IPv6&, const string&)
     V4Sockets::iterator i = _v4sockets.begin();
     while (i != _v4sockets.end()) {
 	ref_ptr<RemoteSocket<IPv4> > rp4 = *i;
 	if (rp4->addr_is(addr)) {
 	    RemoteSocketOwner& o = rp4->owner();
 	    o.enqueue(new
-		      Socket4UserSendCloseEvent(o.tgt_name().c_str(),
-						rp4->sockid(),
-						why));
+		      SocketUserSendCloseEvent<IPv4>(o.tgt_name().c_str(),
+						     rp4->sockid(),
+						     why));
 	    _v4sockets.erase(i++);
 	    continue;
 	}
@@ -1017,10 +1516,24 @@ XrlSocketServer::invalidate_address(const IPv4& addr, const string& why)
 }
 
 void
-XrlSocketServer::invalidate_address(const IPv6&, const string&)
+XrlSocketServer::invalidate_address(const IPv6& addr, const string& why)
 {
-    XLOG_ERROR("Not implemented.");
-    // XXX Copy IPv4 code and s/4/6/.
+    // This code is copied from:
+    // 		invalidate_address(const IPv4&, const string&)
+    V6Sockets::iterator i = _v6sockets.begin();
+    while (i != _v6sockets.end()) {
+	ref_ptr<RemoteSocket<IPv6> > rp6 = *i;
+	if (rp6->addr_is(addr)) {
+	    RemoteSocketOwner& o = rp6->owner();
+	    o.enqueue(new
+		      SocketUserSendCloseEvent<IPv6>(o.tgt_name().c_str(),
+						     rp6->sockid(),
+						     why));
+	    _v6sockets.erase(i++);
+	    continue;
+	}
+	++i;
+    }
 }
 
 

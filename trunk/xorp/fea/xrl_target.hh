@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.24 2004/01/15 19:12:23 hodson Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.25 2004/01/16 19:06:32 hodson Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -696,6 +696,12 @@ public:
     XrlCmdError socket4_locator_0_1_find_socket_server_for_addr(
 	// Input value
 	const IPv4& addr,
+	// Output value
+	string&	xrl_target);
+
+    XrlCmdError socket6_locator_0_1_find_socket_server_for_addr(
+	// Input value
+	const IPv6& addr,
 	// Output value
 	string&	xrl_target);
 
