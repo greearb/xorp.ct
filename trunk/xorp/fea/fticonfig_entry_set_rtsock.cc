@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.3 2003/05/20 23:25:13 atanu Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.4 2003/05/21 00:46:44 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -128,15 +128,19 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     case AF_INET:
 	rtm->rtm_msglen = sizeof(*rtm) + 3 * sizeof(struct sockaddr_in);
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
-	sin_gateway = sin_dst + sizeof(struct sockaddr_in);
-	sin_netmask = sin_gateway + sizeof(struct sockaddr_in);
+	sin_gateway = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in),
+				  struct sockaddr_in *);
+	sin_netmask = ADD_POINTER(sin_gateway, sizeof(struct sockaddr_in),
+				  struct sockaddr_in *);
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
 	rtm->rtm_msglen = sizeof(*rtm) + 3 * sizeof(struct sockaddr_in6);
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
-	sin_gateway = sin_dst + sizeof(struct sockaddr_in6);
-	sin_netmask = sin_gateway + sizeof(struct sockaddr_in6);
+	sin_gateway = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in6),
+				  struct sockaddr_in *);
+	sin_netmask = ADD_POINTER(sin_gateway, sizeof(struct sockaddr_in6),
+				  struct sockaddr_in *);
 	break;
 #endif // HAVE_IPV6
     default:
@@ -156,7 +160,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     rtm->rtm_flags |= RTF_PROTO1;	// Mark this as a XORP route
     rtm->rtm_pid = rs.pid();
     rtm->rtm_seq = rs.seqno();
-    
+
     // Copy the destination, the gateway, and the netmask addresses
     fte.net().masked_addr().copy_out(*sin_dst);
     fte.gateway().copy_out(*sin_gateway);
@@ -166,7 +170,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	// gateway_dl.sdl_index = ifindex(fte.vifname());
     }
     fte.net().netmask().copy_out(*sin_netmask);
-    
+
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("error writing to routing socket: %s", strerror(errno));
 	return false;
@@ -202,7 +206,8 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
 	if (fte.is_host_route()) {
 	    rtm->rtm_msglen += sizeof(struct sockaddr_in);
-	    sin_netmask = sin_dst + sizeof(struct sockaddr_in);
+	    sin_netmask = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in),
+				      struct sockaddr_in *);
 	}
 	break;
 #ifdef HAVE_IPV6
@@ -211,7 +216,8 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
 	if (fte.is_host_route()) {
 	    rtm->rtm_msglen += sizeof(struct sockaddr_in6);
-	    sin_netmask = sin_dst + sizeof(struct sockaddr_in6);
+	    sin_netmask = ADD_POINTER(sin_dst, sizeof(struct sockaddr_in6),
+				      struct sockaddr_in *);
 	}
 	break;
 #endif // HAVE_IPV6

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.1 2003/05/02 23:21:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.2 2003/05/14 01:13:40 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -320,11 +320,13 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
     // Copy the network mask
     switch (dst.af()) {
     case AF_INET:
-	sin += sizeof(struct sockaddr_in);
+	sin = ADD_POINTER(sin, sizeof(struct sockaddr_in),
+			  struct sockaddr_in *);
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	sin += sizeof(struct sockaddr_in6);
+	sin = ADD_POINTER(sin, sizeof(struct sockaddr_in6),
+			  struct sockaddr_in *);
 	break;
 #endif // HAVE_IPV6
     default:
