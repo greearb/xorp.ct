@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.7 2003/03/12 20:02:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.8 2003/04/21 22:02:55 mjh Exp $"
 
 #include "finder_module.h"
 
@@ -80,7 +80,8 @@ public:
     write_msg()
     {
 	string s = c_format("%p Write event %d", this, _writes);
-	strncpy(_buf, s.c_str(), 254);
+	strncpy(_buf, s.c_str(), sizeof(_buf) - 1);
+	_buf[sizeof(_buf) - 1] = '\0';
 	write_data(reinterpret_cast<const uint8_t*>(_buf), strlen(_buf));
     }
     
