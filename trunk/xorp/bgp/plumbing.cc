@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.57 2004/10/04 07:49:08 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.58 2005/01/05 21:40:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -606,7 +606,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 
     /* 10. cause the routing table to be dumped to the new peer */
     dump_entire_table(filter_out, _ribname);
-    if(_awaits_push)
+    if (_awaits_push)
 	push(peer_handler);
 
     return 0;
@@ -625,7 +625,8 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler)
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
 	XLOG_FATAL("BGPPlumbingAF<IPv%u,%s>::stop_peering: peer %#x not found",
-		   A::ip_version(),  pretty_string_safi(_master.safi()),
+		   XORP_UINT_CAST(A::ip_version()),
+		   pretty_string_safi(_master.safi()),
 		   (u_int)peer_handler);
     rt = iter->second;
     prevrt = rt;
@@ -717,7 +718,7 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
     //do the route dump
     dump_entire_table(filter_out, _ribname);
 
-    if(_awaits_push)
+    if (_awaits_push)
 	push(peer_handler);
     return 0;
 }
@@ -836,7 +837,8 @@ template <class A>
 void
 BGPPlumbingAF<A>::flush(PeerHandler* peer_handler) 
 {
-    debug_msg("BGPPlumbingAF<IPv%u:%s>::flush\n", A::ip_version(),
+    debug_msg("BGPPlumbingAF<IPv%u:%s>::flush\n",
+	      XORP_UINT_CAST(A::ip_version()),
 	      pretty_string_safi(_master.safi()));
 
     RibInTable<A> *rib_in;
@@ -845,7 +847,8 @@ BGPPlumbingAF<A>::flush(PeerHandler* peer_handler)
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF<IPv%u:%s>: "
 		   "flush called for a PeerHandler "
-		   "that has no associated RibIn", A::ip_version(),
+		   "that has no associated RibIn",
+		   XORP_UINT_CAST(A::ip_version()),
 		   pretty_string_safi(_master.safi()));
 
     rib_in = iter->second;
@@ -859,7 +862,8 @@ int
 BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    PeerHandler* peer_handler) 
 {
-    debug_msg("BGPPlumbingAF<IPv%u:%s>::add_route\n", A::ip_version(),
+    debug_msg("BGPPlumbingAF<IPv%u:%s>::add_route\n",
+	      XORP_UINT_CAST(A::ip_version()),
 	      pretty_string_safi(_master.safi()));
 
     int result = 0;
@@ -869,7 +873,8 @@ BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg,
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF<IPv%u:%s>: "
 		   "add_route called for a PeerHandler "
-		   "that has no associated RibIn", A::ip_version(),
+		   "that has no associated RibIn",
+		   XORP_UINT_CAST(A::ip_version()),
 		   pretty_string_safi(_master.safi()));
 
     rib_in = iter->second;
@@ -946,11 +951,12 @@ template <class A>
 void
 BGPPlumbingAF<A>::push(PeerHandler* peer_handler) 
 {
-    debug_msg("BGPPlumbingAF<IPv%u:%s>::push\n", A::ip_version(),
+    debug_msg("BGPPlumbingAF<IPv%u:%s>::push\n",
+	      XORP_UINT_CAST(A::ip_version()),
 	      pretty_string_safi(_master.safi()));
     if (_awaits_push == false) {
 	XLOG_WARNING("push <IPv%u:%s> when none needed",
-		     A::ip_version(),
+		     XORP_UINT_CAST(A::ip_version()),
 		     pretty_string_safi(_master.safi()));
 	return;
     }
