@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.3 2003/10/03 00:10:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.4 2003/10/13 23:32:41 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -163,7 +163,15 @@ IfConfigGetNetlink::read_config(IfTree& it)
     //
     // Force to receive data from the kernel, and then parse it
     //
+    //
+    // XXX: setting the flag below is a work-around hack because of a
+    // Linux kernel bug: when we read the whole table the kernel
+    // may not set the NLM_F_MULTI flag for the multipart messages.
+    //
+    ns4.set_multipart_message_read(true);
     _ns_reader.receive_data4(nlh->nlmsg_seq);
+    // XXX: reset the multipart message read hackish flag
+    ns4.set_multipart_message_read(false);
     if (parse_buffer_nlm(it, _ns_reader.buffer(), _ns_reader.buffer_size())
 	!= true) {
 	return (false);
@@ -226,7 +234,15 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	//
 	// Force to receive data from the kernel, and then parse it
 	//
+	//
+	// XXX: setting the flag below is a work-around hack because of a
+	// Linux kernel bug: when we read the whole table the kernel
+	// may not set the NLM_F_MULTI flag for the multipart messages.
+	//
+	ns4.set_multipart_message_read(true);
 	_ns_reader.receive_data4(nlh->nlmsg_seq);
+	// XXX: reset the multipart message read hackish flag
+	ns4.set_multipart_message_read(false);
 	if (parse_buffer_nlm(it, _ns_reader.buffer(), _ns_reader.buffer_size())
 	    != true) {
 	    return (false);
@@ -262,7 +278,15 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	//
 	// Force to receive data from the kernel, and then parse it
 	//
+	//
+	// XXX: setting the flag below is a work-around hack because of a
+	// Linux kernel bug: when we read the whole table the kernel
+	// may not set the NLM_F_MULTI flag for the multipart messages.
+	//
+	ns6.set_multipart_message_read(true);
 	_ns_reader.receive_data6(nlh->nlmsg_seq);
+	// XXX: reset the multipart message read hackish flag
+	ns6.set_multipart_message_read(false);
 	if (parse_buffer_nlm(it, _ns_reader.buffer(), _ns_reader.buffer_size())
 	    != true) {
 	    return (false);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.11 2003/10/13 02:17:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.12 2003/10/13 23:32:41 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -214,7 +214,15 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     //
     // Force to receive data from the kernel, and then parse it
     //
+    //
+    // XXX: setting the flag below is a work-around hack because of a
+    // Linux kernel bug: when we read the forwarding table the kernel
+    // doesn't set the NLM_F_MULTI flag for the multipart messages.
+    //
+    ns_ptr->set_multipart_message_read(true);
     _ns_reader.receive_data(*ns_ptr, nlh->nlmsg_seq);
+    // XXX: reset the multipart message read hackish flag
+    ns_ptr->set_multipart_message_read(false);
     if (parse_buffer_nlm(family, fte_list, _ns_reader.buffer(),
 			 _ns_reader.buffer_size())
 	!= true) {

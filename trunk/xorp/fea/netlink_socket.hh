@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.6 2003/10/14 01:34:08 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.7 2003/10/24 00:02:23 hodson Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -138,6 +138,21 @@ public:
      */
     void	set_nl_groups(uint32_t v) { _nl_groups = v; }
 
+    /**
+     * Set a flag to expect to read a multipart message that is terminated
+     * with NLMSG_DONE.
+     *
+     * This flag is required to fix a bug with the Linux kernel:
+     * if we try to read the whole forwarding table, the kernel
+     * doesn't set the NLM_F_MULTI flag in each part of the multi-part
+     * message. The problem is similar when we read all addresses on
+     * an interface.
+     *
+     * @param v if true, set the flag to expect to read a multi-part message
+     * that is terminated with NLMSG_DONE.
+     */
+    void	set_multipart_message_read(bool v) { _is_multipart_message_read = v; }
+
 private:
     typedef list<NetlinkSocketObserver*> ObserverList;
 
@@ -165,7 +180,8 @@ private:
     static uint16_t _instance_cnt;
     static pid_t    _pid;
 
-    uint32_t	    _nl_groups;	// The netlink multicast groups to listen for
+    uint32_t	_nl_groups;	// The netlink multicast groups to listen for
+    bool	_is_multipart_message_read; // If true, expect to read a multipart message
 
     friend class NetlinkSocketPlumber; // class that hooks observers in and out
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.12 2003/10/31 18:42:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.13 2003/10/31 18:47:33 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -52,7 +52,8 @@ NetlinkSocket::NetlinkSocket(EventLoop& e)
       _fd(-1),
       _seqno(0),
       _instance_no(_instance_cnt++),
-      _nl_groups(0)		// XXX: no netlink multicast groups
+      _nl_groups(0),		// XXX: no netlink multicast groups
+      _is_multipart_message_read(false)
 {
     
 }
@@ -274,7 +275,8 @@ NetlinkSocket::force_read()
 	     NLMSG_OK(mh, new_size);
 	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
-	    if (mh->nlmsg_flags & NLM_F_MULTI) {
+	    if ((mh->nlmsg_flags & NLM_F_MULTI)
+		|| _is_multipart_message_read) {
 		is_end_of_message = false;
 		if (mh->nlmsg_type == NLMSG_DONE)
 		    is_end_of_message = true;
@@ -344,7 +346,8 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 	     NLMSG_OK(mh, new_size);
 	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
-	    if (mh->nlmsg_flags & NLM_F_MULTI) {
+	    if ((mh->nlmsg_flags & NLM_F_MULTI)
+		|| _is_multipart_message_read) {
 		is_end_of_message = false;
 		if (mh->nlmsg_type == NLMSG_DONE)
 		    is_end_of_message = true;
@@ -442,7 +445,8 @@ NetlinkSocket::force_recvmsg(int flags)
 	     NLMSG_OK(mh, new_size);
 	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
-	    if (mh->nlmsg_flags & NLM_F_MULTI) {
+	    if ((mh->nlmsg_flags & NLM_F_MULTI)
+		|| _is_multipart_message_read) {
 		is_end_of_message = false;
 		if (mh->nlmsg_type == NLMSG_DONE)
 		    is_end_of_message = true;
