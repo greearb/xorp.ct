@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.43 2005/02/14 20:35:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.44 2005/02/15 02:08:37 pavlin Exp $"
 
 
 //
@@ -296,47 +296,6 @@ MfeaNode::final_stop()
 	return (XORP_ERROR);
 
     return (XORP_OK);
-}
-
-/**
- * MfeaNode::has_pending_down_units:
- * @reason_msg: return-by-reference string that contains human-readable
- * information about the status.
- * 
- * Test if there is an unit that is in PENDING_DOWN state.
- * 
- * Return value: True if there is an unit that is in PENDING_DOWN state,
- * otherwise false.
- **/
-bool
-MfeaNode::has_pending_down_units(string& reason_msg)
-{
-    vector<MfeaVif *>::iterator iter;
-    
-    //
-    // Test the interfaces
-    //
-    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
-	MfeaVif *mfea_vif = (*iter);
-	if (mfea_vif == NULL)
-	    continue;
-	// TODO: XXX: PAVPAVPAV: vif pending-down state
-	// is not used/implemented yet
-	if (mfea_vif->is_pending_down()) {
-	    reason_msg = c_format("Vif %s is in state %s",
-				  mfea_vif->name().c_str(),
-				  mfea_vif->state_str().c_str());
-	    return (true);
-	}
-    }
-    
-    //
-    // TODO: XXX: PAVPAVPAV: test other units that may be waiting
-    // in PENDING_DOWN state.
-    //
-    
-    reason_msg = "No pending-down units";
-    return (false);
 }
 
 void

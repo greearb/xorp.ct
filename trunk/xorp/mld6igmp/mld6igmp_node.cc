@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.35 2005/02/17 01:03:36 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.36 2005/02/24 00:21:16 pavlin Exp $"
 
 
 //
@@ -264,47 +264,6 @@ Mld6igmpNode::final_stop()
     mfea_register_shutdown();
 
     return (XORP_OK);
-}
-
-/**
- * Mld6igmpNode::has_pending_down_units:
- * @reason_msg: return-by-reference string that contains human-readable
- * information about the status.
- * 
- * Test if there is an unit that is in PENDING_DOWN state.
- * 
- * Return value: True if there is an unit that is in PENDING_DOWN state,
- * otherwise false.
- **/
-bool
-Mld6igmpNode::has_pending_down_units(string& reason_msg)
-{
-    vector<Mld6igmpVif *>::iterator iter;
-    
-    //
-    // Test the interfaces
-    //
-    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
-	Mld6igmpVif *mld6igmp_vif = (*iter);
-	if (mld6igmp_vif == NULL)
-	    continue;
-	// TODO: XXX: PAVPAVPAV: vif pending-down state
-	// is not used/implemented yet
-	if (mld6igmp_vif->is_pending_down()) {
-	    reason_msg = c_format("Vif %s is in state %s",
-				  mld6igmp_vif->name().c_str(),
-				  mld6igmp_vif->state_str().c_str());
-	    return (true);
-	}
-    }
-    
-    //
-    // TODO: XXX: PAVPAVPAV: test other units that may be waiting
-    // in PENDING_DOWN state.
-    //
-    
-    reason_msg = "No pending-down units";
-    return (false);
 }
 
 void

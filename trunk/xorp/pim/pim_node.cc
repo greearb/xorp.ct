@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.57 2005/02/19 02:55:14 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.58 2005/02/24 00:31:15 pavlin Exp $"
 
 
 //
@@ -299,47 +299,6 @@ PimNode::final_stop()
     mfea_register_shutdown();
 
     return (XORP_OK);
-}
-
-/**
- * PimNode::has_pending_down_units:
- * @reason_msg: return-by-reference string that contains human-readable
- * information about the status.
- * 
- * Test if there is an unit that is in PENDING_DOWN state.
- * 
- * Return value: True if there is an unit that is in PENDING_DOWN state,
- * otherwise false.
- **/
-bool
-PimNode::has_pending_down_units(string& reason_msg)
-{
-    vector<PimVif *>::iterator iter;
-    
-    //
-    // Test the interfaces
-    //
-    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
-	PimVif *pim_vif = (*iter);
-	if (pim_vif == NULL)
-	    continue;
-	if (pim_vif->is_pending_down()) {
-	    reason_msg = c_format("Vif %s is in state %s: remaining %u tasks",
-				  pim_vif->name().c_str(),
-				  pim_vif->state_str().c_str(),
-				  (uint32_t)pim_vif->usage_by_pim_mre_task());
-	    return (true);
-	}
-    }
-    
-    //
-    // TODO: XXX: PAVPAVPAV: test other units that may be waiting
-    // in PENDING_DOWN state: PimMrt, PimMribTable, PimBsr, RpTable,
-    // PimScopeZoneTable, etc.
-    //
-    
-    reason_msg = "No pending-down units";
-    return (false);
 }
 
 void

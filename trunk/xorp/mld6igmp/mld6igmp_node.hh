@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.15 2004/06/10 22:41:27 hodson Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.16 2005/02/17 01:03:36 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -112,17 +112,6 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		final_stop();
-    
-    /**
-     * Test if there is an unit that is in PENDING_DOWN state.
-     * 
-     * @param reason_msg return-by-reference string that contains
-     * human-readable information about the unit that is in PENDING_DOWN
-     * state (if any).
-     * @return true if there is an unit that is in PENDING_DOWN state,
-     * otherwise false.
-     */
-    bool	has_pending_down_units(string& reason_msg);
     
     /**
      * Install a new MLD/IGMP vif.

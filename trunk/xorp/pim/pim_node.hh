@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.39 2005/01/28 03:34:20 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.40 2005/02/19 02:55:14 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -129,17 +129,6 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		final_stop();
-
-    /**
-     * Test if there is an unit that is in PENDING_DOWN state.
-     * 
-     * @param reason_msg return-by-reference string that contains
-     * human-readable information about the unit that is in PENDING_DOWN
-     * state (if any).
-     * @return true if there is an unit that is in PENDING_DOWN state,
-     * otherwise false.
-     */
-    bool	has_pending_down_units(string& reason_msg);
 
     /**
      * Install a new PIM vif.
