@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.53 2004/05/23 02:54:23 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.54 2004/06/10 22:40:32 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -31,11 +32,13 @@
 BGPPlumbing::BGPPlumbing(const Safi safi,
 			 RibIpcHandler* ribhandler,
 			 NextHopResolver<IPv4>& next_hop_resolver_ipv4,
-			 NextHopResolver<IPv6>& next_hop_resolver_ipv6)
+			 NextHopResolver<IPv6>& next_hop_resolver_ipv6,
+			 PolicyFilters& pfs)
     : _rib_handler(ribhandler),
       _next_hop_resolver_ipv4(next_hop_resolver_ipv4),
       _next_hop_resolver_ipv6(next_hop_resolver_ipv6),
       _safi(safi),
+      _policy_filters(pfs),
       _plumbing_ipv4("[IPv4:" + string(pretty_string_safi(safi)) + "]", *this,
 		     _next_hop_resolver_ipv4),
       _plumbing_ipv6("[IPv6:" + string(pretty_string_safi(safi)) + "]", *this, 
@@ -232,6 +235,12 @@ BGPPlumbing::status(string& reason) const
     return true;
 }
 
+void
+BGPPlumbing::push_routes() {
+    plumbing_ipv4().push_routes();
+    plumbing_ipv6().push_routes();
+}
+
 /***********************************************************************/
 
 template <class A>
@@ -269,11 +278,19 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			     _next_hop_resolver);
     _next_hop_resolver.add_decision(_decision_table);
 
+    _policy_sourcematch_table =
+	new PolicyTableSourceMatch<A>(ribname + "PolicyExportSourceMatchTable",
+				      _master.safi(),
+				      _decision_table,
+				      _master.policy_filters());
+    _decision_table->set_next_table(_policy_sourcematch_table);
+
+
     _fanout_table = 
 	new FanoutTable<A>(ribname + "FanoutTable", 
 			   _master.safi(),
-			   _decision_table);
-    _decision_table->set_next_table(_fanout_table);
+			   _policy_sourcematch_table);
+    _policy_sourcematch_table->set_next_table(_fanout_table);
 
     /*
      * Plumb the input branch
@@ -285,6 +302,8 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			  _master.rib_handler());
     _in_map[_master.rib_handler()] = _ipc_rib_in_table;
 
+    
+
     FilterTable<A>* filter_in =
 	new FilterTable<A>(_ribname + "IpcChannelInputFilter",
 			   _master.safi(),
@@ -292,12 +311,19 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			   _next_hop_resolver);
     _ipc_rib_in_table->set_next_table(filter_in);
     
+    PolicyTableImport<A>* policy_filter_in =
+	new PolicyTableImport<A>(_ribname + "IpcChannelInputPolicyFilter",
+				 _master.safi(),
+				 filter_in,
+				 _master.policy_filters());
+    filter_in->set_next_table(policy_filter_in);
+
     CacheTable<A>* cache_in = 
 	new CacheTable<A>(_ribname + "IpcChannelInputCache",
 			  _master.safi(),
-			  filter_in,
+			  policy_filter_in,
 			  _master.rib_handler());
-    filter_in->set_next_table(cache_in);
+    policy_filter_in->set_next_table(cache_in);
 
     NhLookupTable<A> *nexthop_in =
 	new NhLookupTable<A>(_ribname + "IpcChannelNhLookup",
@@ -311,6 +337,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 				_ipc_rib_in_table->genid());
 
     _tables.insert(filter_in);
+    _tables.insert(policy_filter_in);
     _tables.insert(cache_in);
 
     /*
@@ -326,12 +353,22 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 				  _ipc_rib_in_table->genid());
     _tables.insert(filter_out);
 
+    PolicyTable<A>* policy_filter_out =
+	new PolicyTable<A>(ribname + "IpcChannelOutputPolicyFilter",
+			   _master.safi(),
+			   filter_out,
+			   _master.policy_filters(),
+			   filter::EXPORT);
+    filter_out->set_next_table(policy_filter_out);
+    _tables.insert(policy_filter_out);
+
+
     CacheTable<A> *cache_out =
 	new CacheTable<A>(ribname + "IpcChannelOutputCache",
 			  _master.safi(),
-			  filter_out,
+			  policy_filter_out,
 			  _master.rib_handler());
-    filter_out->set_next_table(cache_out);
+    policy_filter_out->set_next_table(cache_out);
     _tables.insert(cache_out);
 
     _ipc_rib_out_table =
@@ -341,9 +378,12 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			   _master.rib_handler());
     _out_map[_master.rib_handler()] = _ipc_rib_out_table;
     cache_out->set_next_table(_ipc_rib_out_table);
-    
+
+    // XXX: these are dups ?
+#if 0    
     _tables.insert(filter_out);
     _tables.insert(cache_out);
+#endif    
 }
 
 template <class A>
@@ -354,6 +394,7 @@ BGPPlumbingAF<A>::~BGPPlumbingAF()
 	delete (*i);
     }
     delete _decision_table;
+    delete _policy_sourcematch_table;
     delete _fanout_table;
     delete _ipc_rib_in_table;
     delete _ipc_rib_out_table;
@@ -400,12 +441,19 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 			   _next_hop_resolver);
     rib_in->set_next_table(filter_in);
     
+    PolicyTableImport<A>* policy_filter_in =
+	new PolicyTableImport<A>(_ribname + "PeerInputPolicyFilter" + peername,
+				 _master.safi(),
+				 filter_in,
+				 _master.policy_filters());
+    filter_in->set_next_table(policy_filter_in);			   
+
     CacheTable<A>* cache_in = 
 	new CacheTable<A>(_ribname + "PeerInputCache" + peername,
 			  _master.safi(),
-			  filter_in,
+			  policy_filter_in,
 			  peer_handler);
-    filter_in->set_next_table(cache_in);
+    policy_filter_in->set_next_table(cache_in);
 
     NhLookupTable<A> *nexthop_in =
 	new NhLookupTable<A>(_ribname + "NhLookup" + peername,
@@ -419,6 +467,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 
     _tables.insert(rib_in);
     _tables.insert(filter_in);
+    _tables.insert(policy_filter_in);
     _tables.insert(cache_in);
     _tables.insert(nexthop_in);
 
@@ -429,6 +478,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     const AsNum& his_AS_number = peer_handler->AS_number();
     const AsNum& my_AS_number = _master.my_AS_number();
 
+    
     /* 1. configure the loop filters */
     filter_in->add_simple_AS_filter(my_AS_number);
 
@@ -446,7 +496,6 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     /*
      * Plumb the output branch
      */
-    
     FilterTable<A>* filter_out =
 	new FilterTable<A>(_ribname + "PeerOutputFilter" + peername,
 			   _master.safi(),
@@ -454,13 +503,21 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 			   _next_hop_resolver);
     _fanout_table->add_next_table(filter_out, peer_handler,
 				  rib_in->genid());
-    
+
+    PolicyTable<A>* policy_filter_out =
+	new PolicyTable<A>(_ribname + "PeerOutputPolicyFilter" + peername,
+			   _master.safi(),
+			   filter_out,
+			   _master.policy_filters(),
+			   filter::EXPORT);
+    filter_out->set_next_table(policy_filter_out);
+   
     CacheTable<A>* cache_out = 
 	new CacheTable<A>(_ribname + "PeerOutputCache" + peername,
 			  _master.safi(),
-			  filter_out,
+			  policy_filter_out,
 			  peer_handler);
-    filter_out->set_next_table(cache_out);
+    policy_filter_out->set_next_table(cache_out);
 
     RibOutTable<A>* rib_out =
 	new RibOutTable<A>(_ribname + "RibOut" + peername,
@@ -472,10 +529,10 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
     _reverse_out_map[rib_out] = peer_handler;
 
     _tables.insert(filter_out);
+    _tables.insert(policy_filter_out);
     _tables.insert(cache_out);
     _tables.insert(rib_out);
 
-    
     /*
      * Start things up on the output branch
      */
@@ -524,7 +581,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 
     /* 9. load up damping filters */
     /* TBD */
-    
+
     /* 10. cause the routing table to be dumped to the new peer */
     dump_entire_table(filter_out, _ribname);
     if(_awaits_push)
@@ -979,6 +1036,17 @@ bool
 BGPPlumbingAF<A>::status(string&) const
 {
     return true;
+}
+
+
+template <class A>
+void
+BGPPlumbingAF<A>::push_routes() {
+    list<const PeerTableInfo<A>*> peer_list;
+
+    _fanout_table->peer_table_info(peer_list);
+
+    _policy_sourcematch_table->push_routes(peer_list);
 }
 
 template class BGPPlumbingAF<IPv4>;

@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.31 2004/05/19 17:37:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.32 2004/06/10 22:40:35 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -307,7 +308,7 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 {
     typename BgpTrie<A>::iterator route_iterator;
     debug_msg("dump iter: %s\n", dump_iter.str().c_str());
-
+   
     if (dump_iter.route_iterator_is_valid()) {
 	debug_msg("route_iterator is valid\n");
  	route_iterator = dump_iter.route_iterator();
@@ -330,13 +331,22 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
     for ( ; route_iterator != _route_table->end(); route_iterator++) {
 	chained_rt = &(route_iterator.payload());
 	debug_msg("chained_rt: %s\n", chained_rt->str().c_str());
+
 	// propagate downstream
 	// only dump routes that actually won
-	if (chained_rt->is_winner()) {
+	// XXX: or if its a policy route dump
+
+	if (chained_rt->is_winner() || dump_iter.peer_to_dump_to() == NULL) {
 	    InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
 	    rt_msg.set_push();
-	    this->_next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
+	   
+	    int res = this->_next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
 				    dump_iter.peer_to_dump_to());
+
+	    if(res == ADD_FILTERED) 
+		chained_rt->set_filtered(true);
+	    else
+		chained_rt->set_filtered(false);
 	    break;
 	}
     }

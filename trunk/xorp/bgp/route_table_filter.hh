@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.10 2004/06/10 22:40:35 hodson Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.11 2004/06/12 13:20:50 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -45,6 +46,10 @@ public:
 protected:
     void propagate_flags(const InternalMessage<A> *rtmsg,
 			 InternalMessage<A> *new_rtmsg) const;
+
+    void propagate_flags(const SubnetRoute<A>& route,
+			 SubnetRoute<A>& new_route) const;
+
     virtual void drop_message(const InternalMessage<A> *rtmsg, 
 			      bool &modified) const ;
 private:

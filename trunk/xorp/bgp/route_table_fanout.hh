@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.14 2004/05/15 15:12:16 mjh Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.15 2004/06/10 22:40:35 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -98,6 +99,8 @@ public:
 
     RouteTableType type() const {return FANOUT_TABLE;}
     string str() const;
+
+    void peer_table_info(list<const PeerTableInfo<A>*>& peer_list);
 
     int dump_entire_table(BGPRouteTable<A> *child_to_dump_to, Safi safi,
 			  string ribname);

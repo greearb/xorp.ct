@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.27 2004/06/10 22:40:34 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.28 2004/06/25 12:32:08 mjh Exp $"
 
-//#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
@@ -175,6 +175,7 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	//preserve this, because the original old_winner's data will
 	//be clobbered by route_wins.
 	old_winner_clone = new RouteData<A>(*old_winner);
+
     } else if (old_rtmsg.route()->is_winner()) {
 	//the route being deleted was the old winner
 	old_winner_clone = new RouteData<A>(old_rtmsg.route(), caller,
@@ -220,7 +221,8 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     const InternalMessage<A> *old_rtmsg_p, *new_rtmsg_p;
     if (old_winner_clone->route() == old_rtmsg.route()) {
 	old_rtmsg.force_clear_push();
-	old_rtmsg.route()->set_is_not_winner();
+	// FIXME: hack to enable policy route pushing.
+//	old_rtmsg.route()->set_is_not_winner();
 	old_rtmsg_p = &old_rtmsg;
     } else {
 	old_rtmsg_p = new InternalMessage<A>(old_winner_clone->route(), 

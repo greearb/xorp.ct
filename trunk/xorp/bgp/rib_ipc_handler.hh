@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.31 2004/08/14 05:24:51 mjh Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.32 2004/08/14 05:58:48 mjh Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -25,6 +26,8 @@
 #include "libxorp/timer.hh"
 #include "libxipc/xrl_std_router.hh"
 
+#include "policy/backend/policytags.hh"
+
 class RibIpcHandler;
 class EventLoop;
 
@@ -35,7 +38,7 @@ public:
 	     BGPMain &_bgp);
 
     void queue_add_route(string ribname, bool ibgp, Safi, const IPNet<A>& net,
-			 const A& nexthop);
+			 const A& nexthop, const PolicyTags& policytags);
 
     void queue_delete_route(string ribname, bool ibgp, Safi,
 			    const IPNet<A>& net);
@@ -57,6 +60,7 @@ private:
 	IPNet<A> net;
 	A nexthop;
 	string comment;
+	PolicyTags policytags;
     };
 
     deque <Queued> _xrl_queue;
@@ -140,6 +144,7 @@ public:
      * @param next_hop to forward to
      * @param unicast if true install in unicast routing table
      * @param multicast if true install in multicast routing table
+     * @param policytags policy-tags associated with the route
      *
      * @return true on success
      */
@@ -148,7 +153,8 @@ public:
 			 const IPv4Net& nlri,
 			 const IPv4& next_hop,
 			 const bool& unicast,
-			 const bool& multicast);
+			 const bool& multicast,
+			 const PolicyTags& policytags);
 
     /**
      * Originate an IPv6 route
@@ -159,6 +165,7 @@ public:
      * @param next_hop to forward to
      * @param unicast if true install in unicast routing table
      * @param multicast if true install in multicast routing table
+     * @param policytags policy-tags associated with the route
      *
      * @return true on success
      */
@@ -167,7 +174,8 @@ public:
 			 const IPv6Net& nlri,
 			 const IPv6& next_hop,
 			 const bool& unicast,
-			 const bool& multicast);
+			 const bool& multicast,
+			 const PolicyTags& policytags);
 
     /**
      * Withdraw an IPv4 route

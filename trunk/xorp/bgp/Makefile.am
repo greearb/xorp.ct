@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.30 2004/05/01 00:25:03 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.31 2004/09/08 01:15:56 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -37,6 +37,7 @@ noinst_LIBRARIES = libbgp.a
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(noinst_LIBRARIES)
 LDADD		+= $(top_builddir)/xrl/targets/libbgpbase.a
+LDADD           += $(top_builddir)/policy/backend/libpolicybackend.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a
@@ -88,6 +89,7 @@ libbgp_a_SOURCES  = bgp_module.h
 libbgp_a_SOURCES += aspath.hh
 libbgp_a_SOURCES += attribute_manager.hh
 libbgp_a_SOURCES += bgp_trie.hh
+libbgp_a_SOURCES += bgp_varrw.hh
 libbgp_a_SOURCES += dump_iterators.hh
 libbgp_a_SOURCES += exceptions.hh
 libbgp_a_SOURCES += internal_message.hh
@@ -113,6 +115,9 @@ libbgp_a_SOURCES += route_table_dump.hh
 libbgp_a_SOURCES += route_table_fanout.hh
 libbgp_a_SOURCES += route_table_filter.hh
 libbgp_a_SOURCES += route_table_nhlookup.hh
+libbgp_a_SOURCES += route_table_policy.hh
+libbgp_a_SOURCES += route_table_policy_im.hh
+libbgp_a_SOURCES += route_table_policy_sm.hh
 libbgp_a_SOURCES += route_table_ribin.hh
 libbgp_a_SOURCES += route_table_ribout.hh
 libbgp_a_SOURCES += route_table_reader.hh
@@ -125,6 +130,7 @@ libbgp_a_SOURCES += xrl_target.hh
 libbgp_a_SOURCES += aspath.cc
 libbgp_a_SOURCES += attribute_manager.cc
 libbgp_a_SOURCES += bgp_trie.cc
+libbgp_a_SOURCES += bgp_varrw.cc
 libbgp_a_SOURCES += dump_iterators.cc
 libbgp_a_SOURCES += internal_message.cc
 libbgp_a_SOURCES += iptuple.cc
@@ -151,6 +157,9 @@ libbgp_a_SOURCES += route_table_dump.cc
 libbgp_a_SOURCES += route_table_fanout.cc
 libbgp_a_SOURCES += route_table_filter.cc
 libbgp_a_SOURCES += route_table_nhlookup.cc
+libbgp_a_SOURCES += route_table_policy.cc
+libbgp_a_SOURCES += route_table_policy_im.cc
+libbgp_a_SOURCES += route_table_policy_sm.cc
 libbgp_a_SOURCES += route_table_ribin.cc
 libbgp_a_SOURCES += route_table_ribout.cc
 libbgp_a_SOURCES += route_table_reader.cc

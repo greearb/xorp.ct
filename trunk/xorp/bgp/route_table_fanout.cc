@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.36 2004/05/19 17:37:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.37 2004/06/10 22:40:34 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -435,6 +436,18 @@ FanoutTable<A>::remove_dump_table(DumpTable<A> *dump_table)
     i = _dump_tables.find(dump_table);
     XLOG_ASSERT(i != _dump_tables.end());
     _dump_tables.erase(i);
+}
+
+template<class A>
+void
+FanoutTable<A>::peer_table_info(list<const PeerTableInfo<A>*>& peer_list) {
+    typename NextTableMap<A>::iterator i;
+    
+    for (i = _next_tables.begin(); i != _next_tables.end(); i++) {
+	if (i.second().peer_handler() != NULL)
+	    peer_list.push_back(&(i.second()));
+    }
+
 }
 
 template<class A>

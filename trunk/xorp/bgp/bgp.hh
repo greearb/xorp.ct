@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.28 2004/08/06 01:41:17 bms Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.29 2004/08/06 07:22:04 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -31,6 +32,8 @@
 #include "path_attribute.hh"
 #include "peer_handler.hh"
 #include "process_watch.hh"
+
+#include "policy/backend/policy_filters.hh"
 
 class XrlBgpTarget;
 
@@ -215,13 +218,15 @@ public:
      * @param next_hop to forward to
      * @param unicast if true install in unicast routing table
      * @param multicast if true install in multicast routing table
+     * @param policytags policy-tags associated with route.
      *
      * @return true on success
      */
     bool originate_route(const IPv4Net& nlri,
 			 const IPv4& next_hop,
 			 const bool& unicast,
-			 const bool& multicast);
+			 const bool& multicast,
+			 const PolicyTags& policytags);
 
     /**
      * Originate an IPv6 route
@@ -230,13 +235,15 @@ public:
      * @param next_hop to forward to
      * @param unicast if true install in unicast routing table
      * @param multicast if true install in multicast routing table
+     * @param policytags policy-tags associated with route.
      *
      * @return true on success
      */
     bool originate_route(const IPv6Net& nlri,
 			 const IPv6& next_hop,
 			 const bool& unicast,
-			 const bool& multicast);
+			 const bool& multicast,
+			 const PolicyTags& policytags);
 
     /**
      * Withdraw an IPv4 route
@@ -386,6 +393,27 @@ public:
     void finder_death(const char *file, const int lineno) {
 	_process_watch->finder_death(file, lineno);
     }
+
+    /**
+     * Configure a policy filter
+     *
+     * @param filter Id of filter to configure.
+     * @param conf Configuration of filter.
+     */
+    void configure_filter(const uint32_t& filter, const string& conf);
+
+    /**
+     * Reset a policy filter.
+     *
+     * @param filter Id of filter to reset.
+     */
+    void reset_filter(const uint32_t& filter);
+
+    /**
+     * Push routes through policy filters for re-filtering.
+     */
+    void push_routes();
+    
 protected:
 private:
     /**
@@ -514,6 +542,8 @@ private:
     XrlStdRouter *_xrl_router;
     static EventLoop _eventloop;
     ProcessWatch *_process_watch;
+
+    PolicyFilters _policy_filters;
 };
 
 template <typename A>

@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.26 2004/05/15 19:50:38 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.27 2004/06/10 22:40:33 hodson Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -27,10 +28,14 @@
 #include "route_table_filter.hh"
 #include "route_table_cache.hh"
 #include "route_table_nhlookup.hh"
+#include "route_table_policy.hh"
+#include "route_table_policy_sm.hh"
+#include "route_table_policy_im.hh"
 #include "peer.hh"
 #include "rib_ipc_handler.hh"
 #include "next_hop_resolver.hh"
 #include "parameter.hh"
+#include "policy/backend/policy_filters.hh"
 
 class BGPPlumbing;
 
@@ -80,6 +85,12 @@ public:
      * true otherwise 
      */
     bool status(string& reason) const;
+
+    /**
+     * Push routes through policy filters for re-filtering.
+     */
+    void push_routes();
+
 private:
     /**
      * A peering has just come up dump all the routes to it.
@@ -93,6 +104,7 @@ private:
     map <RibOutTable<A>*,  PeerHandler*> _reverse_out_map;
     map <PeerHandler*, RibOutTable<A>*> _out_map;
     DecisionTable<A> *_decision_table;
+    PolicyTableSourceMatch<A>* _policy_sourcematch_table;
     FanoutTable<A> *_fanout_table;
     RibInTable<A> *_ipc_rib_in_table;
     RibOutTable<A> *_ipc_rib_out_table;
@@ -122,7 +134,8 @@ public:
     BGPPlumbing(const Safi safi,
 		RibIpcHandler* rib_handler,
 		NextHopResolver<IPv4>&,
-		NextHopResolver<IPv6>&);
+		NextHopResolver<IPv6>&,
+		PolicyFilters&);
     void set_my_as_number(const AsNum& my_AS_number);
 
     int add_peering(PeerHandler* peer_handler);
@@ -182,6 +195,14 @@ public:
      * @return Safi of this plumb.
      */
     Safi safi() const {return _safi;}
+    
+    /**
+     * Push routes through policy filters for re-filtering.
+     */
+    void push_routes();
+
+    PolicyFilters& policy_filters() { return _policy_filters; }
+
 private:
     RibIpcHandler *_rib_handler;
 
@@ -190,10 +211,16 @@ private:
 
     const Safi _safi;
 
+
+    PolicyFilters& _policy_filters;
+
     BGPPlumbingAF<IPv4> _plumbing_ipv4;
     BGPPlumbingAF<IPv6> _plumbing_ipv6;
 
+
     AsNum _my_AS_number;
+    
+
 };
 
 #endif // __BGP_PLUMBING_HH__

@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.26 2004/06/10 22:40:39 hodson Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.27 2004/08/06 01:41:17 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -359,7 +360,7 @@ XrlBgpTarget::bgp_0_2_originate_route4(
     debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
 
-    if (!_bgp.originate_route(nlri, next_hop, unicast, multicast))
+    if (!_bgp.originate_route(nlri, next_hop, unicast, multicast,PolicyTags()))
 	return XrlCmdError::COMMAND_FAILED();
 
     return XrlCmdError::OKAY();
@@ -376,7 +377,7 @@ XrlBgpTarget::bgp_0_2_originate_route6(
     debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
 
-    if (!_bgp.originate_route(nlri, next_hop, unicast, multicast))
+    if (!_bgp.originate_route(nlri, next_hop, unicast, multicast,PolicyTags()))
 	return XrlCmdError::COMMAND_FAILED();
 
     return XrlCmdError::OKAY();
@@ -845,3 +846,83 @@ XrlBgpTarget::done()
 {
     return _done;
 }
+
+XrlCmdError
+XrlBgpTarget::policy_backend_0_1_configure(const uint32_t& filter, 
+					   const string& conf) {
+    try {
+	_bgp.configure_filter(filter,conf);
+    } catch(const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+					   e.str());
+    }
+    return XrlCmdError::OKAY();					   
+}
+
+XrlCmdError
+XrlBgpTarget::policy_backend_0_1_reset(const uint32_t& filter) {
+    try {
+	_bgp.reset_filter(filter);
+    } catch(const PolicyException& e){ 
+	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
+					   e.str());
+    }
+    return XrlCmdError::OKAY();					   
+}
+
+XrlCmdError
+XrlBgpTarget::policy_backend_0_1_push_routes() {
+    _bgp.push_routes();
+    return XrlCmdError::OKAY();
+}
+
+
+XrlCmdError 
+XrlBgpTarget::policy_redist4_0_1_add_route4(
+        const IPv4Net&	    network,
+        const bool&	    unicast,
+        const bool&	    multicast,
+        const IPv4&	    nexthop,
+        const uint32_t&	    metric,
+        const XrlAtomList&  policytags) {
+
+    UNUSED(metric);
+    _bgp.originate_route(network,nexthop,unicast,multicast,policytags);
+    return XrlCmdError::OKAY();
+	
+}	
+        
+XrlCmdError 
+XrlBgpTarget::policy_redist4_0_1_delete_route4(
+        const IPv4Net&	network,
+        const bool&     unicast,
+        const bool&     multicast) {
+
+    _bgp.withdraw_route(network,unicast,multicast);
+    return XrlCmdError::OKAY();
+}	
+        
+XrlCmdError 
+XrlBgpTarget::policy_redist6_0_1_add_route6(
+        const IPv6Net&	    network,
+        const bool&	    unicast,
+        const bool&	    multicast,
+        const IPv6&	    nexthop,
+        const uint32_t&	    metric,
+        const XrlAtomList&  policytags) {
+    
+    UNUSED(metric);
+    _bgp.originate_route(network,nexthop,unicast,multicast,policytags);
+    return XrlCmdError::OKAY();
+}	
+        
+XrlCmdError 
+XrlBgpTarget::policy_redist6_0_1_delete_route6(
+        const IPv6Net&  network,
+        const bool&     unicast,
+        const bool&     multicast) {
+    
+    _bgp.withdraw_route(network,unicast,multicast);
+    return XrlCmdError::OKAY();
+}	
+

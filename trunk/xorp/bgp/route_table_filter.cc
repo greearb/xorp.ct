@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.21 2004/05/15 15:12:16 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.22 2004/06/10 22:40:35 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -52,6 +53,17 @@ BGPRouteFilter<A>::propagate_flags(const InternalMessage<A> *rtmsg,
     if (rtmsg->from_previous_peering())
 	new_rtmsg->set_from_previous_peering();
 }
+
+
+template<class A>
+void
+BGPRouteFilter<A>::propagate_flags(const SubnetRoute<A>& route,
+				   SubnetRoute<A>& new_route) const {
+    new_route.set_filtered(route.is_filtered());
+    new_route.set_policytags(route.policytags());
+    if(route.is_winner())
+	new_route.set_is_winner(route.igp_metric());
+}				   
 
 /*************************************************************************/
 
@@ -104,6 +116,10 @@ ASPrependFilter<A>::filter(const InternalMessage<A> *rtmsg,
 	= new SubnetRoute<A>(rtmsg->net(), &palist, 
 			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
+
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
+    
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());
@@ -143,6 +159,9 @@ NexthopRewriteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 	= new SubnetRoute<A>(rtmsg->net(), &palist,
 			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
+    
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
 
     debug_msg("NexthopRewriteFilter: new route: %x with attributes %x\n",
 	   (uint)new_route, (uint)(new_route->attributes()));
@@ -217,6 +236,9 @@ LocalPrefInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
 			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
 
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
+
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());
@@ -261,6 +283,9 @@ LocalPrefRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
 	= new SubnetRoute<A>(rtmsg->net(), &palist,
 			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
+
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
 
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
@@ -309,6 +334,9 @@ MEDInsertionFilter<A>::filter(const InternalMessage<A> *rtmsg,
 	= new SubnetRoute<A>(rtmsg->net(), &palist,
 			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
+    
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
 
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
@@ -355,6 +383,9 @@ MEDRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
 			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
 
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
+    
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());
@@ -396,6 +427,9 @@ UnknownFilter<A>::filter(const InternalMessage<A> *rtmsg,
 			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
 
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
+    
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());
@@ -451,6 +485,11 @@ OriginateRouteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 	= new SubnetRoute<A>(rtmsg->net(), &palist, 
 			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
+    
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
+    
+    
     InternalMessage<A> *new_rtmsg = 
 	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
 			       rtmsg->genid());

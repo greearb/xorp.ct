@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.53 2004/06/10 22:40:33 hodson Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.54 2004/08/14 05:24:51 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -187,7 +188,8 @@ RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, Safi safi)
     if("" == _ribname)
 	return 0;
 
-    _v4_queue.queue_add_route(_ribname, _ibgp, safi, rt.net(), rt.nexthop());
+    _v4_queue.queue_add_route(_ribname, _ibgp, safi, rt.net(),
+			      rt.nexthop(), rt.policytags());
 
     return 0;
 }
@@ -200,7 +202,8 @@ RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, Safi safi)
     if ("" == _ribname)
 	return 0;
 
-    _v6_queue.queue_add_route(_ribname, _ibgp, safi, rt.net(), rt.nexthop());
+    _v6_queue.queue_add_route(_ribname, _ibgp, safi, rt.net(), rt.nexthop(),
+			      rt.policytags());
 
     return 0;
 }
@@ -282,7 +285,8 @@ RibIpcHandler::push_packet()
 bool 
 RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
 			       const IPv4Net& nlri, const IPv4& next_hop,
-			       const bool& unicast, const bool& multicast)
+			       const bool& unicast, const bool& multicast, 
+			       const PolicyTags& policytags)
 {
     debug_msg("origin %d aspath %s nlri %s next hop %s unicast %d"
 	      " multicast %d\n",
@@ -299,7 +303,8 @@ RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
     */
     SubnetRoute<IPv4>* msg_route 
 	= new SubnetRoute<IPv4>(nlri, &pa_list, NULL);
-    
+    msg_route->set_policytags(policytags);
+   
     /*
     ** Make an internal message.
     */
@@ -326,7 +331,8 @@ RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
 bool 
 RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
 			       const IPv6Net& nlri, const IPv6& next_hop,
-			       const bool& unicast, const bool& multicast)
+			       const bool& unicast, const bool& multicast,
+			       const PolicyTags& policytags)
 {
     debug_msg("origin %d aspath %s nlri %s next hop %s unicast %d"
 	      " multicast %d\n",
@@ -343,6 +349,7 @@ RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
     */
     SubnetRoute<IPv6>* msg_route 
 	= new SubnetRoute<IPv6>(nlri, &pa_list, NULL);
+    msg_route->set_policytags(policytags);
     
     /*
     ** Make an internal message.
@@ -374,6 +381,8 @@ RibIpcHandler::withdraw_route(const IPv4Net& nlri, const bool& unicast,
     debug_msg("nlri %s unicast %d multicast %d\n", nlri.str().c_str(),
 	      unicast, multicast);
 
+// XXX: bug... wrong function called
+#if 0
     /*
     ** Create a subnet route
     */
@@ -388,17 +397,18 @@ RibIpcHandler::withdraw_route(const IPv4Net& nlri, const bool& unicast,
     /*
     ** Inject the message into the plumbing.
     */
+#endif    
     if (unicast) {
-	_plumbing_unicast->delete_route(msg, this);
+	_plumbing_unicast->delete_route(nlri, this);
 	_plumbing_unicast->push<IPv4>(this);
     }
 
     if (multicast) {
-	_plumbing_multicast->delete_route(msg, this);
+	_plumbing_multicast->delete_route(nlri, this);
 	_plumbing_multicast->push<IPv4>(this);
     }
 
-    msg_route->unref();
+//    msg_route->unref();
 
     return true;
 }
@@ -458,7 +468,8 @@ XrlQueue<A>::eventloop() const
 template<class A>
 void
 XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
-			     const IPNet<A>& net, const A& nexthop)
+			     const IPNet<A>& net, const A& nexthop, 
+			     const PolicyTags& policytags)
 {
     Queued q;
 
@@ -475,6 +486,7 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
 		 safi,
 		 net.str().c_str(),
 		 nexthop.str().c_str());
+    q.policytags = policytags;
 
     _xrl_queue.push_back(q);
 
@@ -594,7 +606,8 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
 	sent = rib.send_add_route4(q.ribname.c_str(),
 			    bgp,
 			    unicast, multicast,
-			    q.net, q.nexthop, /*metric*/0, 
+			    q.net, q.nexthop, /*metric*/0,
+			    q.policytags.xrl_atomlist(),
 			    callback(this, &XrlQueue::route_command_done,
 				     q.comment));
     } else {
@@ -635,6 +648,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
 			    bgp,
 			    unicast, multicast,
 			    q.net, q.nexthop, /*metric*/0, 
+			    q.policytags.xrl_atomlist(),
 			    callback(this, &XrlQueue::route_command_done,
 				     q.comment));
     } else {

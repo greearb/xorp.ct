@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.22 2004/06/10 22:40:39 hodson Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.23 2004/08/06 01:41:17 bms Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -347,6 +347,49 @@ public:
 	// Input values,
 	const string&	target_class,
 	const string&	target_instance);
+
+
+    XrlCmdError policy_backend_0_1_configure(
+        // Input values,
+        const uint32_t& filter,
+        const string&   conf);
+
+    XrlCmdError policy_backend_0_1_reset(
+        // Input values,
+        const uint32_t& filter);
+
+    XrlCmdError policy_backend_0_1_push_routes();
+
+
+    XrlCmdError policy_redist4_0_1_add_route4(
+        // Input values,
+        const IPv4Net&  network,
+        const bool&     unicast,
+        const bool&     multicast,
+        const IPv4&     nexthop,
+        const uint32_t& metric,
+        const XrlAtomList&      policytags);
+        
+    XrlCmdError policy_redist4_0_1_delete_route4(
+        // Input values,
+        const IPv4Net&  network,
+        const bool&     unicast,
+        const bool&     multicast);
+        
+    XrlCmdError policy_redist6_0_1_add_route6(
+        // Input values,
+        const IPv6Net&  network,
+        const bool&     unicast,
+        const bool&     multicast,
+        const IPv6&     nexthop,
+        const uint32_t& metric,
+        const XrlAtomList&      policytags);
+        
+    XrlCmdError policy_redist6_0_1_delete_route6(
+        // Input values,
+        const IPv6Net&  network,
+        const bool&     unicast,
+        const bool&     multicast);
 
     bool waiting();
     bool done();

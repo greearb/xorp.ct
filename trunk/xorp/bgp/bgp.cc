@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.38 2004/08/06 01:41:17 bms Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.39 2004/08/14 05:24:50 mjh Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -63,11 +64,13 @@ BGPMain::BGPMain()
     _plumbing_unicast = new BGPPlumbing(SAFI_UNICAST,
 					_rib_ipc_handler,
 					*_next_hop_resolver_ipv4,
-					*_next_hop_resolver_ipv6);
+					*_next_hop_resolver_ipv6,
+					_policy_filters);
     _plumbing_multicast = new BGPPlumbing(SAFI_MULTICAST,
 					  _rib_ipc_handler,
 					  *_next_hop_resolver_ipv4,
-					  *_next_hop_resolver_ipv6);
+					  *_next_hop_resolver_ipv6,
+					  _policy_filters);
     _rib_ipc_handler->set_plumbing(_plumbing_unicast, _plumbing_multicast);
 
     _process_watch = new ProcessWatch(_xrl_router, eventloop(),
@@ -774,7 +777,8 @@ BGPMain::stop_all_servers()
 
 bool
 BGPMain::originate_route(const IPv4Net& nlri, const IPv4& next_hop,
-			  const bool& unicast, const bool& multicast)
+			  const bool& unicast, const bool& multicast,
+			  const PolicyTags& policytags)
 {
     debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
@@ -782,12 +786,14 @@ BGPMain::originate_route(const IPv4Net& nlri, const IPv4& next_hop,
     AsPath aspath;
 
     return _rib_ipc_handler->originate_route(INCOMPLETE, aspath, nlri,
-					     next_hop, unicast, multicast);
+					     next_hop, unicast,
+					     multicast, policytags);
 }
 
 bool
 BGPMain::originate_route(const IPv6Net& nlri, const IPv6& next_hop,
-			  const bool& unicast, const bool& multicast)
+			  const bool& unicast, const bool& multicast,
+			  const PolicyTags& policytags)
 {
     debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
@@ -795,7 +801,8 @@ BGPMain::originate_route(const IPv6Net& nlri, const IPv6& next_hop,
     AsPath aspath;
 
     return _rib_ipc_handler->originate_route(INCOMPLETE, aspath, nlri,
-					      next_hop, unicast, multicast);
+					      next_hop, unicast,
+					      multicast, policytags);
 }
 
 bool
@@ -936,3 +943,20 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter)
 
     return true;
 }
+
+void
+BGPMain::configure_filter(const uint32_t& filter, const string& conf) {
+    _policy_filters.configure(filter,conf);
+}
+
+void
+BGPMain::reset_filter(const uint32_t& filter) {
+    _policy_filters.reset(filter);
+}
+
+void
+BGPMain::push_routes() {
+    _plumbing_unicast->push_routes();
+    _plumbing_multicast->push_routes();
+}
+

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/test_plumbing.hh,v 1.3 2003/10/14 01:54:36 atanu Exp $
+// $XORP: xorp/bgp/test_plumbing.hh,v 1.4 2004/06/10 22:40:38 hodson Exp $
 
 #ifndef __BGP_TEST_PLUMBING_HH__
 #define __BGP_TEST_PLUMBING_HH__
@@ -37,7 +37,8 @@ public:
 class PlumbingTest : public BGPPlumbing {
 public:
     PlumbingTest(NextHopResolver<IPv4>& nhr_ipv4,
-		 NextHopResolver<IPv6>& nhr_ipv6);
+		 NextHopResolver<IPv6>& nhr_ipv6,
+		 PolicyFilters& pfs);
     bool run_tests();
     bool test1();
     bool test2();

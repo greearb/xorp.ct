@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.13 2004/05/19 10:27:01 mjh Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.14 2004/06/10 22:40:36 hodson Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -22,6 +23,8 @@
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv6net.hh"
+
+#include "policy/backend/policytags.hh"
 
 #define SRF_IN_USE 0x0001
 #define SRF_WINNER 0x0002
@@ -274,6 +277,24 @@ public:
     inline uint16_t refcount() const {
 	return (_flags & SRF_REFCOUNT)>>16;
     }
+
+
+    /**
+     * @return policy tags associated with route.
+     */
+    const PolicyTags& policytags() const {
+	return _policytags;
+    }
+
+    /**
+     * Replaced policy tags of route.
+     *
+     * @param tags new policy tags for route.
+     */
+    void set_policytags(const PolicyTags& tags) {
+	_policytags = tags;
+    }	
+
 protected:
     /**
      * @short protected SubnetRoute destructor.
@@ -361,6 +382,8 @@ private:
      * deciding the route was a winner 
      */
     mutable uint32_t _igp_metric;
+
+    PolicyTags _policytags;
 };
 
 

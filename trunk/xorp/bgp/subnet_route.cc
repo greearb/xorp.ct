@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.12 2004/05/19 17:37:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.13 2004/06/10 22:40:36 hodson Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -46,6 +47,8 @@ SubnetRoute<A>::SubnetRoute(const SubnetRoute<A>& route_to_clone)
     if (_parent_route)
 	_parent_route->bump_refcount(1);
     _igp_metric = route_to_clone._igp_metric;
+
+    _policytags = route_to_clone._policytags;
 }
 
 template<class A>
@@ -240,10 +243,12 @@ SubnetRoute<A>::str() const {
     s += "  Net: " + _net.str() + "\n";
     s += "  PAList: " + _attributes->str();
 #ifdef DEBUG_FLAGS
+    s += "\n";
+    s += "  Policytags: " + _policytags.str() + "\n";
     if (is_winner()) {
-	s += "  route is winner";
+	s += "  route is winner\n";
     } else {
-	s += "  route is not winner";
+	s += "  route is not winner\n";
     }
     if (is_filtered()) {
 	s += "  route is filtered";
