@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mfea/README,v 1.3 2003/03/11 01:21:45 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.1 2003/06/03 21:58:06 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -19,26 +19,26 @@ processes such as MLD/IGMP and PIM-SM.
        system supports it), or reads bandwidth forwarding statistics per
        dataflow.
 
-    3) It reads information about network interfaces from the kernel.
+    3) It receives from the FEA information about network interfaces,
+       and forwards this information to the protocols registered with
+       the MFEA.
 
-    4) It reports changes to network interface configurations (not
-       tested yet).
+    4) It receives from the FEA information about the underlying unicast
+       forwarding table, and composes Reverse-Path Forwarding information
+       for processes such as PIM-SM.
 
-    5) It reads the underlying unicast forwarding table, and composes
-       Reverse-Path Forwarding information for processes such as PIM-SM.
-
-    6) It reports changes to the RPF information.
-
-    7) It allows protocol-specific packets (e.g., PIM or IGMP) to be
+    5) It allows protocol-specific packets (e.g., PIM or IGMP) to be
        sent/received to/from network interfaces.
 
+Note that typically the MFEA would be part of the unicast FEA process,
+though logically it is a separate entity.
 
 Configuration
 =============
 
-MFEA like most Xorp processes does not take its configuration
+MFEA like most Xorp modules does not take its configuration
 parameters from the command line. Its parameters are provided via
-XRLs. At the very least a MFEA process must be provided with
+XRLs. At the very least a MFEA module must be provided with
 the set of network interfaces to enable for multicast.
 
 Startup
@@ -48,9 +48,10 @@ In normal operation, MFEA would be started by the XORP router manager
 process, not directly from the command line.  
 
 For testing and debugging purposes, MFEA can be manually started.  The
-Xorp MFEA process assumes that the XRL finder is are already running.
-However, the binary program ``test_mfea'' already contains it as well,
-therefore it is sufficient to start only this program.
+Xorp MFEA module (as part of the FEA process) assumes that the XRL finder
+is are already running.  However, the binary program ``test_mfea''
+already contains it as well, therefore it is sufficient to start only
+this program.
 
 After ``test_mfea'' is started, the MFEA is disabled by default. To
 start it, and to configure its operation, run script ``configure_mfea''.
@@ -82,9 +83,11 @@ it for each router:
  - After MFEA is started, if you want to access its internal
    information, you can use the built-in CLI:
      telnet localhost 12000
-   If you want to enable access from other subnets other than the local
-   host only, add the corresponding subnet to test_mfea.cc under
-   "CLI access".
+   If you want to enable access from other subnets, add the corresponding
+   subnet to the following variable:
+
+	CLI_ENABLE_SUBNETS="127.0.0.1/32"
+
 
    Currently, the CLI supports primarily "show" commands. For example,
    "show mfea interface" will show the list of all interfaces known to
@@ -116,10 +119,10 @@ the BGP testing framework.
 Status
 ======
 
-Currently (note: March 10, 2003), the MFEA supports abstraction for
+Currently (note: June 6, 2003), the MFEA supports abstraction for
 the following systems:
 
- * {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5).
+ * {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5 and FreeBSD-4.7).
  * Lunux OS (tested only on Red Hat Linux 7.2 with kernel 2.4.18)
 
 However, even though IPv6 support is implemented, it has not been tested yet.
