@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.11 2004/02/22 04:18:17 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.12 2004/02/24 21:04:54 pavlin Exp $"
 
 
 //
@@ -379,35 +379,34 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 
 int
 PimVif::pim_register_send(const IPvX& rp_addr,
-			  const IPvX& ,		// source_addr,
-			  const IPvX& ,		// group_addr,
+			  const IPvX& source_addr,
+			  const IPvX& group_addr,
 			  const uint8_t *rcvbuf,
 			  size_t rcvlen)
 {
     const struct ip *ip4 = (const struct ip *)rcvbuf;
     buffer_t *buffer;
     uint32_t flags = 0;
-    IPvX from(family()), to(family());
     size_t mtu = 0;
     
-    if (ip4->ip_v != from.ip_version()) {
+    if (ip4->ip_v != source_addr.ip_version()) {
 	XLOG_WARNING("Cannot encapsulate IP packet: "
 		     "inner IP version (%d) != expected IP version (%d)",
-		     ip4->ip_v, from.ip_version());
+		     ip4->ip_v, source_addr.ip_version());
 	return (XORP_ERROR);
     }
     
     // TODO: XXX: PAVPAVPAV: if a border router, set the Border-bit to flags
     
     //
-    // Get the inner source and destination addreses
+    // Calculate the MTU.
+    //
+    // Note that we handle only the case when the encapsulated
+    // packet size will become larger than the maximum packet size.
     //
     switch (family()) {
     case AF_INET:
     {
-	from.copy_in(ip4->ip_src);
-	to.copy_in(ip4->ip_dst);
-	// Compute the MTU
 	mtu = 0xffff			// IPv4 max packet size
 	    - (0xf << 2)		// IPv4 max header size
 	    - sizeof(struct pim)
@@ -418,11 +417,6 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
-	const struct ip6_hdr *ip6 = (const struct ip6_hdr *)rcvbuf;
-	
-	from.copy_in(ip6->ip6_src);
-	to.copy_in(ip6->ip6_dst);
-	// Compute the MTU
 	mtu = 0xffff	      // IPv6 max payload size (jumbo payload excluded)
 	    - sizeof(struct pim)
 	    - sizeof(uint32_t);
@@ -462,7 +456,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    XLOG_WARNING("Cannot fragment encapsulated IP packet "
 			 "from %s to %s: "
 			 "fragmentation not allowed",
-			 cstring(from), cstring(to));
+			 cstring(source_addr), cstring(group_addr));
 	    // XXX: we don't send ICMP "fragmentation needed" back to the
 	    // sender, because in IPv4 ICMP error messages are not sent
 	    // back for datagrams destinated to an multicast address.
@@ -474,7 +468,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    XLOG_WARNING("Cannot fragment encapsulated IP packet "
 			 "from %s to %s: "
 			 "cannot send fragment with size less than 8 octets",
-			 cstring(from), cstring(to));
+			 cstring(source_addr), cstring(group_addr));
 	    return (XORP_ERROR);
 	}
 	
@@ -511,7 +505,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 		    XLOG_WARNING("Cannot fragment encapsulated IP packet "
 				 "from %s to %s: "
 				 "malformed IPv4 option",
-				 cstring(from), cstring(to));
+				 cstring(source_addr), cstring(group_addr));
 		    return (XORP_ERROR);
 		}
                 optlen = cp[IPOPT_OLEN];
@@ -519,7 +513,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 		    XLOG_WARNING("Cannot fragment encapsulated IP packet "
 				 "from %s to %s: "
 				 "malformed IPv4 option",
-				 cstring(from), cstring(to));
+				 cstring(source_addr), cstring(group_addr));
 		    return (XORP_ERROR);
 		}
 		
