@@ -30,14 +30,14 @@
 
 \title{
 XRL Interfaces: Specifications and Tools \\
-\vspace{1ex} Version 0.3
+\vspace{1ex} Version 0.4
 }
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{June 9, 2003}
+\date{August 28, 2003}
 
 \begin{document}
 
@@ -109,11 +109,11 @@ client of the former interface and the CLI a client of the latter.
 
 An interface is declared using the \textbf{interface} keyword and a
 set of XRL methods associated with it.
- 
+
 \smallskip
 \noindent\framebox[\textwidth]{
    {\bf interface} $<${\it interface name}$>$/$<${\it interface version}$>$
-   \{ 
+   \{
      \dots {\it xrl method\ list} \dots
    \}
 }
@@ -125,7 +125,7 @@ text form.  An example of this is shown in listing \ref{lst:eg-interface}.
 \lstinputlisting[%
   caption={Example Xrl Interface Specification%
     \label{lst:eg-interface}%
-  }]{../../xrl/interfaces/test.xif} 
+  }]{../../xrl/interfaces/test.xif}
 
 Whitespace can be used to separate XRL Atoms in the description and
 backslashes can be used to continue XRL descriptions across multiple
@@ -161,7 +161,7 @@ example is shown in listing \ref{lst:eg-target} and further examples
 can be found in the \texttt{xorp/xrl/targets} directory.
 
 \lstinputlisting[%
-  caption={Example XRL Target 
+  caption={Example XRL Target
   specification.\label{lst:eg-target}}]%
 {../../xrl/targets/test.tgt}
 
@@ -219,16 +219,16 @@ public:
     typedef XorpCallback2<void, const XrlError&, const string*>::RefPtr CB3;
     /**
      *  Send Xrl intended to:
-     *  
+     *
      *  Get greeting
-     *  
+     *
      *  @param tgt_name Xrl Target name
-     *  
+     *
      *  @param greeting_num index of greeting
      */
     void send_get_greeting(
-        const char*     target_name, 
-        const int32_t&  greeting_num, 
+        const char*     target_name,
+        const int32_t&  greeting_num,
         const CB3&      cb
     );
 
