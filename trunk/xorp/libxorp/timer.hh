@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.6 2003/03/27 07:51:19 hodson Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.7 2003/03/27 17:01:07 hodson Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -62,6 +62,18 @@ public:
     const timeval& expiry() const;
 
     /**
+     * Get the remaining time until the timer expires.
+     * 
+     * @param remain the return-by-reference value with the remaining
+     * time until the timer expires. If the current time is beyond
+     * the expire time (e.g., if we are behind schedule with the timer
+     * processing), the return time is zero.
+     * @return true if the remaining time has meaningful value (e.g.,
+     * if timer was scheduled), otherwise false.
+     */
+    bool time_remaining(TimeVal& remain) const;
+
+    /**
      * Expire the @ref XorpTimer object when the TimerList is next run.
      */
     void schedule_now();
@@ -72,10 +84,10 @@ public:
     void schedule_at(const timeval& when);
 
     /**
-     * Schedule the @ref XorpTimer object amount described in timeval
-     * structure after the current time.
+     * Schedule the @ref XorpTimer object to expire in @ref wait
+     * after the current time.
      */
-    void schedule_after(const timeval& wait);
+    void schedule_after(const TimeVal& wait);
 
     /**
      * Schedule the @ref XorpTimer object.
@@ -189,12 +201,12 @@ public:
     /**
      * Create a XorpTimer that will be scheduled once.
      *
-     * @param interval the relative time when the timer expires.
+     * @param wait the relative time when the timer expires.
      * @param ocb callback object that is invoked when timer expires.
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer new_oneoff_after(const timeval& interval, 
+    XorpTimer new_oneoff_after(const TimeVal& wait,
 			       const OneoffTimerCallback& ocb);
 
     /**
@@ -229,12 +241,12 @@ public:
      *
      * @return the @ref XorpTimer created.  
      */
-    XorpTimer set_flag_at(const timeval& when, bool* flag_ptr);
+    XorpTimer set_flag_at(const timeval& when, bool *flag_ptr);
 
     /**
      * Create a XorpTimer to set a flag.
      *
-     * @param interval the relative time as a timeval when the timer expires.  
+     * @param wait the relative time when the timer expires.  
      *
      * @param flag_ptr pointer to a boolean variable that is set to
      * false when this function is called and will be set to true when
@@ -242,7 +254,7 @@ public:
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer set_flag_after(const timeval& interval, bool* flag_ptr);
+    XorpTimer set_flag_after(const TimeVal& wait, bool *flag_ptr);
     
     /**
      * Create a XorpTimer to set a flag.
@@ -298,7 +310,7 @@ public:
     /**
      * Read from clock used by @ref TimerList object.
      *
-     * @param now the timeval structure to be assigned the current time.
+     * @param now the return-by-reference value with the current time.
      */
     inline void current_time(timeval& now) const { _current_time_proc(&now); }
     
@@ -333,9 +345,10 @@ protected:
 
     bool scheduled() const	{ return _pos_in_heap >= 0; }
     const timeval& expiry() const	{ return _expires; }
+    bool time_remaining(TimeVal& remain) const;
     
     void schedule_at(const timeval&);
-    void schedule_after(const timeval&);
+    void schedule_after(const TimeVal& wait);
     void schedule_after_ms(int x_ms);
     void reschedule_after_ms(int x_ms);
     void unschedule();
@@ -406,6 +419,16 @@ XorpTimer::expiry() const
 {
     assert(_node);
     return _node->expiry();
+}
+
+inline bool
+XorpTimer::time_remaining(TimeVal& remain) const
+{
+    if (_node == NULL) {
+	remain.clear();
+	return (false);
+    }
+    return(_node->time_remaining(remain));
 }
 
 inline void

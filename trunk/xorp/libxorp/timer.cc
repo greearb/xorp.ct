@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.4 2003/03/27 07:51:19 hodson Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.5 2003/03/27 17:01:07 hodson Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -89,6 +89,24 @@ TimerNode::expire(XorpTimer&, void*)
     // Implemented by children
 }
 
+bool
+TimerNode::time_remaining(TimeVal& remain) const
+{
+    struct timeval now_tmp;
+    
+    assert(_list);
+    _list->current_time(now_tmp);
+    
+    TimeVal now(now_tmp);
+    remain.copy_in(expiry());
+    if (remain <= now)
+	remain.clear();
+    else
+	remain -= now;
+    
+    return (true);
+}
+
 void
 TimerNode::unschedule()
 {
@@ -106,12 +124,13 @@ TimerNode::schedule_at(const timeval& t)
 }
 
 void
-TimerNode::schedule_after(const timeval& interval)
+TimerNode::schedule_after(const TimeVal& wait)
 {
     assert(_list);
     unschedule();
 
-    timeval now;
+    timeval now, interval;
+    wait.copy_out(interval);
     _list->current_time(now);
     _expires = now + interval;
     _list->schedule_node(this);
@@ -193,11 +212,12 @@ TimerList::new_oneoff_at(const timeval& tv, const OneoffTimerCallback& cb)
 }
 
 XorpTimer
-TimerList::new_oneoff_after(const timeval& interval, 
+TimerList::new_oneoff_after(const TimeVal& wait, 
 			    const OneoffTimerCallback& cb)
 {
     TimerNode* n = new OneoffTimerNode2(this, cb);
-    n->schedule_after(interval);
+    
+    n->schedule_after(wait);
     return XorpTimer(n);
 }
 
@@ -233,11 +253,11 @@ TimerList::set_flag_at(const timeval& tv, bool *flag_ptr)
 }
 
 XorpTimer
-TimerList::set_flag_after(const timeval& interval, bool *flag_ptr)
+TimerList::set_flag_after(const TimeVal& wait, bool *flag_ptr)
 {
     assert(flag_ptr);
     *flag_ptr = false;
-    return new_oneoff_after(interval, callback(set_flag_hook, flag_ptr));
+    return new_oneoff_after(wait, callback(set_flag_hook, flag_ptr));
 }
 
 XorpTimer
