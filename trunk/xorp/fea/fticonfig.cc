@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.10 2003/10/02 01:12:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.11 2003/10/13 02:23:19 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -39,13 +39,14 @@ FtiConfig::FtiConfig(EventLoop& eventloop)
       _ftic_entry_get(NULL), _ftic_entry_set(NULL), _ftic_entry_observer(NULL),
       _ftic_table_get(NULL), _ftic_table_set(NULL), _ftic_table_observer(NULL),
       _ftic_entry_get_dummy(*this),
-      _ftic_entry_get_netlink(*this),
       _ftic_entry_get_rtsock(*this),
+      _ftic_entry_get_netlink(*this),
       _ftic_entry_set_dummy(*this),
       _ftic_entry_set_rtsock(*this),
       _ftic_entry_set_netlink(*this),
       _ftic_entry_observer_dummy(*this),
       _ftic_entry_observer_rtsock(*this),
+      _ftic_entry_observer_netlink(*this),
       _ftic_table_get_dummy(*this),
       _ftic_table_get_netlink(*this),
       _ftic_table_get_sysctl(*this),
@@ -54,6 +55,7 @@ FtiConfig::FtiConfig(EventLoop& eventloop)
       _ftic_table_set_netlink(*this),
       _ftic_table_observer_dummy(*this),
       _ftic_table_observer_rtsock(*this),
+      _ftic_table_observer_netlink(*this),
       _unicast_forwarding_enabled4(false),
       _unicast_forwarding_enabled6(false),
       _accept_rtadv_enabled6(false)

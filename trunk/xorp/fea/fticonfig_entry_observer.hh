@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_observer.hh,v 1.4 2003/05/28 21:50:53 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_observer.hh,v 1.5 2003/06/05 02:39:36 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_OBSERVER_HH__
 #define __FEA_FTICONFIG_ENTRY_OBSERVER_HH__
@@ -122,6 +122,42 @@ public:
     virtual void receive_data(const uint8_t* data, size_t nbytes);
     
     void rtsock_data(const uint8_t* data, size_t nbytes);
+    
+private:
+    
+};
+
+class FtiConfigEntryObserverNetlink : public FtiConfigEntryObserver,
+				      public NetlinkSocket4,
+				      public NetlinkSocket6,
+				      public NetlinkSocketObserver {
+public:
+    FtiConfigEntryObserverNetlink(FtiConfig& ftic);
+    virtual ~FtiConfigEntryObserverNetlink();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+    
+    /**
+     * Receive data from the underlying system.
+     * 
+     * @param data the buffer with the received data.
+     * @param nbytes the number of bytes in the data buffer @ref data.
+     */
+    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    
+    void nlsock_data(const uint8_t* data, size_t nbytes);
     
 private:
     

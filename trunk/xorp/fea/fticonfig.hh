@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.8 2003/09/12 23:44:45 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.9 2003/10/13 02:23:19 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -362,8 +362,8 @@ private:
     // Ordering is important: the last that is supported is the one to use.
     //
     FtiConfigEntryGetDummy	_ftic_entry_get_dummy;
-    FtiConfigEntryGetNetlink	_ftic_entry_get_netlink;
     FtiConfigEntryGetRtsock	_ftic_entry_get_rtsock;
+    FtiConfigEntryGetNetlink	_ftic_entry_get_netlink;
     
     //
     // The mechanisms to set single-entry information into the unicast
@@ -384,6 +384,7 @@ private:
     //
     FtiConfigEntryObserverDummy	 _ftic_entry_observer_dummy;
     FtiConfigEntryObserverRtsock _ftic_entry_observer_rtsock;
+    FtiConfigEntryObserverNetlink _ftic_entry_observer_netlink;
 
     //
     // The mechanisms to get the whole table information from the unicast
@@ -413,6 +414,7 @@ private:
     //
     FtiConfigTableObserverDummy	 _ftic_table_observer_dummy;
     FtiConfigTableObserverRtsock _ftic_table_observer_rtsock;
+    FtiConfigTableObserverNetlink _ftic_table_observer_netlink;
     
     //
     // Original state from the underlying system before the FEA was started
