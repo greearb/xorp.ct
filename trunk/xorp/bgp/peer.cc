@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.74 2004/05/30 06:39:00 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.75 2004/05/30 07:03:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -345,6 +345,8 @@ void
 BGPPeer::send_notification_complete(SocketClient::Event ev,
 				    const uint8_t* buf, bool error)
 {
+    TIMESPENT();
+
     switch (ev) {
     case SocketClient::DATA:
 	debug_msg("Notification sent\n");
