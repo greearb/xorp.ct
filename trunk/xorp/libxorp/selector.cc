@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.9 2003/04/02 02:53:51 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.10 2003/04/02 17:10:38 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -267,6 +267,19 @@ SelectorList::select(int millisecs)
 {
     TimeVal t(millisecs / 1000, (millisecs % 1000) * 1000);
     return select(&t);
+}
+
+void
+SelectorList::get_fd_set(SelectorMask selected_mask, fd_set& fds) const
+{
+    fds = _fds [selected_mask];
+    return;
+}
+
+int
+SelectorList::get_max_fd() const
+{
+    return _maxfd;
 }
 
 void
