@@ -12,11 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.1 2003/04/24 23:43:48 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "template_tree.hh"
-#include "template_commands.hh"
 #include "module_manager.hh"
 #include "split.hh"
 
@@ -59,12 +58,7 @@ main(int argc, char* const argv[])
 
     //start the module manager
     ModuleManager mmgr(eventloop, /*verbose = */true);
-
-    ModuleCommand mod_cmd("%modinfo", *tt);
-    mod_cmd.add_action(split("provides finder", ' '), tt->xrldb());
-    mod_cmd.add_action(split("path ../libxipc/finder", ' '), tt->xrldb());
-
-    mmgr.new_module(mod_cmd);
+    mmgr.new_module("finder", "../libxipc/finder");
 
     if (mmgr.module_starting("finder") == true
 	|| mmgr.module_running("finder") == true) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.7 2003/04/24 20:45:06 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.8 2003/04/24 23:43:47 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <sys/types.h>
@@ -44,11 +44,9 @@ static void childhandler(int x) {
     module_pids[pid]->failed();
 }
 
-Module::Module(const ModuleCommand& cmd, bool verbose)
-    : _cmd(cmd), _verbose(verbose)
-{
-    _name = cmd.name();
-}
+Module::Module(const string& name, bool verbose)
+    : _name(name), _verbose(verbose)
+{}
 
 int Module::set_execution_path(const string &path) {
     _path = path;
@@ -213,17 +211,16 @@ ModuleManager::~ModuleManager() {
 }
 
 bool
-ModuleManager::new_module(const ModuleCommand& cmd) {
+ModuleManager::new_module(const string& name, const string& path) {
     if (_verbose)
-	printf("ModuleManager::new_module %s\n", cmd.name().c_str());
-    string name = cmd.name();
+	printf("ModuleManager::new_module %s\n", name.c_str());
     map<string, Module *>::iterator found_mod;
     found_mod = _modules.find(name);
     if (found_mod == _modules.end()) {
 	Module *newmod;
-	newmod = new Module(cmd, _verbose);
+	newmod = new Module(name, _verbose);
 	_modules[name] = newmod;
-	if (newmod->set_execution_path(cmd.path()) != XORP_OK)
+	if (newmod->set_execution_path(path) != XORP_OK)
 	    return false;
 	return true;
     } else {

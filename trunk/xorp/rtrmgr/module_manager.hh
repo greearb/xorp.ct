@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.7 2003/04/24 20:45:06 mjh Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.8 2003/04/24 23:43:47 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -42,7 +42,7 @@ public:
 
 class Module {
 public:
-    Module(const ModuleCommand& cmd, bool verbose);
+    Module(const string& name, bool verbose);
     int set_execution_path(const string &path);
     ~Module();
     int run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb);
@@ -61,7 +61,6 @@ private:
     bool _do_exec; //false indicates we're running in debug mode, so
                    //shouldn't actually start any processes
 
-    const ModuleCommand& _cmd;
     bool _verbose; //verbose output of important events
 };
 
@@ -70,7 +69,7 @@ public:
     ModuleManager(EventLoop& eventloop, bool verbose);
 
     ~ModuleManager();
-    bool new_module(const ModuleCommand& cmd);
+    bool new_module(const string& mod_name, const string& path);
     int run_module(const string& mod_name, bool do_exec, 
 		   XorpCallback1<void, bool>::RefPtr cb);
     bool module_exists(const string &name) const;

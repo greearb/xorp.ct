@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.4 2003/04/23 04:24:36 mjh Exp $
+// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.5 2003/04/24 23:43:48 mjh Exp $
 
 #ifndef __RTRMGR_SLAVE_MODULE_MANAGER_HH__
 #define __RTRMGR_SLAVE_MODULE_MANAGER_HH__
@@ -34,7 +34,7 @@ class ModuleCommand;
 class ModuleManager {
 public:
     ModuleManager(EventLoop& eventloop);
-    bool new_module(const ModuleCommand& cmd);
+    bool new_module(const string& mod_name, const string& path);
     int run_module(const string& mod_name, bool do_exec, 
 		   XorpCallback1<void, bool>::RefPtr cb);
     bool module_exists(const string &name) const;

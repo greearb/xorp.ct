@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.15 2003/04/23 04:24:36 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.16 2003/04/24 23:43:48 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -730,7 +730,7 @@ ModuleCommand::execute(XorpClient& xclient, uint tid,
 		|| module_manager.module_running(_modname))
 		return XORP_OK;
 	} else {
-	    if (!module_manager.new_module(*this))
+	    if (!module_manager.new_module(_modname, _modpath))
 		return XORP_ERROR;
 	}
 
