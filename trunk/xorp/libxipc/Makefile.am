@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.9 2003/02/25 18:58:49 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.10 2003/03/04 23:41:22 hodson Exp $
 ##
 
 
@@ -8,7 +8,7 @@
 # - The library
 noinst_LIBRARIES = libxipc.a libfinder.a
 
-# -- Prograsm
+# -- Programs
 bin_PROGRAMS  =	call_xrl finder
 
 if ORIGINAL_FINDER

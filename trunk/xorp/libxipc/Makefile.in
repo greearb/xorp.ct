@@ -82,7 +82,7 @@ RIP_OS = @RIP_OS@
 
 noinst_LIBRARIES = libxipc.a libfinder.a
 
-# -- Prograsm
+# -- Programs
 bin_PROGRAMS = call_xrl finder
 @ORIGINAL_FINDER_TRUE@finder_SOURCES = finder.cc
 @ORIGINAL_FINDER_FALSE@finder_SOURCES = finder_ng_main.cc
