@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.5 2003/01/25 01:25:59 mjh Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.6 2003/01/29 00:43:14 mjh Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -35,6 +35,9 @@
  * The template should be invoked with two classes, the basetype "A"
  * for the search Key (which is a subnet, IPNet<A>), and the Payload.
  */
+
+template <class A, class Payload>
+class RefTrie;
 
 /**
  * @short RefTrieNode definition
@@ -74,7 +77,8 @@ public:
 	//assert that the node has been deleted and it's reference
 	//count is zero
 	assert((_references&(NODE_DELETED|NODE_REFS_MASK))==NODE_DELETED);
-	delete _p; 
+	if (_p)
+	    delete_payload(_p); 
     }
 
     /**
@@ -122,7 +126,8 @@ public:
     Payload &p()    			        { return *_p;		}
 
     void set_payload(const Payload& p) {
-	delete _p;
+	if (_p)
+	    delete_payload(_p);
 	_p = new PPayload(p);
 	//clear the DELETED flag
 	_references ^= _references & NODE_DELETED;
@@ -331,6 +336,11 @@ public:
     }
 
 private:
+    /* delete_payload is a separate method to allow specialization */
+    void delete_payload(Payload* p) {
+	delete p;
+    }
+
 
     void dump(const char *msg) const			{
 #if 0
@@ -353,9 +363,6 @@ private:
     uint32_t    _references;  
 };
 
-
-template <class A, class Payload>
-class RefTrie;
 
 /**
  * Iterator on a trie.
@@ -865,7 +872,7 @@ RefTrieNode<A, Payload>::erase()
     } else {
 	_references |= NODE_DELETED;
 	if (_p) {
-	    delete _p;
+	    delete_payload(_p);
 	    _p = NULL;
 	}
 

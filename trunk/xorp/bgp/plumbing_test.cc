@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.8 2003/01/29 23:38:13 rizzo Exp $"
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.9 2003/02/06 06:44:33 mjh Exp $"
 
 #include "fcntl.h"
 
@@ -113,7 +113,7 @@ PlumbingTest::test1()
     printf("Delete done\n");
 
     delete rtm1;
-    delete route1;
+    route1->unref();
 
     printf("------------------------------------------------------\n");
     IPv4 rtaddr2("10.10.20.0");
@@ -126,7 +126,7 @@ PlumbingTest::test1()
     add_route(*rtm1, &dummy_peerhandler1);
     printf("Add done\n");
     delete rtm1;
-    delete route1;
+    route1->unref();
 
     InternalMessage<IPv4> *rtm2;
     printf("Adding Route 2\n");
@@ -136,7 +136,7 @@ PlumbingTest::test1()
     add_route(*rtm2, &dummy_peerhandler1);
     printf("Add done\n");
     delete rtm2;
-    delete route2;
+    route2->unref();
 
     printf("Pushing Routes\n");
     push(&dummy_peerhandler1);
@@ -150,7 +150,7 @@ PlumbingTest::test1()
     rtm2->set_push();
     delete_route(*rtm2, &dummy_peerhandler1);
     delete rtm2;
-    delete route2;
+    route2->unref();
     printf("Delete done\n");
     printf("------------------------------------------------------\n");
     printf("Deleting Route 1\n");
@@ -161,7 +161,7 @@ PlumbingTest::test1()
     delete_route(*rtm1, &dummy_peerhandler1);
     printf("Delete done\n");
     delete rtm1;
-    delete route1;
+    route1->unref();
     printf("------------------------------------------------------\n");
     printf("Test1 of decision\n");
     printf("Adding Route 1\n");
@@ -171,7 +171,7 @@ PlumbingTest::test1()
     add_route(*rtm1, &dummy_peerhandler1);
     printf("Add done\n");
     delete rtm1;
-    delete route1;
+    route1->unref();
 
     printf("Pushing Routes\n");
     push(&dummy_peerhandler1);
@@ -187,7 +187,7 @@ PlumbingTest::test1()
     add_route(*rtm2, &dummy_peerhandler2);
     printf("Add done\n");
     delete rtm2;
-    delete route2;
+    route2->unref();
 
     printf("Pushing Routes\n");
     push(&dummy_peerhandler2);
@@ -200,7 +200,7 @@ PlumbingTest::test1()
     delete_route(*rtm2, &dummy_peerhandler2);
     printf("Delete done\n");
     delete rtm2;
-    delete route2;
+    route2->unref();
 
     printf("Pushing Routes\n");
     push(&dummy_peerhandler2);
@@ -226,7 +226,7 @@ PlumbingTest::test1()
     delete_route(*rtm2, &dummy_peerhandler2);
     printf("Delete done\n");
     delete rtm2;
-    delete route2;
+    route2->unref();
 
     printf("Pushing Routes\n");
     push(&dummy_peerhandler2);
@@ -293,7 +293,7 @@ PlumbingTest::test2()
 	   (u_int)(&dummy_peerhandler1));
     add_route(*rtm1, &dummy_peerhandler1);
     delete rtm1;
-    delete route1;
+    route1->unref();
     printf("4 ****>%s<****\n", aspathatt.str().c_str());
     printf("Add done\n");
 

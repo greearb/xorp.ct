@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.5 2003/01/16 23:18:57 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.6 2003/02/06 06:44:33 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -21,6 +21,27 @@
 #include "libxorp/xlog.h"
 #include "route_table_cache.hh"
 #include <map>
+
+/**
+ * Specialize Trie so that the SubnetRoute payload is deleted using
+ * the SubnetRoute's unref method, which permits delayed deletion.
+ */
+template<>
+void
+TrieNode<IPv4, const SubnetRoute<IPv4> >
+::delete_payload(const SubnetRoute<IPv4>* p) 
+{
+    p->unref();
+}
+
+template<>
+void
+TrieNode<IPv6, const SubnetRoute<IPv6> >
+::delete_payload(const SubnetRoute<IPv6>* p) 
+{
+    p->unref();
+}
+
 
 template<class A>
 CacheTable<A>::CacheTable(string table_name,  
@@ -139,7 +160,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	    //exists, because the parent_route pointer of our cached
 	    //version is probably now invalid.
 	    old_route_copy->
-		set_parent_route(old_rtmsg.route()->original_route());
+		set_parent_route(old_rtmsg.route()->parent_route());
 
 	    old_rtmsg_ptr = new InternalMessage<A>(old_route_copy,
 						   old_rtmsg.origin_peer(),
@@ -199,7 +220,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     if (old_rtmsg_ptr != &old_rtmsg) {
 	delete old_rtmsg_ptr;
 	assert(old_route_copy != NULL);
-	delete old_route_copy;
+	old_route_copy->unref();
     }
 
     return result;
@@ -229,7 +250,7 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	//set the copy's parent route to one that still exists, because
 	//the parent_route pointer of our cached version is
 	//probably now invalid
-	route_copy.set_parent_route(rtmsg.route()->original_route());
+	route_copy.set_parent_route(rtmsg.route()->parent_route());
 
 	//delete it from our cache trie 
 	_route_table.erase(net);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.6 2003/01/29 00:38:57 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.7 2003/02/06 06:44:35 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -146,7 +146,7 @@ int main(int, char** argv) {
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     nhlookup_table->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table->write_separator();
@@ -157,7 +157,7 @@ int main(int, char** argv) {
     nhlookup_table->delete_route(*msg, NULL);
 
     debug_table->write_separator();
-    delete sr1;
+    sr1->unref();
     delete msg;
 
 
@@ -183,7 +183,7 @@ int main(int, char** argv) {
     nhlookup_table->delete_route(*msg, NULL);
 
     debug_table->write_separator();
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //================================================================
@@ -199,7 +199,7 @@ int main(int, char** argv) {
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     nhlookup_table->add_route(*msg, NULL);
-    //Note: don't delete sr1 here - the NhLookupTable assumes the
+    //Note: don't sr1->unref() here - the NhLookupTable assumes the
     //subnet route is still held in the RIB-In.
     delete msg;
 
@@ -221,7 +221,7 @@ int main(int, char** argv) {
     nhlookup_table->delete_route(*msg, NULL);
 
     debug_table->write_separator();
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //================================================================
@@ -265,12 +265,12 @@ int main(int, char** argv) {
     //delete the routes
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     nhlookup_table->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     nhlookup_table->delete_route(*msg, NULL);
-    delete sr2;
+    sr2->unref();
     delete msg;
 
     debug_table->write_separator();
@@ -301,7 +301,7 @@ int main(int, char** argv) {
     nhlookup_table->replace_route(*msg, *msg2, NULL);
     //Note: don't delete sr2 here - the NhLookupTable assumes the
     //subnet route is still held in the RIB-In.
-    delete sr1;
+    sr1->unref();
     delete msg;
     delete msg2;
 
@@ -322,7 +322,7 @@ int main(int, char** argv) {
     nhlookup_table->delete_route(*msg, NULL);
 
     debug_table->write_separator();
-    delete sr2;
+    sr2->unref();
     delete msg;
 
     //================================================================
@@ -338,7 +338,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD");
     nhlookup_table->add_route(*msg, NULL);
-    //Note: don't delete sr1 here - the NhLookupTable assumes the
+    //Note: don't sr1->unref() here - the NhLookupTable assumes the
     //subnet route is still held in the RIB-In.
     delete msg;
 
@@ -347,14 +347,14 @@ int main(int, char** argv) {
     sr3 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
     //delete the old route, as might happen with a replace route on RibIn
-    delete sr1;
+    sr1->unref();
     sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0); 
     debug_table->write_comment("REPLACE");
     nhlookup_table->replace_route(*msg, *msg2, NULL);
-    //Note: don't delete sr2 here - the NhLookupTable assumes the
+    //Note: don't sr2->unref() here - the NhLookupTable assumes the
     //subnet route is still held in the RIB-In.
-    delete sr3;
+    sr3->unref();
     delete msg;
     delete msg2;
 
@@ -375,7 +375,7 @@ int main(int, char** argv) {
     nhlookup_table->delete_route(*msg, NULL);
 
     debug_table->write_separator();
-    delete sr2;
+    sr2->unref();
     delete msg;
 
     //================================================================
@@ -398,12 +398,12 @@ int main(int, char** argv) {
     msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("FIRST REPLACE");
     nhlookup_table->replace_route(*msg, *msg2, NULL);
-    //Note: don't delete sr2 here - the NhLookupTable assumes the
+    //Note: don't sr2->unref() here - the NhLookupTable assumes the
     //subnet route is still held in the RIB-In.
     delete msg;
     delete msg2;
-    delete sr1;
-    delete sr2;
+    sr1->unref();
+    sr2->unref();
 
     debug_table->write_separator();
  
@@ -413,9 +413,9 @@ int main(int, char** argv) {
     msg2 = new InternalMessage<IPv4>(sr3, &handler1, 0); 
     debug_table->write_comment("SECOND REPLACE");
     nhlookup_table->replace_route(*msg, *msg2, NULL);
-    //Note: don't delete sr2 here - the NhLookupTable assumes the
+    //Note: don't sr2->unref() here - the NhLookupTable assumes the
     //subnet route is still held in the RIB-In.
-    delete sr1;
+    sr1->unref();
     delete msg;
     delete msg2;
 
@@ -436,7 +436,7 @@ int main(int, char** argv) {
     nhlookup_table->delete_route(*msg, NULL);
 
     debug_table->write_separator();
-    delete sr3;
+    sr3->unref();
     delete msg;
 
     //================================================================
@@ -486,13 +486,13 @@ int main(int, char** argv) {
     //delete the routes
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     nhlookup_table->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     msg->set_push();
     nhlookup_table->delete_route(*msg, NULL);
-    delete sr2;
+    sr2->unref();
     delete msg;
 
     debug_table->write_comment("SEND PUSH AGAIN");

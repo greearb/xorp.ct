@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.7 2003/01/31 23:39:40 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.8 2003/02/06 06:44:34 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -112,15 +112,15 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	}
 #endif
 	// preserve the information
-	SubnetRoute<A> route_copy(*existing_route);
-	assert(route_copy.original_route() == &route_copy);
+	SubnetRoute<A>* route_copy = new SubnetRoute<A>(*existing_route);
+	assert(route_copy->parent_route() == NULL);
 	deletion_nexthop_check(existing_route);
 
 	// delete from the Trie
 	_route_table->erase(rtmsg.net());
 	_table_version++;
 
-	InternalMessage<A> old_rt_msg(&route_copy, _peer, _genid);
+	InternalMessage<A> old_rt_msg(route_copy, _peer, _genid);
 
 	// Store it locally.  The BgpTrie will copy it into a ChainedSubnetRoute
 	typename BgpTrie<A>::iterator iter =
@@ -133,6 +133,7 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 	response = _next_table->replace_route(old_rt_msg, new_rt_msg,
 					      (BGPRouteTable<A>*)this);
+	route_copy->unref();
     } else {
 	// Store it locally.  The BgpTrie will copy it into a ChainedSubnetRoute
 	typename BgpTrie<A>::iterator iter =
@@ -180,19 +181,20 @@ RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     if (existing_route != NULL) {
 	// preserve the information
-	SubnetRoute<A> route_copy(*existing_route);
+	SubnetRoute<A>* route_copy = new SubnetRoute<A>(*existing_route);
 	deletion_nexthop_check(existing_route);
-	assert(route_copy.original_route() == &route_copy);
+	assert(route_copy->parent_route() == NULL);
 
 	// remove from the Trie
 	_route_table->erase(rtmsg.net());
 	_table_version++;
 
 	// propogate downstream
-	InternalMessage<A> old_rt_msg(&route_copy, _peer, _genid);
+	InternalMessage<A> old_rt_msg(route_copy, _peer, _genid);
 	if (rtmsg.push()) old_rt_msg.set_push();
 	if (_next_table != NULL)
 	    _next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
+	route_copy->unref();
     } else {
 	// we received a delete, but didn't have anything to delete.
 	// It's debatable whether we should silently ignore this, or

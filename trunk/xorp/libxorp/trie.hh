@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.4 2003/01/25 01:11:22 mjh Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.4 2003/01/25 01:49:44 mjh Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -65,7 +65,11 @@ public:
     TrieNode(const Key& key, TrieNode* up = 0) :
 	_up(up), _left(0), _right(0), _k(key), _p(0) {}
 
-    ~TrieNode() 				{ delete _p; }
+    ~TrieNode() 				
+    { 
+	if (_p)
+	    delete_payload(_p); 
+    }
 
     /**
      * add a node to a subtree
@@ -108,7 +112,8 @@ public:
     Payload &p()    			        { return *_p;		}
 
     void set_payload(const Payload& p) {
-	delete _p;
+	if (_p)
+	    delete_payload(_p);
 	_p = new PPayload(p);
     }
 
@@ -282,6 +287,10 @@ public:
     }
 
 private:
+    /* delete_payload is a separate method to allow specialization */
+    void delete_payload(Payload* p) {
+	delete p;
+    }
 
     void dump(const char *msg) const			{
 #if 1
@@ -665,7 +674,7 @@ TrieNode<A, Payload>::erase()
     TrieNode *me, *parent, *child;
 
     if (_p) {
-	delete _p;
+	delete_payload(_p);
 	_p = NULL;
     }
 

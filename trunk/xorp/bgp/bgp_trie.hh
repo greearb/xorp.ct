@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_trie.hh,v 1.3 2003/01/16 23:18:57 pavlin Exp $
+// $XORP: xorp/bgp/bgp_trie.hh,v 1.4 2003/01/22 00:07:23 mjh Exp $
 
 #ifndef __BGP_TRIE_HH__
 #define __BGP_TRIE_HH__
@@ -69,6 +69,27 @@ private:
     mutable const ChainedSubnetRoute<A> *_prev;
     mutable const ChainedSubnetRoute<A> *_next;
 };
+
+/**
+ * Template specialization of the RefTrieNode, so that the payload is
+ * not immediately deleted unless the SubnetRoute reference count is
+ * zero. 
+ */
+template<>
+void
+RefTrieNode<IPv4, const ChainedSubnetRoute<IPv4> >::
+delete_payload(const ChainedSubnetRoute<IPv4>* p)
+{
+    p->unref();
+}
+
+template<>
+void
+RefTrieNode<IPv6, const ChainedSubnetRoute<IPv6> >::
+delete_payload(const ChainedSubnetRoute<IPv6>* p)
+{
+    p->unref();
+}
 
 /**
  * The BgpTrie is an augmented, specialized trie that allows us to

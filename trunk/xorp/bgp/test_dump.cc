@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.7 2003/01/29 00:38:57 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.8 2003/02/06 06:44:34 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -226,7 +226,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -236,7 +236,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1,  0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -256,7 +256,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -265,7 +265,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -288,7 +288,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -297,7 +297,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -318,7 +318,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -327,7 +327,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -336,7 +336,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -345,7 +345,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -368,7 +368,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -377,7 +377,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -386,7 +386,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -395,7 +395,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -417,7 +417,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -426,7 +426,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -435,7 +435,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -444,7 +444,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -472,7 +472,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -481,7 +481,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -512,7 +512,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -522,7 +522,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -532,7 +532,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -574,7 +574,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -607,7 +607,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -617,7 +617,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -650,7 +650,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -684,7 +684,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -694,7 +694,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -704,7 +704,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -740,7 +740,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -774,7 +774,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -784,7 +784,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -794,7 +794,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -826,7 +826,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -859,7 +859,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -869,7 +869,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -879,7 +879,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -947,7 +947,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -957,7 +957,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -967,7 +967,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -984,7 +984,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -1010,7 +1010,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -1020,7 +1020,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -1040,7 +1040,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //delete the routes
@@ -1052,7 +1052,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //delete the routes
@@ -1064,7 +1064,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //delete the routes
@@ -1076,7 +1076,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //delete the routes
@@ -1088,7 +1088,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //delete the routes
@@ -1100,7 +1100,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -1122,7 +1122,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -1132,7 +1132,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -1142,7 +1142,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -1159,7 +1159,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -1180,7 +1180,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -1190,7 +1190,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();
@@ -1210,7 +1210,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     ribin_table1->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //delete the routes
@@ -1222,7 +1222,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //delete the routes
@@ -1234,7 +1234,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
     msg->set_push();
     ribin_table2->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table1->write_separator();

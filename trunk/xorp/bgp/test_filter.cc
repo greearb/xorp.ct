@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.8 2003/01/29 00:38:57 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.9 2003/02/06 06:44:35 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -129,7 +129,7 @@ int main(int, char** argv) {
     filter_table->delete_route(*msg, ribin_table);
 
     debug_table->write_separator();
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     // ================================================================
@@ -151,7 +151,7 @@ int main(int, char** argv) {
     filter_table->delete_route(*msg, ribin_table);
 
     debug_table->write_separator();
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     // ================================================================
@@ -171,8 +171,8 @@ int main(int, char** argv) {
 
     delete msg;
     delete msg2;
-    delete sr1;
-    delete sr2;
+    sr1->unref();
+    sr2->unref();
 
     // ================================================================
     // Test2b: trivial replace, original route filtered
@@ -191,8 +191,8 @@ int main(int, char** argv) {
 
     delete msg;
     delete msg2;
-    delete sr1;
-    delete sr2;
+    sr1->unref();
+    sr2->unref();
 
     // ================================================================
     // Test2c: trivial replace, new route filtered
@@ -211,8 +211,8 @@ int main(int, char** argv) {
 
     delete msg;
     delete msg2;
-    delete sr1;
-    delete sr2;
+    sr1->unref();
+    sr2->unref();
 
     // ================================================================
     // Test2c: trivial replace, both routes filtered
@@ -230,8 +230,8 @@ int main(int, char** argv) {
 
     delete msg;
     delete msg2;
-    delete sr1;
-    delete sr2;
+    sr1->unref();
+    sr2->unref();
     debug_table->write_separator();
 
     // ================================================================
@@ -244,7 +244,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ROUTE DUMP");
     filter_table->route_dump(*msg, ribin_table, &handler2);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table->write_separator();
@@ -258,7 +258,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ROUTE_DUMP, FILTERED");
     filter_table->route_dump(*msg, ribin_table, &handler2);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table->write_separator();
@@ -271,7 +271,7 @@ int main(int, char** argv) {
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin_table->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table->write_separator();
@@ -289,7 +289,7 @@ int main(int, char** argv) {
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin_table->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
     debug_table->write_separator();
 
@@ -303,7 +303,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD, SHOULD BE FILTERED");
     ribin_table->add_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table->write_separator();
@@ -320,7 +320,7 @@ int main(int, char** argv) {
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("DELETE, SHOULD BE FILTERED");
     ribin_table->delete_route(*msg, NULL);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     debug_table->write_separator();
@@ -342,7 +342,7 @@ int main(int, char** argv) {
     filter_table->delete_route(*msg, ribin_table);
 
     debug_table->write_separator();
-    delete sr1;
+    sr1->unref();
     delete msg;
     // ================================================================
 

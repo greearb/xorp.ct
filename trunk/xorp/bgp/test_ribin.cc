@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.8 2003/01/29 00:38:57 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.9 2003/02/06 06:44:35 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -138,7 +138,7 @@ int main(int, char** argv)
 
     //check we only ended up with one copy of the PA list
     assert(sr1->number_of_managed_atts() == 1);
-    delete sr1;
+    sr1->unref();
 
     debug_table->write_separator();
 
@@ -175,7 +175,7 @@ int main(int, char** argv)
     debug_table->write_separator();
 
     delete msg;
-    delete sr2;
+    sr2->unref();
     delete palist2;
     
     //================================================================
@@ -203,14 +203,14 @@ int main(int, char** argv)
     ribin->add_route(*msg, NULL);
     delete msg;
     delete palist2;
-    delete sr2;
+    sr2->unref();
 
     //check there are two routes in the RIB-IN
     assert(ribin->route_count() == 2);
 
     //check we only ended up with two PA lists
     assert(sr1->number_of_managed_atts() == 2);
-    delete sr1;
+    sr1->unref();
 
     debug_table->write_separator();
 
@@ -247,7 +247,7 @@ int main(int, char** argv)
     debug_table->write_comment("ADD SECOND ROUTE");
     ribin->add_route(*msg, NULL);
     delete msg;
-    delete sr2;
+    sr2->unref();
     delete palist1;
 
     //check there are two routes in the RIB-IN
@@ -255,7 +255,7 @@ int main(int, char** argv)
 
     //check we only ended up with two PA lists
     assert(sr1->number_of_managed_atts() == 2);
-    delete sr1;
+    sr1->unref();
     delete palist2;
 
     debug_table->write_separator();
@@ -287,14 +287,14 @@ int main(int, char** argv)
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
-    delete sr1;
+    sr1->unref();
     delete palist1;
 
     sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
-    delete sr2;
+    sr2->unref();
     delete palist2;
 
 
@@ -319,14 +319,14 @@ int main(int, char** argv)
     ribin->add_route(*msg, NULL);
     delete msg;
     delete palist1;
-    delete sr1;
+    sr1->unref();
 
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("ADD SECOND ROUTE");
     ribin->add_route(*msg, NULL);
     delete msg;
     delete palist2;
-    delete sr2;
+    sr2->unref();
 
     //check there are two routes in the RIB-IN
     assert(ribin->route_count() == 2);
@@ -386,7 +386,7 @@ int main(int, char** argv)
     ribin->add_route(*msg, NULL);
     delete msg;
     delete palist3;
-    delete sr3;
+    sr3->unref();
 
     //check there are 3 routes in the RIB-IN
     assert(ribin->route_count() == 3);
@@ -396,7 +396,7 @@ int main(int, char** argv)
     ribin->add_route(*msg, NULL);
     delete msg;
     delete palist4;
-    delete sr4;
+    sr4->unref();
 
     //check there are 4 routes in the RIB-IN
     assert(ribin->route_count() == 4);
@@ -430,28 +430,28 @@ int main(int, char** argv)
     ribin->delete_route(*msg, NULL);
     delete msg;
     delete palist1;
-    delete sr1;
+    sr1->unref();
 
     sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
     delete palist2;
-    delete sr2;
+    sr2->unref();
 
     sr3 = new SubnetRoute<IPv4>(net3, palist3, NULL);
     msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
     delete palist3;
-    delete sr3;
+    sr3->unref();
 
     sr4 = new SubnetRoute<IPv4>(net4, palist4, NULL);
     msg = new InternalMessage<IPv4>(sr4, &handler1, 0);
     ribin->delete_route(*msg, NULL);
     delete msg;
     delete palist4;
-    delete sr4;
+    sr4->unref();
 
     debug_table->write_separator();
 

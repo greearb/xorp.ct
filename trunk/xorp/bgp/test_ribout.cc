@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.7 2003/01/29 00:38:57 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.8 2003/02/06 06:44:35 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -104,11 +104,10 @@ int main(int, char** argv) {
 	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
 
     //create a subnet route
-    SubnetRoute<IPv4> *sr1, *sr2;
+    SubnetRoute<IPv4> *sr1;
 
     InternalMessage<IPv4>* msg;
 
-    UNUSED(sr2);
     UNUSED(palist3);
     //================================================================
     //Test1: trivial add and delete
@@ -128,7 +127,7 @@ int main(int, char** argv) {
     msg->set_push();
 
     debug_table->write_separator();
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //================================================================
@@ -140,19 +139,19 @@ int main(int, char** argv) {
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->add_route(*msg, debug_table);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->add_route(*msg, debug_table);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->add_route(*msg, debug_table);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     ribout_table->push(debug_table);
@@ -168,13 +167,13 @@ int main(int, char** argv) {
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->delete_route(*msg, debug_table);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->add_route(*msg, debug_table);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     ribout_table->push(debug_table);
@@ -192,7 +191,7 @@ int main(int, char** argv) {
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler, 0);
     ribout_table->add_route(*msg, debug_table);
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     ribout_table->push(debug_table);

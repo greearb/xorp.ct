@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.2 2002/12/16 21:48:34 mjh Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.3 2003/02/06 06:44:34 mjh Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -26,6 +26,14 @@
 #define SRF_IN_USE 0x0001
 #define SRF_WINNER 0x0002
 #define SRF_FILTERED 0x0004
+#define SRF_DELETED 0x0008
+#define SRF_TOKEN 0xff000000
+#define SRF_REFCOUNT 0x00ff0000
+
+//Defining paranoid emables some additional checks to ensure we don't
+//try to reuse deleted data, or follow an obsolete parent_route
+//pointer.
+#define SR_PARANOID
 
 template<class A>
 class SubnetRoute
@@ -71,13 +79,79 @@ public:
 	else
 	    return this;
     }
+    inline const SubnetRoute<A>* parent_route() const {
+	return _parent_route;
+    }
+
+#ifdef SR_PARANOID
+    void unref() const {
+	if (refcount() == 0)
+	    delete this;
+	else {
+	    printf("delaying deletion\n");
+	    _flags |= SRF_DELETED;
+	}
+    }
+#else
+    void unref() const {
+	delete this;
+    }
+#endif
 
     void set_parent_route(const SubnetRoute<A> *parent) 
     {
+	assert(parent != this);
+#ifdef SR_PARANOID
+	if (_parent_route)
+	    _parent_route->bump_refcount(-1);
+#endif
 	_parent_route = parent;
+#ifdef SR_PARANOID
+	if (_parent_route)
+	    _parent_route->bump_refcount(1);
+#endif
     }
+
+#ifdef SR_PARANOID
+    inline uint8_t token() const {
+	return _flags >> 24;
+    }
+    inline uint8_t refcount() const {
+	return (_flags & SRF_REFCOUNT)>>16;
+    }
+#endif
 protected:
 private:
+#ifdef SR_PARANOID
+    inline void set_token(uint8_t token) {
+	_flags |= (token << 24);
+    }
+    inline void choose_token() {
+	_flags |= (SRF_TOKEN & rand());
+    }
+    inline void bump_refcount(int delta) const {
+	assert(delta == 1 || delta == -1);
+	uint8_t refs = refcount();
+	if (delta == 1) {
+	    assert(refs < 255);
+	} else {
+	    assert(refs > 0);
+	}
+	refs += delta;
+
+	//re-insert the new ref count
+	_flags = (_flags ^ (_flags&SRF_REFCOUNT)) | (refs << 16);
+
+	//handle delayed deletion
+	if ((refs==0) && ((_flags & SRF_DELETED) != 0)) {
+	    printf("delayed deletion\n");
+	    delete this;
+	}
+    }
+#endif
+    //prevent accidental use of default assignment operator
+    const SubnetRoute<A>& operator=(const SubnetRoute<A>&);
+
     static AttributeManager<A> _att_mgr;
     IPNet<A> _net;
     const PathAttributeList<A> *_attributes;
@@ -95,6 +169,9 @@ private:
     /* SRF_FILTERED indicates that the route was filtered downstream.
        Currently this is only used for RIB-IN routes that are filtered
        in the inbound filter bank */
+
+    /* SRF_TOKEN is a byte taken from the flags field which is used
+       for runtime data structure consistency checks */
     mutable uint32_t _flags;
 
     /* If the route is a winner (SRF_WINNER is set), then

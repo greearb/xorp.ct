@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/internal_message.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/internal_message.hh,v 1.2 2002/12/16 03:08:20 mjh Exp $
 
 #ifndef __BGP_INTERNAL_MESSAGES_HH__
 #define __BGP_INTERNAL_MESSAGES_HH__
@@ -68,7 +68,7 @@ public:
     void force_clear_push() const { _push = false; }
 
     void inactivate() const {
-	delete _subnet_route;
+	_subnet_route->unref();
 	_subnet_route = NULL;
     }
     string str() const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.3 2002/12/17 22:06:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.4 2003/01/16 23:18:58 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -68,7 +68,7 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     	assert(existing_route->net() == rtmsg.net());
 
 	// preserve the information
-	SubnetRoute<A> route_copy(*existing_route);
+	SubnetRoute<A>* route_copy = new SubnetRoute<A>(*existing_route);
 
 	// delete from the Trie
 	if ((_del_sweep->second->net() == rtmsg.net()) &&
@@ -80,10 +80,11 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	_route_table->erase(rtmsg.net());
 
 	// propogate downstream
-	InternalMessage<A> old_rt_msg(&route_copy, _peer, _genid);
+	InternalMessage<A> old_rt_msg(route_copy, _peer, _genid);
 	old_rt_msg.set_from_previous_peering();
 	return _next_table->replace_route(old_rt_msg, rtmsg,
 					  (BGPRouteTable<A>*)this);
+	route_copy->unref();
     }
     abort();
 }
@@ -224,13 +225,13 @@ DeletionTable<A>::delete_next_chain()
     while (1) {
 	// preserve the information
 	next_rt = chained_rt->next();
-	SubnetRoute<A> route_copy(*chained_rt);
+	SubnetRoute<A>* route_copy = new SubnetRoute<A>(*chained_rt);
 
 	// delete from the Trie
 	_route_table->erase(chained_rt->net());
 
 	// propagate downstream
-	InternalMessage<A> rt_msg(&route_copy, _peer, _genid);
+	InternalMessage<A> rt_msg(route_copy, _peer, _genid);
 	rt_msg.set_from_previous_peering();
 	if (_next_table != NULL)
 	    _next_table->delete_route(rt_msg, (BGPRouteTable<A>*)this);
@@ -242,6 +243,7 @@ DeletionTable<A>::delete_next_chain()
 	    debug_msg("chain continues\n");
 	}
 	chained_rt = next_rt;
+	route_copy->unref();
     }
     if (_next_table != NULL)
 	_next_table->push((BGPRouteTable<A>*)this);

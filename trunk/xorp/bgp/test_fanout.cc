@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.6 2003/01/29 00:38:57 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.7 2003/02/06 06:44:35 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -146,7 +146,7 @@ int main(int, char** argv) {
     fanout_table->push(NULL);
 
     debug_table1->write_separator();
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     //================================================================
@@ -179,7 +179,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("PEER 2 GET_NEXT_MESSAGE");
     fanout_table->get_next_message(debug_table2);
     debug_table1->write_separator();
-    delete sr1;
+    sr1->unref();
 
     //================================================================
     //Test2b: trivial flow control
@@ -212,7 +212,7 @@ int main(int, char** argv) {
     debug_table1->write_comment("PEER 2 GET_NEXT_MESSAGE");
     fanout_table->get_next_message(debug_table2);
     debug_table1->write_separator();
-    delete sr1;
+    sr1->unref();
 
     //================================================================
     //Test3: more complex flow control
@@ -265,8 +265,8 @@ int main(int, char** argv) {
     debug_table1->write_comment("PEER 2 GET_NEXT_MESSAGE");
     fanout_table->get_next_message(debug_table2);
     debug_table1->write_separator();
-    delete sr1;
-    delete sr2;
+    sr1->unref();
+    sr2->unref();
 
     //================================================================
     //Test4: more complex flow control
@@ -321,8 +321,8 @@ int main(int, char** argv) {
     fanout_table->get_next_message(debug_table2);
 
     debug_table1->write_separator();
-    delete sr1;
-    delete sr2;
+    sr1->unref();
+    sr2->unref();
 
     //================================================================
     //Test5: more complex flow control, three peers
@@ -409,8 +409,8 @@ int main(int, char** argv) {
     fanout_table->get_next_message(debug_table3);
 
     debug_table1->write_separator();
-    delete sr1;
-    delete sr2;
+    sr1->unref();
+    sr2->unref();
 
     //================================================================
 

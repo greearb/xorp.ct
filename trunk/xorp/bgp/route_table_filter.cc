@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.7 2003/01/29 00:38:56 rizzo Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.8 2003/02/06 06:44:33 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -32,7 +32,7 @@ BGPRouteFilter<A>::drop_message(const InternalMessage<A> *rtmsg,
     if (rtmsg->changed()) {
 	//It's the responsibility of the final recipient of a
 	//changed route to store it or free it.
-	delete rtmsg->route();
+	rtmsg->route()->unref();
     }
     if (modified) {
 	//This filterbank created this message.  We need to delete

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.6 2003/01/29 00:38:57 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.7 2003/02/06 06:44:34 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -123,7 +123,7 @@ int main(int, char** argv) {
     assert(cache_table->route_count() == 0);
 
     debug_table->write_separator();
-    delete sr1;
+    sr1->unref();
     delete msg;
 
     // ================================================================
@@ -158,7 +158,7 @@ int main(int, char** argv) {
     // note that as the route has changed, the cache table is
     // responsible for deleting the route in the message
     delete msg;
-    delete sr1;
+    sr1->unref();
 
     // verify that this route was now deleted from the cache
     assert(cache_table->route_count() == 0);
@@ -184,8 +184,8 @@ int main(int, char** argv) {
 
     delete msg;
     delete msg2;
-    delete sr1;
-    delete sr2;
+    sr1->unref();
+    sr2->unref();
 
     // ================================================================
     // Test2a: trivial replace, original route cacheed
@@ -216,7 +216,7 @@ int main(int, char** argv) {
 
     delete msg;
     delete msg2;
-    delete sr2;
+    sr2->unref();
 
     // ================================================================
     // Test2b: trivial replace, new route to be cached
@@ -240,7 +240,7 @@ int main(int, char** argv) {
 
     delete msg;
     delete msg2;
-    delete sr1;
+    sr1->unref();
 
     // delete the route
     debug_table->write_comment("CLEANUP");

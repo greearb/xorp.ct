@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_queue.hh,v 1.3 2002/12/16 03:08:20 mjh Exp $
+// $XORP: xorp/bgp/route_queue.hh,v 1.4 2002/12/16 21:48:33 mjh Exp $
 
 #ifndef __BGP_ROUTE_QUEUE_HH__
 #define __BGP_ROUTE_QUEUE_HH__
@@ -49,7 +49,11 @@ public:
 	_origin_peer = origin_peer; // 0 is valid.
     }
 
-    ~RouteQueueEntry()				{ delete _route;	}
+    ~RouteQueueEntry()				
+    { 
+	if (_route)
+	    _route->unref();	
+    }
 
     const SubnetRoute<A> *route() const		{ return _route;	}
     const IPNet<A>& net() const			{ return _route->net();	}
