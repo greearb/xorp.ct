@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.2 2003/01/30 01:43:46 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -166,7 +166,7 @@ PimMfc::recompute_iif_olist_mfc()
     }
     
     if ((new_iif_vif_index == old_iif_vif_index)
-	&& (new_olist != old_olist)) {
+	&& (new_olist == old_olist)) {
 	return;			// Nothing changed
     }
     
