@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_dataflow.hh,v 1.15 2002/12/09 18:29:17 hodson Exp $
+// $XORP: xorp/mfea/mfea_dataflow.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 
 #ifndef __MFEA_MFEA_DATAFLOW_HH__
@@ -245,6 +245,13 @@ public:
      */
     bool	is_empty() const { return (_mfea_dfe_list.empty()); }
     
+    /**
+     * Get the list of @ref MfeaDfe dataflow entries for the same (S,G).
+     * 
+     * @return the list of @ref MfeaDfe dataflow entries for the same (S,G).
+     */
+    list<MfeaDfe *>&	mfea_dfe_list() { return (_mfea_dfe_list); }
+    
 private:
     MfeaDft&		_mfea_dft;	// The Mfea dataflow table (yuck!)
     list<MfeaDfe *>	_mfea_dfe_list;	// The list of dataflow monitor entries
@@ -351,25 +358,27 @@ public:
      * Compare whether the information contained within this @ref MfeaDfe
      * entry is same as the specified information.
      * 
-     * @param threshold_interval the dataflow threshold interval.
-     * @param threshold_packets the threshold (in number of packets)
+     * @param threshold_interval_test the dataflow threshold interval.
+     * @param threshold_packets_test the threshold (in number of packets)
      * to compare against.
-     * @param threshold_bytes the threshold (in number of bytes)
+     * @param threshold_bytes_test the threshold (in number of bytes)
      * to compare against.
-     * @param is_threshold_in_packets if true, @ref threshold_packets is valid.
-     * @param is_threshold_in_bytes if true, @ref threshold_bytes is valid.
-     * @param is_geq_upcall if true, the operation for comparison is ">=".
-     * @param is_leq_upcall if true, the operation for comparison is "<=".
+     * @param is_threshold_in_packets_test if true, @ref threshold_packets is
+     * valid.
+     * @param is_threshold_in_bytes_test if true, @ref threshold_bytes is
+     * valid.
+     * @param is_geq_upcall_test if true, the operation for comparison is ">=".
+     * @param is_leq_upcall_test if true, the operation for comparison is "<=".
      * @return true if the information contained within this @ref MfeaDfe
      * entry is same as the specified information, otherwise false.
      */
-    bool is_same(const struct timeval& threshold_interval,
-		 uint32_t threshold_packets,
-		 uint32_t threshold_bytes,
-		 bool is_threshold_in_packets,
-		 bool is_threshold_in_bytes,
-		 bool is_geq_upcall,
-		 bool is_leq_upcall) const;
+    bool is_same(const struct timeval& threshold_interval_test,
+		 uint32_t threshold_packets_test,
+		 uint32_t threshold_bytes_test,
+		 bool is_threshold_in_packets_test,
+		 bool is_threshold_in_bytes_test,
+		 bool is_geq_upcall_test,
+		 bool is_leq_upcall_test) const;
     
     /**
      * Initialize this entry with the current multicast forwarding information.
@@ -404,14 +413,89 @@ public:
      */
     void dataflow_signal_send();
     
+    /**
+     * Get the threshold interval.
+     * 
+     * @return the threshold interval for this dataflow entry.
+     */
+    const struct timeval& threshold_interval() const {
+	return (_threshold_interval);
+    }
+
+    /**
+     * Get the threshold packets.
+     * 
+     * @return the threshold packets for this dataflow entry.
+     */
+    uint32_t threshold_packets() const { return (_threshold_packets); }
+    
+    /**
+     * Get the threshold bytes.
+     * 
+     * @return the threshold bytes for this dataflow entry.
+     */
+    uint32_t threshold_bytes() const { return (_threshold_bytes); }
+    
+    /**
+     * Test if the threshold is in number of packets.
+     * 
+     * @return true if the threshold is in number of packets.
+     */
+    bool is_threshold_in_packets() const { return (_is_threshold_in_packets); }
+    
+    /**
+     * Test if the threshold is in number of bytes.
+     * 
+     * @return true if the threshold is in number of bytes.
+     */
+    bool is_threshold_in_bytes() const { return (_is_threshold_in_bytes); }
+    
+    /**
+     * Test if the threshold type is "greater-or-equal" (i.e., ">=").
+     * 
+     * @return true if the threshold type is "greater-or-equal" (i.e., ">=").
+     */
+    bool is_geq_upcall() const { return (_is_geq_upcall); }
+    
+    /**
+     * Test if the threshold type is "less-or-equal" (i.e., "<=").
+     * 
+     * @return true if the threshold type is "less-or-equal" (i.e., "<=").
+     */
+    bool is_leq_upcall() const { return (_is_leq_upcall); }
+
+    /**
+     * Get the start time for the most recent measurement interval window.
+     * 
+     * @return the start time for the most recent measurement interval window.
+     */
+    const struct timeval& start_time() const;
+    
+    /**
+     * Get the number of packets measured in the most recent interval window.
+     * 
+     * @return the number of packets measured in the most recent interval
+     * window.
+     */
+    uint32_t measured_packets() const;
+    
+    /**
+     * Get the number of bytes measured in the most recent interval window.
+     * 
+     * @return the number of bytes measured in the most recent interval
+     * window.
+     */
+    uint32_t measured_bytes() const;
+    
+    
 private:
     // Private state
     MfeaDfeLookup& _mfea_dfe_lookup;  // The Mfea dataflow lookup entry (yuck!)
-    struct timeval _threshold_interval; // Measurements interval
+    struct timeval _threshold_interval; // The threshold interval
     uint32_t	_threshold_packets;	// The threshold value (in packets)
     uint32_t	_threshold_bytes;	// The threshold value (in bytes)
-    bool	_is_threshold_in_packets; // If true, _threshold_packets
-					  // is valid
+    bool	_is_threshold_in_packets; // If true, _threshold_packets is
+					  // valid
     bool	_is_threshold_in_bytes;	// If true, _threshold_bytes is valid
     bool	_is_geq_upcall;		// If true, the operation is ">=".
     bool	_is_leq_upcall;		// If true, the operation is "<=".
@@ -425,6 +509,10 @@ private:
     
     struct timeval _measurement_interval; // Interval between two measurements
     Timer	_measurement_timer;	// Timer to perform measurements
+    
+    // Time when current measurement window has started
+    // XXX: used for debug purpose only
+    struct timeval _start_time[MFEA_DATAFLOW_TEST_FREQUENCY];
 };
 
 

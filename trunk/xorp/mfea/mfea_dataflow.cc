@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.17 2002/12/09 18:29:17 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_dataflow.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
 
 
 //
@@ -271,6 +271,8 @@ MfeaDfe::MfeaDfe(MfeaDfeLookup& mfea_dfe_lookup,
     _is_bootstrap_completed = false;
     TIMEVAL_DIV(&_threshold_interval, MFEA_DATAFLOW_TEST_FREQUENCY,
 		&_measurement_interval);
+    for (size_t i = 0; i < sizeof(_start_time)/sizeof(_start_time[0]); i++)
+	TIMEVAL_CLEAR(&_start_time[i]);
 }
 
 MfeaDfe::~MfeaDfe()
@@ -303,26 +305,26 @@ MfeaDfe::is_valid() const
 }
 
 bool
-MfeaDfe::is_same(const struct timeval& threshold_interval,
-		 uint32_t threshold_packets,
-		 uint32_t threshold_bytes,
-		 bool is_threshold_in_packets,
-		 bool is_threshold_in_bytes,
-		 bool is_geq_upcall,
-		 bool is_leq_upcall) const
+MfeaDfe::is_same(const struct timeval& threshold_interval_test,
+		 uint32_t threshold_packets_test,
+		 uint32_t threshold_bytes_test,
+		 bool is_threshold_in_packets_test,
+		 bool is_threshold_in_bytes_test,
+		 bool is_geq_upcall_test,
+		 bool is_leq_upcall_test) const
 {
-    if (is_threshold_in_packets)
-	if (threshold_packets != _threshold_packets)
+    if (is_threshold_in_packets_test)
+	if (threshold_packets_test != _threshold_packets)
 	    return (false);
-    if (is_threshold_in_bytes)
-	if (threshold_bytes != _threshold_bytes)
+    if (is_threshold_in_bytes_test)
+	if (threshold_bytes_test != _threshold_bytes)
 	    return (false);
     
-    return ((threshold_interval == _threshold_interval)
-	    && (is_threshold_in_packets == _is_threshold_in_packets)
-	    && (is_threshold_in_bytes == _is_threshold_in_bytes)
-	    && (is_geq_upcall == _is_geq_upcall)
-	    && (is_leq_upcall == _is_leq_upcall));
+    return ((threshold_interval_test == _threshold_interval)
+	    && (is_threshold_in_packets_test == _is_threshold_in_packets)
+	    && (is_threshold_in_bytes_test == _is_threshold_in_bytes)
+	    && (is_geq_upcall_test == _is_geq_upcall)
+	    && (is_leq_upcall_test == _is_leq_upcall));
 }
 
 void
@@ -447,6 +449,8 @@ MfeaDfe::start_measurement()
 			     TIMEVAL_USEC(&_measurement_interval),
 			     mfea_dfe_measurement_timer_timeout,
 			     this);
+    // XXX: for simulation purpose, replace gettimeofday() with NOW() 
+    gettimeofday(&_start_time[_delta_sg_count_index], NULL);
 }
 
 void
@@ -467,6 +471,51 @@ MfeaDfe::dataflow_signal_send()
 	_is_threshold_in_bytes,
 	_is_geq_upcall,
 	_is_leq_upcall);
+}
+
+const struct timeval&
+MfeaDfe::start_time() const
+{
+    if (! _is_bootstrap_completed)
+	return (_start_time[0]);
+    
+    return (_start_time[_delta_sg_count_index]);
+}
+
+uint32_t
+MfeaDfe::measured_packets() const
+{
+    SgCount result;
+    
+    if (_is_bootstrap_completed) {
+	for (size_t i = 0; i < MFEA_DATAFLOW_TEST_FREQUENCY; i++) {
+	    result += _delta_sg_count[i];
+	}
+    } else {
+	for (size_t i = 0; i < _delta_sg_count_index; i++) {
+	    result += _delta_sg_count[i];
+	}
+    }
+    
+    return (result.pktcnt());
+}
+
+uint32_t
+MfeaDfe::measured_bytes() const
+{
+    SgCount result;
+    
+    if (_is_bootstrap_completed) {
+	for (size_t i = 0; i < MFEA_DATAFLOW_TEST_FREQUENCY; i++) {
+	    result += _delta_sg_count[i];
+	}
+    } else {
+	for (size_t i = 0; i < _delta_sg_count_index; i++) {
+	    result += _delta_sg_count[i];
+	}
+    }
+    
+    return (result.bytecnt());
 }
 
 static void
