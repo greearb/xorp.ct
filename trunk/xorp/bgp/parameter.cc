@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.6 2003/01/30 04:13:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.7 2003/03/10 23:20:00 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -294,8 +294,6 @@ BGPMultiProtocolCapability( uint16_t afi, uint8_t safi )
     _length = 8;
     _data = new uint8_t[_length];
     _address_family = afi;
-    if (safi > 255)
-	abort();
     _subsequent_address_family = safi;
 }
 
