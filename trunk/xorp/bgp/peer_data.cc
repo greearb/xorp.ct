@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.17 2004/12/17 01:31:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.18 2004/12/18 03:21:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -70,7 +70,8 @@ BGPPeerData::get_internal_peer() const
 uint32_t
 BGPPeerData::get_hold_duration() const
 {
-    debug_msg("BGP hold duration retrieved as %d\n", _hold_duration);
+    debug_msg("BGP hold duration retrieved as %u\n",
+	      XORP_UINT_CAST(_hold_duration));
     return _hold_duration;
 }
 
@@ -78,7 +79,7 @@ void
 BGPPeerData::set_hold_duration(uint32_t d)
 {
     _hold_duration = d;
-    debug_msg("BGP hold duration set as %d\n", _hold_duration);
+    debug_msg("BGP hold duration set as %u\n", XORP_UINT_CAST(_hold_duration));
 }
 
 uint32_t
