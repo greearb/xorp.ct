@@ -1,0 +1,21 @@
+/* $XORP$ */
+
+/*
+ * Interface for receiving packets on a raw IPv6 socket.
+ */
+
+interface raw_packet6_client/0.1 {
+	/**
+	 * Receive an IPv6 datagram from a raw socket.
+	 * 
+	 * @param if_name.  Interface datagram arrived on.
+	 * @param vif_name. VIF datagram arrived on.
+	 * @param pktinfo. Raw IPv6 datagram information.
+	 * @param packet. Raw IPv6 datagram payload.
+	 */
+	recv_raw ?							      \
+		if_name:txt &						      \
+		vif_name:txt &						      \
+		pktinfo:binary &					      \
+	        packet:binary
+}

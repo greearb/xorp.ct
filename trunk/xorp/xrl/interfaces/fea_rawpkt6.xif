@@ -1,0 +1,53 @@
+/* $XORP$ */
+
+/*
+ * Interface for sending packets on a raw socket. Typically implemented by the
+ * fea.
+ */
+
+interface raw_packet6/0.1 {
+
+	/**
+	 * Send a raw IPv6 datagram, with packet info.
+	 *
+	 * @param vif_name.Vif to send the packet on, essential for multicast.
+	 *                  In the unicast case this field should be empty.
+	 * @param pktinfo.  Raw IPv6 packet header information.
+	 * @param packet.  Raw IPv6 packet payload.
+	 */
+	send_raw ?							      \
+		vif_name:txt &						      \
+		pktinfo:binary &					      \
+		packet:binary
+
+	/**
+	 * Register to receive IPv6 datagrams.  The receiver is expected to
+	 * support raw_packet6_client/0.1 interface.
+	 *
+	 * @param router_name. Receivers Xrl router name
+	 * @param if_name.  Interface associated with VIF.
+	 * @param vif_name. Vif through which packets should be accepted.
+	 * @param proto. Protocol number that the receiver is interested in.
+	 *               A protocol number of 0 signifies interest in all
+	 *               protocols.
+	 */
+	register_vif_receiver ?		 				      \
+		router_name:txt &					      \
+		if_name:txt &						      \
+		vif_name:txt &						      \
+		proto:u32
+
+	/**
+	 * Unregister stop receiving packets.
+	 *
+	 * @param router_name. Receivers Xrl router name
+	 * @param if_name.  Interface associated with VIF.
+	 * @param vif_name. Vif through which packets should be accepted.
+	 * @param proto Protocol number that the receiver is interested in.
+	 */
+	unregister_vif_receiver ?					      \
+		router_name:txt &					      \
+		if_name:txt &						      \
+		vif_name:txt &						      \
+		proto:u32
+}
