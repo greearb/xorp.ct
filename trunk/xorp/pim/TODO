@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.36 2003/06/13 02:05:07 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.37 2003/06/13 02:29:52 pavlin Exp $
 #
 
 * PIM SPEC: Address questions by "Suresh Boddapati" <suresh@timetra.com>
@@ -83,20 +83,6 @@ probably should be replaced with
   RPF'(S,G,rpt) -> RPF'(*,G) (in case of (*,*,RP) Joins).
   Testing this scenario is pending spec-related clarification about
   changing RPF'(S,G,rpt) with (S,G)Asserts.
-
-* IMPL: lost_assert(S,G,rpt,I) (i.e., PimMre::lost_assert_sg_rpt()) should
-  be computable for (S,G) state as well. Plug-in this modification for the
-  dependency tracking machinery.
-  Check whether lost_assert(S,G,I)
-  shoulc be computable for (S,G,rpt) state as well. Check
-  whether other (S,G) and (S,G,rpt) methods need to be dual-computable.
-
-* IMPL: Rename all methods named recompute_foo_changed() to recompute_foo()
-
-* IMPL: should "inherited_olist_sg_rpt() for PiMre (S,G) entry return
-  the value computed via (S,G,rpt) entry? Similarly, should
-  "inherited_olist_sg() for PimMre (S,G,rpt) entry return the
-  value computed vial (S,G) entry?
 
 * IMPL: whenever the iif changes, should we remove all matching
   PimMfc, and reset the SPT bit?
@@ -185,7 +171,7 @@ probably should be replaced with
 * IMPL: Make sure that t_joinsuppress is used as appropriate instead
   of t_suppress
 
-* Add this text somewhere else:
+* IMPL+SPEC: Add this text somewhere else:
   ECN bits setup for PIM Registers.
   Issue: we don't know whether the encapsulating router (the DR in PIM)
   supports the full-functionality option as described in RFC 2481.
@@ -201,7 +187,7 @@ probably should be replaced with
 
   NO! See Kame's ip_ecn.c and RFC 3168
 
-* Currently, all log traces are controlled by one single variable,
+* IMPL: Currently, all log traces are controlled by one single variable,
   but in the future we may want to enable/disable log traces
   per protocol message type, etc.
   This is true for MFEA, MLD6IMGP, PIM
@@ -228,12 +214,6 @@ probably should be replaced with
   interface timeout. Previously, (*,*,RP), (*,G) or (S,G) entries were
   created as well, and they were never deleted.
   Add the appropriate test scenarion in the testsuite to test that.
-
-* SPEC: correct PruneEcho sending condition: currently the spec
-  says that it should not be sent on interface that contains only one
-  PIM neighbor. The correct wording should be if "no more than one".
-  Also, what about the case when there are 2 nbrs, but the one that
-  sends Prune goes away by the time the PP timer expires?
 
 * SPEC: allow all zeros Upstream Neighbor Address for PIM Join/Prune messages
   on p-to-p interfaces (pending approval from the PIM mailing list).
@@ -445,7 +425,7 @@ received?
 * IMPL: Get rid of this warning at the RP
 [ 2002/08/16 13:03:42 WARNING test_pim PIM ] JoinDesired(S,G) = true: upstream neighbor for source 10.4.0.2 and group 224.0.1.20: not found
 
-* IMP: When processing PimMfc actions, and need to delete the PimMfc,
+* IMPL: When processing PimMfc actions, and need to delete the PimMfc,
   put it in a list of entries to remove, and then the removing task
   will take care of it.
 
@@ -600,8 +580,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 
 * Delete PimMfc and PimMre from the corresponding PimMrt tables as appropriate.
 
-* SPEC: Change  KeepAliveTimer(S,G); to  KeepaliveTimer(S,G);
-
 * IMPL: If I am the RP for PimMre, do we want to explicity test for that and
   set/return the PimNbr and the Mrib to NULL?
   E.g., in PimMre::compute_mrib_next_hop_rp(),
@@ -654,7 +632,7 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 * IMPL: fix the following error:
 [ 2002/06/25 11:51:03 WARNING test_pim PIM ] Cannot timeout BSR zone 224.0.0.0/4 (non-scoped): no such configured zone
 
-* IMPL: make sure that the followign methods are called as appropriate:
+* IMPL: make sure that the following methods are called as appropriate:
   PimMrt:add_task_pim_nbr_changed()
 
 * IMPL: when calling delete_pim_nbr(), make sure that the PimVif
@@ -741,8 +719,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   that require vif_index, we can compute the required
   argument(s) in advance.
 
-* SPEC: Rename "null Register" to "Null Register" ??
-
 * IMPL: when removing a PimNbr, make sure it is not in use anymore
   by any PimMre or other entry.
 
@@ -758,9 +734,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   In that case, does it matter in what order the actions are performed?
   
 * IMPL: make sure that PimMre::recompute_mrib_next_hop_s_changed() is used.
-
-* SPEC: remove the extra ">" in front of "From" in the ASCII version
-  of the spec.
 
 * IMPL: Unite in PimMreTrackState MRIB_NEXT_HOP_RP with MRIB_NEXT_HOP_RP_G
 
@@ -902,17 +875,18 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
   Needed if the number of neighbors become quite large, so the
   neighbor lookup will become much faster.
 
-* IMPLEMENTATION: make sure that Override_Interval(I) and
+* IMPL: make sure that Override_Interval(I) and
   J/P_Override_Iterval(I) are not mixed up!!
 
-* SPEC: The unicast routing may show one MRIB address, but the upstream
+* SPEC+IMPL
+  SPEC: The unicast routing may show one MRIB address, but the upstream
   router may send the Hello messages using only one of the local IP addresses.
   Hence, which IP address to use in the Hello messages?
-  IMPLEMENTATION: when receiving a PIM message, accept it not only if it
+  IMPL: when receiving a PIM message, accept it not only if it
   is destined to the primary IP address of that interface, but to
   any address.
 
-* IMPLEMENT:
+* IMPL:
   When an interface goes down or changes IP address, a Hello message with
   a zero Hold Time should be sent immediately (with the old IP address if
   the IP address changed).  This will cause PIM neighbors to remove this
@@ -925,87 +899,88 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
   may send Prune messages, so need to be careful here...
 
 
-* If a (*,G) or (*,*,RP) PimMre entry is deleted, make sure that
+* IMPL: If a (*,G) or (*,*,RP) PimMre entry is deleted, make sure that
   all pointers to it from corresponding (S,G), (S,G,rpt), (*,G) entries
   are deleted (the last one only for (*,*,RP)
 
-* In PimVif::start(), add a timer for add_protocol_mld6igmp(), so if
+* IMPL: In PimVif::start(), add a timer for add_protocol_mld6igmp(), so if
   the PIM vif registration with MLD6IGMP fails, try again after some
   period of time. Similar repeated trying should be done for
   other registrations as well (e.g. with MFEA). Similar TODO applies
   for other modules (e.g., MLD6IGMP).
 
-* Make the initiation add/delete_protocol from PIM to MLD6IGMP part of PimNode,
-  and then implement the particular interface inside xrl_pim_node.cc.
+* IMPL: Make the initiation add/delete_protocol from PIM to MLD6IGMP
+  part of PimNode, and then implement the particular interface inside
+  xrl_pim_node.cc. 
   The add/delete_protocol would be called when pim_vif.start() or stop().
 
-* Check if multicast add_vif on Linux and Solaris allow
+* IMPL: Check if multicast add_vif on Linux and Solaris allow
   VIF_REGISTER to have any address (e.g., 127.0.0.2). If allowed,
   then modify the MFEA to assign that address itself, and remove
   it from the XRL interface.
 
-* Make sure that all flags setting for PimMre are done through access methods
-  instead of bitwise OR.
+* IMPL: Make sure that all flags setting for PimMre are done through access
+  methods instead of bitwise OR.
 
-* When receiving PIM Bootstrap message and check them whether
+* IMPL: When receiving PIM Bootstrap message and check them whether
   they can be added, if all the info was received already,
   then just silently drop that message instead of printing a warning.
 
-* Check whether KAME's pim6sd RP hash computation that uses CRC
+* IMPL: Check whether KAME's pim6sd RP hash computation that uses CRC
   in a complicated way is same result as the XOR that is specified
   in the spec.
 
-* Print warning messages when ignoring a control message.
+* IMPL: Print warning messages when ignoring a control message.
 
-* Test Bootstrap fragmentation sending and receiving
+* IMPL+TEST: Test Bootstrap fragmentation sending and receiving
 
-* PIM-SM spec:
+* SPEC:
   If the Elected BSR is a neighbor, and that neighbor expired,
   do we want to apply the optimization to expire immediately that BSR?
 
-* PIM-SM spec:
+* SPEC:
   On startup, am I the DR by default, or wait some period of time
   before self-promote as the DR?
 
-* In the PIM-SM spec: Section 4.2.1 "Last hop switchover to the SPT":
+* SPEC: In the PIM-SM spec: Section 4.2.1 "Last hop switchover to the SPT":
   Change "Last hop" to "Last-hop"?
 
-* Can an intermediate router that forwards a Bootstrap message fragment it
-  to fit the max. size on the outgoing link?
+* IMPL+SPEC: Can an intermediate router that forwards a Bootstrap message
+  fragment it to fit the max. size on the outgoing link?
 
 * If there is a scope boundary for some group range, it must
   be a scope boundary (in case of IPv4) for 239.255.0.0/16
   (the IPv4 Local Scope).
 
-* Use everywhere uint16_t for vif index type instead of size_t (??)
+* IMPL: Use everywhere uint16_t for vif index type instead of size_t (??)
 
-* Make sure that the 'updated_entry' BSR-related flag is used,
+* IMPL: Make sure that the 'updated_entry' BSR-related flag is used,
   otherwise remove it.
 
-* There is some inconsistency between "show igmp interface"
+* IMPL: There is some inconsistency between "show igmp interface"
   and "show pim interfaces" commands: the command name,
   as well as the command output.
 
-* Remove maxvifs() (??)
+* IMPL: Remove maxvifs() (??)
 
-* Add functions to start/stop enable/disable a single interface (?)
+* IMPL: Add functions to start/stop enable/disable a single interface (?)
   Same applies for MLD6IGMP, MfeaNode, etc...
 
-* Implement RFC 1256 (Router Solicitation)
+* IMPL: Implement RFC 1256 (Router Solicitation)
 
-* Add the xlog init stuff
+* IMPL: Add the xlog init stuff
 
-* When the BSR collects all cand. RPs for a prefix, if their number is
+* IMPL: When the BSR collects all cand. RPs for a prefix, if their number is
   larger than 255, distribute only the best 255 prefixes.
 
-* All debug messages "from %s:" should be "from %s to %s:"
+* IMPL: All debug messages "from %s:" should be "from %s to %s:"
 
-* Simplify the Bootstrap message processing:
+* IMPL: Simplify the Bootstrap message processing:
   - first parse to determine the zone ID, and then process the rest
 
-* Bug-fix when deleting lists
+* IMPL: Bug-fix when deleting lists
 
-* TODO: take care of the SZ Timer in the BSR spec: unclear when set,
+* IMPL+SPEC: take care of the SZ Timer in the BSR spec: unclear when set,
   what means "always running", etc. See page 8 and 9 of the spec.
 
 * SPEC: should PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT be 1500,
@@ -1013,7 +988,8 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
 
 * SPEC: RP Set or RP-Set??
 
-* PIM MIB:
+* IMPL+SPEC:
+  PIM MIB:
   I just checked RFC 2934, and indeed it seems that PimRPSetEntry
 does not include the RP priority, which IMHO should be there.
 I don't know whether the authors have intentionally left it out for
@@ -1021,13 +997,13 @@ some reasons, or it was an unintentional miss. If it was the
 latter, probably it should be added when it comes for a revision of
 this experimental RFC.
 
-* What if the "Hash Mask len" is different for different prefixes
+* IMPL+SPEC: What if the "Hash Mask len" is different for different prefixes
   in the Bootstrap message? Any issues if different??
 
-* Settle the logistics for start()/stop()/enable()/disable() and
+* IMPL: Settle the logistics for start()/stop()/enable()/disable() and
   syncronize the implementation for all modules to use it.
 
-* PimVif::pim_data_recv() : implement it!!
+* IMPL: PimVif::pim_data_recv() : implement it!!
 
 * TODO (kernel and PIM-SM impl):
 > One limitation with using this option is, it won't allow fragmentation
@@ -1317,8 +1293,6 @@ DONE:
   which is eventually set to PIM_DATA_TIMEOUT_DEFAULT. The spec is not
   clear here.
   
-* SPEC: Replace Assert_timer with Assert-Timer
-
 * SPEC: The PIM-DM [Assert-Timer] is default to 210, but
   the PIM-SM [Assert-Timeout] is default to 180. Any reason for the
   difference?
