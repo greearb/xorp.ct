@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.5 2003/03/10 23:21:03 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.6 2003/03/14 23:18:46 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -27,7 +27,7 @@ XorpBatch::XorpBatch(XorpClient *xclient, uint tid) {
     _tid = tid;
 }
 
-EventLoop*
+EventLoop&
 XorpBatch::eventloop() const 
 {
     return _xclient->eventloop();
@@ -186,7 +186,7 @@ XorpBatchXrlItem::response_callback(const XrlError& err,
 
     if (err != XrlError::OKAY() && _retries > 0) {
 	_retry_timer =
-	    _batch->eventloop()->new_oneoff_after_ms(_retry_ms,
+	    _batch->eventloop().new_oneoff_after_ms(_retry_ms,
 		callback(this, &XorpBatchXrlItem::retry_execution));
 	_retries--;
 	debug_msg("Attempting resend (retries left %d)", _retries);
@@ -226,7 +226,7 @@ XorpBatchModuleItem::execute(XorpClient */*xclient*/, XorpBatch *batch,
 	    cb = callback(this, &XorpBatchModuleItem::response_callback,
 			  true, string(""));
 	    _startup_timer 
-		= _mmgr->eventloop()->new_oneoff_after_ms(2000, cb);
+		= _mmgr->eventloop().new_oneoff_after_ms(2000, cb);
 	    return XORP_OK;
 	} else {
 	    //we failed - trigger the callback immediately
@@ -261,9 +261,9 @@ XorpBatchModuleItem::response_callback(bool success, string errmsg) {
 /* XorpClient                                                          */
 /***********************************************************************/
 
-XorpClient::XorpClient(EventLoop *event_loop, XrlRouter *xrlrouter) 
+XorpClient::XorpClient(EventLoop& eventloop, XrlRouter *xrlrouter) 
+    : _eventloop(eventloop)
 {
-    _event_loop = event_loop;
     _xrlrouter = xrlrouter;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.4 2003/03/10 23:21:03 hodson Exp $
+// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.5 2003/03/14 23:18:46 hodson Exp $
 
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
@@ -52,7 +52,7 @@ public:
 			 const string& errmsg);
     void abort_transaction(const string& errmsg);
 
-    EventLoop* eventloop() const;
+    EventLoop& eventloop() const;
 
     XorpClient* client() const;
     
@@ -119,7 +119,7 @@ public:
 
 class XorpClient  {
 public:
-    XorpClient(EventLoop *event_loop, XrlRouter *xrlrouter);
+    XorpClient(EventLoop& eventloop, XrlRouter *xrlrouter);
     ~XorpClient() {};
     int send_xrl(uint tid, 
 		 const UnexpandedXrl &xrl, 
@@ -139,10 +139,10 @@ public:
     int end_transaction(uint tid, XorpBatch::CommitCallback ending_cb);
     void remove_transaction(uint tid);
 
-    EventLoop* eventloop() const { return _event_loop; }
+    EventLoop& eventloop() const { return _eventloop; }
     
 private:
-    EventLoop *_event_loop;
+    EventLoop& _eventloop;
     XrlRouter *_xrlrouter;
 #ifdef OLDWAY
     int _cmd_done;

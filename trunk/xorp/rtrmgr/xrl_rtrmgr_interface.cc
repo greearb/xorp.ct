@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.2 2003/01/28 00:37:55 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.3 2003/03/10 23:21:03 hodson Exp $"
 
 #include <sys/stat.h>
 #include "rtrmgr_module.h"
@@ -26,12 +26,11 @@
 
 XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter* r, UserDB *userdb,
 				       MasterConfigTree *ct, 
-				       EventLoop *eventloop,
+				       EventLoop& eventloop,
 				       RandomGen *randgen) 
-    : XrlRtrmgrTargetBase(r), _client_interface(r)
+    : XrlRtrmgrTargetBase(r), _client_interface(r), _eventloop(eventloop)
 {
     _conf_tree = ct;
-    _eventloop = eventloop;
     _randgen = randgen;
     _userdb = userdb;
     _config_locked = false;
@@ -452,7 +451,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
 	_config_locked = true;
 	_lock_holder = get_user_id_from_token(token);
 	_lock_timer = 
-	    _eventloop->new_oneoff_after_ms(
+	    _eventloop.new_oneoff_after_ms(
                             timeout, 
 			    callback(this, &XrlRtrmgrInterface::lock_timeout));
 	return XrlCmdError::OKAY();

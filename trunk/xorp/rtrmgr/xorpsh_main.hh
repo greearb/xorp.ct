@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.2 2002/12/14 23:43:10 hodson Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.3 2003/03/10 23:21:03 hodson Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -88,13 +88,13 @@ public:
 	const uint32_t*>::RefPtr PID_CALLBACK;
     void get_rtrmgr_pid(PID_CALLBACK cb);
 
-    EventLoop& eventloop() {return _event_loop;}
+    EventLoop& eventloop() {return _eventloop;}
     SlaveConfigTree *config_tree() {return _ct;}
     OpCommandList *op_cmd_list() {return _ocl;}
     XorpClient& xorp_client() {return _xclient;}
     uint32_t rtrmgr_pid() const {return _rtrmgr_pid;}
 private:
-    EventLoop _event_loop; 
+    EventLoop _eventloop; 
     XrlStdRouter _xrlrouter;
     XorpClient _xclient;
     XrlRtrmgrV0p1Client _rtrmgr_client;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.3 2003/03/10 23:21:03 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.4 2003/03/18 02:44:37 pavlin Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -66,12 +66,12 @@ usage(char *name)
 XorpShell::XorpShell(const string& IPCname, 
 		     const string& config_template_dir, 
 		     const string& xrl_dir)
-    : _event_loop(), 
-    _xrlrouter(_event_loop, IPCname.c_str()),
-    _xclient(&_event_loop, &_xrlrouter),
+    : _eventloop(), 
+    _xrlrouter(_eventloop, IPCname.c_str()),
+    _xclient(_eventloop, &_xrlrouter),
     _rtrmgr_client(&_xrlrouter),
     _xorpsh_interface(&_xrlrouter, this),
-    _cli_node(AF_INET, XORP_MODULE_CLI, _event_loop),
+    _cli_node(AF_INET, XORP_MODULE_CLI, _eventloop),
     _mode(MODE_INITIALIZING)
 {
     _ipc_name = IPCname;
@@ -117,7 +117,7 @@ XorpShell::run() {
     
     _mode = MODE_AUTHENTICATING;
     while (_authfile.empty()) {
-	_event_loop.run();
+	_eventloop.run();
     }
 
 #ifdef DEBUG_STARTUP
@@ -154,7 +154,7 @@ XorpShell::run() {
 					    callback(this, 
 						     &XorpShell::generic_done));
     while (!_done) {
-	_event_loop.run();
+	_eventloop.run();
     }
 
     _mode = MODE_INITIALIZING;
@@ -169,7 +169,7 @@ XorpShell::run() {
 	printf("+");
 	fflush(stdout);
 #endif
-	_event_loop.run();
+	_eventloop.run();
     }
 
 #ifdef DEBUG_STARTUP
@@ -190,7 +190,7 @@ XorpShell::run() {
     _mode = MODE_IDLE;
 
     while (running) {
-	_event_loop.run();
+	_eventloop.run();
     }
 
     _done = false;
@@ -200,7 +200,7 @@ XorpShell::run() {
     _mode = MODE_SHUTDOWN;
     //we need to return to the event loop to cause the unregister to be sent
     while (!_done) {
-	_event_loop.run();
+	_eventloop.run();
     }
 }
 

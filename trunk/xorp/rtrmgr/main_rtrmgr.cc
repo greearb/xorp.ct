@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.6 2003/04/02 22:58:58 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.7 2003/04/03 00:24:01 hodson Exp $"
 
 #include <signal.h>
 
@@ -141,54 +141,54 @@ main(int argc, char* const argv[])
     //    signal(SIGSEGV, signalhandler);
 
     //initialize the event loop
-    EventLoop event_loop; 
-    randgen.add_event_loop(&event_loop);
+    EventLoop eventloop; 
+    randgen.add_eventloop(&eventloop);
 
     /* Finder Server */
-    FinderNGServer fs(event_loop);
+    FinderNGServer fs(eventloop);
 
     //start the module manager
-    ModuleManager mmgr(&event_loop);
+    ModuleManager mmgr(eventloop);
     try {
 	UserDB userdb;
 	userdb.load_password_file();
 
 	//initialize the IPC mechanism
-	XrlStdRouter xrlrouter(event_loop, "rtrmgr");
+	XrlStdRouter xrlrouter(eventloop, "rtrmgr");
 
 	if (no_execute == false) {
 	
-	    XorpClient xclient(&event_loop, &xrlrouter);
+	    XorpClient xclient(eventloop, &xrlrouter);
 
 	    //read the router startup configuration file,
 	    //start the processes required, and initialize them
 	    MasterConfigTree ct(config_boot, tt, &mmgr, &xclient, no_execute);
 	    XrlRtrmgrInterface rtrmgr_target(&xrlrouter, &userdb,
-					     &ct, &event_loop,
+					     &ct, eventloop,
 					     &randgen);
 
 	    //loop while handling configuration events and signals
 	    while (running) {
 		printf("+");
 		fflush(stdout);
-		event_loop.run();
+		eventloop.run();
 	    }
 	} else {
 	    //no-execute mode, for debugging purposes
 
-	    XorpClient xclient(&event_loop, NULL);
+	    XorpClient xclient(eventloop, NULL);
 
 	    printf("here0_______________________\n");
 	    MasterConfigTree ct(config_boot, tt, &mmgr, &xclient, no_execute);
 	    printf("here1_______________________\n");
 	    XrlRtrmgrInterface rtrmgr_target(&xrlrouter, &userdb,
-					     &ct, &event_loop,
+					     &ct, eventloop,
 					     &randgen);
 
 	    while (running) {
 		printf("+");
 		fflush(stdout);
-		event_loop.run();
+		eventloop.run();
 	    }
 	}
     } catch (InitError& e) {

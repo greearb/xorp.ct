@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/randomness.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+// $XORP: xorp/rtrmgr/randomness.hh,v 1.2 2003/03/10 23:21:01 hodson Exp $
 
 #ifndef __RTRMGR_RANDOMNESS_HH__
 #define __RTRMGR_RANDOMNESS_HH__
@@ -24,7 +24,7 @@
 class RandomGen {
 public:
     RandomGen();
-    void add_event_loop(EventLoop *eventloop);
+    void add_eventloop(EventLoop *eventloop);
     void get_random_bytes(size_t len, uint8_t* buf);
 private:
     bool read_file(const string& filename);
