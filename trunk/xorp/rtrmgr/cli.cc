@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.38 2004/05/31 07:02:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.39 2004/05/31 07:59:00 pavlin Exp $"
 
 
 #include <pwd.h>
@@ -98,12 +98,12 @@ To switch to configuration mode, use the \"configure\" command.\n\
 You have to be in the xorp group to be able to use configuration mode.\n\
 \n\
 Optional parameters to configure: \n\
-   exclusive\n\
+    exclusive\n\
 Use \"help configure exclusive\" for more details.";
 
     _help_long_o["configure exclusive"] = "\
 To enter exclusive configuration mode you use the command:\n\
-   configure exclusive\n\
+    configure exclusive\n\
 This will allow you to make changes to the router configuration and lock\n\
 all other users out of configuration mode until you exit.\n\
 Use this command sparingly.";
@@ -631,10 +631,12 @@ RouterCLI::add_static_configure_mode_commands()
 
     com0 = _cli_node.cli_command_root();
     if (_changes_made) {
+	// Commit command
 	com0->add_command("commit", get_help_c("commit"),
 			  callback(this, &RouterCLI::commit_func));
     }
 
+    // Delete command
     _delete_node = com0->add_command("delete", get_help_c("delete"));
 
     // Edit command
@@ -799,24 +801,24 @@ RouterCLI::apply_path_change()
     _cli_node.cli_command_root()->delete_all_commands();
     add_static_configure_mode_commands();
 
-    // Rebuild the command subtree for the edit command
+    // Rebuild the command subtree for the "edit" command
     _edit_node->delete_all_commands();
-
     //
     // Note: the edit subtree must be done before the other subtrees,
-    // because it can force a path change in the root node if the edit
-    // subtree is not a node that can be editted.
+    // because it can force a path change in the root node if the "edit"
+    // subtree is not a node that can be edited.
     //
     add_edit_subtree();
 
+    // Rebuild the command subtree for the "delete" command
     _delete_node->delete_all_commands();
     add_delete_subtree();
 
-    // Rebuild the command subtree for the set command
+    // Rebuild the command subtree for the "set" command
     _set_node->delete_all_commands();
     add_set_subtree();
 
-    // Rebuild the command subtree for the show command
+    // Rebuild the command subtree for the "show" command
     _show_node->delete_all_commands();
     add_show_subtree();
     string cmdpath;
@@ -867,11 +869,9 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	    help = "-- no help available --";
 	}
 	if ((*cmd_iter)->has_command()) {
-	    com = current_cli_node.add_command(cmd_name,
-					       help, cb);
+	    com = current_cli_node.add_command(cmd_name, help, cb);
 	} else {
-	    com = current_cli_node.add_command(cmd_name,
-					       help);
+	    com = current_cli_node.add_command(cmd_name, help);
 	}
 	if (com == NULL) {
 	    XLOG_FATAL("add_command %s failed", cmd_name.c_str());
@@ -908,8 +908,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 	    if (help == "") {
 		help = "-- no help available --";
 	    }
-	    com = current_cli_node.add_command((*cmd_iter)->name(),
-					       help, cb);
+	    com = current_cli_node.add_command((*cmd_iter)->name(), help, cb);
 	    if (com == NULL) {
 		XLOG_FATAL("AI: add_command %s failed",
 			   (*cmd_iter)->name().c_str());
@@ -936,7 +935,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 	    continue;
 	}
 	if ((*tti)->check_command_tree(cmd_names, include_intermediates,
-				       /* depth */ 0)) {
+				       0 /* depth */)) {
 	    if (path.empty())
 		subpath = (*tti)->segname();
 	    else
@@ -947,8 +946,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 		help = "-- no help available --";
 	    }
 	    CliCommand* com;
-	    com = current_cli_node.add_command((*tti)->segname(),
-					       help, cb);
+	    com = current_cli_node.add_command((*tti)->segname(), help, cb);
 	    if (com == NULL) {
 		XLOG_FATAL("AI: add_command %s for template failed",
 			   (*tti)->segname().c_str());
@@ -1025,9 +1023,9 @@ RouterCLI::add_edit_subtree()
     }
 
     current_config_node->create_command_tree(cmd_tree,
-					      cmds,
-					      /* include_intermediates */ true,
-					      /* include templates */ false);
+					     cmds,
+					     true, /* include_intermediates */
+					     false /* include_templates */);
     debug_msg("==========================================================\n");
     debug_msg("edit subtree is:\n\n");
     debug_msg("%s", cmd_tree.tree_str().c_str());
@@ -1048,7 +1046,7 @@ RouterCLI::add_edit_subtree()
     add_immediate_commands(*(_cli_node.cli_command_root()),
 			   cmd_tree,
 			   cmds,
-			   /* include_intermediates */ true,
+			   true, /* include_intermediates */
 			   callback(this, &RouterCLI::text_entry_func),
 			   pathstr());
 #endif
@@ -1067,8 +1065,8 @@ RouterCLI::add_delete_subtree()
     SlaveConfigTreeNode *current_config_node = config_tree()->find_node(_path);
     current_config_node->create_command_tree(cmd_tree,
 					     cmds,
-					     /* include_intermediates */ true,
-					     /* include templates */ false);
+					     true, /* include_intermediates */
+					     false /* include_templates */);
 
     debug_msg("==========================================================\n");
     debug_msg("delete subtree is:\n\n");
@@ -1095,9 +1093,9 @@ RouterCLI::add_set_subtree()
     cmds.push_back("%set");
     SlaveConfigTreeNode *current_config_node = config_tree()->find_node(_path);
     current_config_node->create_command_tree(cmd_tree,
-					      cmds,
-					      /* include_intermediates */false,
-					      /* include templates */ true);
+					     cmds,
+					     false, /* include_intermediates */
+					     true /* include_templates */);
 
     debug_msg("==========================================================\n");
     debug_msg("set subtree is:\n\n");
@@ -1119,7 +1117,7 @@ RouterCLI::add_set_subtree()
     add_immediate_commands(*(_cli_node.cli_command_root()),
 			   cmd_tree,
 			   cmds,
-			   /* include_intermediates */ false,
+			   false, /* include_intermediates */
 			   callback(this, &RouterCLI::immediate_set_func),
 			   pathstr());
 #endif // 0
@@ -1135,8 +1133,8 @@ RouterCLI::add_show_subtree()
     SlaveConfigTreeNode *current_config_node = config_tree()->find_node(_path);
     current_config_node->create_command_tree(cmd_tree,
 					     cmds,
-					     /* include_intermediates */ true,
-					     /* include templates */ false);
+					     true, /* include_intermediates */
+					     false /* include_templates */);
 
     debug_msg("==========================================================\n");
     debug_msg("show subtree is:\n\n");
@@ -1157,10 +1155,14 @@ RouterCLI::add_show_subtree()
 void
 RouterCLI::add_text_entry_commands()
 {
-    XLOG_TRACE(_verbose, "add_text_entry_commands\n");
-    
-    SlaveConfigTreeNode *current_config_node = config_tree()->find_node(_path);
-    const TemplateTreeNode *ttn = current_config_node->template_tree_node();
+    const SlaveConfigTreeNode* current_config_node;
+    const TemplateTreeNode* ttn;
+    CliCommand* com0 = _cli_node.cli_command_root();
+
+    debug_msg("add_text_entry_commands\n");
+
+    current_config_node = config_tree()->find_node(_path);
+    ttn = current_config_node->template_tree_node();
     if (ttn == NULL) {
 	XLOG_TRACE(_verbose, "ttn == NULL >>%s<<\n",
 		   current_config_node->segname().c_str());
@@ -1169,17 +1171,19 @@ RouterCLI::add_text_entry_commands()
 
     list<TemplateTreeNode*>::const_iterator tti;
     for (tti = ttn->children().begin(); tti != ttn->children().end(); ++tti) {
-	 CliCommand *com0, *com;
-	 com0 = _cli_node.cli_command_root();
-	 string help = (*tti)->help();
+	 CliCommand* com;
 	 string subpath;
+
 	 if (pathstr().empty())
 	     subpath = (*tti)->segname();
 	 else
 	     subpath = pathstr() + " " + (*tti)->segname();
+
+	 string help = (*tti)->help();
 	 if (help == "") {
 	     help = "-- no help available --";
 	 }
+
 	 com = com0->add_command((*tti)->segname(),
 				 help, callback(this,
 						&RouterCLI::text_entry_func));
@@ -1290,7 +1294,7 @@ RouterCLI::new_config_user(uid_t user_id)
 	username = pwent->pw_name;
     string alert = c_format("User %s entered configuration mode\n",
 			    username.c_str());
-    notify_user(alert, /* not urgent */ false);
+    notify_user(alert, false /* not urgent */);
 }
 
 void
@@ -1819,7 +1823,6 @@ RouterCLI::text_entry_func(const string& ,
 }
 #endif // 0
 
-
 int
 RouterCLI::text_entry_func(const string& ,
 			   const string& ,
@@ -1888,7 +1891,7 @@ RouterCLI::text_entry_func(const string& ,
     // yet exist, and ctn points to the last existing node.
     //
 
-    const TemplateTreeNode *ttn;
+    const TemplateTreeNode* ttn = NULL;
 
     //
     // Variable "value_expected" keeps track of whether the next
@@ -2125,7 +2128,7 @@ RouterCLI::text_entry_children_func(const string& path,
 {
     map <string, string> children;
     list<string> path_segments;
-    XLOG_TRACE(_verbose, "text_entry_func: %s\n", path.c_str());
+    XLOG_TRACE(_verbose, "text_entry_children_func: %s\n", path.c_str());
 
     string newpath = path;
     while (! newpath.empty()) {
@@ -2170,6 +2173,7 @@ RouterCLI::text_entry_children_func(const string& path,
 
     return children;
 }
+
 int
 RouterCLI::delete_func(const string& ,
 		       const string& ,
