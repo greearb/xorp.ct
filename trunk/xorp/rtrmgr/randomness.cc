@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.8 2003/12/02 09:38:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.9 2003/12/03 00:17:13 pavlin Exp $"
 
 #include <fcntl.h>
 #include <sys/time.h>
@@ -334,7 +334,7 @@ RandomGen::get_random_bytes(size_t len, uint8_t* buf)
 	} else {
 	    size_t bytes_read = fread(buf, 1, len, file);
 	    if (bytes_read < len) {
-		XLOG_ERROR("Failed read on randomness source; read %u words\n",
+		XLOG_ERROR("Failed read on randomness source; read %u words",
 			   (uint32_t)bytes_read);
 	    }
 	}
