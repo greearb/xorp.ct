@@ -197,7 +197,8 @@ the FEA should withdraw all routes that the RIB has sent to it.
 
 \subsubsection{MFEA - Multicast Forwarding Engine Abstraction}
 
-TBD
+The MFEA is multicast analogue to the unicast FEA. If should be noted
+that the MFEA and FEA are currently being merged.
 
 \subsubsection{RIB - Routing Information Base}
 
@@ -208,13 +209,13 @@ The RIB should register interest in the FEA. If the FEA fails the RIB
 should exit. All routing processes that interact with the RIB should
 on detecting the shutdown of the RIB also terminate gracefully.
 
-\subsubsection{IGMP}
+\subsubsection{IGMP/MLD}
 
-TBD
+If the FEA/MFEA process exits then this process should exit.
 
 \subsubsection{PIM}
 
-TBD
+If the RIB or FEA/MFEA exits then this process should exit.
 
 \subsubsection{BGP}
 
