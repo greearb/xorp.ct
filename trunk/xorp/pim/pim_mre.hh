@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.33 2004/02/24 19:57:04 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.34 2004/02/25 00:35:48 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -223,6 +223,8 @@ public:
     // (S,G,rpt)-related upstream changes (recomputed via (S,G) to (S,G,rpt))
     void	recompute_rpfp_nbr_sg_rpt_sg_changed();
     // Misc. other RPF-related info
+    // Note: applies for (S,G) and (S,G,rpt)
+    bool	compute_is_directly_connected_s();
     // Note: applies for (S,G)
     void	recompute_is_directly_connected_sg();
     //

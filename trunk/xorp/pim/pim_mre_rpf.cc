@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.23 2004/02/25 00:41:24 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.25 2004/02/28 10:47:18 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -1332,7 +1332,8 @@ PimMre::recompute_rpfp_nbr_sg_rpt_sg_changed()
     
     //
     // The (S,G,rpt) routing entry doesn't exist, hence create it
-    // and then use it to recompute if RPF'(S,G,rpt) has changed
+    // and then use it to recompute if RPF'(S,G,rpt) has changed.
+    //
     pim_mre_sg_rpt = pim_mrt().pim_mre_find(source_addr(), group_addr(),
 					    PIM_MRE_SG_RPT, PIM_MRE_SG_RPT);
     if (pim_mre_sg_rpt == NULL) {
@@ -1354,11 +1355,27 @@ PimMre::recompute_rpfp_nbr_sg_rpt_sg_changed()
 }
 
 //
+// Note: applies only for (S,G) and (S,G,rpt)
+//
+bool
+PimMre::compute_is_directly_connected_s()
+{
+    bool v = false;
+    PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(rpf_interface_s());
+
+    if (pim_vif != NULL)
+	v = pim_node().is_directly_connected(*pim_vif, source_addr());
+
+    return (v);
+}
+
+//
 // Note: applies only for (S,G)
 //
 void
 PimMre::recompute_is_directly_connected_sg()
 {
-    bool v = pim_node().is_directly_connected(source_addr());
+    bool v = compute_is_directly_connected_s();
+
     set_directly_connected_s(v);
 }
