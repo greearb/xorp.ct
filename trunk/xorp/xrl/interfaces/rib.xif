@@ -1,10 +1,48 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.2 2003/03/10 20:26:48 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.3 2003/03/17 23:21:00 pavlin Exp $ */
 
 /*
  * Routing Information Base XRL interface.
  */
 
 interface rib/0.1 {
+	/**
+	 * Enable/disable/start/stop RIB.
+	 * 
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	enable_rib			-> fail:bool & reason:txt
+	disable_rib			-> fail:bool & reason:txt
+	start_rib			-> fail:bool & reason:txt
+	stop_rib			-> fail:bool & reason:txt
+
+	/**
+	 * Add/delete/enable/disable a RIB client.
+	 * 
+	 * Add/delete/enable/disable a RIB client for a given target name,
+	 * address family, and unicast/multicast flags.
+	 * 
+	 * @param target_name the target name of the RIB client.
+	 * @param family the address family (AF_INET or AF_INET6 for
+	 * IPv4 and IPv6 respectively).
+	 * @param is_unicast true if a client for the unicast RIB.
+	 * @param is_multicast true if a client for the multicast RIB.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	add_rib_client		? target_name:txt & family:u32		\
+				& is_unicast:bool & is_multicast:bool	\
+				-> fail:bool & reason:txt
+	delete_rib_client	? target_name:txt & family:u32		\
+				& is_unicast:bool & is_multicast:bool	\
+				-> fail:bool & reason:txt
+	enable_rib_client	? target_name:txt & family:u32		\
+				& is_unicast:bool & is_multicast:bool	\
+				-> fail:bool & reason:txt
+	disable_rib_client	? target_name:txt & family:u32		\
+				& is_unicast:bool & is_multicast:bool	\
+				-> fail:bool & reason:txt
+
 	/**
 	 * Don't send anything to the FEA - used for testing only
 	 */	

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.9 2003/03/17 23:38:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.10 2003/03/18 02:44:37 pavlin Exp $"
 
 
 //
@@ -212,7 +212,7 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_mfea4(event_loop,
 					  xorp_module_name(AF_INET,
 							   XORP_MODULE_MFEA),
-					    finder_hostname);
+					  finder_hostname);
 	XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA,
 				   event_loop,
 				   &xrl_std_router_mfea4);
@@ -220,20 +220,11 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_mfea6(event_loop,
 					  xorp_module_name(AF_INET6,
 							   XORP_MODULE_MFEA),
-					    finder_hostname);
+					  finder_hostname);
 	XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA,
 				   event_loop,
 				   &xrl_std_router_mfea6);
 #endif // ! DO_IPV4
-	
-	//
-	// The RIB manager
-	//
-#if 0		// TODO: commented-out for now
-	XrlStdRouter xrl_std_router_rib(event_loop, "rib");
-	RibManager rib_manager(event_loop, xrl_std_router_rib);
-	rib_manager.set_fea_enabled(false);
-#endif // 0
 	
 	//
 	// MLD6IGMP node
@@ -242,7 +233,7 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_mld6igmp4(event_loop,
 					      xorp_module_name(AF_INET,
 							       XORP_MODULE_MLD6IGMP),
-						finder_hostname);
+					      finder_hostname);
 	XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET, XORP_MODULE_MLD6IGMP,
 					   event_loop,
 					   &xrl_std_router_mld6igmp4);
@@ -250,10 +241,29 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_mld6igmp6(event_loop,
 					      xorp_module_name(AF_INET6,
 							       XORP_MODULE_MLD6IGMP),
-						finder_hostname);
+					      finder_hostname);
 	XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6, XORP_MODULE_MLD6IGMP,
 					   event_loop,
 					   &xrl_std_router_mld6igmp6);
+#endif // ! DO_IPV4
+	
+	//
+	// The RIB manager
+	//
+#if DO_IPV4
+	XrlStdRouter xrl_std_router_rib4(event_loop,
+					 xorp_module_name(AF_INET,
+							  XORP_MODULE_RIB),
+					 finder_hostname);
+	RibManager rib_manager4(event_loop, xrl_std_router_rib4);
+	rib_manager4.no_fea();
+#else
+	XrlStdRouter xrl_std_router_rib6(event_loop,
+					 xorp_module_name(AF_INET6,
+							  XORP_MODULE_RIB),
+					 finder_hostname);
+	RibManager rib_manager6(event_loop, xrl_std_router_rib6);
+	rib_manager6.no_fea();
 #endif // ! DO_IPV4
 	
 	//
@@ -263,7 +273,7 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_pimsm4(event_loop,
 					   xorp_module_name(AF_INET,
 							    XORP_MODULE_PIMSM),
-					     finder_hostname);
+					   finder_hostname);
 	XrlPimNode xrl_pimsm_node4(AF_INET, XORP_MODULE_PIMSM,
 				   event_loop,
 				   &xrl_std_router_pimsm4);
@@ -275,7 +285,7 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_pimsm6(event_loop,
 					   xorp_module_name(AF_INET6,
 							    XORP_MODULE_PIMSM),
-					     finder_hostname);
+					   finder_hostname);
 	XrlPimNode xrl_pimsm_node6(AF_INET6, XORP_MODULE_PIMSM,
 				   event_loop,
 				   &xrl_std_router_pimsm6);

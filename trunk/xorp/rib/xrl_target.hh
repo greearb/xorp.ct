@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.3 2003/03/10 23:20:58 hodson Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.4 2003/03/19 09:05:21 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -32,21 +32,23 @@ public:
     /**
      * XrlRibTarget constructor
      *
-     * @param r the XrlRouter instance handling sending and receiving
+     * @param xrl_router the XrlRouter instance handling sending and receiving
      * XRLs for this process
-     * @param u4 the IPv4 unicast RIB.
-     * @param m4 the IPv4 multicast RIB.
-     * @param u6 the IPv6 unicast RIB.
-     * @param m6 the IPv6 multicast RIB.
-     * @param vifmanager the VifManager for this process handling
+     * @param urib4 the IPv4 unicast RIB.
+     * @param mrib4 the IPv4 multicast RIB.
+     * @param urib6 the IPv6 unicast RIB.
+     * @param mrib6 the IPv6 multicast RIB.
+     * @param vif_manager the VifManager for this process handling
      * communication with the FEA regarding VIF changes.
+     * @param rib_manager the RibManager for this process.
      */ 
-    XrlRibTarget(XrlRouter *r,
-		 RIB<IPv4>& u4, RIB<IPv4>& m4,
-		 RIB<IPv6>& u6, RIB<IPv6>& m6,
-		 VifManager& vifmanager, RibManager *ribmanager) : 
-	XrlRibTargetBase(r), _urib4(u4), _mrib4(m4), _urib6(u6), _mrib6(m6),
-	_vifmanager(vifmanager), _ribmanager(ribmanager) {}
+    XrlRibTarget(XrlRouter *xrl_router,
+		 RIB<IPv4>& urib4, RIB<IPv4>& mrib4,
+		 RIB<IPv6>& urib6, RIB<IPv6>& mrib6,
+		 VifManager& vif_manager, RibManager *rib_manager)
+	: XrlRibTargetBase(xrl_router),
+	  _urib4(urib4), _mrib4(mrib4), _urib6(urib6), _mrib6(mrib6),
+	  _vif_manager(vif_manager), _rib_manager(rib_manager) {}
     /**
      * XrlRibTarget destructor
      */
@@ -57,8 +59,8 @@ protected:
     RIB<IPv4>&	_mrib4;
     RIB<IPv6>&	_urib6;
     RIB<IPv6>&	_mrib6;
-    VifManager& _vifmanager;
-    RibManager	*_ribmanager;
+    VifManager& _vif_manager;
+    RibManager	*_rib_manager;
 
 protected:
 
@@ -69,6 +71,87 @@ protected:
     virtual XrlCmdError common_0_1_get_version(
 	// Output values, 
 	string&	version);
+
+    /**
+     *  Enable/disable/start/stop RIB.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    virtual XrlCmdError rib_0_1_enable_rib(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError rib_0_1_disable_rib(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError rib_0_1_start_rib(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError rib_0_1_stop_rib(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    /**
+     *  Add/delete/enable/disable a RIB client. Add/delete/enable/disable a RIB
+     *  client for a given target name, address family, and unicast/multicast
+     *  flags.
+     *  
+     *  @param target_name the target name of the RIB client.
+     *  
+     *  @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
+     *  respectively).
+     *  
+     *  @param is_unicast true if a client for the unicast RIB.
+     *  
+     *  @param is_multicast true if a client for the multicast RIB.
+     */
+    virtual XrlCmdError rib_0_1_add_rib_client(
+	// Input values, 
+	const string&	target_name, 
+	const uint32_t&	family, 
+	const bool&	is_unicast, 
+	const bool&	is_multicast, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError rib_0_1_delete_rib_client(
+	// Input values, 
+	const string&	target_name, 
+	const uint32_t&	family, 
+	const bool&	is_unicast, 
+	const bool&	is_multicast, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError rib_0_1_enable_rib_client(
+	// Input values, 
+	const string&	target_name, 
+	const uint32_t&	family, 
+	const bool&	is_unicast, 
+	const bool&	is_multicast, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    virtual XrlCmdError rib_0_1_disable_rib_client(
+	// Input values, 
+	const string&	target_name, 
+	const uint32_t&	family, 
+	const bool&	is_unicast, 
+	const bool&	is_multicast, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
 
     virtual XrlCmdError rib_0_1_no_fea();
 

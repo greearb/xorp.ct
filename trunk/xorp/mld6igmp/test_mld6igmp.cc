@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.8 2003/03/17 23:24:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.9 2003/03/18 02:44:36 pavlin Exp $"
 
 
 //
@@ -211,7 +211,7 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_mfea4(event_loop,
 					  xorp_module_name(AF_INET,
 							   XORP_MODULE_MFEA),
-					    finder_hostname);
+					  finder_hostname);
 	XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA,
 				   event_loop,
 				   &xrl_std_router_mfea4);
@@ -219,7 +219,7 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_mfea6(event_loop,
 					  xorp_module_name(AF_INET6,
 							   XORP_MODULE_MFEA),
-					    finder_hostname);
+					  finder_hostname);
 	XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA,
 				   event_loop,
 				   &xrl_std_router_mfea6);
@@ -232,7 +232,7 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_mld6igmp4(event_loop,
 					      xorp_module_name(AF_INET,
 							       XORP_MODULE_MLD6IGMP),
-						finder_hostname);
+					      finder_hostname);
 	XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET, XORP_MODULE_MLD6IGMP,
 					   event_loop,
 					   &xrl_std_router_mld6igmp4);
@@ -240,7 +240,7 @@ main(int argc, char *argv[])
 	XrlStdRouter xrl_std_router_mld6igmp6(event_loop,
 					      xorp_module_name(AF_INET6,
 							       XORP_MODULE_MLD6IGMP),
-						finder_hostname);
+					      finder_hostname);
 	XrlMld6igmpNode xrl_mld6igmp_node6(AF_INET6, XORP_MODULE_MLD6IGMP,
 					   event_loop,
 					   &xrl_std_router_mld6igmp6);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.8 2003/03/20 04:29:22 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.9 2003/03/21 01:25:15 pavlin Exp $"
 
 #include "version.h"
 #include "rib_module.h"
@@ -37,10 +37,160 @@ XrlRibTarget::common_0_1_get_version(string& version)
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError
+XrlRibTarget::rib_0_1_enable_rib(
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    _rib_manager->enable();
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_disable_rib(
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    _rib_manager->disable();
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_start_rib(
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (_rib_manager->start() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_stop_rib(
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (_rib_manager->stop() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_add_rib_client(
+    // Input values, 
+    const string&	target_name, 
+    const uint32_t&	family, 
+    const bool&		is_unicast, 
+    const bool&		is_multicast, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (_rib_manager->add_rib_client(target_name, family, is_unicast,
+				     is_multicast)
+	!= XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_delete_rib_client(
+    // Input values, 
+    const string&	target_name, 
+    const uint32_t&	family, 
+    const bool&		is_unicast, 
+    const bool&		is_multicast, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (_rib_manager->delete_rib_client(target_name, family, is_unicast,
+					is_multicast)
+	!= XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_enable_rib_client(
+    // Input values, 
+    const string&	target_name, 
+    const uint32_t&	family, 
+    const bool&		is_unicast, 
+    const bool&		is_multicast, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (_rib_manager->enable_rib_client(target_name, family, is_unicast,
+					is_multicast)
+	!= XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_disable_rib_client(
+    // Input values, 
+    const string&	target_name, 
+    const uint32_t&	family, 
+    const bool&		is_unicast, 
+    const bool&		is_multicast, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (_rib_manager->disable_rib_client(target_name, family, is_unicast,
+					 is_multicast)
+	!= XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError 
 XrlRibTarget::rib_0_1_no_fea()
 {
-    _ribmanager->no_fea();
+    _rib_manager->no_fea();
     
     return XrlCmdError::OKAY();
 }
@@ -560,7 +710,7 @@ XrlRibTarget::fea_ifmgr_client_0_1_interface_update(// Input values,
 						    const string& ifname,
 						    const uint32_t& event)
 {
-    _vifmanager.interface_update(ifname, event);
+    _vif_manager.interface_update(ifname, event);
     return XrlCmdError::OKAY();
 }
 
@@ -571,7 +721,7 @@ XrlRibTarget::fea_ifmgr_client_0_1_vif_update(// Input values,
 					      const string& vifname,
 					      const uint32_t& event)
 {
-    _vifmanager.vif_update(ifname, vifname, event);
+    _vif_manager.vif_update(ifname, vifname, event);
     return XrlCmdError::OKAY();
 }
 
@@ -583,7 +733,7 @@ XrlRibTarget::fea_ifmgr_client_0_1_vifaddr4_update(// Input values,
 						   const IPv4& addr,
 						   const uint32_t& event)
 {
-    _vifmanager.vifaddr4_update(ifname, vifname, addr, event);
+    _vif_manager.vifaddr4_update(ifname, vifname, addr, event);
     return XrlCmdError::OKAY();
 }
 
@@ -594,7 +744,7 @@ XrlRibTarget::fea_ifmgr_client_0_1_vifaddr6_update(// Input values,
 						   const IPv6& addr,
 						   const uint32_t& event)
 {
-    _vifmanager.vifaddr6_update(ifname, vifname, addr, event);
+    _vif_manager.vifaddr6_update(ifname, vifname, addr, event);
     return XrlCmdError::OKAY();
 }
 

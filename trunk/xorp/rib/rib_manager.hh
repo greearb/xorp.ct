@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.9 2003/03/20 04:29:22 pavlin Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.10 2003/03/21 01:25:14 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -165,7 +165,7 @@ public:
     /**
      * Find a RIB client.
      * 
-     * Find a RIB client for a given targt name, address family, and
+     * Find a RIB client for a given target name, address family, and
      * unicast/multicast flags.
      * 
      * @param target_name the target name of the RIB client.
@@ -181,7 +181,7 @@ public:
     /**
      * Add a RIB client.
      * 
-     * Add a RIB client for a given targt name, address family, and
+     * Add a RIB client for a given target name, address family, and
      * unicast/multicast flags.
      * 
      * @param target_name the target name of the RIB client.
@@ -197,7 +197,7 @@ public:
     /**
      * Delete a RIB client.
      * 
-     * Delete a RIB client for a given targt name, address family, and
+     * Delete a RIB client for a given target name, address family, and
      * unicast/multicast flags.
      * 
      * @param target_name the target name of the RIB client.
@@ -213,7 +213,7 @@ public:
     /**
      * Enable a RIB client.
      * 
-     * Enable a RIB client for a given targt name, address family, and
+     * Enable a RIB client for a given target name, address family, and
      * unicast/multicast flags.
      * 
      * @param target_name the target name of the RIB client.
@@ -229,7 +229,7 @@ public:
     /**
      * Disable a RIB client.
      * 
-     * Disable a RIB client for a given targt name, address family, and
+     * Disable a RIB client for a given target name, address family, and
      * unicast/multicast flags.
      * 
      * @param target_name the target name of the RIB client.
@@ -283,7 +283,7 @@ private:
     RIB<IPv6>		_urib6;		// The IPv6 unicast RIB
     RIB<IPv6>		_mrib6;		// The IPv6 multicast RIB
     
-    VifManager		_vifmanager;	// The VIF manager
+    VifManager		_vif_manager;	// The VIF manager
     XrlRibTarget	_xrt;
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.10 2003/03/20 04:29:22 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.11 2003/03/21 01:25:14 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -29,8 +29,8 @@ RibManager::RibManager(EventLoop& event_loop, XrlStdRouter& xrl_std_router)
       _mrib4(MULTICAST),
       _urib6(UNICAST),
       _mrib6(MULTICAST),
-      _vifmanager(_xrl_router, _event_loop, this),
-      _xrt(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6, _vifmanager, this)
+      _vif_manager(_xrl_router, _event_loop, this),
+      _xrt(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6, _vif_manager, this)
 {
     _urib4.initialize_export(&_urib4_clients_list);
     _urib4.initialize_register(&_rserv);
@@ -85,7 +85,7 @@ RibManager::start(void)
     if (ProtoState::start() < 0)
 	return (XORP_ERROR);
     
-    _vifmanager.start();
+    _vif_manager.start();
     
     return (XORP_OK);
 }
@@ -104,7 +104,7 @@ RibManager::stop(void)
     if (! is_up())
 	return (XORP_ERROR);
     
-    _vifmanager.stop();
+    _vif_manager.stop();
     
     ProtoState::stop();
     
@@ -456,7 +456,7 @@ RibManager::no_fea()
     disable_rib_client("fea", AF_INET6, true, false);
 #endif
     
-    _vifmanager.no_fea();
+    _vif_manager.no_fea();
     
     return (XORP_OK);
 }
