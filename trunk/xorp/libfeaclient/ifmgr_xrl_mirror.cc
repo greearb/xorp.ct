@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.5 2004/01/12 22:11:26 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.7 2004/04/22 01:11:50 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -843,12 +843,19 @@ IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
 
 IfMgrXrlMirror::~IfMgrXrlMirror()
 {
-    _xrl_tgt->detach(this);
-    _rtr->detach(this);
-    delete _xrl_tgt;
-    _xrl_tgt = 0;
-    delete _rtr;
-    _rtr = 0;
+    if (_rtr != NULL) {
+	//
+	// Both _rtr and _xrl_tgt have been assigned in startup() so
+	// if one is NULL then the other must be NULL and we need to
+	// clean-up.  We test in case startup() has not been called.
+	//
+	_xrl_tgt->detach(this);
+	_rtr->detach(this);
+	delete _xrl_tgt;
+	_xrl_tgt = 0;
+	delete _rtr;
+	_rtr = 0;
+    }
 }
 
 bool
