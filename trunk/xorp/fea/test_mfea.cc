@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.3 2003/09/16 18:13:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.4 2003/12/19 23:58:43 pavlin Exp $"
 
 
 //
@@ -30,35 +30,19 @@
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
+
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
+
 #include "cli/xrl_cli_node.hh"
-#include "fea/fticonfig.hh"
-#include "fea/ifmanager.hh"
-#include "fea/ifconfig.hh"
-#include "fea/xrl_ifupdate.hh"
-#include "fea/xrl_mfea_node.hh"
-#include "fea/xrl_target.hh"
 
+#include "fticonfig.hh"
+#include "ifmanager.hh"
+#include "ifconfig.hh"
+#include "xrl_ifupdate.hh"
+#include "xrl_mfea_node.hh"
+#include "xrl_target.hh"
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-// XXX: set to 1 for IPv4, or set to 0 for IPv6
-#define DO_IPV4 1
-
-//
-// Local variables
-//
 
 //
 // Local functions prototypes
@@ -106,6 +90,24 @@ usage(const char *argv0, int exit_value)
     exit (exit_value);
 
     // NOTREACHED
+}
+
+//
+// Wait until the XrlRouter becomes ready
+//
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    bool timed_out = false;
+
+    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+    while (xrl_router.ready() == false && timed_out == false) {
+	eventloop.run();
+    }
+
+    if (xrl_router.ready() == false) {
+	XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+    }
 }
 
 int
@@ -226,66 +228,27 @@ main(int argc, char *argv[])
 	//
 	// CLI
 	//
-#if DO_IPV4
-	CliNode cli_node4(AF_INET, XORP_MODULE_CLI, eventloop);
-	cli_node4.set_cli_port(12000);
-#else
+	// XXX: we use a single CLI node to handle both IPv4 and IPv6
+	CliNode cli_node(AF_INET, XORP_MODULE_CLI, eventloop);
+	cli_node.set_cli_port(12000);
+	XrlStdRouter xrl_std_router_cli(eventloop, cli_node.module_name(),
+					finder_addr, finder_port);
+	XrlCliNode xrl_cli_node(&xrl_std_router_cli, cli_node);
+	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli);
+
+#if 0
+#ifdef HAVE_IPV6
 	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, eventloop);
 	cli_node6.set_cli_port(12000);
-#endif // ! DO_IPV4
-	//
-	// CLI access
-	//
-	// IPvXNet enable_ipvxnet1("127.0.0.1/32");
-	// IPvXNet enable_ipvxnet2("192.150.187.0/25");
-	// IPvXNet disable_ipvxnet1("0.0.0.0/0");	// Disable everything else
-	//
-	// cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet1);
-	// cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet2);
-	// cli_node4.add_disable_cli_access_from_subnet(disable_ipvxnet1);
-	//
-	// Create and configure the CLI XRL interface
-	//
-#if DO_IPV4
-	XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
-					 finder_addr, finder_port);
-	XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_cli4.ready() == false
-		   && timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_cli4.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-#else
 	XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
 					 finder_addr, finder_port);
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_cli6.ready() == false
-		   && timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_cli6.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-#endif // ! DO_IPV4
+	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli6);
+#endif // HAVE_IPV6
+#endif // 0
 
 	//
-	// MFEA node
+	// FEA
 	//
 	XrlStdRouter xrl_std_router_fea(eventloop,
 					xorp_module_name(AF_INET,
@@ -320,130 +283,33 @@ main(int argc, char *argv[])
 	//
 	XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea, fticonfig,
 				    ifm, ifreporter, 0);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_fea.ready() == false
-		   && timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_fea.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-	
-#if DO_IPV4
+	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
+
+	//
+	// MFEA node
+	//
 	XrlStdRouter xrl_std_router_mfea4(eventloop,
 					  xorp_module_name(AF_INET,
 							   XORP_MODULE_MFEA),
 					  finder_addr, finder_port);
 	XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA, eventloop,
 				   &xrl_std_router_mfea4, fticonfig);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_mfea4.ready() == false
-		   && timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_mfea4.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-#else
+	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea4);
+
+#ifdef HAVE_IPV6
 	XrlStdRouter xrl_std_router_mfea6(eventloop,
 					  xorp_module_name(AF_INET6,
 							   XORP_MODULE_MFEA),
 					  finder_addr, finder_port);
 	XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA, eventloop,
 				   &xrl_std_router_mfea6, fticonfig);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_mfea6.ready() == false
-		   && timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_mfea6.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-#endif // ! DO_IPV4
-
-#if 0	// XXX: old MFEA
-#if DO_IPV4
-	XrlStdRouter xrl_std_router_mfea4(eventloop,
-					  xorp_module_name(AF_INET,
-							   XORP_MODULE_MFEA),
-					  finder_addr, finder_port);
-	XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA,
-				   eventloop,
-				   &xrl_std_router_mfea4);
-#else
-	XrlStdRouter xrl_std_router_mfea6(eventloop,
-					  xorp_module_name(AF_INET6,
-							   XORP_MODULE_MFEA),
-					  finder_addr, finder_port);
-	XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA,
-				   eventloop,
-				   &xrl_std_router_mfea6);
-#endif // ! DO_IPV4
-#endif // 0
-
-	//
-	// Start the nodes
-	//
-
-	// cli_node4.enable();
-	// cli_node4.start();
-	//
-	// cli_node6.enable();
-	// cli_node6.start();
-
-	// xrl_mfea_node4.enable_cli();
-	// xrl_mfea_node4.start_cli();
-	// xrl_mfea_node4.enable_mfea();
-	// xrl_mfea_node4.start_mfea();
-	// xrl_mfea_node4.enable_all_vifs();
-	// xrl_mfea_node4.start_all_vifs();
-	//
-	// xrl_mfea_node6.enable_cli();
-	// xrl_mfea_node6.start_cli();
-	// xrl_mfea_node6.enable_mfea();
-	// xrl_mfea_node6.start_mfea();
-	// xrl_mfea_node6.enable_all_vifs();
-	// xrl_mfea_node6.start_all_vifs();
-
+	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea6);
+#endif // HAVE_IPV6
 
 	// Main loop
 	for (;;) {
 	    eventloop.run();
 	}
-
-	//
-	// Stop the nodes
-	//
-
-	// xrl_mfea_node4.stop_all_vifs();
-	// xrl_mfea_node4.stop_mfea();
-	// xrl_mfea_node4.stop_cli();
-	//
-	// xrl_mfea_node6.stop_all_vifs();
-	// xrl_mfea_node6.stop_mfea();
-	// xrl_mfea_node6.stop_cli();
-
-	// cli_node4.stop();
-	//
-	// cli_node6.stop();
 
 	if (finder != NULL)
 	    delete finder;
