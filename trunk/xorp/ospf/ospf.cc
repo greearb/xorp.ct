@@ -81,13 +81,11 @@ Ospf<A>::Ospf(OspfTypes::Version version, IO* io)
  */
 template <typename A>
 void 
-Ospf<A>::receive(const char* interface, const char *vif,
-		 const char *src,
-		 const char *dst,
+Ospf<A>::receive(const string& interface, const string& vif,
 		 uint8_t* data, uint32_t len)
 {
-    debug_msg("Interface %s Vif %s src %s dst %s data %p len %u",
-	      interface, vif, src, dst, data, len);
+    debug_msg("Interface %s Vif %s data %p len %u",
+	      interface.c_str(), vif.c_str(), data, len);
 
     Packet *packet;
     try {
@@ -100,7 +98,7 @@ Ospf<A>::receive(const char* interface, const char *vif,
     debug_msg("%s\n", packet->str().c_str());
     // We have a packet and its good.
 
-    _peer_manager.incoming_packet(packet);
+    _peer_manager.incoming_packet(interface, vif, packet);
 
     delete packet;
 }
