@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.23 2003/11/20 06:05:04 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.24 2004/01/13 00:17:09 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -34,7 +34,6 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.a
 # xorp_rtrmgr
 #
 xorp_rtrmgr_SOURCES	 = rtrmgr_module.h
-xorp_rtrmgr_SOURCES	+= version.h
 xorp_rtrmgr_SOURCES	+= y.boot_tab.h
 xorp_rtrmgr_SOURCES	+= y.tplt_tab.h
 
@@ -88,7 +87,6 @@ xorp_rtrmgr_LDADD	+= $(LDADD)
 # xorpsh
 #
 xorpsh_SOURCES	 = rtrmgr_module.h
-xorpsh_SOURCES	+= version.h
 xorpsh_SOURCES	+= y.boot_tab.h
 xorpsh_SOURCES	+= y.opcmd_tab.h
 xorpsh_SOURCES	+= y.tplt_tab.h

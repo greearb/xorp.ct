@@ -12,10 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.10 2004/01/14 03:00:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.11 2004/01/15 08:51:59 pavlin Exp $"
 
 // #define DEBUG_CONFIG_CHANGE
-#include "version.h"
 #include "libxorp/status_codes.h"
 #include "libxipc/xrl_router.hh"
 #include "xrl_xorpsh_interface.hh"
@@ -37,9 +36,9 @@ XrlXorpshInterface::common_0_1_get_target_name(// Output values,
 
 XrlCmdError 
 XrlXorpshInterface::common_0_1_get_version(// Output values, 
-					   string& version)
+					   string& v)
 {
-    version = XORPSH_VERSION;
+    v = string(version());
     return XrlCmdError::OKAY();
 }
 

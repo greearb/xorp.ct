@@ -12,12 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.14 2003/12/04 20:21:37 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.15 2003/12/15 22:35:09 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include <sys/stat.h>
 #include "rtrmgr_module.h"
-#include "version.h"
 #include "libxorp/xorp.h"
 #include "libxorp/status_codes.h"
 #include "userdb.hh"
@@ -60,9 +59,9 @@ XrlRtrmgrInterface::common_0_1_get_target_name(// Output values,
 
 XrlCmdError
 XrlRtrmgrInterface::common_0_1_get_version(// Output values, 
-					   string& version)
+					   string& v)
 {
-    version = RTRMGR_VERSION;
+    v = string(version());
     return XrlCmdError::OKAY();
 }
 
