@@ -12,13 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/system.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
+// $XORP: xorp/rip/system.hh,v 1.2 2003/07/09 00:06:34 hodson Exp $
 
 #ifndef __RIP_SYSTEM_HH__
 #define __RIP_SYSTEM_HH__
 
+#include <map>
+
 #include "route_db.hh"
 #include "port_manager.hh"
+#include "redist.hh"
 
 /**
  * @short Top Level container for XORP RIP implementation.
@@ -31,6 +34,7 @@ public:
 
 public:
     System(EventLoop& e) : _e(e), _rtdb(e), _pm(0) {}
+    ~System();
 
     /**
      * Get @ref EventLoop instance that each object in system should
@@ -76,6 +80,54 @@ public:
      */
     inline const PortManager* port_manager() const	{ return _pm; }
 
+    /**
+     * Add route redistributor.
+     *
+     * @param protocol name associated with routing protocol
+     *        originating redistribution routes.
+     * @param tag identifier to be placed in RIP packets.
+     *
+     * @return true on success, false if redistributor already exists
+     *         and has a different tag.
+     */
+    inline bool add_route_redistributor(const string& protocol, uint16_t tag);
+
+     /**
+     * Remove route distributor.
+     *
+     * @param protocol name associated with routing protocol
+     *        originating redistribution routes.
+     *
+     * @return true on success, false if redistributor does not exist.
+     */
+    inline bool remove_route_redistributor(const string& protocol);
+
+    /**
+     * Add route for redistribution.
+     *
+     * @param protocol name associated with routing protocol
+     *        originating redistribution routes.
+     * @param net network route to be added.
+     * @param nh  nexthop to advertise with network.
+     * @param cost cost to adverise route with [1--16].
+     *
+     * @return true on success, false on failure.  Failure may occur
+     * if route already exists or a lower cost route exists.
+     */
+    inline bool redistributor_add_route(const string& 	protocol,
+					const IPNet<A>&	net,
+					const A& 	nh,
+					uint32_t 	cost);
+
+    /**
+     * Remove route from redistribution.
+     * @param protocol name associated with routing protocol
+     *        originating redistribution routes.
+     * @param net network route to be removed.
+     */
+    inline bool redistributor_remove_route(const string& 	protocol,
+					   const IPNet<A>&	net);
+
 protected:
     System(const System&);				// Not implemented
     System& operator=(const System&);			// Not implemented
@@ -84,6 +136,7 @@ protected:
     EventLoop&		_e;
     RouteDatabase	_rtdb;
     PortManager*	_pm;
+    map<string,RouteRedistributor<A>*> _redists;
 };
 
 // ----------------------------------------------------------------------------
@@ -99,6 +152,91 @@ System<A>::set_port_manager(PortManager* pm)
 	return true;
     }
     return false;
+}
+
+template <typename A>
+System<A>::~System()
+{
+    _rtdb.flush_routes();
+
+    while (_redists.empty() == false) {
+	typename map<string,RouteRedistributor<A>*>::iterator i
+	    = _redists.begin();
+	delete i->second;
+	_redists.erase(i);
+    }
+}
+
+template <typename A>
+inline bool
+System<A>::add_route_redistributor(const string& protocol, uint16_t tag)
+{
+    typename map<string,RouteRedistributor<A>*>::const_iterator ci;
+    ci = _redists.find(protocol);
+    if (ci == _redists.end()) {
+	_redists.insert(
+			make_pair(protocol,
+				  new RouteRedistributor<A>(_rtdb,
+							    protocol,
+							    tag)
+				  )
+			);
+	return true;
+    }
+    const RouteRedistributor<A>* prr = ci->second;
+    if (prr->tag() == tag) {
+	return true;	// Already exists and has correct tag
+    }
+    return false;
+}
+
+template <typename A>
+inline bool
+System<A>::remove_route_redistributor(const string& protocol)
+{
+    typename map<string,RouteRedistributor<A>*>::iterator i;
+    i = _redists.find(protocol);
+    if (ci == _redists.end()) {
+	return false;
+    }
+    delete i->second;
+    _redists.erase(i);
+
+    return true;
+}
+
+template <typename A>
+inline bool
+System<A>::redistributor_add_route(const string&	protocol,
+				   const IPNet<A>&	net,
+				   const A&		nh,
+				   uint32_t		cost)
+{
+    typename map<string,RouteRedistributor<A>*>::iterator i;
+    i = _redists.find(protocol);
+    if (i == _redists.end())
+	return false;
+
+    if (cost > RIP_INFINITY)
+	return false;
+
+    RouteRedistributor<A>* prr = i->second;
+    return prr->add_route(net, nh, cost);
+}
+
+template <typename A>
+inline bool
+System<A>::redistributor_remove_route(const string&	protocol,
+				      const IPNet<A>&	net)
+{
+    typename map<string,RouteRedistributor<A>*>::iterator i;
+    i = _redists.find(protocol);
+    if (i == _redists.end()) {
+	return false;
+    }
+
+    RouteRedistributor<A>* prr = i->second;
+    return prr->expire_route(net);
 }
 
 #endif // __RIP_SYSTEM_HH__
