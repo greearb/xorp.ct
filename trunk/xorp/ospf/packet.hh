@@ -514,7 +514,7 @@ class LinkStateRequestPacket : public Packet {
      * Encode the packet.
      *
      * @param pkt vector into which the packet should be placed.
-     * @return true if the encoding suceeded.
+     * @return true if the encoding succeeded.
      */
     bool encode(vector<uint8_t>& pkt);
     
