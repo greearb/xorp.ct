@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.37 2004/05/31 02:32:15 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.38 2004/05/31 07:02:05 pavlin Exp $"
 
 
 #include <pwd.h>
@@ -1233,7 +1233,8 @@ RouterCLI::enter_config_done(const XrlError& e)
     // Either something really bad happened, or a user that didn't
     // have permission attempted to enter config mode.
     //
-    _cli_client.cli_print(c_format("ERROR: %s\n", e.note().c_str()));
+    string errmsg = c_format("ERROR: %s.\n", e.note().c_str());
+    _cli_client.cli_print(errmsg);
     reenable_ui();
 }
 
@@ -1246,11 +1247,9 @@ RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users)
 	    check_for_rtrmgr_restart();
 	    return;
 	}
-	_cli_client.cli_print("ERROR: failed to get config users from rtrmgr\n");
+	_cli_client.cli_print("ERROR: failed to get config users from rtrmgr.\n");
     } else {
-	while (!_config_mode_users.empty()) {
-	    _config_mode_users.pop_front();
-	}
+	_config_mode_users.clear();
 
 	size_t nusers = users->size();
 	bool doneme = false;
@@ -1298,7 +1297,7 @@ void
 RouterCLI::leave_config_done(const XrlError& e)
 {
     if (e != XrlError::OKAY()) {
-	_cli_client.cli_print("ERROR: failed to inform rtrmgr of entry into config mode\n");
+	_cli_client.cli_print("ERROR: failed to inform rtrmgr of entry into config mode.\n");
 	// Something really bad happened - should we just exit here?
 	if (e == XrlError::COMMAND_FAILED() && e.note() == "AUTH_FAIL") {
 	    check_for_rtrmgr_restart();
@@ -1416,11 +1415,14 @@ int
 RouterCLI::logout_func(const string& ,
 		       const string& ,
 		       uint32_t ,		// cli_session_id
-		       const string& ,
+		       const string& command_global_name,
 		       const vector<string>& argv)
 {
     if (! argv.empty()) {
-	_cli_client.cli_print("ERROR: quit does not take any parameters\n");
+	string errmsg = c_format("ERROR: \"%s\" does not take "
+				 "any additional parameters.\n",
+				 command_global_name.c_str());
+	_cli_client.cli_print(errmsg);
 	return (XORP_ERROR);
     }
 
@@ -1439,12 +1441,16 @@ RouterCLI::exit_func(const string& ,
 {
     if (command_global_name == "exit configuration-mode") {
 	if (! argv.empty()) {
-	    _cli_client.cli_print("ERROR: \"exit configuration-mode\"  does not take any additional parameters\n");
+	    string errmsg = c_format("ERROR: \"%s\" does not take "
+				     "any additional parameters.\n",
+				     command_global_name.c_str());
+	    _cli_client.cli_print(errmsg);
 	    return (XORP_ERROR);
 	}
 	if (_changes_made) {
-	    _cli_client.cli_print("ERROR: There are uncommitted changes\n");
-	    _cli_client.cli_print("Use \"commit\" to commit the changes, or \"exit discard\" to discard them\n");
+	    _cli_client.cli_print("ERROR: There are uncommitted changes.\n");
+	    _cli_client.cli_print("Use \"commit\" to commit the changes, "
+				  "or \"exit discard\" to discard them.\n");
 	    return (XORP_ERROR);
 	}
 	idle_ui();
@@ -1454,7 +1460,10 @@ RouterCLI::exit_func(const string& ,
     }
     if (command_global_name == "exit discard") {
 	if (! argv.empty()) {
-	    _cli_client.cli_print("ERROR: \"exit discard\"  does not take any additional parameters\n");
+	    string errmsg = c_format("ERROR: \"%s\" does not take "
+				     "any additional parameters.\n",
+				     command_global_name.c_str());
+	    _cli_client.cli_print(errmsg);
 	    return (XORP_ERROR);
 	}
 	config_tree()->discard_changes();
@@ -1465,7 +1474,10 @@ RouterCLI::exit_func(const string& ,
     }
     if (command_global_name == "top") {
 	if (! argv.empty()) {
-	    _cli_client.cli_print("ERROR: top does not take any parameters\n");
+	    string errmsg = c_format("ERROR: \"%s\" does not take "
+				     "any additional parameters.\n",
+				     command_global_name.c_str());
+	    _cli_client.cli_print(errmsg);
 	    return (XORP_ERROR);
 	}
 	reset_path();
@@ -1479,7 +1491,10 @@ RouterCLI::exit_func(const string& ,
     //
     if (command_global_name == "up") {
 	if (! argv.empty()) {
-	    _cli_client.cli_print("ERROR: up does not take any parameters\n");
+	    string errmsg = c_format("ERROR: \"%s\" does not take "
+				     "any additional parameters.\n",
+				     command_global_name.c_str());
+	    _cli_client.cli_print(errmsg);
 	    return (XORP_ERROR);
 	}
 	if (! _path.empty())
@@ -1490,8 +1505,9 @@ RouterCLI::exit_func(const string& ,
 	    _path.pop_back();
 	} else {
 	    if (_changes_made) {
-		_cli_client.cli_print("ERROR: There are uncommitted changes\n");
-		_cli_client.cli_print("Use \"commit\" to commit the changes, or \"exit discard\" to discard them\n");
+		_cli_client.cli_print("ERROR: There are uncommitted changes.\n");
+		_cli_client.cli_print("Use \"commit\" to commit the changes, "
+				      "or \"exit discard\" to discard them.\n");
 		return (XORP_ERROR);
 	    }
 	    idle_ui();
@@ -1597,7 +1613,7 @@ RouterCLI::text_entry_func(const string& ,
 	// If there are no arguments, it must be a void structuring node
 	if (argv.empty()
 	    && (tag_ttn->type() != NODE_VOID || tag_ttn->is_tag())) {
-	    _cli_client.cli_print("ERROR: Insufficient arguments\n");
+	    _cli_client.cli_print("ERROR: Insufficient arguments.\n");
 	    return (XORP_ERROR);
 	}
 
@@ -1624,9 +1640,11 @@ RouterCLI::text_entry_func(const string& ,
 		}
 	    }
 	    if (data_ttn == NULL) {
-		string result = "ERROR: argument \"" + argv[0] +
-		    "\" is not a valid " + tag_ttn->segname() + "\n";
-		_cli_client.cli_print(result);
+		string errmsg = c_format("ERROR: argument \"%s\" "
+					 "is not a valid \"%s\".\n",
+					 argv[0].c_str(),
+					 tag_ttn->segname().c_str());
+		_cli_client.cli_print(errmsg);
 		return (XORP_ERROR);
 	    }
 
@@ -1640,9 +1658,10 @@ RouterCLI::text_entry_func(const string& ,
 		     cti != ctn->children().end();
 		     ++cti) {
 		    if ((*cti)->segname() == argv[0]) {
-			string result = "ERROR: can't create \"" + argv[0] +
-			    "\", as it already exists.\n";
-			_cli_client.cli_print(result);
+			string errmsg = c_format("ERROR: can't create \"%s\", "
+						 "as it already exists.\n",
+						 argv[0].c_str());
+			_cli_client.cli_print(errmsg);
 			return (XORP_ERROR);
 		    }
 		}
@@ -1650,13 +1669,13 @@ RouterCLI::text_entry_func(const string& ,
 
 	    // Check remaining args are OK
 	    if (argv.size() == 2 && argv[1] != "{") {
-		string result = "ERROR: \"{\" expected instead of  \""
-		    + argv[1] + "\n";
-		_cli_client.cli_print(result);
+		string errmsg = c_format("ERROR: \"{\" expected instead of "
+					 "\"%s\".\n",
+					 argv[1].c_str());
+		_cli_client.cli_print(errmsg);
 		return (XORP_ERROR);
 	    } else if (argv.size() > 2) {
-		string result = "ERROR: too many arguments\n";
-		_cli_client.cli_print(result);
+		_cli_client.cli_print("ERROR: too many arguments.\n");
 		return (XORP_ERROR);
 	    }
 	} else {
@@ -1665,13 +1684,13 @@ RouterCLI::text_entry_func(const string& ,
 	    //
 	    XLOG_ASSERT(tag_ttn->type() == NODE_VOID);
 	    if (argv.size() == 1 && argv[0] != "{") {
-		string result = "ERROR: \"{\" expected instead of  \""
-		    + argv[0] + "\n";
-		_cli_client.cli_print(result);
+		string errmsg = c_format("ERROR: \"{\" expected instead of "
+					 "\"%s\".\n",
+					 argv[0]);
+		_cli_client.cli_print(errmsg);
 		return (XORP_ERROR);
 	    } else if (argv.size() > 1) {
-		string result = "ERROR: too many arguments\n";
-		_cli_client.cli_print(result);
+		_cli_client.cli_print("ERROR: too many arguments.\n");
 		return (XORP_ERROR);
 	    }
 	}
@@ -1910,9 +1929,9 @@ RouterCLI::text_entry_func(const string& ,
 	    // We're expecting a value here
 	    if (new_path_segments.front() == "{" 
 		|| new_path_segments.front() == "}" ) {
-		string errmsg;
-		errmsg = "ERROR: a value for " + ctn->segname() 
-		    + " is required.\n";
+		string errmsg = c_format("ERROR: a value for \"%s\" "
+					 "is required.\n",
+					 ctn->segname().c_str());
 		_cli_client.cli_print(errmsg);
 		goto cleanup;
 	    }
@@ -1936,9 +1955,11 @@ RouterCLI::text_entry_func(const string& ,
 		    }
 		}
 		if (data_ttn == NULL) {
-		    string result = "ERROR: argument \"" + value +
-			"\" is not a valid " + ttn->segname() + "\n";
-		    _cli_client.cli_print(result);
+		    string errmsg = c_format("ERROR: argument \"%s\" "
+					     "is not a valid \"%s\".\n",
+					     value.c_str(),
+					     ttn->segname().c_str());
+		    _cli_client.cli_print(errmsg);
 		    goto cleanup;
 		}
 		path_segments.push_back(value);
@@ -1958,9 +1979,11 @@ RouterCLI::text_entry_func(const string& ,
 		    ctn->set_value(value, getuid());
 		    value_expected = false;
 		} else {
-		    string result = "ERROR: argument \"" + value +
-			"\" is not a valid " + ttn->segname() + "\n";
-		    _cli_client.cli_print(result);
+		    string errmsg = c_format("ERROR: argument \"%s\" "
+					     "is not a valid \"%s\".\n",
+					     value.c_str(),
+					     ttn->segname().c_str());
+		    _cli_client.cli_print(errmsg);
 		    goto cleanup;
 		}
 	    } else {
@@ -1981,7 +2004,7 @@ RouterCLI::text_entry_func(const string& ,
 		// Jump back out to the appropriate nesting depth
 		if (_braces.size() == 1) {
 		    // There's always at least one entry in _braces
-		    _cli_client.cli_print("ERROR: mismatched }\n");
+		    _cli_client.cli_print("ERROR: mismatched \"}\".\n");
 		    goto cleanup;
 		}
 		// The last brace we entered should match the current depth
@@ -2045,9 +2068,9 @@ RouterCLI::text_entry_func(const string& ,
     // input was erroneous.
     //
     if (value_expected) {
-	string result = c_format("ERROR: node %s requires a value\n",
+	string errmsg = c_format("ERROR: node \"%s\" requires a value.\n",
 				 ctn->segname().c_str());
-	_cli_client.cli_print(result);
+	_cli_client.cli_print(errmsg);
     }
 
     // Preserve state for next time, and set up the command prompts
@@ -2260,13 +2283,14 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 
     if (argv.size() != 1) {
 	string result = c_format("ERROR: \"set %s\" should take "
-				 "one argument of type %s",
+				 "one argument of type \"%s\".",
 				 path.c_str(), ttn->typestr().c_str());
 	return result;
     }
 
     if (ttn->type_match(argv[0]) == false) {
-	string result = c_format("ERROR: argument \"%s\" is not a valid %s",
+	string result = c_format("ERROR: argument \"%s\" "
+				 "is not a valid \"%s\".",
 				 argv[0].c_str(), ttn->typestr().c_str());
 	return result;
     }
@@ -2307,11 +2331,14 @@ int
 RouterCLI::commit_func(const string& ,
 		       const string& ,
 		       uint32_t ,
-		       const string& , /* command_global_name */
+		       const string& command_global_name,
 		       const vector<string>& argv)
 {
     if (! argv.empty()) {
-	_cli_client.cli_print("ERROR: commit does not take any arguments\n");
+	string errmsg = c_format("ERROR: \"%s\" does not take "
+				 "any additional parameters.\n",
+				 command_global_name.c_str());
+	_cli_client.cli_print(errmsg);
 	return (XORP_ERROR);
     }
 
@@ -2484,7 +2511,7 @@ RouterCLI::op_mode_cmd_done(bool success, const string& result)
     } else {
 	_cli_client.cli_print("ERROR:\n");
     }
-    if (!result.empty())
+    if (! result.empty())
 	_cli_client.cli_print(result + "\n");
 
     // Re-enable the CLI
@@ -2519,7 +2546,7 @@ RouterCLI::save_done(const XrlError& e)
     debug_msg("in save done\n");
 
     if (e != XrlError::OKAY()) {
-	_cli_client.cli_print("ERROR: Save failed\n");
+	_cli_client.cli_print("ERROR: Save failed.\n");
 	if (e == XrlError::COMMAND_FAILED()) {
 	    if (e.note() == "AUTH_FAIL") {
 		check_for_rtrmgr_restart();
