@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.6 2003/09/30 18:27:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.7 2003/10/01 22:49:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -221,7 +221,14 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
     // Get the destination mask length
     //
     dst_mask_len = rtmsg->rtm_dst_len;
-    
+
+    //
+    // Test whether we installed this route
+    //
+    bool xorp_route = false;
+    if (rtmsg->rtm_protocol == RTPROT_XORP)
+	xorp_route = true;
+
     //
     // Get the interface index
     //
@@ -247,13 +254,29 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
 	}
 	if_name = string(name);
     }
-    
+
     //
-    // TODO: define default routing metric and admin distance instead of ~0
+    // Get the route metric
     //
-    // TODO: XXX: PAVPAVPAV: must set the xorp_route flag!!
+    uint32_t route_metric = ~0;
+    if (rta_array[RTA_METRICS] != NULL) {
+	int int_route_metric;
+	int_route_metric = *(int *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_METRICS]));
+	route_metric = int_route_metric;
+    }
+
+    //
+    // Get the admin distance
+    //
+    uint32_t admin_distance = ~0;
+    if (rta_array[RTA_PRIORITY] != NULL) {
+	int int_admin_distance;
+	int_admin_distance = *(int *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_PRIORITY]));
+	admin_distance = int_admin_distance;
+    }
+
     fte = FteX(IPvXNet(dst_addr, dst_mask_len), gateway_addr, if_name, if_name,
-	       ~0, ~0, false /* TODO: XXX: PAVPAVPAV: xorp_route */);
+	       route_metric, admin_distance, xorp_route);
     
     return true;
 }
