@@ -101,10 +101,10 @@ bin_PROGRAMS = xorp_bgp
 
 # -- Test Programs
 #TESTS		+= update_test
-TESTS = test_packet test_plumbing aspath_test test_packet_coding isolation_tests
+TESTS = test_packet test_plumbing aspath_test test_packet_coding isolation_tests test_peer_data
 
 # -- No-install Programs
-noinst_PROGRAMS = test_packet test_plumbing update_test aspath_test test_packet_coding isolation_tests
+noinst_PROGRAMS = test_packet test_plumbing update_test aspath_test test_packet_coding isolation_tests test_peer_data
 
 # -- No-install Libraries
 noinst_LIBRARIES = libbgp.a
@@ -125,6 +125,8 @@ test_packet_coding_SOURCES = test_packet_coding.cc
 update_test_SOURCES = update_test.cc
 
 isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc test_filter.cc test_cache.cc test_nhlookup.cc test_decision.cc test_fanout.cc test_dump.cc test_ribout.cc test_next_hop_resolver.cc route_table_debug.hh route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc dummy_next_hop_resolver.hh peer_handler_debug.hh peer_handler_debug.cc
+
+test_peer_data_SOURCES = test_peer_data.cc
 
 # -- Library Sources
 libbgp_a_SOURCES = bgp_module.h aspath.hh attribute_manager.hh bgp_trie.hh dump_iterators.hh exceptions.hh internal_message.hh iptuple.hh local_data.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh process_watch.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_ribin.hh route_table_ribout.hh route_table_reader.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh xrl_target.hh aspath.cc attribute_manager.cc bgp_trie.cc dump_iterators.cc internal_message.cc iptuple.cc local_data.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc process_watch.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_ribin.cc route_table_ribout.cc route_table_reader.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc xrl_target.cc
@@ -164,7 +166,8 @@ libbgp_a_OBJECTS = $(am_libbgp_a_OBJECTS)
 bin_PROGRAMS = xorp_bgp$(EXEEXT)
 noinst_PROGRAMS = test_packet$(EXEEXT) test_plumbing$(EXEEXT) \
 	update_test$(EXEEXT) aspath_test$(EXEEXT) \
-	test_packet_coding$(EXEEXT) isolation_tests$(EXEEXT)
+	test_packet_coding$(EXEEXT) isolation_tests$(EXEEXT) \
+	test_peer_data$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_aspath_test_OBJECTS = aspath_test.$(OBJEXT)
@@ -222,6 +225,18 @@ test_packet_coding_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_packet_coding_LDFLAGS =
+am_test_peer_data_OBJECTS = test_peer_data.$(OBJEXT)
+test_peer_data_OBJECTS = $(am_test_peer_data_OBJECTS)
+test_peer_data_LDADD = $(LDADD)
+test_peer_data_DEPENDENCIES = libbgp.a \
+	$(top_builddir)/xrl/targets/libbgpbase.a \
+	$(top_builddir)/xrl/interfaces/libribxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_peer_data_LDFLAGS =
 am_test_plumbing_OBJECTS = test_plumbing.$(OBJEXT) bgp.$(OBJEXT)
 test_plumbing_OBJECTS = $(am_test_plumbing_OBJECTS)
 test_plumbing_LDADD = $(LDADD)
@@ -295,6 +310,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_next_hop_resolver.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_nhlookup.Po $(DEPDIR)/test_packet.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_packet_coding.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_peer_data.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_plumbing.Po $(DEPDIR)/test_ribin.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_ribout.Po $(DEPDIR)/update_attrib.Po \
 @AMDEP_TRUE@	$(DEPDIR)/update_packet.Po $(DEPDIR)/update_test.Po \
@@ -312,8 +328,9 @@ CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) \
 	$(isolation_tests_SOURCES) $(test_packet_SOURCES) \
-	$(test_packet_coding_SOURCES) $(test_plumbing_SOURCES) \
-	$(update_test_SOURCES) $(xorp_bgp_SOURCES)
+	$(test_packet_coding_SOURCES) $(test_peer_data_SOURCES) \
+	$(test_plumbing_SOURCES) $(update_test_SOURCES) \
+	$(xorp_bgp_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -321,7 +338,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) $(isolation_tests_SOURCES) $(test_packet_SOURCES) $(test_packet_coding_SOURCES) $(test_plumbing_SOURCES) $(update_test_SOURCES) $(xorp_bgp_SOURCES)
+SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) $(isolation_tests_SOURCES) $(test_packet_SOURCES) $(test_packet_coding_SOURCES) $(test_peer_data_SOURCES) $(test_plumbing_SOURCES) $(update_test_SOURCES) $(xorp_bgp_SOURCES)
 
 all: all-recursive
 
@@ -381,6 +398,9 @@ test_packet$(EXEEXT): $(test_packet_OBJECTS) $(test_packet_DEPENDENCIES)
 test_packet_coding$(EXEEXT): $(test_packet_coding_OBJECTS) $(test_packet_coding_DEPENDENCIES) 
 	@rm -f test_packet_coding$(EXEEXT)
 	$(CXXLINK) $(test_packet_coding_LDFLAGS) $(test_packet_coding_OBJECTS) $(test_packet_coding_LDADD) $(LIBS)
+test_peer_data$(EXEEXT): $(test_peer_data_OBJECTS) $(test_peer_data_DEPENDENCIES) 
+	@rm -f test_peer_data$(EXEEXT)
+	$(CXXLINK) $(test_peer_data_LDFLAGS) $(test_peer_data_OBJECTS) $(test_peer_data_LDADD) $(LIBS)
 test_plumbing$(EXEEXT): $(test_plumbing_OBJECTS) $(test_plumbing_DEPENDENCIES) 
 	@rm -f test_plumbing$(EXEEXT)
 	$(CXXLINK) $(test_plumbing_LDFLAGS) $(test_plumbing_OBJECTS) $(test_plumbing_LDADD) $(LIBS)
@@ -449,6 +469,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_nhlookup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packet_coding.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peer_data.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_plumbing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ribin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ribout.Po@am__quote@

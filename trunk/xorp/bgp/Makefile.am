@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.25 2003/09/16 21:00:25 hodson Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.26 2003/09/27 02:27:26 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -19,6 +19,7 @@ TESTS		+= test_plumbing
 TESTS		+= aspath_test
 TESTS		+= test_packet_coding
 TESTS		+= isolation_tests
+TESTS		+= test_peer_data
 
 # -- No-install Programs
 noinst_PROGRAMS	 = test_packet
@@ -27,6 +28,7 @@ noinst_PROGRAMS	+= update_test
 noinst_PROGRAMS	+= aspath_test
 noinst_PROGRAMS	+= test_packet_coding
 noinst_PROGRAMS	+= isolation_tests
+noinst_PROGRAMS	+= test_peer_data
 
 # -- No-install Libraries
 noinst_LIBRARIES = libbgp.a
@@ -77,6 +79,7 @@ isolation_tests_SOURCES		+= dummy_next_hop_resolver.hh
 isolation_tests_SOURCES		+= peer_handler_debug.hh
 isolation_tests_SOURCES		+= peer_handler_debug.cc
 
+test_peer_data_SOURCES		= test_peer_data.cc
 
 # -- Library Sources
 libbgp_a_SOURCES  = bgp_module.h
