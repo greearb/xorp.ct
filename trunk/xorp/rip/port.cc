@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.34 2004/05/27 04:15:08 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.35 2004/06/10 22:41:45 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -918,7 +918,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	    nh = src_addr;
 	}
 
-	metric += metric + cost();
+	metric += cost();
 	if (metric > RIP_INFINITY) {
 	    metric = RIP_INFINITY;
 	}
