@@ -332,3 +332,20 @@ RouterLink::str() const
 
     return output;
 }
+
+Lsa::LsaRef
+RouterLsa::decode(uint8_t */*buf*/, size_t& len) const throw(BadPacket)
+{
+    size_t required = _header.length() + min_length();
+
+    if (len < required)
+	xorp_throw(BadPacket,
+		   c_format("RouterLSA too short %u, must be at least %u",
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(required)));
+
+
+    RouterLsa *lsa = new RouterLsa(get_version());
+
+    return Lsa::LsaRef(lsa);
+}

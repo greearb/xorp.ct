@@ -194,7 +194,12 @@ class Lsa {
 	:  _header(version), _version(version)
     {}
 
-    virtual ~Lsa();
+    virtual ~Lsa()
+    {}
+
+    OspfTypes::Version get_version() const {
+	return _version;
+    }
 
     /**
      * Decode an LSA.
@@ -204,7 +209,8 @@ class Lsa {
      *
      * @return A reference to an LSA that manages its own memory.
      */
-    virtual LsaRef decode(uint8_t *buf, size_t& len) = 0;
+    virtual LsaRef decode(uint8_t *buf, size_t& len) const 
+	throw(BadPacket) = 0;
 
     /**
      * Encode an LSA for transmission.
@@ -419,7 +425,22 @@ class RouterLsa : public Lsa {
 	: Lsa(version)
     {}
 
+
+    /**
+     * @return the minimum length of a RouterLSA.
+     */
+    size_t min_length() const {
+	XLOG_UNFINISHED();
+    }
+
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+
  private:
+    bool _w_bit;	// Wildcard multicast receiver! OSPFV3 Only
+    bool _v_bit;	// Virtual link endpoint
+    bool _e_bit;	// AS boundary router (E for external)
+    bool _b_bit;	// Area border router.
+
     list<RouterLink> _router_links;
 };
 
