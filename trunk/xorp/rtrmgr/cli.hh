@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.24 2004/06/11 03:48:19 atanu Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.25 2004/06/11 06:30:40 atanu Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -171,8 +171,20 @@ public:
     /**
      * Callback: called when a user send an interrupt terminate the
      * operational mode command if there is one running.
+     *
+     * @param server_name the name of the server that returned the result.
+     * @param cli_term_name the name of the terminal that originated
+     * the command.
+     * @param cli_session_id the session ID of the terminal that originated
+     * the command.
+     * @param command_global_name the name of the command that is interrupted.
+     * @param command_args the arguments to the command that is interrupted.
      */
-    void op_mode_cmd_interrupt();
+    void op_mode_cmd_interrupt(const string& server_name,
+			       const string& cli_term_name,
+			       uint32_t cli_session_id,
+			       const string& command_global_name,
+			       const vector<string>&  command_args);
 
     /**
      * Tidy up operational mode command.

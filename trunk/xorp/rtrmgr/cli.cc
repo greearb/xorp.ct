@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.51 2004/06/11 03:48:18 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.52 2004/06/11 06:30:40 atanu Exp $"
 
 #include <pwd.h>
 
@@ -509,8 +509,10 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	// Set the callback to pass to the node's children when they
 	// are executed.
 	//
-	com1->set_dynamic_process_callback(callback(this,
-						    &RouterCLI::op_mode_func));
+	com1->set_dynamic_process_callback(
+	    callback(this, &RouterCLI::op_mode_func));
+	com1->set_dynamic_interrupt_callback(
+	    callback(this, &RouterCLI::op_mode_cmd_interrupt));
 	com1->set_can_pipe(false);
     }
 
@@ -2636,8 +2638,10 @@ RouterCLI::op_mode_func(const string& ,
 void
 RouterCLI::op_mode_cmd_print(const string& result)
 {
-    if (! result.empty())
+    if (! result.empty()) {
 	_cli_client.cli_print(result);
+	_cli_client.flush_process_command_output();
+    }
 }
 
 void
@@ -2655,11 +2659,23 @@ RouterCLI::op_mode_cmd_done(bool success, const string& error_msg)
 }
 
 void
-RouterCLI::op_mode_cmd_interrupt()
+RouterCLI::op_mode_cmd_interrupt(const string& server_name,
+				 const string& cli_term_name,
+				 uint32_t cli_session_id,
+				 const string& command_global_name,
+				 const vector<string>&  command_args)
 {
+    //
     // The user has sent an interrupt. If an operational mode command
     // is running terminate it.
+    //
     op_mode_cmd_tidy();
+
+    UNUSED(server_name);
+    UNUSED(cli_term_name);
+    UNUSED(cli_session_id);
+    UNUSED(command_global_name);
+    UNUSED(command_args);
 }
 
 void
