@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.7 2003/06/12 21:58:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.8 2003/06/19 00:46:09 hodson Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -221,7 +221,17 @@ Command::reset(const string& /*line*/, const vector<string>& /*v*/)
     _target_hostname = "";
     _target_port = "";
 
-    _peers.clear();
+    /*
+    ** We want to clear out the _peers map. The problem is that the 
+    ** destructor for a peer calls the eventloop. We can therefore end
+    ** up in a race where a "reset" followed by an "initialise" can
+    ** cause entries to be added while we are in the clear code. Take
+    ** a copy of the map, so any "initialise" calls do not conflict
+    ** with the destruction of the previous peers.
+    */
+    NamePeerMap _tmp_peers;
+    swap(_peers, _tmp_peers);
+    _tmp_peers.clear();
 }
 
 /*
