@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.5 2003/03/12 10:47:54 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.6 2003/03/13 09:56:03 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -33,7 +33,8 @@ Release 0.3 (2003/??/??)
     - IPv6-related bug fixes.
 
   MLD/IGMP:
-    - 
+    - Protocol implementation testing completed
+    - Misc. bug fixes
 
   PIM-SM:
     - 
