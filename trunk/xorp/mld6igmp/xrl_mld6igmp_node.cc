@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.9 2003/05/07 23:15:15 mjh Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.10 2003/05/08 00:01:34 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -755,9 +755,11 @@ XrlMld6igmpNode::mfea_client_0_1_new_vif(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
-    if (Mld6igmpNode::add_vif(vif_name.c_str(), vif_index) != XORP_OK) {
-	string msg = c_format("Failed to add vif %s with vif_index = %d",
-			      vif_name.c_str(), vif_index);
+    string err;
+    
+    if (Mld6igmpNode::add_vif(vif_name, vif_index, err) != XORP_OK) {
+	string msg = c_format("Failed to add vif %s with vif_index = %d: %s",
+			      vif_name.c_str(), vif_index, err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -770,9 +772,11 @@ XrlMld6igmpNode::mfea_client_0_1_delete_vif(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
-    if (Mld6igmpNode::delete_vif(vif_name.c_str()) != XORP_OK) {
-	string msg = c_format("Failed to delete vif %s with vif_index = %d",
-			      vif_name.c_str(), vif_index);
+    string err;
+    
+    if (Mld6igmpNode::delete_vif(vif_name, err) != XORP_OK) {
+	string msg = c_format("Failed to delete vif %s with vif_index = %d: %s",
+			      vif_name.c_str(), vif_index, err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -789,14 +793,17 @@ XrlMld6igmpNode::mfea_client_0_1_add_vif_addr4(
     const IPv4&		broadcast, 
     const IPv4&		peer)
 {
-    if (Mld6igmpNode::add_vif_addr(vif_name.c_str(),
+    string err;
+    
+    if (Mld6igmpNode::add_vif_addr(vif_name,
 				   IPvX(addr),
 				   IPvXNet(subnet),
 				   IPvX(broadcast),
-				   IPvX(peer))
+				   IPvX(peer),
+				   err)
 	!= XORP_OK) {
-	string msg = c_format("Failed to add address %s to vif %s",
-			      cstring(addr), vif_name.c_str());
+	string msg = c_format("Failed to add address %s to vif %s: %s",
+			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -813,14 +820,17 @@ XrlMld6igmpNode::mfea_client_0_1_add_vif_addr6(
     const IPv6&		broadcast, 
     const IPv6&		peer)
 {
-    if (Mld6igmpNode::add_vif_addr(vif_name.c_str(),
+    string err;
+    
+    if (Mld6igmpNode::add_vif_addr(vif_name,
 				   IPvX(addr),
 				   IPvXNet(subnet),
 				   IPvX(broadcast),
-				   IPvX(peer))
+				   IPvX(peer),
+				   err)
 	!= XORP_OK) {
-	string msg = c_format("Failed to add address %s to vif %s",
-			      cstring(addr), vif_name.c_str());
+	string msg = c_format("Failed to add address %s to vif %s: %s",
+			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -834,11 +844,14 @@ XrlMld6igmpNode::mfea_client_0_1_delete_vif_addr4(
     const uint32_t&	, // vif_index, 
     const IPv4&		addr)
 {
-    if (Mld6igmpNode::delete_vif_addr(vif_name.c_str(),
-				      IPvX(addr))
+    string err;
+    
+    if (Mld6igmpNode::delete_vif_addr(vif_name,
+				      IPvX(addr),
+				      err)
 	!= XORP_OK) {
-	string msg = c_format("Failed to delete address %s from vif %s",
-			      cstring(addr), vif_name.c_str());
+	string msg = c_format("Failed to delete address %s from vif %s: %s",
+			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -852,11 +865,14 @@ XrlMld6igmpNode::mfea_client_0_1_delete_vif_addr6(
     const uint32_t&	, // vif_index, 
     const IPv6&		addr)
 {
-    if (Mld6igmpNode::delete_vif_addr(vif_name.c_str(),
-				      IPvX(addr))
+    string err;
+    
+    if (Mld6igmpNode::delete_vif_addr(vif_name,
+				      IPvX(addr),
+				      err)
 	!= XORP_OK) {
-	string msg = c_format("Failed to delete address %s from vif %s",
-			      cstring(addr), vif_name.c_str());
+	string msg = c_format("Failed to delete address %s from vif %s: %s",
+			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -875,16 +891,19 @@ XrlMld6igmpNode::mfea_client_0_1_set_vif_flags(
     const bool&		is_broadcast, 
     const bool&		is_up)
 {
-    if (Mld6igmpNode::set_vif_flags(vif_name.c_str(),
+    string err;
+    
+    if (Mld6igmpNode::set_vif_flags(vif_name,
 				    is_pim_register,
 				    is_p2p,
 				    is_loopback,
 				    is_multicast,
 				    is_broadcast,
-				    is_up)
+				    is_up,
+				    err)
 	!= XORP_OK) {
-	string msg = c_format("Failed to set flags for vif %s",
-			      vif_name.c_str());
+	string msg = c_format("Failed to set flags for vif %s: %s",
+			      vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -897,7 +916,7 @@ XrlMld6igmpNode::mfea_client_0_1_set_vif_done(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
-    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name.c_str());
+    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
     
     if (mld6igmp_vif == NULL) {
 	string msg = c_format("Failed to complete setup for vif %s "

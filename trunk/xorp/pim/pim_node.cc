@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.7 2003/04/22 23:27:24 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.8 2003/05/15 23:40:38 pavlin Exp $"
 
 
 //
@@ -280,13 +280,14 @@ PimNode::has_pending_down_units(void)
 /**
  * PimNode::add_vif:
  * @vif: Information about new PimVif to install.
+ * @err: The error message (if error).
  * 
  * Install a new PIM vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::add_vif(const Vif& vif)
+PimNode::add_vif(const Vif& vif, string& err)
 {
     //
     // Create a new PimVif
@@ -295,6 +296,10 @@ PimNode::add_vif(const Vif& vif)
     
     if (ProtoNode<PimVif>::add_vif(pim_vif) != XORP_OK) {
 	// Cannot add this new vif
+	err = c_format("Cannot add vif %s: internal error",
+		       vif.name().c_str());
+	XLOG_ERROR(err.c_str());
+	
 	delete pim_vif;
 	return (XORP_ERROR);
     }
@@ -312,18 +317,18 @@ PimNode::add_vif(const Vif& vif)
  * PimNode::add_vif:
  * @vif_name: The name of the new vif.
  * @vif_index: The vif index of the new vif.
+ * @err: The error message (if error).
  * 
  * Install a new PIM vif. If the vif exists, nothing is installed.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::add_vif(const char *vif_name, uint16_t vif_index)
+PimNode::add_vif(const string& vif_name, uint16_t vif_index, string& err)
 {
     PimVif *pim_vif = vif_find_by_vif_index(vif_index);
     
-    if ((pim_vif != NULL)
-	&& (pim_vif->name() == string(vif_name))) {
+    if ((pim_vif != NULL) && (pim_vif->name() == vif_name)) {
 	return (XORP_OK);		// Already have this vif
     }
 
@@ -332,7 +337,7 @@ PimNode::add_vif(const char *vif_name, uint16_t vif_index)
     //
     Vif vif(vif_name);
     vif.set_vif_index(vif_index);
-    if (add_vif(vif) != XORP_OK) {
+    if (add_vif(vif, err) != XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -342,29 +347,27 @@ PimNode::add_vif(const char *vif_name, uint16_t vif_index)
 /**
  * PimNode::delete_vif:
  * @vif_name: The name of the vif to delete.
+ * @err: The error message (if error).
  * 
  * Delete an existing PIM vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::delete_vif(const char *vif_name)
+PimNode::delete_vif(const string& vif_name, string& err)
 {
-    if (vif_name == NULL) {
-	XLOG_ERROR("Cannot delete vif with vif_name = NULL");
-	return (XORP_ERROR);
-    }
-    
     PimVif *pim_vif = vif_find_by_name(vif_name);
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot delete vif %s: no such vif",
-		   vif_name);
+	err = c_format("Cannot delete vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
     if (ProtoNode<PimVif>::delete_vif(pim_vif) != XORP_OK) {
-	XLOG_ERROR("Cannot delete vif %s: internal error",
-		   pim_vif->name().c_str());
+	err = c_format("Cannot delete vif %s: internal error",
+		       pim_vif->name().c_str());
+	XLOG_ERROR(err.c_str());
 	delete pim_vif;
 	return (XORP_ERROR);
     }
@@ -375,28 +378,25 @@ PimNode::delete_vif(const char *vif_name)
     
     delete pim_vif;
     
-    XLOG_INFO("Deleted vif: %s", vif_name);
+    XLOG_INFO("Deleted vif: %s", vif_name.c_str());
     
     return (XORP_OK);
 }
 
 int
-PimNode::set_vif_flags(const char *vif_name,
+PimNode::set_vif_flags(const string& vif_name,
 		       bool is_pim_register, bool is_p2p,
 		       bool is_loopback, bool is_multicast,
-		       bool is_broadcast, bool is_up)
+		       bool is_broadcast, bool is_up,
+		       string& err)
 {
     bool is_changed = false;
     
-    if (vif_name == NULL) {
-	XLOG_ERROR("Cannot set flags on vif with vif_name = NULL");
-	return (XORP_ERROR);
-    }
-    
     PimVif *pim_vif = vif_find_by_name(vif_name);
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot set flags vif %s: no such vif",
-		   vif_name);
+	err = c_format("Cannot set flags vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
@@ -436,21 +436,18 @@ PimNode::set_vif_flags(const char *vif_name,
 }
 
 int
-PimNode::add_vif_addr(const char *vif_name,
+PimNode::add_vif_addr(const string& vif_name,
 		      const IPvX& addr,
 		      const IPvXNet& subnet_addr,
 		      const IPvX& broadcast_addr,
-		      const IPvX& peer_addr)
+		      const IPvX& peer_addr,
+		      string &err)
 {
-    if (vif_name == NULL) {
-	XLOG_ERROR("Cannot add address on vif with vif_name = NULL");
-	return (XORP_ERROR);
-    }
-    
     PimVif *pim_vif = vif_find_by_name(vif_name);
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot add address on vif %s: no such vif",
-		   vif_name);
+	err = c_format("Cannot add address on vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
@@ -461,9 +458,10 @@ PimNode::add_vif_addr(const char *vif_name,
     }
     
     if (! addr.is_unicast()) {
-	XLOG_ERROR("Cannot add address on vif %s: "
-		   "invalid unicast address: %s",
-		   pim_vif->name().c_str(), addr.str().c_str());
+	err = c_format("Cannot add address on vif %s: "
+		       "invalid unicast address: %s",
+		       pim_vif->name().c_str(), addr.str().c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
@@ -471,9 +469,10 @@ PimNode::add_vif_addr(const char *vif_name,
 	|| (subnet_addr.af() != family())
 	|| (broadcast_addr.af() != family())
 	|| (peer_addr.af() != family())) {
-	XLOG_ERROR("Cannot add address on vif %s: "
-		   "invalid address family: %s ",
-		   pim_vif->name().c_str(), vif_addr.str().c_str());
+	err = c_format("Cannot add address on vif %s: "
+		       "invalid address family: %s ",
+		       pim_vif->name().c_str(), vif_addr.str().c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
@@ -486,26 +485,24 @@ PimNode::add_vif_addr(const char *vif_name,
 }
 
 int
-PimNode::delete_vif_addr(const char *vif_name,
-			 const IPvX& addr)
+PimNode::delete_vif_addr(const string& vif_name,
+			 const IPvX& addr,
+			 string& err)
 {
-    if (vif_name == NULL) {
-	XLOG_ERROR("Cannot delete address on vif with vif_name = NULL");
-	return (XORP_ERROR);
-    }
-    
     PimVif *pim_vif = vif_find_by_name(vif_name);
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot delete address on vif %s: no such vif",
-		   vif_name);
+	err = c_format("Cannot delete address on vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
     const VifAddr *tmp_vif_addr = pim_vif->find_address(addr);
     if (tmp_vif_addr == NULL) {
-	XLOG_ERROR("Cannot delete address on vif %s: "
-		   "invalid address %s",
-		   pim_vif->name().c_str(), addr.str().c_str());
+	err = c_format("Cannot delete address on vif %s: "
+		       "invalid address %s",
+		       pim_vif->name().c_str(), addr.str().c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.17 2003/05/07 23:15:16 mjh Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.18 2003/05/08 00:01:34 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -988,9 +988,11 @@ XrlPimNode::mfea_client_0_1_new_vif(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
-    if (PimNode::add_vif(vif_name.c_str(), vif_index) != XORP_OK) {
-	string msg = c_format("Failed to add vif %s with vif_index = %d",
-			      vif_name.c_str(), vif_index);
+    string err;
+    
+    if (PimNode::add_vif(vif_name, vif_index, err) != XORP_OK) {
+	string msg = c_format("Failed to add vif %s with vif_index = %d: %s",
+			      vif_name.c_str(), vif_index, err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -1003,9 +1005,11 @@ XrlPimNode::mfea_client_0_1_delete_vif(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
-    if (PimNode::delete_vif(vif_name.c_str()) != XORP_OK) {
-	string msg = c_format("Failed to delete vif %s with vif_index = %d",
-			      vif_name.c_str(), vif_index);
+    string err;
+    
+    if (PimNode::delete_vif(vif_name, err) != XORP_OK) {
+	string msg = c_format("Failed to delete vif %s with vif_index = %d: %s",
+			      vif_name.c_str(), vif_index, err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -1022,14 +1026,17 @@ XrlPimNode::mfea_client_0_1_add_vif_addr4(
     const IPv4&		broadcast, 
     const IPv4&		peer)
 {
-    if (PimNode::add_vif_addr(vif_name.c_str(),
+    string err;
+    
+    if (PimNode::add_vif_addr(vif_name,
 			      IPvX(addr),
 			      IPvXNet(subnet),
 			      IPvX(broadcast),
-			      IPvX(peer))
+			      IPvX(peer),
+			      err)
 	!= XORP_OK) {
-	string msg = c_format("Failed to add address %s to vif %s",
-			      cstring(addr), vif_name.c_str());
+	string msg = c_format("Failed to add address %s to vif %s: %s",
+			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -1046,14 +1053,17 @@ XrlPimNode::mfea_client_0_1_add_vif_addr6(
     const IPv6&		broadcast, 
     const IPv6&		peer)
 {
-    if (PimNode::add_vif_addr(vif_name.c_str(),
+    string err;
+    
+    if (PimNode::add_vif_addr(vif_name,
 			      IPvX(addr),
 			      IPvXNet(subnet),
 			      IPvX(broadcast),
-			      IPvX(peer))
+			      IPvX(peer),
+			      err)
 	!= XORP_OK) {
-	string msg = c_format("Failed to add address %s to vif %s",
-			      cstring(addr), vif_name.c_str());
+	string msg = c_format("Failed to add address %s to vif %s: %s",
+			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -1067,11 +1077,14 @@ XrlPimNode::mfea_client_0_1_delete_vif_addr4(
     const uint32_t&	, // vif_index, 
     const IPv4&		addr)
 {
-    if (PimNode::delete_vif_addr(vif_name.c_str(),
-				      IPvX(addr))
+    string err;
+    
+    if (PimNode::delete_vif_addr(vif_name,
+				 IPvX(addr),
+				 err)
 	!= XORP_OK) {
-	string msg = c_format("Failed to delete address %s from vif %s",
-			      cstring(addr), vif_name.c_str());
+	string msg = c_format("Failed to delete address %s from vif %s: %s",
+			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -1085,11 +1098,14 @@ XrlPimNode::mfea_client_0_1_delete_vif_addr6(
     const uint32_t&	, // vif_index, 
     const IPv6&		addr)
 {
-    if (PimNode::delete_vif_addr(vif_name.c_str(),
-				 IPvX(addr))
+    string err;
+    
+    if (PimNode::delete_vif_addr(vif_name,
+				 IPvX(addr),
+				 err)
 	!= XORP_OK) {
-	string msg = c_format("Failed to delete address %s from vif %s",
-			      cstring(addr), vif_name.c_str());
+	string msg = c_format("Failed to delete address %s from vif %s: %s",
+			      cstring(addr), vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -1108,16 +1124,19 @@ XrlPimNode::mfea_client_0_1_set_vif_flags(
     const bool&		is_broadcast, 
     const bool&		is_up) 
 {
-    if (PimNode::set_vif_flags(vif_name.c_str(),
+    string err;
+    
+    if (PimNode::set_vif_flags(vif_name,
 			       is_pim_register,
 			       is_p2p,
 			       is_loopback,
 			       is_multicast,
 			       is_broadcast,
-			       is_up)
+			       is_up,
+			       err)
 	!= XORP_OK) {
-	string msg = c_format("Failed to set flags for vif %s",
-			      vif_name.c_str());
+	string msg = c_format("Failed to set flags for vif %s: %s",
+			      vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     

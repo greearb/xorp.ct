@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.5 2003/04/16 04:53:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.6 2003/04/22 23:27:22 hodson Exp $"
 
 
 //
@@ -166,13 +166,14 @@ Mld6igmpNode::stop(void)
 /**
  * Mld6igmpNode::add_vif:
  * @vif: Information about new Mld6igmpVif to install.
+ * @err: The error message (if error).
  * 
  * Install a new MLD/IGMP vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::add_vif(const Vif& vif)
+Mld6igmpNode::add_vif(const Vif& vif, string& err)
 {
     //
     // Create a new Mld6igmpVif
@@ -181,6 +182,10 @@ Mld6igmpNode::add_vif(const Vif& vif)
     
     if (ProtoNode<Mld6igmpVif>::add_vif(mld6igmp_vif) != XORP_OK) {
 	// Cannot add this new vif
+	err = c_format("Cannot add vif %s: internal error",
+		       vif.name().c_str());
+	XLOG_ERROR(err.c_str());
+	
 	delete mld6igmp_vif;
 	return (XORP_ERROR);
     }
@@ -194,18 +199,18 @@ Mld6igmpNode::add_vif(const Vif& vif)
  * Mld6igmpNode::add_vif:
  * @vif_name: The name of the new vif.
  * @vif_index: The vif index of the new vif.
+ * @err: The error message (if error).
  * 
  * Install a new MLD/IGMP vif. If the vif exists, nothing is installed.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::add_vif(const char *vif_name, uint32_t vif_index)
+Mld6igmpNode::add_vif(const string& vif_name, uint32_t vif_index, string& err)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_vif_index(vif_index);
     
-    if ((mld6igmp_vif != NULL)
-	&& (mld6igmp_vif->name() == string(vif_name))) {
+    if ((mld6igmp_vif != NULL) && (mld6igmp_vif->name() == vif_name)) {
 	return (XORP_OK);		// Already have this vif
     }
     
@@ -214,7 +219,7 @@ Mld6igmpNode::add_vif(const char *vif_name, uint32_t vif_index)
     //
     Vif vif(vif_name);
     vif.set_vif_index(vif_index);
-    if (add_vif(vif) != XORP_OK) {
+    if (add_vif(vif, err) != XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -224,57 +229,52 @@ Mld6igmpNode::add_vif(const char *vif_name, uint32_t vif_index)
 /**
  * Mld6igmpNode::delete_vif:
  * @vif_name: The name of the vif to delete.
+ * @err: The error message (if error).
  * 
  * Delete an existing MLD/IGMP vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::delete_vif(const char *vif_name)
+Mld6igmpNode::delete_vif(const string& vif_name, string& err)
 {
-    if (vif_name == NULL) {
-	XLOG_ERROR("Cannot delete vif with vif_name = NULL");
-	return (XORP_ERROR);
-    }
-    
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	XLOG_ERROR("Cannot delete vif %s: no such vif",
-		   vif_name);
+	err = c_format("Cannot delete vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
     if (ProtoNode<Mld6igmpVif>::delete_vif(mld6igmp_vif) != XORP_OK) {
-	XLOG_ERROR("Cannot delete vif %s: internal error",
-		   mld6igmp_vif->name().c_str());
+	err = c_format("Cannot delete vif %s: internal error",
+		       mld6igmp_vif->name().c_str());
+	XLOG_ERROR(err.c_str());
 	delete mld6igmp_vif;
 	return (XORP_ERROR);
     }
     
     delete mld6igmp_vif;
     
-    XLOG_INFO("Deleted vif: %s", vif_name);
+    XLOG_INFO("Deleted vif: %s", vif_name.c_str());
     
     return (XORP_OK);
 }
 
 int
-Mld6igmpNode::set_vif_flags(const char *vif_name,
+Mld6igmpNode::set_vif_flags(const string& vif_name,
 			    bool is_pim_register, bool is_p2p,
 			    bool is_loopback, bool is_multicast,
-			    bool is_broadcast, bool is_up)
+			    bool is_broadcast, bool is_up,
+			    string& err)
 {
     bool is_changed = false;
     
-    if (vif_name == NULL) {
-	XLOG_ERROR("Cannot set flags on vif with vif_name = NULL");
-	return (XORP_ERROR);
-    }
-    
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	XLOG_ERROR("Cannot set flags vif %s: no such vif",
-		   vif_name);
+	err = c_format("Cannot set flags vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
@@ -310,21 +310,18 @@ Mld6igmpNode::set_vif_flags(const char *vif_name,
 }
 
 int
-Mld6igmpNode::add_vif_addr(const char *vif_name,
+Mld6igmpNode::add_vif_addr(const string& vif_name,
 			   const IPvX& addr,
 			   const IPvXNet& subnet_addr,
 			   const IPvX& broadcast_addr,
-			   const IPvX& peer_addr)
+			   const IPvX& peer_addr,
+			   string& err)
 {
-    if (vif_name == NULL) {
-	XLOG_ERROR("Cannot add address on vif with vif_name = NULL");
-	return (XORP_ERROR);
-    }
-    
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	XLOG_ERROR("Cannot add address on vif %s: no such vif",
-		   vif_name);
+	err = c_format("Cannot add address on vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
@@ -335,9 +332,10 @@ Mld6igmpNode::add_vif_addr(const char *vif_name,
     }
     
     if (! addr.is_unicast()) {
-	XLOG_ERROR("Cannot add address on vif %s: "
-		   "invalid unicast address: %s",
-		   mld6igmp_vif->name().c_str(), addr.str().c_str());
+	err = c_format("Cannot add address on vif %s: "
+		       "invalid unicast address: %s",
+		       mld6igmp_vif->name().c_str(), addr.str().c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
@@ -345,9 +343,10 @@ Mld6igmpNode::add_vif_addr(const char *vif_name,
 	|| (subnet_addr.af() != family())
 	|| (broadcast_addr.af() != family())
 	|| (peer_addr.af() != family())) {
-	XLOG_ERROR("Cannot add address on vif %s: "
-		   "invalid address family: %s ",
-		   mld6igmp_vif->name().c_str(), vif_addr.str().c_str());
+	err = c_format("Cannot add address on vif %s: "
+		       "invalid address family: %s ",
+		       mld6igmp_vif->name().c_str(), vif_addr.str().c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
@@ -360,26 +359,24 @@ Mld6igmpNode::add_vif_addr(const char *vif_name,
 }
 
 int
-Mld6igmpNode::delete_vif_addr(const char *vif_name,
-			      const IPvX& addr)
+Mld6igmpNode::delete_vif_addr(const string& vif_name,
+			      const IPvX& addr,
+			      string& err)
 {
-    if (vif_name == NULL) {
-	XLOG_ERROR("Cannot delete address on vif with vif_name = NULL");
-	return (XORP_ERROR);
-    }
-    
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	XLOG_ERROR("Cannot delete address on vif %s: no such vif",
-		   vif_name);
+	err = c_format("Cannot delete address on vif %s: no such vif",
+		       vif_name.c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     
     const VifAddr *tmp_vif_addr = mld6igmp_vif->find_address(addr);
     if (tmp_vif_addr == NULL) {
-	XLOG_ERROR("Cannot delete address on vif %s: "
-		   "invalid address %s",
-		   mld6igmp_vif->name().c_str(), addr.str().c_str());
+	err = c_format("Cannot delete address on vif %s: "
+		       "invalid address %s",
+		       mld6igmp_vif->name().c_str(), addr.str().c_str());
+	XLOG_ERROR(err.c_str());
 	return (XORP_ERROR);
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.11 2003/04/22 23:27:24 hodson Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.12 2003/05/15 23:40:38 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -135,26 +135,30 @@ public:
      * Install a new PIM vif.
      * 
      * @param vif vif information about new PimVif to install.
+     * @param err the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_vif(const Vif& vif);
+    int		add_vif(const Vif& vif, string& err);
     
     /**
      * Install a new PIM vif.
      * 
      * @param vif_name the name of the new vif.
      * @param vif_index the vif index of the new vif.
+     * @param err the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_vif(const char *vif_name, uint16_t vif_index);
+    int		add_vif(const string& vif_name, uint16_t vif_index,
+			string& err);
     
     /**
      * Delete an existing PIM vif.
      * 
      * @param vif_name the name of the vif to delete.
+     * @param err the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_vif(const char *vif_name);
+    int		delete_vif(const string& vif_name, string& err);
     
     /**
      * Set flags to a vif.
@@ -166,12 +170,14 @@ public:
      * @param is_multicast rue if the vif is multicast-capable.
      * @param is_broadcast true if the vif is broadcast-capable.
      * @param is_up true if the vif is UP and running.
+     * @param err the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		set_vif_flags(const char *vif_name,
+    int		set_vif_flags(const string& vif_name,
 			      bool is_pim_register, bool is_p2p,
 			      bool is_loopback, bool is_multicast,
-			      bool is_broadcast, bool is_up);
+			      bool is_broadcast, bool is_up,
+			      string& err);
     
     /**
      * Add an address to a vif.
@@ -181,23 +187,27 @@ public:
      * @param subnet_addr the subnet address to add.
      * @param broadcast_addr the broadcast address (when applicable).
      * @param peer_addr the peer address (when applicable).
+     * @param err the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_vif_addr(const char *vif_name,
+    int		add_vif_addr(const string& vif_name,
 			     const IPvX& addr,
 			     const IPvXNet& subnet_addr,
 			     const IPvX& broadcast_addr,
-			     const IPvX& peer_addr);
+			     const IPvX& peer_addr,
+			     string& err);
     
     /**
      * Delete an address from a vif.
      * 
      * @param vif_name the name of the vif.
      * @param addr the unicast address to delete.
+     * @param vif_name the name of the vif.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_vif_addr(const char *vif_name,
-				const IPvX& addr);
+    int		delete_vif_addr(const string& vif_name,
+				const IPvX& addr,
+				string& err);
     
     /**
      * Start PIM on all enabled interfaces.
