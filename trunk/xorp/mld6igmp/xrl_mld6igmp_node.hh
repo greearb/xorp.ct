@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.6 2003/03/10 23:20:43 hodson Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.7 2003/03/13 00:32:06 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -47,13 +47,13 @@ class XrlMld6igmpNode : public Mld6igmpNode,
 			public Mld6igmpNodeCli {
 public:
     XrlMld6igmpNode(int family, x_module_id module_id, 
-		    EventLoop& event_loop, XrlRouter* r)
+		    EventLoop& event_loop, XrlRouter* xrl_router)
 	: Mld6igmpNode(family, module_id, event_loop),
-	  XrlMld6igmpTargetBase(r),
-	  XrlCommonV0p1Client(r),
-	  XrlMfeaV0p1Client(r),
-	  XrlCliManagerV0p1Client(r),
-	  XrlMld6igmpClientV0p1Client(r),
+	  XrlMld6igmpTargetBase(xrl_router),
+	  XrlCommonV0p1Client(xrl_router),
+	  XrlMfeaV0p1Client(xrl_router),
+	  XrlCliManagerV0p1Client(xrl_router),
+	  XrlMld6igmpClientV0p1Client(xrl_router),
 	  Mld6igmpNodeCli(*static_cast<Mld6igmpNode *>(this))
 	{ }
     virtual ~XrlMld6igmpNode() { Mld6igmpNode::stop(); Mld6igmpNodeCli::stop(); }
