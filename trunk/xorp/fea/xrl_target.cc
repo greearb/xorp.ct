@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.36 2004/02/19 04:33:12 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.37 2004/03/15 23:30:57 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1641,13 +1641,20 @@ XrlFeaTarget::socket6_locator_0_1_find_socket_server_for_addr(
     // If we had multiple socket servers we'd look for the right one
     // to use.  At the present time we only have one so this is the
     // one to return
+    UNUSED(addr);
+
     if (_xss == 0) {
 	return XrlCmdError::COMMAND_FAILED("Socket Server is not present.");
     }
     if (_xss->status() != RUNNING) {
 	return XrlCmdError::COMMAND_FAILED("Socket Server not running.");
     }
-    UNUSED(addr);
+
+#ifdef HAVE_IPV6
     svr = _xss->instance_name();
     return XrlCmdError::OKAY();
+#else
+    svr = "";
+    return XrlCmdError::COMMAND_FAILED("IPv6 not supported.");
+#endif /* HAVE_IPV6 */
 }
