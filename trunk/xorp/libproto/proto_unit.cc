@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_unit.cc,v 1.4 2003/03/19 01:04:13 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_unit.cc,v 1.5 2003/03/19 23:38:22 pavlin Exp $"
 
 
 //
@@ -38,7 +38,7 @@
 // TODO: the _4/6 suffix is a temp. solution
 static const char *_xorp_module_name[][2] = {
     { "XORP_MODULE_NULL",	"XORP_MODULE_NULL" },	// 0
-    { "FEA_4",			"FEA_6"		},	// 1
+    { "fea",			"fea"		},	// 1
     { "MFEA_4",			"MFEA_6"	},	// 2
     { "IGMP",			"MLD"		},	// 3
     { "PIMSM_4",		"PIMSM_6"	},	// 4
