@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.34 2004/06/10 22:41:34 hodson Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.35 2004/07/26 02:57:25 pavlin Exp $"
 
 
 //
@@ -315,7 +315,9 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
 	xorp_module_name(AF_INET, XORP_MODULE_MFEA),
 	xorp_module_name(AF_INET, XORP_MODULE_RIB),
 	xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP));
+#if 0	// If disabled, then receive the MRIB from the RIB itself
     xrl_pimsm_node4.set_receive_mrib_from_mfea(true);	// XXX
+#endif
     // XXX: print the PimMre state dependency (for debug purpose)
     // xrl_pimsm_node4.pim_mrt().track_state_print_actions_name();
     // xrl_pimsm_node4.pim_mrt().track_state_print_actions_num();
@@ -335,7 +337,9 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
 	xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
 	xorp_module_name(AF_INET6, XORP_MODULE_RIB),
 	xorp_module_name(AF_INET6, XORP_MODULE_MLD6IGMP));
+#if 0	// If disabled, then receive the MRIB from the RIB itself
     xrl_pimsm_node6.set_receive_mrib_from_mfea(true);	// XXX
+#endif
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_pimsm6);
 #endif // HAVE_IPV6
 
