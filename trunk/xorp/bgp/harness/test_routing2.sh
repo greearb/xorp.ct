@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.5 2003/10/22 00:20:30 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.6 2003/10/22 00:54:20 atanu Exp $
 #
 
 #
@@ -573,14 +573,16 @@ test5()
 
 test6()
 {
+    echo "TEST6 - Verify that it is possible add and remove tables in the RIB"
+
     add_igp_table4 is-is isis isis true false
     delete_igp_table4 is-is isis isis true false
     add_igp_table4 is-is isis isis true false
     delete_igp_table4 is-is isis isis true false
 }
 
-TESTS_NOT_FIXED='test4 test5 test6'
-TESTS='test1 test1_ipv6 test2 test3'
+TESTS_NOT_FIXED='test6'
+TESTS='test1 test1_ipv6 test2 test3 test4 test5'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
