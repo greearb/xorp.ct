@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_manager.hh,v 1.2 2003/07/09 00:08:07 hodson Exp $
+// $XORP: xorp/rip/port_manager.hh,v 1.3 2003/11/04 23:38:04 hodson Exp $
 
 #ifndef __RIP_PORT_MANAGER_HH__
 #define __RIP_PORT_MANAGER_HH__
@@ -53,17 +53,17 @@ public:
     /**
      * Get parent @ref System<A> instance.
      */
-    inline SystemType& system()				{ return _system; }
+    inline SystemType& system()			{ return _system; }
 
     /**
      * Get parent @ref System<A> instance.
      */
-    inline const SystemType& system() const		{ return _system; }
+    inline const SystemType& system() const	{ return _system; }
 
     /**
      * Get list of managed RIP Ports.
      */
-    inline const PortList& ports() const		{ return _ports; }
+    inline const PortList& ports() const	{ return _ports; }
 
     /**
      * Get EventLoop.
@@ -74,6 +74,12 @@ public:
      * Get EventLoop.
      */
     inline const EventLoop& eventloop() const	{ return _system.eventloop(); }
+
+protected:
+    /**
+     * Get list of managed RIP Ports.
+     */
+    inline PortList& ports()			{ return _ports; }
 
 protected:
     SystemType&	_system;
