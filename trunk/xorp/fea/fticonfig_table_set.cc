@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set.cc,v 1.4 2004/08/17 02:20:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set.cc,v 1.5 2004/10/21 00:10:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -53,4 +53,11 @@ void
 FtiConfigTableSet::register_ftic_secondary()
 {
     _ftic.register_ftic_table_set_secondary(this);
+
+    //
+    // XXX: push the current config into the new secondary
+    //
+    if (_is_running) {
+	// TODO: XXX: PAVPAVPAV: implement it!
+    }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.17 2004/11/05 00:48:03 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.18 2004/11/05 01:53:16 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -56,6 +56,12 @@ void
 IfConfigSet::register_ifc_secondary()
 {
     _ifc.register_ifc_set_secondary(this);
+
+    //
+    // XXX: push the current config into the new secondary
+    //
+    if (_is_running)
+	push_config(_ifc.pushed_config());
 }
 
 bool
