@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.5 2003/05/09 05:32:53 mjh Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.6 2003/05/14 01:13:43 pavlin Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
@@ -40,7 +40,7 @@ XrlInterfaceManager::get_if_from_config(const IfTree&	it,
 					const IfTreeInterface*&	fi) const
 {
     IfTree::IfMap::const_iterator ii = it.get_if(ifname);
-    if (ii == iftree().ifs().end()) {
+    if (ii == it.ifs().end()) {
 	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_IF,
 						    ifname.c_str()));
     }
@@ -56,7 +56,7 @@ XrlInterfaceManager::get_vif_from_config(const IfTree&	it,
 					 const IfTreeVif*&		fv) const
 {
     IfTree::IfMap::const_iterator ii = it.get_if(ifname);
-    if (ii == iftree().ifs().end()) {
+    if (ii == it.ifs().end()) {
 	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_IF,
 						    ifname.c_str()));
     }
@@ -80,7 +80,7 @@ XrlInterfaceManager::get_addr_from_config(const IfTree&	it,
 					  const IfTreeAddr4*&	fa) const
 {
     IfTree::IfMap::const_iterator ii = it.get_if(ifname);
-    if (ii == iftree().ifs().end()) {
+    if (ii == it.ifs().end()) {
 	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_IF,
 						    ifname.c_str()));
     }
@@ -112,7 +112,7 @@ XrlInterfaceManager::get_addr_from_config(const IfTree&	it,
 					  const IfTreeAddr6*&	fa) const
 {
     IfTree::IfMap::const_iterator ii = it.get_if(ifname);
-    if (ii == iftree().ifs().end()) {
+    if (ii == it.ifs().end()) {
 	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_IF,
 						    ifname.c_str()));
     }
@@ -198,9 +198,7 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 
 	// Align with device configuration, so that any stuff that failed
 	// in push is not held over in config
-	IfTree dev_config;
-	
-	ifconfig().pull_config(dev_config);
+	const IfTree& dev_config = ifconfig().pull_config();
 	debug_msg("DEV CONFIG %s\n", dev_config.str().c_str());
 	debug_msg("LOCAL CONFIG %s\n", local_config.str().c_str());
 	

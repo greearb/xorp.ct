@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.5 2003/05/10 00:06:40 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.6 2003/05/14 01:13:42 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -106,12 +106,9 @@ public:
     /**
      * Pull up current config from platform.
      *
-     * @param config an IfTree item that can be used to write the
-     * config to.
-     *
-     * @return true on success, otherwise false.
+     * @return the platform IfTree.
      */
-    bool pull_config(IfTree& config);
+    const IfTree& pull_config();
     
     void flush_config() { _live_config = IfTree(); }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.6 2003/05/10 00:06:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.7 2003/05/14 01:13:41 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -117,7 +117,7 @@ IfConfig::start()
 	    return (XORP_ERROR);
     }
     
-    pull_config(_live_config);
+    _live_config = pull_config();
     _live_config.finalize_state();
     
     debug_msg("Start configuration read: %s\n", _live_config.str().c_str());
@@ -155,12 +155,12 @@ IfConfig::push_config(const IfTree& config)
     return (_ifc_set->push_config(config));
 }
 
-bool
-IfConfig::pull_config(IfTree& config)
+const IfTree&
+IfConfig::pull_config()
 {
-    if (_ifc_get == NULL)
-	return false;
-    return (_ifc_get->pull_config(config));
+    if (_ifc_get != NULL)
+	_ifc_get->pull_config(_live_config);
+    return _live_config;
 }
 
 void

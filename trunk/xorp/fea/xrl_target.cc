@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.11 2003/05/09 05:32:54 mjh Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.12 2003/05/14 01:13:43 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -100,9 +100,8 @@ XrlFeaTarget::ifmgr_0_1_get_all_interface_names(
 						// Output values,
 						XrlAtomList&	ifnames)
 {
-    IfTree it;
+    const IfTree& it = _xifmgr.ifconfig().pull_config();
     
-    _xifmgr.ifconfig().pull_config(it);
     for (IfTree::IfMap::const_iterator ii = it.ifs().begin();
 	 ii != it.ifs().end(); ++ii) {
 	ifnames.append(XrlAtom(ii->second.ifname()));
