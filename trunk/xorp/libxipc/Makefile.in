@@ -242,11 +242,11 @@ DEP_FILES =  .deps/call_xrl.P .deps/finder.P .deps/finder_client.P \
 .deps/test_xrl_args.P .deps/test_xrl_atom.P .deps/test_xrl_error.P \
 .deps/test_xrl_parser.P .deps/test_xrl_router.P .deps/xrl.P \
 .deps/xrl_args.P .deps/xrl_atom.P .deps/xrl_atom_encoding.P \
-.deps/xrl_atom_list.P .deps/xrl_error.P .deps/xrl_parser.P \
-.deps/xrl_parser_input.P .deps/xrl_pf_factory.P .deps/xrl_pf_inproc.P \
-.deps/xrl_pf_stcp.P .deps/xrl_pf_stcp_ph.P .deps/xrl_pf_sudp.P \
-.deps/xrl_router.P .deps/xrl_std_router.P .deps/xrl_tokens.P \
-.deps/xrl_cmd_map.P .deps/xuid.P
+.deps/xrl_atom_list.P .deps/xrl_cmd_map.P .deps/xrl_error.P \
+.deps/xrl_parser.P .deps/xrl_parser_input.P .deps/xrl_pf_factory.P \
+.deps/xrl_pf_inproc.P .deps/xrl_pf_stcp.P .deps/xrl_pf_stcp_ph.P \
+.deps/xrl_pf_sudp.P .deps/xrl_router.P .deps/xrl_std_router.P \
+.deps/xrl_tokens.P .deps/xuid.P
 SOURCES = $(libxipc_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_client_SOURCES) $(test_finder_ipc_SOURCES) $(test_finder_ipc2_SOURCES) $(test_finder_msg_SOURCES) $(test_finder_transport_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_sudp_SOURCES) $(test_stcp_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_router_SOURCES) $(test_xrl_parser_SOURCES)
 OBJECTS = $(libxipc_a_OBJECTS) $(call_xrl_OBJECTS) $(finder_OBJECTS) $(test_finder_client_OBJECTS) $(test_finder_ipc_OBJECTS) $(test_finder_ipc2_OBJECTS) $(test_finder_msg_OBJECTS) $(test_finder_transport_OBJECTS) $(test_header_OBJECTS) $(test_inproc_OBJECTS) $(test_lemming_OBJECTS) $(test_sudp_OBJECTS) $(test_stcp_OBJECTS) $(test_xrl_error_OBJECTS) $(test_xrl_OBJECTS) $(test_xrl_atom_OBJECTS) $(test_xrl_args_OBJECTS) $(test_xrl_router_OBJECTS) $(test_xrl_parser_OBJECTS)
 
