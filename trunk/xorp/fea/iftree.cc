@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.10 2003/06/17 23:14:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.11 2003/08/10 22:00:54 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -451,10 +451,6 @@ IfTreeAddr4::set_prefix(uint32_t prefix)
 void
 IfTreeAddr4::set_bcast(const IPv4& baddr)
 {
-    set_broadcast(false);
-    set_point_to_point(false);
-    if (baddr != IPv4::ZERO())
-	set_broadcast(true);
     _oaddr = baddr;
     mark(CHANGED);
 }
@@ -470,10 +466,6 @@ IfTreeAddr4::bcast() const
 void
 IfTreeAddr4::set_endpoint(const IPv4& oaddr)
 {
-    set_broadcast(false);
-    set_point_to_point(false);
-    if (oaddr != IPv4::ZERO())
-	set_point_to_point(true);
     _oaddr = oaddr;
     mark(CHANGED);
 }
@@ -528,9 +520,6 @@ IfTreeAddr6::set_prefix(uint32_t prefix)
 void
 IfTreeAddr6::set_endpoint(const IPv6& oaddr)
 {
-    set_point_to_point(false);
-    if (oaddr != IPv6::ZERO())
-	set_point_to_point(true);
     _oaddr = oaddr;
     mark(CHANGED);
 }
