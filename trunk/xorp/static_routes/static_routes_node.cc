@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.8 2004/04/22 01:14:29 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.9 2004/04/29 23:26:30 pavlin Exp $"
 
 
 //
@@ -757,22 +757,24 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
 	}
 
 	//
-	// Route found. Erase it.
+	// Route found. Create a copy of it and erase it.
 	//
+	StaticRoute copy_route = tmp_route;
+	copy_route.set_delete_route();
 	_static_routes.erase(iter);
 
 	//
 	// Inform the RIB about the change
 	//
-	if (static_route.is_interface_route()) {
+	if (copy_route.is_interface_route()) {
 	    const IfMgrVifAtom* vif_atom;
-	    vif_atom = _iftree.find_vif(static_route.ifname(),
-					static_route.vifname());
+	    vif_atom = _iftree.find_vif(copy_route.ifname(),
+					copy_route.vifname());
 	    if ((vif_atom != NULL) && (vif_atom->enabled()))
-		inform_rib_route_change(static_route);
+		inform_rib_route_change(copy_route);
 	} else {
-	    if (is_directly_connected(_iftree, static_route.nexthop()))
-		inform_rib_route_change(static_route);
+	    if (is_directly_connected(_iftree, copy_route.nexthop()))
+		inform_rib_route_change(copy_route);
 	}
 
 	return XORP_OK;

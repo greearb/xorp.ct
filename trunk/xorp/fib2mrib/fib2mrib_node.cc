@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.6 2004/04/22 01:14:10 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.7 2004/04/29 23:26:42 pavlin Exp $"
 
 
 //
@@ -779,22 +779,24 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
 	}
 
 	//
-	// Route found. Erase it.
+	// Route found. Create a copy of it and erase it.
 	//
+	Fib2mribRoute copy_route = tmp_route;
+	copy_route.set_delete_route();
 	_fib2mrib_routes.erase(iter);
 
 	//
 	// Inform the RIB about the change
 	//
-	if (fib2mrib_route.is_interface_route()) {
+	if (copy_route.is_interface_route()) {
 	    const IfMgrVifAtom* vif_atom;
-	    vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
-					fib2mrib_route.vifname());
+	    vif_atom = _iftree.find_vif(copy_route.ifname(),
+					copy_route.vifname());
 	    if ((vif_atom != NULL) && (vif_atom->enabled()))
-		inform_rib_route_change(fib2mrib_route);
+		inform_rib_route_change(copy_route);
 	} else {
-	    if (is_directly_connected(_iftree, fib2mrib_route.nexthop()))
-		inform_rib_route_change(fib2mrib_route);
+	    if (is_directly_connected(_iftree, copy_route.nexthop()))
+		inform_rib_route_change(copy_route);
 	}
 
 	return XORP_OK;
