@@ -45,18 +45,21 @@ static int yygrowstack();
 #define YYPREFIX "opcmd"
 #line 2 "op_commands.yy"
 #define YYSTYPE char*
+
 #include <assert.h>
 #include <stdio.h>
 
-#include <string>
 #include <map>
 
 #include "rtrmgr_module.h"
+#include "libxorp/xorp.h"
+
 #include "op_commands.hh"
+
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize opcmdstacksize
 #define yysslim opcmdsslim
-#line 60 "y.opcmd_tab.c"
+#line 63 "y.opcmd_tab.c"
 #define YYERRCODE 256
 #define UPLEVEL 257
 #define DOWNLEVEL 258
@@ -200,7 +203,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 107 "op_commands.yy"
+#line 110 "op_commands.yy"
 
 extern "C" int opcmdparse();
 extern int opcmdlex();
@@ -592,7 +595,7 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 596 "y.opcmd_tab.c"
+#line 599 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -788,74 +791,74 @@ yyreduce:
     switch (yyn)
     {
 case 4:
-#line 38 "op_commands.yy"
+#line 41 "op_commands.yy"
 { }
 break;
 case 6:
-#line 42 "op_commands.yy"
+#line 45 "op_commands.yy"
 { }
 break;
 case 9:
-#line 49 "op_commands.yy"
+#line 52 "op_commands.yy"
 { append_path_word(yyvsp[0]); }
 break;
 case 10:
-#line 52 "op_commands.yy"
+#line 55 "op_commands.yy"
 { append_path_variable(yyvsp[0]); }
 break;
 case 11:
-#line 55 "op_commands.yy"
+#line 58 "op_commands.yy"
 { }
 break;
 case 12:
-#line 58 "op_commands.yy"
+#line 61 "op_commands.yy"
 { push_path(); }
 break;
 case 13:
-#line 61 "op_commands.yy"
+#line 64 "op_commands.yy"
 { pop_path(); }
 break;
 case 20:
-#line 74 "op_commands.yy"
+#line 77 "op_commands.yy"
 {
 				add_cmd_module(yyvsp[-1]);
 			}
 break;
 case 21:
-#line 79 "op_commands.yy"
+#line 82 "op_commands.yy"
 {
 				add_cmd_command(yyvsp[-2]);
 			}
 break;
 case 22:
-#line 84 "op_commands.yy"
+#line 87 "op_commands.yy"
 {
 				add_cmd_opt_parameter(yyvsp[-2]);
 			}
 break;
 case 23:
-#line 89 "op_commands.yy"
+#line 92 "op_commands.yy"
 {
 				add_cmd_tag(yyvsp[-2], yyvsp[-1]);
 			}
 break;
 case 24:
-#line 94 "op_commands.yy"
+#line 97 "op_commands.yy"
 {
 				add_cmd_help_tag(yyvsp[0]);
 			}
 break;
 case 25:
-#line 97 "op_commands.yy"
+#line 100 "op_commands.yy"
 {
 				add_cmd_help_string(yyvsp[0]);
 			}
 break;
 case 26:
-#line 102 "op_commands.yy"
+#line 105 "op_commands.yy"
 { opcmderror("syntax error"); }
 break;
-#line 859 "y.opcmd_tab.c"
+#line 862 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

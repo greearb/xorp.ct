@@ -1,13 +1,16 @@
 %{
 #define YYSTYPE char*
+
 #include <assert.h>
 #include <stdio.h>
 
-#include <string>
 #include <map>
 
 #include "rtrmgr_module.h"
+#include "libxorp/xorp.h"
+
 #include "op_commands.hh"
+
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize opcmdstacksize
 #define yysslim opcmdsslim

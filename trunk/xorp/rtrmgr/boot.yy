@@ -1,11 +1,16 @@
 %{
 #define YYSTYPE char*
+
 #include <assert.h>
 #include <stdio.h>
+
 #include "rtrmgr_module.h"
-#include "template_tree_node.hh"
-#include "template_tree.hh"
+#include "libxorp/xorp.h"
+
 #include "conf_tree.hh"
+#include "template_tree.hh"
+#include "template_tree_node.hh"
+
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize bootstacksize
 #define yysslim bootsslim

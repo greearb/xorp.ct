@@ -1,10 +1,15 @@
 %{
 #define YYSTYPE char*
+
 #include <assert.h>
 #include <stdio.h>
+
 #include "rtrmgr_module.h"
+#include "libxorp/xorp.h"
+
 #include "template_tree_node.hh"
 #include "template_tree.hh"
+
 /* XXX: sigh, the -p flag to yacc should do this for us */
 #define yystacksize tpltstacksize
 #define yysslim tpltsslim

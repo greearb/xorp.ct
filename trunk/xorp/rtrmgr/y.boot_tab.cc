@@ -45,16 +45,21 @@ static int yygrowstack();
 #define YYPREFIX "boot"
 #line 2 "boot.yy"
 #define YYSTYPE char*
+
 #include <assert.h>
 #include <stdio.h>
+
 #include "rtrmgr_module.h"
-#include "template_tree_node.hh"
-#include "template_tree.hh"
+#include "libxorp/xorp.h"
+
 #include "conf_tree.hh"
+#include "template_tree.hh"
+#include "template_tree_node.hh"
+
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize bootstacksize
 #define yysslim bootsslim
-#line 58 "y.boot_tab.c"
+#line 63 "y.boot_tab.c"
 #define YYERRCODE 256
 #define UPLEVEL 257
 #define DOWNLEVEL 258
@@ -219,7 +224,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 117 "boot.yy"
+#line 122 "boot.yy"
 
 extern void boot_scan_string(const char *configuration);
 extern int boot_linenum;
@@ -300,7 +305,7 @@ parse_bootfile() throw (ParseError)
     if (bootparse() != 0)
 	booterror("unknown error");
 }
-#line 304 "y.boot_tab.c"
+#line 309 "y.boot_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -496,118 +501,118 @@ yyreduce:
     switch (yyn)
     {
 case 7:
-#line 42 "boot.yy"
+#line 47 "boot.yy"
 { push_path(); }
 break;
 case 8:
-#line 45 "boot.yy"
+#line 50 "boot.yy"
 { push_path(); }
 break;
 case 9:
-#line 48 "boot.yy"
-{ extend_path(yyvsp[0]); }
-break;
-case 11:
-#line 52 "boot.yy"
-{ extend_path(yyvsp[0]); }
-break;
-case 12:
 #line 53 "boot.yy"
 { extend_path(yyvsp[0]); }
 break;
-case 13:
-#line 54 "boot.yy"
-{ extend_path(yyvsp[0]); }
-break;
-case 14:
-#line 55 "boot.yy"
-{ extend_path(yyvsp[0]); }
-break;
-case 15:
-#line 56 "boot.yy"
-{ extend_path(yyvsp[0]); }
-break;
-case 16:
+case 11:
 #line 57 "boot.yy"
 { extend_path(yyvsp[0]); }
 break;
-case 17:
+case 12:
 #line 58 "boot.yy"
 { extend_path(yyvsp[0]); }
 break;
-case 18:
+case 13:
 #line 59 "boot.yy"
 { extend_path(yyvsp[0]); }
 break;
-case 20:
+case 14:
+#line 60 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 15:
+#line 61 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 16:
+#line 62 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 17:
 #line 63 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 18:
+#line 64 "boot.yy"
+{ extend_path(yyvsp[0]); }
+break;
+case 20:
+#line 68 "boot.yy"
 { pop_path(); }
 break;
 case 21:
-#line 66 "boot.yy"
+#line 71 "boot.yy"
 { pop_path(); }
 break;
 case 28:
-#line 81 "boot.yy"
+#line 86 "boot.yy"
 {
 			terminal(yyvsp[-1], strdup(""), NODE_VOID);
 		}
 break;
 case 29:
-#line 84 "boot.yy"
+#line 89 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_TEXT);
 		}
 break;
 case 30:
-#line 87 "boot.yy"
+#line 92 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_BOOL);
 		}
 break;
 case 31:
-#line 90 "boot.yy"
+#line 95 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_UINT);
 		}
 break;
 case 32:
-#line 93 "boot.yy"
+#line 98 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4);
 		}
 break;
 case 33:
-#line 96 "boot.yy"
+#line 101 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV4NET);
 		}
 break;
 case 34:
-#line 99 "boot.yy"
+#line 104 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6);
 		}
 break;
 case 35:
-#line 102 "boot.yy"
+#line 107 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_IPV6NET);
 		}
 break;
 case 36:
-#line 105 "boot.yy"
+#line 110 "boot.yy"
 {
 			terminal(yyvsp[-3], yyvsp[-1], NODE_MACADDR);
 		}
 break;
 case 37:
-#line 110 "boot.yy"
+#line 115 "boot.yy"
 {
 			booterror("syntax error");
 		}
 break;
-#line 611 "y.boot_tab.c"
+#line 616 "y.boot_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
