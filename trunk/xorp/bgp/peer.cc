@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.79 2004/06/10 22:40:31 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.80 2004/09/21 23:13:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -80,9 +80,9 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 {
     if (main()->profile().enabled(profile_message_in))
 	main()->profile().log(profile_message_in,
-			      c_format("message on %s len %d",
+			      c_format("message on %s len %u",
 				       str().c_str(),
-				       length));
+				       static_cast<uint32_t>(length)));
 	
     TIMESPENT();
 
