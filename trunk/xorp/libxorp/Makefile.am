@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.22 2004/07/13 01:53:50 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.23 2004/07/16 06:42:47 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -132,7 +132,7 @@ libxorp_a_SOURCES += utils.hh
 libxorp_a_SOURCES += vif.hh
 
 libxorp_a_SOURCES += debug.c
-libxorp_a_SOURCES += ether_compat.c
+# libxorp_a_SOURCES += ether_compat.c
 libxorp_a_SOURCES += utility.c
 libxorp_a_SOURCES += xlog.c
 
