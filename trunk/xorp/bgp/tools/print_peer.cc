@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.14 2004/12/05 08:44:03 atanu Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.15 2004/12/05 22:23:54 atanu Exp $"
 
 #include "print_peer.hh"
 
@@ -116,9 +116,9 @@ PrintPeers::get_peer_list_next_done(const XrlError& e,
     }
 	
     _count++;
-    printf("Peer %d: local %s/%d remote %s/%d\n", _count,
-	   local_ip->c_str(), *local_port,
-	   peer_ip->c_str(), *peer_port);
+    printf("Peer %u: local %s/%u remote %s/%u\n", XORP_UINT_CAST(_count),
+	   local_ip->c_str(), XORP_UINT_CAST(*local_port),
+	   peer_ip->c_str(), XORP_UINT_CAST(*peer_port));
     if (_verbose) {
 	_more = *more;
 	print_peer_verbose(*local_ip, *local_port, 
@@ -329,7 +329,7 @@ PrintPeers::time_units(uint32_t secs) const {
     if (secs == 1)
 	s = "1 second";
     else
-	s = c_format("%d seconds", secs);
+	s = c_format("%u seconds", XORP_UINT_CAST(secs));
     return s;
 }
 
@@ -381,22 +381,23 @@ PrintPeers::do_verbose_peer_print()
     }
 
     if (_peer_state == 6)
-	printf("  Negotiated BGP Version: %d\n", _negotiated_version);
+	printf("  Negotiated BGP Version: %d\n",
+	       XORP_INT_CAST(_negotiated_version));
     else
 	printf("  Negotiated BGP Version: n/a\n");
-    printf("  Peer AS Number: %d\n", _peer_as);
-    printf("  Updates Received: %d,  Updates Sent: %d\n",
-	   _in_updates, _out_updates);
-    printf("  Messages Received: %d,  Messages Sent: %d\n",
-	   _in_msgs, _out_msgs);
+    printf("  Peer AS Number: %u\n", XORP_UINT_CAST(_peer_as));
+    printf("  Updates Received: %u,  Updates Sent: %u\n",
+	   XORP_UINT_CAST(_in_updates), XORP_UINT_CAST(_out_updates));
+    printf("  Messages Received: %u,  Messages Sent: %u\n",
+	   XORP_UINT_CAST(_in_msgs), XORP_UINT_CAST(_out_msgs));
     if (_in_updates > 0) {
 	printf("  Time since last received update: %s\n",
 	       time_units(_in_update_elapsed).c_str());
     } else {
 	printf("  Time since last received update: n/a\n");
     }
-    printf("  Number of transitions to ESTABLISHED: %d\n",
-	   _transitions);
+    printf("  Number of transitions to ESTABLISHED: %u\n",
+	   XORP_UINT_CAST(_transitions));
     if (_peer_state == 6) {
 	printf("  Time since last entering ESTABLISHED state: %s\n",
 	       time_units(_established_time).c_str());
