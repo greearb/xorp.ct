@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.2 2003/02/25 01:38:49 pavlin Exp $"
 
 
 //
@@ -501,7 +501,14 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
 	    // Put the RP information
 	    //
 	    PUT_ENCODED_UNICAST_ADDR(family(), bsr_rp->rp_addr(), buffer);
-	    BUFFER_PUT_HOST_16(bsr_rp->rp_holdtime(), buffer);
+	    // If this is canceling Bootstrap message, set the Holdtime
+	    // to zero for my RP addresses.
+	    if (bsr_zone.is_cancel()
+		&& (pim_node().is_my_addr(bsr_rp->rp_addr()))) {
+		BUFFER_PUT_HOST_16(0, buffer);
+	    } else {
+		BUFFER_PUT_HOST_16(bsr_rp->rp_holdtime(), buffer);
+	    }
 	    BUFFER_PUT_OCTET(bsr_rp->rp_priority(), buffer);
 	    BUFFER_PUT_OCTET(0, buffer);		// Reserved
 	}
