@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.17 2003/12/08 20:20:36 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.18 2003/12/10 22:21:32 pavlin Exp $"
 
 
 //
@@ -501,11 +501,15 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
     }
     
     VifAddr* node_vif_addr = mld6igmp_vif->find_address(addr);
+
+    if ((node_vif_addr != NULL) && (*node_vif_addr == vif_addr))
+	return (XORP_OK);		// Already have this address
+
+    // XXX: stop the vif if some of its addresses will change
+    mld6igmp_vif->stop();
     
     if (node_vif_addr != NULL) {
 	// Update the address
-	if (*node_vif_addr == vif_addr)
-	    return (XORP_OK);		// Already have this address
 	XLOG_INFO("Updated existing address on vif %s: old is %s new is %s",
 		  mld6igmp_vif->name().c_str(), node_vif_addr->str().c_str(),
 		  vif_addr.str().c_str());
@@ -542,7 +546,10 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
-    
+
+    // XXX: stop the vif if some of its addresses will change
+    mld6igmp_vif->stop();
+
     VifAddr vif_addr = *tmp_vif_addr;	// Get a copy
     if (mld6igmp_vif->delete_address(addr) != XORP_OK) {
 	XLOG_UNREACHABLE();
