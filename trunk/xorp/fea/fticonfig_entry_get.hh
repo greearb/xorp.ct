@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.8 2003/10/13 23:32:40 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.9 2003/10/21 02:04:53 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -94,11 +94,38 @@ public:
      */
     virtual bool lookup_entry6(const IPv6Net& dst, Fte6& fte) = 0;
 
-    int sock(int family);
-    
-protected:
+    /**
+     * Parse information about routing entry information received from
+     * the underlying system.
+     * 
+     * The information to parse is in RTM format
+     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
+     * 
+     * @param fte the Fte storage to store the parsed information.
+     * @param buf the buffer with the data to parse.
+     * @param buf_bytes buf_bytes the size of the data in the buffer.
+     * @return true on success, otherwise false.
+     * @see FteX.
+     */
     bool parse_buffer_rtm(FteX& fte, const uint8_t *buf, size_t buf_bytes);
+
+    /**
+     * Parse information about routing entry information received from
+     * the underlying system.
+     * 
+     * The information to parse is in NETLINK format
+     * (e.g., obtained by netlink(7) sockets mechanism).
+     * 
+     * @param fte the Fte storage to store the parsed information.
+     * @param buf the buffer with the data to parse.
+     * @param buf_bytes buf_bytes the size of the data in the buffer.
+     * @return true on success, otherwise false.
+     * @see FteX.
+     */
     bool parse_buffer_nlm(FteX& fte, const uint8_t *buf, size_t buf_bytes);
+
+protected:
+    int sock(int family);
     
     int	_s4;
     int _s6;
