@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.3 2003/05/05 21:56:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.4 2003/05/10 00:06:38 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -22,21 +22,28 @@
 #include "libxorp/xlog.h"
 #include "libxipc/xrl_std_router.hh"
 
-#if 0	// TODO: XXX: PAVPAVPAV: to be added later
 #include "cli/xrl_cli_node.hh"
-#endif
 
 #include "fticonfig.hh"
 #include "ifmanager.hh"
 #include "ifconfig.hh"
 #include "xrl_ifupdate.hh"
-#if 0	// TODO: XXX: PAVPAVPAV: to be added later
 #include "xrl_mfea_node.hh"
-#endif
 #include "xrl_target.hh"
 
 static const char* xrl_entity = "fea";
+static bool is_dummy = false;		// XXX: set to true if fea_dummy
 
+/**
+ * Print the program usage.
+ * 
+ * If @param exit_value is 0, the usage will be printed to the standart
+ * output, otherwise to the standart error.
+ * 
+ * @param argv0 argument 0 when the program is called (the program name
+ * itself).
+ * @param exit_value the exit value of the program.
+ */
 static void
 usage(const char *argv0, int exit_value)
 {
@@ -86,6 +93,8 @@ fea_main(const char* finder_hostname)
     // 1. FtiConfig
     //
     FtiConfig fticonfig(eventloop);
+    if (is_dummy)
+	fticonfig.set_dummy();
     fticonfig.start();
     
     //
@@ -95,6 +104,8 @@ fea_main(const char* finder_hostname)
     IfConfigErrorReporter iferr;
     
     IfConfig ifconfig(eventloop, ifreporter, iferr);
+    if (is_dummy)
+	ifconfig.set_dummy();
     ifconfig.start();
     
     //
@@ -112,7 +123,6 @@ fea_main(const char* finder_hostname)
     XrlFeaTarget xrl_tgt(eventloop, xrl_std_router_fea, fticonfig, ifm,
 			 ifreporter, 0);
     
-#if 0	// TODO: XXX: PAVPAVPAV: to be added later
     //
     // CLI (for debug purpose)
     //
@@ -120,6 +130,7 @@ fea_main(const char* finder_hostname)
     CliNode cli_node4(AF_INET, XORP_MODULE_CLI, eventloop);
     cli_node4.set_cli_port(12000);
     XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name());
+    XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
     
     //
     //  MFEA node
@@ -134,7 +145,6 @@ fea_main(const char* finder_hostname)
 						       XORP_MODULE_MFEA));
     XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA, eventloop,
 			       &xrl_std_router_mfea6);
-#endif // 0
     
     //
     // Main loop

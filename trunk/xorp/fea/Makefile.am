@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.9 2003/05/08 22:38:05 hodson Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.10 2003/05/10 00:06:38 pavlin Exp $
 ##
 
 
@@ -25,19 +25,49 @@ noinst_LIBRARIES	 = libfea.a
 # -- Program Sources
 
 fea_SOURCES		= fea.cc
-fea_LDADD		= ./libfea.a
-fea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
+fea_LDADD		= $(noinst_LIBRARIES)
+### FEA XRL libraries
 fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
+fea_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
+### MFEA XRL libraries
+fea_LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
+fea_LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
+fea_LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.a
+### MRT libraries
+fea_LDADD		+= $(top_builddir)/mrt/libmrt.a
+### CLI libraries
+fea_LDADD		+= $(top_builddir)/cli/libcli.a
+fea_LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
+fea_LDADD		+= -lcurses
+fea_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
+fea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
+### XORP misc libraries
+fea_LDADD		+= $(top_builddir)/libproto/libproto.a
 fea_LDADD		+= $(top_builddir)/libxipc/libxipc.a
 fea_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 fea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 fea_dummy_SOURCES	= fea_dummy.cc
-fea_dummy_LDADD		= ./libfea.a
-fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
+fea_dummy_LDADD		=  $(noinst_LIBRARIES)
+### FEA XRL libraries
 fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
+fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
+### MFEA XRL libraries
+fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
+fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
+fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.a
+### MRT libraries
+fea_dummy_LDADD		+= $(top_builddir)/mrt/libmrt.a
+### CLI libraries
+fea_dummy_LDADD		+= $(top_builddir)/cli/libcli.a
+fea_dummy_LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
+fea_dummy_LDADD		+= -lcurses
+fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
+fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
+### XORP misc libraries
+fea_dummy_LDADD		+= $(top_builddir)/libproto/libproto.a
 fea_dummy_LDADD		+= $(top_builddir)/libxipc/libxipc.a
 fea_dummy_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 fea_dummy_LDADD		+= $(top_builddir)/libxorp/libxorp.a
@@ -52,6 +82,7 @@ test_rawsock4_LDADD	 = $(top_builddir)/libxorp/libxorp.a
 # -- Library Sources
 
 libfea_a_SOURCES	 = fea_module.h
+libfea_a_SOURCES	+= mfea_module.h
 libfea_a_SOURCES	+= fte.hh
 libfea_a_SOURCES	+= fti.hh
 # libfea_a_SOURCES	+= fti_dummy.hh
@@ -71,6 +102,14 @@ libfea_a_SOURCES	+= ifmanager.hh
 libfea_a_SOURCES	+= ifmanager_transaction.hh
 libfea_a_SOURCES	+= iftree.hh
 libfea_a_SOURCES	+= kernel_utils.hh
+libfea_a_SOURCES	+= mfea_dataflow.hh
+libfea_a_SOURCES	+= mfea_kernel_messages.hh
+libfea_a_SOURCES	+= mfea_mrouter.hh
+libfea_a_SOURCES	+= mfea_node.hh
+libfea_a_SOURCES	+= mfea_node_cli.hh
+libfea_a_SOURCES	+= mfea_osdep.hh
+libfea_a_SOURCES	+= mfea_proto_comm.hh
+libfea_a_SOURCES	+= mfea_vif.hh
 libfea_a_SOURCES	+= netlink_socket.hh
 libfea_a_SOURCES	+= netlink_socket_utils.hh
 libfea_a_SOURCES	+= rawsock4.hh
@@ -79,6 +118,7 @@ libfea_a_SOURCES	+= routing_socket_utils.hh
 libfea_a_SOURCES	+= xrl_fti.hh
 libfea_a_SOURCES	+= xrl_ifmanager.hh
 libfea_a_SOURCES	+= xrl_ifupdate.hh
+libfea_a_SOURCES	+= xrl_mfea_node.hh
 libfea_a_SOURCES	+= xrl_rawsock4.hh
 libfea_a_SOURCES	+= xrl_target.hh
 
@@ -126,6 +166,13 @@ libfea_a_SOURCES	+= ifconfig_set_dummy.cc
 libfea_a_SOURCES	+= ifconfig_set_ioctl.cc
 libfea_a_SOURCES	+= ifmanager_transaction.cc
 libfea_a_SOURCES	+= iftree.cc
+libfea_a_SOURCES	+= mfea_config.cc
+libfea_a_SOURCES	+= mfea_dataflow.cc
+libfea_a_SOURCES	+= mfea_mrouter.cc
+libfea_a_SOURCES	+= mfea_node.cc
+libfea_a_SOURCES	+= mfea_node_cli.cc
+libfea_a_SOURCES	+= mfea_proto_comm.cc
+libfea_a_SOURCES	+= mfea_vif.cc
 libfea_a_SOURCES	+= netlink_socket.cc
 libfea_a_SOURCES	+= netlink_socket_utils.cc
 libfea_a_SOURCES	+= rawsock4.cc
@@ -134,6 +181,7 @@ libfea_a_SOURCES	+= routing_socket_utils.cc
 libfea_a_SOURCES	+= xrl_fti.cc
 libfea_a_SOURCES	+= xrl_ifmanager.cc
 libfea_a_SOURCES	+= xrl_ifupdate.cc
+libfea_a_SOURCES	+= xrl_mfea_node.cc
 libfea_a_SOURCES	+= xrl_rawsock4.cc
 libfea_a_SOURCES	+= xrl_target.cc
 
