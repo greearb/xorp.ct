@@ -40,3 +40,7 @@ o Arrange to have triggered updates go out of all RIP Port instances
 o Add horizon checks to tools/rip_announcer.cc and
   tools/ripng_announcer.cc for packets they receive.  This is icing on
   the cake.
+
+o Move RIP packet handling to FEA.  ie rather than do remote sockets,
+  have an entity in the FEA that is smart about RIP.  It can do
+  appropriate filtering and cut out a fraction of DOS attacks.
