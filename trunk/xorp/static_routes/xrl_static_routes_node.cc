@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.29 2005/03/10 01:13:44 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.30 2005/03/15 00:35:47 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -965,8 +965,10 @@ XrlStaticRoutesNode::common_0_1_get_status(
 XrlCmdError
 XrlStaticRoutesNode::common_0_1_shutdown()
 {
+    string error_msg;
+
     if (shutdown() != true) {
-	string error_msg = c_format("Failed to shutdown StaticRoutes");
+	error_msg = c_format("Failed to shutdown StaticRoutes");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
