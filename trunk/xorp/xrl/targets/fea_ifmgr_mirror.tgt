@@ -1,0 +1,6 @@
+/* $XORP: xorp/xrl/targets/fea.tgt,v 1.4 2003/08/08 18:17:11 hodson Exp $ */
+
+#include "common.xif"
+#include "fea_ifmgr_client2.xif"
+
+target fea_ifmgr_mirror implements common/0.1, fea_ifmgr_client/0.5

@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.14 2003/07/31 19:17:41 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.15 2003/08/08 18:17:10 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -18,6 +18,7 @@ tgt_files		+= cli.tgt
 tgt_files		+= coord.tgt
 tgt_files		+= demo_fea_ifmgr_client.tgt
 tgt_files		+= fea.tgt
+tgt_files		+= fea_ifmgr_mirror.tgt
 tgt_files		+= finder.tgt
 tgt_files		+= finder_client.tgt
 tgt_files		+= mfea.tgt
@@ -49,6 +50,7 @@ noinst_LIBRARIES	+= libclibase.a
 noinst_LIBRARIES	+= libcoordbase.a
 noinst_LIBRARIES	+= libdemofeaifmgrclientbase.a
 noinst_LIBRARIES	+= libfeabase.a
+noinst_LIBRARIES	+= libfeaifmgrmirrorbase.a
 noinst_LIBRARIES	+= libfinderbase.a
 noinst_LIBRARIES	+= libfinderclientbase.a
 noinst_LIBRARIES	+= libmfeabase.a
@@ -105,6 +107,13 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
 		$(INTERFACES_DIR)/fti.xif				\
 		$(INTERFACES_DIR)/fea_rawpkt.xif
+
+# FEA IfMgr Mirror
+libfeaifmgrmirrorbase_a_SOURCES = fea_ifmgr_mirror_base.hh		\
+				  fea_ifmgr_mirror_base.cc
+$(srcdir)/fea_ifmgr_mirror_base.hh $(srcdir)/fea_ifmgr_mirror_base.cc:	\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fea_ifmgr_client2.xif
 
 #
 # Finder
