@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie.hh,v 1.9 2003/09/11 08:19:15 atanu Exp $
+// $XORP: xorp/bgp/harness/trie.hh,v 1.10 2003/09/11 11:56:18 atanu Exp $
 
 #ifndef __BGP_HARNESS_TRIE_HH__
 #define __BGP_HARNESS_TRIE_HH__
 
 #include <stdio.h>
 #include "libxorp/timeval.hh"
+#include "libxorp/callback.hh"
 #include "bgp/packet.hh"
 #include "trie_payload.hh"
 #include "real_trie.hh"
