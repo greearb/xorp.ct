@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.10 2003/10/23 16:54:06 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.11 2003/12/30 02:39:49 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -234,13 +234,13 @@ public:
 
     inline const V4Map&	ipv4addrs() const		{ return _v4addrs; }
     inline V4Map&	ipv4addrs() 			{ return _v4addrs; }
-    inline const IfMgrIPv4Atom*	find_addr(const IPv4& a) const;
-    inline IfMgrIPv4Atom*	find_addr(const IPv4& a);
+    const IfMgrIPv4Atom* find_addr(const IPv4& a) const;
+    IfMgrIPv4Atom*	find_addr(const IPv4& a);
 
     inline const V6Map&	ipv6addrs() const		{ return _v6addrs; }
     inline V6Map&	ipv6addrs() 			{ return _v6addrs; }
-    inline const IfMgrIPv6Atom*	find_addr(const IPv6& a) const;
-    inline IfMgrIPv6Atom*	find_addr(const IPv6& a);
+    const IfMgrIPv6Atom* find_addr(const IPv6& a) const;
+    IfMgrIPv6Atom*	find_addr(const IPv6& a);
 
     bool 		operator==(const IfMgrVifAtom& o) const;
 
@@ -358,6 +358,38 @@ protected:
     bool	_p2p;		// _oaddr refers to a point-to-point address
 
     IPv6	_oaddr;
+};
+
+
+/**
+ * Class specialized to provide a way to find IfMgrIPv{4,6}Atom given
+ * IPv{4,6} type.  This is useful for code that is solely interested
+ * in common attributes and methods of IfMgrIPv4Atom and IfMgrIPv6Atom.
+ *
+ * Example usage:
+ * <pre>
+ * template <typename A>
+ * bool addr_exists_and_enabled(IfMgrVifAtom& vif, const A& a)
+ * {
+ *     const typename IfMgrIP<A>::Atom* a = vif.find_addr(a);
+ *     return a != 0 && a->enabled();
+ * }
+ * </pre>
+ */
+template <typename A>
+struct IfMgrIP
+{};
+
+template <>
+struct IfMgrIP<IPv4>
+{
+    typedef IfMgrIPv4Atom Atom;
+};
+
+template <>
+struct IfMgrIP<IPv6>
+{
+    typedef IfMgrIPv6Atom Atom;
 };
 
 
