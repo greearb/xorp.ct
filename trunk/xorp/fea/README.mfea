@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.1 2003/06/03 21:58:06 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.2 2003/06/05 08:28:29 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -83,10 +83,11 @@ it for each router:
  - After MFEA is started, if you want to access its internal
    information, you can use the built-in CLI:
      telnet localhost 12000
-   If you want to enable access from other subnets, add the corresponding
-   subnet to the following variable:
 
-	CLI_ENABLE_SUBNETS="127.0.0.1/32"
+ - If you want to enable access from other subnets, add the corresponding
+   subnet to the following variable in ``configure_mfea'':
+
+	CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
 
 
    Currently, the CLI supports primarily "show" commands. For example,
@@ -119,7 +120,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (note: June 6, 2003), the MFEA supports abstraction for
+Currently (June 6, 2003), the MFEA supports abstraction for
 the following systems:
 
  * {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5 and FreeBSD-4.7).
