@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.2 2003/05/14 01:13:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.3 2003/05/20 17:26:37 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -84,6 +84,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	//
 	do {
 	    if_index = 0;
+#ifdef AF_LINK
 	    if ((ifa->ifa_addr != NULL)
 		&& (ifa->ifa_addr->sa_family == AF_LINK)) {
 		// Link-level address
@@ -92,6 +93,8 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    }
 	    if (if_index > 0)
 		break;
+#endif // AF_LINK
+	    
 #ifdef HAVE_IF_NAMETOINDEX
 	    // TODO: check whether for Solaris we have to use the
 	    // original interface name instead (i.e., the one that has
@@ -101,6 +104,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    if (if_index > 0)
 		break;
 #endif // HAVE_IF_NAMETOINDEX
+	    
 #ifdef SIOCGIFINDEX
 	    {
 		int s;
@@ -124,6 +128,8 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    if (if_index > 0)
 		break;
 #endif // SIOCGIFINDEX
+	    
+	    break;
 	} while (false);
 	if (if_index == 0) {
 	    // TODO: what to do? Shall I assign my own pseudo-indexes?
@@ -141,6 +147,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	//
 	// Get the MAC address
 	//
+#ifdef AF_LINK
 	if ((ifa->ifa_addr != NULL)
 	    && (ifa->ifa_addr->sa_family == AF_LINK)) {
 	    // Link-level address
@@ -156,10 +163,12 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 		}
 	    }
 	}
+#endif // AF_LINK
 	
 	//
 	// Get the MTU
 	//
+#ifdef AF_LINK
 	if ((ifa->ifa_addr != NULL)
 	    && (ifa->ifa_addr->sa_family == AF_LINK)) {
 	    int mtu = 0;
@@ -174,6 +183,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 		fi.set_mtu(mtu);		
 	    }
 	}
+#endif // AF_LINK
 	
 	//
 	// Get the flags
