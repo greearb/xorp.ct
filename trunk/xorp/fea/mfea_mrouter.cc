@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.26 2005/03/11 22:17:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.27 2005/03/15 01:17:50 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -173,12 +173,12 @@ MfeaMrouter::~MfeaMrouter()
 int
 MfeaMrouter::start()
 {
-    if (is_up() || is_pending_up())
-	return (XORP_OK);
-
     // XXX: MfeaMrouter is automatically enabled by default
     ProtoUnit::enable();
     
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
     
