@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.20 2004/11/12 00:47:36 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.21 2004/12/08 01:41:19 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -303,7 +303,7 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 	    break;		// XXX: ignore the MAC setup
 
 	if (is_primary() && (new_mac == pulled_mac))
-	    break;		// Ignore: the MTU hasn't changed
+	    break;		// Ignore: the MAC hasn't changed
 	
 	if (is_primary()
 	    && (ii != ifc().pulled_config().ifs().end())
