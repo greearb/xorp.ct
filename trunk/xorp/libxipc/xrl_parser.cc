@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.5 2003/03/10 23:20:27 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.6 2003/11/06 03:00:31 pavlin Exp $"
 
 #include <stdio.h>
 
@@ -490,7 +490,7 @@ bool
 XrlParser::parse_atoms_and_spells(XrlArgs* args,
 				  list<XrlAtomSpell>* spells)
 {
-    assert(_pos <= _input.end());
+    assert(_pos < _input.end());
     skip_comments_and_blanks(_input, _pos);
     while (_pos != _input.end() && !iscrlf(*_pos) && !xorp_isspace(*_pos)) {
 	assert(_pos < _input.end());
@@ -595,10 +595,16 @@ XrlParser::get(string& protocol, string& target, string& command,
     get_protocol_target_and_command(_input, _pos, protocol, target, command);
     skip_comments_and_blanks(_input, _pos);
 
+    if (_pos == _input.end()) {
+	return true;
+    }
     if (*_pos == '?') {
 	_pos++;
+	if (_pos == _input.end()) {
+	    throw XrlParseError(_input, _pos,
+				"Expected to find atom or spell");
+	}
 	parse_atoms_and_spells(args, spells);
-	return true;
     }
 
     return true;
