@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.3 2003/01/26 04:06:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.4 2003/03/10 23:20:16 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -68,10 +68,10 @@ RawSocket4::write(const uint8_t* buf, size_t nbytes) const
 
     const struct ip* hdr = reinterpret_cast<const struct ip*>(buf);
     if (hdr->ip_hl < 5) {
-	XLOG_ERROR("bad header length %d\n", hdr->ip_hl);
+	XLOG_ERROR("bad header length %d", hdr->ip_hl);
 	return -1;
     } else if (hdr->ip_v != 4) {
-	XLOG_ERROR("bad ip version %d\n", hdr->ip_v);
+	XLOG_ERROR("bad ip version %d", hdr->ip_v);
 	return -1;
     }
 

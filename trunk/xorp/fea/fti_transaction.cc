@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_transaction.cc,v 1.3 2003/03/10 23:20:14 hodson Exp $"
+#ident "$XORP: xorp/fea/fti_transaction.cc,v 1.4 2003/05/02 07:50:43 pavlin Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -57,7 +57,7 @@ FtiTransactionManager::operation_result(bool success,
     // Record error and xlog first error only
     //
     if (set_unset_error(fto->str())) {
-	XLOG_ERROR("FTI transaction commit failed on %s\n",
+	XLOG_ERROR("FTI transaction commit failed on %s",
 		   fto->str().c_str());
     }
 }
