@@ -530,6 +530,36 @@ class LinkStateRequestPacket : public Packet {
     list<Ls_request> _ls_request;
 };
 
+/**
+ * Link State Upate Packet
+ */
+class LinkStateUpdatePacket : public Packet {
+ public:
+    LinkStateUpdatePacket(OspfTypes::Version version)
+	: Packet(version)
+    {}
+
+    OspfTypes::Type get_type() const { return 4; }
+
+    Packet *decode(uint8_t *ptr, size_t len) const throw(BadPacket);
+
+    /**
+     * Encode the packet.
+     *
+     * @param pkt vector into which the packet should be placed.
+     * @return true if the encoding succeeded.
+     */
+    bool encode(vector<uint8_t>& pkt);
+    
+    /**
+     * Generate a printable representation of the packet.
+     */
+    string str() const;
+    
+ private:
+    list<Lsa::LsaRef> _lsas;
+};
+
 inline
 uint16_t
 extract_16(uint8_t *ptr)
