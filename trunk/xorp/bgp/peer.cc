@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.88 2005/03/11 02:01:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.89 2005/03/11 06:57:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1342,6 +1342,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	// address of our peer
 	// if so, we'd discard the route, but not send a notification
 
+#if	0
 	if (ibgp() && !local_pref)
 	    XLOG_WARNING("%s Update packet from ibgp with no LOCAL_PREF",
 			 this->str().c_str());
@@ -1349,7 +1350,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	if (!ibgp() && local_pref)
 	    XLOG_WARNING("%s Update packet from ebgp with LOCAL_PREF",
 			 this->str().c_str());
-
+#endif
 	// XXX Check Network layer reachability fields
 
     }
