@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.3 2003/05/19 23:34:32 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.4 2003/05/20 00:20:26 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_VIF_MANAGER_HH__
 #define __FEA_XRL_MFEA_VIF_MANAGER_HH__
@@ -188,6 +188,14 @@ private:
     void xrl_result_get_all_vif_names(const XrlError& e,
 				      const XrlAtomList *alist,
 				      string ifname);
+    void xrl_result_get_all_vif_flags(const XrlError& e,
+				      const bool* enabled,
+				      const bool* broadcast,
+				      const bool* loopback,
+				      const bool* point_to_point,
+				      const bool* multicast,
+				      string ifname,
+				      string vifname);
     void xrl_result_get_all_vif_addresses4(const XrlError& e,
 					   const XrlAtomList *alist,
 					   string ifname,

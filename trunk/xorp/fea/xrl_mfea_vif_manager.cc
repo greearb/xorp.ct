@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.5 2003/05/20 00:20:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.6 2003/05/20 00:43:38 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -351,14 +351,27 @@ XrlMfeaVifManager::xrl_result_get_all_vif_names(
     _interfaces_remaining--;
     
     if (e == XrlError::OKAY()) {
+	//
+	// Spin through all the Vifs on this interface, and fire
+	// off requests in parallel to get the flags and all the addresses
+	// on each Vif.
+	//
 	for (size_t i = 0; i < alist->size(); i++) {
-	    //
-	    // Spin through all the Vifs on this interface, and fire
-	    // off requests in parallel for all the addresses on each Vif.
-	    //
 	    XrlAtom atom = alist->get(i);
 	    string vifname = atom.text();
 	    vif_created(ifname, vifname);
+	    
+	    {
+		// Get the vif flags
+		XorpCallback6<void, const XrlError&, const bool*, const bool*,
+		    const bool*, const bool*, const bool*>::RefPtr cb;
+		cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_vif_flags,
+			      ifname, vifname);
+		_ifmgr_client.send_get_all_vif_flags(_fea_target_name.c_str(),
+						     ifname, vifname, cb);
+		_vifs_remaining++;
+	    }
+	    
 	    XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
 	    switch (family()) {
 	    case AF_INET:
@@ -399,6 +412,58 @@ XrlMfeaVifManager::xrl_result_get_all_vif_names(
     // Permanent error
     _state = FAILED;
     XLOG_ERROR("Get VIF Names: Permanent Error");
+}
+
+void
+XrlMfeaVifManager::xrl_result_get_all_vif_flags(const XrlError& e,
+						const bool* enabled,
+						const bool* broadcast,
+						const bool* loopback,
+						const bool* point_to_point,
+						const bool* multicast,
+						string ifname,
+						string vifname)
+{
+    if (_vifs_remaining == 0) {
+	// Unexpected response
+	XLOG_WARNING("Received unexpected XRL response for "
+		     "get_all_vif_flags for interface %s, vif %s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+    
+    _vifs_remaining--;
+    
+    if (e == XrlError::OKAY()) {
+	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
+	    // silently ignore - the vif could have been deleted while we
+	    // were waiting for the answer.
+	    update_state();
+	    return;
+	}
+	Vif* vif = _vifs_by_name[vifname];
+	debug_msg("setting flags for vif %s\n",
+		  vifname.c_str());
+	vif->set_underlying_vif_up(*enabled);
+	vif->set_broadcast_capable(*broadcast);
+	vif->set_loopback(*loopback);
+	vif->set_p2p(*point_to_point);
+	vif->set_multicast_capable(*multicast);
+	
+	update_state();
+	return;
+    }
+    
+    if (e == XrlError::COMMAND_FAILED()) {
+	// perhaps the vif went away
+	update_state();
+	return;
+    }
+    
+    // Permanent error
+    _state = FAILED;
+    XLOG_ERROR("Failed to get flags for vif %s: Permanent Error",
+	       vifname.c_str());
 }
 
 void
@@ -544,7 +609,9 @@ XrlMfeaVifManager::vifaddr4_update(const string& ifname,
 	vifaddr4_deleted(ifname, vifname, addr);
 	break;
     case IF_EVENT_CHANGED:
-	// FALLTHROUGH
+	// XXX: force query address-related info
+	vifaddr4_created(ifname, vifname, addr);
+	break;
     default:
 	XLOG_WARNING("vifaddr4_update invalid event: %u", event);
 	break;
@@ -565,7 +632,9 @@ XrlMfeaVifManager::vifaddr6_update(const string& ifname,
 	vifaddr6_deleted(ifname, vifname, addr);
 	break;
     case IF_EVENT_CHANGED:
-	// FALLTHROUGH
+	// XXX: force query address-related info
+	vifaddr6_created(ifname, vifname, addr);
+	break;
     default:
 	XLOG_WARNING("vifaddr6_update invalid event: %u", event);
 	break;
