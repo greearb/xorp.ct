@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_observer_rs.cc,v 1.1 2003/05/02 07:50:45 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -21,22 +21,22 @@
 #include "libxorp/debug.h"
 
 #include "fticonfig.hh"
-#include "fticonfig_entry_observer.hh"
+#include "fticonfig_table_observer.hh"
 
 
 //
-// Observe single-entry information change about the unicast forwarding table.
+// Observe whole-table information change about the unicast forwarding table.
 //
 // E.g., if the forwarding table has changed, then the information
-// received by the observer would specify the particular entry that
+// received by the observer would NOT specify the particular entry that
 // has changed.
 //
 // The mechanism to set the information is routing sockets.
 //
 
 
-FtiConfigEntryObserverRs::FtiConfigEntryObserverRs(FtiConfig& ftic)
-    : FtiConfigEntryObserver(ftic),
+FtiConfigTableObserverRtsock::FtiConfigTableObserverRtsock(FtiConfig& ftic)
+    : FtiConfigTableObserver(ftic),
       RoutingSocket(ftic.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
@@ -45,25 +45,25 @@ FtiConfigEntryObserverRs::FtiConfigEntryObserverRs(FtiConfig& ftic)
 #endif
 }
 
-FtiConfigEntryObserverRs::~FtiConfigEntryObserverRs()
+FtiConfigTableObserverRtsock::~FtiConfigTableObserverRtsock()
 {
     stop();
 }
 
 int
-FtiConfigEntryObserverRs::start()
+FtiConfigTableObserverRtsock::start()
 {
     return (RoutingSocket::start());
 }
     
 int
-FtiConfigEntryObserverRs::stop()
+FtiConfigTableObserverRtsock::stop()
 {
     return (RoutingSocket::stop());
 }
 
 void
-FtiConfigEntryObserverRs::rtsock_data(const uint8_t* data, size_t nbytes)
+FtiConfigTableObserverRtsock::rtsock_data(const uint8_t* data, size_t nbytes)
 {
-    ftic().ftic_entry_get().receive_data(data, nbytes);
+    ftic().ftic_table_get().receive_data(data, nbytes);
 }

@@ -12,58 +12,54 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
-
+#ident "$XORP: xorp/fea/ifconfig_observer_rs.cc,v 1.1 2003/05/02 07:50:47 pavlin Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "fticonfig.hh"
-#include "fticonfig_table_observer.hh"
+#include "ifconfig.hh"
+#include "ifconfig_observer.hh"
 
 
 //
-// Observe whole-table information change about the unicast forwarding table.
+// Observe information change about network interface configuration from
+// the underlying system.
 //
-// E.g., if the forwarding table has changed, then the information
-// received by the observer would NOT specify the particular entry that
-// has changed.
-//
-// The mechanism to set the information is routing sockets.
+// The mechanism to observe the information change is routing sockets.
 //
 
 
-FtiConfigTableObserverRs::FtiConfigTableObserverRs(FtiConfig& ftic)
-    : FtiConfigTableObserver(ftic),
-      RoutingSocket(ftic.eventloop()),
+IfConfigObserverRtsock::IfConfigObserverRtsock(IfConfig& ifc)
+    : IfConfigObserver(ifc),
+      RoutingSocket(ifc.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_ftic();
+    register_ifc();
 #endif
 }
 
-FtiConfigTableObserverRs::~FtiConfigTableObserverRs()
+IfConfigObserverRtsock::~IfConfigObserverRtsock()
 {
     stop();
 }
 
 int
-FtiConfigTableObserverRs::start()
+IfConfigObserverRtsock::start()
 {
     return (RoutingSocket::start());
 }
-    
+
 int
-FtiConfigTableObserverRs::stop()
+IfConfigObserverRtsock::stop()
 {
     return (RoutingSocket::stop());
 }
 
 void
-FtiConfigTableObserverRs::rtsock_data(const uint8_t* data, size_t nbytes)
+IfConfigObserverRtsock::rtsock_data(const uint8_t* data, size_t nbytes)
 {
-    ftic().ftic_table_get().receive_data(data, nbytes);
+    ifc().ifc_get().receive_data(data, nbytes);
 }

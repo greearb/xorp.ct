@@ -12,54 +12,58 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_observer_rs.cc,v 1.1 2003/05/02 07:50:44 pavlin Exp $"
+
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "ifconfig.hh"
-#include "ifconfig_observer.hh"
+#include "fticonfig.hh"
+#include "fticonfig_entry_observer.hh"
 
 
 //
-// Observe information change about network interface configuration from
-// the underlying system.
+// Observe single-entry information change about the unicast forwarding table.
 //
-// The mechanism to observe the information change is routing sockets.
+// E.g., if the forwarding table has changed, then the information
+// received by the observer would specify the particular entry that
+// has changed.
+//
+// The mechanism to set the information is routing sockets.
 //
 
 
-IfConfigObserverRs::IfConfigObserverRs(IfConfig& ifc)
-    : IfConfigObserver(ifc),
-      RoutingSocket(ifc.eventloop()),
+FtiConfigEntryObserverRtsock::FtiConfigEntryObserverRtsock(FtiConfig& ftic)
+    : FtiConfigEntryObserver(ftic),
+      RoutingSocket(ftic.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_ifc();
+    register_ftic();
 #endif
 }
 
-IfConfigObserverRs::~IfConfigObserverRs()
+FtiConfigEntryObserverRtsock::~FtiConfigEntryObserverRtsock()
 {
-    
+    stop();
 }
 
 int
-IfConfigObserverRs::start()
+FtiConfigEntryObserverRtsock::start()
 {
     return (RoutingSocket::start());
 }
-
+    
 int
-IfConfigObserverRs::stop()
+FtiConfigEntryObserverRtsock::stop()
 {
     return (RoutingSocket::stop());
 }
 
 void
-IfConfigObserverRs::rtsock_data(const uint8_t* data, size_t nbytes)
+FtiConfigEntryObserverRtsock::rtsock_data(const uint8_t* data, size_t nbytes)
 {
-    ifc().ifc_get().receive_data(data, nbytes);
+    ftic().ftic_entry_get().receive_data(data, nbytes);
 }

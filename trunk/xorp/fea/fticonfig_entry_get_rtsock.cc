@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rs.cc,v 1.1 2003/05/02 07:50:43 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -33,7 +33,7 @@
 //
 
 
-FtiConfigEntryGetRs::FtiConfigEntryGetRs(FtiConfig& ftic)
+FtiConfigEntryGetRtsock::FtiConfigEntryGetRtsock(FtiConfig& ftic)
     : FtiConfigEntryGet(ftic),
       RoutingSocket(ftic.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this),
@@ -45,25 +45,25 @@ FtiConfigEntryGetRs::FtiConfigEntryGetRs(FtiConfig& ftic)
 #endif
 }
 
-FtiConfigEntryGetRs::~FtiConfigEntryGetRs()
+FtiConfigEntryGetRtsock::~FtiConfigEntryGetRtsock()
 {
     stop();
 }
 
 int
-FtiConfigEntryGetRs::start()
+FtiConfigEntryGetRtsock::start()
 {
     return (RoutingSocket::start());
 }
     
 int
-FtiConfigEntryGetRs::stop()
+FtiConfigEntryGetRtsock::stop()
 {
     return (RoutingSocket::stop());
 }
 
 void
-FtiConfigEntryGetRs::receive_data(const uint8_t* data, size_t n_bytes)
+FtiConfigEntryGetRtsock::receive_data(const uint8_t* data, size_t n_bytes)
 {
     // TODO: use it?
     UNUSED(data);
@@ -79,7 +79,7 @@ FtiConfigEntryGetRs::receive_data(const uint8_t* data, size_t n_bytes)
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfigEntryGetRs::lookup_route4(const IPv4& dst, Fte4& fte)
+FtiConfigEntryGetRtsock::lookup_route4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
     int ret_value = XORP_ERROR;
@@ -102,7 +102,7 @@ FtiConfigEntryGetRs::lookup_route4(const IPv4& dst, Fte4& fte)
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfigEntryGetRs::lookup_entry4(const IPv4Net& dst, Fte4& fte)
+FtiConfigEntryGetRtsock::lookup_entry4(const IPv4Net& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
     int ret_value = XORP_ERROR;
@@ -125,7 +125,7 @@ FtiConfigEntryGetRs::lookup_entry4(const IPv4Net& dst, Fte4& fte)
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfigEntryGetRs::lookup_route6(const IPv6& dst, Fte6& fte)
+FtiConfigEntryGetRtsock::lookup_route6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
     int ret_value = XORP_ERROR;
@@ -148,7 +148,7 @@ FtiConfigEntryGetRs::lookup_route6(const IPv6& dst, Fte6& fte)
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfigEntryGetRs::lookup_entry6(const IPv6Net& dst, Fte6& fte)
+FtiConfigEntryGetRtsock::lookup_entry6(const IPv6Net& dst, Fte6& fte)
 { 
     FteX ftex(dst.af());
     int ret_value = XORP_ERROR;
@@ -164,18 +164,18 @@ FtiConfigEntryGetRs::lookup_entry6(const IPv6Net& dst, Fte6& fte)
 
 #ifndef HAVE_ROUTING_SOCKETS
 int
-FtiConfigEntryGetRs::lookup_route(const IPvX& , FteX& )
+FtiConfigEntryGetRtsock::lookup_route(const IPvX& , FteX& )
 {
     return (XORP_ERROR);
 }
 int
-FtiConfigEntryGetRs::lookup_entry(const IPvXNet& , FteX& )
+FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& , FteX& )
 {
     return (XORP_ERROR);
 }
 
 void
-FtiConfigEntryGetRs::rtsock_data(const uint8_t* , size_t )
+FtiConfigEntryGetRtsock::rtsock_data(const uint8_t* , size_t )
 {
     
 }
@@ -191,7 +191,7 @@ FtiConfigEntryGetRs::rtsock_data(const uint8_t* , size_t )
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfigEntryGetRs::lookup_route(const IPvX& dst, FteX& fte)
+FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
 {
 #define RTMBUFSIZE (sizeof(struct rt_msghdr) + 512)
     char		rtmbuf[RTMBUFSIZE];
@@ -268,7 +268,7 @@ FtiConfigEntryGetRs::lookup_route(const IPvX& dst, FteX& fte)
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfigEntryGetRs::lookup_entry(const IPvXNet& dst, FteX& fte)
+FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
 {
 #define RTMBUFSIZE (sizeof(struct rt_msghdr) + 512)
     char		rtmbuf[RTMBUFSIZE];
@@ -365,7 +365,7 @@ FtiConfigEntryGetRs::lookup_entry(const IPvXNet& dst, FteX& fte)
  * @param nbytes the number of bytes in the @param data buffer.
  */
 void
-FtiConfigEntryGetRs::rtsock_data(const uint8_t* data, size_t nbytes)
+FtiConfigEntryGetRtsock::rtsock_data(const uint8_t* data, size_t nbytes)
 {
     RoutingSocket& rs = *this;
     

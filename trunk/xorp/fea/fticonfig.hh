@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti.hh,v 1.2 2003/03/10 23:20:13 hodson Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.1 2003/05/02 07:50:43 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -253,15 +253,15 @@ private:
     // forwarding table.
     // Ordering is important: the last that is supported is the one to use.
     //
-    FtiConfigEntryGetNetlink _ftic_entry_get_netlink;
-    FtiConfigEntryGetRs      _ftic_entry_get_rs;
+    FtiConfigEntryGetNetlink	_ftic_entry_get_netlink;
+    FtiConfigEntryGetRtsock	_ftic_entry_get_rtsock;
     
     //
     // The mechanisms to set single-entry information into the unicast
     // forwarding table.
     // Ordering is important: the last that is supported is the one to use.
     //
-    FtiConfigEntrySetRs	_ftic_entry_set_rs;
+    FtiConfigEntrySetRtsock	_ftic_entry_set_rtsock;
     
     //
     // The mechanisms to observe single-entry information change about the
@@ -271,22 +271,22 @@ private:
     // has changed.
     // Ordering is important: the last that is supported is the one to use.
     //
-    FtiConfigEntryObserverRs _ftic_entry_observer_rs;
+    FtiConfigEntryObserverRtsock _ftic_entry_observer_rtsock;
 
     //
     // The mechanisms to get the whole table information from the unicast
     // forwarding table.
     // Ordering is important: the last that is supported is the one to use.
     //
-    FtiConfigTableGetNetlink _ftic_table_get_netlink;
-    FtiConfigTableGetSysctl  _ftic_table_get_sysctl;
+    FtiConfigTableGetNetlink	_ftic_table_get_netlink;
+    FtiConfigTableGetSysctl	_ftic_table_get_sysctl;
     
     //
     // The mechanisms to set the whole table information into the unicast
     // forwarding table.
     // Ordering is important: the last that is supported is the one to use.
     //
-    FtiConfigTableSetRs	_ftic_table_set_rs;
+    FtiConfigTableSetRtsock	_ftic_table_set_rtsock;
     
     //
     // The mechanisms to observe the whole-table information change about the
@@ -296,7 +296,7 @@ private:
     // has changed.
     // Ordering is important: the last that is supported is the one to use.
     //
-    FtiConfigTableObserverRs _ftic_table_observer_rs;
+    FtiConfigTableObserverRtsock _ftic_table_observer_rtsock;
 };
 
 #endif	// __FEA_FTICONFIG_HH__

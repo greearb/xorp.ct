@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rs.cc,v 1.1 2003/05/02 07:50:44 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -31,7 +31,7 @@
 //
 
 
-FtiConfigEntrySetRs::FtiConfigEntrySetRs(FtiConfig& ftic)
+FtiConfigEntrySetRtsock::FtiConfigEntrySetRtsock(FtiConfig& ftic)
     : FtiConfigEntrySet(ftic),
       RoutingSocket(ftic.eventloop())
 {
@@ -40,26 +40,26 @@ FtiConfigEntrySetRs::FtiConfigEntrySetRs(FtiConfig& ftic)
 #endif
 }
 
-FtiConfigEntrySetRs::~FtiConfigEntrySetRs()
+FtiConfigEntrySetRtsock::~FtiConfigEntrySetRtsock()
 {
     stop();
 }
 
 int
-FtiConfigEntrySetRs::start()
+FtiConfigEntrySetRtsock::start()
 {
     return (RoutingSocket::start());
 }
     
 int
-FtiConfigEntrySetRs::stop()
+FtiConfigEntrySetRtsock::stop()
 {
     return (RoutingSocket::stop());
 }
 
 
 int
-FtiConfigEntrySetRs::add_entry4(const Fte4& fte)
+FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance());
@@ -68,7 +68,7 @@ FtiConfigEntrySetRs::add_entry4(const Fte4& fte)
 }
 
 int
-FtiConfigEntrySetRs::delete_entry4(const Fte4& fte)
+FtiConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance());
@@ -77,7 +77,7 @@ FtiConfigEntrySetRs::delete_entry4(const Fte4& fte)
 }
 
 int
-FtiConfigEntrySetRs::add_entry6(const Fte6& fte)
+FtiConfigEntrySetRtsock::add_entry6(const Fte6& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance());
@@ -86,7 +86,7 @@ FtiConfigEntrySetRs::add_entry6(const Fte6& fte)
 }
 
 int
-FtiConfigEntrySetRs::delete_entry6(const Fte6& fte)
+FtiConfigEntrySetRtsock::delete_entry6(const Fte6& fte)
 {
     FteX ftex(IPvXNet(fte.net()), IPvX(fte.gateway()), fte.ifname(),
 	      fte.vifname(), fte.metric(), fte.admin_distance());
@@ -96,20 +96,20 @@ FtiConfigEntrySetRs::delete_entry6(const Fte6& fte)
 
 #ifndef HAVE_ROUTING_SOCKETS
 int
-FtiConfigEntrySetRs::add_entry(const FteX& )
+FtiConfigEntrySetRtsock::add_entry(const FteX& )
 {
     return (XORP_ERROR);
 }
 
 int
-FtiConfigEntrySetRs::delete_entry(const FteX& )
+FtiConfigEntrySetRtsock::delete_entry(const FteX& )
 {
     return (XORP_ERROR);
 }
 
 #else // HAVE_ROUTING_SOCKETS
 int
-FtiConfigEntrySetRs::add_entry(const FteX& fte)
+FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 {
 #define RTMBUFSIZE (sizeof(struct rt_msghdr) + 512)
     char		rtmbuf[RTMBUFSIZE];
@@ -180,7 +180,7 @@ FtiConfigEntrySetRs::add_entry(const FteX& fte)
 }
 
 int
-FtiConfigEntrySetRs::delete_entry(const FteX& fte)
+FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 {
 #define RTMBUFSIZE (sizeof(struct rt_msghdr) + 512)
     char		rtmbuf[RTMBUFSIZE];

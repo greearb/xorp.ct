@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.2 2003/03/10 23:20:15 hodson Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.1 2003/05/02 07:50:43 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -115,12 +115,12 @@ private:
     FtiConfig&	_ftic;
 };
 
-class FtiConfigEntryGetRs : public FtiConfigEntryGet,
-			    public RoutingSocket,
-			    public RoutingSocketObserver {
+class FtiConfigEntryGetRtsock : public FtiConfigEntryGet,
+				public RoutingSocket,
+				public RoutingSocketObserver {
 public:
-    FtiConfigEntryGetRs(FtiConfig& ftic);
-    virtual ~FtiConfigEntryGetRs();
+    FtiConfigEntryGetRtsock(FtiConfig& ftic);
+    virtual ~FtiConfigEntryGetRtsock();
 
     /**
      * Start operation.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_rtsock.cc,v 1.5 2003/03/10 23:20:15 hodson Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_rs.cc,v 1.1 2003/05/02 07:50:45 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -31,7 +31,7 @@
 //
 
 
-FtiConfigTableSetRs::FtiConfigTableSetRs(FtiConfig& ftic)
+FtiConfigTableSetRtsock::FtiConfigTableSetRtsock(FtiConfig& ftic)
     : FtiConfigTableSet(ftic),
       RoutingSocket(ftic.eventloop())
 {
@@ -40,25 +40,25 @@ FtiConfigTableSetRs::FtiConfigTableSetRs(FtiConfig& ftic)
 #endif
 }
 
-FtiConfigTableSetRs::~FtiConfigTableSetRs()
+FtiConfigTableSetRtsock::~FtiConfigTableSetRtsock()
 {
     stop();
 }
 
 int
-FtiConfigTableSetRs::start()
+FtiConfigTableSetRtsock::start()
 {
     return (RoutingSocket::start());
 }
     
 int
-FtiConfigTableSetRs::stop()
+FtiConfigTableSetRtsock::stop()
 {
     return (RoutingSocket::stop());
 }
 
 int
-FtiConfigTableSetRs::set_table4(const list<Fte4>& fte_list)
+FtiConfigTableSetRtsock::set_table4(const list<Fte4>& fte_list)
 {
     list<Fte4>::const_iterator iter;
 
@@ -72,7 +72,7 @@ FtiConfigTableSetRs::set_table4(const list<Fte4>& fte_list)
 }
 
 int
-FtiConfigTableSetRs::delete_all_entries4()
+FtiConfigTableSetRtsock::delete_all_entries4()
 {
     list<Fte4> fte_list;
     list<Fte4>::const_iterator iter;
@@ -90,7 +90,7 @@ FtiConfigTableSetRs::delete_all_entries4()
 }
 
 int
-FtiConfigTableSetRs::set_table6(const list<Fte6>& fte_list)
+FtiConfigTableSetRtsock::set_table6(const list<Fte6>& fte_list)
 {
     list<Fte6>::const_iterator iter;
     
@@ -104,7 +104,7 @@ FtiConfigTableSetRs::set_table6(const list<Fte6>& fte_list)
 }
     
 int
-FtiConfigTableSetRs::delete_all_entries6()
+FtiConfigTableSetRtsock::delete_all_entries6()
 {
     list<Fte6> fte_list;
     list<Fte6>::const_iterator iter;

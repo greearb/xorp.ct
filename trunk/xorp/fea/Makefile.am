@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.3 2003/03/31 16:10:15 hodson Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.5 2003/05/02 07:50:41 pavlin Exp $
 ##
 
 
@@ -76,30 +76,30 @@ libfea_a_SOURCES	+= xrl_target.hh
 libfea_a_SOURCES	+= fti_transaction.cc
 libfea_a_SOURCES	+= fticonfig.cc
 libfea_a_SOURCES	+= fticonfig_entry_get.cc
-libfea_a_SOURCES	+= fticonfig_entry_get_rs.cc
 libfea_a_SOURCES	+= fticonfig_entry_get_netlink.cc
+libfea_a_SOURCES	+= fticonfig_entry_get_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_entry_observer.cc
-libfea_a_SOURCES	+= fticonfig_entry_observer_rs.cc
+libfea_a_SOURCES	+= fticonfig_entry_observer_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_entry_parse_nlm.cc
 libfea_a_SOURCES	+= fticonfig_entry_parse_rtm.cc
 libfea_a_SOURCES	+= fticonfig_entry_set.cc
-libfea_a_SOURCES	+= fticonfig_entry_set_rs.cc
+libfea_a_SOURCES	+= fticonfig_entry_set_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_table_get.cc
 libfea_a_SOURCES	+= fticonfig_table_get_netlink.cc
 libfea_a_SOURCES	+= fticonfig_table_get_sysctl.cc
 libfea_a_SOURCES	+= fticonfig_table_observer.cc
-libfea_a_SOURCES	+= fticonfig_table_observer_rs.cc
+libfea_a_SOURCES	+= fticonfig_table_observer_rtsock.cc
 libfea_a_SOURCES	+= fticonfig_table_parse_nlm.cc
 libfea_a_SOURCES	+= fticonfig_table_parse_rtm.cc
 libfea_a_SOURCES	+= fticonfig_table_set.cc
-libfea_a_SOURCES	+= fticonfig_table_set_rs.cc
+libfea_a_SOURCES	+= fticonfig_table_set_rtsock.cc
 libfea_a_SOURCES	+= ifconfig.cc
 libfea_a_SOURCES	+= ifconfig_get.cc
 libfea_a_SOURCES	+= ifconfig_get_getifaddrs.cc
 libfea_a_SOURCES	+= ifconfig_get_ioctl.cc
 libfea_a_SOURCES	+= ifconfig_get_sysctl.cc
 libfea_a_SOURCES	+= ifconfig_observer.cc
-libfea_a_SOURCES	+= ifconfig_observer_rs.cc
+libfea_a_SOURCES	+= ifconfig_observer_rtsock.cc
 libfea_a_SOURCES	+= ifconfig_parse_ifaddrs.cc
 libfea_a_SOURCES	+= ifconfig_parse_ifreq.cc
 libfea_a_SOURCES	+= ifconfig_parse_rtm.cc
