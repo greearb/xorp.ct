@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/time_slice.cc,v 1.3 2003/03/30 03:50:43 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/time_slice.cc,v 1.4 2003/04/02 02:53:51 pavlin Exp $"
 
 
 //
@@ -50,7 +50,7 @@ TimeSlice::TimeSlice(uint32_t usec_limit, size_t test_iter_frequency)
     : _test_iter_frequency(test_iter_frequency),
       _remain_iter(test_iter_frequency)
 {
-    _time_slice_limit.set(0, usec_limit);
+    _time_slice_limit = TimeVal(0, usec_limit);
     TimerList::system_gettimeofday(&_time_slice_start);
 }
 
