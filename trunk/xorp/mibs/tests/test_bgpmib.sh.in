@@ -212,7 +212,7 @@ then
     ${BGP_BUILDDIR}/bgp = $CXRL finder://bgp/common/0.1/get_target_name
     ${BGP_BUILDDIR}/harness/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
     ${BGP_BUILDDIR}/harness/coord = $CXRL finder://coord/common/0.1/get_target_name
-    ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -c ${SNMPDCONF} -r ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status
+    ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -C -c ${SNMPDCONF} -r ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status
 EOF
     trap '' 0
     exit $?
