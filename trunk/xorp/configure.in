@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.56 2003/07/31 22:30:24 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.57 2003/08/01 23:38:56 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -929,6 +929,25 @@ main()
   [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
+
+dnl ------------------------------------
+dnl Check for Linux /proc filesystem
+dnl ------------------------------------
+AC_MSG_CHECKING(for /proc filesystem on Linux)
+case "${host_os}" in
+    linux* )
+    if test -d /proc; then
+       AC_DEFINE(HAVE_PROC_LINUX, 1, 
+	    [Define to 1 if Linux /proc filesystem exists])
+       AC_MSG_RESULT(yes)
+    else
+       AC_MSG_RESULT(no)
+    fi
+;;
+    * )
+       AC_MSG_RESULT(no)
+;;
+esac
 
 dnl ------------------------------------
 dnl Check for netlink sockets (AF_NETLINK)
