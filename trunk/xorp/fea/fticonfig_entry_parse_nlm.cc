@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_nlm.cc,v 1.6 2003/10/21 02:00:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_nlm.cc,v 1.7 2004/03/17 07:25:39 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -118,7 +118,7 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const uint8_t* buf,
 	    if (rtmsg->rtm_type == RTN_BROADCAST)
 		break;		// XXX: ignore broadcast entries
 	    
-	    return (NlmUtils::nlm_get_to_fte_cfg(fte, rtmsg, rta_len));
+	    return (NlmUtils::nlm_get_to_fte_cfg(fte, nlh, rtmsg, rta_len));
 	}
 	break;
 	

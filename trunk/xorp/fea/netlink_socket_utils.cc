@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.8 2003/10/12 22:15:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.9 2003/10/13 23:32:41 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -160,17 +160,23 @@ NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
 }
 
 bool
-NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
+NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
+			     const struct rtmsg* rtmsg, int rta_len)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[RTA_MAX + 1];
     int if_index;
     string if_name;
     int family = fte.gateway().af();
+    bool is_deleted = false;
     
     // Reset the result
     fte.zero();
     
+    // Test if this entry was deleted
+    if (nlh->nlmsg_type == RTM_DELROUTE)
+	is_deleted = true;
+
     IPvX gateway_addr(family);
     IPvX dst_addr(family);
     int dst_mask_len = 0;
@@ -278,6 +284,8 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg, int rta_len)
 
     fte = FteX(IPvXNet(dst_addr, dst_mask_len), gateway_addr, if_name, if_name,
 	       route_metric, admin_distance, xorp_route);
+    if (is_deleted)
+	fte.mark_deleted();
     
     return true;
 }

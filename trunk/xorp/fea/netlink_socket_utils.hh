@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.6 2003/10/13 23:32:41 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.7 2003/10/24 00:02:23 hodson Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
@@ -63,11 +63,13 @@ public:
      * Extract the routing information from netlink message.
      * 
      * @param fte the return-by-reference @ref FteX entry to return the result.
-     * @param nlm the netlink message.
+     * @param nlh the netlink message header.
+     * @param rtmsg the routing message.
+     * @param rta_len the routing message payload.
      * @return true on success, otherwise false.
      */
-    static bool	nlm_get_to_fte_cfg(FteX& fte, const struct rtmsg* rtmsg,
-				   int rta_len);
+    static bool	nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
+				   const struct rtmsg* rtmsg, int rta_len);
 
     /**
      * Check that a previous netlink request has succeeded.
