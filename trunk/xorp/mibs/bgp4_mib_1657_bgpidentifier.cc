@@ -91,11 +91,11 @@ get_bgpIdentifier(netsnmp_mib_handler * handler,
 {
     DEBUGMSGTL((BgpMib::the_instance().name(), "get_bgpIdentifier called\n"));
     BgpMib& bgp_mib = BgpMib::the_instance();
-    BgpMib::GetBgpidCB cb_id;
+    BgpMib::GetBgpIdCB cb_id;
     netsnmp_delegated_cache* req_cache = netsnmp_create_delegated_cache
 	(handler, reginfo, reqinfo, requests, NULL);
     cb_id = callback(get_bgp_id_done, req_cache);
-    bgp_mib.send_get_bgpid("bgp", cb_id); 
+    bgp_mib.send_get_bgp_id("bgp", cb_id);
 
     requests->delegated = 1;
     return SNMP_ERR_NOERROR;

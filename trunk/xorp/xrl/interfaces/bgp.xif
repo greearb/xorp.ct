@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.10 2003/07/25 02:12:24 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.11 2003/08/06 23:48:07 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -40,12 +40,12 @@ interface bgp/0.2 {
 	 * @param id our BGP ID.
 	 */
 
-	set_bgpid ? id:ipv4
+	set_bgp_id ? id:ipv4
 
 	/**
 	 *  Get the BGP id.
 	 */
-	get_bgpid -> id:ipv4
+	get_bgp_id -> id:ipv4
 
 	/** 
 	 * Add peer.

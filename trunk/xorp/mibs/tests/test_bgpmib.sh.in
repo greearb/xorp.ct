@@ -20,7 +20,7 @@
 #
 set -e
 
-# to debug 
+# to debug
 # set -x
 
 
@@ -47,7 +47,7 @@ configure_snmp()
     echo 'rwcommunity xorp' > ${SNMPDCONF}
     echo "dlmod xorp_if_mib_module "					\
 	 "${XORP_TOP_BUILDDIR}/mibs/xorp_if_mib_module.so"		\
-	    >> ${SNMPDCONF} 
+	    >> ${SNMPDCONF}
     LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${XORP_TOP_BUILDDIR}/mibs
     export LD_LIBRARY_PATH
     MIBDIRS=+`(cd ${srcdir}/../textual; pwd)`
@@ -68,8 +68,8 @@ onexit()
     last=$?
     if [ ${last} -eq 0 ] ; then
 	echo "$0: Tests Succeeded"
-	
-        # Cleanup only on success	
+
+        # Cleanup only on success
 	rm -f bgpPeerTable?.tmp bgp4PathAttrTable?.tmp snmp*.log
     else
 	echo "$0: Tests Failed"
@@ -79,11 +79,11 @@ onexit()
 
     # Unload MIB if not unloaded yet
     if [ "X${BGP_MIB_IDX}" != "X" ]; then
-	
+
 	${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
 	BGP_MIB_IDX=""
     fi
- 
+
     ${CALLXRL} "finder://xorp_if_mib/common/0.1/shutdown"
 
 }
@@ -202,7 +202,7 @@ test1()
  
     echo "${bgp_local_as}"
 
-    ${CALLXRL} "finder://bgp/bgp/0.2/set_bgpid?id:ipv4=${ID}"
+    ${CALLXRL} "finder://bgp/bgp/0.2/set_bgp_id?id:ipv4=${ID}"
 
     echo -n getting the BGP identifier...
     bgp_id=`snmpget ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpIdentifier.0 | \

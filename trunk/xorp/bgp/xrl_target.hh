@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.14 2003/06/17 06:44:17 atanu Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.15 2003/07/25 02:12:24 atanu Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -65,13 +65,13 @@ public:
 				     // Output values, 
 				     uint32_t& as);
 
-    XrlCmdError bgp_0_2_set_bgpid(
+    XrlCmdError bgp_0_2_set_bgp_id(
 	// Input values, 
 	const IPv4&	id);
 
-    XrlCmdError bgp_0_2_get_bgpid(
-				  // Output values, 
-				  IPv4& id);
+    XrlCmdError bgp_0_2_get_bgp_id(
+				   // Output values, 
+				   IPv4& id);
 
     XrlCmdError bgp_0_2_add_peer(
 	// Input values, 
@@ -337,7 +337,7 @@ private:
     /**
      * Waiting for BGP id
      */
-    bool _awaiting_bgpid;
+    bool _awaiting_bgp_id;
     /**
      * BGP id.
      */

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.17 2003/06/20 21:44:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.18 2003/07/25 02:12:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,7 +33,7 @@ XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
 	  _bgp(bgp),
 	  _awaiting_config(true),
 	  _awaiting_as(true),
-	  _awaiting_bgpid(true),
+	  _awaiting_bgp_id(true),
 	  _done(false)
 {
 }
@@ -105,7 +105,7 @@ XrlBgpTarget::bgp_0_2_set_local_as(
 
     _as = as;
     _awaiting_as = false;
-    if(!_awaiting_as && !_awaiting_bgpid) {
+    if(!_awaiting_as && !_awaiting_bgp_id) {
 	_bgp.local_config(_as, _id);
 	_awaiting_config = false;	
     }
@@ -125,21 +125,21 @@ XrlBgpTarget::bgp_0_2_get_local_as(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_set_bgpid(
-				// Input values, 
-				const IPv4&	id)
+XrlBgpTarget::bgp_0_2_set_bgp_id(
+				 // Input values, 
+				 const IPv4&	id)
 {
     debug_msg("id %s\n", id.str().c_str());
 
     /*
     ** We may already be configured so don't allow a reconfiguration.
     */
-    if(!_awaiting_bgpid)
+    if(!_awaiting_bgp_id)
 	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP ID");
 
     _id = id;
-    _awaiting_bgpid = false;
-    if(!_awaiting_as && !_awaiting_bgpid) {
+    _awaiting_bgp_id = false;
+    if(!_awaiting_as && !_awaiting_bgp_id) {
 	_bgp.local_config(_as, _id);
 	_awaiting_config = false;	
     }
@@ -148,11 +148,11 @@ XrlBgpTarget::bgp_0_2_set_bgpid(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_bgpid(
-				// Output values, 
-				IPv4& id) 
+XrlBgpTarget::bgp_0_2_get_bgp_id(
+				 // Output values, 
+				 IPv4& id) 
 {
-    if(_awaiting_bgpid)
+    if(_awaiting_bgp_id)
 	return XrlCmdError::COMMAND_FAILED("BGP ID not yet configured");
     id = _id;
     return XrlCmdError::OKAY();
