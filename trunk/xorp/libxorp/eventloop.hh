@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.6 2003/03/28 12:37:20 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.7 2003/04/02 02:53:50 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -31,6 +31,11 @@
  */
 class EventLoop {
 public:
+    /**
+     * Constructor
+     */
+    EventLoop() {}
+    
     /**
      * Invoke all pending callbacks relating to XorpTimer and file
      * descriptor activity.  This function may block if there are no
@@ -247,6 +252,10 @@ public:
      */
     inline void current_time(TimeVal& now) const;
 
+private:
+    EventLoop(const EventLoop&);		// not implemented
+    EventLoop& operator=(const EventLoop&);	// not implemented
+    
 private:
     TimerList    _timer_list;
     SelectorList _selector_list;
