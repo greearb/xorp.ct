@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.22 2003/05/31 07:03:33 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.23 2003/05/31 17:53:38 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -242,20 +242,15 @@ protected:
      *  Delete an existing vif.
      *  
      *  @param vif_name the name of the vif to delete.
-     *  
-     *  @param vif_index the index of the vif to delete.
      */
     XrlCmdError mfea_client_0_1_delete_vif(
 	// Input values, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index);
+	const string&	vif_name);
 
     /**
      *  Add an address to a vif.
      *  
      *  @param vif_name the name of the vif.
-     *  
-     *  @param vif_index the index of the vif.
      *  
      *  @param addr the unicast address to add.
      *  
@@ -268,7 +263,6 @@ protected:
     XrlCmdError mfea_client_0_1_add_vif_addr4(
 	// Input values, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
 	const IPv4&	addr, 
 	const IPv4Net&	subnet, 
 	const IPv4&	broadcast, 
@@ -277,7 +271,6 @@ protected:
     XrlCmdError mfea_client_0_1_add_vif_addr6(
 	// Input values, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
 	const IPv6&	addr, 
 	const IPv6Net&	subnet, 
 	const IPv6&	broadcast, 
@@ -288,28 +281,22 @@ protected:
      *  
      *  @param vif_name the name of the vif.
      *  
-     *  @param vif_index the index of the vif.
-     *  
      *  @param addr the unicast address to delete.
      */
     XrlCmdError mfea_client_0_1_delete_vif_addr4(
 	// Input values, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
 	const IPv4&	addr);
     
     XrlCmdError mfea_client_0_1_delete_vif_addr6(
 	// Input values, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
 	const IPv6&	addr);
 
     /**
      *  Set flags to a vif.
      *  
      *  @param vif_name the name of the vif.
-     *  
-     *  @param vif_index the index of the vif.
      *  
      *  @param is_pim_register true if this is a PIM Register vif.
      *  
@@ -326,7 +313,6 @@ protected:
     XrlCmdError mfea_client_0_1_set_vif_flags(
 	// Input values, 
 	const string&	vif_name, 
-	const uint32_t&	vif_index, 
 	const bool&	is_pim_register, 
 	const bool&	is_p2p, 
 	const bool&	is_loopback, 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.19 2003/05/31 06:45:21 pavlin Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.20 2003/05/31 16:16:39 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -770,7 +770,6 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	    XrlMfeaClientV0p1Client::send_add_vif_addr4(
 		xrl_sender_name.c_str(),
 		mfea_vif->name(),
-		mfea_vif->vif_index(),
 		vif_addr.addr().get_ipv4(),
 		vif_addr.subnet_addr().get_ipv4net(),
 		vif_addr.broadcast_addr().get_ipv4(),
@@ -780,7 +779,6 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	XrlMfeaClientV0p1Client::send_set_vif_flags(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
-	    mfea_vif->vif_index(),
 	    mfea_vif->is_pim_register(),
 	    mfea_vif->is_p2p(),
 	    mfea_vif->is_loopback(),
@@ -866,7 +864,6 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	    XrlMfeaClientV0p1Client::send_add_vif_addr6(
 		xrl_sender_name.c_str(),
 		mfea_vif->name(),
-		mfea_vif->vif_index(),
 		vif_addr.addr().get_ipv6(),
 		vif_addr.subnet_addr().get_ipv6net(),
 		vif_addr.broadcast_addr().get_ipv6(),
@@ -876,7 +873,6 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	XrlMfeaClientV0p1Client::send_set_vif_flags(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
-	    mfea_vif->vif_index(),
 	    mfea_vif->is_pim_register(),
 	    mfea_vif->is_p2p(),
 	    mfea_vif->is_loopback(),

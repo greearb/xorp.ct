@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.14 2003/05/31 06:45:57 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.15 2003/05/31 16:16:25 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -776,14 +776,13 @@ XrlMld6igmpNode::mfea_client_0_1_new_vif(
 XrlCmdError
 XrlMld6igmpNode::mfea_client_0_1_delete_vif(
     // Input values, 
-    const string&	vif_name, 
-    const uint32_t&	vif_index)
+    const string&	vif_name)
 {
     string err;
     
     if (Mld6igmpNode::delete_vif(vif_name, err) != XORP_OK) {
-	string msg = c_format("Failed to delete vif %s with vif_index = %d: %s",
-			      vif_name.c_str(), vif_index, err.c_str());
+	string msg = c_format("Failed to delete vif %s: %s",
+			      vif_name.c_str(), err.c_str());
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
@@ -794,7 +793,6 @@ XrlCmdError
 XrlMld6igmpNode::mfea_client_0_1_add_vif_addr4(
     // Input values, 
     const string&	vif_name, 
-    const uint32_t&	, // vif_index, 
     const IPv4&		addr, 
     const IPv4Net&	subnet, 
     const IPv4&		broadcast, 
@@ -821,7 +819,6 @@ XrlCmdError
 XrlMld6igmpNode::mfea_client_0_1_add_vif_addr6(
     // Input values, 
     const string&	vif_name, 
-    const uint32_t&	, // vif_index, 
     const IPv6&		addr, 
     const IPv6Net&	subnet, 
     const IPv6&		broadcast, 
@@ -848,7 +845,6 @@ XrlCmdError
 XrlMld6igmpNode::mfea_client_0_1_delete_vif_addr4(
     // Input values, 
     const string&	vif_name, 
-    const uint32_t&	, // vif_index, 
     const IPv4&		addr)
 {
     string err;
@@ -869,7 +865,6 @@ XrlCmdError
 XrlMld6igmpNode::mfea_client_0_1_delete_vif_addr6(
     // Input values, 
     const string&	vif_name, 
-    const uint32_t&	, // vif_index, 
     const IPv6&		addr)
 {
     string err;
@@ -890,7 +885,6 @@ XrlCmdError
 XrlMld6igmpNode::mfea_client_0_1_set_vif_flags(
     // Input values, 
     const string&	vif_name, 
-    const uint32_t&	, // vif_index, 
     const bool&		is_pim_register, 
     const bool&		is_p2p, 
     const bool&		is_loopback, 
