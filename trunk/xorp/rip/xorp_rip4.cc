@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip4.cc,v 1.2 2004/01/09 00:29:03 hodson Exp $"
+#ident "$XORP: xorp/rip/xorp_rip4.cc,v 1.3 2004/01/13 20:43:09 hodson Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -160,7 +160,7 @@ rip_main(const string& finder_host, uint16_t finder_port)
 	System<IPv4> 	     rip_system(e);
 	XrlStdRouter 	     xsr(e, "rip4", finder_host.c_str(), finder_port);
 	XrlProcessSpy	     xps(xsr);
-	IfMgrXrlMirror	     ixm(e);
+	IfMgrXrlMirror	     ixm(e, "fea");
 	XrlPortManager<IPv4> xpm(rip_system, xsr, ixm);
 
 	bool stop_requested(false);
