@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.5 2003/09/11 03:42:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.6 2003/09/11 03:50:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -201,9 +201,10 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     add_nlri<A>(bgpupdate, net);
 
     /*
-    ** Add an origin and a next hop to keep it legal.
+    ** Add an origin, aspath and next hop to keep it legal.
     */
     bgpupdate->add_pathatt(OriginAttribute(IGP));
+    bgpupdate->add_pathatt(ASPathAttribute(AsPath("1,2,3")));
     add_nexthop<A>(bgpupdate, nexthop);
 
     /*
