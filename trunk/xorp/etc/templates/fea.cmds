@@ -1,3 +1,5 @@
+/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+
 show interface $(interfaces.interface.*) {
 	%command: rtrmgr/tools/show_interfaces;
 	%module: fea;

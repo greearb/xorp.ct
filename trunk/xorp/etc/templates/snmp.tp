@@ -1,3 +1,5 @@
+/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+
 protocols {
   snmp {
     targetname: text = "xorp_if_mib";
@@ -7,7 +9,6 @@ protocols {
     }
   }
 }
-
 
 protocols {
   snmp {
@@ -27,12 +28,12 @@ protocols {
 	%set: local;
 	%get: local;
 	%delete: local;
-        }
+      }
       mib-index {
 	%set: local;
 	%get: local;
 	%delete: local;
-	}
+      }
     }
   }
 }

@@ -1,10 +1,12 @@
+/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+
 interfaces {
   interface fxp0 {
     description: "control interface"
     vif fxp0 {
       address 192.150.187.100 {
-        prefix-length: 24
-        broadcast: 192.150.187.255
+	prefix-length: 24
+	broadcast: 192.150.187.255
       }
     }
   }
@@ -36,5 +38,3 @@ protocols {
     }
   }
 }
-
-

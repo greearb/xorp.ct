@@ -1,3 +1,5 @@
+/* $XORP: xorp/etc/templates/fea.tp,v 1.15 2003/11/17 00:21:49 pavlin Exp $ */
+
 /* router config file for tinderbox test on xorp8 */ 
 
 /* please don't modify this file for use on other machines - use the
@@ -8,8 +10,8 @@ interfaces {
     description: "control interface"
     vif rl0 {
       address 192.150.187.108 {
-        prefix-length: 25
-        broadcast: 192.150.187.255
+	prefix-length: 25
+	broadcast: 192.150.187.255
       }
     }
   }
@@ -54,5 +56,3 @@ protocols {
   }
 }
 */
-
-
