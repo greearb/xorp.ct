@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/firewall_ipfw.cc,v 1.1 2004/08/31 17:47:28 bms Exp $
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
@@ -47,8 +47,8 @@
 //
 
 IpfwFwProvider::IpfwFwProvider(FirewallManager& m)
-    : _m(m),
     throw(InvalidFwProvider)
+    : FwProvider(m)
 {
 #ifdef HAVE_FIREWALL_IPFW
 	// Attempt to probe for IPFW with an operation which doesn't
