@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.11 2003/09/16 01:15:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.12 2003/09/23 03:35:38 pavlin Exp $"
 
 
 //
@@ -724,8 +724,8 @@ MfeaMrouter::stop_mrt()
 		       v, strerror(errno));
 	    return (XORP_ERROR);
 	}
-    }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
+    }
     break;
 #endif // HAVE_IPV6
     default:
