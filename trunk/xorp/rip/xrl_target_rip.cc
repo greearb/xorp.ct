@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -34,10 +35,11 @@ XrlRipTarget::XrlRipTarget(EventLoop&			el,
 			   XrlProcessSpy&		xps,
 			   XrlPortManager<IPv4>& 	xpm,
 			   XrlRedistManager<IPv4>&	xrm,
-			   bool&			should_exit)
+			   bool&			should_exit,
+			   System<IPv4>&		rip_system)
     : XrlRipTargetBase(&xr), _e(el)
 {
-    _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, xrm, should_exit);
+    _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, xrm, should_exit,rip_system);
 }
 
 XrlRipTarget::~XrlRipTarget()
@@ -626,3 +628,41 @@ XrlRipTarget::socket4_user_0_1_close_event(const string&	sockid,
     return _ct->socketx_user_0_1_close_event(sockid, reason);
 }
 
+XrlCmdError
+XrlRipTarget::policy_backend_0_1_configure(const uint32_t& filter,
+					   const string& conf) 
+{
+    return _ct->policy_backend_0_1_configure(filter,conf);
+}					   
+
+XrlCmdError
+XrlRipTarget::policy_backend_0_1_reset(const uint32_t& filter) 
+{
+    return _ct->policy_backend_0_1_reset(filter);
+}					  
+
+XrlCmdError
+XrlRipTarget::policy_backend_0_1_push_routes() 
+{
+    return _ct->policy_backend_0_1_push_routes();
+}
+
+XrlCmdError 
+XrlRipTarget::policy_redist4_0_1_add_route4(const IPv4Net&	network,
+					    const bool&		unicast,
+				            const bool&		multicast,
+				            const IPv4&		nexthop,
+				            const uint32_t&	metric,
+    				            const XrlAtomList&  policytags) 
+{
+    return _ct->policy_redistx_0_1_add_routex(network,unicast,multicast,nexthop,
+					      metric, policytags);
+}
+
+XrlCmdError 
+XrlRipTarget::policy_redist4_0_1_delete_route4(const IPv4Net&  network,
+					       const bool&     unicast,
+					       const bool&     multicast)
+{					       
+    return _ct->policy_redistx_0_1_delete_routex(network,unicast,multicast);
+}

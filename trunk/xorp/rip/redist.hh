@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/redist.hh,v 1.2 2004/05/03 23:11:58 hodson Exp $
+// $XORP: xorp/rip/redist.hh,v 1.3 2004/06/10 22:41:45 hodson Exp $
 
 #ifndef __RIP_ROUTE_REDIST_HH__
 #define __RIP_ROUTE_REDIST_HH__
@@ -89,27 +90,31 @@ public:
      *
      * @param net network described by route.
      * @param nexthop router capable of forwarding route.
+     * @param policytags policy-tags associated with route
      *
      * @return true on success, false if route could not be added to
      *         the RouteDatabase.  Failure may occur if route already exists
      *	       or a lower cost route exists.
      */
-    bool add_route(const Net& net, const Addr& nexthop);
+    bool add_route(const Net& net, const Addr& nexthop,
+		   const PolicyTags& policytags);
 
     /**
      * Add a route to be redistributed with specific cost and tag values.
      *
      * @param net network described by route.
      * @param nexthop router capable of forwarding route.
+     * @param policytags policy-tags associated with route
      *
      * @return true on success, false if route could not be added to
      *         the RouteDatabase.  Failure may occur if route already exists
      *	       or a lower cost route exists.
      */
-    bool add_route(const Net&	net,
-		   const Addr&	nexthop,
-		   uint16_t	cost,
-		   uint16_t	tag);
+    bool add_route(const Net&	     net,
+		   const Addr&	     nexthop,
+		   uint16_t	     cost,
+		   uint16_t	     tag,
+		   const PolicyTags& policytags);
 
     /**
      * Trigger route expiry.

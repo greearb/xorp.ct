@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8: 
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_updates.cc,v 1.8 2004/04/02 00:27:56 mjh Exp $"
+#ident "$XORP: xorp/rip/output_updates.cc,v 1.9 2004/06/10 22:41:44 hodson Exp $"
 
 #include "output_updates.hh"
 #include "packet_assembly.hh"
@@ -60,7 +61,19 @@ OutputUpdates<A>::output_packet()
 	if (p.second > RIP_INFINITY)
 	    continue;
 
-	rpa.packet_add_route(r->net(), p.first, p.second, r->tag());
+	RouteEntryOrigin<A>* origin = NULL;
+	RouteEntry<A>* copy = new RouteEntry<A>(r->net(),p.first,p.second,
+						origin,r->tag(),r->policytags());
+
+	bool accepted = doFiltering(copy);
+	if(!accepted) {
+	    delete copy;
+	    continue;
+	}
+
+	rpa.packet_add_route(copy->net(), copy->nexthop(), copy->cost(), r->tag());
+
+	delete copy;
 
 	done++;
 	if (rpa.packet_full()) {

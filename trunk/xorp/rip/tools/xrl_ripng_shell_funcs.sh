@@ -64,6 +64,61 @@ ripng_finder_event_observer_xrl_target_death()
     call_xrl_wrapper -p all "${XRL}"
 }
 
+ripng_policy_backend_configure()
+{
+    if [ $# -ne 2 ] ; then
+        echo "Usage: ripng_policy_backend_configure <filter:u32> <conf:txt>"
+        exit 1
+    fi
+
+    XRL="finder://ripng/policy_backend/0.1/configure?filter:u32=$1&conf:txt=$2"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+ripng_policy_backend_reset()
+{
+    if [ $# -ne 1 ] ; then
+        echo "Usage: ripng_policy_backend_reset <filter:u32>"
+        exit 1
+    fi
+
+    XRL="finder://ripng/policy_backend/0.1/reset?filter:u32=$1"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+ripng_policy_backend_push_routes()
+{
+    if [ $# -ne 0 ] ; then
+        echo "Usage: ripng_policy_backend_push_routes"
+        exit 1
+    fi
+
+    XRL="finder://ripng/policy_backend/0.1/push_routes"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+ripng_policy_redist6_add_route6()
+{
+    if [ $# -ne 6 ] ; then
+        echo "Usage: ripng_policy_redist6_add_route6 <network:ipv6net> <unicast:bool> <multicast:bool> <nexthop:ipv6> <metric:u32> <policytags:list>"
+        exit 1
+    fi
+
+    XRL="finder://ripng/policy_redist6/0.1/add_route6?network:ipv6net=$1&unicast:bool=$2&multicast:bool=$3&nexthop:ipv6=$4&metric:u32=$5&policytags:list=$6"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+ripng_policy_redist6_delete_route6()
+{
+    if [ $# -ne 3 ] ; then
+        echo "Usage: ripng_policy_redist6_delete_route6 <network:ipv6net> <unicast:bool> <multicast:bool>"
+        exit 1
+    fi
+
+    XRL="finder://ripng/policy_redist6/0.1/delete_route6?network:ipv6net=$1&unicast:bool=$2&multicast:bool=$3"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
 ripng_redist6_add_route()
 {
     if [ $# -ne 7 ] ; then

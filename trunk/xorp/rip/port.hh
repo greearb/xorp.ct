@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8: 
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.20 2004/03/03 21:16:09 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.21 2004/06/10 22:41:45 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -158,6 +159,8 @@ public:
     Port(PortManagerBase<A>& manager);
 
     ~Port();
+
+    PortManagerBase<A>& port_manager() { return _pm; }
 
     /**
      * Set enabled state.  When a port is enabled it can perform input

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.4 2004/06/07 00:46:32 hodson Exp $"
+#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.5 2004/06/10 22:41:47 hodson Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -264,7 +264,7 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	XrlPortManager<A>	xpm(rip_system, xsr, ixm);
 	XrlRedistManager<A>	xrm(rip_system, xsr);
 
-	XrlTargetType xrlt(e, xsr, xps, xpm, xrm, _stop_flag);
+	XrlTargetType xrlt(e, xsr, xps, xpm, xrm, _stop_flag,rip_system);
 
 	wait_until_xrl_router_is_ready(e, xsr);
 

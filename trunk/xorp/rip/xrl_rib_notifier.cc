@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.8 2004/05/23 01:19:50 atanu Exp $"
+#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.9 2004/06/10 22:41:48 hodson Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -29,6 +30,7 @@
 #include "constants.hh"
 #include "xrl_config.hh"
 #include "xrl_rib_notifier.hh"
+
 
 
 // ----------------------------------------------------------------------------
@@ -57,12 +59,12 @@ struct Send {
 
     typedef bool (XrlRibV0p1Client::*AddRoute)
 	(const char*, const string&, const bool&, const bool&,
-	 const IPNet<A>&, const A&, const uint32_t&,
+	 const IPNet<A>&, const A&, const uint32_t&, const XrlAtomList&,
 	 const XrlRibV0p1Client::AddRoute6CB&);
 
     typedef bool (XrlRibV0p1Client::*ReplaceRoute)
 	(const char*, const string&, const bool&, const bool&,
-	 const IPNet<A>&, const A&, const uint32_t&,
+	 const IPNet<A>&, const A&, const uint32_t&, const XrlAtomList&,
 	 const XrlRibV0p1Client::ReplaceRoute6CB&);
 
     typedef bool (XrlRibV0p1Client::*DeleteRoute)
@@ -267,11 +269,13 @@ XrlRibNotifier<A>::send_add_route(const RouteEntry<A>& re)
 	ok = (c.*Send<A>::add_route)
 	      (xrl_rib_name(), "rip", true, false,
 	       re.net(), re.nexthop(), re.cost(),
+	       re.policytags().xrl_atomlist(),
 	       callback(this, &XrlRibNotifier<A>::send_route_cb));
     } else {
 	ok = (c.*Send<A>::replace_route)
 	      (xrl_rib_name(), "rip", true, false,
 	       re.net(), re.nexthop(), re.cost(),
+	       re.policytags().xrl_atomlist(),
 	       callback(this, &XrlRibNotifier<A>::send_route_cb));
     }
 

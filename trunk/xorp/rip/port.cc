@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.35 2004/06/10 22:41:45 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.36 2004/08/24 22:19:56 atanu Exp $"
 
 #include "rip_module.h"
 
@@ -568,7 +568,7 @@ Port<A>::kill_peer_routes()
 	for (ri = routes.begin(); ri != routes.end(); ++ri) {
 	    const RouteEntry<A>* r = *ri;
 	    rdb.update_route(r->net(), r->nexthop(), RIP_INFINITY, r->tag(),
-			     p);
+			     p,r->policytags());
 	}
 	pli++;
     }
@@ -929,7 +929,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	//
 	uint16_t tag = entries[i].tag();
 
-	rdb.update_route(net, nh, metric, tag, p);
+	rdb.update_route(net, nh, metric, tag, p, PolicyTags());
     }
 }
 
@@ -1021,7 +1021,7 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	//
 	uint16_t tag = entries[i].tag();
 
-	rdb.update_route(net, nh, metric, tag, p);
+	rdb.update_route(net, nh, metric, tag, p, PolicyTags());
     }
 
 }

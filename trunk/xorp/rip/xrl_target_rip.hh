@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.13 2004/06/10 22:41:48 hodson Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.14 2004/06/21 18:06:04 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -35,7 +36,8 @@ public:
 		 XrlProcessSpy& 		xps,
 		 XrlPortManager<IPv4>&		xpm,
 		 XrlRedistManager<IPv4>& 	xrm,
-		 bool& 				should_exit);
+		 bool& 				should_exit,
+		 System<IPv4>&			rip_system);
     ~XrlRipTarget();
 
     void set_status(ProcessStatus ps, const string& annotation = "");
@@ -318,6 +320,33 @@ public:
 
     XrlCmdError socket4_user_0_1_close_event(const string&	sockid,
 					     const string&	reason);
+
+
+    XrlCmdError policy_backend_0_1_configure(
+        // Input values,
+        const uint32_t& filter,
+        const string&   conf);
+
+    XrlCmdError policy_backend_0_1_reset(
+        // Input values,
+        const uint32_t& filter);
+
+    XrlCmdError policy_backend_0_1_push_routes();
+
+    XrlCmdError policy_redist4_0_1_add_route4(
+        // Input values,
+        const IPv4Net&  network,
+        const bool&     unicast,
+        const bool&     multicast,
+        const IPv4&     nexthop,
+        const uint32_t& metric,
+        const XrlAtomList&      policytags);
+
+    XrlCmdError policy_redist4_0_1_delete_route4(
+        // Input values,
+        const IPv4Net&  network,
+        const bool&     unicast,
+        const bool&     multicast);
 
 protected:
     EventLoop& 			_e;

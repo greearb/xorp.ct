@@ -114,11 +114,11 @@ LDADD = $(top_builddir)/libxorp/libxorp.a
 # -- Real Program Sources
 xorp_rip_CXXFLAGS = -DINSTANTIATE_IPV4
 xorp_rip_SOURCES = xorp_rip_main.cc xrl_target_common.hh xrl_target_rip.hh xrl_target_rip.cc
-xorp_rip_LDADD = ./libripxrl.a ./librip.a $(top_builddir)/xrl/targets/libripbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+xorp_rip_LDADD = ./libripxrl.a ./librip.a $(top_builddir)/xrl/targets/libripbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket4locatorxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 xorp_ripng_CXXFLAGS = -DINSTANTIATE_IPV6
 xorp_ripng_SOURCES = xorp_rip_main.cc xrl_target_common.hh xrl_target_ripng.hh xrl_target_ripng.cc
-xorp_ripng_LDADD = ./libripngxrl.a ./libripng.a $(top_builddir)/xrl/targets/libripngbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket6locatorxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+xorp_ripng_LDADD = ./libripngxrl.a ./libripng.a $(top_builddir)/xrl/targets/libripngbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket6locatorxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Test Program Sources
 test_auth_SOURCES = test_auth.cc test_utils.hh
@@ -128,29 +128,29 @@ test_packets_SOURCES = test_packets.cc test_utils.hh
 test_packets_LDADD = ./librip.a $(LDADD)
 
 test_request_SOURCES = test_request.cc test_utils.hh
-test_request_LDADD = ./librip.a $(LDADD)
+test_request_LDADD = ./librip.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(LDADD)
 
 test_route_walk_SOURCES = test_route_walk.cc test_utils.hh
-test_route_walk_LDADD = ./librip.a ./libripng.a $(LDADD)
+test_route_walk_LDADD = ./librip.a ./libripng.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(LDADD)
 
 test_timers_SOURCES = test_timers.cc test_utils.hh
-test_timers_LDADD = ./librip.a ./libripng.a $(LDADD)
+test_timers_LDADD = ./librip.a ./libripng.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(LDADD)
 
 test_update_queue_SOURCES = test_update_queue.cc test_utils.hh
-test_update_queue_LDADD = ./librip.a ./libripng.a $(LDADD)
+test_update_queue_LDADD = ./librip.a ./libripng.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(LDADD)
 
 test_outputs_SOURCES = test_outputs.cc test_utils.hh
-test_outputs_LDADD = ./librip.a libripng.a $(LDADD)
+test_outputs_LDADD = ./librip.a libripng.a $(top_builddir)/policy/backend/libpolicybackend.a $(top_builddir)/libxipc/libxipc.a $(LDADD)
 
 # -- RIP Core Library Sources
 librip_a_CXXFLAGS = -DINSTANTIATE_IPV4
 
-librip_a_SOURCES = rip_module.h auth.hh constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh port_vars.hh redist.hh rib_notifier_base.hh route_db.hh route_entry.hh system.hh update_queue.hh auth.cc output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc route_db.cc route_entry.cc update_queue.cc
+librip_a_SOURCES = rip_module.h auth.hh constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh port_vars.hh redist.hh rib_notifier_base.hh rip_varrw.hh route_db.hh route_entry.hh system.hh update_queue.hh auth.cc output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc rip_varrw.cc route_db.cc route_entry.cc update_queue.cc
 
 # -- RIP NG Core Library Sources
 libripng_a_CXXFLAGS = -DINSTANTIATE_IPV6
 
-libripng_a_SOURCES = rip_module.h constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh port_vars.hh redist.hh rib_notifier_base.hh route_db.hh route_entry.hh system.hh update_queue.hh output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc route_db.cc route_entry.cc update_queue.cc
+libripng_a_SOURCES = rip_module.h constants.hh output.hh output_table.hh output_updates.hh packet_assembly.hh packet_queue.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh port_vars.hh redist.hh rib_notifier_base.hh rip_varrw.hh route_db.hh route_entry.hh system.hh update_queue.hh output_table.cc output_updates.cc packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc rip_varrw.cc route_db.cc route_entry.cc update_queue.cc
 
 # -- RIP XRL library sources
 libripxrl_a_CXXFLAGS = -DINSTANTIATE_IPV4
@@ -179,8 +179,8 @@ am_librip_a_OBJECTS = librip_a-auth.$(OBJEXT) \
 	librip_a-packet_queue.$(OBJEXT) librip_a-peer.$(OBJEXT) \
 	librip_a-port.$(OBJEXT) librip_a-redist.$(OBJEXT) \
 	librip_a-rib_notifier_base.$(OBJEXT) \
-	librip_a-route_db.$(OBJEXT) librip_a-route_entry.$(OBJEXT) \
-	librip_a-update_queue.$(OBJEXT)
+	librip_a-rip_varrw.$(OBJEXT) librip_a-route_db.$(OBJEXT) \
+	librip_a-route_entry.$(OBJEXT) librip_a-update_queue.$(OBJEXT)
 librip_a_OBJECTS = $(am_librip_a_OBJECTS)
 libripng_a_AR = $(AR) cru
 libripng_a_LIBADD =
@@ -189,7 +189,8 @@ am_libripng_a_OBJECTS = libripng_a-output_table.$(OBJEXT) \
 	libripng_a-packet_queue.$(OBJEXT) libripng_a-peer.$(OBJEXT) \
 	libripng_a-port.$(OBJEXT) libripng_a-redist.$(OBJEXT) \
 	libripng_a-rib_notifier_base.$(OBJEXT) \
-	libripng_a-route_db.$(OBJEXT) libripng_a-route_entry.$(OBJEXT) \
+	libripng_a-rip_varrw.$(OBJEXT) libripng_a-route_db.$(OBJEXT) \
+	libripng_a-route_entry.$(OBJEXT) \
 	libripng_a-update_queue.$(OBJEXT)
 libripng_a_OBJECTS = $(am_libripng_a_OBJECTS)
 libripngxrl_a_AR = $(AR) cru
@@ -224,6 +225,8 @@ test_auth_LDFLAGS =
 am_test_outputs_OBJECTS = test_outputs.$(OBJEXT)
 test_outputs_OBJECTS = $(am_test_outputs_OBJECTS)
 test_outputs_DEPENDENCIES = ./librip.a libripng.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
+	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_outputs_LDFLAGS =
 am_test_packets_OBJECTS = test_packets.$(OBJEXT)
@@ -232,21 +235,30 @@ test_packets_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
 test_packets_LDFLAGS =
 am_test_request_OBJECTS = test_request.$(OBJEXT)
 test_request_OBJECTS = $(am_test_request_OBJECTS)
-test_request_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
+test_request_DEPENDENCIES = ./librip.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libxorp/libxorp.a
 test_request_LDFLAGS =
 am_test_route_walk_OBJECTS = test_route_walk.$(OBJEXT)
 test_route_walk_OBJECTS = $(am_test_route_walk_OBJECTS)
 test_route_walk_DEPENDENCIES = ./librip.a ./libripng.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
+	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_route_walk_LDFLAGS =
 am_test_timers_OBJECTS = test_timers.$(OBJEXT)
 test_timers_OBJECTS = $(am_test_timers_OBJECTS)
 test_timers_DEPENDENCIES = ./librip.a ./libripng.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
+	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_timers_LDFLAGS =
 am_test_update_queue_OBJECTS = test_update_queue.$(OBJEXT)
 test_update_queue_OBJECTS = $(am_test_update_queue_OBJECTS)
 test_update_queue_DEPENDENCIES = ./librip.a ./libripng.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
+	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_update_queue_LDFLAGS =
 am_xorp_rip_OBJECTS = xorp_rip-xorp_rip_main.$(OBJEXT) \
@@ -262,6 +274,7 @@ xorp_rip_DEPENDENCIES = ./libripxrl.a ./librip.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/xrl/interfaces/libsocket4locatorxif.a \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -279,6 +292,7 @@ xorp_ripng_DEPENDENCIES = ./libripngxrl.a ./libripng.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/xrl/interfaces/libsocket6locatorxif.a \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
@@ -297,6 +311,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/librip_a-port.Po \
 @AMDEP_TRUE@	$(DEPDIR)/librip_a-redist.Po \
 @AMDEP_TRUE@	$(DEPDIR)/librip_a-rib_notifier_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/librip_a-rip_varrw.Po \
 @AMDEP_TRUE@	$(DEPDIR)/librip_a-route_db.Po \
 @AMDEP_TRUE@	$(DEPDIR)/librip_a-route_entry.Po \
 @AMDEP_TRUE@	$(DEPDIR)/librip_a-update_queue.Po \
@@ -307,6 +322,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/libripng_a-port.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripng_a-redist.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripng_a-rib_notifier_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/libripng_a-rip_varrw.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripng_a-route_db.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripng_a-route_entry.Po \
 @AMDEP_TRUE@	$(DEPDIR)/libripng_a-update_queue.Po \
@@ -382,6 +398,7 @@ librip_a-peer.$(OBJEXT): peer.cc
 librip_a-port.$(OBJEXT): port.cc
 librip_a-redist.$(OBJEXT): redist.cc
 librip_a-rib_notifier_base.$(OBJEXT): rib_notifier_base.cc
+librip_a-rip_varrw.$(OBJEXT): rip_varrw.cc
 librip_a-route_db.$(OBJEXT): route_db.cc
 librip_a-route_entry.$(OBJEXT): route_entry.cc
 librip_a-update_queue.$(OBJEXT): update_queue.cc
@@ -396,6 +413,7 @@ libripng_a-peer.$(OBJEXT): peer.cc
 libripng_a-port.$(OBJEXT): port.cc
 libripng_a-redist.$(OBJEXT): redist.cc
 libripng_a-rib_notifier_base.$(OBJEXT): rib_notifier_base.cc
+libripng_a-rip_varrw.$(OBJEXT): rip_varrw.cc
 libripng_a-route_db.$(OBJEXT): route_db.cc
 libripng_a-route_entry.$(OBJEXT): route_entry.cc
 libripng_a-update_queue.$(OBJEXT): update_queue.cc
@@ -495,6 +513,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-port.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-redist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-rib_notifier_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-rip_varrw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-route_db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-route_entry.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/librip_a-update_queue.Po@am__quote@
@@ -505,6 +524,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-port.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-redist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-rib_notifier_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-rip_varrw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-route_db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-route_entry.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/libripng_a-update_queue.Po@am__quote@
@@ -643,6 +663,18 @@ librip_a-rib_notifier_base.obj: rib_notifier_base.cc
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-rib_notifier_base.obj `cygpath -w rib_notifier_base.cc`
 
+librip_a-rip_varrw.o: rip_varrw.cc
+@AMDEP_TRUE@	source='rip_varrw.cc' object='librip_a-rip_varrw.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-rip_varrw.Po' tmpdepfile='$(DEPDIR)/librip_a-rip_varrw.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-rip_varrw.o `test -f rip_varrw.cc || echo '$(srcdir)/'`rip_varrw.cc
+
+librip_a-rip_varrw.obj: rip_varrw.cc
+@AMDEP_TRUE@	source='rip_varrw.cc' object='librip_a-rip_varrw.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-rip_varrw.Po' tmpdepfile='$(DEPDIR)/librip_a-rip_varrw.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(librip_a_CXXFLAGS) $(CXXFLAGS) -c -o librip_a-rip_varrw.obj `cygpath -w rip_varrw.cc`
+
 librip_a-route_db.o: route_db.cc
 @AMDEP_TRUE@	source='route_db.cc' object='librip_a-route_db.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/librip_a-route_db.Po' tmpdepfile='$(DEPDIR)/librip_a-route_db.TPo' @AMDEPBACKSLASH@
@@ -762,6 +794,18 @@ libripng_a-rib_notifier_base.obj: rib_notifier_base.cc
 @AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-rib_notifier_base.Po' tmpdepfile='$(DEPDIR)/libripng_a-rib_notifier_base.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-rib_notifier_base.obj `cygpath -w rib_notifier_base.cc`
+
+libripng_a-rip_varrw.o: rip_varrw.cc
+@AMDEP_TRUE@	source='rip_varrw.cc' object='libripng_a-rip_varrw.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-rip_varrw.Po' tmpdepfile='$(DEPDIR)/libripng_a-rip_varrw.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-rip_varrw.o `test -f rip_varrw.cc || echo '$(srcdir)/'`rip_varrw.cc
+
+libripng_a-rip_varrw.obj: rip_varrw.cc
+@AMDEP_TRUE@	source='rip_varrw.cc' object='libripng_a-rip_varrw.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/libripng_a-rip_varrw.Po' tmpdepfile='$(DEPDIR)/libripng_a-rip_varrw.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libripng_a_CXXFLAGS) $(CXXFLAGS) -c -o libripng_a-rip_varrw.obj `cygpath -w rip_varrw.cc`
 
 libripng_a-route_db.o: route_db.cc
 @AMDEP_TRUE@	source='route_db.cc' object='libripng_a-route_db.o' libtool=no @AMDEPBACKSLASH@

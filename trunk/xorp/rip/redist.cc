@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/redist.cc,v 1.3 2004/05/03 23:11:58 hodson Exp $"
+#ident "$XORP: xorp/rip/redist.cc,v 1.4 2004/06/10 22:41:45 hodson Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -68,9 +69,12 @@ RouteRedistributor<A>::~RouteRedistributor()
 
 template <typename A>
 bool
-RouteRedistributor<A>::add_route(const Net&  net, const Addr& nexthop)
+RouteRedistributor<A>::add_route(const Net&  net, const Addr& nexthop,
+				 const PolicyTags& policytags)
 {
-    return _route_db.update_route(net, nexthop, _cost, _tag, _rt_origin);
+    _route_db.add_rib_route(net,nexthop,_cost,_tag,_rt_origin,policytags);
+    return _route_db.update_route(net, nexthop, _cost, _tag, _rt_origin,
+				  policytags);
 }
 
 template <typename A>
@@ -78,17 +82,21 @@ bool
 RouteRedistributor<A>::add_route(const Net&  	net,
 				 const Addr& 	nexthop,
 				 uint16_t 	cost,
-				 uint16_t 	tag)
+				 uint16_t 	tag,
+				 const PolicyTags& policytags)
 {
-    return _route_db.update_route(net, nexthop, cost, tag, _rt_origin);
+    _route_db.add_rib_route(net,nexthop,cost,tag,_rt_origin,policytags);
+    return _route_db.update_route(net, nexthop, cost, tag, _rt_origin,
+				  policytags);
 }
 
 template <typename A>
 bool
 RouteRedistributor<A>::expire_route(const Net& net)
 {
+    _route_db.delete_rib_route(net);
     return _route_db.update_route(net, A::ZERO(), RIP_INFINITY,
-				  _tag, _rt_origin);
+				  _tag, _rt_origin, PolicyTags());
 }
 
 template <typename A>
@@ -153,7 +161,8 @@ RouteRedistributor<A>::withdraw_batch()
     while (r != 0) {
 	if (r->origin() == _rt_origin) {
 	    _route_db.update_route(r->net(), r->nexthop(),
-				   RIP_INFINITY, r->tag(), _rt_origin);
+				   RIP_INFINITY, r->tag(),
+				   _rt_origin,r->policytags());
 	}
 	r = _wdrawer->next_route();
 

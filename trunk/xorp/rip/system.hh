@@ -1,5 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
-
+// vim:set sts=4 ts=8: 
+                       
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/system.hh,v 1.5 2004/05/03 23:10:51 hodson Exp $
+// $XORP: xorp/rip/system.hh,v 1.6 2004/06/10 22:41:46 hodson Exp $
 
 #ifndef __RIP_SYSTEM_HH__
 #define __RIP_SYSTEM_HH__
@@ -21,6 +22,8 @@
 
 #include "route_db.hh"
 #include "port_manager.hh"
+
+#include "policy/backend/policy_filters.hh"
 
 /**
  * @short Top Level container for XORP RIP implementation.
@@ -32,7 +35,7 @@ public:
     typedef PortManagerBase<A>	PortManager;
 
 public:
-    System(EventLoop& e) : _e(e), _rtdb(e), _pm(0) {}
+    System(EventLoop& e) : _e(e), _rtdb(e,_policy_filters), _pm(0) {}
     ~System();
 
     /**
@@ -79,14 +82,51 @@ public:
      */
     inline const PortManager* port_manager() const	{ return _pm; }
 
+    /**
+     * Configure a policy filter
+     *
+     * @param filter id of filter to configure.
+     * @param conf configuration of filter.
+     */
+    void configure_filter(const uint32_t& filter, const string& conf) {
+	_policy_filters.configure(filter,conf);
+    }
+
+    /**
+     * Reset a policy filter.
+     *
+     * @param filter id of filter to reset.
+     */
+    void reset_filter(const uint32_t& filter) {
+	_policy_filters.reset(filter);
+    }
+
+    /**
+     * Push routes through policy filters for re-filtering.
+     */
+    void push_routes() {
+	_rtdb.push_routes();
+    }
+
+    /**
+     * @return reference to global policy filters.
+     */
+    PolicyFilters& policy_filters() { return _policy_filters; }
+
 protected:
     System(const System&);				// Not implemented
     System& operator=(const System&);			// Not implemented
 
 protected:
     EventLoop&		_e;
+    
+    // There should be only one instatiation per process
+    // rip uses separate processes for v4,v6 so we are ok.
+    PolicyFilters	_policy_filters;
+    
     RouteDatabase	_rtdb;
     PortManager*	_pm;
+
 };
 
 // ----------------------------------------------------------------------------

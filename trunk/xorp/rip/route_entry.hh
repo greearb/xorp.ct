@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.5 2004/04/04 18:34:53 hodson Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.6 2004/06/10 22:41:46 hodson Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -20,6 +21,8 @@
 #include "config.h"
 #include "libxorp/ipnet.hh"
 #include "libxorp/timer.hh"
+
+#include "policy/backend/policytags.hh"
 
 template<typename A> class RouteEntryOrigin;
 
@@ -53,6 +56,12 @@ public:
 	       Origin*&	   o,
 	       uint16_t    tag);
 
+    RouteEntry(const Net&  n,
+	       const Addr& nh,
+	       uint16_t	   cost,
+	       Origin*&	   o,
+	       uint16_t    tag,
+	       const PolicyTags& policytags);
     /**
      * Destructor.
      *
@@ -150,18 +159,42 @@ public:
      */
     inline const XorpTimer& timer() const 	{ return _timer; }
 
+    /**
+     * @return policy-tags associated with route
+     */
+    const PolicyTags& policytags() const	{ return _policytags; }
+
+    /**
+     * Replace policy-tags of route
+     * @return true if tags were modified.
+     * @param tags new policy-tags.
+     */
+    bool set_policytags(const PolicyTags& tags);
+  
+    /**
+     * @return true if route was rejected by policy filter.
+     */
+    const bool filtered() const			{ return _filtered; }
+    /**
+     * Set if route is accepted or rejected.
+     *
+     * @param v true if route is filtered
+     */
+    void set_filtered(bool v)			{ _filtered = v;    }
+   
 private:
     friend class RouteEntryRef<A>;
     inline void ref()				{ _ref_cnt++; }
     inline uint16_t unref()			{ return --_ref_cnt; }
     inline uint16_t ref_cnt() const		{ return _ref_cnt; }
-
+    
 protected:
     RouteEntry(const RouteEntry&);			// Not implemented.
     RouteEntry& operator=(const RouteEntry&);		// Not implemented.
 
     inline void dissociate();
     inline void associate(Origin* o);
+
 
 protected:
     Net		_net;
@@ -172,6 +205,10 @@ protected:
     uint16_t	_ref_cnt;
 
     XorpTimer	_timer;
+    
+    PolicyTags	_policytags;
+    bool	_filtered;
+
 };
 
 

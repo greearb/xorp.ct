@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.3 2004/05/07 16:21:38 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.4 2004/06/10 22:41:48 hodson Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -368,6 +369,14 @@ bool
 XrlRedistManager<A>::startup()
 {
     if (status() == READY) {
+	
+	// XXX: hack to get policy route redist
+	RouteRedistributor<A>* rr =
+	    new RouteRedistributor<A>(_rdb,
+				      "policy",
+				      0,0);
+	_redists.push_back(rr);
+	
 	set_status(RUNNING);
 	return true;
     }
@@ -395,9 +404,10 @@ XrlRedistManager<A>::shutdown()
 
 template <typename A>
 void
-XrlRedistManager<A>::add_route(const string&	protocol,
-			       const Net&	net,
-			       const Addr&	nh)
+XrlRedistManager<A>::add_route(const string&	    protocol,
+			       const Net&	    net,
+			       const Addr&	    nh,
+			       const PolicyTags&    policytags)
 {
     typename RedistList::iterator i;
 
@@ -408,7 +418,37 @@ XrlRedistManager<A>::add_route(const string&	protocol,
 		is_redistributor_of<A>(protocol));
     if (i != _redists.end()) {
 	RouteRedistributor<A>* rr = *i;
-	rr->add_route(net, nh);
+	rr->add_route(net, nh, policytags);
+	return;
+    }
+
+    i = find_if(_dead_redists.begin(), _dead_redists.end(),
+		is_redistributor_of<A>(protocol));
+    if (i == _dead_redists.end()) {
+	XLOG_INFO("Received add route for redistribution from unknown "
+		  "protocol \"%s\"", protocol.c_str());
+    }
+}
+
+template <typename A>
+void
+XrlRedistManager<A>::add_route(const string&	    protocol,
+			       const Net&	    net,
+			       const Addr&	    nh,
+			       uint16_t		    cost,
+			       uint16_t		    tag,
+			       const PolicyTags&    policytags)
+{
+    typename RedistList::iterator i;
+
+    debug_msg("got redist add_route for \"%s\" %s %s\n",
+	      protocol.c_str(), net.str().c_str(), nh.str().c_str());
+
+    i = find_if(_redists.begin(), _redists.end(),
+		is_redistributor_of<A>(protocol));
+    if (i != _redists.end()) {
+	RouteRedistributor<A>* rr = *i;
+	rr->add_route(net, nh, cost, tag, policytags);
 	return;
     }
 

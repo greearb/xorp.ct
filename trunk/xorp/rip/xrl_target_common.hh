@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.14 2004/06/10 22:41:48 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.15 2004/06/21 18:06:04 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -38,7 +39,8 @@ public:
     XrlRipCommonTarget(XrlProcessSpy& 		xps,
 		       XrlPortManager<A>&	xpm,
 		       XrlRedistManager<A>&	xrm,
-		       bool& 			should_exit);
+		       bool& 			should_exit,
+		       System<A>&		rip_system);
 
     ~XrlRipCommonTarget();
 
@@ -306,6 +308,25 @@ public:
     XrlCmdError socketx_user_0_1_close_event(const string&	sockid,
 					     const string&	reason);
 
+    XrlCmdError policy_backend_0_1_configure(const uint32_t& filter,
+					     const string& conf);
+
+    XrlCmdError policy_backend_0_1_reset(const uint32_t& filter);
+
+    XrlCmdError policy_backend_0_1_push_routes();
+
+
+    XrlCmdError policy_redistx_0_1_add_routex(const IPNet<A>&	    net,
+					      const bool&	    unicast,
+					      const bool&	    multicast,
+					      const A&		    nexthop,
+					      const uint32_t&	    metric,
+					      const XrlAtomList&    policytags);
+
+    XrlCmdError policy_redistx_0_1_delete_routex(const IPNet<A>&    net,
+						 const bool&	    unicast,
+						 const bool&	    multicast);
+
     /**
      * Find Port associated with ifname, vifname, addr.
      *
@@ -328,6 +349,8 @@ protected:
 
     ProcessStatus		_status;
     string			_status_note;
+
+    System<A>&			_rip_system;
 };
 
 
@@ -338,9 +361,11 @@ template <typename A>
 XrlRipCommonTarget<A>::XrlRipCommonTarget(XrlProcessSpy&	xps,
 					  XrlPortManager<A>& 	xpm,
 					  XrlRedistManager<A>&	xrm,
-					  bool&			should_exit)
+					  bool&			should_exit,
+					  System<A>&		rip_system)
     : _xps(xps), _xpm(xpm), _xrm(xrm),
-      _should_exit(should_exit), _status(PROC_NULL), _status_note("")
+      _should_exit(should_exit), _status(PROC_NULL), _status_note(""),
+      _rip_system(rip_system)
 {
 }
 
@@ -1172,7 +1197,7 @@ XrlRipCommonTarget<A>::redistx_0_1_add_route(const IPNet<A>&	net,
 					     const string&	cookie)
 {
     // We use cookie of the protocol name to make find the relevant redist table simple.
-    _xrm.add_route(cookie, net, nexthop);
+    _xrm.add_route(cookie, net, nexthop, PolicyTags());
     return XrlCmdError::OKAY();
 }
 
@@ -1256,4 +1281,66 @@ XrlRipCommonTarget<A>::socketx_user_0_1_close_event(
     return XrlCmdError::OKAY();
 }
 
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::policy_backend_0_1_configure(const uint32_t& filter,
+						    const string& conf)
+{
+    try {
+	_rip_system.configure_filter(filter,conf);
+    } catch(const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+					   e.str());
+    }
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::policy_backend_0_1_reset(const uint32_t& filter)
+{
+    try {
+	_rip_system.reset_filter(filter);
+    } catch(const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " + 
+					   e.str());
+    }
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::policy_backend_0_1_push_routes()
+{
+    _rip_system.push_routes();
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError 
+XrlRipCommonTarget<A>::policy_redistx_0_1_add_routex(const IPNet<A>&	net,
+						     const bool&	unicast,
+						     const bool&	multicast,
+						     const A&	        nexthop,
+						     const uint32_t&	metric,
+						     const XrlAtomList& policytags)
+{
+    UNUSED(unicast);
+    UNUSED(multicast);
+    _xrm.add_route("policy",net,nexthop,metric,0,policytags);
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError 
+XrlRipCommonTarget<A>::policy_redistx_0_1_delete_routex(const IPNet<A>&	net,
+							const bool&	unicast,
+							const bool&	multicast)
+{
+    UNUSED(unicast);
+    UNUSED(multicast);
+    _xrm.delete_route("policy",net);
+    return XrlCmdError::OKAY();
+}
 #endif // __RIPX_XRL_TARGET_COMMON_HH__

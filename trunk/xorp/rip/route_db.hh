@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8: 
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.13 2004/03/19 05:05:19 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.14 2004/06/10 22:41:46 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -22,6 +23,8 @@
 
 #include "libxorp/ref_ptr.hh"
 #include "route_entry.hh"
+
+#include "policy/backend/policy_filters.hh"
 
 class EventLoop;
 
@@ -65,9 +68,10 @@ public:
     typedef RouteEntryRef<A>			ConstDBRouteEntry;
     typedef PacketRouteEntry<A>			PacketizedRoute;
     typedef map<Net, DBRouteEntry, NetCmp<A> >	RouteContainer;
+    typedef map<Net, Route*, NetCmp<A> >        RouteContainerNoRef;
 
 public:
-    RouteDB(EventLoop& e);
+    RouteDB(EventLoop& e, PolicyFilters& pfs);
     ~RouteDB();
 
     /**
@@ -82,14 +86,42 @@ public:
      *	      route originator.
      * @param tag the corresponding route tag.
      * @param origin the route originator proposing update.
-     *
+     * @param policytags the policytags of this route.
      * @return true if an update occurs, false otherwise.
      */
-    bool update_route(const Net&   net,
-		      const Addr&  nexthop,
-		      uint32_t	   cost,
-		      uint32_t	   tag,
-		      RouteOrigin* origin);
+    bool update_route(const Net&	net,
+		      const Addr&	nexthop,
+		      uint32_t		cost,
+		      uint32_t		tag,
+		      RouteOrigin*	origin,
+		      const PolicyTags& policytags);
+    /**
+     * A copy of RIB routes need to be kept, as they are not advertised
+     * periodically. If a RIB route gets replaced with a better route from
+     * another peer, it will be lost. By storing RIB routes, it is possible to
+     * re-advertise RIB routes which have lost, but are now optimal.
+     *
+     * @param net network of the route being added.
+     * @param nexthop the corresponding nexthop address.
+     * @param cost the corresponding metric value.
+     * @param the corresponding route tag.
+     * @param origin the route originator [RIB in this case].
+     * @param policytags the policytags of this route.
+     */
+    void add_rib_route(const Net&	net,
+		       const Addr&	nexthop,
+		       uint32_t		cost,
+		       uint32_t		tag,
+		       RouteOrigin*	origin,
+		       const PolicyTags& policytags);
+    
+    /**
+     * Permanently delete a RIB route.  This occurs if redistribution of this
+     * route ceased.
+     *
+     * @param net network of the route being deleted.
+     */
+    void delete_rib_route(const Net& net);
 
     /**
      * Flatten route entry collection into a Vector.
@@ -127,6 +159,18 @@ public:
 
     inline EventLoop& eventloop() 			{ return _eventloop; }
 
+    /**
+     * Push routes through policy filters for re-filtering.
+     */
+    void push_routes();
+
+    /**
+     * Do policy filtering
+     * @param r route to filter.
+     * @return true if route was accepted, false otherwise.
+     */
+    bool doFiltering(Route* r);
+
 protected:
     RouteDB(const RouteDB&);			// not implemented
     RouteDB& operator=(const RouteDB&);		// not implemented
@@ -144,7 +188,17 @@ protected:
     EventLoop&		_eventloop;
     RouteContainer	_routes;
     UpdateQueue<A>*	_uq;
+    PolicyFilters&	_policy_filters;
 
+
+    // Rib routes are not "readvertised", so consider if a rib route loses, and
+    // then the winning route expires... we will have no route for that
+    // destination... while we should.
+    //
+    // Also need to be able to re-filter original routes
+    RouteContainerNoRef	_rib_routes;
+    RouteOrigin*	_rib_origin;
+    
     friend class RouteWalker<A>;
 };
 

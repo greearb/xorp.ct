@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.1 2004/05/03 23:10:51 hodson Exp $
+// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.2 2004/06/10 22:41:48 hodson Exp $
 
 #ifndef __RIP_XRL_REDIST_MANAGER__
 #define __RIP_XRL_REDIST_MANAGER__
@@ -60,7 +61,11 @@ public:
 
     void request_no_redist_for(const string& protocol);
 
-    void add_route(const string& protocol, const Net& net, const Addr& nh);
+    void add_route(const string& protocol, const Net& net, const Addr& nh,
+		   const PolicyTags& policytags);
+    
+    void add_route(const string& protocol, const Net& net, const Addr& nh,
+		   uint16_t cost, uint16_t tag, const PolicyTags& policytags);
 
     void delete_route(const string& protocol, const Net& net);
 

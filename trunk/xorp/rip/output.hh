@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8: 
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,14 +13,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/output.hh,v 1.2 2003/08/01 17:10:44 hodson Exp $
+// $XORP: xorp/rip/output.hh,v 1.4 2004/06/10 22:41:44 hodson Exp $
 
 #ifndef __RIP_OUTPUT_HH__
 #define __RIP_OUTPUT_HH__
 
-#include "libxorp/eventloop.hh"
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
+#include "libxorp/debug.h"
+#include "libxorp/eventloop.hh"
+#include "policy/backend/policy_filters.hh"
 #include "port.hh"
+#include "system.hh"
+
+#include "rip_varrw.hh"
 
 template <typename A>
 class PacketQueue;
@@ -110,6 +118,14 @@ protected:
 
     inline void incr_packets_sent()			{ _pkts_out++; }
 
+    /**
+     * Policy filters the route.
+     *
+     * @param r route to filter
+     * @return true if the route was accepted, false otherwise.
+     */
+    bool doFiltering(RouteEntry<A>* r);
+
 private:
     OutputBase(const OutputBase<A>& o);			// Not implemented
     OutputBase<A>& operator=(const OutputBase<A>& o);	// Not implemented
@@ -122,6 +138,8 @@ protected:
     const uint16_t	_ip_port;   // IP port for output packets
     XorpTimer		_op_timer;  // Timer invoking output_packet()
     uint32_t		_pkts_out;  // Packets sent
+
+    PolicyFilters&	_policy_filters;    // Global policy filters.
 };
 
 template <typename A>
@@ -131,7 +149,8 @@ OutputBase<A>::OutputBase(EventLoop&	  e,
 			  const A&	  ip_addr,
 			  uint16_t	  ip_port)
     : _e(e), _port(port), _pkt_queue(pkt_queue),
-      _ip_addr(ip_addr), _ip_port(ip_port), _pkts_out(0)
+      _ip_addr(ip_addr), _ip_port(ip_port), _pkts_out(0),
+      _policy_filters(port.port_manager().system().policy_filters())
 {
 }
 
@@ -162,6 +181,32 @@ inline uint32_t
 OutputBase<A>::interpacket_gap_ms() const
 {
     return _port.constants().interpacket_delay_ms();
+}
+
+
+template <typename A>
+bool
+OutputBase<A>::doFiltering(RouteEntry<A>* route) {
+try {
+    RIPVarRW<A> varrw(*route);
+
+    ostringstream trace;
+
+    debug_msg("[RIP] Running export filter on route: %s\n",
+	      route->net().str().c_str());
+
+    bool accepted = _policy_filters.run_filter(filter::EXPORT,
+					       varrw,
+					       &trace);
+
+    debug_msg("[RIP] Export filter trace:\n%s\nDone. Accepted = %d\n",
+	      trace.str().c_str(),accepted);
+	      
+    return accepted;
+} catch(const PolicyException& e ){
+    XLOG_FATAL("PolicyException: %s",e.str().c_str());
+    abort(); // FIXME
+}
 }
 
 #endif // __RIP_OUTPUT_HH__

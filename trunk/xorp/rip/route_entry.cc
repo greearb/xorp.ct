@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_entry.cc,v 1.7 2004/04/04 18:34:53 hodson Exp $"
+#ident "$XORP: xorp/rip/route_entry.cc,v 1.8 2004/06/10 22:41:46 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -48,7 +49,20 @@ RouteEntry<A>::RouteEntry(const Net&	n,
 			  uint16_t	cost,
 			  Origin*&	o,
 			  uint16_t	tag)
-    : _net(n), _nh(nh), _cost(cost), _tag(tag), _ref_cnt(0)
+    : _net(n), _nh(nh), _cost(cost), _tag(tag), _ref_cnt(0), _filtered(false)
+{
+    associate(o);
+}
+
+template <typename A>
+RouteEntry<A>::RouteEntry(const Net&	    n,
+			  const Addr&	    nh,
+			  uint16_t	    cost,
+			  Origin*&	    o,
+			  uint16_t	    tag,
+			  const PolicyTags& policytags)
+    : _net(n), _nh(nh), _cost(cost), _tag(tag), 
+      _ref_cnt(0), _policytags(policytags), _filtered(false)
 {
     associate(o);
 }
@@ -103,6 +117,17 @@ RouteEntry<A>::set_tag(uint16_t tag)
 {
     if (tag != _tag) {
 	_tag = tag;
+	return true;
+    }
+    return false;
+}
+
+
+template <typename A>
+bool
+RouteEntry<A>::set_policytags(const PolicyTags& ptags) {
+    if (ptags != _policytags) {
+	_policytags = ptags;
 	return true;
     }
     return false;
