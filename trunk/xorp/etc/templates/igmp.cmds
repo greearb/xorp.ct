@@ -1,0 +1,26 @@
+/* $XORP: xorp/etc/templates/fea.cmds,v 1.4 2004/02/01 02:09:37 pavlin Exp $ */
+
+/* TODO: "show igmp" is temporary here just for the sake of the HELP string */
+show igmp {
+	%command: "cli/tools/send_cli_processor_xrl -t IGMP" %help: HELP;
+	%module: igmp;
+	%tag: HELP "Display information about IGMP";
+}
+
+show igmp group {
+	%command: "cli/tools/send_cli_processor_xrl -t IGMP" %help: HELP;
+	%module: igmp;
+	%tag: HELP "Display information about IGMP group membership";
+}
+
+show igmp interface {
+	%command: "cli/tools/send_cli_processor_xrl -t IGMP" %help: HELP;
+	%module: igmp;
+	%tag: HELP "Display information about IGMP interfaces";
+}
+
+show igmp interface address {
+	%command: "cli/tools/send_cli_processor_xrl -t IGMP" %help: HELP;
+	%module: igmp;
+	%tag: HELP "Display information about addresses of IGMP interfaces";
+}

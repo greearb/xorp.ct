@@ -1,0 +1,32 @@
+/* $XORP: xorp/etc/templates/fea.cmds,v 1.4 2004/02/01 02:09:37 pavlin Exp $ */
+
+/* TODO: "show mfea" is temporary here just for the sake of the HELP string */
+show mfea {
+	%command: "cli/tools/send_cli_processor_xrl -t MFEA_4" %help: HELP;
+	%module: mfea4;
+	%tag: HELP "Display information about IPv4 MFEA";
+}
+
+show mfea dataflow {
+	%command: "cli/tools/send_cli_processor_xrl -t MFEA_4" %help: HELP;
+	%module: mfea4;
+	%tag: HELP "Display information about MFEA IPv4 dataflow filters";
+}
+
+show mfea interface {
+	%command: "cli/tools/send_cli_processor_xrl -t MFEA_4" %help: HELP;
+	%module: mfea4;
+	%tag: HELP "Display information about MFEA IPv4 interfaces";
+}
+
+show mfea interface address {
+	%command: "cli/tools/send_cli_processor_xrl -t MFEA_4" %help: HELP;
+	%module: mfea4;
+	%tag: HELP "Display information about addresses of MFEA IPv4 interfaces";
+}
+
+show mfea mrib {
+	%command: "cli/tools/send_cli_processor_xrl -t MFEA_4" %help: HELP;
+	%module: mfea4;
+	%tag: HELP "Display MRIB IPv4 information inside MFEA";
+}
