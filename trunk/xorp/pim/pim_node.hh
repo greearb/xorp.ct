@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.40 2005/02/19 02:55:14 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.41 2005/02/24 02:47:41 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -1230,9 +1230,9 @@ private:
     
     PimMrt	_pim_mrt;		// PIM Multicast Routing Table
     PimMribTable _pim_mrib_table;	// PIM Multicast Routing Information Base table
-    PimBsr	_pim_bsr;		// The BSR state
     RpTable	_rp_table;		// The RP table
     PimScopeZoneTable _pim_scope_zone_table; // The scope zone table
+    PimBsr	_pim_bsr;		// The BSR state
     
     uint16_t	_pim_register_vif_index;// The PIM Register vif index
     Mifset	_pim_vifs_dr;		// The vifs I am the DR

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.61 2005/02/27 20:49:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.62 2005/02/27 21:32:55 pavlin Exp $"
 
 
 //
@@ -73,9 +73,9 @@ PimNode::PimNode(int family, xorp_module_id module_id,
     : ProtoNode<PimVif>(family, module_id, eventloop),
       _pim_mrt(*this),
       _pim_mrib_table(*this),
-      _pim_bsr(*this),
       _rp_table(*this),
       _pim_scope_zone_table(*this),
+      _pim_bsr(*this),
       _is_switch_to_spt_enabled(false),	// XXX: disabled by defailt
       _switch_to_spt_threshold_interval_sec(0),
       _switch_to_spt_threshold_bytes(0),
@@ -122,6 +122,14 @@ PimNode::~PimNode()
     unset_observer(this);
 
     stop();
+
+    //
+    // XXX: Explicitly clear the PimBsr and RpTable now to avoid
+    // cross-referencing of lists that may be deleted prematurely
+    // at the end of the PimNode destructor.
+    //
+    _pim_bsr.clear();
+    _rp_table.clear();
 
     //
     // XXX: explicitly clear the PimMrt table now, because PimMrt may utilize
