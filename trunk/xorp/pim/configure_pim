@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.7 2003/02/26 19:59:39 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.8 2003/02/27 03:11:05 pavlin Exp $
 #
 
 #
@@ -37,10 +37,8 @@ case $HOSTNAME in
 	;;
 
 	xorp2)
-	ENABLE_VIFS="dc1 dc2 dc4"
+	#ENABLE_VIFS="dc1 dc2 dc4"
 	ENABLE_VIFS="dc1 dc2"
-	CAND_BSR_VIF="dc4"
-	CAND_RP_VIF="dc4"
 	CAND_BSR_VIF="dc1"
 	CAND_RP_VIF="dc1"
 	#CAND_BSR_VIF=""
@@ -50,23 +48,24 @@ case $HOSTNAME in
 	;;
 
 	xorp3)
-	ENABLE_VIFS="dc0 dc1 dc2 dc3"
+	#ENABLE_VIFS="dc0 dc1 dc2 dc3"
 	ENABLE_VIFS="dc0 dc1 dc2"
 	CAND_BSR_VIF="dc0"
 	CAND_RP_VIF="dc0"
-	#CAND_BSR_VIF=""
-	#CAND_RP_VIF=""
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
 	STATIC_RPS="10.2.0.1"
 	STATIC_RPS=""
 	;;
 
 	xorp4)
-	ENABLE_VIFS="eth0 eth1 eth2 eth4 eth5 eth6 eth7"
+	#ENABLE_VIFS="eth0 eth1 eth2 eth4 eth5 eth6 eth7"
 	ENABLE_VIFS="eth2 eth6 eth7"
+	ENABLE_VIFS="eth6 eth7"
 	CAND_BSR_VIF="eth7"
 	CAND_RP_VIF="eth7"
-	#CAND_BSR_VIF=""
-	#CAND_RP_VIF=""
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
 	STATIC_RPS="10.2.0.1"
 	STATIC_RPS=""
 	;;
@@ -75,8 +74,8 @@ case $HOSTNAME in
 	ENABLE_VIFS="dc1"
 	CAND_BSR_VIF="dc1"
 	CAND_RP_VIF="dc1"
-	#CAND_BSR_VIF=""
-	#CAND_RP_VIF=""
+	CAND_BSR_VIF=""
+	CAND_RP_VIF=""
 	STATIC_RPS="10.2.0.1"
 	STATIC_RPS=""
 	;;
@@ -262,6 +261,7 @@ if [ X"$CAND_BSR_VIF" != X ] ; then
 fi
 if [ X"$CAND_RP_VIF" != X ] ; then
 	pim_add_config_cand_rp_by_vif_name4 224.0.0.0/4 false $CAND_RP_VIF 192 150
+	#pim_add_config_cand_rp_by_vif_name4 226.0.0.0/8 false $CAND_RP_VIF 192 150
 fi
 pim_start_bsr
 
