@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.1 2004/03/11 00:04:20 hodson Exp $"
 
 #include "rip/rip_module.h"
 
@@ -124,6 +124,7 @@ originate_routes_from_file(const char* 			file,
 static int
 init_rip_socket(int if_num)
 {
+#ifdef HAVE_IPV6
     in6_addr grp_addr;
     IPv6::RIP2_ROUTERS().copy_out(grp_addr);
     int fd = comm_bind_join_udp6(&grp_addr, if_num, htons(521), /* reuse */1);
@@ -145,6 +146,11 @@ init_rip_socket(int if_num)
 	return -1;
     }
     return fd;
+#else
+    UNUSED(if_num);
+    cerr << "IPv6 support not found during build." << endl;
+    return -1;
+#endif
 }
 
 static void
