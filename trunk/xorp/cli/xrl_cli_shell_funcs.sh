@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.7 2003/08/14 02:56:59 pavlin Exp $
+# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.8 2003/10/15 18:54:27 pavlin Exp $
 #
 
 #
@@ -36,7 +36,7 @@ cli_enable_cli()
     echo "cli_enable_cli" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/enable_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_disable_cli()
@@ -44,7 +44,7 @@ cli_disable_cli()
     echo "cli_disable_cli" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/disable_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_start_cli()
@@ -52,7 +52,7 @@ cli_start_cli()
     echo "cli_start_cli" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/start_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_stop_cli()
@@ -60,7 +60,7 @@ cli_stop_cli()
     echo "cli_stop_cli" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/stop_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_add_enable_cli_access_from_subnet4()
@@ -74,7 +74,7 @@ cli_add_enable_cli_access_from_subnet4()
     echo "cli_add_enable_cli_access_from_subnet4" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/add_enable_cli_access_from_subnet4"
     XRL_ARGS="?subnet_addr:ipv4net=$subnet_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_add_enable_cli_access_from_subnet6()
@@ -88,7 +88,7 @@ cli_add_enable_cli_access_from_subnet6()
     echo "cli_add_enable_cli_access_from_subnet6" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/add_enable_cli_access_from_subnet6"
     XRL_ARGS="?subnet_addr:ipv6net=$subnet_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_delete_enable_cli_access_from_subnet4()
@@ -102,7 +102,7 @@ cli_delete_enable_cli_access_from_subnet4()
     echo "cli_delete_enable_cli_access_from_subnet4" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/delete_enable_cli_access_from_subnet4"
     XRL_ARGS="?subnet_addr:ipv4net=$subnet_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_delete_enable_cli_access_from_subnet6()
@@ -116,7 +116,7 @@ cli_delete_enable_cli_access_from_subnet6()
     echo "cli_delete_enable_cli_access_from_subnet6" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/delete_enable_cli_access_from_subnet6"
     XRL_ARGS="?subnet_addr:ipv6net=$subnet_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_add_disable_cli_access_from_subnet4()
@@ -130,7 +130,7 @@ cli_add_disable_cli_access_from_subnet4()
     echo "cli_add_disable_cli_access_from_subnet4" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/add_disable_cli_access_from_subnet4"
     XRL_ARGS="?subnet_addr:ipv4net=$subnet_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_add_disable_cli_access_from_subnet6()
@@ -144,7 +144,7 @@ cli_add_disable_cli_access_from_subnet6()
     echo "cli_add_disable_cli_access_from_subnet6" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/add_disable_cli_access_from_subnet6"
     XRL_ARGS="?subnet_addr:ipv6net=$subnet_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_delete_disable_cli_access_from_subnet4()
@@ -158,7 +158,7 @@ cli_delete_disable_cli_access_from_subnet4()
     echo "cli_delete_disable_cli_access_from_subnet4" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/delete_disable_cli_access_from_subnet4"
     XRL_ARGS="?subnet_addr:ipv4net=$subnet_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 cli_delete_disable_cli_access_from_subnet6()
@@ -172,5 +172,5 @@ cli_delete_disable_cli_access_from_subnet6()
     echo "cli_delete_disable_cli_access_from_subnet6" $*
     XRL="finder://$CLI_TARGET/cli_manager/0.1/delete_disable_cli_access_from_subnet6"
     XRL_ARGS="?subnet_addr:ipv6net=$subnet_addr"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }

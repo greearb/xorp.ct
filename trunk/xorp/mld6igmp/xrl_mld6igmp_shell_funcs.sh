@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.8 2003/08/14 02:57:00 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.9 2003/10/15 18:54:28 pavlin Exp $
 #
 
 #
@@ -42,7 +42,7 @@ mld6igmp_enable_vif()
     echo "mld6igmp_enable_vif" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/enable_vif"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_disable_vif()
@@ -56,7 +56,7 @@ mld6igmp_disable_vif()
     echo "mld6igmp_disable_vif" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/disable_vif"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_start_vif()
@@ -70,7 +70,7 @@ mld6igmp_start_vif()
     echo "mld6igmp_start_vif" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/start_vif"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_stop_vif()
@@ -84,7 +84,7 @@ mld6igmp_stop_vif()
     echo "mld6igmp_stop_vif" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/stop_vif"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_enable_all_vifs()
@@ -92,7 +92,7 @@ mld6igmp_enable_all_vifs()
     echo "mld6igmp_enable_all_vifs" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/enable_all_vifs"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_disable_all_vifs()
@@ -100,7 +100,7 @@ mld6igmp_disable_all_vifs()
     echo "mld6igmp_disable_all_vifs" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/disable_all_vifs"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_start_all_vifs()
@@ -108,7 +108,7 @@ mld6igmp_start_all_vifs()
     echo "mld6igmp_start_all_vifs" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/start_all_vifs"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_stop_all_vifs()
@@ -116,7 +116,7 @@ mld6igmp_stop_all_vifs()
     echo "mld6igmp_stop_all_vifs" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/stop_all_vifs"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_is_vif_setup_completed()
@@ -124,7 +124,7 @@ mld6igmp_is_vif_setup_completed()
     echo "mld6igmp_is_vif_setup_completed" $*
     XRL="finder://$MLD6IGMP_TARGET/mfea_client/0.1/is_vif_setup_completed"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS is_completed:bool = true
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS is_completed:bool = true
 }
 
 mld6igmp_enable_mld6igmp()
@@ -132,7 +132,7 @@ mld6igmp_enable_mld6igmp()
     echo "mld6igmp_enable_mld6igmp" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/enable_mld6igmp"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_disable_mld6igmp()
@@ -140,7 +140,7 @@ mld6igmp_disable_mld6igmp()
     echo "mld6igmp_disable_mld6igmp" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/disable_mld6igmp"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_enable_cli()
@@ -148,7 +148,7 @@ mld6igmp_enable_cli()
     echo "mld6igmp_enable_cli" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/enable_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_disable_cli()
@@ -156,7 +156,7 @@ mld6igmp_disable_cli()
     echo "mld6igmp_disable_cli" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/disable_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_start_mld6igmp()
@@ -164,7 +164,7 @@ mld6igmp_start_mld6igmp()
     echo "mld6igmp_start_mld6igmp" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/start_mld6igmp"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_stop_mld6igmp()
@@ -172,7 +172,7 @@ mld6igmp_stop_mld6igmp()
     echo "mld6igmp_stop_mld6igmp" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/stop_mld6igmp"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_start_cli()
@@ -180,7 +180,7 @@ mld6igmp_start_cli()
     echo "mld6igmp_start_cli" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/start_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_stop_cli()
@@ -188,7 +188,7 @@ mld6igmp_stop_cli()
     echo "mld6igmp_stop_cli" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/stop_cli"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 #
@@ -205,7 +205,7 @@ mld6igmp_get_vif_proto_version()
     echo "mld6igmp_get_vif_proto_version" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/get_vif_proto_version"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl -p proto_version:u32 $XRL$XRL_ARGS
+    call_xrl_wrapper -p proto_version:u32 $XRL$XRL_ARGS
 }
 
 mld6igmp_set_vif_proto_version()
@@ -220,7 +220,7 @@ mld6igmp_set_vif_proto_version()
     echo "mld6igmp_set_vif_proto_version" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/set_vif_proto_version"
     XRL_ARGS="?vif_name:txt=$vif_name&proto_version:u32=$proto_version"
-    call_xrl $XRL$XRL_ARGS
+    call_xrl_wrapper $XRL$XRL_ARGS
 }
 
 mld6igmp_reset_vif_proto_version()
@@ -234,7 +234,7 @@ mld6igmp_reset_vif_proto_version()
     echo "mld6igmp_reset_vif_proto_version" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/reset_vif_proto_version"
     XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl $XRL$XRL_ARGS
+    call_xrl_wrapper $XRL$XRL_ARGS
 }
 
 mld6igmp_enable_log_trace()
@@ -242,7 +242,7 @@ mld6igmp_enable_log_trace()
     echo "mld6igmp_enable_log_trace" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/enable_log_trace"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 mld6igmp_disable_log_trace()
@@ -250,5 +250,5 @@ mld6igmp_disable_log_trace()
     echo "mld6igmp_disable_log_trace" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/disable_log_trace"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }

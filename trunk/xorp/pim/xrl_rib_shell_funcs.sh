@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.5 2003/08/14 02:57:40 pavlin Exp $
+# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.6 2003/10/15 18:54:29 pavlin Exp $
 #
 
 #
@@ -40,7 +40,7 @@ rib_enable_rib()
     echo "rib_enable_rib" $*
     XRL="finder://$RIB_TARGET/rib/0.1/enable_rib"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_disable_rib()
@@ -48,7 +48,7 @@ rib_disable_rib()
     echo "rib_disable_rib" $*
     XRL="finder://$RIB_TARGET/rib/0.1/disable_rib"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_start_rib()
@@ -56,7 +56,7 @@ rib_start_rib()
     echo "rib_start_rib" $*
     XRL="finder://$RIB_TARGET/rib/0.1/start_rib"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_stop_rib()
@@ -64,7 +64,7 @@ rib_stop_rib()
     echo "rib_stop_rib" $*
     XRL="finder://$RIB_TARGET/rib/0.1/stop_rib"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_add_rib_client4()
@@ -80,7 +80,7 @@ rib_add_rib_client4()
     echo "rib_add_rib_client4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/add_rib_client4"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_add_rib_client6()
@@ -96,7 +96,7 @@ rib_add_rib_client6()
     echo "rib_add_rib_client6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/add_rib_client6"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_delete_rib_client4()
@@ -112,7 +112,7 @@ rib_delete_rib_client4()
     echo "rib_delete_rib_client4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/delete_rib_client4"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_delete_rib_client6()
@@ -128,7 +128,7 @@ rib_delete_rib_client6()
     echo "rib_delete_rib_client6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/delete_rib_client6"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_enable_rib_client4()
@@ -144,7 +144,7 @@ rib_enable_rib_client4()
     echo "rib_enable_rib_client4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/enable_rib_client4"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_enable_rib_client6()
@@ -160,7 +160,7 @@ rib_enable_rib_client6()
     echo "rib_enable_rib_client6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/enable_rib_client6"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_disable_rib_client4()
@@ -176,7 +176,7 @@ rib_disable_rib_client4()
     echo "rib_disable_rib_client4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/disable_rib_client4"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_disable_rib_client6()
@@ -192,7 +192,7 @@ rib_disable_rib_client6()
     echo "rib_disable_rib_client6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/disable_rib_client6"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_no_fea()
@@ -200,7 +200,7 @@ rib_no_fea()
     echo "rib_no_fea" $*
     XRL="finder://$RIB_TARGET/rib/0.1/no_fea"
     XRL_ARGS=""
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_add_igp_table4()
@@ -216,7 +216,7 @@ rib_add_igp_table4()
     echo "rib_add_igp_table4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/add_igp_table4"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_add_igp_table6()
@@ -232,7 +232,7 @@ rib_add_igp_table6()
     echo "rib_add_igp_table6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/add_igp_table6"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_delete_igp_table4()
@@ -248,7 +248,7 @@ rib_delete_igp_table4()
     echo "rib_delete_igp_table4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/delete_igp_table4"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_delete_igp_table6()
@@ -264,7 +264,7 @@ rib_delete_igp_table6()
     echo "rib_delete_igp_table6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/delete_igp_table6"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_add_egp_table4()
@@ -280,7 +280,7 @@ rib_add_egp_table4()
     echo "rib_add_egp_table4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/add_egp_table4"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_add_egp_table6()
@@ -296,7 +296,7 @@ rib_add_egp_table6()
     echo "rib_add_egp_table6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/add_egp_table6"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_delete_egp_table4()
@@ -312,7 +312,7 @@ rib_delete_egp_table4()
     echo "rib_delete_egp_table4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/delete_egp_table4"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_delete_egp_table6()
@@ -328,7 +328,7 @@ rib_delete_egp_table6()
     echo "rib_delete_egp_table6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/delete_egp_table6"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_add_route4()
@@ -347,7 +347,7 @@ rib_add_route4()
     echo "rib_add_route4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/add_route4"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast&network:ipv4net=$network&nexthop:ipv4=$nexthop&metric:u32=$metric"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_add_route6()
@@ -366,7 +366,7 @@ rib_add_route6()
     echo "rib_add_route6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/add_route6"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast&network:ipv6net=$network&nexthop:ipv6=$nexthop&metric:u32=$metric"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_replace_route4()
@@ -385,7 +385,7 @@ rib_replace_route4()
     echo "rib_replace_route4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/replace_route4"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast&network:ipv4net=$network&nexthop:ipv4=$nexthop&metric:u32=$metric"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_replace_route6()
@@ -404,7 +404,7 @@ rib_replace_route6()
     echo "rib_replace_route6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/replace_route6"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast&network:ipv6net=$network&nexthop:ipv6=$nexthop&metric:u32=$metric"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_delete_route4()
@@ -421,7 +421,7 @@ rib_delete_route4()
     echo "rib_delete_route4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/delete_route4"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast&network:ipv4net=$network"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_delete_route6()
@@ -438,7 +438,7 @@ rib_delete_route6()
     echo "rib_delete_route6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/delete_route6"
     XRL_ARGS="?protocol:txt=$protocol&unicast:bool=$unicast&multicast:bool=$multicast&network:ipv6net=$network"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_lookup_route4()
@@ -454,7 +454,7 @@ rib_lookup_route4()
     echo "rib_lookup_route4" $*
     XRL="finder://$RIB_TARGET/rib/0.1/lookup_route4"
     XRL_ARGS="?addr:ipv4=$addr&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
 rib_lookup_route6()
@@ -470,5 +470,5 @@ rib_lookup_route6()
     echo "rib_lookup_route6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/lookup_route6"
     XRL_ARGS="?addr:ipv6=$addr&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl -r 0 $XRL$XRL_ARGS
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }

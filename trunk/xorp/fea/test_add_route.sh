@@ -1,6 +1,10 @@
 #!/bin/sh
 
 #
+# $XORP$
+#
+
+#
 # Test interaction between the FEA and the kernel unicast forwarding engine:
 #   - add/delete unicast forwarding entries, lookup, etc.
 #
@@ -28,20 +32,20 @@ ADMIN_DISTANCE="20"
 PROTOCOL_ORIGIN="BGP"
 
 case ${HOSTNAME} in
-	xorp1)
-	IFNAME="dc1"
-	GATEWAY="10.2.0.2"
-	;;
+    xorp1)
+    IFNAME="dc1"
+    GATEWAY="10.2.0.2"
+    ;;
 
-	xorp4)
-	IFNAME="eth2"
-	GATEWAY="10.2.0.2"
-	;;
+    xorp4)
+    IFNAME="eth2"
+    GATEWAY="10.2.0.2"
+    ;;
 
-	*)
-	echo "Unknown host : ${HOSTNAME}"
-	exit 1
-	;;
+    *)
+    echo "Unknown host : ${HOSTNAME}"
+    exit 1
+    ;;
 esac
 
 # XXX: for now the vifname is same as the ifname
@@ -60,7 +64,7 @@ fea_fti_start_transaction()
     fi
 
     XRL="finder://fea/fti/0.2/start_transaction"
-    call_xrl -p all $XRL
+    call_xrl_wrapper -p all $XRL
 }
 
 fea_fti_commit_transaction()
@@ -71,7 +75,7 @@ fea_fti_commit_transaction()
     fi
 
     XRL="finder://fea/fti/0.2/commit_transaction?tid:u32=$1"
-    call_xrl -p all $XRL
+    call_xrl_wrapper -p all $XRL
 }
 
 fea_fti_add_entry4()
@@ -82,7 +86,7 @@ fea_fti_add_entry4()
     fi
 
     XRL="finder://fea/fti/0.2/add_entry4?tid:u32=$1&dst:ipv4net=$2&gateway:ipv4=$3&ifname:txt=$4&vifname:txt=$5&metric:u32=$6&admin_distance:u32=$7&protocol_origin:txt=$8"
-    call_xrl -p all $XRL
+    call_xrl_wrapper -p all $XRL
 }
 
 fea_fti_delete_entry4()
@@ -93,7 +97,7 @@ fea_fti_delete_entry4()
     fi
 
     XRL="finder://fea/fti/0.2/delete_entry4?tid:u32=$1&dst:ipv4net=$2"
-    call_xrl -p all $XRL
+    call_xrl_wrapper -p all $XRL
 }
 
 fea_fti_lookup_entry4()
@@ -104,7 +108,7 @@ fea_fti_lookup_entry4()
     fi
 
     XRL="finder://fea/fti/0.2/lookup_entry4?dst:ipv4net=$1"
-    call_xrl -p all $XRL
+    call_xrl_wrapper -p all $XRL
 }
 
 #

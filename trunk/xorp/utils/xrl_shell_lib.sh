@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/utils/xrl_shell_lib.sh,v 1.1 2003/06/03 18:52:19 pavlin Exp $
+# $XORP: xorp/utils/xrl_shell_lib.sh,v 1.2 2003/10/15 18:18:38 pavlin Exp $
 #
 
 #
@@ -257,7 +257,7 @@ print_xrl_result()
 #
 # If necessary to test the return value, keep calling the XRL until success.
 #
-# Usage: call_xrl [-r <max-repeat-number>] [-p <<xrl_variable:xrl_type> | all>] <XRL> [<xrl_variable:xrl_type> <test-operator> <test-value>]
+# Usage: call_xrl_wrapper [-r <max-repeat-number>] [-p <<xrl_variable:xrl_type> | all>] <XRL> [<xrl_variable:xrl_type> <test-operator> <test-value>]
 #
 # Options: -r <max-repeat-number> The maximum number of tries to call the
 #             XRL before giving up. If the value is 0, then the XRL will be
@@ -277,13 +277,13 @@ print_xrl_result()
 # {
 #     echo "mfea_enable_vif" $*
 #     XRL="finder://${MFEA_TARGET}/mfea/0.1/enable_vif?vif_name:txt=$1"
-#     call_xrl -r 0 ${XRL} fail:bool = false
+#     call_xrl_wrapper -r 0 ${XRL} fail:bool = false
 # }
 #
 #
 # XXX: there is latency of 1 second between repeated XRL calls.
 #
-call_xrl()
+call_xrl_wrapper()
 {
     local _max_repeat_number _print_list_xrl_variable_xrl_type _xrl
     local _test_operator _test_value _error _ret_value
@@ -299,7 +299,7 @@ call_xrl()
 	case "$1" in
 	    -r )		# [-r <max-repeat-number>]
 		if [ $# -lt 2 ] ; then
-		    echo "Usage: call_xrl [-r <max-repeat-number>] <<xrl_variable:xrl_type> | all>] <XRL> [<xrl_variable:xrl_type> <test-operator> <test-value>]"
+		    echo "Usage: call_xrl_wrapper [-r <max-repeat-number>] <<xrl_variable:xrl_type> | all>] <XRL> [<xrl_variable:xrl_type> <test-operator> <test-value>]"
 		    exit 1
 		fi
 		shift
@@ -307,7 +307,7 @@ call_xrl()
 		;;
 	    -p )		# [-p <<xrl_variable:xrl_type> | all>]
 		if [ $# -lt 2 ] ; then
-		    echo "Usage: call_xrl [-r <max-repeat-number>] <<xrl_variable:xrl_type> | all>] <XRL> [<xrl_variable:xrl_type> <test-operator> <test-value>]"
+		    echo "Usage: call_xrl_wrapper [-r <max-repeat-number>] <<xrl_variable:xrl_type> | all>] <XRL> [<xrl_variable:xrl_type> <test-operator> <test-value>]"
 		    exit 1
 		fi
 		shift
@@ -321,7 +321,7 @@ call_xrl()
     done
 
     if [ $# -lt 1 ] ; then
-	echo "Usage: call_xrl [-r <max-repeat-number>] <<xrl_variable:xrl_type> | all>] <XRL> [<xrl_variable:xrl_type> <test-operator> <test-value>]"
+	echo "Usage: call_xrl_wrapper [-r <max-repeat-number>] <<xrl_variable:xrl_type> | all>] <XRL> [<xrl_variable:xrl_type> <test-operator> <test-value>]"
 	exit 1
     fi
 
