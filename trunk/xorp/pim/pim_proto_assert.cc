@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.11 2003/05/21 05:32:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.12 2003/06/16 22:48:03 pavlin Exp $"
 
 
 //
@@ -185,7 +185,8 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 	// (*,G) Assert received
 	//
 	// First try to apply this assert to the (S,G) assert state machine.
-	// Only if the (S,G) assert state machine is in NoInfo state as
+	// Only if the (S,G) assert state machine is in NoInfo state, and
+	// only if there was no change in the (S,G) assert state machine
 	// a result of receiving this message, then apply it to the (*,G)
 	// assert state machine.
 	//
