@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.15 2003/07/03 07:17:17 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.16 2003/07/05 19:44:19 pavlin Exp $"
 
 
 //
@@ -625,21 +625,24 @@ PimNode::add_vif_addr(const string& vif_name,
     VifAddr* node_vif_addr = pim_vif->find_address(addr);
     
     if (node_vif_addr != NULL) {
+	// Update the address
 	if (*node_vif_addr == vif_addr)
 	    return (XORP_OK);		// Already have this address
-	// Update the address
 	XLOG_INFO("Updated existing address on vif %s: old is %s new is %s",
 		  pim_vif->name().c_str(), node_vif_addr->str().c_str(),
 		  vif_addr.str().c_str());
 	*node_vif_addr = vif_addr;
-	return (XORP_OK);
+    } else {
+	// Add a new address
+	pim_vif->add_address(vif_addr);
+	
+	XLOG_INFO("Added new address to vif %s: %s",
+		  pim_vif->name().c_str(), vif_addr.str().c_str());
     }
     
-    // Add a new address
-    pim_vif->add_address(vif_addr);
-    
-    XLOG_INFO("Added new address to vif %s: %s",
-	      pim_vif->name().c_str(), vif_addr.str().c_str());
+    // Schedule the dependency-tracking tasks
+    pim_mrt().add_task_my_ip_address(pim_vif->vif_index());
+    pim_mrt().add_task_my_ip_subnet_address(pim_vif->vif_index());
     
     return (XORP_OK);
 }
@@ -674,6 +677,10 @@ PimNode::delete_vif_addr(const string& vif_name,
     
     XLOG_INFO("Deleted address on vif %s: %s",
 	      pim_vif->name().c_str(), vif_addr.str().c_str());
+    
+    // Schedule the dependency-tracking tasks
+    pim_mrt().add_task_my_ip_address(pim_vif->vif_index());
+    pim_mrt().add_task_my_ip_subnet_address(pim_vif->vif_index());
     
     return (XORP_OK);
 }
