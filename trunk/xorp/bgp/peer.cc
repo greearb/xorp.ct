@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.81 2004/09/24 07:25:11 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.82 2004/12/05 16:14:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1074,6 +1074,23 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
 }
 
 #define	REMOVE_UNNEGOTIATED_NLRI
+inline
+bool
+check_multiprotocol_nlri(const UpdatePacket *, const BGPUpdateAttribList& pa,
+			 bool neg)
+{
+    if(!pa.empty() && !neg) {
+#ifdef	REMOVE_UNNEGOTIATED_NLRI
+	// We didn't advertise this capability, so strip this sucker out.
+	const_cast<BGPUpdateAttribList *>(&pa)->clear();
+#else
+	// We didn't advertise this capability, drop peering.
+ 	return false;
+#endif
+    }
+
+    return true;
+}
 
 inline
 bool
@@ -1137,6 +1154,17 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 //     BGPPeerData::Direction dir = BGPPeerData::NEGOTIATED;
     BGPPeerData::Direction dir = BGPPeerData::SENT;
     bool bad_nlri = false;
+#define STOP_IPV4_UNICAST
+#ifdef	STOP_IPV4_UNICAST
+    if(!check_multiprotocol_nlri(p, p->nlri_list(),
+				 peerdata()->
+				 multiprotocol<IPv4>(SAFI_UNICAST, dir)))
+	bad_nlri = true;
+    if(!check_multiprotocol_nlri(p, p->wr_list(),
+				 peerdata()->
+				 multiprotocol<IPv4>(SAFI_UNICAST, dir)))
+	bad_nlri = true;
+#endif
     if(!check_multiprotocol_nlri(p, p->mpreach<IPv4>(SAFI_MULTICAST),
 				 peerdata()->
 				 multiprotocol<IPv4>(SAFI_MULTICAST, dir)))
@@ -1145,7 +1173,6 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 				 peerdata()->
 				 multiprotocol<IPv4>(SAFI_MULTICAST, dir)))
 	bad_nlri = true;
-
     if(!check_multiprotocol_nlri(p, p->mpreach<IPv6>(SAFI_UNICAST),
 				 peerdata()->
 				 multiprotocol<IPv6>(SAFI_UNICAST, dir)))
