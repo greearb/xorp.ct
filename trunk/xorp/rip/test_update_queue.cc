@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.9 2004/09/17 13:57:16 abittau Exp $"
+#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.10 2004/09/18 00:00:32 pavlin Exp $"
 
 #include <set>
 
@@ -143,7 +143,8 @@ public:
     {
 	const uint32_t n_routes = 20000;
 
-	verbose_log("Running test for IPv%u\n", A::ip_version());
+	verbose_log("Running test for IPv%u\n",
+		    XORP_UINT_CAST(A::ip_version()));
 
 	RouteDB<A>& rdb = _rip_system.route_db();
 	UpdateQueue<A>& uq = _rip_system.route_db().update_queue();
@@ -167,7 +168,8 @@ public:
 
 	if (uq.updates_queued() != n_routes) {
 	    verbose_log("%u updates queued, expected %u\n",
-			uq.updates_queued(), n_routes);
+			XORP_UINT_CAST(uq.updates_queued()),
+			XOPR_UINT_CAST(n_routes));
 	    return 1;
 	}
 
@@ -192,11 +194,12 @@ public:
 	}
 
 	verbose_log("%u updates queued, expected %u\n",
-		    uq.updates_queued(), n_routes);
+		    XORP_UINT_CAST(uq.updates_queued()),
+		    XORP_UINT_CAST(n_routes));
 
 	for (n = 0; n < n_routes; n++) {
 	    if (uq.get(_fast_reader) == 0) {
-		verbose_log("Ran out of updates at %u.\n", n);
+		verbose_log("Ran out of updates at %u.\n", XORP_UINT_CAST(n));
 		return 1;
 	    }
 	    uq.next(_fast_reader);
@@ -204,7 +207,7 @@ public:
 
 	for (n = 0; n < 2 * n_routes; n++) {
 	    if (uq.get(_slow_reader) == 0) {
-		verbose_log("Ran out of updates at %u.\n", n);
+		verbose_log("Ran out of updates at %u.\n", XORP_UINT_CAST(n));
 		return 1;
 	    }
 	    uq.next(_slow_reader);
@@ -220,7 +223,7 @@ public:
 
 	if (uq.updates_queued() != 0) {
 	    verbose_log("Updates queued (%u) when no readers present\n",
-			uq.updates_queued());
+			XORP_UINT_CAST(uq.updates_queued()));
 	    return 1;
 	}
 
@@ -267,13 +270,13 @@ public:
 
 	for (n = 0; n < n_routes; n++) {
 	    if (uq.get(_slow_reader) == 0) {
-		verbose_log("Ran out of updates at %u.\n", n);
+		verbose_log("Ran out of updates at %u.\n", XORP_UINT_CAST(n));
 		return 1;
 	    }
 	    uq.next(_slow_reader);
 
 	    if (uq.get(_fast_reader) == 0) {
-		verbose_log("Ran out of updates at %u.\n", n);
+		verbose_log("Ran out of updates at %u.\n", XORP_UINT_CAST(n));
 		return 1;
 	    }
 	    uq.next(_fast_reader);
