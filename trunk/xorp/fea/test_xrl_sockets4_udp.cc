@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.1 2003/12/17 00:04:48 hodson Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.2 2003/12/17 00:56:17 atanu Exp $"
 
 #include <sysexits.h>
 
@@ -126,11 +126,12 @@ TestAddressTable::address_valid(const IPv6& a) const
 
 class TestSocket4UDP : public XrlTestSocket4TargetBase {
 public:
-    TestSocket4UDP(EventLoop& e, const string& ssname)
+    TestSocket4UDP(EventLoop& e, const string& ssname,
+		   IPv4 finder_host, uint16_t finder_port)
 	: _e(e), _ssname(ssname),
 	  _p_snd(0), _p_rcv(0), _b_snd(0), _b_rcv(0), _x_err(0), _closed(false)
     {
-	_r = new XrlStdRouter(_e, "test_xrl_socket");
+	_r = new XrlStdRouter(_e, "test_xrl_socket", finder_host, finder_port);
 	set_command_map(_r);
 	_r->finalize();
     }
@@ -440,11 +441,14 @@ verify_socket4_count(XrlSocketServer** ppxss, int n, bool* eflag)
 static void
 create_test_socket(EventLoop*		pe,
 		   XrlSocketServer**	ppxss,
+		   IPv4			finder_host,
+		   uint16_t		finder_port,
 		   TestSocket4UDP**	ppu)
 {
     XrlSocketServer* pxss = *ppxss;
     verbose_log("Creating TestSocket4UDP instance.\n");
-    *ppu = new TestSocket4UDP(*pe, pxss->instance_name());
+    *ppu = new TestSocket4UDP(*pe, pxss->instance_name(),
+			      finder_host, finder_port);
 }
 
 static void
@@ -493,7 +497,7 @@ match_bytes_sent_received(TestSocket4UDP** pps /* sender */,
 }
 
 static void
-local_close_socket(TestSocket4UDP** ppu)
+close_test_socket(TestSocket4UDP** ppu)
 {
     TestSocket4UDP* pu = *ppu;
     if (pu->close() == false) {
@@ -556,7 +560,8 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     TestSocket4UDP* udp1;
     ev.push_back(e.new_oneoff_after_ms(1000,
 				       callback(create_test_socket,
-						&e, &xss, &udp1)));
+						&e, &xss, finder_host,
+						finder_port, &udp1)));
 
     ev.push_back(e.new_oneoff_after_ms(1500,
 				       callback(bind_test_socket, &udp1,
@@ -569,7 +574,9 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     TestSocket4UDP* udp2;
     ev.push_back(e.new_oneoff_after_ms(2000,
 				       callback(create_test_socket,
-						&e, &xss, &udp2)));
+						&e, &xss, finder_host,
+						finder_port, &udp2)));
+
     ev.push_back(e.new_oneoff_after_ms(2500,
 				       callback(bind_test_socket, &udp2,
 						localhost, uint16_t(5001),
@@ -618,7 +625,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     //
     // Close udp1
     //
-    ev.push_back(e.new_oneoff_after_ms(14000, callback(local_close_socket,
+    ev.push_back(e.new_oneoff_after_ms(14000, callback(close_test_socket,
 						       &udp1)));
 
     //
@@ -772,7 +779,6 @@ main(int argc, char* const argv[])
     xlog_add_default_output();
     xlog_start();
 
-
     IPv4        finder_addr = FINDER_DEFAULT_HOST;
     uint16_t    finder_port = FINDER_DEFAULT_PORT;
 
@@ -786,6 +792,7 @@ main(int argc, char* const argv[])
 		usage(argv[0]);
 		r = 1;
 	    }
+	    break;
 	case 'v':
 	    set_verbose(true);
 	    break;
