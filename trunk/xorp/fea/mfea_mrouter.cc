@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.1 2003/05/15 23:10:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.2 2003/05/16 00:35:03 pavlin Exp $"
 
 
 //
@@ -22,6 +22,28 @@
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
+
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
+#include <net/if.h>
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#ifdef HAVE_NETINET_IP6_H
+#include <netinet/ip6.h>
+#endif
+#ifdef HAVE_NETINET_ICMP6_H
+#include <netinet/icmp6.h>
+#endif
+#ifdef HAVE_NETINET6_IN6_VAR_H
+#include <netinet6/in6_var.h>
+#endif
+
+#include "mrt/include/ip_mroute.h"
+
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
@@ -50,6 +72,10 @@
 //
 // Local constants definitions
 //
+#define IO_BUF_SIZE		(64*1024)  // I/O buffer(s) size
+#define CMSG_BUF_SIZE		(10*1024)  // 'rcvcmsgbuf' and 'sndcmsgbuf'
+#define SO_RCV_BUF_SIZE_MIN	(48*1024)  // Min. socket buffer size
+#define SO_RCV_BUF_SIZE_MAX	(256*1024) // Desired socket buffer size
 
 //
 // Local structures/classes, typedefs and macros

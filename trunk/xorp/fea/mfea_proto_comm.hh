@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.1 2003/05/15 23:10:31 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.2 2003/05/16 00:35:03 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -23,75 +23,23 @@
 // Multicast-related raw protocol communications.
 //
 
+#include "libxorp/xorp.h"
 
-#include "config.h"
-
-#include <sys/socket.h>
 #include <sys/uio.h>
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
-#include <net/if.h>
-#ifdef HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif
-#ifdef HAVE_NET_IF_DL_H
-#include <net/if_dl.h>
-#endif
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#ifdef HAVE_NETINET_IP6_H
-#include <netinet/ip6.h>
-#endif
-#ifdef HAVE_NETINET_ICMP6_H
-#include <netinet/icmp6.h>
-#endif
-#ifdef HAVE_NETINET6_IN6_VAR_H
-#include <netinet6/in6_var.h>
-#endif
-#include "mrt/include/ip_mroute.h"
-#ifdef HAVE_LINUX_RTNETLINK_H
-#include <linux/rtnetlink.h>
-#endif
-
-#include <vector>
 
 #include "libxorp/eventloop.hh"
-
 #include "libproto/proto_unit.hh"
+
 
 //
 // Constants definitions
 //
-#define IO_BUF_SIZE		(64*1024)  // I/O buffer(s) size
-#define CMSG_BUF_SIZE		(10*1024)  // 'rcvcmsgbuf' and 'sndcmsgbuf'
-#define SO_RCV_BUF_SIZE_MIN	(48*1024)  // Min. socket buffer size
-#define SO_RCV_BUF_SIZE_MAX	(256*1024) // Desired socket buffer size
-
-//
-// XXX: in *BSD there is only MRT_ASSERT, but in Linux there are
-// both MRT_ASSERT and MRT_PIM (with MRT_PIM defined as a superset
-// of MRT_ASSERT).
-//
-#ifndef MRT_PIM
-#define MRT_PIM MRT_ASSERT
-#endif
 
 //
 // Structures/classes, typedefs and macros
 //
 
-#ifndef CMSG_LEN
-#define CMSG_LEN(l) (ALIGN(sizeof(struct cmsghdr)) + (l)) // XXX
-#endif
-
-
 class MfeaNode;
-class MfeaVif;
-class Mrib;
-class EventLoop;
-
-
 
 
 /**
@@ -323,26 +271,6 @@ private:
     struct sockaddr_in6 _from6;	// The source addr of recvmsg() msg (IPv6)
     struct sockaddr_in6 _to6;	// The dest.  addr of sendmsg() msg (IPv6)
 #endif
-    
-    // IPv4 Router Alert stuff
-#ifndef IPTOS_PREC_INTERNETCONTROL
-#define IPTOS_PREC_INTERNETCONTROL	0xc0
-#endif
-#ifndef IPOPT_RA
-#define IPOPT_RA			148	/* 0x94 */
-#endif
-    
-    // IPv6 Router Alert stuff
-#ifdef HAVE_IPV6
-#ifndef IP6OPT_ROUTER_ALERT	// XXX: for compatibility with older systems
-#define IP6OPT_ROUTER_ALERT IP6OPT_RTALERT
-#endif
-    uint16_t	_rtalert_code;
-#ifndef HAVE_RFC2292BIS
-    uint8_t	_raopt[IP6OPT_RTALERT_LEN];
-#endif
-#endif // HAVE_IPV6
-    
     bool	_ignore_my_packets; // If true, ignore packets originated by me
 };
 

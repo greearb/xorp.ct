@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.1 2003/05/15 23:10:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.2 2003/05/16 00:35:03 pavlin Exp $"
 
 
 //
@@ -22,6 +22,31 @@
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
+
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
+#include <net/if.h>
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#ifdef HAVE_NET_IF_DL_H
+#include <net/if_dl.h>
+#endif
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#ifdef HAVE_NETINET_IP6_H
+#include <netinet/ip6.h>
+#endif
+#ifdef HAVE_NETINET_ICMP6_H
+#include <netinet/icmp6.h>
+#endif
+#ifdef HAVE_NETINET6_IN6_VAR_H
+#include <netinet6/in6_var.h>
+#endif
+
+#include "mrt/include/ip_mroute.h"
+
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
@@ -32,12 +57,6 @@
 #include "mrt/max_vifs.h"
 #include "mrt/multicast_defs.h"
 
-#include "mfea_node.hh"
-#include "mfea_vif.hh"
-#include "mfea_kernel_messages.hh"
-#include "mfea_osdep.hh"
-#include "mfea_proto_comm.hh"
-
 // XXX: _PIM_VT is needed if we want the extra features of <netinet/pim.h>
 #define _PIM_VT 1
 #ifdef HAVE_NETINET_PIM_H
@@ -45,6 +64,11 @@
 #else
 #include "mrt/include/netinet/pim.h"
 #endif
+
+#include "mfea_node.hh"
+#include "mfea_osdep.hh"
+#include "mfea_proto_comm.hh"
+#include "mfea_vif.hh"
 
 
 //
@@ -58,14 +82,44 @@
 //
 // Local constants definitions
 //
+#define IO_BUF_SIZE		(64*1024)  // I/O buffer(s) size
+#define CMSG_BUF_SIZE		(10*1024)  // 'rcvcmsgbuf' and 'sndcmsgbuf'
+#define SO_RCV_BUF_SIZE_MIN	(48*1024)  // Min. socket buffer size
+#define SO_RCV_BUF_SIZE_MAX	(256*1024) // Desired socket buffer size
 
 //
 // Local structures/classes, typedefs and macros
 //
+#ifndef CMSG_LEN
+#define CMSG_LEN(l) (ALIGN(sizeof(struct cmsghdr)) + (l)) // XXX
+#endif
 
 //
 // Local variables
 //
+
+// IPv4 Router Alert stuff
+#ifndef IPTOS_PREC_INTERNETCONTROL
+#define IPTOS_PREC_INTERNETCONTROL	0xc0
+#endif
+#ifndef IPOPT_RA
+#define IPOPT_RA			148	/* 0x94 */
+#endif
+
+// IPv6 Router Alert stuff
+#ifdef HAVE_IPV6
+#ifndef IP6OPT_ROUTER_ALERT	// XXX: for compatibility with older systems
+#define IP6OPT_ROUTER_ALERT IP6OPT_RTALERT
+#endif
+#endif // HAVE_IPV6
+//
+#ifdef HAVE_IPV6
+static uint16_t		rtalert_code;
+#ifndef HAVE_RFC2292BIS
+static uint8_t		raopt[IP6OPT_RTALERT_LEN];
+#endif
+#endif // HAVE_IPV6
+
 
 //
 // Local functions prototypes
@@ -85,11 +139,11 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
 {
     // Init Router Alert related option stuff
 #ifdef HAVE_IPV6
-    _rtalert_code = htons(IP6OPT_RTALERT_MLD); // XXX: used by MLD only (?)
+    rtalert_code = htons(IP6OPT_RTALERT_MLD); // XXX: used by MLD only (?)
 #ifndef HAVE_RFC2292BIS
-    _raopt[0] = IP6OPT_ROUTER_ALERT;
-    _raopt[1] = IP6OPT_RTALERT_LEN - 2;
-    memcpy(&_raopt[2], (caddr_t)&_rtalert_code, sizeof(_rtalert_code));
+    raopt[0] = IP6OPT_ROUTER_ALERT;
+    raopt[1] = IP6OPT_RTALERT_LEN - 2;
+    memcpy(&raopt[2], (caddr_t)&rtalert_code, sizeof(rtalert_code));
 #endif // ! HAVE_RFC2292BIS
 #endif // HAVE_IPV6
     
@@ -715,7 +769,7 @@ ProtoComm::open_proto_socket(void)
 	return (XORP_ERROR);
     }
     // Restrict multicast TTL
-    if (set_mcast_ttl(MULTICAST_MIN_TTL_THRESHOLD_DEFAULT)
+    if (set_mcast_ttl(MINTTL)
 	< 0) {
 	close_proto_socket();
 	return (XORP_ERROR);
@@ -1410,7 +1464,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	    }
 	    ctllen += CMSG_SPACE(hbhlen);
 #else
-	    hbhlen = inet6_option_space(sizeof(_raopt));
+	    hbhlen = inet6_option_space(sizeof(raopt));
 	    ctllen += hbhlen;
 #endif // ! HAVE_RFC2292BIS
 	}
@@ -1476,7 +1530,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 		XLOG_ERROR("inet6_option_init(IPV6_HOPOPTS) failed");
 		return (XORP_ERROR);
 	    }
-	    if (inet6_option_append(cmsgp, _raopt, 4, 0)) {
+	    if (inet6_option_append(cmsgp, raopt, 4, 0)) {
 		XLOG_ERROR("inet6_option_append(Router Alert) failed");
 		return (XORP_ERROR);
 	    }

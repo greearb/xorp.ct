@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_kernel_messages.hh,v 1.2 2003/03/10 23:20:40 hodson Exp $
+// $XORP: xorp/fea/mfea_kernel_messages.hh,v 1.1 2003/05/15 23:10:30 pavlin Exp $
 
 #ifndef __FEA_MFEA_KERNEL_MESSAGES_HH__
 #define __FEA_MFEA_KERNEL_MESSAGES_HH__
@@ -35,8 +35,8 @@
 // 
 // Note that MFEA_KERNEL_MESSAGE_BW_UPCALL is not sent by the
 // Mfea to the protocol instances, because it is not always supported
-// by the kernel. For this reason the Mfea implements an user-level
-// work-around mechanism, and it uses specific methods to propagate
+// by the kernel. Therefore, the Mfea implements a work-around mechanism
+// at user-level, and it uses separate channel to propagate
 // this information to the protocol instances.
 // 
 #define MFEA_KERNEL_MESSAGE_NOCACHE	1

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_dataflow.hh,v 1.6 2003/04/22 23:27:20 hodson Exp $
+// $XORP: xorp/fea/mfea_dataflow.hh,v 1.1 2003/05/15 23:10:30 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_DATAFLOW_HH__
@@ -511,7 +511,7 @@ private:
 #define MFEA_DATAFLOW_TEST_FREQUENCY	4
     SgCount	_last_sg_count;		// Last measurement result
     SgCount	_measured_sg_count;	// Measured result
-    SgCount	_delta_sg_count[MFEA_DATAFLOW_TEST_FREQUENCY];	// Delta measurement result
+    SgCount	_delta_sg_count[MFEA_DATAFLOW_TEST_FREQUENCY]; // Delta measurement result
     size_t	_delta_sg_count_index; // Index into next '_delta_sg_count'
     bool	_is_bootstrap_completed;
     

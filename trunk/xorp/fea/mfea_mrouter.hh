@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.1 2003/05/15 23:10:30 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.2 2003/05/16 00:35:03 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -23,41 +23,9 @@
 // Multicast routing kernel-access specific definitions.
 //
 
-
-#include "config.h"
-
-#include <sys/socket.h>
 #include <sys/uio.h>
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
-#include <net/if.h>
-#ifdef HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif
-#ifdef HAVE_NET_IF_DL_H
-#include <net/if_dl.h>
-#endif
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#ifdef HAVE_NETINET_IP6_H
-#include <netinet/ip6.h>
-#endif
-#ifdef HAVE_NETINET_ICMP6_H
-#include <netinet/icmp6.h>
-#endif
-#ifdef HAVE_NETINET6_IN6_VAR_H
-#include <netinet6/in6_var.h>
-#endif
-#include "mrt/include/ip_mroute.h"
-#ifdef HAVE_LINUX_RTNETLINK_H
-#include <linux/rtnetlink.h>
-#endif
-
-#include <vector>
 
 #include "libxorp/eventloop.hh"
-
 #include "libproto/proto_register.hh"
 #include "libproto/proto_unit.hh"
 
@@ -65,252 +33,17 @@
 //
 // Constants definitions
 //
-#define IO_BUF_SIZE		(64*1024)  // I/O buffer(s) size
-#define CMSG_BUF_SIZE		(10*1024)  // 'rcvcmsgbuf' and 'sndcmsgbuf'
-#define SO_RCV_BUF_SIZE_MIN	(48*1024)  // Min. socket buffer size
-#define SO_RCV_BUF_SIZE_MAX	(256*1024) // Desired socket buffer size
 
-//
-// XXX: in *BSD there is only MRT_ASSERT, but in Linux there are
-// both MRT_ASSERT and MRT_PIM (with MRT_PIM defined as a superset
-// of MRT_ASSERT).
-//
-#ifndef MRT_PIM
-#define MRT_PIM MRT_ASSERT
-#endif
 
 //
 // Structures/classes, typedefs and macros
 //
 
-#ifndef CMSG_LEN
-#define CMSG_LEN(l) (ALIGN(sizeof(struct cmsghdr)) + (l)) // XXX
-#endif
-
-
-/**
- * @short Class that contains various counters per (S,G) entry.
- * 
- * All counters are related to the multicast data packets per (S,G) entry.
- */
-class SgCount {
-public:
-    /**
-     * Default constructor
-     */
-    SgCount() : _pktcnt(0), _bytecnt(0), _wrong_if(0) {}
-    
-    /**
-     * Assignment Operator
-     * 
-     * @param sg_count the value to assing to this entry.
-     * @return the entry with the new value assigned.
-     */
-    SgCount& operator=(const SgCount& sg_count) {
-	_pktcnt = sg_count.pktcnt();
-	_bytecnt = sg_count.bytecnt();
-	_wrong_if = sg_count.wrong_if();
-	return (*this);
-    }
-    
-    /**
-     * Assign-Sum Operator
-     * 
-     * @param sg_count the value to add to this entry.
-     * @return the entry with the new value after @ref sg_count was added.
-     */
-    SgCount& operator+=(const SgCount& sg_count) {
-	_pktcnt += sg_count.pktcnt();
-	_bytecnt += sg_count.bytecnt();
-	_wrong_if += sg_count.wrong_if();
-	return (*this);
-    }
-    
-    /**
-     * Assign-Difference Operator
-     * 
-     * @param sg_count the value to substract from this entry.
-     * @return the entry with the new value after @ref sg_count was
-     * substracted.
-     */
-    SgCount& operator-=(const SgCount& sg_count) {
-	_pktcnt -= sg_count.pktcnt();
-	_bytecnt -= sg_count.bytecnt();
-	_wrong_if -= sg_count.wrong_if();
-	return (*this);
-    }
-    
-    /**
-     * Get the packet count.
-     * 
-     * @return the packet count.
-     */
-    size_t	pktcnt()	const	{ return (_pktcnt);	}
-    
-    /**
-     * Get the byte count.
-     * 
-     * @return the byte count.
-     */
-    size_t	bytecnt()	const	{ return (_bytecnt);	}
-    
-    /**
-     * Get the number of packets received on wrong interface.
-     * 
-     * @return the number of packets received on wrong interface.
-     */
-    size_t	wrong_if()	const	{ return (_wrong_if);	}
-    
-    /**
-     * Set the packet count.
-     * 
-     * @param v the value to assign to the packet count.
-     */
-    void	set_pktcnt(size_t v)	{ _pktcnt = v;		}
-    
-    /**
-     * Set the byte count.
-     * 
-     * @param v the value to assign to the byte count.
-     */
-    void	set_bytecnt(size_t v)	{ _bytecnt = v;		}
-    
-    /**
-     * Set the wrong-interface packet count.
-     * 
-     * @param v the value to assign to the wrong-interface packet count.
-     */
-    void	set_wrong_if(size_t v)	{ _wrong_if = v;	}
-    
-    /**
-     * Reset all counters.
-     */
-    void	reset() { _pktcnt = 0; _bytecnt = 0; _wrong_if = 0; }
-    
-    /**
-     * Test if this entry contains valid counters.
-     * 
-     * @return true if this entry contains valid counters, otherwise false.
-     */
-    bool	is_valid() const { return (! ((_pktcnt == (size_t)~0)
-					      && (_bytecnt == (size_t)~0)
-					      && (_wrong_if == (size_t)~0))); }
-    
-private:
-    size_t	_pktcnt;	// Number of multicast data packets received
-    size_t	_bytecnt;	// Number of multicast data bytes received
-    size_t	_wrong_if;	// Number of multicast data packets received
-				// on wrong iif
-};
-
-//
-// A class that contains information about a vif in the kernel.
-//
-
-/**
- * @short Class that contains various counters per virtual interface.
- * 
- * All counters are related to the multicast data packets per virtual
- * interface.
- */
-class VifCount {
-public:
-    /**
-     * Default constructor
-     */
-    VifCount() : _icount(0), _ocount(0), _ibytes(0), _obytes(0) {}
-    
-    /**
-     * Assignment Operator
-     * 
-     * @param vif_count the value to assign to this entry.
-     * @return the entry with the new value assigned.
-     */
-    VifCount& operator=(const VifCount& vif_count) {
-	_icount = vif_count.icount();
-	_ocount = vif_count.ocount();
-	_ibytes = vif_count.ibytes();
-	_obytes = vif_count.obytes();
-	return (*this);
-    }
-    
-    /**
-     * Get the input packet count.
-     * 
-     * @return the input packet count.
-     */
-    size_t	icount()	const	{ return (_icount);	}
-    
-    /**
-     * Get the output packet count.
-     * 
-     * @return the output packet count.
-     */
-    size_t	ocount()	const	{ return (_ocount);	}
-    
-    /**
-     * Get the input byte count.
-     * 
-     * @return the input byte count.
-     */
-    size_t	ibytes()	const	{ return (_ibytes);	}
-    
-    /**
-     * Get the output byte count.
-     * 
-     * @return the output byte count.
-     */
-    size_t	obytes()	const	{ return (_obytes);	}
-    
-    /**
-     * Set the input packet count.
-     * 
-     * @param v the value to assign to the data packet count.
-     */
-    void	set_icount(size_t v)	{ _icount = v;		}
-
-    /**
-     * Set the output packet count.
-     * 
-     * @param v the value to assign to the output packet count.
-     */
-    void	set_ocount(size_t v)	{ _ocount = v;		}
-
-    /**
-     * Set the input byte count.
-     * 
-     * @param v the value to assign to the data byte count.
-     */
-    void	set_ibytes(size_t v)	{ _ibytes = v;		}
-    
-    /**
-     * Set the output byte count.
-     * 
-     * @param v the value to assign to the output byte count.
-     */
-    void	set_obytes(size_t v)	{ _obytes = v;		}
-    
-    /**
-     * Test if this entry contains valid counters.
-     * 
-     * @return true if this entry contains valid counters, otherwise false.
-     */
-    bool	is_valid() const { return (! ((_icount == (size_t)~0)
-					      && (_ocount == (size_t)~0)
-					      && (_ibytes == (size_t)~0)
-					      && (_obytes == (size_t)~0))); }
-    
-private:
-    size_t	_icount;	// Number of input multicast data packets
-    size_t	_ocount;	// Number of output multicast data packets
-    size_t	_ibytes;	// Number of input multicast data bytes
-    size_t	_obytes;	// Number of output multicast data bytes
-};
-
+class IPvX;
 class MfeaNode;
-class MfeaVif;
-class Mrib;
-class EventLoop;
+class SgCount;
+class TimeVal;
+class VifCount;
 
 
 /**
@@ -678,6 +411,225 @@ private:
     
     // The set of module instances to receive kernel signal messages
     ProtoRegister _kernel_signal_messages_register;
+};
+
+/**
+ * @short Class that contains various counters per (S,G) entry.
+ * 
+ * All counters are related to the multicast data packets per (S,G) entry.
+ */
+class SgCount {
+public:
+    /**
+     * Default constructor
+     */
+    SgCount() : _pktcnt(0), _bytecnt(0), _wrong_if(0) {}
+    
+    /**
+     * Assignment Operator
+     * 
+     * @param sg_count the value to assing to this entry.
+     * @return the entry with the new value assigned.
+     */
+    SgCount& operator=(const SgCount& sg_count) {
+	_pktcnt = sg_count.pktcnt();
+	_bytecnt = sg_count.bytecnt();
+	_wrong_if = sg_count.wrong_if();
+	return (*this);
+    }
+    
+    /**
+     * Assign-Sum Operator
+     * 
+     * @param sg_count the value to add to this entry.
+     * @return the entry with the new value after @ref sg_count was added.
+     */
+    SgCount& operator+=(const SgCount& sg_count) {
+	_pktcnt += sg_count.pktcnt();
+	_bytecnt += sg_count.bytecnt();
+	_wrong_if += sg_count.wrong_if();
+	return (*this);
+    }
+    
+    /**
+     * Assign-Difference Operator
+     * 
+     * @param sg_count the value to substract from this entry.
+     * @return the entry with the new value after @ref sg_count was
+     * substracted.
+     */
+    SgCount& operator-=(const SgCount& sg_count) {
+	_pktcnt -= sg_count.pktcnt();
+	_bytecnt -= sg_count.bytecnt();
+	_wrong_if -= sg_count.wrong_if();
+	return (*this);
+    }
+    
+    /**
+     * Get the packet count.
+     * 
+     * @return the packet count.
+     */
+    size_t	pktcnt()	const	{ return (_pktcnt);	}
+    
+    /**
+     * Get the byte count.
+     * 
+     * @return the byte count.
+     */
+    size_t	bytecnt()	const	{ return (_bytecnt);	}
+    
+    /**
+     * Get the number of packets received on wrong interface.
+     * 
+     * @return the number of packets received on wrong interface.
+     */
+    size_t	wrong_if()	const	{ return (_wrong_if);	}
+    
+    /**
+     * Set the packet count.
+     * 
+     * @param v the value to assign to the packet count.
+     */
+    void	set_pktcnt(size_t v)	{ _pktcnt = v;		}
+    
+    /**
+     * Set the byte count.
+     * 
+     * @param v the value to assign to the byte count.
+     */
+    void	set_bytecnt(size_t v)	{ _bytecnt = v;		}
+    
+    /**
+     * Set the wrong-interface packet count.
+     * 
+     * @param v the value to assign to the wrong-interface packet count.
+     */
+    void	set_wrong_if(size_t v)	{ _wrong_if = v;	}
+    
+    /**
+     * Reset all counters.
+     */
+    void	reset() { _pktcnt = 0; _bytecnt = 0; _wrong_if = 0; }
+    
+    /**
+     * Test if this entry contains valid counters.
+     * 
+     * @return true if this entry contains valid counters, otherwise false.
+     */
+    bool	is_valid() const { return (! ((_pktcnt == (size_t)~0)
+					      && (_bytecnt == (size_t)~0)
+					      && (_wrong_if == (size_t)~0))); }
+    
+private:
+    size_t	_pktcnt;	// Number of multicast data packets received
+    size_t	_bytecnt;	// Number of multicast data bytes received
+    size_t	_wrong_if;	// Number of multicast data packets received
+				// on wrong iif
+};
+
+//
+// A class that contains information about a vif in the kernel.
+//
+
+/**
+ * @short Class that contains various counters per virtual interface.
+ * 
+ * All counters are related to the multicast data packets per virtual
+ * interface.
+ */
+class VifCount {
+public:
+    /**
+     * Default constructor
+     */
+    VifCount() : _icount(0), _ocount(0), _ibytes(0), _obytes(0) {}
+    
+    /**
+     * Assignment Operator
+     * 
+     * @param vif_count the value to assign to this entry.
+     * @return the entry with the new value assigned.
+     */
+    VifCount& operator=(const VifCount& vif_count) {
+	_icount = vif_count.icount();
+	_ocount = vif_count.ocount();
+	_ibytes = vif_count.ibytes();
+	_obytes = vif_count.obytes();
+	return (*this);
+    }
+    
+    /**
+     * Get the input packet count.
+     * 
+     * @return the input packet count.
+     */
+    size_t	icount()	const	{ return (_icount);	}
+    
+    /**
+     * Get the output packet count.
+     * 
+     * @return the output packet count.
+     */
+    size_t	ocount()	const	{ return (_ocount);	}
+    
+    /**
+     * Get the input byte count.
+     * 
+     * @return the input byte count.
+     */
+    size_t	ibytes()	const	{ return (_ibytes);	}
+    
+    /**
+     * Get the output byte count.
+     * 
+     * @return the output byte count.
+     */
+    size_t	obytes()	const	{ return (_obytes);	}
+    
+    /**
+     * Set the input packet count.
+     * 
+     * @param v the value to assign to the data packet count.
+     */
+    void	set_icount(size_t v)	{ _icount = v;		}
+
+    /**
+     * Set the output packet count.
+     * 
+     * @param v the value to assign to the output packet count.
+     */
+    void	set_ocount(size_t v)	{ _ocount = v;		}
+
+    /**
+     * Set the input byte count.
+     * 
+     * @param v the value to assign to the data byte count.
+     */
+    void	set_ibytes(size_t v)	{ _ibytes = v;		}
+    
+    /**
+     * Set the output byte count.
+     * 
+     * @param v the value to assign to the output byte count.
+     */
+    void	set_obytes(size_t v)	{ _obytes = v;		}
+    
+    /**
+     * Test if this entry contains valid counters.
+     * 
+     * @return true if this entry contains valid counters, otherwise false.
+     */
+    bool	is_valid() const { return (! ((_icount == (size_t)~0)
+					      && (_ocount == (size_t)~0)
+					      && (_ibytes == (size_t)~0)
+					      && (_obytes == (size_t)~0))); }
+    
+private:
+    size_t	_icount;	// Number of input multicast data packets
+    size_t	_ocount;	// Number of output multicast data packets
+    size_t	_ibytes;	// Number of input multicast data bytes
+    size_t	_obytes;	// Number of output multicast data bytes
 };
 
 //
