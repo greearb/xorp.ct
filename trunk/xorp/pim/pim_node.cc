@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.17 2003/07/07 18:45:11 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.18 2003/07/07 21:37:58 pavlin Exp $"
 
 
 //
@@ -91,9 +91,11 @@ PimNode::PimNode(int family, xorp_module_id module_id,
     
     _buffer_recv = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     
+    //
     // Set the node status.
     // XXX: note that we don't really need to wait for MFEA and MLD6IGMP,
     // hence we are READY.
+    //
     ProtoNode<PimVif>::set_node_status(PROC_READY);
 }
 
@@ -111,29 +113,11 @@ PimNode::~PimNode(void)
     //
     // XXX: the MRT, MRIB, etc tables, and the PimVifs will be automatically
     // "destructed".
+    //
     
     delete_all_vifs();
     
     BUFFER_FREE(_buffer_recv);
-}
-
-/**
- * PimNode::set_proto_version:
- * @proto_version: The protocol version to set.
- * 
- * Set protocol version.
- * 
- * Return value: %XORP_OK is @proto_version is valid, otherwise %XORP_ERROR.
- **/
-int
-PimNode::set_proto_version(int proto_version)
-{
-    if ((proto_version < PIM_VERSION_MIN) || (proto_version > PIM_VERSION_MAX))
-	return (XORP_ERROR);
-    
-    ProtoUnit::set_proto_version(proto_version);
-    
-    return (XORP_OK);
 }
 
 /**
@@ -152,9 +136,11 @@ PimNode::start(void)
     if (ProtoNode<PimVif>::start() < 0)
 	return (XORP_ERROR);
     
+    //
     // Set the node status.
     // XXX: note that we don't really need to wait for MFEA and MLD6IGMP,
     // hence we are READY.
+    //
     ProtoNode<PimVif>::set_node_status(PROC_READY);
     
     //
@@ -169,17 +155,11 @@ PimNode::start(void)
     // Start the pim_vifs
     start_all_vifs();
     
-    // TODO: start the BSR module only if we are enabled to run the
-    // BSR mechanism.
+    // Start the BSR module only if we are enabled to run the BSR mechanism
     if (_pim_bsr.is_enabled()) {
 	if (_pim_bsr.start() < 0)
 	    return (XORP_ERROR);
     }
-    
-    //
-    // Perform misc. PIM-specific start operations
-    //
-    // TODO: IMPLEMENT IT!
     
     return (XORP_OK);
 }
@@ -211,8 +191,6 @@ PimNode::stop(void)
     //
     // Perform misc. PIM-specific stop operations
     //
-    // TODO: IMPLEMENT IT!
-    
     _pim_bsr.stop();
     
     // Stop the vifs
