@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.2 2003/08/25 16:59:10 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.3 2003/08/26 19:04:38 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -48,9 +48,9 @@ public:
     inline IfMap& interfaces()				{ return _ifs; }
 
     /**
-     * Erase all interface state.
+     * Clear all interface state.
      */
-    inline void clear();
+    inline void clear()					{ _ifs.clear(); }
 
     /**
      * Find interface.
@@ -352,6 +352,7 @@ IfMgrIfAtom::IfMgrIfAtom(const string& name)
     : _name(name)
 {}
 
+
 // ----------------------------------------------------------------------------
 // Inline IfMgrVifAtom methods
 
