@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.5 2003/05/04 06:25:21 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/unexpanded_xrl.cc,v 1.6 2003/12/02 09:38:59 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -38,22 +38,30 @@ UnexpandedXrl::~UnexpandedXrl()
 }
 
 /**
- * expand expands the variables in the unexpanded xrl, and creates an
+ * Expand expands the variables in the unexpanded XRL, and creates an
  * XRL that we can actually send.  
  */
 Xrl*
 UnexpandedXrl::expand() const
 {
-    
-    if (_xrl == NULL) {
-	string request = _action.expand_xrl_variables(_node);
-	debug_msg("XRL expanded to %s\n", request.c_str());
-	try {
-	    _xrl = new Xrl(request.c_str());
-	} catch (const InvalidString& e) {
-	    debug_msg("Failed to initialize XRL: %s\n", e.why().c_str());
-	    return NULL;
-	}
+    string request, errmsg;
+
+    // Remove the old expanded XRL, because it may be obsolete
+    if (_xrl != NULL) {
+	delete _xrl;
+	_xrl = NULL;
+    }
+
+    if (_action.expand_xrl_variables(_node, request, errmsg) != XORP_OK) {
+	debug_msg("Failed to expand XRL variables: %s\n", errmsg.c_str());
+	return NULL;
+    }
+    debug_msg("XRL expanded to %s\n", request.c_str());
+    try {
+	_xrl = new Xrl(request.c_str());
+    } catch (const InvalidString& e) {
+	debug_msg("Failed to initialize XRL: %s\n", e.why().c_str());
+	return NULL;
     }
     return _xrl;
 }
