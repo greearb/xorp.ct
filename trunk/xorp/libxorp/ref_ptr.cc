@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ref_ptr.cc,v 1.3 2003/03/10 23:20:34 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ref_ptr.cc,v 1.4 2003/03/31 16:40:03 hodson Exp $"
 
 #include <assert.h>
 #include <iostream>
@@ -236,7 +236,7 @@ int32_t
 cref_counter_pool::decr_counter(int32_t index)
 {
     POOL_PARANOIA(assert((size_t)index < _counters.size()));
-    int32_t c = _counters[index].count--;
+    int32_t c = --_counters[index].count;
     if (c == 0) {
 	POOL_PARANOIA(check());
 	/* recycle */
