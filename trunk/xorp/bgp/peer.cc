@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.61 2004/04/01 19:54:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.62 2004/04/15 16:13:28 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
+// #define CHECK_TIME
 
 #include "bgp_module.h"
 #include "config.h"
@@ -23,6 +24,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/timer.hh"
 #include "xrl/interfaces/bgp_mib_traps_xif.hh"
+#include "libxorp/timespent.hh"
 
 #include "peer.hh"
 #include "bgp.hh"
@@ -72,6 +74,8 @@ bool
 BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 			 size_t length)
 {
+    TIMESPENT();
+
     switch (status) {
     case BGPPacket::GOOD_MESSAGE:
 	break;
@@ -79,12 +83,14 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
     case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
 	notify_peer_of_error(MSGHEADERERR, BADMESSLEN);
 	event_tranfatal();
+	TIMESPENT_CHECK();
 	return false;
 
     case BGPPacket::CONNECTION_CLOSED:
  	// _SocketClient->disconnect();
  	event_closed();
 	// XLOG_ASSERT(!is_connected());
+	TIMESPENT_CHECK();
 	return false;
     }
 
@@ -112,6 +118,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    // want unified decode call. now need to get peerdata out.
 	    _peerdata->dump_peer_data();
 	    event_openmess(&pac);
+	    TIMESPENT_CHECK();
 	    break;
 	}
 	case MESSAGETYPEKEEPALIVE: {
@@ -120,6 +127,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    KeepAlivePacket pac(buf, length);
 	    // debug_msg(pac.str().c_str());
 	    event_keepmess();
+	    TIMESPENT_CHECK();
 	    break;
 	}
 	case MESSAGETYPEUPDATE: {
@@ -130,6 +138,10 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
 	    event_recvupdate(&pac);
+	    TIMESPENT_CHECK();
+	    if(TIMESPENT_OVERLIMIT()) {
+		printf("%s\n", pac.str().c_str());
+	    }
 	    break;
 	}
 	case MESSAGETYPENOTIFICATION: {
@@ -155,6 +167,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		_last_error[1] = pac.error_subcode();
 		event_recvnotify();
 	    }
+	    TIMESPENT_CHECK();
 	    break;
 	}
 	default:
@@ -164,6 +177,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    XLOG_ERROR("Unknown packet type %d", header->type);
 	    notify_peer_of_error(MSGHEADERERR, BADMESSTYPE);
 	    event_tranfatal();
+	    TIMESPENT_CHECK();
 	    return false;
 	}
     } catch(CorruptMessage c) {
@@ -175,15 +189,19 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		     c.why().c_str());
 	notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
 	event_tranfatal();
-
+	TIMESPENT_CHECK();
 	return false;
     }
+
+    TIMESPENT_CHECK();
 
     /*
     ** If we are still connected and supposed to be reading.
     */
-    if (!is_connected() || !still_reading())
+    if (!is_connected() || !still_reading()) {
+	TIMESPENT_CHECK();
 	return false;
+    }
 
     return true;
 }
@@ -378,6 +396,8 @@ BGPPeer::hook_stopped()
 void
 BGPPeer::event_start()			// EVENTBGPSTART
 { 
+    TIMESPENT();
+
     switch(_state) {
 
     case STATESTOPPED:
@@ -1425,10 +1445,14 @@ BGPPeer::clear_stopped_timer()
 bool
 BGPPeer::release_resources()
 {
+    TIMESPENT();
+
     debug_msg("BGPPeer::release_resources()\n");
 
     if (_handler != NULL && _handler->peering_is_up())
 	_handler->peering_went_down();
+
+    TIMESPENT_CHECK();
 
     /*
     ** Only if we are connected call the disconnect.
@@ -1479,6 +1503,8 @@ BGPPeer::pretty_print_state(FSMState s)
 void
 BGPPeer::set_state(FSMState s, bool error)
 {
+    TIMESPENT();
+
     debug_msg("Peer %s: Previous state: %s Current state: %s\n",
 	    peerdata()->iptuple().str().c_str(),
 	    pretty_print_state(_state),
