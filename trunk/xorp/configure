@@ -3699,7 +3699,7 @@ fi
 echo "$as_me:$LINENO: result: $xorp_cv_default_gmake" >&5
 echo "${ECHO_T}$xorp_cv_default_gmake" >&6
 
-for ac_prog in python2 python
+for ac_prog in python2.2 python2 python
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -9176,7 +9176,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile MakefileRootCheck bgp/Makefile bgp/harness/Makefile bgp/tools/Makefile cli/Makefile docs/Makefile docs/bgp/Makefile docs/design_arch/Makefile docs/fea/Makefile docs/libxipc/Makefile docs/libxorp/Makefile docs/mfea/Makefile docs/mld6igmp/Makefile docs/multicast/Makefile docs/pim/Makefile docs/pim_testsuite/Makefile docs/rib/Makefile docs/rtrmgr/Makefile docs/snmp/Makefile docs/test_harness/Makefile etc/Makefile etc/templates/Makefile fea/Makefile fea/MakefileRootCheck libcomm/Makefile libfeaclient/Makefile libproto/Makefile libxipc/Makefile libxorp/Makefile mibs/Makefile mibs/snmpdscripts/Makefile mibs/tests/Makefile mld6igmp/Makefile mrt/Makefile ospfd/Makefile ospfd/src/Makefile ospfd/xorp/Makefile pim/Makefile policy/Makefile rib/Makefile rip/Makefile rtrmgr/Makefile rtrmgr/tools/Makefile utils/Makefile utils/flower_malloc/Makefile xrl/Makefile xrl/interfaces/Makefile xrl/targets/Makefile xrl/tests/Makefile mibs/tests/test_bgpmib.sh mibs/snmpdscripts/startsnmp"
+ac_config_files="$ac_config_files Makefile MakefileRootCheck bgp/Makefile bgp/harness/Makefile bgp/tools/Makefile cli/Makefile docs/Makefile docs/bgp/Makefile docs/design_arch/Makefile docs/fea/Makefile docs/libxipc/Makefile docs/libxorp/Makefile docs/mfea/Makefile docs/mld6igmp/Makefile docs/multicast/Makefile docs/pim/Makefile docs/pim_testsuite/Makefile docs/rib/Makefile docs/rtrmgr/Makefile docs/snmp/Makefile docs/test_harness/Makefile etc/Makefile etc/templates/Makefile fea/Makefile fea/MakefileRootCheck libcomm/Makefile libfeaclient/Makefile libproto/Makefile libxipc/Makefile libxorp/Makefile mibs/Makefile mibs/snmpdscripts/Makefile mibs/tests/Makefile mld6igmp/Makefile mrt/Makefile ospfd/Makefile ospfd/src/Makefile ospfd/xorp/Makefile pim/Makefile policy/Makefile rib/Makefile rip/Makefile rtrmgr/Makefile rtrmgr/tools/Makefile static_routes/Makefile utils/Makefile utils/flower_malloc/Makefile xrl/Makefile xrl/interfaces/Makefile xrl/targets/Makefile xrl/tests/Makefile mibs/tests/test_bgpmib.sh mibs/snmpdscripts/startsnmp"
 ac_config_commands="$ac_config_commands default"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9704,6 +9704,7 @@ do
   "rip/Makefile" ) CONFIG_FILES="$CONFIG_FILES rip/Makefile" ;;
   "rtrmgr/Makefile" ) CONFIG_FILES="$CONFIG_FILES rtrmgr/Makefile" ;;
   "rtrmgr/tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES rtrmgr/tools/Makefile" ;;
+  "static_routes/Makefile" ) CONFIG_FILES="$CONFIG_FILES static_routes/Makefile" ;;
   "utils/Makefile" ) CONFIG_FILES="$CONFIG_FILES utils/Makefile" ;;
   "utils/flower_malloc/Makefile" ) CONFIG_FILES="$CONFIG_FILES utils/flower_malloc/Makefile" ;;
   "xrl/Makefile" ) CONFIG_FILES="$CONFIG_FILES xrl/Makefile" ;;

@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.76 2003/11/07 00:30:02 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.77 2003/11/07 07:05:54 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -284,7 +284,7 @@ AC_CACHE_CHECK(if default make is GNU make, xorp_cv_default_gmake,
 		  fi
 		  xorp_cv_default_gmake=${DEFAULT_GMAKE})
 
-AC_CHECK_PROGS(PYTHON, python2 python, "NO_PYTHON")
+AC_CHECK_PROGS(PYTHON, python2.2 python2 python, "NO_PYTHON")
 if test "${PYTHON}" != "NO_PYTHON" ; then
   AC_CACHE_CHECK(
     "python version 2.0 or above", xorp_python_good,
@@ -1361,6 +1361,7 @@ AC_OUTPUT(
 	rip/Makefile
 	rtrmgr/Makefile
 	rtrmgr/tools/Makefile
+	static_routes/Makefile
 	utils/Makefile
 	utils/flower_malloc/Makefile
 	xrl/Makefile
