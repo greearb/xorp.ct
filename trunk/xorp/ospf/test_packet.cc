@@ -429,7 +429,6 @@ packet_decoder2(TestInfo& info, OspfTypes::Version version)
 
     HelloPacket hello(version);
     populate_hello(&hello, version);
-
     
     vector<uint8_t> pkt;
     hello.encode(pkt);
@@ -518,6 +517,51 @@ router_lsa_compare(TestInfo& info, OspfTypes::Version version)
     return true;
 }
 
+bool
+lsa_decoder1(TestInfo& info, OspfTypes::Version version)
+{
+    LsaDecoder dec(version);
+    RouterLsa router_lsa(version);
+    populate_router_lsa(&router_lsa, version);
+
+    router_lsa.encode();
+    size_t len;
+    uint8_t *ptr = router_lsa.lsa(len);
+
+    // An attempt to decode a packet with no decoders installed should
+    // fail.
+    try {
+	dec.decode(ptr, len);
+    } catch(BadPacket& e) {
+	DOUT(info) << "Caught exception: " << e.str() << endl;
+	return true;
+    }
+
+    return false;
+}
+
+bool
+lsa_decoder2(TestInfo& info, OspfTypes::Version version)
+{
+    LsaDecoder dec(version);
+    // Install a decoder for router LSAs.
+    RouterLsa *router_lsa_decoder = new RouterLsa(version);
+    dec.register_decoder(router_lsa_decoder);
+
+    RouterLsa router_lsa(version);
+    populate_router_lsa(&router_lsa, version);
+    router_lsa.encode();
+    size_t len;
+    uint8_t *ptr = router_lsa.lsa(len);
+
+    // An attempt to decode a LSA with a decoder installed should succeed.
+    Lsa::LsaRef lsaref = dec.decode(ptr, len);
+
+    DOUT(info) << lsaref->str() << endl;
+
+    return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -556,6 +600,10 @@ main(int argc, char **argv)
 
 	{"router_lsa_compareV2", callback(router_lsa_compare, OspfTypes::V2)},
 	{"router_lsa_compareV3", callback(router_lsa_compare, OspfTypes::V3)},
+	{"lsa_decoder1V2", callback(lsa_decoder1, OspfTypes::V2)},
+	{"lsa_decoder1V3", callback(lsa_decoder1, OspfTypes::V3)},
+	{"lsa_decoder2V2", callback(lsa_decoder2, OspfTypes::V2)},
+	{"lsa_decoder2V3", callback(lsa_decoder2, OspfTypes::V3)},
     };
 
     try {
