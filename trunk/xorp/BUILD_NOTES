@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.12 2004/06/16 05:37:05 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.13 2004/06/17 05:20:52 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -83,9 +83,17 @@ gmake check
       limit.  If you see a compilation error like:
 	  /usr/bin/ld: final link failed: Memory exhausted
 	  collect2: ld returned 1 exit status
-      then you should run "limit datasize 200000" in tcsh
-      or "ulimit -d 200000" in sh. If necessary, increase further the
-      the datasize limit.
+      then you should increase the data size limit by
+      "limit datasize 200000" in tcsh or "ulimit -d 200000" in sh.
+      If necessary, increase further the the datasize limit.
+    - The default limit of maximum opened file descriptors per process
+      is 64 which may not be sufficient. If you run a XORP program and
+      there are errors like:
+
+	  [ 2004/06/20 22:26:09  ERROR test_pim:31634 LIBCOMM +582 comm_sock.c comm_sock_accept ] Error accepting socket 4: Too many open files
+
+      then you should increase the file descriptors limit by
+      "limit descriptors 500" in tcsh or "ulimit -n 400" in sh.
 
 3.4. Linux
 ==========
