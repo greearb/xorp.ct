@@ -1,10 +1,9 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/targets/policy.tgt,v 1.1 2004/09/17 14:05:12 abittau Exp $ */
 
 #include "common.xif"
 #include "finder_event_observer.xif"
 #include "policy.xif"
 
-target policy implements \
-	common/0.1, \
-	finder_event_observer/0.1, \
-	policy/0.1
+target policy implements	common/0.1,				\
+				finder_event_observer/0.1,		\
+				policy/0.1
