@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.12 2003/10/13 23:32:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.13 2003/10/21 02:04:53 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -301,7 +301,8 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     // Force to receive data from the kernel, and then parse it
     //
     _ns_reader.receive_data(*ns_ptr, nlh->nlmsg_seq);
-    if (parse_buffer_nlm(fte, _ns_reader.buffer(), _ns_reader.buffer_size())
+    if (parse_buffer_nlm(fte, _ns_reader.buffer(), _ns_reader.buffer_size(),
+			 true)
 	!= true) {
 	return (false);
     }
