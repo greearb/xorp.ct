@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.15 2004/10/01 22:47:35 atanu Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.16 2004/10/05 01:53:48 atanu Exp $"
 
 #include <list>
 #include <string>
@@ -995,7 +995,11 @@ RedistTransactionXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
 {
     if (this->_profile.enabled(profile_route_rpc_in))
 	this->_profile.log(profile_route_rpc_in,
-			   c_format("add %s", ipr.net().str().c_str()));
+			   c_format("add %s %s %s %u",
+				    ipr.protocol().name().c_str(),
+				    ipr.net().str().c_str(),
+				    ipr.nexthop()->str().c_str(),
+				    ipr.metric()));
 
     bool no_running_tasks = (this->task_count() == 0);
 
@@ -1022,7 +1026,9 @@ RedistTransactionXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
 {
     if (this->_profile.enabled(profile_route_rpc_in))
 	this->_profile.log(profile_route_rpc_in,
-			   c_format("delete %s", ipr.net().str().c_str()));
+			   c_format("add %s %s",
+				    ipr.protocol().name().c_str(),
+				    ipr.net().str().c_str()));
 
     bool no_running_tasks = (this->task_count() == 0);
 
