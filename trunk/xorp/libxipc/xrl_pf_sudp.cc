@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.3 2002/12/19 01:29:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.4 2003/01/17 00:49:12 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -71,7 +71,7 @@ render_dispatch_header(const XUID& id, size_t content_bytes)
     HeaderWriter h;
     h.add("Protocol", SUDP_PROTOCOL);
     h.add("XUID", id.str());
-    h.add("Content-Length", content_bytes);
+    h.add("Content-Length", (uint32_t)content_bytes);
     return h.str();
 }
 
@@ -83,7 +83,7 @@ parse_dispatch_header(string hdr, XUID& id, size_t& content_bytes)
 	string protocol, sid;
 	h.get("Protocol", protocol);
 	h.get("XUID", sid);
-	h.get("Content-Length", content_bytes);
+	h.get("Content-Length", (uint32_t&)content_bytes);
 	id = XUID(sid);
 	return (protocol == SUDP_PROTOCOL);
     } catch (const HeaderReader::InvalidString&) {
@@ -133,7 +133,7 @@ render_response(const XrlError& e, const XUID& id, size_t content_bytes)
     h.add("Protocol", SUDP_PROTOCOL);
     h.add("XUID", id.str());
     h.add("Status", xrlerror_to_status(e));
-    h.add("Content-Length", content_bytes);
+    h.add("Content-Length", (uint32_t)content_bytes);
     return h.str();
 }
 
@@ -157,7 +157,7 @@ parse_response(const char* buf,
 	string xuid_str;
 	h.get("XUID", xuid_str);
 	xuid = XUID(xuid_str);
-	h.get("Content-Length", content_bytes);
+	h.get("Content-Length", (uint32_t&)content_bytes);
 	header_bytes = h.bytes_consumed();
 
 	return true;
