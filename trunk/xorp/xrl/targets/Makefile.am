@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.27 2004/03/15 23:28:06 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.28 2004/03/18 13:14:28 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -87,12 +87,14 @@ libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
 $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/bgp.xif				\
-		$(INTERFACES_DIR)/rib_client.xif
+		$(INTERFACES_DIR)/rib_client.xif			\
+		$(INTERFACES_DIR)/finder_event_observer.xif
 
 # BGP4MIB
 libbgp4mibbase_a_SOURCES = bgp4_mib_base.hh bgp4_mib_base.cc
 $(srcdir)/bgp4_mib_base.hh $(srcdir)/bgp4_mib_base.cc:			\
-		$(INTERFACES_DIR)/common.xif
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/bgp_mib_traps.xif
 
 # CLI
 libclibase_a_SOURCES = cli_base.hh cli_base.cc
@@ -193,15 +195,17 @@ $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
 		$(INTERFACES_DIR)/mfea_client.xif			\
-		$(INTERFACES_DIR)/mld6igmp_client.xif			\
 		$(INTERFACES_DIR)/fti.xif				\
+		$(INTERFACES_DIR)/mld6igmp_client.xif			\
 		$(INTERFACES_DIR)/pim.xif
 
 # RIB
 libribbase_a_SOURCES = rib_base.hh rib_base.cc
 $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/rib.xif
+		$(INTERFACES_DIR)/rib.xif				\
+		$(INTERFACES_DIR)/fea_ifmgr_client.xif			\
+		$(INTERFACES_DIR)/finder_event_observer.xif
 
 # RIB client
 libribclientbase_a_SOURCES = ribclient_base.hh ribclient_base.cc
