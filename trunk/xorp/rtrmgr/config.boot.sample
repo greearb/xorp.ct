@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.10 2004/06/12 05:50:02 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.11 2004/06/15 00:21:01 atanu Exp $ */
 
 
 interfaces {
@@ -126,7 +126,7 @@ protocols {
 	    as: 65000
 	    holdtime: 90
 	    next-hop: 10.10.10.20
-	    enabled: true
+	    /* enabled: true */
 
 	    /* Optionally enable other AFI/SAFI combinations */
 	    /*enable-ipv4-multicast*/
