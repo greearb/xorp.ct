@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.7 2003/06/04 17:31:18 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.8 2003/06/05 02:38:26 pavlin Exp $
 #
 
 #
@@ -372,6 +372,16 @@ html_start_page="index.html"
 files="fea/*.hh"
 excludes="fea/*click*hh"
 xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli"
+kdocify
+
+#
+# libfeaclient
+#
+lib="libfeaclient"
+desc="Forwarind Engine Abstraction Library"
+html_start_page="index.html"
+files="libfeaclient/*.hh"
+xref="libxorp libxorp-callback libcomm libxipc"
 kdocify
 
 #
