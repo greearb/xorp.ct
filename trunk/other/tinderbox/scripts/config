@@ -43,7 +43,12 @@ home_linux26_gcc33="tinderbox"
 env_linux26_gcc33="MALLOC_CHECK_=2"
 buildflags_linux26_gcc33="-j 2"
 
-TINDERBOX_CONFIGS="fbsd410_gcc34 fbsd410_gcc34_stldebug fbsd410_gcc33 fbsd410_gcc295 linux24_gcc296 linux26_gcc33"
+host_fbsd53_gcc34="ibex.cs.ucl.ac.uk"
+home_fbsd53_gcc34="tinderbox"
+env_fbsd53_gcc34="MALLOC_CHECK_=2"
+buildflags_fbsd53_gcc34="-j 2"
+
+TINDERBOX_CONFIGS="fbsd410_gcc34 fbsd410_gcc34_stldebug fbsd410_gcc33 fbsd410_gcc295 linux24_gcc296 linux26_gcc33 fbsd53_gcc34"
 
 #
 # Configuration variables for tinderbox
