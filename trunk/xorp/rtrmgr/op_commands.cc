@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.12 2004/01/15 08:51:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.16 2004/05/26 04:24:32 pavlin Exp $"
 
 #include <glob.h>
 #include <sys/types.h>
@@ -285,7 +285,7 @@ OpCommand::execute(EventLoop* eventloop, const list<string>& command_line,
 		   RouterCLI::OpModeCallback cb)
 {
     string command_arguments_str;
-    list<string>::const_iterator iter, iter2;
+    list<string>::const_iterator iter;
 
     //
     // Add all arguments. If an argument is positional (e.g., $0, $1, etc),
