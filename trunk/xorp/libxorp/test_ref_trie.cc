@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.3 2003/06/26 21:38:54 jcardona Exp $"
+#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.4 2003/07/28 23:37:50 jcardona Exp $"
 
 #include "xorp.h"
 #include "ipv4net.hh"
@@ -540,7 +540,7 @@ int main() {
     printf("-----------\n");
     RefTrie<IPv4, IPv4RouteEntry*>::PreOrderIterator ti; 
     int subnetidx = 0;
-    for (ti = trie.begin() ; ti != trie.end() ; ti++) {
+    for (ti = trie.begin() ; ti != trie.end() ; ++ti) {
         printf("*** node: %-26s %s\n",
                ti.cur()->k().str().c_str(),
                ti.cur()->has_payload() ? "PL" : "[]");
@@ -564,7 +564,7 @@ int main() {
     printf("Test of postfix increment (ti++)\n");
     printf("-----------\n");
     subnetidx = 0;     
-    for (ti = trie.begin() ; ti != trie.end() ; ++ti) {
+    for (ti = trie.begin() ; ti != trie.end() ; ti++) {
         printf("*** node: %-26s %s\n",
                ti.cur()->k().str().c_str(),
                ti.cur()->has_payload() ? "PL" : "[]");
