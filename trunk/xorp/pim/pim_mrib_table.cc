@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.5 2004/05/17 23:50:09 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.6 2004/06/10 22:41:31 hodson Exp $"
 
 //
 // PIM Multicast Routing Information Base Table implementation.
@@ -90,14 +90,16 @@ PimMribTable::add_pending_insert(uint32_t tid, const Mrib& mrib,
     add_modified_prefix(mrib.dest_prefix());
 
     //
-    // XXX: if the MRIB entry is for one of my own addresses, then we
-    // check the next-hop interface. If it points toward the loopback
-    // interface (e.g., in case of KAME IPv6 stack), then we overwrite it
-    // with the network interface this address belongs to.
+    // XXX: if the next-hop interface points toward the loopback interface
+    // (e.g., in case of KAME IPv6 stack), or points toward an invalid
+    // interface (e.g., in case the loopback interface is not configured),
+    // and if the MRIB entry is for one of my own addresses, then we
+    // overwrite it with the network interface this address belongs to.
     //
     uint16_t vif_index = mrib.next_hop_vif_index();
     PimVif *pim_vif = pim_node().vif_find_by_vif_index(vif_index);
-    if ((pim_vif != NULL) && pim_vif->is_loopback()) {
+    if ((vif_index == Vif::VIF_INDEX_INVALID)
+	|| ((pim_vif != NULL) && pim_vif->is_loopback())) {
 	const IPvXNet& dest_prefix = mrib.dest_prefix();
 	if (dest_prefix.prefix_len() == IPvX::addr_bitlen(family())) {
 	    pim_vif = pim_node().vif_find_by_addr(dest_prefix.masked_addr());
