@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.2 2004/10/21 07:30:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.3 2004/10/27 01:19:02 bms Exp $"
 
 
 #include "fea_module.h"
@@ -46,10 +46,12 @@ ClickSocket::ClickSocket(EventLoop& e)
       _fd(-1),
       _seqno(0),
       _instance_no(_instance_cnt++),
+      _is_enabled(false),
       _is_kernel_click(false),
       _is_user_click(false),
-      _user_click_addr(DEFAULT_USER_CLICK_CONTROL_ADDRESS),
-      _user_click_port(DEFAULT_USER_CLICK_CONTROL_PORT)
+      _user_click_command_execute_on_startup(false),
+      _user_click_control_address(DEFAULT_USER_CLICK_CONTROL_ADDRESS),
+      _user_click_control_socket_port(DEFAULT_USER_CLICK_CONTROL_SOCKET_PORT)
 {
 
 }
@@ -71,14 +73,15 @@ ClickSocket::start()
 
     if (is_user_click()) {
 	if (_fd >= 0)
-	    return (_fd);
+	    return (XORP_OK);
 
 	//
 	// Open the socket
 	//
 	struct in_addr in_addr;
-	_user_click_addr.copy_out(in_addr);
-	_fd = comm_connect_tcp4(&in_addr, htons(_user_click_port),
+	_user_click_control_address.copy_out(in_addr);
+	_fd = comm_connect_tcp4(&in_addr,
+				htons(_user_click_control_socket_port),
 				COMM_SOCK_BLOCKING);
 	if (_fd < 0) {
 	    XLOG_ERROR("Could not open user-level Click socket: %s",

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/click_socket.hh,v 1.1 2004/10/21 00:44:22 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -35,6 +35,22 @@ class ClickSocket {
 public:
     ClickSocket(EventLoop& e);
     ~ClickSocket();
+
+    /**
+     * Enable/disable Click support.
+     *
+     * Note that this operation does not start the Click operations.
+     *
+     * @param v if true, then enable Click support, otherwise disable it.
+     */
+    void enable_click(bool v) { _is_enabled = v; }
+
+    /**
+     * Test if the Click support is enabled.
+     *
+     * @return true if the Click support is enabled, otherwise false.
+     */
+    bool is_enabled() const { return (_is_enabled); }
 
     /**
      * Enable/disable kernel-level Click.
@@ -83,6 +99,76 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int stop();
+
+    /**
+     * Specify the external program to generate the Click configuration.
+     *
+     * @param v the name of the external program to generate the Click
+     * configuration.
+     */
+    void set_click_config_generator_file(const string& v) {
+	_click_config_generator_file = v;
+    }
+
+    /**
+     * Specify the user-level Click command file.
+     *
+     * @param v the name of the user-level Click command file.
+     */
+    void set_user_click_command_file(const string& v) {
+	_user_click_command_file = v;
+    }
+
+    /**
+     * Specify the extra arguments to the user-level Click command.
+     *
+     * @param v the extra arguments to the user-level Click command.
+     */
+    void set_user_click_command_extra_arguments(const string& v) {
+	_user_click_command_extra_arguments = v;
+    }
+
+    /**
+     * Specify whether to execute on startup the user-level Click command.
+     *
+     * @param v if true, then execute the user-level Click command on startup.
+     */
+    void set_user_click_command_execute_on_startup(bool v) {
+	_user_click_command_execute_on_startup = v;
+    }
+
+    /**
+     * Specify the configuration file to be used by user-level Click on
+     * startup.
+     *
+     * @param v the name of the configuration file to be used by user-level
+     * Click on startup.
+     */
+    void set_user_click_startup_config_file(const string& v) {
+	_user_click_startup_config_file = v;
+    }
+
+    /**
+     * Specify the address to use for control access to the user-level
+     * Click.
+     *
+     * @param v the address to use for control access to the user-level
+     * Click.
+     */
+    void set_user_click_control_address(const IPv4& v) {
+	_user_click_control_address = v;
+    }
+
+    /**
+     * Specify the socket port to use for control access to the user-level
+     * Click.
+     *
+     * @param v the socket port to use for control access to the user-level
+     * Click.
+     */
+    void set_user_click_control_socket_port(uint16_t v) {
+	_user_click_control_socket_port = v;
+    }
 
     /**
      * Test if the Click socket is open.
@@ -182,7 +268,7 @@ private:
     static const size_t CLSOCK_BYTES = 8*1024; // Initial guess at msg size
 
     static const IPv4 DEFAULT_USER_CLICK_CONTROL_ADDRESS;
-    static const uint16_t DEFAULT_USER_CLICK_CONTROL_PORT = 13000;
+    static const uint16_t DEFAULT_USER_CLICK_CONTROL_SOCKET_PORT = 13000;
     static const int CLICK_MAJOR_VERSION = 1;
     static const int CLICK_MINOR_VERSION = 1;
     static const size_t CLICK_COMMAND_RESPONSE_MIN_SIZE = 4;
@@ -204,10 +290,17 @@ private:
     static uint16_t _instance_cnt;
     static pid_t    _pid;
 
+    bool	_is_enabled;		// True if Click is enabled
     bool	_is_kernel_click;	// True if kernel Click is enabled
-    bool	_is_user_click;		// True if user CLick is enabled
-    IPv4	_user_click_addr;
-    uint16_t	_user_click_port;
+    bool	_is_user_click;		// True if user Click is enabled
+
+    string	_click_config_generator_file;
+    string	_user_click_command_file;
+    string	_user_click_command_extra_arguments;
+    bool	_user_click_command_execute_on_startup;
+    string	_user_click_startup_config_file;
+    IPv4	_user_click_control_address;
+    uint16_t	_user_click_control_socket_port;
 
     friend class ClickSocketPlumber; // class that hooks observers in and out
 };
