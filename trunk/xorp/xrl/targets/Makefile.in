@@ -24,7 +24,6 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
 libexecdir = @libexecdir@
-datadir = @datadir@
 sysconfdir = @sysconfdir@
 sharedstatedir = @sharedstatedir@
 localstatedir = @localstatedir@
@@ -89,12 +88,24 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
+# Redefine the data installation directory
+datadir = $(prefix)/$(subdir)
+
 INTERFACES_DIR = $(top_srcdir)/xrl/interfaces
 TARGET_DIR = $(top_srcdir)/xrl/targets
 
 ###############################################################################
 # Xrl Target related
 ###############################################################################
+
+# Add your target file here
+tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt pim.tgt rib.tgt ribclient.tgt rtrmgr.tgt test.tgt test_finder_events.tgt test_peer.tgt xorp_if_mib.tgt xorpsh.tgt
+
+# Automatically compute the list of the *.xrls files
+xrls_files = $(tgt_files:%.tgt=%.xrls)
+
+# -- Data
+data_DATA = $(xrls_files)
 
 # Add your target's library here
 noinst_LIBRARIES = libbgpbase.a libbgp4mibbase.a libclibase.a libcoordbase.a libdemofeaifmgrclientbase.a libfeabase.a libfinderbase.a libfinderclientbase.a libmfeabase.a libmld6igmpbase.a libospfbase.a libpimbase.a libribbase.a libribclientbase.a librtrmgrbase.a libtestbase.a libtestfindereventsbase.a libtestpeerbase.a libxorpifmibbase.a libxorpshbase.a
@@ -176,6 +187,9 @@ libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
 # Add your target's library sources like this:
 # Test target
 libtestbase_a_SOURCES = test_base.hh test_base.cc
+
+# -- Extra files and directories to add to the distribution
+EXTRA_DIST = $(tgt_files) $(xrls_files)
 
 
 ################################################################
@@ -318,6 +332,8 @@ DIST_SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) \
 	$(libtestfindereventsbase_a_SOURCES) \
 	$(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) \
 	$(libxorpshbase_a_SOURCES)
+DATA = $(data_DATA)
+
 DIST_COMMON = Makefile.am Makefile.in
 SOURCES = $(libbgp4mibbase_a_SOURCES) $(libbgpbase_a_SOURCES) $(libclibase_a_SOURCES) $(libcoordbase_a_SOURCES) $(libdemofeaifmgrclientbase_a_SOURCES) $(libfeabase_a_SOURCES) $(libfinderbase_a_SOURCES) $(libfinderclientbase_a_SOURCES) $(libmfeabase_a_SOURCES) $(libmld6igmpbase_a_SOURCES) $(libospfbase_a_SOURCES) $(libpimbase_a_SOURCES) $(libribbase_a_SOURCES) $(libribclientbase_a_SOURCES) $(librtrmgrbase_a_SOURCES) $(libtestbase_a_SOURCES) $(libtestfindereventsbase_a_SOURCES) $(libtestpeerbase_a_SOURCES) $(libxorpifmibbase_a_SOURCES) $(libxorpshbase_a_SOURCES)
 
@@ -461,6 +477,23 @@ distclean-depend:
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
+install-dataDATA: $(data_DATA)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(datadir)
+	@list='$(data_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " $(INSTALL_DATA) $$d$$p $(DESTDIR)$(datadir)/$$f"; \
+	  $(INSTALL_DATA) $$d$$p $(DESTDIR)$(datadir)/$$f; \
+	done
+
+uninstall-dataDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(data_DATA)'; for p in $$list; do \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(datadir)/$$f"; \
+	  rm -f $(DESTDIR)$(datadir)/$$f; \
+	done
 
 tags: TAGS
 
@@ -517,9 +550,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(LIBRARIES) $(DATA)
 
 installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(datadir)
 
 install: install-am
 install-exec: install-exec-am
@@ -561,7 +595,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-dataDATA
 
 install-exec-am:
 
@@ -579,18 +613,18 @@ mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
-uninstall-am: uninstall-info-am
+uninstall-am: uninstall-dataDATA uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-am clean clean-generic \
 	clean-noinstLIBRARIES distclean distclean-compile \
 	distclean-depend distclean-generic distclean-tags distdir dvi \
 	dvi-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-data-am install-dataDATA install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic tags uninstall uninstall-am \
-	uninstall-info-am
+	uninstall-dataDATA uninstall-info-am
 
 $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\

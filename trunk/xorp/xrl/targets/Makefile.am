@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.12 2003/05/21 00:13:04 atanu Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.13 2003/06/11 23:18:44 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -11,27 +11,58 @@ TARGET_DIR=$(top_srcdir)/xrl/targets
 # Xrl Target related
 ###############################################################################
 
+# Add your target file here
+tgt_files		 = bgp.tgt
+tgt_files		+= bgp4_mib.tgt
+tgt_files		+= cli.tgt
+tgt_files		+= coord.tgt
+tgt_files		+= demo_fea_ifmgr_client.tgt
+tgt_files		+= fea.tgt
+tgt_files		+= finder.tgt
+tgt_files		+= finder_client.tgt
+tgt_files		+= mfea.tgt
+tgt_files		+= mld6igmp.tgt
+tgt_files		+= ospf.tgt
+tgt_files		+= pim.tgt
+tgt_files		+= rib.tgt
+tgt_files		+= ribclient.tgt
+tgt_files		+= rtrmgr.tgt
+tgt_files		+= test.tgt
+tgt_files		+= test_finder_events.tgt
+tgt_files		+= test_peer.tgt
+tgt_files		+= xorp_if_mib.tgt
+tgt_files		+= xorpsh.tgt
+
+# Automatically compute the list of the *.xrls files
+xrls_files		 = $(tgt_files:%.tgt=%.xrls)
+
+# Redefine the data installation directory
+datadir = $(prefix)/$(subdir)
+
+# -- Data
+data_DATA		 = $(xrls_files)
+
 # Add your target's library here
-noinst_LIBRARIES  = libbgpbase.a
-noinst_LIBRARIES += libbgp4mibbase.a
-noinst_LIBRARIES += libclibase.a
-noinst_LIBRARIES += libcoordbase.a
-noinst_LIBRARIES += libdemofeaifmgrclientbase.a
-noinst_LIBRARIES += libfeabase.a
-noinst_LIBRARIES += libfinderbase.a
-noinst_LIBRARIES += libfinderclientbase.a
-noinst_LIBRARIES += libmfeabase.a
-noinst_LIBRARIES += libmld6igmpbase.a
-noinst_LIBRARIES += libospfbase.a
-noinst_LIBRARIES += libpimbase.a
-noinst_LIBRARIES += libribbase.a
-noinst_LIBRARIES += libribclientbase.a
-noinst_LIBRARIES += librtrmgrbase.a
-noinst_LIBRARIES += libtestbase.a
-noinst_LIBRARIES += libtestfindereventsbase.a
-noinst_LIBRARIES += libtestpeerbase.a
-noinst_LIBRARIES += libxorpifmibbase.a
-noinst_LIBRARIES += libxorpshbase.a
+noinst_LIBRARIES	 = libbgpbase.a
+noinst_LIBRARIES	+= libbgp4mibbase.a
+noinst_LIBRARIES	+= libclibase.a
+noinst_LIBRARIES	+= libcoordbase.a
+noinst_LIBRARIES	+= libdemofeaifmgrclientbase.a
+noinst_LIBRARIES	+= libfeabase.a
+noinst_LIBRARIES	+= libfinderbase.a
+noinst_LIBRARIES	+= libfinderclientbase.a
+noinst_LIBRARIES	+= libmfeabase.a
+noinst_LIBRARIES	+= libmld6igmpbase.a
+noinst_LIBRARIES	+= libospfbase.a
+noinst_LIBRARIES	+= libpimbase.a
+noinst_LIBRARIES	+= libribbase.a
+noinst_LIBRARIES	+= libribclientbase.a
+noinst_LIBRARIES	+= librtrmgrbase.a
+noinst_LIBRARIES	+= libtestbase.a
+noinst_LIBRARIES	+= libtestfindereventsbase.a
+noinst_LIBRARIES	+= libtestpeerbase.a
+noinst_LIBRARIES	+= libxorpifmibbase.a
+noinst_LIBRARIES	+= libxorpshbase.a
 
 # BGP
 libbgpbase_a_SOURCES = bgp_base.hh bgp_base.cc
@@ -186,6 +217,10 @@ libtestbase_a_SOURCES = test_base.hh test_base.cc
 $(srcdir)/test_base.hh $(srcdir)/test_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test.xif
+
+# -- Extra files and directories to add to the distribution
+EXTRA_DIST	 = $(tgt_files)
+EXTRA_DIST	+= $(xrls_files)
 
 ################################################################
 ##
