@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/profile_vars.hh,v 1.2 2004/09/21 23:13:06 atanu Exp $
+// $XORP: xorp/bgp/profile_vars.hh,v 1.3 2004/09/23 08:38:54 atanu Exp $
 
 #ifndef __BGP_PROFILE_VARS_HH__
 #define __BGP_PROFILE_VARS_HH__
@@ -28,29 +28,4 @@ const string profile_route_rpc_out = "route_rpc_out";
 
 void initialize_profiling_variables(Profile& p);
 
-/******* Profile Server Support */
-
-#include "libxipc/xrl_std_router.hh"
-#include "libxipc/xrl_error.hh"
-#include "xrl/interfaces/profile_client_xif.hh"
-
-void
-profile_transmit_log(const string& pname, XrlStdRouter *xrl_router,
-		     const string& instance_name,
-		     Profile *profile);
-
-void 
-profile_transmit_callback(const XrlError& error, string pname,
-			  XrlStdRouter *xrl_router, const string instance_name,
-			  Profile *profile);
-
-void
-profile_transmit_finished(const string& pname, XrlStdRouter *xrl_router,
-			  const string& instance_name);
-
-void
-profile_transmit_finished_callback(const XrlError& error, const string pname);
-
 #endif // __BGP_PROFILE_VARS_HH__
-
-
