@@ -1,12 +1,33 @@
-o Play catch up with RIPng.  This is mostly dulicating socket handling
-  code.
+// ----------------------------------------------------------------------------
+// Pre 1.0 Release
 
-o Arrange to have triggered updates go out of all RIP Port instances
-  at the same time.  This is a little tricky as each RIP Port instance
-  is autonomous.
+o Add HopCount check on received RIPng packets.
+
+o Add option to accept non-rip queries.
+
+o Add accessors for counters, listing peers, getting peer counters,
+  etc.  These for the basis for operational commands.
+
+o Add Operational commands.
+
+o Check and double check nexthop handling paying attention to incoming
+  and outgoing interfaces and their properties.
+
+o Reception of static routes from FEA / statics process.
+
+o Inter-op testing.
+
+// ----------------------------------------------------------------------------
+// Post 1.0 Release
+
+o MIB.
 
 o Clean up RIB interaction.  Add flag signifying RIB aware of route
   state to RouteEntry structure.  Twiddle flag when route is updated.
 
 o Consider keeping losing routes, age them in the normal way, etc, and
   be prepared to fall back to them if/when winning routes expire.
+
+o Arrange to have triggered updates go out of all RIP Port instances
+  at the same time.  This is a little tricky as each RIP Port instance
+  is autonomous.
