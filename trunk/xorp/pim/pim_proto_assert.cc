@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.16 2003/08/12 15:11:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.17 2003/09/30 18:27:05 pavlin Exp $"
 
 
 //
@@ -185,7 +185,8 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 	//
 	// (*,G) Assert received
 	//
-	// First try to apply this assert to the (S,G) assert state machine.
+	// If the source address is not zero, then first try to apply
+	// this assert to the (S,G) assert state machine.
 	// Only if the (S,G) assert state machine is in NoInfo state, and
 	// only if there was no change in the (S,G) assert state machine
 	// a result of receiving this message, then apply it to the (*,G)
@@ -194,8 +195,14 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 	do {
 	    bool is_sg_noinfo_old, is_sg_noinfo_new;
 	    
-	    if (! assert_source_addr.is_unicast())
-		break;	// Assert source address is not unicast
+	    if (assert_source_addr == IPvX::ZERO(family())) {
+		//
+		// Assert source address is zero, hence don't try to apply
+		// it to the (S,G) assert state machine.
+		//
+		break;
+	    }
+	    
 	    //
 	    // XXX: strictly speaking, we should try to create
 	    // the (S,G) state, and explicitly compare the old
@@ -374,7 +381,7 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "invalid address family error = %d",
 	       PIMTYPE2ASCII(PIM_ASSERT),
-	       cstring(addr()),
+	       cstring(primary_addr()),
 	       cstring(IPvX::PIM_ROUTERS(family())),
 	       family());
     return (XORP_ERROR);
@@ -384,7 +391,7 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_ASSERT),
-	       cstring(addr()),
+	       cstring(primary_addr()),
 	       cstring(IPvX::PIM_ROUTERS(family())));
     return (XORP_ERROR);
 }
