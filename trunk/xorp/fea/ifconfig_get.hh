@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.6 2003/05/28 21:50:54 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.7 2003/08/21 23:47:54 fred Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -21,6 +21,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/ipvx.hh"
 
+#include "netlink_socket.hh"
 
 class IfConfig;
 class IfTree;
@@ -59,6 +60,7 @@ public:
     bool parse_buffer_rtm(IfTree& it, const uint8_t *buf, size_t buf_bytes);
     bool parse_buffer_ifreq(IfTree& it, int family, const uint8_t *buf,
 			    size_t buf_bytes);
+    bool parse_buffer_nlm(IfTree& it, const uint8_t *buf, size_t buf_bytes);
     
 protected:
     int	_s4;
@@ -194,6 +196,48 @@ public:
     virtual bool pull_config(IfTree& config);
     
 private:
+};
+
+class IfConfigGetNetlink : public IfConfigGet,
+			   public NetlinkSocket4,
+			   public NetlinkSocket6,
+			   public NetlinkSocketObserver {
+public:
+    IfConfigGetNetlink(IfConfig& ifc);
+    virtual ~IfConfigGetNetlink();
+    
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+    
+    virtual bool read_config(IfTree& it);
+    virtual bool pull_config(IfTree& config);
+    
+    /**
+     * Data has pop-up.
+     * 
+     * @param data the buffer with the data.
+     * @param nbytes the number of bytes in the @ref data buffer.
+     */
+    virtual void nlsock_data(const uint8_t* data, size_t nbytes);
+    
+private:
+    
+    bool	    _cache_valid;	// Cache data arrived.
+    uint32_t	    _cache_seqno;	// Seqno of netlink socket data to
+					// cache so route lookup via netlink
+					// socket can appear synchronous.
+    vector<uint8_t> _cache_data;	// Cached netlink socket data.
 };
 
 #endif // __FEA_IFCONFIG_GET_HH__

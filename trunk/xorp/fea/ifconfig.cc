@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.10 2003/05/23 23:35:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.11 2003/08/21 23:49:14 fred Exp $"
 
 
 #include "fea_module.h"
@@ -62,6 +62,7 @@ IfConfig::IfConfig(EventLoop& eventloop,
       _ifc_get_sysctl(*this),
       _ifc_get_getifaddrs(*this),
       _ifc_get_proc_linux(*this),
+      _ifc_get_netlink(*this),
       _ifc_set_dummy(*this),
       _ifc_set_ioctl(*this),
       _ifc_observer_dummy(*this),
@@ -77,7 +78,7 @@ IfConfig::register_ifc_get(IfConfigGet *ifc_get)
     
     return (XORP_OK);
 }
-    
+
 int
 IfConfig::register_ifc_set(IfConfigSet *ifc_set)
 {
@@ -85,7 +86,7 @@ IfConfig::register_ifc_set(IfConfigSet *ifc_set)
     
     return (XORP_OK);
 }
-    
+
 int
 IfConfig::register_ifc_observer(IfConfigObserver *ifc_observer)
 {
@@ -251,13 +252,12 @@ IfConfig::push_error() const
     return _er.first_error();
 }
 
-
 void
 IfConfig::map_ifindex(uint32_t index, const string& name)
 {
     _ifnames[index] = name;
 }
-	
+
 void
 IfConfig::unmap_ifindex(uint32_t index)
 {
@@ -359,4 +359,3 @@ IfConfigErrorReporter::vifaddr_error(const string& ifname,
 			     addr.str().c_str()));
     log_error(preamble + error_msg);
 }
-
