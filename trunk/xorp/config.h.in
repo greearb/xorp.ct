@@ -176,6 +176,9 @@
 /* Define if you have the getifaddrs function.  */
 #undef HAVE_GETIFADDRS
 
+/* Define if you have the if_indextoname function.  */
+#undef HAVE_IF_INDEXTONAME
+
 /* Define if you have the if_nametoindex function.  */
 #undef HAVE_IF_NAMETOINDEX
 

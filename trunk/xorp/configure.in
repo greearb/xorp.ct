@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.14 2003/04/10 00:30:58 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.15 2003/04/10 03:12:03 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -613,6 +613,7 @@ dnl ---------------------------------------------------------------------------
 AC_CHECK_FUNCS(strerror)
 AC_CHECK_FUNCS(getifaddrs)
 AC_CHECK_FUNCS(if_nametoindex)
+AC_CHECK_FUNCS(if_indextoname)
 
 
 dnl ---------------------------------------------------------------------------
