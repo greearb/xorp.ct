@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_unit.hh,v 1.5 2003/03/19 23:38:22 pavlin Exp $
+// $XORP: xorp/libproto/proto_unit.hh,v 1.6 2004/02/12 20:14:13 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_UNIT_HH__
@@ -59,6 +59,7 @@ enum xorp_module_id {
     XORP_MODULE_RIB		= 11,
     XORP_MODULE_RTRMGR		= 12,
     XORP_MODULE_STATIC_ROUTES	= 13,
+    XORP_MODULE_FIB2MRIB	= 14,
     XORP_MODULE_MAX
 };
 
@@ -236,6 +237,13 @@ public:
      * @return true if the protocol is StaticRoutes
      */
     bool	proto_is_static_routes() const { return (_module_id == XORP_MODULE_STATIC_ROUTES); }
+
+    /**
+     * Test if the protocol is Fib2mrib.
+     * 
+     * @return true if the protocol is Fib2mrib
+     */
+    bool	proto_is_fib2mrib() const { return (_module_id == XORP_MODULE_FIB2MRIB); }
     
 private:
     int		_family;		// The address family.
