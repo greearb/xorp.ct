@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.3 2002/12/17 22:06:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.4 2003/02/11 21:51:16 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -34,7 +34,7 @@ DebugTable<A>::DebugTable(string table_name,
 
 template<class A>
 DebugTable<A>::~DebugTable() {
-    if (_ofile != NULL)
+    if (_ofile != NULL && _close_on_delete)
 	fclose(_ofile);
 }
 
@@ -210,12 +210,14 @@ DebugTable<A>::set_output_file(const string& filename) {
 		   strerror(errno));
 	return false;
     }
+    _close_on_delete = true;
     return true;
 }
 
 template<class A>
 void
 DebugTable<A>::set_output_file(FILE *file) {
+    _close_on_delete = false;
     _ofile = file;
 }
 

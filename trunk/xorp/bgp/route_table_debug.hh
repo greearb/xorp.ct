@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_debug.hh,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+// $XORP: xorp/bgp/route_table_debug.hh,v 1.2 2002/12/17 22:06:05 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DEBUG_HH__
 #define __BGP_ROUTE_TABLE_DEBUG_HH__
@@ -67,6 +67,7 @@ private:
     int _canned_response;
     int _msgs;
     FILE *_ofile;
+    bool _close_on_delete;
     bool _print_tablename;
 };
 
