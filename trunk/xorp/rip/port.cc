@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.37 2004/09/17 13:57:14 abittau Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.38 2004/09/18 00:00:31 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -203,7 +203,8 @@ Port<A>::triggered_update_timeout()
     {
 	RouteDB<A>& rdb = _pm.system().route_db();
 	UNUSED(rdb);
-	debug_msg("- Route DB routes = %u\n", rdb.route_count());
+	debug_msg("- Route DB routes = %u\n",
+		  XORP_UINT_CAST(rdb.route_count()));
     }
 
     // Table dump is running, we should not be doing triggered updates.
@@ -752,8 +753,8 @@ Port<A>::port_io_receive(const A&	src_address,
 
     if (rip_packet_bytes < RIPv2_MIN_PACKET_BYTES) {
 	record_bad_packet(c_format("Packet size less than minimum (%u < %u)",
-				   uint32_t(rip_packet_bytes),
-				   uint32_t(RIPv2_MIN_PACKET_BYTES)),
+				   XORP_UINT_CAST(rip_packet_bytes),
+				   XORP_UINT_CAST(RIPv2_MIN_PACKET_BYTES)),
 			  src_address, src_port, p);
 	return;
     }

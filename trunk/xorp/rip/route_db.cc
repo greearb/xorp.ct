@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.17 2004/09/17 20:02:27 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.18 2004/09/18 00:00:32 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -201,7 +201,8 @@ RouteDB<A>::update_route(const Net&	    net,
 
     if (tag > 0xffff) {
 	// Ingress sanity checks should take care of this
-	XLOG_FATAL("Invalid tag (%d) when updating route.", tag);
+	XLOG_FATAL("Invalid tag (%u) when updating route.",
+		   XORP_UINT_CAST(tag));
 	return false;
     }
 
