@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/xrl_port_io.hh,v 1.1 2004/01/09 00:28:13 hodson Exp $
 
 #ifndef __XRL_PORT_IO_HH__
 #define __XRL_PORT_IO_HH__
@@ -38,11 +38,11 @@ public:
 public:
     XrlPortIO(XrlRouter&	xr,
 	      PortIOUser&	port,
-	      const string&	ifname,
+	      const string& 	ifname,
 	      const string&	vifname,
 	      const Addr&	addr)
 	: PortIOBase<A>(port, ifname, vifname, addr, false),
-	  _xr(xr), _pending(false)
+	  ServiceBase("RIP I/O port"), _xr(xr), _pending(false)
     {}
 
     /**
@@ -107,4 +107,4 @@ protected:
     bool	_pending;
 };
 
-#endif // __PATH_TO_TEMPLATE_HH__
+#endif // __XRL_PORT_IO_HH__
