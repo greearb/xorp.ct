@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers.cc,v 1.2 2003/04/10 02:41:50 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.3 2003/04/21 15:39:36 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -90,6 +90,10 @@ public:
     ~SpoofPort4()
     {
 	verbose_log("Destructing SpoofPort4 instance\n");
+	while (_peers.empty() == false) {
+	    delete _peers.front();
+	    _peers.pop_front();
+	}
     }
 };
 
@@ -100,10 +104,19 @@ public:
 
 class SpoofPortManager4 : public PortManagerBase<IPv4> {
 public:
-    SpoofPortManager4(System<IPv4>& s) : PortManagerBase<IPv4>(s) {
+    SpoofPortManager4(System<IPv4>& s) : PortManagerBase<IPv4>(s)
+    {
 	_ports.push_back(new SpoofPort4(*this, IPv4("10.0.0.1")));
     }
 
+    ~SpoofPortManager4()
+    {
+	while (!_ports.empty()) {
+	    delete _ports.front();
+	    _ports.pop_front();
+	}
+    }
+    
     Port<IPv4>* the_port()
     {
 	XLOG_ASSERT(_ports.size() == 1);
