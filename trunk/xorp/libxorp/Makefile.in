@@ -738,12 +738,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	uninstall-binPROGRAMS uninstall-info-am
 
 
-debug.o: debug.c
-	$(subst -Wnon-const-format,,$(COMPILE)) -c $<
-
-xlog.o: xlog.c
-	$(subst -Wnon-const-format,,$(COMPILE)) -c $<
-
 # If this code is commented out, please upgrade to python2.0 or above.
 
 @PY_BUILD@callback_nodebug.hh: callback-gen.py

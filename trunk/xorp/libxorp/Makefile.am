@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.23 2004/07/16 06:42:47 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.24 2004/07/16 11:27:12 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -169,12 +169,6 @@ EXTRA_DIST	   = callback_gen.py
 ##
 
 INCLUDES =	-I$(top_srcdir)
-
-debug.o: debug.c
-	$(subst -Wnon-const-format,,$(COMPILE)) -c $<
-
-xlog.o: xlog.c
-	$(subst -Wnon-const-format,,$(COMPILE)) -c $<
 
 # If this code is commented out, please upgrade to python2.0 or above.
 
