@@ -10,13 +10,13 @@
 
 \title{XORP BGP Routing Daemon \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 4, 2003}
 
 %\twocolumn
 \begin{document}
@@ -93,7 +93,8 @@ separate {\tt add\_route} call, which includes all the Path Attribute
 information.
 
 On the output side, the PeerHandler receives a series of {\tt add\_route},
-{\tt delete\_route}, or {\tt replace\_route} calls.  Each batch of calls is for
+{\tt delete\_route}, or \\
+{\tt replace\_route} calls.  Each batch of calls is for
 routes that share the same path attribute list.  The PeerHandler then
 constructs an Update Message from each batch, and passes it on to the
 classes that handle the peering for transmission to the relevant BGP
@@ -149,7 +150,7 @@ is the responsibility of the receive code in the Peer classes to check
 that received update messages are syntactically and semantically
 valid.
 
-The current (Nov 2002) version of XORP stores all routes in the RibIn,
+The current (Mar 2003) version of XORP stores all routes in the RibIn,
 irrespective of whether or not they will fail to pass a downstream
 filter.  However, the RibIn has enough information (from the values
 returned by the {\tt add\_route}, {\tt delete\_route} and {\tt
@@ -181,6 +182,16 @@ route-specific filters.
 \item {\bf LocalPrefRemovalFilter:} Removes the BGP Local Preference
 attribute from all routes that pass through the filter.  Typically
 used on output to an EBGP peer.
+\item {\bf MEDInsertionFilter:} Adds a Multi-exit Descriminator
+attribute based on the routes IGP metric to each route that passes
+through the filter.  Typically used on output to an EBGP peer.  Note
+that the MED to be inserted will have been added to the route by the
+DecisionTable, so MEDInsertionFilter cannot be used as an input-branch
+filter.
+\item {\bf MEDRemovalFilter:} Removes the  Multi-exit Descriminator
+attribute from all routes that pass through the filter.  Typically
+used just before a MEDInsertionFilter to remove the MED received from
+the previous AS.
 \end{itemize}
 Note that filters are not just for operator configured filtering -
 they comprise part of the basic BGP processing mechanism.
@@ -243,16 +254,17 @@ either a delete with no add, two deletes, or two adds).
 The BGP decision process implemented in DecisionTable is relatively
 complex, and takes into account many possible factors including ``IGP
 distance''.  IGP distance is the IGP routing metric for the route to
-reach the BGP NextHop (which is often a number of IP hops away).  Also
-of interest is whether the BGP NextHop is actually reachable according
-to the IGP protocols.  Because of the multi-process architecture of
-XORP, BGP does not know the IGP distance or whether the nexthop is
-reachable.  To find out this information, BGP must query the RIB, and
-this is done by the NextHopResolver class instance.  If DecisionTable
-had to perform this lookup, it would become very complex because it
-would have to handle suspending the decision process while waiting for
-results from the RIB.  A multi-threaded implementation would solve
-this problem, but would cause other issues.  
+reach the BGP NextHop (which is often a number of IP hops away in the
+case of IBGP).  Also of interest is whether the BGP NextHop is
+actually reachable according to the IGP protocols.  Because of the
+multi-process architecture of XORP, BGP does not know the IGP distance
+or whether the nexthop is reachable.  To find out this information,
+BGP must query the RIB, and this is done by the NextHopResolver class
+instance.  If DecisionTable had to perform this lookup, it would
+become very complex because it would have to handle suspending the
+decision process while waiting for results from the RIB.  A
+multi-threaded implementation would solve this problem, but would
+cause other issues.
 
 To solve these problems we insert an NhLookupTable upstream of the
 DecisionTable.  NhLookupTable queues any updates with NextHop
@@ -312,7 +324,7 @@ and there are no alternatives) will be sent downstream.
 \subsection{NextHopResolver Class}
 
 Unlike most of the previous classes, NextHopResolver is not a
-RouteTable class.  A BGP implementation has a single NextHopResolver
+RouteTable sub-class.  A BGP implementation has a single NextHopResolver
 instance per address family.  The NextHopResolver takes requests to
 resolve a BGP NextHop address and attempts to resolve the address to
 that of the immediate neighbor router that would be used to forward
@@ -393,7 +405,7 @@ they can be sent on in the same Update message.
 
 In principle, the RibOut could also store pointers to the routing
 information that was passed on to the peer so that Route Refresh
-(RFC????) could be handled efficiently.  In our current implementation
+(RFC 2918) could be handled efficiently.  In our current implementation
 we do not do this - the RibOut maintains no record of the routes
 passed to the peer.
 
@@ -442,7 +454,7 @@ background nature of such tasks needs to be explicitly coded.  We do
 this by dividing the background task into small enough segments.  At
 completion of such a segment we schedule a zero-second timer to
 schedule execution of the next segment, and drop back to the main
-event loop.  Execution will the be restarted after pending network
+event loop.  Execution will then be restarted after pending network
 events and expired timers have been processed by the main event loop.
 Care must of course be taken to ensure that when execution returns,
 the processing of events or other background tasks has not rendered
@@ -551,14 +563,11 @@ during the dump.  Peers are never added to this list during the dump.
 them.  Along with each peer is stored enough state to know how far
 we'd got though the route dump from that peer before it went down.
 \item The current peer whose routes are being dumped.
-\item An iterator pointing to the next RibIn trie entry to be dumped
+\item A trie iterator pointing to the next RibIn trie entry to be dumped
 on the current peer (we call this the Route Iterator)
+\item The last subnet dumped from the current peer.
 \item A flag that indicates whether the Route Iterator is currently
 valid.
-\item The subnet of the route pointed to by the Route Iterator.
-\item The version of the RibIn of the current peer when we started to
-dump it.  RibIn version number are incremented each time a change is
-made to the RibIn.
 \item The last GenID seen.  The GenID of the RibIn is incremented each
 time the peering comes up.
 \end{itemize}
@@ -573,15 +582,27 @@ upstream to the DecisionTable.  DecisionTable relays the request to
 the input branch of the first peer listed in the list of remaining
 peers, and from there it is relayed back to the relevant RibIn.
 
-If the RibIn version has not changed since the last call of {\tt
-dump\_next\_route}, then the Route Iterator is still valid, and the
-route it references can be directly dumped.  If not, then a search is
-performed for the first route in the trie with a subnet equal to or
-greater than the subnet stored in the DumpIterator, and
-this is the route that will be dumped.  This allows routes in the
-RibIn to be deleted during the route dump without causing a problem.
+To allow routes in the RibIn to be deleted during the route dump
+without the Route Iterator becoming invalid, we use a special trie and
+trie iterator in RibIn, where the route in the trie will not actually
+be deleted until no trie iterator is pointing at it.  This is
+implemented using reference counts in the Trie nodes themselves.
+
+{\tt dump\_next\_route} in the RibIn checks the Route Iterator to see
+if it points to the end of the Trie.  If the previous call to {\tt
+dump\_next\_route} had left the Route Iterator pointing to a node that has
+subsequently been deleted, this comparison transparently causes the
+Route Iterator to move on to the next non-deleted node, or to the end
+of the Trie if there are no subsequent deleted nodes.  This updating
+of the Route Iterator is transparent to the user of the iterator.
+
+The route pointed to by the Route Iterator is then propated downstream
+from the RibIn to the DumpTable as a {\tt route\_dump} call.  The
+DumpTable turns this into an {\tt add\_route} call which it propagates
+downstream to the new peer.
+
 At the end of {\tt dump\_next\_route}, the RibIn increments the
-RouteIterator ready for next time.
+RouteIterator ready for next time.  
 
 DumpTable then schedules the next call to {\tt dump\_next\_route} using a
 zero-second timer to allow other pending events to be processed.
@@ -594,7 +615,8 @@ be able to tell which changes it needs to propagate downstream because
 we've already passed their location in the dump process, and which are
 unnecessary because we will get round to dumping them eventually.
 
-In general, a route change needs to be propagated downstream if:
+In general, a route
+change needs to be propagated downstream if:
 \begin{itemize}
 \item It comes from a peer that is not in our remaining peers list.
 \item It comes from the peer currently being dumped, but its route is
