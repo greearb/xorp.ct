@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.10 2003/06/12 22:06:21 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.11 2003/06/12 22:20:54 atanu Exp $
 #
 
 #
@@ -18,7 +18,6 @@
 # 5) Run "./coord"
 #
 set -e
-shopt -s xpg_echo
 
 # srcdir is set by make for check target
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
@@ -220,9 +219,9 @@ test3()
     TFILE=$1
 
     echo "TEST3:"
-    echo "\t 1) Start injecting a saved feed (peer2) - $TFILE" 
-    echo "\t 2) Bring in a second peering (peer1) "
-    echo "\t 3) Drop the injecting feed (peer2) "
+    echo "      1) Start injecting a saved feed (peer2) - $TFILE" 
+    echo "      2) Bring in a second peering (peer1) "
+    echo "      3) Drop the injecting feed (peer2) "
 
     # Reset the peers
     reset
@@ -234,8 +233,8 @@ test3()
     # send in the saved file
     NOBLOCK=true coord peer2 send dump mrtd update $TFILE
 
+    # Bring up another peering
     NOBLOCK=true coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
-    NOBLOCK=true coord peer1 assert established
 
     # Allow some routes to be loaded
     sleep 5
