@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.34 2002/12/10 06:56:09 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
 
 #include "urib_module.h"
 #include "libxorp/xlog.h"
@@ -46,7 +46,7 @@ template<class A>
 OriginTable<A>::~OriginTable<A>() 
 {
     // delete all the routes in the trie.
-    Trie<A, const IPRouteEntry<A>*>::iterator i;
+    typename Trie<A, const IPRouteEntry<A>*>::iterator i;
     for (i = _ip_route_table.begin(); i != _ip_route_table.end(); i++) {
 	delete i.payload();
     }
@@ -109,7 +109,7 @@ int OriginTable<A>::delete_route(const IPNet<A> &net)
 #ifdef DEBUG_LOGGING
     _ip_route_table.print();
 #endif
-    Trie<A, const IPRouteEntry<A>*>::iterator iter 
+    typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
 	= _ip_route_table.lookup_node(net);
     cp(3);
     if (iter != _ip_route_table.end()) {
@@ -134,7 +134,7 @@ template<class A>
 void OriginTable<A>::delete_all_routes() 
 {
     cp(5);
-    Trie<A, const IPRouteEntry<A>*>::iterator i;
+    typename Trie<A, const IPRouteEntry<A>*>::iterator i;
     for (i = _ip_route_table.begin(); i != _ip_route_table.end(); i++) {
 	delete i.payload();
     }
@@ -150,7 +150,7 @@ OriginTable<A>::lookup_route(const IPNet<A> &net) const
     debug_msg("------------------\nlookup_route in table %s\n",
 	tablename().c_str());
     debug_msg("OriginTable: Looking up route %s\n", net.str().c_str());
-    Trie<A, const IPRouteEntry<A>*>::iterator iter 
+    typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
 	= _ip_route_table.lookup_node(net);
     return (iter == _ip_route_table.end()) ? NULL : iter.payload();
 }
@@ -165,7 +165,7 @@ OriginTable<A>::lookup_route(const A &addr) const
 	   _admin_distance, addr.str().c_str());
 
     cp(7);
-    Trie<A, const IPRouteEntry<A>*>::iterator iter 
+    typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
 	= _ip_route_table.find(addr);
     if (iter == _ip_route_table.end()) {
 	debug_msg("No match found\n");
@@ -178,7 +178,7 @@ RouteRange<A>*
 OriginTable<A>::lookup_route_range(const A &addr) const
 {
     const IPRouteEntry<A>* route;
-    Trie<A, const IPRouteEntry<A>*>::iterator iter 
+    typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
 	= _ip_route_table.find(addr);
 
     route = (iter == _ip_route_table.end()) ? NULL : iter.payload();

@@ -12,10 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.36 2002/12/09 18:29:33 hodson Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
 
 #include "config.h"
 #include "urib_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "register_server.hh"
@@ -29,7 +30,7 @@
 template<class A> inline RouteTable<A>*
 RIB<A>::find_table(const string& tablename)
 {
-    map<string, RouteTable<A>*>::iterator mi = _tables.find(tablename);
+    typename map<string, RouteTable<A>*>::iterator mi = _tables.find(tablename);
     if (mi == _tables.end()) {
 	return 0;
     }
@@ -50,7 +51,7 @@ RIB<A>::add_table(const string& tablename, RouteTable<A>* table)
 template<class A> inline int
 RIB<A>::remove_table(const string& tablename)
 {
-    map<string, RouteTable<A>*>::iterator mi = _tables.find(tablename);
+    typename map<string, RouteTable<A>*>::iterator mi = _tables.find(tablename);
     if (mi == _tables.end()) {
 	XLOG_WARNING("remove_table: table %s doesn't exist\n", 
 		     tablename.c_str());
@@ -64,7 +65,7 @@ template<class A> inline int
 RIB<A>::admin_distance(const string& tablename)
 {
     map<const string, int>::iterator mi = _admin_distances.find(tablename);
-    if (mi == _tables.end()) {
+    if (mi == _admin_distances.end()) {
 	XLOG_ERROR("Administrative distance of \"%s\" unknown.",
 		   tablename.c_str());
 	return _admin_distances["unknown"];
@@ -87,7 +88,7 @@ RIB<A>::find_vif(const A& addr)
 template<class A> inline IPExternalNextHop<A>*
 RIB<A>::find_external_nexthop(const A& addr)
 {
-    map<const A, IPExternalNextHop<A> >::iterator mi;
+    typename map<const A, IPExternalNextHop<A> >::iterator mi;
     mi = _external_nexthops.find(addr);
     if (mi == _external_nexthops.end())
 	return 0;
@@ -97,7 +98,7 @@ RIB<A>::find_external_nexthop(const A& addr)
 template<class A> inline IPPeerNextHop<A>*
 RIB<A>::find_peer_nexthop(const A& addr)
 {
-    map<const A, IPPeerNextHop<A> >::iterator mi;
+    typename map<const A, IPPeerNextHop<A> >::iterator mi;
     mi = _peer_nexthops.find(addr);
     if (mi == _peer_nexthops.end())
 	return 0;
@@ -110,8 +111,8 @@ RIB<A>::find_or_create_external_nexthop(const A& addr)
     IPExternalNextHop<A>* nh = find_external_nexthop(addr);
     if (nh) return nh;
     typedef map<const A,IPExternalNextHop<A> > C;	// ugly, but convenient
-    C::value_type vt(addr, IPExternalNextHop<A>(addr));
-    C::iterator i = _external_nexthops.insert(_external_nexthops.end(), vt);
+    typename C::value_type vt(addr, IPExternalNextHop<A>(addr));
+    typename C::iterator i = _external_nexthops.insert(_external_nexthops.end(), vt);
     return &i->second;
 }
 
@@ -121,8 +122,8 @@ RIB<A>::find_or_create_peer_nexthop(const A& addr)
     IPPeerNextHop<A>* nh = find_peer_nexthop(addr);
     if (nh) return nh;
     typedef map<const A,IPPeerNextHop<A> > C;		// ugly, but convenient
-    C::value_type vt(addr, addr);
-    C::iterator i = _peer_nexthops.insert(_peer_nexthops.end(), vt);
+    typename C::value_type vt(addr, addr);
+    typename C::iterator i = _peer_nexthops.insert(_peer_nexthops.end(), vt);
     return &i->second;
 }
 
@@ -733,7 +734,7 @@ RIB<A>::add_origin_table(const string& tablename, int type) {
     RouteTable<A>* egp_table = 0;
     ExtIntTable<A>* ei_table = 0;
 
-    typedef map<string, RouteTable<A> *>::iterator Iter;
+    typedef typename map<string, RouteTable<A> *>::iterator Iter;
     Iter rtpair = _tables.begin();
     for (rtpair = _tables.begin(); rtpair != _tables.end(); ++rtpair) {
 	/*skip the new table!*/

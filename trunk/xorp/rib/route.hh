@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.39 2002/12/09 18:29:33 hodson Exp $
+// $XORP: xorp/rib/route.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -297,7 +297,7 @@ public:
      *
      * @param backlink the ExtIntTable multimap iterator for this route.
      */
-    void set_backlink(RouteBackLink::iterator backlink) 
+    void set_backlink(typename RouteBackLink::iterator backlink) 
     { 
 	_backlink = backlink; 
     }
@@ -308,7 +308,7 @@ public:
      *
      * @return the backlink iterator.
      */
-    RouteBackLink::iterator backlink() const { return _backlink; }
+    typename RouteBackLink::iterator backlink() const { return _backlink; }
 private:
     mutable const IPRouteEntry<A>* _igp_parent;
     mutable const IPRouteEntry<A>* _egp_parent;
@@ -316,7 +316,7 @@ private:
     /* _backlink is used for removing the corresponding entry from the
        RouteTable's map that is indexed by igp_parent.  Without it,
        route deletion would be expensive*/
-    RouteBackLink::iterator _backlink;
+    typename RouteBackLink::iterator _backlink;
 };
 
 typedef ResolvedIPRouteEntry<IPv4> ResolvedIPv4RouteEntry;

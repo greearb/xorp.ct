@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.23 2002/12/09 18:29:32 hodson Exp $
+// $XORP: xorp/rib/parser.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -215,11 +215,11 @@ protected:
     /* bind positional argument to Datum type so when argument n arrives, it
      * can be decoded into a member variable 
      */
-    inline void bind(int n, DatumVariableBinding* b);
-    inline void bind_int(int n, int& i);
-    inline void bind_string(int n, string& s);
-    inline void bind_ipv4(int n, IPv4& addr);
-    inline void bind_ipv4net(int n, IPv4Net& net);
+    void bind(int n, DatumVariableBinding* b);
+    void bind_int(int n, int& i);
+    void bind_string(int n, string& s);
+    void bind_ipv4(int n, IPv4& addr);
+    void bind_ipv4net(int n, IPv4Net& net);
 
     DatumVariableBinding* find_binding(int n);
 

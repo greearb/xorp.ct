@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.31 2002/12/10 06:56:08 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
 
 #include "urib_module.h"
 #include "libxorp/xlog.h"
@@ -157,7 +157,7 @@ ExtIntTable<A>::resolve_and_store_route(const IPRouteEntry<A> &route,
 	_resolving_routes.insert(nhroute->net(), nhroute);
     }
 
-    RouteBackLink::iterator backlink =
+    typename RouteBackLink::iterator backlink =
 	_ip_igp_parents.insert(pair<const IPRouteEntry<A> *,
 			       ResolvedIPRouteEntry<A> *>
 			       (nhroute, resolved_route));
@@ -264,7 +264,7 @@ const ResolvedIPRouteEntry<A> *
 ExtIntTable<A>::lookup_in_resolved_table(const IPNet<A> &net) 
 {
     debug_msg("------------------\nlookup_route in resolved table %s\n", tablename().c_str());
-    Trie<A, const ResolvedIPRouteEntry<A>*>::iterator iter;
+    typename Trie<A, const ResolvedIPRouteEntry<A>*>::iterator iter;
     iter = _ip_route_table.lookup_node(net);
     if (iter == _ip_route_table.end())
 	return NULL;
@@ -276,7 +276,7 @@ template<class A>
 void
 ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A> &nhroute) 
 {
-    typedef map<A, const IPRouteEntry<A> *>::iterator CI;
+    typedef typename map<A, const IPRouteEntry<A> *>::iterator CI;
 
     A unh, new_subnet;
     new_subnet = nhroute.net().masked_addr();
@@ -330,7 +330,7 @@ bool
 ExtIntTable<A>::delete_unresolved_nexthop(const IPRouteEntry<A> *route) 
 {
     debug_msg("delete_unresolved_nexthop %s\n", route->str().c_str());
-    typedef map<A, const IPRouteEntry<A> *>::iterator CI;
+    typedef typename map<A, const IPRouteEntry<A> *>::iterator CI;
     IPNextHop<A>* rt_nexthop = (IPNextHop<A>*)route->nexthop();
     CI rpair = _ip_unresolved_nexthops.find(rt_nexthop->addr());
     cp(24);
@@ -354,7 +354,7 @@ ExtIntTable<A>::lookup_by_igp_parent(const IPRouteEntry<A> *route)
     debug_msg("lookup_by_igp_parent %x -> %s\n", (u_int)route, route->net().str().c_str());
 
     cp(27);
-    RouteBackLink::iterator found;
+    typename RouteBackLink::iterator found;
     found = _ip_igp_parents.find(route);
     if (found == _ip_igp_parents.end()) {
 	cp(28);
@@ -380,7 +380,7 @@ ExtIntTable<A>::lookup_next_by_igp_parent(const IPRouteEntry<A> *route,
     // if we have a large number of routes with the same IGP parent,
     // this can be very inefficient.
 
-    RouteBackLink::iterator found;
+    typename RouteBackLink::iterator found;
     found = _ip_igp_parents.find(route);
     cp(30);
     while (found != _ip_igp_parents.end()
@@ -416,7 +416,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A> &new_route)
 {
     debug_msg("recalculate_nexthops: %s\n", new_route.str().c_str());
     const IPRouteEntry<A> *old_route;
-    Trie<A, const IPRouteEntry<A>*>::iterator iter;
+    typename Trie<A, const IPRouteEntry<A>*>::iterator iter;
     iter = _resolving_routes.find_less_specific(new_route.net());
     cp(35);
     if (iter == _resolving_routes.end()) {
@@ -488,7 +488,7 @@ ExtIntTable<A>::lookup_route(const IPNet<A> &ipv4net) const
     const IPRouteEntry<A> *ext_found;
     // first try our local version
     debug_msg("------------------\nlookup_route in resolved table %s\n", tablename().c_str());
-    Trie<A, const ResolvedIPRouteEntry<A>*>::iterator iter;
+    typename Trie<A, const ResolvedIPRouteEntry<A>*>::iterator iter;
     iter = _ip_route_table.lookup_node(ipv4net);
     cp(44);
     if (iter != _ip_route_table.end()) {
@@ -531,7 +531,7 @@ ExtIntTable<A>::lookup_route(const A &addr) const
     debug_msg("ExtIntTable::lookup_route\n");
 
     //lookup locally, and in both internal and external tables
-    Trie<A, const ResolvedIPRouteEntry<A>*>::iterator iter;
+    typename Trie<A, const ResolvedIPRouteEntry<A>*>::iterator iter;
     iter = _ip_route_table.find(addr);
     if (iter != _ip_route_table.end()) {
 	found.push_back(iter.payload());
@@ -556,7 +556,7 @@ ExtIntTable<A>::lookup_route(const A &addr) const
 
     //retain only the routes with the longest prefix
     uint32_t longest_prefix = 0;
-    list <const IPRouteEntry<A>*>::iterator i, i2;
+    typename list <const IPRouteEntry<A>*>::iterator i, i2;
     for (i = found.begin(); i != found.end(); i++) {
 	if ((*i)->net().prefix_len() > longest_prefix) {
 	    longest_prefix = (*i)->net().prefix_len();
@@ -654,7 +654,7 @@ ExtIntTable<A>::lookup_route_range(const A &addr) const
 
     // what do we think the answer is?
     const IPRouteEntry<A>* route;
-    Trie<A, const ResolvedIPRouteEntry<A>*>::iterator iter;
+    typename Trie<A, const ResolvedIPRouteEntry<A>*>::iterator iter;
     iter = _ip_route_table.find(addr);
     if (iter == _ip_route_table.end())
 	route = NULL;

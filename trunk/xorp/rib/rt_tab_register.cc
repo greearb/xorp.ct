@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.2 2002/12/13 20:01:05 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rt_tab_register.hh"
@@ -67,7 +67,7 @@ RegisterTable<A>::find_matches(const IPRouteEntry<A> &route)
 
     debug_msg("FM: %s\n", route.net().str().c_str());
     // find any exact matches
-    Trie<A, RouteRegister<A>*>::iterator iter;
+    typename Trie<A, RouteRegister<A>*>::iterator iter;
     iter = _ipregistry.lookup_node(route.net());
     if (iter != _ipregistry.end()) {
 	debug_msg("FM: exact match\n");
@@ -113,7 +113,7 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 
     debug_msg("NRM: %s\n", changed_net.str().c_str());
     // find any exact matches
-    Trie<A, RouteRegister<A>*>::iterator iter, nextiter;
+    typename Trie<A, RouteRegister<A>*>::iterator iter, nextiter;
     iter = _ipregistry.lookup_node(changed_net);
     if (iter != _ipregistry.end()) {
 	debug_msg("NRM: exact match\n");
@@ -239,7 +239,7 @@ RegisterTable<A>::add_registration(const IPNet<A> &net,
     }
 
     /*do we have an existing registry for this subnet?*/
-    Trie<A, RouteRegister<A>*>::iterator iter, next_iter;
+    typename Trie<A, RouteRegister<A>*>::iterator iter, next_iter;
     iter = _ipregistry.lookup_node(net);
     RouteRegister<A> *rr;
     if (iter == _ipregistry.end()) {
@@ -307,7 +307,7 @@ RegisterTable<A>::delete_registration(const IPNet<A> &net,
     tmpmod = *mod_iter;
     debug_msg("tmpmod2: %p\n", tmpmod);
 
-    Trie<A, RouteRegister<A>*>::iterator iter;
+    typename Trie<A, RouteRegister<A>*>::iterator iter;
     iter = _ipregistry.lookup_node(net);
     if (iter == _ipregistry.end()) {
 	fprintf(stderr, "delete_registration called for unregisted net: %s\n",
@@ -399,7 +399,7 @@ RegisterTable<A>::print()
 template<class A>
 void
 RegisterTable<A>::notify_route_changed(
-    Trie<A, RouteRegister<A>*>::iterator iter,
+    typename Trie<A, RouteRegister<A>*>::iterator iter,
     const IPRouteEntry<A> &changed_route)
 {
     list <string> module_names = iter.payload()->module_names();
@@ -436,7 +436,7 @@ RegisterTable<A>::notify_route_changed(
 
 template<class A>
 void
-RegisterTable<A>::notify_invalidated(Trie<A, RouteRegister<A>*>::iterator iter)
+RegisterTable<A>::notify_invalidated(typename Trie<A, RouteRegister<A>*>::iterator iter)
 {
     list <string> module_names = iter.payload()->module_names();
     list <string>::const_iterator i;

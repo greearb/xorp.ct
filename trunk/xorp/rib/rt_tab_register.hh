@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_register.hh,v 1.22 2002/12/10 16:50:15 hodson Exp $
+// $XORP: xorp/rib/rt_tab_register.hh,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $
 
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
@@ -420,8 +420,8 @@ private:
 				 const IPRouteEntry<A> &changed_route);
     bool find_matches(const IPRouteEntry<A>& route);
 
-    void notify_invalidated(Trie<A, RouteRegister<A>*>::iterator iter);
-    void notify_route_changed(Trie<A, RouteRegister<A>*>::iterator iter,
+    void notify_invalidated(typename Trie<A, RouteRegister<A>*>::iterator iter);
+    void notify_route_changed(typename Trie<A, RouteRegister<A>*>::iterator iter,
 			      const IPRouteEntry<A> &changed_route);
 
     set<const ModuleData*, ModuleCmp> _module_names;

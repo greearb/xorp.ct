@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_extint.hh,v 1.16 2002/12/09 18:29:34 hodson Exp $
+// $XORP: xorp/rib/rt_tab_extint.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
 
 #ifndef __RIB_RT_TAB_EXTINT_HH__
 #define __RIB_RT_TAB_EXTINT_HH__
@@ -153,7 +153,7 @@ public:
     string str() const;
 
 private:
-    typedef ResolvedIPRouteEntry<A>::RouteBackLink RouteBackLink;
+    typedef typename ResolvedIPRouteEntry<A>::RouteBackLink RouteBackLink;
 
     const ResolvedIPRouteEntry<A> *
          lookup_in_resolved_table(const IPNet<A> &ipv4net);
