@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.1 2004/09/22 02:48:59 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.2 2004/09/23 12:48:33 mjh Exp $"
 
 
 //
@@ -50,7 +50,7 @@
 // Define the maximum number of XRLs to send into a batch, and the
 // XRL pipe size.
 //
-#define MAX_XRL_ID	100		// 100000
+#define MAX_XRL_ID	100000		// 100000
 #define XRL_PIPE_SIZE	100000		// 100000
 
 //
