@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.cc,v 1.9 2004/09/23 12:15:56 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.cc,v 1.10 2004/09/24 06:50:40 pavlin Exp $
 
 #include "fea/fea_module.h"
 
@@ -134,9 +134,10 @@ IpfwFwProvider::take_table_ownership()
 	FwTable4::iterator	fi4;
 	FwTable4&		ft4 = _m._fwtable4;
 
+	//
 	// Take ownership of the IPv4 table by converting all of the
 	// FwRules to IpfwFwRules.
-
+	//
 	for (fi4 = ft4.begin(); fi4 != ft4.end(); ++fi4) {
 		FwRule4* rp4 = *fi4;
 		IpfwFwRule4* nrp4 = new IpfwFwRule4(*rp4);
@@ -157,6 +158,7 @@ IpfwFwProvider::take_table_ownership()
 // IPv4 firewall provider interface
 //
 
+// XXX: needs pointer, not reference?
 int
 IpfwFwProvider::add_rule4(FwRule4& rule)
 {
@@ -169,6 +171,11 @@ IpfwFwProvider::add_rule4(FwRule4& rule)
 
 	prule->_index = ruleno;
 	//prule->_ip_fw.idx = ruleno;
+
+	// Here, we are adding a new rule to the table. It will not
+	// have been previously converted or cast to use the underlying
+	// provider's intermediate representation. Perform this
+	// conversion now.
 
 	// .. rule was converted to ipfw format when table ownership
 	// was taken?
@@ -186,6 +193,7 @@ IpfwFwProvider::add_rule4(FwRule4& rule)
 
 //
 // Propagate a delete down to the provider level.
+// The rule already exists.
 //
 int
 IpfwFwProvider::delete_rule4(FwRule4& rule)
@@ -216,6 +224,26 @@ IpfwFwProvider::delete_rule4(FwRule4& rule)
 	return (XORP_ERROR);
 #endif
 }
+
+#ifdef notyet
+#ifdef HAVE_FIREWALL_IPFW
+//
+// Function to clear the range managed by XORP's IPFW firewall backend.
+//
+int
+IpfwFwProvider::clear_ipfw_managed_range()
+{
+	struct ip_fw	stubrule;
+	memset(&stubrule, 0, sizeof(stubrule));
+
+	for (int i = _ipfw_xorp_start_idx; i <= _ipfw_xorp_end_idx; i++) {
+		stubrule.fw_number = i;
+		(void) ::setsockopt(_s, IPPROTO_IP, IP_FW_DEL, &stubrule,
+		    sizeof(struct ip_fw));
+	}
+}
+#endif
+#endif
 
 //
 // Get number of XORP rules actually installed in system tables
