@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.25 2003/06/01 02:13:45 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.26 2003/06/16 22:47:37 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -171,7 +171,7 @@ XrlPimNode::stop_bsr()
  * the TTL will be set by the lower layers.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * the TOS will be set by the lower layers.
- * @router_alert_bool: If true, the ROUTER_ALERT IP option for the IP
+ * @router_alert_bool: If true, the Router Alert IP option for the IP
  * packet of the incoming message should be set.
  * @sndbuf: The data buffer with the message to send.
  * @sndlen: The data length in @sndbuf.

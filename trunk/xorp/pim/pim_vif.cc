@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.17 2003/07/15 00:46:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.18 2003/07/16 02:12:20 pavlin Exp $"
 
 
 //
@@ -579,7 +579,7 @@ PimVif::pim_send(const IPvX& dst,
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: True if the received IP packet had the ROUTER_ALERT
+ * @router_alert_bool: True if the received IP packet had the Router Alert
  * IP option set.
  * @buffer: The buffer with the received message.
  * 
@@ -614,7 +614,7 @@ PimVif::pim_recv(const IPvX& src,
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: True if the received IP packet had the ROUTER_ALERT
+ * @router_alert_bool: True if the received IP packet had the Router Alert
  * IP option set.
  * @buffer: The buffer with the message.
  * 

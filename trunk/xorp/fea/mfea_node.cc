@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.8 2003/06/02 02:17:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.9 2003/07/03 07:05:42 pavlin Exp $"
 
 
 //
@@ -925,7 +925,7 @@ MfeaNode::send_set_mrib_done()
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: If true, set the ROUTER_ALERT IP option for the IP
+ * @router_alert_bool: If true, set the Router Alert IP option for the IP
  * packet of the outgoung message.
  * @rcvbuf: The data buffer with the message to send.
  * @rcvlen: The data length in @rcvbuf.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_node.hh,v 1.8 2003/05/15 23:40:37 pavlin Exp $
+// $XORP: xorp/mfea/mfea_node.hh,v 1.9 2003/05/19 00:18:40 pavlin Exp $
 
 
 #ifndef __MFEA_MFEA_NODE_HH__
@@ -413,7 +413,7 @@ public:
      * @param ip_tos the IP TOS of the message. If it has a negative value,
      * the TOS will be set by the lower layers (including the MFEA).
      * 
-     * @param router_alert_bool if true, set the ROUTER_ALERT IP option for
+     * @param router_alert_bool if true, set the Router Alert IP option for
      * the IP packet of the outgoung message.
      * 
      * @param rcvbuf the data buffer with the received message.
@@ -451,7 +451,7 @@ public:
      * @param ip_tos the IP TOS (Type of Service) of the message. If it has
      * a negative value, it should be ignored.
      * 
-     * @param router_alert_bool if true, the ROUTER_ALERT IP option for the IP
+     * @param router_alert_bool if true, the Router Alert IP option for the IP
      * packet of the incoming message was set.
      * 
      * @param rcvbuf the data buffer with the received message.

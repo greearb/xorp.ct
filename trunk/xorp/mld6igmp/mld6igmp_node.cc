@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.9 2003/07/12 01:05:18 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.10 2003/07/15 00:45:49 pavlin Exp $"
 
 
 //
@@ -678,7 +678,7 @@ Mld6igmpNode::delete_all_vifs(void)
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: If true, the ROUTER_ALERT IP option for the IP
+ * @router_alert_bool: If true, the Router Alert IP option for the IP
  * packet of the incoming message was set.
  * @rcvbuf: The data buffer with the received message.
  * @rcvlen: The data length in @rcvbuf.
@@ -745,7 +745,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
  * the TTL will be set by the lower layers.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * the TOS will be set by the lower layers.
- * @router_alert_bool: If true, set the ROUTER_ALERT IP option for the IP
+ * @router_alert_bool: If true, set the Router Alert IP option for the IP
  * packet of the outgoung message.
  * @buffer: The #buffer_t data buffer with the message to send.
  * 

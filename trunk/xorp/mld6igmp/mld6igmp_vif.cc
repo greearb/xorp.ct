@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.10 2003/05/21 05:32:52 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.11 2003/07/15 00:45:49 pavlin Exp $"
 
 
 //
@@ -409,7 +409,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: True if the received IP packet had the ROUTER_ALERT
+ * @router_alert_bool: True if the received IP packet had the Router Alert
  * IP option set.
  * @buffer: The buffer with the received message.
  * 

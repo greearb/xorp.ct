@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.16 2003/07/01 00:59:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.17 2003/07/15 00:45:49 pavlin Exp $"
 
 
 //
@@ -60,7 +60,7 @@
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: True if the received IP packet had the ROUTER_ALERT
+ * @router_alert_bool: True if the received IP packet had the Router Alert
  * IP option set.
  * @buffer: The buffer with the message.
  * 

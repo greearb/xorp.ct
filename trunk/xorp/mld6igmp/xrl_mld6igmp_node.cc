@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.16 2003/06/01 02:11:18 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.17 2003/07/12 01:05:19 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -126,7 +126,7 @@ XrlMld6igmpNode::stop_mld6igmp()
  * the TTL will be set by the lower layers.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * the TOS will be set by the lower layers.
- * @router_alert_bool: If true, the ROUTER_ALERT IP option for the IP
+ * @router_alert_bool: If true, the Router Alert IP option for the IP
  * packet of the incoming message should be set.
  * @sndbuf: The data buffer with the message to send.
  * @sndlen: The data length in @sndbuf.
