@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.11 2003/06/02 01:57:16 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.12 2003/06/17 23:04:47 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -133,29 +133,28 @@ public:
      * vif_index if found, otherwise NULL.
      */
     inline V *vif_find_by_vif_index(uint16_t vif_index) const;
+
+    /**
+     * Find a virtual interface that belongs to the same subnet
+     * as a given subnet address.
+     * 
+     * @param subnet_test the subnet address to search by.
+     * @return the virtual interface that belongs to the same subnet
+     * address @ref subnet_test if found, otherwise NULL.
+     */
+    inline V *vif_find_same_subnet(const IPvXNet& subnet_test) const;
     
     /**
-     * Find a virtual interface that is directly connected to the given
-     * address.
+     * Find a virtual interface that belongs to the same subnet
+     * or point-to-point link as a given address.
      * 
      * @param ipaddr_test the address to search by.
-     * @return the virtual interface that is directly connected to
-     * address @ref ipaddr_test if found, otherwise NULL.
+     * @return the virtual interface that belongs to the same subnet
+     * or point-to-point link as address @ref ipaddr_test if found,
+     * otherwise NULL.
      */
-    inline V *vif_find_direct(const IPvX& ipaddr_test) const;
-    
-    /**
-     * Test if an address is directly connected to one of my virtual
-     * interfaces.
-     * 
-     * @param ipaddr_test the address to test.
-     * @return true if @ref ipaddr_test is directly connected to one of
-     * my virtual interfaces, otherwise false.
-     */
-    bool is_directly_connected(const IPvX& ipaddr_test) const {
-	return (vif_find_direct(ipaddr_test) != NULL);
-    }
-    
+    inline V *vif_find_same_subnet_or_p2p(const IPvX& ipaddr_test) const;
+
     /**
      * Test if an address belongs to one of my virtual interfaces.
      * 
@@ -192,6 +191,13 @@ public:
      * @return the array of pointers to the virtual interfaces.
      */
     vector<V *>& proto_vifs() { return (_proto_vifs);	}
+
+    /**
+     * Get the array of pointers to the virtual interfaces.
+     * 
+     * @return the array of pointers to the virtual interfaces.
+     */
+    const vector<V *>& const_proto_vifs() const { return (_proto_vifs);	}
     
     /**
      * Get the maximum number of vifs.
@@ -656,7 +662,7 @@ ProtoNode<V>::vif_find_by_vif_index(uint16_t vif_index) const
 
 template<class V>
 inline V *
-ProtoNode<V>::vif_find_direct(const IPvX& ipaddr_test) const
+ProtoNode<V>::vif_find_same_subnet(const IPvXNet& subnet_test) const
 {
     typename vector<V *>::const_iterator iter;
     
@@ -664,7 +670,26 @@ ProtoNode<V>::vif_find_direct(const IPvX& ipaddr_test) const
 	V *vif = *iter;
 	if (vif == NULL)
 	    continue;
-	if (vif->is_directly_connected(ipaddr_test))
+	
+	if (vif->is_same_subnet(subnet_test))
+	    return (vif);
+    }
+    
+    return (NULL);
+}
+
+template<class V>
+inline V *
+ProtoNode<V>::vif_find_same_subnet_or_p2p(const IPvX& ipaddr_test) const
+{
+    typename vector<V *>::const_iterator iter;
+    
+    for (iter = _proto_vifs.begin(); iter != _proto_vifs.end(); ++iter) {
+	V *vif = *iter;
+	if (vif == NULL)
+	    continue;
+	
+	if (vif->is_same_subnet(ipaddr_test) || vif->is_same_p2p(ipaddr_test))
 	    return (vif);
     }
     
