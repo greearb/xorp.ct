@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/Makefile.am,v 1.15 2004/06/10 16:14:41 hodson Exp $
+## $XORP: xorp/Makefile.am,v 1.16 2004/07/26 02:58:56 pavlin Exp $
 ##
 
 # --- Options
@@ -21,7 +21,7 @@ SUBDIRS += bgp pim rip rtrmgr static_routes
 SUBDIRS += etc contrib
 
 # --- Conditional applications
-SUBDIRS += @MIBS@
+#SUBDIRS += @MIBS@
 
 ################################################################
 ##
