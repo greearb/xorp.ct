@@ -51,7 +51,7 @@ IPV4 {DBYTE}.{DBYTE}.{DBYTE}.{DBYTE}
 	bootlval = strdup(boottext);
 	return BOOL;
 	}
-"\n"	{ 
+"\n"	{
 	bootlinenum++;
 	return END;
 	}
