@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.9 2003/10/13 23:32:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.10 2004/03/17 08:13:01 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -185,6 +185,10 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const struct nlmsghdr* nlh,
     if (rtmsg->rtm_type == RTN_LOCAL) {
 	// TODO: XXX: PAVPAVPAV: handle it, if needed!
 	return false;		// TODO: is it really an error?
+    }
+    if (rtmsg->rtm_type == RTN_UNREACHABLE) {
+	// Ignore unreachable destinations
+	return false;
     }
     if (rtmsg->rtm_type != RTN_UNICAST) {
 	XLOG_ERROR("nlm_get_to_fte_cfg() failed: "
