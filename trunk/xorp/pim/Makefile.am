@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.16 2004/03/15 23:35:09 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.17 2004/03/18 00:45:58 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
-bin_PROGRAMS	 =
+bin_PROGRAMS	 = xorp_pim
 
 # -- Test Programs
 TESTS		 =
@@ -68,7 +68,9 @@ LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-test_pim_SOURCES = test_pim.cc
+xorp_pim_SOURCES  = xorp_pim.cc
+
+test_pim_SOURCES  = test_pim.cc
 test_pim_SOURCES += $(top_builddir)/rib/rib_manager.hh
 test_pim_SOURCES += $(top_builddir)/rib/rib_manager.cc
 test_pim_SOURCES += $(top_builddir)/rib/xrl_target.hh
