@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.5 2004/12/14 21:58:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.6 2004/12/18 02:08:12 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -282,6 +282,20 @@ MasterConfigTreeNode::initialize_commit()
     }
 }
 
+bool
+MasterConfigTreeNode::children_changed()
+{
+    if (_existence_committed == false || _value_committed == false)
+	return true;
+    list<ConfigTreeNode *>::iterator iter;
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*iter);
+	if (child->children_changed()) {
+	    return true;
+	}
+    }
+    return false;
+}
 
 bool
 MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
@@ -303,6 +317,17 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	debug_msg("_existence_committed == false\n");
     if (_value_committed == false)
 	debug_msg("_value_committed == false\n");
+
+    // Don't bother to recurse if no child node has any changes to commit.
+    // Calling this every time is rather inefficient, but for the
+    // scales we're talking about, it's not a big deal.
+    if (children_changed() == false) {
+	debug_msg("No children changed\n");
+	return success;
+    } else {
+	debug_msg("Children have changed\n");
+    }
+
 
     // The root node has a NULL template
     if (_template_tree_node != NULL) {
