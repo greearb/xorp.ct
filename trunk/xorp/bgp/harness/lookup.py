@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# $XORP$
+# $XORP: xorp/bgp/harness/lookup.py,v 1.1 2005/03/18 03:46:09 atanu Exp $
 
 # On standard input take a list of update packets in XORP text format
 # On standard output generate a list of lookup xrls that can be passed to
@@ -8,6 +8,8 @@
 
 import sys
 import getopt
+
+AS_PREFIX_STRING = ' - AS Path Attribute AsPath: '
 
 def coord(command):
     """
@@ -21,29 +23,45 @@ def lookup(peer, trie, add, remove):
     Read through XORP BGP routes on stdin and generate lookup xrls on stdout
     """
 
+    global AS_PREFIX_STRING
+
+    cache = {}
+
     while 1:
         line = sys.stdin.readline()
         if not line:
             break
-        if line.startswith(" - AS"):
-            aspath = line.split('[')[1]
+        # Collect PATH attribute
+        if line.startswith(AS_PREFIX_STRING):
+            aspath = line.replace(AS_PREFIX_STRING, '')
             aspath = aspath.replace('AS/', '')
             aspath = aspath.replace(' ', '')
-            aspath = aspath.replace(']', '')
+            aspath = aspath.replace('[', '(')
+            aspath = aspath.replace(']', ')')
             # AS SET
             aspath = aspath.replace('{',',(')
             aspath = aspath.replace('}',')')
             if "" != add:
-                aspath = add + "," + aspath
+                aspath = '(' + add + "," + aspath[1:]
             if "" != remove:
                 aspath = aspath.replace(remove + ',', '')
             aspath = aspath[:-1]
             continue
+        # Store the latest NLRI
         if line.startswith(" - Nlri"):
             nlri = line.split()[2]
-            coord("%s trie %s lookup %s aspath %s" %
+            cache[nlri] = ("%s trie %s lookup %s aspath %s" %
                   (peer, trie, nlri, aspath))
             continue
+        # Don't look for it if its been withdrawn
+        if line.startswith(" - Withdrawn"):
+            nlri = line.split()[2]
+            cache[nlri] = None
+            continue
+
+    for i in cache:
+        if cache[i]:
+            coord(cache[i])
 
 us= \
 """\
