@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.5 2003/06/05 02:11:21 atanu Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.6 2003/06/09 21:32:43 hodson Exp $"
 
 #include <list>
 #include <vector>
@@ -444,7 +444,7 @@ test_main(IPv4		 finder_addr,
 
     uint32_t t0 = 1000;
 
-    static uint32_t tstep = 250;
+    static uint32_t tstep = 500;
 
     vector<XorpTimer> timers;
 
