@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.4 2003/01/24 00:51:36 mjh Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.5 2003/01/25 01:25:59 mjh Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -590,6 +590,7 @@ public:
 	Node *out = Node::insert(&_root, net, p, replaced);
 	if (replaced) {
 	    fprintf(stderr, "overwriting a full node"); //XXX
+	    fprintf(stderr, "net %s\n", net.str().c_str());
 	} else {
 	    _payload_count++;
 	}
@@ -786,7 +787,7 @@ RefTrieNode<A, Payload>::insert(RefTrieNode **root,
 	Key y = newroot->_k;
 	if (x == y) {					/* case 0 */
 	    debug_msg("case 0\n");
-	    replaced = newroot->has_payload();
+	    replaced = newroot->has_payload() & (!newroot->deleted());
 	    newroot->set_payload(p);
 	    me = newroot;
 	    break;
