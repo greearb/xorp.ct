@@ -1,11 +1,11 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.9 2003/05/31 17:43:00 pavlin Exp $
+# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.10 2003/06/06 23:47:18 pavlin Exp $
 #
 
 #
-# Send configuration commands to a running PIM process.
+# Send configuration commands to a running MLD/IGMP process.
 #
 
 MODULE_NAME="IGMP"
