@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.7 2003/04/15 17:16:45 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.8 2003/04/15 17:50:18 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -337,7 +337,7 @@ XrlAtom::copy(const XrlAtom& xa)
     }
 }
 
-inline void
+void
 XrlAtom::discard_dynamic()
 {
     if (_have_data) {

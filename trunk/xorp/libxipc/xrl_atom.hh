@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom.hh,v 1.4 2003/03/16 08:20:31 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_atom.hh,v 1.5 2003/04/18 04:52:08 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_HH__
 #define __LIBXIPC_XRL_ATOM_HH__
@@ -368,7 +368,7 @@ public:
 
 private:
 
-    inline void discard_dynamic();
+    void discard_dynamic();
     inline void type_and_data_okay(const XrlAtomType& t) const
 	throw (NoData, WrongType);
 
