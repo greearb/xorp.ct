@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim/pim_arch.tex,v 1.26 2002/12/11 10:19:33 pavlin Exp $
+% $XORP: xorp/docs/pim/pim_arch.tex,v 1.1.1.1 2002/12/11 23:56:00 hodson Exp $
 %
 
 \documentclass[11pt]{article}
@@ -37,13 +37,13 @@
 
 \title{XORP PIM-SM Routing Daemon \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 6, 2003}
 
 \maketitle
 
@@ -76,12 +76,13 @@ implementation is well tested, we should
 try to optimize those parts of the implementation that should prove
 to be a bottleneck.
 
-Currently (December 2002), the PIM-SM implementation is based
+Currently (March 2003), the PIM-SM implementation is based
 on the specification in the following documents:
 \begin{itemize}
   \item \verb=draft-ietf-pim-sm-v2-new-05.{ps,txt}= (The core PIM-SM
   specification).
-  \item \verb=draft-ietf-pim-sm-bsr-02.{ps,txt}= (The Bootstrap mechanism).
+  \item \verb=draft-ietf-pim-sm-bsr-03.{ps,txt}= (The Bootstrap mechanism
+  specification).
 \end{itemize}
 
 The only major features not implemented yet are SSM support and security.
@@ -225,7 +226,7 @@ routing.
 
 Typically, from developer's point of view, all interaction with PimVif
 would be through PimNode~\footnote{Note that on few occasions in the current
-implementation (December 2002) XrlPimNode for simplicity uses
+implementation (March 2003) XrlPimNode for simplicity uses
 direct access to PimVif.}.
 
 The public interface for PimVif contains the methods to manipulate a
@@ -259,7 +260,7 @@ PimSconeZoneTable is a table that contains information about scoped
 zones. There is one table per PimNode. This table is used to check
 whether various control messages are allowed to be send or accepted on
 specific interfaces~\footnote{Note that in the current implementation
-(December 2002) the PimScopeZoneTable is used only for PIM
+(March 2003) the PimScopeZoneTable is used only for PIM
 Bootstrap messages. In the future, the scope zone information would be
 used for other control messages as well.}.
 
@@ -317,12 +318,12 @@ contains PimMre entries (described in file \verb=pim/pim_mre.hh=):
 
 \end{itemize}
 
-For simplicity of implementation, currently (December 2002) PimMrt
+For simplicity of implementation, currently (March 2003) PimMrt
 contains one more table: PimMrtMfc PIM-specific table with Multicast
 Forwarding Cache entries (in the future, this table may be moved out of
 PimMrt to PimNode) composed of PimMfc entries. This table contains all
 entries that have been installed in the multicast forwarding table in
-the multicast forwarding engine. Currently (December 2002), those
+the multicast forwarding engine. Currently (March 2003), those
 entries are source-group-specific, and are installed ``on-demand'' (\ie
 only if there is an active source for some group). In the future,
 group-specific entries may be supported as well (assuming that that
@@ -396,8 +397,8 @@ input event returns a list of the ordered output operations that need to
 be performed.
 
 If there are just few input events and output operations, it might be
-possible to create such table manually. However, currently (December
-2002) there are 47 input events and 70 output operations,
+possible to create such table manually. However, currently (March
+2003) there are 52 input events and 75 output operations,
 therefore manually creating such table is not feasible.
 The solution is on startup to automatically compute this table based on
 a set of rules about the various state dependencies as defined in the
@@ -454,8 +455,8 @@ long if there is a large number of PimMre or PimMrt entries that
 need to be processed (for example, thousands of (*,G) entries if the RP
 for those entries changes). In that case, we use ``time-slices'' to
 compute how long has taken after processing each (*,G) entry. If the
-elapsed time is above a threshold (default to 100ms as of December
-2002), we save the appropriate state to continue the processing later
+elapsed time is above a threshold (default to 100ms as of March
+2003), we save the appropriate state to continue the processing later
 (\eg in the above example the address of the next multicast group to
 process).
 
@@ -474,11 +475,13 @@ unit per PimNode. The main purpose of the PimBsr is to run the Bootstrap
 mechanism, and to update accordingly the RpTable with the current RP-set.
 
 The data contained in PimBsr is organized as described below.
-PimBsr keeps two lists of BsrZone entries: one list for the active BSR
-zones, and another list for the locally configured Cand-BSR zones and/or
-Cand-RP information. On startup, the active BSR zones list is empty. If
-the node is configured as a Candidate-BSR and/or a Candidate-RP, this
-information will be added to the second list; otherwise that list is
+PimBsr keeps three lists of BsrZone entries: one list for the active BSR
+zones, another list that contains information about expiring Candidate-RPs for
+group prefixes that the lastest Bootstrap message did not contain information
+about, and another list for the locally configured Cand-BSR zones and/or
+Cand-RP information. On startup, the active and expire BSR zones lists are
+empty. If the node is configured as a Candidate-BSR and/or a Candidate-RP,
+this information will be added to the third list; otherwise that list is 
 also empty.
 
 Each scope zone is identified by a scope zone ID, and a flag.
@@ -501,7 +504,7 @@ All information from the Bootstrap and Candidate-RP messages is kept in
 the above data structures. Further, those structures are used to keep
 various timers such as to timeout Candidate RPs or the current BSR.
 If the RP-set is changed after receiving a Bootstrap message, or after a
-timeout, the RpTable is updated accordingly.
+timeout of an Candidate-RP, the RpTable is updated accordingly.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -530,12 +533,12 @@ groups may map to a different RP, therefore we must process all entries
 one-by-one. This is achieved by scheduling a PimMreTask by the PimMrt,
 that takes the appropriate dependency actions for each entry.
 
-The RpTable may contain one special PimRp entry with address of
+The RpTable may contain one special PimRp entry with an RP address of
 all-zeroes. This entry is used to keep the lists of all PimMre and
 PimMfc entries that have no RP yet. If a new RP is added to the RpTable,
 then all entries that have no RP yet are processed to find if some
-of them may map to this new RP. Those who do map are moved to the
-appropriate list on the new RP.
+of them may map to this new RP. Those who do map to the new RP are moved to
+the appropriate list for that RP.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -564,7 +567,7 @@ class Mrib {
 
 
 The MRIB information is obtained from the RIB
-module~\footnote{Currently (December 2002), the information is
+module~\footnote{Currently (March 2003), the information is
 received from the MFEA instead.}; if the RIB changes, the
 PimMribTable is updated as well. Examples when the MRIB information
 may change are: the unicast routing changes the next-hop router address
@@ -646,7 +649,7 @@ would contain all affected entries: \eg a list of \emph{MRIB\_ADD} and
 entries would specify also the order the PIM-SM module should apply
 them.
 
-Note that as we mentioned earlier, currently (December 2002), the MRIB
+Note that as we mentioned earlier, currently (March 2003), the MRIB
 information is received from the MFEA, which reads directly the unicast
 forwarding table from the (UNIX) kernel, and PIM-SM keeps a local copy
 of the whole table. The MFEA periodically reads (\eg every 10 seconds)
@@ -668,7 +671,7 @@ future the current behavior may be changed.}.
 \subsection{PimConfig Description}
 
 PimConfig handles the PIM-specific configuration~\footnote{Currently
-(December 2002), PimConfig is not implemented; rather, all state is
+(March 2003), PimConfig is not implemented; rather, all state is
 kept into PimNode instead.}. This configuration is used to configure the
 following units:
 
@@ -677,7 +680,7 @@ following units:
   \item PimVif: protocol version, Hello-related options and timer
   values, etc.
 
-  \item PimScopeZone table: add information about scoped zones.
+  \item PimScopeZone table: add and delete information about scoped zones.
 
   \item PimBsr: configure the local routing unit as a Candidate-BSR or a
   Candidate-RP.
@@ -696,6 +699,8 @@ following units:
 \begin{itemize}
 
   \item December 11, 2002: Version 0.1 completed.
+
+  \item March 6, 2003: Version 0.2 completed.
 
 \end{itemize}
 
