@@ -156,9 +156,9 @@ test1()
     fi
 
     # verify that bgpPeerInUpdateElapsedTime is changing 
-    tmp=`diff -y  bgpPeerTable{1,3}.tmp | grep UpdateElapsedTime` 
+    tmp=`diff -y  bgpPeerTable{1,3}.tmp | grep UpdateElapsedTime | wc -l` 
 
-    if [ -n $tmp ]; then 
+    if [ $tmp = '0' ]; then 
 	echo "bgpPeerInUpdateElapsedTime not changing"; exit 1 
     fi
 
