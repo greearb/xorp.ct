@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.20 2003/07/12 01:14:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.21 2003/07/31 18:11:28 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -137,6 +137,7 @@ PimMreTrackState::PimMreTrackState(PimMrt& pim_mrt)
     output_state_out_remove_pim_mre_sg_entry_sg_rpt(action_list);
     output_state_out_remove_pim_mre_sg_rpt_entry_sg(action_list);
     output_state_out_remove_pim_mre_sg_rpt_entry_sg_rpt(action_list);
+    output_state_out_remove_pim_mfc_entry_mfc(action_list);
     
     //
     // Create the final result
@@ -489,6 +490,7 @@ do {									\
     INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_WC);		// 49
     INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG);		// 50
     INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT);		// 51
+    INPUT_NAME(INPUT_STATE_IN_REMOVE_PIM_MFC);			// 52
     
     OUTPUT_NAME(OUTPUT_STATE_RP_WC);				// 0
     OUTPUT_NAME(OUTPUT_STATE_RP_SG);				// 1
@@ -567,6 +569,7 @@ do {									\
     OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT);// 74
     OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG);// 75
     OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT);// 76
+    OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC);	// 77
     
 #undef INPUT_NAME
 #undef OUTPUT_NAME
@@ -1001,6 +1004,12 @@ void
 PimMreTrackState::input_state_in_remove_pim_mre_sg_rpt(list<PimMreAction> action_list)
 {
     add_action_list(INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT, action_list);
+}
+
+void
+PimMreTrackState::input_state_in_remove_pim_mfc(list<PimMreAction> action_list)
+{
+    add_action_list(INPUT_STATE_IN_REMOVE_PIM_MFC, action_list);
 }
 
 
@@ -2169,6 +2178,21 @@ PimMreTrackState::output_state_out_remove_pim_mre_sg_rpt_entry_sg_rpt(list<PimMr
     return (action_list);
 }
 
+list<PimMreAction>
+PimMreTrackState::output_state_out_remove_pim_mfc_entry_mfc(list<PimMreAction> action_list)
+{
+    bool init_flag = action_list.empty();
+    PimMreAction action(OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC, PIM_MFC);
+    
+    if (can_add_action_to_list(action_list, action))
+	action_list.push_back(action);
+    
+    if (init_flag)
+	track_state_out_remove_pim_mfc_entry_mfc(action_list);
+    
+    return (action_list);
+}
+
 //
 // Track state methods
 //
@@ -3082,6 +3106,12 @@ PimMreTrackState::track_state_in_remove_pim_mre_sg_rpt(list<PimMreAction> action
 }
 
 void
+PimMreTrackState::track_state_in_remove_pim_mfc(list<PimMreAction> action_list)
+{
+    input_state_in_remove_pim_mfc(action_list);
+}
+
+void
 PimMreTrackState::track_state_out_start_vif_rp(list<PimMreAction> action_list)
 {
     action_list = output_state_out_start_vif_rp(action_list);
@@ -3319,6 +3349,14 @@ PimMreTrackState::track_state_out_remove_pim_mre_sg_rpt_entry_sg_rpt(list<PimMre
     action_list = output_state_out_remove_pim_mre_sg_rpt_entry_sg_rpt(action_list);
     
     track_state_in_remove_pim_mre_sg_rpt(action_list);
+}
+
+void
+PimMreTrackState::track_state_out_remove_pim_mfc_entry_mfc(list<PimMreAction> action_list)
+{
+    action_list = output_state_out_remove_pim_mfc_entry_mfc(action_list);
+    
+    track_state_in_remove_pim_mfc(action_list);
 }
 
 
@@ -3671,6 +3709,11 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	pim_mre.remove_pim_mre_sg_rpt_entry();
 	break;
 	
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC:	// 77
+	XLOG_UNREACHABLE();
+	// pim_mfc.remove_pim_mfc_entry_mfc();
+	break;
+	
     default:
 	XLOG_UNREACHABLE();
 	break;
@@ -3696,6 +3739,10 @@ PimMreAction::perform_action(PimMfc& pim_mfc)
 	
     case PimMreTrackState::OUTPUT_STATE_SPT_SWITCH_THRESHOLD_CHANGED_MFC: // 19
 	pim_mfc.recompute_spt_switch_threshold_changed_mfc();
+	break;
+	
+    case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC:	// 77
+	pim_mfc.remove_pim_mfc_entry_mfc();
 	break;
 	
     default:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.10 2003/07/07 23:13:02 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.11 2003/07/12 01:14:38 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_TRACK_STATE_HH__
@@ -113,6 +113,7 @@ public:
 	INPUT_STATE_IN_REMOVE_PIM_MRE_WC,		// 49
 	INPUT_STATE_IN_REMOVE_PIM_MRE_SG,		// 50
 	INPUT_STATE_IN_REMOVE_PIM_MRE_SG_RPT,		// 51
+	INPUT_STATE_IN_REMOVE_PIM_MFC,			// 52
 	INPUT_STATE_MAX
     };
     //
@@ -196,6 +197,7 @@ public:
 	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_ENTRY_SG_RPT,// 74
 	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG,// 75
 	OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT,// 76
+	OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC,	// 77
 	OUTPUT_STATE_MAX
     };
     
@@ -254,6 +256,7 @@ public:
     void	input_state_in_remove_pim_mre_wc(list<PimMreAction> action_list);
     void	input_state_in_remove_pim_mre_sg(list<PimMreAction> action_list);
     void	input_state_in_remove_pim_mre_sg_rpt(list<PimMreAction> action_list);
+    void	input_state_in_remove_pim_mfc(list<PimMreAction> action_list);
     
     
     //
@@ -336,6 +339,7 @@ public:
     list<PimMreAction>	output_state_out_remove_pim_mre_sg_entry_sg_rpt(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_out_remove_pim_mre_sg_rpt_entry_sg(list<PimMreAction> action_list);
     list<PimMreAction>	output_state_out_remove_pim_mre_sg_rpt_entry_sg_rpt(list<PimMreAction> action_list);
+    list<PimMreAction>	output_state_out_remove_pim_mfc_entry_mfc(list<PimMreAction> action_list);
     
     //
     // The output actions
@@ -541,6 +545,7 @@ private:
     void	track_state_in_remove_pim_mre_wc(list<PimMreAction> action_list);
     void	track_state_in_remove_pim_mre_sg(list<PimMreAction> action_list);
     void	track_state_in_remove_pim_mre_sg_rpt(list<PimMreAction> action_list);
+    void	track_state_in_remove_pim_mfc(list<PimMreAction> action_list);
     void	track_state_out_add_pim_mre_rp_entry_rp(list<PimMreAction> action_list);
     void	track_state_out_add_pim_mre_rp_entry_wc(list<PimMreAction> action_list);
     void	track_state_out_add_pim_mre_rp_entry_sg(list<PimMreAction> action_list);
@@ -563,6 +568,7 @@ private:
     void	track_state_out_remove_pim_mre_sg_entry_sg_rpt(list<PimMreAction> action_list);
     void	track_state_out_remove_pim_mre_sg_rpt_entry_sg(list<PimMreAction> action_list);
     void	track_state_out_remove_pim_mre_sg_rpt_entry_sg_rpt(list<PimMreAction> action_list);
+    void	track_state_out_remove_pim_mfc_entry_mfc(list<PimMreAction> action_list);
     
     // Private state
     PimMrt&	_pim_mrt;		// The PIM MRT
