@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.15 2003/10/11 19:47:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.16 2003/10/30 18:57:43 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -233,7 +233,9 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
     strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
 
 #if defined(SIOCSIFLLADDR)
-    // XXX: FreeBSD
+    //
+    // FreeBSD
+    //
     ifreq.ifr_addr.sa_family = AF_LINK;
     memcpy(ifreq.ifr_addr.sa_data, &ether_addr, ETHER_ADDR_LEN);
 #ifdef HAVE_SA_LEN
@@ -245,23 +247,10 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
     }
     return (XORP_OK);
 
-#elif defined(SIOCSIFADDR) && defined(AF_LINK)
-    // XXX: NetBSD and OpenBSD
-    // XXX: currently (NetBSD-1.6.1 and OpenBSD-3.3) do not support
-    // setting the MAC address, hence the code below will definitely fail.
-    ifreq.ifr_addr.sa_family = AF_LINK;
-    memcpy(ifreq.ifr_addr.sa_data, &ether_addr, ETHER_ADDR_LEN);
-#ifdef HAVE_SA_LEN
-    ifreq.ifr_addr.sa_len = ETHER_ADDR_LEN;
-#endif
-    if (ioctl(_s4, SIOCSIFADDR, &ifreq) < 0) {
-	reason = c_format("%s", strerror(errno));
-	return (XORP_ERROR);
-    }
-    return (XORP_OK);
-
 #elif defined(SIOCSIFHWADDR)
-    // XXX: Linux
+    //
+    // Linux
+    //
     ifreq.ifr_hwaddr.sa_family = ARPHRD_ETHER;
     memcpy(ifreq.ifr_hwaddr.sa_data, &ether_addr, ETH_ALEN);
 #ifdef HAVE_SA_LEN
@@ -274,7 +263,15 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
     return (XORP_OK);
 
 #else
-#error No mechanism to set the MAC address on an interface
+    //
+    // No mechanism: NetBSD and OpenBSD, et. al.
+    //
+    // XXX: currently (NetBSD-1.6.1 and OpenBSD-3.3) do not support
+    // setting the MAC address.
+    //
+    UNUSED(ether_addr);
+    reason = c_format("No mechanism to set the MAC address on an interface");
+    return (XORP_ERROR);
 #endif
 }
 
