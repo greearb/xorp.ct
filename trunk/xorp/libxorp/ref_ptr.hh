@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.11 2002/12/09 18:29:13 hodson Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -20,7 +20,6 @@
 #include "config.h"
 #include "xorp.h"
 #include <vector>
-#include <stdio.h>
 
 /**
  * @short class for maintaining the storage of counters used by ref_ptr.
@@ -89,7 +88,6 @@ public:
      * @return singleton ref_counter_pool.
      */
     static ref_counter_pool& instance();
-
 
     ref_counter_pool();
 };
