@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.56 2004/07/26 09:25:28 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.57 2005/01/19 00:14:51 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -40,7 +40,7 @@ Release 1.1 (2005/??/??)
     - 
 
   FEA/MFEA:
-    - 
+    - Implementation of Click FEA support.
 
   RIB:
     - Bug fix when adding point-to-point network interfaces.
