@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.5 2003/02/06 22:21:31 hodson Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.6 2003/03/10 23:20:43 hodson Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -529,71 +529,6 @@ protected:
 	return XrlCmdError::OKAY();
     }
     
-    /**
-     *  Add/delete a protocol in the MLD/IGMP protocol.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param protocol_name the name of the protocol to add.
-     *  
-     *  @param protocol_id the ID of the protocol to add (both sides must agree
-     *  on the particular values).
-     *
-     *  @param vif_name the name of the vif the protocol add/delete to apply
-     *  to.
-     *  
-     *  @param vif_index the index of the vif the protocol add/delete to apply
-     *  to.
-     *  
-     *  @param fail true if failure has occured.
-     *  
-     *  @param reason contains failure reason if it occured. The added protocol
-     *  will receive Join/Leave membership information about same-LAN members.
-     */
-    XrlCmdError mld6igmp_0_1_add_protocol4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
-
-    XrlCmdError mld6igmp_0_1_add_protocol6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
-
-    XrlCmdError mld6igmp_0_1_delete_protocol4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
-
-    XrlCmdError mld6igmp_0_1_delete_protocol6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	// Output values, 
-	bool&	fail, 
-	string&	reason);
-    
     //
     // MRIB-related add/delete/done: not used by MLD6 or IGMP.
     //
@@ -839,6 +774,44 @@ protected:
 	string&	reason);
 
     /**
+     *  Pure-virtual function that needs to be implemented to:
+     *  
+     *  Configure MLD6IGMP interface-related metrics. The 'set_foo' XRLs set
+     *  the particular values. The 'reset_foo' XRLs reset the metrics to their
+     *  default values.
+     *  
+     *  @param vif_name the name of the vif to configure.
+     *  
+     *  @param proto_version the protocol version.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    XrlCmdError mld6igmp_0_1_get_vif_proto_version(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	uint32_t&	proto_version, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError mld6igmp_0_1_set_vif_proto_version(
+	// Input values, 
+	const string&	vif_name, 
+	const uint32_t&	proto_version, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError mld6igmp_0_1_reset_vif_proto_version(
+	// Input values, 
+	const string&	vif_name, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    /**
      *  Enable/disable the MLD6IGMP trace log.
      *  
      *  @param fail true if failure has occured.
@@ -854,6 +827,73 @@ protected:
 	// Output values, 
 	bool&	fail, 
 	string&	reason);
+
+    /**
+     *  Add/delete a client protocol in the MLD/IGMP protocol.
+     *  
+     *  @param xrl_sender_name the XRL name of the originator of this XRL.
+     *  
+     *  @param protocol_name the name of the protocol to add/delete.
+     *  
+     *  @param protocol_id the ID of the protocol to add/delete (both sides
+     *  must agree on the particular values).
+     *  
+     *  @param vif_name the name of the vif the protocol add/delete to apply
+     *  to.
+     *  
+     *  @param vif_index the index of the vif the protocol add/delete to apply
+     *  to.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured. The added protocol
+     *  will receive Join/Leave membership information about same-LAN members
+     *  for the particular vif.
+     */
+    XrlCmdError mld6igmp_0_1_add_protocol4(
+	// Input values, 
+	const string&	xrl_sender_name, 
+	const string&	protocol_name, 
+	const uint32_t&	protocol_id, 
+	const string&	vif_name, 
+	const uint32_t&	vif_index, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError mld6igmp_0_1_add_protocol6(
+	// Input values, 
+	const string&	xrl_sender_name, 
+	const string&	protocol_name, 
+	const uint32_t&	protocol_id, 
+	const string&	vif_name, 
+	const uint32_t&	vif_index, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError mld6igmp_0_1_delete_protocol4(
+	// Input values, 
+	const string&	xrl_sender_name, 
+	const string&	protocol_name, 
+	const uint32_t&	protocol_id, 
+	const string&	vif_name, 
+	const uint32_t&	vif_index, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError mld6igmp_0_1_delete_protocol6(
+	// Input values, 
+	const string&	xrl_sender_name, 
+	const string&	protocol_name, 
+	const uint32_t&	protocol_id, 
+	const string&	vif_name, 
+	const uint32_t&	vif_index, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+    
     
 private:
     const string& my_xrl_target_name() {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.2 2003/03/10 23:20:43 hodson Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -63,6 +63,18 @@ public:
     virtual ~Mld6igmpVif();
     
     /**
+     * Set the current protocol version.
+     * 
+     * The protocol version must be in the interval
+     * [IGMP_VERSION_MIN, IGMP_VERSION_MAX]
+     * or [MLD6_VERSION_MIN, MLD6_VERSION_MAX]
+     * 
+     * @param proto_version the protocol version to set.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_proto_version(int proto_version);
+    
+    /**
      *  Start MLD6/IGMP on a single virtual interface.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -75,7 +87,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
-    
+
     /**
      * Receive a protocol message.
      * 

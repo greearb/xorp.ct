@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.3 2003/02/14 23:55:58 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.4 2003/03/10 23:20:43 hodson Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -1183,6 +1183,379 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
 }
 
 XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_enable_vif(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
+    
+    if (mld6igmp_vif == NULL) {
+	reason = c_format("Cannot enable vif %s: "
+			  "no such vif", vif_name.c_str());
+	XLOG_ERROR("%s", reason.c_str());
+	fail = true;
+    } else {
+	mld6igmp_vif->enable();
+	fail = false;
+	reason = "";
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_disable_vif(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
+    
+    if (mld6igmp_vif == NULL) {
+	reason = c_format("Cannot disable vif %s: "
+			  "no such vif", vif_name.c_str());
+	XLOG_ERROR("%s", reason.c_str());
+	fail = true;
+    } else {
+	mld6igmp_vif->disable();
+	fail = false;
+	reason = "";
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_start_vif(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
+    
+    if (mld6igmp_vif == NULL) {
+	reason = c_format("Cannot start vif %s: "
+			  "no such vif", vif_name.c_str());
+	XLOG_ERROR("%s", reason.c_str());
+	fail = true;
+    } else {
+	if (mld6igmp_vif->start() != XORP_OK) {
+	    fail = true;
+	} else {
+	    fail = false;
+	}
+	reason = "";
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_stop_vif(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
+    
+    if (mld6igmp_vif == NULL) {
+	reason = c_format("Cannot stop vif %s: "
+			  "no such vif", vif_name.c_str());
+	XLOG_ERROR("%s", reason.c_str());
+	fail = true;
+    } else {
+	if (mld6igmp_vif->stop() != XORP_OK) {
+	    fail = true;
+	} else {
+	    fail = false;
+	}
+	reason = "";
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_enable_all_vifs(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    Mld6igmpNode::enable_all_vifs();
+    
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_disable_all_vifs(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    Mld6igmpNode::disable_all_vifs();
+    
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_start_all_vifs(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    Mld6igmpNode::start_all_vifs();
+    
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_stop_all_vifs(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    Mld6igmpNode::stop_all_vifs();
+    
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_enable_mld6igmp(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (enable_mld6igmp() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_disable_mld6igmp(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (disable_mld6igmp() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_enable_cli(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (enable_cli() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_disable_cli(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (disable_cli() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_start_mld6igmp(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (start_mld6igmp() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_stop_mld6igmp(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (stop_mld6igmp() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_start_cli(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (start_cli() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_stop_cli(
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (stop_cli() != XORP_OK) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_get_vif_proto_version(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    uint32_t&		proto_version, 
+    bool&		fail, 
+    string&		reason)
+{
+    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
+    
+    if (mld6igmp_vif == NULL) {
+	fail = true;
+    } else {
+	proto_version = mld6igmp_vif->proto_version();
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_set_vif_proto_version(
+    // Input values, 
+    const string&	vif_name, 
+    const uint32_t&	proto_version, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (Mld6igmpNode::set_vif_proto_version(vif_name, proto_version) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_reset_vif_proto_version(
+    // Input values, 
+    const string&	vif_name, 
+    // Output values, 
+    bool&		fail, 
+    string&		reason)
+{
+    if (Mld6igmpNode::reset_vif_proto_version(vif_name) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_enable_log_trace(
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    Mld6igmpNode::set_log_trace(true);
+    
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_disable_log_trace(
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    Mld6igmpNode::set_log_trace(false);
+    
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
     // Input values, 
     const string&	xrl_sender_name, 
@@ -1472,320 +1845,6 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
     //
     // Success
     //
-    fail = false;
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_enable_vif(
-    // Input values, 
-    const string&	vif_name, 
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
-    
-    if (mld6igmp_vif == NULL) {
-	reason = c_format("Cannot enable vif %s: "
-			  "no such vif", vif_name.c_str());
-	XLOG_ERROR("%s", reason.c_str());
-	fail = true;
-    } else {
-	mld6igmp_vif->enable();
-	fail = false;
-	reason = "";
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_disable_vif(
-    // Input values, 
-    const string&	vif_name, 
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
-    
-    if (mld6igmp_vif == NULL) {
-	reason = c_format("Cannot disable vif %s: "
-			  "no such vif", vif_name.c_str());
-	XLOG_ERROR("%s", reason.c_str());
-	fail = true;
-    } else {
-	mld6igmp_vif->disable();
-	fail = false;
-	reason = "";
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_start_vif(
-    // Input values, 
-    const string&	vif_name, 
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
-    
-    if (mld6igmp_vif == NULL) {
-	reason = c_format("Cannot start vif %s: "
-			  "no such vif", vif_name.c_str());
-	XLOG_ERROR("%s", reason.c_str());
-	fail = true;
-    } else {
-	if (mld6igmp_vif->start() != XORP_OK) {
-	    fail = true;
-	} else {
-	    fail = false;
-	}
-	reason = "";
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_stop_vif(
-    // Input values, 
-    const string&	vif_name, 
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_name(vif_name);
-    
-    if (mld6igmp_vif == NULL) {
-	reason = c_format("Cannot stop vif %s: "
-			  "no such vif", vif_name.c_str());
-	XLOG_ERROR("%s", reason.c_str());
-	fail = true;
-    } else {
-	if (mld6igmp_vif->stop() != XORP_OK) {
-	    fail = true;
-	} else {
-	    fail = false;
-	}
-	reason = "";
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_enable_all_vifs(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    Mld6igmpNode::enable_all_vifs();
-    
-    fail = false;
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_disable_all_vifs(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    Mld6igmpNode::disable_all_vifs();
-    
-    fail = false;
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_start_all_vifs(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    Mld6igmpNode::start_all_vifs();
-    
-    fail = false;
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_stop_all_vifs(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    Mld6igmpNode::stop_all_vifs();
-    
-    fail = false;
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_enable_mld6igmp(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    if (enable_mld6igmp() != XORP_OK) {
-	fail = true;
-    } else {
-	fail = false;
-    }
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_disable_mld6igmp(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    if (disable_mld6igmp() != XORP_OK) {
-	fail = true;
-    } else {
-	fail = false;
-    }
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_enable_cli(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    if (enable_cli() != XORP_OK) {
-	fail = true;
-    } else {
-	fail = false;
-    }
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_disable_cli(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    if (disable_cli() != XORP_OK) {
-	fail = true;
-    } else {
-	fail = false;
-    }
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_start_mld6igmp(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    if (start_mld6igmp() != XORP_OK) {
-	fail = true;
-    } else {
-	fail = false;
-    }
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_stop_mld6igmp(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    if (stop_mld6igmp() != XORP_OK) {
-	fail = true;
-    } else {
-	fail = false;
-    }
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_start_cli(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    if (start_cli() != XORP_OK) {
-	fail = true;
-    } else {
-	fail = false;
-    }
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_stop_cli(
-    // Output values, 
-    bool&		fail, 
-    string&		reason)
-{
-    if (stop_cli() != XORP_OK) {
-	fail = true;
-    } else {
-	fail = false;
-    }
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_enable_log_trace(
-    // Output values, 
-    bool&	fail, 
-    string&	reason)
-{
-    Mld6igmpNode::set_log_trace(true);
-    
-    fail = false;
-    reason = "";
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_disable_log_trace(
-    // Output values, 
-    bool&	fail, 
-    string&	reason)
-{
-    Mld6igmpNode::set_log_trace(false);
-    
     fail = false;
     reason = "";
     

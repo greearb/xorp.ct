@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.2 2003/03/10 23:20:42 hodson Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -450,6 +450,33 @@ public:
 				  const IPvX& source,
 				  const IPvX& group,
 				  action_jp_t action_jp);
+
+    //
+    // Configuration methods
+    //
+    
+    /**
+     * Set the protocol version on an interface.
+     * 
+     * @param vif_name the name of the vif to set the protocol version of.
+     * @param proto_version the new protocol version.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_vif_proto_version(const string& vif_name,
+				      int proto_version);
+    
+    /**
+     * Reset the protocol version on an interface to its default value.
+     * 
+     * @param vif_name the name of the vif to reset the protocol version of
+     * to its default value.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		reset_vif_proto_version(const string& vif_name);
+    
+    //
+    // Debug-related methods
+    //
     
     /**
      * Test if trace log is enabled.

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.2 2003/03/05 03:05:25 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -58,6 +58,7 @@ libmld6igmp_a_SOURCES += xrl_mld6igmp_node.hh
 
 libmld6igmp_a_SOURCES += igmp_proto.cc
 libmld6igmp_a_SOURCES += mld6_proto.cc
+libmld6igmp_a_SOURCES += mld6igmp_config.cc
 libmld6igmp_a_SOURCES += mld6igmp_member_query.cc
 libmld6igmp_a_SOURCES += mld6igmp_node.cc
 libmld6igmp_a_SOURCES += mld6igmp_node_cli.cc

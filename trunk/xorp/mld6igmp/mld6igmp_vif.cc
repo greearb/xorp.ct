@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.2 2003/03/10 23:20:43 hodson Exp $"
 
 
 //
@@ -101,6 +101,34 @@ Mld6igmpVif::~Mld6igmpVif(void)
     _members.clear();
     
     BUFFER_FREE(_buffer_send);
+}
+
+/**
+ * Mld6igmpVif::set_proto_version:
+ * @proto_version: The protocol version to set.
+ * 
+ * Set protocol version.
+ * 
+ * Return value: %XORP_OK is @proto_version is valid, otherwise %XORP_ERROR.
+ **/
+int
+Mld6igmpVif::set_proto_version(int proto_version)
+{
+    if (proto_is_igmp()) {
+	if ((proto_version < IGMP_VERSION_MIN)
+	    || (proto_version > IGMP_VERSION_MAX))
+	return (XORP_ERROR);
+    }
+    
+    if (proto_is_mld6()) {
+	if ((proto_version < MLD6_VERSION_MIN)
+	    || (proto_version > MLD6_VERSION_MAX))
+	return (XORP_ERROR);
+    }
+    
+    ProtoUnit::set_proto_version(proto_version);
+    
+    return (XORP_OK);
 }
 
 /**

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mld6igmp.xif,v 1.7 2002/12/08 11:02:38 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mld6igmp.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
 
 /*
  * Multicast Listener Discovery/Internet Group Management Protocol
@@ -7,42 +7,6 @@
 
 
 interface mld6igmp/0.1 {
-
-	/**
-	 * Add/delete a client protocol in the MLD/IGMP protocol.
-	 *
-	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param protocol_name the name of the protocol to add/delete.
-	 * @param protocol_id the ID of the protocol to add/delete
-	 * (both sides must agree on the particular values).
-	 * @param vif_name the name of the vif the protocol add/delete to
-	 * apply to.
-	 * @param vif_index the index of the vif the protocol add/delete to
-	 * apply to.
-	 * @param fail true if failure has occured.
-	 * @param reason contains failure reason if it occured.
-	 *
-	 * The added protocol will receive Join/Leave membership information
-	 * about same-LAN members for the particular vif.
-	 */
-	/* TODO: the protocol names have to be globally defined */
-	add_protocol4	? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
-	add_protocol6	? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
-	
-	delete_protocol4 ? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
-	delete_protocol6 ? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32			\
-			-> fail:bool & reason:txt
 
 	/**
 	 * Enable/disable/start/stop a MLD6IGMP vif interface.
@@ -84,6 +48,26 @@ interface mld6igmp/0.1 {
 	stop_cli			-> fail:bool & reason:txt
 
 	/**
+	 * Configure MLD6IGMP interface-related metrics.
+	 * 
+	 * The 'set_foo' XRLs set the particular values. The 'reset_foo'
+	 * XRLs reset the metrics to their default values.
+	 *
+	 * @param vif_name the name of the vif to configure.
+	 * @param proto_version the protocol version.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	get_vif_proto_version		? vif_name:txt			\
+					-> proto_version:u32		\
+					& fail:bool & reason:txt
+	set_vif_proto_version		? vif_name:txt			\
+					& proto_version:u32		\
+					-> fail:bool & reason:txt
+	reset_vif_proto_version		? vif_name:txt			\
+					-> fail:bool & reason:txt
+
+	/**
 	 * Enable/disable the MLD6IGMP trace log.
 	 * 
 	 * @param fail true if failure has occured.
@@ -91,4 +75,41 @@ interface mld6igmp/0.1 {
 	 */
 	enable_log_trace		-> fail:bool & reason:txt
 	disable_log_trace		-> fail:bool & reason:txt
+
+
+	/**
+	 * Add/delete a client protocol in the MLD/IGMP protocol.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param protocol_name the name of the protocol to add/delete.
+	 * @param protocol_id the ID of the protocol to add/delete
+	 * (both sides must agree on the particular values).
+	 * @param vif_name the name of the vif the protocol add/delete to
+	 * apply to.
+	 * @param vif_index the index of the vif the protocol add/delete to
+	 * apply to.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 *
+	 * The added protocol will receive Join/Leave membership information
+	 * about same-LAN members for the particular vif.
+	 */
+	/* TODO: the protocol names have to be globally defined */
+	add_protocol4	? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32			\
+			-> fail:bool & reason:txt
+	add_protocol6	? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32			\
+			-> fail:bool & reason:txt
+	
+	delete_protocol4 ? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32			\
+			-> fail:bool & reason:txt
+	delete_protocol6 ? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32			\
+			-> fail:bool & reason:txt
 }

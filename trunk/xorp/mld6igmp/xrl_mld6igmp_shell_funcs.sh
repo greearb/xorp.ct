@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.2 2003/03/03 02:00:42 pavlin Exp $
 #
 
 #
@@ -170,6 +170,52 @@ mld6igmp_stop_cli()
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/stop_cli"
     XRL_ARGS=""
     call_xrl -r 0 $XRL$XRL_ARGS fail:bool = false
+}
+
+#
+# Configure MLD6IGMP interface-related metrics.
+#
+mld6igmp_get_vif_proto_version()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_get_vif_proto_version <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+
+    echo "mld6igmp_get_vif_proto_version" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/get_vif_proto_version"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl -p proto_version:u32 $XRL$XRL_ARGS
+}
+
+mld6igmp_set_vif_proto_version()
+{
+    if [ $# -lt 2 ] ; then
+	echo "Usage: mld6igmp_set_vif_proto_version <vif_name:txt> <proto_version:u32>"
+	exit 1
+    fi
+    vif_name=$1
+    proto_version=$2
+    
+    echo "mld6igmp_set_vif_proto_version" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/set_vif_proto_version"
+    XRL_ARGS="?vif_name:txt=$vif_name&proto_version:u32=$proto_version"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
+}
+
+mld6igmp_reset_vif_proto_version()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_reset_vif_proto_version <vif_name:txt>"
+	exit 1
+    fi
+    vif_name=$1
+    
+    echo "mld6igmp_reset_vif_proto_version" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/reset_vif_proto_version"
+    XRL_ARGS="?vif_name:txt=$vif_name"
+    call_xrl $XRL$XRL_ARGS fail:bool = false
 }
 
 mld6igmp_enable_log_trace()
