@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.4 2003/08/14 15:29:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.5 2003/08/14 18:43:11 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -584,32 +584,6 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
     }
 
     //
-    // Check if interface flags need setting
-    //
-    uint32_t reqmask = a.addr_flags();
-    uint32_t curflags;
-    if (IfGetFlags(_s4, i.ifname(), curflags).execute() < 0) {
-	ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-				 c_format("Failed to get interface flags (%s)",
-					  strerror(errno)));
-	XLOG_ERROR(ifc().er().last_error().c_str());
-	return;
-    }
-
-    if (reqmask && (curflags & reqmask) == 0) {
-	XLOG_INFO("Interface flags need to be set to configure address.");
-	uint32_t nflags = ((curflags & ~(IFF_BROADCAST | IFF_POINTOPOINT)) |
-			   reqmask);
-	if (IfSetFlags(_s4, i.ifname(), nflags).execute() < 0) {
-	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-				     c_format("Failed to set interface flags to %08x (%s)",
-					      nflags, strerror(errno)));
-	    XLOG_ERROR(ifc().er().last_error().c_str());
-	    return;
-	}
-    }
-
-    //
     // Set the address
     //
     do {
@@ -695,32 +669,6 @@ IfConfigSetIoctl::push_addr(const IfTreeInterface&	i,
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	}
 	return;
-    }
-
-    //
-    // Check if interface flags need setting
-    //
-    uint32_t reqmask = a.addr_flags();
-    uint32_t curflags;
-    if (IfGetFlags(_s6, i.ifname(), curflags).execute() < 0) {
-	ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-				 c_format("Failed to get interface flags (%s)",
-					  strerror(errno)));
-	XLOG_ERROR(ifc().er().last_error().c_str());
-	return;
-    }
-
-    if (reqmask && (curflags & reqmask) == 0) {
-	XLOG_INFO("Interface flags need to be set to configure address.");
-	uint32_t nflags = ((curflags & ~(IFF_BROADCAST | IFF_POINTOPOINT)) |
-			   reqmask);
-	if (IfSetFlags(_s6, i.ifname(), nflags).execute() < 0) {
-	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-				     c_format("Failed to set interface flags to %08x (%s)",
-					      nflags, strerror(errno)));
-	    XLOG_ERROR(ifc().er().last_error().c_str());
-	    return;
-	}
     }
 
     //

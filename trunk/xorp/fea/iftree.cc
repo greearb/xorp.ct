@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.12 2003/08/11 06:18:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.13 2003/08/12 21:55:07 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -277,7 +277,7 @@ IfTree::ignore_duplicates(const IfTree& o)
 /* IfTreeInterface code */
 
 IfTreeInterface::IfTreeInterface(const string& ifname)
-    : IfTreeItem(), _ifname(ifname), _enabled(false), _if_flags(0), _mtu(0)
+    : IfTreeItem(), _ifname(ifname), _enabled(false), _mtu(0)
 {}
 
 bool
@@ -326,9 +326,9 @@ IfTreeInterface::finalize_state()
 string
 IfTreeInterface::str() const
 {
-    return c_format("Interface %s { enabled := %s } { flags := 0x%02x } "
+    return c_format("Interface %s { enabled := %s } "
 		    "{ mtu := %d } { mac := %s }",
-		    _ifname.c_str(), true_false(_enabled), _if_flags, _mtu,
+		    _ifname.c_str(), true_false(_enabled), _mtu,
 		    _mac.str().c_str()) + string(" ") + IfTreeItem::str();
 }
 
@@ -339,7 +339,7 @@ IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
     : IfTreeItem(), _ifname(ifname), _vifname(vifname),
       _pif_index(0), _enabled(false),
       _broadcast(false), _loopback(false), _point_to_point(false),
-      _multicast(false), _vif_flags(0)
+      _multicast(false)
 {}
 
 bool
@@ -426,11 +426,10 @@ IfTreeVif::str() const
 {
     return c_format("VIF %s { enabled := %s } { broadcast := %s } "
 		    "{ loopback := %s } { point_to_point := %s } "
-		    "{ multicast := %s } { flags := 0x%02x }",
+		    "{ multicast := %s } ",
 		    _vifname.c_str(), true_false(_enabled),
 		    true_false(_broadcast), true_false(_loopback),
-		    true_false(_point_to_point), true_false(_multicast),
-		    _vif_flags)
+		    true_false(_point_to_point), true_false(_multicast))
 	+ string(" ") + IfTreeItem::str();
 }
 
@@ -489,12 +488,12 @@ IfTreeAddr4::str() const
 {
     string r = c_format("V4Addr %s { enabled := %s } { broadcast := %s } "
 			"{ loopback := %s } { point_to_point := %s } "
-			"{ multicast := %s } { flags := 0x%02x } "
+			"{ multicast := %s } "
 			"{ prefix := %d }",
 			_addr.str().c_str(), true_false(_enabled),
 			true_false(_broadcast), true_false(_loopback),
 			true_false(_point_to_point), true_false(_multicast),
-			_addr_flags, _prefix);
+			_prefix);
     if (_point_to_point)
 	r += c_format(" { endpoint := %s }", _oaddr.str().c_str());
     if (_broadcast)
@@ -543,12 +542,12 @@ IfTreeAddr6::str() const
 {
     string r = c_format("V6Addr %s { enabled := %s } "
 			"{ loopback := %s } { point_to_point := %s } "
-			"{ multicast := %s } { flags := 0x%02x } "
+			"{ multicast := %s } "
 			"{ prefix := %d }",
 			_addr.str().c_str(), true_false(_enabled),
 			true_false(_loopback),
 			true_false(_point_to_point), true_false(_multicast),
-			_addr_flags, _prefix);
+			_prefix);
     if (_point_to_point)
 	r += c_format(" { endpoint := %s }", _oaddr.str().c_str());
     r += string(" ") + IfTreeItem::str();

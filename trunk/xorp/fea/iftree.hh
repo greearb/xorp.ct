@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.9 2003/08/11 17:20:23 hodson Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.10 2003/08/12 21:54:11 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -219,10 +219,6 @@ public:
 
     inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
 
-    inline uint32_t if_flags() const	{ return _if_flags; }
-
-    inline void set_if_flags(uint32_t v) { _if_flags = v; mark(CHANGED); }
-
     inline uint32_t mtu() const		{ return _mtu; }
 
     inline void set_mtu(uint32_t mtu)	{ _mtu = mtu; mark(CHANGED); }
@@ -248,7 +244,6 @@ public:
     inline void copy_state(const IfTreeInterface& o)
     {
 	set_enabled(o.enabled());
-	set_if_flags(o.if_flags());
 	set_mtu(o.mtu());
 	set_mac(o.mac());
     }
@@ -262,7 +257,6 @@ public:
     inline bool is_same_state(const IfTreeInterface& o)
     {
 	return ((enabled() == o.enabled())
-		&& (if_flags() == o.if_flags())
 		&& (mtu() == o.mtu())
 		&& (mac() == o.mac()));
     }
@@ -274,7 +268,6 @@ public:
 protected:
     const string _ifname;
     bool 	 _enabled;
-    uint32_t	 _if_flags;
     uint32_t 	 _mtu;
     Mac 	 _mac;
     VifMap	 _vifs;
@@ -309,10 +302,6 @@ public:
     inline void set_loopback(bool v)	{ _loopback = v; mark(CHANGED); }
     inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
     inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
-
-    inline uint32_t vif_flags() const	{ return _vif_flags; }
-
-    inline void set_vif_flags(uint32_t v) { _vif_flags = v; mark(CHANGED); }
 
     inline const V4Map& v4addrs() const	{ return _v4addrs; }
     inline V4Map& v4addrs()		{ return _v4addrs; }
@@ -375,7 +364,6 @@ public:
 	set_loopback(o.loopback());
 	set_point_to_point(o.point_to_point());
 	set_multicast(o.multicast());
-	set_vif_flags(o.vif_flags());
     }
 
     /**
@@ -391,8 +379,7 @@ public:
 		&& (broadcast() == o.broadcast())
 		&& (loopback() == o.loopback())
 		&& (point_to_point() == o.point_to_point())
-		&& (multicast() == o.multicast())
-		&& (vif_flags() == o.vif_flags()));
+		&& (multicast() == o.multicast()));
     }
 
     void finalize_state();
@@ -409,7 +396,6 @@ protected:
     bool	 _loopback;
     bool	 _point_to_point;
     bool	 _multicast;
-    uint32_t	 _vif_flags;
 
     V4Map	 _v4addrs;
     V6Map	 _v6addrs;
@@ -424,7 +410,7 @@ public:
     IfTreeAddr4(const IPv4& addr)
 	: IfTreeItem(), _addr(addr), _enabled(false), _broadcast(false),
 	  _loopback(false), _point_to_point(false), _multicast(false),
-	  _addr_flags(0), _prefix(0)
+	  _prefix(0)
     {}
 
     inline const IPv4& addr() const	{ return _addr; }
@@ -440,10 +426,6 @@ public:
     inline void set_loopback(bool v)	{ _loopback = v; mark(CHANGED); }
     inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
     inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
-
-    inline uint32_t addr_flags() const	{ return _addr_flags; }
-
-    inline void set_addr_flags(uint32_t v) { _addr_flags = v; mark(CHANGED); }
 
     /**
      * Get prefix associates with interface.
@@ -492,7 +474,6 @@ public:
 	set_loopback(o.loopback());
 	set_point_to_point(o.point_to_point());
 	set_multicast(o.multicast());
-	set_addr_flags(o.addr_flags());
 	if (o.broadcast())
 	    set_bcast(o.bcast());
 	if (o.point_to_point())
@@ -513,7 +494,6 @@ public:
 		&& (loopback() == o.loopback())
 		&& (point_to_point() == o.point_to_point())
 		&& (multicast() == o.multicast())
-		&& (addr_flags() == o.addr_flags())
 		&& (bcast() == o.bcast())
 		&& (endpoint() == o.endpoint())
 		&& (prefix() == o.prefix()));
@@ -531,7 +511,6 @@ protected:
     bool	_loopback;
     bool	_point_to_point;
     bool	_multicast;
-    uint32_t	_addr_flags;
 
     IPv4	_oaddr;		// Other address - p2p endpoint or bcast addr
     uint32_t	_prefix;
@@ -547,7 +526,7 @@ public:
     IfTreeAddr6(const IPv6& addr)
 	: IfTreeItem(), _addr(addr), _enabled(false),
 	  _loopback(false), _point_to_point(false), _multicast(false),
-	  _addr_flags(0), _prefix(0)
+	  _prefix(0)
     {}
 
     const IPv6& addr() const		{ return _addr; }
@@ -561,10 +540,6 @@ public:
     inline void set_loopback(bool v)	{ _loopback = v; mark(CHANGED); }
     inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
     inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
-
-    inline uint32_t addr_flags() const	{ return _addr_flags; }
-
-    inline void set_addr_flags(uint32_t v) { _addr_flags = v; mark(CHANGED); }
 
     /**
      * Get prefix associated with address.
@@ -590,7 +565,6 @@ public:
 	set_loopback(o.loopback());
 	set_point_to_point(o.point_to_point());
 	set_multicast(o.multicast());
-	set_addr_flags(o.addr_flags());
 	if (o.point_to_point())
 	    set_endpoint(o.endpoint());
 	set_prefix(o.prefix());
@@ -608,7 +582,6 @@ public:
 		&& (loopback() == o.loopback())
 		&& (point_to_point() == o.point_to_point())
 		&& (multicast() == o.multicast())
-		&& (addr_flags() == o.addr_flags())
 		&& (endpoint() == o.endpoint())
 		&& (prefix() == o.prefix()));
     }
@@ -624,7 +597,6 @@ protected:
     bool	_loopback;
     bool	_point_to_point;
     bool	_multicast;
-    uint32_t	_addr_flags;
 
     IPv6	_oaddr;		// Other address - p2p endpoint
     uint32_t	_prefix;
