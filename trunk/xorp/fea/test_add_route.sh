@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.5 2003/10/21 02:10:51 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.6 2003/10/21 18:59:31 pavlin Exp $
 #
 
 #
@@ -33,7 +33,9 @@ OS=`uname -s`
 #
 
 DEST="10.30.0.0/24"
-DEST_HOST="10.30.0.0"
+DEST2="10.40.0.0/24"
+DEST_HOST="10.30.0.10"
+DEST_HOST2="10.40.0.10"
 METRIC="10"
 ADMIN_DISTANCE="20"
 PROTOCOL_ORIGIN="BGP"
@@ -61,14 +63,146 @@ VIFNAME="${IFNAME}"
 #
 # Test functions
 #
+test_have_ipv4()
+{
+    local _xrl_result _ret_value _result
+
+    echo "TEST: Whether the underlying system supports IPv4"
+
+    _xrl_result=`fea_fti_have_ipv4 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot test whether the underlying system supports IPv4:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+    _result=`get_xrl_variable_value "${_xrl_result}" result:bool`
+    if [ "${_result}" != "true" ] ; then
+	echo "ERROR: result is ${_result}; expecting true"
+	return 1
+    fi
+
+    #
+    # Print the result
+    #
+    echo "RESULT:"
+    echo "${_xrl_result}"
+}
+
+test_prepare_unicast_forwarding4()
+{
+    local _xrl_result _ret_value
+
+    echo "TEST: Prepare IPv4 unicast forwarding tests (explicitly disable forwarding)"
+
+    _xrl_result=`fea_fti_set_unicast_forwarding_enabled4 false 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot prepare IPv4 unicast forwarding tests:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+}
+
+test_enable_unicast_forwarding4()
+{
+    local _xrl_result _ret_value
+
+    echo "TEST: Enable IPv4 unicast forwarding"
+
+    _xrl_result=`fea_fti_set_unicast_forwarding_enabled4 true 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot enable IPv4 unicast forwarding:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+}
+
+test_disable_unicast_forwarding4()
+{
+    local _xrl_result _ret_value
+
+    echo "TEST: Enable IPv4 unicast forwarding"
+
+    _xrl_result=`fea_fti_set_unicast_forwarding_enabled4 false 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot enable IPv4 unicast forwarding:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+}
+
+test_get_enabled_unicast_forwarding4()
+{
+    local _xrl_result _ret_value _enabled
+
+    echo "TEST: Whether IPv4 unicast forwarding is enabled"
+
+    _xrl_result=`fea_fti_get_unicast_forwarding_enabled4 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot test whether IPv4 unicast forwarding is enabled:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+    _enabled=`get_xrl_variable_value "${_xrl_result}" enabled:bool`
+    if [ "${_enabled}" != "true" ] ; then
+	echo "ERROR: enabled is ${_enabled}; expecting true"
+	return 1
+    fi
+
+    #
+    # Print the result
+    #
+    echo "RESULT:"
+    echo "${_xrl_result}"
+    
+}
+
+test_get_disabled_unicast_forwarding4()
+{
+    local _xrl_result _ret_value _disabled
+
+    echo "TEST: Whether IPv4 unicast forwarding is disabled"
+
+    _xrl_result=`fea_fti_get_unicast_forwarding_enabled4 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: cannot test whether IPv4 unicast forwarding is disabled:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+    _enabled=`get_xrl_variable_value "${_xrl_result}" enabled:bool`
+    if [ "${_enabled}" != "false" ] ; then
+	echo "ERROR: enabled is ${_enabled}; expecting false"
+	return 1
+    fi
+
+    #
+    # Print the result
+    #
+    echo "RESULT:"
+    echo "${_xrl_result}"
+    
+}
+
 test_cleanup_gateway4()
 {
+    local _xrl_result _ret_value _gateway
+
     echo "TEST: Clean-up gateway (if any) for destination ${DEST}"
 
     # Lookup the entry
-    gateway=`get_xrl_variable_value \`fea_fti_lookup_entry4 ${DEST}\` gateway:ipv4`
-    if [ "${gateway}" = "" ] ; then
-	echo "TEST RESULT: No gateway to delete for destination ${DEST}"
+    _gateway=""
+    _xrl_result=`fea_fti_lookup_entry4 ${DEST} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -eq 0 ] ; then
+	_gateway=`get_xrl_variable_value "${_xrl_result}" gateway:ipv4`
+    fi
+    if [ "${_gateway}" = "" ] ; then
+	echo "RESULT: No gateway to delete for destination ${DEST}"
     else
 	tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
 	if [ "${tid}" = "" ] ; then
@@ -95,15 +229,16 @@ test_add_entry4()
 
 test_lookup_entry4()
 {
-    local _xrl_result _xrl_value _gateway _ifname _vifname _metric
+    local _xrl_result _ret_value _gateway _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
     echo "TEST: Look-up gateway for destination ${DEST}"
 
-    _xrl_result=`fea_fti_lookup_entry4 ${DEST}`
+    _xrl_result=`fea_fti_lookup_entry4 ${DEST} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
-	echo "ERROR: ${_xrl_result}"
+	echo "ERROR: routing entry was not found:"
+	echo "${_xrl_result}"
 	return ${_ret_value}
     fi
     _gateway=`get_xrl_variable_value ${_xrl_result} gateway:ipv4`
@@ -148,21 +283,22 @@ test_lookup_entry4()
     #
     # Print the result
     #
-    echo "TEST RESULT:"
+    echo "RESULT:"
     echo "${_xrl_result}"
 }
 
 test_lookup_route4()
 {
-    local _xrl_result _xrl_value _gateway _ifname _vifname _metric
+    local _xrl_result _ret_value _gateway _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
     echo "TEST: Look-up route for destination ${DEST_HOST}"
 
-    _xrl_result=`fea_fti_lookup_route4 ${DEST_HOST}`
+    _xrl_result=`fea_fti_lookup_route4 ${DEST_HOST} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
-	echo "ERROR: ${_xrl_result}"
+	echo "ERROR: route was not found:"
+	echo "${_xrl_result}"
 	return ${_ret_value}
     fi
     _gateway=`get_xrl_variable_value ${_xrl_result} gateway:ipv4`
@@ -207,7 +343,7 @@ test_lookup_route4()
     #
     # Print the result
     #
-    echo "TEST RESULT:"
+    echo "RESULT:"
     echo "${_xrl_result}"
 }
 
@@ -226,12 +362,11 @@ test_delete_entry4()
 
 test_lookup_deleted_entry4()
 {
-    local _xrl_result _xrl_value _gateway _ifname _vifname _metric
-    local _admin_distance _protocol_origin
+    local _xrl_result _ret_value
 
     echo "TEST: Look-up deleted entry for destination ${DEST}"
 
-    _xrl_result=`fea_fti_lookup_entry4 ${DEST}`
+    _xrl_result=`fea_fti_lookup_entry4 ${DEST} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
 	echo "ERROR: routing entry was not deleted:"
@@ -244,15 +379,14 @@ test_lookup_deleted_entry4()
 
 test_lookup_deleted_route4()
 {
-    local _xrl_result _xrl_value _gateway _ifname _vifname _metric
-    local _admin_distance _protocol_origin
+    local _xrl_result _ret_value
 
     echo "TEST: Look-up deleted route for destination ${DEST_HOST}"
 
-    echo "Sleeping for 3 seconds (to timeout any obsoleted cloned entries)..."
+    echo "INFO: Sleeping for 3 seconds (to timeout any obsoleted cloned entries)..."
     sleep 3
 
-    _xrl_result=`fea_fti_lookup_route4 ${DEST_HOST}`
+    _xrl_result=`fea_fti_lookup_route4 ${DEST_HOST} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -eq 0 ] ; then
 	echo "ERROR: routing entry was not deleted:"
@@ -263,10 +397,74 @@ test_lookup_deleted_route4()
     return 0
 }
 
+test_delete_all_entries4()
+{
+    echo "TEST: Delete all entries installed by XORP"
+
+    # Add the entries
+    tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
+    fea_fti_add_entry4 ${tid} ${DEST} ${GATEWAY} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${PROTOCOL_ORIGIN}
+    fea_fti_add_entry4 ${tid} ${DEST2} ${GATEWAY} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${PROTOCOL_ORIGIN}
+    fea_fti_commit_transaction ${tid}
+
+    # Check that the entries were installed
+    _xrl_result=`fea_fti_lookup_entry4 ${DEST} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: routing entry for ${DEST} was not found:"
+	echo "${_xrl_result}"
+	return ${_ret_value}
+    fi
+    _xrl_result=`fea_fti_lookup_entry4 ${DEST2} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -ne 0 ] ; then
+	echo "ERROR: routing entry for ${DEST2} was not found:"
+	echo "${_xrl_result}"
+	return ${_ret_value}
+    fi
+
+    # Delete all entries
+    tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
+    if [ "${tid}" = "" ] ; then
+	echo "ERROR: cannot start transaction: cannot get transaction ID"
+	return 1
+    fi
+    fea_fti_delete_all_entries4 ${tid}
+    fea_fti_commit_transaction ${tid}
+
+    # Check that the entries were deleted
+    _xrl_result=`fea_fti_lookup_entry4 ${DEST} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -eq 0 ] ; then
+	echo "ERROR: routing entry for ${DEST} was not deleted:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+    _xrl_result=`fea_fti_lookup_entry4 ${DEST2} 2>&1`
+    _ret_value=$?
+    if [ ${_ret_value} -eq 0 ] ; then
+	echo "ERROR: routing entry for ${DEST2} was not deleted:"
+	echo "${_xrl_result}"
+	return 1
+    fi
+}
+
 #
 # The tests
 #
 TESTS=""
+TESTS="$TESTS test_have_ipv4"
+#
+TESTS="$TESTS test_prepare_unicast_forwarding4"
+TESTS="$TESTS test_enable_unicast_forwarding4"
+TESTS="$TESTS test_get_enabled_unicast_forwarding4"
+TESTS="$TESTS test_disable_unicast_forwarding4"
+TESTS="$TESTS test_get_disabled_unicast_forwarding4"
+#
 TESTS="$TESTS test_cleanup_gateway4"
 TESTS="$TESTS test_add_entry4"
 TESTS="$TESTS test_lookup_entry4"
@@ -274,6 +472,7 @@ TESTS="$TESTS test_lookup_route4"
 TESTS="$TESTS test_delete_entry4"
 TESTS="$TESTS test_lookup_deleted_entry4"
 TESTS="$TESTS test_lookup_deleted_route4"
+TESTS="$TESTS test_delete_all_entries4"
 
 for t in ${TESTS} ; do
     $t
