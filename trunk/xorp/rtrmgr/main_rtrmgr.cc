@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.22 2003/06/01 21:37:51 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.23 2003/06/09 23:38:40 mjh Exp $"
 
 #include <signal.h>
 
@@ -274,7 +274,6 @@ main(int argc, char* const argv[])
 
     //loop while handling configuration events and signals
     while (running) {
-	printf("+");
 	fflush(stdout);
 	eventloop.run();
     }
