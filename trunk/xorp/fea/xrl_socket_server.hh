@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.1 2003/12/17 00:04:49 hodson Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.3 2004/02/19 04:33:12 hodson Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -120,6 +120,14 @@ public:
 						  const uint32_t& remote_port,
 						  string&	sockid);
 
+    XrlCmdError socket4_0_1_udp_join_group(const string&	sockid,
+					   const IPv4&		group,
+					   const IPv4&		if_addr);
+
+    XrlCmdError socket4_0_1_udp_leave_group(const string&	sockid,
+					    const IPv4&	 	group,
+					    const IPv4&	 	if_addr);
+
     XrlCmdError socket4_0_1_close(const string& sockid);
 
     XrlCmdError socket4_0_1_tcp_listen(const string&	sockid,
@@ -146,6 +154,14 @@ public:
 					       const bool&	out_of_band,
 					       const bool&	end_of_record,
 					       const bool&	end_of_file);
+
+    XrlCmdError socket4_0_1_send_from_multicast_if(
+					const string&	sockid,
+					const IPv4&	group_addr,
+					const uint32_t&	group_port,
+					const IPv4&	if_addr,
+					const vector<uint8_t>& data
+					);
 
     XrlCmdError socket4_0_1_set_socket_option(const string&	sockid,
 					      const string&	optname,
@@ -187,6 +203,14 @@ public:
 						  const uint32_t& remote_port,
 						  string&	sockid);
 
+    XrlCmdError socket6_0_1_udp_join_group(const string&	sockid,
+					   const IPv6&		group,
+					   const IPv6&		if_addr);
+
+    XrlCmdError socket6_0_1_udp_leave_group(const string&	sockid,
+					    const IPv6&	 	group,
+					    const IPv6&	 	if_addr);
+
     XrlCmdError socket6_0_1_close(const string& sockid);
 
     XrlCmdError socket6_0_1_tcp_listen(const string&	sockid,
@@ -213,6 +237,14 @@ public:
 					       const bool&	out_of_band,
 					       const bool&	end_of_record,
 					       const bool&	end_of_file);
+
+    XrlCmdError socket6_0_1_send_from_multicast_if(
+					const string&		sockid,
+					const IPv6&		group_addr,
+					const uint32_t&		group_port,
+					const IPv6&		if_addr,
+					const vector<uint8_t>&	data
+					);
 
     XrlCmdError socket6_0_1_set_socket_option(const string&	sockid,
 					      const string&	optname,
@@ -280,9 +312,10 @@ public:
 
     void remove_sockets_owned_by(const string& xrl_target_name);
 
-protected:
+public:
     template <typename A>
     struct RemoteSocket {
+    public:
 	RemoteSocket(XrlSocketServer&	ss,
 		     RemoteSocketOwner& rso,
 		     int		fd,
@@ -290,8 +323,8 @@ protected:
 	~RemoteSocket();
 
 	inline int  fd() const				{ return _fd;	      }
-	inline bool addr_is(const A& a) const		{ return a == _addr;  }
 	inline const string& sockid() const		{ return _sockid;     }
+	inline bool addr_is(const A& a) const		{ return a == _addr;  }
 	inline const RemoteSocketOwner& owner() const	{ return _owner; }
 	inline RemoteSocketOwner& owner()		{ return _owner; }
 
@@ -316,7 +349,7 @@ protected:
     void push_socket(const ref_ptr<RemoteSocket<IPv4> >& s);
     void push_socket(const ref_ptr<RemoteSocket<IPv6> >& s);
 
-protected:
+public:
     typedef list<ref_ptr<RemoteSocket<IPv4> > > V4Sockets;
     typedef list<ref_ptr<RemoteSocket<IPv6> > > V6Sockets;
 

@@ -12,11 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.8 2004/02/19 16:12:29 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.9 2004/03/10 23:18:43 hodson Exp $"
 
 #include "fea_module.h"
 
 #include "config.h"
+#include "libxorp/xorp.h"
+
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/status_codes.h"
@@ -29,6 +31,9 @@
 #include "xrl_socket_server.hh"
 
 static const char* NOT_RUNNING_MSG = "SocketServer is not operational.";
+static const char* NOT_FOUND_MSG   = "Socket not found.";
+static const char* NO_PIF_MSG 	   = "Could not find interface index "
+				     "associated with address.";
 
 /**
  * XrlRouter that informs XrlSocketServer of events.
@@ -293,9 +298,13 @@ XrlSocketServer::RemoteSocket<A>::set_data_recv_enable(bool en)
 {
     EventLoop& e = _ss.eventloop();
     if (en) {
-	e.add_selector(_fd, SEL_RD,
-		       callback(this, &RemoteSocket::data_sel_cb));
+	debug_msg("Adding selector for %d\n", _fd);
+	if (e.add_selector(_fd, SEL_RD,
+		callback(this, &RemoteSocket::data_sel_cb)) == false) {
+	    XLOG_ERROR("FAILED TO ADD SELECTOR %d\n", _fd);
+	}
     } else {
+	debug_msg("Removing selector for %d\n", _fd);
 	e.remove_selector(_fd);
     }
 }
@@ -305,6 +314,7 @@ void
 XrlSocketServer::RemoteSocket<A>::data_sel_cb(int fd, SelectorMask)
 {
     XLOG_ASSERT(fd == _fd);
+    debug_msg("data_sel_cb %d\n", fd);
     //
     // Create command.  We use buffer associated with this command type
     // to read data into (to avoid a copy).
@@ -335,7 +345,7 @@ XrlSocketServer::RemoteSocket<A>::data_sel_cb(int fd, SelectorMask)
 
     XLOG_ASSERT(sa->sa_family == A::af());
     cmd->set_source(sin, sin_len);
-
+    debug_msg("Command %s\n", cmd->str().c_str());
     owner().enqueue(cmd);
 }
 
@@ -351,7 +361,6 @@ XrlSocketServer::RemoteSocket<A>::set_connect_recv_enable(bool en)
 	e.remove_selector(_fd);
     }
 }
-
 
 template <typename A>
 void
@@ -437,8 +446,29 @@ XrlSocketServer::push_socket(const ref_ptr<RemoteSocket<IPv6> >& rs)
 }
 
 // ----------------------------------------------------------------------------
-//
+// Helpers
+
+template <typename A>
+struct has_sockid {
+    typedef XrlSocketServer::RemoteSocket<A> RemoteSocketType;
+
+    has_sockid(const string* s) : _sockid(s) {}
+
+    bool operator() (const ref_ptr<RemoteSocketType>& rps) const {
+	return rps->sockid() == *_sockid;
+    }
+    bool operator() (ref_ptr<RemoteSocketType>& rps) {
+	return rps->sockid() == *_sockid;
+    }
+
+private:
+    const string* _sockid;
+};
+
 
+// ----------------------------------------------------------------------------
+//
+
 XrlSocketServer::XrlSocketServer(EventLoop&		e,
 				 AddressTableBase&	atable,
 				 const IPv4&		finder_host,
@@ -601,7 +631,8 @@ XrlSocketServer::socket4_0_1_tcp_open_and_bind(const string&	creator,
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
-    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+    if (local_addr != IPv4::ANY() &&
+	valid_addr_port(_atable, local_addr, local_port, err) == false) {
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -633,7 +664,8 @@ XrlSocketServer::socket4_0_1_udp_open_and_bind(const string&	creator,
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
-    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+    if (IPv4::ANY() != local_addr &&
+	valid_addr_port(_atable, local_addr, local_port, err) == false) {
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -665,11 +697,16 @@ XrlSocketServer::socket4_0_1_udp_open_bind_join(const string&	creator,
 						const bool&	reuse,
 						string&		sockid)
 {
+    debug_msg("udp_open_bind_join(%s, %s, %u, %s, ttl=%u, reuse %d)\n",
+	      creator.c_str(), local_addr.str().c_str(), local_port,
+	      mcast_addr.str().c_str(), ttl, reuse);
+
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
-    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+    if (local_addr != IPv4::ANY() &&
+	valid_addr_port(_atable, local_addr, local_port, err) == false) {
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -683,8 +720,8 @@ XrlSocketServer::socket4_0_1_udp_open_bind_join(const string&	creator,
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
-
-    if (comm_set_iface4(fd, &ia) != XORP_OK) {
+    debug_msg("fd = %d\n", fd);
+    if (local_addr != IPv4::ANY() && comm_set_iface4(fd, &ia) != XORP_OK) {
 	comm_close(fd);
 	return XrlCmdError::COMMAND_FAILED("Setting interface.");
     }
@@ -694,6 +731,14 @@ XrlSocketServer::socket4_0_1_udp_open_bind_join(const string&	creator,
     }
     if (comm_set_loopback(fd, 0) != XORP_OK) {
 	XLOG_WARNING("Could not turn off loopback.");
+    }
+    if (comm_set_reuseaddr(fd, true) != XORP_OK) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Setting reuse addr failed.");
+    }
+    if (comm_set_reuseport(fd, reuse) != XORP_OK) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Setting reuse addr failed.");
     }
 
     RemoteSocketOwner* rso = find_or_create_owner(creator);
@@ -796,6 +841,76 @@ XrlSocketServer::socket4_0_1_udp_open_bind_connect(
 }
 
 XrlCmdError
+XrlSocketServer::socket4_0_1_udp_join_group(const string&	sockid,
+					    const IPv4&		group,
+					    const IPv4&		if_addr)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    V4Sockets::const_iterator ci = find_if(_v4sockets.begin(),
+					   _v4sockets.end(),
+					   has_sockid<IPv4>(&sockid));
+    if (ci == _v4sockets.end())
+	return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+
+    string err;
+    if (valid_addr_port(_atable, if_addr, /* fake port */1, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    in_addr ia_group;
+    group.copy_out(ia_group);
+
+    in_addr ia_if_addr;
+    if_addr.copy_out(ia_if_addr);
+
+    const RemoteSocket<IPv4>* 	rs = ci->get();
+    int				fd = rs->fd();
+
+    if (comm_sock_join4(fd, &ia_group, &ia_if_addr) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket4_0_1_udp_leave_group(const string&	sockid,
+					    const IPv4&		group,
+					    const IPv4&		if_addr)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    V4Sockets::const_iterator ci = find_if(_v4sockets.begin(),
+					   _v4sockets.end(),
+					   has_sockid<IPv4>(&sockid));
+    if (ci == _v4sockets.end())
+	return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+
+    string err;
+    if (valid_addr_port(_atable, if_addr, /* fake port */1, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    in_addr ia_group;
+    group.copy_out(ia_group);
+
+    in_addr ia_if_addr;
+    if_addr.copy_out(ia_if_addr);
+
+    const RemoteSocket<IPv4>* 	rs = ci->get();
+    int				fd = rs->fd();
+
+    if (comm_sock_leave4(fd, &ia_group, &ia_if_addr) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlSocketServer::socket4_0_1_close(const string& sockid)
 {
     if (status() != RUNNING)
@@ -809,7 +924,7 @@ XrlSocketServer::socket4_0_1_close(const string& sockid)
 	    return XrlCmdError::OKAY();
 	}
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 XrlCmdError
@@ -830,7 +945,7 @@ XrlSocketServer::socket4_0_1_tcp_listen(const string&	sockid,
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 
@@ -854,7 +969,7 @@ XrlSocketServer::socket4_0_1_send(
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 XrlCmdError
@@ -909,7 +1024,7 @@ XrlSocketServer::socket4_0_1_send_with_flags(
 	}
 	return XrlCmdError::COMMAND_FAILED(strerror(errno));
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 XrlCmdError
@@ -941,7 +1056,7 @@ XrlSocketServer::socket4_0_1_send_to(const string&		sockid,
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 XrlCmdError
@@ -1004,29 +1119,129 @@ XrlSocketServer::socket4_0_1_send_to_with_flags(const string&	sockid,
 	}
 	return XrlCmdError::COMMAND_FAILED(strerror(errno));
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 XrlCmdError
-XrlSocketServer::socket4_0_1_set_socket_option(const string&	/* sockid */,
-					       const string&	/* optname */,
-					       const uint32_t&	/* optval */)
+XrlSocketServer::socket4_0_1_send_from_multicast_if(
+					const string&		sockid,
+					const IPv4&		group_addr,
+					const uint32_t&		group_port,
+					const IPv4&		if_addr,
+					const vector<uint8_t>& 	data
+					)
 {
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
-    return XrlCmdError::COMMAND_FAILED("Not implemented");
+    string err;
+    if (valid_addr_port(_atable, if_addr, group_port, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    V4Sockets::const_iterator ci = find_if(_v4sockets.begin(),
+					   _v4sockets.end(),
+					   has_sockid<IPv4>(&sockid));
+
+    if (ci == _v4sockets.end())
+	return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+
+    const RemoteSocket<IPv4>* 	rs = ci->get();
+    int				fd = rs->fd();
+
+    // Save old multicast interface so it can be restored after send.
+    uint32_t	oa;
+    socklen_t	oa_len = sizeof(oa);
+    if (0 != getsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, &oa, &oa_len)) {
+	XLOG_WARNING("Failed to get multicast interface.");
+    }
+
+    uint32_t a  = if_addr.addr();
+    if (0 != setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, &a, sizeof(a))) {
+	return XrlCmdError::COMMAND_FAILED(
+		"Could not set default multicast interface to " +
+		if_addr.str() );
+    }
+
+    XrlCmdError r = socket4_0_1_send_to(sockid, group_addr, group_port, data);
+
+    // Restore old multicast interface
+    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, &oa, sizeof(oa));
+    return r;
 }
 
 XrlCmdError
-XrlSocketServer::socket4_0_1_get_socket_option(const string&	/* sockid */,
-					       const string&	/* optname */,
-					       uint32_t&	/* optval */)
+XrlSocketServer::socket4_0_1_set_socket_option(const string&	sockid,
+					       const string&	optname,
+					       const uint32_t&	optval)
 {
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
-    return XrlCmdError::COMMAND_FAILED("Not implemented");
+    const char* o_cstr = optname.c_str();
+
+    V4Sockets::const_iterator ci = find_if(_v4sockets.begin(),
+					   _v4sockets.end(),
+					   has_sockid<IPv4>(&sockid));
+
+    if (ci == _v4sockets.end())
+	return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+
+    const RemoteSocket<IPv4>* 	rs = ci->get();
+    int				fd = rs->fd();
+
+    if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
+	if (setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP,
+		       &optval, sizeof(optval)) != 0) {
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    } else if (strcasecmp(o_cstr, "multicast_ttl") == 0) {
+	if (setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL,
+		       &optval, sizeof(optval)) != 0) {
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    } else {
+	return XrlCmdError::COMMAND_FAILED("Not implemented");
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket4_0_1_get_socket_option(const string&	sockid,
+					       const string&	optname,
+					       uint32_t&	optval)
+{
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    const char* o_cstr = optname.c_str();
+
+    V4Sockets::const_iterator ci = find_if(_v4sockets.begin(),
+					   _v4sockets.end(),
+					   has_sockid<IPv4>(&sockid));
+
+    if (ci == _v4sockets.end())
+	return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+
+    const RemoteSocket<IPv4>* 	rs = ci->get();
+    int				fd = rs->fd();
+    socklen_t			optlen = sizeof(optval);
+    if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
+	if (getsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP,
+		       &optval, &optlen) != 0) {
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    } else if (strcasecmp(o_cstr, "multicast_ttl") == 0) {
+	if (getsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL,
+		       &optval, &optlen) != 0) {
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    } else {
+	return XrlCmdError::COMMAND_FAILED("Not implemented");
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 
@@ -1149,14 +1364,14 @@ XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
     string err;
-    if (valid_addr_port(_atable, local_addr, local_port, err) == false) {
+    if (local_addr != IPv6::ANY() &&
+	valid_addr_port(_atable, local_addr, local_port, err) == false) {
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
     uint32_t pif_index = _atable.address_pif_index(local_addr);
     if (pif_index == 0) {
-	return XrlCmdError::COMMAND_FAILED("Could not find interface index "
-					   "associated with address.");
+	return XrlCmdError::COMMAND_FAILED(NO_PIF_MSG);
     }
 
     in6_addr grp;
@@ -1308,6 +1523,94 @@ XrlSocketServer::socket6_0_1_udp_open_bind_connect(
 }
 
 XrlCmdError
+XrlSocketServer::socket6_0_1_udp_join_group(const string&	sockid,
+					    const IPv6&		group,
+					    const IPv6&		if_addr)
+{
+#ifdef HAVE_IPV6
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    V6Sockets::const_iterator ci = find_if(_v6sockets.begin(),
+					   _v6sockets.end(),
+					   has_sockid<IPv6>(&sockid));
+    if (ci == _v6sockets.end())
+	return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+
+    string err;
+    if (valid_addr_port(_atable, if_addr, /* fake port */1, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    in6_addr ia_group;
+    group.copy_out(ia_group);
+
+    uint32_t pif_index = _atable.address_pif_index(if_addr);
+    if (pif_index == 0) {
+	return XrlCmdError::COMMAND_FAILED(NO_PIF_MSG);
+    }
+
+    const RemoteSocket<IPv6>* 	rs = ci->get();
+    int				fd = rs->fd();
+
+    if (comm_sock_join6(fd, &ia_group, pif_index) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    return XrlCmdError::OKAY();
+#else
+    UNUSED(sockid);
+    UNUSED(group);
+    UNUSED(if_addr);
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif /* HAVE_IPV6 */
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_udp_leave_group(const string&	sockid,
+					     const IPv6&	group,
+					     const IPv6&	if_addr)
+{
+#ifdef HAVE_IPV6
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    V6Sockets::const_iterator ci = find_if(_v6sockets.begin(),
+					   _v6sockets.end(),
+					   has_sockid<IPv6>(&sockid));
+    if (ci == _v6sockets.end())
+	return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+
+    string err;
+    if (valid_addr_port(_atable, if_addr, /* fake port */1, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    in6_addr ia_group;
+    group.copy_out(ia_group);
+
+    uint32_t pif_index = _atable.address_pif_index(if_addr);
+    if (pif_index == 0) {
+	return XrlCmdError::COMMAND_FAILED(NO_PIF_MSG);
+    }
+
+    const RemoteSocket<IPv6>* 	rs = ci->get();
+    int				fd = rs->fd();
+
+    if (comm_sock_leave6(fd, &ia_group, pif_index) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    return XrlCmdError::OKAY();
+#else
+    UNUSED(sockid);
+    UNUSED(group);
+    UNUSED(if_addr);
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif /* HAVE_IPV6 */
+}
+
+XrlCmdError
 XrlSocketServer::socket6_0_1_close(const string& sockid)
 {
     if (status() != RUNNING)
@@ -1321,7 +1624,7 @@ XrlSocketServer::socket6_0_1_close(const string& sockid)
 	    return XrlCmdError::OKAY();
 	}
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 XrlCmdError
@@ -1343,7 +1646,7 @@ XrlSocketServer::socket6_0_1_tcp_listen(const string&	sockid,
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 #else
     UNUSED(sockid);
     UNUSED(backlog);
@@ -1371,7 +1674,7 @@ XrlSocketServer::socket6_0_1_send(
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 XrlCmdError
@@ -1426,7 +1729,7 @@ XrlSocketServer::socket6_0_1_send_with_flags(
 	}
 	return XrlCmdError::COMMAND_FAILED(strerror(errno));
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 XrlCmdError
@@ -1458,7 +1761,7 @@ XrlSocketServer::socket6_0_1_send_to(const string&		sockid,
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 XrlCmdError
@@ -1521,35 +1824,151 @@ XrlSocketServer::socket6_0_1_send_to_with_flags(const string&	sockid,
 	}
 	return XrlCmdError::COMMAND_FAILED(strerror(errno));
     }
-    return XrlCmdError::COMMAND_FAILED("Socket not found");
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
 
 XrlCmdError
-XrlSocketServer::socket6_0_1_set_socket_option(const string&	/* sockid */,
-					       const string&	/* optname */,
-					       const uint32_t&	/* optval */)
+XrlSocketServer::socket6_0_1_send_from_multicast_if(
+					const string&		sockid,
+					const IPv6&		group_addr,
+					const uint32_t&		group_port,
+					const IPv6&		if_addr,
+					const vector<uint8_t>& 	data
+					)
 {
 #ifdef HAVE_IPV6
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
-    return XrlCmdError::COMMAND_FAILED("Not implemented");
+    string err;
+    if (valid_addr_port(_atable, if_addr, group_port, err) == false) {
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    uint32_t pi = _atable.address_pif_index(if_addr);
+    if (pi == 0) {
+	return XrlCmdError::COMMAND_FAILED(NO_PIF_MSG);
+    }
+
+    V6Sockets::const_iterator ci = find_if(_v6sockets.begin(),
+					   _v6sockets.end(),
+					   has_sockid<IPv6>(&sockid));
+
+    if (ci == _v6sockets.end())
+	return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+
+    const RemoteSocket<IPv6>* 	rs = ci->get();
+    int				fd = rs->fd();
+
+    uint32_t  	old_pi;
+    socklen_t 	old_pi_len = sizeof(old_pi);
+
+    getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &old_pi, &old_pi_len);
+
+    if (0 != setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+			&pi, sizeof(pi))) {
+	return XrlCmdError::COMMAND_FAILED(
+		"Could not set default multicast interface to " +
+			 if_addr.str() );
+    }
+
+    XrlCmdError r = socket6_0_1_send_to(sockid, group_addr, group_port, data);
+    setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &old_pi, sizeof(old_pi));
+    return r;
 #else
+    UNUSED(sockid);
+    UNUSED(group_addr);
+    UNUSED(group_port);
+    UNUSED(if_addr);
+    UNUSED(data);
     return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 #endif
 }
 
 XrlCmdError
-XrlSocketServer::socket6_0_1_get_socket_option(const string&	/* sockid */,
-					       const string&	/* optname */,
-					       uint32_t&	/* optval */)
+XrlSocketServer::socket6_0_1_set_socket_option(const string&	sockid,
+					       const string&	optname,
+					       const uint32_t&	optval)
 {
 #ifdef HAVE_IPV6
     if (status() != RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
 
-    return XrlCmdError::COMMAND_FAILED("Not implemented");
+    const char* o_cstr = optname.c_str();
+
+    V6Sockets::const_iterator ci = find_if(_v6sockets.begin(),
+					   _v6sockets.end(),
+					   has_sockid<IPv6>(&sockid));
+
+    if (ci == _v6sockets.end())
+	return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+
+    const RemoteSocket<IPv6>* 	rs = ci->get();
+    int				fd = rs->fd();
+
+    if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
+	if (setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+		       &optval, sizeof(optval)) != 0) {
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    } else if (strcasecmp(o_cstr, "multicast_hops") == 0) {
+	if (setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+		       &optval, sizeof(optval)) != 0) {
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    } else {
+	return XrlCmdError::COMMAND_FAILED("Not implemented");
+    }
+
+    return XrlCmdError::OKAY();
 #else
+    UNUSED(sockid);
+    UNUSED(optname);
+    UNUSED(optval);
+    return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
+#endif
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_get_socket_option(const string&	sockid,
+					       const string&	optname,
+					       uint32_t&	optval)
+{
+#ifdef HAVE_IPV6
+    if (status() != RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    const char* o_cstr = optname.c_str();
+
+    V6Sockets::const_iterator ci = find_if(_v6sockets.begin(),
+					   _v6sockets.end(),
+					   has_sockid<IPv6>(&sockid));
+
+    if (ci == _v6sockets.end())
+	return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+
+    const RemoteSocket<IPv6>* 	rs = ci->get();
+    int				fd = rs->fd();
+    socklen_t			optlen = sizeof(optval);
+    if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
+	if (getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+		       &optval, &optlen) != 0) {
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    } else if (strcasecmp(o_cstr, "multicast_hops") == 0) {
+	if (getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+		       &optval, &optlen) != 0) {
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    } else {
+	return XrlCmdError::COMMAND_FAILED("Not implemented");
+    }
+
+    return XrlCmdError::OKAY();
+#else
+    UNUSED(sockid);
+    UNUSED(optname);
+    UNUSED(optval);
     return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
 #endif
 }

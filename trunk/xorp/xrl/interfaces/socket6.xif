@@ -132,6 +132,35 @@ interface socket6/0.1 {
 
 
     /**
+     * Join multicast group on already bound socket.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param mcast_addr group to join.
+     *
+     * @param join_if_addr interface address to perform join on.
+     *
+     */
+    udp_join_group		? sockid:txt				\
+				& mcast_addr:ipv6			\
+				& join_if_addr:ipv6
+
+    /**
+     * Leave multicast group on already bound socket.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param mcast_addr group to leave.
+     *
+     * @param leave_if_addr interface address to perform leave on.
+     *
+     */
+    udp_leave_group		? sockid:txt				\
+				& mcast_addr:ipv6			\
+				& leave_if_addr:ipv6
+
+
+    /**
      * Close socket.
      *
      * @param sockid unique socket id of socket to be closed.
@@ -232,13 +261,33 @@ interface socket6/0.1 {
 				& end_of_record:bool			\
 				& end_of_file:bool
 
+   /**
+     * Send data on socket to a given multicast group from a given
+     * interface.
+     *
+     * @param sockid unique socket id.
+     *
+     * @param group_addr destination address for data.
+     *
+     * @param group_port destination port for data.
+     *
+     * @param ifaddr interface address
+     */
+    send_from_multicast_if	? sockid:txt				\
+				& group_addr:ipv6			\
+				& group_port:u32			\
+				& ifaddr:ipv6				\
+				& data:binary
+
 
     /**
      * Set a named socket option.
      *
      * @param sockid unique socket id.
      *
-     * @param optname name of option to be set.  Valid values are ...
+     * @param optname name of option to be set.  Valid values are:
+     * 		"multicast_loopback"
+     *		"multicast_hops"
      *
      * @param optval value of option to be set.  If value is logically boolean
      *        then zero represents false and any non-zero value true.
@@ -252,7 +301,8 @@ interface socket6/0.1 {
      *
      * @param sockid unique socket id.
      *
-     * @param optname name of option to be set.  Valid values are ...
+     * @param optname name of option to be set.  Valid values are documented
+     * in set_socket_option.
      *
      * @param optval value of option to be set.  If value is logically boolean
      *        then zero represents false and any non-zero value true.
