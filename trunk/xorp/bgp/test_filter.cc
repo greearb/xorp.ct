@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.11 2003/02/08 07:30:24 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.12 2003/02/10 22:44:01 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -31,12 +31,7 @@
 #include "dummy_next_hop_resolver.hh"
 
 
-bool test_filter(int, char** argv) {
-    // stuff needed to create an eventloop
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
-    xlog_add_default_output();
-    xlog_start();
+bool test_filter() {
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_filter.";
     filename += pwd->pw_name;

@@ -12,33 +12,39 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.1 2003/02/10 23:40:09 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.2 2003/02/11 00:06:07 mjh Exp $"
 
 #include <stdio.h>
 #include "bgp_module.h"
 #include "config.h"
+#include "libxorp/xlog.h"
 
-bool test_ribin(int, char**);
-bool test_deletion(int, char**);
-bool test_filter(int, char**);
-bool test_cache(int, char**);
-bool test_nhlookup(int, char**);
-bool test_decision(int, char**);
-bool test_fanout(int, char**);
-bool test_dump(int, char**);
-bool test_ribout(int, char**);
+bool test_ribin();
+bool test_deletion();
+bool test_filter();
+bool test_cache();
+bool test_nhlookup();
+bool test_decision();
+bool test_fanout();
+bool test_dump();
+bool test_ribout();
 
-int main(int argc, char** argv) 
+int main(int, char** argv) 
 {
-    bool test_ribin_succeeded = test_ribin(argc, argv);
-    bool test_deletion_succeeded = test_deletion(argc, argv);
-    bool test_filter_succeeded = test_filter(argc, argv);
-    bool test_cache_succeeded = test_cache(argc, argv);
-    bool test_nhlookup_succeeded = test_nhlookup(argc, argv);
-    bool test_decision_succeeded = test_decision(argc, argv);
-    bool test_fanout_succeeded = test_fanout(argc, argv);
-    bool test_dump_succeeded = test_dump(argc, argv);
-    bool test_ribout_succeeded = test_ribout(argc, argv);
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
+    xlog_add_default_output();
+    xlog_start();
+
+    bool test_ribin_succeeded = test_ribin();
+    bool test_deletion_succeeded = test_deletion();
+    bool test_filter_succeeded = test_filter();
+    bool test_cache_succeeded = test_cache();
+    bool test_nhlookup_succeeded = test_nhlookup();
+    bool test_decision_succeeded = test_decision();
+    bool test_fanout_succeeded = test_fanout();
+    bool test_dump_succeeded = test_dump();
+    bool test_ribout_succeeded = test_ribout();
 
 
     bool status = 0;

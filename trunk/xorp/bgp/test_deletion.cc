@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.10 2003/02/08 07:30:24 rizzo Exp $"
+#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.11 2003/02/10 22:44:01 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -29,12 +29,7 @@
 #include "dump_iterators.hh"
 
 
-int test_deletion(int, char** argv) {
-    //stuff needed to create an eventloop
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
-    xlog_add_default_output();
-    xlog_start();
+int test_deletion() {
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_deletion.";
     filename += pwd->pw_name;
