@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.34 2003/12/15 19:45:49 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.35 2004/03/24 19:14:07 atanu Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -168,7 +168,7 @@ XrlRouter::XrlRouter(EventLoop&  e,
 		     const char* finder_addr,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
-    : XrlDispatcher(class_name), _e(e), _finalized(false)
+    : XrlDispatcher(class_name), _e(e), _finalized(false), _failed(false)
 {
     IPv4 finder_ip;
     if (0 == finder_addr) {
@@ -188,7 +188,7 @@ XrlRouter::XrlRouter(EventLoop&  e,
 		     IPv4 	 finder_ip,
 		     uint16_t	 finder_port)
     throw (InvalidAddress)
-    : XrlDispatcher(class_name), _e(e), _finalized(false)
+    : XrlDispatcher(class_name), _e(e), _finalized(false), _failed(false)
 {
     if (0 == finder_port)
 	finder_port = FINDER_DEFAULT_PORT;
@@ -230,6 +230,12 @@ bool
 XrlRouter::ready() const
 {
     return _fc && _fc->ready();
+}
+
+bool
+XrlRouter::failed() const
+{
+    return _failed;
 }
 
 bool
@@ -517,6 +523,7 @@ void
 XrlRouter::finder_disconnect_event()
 {
     debug_msg("Finder disconnect event\n");
+    _failed = true;
 }
 
 void

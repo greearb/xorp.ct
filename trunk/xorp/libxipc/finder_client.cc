@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.21 2003/06/19 19:20:07 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.22 2003/09/27 00:25:55 hodson Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -758,9 +758,11 @@ FinderClient::notify_failed(const FinderClientOp* op)
 
     _pending_result = false;
 
-    // trigger restart
-    //    delete _messenger;
-    //    _messenger = 0;
+    // Assume messenger is dead. Note well: deletion of messenger triggers a message to
+    // be bubbled up announcing its death.
+    FinderMessengerBase* m = _messenger;
+    _messenger = 0;
+    delete m;
 }
 
 void

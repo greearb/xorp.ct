@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.24 2003/09/11 19:24:39 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.25 2003/12/15 19:45:49 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -59,22 +59,69 @@ public:
 
     virtual ~XrlRouter();
 
+    /**
+     * Add a protocol family listener.  When XRLs are
+     * registered through XrlRouter::finalize() they will register
+     * support for each protocol family listener added.
+     */
     bool add_listener(XrlPFListener* listener);
 
+    /**
+     * Start registration of XRLs that have been registered via
+     * add_handler with the Finder.
+     */
     void finalize();
 
+    /**
+     * @return true when XRLs
+     */
     inline bool finalized() const		{ return _finalized; }
 
+    /**
+     * @return true if instance has established a connection to the Finder.
+     */
     bool connected() const;
 
+    /**
+     * @return true if instance has established a connection to the Finder,
+     * registered own XRLs, and should be considered operational.
+     */
     bool ready() const;
 
-    bool pending() const;
+    /**
+     * @return true if instance has experienced an unrecoverable error.
+     */
+    bool failed() const;
 
+    /**
+     * Send XRL.
+     *
+     * @param xrl XRL to be sent.
+     * @param cb callback to be dispatched with XRL result and return values.
+     *
+     * @return true if XRL accepted for sending, false if insufficient
+     * resources are available.
+     */
     bool send(const Xrl& xrl, const XrlCallback& cb);
 
+    /**
+     * @return true if at least one XrlRouter::send() call is still pending
+     * a result.
+     */
+    bool pending() const;
+
+    /**
+     * Add an XRL method handler.
+     *
+     * @param cmd XRL method path name.
+     * @param rcb callback to be dispatched when XRL method is received for
+     * invocation.
+     */
     bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
 
+    /**
+     * @return EventLoop used by XrlRouter instance.
+     */
     inline EventLoop& eventloop()		{ return _e; }
 
     inline const string& instance_name() const	{ return _instance_name; }
@@ -88,15 +135,11 @@ public:
 protected:
     /**
      * Called when Finder connection is established.
-     *
-     * Default implementation is a no-op.
      */
     virtual void finder_connect_event();
 
     /**
      * Called when Finder disconnect occurs.
-     *
-     * Default implementation is a no-op.
      */
     virtual void finder_disconnect_event();
 
@@ -156,6 +199,7 @@ protected:
     FinderTcpAutoConnector*	_fac;
     string			_instance_name;
     bool			_finalized;
+    bool			_failed;	// Connected and disconnected
 
     list<XrlPFListener*>	_listeners;		// listeners
     list<XrlRouterDispatchState*> _dsl;			// dispatch state

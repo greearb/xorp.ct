@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.9 2003/05/09 20:58:23 hodson Exp $"
+#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.10 2003/05/22 17:54:02 hodson Exp $"
 
 #include <iostream>
 
@@ -38,12 +38,12 @@ run_test()
     EventLoop e;
     FinderServer finder(e);
 
-    // Configure target for test    
-    XrlStdRouter tgt_router(e, g_tgt_name, finder.addr(), finder.port()); 
+    // Configure target for test
+    XrlStdRouter tgt_router(e, g_tgt_name, finder.addr(), finder.port());
     XrlTestTarget tgt_target(&tgt_router);
-    
+
     // Configure client for test
-    XrlRouter clnt_router(e, g_clnt_name, finder.addr(), finder.port()); 
+    XrlRouter clnt_router(e, g_clnt_name, finder.addr(), finder.port());
 
     bool timeout = false;
     XorpTimer t = e.set_flag_after_ms(2000, &timeout);
@@ -57,7 +57,7 @@ run_test()
 
     while (timeout == false)
 	e.run();
-    
+
     // Run test
     fprintf(stderr, "common xif methods\n");
     try_common_xif_methods(&e, &clnt_router, tgt_router.name().c_str());

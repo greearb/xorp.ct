@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.1 2004/05/21 08:08:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.2 2004/05/21 22:14:26 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -451,15 +451,11 @@ usage(const char *argv0, int exit_value)
 static void
 wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 {
-    bool timed_out = false;
-
-    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-    while (xrl_router.ready() == false && timed_out == false) {
+    while (xrl_router.ready() == false) {
 	eventloop.run();
-    }
-
-    if (xrl_router.ready() == false) {
-	XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	if (xrl_router.failed()) {
+	    XLOG_FATAL("XrlRouter failed.  No Finder?");
+	}
     }
 }
 

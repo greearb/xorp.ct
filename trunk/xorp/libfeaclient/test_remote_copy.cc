@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.4 2003/10/23 22:31:22 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.5 2004/01/15 19:15:15 hodson Exp $"
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.4 2003/10/23 22:31:22 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.5 2004/01/15 19:15:15 hodson Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -282,6 +282,10 @@ test_main()
 	e.run();
 	if (expired) {
 	    verbose_log("IfMgr XrlRouter did not become ready.");
+	    return -1;
+	}
+	if (mrtr.failed() == true) {
+	    verbose_log("IfMgr XrlRouter failed.");
 	    return -1;
 	}
     }

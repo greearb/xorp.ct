@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.15 2004/05/16 00:26:23 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.16 2004/05/17 16:41:48 atanu Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -224,8 +224,20 @@ Coord::mark_done()
     _done = true;
 }
 
-void
-usage(char *name)
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    while (xrl_router.ready() == false) {
+	eventloop.run();
+	if (xrl_router.failed()) {
+	    XLOG_FATAL("XrlRouter failed.  No Finder?");
+	}
+    }
+}
+
+
+static void
+usage(const char *name)
 {
     fprintf(stderr,"usage: %s [-h (finder host)]\n", name);
     exit(-1);
@@ -267,15 +279,7 @@ main(int argc, char **argv)
 	Coord coord(eventloop, com);
 	XrlCoordTarget xrl_target(&router, coord);
 
-	{
-	    bool timed_out(false);
-	    XorpTimer t = eventloop.set_flag_after_ms(5000, &timed_out);
-	    while (router.ready() == false && timed_out == false) {
-		eventloop.run();
-	    }
-	    if (router.ready() == false)
-		XLOG_FATAL("Xrl router did not become ready - No Finder?");
-	}
+	wait_until_xrl_router_is_ready(eventloop, router);
 
 	while (coord.done() == false) {
 	    eventloop.run();

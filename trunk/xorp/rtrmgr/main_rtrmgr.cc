@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.44 2004/05/10 14:41:09 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.45 2004/05/22 06:09:06 atanu Exp $"
 
 #include <signal.h>
 
@@ -128,6 +128,17 @@ valid_interface(const IPv4& addr)
     return false;
 }
 
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    while (xrl_router.ready() == false) {
+	eventloop.run();
+	if (xrl_router.failed()) {
+	    XLOG_FATAL("XrlRouter failed.  No Finder?");
+	}
+    }
+}
+
 Rtrmgr::Rtrmgr(const string& template_dir, 
 	       const string& xrl_dir,
 	       const string& boot_file,
@@ -237,19 +248,8 @@ Rtrmgr::run()
 	UserDB userdb;
 	userdb.load_password_file();
 	XrlRtrmgrInterface xrt(xrl_router, userdb, eventloop, randgen, *this);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
 
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_router.ready() == false && timed_out == false) {
-		eventloop.run();
-	    }
-
-	    if (xrl_router.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
+	wait_until_xrl_router_is_ready(eventloop, xrl_router);
 
 	_mct = new MasterConfigTree(boot_file, tt, mmgr, xclient, _do_exec);
 	//

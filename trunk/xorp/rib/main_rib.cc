@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.18 2004/05/15 23:16:23 pavlin Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.19 2004/05/20 22:18:17 pavlin Exp $"
 
 #include <sysexits.h>
 
@@ -24,8 +24,23 @@
 
 #include "rib_manager.hh"
 
-int 
-main (int /* argc */, char* argv[]) 
+//
+// Wait until the XrlRouter becomes ready
+//
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    while (xrl_router.ready() == false) {
+	eventloop.run();
+	if (xrl_router.failed()) {
+	    XLOG_FATAL("XrlRouter failed.  No Finder?");
+	}
+    }
+}
+
+
+int
+main (int /* argc */, char* argv[])
 {
     //
     // Initialize and start xlog
@@ -51,17 +66,7 @@ main (int /* argc */, char* argv[])
 	RibManager rib_manager(eventloop, xrl_std_router_rib, "fea");
 	rib_manager.enable();
 
-	{
-	    bool timed_out = false;
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_rib.ready() == false && timed_out == false) {
-		eventloop.run();
-	    }
-
-	    if (xrl_std_router_rib.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready. No Finder?");
-	    }
-	}
+	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_rib);
 
 	// Add the FEA as a RIB client
 #if 0	// TODO: change to "#if 1" to switch-back to the old interface
@@ -85,7 +90,7 @@ main (int /* argc */, char* argv[])
 #endif // 0/1
 
 	rib_manager.start();
-	
+
 	//
 	// Main loop
 	//
@@ -102,6 +107,6 @@ main (int /* argc */, char* argv[])
     //
     xlog_stop();
     xlog_exit();
-    
+
     return 0;
 }

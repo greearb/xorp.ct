@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip.cc,v 1.2 2004/02/20 01:22:04 hodson Exp $"
+#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.1 2004/05/04 16:16:58 hodson Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -183,6 +183,20 @@ protected:
 
 
 /**
+ * Wait until the XrlRouter becomes ready or it's failure is detected.
+ */
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    while (xrl_router.ready() == false) {
+	eventloop.run();
+	if (xrl_router.failed()) {
+	    XLOG_FATAL("XrlRouter failed.  No Finder?");
+	}
+    }
+}
+
+/**
  * Extract Host and port from either host string or host colon port string, eg
  * "host" or "<host>:<port>".
  *
@@ -266,9 +280,7 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 
 	XrlTargetType xrlt(e, xsr, xps, xpm, xrm, _stop_flag);
 
-	while (xsr.ready() == false) {
-	    e.run();
-	}
+	wait_until_xrl_router_is_ready(e, xsr);
 
 	Service2XrlTargetStatus<A> smon(xrlt);
 
@@ -292,7 +304,7 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	xrm.startup();
 	smon.add_service(&xrm);
 
-	while (_stop_flag == false && smon.have_status(FAILED) == false) {
+	while (_stop_flag == false && smon.have_status(FAILED) == false && xsr.failed() == false) {
 	    e.run();
 	}
 

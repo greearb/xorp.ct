@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xorp_pimsm4.cc,v 1.2 2004/05/05 06:23:30 pavlin Exp $"
+#ident "$XORP: xorp/pim/xorp_pimsm4.cc,v 1.3 2004/05/18 07:47:20 pavlin Exp $"
 
 
 //
@@ -88,15 +88,11 @@ usage(const char *argv0, int exit_value)
 static void
 wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 {
-    bool timed_out = false;
-
-    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-    while (xrl_router.ready() == false && timed_out == false) {
+    while (xrl_router.ready() == false) {
 	eventloop.run();
-    }
-
-    if (xrl_router.ready() == false) {
-	XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	if (xrl_router.failed()) {
+	    XLOG_FATAL("XrlRouter failed.  No Finder?");
+	}
     }
 }
 

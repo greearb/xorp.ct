@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.24 2004/02/11 08:48:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.25 2004/05/20 22:18:18 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -35,6 +35,18 @@
 #include "xrl_target.hh"
 
 
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    while (xrl_router.ready() == false) {
+	eventloop.run();
+	if (xrl_router.failed()) {
+	    XLOG_FATAL("XrlRouter failed.  No Finder?");
+	}
+    }
+}
+
+
 bool callback_flag;
 
 class RibClientTarget : public XrlRibclientTargetBase {
@@ -42,10 +54,10 @@ public:
     RibClientTarget(XrlRouter* r) : XrlRibclientTargetBase(r) {}
 
     XrlCmdError rib_client_0_1_route_info_changed4(
-	// Input values, 
-	const IPv4&	addr, 
-	const uint32_t&	prefix_len, 
-	const IPv4&	nexthop, 
+	// Input values,
+	const IPv4&	addr,
+	const uint32_t&	prefix_len,
+	const IPv4&	nexthop,
 	const uint32_t&	metric,
 	const uint32_t&	admin_distance,
 	const string&	protocol_origin)
@@ -66,10 +78,10 @@ public:
     }
 
     XrlCmdError rib_client_0_1_route_info_changed6(
-	// Input values, 
-        const IPv6&	/* addr */, 
-	const uint32_t&	/* prefix_len */, 
-	const IPv6&	/* nexthop */, 
+	// Input values,
+        const IPv6&	/* addr */,
+	const uint32_t&	/* prefix_len */,
+	const IPv6&	/* nexthop */,
 	const uint32_t&	/* metric */,
 	const uint32_t&	/* admin_distance */,
 	const string&	/* protocol_origin */)
@@ -78,9 +90,9 @@ public:
     }
 
     XrlCmdError rib_client_0_1_route_info_invalid4(
-	// Input values, 
-	const IPv4&	addr, 
-	const uint32_t&	prefix_len) 
+	// Input values,
+	const IPv4&	addr,
+	const uint32_t&	prefix_len)
     {
 	IPv4Net net(addr, prefix_len);
 	printf("route_info_invalid4: net:%s\n", net.str().c_str());
@@ -93,7 +105,7 @@ public:
 
     XrlCmdError rib_client_0_1_route_info_invalid6(
 	// Input values,
-        const IPv6&	/* addr */, 
+        const IPv6&	/* addr */,
 	const uint32_t&	/* prefix_len */)
     {
 	return XrlCmdError::OKAY();
@@ -108,7 +120,7 @@ private:
     set<string> _changed;
 };
 
-bool 
+bool
 RibClientTarget::verify_invalidated(const string& invalid)
 {
     set<string>::iterator iter;
@@ -124,11 +136,11 @@ RibClientTarget::verify_invalidated(const string& invalid)
     return true;
 }
 
-bool 
+bool
 RibClientTarget::verify_changed(const string& changed)
 {
     set<string>::iterator iter;
-    
+
     iter = _changed.find(changed);
     if (iter == _changed.end()) {
 	printf("EXPECTED: >%s<\n", changed.c_str());
@@ -161,8 +173,8 @@ xrl_done(const XrlError& e)
 }
 
 int
-add_igp_table(XrlRibV0p1Client& client, 
-	      EventLoop& loop, 
+add_igp_table(XrlRibV0p1Client& client,
+	      EventLoop& loop,
 	      const string& tablename)
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
@@ -177,8 +189,8 @@ add_igp_table(XrlRibV0p1Client& client,
 }
 
 int
-add_egp_table(XrlRibV0p1Client& client, 
-	      EventLoop& loop, 
+add_egp_table(XrlRibV0p1Client& client,
+	      EventLoop& loop,
 	      const string& tablename)
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
@@ -193,9 +205,9 @@ add_egp_table(XrlRibV0p1Client& client,
 }
 
 int
-add_vif(XrlRibV0p1Client& client, 
-	EventLoop& loop, 
-	const string& vifname, 
+add_vif(XrlRibV0p1Client& client,
+	EventLoop& loop,
+	const string& vifname,
 	IPv4 myaddr, IPv4Net net)
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
@@ -218,9 +230,9 @@ add_vif(XrlRibV0p1Client& client,
 }
 
 int
-add_route(XrlRibV0p1Client& client, 
-	  EventLoop& loop, 
-	  const string& protocol, 
+add_route(XrlRibV0p1Client& client,
+	  EventLoop& loop,
+	  const string& protocol,
 	  IPv4Net net, IPv4 nexthop, uint32_t metric)
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
@@ -236,14 +248,14 @@ add_route(XrlRibV0p1Client& client,
 }
 
 int
-delete_route(XrlRibV0p1Client& client, 
-	     EventLoop& loop, 
-	     const string& protocol, 
+delete_route(XrlRibV0p1Client& client,
+	     EventLoop& loop,
+	     const string& protocol,
 	     IPv4Net net)
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
-    client.send_delete_route4("rib", protocol, true, false, 
+    client.send_delete_route4("rib", protocol, true, false,
 			      net, cb);
 
     xrl_done_flag = false;
@@ -254,15 +266,15 @@ delete_route(XrlRibV0p1Client& client,
 }
 
 void
-register_done(const XrlError& e, 
-	      const bool* resolves, 
-	      const IPv4* base_addr, 
-	      const uint32_t* prefix_len, 
-	      const uint32_t* /* real_prefix_len */, 
-	      const IPv4* nexthop, 
-	      const uint32_t* metric, 
+register_done(const XrlError& e,
+	      const bool* resolves,
+	      const IPv4* base_addr,
+	      const uint32_t* prefix_len,
+	      const uint32_t* /* real_prefix_len */,
+	      const IPv4* nexthop,
+	      const uint32_t* metric,
 	      bool expected_resolves,
-	      IPv4Net expected_net, 
+	      IPv4Net expected_net,
 	      IPv4 expected_nexthop,
 	      uint32_t expected_metric)
 {
@@ -273,7 +285,7 @@ register_done(const XrlError& e,
 	IPv4Net net(*base_addr, *prefix_len);
 	XLOG_ASSERT(net == expected_net);
 	if (*metric != expected_metric) {
-	    fprintf(stderr, "Expected metric %d, got %d\n", 
+	    fprintf(stderr, "Expected metric %d, got %d\n",
 		    expected_metric, *metric);
 	    abort();
 	}
@@ -285,19 +297,19 @@ register_done(const XrlError& e,
 }
 
 int
-register_interest(XrlRibV0p1Client& client, 
-		  EventLoop& loop, 
+register_interest(XrlRibV0p1Client& client,
+		  EventLoop& loop,
 		  const IPv4& addr,
 		  bool expected_resolves,
 		  const IPv4Net& expected_net,
 		  const IPv4& expected_nexthop,
 		  uint32_t expected_metric)
 {
-    XorpCallback7<void, const XrlError&, const bool*, const IPv4*, 
-	const uint32_t*, const uint32_t*, const IPv4*, 
+    XorpCallback7<void, const XrlError&, const bool*, const IPv4*,
+	const uint32_t*, const uint32_t*, const IPv4*,
 	const uint32_t*>::RefPtr cb;
 
-    cb = callback(register_done, expected_resolves, 
+    cb = callback(register_done, expected_resolves,
 		  expected_net, expected_nexthop, expected_metric);
     client.send_register_interest4("rib", "ribclient", addr, cb);
 
@@ -362,19 +374,7 @@ main(int /* argc */, char* argv[])
 
     XrlRibV0p1Client xc(&xrl_router);
 
-    {
-	// Wait until the XrlRouter becomes ready
-	bool timed_out = false;
-	
-	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	while (xrl_router.ready() == false && timed_out == false) {
-	    eventloop.run();
-	}
-	
-	if (xrl_router.ready() == false) {
-	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	}
-    }
+    wait_until_xrl_router_is_ready(eventloop, xrl_router);
 
     add_igp_table(xc, eventloop, "ospf");
     add_egp_table(xc, eventloop, "ebgp");
@@ -383,16 +383,16 @@ main(int /* argc */, char* argv[])
 
     add_vif(xc, eventloop, "xl0", IPv4("1.0.0.1"), IPv4Net("1.0.0.0/24"));
     add_vif(xc, eventloop, "xl1", IPv4("1.0.1.1"), IPv4Net("1.0.1.0/24"));
-    
+
     add_route(xc, eventloop, "ospf",
 	      IPv4Net("9.0.0.0/24"), IPv4("1.0.0.2"), 7);
 
     printf("====================================================\n");
 
-    register_interest(xc, eventloop, IPv4("9.0.0.1"), 
+    register_interest(xc, eventloop, IPv4("9.0.0.1"),
 		      true, IPv4Net("9.0.0.0/24"), IPv4("1.0.0.2"), 7);
 
-    register_interest(xc, eventloop, IPv4("9.0.1.1"), 
+    register_interest(xc, eventloop, IPv4("9.0.1.1"),
 		      false, IPv4Net("0.0.0.0/0"), IPv4("0.0.0.0"), 0);
 
     printf("====================================================\n");
@@ -426,6 +426,6 @@ main(int /* argc */, char* argv[])
     //
     xlog_stop();
     xlog_exit();
-    
+
     exit (0);
 }

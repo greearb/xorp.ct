@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.21 2004/05/16 00:26:24 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.22 2004/05/17 16:41:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -769,8 +769,19 @@ TestPeer::xrl_callback(const XrlError& error)
     sendit();
 }
 
-void
-usage(char *name)
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    while (xrl_router.ready() == false) {
+	eventloop.run();
+	if (xrl_router.failed()) {
+	    XLOG_FATAL("XrlRouter failed.  No Finder?");
+	}
+    }
+}
+
+static void
+usage(const char *name)
 {
     fprintf(stderr,
 	    "usage: %s [-h (finder host)] [-s server name] [-v][-t]\n", name);
@@ -822,14 +833,7 @@ main(int argc, char **argv)
 	TestPeer test_peer(eventloop, router, server, verbose);
 	XrlTestPeerTarget xrl_target(&router, test_peer, trace);
 
-	bool timed_out = false;
-	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	while (router.ready() == false && timed_out == false) {
-	    eventloop.run();
-	}
-	if (router.ready() == false) {
-	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	}
+	wait_until_xrl_router_is_ready(eventloop, router);
 
 	while(!test_peer.done()) {
 	    eventloop.run();

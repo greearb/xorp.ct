@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.29 2004/05/06 23:05:24 hodson Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.30 2004/05/20 22:18:18 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -33,12 +33,24 @@
 #include "xrl_target.hh"
 
 
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    while (xrl_router.ready() == false) {
+	eventloop.run();
+	if (xrl_router.failed()) {
+	    XLOG_FATAL("XrlRouter failed.  No Finder?");
+	}
+    }
+}
+
+
 bool verbose = false;
 
 class XrlRibParser : public Parser {
 public:
-    XrlRibParser(EventLoop&	   e, 
-		 XrlRibV0p1Client& xrl_client, 
+    XrlRibParser(EventLoop&	   e,
+		 XrlRibV0p1Client& xrl_client,
 		 RIB<IPv4>&	   rib,
 		 XrlCompletion&    cv) {
 	add_command(new XrlRouteAddCommand(e, xrl_client, cv));
@@ -87,33 +99,10 @@ parser_main()
     vif_manager.start();
     XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager,
 		     NULL);
-    {
-	// Wait until the XrlRouter becomes ready
-	bool timed_out = false;
-	
-	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	while (xrl_router.ready() == false && timed_out == false) {
-	    eventloop.run();
-	}
 
-	if (xrl_router.ready() == false) {
-	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	}
-    }
+    wait_until_xrl_router_is_ready(eventloop, xrl_router);
 
     XrlRibV0p1Client xrl_client(&xrl_router);
-
-    {
-	bool timed_out = false;
-	XorpTimer t = eventloop.set_flag_after_ms(1000, &timed_out);
-	while (xrl_router.ready() == false && timed_out == false) {
-	    eventloop.run();
-	}
-	if (xrl_router.ready() == false) {
-	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	}
-    }
-
 
     // Variable used to signal completion of Xrl parse completion
     XrlCompletion cv;
@@ -165,6 +154,6 @@ main(int /* argc */, char* argv[])
     //
     xlog_stop();
     xlog_exit();
-    
+
     exit (0);
 }

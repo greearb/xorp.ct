@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.24 2004/02/28 04:38:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.25 2004/03/09 05:51:52 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -49,16 +49,17 @@ announce_waiting()
 }
 
 static bool
-wait_for_xrlrouter_ready(EventLoop& e, XrlRouter& rtr)
+wait_for_xrlrouter_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 {
-    bool bad_router = false;
-    XorpTimer timeout = e.set_flag_after_ms(10 * 1000, &bad_router);
-    XorpTimer announcer = e.new_oneoff_after_ms(3 * 1000,
-						callback(&announce_waiting));
-    while (rtr.ready() == false) {
-	e.run();
-	if (bad_router) {
+    XorpTimer announcer = eventloop.new_oneoff_after_ms(
+				3 * 1000, callback(&announce_waiting)
+				);
+    while (xrl_router.ready() == false) {
+	eventloop.run();
+	if (xrl_router.failed()) {
+	    XLOG_ERROR("XrlRouter failed.  No Finder?");
 	    return false;
+	    break;
 	}
     }
     return true;

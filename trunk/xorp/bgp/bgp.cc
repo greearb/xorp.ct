@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.31 2004/05/14 01:45:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.32 2004/05/15 18:31:38 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -31,7 +31,28 @@
 #include "iptuple.hh"
 #include "xrl_target.hh"
 
+// ----------------------------------------------------------------------------
+// Utilities
+
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    while (xrl_router.ready() == false) {
+	eventloop.run();
+	if (xrl_router.failed()) {
+	    XLOG_FATAL("XrlRouter failed.  No Finder?");
+	}
+    }
+}
+
+
+// ----------------------------------------------------------------------------
+// Static class members
+
 EventLoop BGPMain::_eventloop;
+
+// ----------------------------------------------------------------------------
+// BGPMain implementation
 
 BGPMain::BGPMain()
     : _exit_loop(false)
@@ -45,17 +66,7 @@ BGPMain::BGPMain()
     _xrl_router = new XrlStdRouter(eventloop(), "bgp");
     _xrl_target = new XrlBgpTarget(_xrl_router, *this);
 
-    {
-	bool timed_out = false;
-	XorpTimer t = eventloop().set_flag_after_ms(10000, &timed_out);
-	while (_xrl_router->ready() == false && timed_out == false) {
-	    eventloop().run();
-	}
-
-	if (_xrl_router->ready() == false) {
-	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	}
-    }
+    wait_until_xrl_router_is_ready(eventloop(), *_xrl_router);
 
     _rib_ipc_handler = new RibIpcHandler(_xrl_router, *this);
     _next_hop_resolver_ipv4 = new NextHopResolver<IPv4>(_xrl_router,
