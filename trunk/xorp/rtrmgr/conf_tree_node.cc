@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.42 2004/05/28 18:26:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.43 2004/05/28 22:27:56 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -1008,10 +1008,12 @@ ConfigTreeNode::show_subtree(int depth, int indent, bool do_indent,
 	}
 	if (_children.size() == 0 
 	    && (type() != NODE_VOID || _has_value)) {
-	    //normally if a node has no children, we don't want the
-	    //braces, but certain grouping nodes, with type NODE_VOID
-	    //(e.g. "protocols") won't parse correctly if we print
-	    //them without the braces
+	    //
+	    // Normally if a node has no children, we don't want the
+	    // braces, but certain grouping nodes, with type NODE_VOID
+	    // (e.g. "protocols") won't parse correctly if we print
+	    // them without the braces.
+	    //
 	    s += "\n";
 	    return s;
 	}
@@ -1486,15 +1488,19 @@ ConfigTreeNode::expand_varname_to_matchlist(const vector<string>& parts,
 					    size_t part,
 					    list<string>& matches) const
 {
+    bool ok = false;
+
     // Don't expand unless the node has been committed
-    if (!_existence_committed)
+    if (! _existence_committed)
 	return;
 
-    bool ok = false;
     if (is_root_node()) {
-	// root node
+	// The root node
 	ok = true;
-	// TODO: what about if "part" is 0?
+	//
+	// XXX: note that even if "part" is 0, this is compensated later by
+	// the usage of "part + 1" later.
+	//
 	part--;		// Prevent increment of part later
     } else if ((!_parent->is_root_node()) && _parent->is_tag()) {
 	// We're the varname after a tag
@@ -1508,21 +1514,23 @@ ConfigTreeNode::expand_varname_to_matchlist(const vector<string>& parts,
 	}
 	ok = true;
     }
-    if (ok) {
-	if (part == parts.size() - 1) {
-	    // Everything that we were looking for matched
-	    XLOG_ASSERT(parts[part] == "*");
-	    matches.push_back(_segname);
-	    return;
-	} 
-	if (_children.empty()) {
-	    // No more children, but the search string still has components
-	    return;
-	}
-	list<ConfigTreeNode*>::const_iterator iter;
-	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    (*iter)->expand_varname_to_matchlist(parts, part + 1, matches);
-	}
+
+    if (! ok)
+	return;
+
+    if (part == parts.size() - 1) {
+	// Everything that we were looking for matched
+	XLOG_ASSERT(parts[part] == "*");
+	matches.push_back(_segname);
+	return;
+    } 
+
+    //
+    // Search the children. If no more children, return the result so far
+    //
+    list<ConfigTreeNode*>::const_iterator iter;
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	(*iter)->expand_varname_to_matchlist(parts, part + 1, matches);
     }
 }
 

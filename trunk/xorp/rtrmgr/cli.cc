@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.35 2004/05/28 18:26:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.36 2004/05/28 22:27:55 pavlin Exp $"
 
 
 #include <pwd.h>
@@ -41,8 +41,10 @@ RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node, bool verbose)
       _mode(CLI_MODE_NONE),
       _changes_made(false)
 {
-    //we do all this here to allow for later extensions for
-    //internationalization
+    //
+    // We do all this here to allow for later extensions for
+    // internationalization.
+    //
     _help_o["configure"] = "Switch to configuration mode";
     _help_o["configure exclusive"] 
 	= "Switch to configuration mode, locking out other users";
@@ -370,37 +372,40 @@ RouterCLI::~RouterCLI()
 }
 
 string 
-RouterCLI::get_help_o(const string& s) const {
+RouterCLI::get_help_o(const string& s) const
+{
     map<string,string>::const_iterator i = _help_o.find(s);
+
     if (i == _help_o.end())
 	return string("");
     else
 	return i->second;
 }
 
-
 string 
-RouterCLI::get_help_c(const string& s) const {
+RouterCLI::get_help_c(const string& s) const
+{
     map<string,string>::const_iterator i = _help_c.find(s);
+
     if (i == _help_c.end())
 	return string("");
     else
 	return i->second;
 }
 
-
-
 void
 RouterCLI::commit_done_by_user(int uid)
 {
-    // someone just did a commit, so we may need to regenerate options
-    if (_mode == CLI_MODE_OPERATIONAL) {
-	string message = c_format("\nUser %d changed the configuration.\n",
-				  uid);
-	_cli_client.cli_print(message);
-	clear_command_set();
-	add_op_mode_commands(NULL);
-    }
+    if (_mode != CLI_MODE_OPERATIONAL)
+	return;
+
+    //
+    // Someone just did a commit, so we may need to regenerate options
+    //
+    string message = c_format("\nUser %d changed the configuration.\n", uid);
+    _cli_client.cli_print(message);
+    clear_command_set();
+    add_op_mode_commands(NULL);
 }
 
 void
@@ -420,6 +425,7 @@ void
 RouterCLI::add_op_mode_commands(CliCommand* com0)
 {
     CliCommand *com1, *com2, *help_com;
+
     // com0->add_command("clear", "Clear information in the system *");
 
     // If no root node is specified, default to the true root
@@ -436,17 +442,15 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 				 callback(this, &RouterCLI::configure_func));
 	com2->set_global_name("configure exclusive");
 
-	/*Help Command*/
+	// Help Command
 	help_com = com0->add_command("help", get_help_o("help"));
 	help_com->set_global_name("help");
-	help_com->
-	    set_dynamic_children_callback(callback(this,
-						   &RouterCLI::op_mode_help));
+	help_com->set_dynamic_children_callback(
+	    callback(this, &RouterCLI::op_mode_help));
+	help_com->set_dynamic_process_callback(
+	    callback(this, &RouterCLI::op_help_func));
 
-	help_com->
-	    set_dynamic_process_callback(callback(this,
-						  &RouterCLI::op_help_func));
-	/*Quit Command*/
+	// Quit Command
 	com0->add_command("quit", 
 			  get_help_o("quit"),
 			  callback(this, &RouterCLI::logout_func));
@@ -460,8 +464,10 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	// Set the callback to generate the node's children
 	com1->set_dynamic_children_callback(callback(op_cmd_list(),
 						     &OpCommandList::childlist));
+	//
 	// Set the callback to pass to the node's children when they
-	// are executed
+	// are executed.
+	//
 	com1->set_dynamic_process_callback(callback(this,
 						    &RouterCLI::op_mode_func));
     }
@@ -474,23 +480,23 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 }
 
 map<string, string> 
-RouterCLI::op_mode_help(const string& path,
-			bool& is_executable) const
+RouterCLI::op_mode_help(const string& path, bool& is_executable) const
 {
     UNUSED(path);
     UNUSED(is_executable);
-    map <string, string> children;
+    map<string, string> children;
     string trimmed_path;
-    XLOG_ASSERT(path.substr(0,4)=="help");
-    if (path.size()==4) {
+
+    XLOG_ASSERT(path.substr(0, 4) == "help");
+    if (path.size() == 4) {
 	trimmed_path == "";
     } else {
-	XLOG_ASSERT(path.substr(0,5)=="help ");
-	trimmed_path = path.substr(5, path.size()-5);
+	XLOG_ASSERT(path.substr(0,5) == "help ");
+	trimmed_path = path.substr(5, path.size() - 5);
     }
 
     if (trimmed_path == "") {
-	//Add the static commands:
+	// Add the static commands:
 	children["configure"] = get_help_o("configure");
 	children["quit"] = get_help_o("quit");
 	children["help"] = get_help_o("help");
@@ -512,6 +518,7 @@ RouterCLI::op_mode_help(const string& path,
     } else {
 	children = op_cmd_list()->childlist(trimmed_path, is_executable);
     }
+
     return children;
 }
 
@@ -539,38 +546,43 @@ void
 RouterCLI::display_config_mode_users() const
 {
     _cli_client.cli_print("Entering configuration mode.\n");
+
     if (_config_mode_users.empty()) {
 	_cli_client.cli_print("There are no other users in configuration mode.\n");
-    } else {
-	if (_config_mode_users.size() == 1)
-	    _cli_client.cli_print("User ");
-	else
-	    _cli_client.cli_print("Users ");
-	list<uint32_t>::const_iterator iter, iter2;
-	struct passwd* pwent;
-	for (iter = _config_mode_users.begin();
-	    iter != _config_mode_users.end();
-	    ++iter) {
-	    if (iter != _config_mode_users.begin()) {
-		iter2 = iter;
-		++iter2;
-		if (iter2 == _config_mode_users.end())
-		    _cli_client.cli_print(" and ");
-		else
-		    _cli_client.cli_print(", ");
-	    }
-	    pwent = getpwuid(*iter);
-	    if (pwent == NULL)
-		_cli_client.cli_print(c_format("UID:%d", *iter));
-	    else
-		_cli_client.cli_print(pwent->pw_name);
-	}
-	endpwent();
-	if (_config_mode_users.size() == 1)
-	    _cli_client.cli_print(" is also in configuration mode.\n");
-	else
-	    _cli_client.cli_print(" are also in configuration mode.\n");
+	return;
     }
+
+    //
+    // There are other users
+    //
+    if (_config_mode_users.size() == 1)
+	_cli_client.cli_print("User ");
+    else
+	_cli_client.cli_print("Users ");
+    list<uint32_t>::const_iterator iter, iter2;
+    struct passwd* pwent;
+    for (iter = _config_mode_users.begin();
+	 iter != _config_mode_users.end();
+	 ++iter) {
+	if (iter != _config_mode_users.begin()) {
+	    iter2 = iter;
+	    ++iter2;
+	    if (iter2 == _config_mode_users.end())
+		_cli_client.cli_print(" and ");
+	    else
+		_cli_client.cli_print(", ");
+	}
+	pwent = getpwuid(*iter);
+	if (pwent == NULL)
+	    _cli_client.cli_print(c_format("UID:%d", *iter));
+	else
+	    _cli_client.cli_print(pwent->pw_name);
+    }
+    endpwent();
+    if (_config_mode_users.size() == 1)
+	_cli_client.cli_print(" is also in configuration mode.\n");
+    else
+	_cli_client.cli_print(" are also in configuration mode.\n");
 }
 
 void
@@ -616,6 +628,7 @@ void
 RouterCLI::add_static_configure_mode_commands()
 {
     CliCommand *com0, *com1, *com2, *help_com;
+
     com0 = _cli_node.cli_command_root();
     if (_changes_made) {
 	com0->add_command("commit", get_help_c("commit"),
@@ -641,16 +654,13 @@ RouterCLI::add_static_configure_mode_commands()
 			     callback(this, &RouterCLI::exit_func));
     com2->set_global_name("exit discard");
 
-    /*Help Command*/
+    // Help Command
     help_com = com0->add_command("help", get_help_c("help"));
     help_com->set_global_name("help");
-    help_com->
-	set_dynamic_children_callback(callback(this,
-                                         &RouterCLI::configure_mode_help));
-    
-    help_com->
-	set_dynamic_process_callback(callback(this,
-					      &RouterCLI::conf_help_func));
+    help_com->set_dynamic_children_callback(
+	callback(this, &RouterCLI::configure_mode_help));
+    help_com->set_dynamic_process_callback(
+	callback(this, &RouterCLI::conf_help_func));
 
     // Load Command
     com1 = com0->add_command("load", get_help_c("load"),
@@ -693,18 +703,19 @@ RouterCLI::configure_mode_help(const string& path,
 {
     UNUSED(path);
     UNUSED(is_executable);
-    map <string, string> children;
+    map<string, string> children;
     string trimmed_path;
-    XLOG_ASSERT(path.substr(0,4)=="help");
-    if (path.size()==4) {
+
+    XLOG_ASSERT(path.substr(0,4) == "help");
+    if (path.size() == 4) {
 	trimmed_path == "";
     } else {
-	XLOG_ASSERT(path.substr(0,5)=="help ");
-	trimmed_path = path.substr(5, path.size()-5);
+	XLOG_ASSERT(path.substr(0,5) == "help ");
+	trimmed_path = path.substr(5, path.size() - 5);
     }
 
     if (trimmed_path == "") {
-	//Add the static commands:
+	// Add the static commands:
 	children["commit"] = get_help_c("commit");
 	children["delete"] = get_help_c("delete");
 	children["edit"] = get_help_c("edit");
@@ -719,8 +730,10 @@ RouterCLI::configure_mode_help(const string& path,
 	children["top"] = get_help_c("top");
 	children["up"] = get_help_c("up");
 
-	//XXX need to insert the commands that come from the template
-	//tree here.
+	//
+	// TODO: need to insert the commands that come from the template
+	// tree here.
+	//
 
 	is_executable = true;
     } else if (trimmed_path == "exit") {
@@ -728,24 +741,24 @@ RouterCLI::configure_mode_help(const string& path,
 	children["discard"] = get_help_c("exit discard");
 	is_executable = true;
     } else {
-	//make the help for static commands executable
+	// Make the help for static commands executable
 	map<string,string>::const_iterator i;
 	is_executable = false;
-	for (i=_help_c.begin(); i!=_help_c.end(); i++) {
+	for (i = _help_c.begin(); i != _help_c.end(); ++i) {
 	    if (trimmed_path == i->first) {
 		is_executable = true;
 		break;
 	    }
 	}
     }
+
     return children;
 }
 
 void
 RouterCLI::reset_path()
 {
-    while (_path.size() > 0)
-	_path.pop_front();
+    _path.clear();
 }
 
 void
@@ -754,15 +767,15 @@ RouterCLI::set_path(string path)
     reset_path();
     debug_msg("set path: >%s<\n", path.c_str());
     string::size_type ix;
-    while (path.size() > 0) {
+
+    while (! path.empty()) {
 	ix = path.find(' ');
-	if (ix == string::npos && path.size() > 0) {
+	if (ix == string::npos) {
 	    _path.push_back(path);
 	    break;
-	} else {
-	    _path.push_back(path.substr(0, ix));
-	    path = path.substr(ix + 1, path.size() - ix + 1);
 	}
+	_path.push_back(path.substr(0, ix));
+	path = path.substr(ix + 1, path.size() - ix + 1);
     }
 }
 
@@ -879,9 +892,9 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 {
     string subpath;
     set<string> existing_children;
-
     const list<CommandTreeNode*>& children = command_tree.root_node().children();
     list<CommandTreeNode*>::const_iterator cmd_iter;
+
     for (cmd_iter = children.begin(); cmd_iter != children.end(); ++cmd_iter) {
 	if (include_intermediates || (*cmd_iter)->has_command()) {
 	    if (path.empty())
@@ -916,7 +929,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 
     list<TemplateTreeNode*>::const_iterator tti;
     for (tti = ttn->children().begin(); tti != ttn->children().end(); ++tti) {
-	// we don't need to consider this child if it's already added
+	// We don't need to consider this child if it's already added
 	if (existing_children.find((*tti)->segname())
 	    != existing_children.end()) {
 	    continue;
@@ -967,6 +980,7 @@ RouterCLI::pathstr() const
 	else
 	    s += " " + *iter;
     }
+
     return s;
 }
 
@@ -982,6 +996,7 @@ RouterCLI::pathstr2() const
 	else
 	    s += " >" + *iter + "<";
     }
+
     return s;
 }
 
@@ -1017,7 +1032,7 @@ RouterCLI::add_edit_subtree()
     debug_msg("%s", cmd_tree.tree_str().c_str());
     debug_msg("==========================================================\n");
 
-    if (_braces.size() == 0) {
+    if (_braces.empty()) {
 	string cmdpath;
 	if (_path.empty())
 	    cmdpath = "edit";
@@ -1088,7 +1103,7 @@ RouterCLI::add_set_subtree()
     debug_msg("%s", cmd_tree.tree_str().c_str());
     debug_msg("==========================================================\n");
 
-    if (_braces.size() == 0) {
+    if (_braces.empty()) {
 	string cmdpath;
 	if (_path.empty())
 	    cmdpath = "set";
@@ -1150,6 +1165,7 @@ RouterCLI::add_text_entry_commands()
 		   current_config_node->segname().c_str());
 	ttn = template_tree()->root_node();
     }
+
     list<TemplateTreeNode*>::const_iterator tti;
     for (tti = ttn->children().begin(); tti != ttn->children().end(); ++tti) {
 	 CliCommand *com0, *com;
@@ -1173,10 +1189,10 @@ RouterCLI::add_text_entry_commands()
 	     com->set_global_name(subpath);
 	 }
 
-	 com->set_dynamic_children_callback(callback(this,
-					&RouterCLI::text_entry_children_func));
-	 com->set_dynamic_process_callback(callback(this,
-						&RouterCLI::text_entry_func));
+	 com->set_dynamic_children_callback(
+	     callback(this, &RouterCLI::text_entry_children_func));
+	 com->set_dynamic_process_callback(
+	     callback(this, &RouterCLI::text_entry_func));
     }
 }
 
@@ -1195,33 +1211,35 @@ RouterCLI::configure_func(const string& ,
     idle_ui();
     _xorpsh.enter_config_mode(exclusive,
 			       callback(this, &RouterCLI::enter_config_done));
+
      return (XORP_OK);
 }
 
 void
 RouterCLI::enter_config_done(const XrlError& e)
 {
-    if (e != XrlError::OKAY()) {
-	if ((e == XrlError::COMMAND_FAILED()) && (e.note() == "AUTH_FAIL")) {
-	    check_for_rtrmgr_restart();
-	    return;
-	}
-	_cli_client.cli_print(c_format("ERROR: %s\n", e.note().c_str()));
-	//
-	// Either something really bad happened, or a user that didn't
-	// have permission attempted to enter config mode.
-	//
-	reenable_ui();
+    if (e == XrlError::OKAY()) {
+	_xorpsh.get_config_users(callback(this, &RouterCLI::got_config_users));
 	return;
     }
 
-   _xorpsh.get_config_users(callback(this, &RouterCLI::got_config_users));
+    if ((e == XrlError::COMMAND_FAILED()) && (e.note() == "AUTH_FAIL")) {
+	check_for_rtrmgr_restart();
+	return;
+    }
+
+    //
+    // Either something really bad happened, or a user that didn't
+    // have permission attempted to enter config mode.
+    //
+    _cli_client.cli_print(c_format("ERROR: %s\n", e.note().c_str()));
+    reenable_ui();
 }
 
 void
 RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users)
 {
-    // clear the old list
+    // Clear the old list
     if (e != XrlError::OKAY()) {
 	if (e == XrlError::COMMAND_FAILED() && e.note() == "AUTH_FAIL") {
 	    check_for_rtrmgr_restart();
@@ -1247,7 +1265,7 @@ RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users)
 		    _config_mode_users.push_back(uid);
 	    }
 	    catch (const XrlAtom::WrongType& wt) {
-		// this had better not happen
+		// This had better not happen
 		XLOG_FATAL("Internal Error");
 	    }
 	}
@@ -1260,18 +1278,19 @@ RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users)
 void
 RouterCLI::new_config_user(uid_t user_id)
 {
-    if (_mode == CLI_MODE_CONFIGURE || _mode == CLI_MODE_TEXTENTRY) {
-	_config_mode_users.push_back(user_id);
-	struct passwd* pwent = getpwuid(user_id);
-	string username;
-	if (pwent == NULL)
-	    username = c_format("UID:%d", user_id);
-	else
-	    username = pwent->pw_name;
-	string alert = c_format("User %s entered configuration mode\n",
-				username.c_str());
-	notify_user(alert, /* not urgent */ false);
-    }
+    if ((_mode != CLI_MODE_CONFIGURE) && (_mode != CLI_MODE_TEXTENTRY))
+	return;
+
+    _config_mode_users.push_back(user_id);
+    struct passwd* pwent = getpwuid(user_id);
+    string username;
+    if (pwent == NULL)
+	username = c_format("UID:%d", user_id);
+    else
+	username = pwent->pw_name;
+    string alert = c_format("User %s entered configuration mode\n",
+			    username.c_str());
+    notify_user(alert, /* not urgent */ false);
 }
 
 void
@@ -1279,7 +1298,7 @@ RouterCLI::leave_config_done(const XrlError& e)
 {
     if (e != XrlError::OKAY()) {
 	_cli_client.cli_print("ERROR: failed to inform rtrmgr of entry into config mode\n");
-	// something really bad happened - should we just exit here?
+	// Something really bad happened - should we just exit here?
 	if (e == XrlError::COMMAND_FAILED() && e.note() == "AUTH_FAIL") {
 	    check_for_rtrmgr_restart();
 	    operational_mode();
@@ -1307,40 +1326,43 @@ RouterCLI::op_help_func(const string& ,
 			const string& command_global_name,
 			const vector<string>& argv)
 {
-    if (argv.size() == 0) {
-	string cmd_name = command_global_name;
-	string path;
-	if (cmd_name.size()==4) {
-	    XLOG_ASSERT(cmd_name.substr(0, 4) == "help");
-	    path = "";
-	} else {
-	    XLOG_ASSERT(cmd_name.substr(0, 5) == "help ");
-	    path = cmd_name.substr(5, cmd_name.size() - 5);
-	}
-
-	if (path == "") path = "NULL";
-
-	// try and find the detailed help for standard commands
-	map<string,string>::const_iterator i;
-	i = _help_long_o.find(path);
-	if (i != _help_long_o.end()) {
-	    _cli_client.cli_print("\n" + i->second + "\n\n");
-	    return (XORP_OK);
-	} 
-	
-	// there was no long help description available.  If there's a
-	// short description, that will have to do.
-	i = _help_o.find(path);
-	if (i != _help_o.end()) {
-	    _cli_client.cli_print(i->second + "\n");
-	    return (XORP_OK);
-	}
-
-	_cli_client.cli_print("Sorry, no help available for " + path + "\n");
-	return (XORP_OK);
-    } else {
+    if (! argv.empty())
 	return (XORP_ERROR);
+
+    string cmd_name = command_global_name;
+    string path;
+    if (cmd_name.size() == 4) {
+	XLOG_ASSERT(cmd_name.substr(0, 4) == "help");
+	path = "";
+    } else {
+	XLOG_ASSERT(cmd_name.substr(0, 5) == "help ");
+	path = cmd_name.substr(5, cmd_name.size() - 5);
     }
+
+    if (path == "")
+	path = "NULL";
+
+    // Try and find the detailed help for standard commands
+    map<string,string>::const_iterator i;
+    i = _help_long_o.find(path);
+    if (i != _help_long_o.end()) {
+	_cli_client.cli_print("\n" + i->second + "\n\n");
+	return (XORP_OK);
+    } 
+
+    //
+    // There was no long help description available.  If there's a
+    // short description, that will have to do.
+    //
+    i = _help_o.find(path);
+    if (i != _help_o.end()) {
+	_cli_client.cli_print(i->second + "\n");
+	return (XORP_OK);
+    }
+
+    _cli_client.cli_print("Sorry, no help available for " + path + "\n");
+
+    return (XORP_OK);
 }
 
 int
@@ -1350,40 +1372,43 @@ RouterCLI::conf_help_func(const string& ,
 			  const string& command_global_name,
 			  const vector<string>& argv)
 {
-    if (argv.size() == 0) {
-	string cmd_name = command_global_name;
-	string path;
-	if (cmd_name.size()==4) {
-	    XLOG_ASSERT(cmd_name.substr(0, 4) == "help");
-	    path = "";
-	} else {
-	    XLOG_ASSERT(cmd_name.substr(0, 5) == "help ");
-	    path = cmd_name.substr(5, cmd_name.size() - 5);
-	}
-
-	if (path == "") path = "NULL";
-
-	// try and find the detailed help for standard commands
-	map<string,string>::const_iterator i;
-	i = _help_long_c.find(path);
-	if (i != _help_long_c.end()) {
-	    _cli_client.cli_print("\n" + i->second + "\n\n");
-	    return (XORP_OK);
-	} 
-	
-	// there was no long help description available.  If there's a
-	// short description, that will have to do.
-	i = _help_c.find(path);
-	if (i != _help_c.end()) {
-	    _cli_client.cli_print(i->second + "\n");
-	    return (XORP_OK);
-	}
-
-	_cli_client.cli_print("Sorry, no help available for " + path + "\n");
-	return (XORP_OK);
-    } else {
+    if (! argv.empty())
 	return (XORP_ERROR);
+
+    string cmd_name = command_global_name;
+    string path;
+    if (cmd_name.size() == 4) {
+	XLOG_ASSERT(cmd_name.substr(0, 4) == "help");
+	path = "";
+    } else {
+	XLOG_ASSERT(cmd_name.substr(0, 5) == "help ");
+	path = cmd_name.substr(5, cmd_name.size() - 5);
     }
+
+    if (path == "")
+	path = "NULL";
+
+    // Try and find the detailed help for standard commands
+    map<string,string>::const_iterator i;
+    i = _help_long_c.find(path);
+    if (i != _help_long_c.end()) {
+	_cli_client.cli_print("\n" + i->second + "\n\n");
+	return (XORP_OK);
+    } 
+
+    //
+    // There was no long help description available.  If there's a
+    // short description, that will have to do.
+    //
+    i = _help_c.find(path);
+    if (i != _help_c.end()) {
+	_cli_client.cli_print(i->second + "\n");
+	return (XORP_OK);
+    }
+
+    _cli_client.cli_print("Sorry, no help available for " + path + "\n");
+
+    return (XORP_OK);
 }
 
 int
@@ -1393,14 +1418,15 @@ RouterCLI::logout_func(const string& ,
 		       const string& ,
 		       const vector<string>& argv)
 {
-    if (argv.size() == 0) {
-	idle_ui();
-	_cli_node.delete_stdio_client(&_cli_client);
-	return (XORP_OK);
-    } else {
+    if (! argv.empty()) {
 	_cli_client.cli_print("Error: quit does not take any parameters\n");
 	return (XORP_ERROR);
     }
+
+    idle_ui();
+    _cli_node.delete_stdio_client(&_cli_client);
+
+    return (XORP_OK);
 }
 
 int
@@ -1411,7 +1437,7 @@ RouterCLI::exit_func(const string& ,
 		     const vector<string>& argv)
 {
     if (command_global_name == "exit configuration-mode") {
-	if (argv.size() > 0) {
+	if (! argv.empty()) {
 	    _cli_client.cli_print("Error: \"exit configuration-mode\"  does not take any additional parameters\n");
 	    return (XORP_ERROR);
 	}
@@ -1426,7 +1452,7 @@ RouterCLI::exit_func(const string& ,
 	return (XORP_OK);
     }
     if (command_global_name == "exit discard") {
-	if (argv.size() > 0) {
+	if (! argv.empty()) {
 	    _cli_client.cli_print("Error: \"exit discard\"  does not take any additional parameters\n");
 	    return (XORP_ERROR);
 	}
@@ -1437,7 +1463,7 @@ RouterCLI::exit_func(const string& ,
 	return (XORP_OK);
     }
     if (command_global_name == "top") {
-	if (argv.size() > 0) {
+	if (! argv.empty()) {
 	    _cli_client.cli_print("Error: top does not take any parameters\n");
 	    return (XORP_ERROR);
 	}
@@ -1451,15 +1477,17 @@ RouterCLI::exit_func(const string& ,
     // configuration-mode if it's executed at the top level
     //
     if (command_global_name == "up") {
-	if (argv.size() > 0) {
+	if (! argv.empty()) {
 	    _cli_client.cli_print("Error: up does not take any parameters\n");
 	    return (XORP_ERROR);
 	}
-	if (_path.size() > 0)
+	if (! _path.empty())
 	    _path.pop_back();
     }
     if ((command_global_name == "exit") || (command_global_name == "quit")) {
-	if (_path.size() == 0) {
+	if (! _path.empty()) {
+	    _path.pop_back();
+	} else {
 	    if (_changes_made) {
 		_cli_client.cli_print("Error: There are uncommitted changes\n");
 		_cli_client.cli_print("Use \"commit\" to commit the changes, or \"exit discard\" to discard them\n");
@@ -1469,53 +1497,53 @@ RouterCLI::exit_func(const string& ,
 	    _xorpsh.leave_config_mode(callback(this,
 					       &RouterCLI::leave_config_done));
 	    return (XORP_OK);
-	} else {
-	    _path.pop_back();
 	}
     }
+
     apply_path_change();
+
     return (XORP_OK);
 }
 
 int
 RouterCLI::edit_func(const string& ,
 		     const string& ,
-		     uint32_t ,		// cli_session_id
+		     uint32_t ,			// cli_session_id
 		     const string& command_global_name,
 		     const vector<string>& argv)
 {
-    if (argv.size() == 0) {
-	string cmd_name = command_global_name;
-	XLOG_ASSERT(cmd_name.substr(0, 5) == "edit ");
-	string path = cmd_name.substr(5, cmd_name.size() - 5);
-	set_path(path);
-	apply_path_change();
-	return (XORP_OK);
-    } else {
+    if (! argv.empty())
 	return (XORP_ERROR);
-    }
+
+    string cmd_name = command_global_name;
+    XLOG_ASSERT(cmd_name.substr(0, 5) == "edit ");
+    string path = cmd_name.substr(5, cmd_name.size() - 5);
+
+    set_path(path);
+    apply_path_change();
+
+    return (XORP_OK);
 }
 
 #if 0
 int
 RouterCLI::text_entry_func(const string& ,
 			   const string& ,
-			   uint32_t /* cli_session_id */,
+			   uint32_t ,		// cli_session_id
 			   const string& command_global_name,
 			   const vector<string>& argv)
 {
     string path = command_global_name;
     list<string> path_segments;
 
-    while (path.size() > 0) {
+    while (! path.empty()) {
 	string::size_type ix = path.find(' ');
-	if ((ix == string::npos) && (path.size() > 0)) {
+	if (ix == string::npos) {
 	    path_segments.push_back(path);
 	    break;
-	} else {
-	    path_segments.push_back(path.substr(0, ix));
-	    path = path.substr(ix + 1, path.size() - ix + 1);
 	}
+	path_segments.push_back(path.substr(0, ix));
+	path = path.substr(ix + 1, path.size() - ix + 1);
     }
 
     SlaveConfigTreeNode* ctn = config_tree()->find_node(path_segments);
@@ -1524,21 +1552,21 @@ RouterCLI::text_entry_func(const string& ,
     bool create_needed = false;
     string nodename;
 
-    if (argv.size() != 0 || (path_segments.back() != "}")) {
-	if (ctn == NULL) {
+    if ((! argv.empty()) || (path_segments.back() != "}")) {
+	if (ctn != NULL) {
+	    tag_ttn = ctn->template_tree_node();
+	} else {
 	    create_needed = true;
 	    tag_ttn = config_tree()->find_template(path_segments);
 	    XLOG_ASSERT(tag_ttn != NULL);
 	    nodename = path_segments.back();
 	    path_segments.pop_back();
 	    ctn = config_tree()->find_node(path_segments);
-	} else {
-	    tag_ttn = ctn->template_tree_node();
 	}
 
 	// If there are no arguments, it must be a void structuring node
-	if ((argv.size() == 0) && 
-	    (tag_ttn->type() != NODE_VOID || tag_ttn->is_tag())) {
+	if (argv.empty()
+	    && (tag_ttn->type() != NODE_VOID || tag_ttn->is_tag())) {
 	    _cli_client.cli_print("ERROR: Insufficient arguments\n");
 	    return (XORP_ERROR);
 	}
@@ -1551,11 +1579,12 @@ RouterCLI::text_entry_func(const string& ,
 	    // Check type of argv[0] is OK
 	    list<TemplateTreeNode*>::const_iterator iter;
 	    data_ttn = NULL;
+
 	    //
 	    // The tag can have multiple children of different types -
 	    // take the first that has valid syntax.
 	    //
-	    // XXX we really ought to check the allow commands here
+	    // TODO: we really ought to check the allow commands here
 	    for (iter = tag_ttn->children().begin();
 		 iter != tag_ttn->children().end();
 		 ++iter) {
@@ -1579,7 +1608,7 @@ RouterCLI::text_entry_func(const string& ,
 		list<ConfigTreeNode*>::const_iterator cti;
 		for (cti = ctn->children().begin();
 		     cti != ctn->children().end();
-		     cti++) {
+		     ++cti) {
 		    if ((*cti)->segname() == argv[0]) {
 			string result = "ERROR: can't create \"" + argv[0] +
 			    "\", as it already exists.\n";
@@ -1601,9 +1630,9 @@ RouterCLI::text_entry_func(const string& ,
 		return (XORP_ERROR);
 	    }
 	} else {
-
+	    //
 	    // We're dealing with a NODE_VOID structuring node.
-
+	    //
 	    XLOG_ASSERT(tag_ttn->type() == NODE_VOID);
 	    if (argv.size() == 1 && argv[0] != "{") {
 		string result = "ERROR: \"{\" expected instead of  \""
@@ -1636,8 +1665,9 @@ RouterCLI::text_entry_func(const string& ,
 	}
 
 	if (tag_ttn->is_tag()) {
+	    //
 	    // We're dealing with a tag node, plus value.
-
+	    //
 	    newpath += " " + argv[0];
 	    newnode = new SlaveConfigTreeNode(argv[0], newpath, data_ttn,
 					      ctn, getuid());
@@ -1675,8 +1705,10 @@ RouterCLI::text_entry_func(const string& ,
 		_nesting_depth++;
 	    }
 	} else {
+	    //
 	    // We're dealing with a NODE_VOID structuring node.
-	    if (argv.size() == 0 && _nesting_depth == 0) {
+	    //
+	    if (argv.empty() && _nesting_depth == 0) {
 		// Nothing more to enter
 		_cli_client.cli_print("OK\n");
 		_changes_made = true;
@@ -1697,10 +1729,10 @@ RouterCLI::text_entry_func(const string& ,
 	add_edit_subtree();
 	add_set_subtree();
 	CliCommand* com;
-	com = _cli_node.cli_command_root()->
-	    add_command("}",
-			"complete this configuration level",
-			callback(this, &RouterCLI::text_entry_func));
+	com = _cli_node.cli_command_root()->add_command(
+	    "}",
+	    "complete this configuration level",
+	    callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name("}");
 	_changes_made = true;
 	return (XORP_OK);
@@ -1720,10 +1752,10 @@ RouterCLI::text_entry_func(const string& ,
 	    add_edit_subtree();
 	    add_set_subtree();
 	    CliCommand* com;
-	    com = _cli_node.cli_command_root()->
-		add_command("}",
-			    "complete this configuration level",
-			    callback(this, &RouterCLI::text_entry_func));
+	    com = _cli_node.cli_command_root()->add_command(
+		"}",
+		"complete this configuration level",
+		callback(this, &RouterCLI::text_entry_func));
 	    com->set_global_name("}");
 	    _changes_made = true;
 	    return (XORP_OK);
@@ -1742,24 +1774,27 @@ RouterCLI::text_entry_func(const string& ,
 int
 RouterCLI::text_entry_func(const string& ,
 			   const string& ,
-			   uint32_t /* cli_session_id */,
+			   uint32_t ,		// cli_session_id
 			   const string& command_global_name,
 			   const vector<string>& argv)
 {
-    //path contains the part of the command we managed to command-line
-    //complete.  The remainder is in argv.
+    //
+    // The path contains the part of the command we managed to command-line
+    // complete.  The remainder is in argv.
+    //
     string path = command_global_name;
     list<string> path_segments;
     XLOG_TRACE(_verbose, "text_entry_func: %s\n", path.c_str());
     SlaveConfigTreeNode *ctn = NULL, *original_ctn = NULL, *brace_ctn;
 
-
-    //restore the indent position from last time we were called
-    uint32_t original_braces_length = _braces.size();
+    // Restore the indent position from last time we were called
+    size_t original_braces_length = _braces.size();
     brace_ctn = config_tree()->find_node(_path);
     if (original_braces_length == 0) {
-	//we're coming here from configuration mode, rather that
-	//already being in text_entry_mode
+	//
+	// We're coming here from configuration mode, rather that
+	// already being in text_entry_mode.
+	//
 	if (brace_ctn == NULL) {
 	    _braces.push_front(0);
 	    brace_ctn = &(config_tree()->root_node());
@@ -1770,15 +1805,19 @@ RouterCLI::text_entry_func(const string& ,
 
     path_segments = splitpath(path);
 
-    //push argv onto the list of path segments - there's no
-    //substantial difference between the path and argv, except that
-    //path has already seen some sanity checking
-    for (uint32_t i = 0; i < argv.size(); i++) {
+    //
+    // Push argv onto the list of path segments - there's no
+    // substantial difference between the path and argv, except that
+    // path has already seen some sanity checking.
+    //
+    for (size_t i = 0; i < argv.size(); i++) {
 	path_segments.push_back(argv[i]);
     }
 
-    // the path_segments probably contain part of the path that already
+    //
+    // The path_segments probably contain part of the path that already
     // exists and part that does not yet exist.  Find which is which.
+    //
     list <string> new_path_segments;
     while (!path_segments.empty()) {
 	ctn = config_tree()->find_node(path_segments);
@@ -1794,30 +1833,35 @@ RouterCLI::text_entry_func(const string& ,
     if (ctn == NULL)
 	ctn = &(config_tree()->root_node());
 
-    // at this point, path_segments contains the path of nodes that
+    //
+    // At this point, path_segments contains the path of nodes that
     // already exist, new_path_segments contains the path that does not
     // yet exist, and ctn points to the last existing node.
+    //
 
     const TemplateTreeNode *ttn;
 
-    bool value_expected = false; //keeps track of whether the next
-				 //segment should be a value for the
-				 //node we just created
+    //
+    // Variable "value_expected" keeps track of whether the next
+    // segment should be a value for the node we just created.
+    //
+    bool value_expected = false;
 
 
     if (ctn->is_tag() || ctn->is_leaf())
 	value_expected = true;
 
-    while (!new_path_segments.empty()) {
-	if (!ctn->children().empty()) {
+    while (! new_path_segments.empty()) {
+	if (! ctn->children().empty()) {
+	    //
 	    // The previous node already has children.  We need to
 	    // check that the current path segment isn't one of those
-	    // children.  If it is, then we don't need to create a new
-	    // node.
+	    // children.  If it is, then we don't need to create a new node.
+	    //
 	    bool exists = false;
 	    list <ConfigTreeNode*>::iterator cti;
 	    for (cti = ctn->children().begin();
-		 cti != ctn->children().end();  cti++) {
+		 cti != ctn->children().end();  ++cti) {
 		if ((*cti)->segname() == new_path_segments.front()) {
 		    XLOG_TRACE(_verbose, "Found pre-existing node: %s\n", 
 			       (*cti)->segname().c_str());
@@ -1829,10 +1873,11 @@ RouterCLI::text_entry_func(const string& ,
 		    break;
 		}
 	    }
-	    if (exists) continue;
+	    if (exists)
+		continue;
 	}
 	if (value_expected) {
-	    // we're expecting a value here
+	    // We're expecting a value here
 	    if (new_path_segments.front() == "{" 
 		|| new_path_segments.front() == "}" ) {
 		string errmsg;
@@ -1843,14 +1888,14 @@ RouterCLI::text_entry_func(const string& ,
 	    }
 	    string value = new_path_segments.front();
 	    ttn = ctn->template_tree_node();
-	    XLOG_ASSERT(ttn!=NULL);
+	    XLOG_ASSERT(ttn != NULL);
 	    if (ctn->is_tag()) {
 		const TemplateTreeNode *data_ttn = NULL;
 		//
 		// The tag can have multiple children of different types -
 		// take the first that has valid syntax.
 		//
-		// XXX we really ought to check the allow commands here
+		// TODO: we really ought to check the allow commands here
 		list<TemplateTreeNode*>::const_iterator tti;
 		for (tti = ttn->children().begin();
 		     tti != ttn->children().end();
@@ -1875,7 +1920,7 @@ RouterCLI::text_entry_func(const string& ,
 		_changes_made = true;
 		value_expected = false;
 	    } else if (ctn->is_leaf()) {
-		//it must be a leaf, and we're expecting a value
+		// It must be a leaf, and we're expecting a value
 		if (ttn->type_match(value)) {
 		    XLOG_TRACE(_verbose, "setting node %s to %s\n", 
 			       ctn->segname().c_str(),
@@ -1893,27 +1938,29 @@ RouterCLI::text_entry_func(const string& ,
 	    }
 	} else {
 	    if (new_path_segments.front() == "{") {
-		// just keep track of the nesting depth so we can match
-		// braces on the way back out
+		//
+		// Just keep track of the nesting depth so we can match
+		// braces on the way back out.
+		//
 		_braces.push_back(ctn->depth());
 		brace_ctn = ctn;
 		new_path_segments.pop_front();
 		continue;
 	    }
 	    if (new_path_segments.front() == "}") {
-		// jump back out to the appropriate nesting depth
-		if (_braces.size()==1) {
-		    //there's always at least one entry in _braces
+		// Jump back out to the appropriate nesting depth
+		if (_braces.size() == 1) {
+		    // There's always at least one entry in _braces
 		    _cli_client.cli_print("ERROR: mismatched }\n");
 		    goto cleanup;
 		}
-		// the last brace we entered should match the current depth
+		// The last brace we entered should match the current depth
 		XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n", 
 			   _braces.back(),
 			   ctn->depth(), ctn->segname().c_str());
 		XLOG_ASSERT(_braces.back() == ctn->depth());
 		_braces.pop_back();
-		// the next brace should be where we're jumping to.
+		// The next brace should be where we're jumping to.
 		uint32_t new_depth = 0;
 		XLOG_ASSERT(!_braces.empty());
 		new_depth = _braces.back();
@@ -1931,7 +1978,9 @@ RouterCLI::text_entry_func(const string& ,
 		new_path_segments.pop_front();
 		continue;
 	    }
-	    // we're expecting a tag, a grouping node, or a leaf node.
+	    //
+	    // We're expecting a tag, a grouping node, or a leaf node.
+	    //
 	    path_segments.push_back(new_path_segments.front());
 	    ttn = config_tree()->find_template(path_segments);
 
@@ -1951,52 +2000,59 @@ RouterCLI::text_entry_func(const string& ,
 	    }
 
 	}
-	// keep track of where we started because if there's an error we'll
+	//
+	// Keep track of where we started because if there's an error we'll
 	// need to clear out this node and all its children.
+	//
 	if (original_ctn == NULL)
 	    original_ctn = ctn;
 	    
 	new_path_segments.pop_front();
     }
 
+    //
     // If there's no more input and we still expected a value, the
-    // input was erroneous
+    // input was erroneous.
+    //
     if (value_expected) {
-	string result = "ERROR: node " + ctn->segname() + 
-	    " requires a value\n";
+	string result = c_format("ERROR: node %s requires a value\n",
+				 ctn->segname().c_str());
 	_cli_client.cli_print(result);
     }
 
     // Preserve state for next time, and set up the command prompts
     _path = splitpath(brace_ctn->path());
-    if (_braces.size()==1) {
+    if (_braces.size() == 1) {
 	// We're finishing text_entry mode
 	_braces.pop_front();
 	config_tree()->add_default_children();
 
-	//force the commands to be regenerated if any changes were made
+	// Force the commands to be regenerated if any changes were made
 	if (_mode == CLI_MODE_CONFIGURE && _changes_made)
 	    _mode = CLI_MODE_TEXTENTRY;
 
 	configure_mode();
     } else {
+	//
 	// We need to remain in text_entry mode because we haven't seen
-	// the closing braces yet
+	// the closing braces yet.
+	//
 	text_entry_mode();
 	add_text_entry_commands();
 	CliCommand* com;
-	com = _cli_node.cli_command_root()->
-	    add_command("}",
-			"complete this configuration level",
-			callback(this, &RouterCLI::text_entry_func));
+	com = _cli_node.cli_command_root()->add_command(
+	    "}",
+	    "complete this configuration level",
+	    callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name("}");
     }
 
     return (XORP_OK);
 
  cleanup:
-    // cleanup back to the state we were in before we started parsing this 
-    // mess.
+    //
+    // Cleanup back to the state we were in before we started parsing this mess
+    //
     while (_braces.size() > original_braces_length) {
 	_braces.pop_back();
     }
@@ -2006,10 +2062,11 @@ RouterCLI::text_entry_func(const string& ,
 		   original_ctn->segname().c_str());
 	original_ctn->delete_subtree_silently();
     }
+
     return (XORP_ERROR);
 }
 
-map <string, string> 
+map<string, string> 
 RouterCLI::text_entry_children_func(const string& path,
 				    bool& is_executable) const
 {
@@ -2018,15 +2075,14 @@ RouterCLI::text_entry_children_func(const string& path,
     XLOG_TRACE(_verbose, "text_entry_func: %s\n", path.c_str());
 
     string newpath = path;
-    while (newpath.size() > 0) {
+    while (! newpath.empty()) {
 	string::size_type ix = newpath.find(' ');
-	if ((ix == string::npos) && (newpath.size() > 0)) {
+	if (ix == string::npos){
 	    path_segments.push_back(newpath);
 	    break;
-	} else {
-	    path_segments.push_back(newpath.substr(0, ix));
-	    newpath = newpath.substr(ix + 1, newpath.size() - ix + 1);
 	}
+	path_segments.push_back(newpath.substr(0, ix));
+	newpath = newpath.substr(ix + 1, newpath.size() - ix + 1);
     }
 
     const TemplateTreeNode *ttn = template_tree()->find_node(path_segments);
@@ -2054,10 +2110,11 @@ RouterCLI::text_entry_children_func(const string& path,
 	if (ttn->is_tag())
 	    is_executable = false;
 #endif // 0
-	if (!ttn->is_tag() && (ttn->children().size() > 0)) {
+	if (!ttn->is_tag() && !ttn->children().empty()) {
 	    children["{"] = "enter text on multiple lines";
 	}
     }
+
     return children;
 }
 int
@@ -2067,38 +2124,36 @@ RouterCLI::delete_func(const string& ,
 		       const string& command_global_name,
 		       const vector<string>& argv)
 {
-    if (argv.size() == 0) {
-	string cmd_name = command_global_name;
-	XLOG_ASSERT(cmd_name.substr(0, 7) == "delete ");
-	string path = cmd_name.substr(7, cmd_name.size() - 7);
-	list<string> path_segments;
-
-	while (path.size() > 0) {
-	    string::size_type ix = path.find(' ');
-	    if ((ix == string::npos) && (path.size() > 0)) {
-		path_segments.push_back(path);
-		break;
-	    } else {
-		path_segments.push_back(path.substr(0, ix));
-		path = path.substr(ix + 1, path.size() - ix + 1);
-	    }
-	}
-
-	string result = config_tree()->show_subtree(path_segments);
-	_cli_client.cli_print("Deleting: \n");
-	_cli_client.cli_print(result + "\n");
-
-	result = config_tree()->mark_subtree_for_deletion(path_segments,
-							  getuid());
-	_cli_client.cli_print(result + "\n");
-
-	// Regenerate the available command tree without the deleted stuff
-	_changes_made = true;
-	apply_path_change();
-	return (XORP_OK);
-    } else {
+    if (! argv.empty())
 	return (XORP_ERROR);
+
+    string cmd_name = command_global_name;
+    XLOG_ASSERT(cmd_name.substr(0, 7) == "delete ");
+    string path = cmd_name.substr(7, cmd_name.size() - 7);
+    list<string> path_segments;
+
+    while (! path.empty()) {
+	string::size_type ix = path.find(' ');
+	if (ix == string::npos) {
+	    path_segments.push_back(path);
+	    break;
+	}
+	path_segments.push_back(path.substr(0, ix));
+	path = path.substr(ix + 1, path.size() - ix + 1);
     }
+
+    string result = config_tree()->show_subtree(path_segments);
+    _cli_client.cli_print("Deleting: \n");
+    _cli_client.cli_print(result + "\n");
+
+    result = config_tree()->mark_subtree_for_deletion(path_segments, getuid());
+    _cli_client.cli_print(result + "\n");
+
+    // Regenerate the available command tree without the deleted stuff
+    _changes_made = true;
+    apply_path_change();
+
+    return (XORP_OK);
 }
 
 int
@@ -2112,8 +2167,10 @@ RouterCLI::set_func(const string& ,
     XLOG_ASSERT(cmd_name.substr(0, 4) == "set ");
     string path = cmd_name.substr(4, cmd_name.size() - 4);
     string response = run_set_command(path, argv);
+
     _cli_client.cli_print(response + "\n");
     apply_path_change();
+
     return (XORP_OK);
 }
 
@@ -2126,7 +2183,8 @@ RouterCLI::immediate_set_func(const string& ,
 {
     string path = command_global_name;
     string response = run_set_command(path, argv);
-    if (_braces.size() == 0) {
+
+    if (_braces.empty()) {
 	_cli_client.cli_print(response + "\n");
 	config_mode_prompt();
     } else {
@@ -2136,11 +2194,13 @@ RouterCLI::immediate_set_func(const string& ,
 	add_edit_subtree();
 	add_set_subtree();
 	CliCommand* com;
-	com = _cli_node.cli_command_root()->
-	    add_command("}", "complete this configuration level",
-			callback(this, &RouterCLI::text_entry_func));
+	com = _cli_node.cli_command_root()->add_command(
+	    "}",
+	    "complete this configuration level",
+	    callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name("}");
     }
+
     return (XORP_OK);
 }
 
@@ -2154,6 +2214,7 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
     const TemplateTreeNode* ttn;
     bool create_needed = false;
     string nodename;
+
     if (ctn == NULL) {
 	create_needed = true;
 	ttn = config_tree()->find_template(path_parts);
@@ -2168,12 +2229,15 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
     XLOG_ASSERT(ctn != NULL && ttn != NULL);
 
     if (argv.size() != 1) {
-	string result = "ERROR: \"set " + path + "\" should take one argument of type " + ttn->typestr();
+	string result = c_format("ERROR: \"set %s\" should take "
+				 "one argument of type %s",
+				 path.c_str(), ttn->typestr().c_str());
 	return result;
     }
 
     if (ttn->type_match(argv[0]) == false) {
-	string result = "ERROR: argument \"" + argv[0] + "\" is not a valid " + ttn->typestr();
+	string result = c_format("ERROR: argument \"%s\" is not a valid %s",
+				 argv[0].c_str(), ttn->typestr().c_str());
 	return result;
     }
 
@@ -2181,6 +2245,7 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 	string newpath;
 	path_parts.push_back(nodename);
 	list<string>::const_iterator iter;
+
 	for (iter = path_parts.begin(); iter != path_parts.end(); ++iter) {
 	    if (newpath.empty())
 		newpath = *iter;
@@ -2197,9 +2262,13 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
     } else {
 	ctn->set_value(argv[0], getuid());
     }
-    // we don't execute commands until a commit is received
+
+    //
+    // We don't execute commands until a commit is received
+    //
     // string result = config_tree()->execute_node_command(ctn, "%set");
     _changes_made = true;
+
     string result = "OK";
     return result;
 }
@@ -2211,7 +2280,7 @@ RouterCLI::commit_func(const string& ,
 		       const string& , /* command_global_name */
 		       const vector<string>& argv)
 {
-    if (!argv.empty()) {
+    if (! argv.empty()) {
 	_cli_client.cli_print("ERROR: commit does not take any arguments\n");
 	return (XORP_ERROR);
     }
@@ -2221,10 +2290,9 @@ RouterCLI::commit_func(const string& ,
 
     string response;
     XLOG_ASSERT(_changes_made);
-    bool success =
-	config_tree()->commit_changes(response, _xorpsh,
-				      callback(this, &RouterCLI::commit_done));
-    if (!success) {
+    bool success = config_tree()->commit_changes(
+	response, _xorpsh, callback(this, &RouterCLI::commit_done));
+    if (! success) {
 	// _changes_made = false;
 	_cli_client.cli_print(response);
 	_cli_client.cli_print("The configuration has not been changed.\n");
@@ -2235,8 +2303,10 @@ RouterCLI::commit_func(const string& ,
 
 	return (XORP_ERROR);
     }
+
     // _cli_client.cli_print(response + "\n");
     // apply_path_change();
+
     return (XORP_OK);
 }
 
@@ -2267,7 +2337,7 @@ RouterCLI::commit_done(bool success, string errmsg)
     // XRL from the rtrmgr to inform us what really happened as the
     // change was applied.
     //
-    if (!success) {
+    if (! success) {
 	_cli_client.cli_print("Commit Failed\n");
 	_cli_client.cli_print(errmsg);
     } else {
@@ -2283,45 +2353,46 @@ RouterCLI::commit_done(bool success, string errmsg)
 int
 RouterCLI::show_func(const string& ,
 		     const string& ,
-		     uint32_t ,		// cli_session_id
+		     uint32_t ,			// cli_session_id
 		     const string& command_global_name,
 		     const vector<string>& argv)
 {
-    if (argv.size() == 0) {
-	string cmd_name = command_global_name;
-	XLOG_ASSERT(cmd_name.substr(0, 4) == "show");
-	string path;
-
-	if (cmd_name == "show") {
-	    // Command "show" with no parameters at the top level
-	    path = "";
-	} else {
-	    path = cmd_name.substr(5, cmd_name.size() - 5);
-	}
-	list<string> path_segments;
-	while (path.size() > 0) {
-	    string::size_type ix = path.find(' ');
-	    if (ix == string::npos && path.size() > 0) {
-		path_segments.push_back(path);
-		break;
-	    } else {
-		path_segments.push_back(path.substr(0, ix));
-		path = path.substr(ix + 1, path.size() - ix + 1);
-	    }
-	}
-	string result = config_tree()->show_subtree(path_segments);
-	_cli_client.cli_print(result + "\n");
-	config_mode_prompt();
-	return (XORP_OK);
-    } else {
+    if (! argv.empty())
 	return (XORP_ERROR);
+
+    string cmd_name = command_global_name;
+    XLOG_ASSERT(cmd_name.substr(0, 4) == "show");
+    string path;
+
+    if (cmd_name == "show") {
+	// Command "show" with no parameters at the top level
+	path = "";
+    } else {
+	path = cmd_name.substr(5, cmd_name.size() - 5);
     }
+
+    list<string> path_segments;
+    while (! path.empty()) {
+	string::size_type ix = path.find(' ');
+	if (ix == string::npos) {
+	    path_segments.push_back(path);
+	    break;
+	}
+	path_segments.push_back(path.substr(0, ix));
+	path = path.substr(ix + 1, path.size() - ix + 1);
+    }
+
+    string result = config_tree()->show_subtree(path_segments);
+    _cli_client.cli_print(result + "\n");
+    config_mode_prompt();
+
+    return (XORP_OK);
 }
 
 int
 RouterCLI::op_mode_func(const string& ,
-			const string& ,	// cli_term_name
-			uint32_t ,	// cli_session_id
+			const string& ,		// cli_term_name
+			uint32_t ,		// cli_session_id
 			const string& command_global_name,
 			const vector<string>& argv)
 {
@@ -2350,7 +2421,8 @@ RouterCLI::op_mode_func(const string& ,
 	string cmd_error;
 
 	_cli_client.cli_print("Error: no matching command:\n");
-	for (iter = path_segments.begin(); iter != path_segments.end();
+	for (iter = path_segments.begin();
+	     iter != path_segments.end();
 	     ++iter) {
 	    if (iter != path_segments.begin())
 		cmd_error += " ";
@@ -2367,9 +2439,10 @@ RouterCLI::op_mode_func(const string& ,
 	_cli_client.cli_print(
 	    c_format("%s\n%s\n", full_command.c_str(), cmd_error.c_str())
 	    );
-	return XORP_ERROR;
+	return (XORP_ERROR);
     }
-    return XORP_OK;
+
+    return (XORP_OK);
 }
 
 void
@@ -2393,27 +2466,28 @@ RouterCLI::op_mode_cmd_done(bool success, const string& result)
 int
 RouterCLI::save_func(const string& ,
 		     const string& ,
-		     uint32_t ,		// cli_session_id
+		     uint32_t ,			// cli_session_id
 		     const string& command_global_name,
 		     const vector<string>& argv)
 {
     if (argv.size() != 1) {
 	_cli_client.cli_print("Usage: save <filename>\n");
 	return (XORP_ERROR);
-    } else {
-	XLOG_ASSERT(command_global_name == "save");
-	_cli_client.cli_print(c_format("save, filename = %s\n",
-				       argv[0].c_str()));
-	_xorpsh.save_to_file(argv[0], callback(this, &RouterCLI::save_done));
-	idle_ui();
-	return (XORP_OK);
     }
+
+    XLOG_ASSERT(command_global_name == "save");
+    _cli_client.cli_print(c_format("save, filename = %s\n", argv[0].c_str()));
+    _xorpsh.save_to_file(argv[0], callback(this, &RouterCLI::save_done));
+    idle_ui();
+
+    return (XORP_OK);
 }
 
 void
 RouterCLI::save_done(const XrlError& e)
 {
     debug_msg("in save done\n");
+
     if (e != XrlError::OKAY()) {
 	_cli_client.cli_print("ERROR: Save failed\n");
 	if (e == XrlError::COMMAND_FAILED()) {
@@ -2444,15 +2518,16 @@ RouterCLI::load_func(const string& ,
     if (argv.size() != 1) {
 	_cli_client.cli_print("Usage: load <filename>\n");
 	return (XORP_ERROR);
-    } else {
-	XLOG_ASSERT(command_global_name == "load");
-	XLOG_TRACE(_verbose, "load, filename = %s\n", argv[0].c_str());
-	_xorpsh.load_from_file(argv[0],
-				callback(this, &RouterCLI::load_communicated),
-				callback(this, &RouterCLI::load_done));
-	idle_ui();
-	return (XORP_OK);
     }
+
+    XLOG_ASSERT(command_global_name == "load");
+    XLOG_TRACE(_verbose, "load, filename = %s\n", argv[0].c_str());
+    _xorpsh.load_from_file(argv[0],
+			   callback(this, &RouterCLI::load_communicated),
+			   callback(this, &RouterCLI::load_done));
+    idle_ui();
+
+    return (XORP_OK);
 }
 
 //
@@ -2493,7 +2568,7 @@ RouterCLI::load_communicated(const XrlError& e)
 void
 RouterCLI::load_done(bool success, string errmsg)
 {
-    if (!success) {
+    if (! success) {
 	_cli_client.cli_print("ERROR: Load failed.\n");
 	_cli_client.cli_print(errmsg);
     } else {
@@ -2501,10 +2576,11 @@ RouterCLI::load_done(bool success, string errmsg)
     }
     _xorpsh.set_mode(XorpShell::MODE_IDLE);
     reenable_ui();
-    return;
 };
 
-//just to make the code more readable:
+//
+// Just to make the code more readable:
+//
 SlaveConfigTree*
 RouterCLI::config_tree()
 {
@@ -2567,12 +2643,14 @@ RouterCLI::makepath(const list<string>& parts) const
 {
     string path;
     list<string>::const_iterator iter;
+
     for (iter = parts.begin(); iter != parts.end(); ++iter) {
 	if (path.empty())
 	    path = *iter;
 	else
 	    path += " " + *iter;
     }
+
     return path;
 }
 
@@ -2581,15 +2659,16 @@ RouterCLI::splitpath(const string& origpath) const
 {
     string path = origpath;
     list <string> path_segments;
-    while (path.size() > 0) {
+
+    while (! path.empty()) {
 	string::size_type ix = path.find(' ');
-	if ((ix == string::npos) && (path.size() > 0)) {
+	if (ix == string::npos) {
 	    path_segments.push_back(path);
 	    break;
-	} else {
-	    path_segments.push_back(path.substr(0, ix));
-	    path = path.substr(ix + 1, path.size() - ix + 1);
 	}
+	path_segments.push_back(path.substr(0, ix));
+	path = path.substr(ix + 1, path.size() - ix + 1);
     }
+
     return path_segments;
 }

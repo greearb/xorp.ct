@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.15 2004/05/28 18:26:25 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.16 2004/05/28 22:27:55 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -171,7 +171,7 @@ private:
 			     const CLI_PROCESS_CALLBACK& cli_process_callback,
 			     string path, size_t depth);
 
-#ifdef NOTDEF    
+#if 0
     /**
      * @short add commands for direct configuration of new nodes
      *
