@@ -93,6 +93,10 @@ test_auth_SOURCES = test_auth.cc
 test_packets_SOURCES = test_packets.cc
 test_timers_SOURCES = test_timers.cc
 librip_a_SOURCES = rip_module.h auth.hh constants.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh route_db.hh route_entry.hh update_queue.hh auth.cc port.cc route_db.cc route_entry.cc update_queue.cc
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 

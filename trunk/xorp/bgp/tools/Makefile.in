@@ -95,6 +95,10 @@ print_routes_SOURCES = print_routes.cc  print_routes.hh  print_routes_main.cc
 print_routes_LDADD = $(LDADD) $(top_builddir)/bgp/libbgp.a
 xorpsh_print_routes_SOURCES = print_routes.cc print_routes.hh xorpsh_print_routes.cc
 xorpsh_print_routes_LDADD = $(LDADD) $(top_builddir)/bgp/libbgp.a
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -420,8 +424,6 @@ uninstall-am uninstall all-redirect all-am all installdirs \
 mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
-
-################################################################
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

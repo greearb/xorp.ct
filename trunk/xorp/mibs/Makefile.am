@@ -91,3 +91,6 @@ xorp_if_mib_module_so_SOURCES += xorp_if_mib_module.cc
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
+

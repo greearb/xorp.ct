@@ -106,6 +106,10 @@ test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $
 test_rib_client_SOURCES = test_rib_client.cc
 librib_a_SOURCES = rib_module.h version.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_client.cc rib_manager.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc xrl_target.cc
 EXTRA_DIST = commands test_rib_direct.sh test_rib_xrls.sh xrl_shell_funcs.sh
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -523,7 +527,6 @@ mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
-################################################################
 test_rib_direct.sh: test_rib_direct
 
 test_rib_xrls.sh: test_rib_xrls

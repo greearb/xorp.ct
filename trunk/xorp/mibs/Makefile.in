@@ -131,6 +131,10 @@ libnetsnmpxorp_so_SOURCES = xorpevents.cc xorpevents.hh
 bgp4_mib_1657_so_SOURCES = bgp4_mib_1657.hh bgp4_mib_1657.cc bgp4_mib_1657_bgpversion.hh bgp4_mib_1657_bgpversion.cc bgp4_mib_1657_bgppeertable.hh bgp4_mib_1657_bgppeertable.cc
 ospf_mib_1850_so_SOURCES = ospf_mib_1850.hh ospf_mib_1850.cc
 xorp_if_mib_module_so_SOURCES = xorp_if_mib_module.hh xorp_if_mib_module.cc
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -463,8 +467,6 @@ all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
-
-################################################################
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.2 2003/03/29 19:03:12 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_builddir)/xrl/interfaces
@@ -122,11 +122,20 @@ libtestbase_a_SOURCES = test_base.hh test_base.cc
 # rib target are touched.  It largely duplicates information inside rib.tgt
 test_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/test.xif
 
+
+################################################################
+##
+## Everything past here is useful to the maintainer, but probably not
+## to anybody else
+##
+
+INCLUDES =	-I$(top_srcdir)
+
 ###############################################################################
 # Implicit Rules and related
 ###############################################################################
 
-SCRIPT_DIR=../scripts
+SCRIPT_DIR=$(top_srcdir)/xrl/scripts
 TGTGEN_PY=$(SCRIPT_DIR)/tgt-gen
 
 # If this code is commented out, please upgrade to python2.0 or above.

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mfea/Makefile.am,v 1.3 2003/03/05 03:05:24 pavlin Exp $
+## $XORP: xorp/mfea/Makefile.am,v 1.4 2003/03/31 16:10:17 hodson Exp $
 ##
 
 # -- Real Programs
@@ -76,4 +76,6 @@ EXTRA_DIST	 += xrl_shell_lib.sh
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
 

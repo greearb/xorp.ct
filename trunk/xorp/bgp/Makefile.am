@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.14 2003/03/31 16:10:14 hodson Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.15 2003/04/15 16:37:48 hodson Exp $
 ##
 
 # -- Subdirectories
@@ -162,3 +162,6 @@ EXTRA_DIST	+= xrl_shell_funcs.sh
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
+

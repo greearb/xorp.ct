@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.2 2003/03/29 19:03:11 pavlin Exp $
 ##
 
 ###############################################################################
@@ -114,11 +114,19 @@ noinst_LIBRARIES += libtestxif.a
 libtestxif_a_SOURCES = test_xif.hh test_xif.cc
 
 
+################################################################
+##
+## Everything past here is useful to the maintainer, but probably not
+## to anybody else
+##
+
+INCLUDES =	-I$(top_srcdir)
+
 ###############################################################################
 # Implicit Rules
 ###############################################################################
 
-SCRIPT_DIR=../scripts
+SCRIPT_DIR=$(top_srcdir)/xrl/scripts
 CLNTGEN_PY=$(SCRIPT_DIR)/clnt-gen
 
 @PY_BUILD@%_xif.hh %_xif.cc: %.xif $(CLNTGEN_PY)

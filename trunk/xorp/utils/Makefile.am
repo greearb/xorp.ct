@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/utils/Makefile.am,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+## $XORP: xorp/utils/Makefile.am,v 1.2 2003/03/31 16:10:19 hodson Exp $
 ##
 
 # -- Real Programs
@@ -29,3 +29,6 @@ EXTRA_DIST	 += xorpc.sh
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
+

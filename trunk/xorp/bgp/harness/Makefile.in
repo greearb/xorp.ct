@@ -95,6 +95,10 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/bgp/libbgp.a $(top_builddir)/libxipc
 test_peer_SOURCES = bgppp.hh test_peer.hh bgppp.cc test_peer.cc
 coord_SOURCES = bgppp.hh command.hh coord.hh peer.hh trie.hh bgppp.cc command.cc coord.cc peer.cc trie.cc
 EXTRA_DIST = $(TESTS) NOTES args.sh soak.sh test1.sh test2.sh test_rib_fea1.sh xrl_shell_funcs.sh
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -436,8 +440,6 @@ mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 TESTS		+ = test_peering2.sh
-
-################################################################
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

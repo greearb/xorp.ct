@@ -86,6 +86,10 @@ TESTS = test_generated
 noinst_PROGRAMS = $(TESTS)
 test_generated_SOURCES = test_generated.cc test_tgt.hh test_tgt.cc test_xifs.hh test_xifs.cc
 test_generated_LDADD = $(top_builddir)/xrl/interfaces/libcommonxif.a $(top_builddir)/xrl/interfaces/libtestxif.a $(top_builddir)/xrl/targets/libtestbase.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 

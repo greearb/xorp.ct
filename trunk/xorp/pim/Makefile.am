@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.4 2003/03/29 19:03:09 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.5 2003/03/31 16:10:18 hodson Exp $
 ##
 
 # -- Real Programs
@@ -126,4 +126,6 @@ EXTRA_DIST	 += xrl_pim_shell_funcs.sh
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
 

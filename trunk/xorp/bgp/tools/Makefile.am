@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/tools/Makefile.am,v 1.6 2003/02/27 19:54:14 hodson Exp $
+## $XORP: xorp/bgp/tools/Makefile.am,v 1.7 2003/03/31 16:10:14 hodson Exp $
 ##
 
 # -- Real Programs
@@ -42,3 +42,6 @@ xorpsh_print_routes_LDADD += $(top_builddir)/bgp/libbgp.a
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
+

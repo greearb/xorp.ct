@@ -89,11 +89,17 @@ bin_PROGRAMS = ospfd ospfd_mon ospfd_browser
 # -- Test Programs
 #bin_PROGRAMS +=
 
-AM_CPPFLAGS = -I$(top_builddir) -I../src
+AM_CPPFLAGS = -I$(top_builddir) -I$(srcdir)/../src
 LDADD = $(top_builddir)/ospfd/src/libospfd.a $(top_builddir)/xrl/targets/libospfbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 ospfd_SOURCES = ospf_module.h ospfd_xorp.h os-instance.h tcppkt.h xrl_target.h  ospfd_xorp.C os-instance.C tcppkt.C system.C xrl_target.C
 ospfd_mon_SOURCES = tcppkt.h tcppkt.C lsa_prn.C ospfd_mon.C
 ospfd_browser_SOURCES = tcppkt.h tcppkt.C lsa_prn.C ospfd_browser.C
+
+# -- Library Sources
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -388,10 +394,6 @@ uninstall-am uninstall all-redirect all-am all installdirs \
 mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
-
-# -- Library Sources
-
-################################################################
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

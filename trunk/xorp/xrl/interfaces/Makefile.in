@@ -118,11 +118,15 @@ librtrmgr_clientxif_a_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
 libtestpeerxif_a_SOURCES = test_peer_xif.hh test_peer_xif.cc
 libtestxif_a_SOURCES = test_xif.hh test_xif.cc
 
+################################################################
+
+INCLUDES = -I$(top_srcdir)
+
 ###############################################################################
 # Implicit Rules
 ###############################################################################
 
-SCRIPT_DIR = ../scripts
+SCRIPT_DIR = $(top_srcdir)/xrl/scripts
 CLNTGEN_PY = $(SCRIPT_DIR)/clnt-gen
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h

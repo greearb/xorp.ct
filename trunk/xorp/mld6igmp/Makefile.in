@@ -94,6 +94,10 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_bu
 test_mld6igmp_SOURCES = test_mld6igmp.cc
 libmld6igmp_a_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h mld6igmp_member_query.hh mld6igmp_node.hh mld6igmp_node_cli.hh mld6igmp_private.hh mld6igmp_vif.hh xrl_mld6igmp_node.hh igmp_proto.cc mld6_proto.cc mld6igmp_config.cc mld6igmp_member_query.cc mld6igmp_node.cc mld6igmp_node_cli.cc mld6igmp_proto.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
 EXTRA_DIST = configure_mld6igmp docs xrl_mld6igmp_shell_funcs.sh
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -398,8 +402,6 @@ all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
-
-################################################################
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

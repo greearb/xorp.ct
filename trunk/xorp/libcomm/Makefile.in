@@ -93,6 +93,10 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxorp/libxorp.a
 # -- Program Sources
 test_comm_SOURCES = test_comm.c
 libcomm_a_SOURCES = comm_module.h comm_api.h comm_private.h comm_sock.c comm_user.c
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -353,8 +357,6 @@ all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
-
-################################################################
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

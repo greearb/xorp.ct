@@ -84,8 +84,12 @@ net_snmp_found = @net_snmp_found@
 
 noinst_LIBRARIES = libospfd.a
 
-AM_CPPFLAGS = -I../@OSPFD_OS@
+AM_CPPFLAGS = -I$(srcdir)/../@OSPFD_OS@
 libospfd_a_SOURCES = arch.h avl.h config.h dbage.h globals.h ifcfsm.h igmp.h ip.h iterator.h lsa.h lsalist.h lshdr.h mcache.h monitor.h mospf.h nbrfsm.h opqlsa.h ospf.h ospfinc.h pat.h phyint.h priq.h rte.h spfarea.h spfifc.h spflog.h spfnbr.h spfparam.h spfpkt.h spftype.h spfutil.h stack.h system.h timer.h tlv.h asbrlsa.C asexlsa.C avl.C cksum.C config.C dbage.C grplsa.C helper.C hostmode.C ifcfsm.C lsa.C lsalist.C lsdb.C monitor.C mospf.C nbrfsm.C netlsa.C opqlsa.C ospf.C pat.C phyint.C priq.C restart.C rte.C rtrlsa.C spfack.C spfarea.C spfcalc.C spfdd.C spfhello.C spfvl.C spfifc.C spflood.C spfnbr.C spforig.C spfutil.C summlsa.C timer.C tlv.C global.h md5.h md5c.c
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 
 # -- Automake does not currently like files in other directories when
 # building libraries.  Since there are only a few we symlink other

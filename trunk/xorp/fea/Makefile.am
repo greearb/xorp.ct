@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.6 2003/05/02 23:21:35 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.7 2003/05/05 19:34:00 pavlin Exp $
 ##
 
 
@@ -128,3 +128,6 @@ EXTRA_DIST	 = test_xrls.sh
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
+

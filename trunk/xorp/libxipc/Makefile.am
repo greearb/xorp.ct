@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.15 2003/04/21 06:41:45 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.16 2003/04/23 20:50:45 hodson Exp $
 ##
 
 
@@ -149,6 +149,8 @@ libfinder_a_SOURCES += finder_xrl_target.cc
 ## to anybody else
 ##
 
+INCLUDES =	-I$(top_srcdir)
+
 # -- Generated Sources used in libxipc and libfinder (see explanation at end of file)
 BUILT_SOURCES  = common_xif.hh
 BUILT_SOURCES += common_xif.cc
@@ -186,30 +188,31 @@ libfinder_a_SOURCES += finder_client_xif.cc
 # automake (rightly) dislikes cross directory builds.
 #
 
-IDIR=$(top_builddir)/xrl/interfaces
-TDIR=$(top_builddir)/xrl/targets
+IDIR=$(top_srcdir)/xrl/interfaces
+TDIR=$(top_srcdir)/xrl/targets
+SDIR=$(srcdir)
 
 common_xif.%: $(IDIR)/common_xif.%
 	cd $(IDIR) && $(MAKE) $(notdir $@)
-	$(RM) $@
-	$(LN_S) $(IDIR)/$@ .
+	cd $(SDIR) && $(RM) $@
+	cd $(SDIR) && $(LN_S) $(IDIR)/$@ .
 
 finder_base.%: $(TDIR)/finder_base.%
 	cd $(TDIR) && $(MAKE) $(notdir $@)
-	$(RM) $@
-	$(LN_S) $(TDIR)/$@ .
+	cd $(SDIR) && $(RM) $@
+	cd $(SDIR) && $(LN_S) $(TDIR)/$@ .
 
 finder_xif.%: $(IDIR)/finder_xif.%
 	cd $(IDIR) && $(MAKE) $(notdir $@)
-	$(RM) $@
-	$(LN_S) $(IDIR)/$@ .
+	cd $(SDIR) && $(RM) $@
+	cd $(SDIR) && $(LN_S) $(IDIR)/$@ .
 
 finder_client_base.%: $(TDIR)/finder_client_base.%
 	cd $(TDIR) && $(MAKE) $(notdir $@)
-	$(RM) $@
-	$(LN_S) $(TDIR)/$@ .
+	cd $(SDIR) && $(RM) $@
+	cd $(SDIR) && $(LN_S) $(TDIR)/$@ .
 
 finder_client_xif.%: $(IDIR)/finder_client_xif.%
 	cd $(IDIR) && $(MAKE) $(notdir $@)
-	$(RM) $@
-	$(LN_S) $(IDIR)/$@ .
+	cd $(SDIR) && $(RM) $@
+	cd $(SDIR) && $(LN_S) $(IDIR)/$@ .

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.6 2003/04/01 21:50:45 hodson Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.7 2003/04/02 20:03:35 hodson Exp $
 ##
 
 # - The library
@@ -112,6 +112,8 @@ EXTRA_DIST	 = callback-gen.py
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
 
 debug.o: debug.c
 	$(subst -Wnon-const-format,,$(COMPILE)) -c $<

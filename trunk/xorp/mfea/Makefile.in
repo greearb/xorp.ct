@@ -94,6 +94,10 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(
 test_mfea_SOURCES = test_mfea.cc
 libmfea_a_SOURCES = mfea_module.h mfea_dataflow.hh mfea_node.hh mfea_node_cli.hh mfea_private.hh mfea_unix_comm.hh mfea_unix_kernel_messages.hh mfea_unix_osdep.hh mfea_vif.hh xrl_mfea_node.hh mfea_config.cc mfea_dataflow.cc mfea_node.cc mfea_node_cli.cc mfea_unix_comm.cc mfea_unix_if_getifaddrs.cc mfea_unix_if_ioctl.cc mfea_unix_if_sysctl.cc mfea_unix_mrib_netlink.cc mfea_unix_mrib_rawsock.cc mfea_unix_rtread_sysctl.cc mfea_unix_rtread_netlink.cc mfea_vif.cc xrl_mfea_node.cc
 EXTRA_DIST = DEVNOTES configure_mfea xrl_mfea_shell_funcs.sh xrl_shell_lib.sh
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -399,8 +403,6 @@ all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
-
-################################################################
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

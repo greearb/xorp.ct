@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.4 2003/03/31 03:46:47 pavlin Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.5 2003/03/31 16:10:17 hodson Exp $
 ##
 
 # -- Real Programs
@@ -76,4 +76,6 @@ EXTRA_DIST	 += xrl_mld6igmp_shell_funcs.sh
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
 

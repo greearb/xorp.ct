@@ -94,6 +94,10 @@ noinst_LIBRARIES = libproto.a
 # -- Libraries and library flags to link the binary programs
 LDADD = $(noinst_LIBRARIES)
 libproto_a_SOURCES = libproto_module.h proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc
+
+################################################################
+
+INCLUDES = -I$(top_srcdir)
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -373,8 +377,6 @@ all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
-
-################################################################
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libcomm/Makefile.am,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+## $XORP: xorp/libcomm/Makefile.am,v 1.2 2003/03/31 16:10:15 hodson Exp $
 ##
 
 # -- Real Programs
@@ -32,3 +32,6 @@ libcomm_a_SOURCES += comm_user.c
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
+

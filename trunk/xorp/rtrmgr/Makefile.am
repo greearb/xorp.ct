@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.12 2003/05/01 07:55:28 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.13 2003/05/02 09:00:01 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -164,6 +164,8 @@ EXTRA_DIST	 += fea.boot
 ## to anybody else
 ##
 
+INCLUDES =	-I$(top_srcdir)
+
 ################################################################ 
 ## Yes, this isn't portable, but the portable way in the automake
 ## documentation doesn't work for multiple scanners in one binary.
@@ -179,20 +181,24 @@ EXTRA_DIST	 += fea.boot
 
 yacc:	.yacc_generated_files
 
-.yacc_generated_files: template.yy boot.yy op_commands.yy
-	yacc -d -p tplt -o y.tplt_tab.c template.yy
-	mv y.tplt_tab.c y.tplt_tab.cc
-	yacc -d -p boot -o y.boot_tab.c boot.yy
-	mv y.boot_tab.c y.boot_tab.cc
-	yacc -d -p opcmd -o y.opcmd_tab.c op_commands.yy
-	mv y.opcmd_tab.c y.opcmd_tab.cc
-	touch .yacc_generated_files
+.yacc_generated_files: $(srcdir)/template.yy $(srcdir)/boot.yy $(srcdir)/op_commands.yy
+	( cd $(srcdir); \
+	yacc -d -p tplt -o y.tplt_tab.c template.yy; \
+	mv y.tplt_tab.c y.tplt_tab.cc; \
+	yacc -d -p boot -o y.boot_tab.c boot.yy; \
+	mv y.boot_tab.c y.boot_tab.cc; \
+	yacc -d -p opcmd -o y.opcmd_tab.c op_commands.yy; \
+	mv y.opcmd_tab.c y.opcmd_tab.cc; \
+	touch .yacc_generated_files )
 
-lex.tplt.cc:     template.ll y.tplt_tab.cc
-	flex -Ptplt -olex.tplt.cc template.ll
+$(srcdir)/lex.tplt.cc: $(srcdir)/template.ll $(srcdir)/y.tplt_tab.cc
+	( cd $(srcdir); \
+	flex -Ptplt -olex.tplt.cc template.ll )
  
-lex.boot.cc:     boot.ll y.boot_tab.cc
-	flex -Pboot -olex.boot.cc boot.ll 
+$(srcdir)/lex.boot.cc: $(srcdir)/boot.ll $(srcdir)/y.boot_tab.cc
+	( cd $(srcdir); \
+	flex -Pboot -olex.boot.cc boot.ll )
 
-lex.opcmd.cc:     op_commands.ll y.opcmd_tab.cc
-	flex -Popcmd -olex.opcmd.cc op_commands.ll 
+$(srcdir)/lex.opcmd.cc: $(srcdir)/op_commands.ll $(srcdir)/y.opcmd_tab.cc
+	( cd $(srcdir); \
+	flex -Popcmd -olex.opcmd.cc op_commands.ll )

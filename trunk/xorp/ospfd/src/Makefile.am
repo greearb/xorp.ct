@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libospfd.a
 
-AM_CPPFLAGS = -I../@OSPFD_OS@
+AM_CPPFLAGS = -I$(srcdir)/../@OSPFD_OS@
 
 #libospfd_a_SOURCES  = contrib/global.h
 #libospfd_a_SOURCES += contrib/md5.h
@@ -87,6 +87,14 @@ libospfd_a_SOURCES += tlv.C
 libospfd_a_SOURCES += global.h
 libospfd_a_SOURCES += md5.h
 libospfd_a_SOURCES += md5c.c
+
+################################################################
+##
+## Everything past here is useful to the maintainer, but probably not
+## to anybody else
+##
+
+INCLUDES =	-I$(top_srcdir)
 
 # -- Automake does not currently like files in other directories when
 # building libraries.  Since there are only a few we symlink other

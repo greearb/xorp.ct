@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.8 2003/03/29 19:03:10 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.9 2003/03/31 16:10:18 hodson Exp $
 ##
 
 # -- Real Programs
@@ -110,6 +110,9 @@ EXTRA_DIST	 += xrl_shell_funcs.sh
 ## Everything past here is useful to the maintainer, but probably not
 ## to anybody else
 ##
+
+INCLUDES =	-I$(top_srcdir)
+
 test_rib_direct.sh: test_rib_direct
 
 test_rib_xrls.sh: test_rib_xrls

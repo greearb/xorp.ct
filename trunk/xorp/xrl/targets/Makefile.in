@@ -138,11 +138,15 @@ libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
 # Test target
 libtestbase_a_SOURCES = test_base.hh test_base.cc
 
+################################################################
+
+INCLUDES = -I$(top_srcdir)
+
 ###############################################################################
 # Implicit Rules and related
 ###############################################################################
 
-SCRIPT_DIR = ../scripts
+SCRIPT_DIR = $(top_srcdir)/xrl/scripts
 TGTGEN_PY = $(SCRIPT_DIR)/tgt-gen
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
