@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.3 2003/01/29 23:38:12 rizzo Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.4 2003/03/10 23:20:01 hodson Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -29,6 +29,9 @@
 
 #define BGPVERSION 4
 
+/**
+ * Data that applies to a specific peering.
+ */
 class BGPPeerData {
 public:
     BGPPeerData();
