@@ -1,6 +1,42 @@
 #
-# $XORP: xorp/pim/TODO,v 1.63 2003/12/02 08:15:50 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.64 2003/12/10 22:24:49 pavlin Exp $
 #
+
+* BSR SPEC:
+  Change all "sec" to "secs".
+
+* IMPL:
+  If a PIM control message is received witn an unrecognized version
+  or type field, then the error message should be rate-limited.
+
+* IMPL:
+  Implement the following from the spec:
+
+  In IPv6, the DR MUST perform Path-MTU discovery, and
+  an ICMP Fragmentation Required message MUST be sent by the
+  encapsulating DR if it receives a packet that will not fit in the
+  effective MTU of the tunnel.
+  If the MTU between the DR and the RP results in the effective tunnel
+  MTU being smaller than 1280 (the IPv6 minimum MTU), the DR MUST
+  send Fragmentation Required messages with an MTU value of 1280 and
+  MUST fragment its PIM register messages as required, using an
+  IPv6 fragmentation header between the outer IPv6 header and the
+  PIM Register header.
+
+* IMPL+PIM KERNEL IMPL:
+  Make sure that the following is implemented:
+
+  The encapsulating packet uses the normal TTL that the router would use
+  for any locally-generated IP packet.
+
+* BSR SPEC: Change "No Info" to "NoInfo".
+
+* IMPL: If the IP address of an interface changes, and if the router
+  has not sent yet a Hello message, then if a Join/Prune or Assert message
+  message needs to be send, a Hello message must be sent first
+  (See Section 4.3.1). Note that sending first a Hello message on startup
+  is implemented. Need to verify that the right thing happens if the IP
+  address changes.
 
 * IMPL: If a PimVif interface fails to start/stop/etc, then
   the error message should be meaningful and contain the exact
@@ -28,6 +64,9 @@
   and "RPF'(S,G) changes" -> "RPF'(S,G) changes due to an Assert"
 
 * IMPL: Implement the PMBR behavior (Section 4.7)
+
+* IMPL: Add a discard interface that is needed to implement the PMBR
+  behavior.
 
 * BSR SPEC+IMPL+TESTSUITE:
   Make sure that Mark's email to PIM Mailing list "Re: [pim] PIM BSR Draft"
