@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.19 2004/02/06 22:44:11 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.20 2004/02/11 08:48:46 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -583,6 +583,19 @@ RIB<A>::add_route(const string& tablename,
 	    return XORP_OK;
 	} else {
 	    debug_msg("**not directly connected route found for nexthop\n");
+	    //
+	    // XXX: If the route came from an IGP, then we must have
+	    // a directly-connected interface toward the next-hop router
+	    //
+	    if (protocol->protocol_type() == IGP) {
+		XLOG_ERROR("Attempting to add IGP route to table \"%s\" "
+			   "(prefix %s next-hop %s): no directly connected "
+			   "interface toward the next-hop router",
+			   tablename.c_str(), net.str().c_str(),
+			   nexthop_addr.str().c_str());
+		return XORP_ERROR;
+	    }
+
 	    IPNextHop<A>* nexthop = find_or_create_external_nexthop(nexthop_addr);
 	    ot->add_route(IPRouteEntry<A>(net, /* No vif */ NULL, nexthop, 
 					  *protocol, metric));
@@ -603,6 +616,19 @@ RIB<A>::add_route(const string& tablename,
     if (vif != NULL) {
 	nexthop = find_or_create_peer_nexthop(nexthop_addr);
     } else {
+	//
+	// XXX: If the route came from an IGP, then we must have
+	// a directly-connected interface toward the next-hop router
+	//
+	if (protocol->protocol_type() == IGP) {
+	    XLOG_ERROR("Attempting to add IGP route to table \"%s\" "
+		       "(prefix %s next-hop %s): no directly connected "
+		       "interface toward the next-hop router",
+		       tablename.c_str(), net.str().c_str(),
+		       nexthop_addr.str().c_str());
+	    return XORP_ERROR;
+	}
+
 	nexthop = find_or_create_external_nexthop(nexthop_addr);
     }
     XLOG_ASSERT(nexthop->addr() == nexthop_addr);
@@ -733,21 +759,6 @@ RIB<A>::verify_route(const A& lookup_addr,
 }
 
 template<class A>
-inline static const A&
-addr_zero(const A&)
-{
-    return A::ZERO();
-}
-
-template<>
-inline static const IPv4&
-addr_zero(const IPv4&)
-{
-    static IPv4 z = IPv4::ZERO(); // Needs an instance to return a temporary
-    return z;
-}
-
-template<class A>
 const A&
 RIB<A>::lookup_route(const A& lookupaddr) 
 {
@@ -755,7 +766,7 @@ RIB<A>::lookup_route(const A& lookupaddr)
 
     const IPRouteEntry<A>* re = _final_table->lookup_route(lookupaddr);
     if (re == NULL || re->vif() == NULL) {
-	return addr_zero(lookupaddr);
+	return A::ZERO();
     }
 
     IPNextHop<A>* route_nexthop = static_cast<IPNextHop<A>* >(re->nexthop());
