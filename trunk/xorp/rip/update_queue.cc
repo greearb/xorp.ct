@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/update_queue.cc,v 1.7 2004/02/05 20:01:34 hodson Exp $"
+#ident "$XORP: xorp/rip/update_queue.cc,v 1.8 2004/02/20 01:22:04 hodson Exp $"
 
 #include <vector>
 #include <list>
@@ -251,14 +251,17 @@ public:
 	XLOG_ASSERT(_readers[id] != 0);
 
 	ReaderPos* rp = _readers[id];
-	if (rp->position() != UpdateBlock<A>::MAX_UPDATES) {
-	    // debug_msg("Advancing position\n");
+	if (rp->position() != rp->block()->count()) {
+	    debug_msg("Advancing position\n");
 	    rp->advance_position();
 	}
 
-	if (rp->position() == UpdateBlock<A>::MAX_UPDATES &&
-	    rp->block() != --_update_blocks.end()) {
-	    // debug_msg("Advancing block\n");
+	if (rp->position() == rp->block()->count() &&
+	    rp->block()->count() != 0) {
+	    if (rp->block() == --_update_blocks.end()) {
+		_update_blocks.push_back(UpdateBlock<A>());
+	    }
+	    debug_msg("Advancing block\n");
 	    rp->advance_block();
 	    garbage_collect();
 	}
@@ -276,6 +279,7 @@ public:
 
 	typename UpdateBlockList::iterator bi = --_update_blocks.end();
 	_readers[id]->move_to(bi, bi->count());
+	advance_reader(id);
 
 	garbage_collect();
     }
@@ -310,19 +314,21 @@ public:
 	XLOG_ASSERT(_readers[id] != 0);
 
 	ReaderPos* rp = _readers[id];
-	// debug_msg("Reading from %d %u/%u\n",
-	//	  id, rp->position(), rp->block()->size());
+	debug_msg("Reading from %d %u/%u\n",
+		  id, rp->position(), rp->block()->count());
 
 	// Reader may have reached end of last block and stopped, but
 	// more data may now have been added.
-	if (rp->position() == UpdateBlock<A>::MAX_UPDATES) {
+	if (rp->position() == rp->block()->count()) {
 	    advance_reader(id);
 	}
 
 	if (rp->position() < rp->block()->count()) {
 	    const RouteUpdate& u = rp->block()->get(rp->position());
+	    debug_msg("Got route\n");
 	    return u.get();
 	}
+	debug_msg("Nothing available\n");
 	return 0;
     }
 
@@ -340,8 +346,13 @@ public:
 
     uint32_t updates_queued() const
     {
-	return (_update_blocks.size() - 1) * UpdateBlock<A>::MAX_UPDATES
-	    + _update_blocks.back().count();
+	UpdateBlockList::const_iterator ci = _update_blocks.begin();
+	uint32_t total = 0;
+	while (ci != _update_blocks.end()) {
+	    total += ci->count();
+	    ++ci;
+	}
+	return total;
     }
 };
 
