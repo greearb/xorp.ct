@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.17 2003/06/26 02:22:04 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.18 2003/06/26 03:12:12 atanu Exp $
 #
 
 #
@@ -306,7 +306,7 @@ TIME_WAIT=`time_wait_seconds`
 if [ $START_PROGRAMS = "yes" ]
 then
 CXRL="$CALLXRL -r 10"
-    ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    ../../utils/runit -v $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ../../libxipc/finder
     ../../fea/fea_dummy   = $CXRL finder://fea/common/0.1/get_target_name
     ../../rib/rib         = $CXRL finder://rib/common/0.1/get_target_name
