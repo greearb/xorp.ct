@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.14 2003/04/02 22:58:57 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.15 2003/04/23 00:28:39 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
 #include "libxorp/callback.hh"
 #include "libxorp/xlog.h"
 
+#include "hmac_md5.h"
 #include "xrl_error.hh"
 #include "xrl_router.hh"
 #include "xrl_pf.hh"
@@ -114,6 +115,36 @@ finder_host(const char* host)
     return IPv4(ia);
 }
 
+static string
+mk_instance_name(EventLoop& e, const char* classname)
+{
+    static uint32_t sp = (uint32_t)getpid();
+    static uint32_t sa = if_get_preferred().s_addr;
+    static uint32_t sc;
+    
+    TimeVal now;
+    e.current_time(now);
+    sc++;
+    
+    uint32_t data[5];
+    data[0] = sa;
+    data[1] = sp;
+    data[2] = sc;
+    data[3] = now.sec();
+    data[4] = now.usec();
+
+    const char* key = "hubble bubble toil and trouble";
+    uint8_t digest[16];
+    hmac_md5(reinterpret_cast<const uint8_t*>(data), sizeof(data),
+	     reinterpret_cast<const uint8_t*>(key), sizeof(key), digest);
+
+    char asc_digest[33];
+    if (hmac_md5_digest_to_ascii(digest, asc_digest, sizeof(asc_digest)) == 0)
+	XLOG_FATAL("Could not make ascii md5 digest representation");
+    
+    return c_format("%s-%s@", classname, asc_digest) + IPv4(sa).str();
+}
+
 XrlRouter::XrlRouter(EventLoop&  e,
 		     const char* entity_name,
 		     const char* host,
@@ -129,7 +160,8 @@ XrlRouter::XrlRouter(EventLoop&  e,
     _fac = new FinderNGTcpAutoConnector(e, *_fc, _fc->commands(),
 					finder_host(host), port);
 
-    if (_fc->register_xrl_target(entity_name, "undisclosed", _id) == false) {
+    string iname = mk_instance_name(e, entity_name);
+    if (_fc->register_xrl_target(entity_name, iname, _id) == false) {
 	XLOG_FATAL("Failed to register target %s\n", entity_name);
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.12 2003/04/02 22:58:57 hodson Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.13 2003/04/22 18:07:36 mjh Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -48,7 +48,7 @@ public:
     
 public:
     XrlRouter(EventLoop&	e,
-	      const char*	entity_name,
+	      const char*	classname,
 	      const char*	finder_address = "localhost",
 	      uint16_t		finder_port = 0)
 	throw (InvalidAddress);
