@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set.cc,v 1.5 2004/10/21 00:10:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set.cc,v 1.6 2004/11/12 00:33:31 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -58,6 +58,26 @@ FtiConfigTableSet::register_ftic_secondary()
     // XXX: push the current config into the new secondary
     //
     if (_is_running) {
-	// TODO: XXX: PAVPAVPAV: implement it!
+	list<Fte4> fte_list4;
+
+	if (_ftic.get_table4(fte_list4) == true) {
+	    if (set_table4(fte_list4) != true) {
+		XLOG_ERROR("Cannot push the current IPv4 forwarding table "
+			   "into a new secondary mechanism for setting the "
+			   "forwarding table");
+	    }
+	}
+
+#ifdef HAVE_IPV6
+	list<Fte6> fte_list6;
+
+	if (_ftic.get_table6(fte_list6) == true) {
+	    if (set_table6(fte_list6) != true) {
+		XLOG_ERROR("Cannot push the current IPv6 forwarding table "
+			   "into a new secondary mechanism for setting the "
+			   "forwarding table");
+	    }
+	}
+#endif // HAVE_IPV6
     }
 }
