@@ -28,6 +28,7 @@ fi
 remote_run $HOST rm -r "${DESTDIR}/scripts"
 remote_run $HOST rm -r "${DESTDIR}/tmp"
 remote_run $HOST rm -r "${DESTDIR}/xorp"
+remote_run $HOST rm -r "${DESTDIR}/data"
 
 # We make tmp as it forces DESTDIR to be created if it doesn't exist and
 # doesn't cause an error if it already does since previous command deletes tmp
