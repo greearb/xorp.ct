@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute_list.hh,v 1.2 2003/01/17 05:51:07 mjh Exp $
+// $XORP: xorp/bgp/path_attribute_list.hh,v 1.3 2003/01/26 01:22:37 mjh Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_LIST_HH__
 #define __BGP_PATH_ATTRIBUTE_LIST_HH__
@@ -21,10 +21,23 @@
 #include <list>
 #include "path_attribute.hh"
 
+/**
+ * PathAttributeList is used to handle efficiently path attribute lists.
+ *
+ * An object in the class is initialized from explicit PathAttribute
+ * objects passed in by reference. The initialization creates a copy
+ * of the attribute, links it into a list, and for mandatory attributes
+ * it also stores a pointer to the newly created attribute into a
+ * class member (e.g. _aspath_att ...) for ease of use.
+ */
+
 template<class A>
 class PathAttributeList
 {
 public:
+   typedef list<PathAttribute*>::const_iterator const_iterator;
+   typedef list<PathAttribute*>::iterator iterator;
+
     PathAttributeList();
     PathAttributeList(const NextHopAttribute<A> &nexthop,
 			 const ASPathAttribute &aspath,
@@ -32,9 +45,9 @@ public:
     PathAttributeList(const PathAttributeList<A>& palist);
     ~PathAttributeList();
     void add_path_attribute(const PathAttribute &att);
-    const A& nexthop() const { return _nexthop_att->nexthop(); }
-    const AsPath& aspath() const { return _aspath_att->as_path(); }
-    const uint8_t origin() const { return _origin_att->origintype(); }
+    const A& nexthop() const		{ return _nexthop_att->nexthop(); }
+    const AsPath& aspath() const	{ return _aspath_att->as_path(); }
+    const uint8_t origin() const	{ return _origin_att->origintype(); }
 
     const MEDAttribute* med_att() const;
     const LocalPrefAttribute* local_pref_att() const;
@@ -42,18 +55,19 @@ public:
     const AggregatorAttribute* aggregator_att() const;
 
     void rehash();
-    const uint8_t* hash() const {
+    const uint8_t* hash() const			{
 	assert_rehash();
 	return _hash;
     }
 
     const list<PathAttribute*>& att_list() const {
-// 	printf("PathAttributeList:att_list(): size = %d\n", _att_list.size());
+	debug_msg("PathAttributeList:att_list(): size = %d\n",
+		_att_list.size());
 	return _att_list;
     }
 
     // complete() is true when all the mandatory attributes are present
-    bool complete() const {
+    bool complete() const			{
 	return ((_nexthop_att != NULL) &&
 		(_aspath_att != NULL) && (_origin_att != NULL));
     }
@@ -61,7 +75,6 @@ public:
     void replace_nexthop(const A& nexthop);
     void replace_AS_path(const AsPath& as_path);
     void remove_attribute_by_type(PathAttType type);
-
 
     string str() const;
 
@@ -81,14 +94,12 @@ private:
     void assert_rehash() const;
     const PathAttribute* find_attribute_by_type(PathAttType type) const;
 
-    NextHopAttribute<A> *_nexthop_att;
-    ASPathAttribute *_aspath_att;
-    OriginAttribute *_origin_att;
-    list <PathAttribute*> _att_list;
+    NextHopAttribute<A> *	_nexthop_att;
+    ASPathAttribute *		_aspath_att;
+    OriginAttribute *		_origin_att;
+    list <PathAttribute*>	_att_list;
 
-    // hash is used for fast comparisons
-    uint8_t _hash[16];
-    // A _nexthop;
+    uint8_t			_hash[16];	// used for fast comparisons
 };
 
 #endif // __BGP_PATH_ATTRIBUTE_LIST_HH__

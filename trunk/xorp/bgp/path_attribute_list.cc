@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.3 2003/01/17 05:51:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.4 2003/01/26 01:22:37 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,6 +40,7 @@ PathAttributeList<A>::
 			  const ASPathAttribute &aspath_att,
 			  const OriginAttribute &origin_att)
 {
+    // no need to clear the *_att pointers, will be done by these 3 adds.
     add_path_attribute(origin_att);
     add_path_attribute(nexthop_att);
     add_path_attribute(aspath_att);
@@ -47,14 +48,12 @@ PathAttributeList<A>::
 }
 
 template<class A>
-PathAttributeList<A>::
-PathAttributeList<A>(const PathAttributeList<A>& palist)
+PathAttributeList<A>::PathAttributeList<A>(const PathAttributeList<A>& palist)
 {
     _nexthop_att = NULL;
     _aspath_att = NULL;
     _origin_att = NULL;
-    list<PathAttribute*>::const_iterator i;
-    i = palist._att_list.begin();
+    const_iterator i = palist._att_list.begin();
     while (i != palist._att_list.end()) {
 	add_path_attribute(**i);
 	++i;
@@ -65,8 +64,7 @@ PathAttributeList<A>(const PathAttributeList<A>& palist)
 template<class A>
 PathAttributeList<A>::~PathAttributeList<A>()
 {
-    typedef list<PathAttribute*>::const_iterator Iter;
-    Iter i = _att_list.begin();
+    const_iterator i = _att_list.begin();
     while (i != _att_list.end()) {
 	delete (*i);
 	++i;
@@ -81,6 +79,7 @@ void
 PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 {
     PathAttribute *new_att = NULL;
+    // store a reference to the mandatory attributes
     switch (att.type()) {
     case ORIGIN:
 	_origin_att = new OriginAttribute((const OriginAttribute&)att);
@@ -122,7 +121,7 @@ PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 	if (_att_list.empty()) {
 	    _att_list.push_back(new_att);
 	} else {
-	    list <PathAttribute*>::iterator i;
+	    iterator i;
 	    for (i = _att_list.begin(); i != _att_list.end(); i++) {
 		if ((*i)->sorttype() > att.sorttype()) {
 		    _att_list.insert(i, new_att);
@@ -146,7 +145,7 @@ PathAttributeList<A>::str() const
     s += _aspath_att->str() + "\n";
     s += _origin_att->str() + "\n";
 #endif
-    list<PathAttribute*>::const_iterator i = _att_list.begin();
+    const_iterator i = _att_list.begin();
     while (i != _att_list.end()) {
 	s += (*i)->str() + "\n";
 	++i;
@@ -160,7 +159,7 @@ PathAttributeList<A>::rehash()
 {
     MD5_CTX context;
     MD5Init(&context);
-    list<PathAttribute*>::const_iterator i;
+    const_iterator i;
     for (i = _att_list.begin(); i != _att_list.end(); i++) {
 	(*i)->add_hash(&context);
     }
@@ -172,11 +171,11 @@ bool
 PathAttributeList<A>::
 operator< (const PathAttributeList<A> &him) const
 {
+    // XXX we should be using hashes, not direct comparisons!
     assert_rehash();
-    list<PathAttribute*>::const_iterator my_i;
-    my_i = _att_list.begin();
-    list<PathAttribute*>::const_iterator his_i;
-    his_i = him.att_list().begin();
+    him.assert_rehash();
+    const_iterator my_i = _att_list.begin();
+    const_iterator his_i = him.att_list().begin();
     while (1) {
 	// are they equal.
 	if ((my_i == _att_list.end()) && (his_i == him.att_list().end())) {
@@ -206,6 +205,7 @@ PathAttributeList<A>::
 operator == (const PathAttributeList<A> &him) const
 {
     assert_rehash();
+    him.assert_rehash();
     if (memcmp(_hash, him.hash(), 16) == 0)
 	return true;
     return false;
@@ -219,8 +219,7 @@ PathAttributeList<A>::replace_attribute(PathAttribute* new_att,
     debug_msg("Replace attribute\n");
     debug_msg("Before: \n%s\n", str().c_str());
     debug_msg("New Att: %s\n", new_att->str().c_str());
-    typedef list<PathAttribute*>::iterator Iter;
-    Iter i = _att_list.begin();
+    iterator i = _att_list.begin();
     while (i != _att_list.end()) {
 	if ((*i)->type() == type) {
 	    _att_list.insert(i, new_att);
@@ -240,6 +239,7 @@ void
 PathAttributeList<A>::replace_AS_path(const AsPath& new_as_path)
 {
     ASPathAttribute *aspath_att = new ASPathAttribute(new_as_path);
+    _aspath_att = aspath_att;
     replace_attribute(aspath_att, AS_PATH);
 }
 
@@ -248,6 +248,7 @@ void
 PathAttributeList<A>::replace_nexthop(const A& new_nexthop)
 {
     NextHopAttribute<A> *nh_att = new NextHopAttribute<A>(new_nexthop);
+    _nexthop_att = nh_att;
     replace_attribute(nh_att, NEXT_HOP);
 }
 
@@ -256,7 +257,7 @@ void
 PathAttributeList<A>::remove_attribute_by_type(PathAttType type)
 {
     // we only remove the first instance of an attribute with matching type
-    list<PathAttribute*>::iterator i;
+    iterator i;
     for (i = _att_list.begin(); i != _att_list.end(); i++) {
 	if ((*i)->type() == type) {
 	    delete *i;
@@ -272,7 +273,7 @@ const PathAttribute*
 PathAttributeList<A>::find_attribute_by_type(PathAttType type) const
 {
     // we only remove the first instance of an attribute with matching type
-    list<PathAttribute*>::const_iterator i;
+    const_iterator i;
     for (i = _att_list.begin(); i != _att_list.end(); i++) {
 	if ((*i)->type() == type) {
 	    return *i;
@@ -312,6 +313,11 @@ PathAttributeList<A>::aggregator_att() const
               find_attribute_by_type(AGGREGATOR));
 }
 
+/*
+ * check whether the class has been properly rehashed.
+ * A _hash of all 0's means with high probability that we forgot to
+ * recompute it.
+ */
 template<class A>
 void
 PathAttributeList<A>::assert_rehash() const
