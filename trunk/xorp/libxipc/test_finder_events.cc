@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.13 2004/12/09 07:54:37 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.14 2004/12/18 03:24:37 pavlin Exp $"
 
 #include <list>
 #include <vector>
@@ -483,8 +483,8 @@ drip_run(EventLoop& e, list<OneoffTimerCallback>& locb, bool delay = false)
 	    e.run();
 	}
 	verbose_log("Events: %u ready: %d scheduled: %d delay %d\n",
-		    (uint32_t)e.timer_list_length(), ready, pause.scheduled(),
-		    delay);
+		    XORP_UINT_CAST(e.timer_list_length()), ready,
+		    pause.scheduled(), delay);
 	if (0 != ready)
 	    XLOG_WARNING("ready is %d not zero", ready);
 	// XLOG_ASSERT(0 == ready);
@@ -533,7 +533,8 @@ test1(IPv4		finder_addr,
     locb.push_back(callback(remove_watch_from_observer, &pfeo, "class_a"));
     locb.push_back(callback(assert_observer_not_watching, &pfeo, "class_a"));
     locb.push_back(callback(destroy_observer, &pfeo));
-    locb.push_back(callback(assert_xrl_target_count, &tgt_store, 0u));
+    locb.push_back(callback(assert_xrl_target_count, &tgt_store,
+			    static_cast<uint32_t>(0u)));
 
     drip_run(e, locb);
 
@@ -585,21 +586,22 @@ test2(IPv4		finder_addr,
 				finder_addr, finder_port,
 				"class_a", &tgt_store));
 	locb.push_back(callback(assert_observer_class_instance_count,
-		     &pfeo, "class_a", 1u));
+				&pfeo, "class_a", static_cast<uint32_t>(1u)));
 	locb.push_back(callback(remove_oldest_xrl_target, &tgt_store));
 	locb.push_back(callback(assert_observer_class_instance_count,
-		     &pfeo, "class_a", 0u));
+				&pfeo, "class_a", static_cast<uint32_t>(0u)));
     }
 
     locb.push_back(callback(create_xrl_target, &e, finder_addr, finder_port,
 			  "class_b", &tgt_store));
     locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
-			    "class_b", 0u));
+			    "class_b", static_cast<uint32_t>(0u)));
     locb.push_back(callback(remove_oldest_xrl_target, &tgt_store));
     locb.push_back(callback(remove_watch_from_observer, &pfeo, "class_a"));
     locb.push_back(callback(assert_observer_not_watching, &pfeo, "class_a"));
     locb.push_back(callback(destroy_observer, &pfeo));
-    locb.push_back(callback(assert_xrl_target_count, &tgt_store, 0u));
+    locb.push_back(callback(assert_xrl_target_count, &tgt_store,
+			    static_cast<uint32_t>(0u)));
 
     drip_run(e, locb);
 
@@ -658,11 +660,12 @@ test3(IPv4		finder_addr,
 		     "class_a", burst_cnt - i));
     }
     locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
-			    "class_a", 0u));
+			    "class_a", static_cast<uint32_t>(0u)));
     locb.push_back(callback(remove_watch_from_observer, &pfeo, "class_a"));
     locb.push_back(callback(assert_observer_not_watching, &pfeo, "class_a"));
     locb.push_back(callback(destroy_observer, &pfeo));
-    locb.push_back(callback(assert_xrl_target_count, &tgt_store, 0u));
+    locb.push_back(callback(assert_xrl_target_count, &tgt_store,
+			    static_cast<uint32_t>(0u)));
 
     drip_run(e, locb);
 
@@ -737,7 +740,8 @@ test4(IPv4		finder_addr,
     for (uint32_t i = 1; i <= burst_cnt ; i++) {
 	locb.push_back(callback(remove_any_xrl_target, &tgt_store));
     }
-    locb.push_back(callback(assert_xrl_target_count, &tgt_store, 0u));
+    locb.push_back(callback(assert_xrl_target_count, &tgt_store,
+			    static_cast<uint32_t>(0u)));
 
     drip_run(e, locb);
 
@@ -889,9 +893,9 @@ main(int argc, char * const argv[])
     //
     if (burst_cnt > dtablesize / 20) {
 	burst_cnt = dtablesize / 20;
-	verbose_log("Cropped maximum burst count to %d "
+	verbose_log("Cropped maximum burst count to %u "
 		    "(descriptor table constraint).\n",
-		    burst_cnt);
+		    XORP_UINT_CAST(burst_cnt));
     }
 
     int ch;
