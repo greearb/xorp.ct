@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.18 2003/11/20 06:37:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.19 2003/12/02 09:38:54 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -389,7 +389,7 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 					       "help");
 	}
 	if (com == NULL) {
-	    XLOG_FATAL("add_command %s failed\n", (*cmd_iter)->name().c_str());
+	    XLOG_FATAL("add_command %s failed", (*cmd_iter)->name().c_str());
 	} else {
 	    com->set_global_name(subpath.c_str());
 	}
@@ -437,7 +437,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
     if (_current_config_node->is_root_node()) {
 	ttn = template_tree()->root_node();
     } else {
-	ttn = _current_config_node->template_node();
+	ttn = _current_config_node->template_tree_node();
     }
     XLOG_ASSERT(ttn != NULL);
 
@@ -459,7 +459,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 		com = current_cli_node.add_command((*tti)->segname().c_str(),
 						   "help", cb);
 		if (com == NULL) {
-		    XLOG_FATAL("AI: add_command %s for template failed\n",
+		    XLOG_FATAL("AI: add_command %s for template failed",
 			       (*tti)->segname().c_str());
 		} else {
 		    com->set_global_name(subpath.c_str());
@@ -525,7 +525,7 @@ RouterCLI::add_edit_subtree()
     // If we ended up at a node that can't be the root for an edit
     // tree, go back up one level now.
     //
-    const TemplateTreeNode* ttn = _current_config_node->template_node();
+    const TemplateTreeNode* ttn = _current_config_node->template_tree_node();
     if (ttn != NULL) {
 	if (ttn->is_tag() && !_path.empty()) {
 	    _path.pop_back();
@@ -911,7 +911,7 @@ RouterCLI::text_entry_func(const char* ,
 	    path_segments.pop_back();
 	    ctn = config_tree()->find_node(path_segments);
 	} else {
-	    tag_ttn = ctn->template_node();
+	    tag_ttn = ctn->template_tree_node();
 	}
 
 	// If there are no arguments, it must be a void structuring node
@@ -1216,7 +1216,7 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 	ctn = config_tree()->find_node(path_parts);
     } else {
 	XLOG_ASSERT(ctn->is_leaf());
-	ttn = ctn->template_node();
+	ttn = ctn->template_tree_node();
     }
 
     XLOG_ASSERT(ctn != NULL && ttn != NULL);
