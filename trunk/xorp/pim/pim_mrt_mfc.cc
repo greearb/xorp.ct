@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.13 2003/07/08 01:36:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.14 2003/07/12 01:14:38 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -212,32 +212,45 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	    pim_mre_wc = pim_mre->wc_entry();
 	}
     }
-    if ((pim_mre != NULL) && pim_mre->is_sg())
-	pim_mre_sg = pim_mre;
+    
+    //
+    // Get the (S,G) entry (if exits).
+    //
+    do {
+	if (pim_mre == NULL)
+	    break;
+	if (pim_mre->is_sg()) {
+	    pim_mre_sg = pim_mre;
+	    break;
+	}
+	if (pim_mre->is_sg_rpt()) {
+	    pim_mre_sg = pim_mre->sg_entry();
+	    break;
+	}
+	break;
+    } while (false);
     
     //
     // Take action if directly-connected source
     //
     if (is_directly_connected_s) {
 	// Create a (S,G) entry if necessary
-	if ((pim_mre == NULL) || (! pim_mre->is_sg())) {
-	    if (pim_mre_sg == NULL) {
-		pim_mre = pim_mre_find(src, dst, PIM_MRE_SG, PIM_MRE_SG);
-		pim_mre_sg = pim_mre;
-	    }
-	    //
-	    // Take action if directly-connected source
-	    //
-	    // set KeepaliveTimer(S,G) to Keepalive_Period
-	    // # Note: a register state transition may happen as a result
-	    // # of restarting KeepaliveTimer, and must be dealt with here.
-	    pim_mre_sg->start_keepalive_timer();
-	    is_keepalive_timer_restarted = true;
-	    
-	    // TODO: XXX: PAVPAVPAV: OK TO COMMENT?
-	    pim_mre_sg->recompute_is_could_register_sg();
-	    pim_mre_sg->recompute_is_join_desired_sg();
+	if (pim_mre_sg == NULL) {
+	    pim_mre = pim_mre_find(src, dst, PIM_MRE_SG, PIM_MRE_SG);
+	    pim_mre_sg = pim_mre;
 	}
+	//
+	// Take action if directly-connected source
+	//
+	// set KeepaliveTimer(S,G) to Keepalive_Period
+	// # Note: a register state transition may happen as a result
+	// # of restarting KeepaliveTimer, and must be dealt with here.
+	pim_mre_sg->start_keepalive_timer();
+	is_keepalive_timer_restarted = true;
+	
+	// TODO: XXX: PAVPAVPAV: OK TO COMMENT?
+	pim_mre_sg->recompute_is_could_register_sg();
+	pim_mre_sg->recompute_is_join_desired_sg();
     }
     
     if (pim_mre == NULL) {
@@ -262,12 +275,6 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	}
 	return;
     }
-    
-    //
-    // Get the (S,G) entry (if exists).
-    //
-    if ((pim_mre_sg == NULL) && pim_mre->is_sg_rpt())
-	pim_mre_sg = pim_mre->sg_entry();
     
     //
     // Update the SPT-bit
