@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.11 2003/03/02 06:46:31 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.12 2003/03/04 03:35:56 pavlin Exp $"
 
 
 //
@@ -179,18 +179,21 @@ PimBsr::stop(void)
 	    continue;		// No active BsrZone yet
 	if (! active_bsr_zone->bsr_addr().is_unicast())
 	    continue;		// We don't know the BSR address
-	if (active_bsr_zone->i_am_bsr())
-	    continue;		// I am the BSR, hence don't send the messages
 	
 	//
 	// Cancel the Cand-RP-Advertise timer,
 	// and send Cand-RP-Adv messages with holdtime of zero.
 	//
 	do {
+	    //
+	    // Cancel the Cand-RP-Advertise timer
+	    //
 	    if (! config_bsr_zone->candidate_rp_advertise_timer().is_set())
 		break;		// We were not sending Cand-RP-Adv messages
-	    
 	    config_bsr_zone->candidate_rp_advertise_timer().cancel();
+	    
+	    if (active_bsr_zone->i_am_bsr())
+		break;		// I am the BSR, hence don't send the messages
 	    
 	    if (config_bsr_zone->bsr_group_prefix_list().empty())
 		break;		// No Cand-RP-Adv to cancel
@@ -220,30 +223,32 @@ PimBsr::stop(void)
 	//
 	// Send Bootstrap message with lowest priority
 	//
-	if (! config_bsr_zone->i_am_candidate_bsr())
-	    continue;
-	
-	//
-	// TODO: XXX: Sending BSM-cancel when in STATE_PENDING_BSR is not
-	// in the spec (04/27/2002).
-	//
-	if (! ((active_bsr_zone->bsr_zone_state()
-		== BsrZone::STATE_ELECTED_BSR)
-	       || (active_bsr_zone->bsr_zone_state()
-		   == BsrZone::STATE_PENDING_BSR))) {
-	    continue;
-	}
-	
-	active_bsr_zone->new_fragment_tag();
-	active_bsr_zone->set_is_cancel(true);
-	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
-	    PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
-	    if (pim_vif == NULL)
-		continue;
-	    pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(pim_vif->family()),
-					*active_bsr_zone);
-	}
-	active_bsr_zone->set_is_cancel(false);
+	do {
+	    if (! config_bsr_zone->i_am_candidate_bsr())
+		break;
+	    
+	    //
+	    // TODO: XXX: Sending BSM-cancel when in STATE_PENDING_BSR is not
+	    // in the spec (04/27/2002).
+	    //
+	    if (! ((active_bsr_zone->bsr_zone_state()
+		    == BsrZone::STATE_ELECTED_BSR)
+		   || (active_bsr_zone->bsr_zone_state()
+		       == BsrZone::STATE_PENDING_BSR))) {
+		break;
+	    }
+	    
+	    active_bsr_zone->new_fragment_tag();
+	    active_bsr_zone->set_is_cancel(true);
+	    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+		PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
+		if (pim_vif == NULL)
+		    continue;
+		pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(pim_vif->family()),
+					    *active_bsr_zone);
+	    }
+	    active_bsr_zone->set_is_cancel(false);
+	} while (false);
     }
     
     // Remove the lists of active and expiring BsrZone entries
