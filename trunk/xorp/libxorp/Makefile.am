@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.17 2004/03/05 18:41:18 hodson Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.18 2004/03/05 22:12:48 hodson Exp $
 ##
 
 # -- Real Programs
@@ -174,7 +174,7 @@ xlog.o: xlog.c
 # If this code is commented out, please upgrade to python2.0 or above.
 
 @PY_BUILD@callback_nodebug.hh: callback-gen.py
-@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -b 6 -l 13 > $(srcdir)/$@
+@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -b 6 -l 13 > $(srcdir)/callback_nodebug.hh
 
 @PY_BUILD@callback_debug.hh: callback-gen.py
-@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -d -b 6 -l 13 > $(srcdir)/$@
+@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -d -b 6 -l 13 > $(srcdir)/callback_debug.hh
