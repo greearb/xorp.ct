@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.13 2003/10/01 02:48:08 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.14 2003/10/01 03:55:50 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -57,8 +57,13 @@ BGPMain::BGPMain()
     }
 
     _rib_ipc_handler = new RibIpcHandler(_xrl_router, eventloop(), *this);
-    _plumbing = new BGPPlumbing(_xrl_router, _rib_ipc_handler,
-				eventloop(), *this);
+    _plumbing_unicast = new BGPPlumbing("Unicast",
+					_xrl_router, _rib_ipc_handler,
+					eventloop(), *this);
+    _plumbing_multicast = new BGPPlumbing("Multicast",
+					  _xrl_router, _rib_ipc_handler,
+					  eventloop(), *this);
+    _rib_ipc_handler->set_plumbing(_plumbing_unicast, _plumbing_multicast);
 
     _process_watch = new ProcessWatch(_xrl_router, eventloop(),
 				      bgp_mib_name().c_str(),
@@ -123,8 +128,12 @@ BGPMain::~BGPMain()
     delete _peerlist;
 
     debug_msg("-------------------------------------------\n");
-    debug_msg("Deleting plumbing\n");
-    delete _plumbing;
+    debug_msg("Deleting plumbing unicast\n");
+    delete _plumbing_unicast;
+
+    debug_msg("-------------------------------------------\n");
+    debug_msg("Deleting plumbing multicast\n");
+    delete _plumbing_multicast;
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting process watcher\n");
@@ -143,7 +152,8 @@ BGPMain::status(string& reason)
 
     if (_rib_ipc_handler->status(reason) == false) {
 	s = PROC_FAILED;
-    } else if (_plumbing->status(reason) == false) {
+    } else if (_plumbing_unicast->status(reason) == false ||
+	       _plumbing_multicast->status(reason) == false) {
 	s = PROC_FAILED;
     } else if (_exit_loop == true) {
 	s = PROC_SHUTDOWN;
@@ -211,7 +221,8 @@ BGPMain::local_config(const uint32_t& as, const IPv4& id)
     local->set_as(AsNum(as));
     local->set_id(id);
 
-    _plumbing->set_my_as_number(local->as());
+    _plumbing_unicast->set_my_as_number(local->as());
+    _plumbing_multicast->set_my_as_number(local->as());
 }
 
 /*
@@ -564,10 +575,10 @@ BGPMain::register_ribname(const string& name)
     if (!_rib_ipc_handler->register_ribname(name))
 	return false;
 
-    if (!plumbing()->plumbing4().next_hop_resolver().register_ribname(name))
+    if (!plumbing_unicast()->plumbing4().next_hop_resolver().register_ribname(name))
 	return false;
 
-    if (!plumbing()->plumbing6().next_hop_resolver().register_ribname(name))
+    if (!plumbing_unicast()->plumbing6().next_hop_resolver().register_ribname(name))
 	return false;
 
     return true;
@@ -697,14 +708,14 @@ BGPMain::delete_route(const IPv4Net& nlri)
 bool
 BGPMain::get_route_list_start4(uint32_t& token)
 {
-    token = _plumbing->create_ipv4_route_table_reader();
+    token = _plumbing_unicast->create_ipv4_route_table_reader();
     return true;
 }
 
 bool
 BGPMain::get_route_list_start6(uint32_t& token)
 {
-    token = _plumbing->create_ipv6_route_table_reader();
+    token = _plumbing_unicast->create_ipv6_route_table_reader();
     return true;
 }
 
@@ -821,7 +832,7 @@ BGPMain::get_route_list_next4(
 			      bool& best)
 {
     const SubnetRoute<IPv4>* route;
-    if (_plumbing->read_next_route(token, route, peer_id)) {
+    if (_plumbing_unicast->read_next_route(token, route, peer_id)) {
 	net = route->net();
 	extract_attributes(*route->attributes(),
 			   origin, aspath, nexthop, med, localpref, atomic_agg,
@@ -851,7 +862,7 @@ BGPMain::get_route_list_next6(
 			      bool& best)
 {
     const SubnetRoute<IPv6>* route;
-    if (_plumbing->read_next_route(token, route, peer_id)) {
+    if (_plumbing_unicast->read_next_route(token, route, peer_id)) {
 	net = route->net();
 	nexthop = route->nexthop();
 	extract_attributes(*route->attributes(),
@@ -874,7 +885,7 @@ BGPMain::rib_client_route_info_changed4(const IPv4& addr,
 	      " addr %s prefix_len %d nexthop %s metric %d\n",
 	      addr.str().c_str(), prefix_len, nexthop.str().c_str(), metric);
 
-    return plumbing()->plumbing4().
+    return plumbing_unicast()->plumbing4().
 	next_hop_resolver().rib_client_route_info_changed(addr, prefix_len,
 							  nexthop, metric);
 }
@@ -889,7 +900,7 @@ BGPMain::rib_client_route_info_changed6(const IPv6& addr,
 	      " addr %s prefix_len %d nexthop %s metric %d\n",
 	      addr.str().c_str(), prefix_len, nexthop.str().c_str(), metric);
 
-    return plumbing()->plumbing6().
+    return plumbing_unicast()->plumbing6().
 	next_hop_resolver().rib_client_route_info_changed(addr, prefix_len,
 							  nexthop, metric);
 }
@@ -901,7 +912,7 @@ BGPMain::rib_client_route_info_invalid4(const IPv4& addr,
     debug_msg("rib_client_route_info_invalid4:"
 	      " addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
 
-    return plumbing()->plumbing4().
+    return plumbing_unicast()->plumbing4().
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
 }
 
@@ -912,7 +923,7 @@ BGPMain::rib_client_route_info_invalid6(const IPv6& addr,
     debug_msg("rib_client_route_info_invalid6:"
 	      " addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
 
-    return plumbing()->plumbing6().
+    return plumbing_unicast()->plumbing6().
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.17 2003/07/03 02:03:17 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.18 2003/09/16 21:00:27 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -38,9 +38,9 @@ test_ribin(TestInfo& /*info*/)
     BGPMain bgpmain;
     LocalData localdata;
     BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
-    PeerHandler handler1("test1", &peer1, NULL);
+    PeerHandler handler1("test1", &peer1, NULL, NULL);
     BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
-    PeerHandler handler2("test2", &peer2, NULL);
+    PeerHandler handler2("test2", &peer2, NULL, NULL);
 
     //trivial plumbing
     RibInTable<IPv4> *ribin 

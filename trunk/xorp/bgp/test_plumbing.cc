@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.2 2003/09/27 02:37:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.3 2003/10/03 05:40:12 pavlin Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -23,7 +23,7 @@
 
 PlumbingTest::PlumbingTest(EventLoop& eventloop, BGPMain& bgp) 
     //dummy args to BGPPlumbing because we'll not use this constructor
-    : BGPPlumbing(NULL, NULL, eventloop, bgp) 
+    : BGPPlumbing(NULL, NULL, NULL, eventloop, bgp) 
 {
 }
 
@@ -58,7 +58,7 @@ PlumbingTest::test1()
 
     printf("Adding Peering 1\n");
     //note: creating the peerhandler adds the peering.
-    DummyPeerHandler dummy_peerhandler1("peer1", &dummy_peer1, this);
+    DummyPeerHandler dummy_peerhandler1("peer1", &dummy_peer1, this, 0);
     //add_peering(&dummy_peerhandler1);
     printf("Peering Added.\n");
 
@@ -69,7 +69,7 @@ PlumbingTest::test1()
  
     printf("Adding Peering 2\n");
    //note: creating the peerhandler adds the peering.
-    DummyPeerHandler dummy_peerhandler2("peer2", &dummy_peer2, this);
+    DummyPeerHandler dummy_peerhandler2("peer2", &dummy_peer2, this, 0);
     //add_peering(&dummy_peerhandler2);
     printf("Peering Added.\n");
 
@@ -265,7 +265,7 @@ PlumbingTest::test2()
 
     printf("Adding Peering 1\n");
     //note: creating the peerhandler adds the peering.
-    DummyPeerHandler dummy_peerhandler1("peer1", &dummy_peer1, this);
+    DummyPeerHandler dummy_peerhandler1("peer1", &dummy_peer1, this, 0);
     //add_peering(&dummy_peerhandler1);
     printf("Peering Added.\n");
 
@@ -315,7 +315,7 @@ PlumbingTest::test2()
  
     printf("Adding Peering 2\n");
    //note: creating the peerhandler adds the peering.
-    DummyPeerHandler dummy_peerhandler2("peer2", &dummy_peer2, this);
+    DummyPeerHandler dummy_peerhandler2("peer2", &dummy_peer2, this, 0);
     //add_peering(&dummy_peerhandler2);
     printf("Peering Added.\n");
 
@@ -335,8 +335,10 @@ DummyPeer::send_update_message(const UpdatePacket& p)
 }
 
 DummyPeerHandler::DummyPeerHandler(const string &init_peername,
-				   BGPPeer *peer, BGPPlumbing *plumbing) 
-    : PeerHandler(init_peername, peer, plumbing)
+				   BGPPeer *peer,
+				   BGPPlumbing *plumbing_unicast,
+				   BGPPlumbing *plumbing_multicast) 
+    : PeerHandler(init_peername, peer, plumbing_unicast, plumbing_multicast)
 {
 }
 
@@ -373,7 +375,7 @@ int main(int /* argc */, char *argv[])
 	BGPMain bgpm;
 
 	PlumbingTest *tester;
- 	tester = (PlumbingTest*)(bgpm.plumbing());
+ 	tester = (PlumbingTest*)(bgpm.plumbing_unicast());
 	if (!tester->run_tests()) {
 	    fprintf(stderr, "Test failed\n");
 	    exit(1);

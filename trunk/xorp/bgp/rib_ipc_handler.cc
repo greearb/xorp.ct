@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.25 2003/09/27 22:32:44 mjh Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.26 2003/10/03 00:26:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -30,7 +30,7 @@
 
 RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop, 
 			     BGPMain& bgp) 
-    : PeerHandler("RIBIpcHandler", NULL, NULL), 
+    : PeerHandler("RIBIpcHandler", NULL, NULL, NULL), 
     _ribname(""),
       _xrl_router(xrl_router), _eventloop(eventloop),
     _interface_failed(false),
@@ -44,7 +44,7 @@ RibIpcHandler::~RibIpcHandler()
     if(_v4_queue.busy() || _v6_queue.busy())
 	XLOG_WARNING("Deleting RibIpcHandler with callbacks pending");
 
-    set_plumbing(NULL);
+    set_plumbing(NULL, NULL);
 
     if("" != _ribname)
 	XLOG_WARNING("Deleting RibIpcHandler while still registered with RIB");
@@ -306,8 +306,8 @@ RibIpcHandler::insert_static_route(const OriginType origin,
     /*
     ** Inject the message into the plumbing.
     */
-    _plumbing->add_route(msg, this);
-    _plumbing->push_ipv4(this);
+    _plumbing_unicast->add_route(msg, this);
+    _plumbing_unicast->push_ipv4(this);
     msg_route->unref();
 
     return true;
@@ -332,8 +332,8 @@ RibIpcHandler::delete_static_route(const IPNet<IPv4>& nlri)
     /*
     ** Inject the message into the plumbing.
     */
-    _plumbing->delete_route(msg, this);
-    _plumbing->push_ipv6(this);
+    _plumbing_unicast->delete_route(msg, this);
+    _plumbing_unicast->push_ipv6(this);
     msg_route->unref();
 
     return true;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.47 2003/09/26 17:11:45 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.48 2003/09/27 03:42:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1135,7 +1135,8 @@ BGPPeer::established()
 	string peername = "Peer-" + peerdata()->iptuple().str();
 	debug_msg("Peer is called >%s<\n", peername.c_str());
 	_handler = new PeerHandler(peername, this,
-				   _mainprocess->plumbing());
+				   _mainprocess->plumbing_unicast(),
+				   _mainprocess->plumbing_multicast());
     } else {
 	_handler->peering_came_up();
     }

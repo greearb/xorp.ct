@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.12 2003/06/20 18:55:56 hodson Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.13 2003/07/14 21:58:54 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -125,7 +125,11 @@ public:
     void rib_command_done(const XrlError& error, const char *comment);
     PeerOutputState push_packet();
 
-    void set_plumbing(BGPPlumbing *plumbing) {_plumbing = plumbing;}
+    void set_plumbing(BGPPlumbing *plumbing_unicast,
+		      BGPPlumbing *plumbing_multicast) {
+	_plumbing_unicast = plumbing_unicast;
+	_plumbing_multicast = plumbing_multicast;
+    }
     /*
     ** Insert fake static route into routing table.
     */

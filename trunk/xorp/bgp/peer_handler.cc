@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.21 2003/09/19 21:31:43 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.22 2003/10/03 00:26:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,11 +25,24 @@
 #include "bgp.hh"
 
 PeerHandler::PeerHandler(const string &init_peername,
-			 BGPPeer *peer, BGPPlumbing *plumbing)
-    : _plumbing(plumbing), _peername(init_peername), _peer(peer),
+			 BGPPeer *peer,
+			 BGPPlumbing *plumbing_unicast,
+			 BGPPlumbing *plumbing_multicast)
+    : _plumbing_unicast(plumbing_unicast), 
+      _plumbing_multicast(plumbing_multicast),
+      _peername(init_peername), _peer(peer),
       _packet(NULL)
 {
-    if (_plumbing != NULL) _plumbing->add_peering(this);
+    debug_msg("peername: %s peer %p unicast %p multicast %p\n", 
+	      _peername.c_str(), peer, _plumbing_unicast,
+	      _plumbing_multicast);
+
+    if (_plumbing_unicast != NULL) 
+	_plumbing_unicast->add_peering(this);
+
+    if (_plumbing_multicast != NULL) 
+	_plumbing_multicast->add_peering(this);
+
     _peering_is_up = true;
 
     // stats for debugging only
@@ -55,8 +68,10 @@ PeerHandler::~PeerHandler()
 {
     debug_msg("PeerHandler destructor called\n");
 
-    if (_plumbing != NULL)
-	_plumbing->delete_peering(this);
+    if (_plumbing_unicast != NULL)
+	_plumbing_unicast->delete_peering(this);
+    if (_plumbing_multicast != NULL)
+	_plumbing_multicast->delete_peering(this);
     if (_packet != NULL)
 	delete _packet;
 }
@@ -65,21 +80,24 @@ void
 PeerHandler::stop()
 {
     debug_msg("PeerHandler STOP!\n");
-    _plumbing->stop_peering(this);
+    _plumbing_unicast->stop_peering(this);
+    _plumbing_multicast->stop_peering(this);
 }
 
 void
 PeerHandler::peering_went_down()
 {
     _peering_is_up = false;
-    _plumbing->peering_went_down(this);
+    _plumbing_unicast->peering_went_down(this);
+    _plumbing_multicast->peering_went_down(this);
 }
 
 void
 PeerHandler::peering_came_up()
 {
     _peering_is_up = true;
-    _plumbing->peering_came_up(this);
+    _plumbing_unicast->peering_came_up(this);
+    _plumbing_multicast->peering_came_up(this);
 }
 
 /*
@@ -152,7 +170,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 	BGPUpdateAttribList::const_iterator wi;
 	wi = p->wr_list().begin();
 	while (wi != p->wr_list().end()) {
-	    _plumbing->delete_route(wi->net(), this);
+	    _plumbing_unicast->delete_route(wi->net(), this);
 	    ++wi;
 	}
     }
@@ -165,7 +183,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 	list<IPNet<IPv6> >::const_iterator wi6;
 	wi6 = mpunreach->wr_list().begin();
 	while (wi6 != mpunreach->wr_list().end()) {
-	    _plumbing->delete_route(*wi6, this);
+	    _plumbing_unicast->delete_route(*wi6, this);
 	    ++wi6;
 	}
     }
@@ -185,7 +203,7 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 	    SubnetRoute<IPv4>* msg_route 
 		= new SubnetRoute<IPv4>(ni4->net(), &pa_list4, NULL);
 	    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
-	    _plumbing->add_route(msg, this);
+	    _plumbing_unicast->add_route(msg, this);
 	    msg_route->unref();
 	    ++ni4;
 	}
@@ -206,16 +224,16 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 	    SubnetRoute<IPv6>* msg_route 
 		= new SubnetRoute<IPv6>(*ni6, &pa_list6, NULL);
 	    InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
-	    _plumbing->add_route(msg, this);
+	    _plumbing_unicast->add_route(msg, this);
 	    msg_route->unref();
 	    ++ni6;
 	}
     }
 
     if (ipv4)
-	_plumbing->push_ipv4(this);
+	_plumbing_unicast->push_ipv4(this);
     if (ipv6)
-	_plumbing->push_ipv6(this);
+	_plumbing_unicast->push_ipv6(this);
     return 0;
 }
 
@@ -393,8 +411,10 @@ PeerHandler::push_packet()
 void
 PeerHandler::output_no_longer_busy()
 {
-    if (_peering_is_up)
-	_plumbing->output_no_longer_busy(this);
+    if (_peering_is_up) {
+	_plumbing_unicast->output_no_longer_busy(this);
+	_plumbing_multicast->output_no_longer_busy(this);
+    }
 }
 
 EventLoop&

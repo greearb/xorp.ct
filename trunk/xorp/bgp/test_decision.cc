@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.20 2003/07/03 02:03:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.21 2003/09/16 21:00:26 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -46,7 +46,7 @@ test_decision(TestInfo& /*info*/)
     peer_data1->set_internal_peer(true);
     peer_data1->set_id("2.0.0.0");
     BGPPeer peer1(&localdata, peer_data1, NULL, &bgpmain);
-    PeerHandler handler1("test1", &peer1, NULL);
+    PeerHandler handler1("test1", &peer1, NULL, NULL);
 
     Iptuple iptuple2("3.0.0.127", 179, "2.0.0.2", 179);
     BGPPeerData *peer_data2 =
@@ -55,7 +55,7 @@ test_decision(TestInfo& /*info*/)
     peer_data2->set_internal_peer(true);
     peer_data2->set_id("2.0.0.0");
     BGPPeer peer2(&localdata, peer_data2, NULL, &bgpmain);
-    PeerHandler handler2("test2", &peer2, NULL);
+    PeerHandler handler2("test2", &peer2, NULL, NULL);
 
     Iptuple iptuple3("3.0.0.127", 179, "2.0.0.3", 179);
     BGPPeerData *peer_data3 =
@@ -64,7 +64,7 @@ test_decision(TestInfo& /*info*/)
     peer_data3->set_internal_peer(true);
     peer_data3->set_id("2.0.0.0");
     BGPPeer peer3(&localdata, peer_data3, NULL, &bgpmain);
-    PeerHandler handler3("test3", &peer3, NULL);
+    PeerHandler handler3("test3", &peer3, NULL, NULL);
 
     DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop(), bgpmain);
 

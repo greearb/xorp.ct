@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.5 2003/03/10 23:20:02 hodson Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.6 2003/04/22 19:20:17 mjh Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -33,7 +33,8 @@ class BGPPlumbing;
 class PeerHandler {
 public:
     PeerHandler(const string &peername, BGPPeer *peer,
-		   BGPPlumbing *plumbing);
+		BGPPlumbing *plumbing_unicast,
+		BGPPlumbing *plumbing_multicast);
     virtual ~PeerHandler();
 
     void stop();
@@ -93,7 +94,8 @@ public:
 
     EventLoop& eventloop() const;
 protected:
-    BGPPlumbing *_plumbing;
+    BGPPlumbing *_plumbing_unicast;
+    BGPPlumbing *_plumbing_multicast;
     bool _ibgp; // did the current update message originate in IBGP?
 private:
     string _peername;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.24 2003/09/10 21:37:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.25 2003/09/16 21:00:26 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,16 +28,14 @@
 #include "plumbing.hh"
 #include "bgp.hh"
 
-BGPPlumbing::BGPPlumbing(XrlStdRouter *xrl_router, RibIpcHandler* ribhandler,
+BGPPlumbing::BGPPlumbing(const string& safi, XrlStdRouter *xrl_router,
+			 RibIpcHandler* ribhandler,
 			 EventLoop& eventloop, BGPMain& bgp)
-    : _rib_handler(ribhandler), 
-    _v4_plumbing("IPv4", *this, xrl_router, eventloop, bgp), 
-    _v6_plumbing("IPv6", *this, xrl_router, eventloop, bgp),
+    : _rib_handler(ribhandler),
+    _v4_plumbing("(IPv4:" + safi + ")", *this, xrl_router, eventloop, bgp), 
+    _v6_plumbing("(IPv6:" + safi + ")", *this, xrl_router, eventloop, bgp),
     _my_AS_number(AsNum::AS_INVALID)
 {
-    /*most of the interesting stuff happens in the address-family
-      specific code */
-    _rib_handler->set_plumbing(this);
 }
 
 void
@@ -214,7 +212,7 @@ BGPPlumbing::status(string& reason) const
 /***********************************************************************/
 
 template <class A>
-BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
+BGPPlumbingAF<A>::BGPPlumbingAF<A> (const string& ribname, BGPPlumbing& master,
 				    XrlStdRouter *xrl_router,
 				    EventLoop& eventloop,
 				    BGPMain& bgp) 

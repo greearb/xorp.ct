@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.18 2003/09/05 00:43:14 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.19 2003/09/10 21:37:06 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -278,7 +278,8 @@ public:
      * Originally inserted for testing. However, now used by all the
      * "rib_client_route_info_*" methods.
      */
-    BGPPlumbing *plumbing() const { return _plumbing; }
+    BGPPlumbing *plumbing_unicast() const { return _plumbing_unicast; }
+    BGPPlumbing *plumbing_multicast() const { return _plumbing_multicast; }
 
     XrlStdRouter *get_router() { return _xrl_router; }
     EventLoop& eventloop() { return _eventloop; }
@@ -387,7 +388,17 @@ private:
 
     bool _exit_loop;
     BGPPeerList *_peerlist;
-    BGPPlumbing *_plumbing;
+
+    /**
+    * Unicast Routing Table. SAFI = 1.
+    */
+    BGPPlumbing *_plumbing_unicast;
+
+    /**
+    * Multicast Routing Table. SAFI = 2.
+    */
+    BGPPlumbing *_plumbing_multicast;
+
     XrlBgpTarget *_xrl_target;
     RibIpcHandler *_rib_ipc_handler;
     LocalData _local_data;
