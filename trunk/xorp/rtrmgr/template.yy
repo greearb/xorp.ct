@@ -132,10 +132,13 @@ statements:	/* empty string */
 		| statement statements
 		;
 
-statement:	terminal | command | definition
+statement:	terminal
+		| command
+		| definition
 		;
 
-terminal:	default_terminal | regular_terminal
+terminal:	default_terminal
+		| regular_terminal
 		;
 
 regular_terminal:	LITERAL COLON type END { terminal($1); }

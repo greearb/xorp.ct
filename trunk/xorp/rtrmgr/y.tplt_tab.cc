@@ -285,7 +285,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 221 "template.yy"
+#line 224 "template.yy"
 
 extern char *lstr;
 extern char *vstr;
@@ -757,26 +757,26 @@ case 32:
 { pop_path(); }
 break;
 case 40:
-#line 141 "template.yy"
-{ terminal(yyvsp[-3]); }
-break;
-case 41:
 #line 144 "template.yy"
 { terminal(yyvsp[-3]); }
 break;
+case 41:
+#line 147 "template.yy"
+{ terminal(yyvsp[-3]); }
+break;
 case 46:
-#line 157 "template.yy"
+#line 160 "template.yy"
 { add_cmd(yyvsp[0]); }
 break;
 case 49:
-#line 164 "template.yy"
+#line 167 "template.yy"
 {
 			prepend_cmd(yyvsp[-1]);
 			end_cmd();
 		}
 break;
 case 50:
-#line 168 "template.yy"
+#line 171 "template.yy"
 {
 			append_cmd(yyvsp[-3]);
 			append_cmd(yyvsp[-2]);
@@ -786,7 +786,7 @@ case 50:
 		}
 break;
 case 51:
-#line 175 "template.yy"
+#line 178 "template.yy"
 { /* e.g.: set FOOBAR ipv4 */
 			append_cmd(yyvsp[-2]);
 			append_cmd(yyvsp[-1]);
@@ -795,7 +795,7 @@ case 51:
 		}
 break;
 case 52:
-#line 181 "template.yy"
+#line 184 "template.yy"
 {
 			append_cmd(yyvsp[-1]);
 			append_cmd(yyvsp[0]);
@@ -803,7 +803,7 @@ case 52:
 		}
 break;
 case 53:
-#line 186 "template.yy"
+#line 189 "template.yy"
 {
 			append_cmd(yyvsp[-2]);
 			append_cmd(yyvsp[-1]);
@@ -812,39 +812,39 @@ case 53:
 		}
 break;
 case 54:
-#line 192 "template.yy"
+#line 195 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 			end_cmd();
 		}
 break;
 case 55:
-#line 196 "template.yy"
+#line 199 "template.yy"
 {
 			prepend_cmd(yyvsp[-1]);
 			end_cmd();
 		}
 break;
 case 56:
-#line 200 "template.yy"
+#line 203 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 		}
 break;
 case 57:
-#line 206 "template.yy"
+#line 209 "template.yy"
 {
 			prepend_cmd(yyvsp[0]);
 		}
 break;
 case 58:
-#line 209 "template.yy"
+#line 212 "template.yy"
 {
 			prepend_cmd(yyvsp[-1]);
 		}
 break;
 case 59:
-#line 214 "template.yy"
+#line 217 "template.yy"
 {
 			tplterror("syntax error");
 		}
