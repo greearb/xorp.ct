@@ -246,11 +246,6 @@ class Lsa {
 //     virtual uint8_t *encode(size_t &len) = 0;
 
     /**
-     * Add the LSA type bindings.
-     */
-//     void install_type(LsaType type, Lsa *lsa); 
-    
-    /**
      * Get a reference to the raw LSA
      *
      * @param len The length of the LSA.
@@ -261,6 +256,12 @@ class Lsa {
 	len = _pkt.size();
 	return &_pkt[0];
     }
+
+    /**
+     * Add the LSA type bindings.
+     */
+//     void install_type(LsaType type, Lsa *lsa); 
+    
  protected:
     Lsa_header _header;		// Common LSA header.
     vector<uint8_t> _pkt;	// Raw LSA.
