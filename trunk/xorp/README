@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.13 2003/08/28 15:57:33 pavlin Exp $
+# $XORP: xorp/README,v 1.14 2003/10/15 04:12:47 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -71,7 +71,10 @@ release of XORP may compile or work on.
 Currently, XORP implements the following protocols:
 
   * BGP4:
-   - draft-ietf-idr-bgp4-20.txt
+   - draft-ietf-idr-bgp4-22.txt (A Border Gateway Protocol 4 (BGP-4))
+   - RFC 3392 (Capabilities Advertisement with BGP-4)
+   - draft-ietf-idr-rfc2858bis-03.txt (Multiprotocol Extensions for BGP-4)
+   - RFC 2545 (Use of Multiprotocol Extensions for IPv6 Inter-Domain Routing)
 
   * PIM-SM:
     - draft-ietf-pim-sm-v2-new-05.{ps,txt} (without SSM).
