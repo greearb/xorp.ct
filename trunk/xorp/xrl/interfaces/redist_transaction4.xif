@@ -33,6 +33,8 @@ interface redist_transaction4/0.1 {
 	 * @param ad administrative distance of origin routing protocol.
 	 * @param cookie value set be requestor to identify redistribution
 	 *        source.  Typical value is the originating protocol name.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this entry.
 	 */
 	add_route ? tid:u32						\
 		  & dst:ipv4net						\
@@ -41,7 +43,8 @@ interface redist_transaction4/0.1 {
 		  & vifname:txt						\
 		  & metric:u32						\
 		  & ad:u32						\
-		  & cookie:txt
+		  & cookie:txt						\
+		  & protocol_origin:txt
 
 	delete_route ? tid:u32						\
 		     & network:ipv4net					\

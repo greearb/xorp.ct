@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.4 2004/05/12 21:42:27 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.5 2004/05/13 01:43:54 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -87,6 +87,7 @@ protected:
     string	_vifname;
     uint32_t	_metric;
     uint32_t	_admin_distance;
+    string	_protocol_origin;
 };
 
 template <typename A>
@@ -167,7 +168,8 @@ template <typename A>
 AddRoute<A>::AddRoute(RedistXrlOutput<A>* parent, const IPRouteEntry<A>& ipr)
     : RedistXrlTask<A>(parent), _net(ipr.net()), _nh(ipr.nexthop_addr()),
       _ifname(ipr.vif()->ifname()), _vifname(ipr.vif()->name()),
-      _metric(ipr.metric()), _admin_distance(ipr.admin_distance())
+      _metric(ipr.metric()), _admin_distance(ipr.admin_distance()),
+      _protocol_origin(ipr.protocol().name())
 {
 }
 
@@ -319,6 +321,7 @@ AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router)
 			     this->parent()->tid(),
 			     _net, _nh, _ifname, _vifname, _metric,
 			     _admin_distance, this->parent()->cookie(),
+			     _protocol_origin,
 			     callback(dynamic_cast<AddRoute<IPv4>* >(this),
 				      &AddRoute<IPv4>::dispatch_complete)
 			     );
@@ -342,6 +345,7 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router)
 			     this->parent()->tid(),
 			     _net, _nh, _ifname, _vifname, _metric,
 			     _admin_distance, this->parent()->cookie(),
+			     _protocol_origin,
 			     callback(dynamic_cast<AddRoute<IPv6>* >(this),
 				      &AddRoute<IPv6>::dispatch_complete)
 			     );

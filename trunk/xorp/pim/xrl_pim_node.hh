@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.37 2004/04/29 23:39:28 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.38 2004/05/12 21:59:34 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -550,6 +550,9 @@ protected:
      *
      *  @param cookie value set be requestor to identify redistribution source.
      *  Typical value is the originating protocol name.
+     *
+     *  @param protocol_origin the name of the protocol that originated this
+     *  entry.
      */
     XrlCmdError redist_transaction4_0_1_add_route(
 	// Input values,
@@ -560,7 +563,8 @@ protected:
 	const string&	vifname,
 	const uint32_t&	metric,
 	const uint32_t&	ad,
-	const string&	cookie);
+	const string&	cookie,
+	const string&	protocol_origin);
 
     XrlCmdError redist_transaction4_0_1_delete_route(
 	// Input values,
@@ -614,6 +618,9 @@ protected:
      *
      *  @param cookie value set be requestor to identify redistribution source.
      *  Typical value is the originating protocol name.
+     *
+     *  @param protocol_origin the name of the protocol that originated this
+     *  entry.
      */
     XrlCmdError redist_transaction6_0_1_add_route(
 	// Input values,
@@ -624,7 +631,8 @@ protected:
 	const string&	vifname,
 	const uint32_t&	metric,
 	const uint32_t&	ad,
-	const string&	cookie);
+	const string&	cookie,
+	const string&	protocol_origin);
 
     XrlCmdError redist_transaction6_0_1_delete_route(
 	// Input values,

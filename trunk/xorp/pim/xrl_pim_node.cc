@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.48 2004/04/30 23:06:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.49 2004/05/12 21:59:34 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -2413,7 +2413,8 @@ XrlPimNode::redist_transaction4_0_1_add_route(
     const string&	vifname,
     const uint32_t&	metric,
     const uint32_t&	ad,
-    const string&	cookie)
+    const string&	cookie,
+    const string&	protocol_origin)
 {
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
 
@@ -2453,6 +2454,7 @@ XrlPimNode::redist_transaction4_0_1_add_route(
     return XrlCmdError::OKAY();
 
     UNUSED(cookie);
+    UNUSED(protocol_origin);
 }
 
 XrlCmdError
@@ -2573,7 +2575,8 @@ XrlPimNode::redist_transaction6_0_1_add_route(
     const string&	vifname,
     const uint32_t&	metric,
     const uint32_t&	ad,
-    const string&	cookie)
+    const string&	cookie,
+    const string&	protocol_origin)
 {
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
 
@@ -2613,6 +2616,7 @@ XrlPimNode::redist_transaction6_0_1_add_route(
     return XrlCmdError::OKAY();
 
     UNUSED(cookie);
+    UNUSED(protocol_origin);
 }
 
 XrlCmdError
