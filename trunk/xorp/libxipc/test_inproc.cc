@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.2 2002/12/14 23:42:55 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.3 2002/12/18 22:54:29 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -36,21 +36,21 @@ static const bool g_show_trace = false;
 static bool hello_done = false;
 
 static const XrlCmdError
-hello_recv_handler(const Xrl&	request, 
+hello_recv_handler(const Xrl&	request,
 		   XrlArgs*	response)
 {
-    trace("hello_recv_handler: request %s response %p\n", 
+    trace("hello_recv_handler: request %s response %p\n",
 	  request.str().c_str(), response);
     return XrlCmdError::OKAY();
 }
 
 static void
 hello_reply_handler(const XrlError&	e,
-		    const Xrl&		request, 
+		    const Xrl&		request,
 		    XrlArgs*		response)
 {
     if (e == XrlError::OKAY()) {
-	trace("hello_reply_handler: request %s response %p\n", 
+	trace("hello_reply_handler: request %s response %p\n",
 	      request.str().c_str(), response);
     } else {
 	trace("hello failed: %s\n", e.str().c_str());
@@ -59,7 +59,8 @@ hello_reply_handler(const XrlError&	e,
 }
 
 static void
-test_hello(EventLoop& e, XrlPFInProcSender &s) {
+test_hello(EventLoop& e, XrlPFInProcSender &s)
+{
     Xrl x("anywhere", "hello");
 
     debug_msg("test_hello\n");
@@ -77,10 +78,10 @@ test_hello(EventLoop& e, XrlPFInProcSender &s) {
 static bool int32_done = false;
 
 static const XrlCmdError
-int32_recv_handler(const Xrl&	request, 
+int32_recv_handler(const Xrl&	request,
 		   XrlArgs*	response)
 {
-    trace("int32_recv_handler: request %s response %p\n", 
+    trace("int32_recv_handler: request %s response %p\n",
 	   request.str().c_str(), response);
     if (response)
 	response->add_int32("an_int32", 123456);
@@ -88,8 +89,8 @@ int32_recv_handler(const Xrl&	request,
 }
 
 static void
-int32_reply_handler(const XrlError&	e, 
-		    const Xrl&		request, 
+int32_reply_handler(const XrlError&	e,
+		    const Xrl&		request,
 		    XrlArgs*		response)
 {
     if (e == XrlError::OKAY()) {
@@ -105,13 +106,14 @@ int32_reply_handler(const XrlError&	e,
 }
 
 static void
-test_int32(EventLoop& e, XrlPFInProcSender& s) {
+test_int32(EventLoop& e, XrlPFInProcSender& s)
+{
     Xrl x("anywhere", "get_int32");
 
     debug_msg("test_int32\n");
 
     s.send(x, callback(int32_reply_handler));
-    while(int32_done == 0)
+    while (int32_done == 0)
 	e.run();
 
     int32_done = 0;
@@ -142,10 +144,10 @@ run_test()
     assert(dp.scheduled());
 
     printf("Testing XRLPFInProc");
-    for(int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 100000; i++) {
 	test_hello(event_loop, s);
 	test_int32(event_loop, s);
-	// Can't call event_loop.run() because it blocks and inproc 
+	// Can't call event_loop.run() because it blocks and inproc
 	// send/recv stuff happens instantaneously.
 	event_loop.timer_list().run();
     }
@@ -156,7 +158,8 @@ run_test()
 // ----------------------------------------------------------------------------
 // Main
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
     //
     // Initialize and start xlog
     //
@@ -174,6 +177,6 @@ int main(int /* argc */, char *argv[]) {
     //
     xlog_stop();
     xlog_exit();
-    
+
     return 0;
 }

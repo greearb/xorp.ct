@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_transport.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_transport.cc,v 1.1 2002/12/14 23:42:54 hodson Exp $"
 
 #include <vector>
 
@@ -34,14 +34,14 @@
 /* static FinderTransport methods */
 
 void
-FinderTransport::no_arrival_callback(const FinderTransport&, 
+FinderTransport::no_arrival_callback(const FinderTransport&,
 				     const string&)
 {
     XLOG_ERROR("FinderTransport with no arrival callback.");
 }
 
 void
-FinderTransport::no_departure_callback(const FinderTransport&, 
+FinderTransport::no_departure_callback(const FinderTransport&,
 				       const FinderMessage::RefPtr&)
 {
     XLOG_ERROR("FinderTransport with no departure callback.");
@@ -66,7 +66,7 @@ public:
 	reader_reprovision(1480);
     }
 
-    ~FinderTcpTransport() 
+    ~FinderTcpTransport()
     {
 	if (_fd > 0)
 	    close_socket(_fd);
@@ -90,14 +90,14 @@ protected:
 
     // Methods
     void push_departures();
-    void async_write(AsyncFileWriter::Event	e, 
-		     const uint8_t*		buffer, 
+    void async_write(AsyncFileWriter::Event	e,
+		     const uint8_t*		buffer,
 		     size_t			buffer_bytes,
 		     size_t			offset);
 
     void reader_reprovision(size_t bytes_required);
-    void async_read(AsyncFileReader::Event	e, 
-		     const uint8_t*		buffer, 
+    void async_read(AsyncFileReader::Event	e,
+		     const uint8_t*		buffer,
 		     size_t			buffer_bytes,
 		     size_t			offset);
 };
@@ -105,7 +105,7 @@ protected:
 void
 FinderTcpTransport::push_departures()
 {
-    debug_msg("writer running (%d)\n", 
+    debug_msg("writer running (%d)\n",
 	      _writer.running());
 
     if (_writer.running() == false && departures_waiting() == 1) {
@@ -120,7 +120,7 @@ FinderTcpTransport::push_departures()
 	}
 	if (_writer.buffers_remaining())
 	    _writer.flush_buffers();
-	_writer.add_buffer((const uint8_t*)_write_data.begin(), 
+	_writer.add_buffer((const uint8_t*)_write_data.begin(),
 			   _write_data.size(),
 			   callback(this, &FinderTcpTransport::async_write));
 	_writer.start();
@@ -172,7 +172,7 @@ FinderTcpTransport::reader_reprovision(size_t extra_bytes)
     if (_read_pos > extra_bytes) {
 	// Free space exists at start of buffer
 	// Copy all pending data there.
-	copy(_read_data.begin() + _read_pos, _read_data.end(), 
+	copy(_read_data.begin() + _read_pos, _read_data.end(),
 	     _read_data.begin());
 	resume_pos = _read_data.size() - _read_pos;
 	_read_pos = 0;
@@ -182,7 +182,7 @@ FinderTcpTransport::reader_reprovision(size_t extra_bytes)
     }
     _reader.flush_buffers();
 
-    debug_msg("Reprovision %d (%d -> %d)\n", _read_pos, 
+    debug_msg("Reprovision %d (%d -> %d)\n", _read_pos,
 	      _read_data.size(), _read_data.size() + extra_bytes);
     _reader.add_buffer_with_offset((uint8_t*)_read_data.begin(),
 				   _read_data.size(),
@@ -198,11 +198,11 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
 			       size_t			/* buffer_bytes */,
 			       size_t			offset)
 {
-    if (ev == AsyncFileReader::FLUSHING) 
+    if (ev == AsyncFileReader::FLUSHING)
 	return; // this code pre-dates flushing callbacks.
 
     assert(buffer == (const uint8_t*)_read_data.begin());
-    debug_msg("async_read Event %d pos %d offset %d space %d\n", 
+    debug_msg("async_read Event %d pos %d offset %d space %d\n",
 	      ev, _read_pos, offset, _read_data.size());
     if (ev != AsyncFileReader::DATA) {
 	if (errno == EAGAIN) {
@@ -216,7 +216,7 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
     }
 
     string r;
-    for(;;) {
+    for (;;) {
 	try {
 	    assert(_read_pos < _read_data.size());
 	    ssize_t available = offset - _read_pos;
@@ -244,7 +244,7 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
 	    size_t payload_bytes = FinderParser::peek_payload_bytes(r);
 	    size_t msg_bytes = header_bytes + payload_bytes;
 
-	    debug_msg("Space %d Need %d\n", 
+	    debug_msg("Space %d Need %d\n",
 		      _read_data.size() - _read_pos, msg_bytes);
 	    if (_read_data.size() < _read_pos + msg_bytes) {
 		// short of space...resize buffer and push back
@@ -257,7 +257,7 @@ FinderTcpTransport::async_read(AsyncFileReader::Event	ev,
 
 	    assert(_read_pos + msg_bytes <= _read_data.size());
 	    debug_msg("message bytes %d\n", msg_bytes);
-	    string msg(_read_data.begin() + _read_pos, msg_bytes); 
+	    string msg(_read_data.begin() + _read_pos, msg_bytes);
 	    announce_arrival(msg);
 	    _read_pos += msg_bytes;
 	    if (_read_pos == _read_data.size()) {
@@ -285,9 +285,9 @@ FinderTcpServerFactory::FinderTcpServerFactory(EventLoop&		e,
     throw (BadPort) : FinderTransportServerFactory(cb), _event_loop(e)
 {
     _fd = create_listening_ip_socket(TCP, port);
-    if (_fd < 0) 
+    if (_fd < 0)
 	xorp_throw(BadPort, c_format("Port %d: %s", port, strerror(errno)));
-    _event_loop.add_selector(_fd, SEL_RD, 
+    _event_loop.add_selector(_fd, SEL_RD,
 			     callback(this, &FinderTcpServerFactory::connect));
 }
 
@@ -315,7 +315,7 @@ FinderTcpServerFactory::connect(int fd, SelectorMask m)
     } else {
         XLOG_ERROR("accept() from FinderTcpServerFactory::connect() failed: "
 		   "%s", strerror(errno));
-    }        
+    }
 }
 
 /* ------------------------------------------------------------------------- */
@@ -323,13 +323,13 @@ FinderTcpServerFactory::connect(int fd, SelectorMask m)
 
 FinderTcpClientFactory::FinderTcpClientFactory(EventLoop&  e,
 					       const char* addr, int port)
-    throw (BadDest) : _e(e), _addr(addr), _port(port) 
+    throw (BadDest) : _e(e), _addr(addr), _port(port)
 {
 
     in_addr ia;
-    if (address_lookup(addr, ia) == false) 
+    if (address_lookup(addr, ia) == false)
 	xorp_throw(BadDest, c_format("Bad address: %s", addr));
-    if (port > 65536) 
+    if (port > 65536)
 	xorp_throw(BadDest, c_format("Bad port: %d", port));
 }
 

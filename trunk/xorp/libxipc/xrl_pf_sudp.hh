@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.1 2002/12/14 23:43:02 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.2 2002/12/18 22:54:30 hodson Exp $
 
 #ifndef __XRLPF_SUDP_HH__
 #define __XRLPF_SUDP_HH__
@@ -20,11 +20,11 @@
 #include "xrl_pf.hh"
 
 // ----------------------------------------------------------------------------
-// XRL Protocol Family : Simplest UDP 
+// XRL Protocol Family : Simplest UDP
 
 class XrlPFSUDPListener : public XrlPFListener {
 public:
-    XrlPFSUDPListener(EventLoop& e, XrlCmdMap* m = 0) 
+    XrlPFSUDPListener(EventLoop& e, XrlCmdMap* m = 0)
 	throw (XrlPFConstructorError);
     ~XrlPFSUDPListener();
 
@@ -45,7 +45,7 @@ private:
 
 class XrlPFSUDPSender : public XrlPFSender {
 public:
-    XrlPFSUDPSender(EventLoop& e, const char* address = NULL) 
+    XrlPFSUDPSender(EventLoop& e, const char* address = NULL)
 	throw (XrlPFConstructorError);
     virtual ~XrlPFSUDPSender();
 
@@ -64,7 +64,7 @@ private:
 
     void timeout_hook(XUID x);
 
-    static int instance_count; 	
+    static int instance_count;
     static map<const XUID, Request> requests_pending; // demux help
 };
 

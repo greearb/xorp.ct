@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_header.cc,v 1.11 2002/12/09 18:29:05 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_header.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 #include <string>
 #include <stdio.h>
@@ -45,7 +45,7 @@ run_test()
 	r.get("a string", s).get("an int", i).get("a double", d);
 
 	if (s != src_text) {
-	    fprintf(stderr, "failed string %s != %s", 
+	    fprintf(stderr, "failed string %s != %s",
 		    s.c_str(), src_text.c_str());
 	    exit(-1);
 	} else if (i != src_int) {
@@ -61,7 +61,7 @@ run_test()
 	    printf("failed: incorrect match\n");
 	    exit(-1);
 	} catch (const HeaderReader::NotFound& e) {
-	    //	    printf("okay\n");	    
+	    //	    printf("okay\n");
 	}
     }
 
@@ -84,8 +84,9 @@ run_test()
     }
 }
 
-int 
-main(int /* argc */, char *argv[]) {
+int
+main(int /* argc */, char *argv[])
+{
     //
     // Initialize and start xlog
     //
@@ -103,6 +104,6 @@ main(int /* argc */, char *argv[]) {
     //
     xlog_stop();
     xlog_exit();
-    
+
     return 0;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/sockutil.hh,v 1.6 2002/12/09 18:29:05 hodson Exp $
+// $XORP: xorp/libxipc/sockutil.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
 
 /* Some helper functions for sockets */
 
@@ -33,11 +33,11 @@ enum IPSocketType { UDP = IPPROTO_UDP, TCP = IPPROTO_TCP };
  * @return fd of socket or -1 if unsuccessful.
  */
 int create_connected_ip_socket(IPSocketType t, const string& addr_slash_port);
-			       
+
 /**
  * @return fd of socket or -1 if unsuccessful.
  */
-int create_connected_ip_socket(IPSocketType t, 
+int create_connected_ip_socket(IPSocketType t,
 			       const string& addr, uint16_t port);
 
 /**
@@ -89,7 +89,7 @@ int set_socket_sndbuf_bytes(int fd, uint32_t bytes);
 int set_socket_rcvbuf_bytes(int fd, uint32_t bytes);
 
 /**
- * @return address slash port 
+ * @return address slash port
  */
 string address_slash_port(const string& addr, uint16_t port);
 
@@ -119,7 +119,7 @@ uint32_t if_count();
  * @param reference to string to take interface's name.
  * @param reference to in_addr to take interface's IPv4 address.
  * @param reference to uint16_t to take interface's flags.
- * 
+ *
  * @return true on success, false on failure.
  */
 bool if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags);

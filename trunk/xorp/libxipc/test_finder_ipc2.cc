@@ -1,4 +1,4 @@
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string>
@@ -15,8 +15,9 @@
 
 static bool can_read = false;
 
-static void 
-select_hook(int fd, SelectorMask m, void *thunk) {
+static void
+select_hook(int fd, SelectorMask m, void *thunk)
+{
     FinderTCPIPCService *ipc = reinterpret_cast<FinderTCPIPCService*>(thunk);
     assert(ipc->descriptor() == fd);
     assert(m == SEL_RD);
@@ -24,13 +25,15 @@ select_hook(int fd, SelectorMask m, void *thunk) {
 }
 
 static void
-connect_hook(FinderTCPIPCService* created, void* thunk) {
+connect_hook(FinderTCPIPCService* created, void* thunk)
+{
     FinderIPCService** pps = reinterpret_cast<FinderIPCService**>(thunk);
     *pps = created;
 }
 
-static bool 
-periodic_dot_printing(void*) {
+static bool
+periodic_dot_printing(void*)
+{
     printf(".");
     fflush(stdout);
     return true;
@@ -43,8 +46,8 @@ typedef bool (*test_iter_f)(EventLoop *, FinderIPCService* /* reader */,
 			    FinderIPCService* /* writer */);
 
 static bool
-test_hello_iter(EventLoop *e, 
-		FinderIPCService* reader, 
+test_hello_iter(EventLoop *e,
+		FinderIPCService* reader,
 		FinderIPCService* writer) {
     bool timed_out = false;
     XorpTimer timeout_timer = e->set_flag_after_ms(500, &timed_out);
@@ -54,7 +57,7 @@ test_hello_iter(EventLoop *e,
     writer->prepare_message(m, HELLO);
     writer->write_message(m);
 
-    for(can_read = false; (can_read | timed_out) == false; e->run());
+    for (can_read = false; (can_read | timed_out) == false; e->run());
     if (can_read)
         reader->read_message(n);
 
@@ -73,16 +76,16 @@ test_bye_iter(EventLoop *e,
     writer->prepare_message(m, BYE);
     writer->write_message(m);
 
-    for(can_read = false; (can_read|timed_out) == false; e->run());
+    for (can_read = false; (can_read|timed_out) == false; e->run());
     if (can_read)
         reader->read_message(n);
-    
+
     return (m == n);
 }
 
-static bool 
-test_register_iter(EventLoop*		e, 
-		   FinderIPCService*	reader, 
+static bool
+test_register_iter(EventLoop*		e,
+		   FinderIPCService*	reader,
 		   FinderIPCService*	writer) {
     bool timed_out = false;
     XorpTimer timeout_timer = e->set_flag_after_ms(500, &timed_out);
@@ -93,16 +96,16 @@ test_register_iter(EventLoop*		e,
     writer->prepare_message(m, REGISTER, key, value);
     writer->write_message(m);
 
-    for(can_read = false; (can_read|timed_out) == false; e->run());
+    for (can_read = false; (can_read|timed_out) == false; e->run());
     if (can_read)
         reader->read_message(n);
 
     return (m == n);
 }
 
-static bool 
+static bool
 test_register_iter2(EventLoop*		e,
-		    FinderIPCService*	reader, 
+		    FinderIPCService*	reader,
 		    FinderIPCService*	writer) {
     bool timed_out = false;
     XorpTimer timeout_timer = e->set_flag_after_ms(500, &timed_out);
@@ -130,21 +133,21 @@ test_register_iter2(EventLoop*		e,
 	writer->write_message(m[i]);
     }
 
-    for(i = 0; i < nd; i++) {
+    for (i = 0; i < nd; i++) {
 	for (can_read = false; (can_read|timed_out) == false; e->run());
 	if (can_read) {
 	    reader->read_message(n[i]);
 	    if (n[i] != m[i])
 		i = nd + 1;
-	} 
+	}
     }
 
     return (i == nd);
 }
 
-static bool 
+static bool
 test_notify_iter(EventLoop*		e,
-		 FinderIPCService*	reader, 
+		 FinderIPCService*	reader,
 		 FinderIPCService*	writer) {
     bool timed_out = false;
     XorpTimer timeout_timer = e->set_flag_after_ms(500, &timed_out);
@@ -155,17 +158,17 @@ test_notify_iter(EventLoop*		e,
     writer->prepare_message(m, NOTIFY, key, value);
     writer->write_message(m);
 
-    for(can_read = false; (can_read|timed_out) == false; e->run());
+    for (can_read = false; (can_read|timed_out) == false; e->run());
     if (can_read) {
         reader->read_message(n);
-    } 
+    }
 
     return (m == n);
 }
 
-static bool 
+static bool
 test_locate_iter(EventLoop*		e,
-		 FinderIPCService*	reader, 
+		 FinderIPCService*	reader,
 		 FinderIPCService*	writer) {
     bool timed_out = false;
     XorpTimer timeout_timer = e->set_flag_after_ms(500, &timed_out);
@@ -176,18 +179,18 @@ test_locate_iter(EventLoop*		e,
     writer->prepare_message(m, LOCATE, key);
     writer->write_message(m);
 
-    for(can_read = false; (can_read|timed_out) == false; e->run());
+    for (can_read = false; (can_read|timed_out) == false; e->run());
     if (can_read) {
         reader->read_message(n);
-    } 
+    }
 
     return (m == n);
 }
 
-static bool 
-run_test(EventLoop*		event_loop, 
-	 FinderIPCService*	server, 
-	 FinderIPCService*	client, 
+static bool
+run_test(EventLoop*		event_loop,
+	 FinderIPCService*	server,
+	 FinderIPCService*	client,
 	 test_iter_f		iter_func,
 	 const char* 		name) {
 
@@ -196,19 +199,20 @@ run_test(EventLoop*		event_loop,
     XorpTimer dot_printer = event_loop->new_periodic(100, periodic_dot_printing, 0);
 
     bool failed = false;
-    for(int i = 0; i < 20 && failed == false; i++) {
+    for (int i = 0; i < 20 && failed == false; i++) {
 	failed = !iter_func(event_loop, server, client);
-    } 
+    }
 
     printf("%s\n", (failed) ? "fail" : "okay");
     return failed;
 }
 
-int 
-main(int /* argc */, char *argv[]) {
+int
+main(int /* argc */, char *argv[])
+{
     EventLoop event_loop;
     FinderTCPIPCService *client, *server;
-    
+
     //
     // Initialize and start xlog
     //
@@ -218,25 +222,25 @@ main(int /* argc */, char *argv[]) {
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     FinderTCPServerIPCFactory f(event_loop.selector_list(), connect_hook,
 				reinterpret_cast<void*>(&server));
 
     client = FinderTCPClientIPCFactory::create();
-    for(server = NULL; server == NULL; event_loop.run());
+    for (server = NULL; server == NULL; event_loop.run());
 
     event_loop.add_selector(server->descriptor(), SEL_RD,
 			    select_hook, server);
-    
+
     bool failed = false;
     failed |= run_test(&event_loop, server, client, test_hello_iter, "HELLO");
-    failed |= run_test(&event_loop, server, client, test_register_iter, 
+    failed |= run_test(&event_loop, server, client, test_register_iter,
 		       "REGISTER");
-    failed |= run_test(&event_loop, server, client, test_register_iter2, 
+    failed |= run_test(&event_loop, server, client, test_register_iter2,
 		       "REGISTER multi");
-    failed |= run_test(&event_loop, server, client, test_notify_iter, 
+    failed |= run_test(&event_loop, server, client, test_notify_iter,
 		       "NOTIFY");
-    failed |= run_test(&event_loop, server, client, test_locate_iter, 
+    failed |= run_test(&event_loop, server, client, test_locate_iter,
 		       "LOCATE");
     failed |= run_test(&event_loop, server, client, test_bye_iter, "BYE");
     if (failed)
@@ -250,7 +254,7 @@ main(int /* argc */, char *argv[]) {
     //
     xlog_stop();
     xlog_exit();
-    
+
     return 0;
 }
 

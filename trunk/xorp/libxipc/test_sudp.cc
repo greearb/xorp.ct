@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_sudp.cc,v 1.2 2002/12/14 23:42:57 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_sudp.cc,v 1.3 2002/12/18 22:54:30 hodson Exp $"
 
 #include <stdio.h>
 #include "xrl_module.h"
@@ -28,36 +28,37 @@ static bool g_trace = false;
 static bool hello_done = false;
 
 static const XrlCmdError
-hello_recv_handler(const Xrl&	request, 
+hello_recv_handler(const Xrl&	request,
 		   XrlArgs*	response)
 {
-    trace("hello_recv_handler: request %s response %p\n", 
+    trace("hello_recv_handler: request %s response %p\n",
 	  request.str().c_str(), response);
     return XrlCmdError::OKAY();
 }
 
 static void
 hello_reply_handler(const XrlError&	e,
-		    const Xrl&		request, 
+		    const Xrl&		request,
 		    XrlArgs*		response)
 {
     if (e != XrlError::OKAY()) {
 	fprintf(stderr, "hello failed: %s\n", e.str().c_str());
 	exit(-1);
     }
-    trace("hello_reply_handler: request %s response %p\n", 
+    trace("hello_reply_handler: request %s response %p\n",
 	  request.str().c_str(), response);
     hello_done = true;
 }
 
 static void
-test_hello(EventLoop& e, XrlPFSUDPListener &l) {
+test_hello(EventLoop& e, XrlPFSUDPListener &l)
+{
     Xrl x("anywhere", "hello");
 
     XrlPFSUDPSender s(e, l.address());
     s.send(x, callback(hello_reply_handler));
 
-    while(hello_done == 0) {
+    while (hello_done == 0) {
 	e.run();
     }
 }
@@ -68,10 +69,10 @@ test_hello(EventLoop& e, XrlPFSUDPListener &l) {
 static bool int32_done = false;
 
 static const XrlCmdError
-int32_recv_handler(const Xrl&	request, 
-		   XrlArgs*	response) 
+int32_recv_handler(const Xrl&	request,
+		   XrlArgs*	response)
 {
-    trace("int32_recv_handler: request %s response %p\n", 
+    trace("int32_recv_handler: request %s response %p\n",
 	   request.str().c_str(), response);
     if (response) {
 	response->add_int32("an_int32", 123456);
@@ -80,28 +81,29 @@ int32_recv_handler(const Xrl&	request,
 }
 
 static void
-int32_reply_handler(const XrlError&	e, 
-		    const Xrl&		request, 
+int32_reply_handler(const XrlError&	e,
+		    const Xrl&		request,
 		    XrlArgs*		response)
 {
     if (e != XrlError::OKAY()) {
 	fprintf(stderr, "get_int32 failed: %s\n", e.str().c_str());
 	exit(-1);
     }
-    trace("int32_reply_handler: request %s response %p\n", 
+    trace("int32_reply_handler: request %s response %p\n",
 	  request.str().c_str(), response);
     trace("int32 -> %s\n", response->str().c_str());
     int32_done = true;
 }
 
 static void
-test_int32(EventLoop& e, XrlPFSUDPListener& l) {
+test_int32(EventLoop& e, XrlPFSUDPListener& l)
+{
     Xrl x("anywhere", "get_int32");
 
     XrlPFSUDPSender s(e, l.address());
     s.send(x, callback(int32_reply_handler));
 
-    while(int32_done == 0) {
+    while (int32_done == 0) {
 	e.run();
     }
 }
@@ -135,7 +137,7 @@ no_execute_reply_handler(const XrlError& e,
 }
 
 static void
-test_xrlerror_note(EventLoop&e, XrlPFSUDPListener& l) 
+test_xrlerror_note(EventLoop&e, XrlPFSUDPListener& l)
 {
     Xrl x("anywhere", "no_execute");
 
@@ -144,7 +146,7 @@ test_xrlerror_note(EventLoop&e, XrlPFSUDPListener& l)
     bool done = false;
     s.send(x, callback(no_execute_reply_handler, &done));
 
-    while(done == false) {
+    while (done == false) {
 	e.run();
     }
 }
@@ -157,7 +159,7 @@ run_test()
     XrlCmdMap cmd_map;
     cmd_map.add_handler("hello", callback(hello_recv_handler));
     cmd_map.add_handler("get_int32", callback(int32_recv_handler));
-    cmd_map.add_handler("no_execute", 
+    cmd_map.add_handler("no_execute",
 			callback(no_execute_recv_handler, NOISE));
 
     XrlPFSUDPListener listener(event_loop, &cmd_map);
@@ -172,7 +174,8 @@ run_test()
 // ----------------------------------------------------------------------------
 // Main
 
-int main(int /* argc */, char* argv[]) {
+int main(int /* argc */, char* argv[])
+{
 
 
     //

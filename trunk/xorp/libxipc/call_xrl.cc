@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.2 2002/12/14 23:42:52 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -51,8 +51,9 @@ response_handler(const XrlError& e,
     *done_flag = true;
 }
 
-void usage() {
-    fprintf(stderr, 
+void usage()
+{
+    fprintf(stderr,
     "Usage: call_xrl [-r retry] <[-E] -f file1 ... fileN | xrl1 ... xrl>\n"
     "where -f reads XRLs from a file rather than the command line\n"
     "and   -E only passes XRLs through the preprocessor\n"
@@ -112,9 +113,9 @@ preprocess_file(XrlParserFileInput& xfp)
 static void
 input_file(EventLoop& event_loop,
 	   XrlRouter& router,
-	   XrlParserFileInput& xfp) 
+	   XrlParserFileInput& xfp)
 {
-    
+
     while (!xfp.eof()) {
 	string l;
 	if (xfp.getline(l) == true) continue;
@@ -130,7 +131,7 @@ input_file(EventLoop& event_loop,
 }
 
 static void
-input_files(int argc,  char* const argv[], bool pponly) 
+input_files(int argc,  char* const argv[], bool pponly)
 {
     EventLoop	 event_loop;
     XrlStdRouter router(event_loop, ROUTER_NAME);
@@ -173,8 +174,8 @@ input_cmds(int argc, char* const argv[])
     }
 }
 
-int 
-main(int argc, char* const argv[]) 
+int
+main(int argc, char* const argv[])
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     //
@@ -191,7 +192,7 @@ main(int argc, char* const argv[])
     bool fileinput = false;
     int c;
     while ((c = getopt(argc, argv, "Efir:")) != -1) {
-	switch(c) {
+	switch (c) {
 	case 'E':
 	    pponly = true;
 	    fileinput = true;
@@ -230,6 +231,6 @@ main(int argc, char* const argv[])
     //
     xlog_stop();
     xlog_exit();
-    
+
     return 0;
 }

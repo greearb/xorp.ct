@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/header.hh,v 1.8 2002/12/09 18:29:04 hodson Exp $
+// $XORP: xorp/libxipc/header.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
 
 #ifndef __XORP_IPC_HEADER_HELPER__
 #define __XORP_IPC_HEADER_HELPER__
@@ -26,11 +26,11 @@
 class HeaderWriter {
 public:
     class InvalidName {};
-    HeaderWriter& add(const string& name, const string& value) 
+    HeaderWriter& add(const string& name, const string& value)
 	throw (InvalidName);
-    HeaderWriter& add(const string& name, int32_t value) 
+    HeaderWriter& add(const string& name, int32_t value)
 	throw (InvalidName);
-    HeaderWriter& add(const string& name, uint32_t value) 
+    HeaderWriter& add(const string& name, uint32_t value)
 	throw (InvalidName);
     HeaderWriter& add(const string& name, const double& value)
 	throw (InvalidName);
@@ -58,8 +58,8 @@ public:
     const size_t bytes_consumed() const { return _bytes_consumed; }
 private:
     size_t _bytes_consumed;
-    map<string,string> _map;
-    typedef map<string,string>::iterator CMI;
+    map<string, string> _map;
+    typedef map<string, string>::iterator CMI;
 };
 
 #endif // __XORP_IPC_HEADER_HELPER__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.1 2002/12/14 23:43:02 hodson Exp $
 
 #ifndef __XRLPF_STCP_PH_HH__
 #define __XRLPF_STCP_PH_HH__
@@ -34,15 +34,15 @@ enum STCPPacketType {
     STCP_PT_RESPONSE	= 0x02
 };
 
-// STCP Packet Header.  
+// STCP Packet Header.
 struct STCPPacketHeader {
-    STCPPacketHeader(uint32_t seqno, 
+    STCPPacketHeader(uint32_t seqno,
 		     STCPPacketType type,
-		     const XrlError& err, 
+		     const XrlError& err,
 		     uint32_t xrl_data_bytes) {
 	initialize(seqno, type, err, xrl_data_bytes);
     }
-    void initialize(uint32_t seqno, STCPPacketType type, 
+    void initialize(uint32_t seqno, STCPPacketType type,
 		    const XrlError& err, uint32_t xrl_data_bytes);
 
     bool is_valid() const;
@@ -61,14 +61,14 @@ struct STCPPacketHeader {
 
     uint32_t xrl_data_bytes() const;
 
-    inline uint32_t payload_bytes() const 
-    { 
+    inline uint32_t payload_bytes() const
+    {
 	return error_note_bytes() + xrl_data_bytes();
     }
 
 private:
     uint8_t _fourcc[4];		  // fourcc 'S' 'T' 'C' 'P'
-    uint8_t _major[1];		  // Version 
+    uint8_t _major[1];		  // Version
     uint8_t _minor[1];		  // Version
     uint8_t _seqno[4];		  // Sequence number
     uint8_t _type[2];		  // [15:7] Set to zero, [0:1] hello/req./resp.

@@ -1,4 +1,4 @@
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "finder_module.h"
@@ -9,7 +9,8 @@
 typedef bool (*test_iter_f)(FinderIPCService*);
 
 static bool
-test_hello_iter(FinderIPCService* s) {
+test_hello_iter(FinderIPCService* s)
+{
     FinderMessage m, n;
 
     s->prepare_message(m, HELLO);
@@ -24,7 +25,8 @@ test_hello_iter(FinderIPCService* s) {
 }
 
 static bool
-test_bye_iter(FinderIPCService* s) {
+test_bye_iter(FinderIPCService* s)
+{
     FinderMessage m, n;
 
     s->prepare_message(m, BYE);
@@ -38,8 +40,9 @@ test_bye_iter(FinderIPCService* s) {
     return (m == n);
 }
 
-static bool 
-test_register_iter(FinderIPCService* s) {
+static bool
+test_register_iter(FinderIPCService* s)
+{
     const char key[] = "porridge", value[] = "goldilocks";
     FinderMessage m, n;
 
@@ -51,15 +54,16 @@ test_register_iter(FinderIPCService* s) {
     if (s->alive() && s->bytes_buffered()) {
         s->read_message(n);
         if ((strcmp(n.get_arg(0), key) != 0) ||
-            (strcmp(n.get_arg(1), value) != 0)) { 
+            (strcmp(n.get_arg(1), value) != 0)) {
             return false;
         }
     }
     return (m == n);
 }
 
-static bool 
-test_register_iter2(FinderIPCService* s) {
+static bool
+test_register_iter2(FinderIPCService* s)
+{
 
     FinderMessage m, n;
     const char *key[] = {
@@ -88,7 +92,7 @@ test_register_iter2(FinderIPCService* s) {
         if (s->alive() && s->bytes_buffered()) {
             s->read_message(n);
             if ((strcmp(n.get_arg(0), key[i]) != 0) ||
-                (strcmp(n.get_arg(1), value[i]) != 0)) { 
+                (strcmp(n.get_arg(1), value[i]) != 0)) {
                 return false;
             }
         }
@@ -96,8 +100,9 @@ test_register_iter2(FinderIPCService* s) {
     return (m == n);
 }
 
-static bool 
-test_notify_iter(FinderIPCService* s) {
+static bool
+test_notify_iter(FinderIPCService* s)
+{
     const char key[] = "porridge", value[] = "goldilocks";
     FinderMessage m, n;
 
@@ -109,15 +114,16 @@ test_notify_iter(FinderIPCService* s) {
     if (s->alive() && s->bytes_buffered()) {
         s->read_message(n);
         if ((strcmp(n.get_arg(0), key) != 0) ||
-            (strcmp(n.get_arg(1), value) != 0)) { 
+            (strcmp(n.get_arg(1), value) != 0)) {
             return false;
         }
     }
     return (m == n);
 }
 
-static bool 
-test_locate_iter(FinderIPCService* s) {
+static bool
+test_locate_iter(FinderIPCService* s)
+{
     const char key[] = "porridge";
     FinderMessage m, n;
 
@@ -134,23 +140,24 @@ test_locate_iter(FinderIPCService* s) {
     return (m == n);
 }
 
-static bool 
-run_test(FinderIPCService *s, 
+static bool
+run_test(FinderIPCService *s,
          test_iter_f iter_func, const char* name) {
     const int iters = 10000;
     bool failed = false;
 
     printf("Testing %s...", name);
 
-    for(int i = 0; i < iters && failed == false; i++) {
+    for (int i = 0; i < iters && failed == false; i++) {
         failed = !iter_func(s);
-    } 
+    }
 
     printf("%s\n", (failed) ? "fail" : "okay");
     return failed;
 }
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
     FinderTestIPCService s;
     bool failed;
     //

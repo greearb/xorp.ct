@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom_encoding.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xrl_atom_encoding.hh,v 1.1 2002/12/14 23:43:00 hodson Exp $
 
 #ifndef __XRLATOM_ENCODING_HH__
 #define __XRLATOM_ENCODING_HH__
@@ -25,7 +25,7 @@
  * suitable for integrating into a spaceless Xrl representation.  This
  * is essentially URL encoding though a reduced subset of
  * non-alphanumeric characters are escaped, ie only those that would
- * otherwise interfere with Xrl parsing.  
+ * otherwise interfere with Xrl parsing.
  */
 string
 xrlatom_encode_value(const char* val, size_t val_bytes);
@@ -35,10 +35,11 @@ xrlatom_encode_value(const char* val, size_t val_bytes);
  * suitable for integrating into a spaceless Xrl representation.  This
  * is essentially URL encoding though a reduced subset of
  * non-alphanumeric characters are escaped, ie only those that would
- * otherwise interfere with Xrl parsing.  
+ * otherwise interfere with Xrl parsing.
  */
 inline string
-xrlatom_encode_value(const string& val) {
+xrlatom_encode_value(const string& val)
+{
     return xrlatom_encode_value(val.c_str(), val.size());
 }
 
@@ -47,8 +48,9 @@ xrlatom_encode_value(const string& val) {
  * a value suitable for integrating into a spaceless Xrl representation.
  */
 inline string
-xrlatom_encode_value(const vector<uint8_t>& v) {
-    return xrlatom_encode_value(reinterpret_cast<const char*>(v.begin()), 
+xrlatom_encode_value(const vector<uint8_t>& v)
+{
+    return xrlatom_encode_value(reinterpret_cast<const char*>(v.begin()),
 				v.size());
 }
 

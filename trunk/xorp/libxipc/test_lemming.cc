@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.2 2002/12/14 23:42:56 hodson Exp $"
 
 #define XORP_MODULE_NAME "lemming"
 
@@ -57,7 +57,7 @@ protected:
 //
 // The Lemming is a an Xrl entity that periodically dies and is reborn.  When
 // the Lemming is reborn it registers itself with the "pinger", that proceeds
-// to ping the Xrl target named "lemming" repeatedly.  To make things 
+// to ping the Xrl target named "lemming" repeatedly.  To make things
 // interesting the finder dies periodically too.
 //
 
@@ -74,13 +74,13 @@ public:
     ~Lemming() {
 	vout << "...a lemming dies." << endl;
     }
-	
+
     const XrlCmdError
-    ping(const Xrl&, XrlArgs*) 
+    ping(const Xrl&, XrlArgs*)
     {
 	return XrlCmdError::OKAY();
     }
-	
+
     const XrlCmdError
     jump(const Xrl&, XrlArgs*)
     {
@@ -101,7 +101,7 @@ private:
 
     bool login() {
 	if (false == _registered) {
-	    Xrl x("pinger", "register", 
+	    Xrl x("pinger", "register",
 		  XrlArgs().add(XrlAtom("who", _r.name())));
 	    _r.send(x, callback(this, &Lemming::login_cb));
 	    return true;
@@ -144,7 +144,7 @@ public:
 
     bool
     send_ping() {
-	vout << "ping \"" << _who << "\"" << endl;	
+	vout << "ping \"" << _who << "\"" << endl;
 	if (_who.empty() == false) {
 	    Xrl x(_who, "ping");
 	    _r.send(x, callback(this, &Pinger::ping_cb));
@@ -173,7 +173,7 @@ toggle_finder(EventLoop* e, FinderServer** ppfs)
     return true;
 }
 
-static void 
+static void
 snuff_flag(bool *flag)
 {
     *flag = false;
@@ -192,16 +192,16 @@ lemming_main()
     Pinger p(e);
 
     XorpTimer lemming_timer = e.new_oneoff_after_ms(1 * 60 * 1000,
-						    callback(&snuff_flag, 
+						    callback(&snuff_flag,
 							     &run));
 
-    XorpTimer frt = e.new_periodic(18 * 1000, 
+    XorpTimer frt = e.new_periodic(18 * 1000,
 				   callback(&toggle_finder, &e, &pfs));
-    
+
     while (run && pfs) {
 	bool life = true;
 	XorpTimer snuffer = e.new_oneoff_after_ms((random() % 7777) + 1000,
-						  callback(&snuff_flag, 
+						  callback(&snuff_flag,
 							   &life));
 
 	{
@@ -247,7 +247,7 @@ main(int argc, char* const argv[])
                 return (1);
         }
     }
-    
+
     try {
 	lemming_main();
     } catch (...) {

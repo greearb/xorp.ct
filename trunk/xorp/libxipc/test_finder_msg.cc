@@ -55,7 +55,8 @@ run_test()
     }
 }
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
     //
     // Initialize and start xlog
     //

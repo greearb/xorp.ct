@@ -40,7 +40,7 @@ public:
     XrlCmdMap(const char* name = "anonymous") : _name(name) {}
 
     const string& name() { return _name; }
-    
+
     inline bool add_handler(const char* cmd, const XrlRecvCallback& rcb)
     {
 	return add_handler(XrlCmdEntry(cmd, rcb));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_transport.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+// $XORP: xorp/libxipc/finder_transport.hh,v 1.1 2002/12/14 23:42:54 hodson Exp $
 
 #ifndef __LIBXORP_FINDER_TRANSPORT_HH__
 #define __LIBXORP_FINDER_TRANSPORT_HH__
@@ -36,15 +36,15 @@ public:
      * The callback is invoked with the string representation of the
      * FinderMessage (as much information as can be gleaned from the
      * static FinderParser methods - FinderTransport is independent of
-     * Parser).  
+     * Parser).
      */
     typedef XorpCallback2<void, const FinderTransport&, const string&>::RefPtr ACallback;
 
     /**
      * Type of callback to be invoked when a FinderMessage has been sent.
      */
-    typedef XorpCallback2<void, 
-	const FinderTransport&, 
+    typedef XorpCallback2<void,
+	const FinderTransport&,
 	const FinderMessage::RefPtr&>::RefPtr DCallback;
 
     /**
@@ -62,14 +62,14 @@ public:
      * successfully written.
      *
      * @param failure_cb callback to be invoked with underlying transport
-     * mechanism fails.  
+     * mechanism fails.
      *
      * @param hmac @ref HMAC object to be used to sign messages.
      */
-    FinderTransport(const ACallback& arrive_cb = callback(no_arrival_callback), 
+    FinderTransport(const ACallback& arrive_cb = callback(no_arrival_callback),
 		    const DCallback& departure_cb = callback(no_departure_callback),
 		    const FCallback& failure_cb = callback(no_failure_callback),
-		    const HMAC* hmac = 0) 
+		    const HMAC* hmac = 0)
 	: _acb(arrive_cb), _dcb(departure_cb), _fcb(failure_cb), _hmac(NULL)
     {
 	set_hmac(hmac);
@@ -112,7 +112,7 @@ public:
      * set_failure_callback, or via constructor).
      */
     inline bool callbacks_set() const {
-	return _acb != callback(no_arrival_callback)   && 
+	return _acb != callback(no_arrival_callback)   &&
 	       _dcb != callback(no_departure_callback) &&
 	       _fcb != callback(no_failure_callback);
     }
@@ -144,14 +144,14 @@ public:
 
 protected:
     /**
-     * Method to be implemented by sub-classes to push-start 
+     * Method to be implemented by sub-classes to push-start
      * departures.
      */
     virtual void push_departures() = 0;
-    
+
     /**
      * Method that transport implementations call when a message
-     * arrives.  
+     * arrives.
      */
     inline void announce_arrival(const string& s) {
 	_acb->dispatch(*this, s);
@@ -197,7 +197,7 @@ protected:
      * Callback function invoked when no user specified departure callback
      * provided.
      */
-    static void no_departure_callback(const FinderTransport&, 
+    static void no_departure_callback(const FinderTransport&,
 				      const FinderMessage::RefPtr&);
 
     /**
@@ -222,7 +222,7 @@ class FinderTransportServerFactory {
 public:
     /**
      * Callback object type.  Callback takes a pointer to the newly
-     * created FinderTransport object as an argument. 
+     * created FinderTransport object as an argument.
      */
     typedef XorpCallback1<void, FinderTransport::RefPtr&>::RefPtr ConnectCallback;
 
@@ -242,8 +242,8 @@ public:
      */
     virtual ~FinderTransportServerFactory() {}
 
-protected:    
-    ConnectCallback		_connect_cb;	
+protected:
+    ConnectCallback		_connect_cb;
 
     /**
      * Called by derived classed when a FinderTransport is created.
@@ -258,7 +258,7 @@ protected:
 #define FINDER_TCP_DEFAULT_PORT 19999
 
 /**
- * Factory class for FinderTransport objects on a server.  
+ * Factory class for FinderTransport objects on a server.
  */
 class FinderTcpServerFactory : public FinderTransportServerFactory {
 public:
@@ -277,10 +277,10 @@ public:
      *
      * @param Callback object to invoke when connection arrives.
      */
-    FinderTcpServerFactory(EventLoop&				e, 
-			   int					port, 
+    FinderTcpServerFactory(EventLoop&				e,
+			   int					port,
 			   const ConnectCallback&		cb)
-	throw (BadPort); 
+	throw (BadPort);
 
     /**
      * Destructor
@@ -322,13 +322,13 @@ public:
 
     /**
      * Callback object type.  Callback takes a pointer to the newly
-     * created FinderTransport object as an argument. 
+     * created FinderTransport object as an argument.
      */
-    typedef 
+    typedef
     XorpCallback1<void, FinderTransport::RefPtr&>::RefPtr ConnectCallback;
 
     /**
-     * Repeatedly attempt to instantiate a FinderTransport and call 
+     * Repeatedly attempt to instantiate a FinderTransport and call
      * ConnectCallback upon success.  Ceases to attempt to instantiate
      * FinderTransport when success achieved.  It is an error to call
      * run() if factory is already running.
@@ -339,7 +339,7 @@ public:
      * @return whether factory is attempting to instantiate a transport.
      */
     virtual bool running() const = 0;
-    
+
     /**
      * Force factory to stop try to instantiate FinderTransport.
      */
@@ -353,8 +353,8 @@ public:
 	    XorpReasonedException("BadDest", file, line, why) {}
     };
 
-    FinderTcpClientFactory(EventLoop& e, 
-			   const char* addr = "localhost", 
+    FinderTcpClientFactory(EventLoop& e,
+			   const char* addr = "localhost",
 			   int port = FINDER_TCP_DEFAULT_PORT) throw (BadDest);
 
     void run(const ConnectCallback& cb);
@@ -368,7 +368,7 @@ private:
 
     XorpTimer		_connect_timer;
     ConnectCallback	_connect_cb;
-    
+
     bool connect();
 };
 

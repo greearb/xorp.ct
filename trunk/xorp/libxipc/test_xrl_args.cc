@@ -38,8 +38,8 @@ run_test()
     al.add_string("bad_karma", "");
 
     XrlAtomList xal;
-    xal.append(XrlAtom("first",string("fooo")));
-    xal.append(XrlAtom("second",string("baar")));
+    xal.append(XrlAtom("first", string("fooo")));
+    xal.append(XrlAtom("second", string("baar")));
     al.add(XrlAtom("a_list", xal));
 
     XrlArgs b(al.str().c_str());
@@ -62,7 +62,7 @@ run_test()
     } catch (...) {
 	exit(-1);
     }
-    
+
     try {
 	al.get_ipv4("a_named_ipv4");
 	al.get_ipv4net("a_named_ipv4net");
@@ -82,7 +82,8 @@ run_test()
     }
 }
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
     //
     // Initialize and start xlog
     //
@@ -94,7 +95,7 @@ int main(int /* argc */, char *argv[]) {
     xlog_start();
 
     run_test();
-    
+
     //
     // Gracefully stop and exit xlog
     //

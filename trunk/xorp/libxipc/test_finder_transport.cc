@@ -32,10 +32,10 @@ static void time_out(void) throw (TimeOut)
 
 class FTT {
 public:
-    FTT(EventLoop& e) 
+    FTT(EventLoop& e)
 	: _sfactory(e, FINDER_TCP_DEFAULT_PORT, callback(this, &FTT::connect)),
-	_cfactory(e), _server_msgs_recv(0), _client_msgs_recv(0), 
-	_client_msgs_sent(0),_e(e)
+	_cfactory(e), _server_msgs_recv(0), _client_msgs_recv(0),
+	_client_msgs_sent(0), _e(e)
     {
 	_cfactory.run(callback(this, &FTT::connected));
 	g_timeout = _e.new_oneoff_after_ms(5000, callback(&time_out));
@@ -45,12 +45,12 @@ public:
 
     /* Server Related */
 
-    void server_arrival_event(const FinderTransport&, const string& /* msg */) 
+    void server_arrival_event(const FinderTransport&, const string& /* msg */)
     {
 	//	cout << "Server received: " << msg << endl;
 	_server_msgs_recv++;
     }
-    void server_departure_event(const FinderTransport&, 
+    void server_departure_event(const FinderTransport&,
 				const FinderMessage::RefPtr& m)
     {
 	//	cout << "Server sent message "<< m->seqno() << endl;
@@ -67,7 +67,7 @@ public:
 	abort();
     }
 
-    void connect(FinderTransport::RefPtr& rp) 
+    void connect(FinderTransport::RefPtr& rp)
     {
 	cout << "Server received connection" << endl;
 	_server = rp;
@@ -95,15 +95,15 @@ public:
 
     /* Client Related */
 
-    void client_arrival_event(const FinderTransport&, const string& /* msg */) 
+    void client_arrival_event(const FinderTransport&, const string& /* msg */)
     {
 	//	cout << "Client received: " << msg << endl;
 	_client_msgs_recv++;
 	g_timeout = _e.new_oneoff_after_ms(5000, callback(&time_out));
     }
 
-    void client_departure_event(const FinderTransport&, 
-				const FinderMessage::RefPtr& m) 
+    void client_departure_event(const FinderTransport&,
+				const FinderMessage::RefPtr& m)
     {
 	//	cout << "Client sent message "<< m->seqno() << endl;
 	_client_msgs_sent++;
@@ -120,7 +120,7 @@ public:
 	abort();
     }
 
-    void client_send_hello() 
+    void client_send_hello()
     {
 	uint32_t src = random();
 	FinderMessage* fm = new FinderHello(src, 0);
@@ -146,7 +146,7 @@ public:
     void departure_event(list<FinderMessage::RefPtr>& msgs,
 			 const FinderMessage::RefPtr& m) {
 	list<FinderMessage::RefPtr>::iterator i;
-	i = find_if(msgs.begin(), msgs.end(), 
+	i = find_if(msgs.begin(), msgs.end(),
 		    compose1(bind2nd(equal_to<const FinderMessage*>(), m.get()),
 			     mem_fun_ref(&FinderMessage::RefPtr::get)));
 	if (i == msgs.end()) {
@@ -160,7 +160,7 @@ public:
 private:
     FinderTransport::RefPtr		_client;
     FinderTransport::RefPtr		_server;
-    
+
     FinderTcpServerFactory		_sfactory;
     FinderTcpClientFactory		_cfactory;
 
@@ -224,12 +224,12 @@ int main(int /* argc */, char *argv[])
     xlog_start();
 
     int r = run_test();
-    
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
+
     return r;
 }

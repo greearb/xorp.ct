@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_parser.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_parser.cc,v 1.1 2002/12/14 23:42:57 hodson Exp $"
 
 #include <stdio.h>
 #include <string>
@@ -30,7 +30,8 @@ static const char QUOT='"';
  * @return number of errors encountered.
  */
 static uint32_t
-parse_buffer(XrlParser& p) {
+parse_buffer(XrlParser& p)
+{
     uint32_t errcnt = 0;
     try {
 	while (p.start_next() == true) {
@@ -40,13 +41,13 @@ parse_buffer(XrlParser& p) {
 	    list<XrlAtomSpell> rspec;
 
 	    try {
-		cout << string(80, '-') << endl; 
+		cout << string(80, '-') << endl;
 		cout << "Input:    " << QUOT << p.input() << QUOT << endl;
 		cout << string(80, '=') << endl;
 		p.get(protocol, target, command, args, spells);
 
-		cout << "Protocol: " << QUOT << protocol  << QUOT << endl 
-		     << "Target:   " << QUOT << target    << QUOT << endl 
+		cout << "Protocol: " << QUOT << protocol  << QUOT << endl
+		     << "Target:   " << QUOT << target    << QUOT << endl
 		     << "Command:  " << QUOT << command   << QUOT << endl;
 
 		if (!args.empty()) {
@@ -59,30 +60,30 @@ parse_buffer(XrlParser& p) {
 
 		if (!spells.empty()) {
 		    cout << "Input variable assignments: " << endl;
-		    for (list<XrlAtomSpell>::const_iterator si = spells.begin(); 
+		    for (list<XrlAtomSpell>::const_iterator si = spells.begin();
 			 si != spells.end(); si++) {
-			cout << "\t" 
-			     << si->atom().str() << " - " << si->spell() 
+			cout << "\t"
+			     << si->atom().str() << " - " << si->spell()
 			     << endl;
 		    }
 		}
 		if (p.get_return_specs(rspec)) {
 		    cout << "Return Specification:" << endl;
-		    for (list<XrlAtomSpell>::const_iterator si = rspec.begin(); 
+		    for (list<XrlAtomSpell>::const_iterator si = rspec.begin();
 			 si != rspec.end(); si++) {
-			cout << "\t" 
-			     << si->atom().str() << " - " << si->spell() 
+			cout << "\t"
+			     << si->atom().str() << " - " << si->spell()
 			     << endl;
 		    }
 		}
 	    } catch (const XrlParseError& xpe) {
 		cout << string(79, '-') << endl;
 		cout << xpe.pretty_print() << "\n";
-		cout << string(79, '=') << endl; 
+		cout << string(79, '=') << endl;
 		cout << "Attempting resync...";
-		if (p.resync()) 
-		    cout << "okay"; 
-		else 
+		if (p.resync())
+		    cout << "okay";
+		else
 		    cout << "fail";
 		cout << endl;
 		errcnt++;
@@ -100,7 +101,8 @@ parse_buffer(XrlParser& p) {
 }
 
 int
-main(int argc, char *argv[]) {
+main(int argc, char *argv[])
+{
     //
     // Initialize and start xlog
     //
@@ -112,7 +114,7 @@ main(int argc, char *argv[]) {
     xlog_start();
 
     uint32_t errcnt = 0;
-    
+
     for (int i = 1; i < argc; i++) {
 	XrlParserFileInput xpfi(argv[i]);
 	XrlParser xp(xpfi);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_client2.cc,v 1.2 2002/12/14 23:42:55 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_client2.cc,v 1.3 2002/12/18 22:54:29 hodson Exp $"
 
 #include <string>
 
@@ -35,9 +35,10 @@
 // the values.
 
 // ----------------------------------------------------------------------------
-// Global state 
+// Global state
 
-static struct association {
+static struct association
+{
     const char* name;
     const char* value;
 } entries[] = {
@@ -52,13 +53,15 @@ static const size_t num_entries = sizeof(entries) / sizeof(entries[0]);
 // Printing
 
 void
-announce_test(const char* name) {
-    printf("%s...", name); 
+announce_test(const char* name)
+{
+    printf("%s...", name);
     fflush(stdout);
 }
 
 void
-announce_result(bool success) {
+announce_result(bool success)
+{
     printf("%s\n", (success) ? "okay" : "fail");
     fflush(stdout);
 }
@@ -83,42 +86,43 @@ add_hook(FinderClient::Error e,
 }
 
 static bool
-connect_okay(EventLoop* e, 
+connect_okay(EventLoop* e,
 	     FinderClient* pfc) {
     announce_test("Connecting to server");
 
     bool timed_out = false;
     XorpTimer timeout = e->set_flag_after_ms(2000, &timed_out);
-    
-    while(pfc->connected() == false && timed_out == false) {
+
+    while (pfc->connected() == false && timed_out == false) {
 	e->run();
     }
 
     if (timed_out == false) {
 	announce_result(true);
-	return true; 
+	return true;
     }
     announce_result(false);
     return false;
-} 
+}
 
 // ----------------------------------------------------------------------------
 // Server registration
 
 static bool
-register_okay(EventLoop* e, FinderClient* fc) {
+register_okay(EventLoop* e, FinderClient* fc)
+{
     announce_test("Client registering values");
 
     int done = 0;
     for (int i = 0; i < (int)num_entries; i++) {
-	fc->add(entries[i].name, entries[i].value, add_hook, 
+	fc->add(entries[i].name, entries[i].value, add_hook,
 	       reinterpret_cast<int*>(&done));
     }
 
     bool timed_out = false;
     XorpTimer timeout = e->set_flag_after_ms(2000, &timed_out);
 
-    while(done < (int)num_entries && !timed_out) {
+    while (done < (int)num_entries && !timed_out) {
 	e->run();
     }
 
@@ -157,19 +161,20 @@ resolve_callback(FinderClient::Error	e,
 }
 
 static bool
-client_resolves_all_values(EventLoop *e, FinderClient *fc) {
+client_resolves_all_values(EventLoop *e, FinderClient *fc)
+{
     announce_test("Another client resolving registered values");
 
     size_t num_resolved = 0;
     for (size_t i = 0; i < num_entries; i++) {
-	fc->lookup(entries[i].name, resolve_callback, 
+	fc->lookup(entries[i].name, resolve_callback,
 		   reinterpret_cast<void*>(&num_resolved));
     }
 
     bool timed_out = false;
     XorpTimer timeout = e->set_flag_after_ms(5000, &timed_out);
 
-    while(num_resolved < num_entries && timed_out == false) {
+    while (num_resolved < num_entries && timed_out == false) {
 	e->run();
     }
 
@@ -184,7 +189,8 @@ client_resolves_all_values(EventLoop *e, FinderClient *fc) {
     return true;
 }
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
     EventLoop e;
     FinderServer fs(e);
     FinderClient fc1(e), fc2(e);
@@ -200,10 +206,10 @@ int main(int /* argc */, char *argv[]) {
     xlog_add_default_output();
     xlog_start();
 
-    if (connect_okay(&e, &fc1) == false || 
-	connect_okay(&e, &fc2) == false || 
-	connect_okay(&e, pfc) == false || 
-	register_okay(&e, &fc1) == false || 
+    if (connect_okay(&e, &fc1) == false ||
+	connect_okay(&e, &fc2) == false ||
+	connect_okay(&e, pfc) == false ||
+	register_okay(&e, &fc1) == false ||
 	client_resolves_all_values(&e, pfc) == false) {
 	delete pfc;
 	return -1;
@@ -212,7 +218,7 @@ int main(int /* argc */, char *argv[]) {
     delete pfc;
 
     pfc = new FinderClient(e);
-    if (connect_okay(&e, pfc) == false || 
+    if (connect_okay(&e, pfc) == false ||
 	client_resolves_all_values(&e, pfc) == false) {
 	delete pfc;
 	return -1;
@@ -229,7 +235,7 @@ int main(int /* argc */, char *argv[]) {
 
     bool pause_for_hello;
     XorpTimer t = e.set_flag_after_ms(4000, &pause_for_hello);
-    while (pause_for_hello == false) 
+    while (pause_for_hello == false)
 	e.run();
 
     //

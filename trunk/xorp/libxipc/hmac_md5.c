@@ -3,12 +3,12 @@
  * AUTHORS: Colin Perkins
  *
  * HMAC message authentication (RFC2104)
- * 
+ *
  * Copyright (c) 1998-2000 University College London
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, is permitted provided that the following conditions 
+ * modification, is permitted provided that the following conditions
  * are met:
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
@@ -48,15 +48,15 @@
  * @key: pointer to authentication key.
  * @key_len: length of authentication key in bytes.
  * @digest: digest to be filled in.
- * 
- * Computes MD5 @digest of @data using key @key. 
- * 
+ *
+ * Computes MD5 @digest of @data using key @key.
+ *
  **/
-void hmac_md5(const unsigned char   *data,	   
-	      int              data_len,   
-	      const unsigned char   *key, 	   
-	      int              key_len,	   
-	      unsigned char    digest[16]) 
+void hmac_md5(const unsigned char   *data,
+	      int              data_len,
+	      const unsigned char   *key,
+	      int              key_len,
+	      unsigned char    digest[16])
 {
         MD5_CTX       context;
         unsigned char k_ipad[65];    /* inner padding - key XORd with ipad */
@@ -64,7 +64,7 @@ void hmac_md5(const unsigned char   *data,
         unsigned char tk[16];
         int           i;
 
-        /* If key is longer than 64 bytes reset it to key=MD5(key) */
+        /* If key is longer than 64 bytes reset it to key = MD5(key) */
         if (key_len > 64) {
                 MD5_CTX      tctx;
 
@@ -72,7 +72,7 @@ void hmac_md5(const unsigned char   *data,
                 MD5Update(&tctx, key, key_len);
                 MD5Final(tk, &tctx);
 
-                key     = tk;
+                key = tk;
                 key_len = 16;
         }
 
@@ -94,7 +94,7 @@ void hmac_md5(const unsigned char   *data,
         memcpy(k_opad, key, key_len);
 
         /* XOR key with ipad and opad values */
-        for (i=0; i<64; i++) {
+        for (i = 0; i<64; i++) {
                 k_ipad[i] ^= 0x36;
                 k_opad[i] ^= 0x5c;
         }
@@ -116,7 +116,7 @@ void hmac_md5(const unsigned char   *data,
 
 /*
  * Test Vectors (Trailing '\0' of a character string not included in test):
- * 
+ *
  * key =         0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
  * key_len =     16 bytes
  * data =        "Hi There"

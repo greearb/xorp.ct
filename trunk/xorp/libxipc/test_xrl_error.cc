@@ -8,26 +8,30 @@
 static bool g_trace = false;
 #define tracef(args...) if (g_trace) printf(args)
 
-static const XrlError foo() {
+static const XrlError foo()
+{
     return XrlError::REPLY_TIMED_OUT();
 }
 
-static const XrlCmdError bar() {
+static const XrlCmdError bar()
+{
     return XrlCmdError::BAD_ARGS();
 }
 
-static const XrlError baz() {
+static const XrlError baz()
+{
     return foo();
 }
 
-static const XrlError baz2() {
+static const XrlError baz2()
+{
     return baz();
 }
 
 static void
 run_test()
 {
-    for(uint32_t i = 0; i < 1000; i++) {
+    for (uint32_t i = 0; i < 1000; i++) {
 	    XrlError e(i);
 	    tracef("%s\n", e.str().c_str());
     }
@@ -37,19 +41,20 @@ run_test()
     assert(xce == xe);
 
     const XrlError& e1 = foo();
-    tracef("%s\n", e1.str().c_str());    
+    tracef("%s\n", e1.str().c_str());
 
     const XrlCmdError& e2 = bar();
-    tracef("%s\n", e2.str().c_str());    
+    tracef("%s\n", e2.str().c_str());
 
     const XrlError& e3 = e2;
-    tracef("%s\n", e3.str().c_str());    
+    tracef("%s\n", e3.str().c_str());
 
     tracef("%s\n", baz().str().c_str());
     tracef("%s\n", baz2().str().c_str());
 }
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
 
     //
     // Initialize and start xlog

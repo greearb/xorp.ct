@@ -14,7 +14,7 @@
 // ----------------------------------------------------------------------------
 // Xrl request callbacks
 
-static const XrlCmdError 
+static const XrlCmdError
 hello_world(const Xrl&	/* request */,
 	    XrlArgs*	/* response */)
 {
@@ -79,7 +79,8 @@ got_integer(const XrlError&	e,
     *done = true;
 }
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
     EventLoop		event_loop;
 
     //
@@ -131,7 +132,7 @@ int main(int /* argc */, char *argv[]) {
     while (step1_done == false || step2_done == false) {
 	event_loop.run();
 	if (finito) {
-	    fprintf(stderr, "Test timed out (%d %d)\n", 
+	    fprintf(stderr, "Test timed out (%d %d)\n",
 		    step1_done, step2_done);
 	    exit(-1);
 	}
@@ -145,7 +146,7 @@ int main(int /* argc */, char *argv[]) {
     //
     xlog_stop();
     xlog_exit();
-    
+
     printf("Test ran okay.\n");
     return 0;
 }

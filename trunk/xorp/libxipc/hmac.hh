@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/hmac.hh,v 1.6 2002/12/09 18:29:04 hodson Exp $
+// $XORP: xorp/libxipc/hmac.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
 
 #ifndef __LIBXORP_HMAC_HH_HH__
 #define __LIBXORP_HMAC_HH_HH__
@@ -40,7 +40,7 @@ public:
     ~HMACMD5() {}
     size_t signature_size() const { return SIG_SZ; }
     const string signature(const string& message) const;
-    
+
     virtual HMAC* clone() const {
 	return new HMACMD5(key());
     }

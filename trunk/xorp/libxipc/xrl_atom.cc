@@ -54,34 +54,34 @@ static const char* xrlatom_binary_name	= "binary";
 const char*
 xrlatom_type_name(const XrlAtomType& t)
 {
-    switch(t) {
+    switch (t) {
 #define NAME_CASE(x) case (x): return x##_name
-	NAME_CASE(xrlatom_no_type); 
+	NAME_CASE(xrlatom_no_type);
 	NAME_CASE(xrlatom_boolean);
 	NAME_CASE(xrlatom_int32);
-	NAME_CASE(xrlatom_uint32); 
-	NAME_CASE(xrlatom_ipv4); 
-	NAME_CASE(xrlatom_ipv4net); 
-	NAME_CASE(xrlatom_ipv6); 
-	NAME_CASE(xrlatom_ipv6net); 
-	NAME_CASE(xrlatom_mac); 
-	NAME_CASE(xrlatom_text); 
-	NAME_CASE(xrlatom_list); 
+	NAME_CASE(xrlatom_uint32);
+	NAME_CASE(xrlatom_ipv4);
+	NAME_CASE(xrlatom_ipv4net);
+	NAME_CASE(xrlatom_ipv6);
+	NAME_CASE(xrlatom_ipv6net);
+	NAME_CASE(xrlatom_mac);
+	NAME_CASE(xrlatom_text);
+	NAME_CASE(xrlatom_list);
 	NAME_CASE(xrlatom_binary);
 	// ... Your type here ...
     }
     return xrlatom_no_type_name;
 }
 
-static XrlAtomType 
+static XrlAtomType
 resolve_xrlatom_name(const char* name)
 {
     // This awkward construct ensures names of all atoms defined are mapped
     // since it generates a compile time error for missing enum values in
     // XrlAtomType.
-    for (XrlAtomType t = xrlatom_start; t <= xrlatom_end; 
+    for (XrlAtomType t = xrlatom_start; t <= xrlatom_end;
 	 t = XrlAtomType(t + 1)) {
-	switch(t) {
+	switch (t) {
 #define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x;
 	    CHECK_NAME(xrlatom_int32);		/* FALLTHRU */
 	    CHECK_NAME(xrlatom_uint32);		/* FALLTHRU */
@@ -130,7 +130,7 @@ XrlAtom::data_from_c_str(const char* c_str)
     c_str = decoded.c_str();
     _have_data = true;
 
-    switch(_type) {
+    switch (_type) {
     case xrlatom_no_type:
 	break;
     case xrlatom_boolean:
@@ -157,7 +157,7 @@ XrlAtom::data_from_c_str(const char* c_str)
     case xrlatom_mac:
 	_mac = new Mac(c_str);
 	break;
-    case xrlatom_text: 
+    case xrlatom_text:
 	_text = new string(decoded);
 	break;
     case xrlatom_list:
@@ -165,22 +165,23 @@ XrlAtom::data_from_c_str(const char* c_str)
 	break;
     case xrlatom_binary:
 	abort(); // Binary is a special case and handled at start of routine
-	break; 
+	break;
 
 	// ... Your types instantiator here ...
     }
     return -1;
 }
 
-XrlAtom::~XrlAtom() {
-    discard_dynamic(); 
+XrlAtom::~XrlAtom()
+{
+    discard_dynamic();
 }
 
 // ----------------------------------------------------------------------------
 // XrlAtom accessor functions
 
 inline void
-XrlAtom::type_and_data_okay(const XrlAtomType& t) const 
+XrlAtom::type_and_data_okay(const XrlAtomType& t) const
     throw (NoData, WrongType) {
     if (_type != t)
         xorp_throw(WrongType, t, _type);
@@ -189,87 +190,100 @@ XrlAtom::type_and_data_okay(const XrlAtomType& t) const
 }
 
 const bool&
-XrlAtom::boolean() const throw (NoData, WrongType) {
+XrlAtom::boolean() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_boolean);
     return _boolean;
 }
 
-const int32_t& 
-XrlAtom::int32() const throw (NoData, WrongType) {
+const int32_t&
+XrlAtom::int32() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_int32);
     return _i32val;
 }
 
-const uint32_t& 
-XrlAtom::uint32() const throw (NoData, WrongType) {
+const uint32_t&
+XrlAtom::uint32() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_uint32);
     return _u32val;
 }
 
-const IPv4& 
-XrlAtom::ipv4() const throw (NoData, WrongType) {
+const IPv4&
+XrlAtom::ipv4() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_ipv4);
     return *_ipv4;
 }
 
-const IPv4Net& 
-XrlAtom::ipv4net() const throw (NoData, WrongType) {
+const IPv4Net&
+XrlAtom::ipv4net() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_ipv4net);
     return *_ipv4net;
 }
 
-const IPv6& 
-XrlAtom::ipv6() const throw (NoData, WrongType) {
+const IPv6&
+XrlAtom::ipv6() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_ipv6);
     return *_ipv6;
 }
 
-const IPv6Net& 
-XrlAtom::ipv6net() const throw (NoData, WrongType) {
+const IPv6Net&
+XrlAtom::ipv6net() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_ipv6net);
     return *_ipv6net;
 }
 
 const IPvX
-XrlAtom::ipvx() const throw (NoData, WrongType) {
+XrlAtom::ipvx() const throw (NoData, WrongType)
+{
     if (_type == xrlatom_ipv4) {
 	return ipv4();
-    } else { 
+    } else {
 	assert(_type == xrlatom_ipv6);
 	return ipv6();
     }
 }
 
 const IPvXNet
-XrlAtom::ipvxnet() const throw (NoData, WrongType) {
+XrlAtom::ipvxnet() const throw (NoData, WrongType)
+{
     if (_type == xrlatom_ipv4net) {
 	return ipv4net();
-    } else { 
+    } else {
 	assert(_type == xrlatom_ipv6);
 	return ipv6net();
     }
 }
 
-const Mac& 
-XrlAtom::mac() const throw (NoData, WrongType) {
+const Mac&
+XrlAtom::mac() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_mac);
     return *_mac;
 }
 
-const string& 
-XrlAtom::text() const throw (NoData, WrongType) {
+const string&
+XrlAtom::text() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_text);
     return *_text;
 }
 
 const XrlAtomList&
-XrlAtom::list() const throw (NoData, WrongType) {
+XrlAtom::list() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_list);
     return *_list;
 }
 
 const vector<uint8_t>&
-XrlAtom::binary() const throw (NoData, WrongType) {
+XrlAtom::binary() const throw (NoData, WrongType)
+{
     type_and_data_okay(xrlatom_binary);
     return *_binary;
 }
@@ -278,14 +292,15 @@ XrlAtom::binary() const throw (NoData, WrongType) {
 // XrlAtom dynamic data management functions
 
 void
-XrlAtom::copy(const XrlAtom& xa) {
+XrlAtom::copy(const XrlAtom& xa)
+{
 
     set_name(xa.name().c_str());
-    _type      = xa._type;
+    _type = xa._type;
     _have_data = xa._have_data;
-    
+
     if (_have_data) {
-        switch(_type) {
+        switch (_type) {
 	case xrlatom_boolean:
 	    _boolean = xa._boolean;
 	    break;
@@ -328,9 +343,10 @@ XrlAtom::copy(const XrlAtom& xa) {
 }
 
 inline void
-XrlAtom::discard_dynamic() {
+XrlAtom::discard_dynamic()
+{
     if (_have_data) {
-        switch(_type) {
+        switch (_type) {
         case xrlatom_no_type:
 	case xrlatom_boolean:
         case xrlatom_int32:
@@ -380,7 +396,8 @@ XrlAtom::discard_dynamic() {
 // See devnotes/xrl-syntax.txt for more info.
 
 string
-XrlAtom::str() const {
+XrlAtom::str() const
+{
     if (_have_data) {
 	return c_format("%s%s%s%s%s", name().c_str(), XrlToken::ARG_NT_SEP,
 			type_name().c_str(), XrlToken::ARG_TV_SEP,
@@ -390,10 +407,10 @@ XrlAtom::str() const {
 		    type_name().c_str());
 }
 
-XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName) 
+XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
     : _type(xrlatom_no_type), _have_data(false)
 {
-    
+
     const char *start, *sep;
 
     start = serialized;
@@ -413,14 +430,14 @@ XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
     if (0 == sep) {
 	_type = resolve_type_c_str(start);
 	_have_data = false;
-	if (_type == xrlatom_no_type) 
+	if (_type == xrlatom_no_type)
 	    xorp_throw(InvalidString,
 		       c_format("xrlatom bad type: \"%s\"", start));
     } else {
 	_type = resolve_type_c_str(string(start, sep).c_str());
 	if (xrlatom_no_type == _type)
 	    xorp_throw(InvalidString,
-		       c_format("xrlatom bad type: \"%s\"", 
+		       c_format("xrlatom bad type: \"%s\"",
 				string(start, sep).c_str()));
 	start = sep + TOKEN_BYTES(XrlToken::ARG_TV_SEP) - 1;
 	// Get Data
@@ -430,28 +447,29 @@ XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
     }
 }
 
-XrlAtom::XrlAtom(const string& name, XrlAtomType t, 
-		 const string& serialized_data) throw (InvalidString) 
+XrlAtom::XrlAtom(const string& name, XrlAtomType t,
+		 const string& serialized_data) throw (InvalidString)
     : _type(t)
 {
     set_name(name);
     ssize_t bad_pos = data_from_c_str(serialized_data.c_str());
-    if (bad_pos >= 0) 
+    if (bad_pos >= 0)
 	xorp_throw0(InvalidString);
 }
 
-XrlAtom::XrlAtom(const char* name, XrlAtomType t, 
-		 const string& serialized_data) throw (InvalidString) 
+XrlAtom::XrlAtom(const char* name, XrlAtomType t,
+		 const string& serialized_data) throw (InvalidString)
     : _type(t)
 {
     set_name(name);
     ssize_t bad_pos = data_from_c_str(serialized_data.c_str());
-    if (bad_pos >= 0) 
+    if (bad_pos >= 0)
 	xorp_throw0(InvalidString);
 }
 
-const string 
-XrlAtom::value() const {
+const string
+XrlAtom::value() const
+{
     static char tmp[32];
     tmp[0] = '\0';
 
@@ -459,15 +477,15 @@ XrlAtom::value() const {
     case xrlatom_no_type:
 	break;
     case xrlatom_boolean:
-	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), 
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]),
 		 _boolean ? "true" : "false");
 	return xrlatom_encode_value(tmp, strlen(tmp));
 	break;
-    case xrlatom_int32: 
+    case xrlatom_int32:
 	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%d", _i32val);
 	return xrlatom_encode_value(tmp, strlen(tmp));
 	break;
-    case xrlatom_uint32: 
+    case xrlatom_uint32:
 	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%u", _u32val);
 	return xrlatom_encode_value(tmp, strlen(tmp));
 	break;
@@ -481,7 +499,7 @@ XrlAtom::value() const {
 	return xrlatom_encode_value(_ipv6net->str());
     case xrlatom_mac:
 	return xrlatom_encode_value(_mac->str());
-    case xrlatom_text: 
+    case xrlatom_text:
 	return xrlatom_encode_value(*_text);
     case xrlatom_list:
 	return _list->str();
@@ -495,27 +513,30 @@ XrlAtom::value() const {
 }
 
 const string
-XrlAtom::type_name() const {
+XrlAtom::type_name() const
+{
     return xrlatom_type_name(_type);
 }
 
 XrlAtomType
-XrlAtom::resolve_type_c_str(const char *c_str) {
+XrlAtom::resolve_type_c_str(const char *c_str)
+{
     return resolve_xrlatom_name(c_str);
 }
 
 // ----------------------------------------------------------------------------
 // Misc Operators
 
-bool 
-XrlAtom::operator==(const XrlAtom& other) const {
+bool
+XrlAtom::operator==(const XrlAtom& other) const
+{
 
     bool mn = (name() == other.name());
     bool mt = (_type == other._type);
     bool md = (_have_data == other._have_data);
     bool mv = true;
     if (_have_data && md) {
-	switch(_type) {
+	switch (_type) {
 	case xrlatom_no_type:
 	    mv = true;
 	    break;
@@ -578,8 +599,9 @@ XrlAtom::operator==(const XrlAtom& other) const {
 // network order where appropriate.  The only "funny" data type is
 // xrlatom_text which we prefix with a 32-bit length field.
 
-size_t 
-XrlAtom::packed_bytes() const {
+size_t
+XrlAtom::packed_bytes() const
+{
     size_t bytes = 1;	// Packing header space
 
     if (name().size() > 0) {
@@ -595,7 +617,7 @@ XrlAtom::packed_bytes() const {
     static_assert(sizeof(IPv4Net) == sizeof(IPv4) + 4);
     static_assert(sizeof(IPv6Net) == sizeof(IPv6) + 4);
 
-    switch(_type) {
+    switch (_type) {
     case xrlatom_no_type:
 	break;
     case xrlatom_boolean:
@@ -625,7 +647,7 @@ XrlAtom::packed_bytes() const {
 	break;
     case xrlatom_list:
 	bytes += 4;
-	for(size_t i = 0; i < _list->size(); i++)
+	for (size_t i = 0; i < _list->size(); i++)
 	    bytes += _list->get(i).packed_bytes();
 	break;
     case xrlatom_binary:
@@ -644,7 +666,7 @@ XrlAtom::packed_bytes() const {
 inline bool
 XrlAtom::packed_bytes_fixed() const
 {
-    switch(_type) {
+    switch (_type) {
     case xrlatom_no_type:
     case xrlatom_int32:
     case xrlatom_uint32:
@@ -664,9 +686,10 @@ XrlAtom::packed_bytes_fixed() const
 }
 
 size_t
-XrlAtom::pack_name(uint8_t* buffer) const {
+XrlAtom::pack_name(uint8_t* buffer) const
+{
     assert(name().size() > 0 && name().size() < 65536);
-    uint16_t sz =(uint16_t)name().size();
+    uint16_t sz = (uint16_t)name().size();
     buffer[0] = sz >> 8;
     buffer[1] = sz & 0xff;
     memcpy(buffer + sizeof(sz), name().c_str(), name().size());
@@ -674,8 +697,8 @@ XrlAtom::pack_name(uint8_t* buffer) const {
 }
 
 size_t
-XrlAtom::unpack_name(const uint8_t* buffer, size_t buffer_bytes) 
-    throw (BadName) 
+XrlAtom::unpack_name(const uint8_t* buffer, size_t buffer_bytes)
+    throw (BadName)
 {
     uint16_t sz;
     if (buffer_bytes < sizeof(sz)) {
@@ -698,13 +721,14 @@ XrlAtom::pack_boolean(uint8_t* buffer) const
 }
 
 size_t
-XrlAtom::unpack_boolean(const uint8_t* buf) {
+XrlAtom::unpack_boolean(const uint8_t* buf)
+{
     _boolean = bool(buf[0]);
     return 1;
 }
 
 size_t
-XrlAtom::pack_uint32(uint8_t* buffer) const 
+XrlAtom::pack_uint32(uint8_t* buffer) const
 {
     buffer[0] = (uint8_t)(_u32val >> 24);
     buffer[1] = (uint8_t)(_u32val >> 16);
@@ -714,20 +738,23 @@ XrlAtom::pack_uint32(uint8_t* buffer) const
 }
 
 size_t
-XrlAtom::unpack_uint32(const uint8_t* buf) {
+XrlAtom::unpack_uint32(const uint8_t* buf)
+{
     _u32val = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
     return sizeof(_u32val);
 }
 
 size_t
-XrlAtom::pack_ipv4(uint8_t* buffer) const {
+XrlAtom::pack_ipv4(uint8_t* buffer) const
+{
     uint32_t ul = _ipv4->addr();
     memcpy(buffer, &ul, sizeof(ul));
     return sizeof(ul);
 }
 
 size_t
-XrlAtom::unpack_ipv4(const uint8_t* b) {
+XrlAtom::unpack_ipv4(const uint8_t* b)
+{
     uint32_t a;
     memcpy(&a, b, sizeof(a));
     _ipv4 = new IPv4(a);
@@ -735,7 +762,8 @@ XrlAtom::unpack_ipv4(const uint8_t* b) {
 }
 
 size_t
-XrlAtom::pack_ipv4net(uint8_t* buffer) const {
+XrlAtom::pack_ipv4net(uint8_t* buffer) const
+{
     uint32_t ul = _ipv4net->masked_addr().addr();
     memcpy(buffer, &ul, sizeof(ul));
     buffer[sizeof(ul)] = (uint8_t)_ipv4net->prefix_len();
@@ -743,7 +771,8 @@ XrlAtom::pack_ipv4net(uint8_t* buffer) const {
 }
 
 size_t
-XrlAtom::unpack_ipv4net(const uint8_t* b) {
+XrlAtom::unpack_ipv4net(const uint8_t* b)
+{
     uint32_t a;
     memcpy(&a, b, sizeof(a));
     IPv4 v(a);
@@ -752,14 +781,16 @@ XrlAtom::unpack_ipv4net(const uint8_t* b) {
 }
 
 size_t
-XrlAtom::pack_ipv6(uint8_t* buffer) const {
+XrlAtom::pack_ipv6(uint8_t* buffer) const
+{
     const uint32_t* a = _ipv6->addr();
     memcpy(buffer, a, 4 * sizeof(*a));
     return 4 * sizeof(*a);
 }
 
 size_t
-XrlAtom::unpack_ipv6(const uint8_t* buffer) {
+XrlAtom::unpack_ipv6(const uint8_t* buffer)
+{
     uint32_t a[4];
     memcpy(a, buffer, sizeof(a));
     _ipv6 = new IPv6(a);
@@ -767,7 +798,8 @@ XrlAtom::unpack_ipv6(const uint8_t* buffer) {
 }
 
 size_t
-XrlAtom::pack_ipv6net(uint8_t* buffer) const {
+XrlAtom::pack_ipv6net(uint8_t* buffer) const
+{
     const uint32_t* a = _ipv6net->masked_addr().addr();
     memcpy(buffer, a, 4 * sizeof(*a));
     buffer[sizeof(IPv6)] = (uint8_t)_ipv6net->prefix_len();
@@ -775,7 +807,8 @@ XrlAtom::pack_ipv6net(uint8_t* buffer) const {
 }
 
 size_t
-XrlAtom::unpack_ipv6net(const uint8_t* buffer) {
+XrlAtom::unpack_ipv6net(const uint8_t* buffer)
+{
     uint32_t a[4];
     memcpy(a, buffer, sizeof(a));
     IPv6 v(a);
@@ -784,7 +817,8 @@ XrlAtom::unpack_ipv6net(const uint8_t* buffer) {
 }
 
 size_t
-XrlAtom::pack_mac(uint8_t* buffer) const {
+XrlAtom::pack_mac(uint8_t* buffer) const
+{
     string ser = _mac->str();
     uint32_t sz = ser.size();
     uint32_t ul = htonl(sz);
@@ -796,7 +830,8 @@ XrlAtom::pack_mac(uint8_t* buffer) const {
 }
 
 size_t
-XrlAtom::unpack_mac(const uint8_t* buffer, size_t buffer_bytes) {
+XrlAtom::unpack_mac(const uint8_t* buffer, size_t buffer_bytes)
+{
     if (buffer_bytes < sizeof(uint32_t)) {
 	return 0;
     }
@@ -812,7 +847,8 @@ XrlAtom::unpack_mac(const uint8_t* buffer, size_t buffer_bytes) {
 }
 
 size_t
-XrlAtom::pack_text(uint8_t* buffer) const {
+XrlAtom::pack_text(uint8_t* buffer) const
+{
     uint32_t sz = _text->size();
     uint32_t ul = htonl(sz);
     memcpy(buffer, &ul, sizeof(ul));
@@ -823,7 +859,8 @@ XrlAtom::pack_text(uint8_t* buffer) const {
 }
 
 size_t
-XrlAtom::unpack_text(const uint8_t* buffer, size_t buffer_bytes) {
+XrlAtom::unpack_text(const uint8_t* buffer, size_t buffer_bytes)
+{
     if (buffer_bytes < sizeof(uint32_t)) {
 	return 0;
     }
@@ -839,7 +876,8 @@ XrlAtom::unpack_text(const uint8_t* buffer, size_t buffer_bytes) {
 }
 
 size_t
-XrlAtom::pack_list(uint8_t* buffer, size_t buffer_bytes) const {
+XrlAtom::pack_list(uint8_t* buffer, size_t buffer_bytes) const
+{
     size_t done = 0;
 
     size_t nelem = htonl(_list->size());
@@ -849,7 +887,7 @@ XrlAtom::pack_list(uint8_t* buffer, size_t buffer_bytes) const {
     done += sizeof(nelem);
 
     nelem = ntohl(nelem);
-    for(size_t i = 0; i < nelem; i++) {
+    for (size_t i = 0; i < nelem; i++) {
 	done += _list->get(i).pack(buffer + done, buffer_bytes - done);
 	assert(done <= buffer_bytes);
     }
@@ -857,7 +895,8 @@ XrlAtom::pack_list(uint8_t* buffer, size_t buffer_bytes) const {
 }
 
 size_t
-XrlAtom::unpack_list(const uint8_t* buffer, size_t buffer_bytes) {
+XrlAtom::unpack_list(const uint8_t* buffer, size_t buffer_bytes)
+{
     size_t used = 0;
     size_t nelem;
 
@@ -867,7 +906,7 @@ XrlAtom::unpack_list(const uint8_t* buffer, size_t buffer_bytes) {
     _list = new XrlAtomList;
 
     nelem = ntohl(nelem);
-    for(size_t i = 0; i < nelem; i++) {
+    for (size_t i = 0; i < nelem; i++) {
 	XrlAtom tmp;
 	used += tmp.unpack(buffer + used, buffer_bytes - used);
 	assert(used <= buffer_bytes);
@@ -877,7 +916,8 @@ XrlAtom::unpack_list(const uint8_t* buffer, size_t buffer_bytes) {
 }
 
 size_t
-XrlAtom::pack_binary(uint8_t* buffer) const {
+XrlAtom::pack_binary(uint8_t* buffer) const
+{
     uint32_t sz = _binary->size();
     uint32_t ul = htonl(sz);
     memcpy(buffer, &ul, sizeof(ul));
@@ -888,7 +928,8 @@ XrlAtom::pack_binary(uint8_t* buffer) const {
 }
 
 size_t
-XrlAtom::unpack_binary(const uint8_t* buffer, size_t buffer_bytes) {
+XrlAtom::unpack_binary(const uint8_t* buffer, size_t buffer_bytes)
+{
     if (buffer_bytes < sizeof(uint32_t)) {
 	return 0;
     }
@@ -899,19 +940,20 @@ XrlAtom::unpack_binary(const uint8_t* buffer, size_t buffer_bytes) {
 	abort();
 	return 0;
     }
-    _binary = new vector<uint8_t>(buffer + sizeof(len), 
+    _binary = new vector<uint8_t>(buffer + sizeof(len),
 				  buffer + sizeof(len) + len);
     return sizeof(len) + len;
 }
 
 size_t
-XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const {
+XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const
+{
     if (buffer_bytes < packed_bytes()) {
-	debug_msg("Buffer too small (%d < %d)\n", 
+	debug_msg("Buffer too small (%d < %d)\n",
 		  buffer_bytes, packed_bytes());
 	return 0;
     }
-    
+
     uint8_t& header = *buffer;
     header = _type;
 
@@ -924,7 +966,7 @@ XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const {
 
     if (_have_data) {
 	header |= DATA_PRESENT;
-	switch(_type) {
+	switch (_type) {
 	case xrlatom_no_type:
 	    abort();
 	case xrlatom_boolean:
@@ -953,7 +995,7 @@ XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const {
 	    packed_size += pack_text(buffer + packed_size);
 	    break;
 	case xrlatom_list:
-	    packed_size += pack_list(buffer + packed_size, 
+	    packed_size += pack_list(buffer + packed_size,
 				     buffer_bytes - packed_size);
 	    break;
 	case xrlatom_binary:
@@ -967,7 +1009,8 @@ XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const {
 }
 
 size_t
-XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes) {
+XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
+{
     if (buffer_bytes == 0) {
 	debug_msg("Shoot! Passed 0 length buffer for unpacking\n");
 	return 0;
@@ -975,14 +1018,14 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes) {
 
     const uint8_t& header = *buffer;
     size_t unpacked = 1;
-    
+
     if (header & NAME_PRESENT) {
 	try {
 	    size_t used = unpack_name(buffer + unpacked, buffer_bytes - unpacked);
 	    unpacked += used;
 	} catch (const XrlAtom::BadName& bn) {
 	    debug_msg("Unpacking failed:\n%s\n", bn.str().c_str());
-	    return 0;	    
+	    return 0;
 	}
     }
 
@@ -1003,7 +1046,7 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes) {
 
 	// unpack
 	size_t used = 0;
-	switch(_type) {
+	switch (_type) {
 	case xrlatom_no_type:
 	    return 0;
 	case xrlatom_boolean:
@@ -1037,7 +1080,7 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes) {
 	case xrlatom_binary:
 	    used = unpack_binary(buffer + unpacked, buffer_bytes - unpacked);
 	    break;
-	    
+
 	    // ... Your type here ...
 	}
 
@@ -1051,7 +1094,8 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes) {
 }
 
 void
-XrlAtom::set_name(const char *name) throw (BadName) {
+XrlAtom::set_name(const char *name) throw (BadName)
+{
     if (name == 0) name = "";
     _atom_name = name;
     if (!valid_name(name))
@@ -1059,7 +1103,8 @@ XrlAtom::set_name(const char *name) throw (BadName) {
 }
 
 bool
-XrlAtom::valid_name(const string& s) {
+XrlAtom::valid_name(const string& s)
+{
     string::const_iterator si;
     si = s.begin();
     while (si != s.end()) {
@@ -1071,7 +1116,8 @@ XrlAtom::valid_name(const string& s) {
 }
 
 bool
-XrlAtom::valid_type(const string& s) {
+XrlAtom::valid_type(const string& s)
+{
     XrlAtomType t = resolve_xrlatom_name(s.c_str());
     return (t != xrlatom_no_type);
 }

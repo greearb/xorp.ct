@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_tokens.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xrl_tokens.hh,v 1.1 2002/12/14 23:43:03 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_CHARS_HH__
 #define __LIBXIPC_XRL_CHARS_HH__
@@ -22,7 +22,7 @@ struct XrlToken {
     static const char PROTO_TGT_SEP[] = "://";
 
     // Target - Command separator
-    static const char TGT_CMD_SEP[] = "/";	
+    static const char TGT_CMD_SEP[] = "/";
 
     // Command - Arguments separator
     static const char CMD_ARGS_SEP[] = "?";

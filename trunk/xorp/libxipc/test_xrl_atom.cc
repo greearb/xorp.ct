@@ -29,7 +29,8 @@ static bool g_trace = false;
 #define tracef(args...) if (g_trace) printf(args)
 
 static void
-dump(const uint8_t* p, size_t p_bytes) {
+dump(const uint8_t* p, size_t p_bytes)
+{
     for (size_t i = 0; i < p_bytes; i++) {
 	tracef("%02x ", p[i]);
     }
@@ -37,14 +38,16 @@ dump(const uint8_t* p, size_t p_bytes) {
 }
 
 static bool
-assignment_test(const XrlAtom& a) {
+assignment_test(const XrlAtom& a)
+{
     XrlAtom b(a);
     tracef("Assignment test... %s\n", (a == b) ? "yes" : "NO");
     return (a == b);
 }
 
 static bool
-ascii_test(const XrlAtom& a) {
+ascii_test(const XrlAtom& a)
+{
     // Test 1 string serialization
     XrlAtom b(a.str().c_str());
     if (a != b) {
@@ -56,7 +59,8 @@ ascii_test(const XrlAtom& a) {
 }
 
 static bool
-binary_test(const XrlAtom& a) {
+binary_test(const XrlAtom& a)
+{
     XrlAtom b;
     vector<uint8_t> buffer(a.packed_bytes());
     if (a.pack(buffer.begin(), buffer.size()) == a.packed_bytes()) {
@@ -69,7 +73,8 @@ binary_test(const XrlAtom& a) {
 }
 
 static bool
-binary_test2(const XrlAtom& a) {
+binary_test2(const XrlAtom& a)
+{
     tracef("\tBinary Serialization II...");
 
     // buffer is too small shouldn't be able to pack
@@ -85,7 +90,8 @@ binary_test2(const XrlAtom& a) {
 }
 
 static bool
-binary_test3(const XrlAtom& a) {
+binary_test3(const XrlAtom& a)
+{
     tracef("\tBinary Serialization III...");
 
     XrlAtom b;
@@ -101,9 +107,9 @@ binary_test3(const XrlAtom& a) {
 static void
 test_atom(const XrlAtom& a)
 {
-    
+
     // Print test name
-    tracef("Testing %s %s\n", 
+    tracef("Testing %s %s\n",
 	   (a.name().size()) ? "Named" : "Unnamed",
 	   a.type_name().c_str());
 
@@ -135,7 +141,7 @@ test()
     // when new XrlAtom types are added. Please add your type below
     // *and* write a test for it.
     for (XrlAtomType t = xrlatom_start /* xrlatom_list */; t != xrlatom_no_type; ++t) {
-	switch(t) {
+	switch (t) {
 	case xrlatom_no_type:
 	    // No test
 	    break;
@@ -160,17 +166,17 @@ test()
 	    break;
 	case xrlatom_ipv6:
 	    //	    test_atom(XrlAtom(IPv6("fe80::2c0:4fff:fea1:1a71")));
-	    test_atom(XrlAtom("test_ip6_value", 
+	    test_atom(XrlAtom("test_ip6_value",
 			      IPv6("fe80::2c0:4fff:fea1:1a71")));
 	    break;
 	case xrlatom_ipv6net:
 	    //	    test_atom(XrlAtom(IPv6Net("fe80::2c0:4fff:fea1:1a71/96")));
-	    test_atom(XrlAtom("A_net6_value", 
+	    test_atom(XrlAtom("A_net6_value",
 			      IPv6Net("fe80::2c0:4fff:fea1:1a71/96")));
 	    break;
 	case xrlatom_mac:
 	    //	    test_atom(XrlAtom(Mac("11:22:33:44:55:66")));
-	    test_atom(XrlAtom("Some_Ethernet_Mac_address_you_have_there_sir", 
+	    test_atom(XrlAtom("Some_Ethernet_Mac_address_you_have_there_sir",
 			      Mac("11:22:33:44:55:66")));
 	    break;
 	case xrlatom_text:
@@ -197,8 +203,8 @@ test()
 		xl.append(XrlAtom ("string_1", string("abc")));
 		xl.append(XrlAtom ("string_2", string("def")));
 		xl.append(XrlAtom ("string_3", string("ghi")));
-		tracef("XrlAtomList looks like: %s\n", 
-		       XrlAtom("foo",xl).str().c_str());
+		tracef("XrlAtomList looks like: %s\n",
+		       XrlAtom("foo", xl).str().c_str());
 		test_atom(XrlAtom("An-XrlAtomList", xl));
 		tracef("---");
 		XrlAtomList yl;
@@ -220,9 +226,10 @@ test()
     }
 }
 
-int 
-main(int argc, const char *argv[]) {
-    
+int
+main(int argc, const char *argv[])
+{
+
 
     //
     // Initialize and start xlog

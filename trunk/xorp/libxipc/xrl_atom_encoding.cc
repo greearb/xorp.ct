@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.1 2002/12/14 23:43:00 hodson Exp $"
 
 #include "config.h"
 #include "libxorp/xorp.h"
@@ -23,18 +23,18 @@
 // Encoding here is URL encoding like:
 // 	Alpha-numerics are not touched
 // 	' ' -> '+'
-//	Characters with special Xrl meaning and non-printing characters 
+//	Characters with special Xrl meaning and non-printing characters
 //	are URL escape quoted (%[0-f][0-f]).
 
 // Characters that require escaping
 static const char ESCAPE_CHARS[] = "[]&=+%$,;{}# ";
 
-inline static bool 
+inline static bool
 needs_escape(char c)
 {
     size_t n = sizeof(ESCAPE_CHARS) / sizeof(ESCAPE_CHARS[0]);
     for (size_t i = 0; i < n; i++) {
-	if (ESCAPE_CHARS[i] == c) 
+	if (ESCAPE_CHARS[i] == c)
 	    return true;
     }
     return ( iscntrl(c) || !isascii(c) );
@@ -51,7 +51,7 @@ init_escape_table()
 {
     for (int i = 0; i < 8; i++)
 	escape_table[i] = 0;
-    for(int i = 0; i < 256; i++) {
+    for (int i = 0; i < 256; i++) {
 	if (needs_escape(i)) {
 	    escape_table[i>>3] |= 1 << (i & 0x07);
 	}
@@ -79,7 +79,7 @@ is_a_quote(string::const_iterator c)
     return (*c == '%' || *c == '+');
 }
 
-inline static const char* 
+inline static const char*
 escape_encode(string::const_iterator c)
 {
     if (*c == ' ') {
@@ -136,11 +136,11 @@ xrlatom_encode_value(const char* val, size_t val_bytes)
 
     while (reg_start != val_end) {
 	reg_end = reg_start;
-	while(reg_end != val_end && fast_needs_escape(*reg_end) == false) {
+	while (reg_end != val_end && fast_needs_escape(*reg_end) == false) {
 	    reg_end++;
 	}
 	out.append(reg_start, reg_end);
-	
+
 	// Do escapes one at a time.
 	reg_start = reg_end;
 	while (reg_start != val_end && fast_needs_escape(*reg_start) == true) {
@@ -182,7 +182,7 @@ xrlatom_decode_value(const char* input, size_t input_bytes, string& out)
 	    if (skip < 1) {
 		// Decoding failed return position of failure
 		return (reg_start - input);
-	    } 
+	    }
 	    reg_start += skip;
 	}
     }
@@ -192,8 +192,8 @@ xrlatom_decode_value(const char* input, size_t input_bytes, string& out)
 // The code for this function is essentially cut-and-paste of above with
 // minor edits.  Could probably be templatized
 ssize_t
-xrlatom_decode_value(const char* input, size_t input_bytes, 
-		     vector<uint8_t>& out) 
+xrlatom_decode_value(const char* input, size_t input_bytes,
+		     vector<uint8_t>& out)
 {
     out.resize(0);
 
@@ -208,7 +208,7 @@ xrlatom_decode_value(const char* input, size_t input_bytes,
 	while (reg_end < input_end && is_a_quote(reg_end) == false) {
 	    reg_end++;
 	}
-	out.insert(out.end(), 
+	out.insert(out.end(),
 		   reinterpret_cast<const uint8_t*>(reg_start),
 		   reinterpret_cast<const uint8_t*>(reg_end));
 
@@ -225,7 +225,7 @@ xrlatom_decode_value(const char* input, size_t input_bytes,
 	    if (skip < 1) {
 		// Decoding failed return position of failure
 		return (reg_start - input);
-	    } 
+	    }
 	    reg_start += skip;
 	}
     }
@@ -234,7 +234,7 @@ xrlatom_decode_value(const char* input, size_t input_bytes,
 
 #ifdef TEST_XRLATOM_ENCODING
 
-void 
+void
 test_decode(const string& encoded, int expected_failure_position)
 {
     string decoded;

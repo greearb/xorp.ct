@@ -31,13 +31,13 @@ class FinderConnectionInfo;
 
 class FinderServer {
 public:
-    FinderServer(EventLoop& e, const char* auth_key, 
+    FinderServer(EventLoop& e, const char* auth_key,
 		 int port = FINDER_TCP_DEFAULT_PORT)
 	throw (FinderTCPServerIPCFactory::FactoryError);
     FinderServer(EventLoop& e, int port = FINDER_TCP_DEFAULT_PORT)
 	throw (FinderTCPServerIPCFactory::FactoryError);
     ~FinderServer();
-    
+
     const char*	set_auth_key(const char* key);
     const char*	auth_key();
 

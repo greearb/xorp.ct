@@ -71,7 +71,8 @@ struct finder_msg_desc {
     uint32_t    argc;
 };
 
-static const struct finder_msg_desc finder_msg[] = {
+static const struct finder_msg_desc finder_msg[] =
+{
     { "HELLO",      0 },
     { "BYE",        0 },
     { "REGISTER",   2 },
@@ -81,8 +82,9 @@ static const struct finder_msg_desc finder_msg[] = {
     { "ERROR",      2 }
 };
 
-static int finder_command_token(const char* command, FinderMessageType* t) {
-    for(size_t i = 0; i < sizeof(finder_msg) / sizeof(finder_msg[0]); i++) {
+static int finder_command_token(const char* command, FinderMessageType* t)
+{
+    for (size_t i = 0; i < sizeof(finder_msg) / sizeof(finder_msg[0]); i++) {
         size_t l = strlen(finder_msg[i].name);
         if (strncasecmp(command, finder_msg[i].name, l) == 0) {
             *t = (FinderMessageType)i;
@@ -92,13 +94,15 @@ static int finder_command_token(const char* command, FinderMessageType* t) {
     return 0;
 }
 
-static inline const uint32_t& 
-finder_command_arg_count(const FinderMessageType &t) {
+static inline const uint32_t&
+finder_command_arg_count(const FinderMessageType &t)
+{
     return finder_msg[t].argc;
 }
 
-static inline const char* 
-finder_command_name(const FinderMessageType &t) {
+static inline const char*
+finder_command_name(const FinderMessageType &t)
+{
     return finder_msg[t].name;
 }
 
@@ -106,23 +110,25 @@ finder_command_name(const FinderMessageType &t) {
 // FinderMessage method implementation
 
 bool
-FinderMessage::operator==(const FinderMessage& m) const {
-    if ((_type  != m._type) ||
-        (_seqno != m._seqno) || 
+FinderMessage::operator==(const FinderMessage& m) const
+{
+    if ((_type != m._type) ||
+        (_seqno != m._seqno) ||
         (_ackno != m._ackno) ||
-        (_argc  != m._argc)) {
+        (_argc != m._argc)) {
         return false;
     }
     for (uint32_t i = 0; i < _argc; i++) {
         if (_argv[i] != m._argv[i]) {
             return false;
-        } 
+        }
     }
     return true;
 }
 
 bool
-FinderMessage::add_arg(const char* arg) {
+FinderMessage::add_arg(const char* arg)
+{
     size_t arg_len;
 
     arg_len = strlen(arg);
@@ -136,14 +142,16 @@ FinderMessage::add_arg(const char* arg) {
 }
 
 const char*
-FinderMessage::get_arg(uint32_t fieldno) const {
-    if (fieldno > _argc) 
+FinderMessage::get_arg(uint32_t fieldno) const
+{
+    if (fieldno > _argc)
         return NULL;
     return _argv[fieldno].c_str();
 }
 
 string
-FinderMessage::str() const {
+FinderMessage::str() const
+{
     char   tmp[64];
     string r;
 
@@ -160,7 +168,7 @@ FinderMessage::str() const {
     }
 
     r += string("Args: ");
-    for(uint32_t i = 0; i < _argc; i++) {
+    for (uint32_t i = 0; i < _argc; i++) {
 	r += string("\"") + string(_argv[i]) + string("\" ");
     }
     r += string("\n---\n");
@@ -171,8 +179,9 @@ FinderMessage::str() const {
 // ----------------------------------------------------------------------------
 // FinderIPCService methods
 
-FinderIPCService::FinderIPCService() {
-    _hmac_key  = FINDER_MD5_DEFAULT_KEY;
+FinderIPCService::FinderIPCService()
+{
+    _hmac_key = FINDER_MD5_DEFAULT_KEY;
     _last_sent = random() & 0xffff;
     _last_recv = -1;
 }
@@ -185,9 +194,9 @@ FinderIPCService::prepare_message(FinderMessage& m,
     assert(_last_sent >= 0);
     m._seqno = _last_sent;
     m._ackno = -1;
-    m._type  = type;
-    m._argc  = 0;
-    
+    m._type = type;
+    m._argc = 0;
+
     if (arg0) m.add_arg(arg0);
     if (arg1) m.add_arg(arg1);
 }
@@ -207,8 +216,9 @@ FinderIPCService::prepare_error(const FinderMessage& m, FinderMessage& err,
     prepare_message(err, ERROR, seqno, reason);
 }
 
-const char* 
-FinderIPCService::set_auth_key(const char* auth_key) {
+const char*
+FinderIPCService::set_auth_key(const char* auth_key)
+{
     if (auth_key != NULL) {
         _hmac_key = auth_key;
     }
@@ -216,12 +226,13 @@ FinderIPCService::set_auth_key(const char* auth_key) {
 }
 
 const char*
-FinderIPCService::auth_key() {
+FinderIPCService::auth_key()
+{
     return _hmac_key.c_str();
 }
 
 bool
-FinderIPCService::hmac_str(const char *buf, uint32_t buf_bytes, 
+FinderIPCService::hmac_str(const char *buf, uint32_t buf_bytes,
                            char *dst, uint32_t dst_bytes) {
     uint8_t digest[16];
 
@@ -236,10 +247,10 @@ FinderIPCService::hmac_str(const char *buf, uint32_t buf_bytes,
     hmac_md5((const uint8_t*)buf, (int)buf_bytes,
              (const uint8_t*)_hmac_key.c_str(), (int)strlen(_hmac_key.c_str()),
              digest);
-         
+
     snprintf(dst, dst_bytes, "%s\t0x", FINDER_HMAC);
     size_t offset = strlen(dst);
-    for(size_t i = 0; i < 16; i++) {
+    for (size_t i = 0; i < 16; i++) {
         snprintf(dst + offset + 2 * i, dst_bytes - (offset + 2 * i),
 		 "%02x", digest[i]);
     }
@@ -249,7 +260,8 @@ FinderIPCService::hmac_str(const char *buf, uint32_t buf_bytes,
 }
 
 bool
-FinderIPCService::write_message(FinderMessage& m) {
+FinderIPCService::write_message(FinderMessage& m)
+{
     string      out;
     char        tmp[128];
 
@@ -257,7 +269,7 @@ FinderIPCService::write_message(FinderMessage& m) {
         debug_msg("Service uninitialized or finished.\n");
         return false;
     }
-    
+
     if ((finder_command_arg_count(m._type) != m._argc) &&
 	(m._ackno >= 0 && m._argc > 0)) {
         debug_msg("Invalid argument count\n");
@@ -265,7 +277,7 @@ FinderIPCService::write_message(FinderMessage& m) {
     }
 
     // Header Line
-    snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%s\t%d", 
+    snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%s\t%d",
 	     FINDER_PROTOCOL, m._seqno);
     out = tmp;
     if (m._ackno >= 0) {
@@ -276,14 +288,14 @@ FinderIPCService::write_message(FinderMessage& m) {
 
     // Command Line
     out += finder_msg[m._type].name;
-    for(uint32_t i = 0; i < m._argc; i++) {
+    for (uint32_t i = 0; i < m._argc; i++) {
         out += "\t";
         out += m._argv[i];
     }
     out += FINDER_CRLF;
 
     // Message hash
-    hmac_str(out.c_str(), (uint32_t)out.size(), 
+    hmac_str(out.c_str(), (uint32_t)out.size(),
              (char*)tmp, (uint32_t)sizeof(tmp));
     out += tmp;
     out += FINDER_CRLF;
@@ -292,9 +304,10 @@ FinderIPCService::write_message(FinderMessage& m) {
 }
 
 uint32_t
-FinderIPCService::read_line(char *buf, uint32_t buf_bytes) {
+FinderIPCService::read_line(char *buf, uint32_t buf_bytes)
+{
     uint32_t done;
-    
+
     // We'd really like to be using line buffered i/o
     if (buf_bytes < FINDER_CRLF_LENGTH) {
         return 0;
@@ -306,8 +319,8 @@ FinderIPCService::read_line(char *buf, uint32_t buf_bytes) {
         return 0;
     }
 
-    while(memcmp(FINDER_CRLF, 
-                 buf + done - FINDER_CRLF_LENGTH, 
+    while (memcmp(FINDER_CRLF,
+                 buf + done - FINDER_CRLF_LENGTH,
                  FINDER_CRLF_LENGTH) != 0 && done < buf_bytes) {
         if (read(&buf[done], 1) != 1) {
             debug_msg("read error: %s\n", strerror(errno));
@@ -315,12 +328,12 @@ FinderIPCService::read_line(char *buf, uint32_t buf_bytes) {
         }
         done++;
     }
-    
+
     return done;
 }
 
 bool
-FinderIPCService::fetch_and_verify_message(char *buf, 
+FinderIPCService::fetch_and_verify_message(char *buf,
                                            uint32_t buf_bytes) {
     const char *verify[3];
     char        hmac[128];
@@ -330,17 +343,17 @@ FinderIPCService::fetch_and_verify_message(char *buf,
     verify[FINDER_COMMAND_LINE] = NULL;
     verify[FINDER_HMAC_LINE]    = FINDER_HMAC;
 
-    for(int i = start[0] = 0; i < FINDER_LINES_PER_MESSAGE; i++) {
+    for (int i = start[0] = 0; i < FINDER_LINES_PER_MESSAGE; i++) {
         avail = bytes_buffered();
         if (avail == 0) {
             return false;
         }
 
-        got = read_line(buf + start[i], 
+        got = read_line(buf + start[i],
                         (uint32_t)min(avail, buf_bytes - start[i]));
         if (got == 0) {
             return false;
-        } 
+        }
 
         // Quick sanity check - bail quickly to help dealing with crap
         if (verify[i]) {
@@ -376,7 +389,7 @@ FinderIPCService::fetch_and_verify_message(char *buf,
 }
 
 bool
-FinderIPCService::parse_message(const char*    msg, 
+FinderIPCService::parse_message(const char*    msg,
                                 uint32_t       msg_bytes,
                                 FinderMessage& m) {
     char *buf, *header, *command, *tok, *tok_last;
@@ -404,7 +417,7 @@ FinderIPCService::parse_message(const char*    msg,
 
     // Header format is <protocol> <seqno> [<ackno>]
     tok = strtok_r(header, "\t", &tok_last);
-    if (tok == NULL || 
+    if (tok == NULL ||
         strncasecmp(tok, FINDER_PROTOCOL, FINDER_PROTOCOL_LENGTH)) {
         debug_msg("Incompatible protocol version");
         goto parse_fail;
@@ -429,7 +442,7 @@ FinderIPCService::parse_message(const char*    msg,
             debug_msg("Invalid ackno number\n");
             goto parse_fail;
         }
-    } 
+    }
 
     // Command format is <command> <value1> [<value2>]
     tok = strtok_r(command, "\t", &tok_last);
@@ -439,8 +452,8 @@ FinderIPCService::parse_message(const char*    msg,
     }
 
     if (m._ackno < 0) {
-	for(m._argc = 0; 
-	    m._argc != finder_command_arg_count(m._type); 
+	for (m._argc = 0;
+	    m._argc != finder_command_arg_count(m._type);
 	    m._argc++) {
 	    tok = strtok_r(NULL, "\t", &tok_last);
 	    if (tok == NULL) {
@@ -458,7 +471,7 @@ FinderIPCService::parse_message(const char*    msg,
     // Check seqno. This relatively late on it, but we have read
     // complete info in buffer and don't leave any stuff that the next
     // read would need to flush.
-    if (_last_recv >= 0 && 
+    if (_last_recv >= 0 &&
         m._seqno != ((_last_recv + 1) & 0xffff)) {
         debug_msg("Out of sequence packet discard (%d != %d)\n",
                   m._seqno, (_last_recv + 1) & 0xffff);
@@ -477,7 +490,8 @@ FinderIPCService::parse_message(const char*    msg,
 }
 
 bool
-FinderIPCService::read_message(FinderMessage &m) {
+FinderIPCService::read_message(FinderMessage &m)
+{
     char        buf[1024];
     uint32_t    buf_bytes = sizeof(buf);
 
@@ -485,7 +499,7 @@ FinderIPCService::read_message(FinderMessage &m) {
         parse_message(buf, buf_bytes, m)) {
         return true;
     }
-    
+
     return false;
 }
 
@@ -494,13 +508,15 @@ FinderIPCService::read_message(FinderMessage &m) {
 
 uint32_t FinderTestIPCService::_blksz = 4096;
 
-FinderTestIPCService::FinderTestIPCService() {
+FinderTestIPCService::FinderTestIPCService()
+{
     _blks.push_back(new char[_blksz]);
     _rbuf = _wbuf = _blks.begin();
     _roff = _woff = 0;
 }
 
-FinderTestIPCService::~FinderTestIPCService() {
+FinderTestIPCService::~FinderTestIPCService()
+{
     while (_blks.empty() == false) {
         delete [] *_rbuf;
         _blks.erase(_rbuf);
@@ -508,18 +524,21 @@ FinderTestIPCService::~FinderTestIPCService() {
     }
 }
 
-bool 
-FinderTestIPCService::alive() const {
+bool
+FinderTestIPCService::alive() const
+{
     return true;
 }
 
-uint32_t 
-FinderTestIPCService::bytes_buffered() const {
+uint32_t
+FinderTestIPCService::bytes_buffered() const
+{
     return (_blks.size() - 1) * _blksz + _woff - _roff;
 }
 
-int 
-FinderTestIPCService::read(char *buf, uint32_t buf_bytes) {
+int
+FinderTestIPCService::read(char *buf, uint32_t buf_bytes)
+{
     uint32_t done;
 
     buf_bytes = min(buf_bytes, bytes_buffered());
@@ -544,7 +563,8 @@ FinderTestIPCService::read(char *buf, uint32_t buf_bytes) {
 }
 
 int
-FinderTestIPCService::write(const char* buf, uint32_t buf_bytes) {
+FinderTestIPCService::write(const char* buf, uint32_t buf_bytes)
+{
     uint32_t done;
 
     done = 0;
@@ -565,17 +585,20 @@ FinderTestIPCService::write(const char* buf, uint32_t buf_bytes) {
 // ----------------------------------------------------------------------------
 // FinderTCPIPCService
 
-FinderTCPIPCService::~FinderTCPIPCService() {
+FinderTCPIPCService::~FinderTCPIPCService()
+{
     close_socket(_fd);
 }
 
-bool 
-FinderTCPIPCService::alive() const {
+bool
+FinderTCPIPCService::alive() const
+{
     return (_io_failed == false);
 }
 
 uint32_t
-FinderTCPIPCService::bytes_buffered() const {
+FinderTCPIPCService::bytes_buffered() const
+{
     int avail;
 
     if (ioctl(_fd, FIONREAD, &avail) < 0) {
@@ -587,7 +610,8 @@ FinderTCPIPCService::bytes_buffered() const {
 }
 
 int
-FinderTCPIPCService::read(char* buf, uint32_t buf_bytes) {
+FinderTCPIPCService::read(char* buf, uint32_t buf_bytes)
+{
     int l = (int)min(bytes_buffered(), buf_bytes);
     int done = ::read(_fd, buf, l);
 
@@ -597,10 +621,11 @@ FinderTCPIPCService::read(char* buf, uint32_t buf_bytes) {
         done = 0;
     }
     return done;
-} 
+}
 
 int
-FinderTCPIPCService::write(const char* buf, uint32_t buf_bytes) {
+FinderTCPIPCService::write(const char* buf, uint32_t buf_bytes)
+{
     errno = 0;
     sig_t old_sigpipe = signal(SIGPIPE, SIG_IGN);
     int done = ::write(_fd, buf, buf_bytes);
@@ -611,7 +636,7 @@ FinderTCPIPCService::write(const char* buf, uint32_t buf_bytes) {
 	_io_failed = true;
 	// write() may report correct number of bytes though failing
 	// with SIGPIPE
-        errno = done = 0; 
+        errno = done = 0;
     }
     return done;
 }
@@ -622,7 +647,7 @@ FinderTCPIPCService::write(const char* buf, uint32_t buf_bytes) {
 FinderTCPServerIPCFactory::FinderTCPServerIPCFactory(SelectorList& slctr,
 						     ServiceCreationHook hook,
 						     void* thunk,
-						     int port) 
+						     int port)
     : _selector_list(slctr), _creation_hook(hook), _creation_thunk(thunk) {
 
     _fd = create_listening_ip_socket(TCP, port);
@@ -630,19 +655,21 @@ FinderTCPServerIPCFactory::FinderTCPServerIPCFactory(SelectorList& slctr,
 	xorp_throw(FactoryError, strerror(errno));
     }
 
-    _selector_list.add_selector(_fd, SEL_RD, connect_hook, 
+    _selector_list.add_selector(_fd, SEL_RD, connect_hook,
 				 reinterpret_cast<void*>(this));
 }
 
-FinderTCPServerIPCFactory::~FinderTCPServerIPCFactory() {
+FinderTCPServerIPCFactory::~FinderTCPServerIPCFactory()
+{
     if (_fd > 0) {
 	_selector_list.remove_selector(_fd);
         close_socket(_fd);
     }
 }
 
-FinderTCPIPCService* 
-FinderTCPServerIPCFactory::create() {
+FinderTCPIPCService*
+FinderTCPServerIPCFactory::create()
+{
     struct sockaddr_in sin;
     socklen_t slen = sizeof(sin);
 
@@ -650,16 +677,16 @@ FinderTCPServerIPCFactory::create() {
     if (r > 0) {
         return new FinderTCPIPCService(r);
     } else {
-        debug_msg("accept failed: %s\n", 
+        debug_msg("accept failed: %s\n",
                   strerror(errno));
-    }        
+    }
     return NULL;
 }
 
 void
-FinderTCPServerIPCFactory::connect_hook(int fd, SelectorMask m, 
+FinderTCPServerIPCFactory::connect_hook(int fd, SelectorMask m,
 					void* thunked_factory) {
-    FinderTCPServerIPCFactory *f = 
+    FinderTCPServerIPCFactory *f =
 	reinterpret_cast<FinderTCPServerIPCFactory*>(thunked_factory);
 
     assert(fd == f->_fd);
@@ -675,10 +702,11 @@ FinderTCPServerIPCFactory::connect_hook(int fd, SelectorMask m,
 // FinderTCPClientIPCFactory
 
 FinderTCPIPCService*
-FinderTCPClientIPCFactory::create(const char* addr, int port) {
+FinderTCPClientIPCFactory::create(const char* addr, int port)
+{
 
     int fd = create_connected_ip_socket(TCP, addr, port);
-    if (fd < 0) 
+    if (fd < 0)
 	return NULL;
 
     return new FinderTCPIPCService(fd);

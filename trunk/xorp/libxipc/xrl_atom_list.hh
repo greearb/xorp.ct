@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom_list.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xrl_atom_list.hh,v 1.1 2002/12/14 23:43:01 hodson Exp $
 
 #ifndef __XRLATOM_LIST_HH__
 #define __XRLATOM_LIST_HH__
@@ -26,8 +26,8 @@ class XrlAtom;
  *
  * The XrlAtomList class is used to pass lists of XrlAtoms of a given
  * type in Xrl calls.  The XrlAtom type that the list supports is
- * determined by the first XrlAtom added to the list via the 
- * prepend() and append() methods.  
+ * determined by the first XrlAtom added to the list via the
+ * prepend() and append() methods.
 */
 class XrlAtomList {
 public:
@@ -62,7 +62,7 @@ public:
     /**
      * Removes an XrlAtom from list.
      *
-     * @param itemno the index of the atom in the list to be removed.  
+     * @param itemno the index of the atom in the list to be removed.
      */
     void remove(size_t itemno) throw (InvalidIndex);
 

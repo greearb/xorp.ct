@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_parser.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xrl_parser.hh,v 1.1 2002/12/14 23:43:01 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PARSER_HH__
 #define __LIBXIPC_XRL_PARSER_HH__
@@ -28,7 +28,7 @@ public:
     XrlParseError(const string& input, ssize_t offset, const string& reason)
 	: _input(input), _offset(offset), _reason(reason) {}
 
-    XrlParseError(const string& input, string::const_iterator pos, 
+    XrlParseError(const string& input, string::const_iterator pos,
 		  const string& reason)
 	: _input(input), _offset(pos - input.begin()), _reason(reason) {}
 
@@ -42,7 +42,7 @@ public:
 
     string pretty_print(size_t termwidth = 80u) const;
 
-protected:	
+protected:
     const string    _input;
     size_t	    _offset;
     string 	    _reason;
@@ -69,17 +69,17 @@ public:
      */
     bool finished() const { return _xpi.eof(); }
 
-    bool get(string&  protocol, 
-	     string&  target, 
+    bool get(string&  protocol,
+	     string&  target,
 	     string&  command,
 	     XrlArgs& args)
 	throw (XrlParseError);
 
-    bool get(string& protocol, 
-	     string& target, 
-	     string& command, 
-	     XrlArgs& args, 
-	     list<XrlAtomSpell>& spells) 
+    bool get(string& protocol,
+	     string& target,
+	     string& command,
+	     XrlArgs& args,
+	     list<XrlAtomSpell>& spells)
 	throw (XrlParseError);
 
     bool get(string& xrl_c_str) throw (XrlParseError);
@@ -100,14 +100,14 @@ public:
 
 protected:
 
-    bool get(string& 		 protocol, 
-	     string& 		 target, 
+    bool get(string& 		 protocol,
+	     string& 		 target,
 	     string& 		 command,
-	     XrlArgs*		 args, 
+	     XrlArgs*		 args,
 	     list<XrlAtomSpell>* spells)
 	throw (XrlParseError);
 
-    bool parse_atoms_and_spells(XrlArgs*	    args, 
+    bool parse_atoms_and_spells(XrlArgs*	    args,
 				list<XrlAtomSpell>* spells);
 
     XrlParserInput&	   _xpi;

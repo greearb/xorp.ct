@@ -7,11 +7,12 @@
 #include "finder_client.hh"
 #include "finder_server.hh"
 
-const char* okay_str(bool okay) {
+const char* okay_str(bool okay)
+{
     return okay ? "okay" : "fail";
 }
 
-void 
+void
 finder_addition(FinderClient::Error e,
 		const char*	  /* name */,
 		const char*       /* value */,
@@ -27,7 +28,7 @@ finder_addition(FinderClient::Error e,
     *p_success = true;
 }
 
-void 
+void
 finder_removal(FinderClient::Error e,
 	       const char*	 /* name */,
 	       const char*       /* value */,
@@ -43,7 +44,7 @@ finder_removal(FinderClient::Error e,
     *p_success = true;
 }
 
-void timed_out() 
+void timed_out()
 {
     fprintf(stderr, "Test timed out.");
     exit(-1);
@@ -76,7 +77,8 @@ run_test()
     return;
 }
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
 
     //
     // Initialize and start xlog
@@ -89,12 +91,12 @@ int main(int /* argc */, char *argv[]) {
     xlog_start();
 
     run_test();
-    
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
+
     return 0;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.2 2002/12/14 23:42:53 hodson Exp $"
 
 #include <signal.h>
 #include <setjmp.h>
@@ -31,13 +31,15 @@
 static jmp_buf tidy_exit;
 
 static void
-trigger_exit(int signo) {
+trigger_exit(int signo)
+{
     fprintf(stderr, "Finder caught signal: %d\n", signo);
     longjmp(tidy_exit, -1);
 }
 
 static void
-install_signal_traps(sig_t func) {
+install_signal_traps(sig_t func)
+{
     signal(SIGINT, func);
     signal(SIGTERM, func);
 }
@@ -49,7 +51,7 @@ print_twirl()
     static const size_t nt = sizeof(t) / sizeof(t[0]);
     static size_t n = 0;
     static char erase = '\0';
-   
+
     printf("%c%c", erase, t[n % nt]); fflush(stdout);
     n++;
     erase = '\b';
@@ -62,8 +64,8 @@ finder_main(int argc, char* const argv[])
     bool run_verbose = false;
     int ch;
 
-    while((ch = getopt(argc, argv, "hv")) != -1) {
-	switch(ch) {
+    while ((ch = getopt(argc, argv, "hv")) != -1) {
+	switch (ch) {
 	case 'v':
 	    run_verbose = true;
 	    break;
@@ -80,17 +82,17 @@ finder_main(int argc, char* const argv[])
 	EventLoop e;
         FinderServer fs(e);
 
-	XorpTimer twirl;	
-	if (run_verbose) 
+	XorpTimer twirl;
+	if (run_verbose)
 	    twirl = e.new_periodic(250, callback(print_twirl));
 
 	// Using setjmp ensures that the Eventloop and FinderServer
 	// destructor's get called if a signal is received whilst in
 	// the code on the eventloop.  In particular, we clean up all
-	// socket state associated with the FinderServer so we can 
+	// socket state associated with the FinderServer so we can
 	// restart the Finder immediately.
 	if (setjmp(tidy_exit) == 0) {
-	    for(;;) {
+	    for (;;) {
 		e.run();
 	    }
 	}
@@ -99,9 +101,9 @@ finder_main(int argc, char* const argv[])
 	// received.  Install new signal handlers so if we get a second
 	// signal application bails.
     } catch (const FinderTCPServerIPCFactory::FactoryError& fe) {
-	fprintf(stderr, "Could not instantiate finder: %s\n", 
+	fprintf(stderr, "Could not instantiate finder: %s\n",
 		fe.why().c_str());
-	fprintf(stderr, 
+	fprintf(stderr,
 		"Check whether another instance is already running.\n");
     } catch (...) {
 	xorp_catch_standard_exceptions();
@@ -109,8 +111,9 @@ finder_main(int argc, char* const argv[])
     install_signal_traps(SIG_DFL);
 }
 
-int 
-main(int argc, char * const argv[]) {
+int
+main(int argc, char * const argv[])
+{
     //
     // Initialize and start xlog
     //
@@ -128,6 +131,6 @@ main(int argc, char * const argv[]) {
     //
     xlog_stop();
     xlog_exit();
-    
+
     return 0;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser_input.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser_input.cc,v 1.1 2002/12/14 23:43:01 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 #include "xrl_parser_input.hh"
@@ -27,8 +27,8 @@ XrlParserFileInput::eof() const
     return _stack[0].input()->eof() && _inserted_lines.empty();
 }
 
-bool 
-XrlParserFileInput::slurp_line(string& line) 
+bool
+XrlParserFileInput::slurp_line(string& line)
     throw (XrlParserInputException)
 {
     // Check if we need to step down a stack level
@@ -36,7 +36,7 @@ XrlParserFileInput::slurp_line(string& line)
 	if (stack_depth() > 1) {
 	    close_input(stack_top().input());
 	    pop_stack();
-	    line = c_format("# %d \"%s\" %d", stack_top().line(), 
+	    line = c_format("# %d \"%s\" %d", stack_top().line(),
 			 stack_top().filename(), RETURNING_TO_FILE);
 	    _inserted_lines.push_back("");
 	    return true;
@@ -48,7 +48,7 @@ XrlParserFileInput::slurp_line(string& line)
 
     stack_top().incr_line();
     ::getline(*stack_top().input(), line);
-    
+
     // Okay, got line see if it's a pre-processor directive
     for (string::const_iterator c = line.begin();
 	 c != line.end(); c++) {
@@ -81,7 +81,7 @@ XrlParserFileInput::try_include(string::const_iterator& begin,
 {
     static const string h("#include");
     for (string::const_iterator hi = h.begin(); hi != h.end(); hi++, begin++) {
-	if (begin == end || *begin != *hi) 
+	if (begin == end || *begin != *hi)
 	    xorp_throw(XrlParserInputException, "Unsupported # directive");
     }
 
@@ -93,7 +93,7 @@ XrlParserFileInput::try_include(string::const_iterator& begin,
     string::const_iterator fn_start;
     for (fn_start = begin; fn_start <= end; fn_start++) {
 	if (*fn_start == '"') {
-	    fn_start++; 
+	    fn_start++;
 	    qc = '"';
 	    break;
 	} else if (*fn_start == '<') {
@@ -116,26 +116,26 @@ XrlParserFileInput::try_include(string::const_iterator& begin,
     }
 
     // Check for junk following end of filename
-    
+
     for (string::const_iterator junk = fn_end + 1; junk < end; junk++) {
 	if (!isspace(*junk)) {
-	    xorp_throw (XrlParserInputException, 
+	    xorp_throw (XrlParserInputException,
 			"Junk following filename in #include directive");
 	}
     }
-    
+
     string filename(fn_start, fn_end);
     push_stack(FileState(path_open_input(filename.c_str()), filename.c_str()));
     return c_format("# %d \"%s\" %d", 1, filename.c_str(), OPENING_FILE);
 }
 
-string 
+string
 XrlParserFileInput::stack_trace() const
 {
     string s;
     for (size_t i = 0; i < _stack.size(); i++) {
 	s += string("  ", i);
-	s += c_format("From file \"%s\" line %d\n", 
+	s += c_format("From file \"%s\" line %d\n",
 		      _stack[i].filename(), _stack[i].line());
     }
     return s;
@@ -147,7 +147,7 @@ XrlParserFileInput::path_open_input(const char* filename)
 {
     // XXX We could check for recursive includes here
 
-    for (list<string>::const_iterator pi = _path.begin(); 
+    for (list<string>::const_iterator pi = _path.begin();
 	 pi != _path.end(); pi++) {
 	const string& path = *pi;
 
@@ -173,7 +173,7 @@ XrlParserFileInput::path_open_input(const char* filename)
 }
 
 void
-XrlParserFileInput::close_input(istream* pif) 
+XrlParserFileInput::close_input(istream* pif)
 {
     delete pif;
 }
@@ -244,9 +244,9 @@ XrlParserFileInput::stack_depth() const
 }
 
 /* Return true if caller should try getline() again to get useful
- * line data, false otherwise. 
+ * line data, false otherwise.
  */
-bool 
+bool
 XrlParserFileInput::getline(string& line) throw (XrlParserInputException)
 {
     line.erase();
@@ -278,7 +278,7 @@ XrlParserFileInput::getline(string& line) throw (XrlParserInputException)
  * @sideeffect advance i to one past terminating squote.
  */
 bool
-advance_to_terminating_squote(string::const_iterator& i, 
+advance_to_terminating_squote(string::const_iterator& i,
 			      const string::const_iterator& end)
 {
     while (i != end) {
@@ -295,7 +295,7 @@ advance_to_terminating_squote(string::const_iterator& i,
  * @sideeffect advance i to one past terminating squote.
  */
 bool
-advance_to_terminating_dquote(string::const_iterator& i, 
+advance_to_terminating_dquote(string::const_iterator& i,
 			      const string::const_iterator& end)
 {
     if (*i == '"') {
@@ -318,7 +318,7 @@ advance_to_terminating_dquote(string::const_iterator& i,
  * @sideeffect advance i to one past terminating squote.
  */
 bool
-advance_to_terminating_c_comment(string::const_iterator& i, 
+advance_to_terminating_c_comment(string::const_iterator& i,
 				 const string::const_iterator& end)
 {
     const string::const_iterator last_start = end - 1;
@@ -341,7 +341,7 @@ XrlParserFileInput::filter_line(string& output, const string& input)
 {
     string::const_iterator ci = input.begin();
     while (ci != input.end()) {
-	switch(_current_mode) {
+	switch (_current_mode) {
 	case NORMAL: {
 	    string::const_iterator began = ci;
 	    while (ci != input.end()) {
@@ -383,7 +383,7 @@ XrlParserFileInput::filter_line(string& output, const string& input)
 	    string::const_iterator began = ci;
 	    if (advance_to_terminating_squote(ci, input.end())) {
 		_current_mode = NORMAL;
-	    }	
+	    }
 	    output += string(began, ci);
 	    break;
 	}
@@ -398,10 +398,10 @@ XrlParserFileInput::filter_line(string& output, const string& input)
 	    }
 	    break;
 	}
-	case IN_C_COMMENT: 
+	case IN_C_COMMENT:
 	    if (advance_to_terminating_c_comment(ci, input.end())) {
 		_current_mode = NORMAL;
-	    }	
+	    }
 	    /* do not copy output */
 	    break;
 	}

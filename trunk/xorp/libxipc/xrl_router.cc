@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.2 2002/12/15 22:53:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.3 2002/12/18 22:54:31 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -27,7 +27,7 @@ inline void
 trace_xrl(const string& preamble, const Xrl& xrl)
 {
     static const char* do_trace = getenv("XRLTRACE");
-    
+
     if (do_trace) {
 	string s(preamble + xrl.str());
 	XLOG_INFO(s.c_str());
@@ -52,12 +52,12 @@ struct DispatchState {
 
 void
 XrlRouter::send_callback(const XrlError &e,
-			 const Xrl& xrl, 
-			 XrlArgs* ret, 
+			 const Xrl& xrl,
+			 XrlArgs* ret,
 			 DispatchState* ds)
 {
     ds->_cb->dispatch(e, *ds->_router, xrl, ret);
-	
+
     ds->_router->_sends_pending--;
     if (e != XrlError::OKAY() && e != XrlError::COMMAND_FAILED()) {
 	FinderClient& fc = ds->_router->_fc;
@@ -77,7 +77,7 @@ XrlRouter::resolve_callback(FinderClient::Error	err,
 
     if (err == FinderClient::FC_OKAY) {
 	debug_msg("Resolved: %s\n", value);
-	XrlPFSender* s = XrlPFSenderFactory::create(ds->_router->_event_loop, 
+	XrlPFSender* s = XrlPFSenderFactory::create(ds->_router->_event_loop,
 						    value);
 	if (s) {
 	    ds->_sender = s;
@@ -87,13 +87,13 @@ XrlRouter::resolve_callback(FinderClient::Error	err,
 	    trace_xrl("Sending ", ds->_xrl);
 	} else {
 	    trace_xrl("Resolve failed on ", ds->_xrl);
-	    ds->_cb->dispatch(XrlError::RESOLVE_FAILED(), 
+	    ds->_cb->dispatch(XrlError::RESOLVE_FAILED(),
 			      *ds->_router, ds->_xrl, 0);
 	    delete ds;
 	}
     } else {
 	trace_xrl("Resolve failed on ", ds->_xrl);
-	ds->_cb->dispatch(XrlError::RESOLVE_FAILED(), 
+	ds->_cb->dispatch(XrlError::RESOLVE_FAILED(),
 			  *ds->_router, ds->_xrl, (XrlArgs*)0);
 	delete ds;
     }
@@ -117,7 +117,8 @@ XrlRouter::send(const Xrl&      	xrl,
     return true;	// XXX This needs correcting.
 }
 
-XrlRouter::~XrlRouter() {
+XrlRouter::~XrlRouter()
+{
     assert(_finder_lookups_pending >= 0 && _sends_pending >= 0);
 
     // XXX XrlRouter's are not intended to be dynamic...
@@ -129,7 +130,7 @@ XrlRouter::~XrlRouter() {
 	bool pends_failed = false;
 	XorpTimer t = _event_loop.set_flag_after_ms(10000, &pends_failed);
 
-	while((_finder_lookups_pending > 0 || _sends_pending > 0) &&
+	while ((_finder_lookups_pending > 0 || _sends_pending > 0) &&
 	      pends_failed == false) {
 	    _event_loop.run();
 	}
@@ -163,14 +164,15 @@ XrlRouter::finder_register_callback(FinderClient::Error	e,
 }
 
 bool
-XrlRouter::add_listener(XrlPFListener* pfl) {
+XrlRouter::add_listener(XrlPFListener* pfl)
+{
 
     bool timed_out = false;
     XorpTimer timeout = _event_loop.set_flag_after_ms(3000, &timed_out);
 
     int frs = FINDER_REGISTER_PENDING;
-    
-    string protocol_colon_address = 
+
+    string protocol_colon_address =
 	string(pfl->protocol()) + string(":") + string(pfl->address());
 
     _fc.add(name().c_str(), protocol_colon_address.c_str(),

@@ -77,7 +77,7 @@ public:
     // Compositional helpers
     void prepare_message(FinderMessage& m, FinderMessageType type,
 			 const char* arg0 = NULL, const char* arg1 = NULL);
-    void prepare_ack(const FinderMessage& m, FinderMessage& ack, 
+    void prepare_ack(const FinderMessage& m, FinderMessage& ack,
 		     const char *arg0 = NULL, const char* arg1 = NULL);
     void prepare_error(const FinderMessage& m, FinderMessage& err,
 		       const char* reason);
@@ -100,9 +100,9 @@ protected:
     void        free_auth_key();
     uint32_t    read_line(char *buf, uint32_t buf_bytes);
     bool        fetch_and_verify_message(char *buf, uint32_t buf_bytes);
-    bool        hmac_str(const char *buf, uint32_t buf_bytes, 
+    bool        hmac_str(const char *buf, uint32_t buf_bytes,
                          char *dst, uint32_t dst_bytes);
-    bool        parse_message(const char *buf, uint32_t buf_bytes, 
+    bool        parse_message(const char *buf, uint32_t buf_bytes,
                               FinderMessage &m);
 
     string      _hmac_key;
@@ -155,9 +155,9 @@ public:
 			      int port = FINDER_TCP_DEFAULT_PORT);
     virtual ~FinderTCPServerIPCFactory();
 
-    // Exceptions 
+    // Exceptions
     struct FactoryError : public XorpReasonedException {
-	FactoryError(const char* file, size_t line, const string& why) 
+	FactoryError(const char* file, size_t line, const string& why)
 	    : XorpReasonedException("FactoryError", file, line, why) {}
     };
 
@@ -180,7 +180,7 @@ protected:
 
 class FinderTCPClientIPCFactory {
 public:
-    static FinderTCPIPCService* create(const char* addr = "localhost", 
+    static FinderTCPIPCService* create(const char* addr = "localhost",
 				       int port = FINDER_TCP_DEFAULT_PORT);
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_error.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_error.cc,v 1.1 2002/12/14 23:43:01 hodson Exp $"
 
 #include <stdio.h>
 #include <string>
@@ -56,7 +56,7 @@ protected:
 
 XrlErrlet* XrlErrlet::_errlet_head = 0;
 
-// Macro that glues together 
+// Macro that glues together
 #define XRL_ERROR_GLUE(ename, oname, code, reason) \
 static const XrlErrlet ename(code, reason); \
 const XrlError XrlError::oname(&ename);
@@ -100,8 +100,8 @@ XrlError::XrlError(uint32_t errcode, const string& note)
     }
 }
 
-bool 
-XrlError::known_code(uint32_t errcode) 
+bool
+XrlError::known_code(uint32_t errcode)
 {
     return (XrlErrlet::find(errcode) != 0);
 }

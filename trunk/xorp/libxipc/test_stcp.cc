@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.2 2002/12/14 23:42:57 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.3 2002/12/18 22:54:30 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -36,24 +36,24 @@ do { \
 static bool hello_done = false;
 
 static const XrlCmdError
-hello_recv_handler(const Xrl&	request, 
-		   XrlArgs*	response) 
+hello_recv_handler(const Xrl&	request,
+		   XrlArgs*	response)
 {
-    tracef("hello_recv_handler: request %s response %p\n", 
+    tracef("hello_recv_handler: request %s response %p\n",
 	   request.str().c_str(), response);
     return XrlCmdError::OKAY();
 }
 
 static void
 hello_reply_handler(const XrlError&	e,
-		    const Xrl&		request, 
-		    XrlArgs*		response) 
+		    const Xrl&		request,
+		    XrlArgs*		response)
 {
     if (e != XrlError::OKAY()) {
 	fprintf(stderr, "hello failed: %s\n", e.str().c_str());
 	exit(-1);
     }
-    tracef("hello_reply_handler: request %s response %p\n", 
+    tracef("hello_reply_handler: request %s response %p\n",
 	   request.str().c_str(), response);
     hello_done = true;
 }
@@ -77,10 +77,10 @@ test_hello(EventLoop& e, XrlPFSTCPSender &s)
 static bool int32_done = false;
 
 static const XrlCmdError
-int32_recv_handler(const Xrl&	request, 
-		   XrlArgs*	response) 
+int32_recv_handler(const Xrl&	request,
+		   XrlArgs*	response)
 {
-    tracef("int32_recv_handler: request %s response %p\n", 
+    tracef("int32_recv_handler: request %s response %p\n",
 	   request.str().c_str(), response);
     if (response) {
 	response->add_int32("an_int32", 123456);
@@ -97,7 +97,7 @@ int32_reply_handler(const XrlError&	e,
 	fprintf(stderr, "get_int32 failed: %s\n", e.str().c_str());
 	exit(-1);
     }
-    tracef("int32_reply_handler: request %s response %p\n", 
+    tracef("int32_reply_handler: request %s response %p\n",
 	   request.str().c_str(), response);
     tracef("int32 -> %s\n", response->str().c_str());
     int32_done = true;
@@ -147,7 +147,7 @@ no_execute_reply_handler(const XrlError& e,
 }
 
 static void
-test_xrlerror_note(EventLoop&e, XrlPFSTCPListener& l) 
+test_xrlerror_note(EventLoop&e, XrlPFSTCPListener& l)
 {
     Xrl x("anywhere", "no_execute");
 
@@ -176,7 +176,7 @@ run_test()
     XrlCmdMap cmd_map;
     cmd_map.add_handler("hello", callback(hello_recv_handler));
     cmd_map.add_handler("get_int32", callback(int32_recv_handler));
-    cmd_map.add_handler("no_execute", 
+    cmd_map.add_handler("no_execute",
 			callback(no_execute_recv_handler, NOISE));
 
     XrlPFSTCPListener listener(event_loop, &cmd_map);
@@ -188,7 +188,7 @@ run_test()
     XorpTimer dp = event_loop.new_periodic(500, callback(&print_dot));
 
     tracef("Testing XrlPFSTCP\n");
-    for(int i = 1; i < 50; i++) {
+    for (int i = 1; i < 50; i++) {
 	test_hello(event_loop, s);
 	assert(s.alive());
 
@@ -210,7 +210,8 @@ run_test()
 // ----------------------------------------------------------------------------
 // Main
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
     //
     // Initialize and start xlog
     //

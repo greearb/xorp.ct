@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_msg.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_msg.cc,v 1.1 2002/12/14 23:42:54 hodson Exp $"
 
 #include <algorithm>
 #include <functional>
@@ -31,22 +31,22 @@ static const uint32_t FINDER_PROTO_MAJOR = 1;
 static const uint32_t FINDER_PROTO_MINOR = 1;
 
 static const string msg_header("Finder/%u.%u src=%u seqno=%u payload=%u %s\n");
-static const string smallest_msg = c_format(msg_header.c_str(), 
+static const string smallest_msg = c_format(msg_header.c_str(),
 					    0, 0, 0, 0, 0, "");
 
 /* ------------------------------------------------------------------------- */
 /* FinderMessage code */
 
 const string
-FinderMessage::render_header(size_t payload_bytes) const 
+FinderMessage::render_header(size_t payload_bytes) const
 {
-    return c_format(msg_header.c_str(), 
+    return c_format(msg_header.c_str(),
 		    FINDER_PROTO_MAJOR, FINDER_PROTO_MINOR,
 		    srcid(), seqno(), payload_bytes, name().c_str());
 };
 
 const string
-FinderMessage::render_signature(const HMAC& k, const string &header) const 
+FinderMessage::render_signature(const HMAC& k, const string& header) const
 {
     // NB do not edit this without editing FinderParser::parse_signature
     string sig = k.signature(header);
@@ -54,7 +54,7 @@ FinderMessage::render_signature(const HMAC& k, const string &header) const
 }
 
 const string
-FinderMessage::render() const 
+FinderMessage::render() const
 {
     const string payload = render_payload();
     const string header = render_header(payload.size());
@@ -62,11 +62,11 @@ FinderMessage::render() const
 }
 
 const string
-FinderMessage::render_signed(const HMAC& k) const 
+FinderMessage::render_signed(const HMAC& k) const
 {
     const string payload = render_payload();
-    const string header  = render_header(payload.size() + 
-					 k.signature_size() + 1);
+    const string header = render_header(payload.size() +
+					k.signature_size() + 1);
     const string signature = render_signature(k, header);
     return header + signature + payload;
 }
@@ -76,7 +76,7 @@ FinderMessage::render_signed(const HMAC& k) const
 
 bool
 skip_word(string::const_iterator& str_pos,
-	  const string& word) 
+	  const string& word)
 {
     string::const_iterator spos = str_pos;
     string::const_iterator wpos = word.begin();
@@ -92,17 +92,17 @@ skip_word(string::const_iterator& str_pos,
 
 inline size_t
 skip_equal(string::const_iterator& a,
-	   string::const_iterator& b) 
+	   string::const_iterator& b)
 {
     size_t matching = 0;
-    for(;*a && (*a == *b); a++, b++) {
+    for (;*a && (*a == *b); a++, b++) {
 	matching++;
     }
     return matching;
 }
 
 template <class _Predicate> inline const string
-get_chars(string::const_iterator& spos, _Predicate chrcls) 
+get_chars(string::const_iterator& spos, _Predicate chrcls)
 {
     string::const_iterator begin = spos;
     while (*spos && chrcls(*spos))
@@ -145,7 +145,7 @@ get_line(string::const_iterator& spos, string& r)
 }
 
 inline bool
-get_all(string::const_iterator& spos, string& r) 
+get_all(string::const_iterator& spos, string& r)
 {
     string::const_iterator s = spos;
     while (*spos) spos++;
@@ -159,7 +159,7 @@ get_all(string::const_iterator& spos, string& r)
 bool
 FinderParser::parse_header(string::const_iterator& buffer_pos,
 			   uint32_t& major, uint32_t& minor,
-			   uint32_t& src, uint32_t& seqno, 
+			   uint32_t& src, uint32_t& seqno,
 			   uint32_t& payload_bytes, string& msg_name)
 {
     string::const_iterator scan_pos = msg_header.begin();
@@ -211,21 +211,21 @@ FinderParser::parse_header(string::const_iterator& buffer_pos,
 
 ssize_t
 FinderParser::peek_header_bytes(const string& header)
-    throw (BadFinderMessage) 
+    throw (BadFinderMessage)
 {
     string::size_type pos = header.find('\n');
     if (pos == string::npos)
 	return -1;
     if (pos < smallest_msg.size())
-	xorp_throw(BadFinderMessage, c_format("Header is too small (%d < %d)", 
+	xorp_throw(BadFinderMessage, c_format("Header is too small (%d < %d)",
 					      pos, smallest_msg.size()));
     return (ssize_t)pos + 1;
 }
 
 size_t
-FinderParser::max_header_bytes() 
-{ 
-    return 250; 
+FinderParser::max_header_bytes()
+{
+    return 250;
 }
 
 size_t
@@ -238,13 +238,13 @@ FinderParser::peek_payload_bytes(const string& header)
     string name;
 
     if (parse_header(h_pos, major, minor, src, seqno, pbytes, name) == false)
-	xorp_throw(BadFinderMessage, 
+	xorp_throw(BadFinderMessage,
 		   c_format("Junk Header >>%s\n", header.c_str()));
     return pbytes;
 }
 
 inline bool
-FinderParser::parse_signature(const HMAC*		hmac, 
+FinderParser::parse_signature(const HMAC*		hmac,
 			      const string&		header,
 			      const string&		/* buf */,
 			      string::const_iterator&	bp) const
@@ -253,22 +253,22 @@ FinderParser::parse_signature(const HMAC*		hmac,
     return skip_word(bp, sig);
 }
 
-bool 
+bool
 FinderParser::parse_payload(uint32_t			src,
-			    uint32_t			seqno, 
+			    uint32_t			seqno,
 			    const string&		msgname,
-			    const string&		buf, 
-			    string::const_iterator& 	buf_pos) const 
+			    const string&		buf,
+			    string::const_iterator& 	buf_pos) const
 {
 
     // Find any matching parser, syntax is dead ugly here because of
     // ref_ptr use in ParsingElement type.
-    PEList::const_iterator i = find_if(_parsers.begin(), 
+    PEList::const_iterator i = find_if(_parsers.begin(),
 				       _parsers.end(),
 				       compose1(bind2nd(equal_to<const string>(), msgname),
 						compose1(mem_fun(&FinderParselet::name),
 							 mem_fun_ref(&ParsingElement::get))));
-    if (i == _parsers.end()) 
+    if (i == _parsers.end())
 	return false;
 
     const FinderParselet* p = i->get();
@@ -277,8 +277,8 @@ FinderParser::parse_payload(uint32_t			src,
 }
 
 size_t
-FinderParser::parse(const HMAC*			hmac, 
-		    const string&		b, 
+FinderParser::parse(const HMAC*			hmac,
+		    const string&		b,
 		    string::const_iterator&	bpos) const
     throw (BadFinderMessage)
 {
@@ -288,7 +288,7 @@ FinderParser::parse(const HMAC*			hmac,
     string msgname;
 
     if (parse_header(bpos, major, minor, src, seqno, pbytes, msgname) == false)
-	xorp_throw(BadFinderMessage, 
+	xorp_throw(BadFinderMessage,
 		   c_format("Junk Header >>%s\n", start));
 
     if (hmac) {
@@ -310,7 +310,7 @@ FinderParser::parse(const HMAC*			hmac,
 }
 
 bool
-FinderParser::add(const ParsingElement& pe) 
+FinderParser::add(const ParsingElement& pe)
 {
     _parsers.push_back(pe);
     return true;
@@ -320,13 +320,13 @@ FinderParser::add(const ParsingElement& pe)
 /* HELLO related */
 
 const string
-FinderHello::render_payload() const 
+FinderHello::render_payload() const
 {
     return string("");
 }
 
 void
-FinderHelloParser::parse(uint32_t src, 
+FinderHelloParser::parse(uint32_t src,
 			 uint32_t seqno,
 			 const string&, string::const_iterator&) const
     throw (BadFinderMessage)
@@ -339,7 +339,7 @@ FinderHelloParser::parse(uint32_t src,
 /* BYE related */
 
 const string
-FinderBye::render_payload() const 
+FinderBye::render_payload() const
 {
     return string("");
 }
@@ -358,13 +358,13 @@ FinderByeParser::parse(uint32_t src,
 /* ACK related */
 
 const string
-FinderAck::render_payload() const 
+FinderAck::render_payload() const
 {
     return c_format("%u", _ack);
 }
 
 void
-FinderAckParser::parse(uint32_t src, 
+FinderAckParser::parse(uint32_t src,
 		       uint32_t seqno,
 		       const string&, string::const_iterator& bpos) const
     throw (BadFinderMessage)
@@ -382,14 +382,14 @@ FinderAckParser::parse(uint32_t src,
 /* Associate related */
 
 const string
-FinderAssociate::render_payload() const 
+FinderAssociate::render_payload() const
 {
     return _t_and_m + string("\n") + _a;
 }
 
 void
-FinderAssociateParser::parse(uint32_t src, 
-			     uint32_t seqno, 
+FinderAssociateParser::parse(uint32_t src,
+			     uint32_t seqno,
 			     const string&, string::const_iterator& bpos) const
     throw (BadFinderMessage)
 {

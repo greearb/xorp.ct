@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.2 2002/12/15 22:53:23 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.3 2002/12/18 22:54:30 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -32,8 +32,8 @@
 // XrlPFListener and XrlPFSender.
 
 struct XrlPFConstructorError : public exception {
-    XrlPFConstructorError(const char* reason = "Not specified") 
-	: _reason(reason) {} 
+    XrlPFConstructorError(const char* reason = "Not specified")
+	: _reason(reason) {}
     const char* what() { return _reason; }
 protected:
     const char* _reason;
@@ -41,18 +41,18 @@ protected:
 
 class XrlPFListener {
 public:
-    XrlPFListener(EventLoop& e, XrlCmdMap* m = 0) 
+    XrlPFListener(EventLoop& e, XrlCmdMap* m = 0)
 	: _event_loop(e), _cmd_map(m) {}
     virtual ~XrlPFListener() {}
-    virtual const char*	address() const = 0; 
-    virtual const char*	protocol() const = 0; 
+    virtual const char*	address() const = 0;
+    virtual const char*	protocol() const = 0;
 
     // set_command_map adds table of request handlers.  Fails and
     // returns false if already assigned, true otherwise.
     bool  set_command_map(XrlCmdMap* m);
-    const XrlCmdMap& command_map() const { 
+    const XrlCmdMap& command_map() const {
 	if (_cmd_map == 0) abort();
-	return *_cmd_map; 
+	return *_cmd_map;
     }
     EventLoop& event_loop() const { return _event_loop; }
 
@@ -75,7 +75,7 @@ protected:
 
 class XrlPFSender {
 public:
-    XrlPFSender(EventLoop& e, const char* address = "") 
+    XrlPFSender(EventLoop& e, const char* address = "")
 	: _event_loop(e), _address(address) {}
 
     virtual ~XrlPFSender() {}
@@ -83,7 +83,7 @@ public:
     typedef
     XorpCallback3<void, const XrlError&, const Xrl&, XrlArgs*>::RefPtr
     SendCallback;
-    
+
     virtual void send(const Xrl& x, const SendCallback& cb) = 0;
     virtual bool sends_pending() const = 0;
 
@@ -93,10 +93,10 @@ public:
     struct Request {
 	XrlPFSender*	parent;
 	XUID		xuid;		// to match requests and responses
-	Xrl		xrl;		
+	Xrl		xrl;
 	SendCallback	callback;
 	XorpTimer	timeout;
-	Request(XrlPFSender* p, const Xrl& x, const SendCallback& cb) 
+	Request(XrlPFSender* p, const Xrl& x, const SendCallback& cb)
 	    : parent(p), xuid(), xrl(x), callback(cb) {}
 	Request() {}
 	bool operator==(const XUID& x) const { return xuid == x; }
@@ -111,7 +111,8 @@ protected:
 // Inline XrlPFListener Methods
 
 inline bool
-XrlPFListener::set_command_map(XrlCmdMap *m) {
+XrlPFListener::set_command_map(XrlCmdMap *m)
+{
     if (_cmd_map == 0) {
 	_cmd_map = m;
 	return true;

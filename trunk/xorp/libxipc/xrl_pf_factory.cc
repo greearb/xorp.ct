@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.1 2002/12/14 23:43:01 hodson Exp $"
 
 #include "config.h"
 
@@ -39,7 +39,7 @@ XrlPFSenderFactory::create(EventLoop& event_loop,
     string address(colon + 1);
 
     try {
-	char *address = colon + 1;	
+	char *address = colon + 1;
 
 	if (string(XrlPFSUDPSender::protocol()) == protocol)
 	    return new XrlPFSUDPSender(event_loop, address);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.20 2002/12/09 18:29:05 hodson Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 #include "config.h"
 
@@ -49,9 +49,9 @@
  * @sock: The socket whose sending buffer size to set.
  * @desired_bufsize: The preferred buffer size.
  * @min_bufsize: The smallest acceptable buffer size.
- * 
+ *
  * Set the sending buffer size of a socket.
- * 
+ *
  * Return value: the successfully set buffer size on success,
  * otherwise 0.
  **/
@@ -59,7 +59,7 @@ int
 x_comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
 {
     int delta = desired_bufsize / 2;
-    
+
     /*
      * Set the socket buffer size.  If we can't set it as large as we
      * want, search around to try to find the highest acceptable
@@ -72,7 +72,7 @@ x_comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
 	while (true) {
 	    if (delta > 1)
 		delta /= 2;
-	    
+
 	    if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF,
 			   (void *)&desired_bufsize, sizeof(desired_bufsize))
 		< 0) {
@@ -90,7 +90,7 @@ x_comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
 	    return 0;
 	}
     }
-    
+
     return (desired_bufsize);
 }
 
@@ -99,9 +99,9 @@ x_comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
  * @sock: The socket whose receiving buffer size to set.
  * @desired_bufsize: The preferred buffer size.
  * @min_bufsize: The smallest acceptable buffer size.
- * 
+ *
  * Set the receiving buffer size of a socket.
- * 
+ *
  * Return value: the successfully set buffer size on success,
  * otherwise 0.
  **/
@@ -109,7 +109,7 @@ int
 x_comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
 {
     int delta = desired_bufsize / 2;
-    
+
     /*
      * Set the socket buffer size.  If we can't set it as large as we
      * want, search around to try to find the highest acceptable
@@ -122,7 +122,7 @@ x_comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
 	while (true) {
 	    if (delta > 1)
 		delta /= 2;
-	    
+
 	    if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF,
 			   (void *)&desired_bufsize, sizeof(desired_bufsize))
 		< 0) {
@@ -140,7 +140,7 @@ x_comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
 	    return 0;
 	}
     }
-    
+
     return (desired_bufsize);
 }
 //
@@ -166,7 +166,7 @@ get_local_socket_details(int fd, string& addr, uint16_t& port)
 	static in_addr haddr;
 	if (haddr.s_addr == 0) {
 	    /* Socket is not associated with any particular to anything...
-	     * ... this is not great. 
+	     * ... this is not great.
 	     */
 	    char hname[MAXHOSTNAMELEN + 1];
 	    hname[MAXHOSTNAMELEN] = '\0';
@@ -176,13 +176,13 @@ get_local_socket_details(int fd, string& addr, uint16_t& port)
 	    }
 
 	    /* Check hostname resolves otherwise anything that relies on
-	     *  this info is going to have problems. 
+	     *  this info is going to have problems.
 	     */
 	    if (address_lookup(hname, haddr) == false) {
 		XLOG_ERROR("Local hostname %s does not resolve", hname);
 		return false;
 	    }
-	}	
+	}
 	addr = inet_ntoa(haddr);
     }
     port = htons(sin.sin_port);
@@ -201,7 +201,7 @@ get_remote_socket_details(int fd, string& addr, string& port)
         XLOG_ERROR("getsockname failed: %s", strerror(errno));
 	return false;
     }
-    
+
     addr = inet_ntoa(sin.sin_addr);
 
     char pbuf[8];
@@ -233,35 +233,35 @@ create_connected_ip_socket(IPSocketType ist, const string& addr, uint16_t port)
 	XLOG_ERROR("failed to open socket: %s", strerror(errno));
 	return -1;
     }
-    
+
     // Set the receiving socket buffer size in the kernel
     if (x_comm_sock_set_rcvbuf(fd, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
 	< SO_RCV_BUF_SIZE_MIN) {
 	close_socket(fd);
 	return -1;
     }
-    
+
     // Set the sending socket buffer size in the kernel
     if (x_comm_sock_set_sndbuf(fd, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
 	< SO_SND_BUF_SIZE_MIN) {
 	close_socket(fd);
 	return -1;
     }
-    
+
     // Resolve address
     struct in_addr ia;
     if (address_lookup(addr, ia) == false) {
 	XLOG_ERROR("Can't resolve IP address for %s", addr.c_str());
 	return -1;
     }
-    
+
     // Connect
     struct sockaddr_in sin;
     sin.sin_family = AF_INET;
     sin.sin_port = htons(port);
     sin.sin_addr.s_addr = ia.s_addr;
     if (connect(fd, (struct sockaddr*)&sin, sizeof(sin)) < 0) {
-        XLOG_ERROR("failed to connect to %s port %d: %s", 
+        XLOG_ERROR("failed to connect to %s port %d: %s",
                   addr.c_str(), port, strerror(errno));
 	close_socket(fd);
 	return -1;
@@ -279,14 +279,14 @@ create_listening_ip_socket(IPSocketType ist, uint16_t port)
 	XLOG_ERROR("failed to open socket: %s", strerror(errno));
 	return -1;
     }
-    
+
     // Set the receiving socket buffer size in the kernel
     if (x_comm_sock_set_rcvbuf(fd, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
 	< SO_RCV_BUF_SIZE_MIN) {
 	close_socket(fd);
 	return -1;
     }
-    
+
     // Set the sending socket buffer size in the kernel
     if (x_comm_sock_set_sndbuf(fd, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
 	< SO_SND_BUF_SIZE_MIN) {
@@ -303,11 +303,11 @@ create_listening_ip_socket(IPSocketType ist, uint16_t port)
 	return -1;
     }
 
-    // bind 
+    // bind
     struct sockaddr_in sin;
     memset((void *)&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(port); 
+    sin.sin_port = htons(port);
     sin.sin_addr = if_get_preferred();
     if (bind(fd, (sockaddr*)&sin, sizeof(sin)) < 0) {
         XLOG_ERROR("failed to bind socket: %s (%s)",
@@ -315,7 +315,7 @@ create_listening_ip_socket(IPSocketType ist, uint16_t port)
         close_socket(fd);
 	return -1;
     }
-    
+
     // listen
     if (stype == SOCK_STREAM && listen(fd, 5) < 0) {
         XLOG_ERROR("failed to listen: %s", strerror(errno));
@@ -397,7 +397,7 @@ split_address_slash_port(const string& address_slash_port,
 
     address = string(address_slash_port, 0, slash);
     port = atoi(address_slash_port.c_str() + slash + 1);
-    
+
     return true;
 }
 
@@ -423,7 +423,7 @@ address_lookup(const string& addr, in_addr& ia)
 	ia = if_get_preferred();
 	return true;
     }
-    
+
     int retry = 0;
     do {
 	struct hostent *h = gethostbyname(addr.c_str());
@@ -432,7 +432,7 @@ address_lookup(const string& addr, in_addr& ia)
 		       hstrerror(h_errno), h_errno);
 	    return false;
 	} else {
-	    memcpy(&ia, h->h_addr_list[0], sizeof(ia));	    
+	    memcpy(&ia, h->h_addr_list[0], sizeof(ia));
 	    return true;
 	}
 	usleep(100000);
@@ -449,7 +449,7 @@ if_count()
     if (cnt == 0) {
 	char buf[IF_NAMESIZE];
 	char* ifname = 0;
-	while ((ifname = if_indextoname(cnt + 1, buf)) != 0) 
+	while ((ifname = if_indextoname(cnt + 1, buf)) != 0)
 	    cnt++;
     }
     return cnt;
@@ -470,7 +470,7 @@ if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags)
 	debug_msg("Failed to open socket\n");
 	return false;
     }
-	      
+
     if (ioctl(s, SIOCGIFADDR, &ifr) < 0) {
 	debug_msg("Failed to get interface address\n");
 	close(s);
@@ -478,14 +478,14 @@ if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags)
     }
     sockaddr_in& sin = reinterpret_cast<sockaddr_in&>(ifr.ifr_addr);
     addr.s_addr = sin.sin_addr.s_addr;
-    
+
     if (ioctl(s, SIOCGIFFLAGS, &ifr) < 0) {
 	debug_msg("Failed to get interface flags\n");
 	close(s);
 	return false;
     }
     flags = ifr.ifr_flags;
-    
+
     close(s);
     return true;
 }
@@ -519,7 +519,7 @@ in_addr if_get_preferred()
 	return s_if_preferred;
 
     uint32_t n = if_count();
-    
+
     string	name;
     in_addr	addr;
     uint16_t	flags;
@@ -542,7 +542,7 @@ in_addr if_get_preferred()
     // Random badness
     name = "any";
     addr.s_addr = INADDR_ANY;
-    
+
  done:
     //    XLOG_INFO("Using interface %s addr %s for IP based XRL "
     //	      "communication.", name.c_str(), inet_ntoa(addr));

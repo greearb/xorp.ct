@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.1 2002/12/14 23:43:02 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.2 2002/12/18 22:54:30 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -66,7 +66,8 @@ const char* XrlPFSUDPListener::_protocol = SUDP_PROTOCOL_NAME;
 // Utility Functions
 
 static string
-render_dispatch_header(const XUID& id, size_t content_bytes) {
+render_dispatch_header(const XUID& id, size_t content_bytes)
+{
     HeaderWriter h;
     h.add("Protocol", SUDP_PROTOCOL);
     h.add("XUID", id.str());
@@ -75,7 +76,8 @@ render_dispatch_header(const XUID& id, size_t content_bytes) {
 }
 
 static bool
-parse_dispatch_header(string hdr, XUID& id, size_t& content_bytes) {
+parse_dispatch_header(string hdr, XUID& id, size_t& content_bytes)
+{
     try {
 	HeaderReader h(hdr);
 	string protocol, sid;
@@ -117,7 +119,8 @@ static XrlError status_to_xrlerror(const string& status)
 }
 
 static string
-render_response(const XrlError& e, const XUID& id, size_t content_bytes) {
+render_response(const XrlError& e, const XUID& id, size_t content_bytes)
+{
     HeaderWriter h;
     h.add("Protocol", SUDP_PROTOCOL);
     h.add("XUID", id.str());
@@ -127,10 +130,10 @@ render_response(const XrlError& e, const XUID& id, size_t content_bytes) {
 }
 
 static bool
-parse_response(const char* buf, 
+parse_response(const char* buf,
 	       XrlError& e,
 	       XUID& xuid,
-	       size_t& header_bytes, 
+	       size_t& header_bytes,
 	       size_t& content_bytes) {
     try {
 	HeaderReader h(buf);
@@ -148,7 +151,7 @@ parse_response(const char* buf,
 	xuid = XUID(xuid_str);
 	h.get("Content-Length", content_bytes);
 	header_bytes = h.bytes_consumed();
-	
+
 	return true;
     } catch (const HeaderReader::InvalidString&) {
 	debug_msg("Invalid string");
@@ -161,14 +164,14 @@ parse_response(const char* buf,
 }
 
 // ----------------------------------------------------------------------------
-// XrlPFUDPSender 
+// XrlPFUDPSender
 
 int XrlPFSUDPSender::sender_fd;
 int XrlPFSUDPSender::instance_count;
 map<const XUID, XrlPFSender::Request> XrlPFSUDPSender::requests_pending;
 
-XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port) 
-    throw (XrlPFConstructorError) : 
+XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
+    throw (XrlPFConstructorError) :
     XrlPFSender(e, address_slash_port) {
 
     string addr;
@@ -180,16 +183,16 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 	throw XrlPFConstructorError();
     }
 #ifdef HAVE_SIN_LEN
-    _destination.sin_len    = sizeof(_destination);
+    _destination.sin_len = sizeof(_destination);
 #endif /* HAVE_SIN_LEN */
     _destination.sin_family = AF_INET;
-    _destination.sin_port   = htons(port);
+    _destination.sin_port = htons(port);
 
     if (sender_fd <= 0) {
 	debug_msg("Creating master socket");
 	sender_fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sender_fd > 0) {
-	    _event_loop.add_selector(sender_fd, SEL_RD, 
+	    _event_loop.add_selector(sender_fd, SEL_RD,
 				     callback(&XrlPFSUDPSender::recv));
 	} else {
 	    debug_msg("Could not create master socket: %s\n", strerror(errno));
@@ -201,7 +204,8 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 	      address_slash_port, instance_count, sender_fd);
 }
 
-XrlPFSUDPSender::~XrlPFSUDPSender() {
+XrlPFSUDPSender::~XrlPFSUDPSender()
+{
     instance_count--;
     debug_msg("~XrlPFSUDPSender - instance count %d\n", instance_count);
     if (instance_count == 0) {
@@ -211,7 +215,7 @@ XrlPFSUDPSender::~XrlPFSUDPSender() {
     }
 }
 
-void 
+void
 XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 {
     // Map request id to current object instance
@@ -227,9 +231,9 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
     ssize_t msg_bytes = msg.size();
     if (msg_bytes > SUDP_RECV_BUFFER_BYTES) {
 	debug_msg("Message sent larger than transport method designed");
-    } else if (sendto(sender_fd, 
-		      msg.data(), msg.size(), 0, 
-		      (sockaddr*)&_destination, sizeof(_destination)) 
+    } else if (sendto(sender_fd,
+		      msg.data(), msg.size(), 0,
+		      (sockaddr*)&_destination, sizeof(_destination))
 	       != msg_bytes) {
 	debug_msg("Write failed: %s\n", strerror(errno));
 	cb->dispatch(XrlError::SEND_FAILED(), x, 0);
@@ -238,14 +242,15 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 
     assert(requests_pending[request.xuid].xuid == request.xuid);
 
-    requests_pending[request.xuid].timeout = 
-	_event_loop.new_oneoff_after_ms(SUDP_REPLY_TIMEOUT_MS, 
+    requests_pending[request.xuid].timeout =
+	_event_loop.new_oneoff_after_ms(SUDP_REPLY_TIMEOUT_MS,
 	    callback(this, &XrlPFSUDPSender::timeout_hook, request.xuid));
     debug_msg("XrlPFSUDPSender::send (qsize %d)\n", requests_pending.size());
 }
 
 void
-XrlPFSUDPSender::timeout_hook(XUID xuid) {
+XrlPFSUDPSender::timeout_hook(XUID xuid)
+{
 
     map<const XUID, Request>::iterator i = requests_pending.find(xuid);
     assert (i != requests_pending.end());
@@ -261,11 +266,11 @@ XrlPFSUDPSender::timeout_hook(XUID xuid) {
 // XrlPFSUDPSender timer and selector hooks
 
 void
-XrlPFSUDPSender::recv(int fd, SelectorMask m) 
+XrlPFSUDPSender::recv(int fd, SelectorMask m)
 {
     assert(fd == sender_fd);
     assert(m == SEL_RD);
-    
+
     char buf[SUDP_RECV_BUFFER_BYTES + 1];
 
     ssize_t read_bytes = read(sender_fd, buf, SUDP_RECV_BUFFER_BYTES);
@@ -311,12 +316,12 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 // ----------------------------------------------------------------------------
 // XrlPFUDPListener
 
-XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlCmdMap* m) 
-    throw (XrlPFConstructorError) 
+XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlCmdMap* m)
+    throw (XrlPFConstructorError)
     : XrlPFListener(e, m) {
 
     debug_msg("XrlPFSUDPListener\n");
-    if ((_fd = create_listening_ip_socket(UDP)) < 0) 
+    if ((_fd = create_listening_ip_socket(UDP)) < 0)
 	throw XrlPFConstructorError(strerror(errno));
 
     string addr;
@@ -327,17 +332,19 @@ XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlCmdMap* m)
     }
     _address_slash_port = address_slash_port(addr, port);
 
-    _event_loop.add_selector(_fd, SEL_RD, 
+    _event_loop.add_selector(_fd, SEL_RD,
 			     callback(this, &XrlPFSUDPListener::recv));
 }
 
-XrlPFSUDPListener::~XrlPFSUDPListener() {
+XrlPFSUDPListener::~XrlPFSUDPListener()
+{
     _event_loop.remove_selector(_fd);
     close(_fd);
 }
 
-void 
-XrlPFSUDPListener::recv(int fd, SelectorMask m) {
+void
+XrlPFSUDPListener::recv(int fd, SelectorMask m)
+{
     static char rbuf[SUDP_RECV_BUFFER_BYTES + 1];
 
     assert(fd == _fd);
@@ -356,10 +363,10 @@ XrlPFSUDPListener::recv(int fd, SelectorMask m) {
     } else if (errno != 0) {
 	debug_msg("recvfrom failed: %s\n", strerror(errno));
 	return;
-    } 
+    }
 
     if (rbuf_bytes > SUDP_RECV_BUFFER_BYTES) {
-	debug_msg("Packet too large (%d > %d) bytes\n", 
+	debug_msg("Packet too large (%d > %d) bytes\n",
 		  rbuf_bytes, SUDP_RECV_BUFFER_BYTES);
 	return;
     }
@@ -381,7 +388,8 @@ XrlPFSUDPListener::recv(int fd, SelectorMask m) {
 }
 
 const XrlError
-XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& response) {
+XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& response)
+{
     assert(_cmd_map != NULL);
     try {
 	Xrl x(rbuf);
@@ -399,8 +407,8 @@ XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& response) {
 }
 
 void
-XrlPFSUDPListener::send_reply(sockaddr*			sa, 
-			      const XrlError&		e, 
+XrlPFSUDPListener::send_reply(sockaddr*			sa,
+			      const XrlError&		e,
 			      const XUID&		xuid,
 			      const XrlArgs* 	reply_args) {
 
@@ -419,16 +427,16 @@ XrlPFSUDPListener::send_reply(sockaddr*			sa,
 
     struct iovec v[2];
     v[0].iov_base = const_cast<char*>(header.c_str());
-    v[0].iov_len  = header.size();
+    v[0].iov_len = header.size();
     v[1].iov_base = const_cast<char*>(reply.c_str());
-    v[1].iov_len  = reply.size();
+    v[1].iov_len = reply.size();
 
     msghdr m;
     memset(&m, 0, sizeof(m));
-    m.msg_name	  = sa;
-    m.msg_namelen = sizeof(*sa); 
-    m.msg_iov     = v;
-    m.msg_iovlen  = sizeof(v) / sizeof(v[0]);
+    m.msg_name = sa;
+    m.msg_namelen = sizeof(*sa);
+    m.msg_iov = v;
+    m.msg_iovlen = sizeof(v) / sizeof(v[0]);
 
     ssize_t v_bytes = v[0].iov_len + v[1].iov_len;
     if (v_bytes > SUDP_RECV_BUFFER_BYTES ||

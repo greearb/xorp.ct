@@ -3,12 +3,12 @@
  * AUTHORS: Colin Perkins
  *
  * HMAC message authentication (RFC2104)
- * 
+ *
  * Copyright (c) 1998-2000 University College London
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, is permitted provided that the following conditions 
+ * modification, is permitted provided that the following conditions
  * are met:
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
@@ -39,7 +39,7 @@
 extern "C" {
 #endif
 
-void hmac_md5(const unsigned char *data, int data_len, 
+void hmac_md5(const unsigned char *data, int data_len,
               const unsigned char *key,  int key_len,
 	      unsigned char  digest[16]);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.2 2002/12/14 23:43:00 hodson Exp $
 
 #ifndef __XRL_H__
 #define __XRL_H__
@@ -33,35 +33,35 @@ public:
     /**
      * Construct an Xrl.
      */
-    Xrl(const string&	protocol, 
-	const string&	protocol_target, 
-	const string&	command, 
-	const XrlArgs&	args) 
+    Xrl(const string&	protocol,
+	const string&	protocol_target,
+	const string&	command,
+	const XrlArgs&	args)
 	: _protocol(protocol), _target(protocol_target), _command(command),
 	  _args(args) {}
 
     /**
      * Construct an Xrl (with implicit finder protocol).
      */
-    Xrl(const string&	target, 
-	const string&	command, 
-	const XrlArgs&	args) 
+    Xrl(const string&	target,
+	const string&	command,
+	const XrlArgs&	args)
 	: _protocol(_finder_protocol), _target(target), _command(command),
 	  _args(args) {}
 
     /**
      * Construct an Xrl that does not have an argument list.
      */
-    Xrl(const string& protocol, 
-	const string& protocol_target, 
-	const string& command) 
+    Xrl(const string& protocol,
+	const string& protocol_target,
+	const string& command)
 	: _protocol(protocol), _target(protocol_target), _command(command) {}
 
     /**
      * Construct an Xrl that does not have an argument list.
      */
-    Xrl(const string& target, 
-	const string& command) 
+    Xrl(const string& target,
+	const string& command)
 	: _protocol(_finder_protocol), _target(target), _command(command) {}
 
     /**

@@ -33,35 +33,35 @@ class DispatchState;
  * An XrlRouter is responsible for sending and receiving XRL requests
  * for entities in a XORP Router.  A single process may have multiple
  * XrlRouter objects.  In this case each XrlRouter object corresponds
- * to an independent entity within the process.  
+ * to an independent entity within the process.
  */
 class XrlRouter : public XrlCmdMap {
 public:
     /**
      * Constructor for when the Finder is running on the local host.
      *
-     * @param event_loop the EventLoop that the XrlRouter should associate 
+     * @param event_loop the EventLoop that the XrlRouter should associate
      * itself with.
      * @param entity_name the name this router will register with the Finder.
      */
     XrlRouter(EventLoop& event_loop, const char* entity_name)
-	: XrlCmdMap(entity_name), _event_loop(event_loop), _fc(event_loop), 
+	: XrlCmdMap(entity_name), _event_loop(event_loop), _fc(event_loop),
 	_sends_pending(0), _finder_lookups_pending(0) {}
 
     /**
      * Constructor for when the Finder is running on another host on
      * the default Finder port.
      *
-     * @param event_loop the EventLoop that the XrlRouter should associate 
+     * @param event_loop the EventLoop that the XrlRouter should associate
      * itself with.
      * @param entity_name the name this router will register with the Finder.
-     * @param finder_address the hostname running the Finder process.  
+     * @param finder_address the hostname running the Finder process.
      */
-    XrlRouter(EventLoop& event_loop, 
+    XrlRouter(EventLoop& event_loop,
 	      const char* entity_name,
 	      const char* finder_address)
 	: XrlCmdMap(entity_name), _event_loop(event_loop),
-	_fc(event_loop, finder_address), 
+	_fc(event_loop, finder_address),
 	_sends_pending(0), _finder_lookups_pending(0) {}
 
     /**
@@ -77,14 +77,14 @@ public:
     XrlRouter(EventLoop& event_loop,
 	      const char* entity_name,
 	      const char* finder_address, uint16_t finder_port)
-	: XrlCmdMap(entity_name), _event_loop(event_loop), 
+	: XrlCmdMap(entity_name), _event_loop(event_loop),
 	_fc(event_loop, finder_address, finder_port),
 	_sends_pending(0), _finder_lookups_pending(0) {}
 
     virtual ~XrlRouter();
-    
+
     /**
-     * Add a protocol family listener.  
+     * Add a protocol family listener.
      *
      * This call associates the entity name of the XrlRouter with the
      * protocol family listener at the Finder.  Other processes may
@@ -95,7 +95,7 @@ public:
      * object is already in use at the Finder, or if the Finder is not
      * contactable.
      *
-     * @return true if registration succeeds, false otherwise.  
+     * @return true if registration succeeds, false otherwise.
      */
     bool add_listener (XrlPFListener* pf);
 
@@ -109,7 +109,7 @@ public:
      * dispatcher wants to know that the Xrl dispatch was successful
      * and completed.
      *
-     * @param xrl The Xrl to be dispatched.  
+     * @param xrl The Xrl to be dispatched.
      * @param callback invoked when the Xrl has returns or fails.
      *
      * @return true if sufficient resources available, false otherwise.
@@ -126,7 +126,7 @@ public:
     /**
      * Assignment operator (unimplemented and compiler generated not wanted).
      */
-    XrlRouter& operator=(const XrlRouter&);	
+    XrlRouter& operator=(const XrlRouter&);
 
     /**
      * Copy constructor (unimplemented and compiler generated not wanted).
@@ -140,9 +140,9 @@ public:
      *         to finder.
      */
     inline bool connected() const {
-	return _fc.connected(); 
+	return _fc.connected();
     }
-    
+
 private:
     EventLoop&		_event_loop;
 
@@ -157,12 +157,12 @@ private:
     // The number of unanswered resolve requests
     int32_t 		_finder_lookups_pending;
 
-    static void		resolve_callback(FinderClient::Error, 
+    static void		resolve_callback(FinderClient::Error,
 					 const char*, const char*,
 					 DispatchState*);
 
     static void 	send_callback(const XrlError&,
-				      const Xrl&, 
+				      const Xrl&,
 				      XrlArgs*,
 				      DispatchState*);
 

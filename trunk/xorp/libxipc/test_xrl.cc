@@ -24,7 +24,8 @@
 #include "xrl_args.hh"
 
 static int
-xrl_test(const char* testname, const Xrl& x, const Xrl& y) {
+xrl_test(const char* testname, const Xrl& x, const Xrl& y)
+{
     if (x != y) {
 	cout << "Test failed: " << testname << endl;
         cout << "\t" << x.str() << "!=" << y.str().c_str() << endl;
@@ -49,29 +50,29 @@ run_test()
 	const char*	testname;
 	XrlAtom		arg;
     } tests [] = {
-	{ 
-	    "Xrl named int32", 
-	    XrlAtom("foo-i32", int32_t(987654321))
-	}, 
 	{
-	    "Xrl named uint32", 
+	    "Xrl named int32",
+	    XrlAtom("foo-i32", int32_t(987654321))
+	},
+	{
+	    "Xrl named uint32",
 	    XrlAtom("foo-u32", uint32_t(0xcafebabe))
 	},
-	{ 
-	    "Xrl named ipv4", 
+	{
+	    "Xrl named ipv4",
 	    XrlAtom("foo-ipv4", IPv4("128.16.64.84"))
 	},
-	{ 
-	    "Xrl named ipv6", 
+	{
+	    "Xrl named ipv6",
 	    XrlAtom("foo-ipv6", IPv6("fe80::2c0:4fff:fea1:1a71"))
 	},
-	{ 
-	    "Xrl named mac", 
+	{
+	    "Xrl named mac",
 	    XrlAtom("foo-ether", Mac("aa:bb:cc:dd:ee:ff"))
 	},
 	{
 	    "Xrl named string",
-	    XrlAtom("foo-string", 
+	    XrlAtom("foo-string",
 		    string("ABCabc DEFdef 1234 !@#$%^&*(){}[]:;'\"<>"))
 	},
     };
@@ -108,7 +109,7 @@ run_test()
 		s = x.str().c_str();
 
 		Xrl sx(s);
-		string nom = string(tests[i].testname) + string(" + ") + 
+		string nom = string(tests[i].testname) + string(" + ") +
 		    string(tests[j].testname);
 		failure = xrl_test(nom.c_str(), x, sx);
 		failures += (failure) ? 1 : 0;
@@ -117,7 +118,7 @@ run_test()
 		failures++;
 		break;
 	    } catch (const XrlArgs::XrlAtomFound&) {
-		cout << "Adding same argument twice (" 
+		cout << "Adding same argument twice ("
 		     << tests[i].testname << ", " << tests[j].testname << ")"
 		     << endl;
 		failures++;
@@ -127,7 +128,8 @@ run_test()
     return failures;
 }
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
     //
     // Initialize and start xlog
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.1 2002/12/14 23:43:02 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -26,7 +26,7 @@
 #include "xrl_error.hh"
 #include "xrl_pf_stcp_ph.hh"
 
-static const uint32_t PROTO_FOURCC = (('S' << 24) | ('T' << 16) | 
+static const uint32_t PROTO_FOURCC = (('S' << 24) | ('T' << 16) |
 				      ('C' <<  8) | ('P' <<  0));
 static const uint8_t PROTO_MAJOR = 1;
 static const uint8_t PROTO_MINOR = 1;
@@ -76,7 +76,7 @@ static inline uint8_t unpack1(const uint8_t* src)
 void
 STCPPacketHeader::initialize(uint32_t seqno,
 			     STCPPacketType type,
-			     const XrlError& xrl_err, 
+			     const XrlError& xrl_err,
 			     uint32_t xrl_data_bytes) {
     pack4(PROTO_FOURCC, _fourcc);
     pack1(PROTO_MAJOR, _major);
@@ -89,8 +89,9 @@ STCPPacketHeader::initialize(uint32_t seqno,
 }
 
 static bool
-stcp_packet_type_valid(uint8_t t) {
-    switch(STCPPacketType(t)) {
+stcp_packet_type_valid(uint8_t t)
+{
+    switch (STCPPacketType(t)) {
     case STCP_PT_HELO:
     case STCP_PT_REQUEST:
     case STCP_PT_RESPONSE:
@@ -100,7 +101,8 @@ stcp_packet_type_valid(uint8_t t) {
 }
 
 bool
-STCPPacketHeader::is_valid() const {
+STCPPacketHeader::is_valid() const
+{
     if (fourcc() != PROTO_FOURCC) {
 	debug_msg("invalid fourcc %c %c %c %c\n",
 		  _fourcc[0], _fourcc[1], _fourcc[2], _fourcc[3]);
@@ -117,7 +119,7 @@ STCPPacketHeader::is_valid() const {
     return true;
 }
 
-uint32_t 
+uint32_t
 STCPPacketHeader::fourcc() const
 {
     return unpack4(_fourcc);
@@ -135,27 +137,32 @@ STCPPacketHeader::minor() const
     return unpack1(_minor);
 }
 
-STCPPacketType 
-STCPPacketHeader::type() const {
+STCPPacketType
+STCPPacketHeader::type() const
+{
     return STCPPacketType(unpack2(_type));
 }
 
 uint32_t
-STCPPacketHeader::seqno() const {
+STCPPacketHeader::seqno() const
+{
     return unpack4(_seqno);
 }
 
 uint32_t
-STCPPacketHeader::error_code() const {
+STCPPacketHeader::error_code() const
+{
     return unpack4(_error_code);
 }
 
 uint32_t
-STCPPacketHeader::error_note_bytes() const {
+STCPPacketHeader::error_note_bytes() const
+{
     return unpack4(_error_note_bytes);
 }
 
 uint32_t
-STCPPacketHeader::xrl_data_bytes() const {
+STCPPacketHeader::xrl_data_bytes() const
+{
     return unpack4(_xrl_data_bytes);
 }

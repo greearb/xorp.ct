@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_parser_input.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xrl_parser_input.hh,v 1.1 2002/12/14 23:43:01 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PARSER_INPUT_HH__
 #define __LIBXIPC_XRL_PARSER_INPUT_HH__
@@ -27,11 +27,11 @@
 #include "libxorp/exceptions.hh"
 
 /**
- * @short Base class for XrlParserInput's.  
+ * @short Base class for XrlParserInput's.
  *
  * XrlParserInput's are used by the @ref XrlParser class to manage
  * input.  The output of XrlParserInput should only contain
- * material likely to XRL's and C-preprocessor hash directives, 
+ * material likely to XRL's and C-preprocessor hash directives,
  * ie # <num>  "file" <line> directives.
  */
 
@@ -40,18 +40,18 @@ public:
     /** Retrieves 1 line of input from source.
      *
      *  @param lineout string that is set if line of text is available.
-     *  @return true if line was read into lineout, false otherwise.  
+     *  @return true if line was read into lineout, false otherwise.
      */
     virtual bool getline(string& lineout) = 0;
 
-    /** 
-     * @return true if no more data is available for reading. 
+    /**
+     * @return true if no more data is available for reading.
      */
     virtual bool eof() const = 0;
 
-    /** 
+    /**
      * @return string containing stack trace to be used for tracking
-     * errors in the input. 
+     * errors in the input.
      */
     virtual string stack_trace() const = 0;
 
@@ -63,13 +63,13 @@ public:
  */
 
 struct XrlParserInputException : public XorpReasonedException {
-    XrlParserInputException(const char* file, int line, const string& reason) 
+    XrlParserInputException(const char* file, int line, const string& reason)
 	: XorpReasonedException("XrlParserInputException", file, line, reason) {}
 };
 
-/** XrlParserFileInput class reads lines from a data source, strips out 
+/** XrlParserFileInput class reads lines from a data source, strips out
  *  comments and handles continuation characters.  It is similar to the
- *  C-preprocessor in that it strips out C and C++ comments and handles 
+ *  C-preprocessor in that it strips out C and C++ comments and handles
  *  #include directives.
  */
 
@@ -81,10 +81,10 @@ public:
      * @param fname filename.
      * @throws XrlParserInputException if input file stream is not good().
      */
-    XrlParserFileInput(istream* input, const char* fname = "") 
+    XrlParserFileInput(istream* input, const char* fname = "")
 	throw (XrlParserInputException);
 
-    XrlParserFileInput(const char* filename) 
+    XrlParserFileInput(const char* filename)
 	throw (XrlParserInputException);
 
     ~XrlParserFileInput();
@@ -100,7 +100,7 @@ protected:
     bool slurp_line(string& line) throw (XrlParserInputException);
 
     struct FileState {
-	FileState(istream* input, const char* fname) : 
+	FileState(istream* input, const char* fname) :
 	    _input(input), _fname(fname), _line(0) {}
 	// Accessors
 	inline istream*	input() const { return _input; }
@@ -113,9 +113,9 @@ protected:
 	int	    _line;
     };
     /** Push FileState onto stack
-     * @throws XrlParserInputException if input file stream is not good(); 
+     * @throws XrlParserInputException if input file stream is not good();
      */
-    void push_stack(const FileState& fs) 
+    void push_stack(const FileState& fs)
 	throw (XrlParserInputException);
 
     void pop_stack();

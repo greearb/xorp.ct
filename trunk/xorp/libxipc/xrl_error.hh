@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_error.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
+// $XORP: xorp/libxipc/xrl_error.hh,v 1.1 2002/12/14 23:43:01 hodson Exp $
 
 #ifndef	__XRLERROR_HH__
 #define __XRLERROR_HH__
@@ -42,7 +42,7 @@ public:
 
     /**
      * The value that should be returned when the arguments in an XRL
-     * do not match what the receiver expected.  
+     * do not match what the receiver expected.
      */
     static const XrlError& BAD_ARGS() 		{ return E_BAD_ARGS; }
 
@@ -127,7 +127,7 @@ public:
      */
     inline string str() const {
 	string r = c_format("%d ", error_code()) + error_msg();
-	return note().size() ? (r + " " + note()) : r; 
+	return note().size() ? (r + " " + note()) : r;
     }
 
     /**
@@ -141,24 +141,24 @@ public:
 
     /* Strictly for classes that have access to XrlErrlet to construct
        XrlError's */
-    XrlError(const XrlErrlet& x, const string& note = "") : 
+    XrlError(const XrlErrlet& x, const string& note = "") :
 	_errlet(&x), _note(note) {}
 
 protected:
     const XrlErrlet* _errlet;
     string	     _note;
-    
+
     XrlError(const XrlErrlet*);
 
     static const XrlError E_OKAY, E_BAD_ARGS, E_COMMAND_FAILED,
-	E_RESOLVE_FAILED, E_NO_FINDER, E_SEND_FAILED, E_REPLY_TIMED_OUT, 
+	E_RESOLVE_FAILED, E_NO_FINDER, E_SEND_FAILED, E_REPLY_TIMED_OUT,
 	E_NO_SUCH_METHOD, E_CORRUPT_XRL, E_CORRUPT_RESPONSE, E_BAD_PROTOCOL,
 	E_SYSCALL_FAILED, E_FAILED_UNKNOWN;
 };
 
 /**
  * Error codes for user callbacks.
- * These are a subset of @ref XrlError 
+ * These are a subset of @ref XrlError
  */
 struct XrlCmdError {
 public:
@@ -166,7 +166,7 @@ public:
      * The default return value.  Indicates that the arguments to the
      * XRL method were correct.  Inability to perform operation should
      * still return OKAY(), but the return list should indicate the
-     * error. 
+     * error.
      */
     inline static const XrlCmdError OKAY() { return XrlError::OKAY(); }
     /**
@@ -206,7 +206,8 @@ private:
     const XrlError _xrl_error;
 };
 
-inline bool operator==(const XrlError& e1, const XrlError& e2) {
+inline bool operator==(const XrlError& e1, const XrlError& e2)
+{
     return e1.error_code() == e2.error_code();
 }
 

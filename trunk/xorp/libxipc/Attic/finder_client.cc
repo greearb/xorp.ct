@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.1 2002/12/14 23:42:54 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.2 2002/12/18 22:54:29 hodson Exp $"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -41,9 +41,9 @@ public:
     const char* 		value() const { return _value.c_str(); }
 
     uint16_t 			seqno() const { return _seqno; }
-    uint16_t			set_seqno(uint16_t s) { 
+    uint16_t			set_seqno(uint16_t s) {
 	gettimeofday(&_issued, NULL);
-	return _seqno = s; 
+	return _seqno = s;
     }
     const timeval& 		issued() const { return _issued; }
 
@@ -70,15 +70,17 @@ static const int CONNECT_RETRY_MILLISEC = 250;
 static const int CONNECT_REAP_MILLISEC  = 2500;
 
 // ----------------------------------------------------------------------------
-// Authentication 
+// Authentication
 
 const char*
-FinderClient::set_auth_key(const char* key) {
+FinderClient::set_auth_key(const char* key)
+{
     return _connection->set_auth_key(key);
 }
 
 const char*
-FinderClient::auth_key() {
+FinderClient::auth_key()
+{
     return _connection->auth_key();
 }
 
@@ -86,7 +88,8 @@ FinderClient::auth_key() {
 // Protocol Related
 
 void
-FinderClient::send_register(FinderRegistration& r) {
+FinderClient::send_register(FinderRegistration& r)
+{
     FinderMessage m;
 
     _connection->prepare_message(m, REGISTER, r.name(), r.value());
@@ -101,7 +104,8 @@ FinderClient::send_register(FinderRegistration& r) {
 }
 
 void
-FinderClient::send_resolve(FinderRegistration& r) {
+FinderClient::send_resolve(FinderRegistration& r)
+{
     FinderMessage m;
 
     _connection->prepare_message(m, LOCATE, r.name());
@@ -116,8 +120,9 @@ FinderClient::send_resolve(FinderRegistration& r) {
     debug_msg(m.str().c_str());
 }
 
-void 
-FinderClient::send_unregister(FinderRegistration& r) {
+void
+FinderClient::send_unregister(FinderRegistration& r)
+{
     FinderMessage m;
 
     _connection->prepare_message(m, UNREGISTER, r.name());
@@ -130,23 +135,26 @@ FinderClient::send_unregister(FinderRegistration& r) {
 }
 
 void
-FinderClient::send_bye() {
+FinderClient::send_bye()
+{
     FinderMessage m;
     _connection->prepare_message(m, BYE);
     _connection->write_message(m);
 }
 
 void
-FinderClient::hello_handler(const FinderMessage& m) {
+FinderClient::hello_handler(const FinderMessage& m)
+{
     struct timeval now;
     gettimeofday(&now, NULL);
-    debug_msg("got hello (seqno %d) %ld.%06ld\n", m.seqno(), 
+    debug_msg("got hello (seqno %d) %ld.%06ld\n", m.seqno(),
 	      now.tv_sec, now.tv_usec);
     UNUSED(m);
 }
 
 void
-FinderClient::bye_handler(const FinderMessage& msg) {
+FinderClient::bye_handler(const FinderMessage& msg)
+{
     if (msg.is_ack() == false) {
 	FinderMessage ack;
 	_connection->prepare_ack(msg, ack);
@@ -156,14 +164,15 @@ FinderClient::bye_handler(const FinderMessage& msg) {
 }
 
 void
-FinderClient::register_handler(const FinderMessage& msg) {
+FinderClient::register_handler(const FinderMessage& msg)
+{
     debug_msg(msg.str().c_str());
     if (msg.is_ack() == false) {
 	debug_msg("Protocol error! - client received REGISTER.\n");
 	return;
     }
 
-    for(RLI r = _registers.begin(); r != _registers.end(); r++) {
+    for (RLI r = _registers.begin(); r != _registers.end(); r++) {
 	debug_msg("acked something %d %d\n", r->seqno(), msg.ackno());
 	if (r->seqno() == msg.ackno()) {
 	    _resolved[r->name()] = r->value();
@@ -175,14 +184,15 @@ FinderClient::register_handler(const FinderMessage& msg) {
 }
 
 void
-FinderClient::unregister_handler(const FinderMessage& msg) {
+FinderClient::unregister_handler(const FinderMessage& msg)
+{
     debug_msg(msg.str().c_str());
     if (msg.is_ack() == false) {
 	debug_msg("Protocol error! - client received UNREGISTER.\n");
 	return;
     }
 
-    for(RLI r = _unregisters.begin(); r != _unregisters.end(); r++) {
+    for (RLI r = _unregisters.begin(); r != _unregisters.end(); r++) {
 	debug_msg("acked something %d %d", r->seqno(), msg.ackno());
 	if (r->seqno() == msg.ackno()) {
 	    r->notify(FinderClient::FC_OKAY, r->name(), r->value());
@@ -193,7 +203,8 @@ FinderClient::unregister_handler(const FinderMessage& msg) {
 }
 
 void
-FinderClient::notify_handler(const FinderMessage& msg) {
+FinderClient::notify_handler(const FinderMessage& msg)
+{
     if (msg.is_ack() == true) {
 	debug_msg("Protocol error! - client received NOTIFY_ACK.\n");
 	return;
@@ -213,7 +224,8 @@ FinderClient::notify_handler(const FinderMessage& msg) {
 }
 
 void
-FinderClient::locate_handler(const FinderMessage& msg) {
+FinderClient::locate_handler(const FinderMessage& msg)
+{
     if (msg.is_ack() != true) {
 	debug_msg("Protocol error! - client receive LOCATE.\n");
     }
@@ -221,7 +233,8 @@ FinderClient::locate_handler(const FinderMessage& msg) {
 }
 
 void
-FinderClient::error_handler(const FinderMessage& msg) {
+FinderClient::error_handler(const FinderMessage& msg)
+{
     debug_msg("ERROR %s\n", msg.str().c_str());
     if (msg.is_ack() == true) {
 	return;
@@ -239,11 +252,11 @@ FinderClient::error_handler(const FinderMessage& msg) {
 	}
     }
 
-    // Check if message relates to lookup 
+    // Check if message relates to lookup
     for (RLI q = _queries.begin(); q != _queries.end(); q++) {
 	if (seqno == q->seqno()) {
-	    q->notify(FinderClient::FC_LOOKUP_FAILED, q->name(), 0); 
-	    debug_msg("Look up failed (\"%s\"): %s\n", 
+	    q->notify(FinderClient::FC_LOOKUP_FAILED, q->name(), 0);
+	    debug_msg("Look up failed (\"%s\"): %s\n",
 		      q->name(), msg.get_arg(1));
 	    _queries.erase(q);
 	    return;
@@ -252,7 +265,8 @@ FinderClient::error_handler(const FinderMessage& msg) {
 }
 
 void
-FinderClient::receive_hook(int fd, SelectorMask sm, void* thunked_client) {
+FinderClient::receive_hook(int fd, SelectorMask sm, void* thunked_client)
+{
     FinderClient* c = reinterpret_cast<FinderClient*>(thunked_client);
 
     assert(c->_connection->descriptor() == fd);
@@ -265,7 +279,7 @@ FinderClient::receive_hook(int fd, SelectorMask sm, void* thunked_client) {
 
     switch (msg.type()) {
     case HELLO:
-	c->hello_handler(msg); 
+	c->hello_handler(msg);
 	break;
     case BYE:
 	c->bye_handler(msg);
@@ -301,7 +315,7 @@ FinderClient::receive_hook(int fd, SelectorMask sm, void* thunked_client) {
 // ----------------------------------------------------------------------------
 // Registration Related
 
-void 
+void
 FinderClient::add(const char* name, const char* value, const Callback& cb)
 {
     if (_connection) {
@@ -314,13 +328,13 @@ FinderClient::add(const char* name, const char* value, const Callback& cb)
 }
 
 void
-FinderClient::lookup(const char* name, const Callback& cb) 
+FinderClient::lookup(const char* name, const Callback& cb)
 {
     debug_msg("lookup %s\n", name);
     RMI i = _resolved.find(name);
     if (i != _resolved.end()) {
 	const string& v = i->second;
-	if (cb.is_empty() == false) 
+	if (cb.is_empty() == false)
 	    cb->dispatch(FinderClient::FC_OKAY, name, v.c_str());
 	return;
     }
@@ -334,7 +348,7 @@ FinderClient::lookup(const char* name, const Callback& cb)
 }
 
 void
-FinderClient::remove(const char* name, const Callback& cb) 
+FinderClient::remove(const char* name, const Callback& cb)
 {
     RI i = _registered.find(name);
     if (i != _registered.end()) {
@@ -358,7 +372,7 @@ void
 FinderClient::invalidate(const string& name)
 {
     /* klduge */
-    map<string,string>::iterator i = _resolved.find(name);
+    map<string, string>::iterator i = _resolved.find(name);
     if (i != _resolved.end()) {
 	_resolved.erase(i);
 	debug_msg("Invalidating %s\n", name.c_str());
@@ -369,12 +383,13 @@ FinderClient::invalidate(const string& name)
 // Connection related
 
 void
-FinderClient::initiate_hook(void *thunked_client) {
+FinderClient::initiate_hook(void *thunked_client)
+{
     FinderClient *c = reinterpret_cast<FinderClient*>(thunked_client);
-    
+
     assert(c->_connection == NULL);
-    c->_connection = 
-	FinderTCPClientIPCFactory::create(c->_finder_host.c_str(), 
+    c->_connection =
+	FinderTCPClientIPCFactory::create(c->_finder_host.c_str(),
 					  c->_finder_port);
     if (c->_connection) {
 	struct timeval now;
@@ -397,7 +412,7 @@ FinderClient::initiate_hook(void *thunked_client) {
 	c->_connect_timer.clear(); // timer free'd when this fn returns
     } else {
 	debug_msg("Failed to connect to Finder. Retrying...\n");
-	// Connect failed try again 
+	// Connect failed try again
 	c->_connect_timer = c->_event_loop.new_oneoff_after_ms
 	    (CONNECT_RETRY_MILLISEC, initiate_hook, thunked_client);
     }
@@ -414,21 +429,24 @@ FinderClient::reap_hook(void* thunked_client)
     }
 }
 
-void 
-FinderClient::connect() {
+void
+FinderClient::connect()
+{
     if (!connected()) {
 	start_connection();
     }
 }
 
 void
-FinderClient::start_connection() {
+FinderClient::start_connection()
+{
     assert(_connection == 0);
     initiate_hook(reinterpret_cast<void*>(this));
 }
 
 void
-FinderClient::restart_connection() {
+FinderClient::restart_connection()
+{
     assert(_connection != 0);
     debug_msg("Restarting connection %p\n", this);
     terminate_connection();
@@ -436,7 +454,8 @@ FinderClient::restart_connection() {
 }
 
 void
-FinderClient::terminate_connection() {
+FinderClient::terminate_connection()
+{
     assert(_connection != 0);
     _event_loop.remove_selector(_connection->descriptor());
     delete _connection;
@@ -462,14 +481,15 @@ FinderClient::terminate_connection() {
 // ----------------------------------------------------------------------------
 // Constructor/Destructor
 
-FinderClient::FinderClient(EventLoop& e, const char* addr, uint16_t port) 
+FinderClient::FinderClient(EventLoop& e, const char* addr, uint16_t port)
     : _finder_host(addr), _finder_port(port), _connection(NULL),
       _event_loop(e)
 {
     connect();
 }
 
-FinderClient::~FinderClient() {
+FinderClient::~FinderClient()
+{
     if (connected()) {
 	send_bye();
 	_event_loop.remove_selector(_connection->descriptor());

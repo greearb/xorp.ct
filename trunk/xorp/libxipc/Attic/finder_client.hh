@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.1 2002/12/14 23:42:54 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.2 2002/12/18 22:54:29 hodson Exp $
 
 #ifndef __FINDER_CLIENT_HH__
 #define __FINDER_CLIENT_HH__
@@ -33,20 +33,20 @@ public:
     enum Error {
 	FC_OKAY,
 	FC_LOOKUP_FAILED,
-	FC_ADD_FAILED, 
+	FC_ADD_FAILED,
 	FC_REMOVE_FAILED,
 	FC_NO_SERVER
     };
 
     typedef
-    XorpCallback3<void,Error,const char*,const char*>::RefPtr
+    XorpCallback3<void, Error, const char*, const char*>::RefPtr
     Callback;
 
 public:
-    
+
     FinderClient(EventLoop& e,
-		 const char*	ipaddr = "localhost", 
-		 uint16_t	port   = FINDER_TCP_DEFAULT_PORT);
+		 const char*	ipaddr = "localhost",
+		 uint16_t	port = FINDER_TCP_DEFAULT_PORT);
     ~FinderClient();
 
     inline bool connected() const { return _connection != NULL; }
@@ -62,7 +62,7 @@ public:
     const char* auth_key();
 
     struct ClientConnectionError : public exception {
-	ClientConnectionError(const char* reason = "Not specified") 
+	ClientConnectionError(const char* reason = "Not specified")
 	    : _reason(reason) {}
         const char* what() { return _reason; }
     protected:
@@ -73,7 +73,7 @@ private:
     typedef map<string, FinderRegistration>::iterator RI;
 
     map<string, string> _resolved;
-    typedef map<string,string>::iterator RMI;
+    typedef map<string, string>::iterator RMI;
 
     // Pending transactions
     list<FinderRegistration>	_queries;	// unresolved queries
@@ -107,7 +107,7 @@ private:
     // Connection related methods, hooks, and timers
     void start_connection();
     void terminate_connection();
-    void restart_connection(); 
+    void restart_connection();
 
     static void initiate_hook(void* thunked_client);
     XorpTimer _connect_timer; // Connection retry timer.

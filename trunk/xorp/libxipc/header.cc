@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/header.cc,v 1.12 2002/12/09 18:29:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/header.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,12 +26,13 @@ static const string HEADER_SEP(":\t");
 static const string HEADER_EOL("\r\n");
 
 bool
-HeaderWriter::name_valid(const string &name) {
+HeaderWriter::name_valid(const string &name)
+{
     return (name.find(HEADER_SEP) == ~0U);
 }
 
 HeaderWriter&
-HeaderWriter::add(const string& name, 
+HeaderWriter::add(const string& name,
 		  const string& value) throw (InvalidName) {
     if (name_valid(name) == false) throw InvalidName();
 
@@ -41,7 +42,8 @@ HeaderWriter::add(const string& name,
 }
 
 HeaderWriter&
-HeaderWriter::add(const string& name, int32_t value) throw (InvalidName) {
+HeaderWriter::add(const string& name, int32_t value) throw (InvalidName)
+{
     if (name_valid(name) == false) throw InvalidName();
 
     char buffer[32];
@@ -52,7 +54,8 @@ HeaderWriter::add(const string& name, int32_t value) throw (InvalidName) {
 }
 
 HeaderWriter&
-HeaderWriter::add(const string& name, uint32_t value) throw (InvalidName) {
+HeaderWriter::add(const string& name, uint32_t value) throw (InvalidName)
+{
     if (name_valid(name) == false) throw InvalidName();
 
     char buffer[32];
@@ -63,7 +66,7 @@ HeaderWriter::add(const string& name, uint32_t value) throw (InvalidName) {
 }
 
 HeaderWriter&
-HeaderWriter::add(const string& name, 
+HeaderWriter::add(const string& name,
 		  const double& value) throw (InvalidName) {
     if (name_valid(name) == false) throw InvalidName();
 
@@ -75,18 +78,20 @@ HeaderWriter::add(const string& name,
 }
 
 string
-HeaderWriter::str() const {
+HeaderWriter::str() const
+{
     list<Node>::const_iterator ci;
-    
+
     string r;
-    for(ci = _list.begin(); ci != _list.end(); ci++) {
+    for (ci = _list.begin(); ci != _list.end(); ci++) {
 	r += ci->key + HEADER_SEP + ci->value + HEADER_EOL;
     }
     r += HEADER_EOL;
     return r;
 }
 
-HeaderReader::HeaderReader(const string& serialized) throw (InvalidString) {
+HeaderReader::HeaderReader(const string& serialized) throw (InvalidString)
+{
     debug_msg("HeaderReader:\n%s\n", serialized.c_str());
 
     if (serialized.find(HEADER_EOL + HEADER_EOL) == ~0U)
@@ -98,7 +103,7 @@ HeaderReader::HeaderReader(const string& serialized) throw (InvalidString) {
 
     start = serialized.c_str();
     size_t remain = serialized.size();
-    
+
     while (remain > 0 && *start != '\0') {
 	sep = strstr(start, HEADER_SEP.c_str());
 	if (sep == NULL) break;
@@ -125,8 +130,9 @@ HeaderReader::HeaderReader(const string& serialized) throw (InvalidString) {
 	throw InvalidString();
 }
 
-HeaderReader& 
-HeaderReader::get(const string& name, string& value) throw (NotFound) {
+HeaderReader&
+HeaderReader::get(const string& name, string& value) throw (NotFound)
+{
     CMI m = _map.find(name);
     if (m == _map.end())
 	throw NotFound();
@@ -134,24 +140,27 @@ HeaderReader::get(const string& name, string& value) throw (NotFound) {
     return *this;
 }
 
-HeaderReader& 
-HeaderReader::get(const string& name, int32_t& value) throw (NotFound) {
+HeaderReader&
+HeaderReader::get(const string& name, int32_t& value) throw (NotFound)
+{
     string tmp;
     get(name, tmp);
     value = strtol(tmp.c_str(), 0, 10);
     return *this;
 }
 
-HeaderReader& 
-HeaderReader::get(const string& name, uint32_t& value) throw (NotFound) {
+HeaderReader&
+HeaderReader::get(const string& name, uint32_t& value) throw (NotFound)
+{
     string tmp;
     get(name, tmp);
     value = strtoul(tmp.c_str(), 0, 10);
     return *this;
 }
 
-HeaderReader& 
-HeaderReader::get(const string& name, double& value) throw (NotFound) {
+HeaderReader&
+HeaderReader::get(const string& name, double& value) throw (NotFound)
+{
     string tmp;
     get(name, tmp);
     value = strtod(tmp.c_str(), 0);

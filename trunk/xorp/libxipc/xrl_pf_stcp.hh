@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.1 2002/12/14 23:43:02 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.2 2002/12/18 22:54:30 hodson Exp $
 
 #ifndef __XRLPF_STCP_HH__
 #define __XRLPF_STCP_HH__
@@ -21,7 +21,7 @@
 #include "libxorp/asyncio.hh"
 
 // ----------------------------------------------------------------------------
-// XRL Protocol Family : Simplest TCP 
+// XRL Protocol Family : Simplest TCP
 
 class STCPRequestHandler;
 class XrlPFSTCPSender;
@@ -34,7 +34,7 @@ struct RequestState {
     XorpTimer			timeout;
     XrlPFSender::SendCallback	callback;
 
-    RequestState(XrlPFSTCPSender* p, uint32_t sno, const Xrl& x, 
+    RequestState(XrlPFSTCPSender* p, uint32_t sno, const Xrl& x,
 		 const XrlPFSender::SendCallback& cb)
 	: parent(p), seqno(sno), xrl(x), callback(cb)
     {}
@@ -46,7 +46,7 @@ struct RequestState {
 
 class XrlPFSTCPListener : public XrlPFListener {
 public:
-    XrlPFSTCPListener(EventLoop& e, XrlCmdMap* m = 0, int port = 0) 
+    XrlPFSTCPListener(EventLoop& e, XrlCmdMap* m = 0, int port = 0)
 	throw (XrlPFConstructorError);
     ~XrlPFSTCPListener();
 
@@ -71,7 +71,7 @@ private:
 
 class XrlPFSTCPSender : public XrlPFSender {
 public:
-    XrlPFSTCPSender(EventLoop& e, const char* address = NULL) 
+    XrlPFSTCPSender(EventLoop& e, const char* address = NULL)
 	throw (XrlPFConstructorError);
     virtual ~XrlPFSTCPSender();
 
@@ -106,7 +106,7 @@ private:
     uint32_t		_current_seqno;
 
     void update_writer(AsyncFileWriter::Event	e,
-		       const uint8_t*		buffer, 
+		       const uint8_t*		buffer,
 		       size_t 			buffer_bytes,
 		       size_t 			bytes_done);
 
@@ -125,7 +125,7 @@ private:
 
     void prepare_for_reply_header();
 
-    void recv_data(AsyncFileReader::Event	ev, 
+    void recv_data(AsyncFileReader::Event	ev,
 		   const uint8_t*		buffer,
 		   size_t			buffer_bytes,
 		   size_t			offset);

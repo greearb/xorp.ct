@@ -34,7 +34,7 @@ public:
     XrlArgs() {}
     ~XrlArgs() {}
 
-    class XrlAtomNotFound { }; 
+    class XrlAtomNotFound { };
     class XrlAtomFound { };
 
     XrlArgs& add(const XrlAtom& xa) throw (XrlAtomFound);
@@ -56,7 +56,7 @@ public:
 	return add_bool(n, v);
     }
 
-    inline void get(const char *n, bool& t) const throw (XrlAtomNotFound) 
+    inline void get(const char *n, bool& t) const throw (XrlAtomNotFound)
     {
 	t = get_bool(n);
     }
@@ -74,7 +74,7 @@ public:
 	return add_int32(n, v);
     }
 
-    inline void get(const char *n, int32_t& t) const throw (XrlAtomNotFound) 
+    inline void get(const char *n, int32_t& t) const throw (XrlAtomNotFound)
     {
 	t = get_int32(n);
     }
@@ -92,11 +92,11 @@ public:
 	return add_uint32(n, v);
     }
 
-    inline void get(const char *n, uint32_t& t) const 
+    inline void get(const char *n, uint32_t& t) const
 	throw (XrlAtomNotFound) {
 	t = get_uint32(n);
     }
-    
+
     /* --- ipv4 accessors --- */
 
     XrlArgs& add_ipv4(const char* n, const IPv4& a) throw (XrlAtomFound);
@@ -110,18 +110,18 @@ public:
 	return add_ipv4(n, a);
     }
 
-    inline void get(const char *n, IPv4& a) const 
-	throw (XrlAtomNotFound) 
+    inline void get(const char *n, IPv4& a) const
+	throw (XrlAtomNotFound)
     {
 	a = get_ipv4(n);
     }
 
     /* --- ipv4net accessors --- */
 
-    XrlArgs& add_ipv4net(const char* n, const IPv4Net& a) 
+    XrlArgs& add_ipv4net(const char* n, const IPv4Net& a)
 	throw (XrlAtomFound);
 
-    const IPv4Net& get_ipv4net(const char* name) const 
+    const IPv4Net& get_ipv4net(const char* name) const
 	throw (XrlAtomNotFound);
 
     void remove_ipv4net(const char* name) throw (XrlAtomNotFound);
@@ -131,14 +131,14 @@ public:
 	return add_ipv4net(n, v);
     }
 
-    inline void get(const char *n, IPv4Net& t) const 
+    inline void get(const char *n, IPv4Net& t) const
 	throw (XrlAtomNotFound) {
 	t = get_ipv4net(n);
     }
 
     /* --- ipv6 accessors --- */
 
-    XrlArgs& add_ipv6(const char* name, const IPv6& addr) 
+    XrlArgs& add_ipv6(const char* name, const IPv6& addr)
 	throw (XrlAtomFound);
 
     const IPv6& get_ipv6(const char* name) const throw (XrlAtomNotFound);
@@ -150,18 +150,18 @@ public:
 	return add_ipv6(n, a);
     }
 
-    inline void get(const char *n, IPv6& a) const 
-	throw (XrlAtomNotFound) 
+    inline void get(const char *n, IPv6& a) const
+	throw (XrlAtomNotFound)
     {
 	a = get_ipv6(n);
     }
 
     /* --- ipv6net accessors --- */
 
-    XrlArgs& add_ipv6net(const char* name, const IPv6Net& addr) 
+    XrlArgs& add_ipv6net(const char* name, const IPv6Net& addr)
 	throw (XrlAtomFound);
 
-    const IPv6Net& get_ipv6net(const char* name) const 
+    const IPv6Net& get_ipv6net(const char* name) const
 	throw (XrlAtomNotFound);
 
     void remove_ipv6net(const char* name) throw (XrlAtomNotFound);
@@ -172,8 +172,8 @@ public:
 	return add_ipv6net(n, a);
     }
 
-    inline void get(const char *n, IPv6Net& a) const 
-	throw (XrlAtomNotFound) 
+    inline void get(const char *n, IPv6Net& a) const
+	throw (XrlAtomNotFound)
     {
 	a = get_ipv6net(n);
     }
@@ -183,7 +183,7 @@ public:
     XrlArgs& add_ipvx(const char* name, const IPvX& ipvx)
 	throw (XrlAtomFound);
 
-    const IPvX get_ipvx(const char* name) const 
+    const IPvX get_ipvx(const char* name) const
 	throw (XrlAtomNotFound);
 
     void remove_ipvx(const char* name) throw (XrlAtomNotFound);
@@ -193,8 +193,8 @@ public:
 	return add_ipvx(n, a);
     }
 
-    inline void get(const char *n, IPvX& a) const 
-	throw (XrlAtomNotFound) 
+    inline void get(const char *n, IPvX& a) const
+	throw (XrlAtomNotFound)
     {
 	a = get_ipvx(n);
     }
@@ -204,7 +204,7 @@ public:
     XrlArgs& add_ipvxnet(const char* name, const IPvXNet& ipvxnet)
 	throw (XrlAtomFound);
 
-    const IPvXNet get_ipvxnet(const char* name) const 
+    const IPvXNet get_ipvxnet(const char* name) const
 	throw (XrlAtomNotFound);
 
     void remove_ipvxnet(const char* name) throw (XrlAtomNotFound);
@@ -214,8 +214,8 @@ public:
 	return add_ipvxnet(n, a);
     }
 
-    inline void get(const char *n, IPvXNet& a) const 
-	throw (XrlAtomNotFound) 
+    inline void get(const char *n, IPvXNet& a) const
+	throw (XrlAtomNotFound)
     {
 	a = get_ipvxnet(n);
     }
@@ -235,8 +235,8 @@ public:
 	return add_mac(n, a);
     }
 
-    inline void get(const char *n, Mac& a) const 
-	throw (XrlAtomNotFound) 
+    inline void get(const char *n, Mac& a) const
+	throw (XrlAtomNotFound)
     {
 	a = get_mac(n);
     }
@@ -255,8 +255,8 @@ public:
 	return add_string(n, a);
     }
 
-    inline void get(const char *n, string& a) const 
-	throw (XrlAtomNotFound) 
+    inline void get(const char *n, string& a) const
+	throw (XrlAtomNotFound)
     {
 	a = get_string(n);
     }
@@ -266,19 +266,19 @@ public:
     XrlArgs& add_list(const char* name, const XrlAtomList& addr)
 	throw (XrlAtomFound);
 
-    const XrlAtomList& get_list(const char* name) 
+    const XrlAtomList& get_list(const char* name)
 	const throw (XrlAtomNotFound);
 
     void remove_list(const char* name) throw (XrlAtomNotFound);
 
-    inline XrlArgs& add(const char *n, const XrlAtomList& a) 
+    inline XrlArgs& add(const char *n, const XrlAtomList& a)
 	throw (XrlAtomFound)
     {
 	return add_list(n, a);
     }
 
-    inline void get(const char *n, XrlAtomList& a) const 
-	throw (XrlAtomNotFound) 
+    inline void get(const char *n, XrlAtomList& a) const
+	throw (XrlAtomNotFound)
     {
 	a = get_list(n);
     }
@@ -287,24 +287,24 @@ public:
     XrlArgs& add_binary(const char* name, const vector<uint8_t>& addr)
 	throw (XrlAtomFound);
 
-    const vector<uint8_t>& get_binary(const char* name) const 
+    const vector<uint8_t>& get_binary(const char* name) const
 	throw (XrlAtomNotFound);
 
     void remove_binary(const char* name) throw (XrlAtomNotFound);
 
-    inline XrlArgs& add(const char *n, const vector<uint8_t>& a) 
+    inline XrlArgs& add(const char *n, const vector<uint8_t>& a)
 	throw (XrlAtomFound)
     {
 	return add_binary(n, a);
     }
 
-    inline void get(const char *n, vector<uint8_t>& a) const 
-	throw (XrlAtomNotFound) 
+    inline void get(const char *n, vector<uint8_t>& a) const
+	throw (XrlAtomNotFound)
     {
 	a = get_binary(n);
     }
 
-    // ... Add your type's add,get,remove functions here ...
+    // ... Add your type's add, get, remove functions here ...
 
     // Append all atoms from an existing XrlArgs structure
     XrlArgs& add(const XrlArgs& args) throw (XrlAtomFound);
@@ -317,14 +317,14 @@ public:
     size_t size() const;
 
     const XrlAtom& operator[](uint32_t index) const; // throw out_of_range
-    inline const XrlAtom& item(uint32_t index) const 
+    inline const XrlAtom& item(uint32_t index) const
     { return operator[](index); }
 
-    const XrlAtom& operator[](const string& name) const 
+    const XrlAtom& operator[](const string& name) const
 	throw (XrlAtomNotFound);
 
-    inline const XrlAtom& item(const string& name) const 
-	throw (XrlAtomNotFound) 
+    inline const XrlAtom& item(const string& name) const
+	throw (XrlAtomNotFound)
     { return operator[](name); }
 
     typedef list<XrlAtom>::const_iterator const_iterator;

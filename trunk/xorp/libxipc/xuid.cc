@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xuid.cc,v 1.17 2002/12/09 18:29:10 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xuid.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -35,8 +35,9 @@
 
 static const char* sfmt = "%08x-%08x-%08x-%08x";
 
-static uint32_t 
-local_ip4_addr() {
+static uint32_t
+local_ip4_addr()
+{
     static uint32_t cached_addr;
     struct in_addr ia;
 
@@ -61,7 +62,8 @@ local_ip4_addr() {
 }
 
 void
-XUID::initialize() {
+XUID::initialize()
+{
     static struct timeval last;	// last time clock reading value
     static uint16_t ticks;	// number of ticks with same clock reading
 
@@ -96,16 +98,17 @@ XUID::initialize() {
     _data[3] = htonl((pid << 16) + tid);
 }
 
-static const uint32_t XUID_CSTR_BYTES = (32 + 3); 
+static const uint32_t XUID_CSTR_BYTES = (32 + 3);
 
-XUID::XUID(const string& s) throw (InvalidString) {
+XUID::XUID(const string& s) throw (InvalidString)
+{
     static_assert(sizeof(_data) == 16);
     static_assert(sizeof(_data[0]) == 4);
 
     if (s.size() < XUID_CSTR_BYTES)
 	throw InvalidString();
 
-    if (sscanf(s.c_str(), sfmt, &_data[0], &_data[1], &_data[2], &_data[3]) 
+    if (sscanf(s.c_str(), sfmt, &_data[0], &_data[1], &_data[2], &_data[3])
 	!= 4) {
             throw InvalidString();
     }
@@ -114,13 +117,15 @@ XUID::XUID(const string& s) throw (InvalidString) {
     }
 }
 
-bool 
-XUID::operator==(const XUID& x) const {
+bool
+XUID::operator==(const XUID& x) const
+{
     return (memcmp(x._data, _data, sizeof(_data)) == 0);
 }
 
 bool
-XUID::operator<(const XUID& x) const {
+XUID::operator<(const XUID& x) const
+{
     static_assert(sizeof(_data) == 16);
     static_assert(sizeof(_data[0]) == 4);
     int i;
@@ -131,13 +136,13 @@ XUID::operator<(const XUID& x) const {
 	}
     }
     return ntohl(_data[i]) < ntohl(x._data[i]);
-} 
+}
 
 string
-XUID::str() const 
+XUID::str() const
 {
     char dst[XUID_CSTR_BYTES + 1];
-    snprintf(dst, sizeof(dst) / sizeof(dst[0]), sfmt, ntohl(_data[0]), 
+    snprintf(dst, sizeof(dst) / sizeof(dst[0]), sfmt, ntohl(_data[0]),
 	     ntohl(_data[1]), ntohl(_data[2]), ntohl(_data[3]));
     return string(dst);
 }

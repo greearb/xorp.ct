@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_list.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_list.cc,v 1.1 2002/12/14 23:43:00 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -24,7 +24,8 @@
 XrlAtomList::XrlAtomList() {}
 
 void
-XrlAtomList::prepend(const XrlAtom& xa) throw (BadAtomType) {
+XrlAtomList::prepend(const XrlAtom& xa) throw (BadAtomType)
+{
     if (_list.empty() == false && _list.front().type() != xa.type()) {
 	// Atom being prepended is of different type to head
 	throw BadAtomType();
@@ -33,7 +34,8 @@ XrlAtomList::prepend(const XrlAtom& xa) throw (BadAtomType) {
 }
 
 void
-XrlAtomList::append(const XrlAtom& xa) throw (BadAtomType) {
+XrlAtomList::append(const XrlAtom& xa) throw (BadAtomType)
+{
     if (_list.empty() == false && _list.front().type() != xa.type()) {
 	// Atom being prepended is of different type to head
 	throw BadAtomType();
@@ -42,7 +44,8 @@ XrlAtomList::append(const XrlAtom& xa) throw (BadAtomType) {
 }
 
 const XrlAtom&
-XrlAtomList::get(size_t itemno) const throw (InvalidIndex) {
+XrlAtomList::get(size_t itemno) const throw (InvalidIndex)
+{
     if (itemno >= _list.size()) {
 	throw InvalidIndex();
     }
@@ -55,9 +58,10 @@ XrlAtomList::get(size_t itemno) const throw (InvalidIndex) {
 }
 
 void
-XrlAtomList::remove(size_t itemno) throw (InvalidIndex) {
+XrlAtomList::remove(size_t itemno) throw (InvalidIndex)
+{
     size_t count = 0;
-    for (list<XrlAtom>::iterator i = _list.begin();  i != _list.end(); 
+    for (list<XrlAtom>::iterator i = _list.begin();  i != _list.end();
 	 i++, count++) {
 	if (count == itemno) {
 	    _list.erase(i);
@@ -67,22 +71,24 @@ XrlAtomList::remove(size_t itemno) throw (InvalidIndex) {
     throw InvalidIndex();
 }
 
-size_t XrlAtomList::size() const { 
-    return _list.size(); 
+size_t XrlAtomList::size() const
+{
+    return _list.size();
 }
 
 bool
-XrlAtomList::operator==(const XrlAtomList& other) const {
+XrlAtomList::operator==(const XrlAtomList& other) const
+{
     list<XrlAtom>::const_iterator a = _list.begin();
     list<XrlAtom>::const_iterator b = other._list.begin();
     int i = 0;
     while (a != _list.end()) {
 	if (b == other._list.end()) {
-	    debug_msg("lengths differ\n"); 
+	    debug_msg("lengths differ\n");
 	    return false;
 	}
 	if (*a != *b) {
-		debug_msg("%d -> \"%s\" %d \"%s\" != \"%s\" %d \"%s\"\n", i, 
+		debug_msg("%d -> \"%s\" %d \"%s\" != \"%s\" %d \"%s\"\n", i,
 		       a->text().c_str(), a->type(), a->name().c_str(),
 		       b->text().c_str(), b->type(), b->name().c_str());
 		return false;
@@ -93,7 +99,8 @@ XrlAtomList::operator==(const XrlAtomList& other) const {
 }
 
 string
-XrlAtomList::str() const {
+XrlAtomList::str() const
+{
     string r;
     list<XrlAtom>::const_iterator ci = _list.begin();
     while (ci != _list.end()) {
@@ -106,11 +113,12 @@ XrlAtomList::str() const {
     return r;
 }
 
-XrlAtomList::XrlAtomList(const string& s) {
+XrlAtomList::XrlAtomList(const string& s)
+{
     const char *start, *sep;
     start = s.c_str();
 
-    for(;;) {
+    for (;;) {
 	sep = strstr(start, XrlToken::LIST_SEP);
 	if (0 == sep) break;
 	append(XrlAtom(string(start, sep - start).c_str()));

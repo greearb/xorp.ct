@@ -7,7 +7,8 @@
 #include "xrl_pf_stcp_ph.hh"
 
 static void
-test_packet_header(bool is_request, const XrlError& e, uint32_t p_bytes) {
+test_packet_header(bool is_request, const XrlError& e, uint32_t p_bytes)
+{
     printf("Testing STCPPacketHeader(%s, \"%s\", %ul)... ",
 	   is_request ? "true" : "false", string(e).c_str(), p_bytes);
     STCPPacketHeader sph(is_request, e, p_bytes);
@@ -25,7 +26,8 @@ test_packet_header(bool is_request, const XrlError& e, uint32_t p_bytes) {
     }
 }
 
-int main(int /* argc */, char *argv[]) {
+int main(int /* argc */, char *argv[])
+{
 
     //
     // Initialize and start xlog

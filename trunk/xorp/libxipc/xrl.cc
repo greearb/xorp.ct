@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.2 2002/12/14 23:43:00 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -21,7 +21,8 @@
 
 const string Xrl::_finder_protocol = "finder";
 
-Xrl::Xrl(const char* c_str) throw (InvalidString) {
+Xrl::Xrl(const char* c_str) throw (InvalidString)
+{
     const char *sep, *start;
 
     if (0 == c_str)
@@ -40,7 +41,7 @@ Xrl::Xrl(const char* c_str) throw (InvalidString) {
 
     // Extract Target
     sep = strstr(start, XrlToken::TGT_CMD_SEP);
-    if (0 == sep) 
+    if (0 == sep)
 	xorp_throw0(InvalidString);
     _target = string(start, sep - start);
     start = sep + TOKEN_BYTES(XrlToken::TGT_CMD_SEP) - 1;
@@ -69,8 +70,9 @@ Xrl::Xrl(const char* c_str) throw (InvalidString) {
 }
 
 string
-Xrl::str() const {
-    string s = _protocol + string(XrlToken::PROTO_TGT_SEP) + _target + 
+Xrl::str() const
+{
+    string s = _protocol + string(XrlToken::PROTO_TGT_SEP) + _target +
 	       string(XrlToken::TGT_CMD_SEP) + _command;
     if (_args.size()) {
 	s += string(XrlToken::CMD_ARGS_SEP) + _args.str();
@@ -79,7 +81,8 @@ Xrl::str() const {
 }
 
 bool
-Xrl::operator==(const Xrl& x) const {
-    return ((x._protocol == _protocol) && (x._target == _target) && 
+Xrl::operator==(const Xrl& x) const
+{
+    return ((x._protocol == _protocol) && (x._target == _target) &&
 	    (x._command == _command) && (x.const_args() == const_args()));
 }
