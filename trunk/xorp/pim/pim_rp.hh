@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_rp.hh,v 1.3 2003/04/01 00:56:24 pavlin Exp $
+// $XORP: xorp/pim/pim_rp.hh,v 1.5 2004/06/10 22:41:34 hodson Exp $
 
 
 #ifndef __PIM_PIM_RP_HH__
@@ -144,7 +144,8 @@ class RpTable : public ProtoUnit {
 public:
     RpTable(PimNode& pim_node);
     ~RpTable();
-    
+
+    void	clear();    
     int		start();
     int		stop();
     PimNode&	pim_node()	{ return (_pim_node);			}

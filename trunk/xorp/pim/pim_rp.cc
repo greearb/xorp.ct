@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_rp.cc,v 1.7 2004/06/10 22:41:34 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_rp.cc,v 1.8 2005/02/27 20:49:49 pavlin Exp $"
 
 
 //
@@ -87,6 +87,15 @@ RpTable::RpTable(PimNode& pim_node)
  * 
  **/
 RpTable::~RpTable()
+{
+    clear();
+}
+
+/**
+ * Clear the entry.
+ */
+void
+RpTable::clear()
 {
     stop();
 }
