@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/work_plan.txt,v 1.24 2003/08/14 22:36:13 pavlin Exp $
+# $XORP: xorp/devnotes/work_plan.txt,v 1.25 2003/08/21 21:34:02 pavlin Exp $
 #
 
 Priority:
@@ -22,12 +22,12 @@ Immediate Tasks                                       Priority Who
 For 0.5:
 * Complete Linux support.				M	FB+PR
 * UDP send/receive interface.				H	OH+PR
-* Library for monitoring the network interface state	H	OH
-  from the FEA
 
 For 0.x:
+* Use the library for monitoring the network		H	Everyone
+  interface state from the FEA
 * Equal-cost multipath					L	??
-* Add support for discard interface			H	PR
+* Add support for discard interface			H	FB
   (pkts routed on that interface are discarded).
 
 Longer Term tasks
@@ -39,12 +39,13 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.5:
-* Handle route process death				H	MH/PR
+* Handle route process death				H	AG/MH/PR
   - see the error-handling document (e.g., exit if the FEA is gone)
   - Example: if BGP goes away, then the RIB should pull-out all
     routing state that comes from BGP
     Also, if the FEA goes away, then RIB should go away too.
   - PR look into it, and if too compicated, then move it to 0.x
+* Change the RIB to use the RefTrie			L	AG
 
 For 0.x:
 * Support recursive BGP Lookups				L	MH
@@ -67,14 +68,8 @@ Longer Term tasks
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.4:
-* Add support and tests for unrecognized attributes	Done	AG
-* Make the BGP tests working again			Done	AG
-* Monitoring/Instrumentation (show ip bgp, MIB)		Done	JC
-  (DONE: add a trie iterator to libxorp trie implementation)
-
 For 0.5:
-* IPv6 support						L	AG
+* IPv6/multi-protocol support				H	AG
 * Finish Kdoc'ing BGP                                   L	as needed
 
 For 0.x:
@@ -104,9 +99,6 @@ Longer Term tasks
 
 Immediate Tasks                                       Priority Who  Time
 ---------------                                       -------- ---  ----
-For 0.4:
-* Commit PIM patches to FreeBSD				Almost  PR  July 2003
-
 For 0.5:
 * RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
 * Integration of PIM/MLD/MFEA and RTRMGR		H	PR  2 weeks
@@ -114,26 +106,43 @@ For 0.5:
 
 
 For 0.x:
+* IGMPv3 and MLDv2 implementation			L	PR+other 1-2m
+* PIM-SSM support					L	PR  1 week
 * Framework for regression tests for multicast		H-M	PR+other 1 m
 * IPv6 support and tests for PIM/MLD/MFEA		M	PR  1-1.5m
   - Initial support: e.g. no scoping
-* IGMPv3 and MLDv2 implementation			L	PR+other 1-2m
-* PIM-SSM support					L	PR  1 week
+* Port the FreeBSD PIM kernel mods to NetBSD and	H	PR  1 week
+  OpenBSD
 
 Longer Term tasks
 -----------------
 * Bidir-PIM implementation				Wish	PR  1.5-3m
 * Implement multicast support for Click			Wish	PR  2-3 months
 
+================================ StaticRoutes ===============================
+
+Immediate Tasks                                       Priority Who  Time
+---------------                                       -------- ---  ----
+For 0.5:
+* Implement Static Routes				H	PR  2 weeks
+
+================================ Spoof IGP ===================================
+
+Immediate Tasks                                       Priority Who  Time
+---------------                                       -------- ---  ----
+For 0.5:
+* Come-up with a better name
+* Implement Spoof IGP					H	PR  2 weeks
+
 ============================== RTRMGR ========================================
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.5:
-* Isolation test suite				     PartlyDone	MH
-* Add target name and instance				H	MH+PR
+* Isolation test suite				     PartlyDone	MH+AG
 
 For 0.x:
+* Add target name and instance				H	MH+PR
 
 Longer Term tasks
 -----------------
@@ -148,14 +157,14 @@ For 0.5:
 * FEA user tutorial (vifs, etc)				H	Everyone
 * Make sure that XORPSH can be started via a shell script H	PR
 
-For 0.5:
+For 0.x:
+
+For 1.0:
 * Task interruption.
   - make sure that the task is interrupted at the	H	MH+PR
     server process. XXX: if we hit Ctrl-C in UNIX,
-    is the expected result? Undetermined, hence
+    what is the expected result? Undetermined, hence
     do we need to do anything in case of xorpsh?
-
-For 0.x:
 
 Longer Term tasks
 -----------------
@@ -164,7 +173,9 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.5:
-* Switch to reliable XRLs				H	OH
+* Switch to reliable XRLs				Done	OH
+
+For 1.0:
 * Interface specification (reliable/non-reliable)	M	OH
 
 ================================ RIP =======================================
@@ -179,37 +190,24 @@ For 0.x:
 ================================ SNMP  =======================================
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.4:
-* Write bgp4_mib_1657 module				Done	JC 3 weeks
-* Hide events synchronization				Done	JC
-* Fix snmpd termination problem				Done	JC
-* Implement SNMP traps					Done	JC
-
-Immediate Tasks                                       Priority Who
----------------                                       -------- ---
-For 0.5:
-
 For 0.x:
-* Improve documentation					H	JC few days
+* Improve documentation					H	??
+* Fix the crash when unloading modules			H	??
 
 ================================ TESTS =======================================
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-For 0.4:
-* Use BGP/RIB/FEA test-router on xorp12			Done	AG
-
 For 0.5:
 * Use BGP/RIB/FEA test-router on xorp8			H	Everyone
   (think what exactly we want to happen)
 
 ================================ Other =======================================
-
 For 1.0:
-* Simulation-like environment for running XORP		H Defer	PR  3-6 months
-* Implement Web manager					H	JC  by 10/03
 
 Longer Term tasks
 -----------------
+* Implement Web manager					H	??
+* Simulation-like environment for running XORP		H Defer	PR  3-6 months
 * Rewrite CLI						L	PR  2-3 weeks
 
 ================================ Next Release ================================
@@ -217,14 +215,10 @@ Longer Term tasks
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
-* Fix memory leak in SNMP and/or XRL			H	JC+OH
 * Add multiprotocol support to BGP			M	AG
-* Process name convention: xorp_foo			Done	PR
-* Add "gmake install" support				Done	PR
-* Add bugzilla						Done	JC
 
 ================================ Next-Next Release ===========================
-* Next-next release (xorp-0.5): October 16, 2003
+* Next release (xorp-0.5): October 16, 2003
 
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
