@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.2 2002/12/13 22:38:53 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -287,7 +287,7 @@ AsPath::encode(size_t &len) const
     iter = _segments.begin();
     for (i=0; iter != _segments.end(); ++iter, ++i) {
 	memcpy(&data[pos], bufs[i], lengths[i]);
-	delete bufs[i];
+	delete[] bufs[i];
 	pos += lengths[i];
     }
 

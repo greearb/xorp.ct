@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.3 2002/12/13 23:57:05 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -477,7 +477,7 @@ ASPathAttribute::encode() const
     }
 
     memcpy(data+hdrlen, temp_data, l);
-    delete temp_data;
+    delete[] temp_data;
 
     _length = l + hdrlen; // Include header length
     debug_msg("ASPath encode: length is %d\n", _length);
