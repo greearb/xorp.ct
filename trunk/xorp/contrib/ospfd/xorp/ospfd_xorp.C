@@ -579,8 +579,6 @@ static void ospfd_main()
 {
     EventLoop eventloop;
     XrlStdRouter xrtr(eventloop, "ospfd");
-    XrlPFSUDPListener listener(eventloop);
-    xrtr.add_listener(&listener);
 
     XorpOspfd ospfd_sys(eventloop, xrtr);
     sys = &ospfd_sys; // Set global ospf system pointer to the one in use
