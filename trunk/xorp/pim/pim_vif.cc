@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.19 2003/07/16 02:56:57 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.20 2003/08/07 01:09:11 pavlin Exp $"
 
 
 //
@@ -1399,10 +1399,6 @@ PimVif::flags_string() const
 	flags += " ENABLED";
     if (is_disabled())
 	flags += " DISABLED";
-    if (is_underlying_vif_up())
-	flags += " KERNEL_UP";
-    else
-	flags += " KERNEL_DOWN";
     
     return (flags);
 }

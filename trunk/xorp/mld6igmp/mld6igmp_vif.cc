@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.13 2003/07/30 19:05:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.14 2003/08/07 01:07:58 pavlin Exp $"
 
 
 //
@@ -626,10 +626,6 @@ Mld6igmpVif::flags_string() const
 	flags += " ENABLED";
     if (is_disabled())
 	flags += " DISABLED";
-    if (is_underlying_vif_up())
-	flags += " KERNEL_UP";
-    else
-	flags += " KERNEL_DOWN";
     
     return (flags);
 }
