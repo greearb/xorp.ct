@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.6 2004/12/03 00:29:05 bms Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.7 2004/12/03 00:59:49 bms Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -185,8 +185,12 @@ IoRawSocket6::recv(int fd, SelectorMask m)
     // Process the received control message headers.
     struct cmsghdr *chp;
     for (chp = CMSG_FIRSTHDR(&mh); chp != NULL; chp = CMSG_NXTHDR(&mh, chp)) {
+#ifdef IPV6_PKTINFO
 	uint32_t*		intp;
+#endif
+#if defined(IPV6_HOPLIMIT) || defined(IPV6_TCLASS)
 	struct in6_pktinfo*	pip;
+#endif
 
 	if (chp->cmsg_level == IPPROTO_IPV6) {
 	    switch (chp->cmsg_type) {
