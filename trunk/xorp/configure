@@ -4487,6 +4487,75 @@ echo "${ECHO_T}no" >&6
     fi
 fi
 
+oldCPPFLAGS=${CPPFLAGS}
+CPPFLAGS=`net-snmp-config --cflags`
+
+for ac_header in net-snmp/library/container.h
+do
+as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $ac_header" >&5
+echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+    #include <net-snmp/net-snmp-config.h>
+    #include <net-snmp/net-snmp-includes.h>
+    #include <net-snmp/agent/net-snmp-agent-includes.h>
+
+
+
+#include <$ac_header>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  eval "$as_ac_Header=yes"
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+eval "$as_ac_Header=no"
+fi
+rm -f conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
+if test `eval echo '${'$as_ac_Header'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+ net_snmp_container_bug=no
+else
+  net_snmp_container_bug=yes
+fi
+
+done
+
+CPPFLAGS=${oldCPPFLAGS}
+
+if test "${net_snmp_container_bug}" = "yes" ; then
+echo "-------------------------------------------------------------   "
+{ echo "$as_me:$LINENO: WARNING: You should apply the patch xorp/mibs/container.h.patch" >&5
+echo "$as_me: WARNING: You should apply the patch xorp/mibs/container.h.patch" >&2;}
+echo -n "To do that, copy that file to"
+echo -n `net-snmp-config --prefix`
+echo "/include/net-snmp/library"
+echo "and execute (as root) patch < container.h.patch"
+echo "-------------------------------------------------------------   "
+fi
+
 if test "${snmpd_valid}" = "yes" ; then
     MIBS="mibs"
 else

@@ -17,7 +17,7 @@ extern "C" {
     
 #include <net-snmp/net-snmp-config.h>
 
-#ifdef NETSNMP_CONTAINER_H_COMPILES_IN_CPP
+#ifdef HAVE_NET_SNMP_LIBRARY_CONTAINER_H
 #include <net-snmp/library/container.h>
 #else
 #include "patched_container.h"

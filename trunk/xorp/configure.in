@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.51 2003/07/16 03:45:40 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.52 2003/07/16 03:50:56 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -460,6 +460,28 @@ else
 	echo "see this message again, run ./configure --without-snmp          "
         echo "-------------------------------------------------------------   "
     fi
+fi
+
+oldCPPFLAGS=${CPPFLAGS}
+CPPFLAGS=`net-snmp-config --cflags`
+AC_CHECK_HEADERS([net-snmp/library/container.h],net_snmp_container_bug=no,
+    net_snmp_container_bug=yes, 
+    [
+    #include <net-snmp/net-snmp-config.h>
+    #include <net-snmp/net-snmp-includes.h>
+    #include <net-snmp/agent/net-snmp-agent-includes.h>
+    ]
+)
+CPPFLAGS=${oldCPPFLAGS}
+
+if test "${net_snmp_container_bug}" = "yes" ; then
+echo "-------------------------------------------------------------   "
+AC_WARN([You should apply the patch xorp/mibs/container.h.patch])
+echo -n "To do that, copy that file to"
+echo -n `net-snmp-config --prefix` 
+echo "/include/net-snmp/library"
+echo "and execute (as root) patch < container.h.patch"
+echo "-------------------------------------------------------------   "
 fi
 
 if test "${snmpd_valid}" = "yes" ; then

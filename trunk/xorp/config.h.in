@@ -130,6 +130,9 @@
 /* Define to 1 if you have the <net/if_var.h> header file. */
 #undef HAVE_NET_IF_VAR_H
 
+/* Define to 1 if you have the <net-snmp/library/container.h> header file. */
+#undef HAVE_NET_SNMP_LIBRARY_CONTAINER_H
+
 /* Define to 1 if you have newer IPv6 advanced API */
 #undef HAVE_RFC2292BIS
 
