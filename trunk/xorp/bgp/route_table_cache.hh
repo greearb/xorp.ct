@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.16 2004/06/12 15:02:27 mjh Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.17 2005/01/05 22:04:31 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -140,7 +140,7 @@ public:
 	}
     
     /**
-     * Background task that deletes nodes it trie.
+     * Background task that deletes nodes in trie.
      *
      * @return true if there are routes to delete.
      */
