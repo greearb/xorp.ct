@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.130 2005/01/28 00:35:25 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.131 2005/02/03 04:36:40 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -36,7 +36,7 @@ AC_INIT(libxorp/xorp.h)
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_SYSTEM
 AC_CONFIG_SUBDIRS(cli/libtecla)
-AM_INIT_AUTOMAKE(xorp, 1.0)
+AM_INIT_AUTOMAKE(xorp, 1.1-RC)
 AM_CONFIG_HEADER(config.h)
 
 dnl
