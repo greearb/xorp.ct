@@ -108,28 +108,32 @@ noinst_LIBRARIES = librib.a
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 
 # -- Program Sources
-main_routemap_SOURCES = routemap.hh routemap.cc main_routemap.cc
+main_routemap_SOURCES = rib_module.h protocol.hh route.hh routemap.hh main_routemap.cc routemap.cc
+main_routemap_LDADD = $(LDADD)
 
-xorp_rib_SOURCES = main_rib.cc rib_manager.hh rib_manager.cc xrl_target.hh xrl_target.cc
+xorp_rib_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh main_rib.cc rib_manager.cc xrl_target.cc
 xorp_rib_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libribbase.a
 
-test_rib_direct_SOURCES = parser.hh parser_direct_cmds.hh parser.cc test_rib_direct.cc dummy_register_server.hh dummy_register_server.cc dummy_rib_manager.hh dummy_rib_manager.cc
+test_rib_direct_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh protocol.hh register_server.hh rib.hh rib_client.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_direct.cc
+test_rib_direct_LDADD = $(LDADD)
 
-test_rib_xrls_SOURCES = parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh parser.cc test_rib_xrls.cc dummy_register_server.hh dummy_register_server.cc dummy_rib_manager.hh dummy_rib_manager.cc xrl_target.hh xrl_target.cc
+test_rib_xrls_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc parser.cc test_rib_xrls.cc xrl_target.cc
 test_rib_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a
 
-test_register_SOURCES = test_register.cc dummy_register_server.hh dummy_register_server.cc dummy_rib_manager.hh dummy_rib_manager.cc
+test_register_SOURCES = rib_module.h dummy_register_server.hh dummy_rib_manager.hh protocol.hh register_server.hh rib.hh rib_client.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh dummy_register_server.cc dummy_rib_manager.cc test_register.cc
+test_register_LDADD = $(LDADD)
 
-test_register_xrls_SOURCES = parser_direct_cmds.hh parser_xrl_cmds.hh test_register_xrls.cc rib_manager.hh rib_manager.cc xrl_target.hh xrl_target.cc
+test_register_xrls_SOURCES = rib_module.h parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh rib_manager.cc test_register_xrls.cc xrl_target.cc
 test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/targets/libribclientbase.a
 
-test_deletion_SOURCES = test_deletion.cc rt_tab_expect.hh rt_tab_expect.cc
+test_deletion_SOURCES = rib_module.h rt_tab_base.hh rt_tab_expect.hh rt_tab_origin.hh protocol.hh route.hh rt_tab_expect.cc test_deletion.cc
 test_deletion_LDADD = $(LDADD)
 
-test_rib_client_SOURCES = test_rib_client.cc
+test_rib_client_SOURCES = rib_module.h protocol.hh rib_client.hh route.hh test_rib_client.cc
+test_rib_client_LDADD = $(LDADD)
 
 # -- Library Sources
-librib_a_SOURCES = rib_module.h version.h protocol.hh register_server.hh rib.hh rib_client.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_deletion.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh protocol.cc register_server.cc rib.cc rib_client.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_deletion.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
+librib_a_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_deletion.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_client.cc route.cc rt_tab_base.cc rt_tab_deletion.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = commands test_rib_direct.sh.in test_rib_xrls.sh.in xrl_shell_funcs.sh
@@ -147,10 +151,10 @@ librib_a_AR = $(AR) cru
 librib_a_LIBADD =
 am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
 	rib.$(OBJEXT) rib_client.$(OBJEXT) route.$(OBJEXT) \
-	rt_tab_base.$(OBJEXT) rt_tab_export.$(OBJEXT) \
-	rt_tab_extint.$(OBJEXT) rt_tab_log.$(OBJEXT) \
-	rt_tab_merged.$(OBJEXT) rt_tab_origin.$(OBJEXT) \
-	rt_tab_deletion.$(OBJEXT) rt_tab_redist.$(OBJEXT) \
+	rt_tab_base.$(OBJEXT) rt_tab_deletion.$(OBJEXT) \
+	rt_tab_export.$(OBJEXT) rt_tab_extint.$(OBJEXT) \
+	rt_tab_log.$(OBJEXT) rt_tab_merged.$(OBJEXT) \
+	rt_tab_origin.$(OBJEXT) rt_tab_redist.$(OBJEXT) \
 	rt_tab_register.$(OBJEXT) vifmanager.$(OBJEXT)
 librib_a_OBJECTS = $(am_librib_a_OBJECTS)
 bin_PROGRAMS = xorp_rib$(EXEEXT)
@@ -160,9 +164,8 @@ noinst_PROGRAMS = main_routemap$(EXEEXT) test_rib_client$(EXEEXT) \
 	test_deletion$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
-am_main_routemap_OBJECTS = routemap.$(OBJEXT) main_routemap.$(OBJEXT)
+am_main_routemap_OBJECTS = main_routemap.$(OBJEXT) routemap.$(OBJEXT)
 main_routemap_OBJECTS = $(am_main_routemap_OBJECTS)
-main_routemap_LDADD = $(LDADD)
 main_routemap_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
@@ -174,8 +177,8 @@ main_routemap_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 main_routemap_LDFLAGS =
-am_test_deletion_OBJECTS = test_deletion.$(OBJEXT) \
-	rt_tab_expect.$(OBJEXT)
+am_test_deletion_OBJECTS = rt_tab_expect.$(OBJEXT) \
+	test_deletion.$(OBJEXT)
 test_deletion_OBJECTS = $(am_test_deletion_OBJECTS)
 test_deletion_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
@@ -188,10 +191,9 @@ test_deletion_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_deletion_LDFLAGS =
-am_test_register_OBJECTS = test_register.$(OBJEXT) \
-	dummy_register_server.$(OBJEXT) dummy_rib_manager.$(OBJEXT)
+am_test_register_OBJECTS = dummy_register_server.$(OBJEXT) \
+	dummy_rib_manager.$(OBJEXT) test_register.$(OBJEXT)
 test_register_OBJECTS = $(am_test_register_OBJECTS)
-test_register_LDADD = $(LDADD)
 test_register_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
@@ -203,8 +205,8 @@ test_register_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_register_LDFLAGS =
-am_test_register_xrls_OBJECTS = test_register_xrls.$(OBJEXT) \
-	rib_manager.$(OBJEXT) xrl_target.$(OBJEXT)
+am_test_register_xrls_OBJECTS = rib_manager.$(OBJEXT) \
+	test_register_xrls.$(OBJEXT) xrl_target.$(OBJEXT)
 test_register_xrls_OBJECTS = $(am_test_register_xrls_OBJECTS)
 test_register_xrls_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
@@ -222,7 +224,6 @@ test_register_xrls_DEPENDENCIES = librib.a \
 test_register_xrls_LDFLAGS =
 am_test_rib_client_OBJECTS = test_rib_client.$(OBJEXT)
 test_rib_client_OBJECTS = $(am_test_rib_client_OBJECTS)
-test_rib_client_LDADD = $(LDADD)
 test_rib_client_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
@@ -234,10 +235,10 @@ test_rib_client_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_rib_client_LDFLAGS =
-am_test_rib_direct_OBJECTS = parser.$(OBJEXT) test_rib_direct.$(OBJEXT) \
-	dummy_register_server.$(OBJEXT) dummy_rib_manager.$(OBJEXT)
+am_test_rib_direct_OBJECTS = dummy_register_server.$(OBJEXT) \
+	dummy_rib_manager.$(OBJEXT) parser.$(OBJEXT) \
+	test_rib_direct.$(OBJEXT)
 test_rib_direct_OBJECTS = $(am_test_rib_direct_OBJECTS)
-test_rib_direct_LDADD = $(LDADD)
 test_rib_direct_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
 	$(top_builddir)/libxipc/libfinder.a \
@@ -249,9 +250,9 @@ test_rib_direct_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_rib_direct_LDFLAGS =
-am_test_rib_xrls_OBJECTS = parser.$(OBJEXT) test_rib_xrls.$(OBJEXT) \
-	dummy_register_server.$(OBJEXT) dummy_rib_manager.$(OBJEXT) \
-	xrl_target.$(OBJEXT)
+am_test_rib_xrls_OBJECTS = dummy_register_server.$(OBJEXT) \
+	dummy_rib_manager.$(OBJEXT) parser.$(OBJEXT) \
+	test_rib_xrls.$(OBJEXT) xrl_target.$(OBJEXT)
 test_rib_xrls_OBJECTS = $(am_test_rib_xrls_OBJECTS)
 test_rib_xrls_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
