@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.10 2003/05/23 00:02:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.11 2004/02/24 03:16:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -51,8 +51,8 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 {
     debug_msg("DeletionTable<A>::add_route %x on %s\n",
 	      (u_int)(&rtmsg), tablename().c_str());
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
 
     IPNet<A> net = rtmsg.net();
 
@@ -66,7 +66,7 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	const SubnetRoute<A> *existing_route = &(iter.payload());
 	// We have a copy of this route in our deletion cache.
 
-    	assert(existing_route->net() == rtmsg.net());
+    	XLOG_ASSERT(existing_route->net() == rtmsg.net());
 
 	// Preserve the route.  Taking a reference will prevent the
 	// route being deleted when it's erased from the Trie.
@@ -99,11 +99,11 @@ DeletionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 {
     debug_msg("DeletionTable<A>::replace_route %x -> %x on %s\n",
 	      (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
-    assert(caller == _parent);
-    assert(_next_table != NULL);
-    assert(old_rtmsg.net() == new_rtmsg.net());
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(old_rtmsg.net() == new_rtmsg.net());
     // we should never see a replace for a net that's in the deletion cache
-    assert(_route_table->lookup_node(old_rtmsg.net()) ==
+    XLOG_ASSERT(_route_table->lookup_node(old_rtmsg.net()) ==
 	   _route_table->end());
 
     return _next_table->replace_route(old_rtmsg, new_rtmsg,
@@ -116,14 +116,14 @@ DeletionTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller,
 			     const PeerHandler *dump_peer)
 {
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
 
     /* A route dump must have been initiated after this table was
        created (because the creation of this table would terminate any
        previous route dump).  So the contents of this dump MUST NOT be
        in our table */
-    assert(_route_table->lookup_node(rtmsg.net()) ==
+    XLOG_ASSERT(_route_table->lookup_node(rtmsg.net()) ==
 	   _route_table->end());
 
     return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, dump_peer);
@@ -136,10 +136,10 @@ DeletionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 {
     debug_msg("DeletionTable<A>::delete_route %x on %s\n",
 	      (u_int)(&rtmsg), tablename().c_str());
-    assert(caller == _parent);
-    assert(_next_table != NULL);
+    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(_next_table != NULL);
     // we should never see a delete for a net that's in the deletion cache
-    assert(_route_table->lookup_node(rtmsg.net()) ==
+    XLOG_ASSERT(_route_table->lookup_node(rtmsg.net()) ==
 	   _route_table->end());
 
     return _next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -149,7 +149,7 @@ template<class A>
 int
 DeletionTable<A>::push(BGPRouteTable<A> *caller)
 {
-    assert(caller == _parent);
+    XLOG_ASSERT(caller == _parent);
     return _next_table->push((BGPRouteTable<A>*)this);
 }
 
@@ -187,7 +187,7 @@ template<class A>
 void
 DeletionTable<A>::initiate_background_deletion()
 {
-    assert(_next_table != NULL);
+    XLOG_ASSERT(_next_table != NULL);
     _del_sweep = _route_table->pathmap().begin();
     _deleted = 0;
     _chains = 0;
@@ -265,8 +265,9 @@ void
 DeletionTable<A>::unplumb_self()
 {
     debug_msg("unplumbing self\n");
-    assert(_next_table != NULL);
-    assert(_parent != NULL);
+    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(_parent != NULL);
+    XLOG_ASSERT(0 == _route_table->route_count());
 
     // signal downstream that we finished deleting routes from this
     // version of this RibIn.
