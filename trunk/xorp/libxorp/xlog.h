@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.3 2003/05/16 17:28:16 hodson Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.4 2003/05/21 00:24:20 pavlin Exp $
  */
 
 
@@ -334,7 +334,7 @@ do {									\
  */
 #define XLOG_UNREACHABLE()						\
 do {									\
-	XLOG_FATAL("Internal error");					\
+	XLOG_FATAL("Internal fatal error");				\
 } while (0)
 
 /**
