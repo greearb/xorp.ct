@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.2 2003/05/21 05:32:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.3 2003/06/02 23:20:17 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -88,8 +88,8 @@ NetlinkSocket::NetlinkSocket(EventLoop& e)
 
 NetlinkSocket::~NetlinkSocket()
 {
-    shutdown();
-    assert(_ol.empty());
+    stop();
+    XLOG_ASSERT(_ol.empty());
 }
 
 int
@@ -139,11 +139,11 @@ NetlinkSocket::start(int af)
     memset(&snl, 0, sizeof(snl));
     snl.nl_family = AF_NETLINK;
     snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
-    snl.nl_groups = 0;
+    snl.nl_groups = 0;		// no multicast
     if (bind(_fd, (struct sockaddr *)&snl, sizeof(snl)) < 0) {
+	XLOG_ERROR("bind(AF_NETLINK) failed: %s", strerror(errno));
 	close(_fd);
 	_fd = -1;
-	XLOG_ERROR("bind(AF_NETLINK) failed: %s", strerror(errno));
 	return (XORP_ERROR);
     }
     
@@ -152,34 +152,34 @@ NetlinkSocket::start(int af)
     //
     snl_len = sizeof(snl);
     if (getsockname(_fd, (struct sockaddr *)&snl, &snl_len) < 0) {
+	XLOG_ERROR("getsockname(AF_NETLINK) failed: %s", strerror(errno));
 	close(_fd);
 	_fd = -1;
-	XLOG_ERROR("getsockname(AF_NETLINK) failed: %s", strerror(errno));
 	return (XORP_ERROR);
     }
     if (snl_len != sizeof(snl)) {
-	close(_fd);
-	_fd = -1;
 	XLOG_ERROR("Wrong address length of AF_NETLINK socket: "
 		   "%d instead of %d",
 		   snl_len, sizeof(snl));
+	close(_fd);
+	_fd = -1;
 	return (XORP_ERROR);
     }
     if (snl.nl_family != AF_NETLINK) {
-	close(_fd);
-	_fd = -1;
 	XLOG_ERROR("Wrong address family of AF_NETLINK socket: "
 		   "%d instead of %d",
 		   snl.nl_family, AF_NETLINK);
+	close(_fd);
+	_fd = -1;
 	return (XORP_ERROR);
     }
 #if 0				// XXX
     // XXX: 'nl_pid' is supposed to be defined as 'pid_t'
     if ( (pid_t)snl.nl_pid != pid()) {
-	close(_fd);
-	_fd = -1;
 	XLOG_ERROR("Wrong nl_pid of AF_NETLINK socket: %d instead of %d",
 		   snl.nl_pid, pid());
+	close(_fd);
+	_fd = -1;
 	return (XORP_ERROR);
     }
 #endif // 0
@@ -246,7 +246,7 @@ NetlinkSocket::force_read()
 	    return;
 	}
 	if (got < (ssize_t)sizeof(struct nlmsghdr)) {
-	    XLOG_ERROR("Netlink socket read failed: message truncated : "
+	    XLOG_ERROR("Netlink socket read failed: message truncated: "
 		       "received %d bytes instead of (at least) %u bytes",
 		       got, (uint32_t)sizeof(struct nlmsghdr));
 	    shutdown();
@@ -256,7 +256,7 @@ NetlinkSocket::force_read()
 	//
 	// Received message (probably) OK
 	//
-	const struct nlmsghdr* mh = reinterpret_cast<struct nlmsghdr*>(_buffer);
+	const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(_buffer);
 	XLOG_ASSERT(mh->nlmsg_len <= NLSOCK_BYTES);
 	// XLOG_ASSERT((ssize_t)mh->nlmsg_len == got);
 	break;
@@ -286,7 +286,7 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 	    return;
 	}
 	if (got < (ssize_t)sizeof(struct nlmsghdr)) {
-	    XLOG_ERROR("Netlink socket recvfrom failed: message truncated : "
+	    XLOG_ERROR("Netlink socket recvfrom failed: message truncated: "
 		       "received %d bytes instead of (at least) %u bytes",
 		       got, (uint32_t)sizeof(struct nlmsghdr));
 	    shutdown();
@@ -296,7 +296,7 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 	//
 	// Received message (probably) OK
 	//
-	const struct nlmsghdr* mh = reinterpret_cast<struct nlmsghdr*>(_buffer);
+	const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(_buffer);
 	XLOG_ASSERT(mh->nlmsg_len <= NLSOCK_BYTES);
 	// XLOG_ASSERT((ssize_t)mh->nlmsg_len == got);
 	break;
@@ -350,7 +350,7 @@ NetlinkSocket::force_recvmsg(int flags)
 	    return;
 	}
 	if (got < (ssize_t)sizeof(struct nlmsghdr)) {
-	    XLOG_ERROR("Netlink socket recvfrom failed: message truncated : "
+	    XLOG_ERROR("Netlink socket recvfrom failed: message truncated: "
 		       "received %d bytes instead of (at least) %u bytes",
 		       got, (uint32_t)sizeof(struct nlmsghdr));
 	    shutdown();
@@ -360,7 +360,7 @@ NetlinkSocket::force_recvmsg(int flags)
 	//
 	// Received message (probably) OK
 	//
-	const struct nlmsghdr* mh = reinterpret_cast<struct nlmsghdr*>(_buffer);
+	const struct nlmsghdr* mh = reinterpret_cast<const struct nlmsghdr*>(_buffer);
 	XLOG_ASSERT(mh->nlmsg_len <= NLSOCK_BYTES);
 	// XLOG_ASSERT((ssize_t)mh->nlmsg_len == got);
 	break;
@@ -377,8 +377,8 @@ NetlinkSocket::force_recvmsg(int flags)
 void
 NetlinkSocket::select_hook(int fd, SelectorMask m)
 {
-    assert(fd == _fd);
-    assert(m == SEL_RD);
+    XLOG_ASSERT(fd == _fd);
+    XLOG_ASSERT(m == SEL_RD);
     force_read();
 }
 
@@ -398,7 +398,7 @@ struct NetlinkSocketPlumber {
 	ObserverList::iterator i = find(ol.begin(), ol.end(), o);
 	debug_msg("Plumbing NetlinkSocketObserver %p to NetlinkSocket%p\n",
 		  o, &r);
-	assert(i == ol.end());
+	XLOG_ASSERT(i == ol.end());
 	ol.push_back(o);
     }
     static void
@@ -408,7 +408,7 @@ struct NetlinkSocketPlumber {
 	debug_msg("Unplumbing NetlinkSocketObserver%p from "
 		  "NetlinkSocket %p\n", o, &r);
 	ObserverList::iterator i = find(ol.begin(), ol.end(), o);
-	assert(i != ol.end());
+	XLOG_ASSERT(i != ol.end());
 	ol.erase(i);
     }
 };
