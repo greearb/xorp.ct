@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.3 2003/05/02 07:50:48 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.4 2003/05/15 15:53:05 hodson Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -21,10 +21,6 @@
 
 #include <map>
 #include <string>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <net/if.h> 			/* Included for IFF_ definitions */
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
@@ -94,8 +90,8 @@ protected:
     State _st;
 };
 
-
-/* Classes derived from IfTreeItem */
+
+// Classes derived from IfTreeItem
 class IfTree;
 class IfTreeInterface;
 class IfTreeVif;
@@ -183,7 +179,7 @@ protected:
     IfMap	_ifs;
 };
 
-
+
 /**
  * Fea class for holding physical interface state.
  */
@@ -203,7 +199,7 @@ public:
 
     inline uint32_t if_flags() const	{ return _if_flags; }
 
-    inline void set_if_flags(uint32_t v) { _if_flags = v; }
+    inline void set_if_flags(uint32_t v) { _if_flags = v; mark(CHANGED); }
 
     inline uint32_t mtu() const		{ return _mtu; }
 
@@ -248,7 +244,7 @@ protected:
     VifMap	 _vifs;
 };
 
-
+
 /**
  * Fea class for virtual (logical) interface state.
  */
@@ -277,7 +273,7 @@ public:
 
     inline uint32_t vif_flags() const	{ return _vif_flags; }
 
-    inline void set_vif_flags(uint32_t v) { _vif_flags = v; }
+    inline void set_vif_flags(uint32_t v) { _vif_flags = v; mark(CHANGED); }
 
     inline const V4Map& v4addrs() const	{ return _v4addrs; }
     inline V4Map& v4addrs()		{ return _v4addrs; }
@@ -361,7 +357,7 @@ protected:
     V6Map	 _v6addrs;
 };
 
-
+
 /**
  * Class for holding an IPv4 interface address and address related items.
  */
@@ -389,7 +385,7 @@ public:
 
     inline uint32_t addr_flags() const	{ return _addr_flags; }
 
-    inline void set_addr_flags(uint32_t v) { _addr_flags = v; }
+    inline void set_addr_flags(uint32_t v) { _addr_flags = v; mark(CHANGED); }
 
     /**
      * Get prefix associates with interface.
@@ -442,11 +438,11 @@ protected:
     bool	_multicast;
     uint32_t	_addr_flags;
 
-    IPv4	_oaddr;	  /* Other address - p2p endpoint or bcast addr */
+    IPv4	_oaddr;	  // Other address - p2p endpoint or bcast addr
     uint32_t	_prefix;
 };
 
-
+
 /**
  * Class for holding an IPv6 interface address and address related items.
  */
@@ -473,7 +469,7 @@ public:
 
     inline uint32_t addr_flags() const	{ return _addr_flags; }
 
-    inline void set_addr_flags(uint32_t v) { _addr_flags = v; }
+    inline void set_addr_flags(uint32_t v) { _addr_flags = v; mark(CHANGED); }
 
     /**
      * Get prefix associated with address.
@@ -503,11 +499,11 @@ protected:
     bool	_multicast;
     uint32_t	_addr_flags;
 
-    IPv6	_oaddr;	  /* Other address - p2p endpoint */
+    IPv6	_oaddr;	  // Other address - p2p endpoint
     uint32_t	_prefix;
 };
 
-
+
 //
 // Inline IfTree methods
 //
