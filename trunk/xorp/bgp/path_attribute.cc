@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.40 2003/10/17 03:36:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.41 2003/10/23 04:10:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -550,9 +550,71 @@ MPReachNLRIAttribute<IPv6>::encode()
 }
 
 template <>
+void
+MPReachNLRIAttribute<IPv4>::encode()
+{
+    delete[] _data;	// Zap any old allocation.
+
+    XLOG_ASSERT(AFI_IPV4 == _afi && SAFI_MULTICAST == _safi);
+    XLOG_ASSERT(4 == IPv4::addr_size());
+
+    /*
+    ** Figure out how many bytes we need to allocate.
+    */
+    size_t len;
+    len = 2;	// AFI
+    len += 1;	// SAFI
+    len += 1;	// Length of Next Hop Address
+    len += IPv4::addr_size();	// Next Hop
+    len += 1;	// Number of SNPAs
+
+    const_iterator i;
+    for (i = _nlri.begin(); i != _nlri.end(); i++) {
+	len += 1;
+	len += (i->prefix_len() + 3) / 4;
+    }
+
+    uint8_t *d = set_header(len);
+    
+    /*
+    ** Fill in the buffer.
+    */
+    *d++ = (_afi << 8) & 0xff;	// AFI
+    *d++ = _afi & 0xff;		// AFI
+    
+    *d++ = _safi;		// SAFIs
+
+    *d++ = IPv4::addr_size();
+    nexthop().copy_out(d);
+    d += IPv4::addr_size();
+    
+    *d++ = 0;	// Number of SNPAs
+
+    for (i = _nlri.begin(); i != _nlri.end(); i++) {
+	int bytes = (i->prefix_len() + 3) / 4;
+	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
+	uint8_t buf[IPv4::addr_size()];
+	i->masked_addr().copy_out(buf);
+
+	*d++ = i->prefix_len();
+	memcpy(d, buf, bytes);
+	d += bytes;
+    }
+}
+
+template <>
 MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(Safi safi)
     : PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI),
       _afi(AFI_IPV6),
+      _safi(safi)
+{
+    encode();
+}
+
+template <>
+MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(Safi safi)
+    : PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI),
+      _afi(AFI_IPV4),
       _safi(safi)
 {
     encode();
@@ -691,6 +753,116 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     encode();
 }
 
+template <>
+MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+    : PathAttribute(d)
+{
+    if (!optional() || !transitive())
+	xorp_throw(CorruptMessage,
+		   "Bad Flags in Multiprotocol Reachable NLRI attribute",
+		   UPDATEMSGERR, ATTRFLAGS);
+
+    const uint8_t *data = payload(d);
+    const uint8_t *end = payload(d) + length(d);
+
+    uint16_t afi;
+    afi = *data++;
+    afi <<= 8;
+    afi |= *data++;
+
+    /*
+    ** This is method is specialized for dealing with IPv4.
+    */
+    if (AFI_IPV4_VAL != afi)
+	xorp_throw(CorruptMessage,
+		   c_format("Expected AFI to be %d not %d",
+			    AFI_IPV4, afi),
+		   UPDATEMSGERR, OPTATTR);
+    _afi = AFI_IPV4;
+
+    uint8_t safi = *data++;
+    switch(safi) {
+    case SAFI_UNICAST_VAL:
+	_safi = SAFI_UNICAST;
+	break;
+    case SAFI_MULTICAST_VAL:
+	_safi = SAFI_MULTICAST;
+	break;
+    default:
+	xorp_throw(CorruptMessage,
+		   c_format("Expected SAFI to %d or %d not %d",
+			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
+		   UPDATEMSGERR, OPTATTR);
+    }
+
+    /*
+    ** Next Hop
+    */
+    uint8_t len = *data++;
+
+    XLOG_ASSERT(4 == IPv4::addr_size());
+    IPv4 temp;
+
+    switch(len) {
+    case 4:
+	temp.copy_in(data);
+	set_nexthop(temp);
+	data += IPv4::addr_size();
+	break;
+    default:
+	xorp_throw(CorruptMessage,
+		   c_format("BAD Next Hop size in "
+			    "IPv4 Multiprotocol Reachable NLRI attribute "
+			    "4 allowed not %u", len),
+		   UPDATEMSGERR, OPTATTR);
+    }
+    
+    if (data > end)
+	xorp_throw(CorruptMessage,
+		   "Premature end of Multiprotocol Reachable NLRI attribute",
+		   UPDATEMSGERR, ATTRLEN);
+
+    /*
+    ** SNPA - I have no idea how these are supposed to be used for IPv4
+    ** so lets just step over them.
+    */
+    uint8_t snpa_cnt = *data++;
+    for (;snpa_cnt > 0; snpa_cnt--) {
+	uint8_t snpa_length = *data++;
+	data += snpa_length;
+    }
+
+    if (data > end) {
+	xorp_throw(CorruptMessage,
+		   "Premature end of Multiprotocol Reachable NLRI attribute",
+		   UPDATEMSGERR, ATTRLEN);
+    }
+
+    /*
+    ** NLRI
+    */
+    while(data < end) {
+	uint8_t prefix_length = *data++;
+	size_t bytes = (prefix_length + 3) / 4;
+	if(bytes > IPv4::addr_size())
+	    xorp_throw(CorruptMessage,
+		       c_format("prefix length too long %d", prefix_length),
+		       UPDATEMSGERR, OPTATTR);
+	uint8_t buf[IPv4::addr_size()];
+	memset(buf, 0, sizeof(buf));
+	memcpy(buf, data, bytes);
+	IPv4 nlri;
+	nlri.copy_in(buf);
+	_nlri.push_back(IPNet<IPv4>(nlri, prefix_length));
+	data += bytes;
+	debug_msg("decode %s/%d bytes = %u\n", nlri.str().c_str(),
+		  prefix_length, static_cast<uint32_t>(bytes));
+    }
+
+    encode();
+}
+
 template <class A>
 string
 MPReachNLRIAttribute<A>::str() const
@@ -751,9 +923,62 @@ MPUNReachNLRIAttribute<IPv6>::encode()
 }
 
 template <>
+void
+MPUNReachNLRIAttribute<IPv4>::encode()
+{
+    delete[] _data;	// Zap any old allocation.
+
+    XLOG_ASSERT(AFI_IPV4 == _afi && SAFI_MULTICAST == _safi);
+    XLOG_ASSERT(4 == IPv4::addr_size());
+
+    /*
+    ** Figure out how many bytes we need to allocate.
+    */
+    size_t len;
+    len = 2;	// AFI
+    len += 1;	// SAFI
+
+    const_iterator i;
+    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
+	len += 1;
+	len += (i->prefix_len() + 3) / 4;
+    }
+
+    uint8_t *d = set_header(len);
+    
+    /*
+    ** Fill in the buffer.
+    */
+    *d++ = (_afi << 8) & 0xff;	// AFI
+    *d++ = _afi & 0xff;		// AFI
+
+    *d++ = _safi;		// SAFIs
+    
+    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
+	int bytes = (i->prefix_len() + 3) / 4;
+	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
+	uint8_t buf[IPv4::addr_size()];
+	i->masked_addr().copy_out(buf);
+
+	*d++ = i->prefix_len();
+	memcpy(d, buf, bytes);
+	d += bytes;
+    }
+}
+
+template <>
 MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(Safi safi)
     : PathAttribute((Flags)(Optional | Transitive), MP_UNREACH_NLRI),
       _afi(AFI_IPV6),
+      _safi(safi)
+{
+    encode();
+}
+
+template <>
+MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(Safi safi)
+    : PathAttribute((Flags)(Optional | Transitive), MP_UNREACH_NLRI),
+      _afi(AFI_IPV4),
       _safi(safi)
 {
     encode();
@@ -835,6 +1060,73 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
 	IPv6 nlri;
 	nlri.set_addr(buf);
 	_withdrawn.push_back(IPNet<IPv6>(nlri, prefix_length));
+	data += bytes;
+    }
+
+    encode();
+}
+
+template <>
+MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+    : PathAttribute(d)
+{
+    if (!optional() || !transitive())
+	xorp_throw(CorruptMessage,
+		   "Bad Flags in Multiprotocol UNReachable NLRI attribute",
+		   UPDATEMSGERR, ATTRFLAGS);
+
+    const uint8_t *data = payload(d);
+    const uint8_t *end = payload(d) + length(d);
+
+    uint16_t afi;
+    afi = *data++;
+    afi <<= 8;
+    afi |= *data++;
+
+    /*
+    ** This is method is specialized for dealing with IPv4.
+    */
+    if (AFI_IPV4_VAL != afi)
+	xorp_throw(CorruptMessage,
+		   c_format("Expected AFI to be %d not %d",
+			    AFI_IPV4, afi),
+		   UPDATEMSGERR, OPTATTR);
+    _afi = AFI_IPV4;
+
+    uint8_t safi = *data++;
+    switch(safi) {
+    case SAFI_UNICAST_VAL:
+	_safi = SAFI_UNICAST;
+	break;
+    case SAFI_MULTICAST_VAL:
+	_safi = SAFI_MULTICAST;
+	break;
+    default:
+	xorp_throw(CorruptMessage,
+		   c_format("Expected SAFI to %d or %d not %d",
+			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
+		   UPDATEMSGERR, OPTATTR);
+    }
+
+    /*
+    ** NLRI
+    */
+    while(data < end) {
+	uint8_t prefix_length = *data++;
+	debug_msg("decode prefix length = %d\n", prefix_length);
+	size_t bytes = (prefix_length + 7)/ 8;
+	if(bytes > IPv4::addr_size())
+	    xorp_throw(CorruptMessage,
+		       c_format("prefix length too long %d", prefix_length),
+		       UPDATEMSGERR, OPTATTR);
+	debug_msg("decode bytes = %u\n", static_cast<uint32_t>(bytes));
+	uint8_t buf[IPv4::addr_size()];
+	memset(buf, 0, sizeof(buf));
+	memcpy(buf, data, bytes);
+	IPv4 nlri;
+	nlri.copy_in(buf);
+	_withdrawn.push_back(IPNet<IPv4>(nlri, prefix_length));
 	data += bytes;
     }
 
@@ -951,11 +1243,19 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
 	break;
          
     case MP_REACH_NLRI:
-	pa = new MPReachNLRIAttribute<IPv6>(d);
+	try {
+	    pa = new MPReachNLRIAttribute<IPv6>(d);
+	} catch(...) {
+	    pa = new MPReachNLRIAttribute<IPv4>(d);
+	}
 	break;
 
     case MP_UNREACH_NLRI:
-	pa = new MPUNReachNLRIAttribute<IPv6>(d);
+	try {
+	    pa = new MPUNReachNLRIAttribute<IPv6>(d);
+	} catch(...) {
+	    pa = new MPUNReachNLRIAttribute<IPv4>(d);
+	}
 	break;
 	
     default:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.7 2003/10/13 23:42:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.8 2003/10/23 04:10:24 atanu Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -35,6 +35,45 @@ test_multprotocol(TestInfo& /*info*/)
     assert(multi.length() == recv.length());
 
     assert(memcmp(multi.data(), recv.data(), recv.length()) == 0);
+
+    return true;
+}
+
+bool
+test_multiprotocol_reach_ipv4(TestInfo& /*info*/)
+{
+    MPReachNLRIAttribute<IPv4> mpreach(SAFI_MULTICAST);
+
+    mpreach.encode();
+    assert(12 == mpreach.wire_size());
+
+    mpreach.set_nexthop(IPv4("128.16.0.0"));
+
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/1"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/2"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/3"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/4"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/5"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/6"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/7"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/8"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/9"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/10"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/11"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/12"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/13"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/14"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/15"));
+    mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/16"));
+    mpreach.encode();
+
+    assert(68 == mpreach.wire_size());
+
+    MPReachNLRIAttribute<IPv4> recv(mpreach.data());
+
+    assert(mpreach.wire_size() == recv.wire_size());
+
+    assert(memcmp(mpreach.data(), recv.data(), recv.wire_size()) == 0);
 
     return true;
 }
@@ -579,6 +618,8 @@ main(int argc, char** argv)
 	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
 	} tests[] = {
 	    {"multiprotocol", callback(test_multprotocol)},
+	    {"multiprotocol_reach_ipv4",
+	     callback(test_multiprotocol_reach_ipv4)},
 	    {"multiprotocol_unreach", callback(test_multiprotocol_unreach)},
 	    {"refresh", callback(test_refresh)},
 	    {"simple_open_packet", callback(test_simple_open_packet)},
