@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.2 2003/03/10 23:20:16 hodson Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -565,6 +565,7 @@ public:
 	IfTreeAddr4* fa = addr();
 	if (fa == 0) return false;
 	fa->set_endpoint(_endpoint);
+	fa->set_point_to_point(true);
 	return true;
     }
 
@@ -593,6 +594,7 @@ public:
 	IfTreeAddr4* fa = addr();
 	if (fa == 0) return false;
 	fa->set_bcast(_bcast);
+	fa->set_broadcast(true);
 	return true;
     }
 
@@ -723,6 +725,7 @@ public:
 	IfTreeAddr6* fa = addr();
 	if (fa == 0) return false;
 	fa->set_endpoint(_endpoint);
+	fa->set_point_to_point(true);
 	return true;
     }
 
