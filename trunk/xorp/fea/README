@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
+# $XORP: xorp/fea/README,v 1.2 2003/06/03 21:58:06 pavlin Exp $
 #
 
 Forwarding Engine Abstraction
@@ -21,7 +21,8 @@ Documentation
 =============
 
 The FEA architecture is described in xorp/docs/fea.
-The multicast-related MFEA architecture is described in xorp/docs/mfea.
+For information about the multicast-related MFEA see README.mfea
+The MFEA architecture is described in xorp/docs/mfea.
 
 Status
 ======
