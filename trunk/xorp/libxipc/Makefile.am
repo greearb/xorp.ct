@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.5 2003/01/21 18:51:36 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.6 2003/01/24 02:48:21 hodson Exp $
 ##
 
 # - The library
@@ -35,6 +35,8 @@ finder_ng_SOURCES		+= finder_ng.cc
 finder_ng_SOURCES		+= finder_ng_main.cc
 finder_ng_SOURCES		+= finder_base.hh
 finder_ng_SOURCES		+= finder_base.cc
+finder_ng_SOURCES		+= finder_ng_xrl_target.hh
+finder_ng_SOURCES		+= finder_ng_xrl_target.cc
 
 test_finder_client_SOURCES	= test_finder_client.cc
 test_finder_ipc_SOURCES		= test_finder_ipc.cc

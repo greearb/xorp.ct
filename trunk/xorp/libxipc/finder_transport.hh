@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_transport.hh,v 1.1 2002/12/14 23:42:54 hodson Exp $
+// $XORP: xorp/libxipc/finder_transport.hh,v 1.2 2002/12/19 01:29:09 hodson Exp $
 
 #ifndef __LIBXORP_FINDER_TRANSPORT_HH__
 #define __LIBXORP_FINDER_TRANSPORT_HH__
@@ -255,7 +255,7 @@ protected:
     }
 };
 
-#define FINDER_TCP_DEFAULT_PORT 19999
+static const uint16_t FINDER_TCP_DEFAULT_PORT = 19999;
 
 /**
  * Factory class for FinderTransport objects on a server.

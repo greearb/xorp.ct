@@ -95,7 +95,7 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxorp/libxorp.a $(top_builddir)/li
 # -- Program Sources
 call_xrl_SOURCES = call_xrl.cc
 finder_SOURCES = finder.cc
-finder_ng_SOURCES = finder_ng.hh  finder_ng.cc finder_ng_main.cc finder_base.hh finder_base.cc
+finder_ng_SOURCES = finder_ng.hh  finder_ng.cc finder_ng_main.cc finder_base.hh finder_base.cc finder_ng_xrl_target.hh finder_ng_xrl_target.cc
 
 test_finder_client_SOURCES = test_finder_client.cc
 test_finder_ipc_SOURCES = test_finder_ipc.cc
@@ -165,7 +165,8 @@ finder_LDADD = $(LDADD)
 finder_DEPENDENCIES =  libxipc.a $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/libcomm/libcomm.a
 finder_LDFLAGS = 
-finder_ng_OBJECTS =  finder_ng.o finder_ng_main.o finder_base.o
+finder_ng_OBJECTS =  finder_ng.o finder_ng_main.o finder_base.o \
+finder_ng_xrl_target.o
 finder_ng_LDADD = $(LDADD)
 finder_ng_DEPENDENCIES =  libxipc.a $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/libcomm/libcomm.a
@@ -287,18 +288,18 @@ DEP_FILES =  .deps/call_xrl.P .deps/common_xif.P .deps/finder.P \
 .deps/finder_base.P .deps/finder_client.P .deps/finder_client_base.P \
 .deps/finder_ipc.P .deps/finder_messenger.P .deps/finder_msg.P \
 .deps/finder_msgs.P .deps/finder_ng.P .deps/finder_ng_main.P \
-.deps/finder_server.P .deps/finder_tcp.P .deps/finder_tcp_messenger.P \
-.deps/finder_transport.P .deps/finder_xif.P .deps/header.P .deps/hmac.P \
-.deps/hmac_md5.P .deps/md5.P .deps/sockutil.P \
-.deps/test_finder_client.P .deps/test_finder_ipc.P \
-.deps/test_finder_ipc2.P .deps/test_finder_messenger.P \
-.deps/test_finder_msg.P .deps/test_finder_msgs.P \
-.deps/test_finder_tcp.P .deps/test_finder_transport.P \
-.deps/test_header.P .deps/test_inproc.P .deps/test_lemming.P \
-.deps/test_stcp.P .deps/test_sudp.P .deps/test_xrl.P \
-.deps/test_xrl_args.P .deps/test_xrl_atom.P .deps/test_xrl_error.P \
-.deps/test_xrl_parser.P .deps/test_xrl_router.P .deps/xrl.P \
-.deps/xrl_args.P .deps/xrl_atom.P .deps/xrl_atom_encoding.P \
+.deps/finder_ng_xrl_target.P .deps/finder_server.P .deps/finder_tcp.P \
+.deps/finder_tcp_messenger.P .deps/finder_transport.P \
+.deps/finder_xif.P .deps/header.P .deps/hmac.P .deps/hmac_md5.P \
+.deps/md5.P .deps/sockutil.P .deps/test_finder_client.P \
+.deps/test_finder_ipc.P .deps/test_finder_ipc2.P \
+.deps/test_finder_messenger.P .deps/test_finder_msg.P \
+.deps/test_finder_msgs.P .deps/test_finder_tcp.P \
+.deps/test_finder_transport.P .deps/test_header.P .deps/test_inproc.P \
+.deps/test_lemming.P .deps/test_stcp.P .deps/test_sudp.P \
+.deps/test_xrl.P .deps/test_xrl_args.P .deps/test_xrl_atom.P \
+.deps/test_xrl_error.P .deps/test_xrl_parser.P .deps/test_xrl_router.P \
+.deps/xrl.P .deps/xrl_args.P .deps/xrl_atom.P .deps/xrl_atom_encoding.P \
 .deps/xrl_atom_list.P .deps/xrl_cmd_map.P .deps/xrl_error.P \
 .deps/xrl_parser.P .deps/xrl_parser_input.P .deps/xrl_pf_factory.P \
 .deps/xrl_pf_inproc.P .deps/xrl_pf_stcp.P .deps/xrl_pf_stcp_ph.P \

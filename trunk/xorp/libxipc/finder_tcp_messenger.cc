@@ -12,20 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.1 2003/01/21 18:51:36 hodson Exp $"
 
 #include "finder_module.h"
 #include "libxorp/xlog.h"
 
 #include "finder_tcp_messenger.hh"
 
-FinderTcpMessenger::~FinderTcpMessenger()
+FinderTcpMessengerBase::~FinderTcpMessengerBase()
 {
     drain_queue();
 }
 
 void
-FinderTcpMessenger::read_event(int	      errval,
+FinderTcpMessengerBase::read_event(int	      errval,
 			       const uint8_t* data,
 			       uint32_t	      data_bytes)
 {
@@ -60,7 +60,7 @@ FinderTcpMessenger::read_event(int	      errval,
 }
 
 bool
-FinderTcpMessenger::send(const Xrl& xrl, const SendCallback& scb)
+FinderTcpMessengerBase::send(const Xrl& xrl, const SendCallback& scb)
 {
     if (pending())
 	return false;
@@ -84,13 +84,13 @@ FinderTcpMessenger::send(const Xrl& xrl, const SendCallback& scb)
 }
 
 bool
-FinderTcpMessenger::pending() const
+FinderTcpMessengerBase::pending() const
 {
     return (false == _out_queue.empty());
 }
 
 void
-FinderTcpMessenger::reply(uint32_t	  seqno,
+FinderTcpMessengerBase::reply(uint32_t	  seqno,
 			  const XrlError& xe,
 			  const XrlArgs*  args)
 {
@@ -117,7 +117,7 @@ get_data_bytes(const FinderMessageBase& fm)
 }
 
 void
-FinderTcpMessenger::push_queue()
+FinderTcpMessengerBase::push_queue()
 {
     XLOG_ASSERT(false == _out_queue.empty());
     const FinderMessageBase* fm = _out_queue.front();
@@ -143,7 +143,7 @@ FinderTcpMessenger::push_queue()
 }
 
 void
-FinderTcpMessenger::drain_queue()
+FinderTcpMessengerBase::drain_queue()
 {
     while (false == _out_queue.empty()) {
 	delete _out_queue.front();
@@ -151,7 +151,7 @@ FinderTcpMessenger::drain_queue()
 }
 
 void
-FinderTcpMessenger::write_event(int 		errval,
+FinderTcpMessengerBase::write_event(int 		errval,
 				const uint8_t*	data,
 				uint32_t	data_bytes)
 {
@@ -169,7 +169,8 @@ FinderTcpMessenger::write_event(int 		errval,
 }
 
 void
-FinderTcpMessenger::close_event()
+FinderTcpMessengerBase::close_event()
 {
     // XXX TODO 
 }
+

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.1 2003/01/24 02:48:22 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -31,6 +31,8 @@
 
 #include "sockutil.hh"
 #include "finder_ng.hh"
+#include "finder_tcp_messenger.hh"
+#include "finder_ng_xrl_target.hh"
 
 static jmp_buf tidy_exit;
 
@@ -102,11 +104,12 @@ valid_interface(const IPv4& addr)
 static void
 finder_main(int argc, char* const argv[])
 {
-    bool		run_verbose = false;
-    IPv4		bind_addr = IPv4::ANY();
-    uint16_t		bind_port = FINDER_TCP_DEFAULT_PORT;
-    FinderNG::Addr4List	permitted_addrs;
-    FinderNG::Net4List	permitted_nets;
+    bool	run_verbose = false;
+    IPv4	bind_addr = IPv4::ANY();
+    uint16_t	bind_port = FINDER_TCP_DEFAULT_PORT;
+
+    FinderNGTcpListener::Addr4List	permitted_addrs;
+    FinderNGTcpListener::Net4List	permitted_nets;
 
     int ch;
     while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) {
@@ -189,13 +192,15 @@ finder_main(int argc, char* const argv[])
     install_signal_traps(trigger_exit);
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	EventLoop e;
-	FinderNG finder(e, bind_addr, bind_port);
+	EventLoop		 e;
+	FinderNG	  	 finder;
+	FinderNGTcpListener	 finder_tcp4_source(finder, e,
+						    bind_addr, bind_port);
 
-	// TODO associate finder instance with xrl handler
+	// FinderNGXrlTarget finder_xrl_target(finder);
 
-	finder.add_permitted_addrs(permitted_addrs);
-	finder.add_permitted_nets(permitted_nets);
+	finder_tcp4_source.add_permitted_addrs(permitted_addrs);
+	finder_tcp4_source.add_permitted_nets(permitted_nets);
 	
 	XorpTimer twirl;
 	if (run_verbose)

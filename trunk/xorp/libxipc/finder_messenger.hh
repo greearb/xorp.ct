@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+// $XORP: xorp/libxipc/finder_messenger.hh,v 1.1 2003/01/21 18:51:36 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_MESSENGER__
 #define __LIBXIPC_FINDER_MESSENGER__
@@ -34,9 +34,13 @@
 class FinderMessengerBase : public XrlSender
 {
 public:
-    FinderMessengerBase(EventLoop& e, XrlCmdMap& cmds)
-	: _event_loop(e), _cmds(cmds) {}
-
+    FinderMessengerBase(EventLoop& e,
+			XrlCmdMap& cmds)
+	: _event_loop(e), _cmds(cmds)
+    {}
+    
+    virtual ~FinderMessengerBase();
+    
     typedef XrlSender::Callback SendCallback;
 
     virtual bool send(const Xrl& xrl, const SendCallback& scb) = 0;
@@ -107,10 +111,14 @@ private:
     friend class ResponseState;
 
 private:
-    EventLoop&		_event_loop;
-    SeqNoResponseMap	_expected_responses;
-    XrlCmdMap&		_cmds;
+    EventLoop&			 _event_loop;
+    SeqNoResponseMap		 _expected_responses;
+    XrlCmdMap&			 _cmds;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Inline methods
 
 inline XrlCmdMap&
 FinderMessengerBase::command_map()

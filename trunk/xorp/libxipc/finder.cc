@@ -12,48 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng.cc,v 1.1 2003/01/24 02:48:21 hodson Exp $"
 
 #include "finder_module.h"
 
 #include "libxorp/xlog.h"
+
+#include "finder_tcp.hh"
 #include "finder_ng.hh"
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// FinderNGMessenger methods
-//
-
-void
-FinderNGMessenger::pre_dispatch_xrl()
-{
-    FinderNGMessenger* old = _finder.set_active_messenger(this);
-    XLOG_ASSERT(0 == old);
-}
-
-void
-FinderNGMessenger::post_dispatch_xrl()
-{
-    FinderNGMessenger* old = _finder.set_active_messenger(0);
-    XLOG_ASSERT(this == old);
-}
-
-void
-FinderNGMessenger::close_event()
-{
-    _finder.messenger_death_event(this);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // FinderNG
 //
 
-FinderNG::FinderNG(EventLoop& e, IPv4 interface, uint16_t port)
-	throw (InvalidPort)
-    : FinderTcpListenerBase(e, interface, port)
-{   
-}
+FinderNG::FinderNG()
+{}
 
 FinderNG::~FinderNG()
 {
@@ -63,28 +37,125 @@ FinderNG::~FinderNG()
     }
 }
 
-FinderNGMessenger*
-FinderNG::set_active_messenger(FinderNGMessenger* m)
+void
+FinderNG::messenger_active_event(FinderMessengerBase* m)
 {
-    FinderNGMessenger* old = _active_messenger;
+    XLOG_ASSERT(0 == _active_messenger);
     _active_messenger = m;
-    return old;
-}
-
-bool
-FinderNG::connection_event(int fd)
-{
-    FinderNGMessenger* m = new FinderNGMessenger(event_loop(), *this,
-						 fd, _cmds);
-    _messengers.push_back(m);
-    return true;
 }
 
 void
-FinderNG::messenger_death_event(FinderNGMessenger* m)
+FinderNG::messenger_inactive_event(FinderMessengerBase* m)
+{
+    XLOG_ASSERT(m == _active_messenger);
+    _active_messenger = 0;
+}
+
+void
+FinderNG::messenger_stopped_event(FinderMessengerBase* m)
+{
+    XLOG_INFO("Messenger %p stopped.", m);
+}
+
+void
+FinderNG::messenger_birth_event(FinderMessengerBase* m)
+{
+    _messengers.push_back(m);
+}
+
+void
+FinderNG::messenger_death_event(FinderMessengerBase* m)
 {
     // The messenger is telling us it's about to die, ie we're losing
     // the connection to a particular process and it can be considered
     // dead.  We need to do something here
-    XLOG_INFO("FinderNGMessenger dead (instance @ 0x%p)\n", m);
+    XLOG_INFO("FinderMessenger dead (instance @ 0x%p)\n", m);
+}
+
+XrlCmdMap&
+FinderNG::commands()
+{
+    return _cmds;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// FinderTcpMessenger methods
+//
+
+FinderTcpMessenger::FinderTcpMessenger(EventLoop& e,
+				       FinderNG&  finder,
+				       int	  fd,
+				       XrlCmdMap& cmds)
+    : FinderTcpMessengerBase(e, fd, cmds), _finder(&finder)
+{
+    _finder->messenger_birth_event(this);
+}
+
+FinderTcpMessenger::FinderTcpMessenger(EventLoop& e,
+				       int	  fd,
+				       XrlCmdMap& cmds)
+    : FinderTcpMessengerBase(e, fd, cmds), _finder(0)
+{
+    if (_finder)
+	_finder->messenger_birth_event(this);
+}
+
+FinderTcpMessenger::~FinderTcpMessenger()
+{
+    if (_finder)
+	_finder->messenger_death_event(this);
+}
+
+void
+FinderTcpMessenger::pre_dispatch_xrl()
+{
+    if (_finder)
+	_finder->messenger_active_event(this);
+}
+
+void
+FinderTcpMessenger::post_dispatch_xrl()
+{
+    if (_finder)
+	_finder->messenger_inactive_event(this);
+}
+
+void
+FinderTcpMessenger::close_event()
+{
+    if (_finder)
+	_finder->messenger_stopped_event(this);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// FinderNGTcpListener methods
+//
+
+FinderNGTcpListener::FinderNGTcpListener(FinderNG&  finder,
+					 EventLoop& e,
+					 IPv4	    interface,
+					 uint16_t   port)
+    throw (InvalidPort)
+    : FinderTcpListenerBase(e, interface, port), _finder(finder)
+{
+}
+					 
+FinderNGTcpListener::~FinderNGTcpListener()
+{
+    while (false == _messengers.empty()) {
+	delete _messengers.front();
+	_messengers.pop_front();
+    }
+}
+
+bool
+FinderNGTcpListener::connection_event(int fd)
+{
+    FinderTcpMessenger* m = new FinderTcpMessenger(event_loop(),
+						   _finder, fd,
+						   _finder.commands());
+    _messengers.push_back(m);
+    return true;
 }

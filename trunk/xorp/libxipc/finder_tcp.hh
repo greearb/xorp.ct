@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.3 2003/01/24 02:03:14 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.4 2003/01/24 02:47:25 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -22,6 +22,7 @@
 
 #include <vector>
 
+#include "libxorp/xorp.h"
 #include "libxorp/asyncio.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.2 2003/01/24 02:03:14 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_messenger.cc,v 1.3 2003/01/24 02:47:25 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -81,7 +81,7 @@ send_hello_complete(const XrlError& e, XrlArgs*, bool *success, bool* done)
 }
 
 static void
-send_hello(FinderTcpMessenger* fm, bool* success, bool* done)
+send_hello(FinderTcpMessengerBase* fm, bool* success, bool* done)
 {
     bool send_okay;
 
@@ -98,7 +98,7 @@ add_commands(XrlCmdMap& cmds)
 }
 
 static void
-connect_client(EventLoop* e, FinderTcpMessenger** m, bool* failed)
+connect_client(EventLoop* e, FinderTcpMessengerBase** m, bool* failed)
 {
     IPv4 ipc_addr = if_get_preferred();
     struct in_addr ia;
@@ -111,18 +111,18 @@ connect_client(EventLoop* e, FinderTcpMessenger** m, bool* failed)
 	return;
     }
     verbose_log("Client connected to server\n");
-    *m = new FinderTcpMessenger(*e, fd, xrl_cmds);
+    *m = new FinderTcpMessengerBase(*e, fd, xrl_cmds);
 }
 
 class DummyFinder;
 
-class FinderAttachedTcpMessenger : public FinderTcpMessenger {
+class FinderAttachedTcpMessenger : public FinderTcpMessengerBase {
 public:
     FinderAttachedTcpMessenger(DummyFinder& 	finder,
 			       EventLoop&   	e,
 			       int		fd,
 			       XrlCmdMap&	cmds)
-	: FinderTcpMessenger(e, fd, cmds), _finder(finder)
+	: FinderTcpMessengerBase(e, fd, cmds), _finder(finder)
     {}
 
     void pre_dispatch_xrl();
@@ -155,15 +155,15 @@ public:
 	return true;
     }
 
-    FinderTcpMessenger* messenger() { return _messenger; }
+    FinderTcpMessengerBase* messenger() { return _messenger; }
 
-    void set_xrl_dispatcher(FinderTcpMessenger* fm)
+    void set_xrl_dispatcher(FinderTcpMessengerBase* fm)
     {
 	verbose_log("Setting dispatcher to %p\n", fm);
     }
     
 protected:
-    FinderTcpMessenger* _messenger;
+    FinderTcpMessengerBase* _messenger;
 };
 
 void
@@ -178,8 +178,8 @@ FinderAttachedTcpMessenger::post_dispatch_xrl() {
 
 static int
 test_hellos(EventLoop&e,
-	    FinderTcpMessenger* src,
-	    FinderTcpMessenger* dst)
+	    FinderTcpMessengerBase* src,
+	    FinderTcpMessengerBase* dst)
 {
     bool timeout_flag = false;
     XorpTimer timeout = e.set_flag_after_ms(0, &timeout_flag);
@@ -219,7 +219,7 @@ test_main(void)
 {
     EventLoop e;
 
-    FinderTcpMessenger* client = 0;
+    FinderTcpMessengerBase* client = 0;
 
     IPv4 ipc_addr = if_get_preferred();
     DummyFinder finder(e, ipc_addr);

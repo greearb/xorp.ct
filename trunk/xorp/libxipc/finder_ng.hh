@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libxipc/finder_ng.hh,v 1.1 2003/01/24 02:48:22 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_HH__
 #define __LIBXIPC_FINDER_NG_HH__
@@ -20,19 +20,45 @@
 #include "config.h"
 
 #include "libxipc/xrl_cmd_map.hh"
+#include "finder_messenger.hh"
+
+class FinderNG {
+public:
+    
+public:
+    FinderNG();
+    ~FinderNG();
+
+    void messenger_active_event(FinderMessengerBase*);
+    void messenger_inactive_event(FinderMessengerBase*);
+    void messenger_stopped_event(FinderMessengerBase*);
+    void messenger_birth_event(FinderMessengerBase*);
+    void messenger_death_event(FinderMessengerBase*);
+
+    XrlCmdMap& commands();
+    
+protected:
+    XrlCmdMap _cmds;
+    FinderMessengerBase* _active_messenger;
+    list<FinderMessengerBase*> _messengers;
+};
+
+#include "finder_tcp.hh"
 #include "finder_tcp_messenger.hh"
 
-class FinderNG;
-
-class FinderNGMessenger : public FinderTcpMessenger {
+class FinderTcpMessenger : public FinderTcpMessengerBase {
 public:
-    FinderNGMessenger(EventLoop& e,
-		      FinderNG&	 finder,
-		      int	 fd,
-		      XrlCmdMap& cmds)
-	: FinderTcpMessenger(e, fd, cmds), _finder(finder)
-    {}
+    FinderTcpMessenger(EventLoop& e,
+		       FinderNG&  finder,
+		       int	  fd,
+		       XrlCmdMap& cmds);
 
+    FinderTcpMessenger(EventLoop& e,
+		       int	  fd,
+		       XrlCmdMap& cmds);
+
+    ~FinderTcpMessenger();
+    
     void pre_dispatch_xrl();
 
     void post_dispatch_xrl();
@@ -40,29 +66,38 @@ public:
     void close_event();
     
 protected:
-    FinderNG& _finder;
+    FinderNG* _finder;
 };
 
-class FinderNG : public FinderTcpListenerBase {
+/**
+ * Class that creates FinderMessengers for incoming connections.
+ *
+ * New FinderMessengers are announced to the Finder via
+ * FinderNG::messenger_birth_event, and the Finder becomes responsible
+ * for the memory management of the messengers.
+ */
+class FinderNGTcpListener : public FinderTcpListenerBase {
 public:
     typedef FinderTcpListenerBase::AddrList Addr4List;
     typedef FinderTcpListenerBase::NetList Net4List;
-    
-public:
-    FinderNG(EventLoop& e, IPv4 interface, uint16_t port)
+
+    FinderNGTcpListener(FinderNG&  finder,
+			EventLoop& e,
+			IPv4	   interface,
+			uint16_t   port)
 	throw (InvalidPort);
-    ~FinderNG();
-    
-    FinderNGMessenger* set_active_messenger(FinderNGMessenger*);
 
-    void messenger_death_event(FinderNGMessenger*);
+    ~FinderNGTcpListener();
 
+    /**
+     * Instantiate a Messenger instance for fd.
+     * @return true on success, false on failure.
+     */
     bool connection_event(int fd);
     
 protected:
-    XrlCmdMap _cmds;
-    FinderNGMessenger* _active_messenger;
-    list<FinderNGMessenger*> _messengers;
+    FinderNG&			_finder;
+    list<FinderTcpMessenger*> _messengers;
 };
 
 #endif // __LIBXIPC_FINDER_NG_HH__

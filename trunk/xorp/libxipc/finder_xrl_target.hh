@@ -1,0 +1,32 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+
+// Copyright (c) 2001-2003 International Computer Science Institute
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software")
+// to deal in the Software without restriction, subject to the conditions
+// listed in the XORP LICENSE file. These conditions include: you must
+// preserve this copyright notice, and you cannot mention the copyright
+// holders in advertising related to the Software without their permission.
+// The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+// notice is a summary of the XORP LICENSE file; the license in that file is
+// legally binding.
+
+// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+
+#ifndef __LIBXIPC_FINDER_XRL_TGT_HH__
+#define __LIBXIPC_FINDER_XRL_TGT_HH__
+
+#include "finder_base.hh"
+
+class FinderNG;
+
+class FinderNGXrlTarget : public XrlFinderTargetBase {
+public:
+    FinderNGXrlTarget(FinderNG& finder);
+
+protected:
+    FinderNG& _finder;
+};
+
+#endif // __LIBXIPC_FINDER_XRL_TGT_HH__
