@@ -1,0 +1,9 @@
+--- group	Sun May 23 01:12:33 2004
++++ group.diff	Sun May 23 01:15:11 2004
+@@ -22,5 +22,6 @@
+ dialer:*:68:
+ network:*:69:
+ www:*:80:
++xorp:*:1947:xorp,root
+ nogroup:*:65533:
+ nobody:*:65534:
