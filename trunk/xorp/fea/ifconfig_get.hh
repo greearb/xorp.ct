@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.5 2003/05/23 23:27:03 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.6 2003/05/28 21:50:54 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -150,6 +150,31 @@ class IfConfigGetIoctl : public IfConfigGet {
 public:
     IfConfigGetIoctl(IfConfig& ifc);
     virtual ~IfConfigGetIoctl();
+    
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+    
+    virtual bool read_config(IfTree& it);
+    virtual bool pull_config(IfTree& config);
+    
+private:
+};
+
+class IfConfigGetProcLinux : public IfConfigGet {
+public:
+    IfConfigGetProcLinux(IfConfig& ifc);
+    virtual ~IfConfigGetProcLinux();
     
     /**
      * Start operation.
