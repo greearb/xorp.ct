@@ -36,13 +36,6 @@ void get_bgp_version_done(const XrlError& e, const uint32_t* ver,
     DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "get_bgp_version_done called\n"));
     DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "ver = %ld\n", *ver));
 
-    if (e != XrlError::OKAY()) {
-	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "XrlError: "));
-	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", e.error_msg()));
-	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "\n"));
-	return;
-    }
-
     netsnmp_request_info *requests;
     netsnmp_agent_request_info *reqinfo;
 
@@ -53,32 +46,27 @@ void get_bgp_version_done(const XrlError& e, const uint32_t* ver,
         return;
     }
 
-    /*
-     * re-establish the previous pointers we are used to having 
-     */
+    // re-establish the previous pointers we are used to having 
     reqinfo = cache->reqinfo;
     requests = cache->requests;
 
-    DEBUGMSGTL((XORP_MODULE_NAME,
-                "continuing delayed request, mode = %d\n", cache->reqinfo->mode));
+    if (e != XrlError::OKAY()) {
+	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "XrlError: "));
+	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", e.error_msg()));
+	DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "\n"));
+	netsnmp_set_request_error(reqinfo, requests, SNMP_NOSUCHINSTANCE);
+	return;
+    }
 
-    /*
-     * mention that it's no longer delegated, and we've now answered
-     * the query (which we'll do down below). 
-     */
+    DEBUGMSGTL((XORP_MODULE_NAME,"continuing delayed req, mode = %d\n", reqinfo->mode));
+
+    // no longer delegated since we'll answer down below
     requests->delegated = 0;
 
-    switch(reqinfo->mode) {
+    snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
+	(unsigned char *) bgpVersion, bgpVersionLen);
 
-        case MODE_GET:
-	    snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-				     (unsigned char *) bgpVersion, 
-				     bgpVersionLen);
-	break;
-        default:
-            /* we should never get here, so this is a really bad error */
-            return;
-    }
+    return;
 }
 
 
@@ -88,12 +76,6 @@ get_bgpVersion(netsnmp_mib_handler * handler,
                           netsnmp_agent_request_info *  reqinfo,
                           netsnmp_request_info *requests)
 {
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
-
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-    
     DEBUGMSGTL(("bgp4_mib_1657_bgpversion", "get_bgpVersion called\n"));
     BgpMibXrlClient& bgp_mib = BgpMibXrlClient::the_instance();
     BgpMibXrlClient::CB0 cb_version;

@@ -70,7 +70,7 @@ BgpMibXrlClient::the_instance()
 
 BgpMibXrlClient::BgpMibXrlClient() 
     : XrlBgpV0p2Client(&_xrl_rtr), 
-      _xrl_rtr(SnmpEventLoop::the_instance(),"bgp mib")
+      _xrl_rtr(SnmpEventLoop::the_instance(),"bgp4mib")
 {
 }
 
