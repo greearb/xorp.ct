@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.9 2004/06/10 22:40:56 hodson Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.10 2004/09/01 18:10:18 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -154,6 +154,9 @@ RoutingSocket::force_read()
 	do {
 	    got = recv(_fd, &buffer[0], buffer.size(),
 		       MSG_DONTWAIT | MSG_PEEK);
+	    if ((got < 0) && (errno == EINTR))
+		continue;	// XXX: the receive was interrupted by a signal
+	    }
 	    if ((got < 0) || (got < (ssize_t)buffer.size()))
 		break;		// The buffer is big enough
 	    buffer.resize(buffer.size() + RTSOCK_BYTES);
