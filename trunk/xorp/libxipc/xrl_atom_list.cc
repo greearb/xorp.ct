@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_list.cc,v 1.2 2002/12/19 01:29:12 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_list.cc,v 1.3 2003/03/10 23:20:27 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -28,7 +28,9 @@ XrlAtomList::prepend(const XrlAtom& xa) throw (BadAtomType)
 {
     if (_list.empty() == false && _list.front().type() != xa.type()) {
 	// Atom being prepended is of different type to head
-	throw BadAtomType();
+	xorp_throw(BadAtomType,
+		   c_format("Head type = %d, added type %d\n",
+			    _list.front().type(), xa.type()));
     }
     _list.push_front(xa);
 }
@@ -37,8 +39,10 @@ void
 XrlAtomList::append(const XrlAtom& xa) throw (BadAtomType)
 {
     if (_list.empty() == false && _list.front().type() != xa.type()) {
-	// Atom being prepended is of different type to head
-	throw BadAtomType();
+	// Atom being appended is of different type to head
+	xorp_throw(BadAtomType,
+		   c_format("Head type = %d, added type %d\n",
+			    _list.front().type(), xa.type()));
     }
     _list.push_back(xa);
 }
@@ -46,12 +50,12 @@ XrlAtomList::append(const XrlAtom& xa) throw (BadAtomType)
 const XrlAtom&
 XrlAtomList::get(size_t itemno) const throw (InvalidIndex)
 {
-    if (itemno >= _list.size()) {
-	throw InvalidIndex();
-    }
     list<XrlAtom>::const_iterator ci = _list.begin();
     while (itemno != 0) {
 	ci++;
+	if (ci == _list.end()) {
+	    xorp_throw(InvalidIndex, "Index out of range.");
+	}
 	itemno--;
     }
     return *ci;
@@ -60,15 +64,16 @@ XrlAtomList::get(size_t itemno) const throw (InvalidIndex)
 void
 XrlAtomList::remove(size_t itemno) throw (InvalidIndex)
 {
-    size_t count = 0;
-    for (list<XrlAtom>::iterator i = _list.begin();  i != _list.end();
-	 i++, count++) {
-	if (count == itemno) {
-	    _list.erase(i);
-	    return;
+    list<XrlAtom>::iterator i = _list.begin();
+
+    while (itemno != 0) {
+	i++;
+	if (i == _list.end()) {
+	    xorp_throw(InvalidIndex, "Index out of range.");
 	}
+	itemno--;
     }
-    throw InvalidIndex();
+    _list.erase(i);
 }
 
 size_t XrlAtomList::size() const

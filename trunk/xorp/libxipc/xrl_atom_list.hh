@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom_list.hh,v 1.3 2003/03/10 23:20:27 hodson Exp $
+// $XORP: xorp/libxipc/xrl_atom_list.hh,v 1.4 2003/03/16 08:20:32 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_LIST_HH__
 #define __LIBXIPC_XRL_ATOM_LIST_HH__
 
 #include <list>
+#include "libxorp/exceptions.hh"
 
 class XrlAtom;
 
@@ -31,10 +32,19 @@ class XrlAtom;
 */
 class XrlAtomList {
 public:
-    XrlAtomList();
+    struct BadAtomType : public XorpReasonedException {
+	BadAtomType(const char* file, size_t line, const string& init_why)
+	    : XorpReasonedException("BadAtomType", file, line, init_why)
+	{}
+    };
+    struct InvalidIndex : public XorpReasonedException {
+	InvalidIndex(const char* file, size_t line, const string& init_why)
+	    : XorpReasonedException("InvalidIndex", file, line, init_why)
+	{}
+    };
 
-    class BadAtomType {};
-    class InvalidIndex {};
+public:
+    XrlAtomList();
 
     /**
      * Insert an XrlAtom at the front of the list.
@@ -49,7 +59,6 @@ public:
      * @param xa the XrlAtom to be inserted.
      */
     void append(const XrlAtom& xa) throw (BadAtomType);
-
 
     /**
      * Retrieve an XrlAtom from list.
