@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.11 2003/05/15 23:10:30 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.12 2003/05/19 03:15:17 pavlin Exp $
 ##
 
 
@@ -87,7 +87,6 @@ libfea_a_SOURCES	 = fea_module.h
 libfea_a_SOURCES	+= mfea_module.h
 libfea_a_SOURCES	+= fte.hh
 libfea_a_SOURCES	+= fti.hh
-# libfea_a_SOURCES	+= fti_dummy.hh
 libfea_a_SOURCES	+= fti_transaction.hh
 libfea_a_SOURCES	+= fticonfig.hh
 libfea_a_SOURCES	+= fticonfig_entry_get.hh
@@ -125,7 +124,6 @@ libfea_a_SOURCES	+= xrl_mfea_vif_manager.hh
 libfea_a_SOURCES	+= xrl_rawsock4.hh
 libfea_a_SOURCES	+= xrl_target.hh
 
-# libfea_a_SOURCES	+= fti_dummy.cc
 libfea_a_SOURCES	+= fti_transaction.cc
 libfea_a_SOURCES	+= fticonfig.cc
 libfea_a_SOURCES	+= fticonfig_entry_get.cc
