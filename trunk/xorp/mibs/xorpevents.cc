@@ -164,14 +164,8 @@ SnmpEventLoop::notify_scheduled(const TimeVal& abs_tv)
 
     the_instance().timer_list().current_time(now_tv);
 
-    if ((abs_tv < now_tv) || (abs_tv == now_tv)) {
-	// if already expired, do not export, just execute callbacks 
-	DEBUGMSGTL((_log_name, "running callbacks of expired timer(s)\n"));
-	the_instance().timer_list().run();
-	return;
-    }
+    (abs_tv > now_tv) ? del_tv = abs_tv - now_tv : del_tv = TimeVal::MINIMUM(); 
 
-    del_tv = abs_tv - now_tv; 
     del_tv.copy_out(snmp_tv);
     alarm_id = snmp_alarm_register_hr(snmp_tv, 0, run_timer_callbacks, NULL);
     if (!alarm_id) snmp_log(LOG_WARNING, "unable to import xorp timeout");
