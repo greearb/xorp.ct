@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.4 2003/05/14 01:13:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.5 2003/08/15 23:58:36 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -394,6 +394,7 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 	return (XORP_ERROR);
     }
 #elif defined(HOST_OS_LINUX)
+#if 0	// TODO: XXX: PAVPAVPAV: Linux doesn't hae sysctlbyname...
     if (sysctlbyname("net.ipv4.conf.all.forwarding", &enabled, &sz, NULL, 0)
 	!= 0) {
 	error_msg = c_format("Cannot get 'net.ipv4.conf.all.forwarding': %s",
@@ -401,6 +402,11 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
+#endif
+    UNUSED(enabled);
+    UNUSED(sz);
+    UNUSED(error_msg);
+    
 #else
 #error "OS not supported: don't know how to test whether"
 #error "IPv4 unicast forwarding is enabled/disabled"
@@ -447,6 +453,7 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 	return (XORP_ERROR);
     }
 #elif defined(HOST_OS_LINUX)
+#if 0	// TODO: XXX: PAVPAVPAV: Linux doesn't hae sysctlbyname...
     if (sysctlbyname("net.ipv6.conf.all.forwarding", &enabled, &sz, NULL, 0)
 	!= 0) {
 	error_msg = c_format("Cannot get 'net.ipv6.conf.all.forwarding': %s",
@@ -454,6 +461,11 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
+#endif
+    UNUSED(enabled);
+    UNUSED(sz);
+    UNUSED(error_msg);
+    
 #else
 #error "OS not supported: don't know how to test whether"
 #error "IPv6 unicast forwarding is enabled/disabled"
@@ -503,6 +515,7 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
     }
 #elif defined(HOST_OS_LINUX)
     // XXX: nothing to do in case of Linux
+    error_msg = "";
 #else
 #error "OS not supported: don't know how to test whether"
 #error "the acceptance of IPv6 Router Advertisement messages"
@@ -549,6 +562,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	return (XORP_ERROR);
     }
 #elif defined(HOST_OS_LINUX)
+#if 0	// TODO: XXX: PAVPAVPAV: Linux doesn't hae sysctlbyname...
     if (sysctlbyname("net.ipv4.conf.all.forwarding", NULL, NULL,
 		     &enable, sizeof(enable))
 	!= 0) {
@@ -557,6 +571,10 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
+#endif // 0
+    UNUSED(enable);
+    UNUSED(error_msg);
+    
 #else
 #error "OS not supported: don't know how to enable/disable"
 #error "IPv4 unicast forwarding"
@@ -614,6 +632,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	return (XORP_ERROR);
     }
 #elif defined(HOST_OS_LINUX)
+#if 0	// TODO: XXX: PAVPAVPAV: Linux doesn't hae sysctlbyname...
     if (sysctlbyname("net.ipv6.conf.all.forwarding", NULL, NULL,
 		     &enable, sizeof(enable))
 	!= 0) {
@@ -627,6 +646,10 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	}
 	return (XORP_ERROR);
     }
+#endif // 0
+    UNUSED(enable);
+    UNUSED(error_msg);
+    
 #else
 #error "OS not supported: don't know how to enable/disable"
 #error "IPv6 unicast forwarding"
@@ -679,6 +702,7 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
     }
 #elif defined(HOST_OS_LINUX)
     // XXX: nothing to do in case of Linux
+    error_msg = "";
 #else
 #error "OS not supported: don't know how to enable/disable"
 #error "the acceptance of IPv6 Router Advertisement messages"
