@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.7 2003/05/09 19:36:15 hodson Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.8 2003/05/09 21:00:51 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_CLIENT_HH__
 #define __LIBXIPC_FINDER_NG_CLIENT_HH__
@@ -28,6 +28,10 @@
 
 class FinderClientOp;
 
+/**
+ * A one-to-many container used by the FinderClient to store
+ * unresolved-to-resolved Xrl mappings.
+ */
 struct FinderDBEntry
 {
     FinderDBEntry(const string& key);
@@ -43,6 +47,13 @@ protected:
     list<string> _values;
 };
 
+/**
+ * Interface class for FinderClient Xrl requests.
+ *
+ * The methods in this interface are implemented by the FinderClient
+ * to handle its XRL requests.  It exists as a separate class to restrict
+ * the operations that the XRL interface can invoke.
+ */
 class FinderClientXrlCommandInterface
 {
 public:
@@ -51,6 +62,14 @@ public:
     virtual XrlCmdError dispatch_tunneled_xrl(const string& xrl) = 0;
 };
 
+/**
+ * @short Class that represents clients of the Finder.
+ *
+
+ * The FinderClient class performs communication processing with the
+ * Finder on behalf of XORP processes.  It handles XRL registration
+ * and resolution requests.
+ */
 class FinderClient :
     public FinderMessengerManager, public FinderClientXrlCommandInterface
 {
@@ -68,37 +87,144 @@ public:
     typedef vector<InstanceInfo>	InstanceList;
     
 public:
+    /**
+     * Constructor.
+     */
     FinderClient();
+
+    /**
+     * Destructor.
+     */
     virtual ~FinderClient();
 
+    /**
+     * Register an Xrl Target with the FinderClient and place request with
+     * Finder to perform registration. The request to the Finder is 
+     * asynchronous and there is a delay between when the request is made
+     * when it is satisfied.
+     *
+     * @param instance_name a unique name to be associated with the Target.
+     * @param class_name the class name that the Target is an instance of.
+     * @param dispatcher pointer to Xrl dispatcher that can execute the
+     * command.
+     *
+     * @return true on success, false if @ref instance_name or @ref
+     * class_name are empty.
+     */
     bool register_xrl_target(const string&	  instance_name,
 			     const string&	  class_name,
 			     const XrlDispatcher* dispatcher);
 
+    /**
+     * Unregister Xrl Target with FinderClient and place a request with
+     * the Finder to remove registration.   The request to the Finder is 
+     * asynchronous and there is a delay between when the request is made
+     * when it is satisfied.
+     *
+     * @param instance_name unique name associated with Xrl Target.
+     */
     bool unregister_xrl_target(const string& instance_name);
-    
+
+    /**
+     * Register an Xrl with the Finder.
+     *
+     * @param instance_name unique name associated with Xrl Target and making
+     * the registration.
+     *
+     * @param xrl string representation of the Xrl.
+     * @param pf_name protocol family name that implements Xrl.
+     * @param pf_args protocol family arguments to locate dispatcher for
+     * registered Xrl.
+     *
+     * @return true if registration request is successfully enqueued, false
+     * otherwise.
+     */
     bool register_xrl(const string& instance_name,
 		      const string& xrl,
 		      const string& pf_name,
 		      const string& pf_args);
 
+    /**
+     * Request Finder advertise Xrls associated with an Xrl Target instance
+     * to other XORP Xrl targets.  Until the Finder has satisfied this
+     * request the Xrl Target has no visibility in the Xrl universe.
+     *
+     * @param instance_name unique name associated with Xrl Target to
+     * be advertised.
+     *
+     * @return true on success, false if instance_name has not previously
+     * been registered with FinderClient.
+     */
     bool enable_xrls(const string& instance_name);
-    
-    void query(const string&	    key,
+
+    /**
+     * Request resolution of an Xrl.
+     *
+     * If the Xrl to be resolved in cache exists in the FinderClients
+     * cache, the callback provided as a function argument is invoked
+     * immediately.  Otherwise the request is forwarded to the finder,
+     * the cache updated, and callback dispatched when the Finder
+     * answers the request.
+     *
+     * @param xrl Xrl to be resolved.
+     * @param qcb callback to be dispatched when result is availble.
+     */
+    void query(const string&	    xrl,
 	       const QueryCallback& qcb);
 
+    /**
+     * Resolve Xrl that an Xrl Target associated with the FinderClient
+     * registered.
+     *
+     * @param incoming_xrl_command the command component of the Xrl being
+     * resolved.
+     * @param local_xrl_command the local name of the Xrl command being
+     * resolved.
+     * @return true and assign value to local_xrl_command on success, false
+     * on failure.
+     */
     bool query_self(const string& incoming_xrl_command,
 		    string& local_xrl_command) const;
 
-    bool forward_finder_xrl(const Xrl&, const XrlPFSender::SendCallback&);
-    
+    /**
+     * Send an Xrl for the Finder to dispatch.  This is the mechanism
+     * that allows clients of the Finder to interrogate the Finder through
+     * an Xrl interface.
+     *
+     * @param x Xrl to be dispatched.
+     * @param cb callback to be called with dispatch result.
+     * @return true on success.
+     */
+    bool forward_finder_xrl(const Xrl& x, const XrlPFSender::SendCallback& cb);
+
+    /**
+     * Accessor for Finder Messenger used by FinderClient instance.
+     */
     FinderMessengerBase* messenger();
 
+    /**
+     * Get list of operations pending.
+     */
     inline OperationQueue& todo_list()		{ return _todo_list; }
+
+    /**
+     * Get List of operations done and are repeatable.
+     */
     inline OperationQueue& done_list()		{ return _done_list; }
+
+    /**
+     * Notify successful completion of an operation on the todo list.
+     */
     void   notify_done(const FinderClientOp* completed);
+
+    /**
+     * Notify failed completion of an operation on the todo list.
+     */
     void   notify_failed(const FinderClientOp* completed);
 
+    /**
+     * Get the Xrl Commands implemented by the FinderClient.
+     */
     inline XrlCmdMap& commands()		{ return _commands; }
 
     /**
@@ -136,13 +262,13 @@ protected:
     inline InstanceList::const_iterator find_instance(const string& instance) const;
     
 protected:
-    OperationQueue	_todo_list;
-    OperationQueue	_done_list;
-    ResolvedTable	_rt;
-    LocalResolvedTable  _lrt;
-    InstanceList	_ids;
+    OperationQueue	 _todo_list;
+    OperationQueue	 _done_list;
+    ResolvedTable	 _rt;
+    LocalResolvedTable	 _lrt;
+    InstanceList	 _ids;
 
-    XrlCmdMap		_commands;
+    XrlCmdMap		 _commands;
     
     FinderMessengerBase* _messenger;
     bool		 _pending_result;
