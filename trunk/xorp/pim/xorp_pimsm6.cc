@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xorp_pim.cc,v 1.1 2004/04/30 02:39:25 pavlin Exp $"
+#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.1 2004/05/04 00:14:46 pavlin Exp $"
 
 
 //
@@ -85,6 +85,7 @@ usage(const char *argv0, int exit_value)
 //
 // Wait until the XrlRouter becomes ready
 //
+#ifdef HAVE_IPV6
 static void
 wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 {
@@ -99,10 +100,12 @@ wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 	XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
     }
 }
+#endif // HAVE_IPV6
 
 static void
 pim_main(const char* finder_hostname, uint16_t finder_port)
 {
+#ifdef HAVE_IPV6
     //
     // Init stuff
     //
@@ -111,7 +114,6 @@ pim_main(const char* finder_hostname, uint16_t finder_port)
     //
     // PIMSM node
     //
-#ifdef HAVE_IPV6
     XrlStdRouter xrl_std_router_pimsm6(eventloop,
 				       xorp_module_name(AF_INET6,
 							XORP_MODULE_PIMSM),
@@ -124,7 +126,6 @@ pim_main(const char* finder_hostname, uint16_t finder_port)
 			       xorp_module_name(AF_INET6, XORP_MODULE_RIB),
 			       xorp_module_name(AF_INET6, XORP_MODULE_MLD6IGMP));
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_pimsm6);
-#endif // HAVE_IPV6
 
     // Startup
 #ifdef HAVE_IPV6_MULTICAST
@@ -144,6 +145,10 @@ pim_main(const char* finder_hostname, uint16_t finder_port)
 	eventloop.run();
     }
 #endif // HAVE_IPV6_MULTICAST
+#endif // HAVE_IPV6
+
+    UNUSED(finder_hostname);
+    UNUSED(finder_port);
 }
 
 int
