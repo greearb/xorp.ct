@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.12 2003/06/11 21:58:03 pavlin Exp $
+# $XORP: xorp/README,v 1.13 2003/08/28 15:57:33 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -55,7 +55,7 @@ nothing more than source code browsing, compilation, and simple testing.
 Supported platforms:
 
   * FreeBSD-4.6-RELEASE and FreeBSD-4.8-RELEASE with:
-    - gcc/g++ version 2.95.4 or 3.2.1
+    - gcc/g++ version 2.95.4 (default), 3.2.1, or 3.3.1
     - gmake (GNU make) version 3.79.1
     - autoconf version 2.53
     - automake version 1.5
@@ -63,26 +63,10 @@ Supported platforms:
     - yacc version default one that comes with the above OS
 
   * Linux RedHat-7.3 (kernel 2.4-20) with:
-    - gcc/g++ version 2.96
+    - gcc/g++ version 2.96 (default)
 
-This release of XORP compiles or may work on:
-
-  * FreeBSD-4.5 and FreeBSD-4.6.2:
-    - Earlier XORP releases have been developed and tested on those
-      platforms.
-
-  * Linux RedHat-7.2 (kernel 2.4.18):
-    - The code compiles, but some of the internal tests fail dumping core.
-      The problem is attributable to exception handler failures caused by
-      the default compiler/binutils combination.  More information is
-      available at:
-	http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=54724
-    - IGMP and PIM-SM appear to work.
-
-Known problems:
-
-  * Parallel building (e.g., "gmake -j 4") may fail on multi-CPU machines.
-    The simplest work-around is to rerun gmake or not to use the -j flag.
+See $XORP/BUILD_NOTES for the list of additional platforms this
+release of XORP may compile or work on.
 
 Currently, XORP implements the following protocols:
 
@@ -101,14 +85,17 @@ Currently, XORP implements the following protocols:
 
 For description of the changes in each release, see $XORP/RELEASE_NOTES.
 
-3. Compilation, configuration and startup
-============================
 
-To compile xorp, you must have GNU make (gmake) installed. Then just
+3. Compilation, configuration and startup
+=========================================
+
+To compile XORP, you must have GNU make (gmake) installed. Then just
 run the following commands in the top-level directory:
 
 ./configure
 gmake
+
+See $XORP/BUILD_NOTES for additional information of building XORP.
 
 At this stage you should not expect to use the XORP code for other
 purposes than studying its architecture and running simple tests.
@@ -285,5 +272,13 @@ The core team currently consists of:
     of the email. For more subscription options, send the command
     "help" instead, or use the following URL:
     http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-users
+
+  * XORP hackers mailing list: xorp-hackers@xorp.org
+
+    To subscribe, send email to xorp-hackers-request@xorp.org with
+    the word "subscribe" (no quotes!) in the subject or the body
+    of the email. For more subscription options, send the command
+    "help" instead, or use the following URL:
+    http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-hackers
 
   * Feedback: feedback@xorp.org
