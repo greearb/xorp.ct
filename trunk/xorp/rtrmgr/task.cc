@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.8 2003/05/05 22:43:04 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.9 2003/05/09 23:47:47 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -59,7 +59,8 @@ StatusReadyValidation::validate(CallBack cb)
 {
     _cb = cb;
     if (_task_manager.do_exec()) {
-	Xrl xrl(_target, "finder://" + _target + "/common/0.1/get_status");
+	Xrl xrl(_target, "common/0.1/get_status");
+	printf("XRL: >%s<\n", xrl.str().c_str());
 	string response = "status:bool&reason:txt";
 	_task_manager.xorp_client().
 	    send_now(xrl, callback(this, &StatusReadyValidation::xrl_done),
