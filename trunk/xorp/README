@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.9 2003/06/06 06:54:04 pavlin Exp $
+# $XORP: xorp/README,v 1.10 2003/06/06 08:52:26 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -53,6 +53,7 @@ This is alpha release, which means that it should be used for
 nothing more than source code browsing, compilation, and simple testing.
 
 Supported platforms:
+
   * FreeBSD-4.6-RELEASE and FreeBSD-4.8-RELEASE with:
     - gcc/g++ version 2.95.4 or 3.2.1
     - gmake (GNU make) version 3.79.1
@@ -60,20 +61,32 @@ Supported platforms:
     - automake version 1.5
     - flex version 2.5.4
     - yacc version default one that comes with the above OS
+
   * Linux RedHat-7.3 (kernel 2.4-20) with:
     - gcc/g++ version 2.96
 
 This release of XORP compiles or may work on:
-   * FreeBSD-4.5 and FreeBSD-4.6.2:
-     - earlier XORP releases have been developed and tested on
-       those platforms
-   * Linux RedHat-7.2 (kernel 2.4.18):
-     - the code compiles, but some of the internal tests fail
-     - IGMP and PIM-SM appear to work
-   * MacOS X 10.2.x:
-     - the code compiles, but some of the internal tests fail
-     - there is no FEA support
 
+  * FreeBSD-4.5 and FreeBSD-4.6.2:
+    - Earlier XORP releases have been developed and tested on those
+      platforms.
+
+  * Linux RedHat-7.2 (kernel 2.4.18):
+    - The code compiles, but some of the internal tests fail dumping core.
+      The problem is attributable to exception handler failures caused by
+      the default compiler/binutils combination.  More information is
+      available at:
+	http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=54724
+    - IGMP and PIM-SM appear to work.
+
+  * MacOS X 10.2.x:
+    - The code compiles, but some of the internal tests fail.
+    - There is no FEA support.
+
+Known problems:
+
+  * Parallel building (e.g., "gmake -j 4") may fail on multi-CPU machines.
+    The simplest work-around is to rerun gmake or not to use the -j flag.
 
 Currently, XORP implements the following protocols:
 
