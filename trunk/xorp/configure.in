@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.109 2004/08/31 17:12:32 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.110 2004/08/31 19:28:49 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1083,11 +1083,8 @@ AC_TRY_COMPILE([
 #include <netinet/ip_fil.h>
 ],
 [
-main()
-{
   char *myipfname = IPL_NAME;
   int myioctl = SIOCGETFF;
-}
 ],
   [AC_DEFINE(HAVE_FIREWALL_IPF, 1,
 	[Define to 1 if you have an IPF host build environment])
@@ -1112,10 +1109,7 @@ AC_TRY_COMPILE([
 #include <netinet/ip_fw.h>
 ],
 [
-main()
-{
   int mysockopt = IP_FW_ADD;
-}
 ],
   [AC_DEFINE(HAVE_FIREWALL_IPFW, 1,
 	[Define to 1 if you have an IPFW build environment])
@@ -1145,9 +1139,6 @@ AC_TRY_COMPILE([
 #include "iptables.h"
 ],
 [
-main()
-{
-}
 ],
   [AC_DEFINE(HAVE_FIREWALL_IPTABLES, 1,
 	[Define to 1 if you have an IPTABLES build environment])
