@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_queue.cc,v 1.3 2003/05/09 19:36:15 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_queue.cc,v 1.4 2003/05/09 21:00:51 hodson Exp $"
 
 #include "finder_module.h"
 #include "libxorp/debug.h"
@@ -20,6 +20,22 @@
 #include "libxorp/xlog.h"
 #include "finder_messenger.hh"
 #include "finder_xrl_queue.hh"
+
+FinderXrlCommandQueue::FinderXrlCommandQueue(FinderMessengerBase* messenger)
+    : _m(messenger), _pending(false)
+{
+}
+
+FinderXrlCommandQueue::FinderXrlCommandQueue(const FinderXrlCommandQueue& oq)
+    : _m(oq._m), _pending(oq._pending)
+{
+    XLOG_ASSERT(oq._cmds.empty());
+    XLOG_ASSERT(oq._pending == false);
+}
+
+FinderXrlCommandQueue::~FinderXrlCommandQueue()
+{
+}
 
 inline EventLoop&
 FinderXrlCommandQueue::eventloop()
@@ -31,11 +47,21 @@ inline void
 FinderXrlCommandQueue::push()
 {
     debug_msg("push\n");
-    if (false == _pending && false == _cmds.empty()) {
-	_cmds.front()->dispatch();
-	_pending = true;
+    if (false == _pending && _cmds.empty() == false&&
+	_dispatcher.scheduled() == false) {
+	_dispatcher = eventloop().new_oneoff_after_ms(0,
+			callback(this, &FinderXrlCommandQueue::dispatch_one));
     }
-}	
+}
+
+void
+FinderXrlCommandQueue::dispatch_one()
+{
+    debug_msg("dispatch_one\n");
+    XLOG_ASSERT(_cmds.empty() == false);
+    _cmds.front()->dispatch();
+    _pending = true;
+}
 
 void
 FinderXrlCommandQueue::enqueue(const FinderXrlCommandQueue::Command& cmd)

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.20 2003/05/12 23:57:20 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.21 2003/05/13 23:59:15 hodson Exp $
 ##
 
 # - The library
@@ -9,12 +9,12 @@ noinst_LIBRARIES = libxipc.a libfinder.a
 # -- Programs
 bin_PROGRAMS  =	call_xrl finder
 
-# -- Test Programs and scripts
-test_programs  = test_finder_messenger test_finder_msgs test_finder
-test_programs += test_finder_tcp
-test_programs += test_header test_inproc test_lemming test_sudp test_stcp
-test_programs += test_xrl_error test_xrl test_xrl_atom test_xrl_args 
-test_programs += test_xrl_router
+# -- Test Programs and scripts (order of increasing complexity)
+test_programs  = test_xrl_error test_xrl test_xrl_atom test_xrl_args 
+test_programs += test_header test_inproc test_sudp test_stcp
+test_programs += test_lemming test_xrl_router
+test_programs += test_finder_tcp test_finder_messenger test_finder_msgs 
+test_programs += test_finder test_finder_events 
 
 test_extra_programs = test_xrl_parser test_finder_to
 
@@ -38,32 +38,39 @@ finder_LDADD			+= $(top_builddir)/libcomm/libcomm.a
 
 # -- Program Sources
 
-call_xrl_SOURCES		= call_xrl.cc
-finder_SOURCES			= finder_main.cc
+call_xrl_SOURCES		 = call_xrl.cc
+finder_SOURCES			 = finder_main.cc
 
-test_finder_messenger_SOURCES	= test_finder_messenger.cc
-test_finder_msgs_SOURCES	= test_finder_msgs.cc
-test_finder_tcp_SOURCES		= test_finder_tcp.cc
+test_finder_messenger_SOURCES	 = test_finder_messenger.cc
+test_finder_msgs_SOURCES	 = test_finder_msgs.cc
+test_finder_tcp_SOURCES		 = test_finder_tcp.cc
 
-test_header_SOURCES		= test_header.cc
-test_inproc_SOURCES		= test_inproc.cc
-test_lemming_SOURCES		= test_lemming.cc
-test_stcp_SOURCES		= test_stcp.cc
-test_sudp_SOURCES		= test_sudp.cc
-test_xrl_SOURCES		= test_xrl.cc
-test_xrl_atom_SOURCES		= test_xrl_atom.cc
-test_xrl_args_SOURCES		= test_xrl_args.cc
-test_xrl_parser_SOURCES		= test_xrl_parser.cc
-test_xrl_error_SOURCES		= test_xrl_error.cc
+test_header_SOURCES		 = test_header.cc
+test_inproc_SOURCES		 = test_inproc.cc
+test_lemming_SOURCES		 = test_lemming.cc
+test_stcp_SOURCES		 = test_stcp.cc
+test_sudp_SOURCES		 = test_sudp.cc
+test_xrl_SOURCES		 = test_xrl.cc
+test_xrl_atom_SOURCES		 = test_xrl_atom.cc
+test_xrl_args_SOURCES		 = test_xrl_args.cc
+test_xrl_parser_SOURCES		 = test_xrl_parser.cc
+test_xrl_error_SOURCES		 = test_xrl_error.cc
 
-test_xrl_router_SOURCES		= test_xrl_router.cc
-test_xrl_router_LDADD		= libfinder.a $(LDADD)
+test_xrl_router_SOURCES		 = test_xrl_router.cc
+test_xrl_router_LDADD		 = libfinder.a $(LDADD)
 
-test_finder_SOURCES		= test_finder.cc
-test_finder_LDADD		= libfinder.a $(LDADD)
+test_finder_SOURCES		 = test_finder.cc
+test_finder_LDADD		 = libfinder.a $(LDADD)
 
-test_finder_to_SOURCES		= test_finder_to.cc
-test_finder_to_LDADD		= libfinder.a $(LDADD)
+test_finder_events_SOURCES	 = test_finder_events.cc
+test_finder_events_SOURCES	+= test_finder_events_base.hh
+test_finder_events_SOURCES	+= test_finder_events_base.cc
+test_finder_events_SOURCES	+= finder_event_notifier_xif.hh
+test_finder_events_SOURCES	+= finder_event_notifier_xif.cc
+test_finder_events_LDADD	 = libfinder.a $(LDADD)
+
+test_finder_to_SOURCES		 = test_finder_to.cc
+test_finder_to_LDADD		 = libfinder.a $(LDADD)
 
 # -- Library Sources (libxipc)
 libxipc_a_SOURCES  = finder_module.h
@@ -161,7 +168,8 @@ libfinder_a_SOURCES += finder_xrl_target.cc
 
 INCLUDES =	-I$(top_srcdir)
 
-# -- Generated Sources used in libxipc and libfinder (see explanation at end of file)
+# -- Generated Sources used in libxipc and libfinder 
+# (see explanation at end of file)
 BUILT_SOURCES  = common_xif.hh
 BUILT_SOURCES += common_xif.cc
 BUILT_SOURCES += finder_base.hh
@@ -172,6 +180,12 @@ BUILT_SOURCES += finder_client_xif.hh
 BUILT_SOURCES += finder_client_xif.cc
 BUILT_SOURCES += finder_xif.hh
 BUILT_SOURCES += finder_xif.cc
+BUILT_SOURCES += finder_event_notifier_xif.hh
+BUILT_SOURCES += finder_event_notifier_xif.cc
+BUILT_SOURCES += finder_event_observer_xif.hh
+BUILT_SOURCES += finder_event_observer_xif.cc
+BUILT_SOURCES += test_finder_events_base.hh
+BUILT_SOURCES += test_finder_events_base.cc
 
 CLEANFILES = $(BUILT_SOURCES)
 
@@ -186,6 +200,8 @@ libfinder_a_SOURCES += finder_base.hh
 libfinder_a_SOURCES += finder_base.cc
 libfinder_a_SOURCES += finder_client_xif.hh
 libfinder_a_SOURCES += finder_client_xif.cc
+libfinder_a_SOURCES += finder_event_observer_xif.hh
+libfinder_a_SOURCES += finder_event_observer_xif.cc
 
 ###############################################################################
 #
@@ -198,9 +214,12 @@ libfinder_a_SOURCES += finder_client_xif.cc
 # automake (rightly) dislikes cross directory builds.
 #
 
+###############################################################################
 #
 # Build interfaces
 #
+###############################################################################
+
 common_xif.%: $(top_srcdir)/xrl/interfaces/common_xif.%
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
@@ -222,20 +241,56 @@ finder_client_xif.%: $(top_srcdir)/xrl/interfaces/finder_client_xif.%
 $(top_srcdir)/xrl/interfaces/finder_client_xif.hh $(top_srcdir)/xrl/interfaces/finder_client_xif.cc: $(top_srcdir)/xrl/interfaces/finder_client.xif
 	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
 
+finder_event_notifier_xif.%: $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
+
+$(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.hh $(top_srcdir)/xrl/interfaces/finder_event_notifier_xif.cc: $(top_srcdir)/xrl/interfaces/finder_event_notifier.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
+
+finder_event_observer_xif.%: $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/interfaces/$@ $(srcdir)
+
+$(top_srcdir)/xrl/interfaces/finder_event_observer_xif.hh $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc: $(top_srcdir)/xrl/interfaces/finder_event_observer.xif
+	cd $(top_builddir)/xrl/interfaces && $(MAKE) $(notdir $@)
+
+###############################################################################
 #
 # Build handler bases
 #
+###############################################################################
+
+# Finder base
+
 finder_base.%: $(top_srcdir)/xrl/targets/finder_base.%
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
 
-$(top_srcdir)/xrl/targets/finder_base.hh $(top_srcdir)/xrl/targets/finder_base.cc: $(top_srcdir)/xrl/targets/finder.tgt
+$(top_srcdir)/xrl/targets/finder_base.hh				\
+$(top_srcdir)/xrl/targets/finder_base.cc:				\
+    $(top_srcdir)/xrl/targets/finder.tgt
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
+
+# Finder client base
 
 finder_client_base.%: $(top_srcdir)/xrl/targets/finder_client_base.%
 	$(RM) $(srcdir)/$(notdir $@)
 	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
 
-$(top_srcdir)/xrl/targets/finder_client_base.hh $(top_srcdir)/xrl/targets/finder_client_base.cc: $(top_srcdir)/xrl/targets/finder_client.tgt
+$(top_srcdir)/xrl/targets/finder_client_base.hh				\
+$(top_srcdir)/xrl/targets/finder_client_base.cc:			\
+    $(top_srcdir)/xrl/targets/finder_client.tgt
+	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
+
+# Test Finder events base
+
+test_finder_events_base.%: $(top_srcdir)/xrl/targets/test_finder_events_base.%
+	$(RM) $(srcdir)/$(notdir $@)
+	$(LN_S) $(top_srcdir)/xrl/targets/$@ $(srcdir)
+
+$(top_srcdir)/xrl/targets/test_finder_events_base.hh 			\
+$(top_srcdir)/xrl/targets/test_finder_events_base.cc:			\
+    $(top_srcdir)/xrl/targets/test_finder_events.tgt
 	cd $(top_builddir)/xrl/targets && $(MAKE) $(notdir $@)
 

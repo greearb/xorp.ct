@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.5 2003/05/09 19:36:15 hodson Exp $
+// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.6 2003/05/09 21:00:51 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
 #define __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
@@ -31,38 +31,45 @@ class FinderXrlCommandBase;
  * intervention.  During the completion of each Xrl in the queue triggers
  * the sending of the next Xrl.
  */
-class FinderXrlCommandQueue {
+class FinderXrlCommandQueue
+{
 public:
     typedef ref_ptr<FinderXrlCommandBase> Command;
 
 public:
-    FinderXrlCommandQueue(FinderMessengerBase* messenger) :
-	_m(messenger), _pending(false)
-    {}
+    FinderXrlCommandQueue(FinderMessengerBase* messenger);
+    FinderXrlCommandQueue(const FinderXrlCommandQueue& oq);
+    ~FinderXrlCommandQueue();
 
     inline FinderMessengerBase& messenger() { return *_m; }
 
     void enqueue(const Command& cmd);
-    
+
 protected:
     void push();
+    void dispatch_one();
     EventLoop& eventloop();
-    
+
 protected:
     friend class FinderXrlCommandBase;
     void crank();
     void kill_messenger();
-    
+
+private:
+    FinderXrlCommandQueue& operator=(const FinderXrlCommandQueue&); // no impl
+
 private:
     FinderMessengerBase* _m;
     list<Command>	 _cmds;
     bool		 _pending;
+    XorpTimer		 _dispatcher;
 };
 
 /**
  * @short Base class for Xrls sent from Finder.
  */
-class FinderXrlCommandBase {
+class FinderXrlCommandBase
+{
 public:
     FinderXrlCommandBase(FinderXrlCommandQueue& q) : _queue(q) {}
     virtual ~FinderXrlCommandBase() {}
@@ -106,7 +113,7 @@ public:
 		  callback(static_cast<FinderXrlCommandBase*>(this),
 			   &FinderXrlCommandBase::dispatch_cb));
     }
-    
+
 protected:
     string _tgtname;
 };
@@ -114,7 +121,8 @@ protected:
 /**
  * @short Send "remove xrl" to client.
  */
-class FinderSendRemoveXrl : public FinderXrlCommandBase {
+class FinderSendRemoveXrl : public FinderXrlCommandBase
+{
 public:
     FinderSendRemoveXrl(FinderXrlCommandQueue& q,
 			const string&	       tgtname,
@@ -127,7 +135,7 @@ public:
     {
 	_tgtname = _xrl = "croak";
     }
-    
+
     bool dispatch()
     {
 	XrlFinderClientV0p2Client client(&(queue().messenger()));
@@ -135,7 +143,7 @@ public:
 		  callback(static_cast<FinderXrlCommandBase*>(this),
 			   &FinderXrlCommandBase::dispatch_cb));
     }
-    
+
 protected:
     string _tgtname;
     string _xrl;
@@ -144,7 +152,8 @@ protected:
 /**
  * @short Send "remove xrls for target" to client.
  */
-class FinderSendRemoveXrls : public FinderXrlCommandBase {
+class FinderSendRemoveXrls : public FinderXrlCommandBase
+{
 public:
     FinderSendRemoveXrls(FinderXrlCommandQueue& q,
 			 const string&		tgtname)
@@ -160,14 +169,54 @@ public:
     bool dispatch()
     {
 	XrlFinderClientV0p2Client client(&(queue().messenger()));
-	return client.send_remove_xrls_for_target_from_cache(_tgtname.c_str(),
-							     _tgtname,
-		  callback(static_cast<FinderXrlCommandBase*>(this),
-			   &FinderXrlCommandBase::dispatch_cb));
+	return client.send_remove_xrls_for_target_from_cache(
+		     _tgtname.c_str(), _tgtname,
+		     callback(static_cast<FinderXrlCommandBase*>(this),
+			      &FinderXrlCommandBase::dispatch_cb));
     }
-    
+
 protected:
     string _tgtname;
+};
+
+/**
+ * @short Send tunneled Xrl to client.  Client is expected to be
+ * able to dispatch Xrl.
+ */
+class FinderSendTunneledXrl : public FinderXrlCommandBase
+{
+public:
+    FinderSendTunneledXrl(FinderXrlCommandQueue& q,
+			  const string&		 tgtname,
+			  const string&		 xrl)
+	: FinderXrlCommandBase(q), _tgtname(tgtname), _xrl(xrl)
+    {
+    }
+
+    ~FinderSendTunneledXrl()
+    {
+	_tgtname = "croak";
+    }
+
+    void dispatch_cb(const XrlError& e,
+		     const uint32_t* /* p_errno */,
+		     const string*   /* p_errtxt */)
+    {
+	//	if (e != XrlError::OKAY())
+	FinderXrlCommandBase::dispatch_cb(e);
+	// TODO: XXX
+    }
+
+    bool dispatch()
+    {
+	XrlFinderClientV0p2Client client(&(queue().messenger()));
+	return client.send_dispatch_tunneled_xrl(_tgtname.c_str(), _xrl,
+		 callback(this, &FinderSendTunneledXrl::dispatch_cb));
+    }
+
+protected:
+    string _tgtname;
+    string _xrl;
 };
 
 #endif // __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.14 2003/05/09 19:36:15 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.15 2003/05/09 21:00:51 hodson Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -31,22 +31,21 @@
 
 static const char* finder = "finder";
 
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Tracing related
 //
 
-static class TraceFinder
+static class TraceFinderClient
 {
 public:
-    TraceFinder() {
-	_do_trace = !(getenv("FINDERCLIENTTRACE") == 0);
+    TraceFinderClient() : _do_trace(getenv("FINDERCLIENTTRACE") != 0)
+    {
     }
-    inline bool on() const { return _do_trace; }
-    operator bool() { return _do_trace; }
-    inline void set_context(const string& s) { _context = s; }
-    inline const string& context() const { return _context; }
+    inline bool on() const			{ return _do_trace; }
+    inline operator bool()			{ return _do_trace; }
+    inline void set_context(const string& s)	{ _context = s; }
+    inline const string& context() const	{ return _context; }
 protected:
     bool _do_trace;
     string _context;
@@ -822,20 +821,21 @@ FinderClient::manages(const FinderMessengerBase* m) const
 void
 FinderClient::uncache_xrl(const string& xrl)
 {
-    debug_msg("Request to uncache xrl \"%s\"\n", xrl.c_str());
+    finder_trace_init("Request to uncache xrl \"%s\"\n", xrl.c_str());
 
     ResolvedTable::iterator i = _rt.find(xrl);
     if (_rt.end() != i) {
-	debug_msg("Request fulfilled.\n");
+	finder_trace_result("Request fulfilled.\n");
 	_rt.erase(i);
 	return;
     }
-    debug_msg("Request not fulfilled - not in cache.\n");
+    finder_trace_result("Request not fulfilled - not in cache.\n");
 }
 
 void
 FinderClient::uncache_xrls_from_target(const string& target)
 {
+    finder_trace_init("uncache_xrls_from_target");
     size_t n = 0;
     ResolvedTable::iterator i = _rt.begin();
     while (_rt.end() != i) {
@@ -846,18 +846,36 @@ FinderClient::uncache_xrls_from_target(const string& target)
 	    ++i;
 	}
     }
-    debug_msg("Uncached %u Xrls relating to target \"%s\"\n",
-	      (uint32_t)n, target.c_str());
+    finder_trace_result("Uncached %u Xrls relating to target \"%s\"\n",
+			(uint32_t)n, target.c_str());
 }
 
 XrlCmdError
 FinderClient::dispatch_tunneled_xrl(const string& xrl_str)
 {
+    finder_trace_init("dispatch_tunneled_xrl(\"%s\")", xrl_str.c_str());
     Xrl xrl;
     try {
 	xrl = Xrl(xrl_str.c_str());
+	InstanceList::iterator i = find_instance(xrl.target());
+	if (i == _ids.end()) {
+	    finder_trace_result("target not found");
+	    return XrlCmdError::COMMAND_FAILED("target not found");
+	}
+
+	string local_xrl_command;
+	if (query_self(xrl.command(), local_xrl_command) == false) {
+	    finder_trace_result("local resolution not found");
+	    return XrlCmdError::COMMAND_FAILED("xrl not found");
+	}
+
+	Xrl dispatch_me(xrl.target(), local_xrl_command, xrl.args());
+	XrlArgs ret_vals;
+	i->dispatcher()->dispatch_xrl(dispatch_me, ret_vals);
+	
+	finder_trace_result("success");
+	return XrlCmdError::OKAY();
     } catch (InvalidString&) {
 	return XrlCmdError::COMMAND_FAILED("Bad Xrl string");
     }
-    return XrlCmdError::COMMAND_FAILED("Not implemented");
 }

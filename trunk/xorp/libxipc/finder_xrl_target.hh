@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.8 2003/05/09 19:36:16 hodson Exp $
+// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.9 2003/05/09 21:00:52 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_XRL_TARGET_HH__
 #define __LIBXIPC_FINDER_XRL_TARGET_HH__
@@ -98,12 +98,6 @@ public:
     /**
      * Event notifier interface.
      */
-    XrlCmdError finder_event_notifier_0_1_register_all_event_interest(
-		    const string& who);
-
-    XrlCmdError finder_event_notifier_0_1_deregister_all_event_interest(
-		    const string& who);
-
     XrlCmdError finder_event_notifier_0_1_register_class_event_interest(
 		    const string& who, const string& class_name);
 

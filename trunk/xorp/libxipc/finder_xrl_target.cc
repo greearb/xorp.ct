@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.12 2003/05/09 19:36:15 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.13 2003/05/09 21:00:52 hodson Exp $"
 
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
@@ -127,7 +127,7 @@ FinderXrlTarget::finder_0_2_register_finder_client(const string& tgt_name,
 	out_cookie = make_cookie();
     }
 
-    if (_finder.add_target(tgt_name, class_name, singleton, out_cookie)) {
+    if (_finder.add_target(class_name, tgt_name, singleton, out_cookie)) {
 	finder_trace_result("\"%s\" okay",  out_cookie.c_str());
 	return XrlCmdError::OKAY();
     }
@@ -405,31 +405,22 @@ FinderXrlTarget::finder_0_2_get_ipv6_permitted_nets(XrlAtomList& ipv6nets)
 }
 
 XrlCmdError
-FinderXrlTarget::finder_event_notifier_0_1_register_all_event_interest(
-						const string& who
-						)
-{
-    UNUSED(who);
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-FinderXrlTarget::finder_event_notifier_0_1_deregister_all_event_interest(
-						 const string& who
-						 )
-{
-    UNUSED(who);
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 FinderXrlTarget::finder_event_notifier_0_1_register_class_event_interest(
 						 const string& who,
 						 const string& class_name
 						 )
 {
-    UNUSED(who);
-    UNUSED(class_name);
+    finder_trace_init("register_class_event_interest (who = %s, class = %s)",
+		      who.c_str(), class_name.c_str());
+    if (_finder.active_messenger_represents_target(who) == false) {
+	finder_trace_result("messenger does not represent target.");
+	return XrlCmdError::COMMAND_FAILED("failed (not originator).");
+    }
+    if (_finder.add_class_watch(who, class_name) == false) {
+	finder_trace_result("failed to add watch.");
+	return XrlCmdError::COMMAND_FAILED("failed to add watch");
+    }
+    finder_trace_result("okay");
     return XrlCmdError::OKAY();
 }
 
@@ -439,7 +430,16 @@ FinderXrlTarget::finder_event_notifier_0_1_deregister_class_event_interest(
 						 const string& class_name
 						 )
 {
-    UNUSED(who);
-    UNUSED(class_name);
+    finder_trace_init("deregister_class_event_interest (who = %s, class = %s)",
+		      who.c_str(), class_name.c_str());
+    if (_finder.active_messenger_represents_target(who) == false) {
+	finder_trace_result("messenger does not represent target.");
+	return XrlCmdError::COMMAND_FAILED("failed (not originator).");
+    }
+    if (_finder.remove_class_watch(who, class_name)) {
+	finder_trace_result("okay, but watch was non-existent.");
+	return XrlCmdError::OKAY();
+    }
+    finder_trace_result("okay");
     return XrlCmdError::OKAY();
 }
