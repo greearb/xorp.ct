@@ -306,6 +306,15 @@ interface ripng/0.1 {
 					& addrs:list
 
     /**
+     * Get counters associated with interface / vif /address.
+     */
+     get_counters			? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					-> counter_descriptions:list	\
+					&  counter_values:list
+
+    /**
      * Add a static route.
      *
      * @param network route target.

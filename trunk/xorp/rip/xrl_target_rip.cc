@@ -510,6 +510,17 @@ XrlRipTarget::rip_0_1_get_all_peers(XrlAtomList&	peers,
 }
 
 XrlCmdError
+XrlRipTarget::rip_0_1_get_counters(const string&	ifname,
+				   const string&	vifname,
+				   const IPv4&		addr,
+				   XrlAtomList&		descs,
+				   XrlAtomList&		values)
+{
+    return _ct->ripx_0_1_get_counters(ifname, vifname, addr, descs, values);
+}
+
+
+XrlCmdError
 XrlRipTarget::rip_0_1_add_static_route(const IPv4Net& 	network,
 				       const IPv4& 	nexthop,
 				       const uint32_t& 	cost)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.3 2004/03/01 19:53:57 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.4 2004/03/02 00:53:04 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -248,6 +248,12 @@ public:
 				       XrlAtomList& ifnames,
 				       XrlAtomList& vifnames,
 				       XrlAtomList& addrs);
+
+    XrlCmdError ripx_0_1_get_counters(const string&	ifname,
+				      const string&	vifname,
+				      const A&		addr,
+				      XrlAtomList&	descriptions,
+				      XrlAtomList&	values);
 
     XrlCmdError ripx_0_1_add_static_route(const IPNet<A>& 	network,
 					  const A&	 	nexthop,
@@ -969,6 +975,50 @@ XrlRipCommonTarget<A>::ripx_0_1_get_all_peers(XrlAtomList&	peers,
     return XrlCmdError::OKAY();
 }
 
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_get_counters(const string&	ifn,
+					     const string&	vifn,
+					     const A&		addr,
+					     XrlAtomList&	descriptions,
+					     XrlAtomList&	values)
+{
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifn, vifn, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    const Port<A>* p = pp.first;
+    descriptions.append(XrlAtom(0, "Updates Sent"));
+    values.append(XrlAtom(p->counters().unsolicited_updates()));
+
+    descriptions.append(XrlAtom(0, "Triggered Updates Sent"));
+    values.append(XrlAtom(p->counters().triggered_updates()));
+
+    descriptions.append(XrlAtom(0, "Requests Sent"));
+    values.append(XrlAtom(p->counters().table_requests_sent()));
+
+    descriptions.append(XrlAtom(0, "Packets Received"));
+    values.append(XrlAtom(p->counters().packets_recv()));
+
+    descriptions.append(XrlAtom(0, "Bad Packets Received"));
+    values.append(XrlAtom(p->counters().bad_packets()));
+
+    if (A::ip_version() == 4) {
+	descriptions.append(XrlAtom(0, "Authentication Failures"));
+	values.append(XrlAtom(p->counters().bad_auth_packets()));
+    }
+
+    descriptions.append(XrlAtom(0, "Bad Routes Received"));
+    values.append(XrlAtom(p->counters().bad_routes()));
+
+    descriptions.append(XrlAtom(0, "Non-RIP Requests Received"));
+    values.append(XrlAtom(p->counters().non_rip_requests_recv()));
+
+    descriptions.append(XrlAtom(0, "Non-RIP Updates Sent"));
+    values.append(XrlAtom(p->counters().non_rip_updates_sent()));
+
+    return XrlCmdError::OKAY();
+}
 
 template <typename A>
 XrlCmdError

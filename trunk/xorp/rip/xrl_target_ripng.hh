@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.5 2004/03/01 19:53:57 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.6 2004/03/02 00:53:04 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -251,6 +251,12 @@ public:
 					XrlAtomList&	ifnames,
 					XrlAtomList&	vifnames,
 					XrlAtomList&	addrs);
+
+    XrlCmdError ripng_0_1_get_counters(const string&	ifname,
+				       const string&	vifname,
+				       const IPv6&	addr,
+				       XrlAtomList&	descriptions,
+				       XrlAtomList&	values);
 
     XrlCmdError ripng_0_1_add_static_route(const IPv6Net& 	network,
 					   const IPv6& 		nexthop,
