@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.12 2003/03/04 03:35:56 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.13 2003/03/04 05:25:56 pavlin Exp $"
 
 
 //
@@ -1484,7 +1484,8 @@ BsrZone::merge_rp_set(const BsrZone& bsr_zone)
 	if (org_bsr_group_prefix == NULL) {
 	    // A new group prefix. Add it to the list.
 	    BsrGroupPrefix *new_bsr_group_prefix;
-	    new_bsr_group_prefix = new BsrGroupPrefix(*bsr_group_prefix);
+	    new_bsr_group_prefix = new BsrGroupPrefix(*this,
+						      *bsr_group_prefix);
 	    _bsr_group_prefix_list.push_back(new_bsr_group_prefix);
 	    continue;
 	}
