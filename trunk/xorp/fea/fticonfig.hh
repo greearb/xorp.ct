@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.28 2004/12/02 02:37:48 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.29 2004/12/02 07:02:38 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -112,6 +112,8 @@ public:
     FtiConfigTableGet&		ftic_table_get_primary() { return *_ftic_table_get_primary; }
     FtiConfigTableSet&		ftic_table_set_primary() { return *_ftic_table_set_primary; }
     FtiConfigTableObserver&	ftic_table_observer_primary() { return *_ftic_table_observer_primary; }
+
+    FtiConfigEntrySetClick&	ftic_entry_set_click() { return _ftic_entry_set_click; }
 
     /**
      * Setup the unit to behave as dummy (for testing purpose).
