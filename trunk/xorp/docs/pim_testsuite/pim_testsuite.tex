@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.18 2003/03/06 12:21:37 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.19 2003/03/06 23:57:25 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -85,7 +85,7 @@ and can be used for evaluating any other PIM-SM implementation.
 \section{Test Software}
 
 The test software used in this test suite is the XORP PIM-SM implementation
-itself. More specifically, the XORP PIM-SM implementation has extentions that
+itself. More specifically, the XORP PIM-SM implementation has extensions that
 can be used to generate various PIM-SM protocol control packets for testing
 purpose. In addition, on several occasions a multicast sender and receiver
 programs are used to generate and receive multicast data traffic. In general,
@@ -4199,7 +4199,7 @@ Verify that (*,*,RP) Join/Prune messages are sent properly.
 If a router receives an (*,*,RP) Join/Prune message, it may need to propagate
 it toward the RP. A router should monitor its upstream interface for messages
 from other routers on that subnet, and if it sees an (*,*,RP) Join to the
-correct upstream neighbor, it should supress its own (*,*,RP) Join message.
+correct upstream neighbor, it should suppress its own (*,*,RP) Join message.
 If it sees an (*,*,RP) Prune, it should override that prune by sending an
 (*,*,RP) Join almost immediately. If a router sees the Generation ID of the
 correct upstream neighbor change, the router should refresh the state by
@@ -4639,7 +4639,7 @@ Group           Source          RP              Flags
 \end{verbatim}
 
   \item After TR3 sends the (*,*,RP) Join message to TR4, it should suppress
-  the generation of the (*,*,RP) Join message at the RUT by uncreasing the
+  the generation of the (*,*,RP) Join message at the RUT by increasing the
   Join Timer in the corresponding (*,*,RP) state to \verb=t_joinsuppress=
   (see the protocol specification for description of its value):
 
@@ -4821,7 +4821,7 @@ If a router receives an (*,G) Join/Prune message, it may need to propagate
 it toward the RP for that group. A router should monitor its upstream
 interface for messages
 from other routers on that subnet, and if it sees an (*,G) Join to the
-correct upstream neighbor, it should supress its own (*,G) Join message.
+correct upstream neighbor, it should suppress its own (*,G) Join message.
 If it sees an (*,G) Prune, it should override that prune by sending an
 (*,G) Join almost immediately. If a router sees the Generation ID of the
 correct upstream neighbor change, the router should refresh the state by
@@ -5026,7 +5026,7 @@ TR4, unless stated otherwise.
 
   \item Trigger changing of RPF'(*,G) at the RUT to TR3 by composing an
   (*,G) Assert message at TR3 with RPT-bit set to one, metric and metric 
-  perference set to zero, and sending it on LAN5.
+  preference set to zero, and sending it on LAN5.
 
   \item Keep observing the (*,G) Join/Prune messages transmitted by the
   RUT on LAN5 for at least \verb=J/P_HoldTime= ({\PimsmJPHoldTime}).
@@ -5277,7 +5277,7 @@ Group           Source          RP              Flags
 \end{verbatim}
 
   \item After TR3 sends the (*,G) Join message to TR4, it should suppress
-  the generation of the (*,G) Join message at the RUT by uncreasing the
+  the generation of the (*,G) Join message at the RUT by increasing the
   Join Timer in the corresponding (*,G) state to \verb=t_joinsuppress=
   (see the protocol specification for description of its value):
 
@@ -5527,7 +5527,7 @@ If a router receives an (S,G) Join/Prune message, it may need to propagate
 it toward the source. A router should monitor its upstream
 interface for messages
 from other routers on that subnet, and if it sees an (S,G) Join to the
-correct upstream neighbor, it should supress its own (S,G) Join message.
+correct upstream neighbor, it should suppress its own (S,G) Join message.
 If it sees an (S,G) Prune, it should override that prune by sending an
 (S,G) Join almost immediately. If a router sees the Generation ID of the
 correct upstream neighbor change, the router should refresh the state by
@@ -5748,7 +5748,7 @@ TR4, unless stated otherwise.
 
   \item Trigger changing of RPF'(S,G) at the RUT to TR3 by composing an
   (S,G) Assert message at TR3 with RPT-bit, metric and metric 
-  perference set to zero, and sending it on LAN5.
+  preference set to zero, and sending it on LAN5.
 
   \item Keep observing the (S,G) Join/Prune messages transmitted by the
   RUT on LAN5 for at least \verb=J/P_HoldTime= ({\PimsmJPHoldTime}).
@@ -6017,7 +6017,7 @@ Group           Source          RP              Flags
 \end{verbatim}
 
   \item After TR3 sends the (S,G) Join message to TR4, it should suppress
-  the generation of the (S,G) Join message at the RUT by uncreasing the
+  the generation of the (S,G) Join message at the RUT by increasing the
   Join Timer in the corresponding (S,G) entry to \verb=t_joinsuppress=
   (see the protocol specification for description of its value):
 
@@ -6425,7 +6425,7 @@ Configure TR3 such that the next-hop router toward S1 is TR4.
 
   \item Trigger changing of RPF'(S,G,rpt) at the RUT to TR3 by composing an
   (S,G) Assert message at TR3 with RPT-bit, metric and metric 
-  perference set to zero, and sending it on LAN2.
+  preference set to zero, and sending it on LAN2.
 
   \item Keep observing the Join/Prune messages transmitted by the
   RUT on LAN2 until the next (*,G) Join message is transmitted on
@@ -6433,9 +6433,9 @@ Configure TR3 such that the next-hop router toward S1 is TR4.
 
   \item Trigger changing of RPF'(S,G,rpt) at the RUT to TR2 by composing an
   (S,G) Assert message at TR3 with RPT-bit set to zero, metric and metric 
-  perference set to 10000, and sending it on LAN2. Right after that
+  preference set to 10000, and sending it on LAN2. Right after that
   compose an (S,G) Assert message at TR2 with RPT-bit, metric and metric 
-  perference set to zero, and send it on LAN2.
+  preference set to zero, and send it on LAN2.
 
   \item Keep observing the Join/Prune messages transmitted by the
   RUT on LAN2 until the next (*,G) Join message is transmitted on
@@ -6632,7 +6632,7 @@ Group           Source          RP              Flags
     PIM exclude SG:           ..............
 \end{verbatim}
 
-  Until before the (S,G,rpt) Join is receved, the periodic (*,G) Join messages
+  Until before the (S,G,rpt) Join is received, the periodic (*,G) Join messages
   sent by the RUT on LAN2 to neighbor TR2 must contain (S,G,rpt) Prune as
   well.
 
@@ -7202,7 +7202,7 @@ transaction in RPTNotJoined(G) state.}
 
   \item Trigger changing of RPF'(S,G,rpt) at the RUT to TR3 by composing an
   (S,G) Assert message at TR3 with RPT-bit, metric and metric 
-  perference set to zero, and sending it on LAN2.
+  preference set to zero, and sending it on LAN2.
 
   \item Keep observing the Join/Prune messages transmitted by the
   RUT on LAN2 until the next (*,G) Join message is transmitted on
@@ -7210,9 +7210,9 @@ transaction in RPTNotJoined(G) state.}
 
   \item Trigger changing of RPF'(S,G,rpt) at the RUT to TR2 by composing an
   (S,G) Assert message at TR3 with RPT-bit set to zero, metric and metric 
-  perference set to 10000, and sending it on LAN2. Right after that
+  preference set to 10000, and sending it on LAN2. Right after that
   compose an (S,G) Assert message at TR2 with RPT-bit, metric and metric 
-  perference set to zero, and send it on LAN2.
+  preference set to zero, and send it on LAN2.
 
   \item Observe the Join/Prune messages transmitted by the RUT on LAN2 and the
   (S,G,rpt) state in the RUT for at least \verb=t_override=
@@ -8122,7 +8122,7 @@ Group           Source          RP              Flags
   the RUT should transmit an (S,G,rpt) Join on LAN2 with the upstream neighbor
   address set to TR2.
 
-  \item Afrer TR3 transmits its second (S,G,rpt) Prune message on LAN2
+  \item After TR3 transmits its second (S,G,rpt) Prune message on LAN2
   immediately followed by an (S,G,rpt) Join, the Override Timer of the
   (S,G,rpt) entry in the RUT that was set to \verb=t_override=
   ({\PimsmTOverride}) by the (S,G,rpt) Prune message should be canceled by the
@@ -8189,7 +8189,7 @@ Test sending and receiving of PIM Assert messages.
 \para{Overview:}
 Whenever on a shared LAN there is more than one upstream router that has valid
 forwarding state for a packet, this may lead to packet duplication.
-PIM does not attempt to prevent this from occuring. Instead, it detects when
+PIM does not attempt to prevent this from occurring. Instead, it detects when
 this has happened, and uses PIM Assert messages to elect a single forwarder
 amongst the upstream routers. Assert messages are also received by downstream
 routers on the LAN; as a result, subsequent Join/Prune messages are sent to
@@ -9025,7 +9025,7 @@ Group           Source          RP              Flags
 \end{verbatim}
 
   In addition, the RUT should store TR3 as AssertWinner(S,G,I) for the
-  intarface that connects the RUT to LAN2, it should store the assert metric
+  interface that connects the RUT to LAN2, it should store the assert metric
   of TR3 as AssertWinnerMetric(S,G,I), and the assert timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
 
@@ -9312,7 +9312,7 @@ The results should be same as in Part I.
   \item The (S,G) Assert state machine for the interface that connects the RUT
   to LAN1 should continue to be in I Am Assert Loser state for
   (\verb=Assert_Time=) ({\PimsmAssertTime}). After that the assert timer for
-  that interface should expire, and the assert shate machine should be in No
+  that interface should expire, and the assert state machine should be in No
   Info state.
   Further, the RUT should delete the AssertWinner(S,G,I) and
   AssertWinnerMetric(S,G,I) information for the interface that connects it to
@@ -9476,7 +9476,7 @@ Verify that the (*,G) Assert state machine operates properly.
 \para{Discussion:}
 When a PIM-SM router receives a PIM Assert message, first the per-interface
 (S,G) state machine should be updated appropriately. Only if no change of
-state has occured in the (S,G) assert state machine, and only if the (S,G)
+state has occurred in the (S,G) assert state machine, and only if the (S,G)
 assert state machine is in NoInfo state, then the per-interface
 (*,G) state machine should be updated appropriately. Typically, if an
 Assert message is received on an outgoing interface for the corresponding
@@ -10003,7 +10003,7 @@ Assert Loser State.}
   LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
   LAN1.
 
-  \item Repeate the test except that TR1 composes and sends (*,*,RP) Join
+  \item Repeat the test except that TR1 composes and sends (*,*,RP) Join
   message instead of the second (*,G) Join message.
 
 \end{enumerate}
@@ -10305,7 +10305,7 @@ Group           Source          RP              Flags
 \end{verbatim}
 
   In addition, the RUT should store TR3 as AssertWinner(*,G,I) for the
-  intarface that connects the RUT to LAN2, it should store the assert metric
+  interface that connects the RUT to LAN2, it should store the assert metric
   of TR3 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
 
@@ -10585,7 +10585,7 @@ The results should be same as in Part I.
   \item The (*,G) Assert state machine for the interface that connects the RUT
   to LAN1 should continue to be in I Am Assert Loser state for
   (\verb=Assert_Time=) ({\PimsmAssertTime}). After that the assert timer for
-  that interface should expire, and the assert shate machine should be in No
+  that interface should expire, and the assert state machine should be in No
   Info state.
   Further, the RUT should delete the AssertWinner(*,G,I) and
   AssertWinnerMetric(*,G,I) information for the interface that connects it to
@@ -12436,7 +12436,7 @@ RUT is not disabled.
   \item Check the Cand-RP state in the RUT, and the Bootstrap
   messages transmitted on LAN1.
 
-  \item Continue obsrving the Bootstrap messages transmitted on LAN1
+  \item Continue observing the Bootstrap messages transmitted on LAN1
   for at least \verb=BS_Timeout= ({\PimsmBSTimeout}).
 
 \end{enumerate}
@@ -12810,7 +12810,7 @@ Test that the Bootstrap messages originated at the BSR are forwarded properly.
 Bootstrap messages originated at the BSR are forwarded hop-by-hop by
 intermediate routers if they pass the Bootstrap Message Processing Check.
 When a Bootstrap message is forwarded, it is forwarded out on every multicast
-capable-interface excelt if the interface is an administrative scope boundary
+capable-interface except if the interface is an administrative scope boundary
 for the admin scope zone indicated in the first group address in the Bootstrap
 message packet.
 
@@ -14079,7 +14079,7 @@ RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix
 \subpara{Part C:}
 
 The results should be same as in Part B, except that 224.0.0.0/4 is
-substitured everywhere with 226.0.0.0/8, and except that
+substituted everywhere with 226.0.0.0/8, and except that
 the CLI commands to show the scoped-zone results are:
 \begin{verbatim}
 Xorp> show pim bootstrap 226.0.0.0/8 scoped
