@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_error.hh,v 1.7 2003/04/23 00:28:38 hodson Exp $
+// $XORP: xorp/libxipc/xrl_error.hh,v 1.8 2003/05/07 21:43:59 hodson Exp $
 
 #ifndef	__LIBXIPC_XRL_ERROR_HH__
 #define __LIBXIPC_XRL_ERROR_HH__
@@ -24,6 +24,22 @@
 #include "libxorp/c_format.hh"
 
 struct XrlErrlet;
+
+enum XrlErrorCode {
+    OKAY		  = 100,
+    BAD_ARGS		  = 101,
+    COMMAND_FAILED	  = 102,
+
+    NO_FINDER		  = 200,
+    RESOLVE_FAILED	  = 201,
+    NO_SUCH_METHOD	  = 202,
+
+    SEND_FAILED		  = 210,
+    REPLY_TIMED_OUT	  = 211,
+    SEND_FAILED_TRANSIENT = 212,
+    
+    INTERNAL_ERROR	  = 220
+};
 
 /**
  * All known error codes arising from XRL dispatches.  These include
@@ -53,17 +69,23 @@ public:
     static const XrlError& COMMAND_FAILED();
 
     /**
+     * The Xrl Finder process is not running or not ready to resolve
+     * Xrl target names
+     */
+    static const XrlError& NO_FINDER();
+    
+    /**
      * Returned when an XRL cannot be dispatched because the target name
      * is not registered in the system.
      */
     static const XrlError& RESOLVE_FAILED();
 
     /**
-     * The Xrl Finder process is not running or not ready to resolve
-     * Xrl target names
+     * Returned when the method within the XRL is not recognized by
+     * the receiver.
      */
-    static const XrlError& NO_FINDER();
-
+    static const XrlError& NO_SUCH_METHOD();
+    
     /**
      * Returned when the underlying XRL transport mechanism fails.
      */
@@ -76,11 +98,10 @@ public:
     static const XrlError& REPLY_TIMED_OUT();
 
     /**
-     * Returned when the method within the XRL is not recognized by
-     * the receiver.
+     * Returned when the underlying XRL transport mechanism fails.
      */
-    static const XrlError& NO_SUCH_METHOD();
-
+    static const XrlError& SEND_FAILED_TRANSIENT();
+    
     /**
      * An error has occurred within the XRL system.  This is usually a sign
      * of an implementation issue.  This error replaces no longer
@@ -91,19 +112,9 @@ public:
     static const XrlError& INTERNAL_ERROR();
     
     /**
-     * System call failed in transport protocol implementation.
-     */
-    static const XrlError& SYSCALL_FAILED();
-
-    /**
-     * Unspecified error.
-     */
-    static const XrlError& FAILED_UNKNOWN();
-
-    /**
      * @return the unique identifer number associated with error.
      */
-    uint32_t error_code() const;
+    XrlErrorCode error_code() const;
 
     /**
      * @return string containing textual description of error.
@@ -130,7 +141,7 @@ public:
     static bool known_code(uint32_t code);
 
     XrlError();
-    XrlError(uint32_t error_code, const string& note = "");
+    XrlError(XrlErrorCode error_code, const string& note = "");
     XrlError(const XrlError& xe) : _errlet(xe._errlet), _note(xe._note) {}
 
     /* Strictly for classes that have access to XrlErrlet to construct
@@ -192,7 +203,7 @@ public:
     /**
      * @return the unique identifer number associated with error.
      */
-    inline uint32_t error_code() const
+    inline XrlErrorCode error_code() const
     {
 	return _xrl_error.error_code();
     }

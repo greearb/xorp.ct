@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_error.cc,v 1.3 2003/03/16 08:20:30 pavlin Exp $"
 
 #include <assert.h>
 #include <stdio.h>
@@ -48,8 +48,9 @@ static void
 run_test()
 {
     for (uint32_t i = 0; i < 1000; i++) {
-	    XrlError e(i);
-	    tracef("%s\n", e.str().c_str());
+	XrlErrorCode ec = XrlErrorCode(i);
+	XrlError e(ec);
+	tracef("%s\n", e.str().c_str());
     }
     const XrlCmdError& xce = XrlCmdError::OKAY();
     const XrlError& xe = XrlError::OKAY();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.15 2003/05/09 19:36:17 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.16 2003/05/09 21:00:53 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -118,15 +118,14 @@ static XrlError status_to_xrlerror(const string& status)
     
     if (si == status.begin()) {
 	XLOG_ERROR("Missing XrlError::errorcode value");
-	return XrlError(XrlError::INTERNAL_ERROR().error_code(),
-			"corrupt xrl response");
+	return XrlError(INTERNAL_ERROR,	"corrupt xrl response");
     }
 
     if (si == status.end())
-	return XrlError(error_code);
+	return XrlErrorCode(error_code);
     
     si++;
-    return XrlError(error_code, string(si, status.end()));
+    return XrlError(XrlErrorCode(error_code), string(si, status.end()));
 }
 
 static string

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.16 2003/05/22 22:25:21 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.17 2003/06/01 21:37:27 hodson Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -220,7 +220,8 @@ public:
 	    // Out of memory (?)
 	    XLOG_ERROR("Failed to add entry for %s to resolve table.\n",
 		       _key.c_str());
-	    _qcb->dispatch(XrlError::FAILED_UNKNOWN(), 0); // :-(
+	    XrlError e(RESOLVE_FAILED, "Out of memory");
+	    _qcb->dispatch(e, 0); // :-(
 	    finder_trace_result("failed (unknown)");
 	    client().notify_failed(this);
 	    return;

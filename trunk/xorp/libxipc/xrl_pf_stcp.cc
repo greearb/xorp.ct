@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.14 2003/05/09 21:00:52 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.15 2003/05/30 18:15:53 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -479,7 +479,7 @@ XrlPFSTCPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 {
     if (_fd <= 0) {
 	debug_msg("Attempted send when socket is dead!\n");
-	cb->dispatch(XrlError::SEND_FAILED(), x, 0);
+	cb->dispatch(XrlError(SEND_FAILED, "socket dead"), x, 0);
 	return;
     }
     _requests_pending.push_back(RequestState(this, _current_seqno++, x, cb));
@@ -528,7 +528,7 @@ XrlPFSTCPSender::timeout_request(uint32_t seqno)
 {
     RequestState* rs = find_request(seqno);
     if (rs->callback.is_empty() == false)
-	rs->callback->dispatch(XrlError::REPLY_TIMED_OUT(), rs->xrl, 0);
+	rs->callback->dispatch(REPLY_TIMED_OUT, rs->xrl, 0);
     rs->callback = 0; // set to null because we don't want to call this again
     rs->timeout.unschedule();
     debug_msg("timeout_request:\nseqno %d xrl >> %s <<\n",
@@ -614,11 +614,11 @@ XrlPFSTCPSender::dispatch_reply()
 
     XrlError rcv_err;
     if (_sph->error_note_bytes()) {
-	rcv_err = XrlError(_sph->error_code(),
+	rcv_err = XrlError(XrlErrorCode(_sph->error_code()),
 			   string(data, _sph->error_note_bytes()));
 	data += _sph->error_note_bytes();
     } else {
-	rcv_err = XrlError(_sph->error_code());
+	rcv_err = XrlError(XrlErrorCode(_sph->error_code()));
     }
 
     const char* xrl_data = "";

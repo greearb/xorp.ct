@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_msgs.cc,v 1.2 2003/02/24 19:39:18 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_msgs.cc,v 1.3 2003/03/10 23:20:23 hodson Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/c_format.hh"
@@ -245,7 +245,7 @@ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
 	xorp_throw(InvalidString, "Code not decode XrlError note.");    
     }
 
-    _xrl_error = XrlError(code, note);
+    _xrl_error = XrlError(XrlErrorCode(code), note);
 
     p1++;
     if (*p1 != '\0')
