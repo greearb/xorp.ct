@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.18 2004/06/15 20:31:06 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.19 2004/07/02 17:18:54 hodson Exp $
 #
 
 #
@@ -473,6 +473,48 @@ kdoc_pim()
 }
 
 #
+# Policy manager
+# 
+kdoc_policy()
+{
+    lib="policy"
+    desc="Policy manager daemon"
+    html_start_page="index.html"
+    files="policy/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto policy-common"
+    kdocify
+}
+
+#
+# Policy backend
+# 
+kdoc_libpolicybackend()
+{
+    lib="libpolicybackend"
+    desc="Policy backend filter"
+    html_start_page="index.html"
+    files="policy/backend/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto policy-common"
+    kdocify
+}
+
+#
+# Policy common
+# 
+kdoc_policycommon()
+{
+    lib="policy-common"
+    desc="Policy shared routines between backend/frontend"
+    html_start_page="index.html"
+    files="policy/common/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto"
+    kdocify
+}
+
+#
 # bgp
 #
 kdoc_bgp()
@@ -482,7 +524,7 @@ kdoc_bgp()
     html_start_page="index.html"
     files="bgp/*.hh"
     excludes="bgp/*test*h"
-    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libpolicybackend"
     kdocify
 }
 
@@ -524,7 +566,7 @@ kdoc_rib()
     html_start_page="index.html"
     files="rib/*.hh"
     excludes="rib/dummy_register_server.hh rib/parser_direct_cmds.hh rib/parser_xrl_cmds.hh rib/parser.hh"
-    xref="libxorp libxorp-callback xrl-interfaces xrl-targets libproto libfeaclient"
+    xref="libxorp libxorp-callback xrl-interfaces xrl-targets libproto libfeaclient libpolicybackend"
     kdocify
 }
 
@@ -538,7 +580,7 @@ kdoc_rip()
     html_start_page="index.html"
     files="rip/*.hh"
     excludes=""
-    xref="libxorp libxorp-callback libxipc xrl-interfaces xrl-targets libfeaclient"
+    xref="libxorp libxorp-callback libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
     kdocify
 }
 
@@ -566,14 +608,14 @@ kdoc_static_routes()
     html_start_page="index.html"
     files="static_routes/*.hh"
     excludes=""
-    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
     kdocify
 }
 
 
 KDOC_ALL_TGTS="libxorp callback libcomm libxipc libproto xrl_interfaces \
-	       xrl_targets mrt cli libfeaclient fea mld6igmp pim bgp fib2mrib \
-	       mibs rib rip rtrmgr static_routes"
+	       xrl_targets mrt cli libfeaclient fea mld6igmp pim policycommon \
+	       libpolicybackend policy bgp fib2mrib mibs rib rip rtrmgr static_routes"
 : ${KDOC_TGTS:=${KDOC_ALL_TGTS}}
 for i in ${KDOC_TGTS} ; do
     kdoc_$i
