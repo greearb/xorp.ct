@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_state.cc,v 1.1 2003/03/19 23:38:22 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_state.cc,v 1.2 2003/11/05 21:47:02 pavlin Exp $"
 
 
 //
@@ -21,8 +21,10 @@
 
 
 #include "libproto_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+
 #include "proto_state.hh"
 
 
@@ -56,12 +58,110 @@ ProtoState::ProtoState()
 {
     _flags		= 0;
     _debug_flag		= false;
-    disable();			// XXX: default is to disable.
+    _flags &= ~XORP_ENABLED;	// XXX: default is to disable.
 }
 
 ProtoState::~ProtoState()
 {
     
+}
+
+int
+ProtoState::start()
+{
+    if (is_disabled())
+	return (XORP_ERROR);
+    if (is_up())
+	return (XORP_OK);		// Already running
+
+    if (ProtoState::startup() != true)
+	return (XORP_ERROR);
+
+    ServiceBase::set_status(RUNNING);
+
+    return (XORP_OK);
+}
+
+int
+ProtoState::stop()
+{
+    if (is_down())
+	return (XORP_OK);		// Already down
+
+    if (ProtoState::shutdown() != true)
+	return (XORP_ERROR);
+
+    ServiceBase::set_status(SHUTDOWN);
+
+    return (XORP_OK);
+}
+
+int
+ProtoState::pending_start()
+{
+    if (is_disabled())
+	return (XORP_ERROR);
+    if (is_up())
+	return (XORP_OK);		// Already running
+    if (is_pending_up())
+	return (XORP_OK);		// Already pending UP
+
+    ServiceBase::set_status(STARTING);
+    
+    return (XORP_OK);
+}
+
+int
+ProtoState::pending_stop()
+{
+    if (is_down())
+	return (XORP_OK);		// Already down
+    if (is_pending_down())
+	return (XORP_OK);		// Already pending DOWN
+
+    ServiceBase::set_status(SHUTTING_DOWN);
+
+    return (XORP_OK);
+}
+
+bool
+ProtoState::startup()
+{
+    //
+    // Test the service status
+    //
+    if ((ServiceBase::status() == STARTING)
+	|| (ServiceBase::status() == RUNNING))
+	return true;
+
+    if (ServiceBase::status() != READY)
+	return false;
+
+    return true;
+}
+
+bool
+ProtoState::shutdown()
+{
+    //
+    // We cannot shutdown if our status is SHUTDOWN or FAILED.
+    //
+    if ((ServiceBase::status() == SHUTDOWN)
+	|| (ServiceBase::status() == FAILED)) {
+	return true;
+    }
+
+    if (ServiceBase::status() != RUNNING)
+	return false;
+
+    return true;
+}
+
+void
+ProtoState::disable()
+{
+    ProtoState::shutdown();
+    _flags &= ~XORP_ENABLED;
 }
 
 const char *
@@ -81,54 +181,47 @@ ProtoState::state_string() const
     return ("UNKNOWN");
 }
 
-int
-ProtoState::start()
+/**
+ * Test if the unit state is UP.
+ * 
+ * @return true if the unit state is UP.
+ */
+bool
+ProtoState::is_up() const
 {
-    if (is_disabled())
-	return (XORP_ERROR);
-    if (is_up())
-	return (XORP_ERROR);		// Already running
-    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
-    _flags |= XORP_UP;
+    return (ServiceBase::status() == RUNNING);
+}
     
-    return (XORP_OK);
+/**
+ * Test if the unit state is DOWN.
+ * 
+ * @return true if the unit state is DOWN.
+ */
+bool
+ProtoState::is_down() const
+{
+    return ((ServiceBase::status() == READY)
+	    || (ServiceBase::status() == SHUTDOWN));
 }
 
-int
-ProtoState::stop()
+/**
+ * Test if the unit state is PENDING-UP.
+ * 
+ * @return true if the unit state is PENDING-UP.
+ */
+bool
+ProtoState::is_pending_up() const
 {
-    if (is_down())
-	return (XORP_ERROR);		// Wasn't running
-    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
-    _flags |= XORP_DOWN;
-    
-    return (XORP_OK);
+    return (ServiceBase::status() == STARTING);
 }
 
-int
-ProtoState::pending_start()
+/**
+ * Test if the unit state is PENDING-DOWN.
+ * 
+ * @return true if the unit state is PENDING-DOWN.
+ */
+bool
+ProtoState::is_pending_down() const
 {
-    if (is_disabled())
-	return (XORP_ERROR);
-    if (is_up())
-	return (XORP_ERROR);		// Already running
-    if (is_pending_up())
-	return (XORP_ERROR);		// Already pending UP
-    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
-    _flags |= XORP_PENDING_UP;
-    
-    return (XORP_OK);
-}
-
-int
-ProtoState::pending_stop()
-{
-    if (! is_up())
-	return (XORP_ERROR);		// Wasn't running
-    if (is_pending_down())
-	return (XORP_ERROR);		// Already pending DOWN
-    _flags &= ~(XORP_UP | XORP_DOWN | XORP_PENDING_UP | XORP_PENDING_DOWN);
-    _flags |= XORP_PENDING_DOWN;
-    
-    return (XORP_OK);
+    return (ServiceBase::status() == SHUTTING_DOWN);
 }

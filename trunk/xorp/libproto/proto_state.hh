@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_unit.hh,v 1.4 2003/03/19 01:04:14 pavlin Exp $
+// $XORP: xorp/libproto/proto_state.hh,v 1.1 2003/03/19 23:38:22 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_STATE_HH__
@@ -20,6 +20,7 @@
 
 
 #include "libxorp/xorp.h"
+#include "libxorp/service.hh"
 
 
 //
@@ -38,7 +39,7 @@
 /**
  * @short Base class for keeping state for each protocol unit (node, vif, etc).
  */
-class ProtoState {
+class ProtoState : public ServiceBase {
 public:
     /**
      * Default Constructor.
@@ -98,7 +99,7 @@ public:
      * 
      * If an unit is not enabled, it cannot be start, or pending-start.
      */
-    void	enable()		{ _flags |= XORP_ENABLED;	}
+    void	enable()	{ _flags |= XORP_ENABLED;	}
     
     /**
      * Disable the unit.
@@ -106,35 +107,35 @@ public:
      * If an unit is disabled, it cannot be start or pending-start.
      * If the unit was runnning, it will be stop first.
      */
-    void	disable()		{ stop(); _flags &= ~XORP_ENABLED; }
+    void	disable();
     
     /**
      * Test if the unit state is UP.
      * 
      * @return true if the unit state is UP.
      */
-    bool	is_up()		const	{ return (_flags & XORP_UP);	}
+    bool	is_up()	const;
     
     /**
      * Test if the unit state is DOWN.
      * 
      * @return true if the unit state is DOWN.
      */
-    bool	is_down()	const	{ return (_flags & XORP_DOWN);	}
+    bool	is_down() const;
 
     /**
      * Test if the unit state is PENDING-UP.
      * 
      * @return true if the unit state is PENDING-UP.
      */
-    bool	is_pending_up()	const	{ return (_flags & XORP_PENDING_UP); }
+    bool	is_pending_up()	const;
 
     /**
      * Test if the unit state is PENDING-DOWN.
      * 
      * @return true if the unit state is PENDING-DOWN.
      */
-    bool	is_pending_down() const	{ return (_flags & XORP_PENDING_DOWN); }
+    bool	is_pending_down() const;
     
     /**
      * Test if the unit is enabled.
@@ -175,14 +176,24 @@ public:
     const char	*state_string() const;
     
 private:
+    /**
+     * Startup operation.
+     * 
+     * @return true on success, false on failure.
+     */
+    bool	startup();
+
+    /**
+     * Shutdown operation.
+     * 
+     * @return true on success, false on failure.
+     */
+    bool	shutdown();
+
     enum {
-	XORP_UP		= 1 << 0,	// Entity is UP and running.
-	XORP_DOWN	= 1 << 1,	// Entity is DOWN.
-	XORP_PENDING_UP	= 1 << 2,	// Entity is pending UP.
-	XORP_PENDING_DOWN = 1 << 3,	// Entity is pending DOWN.
-	XORP_ENABLED	= 1 << 4	// Entity is enabled.
+	XORP_ENABLED	= 1 << 0	// Entity is enabled.
     };
-    uint32_t	_flags;			// Misc. flags: XORP_UP, XORP_DOWN, etc
+    uint32_t	_flags;			// Misc. flags: XORP_ENABLED, etc
 					// (see above).
     bool	_debug_flag;		// Enable/Disable debug messages.
 };
