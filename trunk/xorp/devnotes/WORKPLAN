@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.5 2003/03/14 12:35:30 pavlin Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.6 2003/03/26 03:04:40 pavlin Exp $
 #
 
 Priority:
@@ -70,6 +70,14 @@ Longer Term tasks
 ================================ Other =======================================
 * Simulation-like environment for running XORP		H Defer	PR  3-6 months
 * Rewrite CLI						L	PR  2-3 weeks
+
+================================ SNMP  =======================================
+* Writing autoconf tests for Net-SNMP			M	JC    2 weeks
+* Write module to make snmpd responsive to XORP events  H	JC    2 weeks
+* Write bgp4_mib_1657 module				H	JC    3 weeks
+* Write bgp4_mib_1657 tests using Net-SNMP tools	H	JC    1 week
+* Document mib development framework			M	JC  < 1 week
+* Generate Net-SNMP configuration file for XORP		Wish	JC    1 week
 
 ================================ Next Release ================================
 * Next release (xorp-0.3): ?? ??, 2003
