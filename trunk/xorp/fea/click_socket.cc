@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.17 2004/12/17 06:05:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.18 2005/01/20 00:43:16 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -908,7 +908,7 @@ ClickSocket::write_config(const string& element, const string& handler,
 	//
 	string config = c_format("WRITEDATA %s %u\n",
 				 output_handler.c_str(),
-				 static_cast<uint32_t>(user_config.size()));
+				 XORP_UINT_CAST(user_config.size()));
 	config += user_config;
 
 	//
@@ -1004,8 +1004,8 @@ ClickSocket::check_user_command_status(bool& is_warning,
 	    error_msg = c_format(
 		"User-level Click command line response is too short "
 		"(expected min size %u received %u): %s",
-		static_cast<uint32_t>(CLICK_COMMAND_RESPONSE_MIN_SIZE),
-		static_cast<uint32_t>(line.size()),
+		XORP_UINT_CAST(CLICK_COMMAND_RESPONSE_MIN_SIZE),
+		XORP_UINT_CAST(line.size()),
 		line.c_str());
 	    return (XORP_ERROR);
 	}
