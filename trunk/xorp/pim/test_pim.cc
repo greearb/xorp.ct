@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.43 2004/12/09 07:54:39 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.44 2005/01/28 03:34:20 pavlin Exp $"
 
 
 //
@@ -307,16 +307,15 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
     // Fib2Mrib node
     //
     // XXX: we use a single Fib2Mrib node to handle both IPv4 and IPv6
-    XrlStdRouter xrl_std_router_fib2mrib(
-	eventloop,
-	xorp_module_name(AF_INET, XORP_MODULE_FIB2MRIB),
-	finder_hostname, finder_port);
     XrlFib2mribNode xrl_fib2mrib_node(
 	eventloop,
-	&xrl_std_router_fib2mrib,
+	xorp_module_name(AF_INET, XORP_MODULE_FIB2MRIB),
+	finder_hostname,
+	finder_port,
+	"finder",
 	xorp_module_name(AF_INET, XORP_MODULE_FEA),
 	xorp_module_name(AF_INET, XORP_MODULE_RIB));
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fib2mrib);
+    wait_until_xrl_router_is_ready(eventloop, xrl_fib2mrib_node.xrl_router());
     xrl_fib2mrib_node.startup();
 
     //
