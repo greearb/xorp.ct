@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.3 2003/01/21 18:54:28 rizzo Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.4 2003/01/26 04:06:19 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -673,6 +673,8 @@ TestPeer::sendit()
     debug_msg("%u\n", (uint32_t)q.v.size());
     XLOG_ASSERT(q.len == q.v.size());
 
+    _flying++;
+
     switch(q.len) {
     case 0:
 	datain.send_closed(_coordinator.c_str(), _server,
@@ -690,7 +692,6 @@ TestPeer::sendit()
 			    ::callback(this, &TestPeer::callback));
 	break;
     }
-    _flying++;
 }
 
 void
