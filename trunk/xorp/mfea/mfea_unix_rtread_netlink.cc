@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_unix_rtread_netlink.cc,v 1.21 2002/12/09 18:29:18 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_unix_rtread_netlink.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
 
 
 //
@@ -346,6 +346,10 @@ UnixComm::get_mrib_table_osdep(Mrib *return_mrib_table[])
 	    
 	    // The destination prefix
 	    mrib->set_dest_prefix(IPvXNet(dest_addr, dest_masklen));
+	    
+	    // XXX: the UNIX kernel doesn't provide reasonable metrics
+	    mrib->set_metric_preference(MRIB_DEFAULT_METRIC_PREFERENCE);
+	    mrib->set_metric(MRIB_DEFAULT_METRIC);
 	    
 	    // The vif
 	    if (rta_array[RTA_OIF] != NULL) {
