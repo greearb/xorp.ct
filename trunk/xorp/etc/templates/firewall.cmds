@@ -1,0 +1,7 @@
+/* $XORP$ */
+
+show filters {
+    %command: "fea/firewall/show_filters" %help: HELP;
+    %module: fea;
+    %tag: HELP "Show the firewall rule table";
+}

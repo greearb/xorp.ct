@@ -1,0 +1,161 @@
+/* $XORP$ */
+
+/*
+ Example: Drop all traffic with an RFC1918 source address; default
+ to allowing all other traffic.
+
+ firewall {
+   enable: true;
+   default-drop: false;
+
+   rule4 {
+      interface: fxp0;
+      source: 10.0.0.0/8;
+      action: drop;
+      description: "Drop traffic from 24-bit RFC1918 block";
+   }
+   rule4 {
+      interface: fxp0;
+      source: 172.16.0.0/12;
+      action: drop;
+      description: "Drop traffic from 20-bit RFC1918 block";
+   }
+   rule4 {
+      interface: fxp0;
+      source: 192.168.0.0/16;
+      action: drop;
+      description: "Drop traffic from 16-bit RFC1918 block";
+   }
+ }
+*/
+
+firewall {
+	targetname:		txt = "fea";
+
+	enable:			bool;
+	default-drop:		bool;
+	provider:		txt;
+
+	rule4 {
+		source:		ipv4net;
+		dest:		ipv4net;
+		protocol:	u32;
+		source-port:	u32;
+		dest-port:	u32;
+		action:		txt;
+		description:	txt;
+	}
+
+	/* rule6 { } */
+}
+
+firewall {
+	%help:		short			"Configure IP filtering";
+	%modinfo:	provides		firewall;
+	%modinfo:	depends			fea;
+	%modinfo:	path			"fea/xorp_fea";
+	%modinfo:	default_targetname	"fea";
+
+	/* status_method? */
+	/* shutdown_method? */
+
+	%mandatory	targetname;
+
+	targetname {
+		%help:	short "Set the target name";
+		%set: ;
+	}
+
+	/* XXX: Default is 'false' */
+	enable {
+		%help:		short "Enable IP filtering";
+		%set:		xrl "$(fea.targetname)/firewall/0.1/set_fw_enabled?enabled:bool=$(@)";
+		%delete:	xrl "$(fea.targetname)/firewall/0.1/set_fw_enabled?enabled:bool=`~$(DEFAULT)`";
+	}
+
+	/* XXX: Default is 'false' */
+	default-drop {
+		%help:		short "Drop unmatched packets by default";
+		%set:		xrl "$(fea.targetname)/firewall/0.1/set_fw_default_drop?drop:bool=$(@)";
+		%delete:	xrl "$(fea.targetname)/firewall/0.1/set_fw_default_drop?drop:bool=`~$(DEFAULT)`";
+	}
+
+	/* XXX: Default is 'default', i.e. whatever the host platform prefers */
+	provider {
+		%help:		short "Set IP filtering provider name";
+		%allow:		$(@) "default" "dummy" "ipf" "ipfw" "iptables" "pf";
+		%set:		xrl "$(fea.targetname)/firewall/0.1/set_fw_provider?provider:txt=$(@)";
+		%delete:	xrl "$(fea.targetname)/firewall/0.1/set_fw_provider?provider:txt=`~$(DEFAULT)`";
+	}
+
+	rule4 {
+		%help:		short "Configure an IPv4 firewall rule";
+		%mandatory:	interface;
+		%mandatory:	action;
+
+/* XXX the XRL argument names are...  iface src dst proto sport dport action */
+
+/* XXX
+		%activate:	xrl "";
+		%delete:	xrl "";
+*/
+
+		/* XXX: mandatory, rules are tied to *named* interfaces */
+		interface {
+			%help:	short "Configure the interface";
+			%set: ;
+		}
+
+		/* XXX: if not specified use wildcard 'any' token */
+		source {
+			%help:	short "Configure the source address";
+			%set: ;
+		}
+
+		/* XXX: if not specified use wildcard 'any' token */
+		dest {
+			%help:	short "Configure the destination address";
+			%set: ;
+		}
+
+		/* XXX: if not specified use wildcard 'any' token 255 */
+		protocol {
+			%help:	short "Configure the IP protocol";
+			%allow-range:	$(@) "0" "255";
+			%set: ;
+		}
+
+		/* XXX: if not specified use wildcard 'any' token 0 */
+		source-port {
+			%help:	short "Configure the source port";
+			%allow-range:	$(@) "0" "65535";
+			%set: ;
+		}
+
+		/* XXX: if not specified use wildcard 'any' token 0 */
+		dest-port {
+			%help:	short "Configure the destination port";
+			%allow-range:	$(@) "0" "65535";
+			%set: ;
+		}
+
+		/* XXX: mandatory, rules must have an action; default none */
+		action {
+			%help:	short "Configure the action to be taken on a match";
+			%allow: $(@) "none" "pass" "drop" ;
+			%set: ;
+		}
+
+		description {
+			%help:	short "Add a human-readable description of a rule";
+			%set: ;
+			%get: ;
+			%delete: ;
+		}
+	}
+/* XXX
+	rule6 @: txt {
+		%help:		short "Configure an IPv6 firewall rule";
+	}
+*/
+}
