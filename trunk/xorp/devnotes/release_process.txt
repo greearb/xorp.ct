@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.9 2003/06/09 20:15:17 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.10 2003/08/27 17:08:18 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -122,6 +122,12 @@ the login shell is csh or tcsh):
 	WHO:  Release manager
 	WHEN: 1 day before the release date
 	MISC: Modify the document version and date
+
+========================================================================
+1550.	TASK: Update the date and release version in
+	      xorp/docs/status.html
+	WHO:  Release manager
+	WHEN: 1 day before the release date
 
 ========================================================================
 1600.	TASK: Update xorp/README
