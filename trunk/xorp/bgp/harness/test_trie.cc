@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.8 2003/09/11 10:44:41 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.9 2003/09/11 11:56:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -95,7 +95,9 @@ replay_walker(const UpdatePacket *p, const TimeVal&, TestInfo info,
     DOUT(info) << info.test_name() << " " << (*pos) << endl << p->str();
 
     if(ulist.size() <= *pos)
-	XLOG_FATAL("vector limit exceeded: %d %d", ulist.size(), *pos);
+	XLOG_FATAL("vector limit exceeded: %u %u",
+		   static_cast<uint32_t>(ulist.size()),
+		   static_cast<uint32_t>(*pos));
 
     if(*p != *ulist[*pos])
 	XLOG_FATAL("%s NOT EQUAL TO %s", p->str().c_str(),

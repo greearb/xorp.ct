@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.38 2003/09/19 21:06:49 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.39 2003/10/13 23:42:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -668,8 +668,8 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
 	nlri.set_addr(buf);
 	_nlri.push_back(IPNet<IPv6>(nlri, prefix_length));
 	data += bytes;
-	debug_msg("decode %s/%d bytes = %d\n", nlri.str().c_str(), 
-		  prefix_length, bytes);
+	debug_msg("decode %s/%d bytes = %u\n", nlri.str().c_str(),
+		  prefix_length, static_cast<uint32_t>(bytes));
     }
 
     encode();
@@ -796,7 +796,7 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
 	    xorp_throw(CorruptMessage,
 		       c_format("prefix length too long %d", prefix_length),
 		       UPDATEMSGERR, OPTATTR);
-	debug_msg("decode bytes = %d\n", bytes);
+	debug_msg("decode bytes = %u\n", static_cast<uint32_t>(bytes));
 	uint8_t buf[IPv6::addr_size()];
 	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
