@@ -3697,20 +3697,21 @@ else
 fi
 
 
-echo "$as_me:$LINENO: checking if default make is GNU make" >&5
-echo $ECHO_N "checking if default make is GNU make... $ECHO_C" >&6
-if test "${xorp_cv_default_gmake+set}" = set; then
+echo "$as_me:$LINENO: checking if GNU make is installed" >&5
+echo $ECHO_N "checking if GNU make is installed... $ECHO_C" >&6
+if test "${xorp_cv_gmake_name+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if (make -version) < /dev/null > /dev/null 2>&1 ; then
-		    DEFAULT_GMAKE="yes"
-		  else
-		    DEFAULT_GMAKE="no"
+  for g in ${GMAKE} make gmake gnumake; do
+		  if ($g -version) < /dev/null > /dev/null 2>&1 ; then
+		    GMAKE_NAME="$g"
+		    break
 		  fi
-		  xorp_cv_default_gmake=${DEFAULT_GMAKE}
+		done
+		xorp_cv_gmake_name=${GMAKE_NAME}
 fi
-echo "$as_me:$LINENO: result: $xorp_cv_default_gmake" >&5
-echo "${ECHO_T}$xorp_cv_default_gmake" >&6
+echo "$as_me:$LINENO: result: $xorp_cv_gmake_name" >&5
+echo "${ECHO_T}$xorp_cv_gmake_name" >&6
 
 for ac_prog in python2.2 python2 python
 do
@@ -10658,14 +10659,19 @@ echo "Compiler C++ flags = $CXXFLAGS"
 
 
 
-if test "${DEFAULT_GMAKE}" != "yes" ; then
+if test -z "${xorp_cv_gmake_name}" ; then
+   echo "=============================================================================="
+   echo "GNU make was not found during configure process and is essential for building"
+   echo "XORP.  If you believe this is an error, please let feedback@xorp.org know."
+   echo "=============================================================================="
+   echo
+elif test "${xorp_cv_gmake_name}" != "make" ; then
    echo
    echo "=============================================================================="
-   echo "The default \"make\" on this machine is not GNU make, but \"gmake\" exists"
-   echo "and should be used when building XORP."
+   echo "GNU make is required when building XORP.  This appears to be installed as"
+   echo "\"${xorp_cv_gmake_name}\".  If this does not work, please let feedback@xorp.org know."
    echo "=============================================================================="
    echo
 fi
-
 
 
