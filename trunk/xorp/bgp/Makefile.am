@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.29 2004/02/13 22:00:14 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.30 2004/05/01 00:25:03 atanu Exp $
 ##
 
 # -- Subdirectories
-SUBDIRS = . harness tools
+SUBDIRS = . tools harness
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)

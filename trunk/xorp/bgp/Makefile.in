@@ -94,7 +94,7 @@ snmpd2 = @snmpd2@
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
-SUBDIRS = . harness tools
+SUBDIRS = . tools harness
 
 # -- Real Programs
 bin_PROGRAMS = xorp_bgp
