@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.16 2003/09/27 10:42:39 mjh Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.17 2003/09/27 22:32:45 mjh Exp $"
 
 #include "config.h"
 #include "rib_module.h"
@@ -34,7 +34,7 @@ RIB<A>::find_table(const string& tablename)
 {
     typename map<string, RouteTable<A> *>::iterator mi = _tables.find(tablename);
     if (mi == _tables.end()) {
-	return 0;
+	return NULL;
     }
     return mi->second;
 }
@@ -45,12 +45,12 @@ RIB<A>::find_table_by_instance(const string& tablename,
 			       const string& tgt_class,
 			       const string& tgt_instance)
 {
-    typename map<string, OriginTable<A> *>::iterator mi 
-	= _routing_protocol_instances.find(tablename + " " 
-					   + tgt_class + " " 
-					   + tgt_instance);
+    typename map<string, OriginTable<A> *>::iterator mi;
+    mi = _routing_protocol_instances.find(tablename + " " 
+					  + tgt_class + " " 
+					  + tgt_instance);
     if (mi == _routing_protocol_instances.end()) {
-	return 0;
+	return NULL;
     }
     return mi->second;
 }
@@ -61,7 +61,7 @@ RIB<A>::find_protocol(const string& protocol)
 {
     typename map<string, Protocol *>::iterator mi = _protocols.find(protocol);
     if (mi == _protocols.end()) {
-	return 0;
+	return NULL;
     }
     return mi->second;
 }
@@ -70,26 +70,27 @@ template<class A>
 inline int
 RIB<A>::add_table(const string& tablename, RouteTable<A> *table)
 {
-    if (find_table(tablename) != 0) {
+    if (find_table(tablename) != NULL) {
 	XLOG_WARNING("add_table: table %s already exists", tablename.c_str());
-	return -1;
+	return XORP_ERROR;
     }
     _tables[tablename] = table;
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
 inline int
 RIB<A>::remove_table(const string& tablename)
 {
-    typename map<string, RouteTable<A> *>::iterator mi = _tables.find(tablename);
+    typename map<string, RouteTable<A> *>::iterator mi;
+    mi = _tables.find(tablename);
     if (mi == _tables.end()) {
 	XLOG_WARNING("remove_table: table %s doesn't exist", 
 		     tablename.c_str());
-	return -1;
+	return XORP_ERROR;
     }
     _tables.erase(mi);
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -115,7 +116,7 @@ RIB<A>::find_vif(const A& addr)
 	if (v.is_my_addr(addr)) 
 	    return &v;
     }
-    return 0;
+    return NULL;
 }
 
 template<class A>
@@ -125,7 +126,7 @@ RIB<A>::find_external_nexthop(const A& addr)
     typename map<const A, IPExternalNextHop<A> >::iterator mi;
     mi = _external_nexthops.find(addr);
     if (mi == _external_nexthops.end())
-	return 0;
+	return NULL;
     return &mi->second;
 }
 
@@ -136,7 +137,7 @@ RIB<A>::find_peer_nexthop(const A& addr)
     typename map<const A, IPPeerNextHop<A> >::iterator mi;
     mi = _peer_nexthops.find(addr);
     if (mi == _peer_nexthops.end())
-	return 0;
+	return NULL;
     return &mi->second;
 }
 
@@ -145,7 +146,8 @@ inline IPExternalNextHop<A> *
 RIB<A>::find_or_create_external_nexthop(const A& addr)
 {
     IPExternalNextHop<A> *nh = find_external_nexthop(addr);
-    if (nh) return nh;
+    if (nh != NULL)
+	return nh;
     typedef map<const A,IPExternalNextHop<A> > C;	// ugly, but convenient
     typename C::value_type vt(addr, IPExternalNextHop<A>(addr));
     typename C::iterator i = _external_nexthops.insert(_external_nexthops.end(), vt);
@@ -157,7 +159,7 @@ inline IPPeerNextHop<A> *
 RIB<A>::find_or_create_peer_nexthop(const A& addr)
 {
     IPPeerNextHop<A> *nh = find_peer_nexthop(addr);
-    if (nh)
+    if (nh != NULL)
 	return nh;
     typedef map<const A,IPPeerNextHop<A> > C;		// ugly, but convenient
     typename C::value_type vt(addr, addr);
@@ -225,13 +227,13 @@ RIB<A>::initialize_export(list<RibClient *> *rib_clients_list)
     ExportTable<A> *et = new ExportTable<A>("ExportToRibClients", 0,
 					    rib_clients_list);
     
-    if (add_table("ExportToRibClients", et) != 0) {
+    if (add_table("ExportToRibClients", et) != XORP_OK) {
 	XLOG_FATAL("Export already initialized.");
 	//delete et;
-	//return -1;
+	//return XORP_ERROR;
     }
     _final_table = et;
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -247,32 +249,32 @@ template<class A>
 int
 RIB<A>::initialize_register(RegisterServer *regserv) 
 {
-    if (_register_table) {
+    if (_register_table != NULL) {
 	XLOG_WARNING("Register table already initialized.");
-	return -1;
+	return XORP_ERROR;
     }
 
-    RegisterTable<A> *rt 
-	= new RegisterTable<A>("RegisterTable", regserv, _mcast);
-    if (add_table("RegisterTable", rt) != 0) {
+    RegisterTable<A> *rt;
+    rt = new RegisterTable<A>("RegisterTable", regserv, _mcast);
+    if (add_table("RegisterTable", rt) != XORP_OK) {
 	// Hopefully never reached.
 	XLOG_WARNING("Add RegisterTable failed.");
 	delete rt;
-	return -1;
+	return XORP_ERROR;
     }
     _register_table = rt;
 
-    if (find_table("ExportToRibClients") == 0) {
+    if (find_table("ExportToRibClients") == NULL) {
 	//No ExportTable<A> - perhaps we're an MRIB.
-	if (_final_table != 0) {
+	if (_final_table != NULL) {
 	    XLOG_FATAL("No export table when initializing register table");
 	}
 	_final_table = _register_table;
     } else {
-	_final_table->replumb(0, _register_table);
+	_final_table->replumb(NULL, _register_table);
 	_register_table->set_next_table(_final_table);
     }
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -285,11 +287,11 @@ RIB<A>::new_origin_table(const string&	tablename,
 {
     OriginTable<A> *ot = new OriginTable<A>(tablename, admin_distance, igp,
 					    _eventloop);
-    if (ot == 0 || add_table(tablename, ot) != 0) {
+    if (ot == NULL || add_table(tablename, ot) != XORP_OK) {
 	XLOG_WARNING("Could not add origin table %s", tablename.c_str());
 	delete ot;
-	return -1;
-    } else if (_final_table == 0) {
+	return XORP_ERROR;
+    } else if (_final_table == NULL) {
 	_final_table = ot;
     }
 
@@ -301,7 +303,7 @@ RIB<A>::new_origin_table(const string&	tablename,
 				   + tgt_class + " "
 				   + tgt_instance] = ot;
     }
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -311,25 +313,25 @@ RIB<A>::new_merged_table(const string& tablename,
 			 const string& tb) 
 {
     RouteTable<A> *table_a = find_table(ta);
-    if (0 == table_a) {
+    if (NULL == table_a) {
 	XLOG_WARNING("Attempted to create merged table \"%s\" from not existent table \"%s\"", tablename.c_str(), ta.c_str());
-	return -1;
+	return XORP_ERROR;
     }
 
     RouteTable<A> *table_b = find_table(tb);
-    if (0 == table_b) {
+    if (NULL == table_b) {
 	XLOG_WARNING("Attempted to create merged table \"%s\" from not existent table \"%s\"", tablename.c_str(), tb.c_str());
-	return -1; 
+	return XORP_ERROR; 
     }
 
     MergedTable<A> *mt = new MergedTable<A>(tablename, table_a, table_b);
-    if (mt == 0 || add_table(tablename, mt) != 0) {
+    if (mt == NULL || add_table(tablename, mt) != XORP_OK) {
 	XLOG_WARNING("Could not add merge table \"%s\"", tablename.c_str());
 	delete mt;
-	return -1;
+	return XORP_ERROR;
     }
     _final_table = mt;
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -339,29 +341,29 @@ RIB<A>::new_extint_table(const string& tablename,
 			 const string& t_int) 
 {
     RouteTable<A> *table_ext = find_table(t_ext);
-    if (0 == table_ext) {
+    if (NULL == table_ext) {
 	XLOG_WARNING("Could not create extint table \"%s\" as external table "
 		     "\"%s\" does not exist", 
 		     tablename.c_str(), t_ext.c_str());
-	return -1;
+	return XORP_ERROR;
     }
 
     RouteTable<A> *table_int = find_table(t_int);
-    if (0 == table_int) {
+    if (NULL == table_int) {
 	XLOG_WARNING("Could not create extint table \"%s\" as internal table "
 		     "\"%s\" does not exist",
 		     tablename.c_str(), t_int.c_str());
-	return -1;
+	return XORP_ERROR;
     }
 
     ExtIntTable<A> *eit = new ExtIntTable<A>(tablename, table_ext, table_int);
-    if (eit == 0 || add_table(tablename, eit) != 0) {
+    if (eit == NULL || add_table(tablename, eit) != XORP_OK) {
 	XLOG_WARNING("Could not add extint table \"%s\"", tablename.c_str());
 	delete eit;
-	return -1;
+	return XORP_ERROR;
     } 
     _final_table = eit;
-    return 0;
+    return XORP_OK;
 }
 
 template<> 
@@ -389,9 +391,9 @@ RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
 	    }
 	}
 	
-	return 0;
+	return XORP_OK;
     }
-    return -1;
+    return XORP_ERROR;
 }
 
 template<> 
@@ -419,9 +421,9 @@ RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
 	    }
 	}
 	
-	return 0;
+	return XORP_OK;
     }
-    return -1;
+    return XORP_ERROR;
 }
 
 template<class A> 
@@ -432,13 +434,13 @@ RIB<A>::delete_vif(const string& vifname)
     map<const string, Vif>::iterator i;
     i = _vifs.find(vifname);
     if (i == _vifs.end()) {
-	return -1;
+	return XORP_ERROR;
     }
     list<VifAddr>::const_iterator vai;
     for (vai = i->second.addr_list().begin(); 
 	 vai != i->second.addr_list().end();
 	 vai++) {
-	//delete the directly connected routes associated with this VIF
+	// Delete the directly connected routes associated with this VIF
 	IPvXNet subnetvX = vai->subnet_addr();
 	IPNet<A> subnet;
 	subnetvX.get(subnet);
@@ -446,7 +448,7 @@ RIB<A>::delete_vif(const string& vifname)
     }
 
     _vifs.erase(i);
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -459,12 +461,12 @@ RIB<A>::add_vif_address(const string&	vifname,
     if (vi == _vifs.end()) {
 	XLOG_ERROR("Attempting to add address to non-existant Vif \"%s\"",
 		   vifname.c_str());
-	return -1;
+	return XORP_ERROR;
     }
     vi->second.add_address(VifAddr(addr, subnet, A::ZERO(), A::ZERO()));
-    //add a route for this subnet
+    // Add a route for this subnet
     add_route("connected", subnet, addr, /* best possible metric */ 0);
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -476,7 +478,7 @@ RIB<A>::delete_vif_address(const string& vifname,
     if (vi == _vifs.end()) {
 	XLOG_ERROR("Attempting to delete address from non-existant Vif \"%s\"",
 		   vifname.c_str());
-	return -1;
+	return XORP_ERROR;
     }
     list<VifAddr>::const_iterator vai;
     for (vai = vi->second.addr_list().begin(); 
@@ -490,10 +492,10 @@ RIB<A>::delete_vif_address(const string& vifname,
 	    IPNet<A> subnet;
 	    subnetvX.get(subnet);
 	    delete_route("connected", subnet);
-	    return 0;
+	    return XORP_OK;
 	}
     }
-    return -1;
+    return XORP_ERROR;
 }
 
 template<class A>
@@ -511,7 +513,7 @@ RIB<A>::add_route(const string& tablename,
 	} else {
 	    XLOG_ERROR("Attempting to add route to unknown table \"%s\".",
 		       tablename.c_str());
-	    return -1;
+	    return XORP_ERROR;
 	}
     }
 
@@ -523,7 +525,7 @@ RIB<A>::add_route(const string& tablename,
 	} else {
 	    XLOG_ERROR("Attempting to add route with unknown protocol \"%s\".",
 		       tablename.c_str());
-	    return -1;
+	    return XORP_ERROR;
 	}
     }
 
@@ -535,11 +537,11 @@ RIB<A>::add_route(const string& tablename,
 	} else {
 	    XLOG_ERROR("Attempting to add route to table \"%s\" that is not "
 		       "an origin table.", tablename.c_str());
-	    return -1;
+	    return XORP_ERROR;
 	}
     }
 
-    // Find the vif so we can see if the nexthop is a peer.  first
+    // Find the vif so we can see if the nexthop is a peer.  First
     // lookup the nexthop addr, and see it's the subnet is a directly
     // connected one.
     const IPRouteEntry<A> *re = _final_table->lookup_route(nexthop_addr);
@@ -553,14 +555,14 @@ RIB<A>::add_route(const string& tablename,
 	    IPNextHop<A> *nh = find_or_create_peer_nexthop(nexthop_addr);
 	    ot->add_route(IPRouteEntry<A>(net, re->vif(), nh, *proto, metric));
 	    flush();
-	    return 0;
+	    return XORP_OK;
 	} else {
 	    debug_msg("**not directly connected route found for nexthop\n");
 	    IPNextHop<A> *nh = find_or_create_external_nexthop(nexthop_addr);
 	    ot->add_route(IPRouteEntry<A>(net, /* No vif */ NULL, nh, 
 					  *proto, metric));
 	    flush();
-	    return 0;
+	    return XORP_OK;
 	}
     }
 
@@ -571,7 +573,7 @@ RIB<A>::add_route(const string& tablename,
     Vif *vif = find_vif(nexthop_addr);
     debug_msg("Vif %p\n", vif);
     IPNextHop<A> *nh;
-    if (vif) {
+    if (vif != NULL) {
 	nh = find_or_create_peer_nexthop(nexthop_addr);
     } else {
 	nh = find_or_create_external_nexthop(nexthop_addr);
@@ -588,7 +590,7 @@ RIB<A>::add_route(const string& tablename,
     ot->add_route(IPRouteEntry<A>(net, vif, nh, *proto, metric));
 
     flush();
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -599,21 +601,20 @@ RIB<A>::replace_route(const string& tablename,
 		      uint32_t metric) 
 {
     RouteTable<A> *rt = find_table(tablename);
-    if (0 == rt)
-	return -1; // Table does not exist
+    if (NULL == rt)
+	return XORP_ERROR; // Table does not exist
 
     OriginTable<A> *ot = dynamic_cast<OriginTable<A> *>(rt);
-    if (0 == ot)
-	return -1; // Table is not an origin table
+    if (NULL == ot)
+	return XORP_ERROR; // Table is not an origin table
 
     int response = ot->delete_route(net);
-
-    if (response != 0) {
+    if (response != XORP_OK)
 	return response;
-    }
+
     response = add_route(tablename, net, nexthop_addr, metric);
 
-    // no need to flush here, as add_route will do it for us
+    // No need to flush here, as add_route will do it for us
 
     return response;
 }
@@ -623,12 +624,12 @@ int
 RIB<A>::delete_route(const string& tablename, const IPNet<A>& net) 
 {
     RouteTable<A> *rt = find_table(tablename);
-    if (0 == rt)
-	return -1; // Table does not exist
+    if (NULL == rt)
+	return XORP_ERROR; // Table does not exist
 
     OriginTable<A> *ot = dynamic_cast<OriginTable<A> *>(rt);
-    if (0 == ot)
-	return -1; // Table is not an origin table
+    if (NULL == ot)
+	return XORP_ERROR; // Table is not an origin table
 
     int result = ot->delete_route(net);
     flush();
@@ -655,29 +656,29 @@ RIB<A>::verify_route(const A& lookup_addr,
     const IPRouteEntry<A> *re;
 
     re = _final_table->lookup_route(lookup_addr);
-    if (re == 0 || re->vif() == 0) {
+    if (re == NULL || re->vif() == NULL) {
 	if (ifname == "discard") {
 	    debug_msg("****ROUTE FAILURE SUCCESSFULLY VERIFIED****\n");
-	    return 0;
+	    return XORP_OK;
 	} 
-	if (re == 0) {
+	if (re == NULL) {
 	    debug_msg("RouteVerify: Route Lookup failed\n");
 	} else {
 	    debug_msg("Route lookup returned NULL vif: %s\n", 
 		      re->str().c_str());
 	}
-	return -1;
+	return XORP_ERROR;
     }
 
     IPNextHop<A> *route_nh = dynamic_cast<IPNextHop<A> *>(re->nexthop());
-    if (route_nh == 0) {
+    if (route_nh == NULL) {
 	debug_msg("Next hop is not an IPNextHop\n");
-	return -1;
+	return XORP_ERROR;
     } else if ((nh_addr != route_nh->addr())) {
 	debug_msg("NextHop: Exp: %s != Got: %s\n",
 		  nh_addr.str().c_str(),
 		  route_nh->addr().str().c_str());
-	return -1;
+	return XORP_ERROR;
     } else {
 	debug_msg("NextHop: Exp: %s != Got: %s\n",
 		  nh_addr.str().c_str(),
@@ -686,7 +687,7 @@ RIB<A>::verify_route(const A& lookup_addr,
     if (ifname != re->vif()->name()) {
 	XLOG_ERROR("Interface \"%s\" does not match expected \"%s\".", 
 		   re->vif()->str().c_str(), ifname.c_str());
-	return -1;
+	return XORP_ERROR;
     } else {
 	debug_msg("Ifname: Exp: %s == Got: %s\n", 
 		  ifname.c_str(),
@@ -695,13 +696,13 @@ RIB<A>::verify_route(const A& lookup_addr,
     if (metric != re->metric()) {
 	XLOG_ERROR("Metric \"%d\" does not match expected \"%d\".", 
 		   re->metric(), metric);
-	return -1;
+	return XORP_ERROR;
     } else {
 	debug_msg("Metric: Exp: %d == Got: %d\n", metric, 
 		  re->metric());
     }
     debug_msg("****ROUTE SUCCESSFULLY VERIFIED****\n");
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -726,7 +727,7 @@ RIB<A>::lookup_route(const A& lookupaddr)
     debug_msg("looking up %s\n", lookupaddr.str().c_str());
 
     const IPRouteEntry<A> *re = _final_table->lookup_route(lookupaddr);
-    if (re == 0 || re->vif() == 0) {
+    if (re == NULL || re->vif() == NULL) {
 	return addr_zero(lookupaddr);
     }
 
@@ -750,7 +751,7 @@ RIB<A>::route_register(const A& lookupaddr, const string& module)
 }
 
 template<class A> 
-bool
+int
 RIB<A>::route_deregister(const IPNet<A>& subnet, const string& module)
 {
     debug_msg("deregistering %s\n", subnet.str().c_str());
@@ -763,37 +764,37 @@ RIB<A>::redist_enable(const string& fromtable, const string& totable)
 {
     // We can redistribute from any RouteTable<A>;
     RouteTable<A> *fromtab = find_table(fromtable);
-    if (fromtab == 0) {
+    if (fromtab == NULL) {
 	XLOG_ERROR("Attempt to redistribute from non-existent table \"%s\".",
 		   fromtable.c_str());
-	return -1;
+	return XORP_ERROR;
     }
 
     // Find totable
     RouteTable<A> *trt = find_table(totable);
-    if (trt == 0) {
+    if (trt == NULL) {
 	XLOG_ERROR("Attempt to redistribute to non-existent table \"%s\".",
 		   totable.c_str());
-	return -1;
+	return XORP_ERROR;
     }
 
     // We can only redistribute to an OriginTable
     OriginTable<A> *totab = dynamic_cast<OriginTable<A> *>(trt);
-    if (totab == 0) {
+    if (totab == NULL) {
 	XLOG_ERROR("Redistribution failed \"%s\" is not an origin table.",
 		   totable.c_str());
-	return -1;
+	return XORP_ERROR;
     }
 
     string tablename = redist_tablename(fromtable, totable);
     RedistTable<A> *rdt = new RedistTable<A>(tablename, fromtab, totab);
-    if (add_table(tablename, rdt) != 0) {
+    if (add_table(tablename, rdt) != XORP_OK) {
 	XLOG_WARNING("Redistribution failed because redist table \"%s\" "
 		     "already exists", tablename.c_str());
 	delete rdt;
-	return -1;
+	return XORP_ERROR;
     }
-    return 0;
+    return XORP_OK;
 }
 
 template<class A> 
@@ -804,13 +805,15 @@ RIB<A>::redist_disable(const string& fromtable, const string& totable)
 
     // XXX This routine currently trawls tables map twice.
     RedistTable<A> *rdt = dynamic_cast<RedistTable<A> *>(find_table(tname));
-    if (rdt == 0) {
+    if (rdt == NULL) {
 	XLOG_WARNING("Attempt to disable redistribution \"%s\" when "
 		     "redistribution is not enabled.", tname.c_str());
-	return -1;
+	return XORP_ERROR;
     }
-    remove_table(tname);
-    return 0;
+    if (remove_table(tname) != XORP_OK) {
+	return XORP_ERROR;
+    }
+    return XORP_OK;
 }
 
 template<class A> 
@@ -835,7 +838,7 @@ RIB<A>::add_egp_table(const string& tablename,
 
 // All the magic is in add_origin_table - XXX split into smaller units (?)
 
-template<class A> 
+template<class A>
 int
 RIB<A>::add_origin_table(const string& tablename, 
 			 const string& tgt_class,
@@ -855,20 +858,20 @@ RIB<A>::add_origin_table(const string& tablename,
 
     // Check if table exists and check type if so
     RouteTable<A> *rt = find_table(tablename);
-    if (rt) {
-	if (dynamic_cast<OriginTable<A> *>(rt) == 0) {
+    if (rt != NULL) {
+	if (dynamic_cast<OriginTable<A> *>(rt) == NULL) {
 	    XLOG_ERROR("add_origin_table: table \"%s\" already exists, but is "
 		       "not is an OriginTable.", tablename.c_str());
-	    return -1;
+	    return XORP_ERROR;
 	} else {
-	    return 0; 	    // table already exists, use that
+	    return XORP_OK; 	    // table already exists, use that
 	}
     }
 
     if (new_origin_table(tablename, tgt_class, tgt_instance, 
-			 admin_distance(tablename), type) < 0) {
+			 admin_distance(tablename), type) != XORP_OK) {
 	debug_msg("new_origin_table failed\n");
-	return -1;
+	return XORP_ERROR;
     }
 
     OriginTable<A> *new_table = static_cast<OriginTable<A> *>(find_table(tablename));
@@ -877,7 +880,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	// this won't occur if there's an ExportTable<A>, because that
 	// would have been created already
 	debug_msg("first table\n");
-	return 0;
+	return XORP_OK;
     } 
 
     //
@@ -911,7 +914,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	}
 
 	OriginTable<A> *ot = dynamic_cast<OriginTable<A> *>(rtpair->second);
-	if (ot) {
+	if (ot != NULL) {
 	    if (ot->proto_type() == IGP) {
 		igp_table = ot;
 	    } else if (ot->proto_type() == EGP) {
@@ -939,7 +942,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	// weren't both IGP and EGP tables
 	XLOG_ASSERT(ei_table == NULL);
 
-	if ((egp_table == 0) && (igp_table == 0)) {
+	if ((egp_table == NULL) && (igp_table == NULL)) {
 	    // There are tables, but neither IGP or EGP origin tables
 	    // Therefore the final table must be an ExportTable<A> or 
 	    // a RegisterTable (MRIB's have no ExportTable<A>)
@@ -954,12 +957,12 @@ RIB<A>::add_origin_table(const string& tablename,
 	    RouteTable<A> *rt = track_back(_final_table, 
 					   EXPORT_TABLE | REGISTER_TABLE);
 
-	    // new plumb our new table in ahead of the first
+	    // New plumb our new table in ahead of the first
 	    // single-parent table
-	    rt->replumb(0, new_table);
+	    rt->replumb(NULL, new_table);
 	    new_table->set_next_table(rt);
 	    //	    print_rib();
-	    return 0;
+	    return XORP_OK;
 	}
 
 	// Find the appropriate existng table to be a parent of the
@@ -977,13 +980,13 @@ RIB<A>::add_origin_table(const string& tablename,
 	}
 
 	// XXX Added table to list of resources (was not done previously)
-	if (ei_table == 0) {
+	if (ei_table == NULL) {
 	    XLOG_ERROR("Failed to create ExtIntTable \"%s\".", einame.c_str());
-	    return -1;
-	} else if (add_table(ei_table->tablename(), ei_table) != 0) {
+	    return XORP_ERROR;
+	} else if (add_table(ei_table->tablename(), ei_table) != XORP_OK) {
 	    XLOG_ERROR("Failed to add ExtIntTable \"%s\".", einame.c_str());
 	    delete ei_table;
-	    return -1;
+	    return XORP_ERROR;
 	}
 
 	if (_final_table->type() & (EXPORT_TABLE | REGISTER_TABLE)) {
@@ -994,7 +997,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	}
 
 	// print_rib();
-	return 0;
+	return XORP_OK;
     }
 
     //
@@ -1017,13 +1020,13 @@ RIB<A>::add_origin_table(const string& tablename,
     MergedTable<A> *merged_table = new MergedTable<A>(mtname,
 						      existing_table,
 						      new_table);
-    if (merged_table == 0 || add_table(mtname, merged_table)) {
+    if (merged_table == NULL || add_table(mtname, merged_table) != XORP_OK) {
 	delete merged_table;
-	return -1;
+	return XORP_ERROR;
     }
 
     merged_table->set_next_table(next_table);
-    if (next_table != 0)
+    if (next_table != NULL)
 	next_table->replumb(existing_table, merged_table);
 
     //
@@ -1034,7 +1037,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	_final_table = merged_table;
 
     // print_rib();
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -1062,13 +1065,13 @@ RIB<A>::delete_origin_table(const string& tablename,
 			    const string& tgt_instance) 
 {
     OriginTable<A> *ot = dynamic_cast<OriginTable<A> *>(find_table(tablename));
-    if (0 == ot)
-	return -1;
+    if (NULL == ot)
+	return XORP_ERROR;
 
     if (!tgt_instance.empty()) {
 	if (find_table_by_instance(tablename, tgt_class, tgt_instance) != ot) {
 	    XLOG_ERROR("Got delete_origin_table for wrong target name\n");
-	    return -1;
+	    return XORP_ERROR;
 	} else {
 	    _routing_protocol_instances.erase(tablename + " " 
 					      + tgt_class + " " 
@@ -1078,7 +1081,7 @@ RIB<A>::delete_origin_table(const string& tablename,
 
     // Remove all the routes this table used to originate, but keep table
     ot->routing_protocol_shutdown();
-    return 0;
+    return XORP_OK;
 }
 
 template <class A>
@@ -1112,7 +1115,7 @@ RouteTable<A> *
 RIB<A>::track_back(RouteTable<A> *rt, int typemask) const
 {
 
-    if (rt == 0 || (rt->type() & typemask) == 0) {
+    if (rt == NULL || (rt->type() & typemask) == 0) {
 	return rt;
     }
 
@@ -1135,13 +1138,13 @@ RIB<A>::track_forward(RouteTable<A> *rt, int typemask) const
 {
     debug_msg("here1\n");
     RouteTable<A> *next;
-    if (0 == rt) {
+    if (NULL == rt) {
 	// XXX not the same test as track back (deliberate ?)
 	return rt;
     }
     next = rt->next_table();
     debug_msg("here2\n");
-    while (next != 0) {
+    while (next != NULL) {
 	debug_msg("here3\n");
 	if ((next->type() & typemask) != 0) {
 	    debug_msg("here4 next->type()= %d, typemask=%x\n", 

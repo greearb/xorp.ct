@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.6 2003/09/27 10:42:40 mjh Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.7 2003/09/27 22:32:47 mjh Exp $"
 
 #include "rib_module.h"
 #include "config.h"
@@ -37,7 +37,7 @@ verify_route(const string& ipv4, const string& vifname,
 	       ipv4.c_str(), vifname.c_str(), nexthop.c_str());
     }
     if (rib_ptr->verify_route(IPv4(ipv4.c_str()), vifname, 
-			      IPv4(nexthop.c_str()), metric) != 0) {
+			      IPv4(nexthop.c_str()), metric) != XORP_OK) {
 	printf("route verify failed\n");
 	abort();
     }
@@ -187,7 +187,8 @@ main (int /* argc */, char *argv[])
 
 
     // check we can delete and add back
-    if (! rib.route_deregister(IPv4Net("1.0.5.0", 26), string("foo"))) {
+    if (rib.route_deregister(IPv4Net("1.0.5.0", 26), string("foo"))
+	!= XORP_OK) {
 	abort();
     }
     rreg = rib.route_register(IPv4("1.0.5.1"), string("foo"));
@@ -213,10 +214,12 @@ main (int /* argc */, char *argv[])
 
     // verify that the deregister now fails because the registrations
     // became invalid
-    if (rib.route_deregister(IPv4Net("1.0.5.0", 26), string("foo"))) {
+    if (rib.route_deregister(IPv4Net("1.0.5.0", 26), string("foo"))
+	== XORP_OK) {
 	abort();
     }
-    if (rib.route_deregister(IPv4Net("1.0.5.0", 26), string("foo2"))) {
+    if (rib.route_deregister(IPv4Net("1.0.5.0", 26), string("foo2"))
+	== XORP_OK) {
 	abort();
     }
 

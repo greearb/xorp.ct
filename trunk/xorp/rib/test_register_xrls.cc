@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.19 2003/09/27 22:32:47 mjh Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.20 2003/09/30 03:08:00 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -165,7 +165,7 @@ add_igp_table(XrlRibV0p1Client& client,
     while (xrl_done_flag == false) {
 	loop.run();
     }
-    return 0;
+    return XORP_OK;
 }
 
 int
@@ -181,7 +181,7 @@ add_egp_table(XrlRibV0p1Client& client,
     while (xrl_done_flag == false) {
 	loop.run();
     }
-    return 0;
+    return XORP_OK;
 }
 
 int
@@ -206,7 +206,7 @@ add_vif(XrlRibV0p1Client& client,
     while (xrl_done_flag == false) {
 	loop.run();
     }
-    return 0;
+    return XORP_OK;
 }
 
 int
@@ -224,7 +224,7 @@ add_route(XrlRibV0p1Client& client,
     while (xrl_done_flag == false) {
 	loop.run();
     }
-    return 0;
+    return XORP_OK;
 }
 
 int
@@ -242,7 +242,7 @@ delete_route(XrlRibV0p1Client& client,
     while (xrl_done_flag == false) {
 	loop.run();
     }
-    return 0;
+    return XORP_OK;
 }
 
 void
@@ -295,7 +295,7 @@ register_interest(XrlRibV0p1Client& client,
     while (xrl_done_flag == false) {
 	loop.run();
     }
-    return 0;
+    return XORP_OK;
 }
 
 
@@ -331,7 +331,7 @@ main(int /* argc */, char *argv[])
     RIB<IPv4> urib4(UNICAST, rib_manager, eventloop);
     RegisterServer regserv(&xrl_router);
     urib4.initialize_register(&regserv);
-    if (urib4.add_igp_table("connected", "", "") < 0) {
+    if (urib4.add_igp_table("connected", "", "") != XORP_OK) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib4");
 	abort();
     }

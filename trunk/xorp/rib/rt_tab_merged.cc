@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.7 2003/09/27 22:32:46 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.8 2003/09/30 03:08:00 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -42,15 +42,14 @@ MergedTable<A>::MergedTable<A>(const string&  tablename,
 
 template <class A>
 int
-MergedTable<A>::
-add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller)
+MergedTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller)
 {
     debug_msg("MT[%s]: Adding route %s\n", _tablename.c_str(),
 	   route.str().c_str());
 
     cp(2);
     if (_next_table == NULL)
-	return -1;
+	return XORP_ERROR;
     cp(3);
     cp(4);
     RouteTable<A> *other_table;
@@ -72,13 +71,13 @@ add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller)
 	    _next_table->delete_route(found, this);
 	} else {
 	    cp(8);
-	    return -1;
+	    return XORP_ERROR;
 	}
     }
     cp(9);
     _next_table->add_route(route, this);
 
-    return 0;
+    return XORP_OK;
 }
 
 
@@ -88,7 +87,7 @@ MergedTable<A>::delete_route(const IPRouteEntry<A> *route,
 			       RouteTable<A> *caller) 
 {
     if (_next_table == NULL)
-	return -1;
+	return XORP_ERROR;
     RouteTable<A> *other_table;
     cp(10);
     if (caller == _table_b) {
@@ -108,18 +107,18 @@ MergedTable<A>::delete_route(const IPRouteEntry<A> *route,
 	    cp(13);
 	    _next_table->delete_route(route, this);
 	    _next_table->add_route(*found, this);
-	    return 0;
+	    return XORP_OK;
 	} else {
 	    // the admin distance of the existing route is better, so
 	    // this route would not previously have been propagated
 	    // downstream
 	    cp(14);
-	    return -1;
+	    return XORP_ERROR;
 	}
     }
     cp(15);
     _next_table->delete_route(route, this);
-    return 0;
+    return XORP_OK;
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.23 2003/08/07 02:24:13 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.24 2003/09/20 06:21:45 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -72,7 +72,7 @@ VifManager::start()
 {
     enable();	// XXX: by default the VifManager is always enabled
     
-    if (ProtoState::start() < 0)
+    if (ProtoState::start() != XORP_OK)
 	return (XORP_ERROR);
     
     if (_no_fea) {
@@ -210,14 +210,14 @@ VifManager::set_vif_state()
 		 ++ipvx_iter) {
 		const IPvX& ipvx = *ipvx_iter;
 		if (ipvx.is_ipv4()) {
-		    _rib_manager->delete_vif_addr(node_vif->name(),
-						  ipvx.get_ipv4(),
-						  error_msg);
+		    _rib_manager->delete_vif_address(node_vif->name(),
+						     ipvx.get_ipv4(),
+						     error_msg);
 		}
 		if (ipvx.is_ipv6()) {
-		    _rib_manager->delete_vif_addr(node_vif->name(),
-						  ipvx.get_ipv6(),
-						  error_msg);
+		    _rib_manager->delete_vif_address(node_vif->name(),
+						     ipvx.get_ipv6(),
+						     error_msg);
 		}
 		node_vif->delete_address(ipvx);
 	    }
@@ -235,16 +235,16 @@ VifManager::set_vif_state()
 		VifAddr* node_vif_addr = node_vif->find_address(vif_addr.addr());
 		if (node_vif_addr == NULL) {
 		    if (vif_addr.addr().is_ipv4()) {
-			_rib_manager->add_vif_addr(node_vif->name(),
-						   vif_addr.addr().get_ipv4(),
-						   vif_addr.subnet_addr().get_ipv4net(),
-						   error_msg);
+			_rib_manager->add_vif_address(node_vif->name(),
+						      vif_addr.addr().get_ipv4(),
+						      vif_addr.subnet_addr().get_ipv4net(),
+						      error_msg);
 		    }
 		    if (vif_addr.addr().is_ipv6()) {
-			_rib_manager->add_vif_addr(node_vif->name(),
-						   vif_addr.addr().get_ipv6(),
-						   vif_addr.subnet_addr().get_ipv6net(),
-						   error_msg);
+			_rib_manager->add_vif_address(node_vif->name(),
+						      vif_addr.addr().get_ipv6(),
+						      vif_addr.subnet_addr().get_ipv6net(),
+						      error_msg);
 		    }
 		    node_vif->add_address(vif_addr);
 		    continue;

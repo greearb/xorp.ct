@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/parser.cc,v 1.5 2003/05/14 10:32:25 pavlin Exp $"
+#ident "$XORP: xorp/rib/parser.cc,v 1.6 2003/11/06 03:00:32 pavlin Exp $"
 
 #include <stdexcept>
 
@@ -32,7 +32,7 @@ IntArgumentParser::parse(const string& str) const
 	printf(">>>str=%s\n", str.c_str());
 	return new IntDatum(str);
     } catch (const InvalidString&) {
-	return 0;
+	return NULL;
     }
 }
 
@@ -42,7 +42,7 @@ StringArgumentParser::parse(const string& str) const
     try {
 	return new StringDatum(str);
     } catch (const InvalidString&) {
-	return 0;
+	return NULL;
     }
 }
 
@@ -52,7 +52,7 @@ IPv4ArgumentParser::parse(const string& str) const
     try {
 	return new IPv4Datum(str);
     } catch (const InvalidString&) {
-	return 0;
+	return NULL;
     }
 }
 
@@ -62,7 +62,7 @@ IPv4NetArgumentParser::parse(const string& str) const
     try {
 	return new IPv4NetDatum(str);
     } catch (const InvalidString&) {
-	return 0;
+	return NULL;
     }
 }
 
@@ -74,7 +74,7 @@ Command::~Command()
     for (size_t i = 0; i < _bindings.size(); i++) {
 	DatumVariableBinding* d = find_binding(i);
 	delete d;
-	_bindings[i] = 0;
+	_bindings[i] = NULL;
     }
 }
 
@@ -90,14 +90,14 @@ Command::find_binding(int n)
 {
     map<int, DatumVariableBinding*>::iterator mi = _bindings.find(n);
     if (mi == _bindings.end())
-	return 0;
+	return NULL;
     return mi->second;
 }
 
 void
 Command::bind(int n, DatumVariableBinding* d)
 {
-    if (find_binding(n)) 
+    if (find_binding(n) != NULL)
 	abort();  // binding already exists for argument
     if ((size_t)n != _bindings.size()) 
 	abort(); // non-contiguous positional binding
@@ -133,7 +133,7 @@ void
 Command::set_arg(int n, Datum *d) throw (Parse_error)
 {
     DatumVariableBinding *b = find_binding(n);
-    if (b == 0) 
+    if (b == NULL) 
 	throw Parse_error(c_format("Argument %d has no variable associated "
 				   "with it", n));
     b->transfer(d);
@@ -176,7 +176,7 @@ Parser::get_argument_parser(const string& name) const
 {
     map<string, ArgumentParser*>::const_iterator mi = _argtypes.find(name);
     if (mi == _argtypes.end())
-	return 0;
+	return NULL;
     return mi->second;
 }
 
@@ -248,7 +248,7 @@ static string prepare_line(const string& s)
 
 // ----------------------------------------------------------------------------
 
-int 
+int
 Parser::parse(const string& s) const 
 {
     debug_msg("-------------------------------------------------------\n");
@@ -256,7 +256,7 @@ Parser::parse(const string& s) const
 
     string str = prepare_line(s);
     if (str[0] == '#')
-	return 0;
+	return XORP_OK;
 
     typedef map<string, Command*>::const_iterator CI;
     CI rpair = _templates.lower_bound(str);
@@ -270,7 +270,7 @@ Parser::parse(const string& s) const
     int twcount = split_into_words(rpair->first, template_words);
 
     try {
-	if (cmd == 0)
+	if (cmd == NULL)
 	    throw Parse_error("Command invalid");
 	if (wcount != twcount) {
 	    throw Parse_error(c_format("word count bad (got %d expected %d)",
@@ -284,13 +284,13 @@ Parser::parse(const string& s) const
 		    throw Parse_error(words[i]);
 		}
 	    } else {
-		const ArgumentParser* arg = 
-		    get_argument_parser(template_words[i]);
-		if (arg == 0) 
+		const ArgumentParser* arg;
+		arg = get_argument_parser(template_words[i]);
+		if (arg == NULL)
 		    throw Parse_error(c_format("No parser for type %s",
 					       template_words[i].c_str()));
 		Datum* d = arg->parse(words[i]);
-		if (d == 0) 
+		if (d == NULL)
 		    throw Parse_error(words[i]);
 
 		debug_msg("%s = %s\n", 
@@ -304,7 +304,7 @@ Parser::parse(const string& s) const
 	    throw Parse_error(c_format("Got %d args, expected %d\n",
 				       args_done, cmd->num_args()));
 	}
-	if (cmd->execute() != 0) {
+	if (cmd->execute() != XORP_OK) {
 	    throw Parse_error("Command failed\n");
 	}
     }
@@ -313,13 +313,13 @@ Parser::parse(const string& s) const
 	cerr << pe.str() << "\n";
 	exit(1);
     } 
-    return 0;
+    return XORP_OK;
 }
 
 int 
 Parser::split_into_words(const string& str, vector<string>& words) const
 {
-    int word=0;
+    int word = 0;
     int len;
     string tmpstr(str);
     
@@ -327,7 +327,7 @@ Parser::split_into_words(const string& str, vector<string>& words) const
 	while (true) {
 	    //remove leading whitespace
 	    while (tmpstr.at(0) == ' ' && tmpstr.length() > 0) {
-		tmpstr.erase(0,1);
+		tmpstr.erase(0, 1);
 	    }
 	    if (tmpstr.length() == 0)
 		break;
@@ -338,8 +338,7 @@ Parser::split_into_words(const string& str, vector<string>& words) const
 	    if (tmpstr.length() == 0)
 		break;
 	}
-    }
-    catch (out_of_range) {
+    } catch (out_of_range) {
     }
     return word;
 }

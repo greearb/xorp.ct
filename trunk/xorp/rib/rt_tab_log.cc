@@ -40,10 +40,10 @@ LogTable<A>::add_route(const IPRouteEntry<A>& 	route,
 {
     _u_no++;
     RouteTable<A>* n = next_table();
-    if (n) {
+    if (n != NULL) {
 	return n->add_route(route, caller);
     }
-    return 0;
+    return XORP_OK;
 }
 
 template<typename A>
@@ -52,11 +52,11 @@ LogTable<A>::delete_route(const IPRouteEntry<A>* route,
 			  RouteTable<A>* 	 caller)
 {
     RouteTable<A>* n = next_table();
-    if (n) {
+    if (n != NULL) {
 	return n->delete_route(route, caller);
     }
     _u_no++;
-    return 0;
+    return XORP_OK;
 }
 
 template<typename A>
@@ -127,13 +127,13 @@ int
 OstreamLogTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 				 RouteTable<A>* 		caller)
 {
-    if (route) {
+    if (route != NULL) {
 	_o << update_number() << " Delete: " << route->str() << " Return: ";
     }
 
     int s = LogTable<A>::delete_route(route, caller);
 
-    if (route) {
+    if (route != NULL) {
 	_o << s << std::endl;
     }
     return s;
@@ -183,14 +183,14 @@ XLogTraceTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 {
     string msg;
 
-    if (route) {
+    if (route != NULL) {
 	msg = c_format("%u Delete: %s Return: ",
 		       update_number(), route->str().c_str());
     }
 
     int s = LogTable<A>::delete_route(route, caller);
 
-    if (route) {
+    if (route != NULL) {
 	msg += c_format("%d\n", s);
 	XLOG_TRACE(true, msg.c_str());
     }
@@ -242,14 +242,14 @@ DebugMsgLogTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 {
     string msg;
 
-    if (route) {
+    if (route != NULL) {
 	msg = c_format("%u Delete: %s Return: ",
 		       update_number(), route->str().c_str());
     }
 
     int s = LogTable<A>::delete_route(route, caller);
 
-    if (route) {
+    if (route != NULL) {
 	msg += c_format("%d\n", s);
 	debug_msg(msg.c_str());
     }

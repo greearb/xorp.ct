@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rib/test_rib_client.cc,v 1.3 2003/05/29 17:59:10 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -46,7 +46,7 @@ rib_client_test()
 
     XorpTimer t = e.new_periodic(1000, callback(&send_rib_client_commands,
 						&rc, &n));
-    while(n < 10) 
+    while (n < 10) 
 	e.run();
     t.unschedule();
     

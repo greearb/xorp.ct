@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_extint.hh,v 1.4 2003/03/16 07:18:59 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_extint.hh,v 1.5 2003/03/19 09:05:20 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXTINT_HH__
 #define __RIB_RT_TAB_EXTINT_HH__
@@ -72,6 +72,7 @@ public:
      *
      * @param route the new route
      * @param caller the parent table sending the new route
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
     int add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller);
 
@@ -85,6 +86,7 @@ public:
      *
      * @param route the route to be deleted.
      * @param caller the parent table sending the delete_route.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
     int delete_route(const IPRouteEntry<A> *route, RouteTable<A> *caller);
 

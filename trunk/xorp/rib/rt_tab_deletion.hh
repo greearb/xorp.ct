@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_deletion.hh,v 1.1 2003/09/27 10:42:40 mjh Exp $
+// $XORP: xorp/rib/rt_tab_deletion.hh,v 1.2 2003/09/27 22:32:46 mjh Exp $
 
 #ifndef __RIB_RT_TAB_DELETION_HH__
 #define __RIB_RT_TAB_DELETION_HH__
@@ -55,12 +55,13 @@ public:
      * we'll remove it and propagate the delete and add downstream.
      *
      * @param route the route entry to be added.  
-     * @return 0 on success, -1 otherwise 
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
     int add_route(const IPRouteEntry<A>&, RouteTable<A> *);
 
     /**
      * Delete a route.  This route MUST NOT be in the DeletionTable trie.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
     int delete_route(const IPRouteEntry<A> *, RouteTable<A> *caller);
 
@@ -76,7 +77,8 @@ public:
      * or the upstream tables.
      *
      * @param net the subnet to look up.
-     * @return a pointer to the route entry if it exists, NULL otherwise.  */
+     * @return a pointer to the route entry if it exists, NULL otherwise.
+     */
     const IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const;
 
     /**
@@ -86,7 +88,8 @@ public:
      *
      * @param addr the IP address to look up.
      * @return a pointer to the most specific route entry if any entry
-     * matches, NULL otherwise.  */
+     * matches, NULL otherwise.
+     */
     const IPRouteEntry<A> *lookup_route(const A& addr) const;
 
     /**
@@ -99,7 +102,8 @@ public:
      * @param addr the IP address to look up.
      * @return a pointer to a RouteRange class instance containing the
      * relevant answer.  It is up to the recipient of this pointer to
-     * free the associated memory.  */
+     * free the associated memory.
+     */
     RouteRange<A> *lookup_route_range(const A& addr) const;
 
 
@@ -132,6 +136,7 @@ public:
      * Render the DeletionTable as a string for debugging purposes
      */
     string str() const;
+
 private:
     Trie<A, const IPRouteEntry<A> *> *_ip_route_table;
     RouteTable<A> *_parent;

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.15 2003/05/24 23:35:26 mjh Exp $
+// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.1 2003/09/27 22:32:45 mjh Exp $
 
-#ifndef __RIB_RIB_MANAGER_HH__
-#define __RIB_RIB_MANAGER_HH__
+#ifndef __RIB_DUMMY_RIB_MANAGER_HH__
+#define __RIB_DUMMY_RIB_MANAGER_HH__
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
@@ -87,7 +87,19 @@ public:
      * @return process status code
      */
     ProcessStatus status(string& reason) const; 
-    
+
+    /**
+     * Inform the RIB about the existence of a Virtual Interface.
+     * Note that it is an error to add twice a vif with the same vifname.
+     *
+     * @see Vif
+     * @param vifname the name of the VIF, as understood by the FEA.
+     * @param vif Vif class instance giving the information about this vif.
+     * @param err reference to string in which to store the
+     * human-readable error message in case anything goes wrong.  Used
+     * for debugging purposes.  
+     * @return XORP_OK on success, XORP_ERROR otherwise.
+     */
     int new_vif(const string& vifname, const Vif& vif, string& err);
 
     /**
@@ -97,44 +109,13 @@ public:
      * @param vifname the name of the VIF that was deleted.
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
-     * for debugging purposes.  
+     * for debugging purposes.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
     int delete_vif(const string& vifname, string& err);
 
     /**
-     * add_vif_addr is called to inform all the RIBs that a new IPv4
-     * address has been added to a virtual interface.
-     *
-     * @param vifname the name of the VIF that the address was added to.
-     * @param addr the new address.
-     * @param net the subnet (masked address) that the new address
-     * resides on.
-     * @param err reference to string in which to store the
-     * human-readable error message in case anything goes wrong.  Used
-     * for debugging purposes.  
-     */
-    int add_vif_addr(const string& vifname, 
-		     const IPv4& addr,
-		     const IPNet<IPv4>& net,
-		     string& err);
-
-    /**
-     * delete_vif_addr is called to inform all the RIBs that an IPv4
-     * address that they previously know about has been deleted from a
-     * specific VIF.
-     *
-     * @param vifname the name of the VIF that the address was deleted from.
-     * @param addr the address that was deleted.
-     * @param err reference to string in which to store the
-     * human-readable error message in case anything goes wrong.  Used
-     * for debugging purposes.  
-     */
-    int delete_vif_addr(const string& vifname, 
-			const IPv4& addr,
-			string& err);
-
-    /**
-     * add_vif_addr is called to inform all the RIBs that a new IPv6
+     * add_vif_address is called to inform all the RIBs that a new IPv4
      * address has been added to a virtual interface.
      *
      * @param vifname the name of the VIF that the address was added to.
@@ -144,14 +125,15 @@ public:
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
-    int add_vif_addr(const string& vifname,
-		     const IPv6& addr,
-		     const IPNet<IPv6>& net,
-		     string& err);
+    int add_vif_address(const string& vifname, 
+			const IPv4& addr,
+			const IPNet<IPv4>& net,
+			string& err);
 
     /**
-     * delete_vif_addr is called to inform all the RIBs that an IPv6
+     * delete_vif_address is called to inform all the RIBs that an IPv4
      * address that they previously know about has been deleted from a
      * specific VIF.
      *
@@ -159,11 +141,46 @@ public:
      * @param addr the address that was deleted.
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
-     * for debugging purposes.  
+     * for debugging purposes.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
-    int delete_vif_addr(const string& vifname, 
+    int delete_vif_address(const string& vifname, 
+			   const IPv4& addr,
+			   string& err);
+
+    /**
+     * add_vif_address is called to inform all the RIBs that a new IPv6
+     * address has been added to a virtual interface.
+     *
+     * @param vifname the name of the VIF that the address was added to.
+     * @param addr the new address.
+     * @param net the subnet (masked address) that the new address
+     * resides on.
+     * @param err reference to string in which to store the
+     * human-readable error message in case anything goes wrong.  Used
+     * for debugging purposes.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
+     */
+    int add_vif_address(const string& vifname,
 			const IPv6& addr,
+			const IPNet<IPv6>& net,
 			string& err);
+
+    /**
+     * delete_vif_address is called to inform all the RIBs that an IPv6
+     * address that they previously know about has been deleted from a
+     * specific VIF.
+     *
+     * @param vifname the name of the VIF that the address was deleted from.
+     * @param addr the address that was deleted.
+     * @param err reference to string in which to store the
+     * human-readable error message in case anything goes wrong.  Used
+     * for debugging purposes.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
+     */
+    int delete_vif_address(const string& vifname, 
+			   const IPv6& addr,
+			   string& err);
     
     
     /**
@@ -281,4 +298,4 @@ public:
 private:
 };
 
-#endif // __RIB_RIB_MANAGER_HH__
+#endif // __RIB_DUMMY_RIB_MANAGER_HH__

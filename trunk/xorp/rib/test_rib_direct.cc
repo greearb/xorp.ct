@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_direct.cc,v 1.6 2003/09/27 10:42:40 mjh Exp $"
+#ident "$XORP: xorp/rib/test_rib_direct.cc,v 1.7 2003/09/27 22:32:47 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -72,7 +72,8 @@ parser_main()
     int line = 0;
     while (feof(stdin) == 0) {
 	getline(cin, cmd);
-	if (feof(stdin)!=0) break;
+	if (feof(stdin) != 0)
+	    break;
 	line++;
 	cout << line << ": " << cmd << endl;
 	parser.parse(cmd);

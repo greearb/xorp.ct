@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.6 2003/07/04 19:59:50 pavlin Exp $
+// $XORP: xorp/rib/parser.hh,v 1.7 2003/11/06 03:00:32 pavlin Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -151,7 +151,7 @@ public:
     DatumIntBinding(int& i) : _i(i) {}
     void transfer(Datum *d) throw (Parse_error) {
 	IntDatum *id = dynamic_cast<IntDatum *>(d);
-	if (0 == id)
+	if (NULL == id)
 	    throw Parse_error("Wrong type ? int decoding failed");
 	_i = id->get();
     }
@@ -164,7 +164,7 @@ public:
     DatumStringBinding(string& s) : _s(s) {}
     void transfer(Datum *d) throw (Parse_error) {
 	StringDatum *id = dynamic_cast<StringDatum *>(d);
-	if (0 == id)
+	if (NULL == id)
 	    throw Parse_error("Wrong type ? string decoding failed");
 	_s = id->get();
     }
@@ -177,7 +177,7 @@ public:
     DatumIPv4Binding(IPv4& ipv4) : _ipv4(ipv4) {}
     void transfer(Datum *d) throw (Parse_error) {
 	IPv4Datum *id = dynamic_cast<IPv4Datum *>(d);
-	if (0 == id)
+	if (NULL == id)
 	    throw Parse_error("Wrong type ? ipv4 decoding failed");
 	_ipv4 = id->get();
     }
@@ -190,7 +190,7 @@ public:
     DatumIPv4NetBinding(IPv4Net& ipv4net) : _ipv4net(ipv4net) {}
     void transfer(Datum *d) throw (Parse_error) {
 	IPv4NetDatum *id = dynamic_cast<IPv4NetDatum *>(d);
-	if (0 == id)
+	if (NULL == id)
 	    throw Parse_error("Wrong type ? ipv4 decoding failed");
 	_ipv4net = id->get();
     }

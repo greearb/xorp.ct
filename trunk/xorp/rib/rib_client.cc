@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_client.cc,v 1.7 2003/05/08 05:51:27 mjh Exp $"
+#ident "$XORP: xorp/rib/rib_client.cc,v 1.8 2003/05/14 10:32:25 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -67,8 +67,8 @@ public:
     void start(const CompletionCallback& cb, const GetNextCallback& gncb);
 
     // Methods to be implemented by actual commands
-    virtual void send_command(uint32_t tid, const CommandCompleteCallback& cb)
-	= 0;
+    virtual void send_command(uint32_t tid,
+			      const CommandCompleteCallback& cb) = 0;
 
 protected:
     void redo_start();
@@ -111,15 +111,14 @@ SyncFtiCommand::start(const CompletionCallback& ccb,
 {
     _completion_cb = ccb;
     _get_next_cb = gncb;
-    if (!_fticlient.
-	send_start_transaction(_target_name.c_str(),
+    if (!_fticlient.send_start_transaction(_target_name.c_str(),
 			       callback(this,
 					&SyncFtiCommand::start_complete))) {
-	//The send failed - not enough buffer space?.
-	//We resend after a delay
-	_rtx_timer 
-	    = _eventloop.new_oneoff_after_ms(1000, 
-                   callback(this, &SyncFtiCommand::redo_start));
+	// The send failed - not enough buffer space?.
+	// We resend after a delay
+	_rtx_timer = _eventloop.new_oneoff_after_ms(
+	    1000, 
+	    callback(this, &SyncFtiCommand::redo_start));
     }
 }
 
@@ -149,11 +148,11 @@ SyncFtiCommand::start_complete(const XrlError& e, const uint32_t *tid)
 	    fatal_error = true;
 	} else if ((e == XrlError::RESOLVE_FAILED())
 		   && (!_previously_successful)) {
-	    //We've not yet succeeded in talking to the target, so
-	    //give them a chance to get started - not strictly necessary.
-	    _rtx_timer 
-		= _eventloop.new_oneoff_after_ms(1000, 
-                       callback(this, &SyncFtiCommand::redo_start));
+	    // We've not yet succeeded in talking to the target, so
+	    // give them a chance to get started - not strictly necessary.
+	    _rtx_timer = _eventloop.new_oneoff_after_ms(
+		1000,
+		callback(this, &SyncFtiCommand::redo_start));
 	} else {
 	    XLOG_ERROR("Could not start Synchronous RibClient command: %s",
 		       e.str().c_str());

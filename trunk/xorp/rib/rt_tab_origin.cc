@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.10 2003/09/27 10:42:40 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.11 2003/09/27 22:32:46 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -75,11 +75,11 @@ OriginTable<A>::add_route(const IPRouteEntry<A>& route)
     // corresponding deletes. So if this route is already in the table
     // remove it.
     //
-    if (lookup_route(route.net()))
+    if (lookup_route(route.net()) != NULL)
 	delete_route(route.net());
 #else
-    if (lookup_route(route.net()))
-	return -1;
+    if (lookup_route(route.net()) != NULL)
+	return XORP_ERROR;
 #endif
 
     // now add the route to this table
@@ -99,11 +99,12 @@ OriginTable<A>::add_route(const IPRouteEntry<A>& route)
 	_next_table->add_route(*routecopy, (RouteTable<A>*)this);
     }
 
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
-int OriginTable<A>::delete_route(const IPNet<A>& net)
+int
+OriginTable<A>::delete_route(const IPNet<A>& net)
 {
     debug_msg("OT[%s]: Deleting route %s\n", _tablename.c_str(),
 	   net.str().c_str());
@@ -123,11 +124,11 @@ int OriginTable<A>::delete_route(const IPNet<A>& net)
 
 	// finally we're done, and can cleanup
 	delete found;
-	return 0;
+	return XORP_OK;
     }
     XLOG_ERROR("OT: attempt to delete a route that doesn't exist: %s",
 	       net.str().c_str());
-    return -1;
+    return XORP_ERROR;
 }
 
 

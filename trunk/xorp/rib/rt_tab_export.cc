@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.10 2003/05/08 05:51:27 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.11 2003/05/23 00:02:07 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -54,7 +54,7 @@ ExportTable<A>::add_route(const IPRouteEntry<A>& route,
 
     if (route.protocol().name() == "connected") {
 	printf("Add route called for connected route\n");
-	return 0;
+	return XORP_OK;
     }
     
     //
@@ -68,7 +68,7 @@ ExportTable<A>::add_route(const IPRouteEntry<A>& route,
     
     debug_msg(("Add route called on export table " + _tablename +
 	       "\n").c_str());
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -80,7 +80,7 @@ ExportTable<A>::delete_route(const IPRouteEntry<A> *route,
 
     if (route->protocol().name() == "connected") {
 	printf("Delete route called for connected route\n");
-	return 0;
+	return XORP_OK;
     }
 
     //
@@ -93,7 +93,7 @@ ExportTable<A>::delete_route(const IPRouteEntry<A> *route,
     }
 
     debug_msg("Delete route called on export table\n");
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>

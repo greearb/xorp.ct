@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.12 2003/09/27 22:32:46 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.13 2003/10/21 20:56:55 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rib_module.h"
@@ -20,7 +20,7 @@
 #include "register_server.hh"
 
 template<class A>
-bool
+int
 RouteRegister<A>::delete_registrant(const ModuleData *module)
 {
     debug_msg("delete_registrant: this: %p, Module: %s\n", this,
@@ -29,11 +29,11 @@ RouteRegister<A>::delete_registrant(const ModuleData *module)
     mod_iter = _modules.find(module);
 
     if (mod_iter == _modules.end()) {
-	return false;
+	return XORP_ERROR;
     }
     _modules.erase(mod_iter);
     debug_msg("new Value:\n%s\n", str().c_str());
-    return true;
+    return XORP_OK;
 }
 
 template<class A> string
@@ -76,7 +76,7 @@ RegisterTable<A>::replumb(RouteTable<A> *old_parent,
 }
 
 template<class A>
-bool
+int
 RegisterTable<A>::find_matches(const IPRouteEntry<A>& route)
 {
     bool matches = false;
@@ -92,7 +92,7 @@ RegisterTable<A>::find_matches(const IPRouteEntry<A>& route)
     if (iter != _ipregistry.end()) {
 	debug_msg("FM: exact match\n");
 	iter.payload()->mark_modules();
-	return true;
+	return XORP_OK;
     }
     debug_msg("FM: no exact match\n");
 
@@ -102,7 +102,7 @@ RegisterTable<A>::find_matches(const IPRouteEntry<A>& route)
     if (iter != _ipregistry.end()) {
 	debug_msg("FM: less specific match\n");
 	iter.payload()->mark_modules();
-	return true;
+	return XORP_OK;
     }
     debug_msg("FM: no less specific match\n");
 
@@ -116,11 +116,15 @@ RegisterTable<A>::find_matches(const IPRouteEntry<A>& route)
     }
     if (matches == false)
 	debug_msg("FM:  no children found\n");
-    return matches;
+
+    if (matches)
+	return XORP_OK;
+    else
+	return XORP_ERROR;
 }
 
 template<class A>
-bool
+int
 RegisterTable<A>::notify_relevant_modules(bool add,
 					  const IPRouteEntry<A>& changed_route)
 {
@@ -143,7 +147,7 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 	    // delete
 	    notify_invalidated(iter);
 	}
-	return true;
+	return XORP_OK;
     }
     debug_msg("NRM: no exact match\n");
 
@@ -159,7 +163,7 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 	    // overlapped by more specific routes
 	    XLOG_UNREACHABLE();
 	}
-	return true;
+	return XORP_OK;
     }
     debug_msg("NRM: no less specific match\n");
 
@@ -191,7 +195,7 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 		matches = true;
 	    }
 	} else {
-	    if (iter.payload()->route()  
+	    if (iter.payload()->route() != NULL
 		&& iter.payload()->route()->net() == changed_net) {
 		notify_invalidated(iter);
 		matches = true;
@@ -201,7 +205,11 @@ RegisterTable<A>::notify_relevant_modules(bool add,
     }
     if (matches == false)
 	debug_msg("NRM:  no children found\n");
-    return matches;
+
+    if (matches)
+	return XORP_OK;
+    else
+	return XORP_ERROR;
 }
 
 template<class A>
@@ -218,7 +226,7 @@ RegisterTable<A>::add_route(const IPRouteEntry<A>& route,
     notify_relevant_modules(true /* it's an add */, route);
 
     debug_msg("Add route called on register table %s\n", _tablename.c_str());
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -237,7 +245,7 @@ RegisterTable<A>::delete_route(const IPRouteEntry<A> *route,
     debug_msg("Delete route called on register table\n");
     debug_msg("After:\n");
     print();
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -312,7 +320,7 @@ RegisterTable<A>::add_registration(const IPNet<A>& net,
 }
 
 template<class A>
-bool
+int
 RegisterTable<A>::delete_registration(const IPNet<A>& net,
 				      const string& module)
 {
@@ -323,7 +331,7 @@ RegisterTable<A>::delete_registration(const IPNet<A>& net,
 	fprintf(stderr,
 		"delete_registration called for unregistered module: %s\n",
 		module.c_str());
-	return false;
+	return XORP_ERROR;
     }
     debug_msg("tmpmod: %p\n", tmpmod);
     delete tmpmod;
@@ -335,21 +343,21 @@ RegisterTable<A>::delete_registration(const IPNet<A>& net,
     if (iter == _ipregistry.end()) {
 	fprintf(stderr, "delete_registration called for unregisted net: %s\n",
 		net.str().c_str());
-	return false;
+	return XORP_ERROR;
     }
     RouteRegister<A> *rr = iter.payload();
     debug_msg("found registration %p\n", rr);
-    if (rr->delete_registrant(tmpmod) == false) {
+    if (rr->delete_registrant(tmpmod) != XORP_OK) {
 	fprintf(stderr, "delete_registration failed: %s\n",
 		net.str().c_str());
-	return false;
+	return XORP_ERROR;
     }
     if (rr->size() > 0) {
 	debug_msg("retaining RouteRegister %p\n", rr);
 #ifdef DEBUG_LOGGING
 	_ipregistry.print();
 #endif
-	return true;;
+	return XORP_OK;
     }
 
     _ipregistry.erase(net);
@@ -358,7 +366,7 @@ RegisterTable<A>::delete_registration(const IPNet<A>& net,
 #ifdef DEBUG_LOGGING
     _ipregistry.print();
 #endif
-    return true;
+    return XORP_OK;
 }
 
 //this is the method to be called to register a route
@@ -384,7 +392,7 @@ RegisterTable<A>::register_route_range(const A& addr,
 
 // this is the method to be called to deregister a route
 template<class A>
-bool
+int
 RegisterTable<A>::deregister_route_range(const IPNet<A>& subnet,
 					 const string& module)
 {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.6 2003/05/29 17:59:10 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -54,7 +54,7 @@ RedistTable<A>::add_route(const IPRouteEntry<A>& route,
     _next_table->add_route(route, this);
 
     cout << "Add route called on redist table " << _tablename << "\n";
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -66,7 +66,7 @@ RedistTable<A>::delete_route(const IPRouteEntry<A> *route,
     _next_table->delete_route(route, this);
 
     cout << "Delete route called on redist table\n";
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>

@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.6 2003/09/27 10:42:40 mjh Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.7 2003/09/27 22:32:46 mjh Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
 
-#include "rt_tab_base.hh"
 #include "libxorp/eventloop.hh"
+
+#include "rt_tab_base.hh"
 
 /**
  * @short RouteTable that receives and stores raw routes sent by
@@ -65,27 +66,29 @@ public:
      * in the OriginTable.
      *
      * @param route the route entry to be added.  
-     * @return 0 on success, -1 otherwise 
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
     int add_route(const IPRouteEntry<A>& route);
 
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
-    int add_route(const IPRouteEntry<A>&, RouteTable<A> *) { abort(); return 0;}
+    int add_route(const IPRouteEntry<A>&, RouteTable<A> *) { abort(); return XORP_ERROR;}
 
     /**
      * Delete a route from the OriginTable.
      *
      * @param net the subnet of the route entry to be deleted.  
-     * @return 0 on success, -1 otherwise 
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
     int delete_route(const IPNet<A>& net);
 
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
-    int delete_route(const IPRouteEntry<A> *, RouteTable<A> *) { abort(); return 0; }
+    int delete_route(const IPRouteEntry<A> *, RouteTable<A> *) { abort(); return XORP_ERROR; }
 
     /**
      * Delete all the routes that are in this OriginTable.  The

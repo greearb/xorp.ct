@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.10 2003/07/03 06:59:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.11 2003/09/30 03:08:00 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -38,8 +38,8 @@ ExtIntTable<A>::ExtIntTable<A>(const string&  tablename,
 }
 
 template<class A>
-int ExtIntTable<A>::add_route(const IPRouteEntry<A>& route,
-			      RouteTable<A> *caller) 
+int
+ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller) 
 {
     debug_msg("EIT[%s]: Adding route %s\n", _tablename.c_str(),
 	   route.str().c_str());
@@ -56,7 +56,7 @@ int ExtIntTable<A>::add_route(const IPRouteEntry<A>& route,
 		delete_route(found, _ext_table);
 	    } else {
 		cp(3);
-		return -1;
+		return XORP_ERROR;
 	    }
 	}
 
@@ -64,7 +64,7 @@ int ExtIntTable<A>::add_route(const IPRouteEntry<A>& route,
 	    // An IGP route must have a local nexthop.
 	    XLOG_ERROR(c_format("Received route from IGP that contains a non-local nexthop: %s\n",
 				route.str().c_str()).c_str());
-	    return -1;
+	    return XORP_ERROR;
 	}
 
 	if (_next_table != NULL)
@@ -77,7 +77,7 @@ int ExtIntTable<A>::add_route(const IPRouteEntry<A>& route,
 	// Does this new route cause any unresolved nexthops to be resolved?
 	resolve_unresolved_nexthops(route);
 
-	return 0;
+	return XORP_OK;
     } else if (caller == _ext_table) {
 	// the new route comes from the EGP table
 	debug_msg("route comes from EGP\n");
@@ -92,19 +92,19 @@ int ExtIntTable<A>::add_route(const IPRouteEntry<A>& route,
 		cp(5);
 	    } else {
 		cp(6);
-		return -1;
+		return XORP_ERROR;
 	    }
 	}
 	IPNextHop<A>* rt_nexthop = (IPNextHop<A>*)(route.nexthop());
 	A nh = rt_nexthop->addr();
 	const IPRouteEntry<A> *nhroute = lookup_route_in_igp_parent(nh);
 	if (nhroute == NULL) {
-	    // store the fact that this was unresolved for later.
+	    // Store the fact that this was unresolved for later.
 	    debug_msg("nexthop %s was unresolved\n", nh.str().c_str());
 	    _ip_unresolved_nexthops.insert(pair<A, const IPRouteEntry<A> *>
 					   (rt_nexthop->addr(), &route));
 	    cp(7);
-	    return -1;
+	    return XORP_ERROR;
 	} else {
 	    Vif *vif = nhroute->vif();
 	    if ((vif != NULL)
@@ -116,7 +116,7 @@ int ExtIntTable<A>::add_route(const IPRouteEntry<A>& route,
 		if (_next_table != NULL)
 		    _next_table->add_route(route, this);
 		cp(8);
-		return 0;
+		return XORP_OK;
 	    } else {
 		debug_msg("nexthop resolved to \n   %s\n",
 		       nhroute->str().c_str());
@@ -128,14 +128,14 @@ int ExtIntTable<A>::add_route(const IPRouteEntry<A>& route,
 		if (_next_table != NULL)
 		    _next_table->add_route(*resolved_route, this);
 		cp(9);
-		return 0;
+		return XORP_OK;
 	    }
 	}
     } else {
 	XLOG_FATAL("ExtIntTable::add_route called from a class that "
 		   "isn't a component of this override table\n");
     }
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>
@@ -182,7 +182,7 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A> *route,
 
 	if (route->nexthop()->type() == EXTERNAL_NEXTHOP) {
 	    // we didn't propagate the add_route, so also ignore the deletion
-	    return -1;
+	    return XORP_ERROR;
 	}
 
 	found = lookup_by_igp_parent(route);
@@ -258,7 +258,7 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A> *route,
 	XLOG_FATAL("ExtIntTable::delete_route called from a class that "
 		   "isn't a component of this override table\n");
     }
-    return 0;
+    return XORP_OK;
 }
 
 template<class A>

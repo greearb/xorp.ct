@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/routemap.cc,v 1.3 2003/03/15 02:28:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/routemap.cc,v 1.4 2003/03/16 07:18:58 pavlin Exp $"
 
 #include "rib_module.h"
 #include "routemap.hh"
@@ -29,7 +29,7 @@ RouteMap::add_rule(RMRule *rule)
     if (_ruleset[rule->seq()] != NULL) {
 	cerr << "Attempt to add duplicate rule number " << rule->seq() 
 	     << " to RouteMap " << _mapname << "\n";
-	return -1;
+	return XORP_ERROR;
     }
 #endif
     
@@ -41,13 +41,13 @@ RouteMap::add_rule(RMRule *rule)
 	if (rule->seq() < (*ptr)->seq()) {
 	    cout << "here1\n";
 	    _ruleset.insert(ptr, rule);
-	    return 0;
+	    return XORP_OK;
 	}
 	ptr++;
     }
     cout << "here2\n";
     _ruleset.insert(ptr, rule);
-    return 0;
+    return XORP_OK;
 }
 
 string

@@ -144,13 +144,13 @@ ExpectTable<A>::add_route(const IPRouteEntry<A>& 	route,
     }
     if (_expected.front().matches_add(route)) {
 	_expected.pop_front();
-	return 0;
+	return XORP_OK;
     }
     fprintf(stderr, "ExpectTable: add_route received, but not what was expected\n");
     fprintf(stderr, "Expected: %s\n", _expected.front().str().c_str());
     fprintf(stderr, "Received: Add of %s\n", route.str().c_str());
     abort();
-    return -1;
+    return XORP_ERROR;
 }
 
 template<class A>
@@ -167,13 +167,13 @@ ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route,
     }
     if (_expected.front().matches_delete(route)) {
 	_expected.pop_front();
-	return 0;
+	return XORP_OK;
     }
     fprintf(stderr, "ExpectTable: delete_route received, but not what was expected\n");
     fprintf(stderr, "Expected: %s\n", _expected.front().str().c_str());
     fprintf(stderr, "Received: Delete of %s\n", route->str().c_str());
     abort();
-    return -1;
+    return XORP_ERROR;
 }
 
 template<class A>

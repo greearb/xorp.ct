@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_register.hh,v 1.5 2003/03/19 09:05:20 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_register.hh,v 1.6 2003/09/27 22:32:46 mjh Exp $
 
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
@@ -37,7 +37,7 @@ public:
      * requested notification about a route change.  
      */
     ModuleData(const string& modulename) :
-	_modulename(modulename), _is_set(0)	{ }
+	_modulename(modulename), _is_set(false)	{ }
 
     /**
      * @return the XRL target name of the module
@@ -176,14 +176,14 @@ public:
      *
      * @param module the ModuleData instance refering to the
      * additional routing protocol that just registered interest.
-     * @return false if the module was already registered, true otherwise.  
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
-    bool add_registrant(const ModuleData *module) {
+    int add_registrant(const ModuleData *module) {
 	    debug_msg("add_registrant: Module: %s\n", module->str().c_str());
 	    if (_modules.find(module) != _modules.end())
-		return false;
+		return XORP_ERROR;
 	    _modules.insert(module);
-	    return true;
+	    return XORP_OK;
     }
 
     /**
@@ -193,8 +193,9 @@ public:
      *
      * @param module the ModuleData instance of the routing protocol
      * that de-registered.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
-    bool delete_registrant(const ModuleData *module);
+    int delete_registrant(const ModuleData *module);
 
     /**
      * mark_modules is called when the routing information matching
@@ -301,6 +302,7 @@ public:
      *
      * @param route the new route.
      * @param caller this must be this table's parent table.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
     int add_route(const IPRouteEntry<A>& route, RouteTable<A> *caller);
 
@@ -311,7 +313,8 @@ public:
      * route.
      *
      * @param route the route being deleted.
-     * @param caller this must be this table's parent table.  
+     * @param caller this must be this table's parent table.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
     int delete_route(const IPRouteEntry<A> *route, RouteTable<A> *caller);
 
@@ -392,11 +395,9 @@ public:
      * RouteRegister returned by a prior call to register_route_range.
      * @param module the XRL target name of the module that is no
      * longer interested in being notified.
-     * @return bool true if the registration was found and removed,
-     * false otherwise.
+     * @return XORP_OK on success, XORP_ERROR otherwise.
      */
-    bool deregister_route_range(const IPNet<A>& subnet,
-				const string& module);
+    int deregister_route_range(const IPNet<A>& subnet, const string& module);
 
     /**
      * @return REGISTER_TABLE
@@ -413,10 +414,10 @@ private:
     RouteRegister<A>* add_registration(const IPNet<A>& net,
 				       const IPRouteEntry<A> *route,
 				       const string& module);
-    bool delete_registration(const IPNet<A>& net, const string& module);
-    bool notify_relevant_modules(bool add,
-				 const IPRouteEntry<A>& changed_route);
-    bool find_matches(const IPRouteEntry<A>& route);
+    int delete_registration(const IPNet<A>& net, const string& module);
+    int notify_relevant_modules(bool add,
+				const IPRouteEntry<A>& changed_route);
+    int find_matches(const IPRouteEntry<A>& route);
 
     void notify_invalidated(typename Trie<A, RouteRegister<A> *>::iterator iter);
     void notify_route_changed(typename Trie<A, RouteRegister<A> *>::iterator iter,

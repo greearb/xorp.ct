@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_deletion.cc,v 1.1 2003/09/27 10:42:40 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_deletion.cc,v 1.2 2003/09/27 22:32:46 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -67,9 +67,9 @@ DeletionTable<A>::add_route(const IPRouteEntry<A>& route,
 	= _ip_route_table->lookup_node(route.net());
     if (iter !=  _ip_route_table->end()) {
 	// We got an add route for a route that was waiting to be
-	//deleted.  Process this now - pass the deletion downstream,
-	//remove the route from our trie, then pass the new route
-	//downstream.
+	// deleted.  Process this now - pass the deletion downstream,
+	// remove the route from our trie, then pass the new route
+	// downstream.
 	const IPRouteEntry<A> *our_route = iter.payload();
 	_ip_route_table->erase(route.net());
 	_next_table->delete_route(our_route, this);
@@ -86,17 +86,18 @@ DeletionTable<A>::delete_route(const IPRouteEntry<A> *route,
 {
     XLOG_ASSERT(caller == _parent);
 
-    //The route MUST NOT be in our trie.
-    typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
-	= _ip_route_table->lookup_node(route->net());
-    XLOG_ASSERT(iter ==  _ip_route_table->end());
+    // The route MUST NOT be in our trie.
+    typename Trie<A, const IPRouteEntry<A>*>::iterator iter;
+    iter = _ip_route_table->lookup_node(route->net());
+    XLOG_ASSERT(iter == _ip_route_table->end());
 
     return _next_table->delete_route(route, this);
 }
 
 
 template<class A>
-void DeletionTable<A>::delete_all_routes() 
+void
+DeletionTable<A>::delete_all_routes() 
 {
     typename Trie<A, const IPRouteEntry<A>*>::iterator i;
     for (i = _ip_route_table->begin(); i != _ip_route_table->end(); i++) {
@@ -112,10 +113,10 @@ DeletionTable<A>::lookup_route(const IPNet<A>& net) const
 {
     const IPRouteEntry<A> *parent_route = _parent->lookup_route(net);
 
-    typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
-	= _ip_route_table->lookup_node(net);
+    typename Trie<A, const IPRouteEntry<A>*>::iterator iter;
+    iter = _ip_route_table->lookup_node(net);
 
-    if (parent_route) {
+    if (parent_route != NULL) {
 	// If we succeeded in looking up the route in the parent table,
 	// then the route MUST NOT be in our deletion table.
 	XLOG_ASSERT(iter == _ip_route_table->end());
@@ -135,10 +136,10 @@ DeletionTable<A>::lookup_route(const A& addr) const
 {
     const IPRouteEntry<A> *parent_route = _parent->lookup_route(addr);
 
-    typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
-	= _ip_route_table->find(addr);
+    typename Trie<A, const IPRouteEntry<A>*>::iterator iter;
+    iter = _ip_route_table->find(addr);
 
-    if (parent_route) {
+    if (parent_route != NULL) {
 	if (iter == _ip_route_table->end()) {
 	    return parent_route;
 	} else {
@@ -169,10 +170,13 @@ RouteRange<A>*
 DeletionTable<A>::lookup_route_range(const A& addr) const
 {
     const IPRouteEntry<A>* route;
-    typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
-	= _ip_route_table->find(addr);
+    typename Trie<A, const IPRouteEntry<A>*>::iterator iter;
+    iter = _ip_route_table->find(addr);
 
-    route = (iter == _ip_route_table->end()) ? NULL : iter.payload();
+    if (iter == _ip_route_table->end())
+	route = NULL;
+    else 
+	route = iter.payload();
 
     A bottom_addr, top_addr;
     _ip_route_table->find_bounds(addr, bottom_addr, top_addr);
@@ -183,7 +187,7 @@ DeletionTable<A>::lookup_route_range(const A& addr) const
     debug_msg("Deletion Table: %s returning upper bound for %s of %s\n",
 	      tablename().c_str(), addr.str().c_str(), top_addr.str().c_str());
 
-    //Merge our own route range with that of our parent.
+    // Merge our own route range with that of our parent.
     RouteRange<A>* parent_rr = _parent->lookup_route_range(addr);
     rr->merge(parent_rr);
     delete parent_rr;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_client.hh,v 1.3 2003/03/29 19:03:10 pavlin Exp $
+// $XORP: xorp/rib/rib_client.hh,v 1.4 2003/05/08 05:51:27 mjh Exp $
 
 #ifndef __RIB_RIB_CLIENT_HH__
 #define __RIB_RIB_CLIENT_HH__

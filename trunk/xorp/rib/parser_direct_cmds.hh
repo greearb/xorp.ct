@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.4 2003/07/04 19:59:51 pavlin Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.5 2003/09/27 22:32:45 mjh Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -99,7 +99,7 @@ public:
 	     << c_format("%d", _metric) << "\n";
 	int dummy = _rib.verify_route(_lookupaddr, _ifname, _nexthop, 
 				      (uint32_t)_metric);
-	if (dummy < 0) {
+	if (dummy != XORP_OK) {
 	    cerr << "RouteVerify Failed!\n";
 	    abort();
 	}

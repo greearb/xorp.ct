@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.21 2003/09/27 10:42:40 mjh Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.22 2003/09/27 22:32:46 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -39,28 +39,28 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router)
 {
     _urib4.initialize_export(&_urib4_clients_list);
     _urib4.initialize_register(&_register_server);
-    if (_urib4.add_igp_table("connected", "", "") < 0) {
+    if (_urib4.add_igp_table("connected", "", "") != XORP_OK) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib4");
 	return;
     }
 
     _mrib4.initialize_export(&_mrib4_clients_list);
     _mrib4.initialize_register(&_register_server);
-    if (_mrib4.add_igp_table("connected", "", "") < 0) {
+    if (_mrib4.add_igp_table("connected", "", "") != XORP_OK) {
 	XLOG_ERROR("Could not add igp table \"connected\" for mrib4");
 	return;
     }
 
     _urib6.initialize_export(&_urib6_clients_list);
     _urib6.initialize_register(&_register_server);
-    if (_urib6.add_igp_table("connected", "", "") < 0) {
+    if (_urib6.add_igp_table("connected", "", "") != XORP_OK) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib6");
 	return;
     }
 
     _mrib6.initialize_export(&_mrib6_clients_list);
     _mrib6.initialize_register(&_register_server);
-    if (_mrib6.add_igp_table("connected", "", "") < 0) {
+    if (_mrib6.add_igp_table("connected", "", "") != XORP_OK) {
 	XLOG_ERROR("Could not add igp table \"connected\" for mrib6");
 	return;
     }
@@ -89,7 +89,7 @@ RibManager::~RibManager()
 int
 RibManager::start()
 {
-    if (ProtoState::start() < 0)
+    if (ProtoState::start() != XORP_OK)
 	return (XORP_ERROR);
     
     _vif_manager.start();
@@ -178,25 +178,25 @@ RibManager::status_updater()
 int
 RibManager::new_vif(const string& vifname, const Vif& vif, string& err) 
 {
-    if (_urib4.new_vif(vifname, vif)) {
+    if (_urib4.new_vif(vifname, vif) != XORP_OK) {
 	err = (c_format("Failed to add vif \"%s\" to unicast IPv4 rib",
 			vifname.c_str()));
 	return XORP_ERROR;
     }
 
-    if (_mrib4.new_vif(vifname, vif)) {
+    if (_mrib4.new_vif(vifname, vif) != XORP_OK) {
 	err = (c_format("Failed to add vif \"%s\" to multicast IPv4 rib",
 			     vifname.c_str()));
 	return XORP_ERROR;
     }
 
-    if (_urib6.new_vif(vifname, vif)) {
+    if (_urib6.new_vif(vifname, vif) != XORP_OK) {
 	err = (c_format("Failed to add vif \"%s\" to unicast IPv6 rib",
 			vifname.c_str()));
 	return XORP_ERROR;
     }
 
-    if (_mrib6.new_vif(vifname, vif)) {
+    if (_mrib6.new_vif(vifname, vif) != XORP_OK) {
 	err = (c_format("Failed to add vif \"%s\" to multicast IPv6 rib",
 			     vifname.c_str()));
 	return XORP_ERROR;
@@ -207,25 +207,25 @@ RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
 int
 RibManager::delete_vif(const string& vifname, string& err) 
 {
-    if (_urib4.delete_vif(vifname)) {
+    if (_urib4.delete_vif(vifname) != XORP_OK) {
 	err = (c_format("Failed to delete vif \"%s\" from unicast IPv4 rib",
 			vifname.c_str()));
 	return XORP_ERROR;
     }
 
-    if (_mrib4.delete_vif(vifname)) {
+    if (_mrib4.delete_vif(vifname) != XORP_OK) {
 	err = (c_format("Failed to delete vif \"%s\" from multicast IPv4 rib",
 			     vifname.c_str()));
 	return XORP_ERROR;
     }
 
-    if (_urib6.delete_vif(vifname)) {
+    if (_urib6.delete_vif(vifname) != XORP_OK) {
 	err = (c_format("Failed to delete vif \"%s\" from unicast IPv6 rib",
 			vifname.c_str()));
 	return XORP_ERROR;
     }
 
-    if (_mrib6.delete_vif(vifname)) {
+    if (_mrib6.delete_vif(vifname) != XORP_OK) {
 	err = (c_format("Failed to delete vif \"%s\" from multicast IPv6 rib",
 			     vifname.c_str()));
 	return XORP_ERROR;
@@ -234,17 +234,17 @@ RibManager::delete_vif(const string& vifname, string& err)
 }
 
 int
-RibManager::add_vif_addr(const string& vifname,
-			 const IPv4& addr,
-			 const IPNet<IPv4>& subnet,
-			 string& err)
+RibManager::add_vif_address(const string& vifname,
+			    const IPv4& addr,
+			    const IPNet<IPv4>& subnet,
+			    string& err)
 {
-    if (_urib4.add_vif_address(vifname, addr, subnet)) {
+    if (_urib4.add_vif_address(vifname, addr, subnet) != XORP_OK) {
 	err = "Failed to add IPv4 Vif address to unicast RIB";
 	return XORP_ERROR;
     }
 
-    if (_mrib4.add_vif_address(vifname, addr, subnet)) {
+    if (_mrib4.add_vif_address(vifname, addr, subnet) != XORP_OK) {
 	err = "Failed to add IPv4 Vif address to multicast RIB";
 	return XORP_ERROR;
     }
@@ -253,16 +253,16 @@ RibManager::add_vif_addr(const string& vifname,
 }
 
 int
-RibManager::delete_vif_addr(const string& vifname,
-			    const IPv4& addr,
-			    string& err)
+RibManager::delete_vif_address(const string& vifname,
+			       const IPv4& addr,
+			       string& err)
 {
-    if (_urib4.delete_vif_address(vifname, addr)) {
+    if (_urib4.delete_vif_address(vifname, addr) != XORP_OK) {
 	err = "Failed to delete IPv4 Vif address from unicast RIB";
 	return XORP_ERROR;
     }
 
-    if (_mrib4.delete_vif_address(vifname, addr)) {
+    if (_mrib4.delete_vif_address(vifname, addr) != XORP_OK) {
 	err = "Failed to delete IPv4 Vif address from multicast RIB";
 	return XORP_ERROR;
     }
@@ -271,17 +271,17 @@ RibManager::delete_vif_addr(const string& vifname,
 }
 
 int
-RibManager::add_vif_addr(const string& vifname,
-			 const IPv6& addr,
-			 const IPNet<IPv6>& subnet,
-			 string& err)
+RibManager::add_vif_address(const string& vifname,
+			    const IPv6& addr,
+			    const IPNet<IPv6>& subnet,
+			    string& err)
 {
-    if (_urib6.add_vif_address(vifname, addr, subnet)) {
+    if (_urib6.add_vif_address(vifname, addr, subnet) != XORP_OK) {
 	err = "Failed to add IPv6 Vif address to unicast RIB";
 	return XORP_ERROR;
     }
 
-    if (_mrib6.add_vif_address(vifname, addr, subnet)) {
+    if (_mrib6.add_vif_address(vifname, addr, subnet) != XORP_OK) {
 	err = "Failed to add IPv6 Vif address to multicast RIB";
 	return XORP_ERROR;
     }
@@ -290,16 +290,16 @@ RibManager::add_vif_addr(const string& vifname,
 }
 
 int
-RibManager::delete_vif_addr(const string& vifname,
-			    const IPv6& addr,
-			    string& err)
+RibManager::delete_vif_address(const string& vifname,
+			       const IPv6& addr,
+			       string& err)
 {
-    if (_urib6.delete_vif_address(vifname, addr)) {
+    if (_urib6.delete_vif_address(vifname, addr) != XORP_OK) {
 	err = "Failed to delete IPv6 Vif address from unicast RIB";
 	return XORP_ERROR;
     }
 
-    if (_mrib6.delete_vif_address(vifname, addr)) {
+    if (_mrib6.delete_vif_address(vifname, addr) != XORP_OK) {
 	err = "Failed to delete IPv6 Vif address from multicast RIB";
 	return XORP_ERROR;
     }
