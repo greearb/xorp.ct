@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.13 2003/01/29 20:32:33 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.14 2003/01/29 22:17:10 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -27,7 +27,7 @@
 void
 dump_bytes(const uint8_t *d, size_t l)
 {
-        printf("DEBUG_BYTES FN : %p %d\n",d,l);
+        printf("DEBUG_BYTES FN : %p %u\n", d, (uint32_t)l);
 	for (u_int i=0;i<l;i++)
 	    printf("%x ",*((const char *)d + i));
 	printf("\n");
@@ -84,8 +84,8 @@ UpdatePacket::big_enough() const
 
     //quick and dirty check
     if (((_wr_list.size() + _nlri_list.size())* 4) > 2048) {
-	debug_msg("withdrawn size = %d\n", _wr_list.size());
-	debug_msg("nlri size = %d\n", _wr_list.size());
+	debug_msg("withdrawn size = %u\n", (uint32_t)_wr_list.size());
+	debug_msg("nlri size = %u\n", (uint32_t)_wr_list.size());
 	return true;
     }
     return false;
@@ -117,8 +117,9 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
     if (len > MAXPACKETSIZE)	// XXX
 	XLOG_FATAL("Attempt to encode a packet that is too big");
 
-    debug_msg("Path Att: %d Withdrawn Routes: %d Net Reach: %d length: %d\n",
-	      pa_list().size(),_wr_list.size(),_nlri_list.size(), len);
+    debug_msg("Path Att: %u Withdrawn Routes: %u Net Reach: %u length: %u\n",
+	      (uint32_t)pa_list().size(), (uint32_t)_wr_list.size(),
+	      (uint32_t)_nlri_list.size(), (uint32_t)len);
     d = basic_encode(len, d);	// allocate buffer and fill header
 
     // fill withdraw list length XXX (bytes ?)
@@ -164,15 +165,16 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
 
     if (MINUPDATEPACKET + wr_len > l)
 	xorp_throw(CorruptMessage,
-		   c_format("Unreachable routes length is bogus %d > %d",
-			    wr_len, l - MINUPDATEPACKET),
+		   c_format("Unreachable routes length is bogus %u > %u",
+			    (uint32_t)wr_len, (uint32_t)(l - MINUPDATEPACKET)),
 		   UPDATEMSGERR, ATTRLEN);
     
     size_t pa_len = (d[wr_len+2] << 8) + d[wr_len+3];	// pathatt length
     if (MINUPDATEPACKET + pa_len + wr_len > l)
 	xorp_throw(CorruptMessage,
-		   c_format("Pathattr length is bogus %d > %d",
-			    pa_len, l - wr_len - MINUPDATEPACKET),
+		   c_format("Pathattr length is bogus %u > %u",
+			    (uint32_t)pa_len,
+			    (uint32_t)(l - wr_len - MINUPDATEPACKET)),
 		UPDATEMSGERR, ATTRLEN);
 
     size_t nlri_len = l - MINUPDATEPACKET - pa_len - wr_len;
@@ -195,7 +197,7 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
     }
     if (wr_len != 0)
 	xorp_throw(CorruptMessage,
-		   c_format("leftover bytes %d", wr_len),
+		   c_format("leftover bytes %u", (uint32_t)wr_len),
 		   UPDATEMSGERR, ATTRLEN);
    
     // Start of decoding of Path Attributes
@@ -204,7 +206,7 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
     while (pa_len > 0) {
 	size_t used = 0;
         PathAttribute *pa = PathAttribute::create(d, pa_len, used);
-	debug_msg("attribute size %d\n", used);
+	debug_msg("attribute size %u\n", (uint32_t)used);
 	if (used == 0)
 	    xorp_throw(CorruptMessage,
 		   c_format("failed to read path attribute"),
@@ -229,20 +231,20 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
 		       " in update message\n").c_str());
     }
     /* End of decoding of Network Reachability */
-    debug_msg("No of withdrawn routes %d. No of path attributes %d. "
-		"No of networks %d.\n",
-		  _wr_list.size(), pa_list().size(),
-		  _nlri_list.size());
+    debug_msg("No of withdrawn routes %u. No of path attributes %u. "
+		"No of networks %u.\n",
+		  (uint32_t)_wr_list.size(), (uint32_t)pa_list().size(),
+		  (uint32_t)_nlri_list.size());
 }
 
 string
 UpdatePacket::str() const
 {
     string s = "Update Packet\n";
-    debug_msg("No of withdrawn routes %d. No of path attributes %d. "
-		"No of networks %d.\n",
-	      _wr_list.size(), pa_list().size(),
-	      _nlri_list.size());
+    debug_msg("No of withdrawn routes %u. No of path attributes %u. "
+		"No of networks %u.\n",
+	      (uint32_t)_wr_list.size(), (uint32_t)pa_list().size(),
+	      (uint32_t)_nlri_list.size());
 
     list <BGPUpdateAttrib>::const_iterator wi = _wr_list.begin();
     while (wi != _wr_list.end()) {
