@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.2 2003/01/17 03:46:41 pavlin Exp $"
 
 #include "config.h"
 #include "urib_module.h"
@@ -944,7 +944,7 @@ RouteTable<A> *RIB<A>::track_forward(RouteTable<A> *rt, int typemask) const {
 template<class A>
 void RIB<A>::print_rib() const {
 #ifdef DEBUG_LOGGING
-    typedef map<string, RouteTable<A> *>::const_iterator CI;
+    typedef typename map<string, RouteTable<A> *>::const_iterator CI;
     CI pair;
     pair = _tables.begin(); 
     //this is printf not debug_msg for a reason.

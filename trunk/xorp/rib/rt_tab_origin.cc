@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.2 2003/01/17 03:46:42 pavlin Exp $"
 
 #include "urib_module.h"
 #include "libxorp/xlog.h"
@@ -88,7 +88,7 @@ OriginTable<A>::add_route(const IPRouteEntry<A> &route)
 #endif
     _ip_route_table.insert(route.net(), routecopy);
     debug_msg("AFTER:\n");
-#if DEBUG_LOGGING
+#ifdef DEBUG_LOGGING
     _ip_route_table.print();
 #endif
 

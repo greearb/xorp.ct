@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.2 2002/12/13 20:01:05 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.3 2003/01/17 03:46:42 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rt_tab_register.hh"
@@ -388,7 +388,7 @@ RegisterTable<A>::print()
 {
 #ifdef DEBUG_LOGGING
     printf("%s\n", str().c_str());
-    Trie<A, RouteRegister<A>*>::iterator i;
+    typename Trie<A, RouteRegister<A>*>::iterator i;
     for (i = _ipregistry.begin(); i != _ipregistry.end(); i++) {
 	printf("----\n");
 	printf("%s\n", i.payload()->str().c_str());
