@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.11 2003/08/14 15:23:25 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.12 2003/08/21 23:49:14 fred Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -73,7 +73,9 @@ public:
     IfConfigGet&	ifc_get() { return *_ifc_get; }
     IfConfigSet&	ifc_set() { return *_ifc_set; }
     IfConfigObserver&	ifc_observer() { return *_ifc_observer; }
-
+    
+    IfConfigGet&	ifc_get_ioctl() { return _ifc_get_ioctl; }
+    
     /**
      * Setup the unit to behave as dummy (for testing purpose).
      * 
