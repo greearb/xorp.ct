@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.4 2003/09/22 15:44:20 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.5 2003/10/13 23:32:41 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -125,10 +125,22 @@ public:
      * Use sparingly, with caution, and at your own risk.
      */
     void force_recvmsg(int flags);
-    
-    typedef list<NetlinkSocketObserver*> ObserverList;
+
+    /**
+     * Set the netlink multicast groups to listen for on the netlink socket.
+     *
+     * Note that this method must be called before method start() is called.
+     * If this method is not called, then the netlink socket will listen
+     * to the default set of netlink multicast groups (the empty set).
+     *
+     * @param v the set of netlink multicast groups to listen for on the
+     * netlink socket.
+     */
+    void	set_nl_groups(uint32_t v) { _nl_groups = v; }
 
 private:
+    typedef list<NetlinkSocketObserver*> ObserverList;
+
     /**
      * Read data available for NetlinkSocket and invoke
      * NetlinkSocketObserver::nlsock_data() on all observers of netlink
@@ -152,6 +164,8 @@ private:
     
     static uint16_t _instance_cnt;
     static pid_t    _pid;
+
+    uint32_t	    _nl_groups;	// The netlink multicast groups to listen for
 
     friend class NetlinkSocketPlumber; // class that hooks observers in and out
 };
