@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.6 2003/01/29 05:44:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.7 2003/01/30 03:40:13 pavlin Exp $"
 
 
 //
@@ -149,25 +149,93 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 	return (XORP_ERROR);
     }
     
+    if (! assert_group_addr.is_multicast()) {
+	XLOG_WARNING("RX %s from %s to %s: "
+		     "invalid assert group address = %s",
+		     PIMTYPE2ASCII(PIM_ASSERT),
+		     cstring(src), cstring(dst),
+		     cstring(assert_group_addr));
+	return (XORP_ERROR);
+    }
+    
+    if (! ((assert_source_addr == IPvX::ZERO(family()))
+	   || assert_source_addr.is_unicast())) {
+	XLOG_WARNING("RX %s from %s to %s: "
+		     "invalid assert source address = %s",
+		     PIMTYPE2ASCII(PIM_ASSERT),
+		     cstring(src), cstring(dst),
+		     cstring(assert_source_addr));
+	return (XORP_ERROR);
+    }
+    
+    if (! assert_metric->rpt_bit_flag()) {
+	// (S,G) Assert received. The assert source address must be unicast.
+	if (! assert_source_addr.is_unicast()) {
+	    XLOG_WARNING("RX %s from %s to %s: "
+			 "invalid unicast assert source address = %s",
+			 PIMTYPE2ASCII(PIM_ASSERT),
+			 cstring(src), cstring(dst),
+			 cstring(assert_source_addr));
+	    return (XORP_ERROR);
+	}
+    }
+    
     if (assert_metric->rpt_bit_flag()) {
 	//
 	// (*,G) Assert received
 	//
 	// First try to apply this assert to the (S,G) assert state machine.
 	// Only if the (S,G) assert state machine is in NoInfo state as
-	// a result of receiving this this message, then apply it to the (*,G)
+	// a result of receiving this message, then apply it to the (*,G)
 	// assert state machine.
 	//
-	pim_mre_sg = pim_mrt().pim_mre_find(assert_source_addr,
-					    assert_group_addr,
-					    PIM_MRE_SG, 0);
-	if (pim_mre_sg != NULL) {
-	    int ret_value = pim_mre_sg->assert_process(this, assert_metric);
-	    if (! pim_mre_sg->is_assert_noinfo_state(vif_index()))
-		return (ret_value);
-	}
+	do {
+	    bool is_sg_noinfo_old, is_sg_noinfo_new;
+	    
+	    if (! assert_source_addr.is_unicast())
+		break;	// Assert source address is not unicast
+	    //
+	    // XXX: strictly speaking, we should try to create
+	    // the (S,G) state, and explicitly compare the old
+	    // and new (S,G) assert state.
+	    // However, we use the observation that if there is no (S,G)
+	    // routing state, then the (*,G) assert message will not change
+	    // the (S,G) assert state mchine. Note that this observation is
+	    // based on the specific details of the (S,G) assert state machine.
+	    // In particular, the action in NoInfo state when
+	    // "Receive Assert with RPTbit set and CouldAssert(S,G,I)".
+	    // If there is no (S,G) routing state, then the SPTbit cannot
+	    // be true, and therefore CouldAssert(S,G,I) also cannot be true.
+	    //
+	    pim_mre_sg = pim_mrt().pim_mre_find(assert_source_addr,
+						assert_group_addr,
+						PIM_MRE_SG, 0);
+	    if (pim_mre_sg == NULL)
+		break;		// XXX: see the above comment about not
+				// creating the (S,G) routing state.
+	    
+	    // Compute the old and new (S,G) assert state.
+	    is_sg_noinfo_old = pim_mre_sg->is_assert_noinfo_state(vif_index());
+	    ret_value = pim_mre_sg->assert_process(this, assert_metric);
+	    is_sg_noinfo_new = pim_mre_sg->is_assert_noinfo_state(vif_index());
+	    
+	    //
+	    // If there was transaction in the (S,G) assert state,
+	    // or if the new (S,G) assert state is not NoInfo, then
+	    // don't apply this message to the (*,G) assert state machine.
+	    // In other words, both the old and the new state in the
+	    // (S,G) assert state machine must be in NoInfo state to
+	    // apply the (*,G) assert message to the (*,G) assert state
+	    // machine.
+	    //
+	    if (is_sg_noinfo_old && is_sg_noinfo_new)
+		break;
+	    return (ret_value);
+	} while (false);
+	
 	//
-	// The (S,G) assert state machine is in NoInfo state.
+	// No transaction occured in the (S,G) assert state machine, and 
+	// it is in NoInfo state.
 	// Apply the assert to the (*,G) assert state machine.
 	//
 	pim_mre_wc = pim_mrt().pim_mre_find(assert_source_addr,
