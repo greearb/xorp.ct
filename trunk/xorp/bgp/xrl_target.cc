@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.33 2004/12/17 01:31:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.34 2004/12/17 09:49:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -202,11 +202,17 @@ XrlBgpTarget::bgp_0_2_add_peer(
     if(!_bgp.processes_ready())
 	return XrlCmdError::COMMAND_FAILED("FEA or RIB not running");
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
-
-    BGPPeerData *pd = new BGPPeerData(iptuple,
-				      AsNum(static_cast<uint16_t>(as)),
-				      next_hop, holdtime);
+    
+    BGPPeerData *pd = 0;
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+	pd = new BGPPeerData(iptuple, AsNum(static_cast<uint16_t>(as)),
+			     next_hop, holdtime);
+    } catch(XorpException& e) {
+	delete pd;
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     if(!_bgp.create_peer(pd)) {
 	delete pd;
@@ -243,10 +249,15 @@ XrlBgpTarget::bgp_0_2_enable_peer(
     debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
 	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
 
-    if(!_bgp.enable_peer(iptuple))
-	return XrlCmdError::COMMAND_FAILED();
+	if(!_bgp.enable_peer(iptuple))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -262,10 +273,15 @@ XrlBgpTarget::bgp_0_2_disable_peer(
     debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
 	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
 
-    if(!_bgp.disable_peer(iptuple))
-	return XrlCmdError::COMMAND_FAILED();
+	if(!_bgp.disable_peer(iptuple))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -284,10 +300,15 @@ XrlBgpTarget::bgp_0_2_set_nexthop6(
 	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
 	      cstring(next_hop));
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
 
-    if(!_bgp.set_nexthop6(iptuple, next_hop))
-	return XrlCmdError::COMMAND_FAILED();
+	if(!_bgp.set_nexthop6(iptuple, next_hop))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -304,10 +325,15 @@ XrlBgpTarget::bgp_0_2_get_nexthop6(
     debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
 	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
 
-    if(!_bgp.get_nexthop6(iptuple, next_hop))
-	return XrlCmdError::COMMAND_FAILED();
+	if(!_bgp.get_nexthop6(iptuple, next_hop))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -324,10 +350,15 @@ XrlBgpTarget::bgp_0_2_set_peer_state(
     debug_msg("local ip %s local port %d peer ip %s peer port %d toggle %d\n",
 	  local_ip.c_str(), local_port, peer_ip.c_str(), peer_port, toggle);
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
 
-    if(!_bgp.set_peer_state(iptuple, toggle))
-	return XrlCmdError::COMMAND_FAILED();
+	if(!_bgp.set_peer_state(iptuple, toggle))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -345,14 +376,18 @@ XrlBgpTarget::bgp_0_2_set_peer_md5_password(
 	  local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
 	  password.c_str());
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
 
-    if(!_bgp.set_peer_md5_password(iptuple, password))
-	return XrlCmdError::COMMAND_FAILED();
+	if(!_bgp.set_peer_md5_password(iptuple, password))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
-
 
 XrlCmdError 
 XrlBgpTarget::bgp_0_2_activate(
@@ -365,10 +400,15 @@ XrlBgpTarget::bgp_0_2_activate(
     debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
 	  local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
 
-    if(!_bgp.activate(iptuple))
-	return XrlCmdError::COMMAND_FAILED();
+	if(!_bgp.activate(iptuple))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -387,10 +427,15 @@ XrlBgpTarget::bgp_0_2_next_hop_rewrite_filter(
 	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
 	      next_hop.str().c_str());
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
 
-    if(!_bgp.next_hop_rewrite_filter(iptuple, next_hop))
-	return XrlCmdError::COMMAND_FAILED();
+	if(!_bgp.next_hop_rewrite_filter(iptuple, next_hop))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -507,10 +552,17 @@ XrlBgpTarget::bgp_0_2_get_peer_id(
     debug_msg("local ip %s local port %d peer ip %s peer port %d\n",
 	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
-    if (!_bgp.get_peer_id(iptuple, peer_id)) {
-	return XrlCmdError::COMMAND_FAILED();
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if (!_bgp.get_peer_id(iptuple, peer_id)) {
+	    return XrlCmdError::COMMAND_FAILED();
+	}
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
     }
+
     return XrlCmdError::OKAY();
 }
 
@@ -525,10 +577,18 @@ XrlBgpTarget::bgp_0_2_get_peer_status(
 				      uint32_t&	peer_state, 
 				      uint32_t&	admin_status)
 {
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
-    if (!_bgp.get_peer_status(iptuple, peer_state, admin_status)) {
-	return XrlCmdError::COMMAND_FAILED();
+
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if (!_bgp.get_peer_status(iptuple, peer_state, admin_status)) {
+	    return XrlCmdError::COMMAND_FAILED();
+	}
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
     }
+
     return XrlCmdError::OKAY();
 }
 
@@ -542,10 +602,17 @@ XrlBgpTarget::bgp_0_2_get_peer_negotiated_version(
 						  // Output values, 
 						  int32_t& neg_version)
 {
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
-    if (!_bgp.get_peer_negotiated_version(iptuple, neg_version)) {
-	return XrlCmdError::COMMAND_FAILED();
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if (!_bgp.get_peer_negotiated_version(iptuple, neg_version)) {
+	    return XrlCmdError::COMMAND_FAILED();
+	}
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
     }
+
     return XrlCmdError::OKAY();
 }
 
@@ -559,10 +626,17 @@ XrlBgpTarget::bgp_0_2_get_peer_as(
 				  // Output values, 
 				  uint32_t& peer_as)
 {
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
-    if (!_bgp.get_peer_as(iptuple, peer_as)) {
-	return XrlCmdError::COMMAND_FAILED();
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if (!_bgp.get_peer_as(iptuple, peer_as)) {
+	    return XrlCmdError::COMMAND_FAILED();
+	}
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
     }
+
     return XrlCmdError::OKAY();
 }
 
@@ -581,14 +655,21 @@ XrlBgpTarget::bgp_0_2_get_peer_msg_stats(
 					 uint32_t&	last_error, 
 					 uint32_t&	in_update_elapsed)
 {
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
-    uint16_t last_error_short;
-    if (!_bgp.get_peer_msg_stats(iptuple, in_updates, out_updates,
-				 in_msgs, out_msgs, last_error_short, 
-				 in_update_elapsed)) {
-	return XrlCmdError::COMMAND_FAILED();
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	uint16_t last_error_short;
+	if (!_bgp.get_peer_msg_stats(iptuple, in_updates, out_updates,
+				     in_msgs, out_msgs, last_error_short, 
+				     in_update_elapsed)) {
+	    return XrlCmdError::COMMAND_FAILED();
+	}
+	last_error = last_error_short;
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
     }
-    last_error = last_error_short;
+
     return XrlCmdError::OKAY();
 }
 
@@ -603,10 +684,16 @@ XrlBgpTarget::bgp_0_2_get_peer_established_stats(
 						 uint32_t& transitions, 
 						 uint32_t& established_time)
 {
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
-    if (!_bgp.get_peer_established_stats(iptuple, transitions, 
-					 established_time)) {
-	return XrlCmdError::COMMAND_FAILED();
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if (!_bgp.get_peer_established_stats(iptuple, transitions,
+					     established_time)) {
+	    return XrlCmdError::COMMAND_FAILED();
+	}
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
     }
     return XrlCmdError::OKAY();
 }
@@ -615,9 +702,9 @@ XrlCmdError
 XrlBgpTarget::bgp_0_2_get_peer_timer_config(
 					    // Input values, 
 					    const string&	local_ip, 
-					    const uint32_t& local_port, 
+					    const uint32_t&	local_port, 
 					    const string&	peer_ip, 
-					    const uint32_t& peer_port, 
+					    const uint32_t&	peer_port, 
 					    // Output values, 
 					    uint32_t& retry_interval, 
 					    uint32_t& hold_time, 
@@ -627,12 +714,17 @@ XrlBgpTarget::bgp_0_2_get_peer_timer_config(
 					    uint32_t& min_as_origin_interval,
 					    uint32_t& min_route_adv_interval)
 {
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
-    if (!_bgp.get_peer_timer_config(iptuple, retry_interval, hold_time,
-				    keep_alive, hold_time_conf,
-				    keep_alive_conf, min_as_origin_interval,
-				    min_route_adv_interval)) {
-	return XrlCmdError::COMMAND_FAILED();
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+	if (!_bgp.get_peer_timer_config(iptuple, retry_interval, hold_time,
+					keep_alive, hold_time_conf,
+					keep_alive_conf, min_as_origin_interval,
+					min_route_adv_interval)) {
+	    return XrlCmdError::COMMAND_FAILED();
+	}
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
     }
     return XrlCmdError::OKAY();
 }
@@ -857,10 +949,15 @@ XrlCmdError XrlBgpTarget::bgp_0_2_set_parameter(
 	      local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
 	      parameter.c_str(), toggle ? "set" : "unset");
 
-    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
 
-    if(!_bgp.set_parameter(iptuple,parameter, toggle))
-	return XrlCmdError::COMMAND_FAILED();
+	if(!_bgp.set_parameter(iptuple,parameter, toggle))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
