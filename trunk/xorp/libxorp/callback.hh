@@ -5,7 +5,7 @@
  * This file is PROGRAMMATICALLY GENERATED.
  * 
  * This instance was generated with:
- *      /home/puma/u0/hodson/src/xorp/libxorp/callback-gen.py -b 6 -l 12 
+ *      /home/tigger/u0/atanu/xorp/xorp/libxorp/callback-gen.py -b 6 -l 13 
  */
 
 /**
@@ -10876,6 +10876,827 @@ template <class R, class O, class A1, class A2, class A3, class A4, class A5, cl
 dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
     return XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr(new XorpConstMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6));
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Code relating to callbacks with 13 late args
+//
+
+/**
+ * @short Base class for callbacks with 13 dispatch time args.
+ */
+template<class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+struct XorpCallback13 {
+    typedef ref_ptr<XorpCallback13> RefPtr;
+
+    XorpCallback13(const char* file, int line)
+	: _file(file), _line(line) {}
+    virtual ~XorpCallback13() {}
+    virtual R dispatch(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) = 0;
+    const char* file() const		{ return _file; }
+    int line() const			{ return _line; }
+private:
+    const char* _file;
+    int         _line;
+};
+
+/**
+ * @short Callback object for functions with 13 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+struct XorpFunctionCallback13B0 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13);
+    XorpFunctionCallback13B0(const char* file, int line, F f)
+	: XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line),
+	  _f(f) 
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13); } 
+protected:
+    F   _f;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 13 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13)) {
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B0<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line, f));
+}
+
+/**
+ * @short Callback object for  member methods with 13 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+struct XorpMemberCallback13B0 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) ;
+    XorpMemberCallback13B0(const char* file, int line, O *o, M m)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13))
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line, o, p));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13))
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line, &o, p));
+}
+
+
+/**
+ * @short Callback object for  const member methods with 13 dispatch time
+ * arguments and 0 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
+struct XorpConstMemberCallback13B0 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13)  const;
+    XorpConstMemberCallback13B0(const char* file, int line, O *o, M m)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) const)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line, o, p));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 0 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) const)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line, &o, p));
+}
+
+
+/**
+ * @short Callback object for functions with 13 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1>
+struct XorpFunctionCallback13B1 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1);
+    XorpFunctionCallback13B1(const char* file, int line, F f, BA1 ba1)
+	: XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line),
+	  _f(f), _ba1(ba1) 
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1); } 
+protected:
+    F   _f;
+    BA1 _ba1;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 13 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1>
+typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1), BA1 ba1) {
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B1<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(file, line, f, ba1));
+}
+
+/**
+ * @short Callback object for  member methods with 13 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1>
+struct XorpMemberCallback13B1 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1) ;
+    XorpMemberCallback13B1(const char* file, int line, O *o, M m, BA1 ba1)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1), BA1 ba1)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(file, line, o, p, ba1));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1), BA1 ba1)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(file, line, &o, p, ba1));
+}
+
+
+/**
+ * @short Callback object for  const member methods with 13 dispatch time
+ * arguments and 1 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1>
+struct XorpConstMemberCallback13B1 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1)  const;
+    XorpConstMemberCallback13B1(const char* file, int line, O *o, M m, BA1 ba1)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1) const, BA1 ba1)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(file, line, o, p, ba1));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 1 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1) const, BA1 ba1)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(file, line, &o, p, ba1));
+}
+
+
+/**
+ * @short Callback object for functions with 13 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2>
+struct XorpFunctionCallback13B2 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2);
+    XorpFunctionCallback13B2(const char* file, int line, F f, BA1 ba1, BA2 ba2)
+	: XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line),
+	  _f(f), _ba1(ba1), _ba2(ba2) 
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2); } 
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 13 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2>
+typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2), BA1 ba1, BA2 ba2) {
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B2<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(file, line, f, ba1, ba2));
+}
+
+/**
+ * @short Callback object for  member methods with 13 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2>
+struct XorpMemberCallback13B2 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2) ;
+    XorpMemberCallback13B2(const char* file, int line, O *o, M m, BA1 ba1, BA2 ba2)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2), BA1 ba1, BA2 ba2)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(file, line, o, p, ba1, ba2));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2), BA1 ba1, BA2 ba2)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(file, line, &o, p, ba1, ba2));
+}
+
+
+/**
+ * @short Callback object for  const member methods with 13 dispatch time
+ * arguments and 2 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2>
+struct XorpConstMemberCallback13B2 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2)  const;
+    XorpConstMemberCallback13B2(const char* file, int line, O *o, M m, BA1 ba1, BA2 ba2)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2) const, BA1 ba1, BA2 ba2)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(file, line, o, p, ba1, ba2));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 2 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2) const, BA1 ba1, BA2 ba2)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(file, line, &o, p, ba1, ba2));
+}
+
+
+/**
+ * @short Callback object for functions with 13 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3>
+struct XorpFunctionCallback13B3 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3);
+    XorpFunctionCallback13B3(const char* file, int line, F f, BA1 ba1, BA2 ba2, BA3 ba3)
+	: XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3) 
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3); } 
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 13 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3>
+typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3) {
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B3<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(file, line, f, ba1, ba2, ba3));
+}
+
+/**
+ * @short Callback object for  member methods with 13 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3>
+struct XorpMemberCallback13B3 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3) ;
+    XorpMemberCallback13B3(const char* file, int line, O *o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(file, line, o, p, ba1, ba2, ba3));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(file, line, &o, p, ba1, ba2, ba3));
+}
+
+
+/**
+ * @short Callback object for  const member methods with 13 dispatch time
+ * arguments and 3 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3>
+struct XorpConstMemberCallback13B3 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3)  const;
+    XorpConstMemberCallback13B3(const char* file, int line, O *o, M m, BA1 ba1, BA2 ba2, BA3 ba3)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(file, line, o, p, ba1, ba2, ba3));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 3 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(file, line, &o, p, ba1, ba2, ba3));
+}
+
+
+/**
+ * @short Callback object for functions with 13 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4>
+struct XorpFunctionCallback13B4 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4);
+    XorpFunctionCallback13B4(const char* file, int line, F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	: XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) 
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3, _ba4); } 
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 13 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4>
+typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4) {
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B4<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(file, line, f, ba1, ba2, ba3, ba4));
+}
+
+/**
+ * @short Callback object for  member methods with 13 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4>
+struct XorpMemberCallback13B4 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4) ;
+    XorpMemberCallback13B4(const char* file, int line, O *o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3, _ba4); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(file, line, o, p, ba1, ba2, ba3, ba4));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(file, line, &o, p, ba1, ba2, ba3, ba4));
+}
+
+
+/**
+ * @short Callback object for  const member methods with 13 dispatch time
+ * arguments and 4 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4>
+struct XorpConstMemberCallback13B4 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4)  const;
+    XorpConstMemberCallback13B4(const char* file, int line, O *o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3, _ba4); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(file, line, o, p, ba1, ba2, ba3, ba4));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 4 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(file, line, &o, p, ba1, ba2, ba3, ba4));
+}
+
+
+/**
+ * @short Callback object for functions with 13 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpFunctionCallback13B5 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5);
+    XorpFunctionCallback13B5(const char* file, int line, F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	: XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) 
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3, _ba4, _ba5); } 
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+    BA5 _ba5;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 13 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5>
+typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5) {
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B5<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(file, line, f, ba1, ba2, ba3, ba4, ba5));
+}
+
+/**
+ * @short Callback object for  member methods with 13 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpMemberCallback13B5 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5) ;
+    XorpMemberCallback13B5(const char* file, int line, O *o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3, _ba4, _ba5); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(file, line, o, p, ba1, ba2, ba3, ba4, ba5));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(file, line, &o, p, ba1, ba2, ba3, ba4, ba5));
+}
+
+
+/**
+ * @short Callback object for  const member methods with 13 dispatch time
+ * arguments and 5 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5>
+struct XorpConstMemberCallback13B5 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5)  const;
+    XorpConstMemberCallback13B5(const char* file, int line, O *o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3, _ba4, _ba5); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(file, line, o, p, ba1, ba2, ba3, ba4, ba5));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 5 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(file, line, &o, p, ba1, ba2, ba3, ba4, ba5));
+}
+
+
+/**
+ * @short Callback object for functions with 13 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpFunctionCallback13B6 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (*F)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6);
+    XorpFunctionCallback13B6(const char* file, int line, F f, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	: XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line),
+	  _f(f), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) 
+    {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return (*_f)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6); } 
+protected:
+    F   _f;
+    BA1 _ba1;
+    BA2 _ba2;
+    BA3 _ba3;
+    BA4 _ba4;
+    BA5 _ba5;
+    BA6 _ba6;
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ * function with 13 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, R (*f)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6) {
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpFunctionCallback13B6<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, f, ba1, ba2, ba3, ba4, ba5, ba6));
+}
+
+/**
+ * @short Callback object for  member methods with 13 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpMemberCallback13B6 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6) ;
+    XorpMemberCallback13B6(const char* file, int line, O *o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+    BA6 _ba6;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  member function with 13 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6));
+}
+
+
+/**
+ * @short Callback object for  const member methods with 13 dispatch time
+ * arguments and 6 bound (stored) arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
+struct XorpConstMemberCallback13B6 : public XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13> {
+    typedef R (O::*M)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6)  const;
+    XorpConstMemberCallback13B6(const char* file, int line, O *o, M m, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+	 : XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(file, line), 
+	  _o(o), _m(m), _ba1(ba1), _ba2(ba2), _ba3(ba3), _ba4(ba4), _ba5(ba5), _ba6(ba6) {}
+    R dispatch(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10, A11 a11, A12 a12, A13 a13) { return ((*_o).*_m)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, _ba1, _ba2, _ba3, _ba4, _ba5, _ba6); }
+protected:
+    O	*_o;	// Callback's target object
+    M	 _m;	// Callback's target method
+    BA1 _ba1;	// Bound argument
+    BA2 _ba2;	// Bound argument
+    BA3 _ba3;	// Bound argument
+    BA4 _ba4;	// Bound argument
+    BA5 _ba5;	// Bound argument
+    BA6 _ba6;	// Bound argument
+};
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O *o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6));
+}
+
+
+/**
+ * Factory function that creates a callback object targetted at a
+ *  const member function with 13 dispatch time arguments and 6 bound arguments.
+ */
+template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
+dbg_callback(const char* file, int line, O &o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+{
+    return XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr(new XorpConstMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6));
 }
 
 
