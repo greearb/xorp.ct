@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.3 2003/05/21 02:53:30 pavlin Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.4 2003/11/06 01:21:38 pavlin Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -50,19 +50,27 @@
  * argument is not representable as an unsigned char and doesn't have the
  * value of EOF.
  */
-int xorp_isalnum(int c);
-int xorp_isalpha(int c);
-int xorp_isblank(int c);
-int xorp_iscntrl(int c);
-int xorp_isdigit(int c);
-int xorp_isgraph(int c);
-int xorp_islower(int c);
-int xorp_isprint(int c);
-int xorp_ispunct(int c);
-int xorp_isspace(int c);
-int xorp_isupper(int c);
-int xorp_isxdigit(int c);
-int xorp_tolower(int c);
-int xorp_toupper(int c);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int xorp_isalnum(int c);
+extern int xorp_isalpha(int c);
+extern int xorp_isblank(int c);
+extern int xorp_iscntrl(int c);
+extern int xorp_isdigit(int c);
+extern int xorp_isgraph(int c);
+extern int xorp_islower(int c);
+extern int xorp_isprint(int c);
+extern int xorp_ispunct(int c);
+extern int xorp_isspace(int c);
+extern int xorp_isupper(int c);
+extern int xorp_isxdigit(int c);
+extern int xorp_tolower(int c);
+extern int xorp_toupper(int c);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __LIBXORP_UTILITY_H__ */
