@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.16 2003/04/15 22:52:00 kohler Exp $
+% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.17 2003/04/16 00:25:22 jcardona Exp $
 %
 
 \documentclass[11pt]{article}
@@ -294,50 +294,102 @@ Interprocess communication in \xorp is achieved using XRLs. In this
 section we will consider what should be done when an XRL call fails
 due to a communication error.
 
+XRLs can be sent over unreliable transports such as UDP or reliable
+transports such as TCP. The type of transport that should be used will
+be specified when defining the interface. In the case of reliable
+transport, the XRL library and transport mechanism together mask certain
+errors, reducing the error cases that must be handled by the application.
+The cost is generally higher latency and less flexibility.
+
 All XRL calls will ultimately get a response. In the normal case the
 response returns the status of the call (good or bad). In addition to
 error responses produced by the application, the XRL library can also
 return the following error responses:
+
 \begin{itemize}
-\item NO\_FINDER
-\item RESOLVE\_FAILED
-\item SEND\_FAILED
-\item REPLY\_TIMED\_OUT
-\item FATAL\_TRANSPORT\_ERROR
+
+\item NO\_FINDER -- This error occurs when a \xorp process cannot find the
+\finder. This error always indicates a serious problem with the router. The
+application MAY treat this error as fatal.
+
+\item TARGET\_FAILED -- This error occurs when a \xorp process tries to
+communicate with another process that does not exist, or has not yet
+initialized itself. The XRL library will, by default, hide transient
+TARGET\_FAILED errors through a limited retransmission policy, in which
+case TARGET\_FAILED errors indicate serious problems with the router. The
+application MAY control this policy by changing the maximum retransmission
+time, in order to handle any necessary retransmissions itself.
+
+\item RESOLVE\_FAILED -- This error occurs when a \xorp process tries to
+communicate with a nonexistent interface on another process. That is, the
+XRL's target process does exist, but the target does not implement the
+requested interface. RESOLVE\_FAILED generally indicates a version mismatch
+between two processes. This error may be considered fatal, or (for example)
+the application might react by trying to access an older version of the
+interface. The application can expect, however, that RESOLVE\_FAILED errors
+are not transient: If an XRL access gets a RESOLVE\_FAILED error, then that
+XRL will always result in a RESOLVE\_FAILED error, at least until the
+target process restarts.
+
+\item SEND\_FAILED -- This error occurs when the XRL library temporarily
+cannot send a particular XRL. Usually, this will be because of congestion
+or a slow receiver: the kernel has run out of buffer space. Note that the
+XRL library performs some buffering itself, to ensure that XRL requests are
+either completely transmitted or not transmitted at all. (There's no such
+thing as a SEND\_PARTIALLY\_FAILED error.)
+
+\item REPLY\_TIMED\_OUT -- This error occurs in unreliable transmit only.
+It happens when the XRL library's timeout for a given request has expired.
+Possible reasons include network congestion, peer failure, network
+interface failure, and so on. As in all network communications, when a
+timeout occurs we don't know if the last unacknowledged XRL request was
+received and processed by the peer.
+
+\item FATAL\_TRANSPORT\_ERROR -- This error occurs when the XRL library's
+connection to the relevant endpoint fails. For example, the TCP connection
+has been reset, or a UDP connection gets a port-unreachable message. The
+expectation is that no further communication with the specific endpoint
+will succeed.
+
+The XRL library MAY hide certain REPLY\_TIMED\_OUT and
+FATAL\_TRANSPORT\_ERROR errors for class targets (that is, targets that do
+not specify a particular process). These XRLs are used when any matching
+process suffices. When communication with a particular instance of the
+target fails, the XRL library thus MAY search for another instance by
+contacting the \finder. The XRL library MUST NOT perform this
+retransmission, however, unless it can guarantee that the request was not
+acted on by any instance. (This rules out most unreliable transports.) If
+it cannot guarantee this, or if retransmission fails, the XRL will get an
+error -- either REPLY\_TIMED\_OUT, FATAL\_TRANSPORT\_ERROR, NO\_FINDER, or
+TARGET\_FAILED.
+
 \end{itemize}
-From an application point or view, the first three errors are
-equivalent: the XRL was not communicated to the destination.  We will
-discuss these below using the generic term {\em XRL send failure}.
 
-XRLs can be sent over unreliable transports such as UDP or reliable
-transports such as TCP. The type of transport that should be used will
-be specified when defining the interface. In the case of reliable
-transport, the errors above should generally not occur, but in any
-event we need general rules about how to handle them should something
-fail in an unexpected way.
+NO\_FINDER, TARGET\_FAILED, and to some extent RESOLVE\_FAILED generally
+represent serious problems with the router. FATAL\_TRANSPORT\_ERROR
+represents a serious problem with the target, such as that an instance of
+the target has died; this problem may or may not be transient. SEND\_FAILED
+and REPLY\_TIMED\_OUT are potentially common errors, and should be handled
+by the application. However, the likelihood of SEND\_FAILED can often be
+reduced, making it a ``fatal'' error from the application's point of view,
+by limiting the rate at which requests are sent.
 
-In the case of an unreliable transport, REPLY\_TIMED\_OUT may be
-expected, but 
-\newline
-FATAL\_TRANSPORT\_ERROR will never occur.  In the case
-of a reliable transport, FATAL\_TRANSPORT\_ERROR may occur, but
-REPLY\_TIMED\_OUT will never occur.
+The first four errors, NO\_FINDER, TARGET\_FAILED, RESOLVE\_FAILED, and
+SEND\_FAILED, occur when there is no chance that the relevant XRL was
+communicated to its target. They are therefore called \emph{send failures}.
+The other two errors, REPLY\_TIMED\_OUT and FATAL\_TRANSPORT\_ERROR, may be
+generated even if the target received the request. They are therefore
+called \emph{receive failures}.
 
-It's not clear what can be inferred from a timeout response. The
-reasons for a timeout might be: the peer has died, the peer is slow to
-respond, the network cable has been removed. As in all network
-communications, when a timeout occurs we don't know if the last
-unacknowledged XRL request was received and processed by the peer.
-
-If the timeout has occurred because the peer has died we will receive
-notification of this explicitly and will deal with it as specified in
-section \ref{pfailure}.  Thus an XRL transport error SHOULD NOT be
-taken as an indication that the peer is definitely dead.  If an application cares
-that the peer has died or restarted, it SHOULD register with the
-finder to receive notifications of process restarts.  Thus, a process
-SHOULD assume that an XRL transport problem will be transient until it
-receives an explicit confirmation that the destination has failed,
-particularly when the XRL interface is unreliable. 
+If a peer dies, we will receive notification of this explicitly and will
+deal with it as specified in section \ref{pfailure}. Thus most XRL
+transport errors SHOULD NOT be taken as an indication that the peer is
+definitely dead. If an application cares that the peer has died or
+restarted, it SHOULD register with the finder to receive notifications of
+process restarts. Thus, a process SHOULD assume that an XRL transport
+problem will be transient until it receives an explicit confirmation that
+the destination has failed, particularly when the XRL interface is
+unreliable.
 
 In addition to an XRL interface being reliable or unreliable, the way
 the application uses an XRL interface can by pipelined or
@@ -346,68 +398,55 @@ outstanding simultaneously; in the non-pipelined case at most one
 request can be outstanding at a time.
 
 It is useful for us to categorise XRL interfaces along these two axes:
-reliable/unreliable and pipelined/non-pipelined.
+reliable/unreliable and pipelined/non-pipelined. 
 
 \subsection*{Unreliable, Non-pipelined}
 
 If an XRL send failure occurs, the sending application MAY choose to
 retransmit the XRL, or ignore the failure as it sees fit.  
 
-In an XRL timeout occurs, the sending application MAY also choose to
-retransmit the XRL, or ignore the failure as it sees fit.  However, if
-the application chooses to re-send the XRL, the interface MUST be
-written in such a way that if this XRL had previously been received,
-this will not cause a further failure.
+In an XRL receive failure occurs, the sending application MAY also choose
+to retransmit the XRL, or ignore the failure as it sees fit. However, if
+the application chooses to re-send the XRL, the interface MUST be written
+in such a way that the receipt of a duplicate request will not damage the
+system. (XXX Isn't this true anyway? Network duplicates?)
 
 \subsection*{Reliable, Non-pipelined}
 
-If an XRL send failure occurs, the sending application SHOULD
-retransmit the XRL.  Further requests using this interface
-MUST be queued until the XRL has successfully been received.
+If a SEND\_FAILED error occurs, the sending application MAY retransmit the
+XRL.
 
-If a FATAL\_TRANSPORT\_ERROR occurs, this is an unrecoverable error.
+FATAL\_TRANSPORT\_ERROR,  NO\_FINDER, and most TARGET\_FAILED and
+RESOLVE\_FAILED errors are unrecoverable.
 The application should cause this XRL interface to go dormant, in the
 expectation that it will authoritatively discover from the finder that
 the target has died.
+
+REPLY\_TIMED\_OUT cannot happen on reliable interfaces.
 
 \subsection*{Unreliable, Pipelined}
 
 The same issues apply as with unreliable, non-pipelined, but the
 situation is more complicated.  An interface that uses unreliable
-transport and pipelining is one that explicitly permits loss and {\em
+transport and pipelining is one that explicitly permits loss \emph{and
 re-ordering} of requests.  It is up to the application to choose
-whether to retransmit XRLs that return XRL send failed or timeout, but
+whether to retransmit XRLs that return SEND\_FAILED or REPLY\_TIMED\_OUT, but
 the application must only do so if it is certain that the re-ordering
 caused by retransmission will not be a problem.
 
 \subsection*{Reliable, Pipelined}
 
-Reliable, pipelined interfaces are the most difficult in which to
-handle XRL errors.  In the general case, three issues would need to be
-considered:
-\begin{itemize}
-\item The XRL that failed due to a transport error may be followed by
-pipelined XRLs that succeeded.
-\item The XRL that failed due to a transport error may be followed by
-pipelined XRLs that failed at the application level due to the state
-caused by the first failed XRL not being instantiated.
-\item If a failed XRL was followed by pipelined XRLs that succeeded,
-retransmitting that XRL will cause a re-ordering that might leave the
-destination in a different state than it would be if the XRLs had
-arrived in order.
-\end{itemize}
-To avoid the need to consider all these problems we require that a
-reliable XRL transport fail to deliver all subsequent XRLs in the
-pipeline if a single XRL fails.
+The XRL library ensures that pipelined messages sent to a reliable target
+are delivered in order. In particular, if a request $R$ to a given target
+gets an error, then no \emph{outstanding} requests to that target
+\emph{registered later than $R$} will successfully complete -- they will
+all get the same error, and none of them will be delivered to the receiving
+application. Once the error is delivered, this error state is wiped out,
+and later requests to the target may succeed -- perhaps because the target
+was restarted.
 
-Thus, in the case of an XRL send error, the reliable pipelined
-interface SHOULD fall back to a reliable, non-pipelined behaviour
-after a failure, and SHOULD retransmit the first XRL that failed until
-either it is successful or the application authoritatively discovers
-from the finder that the target has died.  After the retransmitted XRL
-is successful, the pipelined operation may resume.
-
-If a FATAL\_TRANSPORT\_ERROR occurs, this is an unrecoverable error.
+Again, FATAL\_TRANSPORT\_ERROR, NO\_FINDER, and most TARGET\_FAILED and
+RESOLVE\_FAILED errors are unrecoverable.
 The application SHOULD cause this XRL interface to go dormant, in the
 expectation that it will authoritatively discover from the finder that
 the target has died.
