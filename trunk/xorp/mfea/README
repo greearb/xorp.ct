@@ -1,6 +1,12 @@
 #
-# $XORP: xorp/mfea/README,v 1.2 2003/03/11 01:19:29 pavlin Exp $
+# $XORP: xorp/mfea/README,v 1.3 2003/03/11 01:21:45 pavlin Exp $
 #
+
+NOTE:
+This stand-alone MFEA is obsoleted, and its code has been merged
+with the FEA (see xorp/fea/README.mfea).
+The xorp/mfea directory is kept temporary, but will disappear soon.
+
 
 Multicast Forwarding Engine Abstraction
 =============================
