@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.19 2004/12/17 01:31:03 atanu Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.20 2004/12/17 06:03:18 pavlin Exp $ */
 
 
 interfaces {
@@ -55,6 +55,12 @@ fea {
 
     click {
 	enabled: true
+
+	/*
+	 * Set duplicate-routes-to-kernel to true if the XORP routes
+	 * added to Click should be added to the system kernel as well.
+	 */
+	duplicate-routes-to-kernel: false
 
 	/*
 	 * Note: If both kernel-click and user-click are enabled, then

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.28 2004/12/02 02:37:47 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.29 2004/12/17 00:19:34 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
@@ -7,6 +7,7 @@ fea {
 
     click {
 	enabled:			bool = false;
+	duplicate-routes-to-kernel:	bool = false;
 
 	kernel-click {
 	    enabled:				bool = false;
@@ -63,6 +64,12 @@ fea {
 	    %help:	short "Enable Click FEA support";
 	    %set:	xrl "$(fea.targetname)/fea_click/0.1/enable_click?enable:bool=$(@)";
 	    %delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_click?enable:bool=$(DEFAULT)";
+	}
+
+	duplicate-routes-to-kernel {
+	    %help:	short "Enable duplicating the Click routes to the system kernel";
+	    %set:	xrl "$(fea.targetname)/fea_click/0.1/enable_duplicate_routes_to_kernel?enable:bool=$(@)";
+	    %delete:	xrl "$(fea.targetname)/fea_click/0.1/enable_duplicate_routes_to_kernel?enable:bool=$(DEFAULT)";
 	}
 
 	kernel-click {
