@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.23 2004/02/05 09:22:24 atanu Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.24 2004/04/01 19:54:05 mjh Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -27,9 +27,8 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
 #include "libxorp/ref_trie.hh"
-#include "xrl/targets/ribclient_base.hh"
+
 #include "libxipc/xrl_std_router.hh"
-#include "xrl/interfaces/rib_xif.hh"
 
 template<class A> class NhLookupTable;
 template<class A> class NextHopCache;

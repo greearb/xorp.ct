@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.26 2004/04/01 19:54:06 mjh Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.27 2004/04/14 19:15:01 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -24,7 +24,6 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/timer.hh"
 #include "libxipc/xrl_std_router.hh"
-#include "xrl/interfaces/rib_xif.hh"
 
 class RibIpcHandler;
 class EventLoop;
@@ -69,11 +68,10 @@ private:
      * The specialised method called by sendit to deal with IPv4/IPv6.
      *
      * @param q the queued command.
-     * @param rib XRL handle to RIB
      * @param bgp "ibgp" or "ebgp".
      * @return True if the add/delete was queued.
      */
-    bool sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp);
+    bool sendit_spec(Queued& q, const char *bgp);
 
     inline EventLoop& eventloop() const;
 

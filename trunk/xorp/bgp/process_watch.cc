@@ -12,13 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/process_watch.cc,v 1.10 2003/10/23 10:54:40 atanu Exp $"
+#ident "$XORP: xorp/bgp/process_watch.cc,v 1.11 2004/04/15 16:13:28 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/exceptions.hh"
+
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
+
 #include "exceptions.hh"
 #include "process_watch.hh"
 

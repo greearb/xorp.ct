@@ -12,13 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.48 2004/04/01 19:54:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.49 2004/04/15 16:13:28 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
+
+#include "xrl/interfaces/rib_xif.hh"
+
 #include "bgp.hh"
 #include "rib_ipc_handler.hh"
 
@@ -532,9 +535,9 @@ XrlQueue<A>::start()
 	XLOG_ASSERT(qi != _xrl_queue.end());
 
 	Queued q = *qi;
-	XrlRibV0p1Client rib(_xrl_router);
+
 	const char *bgp = q.ibgp ? "ibgp" : "ebgp";
-	bool sent = sendit_spec(q, rib, bgp);
+	bool sent = sendit_spec(q, bgp);
 
 	if (sent) {
 	    _flying++;
@@ -557,7 +560,7 @@ XrlQueue<A>::start()
 
 template<>
 bool
-XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
+XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
 {
     bool sent;
     bool unicast = false;
@@ -572,6 +575,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 	break;
     }
 
+    XrlRibV0p1Client rib(_xrl_router);
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
 	sent = rib.send_add_route4(q.ribname.c_str(),
@@ -596,7 +600,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 
 template<>
 bool
-XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
+XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
 {
     bool sent;
     bool unicast = false;
@@ -611,6 +615,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 	break;
     }
 
+    XrlRibV0p1Client rib(_xrl_router);
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
 	sent = rib.send_add_route6(q.ribname.c_str(),

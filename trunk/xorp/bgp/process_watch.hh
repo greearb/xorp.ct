@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/process_watch.hh,v 1.7 2003/08/27 01:29:33 atanu Exp $
+// $XORP: xorp/bgp/process_watch.hh,v 1.8 2003/10/23 10:54:40 atanu Exp $
 
 #ifndef __BGP_PROCESS_WATCH_HH__
 #define __BGP_PROCESS_WATCH_HH__
@@ -22,7 +22,6 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/timer.hh"
 #include "libxipc/xrl_std_router.hh"
-#include "xrl/interfaces/finder_event_notifier_xif.hh"
 
 class ProcessWatch {
 public:
