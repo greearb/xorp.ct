@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.8 2004/12/17 04:55:53 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.9 2004/12/18 02:03:21 pavlin Exp $
 #
 
 #
@@ -861,14 +861,16 @@ function process_statement(statement)
 function syntax_error(message)
 {
     is_syntax_error = 1;
-    printf("Syntax error (file %s line %d): %s\n", FILENAME, FNR, message);
+    printf("Syntax error (file %s line %d): %s\n", FILENAME, FNR,
+	   message) > "/dev/stderr";
     exit(1);
 }
 
 function internal_error(message)
 {
     is_internal_error = 1;
-    printf("Internal error (file %s): %s\n", FILENAME, message);
+    printf("Internal error (file %s): %s\n", FILENAME,
+	   message) > "/dev/stderr";
     exit(1);
 }
 
