@@ -303,6 +303,7 @@ Input = INPUT_STATE_MY_IP_ADDRESS
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
+        OUTPUT_STATE_IS_DIRECTLY_CONNECTED_SG                         (S,G)
         OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
@@ -311,6 +312,7 @@ Input = INPUT_STATE_MY_IP_ADDRESS
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
 
 Input = INPUT_STATE_MY_IP_SUBNET_ADDRESS
+        OUTPUT_STATE_IS_DIRECTLY_CONNECTED_SG                         (S,G)
         OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
 
 Input = INPUT_STATE_IS_SWITCH_TO_SPT_DESIRED_SG
