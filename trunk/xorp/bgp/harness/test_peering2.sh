@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.32 2004/04/01 19:54:09 mjh Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.33 2004/04/02 07:17:17 mjh Exp $
 #
 
 #
@@ -557,7 +557,7 @@ fi
 
 for i in $TESTS
 do
-    for t in $TRAFFIC_FILES
+    for t in ${TFILE:-$TRAFFIC_FILES}
     do 
 	if [ -f $t ]
 	then
