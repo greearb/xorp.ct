@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom_encoding.hh,v 1.1 2002/12/14 23:43:00 hodson Exp $
+// $XORP: xorp/libxipc/xrl_atom_encoding.hh,v 1.2 2002/12/19 01:29:12 hodson Exp $
 
 #ifndef __XRLATOM_ENCODING_HH__
 #define __XRLATOM_ENCODING_HH__
@@ -58,7 +58,7 @@ xrlatom_encode_value(const vector<uint8_t>& v)
  * Decode escaped XrlAtom representation.
  *
  * @returns -1 on success, or the index of the character causing the
- * decode failure in the string "in" when an.
+ * decode failure in the string "in".
  */
 ssize_t
 xrlatom_decode_value(const char* in, size_t in_bytes, string& out);
@@ -67,7 +67,7 @@ xrlatom_decode_value(const char* in, size_t in_bytes, string& out);
  * Decode escaped XrlAtom representation of XrlAtom binary data type.
  *
  * @returns -1 on success, or the index of the character causing the
- * decode failure in the string "in" when an.
+ * decode failure in the string "in".
  */
 ssize_t
 xrlatom_decode_value(const char* in, size_t in_bytes, vector<uint8_t>& out);
