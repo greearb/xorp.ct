@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.20 2004/08/19 01:01:14 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.21 2004/11/16 21:43:12 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -33,15 +33,16 @@ class TemplateTree;
 
 class OpInstance {
 public:
-    OpInstance(EventLoop& eventloop, const string& executable_filename,
-	       const string& command_arguments,
-	       RouterCLI::OpModePrintCallback print_cb,
-	       RouterCLI::OpModeDoneCallback done_cb,
-	       OpCommand* op_command);
+    OpInstance(EventLoop&			eventloop,
+	       const string&			executable_filename,
+	       const string&			command_arguments,
+	       RouterCLI::OpModePrintCallback	print_cb,
+	       RouterCLI::OpModeDoneCallback	done_cb,
+	       OpCommand*			op_command);
     OpInstance(const OpInstance& orig);
     ~OpInstance();
 
-    void append_data(AsyncFileOperator::Event e, const uint8_t* buffer,
+    void append_data(AsyncFileOperator::Event event, const uint8_t* buffer,
 		     size_t buffer_bytes, size_t offset);
     void done(bool success);
     bool operator<(const OpInstance& them) const;
@@ -50,6 +51,7 @@ public:
      * Terminate this command
      */
     void terminate();
+
 private:
     static const size_t OP_BUF_SIZE = 8192;
 
@@ -58,12 +60,12 @@ private:
     OpCommand*		_op_command;
     AsyncFileReader*	_stdout_file_reader;
     AsyncFileReader*	_stderr_file_reader;
+    FILE*		_stdout_stream;
+    FILE*		_stderr_stream;
+    uint8_t		_stdout_buffer[OP_BUF_SIZE];
+    uint8_t		_stderr_buffer[OP_BUF_SIZE];
     pid_t		_pid;
-    FILE 		*_out_stream;
-    FILE 		*_err_stream;
-    char		_outbuffer[OP_BUF_SIZE];
-    char		_errbuffer[OP_BUF_SIZE];
-    bool		_error;
+    bool		_is_error;
     string		_error_msg;
     size_t		_last_offset;
     RouterCLI::OpModePrintCallback _print_callback;
@@ -114,7 +116,7 @@ public:
      *
      * @return a pointer to the command instance on success.
      */
-    OpInstance *execute(EventLoop& eventloop,
+    OpInstance* execute(EventLoop& eventloop,
 			const list<string>& command_line,
 			RouterCLI::OpModePrintCallback print_cb,
 			RouterCLI::OpModeDoneCallback done_cb);

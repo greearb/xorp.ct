@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.36 2004/11/16 05:42:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.37 2004/11/16 21:43:12 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,46 +42,48 @@ extern int init_opcmd_parser(const char *filename, OpCommandList *o);
 extern void parse_opcmd() throw (ParseError);
 extern int opcmderror(const char *s);
 
-OpInstance::OpInstance(EventLoop& eventloop, const string& executable_filename,
-		       const string& command_arguments,
-		       RouterCLI::OpModePrintCallback print_cb,
-		       RouterCLI::OpModeDoneCallback done_cb,
-		       OpCommand* op_command)
+OpInstance::OpInstance(EventLoop&			eventloop,
+		       const string&			executable_filename,
+		       const string&			command_arguments,
+		       RouterCLI::OpModePrintCallback	print_cb,
+		       RouterCLI::OpModeDoneCallback	done_cb,
+		       OpCommand*			op_command)
     : _executable_filename(executable_filename),
       _command_arguments(command_arguments),
       _op_command(op_command),
       _stdout_file_reader(NULL),
       _stderr_file_reader(NULL),
+      _stdout_stream(NULL),
+      _stderr_stream(NULL),
       _pid(0),
-      _out_stream(NULL),
-      _err_stream(NULL),
-      _error(false),
+      _is_error(false),
       _last_offset(0),
       _print_callback(print_cb),
       _done_callback(done_cb)
 {
     XLOG_ASSERT(op_command->is_executable());
-    debug_msg("\n");
 
-    memset(_outbuffer, 0, OP_BUF_SIZE);
-    memset(_errbuffer, 0, OP_BUF_SIZE);
+    memset(_stdout_buffer, 0, OP_BUF_SIZE);
+    memset(_stderr_buffer, 0, OP_BUF_SIZE);
 
     string execute = executable_filename + " " + command_arguments;
 
-    _pid = popen2(execute, _out_stream, _err_stream);
-    if (_out_stream == NULL) {
+    _pid = popen2(execute, _stdout_stream, _stderr_stream);
+    if (_stdout_stream == NULL) {
 	done_cb->dispatch(false, "Failed to execute command");
     }
 
-    _stdout_file_reader = new AsyncFileReader(eventloop, fileno(_out_stream));
-    _stdout_file_reader->add_buffer((uint8_t*)_outbuffer, OP_BUF_SIZE,
+    _stdout_file_reader = new AsyncFileReader(eventloop,
+					      fileno(_stdout_stream));
+    _stdout_file_reader->add_buffer(_stdout_buffer, OP_BUF_SIZE,
 				    callback(this, &OpInstance::append_data));
     if (! _stdout_file_reader->start()) {
 	done_cb->dispatch(false, "Failed to execute command");
     }
 
-    _stderr_file_reader = new AsyncFileReader(eventloop, fileno(_err_stream));
-    _stderr_file_reader->add_buffer((uint8_t*)_errbuffer, OP_BUF_SIZE,
+    _stderr_file_reader = new AsyncFileReader(eventloop,
+					      fileno(_stderr_stream));
+    _stderr_file_reader->add_buffer(_stderr_buffer, OP_BUF_SIZE,
 				    callback(this, &OpInstance::append_data));
     if (! _stderr_file_reader->start()) {
 	done_cb->dispatch(false, "Failed to execute command");
@@ -94,39 +96,37 @@ OpInstance::~OpInstance()
 }
 
 void
-OpInstance::append_data(AsyncFileOperator::Event e,
+OpInstance::append_data(AsyncFileOperator::Event event,
 			const uint8_t* buffer,
 			size_t /* buffer_bytes */,
 			size_t offset)
 {
-    debug_msg("\n");
-
-    if ((const char *)buffer == _errbuffer) {
-	if (_error == false) {
+    if (buffer == _stderr_buffer) {
+	if (_is_error == false) {
 	    // We hadn't previously seen any error output
-	    if (e == AsyncFileOperator::END_OF_FILE) {
+	    if (event == AsyncFileOperator::END_OF_FILE) {
 		// We just got EOF on stderr - ignore this and wait for
 		// EOF on stdout
 		return;
 	    }
-	    _error = true;
+	    _is_error = true;
 	    // Reset for reading error response
 	    _error_msg = "";
 	    _last_offset = 0;
 	}
     } else {
-	if (_error == true) {
+	if (_is_error == true) {
 	    // Discard further output
 	    return;
 	}
     }
 
-    if ((e == AsyncFileOperator::DATA)
-	|| (e == AsyncFileOperator::END_OF_FILE)) {
+    if ((event == AsyncFileOperator::DATA)
+	|| (event == AsyncFileOperator::END_OF_FILE)) {
 	XLOG_ASSERT(offset >= _last_offset);
 	if (offset == _last_offset) {
-	    XLOG_ASSERT(e == AsyncFileOperator::END_OF_FILE);
-	    done(!_error);
+	    XLOG_ASSERT(event == AsyncFileOperator::END_OF_FILE);
+	    done(!_is_error);
 	    return;
 	}
 
@@ -134,7 +134,7 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 	    const char* p   = (const char*)buffer + _last_offset;
 	    size_t 	len = offset - _last_offset;
 	    debug_msg("len = %u\n", static_cast<uint32_t>(len));
-	    if (!_error) {
+	    if (!_is_error) {
 		_print_callback->dispatch(string(p, len));
 	    } else {
 		_error_msg.append(p, p + len);
@@ -142,24 +142,22 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 	    _last_offset = offset;
 	}
 
-	if (e == AsyncFileOperator::END_OF_FILE) {
-	    done(!_error);
+	if (event == AsyncFileOperator::END_OF_FILE) {
+	    done(!_is_error);
 	    return;
 	}
 
 	if (offset == OP_BUF_SIZE) {
 	    // The buffer is exhausted
 	    _last_offset = 0;
-	    if (_error) {
-		memset(_errbuffer, 0, OP_BUF_SIZE);
-		_stderr_file_reader->add_buffer((uint8_t*)_errbuffer,
-						OP_BUF_SIZE,
+	    if (_is_error) {
+		memset(_stderr_buffer, 0, OP_BUF_SIZE);
+		_stderr_file_reader->add_buffer(_stderr_buffer, OP_BUF_SIZE,
 				callback(this, &OpInstance::append_data));
 		_stderr_file_reader->start();
 	    } else {
-		memset(_outbuffer, 0, OP_BUF_SIZE);
-		_stdout_file_reader->add_buffer((uint8_t*)_outbuffer,
-						OP_BUF_SIZE,
+		memset(_stdout_buffer, 0, OP_BUF_SIZE);
+		_stdout_file_reader->add_buffer(_stdout_buffer, OP_BUF_SIZE,
 				callback(this, &OpInstance::append_data));
 		_stdout_file_reader->start();
 	    }
@@ -175,8 +173,6 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 void
 OpInstance::done(bool success)
 {
-    debug_msg("\n");
-
     _op_command->remove_instance(this);
     _done_callback->dispatch(success, _error_msg);
     // The callback will delete us. Don't do anything more in this method.
@@ -196,8 +192,6 @@ OpInstance::operator<(const OpInstance& them) const
 void
 OpInstance::terminate()
 {
-    debug_msg("\n");
-
     // Kill the process group
     if (0 != _pid)
 	killpg(_pid, SIGTERM);
@@ -210,15 +204,15 @@ OpInstance::terminate()
 	delete _stderr_file_reader;
 	_stderr_file_reader = NULL;
     }
-    if (_out_stream != NULL) {
-	pclose2(_out_stream);
-	_out_stream = NULL;
+    if (_stdout_stream != NULL) {
+	pclose2(_stdout_stream);
+	_stdout_stream = NULL;
     }
     //
-    // XXX: don't call pclose2(_err_stream), because pclose2(_out_stream)
-    // automatically takes care of the _err_stream as well.
+    // XXX: don't call pclose2(_stderr_stream), because pclose2(_stdout_stream)
+    // automatically takes care of the _stderr_stream as well.
     //
-    _err_stream = NULL;
+    _stderr_stream = NULL;
 }
 
 OpCommand::OpCommand(const list<string>& command_parts)
