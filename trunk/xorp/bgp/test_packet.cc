@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet.cc,v 1.1 2003/08/21 18:37:09 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet.cc,v 1.2 2003/08/21 18:51:51 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -69,7 +69,6 @@ void BGPTestPacket::run_tests()
     else
 	printf("Open packet test failed\n");
 
-    
     if (test_update())
 	printf("Update packet test passed\n");
     else
@@ -336,8 +335,18 @@ UpdatePacket* BGPTestPacket::create_update_ipv6()
     bup->add_nlri(nlr_0);
     bup->add_nlri(nlr_1);
 
-    bup->add_pathatt(MPReachNLRIAttribute<IPv6>());
-    bup->add_pathatt(MPUNReachNLRIAttribute<IPv6>());
+    MPReachNLRIAttribute<IPv6> mpreach;
+    mpreach.set_nexthop("20:20:20:20:20:20:20:20");
+    mpreach.add_nlri("2000::/3");
+    mpreach.encode();
+    debug_msg("%s\n", mpreach.str().c_str());
+    bup->add_pathatt(mpreach);
+    debug_msg("%s\n", bup->str().c_str());
+
+    MPUNReachNLRIAttribute<IPv6> mpunreach;
+    mpunreach.add_withdrawn("2000::/3");
+    mpunreach.encode();
+    bup->add_pathatt(mpunreach);
 
     return bup;
 }
