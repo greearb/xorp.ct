@@ -226,6 +226,13 @@ class Lsa {
     virtual uint16_t get_lsa_type() const = 0;
 
     /**
+     * It is the responsibilty of the derived type to return this
+     * information.
+     * @return The minmum possible length of this LSA.
+     */
+    virtual size_t min_length() const = 0;
+
+    /**
      * Decode an LSA.
      * @param buf pointer to buffer.
      * @param len length of the buffer on input set to the number of
@@ -285,7 +292,8 @@ class Lsa {
  */
 class LsaDecoder {
  public:    
-    LsaDecoder(OspfTypes::Version version) : _version(version)
+    LsaDecoder(OspfTypes::Version version)
+	: _version(version), _min_lsa_length(0)
     {}
 
     ~LsaDecoder();
@@ -298,20 +306,30 @@ class LsaDecoder {
     void register_decoder(Lsa *lsa);
 
     /**
-     * Decode byte stream.
+     * Decode an LSA.
      *
-     * @param ptr to data packet
-     * @param length of data packet
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
      *
-     * @return a LsaRef
+     * @return A reference to an LSA that manages its own memory.
      */
-    Lsa::LsaRef decode(uint8_t *ptr, size_t len) throw(BadPacket);
+    Lsa::LsaRef decode(uint8_t *ptr, size_t& len) throw(BadPacket);
+
+    /**
+     * @return The length of the smallest LSA that we can decode.
+     */
+    size_t min_length() const {
+	return _min_lsa_length + Lsa_header::length();
+    }
 
     OspfTypes::Version get_version() const {
 	return _version;
     }
  private:
     const OspfTypes::Version 	_version;
+    size_t _min_lsa_length;		// The smallest LSA we know
+					// how to decode, excluding LSA header.
 
     map<uint16_t, Lsa *> _lsa_decoders;	// OSPF LSA decoders
 };
@@ -526,6 +544,14 @@ class RouterLsa : public Lsa {
 	return 0;
     }
 
+    /**
+     * Decode an LSA.
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
+     *
+     * @return A reference to an LSA that manages its own memory.
+     */
     LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
 
     bool encode();

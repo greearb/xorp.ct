@@ -254,10 +254,17 @@ LsaDecoder::register_decoder(Lsa *lsa)
 	_lsa_decoders[lsa->get_lsa_type()] = lsa;
 	break;
     }
+
+    // Keep a record of the smallest LSA that we may be required to
+    // decode. This will be useful as sanity check in the packet decoder.
+    if (0 == _min_lsa_length)
+	_min_lsa_length = lsa->min_length();
+    else if (_min_lsa_length > lsa->min_length())
+	_min_lsa_length = lsa->min_length();
 }
 
 Lsa::LsaRef
-LsaDecoder::decode(uint8_t *ptr, size_t len) throw(BadPacket)
+LsaDecoder::decode(uint8_t *ptr, size_t& len) throw(BadPacket)
 {
     OspfTypes::Version version = get_version();
     Lsa_header header(version);
