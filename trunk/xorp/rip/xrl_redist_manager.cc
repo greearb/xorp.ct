@@ -12,10 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.1 2004/05/03 23:10:51 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.2 2004/05/06 23:03:54 hodson Exp $"
+
+// #define DEBUG_LOGGING
 
 #include "libxorp/c_format.hh"
 #include "libxorp/callback.hh"
+#include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
@@ -117,7 +120,7 @@ public:
     inline const uint16_t& tag() const			{ return _tag; }
     string str() const;
 protected:
-    RedistList  _redists;
+    RedistList& _redists;
     string	_protocol;
     uint16_t	_cost;
     uint16_t	_tag;
@@ -171,6 +174,8 @@ template <typename A>
 void
 XrlRedistEnable<A>::dispatch_complete(const XrlError& xe)
 {
+    debug_msg("XrlRedistEnable for \"%s\" - %s\n",
+	      this->protocol().c_str(), xe.str().c_str());
     if (xe == XrlError::OKAY()) {
 	RouteRedistributor<A>* rr =
 	    new RouteRedistributor<A>(this->manager().route_db(),
@@ -261,6 +266,9 @@ template <typename A>
 void
 XrlRedistDisable<A>::dispatch_complete(const XrlError& xe)
 {
+    debug_msg("XrlRedistDisable for \"%s\" - %s\n",
+	      this->protocol().c_str(), xe.str().c_str());
+
     if (xe != XrlError::OKAY()) {
 	XLOG_INFO("Failed %s - XRL failed: \"%s\"",
 		  this->str().c_str(), xe.str().c_str());
@@ -393,6 +401,9 @@ XrlRedistManager<A>::add_route(const string&	protocol,
 {
     typename RedistList::iterator i;
 
+    debug_msg("got redist add_route for \"%s\" %s %s\n",
+	      protocol.c_str(), net.str().c_str(), nh.str().c_str());
+
     i = find_if(_redists.begin(), _redists.end(),
 		is_redistributor_of<A>(protocol));
     if (i != _redists.end()) {
@@ -486,6 +497,7 @@ XrlRedistManager<A>::run_next_job()
 
     RedistJob<A>* rj = _jobs.front();
     if (rj->dispatch() == true) {
+	debug_msg("Dispatched %s\n", rj->str().c_str());
 	// Dispatch successful, no additional processing necessary.
 	return;
     }
