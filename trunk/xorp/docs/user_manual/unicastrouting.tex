@@ -2,10 +2,128 @@
 
 \section{An Overview of Unicast Routing}
 
-the general idea.
+To forward packets, a router maintains a forwarding table which holds
+routes indicating which neighboring router a packet for a particular
+destination should be forwarded to.  At the minimum, a route then
+consists of a destination {\it subnet} and a {\it nexthop}.  The destination
+subnet is usually represented as a base IP address and a prefix-length
+in bits.  For example, the subnet {\stt 128.16.64.0/24} has a prefix
+length of 24 bits, indicating that the first 24 bits of this address
+identify the network in question, and the last 8 bits identify hosts
+on this subnet.  Thus a route for this subnet would be used to forward
+packets for addresses 128.16.64.0 to 128.16.64.255 inclusive.  The
+nexthop can be the IP address of a neighboring router, or it might
+indicate that the route is for a subnet that is directly connected to
+this router.
 
-static vs dynamic routes.
+IP routers perform {\it longest prefix match} forwarding.  This means
+that a router might have more than one route that matches a
+destination address, and under such circumstances, it will use the
+route that has the longest prefix.   For example, if a router has two routes:
+\begin{itemize}
+\item Subnet: {\tt 128.16.0.0/16} Nexthop: {\tt 10.0.0.1}
+\item Subnet: {\tt 128.16.64.0/24} Nexthop: {\tt 10.0.0.2}
+\end{itemize}
+\noindent A packet destined for {\tt 128.16.0.1} would match the first
+route only, and so would be forwarded to {\tt 10.0.0.1}.  However a
+packet destined for {\tt 128.16.64.1} would match both routes, and so
+would be forwarded to {\tt 10.0.0.2} because the second route has a
+longer prefix (24 is longer than 16).
 
-what protocols we support
+To be useful, a router needs to populate its forwarding table.  It can
+do this in three ways:
+\begin{itemize}
+\item Routes for directly connected subnets are automatically entered into
+the forwarding table.
+\item Routes may be configured via the router's configuration file or
+command line interface.  Such routes are known as {\it static
+routes}. Static routes will be discussed in chapter \ref{staticroutes}.
+\item Routes may be learned from another router via a routing
+protocol.  Such routes are known as {\it dynamic routes}.
+\end{itemize}
 
-route redistribution
+\subsection{Dyanmic Routing}
+
+Many different routing protocols can supply dynamic routes.  The dynamic
+routing protocols that are in most common use are:
+\begin{itemize}
+\item {\bf Border Gateway Protocol (BGP)}.  This is used for
+inter-domain routing.
+\item {\bf Routing Information Protocol (RIP)}.  This is probably the
+simplest intra-domain routing protocol, and tends to be used on small
+networks.
+\item {\bf Open Shortest Path First (OSPF)}.  Used for intra-domain routing,
+often on large ISP networks.
+\item {\bf Integrated IS-IS}.  Used for intra-domain routing, often
+on large ISP networks.  Similar to OSPF.
+\item {\bf IGRP}: Used for intra-domain routing, typically in small to
+medium sized networks.  Cisco-proprietary.
+\end{itemize}
+As of the 1.0 release, XORP supports BGP and RIP.  We plan to
+implement OSPF and IS-IS shortly.  Our BGP implementation is discussed
+in chapter \ref{bgp} and our RIP implementation is discussed in
+chapter \ref{rip}.  In addition, there are also multicast routing
+protocols, which we will discuss in chapter \ref{multicast}.
+
+\subsection{Administrative Distance}
+
+A router can run multiple routing protocols simultaneously.  For
+example, we may use RIP to distribute routes within our network, and
+BGP to learn external routes.  In some situations this can lead to a
+router learning the same route from more than one routing protocol.
+For example, we might learn the following routes:
+\begin{itemize}
+\item Subnet: {\tt 128.16.64.0/24} nexthop: {\tt 192.150.187.1}, Learned from BGP via an external peering. AS Path: {\tt 123 567 987}.
+\item Subnet: {\tt 128.16.64.0/24} Nexthop: {\tt 10.0.0.2}, Learned from RIP with metric 13
+\end{itemize}
+The longest prefix match rule doesn't help us because the prefix
+lengths are the same, and the metric used for RIP is not directly
+comparable against the AS path length or any other attribute attached
+to a BGP route.  How then do we decide which route to take?
+
+A XORP router uses the concept of {\it administrative distance} to
+determine which route wins.  This concept is the same as that used by
+Cisco routers.  Basically each routing protocol has a configured
+``distance'', and if a route is heard from two protocols, then the
+version with the smallest distance wins.
+
+The built-in table of administative distances XORP uses is:
+\begin{tabbing}
+xxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\>Directly connected subnets: \>0\\
+\>Static routes:\>1\\
+\>BGP, heard from external peer:\>20\\
+\>OSPF (when implemented):\>110\\
+\>IS-IS (when implemented):\>115\\
+\>RIP:\>120\\
+\>BGP, heard from internal peer\>200\\
+\end{tabbing}
+As of the XORP 1.0 release, the is no way to modify these defaults,
+but this capability will be added soon.
+
+\subsection{Route Redistribution}
+
+A common requirement is to redistribute routes between routing
+protocols.  Some examples might be:
+\begin{itemize}
+\item When interconnecting some subnets that are statically routed
+  with some subnets that are dynamically routed using RIP.  Rather
+  that configure the static routes and additionally tell RIP to
+  originate route advertisements for the same subnets, it is simpler
+  and less error prone to configure the router to simply redistribute
+  all the static routes into RIP.
+\item When a network is using RIP internally, and also uses BGP to
+  peer with the rest of the Internet.  One solution would be to
+  configure BGP at the border routes to originate route advertisements
+  for the internal subnets, but if a new subnet is added internally,
+  then the border routers also need to be correctly modified.  Instead
+  we can simply configure the border routers to redistribute RIP
+  routes into BGP.  
+\end{itemize}
+XORP is capable of performing such route redistribution.  This is
+generally configured using the {\stt import} and {\stt export}
+configuration statements.  These terms are relative to the router's
+routing table, so if the directive {\stt export static} is added to
+the RIP configuration, then this indicates that RIP should export all
+the static routes to its neighbors via the RIP protocol.
+

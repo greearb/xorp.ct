@@ -1,12 +1,18 @@
 \chapter{Static Routes}
-
+\label{staticroutes}
 \section{Terminology and Concepts}
 
-what is a static route?
+A static route is a manually configured route.  Static routes will not
+automatically change if a link or neighboring router fails.  In
+general, static routes should only be used for very simple network
+topologies, or to override the behaviour of a dyanmic routing protocol
+for a small number of routes.
 
 \section{Configuration of Static Routes}
 
 \subsection{Configuration Syntax}
+
+The syntax for defining static routes is shown below.
 \vspace{0.1in}
 \noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
@@ -42,6 +48,16 @@ protocols \{\\
 \end{minipage}
 }
 \vspace{0.1in}
+
+\noindent
+The configuration parameters are used as follows:
+\begin{description}
+\item{\tt static}: the delimits the part of the router configuration
+  that is related to configuring static routes.
+\item{\tt targetname} this is the name for this instance of static\_routes.  It
+  defaults to ``{\stt static\_routes}'', and it is not recommended that this
+  default is overridden under normal usage scenarios.
+\end{description}
 
 
 \subsection{Example Configurations}
