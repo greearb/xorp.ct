@@ -4,7 +4,10 @@ specify the host and port to be used to contact the Finder.
 
 Unless there are objections let's go with:
 
-	-F <host>:<port>
+	-F <host>[:<port>]
+
+	where the port number is optional (if not specified, the default
+	value is used)
 
 and reserve:
 
