@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.39 2005/02/27 21:32:54 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.40 2005/03/15 00:32:39 pavlin Exp $"
 
 
 //
@@ -126,6 +126,9 @@ Mld6igmpNode::~Mld6igmpNode()
 int
 Mld6igmpNode::start()
 {
+    if (! is_enabled())
+	return (XORP_OK);
+
     //
     // Test the service status
     //
@@ -190,13 +193,8 @@ Mld6igmpNode::final_start()
  * @: 
  * 
  * Gracefully stop the MLD or IGMP protocol.
- * XXX: This function, unlike start(), will stop the protocol
- * operation on all interfaces.
  * XXX: After the cleanup is completed,
  * Mld6igmpNode::final_stop() is called to complete the job.
- * XXX: If this method is called one-after-another, the second one
- * will force calling immediately Mld6igmpNode::final_stop() to quickly
- * finish the job. TODO: is this a desired semantic?
  * XXX: This function, unlike start(), will stop the protocol
  * operation on all interfaces.
  * 
@@ -220,7 +218,10 @@ Mld6igmpNode::stop()
 	&& (ServiceBase::status() != SERVICE_RESUMING)) {
 	return (XORP_ERROR);
     }
-    
+
+    if (ProtoNode<Mld6igmpVif>::pending_stop() < 0)
+	return (XORP_ERROR);
+
     //
     // Perform misc. MLD6IGMP-specific stop operations
     //
@@ -229,9 +230,6 @@ Mld6igmpNode::stop()
     // Stop the vifs
     stop_all_vifs();
     
-    if (ProtoNode<Mld6igmpVif>::pending_stop() < 0)
-	return (XORP_ERROR);
-
     //
     // Set the node status
     //
@@ -639,8 +637,6 @@ Mld6igmpNode::enable_vif(const string& vif_name, string& error_msg)
     
     mld6igmp_vif->enable();
     
-    XLOG_INFO("Enabled vif: %s", vif_name.c_str());
-    
     return (XORP_OK);
 }
 
@@ -665,8 +661,6 @@ Mld6igmpNode::disable_vif(const string& vif_name, string& error_msg)
     }
     
     mld6igmp_vif->disable();
-    
-    XLOG_INFO("Disabled vif: %s", vif_name.c_str());
     
     return (XORP_OK);
 }
@@ -698,8 +692,6 @@ Mld6igmpNode::start_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("Started vif: %s", vif_name.c_str());
-    
     return (XORP_OK);
 }
 
@@ -730,8 +722,6 @@ Mld6igmpNode::stop_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    XLOG_INFO("Stopped vif: %s", vif_name.c_str());
-    
     return (XORP_OK);
 }
 
@@ -741,31 +731,24 @@ Mld6igmpNode::stop_vif(const string& vif_name, string& error_msg)
  * 
  * Start MLD/IGMP on all enabled interfaces.
  * 
- * Return value: The number of virtual interfaces MLD/IGMP was started on,
- * or %XORP_ERROR if error occured.
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 Mld6igmpNode::start_all_vifs()
 {
-    int n = 0;
     vector<Mld6igmpVif *>::iterator iter;
     string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	Mld6igmpVif *mld6igmp_vif = (*iter);
 	if (mld6igmp_vif == NULL)
 	    continue;
-	if (! mld6igmp_vif->is_enabled())
-	    continue;
-	if (mld6igmp_vif->start(error_msg) != XORP_OK) {
-	    XLOG_ERROR("Cannot start vif %s: %s",
-		       mld6igmp_vif->name().c_str(), error_msg.c_str());
-	} else {
-	    n++;
-	}
+	if (start_vif(mld6igmp_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (n);
+    return (ret_value);
 }
 
 /**
@@ -774,29 +757,24 @@ Mld6igmpNode::start_all_vifs()
  * 
  * Stop MLD/IGMP on all interfaces it was running on.
  * 
- * Return value: The number of virtual interfaces MLD/IGMP was stopped on,
- * or %XORP_ERROR if error occured.
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
 Mld6igmpNode::stop_all_vifs()
 {
-    int n = 0;
     vector<Mld6igmpVif *>::iterator iter;
     string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	Mld6igmpVif *mld6igmp_vif = (*iter);
 	if (mld6igmp_vif == NULL)
 	    continue;
-	if (mld6igmp_vif->stop(error_msg) != XORP_OK) {
-	    XLOG_ERROR("Cannot stop vif %s: %s",
-		       mld6igmp_vif->name().c_str(), error_msg.c_str());
-	} else {
-	    n++;
-	}
+	if (stop_vif(mld6igmp_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (n);
+    return (ret_value);
 }
 
 /**
@@ -811,15 +789,18 @@ int
 Mld6igmpNode::enable_all_vifs()
 {
     vector<Mld6igmpVif *>::iterator iter;
+    string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	Mld6igmpVif *mld6igmp_vif = (*iter);
 	if (mld6igmp_vif == NULL)
 	    continue;
-	mld6igmp_vif->enable();
+	if (enable_vif(mld6igmp_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return (ret_value);
 }
 
 /**
@@ -835,17 +816,18 @@ int
 Mld6igmpNode::disable_all_vifs()
 {
     vector<Mld6igmpVif *>::iterator iter;
-    
-    stop_all_vifs();
+    string error_msg;
+    int ret_value = XORP_OK;
     
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	Mld6igmpVif *mld6igmp_vif = (*iter);
 	if (mld6igmp_vif == NULL)
 	    continue;
-	mld6igmp_vif->disable();
+	if (disable_vif(mld6igmp_vif->name(), error_msg) != XORP_OK)
+	    ret_value = XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return (ret_value);
 }
 
 /**
@@ -913,7 +895,9 @@ Mld6igmpNode::vif_shutdown_completed(const string& vif_name)
     //
     // De-register with the MFEA
     //
-    mfea_register_shutdown();
+    if (ServiceBase::status() == SERVICE_SHUTTING_DOWN) {
+	mfea_register_shutdown();
+    }
 
     UNUSED(vif_name);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.17 2005/02/24 02:47:40 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.18 2005/03/15 00:32:39 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -230,16 +230,14 @@ public:
     /**
      * Start MLD/IGMP on all enabled interfaces.
      * 
-     * @return the number of virtual interfaces MLD/IGMP was started on,
-     * or XORP_ERROR if error occured.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start_all_vifs();
     
     /**
      * Stop MLD/IGMP on all interfaces it was running on.
      * 
-     * @return he number of virtual interfaces MLD/IGMP was stopped on,
-     * or XORP_ERROR if error occured.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop_all_vifs();
     
