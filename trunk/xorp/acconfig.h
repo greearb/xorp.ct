@@ -180,13 +180,18 @@ typedef int socklen_t;
 #endif /* HAVE_SOCKLEN_T */
 
 /* KAME code likes to use INET6 to ifdef IPv6 code */
-#ifdef HAVE_IPV6
-#ifdef IPV6_STACK_KAME
+#if defined(HAVE_IPV6) && defined (IPV6_STACK_KAME)
 #ifndef INET6
 #define INET6
-#endif /* INET6 */
-#endif /* IPV6_STACK_KAME */
-#endif /* HAVE_IPV6 */
+#endif
+#endif /* HAVE_IPV6 && IPV6_STACK_KAME */
+
+/* KAME backward-compatibility definitions */
+#if defined(HAVE_IPV6) && defined (IPV6_STACK_KAME)
+#ifndef HAVE_MLD_HDR
+#define mld_hdr mld6_hdr
+#endif
+#endif /* HAVE_IPV6 && IPV6_STACK_KAME */
 
 #ifndef WORDS_BIGENDIAN
 #define WORDS_SMALLENDIAN
