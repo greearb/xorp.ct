@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.2 2003/05/14 01:13:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.3 2003/05/16 04:18:46 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -94,6 +94,8 @@ bool
 FtiConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
 {
 #ifndef HAVE_IPV6
+    UNUSED(fte_list);
+    
     return false;
 #else
     list<FteX> ftex_list;
