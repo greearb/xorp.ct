@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.20 2003/12/03 20:27:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.21 2004/01/13 01:17:32 pavlin Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -32,13 +32,15 @@
 #include "xorpsh_main.hh"
 #include "util.hh"
 
+
 //
-// Defaults
+// Local state
 //
 static bool running = false;
 
 static void signal_handler(int signal_value);
 static void exit_handler(CliClient*);
+
 
 static void
 announce_waiting()
@@ -150,8 +152,7 @@ XorpShell::run()
 
     FILE* file = fopen(_authfile.c_str(), "r");
     if (file == NULL) {
-	XLOG_FATAL("Failed to open authfile %s",
-		   _authfile.c_str());
+	XLOG_FATAL("Failed to open authfile %s", _authfile.c_str());
     }
     char buf[256];
     memset(buf, 0, sizeof(buf));
@@ -249,15 +250,15 @@ XorpShell::generic_done(const XrlError& e)
     if (e == XrlError::OKAY()) {
 	_done = true;
 	return;
-    } else if ((e == XrlError::COMMAND_FAILED())
-	       && (e.note() == "AUTH_FAIL")) {
+    }
+
+    if ((e == XrlError::COMMAND_FAILED()) && (e.note() == "AUTH_FAIL")) {
 	fprintf(stderr, "Authentication Failure\n");
-	exit(1);
     } else {
 	fprintf(stderr, "XRL failed\n");
 	fprintf(stderr, "%s\n", e.str().c_str());
-	exit(1);
     }
+    exit(1);
 }
 
 void
@@ -267,15 +268,15 @@ XorpShell::receive_config(const XrlError& e, const string* config)
 	_configuration = *config;
 	_got_config = true;
 	return;
-    } else if ((e == XrlError::COMMAND_FAILED())
-	       && (e.note() == "AUTH_FAIL")) {
+    }
+
+    if ((e == XrlError::COMMAND_FAILED()) && (e.note() == "AUTH_FAIL")) {
 	fprintf(stderr, "Authentication Failure\n");
-	exit(1);
     } else {
 	fprintf(stderr, "Failed to register with router manager process\n");
 	fprintf(stderr, "%s\n", e.str().c_str());
-	exit(1);
     }
+    exit(1);
 }
 
 void
@@ -297,7 +298,7 @@ XorpShell::commit_changes(const string& deltas, const string& deletions,
 void
 XorpShell::commit_done(bool success, const string& errmsg)
 {
-    // Call unlock_config.  The callback from unlock will finally clear
+    // Call unlock_config. The callback from unlock will finally clear
     // things up.
     _ct->commit_phase4(success, errmsg, _commit_callback, this);
 }
@@ -355,6 +356,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	// This is the response back to our own request
 	return;
     }
+
     string response;
     if (!_ct->apply_deltas(user_id, deltas,
 			   /* this is not a provisional change */ false,
@@ -446,6 +448,8 @@ display_defaults()
 int
 main(int argc, char *argv[])
 {
+    int errcode = 0;
+
     //
     // Initialize and start xlog
     //
@@ -459,7 +463,7 @@ main(int argc, char *argv[])
     xlog_start();
 
     //
-    // Install handler for unexpected exceptions
+    // Install the handler for unexpected exceptions
     //
     XorpUnexpectedHandler eh(xorp_unexpected_handler);
 
@@ -467,7 +471,6 @@ main(int argc, char *argv[])
     // Expand the default variables to include the XORP root path
     //
     xorp_path_init(argv[0]);
-
     string template_dir = xorp_template_dir();
     string xrl_dir	= xorp_xrl_targets_dir();
 
@@ -487,30 +490,33 @@ main(int argc, char *argv[])
 	case 'h':
 	    usage(argv[0]);
 	    display_defaults();
-	    xlog_stop();
-	    xlog_exit();
-	    exit(-1);
+	    errcode = 1;
+	    goto cleanup;
 	}
     }
 
+    //
     // Initialize the IPC mechanism.
     // As there can be multiple xorpsh instances, we need to generate a
     // unique name for our xrlrouter.
+    //
     char hostname[MAXHOSTNAMELEN];
-    if (gethostname(hostname, MAXHOSTNAMELEN) < 0) {
+    if (gethostname(hostname, sizeof(hostname)) < 0) {
 	XLOG_FATAL("gethostname failed: %s", strerror(errno));
     }
     hostname[MAXHOSTNAMELEN - 1] = '\0';
 
-    string xname = "xorpsh" + c_format("-%d-%s", getpid(), hostname);
-
     try {
+	string xname = "xorpsh" + c_format("-%d-%s", getpid(), hostname);
 	XorpShell xorpsh(xname, xorp_binary_root_dir(), template_dir, xrl_dir);
 	xorpsh.run();
     } catch (const InitError& e) {
 	XLOG_ERROR("xorpsh exiting due to an init error: %s", e.why().c_str());
-	exit(1);
+	errcode = 1;
+	goto cleanup;
     }
+
+ cleanup:
 
     //
     // Gracefully stop and exit xlog
@@ -518,5 +524,5 @@ main(int argc, char *argv[])
     xlog_stop();
     xlog_exit();
 
-    return 0;
+    exit(errcode);
 }
