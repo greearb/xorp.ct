@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.29 2003/12/13 00:43:34 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.30 2003/12/19 09:33:13 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -77,25 +77,40 @@ XrlStatusValidation::validate(CallBack cb)
 
     _cb = cb;
     if (_task_manager.do_exec()) {
-	string xrl_request;
+	string xrl_request, errmsg;
 	Xrl* xrl = NULL;
 	do {
 	    // Try to expand using the configuration tree
 	    const ConfigTreeNode* ctn;
 	    ctn = _task_manager.config_tree().find_config_module(_module_name);
 	    if (ctn != NULL) {
-		xrl_request = _xrl_action.expand_xrl_variables(*ctn);
+		if (_xrl_action.expand_xrl_variables(*ctn, xrl_request,
+						     errmsg)
+		    != XORP_OK) {
+		    XLOG_FATAL("Cannot expand XRL validation action %s "
+			       "for module %s: %s",
+			       _xrl_action.str().c_str(),
+			       _module_name.c_str(),
+			       errmsg.c_str());
+		}
 		break;
 	    }
+
 	    // Try to expand using the template tree
 	    const TemplateTreeNode& ttn = _xrl_action.template_tree_node();
-	    xrl_request = _xrl_action.expand_xrl_variables(ttn);
+	    if (_xrl_action.expand_xrl_variables(ttn, xrl_request, errmsg)
+		!= XORP_OK) {
+		XLOG_FATAL("Cannot expand XRL validation action %s "
+			   "for module %s: %s",
+			   _xrl_action.str().c_str(),
+			   _module_name.c_str(),
+			   errmsg.c_str());
+	    }
 	    break;
 	} while (false);
 	if (xrl_request.empty()) {
-	    XLOG_ERROR("Cannot expand XRL validation action %s for module %s",
+	    XLOG_FATAL("Cannot expand XRL validation action %s for module %s",
 		       _xrl_action.str().c_str(), _module_name.c_str());
-	    return;
 	}
 
 	// Create the XRL
@@ -108,15 +123,17 @@ XrlStatusValidation::validate(CallBack cb)
 
 	printf("XRL: >%s<\n", xrl->str().c_str());
 	string response = _xrl_action.xrl_return_spec();
-	_task_manager.xorp_client().
-	    send_now(*xrl, callback(this, &XrlStatusValidation::xrl_done),
-		     response, true);
+	_task_manager.xorp_client().send_now(*xrl,
+			callback(this, &XrlStatusValidation::xrl_done),
+			response, true);
 	delete xrl;
     } else {
+	//
 	// When we're running with do_exec == false, we want to
 	// exercise most of the same machinery, but we want to ensure
 	// that the xrl_done response gets the right arguments even
 	// though we're not going to call the XRL.
+	//
 	_retry_timer = eventloop().new_oneoff_after_ms(1000,
 			callback(this, &XrlStatusValidation::dummy_response));
     }
@@ -145,7 +162,7 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 	    return;
 	} catch (XrlArgs::XrlAtomNotFound) {
 	    // Not a valid response
-	    XLOG_ERROR("Bad XRL response to get_status\n");
+	    XLOG_ERROR("Bad XRL response to get_status");
 	    _cb->dispatch(false);
 	    return;
 	}
@@ -320,7 +337,7 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 	    return;
 	} catch (XrlArgs::XrlAtomNotFound) {
 	    // Not a valid response
-	    XLOG_ERROR("Bad XRL response to get_status\n");
+	    XLOG_ERROR("Bad XRL response to get_status");
 	    _cb->dispatch(false);
 	    return;
 	}
@@ -381,19 +398,34 @@ XrlShutdown::shutdown(CallBack cb)
 {
     _cb = cb;
     if (_task_manager.do_exec()) {
-	string xrl_request;
+	string xrl_request, errmsg;
 	Xrl* xrl = NULL;
 	do {
 	    // Try to expand using the configuration tree
 	    const ConfigTreeNode* ctn;
 	    ctn = _task_manager.config_tree().find_config_module(_module_name);
 	    if (ctn != NULL) {
-		xrl_request = _xrl_action.expand_xrl_variables(*ctn);
-		break;
+		if (_xrl_action.expand_xrl_variables(*ctn, xrl_request,
+						     errmsg)
+		    != XORP_OK) {
+		    XLOG_FATAL("Cannot expand XRL shutdown action %s "
+			       "for module %s: %s",
+			       _xrl_action.str().c_str(),
+			       _module_name.c_str(),
+			       errmsg.c_str());
+		}
 	    }
+
 	    // Try to expand using the template tree
 	    const TemplateTreeNode& ttn = _xrl_action.template_tree_node();
-	    xrl_request = _xrl_action.expand_xrl_variables(ttn);
+	    if (_xrl_action.expand_xrl_variables(ttn, xrl_request, errmsg)
+		!= XORP_OK) {
+		XLOG_FATAL("Cannot expand XRL shutdown action %s "
+			   "for module %s: %s",
+			   _xrl_action.str().c_str(),
+			   _module_name.c_str(),
+			   errmsg.c_str());
+	    }
 	    break;
 	} while (false);
 	if (xrl_request.empty()) {
@@ -483,7 +515,8 @@ TaskXrlItem::execute(string& errmsg)
 
     Xrl* xrl = _unexpanded_xrl.expand();
     if (xrl == NULL) {
-	errmsg = "Failed to expand XRL " + _unexpanded_xrl.str();
+	errmsg = c_format("Failed to expand XRL %s",
+			  _unexpanded_xrl.str().c_str());
 	return false;
     }
     printf("  XRL: >%s<\n", xrl->str().c_str());
@@ -762,7 +795,7 @@ Task::step3_config()
 	    string errmsg;
 	    printf("step3: execute\n");
 	    if (_xrls.front().execute(errmsg) == false) {
-		XLOG_WARNING("Failed to execute XRL: %s\n", errmsg.c_str());
+		XLOG_WARNING("Failed to execute XRL: %s", errmsg.c_str());
 		task_fail(errmsg, false);
 		return;
 	    }
@@ -1097,7 +1130,7 @@ TaskManager::task_done(bool success, string errmsg)
 void
 TaskManager::fail_tasklist_initialization(const string& errmsg)
 {
-    XLOG_ERROR((errmsg + "\n").c_str());
+    XLOG_ERROR(errmsg.c_str());
     reset();
     return;
 }
