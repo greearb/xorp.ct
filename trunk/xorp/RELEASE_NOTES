@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.11 2003/06/06 01:29:14 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.12 2003/06/06 01:34:09 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -113,7 +113,15 @@ Release 0.3 (2003/06/06)
     - ``fea_rtsock'' deprecated (replaced with the generic ``fea'').
 
   RIB: 
-    - 
+    - Export a RIB table to any target that registers interest.
+
+    - Replace fea_fti/0.1 XRL interface with fti/0.2.  The new interface
+      introduces metric, admin_distance and protocol_origin when RIB
+      information is propagated to the RIB clients.
+
+    - Refactoring of the Vif manager implementation.
+
+    - Support for setting the process status PROC_FOO code.
 
   BGP:
     - More robust to XRL communication failures. In particular support
