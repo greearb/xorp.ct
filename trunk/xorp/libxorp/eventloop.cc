@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.2 2003/03/10 23:20:31 hodson Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.3 2003/04/02 02:53:50 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -25,9 +25,12 @@ EventLoop::run()
 {
     const time_t MAX_ALLOWED = 2;
     static time_t last = time(0);
+    static bool warned = false;
     time_t diff = time(0) - last;
-    if(diff > MAX_ALLOWED)
+    if (!warned && (diff > MAX_ALLOWED)) {
 	XLOG_WARNING("%d seconds between calls to EventLoop::run", (int)diff);
+	warned = true;
+    }
 
     TimeVal t;
     _timer_list.get_next_delay(t);
