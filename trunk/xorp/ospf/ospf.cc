@@ -126,7 +126,7 @@ Ospf<A>::disable_interface_vif(const string& interface, const string& vif)
 
 template <typename A>
 bool
-Ospf<A>::send(const string& interface, const string& vif,
+Ospf<A>::transmit(const string& interface, const string& vif,
 		 uint8_t* data, uint32_t len)
 {
     debug_msg("Interface %s Vif %s data %p len %u",

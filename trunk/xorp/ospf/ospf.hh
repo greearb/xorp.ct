@@ -132,7 +132,7 @@ class Ospf {
     /**
      * Used to send traffic on the IO interface.
      */
-    bool send(const string& interface, const string& vif,
+    bool transmit(const string& interface, const string& vif,
 	      uint8_t* data, uint32_t len);
 
     /**
