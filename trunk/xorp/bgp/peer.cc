@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.54 2003/12/11 03:04:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.55 2003/12/12 23:18:03 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1023,7 +1023,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
     **
     ** There are two questions that seem to ambiguous in the BGP specs.
     **
-    ** 1) How do we deal with a multiprotol attribute that hasn't
+    ** 1) How do we deal with a multiprotocol attribute that hasn't
     **    been "negotiated".
     **	  a) Strip out the offending attribute.
     **	  b) Send a notify and drop the peering.
@@ -1184,18 +1184,21 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	    }
 	}
 
-	if (!ibgp()) {
-	    // If this is an EBGP peering, the AS Path MUST NOT be empty
-	    if (as_path_attr->as_path().path_length() == 0)
-		return new NotificationPacket(UPDATEMSGERR, MALASPATH);
+	// If we got this far and as_path_attr is not set this is a
+	// multiprotocol withdraw.
+	if (as_path_attr != NULL) {
+	    if (!ibgp()) {
+		// If this is an EBGP peering, the AS Path MUST NOT be empty
+		if (as_path_attr->as_path().path_length() == 0)
+		    return new NotificationPacket(UPDATEMSGERR, MALASPATH);
 
-	    // If this is an EBGP peering, the AS Path MUST start
-	    // with the AS number of the peer.
-	    AsNum my_asnum(peerdata()->as());
-	    if (as_path_attr->as_path().first_asnum() != my_asnum)
-		return new NotificationPacket(UPDATEMSGERR, MALASPATH);
+		// If this is an EBGP peering, the AS Path MUST start
+		// with the AS number of the peer.
+		AsNum my_asnum(peerdata()->as());
+		if (as_path_attr->as_path().first_asnum() != my_asnum)
+		    return new NotificationPacket(UPDATEMSGERR, MALASPATH);
+	    }
 	}
-
 
 	// XXX need also to check that the nexthop address is not
 	// one of our addresses, and with single hop EBGP that the
