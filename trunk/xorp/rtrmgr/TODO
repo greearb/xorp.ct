@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.20 2004/05/18 07:11:08 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.21 2004/05/28 22:34:43 pavlin Exp $
 #
 
 Urgent
@@ -48,6 +48,11 @@ Operational Mode
    process (the rtrmgr).
 
 Other
+ - Whenever we deal with configuration trees, use
+   add_default_children() in a single place to add the defaults
+   from the template tree rather than doing so every time we
+   create a configuration tree from somewhere (e.g., file, xorpsh, etc).
+
  - Fix test_router_manager, because even if the path to the xorp_finder
    binary is incorrect, it doesn't report an error.
 
