@@ -75,8 +75,6 @@ Lsa_header::copy_out(uint8_t *ptr) const
 {
     OspfTypes::Version version = get_version();
 
-    Lsa_header header(version);
-
     embed_16(&ptr[0], get_ls_age());
 
     switch(version) {
@@ -157,8 +155,6 @@ size_t
 Ls_request::copy_out(uint8_t *ptr) const
 {
     OspfTypes::Version version = get_version();
-
-    Ls_request header(version);
 
     switch(version) {
     case OspfTypes::V2:
