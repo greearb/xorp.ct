@@ -12,9 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.6 2004/06/10 22:41:17 hodson Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.7 2004/12/15 21:33:04 pavlin Exp $"
 
+#include "libxorp_module.h"
 #include "xorp.h"
+#include "xlog.h"
 #include "mac.hh"
 #include "ether_compat.h" 
 
@@ -36,12 +38,30 @@ Mac::Mac(const string& s) throw (InvalidString)
     // Add new MyMac::valid methods here
     // ------------------------------------------------------------------------
     if (EtherMac::valid(_srep)) {
-	_srep = EtherMac::normalize(_srep);
 	return;
     }
 
     xorp_throw(InvalidString,
 	       c_format("Unknown Mac representation: %s", s.c_str()));
+}
+
+string
+Mac::normalized_str() const
+{
+    // ------------------------------------------------------------------------
+    // I M P O R T A N T !
+    //
+    // Check all known MAC instance classes for whether string is valid
+    // and return the corresponding normalized string.
+    //
+    // Add new MyMac::valid and MyMac::normalize() methods here
+    // ------------------------------------------------------------------------
+    if (EtherMac::valid(_srep)) {
+	return EtherMac::normalize(_srep);
+    }
+
+    XLOG_UNREACHABLE();
+    return (_srep);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -50,8 +70,7 @@ Mac::Mac(const string& s) throw (InvalidString)
 EtherMac::EtherMac(const string& s) throw (InvalidString)
 {
     if (valid(s)) {
-	string ns = EtherMac::normalize(s);
-	set_rep(ns);
+	set_rep(s);
 	return;
     }
 
@@ -64,8 +83,7 @@ EtherMac::EtherMac(const Mac& m) throw (BadMac)
     string s = m.str();
 
     if (valid(s)) {
-	string ns = EtherMac::normalize(s);
-	set_rep(ns);
+	set_rep(s);
 	return;
     }
 

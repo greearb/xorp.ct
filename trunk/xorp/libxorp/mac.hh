@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.4 2004/06/10 22:41:17 hodson Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.5 2004/12/15 21:33:04 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -63,6 +63,20 @@ public:
      * @return string representation of MAC address.
      */
     inline const string& str() const { return _srep; }
+
+    /**
+     * Get the normalized string of MAC address.
+     *
+     * For example, in case of Ethernet MAC address, the original
+     * string with an EtherMAC address is converted into
+     * an "struct ether_addr", and then back to a string.
+     * Thus, the string address representation is normalized
+     * to the system's internal preference. Example:
+     * "00:00:00:00:00:00" -> "0:0:0:0:0:0"
+     *
+     * @return normalized string representation of MAC address.
+     */
+    string normalized_str() const;
 
     /**
      * @return true if MAC address value is unset.
@@ -143,7 +157,7 @@ public:
 inline bool
 operator==(const Mac& m1, const Mac& m2)
 {
-    return m1.str() == m2.str();
+    return m1.normalized_str() == m2.normalized_str();
 }
 
 inline bool
