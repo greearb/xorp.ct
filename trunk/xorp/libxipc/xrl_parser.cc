@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.2 2002/12/19 01:29:13 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.3 2003/01/26 04:06:20 pavlin Exp $"
 
 #include <stdio.h>
 
@@ -430,8 +430,8 @@ push_atoms_and_spells(XrlArgs* args,
 	if (atom_value.empty()) {
 	    if (args)
 		args->add(XrlAtom(atom_name, t));
-	    // if (spells != 0)
-	    // spells->push_back(XrlAtomSpell(atom_name, t, ""));
+	    if (spells != 0)
+		spells->push_back(XrlAtomSpell(atom_name, t, ""));
 	} else if (atom_value[0] == '$') {
 	    if (args)
 		args->add(XrlAtom(atom_name, t));
