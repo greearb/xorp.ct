@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.17 2004/12/18 02:01:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.18 2005/01/20 00:43:17 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -344,25 +344,41 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 	break;
     } while (false);
 
+#if 0	// TODO: XXX: currently, we don't have the next-hop info, hence
+	// we allow to delete an entry without the port number.
     if (port < 0) {
 	XLOG_ERROR("Cannot find outgoing port number for the Click forwarding "
 		   "table element to delete entry %s", fte.str().c_str());
 	return (false);
     }
+#endif // 0
 
     //
     // Write the configuration
     //
     string config;
-    if (fte.is_connected_route()) {
-	config = c_format("%s %d\n",
-			  fte.net().str().c_str(),
-			  port);
+    if (port < 0) {
+	// XXX: remove all routes for a given prefix
+	//
+	// TODO: XXX: currently, we don't have the next-hop info,
+	// hence we delete all routes for a given prefix. After all,
+	// in case of XORP+Click we always install no more than
+	// a single route per prefix.
+	//
+	config = c_format("%s\n",
+			  fte.net().str().c_str());
     } else {
-	config = c_format("%s %s %d\n",
-			  fte.net().str().c_str(),
-			  fte.nexthop().str().c_str(),
-			  port);
+	// XXX: remove a specific route
+	if (fte.is_connected_route()) {
+	    config = c_format("%s %d\n",
+			      fte.net().str().c_str(),
+			      port);
+	} else {
+	    config = c_format("%s %s %d\n",
+			      fte.net().str().c_str(),
+			      fte.nexthop().str().c_str(),
+			      port);
+	}
     }
     string element = "_xorp_rt";
     string handler = "remove";
