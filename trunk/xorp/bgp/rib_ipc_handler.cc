@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.37 2003/12/19 01:54:49 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.38 2003/12/19 07:03:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -367,7 +367,7 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
 
     _xrl_queue.push_back(q);
 
-    sendit();
+    start();
 }
 
 template<class A>
@@ -391,7 +391,7 @@ XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, Safi safi,
 
     _xrl_queue.push_back(q);
 
-    sendit();
+    start();
 }
 
 template<class A>
@@ -403,13 +403,10 @@ XrlQueue<A>::busy()
 
 template<class A>
 void
-XrlQueue<A>::sendit()
+XrlQueue<A>::start()
 {
     for(;;) {
 	debug_msg("queue length %u\n", (uint32_t)_xrl_queue.size());
-
-	if(_flying >= FLYING_LIMIT)
-	    return;
 
 	if(_xrl_queue.empty()) {
 	    debug_msg("Output no longer busy\n");
@@ -417,15 +414,9 @@ XrlQueue<A>::sendit()
 	    return;
 	}
 
-	if (_xrl_queue.size() <= _flying)
-	    return;
-
 	typename deque <XrlQueue<A>::Queued>::const_iterator qi;
-	size_t i = 0;
 
-	for (qi = _xrl_queue.begin(); qi != _xrl_queue.end(); qi++, i++)
-	    if (i == _flying)
-		break;
+	qi = _xrl_queue.begin();
 
 	XLOG_ASSERT(qi != _xrl_queue.end());
 
@@ -436,6 +427,7 @@ XrlQueue<A>::sendit()
 
 	if (sent) {
 	    _flying++;
+	    _xrl_queue.pop_front();
 	    continue;
 	}
 
@@ -539,8 +531,6 @@ XrlQueue<A>::route_command_done(const XrlError& error,
 
     switch (error.error_code()) {
     case OKAY:
-	_xrl_queue.pop_front();
-	sendit();
 	break;
 
     case REPLY_TIMED_OUT:
@@ -568,4 +558,7 @@ XrlQueue<A>::route_command_done(const XrlError& error,
 	XLOG_FATAL("callback: %s %s",  comment, error.str().c_str());
 	break;
     }
+
+    // Fire of more requests.
+    start();
 }

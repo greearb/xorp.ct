@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.21 2003/12/19 01:50:19 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.22 2003/12/19 07:03:17 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -58,14 +58,12 @@ private:
     };
 
     deque <Queued> _xrl_queue;
-    static const size_t FLYING_LIMIT = 1;// XRL's allowed in flight
-					   // at one time.
     size_t _flying; //XRLs currently in flight
 
     /**
      * Start the transmission of XRLs to tbe RIB.
      */
-    void sendit();
+    void start();
 
     /**
      * The specialised method called by sendit to deal with IPv4/IPv6.
