@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.9 2004/06/10 02:20:03 atanu Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.10 2004/06/12 05:50:02 pavlin Exp $ */
 
 
 interfaces {
@@ -128,23 +128,30 @@ protocols {
 	    next-hop: 10.10.10.20
 	    enabled: true
 
-	    enable-ipv4-multicast
+	    /* Optionally enable other AFI/SAFI combinations */
+	    /*enable-ipv4-multicast*/
 
-            enable-ipv6-unicast
-            enable-ipv6-multicast
+            /*enable-ipv6-unicast*/
+            /*enable-ipv6-multicast*/
 	}
 
+	/* Originate IPv4 Routes */
+/*
 	network4 10.10.10.0/24 {
 	    next-hop: 10.10.10.10
 	    unicast: true
 	    multicast: true
 	}
+*/
 
+	/* Originate IPv6 Routes */
+/*
 	network6 10:10:10:10::/64 {
 	    next-hop: 10:10:10:10:10:10:10:10
 	    unicast: true
 	    multicast: true
 	}
+*/
     }
 }
 
