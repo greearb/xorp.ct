@@ -1,7 +1,7 @@
-/* $XORP: xorp/etc/templates/fea.cmds,v 1.4 2004/02/01 02:09:37 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.cmds,v 1.5 2004/05/16 07:15:16 pavlin Exp $ */
 
 show interface $(interfaces.interface.*) {
-    %command: "rtrmgr/tools/show_interfaces" %help: HELP;
+    %command: "fea/tools/show_interfaces" %help: HELP;
     %module: fea;
     %opt_parameter: "brief" %help: BRIEF;
     %opt_parameter: "detail" %help: DETAIL;
@@ -13,7 +13,7 @@ show interface $(interfaces.interface.*) {
 }
 
 show vif $(interfaces.interface.*.vif.*) {
-    %command: "rtrmgr/tools/show_interfaces" %help: HELP;
+    %command: "fea/tools/show_interfaces" %help: HELP;
     %module: fea;
     %opt_parameter: "brief" %help: BRIEF;
     %opt_parameter: "detail" %help: DETAIL;

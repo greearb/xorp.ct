@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.90 2004/05/05 05:11:45 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.91 2004/05/21 04:46:35 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1391,6 +1391,7 @@ AC_OUTPUT(
 	etc/templates/Makefile
 	fea/Makefile
 	fea/MakefileRootCheck
+	fea/tools/Makefile
 	fib2mrib/Makefile
 	libcomm/Makefile
 	libfeaclient/Makefile
@@ -1411,7 +1412,6 @@ AC_OUTPUT(
 	rip/Makefile
 	rip/tools/Makefile
 	rtrmgr/Makefile
-	rtrmgr/tools/Makefile
 	static_routes/Makefile
 	utils/Makefile
 	utils/flower_malloc/Makefile

@@ -3,9 +3,6 @@
 ## $XORP: xorp/rtrmgr/Makefile.am,v 1.24 2004/01/13 00:17:09 pavlin Exp $
 ##
 
-# -- Subdirectories
-SUBDIRS = . tools
-
 # -- Real Programs
 bin_PROGRAMS	 = xorp_rtrmgr xorpsh
 

@@ -105,10 +105,11 @@ noinst_PROGRAMS =
 noinst_LIBRARIES = 
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+LDADD = $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 show_interfaces_SOURCES = show_interfaces.hh show_interfaces.cc
+show_interfaces_LDADD = $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(LDADD)
 
 # -- Library Sources
 
@@ -118,7 +119,7 @@ EXTRA_DIST =
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
-subdir = rtrmgr/tools
+subdir = fea/tools
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
@@ -130,11 +131,14 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_show_interfaces_OBJECTS = show_interfaces.$(OBJEXT)
 show_interfaces_OBJECTS = $(am_show_interfaces_OBJECTS)
-show_interfaces_LDADD = $(LDADD)
-show_interfaces_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.a \
+show_interfaces_DEPENDENCIES = \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+	$(top_builddir)/libxorp/libxorp.a
 show_interfaces_LDFLAGS =
 
 DEFS = @DEFS@
@@ -165,7 +169,7 @@ all: all-am
 .SUFFIXES: .cc .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  rtrmgr/tools/Makefile
+	  $(AUTOMAKE) --gnu  fea/tools/Makefile
 Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && \
 	  CONFIG_HEADERS= CONFIG_LINKS= \

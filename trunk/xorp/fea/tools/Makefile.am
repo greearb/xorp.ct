@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/tools/Makefile.am,v 1.5 2003/07/30 23:43:32 pavlin Exp $
+## $XORP: xorp/rtrmgr/tools/Makefile.am,v 1.6 2003/08/01 02:11:51 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -22,11 +22,15 @@ noinst_LIBRARIES =
 LDADD		 = $(top_builddir)/libxipc/libxipc.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 
 # -- Program Sources
 show_interfaces_SOURCES	 = show_interfaces.hh
 show_interfaces_SOURCES	+= show_interfaces.cc
+show_interfaces_LDADD	 = $(top_builddir)/libfeaclient/libfeaclient.a
+show_interfaces_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
+show_interfaces_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a
+show_interfaces_LDADD	+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a
+show_interfaces_LDADD	+= $(LDADD)
 
 # -- Library Sources
 
