@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.10 2003/01/28 03:21:52 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.11 2003/01/28 19:15:17 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -76,9 +76,8 @@ AsSegment::_encode(size_t &len) const
     data[pos++] = _entries;
 
     for (iter = _aslist.begin(); iter != _aslist.end(); ++iter) {
-	uint16_t temp = htons(iter->as());
 	debug_msg("Encoding 16-bit As %d\n", iter->as());
-	memcpy(&data[pos], &temp, 2);
+	iter->copy_out(&data[pos]);
 	pos += 2;
     }
 

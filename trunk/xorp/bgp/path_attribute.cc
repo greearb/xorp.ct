@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.8 2003/01/26 04:06:17 pavlin Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.9 2003/01/27 18:04:52 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -529,8 +529,7 @@ NextHopAttribute<IPv4>::encode()
     data[0] = flags();
     data[1] = NEXT_HOP;
     data[2] = 4; // length of data
-    uint32_t addr = _next_hop.addr();
-    memcpy(&data[3], &addr, 4);
+    _next_hop.copy_out(data+3);
     _data = data;
 }
 
@@ -865,12 +864,9 @@ AggregatorAttribute::encode()
     data[0] = flags();
     data[1] = AGGREGATOR;
     data[2] = 6;
-    uint16_t agg_as = htons(_aggregatoras.as());
-    memcpy(data + 3, &agg_as, 2);
+    _aggregatoras.copy_out(data+3);
     // This defined to be an IPv4 address in RFC 2858 (line 46)
-    // Note: addr() is already in network byte order
-    uint32_t agg_addr = _routeaggregator.addr();
-    memcpy(data + 5, &agg_addr, 4);
+    _routeaggregator.copy_out(data+5);
     _data = data;
 }
 
@@ -888,13 +884,8 @@ AggregatorAttribute::decode()
 	d += 3;
     }
     // The internet draft sets this AS Number to be 2 octets (section 4.3)
-    uint16_t agg_as;
-    memcpy(&agg_as, d, 2);
-    _aggregatoras = AsNum(ntohs(agg_as));
-    d += 2;
-    uint32_t agg_addr;
-    memcpy(&agg_addr, d, 4);
-    _routeaggregator = IPv4(agg_addr);
+    _aggregatoras = AsNum(d);
+    _routeaggregator = IPv4(d+2);
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Aggregator attribute",

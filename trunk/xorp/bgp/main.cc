@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.10 2003/01/28 03:21:52 rizzo Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.11 2003/01/28 19:15:17 rizzo Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -721,10 +721,8 @@ BGPMain::extract_attributes(// Input values,
 	= attributes.aggregator_att();
     if (agg_att) {
 	aggregator.resize(6);
-	uint32_t addr = htonl(agg_att->route_aggregator().addr());
-	uint16_t as = htons(agg_att->aggregator_as().as());
-	memcpy(&aggregator[0], &addr, 4);
-	memcpy(&aggregator[4], &as, 2);
+	agg_att->route_aggregator().copy_out(&aggregator[0]);
+	agg_att->aggregator_as().copy_out(&aggregator[4]);
     } else {
 	assert(aggregator.size()==0);
     }
