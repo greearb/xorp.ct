@@ -254,7 +254,7 @@ get_prefix6()
 start_fti_transaction()
 {
     if [ $# -eq 0 ] ; then
-	tid=`$CALLXRL "finder://fea/fti/0.1/start_transaction" | sed 's/.*=//'`
+	tid=`$CALLXRL "finder://fea/fti/0.2/start_transaction" | sed 's/.*=//'`
 	err=$?
 	echo $tid
 	return $err
@@ -271,7 +271,7 @@ commit_fti_transaction()
 {
     echo -n "commit_transaction"
     if [ $# -eq 1 ] ; then
-	$CALLXRL "finder://fea/fti/0.1/commit_transaction?tid:u32=$1"
+	$CALLXRL "finder://fea/fti/0.2/commit_transaction?tid:u32=$1"
 	return $?
     fi
     cat >&2 <<EOF
@@ -285,7 +285,7 @@ abort_fti_transaction()
 {
     echo -n "abort_transaction"
     if [ $# -eq 1 ] ; then
-	$CALLXRL "finder://fea/fti/0.1/abort_transaction?tid:u32=$1"
+	$CALLXRL "finder://fea/fti/0.2/abort_transaction?tid:u32=$1"
 	return $?
     fi
     cat >&2 <<EOF
@@ -297,15 +297,15 @@ EOF
 
 add_entry4()
 {
-    if [ $# -ne 5 ] ; then
+    if [ $# -ne 8 ] ; then
 	cat >&2 <<EOF
-usage: add_entry4 <tid> <dest net> <gw> <ifname> <vifname>
-eg:    add_entry4 6987662 187.1.0.0/16 164.27.13.1 ed0
+usage: add_entry4 <tid> <dest net> <gw> <ifname> <vifname> <metric> <admin_distance> <protocol_origin>
+eg:    add_entry4 6987662 187.1.0.0/16 164.27.13.1 ed0 10 20 BGP
 EOF
 	return 127
     fi
 
-    $CALLXRL "finder://fea/fti/0.1/add_entry4?tid:u32=$1&dst:ipv4net=$2&gateway:ipv4=$3&ifname:txt=$4&vifname:txt=$5"
+    $CALLXRL "finder://fea/fti/0.2/add_entry4?tid:u32=$1&dst:ipv4net=$2&gateway:ipv4=$3&ifname:txt=$4&vifname:txt=$5&metric:u32=$6&admin_distance:u32=$7&protocol_origin:txt=$8"
 }
 
 delete_entry4()
@@ -318,19 +318,19 @@ EOF
 	return 127
     fi
 
-    $CALLXRL "finder://fea/fti/0.1/delete_entry4?tid:u32=$1&dst:ipv4net=$2"
+    $CALLXRL "finder://fea/fti/0.2/delete_entry4?tid:u32=$1&dst:ipv4net=$2"
 }
 
 lookup_route4()
 {
     echo -n "lookup_route4" $* "-> " 
-    $CALLXRL "finder://fea/fti/0.1/lookup_route4?dst:ipv4=$1"
+    $CALLXRL "finder://fea/fti/0.2/lookup_route4?dst:ipv4=$1"
 }
 
 lookup_entry4()
 {
     echo -n "lookup_entry4" $* "-> " 
-    $CALLXRL "finder://fea/fti/0.1/lookup_entry4?dst:ipv4net=$1"
+    $CALLXRL "finder://fea/fti/0.2/lookup_entry4?dst:ipv4net=$1"
 }
 
 validate_xrls()
