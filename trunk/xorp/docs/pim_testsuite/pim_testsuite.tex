@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.17 2003/03/05 07:54:42 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.18 2003/03/06 12:21:37 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -42,7 +42,7 @@ Version 0.2}
          Berkeley, CA 94704, USA                        \\
          {\it feedback@xorp.org}
 }
-\date{March 6, 2003}
+\date{March 7, 2003}
 
 \maketitle
 
@@ -58,17 +58,8 @@ Version 0.2}
 \begin{tabular}{lll}
 Version 0.1 completed	& December 5, 2002 & \verb=draft-ietf-pim-sm-v2-new-05.{ps,tex}= \\
 			&		   & \verb=draft-ietf-pim-sm-bsr-02.{ps,tex}= \\
-Version 0.2 completed	& March 6, 2003 & \verb=draft-ietf-pim-sm-v2-new-05.{ps,tex}= \\
+Version 0.2 completed	& March 7, 2003 & \verb=draft-ietf-pim-sm-v2-new-05.{ps,tex}= \\
 			&		   & \verb=draft-ietf-pim-sm-bsr-03.{ps,tex}=
-\end{tabular}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
-{\huge \bf Authors}
-\vspace{4ex}
-
-\begin{tabular}{lll}
-Pavlin Radoslavov	& XORP Project, ICSI & pavlin@icsi.berkeley.edu
 \end{tabular}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -83,15 +74,24 @@ Pavlin Radoslavov	& XORP Project, ICSI & pavlin@icsi.berkeley.edu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Overview}
 
-TODO
-
 This document describes a set of tests for evaluating Protocol Independent
-Multicast - Sparse Mode implementation.
+Multicast - Sparse Mode implementation. Those tests have been designed
+by the XORP project to evaluate the XORP PIM-SM implementation.
+However, even though the description of the observable results uses
+examples with XORP-specific commands, the description of the tests is generic,
+and can be used for evaluating any other PIM-SM implementation.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Test Software}
 
-TODO
+The test software used in this test suite is the XORP PIM-SM implementation
+itself. More specifically, the XORP PIM-SM implementation has extentions that
+can be used to generate various PIM-SM protocol control packets for testing
+purpose. In addition, on several occasions a multicast sender and receiver
+programs are used to generate and receive multicast data traffic. In general,
+any software can be used for that, as long as it allows to specify the
+multicast interface to send or receive multicast packets on, the multicast
+group to use, and (in some cases) to control the data rate of the sender.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Acronyms}
@@ -122,14 +122,27 @@ would be labeled TR1, TR2, TR3.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Definitions}
 
-TODO
+\begin{itemize}
+  \item {\bf Route Metric}: The metric of a route as reported by the unicast
+  routing protocol.
+
+  \item {\bf Route Metric Preference}: The preference for using a route as
+  defined per unicast routing protocol that has been used to compute the
+  route, or as configured per route.
+
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Timers and Default Values}
 PIM-SMv2 defines several timers and default values. For the purpose of
 testing, all configurable timers and values are set to their defaults, unless
 otherwise noted in the test description. These defaults are given here for
-reference, taken or calculated from the PIM-SM spec.
+reference, taken or calculated from the PIM-SM
+protocol specification.
+Table~\ref{table:pim_sm_base_spec_values} contains the timer and default values
+from the PIM-SM base protocol specification.
+Table~\ref{table:pim_sm_bootstrap_spec_values} contains the timer and default
+values from the PIM-SM Bootstrap protocol specification.
 
 %
 % PIM-SM spec values
@@ -153,21 +166,13 @@ reference, taken or calculated from the PIM-SM spec.
 \newcommand{\PimsmRegisterSuppressionTime}{60 sec}  % Register_Suppression_Time
 \newcommand{\PimsmRegisterProbeTime}{5 sec}		% Register_Probe_Time
 
-%
-% PIM-SM Bootstrap mechanism spec values
-%
-\newcommand{\PimsmBSPeriod}{60 sec}			% BS_Period
-\newcommand{\PimsmBSTimeout}{130 sec}			% BS_Timeout
-\newcommand{\PimsmRandOverride}{weighted\_rand(5.0, 23.0) sec} % rand_override
-\newcommand{\PimsmCRPTimeout}{150 sec}			% C-RP_Timeout
-\newcommand{\PimsmCRPAdvPeriod}{60 sec}			% C-RP-Adv_Period
-\newcommand{\PimsmSZTimeout}{1300 sec}			% SZ_Timeout
-
-\begin{itemize}
-
-\item PIM-SM protocol spec:
-
-\begin{tabular}{ll}
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline
+Protocol Timer or Variable Name	& Value		\\
+\hline
+\hline
 \verb=PIM_SM_version_default=	& 2		\\	% XXX: no such variable
 \verb=LAN_delay_default=	& 0.5 sec	\\
 \verb=t_override_default=	& 2.5 sec	\\
@@ -185,36 +190,96 @@ reference, taken or calculated from the PIM-SM spec.
 \verb=Keepalive_Period=		& 210 sec	\\
 \verb=RP_Keepalive_Period=	& 185 sec	\\
 \verb=Register_Suppression_Time= & 60 sec	\\
-\verb=Register_Probe_Time=	& 5 sec
+\verb=Register_Probe_Time=	& 5 sec		\\
+\hline
 \end{tabular}
+\caption{PIM-SM base protocol specification timers and default values}
+\label{table:pim_sm_base_spec_values}
+\end{center}
+\end{table}
 
-\item Bootstrap mechanism spec:
+%
+% PIM-SM Bootstrap mechanism spec values
+%
+\newcommand{\PimsmBSPeriod}{60 sec}			% BS_Period
+\newcommand{\PimsmBSTimeout}{130 sec}			% BS_Timeout
+\newcommand{\PimsmRandOverride}{weighted\_rand(5.0, 23.0) sec} % rand_override
+\newcommand{\PimsmCRPTimeout}{150 sec}			% C-RP_Timeout
+\newcommand{\PimsmCRPAdvPeriod}{60 sec}			% C-RP-Adv_Period
+\newcommand{\PimsmSZTimeout}{1300 sec}			% SZ_Timeout
 
-\begin{tabular}{ll}
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline
+Protocol Timer or Variable Name	& Value		\\
+\hline
+\hline
 \verb=BS_Period=		& 60 sec	\\
 \verb=BS_Timeout=		& 130 sec	\\
 \verb=rand_override=		& weighted\_rand(5.0, 23.0) sec \\
 \verb=C-RP_Timeout=		& 150 sec	\\
 \verb=C-RP-Adv_Period=		& 60 sec	\\
-\verb=SZ_Timeout=		& 1300 sec
+\verb=SZ_Timeout=		& 1300 sec	\\
+\hline
 \end{tabular}
-
-\end{itemize}
+\caption{PIM-SM Bootstrap protocol specification timers and default values}
+\label{table:pim_sm_bootstrap_spec_values}
+\end{center}
+\end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Test Organization}
 
-TODO
+This document organizes tests by loosely following the protocol specification
+as described in the protocol specification documents (see
+Section~\ref{sec:references}). Each test has the following format:
+
+\begin{itemize}
+
+  \item {\bf Test Name:} The name of the test. Typically, it corresponds to a
+  sub-section in the protocol specification document.
+
+  \item {\bf Purpose:} A short description of the goal of the test.
+
+  \item {\bf References:} A list of documents that can be useful to understand
+  the purpose of the test, and the expected behavior.
+
+  \item {\bf Test Setup:} A description of the configuration that should be
+  prepared in advance. If a value for a configurable protocol parameter is not
+  provided, then the protocol's default value is used.
+  Occasionally, some configuration needs to be changed
+  while the test is in process. In that case, this is explicitly described in
+  the procedure for that test. 
+
+  \item {\bf Procedure:} Detailed step-by-step instructions for performing the
+  test. For example, starting a router, sending a protocol packet, observing
+  transmitted packets on a network, observing protocol-specific state
+  in a router, etc. Typically, the procedure has several parts. By default,
+  each part should start with the original test setup, unless stated
+  otherwise.
+
+  \item {\bf Observable Results:} Detailed description of the results that are
+  expected as the test is performed. Typically, those are some specific
+  protocol or data packets expected to appear on a network, the protocol state
+  inside a router to change in some specific way, etc. It is not necessary to
+  observer everything at the same type. The procedure description contains
+  information about what and when to observe.
+
+  \item {\bf Possible Problems:} A description of various issues that may
+  affect the test results in certain situations. For example, some precise
+  event timing or some permitted variations in the way the protocol is
+  implemented may result in slightly different behavior.
+
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{References}
+\label{sec:references}
 
 The following documents are referenced in this text:
 
 \begin{itemize}
-
- \item RFC 2362 -- Protocol Independent Multicast-Sparse Mode (PIM-SM):
-		  Protocol Specification
 
  \item \verb=draft-ietf-pim-sm-v2-new-05.{ps,tex}= -- Protocol Independent
 		  Multicast - Sparse Mode (PIM-SM): Protocol Specification
@@ -719,10 +784,10 @@ dc2                       1 10.3.0.1        15 Sparse       105     103
         B may not be appropriate for such implementations.
 
   \item At the moment of writing, the lastest
-        PIM-SM spec does not describe the behavior if a PIM message is
+        PIM-SM specification does not describe the behavior if a PIM message is
         received with protocol version that is larger than the implemented
         one.
-        (TODO: if the spec later is modified to include that behavior,
+        (TODO: if the specification later is modified to include that behavior,
         remove this bullet).
         Hence, in Part C, it is possible that an implementation may
         silently ignore all messages with protocol version larger than
@@ -1370,7 +1435,8 @@ they come from a known PIM neighbor: Join/Prune, Bootstrap, Assert, Graft, and
 Graft-Ack. A PIM router hears about PIM neighbors
 through PIM Hello messages. However, some older PIM implementations
 incorrectly fail to send Hello messages on point-to-point interfaces. Hence,
-the spec recommends that a configuration option should be provided to allow
+the protocol specification recommends that a configuration option should be
+provided to allow 
 interoperation with such old routers (disabled by default). More specifically,
 if the option is enabled, then the above PIM control messages should be
 accepted from a neighbor even if no Hello message was received first from that
@@ -4575,7 +4641,7 @@ Group           Source          RP              Flags
   \item After TR3 sends the (*,*,RP) Join message to TR4, it should suppress
   the generation of the (*,*,RP) Join message at the RUT by uncreasing the
   Join Timer in the corresponding (*,*,RP) state to \verb=t_joinsuppress=
-  (see the protocol spec for description of its value):
+  (see the protocol specification for description of its value):
 
 \begin{verbatim}
 Xorp> show pim join 
@@ -5213,7 +5279,7 @@ Group           Source          RP              Flags
   \item After TR3 sends the (*,G) Join message to TR4, it should suppress
   the generation of the (*,G) Join message at the RUT by uncreasing the
   Join Timer in the corresponding (*,G) state to \verb=t_joinsuppress=
-  (see the protocol spec for description of its value):
+  (see the protocol specification for description of its value):
 
 \begin{verbatim}
 Xorp> show pim join 
@@ -5953,7 +6019,7 @@ Group           Source          RP              Flags
   \item After TR3 sends the (S,G) Join message to TR4, it should suppress
   the generation of the (S,G) Join message at the RUT by uncreasing the
   Join Timer in the corresponding (S,G) entry to \verb=t_joinsuppress=
-  (see the protocol spec for description of its value):
+  (see the protocol specification for description of its value):
 
 \begin{verbatim}
 Xorp> show pim join 
@@ -8095,7 +8161,8 @@ Group           Source          RP              Flags
 
 \para{Possible Problems:}
 % TODO: XXX: after the spec if fixed, remove this?
-The current spec (draft-ietf-pim-sm-v2-new-05.{txt,ps}) is incomplete in
+The current protocol specification (draft-ietf-pim-sm-v2-new-05.{txt,ps}) is
+incomplete in 
 specifying whether (*,*,RP) Join messages should include (S,G,rpt) Prune
 messages, therefore the (*,*,RP) Join messages generated by the RUT may not
 contain (S,G,rpt) Prune.
@@ -14407,179 +14474,32 @@ RP              Type      Pri Holdtime Timeout ActiveGroups GroupPrefix
 None.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Multicast Routing Table}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \newpage
+% \section{Template}
 
-\para{Scope:}
-TODO
+% \para{Purpose:}
+% TODO
 
-\para{Overview:}
-TODO
+% \para{References:}
+% \begin{itemize}
+%   \item draft-ietf-pim-sm-v2-new-05 -- Section TODO
+% \end{itemize}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
-\section{Single Router Same-LAN Membership}
+% \para{Discussion:}
+% TODO
 
-\para{Purpose:}
-Test the same-LAN membership on a single router.
+% \para{Test Setup:}
+% TODO
 
-\para{References:}
-\begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.1.6
-\end{itemize}
+% \para{Procedure:}
+% TODO
 
-\para{Discussion:}
-A router that has same-LAN group-specific or
-source-group-specific member must be able to detect it and create the
-appropriate MRE state in the MRT.
+% \para{Observable Results:}
+% TODO
 
-\para{Test Setup:}
-Connect the RUT and Rx1 according to
-Figure~\ref{fig:single_router_same_lan_membership}.
-Configure the RUT as a Cand-BSR and a Cand-RP.
-
-\begin{figure}[htbp]
-  \begin{center}
-    \includegraphics[scale=0.8]{figs/pim_test_7_1_single_router_samelan_membership}
-    \caption{Single router Same-LAN membership test setup}
-    \label{fig:single_router_same_lan_membership}
-  \end{center}
-\end{figure}
-
-\para{Procedure:}
-
-\subpara{Part A: Group-specific same-LAN membership.}
-
-\begin{enumerate}
-
-  \item Start the RUT.
-
-  \item Wait until the RP-Set of the RUT becomes non-empty.
-
-  \item Test that the RUT has no local membership state:
-
-\begin{verbatim}
-Xorp> show pim join
-Group           Source          RP              Flags
-\end{verbatim}
-
-  \item Start receiver Rx for group 224.0.1.20. For example:
-
-\begin{verbatim}
-root@xorp1[42] msend -i 10.2.0.1 -r 224.0.1.20/12345
-\end{verbatim}
-
-  \item Test that the RUT now has local membership for group 224.0.1.20:
-
-\begin{verbatim}
-Xorp> show pim join
-Group           Source          RP              Flags
-224.0.1.20      0.0.0.0         10.3.0.1        WC
-    Upstream interface (S): UNKNOWN
-    Upstream interface (RP): register_vif
-    Upstream state: Joined
-    Register state:
-    Join timer: 57
-    Local include:            ......O.......
-    Local exclude:            ..............
-    Local include WC:         ......O.......
-    Local include SG:         ..............
-    Local exclude SG:         ..............
-    Joins RP:                 ..............
-    Joins WC:                 ..............
-    Joins SG:                 ..............
-    Prunes SG_RPT:            ..............
-    Join state:               ..............
-    Prune state:              ..............
-    Prune pending state:      ..............
-    I am assert winner state: ..............
-    I am assert loser state:  ..............
-    Assert winner WC:         ..............
-    Assert winner SG:         ..............
-    Assert lost WC:           ..............
-    Could assert SG:          ..............
-    I am DR:                  .....OO.......
-    Immediate olist RP:       ..............
-    Immediate olist WC:       ......O.......
-    Immediate olist SG:       ..............
-    Inherited olist SG:       ..............
-    Inherited olist SG_RPT:   ..............
-    PIM include WC:           ......O.......
-\end{verbatim}
-
-  \item Stop receiver Rx
-
-  \item Test that the RUT now has no local membership for group 224.0.1.20:
-
-\begin{verbatim}
-Xorp> show pim join
-Group           Source          RP              Flags
-\end{verbatim}
-
-\end{enumerate}
-
-\subpara{Part B: Source-group-specific same-LAN membership.}
-
-\begin{enumerate}
-
-  \item Start the RUT.
-
-  \item Wait until the RP-Set of the RUT becomes non-empty.
-
-  \item Test that the RUT has no local membership state:
-
-\begin{verbatim}
-Xorp> show pim join
-Group           Source          RP              Flags
-\end{verbatim}
-
-  \item TODO: Start receiver Rx for...
-
-  \item TODO: Test that the RUT now has local membership for...
-
-  \item Stop receiver Rx
-
-  \item TODO: Test that the RUT now has no local membership for...
-
-\begin{verbatim}
-Xorp> show pim join
-Group           Source          RP              Flags
-\end{verbatim}
-
-\end{enumerate}
-
-\para{Observable Results:}
-TODO
-
-\para{Possible Problems:}
-TODO
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
-\section{Template}
-
-\para{Purpose:}
-TODO
-
-\para{References:}
-\begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section TODO
-\end{itemize}
-
-\para{Discussion:}
-TODO
-
-\para{Test Setup:}
-TODO
-
-\para{Procedure:}
-TODO
-
-\para{Observable Results:}
-TODO
-
-\para{Possible Problems:}
-TODO
+% \para{Possible Problems:}
+% TODO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     BIBLIOGRAPHY
@@ -14590,10 +14510,3 @@ TODO
 
 \end{document}
 
-% \begin{figure}[htbp]
-%   \begin{center}
-%     \includegraphics[width=5.0in]{figs/pim_test_1_1_foo}
-%     \caption{TODO}
-%     \label{fig:TODO}
-%   \end{center}
-% \end{figure}
