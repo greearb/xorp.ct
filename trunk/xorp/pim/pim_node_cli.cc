@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.13 2003/05/21 05:32:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.14 2003/06/13 01:28:02 pavlin Exp $"
 
 
 //
@@ -964,11 +964,9 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 	cli_print(c_format("    Assert tracking SG:        %s\n",
 			   mifset_str(pim_mre->assert_tracking_desired_sg()).c_str()));
     }
-    if (pim_mre->is_wc() || pim_mre->is_sg()) {
-	cli_print(c_format("    Could assert WC:           %s\n",
-			   mifset_str(pim_mre->could_assert_wc()).c_str()));
-    }
-    if (pim_mre->is_sg()) {
+    cli_print(c_format("    Could assert WC:           %s\n",
+		       mifset_str(pim_mre->could_assert_wc()).c_str()));
+    if (pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
 	cli_print(c_format("    Could assert SG:           %s\n",
 			   mifset_str(pim_mre->could_assert_sg()).c_str()));
     }
