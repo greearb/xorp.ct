@@ -1,4 +1,5 @@
-/* $XORP: xorp/etc/templates/rip.cmds,v 1.4 2004/06/06 02:12:25 hodson Exp $ */
+
+/* $XORP: xorp/etc/templates/rib.cmds,v 1.1 2004/06/11 23:34:59 hodson Exp $ */
 
 /*
  * At the time this file was written, route redistribution from the
@@ -151,13 +152,13 @@ show route table ipv4 unicast rip winners {
 /*
  * RIPng show route commands
  */
-show incoming routes ipv6 unicast ripng {
+show route table ipv6 unicast ripng {
      %command: "rib/tools/show_routes ribin $4 $5 rip" %help: HELP;
      %module: rib;
-     %tag: HELP "Show RIPng that reach forwarding engine";
+     %tag: HELP "Show routes from RIPng";
 }
 
-show incoming routes ipv6 unicast ripng winners {
+show route table ipv6 unicast ripng winners {
      %command: "rib/tools/show_routes ribout $4 $5 rip" %help: HELP;
      %module: rib;
      %tag: HELP "Show RIPng that reach forwarding engine";

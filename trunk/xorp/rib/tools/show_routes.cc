@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.2 2004/06/10 22:41:43 hodson Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.3 2004/06/11 23:34:12 hodson Exp $"
 
 #include "rib/rib_module.h"
 
@@ -339,7 +339,7 @@ ShowRoutesProcessor::request_redist_cb(const XrlError& xe)
     }
     set_status(FAILED,
 	       c_format("Request for routes to be redistributed from %s "
-			"failed.\nPerhaps protocol is not active.",
+			"failed.\nThe protocol is probably not active.",
 			_opts.protocol));
     return;
 }
