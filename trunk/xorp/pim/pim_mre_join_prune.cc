@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.5 2003/01/07 03:08:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.6 2003/01/12 04:52:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1523,6 +1523,9 @@ PimMre::sg_rpt_see_join_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     // Cancel OverrideTimer
     override_timer().cancel();
     
+    // Try to remove the entry
+    entry_try_remove();
+    
     UNUSED(holdtime);
 }
 
@@ -1913,6 +1916,7 @@ PimMre::recompute_is_prune_desired_sg_rpt()
 	// XXX: this situation should have been handled earlier by
 	// recompute_is_rpt_join_desired_g(), but anyway, just in case....
 	set_rpt_not_joined_state();
+	entry_try_remove();
 	return (true);
     }
     // RPTJoinDesired(G) == true
@@ -1944,6 +1948,7 @@ PimMre::recompute_is_prune_desired_sg_rpt()
 	}
     }
     set_not_pruned_state();
+    entry_try_remove();
     return (true);
     
  not_pruned_state_label:
@@ -1981,6 +1986,8 @@ PimMre::recompute_is_prune_desired_sg_rpt()
     // Cancel Override Timer
     override_timer().cancel();
     set_pruned_state();
+    // XXX: no need to try to remove the (S,G,rpt) routing state, because
+    // it is in Pruned state.
     return (true);
 }
 
@@ -2012,6 +2019,7 @@ PimMre::recompute_is_rpt_join_desired_g()
 	return (false);		// Nothing changed
     // RPTJoinDesired(G) -> false
     set_rpt_not_joined_state();
+    entry_try_remove();
     return (true);
     
  not_pruned_state_label:
@@ -2021,6 +2029,7 @@ PimMre::recompute_is_rpt_join_desired_g()
     // RPTJoinDesired(G) -> false
     override_timer().cancel();
     set_rpt_not_joined_state();
+    entry_try_remove();
     return (true);
 }
 
@@ -2047,6 +2056,7 @@ PimMre::recompute_inherited_olist_sg_rpt()
 	return (false);		// Nothing changed
     // inherited_olist(S,G,rpt)->non-NULL
     set_not_pruned_state();
+    entry_try_remove();
     return (true);
     
  pruned_state_label:
@@ -2189,11 +2199,11 @@ pim_mre_override_timer_timeout(void *data_pointer)
     
     // TODO: XXX: implement the rest if needed
     return;
-
+    
  sg_rpt_entry_label:
     // (S,G,rpt) state
     if (! pim_mre->is_not_pruned_state())
-	return;		// Wrong state	TODO: trigger state deletion?
+	goto return_label;	// Wrong state
     
     // NotPruned state
     // Send Join(S,G,rpt) to RPF'(S,G,rpt)
@@ -2210,7 +2220,7 @@ pim_mre_override_timer_timeout(void *data_pointer)
     } else if (pim_nbr != pim_nbr_rpfp_nbr_wc) {
 	// RPF'(S,G,rpt) != RPF'(*,G)
 	// Ignore. TODO: it is unclear what exactly the spec suggests
-	return;
+	goto return_label;
     } else {
 	// RPF'(S,G,rpt) == RPF'(*,G)
 	// Send Join(S,G,rpt) to RPF'(S,G,rpt)
@@ -2223,5 +2233,8 @@ pim_mre_override_timer_timeout(void *data_pointer)
 			      new_group_bool);
     }
     
-    return;
+ return_label:
+    if (pim_mre->is_sg_rpt()) {
+	pim_mre->entry_try_remove();
+    }
 }

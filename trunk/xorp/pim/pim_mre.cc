@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.3 2003/01/13 20:40:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.4 2003/01/14 02:44:28 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -464,7 +464,7 @@ PimMre::prunes_sg_rpt() const
     
     mifs = downstream_prune_state();
     mifs |= downstream_prune_tmp_state();
-    return(mifs);    
+    return (mifs);    
 }
 
 // Note: works for (*,*,RP), (*,G), (S,G), (S,G,rpt)
@@ -1736,13 +1736,14 @@ PimMre::entry_can_remove() const
 	if (pim_exclude_sg().any())
 	    return (false);
     }
-#if 0		// TODO: XXX: PAVPAVPAV: not needed?
-    // XXX: (S,G,rpt) entry can be removed if all downstream state is NoInfo
+    // XXX: (S,G,rpt) entry cannot be removed if upstream state is Pruned,
+    // or the Override Timer is running.
     if (is_sg_rpt()) {
-	if (is_pruned_state() || is_not_pruned_state())
+	if (is_pruned_state())
+	    return (false);
+	if (const_override_timer().is_set())
 	    return (false);
     }
-#endif // 0
 #if 0		// TODO: XXX: PAVPAVPAV: not needed?
     if (inherited_olist_sg_forward().any())
 	return (false);

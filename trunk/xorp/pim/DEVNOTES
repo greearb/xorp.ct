@@ -1,6 +1,15 @@
 #
-# $XORP: xorp/pim/DEVNOTES,v 1.9 2002/10/07 19:35:16 pavlin Exp $
+# $XORP: xorp/pim/DEVNOTES,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
 #
+
+* Always call PimMre::entry_try_remove() for (S,G,rpt) routing entry
+  whenever one of the following happens:
+  - its Override Timer timeout or is canceled: PimMre::override_timer();
+  - the upstream state machine moves to RPTNotJoined or NotPruned state:
+    PimMre::set_rpt_not_joined_state()
+    PimMre::set_not_pruned_state();
+  - the downstream interface state machine moves to NoInfo state
+    PimMre::set_downstream_noinfo_state()
 
 * If accept_nohello_neighbors configuration is set to true,
   all messages enumerated below will be accepted from a neighbor that didn't

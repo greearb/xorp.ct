@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.57 2002/12/09 18:29:27 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.1.1.1 2002/12/11 23:56:12 hodson Exp $"
 
 //
 // PIM Multicast Routing Table implementation.
@@ -317,6 +317,12 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    if (pim_mre->rpfp_nbr_sg_rpt() == NULL) {
 		pim_node().add_pim_mre_no_pim_nbr(pim_mre);
 	    }
+	    
+	    // Set the starting state in the upstream state machine
+	    if (pim_mre->is_rpt_join_desired_g())
+		pim_mre->set_not_pruned_state();
+	    else
+		pim_mre->set_rpt_not_joined_state();
 	    
 	    // Add a task to handle any CPU-intensive operations
 	    // XXX: not needed for this entry.
