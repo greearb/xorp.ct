@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.11 2003/10/23 04:10:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.12 2004/04/01 19:54:09 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -265,7 +265,8 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     /*
     ** Create an update packet with a single NLRI.
     */
-    UpdatePacket *bgpupdate = new UpdatePacket();
+    UpdatePacket *bgpupdate;
+    bgpupdate = new UpdatePacket();
     add_nlri<A>(bgpupdate, net);
 
     /*

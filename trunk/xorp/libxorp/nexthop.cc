@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/nexthop.cc,v 1.2 2003/03/10 23:20:34 hodson Exp $"
+#ident "$XORP: xorp/libxorp/nexthop.cc,v 1.3 2004/04/01 19:54:10 mjh Exp $"
 
 #include "xorp.h"
 #include "nexthop.hh"
@@ -40,7 +40,7 @@ IPEncapsNextHop<A>::IPEncapsNextHop<A>(const A &from_ipaddr)
 
 template<class A> string
 IPEncapsNextHop<A>::str() const {
-    string enh = string("NH->");
+    string enh = "NH->";
     return enh + this->_addr.str();
 }
 
