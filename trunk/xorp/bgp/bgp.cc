@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.17 2003/10/14 01:54:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.18 2003/10/23 03:10:04 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -967,13 +967,27 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter)
 // 		  iptuple.str().c_str());
 // 	peerdata = const_cast<BGPPeerData *const>(peer->peerdata());
 // 	peerdata->add_sent_parameter( new BGPRefreshCapability() );
-    } else  if (strcmp(parameter.c_str(),"MultiProtocolIPv6") == 0) {
- 	debug_msg("Setting Multiprotocol IPv6 for peer %s.",
+    } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv4.Multicast") == 0) {
+ 	debug_msg("Setting Multiprotocol IPv4 Multicast for peer %s.",
+		  iptuple.str().c_str());
+ 	BGPPeerData *peerdata =
+	    const_cast<BGPPeerData *const>(peer->peerdata());
+ 	peerdata->add_sent_parameter(
+	     new BGPMultiProtocolCapability(AFI_IPV4, SAFI_MULTICAST));
+    } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv6.Unicast") == 0) {
+ 	debug_msg("Setting Multiprotocol IPv6 Unicast for peer %s.",
 		  iptuple.str().c_str());
  	BGPPeerData *peerdata =
 	    const_cast<BGPPeerData *const>(peer->peerdata());
  	peerdata->add_sent_parameter(
 	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_UNICAST));
+    } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv6.Multicast") == 0) {
+ 	debug_msg("Setting Multiprotocol IPv6 Multicast for peer %s.",
+		  iptuple.str().c_str());
+ 	BGPPeerData *peerdata =
+	    const_cast<BGPPeerData *const>(peer->peerdata());
+ 	peerdata->add_sent_parameter(
+	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_MULTICAST));
     } else {
 	XLOG_WARNING("Unable to set unknown parameter: <%s>.",
 		     parameter.c_str());
