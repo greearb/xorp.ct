@@ -86,7 +86,7 @@ initialize_table_bgpPeerTable(void)
     iinfo->get_next_data_point = bgpPeerTable_get_next_data_point;
     iinfo->free_loop_context_at_end = free_context;
     iinfo->free_loop_context = NULL;  // only free at end
-    iinfo->free_data_context = NULL; // since we reuse the loop context struc
+    iinfo->free_data_context = free_context; 
 
     iinfo->table_reginfo = table_info;
 
@@ -148,7 +148,7 @@ bgpPeerTable_get_first_data_point(void **my_loop_context,void **my_data_context,
     bool timeout = false;
     eventloop.set_flag_after_ms(1000, &timeout);
     while (!timeout && !loop_context->valid) {
-	DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "waiting for peer list...\n"));
+	DEBUGMSGTL(("bgp4_mib_1657_bgppeertable","waiting for peer list...\n"));
 	eventloop.run(); //see note in function header if this shocks you...
     }
 
@@ -160,7 +160,7 @@ bgpPeerTable_get_first_data_point(void **my_loop_context,void **my_data_context,
 
     (*my_loop_context) = (void *) loop_context; 
 
-    // we are now ready to go fetch this table's index data 
+    // we are now ready to go fetch the index values for the first row 
     return bgpPeerTable_get_next_data_point(my_loop_context, my_data_context,
 					    put_index_data, mydata);
 }
@@ -182,15 +182,18 @@ bgpPeerTable_get_next_data_point(void **my_loop_context, void **my_data_context,
     BgpMibXrlClient& bgp_mib = BgpMibXrlClient::the_instance();
     SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
     PeerLoopContext* loop_context = (PeerLoopContext*) (*my_loop_context);
-    // note that loop_context and data_context point to the same structure!    
-    PeerDataContext* data_context = (PeerLoopContext*) (*my_loop_context);
+    PeerDataContext* data_context;  
+
+    
+    // allocate data context for this row
+    data_context = SNMP_MALLOC_TYPEDEF(PeerDataContext);
+    if (NULL == data_context) return NULL;
 
     DEBUGMSGTL(("bgp4_mib_1657_bgppeertable", "get_next_data_point\n"));
 
+    if (!loop_context->more) return NULL;
+
     BgpMibXrlClient::CB13 cb13;    // see bgp_xif.hh for this prototype
-
-    if (!data_context->more) return NULL;
-
 
     cb13 = callback(get_peer_list_next_done, data_context);
     data_context->valid = false; 
@@ -209,8 +212,11 @@ bgpPeerTable_get_next_data_point(void **my_loop_context, void **my_data_context,
 	return NULL; // timeout
     }
     
-    (*my_data_context) = (void*) data_context;
-     
+    (*my_data_context) = data_context; 
+
+    // data_context goes away so store state in loop_context
+    loop_context->more = data_context->more;
+
     uint32_t raw_ip = ntohl(data_context->peer_remote_ip.addr());
 
     snmp_set_var_typed_value(put_index_data, ASN_IPADDRESS, 
@@ -289,7 +295,7 @@ bgpPeerTable_handler(
 			bgp_mib.send_get_peer_id("bgp", cntxt->peer_local_ip, 
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
 			    cntxt->peer_remote_port, cb_peerid);
-			requests->delegated = 1;
+			requests->delegated++;
 			eventloop.export_events();
 			break;
 			}
@@ -303,7 +309,7 @@ bgpPeerTable_handler(
 			    cntxt->peer_local_ip, cntxt->peer_local_port, 
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port, 
 			    cb_peerstatus);
-			requests->delegated = 1;
+			requests->delegated++;
 			eventloop.export_events();
 			break;
 			}
@@ -316,7 +322,7 @@ bgpPeerTable_handler(
 			    cntxt->peer_local_ip, cntxt->peer_local_port, 
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port, 
 			    cb_peernegver);
-			requests->delegated = 1;
+			requests->delegated++;
 			eventloop.export_events();
 			break;
 			}
@@ -359,7 +365,7 @@ bgpPeerTable_handler(
 			bgp_mib.send_get_peer_as("bgp", cntxt->peer_local_ip, 
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
 			    cntxt->peer_remote_port, cb_peeras);
-			requests->delegated = 1;
+			requests->delegated++;
 			eventloop.export_events();
 			break;
 			}
@@ -377,7 +383,7 @@ bgpPeerTable_handler(
 			    cntxt->peer_local_ip, 
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
 			    cntxt->peer_remote_port, cb_peermsgstats);
-			requests->delegated = 1;
+			requests->delegated++;
 			eventloop.export_events();
 			break;
 			}
@@ -391,7 +397,7 @@ bgpPeerTable_handler(
 			    cntxt->peer_local_ip, cntxt->peer_local_port, 
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port,
 			    cb_peereststats);
-			requests->delegated = 1;
+			requests->delegated++;
 			eventloop.export_events();
 			break;
 			}
@@ -410,7 +416,7 @@ bgpPeerTable_handler(
 			    cntxt->peer_local_ip, cntxt->peer_local_port, 
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port, 
 			    cb_peertimercfg);
-			requests->delegated = 1;
+			requests->delegated++;
 			eventloop.export_events();
 			break;
 			}
@@ -494,8 +500,7 @@ void get_peer_id_done(const XrlError& e, const IPv4* peer_id,
     netsnmp_request_info *request;
     netsnmp_agent_request_info *reqinfo;
 
-    cache = netsnmp_handler_check_cache(cache);
-
+    
     if (!cache) {
         snmp_log(LOG_ERR, "illegal call to return delayed response\n");
         return;
@@ -510,7 +515,7 @@ void get_peer_id_done(const XrlError& e, const IPv4* peer_id,
     table_info = netsnmp_extract_table_info(request);
 
     // no longer delegated, since we'll complete the request down below
-    request->delegated = 0;
+    request->delegated--;
 
     switch(table_info->colnum) {
 	case COLUMN_BGPPEERIDENTIFIER:       
@@ -546,8 +551,7 @@ get_peer_status_done(const XrlError& e, const uint32_t* state,
     netsnmp_request_info *request;
     netsnmp_agent_request_info *reqinfo;
 
-    cache = netsnmp_handler_check_cache(cache);
-
+    
     if (!cache) {
         snmp_log(LOG_ERR, "illegal call to return delayed response\n");
         return;
@@ -562,7 +566,7 @@ get_peer_status_done(const XrlError& e, const uint32_t* state,
     table_info = netsnmp_extract_table_info(request);
 
     // no longer delegated, since we'll complete the request down below
-    request->delegated = 0;
+    request->delegated--;
 
     switch(table_info->colnum) {
 	case COLUMN_BGPPEERSTATE:       
@@ -598,8 +602,7 @@ get_peer_negotiated_version_done(const XrlError& e, const int32_t * negver,
     netsnmp_request_info *request;
     netsnmp_agent_request_info *reqinfo;
 
-    cache = netsnmp_handler_check_cache(cache);
-
+    
     if (!cache) {
         snmp_log(LOG_ERR, "illegal call to return delayed response\n");
         return;
@@ -614,7 +617,7 @@ get_peer_negotiated_version_done(const XrlError& e, const int32_t * negver,
     table_info = netsnmp_extract_table_info(request);
 
     // no longer delegated, since we'll complete the request down below
-    request->delegated = 0;
+    request->delegated--;
 
     switch(table_info->colnum) {
 	case COLUMN_BGPPEERNEGOTIATEDVERSION:       
@@ -646,8 +649,7 @@ void get_peer_as_done(const XrlError& e, const uint32_t * asnum,
     netsnmp_request_info *request;
     netsnmp_agent_request_info *reqinfo;
 
-    cache = netsnmp_handler_check_cache(cache);
-
+    
     if (!cache) {
         snmp_log(LOG_ERR, "illegal call to return delayed response\n");
         return;
@@ -662,7 +664,7 @@ void get_peer_as_done(const XrlError& e, const uint32_t * asnum,
     table_info = netsnmp_extract_table_info(request);
 
     // no longer delegated, since we'll complete the request down below
-    request->delegated = 0;
+    request->delegated--;
 
     switch(table_info->colnum) {
 	case COLUMN_BGPPEERREMOTEAS:       
@@ -698,8 +700,7 @@ void get_peer_msg_stats_done(const XrlError& e, const uint32_t * inupd,
     netsnmp_request_info *request;
     netsnmp_agent_request_info *reqinfo;
 
-    cache = netsnmp_handler_check_cache(cache);
-
+    
     if (!cache) {
         snmp_log(LOG_ERR, "illegal call to return delayed response\n");
         return;
@@ -714,7 +715,7 @@ void get_peer_msg_stats_done(const XrlError& e, const uint32_t * inupd,
     table_info = netsnmp_extract_table_info(request);
 
     // no longer delegated, since we'll complete the request down below
-    request->delegated = 0;
+    request->delegated--;
 
     switch(table_info->colnum) {
 	case COLUMN_BGPPEERINUPDATES:
@@ -766,8 +767,7 @@ get_peer_established_stats(const XrlError& e, const uint32_t * trans,
     netsnmp_request_info *request;
     netsnmp_agent_request_info *reqinfo;
 
-    cache = netsnmp_handler_check_cache(cache);
-
+    
     if (!cache) {
         snmp_log(LOG_ERR, "illegal call to return delayed response\n");
         return;
@@ -782,7 +782,7 @@ get_peer_established_stats(const XrlError& e, const uint32_t * trans,
     table_info = netsnmp_extract_table_info(request);
 
     // no longer delegated, since we'll complete the request down below
-    request->delegated = 0;
+    request->delegated--;
 
     switch(table_info->colnum) {
 	case COLUMN_BGPPEERFSMESTABLISHEDTRANSITIONS:
@@ -825,8 +825,7 @@ get_peer_timer_config_done(const XrlError& e, const uint32_t * retryint,
     netsnmp_request_info *request;
     netsnmp_agent_request_info *reqinfo;
 
-    cache = netsnmp_handler_check_cache(cache);
-
+    
     if (!cache) {
         snmp_log(LOG_ERR, "illegal call to return delayed response\n");
         return;
@@ -841,7 +840,7 @@ get_peer_timer_config_done(const XrlError& e, const uint32_t * retryint,
     table_info = netsnmp_extract_table_info(request);
 
     // no longer delegated, since we'll complete the request down below
-    request->delegated = 0;
+    request->delegated--;
 
     switch(table_info->colnum) {
 	case COLUMN_BGPPEERCONNECTRETRYINTERVAL:
