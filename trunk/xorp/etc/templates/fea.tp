@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.16 2003/11/17 22:10:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.17 2003/11/18 23:03:57 pavlin Exp $ */
 
 interfaces {
   targetname: text = "fea";
@@ -39,6 +39,9 @@ interfaces {
   %modinfo: startcommit xrl "$(interfaces.targetname)/ifmgr/0.1/start_transaction->tid:u32=$(interfaces.TID)";
   %modinfo: endcommit xrl "$(interfaces.targetname)/ifmgr/0.1/commit_transaction?tid:u32=$(interfaces.TID)";
   targetname {
+    %create:;
+  }
+  TID {
     %create:;
   }
   interface @: text {
