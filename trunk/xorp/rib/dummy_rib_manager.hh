@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.7 2004/05/12 08:28:50 pavlin Exp $
+// $XORP: xorp/rib/dummy_rib_manager.hh,v 1.8 2004/05/20 22:18:17 pavlin Exp $
 
 #ifndef __RIB_DUMMY_RIB_MANAGER_HH__
 #define __RIB_DUMMY_RIB_MANAGER_HH__
@@ -281,16 +281,6 @@ public:
      */
     int disable_rib_client(const string& target_name, int family,
 			   bool unicast, bool multicast);
-
-    /**
-     * Don't try to communicate with the FEA.
-     *
-     * Note that this method will be obsoleted in the future, and will
-     * be replaced with cleaner interface.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int no_fea();
 
     /**
      * Make some errors we'd normally mask fatal.  Should be used for

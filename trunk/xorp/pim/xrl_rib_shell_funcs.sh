@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.6 2003/10/15 18:54:29 pavlin Exp $
+# $XORP: xorp/pim/xrl_rib_shell_funcs.sh,v 1.7 2003/10/16 18:23:07 pavlin Exp $
 #
 
 #
@@ -192,14 +192,6 @@ rib_disable_rib_client6()
     echo "rib_disable_rib_client6" $*
     XRL="finder://$RIB_TARGET/rib/0.1/disable_rib_client6"
     XRL_ARGS="?target_name:txt=$target_name&unicast:bool=$unicast&multicast:bool=$multicast"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-rib_no_fea()
-{
-    echo "rib_no_fea" $*
-    XRL="finder://$RIB_TARGET/rib/0.1/no_fea"
-    XRL_ARGS=""
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.20 2004/05/12 08:28:50 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.21 2004/05/20 22:18:18 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -158,11 +158,6 @@ protected:
 	const string&	target_name,
 	const bool&	unicast,
 	const bool&	multicast);
-
-    /**
-     *  Don't send anything to the FEA - used for testing only
-     */
-    XrlCmdError rib_0_1_no_fea();
 
     /**
      *  Make errors fatal; used to detect errors we'd normally mask

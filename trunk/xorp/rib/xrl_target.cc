@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.34 2004/05/12 08:28:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.35 2004/05/20 22:18:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -229,13 +229,6 @@ XrlRibTarget::rib_0_1_disable_rib_client6(
     }
     return XrlCmdError::OKAY();
 #endif // HAVE_IPV6
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_no_fea()
-{
-    _rib_manager->no_fea();
-    return XrlCmdError::OKAY();
 }
 
 XrlCmdError

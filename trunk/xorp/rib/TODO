@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rib/TODO,v 1.8 2004/02/06 22:58:44 atanu Exp $
+# $XORP: xorp/rib/TODO,v 1.9 2004/05/06 18:01:25 hodson Exp $
 #
 
 RIB To Do List
@@ -27,11 +27,6 @@ o Route filters are needed for route redistribution.
 o Change OriginTable to hold data rather than pointers in the Trie.
 
 o Better, more extensive test suites.
-
-o Change virtual XrlCmdError rib_0_1_no_fea(); to enable/disable
-    RIB clients.
-
-o Fix XrlRibTarget::rib_0_1_no_fea() to correspond to rib clients.
 
 o Rething the logic computing whether a route is directly connected
     (e.g., when we use Vif::is_same_subnet() or Vif::is_same_p2p()):

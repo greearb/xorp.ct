@@ -1,16 +1,10 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.5 2003/10/21 04:28:08 atanu Exp $
+# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.6 2004/02/06 22:44:13 pavlin Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
-
-no_fea()
-{
-    echo -n "no_fea" $1
-    $CALLXRL "finder://rib/rib/0.1/no_fea"
-}
 
 make_rib_errors_fatal()
 {

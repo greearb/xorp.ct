@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.32 2004/05/14 20:45:57 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.33 2004/05/20 22:18:18 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -532,22 +532,6 @@ RibManager::disable_rib_client(const string& target_name, int family,
 	return (XORP_ERROR);
 
     rib_client->set_enabled(false);
-
-    return (XORP_OK);
-}
-
-//
-// Don't try to communicate with the FEA.
-//
-// Note that this method will be obsoleted in the future, and will
-// be replaced with cleaner interface.
-//
-int
-RibManager::no_fea()
-{
-    // TODO: FEA target name hardcoded
-    disable_rib_client(_fea_target, AF_INET, true, false);
-    disable_rib_client(_fea_target, AF_INET6, true, false);
 
     return (XORP_OK);
 }

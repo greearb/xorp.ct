@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.8 2004/05/12 08:28:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.9 2004/05/20 22:18:17 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -158,12 +158,6 @@ RibManager::delete_vif_address(const string& vifname,
 void
 RibManager::make_errors_fatal()
 {
-}
-
-int
-RibManager::no_fea()
-{
-    return XORP_OK;
 }
 
 int
