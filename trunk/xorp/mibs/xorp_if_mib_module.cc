@@ -42,12 +42,12 @@ init_xorp_if_mib_module(void)
 void
 deinit_xorp_if_mib_module(void)
 {
-    XorpIfMib & xorp_if_mib = XorpIfMib::the_instance();
-    DEBUGMSGTL((xorp_if_mib.name(), "Unloaded...\n"));
-    xorp_if_mib.explicit_destructor();
+    DEBUGMSGTL((XorpIfMib::the_instance().name(), "Unloaded...\n"));
+    XorpIfMib::the_instance().destroy();
 
     // since this is the last XORP mib module that will be unloaded, it must do
     // the clean up 
+    SnmpEventLoop::the_instance().destroy();
     xlog_stop();
     xlog_exit();
 }
@@ -68,16 +68,18 @@ XorpIfMib::the_instance()
 
 XorpIfMib::XorpIfMib()
     : _xrl_router(SnmpEventLoop::the_instance(),"xorp_if_mib"),
-      _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME) {}
+      _xrl_target(&_xrl_router, *this) {}
 
 void
-XorpIfMib::explicit_destructor()
+XorpIfMib::destroy()
 {
     DEBUGMSGTL((XORP_MODULE_NAME, "XorpIfMib destroyed\n"));
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
-    bool cleanup_done = false;
-    XorpTimer t = eventloop.set_flag_after_ms(1000, &cleanup_done);
-    while (!cleanup_done)
-	eventloop.run();
-    if (_xorp_if_mib) delete _xorp_if_mib;
+    if (_xorp_if_mib) {
+	while(_xrl_router.pending()) {
+	    SnmpEventLoop::the_instance().run();
+	    DEBUGMSGTL((XORP_MODULE_NAME, "flushing _xrl_router "
+		"operations...\n"));
+	}
+	delete _xorp_if_mib;
+    }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.5 2003/06/13 05:58:49 jcardona Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.6 2003/06/13 19:20:56 jcardona Exp $
 
 #ifndef __MIBS_XORPEVENTLOOP_HH__
 #define __MIBS_XORPEVENTLOOP_HH__
@@ -64,6 +64,11 @@ public:
      */
     static SnmpEventLoop& the_instance();
 
+    /**
+    * This will free the one and only instance
+    */
+    void destroy();
+
      /**
      * This is the name this class will use to identify itself in the
      * snmpd log.  Only used for debugging
@@ -96,7 +101,7 @@ private:
     friend void run_timer_callbacks(u_int, void *);
 
     static const char * _log_name;
-    static SnmpEventLoop _sel;
+    static SnmpEventLoop * _sel;
 };
 
 

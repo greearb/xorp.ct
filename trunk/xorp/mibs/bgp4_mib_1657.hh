@@ -33,9 +33,9 @@ class BgpMib : public XrlBgpV0p2Client {
 
 public:
     static BgpMib& the_instance();
-    static void explicit_destructor();
-    const char * name()    { return _name.c_str(); };
+    static const char * name()    { return XORP_MODULE_NAME; };
 
+    void destroy();
 private:
     BgpMib();
     XrlStdRouter _xrl_router;

@@ -37,7 +37,7 @@ deinit_bgp4_mib_1657 (void)
 {
     BgpMib & bgp_mib = BgpMib::the_instance();
     DEBUGMSGTL((bgp_mib.name(), "Unloading...\n"));
-    bgp_mib.explicit_destructor();
+    bgp_mib.destroy();
 }
 
 BgpMib *  BgpMib::_bgp_mib = NULL;
@@ -59,14 +59,9 @@ BgpMib::BgpMib()
       _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME) {}
 
 void
-BgpMib::explicit_destructor()
+BgpMib::destroy()
 {
     DEBUGMSGTL((XORP_MODULE_NAME, "BgpMib destroyed\n"));
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
-    bool cleanup_done = false;
-    XorpTimer t = eventloop.set_flag_after_ms(1000, &cleanup_done);
-    while (!cleanup_done)
-	eventloop.run();
     if (_bgp_mib) delete _bgp_mib;
 }
 

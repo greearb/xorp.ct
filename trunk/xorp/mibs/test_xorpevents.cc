@@ -383,11 +383,10 @@ run_test_2()
 	    exit(TEST_FAIL);
 	}
     }
-
     if (finder)
 	delete finder;
-
 }
+
 int
 main(int /* argc */, char *argv[])
 {
@@ -408,7 +407,7 @@ main(int /* argc */, char *argv[])
     xlog_disable(XLOG_LEVEL_WARNING);
     
     try {
-    // run_test_1();
+    run_test_1();
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
@@ -418,6 +417,8 @@ main(int /* argc */, char *argv[])
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
+
+    SnmpEventLoop::the_instance().destroy();
 
     //
     // Gracefully stop and exit xlog

@@ -29,19 +29,15 @@ void deinit_xorp_if_mib_module(void);
  */
 
 class XorpIfMib {
-
-public:
+public:    
     static XorpIfMib& the_instance();
-    static void explicit_destructor();
- 
-    const char * name() { return _name.c_str(); };
+    static const char * name() { return  XORP_MODULE_NAME; };
+    void destroy();
 
 private:
     XorpIfMib();
     XrlStdRouter _xrl_router;
     XrlXorpIfMibTarget _xrl_target;
-
-    const string  _name; 
 
     static XorpIfMib* _xorp_if_mib;
 };

@@ -25,7 +25,7 @@
 
 // definition and initialization of static members
 const char * SnmpEventLoop::_log_name = "SnmpEventLoop";
-SnmpEventLoop SnmpEventLoop::_sel;
+SnmpEventLoop * SnmpEventLoop::_sel = NULL;
 
 //
 // run_fd_callbacks and run_timer_callbacks must be callable from C modules,
@@ -57,8 +57,8 @@ run_timer_callbacks(u_int alarm_id, void *)
     for (p = e._pending_alarms.begin(); p != e._pending_alarms.end(); ++p) {
 	if (alarm_id == (*p).second) {
 	    e._pending_alarms.erase(p);
-	    // exported alarms are all 'one-time', so no need to unregister them
-	    // with calls to snmp_alarm_unregister here.
+	    // exported alarms are all 'one-time', so no need to unregister
+	    // them with calls to snmp_alarm_unregister here.
 	    break;
 	}
     }
@@ -67,7 +67,8 @@ run_timer_callbacks(u_int alarm_id, void *)
 SnmpEventLoop&
 SnmpEventLoop::the_instance()
 {
-    return _sel;
+    if (!_sel) _sel = new SnmpEventLoop;
+    return * _sel;
 }
 
 SnmpEventLoop::SnmpEventLoop() : EventLoop(), SelectorListObserverBase(),
@@ -215,3 +216,9 @@ SnmpEventLoop::clear_monitored_fds ()
     _exported_exceptfds.erase(
 	_exported_exceptfds.begin(), _exported_exceptfds.end());
 }
+
+void
+SnmpEventLoop::destroy()
+{
+    delete this;
+}   
