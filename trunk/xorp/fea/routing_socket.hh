@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket.hh,v 1.4 2003/10/14 01:32:18 pavlin Exp $
+// $XORP: xorp/fea/routing_socket.hh,v 1.6 2004/06/10 22:40:56 hodson Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_HH__
 #define __FEA_ROUTING_SOCKET_HH__
@@ -54,7 +54,7 @@ public:
      * Test if the routing socket is open.
      * 
      * This method is needed because RoutingSocket may fail to open
-     * routing socket during construction.
+     * routing socket during startup.
      * 
      * @return true if the routing socket is open, otherwise false.
      */

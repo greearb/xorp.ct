@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.7 2003/10/24 00:02:23 hodson Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.9 2004/06/10 22:40:56 hodson Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -54,7 +54,7 @@ public:
      * Test if the netlink socket is open.
      * 
      * This method is needed because NetlinkSocket may fail to open
-     * netlink socket during construction.
+     * netlink socket during startup.
      * 
      * @return true if the netlink socket is open, otherwise false.
      */
