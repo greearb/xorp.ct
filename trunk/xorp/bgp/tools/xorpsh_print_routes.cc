@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.3 2003/07/25 02:10:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.4 2004/05/18 01:26:32 atanu Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -21,7 +21,7 @@
 void usage()
 {
     fprintf(stderr,
-	    "Usage: xorpsh_print_routes show bgp routes [summary]\n"
+	    "Usage: xorpsh_print_routes show bgp routes [summary|detail]\n"
 	    "where summary enables brief output.\n");
 }
 
@@ -39,9 +39,38 @@ int main(int argc, char **argv)
     xlog_add_default_output();
     xlog_start();
 
-    PrintRoutes<IPv4>::detail_t verbose = PrintRoutes<IPv4>::NORMAL;
+    bool ipv4, ipv6, unicast, multicast;
+    ipv4 = ipv6 = unicast = multicast = false;
+
+    PrintRoutes<IPv4>::detail_t verbose_ipv4 = PrintRoutes<IPv4>::NORMAL;
+    PrintRoutes<IPv6>::detail_t verbose_ipv6 = PrintRoutes<IPv6>::NORMAL;
     int interval = -1;
-        if (argc > 5) {
+
+    while (argc > 1) {
+	bool match = false;
+	if (strcmp(argv[1], "-4") == 0) {
+	    ipv4 = true;
+	    match = true;
+	}
+	if (strcmp(argv[1], "-6") == 0) {
+	    ipv6 = true;
+	    match = true;
+	}
+	if (strcmp(argv[1], "-u") == 0) {
+	    unicast = true;
+	    match = true;
+	}
+	if (strcmp(argv[1], "-m") == 0) {
+	    multicast = true;
+	    match = true;
+	}
+	if (match)
+	    argc--,argv++;
+	else
+	    break;
+    }
+
+    if (argc > 5) {
 	usage();
 	return -1;
     }
@@ -63,16 +92,30 @@ int main(int argc, char **argv)
     }
     if (argc == 5) {
 	if (strcmp(argv[4], "summary")==0) {
-	    verbose = PrintRoutes<IPv4>::SUMMARY;
+	    verbose_ipv4 = PrintRoutes<IPv4>::SUMMARY;
+	    verbose_ipv6 = PrintRoutes<IPv6>::SUMMARY;
 	} else if (strcmp(argv[4], "detail")==0) {
-	    verbose = PrintRoutes<IPv4>::DETAIL;
+	    verbose_ipv4 = PrintRoutes<IPv4>::DETAIL;
+	    verbose_ipv6 = PrintRoutes<IPv6>::DETAIL;
 	} else {
 	    usage();
 	    return -1;
 	}
     }
+
+    if (ipv4 == false && ipv6 == false)
+	ipv4 = true;
+
+    if (unicast == false && multicast == false)
+	unicast = true;
+
     try {
-	PrintRoutes<IPv4> route_printer(verbose, interval, true, false);
+	if (ipv4)
+	    PrintRoutes<IPv4> route_printer(verbose_ipv4, interval,
+					    unicast, multicast);
+	if (ipv6)
+	    PrintRoutes<IPv6> route_printer(verbose_ipv6, interval,
+					    unicast, multicast);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
