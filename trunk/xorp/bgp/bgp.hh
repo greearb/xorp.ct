@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.31 2004/09/21 18:05:08 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.32 2004/09/28 00:43:23 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -416,7 +416,7 @@ public:
     void push_routes();
     
     /**
-     * @return a pointer to the profiler.
+     * @return a reference to the profiler.
      */
     Profile& profile() {return _profile;}
 
