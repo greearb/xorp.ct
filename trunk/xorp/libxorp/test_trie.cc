@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_trie.cc,v 1.5 2004/03/19 01:28:02 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_trie.cc,v 1.6 2004/06/10 22:41:21 hodson Exp $"
 
 #include "libxorp_module.h"
 
@@ -41,7 +41,7 @@ void test(IPv4Net test_net, IPv4RouteEntry *test_route) {
     if (r==test_route) {
 	printf("PASS\n");
     } else {
-	printf("Fail: route=%x\n", (u_int)r);
+	printf("Fail: route=%p\n", r);
 	trie.print();
 	abort();
     }
@@ -61,7 +61,7 @@ void test_find(IPv4 test_addr, IPv4RouteEntry *test_route) {
     if (r==test_route) {
 	printf("PASS\n");
     } else {
-	printf("Fail: route=%x\n", (u_int)r);
+	printf("Fail: route=%p\n", r);
 	trie.print();
 	abort();
     }
@@ -86,7 +86,7 @@ void test_less_specific(IPv4Net test_net, IPv4RouteEntry *test_route) {
     if (r==test_route) {
 	printf("PASS\n");
     } else {
-	printf("Fail: route=%x\n", (u_int)r);
+	printf("Fail: route=%p\n", r);
 	trie.print();
 	abort();
     }
@@ -141,7 +141,7 @@ void test6(IPv6Net test_net, IPv6RouteEntry *test_route) {
     if (r==test_route) {
 	printf("PASS\n");
     } else {
-	printf("Fail: route=%x\n", (u_int)r);
+	printf("Fail: route=%p\n", r);
 	trie.print();
 	abort();
     }
@@ -161,7 +161,7 @@ void test_find6(IPv6 test_addr, IPv6RouteEntry *test_route) {
     if (r==test_route) {
 	printf("PASS\n");
     } else {
-	printf("Fail: route=%x\n", (u_int)r);
+	printf("Fail: route=%p\n", r);
 	trie.print();
 	abort();
     }
@@ -198,20 +198,20 @@ int main() {
 
     IPv4RouteEntry d1;
     IPv4Net n1(IPv4("1.2.1.0"), 24);
-    printf("adding n1: %s route: %x\n", n1.str().c_str(), (u_int)(&d1));
+    printf("adding n1: %s route: %p\n", n1.str().c_str(), &d1);
     trie.insert(n1, &d1);
     test(n1, &d1);
 
     IPv4RouteEntry d2;
     IPv4Net n2(IPv4("1.2.0.0"), 16);
-    printf("\n\nadding n2: %s route: %x\n", n2.str().c_str(), (u_int)(&d2));
+    printf("\n\nadding n2: %s route: %p\n", n2.str().c_str(), &d2);
     trie.insert(n2, &d2);
     test(n1, &d1);
     test(n2, &d2);
 
     IPv4RouteEntry d3;
     IPv4Net n3(IPv4("1.2.3.0"), 24);
-    printf("\n\nadding n3: %s route: %x\n", n3.str().c_str(), (u_int)(&d3));
+    printf("\n\nadding n3: %s route: %p\n", n3.str().c_str(), &d3);
     trie.insert(n3, &d3);
     test(n1, &d1);
     test(n2, &d2);
@@ -219,7 +219,7 @@ int main() {
 
     IPv4RouteEntry d4;
     IPv4Net n4(IPv4("1.2.128.0"), 24);
-    printf("\n\nadding n4: %s route: %x\n", n4.str().c_str(), (u_int)(&d4));
+    printf("\n\nadding n4: %s route: %p\n", n4.str().c_str(), &d4);
     trie.insert(n4, &d4);
     test(n1, &d1);
     test(n2, &d2);
@@ -228,7 +228,7 @@ int main() {
 
     IPv4RouteEntry d5;
     IPv4Net n5(IPv4("1.2.0.0"), 20);
-    printf("\n\nadding n5: %s route: %x\n", n5.str().c_str(), (u_int)(&d5));
+    printf("\n\nadding n5: %s route: %p\n", n5.str().c_str(), &d5);
     trie.insert(n5, &d5);
     test(n1, &d1);
     test(n2, &d2);
@@ -268,7 +268,7 @@ int main() {
 
     IPv4RouteEntry d6;
     IPv4Net n6(IPv4("1.2.192.0"), 24);
-    printf("\n\nadding n6: %s route: %x\n", n6.str().c_str(), (u_int)(&d6));
+    printf("\n\nadding n6: %s route: %p\n", n6.str().c_str(), &d6);
     trie.insert(n6, &d6);
     test(n2, &d2);
     test(n4, &d4);
@@ -515,27 +515,27 @@ int main() {
 				"1.2.128.0/24" };
     IPv4RouteEntry d16;
     IPv4Net n16(subnets[3]);
-    printf("adding n16: %s route: %x\n", n16.str().c_str(), (u_int)(&d16));
+    printf("adding n16: %s route: %p\n", n16.str().c_str(), &d16);
     preotrie.insert(n16, &d16);
 
     IPv4RouteEntry d17;
     IPv4Net n17(subnets[2]);
-    printf("adding n17: %s route: %x\n", n17.str().c_str(), (u_int)(&d17));
+    printf("adding n17: %s route: %p\n", n17.str().c_str(), &d17);
     preotrie.insert(n17, &d17);
 
     IPv4RouteEntry d18;
     IPv4Net n18(subnets[0]);
-    printf("adding n18: %s route: %x\n", n18.str().c_str(), (u_int)(&d18));
+    printf("adding n18: %s route: %p\n", n18.str().c_str(), &d18);
     preotrie.insert(n18, &d18);
 
     IPv4RouteEntry d19;
     IPv4Net n19(subnets[4]);
-    printf("adding n19: %s route: %x\n", n19.str().c_str(), (u_int)(&d19));
+    printf("adding n19: %s route: %p\n", n19.str().c_str(), &d19);
     preotrie.insert(n19, &d19);
 
     IPv4RouteEntry d20;
     IPv4Net n20(subnets[1]);
-    printf("adding n20: %s route: %x\n", n20.str().c_str(), (u_int)(&d20));
+    printf("adding n20: %s route: %p\n", n20.str().c_str(), &d20);
     preotrie.insert(n20, &d20);
 
     //-------------------------------------------------------    
