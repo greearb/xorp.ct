@@ -6,7 +6,7 @@ PS2PDF	= ps2pdf13 -dEncodeColorImages=false
 
 TEXSRCS = talk.tex
 KILLFIGS = 
-SAVEFIGS = flyingpig.eps ipr.1 routingtable.ps processes3.ps
+SAVEFIGS = flyingpig.eps samp04_iprouter.1 routingtable.ps processes3.ps
 FIGS = $(KILLFIGS) $(SAVEFIGS)
 
 all: talk.ps talk.pdf
