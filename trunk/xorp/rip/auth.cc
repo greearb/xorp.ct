@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.8 2005/01/06 03:21:49 atanu Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.9 2005/01/06 04:55:15 atanu Exp $"
 
 #include "rip_module.h"
 
@@ -497,7 +497,7 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
     uint8_t digest[16];
 
     MD5_Init(&ctx);
-    MD5_Update(&ctx, packet, mpr->auth_offset());
+    MD5_Update(&ctx, packet, mpr->auth_offset() + mpt->data_offset());
     MD5_Update(&ctx, k->key_data(), k->key_data_bytes());
     MD5_Final(digest, &ctx);
 
@@ -516,7 +516,7 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
 	    fclose(fp);
 	}
 #endif
-	return 0;
+	return false;
     }
 
     // Update sequence number only after packet has passed digest check
@@ -562,6 +562,7 @@ MD5AuthHandler::authenticate(const uint8_t* 	     packet,
     MD5_CTX ctx;
     MD5_Init(&ctx);
     MD5_Update(&ctx, packet, mpr->auth_offset());
+    MD5_Update(&ctx, &trailer_data[0], mpt->data_offset());
     MD5_Update(&ctx, k->key_data(), k->key_data_bytes());
     MD5_Final(mpt->data(), &ctx);
 

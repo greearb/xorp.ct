@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.14 2004/04/02 00:27:56 mjh Exp $
+// $XORP: xorp/rip/packets.hh,v 1.15 2004/06/10 22:41:44 hodson Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -311,6 +311,7 @@ public:
     inline uint8_t* data() 				{ return _data; }
     inline const uint8_t* data() const			{ return _data; }
     inline uint32_t data_bytes() const			{ return 16; }
+    inline uint32_t data_offset() const			{ return 4; }
     inline bool valid() const;
 protected:
     uint16_t _af;			// 0xffff - Authentication header

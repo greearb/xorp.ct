@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.8 2005/01/06 05:37:14 atanu Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.9 2005/01/06 05:51:03 atanu Exp $"
 
 #include "rip_module.h"
 
@@ -174,7 +174,7 @@ void dump_binary_data(const vector<uint8_t>& data)
 
 
 /**
- * A MD5 rip packet.
+ * A MD5 rip packet captured on the wire.
  */
 uint8_t rip_packet[] = {
  0x2,   0x2,   0x0,   0x0,  0xff,  0xff,   0x0,   0x3, 
@@ -217,7 +217,7 @@ uint8_t rip_packet[] = {
  */
 inline
 int
-saved_md5()
+check_saved_md5()
 {
     EventLoop e;
     MD5AuthHandler mah(e, 0);
@@ -227,7 +227,7 @@ saved_md5()
     for(uint32_t i = 0; i < sizeof(rip_packet); i++)
 	pkt.push_back(rip_packet[i]);
 
-    uint32_t n = 0;
+    uint32_t n = 11;
     if (check_auth_packet(pkt, mah, n, false)) {
 	verbose_log("Failed MD5 authentication with %d entries\n", n);
 	dump_binary_data(pkt);
@@ -327,9 +327,8 @@ test_main()
     //
     // MD5 Authentication Handler tests
     //
-
-//     if (0 != saved_md5())
-// 	return 1;
+    if (0 != check_saved_md5())
+ 	return 1;
 
     EventLoop e;
     MD5AuthHandler mah(e, 0);
