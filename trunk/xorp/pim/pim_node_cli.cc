@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.6 2003/02/14 23:59:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.7 2003/02/25 01:38:48 pavlin Exp $"
 
 
 //
@@ -143,29 +143,17 @@ PimNodeCli::add_all_cli_commands(void)
 int
 PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 {
-    BsrZone *show_bsr_zone = NULL;
+    PimScopeZoneId zone_id(IPvXNet::ip_multicast_base_prefix(family()), false);
+    bool is_zone_id_set = false;
+    list<BsrZone *>::const_iterator zone_iter;
     
     // Check the optional argument
     if (argv.size()) {
 	try {
-	    IPvXNet scope_zone_id(argv[0].c_str());
-	    if (scope_zone_id.masked_addr().af() != family()) {
+	    zone_id = PimScopeZoneId(argv[0].c_str(), false);
+	    is_zone_id_set = true;
+	    if (zone_id.scope_zone_prefix().masked_addr().af() != family()) {
 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
-			   argv[0].c_str()));
-		return (XORP_ERROR);
-	    }
-	    //
-	    // Try to find a scoped zone. If not found, then try
-	    // a non-scoped zone.
-	    //
-	    show_bsr_zone = pim_node().pim_bsr().find_active_bsr_zone(
-		PimScopeZoneId(scope_zone_id, true));
-	    if (show_bsr_zone == NULL) {
-		show_bsr_zone = pim_node().pim_bsr().find_active_bsr_zone(
-		    PimScopeZoneId(scope_zone_id, false));
-	    }
-	    if (show_bsr_zone == NULL) {
-		cli_print(c_format("ERROR: cannot find a zone with zone ID: %s\n",
 			   argv[0].c_str()));
 		return (XORP_ERROR);
 	    }
@@ -180,13 +168,14 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
     cli_print(c_format("%-16s%4s %-16s%4s %-16s%8s%10s\n",
 	       "BSR", "Pri", "LocalAddress", "Pri", "State", "Timeout",
 	       "SZTimeout"));
-    list<BsrZone *>::const_iterator zone_iter;
     for (zone_iter = pim_node().pim_bsr().active_bsr_zone_list().begin();
 	 zone_iter != pim_node().pim_bsr().active_bsr_zone_list().end();
 	 ++zone_iter) {
 	BsrZone *bsr_zone = *zone_iter;
-	if ((show_bsr_zone != NULL) && (show_bsr_zone != bsr_zone))
+	
+	if (is_zone_id_set && (bsr_zone->zone_id() != zone_id))
 	    continue;
+	
 	string zone_state_string = "Unknown";
 	switch (bsr_zone->bsr_zone_state()) {
 	case BsrZone::STATE_INIT:
@@ -229,18 +218,74 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 		   bsr_zone->const_bsr_timer().left_sec(),
 		   left_sec));
     }
-
+    
+    cli_print("Expiring zones:\n");
+    cli_print(c_format("%-16s%4s %-16s%4s %-16s%8s%10s\n",
+	       "BSR", "Pri", "LocalAddress", "Pri", "State", "Timeout",
+	       "SZTimeout"));
+    for (zone_iter = pim_node().pim_bsr().expire_bsr_zone_list().begin();
+	 zone_iter != pim_node().pim_bsr().expire_bsr_zone_list().end();
+	 ++zone_iter) {
+	BsrZone *bsr_zone = *zone_iter;
+	
+	if (is_zone_id_set && (bsr_zone->zone_id() != zone_id))
+	    continue;
+	
+	string zone_state_string = "Unknown";
+	switch (bsr_zone->bsr_zone_state()) {
+	case BsrZone::STATE_INIT:
+	    zone_state_string = "Init";
+	    break;
+	case BsrZone::STATE_CANDIDATE_BSR:
+	    zone_state_string = "Candidate";
+	    break;
+	case BsrZone::STATE_PENDING_BSR:
+	    zone_state_string = "Pending";
+	    break;
+	case BsrZone::STATE_ELECTED_BSR:
+	    zone_state_string = "Elected";
+	    break;
+	case BsrZone::STATE_NO_INFO:
+	    zone_state_string = "NoInfo";
+	    break;
+	case BsrZone::STATE_ACCEPT_ANY:
+	    zone_state_string = "AcceptAny";
+	    break;
+	case BsrZone::STATE_ACCEPT_PREFERRED:
+	    zone_state_string = "AcceptPreferred";
+	    break;
+	default:
+	    zone_state_string = "InvalidState";
+	    XLOG_ASSERT(false);
+	    return (XORP_ERROR);
+	    break;
+	}
+	int left_sec = -1;
+	if (bsr_zone->const_scope_zone_expiry_timer().is_set()) {
+	    left_sec = bsr_zone->const_scope_zone_expiry_timer().left_sec();
+	}
+	cli_print(c_format("%-16s%4d %-16s%4d %-16s%8d%10d\n",
+		   cstring(bsr_zone->bsr_addr()),
+		   bsr_zone->bsr_priority(),
+		   cstring(bsr_zone->my_bsr_addr()),
+		   bsr_zone->my_bsr_priority(),
+		   zone_state_string.c_str(),
+		   bsr_zone->const_bsr_timer().left_sec(),
+		   left_sec));
+    }
+    
     cli_print("Configured zones:\n");
     cli_print(c_format("%-16s%4s %-16s%4s %-16s%8s%10s\n",
 	       "BSR", "Pri", "LocalAddress", "Pri", "State", "Timeout",
 	       "SZTimeout"));
-    // list<BsrZone *>::const_iterator zone_iter;
     for (zone_iter = pim_node().pim_bsr().config_bsr_zone_list().begin();
 	 zone_iter != pim_node().pim_bsr().config_bsr_zone_list().end();
 	 ++zone_iter) {
 	BsrZone *bsr_zone = *zone_iter;
-	if ((show_bsr_zone != NULL) && (show_bsr_zone != bsr_zone))
+	
+	if (is_zone_id_set && (bsr_zone->zone_id() != zone_id))
 	    continue;
+	
 	string zone_state_string = "Unknown";
 	switch (bsr_zone->bsr_zone_state()) {
 	case BsrZone::STATE_INIT:
@@ -291,48 +336,20 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 int
 PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 {
-    BsrZone *show_active_bsr_zone = NULL;
-    BsrZone *show_config_bsr_zone = NULL;
+    PimScopeZoneId zone_id(IPvXNet::ip_multicast_base_prefix(family()), false);
+    bool is_zone_id_set = false;
+    list<BsrZone *>::const_iterator zone_iter;
     
     // Check the optional argument
     if (argv.size()) {
 	try {
-	    IPvXNet scope_zone_id(argv[0].c_str());
-	    if (scope_zone_id.masked_addr().af() != family()) {
+	    zone_id = PimScopeZoneId(argv[0].c_str(), false);
+	    is_zone_id_set = true;
+	    if (zone_id.scope_zone_prefix().masked_addr().af() != family()) {
 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
 			   argv[0].c_str()));
 		return (XORP_ERROR);
 	    }
-	    //
-	    // Try to find an active scoped zone. If not found, then try
-	    // a non-scoped zone.
-	    //
-	    show_active_bsr_zone = pim_node().pim_bsr().find_active_bsr_zone(
-		PimScopeZoneId(scope_zone_id, true));
-	    if (show_active_bsr_zone == NULL) {
-		show_active_bsr_zone = pim_node().pim_bsr().find_active_bsr_zone(
-		    PimScopeZoneId(scope_zone_id, false));
-	    }
-	    if (show_active_bsr_zone == NULL) {
-		cli_print(c_format("ERROR: cannot find an active zone with zone ID: %s\n",
-			   argv[0].c_str()));
-	    }
-
-	    //
-	    // Try to find a configured scoped zone. If not found, then try
-	    // a non-scoped zone.
-	    //
-	    show_config_bsr_zone = pim_node().pim_bsr().find_config_bsr_zone(
-		PimScopeZoneId(scope_zone_id, true));
-	    if (show_config_bsr_zone == NULL) {
-		show_config_bsr_zone = pim_node().pim_bsr().find_config_bsr_zone(
-		    PimScopeZoneId(scope_zone_id, false));
-	    }
-	    if (show_config_bsr_zone == NULL) {
-		cli_print(c_format("ERROR: cannot find a config zone with zone ID: %s\n",
-			   argv[0].c_str()));
-	    }
-
 	} catch (InvalidString) {
 	    cli_print(c_format("ERROR: Invalid zone ID: %s\n",
 		       argv[0].c_str()));
@@ -344,14 +361,49 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
     cli_print(c_format("%-16s%4s%8s %-19s%-16s%16s\n",
 	       "RP", "Pri", "Timeout", "GroupPrefix", "BSR",
 	       "CandRpAdvTimeout"));
-    list<BsrZone *>::const_iterator zone_iter;
     for (zone_iter = pim_node().pim_bsr().active_bsr_zone_list().begin();
 	 zone_iter != pim_node().pim_bsr().active_bsr_zone_list().end();
 	 ++zone_iter) {
 	BsrZone *bsr_zone = *zone_iter;
 	
-	if ((show_active_bsr_zone != NULL)
-	    && (show_active_bsr_zone != bsr_zone))
+	if (is_zone_id_set && (bsr_zone->zone_id() != zone_id))
+	    continue;
+	
+	list<BsrGroupPrefix *>::const_iterator group_prefix_iter;
+	for (group_prefix_iter = bsr_zone->bsr_group_prefix_list().begin();
+	     group_prefix_iter != bsr_zone->bsr_group_prefix_list().end();
+	     ++group_prefix_iter) {
+	    BsrGroupPrefix *bsr_group_prefix = *group_prefix_iter;
+	    
+	    list<BsrRp *>::const_iterator rp_iter;
+	    for (rp_iter = bsr_group_prefix->rp_list().begin();
+		 rp_iter != bsr_group_prefix->rp_list().end();
+		 ++rp_iter) {
+		BsrRp *bsr_rp = *rp_iter;
+		int left_sec = -1;
+		if (bsr_rp->const_candidate_rp_expiry_timer().is_set())
+		    left_sec = bsr_rp->const_candidate_rp_expiry_timer().left_sec();
+		cli_print(c_format("%-16s%4d%8d %-19s%-16s%16d\n",
+			   cstring(bsr_rp->rp_addr()),
+			   bsr_rp->rp_priority(),
+			   left_sec,
+			   cstring(bsr_group_prefix->group_prefix()),
+			   cstring(bsr_zone->bsr_addr()),
+			   -1));
+	    }
+	}
+    }
+
+    cli_print("Expiring RPs:\n");
+    cli_print(c_format("%-16s%4s%8s %-19s%-16s%16s\n",
+	       "RP", "Pri", "Timeout", "GroupPrefix", "BSR",
+	       "CandRpAdvTimeout"));
+    for (zone_iter = pim_node().pim_bsr().expire_bsr_zone_list().begin();
+	 zone_iter != pim_node().pim_bsr().expire_bsr_zone_list().end();
+	 ++zone_iter) {
+	BsrZone *bsr_zone = *zone_iter;
+	
+	if (is_zone_id_set && (bsr_zone->zone_id() != zone_id))
 	    continue;
 	
 	list<BsrGroupPrefix *>::const_iterator group_prefix_iter;
@@ -383,14 +435,12 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
     cli_print(c_format("%-16s%4s%8s %-19s%-16s%16s\n",
 	       "RP", "Pri", "Timeout", "GroupPrefix", "BSR",
 	       "CandRpAdvTimeout"));
-    // list<BsrZone *>::const_iterator zone_iter;
     for (zone_iter = pim_node().pim_bsr().config_bsr_zone_list().begin();
 	 zone_iter != pim_node().pim_bsr().config_bsr_zone_list().end();
 	 ++zone_iter) {
 	BsrZone *bsr_zone = *zone_iter;
 	
-	if ((show_config_bsr_zone != NULL)
-	    && (show_config_bsr_zone != bsr_zone))
+	if (is_zone_id_set && (bsr_zone->zone_id() != zone_id))
 	    continue;
 	
 	list<BsrGroupPrefix *>::const_iterator group_prefix_iter;
@@ -1116,19 +1166,15 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 	case PimRp::RP_LEARNED_METHOD_BOOTSTRAP:
 	    do {
 		// Try first a scoped zone, then a non-scoped zone
-		BsrZone *bsr_zone
-		    = pim_node().pim_bsr().find_active_bsr_zone_by_prefix(
-			pim_rp->group_prefix(),
-			true);
-		if (bsr_zone == NULL) {
-		    bsr_zone = pim_node().pim_bsr().find_active_bsr_zone_by_prefix(
-			pim_rp->group_prefix(),
-			false);
+		BsrRp *bsr_rp;
+		bsr_rp = pim_node().pim_bsr().find_rp(pim_rp->group_prefix(),
+						      true,
+						      pim_rp->rp_addr());
+		if (bsr_rp == NULL) {
+		    bsr_rp = pim_node().pim_bsr().find_rp(pim_rp->group_prefix(),
+							  false,
+							  pim_rp->rp_addr());
 		}
-		if (bsr_zone == NULL)
-		    break;
-		BsrRp *bsr_rp = bsr_zone->find_rp(pim_rp->group_prefix(),
-						  pim_rp->rp_addr());
 		if (bsr_rp == NULL)
 		    break;
 		holdtime = bsr_rp->rp_holdtime();
@@ -1141,7 +1187,7 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 	default:
 	    break;
 	}
-
+	
 	cli_print(c_format("%-16s%-10s%3d%9d%8d%13u %-18s\n",
 		   cstring(pim_rp->rp_addr()),
 		   rp_type.c_str(),
