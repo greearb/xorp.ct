@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.2 2003/01/13 20:40:22 pavlin Exp $"
 
 
 //
@@ -230,6 +230,9 @@ MribTable::remove(const IPvXNet& dest_prefix)
 	_mrib_lookup_size--;
 	mrib_lookup = parent_mrib_lookup;
     } while (mrib_lookup != NULL);
+    
+    if (_mrib_lookup_size == 0)
+	_mrib_lookup_root = NULL;
 }
 
 //
@@ -274,7 +277,8 @@ MribTable::remove_mrib_lookup(MribLookup *mrib_lookup)
     // Delete myself
     delete mrib_lookup;
     _mrib_lookup_size--;
-    
+    if (_mrib_lookup_size == 0)
+	_mrib_lookup_root = NULL;
     // Done
 }
 
