@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_client.cc,v 1.3 2003/03/29 19:03:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_client.cc,v 1.4 2003/03/29 19:30:11 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -418,8 +418,8 @@ RibClient::tasks_pending() const
 SyncFtiCommand *
 RibClient::get_next()
 {
-    debug_msg("Get next task count %u op count %d\n", (uint32_t)tasks_count(),
-	      _op_count);
+    debug_msg("Get next task count %u op count %u\n", (uint32_t)tasks_count(),
+	      (uint32_t)_op_count);
 
     XLOG_ASSERT(!_tasks.empty());
 
