@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.21 2003/08/05 06:06:22 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.22 2003/08/12 16:02:26 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -66,7 +66,11 @@ Release 0.4 (2003/??/??)
   CLI:
     - On exit, restore the original terminal flags in case of stdio-based
       CLI access. This should fix a bug when running xorpsh from sh/bash
-      and pressing Ctrl-D leaves sh/bash in non-echo mode. 
+      and pressing Ctrl-D leaves sh/bash in non-echo mode.
+
+    - Reverse the key binding of 'j' and 'k' in page mode. Now the
+      binding is same as in "vi/more/less":
+      'j' scroll down one line, while 'k' scroll up one line.
 
   SNMP:
     - 
