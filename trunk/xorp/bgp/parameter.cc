@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.12 2003/08/28 21:21:15 atanu Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.13 2003/08/28 21:41:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -366,7 +366,7 @@ BGPMultiProtocolCapability::encode() const
 string
 BGPMultiProtocolCapability::str() const
 {
-    return c_format("BGP Multiple Protocol Capability AFI = %d SAFI = %d\n",
+    return c_format("BGP Multiple Protocol Capability AFI = %d SAFI = %d",
 		    _address_family, _subsequent_address_family);
 }
 
