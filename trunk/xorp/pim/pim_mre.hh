@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.2 2002/12/17 10:03:46 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -327,37 +327,37 @@ public:
     // Note: applies only for (S,G,rpt)
     void	receive_end_of_message_sg_rpt(uint16_t vif_index);
     // Note: applies only for (*,*,RP)
-    void	rp_see_join_rp(uint16_t vif_index,
+    void	rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
 			       const IPvX& target_nbr_addr);
     // Note: applies only for (*,*,RP)
-    void	rp_see_prune_rp(uint16_t vif_index,
+    void	rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
 				const IPvX& target_nbr_addr);
     // Note: applies only for (*,G)
-    void	wc_see_join_wc(uint16_t vif_index,
+    void	wc_see_join_wc(uint16_t vif_index, uint16_t holdtime,
 			       const IPvX& target_nbr_addr);
     // Note: applies only for (*,G)
-    void	wc_see_prune_wc(uint16_t vif_index,
+    void	wc_see_prune_wc(uint16_t vif_index, uint16_t holdtime,
 				const IPvX& target_nbr_addr);
     // Note: applies only for (S,G)
-    void	sg_see_join_sg(uint16_t vif_index,
+    void	sg_see_join_sg(uint16_t vif_index, uint16_t holdtime,
 			       const IPvX& target_nbr_addr);
     // Note: applies only for (S,G)
-    void	sg_see_prune_sg(uint16_t vif_index,
+    void	sg_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
 				const IPvX& target_nbr_addr);
     // Note: applies only for (S,G)
     void	sg_see_prune_wc(uint16_t vif_index,
 				const IPvX& target_nbr_addr);
     // Note: applies only for (S,G)
-    void	sg_see_prune_sg_rpt(uint16_t vif_index,
+    void	sg_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 				    const IPvX& target_nbr_addr);
     // Note: applies only for (S,G,rpt)
-    void	sg_rpt_see_join_sg_rpt(uint16_t vif_index,
+    void	sg_rpt_see_join_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 				       const IPvX& target_nbr_addr);
     // Note: applies only for (S,G,rpt)
-    void	sg_rpt_see_prune_sg_rpt(uint16_t vif_index,
+    void	sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 					const IPvX& target_nbr_addr);
     // Note: applies only for (S,G,rpt)
-    void	sg_rpt_see_prune_sg(uint16_t vif_index,
+    void	sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
 				    const IPvX& target_nbr_addr);
     // Note: applies only for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     bool	is_join_desired_rp() const;

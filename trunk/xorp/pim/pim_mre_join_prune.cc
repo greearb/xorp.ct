@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.2 2002/12/16 05:25:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.3 2002/12/17 10:03:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1143,7 +1143,8 @@ PimMre::downstream_prune_pending_timer_timeout_sg_rpt(uint16_t vif_index)
 // Upstream J/P (*,*,RP) state machine
 //
 void
-PimMre::rp_see_join_rp(uint16_t vif_index, const IPvX& target_nbr_addr)
+PimMre::rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
+		       const IPvX& target_nbr_addr)
 {
     PimNbr *my_mrib_next_hop_rp;
     PimVif *pim_vif;
@@ -1168,23 +1169,27 @@ PimMre::rp_see_join_rp(uint16_t vif_index, const IPvX& target_nbr_addr)
 	return;
     
     // `target_nbr_addr' is MRIB.next_hop(RP)
-    // Restart JoinTimer if it is larger than t_suppressed
-    struct timeval t_suppressed, timeval_left;
+    // Increase Join Timer to t_joinsuppress
+    struct timeval t_suppressed, t_joinsuppress, timeval_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_suppressed = pim_vif->upstream_join_timer_t_suppressed();
+    TIMEVAL_SET(&t_joinsuppress, holdtime, 0);
+    if (TIMEVAL_CMP(&t_suppressed, &t_joinsuppress, < ))
+	TIMEVAL_COPY(&t_suppressed, &t_joinsuppress);
     join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_suppressed, < )) {
-	// Restart the timer with `t_suppressed'
-	join_timer().start(TIMEVAL_SEC(&t_suppressed),
-			   TIMEVAL_USEC(&t_suppressed),
+    if (TIMEVAL_CMP(&timeval_left, &t_joinsuppress, < )) {
+	// Restart the timer with `t_joinsuppress'
+	join_timer().start(TIMEVAL_SEC(&t_joinsuppress),
+			   TIMEVAL_USEC(&t_joinsuppress),
 			   pim_mre_join_timer_timeout, this);
     }
 }
 
 void
-PimMre::rp_see_prune_rp(uint16_t vif_index, const IPvX& target_nbr_addr)
+PimMre::rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
+			const IPvX& target_nbr_addr)
 {
     PimNbr *my_mrib_next_hop_rp;
     PimVif *pim_vif;
@@ -1222,10 +1227,13 @@ PimMre::rp_see_prune_rp(uint16_t vif_index, const IPvX& target_nbr_addr)
 			   TIMEVAL_USEC(&t_override),
 			   pim_mre_join_timer_timeout, this);
     }
+    
+    UNUSED(holdtime);
 }
 
 void
-PimMre::wc_see_join_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
+PimMre::wc_see_join_wc(uint16_t vif_index, uint16_t holdtime,
+		       const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_wc;
     PimVif *pim_vif;
@@ -1250,23 +1258,27 @@ PimMre::wc_see_join_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
 	return;
     
     // `target_nbr_addr' is RPF'(*,G)
-    // Restart JoinTimer if it is larger than t_suppressed
-    struct timeval t_suppressed, timeval_left;
+    // Increase Join Timer to t_joinsuppress
+    struct timeval t_suppressed, t_joinsuppress, timeval_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_suppressed = pim_vif->upstream_join_timer_t_suppressed();
+    TIMEVAL_SET(&t_joinsuppress, holdtime, 0);
+    if (TIMEVAL_CMP(&t_suppressed, &t_joinsuppress, < ))
+	TIMEVAL_COPY(&t_suppressed, &t_joinsuppress);
     join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_suppressed, < )) {
-	// Restart the timer with `t_suppressed'
-	join_timer().start(TIMEVAL_SEC(&t_suppressed),
-			   TIMEVAL_USEC(&t_suppressed),
+    if (TIMEVAL_CMP(&timeval_left, &t_joinsuppress, < )) {
+	// Restart the timer with `t_joinsuppress'
+	join_timer().start(TIMEVAL_SEC(&t_joinsuppress),
+			   TIMEVAL_USEC(&t_joinsuppress),
 			   pim_mre_join_timer_timeout, this);
     }
 }
 
 void
-PimMre::wc_see_prune_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
+PimMre::wc_see_prune_wc(uint16_t vif_index, uint16_t holdtime,
+			const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_wc;
     PimVif *pim_vif;
@@ -1304,10 +1316,13 @@ PimMre::wc_see_prune_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
 			   TIMEVAL_USEC(&t_override),
 			   pim_mre_join_timer_timeout, this);
     }
+    
+    UNUSED(holdtime);
 }
 
 void
-PimMre::sg_see_join_sg(uint16_t vif_index, const IPvX& target_nbr_addr)
+PimMre::sg_see_join_sg(uint16_t vif_index, uint16_t holdtime,
+		       const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg;
     PimVif *pim_vif;
@@ -1332,23 +1347,27 @@ PimMre::sg_see_join_sg(uint16_t vif_index, const IPvX& target_nbr_addr)
 	return;
     
     // `target_nbr_addr' is RPF'(S,G)
-    // Restart JoinTimer if it is larger than t_suppressed
-    struct timeval t_suppressed, timeval_left;
+    // Increase Join Timer to t_joinsuppress
+    struct timeval t_suppressed, t_joinsuppress, timeval_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
     t_suppressed = pim_vif->upstream_join_timer_t_suppressed();
+    TIMEVAL_SET(&t_joinsuppress, holdtime, 0);
+    if (TIMEVAL_CMP(&t_suppressed, &t_joinsuppress, < ))
+	TIMEVAL_COPY(&t_suppressed, &t_joinsuppress);
     join_timer().left_timeval(&timeval_left);
-    if (TIMEVAL_CMP(&timeval_left, &t_suppressed, < )) {
-	// Restart the timer with `t_suppressed'
-	join_timer().start(TIMEVAL_SEC(&t_suppressed),
-			   TIMEVAL_USEC(&t_suppressed),
+    if (TIMEVAL_CMP(&timeval_left, &t_joinsuppress, < )) {
+	// Restart the timer with `t_joinsuppress'
+	join_timer().start(TIMEVAL_SEC(&t_joinsuppress),
+			   TIMEVAL_USEC(&t_joinsuppress),
 			   pim_mre_join_timer_timeout, this);
     }
 }
 
 void
-PimMre::sg_see_prune_sg(uint16_t vif_index, const IPvX& target_nbr_addr)
+PimMre::sg_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
+			const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg;
     PimVif *pim_vif;
@@ -1386,6 +1405,8 @@ PimMre::sg_see_prune_sg(uint16_t vif_index, const IPvX& target_nbr_addr)
 			   TIMEVAL_USEC(&t_override),
 			   pim_mre_join_timer_timeout, this);
     }
+    
+    UNUSED(holdtime);
 }
 
 void
@@ -1430,7 +1451,8 @@ PimMre::sg_see_prune_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
 }
 
 void
-PimMre::sg_see_prune_sg_rpt(uint16_t vif_index, const IPvX& target_nbr_addr)
+PimMre::sg_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
+			    const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg;
     PimVif *pim_vif;
@@ -1468,10 +1490,13 @@ PimMre::sg_see_prune_sg_rpt(uint16_t vif_index, const IPvX& target_nbr_addr)
 			   TIMEVAL_USEC(&t_override),
 			   pim_mre_join_timer_timeout, this);
     }
+    
+    UNUSED(holdtime);
 }
 
 void
-PimMre::sg_rpt_see_join_sg_rpt(uint16_t vif_index, const IPvX& target_nbr_addr)
+PimMre::sg_rpt_see_join_sg_rpt(uint16_t vif_index, uint16_t holdtime,
+			       const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg_rpt;
     
@@ -1497,10 +1522,12 @@ PimMre::sg_rpt_see_join_sg_rpt(uint16_t vif_index, const IPvX& target_nbr_addr)
     // `target_nbr_addr' is RPF'(S,G,rpt)
     // Cancel OverrideTimer
     override_timer().cancel();
+    
+    UNUSED(holdtime);
 }
 
 void
-PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index,
+PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 				const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg_rpt;
@@ -1539,10 +1566,13 @@ PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index,
 			       TIMEVAL_USEC(&t_override),
 			       pim_mre_override_timer_timeout, this);
     }
+    
+    UNUSED(holdtime);
 }
 
 void
-PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, const IPvX& target_nbr_addr)
+PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
+			    const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg_rpt;
     PimVif *pim_vif;
@@ -1580,6 +1610,8 @@ PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, const IPvX& target_nbr_addr)
 			       TIMEVAL_USEC(&t_override),
 			       pim_mre_override_timer_timeout, this);
     }
+    
+    UNUSED(holdtime);
 }
 
 //

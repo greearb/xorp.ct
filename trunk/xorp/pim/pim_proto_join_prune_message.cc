@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.3 2002/12/17 10:03:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.4 2002/12/17 20:12:25 pavlin Exp $"
 
 
 //
@@ -389,7 +389,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (i_am_target_router_bool)
 		    pim_mre->receive_join_rp(vif_index, holdtime);
 		else
-		    pim_mre->rp_see_join_rp(vif_index, target_nbr_addr);
+		    pim_mre->rp_see_join_rp(vif_index, holdtime,
+					    target_nbr_addr);
 	    }
 	}
 	// (*,*,RP) Prune
@@ -415,7 +416,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (i_am_target_router_bool)
 		    pim_mre->receive_prune_rp(vif_index, holdtime);
 		else
-		    pim_mre->rp_see_prune_rp(vif_index, target_nbr_addr);
+		    pim_mre->rp_see_prune_rp(vif_index, holdtime,
+					     target_nbr_addr);
 	    }
 	}
 	// (*,G) Join
@@ -442,7 +444,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (i_am_target_router_bool)
 		    pim_mre->receive_join_wc(vif_index, holdtime);
 		else
-		    pim_mre->wc_see_join_wc(vif_index, target_nbr_addr);
+		    pim_mre->wc_see_join_wc(vif_index, holdtime,
+					    target_nbr_addr);
 	    }
 	}
 	// (*,G) Prune
@@ -471,7 +474,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (i_am_target_router_bool)
 		    pim_mre->receive_prune_wc(vif_index, holdtime);
 		else
-		    pim_mre->wc_see_prune_wc(vif_index, target_nbr_addr);
+		    pim_mre->wc_see_prune_wc(vif_index, holdtime,
+					     target_nbr_addr);
 	    }
 	}
 	// (S,G,rpt) Join
@@ -498,7 +502,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (i_am_target_router_bool)
 		    pim_mre->receive_join_sg_rpt(vif_index, holdtime);
 		else
-		    pim_mre->sg_rpt_see_join_sg_rpt(vif_index,
+		    pim_mre->sg_rpt_see_join_sg_rpt(vif_index, holdtime,
 						    target_nbr_addr);
 	    }
 	}
@@ -539,7 +543,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		    pim_mre->receive_prune_sg_rpt(vif_index, holdtime,
 						  join_wc_received_bool);
 		else
-		    pim_mre->sg_rpt_see_prune_sg_rpt(vif_index,
+		    pim_mre->sg_rpt_see_prune_sg_rpt(vif_index, holdtime,
 						     target_nbr_addr);
 	    }
 	    
@@ -557,7 +561,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 							lookup_flags, 0);
 		}
 		if (pim_mre_sg != NULL)
-		    pim_mre_sg->sg_see_prune_sg_rpt(vif_index,
+		    pim_mre_sg->sg_see_prune_sg_rpt(vif_index, holdtime,
 						    target_nbr_addr);
 	    }
 	}
@@ -587,7 +591,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (i_am_target_router_bool)
 		    pim_mre->receive_join_sg(vif_index, holdtime);
 		else
-		    pim_mre->sg_see_join_sg(vif_index, target_nbr_addr);
+		    pim_mre->sg_see_join_sg(vif_index, holdtime,
+					    target_nbr_addr);
 	    }
 	}
 	// (S,G) Prune
@@ -614,7 +619,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		if (i_am_target_router_bool)
 		    pim_mre->receive_prune_sg(vif_index, holdtime);
 		else
-		    pim_mre->sg_see_prune_sg(vif_index, target_nbr_addr);
+		    pim_mre->sg_see_prune_sg(vif_index, holdtime,
+					     target_nbr_addr);
 	    }
 	    
 	    //
@@ -631,7 +637,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 							    lookup_flags, 0);
 		}
 		if (pim_mre_sg_rpt != NULL)
-		    pim_mre_sg_rpt->sg_rpt_see_prune_sg(vif_index,
+		    pim_mre_sg_rpt->sg_rpt_see_prune_sg(vif_index, holdtime,
 							target_nbr_addr);
 	    }
 	}
