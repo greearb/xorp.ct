@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.4 2003/05/09 19:36:03 hodson Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.5 2003/05/09 20:58:20 hodson Exp $
 ##
 
 ###############################################################################
@@ -116,13 +116,11 @@ librtrmgr_clientxif_a_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
 noinst_LIBRARIES += libtestpeerxif.a
 libtestpeerxif_a_SOURCES = test_peer_xif.hh test_peer_xif.cc
 
-
 #
 # Sample Test Client Interface 
 #
 noinst_LIBRARIES += libtestxif.a
 libtestxif_a_SOURCES = test_xif.hh test_xif.cc
-
 
 ################################################################
 ##
@@ -133,11 +131,11 @@ libtestxif_a_SOURCES = test_xif.hh test_xif.cc
 INCLUDES =	-I$(top_srcdir)
 
 ###############################################################################
-# Implicit Rules
+# Static Pattern Rules
 ###############################################################################
 
 SCRIPT_DIR=$(top_srcdir)/xrl/scripts
 CLNTGEN_PY=$(SCRIPT_DIR)/clnt-gen
 
-@PY_BUILD@%_xif.hh %_xif.cc: %.xif $(CLNTGEN_PY)
+@PY_BUILD@%_xif.cc %_xif.hh $(srcdir)/%_xif.hh $(srcdir)/%_xif.cc: $(srcdir)/%.xif $(CLNTGEN_PY)
 @PY_BUILD@	$(PYTHON) $(CLNTGEN_PY) $<

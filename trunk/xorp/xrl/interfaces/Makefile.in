@@ -568,7 +568,7 @@ mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
-@PY_BUILD@%_xif.hh %_xif.cc: %.xif $(CLNTGEN_PY)
+@PY_BUILD@%_xif.cc %_xif.hh $(srcdir)/%_xif.hh $(srcdir)/%_xif.cc: $(srcdir)/%.xif $(CLNTGEN_PY)
 @PY_BUILD@	$(PYTHON) $(CLNTGEN_PY) $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
