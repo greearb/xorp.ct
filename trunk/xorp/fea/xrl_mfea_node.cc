@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.42 2005/03/15 00:52:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.43 2005/03/19 23:25:45 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -1644,8 +1644,10 @@ XrlMfeaNode::common_0_1_get_status(
 XrlCmdError
 XrlMfeaNode::common_0_1_shutdown()
 {
+    string error_msg;
+
     if (shutdown() != true) {
-	string error_msg = c_format("Failed to shutdown MFEA");
+	error_msg = c_format("Failed to shutdown MFEA");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1763,12 +1765,14 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
     const string&	, // protocol_name, 
     const uint32_t&	protocol_id)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -1777,7 +1781,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1786,9 +1790,9 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
     //
     if (MfeaNode::add_protocol(xrl_sender_name, src_module_id) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot add protocol instance '%s' "
-				    "with module_id = %d",
-				    xrl_sender_name.c_str(), src_module_id);
+	error_msg = c_format("Cannot add protocol instance '%s' "
+			     "with module_id = %d",
+			     xrl_sender_name.c_str(), src_module_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1848,12 +1852,14 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
     const string&	, // protocol_name, 
     const uint32_t&	protocol_id)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -1862,7 +1868,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1871,9 +1877,9 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
     //
     if (MfeaNode::add_protocol(xrl_sender_name, src_module_id) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot add protocol instance '%s' "
-				    "with module_id = %d",
-				    xrl_sender_name.c_str(), src_module_id);
+	error_msg = c_format("Cannot add protocol instance '%s' "
+			     "with module_id = %d",
+			     xrl_sender_name.c_str(), src_module_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1933,12 +1939,14 @@ XrlMfeaNode::mfea_0_1_delete_protocol4(
     const string&	, // protocol_name, 
     const uint32_t&	protocol_id)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1947,7 +1955,7 @@ XrlMfeaNode::mfea_0_1_delete_protocol4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1956,9 +1964,9 @@ XrlMfeaNode::mfea_0_1_delete_protocol4(
     //
     if (MfeaNode::delete_protocol(xrl_sender_name, src_module_id) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot delete protocol instance '%s' "
-				    "with module_id =  %d",
-				    xrl_sender_name.c_str(), src_module_id);
+	error_msg = c_format("Cannot delete protocol instance '%s' "
+			     "with module_id =  %d",
+			     xrl_sender_name.c_str(), src_module_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1975,12 +1983,14 @@ XrlMfeaNode::mfea_0_1_delete_protocol6(
     const string&	, // protocol_name, 
     const uint32_t&	protocol_id)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1989,7 +1999,7 @@ XrlMfeaNode::mfea_0_1_delete_protocol6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1998,9 +2008,9 @@ XrlMfeaNode::mfea_0_1_delete_protocol6(
     //
     if (MfeaNode::delete_protocol(xrl_sender_name, src_module_id) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot delete protocol instance '%s' "
-				    "with module_id =  %d",
-				    xrl_sender_name.c_str(), src_module_id);
+	error_msg = c_format("Cannot delete protocol instance '%s' "
+			     "with module_id =  %d",
+			     xrl_sender_name.c_str(), src_module_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2019,12 +2029,14 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif4(
     const string&	, // vif_name, 
     const uint32_t&	vif_index)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2033,7 +2045,7 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2043,9 +2055,9 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif4(
     if (MfeaNode::start_protocol_vif(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot start protocol instance '%s' "
-				    "on vif_index %d",
-				    xrl_sender_name.c_str(), vif_index);
+	error_msg = c_format("Cannot start protocol instance '%s' "
+			     "on vif_index %d",
+			     xrl_sender_name.c_str(), vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2064,12 +2076,14 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif6(
     const string&	, // vif_name, 
     const uint32_t&	vif_index)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2078,7 +2092,7 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2088,9 +2102,9 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif6(
     if (MfeaNode::start_protocol_vif(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot start protocol instance '%s' "
-				    "on vif_index %d",
-				    xrl_sender_name.c_str(), vif_index);
+	error_msg = c_format("Cannot start protocol instance '%s' "
+			     "on vif_index %d",
+			     xrl_sender_name.c_str(), vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2109,12 +2123,14 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif4(
     const string&	, // vif_name, 
     const uint32_t&	vif_index)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2123,7 +2139,7 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2133,9 +2149,9 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif4(
     if (MfeaNode::stop_protocol_vif(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot stop protocol instance '%s' "
-				    "on vif_index %d",
-				    xrl_sender_name.c_str(), vif_index);
+	error_msg = c_format("Cannot stop protocol instance '%s' "
+			     "on vif_index %d",
+			     xrl_sender_name.c_str(), vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2154,12 +2170,14 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif6(
     const string&	, // vif_name, 
     const uint32_t&	vif_index)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2168,7 +2186,7 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2178,9 +2196,9 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif6(
     if (MfeaNode::stop_protocol_vif(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot stop protocol instance '%s' "
-				    "on vif_index %d",
-				    xrl_sender_name.c_str(), vif_index);
+	error_msg = c_format("Cannot stop protocol instance '%s' "
+			     "on vif_index %d",
+			     xrl_sender_name.c_str(), vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2198,12 +2216,14 @@ XrlMfeaNode::mfea_0_1_allow_signal_messages(
     const uint32_t&	protocol_id, 
     const bool&		is_allow)
 {
+    string error_msg;
+
     //
     // Verify the module ID
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2211,20 +2231,20 @@ XrlMfeaNode::mfea_0_1_allow_signal_messages(
 	if (MfeaNode::add_allow_kernel_signal_messages(xrl_sender_name,
 						       src_module_id)
 	    != XORP_OK) {
-	    string error_msg = c_format("Failed to enable kernel signal "
-					"messages for target %s with "
-					"protocol_id = %d",
-					xrl_sender_name.c_str(), protocol_id);
+	    error_msg = c_format("Failed to enable kernel signal "
+				 "messages for target %s with "
+				 "protocol_id = %d",
+				 xrl_sender_name.c_str(), protocol_id);
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     } else {
 	if (MfeaNode::delete_allow_kernel_signal_messages(xrl_sender_name,
 							  src_module_id)
 	    != XORP_OK) {
-	    string error_msg = c_format("Failed to disable kernel signal "
-					"messages for target %s with "
-					"protocol_id = %d",
-					xrl_sender_name.c_str(), protocol_id);
+	    error_msg = c_format("Failed to disable kernel signal "
+				 "messages for target %s with "
+				 "protocol_id = %d",
+				 xrl_sender_name.c_str(), protocol_id);
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     }
@@ -2245,12 +2265,14 @@ XrlMfeaNode::mfea_0_1_join_multicast_group4(
     const uint32_t&	vif_index, 
     const IPv4&		group_address)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2259,16 +2281,16 @@ XrlMfeaNode::mfea_0_1_join_multicast_group4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (MfeaNode::join_multicast_group(xrl_sender_name, src_module_id, vif_index,
 				       IPvX(group_address)) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot join group %s on vif %s",
-				    group_address.str().c_str(),
-				    vif_name.c_str());
+	error_msg = c_format("Cannot join group %s on vif %s",
+			     group_address.str().c_str(),
+			     vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2288,11 +2310,13 @@ XrlMfeaNode::mfea_0_1_join_multicast_group6(
     const uint32_t&	vif_index, 
     const IPv6&		group_address)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
+	error_msg = c_format("Received protocol message with "
 				    "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2302,16 +2326,16 @@ XrlMfeaNode::mfea_0_1_join_multicast_group6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (MfeaNode::join_multicast_group(xrl_sender_name, src_module_id, vif_index,
 				       IPvX(group_address)) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot join group %s on vif %s",
-				    group_address.str().c_str(),
-				    vif_name.c_str());
+	error_msg = c_format("Cannot join group %s on vif %s",
+			     group_address.str().c_str(),
+			     vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2331,12 +2355,14 @@ XrlMfeaNode::mfea_0_1_leave_multicast_group4(
     const uint32_t&	vif_index, 
     const IPv4&		group_address)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2345,16 +2371,16 @@ XrlMfeaNode::mfea_0_1_leave_multicast_group4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (MfeaNode::leave_multicast_group(xrl_sender_name, src_module_id,
 					vif_index, IPvX(group_address)) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot leave group %s on vif %s",
-				    group_address.str().c_str(),
-				    vif_name.c_str());
+	error_msg = c_format("Cannot leave group %s on vif %s",
+			     group_address.str().c_str(),
+			     vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2374,12 +2400,14 @@ XrlMfeaNode::mfea_0_1_leave_multicast_group6(
     const uint32_t&	vif_index, 
     const IPv6&		group_address)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2388,16 +2416,16 @@ XrlMfeaNode::mfea_0_1_leave_multicast_group6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (MfeaNode::leave_multicast_group(xrl_sender_name, src_module_id,
 					vif_index, IPvX(group_address)) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot leave group %s on vif %s",
-				    group_address.str().c_str(),
-				    vif_name.c_str());
+	error_msg = c_format("Cannot leave group %s on vif %s",
+			     group_address.str().c_str(),
+			     vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2419,6 +2447,7 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
     const uint32_t&	max_vifs_oiflist, 
     const IPv4&		rp_address)
 {
+    string error_msg;
     Mifset mifset;
     Mifset mifset_disable_wrongvif;
 
@@ -2426,18 +2455,18 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     // Check the number of covered interfaces
     if (max_vifs_oiflist > mifset.size()) {
 	// Invalid number of covered interfaces
-	string error_msg = c_format("Received 'add_mfc' with invalid "
-				    "'max_vifs_oiflist' = %u (expected <= %u)",
-				    max_vifs_oiflist,
-				    XORP_UINT_CAST(mifset.size()));
+	error_msg = c_format("Received 'add_mfc' with invalid "
+			     "'max_vifs_oiflist' = %u (expected <= %u)",
+			     max_vifs_oiflist,
+			     XORP_UINT_CAST(mifset.size()));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2454,12 +2483,12 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
 			  IPvX(rp_address))
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot add MFC for "
-				    "source %s and group %s "
-				    "with iif_vif_index = %d",
-				    source_address.str().c_str(),
-				    group_address.str().c_str(),
-				    iif_vif_index);
+	error_msg = c_format("Cannot add MFC for "
+			     "source %s and group %s "
+			     "with iif_vif_index = %d",
+			     source_address.str().c_str(),
+			     group_address.str().c_str(),
+			     iif_vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2481,6 +2510,7 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
     const uint32_t&	max_vifs_oiflist, 
     const IPv6&		rp_address)
 {
+    string error_msg;
     Mifset mifset;
     Mifset mifset_disable_wrongvif;
 
@@ -2488,18 +2518,18 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     // Check the number of covered interfaces
     if (max_vifs_oiflist > mifset.size()) {
 	// Invalid number of covered interfaces
-	string error_msg = c_format("Received 'add_mfc' with invalid "
-				    "'max_vifs_oiflist' = %u (expected <= %u)",
-				    max_vifs_oiflist,
-				    XORP_UINT_CAST(mifset.size()));
+	error_msg = c_format("Received 'add_mfc' with invalid "
+			     "'max_vifs_oiflist' = %u (expected <= %u)",
+			     max_vifs_oiflist,
+			     XORP_UINT_CAST(mifset.size()));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2516,12 +2546,12 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
 			  IPvX(rp_address))
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot add MFC for "
-				    "source %s and group %s "
-				    "with iif_vif_index = %d",
-				    source_address.str().c_str(),
-				    group_address.str().c_str(),
-				    iif_vif_index);
+	error_msg = c_format("Cannot add MFC for "
+			     "source %s and group %s "
+			     "with iif_vif_index = %d",
+			     source_address.str().c_str(),
+			     group_address.str().c_str(),
+			     iif_vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2538,22 +2568,24 @@ XrlMfeaNode::mfea_0_1_delete_mfc4(
     const IPv4&		source_address, 
     const IPv4&		group_address)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     if (MfeaNode::delete_mfc(xrl_sender_name,
 			     IPvX(source_address), IPvX(group_address)) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot delete MFC for "
-				    "source %s and group %s",
-				    source_address.str().c_str(),
-				    group_address.str().c_str());
+	error_msg = c_format("Cannot delete MFC for "
+			     "source %s and group %s",
+			     source_address.str().c_str(),
+			     group_address.str().c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2570,22 +2602,24 @@ XrlMfeaNode::mfea_0_1_delete_mfc6(
     const IPv6&		source_address, 
     const IPv6&		group_address)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     if (MfeaNode::delete_mfc(xrl_sender_name,
 			     IPvX(source_address), IPvX(group_address)) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot delete MFC for "
-				    "source %s and group %s",
-				    source_address.str().c_str(),
-				    group_address.str().c_str());
+	error_msg = c_format("Cannot delete MFC for "
+			     "source %s and group %s",
+			     source_address.str().c_str(),
+			     group_address.str().c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2610,12 +2644,14 @@ XrlMfeaNode::mfea_0_1_send_protocol_message4(
     const bool&		is_router_alert, 
     const vector<uint8_t>& protocol_message)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2624,7 +2660,7 @@ XrlMfeaNode::mfea_0_1_send_protocol_message4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2642,12 +2678,12 @@ XrlMfeaNode::mfea_0_1_send_protocol_message4(
 			     &protocol_message[0],
 			     protocol_message.size()) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot send %s protocol message "
-				    "from %s to %s on vif %s",
-				    xrl_sender_name.c_str(),
-				    source_address.str().c_str(),
-				    dest_address.str().c_str(),
-				    vif_name.c_str());
+	error_msg = c_format("Cannot send %s protocol message "
+			     "from %s to %s on vif %s",
+			     xrl_sender_name.c_str(),
+			     source_address.str().c_str(),
+			     dest_address.str().c_str(),
+			     vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2672,12 +2708,14 @@ XrlMfeaNode::mfea_0_1_send_protocol_message6(
     const bool&		is_router_alert, 
     const vector<uint8_t>& protocol_message)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! MfeaNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2686,7 +2724,7 @@ XrlMfeaNode::mfea_0_1_send_protocol_message6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2704,12 +2742,12 @@ XrlMfeaNode::mfea_0_1_send_protocol_message6(
 			     &protocol_message[0],
 			     protocol_message.size()) < 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot send %s protocol message "
-				    "from %s to %s on vif %s",
-				    xrl_sender_name.c_str(),
-				    source_address.str().c_str(),
-				    dest_address.str().c_str(),
-				    vif_name.c_str());
+	error_msg = c_format("Cannot send %s protocol message "
+			     "from %s to %s on vif %s",
+			     xrl_sender_name.c_str(),
+			     source_address.str().c_str(),
+			     dest_address.str().c_str(),
+			     vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3042,8 +3080,10 @@ XrlMfeaNode::mfea_0_1_enable_all_vifs(
 XrlCmdError
 XrlMfeaNode::mfea_0_1_start_all_vifs()
 {
+    string error_msg;
+
     if (MfeaNode::start_all_vifs() < 0) {
-	string error_msg = c_format("Failed to start all vifs");
+	error_msg = c_format("Failed to start all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3053,8 +3093,10 @@ XrlMfeaNode::mfea_0_1_start_all_vifs()
 XrlCmdError
 XrlMfeaNode::mfea_0_1_stop_all_vifs()
 {
+    string error_msg;
+
     if (MfeaNode::stop_all_vifs() < 0) {
-	string error_msg = c_format("Failed to stop all vifs");
+	error_msg = c_format("Failed to stop all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3088,8 +3130,10 @@ XrlMfeaNode::mfea_0_1_enable_mfea(
 XrlCmdError
 XrlMfeaNode::mfea_0_1_start_mfea()
 {
+    string error_msg;
+
     if (start_mfea() != XORP_OK) {
-	string error_msg = c_format("Failed to start MFEA");
+	error_msg = c_format("Failed to start MFEA");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -3099,8 +3143,10 @@ XrlMfeaNode::mfea_0_1_start_mfea()
 XrlCmdError
 XrlMfeaNode::mfea_0_1_stop_mfea()
 {
+    string error_msg;
+
     if (stop_mfea() != XORP_OK) {
-	string error_msg = c_format("Failed to stop MFEA");
+	error_msg = c_format("Failed to stop MFEA");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3134,8 +3180,10 @@ XrlMfeaNode::mfea_0_1_enable_cli(
 XrlCmdError
 XrlMfeaNode::mfea_0_1_start_cli()
 {
+    string error_msg;
+
     if (start_cli() != XORP_OK) {
-	string error_msg = c_format("Failed to start MFEA CLI");
+	error_msg = c_format("Failed to start MFEA CLI");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3145,8 +3193,10 @@ XrlMfeaNode::mfea_0_1_start_cli()
 XrlCmdError
 XrlMfeaNode::mfea_0_1_stop_cli()
 {
+    string error_msg;
+
     if (stop_cli() != XORP_OK) {
-	string error_msg = c_format("Failed to start MFEA CLI");
+	error_msg = c_format("Failed to start MFEA CLI");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.41 2005/03/18 01:18:13 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.42 2005/03/19 23:43:25 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -1892,6 +1892,15 @@ XrlMld6igmpNode::mfea_client_0_1_add_vif_addr4(
     const IPv4&		peer)
 {
     string error_msg;
+
+    //
+    // Verify the address family
+    //
+    if (! Mld6igmpNode::is_ipv4()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     if (Mld6igmpNode::add_vif_addr(vif_name,
 				   IPvX(addr),
@@ -1916,7 +1925,16 @@ XrlMld6igmpNode::mfea_client_0_1_add_vif_addr6(
     const IPv6&		peer)
 {
     string error_msg;
-    
+
+    //
+    // Verify the address family
+    //
+    if (! Mld6igmpNode::is_ipv6()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (Mld6igmpNode::add_vif_addr(vif_name,
 				   IPvX(addr),
 				   IPvXNet(subnet),
@@ -1937,7 +1955,16 @@ XrlMld6igmpNode::mfea_client_0_1_delete_vif_addr4(
     const IPv4&		addr)
 {
     string error_msg;
-    
+
+    //
+    // Verify the address family
+    //
+    if (! Mld6igmpNode::is_ipv4()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (Mld6igmpNode::delete_vif_addr(vif_name,
 				      IPvX(addr),
 				      error_msg)
@@ -1955,7 +1982,16 @@ XrlMld6igmpNode::mfea_client_0_1_delete_vif_addr6(
     const IPv6&		addr)
 {
     string error_msg;
-    
+
+    //
+    // Verify the address family
+    //
+    if (! Mld6igmpNode::is_ipv6()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     if (Mld6igmpNode::delete_vif_addr(vif_name,
 				      IPvX(addr),
 				      error_msg)
@@ -2036,12 +2072,14 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message4(
     const bool&		is_router_alert, 
     const vector<uint8_t>& protocol_message)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! Mld6igmpNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2050,7 +2088,7 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2091,12 +2129,14 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
     const bool&		is_router_alert, 
     const vector<uint8_t>& protocol_message)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! Mld6igmpNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2105,7 +2145,7 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2204,8 +2244,10 @@ XrlMld6igmpNode::mld6igmp_0_1_enable_all_vifs(
 XrlCmdError
 XrlMld6igmpNode::mld6igmp_0_1_start_all_vifs()
 {
+    string error_msg;
+
     if (Mld6igmpNode::start_all_vifs() < 0) {
-	string error_msg = c_format("Failed to start all vifs");
+	error_msg = c_format("Failed to start all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2215,8 +2257,10 @@ XrlMld6igmpNode::mld6igmp_0_1_start_all_vifs()
 XrlCmdError
 XrlMld6igmpNode::mld6igmp_0_1_stop_all_vifs()
 {
+    string error_msg;
+
     if (Mld6igmpNode::stop_all_vifs() < 0) {
-	string error_msg = c_format("Failed to stop all vifs");
+	error_msg = c_format("Failed to stop all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2250,8 +2294,10 @@ XrlMld6igmpNode::mld6igmp_0_1_enable_mld6igmp(
 XrlCmdError
 XrlMld6igmpNode::mld6igmp_0_1_start_mld6igmp()
 {
+    string error_msg;
+
     if (start_mld6igmp() != XORP_OK) {
-	string error_msg = c_format("Failed to start MLD6IMGP");
+	error_msg = c_format("Failed to start MLD6IMGP");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2261,8 +2307,10 @@ XrlMld6igmpNode::mld6igmp_0_1_start_mld6igmp()
 XrlCmdError
 XrlMld6igmpNode::mld6igmp_0_1_stop_mld6igmp()
 {
+    string error_msg;
+
     if (stop_mld6igmp() != XORP_OK) {
-	string error_msg = c_format("Failed to stop MLD6IMGP");
+	error_msg = c_format("Failed to stop MLD6IMGP");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2296,8 +2344,10 @@ XrlMld6igmpNode::mld6igmp_0_1_enable_cli(
 XrlCmdError
 XrlMld6igmpNode::mld6igmp_0_1_start_cli()
 {
+    string error_msg;
+
     if (start_cli() != XORP_OK) {
-	string error_msg = c_format("Failed to start MLD6IMGP CLI");
+	error_msg = c_format("Failed to start MLD6IMGP CLI");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2307,8 +2357,10 @@ XrlMld6igmpNode::mld6igmp_0_1_start_cli()
 XrlCmdError
 XrlMld6igmpNode::mld6igmp_0_1_stop_cli()
 {
+    string error_msg;
+
     if (stop_cli() != XORP_OK) {
-	string error_msg = c_format("Failed to stop MLD6IMGP CLI");
+	error_msg = c_format("Failed to stop MLD6IMGP CLI");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2379,12 +2431,14 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! Mld6igmpNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2393,18 +2447,18 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (Mld6igmpNode::add_protocol(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot add protocol instance '%s' "
-				    "on vif %s with vif_index %d",
-				    xrl_sender_name.c_str(),
-				    vif_name.c_str(),
-				    vif_index);
+	error_msg = c_format("Cannot add protocol instance '%s' "
+			     "on vif %s with vif_index %d",
+			     xrl_sender_name.c_str(),
+			     vif_name.c_str(),
+			     vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2414,12 +2468,12 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
     if (mld6igmp_vif == NULL) {
 	Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index);
-	string error_msg = c_format("Cannot add protocol instance '%s' "
-				    "on vif %s with vif_index %d: "
-				    "no such vif",
-				    xrl_sender_name.c_str(),
-				    vif_name.c_str(),
-				    vif_index);
+	error_msg = c_format("Cannot add protocol instance '%s' "
+			     "on vif %s with vif_index %d: "
+			     "no such vif",
+			     xrl_sender_name.c_str(),
+			     vif_name.c_str(),
+			     vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2450,12 +2504,14 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! Mld6igmpNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2464,18 +2520,18 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (Mld6igmpNode::add_protocol(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot add protocol instance '%s' "
-				    "on vif %s with vif_index %d",
-				    xrl_sender_name.c_str(),
-				    vif_name.c_str(),
-				    vif_index);
+	error_msg = c_format("Cannot add protocol instance '%s' "
+			     "on vif %s with vif_index %d",
+			     xrl_sender_name.c_str(),
+			     vif_name.c_str(),
+			     vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2485,12 +2541,12 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
     if (mld6igmp_vif == NULL) {
 	Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index);
-	string error_msg = c_format("Cannot add protocol instance '%s' "
-				    "on vif %s with vif_index %d: "
-				    "no such vif",
-				    xrl_sender_name.c_str(),
-				    vif_name.c_str(),
-				    vif_index);
+	error_msg = c_format("Cannot add protocol instance '%s' "
+			     "on vif %s with vif_index %d: "
+			     "no such vif",
+			     xrl_sender_name.c_str(),
+			     vif_name.c_str(),
+			     vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2521,12 +2577,14 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol4(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! Mld6igmpNode::is_ipv4()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv4");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2535,18 +2593,18 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot delete protocol instance '%s' "
-				    "on vif %s with vif_index %d",
-				    xrl_sender_name.c_str(),
-				    vif_name.c_str(),
-				    vif_index);
+	error_msg = c_format("Cannot delete protocol instance '%s' "
+			     "on vif %s with vif_index %d",
+			     xrl_sender_name.c_str(),
+			     vif_name.c_str(),
+			     vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2565,12 +2623,14 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
+    string error_msg;
+
     //
     // Verify the address family
     //
     if (! Mld6igmpNode::is_ipv6()) {
-	string error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2579,18 +2639,18 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d", protocol_id);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot delete protocol instance '%s' "
-				    "on vif %s with vif_index %d",
-				    xrl_sender_name.c_str(),
-				    vif_name.c_str(),
-				    vif_index);
+	error_msg = c_format("Cannot delete protocol instance '%s' "
+			     "on vif %s with vif_index %d",
+			     xrl_sender_name.c_str(),
+			     vif_name.c_str(),
+			     vif_index);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
