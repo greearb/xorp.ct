@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.71 2005/03/17 18:49:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.72 2005/03/17 19:44:52 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -1299,14 +1299,13 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
     entry = dynamic_cast<StartStopProtocolKernelVif*>(xrl_task_base);
     XLOG_ASSERT(entry != NULL);
 
-    uint16_t vif_index = entry->vif_index();
     bool is_start = entry->is_start();
+    uint16_t vif_index = entry->vif_index();
 
     //
     // Check whether we have already registered with the MFEA
     //
     if (! _is_mfea_add_protocol_registered) {
-	success = false;
 	retry_xrl_task();
 	return;
     }
@@ -1319,6 +1318,7 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		   vif_index);
 	pop_xrl_task();
 	retry_xrl_task();
+	return;
     }
 
     if (is_start) {
@@ -1386,6 +1386,7 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 		   (is_start)? "start" : "stop",
 		   pim_vif->name().c_str());
 	retry_xrl_task();
+	return;
     }
 }
 
@@ -1481,13 +1482,8 @@ XrlPimNode::join_multicast_group(uint16_t vif_index,
     }
 
     PimNode::incr_startup_requests_n();
-    _join_leave_multicast_group_queue.push_back(
-	JoinLeaveMulticastGroup(vif_index, multicast_group, true));
-
-    // If the queue was empty before, start sending the changes
-    if (_join_leave_multicast_group_queue.size() == 1) {
-	send_join_leave_multicast_group();
-    }
+    add_task(new JoinLeaveMulticastGroup(*this, vif_index, multicast_group,
+					 true));
 
     return (XORP_OK);
 }
@@ -1505,13 +1501,8 @@ XrlPimNode::leave_multicast_group(uint16_t vif_index,
     }
 
     PimNode::incr_shutdown_requests_n();
-    _join_leave_multicast_group_queue.push_back(
-	JoinLeaveMulticastGroup(vif_index, multicast_group, false));
-
-    // If the queue was empty before, start sending the changes
-    if (_join_leave_multicast_group_queue.size() == 1) {
-	send_join_leave_multicast_group();
-    }
+    add_task(new JoinLeaveMulticastGroup(*this, vif_index, multicast_group,
+					 false));
 
     return (XORP_OK);
 }
@@ -1525,29 +1516,37 @@ XrlPimNode::send_join_leave_multicast_group()
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    if (_join_leave_multicast_group_queue.empty())
+    if (_xrl_tasks_queue.empty())
 	return;			// No more changes
 
-    JoinLeaveMulticastGroup& group = _join_leave_multicast_group_queue.front();
-    bool is_join = group.is_join();
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    JoinLeaveMulticastGroup* entry;
+
+    entry = dynamic_cast<JoinLeaveMulticastGroup*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_join = entry->is_join();
+    uint16_t vif_index = entry->vif_index();
+    const IPvX& multicast_group = entry->multicast_group();
 
     //
     // Check whether we have already registered with the MFEA
     //
     if (! _is_mfea_add_protocol_registered) {
-	success = false;
-	goto start_timer_label;
+	retry_xrl_task();
+	return;
     }
 
-    pim_vif = PimNode::vif_find_by_vif_index(group.vif_index());
+    pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL) {
 	XLOG_ERROR("Cannot %s group %s on vif with vif_index %d: "
 		   "no such vif",
 		   (is_join)? "join" : "leave",
-		   cstring(group.multicast_group()),
-		   group.vif_index());
-	_join_leave_multicast_group_queue.pop_front();
-	goto start_timer_label;
+		   cstring(multicast_group),
+		   vif_index);
+	pop_xrl_task();
+	retry_xrl_task();
+	return;
     }
 
     if (is_join) {
@@ -1559,8 +1558,8 @@ XrlPimNode::send_join_leave_multicast_group()
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		pim_vif->name(),
-		group.vif_index(),
-		group.multicast_group().get_ipv4(),
+		vif_index,
+		multicast_group.get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
 	    if (success)
 		return;
@@ -1573,8 +1572,8 @@ XrlPimNode::send_join_leave_multicast_group()
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		pim_vif->name(),
-		group.vif_index(),
-		group.multicast_group().get_ipv6(),
+		vif_index,
+		multicast_group.get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
 	    if (success)
 		return;
@@ -1588,8 +1587,8 @@ XrlPimNode::send_join_leave_multicast_group()
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		pim_vif->name(),
-		group.vif_index(),
-		group.multicast_group().get_ipv4(),
+		vif_index,
+		multicast_group.get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
 	    if (success)
 		return;
@@ -1602,8 +1601,8 @@ XrlPimNode::send_join_leave_multicast_group()
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		pim_vif->name(),
-		group.vif_index(),
-		group.multicast_group().get_ipv6(),
+		vif_index,
+		multicast_group.get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_join_leave_multicast_group_cb));
 	    if (success)
 		return;
@@ -1617,12 +1616,10 @@ XrlPimNode::send_join_leave_multicast_group()
 	XLOG_ERROR("Failed to %s group %s on vif %s with the MFEA. "
 		   "Will try again.",
 		   (is_join)? "join" : "leave",
-		   cstring(group.multicast_group()),
+		   cstring(multicast_group),
 		   pim_vif->name().c_str());
-    start_timer_label:
-	_join_leave_multicast_group_queue_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlPimNode::send_join_leave_multicast_group));
+	retry_xrl_task();
+	return;
     }
 }
 
@@ -1630,7 +1627,15 @@ void
 XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
     const XrlError& xrl_error)
 {
-    bool is_join = _join_leave_multicast_group_queue.front().is_join();
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    JoinLeaveMulticastGroup* entry;
+
+    entry = dynamic_cast<JoinLeaveMulticastGroup*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_join = entry->is_join();
+    uint16_t vif_index = entry->vif_index();
+    const IPvX& multicast_group = entry->multicast_group();
 
     switch (xrl_error.error_code()) {
     case OKAY:
@@ -1641,8 +1646,8 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
 	    PimNode::decr_startup_requests_n();
 	else
 	    PimNode::decr_shutdown_requests_n();
-	_join_leave_multicast_group_queue.pop_front();
-	send_join_leave_multicast_group();
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -1668,8 +1673,8 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
 	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
 	} else {
 	    PimNode::decr_shutdown_requests_n();
-	    _join_leave_multicast_group_queue.pop_front();
-	    send_join_leave_multicast_group();
+	    pop_xrl_task();
+	    send_xrl_task();
 	}
 	break;
 
@@ -1690,15 +1695,14 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
 	// If a transient error, then start a timer to try again
 	// (unless the timer is already running).
 	//
-	if (! _join_leave_multicast_group_queue_timer.scheduled()) {
-	    XLOG_ERROR("Failed to %s a multicast group with the MFEA: %s. "
-		       "Will try again.",
-		       (is_join)? "join" : "leave",
-		       xrl_error.str().c_str());
-	    _join_leave_multicast_group_queue_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlPimNode::send_join_leave_multicast_group));
-	}
+	XLOG_ERROR("Failed to %s group %s on vif with vif_index %d "
+		   "with the MFEA: %s. "
+		   "Will try again.",
+		   (is_join)? "join" : "leave",
+		   cstring(multicast_group),
+		   vif_index,
+		   xrl_error.str().c_str());
+	retry_xrl_task();
 	break;
     }
 }
@@ -1706,13 +1710,7 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
 int
 XrlPimNode::add_mfc_to_kernel(const PimMfc& pim_mfc)
 {
-    _add_delete_mfc_dataflow_monitor_queue.push_back(
-	AddDeleteMfcDataflowMonitor(AddDeleteMfc(pim_mfc, true)));
-
-    // If the queue was empty before, start sending the changes
-    if (_add_delete_mfc_dataflow_monitor_queue.size() == 1) {
-	send_add_delete_mfc_dataflow_monitor();
-    }
+    add_task(new AddDeleteMfc(*this, pim_mfc, true));
 
     return (XORP_OK);
 }
@@ -1720,39 +1718,47 @@ XrlPimNode::add_mfc_to_kernel(const PimMfc& pim_mfc)
 int
 XrlPimNode::delete_mfc_from_kernel(const PimMfc& pim_mfc)
 {
-    _add_delete_mfc_dataflow_monitor_queue.push_back(
-	AddDeleteMfcDataflowMonitor(AddDeleteMfc(pim_mfc, false)));
-
-    // If the queue was empty before, start sending the changes
-    if (_add_delete_mfc_dataflow_monitor_queue.size() == 1) {
-	send_add_delete_mfc_dataflow_monitor();
-    }
+    add_task(new AddDeleteMfc(*this, pim_mfc, false));
 
     return (XORP_OK);
 }
 
 void
-XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
+XrlPimNode::send_add_delete_mfc()
 {
     bool success = true;
-    bool is_add = mfc.is_add();
-    size_t max_vifs_oiflist = mfc.olist().size();
-    vector<uint8_t> oiflist_vector(max_vifs_oiflist);
-    vector<uint8_t> oiflist_disable_wrongvif_vector(max_vifs_oiflist);
 
     if (! _is_finder_alive)
 	return;		// The Finder is dead
 
-    mifset_to_vector(mfc.olist(), oiflist_vector);
-    mifset_to_vector(mfc.olist_disable_wrongvif(),
+    if (_xrl_tasks_queue.empty())
+	return;		// No more changes
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    AddDeleteMfc* entry;
+
+    entry = dynamic_cast<AddDeleteMfc*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_add = entry->is_add();
+    size_t max_vifs_oiflist = entry->olist().size();
+    const IPvX& source_addr = entry->source_addr();
+    const IPvX& group_addr = entry->group_addr();
+    uint16_t iif_vif_index = entry->iif_vif_index();
+    const IPvX& rp_addr = entry->rp_addr();
+
+    vector<uint8_t> oiflist_vector(max_vifs_oiflist);
+    vector<uint8_t> oiflist_disable_wrongvif_vector(max_vifs_oiflist);
+    mifset_to_vector(entry->olist(), oiflist_vector);
+    mifset_to_vector(entry->olist_disable_wrongvif(),
 		     oiflist_disable_wrongvif_vector);
     
     //
     // Check whether we have already registered with the MFEA
     //
     if (! _is_mfea_add_protocol_registered) {
-	success = false;
-	goto start_timer_label;
+	retry_xrl_task();
+	return;
     }
 
     if (is_add) {
@@ -1761,14 +1767,14 @@ XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
 	    success = _xrl_mfea_client.send_add_mfc4(
 		_mfea_target.c_str(),
 		my_xrl_target_name(),
-		mfc.source_addr().get_ipv4(),
-		mfc.group_addr().get_ipv4(),
-		mfc.iif_vif_index(),
+		source_addr.get_ipv4(),
+		group_addr.get_ipv4(),
+		iif_vif_index,
 		oiflist_vector,
 		oiflist_disable_wrongvif_vector,
 		max_vifs_oiflist,
-		mfc.rp_addr().get_ipv4(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
+		rp_addr.get_ipv4(),
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
 	    if (success)
 		return;
 	}
@@ -1777,14 +1783,14 @@ XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
 	    success = _xrl_mfea_client.send_add_mfc6(
 		_mfea_target.c_str(),
 		my_xrl_target_name(),
-		mfc.source_addr().get_ipv6(),
-		mfc.group_addr().get_ipv6(),
-		mfc.iif_vif_index(),
+		source_addr.get_ipv6(),
+		group_addr.get_ipv6(),
+		iif_vif_index,
 		oiflist_vector,
 		oiflist_disable_wrongvif_vector,
 		max_vifs_oiflist,
-		mfc.rp_addr().get_ipv6(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
+		rp_addr.get_ipv6(),
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
 	    if (success)
 		return;
 	}
@@ -1794,9 +1800,9 @@ XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
 	    success = _xrl_mfea_client.send_delete_mfc4(
 		_mfea_target.c_str(),
 		my_xrl_target_name(),
-		mfc.source_addr().get_ipv4(),
-		mfc.group_addr().get_ipv4(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
+		source_addr.get_ipv4(),
+		group_addr.get_ipv4(),
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
 	    if (success)
 		return;
 	}
@@ -1805,9 +1811,9 @@ XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
 	    success = _xrl_mfea_client.send_delete_mfc6(
 		_mfea_target.c_str(),
 		my_xrl_target_name(),
-		mfc.source_addr().get_ipv6(),
-		mfc.group_addr().get_ipv6(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
+		source_addr.get_ipv6(),
+		group_addr.get_ipv6(),
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
 	    if (success)
 		return;
 	}
@@ -1820,266 +1826,31 @@ XrlPimNode::send_add_delete_mfc(const AddDeleteMfc& mfc)
 	XLOG_ERROR("Failed to %s MFC entry for (%s,%s) with the MFEA. "
 		   "Will try again.",
 		   (is_add)? "add" : "delete",
-		   cstring(mfc.source_addr()),
-		   cstring(mfc.group_addr()));
-    start_timer_label:
-	_add_delete_mfc_dataflow_monitor_queue_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
-    }
-}
-
-int
-XrlPimNode::add_dataflow_monitor(const IPvX& source_addr,
-				 const IPvX& group_addr,
-				 uint32_t threshold_interval_sec,
-				 uint32_t threshold_interval_usec,
-				 uint32_t threshold_packets,
-				 uint32_t threshold_bytes,
-				 bool is_threshold_in_packets,
-				 bool is_threshold_in_bytes,
-				 bool is_geq_upcall,
-				 bool is_leq_upcall)
-{
-    _add_delete_mfc_dataflow_monitor_queue.push_back(
-	AddDeleteMfcDataflowMonitor(
-	    AddDeleteDataflowMonitor(source_addr,
-				     group_addr,
-				     threshold_interval_sec,
-				     threshold_interval_usec,
-				     threshold_packets,
-				     threshold_bytes,
-				     is_threshold_in_packets,
-				     is_threshold_in_bytes,
-				     is_geq_upcall,
-				     is_leq_upcall,
-				     true)));
-
-    // If the queue was empty before, start sending the changes
-    if (_add_delete_mfc_dataflow_monitor_queue.size() == 1) {
-	send_add_delete_mfc_dataflow_monitor();
-    }
-
-    return (XORP_OK);
-}
-
-int
-XrlPimNode::delete_dataflow_monitor(const IPvX& source_addr,
-				    const IPvX& group_addr,
-				    uint32_t threshold_interval_sec,
-				    uint32_t threshold_interval_usec,
-				    uint32_t threshold_packets,
-				    uint32_t threshold_bytes,
-				    bool is_threshold_in_packets,
-				    bool is_threshold_in_bytes,
-				    bool is_geq_upcall,
-				    bool is_leq_upcall)
-{
-    _add_delete_mfc_dataflow_monitor_queue.push_back(
-	AddDeleteMfcDataflowMonitor(
-	    AddDeleteDataflowMonitor(source_addr,
-				     group_addr,
-				     threshold_interval_sec,
-				     threshold_interval_usec,
-				     threshold_packets,
-				     threshold_bytes,
-				     is_threshold_in_packets,
-				     is_threshold_in_bytes,
-				     is_geq_upcall,
-				     is_leq_upcall,
-				     false)));
-
-    // If the queue was empty before, start sending the changes
-    if (_add_delete_mfc_dataflow_monitor_queue.size() == 1) {
-	send_add_delete_mfc_dataflow_monitor();
-    }
-
-    return (XORP_OK);
-}
-
-int
-XrlPimNode::delete_all_dataflow_monitor(const IPvX& source_addr,
-					const IPvX& group_addr)
-{
-    _add_delete_mfc_dataflow_monitor_queue.push_back(
-	AddDeleteMfcDataflowMonitor(
-	    AddDeleteDataflowMonitor(source_addr,
-				     group_addr)));
-
-    // If the queue was empty before, start sending the changes
-    if (_add_delete_mfc_dataflow_monitor_queue.size() == 1) {
-	send_add_delete_mfc_dataflow_monitor();
-    }
-
-    return (XORP_OK);
-}
-
-void
-XrlPimNode::send_add_delete_dataflow_monitor(
-    const AddDeleteDataflowMonitor& monitor)
-{
-    bool success = true;
-    bool is_add = monitor.is_add();
-    bool is_delete_all = monitor.is_delete_all();
-
-    if (! _is_finder_alive)
-	return;		// The Finder is dead
-
-    //
-    // Check whether we have already registered with the MFEA
-    //
-    if (! _is_mfea_add_protocol_registered) {
-	success = false;
-	goto start_timer_label;
-    }
-
-    if (is_delete_all) {
-	// Delete all dataflow monitors for a source and a group addresses
-	if (PimNode::is_ipv4()) {
-	    success = _xrl_mfea_client.send_delete_all_dataflow_monitor4(
-		_mfea_target.c_str(),
-		my_xrl_target_name(),
-		monitor.source_addr().get_ipv4(),
-		monitor.group_addr().get_ipv4(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
-	    if (success)
-		return;
-	}
-
-	if (PimNode::is_ipv6()) {
-	    success = _xrl_mfea_client.send_delete_all_dataflow_monitor6(
-		_mfea_target.c_str(),
-		my_xrl_target_name(),
-		monitor.source_addr().get_ipv6(),
-		monitor.group_addr().get_ipv6(),
-		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
-	    if (success)
-		return;
-	}
-    } else {
-	if (is_add) {
-	    // Add a dataflow monitor with the MFEA
-	    if (PimNode::is_ipv4()) {
-		success = _xrl_mfea_client.send_add_dataflow_monitor4(
-		    _mfea_target.c_str(),
-		    my_xrl_target_name(),
-		    monitor.source_addr().get_ipv4(),
-		    monitor.group_addr().get_ipv4(),
-		    monitor.threshold_interval_sec(),
-		    monitor.threshold_interval_usec(),
-		    monitor.threshold_packets(),
-		    monitor.threshold_bytes(),
-		    monitor.is_threshold_in_packets(),
-		    monitor.is_threshold_in_bytes(),
-		    monitor.is_geq_upcall(),
-		    monitor.is_leq_upcall(),
-		    callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
-		if (success)
-		    return;
-	    }
-
-	    if (PimNode::is_ipv6()) {
-		success = _xrl_mfea_client.send_add_dataflow_monitor6(
-		    _mfea_target.c_str(),
-		    my_xrl_target_name(),
-		    monitor.source_addr().get_ipv6(),
-		    monitor.group_addr().get_ipv6(),
-		    monitor.threshold_interval_sec(),
-		    monitor.threshold_interval_usec(),
-		    monitor.threshold_packets(),
-		    monitor.threshold_bytes(),
-		    monitor.is_threshold_in_packets(),
-		    monitor.is_threshold_in_bytes(),
-		    monitor.is_geq_upcall(),
-		    monitor.is_leq_upcall(),
-		    callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
-		if (success)
-		    return;
-	    }
-	} else {
-	    // Delete a dataflow monitor with the MFEA
-	    if (PimNode::is_ipv4()) {
-		success = _xrl_mfea_client.send_delete_dataflow_monitor4(
-		    _mfea_target.c_str(),
-		    my_xrl_target_name(),
-		    monitor.source_addr().get_ipv4(),
-		    monitor.group_addr().get_ipv4(),
-		    monitor.threshold_interval_sec(),
-		    monitor.threshold_interval_usec(),
-		    monitor.threshold_packets(),
-		    monitor.threshold_bytes(),
-		    monitor.is_threshold_in_packets(),
-		    monitor.is_threshold_in_bytes(),
-		    monitor.is_geq_upcall(),
-		    monitor.is_leq_upcall(),
-		    callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
-		if (success)
-		    return;
-	    }
-
-	    if (PimNode::is_ipv6()) {
-		success = _xrl_mfea_client.send_delete_dataflow_monitor6(
-		    _mfea_target.c_str(),
-		    my_xrl_target_name(),
-		    monitor.source_addr().get_ipv6(),
-		    monitor.group_addr().get_ipv6(),
-		    monitor.threshold_interval_sec(),
-		    monitor.threshold_interval_usec(),
-		    monitor.threshold_packets(),
-		    monitor.threshold_bytes(),
-		    monitor.is_threshold_in_packets(),
-		    monitor.is_threshold_in_bytes(),
-		    monitor.is_geq_upcall(),
-		    monitor.is_leq_upcall(),
-		    callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb));
-		if (success)
-		    return;
-	    }
-	}
-    }
-
-    if (! success) {
-        //
-        // If an error, then start a timer to try again
-        //
-	XLOG_ERROR("Failed to %s dataflow entry for (%s,%s) with the MFEA. "
-		   "Will try again.",
-		   (is_delete_all)? "delete all" : (is_add)? "add" : "delete",
-		   cstring(monitor.source_addr()),
-		   cstring(monitor.group_addr()));
-
-    start_timer_label:
-	_add_delete_mfc_dataflow_monitor_queue_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
+		   cstring(source_addr),
+		   cstring(group_addr));
+	retry_xrl_task();
     }
 }
 
 void
-XrlPimNode::send_add_delete_mfc_dataflow_monitor()
-{
-    if (_add_delete_mfc_dataflow_monitor_queue.empty())
-	return;			// No more changes
-
-    const AddDeleteMfcDataflowMonitor& mfc_dataflow_monitor =
-	_add_delete_mfc_dataflow_monitor_queue.front();
-    if (mfc_dataflow_monitor.mfc() != NULL)
-	send_add_delete_mfc(*mfc_dataflow_monitor.mfc());
-    if (mfc_dataflow_monitor.dataflow_monitor() != NULL)
-	send_add_delete_dataflow_monitor(*mfc_dataflow_monitor.dataflow_monitor());
-}
-
-void
-XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb(
+XrlPimNode::mfea_client_send_add_delete_mfc_cb(
     const XrlError& xrl_error)
 {
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    AddDeleteMfc* entry;
+
+    entry = dynamic_cast<AddDeleteMfc*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_add = entry->is_add();
+
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
 	// If success, then send the next change
 	//
-	_add_delete_mfc_dataflow_monitor_queue.pop_front();
-	send_add_delete_mfc_dataflow_monitor();
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -2087,30 +1858,11 @@ XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb(
 	// If a command failed because the other side rejected it,
 	// then print an error and send the next one.
 	//
-	do {
-	    const AddDeleteMfcDataflowMonitor& mfc_dataflow_monitor =
-		_add_delete_mfc_dataflow_monitor_queue.front();
-	    if (mfc_dataflow_monitor.mfc() != NULL) {
-		const AddDeleteMfc& mfc = *mfc_dataflow_monitor.mfc();
-		bool is_add = mfc.is_add();
-		XLOG_ERROR("Cannot %s a multicast forwarding entry with the MFEA: %s",
-			   (is_add)? "add" : "delete",
-			   xrl_error.str().c_str());
-	    }
-	    if (mfc_dataflow_monitor.dataflow_monitor() != NULL) {
-		const AddDeleteDataflowMonitor& monitor =
-		    *mfc_dataflow_monitor.dataflow_monitor();
-		bool is_add = monitor.is_add();
-		bool is_delete_all = monitor.is_delete_all();
-		XLOG_ERROR("Cannot %s with the MFEA: %s",
-			   (is_add)? "add a dataflow monitor"
-			   : (is_delete_all)? "delete multiple dataflow monitors"
-			   : "delete a dataflow monitor",
-			   xrl_error.str().c_str());
-	    }
-	} while (false);
-	_add_delete_mfc_dataflow_monitor_queue.pop_front();
-	send_add_delete_mfc_dataflow_monitor();
+	XLOG_ERROR("Cannot %s a multicast forwarding entry with the MFEA: %s",
+		   (is_add)? "add" : "delete",
+		   xrl_error.str().c_str());
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case NO_FINDER:
@@ -2142,15 +1894,291 @@ XrlPimNode::mfea_client_send_add_delete_mfc_dataflow_monitor_cb(
 	// If a transient error, then start a timer to try again
 	// (unless the timer is already running).
 	//
-	if (! _add_delete_mfc_dataflow_monitor_queue_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add/delete a multicast forwarding entry "
-		       "or a dataflow monitor with the MFEA: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _add_delete_mfc_dataflow_monitor_queue_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlPimNode::send_add_delete_mfc_dataflow_monitor));
+	XLOG_ERROR("Failed to add/delete a multicast forwarding entry "
+		   "with the MFEA: %s. "
+		   "Will try again.",
+		   xrl_error.str().c_str());
+	retry_xrl_task();
+	break;
+    }
+}
+
+int
+XrlPimNode::add_dataflow_monitor(const IPvX& source_addr,
+				 const IPvX& group_addr,
+				 uint32_t threshold_interval_sec,
+				 uint32_t threshold_interval_usec,
+				 uint32_t threshold_packets,
+				 uint32_t threshold_bytes,
+				 bool is_threshold_in_packets,
+				 bool is_threshold_in_bytes,
+				 bool is_geq_upcall,
+				 bool is_leq_upcall)
+{
+    add_task(new AddDeleteDataflowMonitor(*this,
+					  source_addr,
+					  group_addr,
+					  threshold_interval_sec,
+					  threshold_interval_usec,
+					  threshold_packets,
+					  threshold_bytes,
+					  is_threshold_in_packets,
+					  is_threshold_in_bytes,
+					  is_geq_upcall,
+					  is_leq_upcall,
+					  true));
+
+    return (XORP_OK);
+}
+
+int
+XrlPimNode::delete_dataflow_monitor(const IPvX& source_addr,
+				    const IPvX& group_addr,
+				    uint32_t threshold_interval_sec,
+				    uint32_t threshold_interval_usec,
+				    uint32_t threshold_packets,
+				    uint32_t threshold_bytes,
+				    bool is_threshold_in_packets,
+				    bool is_threshold_in_bytes,
+				    bool is_geq_upcall,
+				    bool is_leq_upcall)
+{
+    add_task(new AddDeleteDataflowMonitor(*this,
+					  source_addr,
+					  group_addr,
+					  threshold_interval_sec,
+					  threshold_interval_usec,
+					  threshold_packets,
+					  threshold_bytes,
+					  is_threshold_in_packets,
+					  is_threshold_in_bytes,
+					  is_geq_upcall,
+					  is_leq_upcall,
+					  false));
+
+    return (XORP_OK);
+}
+
+int
+XrlPimNode::delete_all_dataflow_monitor(const IPvX& source_addr,
+					const IPvX& group_addr)
+{
+    add_task(new AddDeleteDataflowMonitor(*this, source_addr, group_addr));
+
+    return (XORP_OK);
+}
+
+void
+XrlPimNode::send_add_delete_dataflow_monitor()
+{
+    bool success = true;
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
+    if (_xrl_tasks_queue.empty())
+	return;		// No more changes
+
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    AddDeleteDataflowMonitor* entry;
+
+    entry = dynamic_cast<AddDeleteDataflowMonitor*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_add = entry->is_add();
+    bool is_delete_all = entry->is_delete_all();
+
+    //
+    // Check whether we have already registered with the MFEA
+    //
+    if (! _is_mfea_add_protocol_registered) {
+	retry_xrl_task();
+	return;
+    }
+
+    if (is_delete_all) {
+	// Delete all dataflow monitors for a source and a group addresses
+	if (PimNode::is_ipv4()) {
+	    success = _xrl_mfea_client.send_delete_all_dataflow_monitor4(
+		_mfea_target.c_str(),
+		my_xrl_target_name(),
+		entry->source_addr().get_ipv4(),
+		entry->group_addr().get_ipv4(),
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+	    if (success)
+		return;
 	}
+
+	if (PimNode::is_ipv6()) {
+	    success = _xrl_mfea_client.send_delete_all_dataflow_monitor6(
+		_mfea_target.c_str(),
+		my_xrl_target_name(),
+		entry->source_addr().get_ipv6(),
+		entry->group_addr().get_ipv6(),
+		callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+	    if (success)
+		return;
+	}
+    } else {
+	if (is_add) {
+	    // Add a dataflow monitor with the MFEA
+	    if (PimNode::is_ipv4()) {
+		success = _xrl_mfea_client.send_add_dataflow_monitor4(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    entry->source_addr().get_ipv4(),
+		    entry->group_addr().get_ipv4(),
+		    entry->threshold_interval_sec(),
+		    entry->threshold_interval_usec(),
+		    entry->threshold_packets(),
+		    entry->threshold_bytes(),
+		    entry->is_threshold_in_packets(),
+		    entry->is_threshold_in_bytes(),
+		    entry->is_geq_upcall(),
+		    entry->is_leq_upcall(),
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		if (success)
+		    return;
+	    }
+
+	    if (PimNode::is_ipv6()) {
+		success = _xrl_mfea_client.send_add_dataflow_monitor6(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    entry->source_addr().get_ipv6(),
+		    entry->group_addr().get_ipv6(),
+		    entry->threshold_interval_sec(),
+		    entry->threshold_interval_usec(),
+		    entry->threshold_packets(),
+		    entry->threshold_bytes(),
+		    entry->is_threshold_in_packets(),
+		    entry->is_threshold_in_bytes(),
+		    entry->is_geq_upcall(),
+		    entry->is_leq_upcall(),
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		if (success)
+		    return;
+	    }
+	} else {
+	    // Delete a dataflow monitor with the MFEA
+	    if (PimNode::is_ipv4()) {
+		success = _xrl_mfea_client.send_delete_dataflow_monitor4(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    entry->source_addr().get_ipv4(),
+		    entry->group_addr().get_ipv4(),
+		    entry->threshold_interval_sec(),
+		    entry->threshold_interval_usec(),
+		    entry->threshold_packets(),
+		    entry->threshold_bytes(),
+		    entry->is_threshold_in_packets(),
+		    entry->is_threshold_in_bytes(),
+		    entry->is_geq_upcall(),
+		    entry->is_leq_upcall(),
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		if (success)
+		    return;
+	    }
+
+	    if (PimNode::is_ipv6()) {
+		success = _xrl_mfea_client.send_delete_dataflow_monitor6(
+		    _mfea_target.c_str(),
+		    my_xrl_target_name(),
+		    entry->source_addr().get_ipv6(),
+		    entry->group_addr().get_ipv6(),
+		    entry->threshold_interval_sec(),
+		    entry->threshold_interval_usec(),
+		    entry->threshold_packets(),
+		    entry->threshold_bytes(),
+		    entry->is_threshold_in_packets(),
+		    entry->is_threshold_in_bytes(),
+		    entry->is_geq_upcall(),
+		    entry->is_leq_upcall(),
+		    callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
+		if (success)
+		    return;
+	    }
+	}
+    }
+
+    if (! success) {
+        //
+        // If an error, then start a timer to try again
+        //
+	XLOG_ERROR("Failed to %s dataflow entry for (%s,%s) with the MFEA. "
+		   "Will try again.",
+		   (is_delete_all)? "delete all" : (is_add)? "add" : "delete",
+		   cstring(entry->source_addr()),
+		   cstring(entry->group_addr()));
+	retry_xrl_task();
+    }
+}
+
+void
+XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(
+    const XrlError& xrl_error)
+{
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    AddDeleteDataflowMonitor* entry;
+
+    entry = dynamic_cast<AddDeleteDataflowMonitor*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    bool is_add = entry->is_add();
+    bool is_delete_all = entry->is_delete_all();
+
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next change
+	//
+	pop_xrl_task();
+	send_xrl_task();
+	break;
+
+    case COMMAND_FAILED:
+	XLOG_ERROR("Cannot %s with the MFEA: %s",
+		   (is_add)? "add a dataflow monitor"
+		   : (is_delete_all)? "delete multiple dataflow monitors"
+		   : "delete a dataflow monitor",
+		   xrl_error.str().c_str());
+	pop_xrl_task();
+	send_xrl_task();
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	XLOG_ERROR("Failed to add/delete a dataflow monitor with the MFEA: %s. "
+		   "Will try again.",
+		   xrl_error.str().c_str());
+	retry_xrl_task();
 	break;
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.49 2005/03/17 18:49:59 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.50 2005/03/17 19:44:53 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -2169,7 +2169,9 @@ private:
 
     int add_mfc_to_kernel(const PimMfc& pim_mfc);
     int delete_mfc_from_kernel(const PimMfc& pim_mfc);
-    void send_add_delete_mfc(const AddDeleteMfc& mfc);
+    void send_add_delete_mfc();
+    void mfea_client_send_add_delete_mfc_cb(const XrlError& xrl_error);
+
     int add_dataflow_monitor(const IPvX& source_addr,
 			     const IPvX& group_addr,
 			     uint32_t threshold_interval_sec,
@@ -2192,9 +2194,8 @@ private:
 				bool is_leq_upcall);
     int delete_all_dataflow_monitor(const IPvX& source_addr,
 				    const IPvX& group_addr);
-    void send_add_delete_dataflow_monitor(const AddDeleteDataflowMonitor& dataflow_monitor);
-    void send_add_delete_mfc_dataflow_monitor();
-    void mfea_client_send_add_delete_mfc_dataflow_monitor_cb(const XrlError& xrl_error);
+    void send_add_delete_dataflow_monitor();
+    void mfea_client_send_add_delete_dataflow_monitor_cb(const XrlError& xrl_error);
 
     int add_protocol_mld6igmp(uint16_t vif_index);
     int delete_protocol_mld6igmp(uint16_t vif_index);
@@ -2226,174 +2227,6 @@ private:
     const string& my_xrl_target_name() { return XrlPimTargetBase::name(); }
     int family() const { return PimNode::family(); }
 
-    /**
-     * Class for handling the queue of Join/Leave multicast group requests
-     */
-    class JoinLeaveMulticastGroup {
-    public:
-	JoinLeaveMulticastGroup(uint16_t vif_index,
-				const IPvX& multicast_group,
-				bool is_join)
-	    : _vif_index(vif_index),
-	      _multicast_group(multicast_group),
-	      _is_join(is_join) {}
-	uint16_t vif_index() const { return _vif_index; }
-	const IPvX& multicast_group() const { return _multicast_group; }
-	bool is_join() const { return _is_join; }
-
-    private:
-	uint16_t	_vif_index;
-	IPvX		_multicast_group;
-	bool		_is_join;
-    };
-
-    /**
-     * Class for handling the queue of Add/Delete MFC requests
-     */
-    class AddDeleteMfc {
-    public:
-	AddDeleteMfc(const PimMfc& pim_mfc, bool is_add)
-	    : _source_addr(pim_mfc.source_addr()),
-	      _group_addr(pim_mfc.group_addr()),
-	      _rp_addr(pim_mfc.rp_addr()),
-	      _iif_vif_index(pim_mfc.iif_vif_index()),
-	      _olist(pim_mfc.olist()),
-	      _olist_disable_wrongvif(pim_mfc.olist_disable_wrongvif()),
-	      _is_add(is_add) {}
-
-	const IPvX& source_addr() const { return _source_addr; }
-	const IPvX& group_addr() const { return _group_addr; }
-	const IPvX& rp_addr() const { return _rp_addr; }
-	uint16_t iif_vif_index() const { return _iif_vif_index; }
-	const Mifset& olist() const { return _olist; }
-	const Mifset& olist_disable_wrongvif() const { return _olist_disable_wrongvif; }
-	bool is_add() const { return _is_add; }
-
-    private:
-	IPvX		_source_addr;
-	IPvX		_group_addr;
-	IPvX		_rp_addr;
-	uint16_t	_iif_vif_index;
-	Mifset		_olist;
-	Mifset		_olist_disable_wrongvif;
-	bool		_is_add;
-    };
-
-    /**
-     * Class for handling the queue of Add/Delete dataflow monitor requests
-     */
-    class AddDeleteDataflowMonitor {
-    public:
-	AddDeleteDataflowMonitor(const IPvX& source_addr,
-				 const IPvX& group_addr,
-				 uint32_t threshold_interval_sec,
-				 uint32_t threshold_interval_usec,
-				 uint32_t threshold_packets,
-				 uint32_t threshold_bytes,
-				 bool is_threshold_in_packets,
-				 bool is_threshold_in_bytes,
-				 bool is_geq_upcall,
-				 bool is_leq_upcall,
-				 bool is_add)
-	    : _source_addr(source_addr),
-	      _group_addr(group_addr),
-	      _threshold_interval_sec(threshold_interval_sec),
-	      _threshold_interval_usec(threshold_interval_usec),
-	      _threshold_packets(threshold_packets),
-	      _threshold_bytes(threshold_bytes),
-	      _is_threshold_in_packets(is_threshold_in_packets),
-	      _is_threshold_in_bytes(is_threshold_in_bytes),
-	      _is_geq_upcall(is_geq_upcall),
-	      _is_leq_upcall(is_leq_upcall),
-	      _is_add(is_add),
-	      _is_delete_all(false) {}
-	AddDeleteDataflowMonitor(const IPvX& source_addr,
-				 const IPvX& group_addr)
-	    : _source_addr(source_addr),
-	      _group_addr(group_addr),
-	      _threshold_interval_sec(0),
-	      _threshold_interval_usec(0),
-	      _threshold_packets(0),
-	      _threshold_bytes(0),
-	      _is_threshold_in_packets(false),
-	      _is_threshold_in_bytes(false),
-	      _is_geq_upcall(false),
-	      _is_leq_upcall(false),
-	      _is_add(false),
-	      _is_delete_all(true) {}
-
-	const IPvX& source_addr() const { return _source_addr; }
-	const IPvX& group_addr() const { return _group_addr; }
-	uint32_t threshold_interval_sec() const { return _threshold_interval_sec; }
-	uint32_t threshold_interval_usec() const { return _threshold_interval_usec; }
-	uint32_t threshold_packets() const { return _threshold_packets; }
-	uint32_t threshold_bytes() const { return _threshold_bytes; }
-	bool is_threshold_in_packets() const { return _is_threshold_in_packets; }
-	bool is_threshold_in_bytes() const { return _is_threshold_in_bytes; }
-	bool is_geq_upcall() const { return _is_geq_upcall; }
-	bool is_leq_upcall() const { return _is_leq_upcall; }
-	bool is_add() const { return _is_add; }
-	bool is_delete_all() const { return _is_delete_all; }
-
-    private:
-	IPvX		_source_addr;
-	IPvX		_group_addr;
-	uint32_t	_threshold_interval_sec;
-	uint32_t	_threshold_interval_usec;
-	uint32_t	_threshold_packets;
-	uint32_t	_threshold_bytes;
-	bool		_is_threshold_in_packets;
-	bool		_is_threshold_in_bytes;
-	bool		_is_geq_upcall;
-	bool		_is_leq_upcall;
-	bool		_is_add;
-	bool		_is_delete_all;
-    };
-
-    /**
-     * Class for handling the queue of Add/Delete MFC and dataflow monitor
-     * requests
-     */
-    class AddDeleteMfcDataflowMonitor {
-    public:
-	AddDeleteMfcDataflowMonitor(const AddDeleteMfc& mfc) {
-	    _mfc = new AddDeleteMfc(mfc);
-	    _dataflow_monitor = NULL;
-	}
-	AddDeleteMfcDataflowMonitor(const AddDeleteDataflowMonitor& dataflow_monitor) {
-	    _mfc = NULL;
-	    _dataflow_monitor = new AddDeleteDataflowMonitor(dataflow_monitor);
-	}
-	AddDeleteMfcDataflowMonitor(const AddDeleteMfcDataflowMonitor& o) {
-	    if (o._mfc != NULL)
-		_mfc = new AddDeleteMfc(*o._mfc);
-	    else
-		_mfc = NULL;
-	    if (o._dataflow_monitor != NULL)
-		_dataflow_monitor = new AddDeleteDataflowMonitor(*o._dataflow_monitor);
-	    else
-		_dataflow_monitor = NULL;
-	}
-	~AddDeleteMfcDataflowMonitor() {
-	    if (_mfc != NULL) {
-		delete _mfc;
-		_mfc = NULL;
-	    }
-	    if (_dataflow_monitor != NULL) {
-		delete _dataflow_monitor;
-		_dataflow_monitor = NULL;
-	    }
-	}
-
-	const AddDeleteMfc* mfc() const { return _mfc; }
-	const AddDeleteDataflowMonitor* dataflow_monitor() const {
-	    return _dataflow_monitor;
-	}
-
-    private:
-	AddDeleteMfc*			_mfc;
-	AddDeleteDataflowMonitor*	_dataflow_monitor;
-    };
 
     /**
      * A base class for handling tasks for sending XRL requests.
@@ -2411,35 +2244,44 @@ private:
     private:
     };
 
+    /**
+     * Class for handling the task of start/stop a protocol interface with
+     * the MFEA
+     */
     class StartStopProtocolKernelVif : public XrlTaskBase {
     public:
-	StartStopProtocolKernelVif(XrlPimNode& xrl_pim_node,
-				   uint16_t vif_index, bool is_start)
+	StartStopProtocolKernelVif(XrlPimNode&	xrl_pim_node,
+				   uint16_t	vif_index,
+				   bool		is_start)
 	    : XrlTaskBase(xrl_pim_node),
 	      _vif_index(vif_index),
 	      _is_start(is_start) {}
 
-	uint16_t	vif_index() const { return _vif_index; }
-	bool		is_start() const { return _is_start; }
 	void		dispatch() {
 	    _xrl_pim_node.send_start_stop_protocol_kernel_vif();
 	}
+	uint16_t	vif_index() const { return _vif_index; }
+	bool		is_start() const { return _is_start; }
 
     private:
 	uint16_t	_vif_index;
 	bool		_is_start;
     };
 
+    /**
+     * Class for handling the task of adding/deleting a protocol with the MFEA
+     */
     class MfeaAddDeleteProtocol : public XrlTaskBase {
     public:
-	MfeaAddDeleteProtocol(XrlPimNode& xrl_pim_node, bool is_add)
+	MfeaAddDeleteProtocol(XrlPimNode&	xrl_pim_node,
+			      bool		is_add)
 	    : XrlTaskBase(xrl_pim_node),
 	      _is_add(is_add) {}
 
-	bool		is_add() const { return _is_add; }
 	void		dispatch() {
 	    _xrl_pim_node.send_mfea_add_delete_protocol();
 	}
+	bool		is_add() const { return _is_add; }
 
     private:
 	bool		_is_add;
@@ -2447,7 +2289,7 @@ private:
 
     class MfeaAllowSignalMessages : public XrlTaskBase {
     public:
-	MfeaAllowSignalMessages(XrlPimNode& xrl_pim_node)
+	MfeaAllowSignalMessages(XrlPimNode&	xrl_pim_node)
 	    : XrlTaskBase(xrl_pim_node) {}
 
 	void		dispatch() {
@@ -2456,6 +2298,151 @@ private:
 
     private:
     };
+
+    /**
+     * Class for handling the task of join/leave multicast group requests
+     */
+    class JoinLeaveMulticastGroup : public XrlTaskBase {
+    public:
+	JoinLeaveMulticastGroup(XrlPimNode&	xrl_pim_node,
+				uint16_t	vif_index,
+				const IPvX&	multicast_group,
+				bool		is_join)
+	    : XrlTaskBase(xrl_pim_node),
+	      _vif_index(vif_index),
+	      _multicast_group(multicast_group),
+	      _is_join(is_join) {}
+
+	void		dispatch() {
+	    _xrl_pim_node.send_join_leave_multicast_group();
+	}
+	uint16_t	vif_index() const { return _vif_index; }
+	const IPvX&	multicast_group() const { return _multicast_group; }
+	bool		is_join() const { return _is_join; }
+
+    private:
+	uint16_t	_vif_index;
+	IPvX		_multicast_group;
+	bool		_is_join;
+    };
+
+    /**
+     * Class for handling the task of add/delete MFC requests
+     */
+    class AddDeleteMfc : public XrlTaskBase {
+    public:
+	AddDeleteMfc(XrlPimNode&	xrl_pim_node,
+		     const PimMfc&	pim_mfc,
+		     bool		is_add)
+	    : XrlTaskBase(xrl_pim_node),
+	      _source_addr(pim_mfc.source_addr()),
+	      _group_addr(pim_mfc.group_addr()),
+	      _rp_addr(pim_mfc.rp_addr()),
+	      _iif_vif_index(pim_mfc.iif_vif_index()),
+	      _olist(pim_mfc.olist()),
+	      _olist_disable_wrongvif(pim_mfc.olist_disable_wrongvif()),
+	      _is_add(is_add) {}
+
+	void		dispatch() {
+	    _xrl_pim_node.send_add_delete_mfc();
+	}
+	const IPvX&	source_addr() const { return _source_addr; }
+	const IPvX&	group_addr() const { return _group_addr; }
+	const IPvX&	rp_addr() const { return _rp_addr; }
+	uint16_t	iif_vif_index() const { return _iif_vif_index; }
+	const Mifset&	olist() const { return _olist; }
+	const Mifset&	olist_disable_wrongvif() const { return _olist_disable_wrongvif; }
+	bool is_add()	const { return _is_add; }
+
+    private:
+	IPvX		_source_addr;
+	IPvX		_group_addr;
+	IPvX		_rp_addr;
+	uint16_t	_iif_vif_index;
+	Mifset		_olist;
+	Mifset		_olist_disable_wrongvif;
+	bool		_is_add;
+    };
+
+    /**
+     * Class for handling the task of add/delete dataflow monitor requests
+     */
+    class AddDeleteDataflowMonitor : public XrlTaskBase {
+    public:
+	AddDeleteDataflowMonitor(XrlPimNode&	xrl_pim_node,
+				 const IPvX&	source_addr,
+				 const IPvX&	group_addr,
+				 uint32_t	threshold_interval_sec,
+				 uint32_t	threshold_interval_usec,
+				 uint32_t	threshold_packets,
+				 uint32_t	threshold_bytes,
+				 bool		is_threshold_in_packets,
+				 bool		is_threshold_in_bytes,
+				 bool		is_geq_upcall,
+				 bool		is_leq_upcall,
+				 bool		is_add)
+	    : XrlTaskBase(xrl_pim_node),
+	      _source_addr(source_addr),
+	      _group_addr(group_addr),
+	      _threshold_interval_sec(threshold_interval_sec),
+	      _threshold_interval_usec(threshold_interval_usec),
+	      _threshold_packets(threshold_packets),
+	      _threshold_bytes(threshold_bytes),
+	      _is_threshold_in_packets(is_threshold_in_packets),
+	      _is_threshold_in_bytes(is_threshold_in_bytes),
+	      _is_geq_upcall(is_geq_upcall),
+	      _is_leq_upcall(is_leq_upcall),
+	      _is_add(is_add),
+	      _is_delete_all(false) {}
+	AddDeleteDataflowMonitor(XrlPimNode&	xrl_pim_node,
+				 const IPvX&	source_addr,
+				 const IPvX&	group_addr)
+	    : XrlTaskBase(xrl_pim_node),
+	      _source_addr(source_addr),
+	      _group_addr(group_addr),
+	      _threshold_interval_sec(0),
+	      _threshold_interval_usec(0),
+	      _threshold_packets(0),
+	      _threshold_bytes(0),
+	      _is_threshold_in_packets(false),
+	      _is_threshold_in_bytes(false),
+	      _is_geq_upcall(false),
+	      _is_leq_upcall(false),
+	      _is_add(false),
+	      _is_delete_all(true) {}
+
+	void		dispatch() {
+	    _xrl_pim_node.send_add_delete_dataflow_monitor();
+	}
+
+	const IPvX&	source_addr() const { return _source_addr; }
+	const IPvX&	group_addr() const { return _group_addr; }
+	uint32_t	threshold_interval_sec() const { return _threshold_interval_sec; }
+	uint32_t	threshold_interval_usec() const { return _threshold_interval_usec; }
+	uint32_t	threshold_packets() const { return _threshold_packets; }
+	uint32_t	threshold_bytes() const { return _threshold_bytes; }
+	bool		is_threshold_in_packets() const { return _is_threshold_in_packets; }
+	bool		is_threshold_in_bytes() const { return _is_threshold_in_bytes; }
+	bool		is_geq_upcall() const { return _is_geq_upcall; }
+	bool		is_leq_upcall() const { return _is_leq_upcall; }
+	bool		is_add() const { return _is_add; }
+	bool		is_delete_all() const { return _is_delete_all; }
+
+    private:
+	IPvX		_source_addr;
+	IPvX		_group_addr;
+	uint32_t	_threshold_interval_sec;
+	uint32_t	_threshold_interval_usec;
+	uint32_t	_threshold_packets;
+	uint32_t	_threshold_bytes;
+	bool		_is_threshold_in_packets;
+	bool		_is_threshold_in_bytes;
+	bool		_is_geq_upcall;
+	bool		_is_leq_upcall;
+	bool		_is_add;
+	bool		_is_delete_all;
+    };
+
 
     EventLoop&			_eventloop;
     const string		_class_name;
@@ -2503,10 +2490,6 @@ private:
 
     list<XrlTaskBase* >		_xrl_tasks_queue;
     XorpTimer			_xrl_tasks_queue_timer;
-    list<JoinLeaveMulticastGroup> _join_leave_multicast_group_queue;
-    XorpTimer			_join_leave_multicast_group_queue_timer;
-    list<AddDeleteMfcDataflowMonitor> _add_delete_mfc_dataflow_monitor_queue;
-    XorpTimer			_add_delete_mfc_dataflow_monitor_queue_timer;
     list<pair<uint16_t, bool> >	_add_delete_protocol_mld6igmp_queue;
     XorpTimer			_add_delete_protocol_mld6igmp_queue_timer;
 
