@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.2 2003/10/16 18:23:06 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.3 2003/10/16 22:15:46 pavlin Exp $
 #
 
 #
@@ -62,7 +62,7 @@ VIFNAME="${IFNAME}"
 #
 test_cleanup_gateway4()
 {
-    echo "TEST: Cleaning-up gateway (if any) for destination ${DEST}"
+    echo "TEST: Clean-up gateway (if any) for destination ${DEST}"
 
     # Lookup the entry
     gateway=`get_xrl_variable_value \`fea_fti_lookup_entry4 ${DEST}\` gateway:ipv4`
@@ -77,7 +77,7 @@ test_cleanup_gateway4()
 
 test_add_entry4()
 {
-    echo "TEST: Adding ${GATEWAY} as gateway for destination ${DEST}"
+    echo "TEST: Add ${GATEWAY} as gateway for destination ${DEST}"
 
     tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
     fea_fti_add_entry4 ${tid} ${DEST} ${GATEWAY} ${IFNAME} ${VIFNAME} ${METRIC} ${ADMIN_DISTANCE} ${PROTOCOL_ORIGIN}
@@ -89,7 +89,7 @@ test_lookup_entry4()
     local _xrl_result _xrl_value _gateway _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
-    echo "TEST: Looking-up gateway for destination ${DEST}"
+    echo "TEST: Look-up gateway for destination ${DEST}"
 
     _xrl_result=`fea_fti_lookup_entry4 ${DEST}`
     _ret_value=$?
@@ -140,12 +140,12 @@ test_lookup_entry4()
     # Print the result
     #
     echo "TEST RESULT:"
-    echo ${_xrl_result}
+    echo "${_xrl_result}"
 }
 
 test_delete_entry4()
 {
-    echo "TEST: Deleting the gateway for destination ${DEST}"
+    echo "TEST: Delete the gateway for destination ${DEST}"
 
     tid=`get_xrl_variable_value \`fea_fti_start_transaction\` tid:u32`
     fea_fti_delete_entry4 ${tid} ${DEST}
@@ -157,7 +157,7 @@ test_lookup_deleted_entry4()
     local _xrl_result _xrl_value _gateway _ifname _vifname _metric
     local _admin_distance _protocol_origin
 
-    echo "TEST: Looking-up deleted gateway for destination ${DEST}"
+    echo "TEST: Look-up deleted gateway for destination ${DEST}"
 
     _xrl_result=`fea_fti_lookup_entry4 ${DEST}`
     _ret_value=$?
@@ -173,7 +173,12 @@ test_lookup_deleted_entry4()
 #
 # The tests
 #
-TESTS="test_cleanup_gateway4 test_add_entry4 test_lookup_entry4 test_delete_entry4 test_lookup_deleted_entry4"
+TESTS=""
+TESTS="$TESTS test_cleanup_gateway4"
+TESTS="$TESTS test_add_entry4"
+TESTS="$TESTS test_lookup_entry4"
+TESTS="$TESTS test_delete_entry4"
+TESTS="$TESTS test_lookup_deleted_entry4"
 
 for t in ${TESTS} ; do
     $t
@@ -187,6 +192,7 @@ done
 
 echo
 echo "$0: Tests Succeeded"
+exit 0
 
 # Local Variables:
 # mode: shell-script
