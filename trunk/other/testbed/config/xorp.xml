@@ -208,6 +208,20 @@ by create_xml -->
 			00:80:c8:b9:61:04
 		</mac>
         </host> 
+	<host name="xorp12">
+		<mac name="t0" port="i6" cable='611' type="tulip" man="quad">
+			172.16.0.1 
+		</mac>
+		<mac name="t1" port="h6" cable='612' type="tulip" man="quad">
+			172.16.1.1
+		</mac>
+		<mac name="t2" port="g6" cable='614' type="tulip" man="quad">
+			172.16.2.1
+		</mac>
+		<mac name="t3" port="f6" cable='615' type="tulip" man="quad">
+			172.16.3.1
+		</mac>
+        </host> 
 	<!-- These entries are here for completeness -->
 	<host name="xorpc">
 		<mac name="control" port="a6" cable='305' type="sis" use="no">
