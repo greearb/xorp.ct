@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.18 2004/05/30 23:17:33 hodson Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.19 2004/08/06 01:41:18 bms Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -273,27 +273,27 @@ interface bgp/0.2 {
 		? \
 		token:u32 \
 		-> \
-		local_ip:ipv4 \
+		local_ip:txt \
 		& local_port:u32 \
-		& peer_ip:ipv4 \
+		& peer_ip:txt \
 		& peer_port:u32 \
 		& more:bool
 
          
 	get_peer_id \
 		? \
-		local_ip:ipv4 \
+		local_ip:txt \
 		& local_port:u32 \
-		& peer_ip:ipv4 \
+		& peer_ip:txt \
 		& peer_port:u32 \
 		-> \
 		peer_id:ipv4 
 
 	get_peer_status \
 		? \
-		local_ip:ipv4 \
+		local_ip:txt \
 		& local_port:u32 \
-		& peer_ip:ipv4 \
+		& peer_ip:txt \
 		& peer_port:u32 \
 		-> \
 		peer_state:u32 \
@@ -301,27 +301,27 @@ interface bgp/0.2 {
 
 	get_peer_negotiated_version \
 		? \
-		local_ip:ipv4 \
+		local_ip:txt \
 		& local_port:u32 \
-		& peer_ip:ipv4 \
+		& peer_ip:txt \
 		& peer_port:u32 \
 		-> \
 		neg_version:i32 
 
 	get_peer_as \
 		? \
-		local_ip:ipv4 \
+		local_ip:txt \
 		& local_port:u32 \
-		& peer_ip:ipv4 \
+		& peer_ip:txt \
 		& peer_port:u32 \
 		-> \
 		peer_as:u32 
 
 	get_peer_msg_stats \
 		? \
-		local_ip:ipv4 \
+		local_ip:txt \
 		& local_port:u32 \
-		& peer_ip:ipv4 \
+		& peer_ip:txt \
 		& peer_port:u32 \
 		-> \
 		in_updates:u32 \
@@ -333,9 +333,9 @@ interface bgp/0.2 {
 
 	get_peer_established_stats \
 		? \
-		local_ip:ipv4 \
+		local_ip:txt \
 		& local_port:u32 \
-		& peer_ip:ipv4 \
+		& peer_ip:txt \
 		& peer_port:u32 \
 		-> \
 		transitions:u32 \
@@ -344,9 +344,9 @@ interface bgp/0.2 {
 
 	get_peer_timer_config \
 		? \
-		local_ip:ipv4 \
+		local_ip:txt \
 		& local_port:u32 \
-		& peer_ip:ipv4 \
+		& peer_ip:txt \
 		& peer_port:u32 \
 		-> \
 		retry_interval:u32 \
