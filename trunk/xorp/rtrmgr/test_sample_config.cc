@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.7 2003/08/01 23:07:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.8 2003/08/02 16:10:13 pavlin Exp $"
 
 #include <signal.h>
 
@@ -90,8 +90,9 @@ main(int argc, char* const argv[])
     ModuleManager mmgr(eventloop, /*verbose = */false, default_xorp_root_dir);
     try {
 	//initialize the IPC mechanism
-	XrlStdRouter xrlrouter(eventloop, "rtrmgr-test", fs.addr(), fs.port());
-	XorpClient xclient(eventloop, xrlrouter);
+	XrlStdRouter xrl_router(eventloop, "rtrmgr-test", fs.addr(),
+				fs.port());
+	XorpClient xclient(eventloop, xrl_router);
 
 	TaskManager taskmgr(mmgr, xclient, false);
 
