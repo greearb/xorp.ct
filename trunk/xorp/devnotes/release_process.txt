@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/xorp_release_process.txt,v 1.1 2003/03/13 20:11:47 pavlin Exp $
+# $XORP: xorp/devnotes/xorp_release_process.txt,v 1.2 2003/06/05 08:53:10 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -57,11 +57,11 @@ the login shell is csh or tcsh):
    MISC: - Include the list below about tasks for everyone
          - Include info about when everyone should stop committing code
 
-8. TASK: Prune old TODO entries in TODO files
+8. TASK: Prune old entries in xorp/foo/TODO files
    WHO:  Everyone
    WHEN: 1 day before the release date
 
-9. TASK: Update foo/README files
+9. TASK: Update xorp/foo/README files
    WHO:  Everyone
    WHEN: 1 day before the release date
 
@@ -106,7 +106,7 @@ the login shell is csh or tcsh):
    MISC: If necessary, edit xorp/docs/kdoc/gen-kdoc.sh and add new
           subdirectories.
 
-18.TASK: Stop the XORP tinderbox crontab job
+18.TASK: Stop the XORP tinderbox crontab job (OPTIONAL)
    WHO:  XORP tinderbox manager
    WHEN: 4 hours before intended release time
 
@@ -232,7 +232,7 @@ the login shell is csh or tcsh):
    WHO:  XORP project leader
    WHEN: Right after the release
 
-29.TASK: Start the XORP tinderbox crontab job
+29.TASK: Start the XORP tinderbox crontab job (only if it was stopped earlier)
    WHO:  XORP tinderbox manager
    WHEN: Right after the release
 
