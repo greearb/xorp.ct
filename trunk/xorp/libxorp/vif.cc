@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.8 2003/08/06 17:31:46 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.9 2004/02/18 05:08:52 pavlin Exp $"
 
 #include <functional>
 #include <string>
@@ -101,6 +101,7 @@ Vif::Vif(const string& vifname, const string& ifname)
 Vif::Vif(const Vif& vif)
 {
     _name = vif.name();
+    _ifname = vif.ifname();
     set_pif_index(vif.pif_index());
     set_vif_index(vif.vif_index());
     _addr_list = vif.addr_list();
