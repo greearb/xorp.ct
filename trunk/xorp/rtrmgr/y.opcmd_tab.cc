@@ -397,10 +397,11 @@ add_cmd_command(char *s)
     lastsymbol = s;
     free(s);
 
+    //
+    // XXX: note that we allow the command itself to be empty
+    // (e.g., if the entry is for an intermediate node in the hierarchy).
+    //
     command = strip_quotes_and_empty_space(command);
-    if (command.empty()) {
-	opcmderror("Invalid emtpy command");
-    }
 
     // Split the command filename from the arguments
     string filename, arguments;
@@ -416,7 +417,8 @@ add_cmd_command(char *s)
 
     // Find the executable filename
     string executable_filename;
-    if (! ocl->find_executable_filename(filename, executable_filename)) {
+    if ( (! command.empty())
+	&& (! ocl->find_executable_filename(filename, executable_filename))) {
 	string errmsg = c_format("Executable file not found: %s",
 				 filename.c_str());
 	opcmderror(errmsg.c_str());
@@ -595,7 +597,7 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 599 "y.opcmd_tab.c"
+#line 601 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -858,7 +860,7 @@ case 26:
 #line 105 "op_commands.yy"
 { opcmderror("syntax error"); }
 break;
-#line 862 "y.opcmd_tab.c"
+#line 864 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

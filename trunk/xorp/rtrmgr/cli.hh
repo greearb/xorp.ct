@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.19 2004/06/01 04:39:54 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.20 2004/06/01 11:49:12 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -148,8 +148,9 @@ public:
     map<string, string> configure_mode_help(const string& path,
 					    bool& is_executable,
 					    bool& can_pipe) const;
-    typedef XorpCallback2<void, bool, const string&>::RefPtr OpModeCallback;
-    void op_mode_cmd_done(bool success, const string& result);
+    typedef XorpCallback3<void, bool, const string&, bool>::RefPtr OpModeCallback;
+    void op_mode_cmd_done(bool success, const string& result,
+			  bool is_result_delayed);
 
 private:
     void reset_path();

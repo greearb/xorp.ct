@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.21 2004/06/01 17:13:26 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.22 2004/06/01 19:49:57 hodson Exp $"
 
 
 #include <glob.h>
@@ -46,10 +46,14 @@ OpInstance::OpInstance(EventLoop* eventloop, const string& executable_filename,
     : _executable_filename(executable_filename),
       _command_arguments(command_arguments),
       _op_command(op_command),
+      _stdout_file_reader(NULL),
+      _stderr_file_reader(NULL),
       _error(false),
       _last_offset(0),
       _done_callback(cb)
 {
+    XLOG_ASSERT(op_command->is_executable());
+
     FILE *out_stream, *err_stream;
 
     memset(_outbuffer, 0, OP_BUF_SIZE);
@@ -59,21 +63,21 @@ OpInstance::OpInstance(EventLoop* eventloop, const string& executable_filename,
 
     popen2(execute, out_stream, err_stream);
     if (out_stream == NULL) {
-	cb->dispatch(false, "Failed to execute command");
+	cb->dispatch(false, "Failed to execute command", false);
     }
 
     _stdout_file_reader = new AsyncFileReader(*eventloop, fileno(out_stream));
     _stdout_file_reader->add_buffer((uint8_t*)_outbuffer, OP_BUF_SIZE,
 				    callback(this, &OpInstance::append_data));
     if (! _stdout_file_reader->start()) {
-	cb->dispatch(false, "Failed to execute command");
+	cb->dispatch(false, "Failed to execute command", false);
     }
 
     _stderr_file_reader = new AsyncFileReader(*eventloop, fileno(err_stream));
     _stderr_file_reader->add_buffer((uint8_t*)_errbuffer, OP_BUF_SIZE,
 				    callback(this, &OpInstance::append_data));
     if (! _stderr_file_reader->start()) {
-	cb->dispatch(false, "Failed to execute command");
+	cb->dispatch(false, "Failed to execute command", false);
     }
 }
 
@@ -158,7 +162,7 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 void
 OpInstance::done(bool success)
 {
-    _done_callback->dispatch(success, _response);
+    _done_callback->dispatch(success, _response, true);
     _op_command->remove_instance(this);
     delete this;
 }
@@ -294,6 +298,11 @@ OpCommand::execute(EventLoop* eventloop, const list<string>& command_line,
 {
     string command_arguments_str;
     list<string>::const_iterator iter;
+
+    if (! is_executable()) {
+	cb->dispatch(false, "Command is not executable", false);
+	return;
+    }
 
     //
     // Add all arguments. If an argument is positional (e.g., $0, $1, etc),
@@ -552,7 +561,7 @@ OpCommandList::execute(EventLoop *eventloop, const list<string>& command_parts,
 	    return;
 	}
     }
-    cb->dispatch(false, string("No matching command"));
+    cb->dispatch(false, string("No matching command"), false);
 }
 
 OpCommand*

@@ -300,10 +300,11 @@ add_cmd_command(char *s)
     lastsymbol = s;
     free(s);
 
+    //
+    // XXX: note that we allow the command itself to be empty
+    // (e.g., if the entry is for an intermediate node in the hierarchy).
+    //
     command = strip_quotes_and_empty_space(command);
-    if (command.empty()) {
-	opcmderror("Invalid emtpy command");
-    }
 
     // Split the command filename from the arguments
     string filename, arguments;
@@ -319,7 +320,8 @@ add_cmd_command(char *s)
 
     // Find the executable filename
     string executable_filename;
-    if (! ocl->find_executable_filename(filename, executable_filename)) {
+    if ( (! command.empty())
+	&& (! ocl->find_executable_filename(filename, executable_filename))) {
 	string errmsg = c_format("Executable file not found: %s",
 				 filename.c_str());
 	opcmderror(errmsg.c_str());

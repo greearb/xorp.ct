@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.12 2004/05/28 22:27:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.13 2004/06/01 11:46:51 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -75,6 +75,7 @@ public:
     void set_command_action_filename(const string& v) { _command_action_filename = v; }
     void set_command_action_arguments(const list<string>& v) { _command_action_arguments = v; }
     void set_command_executable_filename(const string& v) { _command_executable_filename = v; }
+    bool is_executable() const { return (! _command_action.empty()); }
 
     void add_opt_param(const string& opt_param, const string& opt_param_help);
     bool has_opt_param(const string& opt_param) const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.43 2004/06/01 11:49:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.44 2004/06/01 23:31:22 pavlin Exp $"
 
 
 #include <pwd.h>
@@ -2625,7 +2625,8 @@ RouterCLI::op_mode_func(const string& ,
 }
 
 void
-RouterCLI::op_mode_cmd_done(bool success, const string& result)
+RouterCLI::op_mode_cmd_done(bool success, const string& result,
+			    bool is_result_delayed)
 {
     if (success) {
 	// XXX: don't print anything after a command in operational mode
@@ -2639,7 +2640,10 @@ RouterCLI::op_mode_cmd_done(bool success, const string& result)
     // Re-enable the CLI
     //  clear_command_set();
     //  add_op_mode_commands(NULL);
-    reenable_ui();
+    if (is_result_delayed)
+	reenable_ui();
+    else
+	silent_reenable_ui();
 }
 
 int
