@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_msgs.cc,v 1.3 2003/03/10 23:20:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_msgs.cc,v 1.4 2003/06/03 19:10:31 hodson Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/c_format.hh"
@@ -140,7 +140,7 @@ ParsedFinderMessageBase::ParsedFinderMessageBase(const char* data, char type)
     end = line_end(pos);
     
     _seqno = 0;
-    while (isdigit(*pos)) {
+    while (xorp_isdigit(*pos)) {
 	_seqno *= 10;
 	_seqno += *pos - '0';
 	pos++;
@@ -229,7 +229,7 @@ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
     }
 
     uint32_t code = 0;
-    while (isdigit(*data)) {
+    while (xorp_isdigit(*data)) {
 	code *= 10;
 	code += *data - '0';
 	data++;

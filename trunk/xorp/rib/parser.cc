@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/parser.cc,v 1.4 2003/03/16 07:18:57 pavlin Exp $"
+#ident "$XORP: xorp/rib/parser.cc,v 1.5 2003/05/14 10:32:25 pavlin Exp $"
 
 #include <stdexcept>
 
@@ -187,7 +187,8 @@ static string
 ltrim(const string& s) 
 {
     string::const_iterator i;
-    for (i = s.begin(); i != s.end() && isspace(*i); i++) ;
+    for (i = s.begin(); i != s.end() && xorp_isspace(*i); i++)
+	;
     return string(i, s.end());
 }
 
@@ -196,7 +197,7 @@ rtrim(const string& s)
 {
     string::const_iterator i, lns = s.begin();
     for (i = s.begin(); i != s.end(); i++) {
-	if (isspace(*i) == false) 
+	if (xorp_isspace(*i) == false) 
 	    lns = i + 1;
     }
     return string(s.begin(), lns);
@@ -234,7 +235,7 @@ blat_control(const string& s)
 {
     string tmp(s);
     for (size_t i = 0; i < s.size(); i++) {
-	if (isascii(s[i]) == false || iscntrl(s[i]))
+	if (isascii(s[i]) == false || xorp_iscntrl(s[i]))
 	    tmp[i] = ' ';
     }
     return tmp;

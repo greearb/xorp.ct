@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.3 2003/01/17 00:49:12 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.4 2003/03/10 23:20:27 hodson Exp $"
 
 #include "config.h"
 #include "libxorp/xorp.h"
@@ -37,7 +37,7 @@ needs_escape(char c)
 	if (ESCAPE_CHARS[i] == c)
 	    return true;
     }
-    return ( iscntrl(c) || !isascii(c) );
+    return ( xorp_iscntrl(c) || !isascii(c) );
 }
 
 // ----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.4 2003/02/21 22:11:37 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.5 2003/03/10 23:20:27 hodson Exp $"
 
 #include <stdio.h>
 
@@ -83,7 +83,7 @@ XrlParseError::pretty_print(const size_t termwidth) const
 
     // Filter chars that will give us problems for display
     for (string::iterator si = snapshot.begin(); si != snapshot.end(); si++) {
-	if (iscntrl(*si) || !isascii(*si)) {
+	if (xorp_iscntrl(*si) || !isascii(*si)) {
 	    *si = ' ';
 	}
     }
@@ -122,7 +122,7 @@ advance_to_char(const string& input, string::const_iterator& sci, char c)
 static inline bool
 isxrlplain(int c)
 {
-    return (isalnum(c) || c == '_' || c == '-');
+    return (xorp_isalnum(c) || c == '_' || c == '-');
 }
 
 static inline size_t
@@ -169,9 +169,9 @@ c_escape_to_char(const string& input,
 	if (sci == input.end())
 	    throw XrlParseError(input, sci, "Unexpected end of input.");
 	char v = 0;
-	for (int n = 0; sci != input.end() && n < 2 && isxdigit(*sci);
+	for (int n = 0; sci != input.end() && n < 2 && xorp_isxdigit(*sci);
 	     n++, sci++) {
-	    char c = tolower(*sci);
+	    char c = xorp_tolower(*sci);
 	    v *= 16;
 	    v += (c < '9') ? (c - '0') : (c - 'a' + 10);
 	}
@@ -223,7 +223,7 @@ skip_to_next_line(const string& s, string::const_iterator& sci)
 static inline void
 skip_past_blanks(const string& s, string::const_iterator& sci)
 {
-    while (sci != s.end() && ( isspace(*sci) || iscntrl(*sci) )) {
+    while (sci != s.end() && ( xorp_isspace(*sci) || xorp_iscntrl(*sci) )) {
 	sci++;
     }
 }
@@ -344,8 +344,8 @@ get_unquoted_value(const string& input,
     string::const_iterator sci_start = sci;
     char prev = '\0';
     while (sci != input.end()) {
-	if (isspace(*sci) || iscrlf(*sci) || *sci == '&' ||
-	    *sci == ';' || *sci == '>')
+	if (xorp_isspace(*sci) || iscrlf(*sci) ||
+	    *sci == '&' || *sci == ';' || *sci == '>')
 	   break;
 	prev = *sci;
 	sci++;
@@ -365,7 +365,7 @@ uninterrupted_token_end(const string& input,
     string::const_iterator end = sci;
 
     while (end != input.end() &&
-	  ( !isspace(*end) && isascii(*end) && !iscntrl(*end) )) {
+	  ( !xorp_isspace(*end) && isascii(*end) && !xorp_iscntrl(*end) )) {
 	end++;
     }
 
@@ -389,7 +389,7 @@ get_protocol_target_and_command(const string& input,
     protocol = string(start, sci);
     sci += 3;
     start = sci;
-    while (sci != input.end() && !(isspace(*sci) && iscrlf(*sci)) &&
+    while (sci != input.end() && !(xorp_isspace(*sci) && iscrlf(*sci)) &&
 	   *sci != '/')
 	sci++;
     if (*sci != '/')
@@ -400,7 +400,7 @@ get_protocol_target_and_command(const string& input,
     start = ++sci;
     char prev = '\0';
     while (sci != input.end() &&
-	   !(isspace(*sci) || iscrlf(*sci) ||
+	   !(xorp_isspace(*sci) || iscrlf(*sci) ||
 	     !(isxrlplain(*sci) || *sci == '/' || *sci == '.'))) {
 	prev = *sci;
 	sci++;
@@ -492,7 +492,7 @@ XrlParser::parse_atoms_and_spells(XrlArgs* args,
 {
     assert(_pos <= _input.end());
     skip_comments_and_blanks(_input, _pos);
-    while (_pos != _input.end() && !iscrlf(*_pos) && !isspace(*_pos)) {
+    while (_pos != _input.end() && !iscrlf(*_pos) && !xorp_isspace(*_pos)) {
 	assert(_pos < _input.end());
 	skip_comments_and_blanks(_input, _pos);
 

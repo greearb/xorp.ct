@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser_input.cc,v 1.4 2003/03/10 23:20:27 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser_input.cc,v 1.5 2003/05/15 23:52:26 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 #include "xrl_parser_input.hh"
@@ -52,7 +52,7 @@ XrlParserFileInput::slurp_line(string& line)
     // Okay, got line see if it's a pre-processor directive
     for (string::const_iterator c = line.begin();
 	 c != line.end(); c++) {
-	if (isspace(*c)) continue;
+	if (xorp_isspace(*c)) continue;
 	if ('#' == *c) {
 	    // The following may throw an exception
 	    line = try_include(c, line.end());
@@ -86,7 +86,8 @@ XrlParserFileInput::try_include(string::const_iterator& begin,
     }
 
     // Okay found include directive skip space
-    while (begin != end && isspace(*begin)) begin++;
+    while (begin != end && xorp_isspace(*begin))
+	begin++;
 
     // Find quote
     char qc = 0;
@@ -118,7 +119,7 @@ XrlParserFileInput::try_include(string::const_iterator& begin,
     // Check for junk following end of filename
 
     for (string::const_iterator junk = fn_end + 1; junk < end; junk++) {
-	if (!isspace(*junk)) {
+	if (!xorp_isspace(*junk)) {
 	    xorp_throw (XrlParserInputException,
 			"Junk following filename in #include directive");
 	}
@@ -284,7 +285,8 @@ XrlParserFileInput::getline(string& line) throw (XrlParserInputException)
     }
 
     for (size_t i = 0; i < line.size(); i++) {
-	if (isspace(line[i]) == false) return false; /* Non blank line */
+	if (xorp_isspace(line[i]) == false)
+	    return false;	// Non blank line
     }
 
     line.erase();
@@ -381,7 +383,8 @@ XrlParserFileInput::filter_line(string& output, const string& input)
 			began = ci;
 			break;
 		    } else if (*ci == '/' && *(ci + 1) == '/' &&
-			       (ci == input.begin() || isspace(*(ci - 1)))) {
+			       (ci == input.begin() ||
+				xorp_isspace(*(ci - 1)))) {
 			// Found a c++ comment
 			began = ci;
 			break;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/iptuple.cc,v 1.2 2002/12/20 06:42:47 mjh Exp $"
+#ident "$XORP: xorp/bgp/iptuple.cc,v 1.3 2003/03/10 23:19:58 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -109,7 +109,7 @@ Iptuple::get_addr(const char *host) throw(UnresolvableHost)
 	return addr;
     }
 
-    if (isalpha(*host)) {
+    if (xorp_isalpha(*host)) {
 	struct hostent *hostinfo = gethostbyname(host);
 	if (hostinfo == NULL)
 	    xorp_throw(UnresolvableHost, c_format("Unknown host <%s>",

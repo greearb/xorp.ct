@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.5 2003/03/19 09:05:19 pavlin Exp $
+// $XORP: xorp/rib/parser.hh,v 1.6 2003/07/04 19:59:50 pavlin Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -40,7 +40,8 @@ public:
     IntDatum(const string& s) {
 	_n = 0;
 	for (size_t i = 0; i < s.size(); i++) {
-	    if (!isdigit(s[i])) xorp_throw0(InvalidString);
+	    if (!xorp_isdigit(s[i]))
+		xorp_throw0(InvalidString);
 	    _n *= 10;
 	    _n += s[i] - '0';
 	}

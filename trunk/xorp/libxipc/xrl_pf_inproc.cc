@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.15 2003/09/16 19:06:36 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.16 2003/09/18 19:08:00 hodson Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -86,7 +86,7 @@ split_inproc_address(const char* address,
     p++;
 
     pid = 0;
-    while (isdigit(*p)) {
+    while (xorp_isdigit(*p)) {
 	pid *= 10;
 	pid += *p - '0';
 	p++;
@@ -97,7 +97,7 @@ split_inproc_address(const char* address,
     p++;
 
     iid = 0;
-    while (isdigit(*p)) {
+    while (xorp_isdigit(*p)) {
 	iid *= 10;
 	iid += *p - '0';
 	p++;

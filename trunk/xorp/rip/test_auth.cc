@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.3 2003/06/05 02:11:21 atanu Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.4 2003/07/21 18:01:11 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -180,7 +180,7 @@ void dump_binary_data(const vector<uint8_t>& data)
 	    if ((i & 7) == 4)
 		hex += " ";
 	    hex += c_format("%02x", data[i]);
-	    asc += (isprint(int(data[i]))) ? char(data[i]) : '.';
+	    asc += (xorp_isprint(data[i])) ? char(data[i]) : '.';
 	    i++;
 	    r--;
 	}

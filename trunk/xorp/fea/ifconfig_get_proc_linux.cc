@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.9 2003/10/03 00:14:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.10 2003/10/05 19:08:56 pavlin Exp $"
 
 #define PROC_LINUX_FILE_V4 "/proc/net/dev"
 #define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
@@ -156,15 +156,15 @@ proc_read_ifconf_linux(IfConfig& ifc, IfTree& iftree, int family)
 
 static char *get_name(char *name, char *p)
 {
-    while (isspace(*p))
+    while (xorp_isspace(*p))
 	p++;
     while (*p) {
-	if (isspace(*p))
+	if (xorp_isspace(*p))
 	    break;
 	if (*p == ':') {	/* could be an alias */
 	    char *dot = p, *dotname = name;
 	    *name++ = *p++;
-	    while (isdigit(*p))
+	    while (xorp_isdigit(*p))
 		*name++ = *p++;
 	    if (*p != ':') {	/* it wasn't, backup */
 		p = dot;

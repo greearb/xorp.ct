@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.9 2003/05/15 14:52:09 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.10 2003/10/20 22:36:01 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -1138,7 +1138,7 @@ XrlAtom::valid_name(const string& s)
     string::const_iterator si;
     si = s.begin();
     while (si != s.end()) {
-	if (*si != '_' && *si != '-' && !isalnum(*si))
+	if (*si != '_' && *si != '-' && !xorp_isalnum(*si))
 	    return false;
 	si++;
     }
