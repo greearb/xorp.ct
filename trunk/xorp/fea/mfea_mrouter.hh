@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.2 2003/05/16 00:35:03 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.3 2003/05/16 19:23:17 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -329,36 +329,6 @@ public:
     bool	mrt_api_mrt_mfc_bw_upcall() const {
 	return (_mrt_api_mrt_mfc_bw_upcall);
     }
-
-    /**
-     * Add a protocol to receive kernel signal messages.
-     * 
-     * Add a protocol to the set of protocols that are interested in
-     * receiving kernel signal messages.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to add.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to add.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		add_allow_kernel_signal_messages(const string& module_instance_name,
-						 xorp_module_id module_id);
-    
-    /**
-     * Delete a protocol from receiving kernel signal messages.
-     * 
-     * Delete a protocol from the set of protocols that are interested in
-     * receiving kernel signal messages.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to delete.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to delete.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		delete_allow_kernel_signal_messages(const string& module_instance_name,
-						    xorp_module_id module_id);
     
 private:
     // Private functions
@@ -408,9 +378,6 @@ private:
     bool	_mrt_api_mrt_mfc_flags_border_vif;
     bool	_mrt_api_mrt_mfc_rp;
     bool	_mrt_api_mrt_mfc_bw_upcall;
-    
-    // The set of module instances to receive kernel signal messages
-    ProtoRegister _kernel_signal_messages_register;
 };
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.6 2003/05/31 23:27:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.7 2003/06/01 02:49:55 pavlin Exp $"
 
 
 //
@@ -93,6 +93,10 @@ MfeaNode::MfeaNode(int family, xorp_module_id module_id,
     
     for (size_t i = 0; i < _proto_comms.size(); i++)
 	_proto_comms[i] = NULL;
+    
+    // Set the node status.
+    // XXX: note that we don't really need to wait for FEA, hence we are READY.
+    ProtoNode<MfeaVif>::set_node_status(PROC_READY);
 }
 
 /**
@@ -129,6 +133,10 @@ MfeaNode::start(void)
 {
     if (ProtoNode<MfeaVif>::start() < 0)
 	return (XORP_ERROR);
+    
+    // Set the node status.
+    // XXX: note that we don't really need to wait for FEA, hence we are READY.
+    ProtoNode<MfeaVif>::set_node_status(PROC_READY);
     
     // Start the MfeaMrouter
     _mfea_mrouter.start();
@@ -272,7 +280,7 @@ MfeaNode::add_pim_register_vif()
     }
     if (pim_register_vif_addr != IPvX::ZERO(family())) {
 	// Add the Register vif
-	uint16_t vif_index = find_unused_vif_index();
+	uint16_t vif_index = find_unused_config_vif_index();
 	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	// TODO: XXX: the Register vif name is hardcoded here!
 	MfeaVif register_vif(*this, Vif("register_vif"));
@@ -291,30 +299,11 @@ MfeaNode::add_pim_register_vif()
 	    return (XORP_ERROR);
 	}
 	
-	// Propagate the changes to the MFEA clients.
-	string dummy_reason;
-	add_config_vif(register_vif.name(), register_vif.vif_index(),
-		       dummy_reason);
-	list<VifAddr>::const_iterator vif_addr_iter;
-	for (vif_addr_iter = register_vif.addr_list().begin();
-	     vif_addr_iter != register_vif.addr_list().end();
-	     ++vif_addr_iter) {
-	    const VifAddr& vif_addr = *vif_addr_iter;
-	    add_config_vif_addr(register_vif.name(),
-				vif_addr.addr(),
-				vif_addr.subnet_addr(),
-				vif_addr.broadcast_addr(),
-				vif_addr.peer_addr(),
-				dummy_reason);
+	if (add_config_vif(register_vif, err) < 0) {
+	    XLOG_ERROR("Cannot add Register vif to set of configured vifs: %s",
+		       err.c_str());
+	    return (XORP_ERROR);
 	}
-	set_config_vif_flags(register_vif.name(),
-			     register_vif.is_pim_register(),
-			     register_vif.is_p2p(),
-			     register_vif.is_loopback(),
-			     register_vif.is_multicast_capable(),
-			     register_vif.is_broadcast_capable(),
-			     register_vif.is_underlying_vif_up(),
-			     dummy_reason);
     }
     
     return (XORP_OK);
@@ -742,8 +731,17 @@ int
 MfeaNode::add_allow_kernel_signal_messages(const string& module_instance_name,
 					   xorp_module_id module_id)
 {
-    return (_mfea_mrouter.add_allow_kernel_signal_messages(module_instance_name,
-							   module_id));
+    // Add the state
+    if (_kernel_signal_messages_register.add_protocol(module_instance_name,
+						      module_id)
+	< 0) {
+	XLOG_ERROR("Cannot add protocol instance %s with module_id = %d "
+		   "to receive kernel signal messages",
+		   module_instance_name.c_str(), module_id);
+	return (XORP_ERROR);	// Already added
+    }
+    
+    return (XORP_OK);
 }
 
 /**
@@ -761,8 +759,17 @@ int
 MfeaNode::delete_allow_kernel_signal_messages(const string& module_instance_name,
 					      xorp_module_id module_id)
 {
-    return (_mfea_mrouter.delete_allow_kernel_signal_messages(module_instance_name,
-							      module_id));
+    // Delete the state
+    if (_kernel_signal_messages_register.delete_protocol(module_instance_name,
+							 module_id)
+	< 0) {
+	XLOG_ERROR("Cannot delete protocol instance %s with module_id = %d "
+		   "from receiving kernel signal messages",
+		   module_instance_name.c_str(), module_id);
+	return (XORP_ERROR);	// Probably not added before
+    }
+    
+    return (XORP_OK);
 }
 
 /**
@@ -1157,7 +1164,7 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
     //
     // Send the signal to all upper-layer protocols that expect it.
     //
-    ProtoRegister& pr = mfea_vif->kernel_signal_messages_register();
+    ProtoRegister& pr = _kernel_signal_messages_register;
     const list<pair<string, xorp_module_id> >& module_list = pr.all_module_instance_name_list();
     
     list<pair<string, xorp_module_id> >::const_iterator iter;

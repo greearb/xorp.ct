@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.13 2003/06/01 02:12:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.14 2003/06/01 02:49:56 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -137,21 +137,26 @@ void
 XrlMfeaVifManager::set_vif_state()
 {
     map<string, Vif *>::const_iterator vif_iter;
+    map<string, Vif>::iterator mfea_vif_iter;
     string err;
     
     //
     // Remove vifs that don't exist anymore
     //
-    for (uint16_t i = 0; i < _mfea_node.maxvifs(); i++) {
-	Vif* node_vif = _mfea_node.vif_find_by_vif_index(i);
-	if (node_vif == NULL)
-	    continue;
+    for (mfea_vif_iter = _mfea_node.configured_vifs().begin();
+	 mfea_vif_iter != _mfea_node.configured_vifs().end();
+	 ++mfea_vif_iter) {
+	Vif* node_vif = &mfea_vif_iter->second;
 	if (node_vif->is_pim_register())
 	    continue;		// XXX: don't delete the PIM Register vif
 	if (_vifs_by_name.find(node_vif->name()) == _vifs_by_name.end()) {
 	    // Delete the interface
 	    string vif_name = node_vif->name();
-	    _mfea_node.delete_vif(vif_name, err);
+	    if (_mfea_node.delete_config_vif(vif_name, err) < 0) {
+		XLOG_ERROR("Cannot delete vif %s from the set of configured "
+			   "vifs: %s",
+			   vif_name.c_str(), err.c_str());
+	    }
 	    continue;
 	}
     }
@@ -162,27 +167,39 @@ XrlMfeaVifManager::set_vif_state()
     for (vif_iter = _vifs_by_name.begin();
 	 vif_iter != _vifs_by_name.end(); ++vif_iter) {
 	Vif* vif = vif_iter->second;
-	Vif* node_vif = _mfea_node.vif_find_by_name(vif->name());
+	Vif* node_vif = NULL;
+	
+	mfea_vif_iter = _mfea_node.configured_vifs().find(vif->name());
+	if (mfea_vif_iter != _mfea_node.configured_vifs().end()) {
+	    node_vif = &(mfea_vif_iter->second);
+	}
 	
 	//
 	// Add a new vif
 	//
 	if (node_vif == NULL) {
-	    uint16_t vif_index = _mfea_node.find_unused_vif_index();
+	    uint16_t vif_index = _mfea_node.find_unused_config_vif_index();
 	    XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	    vif->set_vif_index(vif_index);
-	    _mfea_node.add_vif(*vif, err);
+	    if (_mfea_node.add_config_vif(*vif, err) < 0) {
+		XLOG_ERROR("Cannot add vif %s to the set of configured "
+			   "vifs: %s",
+			   vif->name().c_str(), err.c_str());
+	    }
 	    continue;
 	}
 	
 	//
 	// Update the vif flags
 	//
-	node_vif->set_p2p(vif->is_p2p());
-	node_vif->set_loopback(vif->is_loopback());
-	node_vif->set_multicast_capable(vif->is_multicast_capable());
-	node_vif->set_broadcast_capable(vif->is_broadcast_capable());
-	node_vif->set_underlying_vif_up(vif->is_underlying_vif_up());
+	_mfea_node.set_config_vif_flags(vif->name(),
+					vif->is_pim_register(),
+					vif->is_p2p(),
+					vif->is_loopback(),
+					vif->is_multicast_capable(),
+					vif->is_broadcast_capable(),
+					vif->is_underlying_vif_up(),
+					err);
 	
 	//
 	// Delete vif addresses that don't exist anymore
@@ -203,7 +220,13 @@ XrlMfeaVifManager::set_vif_state()
 		 ipvx_iter != delete_addresses_list.end();
 		 ++ipvx_iter) {
 		const IPvX& ipvx = *ipvx_iter;
-		node_vif->delete_address(ipvx);
+		if (_mfea_node.delete_config_vif_addr(vif->name(), ipvx, err)
+		    < 0) {
+		    XLOG_ERROR("Cannot delete address %s from vif %s from "
+			       "the set of configured vifs: %s",
+			       cstring(ipvx), vif->name().c_str(),
+			       err.c_str());
+		}
 	    }
 	}
 	
@@ -218,12 +241,46 @@ XrlMfeaVifManager::set_vif_state()
 		const VifAddr& vif_addr = *vif_addr_iter;
 		VifAddr* node_vif_addr = node_vif->find_address(vif_addr.addr());
 		if (node_vif_addr == NULL) {
-		    node_vif->add_address(vif_addr);
+		    if (_mfea_node.add_config_vif_addr(
+			vif->name(),
+			vif_addr.addr(),
+			vif_addr.subnet_addr(),
+			vif_addr.broadcast_addr(),
+			vif_addr.peer_addr(),
+			err) < 0) {
+			XLOG_ERROR("Cannot add address %s to vif %s from "
+				   "the set of configured vifs: %s",
+				   cstring(vif_addr), vif->name().c_str(),
+				   err.c_str());
+		    }
 		    continue;
 		}
 		// Update the address
 		if (*node_vif_addr != vif_addr) {
 		    *node_vif_addr = vif_addr;
+		    {
+			if (_mfea_node.delete_config_vif_addr(vif->name(),
+							      vif_addr.addr(),
+							      err) < 0) {
+			    XLOG_ERROR("Cannot delete address %s from vif %s "
+				       "from the set of configured vifs: %s",
+				       cstring(vif_addr.addr()),
+				       vif->name().c_str(),
+				       err.c_str());
+			}
+			if (_mfea_node.add_config_vif_addr(
+			    vif->name(),
+			    vif_addr.addr(),
+			    vif_addr.subnet_addr(),
+			    vif_addr.broadcast_addr(),
+			    vif_addr.peer_addr(),
+			    err) < 0) {
+			    XLOG_ERROR("Cannot add address %s to vif %s from "
+				       "the set of configured vifs: %s",
+				       cstring(vif_addr), vif->name().c_str(),
+				       err.c_str());
+			}
+		    }
 		}
 	    }
 	}

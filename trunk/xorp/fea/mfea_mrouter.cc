@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.5 2003/05/19 06:48:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.6 2003/05/21 05:32:50 pavlin Exp $"
 
 
 //
@@ -1745,62 +1745,6 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
     default:
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaMrouter::add_allow_kernel_signal_messages:
- * @module_instance_name: The module instance name of the protocol to add.
- * @module_id: The #xorp_module_id of the protocol to add to receive kernel
- * signal messages.
- * 
- * Add a protocol to the set of protocols that are interested in
- * receiving kernel signal messages.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaMrouter::add_allow_kernel_signal_messages(const string& module_instance_name,
-					      xorp_module_id module_id)
-{
-    // Add the state
-    if (_kernel_signal_messages_register.add_protocol(module_instance_name,
-						      module_id)
-	< 0) {
-	XLOG_ERROR("Cannot add protocol instance %s with module_id = %d "
-		   "to receive kernel signal messages",
-		   module_instance_name.c_str(), module_id);
-	return (XORP_ERROR);	// Already added
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaMrouter::delete_allow_kernel_signal_messages:
- * @module_instance_name: The module instance name of the protocol to delete.
- * @module_id: The #xorp_module_id of the protocol to delete from receiving
- * kernel signal messages.
- * 
- * Delete a protocol from the set of protocols that are interested in
- * receiving kernel signal messages.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaMrouter::delete_allow_kernel_signal_messages(const string& module_instance_name,
-						 xorp_module_id module_id)
-{
-    // Delete the state
-    if (_kernel_signal_messages_register.delete_protocol(module_instance_name,
-							 module_id)
-	< 0) {
-	XLOG_ERROR("Cannot delete protocol instance %s with module_id = %d "
-		   "from receiving kernel signal messages",
-		   module_instance_name.c_str(), module_id);
-	return (XORP_ERROR);	// Probably not added before
     }
     
     return (XORP_OK);

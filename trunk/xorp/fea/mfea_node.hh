@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.4 2003/05/21 14:26:27 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.5 2003/06/01 02:17:00 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -114,6 +114,16 @@ public:
     
     /**
      * Add a configured vif.
+     *
+     * @param vif the vif with the information to add.
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_config_vif(const Vif& vif, string& reason);
+    
+    /**
+     * Add a configured vif.
      * 
      * @param vif_name the name of the vif to add.
      * @param vif_index the vif index of the vif to add.
@@ -124,7 +134,7 @@ public:
     int		add_config_vif(const string& vif_name,
 			       uint16_t vif_index,
 			       string& reason);
-
+    
     /**
      * Delete a configured vif.
      * 
