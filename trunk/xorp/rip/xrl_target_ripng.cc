@@ -176,6 +176,60 @@ XrlRipngTarget::ripng_0_1_passive(const string&	ifn,
     return _ct->ripx_0_1_passive(ifn, vifn, a, passive);
 }
 
+XrlCmdError
+XrlRipngTarget::ripng_0_1_set_accept_non_rip_requests(const string&	ifn,
+						      const string&	vifn,
+						      const IPv6&	addr,
+						      const bool&	accept)
+{
+    return _ct->ripx_0_1_set_accept_non_rip_requests(ifn, vifn, addr, accept);
+}
+
+XrlCmdError
+XrlRipngTarget::ripng_0_1_accept_non_rip_requests(const string&	ifn,
+						  const string&	vifn,
+						  const IPv6&	addr,
+						  bool&		accept)
+{
+    return _ct->ripx_0_1_accept_non_rip_requests(ifn, vifn, addr, accept);
+}
+
+XrlCmdError
+XrlRipngTarget::ripng_0_1_set_accept_default_route(const string&	ifn,
+						   const string&	vifn,
+						   const IPv6&		addr,
+						   const bool&		accept)
+{
+    return _ct->ripx_0_1_set_accept_default_route(ifn, vifn, addr, accept);
+}
+
+XrlCmdError
+XrlRipngTarget::ripng_0_1_accept_default_route(const string&	ifn,
+					     const string&	vifn,
+					     const IPv6&	addr,
+					     bool&		accept)
+{
+    return _ct->ripx_0_1_accept_default_route(ifn, vifn, addr, accept);
+}
+
+XrlCmdError
+XrlRipngTarget::ripng_0_1_set_advertise_default_route(const string&	ifn,
+						      const string&	vifn,
+						      const IPv6&	addr,
+						      const bool&	adv)
+{
+    return _ct->ripx_0_1_set_advertise_default_route(ifn, vifn, addr, adv);
+}
+
+XrlCmdError
+XrlRipngTarget::ripng_0_1_advertise_default_route(const string&	ifn,
+						  const string&	vifn,
+						  const IPv6&	addr,
+						  bool&		adv)
+{
+    return _ct->ripx_0_1_advertise_default_route(ifn, vifn, addr, adv);
+}
+
 
 XrlCmdError
 XrlRipngTarget::ripng_0_1_set_route_expiry_seconds(
@@ -189,23 +243,19 @@ XrlRipngTarget::ripng_0_1_set_route_expiry_seconds(
 }
 
 XrlCmdError
-XrlRipngTarget::ripng_0_1_route_expiry_seconds(
-					     const string&	ifn,
-					     const string&	vifn,
-					     const IPv6&	a,
-					     uint32_t&		t
-					     )
+XrlRipngTarget::ripng_0_1_route_expiry_seconds(const string&	ifn,
+					       const string&	vifn,
+					       const IPv6&	a,
+					       uint32_t&	t)
 {
     return _ct->ripx_0_1_route_expiry_seconds(ifn, vifn, a, t);
 }
 
 XrlCmdError
-XrlRipngTarget::ripng_0_1_set_route_deletion_seconds(
-					const string&	ifn,
-					const string&	vifn,
-					const IPv6&	a,
-					const uint32_t&	t
-					)
+XrlRipngTarget::ripng_0_1_set_route_deletion_seconds(const string&	ifn,
+						     const string&	vifn,
+						     const IPv6&	a,
+						     const uint32_t&	t)
 {
     return _ct->ripx_0_1_set_route_deletion_seconds(ifn, vifn, a, t);
 }

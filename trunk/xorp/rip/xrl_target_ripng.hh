@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.3 2004/02/19 22:01:00 hodson Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.4 2004/02/27 22:14:13 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -102,6 +102,38 @@ public:
 				  const string&	vifname,
 				  const IPv6&	addr,
 				  bool&		passive);
+
+    XrlCmdError
+    ripng_0_1_set_accept_non_rip_requests(const string&	ifname,
+					  const string&	vifname,
+					  const IPv6&	addr,
+					  const bool&	accept);
+
+    XrlCmdError ripng_0_1_accept_non_rip_requests(const string&	ifname,
+						  const string&	vifname,
+						  const IPv6&	addr,
+						  bool&		accept);
+
+    XrlCmdError ripng_0_1_set_accept_default_route(const string& ifname,
+						   const string& vifname,
+						   const IPv6&	 addr,
+						   const bool&	 accept);
+
+    XrlCmdError ripng_0_1_accept_default_route(const string&	ifname,
+					       const string&	vifname,
+					       const IPv6&	addr,
+					       bool&		accept);
+
+    XrlCmdError
+    ripng_0_1_set_advertise_default_route(const string&	ifname,
+					  const string&	vifname,
+					  const IPv6&	addr,
+					  const bool&	advertise);
+
+    XrlCmdError ripng_0_1_advertise_default_route(const string&	ifname,
+						  const string&	vifname,
+						  const IPv6&	addr,
+						  bool&		advertise);
 
     XrlCmdError
     ripng_0_1_set_route_expiry_seconds(const string&	ifname,

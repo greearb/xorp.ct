@@ -87,6 +87,55 @@ interface ripng/0.1 {
 			    -> passive:bool
 
     /**
+     * Accept and respond to non-RIP requests.
+     */
+    set_accept_non_rip_requests		? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv6			\
+					& accept:bool
+
+    /**
+     * Get value indicating whether non-RIP requests are accepted and
+     * responded to on interface/vif/address.
+     */
+    accept_non_rip_requests	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				-> accept:bool
+
+    /**
+     * Accept default route from peers.
+     */
+    set_accept_default_route	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				& accept:bool
+
+    /**
+     * Accessor for whether default route is accepted from peers.
+     */
+    accept_default_route	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				-> accept:bool
+
+    /**
+     * Advertise default route (if present).
+     */
+    set_advertise_default_route	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				& advertise:bool
+
+    /**
+     * Accessor for whether default route is advertised.
+     */
+    advertise_default_route	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv6				\
+				-> advertise:bool
+
+    /**
      * Set period that routes associated with reception address will
      * expire in the absence of updates.
      */

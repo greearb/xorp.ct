@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.13 2004/01/09 00:15:55 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.16 2004/02/27 22:07:52 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -252,7 +252,6 @@ public:
      */
     void set_accept_default_route(bool en);
 
-
     /**
      * Accept routes, but do not advertise them.
      * @return true if this port is passive.
@@ -264,6 +263,18 @@ public:
      * @param passive true if port should receive and not send packets.
      */
     void set_passive(bool passive);
+
+    /**
+     * Accept and respond to non-RIP requests.  Testing and Debugging
+     * tools typically send requests from non-RIP IP ports.
+     */
+    inline bool accept_non_rip_requests() const	{ return _acc_non_rip_reqs; }
+
+    /**
+     * Accept and respond to non-RIP requests.  Testing and Debugging
+     * tools typically send requests from non-RIP IP ports.
+     */
+    void set_accept_non_rip_requests(bool en);
 
     /**
      * Get Peers associated with this Port.
@@ -515,6 +526,7 @@ protected:
     bool		_adv_def_rt;		// Advertise default route
     bool		_acc_def_rt;		// Accept default route
     bool		_passive;		// Passive (recv only port)
+    bool		_acc_non_rip_reqs;	// Accept non-RIP requests
 
     PacketQueue<A>*	_packet_queue;		// Outbound packet queue
     PortTimerConstants	_constants;		// Port related timer constants

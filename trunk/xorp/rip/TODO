@@ -3,8 +3,6 @@
 
 o Add HopCount check on received RIPng packets.
 
-o Add option to accept non-rip queries.
-
 o Add accessors for counters, listing peers, getting peer counters,
   etc.  These for the basis for operational commands.
 

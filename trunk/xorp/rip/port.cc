@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.22 2004/02/25 00:08:50 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.23 2004/02/27 22:07:52 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -98,6 +98,7 @@ Port<A>::Port(PortManagerBase<A>& pm)
        _adv_def_rt(false),
        _acc_def_rt(false),
        _passive(false),
+       _acc_non_rip_reqs(true),
        _ur_out(0),
        _tu_out(0),
        _su_out(0)
@@ -578,6 +579,13 @@ Port<A>::set_accept_default_route(bool en)
 
 template <typename A>
 void
+Port<A>::set_accept_non_rip_requests(bool en)
+{
+    _acc_non_rip_reqs = en;
+}
+
+template <typename A>
+void
 Port<A>::parse_request(const Addr&			src_addr,
 		       uint16_t				src_port,
 		       const PacketRouteEntry<A>*	entries,
@@ -678,7 +686,18 @@ Port<A>::port_io_receive(const A&	src_address,
 	return;
     }
 
-    Peer<A>* p = peer(src_address);
+    Peer<A>* p = 0;
+    if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT) {
+	p = peer(src_address);
+    } else {
+	// If we're from a non-RIP port and we're not accepting non-RIP
+	// requests discard ASAP.
+	if (accept_non_rip_requests() == false) {
+	    return;
+	}
+	XLOG_ASSERT(p == 0);
+    }
+
     record_packet(p);
 
     if (rip_packet_bytes < RIPv2_MIN_PACKET_BYTES) {
@@ -739,10 +758,14 @@ Port<A>::port_io_receive(const A&	src_address,
 	return;
     }
 #elif defined (INSTANTIATE_IPV6)
-    const PacketRouteEntry<A>* entries = reinterpret_cast<const PacketRouteEntry<IPv6>*>(ph + 1);
-    uint32_t n_entries = (rip_packet_bytes - sizeof(*ph)) / sizeof(PacketRouteEntry<A>);
-    if (n_entries * sizeof(PacketRouteEntry<A>) + sizeof(*ph) != rip_packet_bytes) {
-	record_bad_packet("Packet did not contain an integral number of route entries", src_address, src_port, p);
+    const PacketRouteEntry<A>* entries =
+	reinterpret_cast<const PacketRouteEntry<IPv6>*>(ph + 1);
+    uint32_t n_entries = (rip_packet_bytes - sizeof(*ph)) /
+	sizeof(PacketRouteEntry<A>);
+    size_t calc_bytes = n_entries * sizeof(PacketRouteEntry<A>) + sizeof(*ph);
+    if (calc_bytes != rip_packet_bytes) {
+	record_bad_packet("Packet did not contain an integral number "
+			  "of route entries", src_address, src_port, p);
     }
 #endif
 

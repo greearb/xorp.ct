@@ -178,36 +178,84 @@ XrlRipTarget::rip_0_1_passive(const string&	ifn,
     return _ct->ripx_0_1_passive(ifn, vifn, a, passive);
 }
 
+XrlCmdError
+XrlRipTarget::rip_0_1_set_accept_non_rip_requests(const string&	ifn,
+						  const string&	vifn,
+						  const IPv4&	addr,
+						  const bool&	accept)
+{
+    return _ct->ripx_0_1_set_accept_non_rip_requests(ifn, vifn, addr, accept);
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_accept_non_rip_requests(const string&	ifn,
+					      const string&	vifn,
+					      const IPv4&	addr,
+					      bool&		accept)
+{
+    return _ct->ripx_0_1_accept_non_rip_requests(ifn, vifn, addr, accept);
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_set_accept_default_route(const string&	ifn,
+						  const string&	vifn,
+						  const IPv4&	addr,
+						  const bool&	accept)
+{
+    return _ct->ripx_0_1_set_accept_default_route(ifn, vifn, addr, accept);
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_accept_default_route(const string&	ifn,
+					   const string&	vifn,
+					   const IPv4&		addr,
+					   bool&		accept)
+{
+    return _ct->ripx_0_1_accept_default_route(ifn, vifn, addr, accept);
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_set_advertise_default_route(const string&	ifn,
+						  const string&	vifn,
+						  const IPv4&	addr,
+						  const bool&	adv)
+{
+    return _ct->ripx_0_1_set_advertise_default_route(ifn, vifn, addr, adv);
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_advertise_default_route(const string&	ifn,
+					      const string&	vifn,
+					      const IPv4&	addr,
+					      bool&		adv)
+{
+    return _ct->ripx_0_1_advertise_default_route(ifn, vifn, addr, adv);
+}
+
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_route_expiry_seconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv4&	a,
-						const uint32_t&	t
-						)
+XrlRipTarget::rip_0_1_set_route_expiry_seconds(const string&	ifn,
+					       const string&	vifn,
+					       const IPv4&	a,
+					       const uint32_t&	t)
 {
     return _ct->ripx_0_1_set_route_expiry_seconds(ifn, vifn, a, t);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_route_expiry_seconds(
-					     const string&	ifn,
-					     const string&	vifn,
-					     const IPv4&	a,
-					     uint32_t&		t
-					     )
+XrlRipTarget::rip_0_1_route_expiry_seconds(const string&	ifn,
+					   const string&	vifn,
+					   const IPv4&		a,
+					   uint32_t&		t)
 {
     return _ct->ripx_0_1_route_expiry_seconds(ifn, vifn, a, t);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_route_deletion_seconds(
-					const string&	ifn,
-					const string&	vifn,
-					const IPv4&	a,
-					const uint32_t&	t
-					)
+XrlRipTarget::rip_0_1_set_route_deletion_seconds(const string&		ifn,
+						 const string&		vifn,
+						 const IPv4&		a,
+						 const uint32_t&	t)
 {
     return _ct->ripx_0_1_set_route_deletion_seconds(ifn, vifn, a, t);
 }
@@ -222,12 +270,10 @@ XrlRipTarget::rip_0_1_route_deletion_seconds(const string&	ifn,
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_table_request_seconds(
-						const string&	ifn,
+XrlRipTarget::rip_0_1_set_table_request_seconds(const string&	ifn,
 						const string&	vifn,
 						const IPv4&	a,
-						const uint32_t&	t
-						)
+						const uint32_t&	t)
 {
     return _ct->ripx_0_1_set_table_request_seconds(ifn, vifn, a, t);
 }
@@ -275,12 +321,10 @@ XrlRipTarget::rip_0_1_set_unsolicited_response_max_seconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_unsolicited_response_max_seconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv4&	a,
-						uint32_t&	t
-						)
+XrlRipTarget::rip_0_1_unsolicited_response_max_seconds(const string&	ifn,
+						       const string&	vifn,
+						       const IPv4&	a,
+						       uint32_t&	t)
 {
     return _ct->ripx_0_1_unsolicited_response_max_seconds(ifn, vifn, a, t);
 }

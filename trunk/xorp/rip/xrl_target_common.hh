@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.1 2004/02/19 20:15:42 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.2 2004/02/27 22:14:12 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -101,6 +101,38 @@ public:
 				 const string&	vifname,
 				 const A&	addr,
 				 bool&		passive);
+
+    XrlCmdError
+    ripx_0_1_set_accept_non_rip_requests(const string&	ifname,
+					 const string&	vifname,
+					 const A&	addr,
+					 const bool&	accept);
+
+    XrlCmdError ripx_0_1_accept_non_rip_requests(const string&	ifname,
+						 const string&	vifname,
+						 const A&	addr,
+						 bool&		accept);
+
+    XrlCmdError ripx_0_1_set_accept_default_route(const string&	ifname,
+						  const string&	vifname,
+						  const A&	addr,
+						  const bool&	accept);
+
+    XrlCmdError ripx_0_1_accept_default_route(const string&	ifname,
+					      const string&	vifname,
+					      const A&		addr,
+					      bool&		accept);
+
+    XrlCmdError
+    ripx_0_1_set_advertise_default_route(const string&	ifname,
+					 const string&	vifname,
+					 const A&	addr,
+					 const bool&	advertise);
+
+    XrlCmdError ripx_0_1_advertise_default_route(const string&	ifname,
+						 const string&	vifname,
+						 const A&	addr,
+						 bool&		advertise);
 
     XrlCmdError
     ripx_0_1_set_route_expiry_seconds(const string&	ifname,
@@ -517,6 +549,114 @@ XrlRipCommonTarget<A>::ripx_0_1_passive(const string&	ifname,
 
     Port<A>* p = pp.first;
     passive = p->passive();
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_set_accept_non_rip_requests(
+						const string&	ifname,
+						const string&	vifname,
+						const A&	addr,
+						const bool&	accept
+						)
+{
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+    p->set_accept_non_rip_requests(accept);
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_accept_non_rip_requests(
+						const string&	ifname,
+						const string&	vifname,
+						const A&	addr,
+						bool&		accept
+						)
+{
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+    accept = p->accept_non_rip_requests();
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_set_accept_default_route(
+						const string&	ifname,
+						const string&	vifname,
+						const A&	addr,
+						const bool&	accept
+						)
+{
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+    p->set_accept_default_route(accept);
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_accept_default_route(
+						const string&	ifname,
+						const string&	vifname,
+						const A&	addr,
+						bool&		accept
+						)
+{
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+    accept = p->accept_default_route();
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_set_advertise_default_route(
+						const string&	ifname,
+						const string&	vifname,
+						const A&	addr,
+						const bool&	advertise
+						)
+{
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+    p->set_advertise_default_route(advertise);
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_advertise_default_route(
+						const string&	ifname,
+						const string&	vifname,
+						const A&	addr,
+						bool&		advertise
+						)
+{
+    pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+
+    Port<A>* p = pp.first;
+    advertise = p->advertise_default_route();
     return XrlCmdError::OKAY();
 }
 

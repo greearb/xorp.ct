@@ -17,6 +17,9 @@ protocols
 		    horizon:			text    = "split-horizon-poison-reverse" ;
 		    enabled:			bool	= false ;
 		    passive:			bool	= false ;
+		    accept_non_rip_requests:	bool	= true ;
+		    accept_default_route:	bool	= false ;
+		    advertise_default_route:	bool	= false ;
 		    route_expiry_secs:		uint	= 180 ;
 		    route_deletion_secs:	uint	= 120 ;
 		    triggered_update_min_secs:	uint	=   1 ;
@@ -64,6 +67,18 @@ protocols
 		    passive {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&passive:bool=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->passive:bool" ;
+		    }
+		    accept_non_ripng_requests {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_accept_non_rip_requests?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&accept:bool=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/accept_non_rip_requests?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->accept:bool" ;
+		    }
+		    accept_default_route {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_accept_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&accept:bool=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/accept_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->accept:bool" ;
+		    }
+		    advertise_default_route {
+			%set: xrl "$(ripng.targetname)/ripng/0.1/set_advertise_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&advertise:bool=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/advertise_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->advertise:bool" ;
 		    }
 		    route_expiry_secs {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_route_expiry_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
