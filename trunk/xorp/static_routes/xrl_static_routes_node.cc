@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.3 2004/02/14 00:08:00 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.4 2004/03/15 23:36:31 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -151,7 +151,7 @@ XrlStaticRoutesNode::send_rib_registration()
 	    true,	/* multicast */
 	    callback(this, &XrlStaticRoutesNode::send_add_igp_table6_cb));
 	if (success6 != true) {
-	    XLOG_ERROR("Failed to register IPv4 IGP table with the RIB. "
+	    XLOG_ERROR("Failed to register IPv6 IGP table with the RIB. "
 		"Will try again.");
 	    success = false;
 	}
@@ -241,7 +241,7 @@ XrlStaticRoutesNode::send_rib_deregistration()
 	}
     }
 
-    if (_is_rib_igp_table4_registered) {
+    if (_is_rib_igp_table6_registered) {
 	bool success6;
 	success6 = _xrl_rib_client.send_delete_igp_table6(
 	    _rib_target.c_str(),
