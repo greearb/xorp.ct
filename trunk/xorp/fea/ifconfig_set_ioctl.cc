@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.5 2003/08/14 18:43:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.6 2003/08/22 04:23:03 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -133,7 +133,7 @@ protected:
 #ifdef SIOCSIFLLADDR
 class IfSetMac : public IfReq {
 public:
-    IfSetMac(int fd, const string& ifname, const ether_addr& ea)
+    IfSetMac(int fd, const string& ifname, const struct ether_addr& ea)
 	: IfReq(fd, ifname) {
 #ifdef HAVE_SA_LEN
 	_ifreq.ifr_addr.sa_len = ETHER_ADDR_LEN;
@@ -146,7 +146,7 @@ public:
 #else
 class IfSetMac : public IfReq {
 public:
-    IfSetMac(int fd, const string& ifname, const ether_addr& ea)
+    IfSetMac(int fd, const string& ifname, const struct ether_addr& ea)
 	: IfReq(fd, ifname) {
 	UNUSED(ea);
     }
@@ -476,7 +476,7 @@ IfConfigSetIoctl::push_if(const IfTreeInterface& i)
 	if (i.mac().empty())
 	    break;
 	
-	ether_addr ea;
+	struct ether_addr ea;
 	try {
 	    EtherMac em;
 	    em = EtherMac(i.mac());
