@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.12 2003/10/14 22:39:46 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.13 2004/04/29 23:35:43 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -71,8 +71,11 @@ public:
     /**
      * Start the node operation.
      * 
+     * Start the MLD or IGMP protocol.
      * After the startup operations are completed,
-     * @ref Mld6igmpNode::final_start() is called to complete the job.
+     * @ref Mld6igmpNode::final_start() is called internally
+     * to complete the job.
+     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start();
@@ -80,7 +83,11 @@ public:
     /**
      * Stop the node operation.
      * 
-     * Stop the MLD or IGMP protocol.
+     * Gracefully stop the MLD or IGMP protocol.
+     * After the shutdown operations are completed,
+     * @ref Mld6igmpNode::final_stop() is called internally
+     * to complete the job.
+     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
@@ -88,7 +95,7 @@ public:
     /**
      * Completely start the node operation.
      * 
-     * This method should be called after @ref Mld6igmpNode::start()
+     * This method should be called internally after @ref Mld6igmpNode::start()
      * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -98,7 +105,7 @@ public:
     /**
      * Completely stop the node operation.
      * 
-     * This method should be called after @ref Mld6igmpNode::stop()
+     * This method should be called internally after @ref Mld6igmpNode::stop()
      * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.

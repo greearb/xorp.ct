@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.35 2004/04/29 23:39:28 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.36 2004/05/17 21:06:41 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -79,8 +79,10 @@ public:
     /**
      * Start the node operation.
      * 
+     * Start the PIM protocol.
      * After the startup operations are completed,
-     * @ref PimNode::final_start() is called to complete the job.
+     * @ref PimNode::final_start() is called internally
+     * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -94,11 +96,11 @@ public:
      * messages for all multicast routing entries to gracefully clean-up
      * state with neighbors.
      * After the multicast routing entries cleanup is completed,
-     * @ref PimNode::final_stop() is called to complete the job.
+     * @ref PimNode::final_stop() is called internally to complete the job.
      * If this method is called one-after-another, the second one
      * will force calling immediately @ref PimNode::final_stop() to quickly
      * finish the job.
-     * This function, unlike start(), will stop the protocol
+     * This method, unlike start(), will stop the protocol
      * operation on all interfaces.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -108,7 +110,7 @@ public:
     /**
      * Completely start the node operation.
      * 
-     * This method should be called after @ref PimNode::start()
+     * This method should be called internally after @ref PimNode::start()
      * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -118,7 +120,7 @@ public:
     /**
      * Completely stop the node operation.
      * 
-     * This method should be called after @ref PimNode::stop()
+     * This method should be called internally after @ref PimNode::stop()
      * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.

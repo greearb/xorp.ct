@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.17 2004/04/29 23:32:19 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.18 2004/05/06 20:14:28 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -90,13 +90,19 @@ public:
      * Start the node operation.
      * 
      * After the startup operations are completed,
-     * @ref MfeaNode::final_start() is called to complete the job.
+     * @ref MfeaNode::final_start() is called internally
+     * to complete the job.
+     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start();
 
     /**
      * Stop the node operation.
+     * 
+     * After the shutdown operations are completed,
+     * @ref MfeaNode::final_stop() is called internally
+     * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -105,7 +111,7 @@ public:
     /**
      * Completely start the node operation.
      * 
-     * This method should be called after @ref MfeaNode::start()
+     * This method should be called internally after @ref MfeaNode::start()
      * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -115,7 +121,7 @@ public:
     /**
      * Completely stop the node operation.
      * 
-     * This method should be called after @ref MfeaNode::stop()
+     * This method should be called internally after @ref MfeaNode::stop()
      * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
