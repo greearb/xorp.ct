@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.23 2003/06/26 22:52:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.24 2003/06/27 22:28:20 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -100,7 +100,7 @@ PimMre::set_i_am_assert_winner_state(uint16_t vif_index)
     
     _i_am_assert_winner_state.set(vif_index);
     _i_am_assert_loser_state.reset(vif_index);
-
+    
     do {
 	if (is_sg()) {
 	    pim_mrt().add_task_assert_state_sg(vif_index,
@@ -564,7 +564,6 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     //  * Delete assert info (AssertWinner(*,G,I),
     //	  and AssertWinnerMetric(*,G,I) assume default values).
     delete_assert_winner_metric_wc(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (XORP_OK);
 }
@@ -689,7 +688,6 @@ PimMre::assert_process_sg(PimVif *pim_vif,
     //  * Delete assert info (AssertWinner(S,G,I),
     //	  and AssertWinnerMetric(S,G,I) assume default values).
     delete_assert_winner_metric_sg(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (XORP_OK);
     
@@ -906,7 +904,6 @@ PimMre::data_arrived_could_assert_wc(PimVif *pim_vif,
     if (! mifs.test(vif_index)) {
 	return (XORP_OK);	// CouldAssert(*,G,I) is false. Ignore.
     }
-    set_i_am_assert_winner_state(vif_index);
     goto a1;
     
  a1:
@@ -953,7 +950,6 @@ PimMre::data_arrived_could_assert_sg(PimVif *pim_vif,
     if (! mifs.test(vif_index)) {
 	return (XORP_OK);	// CouldAssert(S,G,I) is false. Ignore.
     }
-    set_i_am_assert_winner_state(vif_index);
     goto a1;
     
  a1:
@@ -1046,7 +1042,6 @@ PimMre::process_could_assert_wc(uint16_t vif_index, bool new_value)
     if (new_value)
 	return (true);		// CouldAssert(*,G,I) -> TRUE: ignore
     // CouldAssert(*,G,I) -> FALSE
-    set_assert_noinfo_state(vif_index);
     goto a4;
     
  a4:
@@ -1056,7 +1051,6 @@ PimMre::process_could_assert_wc(uint16_t vif_index, bool new_value)
     //  * Delete assert info (AssertWinner(*,G,I),
     //	  and AssertWinnerMetric(*,G,I) assume default values).
     delete_assert_winner_metric_wc(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
 }
@@ -1161,7 +1155,6 @@ PimMre::process_could_assert_sg(uint16_t vif_index, bool new_value)
     if (new_value)
 	return (true);		// CouldAssert(S,G,I) -> TRUE: ignore
     // CouldAssert(S,G,I) -> FALSE
-    set_assert_noinfo_state(vif_index);
     goto a4;
     
  a4:
@@ -1171,7 +1164,6 @@ PimMre::process_could_assert_sg(uint16_t vif_index, bool new_value)
     //  * Delete assert info (AssertWinner(S,G,I),
     //	  and AssertWinnerMetric(S,G,I) assume default values).
     delete_assert_winner_metric_sg(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
 }
@@ -1211,7 +1203,6 @@ PimMre::assert_timer_timeout_wc(uint16_t vif_index)
     //  * Delete assert info (AssertWinner(*,G,I),
     //	  and AssertWinnerMetric(*,G,I) assume default values).
     delete_assert_winner_metric_wc(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return;
 }
@@ -1252,7 +1243,6 @@ PimMre::assert_timer_timeout_sg(uint16_t vif_index)
     //  * Delete assert info (AssertWinner(S,G,I),
     //	  and AssertWinnerMetric(S,G,I) assume default values).
     delete_assert_winner_metric_sg(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return;
 }
@@ -1460,9 +1450,8 @@ PimMre::recompute_assert_winner_nbr_sg_gen_id_changed(uint16_t vif_index,
     //  * Delete assert info (AssertWinner(S,G,I),
     //	  and AssertWinnerMetric(S,G,I) assume default values).
     delete_assert_winner_metric_sg(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
-    return (XORP_OK);
+    return (true);
 }
 
 // Note: applies only for (*,G)
@@ -1492,9 +1481,8 @@ PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint16_t vif_index,
     //  * Delete assert info (AssertWinner(*,G,I),
     //	  and AssertWinnerMetric(*,G,I) assume default values).
     delete_assert_winner_metric_wc(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
-    return (XORP_OK);
+    return (true);
 }
 
 // Note: applies for (S,G)
@@ -1592,14 +1580,12 @@ PimMre::process_assert_tracking_desired_sg(uint16_t vif_index, bool new_value)
     if (new_value)
 	return (true);		// AssertTrackingDesired(S,G,I) -> TRUE: ignore
     // AssertTrackingDesired(S,G,I) -> FALSE
-    set_assert_noinfo_state(vif_index);
     goto a5;
     
  a5:
     //  * Delete assert info (AssertWinner(S,G,I),
     //	  and AssertWinnerMetric(S,G,I) assume default values).
     delete_assert_winner_metric_sg(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
 }
@@ -1681,14 +1667,12 @@ PimMre::process_assert_tracking_desired_wc(uint16_t vif_index, bool new_value)
     if (new_value)
 	return (true);		// AssertTrackinDesired(*,G,I) -> TRUE: ignore
     // AssertTrackingDesired(*,G,I) -> FALSE
-    set_assert_noinfo_state(vif_index);
     goto a5;
     
  a5:
     //  * Delete assert info (AssertWinner(*,G,I),
     //	  and AssertWinnerMetric(*,G,I) assume default values).
     delete_assert_winner_metric_wc(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
 }
@@ -1863,7 +1847,6 @@ PimMre::recompute_my_assert_metric_sg(uint16_t vif_index)
     //  * Delete assert info (AssertWinner(S,G,I),
     //	  and AssertWinnerMetric(S,G,I) assume default values).
     delete_assert_winner_metric_sg(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
 }
@@ -1902,7 +1885,6 @@ PimMre::recompute_my_assert_metric_wc(uint16_t vif_index)
     //  * Delete assert info (AssertWinner(*,G,I),
     //	  and AssertWinnerMetric(*,G,I) assume default values).
     delete_assert_winner_metric_wc(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
 }
@@ -1936,7 +1918,6 @@ PimMre::recompute_assert_rpf_interface_sg(uint16_t vif_index)
     //  * Delete assert info (AssertWinner(S,G,I),
     //	  and AssertWinnerMetric(S,G,I) assume default values).
     delete_assert_winner_metric_sg(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
 }
@@ -1968,7 +1949,6 @@ PimMre::recompute_assert_rpf_interface_wc(uint16_t vif_index)
     //  * Delete assert info (AssertWinner(*,G,I),
     //	  and AssertWinnerMetric(*,G,I) assume default values).
     delete_assert_winner_metric_wc(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
 }
@@ -1997,7 +1977,6 @@ PimMre::recompute_assert_receive_join_sg(uint16_t vif_index)
     //  * Delete assert info (AssertWinner(S,G,I),
     //	  and AssertWinnerMetric(S,G,I) assume default values).
     delete_assert_winner_metric_sg(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
 }
@@ -2026,7 +2005,6 @@ PimMre::recompute_assert_receive_join_wc(uint16_t vif_index)
     //  * Delete assert info (AssertWinner(*,G,I),
     //	  and AssertWinnerMetric(*,G,I) assume default values).
     delete_assert_winner_metric_wc(vif_index);
-    // TODO: anything else to remove?
     set_assert_noinfo_state(vif_index);
     return (true);
 }
