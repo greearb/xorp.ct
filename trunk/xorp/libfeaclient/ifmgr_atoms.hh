@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.1 2003/08/22 23:19:02 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -101,7 +101,7 @@ public:
     bool operator==(const IfMgrIfAtom& o) const;
 
 private:
-    IfMgrIfAtom();		// not implemented
+    IfMgrIfAtom();					// not implemented
 
 protected:
     string	_name;
@@ -125,10 +125,9 @@ public:
     typedef map<const IPv6, IfMgrIPv6Atom> V6Map;
 
 public:
-    inline IfMgrVifAtom(IfMgrIfAtom* parent, const string& name);
+    inline IfMgrVifAtom(const string& name);
 
-    inline const string&      name() const		{ return _name; }
-    inline const IfMgrIfAtom* parent() const		{ return _parent; }
+    inline const string& name() const			{ return _name; }
 
     inline bool		enabled() const			{ return _en; }
     inline void		set_enabled(bool en)		{ _en = en; }
@@ -157,11 +156,10 @@ public:
     bool 		operator==(const IfMgrVifAtom& o) const;
 
 private:
-    IfMgrVifAtom();		// not implemented
+    IfMgrVifAtom();					// not implemented
 
 protected:
-    IfMgrIfAtom* _parent;
-    string	 _name;
+    string	_name;
 
     bool	_en;		// enabled
     bool	_mcap;		// multicast capable
@@ -183,12 +181,11 @@ protected:
  */
 class IfMgrIPv4Atom {
 public:
-    inline IfMgrIPv4Atom(IfMgrVifAtom* parent, const IPv4& addr)
-	: _parent(parent), _addr(addr)
+    inline IfMgrIPv4Atom(const IPv4& addr)
+	: _addr(addr)
     {}
 
-    inline IPv4			addr() const		{ return _addr; }
-    inline const IfMgrVifAtom*	parent() const		{ return _parent; }
+    inline IPv4		addr() const			{ return _addr; }
 
     inline uint32_t	prefix() const			{ return _prefix; }
     inline void		set_prefix(uint32_t p)		{ _prefix = p; }
@@ -218,10 +215,8 @@ private:
     IfMgrIPv4Atom();		// not implemented
 
 protected:
-    IfMgrVifAtom* _parent;
     IPv4	  _addr;
     uint32_t	  _prefix;	// network prefix
-
     bool	  _en;		// enabled
     bool	  _mcap;	// multicast capable
     bool	  _loop;	// Is a loopback address
@@ -241,12 +236,11 @@ protected:
 
 class IfMgrIPv6Atom {
 public:
-    inline IfMgrIPv6Atom(IfMgrVifAtom* parent, const IPv6& addr)
-	: _parent(parent), _addr(addr)
+    inline IfMgrIPv6Atom(const IPv6& addr)
+	: _addr(addr)
     {}
 
-    inline const IPv6&         addr() const		{ return _addr; }
-    inline const IfMgrVifAtom* parent() const		{ return _parent; }
+    inline const IPv6&  addr() const			{ return _addr; }
 
     inline bool		enabled() const			{ return _en; }
     inline void		set_enabled(bool en)		{ _en = en; }
@@ -271,10 +265,8 @@ private:
     IfMgrIPv6Atom();		// not implemented
 
 protected:
-    IfMgrVifAtom* _parent;
-    IPv6	  _addr;
-    uint32_t	  _prefix;
-
+    IPv6	_addr;
+    uint32_t	_prefix;	// network prefix
     bool	_en;		// enabled
     bool	_mcap;		// multicast capable
     bool	_loop;		// Is a loopback address
@@ -296,8 +288,8 @@ IfMgrIfAtom::IfMgrIfAtom(const string& name)
 // Inline IfMgrVifAtom methods
 
 inline
-IfMgrVifAtom::IfMgrVifAtom(IfMgrIfAtom* parent, const string& name)
-    : _parent(parent), _name(name)
+IfMgrVifAtom::IfMgrVifAtom(const string& name)
+    : _name(name)
 {}
 
 // ----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.1 2003/08/22 23:19:02 hodson Exp $"
 
 #include <algorithm>
 #include <iterator>
@@ -207,14 +207,14 @@ IfMgrIfAtomToCommands::convert(IfMgrCommandSinkBase& s) const
     const IfMgrIfAtom::VifMap& vifs = _i.vifs();
     IfMgrIfAtom::VifMap::const_iterator cvi;
     for (cvi = vifs.begin(); cvi != vifs.end(); ++cvi) {
-	IfMgrVifAtomToCommands(cvi->second).convert(s);
+	IfMgrVifAtomToCommands(_i.name(), cvi->second).convert(s);
     }
 }
 
 void
 IfMgrVifAtomToCommands::convert(IfMgrCommandSinkBase& s) const
 {
-    const string& ifn = _v.parent()->name();
+    const string& ifn = _ifn;
     const string& vifn = _v.name();
 
     s.push(new IfMgrVifAdd(ifn, vifn));
@@ -228,21 +228,21 @@ IfMgrVifAtomToCommands::convert(IfMgrCommandSinkBase& s) const
     const IfMgrVifAtom::V4Map& v4s = _v.ipv4addrs();
     for (IfMgrVifAtom::V4Map::const_iterator cai = v4s.begin();
 	 cai != v4s.end(); ++cai) {
-	IfMgrIPv4AtomToCommands(cai->second).convert(s);
+	IfMgrIPv4AtomToCommands(ifn, vifn, cai->second).convert(s);
     }
 
     const IfMgrVifAtom::V6Map& v6s = _v.ipv6addrs();
     for (IfMgrVifAtom::V6Map::const_iterator cai = v6s.begin();
 	 cai != v6s.end(); ++cai) {
-	IfMgrIPv6AtomToCommands(cai->second).convert(s);
+	IfMgrIPv6AtomToCommands(ifn, vifn, cai->second).convert(s);
     }
 }
 
 void
 IfMgrIPv4AtomToCommands::convert(IfMgrCommandSinkBase& s) const
 {
-    const string& ifn = _a.parent()->parent()->name();
-    const string& vifn = _a.parent()->name();
+    const string& ifn = _ifn;
+    const string& vifn = _vifn;
     IPv4 addr = _a.addr();
 
     s.push(new IfMgrIPv4Add(ifn, vifn, addr));
@@ -258,8 +258,8 @@ IfMgrIPv4AtomToCommands::convert(IfMgrCommandSinkBase& s) const
 void
 IfMgrIPv6AtomToCommands::convert(IfMgrCommandSinkBase& s) const
 {
-    const string& ifn = _a.parent()->parent()->name();
-    const string& vifn = _a.parent()->name();
+    const string& ifn = _ifn;
+    const string& vifn = _vifn;
     const IPv6& addr = _a.addr();
 
     s.push(new IfMgrIPv6Add(ifn, vifn, addr));

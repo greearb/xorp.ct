@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.1 2003/08/22 23:19:02 hodson Exp $
 
 #ifndef __IFMGR_CMD_QUEUE_HH__
 #define __IFMGR_CMD_QUEUE_HH__
@@ -188,9 +188,12 @@ class IfMgrVifAtomToCommands {
 public:
     /**
      * Constructor
+     *
+     * @param ifn the name of the interface the vif belongs to.
+     * @param vif the vif to be converted into a sequence of commands.
      */
-    inline IfMgrVifAtomToCommands(const IfMgrVifAtom& vif)
-	: _v(vif)
+    inline IfMgrVifAtomToCommands(const string& ifn, const IfMgrVifAtom& vif)
+	: _ifn(ifn), _v(vif)
     {}
 
     /**
@@ -203,7 +206,8 @@ public:
     void convert(IfMgrCommandSinkBase& sink) const;
 
 protected:
-    const IfMgrVifAtom& _v;
+    const string&	_ifn;		// Interface name
+    const IfMgrVifAtom&	_v;
 };
 
 /**
@@ -213,9 +217,16 @@ class IfMgrIPv4AtomToCommands {
 public:
     /**
      * Constructor
+     *
+     * @param ifn the name of the interface the vif owning the address
+     *            belongs to.
+     * @param vifn the name of the vif owning the address.
+     * @param a address atom to be converted into a sequence of commands.
      */
-    inline IfMgrIPv4AtomToCommands(const IfMgrIPv4Atom& a)
-	: _a(a)
+    inline IfMgrIPv4AtomToCommands(const string& ifn,
+				   const string& vifn,
+				   const IfMgrIPv4Atom& a)
+	: _ifn(ifn), _vifn(vifn), _a(a)
     {}
 
     /**
@@ -228,6 +239,8 @@ public:
     void convert(IfMgrCommandSinkBase& sink) const;
 
 protected:
+    const string& _ifn;
+    const string& _vifn;
     const IfMgrIPv4Atom& _a;
 };
 
@@ -238,9 +251,16 @@ class IfMgrIPv6AtomToCommands {
 public:
     /**
      * Constructor
+     *
+     * @param ifn the name of the interface the vif owning the address
+     *            belongs to.
+     * @param vifn the name of the vif owning the address.
+     * @param a address atom to be converted into a sequence of commands.
      */
-    inline IfMgrIPv6AtomToCommands(const IfMgrIPv6Atom& a)
-	: _a(a)
+    inline IfMgrIPv6AtomToCommands(const string& ifn,
+				   const string& vifn,
+				   const IfMgrIPv6Atom& a)
+	: _ifn(ifn), _vifn(vifn), _a(a)
     {}
 
     /**
@@ -253,6 +273,8 @@ public:
     void convert(IfMgrCommandSinkBase& sink) const;
 
 protected:
+    const string&	 _ifn;
+    const string&	 _vifn;
     const IfMgrIPv6Atom& _a;
 };
 

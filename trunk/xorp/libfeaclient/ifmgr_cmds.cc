@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.1 2003/08/22 23:19:02 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -316,7 +316,7 @@ IfMgrVifAdd::execute(IfMgrIfTree& tree) const
 	return true;	// Not a failure to add something that already exists
     }
     pair<IfMgrIfAtom::VifMap::iterator, bool> r =
-	vifs.insert( make_pair(n, IfMgrVifAtom(ifa, n)) );
+	vifs.insert( make_pair(n, IfMgrVifAtom(n)) );
     return r.second;
 }
 
@@ -586,7 +586,7 @@ IfMgrIPv4Add::execute(IfMgrIfTree& tree) const
 	return true;	// Not a failure to add something that already exists
     }
     pair<IfMgrVifAtom::V4Map::iterator, bool> r =
-	addrs.insert( make_pair(addr(), IfMgrIPv4Atom(vifa, addr())) );
+	addrs.insert( make_pair(addr(), IfMgrIPv4Atom(addr())) );
     return r.second;
 }
 
@@ -857,7 +857,7 @@ IfMgrIPv6Add::execute(IfMgrIfTree& tree) const
 	return true;	// Not a failure to add something that already exists
     }
     pair<IfMgrVifAtom::V6Map::iterator, bool> r =
-	addrs.insert( make_pair(addr(), IfMgrIPv6Atom(vifa, addr())) );
+	addrs.insert( make_pair(addr(), IfMgrIPv6Atom(addr())) );
     return r.second;
 }
 
