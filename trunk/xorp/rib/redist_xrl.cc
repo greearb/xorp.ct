@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.16 2004/10/05 01:53:48 atanu Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.17 2004/10/05 02:24:35 atanu Exp $"
 
 #include <list>
 #include <string>
@@ -549,7 +549,7 @@ RedistXrlOutput<A>::start_next_task()
     if (t->dispatch(_xrl_router, _profile) == false) {
 	if (t->dispatch_attempts() > MAX_RETRIES) {
 	    XLOG_ERROR("Failed to dispatch command after %u attempts.",
-		       t->dispatch_attempts());
+		       XORP_UINT_CAST(t->dispatch_attempts()));
 	    // XXX signal failure
 	}
 	// Dispatch of task failed.  XrlRouter is presumeably backlogged.
@@ -667,7 +667,7 @@ AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			      p->xrl_target_name().c_str(),
 			      _net.str().c_str(),
 			      _nexthop.str().c_str(),
-			      _metric));
+			      XORP_UINT_CAST(_metric)));
 
     XrlRedistTransaction4V0p1Client cl(&xrl_router);
     return cl.send_add_route(p->xrl_target_name().c_str(),
@@ -700,7 +700,7 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			      p->xrl_target_name().c_str(),
 			      _net.str().c_str(),
 			      _nexthop.str().c_str(),
-			      _metric));
+			      XORP_UINT_CAST(_metric)));
 
     XrlRedistTransaction6V0p1Client cl(&xrl_router);
     return cl.send_add_route(p->xrl_target_name().c_str(),
@@ -999,7 +999,7 @@ RedistTransactionXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
 				    ipr.protocol().name().c_str(),
 				    ipr.net().str().c_str(),
 				    ipr.nexthop()->str().c_str(),
-				    ipr.metric()));
+				    XORP_UINT_CAST(ipr.metric())));
 
     bool no_running_tasks = (this->task_count() == 0);
 
