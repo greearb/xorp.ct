@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.43 2004/10/01 22:47:35 atanu Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.44 2005/01/21 03:25:06 atanu Exp $"
 
 #include "rib_module.h"
 
@@ -121,7 +121,7 @@ RibManager::status_updater()
 	reason = "VifManager resuming";
 	break;
     case SHUTTING_DOWN:
-	s = PROC_NOT_READY;
+	s = PROC_SHUTDOWN;
 	reason = "VifManager shutting down";
 	break;
     case SHUTDOWN:
