@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.24 2005/03/15 01:16:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.25 2005/03/18 21:58:35 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -219,12 +219,12 @@ ProtoComm::~ProtoComm()
 int
 ProtoComm::start()
 {
-    if (is_up() || is_pending_up())
-	return (XORP_OK);
-
     // XXX: all ProtoComm are automatically enabled by default
     ProtoUnit::enable();
     
+    if (is_up() || is_pending_up())
+	return (XORP_OK);
+
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
     
