@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.4 2003/04/20 22:29:15 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.5 2003/04/21 08:20:35 pavlin Exp $
 dnl
 
 dnl
@@ -90,7 +90,7 @@ yes
     AC_DEFINE(IPV6_STACK_KAME, 1, [Define to 1 if you have KAME IPv6 stack])])
     ;;
   esac
-  if test "$ipv6type" != "unknown"; then
+  if test "X${ipv6type}" != "Xunknown"; then
     break
   fi
 done

@@ -124,7 +124,7 @@ AM_CPPFLAGS = `net-snmp-config --cflags`
 # -- Libraries and library flags to link the binary programs
 
 # -Wl,--no-whole-archive must appear after the libraries, and that does not fit
-# into the standard Automake link model.  This is why we must use the LINKER
+# into the standard Automake link model.  This is why we must use the LINK
 # directive
 libnetsnmpxorp_so_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
     $(LDFLAGS) -shared -fPIC -fpic -Wl,--whole-archive -o $@               \

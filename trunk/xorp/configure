@@ -1775,7 +1775,7 @@ TRY_USE_SIM=false
 # Check whether --enable-sim or --disable-sim was given.
 if test "${enable_sim+set}" = set; then
   enableval="$enable_sim"
-  if eval "test x$enable_sim = xyes"; then
+  if test "X${enable_sim}" = "Xyes"; then
     TRY_USE_SIM=true;
   else
     TRY_USE_SIM=false;
@@ -1784,7 +1784,7 @@ if test "${enable_sim+set}" = set; then
 fi;
 
 
-if test x$enable_sim = xyes; then
+if test "X${enable_sim}" = "Xyes"; then
   TRY_USE_SIM_TRUE=
   TRY_USE_SIM_FALSE='#'
 else
@@ -3400,7 +3400,7 @@ rm -f conftest.err conftest.$ac_ext
 fi
 echo "$as_me:$LINENO: result: $xorp_cv_cpp_gnu_va_args" >&5
 echo "${ECHO_T}$xorp_cv_cpp_gnu_va_args" >&6
-if test $xorp_cv_cpp_gnu_va_args = "yes" ; then
+if test "X${xorp_cv_cpp_gnu_va_args}" = "Xyes" ; then
 
 cat >>confdefs.h <<\_ACEOF
 #define CPP_SUPPORTS_GNU_VA_ARGS 1
@@ -3817,7 +3817,7 @@ echo "${ECHO_T}$xorp_python_good" >&6
 fi
 
 PY_BUILD="#"
-if test "${xorp_python_good}" = "yes" ; then
+if test "X${xorp_python_good}" = "Xyes" ; then
    PY_BUILD=''
 fi
 
@@ -4255,7 +4255,7 @@ fi
 
 
 
-if test ${snmp} = "yes"; then
+if test "X${snmp}" = "Xyes"; then
     # Extract the first word of "net-snmp-config", so it can be a program name with args.
 set dummy net-snmp-config; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -4296,7 +4296,7 @@ else
     snmpd="skip_check"
 fi
 
-if test ${net_snmp_found} = "true";  then
+if test "X${net_snmp_found}" = "Xtrue";  then
     net_snmp_v=`net-snmp-config --version`
     net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.`
     net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.`
@@ -4314,7 +4314,7 @@ else
 	elif test "6" -gt $net_snmp_rev ; then
 	    net_snmp_too_old=true
 	fi
-	if test $net_snmp_too_old != "true"; then
+	if test "X${net_snmp_too_old}" != "Xtrue"; then
 	    ac_cv_net_snmp_usable=yes
 	else
 	    ac_cv_net_snmp_usable=no
@@ -4324,18 +4324,18 @@ else
 fi
 echo "$as_me:$LINENO: result: $ac_cv_net_snmp_usable" >&5
 echo "${ECHO_T}$ac_cv_net_snmp_usable" >&6
-    if test ${ac_cv_net_snmp_usable} != "yes" ; then
+    if test "X${ac_cv_net_snmp_usable}" != "Xyes" ; then
 	{ echo "$as_me:$LINENO: WARNING: net-snmp version too old" >&5
 echo "$as_me: WARNING: net-snmp version too old" >&2;}
     fi
-elif test ${net_snmp_found} = "no"; then
+elif test "X${net_snmp_found}" = "Xno"; then
     { echo "$as_me:$LINENO: WARNING: Net-SNMP not found! MIB modules will not be built" >&5
 echo "$as_me: WARNING: Net-SNMP not found! MIB modules will not be built" >&2;}
     snmpd="skip_check"
 fi
 
 
-if test ${snmpd} = "not_found"; then
+if test "X${snmpd}" = "Xnot_found"; then
     # Extract the first word of "snmpd", so it can be a program name with args.
 set dummy snmpd; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -4379,7 +4379,7 @@ fi
 
 fi
 
-if test ${snmpd} = "not_found";  then
+if test "X${snmpd}" = "Xnot_found";  then
     echo "checking again for snmpd in another directory"
     # Extract the first word of "snmpd", so it can be a program name with args.
 set dummy snmpd; ac_word=$2
@@ -4425,10 +4425,10 @@ fi
     snmpd=$snmpd2
 fi
 
-if test ${snmpd} = "not_found" ; then
+if test "X${snmpd}" = "Xnot_found" ; then
     { echo "$as_me:$LINENO: WARNING: \"snmpd not found:  snmp test scripts will not work\"" >&5
 echo "$as_me: WARNING: \"snmpd not found:  snmp test scripts will not work\"" >&2;}
-elif test ${snmpd} = "skip_check"; then
+elif test "X${snmpd}" = "Xskip_check"; then
     echo "$as_me:$LINENO: checking if snmpd can be started" >&5
 echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
     echo "$as_me:$LINENO: result: skipped" >&5
@@ -4451,7 +4451,7 @@ echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
 	fi
 	kill ${pid} > /dev/null
     done
-    if test ${snmpd_valid} = "yes" ; then
+    if test "X${snmpd_valid}" = "Xyes" ; then
 	# Verify that dlmod directive was recognized
 	if ( grep -i -e 'Unknown.*token.*dlmod' conftestsnmp.log ); then
 	    echo "-------------------------------------------------------------"
@@ -4484,7 +4484,7 @@ echo "${ECHO_T}no" >&6
     fi
 fi
 
-if test "XXX${snmpd_valid}" = "XXXyes" ; then
+if test "X${snmpd_valid}" = "Xyes" ; then
     MIBS="mibs"
 else
     { echo "$as_me:$LINENO: WARNING: XORP MIBs will not be built" >&5
@@ -5245,15 +5245,15 @@ fi
 
 done
 
-if test "$ac_cv_header_sys_ethernet_h" = "yes"
+if test "X${ac_cv_header_sys_ethernet_h}" = "Xyes"
 then
 	xr_cv_ether_header="sys/ethernet.h"
 fi
-if test "$ac_cv_header_net_ethernet_h" = "yes"
+if test "X${ac_cv_header_net_ethernet_h}" = "Xyes"
 then
 	xr_cv_ether_header="net/ethernet.h"
 fi
-if test "$ac_cv_header_net_if_ether_h" = "yes"
+if test "X${ac_cv_header_net_if_ether_h}" = "Xyes"
 then
 	xr_cv_ether_header="net/if_ether.h"
 fi
@@ -5281,7 +5281,7 @@ rm -f conftest*
 fi
 echo "$as_me:$LINENO: result: $xr_cv_have_ether_ntoa" >&5
 echo "${ECHO_T}$xr_cv_have_ether_ntoa" >&6
-if test x"$xr_cv_have_ether_ntoa" = x"no" ; then
+if test "X${xr_cv_have_ether_ntoa}" = "Xno" ; then
 
 cat >>confdefs.h <<\_ACEOF
 #define NEED_ETHER_NTOA 1
@@ -5312,7 +5312,7 @@ rm -f conftest*
 fi
 echo "$as_me:$LINENO: result: $xr_cv_have_ether_aton" >&5
 echo "${ECHO_T}$xr_cv_have_ether_aton" >&6
-if test x"$xr_cv_have_ether_aton" = x"no" ; then
+if test "X${xr_cv_have_ether_aton}" = "Xno" ; then
 
 cat >>confdefs.h <<\_ACEOF
 #define NEED_ETHER_ATON 1
@@ -5460,7 +5460,7 @@ rm -f conftest*
 fi
 echo "$as_me:$LINENO: result: $xorp_cv_uint8_t_in_stdint_h" >&5
 echo "${ECHO_T}$xorp_cv_uint8_t_in_stdint_h" >&6
-if test $xorp_cv_uint8_t_in_stdint_h = "no"
+if test "X${xorp_cv_uint8_t_in_stdint_h}" = "Xno"
 then
          echo "$as_me:$LINENO: checking for uint8_t" >&5
 echo $ECHO_N "checking for uint8_t... $ECHO_C" >&6
@@ -5544,7 +5544,7 @@ rm -f conftest*
 fi
 echo "$as_me:$LINENO: result: $xorp_cv_uint16_t_in_stdint_h" >&5
 echo "${ECHO_T}$xorp_cv_uint16_t_in_stdint_h" >&6
-if test $xorp_cv_uint16_t_in_stdint_h = "no"
+if test "X${xorp_cv_uint16_t_in_stdint_h}" = "Xno"
 then
          echo "$as_me:$LINENO: checking for uint16_t" >&5
 echo $ECHO_N "checking for uint16_t... $ECHO_C" >&6
@@ -5628,7 +5628,7 @@ rm -f conftest*
 fi
 echo "$as_me:$LINENO: result: $xorp_cv_uint32_t_in_stdint_h" >&5
 echo "${ECHO_T}$xorp_cv_uint32_t_in_stdint_h" >&6
-if test $xorp_cv_uint32_t_in_stdint_h = "no"
+if test "X${xorp_cv_uint32_t_in_stdint_h}" = "Xno"
 then
          echo "$as_me:$LINENO: checking for uint32_t" >&5
 echo $ECHO_N "checking for uint32_t... $ECHO_C" >&6
@@ -6033,7 +6033,7 @@ rm -f conftest*
 fi
 echo "$as_me:$LINENO: result: $xr_cv_type_sig_t" >&5
 echo "${ECHO_T}$xr_cv_type_sig_t" >&6
-	if test x"$xr_cv_type_sig_t" = x"yes"
+	if test "X${xr_cv_type_sig_t}" = "Xyes"
 	then
 
 cat >>confdefs.h <<\_ACEOF
@@ -7185,7 +7185,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 fi
 
-if test "${ipv6}" = "yes"; then
+if test "X${ipv6}" = "Xyes"; then
 
 
 echo "$as_me:$LINENO: checking whether the system IPv6 stack implementation is reasonable" >&5
@@ -7357,7 +7357,7 @@ rm -f conftest*
 
     ;;
   esac
-  if test "$ipv6type" != "unknown"; then
+  if test "X${ipv6type}" != "Xunknown"; then
     break
   fi
 done
@@ -7593,7 +7593,7 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 
 fi
 
-if test "${ipv6}" = "yes"; then
+if test "X${ipv6}" = "Xyes"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_IPV6 1
@@ -8006,7 +8006,7 @@ echo "$as_me:$LINENO: result: $xorp_cv_ospfd_os" >&5
 echo "${ECHO_T}$xorp_cv_ospfd_os" >&6
 
 OSPFD_OS=${xorp_cv_ospfd_os}
-if test ${OSPFD_OS} != "unsupported" ; then
+if test "X${OSPFD_OS}" != "Xunsupported" ; then
     OSPFD="ospfd"
 else
     echo "OSPFD will not be built."
@@ -8050,8 +8050,7 @@ fi
 
 
 
-if test "$GCC" = yes
-then
+if test "X${GCC}" = "Xyes" ; then
 								CPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs -Wnon-const-format"
 	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wmissing-prototypes -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wnon-const-format -Wtraditional"
 	for ac_flag in $CPARANOIDFLAGS
