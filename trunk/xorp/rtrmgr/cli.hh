@@ -208,9 +208,10 @@ private:
 				const string& path);
 #endif
 
-    void add_text_entry_commands();
+    void add_text_entry_commands(CliCommand* com0);
 
     void add_edit_subtree();
+    void add_create_subtree();
     void add_delete_subtree();
     void add_set_subtree();
     void add_show_subtree();
@@ -244,6 +245,7 @@ private:
     CliCommand*		_set_node;
     CliCommand*		_show_node;
     CliCommand*		_edit_node;
+    CliCommand*		_create_node;
     CliCommand*		_delete_node;
     CliCommand*		_run_node;
     list<string>	_path;

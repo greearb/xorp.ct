@@ -53,6 +53,7 @@ RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node, bool verbose)
 
 
     _help_c["commit"] = "Commit the current set of changes";
+    _help_c["create"] = "Create a sub-element";
     _help_c["delete"] = "Delete a configuration element";
     _help_c["edit"] = "Edit a sub-element";
     _help_c["exit"] = "Exit from this configuration level";
@@ -136,6 +137,42 @@ place immediately.  This allows you to make additional related changes and\n\
 then apply all the changes together.  To apply changes to the running\n\
 configuration, the \"commit\" command is used.  Should the be an error, the\n\
 configuration should be rolled back to the previous state.";
+
+    _help_long_c["create"] = "\
+The \"create\" command allows you to create a new branch of the \n\
+configuration tree.  For example, if the configuration contained:\n\
+\n\
+    protocols {\n\
+        bgp {\n\
+            peer 10.0.0.1 {\n\
+                as 65001 \n\
+            }\n\
+        }\n\
+    }\n\
+\n\
+Then typing \"create protocols static\" would create a configuration\n\
+branch for the static routes, and will fill it in with the template \n\
+default values:\n\
+\n\
+    protocols {\n\
+        bgp {\n\
+            peer 10.0.0.1 {\n\
+                as 65001 \n\
+            }\n\
+        }\n\
+>       static {\n\
+>           targetname: \"static_routes\"\n\
+>           enabled: true\n\
+>       }\n\
+    }\n\
+\n\
+Then you can use the command \"edit\" to navigate around the new branch\n\
+of the configuration tree.  use the command \"set\" to change some of the\n\
+values of the new configuration branch:\n\
+    set protocols static enabled false\n\
+would disable the new static routes module.\n\
+\n\
+See also the \"commit\", \"delete\", \"edit\" and \"set\" commands.";
 
     _help_long_c["delete"] ="\
 The \"delete\" command is used to delete a part of the configuration tree.\n\
@@ -294,7 +331,7 @@ the AS number of the BGP peer from 65001 to 65002.  Only parameters \n\
 command.  New parts of the configuration tree such as a new BGP peer \n\
 are created by directly typing them in configuration mode.\n\
 \n\
-See also \"edit\".";
+See also \"create\" and \"edit\".";
 
     _help_long_c["show"] = "\
 The \"show\" command will display all or part of the router configuration.\n\
@@ -636,6 +673,9 @@ RouterCLI::add_static_configure_mode_commands()
 			  callback(this, &RouterCLI::commit_func));
     }
 
+    // Create command
+    _create_node = com0->add_command("create", get_help_c("create"));
+
     // Delete command
     _delete_node = com0->add_command("delete", get_help_c("delete"));
 
@@ -720,6 +760,7 @@ RouterCLI::configure_mode_help(const string& path,
     if (trimmed_path == "") {
 	// Add the static commands:
 	children["commit"] = get_help_c("commit");
+	children["create"] = get_help_c("create");
 	children["delete"] = get_help_c("delete");
 	children["edit"] = get_help_c("edit");
 	children["exit"] = get_help_c("exit");
@@ -810,6 +851,10 @@ RouterCLI::apply_path_change()
     //
     add_edit_subtree();
 
+    // Rebuild the command subtree for the "create" command
+    _create_node->delete_all_commands();
+    add_create_subtree();
+
     // Rebuild the command subtree for the "delete" command
     _delete_node->delete_all_commands();
     add_delete_subtree();
@@ -827,8 +872,6 @@ RouterCLI::apply_path_change()
     else
 	cmdpath = "show " + pathstr();
     _show_node->set_global_name(cmdpath);
-
-    add_text_entry_commands();
 
     // Set the prompt appropriately
     config_mode_prompt();
@@ -1053,6 +1096,12 @@ RouterCLI::add_edit_subtree()
 }
 
 void
+RouterCLI::add_create_subtree()
+{
+    add_text_entry_commands(_create_node);
+}
+
+void
 RouterCLI::add_delete_subtree()
 {
     CommandTree cmd_tree;
@@ -1153,11 +1202,13 @@ RouterCLI::add_show_subtree()
 }
 
 void
-RouterCLI::add_text_entry_commands()
+RouterCLI::add_text_entry_commands(CliCommand* com0)
 {
     const SlaveConfigTreeNode* current_config_node;
     const TemplateTreeNode* ttn;
-    CliCommand* com0 = _cli_node.cli_command_root();
+
+    if (com0 == NULL)
+	com0 = _cli_node.cli_command_root();
 
     debug_msg("add_text_entry_commands\n");
 
@@ -2094,7 +2145,7 @@ RouterCLI::text_entry_func(const string& ,
 	// the closing braces yet.
 	//
 	text_entry_mode();
-	add_text_entry_commands();
+	add_text_entry_commands(NULL);
 	CliCommand* com;
 	com = _cli_node.cli_command_root()->add_command(
 	    "}",
