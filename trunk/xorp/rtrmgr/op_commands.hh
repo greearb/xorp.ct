@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.17 2004/06/11 03:48:19 atanu Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.18 2004/06/11 06:30:40 atanu Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -64,8 +64,8 @@ private:
     char		_outbuffer[OP_BUF_SIZE];
     char		_errbuffer[OP_BUF_SIZE];
     bool		_error;
+    string		_error_msg;
     size_t		_last_offset;
-    string		_response;
     RouterCLI::OpModePrintCallback _print_callback;
     RouterCLI::OpModeDoneCallback _done_callback;
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.29 2004/06/11 06:30:40 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.30 2004/06/12 00:29:11 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -111,7 +111,7 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 	    }
 	    _error = true;
 	    // Reset for reading error response
-	    _response = "";
+	    _error_msg = "";
 	    _last_offset = 0;
 	}
     } else {
@@ -134,8 +134,11 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 	    const char* p   = (const char*)buffer + _last_offset;
 	    size_t 	len = offset - _last_offset;
 	    debug_msg("len = %d\n", len);
-	    _print_callback->dispatch(string(p, len));
-	    //	    _response.append(p, p + len);
+	    if (!_error) {
+		_print_callback->dispatch(string(p, len));
+	    } else {
+		_error_msg.append(p, p + len);
+	    }
 	    _last_offset = offset;
 	}
 
@@ -164,7 +167,7 @@ OpInstance::append_data(AsyncFileOperator::Event e,
     } else {
 	// Something bad happened
 	// XXX ideally we'd figure out what.
-	_response += "\nsomething bad happened\n";
+	_error_msg += "\nsomething bad happened\n";
 	done(false);
     }
 }
@@ -175,7 +178,7 @@ OpInstance::done(bool success)
     debug_msg("\n");
 
     _op_command->remove_instance(this);
-    _done_callback->dispatch(success, _response);
+    _done_callback->dispatch(success, _error_msg);
     // The callback will delete us. Don't do anything more in this method.
     //    delete this;
 }
