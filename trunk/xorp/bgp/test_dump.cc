@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.37 2004/05/15 15:12:18 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.38 2004/05/15 16:05:22 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -1513,6 +1513,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT NO CHANGE");
     fanout_table->remove_next_table(debug_table1);
     ribin_table1->ribin_peering_went_down();
+    uint32_t del_genid = ribin_table1->genid();
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP AGAIN, BUT SKIP DUMPING TO IT");
@@ -1530,6 +1531,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table3->genid());
     debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+    ((DumpTable<IPv4>*)(debug_table3->parent()))->peering_is_down(&handler1, del_genid);
 
     debug_table1->write_separator();
     debug_table1->write_comment("SENDING FROM PEER 1");
@@ -1891,6 +1893,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
     fanout_table->remove_next_table(debug_table1);
     ribin_table1->ribin_peering_went_down();
+    del_genid = ribin_table1->genid();
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
@@ -1900,6 +1903,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table3->genid());
     debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+    ((DumpTable<IPv4>*)(debug_table3->parent()))->peering_is_down(&handler1, del_genid);
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
@@ -1982,6 +1986,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
     fanout_table->remove_next_table(debug_table1);
     ribin_table1->ribin_peering_went_down();
+    del_genid = ribin_table1->genid();
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
@@ -1999,6 +2004,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table3->genid());
     debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+    ((DumpTable<IPv4>*)(debug_table3->parent()))->peering_is_down(&handler1, del_genid);
 
     debug_table1->write_separator();
     debug_table1->write_comment("RUN EVENT LOOP TO COMPLETION");
@@ -2085,6 +2091,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT NO CHANGE UNTIL EVENTLOOP RUNS");
     fanout_table->remove_next_table(debug_table1);
     ribin_table1->ribin_peering_went_down();
+    del_genid = ribin_table1->genid();
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 1 UP");
@@ -2112,6 +2119,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table3->genid());
     debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+    ((DumpTable<IPv4>*)(debug_table3->parent()))->peering_is_down(&handler1, del_genid);
 
     debug_table1->write_separator();
     debug_table1->write_comment("RUN EVENT LOOP TO COMPLETION");

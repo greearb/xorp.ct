@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.28 2004/05/13 20:31:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.29 2004/05/15 15:12:17 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -70,20 +70,28 @@ RibInTable<A>::ribin_peering_went_down()
        back up before we've finished the background deletion process -
        credits to Atanu Ghosh for this neat idea */
 
-    string tablename = "Deleted" + this->tablename();
+    if (_route_table->route_count() > 0) {
 
-    DeletionTable<A>* deletion_table =
-	new DeletionTable<A>(tablename, this->safi(), _route_table, _peer, 
-			     _genid, this);
+	string tablename = "Deleted" + this->tablename();
 
-    _route_table = new BgpTrie<A>;
+	DeletionTable<A>* deletion_table =
+	    new DeletionTable<A>(tablename, this->safi(), _route_table, _peer, 
+				 _genid, this);
 
-    deletion_table->set_next_table(this->_next_table);
-    this->_next_table->set_parent(deletion_table);
-    this->_next_table = deletion_table;
+	_route_table = new BgpTrie<A>;
 
-    deletion_table->initiate_background_deletion();
-    this->_next_table->peering_went_down(_peer, _genid, this);
+	deletion_table->set_next_table(this->_next_table);
+	this->_next_table->set_parent(deletion_table);
+	this->_next_table = deletion_table;
+
+	deletion_table->initiate_background_deletion();
+	this->_next_table->peering_went_down(_peer, _genid, this);
+    } else {
+	//nothing to delete - just notify everyone
+	this->_next_table->peering_went_down(_peer, _genid, this);
+	this->_next_table->push(this);
+	this->_next_table->peering_down_complete(_peer, _genid, this);
+    }
 }
 
 template<class A>

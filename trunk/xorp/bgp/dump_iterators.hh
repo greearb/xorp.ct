@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dump_iterators.hh,v 1.9 2004/05/15 16:05:21 mjh Exp $
+// $XORP: xorp/bgp/dump_iterators.hh,v 1.10 2004/05/15 16:37:58 mjh Exp $
 
 #ifndef __BGP_DUMP_ITERATORS_HH__
 #define __BGP_DUMP_ITERATORS_HH__
@@ -28,29 +28,71 @@ class BGPPlumbing;
 class PeerHandler;
 template <class A> class InternalMessage;
 
+typedef enum {
+    STILL_TO_DUMP,
+    CURRENTLY_DUMPING,
+    DOWN_DURING_DUMP,
+    DOWN_BEFORE_DUMP,
+    COMPLETELY_DUMPED,
+    NEW_PEER,
+    FIRST_SEEN_DURING_DUMP
+} PeerDumpStatus;
+    
+	
+
 template <class A>
 class PeerDumpState {
 public:
     PeerDumpState(const PeerHandler* peer,
-	       bool routes_dumped,
-	       const IPNet<A>& last_net,
-	       uint32_t genid);
-    PeerDumpState(const PeerHandler* peer, uint32_t genid);
+		  PeerDumpStatus status,
+		  uint32_t genid);
     ~PeerDumpState();
     string str() const;
     const PeerHandler* peer_handler() const { return _peer; }
-    bool routes_dumped() const { return _routes_dumped; }
+
     const IPNet<A>& last_net() const { return _last_net_before_down; }
+    
+    void set_down_during_dump(IPNet<A>& last_net, uint32_t genid) {
+	XLOG_ASSERT(genid == _genid);
+	_status = DOWN_DURING_DUMP;
+	_last_net_before_down = last_net;
+	set_delete_occurring(genid);
+    }
+
+    void set_down(uint32_t genid) {
+	XLOG_ASSERT(_status == STILL_TO_DUMP 
+		    || _status == CURRENTLY_DUMPING);
+	_status = DOWN_BEFORE_DUMP;
+	set_delete_occurring(genid);
+    }
+
+    void start_dump() {
+	XLOG_ASSERT(_status == STILL_TO_DUMP);
+	_status = CURRENTLY_DUMPING;
+    }
+
+    void set_dump_complete() {
+	XLOG_ASSERT(_status == CURRENTLY_DUMPING);
+	_status = COMPLETELY_DUMPED;
+    }
+
     uint32_t genid() const { return _genid; }
     void set_genid(uint32_t genid) { _genid = genid; }
-    void set_delete_complete() { _delete_complete = true; }
-    bool delete_complete() const { return _delete_complete; }
+    
+    PeerDumpStatus status() const { return _status; }
+
+    void set_delete_complete(uint32_t genid);
+    void set_delete_occurring(uint32_t genid) { 
+	_deleting_genids.insert(genid); 
+    }
+    bool delete_complete() const { return _deleting_genids.empty(); }
 private:
     const PeerHandler* _peer;
     bool _routes_dumped;
     IPNet<A> _last_net_before_down;
     uint32_t _genid;
-    bool _delete_complete;
+    set <uint32_t> _deleting_genids;
+    PeerDumpStatus _status;
 };
 
 template <class A>
@@ -58,6 +100,7 @@ class DumpIterator {
 public:
     DumpIterator(const PeerHandler* peer,
 		 const list <const PeerTableInfo<A>*>& peers_to_dump);
+    ~DumpIterator();
     string str() const;
     void route_dump(const InternalMessage<A> &rtmsg);
     const PeerHandler* current_peer() const { 
@@ -113,27 +156,20 @@ public:
 private:
     BGPPlumbing *_plumbing;
     const PeerHandler *_peer;
+
+    /**
+     * The list of peers that remain to be dumped
+     */
     list <PeerTableInfo<A> > _peers_to_dump;
     typename list <PeerTableInfo<A> >::iterator _current_peer;
+
     bool _route_iterator_is_valid;
     typename BgpTrie<A>::iterator _route_iterator;
 
     bool _routes_dumped_on_current_peer;
     IPNet<A> _last_dumped_net;
-    /**
-     * The list of peers that went down during the dump process.
-     */
-    list <PeerDumpState<A> > _downed_peers;
 
-    /**
-     * The list of new peers that appeared during the dump process.
-     */
-    list <PeerDumpState<A> > _new_peers;
-    
-    /**
-     * The list of peers we've already dumped.
-     */
-    list <PeerDumpState<A> > _dumped_peers;
+    map <const PeerHandler*, PeerDumpState<A>* > _peers;
 };
 
 #endif // __BGP_DUMP_ITERATORS_HH__
