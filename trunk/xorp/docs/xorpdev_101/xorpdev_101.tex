@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev-101/xorpdev101.tex,v 1.1 2004/07/18 22:57:35 mjh Exp $
+% $XORP: xorp/docs/xorpdev-101/xorpdev101.tex,v 1.2 2004/07/19 12:13:59 mjh Exp $
 %
 
 \documentclass[11pt]{article}
@@ -109,7 +109,7 @@ the case.
 
 {\it static\_routes} is a very simple XORP process.  To a first
 approximation, it receives XRL configuration requests from the
-xorp\_rtrmgr to set up static routing entries, stores the entries, and
+{\it xorp\_rtrmgr} to set up static routing entries, stores the entries, and
 communicates them to the RIB using XRLs.  
 
 This makes it a good example, because it exports an XRL interface to
@@ -117,8 +117,8 @@ other processes (typically the xorp\_rtrmgr) and calls XRLs on the XRL
 interface of another XORP process (the RIB).  But it doesn't do all
 that much else, so there are few files and the code is quite readable.
 
-The source code to static\_routes is found in the {\stt xorp/static\_routes}
-subdirectory of the XORP source tree.
+The source code for the \SRI process is found in the {\stt
+xorp/static\_routes} subdirectory of the XORP source tree.
 
 We'll walk through the main pieces of static\_routes in the following
 order:
@@ -137,9 +137,9 @@ order:
 
 XRL interfaces are defined by a {\stt.xif} file (pronounced {\it dot-ziff}).
 {\stt xif} stands for XRL InterFace.  All {\stt.xif} files reside in
-{\stt xrl/interfaces}.
+{\stt xorp/xrl/interfaces}.
 
-The relevant file for us in {\stt
+The relevant file for us is {\stt
 xorp/xrl/interfaces/static\_routes.xif}. The first part of this file is
 shown in listing \ref{lst:xif}.
 
@@ -232,8 +232,8 @@ is called the XRL {\it caller}.
 \item The process on which the XRL is called, and which generates
 responses.  This is called the XRL {\it target}.
 \end{itemize}
-XORP provides scripts to generate code to make life much easier for
-both these parties.
+XORP provides scripts which can generate C++ code to make life much
+easier for both these parties.
 
 \subsection{Generating stub code for the caller}
 
@@ -283,7 +283,7 @@ So what actually happens here is that the file {\stt static\_routes.xif}
 is processed by {\stt clnt-gen} to produce {\stt static\_routes\_xif.hh}
 and {\stt static\_routes\_xif.cc}, which are then compiled and linked
 into the library {\stt libstaticroutesxif.a}.  Any process that wants
-to call the \SRI interface can link with the library.
+to call the \SRI interface can link with this library.
 
 So what functionality does this library provide?  Listing
 \ref{lst:sr.xif.hh} shows a fragment from the machine-generated file
@@ -359,7 +359,7 @@ for the XRL, or how the XRL is actually transmitted, or even how the
 target process is discovered.  But you do need to set the {\stt
 target\_name} parameter to the same thing that the \SR process sets it
 to, otherwise the XRL {\it finder} won't be able to route your XRL to
-it's destination.  Often the target name will be the same as the name
+its destination.  Often the target name will be the same as the name
 of the process - in this case \SRI - but if there are multiple
 instances of the interface then you'll need to figure out which target
 name to use.
@@ -386,25 +386,24 @@ other things while we're waiting for the response to come back.  In a
 multi-threaded architecture, this might be achieved by having {\stt
 send\_add\_route4()} block until the response is ready, but XORP is
 deliberately {\it not} a multi-threaded architecture. Thus what
-happens is that {\stt send\_add\_route4()} will return immediately.  It
-will return false is a local error occurs, but will normally return
+happens is that {\stt send\_add\_route4()} will return immediately.
+It will return false if a local error occurs, but will normally return
 true before the XRL has actually been sent.  Some time later the
-response will come back from the \SRI process, and we need to way to
-direct the response to the right class instance that is expecting the
-response.  This is achieved in XORP through the use of {\stt
-callbacks}.
+response will come back from the \SRI process, and we need a way to
+direct the response to the right class instance that is expecting it.
+This is achieved in XORP through the use of {\it callbacks}.
 
 A callback is created using the {\stt callback()} function from
-libxorp.  We'll discuss this in more detail when we look at how \SRI
-sends changes to the RIB in section \ref{rib}.  For now, it suffices
-to say that a callback must be created and passed into {\stt
-send\_add\_route4()}, and that this is how the response from the {\stt
-add\_route4()} XRL is returned to the right class instance.
+libxorp.  We'll discuss this in more detail when we look at how the
+\SRI process sends changes to the RIB in section \ref{rib}.  For now,
+it suffices to say that a callback must be created and passed into
+{\stt send\_add\_route4()}, and that this is how the response from the
+{\stt add\_route4()} XRL is returned to the right place.
 
 \newpage
 \subsection{Generating stub code for the target}
 
-The other side to the XRL story is now the XRL target implements the
+The other side to the XRL story is how the XRL target implements the
 XRLs.  To illustrate this, we will look at how the \SRI process
 implements the XRL interface defined in {\stt static\_routes.xif}.
 A XORP process can implement more than one interface.  In fact most
@@ -412,11 +411,11 @@ XORP processes implement a special-purpose interface and also the
 {\stt common} interface, which provides XRLs to query basic version
 and status information about a target process.
 
+\vspace{0.1in}
 To see what interfaces a particular target process supports we must
 look in the {\stt xorp/xrl/targets} directory.  Listing
 \ref{lst:sr.tgt} shows the entire contents of {\stt
 static\_routes.tgt}.
-
 This file defines that the XRL target called \SR implements the two
 interfaces {\stt common/0.1} and {\stt static\_routes/0.1}.
 
@@ -443,7 +442,7 @@ target.
 The next important point to note from listing \ref{lst:tgt.makefile}
 is that we have specified that we want to build a library called {\stt
 libstaticroutesbase.a}.  This is going to be the library that the \SRI
-process links against to get access to all the stub code to implement
+process links with to get access to all the stub code to implement
 the target part of this interface.
 
 Finally there's the directive to build {\stt libstaticroutesbase.a}
@@ -451,18 +450,19 @@ from the machine-generated source files {\stt static\_routes\_base.hh}
 and {\stt static\_routes\_base.cc}, and that these files depend on the
 files {\stt common.xif} and {\stt static\_routes.xif}.
 
+\vspace{0.1in}
 So, what does {\stt libstaticroutesbase.a} actually provide?  Listing
 \ref{lst:sr.base} shows some extracts from {\stt
 static\_routes\_base.hh}.
-
-Basically {\stt libstaticroutesbase.a} defines a class called {\stt
+Basically {\stt libstaticroutesbase.a} defines a class called \\
+{\stt
 XrlStaticRoutesTargetBase} which will be used to receive XRL requests.
 
 The constructor for {\stt XrlStaticRoutesTargetBase} takes a single
 parameter which is typically the {\stt XrlRouter} for the process.  An
-{\stt XrlRouter} is an object that is bound to an {\tt EventLoop} and
-which sends and receives XRL requests.  Each process has its own {\tt
-EventLoop}.  In section \ref{??} we'll look at what the EventLoop
+{\stt XrlRouter} is an object that is bound to an {\it EventLoop} and
+which sends and receives XRL requests.  Each process has its own {\it
+EventLoop}.  In section \ref{main} we'll look at what the EventLoop
 does.  In any event, once an instance of {\stt
 XrlStaticRoutesTargetBase} has been created with a pointer to a
 working {\stt XrlRouter}, then the process is ready to receive XRL
@@ -478,8 +478,8 @@ XrlStaticRoutesTargetBase}.  So how do we actually make use of this?
 The general idea is that the stub generation code knows the syntax for
 this target interface, so it generates all the code needed to check
 that incoming requests match the defined syntax and handle errors if
-they don't.  But the stub generation code has no idea {\it what} this
-interface actually does.  We need to supply an implemenation for {\stt
+they don't.  But the stub generation code has no idea what this
+interface actually {\it does}.  We need to supply an implemenation for {\stt
 static\_routes\_0\_1\_add\_route4()} that actually does what we want when
 this XRL is called.
 
@@ -542,8 +542,8 @@ TGTGEN_PY=$(SCRIPT_DIR)/tgt-gen
 \begin{lstlisting}[caption={Extracts from {\stt static\_routes\_base.hh}%
                                      \label{lst:sr.base} } ]{}
 class XrlStaticRoutesTargetBase {
-protected:
-    XrlCmdMap* _cmds;
+
+...
 
 public:
     /**
@@ -706,7 +706,7 @@ actually implemented the {\stt XrlStaticRoutesNode} class.
 The constructor for {\stt XrlStaticRoutesNode} obviously passes {\stt
 xrl\_router} to the constructor for the {\stt
 XrlStaticRoutesTargetBase} class, as well as initializing a lot of
-it's own state (not shown).
+its own state (not shown).
 
 The complete implementation of {\stt
 XrlStaticRoutesNode::static\_routes\_0\_1\_add\_route4()} is shown.  In
@@ -716,13 +716,14 @@ incoming XRL request.
 
 Once we have processed the request, we need to return from this
 method.  If this XRL had actually taken any return values, there would
-have been parameters to the {\stt static\_routes\_0\_1\_add\_route4} method
-that were not {\stt const} references, and we would simply have set
-these variables before calling return to pass the values back to the
-XRL caller.  Finally we return {\stt XrlCmdError::OKAY()} if all is
-well, or {\stt XrlCmdError::COMMAND\_FAILED(error\_msg)} if something
-went seriously wrong, passing back a human-readable string for
-diagnostic purposes.
+have been parameters to the {\stt static\_routes\_0\_1\_add\_route4}
+method that were not {\stt const} references, and we would simply have
+set the values of these variables before calling {\stt return} to pass
+the values back to the XRL caller.  In the case of \SRI however, none
+of the XRLs return any values other than success or failure.  We
+return {\stt XrlCmdError::OKAY()} if all is well, or {\stt
+XrlCmdError::COMMAND\_FAILED(error\_msg)} if something went seriously
+wrong, passing back a human-readable string for diagnostic purposes.
 
 In general, if an error response needs to return machine-readable
 error information, it is often better to return {\stt
@@ -733,6 +734,7 @@ passed up to the caller application.
 
 \newpage
 \section{The Main Loop}
+\label{main}
 
 So far we've looked at how to define an XRL interface, how to compile
 the C++ stubs for that interface, and how to define the actual
@@ -740,10 +742,11 @@ code that implements that interface.  Now we need to look at the main
 loop of a XORP process to see how these pieces all come together.
 
 In Listing \ref{lst:srn.main} the main pieces of {\stt
-xorp/xorp\_static\_routes/.cc} are shown.  These comprise the entire
-initialization part and main loop of our \SRI process.
+xorp/static\_routes/xorp\_static\_routes.cc} are shown.  These
+comprise the entire initialization part and main loop of our \SRI
+process.
 
-First come the {\stt \#include}s. Convention indicates that the first
+First come the \#includes. Convention indicates that the first
 of these is a header file defining the module name and version - this
 information is used by later includes which will complain if this
 information is not available.  Then we include the functionality from
@@ -753,10 +756,10 @@ information is not available.  Then we include the functionality from
 \item {\stt xlog.h}: XORP logging functionality.  The convention is to
   use XLOG macros to log warnings and error messages, so we can
   redefine how logging if implemented in future without re-writing
-  code that uses logging.  
+  the code that uses logging.  
 \item {\stt debug.h}: XORP debugging functionality.
 \item {\stt callback.hh}: XORP callback templates, needed to pass a
-  handle in to event handling code to be called when an even later
+  handle into event handling code to be called later when an event
   occurs.
 \item {\stt eventloop.hh}: the main XORP eventloop.
 \item {\stt exceptions.hh}: standard exceptions for standard stuff -
@@ -772,7 +775,7 @@ logging functionality.  Then (not shown) we handle command line
 arguments.  
 
 The main part of this process occurs within a single {\stt try/catch}
-statement.  The {\tt catch} part then handles any of the xorp standard
+statement.  The {\stt catch} part then handles any of the xorp standard
 exceptions that might be thrown.  It is not intended that any
 unhandled exceptions actually get this far, but if they do, then {\stt
 xorp\_catch\_standard\_exceptions()} will ensure that appropriate
@@ -780,7 +783,7 @@ diagnostic information is available when the process expires.  This is
 not required, but it is good coding practice.
 
 The actual main loop that does all the work is in {\stt
-static\_routes\_main}.
+static\_routes\_main()}.
 
 First, the {\tt EventLoop} is created.  Every XORP process should have
 precisely one {\tt EventLoop}.  All processing in a XORP process is
@@ -799,8 +802,8 @@ this case {\stt "static\_routes"}.
 Now we create an instance of the {\stt XrlStaticRoutesNode} class we
 defined earlier to receive XRLs on the \SR XRL target interface.
 
-Before we proceed any further, we much give the XrlRouter time to
-register our existence with the finder.  This we call {\stt
+Before we proceed any further, we must give the XrlRouter time to
+register our existence with the finder.  Thus we call {\stt
 wait\_until\_xrl\_router\_is\_ready()}.
 
 \newpage
@@ -907,6 +910,7 @@ first we'll know about it is when {\stt
 
 \newpage
 \section{Calling XRLs on the RIB}
+\label{rib}
 
 So far we have seen how we define an XRL interface, how we implement
 the target side of such an interface, and how the main loop of a XORP
@@ -922,16 +926,15 @@ If we look in {\stt xorp/xrl/interfaces} we find the file {\stt
 rib.xif} which defines the XRLs available on the {\stt rib} interface.
 Listing \ref{lst:rib.xif} shows some extracts from this file.  As
 we've been following through the {\stt add\_route4} XRL, we'll again
-look at that here.  But it is worth noting in passing that the RIB
-requires a routing protocol (such as \SRI) to call {\stt
-add\_igp\_table4} before sending routes to the RIB, or the RIB will not
-know what to do with the routes.  We'll also look at the {\stt
-lookup\_route4} XRL because this is an example of an XRL that returns
-some data, although this particular XRL is not actually used by the
-\SRI process.
+look at that here.  We'll also look at the {\stt lookup\_route4} XRL
+because this is an example of an XRL that returns some data, although
+this particular XRL is not actually used by the \SRI process. It is
+also worth noting in passing that the RIB requires a routing protocol
+(such as \SRI) to call {\stt add\_igp\_table4} before sending routes
+to the RIB, or the RIB will not know what to do with the routes.
 
 As we saw with the {\stt static\_routes.xif} file, the {\stt rib.xif}
-file is processes by a python script to produce the files {\stt
+file is processed by a python script to produce the files {\stt
 rib\_xif.hh} and {\stt rib\_xif.cc} in the {\stt xorp/xrl/interfaces}
 directory which are then compiled and linked to produce the {\stt
 libribxif.a} library.  This library provides a class definition which
@@ -947,7 +950,7 @@ of this class, calling the constructor and supplying a pointer to an
 {\stt XrlSender}.  Typically such an XrlSender is an instance of an
 {\stt XrlRouter} object.  
 
-In Listing \ref{lst:srn.hh} we can see that our implemenation of class
+In Listing \ref{lst:srn.hh} we can see that our implementation of class
 {\stt XrlStaticRoutesNode} actually defined an instance of {\stt
 XrlRibV0p1Client} called {\stt \_xrl\_rib\_client} as a member
 variable, so this object is created automatically when our main loop
@@ -956,23 +959,23 @@ creates {\stt xrl\_static\_routes\_node} in listing
 passed {\stt xrl\_router} into the constructor for {\stt
 \_xrl\_rib\_client}.
 
-So, once everything else has been initialized, we'll also have access
+So, once everything else has been initialized, we'll have access
 to {\stt \_xrl\_rib\_client} from within {\stt
 xrl\_static\_routes\_node}.  Now, how do we make use of this generated
 code?  The answer is simple: to send a route to the RIB we simply call
 {\stt \_xrl\_rib\_client.send\_add\_route4()} with the appropriate
 parameters, and the generated library code will do the rest.  We can
-see this in Listing \ref{sr.send}, where this code is actually used.
+see this in Listing \ref{lst:sr.send}, where this code is actually used.
 
 The only real complication here is related to how we get the response
 back from the XRL.  Recall that {\stt
-\_xrl\_rib\_client.send\_add\_route4()} will return immediated with a local
+\_xrl\_rib\_client.send\_add\_route4()} will return immediately with a local
 success or failure response, before the XRL has actually been
-transmitted to the RIB.  This we need to pass a {\it callback} in to
+transmitted to the RIB.  Thus we need to pass a {\it callback} in to
 {\stt send\_add\_route4()}.  This callback will wrap up enough state so
 that when the response finally returns to the XrlRouter in the \SRI
 process, it will know which method to call on which object with which
-parameters to send the response to the right place.
+parameters so as to send the response to the right place.
 
 We can see in {\stt XrlRibV0p1Client} (Listing \ref{lst:srn.hh}) that
 the type of the callback is:\\
@@ -1165,15 +1168,15 @@ whether the XRL call was actually successful or not.
 
 \subsection{Returning values in XRLs}
 
-Because the \SRI proces is so simple, none of the XRLs it actually
-calls return any information in the response.  However, it's rather
+Because the \SRI process is so simple, none of the XRLs it calls
+actually return any information in the response.  However, it's rather
 common that we want to make a request of a target and get back some
 information.  This is quite easy to do, but just requires a different
 callback that can receive the relevant parameters.
 
 In Listing \ref{lst:rib.xif} we saw that the XRL {\stt lookup\_route4}
 returns one value of type {\stt ipv4} called {\stt nexthop}.  XRLs can
-actually return multiple parameters, and this is merely a simple
+actually return multiple parameters - this is merely a simple
 example.
 
 In Listing \ref{lst:ribxif.hh} we can see that the callback we need to
