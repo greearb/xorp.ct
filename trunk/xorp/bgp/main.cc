@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.38 2004/03/24 19:14:03 atanu Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.39 2004/06/10 22:40:30 hodson Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -49,6 +49,7 @@ main(int /*argc*/, char **argv)
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
     xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
+    xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
 
