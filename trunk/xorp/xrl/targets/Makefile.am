@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.49 2004/12/10 14:48:18 bms Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.50 2004/12/28 09:49:16 atanu Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -315,6 +315,7 @@ $(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
 libstaticroutesbase_la_SOURCES = static_routes_base.hh static_routes_base.cc
 $(srcdir)/static_routes_base.hh $(srcdir)/static_routes_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/static_routes.xif
 

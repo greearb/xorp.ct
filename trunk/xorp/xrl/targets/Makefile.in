@@ -929,6 +929,7 @@ $(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
 		$(INTERFACES_DIR)/socket6.xif
 $(srcdir)/static_routes_base.hh $(srcdir)/static_routes_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/static_routes.xif
 $(srcdir)/test_fea_ifmgr_mirror_base.hh					\
