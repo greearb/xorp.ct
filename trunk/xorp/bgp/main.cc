@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.4 2003/01/17 04:07:23 mjh Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.5 2003/01/19 00:59:25 mjh Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -242,7 +242,7 @@ BGPMain::connect_attempt(int fd, SelectorMask m,
     // create new peer
     debug_msg("Creating new peer after socket connection\n");
     BGPPeer *peer = new BGPPeer(_localdata, new BGPPeerData, this, connfd);
-    peer->action( EVENTBGPTRANOPEN, NULL);
+    peer->event_open();
     add_peer(peer);
 #endif
 }
@@ -314,7 +314,7 @@ BGPMain::create_peer(BGPPeerData *pd)
     sock->set_callback(callback(p, &BGPPeer::get_message));
 
     attach_peer(p);
-//     p->action(EVENTBGPSTART,NULL);
+//     p->event_start();
 
     return true;
 }
@@ -343,40 +343,30 @@ BGPMain::delete_peer(const Iptuple& iptuple)
 bool
 BGPMain::enable_peer(const Iptuple& iptuple)
 {
-    BGPPeer *peer;
+    BGPPeer *peer = find_peer(iptuple);
 
-    if ((0 == (peer = find_peer(iptuple)))) {
+    if (peer == 0) {
 	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
 	return false;
     }
 
-    peer->action(EVENTBGPSTART);
-
-    /*
-    ** Start a server for this peer.
-    */
-    start_server(iptuple);
-
+    peer->event_start();
+    start_server(iptuple); // Start a server for this peer.
     return true;
 }
 
 bool
 BGPMain::disable_peer(const Iptuple& iptuple)
 {
-    BGPPeer *peer;
+    BGPPeer *peer = find_peer(iptuple);
 
-    if ((0 == (peer = find_peer(iptuple)))) {
+    if (peer == 0) {
 	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
 	return false;
     }
 
-    peer->action(EVENTBGPSTOP);
-
-    /*
-    ** Stop the server for this peer.
-    */
-    stop_server(iptuple);
-
+    peer->event_stop();
+    stop_server(iptuple); // Stop the server for this peer.
     return true;
 }
 
@@ -414,7 +404,7 @@ BGPMain::get_peer_status(const Iptuple& iptuple,
     BGPPeer *peer = find_peer(iptuple);
     if (peer == NULL)
 	return false;
-    peer_state = peer->get_ConnectionState();
+    peer_state = peer->state();
     //XXX state stopped is only for our internal use.
     if (peer_state == STATESTOPPED)
 	peer_state = STATEIDLE;
@@ -431,7 +421,7 @@ BGPMain::get_peer_negotiated_version(const Iptuple& iptuple,
     if (peer == NULL)
 	return false;
 
-    if (peer->get_ConnectionState() == STATEESTABLISHED)
+    if (peer->state() == STATEESTABLISHED)
 	neg_version = 4; /* we only support BGP 4 */
     else
 	neg_version = 0; /* XXX the MIB doesn't say what version
@@ -527,13 +517,6 @@ BGPMain::register_ribname(const string& name)
     return true;
 }
 
-void
-BGPMain::accept_connection_from(BGPPeerData* peer)
-{
-    debug_msg("Accepting messages from (fd %d)\n", peer->get_as_num().as());
-    UNUSED(peer);
-}
-
 int
 BGPMain::create_listener(const Iptuple& iptuple)
 {
@@ -627,12 +610,6 @@ BGPMain::stop_all_servers()
     }
 }
 
-void
-BGPMain::add_update(BGPPeerData* , UpdatePacket* )
-{
-    debug_msg("add_update called\n");
-}
-
 bool
 BGPMain::add_route(const OriginType origin,  const AsNum& as,
 		   const IPv4& next_hop, const IPv4Net&	nlri)
@@ -713,7 +690,8 @@ BGPMain::rib_client_route_info_invalid6(const IPv6& addr,
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
 }
 
-bool BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter)
+bool
+BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter)
 {
     BGPPeer *peer;
     // BGPPeerData *peerdata;

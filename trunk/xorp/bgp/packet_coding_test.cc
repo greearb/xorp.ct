@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.7 2003/01/21 18:54:27 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet_coding_test.cc,v 1.8 2003/01/22 02:46:34 rizzo Exp $"
 
 #include "packet.hh"
 #include "path_attribute_list.hh"
@@ -27,7 +27,7 @@ int test_simple_open_packet()
 			     1234);
     
     const uint8_t *buf;
-    int len;
+    size_t len;
     buf = openpacket.encode(len);
 
     //open packets with no parameters have a fixed length of 29 bytes
@@ -61,7 +61,7 @@ int test_simple_open_packet()
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
     const uint8_t *buf2;
-    int len2;
+    size_t len2;
     buf2 = receivedpacket.encode(len2);
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
@@ -78,7 +78,7 @@ int test_keepalive_packet()
     KeepAlivePacket keepalivepacket;
     
     const uint8_t *buf;
-    int len;
+    size_t len;
     buf = keepalivepacket.encode(len);
 
     //keepalive packets with no parameters have a fixed length of 19 bytes
@@ -99,7 +99,7 @@ int test_keepalive_packet()
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
     const uint8_t *buf2;
-    int len2;
+    size_t len2;
     buf2 = receivedpacket.encode(len2);
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
@@ -120,7 +120,7 @@ int test_notification_packets(const uint8_t *d, uint8_t ec,
     notificationpacket = new NotificationPacket(ec, esc, d, l);
     
     const uint8_t *buf;
-    int len;
+    size_t len;
     buf = notificationpacket->encode(len);
 
     //notification packets have a length of 21 bytes plus the length
@@ -153,7 +153,7 @@ int test_notification_packets(const uint8_t *d, uint8_t ec,
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
     const uint8_t *buf2;
-    int len2;
+    size_t len2;
     buf2 = receivedpacket.encode(len2);
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
@@ -181,7 +181,7 @@ int test_withdraw_packet(bool verbose)
     updatepacket.add_withdrawn(r2);
     
     const uint8_t *buf;
-    int len;
+    size_t len;
     buf = updatepacket.encode(len);
 
     //update packets with have a minumum length of 23 bytes, plus all
@@ -214,7 +214,7 @@ int test_withdraw_packet(bool verbose)
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
     const uint8_t *buf2;
-    int len2;
+    size_t len2;
     buf2 = receivedpacket.encode(len2);
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
@@ -300,7 +300,7 @@ int test_announce_packet(bool verbose)
     }
     
     const uint8_t *buf;
-    int len;
+    size_t len;
     buf = updatepacket.encode(len);
 
     //update packets with have a minumum length of 23 bytes, plus all
@@ -427,7 +427,7 @@ int test_announce_packet(bool verbose)
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
     const uint8_t *buf2;
-    int len2;
+    size_t len2;
     buf2 = receivedpacket.encode(len2);
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.4 2003/01/17 04:07:23 mjh Exp $
+// $XORP: xorp/bgp/main.hh,v 1.5 2003/01/19 00:59:25 mjh Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -137,7 +137,6 @@ public:
 
     bool register_ribname(const string& name);
 
-    void accept_connection_from(BGPPeerData *p);
     void main_loop();
     void terminate() { _exit_loop = true; }
     int create_listener(const Iptuple& iptuple);
@@ -148,7 +147,6 @@ public:
      * Stop listening for incoming connections.
      */
     void stop_all_servers();
-    void add_update(BGPPeerData* p, UpdatePacket* up);
 
     /**
      * add route

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.2 2002/12/14 00:31:13 rizzo Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.3 2003/01/22 02:46:34 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -53,7 +53,7 @@ OpenPacket::OpenPacket(const AsNum& as,
 }
 
 const uint8_t *
-OpenPacket::encode(int& len) const
+OpenPacket::encode(size_t& len) const
 {
     struct iovec io[8 + _num_parameters];
 

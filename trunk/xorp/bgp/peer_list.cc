@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.5 2003/01/18 05:32:04 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.6 2003/01/18 21:41:04 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -31,7 +31,7 @@ BGPPeerList::~BGPPeerList()
     list<BGPPeer *>::iterator i;
 
     for(i = _peers.begin(); i != _peers.end(); i++) {
-	(*i)->action(EVENTBGPSTOP);
+	(*i)->event_stop();
 	delete (*i);
  	*i = 0;
     }
@@ -44,7 +44,7 @@ BGPPeerList::all_stop()
 
     list<BGPPeer *>::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
-	(*i)->action(EVENTBGPSTOP);
+	(*i)->event_stop();
     }
     /* We now need to drop back to the EventLoop - the peers will only
        move to idle and cleanly tear down their state when the EventLoop
@@ -57,7 +57,7 @@ BGPPeerList::not_all_idle()
 {
     list<BGPPeer *>::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++)
-	if(STATEIDLE != (*i)->get_ConnectionState())
+	if(STATEIDLE != (*i)->state())
 	    return true;
     
     return false;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/test_peer.hh,v 1.11 2002/12/09 18:28:52 hodson Exp $
+// $XORP: xorp/bgp/harness/test_peer.hh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 
 #ifndef __BGP_HARNESS_TEST_PEER_HH__
 #define __BGP_HARNESS_TEST_PEER_HH__
@@ -80,7 +80,7 @@ private:
 					 // one time.
     int _flying;
 
-    int _bgp_bytes;
+    size_t _bgp_bytes;
     uint8_t _bgp_buf[MAXPACKETSIZE]; // Maximum allowed BGP message
 };
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.5 2003/01/21 18:54:27 rizzo Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.6 2003/01/22 02:46:34 rizzo Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -94,19 +94,19 @@ struct fixed_header {
 };
 
 // size of fixed_header
-#define BGP_COMMON_HEADER_LEN			19
+const size_t BGP_COMMON_HEADER_LEN = 19;
 
 /* 
  * Various min and max packet size, accounting for the basic
  * information in the packet itself
  */
-#define MINPACKETSIZE		BGP_COMMON_HEADER_LEN
-#define MAXPACKETSIZE		4096
+const size_t MINPACKETSIZE = BGP_COMMON_HEADER_LEN;
+const size_t MAXPACKETSIZE = 4096;
 
-#define MINOPENPACKET		(BGP_COMMON_HEADER_LEN + 10)
-#define MINUPDATEPACKET		(BGP_COMMON_HEADER_LEN + 2 + 2)
-#define MINKEEPALIVEPACKET	BGP_COMMON_HEADER_LEN
-#define MINNOTIFICATIONPACKET	(BGP_COMMON_HEADER_LEN + 2)
+const size_t MINOPENPACKET = BGP_COMMON_HEADER_LEN + 10;
+const size_t MINUPDATEPACKET = BGP_COMMON_HEADER_LEN + 2 + 2;
+const size_t MINKEEPALIVEPACKET = BGP_COMMON_HEADER_LEN;
+const size_t MINNOTIFICATIONPACKET = BGP_COMMON_HEADER_LEN + 2;
 
 /**
  * This exception is thrown when a bad input message is received.
@@ -173,7 +173,7 @@ public:
     uint16_t length() const			{ return _Length; }
     virtual string str() const = 0;
 
-    virtual const uint8_t *encode(int &len) const = 0;
+    virtual const uint8_t *encode(size_t &len) const = 0;
 protected:
     /*
      * Return the external representation of the packet into a buffer.
@@ -186,9 +186,9 @@ protected:
      * The derived-class methods are in charge of filling up any
      * additional data past it.
      */
-    uint8_t *basic_encode(int &len, uint8_t *buf=0) const;
+    uint8_t *basic_encode(size_t &len, uint8_t *buf=0) const;
 
-    const uint8_t *flatten(struct iovec *iov, int cnt, int& len) const;
+    const uint8_t *flatten(struct iovec *iov, int cnt, size_t& len) const;
     // don't allow the use of the default copy constructor
     BGPPacket(const BGPPacket& BGPPacket);
     uint16_t _Length;  /*length is the total packet length, including
@@ -204,7 +204,7 @@ public:
     OpenPacket(const uint8_t *d, uint16_t l);
     OpenPacket(const AsNum& as, const IPv4& bgpid, const uint16_t holdtime);
     ~OpenPacket()				{}
-    const uint8_t *encode(int& len) const;
+    const uint8_t *encode(size_t& len) const;
     string str() const;
 
     const uint8_t Version() const { return _Version; }
@@ -259,7 +259,7 @@ public:
     const list <NetLayerReachability>& nlri_list() const {
 	return _nlri_list;
     }
-    const uint8_t *encode(int& len) const;
+    const uint8_t *encode(size_t& len) const;
 
     bool big_enough() const;
 
@@ -292,7 +292,7 @@ public:
     */
     static bool validate_error_code(const int error, const int subcode);
     const uint8_t* error_data() const { return _error_data; }
-    const uint8_t *encode(int &len) const;
+    const uint8_t *encode(size_t &len) const;
     string str() const;
     bool operator==(const NotificationPacket& him) const;
 protected:
@@ -315,7 +315,14 @@ public:
     /**
      * need nothing to parse incoming data
      */
-    KeepAlivePacket(const uint8_t *, uint16_t l)	{
+    KeepAlivePacket(const uint8_t *, uint16_t l)
+		throw(CorruptMessage)			{
+	if (l != MINKEEPALIVEPACKET)
+	    xorp_throw(CorruptMessage,
+		c_format("KeepAlivePacket length %d instead of %d",
+			l, MINKEEPALIVEPACKET),
+			MSGHEADERERR, UNSPECIFIED);
+
 	_Type = MESSAGETYPEKEEPALIVE;
 	_Length = l;
     }
@@ -325,7 +332,7 @@ public:
 	_Length = MINKEEPALIVEPACKET;
     }
     ~KeepAlivePacket()					{}
-    const uint8_t *encode(int &len) const		{
+    const uint8_t *encode(size_t &len) const		{
 	return basic_encode(len);
     }
     virtual string str() const		{ return "Keepalive Packet\n"; }

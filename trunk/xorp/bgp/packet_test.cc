@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet_test.cc,v 1.3 2002/12/15 04:09:28 mjh Exp $"
+#ident "$XORP: xorp/bgp/packet_test.cc,v 1.4 2003/01/22 02:46:34 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -98,7 +98,7 @@ bool BGPTestPacket::test_keepalive()
     debug_msg("Encoding KeepAlivePacket\n\n");
     
     KeepAlivePacket *ka = create_keepalive();
-    int len;
+    size_t len;
     const uint8_t *buf = ka->encode(len);
 
     debug_msg("Decoding KeepAlivePacket\n\n");
@@ -126,7 +126,7 @@ bool BGPTestPacket::test_open()
     debug_msg("Encoding OpenPacket\n\n");
     
     OpenPacket *op = create_open();
-    int len;
+    size_t len;
     const uint8_t *buf = op->encode(len);
     
     debug_msg("Decoding OpenPacket\n\n");
@@ -162,7 +162,7 @@ bool BGPTestPacket::test_update()
     debug_msg("Encoding UpdatePacket\n\n");
     
     UpdatePacket *up = create_update();
-    int len;
+    size_t len;
     const uint8_t *buf = up->encode(len);
     
     debug_msg("Decoding UpdatePacket\n\n");
@@ -198,7 +198,7 @@ bool BGPTestPacket::test_notification()
     debug_msg("Encoding NotificationPacket\n\n");
     
     NotificationPacket *np = create_notification();
-    int len;
+    size_t len;
     const uint8_t *buf = np->encode(len);
     
     debug_msg("Decoding NotificationPacket\n\n");

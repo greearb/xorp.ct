@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.2 2002/12/18 00:36:38 mjh Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.3 2002/12/20 06:42:48 mjh Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -66,29 +66,45 @@ public:
     BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock, BGPMain *m);
     virtual ~BGPPeer();
 
-    FSMState get_ConnectionState();
-    void set_ConnectionState(FSMState s);
-
     void connected(int s);
     int get_sock();
 
     bool same_sockaddr(struct sockaddr_in *sinp);
 
-    void action(FSMEvent e, const int sock);
-    void action(FSMEvent ConnectionEvent, const int error, const int subcode,
-		const uint8_t*data = 0, const size_t len = 0);
-    void action(FSMEvent e, const BGPPacket *p = NULL);
+    /**
+     * state machine handlers for the various BGP events
+     */
+    void event_start();			// EVENTBGPSTART
+    void event_stop();			// EVENTBGPSTOP
+    void event_open();			// EVENTBGPTRANOPEN
+    void event_open(const int sock);	// EVENTBGPTRANOPEN
+    void event_closed();		// EVENTBGPTRANCLOSED
+    void event_openfail();		// EVENTBGPCONNOPENFAIL
+    void event_tranfatal();		// EVENTBGPTRANFATALERR
+    void event_connexp();		// EVENTCONNTIMEEXP
+    void event_holdexp();		// EVENTHOLDTIMEEXP
+    void event_keepexp();		// EVENTKEEPALIVEEXP
+    void event_openmess(const OpenPacket* p);	// EVENTRECOPENMESS
+    void event_keepmess();		// EVENTRECKEEPALIVEMESS
+    void event_recvupdate(const UpdatePacket *p); // EVENTRECUPDATEMESS
+    void event_recvnotify();		// EVENTRECNOTMESS
 
+    void notify_peer_of_error(const int error, const int subcode,
+		const uint8_t*data = 0, const size_t len = 0);
+
+    FSMState state()			{ return _state; }
     void clear_all_timers();
     void start_connect_retry_timer();
     void clear_connect_retry_timer();
     void restart_connect_retry_timer();
+
     void start_keepalive_timer();
     void clear_keepalive_timer();
-    void restart_keepalive_timer();
+
     void start_hold_timer();
     void clear_hold_timer();
     void restart_hold_timer();
+
     void start_stopped_timer();
     void clear_stopped_timer();
 
@@ -96,23 +112,24 @@ public:
     PeerOutputState send_message(const BGPPacket& p);
     void send_message_complete(SocketClient::Event, const uint8_t *buf);
 
-    static void check_hold_duration(int32_t hold_secs) throw(CorruptMessage);
-
     string str();
-    bool is_connected();
-    bool still_reading();
+    bool is_connected() const		{ return _SocketClient->is_connected(); }
+    bool still_reading() const		{ return _SocketClient->still_reading(); }
     LocalData* _localdata;
-    BGPMain* main() { return _mainprocess; }
-    const BGPPeerData* peerdata() { return _peerdata; }
-    bool ibgp() { return peerdata()->get_internal_peer(); }
+    BGPMain* main()			{ return _mainprocess; }
+    const BGPPeerData* peerdata() const	{ return _peerdata; }
+    bool ibgp() const			{ return peerdata()->get_internal_peer(); }
+
+    /**
+     * send the netreachability message, return send result.
+     */
     bool send_netreachability(const NetLayerReachability &n);
     /*
     ** Virtual so that it can be subclassed in the plumbing test code.
     */
     virtual PeerOutputState send_update_message(const UpdatePacket& p);
 
-    uint32_t get_established_transitions() const 
-    {
+    uint32_t get_established_transitions() const {
 	return _established_transitions;
     }
     uint32_t get_established_time() const;
@@ -124,21 +141,19 @@ public:
 		       uint32_t& in_update_elapsed) const;
 protected:
 private:
-    bool connect_to_peer();
-    void state_machine(FSMEvent e, const BGPPacket *p = NULL);
+    bool connect_to_peer()		{ return _SocketClient->connect(); }
     void send_notification(const NotificationPacket& p, bool error = true) {
 	send_notification(&p, error);
     }
     void send_notification(const NotificationPacket *p, bool error = true);
     void send_notification_complete(SocketClient::Event, const uint8_t *buf,
 				    bool error);
-    void flush_transmit_queue();
-    void stop_reader();
+    void flush_transmit_queue()		{ _SocketClient->flush_transmit_queue(); }
+    void stop_reader()			{ _SocketClient->stop_reader(); }
 
     SocketClient *_SocketClient;
     bool _output_queue_was_busy;
-    FSMState _ConnectionState;
-    FSMEvent _ConnectionEvent;
+    FSMState _state;
 
     BGPPeerData* _peerdata;
     BGPMain* _mainprocess;
@@ -163,17 +178,10 @@ private:
      */
     XorpTimer _timer_stopped;
     void hook_stopped();
-#ifdef	LATER
-    XorpTimer _timer_min_as_orig_interval;
-    XorpTimer _timer_min_route_adv_interval;
-#endif
 
-    bool check_send_keepalive();
-    uint8_t check_open_packet(const OpenPacket *p);
+    void check_open_packet(const OpenPacket *p) throw (CorruptMessage);
     NotificationPacket* check_update_packet(const UpdatePacket *p);
 
-    bool initialise_stage1();
-    bool initialise_stage2();
     /**
      * Called the first time that we go to the established state.
      */
@@ -181,13 +189,13 @@ private:
 
     bool release_resources();
 
+    /**
+     * move to the desired state, plus does some additional
+     * work to clean up existing state and possibly retrying to
+     * open/connect if error = true
+     */
     void set_state(FSMState s, bool error = false);
+    static const char *pretty_print_state(FSMState s);
 };
-
-void hook_connect_retry(BGPPeer *);
-void hook_hold_time(BGPPeer *);
-void hook_keep_alive(BGPPeer *);
-void hook_min_as_orig_interval(BGPPeer *);
-void hook_min_route_adv_interval(BGPPeer *);
 
 #endif // __BGP_PEER_HH__

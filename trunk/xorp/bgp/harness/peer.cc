@@ -291,7 +291,7 @@ Peer::send_packet(const string& line, const vector<string>& words)
     const UpdatePacket *bgpupdate = dynamic_cast<const UpdatePacket *>
 	(Peer::packet(line, words, 3));
 
-    int len;
+    size_t len;
     const uint8_t *buf = bgpupdate->encode(len);
     delete bgpupdate;
     /*
@@ -597,7 +597,7 @@ Peer::assertX(const string& line, const vector<string>& words)
 	       _expect._list.size())
 		xorp_throw(InvalidString, 
 			   c_format("Expected list size to be %d actual %d",
-			      atoi(words[3].c_str()), _expect._list.size()));
+			      atoi(words[4].c_str()), _expect._list.size()));
 	    break;
 	default:
 	    xorp_throw(InvalidString, 
@@ -675,7 +675,7 @@ mrtd_debug_dump(const UpdatePacket* p, const IPv4Net& /*net*/,
 		const timeval& tv,
 		const string fname)
 {
-    int len;
+    size_t len;
     const uint8_t *buf = p->encode(len);
     mrtd_traffic_dump(buf, len , tv, fname);
     delete [] buf;
@@ -859,7 +859,7 @@ Peer::check_expect(BGPPacket *rec)
 	** Need to go through this performance in order to copy a
 	** packet.
 	*/
-	int rec_len;
+	size_t rec_len;
 	const uint8_t *rec_buf = rec->encode(rec_len);
 
 	switch(rec->type()) {
@@ -1062,7 +1062,7 @@ Peer::send_open()
     ** Create an open packet and send it in.
     */
     OpenPacket bgpopen(_as, _id, _holdtime);
-    int len;
+    size_t len;
     const uint8_t *buf = bgpopen.encode(len);
     debug_msg("OPEN Packet SENT\n%s", bgpopen.str().c_str());
     send_message(buf, len, ::callback(this, &Peer::callback, "open"));

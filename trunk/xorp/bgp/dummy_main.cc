@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.4 2002/12/09 18:28:41 hodson Exp $"
+#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include <sys/time.h>
 
@@ -112,11 +112,6 @@ BGPMain::register_ribname(const string&)
     return false;
 }
 
-void
-BGPMain::accept_connection_from(BGPPeerData *)
-{
-}
-
 int
 BGPMain::create_listener(const Iptuple&)
 {
@@ -144,11 +139,6 @@ BGPMain::stop_all_servers()
 {
 }
 
-void
-BGPMain::add_update(BGPPeerData* , UpdatePacket* )
-{
-}
-
 bool 
 BGPMain::add_route(const OriginType,  const AsNum&,
 		   const IPv4&, const IPv4Net&)
@@ -161,7 +151,3 @@ BGPMain::delete_route(const IPv4Net&)
 {
     return false;
 }
-
-
-
-

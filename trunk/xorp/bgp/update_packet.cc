@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.7 2003/01/22 02:46:35 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.8 2003/01/22 03:02:09 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -154,7 +154,7 @@ UpdatePacket::big_enough() const
 }
 
 const uint8_t *
-UpdatePacket::encode(int &len) const
+UpdatePacket::encode(size_t &len) const
 {
     int size = 5 + _att_list.size() + 
 	(2*_withdrawn_list.size()) +(2*_nlri_list.size()); 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet.cc,v 1.4 2003/01/21 16:56:59 rizzo Exp $"
+#ident "$XORP: xorp/bgp/packet.cc,v 1.5 2003/01/22 02:46:34 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,7 +28,7 @@ const uint8_t BGPPacket::Marker[MARKER_SIZE] = {
 };
 
 const uint8_t *
-BGPPacket::flatten(struct iovec *iov, const int cnt, int& len) const
+BGPPacket::flatten(struct iovec *iov, const int cnt, size_t& len) const
 {
     len = 0;
     for (int i = 0; i < cnt; i++) {
@@ -48,7 +48,7 @@ BGPPacket::flatten(struct iovec *iov, const int cnt, int& len) const
 }
 
 uint8_t *
-BGPPacket::basic_encode(int &len, uint8_t *buf) const
+BGPPacket::basic_encode(size_t &len, uint8_t *buf) const
 {
     len = length();
     if (buf == 0)
