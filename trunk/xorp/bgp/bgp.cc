@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.23 2003/11/19 23:56:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.25 2004/03/24 19:34:29 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -718,13 +718,10 @@ BGPMain::originate_route(const IPv4Net& nlri, const IPv4& next_hop,
     debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
 
-    LocalData *local = get_local_data();
-
     AsPath aspath;
-    aspath.prepend_as(local->as());
 
     return _rib_ipc_handler->originate_route(INCOMPLETE, aspath, nlri,
-					      next_hop, unicast, multicast);
+					     next_hop, unicast, multicast);
 }
 
 bool
