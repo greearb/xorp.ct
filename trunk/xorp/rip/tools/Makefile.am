@@ -12,11 +12,15 @@ noinst_SCRIPTS			 = $(tool_scripts)
 
 # -- Program Sources
 show_stats_SOURCES		 = show_stats.cc
+show_stats_SOURCES		+= common.cc
+show_stats_SOURCES		+= common.hh
 show_stats_LDADD		 = $(top_builddir)/xrl/interfaces/libripxif.a
 show_stats_LDADD		+= $(top_builddir)/xrl/interfaces/libripngxif.a
 show_stats_LDADD		+= $(LDADD)
 
 show_peer_stats_SOURCES	 	 = show_peer_stats.cc
+show_peer_stats_SOURCES		+= common.cc
+show_peer_stats_SOURCES		+= common.hh
 show_peer_stats_LDADD	 	 = $(top_builddir)/xrl/interfaces/libripxif.a
 show_peer_stats_LDADD		+= $(top_builddir)/xrl/interfaces/libripngxif.a
 show_peer_stats_LDADD		+= $(LDADD)

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pim6.cmds,v 1.3 2004/05/26 04:25:09 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.cmds,v 1.2 2004/06/02 02:38:42 pavlin Exp $ */
 
 show rip {
      %command: "" %help: HELP;
@@ -7,25 +7,25 @@ show rip {
 }
 
 show rip peer statistics $(protocols.rip.interface.*) $(protocols.rip.interface.*.vif.*) $(protocols.rip.interface.*.vif.*.address.*) {
-     %command: "rip/tools/show_peer_stats $0" %help: HELP;
+     %command: "rip/tools/show_peer_stats $2 $5 $6 $7" %help: HELP;
      %module: rip;
      %tag: HELP "Show RIP statistics for peers on specified address";
 }
 
 show rip peer statistics all {
-     %command: "rip/tools/show_peer_stats" %help: HELP;
+     %command: "rip/tools/show_peer_stats $2" %help: HELP;
      %module: rip;
      %tag: HELP "Show RIP statistics for all peers";
 }
 
 show rip statistics $(protocols.rip.interface.*) $(protocols.rip.interface.*.vif.*) $(protocols.rip.interface.*.vif.*.address.*) {
-     %command: "rip/tools/show_stats $0" %help: HELP;
+     %command: "rip/tools/show_stats $2 $4 $5 $6" %help: HELP;
      %module: rip;
      %tag: HELP "Show RIP statistics on specified address";
 }
 
 show rip statistics all {
-     %command: "rip/tools/show_stats" %help: HELP;
+     %command: "rip/tools/show_stats $2" %help: HELP;
      %module: rip;
      %tag: HELP "Show RIP statistics for all addresses";
 }

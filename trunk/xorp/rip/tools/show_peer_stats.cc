@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/show_peer_stats.cc,v 1.2 2004/04/22 01:11:52 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/show_peer_stats.cc,v 1.3 2004/05/31 04:06:41 hodson Exp $"
 
 #include <iomanip>
 
@@ -32,75 +32,25 @@
 #include "xrl/interfaces/rip_xif.hh"
 #include "xrl/interfaces/ripng_xif.hh"
 
+#include "common.hh"
+
+static const char* NO_PEERS = "There are no known peers.";
+static const char* NO_PEERS_ON_ADDR = "There are no known peers on ";
+
 // ----------------------------------------------------------------------------
 // Utility methods
-
-static uint32_t
-guess_ip_version(int argc, char* const argv[])
-{
-    for (int i = 0; i < argc; i++) {
-	if (strcmp(argv[i], "rip") == 0) {
-	    return 4;
-	}
-	if (strcmp(argv[i], "ripng") == 0) {
-	    return 6;
-	}
-	// Try parsing argument as an IPv4 or IPv6 address
-	try {
-	    IPv4 a(argv[i]);
-	    return a.ip_version();
-	}
-	catch (...) {
-	    try {
-		IPv6 a(argv[i]);
-		return a.ip_version();
-	    }
-	    catch (...) {}
-	}
-    }
-    return 4;
-}
-
-static const char*
-default_xrl_target(uint32_t ip_version)
-{
-    if (ip_version == 6) {
-	return "ripng";
-    } else {
-	return "rip";
-    }
-}
 
 static void
 usage()
 {
-    fprintf(stderr, "%s [options] [<interface> <vif> <addr> <peer>]\n",
+    fprintf(stderr, "Usage: %s [options] (rip|ripng) [<interface> <vif> <addr> [<peer>]]\n",
 	    xlog_process_name());
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "\t -F <finder_host>:<finder_port> "
 	    "Specify Finder host and port to use.\n");
     fprintf(stderr, "\t -T <targetname>                "
 	    "Specify XrlTarget to query.\n\n");
-}
-
-static bool
-parse_finder_args(const string& host_colon_port, string& host, uint16_t& port)
-{
-    string::size_type sp = host_colon_port.find(":");
-    if (sp == string::npos) {
-        host = host_colon_port;
-        // Do not set port, by design it has default finder port value.
-    } else {
-        host = string(host_colon_port, 0, sp);
-        string s_port = string(host_colon_port, sp + 1, 14);
-        uint32_t t_port = atoi(s_port.c_str());
-        if (t_port == 0 || t_port > 65535) {
-            XLOG_ERROR("Finder port %d is not in range 1--65535.\n", t_port);
-            return false;
-        }
-        port = (uint16_t)t_port;
-    }
-    return true;
+    exit(-1);
 }
 
 template <typename A>
@@ -165,57 +115,12 @@ pretty_print_counters(const XrlAtomList& descriptions,
 }
 
 
-// ----------------------------------------------------------------------------
-// Job classes and related
-
-class XrlJobBase;
-
-/**
- * Base class for Xrl Job Queue.
- */
-class XrlJobQueueBase {
-public:
-    typedef ref_ptr<XrlJobBase> Job;
-
-public:
-    virtual ~XrlJobQueueBase() {}
-    virtual XrlSender*	  sender()	 = 0;
-    virtual const string& target() const = 0;
-
-    virtual void enqueue(const Job& j)	 = 0;
-
-    virtual void dispatch_complete(const XrlError&	xe,
-				   const XrlJobBase*	cmd) = 0;
-};
-
-/**
- * Base class for Xrl Jobs that are invoked by classes derived
- * from XrlJobQueueBase.
- */
-class XrlJobBase : public CallbackSafeObject {
-public:
-    XrlJobBase(XrlJobQueueBase& q) : _q(q) {}
-
-    virtual ~XrlJobBase() {}
-    virtual bool dispatch() = 0;
-
-protected:
-    XrlJobQueueBase& queue() { return _q; }
-
-private:
-    XrlJobBase(const XrlJobBase&);		// Not implemented
-    XrlJobBase& operator=(const XrlJobBase&);	// Not implemented
-
-private:
-    XrlJobQueueBase& _q;
-};
-
 /**
  * Invoke Xrl to get peer stats on RIP address and pretty print result.
  */
 class GetPeerStats4 : public XrlJobBase {
 public:
-    GetPeerStats4(XrlJobQueueBase&	jq,
+    GetPeerStats4(XrlJobQueue&	jq,
 		     const string&	ifname,
 		     const string&	vifname,
 		     IPv4		addr,
@@ -273,9 +178,10 @@ protected:
  */
 class GetAllPeerStats4 : public XrlJobBase {
 public:
-    GetAllPeerStats4(XrlJobQueueBase& jq)
+    GetAllPeerStats4(XrlJobQueue& jq)
 	: XrlJobBase(jq)
-    {}
+    {
+    }
 
     bool
     dispatch()
@@ -296,16 +202,22 @@ protected:
 		 const XrlAtomList*	addrs)
     {
 	if (xe == XrlError::OKAY()) {
-	    for (size_t i = 0; i < peers->size(); i++) {
-		const IPv4& 	peer_addr = peers->get(i).ipv4();
-		const string& 	ifn 	  = ifnames->get(i).text();
-		const string& 	vifn 	  = vifnames->get(i).text();
-		const IPv4& 	addr 	  = addrs->get(i).ipv4();
-		queue().enqueue(
-			new GetPeerStats4(queue(), ifn, vifn, addr, peer_addr,
-					  true)
-			);
+	    if (peers->size() == 0) {
+		cout << NO_PEERS << endl;
+	    } else {
+		for (size_t i = 0; i < peers->size(); i++) {
+		    const IPv4& 	peer_addr = peers->get(i).ipv4();
+		    const string& 	ifn 	  = ifnames->get(i).text();
+		    const string& 	vifn 	  = vifnames->get(i).text();
+		    const IPv4& 	addr 	  = addrs->get(i).ipv4();
+		    queue().enqueue(
+				    new GetPeerStats4(queue(), ifn, vifn,
+						      addr, peer_addr, true)
+				    );
+		}
 	    }
+	} else {
+	    cerr << xe.str() << endl;
 	}
 	queue().dispatch_complete(xe, this);
     }
@@ -317,7 +229,7 @@ protected:
  */
 class GetPortPeerStats4 : public XrlJobBase {
 public:
-    GetPortPeerStats4(XrlJobQueueBase& 	jq,
+    GetPortPeerStats4(XrlJobQueue& 	jq,
 		      const string& 	ifname,
 		      const string& 	vifname,
 		      const IPv4&	addr)
@@ -341,17 +253,23 @@ protected:
 		 const XrlAtomList*	addrs)
     {
 	if (xe == XrlError::OKAY()) {
-	    for (size_t i = 0; i < peers->size(); i++) {
-		const IPv4& 	peer_addr = peers->get(i).ipv4();
-		const string& 	ifn 	  = ifnames->get(i).text();
-		const string& 	vifn 	  = vifnames->get(i).text();
-		const IPv4& 	addr 	  = addrs->get(i).ipv4();
+	    if (peers->size() == 0) {
+		cout << NO_PEERS_ON_ADDR << _ifn << " " << _vifn << " "
+		     << _a.str() << endl;
+	    } else {
+		for (size_t i = 0; i < peers->size(); i++) {
+		    const IPv4& 	peer_addr = peers->get(i).ipv4();
+		    const string& 	ifn 	  = ifnames->get(i).text();
+		    const string& 	vifn 	  = vifnames->get(i).text();
+		    const IPv4& 	addr 	  = addrs->get(i).ipv4();
 
-		if (ifn == _ifn && vifn == _vifn && _a == addr) {
-		    queue().enqueue(
-			new GetPeerStats4(queue(), ifn, vifn, addr, peer_addr,
-					  true)
-			);
+		    if (ifn == _ifn && vifn == _vifn && _a == addr) {
+			queue().enqueue(
+					new GetPeerStats4(queue(), ifn, vifn,
+							  addr, peer_addr,
+							  true)
+					);
+		    }
 		}
 	    }
 	}
@@ -369,7 +287,7 @@ protected:
  */
 class GetPeerStats6 : public XrlJobBase {
 public:
-    GetPeerStats6(XrlJobQueueBase&	jq,
+    GetPeerStats6(XrlJobQueue&	jq,
 		     const string&	ifname,
 		     const string&	vifname,
 		     IPv6		addr,
@@ -427,7 +345,7 @@ protected:
  */
 class GetAllPeerStats6 : public XrlJobBase {
 public:
-    GetAllPeerStats6(XrlJobQueueBase& jq)
+    GetAllPeerStats6(XrlJobQueue& jq)
 	: XrlJobBase(jq)
     {}
 
@@ -450,15 +368,19 @@ protected:
 		 const XrlAtomList*	addrs)
     {
 	if (xe == XrlError::OKAY()) {
-	    for (size_t i = 0; i < peers->size(); i++) {
-		const IPv6& 	peer_addr = peers->get(i).ipv6();
-		const string& 	ifn 	  = ifnames->get(i).text();
-		const string& 	vifn 	  = vifnames->get(i).text();
-		const IPv6& 	addr 	  = addrs->get(i).ipv6();
-		queue().enqueue(
-			new GetPeerStats6(queue(), ifn, vifn, addr, peer_addr,
-					  true)
-			);
+	    if (peers->size() == 0) {
+		cout << NO_PEERS << endl;
+	    } else {
+		for (size_t i = 0; i < peers->size(); i++) {
+		    const IPv6& 	peer_addr = peers->get(i).ipv6();
+		    const string& 	ifn 	  = ifnames->get(i).text();
+		    const string& 	vifn 	  = vifnames->get(i).text();
+		    const IPv6& 	addr 	  = addrs->get(i).ipv6();
+		    queue().enqueue(
+				    new GetPeerStats6(queue(), ifn, vifn,
+						      addr, peer_addr, true)
+				    );
+		}
 	    }
 	}
 	queue().dispatch_complete(xe, this);
@@ -471,7 +393,7 @@ protected:
  */
 class GetPortPeerStats6 : public XrlJobBase {
 public:
-    GetPortPeerStats6(XrlJobQueueBase& 	jq,
+    GetPortPeerStats6(XrlJobQueue& 	jq,
 		      const string& 	ifname,
 		      const string& 	vifname,
 		      const IPv6&	addr)
@@ -495,17 +417,23 @@ protected:
 		 const XrlAtomList*	addrs)
     {
 	if (xe == XrlError::OKAY()) {
-	    for (size_t i = 0; i < peers->size(); i++) {
-		const IPv6& 	peer_addr = peers->get(i).ipv6();
-		const string& 	ifn 	  = ifnames->get(i).text();
-		const string& 	vifn 	  = vifnames->get(i).text();
-		const IPv6& 	addr 	  = addrs->get(i).ipv6();
+	    if (peers->size() == 0) {
+		cout << NO_PEERS_ON_ADDR << _ifn << " " << _vifn << " "
+		     << _a.str() << endl;
+	    } else {
+		for (size_t i = 0; i < peers->size(); i++) {
+		    const IPv6& 	peer_addr = peers->get(i).ipv6();
+		    const string& 	ifn 	  = ifnames->get(i).text();
+		    const string& 	vifn 	  = vifnames->get(i).text();
+		    const IPv6& 	addr 	  = addrs->get(i).ipv6();
 
-		if (ifn == _ifn && vifn == _vifn && _a == addr) {
-		    queue().enqueue(
-			new GetPeerStats6(queue(), ifn, vifn, addr, peer_addr,
-					  true)
-			);
+		    if (ifn == _ifn && vifn == _vifn && _a == addr) {
+			queue().enqueue(
+					new GetPeerStats6(queue(), ifn, vifn,
+							  addr, peer_addr,
+							  true)
+					);
+		    }
 		}
 	    }
 	}
@@ -516,120 +444,6 @@ protected:
     string 	_ifn;
     string 	_vifn;
     IPv6 	_a;
-};
-
-
-/**
- * Xrl Job Queue.
- *
- * Executes a list of Xrl command objects.
- *
- * At start up, instances poll on the ready state of their internal
- * XrlRouter.  If the XrlRouter becomes ready, polling is ceased, and
- * Xrl command objects executed until there are no more left or one
- * fails by reporting a return status not of XrlError::OKAY().  If the
- * XrlRouter does not become ready within a preset time, the Job Queue
- * enters the FAILED state of the ServiceBase class.
- */
-class XrlJobQueue
-    : public XrlJobQueueBase, public ServiceBase
-{
-public:
-    typedef XrlJobQueueBase::Job Job;
-
-public:
-    XrlJobQueue(EventLoop& 	e,
-		const string& 	finder_host,
-		uint16_t 	finder_port,
-		const string& 	tgtname)
-	: _e(e), _fhost(finder_host), _fport(finder_port), _tgt(tgtname),
-	  _rtr(0), _rtr_poll_cnt(0)
-    {
-	set_status(READY);
-    }
-
-    ~XrlJobQueue()
-    {
-	delete _rtr;
-    }
-
-    bool startup()
-    {
-	string cls = c_format("%s-%u\n",
-			      xlog_process_name(), (uint32_t)getpid());
-	_rtr = new XrlStdRouter(_e, cls.c_str(), _fhost.c_str(), _fport);
-	_rtr->finalize();
-	set_status(STARTING);
-	_rtr_poll = _e.new_periodic(100,
-			callback(this, &XrlJobQueue::xrl_router_ready_poll));
-	return true;
-    }
-
-    bool shutdown()
-    {
-	while (_jobs.empty() == false) {
-	    _jobs.pop_front();
-	}
-	set_status(SHUTDOWN);
-	return true;
-    }
-
-    void
-    dispatch_complete(const XrlError& xe, const XrlJobBase* cmd)
-    {
-	XLOG_ASSERT(_jobs.empty() == false);
-	XLOG_ASSERT(_jobs.front().get() == cmd);
-
-	if (xe != XrlError::OKAY()) {
-	    shutdown();
-	    return;
-	}
-	_jobs.pop_front();
-	if (_jobs.empty() == false) {
-	    process_next_job();
-	} else {
-	    shutdown();
-	}
-    }
-
-    XrlSender* sender()				{ return _rtr; }
-
-    const string& target() const		{ return _tgt; }
-
-    void enqueue(const Job& cmd)		{ _jobs.push_back(cmd); }
-
-protected:
-    bool
-    xrl_router_ready_poll()
-    {
-	if (_rtr->ready()) {
-	    process_next_job();
-	    return false;
-	}
-	if (_rtr_poll_cnt++ > 50) {
-	    set_status(FAILED, "Could not contact XORP Finder process");
-	}
-	return true;
-    }
-
-    void
-    process_next_job()
-    {
-	if (_jobs.front()->dispatch() == false) {
-	    set_status(FAILED, "Could not dispatch xrl");
-	}
-    }
-
-protected:
-    EventLoop&		_e;
-    string 		_fhost;	// Finder host
-    uint16_t 		_fport;	// Finder port
-    string		_tgt; 	// Xrl target to for jobs
-
-    list<Job> 		_jobs;
-    XrlStdRouter* 	_rtr;
-    XorpTimer		_rtr_poll;	// Timer used to poll XrlRouter::ready
-    uint32_t		_rtr_poll_cnt;	// Number of timer XrlRouter polled.
 };
 
 
@@ -671,20 +485,26 @@ main(int argc, char* const argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (do_run) {
-	    uint32_t ip_version = guess_ip_version(argc, argv);
-	    if (xrl_target.empty())
-		xrl_target = default_xrl_target(ip_version);
-	    // Skip over "show ripX peer statistics" if present
-	    // ie run from xorpsh.
-	    for (int i = 0; i < argc; i++) {
-		if (strcmp(argv[i], "statistics") == 0) {
-		    argc -= i + 1;
-		    argv += i + 1;
-		    break;
-		}
-	    }
+	if (argc == 0) {
+	    usage();
+	}
 
+	uint32_t ip_version = rip_name_to_ip_version(argv[0]);
+	if (ip_version == 0) {
+	    usage();
+	}
+	argc -= 1;
+	argv += 1;
+
+	if (xrl_target.empty()) {
+	    const char* xt = default_xrl_target(ip_version);
+	    if (xt == 0) {
+		usage();
+	    }
+	    xrl_target = xt;
+	}
+
+	if (do_run) {
 	    EventLoop e;
 	    XrlJobQueue job_queue(e, finder_host, finder_port, xrl_target);
 
@@ -719,7 +539,6 @@ main(int argc, char* const argv[])
 		    job_queue.enqueue(new GetAllPeerStats6(job_queue));
 		}
 	    } else {
-		fprintf(stderr, "Expected <ifname> <vifname> <address>\n");
 		usage();
 	    }
 
