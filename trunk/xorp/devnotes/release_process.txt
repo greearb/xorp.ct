@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.18 2004/06/15 21:27:57 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.19 2004/07/09 04:03:38 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -105,6 +105,10 @@ the login shell is csh or tcsh):
  cd www
  gmake -f GNUmakefile
  gmake -f GNUmakefile check
+	NOTE: the last command may fail with huge number of errors.
+	This is probably because of some configuration requirement
+	to run the "nsgmls" verification program. In the near future
+	the problem will be identified and fixed.
 
 ========================================================================
 1170.	TASK: Update the Web pages in the XORP test web server
@@ -277,7 +281,7 @@ the login shell is csh or tcsh):
  setenv ReleaseVersion `cat _XORP_VERSION`
  echo ReleaseVersion
  rm _XORP_VERSION
- cd /home/www/u1/www/data/xorp/releases
+ cd /home/www/u1/www/data/xorp-releases
  mkdir $ReleaseVersion
  cd $ReleaseVersion
  mv ~/xorp-$ReleaseVersion.tar.gz .
@@ -286,15 +290,21 @@ the login shell is csh or tcsh):
  mv docs-$ReleaseVersion docs
 
 ========================================================================
-2600.	TASK: Update the links in the web server
+2550.	TASK: Copy the LiveCD ISO image to the web server
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
+ # Commands continue from the previous task
+ scp -p foo:~/live/cd/location/LiveCD.iso.gz .
+
+========================================================================
+2600.	TASK: Update the links in the web server to the current release
 	WHO:  Release manager
 	WHEN: Release time
 	COMMANDS:
  # Commands continue from the previous task
  cd ..
  rm current; ln -s $ReleaseVersion current
- cd ..
- cvs update
  exit
  unsetenv ReleaseTag
  unsetenv ReleaseVersion
