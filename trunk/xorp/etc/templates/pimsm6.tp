@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.15 2005/03/20 00:02:39 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.16 2005/03/20 02:59:26 pavlin Exp $ */
 
 protocols {
     pimsm6 {
@@ -103,10 +103,12 @@ protocols {
 
 	interface @ {
 	    %help:	short "Configure IPv6 PIM-SM on a network interface";
+	    %delete: xrl "$(pimsm6.targetname)/pim/0.1/stop_vif?vif_name:txt=$(interface.@)";
 	    vif @ {
 		%help:	short "Configure IPv6 PIM-SM on a virtual interface";
 		%activate: xrl "$(pimsm6.targetname)/pim/0.1/start_vif?vif_name:txt=$(vif.@)";
 		%update: xrl "$(pimsm6.targetname)/pim/0.1/start_vif?vif_name:txt=$(vif.@)";
+		%delete: xrl "$(pimsm6.targetname)/pim/0.1/stop_vif?vif_name:txt=$(vif.@)";
 
 		disable {
 		    %help:	short "Disable IPv6 PIM-SM on an interface";
