@@ -1,6 +1,6 @@
 #!/bin/sh 
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.6 2003/04/11 16:58:49 hodson Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.7 2003/05/15 21:46:31 hodson Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -61,7 +61,7 @@ EOF
 }
 
 #
-# extoll - send success message 
+# extoll - send success message
 #
 # $1 = Config message relevant to + message
 # $2 = log file
@@ -72,7 +72,7 @@ extoll()
 }
 
 #
-# harp - send fail message 
+# harp - send fail message
 #
 # $1 = Message relevant to
 # $2 = log file
@@ -115,8 +115,9 @@ run_tinderbox() {
 	    continue
 	fi
 
-	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home}" 
+	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home}"
 
+	# Log in to host and build xorp
 	build_errfile="${errfile}-build"
 	cp ${header} ${build_errfile}
 	ssh ${SSH_FLAGS} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh ${cfg_buildflags}" >>${build_errfile} 2>&1
@@ -125,6 +126,11 @@ run_tinderbox() {
 	    continue
 	fi
 
+	# Kill tinderbox user processes that may be lying around from
+	# earlier runs (boo, hiss)
+	ssh ${SSH_FLAGS} -n ${cfg_host}	"kill -- -1" 2>/dev/null
+
+	# Log into host and run regression tests
 	check_errfile="${errfile}-check"
 	cp ${header} ${check_errfile}
 	ssh ${SSH_FLAGS} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
@@ -169,7 +175,7 @@ roll_over_logs()
     done
 }
 
-roll_over_logs   
+roll_over_logs
 mkdir -p ${LOGDIR}/0
 
 checkout "${LOGDIR}/0/checkout"
