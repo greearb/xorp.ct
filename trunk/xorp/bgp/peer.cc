@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.40 2003/08/27 02:27:54 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.41 2003/08/27 02:30:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -278,9 +278,6 @@ BGPPeer::send_notification(const NotificationPacket *p, bool error)
     ** we're using async sends, we need to chain the rest of the
     ** cleanup on the send complete callback.
     */
-
-    _last_error[0] = p->error_code();	// used for the MIB(?)
-    _last_error[1] = p->error_subcode();
 
     /*
      * First we need to clear the transmit queue - we no longer care
