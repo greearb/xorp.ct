@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.1 2003/02/25 02:18:01 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.2 2003/03/06 22:24:30 mjh Exp $
 #
 
 		XORP RELEASE NOTES
@@ -7,7 +7,7 @@
 This file contains XORP release notes (most recent releases first).
 
 
-Release 0.2 (2003/03/??)
+Release 0.2 (2003/03/10)
 ========================
 
   ALL:
@@ -35,7 +35,6 @@ Release 0.2 (2003/03/??)
       see add_route for these subnets).
 
   BGP:
-
     - XRL interfaces for monitoring BGP peers and the complete BGP
       routing table added.  Helper programs bgp/tools/show_routes and
       bgp/tools/show_peers added, along with versions of these for
@@ -61,18 +60,19 @@ Release 0.2 (2003/03/??)
     - Too many bug fixes to list.
 
   PIM-SM:
-    - Detailed testing of the basic protocol completed and documented
-      in the XORP PIM-SM Test Suite document.
-
-    - PIM-SM Bootstrap mechanism reimplemented (not tested in details yet).
+    - PIM-SM Bootstrap mechanism reimplemented and tested.
       Note that the Bootstrap-related configuration commands in
       pim/configure_pim have changed slightly.
 
+    - Detailed testing of the basic protocol and the Bootstrap mechanism
+      completed and documented in the XORP PIM-SM Test Suite document.
+
+    - Numerious bug fixes.
 
 
 Release 0.1 (2002/12/11)
 ========================
 
-  - XORP Release 0.1 source code released.
+  - First public release.
 
   - CVS repository opened to the world.
