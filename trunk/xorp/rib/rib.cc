@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.30 2004/05/12 21:55:22 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.31 2004/05/20 22:18:17 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -437,11 +437,17 @@ RIB<A>::delete_vif(const string& vifname)
     for (vai = iter->second.addr_list().begin();
 	 vai != iter->second.addr_list().end();
 	 ++vai) {
-	// Delete the directly connected routes associated with this VIF
-	IPvXNet subnetvX = vai->subnet_addr();
-	IPNet<A> subnet;
-	subnetvX.get(subnet);
-	delete_route("connected", subnet);
+	try {
+	    // Delete the directly connected routes associated with this VIF
+	    IPvXNet subnetvX = vai->subnet_addr();
+	    IPNet<A> subnet;
+	    subnetvX.get(subnet);
+	    delete_route("connected", subnet);
+	} catch (const InvalidCast&) {
+	    debug_msg("Invalid cast of %s in RIB<%s>",
+		      vai->subnet_addr().str().c_str(),
+		      A::ip_version_str().c_str());
+	}
     }
 
     _vifs.erase(iter);
@@ -510,14 +516,19 @@ RIB<A>::delete_vif_address(const string& vifname,
 	 vai != vi->second.addr_list().end();
 	 ++vai) {
 	IPvX addrvX = vai->addr();
-	A this_addr;
-	addrvX.get(this_addr);
-	if (addr == this_addr) {
-	    IPvXNet subnetvX = vai->subnet_addr();
-	    IPNet<A> subnet;
-	    subnetvX.get(subnet);
-	    delete_route("connected", subnet);
-	    return XORP_OK;
+	try {
+	    A this_addr;
+	    addrvX.get(this_addr);
+	    if (addr == this_addr) {
+		IPvXNet subnetvX = vai->subnet_addr();
+		IPNet<A> subnet;
+		subnetvX.get(subnet);
+		delete_route("connected", subnet);
+		return XORP_OK;
+	    }
+	} catch (const InvalidCast&) {
+	    debug_msg("Invalid cast of %s in RIB<%s>\n",
+		      addrvX.str().c_str(), A::ip_version_str().c_str());
 	}
     }
     return XORP_ERROR;
