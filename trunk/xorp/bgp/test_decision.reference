@@ -2203,24 +2203,8 @@ SubnetRoute:
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-	Local Preference Attribute - 300
-[PUSH]
-[DELETE]
-SubnetRoute:
-  Net: 1.0.1.0/24
-  PAList: 
-	Next Hop Attribute 2.0.0.1
-	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-	Local Preference Attribute - 300
-[ADD]
-SubnetRoute:
-  Net: 1.0.1.0/24
-  PAList: 
-	Next Hop Attribute 2.0.0.1
-	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
+[PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -2305,6 +2289,7 @@ SubnetRoute:
 	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] NEXTHOP 2.0.0.1 BECOMES UNRESOLVABLE
+[PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
@@ -2313,7 +2298,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 300
-[PUSH]
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2

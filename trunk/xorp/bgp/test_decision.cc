@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.27 2004/06/10 22:40:36 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.28 2004/06/25 12:32:09 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -77,18 +77,36 @@ test_decision(TestInfo& /*info*/)
 
     RibInTable<IPv4>* ribin_table1
 	= new RibInTable<IPv4>("RIB-IN1", SAFI_UNICAST, &handler1);
-    ribin_table1->set_next_table(decision_table);
-    decision_table->add_parent(ribin_table1, &handler1, ribin_table1->genid());
+
+    NhLookupTable<IPv4>* nhlookup_table1
+	= new NhLookupTable<IPv4>("NHL-IN1", SAFI_UNICAST, &next_hop_resolver,
+				  ribin_table1);
+    ribin_table1->set_next_table(nhlookup_table1);
+    nhlookup_table1->set_next_table(decision_table);
+    decision_table->add_parent(nhlookup_table1, &handler1,
+			       ribin_table1->genid());
 
     RibInTable<IPv4>* ribin_table2
 	= new RibInTable<IPv4>("RIB-IN2", SAFI_UNICAST, &handler2);
-    ribin_table2->set_next_table(decision_table);
-    decision_table->add_parent(ribin_table2, &handler2, ribin_table2->genid());
+
+    NhLookupTable<IPv4>* nhlookup_table2
+	= new NhLookupTable<IPv4>("NHL-IN2", SAFI_UNICAST, &next_hop_resolver,
+				  ribin_table2);
+    ribin_table2->set_next_table(nhlookup_table2);
+    nhlookup_table2->set_next_table(decision_table);
+    decision_table->add_parent(nhlookup_table2, &handler2,
+			       ribin_table2->genid());
 
     RibInTable<IPv4>* ribin_table3
 	= new RibInTable<IPv4>("RIB-IN3", SAFI_UNICAST, &handler3);
-    ribin_table3->set_next_table(decision_table);
-    decision_table->add_parent(ribin_table3, &handler3, ribin_table3->genid());
+
+    NhLookupTable<IPv4>* nhlookup_table3
+	= new NhLookupTable<IPv4>("NHL-IN3", SAFI_UNICAST, &next_hop_resolver,
+				  ribin_table3);
+    ribin_table3->set_next_table(nhlookup_table3);
+    nhlookup_table3->set_next_table(decision_table);
+    decision_table->add_parent(nhlookup_table3, &handler3,
+			       ribin_table3->genid());
 
     debug_table->set_output_file(filename);
     debug_table->set_canned_response(ADD_USED);
