@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_varrw.hh,v 1.2 2004/09/18 00:59:58 pavlin Exp $
+// $XORP: xorp/rib/rib_varrw.hh,v 1.3 2004/09/18 02:05:52 pavlin Exp $
 
 #ifndef __RIB_RIB_VARRW_HH__
 #define __RIB_RIB_VARRW_HH__
@@ -38,10 +38,8 @@ public:
      */
     RIBVarRW(IPRouteEntry<A>& route);
 
-    /**
-     * Start modifying route
-     */
-    void single_start();
+    // SingleVarRW interface
+    void start_read();
 
     /**
      * Write a variable.
@@ -50,11 +48,6 @@ public:
      * @param e value of variable.
      */
     void single_write(const string& id, const Element& e);
-
-    /**
-     * Commit all changes.
-     */
-    void single_end();
 
 private:
     /**

@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.1 2004/09/17 13:48:56 abittau Exp $"
 
 #include "config.h"
 #include "single_varrw.hh"
 #include "policy/common/elem_null.hh"
 
-SingleVarRW::SingleVarRW() {
+SingleVarRW::SingleVarRW() : _did_first_read(false) 
+{
 }
 
 
@@ -28,6 +29,13 @@ SingleVarRW::~SingleVarRW() {
 
 const Element&
 SingleVarRW::read(const string& id) {
+
+    // check if its the first one, and inform client
+    if(!_did_first_read) {
+	start_read();
+	_did_first_read = true;
+    }
+	
     Map::iterator i = _map.find(id);
 
     if(i == _map.end())
@@ -56,7 +64,7 @@ SingleVarRW::sync() {
     }	
 
     // Alert the derived class we are starting commits.
-    single_start();
+    start_write();
     
     // commit the change for each element 
     // [once per element... thats where the ugly name of this class comes from]
@@ -77,7 +85,7 @@ SingleVarRW::sync() {
     }
     
     // done commiting [so the derived class may sync]
-    single_end();
+    end_write();
 
     // delete all garbage
     policy_utils::clear_container(_trash);

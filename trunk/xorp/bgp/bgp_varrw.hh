@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.3 2004/09/18 02:06:19 pavlin Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.4 2004/09/27 10:35:14 abittau Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -53,9 +53,9 @@ public:
     InternalMessage<A>* filtered_message();
     
     // SingleVarRW interface
-    void single_start();
+    void start_read();
     void single_write(const string& id, const Element& e);
-    void single_end();
+    void end_write();
 
     /**
      * If a route is modified, the caller may obtain it via the filtered_message

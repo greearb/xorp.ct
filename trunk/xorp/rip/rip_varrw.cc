@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.2 2004/09/18 00:00:31 pavlin Exp $"
+#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.3 2004/10/03 10:35:47 abittau Exp $"
 
 #include "rip_module.h"
 
@@ -28,18 +28,18 @@ template <class A>
 RIPVarRW<A>::RIPVarRW(RouteEntry<A>& route)
     : _route(route)
 {
-    initialize("policytags", _route.policytags().element());
-
-    read_route_nexthop(route);
-
-    initialize("metric", new ElemU32(route.cost()));
-    initialize("tag", new ElemU32(route.tag()));
 }
 
 template <class A>
 void
-RIPVarRW<A>::single_start()
+RIPVarRW<A>::start_read()
 {
+    initialize("policytags", _route.policytags().element());
+
+    read_route_nexthop(_route);
+
+    initialize("metric", new ElemU32(_route.cost()));
+    initialize("tag", new ElemU32(_route.tag()));
 }
 
 template <class A>
@@ -74,11 +74,6 @@ RIPVarRW<A>::single_write(const string& id, const Element& e)
     }
 }
 
-template <class A>
-void
-RIPVarRW<A>::single_end()
-{
-}
 
 #ifdef INSTANTIATE_IPV4
 

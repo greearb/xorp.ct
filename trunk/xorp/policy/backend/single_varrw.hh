@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/policy/backend/single_varrw.hh,v 1.1 2004/09/17 13:48:56 abittau Exp $
 
 #ifndef __POLICY_BACKEND_SINGLE_VARRW_HH__
 #define __POLICY_BACKEND_SINGLE_VARRW_HH__
@@ -89,13 +89,18 @@ public:
 
 
 
+    /**
+     * If any reads are performed, this is a marker which informs the derived
+     * class that reads will now start.
+     */
+    virtual void start_read() {} 
 
 
     /**
      * If any writes were performed, this is a marker which informs the derived
      * class that writes will start.
      */
-    virtual void single_start() = 0;
+    virtual void start_write() {}
 
     /**
      * Write of a variable. The write MUST be performed now, as the element
@@ -110,7 +115,7 @@ public:
     /**
      * Marks the end of writes in case there were any modified fields.
      */
-    virtual void single_end() = 0;
+    virtual void end_write() {}
 
 private:
     // pointers that has to be deleted when we are done.
@@ -122,6 +127,8 @@ private:
 
     // variable id's that changed
     set<string> _modified;
+
+    bool _did_first_read;
 
     // not impl
     SingleVarRW(const SingleVarRW&);

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.3 2004/09/18 02:06:19 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.4 2004/09/27 10:35:15 abittau Exp $"
 
 #include "bgp_module.h"
 
@@ -31,9 +31,24 @@ BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify)
       _no_modify(no_modify),
       _modified(false)
 {
-    initialize("policytags", rtmsg.route()->policytags().element());
+}
 
-    const SubnetRoute<A>* route = rtmsg.route();
+template <class A>
+BGPVarRW<A>::~BGPVarRW()
+{
+    // nobody ever obtained the filtered message but we actually created one. We
+    // must delete it as no one else can, at this point.
+    if(!_got_fmsg && _filtered_rtmsg)
+	delete _filtered_rtmsg;
+}
+
+template <class A>
+void
+BGPVarRW<A>::start_read()
+{
+    initialize("policytags", _orig_rtmsg.route()->policytags().element());
+
+    const SubnetRoute<A>* route = _orig_rtmsg.route();
 
     read_route_nexthop(*route);
     
@@ -73,15 +88,6 @@ BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify)
     }
 }
 
-template <class A>
-BGPVarRW<A>::~BGPVarRW()
-{
-    // nobody ever obtained the filtered message but we actually created one. We
-    // must delete it as no one else can, at this point.
-    if(!_got_fmsg && _filtered_rtmsg)
-	delete _filtered_rtmsg;
-}
-
 template<>
 void
 BGPVarRW<IPv4>::read_route_nexthop(const SubnetRoute<IPv4>& route)
@@ -108,12 +114,6 @@ BGPVarRW<IPv6>::read_route_nexthop(const SubnetRoute<IPv6>& route)
 
     initialize("network4", NULL);
     initialize("nexthop4", NULL);
-}
-
-template <class A>
-void
-BGPVarRW<A>::single_start()
-{
 }
 
 template <class A>
@@ -175,7 +175,7 @@ BGPVarRW<A>::single_write(const string& id, const Element& e)
 
 template <class A>
 void
-BGPVarRW<A>::single_end()
+BGPVarRW<A>::end_write()
 {
     // I think there should be a better way of modifying bgp routes... [a copy
     // constructor, or helper methods possibly].
