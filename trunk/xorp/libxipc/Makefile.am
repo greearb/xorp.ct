@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.33 2004/09/24 22:46:30 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.34 2004/10/04 14:49:51 kohler Exp $
 ##
 
 # Redefine the bin installation directory
@@ -95,9 +95,9 @@ test_xrl_sender_SOURCES		+= test_xrls_base.cc
 
 # -- Library Sources (libxipc)
 libxipc_a_SOURCES  = finder_module.h
+libxipc_a_SOURCES += hmac_md5.h
 libxipc_a_SOURCES += ipc_module.h
 libxipc_a_SOURCES += xrl_module.h
-libxipc_a_SOURCES += hmac_md5.h
 libxipc_a_SOURCES += finder_client.hh
 libxipc_a_SOURCES += finder_client_observer.hh
 libxipc_a_SOURCES += finder_client_xrl_target.hh
@@ -105,42 +105,42 @@ libxipc_a_SOURCES += finder_constants.hh
 libxipc_a_SOURCES += finder_ipc.hh
 libxipc_a_SOURCES += finder_messenger.hh
 libxipc_a_SOURCES += finder_msgs.hh
-libxipc_a_SOURCES += finder_tcp_messenger.hh
 libxipc_a_SOURCES += finder_tcp.hh
+libxipc_a_SOURCES += finder_tcp_messenger.hh
 libxipc_a_SOURCES += header.hh
 libxipc_a_SOURCES += hmac.hh
 libxipc_a_SOURCES += permits.hh
 libxipc_a_SOURCES += sockutil.hh
 libxipc_a_SOURCES += xrl.hh
-libxipc_a_SOURCES += xrl_parser.hh
-libxipc_a_SOURCES += xrl_parser_input.hh
-libxipc_a_SOURCES += xrl_tokens.hh
+libxipc_a_SOURCES += xrl_args.hh
 libxipc_a_SOURCES += xrl_atom.hh
 libxipc_a_SOURCES += xrl_atom_encoding.hh
 libxipc_a_SOURCES += xrl_atom_list.hh
-libxipc_a_SOURCES += xrl_args.hh
 libxipc_a_SOURCES += xrl_cmd_map.hh
 libxipc_a_SOURCES += xrl_dispatcher.hh
+libxipc_a_SOURCES += xrl_error.hh
+libxipc_a_SOURCES += xrl_parser.hh
+libxipc_a_SOURCES += xrl_parser_input.hh
+libxipc_a_SOURCES += xrl_pf.hh
 libxipc_a_SOURCES += xrl_pf_factory.hh
 libxipc_a_SOURCES += xrl_pf_inproc.hh
+libxipc_a_SOURCES += xrl_pf_kill.hh
 libxipc_a_SOURCES += xrl_pf_stcp.hh
 libxipc_a_SOURCES += xrl_pf_stcp_ph.hh
 libxipc_a_SOURCES += xrl_pf_sudp.hh
-libxipc_a_SOURCES += xrl_pf_kill.hh
-libxipc_a_SOURCES += xrl_pf.hh
 libxipc_a_SOURCES += xrl_router.hh
 libxipc_a_SOURCES += xrl_sender.hh
 libxipc_a_SOURCES += xrl_std_router.hh
+libxipc_a_SOURCES += xrl_tokens.hh
 libxipc_a_SOURCES += xuid.hh
-libxipc_a_SOURCES += xrl_error.hh
 
 libxipc_a_SOURCES += hmac_md5.c
 
-libxipc_a_SOURCES += finder_messenger.cc
-libxipc_a_SOURCES += finder_msgs.cc
 libxipc_a_SOURCES += finder_client.cc
 libxipc_a_SOURCES += finder_client_observer.cc
 libxipc_a_SOURCES += finder_client_xrl_target.cc
+libxipc_a_SOURCES += finder_messenger.cc
+libxipc_a_SOURCES += finder_msgs.cc
 libxipc_a_SOURCES += finder_tcp.cc
 libxipc_a_SOURCES += finder_tcp_messenger.cc
 libxipc_a_SOURCES += header.cc
@@ -148,25 +148,25 @@ libxipc_a_SOURCES += hmac.cc
 libxipc_a_SOURCES += permits.cc
 libxipc_a_SOURCES += sockutil.cc
 libxipc_a_SOURCES += xrl.cc
-libxipc_a_SOURCES += xrl_parser.cc
-libxipc_a_SOURCES += xrl_parser_input.cc
-libxipc_a_SOURCES += xrl_tokens.cc
+libxipc_a_SOURCES += xrl_args.cc
 libxipc_a_SOURCES += xrl_atom.cc
 libxipc_a_SOURCES += xrl_atom_encoding.cc
 libxipc_a_SOURCES += xrl_atom_list.cc
-libxipc_a_SOURCES += xrl_args.cc
 libxipc_a_SOURCES += xrl_cmd_map.cc
 libxipc_a_SOURCES += xrl_dispatcher.cc
+libxipc_a_SOURCES += xrl_error.cc
+libxipc_a_SOURCES += xrl_parser.cc
+libxipc_a_SOURCES += xrl_parser_input.cc
 libxipc_a_SOURCES += xrl_pf.cc
 libxipc_a_SOURCES += xrl_pf_factory.cc
 libxipc_a_SOURCES += xrl_pf_inproc.cc
+libxipc_a_SOURCES += xrl_pf_kill.cc
 libxipc_a_SOURCES += xrl_pf_stcp.cc
 libxipc_a_SOURCES += xrl_pf_stcp_ph.cc
 libxipc_a_SOURCES += xrl_pf_sudp.cc
-libxipc_a_SOURCES += xrl_pf_kill.cc
 libxipc_a_SOURCES += xrl_router.cc
 libxipc_a_SOURCES += xrl_std_router.cc
-libxipc_a_SOURCES += xrl_error.cc
+libxipc_a_SOURCES += xrl_tokens.cc
 libxipc_a_SOURCES += xuid.cc
 
 # -- Library Sources (libxipc - built sources)
@@ -220,18 +220,18 @@ BUILT_SOURCES += finder_client_base.hh
 BUILT_SOURCES += finder_client_base.cc
 BUILT_SOURCES += finder_client_xif.hh
 BUILT_SOURCES += finder_client_xif.cc
-BUILT_SOURCES += finder_xif.hh
-BUILT_SOURCES += finder_xif.cc
 BUILT_SOURCES += finder_event_notifier_xif.hh
 BUILT_SOURCES += finder_event_notifier_xif.cc
 BUILT_SOURCES += finder_event_observer_xif.hh
 BUILT_SOURCES += finder_event_observer_xif.cc
+BUILT_SOURCES += finder_xif.hh
+BUILT_SOURCES += finder_xif.cc
 BUILT_SOURCES += test_finder_events_base.hh
 BUILT_SOURCES += test_finder_events_base.cc
-BUILT_SOURCES += test_xrls_xif.hh
-BUILT_SOURCES += test_xrls_xif.cc
 BUILT_SOURCES += test_xrls_base.hh
 BUILT_SOURCES += test_xrls_base.cc
+BUILT_SOURCES += test_xrls_xif.hh
+BUILT_SOURCES += test_xrls_xif.cc
 
 CLEANFILES = $(BUILT_SOURCES)
 

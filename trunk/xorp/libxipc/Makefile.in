@@ -160,7 +160,7 @@ test_xrl_sender_SOURCES = test_xrl_sender.cc test_xrls_xif.hh test_xrls_xif.cc t
 # -- Library Sources (libxipc)
 
 # -- Library Sources (libxipc - built sources)
-libxipc_a_SOURCES = finder_module.h ipc_module.h xrl_module.h hmac_md5.h finder_client.hh finder_client_observer.hh finder_client_xrl_target.hh finder_constants.hh finder_ipc.hh finder_messenger.hh finder_msgs.hh finder_tcp_messenger.hh finder_tcp.hh header.hh hmac.hh permits.hh sockutil.hh xrl.hh xrl_parser.hh xrl_parser_input.hh xrl_tokens.hh xrl_atom.hh xrl_atom_encoding.hh xrl_atom_list.hh xrl_args.hh xrl_cmd_map.hh xrl_dispatcher.hh xrl_pf_factory.hh xrl_pf_inproc.hh xrl_pf_stcp.hh xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_pf_kill.hh xrl_pf.hh xrl_router.hh xrl_sender.hh xrl_std_router.hh xuid.hh xrl_error.hh hmac_md5.c finder_messenger.cc finder_msgs.cc finder_client.cc finder_client_observer.cc finder_client_xrl_target.cc finder_tcp.cc finder_tcp_messenger.cc header.cc hmac.cc permits.cc sockutil.cc xrl.cc xrl_parser.cc xrl_parser_input.cc xrl_tokens.cc xrl_atom.cc xrl_atom_encoding.cc xrl_atom_list.cc xrl_args.cc xrl_cmd_map.cc xrl_dispatcher.cc xrl_pf.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_pf_kill.cc xrl_router.cc xrl_std_router.cc xrl_error.cc xuid.cc common_xif.hh common_xif.cc finder_client_base.hh finder_client_base.cc finder_xif.hh finder_xif.cc
+libxipc_a_SOURCES = finder_module.h hmac_md5.h ipc_module.h xrl_module.h finder_client.hh finder_client_observer.hh finder_client_xrl_target.hh finder_constants.hh finder_ipc.hh finder_messenger.hh finder_msgs.hh finder_tcp.hh finder_tcp_messenger.hh header.hh hmac.hh permits.hh sockutil.hh xrl.hh xrl_args.hh xrl_atom.hh xrl_atom_encoding.hh xrl_atom_list.hh xrl_cmd_map.hh xrl_dispatcher.hh xrl_error.hh xrl_parser.hh xrl_parser_input.hh xrl_pf.hh xrl_pf_factory.hh xrl_pf_inproc.hh xrl_pf_kill.hh xrl_pf_stcp.hh xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_router.hh xrl_sender.hh xrl_std_router.hh xrl_tokens.hh xuid.hh hmac_md5.c finder_client.cc finder_client_observer.cc finder_client_xrl_target.cc finder_messenger.cc finder_msgs.cc finder_tcp.cc finder_tcp_messenger.cc header.cc hmac.cc permits.cc sockutil.cc xrl.cc xrl_args.cc xrl_atom.cc xrl_atom_encoding.cc xrl_atom_list.cc xrl_cmd_map.cc xrl_dispatcher.cc xrl_error.cc xrl_parser.cc xrl_parser_input.cc xrl_pf.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_kill.cc xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_router.cc xrl_std_router.cc xrl_tokens.cc xuid.cc common_xif.hh common_xif.cc finder_client_base.hh finder_client_base.cc finder_xif.hh finder_xif.cc
 
 # -- Library Sources (libfinder)
 
@@ -177,7 +177,7 @@ INCLUDES = -I$(top_srcdir)
 
 # -- Generated Sources used in libxipc and libfinder
 # (see explanation at end of file)
-BUILT_SOURCES = common_xif.hh common_xif.cc finder_base.hh finder_base.cc finder_client_base.hh finder_client_base.cc finder_client_xif.hh finder_client_xif.cc finder_xif.hh finder_xif.cc finder_event_notifier_xif.hh finder_event_notifier_xif.cc finder_event_observer_xif.hh finder_event_observer_xif.cc test_finder_events_base.hh test_finder_events_base.cc test_xrls_xif.hh test_xrls_xif.cc test_xrls_base.hh test_xrls_base.cc
+BUILT_SOURCES = common_xif.hh common_xif.cc finder_base.hh finder_base.cc finder_client_base.hh finder_client_base.cc finder_client_xif.hh finder_client_xif.cc finder_event_notifier_xif.hh finder_event_notifier_xif.cc finder_event_observer_xif.hh finder_event_observer_xif.cc finder_xif.hh finder_xif.cc test_finder_events_base.hh test_finder_events_base.cc test_xrls_base.hh test_xrls_base.cc test_xrls_xif.hh test_xrls_xif.cc
 
 CLEANFILES = $(BUILT_SOURCES)
 subdir = libxipc
@@ -195,23 +195,23 @@ am_libfinder_a_OBJECTS = finder.$(OBJEXT) finder_server.$(OBJEXT) \
 libfinder_a_OBJECTS = $(am_libfinder_a_OBJECTS)
 libxipc_a_AR = $(AR) cru
 libxipc_a_LIBADD =
-am_libxipc_a_OBJECTS = hmac_md5.$(OBJEXT) finder_messenger.$(OBJEXT) \
-	finder_msgs.$(OBJEXT) finder_client.$(OBJEXT) \
+am_libxipc_a_OBJECTS = hmac_md5.$(OBJEXT) finder_client.$(OBJEXT) \
 	finder_client_observer.$(OBJEXT) \
-	finder_client_xrl_target.$(OBJEXT) finder_tcp.$(OBJEXT) \
+	finder_client_xrl_target.$(OBJEXT) finder_messenger.$(OBJEXT) \
+	finder_msgs.$(OBJEXT) finder_tcp.$(OBJEXT) \
 	finder_tcp_messenger.$(OBJEXT) header.$(OBJEXT) hmac.$(OBJEXT) \
 	permits.$(OBJEXT) sockutil.$(OBJEXT) xrl.$(OBJEXT) \
-	xrl_parser.$(OBJEXT) xrl_parser_input.$(OBJEXT) \
-	xrl_tokens.$(OBJEXT) xrl_atom.$(OBJEXT) \
+	xrl_args.$(OBJEXT) xrl_atom.$(OBJEXT) \
 	xrl_atom_encoding.$(OBJEXT) xrl_atom_list.$(OBJEXT) \
-	xrl_args.$(OBJEXT) xrl_cmd_map.$(OBJEXT) \
-	xrl_dispatcher.$(OBJEXT) xrl_pf.$(OBJEXT) \
+	xrl_cmd_map.$(OBJEXT) xrl_dispatcher.$(OBJEXT) \
+	xrl_error.$(OBJEXT) xrl_parser.$(OBJEXT) \
+	xrl_parser_input.$(OBJEXT) xrl_pf.$(OBJEXT) \
 	xrl_pf_factory.$(OBJEXT) xrl_pf_inproc.$(OBJEXT) \
-	xrl_pf_stcp.$(OBJEXT) xrl_pf_stcp_ph.$(OBJEXT) \
-	xrl_pf_sudp.$(OBJEXT) xrl_pf_kill.$(OBJEXT) xrl_router.$(OBJEXT) \
-	xrl_std_router.$(OBJEXT) xrl_error.$(OBJEXT) xuid.$(OBJEXT) \
-	common_xif.$(OBJEXT) finder_client_base.$(OBJEXT) \
-	finder_xif.$(OBJEXT)
+	xrl_pf_kill.$(OBJEXT) xrl_pf_stcp.$(OBJEXT) \
+	xrl_pf_stcp_ph.$(OBJEXT) xrl_pf_sudp.$(OBJEXT) \
+	xrl_router.$(OBJEXT) xrl_std_router.$(OBJEXT) \
+	xrl_tokens.$(OBJEXT) xuid.$(OBJEXT) common_xif.$(OBJEXT) \
+	finder_client_base.$(OBJEXT) finder_xif.$(OBJEXT)
 libxipc_a_OBJECTS = $(am_libxipc_a_OBJECTS)
 bin_PROGRAMS = xorp_finder$(EXEEXT)
 noinst_PROGRAMS = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
@@ -426,10 +426,10 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/xrl_parser.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_parser_input.Po $(DEPDIR)/xrl_pf.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_pf_factory.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_pf_inproc.Po $(DEPDIR)/xrl_pf_stcp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_pf_inproc.Po $(DEPDIR)/xrl_pf_kill.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_pf_stcp.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_pf_stcp_ph.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_pf_sudp.Po $(DEPDIR)/xrl_pf_kill.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_router.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_pf_sudp.Po $(DEPDIR)/xrl_router.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_std_router.Po $(DEPDIR)/xrl_tokens.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xuid.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -661,10 +661,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_factory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_inproc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_kill.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_stcp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_stcp_ph.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_sudp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pf_kill.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_router.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_std_router.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_tokens.Po@am__quote@
