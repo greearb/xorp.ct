@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.13 2003/04/22 19:20:21 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.14 2003/05/29 18:56:26 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
 #include <pwd.h>
 #include "libxorp/selector.hh"
 #include "libxorp/xlog.h"
+#include "libxorp/test_main.hh"
 
 #include "main.hh"
 #include "route_table_base.hh"
@@ -29,8 +30,9 @@
 #include "local_data.hh"
 #include "dump_iterators.hh"
 
-
-bool test_fanout() {
+bool
+test_fanout(TestInfo& /*info*/)
+{
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_fanout.";
     filename += pwd->pw_name;

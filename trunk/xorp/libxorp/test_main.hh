@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/test_main.hh,v 1.4 2003/07/03 00:10:28 atanu Exp $
+// $XORP: xorp/libxorp/test_main.hh,v 1.5 2003/07/03 00:19:46 atanu Exp $
 
 #ifndef __LIBXORP_TEST_MAIN_HH__
 #define __LIBXORP_TEST_MAIN_HH__
@@ -100,15 +100,10 @@ private:
 class TestMain {
 public:
     /**
-     * A test function/method should return one of these values.
-     */
-    enum { SUCCESS = 0, FAILURE = 1};
-
-    /**
      * Start the parsing of command line arguments and enable xlog_*.
      */
     TestMain(int argc, char **argv) :
-	_verbose(false), _verbose_level(0), _exit_status(SUCCESS)
+	_verbose(false), _verbose_level(0), _exit_status(true)
     {
 	_progname = argv[0];
 
@@ -166,7 +161,7 @@ public:
     {
 	_usage += short_form + "|" + long_form + " arg\t" + description + "\n";
 
-	if(SUCCESS != _exit_status)
+	if(false == _exit_status)
 	    return "";
 	list<Arg>::iterator i;
 	for(i = _args.begin(); i != _args.end(); i++) {
@@ -175,7 +170,7 @@ public:
 		string value;
 		value = i->value(has_value);
 		if(!has_value) {
-		    _exit_status = FAILURE;
+		    _exit_status = false;
 		    return "";
 		}
 		_args.erase(i);
@@ -202,7 +197,7 @@ public:
     {
 	_usage += short_form + "|" + long_form + " arg\t" + description + "\n";
 
-	if(SUCCESS != _exit_status)
+	if(false == _exit_status)
 	    return false;
 	list<Arg>::iterator i;
 	for(i = _args.begin(); i != _args.end(); i++) {
@@ -245,7 +240,7 @@ public:
 		cerr << "Unused argument: " << i->name() << endl;
 	    }
 	    cerr << usage();
-	    _exit_status = FAILURE;
+	    _exit_status = false;
 	}
     }
 
@@ -253,7 +248,7 @@ public:
      *
      * Run a test function/method. The test function/method is passed
      * a TestInfo. The test function/method should return
-     * "TestMain::SUCCESS" for success and "TestMain::FAILURE" for
+     * true for success and "false for
      * failure.
      *
      * To run a function call "test":
@@ -263,16 +258,20 @@ public:
      * @param cb Callback object.
      */
     void
-    run(string test_name, XorpCallback1<int, TestInfo&>::RefPtr cb)
+    run(string test_name, XorpCallback1<bool, TestInfo&>::RefPtr cb)
     {
-	if(SUCCESS != _exit_status)
-	    return;
-	if(_verbose)
+ 	if(false == _exit_status)
+ 	    return;
+//  	if(_verbose)
 	    cout << "Running: " << test_name << endl;
 	TestInfo info(test_name, _verbose, _verbose_level, cout);
-	if(SUCCESS != cb->dispatch(info)) {
-	   _exit_status = FAILURE;
+	switch(cb->dispatch(info)) {
+	case true:
+	    break;
+	case false:
+	   _exit_status = false;
 	   cerr << "Failed: " << test_name << endl;
+	   break;
 	}
     }
 
@@ -295,7 +294,7 @@ public:
     failed(string error)
     {
 	_error_string += error;
-	_exit_status = FAILURE;
+	_exit_status = false;
     }
 
     /**
@@ -311,7 +310,7 @@ public:
 
 	xlog_end();
 
-	return _exit_status;
+	return _exit_status ? 0 : -1;
     }
 
 private:
@@ -320,7 +319,7 @@ private:
     list<Arg> _args;
     bool _verbose;
     int _verbose_level;
-    int _exit_status;
+    bool _exit_status;
     string _error_string;
     string _usage;
 

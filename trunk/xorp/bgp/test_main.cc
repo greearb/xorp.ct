@@ -12,113 +12,104 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.4 2003/02/12 20:24:26 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.5 2003/03/10 23:20:07 hodson Exp $"
 
 #include <stdio.h>
 #include "bgp_module.h"
 #include "config.h"
 #include "libxorp/xlog.h"
+#include "test_next_hop_resolver.hh"
 
-bool test_ribin();
-bool test_deletion();
-bool test_filter();
-bool test_cache();
-bool test_nhlookup();
-bool test_decision();
-bool test_fanout();
-bool test_dump();
-bool test_ribout();
-bool test_next_hop_resolver(int, char**);
+bool test_ribin(TestInfo& info);
+bool test_deletion(TestInfo& info);
+bool test_filter(TestInfo& info);
+bool test_cache(TestInfo& info);
+bool test_nhlookup(TestInfo& info);
+bool test_decision(TestInfo& info);
+bool test_fanout(TestInfo& info);
+bool test_dump(TestInfo& info);
+bool test_ribout(TestInfo& info);
 
-int main(int argc, char** argv) 
+int
+main(int argc, char** argv) 
 {
-    xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
-    xlog_add_default_output();
-    xlog_start();
+    XorpUnexpectedHandler x(xorp_unexpected_handler);
 
-    bool test_ribin_succeeded = test_ribin();
-    bool test_deletion_succeeded = test_deletion();
-    bool test_filter_succeeded = test_filter();
-    bool test_cache_succeeded = test_cache();
-    bool test_nhlookup_succeeded = test_nhlookup();
-    bool test_decision_succeeded = test_decision();
-    bool test_fanout_succeeded = test_fanout();
-    bool test_dump_succeeded = test_dump();
-    bool test_ribout_succeeded = test_ribout();
-    bool test_next_hop_resolver_succeeded 
-	= test_next_hop_resolver(argc, argv);
+    TestMain t(argc, argv);
 
+    string test_name =
+	t.get_optional_args("-t", "--test", "run only the specified test");
+    t.complete_args_parsing();
 
-    bool status = 0;
-    if (test_ribin_succeeded) {
-	printf("Test RibIn: PASS\n");
-    } else {
-	status = -1;
-	printf("Test RibIn: FAIL\n");
+    try {
+	/*
+	** For next hop resolver tests.
+	*/
+	IPv4 nh4("128.16.64.1");
+	IPv4 rnh4("1.1.1.1");
+	IPv4Net nlri4("22.0.0.0/8");
+	IPv6 nh6("::128.16.64.1");
+	IPv6 rnh6("::1.1.1.1");
+	IPv6Net nlri6("::22.0.0.0/8");
+	const int iter = 1000;
+
+	struct test {
+	    string test_name;
+	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
+	} tests[] = {
+	    {"RibIn", callback(test_ribin)},
+	    {"Deletion", callback(test_deletion)},
+	    {"Filter", callback(test_filter)},
+	    {"Cache", callback(test_cache)},
+	    {"NhLookup", callback(test_nhlookup)},
+	    {"Decision", callback(test_decision)},
+	    {"Fanout", callback(test_fanout)},
+	    {"Dump", callback(test_dump)},
+	    {"Ribout", callback(test_ribout)},
+
+	    {"nhr.test1", callback(nhr_test1<IPv4>, nh4, rnh4, nlri4)},
+	    {"nhr.test1.ipv6", callback(nhr_test1<IPv6>, nh6, rnh6, nlri6)},
+
+	    {"nhr.test2", callback(nhr_test2<IPv4>, nh4, rnh4, nlri4, iter)},
+	    {"nhr.test2.ipv6", callback(nhr_test2<IPv6>, nh6, rnh6, nlri6,
+					iter)},
+
+	    {"nhr.test3", callback(nhr_test3<IPv4>, nh4, rnh4, nlri4, iter)},
+	    {"nhr.test3.ipv6", callback(nhr_test3<IPv6>, nh6, rnh6, nlri6,
+					iter)},
+
+	    {"nhr.test4", callback(nhr_test4<IPv4>, nh4, rnh4, nlri4)},
+	    {"nhr.test4.ipv6", callback(nhr_test4<IPv6>, nh6, rnh6, nlri6)},
+
+	    {"nhr.test5", callback(nhr_test1<IPv4>, nh4, rnh4, nlri4)},
+	    {"nhr.test5.ipv6", callback(nhr_test5<IPv6>, nh6, rnh6, nlri6)},
+
+	    {"nhr.test6", callback(nhr_test6<IPv4>, nh4, rnh4, nlri4)},
+	    {"nhr.test6.ipv6", callback(nhr_test6<IPv6>, nh6, rnh6, nlri6)},
+
+	    {"nhr.test7", callback(nhr_test7<IPv4>, nh4, rnh4, nlri4)},
+	    {"nhr.test7.ipv6", callback(nhr_test7<IPv6>, nh6, rnh6, nlri6)},
+
+	    {"nhr.test8", callback(nhr_test8<IPv4>, nh4, rnh4, nlri4)},
+	    {"nhr.test8.ipv6", callback(nhr_test8<IPv6>, nh6, rnh6, nlri6)},
+	};
+
+	if("" == test_name) {
+	    for(unsigned int i = 0; i < sizeof(tests) / sizeof(struct test); 
+		i++)
+		t.run(tests[i].test_name, tests[i].cb);
+	} else {
+	    for(unsigned int i = 0; i < sizeof(tests) / sizeof(struct test); 
+		i++)
+		if(test_name == tests[i].test_name) {
+		    t.run(tests[i].test_name, tests[i].cb);
+		    return t.exit();
+		}
+	    t.failed("No test with name " + test_name + " found\n");
+	}
+    } catch(...) {
+	xorp_catch_standard_exceptions();
     }
-    if (test_deletion_succeeded) {
-	printf("Test Deletion: PASS\n");
-    } else {
-	status = -1;
-	printf("Test Deletion: FAIL\n");
-    }
-    if (test_filter_succeeded) {
-	printf("Test Filter: PASS\n");
-    } else {
-	status = -1;
-	printf("Test Filter: FAIL\n");
-    }
-    if (test_cache_succeeded) {
-	printf("Test Cache: PASS\n");
-    } else {
-	status = -1;
-	printf("Test Cache: FAIL\n");
-    }
-    if (test_nhlookup_succeeded) {
-	printf("Test NhLookup: PASS\n");
-    } else {
-	status = -1;
-	printf("Test NhLookup: FAIL\n");
-    }
-    if (test_cache_succeeded) {
-	printf("Test Cache: PASS\n");
-    } else {
-	status = -1;
-	printf("Test Cache: FAIL\n");
-    }
-    if (test_decision_succeeded) {
-	printf("Test Decision: PASS\n");
-    } else {
-	status = -1;
-	printf("Test Decision: FAIL\n");
-    }
-    if (test_fanout_succeeded) {
-	printf("Test Fanout: PASS\n");
-    } else {
-	status = -1;
-	printf("Test Fanout: FAIL\n");
-    }
-    if (test_dump_succeeded) {
-	printf("Test Dump: PASS\n");
-    } else {
-	status = -1;
-	printf("Test Dump: FAIL\n");
-    }
-    if (test_ribout_succeeded) {
-	printf("Test Ribout: PASS\n");
-    } else {
-	status = -1;
-	printf("Test Ribout: FAIL\n");
-    }
-    if (test_next_hop_resolver_succeeded) {
-	printf("Test NextHopResolver: PASS\n");
-    } else {
-	status = -1;
-	printf("Test NextHopResolver: FAIL\n");
-    }
-    return status;
+
+    return t.exit();
 }
-
-
-

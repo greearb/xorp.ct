@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.17 2003/05/29 18:56:26 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.18 2003/06/17 06:44:17 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
 #include <pwd.h>
 #include "libxorp/selector.hh"
 #include "libxorp/xlog.h"
+#include "libxorp/test_main.hh"
 
 #include "main.hh"
 #include "route_table_base.hh"
@@ -29,8 +30,9 @@
 #include "local_data.hh"
 #include "dummy_next_hop_resolver.hh"
 
-
-bool test_dump() {
+bool
+test_dump(TestInfo& /*info*/)
+{
     //stuff needed to create an eventloop
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_dump.";

@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.17 2003/05/29 18:56:26 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.18 2003/06/17 06:44:17 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
 #include <pwd.h>
 #include "libxorp/selector.hh"
 #include "libxorp/xlog.h"
+#include "libxorp/test_main.hh"
 
 #include "main.hh"
 #include "route_table_nhlookup.hh"
@@ -55,10 +56,9 @@ private:
     bool _response;
 };
 
-
-
-
-int test_nhlookup() {
+bool
+test_nhlookup(TestInfo& /*info*/)
+{
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_nhlookup.";
     filename += pwd->pw_name;

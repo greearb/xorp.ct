@@ -12,44 +12,47 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/test_next_hop_resolver.hh,v 1.1 2003/07/03 00:24:43 atanu Exp $
 
 #ifndef __BGP_TEST_NEXT_HOP_RESOLVER_HH__
 #define __BGP_TEST_NEXT_HOP_RESOLVER_HH__
 
 #include "libxorp/test_main.hh"
-#include "libxorp/ipnet.hh"
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv4net.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/ipv6net.hh"
 
 template <class A>
-int
+bool
 nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet);
 
 template <class A>
-int
+bool
 nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg);
 
 template <class A>
-int
+bool
 nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg);
 
 template <class A>
-int
+bool
 nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet);
 
 template <class A>
-int
+bool
 nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet);
 
 template <class A>
-int
+bool
 nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet);
 
 template <class A>
-int
+bool
 nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet);
 
 template <class A>
-int
+bool
 nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet);
 
 

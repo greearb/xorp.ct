@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.11 2003/07/03 00:10:28 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.12 2003/07/03 00:25:13 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -106,7 +106,7 @@ public:
  * Register interest in a nexthop 
  */
 template <class A>
-int
+bool
 nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
@@ -154,7 +154,7 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nht.done()) {
 	DOUT(info) << "Callback to next hop table failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -164,7 +164,7 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop not in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -173,7 +173,7 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(resolves != res || metric != met) {
 	DOUT(info) << "Metrics did not match\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -186,17 +186,17 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
 /**
  * Register interest in a nexthop multiple times.
  */
 template <class A>
-int
+bool
 nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
@@ -245,7 +245,7 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     */
     if(!nht.done()) {
 	DOUT(info) << "Callback to next hop table failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -255,7 +255,7 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Address not in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -264,7 +264,7 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     */
     if(resolves != res || metric != met) {
 	DOUT(info) << "Metrics did not match\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -278,10 +278,10 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     */
     if(nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
 /**
@@ -289,7 +289,7 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
  * first request to resolve before making subsequent calls.
  */
 template <class A>
-int
+bool
 nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
@@ -337,7 +337,7 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     */
     if(!nht.done()) {
 	DOUT(info) << "Callback to next hop table failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -347,7 +347,7 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Address not in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
 
@@ -357,7 +357,7 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     */
     if(resolves != res || metric != met) {
 	DOUT(info) << "Metrics did not match\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -377,10 +377,10 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
     */
     if(nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
 /**
@@ -388,7 +388,7 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
  * from the RIB (pseudo).
  */
 template <class A>
-int
+bool
 nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
@@ -441,7 +441,7 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(nht.done()) {
 	DOUT(info) << "Call to next hop table should not have occured\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -451,10 +451,10 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     uint32_t met;
     if(nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
 /**
@@ -474,7 +474,7 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
  * RIB. When the new value arrives the decision process is notified.
  */
 template <class A>
-int
+bool
 nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
@@ -528,7 +528,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nht.done()) {
 	DOUT(info) << "Callback to next hop table failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -537,7 +537,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
 	DOUT(info) << "Marking address as invalid failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -547,7 +547,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop not in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -556,7 +556,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(resolves != res || metric != met) {
 	DOUT(info) << "Metrics did not match\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -579,7 +579,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!dt.done()) {
 	DOUT(info) << "Callback to decision table failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -587,7 +587,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop not in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -596,7 +596,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(resolves != res || metric != met) {
 	DOUT(info) << "Metrics did not match\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -609,10 +609,10 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
 /**
@@ -620,7 +620,7 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
  * from the RIB.
  */
 template <class A>
-int
+bool
 nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
@@ -672,7 +672,7 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(nht.done()) {
 	DOUT(info) << "Callback to next hop table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -682,10 +682,10 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     uint32_t met;
     if(nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
 /**
@@ -697,7 +697,7 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
  * 5) Before the response gets back from the RIB deregister.
  */
 template <class A>
-int
+bool
 nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
@@ -751,7 +751,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nht.done()) {
 	DOUT(info) << "Callback to next hop table failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -761,7 +761,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop not in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -770,7 +770,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(resolves != res || metric != met) {
 	DOUT(info) << "Metrics did not match\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -779,7 +779,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
 	DOUT(info) << "Marking address as invalid failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -806,7 +806,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(dt.done()) {
 	DOUT(info) << "Callback to decision table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -814,10 +814,10 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
 /**
@@ -827,7 +827,7 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
  * 4) Verify that decision gets called with the new metrics.
  */
 template <class A>
-int
+bool
 nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
@@ -881,7 +881,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nht.done()) {
 	DOUT(info) << "Callback to next hop table failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
     
     /*
@@ -896,7 +896,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
 	DOUT(info) << "Marking address as invalid failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -918,7 +918,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(dt.done()) {
 	DOUT(info) << "Callback to decision table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -928,7 +928,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     uint32_t met;
     if(!nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop not in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -937,7 +937,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(resolves != res || metric != met) {
 	DOUT(info) << "Metrics did not match\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -953,7 +953,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
 	DOUT(info) << "Marking address as invalid failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -976,7 +976,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(dt.done()) {
 	DOUT(info) << "Callback to decision table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -984,7 +984,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop not in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -993,7 +993,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(resolves != res || metric != met) {
 	DOUT(info) << "Metrics did not match\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -1008,7 +1008,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
 	DOUT(info) << "Marking address as invalid failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -1030,7 +1030,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!dt.done()) {
 	DOUT(info) << "Callback to decision table failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -1038,7 +1038,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop not in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -1047,7 +1047,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(resolves != res || metric != met) {
 	DOUT(info) << "Metrics did not match\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -1062,7 +1062,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nhr.rib_client_route_info_invalid(addr, prefix)) {
 	DOUT(info) << "Marking address as invalid failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -1085,7 +1085,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!dt.done()) {
 	DOUT(info) << "Callback to decision table failed\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -1093,7 +1093,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(!nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop not in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -1102,7 +1102,7 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(resolves != res || metric != met) {
 	DOUT(info) << "Metrics did not match\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
     /*
@@ -1115,12 +1115,16 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     */
     if(nhr.lookup(nexthop, res, met)) {
 	DOUT(info) << "Nexthop in table?\n";
-	return TestMain::FAILURE;
+	return false;
     }
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
+/* XXX
+** This function is no longer used, but if it is removed the
+** templateised test functions will not be instantiated.
+*/
 bool
 test_next_hop_resolver(int argc, char **argv)
 {
@@ -1143,7 +1147,7 @@ test_next_hop_resolver(int argc, char **argv)
 
 	struct test {
 	    string test_name;
-	    XorpCallback1<int, TestInfo&>::RefPtr cb;
+	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
 	} tests[] = {
 	    {"test1", callback(nhr_test1<IPv4>, nh4, rnh4, nlri4)},
 	    {"test1.ipv6", callback(nhr_test1<IPv6>, nh6, rnh6, nlri6)},
@@ -1179,7 +1183,7 @@ test_next_hop_resolver(int argc, char **argv)
 		i++)
 		if(test_name == tests[i].test_name) {
 		    t.run(tests[i].test_name, tests[i].cb);
-		    if (t.exit() == TestMain::SUCCESS)
+		    if (t.exit() == true)
 			return true;
 		    else
 			return false;
@@ -1190,7 +1194,7 @@ test_next_hop_resolver(int argc, char **argv)
 	xorp_catch_standard_exceptions();
     }
 
-    if (t.exit() == TestMain::SUCCESS)
+    if (t.exit() == true)
 	return true;
     else
 	return false;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_test_main.cc,v 1.1 2002/12/18 03:06:07 atanu Exp $"
+#ident "$XORP: xorp/libxorp/test_test_main.cc,v 1.2 2003/03/10 23:20:35 hodson Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -22,25 +22,25 @@
 #include "test_main.hh"
 #include "exceptions.hh"
 
-int
+bool
 test1(TestInfo& info)
 {
     if(info.verbose())
 	info.out() << "verbose on\n";
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
-int
+bool
 test2(TestInfo& info)
 {
     if(info.verbose())
 	info.out() << "verbose on level = " <<  info.verbose_level() << endl;
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
-int
+bool
 test3(TestInfo& info, bool fail)
 {
     if(info.verbose())
@@ -48,22 +48,22 @@ test3(TestInfo& info, bool fail)
 	    (fail ? "fail" : "succeed") << endl;
 
     if(fail)
-	return TestMain::FAILURE;
+	return false;
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
-int
+bool
 test4(TestInfo& info, const char *mess)
 {
     if(info.verbose())
 	info.out() << "verbose on level = " << info.verbose_level() << 
 	    " message = " <<  mess << endl;
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
-int
+bool
 test5(TestInfo& info, bool exception)
 {
     if(info.verbose())
@@ -73,10 +73,10 @@ test5(TestInfo& info, bool exception)
     if(exception)
 	xorp_throw(InvalidString, "Hello");
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
-int
+bool
 test6(TestInfo& info, bool exception)
 {
     if(info.verbose())
@@ -86,7 +86,7 @@ test6(TestInfo& info, bool exception)
     if(exception)
 	throw("Unexpected exception");
 
-    return TestMain::SUCCESS;
+    return true;
 }
 
 int
@@ -113,7 +113,7 @@ main(int argc, char **argv)
 
     struct test {
 	string test_name;
-	XorpCallback1<int, TestInfo&>::RefPtr cb;
+	XorpCallback1<bool, TestInfo&>::RefPtr cb;
     } tests[] = {
 	{"test1", callback(test1)},
 	{"test2", callback(test2)},

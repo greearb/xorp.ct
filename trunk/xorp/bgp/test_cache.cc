@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.13 2003/04/22 19:20:20 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.14 2003/05/29 18:56:25 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
 #include <pwd.h>
 #include "libxorp/selector.hh"
 #include "libxorp/xlog.h"
+#include "libxorp/test_main.hh"
 
 #include "main.hh"
 #include "route_table_base.hh"
@@ -28,8 +29,9 @@
 #include "local_data.hh"
 #include "dump_iterators.hh"
 
-
-int test_cache() {
+bool
+test_cache(TestInfo& /*info*/)
+{
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_cache.";
     filename += pwd->pw_name;
