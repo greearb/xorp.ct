@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/debug.c,v 1.3 2004/06/10 22:41:15 hodson Exp $"
+#ident "$XORP: xorp/libxorp/debug.c,v 1.4 2004/08/22 00:11:55 pavlin Exp $"
 
 #include <sys/types.h>
 
@@ -40,7 +40,7 @@ void _xdebug_set_indent(uint32_t n)
 
 static const char*
 _xdebug_preamble(const char*	file, 
-		 int32_t	line, 
+		 int		line, 
 		 const char*	func)
 {
     static size_t sbuf_bytes = 256;
