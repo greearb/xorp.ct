@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.15 2004/02/29 22:57:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.16 2004/03/04 03:01:30 pavlin Exp $"
 
 
 //
@@ -1268,6 +1268,12 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 		    }
 #else // ! HAVE_RFC2292BIS (i.e., the old advanced API)
 		    {
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+			//
+			// TODO: XXX: temporary use HAVE_IPV6_MULTICAST_ROUTING
+			// to conditionally compile, because Linux doesn't
+			// have inet6_option_*
+			//
 			uint8_t  *tptr = NULL;
 			while (inet6_option_next(cmsgp, &tptr) == 0) {
 			    if (*tptr == IP6OPT_ROUTER_ALERT) {
@@ -1275,6 +1281,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 				break;
 			    }
 			}
+#endif // HAVE_IPV6_MULTICAST_ROUTING
 		    }
 #endif // ! HAVE_RFC2292BIS
 		    
@@ -1578,8 +1585,17 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	    }
 	    ctllen += CMSG_SPACE(hbhlen);
 #else
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+	    //
+	    // TODO: XXX: temporary use HAVE_IPV6_MULTICAST_ROUTING
+	    // to conditionally compile, because Linux doesn't
+	    // have inet6_option_*
+	    //
 	    hbhlen = inet6_option_space(sizeof(raopt));
 	    ctllen += hbhlen;
+#else
+	    UNUSED(hbhlen);
+#endif
 #endif // ! HAVE_RFC2292BIS
 	}
 	// Space for IPV6_TCLASS
@@ -1646,7 +1662,13 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	    }
 	    
 #else  // ! HAVE_RFC2292BIS (i.e., the old advanced API)
-	    
+
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+	    //
+	    // TODO: XXX: temporary use HAVE_IPV6_MULTICAST_ROUTING
+	    // to conditionally compile, because Linux doesn't
+	    // have inet6_option_*
+	    //
 	    if (inet6_option_init((void *)cmsgp, &cmsgp, IPV6_HOPOPTS)) {
 		XLOG_ERROR("inet6_option_init(IPV6_HOPOPTS) failed");
 		return (XORP_ERROR);
@@ -1655,6 +1677,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 		XLOG_ERROR("inet6_option_append(Router Alert) failed");
 		return (XORP_ERROR);
 	    }
+#endif // HAVE_IPV6_MULTICAST_ROUTING
 	    
 #endif // ! HAVE_RFC2292BIS
 	    
