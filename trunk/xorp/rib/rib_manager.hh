@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.29 2004/09/28 03:52:33 atanu Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.30 2004/10/05 20:27:17 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -238,6 +238,22 @@ public:
      * @param e XRL Response code.
      */
     void register_interest_in_target_done(const XrlError& e);
+
+    /**
+     * Deregister Interest in an XRL target so we can stop monitor process
+     * births and deaths.
+     *
+     * @param target_class the XRL Target Class we're deregistering
+     * interested in.
+     */
+    void deregister_interest_in_target(const string& target_class);
+
+    /**
+     * Called in response to deregistering interest in an XRL target
+     *
+     * @param e XRL Response code.
+     */
+    void deregister_interest_in_target_done(const XrlError& e);
 
     /**
      * Target Death is called when an XRL target that we've registered

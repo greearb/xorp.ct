@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.45 2005/01/21 22:02:04 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.46 2005/02/12 08:09:09 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -360,6 +360,29 @@ RibManager::register_interest_in_target_done(const XrlError& e)
 }
 
 void
+RibManager::deregister_interest_in_target(const string& target_class)
+{
+    if (_targets_of_interest.find(target_class)
+	!= _targets_of_interest.end()) {
+	_targets_of_interest.erase(target_class);
+	XrlFinderEventNotifierV0p1Client finder(&_xrl_router);
+	XrlFinderEventNotifierV0p1Client::RegisterClassEventInterestCB cb =
+	    callback(this, &RibManager::deregister_interest_in_target_done);
+	finder.send_deregister_class_event_interest("finder",
+						    _xrl_router.instance_name(),
+						    target_class, cb);
+    }
+}
+
+void
+RibManager::deregister_interest_in_target_done(const XrlError& e)
+{
+    if (e != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to deregister interest in an XRL target\n");
+    }
+}
+
+void
 RibManager::target_death(const string& target_class,
 			 const string& target_instance)
 {
@@ -368,6 +391,9 @@ RibManager::target_death(const string& target_class,
 	XLOG_ERROR("FEA died, so RIB is exiting too\n");
 	exit(0);
     }
+
+    // Deregister interest in the target
+    deregister_interest_in_target(target_class);
 
     // Inform the RIBs in case this was a routing protocol that died.
     _urib4.target_death(target_class, target_instance);
