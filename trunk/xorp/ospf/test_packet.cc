@@ -118,6 +118,25 @@ populate_standard_header(Packet *packet, OspfTypes::Version version)
 
 inline
 void
+populate_lsa_header(Lsa_header& header, OspfTypes::Version version)
+{
+    header.set_ls_age(500);
+    switch(version) {
+    case OspfTypes::V2:
+	header.set_options(0xff);
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+    header.set_link_state_id(0x01020304);
+    header.set_advertising_router(0x04030201);
+    header.set_ls_sequence_number(0x0A0B0C0D);
+    header.set_ls_checksum(0x1234);
+    header.set_length(200);
+}
+
+inline
+void
 populate_data_description(DataDescriptionPacket *ddp,
 			  OspfTypes::Version version)
 {
@@ -132,21 +151,7 @@ populate_data_description(DataDescriptionPacket *ddp,
 
     // Create a LSA Header to add
     Lsa_header header(version);
-
-    header.set_ls_age(500);
-    switch(version) {
-    case OspfTypes::V2:
-	header.set_options(0xff);
-	break;
-    case OspfTypes::V3:
-	break;
-    }
-    header.set_link_state_id(0x01020304);
-    header.set_advertising_router(0x04030201);
-    header.set_ls_sequence_number(0x0A0B0C0D);
-    header.set_ls_checksum(0x1234);
-    header.set_length(200);
-
+    populate_lsa_header(header, version);
     ddp->get_lsa_headers().push_back(header);
 }
 
