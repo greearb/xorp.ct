@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.49 2002/12/09 18:28:52 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -464,6 +464,10 @@ Peer::trie(const string& line, const vector<string>& words)
 	xorp_throw(InvalidString,
 		   c_format("Lookup failed [%s]", line.c_str()));
     }
+
+    if((words.size() == 6) && ("not" == words[5]))
+	xorp_throw(InvalidString,
+		   c_format("Lookup failed entry exists [%s]", line.c_str()));
 
     debug_msg("Found: %s\n", bgpupdate->str().c_str());
     
