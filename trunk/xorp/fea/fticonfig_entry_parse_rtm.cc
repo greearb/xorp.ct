@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.1 2003/05/02 07:50:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.2 2003/05/14 01:13:40 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -50,11 +50,11 @@ bool
 FtiConfigEntryGet::parse_buffer_rtm(FteX& fte, const uint8_t* buf,
 				    size_t buf_bytes)
 {
-    const rt_msghdr* rtm = reinterpret_cast<const rt_msghdr *>(buf);
+    const struct rt_msghdr* rtm = reinterpret_cast<const struct rt_msghdr*>(buf);
     const uint8_t* last = buf + buf_bytes;
     
     for (const uint8_t* ptr = buf; ptr < last; ptr += rtm->rtm_msglen) {
-    	rtm = reinterpret_cast<const rt_msghdr*>(ptr);
+    	rtm = reinterpret_cast<const struct rt_msghdr*>(ptr);
 	if (RTM_VERSION != rtm->rtm_version) {
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,
