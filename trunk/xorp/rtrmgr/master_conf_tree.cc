@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.43 2005/01/21 09:41:34 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.44 2005/02/01 02:50:13 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -493,10 +493,12 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 	return;
     }
 
+#ifdef defunct
     for (iter = inactive_modules.begin();
 	 iter != inactive_modules.end(); ++iter) {
 	_task_manager->shutdown_module(*iter);
     }
+#endif
 
     _task_manager->run(callback(this, &MasterConfigTree::commit_pass1_done));
 }
