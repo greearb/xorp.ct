@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.4 2003/08/04 23:39:53 hodson Exp $"
+#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.5 2004/02/20 21:19:11 hodson Exp $"
 
 #include <set>
 
@@ -44,7 +44,6 @@ static const char *program_version_id   = "0.1";
 static const char *program_date         = "July, 2003";
 static const char *program_copyright    = "See file LICENSE.XORP";
 static const char *program_return_value = "0 on success, 1 if test error, 2 if internal error";
-
 
 
 // ----------------------------------------------------------------------------
@@ -81,7 +80,7 @@ template <>
 IPv4 DefaultPeer<IPv4>::get() { return IPv4("10.0.0.1"); }
 
 template <>
-IPv6 DefaultPeer<IPv6>::get() { return IPv6("10:1"); }
+IPv6 DefaultPeer<IPv6>::get() { return IPv6("10::1"); }
 
 // ----------------------------------------------------------------------------
 // Spoof Port Manager instance support a single Spoof Port which in turn
@@ -125,8 +124,8 @@ template <typename A>
 class UpdateQueueTester
 {
 public:
-    UpdateQueueTester()
-	: _e(), _rip_system(_e), _pm(_rip_system)
+    UpdateQueueTester(EventLoop& e)
+	: _e(e), _rip_system(_e), _pm(_rip_system)
     {
 	_pm.the_port()->constants().set_expiry_secs(3);
 	_pm.the_port()->constants().set_deletion_secs(2);
@@ -143,6 +142,8 @@ public:
     int run_test()
     {
 	const uint32_t n_routes = 20000;
+
+	verbose_log("Running test for IPv%u\n", A::ip_version());
 
 	RouteDB<A>& rdb = _rip_system.route_db();
 	UpdateQueue<A>& uq = _rip_system.route_db().update_queue();
@@ -287,13 +288,13 @@ public:
 	    verbose_log("Got an extra update.\n");
 	    return 1;
 	}
-
+	
 	verbose_log("Success\n");
 	return 0;
     }
 
 protected:
-    EventLoop		_e;
+    EventLoop&		_e;
     System<A>		_rip_system;
     SpoofPortManager<A> _pm;
 
@@ -370,8 +371,13 @@ main(int argc, char* const argv[])
     int rval = 0;
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	UpdateQueueTester<IPv4> uqt;
-	rval = uqt.run_test();
+	EventLoop e;
+
+	UpdateQueueTester<IPv4> uqt4(e);
+	rval |= uqt4.run_test();
+
+	UpdateQueueTester<IPv6> uqt6(e);
+	rval |= uqt6.run_test();
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();

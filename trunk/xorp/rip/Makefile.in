@@ -118,25 +118,25 @@ xorp_ripng_SOURCES = xorp_ripng.cc xrl_target_common.hh xrl_target_ripng.hh xrl_
 xorp_ripng_LDADD = ./libripngxrl.a ./libripng.a $(top_builddir)/xrl/targets/libripngbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/xrl/interfaces/libsocket6locatorxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Test Program Sources
-test_auth_SOURCES = test_auth.cc
+test_auth_SOURCES = test_auth.cc test_utils.hh
 test_auth_LDADD = ./librip.a $(LDADD)
 
-test_packets_SOURCES = test_packets.cc
+test_packets_SOURCES = test_packets.cc test_utils.hh
 test_packets_LDADD = ./librip.a $(LDADD)
 
-test_request_SOURCES = test_request.cc
+test_request_SOURCES = test_request.cc test_utils.hh
 test_request_LDADD = ./librip.a $(LDADD)
 
-test_route_walk_SOURCES = test_route_walk.cc
+test_route_walk_SOURCES = test_route_walk.cc test_utils.hh
 test_route_walk_LDADD = ./librip.a ./libripng.a $(LDADD)
 
-test_timers_SOURCES = test_timers.cc
+test_timers_SOURCES = test_timers.cc test_utils.hh
 test_timers_LDADD = ./librip.a ./libripng.a $(LDADD)
 
-test_update_queue_SOURCES = test_update_queue.cc
-test_update_queue_LDADD = ./librip.a $(LDADD)
+test_update_queue_SOURCES = test_update_queue.cc test_utils.hh
+test_update_queue_LDADD = ./librip.a ./libripng.a $(LDADD)
 
-test_outputs_SOURCES = test_outputs.cc
+test_outputs_SOURCES = test_outputs.cc test_utils.hh
 test_outputs_LDADD = ./librip.a libripng.a $(LDADD)
 
 # -- RIP Core Library Sources
@@ -239,7 +239,7 @@ test_timers_DEPENDENCIES = ./librip.a ./libripng.a \
 test_timers_LDFLAGS =
 am_test_update_queue_OBJECTS = test_update_queue.$(OBJEXT)
 test_update_queue_OBJECTS = $(am_test_update_queue_OBJECTS)
-test_update_queue_DEPENDENCIES = ./librip.a \
+test_update_queue_DEPENDENCIES = ./librip.a ./libripng.a \
 	$(top_builddir)/libxorp/libxorp.a
 test_update_queue_LDFLAGS =
 am_xorp_rip_OBJECTS = xorp_rip.$(OBJEXT) xrl_target_rip.$(OBJEXT)

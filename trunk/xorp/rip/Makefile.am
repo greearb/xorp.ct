@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.25 2004/02/20 20:13:25 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.26 2004/02/20 21:19:10 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -77,25 +77,25 @@ xorp_ripng_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 xorp_ripng_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Test Program Sources
-test_auth_SOURCES		 = test_auth.cc
+test_auth_SOURCES		 = test_auth.cc test_utils.hh
 test_auth_LDADD			 = ./librip.a $(LDADD)
 
-test_packets_SOURCES		 = test_packets.cc
+test_packets_SOURCES		 = test_packets.cc test_utils.hh
 test_packets_LDADD		 = ./librip.a $(LDADD)
 
-test_request_SOURCES		 = test_request.cc
+test_request_SOURCES		 = test_request.cc test_utils.hh
 test_request_LDADD		 = ./librip.a $(LDADD)
 
-test_route_walk_SOURCES		 = test_route_walk.cc
+test_route_walk_SOURCES		 = test_route_walk.cc test_utils.hh
 test_route_walk_LDADD		 = ./librip.a ./libripng.a $(LDADD)
 
-test_timers_SOURCES		 = test_timers.cc
+test_timers_SOURCES		 = test_timers.cc test_utils.hh
 test_timers_LDADD		 = ./librip.a ./libripng.a $(LDADD)
 
-test_update_queue_SOURCES	 = test_update_queue.cc
-test_update_queue_LDADD		 = ./librip.a $(LDADD)
+test_update_queue_SOURCES	 = test_update_queue.cc test_utils.hh
+test_update_queue_LDADD		 = ./librip.a ./libripng.a $(LDADD)
 
-test_outputs_SOURCES		 = test_outputs.cc
+test_outputs_SOURCES		 = test_outputs.cc test_utils.hh
 test_outputs_LDADD		 = ./librip.a libripng.a $(LDADD)
 
 # -- RIP Core Library Sources
