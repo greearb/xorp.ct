@@ -271,11 +271,13 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
   keepalive $<$true/false$>$
   holdtime $<$value$>$ 
   id $<$ipv4$>$}
+  ipv6 $<$true/false$>$
 
-  The active, AS, keepalive, holdtime and id arguments are
+  The active, AS, keepalive, holdtime, id and ipv6 arguments are
   optional. Active defaults to being true and actively makes a
   connection, setting active to false sets up a listener. The AS value
-  is recommended if a connection is wanted.
+  is recommended if a connection is wanted. The ipv6 argument defaults
+  to false.
 
 \item {\sf send packet update 
   origin $<$num$>$ 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.10 2003/07/03 23:52:23 atanu Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.11 2003/08/05 22:14:45 atanu Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -131,6 +131,8 @@ private:
     AsNum _as;		// Our AS number.
     int _holdtime;	// The holdtime sent in the BGP open message.
     IPv4 _id;		// The ID sent in the open message.
+    bool _ipv6;		// Should we announce an ipv6 capability in
+			// the open message.
 
     Trie _trie_recv;	// Update messages received.
     Trie _trie_sent;	// Update messages sent.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.30 2003/08/05 23:42:10 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.31 2003/08/06 05:04:46 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -61,7 +61,8 @@ Peer::Peer(EventLoop    *eventloop,
       _keepalive(false),
       _established(false),
       _as(AsNum::AS_INVALID), // XXX
-      _holdtime(0)
+      _holdtime(0),
+      _ipv6(false)
 {
     debug_msg("XXX Creating peer %p\n", this);
 }
@@ -319,6 +320,16 @@ Peer::establish(const string& line, const vector<string>& words)
 	    _holdtime = atoi(words[i + 1].c_str());
 	} else if("id" == words[i]) {
 	    _id = IPv4(words[i + 1].c_str());
+	} else if("ipv6" == words[i]) {
+	    string ipv6arg = words[i+1];
+	    if("true" == ipv6arg)
+		_ipv6 = true;
+	    else if("false" == ipv6arg)
+		_ipv6 = false;
+	    else
+		xorp_throw(InvalidString, 
+			   c_format("Illegal argument to ipv6: <%s>\n[%s]",
+				    ipv6arg.c_str(), line.c_str()));
 	} else
 	    xorp_throw(InvalidString, 
 		       c_format("Illegal argument to establish: <%s>\n[%s]",
@@ -1205,6 +1216,9 @@ Peer::send_open()
     ** Create an open packet and send it in.
     */
     OpenPacket bgpopen(_as, _id, _holdtime);
+    if(_ipv6)
+	bgpopen.add_parameter(
+		new BGPMultiProtocolCapability(AFI_IPV6, SAFI_NLRI_UNICAST));
     size_t len;
     const uint8_t *buf = bgpopen.encode(len);
     debug_msg("OPEN Packet SENT\n%s", bgpopen.str().c_str());
