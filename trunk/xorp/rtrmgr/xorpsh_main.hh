@@ -12,16 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.8 2003/08/01 23:07:29 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.9 2003/12/02 09:39:00 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
 
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
+#include "cli/cli_node.hh"
 #include "xrl/interfaces/rtrmgr_xif.hh"
 #include "xorp_client.hh"
-#include "cli/cli_node.hh"
+#include "rtrmgr_error.hh"
 #include "xrl_xorpsh_interface.hh"
 
 
@@ -37,7 +38,7 @@ public:
     XorpShell(const string& IPCname, 
 	      const string& xorp_root_dir,
 	      const string& config_template_dir, 
-	      const string& xrl_dir);
+	      const string& xrl_dir) throw (InitError);
     ~XorpShell();
 
     void run();

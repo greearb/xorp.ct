@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.19 2003/12/02 09:39:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.20 2003/12/03 20:27:57 pavlin Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -40,50 +40,6 @@ static bool running = false;
 static void signal_handler(int signal_value);
 static void exit_handler(CliClient*);
 
-// ----------------------------------------------------------------------------
-// XorpShell implementation
-
-XorpShell::XorpShell(const string& IPCname,
-		     const string& xorp_root_dir,
-		     const string& config_template_dir,
-		     const string& xrl_dir)
-    : _eventloop(),
-      _xrlrouter(_eventloop, IPCname.c_str()),
-      _xclient(_eventloop, _xrlrouter),
-      _rtrmgr_client(&_xrlrouter),
-      _xorpsh_interface(&_xrlrouter, *this),
-      _cli_node(AF_INET, XORP_MODULE_CLI, _eventloop),
-      _xorp_root_dir(xorp_root_dir),
-      _got_config(false),
-      _mode(MODE_INITIALIZING)
-{
-    _ipc_name = IPCname;
-
-    // Read the router config template files
-    try {
-	_tt = new TemplateTree(xorp_root_dir, config_template_dir, xrl_dir);
-    } catch (const XorpException&) {
-#ifdef DEBUG_STARTUP
-	printf("caught exception\n");
-#endif
-	xorp_unexpected_handler();
-    }
-#if DEBUG_STARTUP
-    _tt->display_tree();
-#endif
-
-    // Read the router operational template files
-    try {
-	_ocl = new OpCommandList(config_template_dir.c_str(), _tt);
-    } catch (const XorpException&) {
-#ifdef DEBUG_STARTUP
-	printf("caught exception\n");
-#endif
-	xorp_unexpected_handler();
-    }
-    _ocl->display_list();
-}
-
 static void
 announce_waiting()
 {
@@ -104,6 +60,60 @@ wait_for_xrlrouter_ready(EventLoop& e, XrlRouter& rtr)
 	}
     }
     return true;
+}
+
+// ----------------------------------------------------------------------------
+// XorpShell implementation
+
+XorpShell::XorpShell(const string& IPCname,
+		     const string& xorp_root_dir,
+		     const string& config_template_dir,
+		     const string& xrl_dir) throw (InitError)
+    : _eventloop(),
+      _xrlrouter(_eventloop, IPCname.c_str()),
+      _xclient(_eventloop, _xrlrouter),
+      _rtrmgr_client(&_xrlrouter),
+      _xorpsh_interface(&_xrlrouter, *this),
+      _tt(NULL),
+      _ct(NULL),
+      _ocl(NULL),
+      _cli_node(AF_INET, XORP_MODULE_CLI, _eventloop),
+      _router_cli(NULL),
+      _xorp_root_dir(xorp_root_dir),
+      _got_config(false),
+      _mode(MODE_INITIALIZING)
+{
+    _ipc_name = IPCname;
+
+    // Read the router config template files
+    try {
+	_tt = new TemplateTree(xorp_root_dir, config_template_dir, xrl_dir);
+    } catch (const InitError& e) {
+	xorp_throw(InitError, e.why());
+    }
+#if DEBUG_STARTUP
+    _tt->display_tree();
+#endif
+
+    // Read the router operational template files
+    try {
+	_ocl = new OpCommandList(config_template_dir.c_str(), _tt);
+    } catch (const InitError& e) {
+	xorp_throw(InitError, e.why());
+    }
+    _ocl->display_list();
+}
+
+XorpShell::~XorpShell()
+{
+    if (_ct != NULL)
+	delete _ct;
+    if (_tt != NULL)
+	delete _tt;
+    if (_ocl != NULL)
+	delete _ocl;
+    if (_router_cli != NULL)
+	delete _router_cli;
 }
 
 void
@@ -188,15 +198,20 @@ XorpShell::run()
     printf("==============================================================\n");
 #endif
 
-    _ct = new SlaveConfigTree(_configuration, _tt, _xclient);
-    _ocl->set_config_tree(_ct);
+    try {
+	_ct = new SlaveConfigTree(_configuration, _tt, _xclient);
 
-    // Start up the CLI
-    _cli_node.enable();
-    _router_cli = new RouterCLI(*this, _cli_node);
+	_ocl->set_config_tree(_ct);
+
+	// Start up the CLI
+	_cli_node.enable();
+	_router_cli = new RouterCLI(*this, _cli_node);
+    } catch (const InitError& e) {
+	XLOG_ERROR("shutting down due to a parse error: %s", e.why().c_str());
+	running = false;
+    }
 
     _mode = MODE_IDLE;
-
     while (running) {
 	_eventloop.run();
     }
@@ -210,14 +225,6 @@ XorpShell::run()
     while (!_done) {
 	_eventloop.run();
     }
-}
-
-XorpShell::~XorpShell()
-{
-    delete _ct;
-    delete _tt;
-    delete _ocl;
-    delete _router_cli;
 }
 
 void
@@ -500,8 +507,9 @@ main(int argc, char *argv[])
     try {
 	XorpShell xorpsh(xname, xorp_binary_root_dir(), template_dir, xrl_dir);
 	xorpsh.run();
-    } catch (...) {
-	xorp_catch_standard_exceptions();
+    } catch (const InitError& e) {
+	XLOG_ERROR("xorpsh exiting due to an init error: %s", e.why().c_str());
+	exit(1);
     }
 
     //
