@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.16 2003/06/12 03:01:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.17 2003/06/12 06:02:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -545,7 +545,7 @@ XrlQueue<A>::callback(const XrlError& error, uint32_t sequence,
 	break;
 
     case REPLY_TIMED_OUT:
-	// We shouldn't really be using a reliable transport where
+	// We should really be using a reliable transport where
 	// this error cannot happen. But it has so lets retry if we can.
 	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
 	_errors++;
