@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.54 2004/07/24 01:24:05 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.55 2004/07/26 09:22:36 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -60,7 +60,7 @@ Release 1.1 (2004/??/??)
     - Bug fix in deleting the Fib2Mrib entries.
 
   CLI:
-    - 
+    - Bug fix in <SPACE> auto-completion for sub-commands.
 
   SNMP:
     - 
