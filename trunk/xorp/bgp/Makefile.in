@@ -101,7 +101,7 @@ bin_PROGRAMS = xorp_bgp
 
 # -- Test Programs
 #TESTS		+= update_test
-TESTS = test_packet test_plumbing aspath_test test_packet_coding isolation_tests test_peer_data
+TESTS = test_packet test_plumbing aspath_test test_packet_coding isolation_tests test_peer_data test_leaks.sh
 
 # -- No-install Programs
 noinst_PROGRAMS = test_packet test_plumbing update_test aspath_test test_packet_coding isolation_tests test_peer_data

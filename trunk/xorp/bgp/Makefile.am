@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.26 2003/09/27 02:27:26 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.27 2003/10/06 22:42:50 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -20,6 +20,7 @@ TESTS		+= aspath_test
 TESTS		+= test_packet_coding
 TESTS		+= isolation_tests
 TESTS		+= test_peer_data
+TESTS		+= test_leaks.sh
 
 # -- No-install Programs
 noinst_PROGRAMS	 = test_packet
