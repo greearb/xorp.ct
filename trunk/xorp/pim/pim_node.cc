@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.41 2004/04/29 23:39:28 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.42 2004/05/04 00:14:46 pavlin Exp $"
 
 
 //
@@ -190,10 +190,8 @@ PimNode::final_start()
 	return (XORP_ERROR);
     }
 
-#if 0	// TODO: XXX: PAVPAVPAV
     // Start the pim_vifs
     start_all_vifs();
-#endif
     
     // Start the BSR module only if we are enabled to run the BSR mechanism
     if (_pim_bsr.is_enabled()) {
@@ -808,6 +806,8 @@ PimNode::start_all_vifs()
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	PimVif *pim_vif = (*iter);
 	if (pim_vif == NULL)
+	    continue;
+	if (! pim_vif->is_enabled())
 	    continue;
 	if (pim_vif->start(error_msg) != XORP_OK) {
 	    XLOG_ERROR("Cannot start vif %s: %s",

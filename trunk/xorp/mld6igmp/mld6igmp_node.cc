@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.23 2004/04/05 03:18:30 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.24 2004/04/29 23:35:43 pavlin Exp $"
 
 
 //
@@ -722,6 +722,8 @@ Mld6igmpNode::start_all_vifs()
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
 	Mld6igmpVif *mld6igmp_vif = (*iter);
 	if (mld6igmp_vif == NULL)
+	    continue;
+	if (! mld6igmp_vif->is_enabled())
 	    continue;
 	if (mld6igmp_vif->start(error_msg) != XORP_OK) {
 	    XLOG_ERROR("Cannot start vif %s: %s",
