@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.56 2004/12/23 17:33:13 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.57 2005/02/03 02:45:26 pavlin Exp $"
 
 #include <signal.h>
 
@@ -82,11 +82,13 @@ usage(const char* argv0)
 {
     fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
     fprintf(stderr, "Options:\n");
+    fprintf(stderr, "  -a <allowed host> Host allowed by the finder\n");
+    fprintf(stderr, "  -n <allowed net>  Subnet allowed by the finder\n");
     fprintf(stderr, "  -h        Display this information\n");
     fprintf(stderr, "  -v        Print verbose information\n");
     fprintf(stderr, "  -b <file> Specify boot file\n");
     fprintf(stderr, "  -s <app>  Specify save config file hook\n");
-    fprintf(stderr, "  -n        Do not execute XRLs\n");
+    fprintf(stderr, "  -N        Do not execute XRLs\n");
     fprintf(stderr, "  -r        Restart failed processes (partially working; not recommended!)\n");
     fprintf(stderr, "  -i <addr> Set or add an interface run Finder on\n");
     fprintf(stderr, "  -p <port> Set port to run Finder on\n");
@@ -482,8 +484,34 @@ main(int argc, char* const argv[])
     save_hook           = "";
 
     int c;
-    while ((c = getopt(argc, argv, "t:b:s:x:i:p:q:nrvh")) != EOF) {
+    while ((c = getopt(argc, argv, "a:n:t:b:s:x:i:p:q:Nrvh")) != EOF) {
 	switch(c) {
+	case 'a':
+	    //
+	    // User is specifying an IPv4 address to accept finder
+	    // connections from.
+	    //
+	    try {
+		add_permitted_host(IPv4(optarg));
+	    } catch (const InvalidString&) {
+		fprintf(stderr, "%s is not a valid IPv4 address.\n", optarg);
+		usage(argv[0]);
+		cleanup_and_exit(1);
+	    }
+	    break;
+	case 'n':
+	    //
+	    // User is specifying a network address to accept finder
+	    // connections from.
+	    //
+	    try {
+		add_permitted_net(IPv4Net(optarg));
+	    } catch (const InvalidString&) {
+		fprintf(stderr, "%s is not a valid IPv4 network.\n", optarg);
+		usage(argv[0]);
+		cleanup_and_exit(1);
+	    }
+	    break;
 	case 't':
 	    template_dir = optarg;
 	    break;
@@ -499,7 +527,7 @@ main(int argc, char* const argv[])
 	case 'q':
 	    quit_time = atoi(optarg);
 	    break;
-	case 'n':
+	case 'N':
 	    do_exec = false;
 	    break;
 	case 'r':
