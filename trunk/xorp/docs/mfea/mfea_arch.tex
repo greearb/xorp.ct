@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.15 2002/12/11 10:19:33 pavlin Exp $
+% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.1.1.1 2002/12/11 23:55:56 hodson Exp $
 %
 
 \documentclass[11pt]{article}
@@ -37,13 +37,13 @@
 
 \title{XORP Multicast Forwarding Engine Abstraction \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 10, 2003}
 
 \maketitle
 
@@ -64,42 +64,40 @@ for software developers who wish to modify this software.
 The main purpose of the MFEA is to abstract the underlying system and
 the multicast forwarding engine, and to provide a consistent interface
 to multicast-related modules such as PIM and MLD/IGMP. Thus, if we want
-to use PIM and MLD/IGMP on different platform/hardware for example, we
-would have to modify only some part of the MFEA. In addition, all the
+to use PIM and MLD/IGMP on different OS platform or hardware, we
+would have to modify the MFEA only. In addition, all the
 complexity associated with network sockets, sending and receiving
-packets, and so on are moved out of the protocol modules to the
-MFEA. This reduces greatly code duplication, and eliminates the
-development overhead of dealing with protocol-independent issues when
-implementing a new protocol. In addition, if we want to use PIM and
-MLD/IGMP in simulation environment, it will be sufficient to add the
-simulation environment support to the MFEA only.
+packets, and so on are moved away from the protocol modules.
+This eliminates code duplication, and reduces greatly the
+development overhead associated with protocol-independent
+issues when implementing a new protocol. In addition, if we want to use
+PIM and MLD/IGMP in a simulation-like environment, it will be sufficient
+to add the simulation environment support only to the MFEA.
 
-Currently (December 2002), the MFEA supports abstraction for
+Currently (March 2003), the MFEA supports abstraction for
 the following systems:
 
 \begin{itemize}
-  \item {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5).
+  \item \{Free,Net,Open\}BSD OS (tested only on FreeBSD-4.5).
   \item Linux OS (tested only on Red Hat Linux 7.2 with kernel 2.4.18)
 \end{itemize}
 
 In the future, the MFEA will support simulation environment, and
 abstraction for Click~\cite{CLICK-PROJECT} forwarding
-path~\footnote{Currently (December 2002) Click does
+path~\footnote{Currently (March 2003) Click does
 not support multicast yet.}. Support for other systems will be added
 on-demand if there are available resources.
 
-Currently (December 2002), for simplicity the MFEA is a
-separate process from the unicast FEA.  One of the reasons is because
+For simplicity, currently (March 2003) the MFEA is a 
+separate process from the unicast FEA. One of the reasons for that
+separation is because
 multicast routing/forwarding should have minimum impact on the unicast
 routing/forwarding. If the FEA and MFEA were a single process, then if
-the PIM-SM daemon for example starts blasting a huge amount of requests
+the PIM-SM daemon for example starts sending a large number of requests
 to the unified FEA/MFEA process, then it may block the operation of that
 process, and it may affect not only multicast, but unicast
 routing/forwarding as well. If the FEA and the MFEA are separate
-processes, the impact will be localized.  Note that the unicast and
-multicast forwarding tables in the kernel may be unified, this is up to
-the implementation; however, it should allow access by more than one
-daemons at the same time (eventually through a locking mechanism).
+processes, the impact will be localized to multicast only.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Acronyms}
@@ -140,7 +138,7 @@ Acronyms used in this document:
   \end{center}
 \end{figure}
 
-Figure~\ref{fig:mfea_design_overview} gives a general overview of the
+Figure~\ref{fig:mfea_design_overview} provides a general overview of the
 MFEA components. For each component there is a C++ class with exactly
 the same name. The main components are briefly described below:
 
@@ -185,16 +183,17 @@ MfeaNode is a representation of a single MFEA unit (\eg as part of a
 virtual multicast router).
 Typically, there would be a single MfeaNode per multicast router.
 However, in some cases a multicast router may have more than one
-MFEA unit. For example, it could have one MfeaNode for IPv4, and
+MFEA units. For example, it could have one MfeaNode for IPv4, and
 another one for IPv6 multicast routing. Further, if we want to
 run MFEA in a simulation environment, each multicast router within that
 simulation will have a single MfeaNode.
 
-From a developer's point of view, MfeaNode contains the front-end interface
-to interact with the MFEA unit, as well as all the state
-related to that unit. For example, MfeaNode contains the methods to
+From a developer's point of view, MfeaNode contains all the state
+related to the MFEA unit, and exports the front-end interface
+to interact with that unit.
+For example, MfeaNode contains the methods to
 start/stop or configure the MFEA, or to send/receive protocol control
-messages (\eg PIM or MLD/IGMP) to/from the unit. Those methods are
+packets (\eg PIM or MLD/IGMP) to/from the unit. Those methods are
 described in the following files:
 
 \begin{itemize}
@@ -211,22 +210,24 @@ modules such as PIM and MLD/IGMP:
   \item Interface to add/delete/start/stop a protocol within the MFEA
   and the underlying system.
 
-  \item Interface to send or receive protocol messages through the
+  \item Interface to send or receive protocol packets through the
   underlying system.
 
   \item Interface to receive (kernel) upcalls/signals from the
-  underlying system and pass those signals to the interested
-  multicast-related modules. Examples of such signals are NOCACHE or
-  WRONGVIF/WRONGMIF in case of UNIX kernel when the underlying multicast
+  underlying system, and to forward those signals to the
+  multicast-related modules that are interested in receiving those
+  signals. Examples of such signals in case of UNIX kernel are NOCACHE or
+  WRONGVIF/WRONGMIF: the former one is sent when the underlying multicast
   forwarding engine has no multicast forwarding entry for a multicast
-  packet or when a multicast packet has arrived on an interface that is
-  not the expected incoming interface.
+  packet; the latter one is sent when a multicast data packet has
+  arrived on an interface that is not the expected incoming interface to
+  forward that data packet.
 
   \item Interface to add/delete dataflow monitors, to monitor network
   bandwidth per dataflow, and to send the appropriate signals to the
   interested multicast-related modules. For example, the PIM-SM module
-  might be interested when the bandwidth of a given dataflow becomes
-  zero, or above a threshold.
+  might be interested to know when the bandwidth of a given dataflow becomes
+  zero, or is above a threshold.
 
   \item Interface to inform the multicast-related modules about the
   available virtual interfaces (\eg network interfaces, tunnels, etc.) on
@@ -250,61 +251,60 @@ to/from the PIM module). Those mechanisms are outside the scope of
 MfeaNode, and must be implemented separately.
 
 MfeaNode contains several pure virtual methods (\eg
-\verb=send_add_mrib()= that is used to add MRIB entry to a
+\verb=send_add_mrib()= is used to add MRIB entry to a
 multicast-related module that is interested in tracking the MRIB) 
 that must be implemented by a class that inherits MfeaNode.
-For example, XrlMfeaNode is a class that uses MfeaNode as a base class,
-and that implements XRL-based communication mechanisms between MfeaNode
+For example, XrlMfeaNode is a class that uses MfeaNode as a base class:
+XrlMfeaNode implements XRL-based communication mechanisms between MfeaNode
 and other XORP components such as the PIM and MLD/IGMP modules.
 
-By default, MfeaNode is disabled; therefore it must be explicitly
-enabled, and then started.
+By default, MfeaNode is disabled; therefore, on startup it must be
+enabled explicitly.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{MfeaVif Description}
 
-MfeaVif is a MFEA-specific virtual interface that is used to keep
-various state per virtual interface. Typically, there would be one
-MfeaVif virtual interface for each interface on the router: physical
-interfaces, tunnels, and the loopback interface. In addition, there will
-be one special MfeaVif virtual interface: the PIM Register virtual
+MfeaVif is a MFEA-specific virtual (network) interface that is used to keep
+various state per interface. Typically, there would be one
+MfeaVif per network interface such as physical
+interface, tunnel, or the loopback interface. In addition, there is
+one special MfeaVif: the PIM Register virtual
 interface that is used for sending and receiving PIM Register
-messages~\footnote{In the future (after December 2002), the PIM
+packets~\footnote{In the future (after March 2003), the PIM
 Register MfeaVif interface may not be part of the MFEA anymore, because
 it is strictly PIM-specific.}.
 
-One of the purposes of MfeaVif is to keep information about each
-interface available on the system: network address, subnet address, is
-the interface up or multicast-capable, etc. This state is used by the
-MFEA to keep track of any changes to an interface (\eg an alias address
-has been added/deleted, etc). If there is a change to an interface, the
-MFEA informs all protocol modules that have enabled the specific
-protocol on that interface~\footnote{Currently (December 2002), the MFEA
-reads the interface status from the underlying system 
-only once (on startup); instead, it should keep monitoring the interface
-status by periodically reading that status for example, and/or by
-considering the information provided by the XORP Router Manager (within
-the XORP framework).}.
+One of the purposes of MfeaVif is to keep various information about each
+network interface available on the system: network and subnet address,
+is the interface up or multicast-capable, and so on. This information is
+used by the MFEA to keep track of any changes to an interface (\eg an
+alias address has been added/deleted, etc). If there is a change to an
+interface, the MFEA informs all protocol modules that have enabled the
+specific protocol on that interface~\footnote{Currently (March 2003),
+the MFEA reads the interface status from the underlying system only once
+(on startup); instead, it should keep monitoring the interface status by
+periodically reading that status for example, and/or by considering the
+information provided by the XORP Router Manager (within the XORP
+framework).}.
 
-Another purpose of MfeaVif is to keep track of the multicast groups
-joined per interface. For example, if a multicast-related module that
-uses the MFEA joins a multicast group on an interface, the MFEA will
-call the appropriate system call to join the group on the specified
-interface, and at the same time it will keep the appropriate state on
-the corresponding MfeaVif. Thus, if more than one modules join exactly
-same multicast group on the same interface, and later one of those
-modules leave that group, the MFEA will modify the appropriate state in
-MfeaVif, but will not use a system call to leave the multicast group on
-the interface.
+Another purpose of MfeaVif is to keep track of the multicast groups that
+have been joined per interface. For example, if a multicast-related
+module that uses the MFEA joins a multicast group on an interface, the
+MFEA uses the appropriate system call to join the group on the
+specified interface, and at the same time it would keep the appropriate
+state on the corresponding MfeaVif. Thus, if another module joins
+exactly same multicast group on that interface, but later one of
+those modules leaves that group, the MFEA would modify only the appropriate
+state in MfeaVif, but will not use a system call to leave the multicast
+group on the interface.
 
-Typically, from developer's point of view, all interaction with MfeaVif
-would be through MfeaNode~\footnote{Note that on few occasions in the current
-implementation (December 2002) XrlMfeaNode for simplicity uses
-direct access to MfeaVif.}.
+Typically, from developer's point of view, all interactions with MfeaVif
+would be through MfeaNode~\footnote{For simplicity, currently (March
+2003) there are few occasions when XrlMfeaNode uses direct access to MfeaVif.}.
 
 The public interface for MfeaVif contains the methods to manipulate a
-virtual interface. Those methods are to start/stop/enable/disable a
-virtual interface, or to configure it. Those methods are described in
+virtual (network) interface. Those methods are to start/stop/enable/disable a
+virtual interface, and to configure it. The methods are described in
 the following files:
 
 \begin{itemize}
@@ -313,22 +313,23 @@ the following files:
   \item \verb=libproto/proto_unit.hh=
 \end{itemize}
 
-By default, each MfeaVif is disabled; therefore it must be explicitly
-enabled, and then started.
+By default, MfeaNode is disabled; therefore, on startup it must be
+enabled explicitly.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{MfeaConfig Description}
 
 MfeaConfig handles the MFEA-specific configuration~\footnote{Currently
-(December 2002), MfeaConfig is not implemented; rather, all state is
-kept into MfeaNode instead.}. This configuration is used to configure the
+(March 2003), MfeaConfig is not implemented; rather, all state is
+kept inside MfeaNode instead.}. This configuration is used to configure the
 following units:
 
 \begin{itemize}
 
-  \item MfeaNode: how often to read the unicast forwarding table, and
-  information about the network interfaces, etc.
+  \item MfeaNode: how often to read the unicast forwarding table,
+  default routing metrics and metric preferences to assign to each
+  route, etc.
 
 \end{itemize}
 
@@ -338,79 +339,80 @@ following units:
 
 Some protocols such as PIM-SM need the bandwidth of multicast data flows
 to be monitored: if the bandwidth of a specific data flow (defined by
-source and group address) is above or below a pre-defined threshold (per
-data flow), the protocol should be informed. For example, if the
-bandwidth of a data flow is zero for some amount of time, the
+a source and a group address) is above or below a pre-defined threshold
+(defined per data flow), the protocol should be informed. For example, if the
+bandwidth of a data flow is zero for some predefined amount of time, the
 corresponding multicast routing entry in the multicast routing protocol
 module might be deleted (as well as the corresponding multicast
 forwarding entry in the multicast forwarding engine). Another example is
-switching to the Shortest-Path Tree in case of PIM-SM: the SPT switch is
+the Shortest-Path Tree switc in case of PIM-SM: the SPT switch is
 triggered if the bandwidth from a specific source is above a
 pre-configured threshold.
 
 If the multicast forwarding engine in the underlying system does
-support bandwidth dataflow monitoring and upcalls, then any addition or
+support bandwidth dataflow monitoring, then any addition or
 deletion of a dataflow monitor to the MFEA translates to a system call
 to the underlying system, and the MFEA itself does not need to keep any
 state. However, if the underlying system does not support bandwidth
-dataflow monitoring, then the MFEA needs to implement a work-around.
+dataflow monitoring, then the MFEA needs to implement that on its own.
 In case of UNIX kernel for example, the kernel supports an ioctl()
-system call to get the number of octets and packets forwarded so far on
-an existing MFC entry. Thus, if the MFEA reads this information two times,
-it can compute the the forwarding bandwidth between the two readings.
+system call to obtain the number of octets and packets forwarded so far on
+an existing MFC entry. Thus, if the MFEA reads this information twice,
+it can compute the data bandwidth between the two readings.
 
-The purpose of the MfeaDft table is to keep state about dataflows the
-MFEA should monitor their bandwidth of (only in the case the underlying
+The purpose of the MfeaDft table is to keep state about the dataflows the
+MFEA is monitoring (only in the case the underlying
 system does not support bandwidth dataflow monitoring). For each entry
 in MfeaDft, the MFEA periodically reads the bandwidth forwarding
 statistics from the underlying system. If the forwarded bandwidth
-satisfies the pre-defined condition, the MFEA originates a dataflow
-signal to the module that has installed that dataflow monitoring
-entry. This signal is delivered every time the pre-defined condition is
-true (until the entry is explicitly deleted by the module that installed
-it).
+satisfies the pre-defined condition for that dataflow, the MFEA
+originates a dataflow signal to the module that has installed that
+dataflow monitoring entry. This signal is delivered every time the
+pre-defined condition is true (until the entry is explicitly deleted by
+the module that installed it).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{MribTable Description}
 
 MribTable is the table with the MRIB information. Whenever this
-information is changed, the change is propagated to all interested
-parties that have registered interest in receiving it. For example, in
+information changes, the change is propagated to all interested
+parties that have registered interest in it. For example, in
 case of PIM-SM the MRIB is used to compute the Reverse-Path Forwarding
 information toward the RPs or the senders. This information contains the
 next-hop router address and the interface toward that router, the
 routing metric and the metric preference.
 
-Currently (December 2002) the MRIB information is obtained by
-periodically reading the underlying unicast forwarding table, but in the
-future the MRIB should be obtained by the interested parties directly
-from the RIB module instead of MFEA; the MFEA itself should be used only
-as a backup solution, and only if explicitly enabled for that purpose.
+Currently (March 2003), the MRIB information is obtained by
+periodically reading the underlying unicast forwarding table. In the
+future, the MRIB would be obtained by the interested parties directly
+from the RIB module instead of the MFEA module; the MFEA itself should
+be used only as a backup solution, and only if explicitly enabled for
+that purpose.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{UnixComm Description}
 
 UnixComm is a per-protocol UNIX-specific unit for communication with the
 underlying system (the only exception is the very first unit, which is
-called UnixComm0 and is described in
+called UnixComm0 and which is described in
 Section~\ref{sec:unixcomm0_description}).
 
-UnixComm implements UNIX-specific methods for calling the appropriate
+UnixComm implements various UNIX-specific methods that use the appropriate
 system calls to open or close a socket per protocol, to send or receive
-protocol message, join or leave a multicast group (per protocol per
-interface), etc. Typically, there is a single UnixComm entry per
+protocol packets, to join or leave a multicast group (per protocol per
+interface), and so on. Typically, there is a single UnixComm entry per
 protocol; \eg one UnixComm for PIM, another one for IGMP (or MLD in case
 of IPv6), etc. When a protocol module registers a network protocol with
 MFEA, the corresponding UnixComm for that protocol is created (if it did
 not exist).
 
 Each UnixComm entry is also used to keep information about various
-protocol preferences: \eg if a protocol module instance is interested in
-receiving various kernel upcall signals, MRIB information,
-etc.~\footnote{From design point of view, this information should not be
-kept in the system-specific UnixComm entry, but in some
+protocol preferences: \eg whether a protocol module instance is interested in
+receiving various kernel upcall signals, whether it needs to receive
+MRIB information, etc.~\footnote{Strictly speaking, this information
+should not be kept in the system-specific UnixComm entry, but in some
 system-independent entry. For simplicity, for now this state is
-kept in UnixComm; in the future (after December 2002), UnixComm
+kept in UnixComm; in the future (after March 2003), UnixComm
 may contain only the system-specific information and methods.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -419,31 +421,33 @@ may contain only the system-specific information and methods.}
 
 UnixComm0 is a special protocol-independent UnixComm unit used for
 communication with the underlying system. For example, UnixComm0 is used
-for the following purpose (this list may not be complete). In other
+for the following tasks (this list may not be complete). In other
 words, UnixComm0 is used for all purposes that do not require
-protocol-specific socket:
+protocol-specific sockets:
 
 \begin{itemize}
 
   \item Start/stop the multicast forwarding engine.
 
-  \item Add/delete a multicast-capable interface with the underlying
-  system.
+  \item Add/delete an interface used for multicast forwarding by the
+  underlying system.
 
-  \item Add/delete a MFC entry with the multicast forwarding engine.
+  \item Add/delete a MFC entry within the multicast forwarding engine.
 
-  \item Install dataflow monitors (if the underlying system supports it).
+  \item Install dataflow monitors (only if the underlying system supports
+  that feature).
 
-  \item Read bandwidth forwarding statistics per dataflow.
+  \item Read data bandwidth forwarding statistics (per dataflow).
 
   \item Read information about the available network interfaces in the
-  system, and reports any changes about it (the latter not implemented yet).
+  system, and report any changes about it (the latter one is not
+  implemented yet).
 
-  \item Read the underlying unicast forwarding table, and reports
+  \item Read the underlying unicast forwarding table, and report
   any changes about it.
 
-  \item Send/receive protocol-specific packets (e.g., PIM or IGMP) to be
-  sent/received to/from network interfaces.
+  \item Send/receive protocol-specific packets (e.g., PIM or IGMP)
+  to/from the network interfaces.
 
 \end{itemize}
 
@@ -460,6 +464,9 @@ operation when MfeaNode is stopped.
 \begin{itemize}
 
   \item December 11, 2002: Version 0.1 completed.
+
+  \item March 10, 2003: Updated to match XORP version 0.2 release code;
+  cleanup.
 
 \end{itemize}
 
