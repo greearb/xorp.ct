@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.32 2003/10/31 03:14:33 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.33 2003/11/18 23:03:56 pavlin Exp $"
 
 #include <signal.h>
 
@@ -148,7 +148,7 @@ main(int argc, char* const argv[])
 
     int c;
 
-    while ((c = getopt (argc, argv, "t:b:x:i:p:q:ndh")) != EOF) {
+    while ((c = getopt(argc, argv, "t:b:x:i:p:q:ndh")) != EOF) {
 	switch(c) {
 	case 't':
 	    template_dir = optarg;
@@ -231,9 +231,11 @@ main(int argc, char* const argv[])
     EventLoop eventloop;
     randgen.add_eventloop(&eventloop);
 
+    //
     // Start the finder.
     // These are dynamically created so we have control over the
     // deletion order.
+    //
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     FinderServer* fs;
     try {
@@ -256,19 +258,21 @@ main(int argc, char* const argv[])
 	exit(-1);
     }
 
-    // start the module manager
+    // Start the module manager.
     ModuleManager mmgr(eventloop, /*verbose = */true, xorp_binary_root_dir());
 
     UserDB userdb;
     userdb.load_password_file();
 
-    // initialize the IPC mechanism
+    // Initialize the IPC mechanism.
     XrlStdRouter xrl_router(eventloop, "rtrmgr", fs->addr(), fs->port());
     XorpClient xclient(eventloop, xrl_router);
 
     try {
-	// read the router startup configuration file,
-	// start the processes required, and initialize them
+	//
+	// Read the router startup configuration file,
+	// start the processes required, and initialize them.
+	//
 	XrlRtrmgrInterface xrt(xrl_router, userdb, eventloop, randgen);
 	{
 	    // Wait until the XrlRouter becomes ready
@@ -296,17 +300,19 @@ main(int argc, char* const argv[])
 	XorpTimer quit_timer;
 	if (quit_time > 0) {
 	    quit_timer =
-		eventloop.new_oneoff_after_ms(quit_time*1000,
+		eventloop.new_oneoff_after_ms(quit_time * 1000,
 					      callback(signalhandler, 0));
 	}
 
-	// loop while handling configuration events and signals
+	// Loop while handling configuration events and signals.
 	while (running) {
 	    fflush(stdout);
 	    eventloop.run();
 	}
 
-	// Shutdown everything
+	//
+	// Shutdown everything.
+	//
 
 	// Delete the configuration.
 	ct->delete_entire_config();
@@ -324,18 +330,18 @@ main(int argc, char* const argv[])
 	running = false;
     }
 
-    //Shut down child processes that haven't already been shutdown.
+    // Shut down child processes that haven't already been shutdown.
     mmgr.shutdown();
 
-    //Wait until child processes have terminated
+    // Wait until child processes have terminated
     while (mmgr.shutdown_complete() == false && eventloop.timers_pending()) {
 	eventloop.run();
     }
 
-    //delete the template tree
+    // Delete the template tree
     delete tt;
 
-    //shutdown the finder
+    // Shutdown the finder
     delete fs;
 
     //
@@ -346,4 +352,3 @@ main(int argc, char* const argv[])
 
     return (errcode);
 }
-
