@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP$
+# $XORP: xorp/utils/xrl_wrappers_generator.sh,v 1.1 2003/10/16 18:46:56 pavlin Exp $
 #
 
 #
@@ -28,6 +28,9 @@
 #            XRL="finder://fea/ifmgr/0.1/get_configured_mtu?ifname:txt=$1"
 #            call_xrl_wrapper -p all "${XRL}"
 #        }
+#
+#        where call_xrl_wrapper is a shell function defined in
+#        $XORP/utils/xrl_shell_lib.sh
 #
 
 if [ $# -ne 1 ] ; then
