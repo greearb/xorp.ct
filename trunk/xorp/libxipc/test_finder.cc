@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.13 2003/06/19 19:20:07 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.14 2004/06/10 22:41:07 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -99,7 +99,8 @@ test_xrls_resolve(EventLoop& e, FinderClient& fc1, list<string>& xrls)
     for (list<string>::const_iterator ci = xrls.begin();
 	 ci != xrls.end(); ++ci) {
 	verbose_log("Resolving %s...\n", ci->c_str());
-	fc1.query(*ci, callback(resolve_callback, &(*ci), &result, &success));
+	fc1.query(e, *ci,
+		  callback(resolve_callback, &(*ci), &result, &success));
     }
 
     while (!expired && success)
