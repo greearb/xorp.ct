@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.24 2004/07/09 06:25:37 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.25 2004/07/09 06:52:17 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -294,7 +294,7 @@ the login shell is csh or tcsh):
  # Wait for the previous command to return
  ssh www.xorp.org
  setenv ReleaseVersion `cat _XORP_VERSION`
- echo ReleaseVersion
+ echo $ReleaseVersion
  rm _XORP_VERSION
  cd /home/www/u1/www/data/xorp-releases
  mkdir $ReleaseVersion
