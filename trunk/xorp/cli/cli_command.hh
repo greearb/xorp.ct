@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.8 2004/06/01 11:44:22 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.9 2004/06/10 22:40:42 hodson Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -53,6 +53,14 @@ typedef XorpCallback5<int,	/* return_value */
     const vector<string>&	/* command_args */
 >::RefPtr CLI_PROCESS_CALLBACK;
 
+typedef XorpCallback5<void,	/* return_value */
+    const string&,		/* server_name */
+    const string&,		/* cli_term_name */
+    uint32_t,			/* cli_session_id */
+    const string&,		/* command_global_name */
+    const vector<string>&	/* command_args */
+>::RefPtr CLI_INTERRUPT_CALLBACK;
+
 typedef XorpCallback3<map<string, string>, /* return value */
     const string& ,		/* global_name */
     bool& ,			/* can_be_run */
@@ -67,6 +75,11 @@ typedef int (* CLI_PROCESS_FUNC)(const string& server_name,
 				 uint32_t cli_session_id,
 				 const string& command_global_name,
 				 const vector<string>& command_args);
+typedef void (* CLI_INTERRUPT_FUNC)(const string& server_name,
+				    const string& cli_term_name,
+				    uint32_t cli_session_id,
+				    const string& command_global_name,
+				    const vector<string>& command_args);
 
 //
 // The type of a function that handles CLI command completions
@@ -158,7 +171,7 @@ public:
 			    const string& init_cd_prompt);
     
     /**
-     * Add a child command with a callback.
+     * Add a child command with a processing callback.
      * 
      * @param init_command_name the command name to add. It can include
      * more than one command levels in the middle. E.g., "show version pim".
@@ -172,6 +185,25 @@ public:
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
 			    const CLI_PROCESS_CALLBACK& init_cli_process_callback);
+
+    /**
+     * Add a child command with a processing and an interrupt callbacks.
+     * 
+     * @param init_command_name the command name to add. It can include
+     * more than one command levels in the middle. E.g., "show version pim".
+     * However, commands "show" and "show version" must have been installed
+     * first.
+     * @param init_command_help the command help.
+     * @param init_cli_process_callback the callback to call when the
+     * command is entered for execution from the command-line.
+     * @param init_cli_interrupt_callback the callback to call when the
+     * user has interrupted the command (e.g., by typing Ctrl-C).
+     * @return the new child command on success, otherwise NULL.
+     */
+    CliCommand *add_command(const string& init_command_name,
+			    const string& init_command_help,
+			    const CLI_PROCESS_CALLBACK& init_cli_process_callback,
+			    const CLI_INTERRUPT_CALLBACK& init_cli_interrupt_callback);
     
     /**
      * Add a child command with a processing function.
@@ -190,6 +222,30 @@ public:
 			    CLI_PROCESS_FUNC init_cli_process_func) {
 	CLI_PROCESS_CALLBACK cb = callback(init_cli_process_func);
 	return (add_command(init_command_name, init_command_help, cb));
+    }
+
+    /**
+     * Add a child command with a processing function and an interrupt
+     * handler.
+     * 
+     * @param init_command_name the command name to add. It can include
+     * more than one command levels in the middle. E.g., "show version pim".
+     * However, commands "show" and "show version" must have been installed
+     * first.
+     * @param init_command_help the command help.
+     * @param init_cli_process_func the processing function to call when the
+     * command is entered for execution from the command-line.
+     * @param init_cli_interrupt_func the function to call when the
+     * user has interrupted the command (e.g., by typing Ctrl-C).
+     * @return the new child command on success, otherwise NULL.
+     */
+    CliCommand *add_command(const string& init_command_name,
+			    const string& init_command_help,
+			    CLI_PROCESS_FUNC init_cli_process_func,
+			    CLI_INTERRUPT_FUNC init_cli_interrupt_func) {
+	CLI_PROCESS_CALLBACK cb1 = callback(init_cli_process_func);
+	CLI_INTERRUPT_CALLBACK cb2 = callback(init_cli_interrupt_func);
+	return (add_command(init_command_name, init_command_help, cb1, cb2));
     }
     
     /**
@@ -274,10 +330,24 @@ public:
     void set_dynamic_process_callback(const CLI_PROCESS_CALLBACK& v) {
 	_dynamic_process_callback = v;
     }
-    
+
+    /**
+     * Set the callback for command interrupt for a dynamically generated
+     * child command.
+     * 
+     * @param v the callback for command processing.
+     */
+    void set_dynamic_interrupt_callback(const CLI_INTERRUPT_CALLBACK& v) {
+	_dynamic_interrupt_callback = v;
+    }
+
 protected:
     void set_cli_process_callback(const CLI_PROCESS_CALLBACK& v) {
 	_cli_process_callback = v;
+    }
+
+    void set_cli_interrupt_callback(const CLI_INTERRUPT_CALLBACK& v) {
+	_cli_interrupt_callback = v;
     }
     
 private:
@@ -309,12 +379,15 @@ private:
     
     
     bool has_cli_process_callback();
+    bool has_cli_interrupt_callback();
     bool has_dynamic_process_callback();
+    bool has_dynamic_interrupt_callback();
     bool has_cli_completion_func() { return (_cli_completion_func != NULL); }
     void set_cli_completion_func (CLI_COMPLETION_FUNC *v) {
 	_cli_completion_func = v;
     }
-    CLI_PROCESS_CALLBACK _cli_process_callback;	// The callback
+    CLI_PROCESS_CALLBACK _cli_process_callback;	// The processing callback
+    CLI_INTERRUPT_CALLBACK _cli_interrupt_callback; // The interrupt callback
     CLI_COMPLETION_FUNC *_cli_completion_func;	// The function to call
 						// to complete a command
 
@@ -323,6 +396,7 @@ private:
     bool _has_dynamic_children;
     // The cli_process_callback to copy to dynamic children
     CLI_PROCESS_CALLBACK _dynamic_process_callback;
+    CLI_INTERRUPT_CALLBACK _dynamic_interrupt_callback;
     
     bool can_complete();
     bool can_pipe() { return (_can_pipe); }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.8 2004/06/01 11:44:22 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.9 2004/06/10 22:40:42 hodson Exp $"
 
 
 //
@@ -214,6 +214,27 @@ CliCommand::add_command(const string& init_command_name,
 	// XXX: by default, enable pipe processing if there is a callback func
 	cli_command->set_can_pipe(true);
     }
+    
+    return (cli_command);
+}
+
+//
+// Create a command and assign a processing and an interrupt callbacks to it.
+// Return the new child command on success, otherwise NULL.
+//
+CliCommand *
+CliCommand::add_command(const string& init_command_name,
+			const string& init_command_help,
+			const CLI_PROCESS_CALLBACK& init_cli_process_callback,
+			const CLI_INTERRUPT_CALLBACK& init_cli_interrupt_callback)
+{
+    CliCommand *cli_command = add_command(init_command_name,
+					  init_command_help,
+					  init_cli_process_callback);
+    
+    if (cli_command == NULL)
+	return (NULL);
+    cli_command->set_cli_interrupt_callback(init_cli_interrupt_callback);
     
     return (cli_command);
 }
@@ -699,6 +720,12 @@ CliCommand::has_dynamic_process_callback()
 }
 
 bool
+CliCommand::has_dynamic_interrupt_callback()
+{
+    return (!_dynamic_interrupt_callback.is_empty());
+}
+
+bool
 CliCommand::has_cli_process_callback()
 {
     if (_has_dynamic_children) {
@@ -709,6 +736,12 @@ CliCommand::has_cli_process_callback()
 	child_command_list();
     }
     return (!_cli_process_callback.is_empty());
+}
+
+bool
+CliCommand::has_cli_interrupt_callback()
+{
+    return (!_cli_interrupt_callback.is_empty());
 }
 
 list<CliCommand *>&	
@@ -733,6 +766,8 @@ CliCommand::child_command_list()
 	if (can_be_run) {
 	    if (_cli_process_callback.is_empty())
 		_cli_process_callback = _dynamic_process_callback;
+	    if (_cli_interrupt_callback.is_empty())
+		_cli_interrupt_callback = _dynamic_interrupt_callback;
 	}
 	map<string, string>::iterator iter;
 	CliCommand *new_cmd;
@@ -747,6 +782,7 @@ CliCommand::child_command_list()
 	    new_cmd->set_can_pipe(can_pipe);
 	    new_cmd->set_dynamic_children_callback(_dynamic_children_callback);
 	    new_cmd->set_dynamic_process_callback(_dynamic_process_callback);
+	    new_cmd->set_dynamic_interrupt_callback(_dynamic_interrupt_callback);
 	}
     }
 
