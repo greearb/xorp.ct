@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.20 2004/09/02 22:45:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.21 2004/09/03 03:46:32 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -81,10 +81,14 @@ NetlinkSocket::stop()
     return (XORP_ERROR);
 }
 
-void
-NetlinkSocket::force_read()
+int
+NetlinkSocket::force_read(string& errmsg)
 {
     XLOG_UNREACHABLE();
+
+    errmsg = "method not supported";
+
+    return (XORP_ERROR);
 }
 
 #else // HAVE_NETLINK_SOCKETS
@@ -237,8 +241,8 @@ NetlinkSocket::sendto(const void* data, size_t nbytes, int flags,
     return ::sendto(_fd, data, nbytes, flags, to, tolen);
 }
 
-void
-NetlinkSocket::force_read()
+int
+NetlinkSocket::force_read(string& errmsg)
 {
     vector<uint8_t> message;
     vector<uint8_t> buffer(NLSOCK_BYTES);
@@ -262,20 +266,20 @@ NetlinkSocket::force_read()
 	if (got < 0) {
 	    if (errno == EINTR)
 		continue;
-	    XLOG_ERROR("Netlink socket read error: %s", strerror(errno));
-	    shutdown();
-	    return;
+	    errmsg = c_format("Netlink socket read error: %s",
+			      strerror(errno));
+	    return (XORP_ERROR);
 	}
 	message.resize(message.size() + got);
 	memcpy(&message[off], &buffer[0], got);
 	off += got;
 	
 	if ((off - last_mh_off) < (ssize_t)sizeof(struct nlmsghdr)) {
-	    XLOG_ERROR("Netlink socket read failed: message truncated: "
-		       "received %d bytes instead of (at least) %u bytes",
-		       got, (uint32_t)sizeof(struct nlmsghdr));
-	    shutdown();
-	    return;
+	    errmsg = c_format("Netlink socket read failed: message truncated: "
+			      "received %d bytes instead of (at least) %u "
+			      "bytes",
+			      got, (uint32_t)sizeof(struct nlmsghdr));
+	    return (XORP_ERROR);
 	}
 	
 	//
@@ -307,11 +311,13 @@ NetlinkSocket::force_read()
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
 	(*i)->nlsock_data(&message[0], message.size());
     }
+
+    return (XORP_OK);
 }
 
-void
+int
 NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
-			      socklen_t* fromlen)
+			      socklen_t* fromlen, string& errmsg)
 {
     vector<uint8_t> message;
     vector<uint8_t> buffer(NLSOCK_BYTES);
@@ -335,20 +341,21 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 	if (got < 0) {
 	    if (errno == EINTR)
 		continue;
-	    XLOG_ERROR("Netlink socket recvfrom error: %s", strerror(errno));
-	    shutdown();
-	    return;
+	    errmsg = c_format("Netlink socket recvfrom error: %s",
+			      strerror(errno));
+	    return (XORP_ERROR);
 	}
 	message.resize(message.size() + got);
 	memcpy(&message[off], &buffer[0], got);
 	off += got;
 	
 	if ((off - last_mh_off) < (ssize_t)sizeof(struct nlmsghdr)) {
-	    XLOG_ERROR("Netlink socket recvfrom failed: message truncated: "
-		       "received %d bytes instead of (at least) %u bytes",
-		       got, (uint32_t)sizeof(struct nlmsghdr));
-	    shutdown();
-	    return;
+	    errmsg = c_format("Netlink socket recvfrom failed: "
+			      "message truncated: "
+			      "received %d bytes instead of (at least) %u "
+			      "bytes",
+			      got, (uint32_t)sizeof(struct nlmsghdr));
+	    return (XORP_ERROR);
 	}
 	
 	//
@@ -380,10 +387,12 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
 	(*i)->nlsock_data(&message[0], message.size());
     }
+
+    return (XORP_OK);
 }
 
-void
-NetlinkSocket::force_recvmsg(int flags)
+int
+NetlinkSocket::force_recvmsg(int flags, string& errmsg)
 {
     vector<uint8_t> message;
     vector<uint8_t> buffer(NLSOCK_BYTES);
@@ -429,27 +438,27 @@ NetlinkSocket::force_recvmsg(int flags)
 	if (got < 0) {
 	    if (errno == EINTR)
 		continue;
-	    XLOG_ERROR("Netlink socket recvmsg error: %s", strerror(errno));
-	    shutdown();
-	    return;
+	    errmsg = c_format("Netlink socket recvmsg error: %s",
+			      strerror(errno));
+	    return (XORP_ERROR);
 	}
 	if (msg.msg_namelen != sizeof(snl)) {
-	    XLOG_ERROR("Netlink socket recvmsg error: "
-		       "sender address length %d instead of %u ",
-		       msg.msg_namelen, sizeof(snl));
-	    shutdown();
-	    return;
+	    errmsg = c_format("Netlink socket recvmsg error: "
+			      "sender address length %d instead of %u ",
+			      msg.msg_namelen, sizeof(snl));
+	    return (XORP_ERROR);
 	}
 	message.resize(message.size() + got);
 	memcpy(&message[off], &buffer[0], got);
 	off += got;
 	
 	if ((off - last_mh_off) < (ssize_t)sizeof(struct nlmsghdr)) {
-	    XLOG_ERROR("Netlink socket recvmsg failed: message truncated: "
-		       "received %d bytes instead of (at least) %u bytes",
-		       got, (uint32_t)sizeof(struct nlmsghdr));
-	    shutdown();
-	    return;
+	    errmsg = c_format("Netlink socket recvmsg failed: "
+			      "message truncated: "
+			      "received %d bytes instead of (at least) %u "
+			      "bytes",
+			      got, (uint32_t)sizeof(struct nlmsghdr));
+	    return (XORP_ERROR);
 	}
 	
 	//
@@ -481,14 +490,21 @@ NetlinkSocket::force_recvmsg(int flags)
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
 	(*i)->nlsock_data(&message[0], message.size());
     }
+
+    return (XORP_OK);
 }
 
 void
 NetlinkSocket::select_hook(int fd, SelectorMask m)
 {
+    string errmsg;
+
     XLOG_ASSERT(fd == _fd);
     XLOG_ASSERT(m == SEL_RD);
-    force_read();
+    if (force_read(errmsg) != XORP_OK) {
+	XLOG_ERROR("Error force_read() from netlink socket: %s",
+		   errmsg.c_str());
+    }
 }
 
 #endif // HAVE_NETLINK_SOCKETS
@@ -569,15 +585,17 @@ NetlinkSocketReader::~NetlinkSocketReader()
  * Force the reader to receive data from the IPv4 netlink socket.
  *
  * @param seqno the sequence number of the data to receive.
+ * @param errmsg the error message (if an error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-NetlinkSocketReader::receive_data4(uint32_t seqno)
+NetlinkSocketReader::receive_data4(uint32_t seqno, string& errmsg)
 {
     _cache_seqno = seqno;
     _cache_valid = false;
     while (_cache_valid == false) {
-	_ns4.force_read();
+	if (_ns4.force_read(errmsg) != XORP_OK)
+	    return (XORP_ERROR);
     }
 
     return (XORP_OK);
@@ -587,15 +605,17 @@ NetlinkSocketReader::receive_data4(uint32_t seqno)
  * Force the reader to receive data from the IPv6 netlink socket.
  *
  * @param seqno the sequence number of the data to receive.
+ * @param errmsg the error message (if an error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-NetlinkSocketReader::receive_data6(uint32_t seqno)
+NetlinkSocketReader::receive_data6(uint32_t seqno, string& errmsg)
 {
     _cache_seqno = seqno;
     _cache_valid = false;
     while (_cache_valid == false) {
-	_ns6.force_read();
+	if (_ns6.force_read(errmsg) != XORP_OK)
+	    return (XORP_ERROR);
     }
 
     return (XORP_OK);
@@ -606,15 +626,18 @@ NetlinkSocketReader::receive_data6(uint32_t seqno)
  *
  * @param ns the netlink socket to receive the data from.
  * @param seqno the sequence number of the data to receive.
+ * @param errmsg the error message (if an error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno)
+NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno,
+				  string& errmsg)
 {
     _cache_seqno = seqno;
     _cache_valid = false;
     while (_cache_valid == false) {
-	ns.force_read();
+	if (ns.force_read(errmsg) != XORP_OK)
+	    return (XORP_ERROR);
     }
 
     return (XORP_OK);
