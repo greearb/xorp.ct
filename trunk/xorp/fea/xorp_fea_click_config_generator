@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.1 2004/11/30 13:11:37 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.2 2004/12/07 22:43:36 pavlin Exp $
 #
 
 #
@@ -65,6 +65,22 @@ function calculate_state()
     }
     max_xorp_rt_port = xorp_rt_port;
 }
+
+function check_state()
+{
+    for (ii = 0; ii < iftree_interfaces_max; ii++) {
+	ifname = iftree_interfaces_ifname[ii];
+	if (iftree_interfaces_has_mac[ii] != 1) {
+	    message = "Missing MAC address configuration for interface " ifname;
+	    syntax_error(message);
+	}
+	if (iftree_interfaces_has_mtu[ii] != 1) {
+	    message = "Missing MTU configuration for interface " ifname;
+	    syntax_error(message);
+	}
+    }
+}
+
 
 function generate_click_config_header()
 {
@@ -458,6 +474,7 @@ function process_statement(statement)
 		i++;
 		v = tokens[i];
 		iftree_interfaces_mac[iftree_interfaces_max - 1] = v;
+		iftree_interfaces_has_mac[iftree_interfaces_max - 1] = 1;
 		continue;
 	    }
 
@@ -467,6 +484,7 @@ function process_statement(statement)
 		i++;
 		v = tokens[i];
 		iftree_interfaces_mtu[iftree_interfaces_max - 1] = v;
+		iftree_interfaces_has_mtu[iftree_interfaces_max - 1] = 1;
 		continue;
 	    }
 
@@ -793,6 +811,7 @@ function syntax_error(message)
 
 END {
     calculate_state();
+    check_state();
 
     generate_click_config_header();
     generate_click_shared_ip_input();
