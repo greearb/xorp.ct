@@ -3,7 +3,7 @@
 CONFIG="$(dirname $0)/config"
 . $CONFIG
 
-cd $ROOTDIR
+cd ${ROOTDIR}
 
 remote_run()
 {
@@ -35,7 +35,11 @@ remote_run $HOST rm -rf "${DESTDIR}/data"
 
 remote_run $HOST mkdir -p ${DESTDIR}/tmp
 
-scp ${SSH_FLAGS} -pr xorp $1:${DESTDIR} && scp ${SSH_FLAGS} -pr scripts $1:${DESTDIR}
-if [ $? -ne 0 ] ; then
-    exit 1
-fi
+for i in xorp scripts data ; do
+    scp ${SSH_FLAGS} -pr ${i} $1:${DESTDIR}
+    if [ $? -ne 0 ] ; then
+	exit 1
+    fi
+done
+
+
