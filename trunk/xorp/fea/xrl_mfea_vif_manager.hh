@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.9 2003/06/17 23:13:40 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.10 2003/10/24 20:51:06 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_VIF_MANAGER_HH__
 #define __FEA_XRL_MFEA_VIF_MANAGER_HH__
@@ -181,9 +181,9 @@ private:
     void set_vif_state();
     
     void clean_out_old_state();
-    void xrl_result_unregister_all_interfaces_client(const XrlError& e);
+    void xrl_result_unregister_system_interfaces_client(const XrlError& e);
     void register_if_spy();
-    void xrl_result_register_all_interfaces_client(const XrlError& e);
+    void xrl_result_register_system_interfaces_client(const XrlError& e);
     void xrl_result_get_system_interface_names(const XrlError& e,
 					       const XrlAtomList *alist);
     void xrl_result_get_system_vif_names(const XrlError& e,

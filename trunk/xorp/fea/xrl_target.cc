@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.28 2003/10/22 19:30:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.29 2003/10/24 20:51:06 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -1109,7 +1109,7 @@ XrlFeaTarget::ifmgr_0_1_unregister_client(const string& client)
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_register_all_interfaces_client(const string& client)
+XrlFeaTarget::ifmgr_0_1_register_system_interfaces_client(const string& client)
 {
     if (_xifcur.has_all_interfaces_reportee(client)) {
 	XLOG_WARNING("Registering again client %s", client.c_str());
@@ -1122,7 +1122,7 @@ XrlFeaTarget::ifmgr_0_1_register_all_interfaces_client(const string& client)
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_unregister_all_interfaces_client(const string& client)
+XrlFeaTarget::ifmgr_0_1_unregister_system_interfaces_client(const string& client)
 {
     if (_xifcur.remove_all_interfaces_reportee(client))
 	return XrlCmdError::OKAY();

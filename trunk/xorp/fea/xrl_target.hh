@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.20 2003/09/30 03:07:57 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.21 2003/10/24 20:51:06 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -506,11 +506,11 @@ public:
 	// Input values,
 	const string&	spyname);
 
-    XrlCmdError ifmgr_0_1_register_all_interfaces_client(
+    XrlCmdError ifmgr_0_1_register_system_interfaces_client(
 	// Input values,
 	const string&	spyname);
 
-    XrlCmdError ifmgr_0_1_unregister_all_interfaces_client(
+    XrlCmdError ifmgr_0_1_unregister_system_interfaces_client(
 	// Input values,
 	const string&	spyname);
 
