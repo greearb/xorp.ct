@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_route_pair.hh,v 1.9 2005/03/18 08:15:02 mjh Exp $
+// $XORP: xorp/bgp/peer_route_pair.hh,v 1.10 2005/03/19 23:01:32 mjh Exp $
 
 #ifndef __BGP_PEER_ROUTE_PAIR_HH__
 #define __BGP_PEER_ROUTE_PAIR_HH__
@@ -39,6 +39,8 @@ public:
 	_genid = genid;
 	_is_ready = true;
 	_has_queued_data = false;
+	_waiting_for_get = false;
+	gettimeofday(&_wakeup_sent, 0);
     }
     PeerTableInfo(const PeerTableInfo& other) {
 	_route_table = other._route_table;
@@ -50,6 +52,9 @@ public:
 	if (_has_queued_data) {
 	    _posn = other._posn;
 	}
+	_waiting_for_get = other._waiting_for_get;
+	_wakeup_sent.tv_sec = other._wakeup_sent.tv_sec;
+	_wakeup_sent.tv_usec = other._wakeup_sent.tv_usec;
     }
 
     BGPRouteTable<A> *route_table() const {
@@ -107,9 +112,9 @@ public:
 	}
     }
     
-    void peer_reset() {
+    void peer_reset() { 
 	_waiting_for_get = false;
-    }
+   }
 
 private:
     BGPRouteTable<A> *_route_table; //the next table after

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.10 2004/06/10 22:40:33 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.11 2005/03/18 08:15:02 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -225,7 +225,6 @@ DebugTable<A>::set_output_file(const string& filename) {
 template<class A>
 void
 DebugTable<A>::set_output_file(FILE *file) {
-    printf("set_output_file: %p\n", file);
     _close_on_delete = false;
     _ofile = file;
 }
