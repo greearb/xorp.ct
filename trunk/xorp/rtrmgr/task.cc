@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.42 2005/02/03 13:45:33 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.43 2005/02/10 04:54:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -166,40 +166,46 @@ XrlStatusValidation::dummy_response()
 void
 XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 {
-    if (e == XrlError::OKAY()) {
+    switch (e.error_code()) {
+    case OKAY:
 	try {
 	    ProcessStatus status;
 	    status = static_cast<ProcessStatus>(xrl_args->get_uint32("status"));
 	    string reason(xrl_args->get_string("reason"));
 	    handle_status_response(status, reason);
-	    return;
 	} catch (XrlArgs::XrlAtomNotFound) {
 	    // Not a valid response
 	    XLOG_ERROR("Bad XRL response to get_status");
 	    _cb->dispatch(false);
-	    return;
 	}
-    } else if (e == XrlError::NO_FINDER()) {
-	// We're in trouble now! This shouldn't be able to happen.
-	XLOG_UNREACHABLE();
-    } else if (e == XrlError::NO_SUCH_METHOD()) {
+	break;
+
+    case BAD_ARGS:
+    case COMMAND_FAILED:
+    case NO_SUCH_METHOD:
+	//
 	// The template file must have been wrong - the target doesn't
 	// support the common interface.
+	// Just return true and hope everything's OK
+	//
 	XLOG_ERROR("Module %s doesn't support status validation",
 		   _module_name.c_str());
-
-	// Just return true and hope everything's OK
 	_cb->dispatch(true);
-    } else if ((e == XrlError::RESOLVE_FAILED())
-	       || (e == XrlError::SEND_FAILED()))  {
+	break;
+
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
 	//
+	// REPLY_TIMED_OUT => We did not yet receive a reply.
 	// RESOLVE_FAILED => It's not yet registered with the finder -
 	// retry after a short delay.
+	// SEND_FAILED and SEND_FAILED_TRANSIENT=> ???  We're dealing with
+	// startup conditions here, so give the problem a chance to resolve
+	// itself.
 	//
-
-	//
-	// SEND_FAILED => ???  We're dealing with startup conditions
-	// here, so give the problem a chance to resolve itself.
+	// TODO: Make retries and delay configurable (no magic numbers).
 	//
 	_retries++;
 	if (_retries > MAX_STATUS_RETRIES) {
@@ -207,10 +213,18 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 	}
 	_retry_timer = eventloop().new_oneoff_after_ms(1000,
 			callback(this, &XrlStatusValidation::validate, _cb));
-    } else {
+	break;
+
+    case INTERNAL_ERROR:
 	XLOG_ERROR("Error while validating module %s", _module_name.c_str());
 	XLOG_WARNING("Continuing anyway, cross your fingers...");
 	_cb->dispatch(true);
+	break;
+
+    case NO_FINDER:
+	// We're in trouble now! This shouldn't be able to happen.
+	XLOG_UNREACHABLE();
+	break;
     }
 }
 
@@ -377,40 +391,55 @@ StatusShutdownValidation::handle_status_response(ProcessStatus status,
 void
 StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 {
-    if (e == XrlError::OKAY()) {
+    switch (e.error_code()) {
+    case OKAY:
 	try {
 	    ProcessStatus status;
 	    status = static_cast<ProcessStatus>(xrl_args->get_uint32("status"));
 	    string reason(xrl_args->get_string("reason"));
 	    handle_status_response(status, reason);
-	    return;
 	} catch (XrlArgs::XrlAtomNotFound) {
 	    // Not a valid response
 	    XLOG_ERROR("Bad XRL response to get_status");
 	    _cb->dispatch(false);
-	    return;
 	}
-    } else if (e == XrlError::NO_FINDER()) {
-	// We're in trouble now! This shouldn't be able to happen.
-	XLOG_UNREACHABLE();
-    } else if (e == XrlError::NO_SUCH_METHOD()) {
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case COMMAND_FAILED:
+	//
 	// The template file must have been wrong - the target doesn't
 	// support the common interface.
+	// Return false, and we can shut it down using kill.
+	//
 	XLOG_ERROR("Module %s doesn't support shutdown validation",
 		   _module_name.c_str());
-	// Return false, and we can shut it down using kill.
 	_cb->dispatch(false);
-    } else if (e == XrlError::RESOLVE_FAILED()) {
-	// The process appears to have shutdown correctly.
+	break;
+
+    case RESOLVE_FAILED:
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// The process appears to have shutdown correctly or the process
+	// is probably gone.
+	//
 	_cb->dispatch(true);
-    } else if (e == XrlError::SEND_FAILED())  {
-	// The process is probably gone.
-	_cb->dispatch(true);
-    } else {
+	break;
+
+    case INTERNAL_ERROR:
+	// Return false, and we can shut it down using kill.
 	XLOG_ERROR("Error while shutdown validation of module %s",
 		   _module_name.c_str());
-	// Return false, and we can shut it down using kill.
 	_cb->dispatch(false);
+	break;
+
+    case NO_FINDER:
+	// We're in trouble now! This shouldn't be able to happen.
+	XLOG_UNREACHABLE();
+	break;
     }
 }
 
@@ -648,17 +677,30 @@ XrlShutdown::dummy_response()
 void
 XrlShutdown::shutdown_done(const XrlError& err, XrlArgs* xrl_args)
 {
-    UNUSED(xrl_args);
-
-    if ((err == XrlError::OKAY())
-	|| (err == XrlError::RESOLVE_FAILED())
-	|| (err == XrlError::SEND_FAILED())) {
+    switch (err.error_code()) {
+    case OKAY:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
 	// Success - either it said it would shutdown, or it's already gone.
 	_cb->dispatch(true);
-    } else {
+	break;
+
+    case BAD_ARGS:
+    case COMMAND_FAILED:
+    case NO_SUCH_METHOD:
+    case INTERNAL_ERROR:	// TODO: should be XLOG_UNREACHABLE()?
 	// We may have to kill it.
 	_cb->dispatch(false);
+	break;
+
+    case NO_FINDER:
+	XLOG_UNREACHABLE();
+	break;
     }
+
+    UNUSED(xrl_args);
 }
 
 
