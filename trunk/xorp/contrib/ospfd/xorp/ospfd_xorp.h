@@ -21,6 +21,9 @@
 #define OSPFD_XORP_H
 
 #include "libxorp/eventloop.hh"
+
+#include <net/route.h>
+
 #include "libxipc/xrl_std_router.hh"
 #include "xrl/interfaces/rib_xif.hh"
 #include "ospf_config.h"
