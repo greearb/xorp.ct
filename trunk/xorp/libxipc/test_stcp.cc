@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.9 2003/05/09 19:36:16 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.10 2003/05/09 21:00:52 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -49,8 +49,8 @@ hello_recv_handler(const Xrl&	request,
 
 static void
 hello_reply_handler(const XrlError&	e,
-		    const Xrl&		request,
-		    XrlArgs*		response)
+		    XrlArgs*		response,
+		    Xrl			request)
 {
     if (e != XrlError::OKAY()) {
 	fprintf(stderr, "hello failed: %s\n", e.str().c_str());
@@ -67,7 +67,7 @@ test_hello(EventLoop& e, XrlPFSTCPSender &s)
     Xrl x("anywhere", "hello");
 
     debug_msg("test_hello\n");
-    s.send(x, callback(hello_reply_handler));
+    s.send(x, callback(hello_reply_handler, x));
     while (hello_done == false) {
 	e.run();
     }
@@ -92,9 +92,10 @@ int32_recv_handler(const Xrl&	request,
 }
 
 static void
-int32_reply_handler(const XrlError&	e,
-		    const Xrl&		request,
-		    XrlArgs*		response)
+int32_reply_handler(const XrlError& e,
+		    XrlArgs*	    response,
+		    Xrl		    request)
+
 {
     if (e != XrlError::OKAY()) {
 	fprintf(stderr, "get_int32 failed: %s\n", e.str().c_str());
@@ -112,7 +113,7 @@ test_int32(EventLoop& e, XrlPFSTCPSender& s)
     Xrl x("anywhere", "get_int32");
 
     debug_msg("test_int32\n");
-    s.send(x, callback(int32_reply_handler));
+    s.send(x, callback(int32_reply_handler, x));
 
     while (int32_done == 0) {
 	e.run();
@@ -132,7 +133,6 @@ no_execute_recv_handler(const Xrl&  /* request*/,
 
 static void
 no_execute_reply_handler(const XrlError& e,
-			 const Xrl&	 /* request */,
 			 XrlArgs*	 /* response */,
 			 bool*		 done)
 {

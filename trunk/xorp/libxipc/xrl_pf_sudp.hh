@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.9 2003/05/09 19:36:17 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.10 2003/05/09 21:00:53 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_SUDP_HH__
 #define __LIBXIPC_XRL_PF_SUDP_HH__
@@ -28,13 +28,16 @@ public:
 	throw (XrlPFConstructorError);
     ~XrlPFSUDPListener();
 
-    const char* address() const	{ return _addr.c_str(); }
-    const char* protocol() const { return _protocol; }
+    const char* address() const			{ return _addr.c_str(); }
+    const char* protocol() const		{ return _protocol; }
 
 private:
     const XrlError dispatch_command(const char* buf, XrlArgs& response);
-    void send_reply(struct sockaddr* sa, const XrlError& e, const XUID& xuid,
-		    const XrlArgs* response);
+
+    void send_reply(struct sockaddr* sa,
+		    const XrlError&  e,
+		    const XUID&	     xuid,
+		    const XrlArgs*   response);
 
     void recv(int fd, SelectorMask m);
 
@@ -56,15 +59,13 @@ public:
 protected:
     static void recv(int fd, SelectorMask m);
     void timeout_hook(XUID x);
-    
+
 private:
     sockaddr_in		_destination;
 
     static const char* _protocol;
     static int sender_fd;     		// shared fd between all senders
-
     static int instance_count;
-    static map<const XUID, Request> requests_pending; // demux help
 };
 
 #endif // __LIBXIPC_XRL_PF_SUDP_HH__

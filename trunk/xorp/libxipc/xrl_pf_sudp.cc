@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.17 2003/06/03 19:10:31 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.18 2003/06/07 01:16:04 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -64,6 +64,17 @@ static const ssize_t	SUDP_RECV_BUFFER_BYTES = 32000;
 const char* XrlPFSUDPSender::_protocol   = SUDP_PROTOCOL_NAME;
 const char* XrlPFSUDPListener::_protocol = SUDP_PROTOCOL_NAME;
 
+struct Request {
+    XrlPFSender*		parent;		// Request creator
+    XrlPFSender::SendCallback	callback;	// User Callback
+    XUID			xuid;		// Unique Request ID
+    XorpTimer			timeout;	// Timeout timer
+
+    Request(XrlPFSender* p, const XrlPFSender::SendCallback& cb)
+	: parent(p), callback(cb) {}
+    bool operator==(const XUID& x) const { return xuid == x; }
+};
+
 // ----------------------------------------------------------------------------
 // Utility Functions
 
@@ -96,7 +107,8 @@ parse_dispatch_header(string hdr, XUID& id, size_t& content_bytes)
     return false;
 }
 
-static string xrlerror_to_status(const XrlError& e)
+static string
+xrlerror_to_status(const XrlError& e)
 {
     string r = c_format("%d", e.error_code());
     if (e.note().size()) {
@@ -105,7 +117,8 @@ static string xrlerror_to_status(const XrlError& e)
     return r;
 }
 
-static XrlError status_to_xrlerror(const string& status)
+static XrlError
+status_to_xrlerror(const string& status)
 {
     uint32_t error_code = 0;
 
@@ -115,7 +128,7 @@ static XrlError status_to_xrlerror(const string& status)
 	error_code += *si - '0';
 	si++;
     }
-    
+
     if (si == status.begin()) {
 	XLOG_ERROR("Missing XrlError::errorcode value");
 	return XrlError(INTERNAL_ERROR,	"corrupt xrl response");
@@ -123,7 +136,7 @@ static XrlError status_to_xrlerror(const string& status)
 
     if (si == status.end())
 	return XrlErrorCode(error_code);
-    
+
     si++;
     return XrlError(XrlErrorCode(error_code), string(si, status.end()));
 }
@@ -179,8 +192,8 @@ parse_response(const char* buf,
 int XrlPFSUDPSender::sender_fd;
 int XrlPFSUDPSender::instance_count;
 
-typedef map<const XUID, XrlPFSender::Request> XuidRequestMap;
-XuidRequestMap XrlPFSUDPSender::requests_pending;
+typedef map<const XUID, Request> XuidRequestMap;
+static XuidRequestMap requests_pending;
 
 XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
     throw (XrlPFConstructorError)
@@ -244,12 +257,19 @@ void
 XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 {
     // Map request id to current object instance
-    Request request(this, x, cb);
+    Request request(this, cb);
     assert(requests_pending.find(request.xuid) == requests_pending.end());
-    requests_pending[request.xuid] = request;
+
+    pair<XuidRequestMap::iterator, bool> p =
+	requests_pending.insert(XuidRequestMap::value_type(request.xuid,
+							   request));
+    if (p.second == false) {
+	cb->dispatch(XrlError(SEND_FAILED, "Insufficient memory"), 0);
+	return;
+    }
 
     // Prepare data
-    string xrl = request.xrl->str();
+    string xrl = x.str();
     string header = render_dispatch_header(request.xuid, xrl.size());
     string msg = header + xrl;
 
@@ -261,13 +281,13 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
 		      (sockaddr*)&_destination, sizeof(_destination))
 	       != msg_bytes) {
 	debug_msg("Write failed: %s\n", strerror(errno));
-	cb->dispatch(XrlError::SEND_FAILED(), x, 0);
+	cb->dispatch(XrlError::SEND_FAILED(), 0);
 	return;
     }
 
-    assert(requests_pending[request.xuid].xuid == request.xuid);
+    XuidRequestMap::iterator& xi = p.first;
 
-    requests_pending[request.xuid].timeout =
+    xi->second.timeout =
 	_eventloop.new_oneoff_after_ms(SUDP_REPLY_TIMEOUT_MS,
 	    callback(this, &XrlPFSUDPSender::timeout_hook, request.xuid));
     debug_msg("XrlPFSUDPSender::send (qsize %u)\n",
@@ -282,13 +302,12 @@ XrlPFSUDPSender::timeout_hook(XUID xuid)
 
     Request& r = i->second;
     SendCallback cb = r.callback;
-    Xrl x = *r.xrl;	// XXX gratuitous copy fix me (fundamentally :-)
 
     debug_msg("%p Erasing state for %s (timeout)\n",
 	      this, r.xuid.str().c_str());
 
     requests_pending.erase(i);
-    cb->dispatch(XrlError::REPLY_TIMED_OUT(), x, 0);
+    cb->dispatch(XrlError::REPLY_TIMED_OUT(), 0);
 }
 
 // ----------------------------------------------------------------------------
@@ -334,7 +353,6 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 
     // Copy out state we'd like to use from request before deleting it.
     SendCallback callback = i->second.callback;
-    const Xrl* px = i->second.xrl;
 
     debug_msg("Erasing state for %s (answered)\n",
 	      i->second.xuid.str().c_str());
@@ -342,12 +360,12 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 
     try {
 	XrlArgs response(buf + header_bytes);
-	callback->dispatch(err, *px, &response);
+	callback->dispatch(err, &response);
     } catch (const InvalidString&) {
 	debug_msg("Corrupt response: header_bytes %u content_bytes %u\n\t\"%s\"\n", (uint32_t)header_bytes, (uint32_t)content_bytes, buf + header_bytes);
 	XrlError xe(XrlError::INTERNAL_ERROR().error_code(),
 		    "corrupt xrl response");
-	callback->dispatch(xe, *px, 0);
+	callback->dispatch(xe, 0);
     }
 }
 

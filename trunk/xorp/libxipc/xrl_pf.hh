@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.14 2003/05/09 21:00:52 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.15 2003/05/30 23:15:56 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -66,7 +66,7 @@ public:
     virtual ~XrlPFSender() {}
 
     typedef
-    XorpCallback3<void, const XrlError&, const Xrl&, XrlArgs*>::RefPtr
+    XorpCallback2<void, const XrlError&, XrlArgs*>::RefPtr
     SendCallback;
 
     virtual void send(const Xrl& x, const SendCallback& cb) = 0;
@@ -74,18 +74,6 @@ public:
 
     const string& address() const { return _address; }
     EventLoop& eventloop() const { return _eventloop; }
-
-    struct Request {
-	XrlPFSender*	parent;
-	XUID		xuid;		// to match requests and responses
-	const Xrl*	xrl;
-	SendCallback	callback;
-	XorpTimer	timeout;
-	Request(XrlPFSender* p, const Xrl& x, const SendCallback& cb)
-	    : parent(p), xuid(), xrl(&x), callback(cb) {}
-	Request() : xrl(0) {}
-	bool operator==(const XUID& x) const { return xuid == x; }
-    };
 
 protected:
     EventLoop& _eventloop;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.17 2003/06/01 21:37:27 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.18 2003/06/03 19:10:31 hodson Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -303,7 +303,7 @@ public:
 	    finder_trace_result("okay");
 	    return;
 	}
-	_xcb->dispatch(XrlError::SEND_FAILED(), _xrl, 0);
+	_xcb->dispatch(XrlError::SEND_FAILED(), 0);
 	XLOG_ERROR("Failed to send forwarded Xrl to Finder.");
 	client().notify_failed(this);
 	finder_trace_result("failed (send)");
@@ -314,7 +314,7 @@ public:
     execute_callback(const XrlError& e, XrlArgs* args)
     {
 	finder_trace_init("ForwardedXrl callback \"%s\"", _xrl.str().c_str());
-	_xcb->dispatch(e, _xrl, args);
+	_xcb->dispatch(e, args);
 	client().notify_done(this);
 	finder_trace_result("%s", e.str().c_str());
     }
@@ -322,7 +322,7 @@ public:
     void force_failure(const XrlError& e)
     {
 	finder_trace("ForwardedXrl force_failure \"%s\"", _xrl.str().c_str());
-	_xcb->dispatch(e, _xrl, 0);
+	_xcb->dispatch(e, 0);
     }
 
 
