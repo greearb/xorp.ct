@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.8 2004/12/01 03:28:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.9 2004/12/02 02:37:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -28,15 +28,26 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
+#include <sys/param.h>
+#ifdef HAVE_SYS_LINKER_H
+#include <sys/linker.h>
+#endif
+#include <sys/mount.h>
 #include <errno.h>
 
 #include "click_socket.hh"
 
 
+const string ClickSocket::PROC_LINUX_MODULES_FILE = "/proc/modules";
+const string ClickSocket::LINUX_COMMAND_LOAD_MODULE = "/sbin/insmod";
+const string ClickSocket::LINUX_COMMAND_UNLOAD_MODULE = "/sbin/rmmod";
+const string ClickSocket::CLICK_FILE_SYSTEM_TYPE = "click";
+
 uint16_t ClickSocket::_instance_cnt = 0;
 pid_t ClickSocket::_pid = getpid();
 
 const IPv4 ClickSocket::DEFAULT_USER_CLICK_CONTROL_ADDRESS = IPv4::LOOPBACK();
+const TimeVal ClickSocket::USER_CLICK_STARTUP_MAX_WAIT_TIME = TimeVal(1, 0);
 
 //
 // Click Sockets communication with Click
@@ -75,8 +86,25 @@ ClickSocket::start(string& error_msg)
 {
     if (is_kernel_click()) {
 	//
-	// TODO: XXX: PAVPAVPAV: Mount the Click FS, etc.
+	// Install kernel Click (if necessary)
 	//
+	if (_kernel_click_install_on_startup) {
+	    string error_msg2;
+
+	    // Load the kernel Click modules
+	    if (load_kernel_click_modules(error_msg) != XORP_OK) {
+		unload_kernel_click_modules(error_msg2);
+		return (XORP_ERROR);
+	    }
+
+	    // Mount the Click file system
+	    if (mount_click_file_system(error_msg) != XORP_OK) {
+		unload_kernel_click_modules(error_msg2);
+		return (XORP_ERROR);
+	    }
+	}
+
+	// TODO: XXX: PAVPAVPAV: open extra reader files, etc.
     }
 
     if (is_user_click()) {
@@ -111,7 +139,7 @@ ClickSocket::start(string& error_msg)
 	// pre-defined amount of time until the user-level Click program
 	// starts responding.
 	//
-	TimeVal max_wait_time(1, 0);		// XXX: max wait time: 1 second
+	TimeVal max_wait_time = USER_CLICK_STARTUP_MAX_WAIT_TIME;
 	TimeVal curr_wait_time(0, 100000);	// XXX: 100ms
 	TimeVal total_wait_time;
 	do {
@@ -234,9 +262,16 @@ int
 ClickSocket::stop(string& error_msg)
 {
     if (is_kernel_click()) {
-	//
-	// TODO: XXX: PAVPAVPAV: Unmount the Click FS, etc.
-	//
+	if (unmount_click_file_system(error_msg) != XORP_OK) {
+	    string error_msg2;
+	    unload_kernel_click_modules(error_msg2);
+	    return (XORP_ERROR);
+	}
+	if (unload_kernel_click_modules(error_msg) != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+
+	// TODO: XXX: PAVPAVPAV: close extra reader files, etc.
     }
 
     if (is_user_click()) {
@@ -255,6 +290,457 @@ ClickSocket::stop(string& error_msg)
 
     // TODO: check for errors
     UNUSED(error_msg);
+}
+
+int
+ClickSocket::load_kernel_click_modules(string& error_msg)
+{
+    list<string>::iterator iter;
+
+    for (iter = _kernel_click_modules.begin();
+	 iter != _kernel_click_modules.end();
+	 ++iter) {
+	const string& module_filename = *iter;
+	if (load_kernel_module(module_filename, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+ClickSocket::unload_kernel_click_modules(string& error_msg)
+{
+    list<string>::reverse_iterator riter;
+
+    for (riter = _kernel_click_modules.rbegin();
+	 riter != _kernel_click_modules.rend();
+	 ++riter) {
+	const string& module_filename = *riter;
+	if (unload_kernel_module(module_filename, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+ClickSocket::load_kernel_module(const string& module_filename,
+				string& error_msg)
+{
+    if (module_filename.empty()) {
+	error_msg = c_format("Kernel module filename to load is empty");
+	return (XORP_ERROR);
+    }
+
+    if (find(_loaded_kernel_click_modules.begin(),
+	     _loaded_kernel_click_modules.end(),
+	     module_filename)
+	!= _loaded_kernel_click_modules.end()) {
+	return (XORP_OK);	// Module already loaded
+    }
+
+    string module_name = kernel_module_filename2modulename(module_filename);
+    if (module_name.empty()) {
+	error_msg = c_format("Invalid kernel module filename: %s",
+			     module_filename.c_str());
+	return (XORP_ERROR);
+    }
+
+    //
+    // Load the kernel module using system-specific mechanism
+    //
+
+#ifdef HOST_OS_FREEBSD
+    //
+    // Test if the kernel module was installed already
+    //
+    if (kldfind(module_name.c_str()) >= 0) {
+	return (XORP_OK);	// Module with the same name already loaded
+    }
+
+    //
+    // Load the kernel module
+    //
+    if (kldload(module_filename.c_str()) < 0) {
+	error_msg = c_format("Cannot load kernel module %s: %s",
+			     module_filename.c_str(), strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    _loaded_kernel_click_modules.push_back(module_filename);
+
+    return (XORP_OK);
+
+#endif // HOST_OS_FREEBSD
+
+#ifdef HOST_OS_LINUX
+    //
+    // Test if the kernel module was installed already
+    //
+    char buf[1024];
+    char name[1024];
+
+    FILE* fh = fopen(PROC_LINUX_MODULES_FILE.c_str(), "r");
+    if (fh == NULL) {
+	error_msg = c_format("Cannot open file %s for reading: %s",
+			     PROC_LINUX_MODULES_FILE.c_str(), strerror(errno));
+	return (XORP_ERROR);
+    }
+    while (fgets(buf, sizeof(buf), fh) != NULL) {
+	char* n = name;
+	char* p = buf;
+	char* s = NULL;
+
+	// Get the module name: the first word in the line
+	do {
+	    while (xorp_isspace(*p))
+		p++;
+	    if (*p == '\0') {
+		s = NULL;
+		break;
+	    }
+
+	    while (*p) {
+		if (xorp_isspace(*p))
+		    break;
+		*n++ = *p++;
+	    }
+	    *n++ = '\0';
+	    s = p;
+	    break;
+	} while (true);
+
+	if (s == NULL) {
+	    XLOG_ERROR("%s: cannot get module name for line %s",
+		       PROC_LINUX_MODULES_FILE.c_str(), buf);
+	    continue;
+	}
+	if (module_name == string(name)) {
+	    fclose(fh);
+	    return (XORP_OK);	// Module with the same name already loaded
+	}
+    }
+    fclose(fh);
+
+    //
+    // Load the kernel module
+    //
+    // XXX: unfortunately, Linux doesn't have a consistent system API
+    // for loading kernel modules, so we have to relay on user-land command
+    // to do this. Sigh...
+    //
+    string command_line = LINUX_COMMAND_LOAD_MODULE + " " + module_filename;
+    int ret_value = system(command_line.c_str());
+    if (ret_value != 0) {
+	if (ret_value < 0) {
+	    error_msg = c_format("Cannot execute system command '%s': %s",
+				 command_line.c_str(), strerror(errno));
+	} else {
+	    error_msg = c_format("Executing system command '%s' "
+				 "returned value '%d'",
+				 command_line.c_str(), ret_value);
+	}
+	return (XORP_ERROR);
+    }
+
+    _loaded_kernel_click_modules.push_back(module_filename);
+
+    return (XORP_OK);
+
+#endif // HOST_OS_LINUX
+
+#ifdef HOST_OS_MACOSX
+    // TODO: implement it
+    error_msg = c_format("No mechanism to load a kernel module");
+    return (XORP_ERROR);
+#endif // HOST_OS_MACOSX
+
+#ifdef HOST_OS_NETBSD
+    // TODO: implement it
+    error_msg = c_format("No mechanism to load a kernel module");
+    return (XORP_ERROR);
+#endif // HOST_OS_NETBSD
+
+#ifdef HOST_OS_OPENBSD
+    // TODO: implement it
+    error_msg = c_format("No mechanism to load a kernel module");
+    return (XORP_ERROR);
+#endif // HOST_OS_OPENBSD
+
+#ifdef HOST_OS_SOLARIS
+    // TODO: implement it
+    error_msg = c_format("No mechanism to load a kernel module");
+    return (XORP_ERROR);
+#endif // HOST_OS_SOLARIS
+
+    error_msg = c_format("No mechanism to load a kernel module");
+    return (XORP_ERROR);
+}
+
+int
+ClickSocket::unload_kernel_module(const string& module_filename,
+				  string& error_msg)
+{
+    if (module_filename.empty()) {
+	error_msg = c_format("Kernel module filename to unload is empty");
+	return (XORP_ERROR);
+    }
+
+    if (find(_loaded_kernel_click_modules.begin(),
+	     _loaded_kernel_click_modules.end(),
+	     module_filename)
+	== _loaded_kernel_click_modules.end()) {
+	return (XORP_OK);	// Module not loaded
+    }
+
+    string module_name = kernel_module_filename2modulename(module_filename);
+    if (module_name.empty()) {
+	error_msg = c_format("Invalid kernel module filename: %s",
+			     module_filename.c_str());
+	return (XORP_ERROR);
+    }
+
+    //
+    // Unload the kernel module using system-specific mechanism
+    //
+
+#ifdef HOST_OS_FREEBSD
+    //
+    // Find the kernel module ID.
+    //
+    int module_id = kldfind(module_name.c_str());
+    if (module_id < 0) {
+	error_msg = c_format("Cannot unload kernel module %s: "
+			     "module ID not found: %s",
+			     module_filename.c_str(), strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    //
+    // Unload the kernel module
+    //
+    if (kldunload(module_id) < 0) {
+	error_msg = c_format("Cannot unload kernel module %s: %s",
+			     module_filename.c_str(), strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    // Remove the module filename from the list of loaded modules
+    list<string>::iterator iter;
+    iter = find(_loaded_kernel_click_modules.begin(),
+		_loaded_kernel_click_modules.end(),
+		module_filename);
+    XLOG_ASSERT(iter != _loaded_kernel_click_modules.end());
+    _loaded_kernel_click_modules.erase(iter);
+
+    return (XORP_OK);
+
+#endif // HOST_OS_FREEBSD
+
+#ifdef HOST_OS_LINUX
+    //
+    // Unload the kernel module
+    //
+    // XXX: unfortunately, Linux doesn't have a consistent system API
+    // for loading kernel modules, so we have to relay on user-land command
+    // to do this. Sigh...
+    //
+    string command_line = LINUX_COMMAND_UNLOAD_MODULE + " " + module_name;
+    int ret_value = system(command_line.c_str());
+    if (ret_value != 0) {
+	if (ret_value < 0) {
+	    error_msg = c_format("Cannot execute system command '%s': %s",
+				 command_line.c_str(), strerror(errno));
+	} else {
+	    error_msg = c_format("Executing system command '%s' "
+				 "returned value '%d'",
+				 command_line.c_str(), ret_value);
+	}
+	return (XORP_ERROR);
+    }
+
+    // Remove the module filename from the list of loaded modules
+    list<string>::iterator iter;
+    iter = find(_loaded_kernel_click_modules.begin(),
+		_loaded_kernel_click_modules.end(),
+		module_filename);
+    XLOG_ASSERT(iter != _loaded_kernel_click_modules.end());
+    _loaded_kernel_click_modules.erase(iter);
+
+    return (XORP_OK);
+
+#endif // HOST_OS_LINUX
+
+#ifdef HOST_OS_MACOSX
+    // TODO: implement it
+    error_msg = c_format("No mechanism to unload a kernel module");
+    return (XORP_ERROR);
+#endif // HOST_OS_MACOSX
+
+#ifdef HOST_OS_NETBSD
+    // TODO: implement it
+    error_msg = c_format("No mechanism to unload a kernel module");
+    return (XORP_ERROR);
+#endif // HOST_OS_NETBSD
+
+#ifdef HOST_OS_OPENBSD
+    // TODO: implement it
+    error_msg = c_format("No mechanism to unload a kernel module");
+    return (XORP_ERROR);
+#endif // HOST_OS_OPENBSD
+
+#ifdef HOST_OS_SOLARIS
+    // TODO: implement it
+    error_msg = c_format("No mechanism to unload a kernel module");
+    return (XORP_ERROR);
+#endif // HOST_OS_SOLARIS
+
+    error_msg = c_format("No mechanism to unload a kernel module");
+    return (XORP_ERROR);
+}
+
+string
+ClickSocket::kernel_module_filename2modulename(const string& module_filename)
+{
+    string filename, module_name;
+    string::size_type slash, dot;
+    list<string> suffix_list;
+
+    // Find the file name after the last '/'
+    slash = module_filename.rfind('/');
+    if (slash == string::npos)
+	filename = module_filename;
+    else
+	filename = module_filename.substr(slash + 1);
+
+    //
+    // Find the module name by excluding the suffix after the last '.'
+    // if that is a well-known suffix (e.g., ".o" or ".ko").
+    //
+    suffix_list.push_back(".o");
+    suffix_list.push_back(".ko");
+    module_name = filename;
+    list<string>::iterator iter;
+    for (iter = suffix_list.begin(); iter != suffix_list.end(); ++iter) {
+	string suffix = *iter;
+	dot = filename.rfind(suffix);
+	if (dot != string::npos) {
+	    if (filename.substr(dot) == suffix) {
+		module_name = filename.substr(0, dot);
+		break;
+	    }
+	}
+    }
+
+    return (module_name);
+}
+
+int
+ClickSocket::mount_click_file_system(string& error_msg)
+{
+    if (_kernel_click_mount_directory.empty()) {
+	error_msg = c_format("Kernel Click mount directory is empty");
+	return (XORP_ERROR);
+    }
+
+    if (! _mounted_kernel_click_mount_directory.empty()) {
+	if (_kernel_click_mount_directory
+	    == _mounted_kernel_click_mount_directory) {
+	    return (XORP_OK);	// Directory already mounted
+	}
+
+	error_msg = c_format("Cannot mount Click on directory %s: "
+			     "Click file system already mounted on "
+			     "directory %s",
+			     _kernel_click_mount_directory.c_str(),
+			     _mounted_kernel_click_mount_directory.c_str());
+	return (XORP_ERROR);
+    }
+
+    //
+    // Test if the Click file system has been installed already.
+    //
+    // We do this by tesing whether we can access a number of Click files
+    // within the Click file system.
+    //
+    list<string> click_files;
+    list<string>::iterator iter;
+    size_t files_found = 0;
+
+    click_files.push_back("/config");
+    click_files.push_back("/flatconfig");
+    click_files.push_back("/packages");
+    click_files.push_back("/version");
+
+    for (iter = click_files.begin(); iter != click_files.end(); ++iter) {
+	string click_filename = _kernel_click_mount_directory + *iter;
+	if (access(click_filename.c_str(), R_OK) == 0) {
+	    files_found++;
+	}
+    }
+    if (files_found > 0) {
+	if (files_found == click_files.size()) {
+	    return (XORP_OK);	// Directory already mounted
+	}
+	error_msg = c_format("Mount directory contains some Click files");
+	return (XORP_ERROR);
+    }
+
+    //
+    // XXX: Linux has different mount(2) API, hence we need to take
+    // care of this. Sigh...
+    //
+    int ret_value = -1;
+#ifndef HOST_OS_LINUX
+    ret_value = mount(CLICK_FILE_SYSTEM_TYPE.c_str(),
+		      _kernel_click_mount_directory.c_str(), 0, 0);
+#else // HOST_OS_LINUX
+    ret_value = mount("none", _kernel_click_mount_directory.c_str(),
+		      CLICK_FILE_SYSTEM_TYPE.c_str(), 0, 0);
+#endif // HOST_OS_LINUX
+
+    if (ret_value != 0) {
+	error_msg = c_format("Cannot mount Click file system "
+			     "on directory %s: %s",
+			     _kernel_click_mount_directory.c_str(),
+			     strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    _mounted_kernel_click_mount_directory = _kernel_click_mount_directory;
+
+    return (XORP_OK);
+}
+
+int
+ClickSocket::unmount_click_file_system(string& error_msg)
+{
+    if (_mounted_kernel_click_mount_directory.empty())
+	return (XORP_OK);	// Directory not mounted
+
+    //
+    // XXX: Linux doesn't have unmount(2). Instead, it has umount(2), hence
+    // we need to take care of this. Sigh...
+    //
+    int ret_value = -1;
+#ifndef HOST_OS_LINUX
+    ret_value = unmount(_mounted_kernel_click_mount_directory.c_str(), 0);
+#else // HOST_OS_LINUX
+    ret_value = umount(_mounted_kernel_click_mount_directory.c_str());
+#endif // HOST_OS_LINUX
+
+    if (ret_value != 0) {
+	error_msg = c_format("Cannot unmount Click file system "
+			     "from directory %s: %s",
+			     _mounted_kernel_click_mount_directory.c_str(),
+			     strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    _mounted_kernel_click_mount_directory.erase();
+
+    return (XORP_OK);
 }
 
 int

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.8 2004/12/02 02:37:47 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.9 2004/12/02 07:02:38 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -313,6 +313,73 @@ private:
     int  force_read_message(vector<uint8_t>& message, string& errmsg);
 
     /**
+     * Load the kernel Click modules.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int load_kernel_click_modules(string& error_msg);
+
+    /**
+     * Unload the kernel Click modules.
+     * 
+     * Note: the modules are unloaded in the reverse order they are loaded.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unload_kernel_click_modules(string& error_msg);
+
+    /**
+     * Load a kernel module.
+     * 
+     * @param module_filename the kernel module filename to load.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int load_kernel_module(const string& module_filename, string& error_msg);
+
+    /**
+     * Unload a kernel module.
+     * 
+     * Note: the module will not be unloaded if it was not loaded
+     * previously by us.
+     * 
+     * @param module_filename the kernel module filename to unload.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unload_kernel_module(const string& module_filename, string& error_msg);
+
+    /**
+     * Get the kernel module name from the kernel module filename.
+     * 
+     * The module name is composed of the name of the file (without
+     * the directory path) but excluding the suffix if that is a well-known
+     * suffix (e.g., ".o" or ".ko").
+     * 
+     * @param module_filename the module filename.
+     * @return the kernel module name.
+     */
+    string kernel_module_filename2modulename(const string& module_filename);
+
+    /**
+     * Mount the Click file system.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int mount_click_file_system(string& error_msg);
+
+    /**
+     * Unmount the Click file system.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unmount_click_file_system(string& error_msg);
+
+    /**
      * Execute the user-level Click command.
      *
      * @param command the command to execute.
@@ -365,6 +432,12 @@ private:
     static const int CLICK_COMMAND_CODE_WARNING_MAX = 299;
     static const int CLICK_COMMAND_CODE_ERROR_MIN = 500;
     static const int CLICK_COMMAND_CODE_ERROR_MAX = 599;
+    static const TimeVal USER_CLICK_STARTUP_MAX_WAIT_TIME;
+
+    static const string PROC_LINUX_MODULES_FILE;
+    static const string LINUX_COMMAND_LOAD_MODULE;
+    static const string LINUX_COMMAND_UNLOAD_MODULE;
+    static const string CLICK_FILE_SYSTEM_TYPE;
 
 private:
     EventLoop&	 _eventloop;
@@ -384,7 +457,9 @@ private:
     string	_click_config_generator_file;
     bool	_kernel_click_install_on_startup;
     list<string> _kernel_click_modules;
+    list<string> _loaded_kernel_click_modules;
     string	_kernel_click_mount_directory;
+    string	_mounted_kernel_click_mount_directory;
     string	_user_click_command_file;
     string	_user_click_command_extra_arguments;
     bool	_user_click_command_execute_on_startup;
