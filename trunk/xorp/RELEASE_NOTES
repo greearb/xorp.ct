@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.34 2003/09/02 22:04:49 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.35 2003/09/02 22:06:24 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -28,7 +28,9 @@ Release 0.5 (2003/??/??)
     - 
 
   FEA/MFEA:
-    - 
+    - Add Linux Netlink support for writing network interface information,
+      and routing entries to the kernel, and for observing the change of
+      that information in the kernel.
 
   RIB: 
     - 
