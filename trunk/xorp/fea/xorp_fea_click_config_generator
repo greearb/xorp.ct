@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.6 2004/12/11 10:35:31 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.7 2004/12/11 10:57:10 pavlin Exp $
 #
 
 #
@@ -17,6 +17,10 @@
 # 2. The first network interface/vif must be connected to _xorp_rt[0],
 #    the second network interface/vif must be connected to _xorp_rt[1],
 #    and so-on.
+#
+# Note that if both kernel-level and user-level Click are enabled
+# (which is allowed), this script will print the kernel-level Click
+# configuration.
 #
 
 BEGIN {
@@ -271,6 +275,11 @@ function generate_click_send_packets_to_host()
     printf("// Local delivery\n");
     # TODO: XXX: Fix the Local delivery for *BSD and/or user-level Click
     if (is_kernel_click) {
+	#
+	# XXX: Note that if both kernel-level and user-level Click are enabled
+	# (which is allowed), this script will print the kernel-level Click
+	# configuration.
+	#
 	printf("%s :: ToHost;\n", xorp_toh);
     } else {
 	printf("%s :: Discard;\n", xorp_toh);
@@ -808,8 +817,6 @@ function process_statement(statement)
 		v = tokens[i];
 		if (v == "true") {
 		    is_kernel_click = 1;
-		    if (is_user_click)
-			syntax_error("Kernel Click and user-level Click are mutually exclusive\n");
 		} else {
 		    is_kernel_click = 0;
 		}
@@ -830,8 +837,6 @@ function process_statement(statement)
 		v = tokens[i];
 		if (v == "true") {
 		    is_user_click = 1;
-		    if (is_kernel_click)
-			syntax_error("Kernel Click and user-level Click are mutually exclusive\n");
 		} else {
 		    is_user_click = 0;
 		}
