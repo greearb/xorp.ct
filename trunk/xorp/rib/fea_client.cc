@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/fea_client.cc,v 1.6 2003/03/10 20:26:47 mjh Exp $"
+#ident "$XORP: xorp/rib/fea_client.cc,v 1.7 2003/03/10 23:20:54 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "config.h"
-#include "urib_module.h"
+#include "rib_module.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 

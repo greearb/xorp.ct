@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.2 2003/02/27 19:54:14 hodson Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.3 2003/03/04 23:41:25 hodson Exp $
 ##
 
 # -- Real Programs
@@ -64,7 +64,7 @@ test_register_xrls_LDADD += $(top_builddir)/xrl/targets/libribclientbase.a
 test_fea_client_SOURCES  = test_fea_client.cc
 
 # -- Library Sources
-librib_a_SOURCES  = urib_module.h
+librib_a_SOURCES  = rib_module.h
 librib_a_SOURCES += version.h
 librib_a_SOURCES += fea_client.hh
 librib_a_SOURCES += protocol.hh

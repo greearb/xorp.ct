@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_register_server.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
+#ident "$XORP: xorp/rib/dummy_register_server.cc,v 1.2 2003/03/10 23:20:54 hodson Exp $"
 
+#include "rib_module.h"
 #include "dummy_register_server.hh"
 
 extern bool verbose;

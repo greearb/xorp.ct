@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/route.cc,v 1.2 2003/02/25 04:05:20 mjh Exp $"
+#ident "$XORP: xorp/rib/route.cc,v 1.3 2003/03/10 23:20:55 hodson Exp $"
 
-#include "urib_module.h"
+#include "rib_module.h"
 #include "route.hh"
 
 RouteEntry::RouteEntry(Vif *vif, NextHop *nh, const Protocol& proto, 
