@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.2 2003/05/19 06:54:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.3 2003/05/19 17:54:02 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -123,7 +123,7 @@ XrlMfeaVifManager::update_state()
 	break;
     }
     
-    // Time to set vif state in the MfeaNode
+    // Time to set the vif state
     if (_state == READY) {
 	if ((_interfaces_remaining == 0)
 	    && (_vifs_remaining == 0)
@@ -201,7 +201,8 @@ XrlMfeaVifManager::set_vif_state()
 	    for (ipvx_iter = delete_addresses_list.begin();
 		 ipvx_iter != delete_addresses_list.end();
 		 ++ipvx_iter) {
-		node_vif->delete_address(*ipvx_iter);
+		const IPvX& ipvx = *ipvx_iter;
+		node_vif->delete_address(ipvx);
 	    }
 	}
 	
@@ -367,6 +368,7 @@ XrlMfeaVifManager::xrl_result_get_all_vif_names(
 							  ifname,
 							  vifname,
 							  cb);
+		_vifs_remaining++;
 		break;
 #ifdef HAVE_IPV6
 	    case AF_INET6:
@@ -376,13 +378,13 @@ XrlMfeaVifManager::xrl_result_get_all_vif_names(
 							  ifname,
 							  vifname,
 							  cb);
+		_vifs_remaining++;
 		break;
 #endif // HAVE_IPV6
 	    default:
 		XLOG_ASSERT(false);
 		break;
 	    }
-	    _vifs_remaining++;
 	}
 	update_state();
 	return;
@@ -727,6 +729,7 @@ XrlMfeaVifManager::xrl_result_get_all_address_flags4(const XrlError& e,
 	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	    // silently ignore - the vif could have been deleted while we
 	    // were waiting for the answer.
+	    update_state();
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
@@ -805,6 +808,7 @@ XrlMfeaVifManager::xrl_result_get_all_address_flags6(const XrlError& e,
 	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	    // silently ignore - the vif could have been deleted while we
 	    // were waiting for the answer.
+	    update_state();
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
@@ -869,6 +873,7 @@ XrlMfeaVifManager::xrl_result_get_all_prefix4(const XrlError& e,
 	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	    // silently ignore - the vif could have been deleted while we
 	    // were waiting for the answer.
+	    update_state();
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
@@ -924,6 +929,7 @@ XrlMfeaVifManager::xrl_result_get_all_prefix6(const XrlError& e,
 	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	    // silently ignore - the vif could have been deleted while we
 	    // were waiting for the answer.
+	    update_state();
 	    return;
 	}
 	Vif *vif = _vifs_by_name[vifname];
@@ -975,6 +981,7 @@ XrlMfeaVifManager::xrl_result_get_all_broadcast4(const XrlError& e,
 	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	    // silently ignore - the vif could have been deleted while we
 	    // were waiting for the answer.
+	    update_state();
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
@@ -1026,6 +1033,7 @@ XrlMfeaVifManager::xrl_result_get_all_endpoint4(const XrlError& e,
 	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	    // silently ignore - the vif could have been deleted while we
 	    // were waiting for the answer.
+	    update_state();
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
@@ -1081,6 +1089,7 @@ XrlMfeaVifManager::xrl_result_get_all_endpoint6(const XrlError& e,
 	if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	    // silently ignore - the vif could have been deleted while we
 	    // were waiting for the answer.
+	    update_state();
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
