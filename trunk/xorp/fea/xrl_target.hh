@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.26 2004/02/19 04:33:12 hodson Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.27 2004/03/15 23:30:57 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -732,6 +732,9 @@ public:
 	string&	xrl_target);
 
 private:
+    bool have_ipv4() const { return (_have_ipv4); };
+    bool have_ipv6() const { return (_have_ipv6); };
+
     XrlFtiTransactionManager	_xftm;
     XrlInterfaceManager 	_xifmgr;
     XrlIfConfigUpdateReporter&	_xifcur;
@@ -739,7 +742,9 @@ private:
     LibFeaClientBridge*		_lfcb;
     XrlSocketServer*		_xss;
 
-    bool			_done;	// True if we are done
+    bool			_done;		// True if we are done
+    bool			_have_ipv4;	// True if we have IPv4
+    bool			_have_ipv6;	// True if we have IPv6
 };
 
 #endif //  __FEA_XRL_TARGET_HH__
