@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/LICENSE,v 1.2 2002/12/09 11:13:04 pavlin Exp $
+# $XORP: xorp/LICENSE,v 1.1.1.1 2002/12/11 23:55:48 hodson Exp $
 #
 
 Portions of this software have one or more of the following copyrights, and
 are subject to the license below. The relevant source files are clearly
 marked; they refer to this file using the phrase ``the Xorp LICENSE file''.
 
-(c) 2002 International Computer Science Institute
+Copyright (c) 2001-2003 International Computer Science Institute
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
