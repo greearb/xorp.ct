@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.11 2003/04/22 23:27:21 hodson Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.1 2003/05/15 23:10:32 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -693,6 +693,32 @@ protected:
 	const uint32_t&	metric);
 
     XrlCmdError mfea_0_1_reset_mrib_table_default_metric();
+
+
+    XrlCmdError fea_ifmgr_client_0_1_interface_update(
+	// Input values, 
+	const string&	ifname, 
+	const uint32_t&	event);
+
+    XrlCmdError fea_ifmgr_client_0_1_vif_update(
+	// Input values, 
+	const string&	ifname, 
+	const string&	vifname, 
+	const uint32_t&	event);
+
+    XrlCmdError fea_ifmgr_client_0_1_vifaddr4_update(
+	// Input values, 
+	const string&	ifname, 
+	const string&	vifname, 
+	const IPv4&	addr, 
+	const uint32_t&	event);
+
+    XrlCmdError fea_ifmgr_client_0_1_vifaddr6_update(
+	// Input values, 
+	const string&	ifname, 
+	const string&	vifname, 
+	const IPv6&	addr, 
+	const uint32_t&	event);
     
 private:
     const string& my_xrl_target_name() {

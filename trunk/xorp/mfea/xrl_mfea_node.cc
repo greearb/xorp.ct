@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.14 2003/05/08 00:01:34 pavlin Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.15 2003/05/15 23:40:37 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -2594,4 +2594,62 @@ XrlMfeaNode::mfea_0_1_reset_mrib_table_default_metric()
     }
     
     return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::fea_ifmgr_client_0_1_interface_update(
+    // Input values, 
+    const string&	ifname, 
+    const uint32_t&	event)
+{
+    UNUSED(ifname);
+    UNUSED(event);
+    
+    return XrlCmdError::COMMAND_FAILED("XRL handling not implemented");
+}
+
+XrlCmdError
+XrlMfeaNode::fea_ifmgr_client_0_1_vif_update(
+    // Input values, 
+    const string&	ifname, 
+    const string&	vifname, 
+    const uint32_t&	event)
+{
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(event);
+
+    return XrlCmdError::COMMAND_FAILED("XRL handling not implemented");
+}
+
+XrlCmdError
+XrlMfeaNode::fea_ifmgr_client_0_1_vifaddr4_update(
+    // Input values, 
+    const string&	ifname, 
+    const string&	vifname, 
+    const IPv4&		addr, 
+    const uint32_t&	event)
+{
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(addr);
+    UNUSED(event);
+    
+    return XrlCmdError::COMMAND_FAILED("XRL handling not implemented");
+}
+
+XrlCmdError
+XrlMfeaNode::fea_ifmgr_client_0_1_vifaddr6_update(
+    // Input values, 
+    const string&	ifname, 
+    const string&	vifname, 
+    const IPv6&		addr, 
+    const uint32_t&	event)
+{
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(addr);
+    UNUSED(event);
+    
+    return XrlCmdError::COMMAND_FAILED("XRL handling not implemented");
 }
