@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.17 2003/06/02 21:26:09 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.18 2003/06/24 18:51:41 atanu Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -25,6 +25,7 @@
 
 static const char* ROUTER_NAME = "call_xrl";
 
+static int wait_time = 1000;	// Time to wait for the callback in ms.
 static int retry_count = 0;	// Number of times to resend xrl on error.
 static bool stdin_forever = false;
 
@@ -62,7 +63,8 @@ void usage()
 	    "and   -E only passes XRLs through the preprocessor\n"
 	    "Options:\n"
 	    "  -F <host>[:<port>]   Specify Finder host and port\n"
-	    "  -r <retries>         Specify number of retry attempts\n");
+	    "  -r <retries>         Specify number of retry attempts\n"
+	    "  -w <time ms>         Time to wait for a callback\n");
 }
 
 static int
@@ -87,7 +89,7 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 				    &x));
 
 	    bool to = false;
-	    XorpTimer timeout = e.set_flag_after_ms(1000, &to);
+	    XorpTimer timeout = e.set_flag_after_ms(wait_time, &to);
 	    while (to == false && done == false) {
 		e.run();
 	    }
@@ -216,7 +218,7 @@ main(int argc, char* const argv[])
     bool pponly = false;	// Pre-process files only
     bool fileinput = false;
     int c;
-    while ((c = getopt(argc, argv, "Efir:")) != -1) {
+    while ((c = getopt(argc, argv, "Efir:w:")) != -1) {
 	switch (c) {
 	case 'E':
 	    pponly = true;
@@ -230,6 +232,9 @@ main(int argc, char* const argv[])
 	    break;
 	case 'r':
 	    retry_count = atoi(optarg);
+	    break;
+	case 'w':
+	    wait_time = atoi(optarg) * 1000;
 	    break;
 	default:
 	    usage();
