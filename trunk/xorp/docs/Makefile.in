@@ -90,7 +90,7 @@ net_snmp_found = @net_snmp_found@
 snmpd = @snmpd@
 snmpd2 = @snmpd2@
 
-SUBDIRS = bgp design_arch fea libxipc libxorp mfea mld6igmp multicast pim pim_testsuite rib rtrmgr snmp  test_harness slides user_manual 
+SUBDIRS = bgp design_arch fea libxipc libxorp mfea mld6igmp multicast pim pim_testsuite rib rtrmgr slides snmp test_harness user_manual
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = kdoc mk papers tex
