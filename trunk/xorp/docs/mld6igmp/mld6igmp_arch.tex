@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mld6igmp/mld6igmp_arch.tex,v 1.10 2002/12/11 10:19:33 pavlin Exp $
+% $XORP: xorp/docs/mld6igmp/mld6igmp_arch.tex,v 1.1.1.1 2002/12/11 23:55:56 hodson Exp $
 %
 
 \documentclass[11pt]{article}
@@ -37,13 +37,13 @@
 
 \title{XORP MLD/IGMP Daemon \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 10, 2003}
 
 \maketitle
 
@@ -62,20 +62,19 @@ Routing Daemon. It is intended to provide a starting point for software
 developers who wish to modify this software.
 
 A router running MLD/IGMP interacts with other MLD/IGMP routers and
-multicast members, and keeps state about local multicast membership
-information.
+multicast group members, and keeps state with information about local
+multicast membership.
 
-The chosen architecture for our MLD/IGMP implementation emphasizes on
+The chosen architecture for the XORP MLD/IGMP implementation emphasizes on
 correctness and extensibility rather than high performance or minimal
 memory footprint. Typically, the amount of state kept by MLD/IGMP is
 relatively small. Further, the multicast routing performance does not
 depend on the MLD/IGMP performance, therefore it is not necessary to
 optimize the implementation. Only if it turns out that there are
-performance issues with MLD/IGMP, we should
-try to optimize those parts of the implementation which are
-the bottleneck.
+performance issues with MLD/IGMP, we would try to optimize those parts of the
+implementation which are the bottleneck.
 
-Currently (December 2002), the MLD and IGMP implementation is based
+Currently (March 2003), the MLD and IGMP implementation is based
 on the specification in the following documents:
 
 \begin{itemize}
@@ -83,7 +82,7 @@ on the specification in the following documents:
   \item RFC 2236: Internet Group Management Protocol, Version 2
 \end{itemize}
 
-In the future there will be support for IGMPv3 and MLDv2.
+In the future there will be support for MLDv2 and IGMPv3.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Acronyms}
@@ -115,7 +114,7 @@ Acronyms used in this document:
   \end{center}
 \end{figure}
 
-Figure~\ref{fig:mld6igmp_design_overview} gives a general overview of the
+Figure~\ref{fig:mld6igmp_design_overview} provides a general overview of the
 MLD/IGMP components. For each component there is a C++ class with exactly
 the same name. The main components are briefly described below:
 
@@ -125,8 +124,8 @@ the same name. The main components are briefly described below:
   (\eg a virtual MLD/IGMP router).
   Typically, there would be a single Mld6igmpNode per multicast router.
 
-  \item {\bf Mld6igmpVif:} MLD/IGMP-specific virtual interface that is used for
-  sending and receiving MLD/IGMP control messages.
+  \item {\bf Mld6igmpVif:} MLD/IGMP-specific virtual (network) interface that
+  is used for sending and receiving MLD/IGMP control packets.
 
   \item {\bf Mld6igmpConfig:} contains MLD/IGMP-specific configuration.
 
@@ -154,10 +153,11 @@ another one for IPv6 multicast routing. Further, if we want to
 run MLD/IGMP in a simulation environment, each multicast router within that
 simulation will be represented by a single Mld6igmpNode.
 
-From a developer's point of view, Mld6igmpNode contains the front-end interface
-to interact with the MLD/IGMP routing unit, as well as all the state
-related to that unit. For example, Mld6igmpNode contains the methods to
-start/stop or configure MLD/IGMP, or to send/receive MLD/IGMP control messages
+From a developer's point of view, Mld6igmpNode contains all the state
+related to the MLD/IGMP routing unit, and exports the front-end interface
+to interact with that unit.
+For example, Mld6igmpNode contains the methods to
+start/stop or configure MLD/IGMP, or to send/receive MLD/IGMP control packets
 to/from the routing unit. Those methods are described in the following files:
 
 \begin{itemize}
@@ -169,44 +169,45 @@ to/from the routing unit. Those methods are described in the following files:
 Mld6igmpNode itself does not implement the mechanisms to communicate with
 other routing units (\eg to send or receive control packets to/from the
 network), or to perform other MLD/IGMP-independent operations such as
-join a multicast routing group. Those mechanisms are outside the scope of
+joining a multicast routing group. Those mechanisms are outside the scope of
 Mld6igmpNode, and must be implemented separately.
 
 Mld6igmpNode contains several pure virtual methods (\eg
-\verb=join_multicast_group()= that is used to join a multicast group on
+\verb=join_multicast_group()= is used to join a multicast group on
 an interface) that must be implemented by a class that inherits Mld6igmpNode.
 For example, XrlMld6igmpNode is a class that uses Mld6igmpNode as a base class,
 and that implements XRL-based communication mechanisms between Mld6igmpNode
 and other XORP components such as the MFEA and PIM modules.
 
-By default, Mld6igmpNode is disabled; therefore it must be explicitly
-enabled, and then started.
+By default, Mld6igmpNode is disabled; therefore, on startup it must be
+enabled explicitly.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Mld6igmpVif Description}
 
-Mld6igmpVif is a MLD/IGMP-specific virtual interface that is used for
-sending and 
-receiving MLD/IGMP control messages. It includes the methods for processing
-and composing MLD/IGMP control messages, as well as various state per
-interface (\eg the multicast group membership on an interface).
+Mld6igmpVif is a MLD/IGMP-specific virtual (network) interface that is
+used for sending and receiving MLD/IGMP control packets. It includes the
+methods for processing and composing MLD/IGMP control messages, as well
+as various state per interface (\eg the multicast group membership on an
+interface). It contains various state per interface ((\eg the multicast
+group membership on an interface), as well as the methods for processing
+and composing MLD/IGMP control messages.
 
-Typically, there would be one Mld6igmpVif virtual interface for each
-interface on the router: physical interfaces, tunnels, and the loopback
+Typically, there would be one Mld6igmpVif per network interface
+such as physical interface, tunnel, or the loopback
 interface. Not all virtual interfaces will be
 used by MLD/IGMP; for example, all interfaces that are not multicast
 capable, and the loopback interface will be ignored for multicast
 routing.
 
 Typically, from developer's point of view, all interaction with Mld6igmpNode
-would be through Mld6igmpNode~\footnote{Note that on few occasions in the
-current 
-implementation (December 2002) XrlMld6igmpNode for simplicity uses
+would be through Mld6igmpNode~\footnote{For simplicity, currently
+(March 2003) there are few occasions when XrlMld6igmpNode uses
 direct access to Mld6igmpVif.}.
 
 The public interface for Mld6igmpVif contains the methods to manipulate a
-virtual interface. Those methods are to start/stop/enable/disable a
-virtual interface, or to configure it. Those methods are described in
+virtual (network) interface. Those methods are to start/stop/enable/disable a
+virtual interface, and to configure it. The methods are described in
 the following files:
 
 \begin{itemize}
@@ -220,22 +221,21 @@ local members (a list of objects of class MemberQuery), and information
 about the current MLD/IGMP querier. Also, all 
 of the MLD/IGMP-specific methods for parsing or constructing MLD/IGMP control
 messages when a MLD/IGMP packet is received or sent are implemented as
-methods to Mld6igmpVif. The parsing or construction of each message type is
+methods in Mld6igmpVif. The parsing or construction of each message type is
 implemented in files \verb=mld6_proto.cc= and \verb=igmp_proto.cc=
 for MLD and IGMP respectively.
 
-By default, each Mld6igmpVif is disabled; therefore it must be explicitly
-enabled, and then started.
+By default, each Mld6igmpVif is disabled; therefore, on startup it must
+be enabled explicitly.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Mld6igmpConfig Description}
 
 Mld6igmpConfig handles the MLD/IGMP-specific
-configuration~\footnote{Note that currently 
-(December 2002), Mld6igmpConfig is not implemented; rather, all state is
-kept into Mld6igmpNode instead.}. This configuration is used to configure the
-following units:
+configuration~\footnote{Currently (March 2003), Mld6igmpConfig is not
+implemented; rather, all state is kept inside Mld6igmpNode instead.}. This
+configuration is used to configure the following units:
 
 \begin{itemize}
 
@@ -254,6 +254,9 @@ following units:
 \begin{itemize}
 
   \item December 11, 2002: Version 0.1 completed.
+
+  \item March 10, 2003: Updated to match XORP version 0.2 release code;
+  cleanup.
 
 \end{itemize}
 
