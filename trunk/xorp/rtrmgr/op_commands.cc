@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.38 2004/11/26 23:05:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.39 2004/12/21 16:16:50 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -658,9 +658,9 @@ OpCommandList::find_executable_filename(const string& command_filename,
 
     if (command_filename[0] == '/') {
 	// Absolute path name
-	if ((stat(command_filename.c_str(), &statbuf) == 0)
-	    && (statbuf.st_mode & S_IFREG > 0)
-	    && (statbuf.st_mode & S_IXUSR > 0)) {
+	if (stat(command_filename.c_str(), &statbuf) == 0 &&
+	    eaccess(command_filename.c_str(), X_OK) == 0 &&
+	    S_ISREG(statbuf.st_mode)) {
 	    executable_filename = command_filename;
 	    return true;
 	}
@@ -680,11 +680,12 @@ OpCommandList::find_executable_filename(const string& command_filename,
 	path.splice(path.end(), l2);
     }
 
+    // Search each path component
     while (!path.empty()) {
 	string full_path_executable = path.front() + "/" + command_filename;
-	if ((stat(full_path_executable.c_str(), &statbuf) == 0)
-	    && (statbuf.st_mode & S_IFREG > 0)
-	    && (statbuf.st_mode & S_IXUSR > 0)) {
+	if (stat(full_path_executable.c_str(), &statbuf) == 0 &&
+	    eaccess(command_filename.c_str(), X_OK) &&
+	    S_ISREG(statbuf.st_mode)) {
 	    executable_filename = full_path_executable;
 	    return true;
 	}
