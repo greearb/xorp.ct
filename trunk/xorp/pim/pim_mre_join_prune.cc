@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.21 2003/05/21 05:32:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.22 2003/06/12 03:01:06 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -583,7 +583,7 @@ PimMre::receive_prune_rp(uint16_t vif_index, uint16_t holdtime)
 
  prune_pending_state_label:
     // PrunePending state
-    return;		// Nothing to do (TODO: is it really true?)
+    return;		// Nothing to do
     
     UNUSED(holdtime);
 }
@@ -670,7 +670,6 @@ PimMre::receive_prune_wc(uint16_t vif_index, uint16_t holdtime)
 	return;
     if (pim_vif->pim_nbrs_number() > 1) {
 	TimeVal tv = pim_vif->jp_override_interval();
-	// TODO: make sure usec resolution works!!
 	_downstream_prune_pending_timers[vif_index] =
 	    pim_node().eventloop().new_oneoff_after(
 		tv,
@@ -776,7 +775,6 @@ PimMre::receive_prune_sg(uint16_t vif_index, uint16_t holdtime)
 	return;
     if (pim_vif->pim_nbrs_number() > 1) {
 	TimeVal tv = pim_vif->jp_override_interval();
-	// TODO: make sure usec resolution works!!
 	_downstream_prune_pending_timers[vif_index] =
 	    pim_node().eventloop().new_oneoff_after(
 		tv,
@@ -912,7 +910,6 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 		     vif_index));
     if (pim_vif->pim_nbrs_number() > 1) {
 	TimeVal tv = pim_vif->jp_override_interval();
-	// TODO: make sure usec resolution works!!
 	_downstream_prune_pending_timers[vif_index] =
 	    pim_node().eventloop().new_oneoff_after(
 		tv,
@@ -959,7 +956,7 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     // FALLTHROUGH to PrunePending state
  prune_pending_state_label:
     // PrunePending state
-    return;		// XXX: TODO: really ignore (S,G,rpt)P in PP state??
+    return;		// Nothing to do
 }
 
 //
