@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.25 2004/07/09 05:22:47 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.26 2004/08/23 16:47:35 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -100,8 +100,8 @@ it for each router:
    [ Note: add alternative subnets with extreme care, only if you know what
    you are really doing! ]
    Example:
-	ALTERNATIVE_SUBNET4="dc1 10.3.0.0/16 dc2 10.4.0.0/16"
-	ALTERNATIVE_SUBNET6=""
+	ALTERNATIVE_SUBNETS4="dc1 10.3.0.0/16 dc2 10.4.0.0/16"
+	ALTERNATIVE_SUBNETS6=""
 
  - All configuration variables described above can be predefined in your
    shell environment instead.
