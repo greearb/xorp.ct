@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.39 2004/10/19 20:08:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.40 2004/11/04 01:33:35 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -69,7 +69,7 @@ NextTableMap<A>::erase(iterator& iter)
     uint32_t id = i->second->peer_handler()->id().addr();
     _next_tables.erase(i);
 
-    typename map <uint32_t, PeerTableInfo<A>* >::iterator j;
+    typename multimap<uint32_t, PeerTableInfo<A>* >::iterator j;
     j = _next_table_order.find(id);
     while (j->first == id  && j->second != prpair) {
 	//find the right one.
