@@ -35,6 +35,10 @@ protocols
 		}
 	    }
 	}
+	import @: text {
+	    cost:uint = 1 ;
+	    tag:uint  = 0 ;
+	}
     }
 }
 
@@ -125,6 +129,10 @@ protocols
 		    }
 		}
 	    }
+	}
+	import @: text {
+	       %activate: xrl "$(rip.targetname)/rip/0.1/import_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.cost)&tag:u32=$(@.tag)";
+	       %delete: xrl "$(rip.targetname)/rip/0.1/no_import_protocol_routes?protocol_name:txt=$(@)";
 	}
     }
 }
