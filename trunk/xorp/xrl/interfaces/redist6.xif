@@ -1,0 +1,13 @@
+interface redist6/0.1 {
+
+	add_route6 ? network:ipv6net					\
+		   & nexthop:ipv6					\
+		   & global_metric:u32					\
+		   & cookie:txt
+
+	delete_route6 ? network:ipv6net					\
+		      & cookie:txt
+
+	delete_all_routes6 ? cookie:txt
+}
+

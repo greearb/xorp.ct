@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.16 2004/03/09 22:15:01 hodson Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.17 2004/03/15 23:26:41 pavlin Exp $
 ##
 
 ###############################################################################
@@ -121,6 +121,13 @@ libospfxif_a_SOURCES = ospf_xif.hh ospf_xif.cc
 # PIM Interface
 noinst_LIBRARIES += libpimxif.a
 libpimxif_a_SOURCES = pim_xif.hh pim_xif.cc
+
+# Redistribution Interface to Routing Protocols
+noinst_LIBRARIES += libredist4xif.a
+libredist4xif_a_SOURCES = redist4_xif.hh redist4_xif.cc
+
+noinst_LIBRARIES += libredist6xif.a
+libredist6xif_a_SOURCES = redist6_xif.hh redist6_xif.cc
 
 # RIB Interface to Routing Protocols
 noinst_LIBRARIES += libribxif.a
