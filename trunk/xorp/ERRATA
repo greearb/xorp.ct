@@ -1,0 +1,58 @@
+#
+# $XORP$
+#
+
+		XORP ERRATA
+
+  ALL:
+    - 
+
+  LIBXORP:
+    - 
+
+  LIBXIPC:
+    - 
+
+  LIBFEACLIENT:
+    - 
+
+  XRL:
+    - 
+
+  RTRMGR:
+    - 
+
+  XORPSH:
+    - A problem was noticed very late in the release process; rather
+      than delay the release we have choosen to document the
+      problem. The xorpsh provides the command line to the XORP
+      router. The router configuration is structured as a tree,
+      for instance configuring a new protocol essentially adds a new
+      node to the tree. Removing a protocol involves deleting a node
+      from the tree. In some cases deleting a node does not remove all
+      the associated state; worse putting the same node back seems to
+      fail in the majority of cases.
+
+  FEA/MFEA:
+    - 
+
+  RIB: 
+    - 
+
+  BGP:
+    - 
+
+  MLD/IGMP:
+    - 
+
+  PIM-SM:
+    - 
+
+  CLI:
+    - 
+
+  SNMP:
+    - 
+
+  RIP:
+    - 
