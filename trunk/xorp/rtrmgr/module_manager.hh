@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.26 2004/12/07 10:45:50 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.27 2004/12/08 22:47:27 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -88,12 +88,10 @@ public:
     int kill_module(const string& module_name, 
 		   XorpCallback0<void>::RefPtr cb);
     void module_shutdown_cb();
-    bool module_exists(const string& module_name) const;
     bool module_is_running(const string& module_name) const;
     bool module_has_started(const string& module_name) const;
     void shutdown();
     bool shutdown_complete();
-    Module::ModuleStatus module_status(const string& module_name) const;
     void module_status_changed(const string& module_name, 
 			       Module::ModuleStatus old_status,
 			       Module::ModuleStatus new_status);
@@ -131,10 +129,6 @@ public:
     bool do_restart() const { return _do_restart; }
 
 private:
-    Module* find_module(const string& module_name);
-    const Module* const_find_module(const string& module_name) const;
-
-    map<string, Module *> _modules;
     bool	_do_restart;
     bool	_verbose;	// Set to true if output is verbose
     string	_xorp_root_dir;	// The root of the XORP tree

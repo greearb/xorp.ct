@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.34 2004/08/19 02:00:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/generic_module_manager.cc,v 1.1 2004/12/06 00:31:42 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -97,13 +97,6 @@ GenericModuleManager::kill_module(const string& module_name,
 }
 
 bool 
-GenericModuleManager::module_exists(const string& module_name) const
-{
-    UNUSED(module_name);
-    return false;
-}
-
-bool 
 GenericModuleManager::module_has_started(const string& module_name) const
 {
     UNUSED(module_name);
@@ -120,3 +113,51 @@ GenericModuleManager::shell_execute(uid_t userid, const vector<string>& argv,
     UNUSED(do_exec);
     return XORP_ERROR;
 }
+
+
+GenericModule*
+GenericModuleManager::find_module(const string& module_name)
+{
+    map<string, GenericModule*>::iterator found;
+
+    found = _modules.find(module_name);
+    if (found == _modules.end()) {
+	debug_msg("GenericModuleManager: Failed to find module %s\n",
+		  module_name.c_str());
+	return NULL;
+    } else {
+	debug_msg("GenericModuleManager: Found module %s\n", module_name.c_str());
+	return found->second;
+    }
+}
+
+const GenericModule*
+GenericModuleManager::const_find_module(const string& module_name) const
+{
+    map<string, GenericModule*>::const_iterator found;
+
+    found = _modules.find(module_name);
+    if (found == _modules.end()) {
+	return NULL;
+    } else {
+	return found->second;
+    }
+}
+
+bool
+GenericModuleManager::module_exists(const string& module_name) const
+{
+    return _modules.find(module_name) != _modules.end();
+}
+
+GenericModule::ModuleStatus 
+GenericModuleManager::module_status(const string& module_name) const
+{
+    const GenericModule *m = const_find_module(module_name);
+    if (m) {
+	return m->status();
+    } else {
+	return GenericModule::NO_SUCH_MODULE;
+    }
+}
+

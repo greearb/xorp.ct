@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.36 2004/12/06 01:15:59 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.37 2004/12/08 22:47:27 mjh Exp $"
 
 #include <signal.h>
 #include <glob.h>
@@ -595,7 +595,7 @@ ModuleManager::new_module(const string& module_name, const string& path)
 {
     debug_msg("ModuleManager::new_module %s\n", module_name.c_str());
 
-    map<string, Module*>::iterator found_mod;
+    map<string, GenericModule*>::iterator found_mod;
     found_mod = _modules.find(module_name);
     if (found_mod == _modules.end()) {
 	Module* new_module;
@@ -615,7 +615,7 @@ int
 ModuleManager::start_module(const string& module_name, bool do_exec,
 			    XorpCallback1<void, bool>::RefPtr cb)
 {
-    Module* module = find_module(module_name);
+    Module* module = (Module*)find_module(module_name);
 
     XLOG_ASSERT(module != NULL);
     return module->run(do_exec, cb);
@@ -625,7 +625,7 @@ int
 ModuleManager::kill_module(const string& module_name,
 			   XorpCallback0<void>::RefPtr cb)
 {
-    Module* module = find_module(module_name);
+    Module* module = (Module*)find_module(module_name);
 
     XLOG_ASSERT(module != NULL);
     module->terminate(cb);
@@ -635,7 +635,7 @@ ModuleManager::kill_module(const string& module_name,
 bool
 ModuleManager::module_is_running(const string& module_name) const
 {
-    const Module* module = const_find_module(module_name);
+    const Module* module = (const Module*)const_find_module(module_name);
 
     if (module == NULL)
 	return false;
@@ -645,57 +645,11 @@ ModuleManager::module_is_running(const string& module_name) const
 bool
 ModuleManager::module_has_started(const string& module_name) const
 {
-    const Module* module = const_find_module(module_name);
+    const Module* module = (const Module*)const_find_module(module_name);
 
     if (module == NULL)
 	return false;
     return (module->status() != Module::MODULE_NOT_STARTED);
-}
-
-Module*
-ModuleManager::find_module(const string& module_name)
-{
-    map<string, Module*>::iterator found;
-
-    found = _modules.find(module_name);
-    if (found == _modules.end()) {
-	debug_msg("ModuleManager: Failed to find module %s\n",
-		  module_name.c_str());
-	return NULL;
-    } else {
-	debug_msg("ModuleManager: Found module %s\n", module_name.c_str());
-	return found->second;
-    }
-}
-
-const Module*
-ModuleManager::const_find_module(const string& module_name) const
-{
-    map<string, Module*>::const_iterator found;
-
-    found = _modules.find(module_name);
-    if (found == _modules.end()) {
-	return NULL;
-    } else {
-	return found->second;
-    }
-}
-
-bool
-ModuleManager::module_exists(const string& module_name) const
-{
-    return _modules.find(module_name) != _modules.end();
-}
-
-Module::ModuleStatus 
-ModuleManager::module_status(const string& module_name) const
-{
-    const Module *m = const_find_module(module_name);
-    if (m) {
-	return m->status();
-    } else {
-	return Module::NO_SUCH_MODULE;
-    }
 }
 
 void
@@ -710,7 +664,7 @@ ModuleManager::module_status_changed(const string& module_name,
 void
 ModuleManager::get_module_list(list <string>& modules)
 {
-    map<string, Module *>::iterator i;
+    map<string, GenericModule *>::iterator i;
     for (i = _modules.begin(); i != _modules.end(); i++) {
 	modules.push_back(i->first);
     }
@@ -721,10 +675,10 @@ ModuleManager::shutdown()
 {
     debug_msg("ModuleManager::shutdown\n");
 
-    map<string, Module*>::iterator iter;
+    map<string, GenericModule*>::iterator iter;
     for (iter = _modules.begin(); iter != _modules.end(); ++iter) {
-	iter->second->terminate(callback(this,
-					 &ModuleManager::module_shutdown_cb));
+	Module *module = (Module*)iter->second;
+	module->terminate(callback(this, &ModuleManager::module_shutdown_cb));
     }
 }
 
@@ -739,7 +693,7 @@ ModuleManager::shutdown_complete()
 {
     bool complete = true;
 
-    map<string, Module*>::iterator iter, iter2;
+    map<string, GenericModule*>::iterator iter, iter2;
     for (iter = _modules.begin(); iter != _modules.end(); ) {
 	if (iter->second->status() == Module::MODULE_NOT_STARTED) {
 	    delete iter->second;
@@ -762,7 +716,7 @@ ModuleManager::shell_execute(uid_t userid, const vector<string>& argv,
     if (!new_module(argv[0], argv[0])) {
 	return XORP_ERROR;
     }
-    Module *module = find_module(argv[0]);
+    Module *module = (Module*)find_module(argv[0]);
     module->set_userid(userid);
     module->set_argv(argv);
     XorpCallback1<void, bool>::RefPtr run_cb 

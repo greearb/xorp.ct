@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.15 2004/12/06 00:31:05 mjh Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.16 2004/12/08 22:47:27 mjh Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -120,6 +120,7 @@ private:
     XorpClient		_xclient;
     XrlRtrmgrV0p1Client	_rtrmgr_client;
     XrlXorpshInterface	_xorpsh_interface;
+    GenericModuleManager _mmgr;
 
     TemplateTree*	_tt;
     SlaveConfigTree*	_ct;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.15 2004/06/10 22:41:56 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.16 2004/12/06 00:31:05 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -109,6 +109,9 @@ XrlXorpshInterface::rtrmgr_client_0_2_module_status(// Input values,
 						    const uint32_t& status)
 {
     XLOG_TRACE(_verbose,
+	       "module status: %s changed to status %d\n",
+	       modname.c_str(), status);
+    printf(
 	       "module status: %s changed to status %d\n",
 	       modname.c_str(), status);
     _xorpsh.module_status_change(modname, (GenericModule::ModuleStatus)status);
