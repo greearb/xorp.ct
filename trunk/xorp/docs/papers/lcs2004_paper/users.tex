@@ -5,26 +5,25 @@ bases we mentioned earlier.
 
 \subsection{Network Research}
 
-There are a lot of very smart people in the network research
-community, but it's difficult for many of these people to do experiments
-that give meaningful results.  A lot of work happens in simulation,
+%There are a lot of very smart people in the network research
+%community, but it's difficult for many of these people to do experiments
+%that give meaningful results.  
+A lot of work happens in simulation,
 but often it's hard to know whether the simulation bears much
 relationship to reality.  There's really no substitute for trying
-something out in the real world.  This is where XORP comes in.
-
-Here are some examples of how XORP can be used:
-
+something out in the real world.  This is where XORP comes in, here are some examples of how XORP can be used:
+\vspace{-0.07in}
 \begin{itemize}
 \item If XORP is used as a production router, it is easy to instrument
 it to perform measurements of traffic, routing messages, or
 practically anything else that goes on in a router.  
-
+\vspace{-0.07in}
 \item XORP can be used as a platform to develop new routing protocols.
 XORP has no built-in concept of which routing protocols exists, so you
 can easily add your own, together with an ASCII configuration template
 file, so the XORP command line interface knows what new
 functionality is available.
-
+\vspace{-0.07in}
 \item XORP can be used as a network emulator.
 XORP's Forwarding Engine Abstraction (FEA) process provides an
 abstract interface through which the whole control plane communicates
@@ -33,7 +32,7 @@ modify the FEA so that multiple emulated routers all exist on the same
 host.  This allows experiments using XORP's real routing code to take
 place in a carefully controlled environment.  It also facilitates new
 protocol development without needing a large lab of machines.
-
+\vspace{-0.07in}
 \item XORP is scriptable.  XORP's internal communication between
 processes uses XRLs.
 These have a canonical form that is ASCII, such as 
@@ -44,7 +43,7 @@ finder://fea/fti/0.1/add_route?net:ipv4net=10.0.0.1/8&\
 \end{verbatim}
 \vspace{-0.1in} There's a command line program \textbf{call\_xrl} that
 allows any scripting language to make calls to any XORP process.  We
-this scipting ability is unique as an enabler for novel uses of
+believe this scipting ability is unique as an enabler for novel uses of
 existing router code.
 \end{itemize}
 
@@ -64,19 +63,17 @@ command line interface which allows all the routing protocols, network
 interfaces, and so forth to be configured.  In future releases, this
 CLI will also be extended to encompass additional router functionality
 such as queue manangement, QoS configuration, firewalls, NATs and DHCP
-configuration.
-
-XORP already supports IPv4 and IPv6, together with BGP4+ and RIP for
+configuration. XORP already supports IPv4 and IPv6, together with BGP4+ and RIP for
 unicast routing, PIM-SM and IGMPv2 for multicast, and limited SNMP
 support.  
 
-We offer XORP as a Live CD - a CD image that you can burn to a
-bootable CD which allows you to run XORP without installing any
-software or knowing anything about Unix system administration.  As it
-runs from a readonly CD, this configuration is more secure than a
-normal Unix installation.
+%We offer XORP as a Live CD - a CD image that you can burn to a
+%bootable CD which allows you to run XORP without installing any
+%software or knowing anything about Unix system administration.  As it
+%runs from a readonly CD, this configuration is more secure than a
+%normal Unix installation.
 
-On the subject of security, the XORP architecture permits different
+The XORP architecture permits different
 routing protocols to run in different security sandboxes.  For
 example, BGP does not need access to the router's filesystem or need
 privileged access to communicate with its peers so, should something
@@ -95,14 +92,12 @@ regards to what works well in the real world, and what doesn't.
 Once XORP has proven itself as a stable software stack for PC routers,
 and its functionality and feature set filled out fully, we hope it
 will prove an attractive alternative to commercial stacks for network
-equipment vendors.  
-
-XORP is licensed under a BSD-style license, which allows it to be used
-for any purpose whatsoever.  Why didn't we use the GPL for our
-license?  Vendors are extremely reticent to reveal details of fast
-forwarding hardware.  But we believe it's also in vendors interest to
-contribute back to the XORP {\it core}, even though they're not
-compelled to do so.
+equipment vendors. XORP is licensed under a BSD-style license, which allows it to be used
+for any purpose whatsoever. % Why didn't we use the GPL for our
+%license?  Vendors are extremely reticent to reveal details of fast
+%forwarding hardware.  But we believe it's also in vendors interest to
+%contribute back to the XORP {\it core}, even though they're not
+%compelled to do so.
 
 We believe XORP's architecture is well suited as a software stack to
 control an advanced hardware forwarding plane.  Our forwarding engine
