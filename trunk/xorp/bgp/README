@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/README,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+# $XORP: xorp/bgp/README,v 1.2 2003/03/11 01:16:51 pavlin Exp $
 #
 
 Border Gateway Protocol (BGP) Implementation
@@ -29,10 +29,14 @@ before it is started:
 ../rib/rib
 ../fea/fea
 
-Structure
-=========
+Documentation
+=============
 
-The structure of the BGP code is described in ../docs/bgp/bgp.ps
+The BGP design architecture and code structure are described in:
+	$(XORP)/docs/bgp/
+
+The programming documentation is in:
+	$(XORP)/docs/kdoc/html/bgp/
 
 Testing
 =======
