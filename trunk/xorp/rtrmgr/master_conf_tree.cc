@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.2 2003/02/22 07:14:32 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.3 2003/02/22 20:21:30 mjh Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -151,6 +151,7 @@ void MasterConfigTree::config_done(int status, const string& errmsg) {
 
 list <string>
 MasterConfigTree::find_changed_modules() const {
+    printf("Find changed modules\n");
     set <string> changed_modules;
     _root_node.find_changed_modules(changed_modules);
 
@@ -162,10 +163,6 @@ MasterConfigTree::find_changed_modules() const {
     list <string> ordered_modules;
     if (changed_modules.empty())
 	return ordered_modules;
-    if (changed_modules.size()==1) {
-	ordered_modules.push_front(*(changed_modules.begin()));
-	return ordered_modules;
-    }
 	
     multimap <string, string> depends; //first depends on second
     set <string> no_info; //modules we found no info about
@@ -208,10 +205,18 @@ MasterConfigTree::find_changed_modules() const {
 	ModuleCommand* mc = _template_tree->find_module(*i);
 	if (mc == NULL) {
 	    printf("%s has no info\n", (*i).c_str());
+	    additional_done.insert(*i);
+	    additional_modules.erase(i);
+	    ordered_modules.push_back(*i);
+	    satisfied.insert(*i);
 	    continue;
 	}
 	if (mc->depends().empty()) {
 	    printf("%s has no dependencies\n", (*i).c_str());
+	    additional_done.insert(*i);
+	    additional_modules.erase(i);
+	    ordered_modules.push_back(*i);
+	    satisfied.insert(*i);
 	    continue;
 	}
 	list <string>::const_iterator di;
@@ -231,10 +236,6 @@ MasterConfigTree::find_changed_modules() const {
     }
     printf("done additional modules\n");
 
-
-    if (ordered_modules.empty() && !depends.empty()) {
-	XLOG_FATAL("Module dependencies cannot be satisfied\n");
-    }
     multimap<string,string>::iterator cur, next;
     while (!depends.empty()) {
 	bool progress_made = false;
