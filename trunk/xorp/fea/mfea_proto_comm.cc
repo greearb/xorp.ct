@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.22 2005/03/03 07:31:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.23 2005/03/05 01:41:27 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -890,17 +890,37 @@ ProtoComm::open_proto_socket()
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
-    
-    // Assign a function to read from this socket
-    if (mfea_node().eventloop().add_selector(_proto_socket, SEL_RD,
-				callback(this, &ProtoComm::proto_socket_read))
-	== false) {
+
+    if (add_proto_socket_selector() < 0) {
+	close_proto_socket();
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
+/**
+ * Add the method to read from the protocol socket.
+ * 
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+ProtoComm::add_proto_socket_selector()
+{
+    if (_proto_socket < 0)
+	return (XORP_ERROR);
+
+    // Assign a method to read from this socket
+    if (mfea_node().eventloop().add_selector(_proto_socket, SEL_RD,
+				callback(this, &ProtoComm::proto_socket_read))
+	== false) {
+	XLOG_ERROR("Cannot add a protocol socket to the set of sockets "
+		   "to read from in the event loop");
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
 
 /**
  * ProtoComm::close_proto_socket:

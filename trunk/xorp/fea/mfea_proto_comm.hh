@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.4 2003/08/05 05:36:26 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.6 2004/06/10 22:40:56 hodson Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -106,6 +106,13 @@ public:
      */
     int		open_proto_socket();
     
+    /**
+     * Add the method to read from the protocol socket.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		add_proto_socket_selector();
+
     /**
      * Close the protocol socket.
      * 
