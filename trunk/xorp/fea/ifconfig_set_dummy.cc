@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.9 2004/09/01 18:17:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.10 2004/09/09 18:55:45 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -116,15 +116,17 @@ int
 IfConfigSetDummy::set_interface_flags(const string& ifname,
 				      uint16_t if_index,
 				      uint32_t flags,
+				      bool is_up,
 				      string& errmsg)
 {
     debug_msg("set_interface_flags "
-	      "(ifname = %s if_index = %u flags = 0x%x)\n",
-	      ifname.c_str(), if_index, flags);
+	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s)\n",
+	      ifname.c_str(), if_index, flags, (is_up)? "true" : "false");
 
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(flags);
+    UNUSED(is_up);
     UNUSED(errmsg);
 
     return (XORP_OK);

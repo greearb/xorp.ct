@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.11 2004/09/01 18:17:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.12 2004/09/09 18:56:46 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -158,15 +158,17 @@ int
 IfConfigSetNetlink::set_interface_flags(const string& ifname,
 					uint16_t if_index,
 					uint32_t flags,
+					bool is_up,
 					string& errmsg)
 {
     debug_msg("set_interface_flags "
-	      "(ifname = %s if_index = %u flags = 0x%x)\n",
-	      ifname.c_str(), if_index, flags);
+	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s)\n",
+	      ifname.c_str(), if_index, flags, (is_up)? "true" : "false");
 
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(flags);
+    UNUSED(is_up);
 
     errmsg = "method not supported";
 
@@ -440,11 +442,12 @@ int
 IfConfigSetNetlink::set_interface_flags(const string& ifname,
 					uint16_t if_index,
 					uint32_t flags,
+					bool is_up,
 					string& errmsg)
 {
     debug_msg("set_interface_flags "
-	      "(ifname = %s if_index = %u flags = 0x%x)\n",
-	      ifname.c_str(), if_index, flags);
+	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s)\n",
+	      ifname.c_str(), if_index, flags, (is_up)? "true" : "false");
 
 #ifndef HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
@@ -456,6 +459,7 @@ IfConfigSetNetlink::set_interface_flags(const string& ifname,
     NetlinkSocket4&	ns4 = *this;
 
     UNUSED(ifname);
+    UNUSED(is_up);
 
     memset(buffer, 0, sizeof(buffer));
 
@@ -508,6 +512,8 @@ IfConfigSetNetlink::set_interface_flags(const string& ifname,
     //
     struct ifreq ifreq;
     int s = socket(AF_INET, SOCK_DGRAM, 0);
+
+    UNUSED(is_up);
 
     if (s < 0) {
 	XLOG_FATAL("Could not initialize IPv4 ioctl() socket");

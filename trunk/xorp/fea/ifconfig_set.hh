@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.14 2004/09/09 04:58:45 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.15 2004/09/09 19:05:05 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -93,12 +93,14 @@ protected:
      * @param ifname the interface name.
      * @param if_index the interface index.
      * @param flags the flags to set.
+     * @param is_up if true, the interface is set to UP.
      * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int set_interface_flags(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t flags,
+				    bool is_up,
 				    string& errmsg) = 0;
 
     /**
@@ -195,6 +197,7 @@ private:
     virtual int set_interface_flags(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t flags,
+				    bool is_up,
 				    string& errmsg);
 
     virtual int set_vif_address(const string& ifname,
@@ -246,6 +249,7 @@ private:
     virtual int set_interface_flags(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t flags,
+				    bool is_up,
 				    string& errmsg);
 
     virtual int set_vif_address(const string& ifname,
@@ -319,6 +323,7 @@ private:
     virtual int set_interface_flags(const string& ifname,
 				    uint16_t if_index,
 				    uint32_t flags,
+				    bool is_up,
 				    string& errmsg);
 
     virtual int set_vif_address(const string& ifname,
