@@ -4722,6 +4722,7 @@ trap 'rm -fr `echo "Makefile
 	rip/routed/Makefile
 	rip/route6d/Makefile
 	rtrmgr/Makefile
+	policy/Makefile
 	utils/Makefile
 	xrl/Makefile
 	xrl/interfaces/Makefile
@@ -4884,6 +4885,7 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
 	rip/routed/Makefile
 	rip/route6d/Makefile
 	rtrmgr/Makefile
+	policy/Makefile
 	utils/Makefile
 	xrl/Makefile
 	xrl/interfaces/Makefile

@@ -12,27 +12,41 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_route.cc,v 1.1 2003/01/30 19:21:10 mjh Exp $"
+#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
 
-#include "policy_route.hh"
+#include "action.hh"
 
-template <typename A>
-PolicyRoute<A>::PolicyRoute(const IPNet<A> &net, 
-			    const A& nexthop, 
-			    const string& origin_protocol)
-    : _net(net), _nexthop(nexthop), _origin_protocol(origin_protocol)
+template <class A>
+PolicyAction<A>::PolicyAction<A>()
 {
 }
 
-
-template <typename A>
-BGPPolicyRoute<A>::BGPPolicyRoute(const IPNet<A> &net, 
-				  const A& nexthop, 
-				  const AsPath& as_path, 
-				  OriginType origin,
-				  bool _ibgp)
-    : PolicyRoute<A>(net, nexthop, "bgp"),
-      _as_path(as_path), _origin(origin), _ibgp(ibgp),
-      _has_med(false), _has_localpref(false)
+template <class A>
+AcceptAction<A>::AcceptAction<A>()
 {
+}
+
+template <class A>
+bool 
+AcceptAction<A>::apply_actions(const PolicyRoute<A>& in_route, 
+			       PolicyRoute<A>*& out_route) const
+{
+    //XXX
+    out_route = &in_route;
+    return true;
+}
+
+template <class A>
+RejectAction<A>::RejectAction<A>()
+{
+}
+
+template <class A>
+bool 
+RejectAction<A>::apply_actions(const PolicyRoute<A>& in_route, 
+			       PolicyRoute<A>*& out_route) const
+{
+    //XXX
+    out_route = &in_route;
+    return true;
 }

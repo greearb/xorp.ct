@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/policy/statement.cc,v 1.1 2003/01/30 19:21:10 mjh Exp $"
 
 #include "statement.hh"
 
@@ -37,7 +37,7 @@ PolicyStatement<A>::apply_policy(const PolicyRoute<A>* in_route) const
 {
     bool route_changed = false;
     PolicyRoute<A> modified_route(*in_route);
-    list<PolicyTerm<A> >::const_iterator i;
+    typename list<PolicyTerm<A> >::const_iterator i;
     for (i = _terms.begin(); i!= _terms.end(); i++) {
 	bool changed, reject, last_term;
 	(*i)->apply_policy(modified_route, changed, reject, last_term);
