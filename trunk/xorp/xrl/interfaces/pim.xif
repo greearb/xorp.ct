@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.14 2003/12/16 23:35:16 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.15 2004/01/05 20:40:48 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -277,6 +277,24 @@ interface pim/0.1 {
 					& interval_sec:u32		\
 					& bytes:u32
 	reset_switch_to_spt_threshold
+
+	/**
+	 * Add or delete an alternative subnet on a PIM vif.
+	 * An alternative subnet is used to make incoming traffic with
+	 * a non-local source address appear as it is coming from a local
+	 * subnet.
+	 * Note: add alternative subnets with extreme care, only if you
+	 * know what you are really doing!
+	 *
+	 * @param vif_name the name of the vif to add or delete an alternative
+	 * subnet.
+	 * @param subnet the subnet address to add or delete.
+	 */
+	add_alternative_subnet4		? vif_name:txt & subnet:ipv4net
+	add_alternative_subnet6		? vif_name:txt & subnet:ipv6net
+	delete_alternative_subnet4	? vif_name:txt & subnet:ipv4net
+	delete_alternative_subnet6	? vif_name:txt & subnet:ipv6net
+	remove_all_alternative_subnets	? vif_name:txt
 
 	/**
 	 * Enable/disable the PIM trace log for all operations.
