@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.11 2003/06/20 18:55:58 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.12 2003/06/20 20:56:48 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -31,13 +31,14 @@ struct RequestState {
     XrlPFSTCPSender*		parent;
     uint32_t			seqno;
     Xrl				xrl;
-    XorpTimer			timeout;
     XrlPFSender::SendCallback	cb;
 
     RequestState(XrlPFSTCPSender* p, uint32_t sno, const Xrl& x,
 		 const XrlPFSender::SendCallback& scb)
 	: parent(p), seqno(sno), xrl(x), cb(scb)
     {}
+
+    ~RequestState();
 
     bool has_seqno(uint32_t n) const { return seqno == n; }
 };
@@ -76,18 +77,18 @@ public:
     virtual ~XrlPFSTCPSender();
 
     void send(const Xrl& x, const XrlPFSender::SendCallback& cb);
-    bool sends_pending() const 			{ return true; }
-    bool alive() const 				{ return _fd > 0; }
 
-    static const char* protocol() 		{ return _protocol; }
+    inline bool sends_pending() const 			{ return true; }
 
-    // Response timeout control
-    void set_timeout_ms(uint32_t t)		{ _timeout_ms = t; }
-    uint32_t timeout_ms() const 		{ return _timeout_ms; }
+    bool alive() const 					{ return _fd > 0; }
 
-    // Keepalive interval
+    const char* protocol() const;
+
+    inline static const char* protocol_name()		{ return _protocol; }
+
     void set_keepalive_ms(uint32_t t);
-    uint32_t keepalive_ms() const		{ return _keepalive_ms; }
+
+    inline uint32_t keepalive_ms() const	{ return _keepalive_ms; }
 
 private:
     void send_first_request();
@@ -110,11 +111,8 @@ private:
 		       size_t 			bytes_done);
 
     RequestState* find_request(uint32_t seqno);
-    void postpone_timeout(uint32_t seqno);
-    void timeout_request(uint32_t seqno);
 
     // Tunable timer variables
-    uint32_t _timeout_ms;
     uint32_t _keepalive_ms;
 
     // Reception related

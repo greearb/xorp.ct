@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.19 2003/06/19 00:44:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.20 2003/06/20 18:55:58 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -36,15 +36,17 @@
 #include "xrl_pf_stcp_ph.hh"
 #include "xrl_dispatcher.hh"
 
-static const string STCP_PROTOCOL_NAME ("stcp");
-static const string STCP_PROTOCOL ("stcp/1.0");
+const char* XrlPFSTCPSender::_protocol   = "stcp";
+const char* XrlPFSTCPListener::_protocol = "stcp";
 
-const char* XrlPFSTCPSender::_protocol   = STCP_PROTOCOL_NAME.c_str();
-const char* XrlPFSTCPListener::_protocol = STCP_PROTOCOL_NAME.c_str();
-
-static const uint32_t DEFAULT_SENDER_TIMEOUT_MS   = 2000;
 static const uint32_t DEFAULT_SENDER_KEEPALIVE_MS = 10000;
 
+RequestState::~RequestState()
+{
+    debug_msg("Destructing RequestState with seqno = %d\n", seqno);
+}
+
+
 // ----------------------------------------------------------------------------
 // STCPRequestHandler - created by Listener to manage requests over a
 // connection.  These are allocated on by XrlPFSTCPListener and delete
@@ -64,7 +66,8 @@ public:
 	prepare_for_request();
 	debug_msg("STCPRequestHandler (%p) fd = %d\n", this, fd);
     }
-    ~STCPRequestHandler() {
+    ~STCPRequestHandler()
+    {
 	_parent.remove_request_handler(this);
 	_reader.stop();
 	_writer.stop();
@@ -232,7 +235,7 @@ STCPRequestHandler::dispatch_request(uint32_t seqno, const char* xrl_c_str)
 
     const XrlDispatcher* d = _parent.dispatcher();
     assert(d != 0);
-    
+
     try {
 	Xrl xrl(xrl_c_str);
 	e = d->dispatch_xrl(xrl.command(), xrl.args(), response);
@@ -326,6 +329,7 @@ STCPRequestHandler::die(const char *reason)
     delete this;
 }
 
+
 // ----------------------------------------------------------------------------
 // Simple TCP Listener - creates TCPRequestHandlers for each incoming
 // connection.
@@ -406,7 +410,6 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
     throw (XrlPFConstructorError)
     : XrlPFSender(e, addr_slash_port),
     _fd(-1),
-    _timeout_ms(DEFAULT_SENDER_TIMEOUT_MS),
     _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS)
 {
     _fd = create_connected_ip_socket(TCP, addr_slash_port);
@@ -484,11 +487,6 @@ XrlPFSTCPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
     }
     _requests_pending.push_back(RequestState(this, _current_seqno++, x, cb));
 
-    RequestState& r = _requests_pending.back();
-    r.timeout = _eventloop.new_oneoff_after_ms(_timeout_ms,
-		    callback(this,
-			     &XrlPFSTCPSender::timeout_request, r.seqno));
-
     if (_requests_pending.empty() == false &&
 	_keepalive_in_progress == false) {
 	send_first_request();
@@ -512,29 +510,9 @@ XrlPFSTCPSender::find_request(uint32_t seqno)
     if (rs != _requests_pending.end()) {
 	return &(*rs);
     }
+
     abort();
     return 0;
-}
-
-void
-XrlPFSTCPSender::postpone_timeout(uint32_t seqno)
-{
-    RequestState* rs = find_request(seqno);
-    rs->timeout.reschedule_after_ms(_timeout_ms);
-}
-
-void
-XrlPFSTCPSender::timeout_request(uint32_t seqno)
-{
-    RequestState* rs = find_request(seqno);
-    if (rs->cb.is_empty() == false)
-	rs->cb->dispatch(REPLY_TIMED_OUT, 0);
-    // set callback to null because we don't want to call this again
-    rs->cb = 0;
-    rs->timeout.unschedule();
-    debug_msg("timeout_request:\nseqno %d xrl >> %s <<\n",
-	      rs->seqno, rs->xrl.str().c_str());
-    die("request timeout");
 }
 
 void
@@ -586,15 +564,16 @@ XrlPFSTCPSender::update_writer(AsyncFileWriter::Event	e,
 	die("write failed");
     }
 
+    if (bytes_done != _request_packet.size()) {
+	return;
+    }
+
     list<RequestState>::iterator rs = _requests_pending.begin();
-    rs->timeout.schedule_after_ms(_timeout_ms);
-    if (bytes_done == _request_packet.size()) {
-	// Request has been sent. Move request from head of pend queue
-	// to tail of sent queue where it will wait for a reply
-	_requests_sent.splice(_requests_sent.end(), _requests_pending, rs);
-	if (_requests_pending.empty() == false) {
-	    send_first_request();
-	}
+    // Request has been sent. Move request from head of pend queue
+    // to tail of sent queue where it will wait for a reply
+    _requests_sent.splice(_requests_sent.end(), _requests_pending, rs);
+    if (_requests_pending.empty() == false) {
+	send_first_request();
     }
 }
 
@@ -602,13 +581,13 @@ void
 XrlPFSTCPSender::dispatch_reply()
 {
     list<RequestState>::iterator rs;
-    rs = find_if(_requests_sent.begin(), _requests_sent.end(),
-		 bind2nd(mem_fun_ref(&RequestState::has_seqno), _sph->seqno()));
-    assert(rs != _requests_sent.end());
+    uint32_t seqno = _sph->seqno();
+    assert(_sph->is_valid());
 
     // Packet format is Header + optional Error note + xrl_data as textual info
 
-    char* data = reinterpret_cast<char*>(&_reply[0] + sizeof(STCPPacketHeader));
+    char* data = reinterpret_cast<char*>(&_reply[0] +
+					 sizeof(STCPPacketHeader));
 
     // We reserved an additional one byte for null termination
     data[_sph->payload_bytes()] = 0;
@@ -626,6 +605,15 @@ XrlPFSTCPSender::dispatch_reply()
     if (_sph->xrl_data_bytes()) {
 	xrl_data = data;
     }
+
+    rs = find_if(_requests_sent.begin(), _requests_sent.end(),
+		 bind2nd(mem_fun_ref(&RequestState::has_seqno), seqno));
+    if (rs == _requests_sent.end()) {
+	RequestState* r = find_request(seqno);
+	if (r != 0)
+	    abort();
+    }
+    assert(rs != _requests_sent.end());
 
     try {
 	XrlArgs response(xrl_data);
@@ -680,7 +668,7 @@ XrlPFSTCPSender::recv_data(AsyncFileReader::Event e,
     assert(_sph == 0 || offset >= sizeof(STCPPacketHeader));
     if (_sph == 0) {
 	// Awaiting header - this looks like it
-	_sph = reinterpret_cast<const STCPPacketHeader*>(buffer);
+	_sph = reinterpret_cast<const STCPPacketHeader*>(&_reply[0]);
 	if (_sph->is_valid() == false) {
 	    debug_msg("Invalid packet header (%d type 0x%02x)\n",
 		      _sph->is_valid(), _sph->type());
@@ -693,15 +681,17 @@ XrlPFSTCPSender::recv_data(AsyncFileReader::Event e,
 	// Dimension to be 1 char longer so we can null terminate data portion
 	// later and cast it to a C-string.
 	_reply.resize(sizeof(STCPPacketHeader) + _sph->payload_bytes() + 1);
+	_sph = reinterpret_cast<const STCPPacketHeader*>(&_reply[0]);
+
 	if (_sph->payload_bytes()) {
-	    _reader->add_buffer_with_offset(&_reply[0],
-					    _reply.size() - 1,
-					    sizeof(STCPPacketHeader),
-					    callback(this, &XrlPFSTCPSender::recv_data));
+	    _reader->add_buffer_with_offset(
+			&_reply[0], _reply.size() - 1,
+			sizeof(STCPPacketHeader),
+			callback(this, &XrlPFSTCPSender::recv_data)
+			);
 	    _reader->start();
 	}
     }
-    postpone_timeout(_sph->seqno());
     postpone_keepalive();
 
     if (offset == sizeof(STCPPacketHeader) + _sph->payload_bytes()) {
@@ -722,13 +712,18 @@ XrlPFSTCPSender::prepare_for_reply_header()
     _reader->start();
 }
 
+const char*
+XrlPFSTCPSender::protocol() const
+{
+    return _protocol;
+}
+
 // ----------------------------------------------------------------------------
 // Sender keepalive related
 
 void
 XrlPFSTCPSender::set_keepalive_ms(uint32_t t)
 {
-    assert(t > _timeout_ms); // assert keepalives won't interfere with data
     _keepalive_ms = t;
     start_keepalives();
 }
