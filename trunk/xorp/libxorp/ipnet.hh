@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.2 2003/01/26 04:06:21 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -127,13 +127,6 @@ public:
     IPNet& operator++();
 
     /**
-     * Bool Operator
-     * 
-     * @return true if the object stores a real (non-default) value.
-     */
-    operator bool() const { return _prefix_len != 0; }
-    
-    /**
      * Convert this address from binary form to presentation format.
      * 
      * @return C++ string with the human-readable ASCII representation
@@ -143,6 +136,13 @@ public:
 	return _masked_addr.str() + c_format("/%u", (uint32_t)_prefix_len);
     }
 
+    /**
+     * Test if the object contains a real (non-default) value.
+     * 
+     * @return true if the object stores a real (non-default) value.
+     */
+     bool is_valid() const { return _prefix_len != 0; }
+    
     /**
      * Test if subnets overlap.
      *

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.2 2003/01/16 19:09:28 hodson Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -111,7 +111,7 @@ public:
     /**
      * Equivalent to @ref initialized.
      */
-    operator bool() const		{ return initialized(); }
+    bool is_valid() const		{ return initialized(); }
 
     XorpTimer()				: _node(0) { }
     XorpTimer(TimerList* list, BasicTimerCallback cb);

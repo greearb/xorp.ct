@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.4 2002/12/09 18:29:14 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -267,11 +267,11 @@ test_ipv4net_operators()
 		   "operator++()");
     
     //
-    // Bool Operator
+    // Test if the object contains a real (non-default) value.
     //
-    verbose_assert(! IPv4Net(), "operator bool");
-    verbose_assert(! IPv4Net("0.0.0.0/0"), "operator bool");
-    verbose_assert(IPv4Net("0.0.0.0/1"), "operator bool");
+    verbose_assert(! IPv4Net().is_valid(), "is_valid()");
+    verbose_assert(! IPv4Net("0.0.0.0/0").is_valid(), "is_valid()");
+    verbose_assert(IPv4Net("0.0.0.0/1").is_valid(), "is_valid()");
 }
 
 /**

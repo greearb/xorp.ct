@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/route.hh,v 1.2 2003/01/17 03:46:42 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -212,7 +212,7 @@ public:
      * @return a human readable representation of the route entry
      */
     string str() const {
-	string dst = (_net) ? _net.str() : string("NULL");
+	string dst = (_net.is_valid()) ? _net.str() : string("NULL");
 	string vif = (_vif) ? string(_vif->name()) : string("NULL");
 	return string("Dst: ") + dst + string(" Vif: ") + vif +
 	    string(" NextHop: ") + _nh->str() + string(" Metric: ") +
