@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.6 2003/08/07 01:10:46 pavlin Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.7 2004/06/10 22:41:23 hodson Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -295,6 +295,13 @@ public:
     bool	is_loopback()		const	{ return _is_loopback; }
     
     /**
+     * Test if this vif is a discard interface.
+     * 
+     * return true if this vif is a discard interface, otherwise false.
+     */
+    bool	is_discard()		const	{ return _is_discard; }
+    
+    /**
      * Test if this vif is multicast capable.
      * 
      * return true if this vif is multicast capable, otherwise false.
@@ -343,6 +350,14 @@ public:
      * otherwise reset it.
      */
     void	set_loopback(bool v)		{ _is_loopback = v; }
+    
+    /**
+     * Set/reset the vif as a discard interface.
+     * 
+     * @param v if true, then set this vif as a discard interface,
+     * otherwise reset it.
+     */
+    void	set_discard(bool v)		{ _is_discard = v; }
     
     /**
      * Set/reset the vif as multicast capable.
@@ -488,6 +503,7 @@ private:
     bool	_is_pim_register;	// PIM Register vif
     bool	_is_p2p;		// Point-to-point interface
     bool	_is_loopback;		// Loopback interface
+    bool	_is_discard;		// Discard interface
     bool	_is_multicast_capable;	// Multicast-capable interface
     bool	_is_broadcast_capable;	// Broadcast-capable interface
     bool	_is_underlying_vif_up;	// True if underlying vif is up

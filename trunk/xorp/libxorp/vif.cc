@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.10 2004/03/30 22:56:26 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.11 2004/06/10 22:41:23 hodson Exp $"
 
 #include <functional>
 #include <string>
@@ -90,6 +90,7 @@ Vif::Vif(const string& vifname, const string& ifname)
     set_pim_register(false);
     set_p2p(false);
     set_loopback(false);
+    set_discard(false);
     set_multicast_capable(false);
     set_broadcast_capable(false);
     set_underlying_vif_up(false);
@@ -108,6 +109,7 @@ Vif::Vif(const Vif& vif)
     set_pim_register(vif.is_pim_register());
     set_p2p(vif.is_p2p());
     set_loopback(vif.is_loopback());
+    set_discard(vif.is_discard());
     set_multicast_capable(vif.is_multicast_capable());
     set_broadcast_capable(vif.is_broadcast_capable());
     set_underlying_vif_up(vif.is_underlying_vif_up());
@@ -159,6 +161,8 @@ Vif::str() const
 	r += " BROADCAST";
     if (is_loopback())
 	r += " LOOPBACK";
+    if (is_discard())
+	r += " DISCARD";
     if (is_underlying_vif_up())
 	r += " UNDERLYING_VIF_UP";
     
