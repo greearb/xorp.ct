@@ -1,6 +1,10 @@
 #
-# $XORP: xorp/pim/TODO,v 1.67 2004/02/24 23:50:19 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.68 2004/02/25 00:35:48 pavlin Exp $
 #
+
+* IMPL:
+ Take care of Section 4.5.10: Background: (*,*,RP) and (S,G,rpt) interaction.
+  (check whether the implementation does the right thing).
 
 * IMPL:
   Implement mixing of IPv4/IPv6 addresses within PIM Join/Prune messages
