@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.8 2003/08/10 22:01:24 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.9 2003/08/11 17:20:23 hodson Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -493,7 +493,10 @@ public:
 	set_point_to_point(o.point_to_point());
 	set_multicast(o.multicast());
 	set_addr_flags(o.addr_flags());
-	set_endpoint(o.endpoint());
+	if (o.broadcast())
+	    set_bcast(o.bcast());
+	if (o.point_to_point())
+	    set_endpoint(o.endpoint());
 	set_prefix(o.prefix());
     }
 
@@ -511,6 +514,7 @@ public:
 		&& (point_to_point() == o.point_to_point())
 		&& (multicast() == o.multicast())
 		&& (addr_flags() == o.addr_flags())
+		&& (bcast() == o.bcast())
 		&& (endpoint() == o.endpoint())
 		&& (prefix() == o.prefix()));
     }
@@ -587,7 +591,8 @@ public:
 	set_point_to_point(o.point_to_point());
 	set_multicast(o.multicast());
 	set_addr_flags(o.addr_flags());
-	set_endpoint(o.endpoint());
+	if (o.point_to_point())
+	    set_endpoint(o.endpoint());
 	set_prefix(o.prefix());
     }
 
