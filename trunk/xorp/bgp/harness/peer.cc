@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.29 2003/08/05 22:14:45 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.30 2003/08/05 23:42:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1244,10 +1244,10 @@ public:
 
     };
 private:
-    static const uint8_t _valid[] = {0x80|0x40, 255, 1, 1};
+    static const uint8_t _valid[];
 };
 
-const uint8_t AnyAttribute::_valid[];
+const uint8_t AnyAttribute::_valid[] = {0x80|0x40, 255, 1, 1};
 
 /*
 ** The input is a comma separated list of numbers that are turned into
