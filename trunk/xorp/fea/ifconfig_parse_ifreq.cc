@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.5 2003/06/17 23:14:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.6 2003/08/06 02:10:42 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -68,13 +68,15 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 				const uint8_t* buf, size_t buf_bytes)
 {
     u_short if_index = 0;
-    string if_name;
+    string if_name, alias_if_name;
     const uint8_t *ptr;
     
     for (ptr = buf; ptr < buf + buf_bytes; ) {
 	int len = 0;
 	const struct ifreq	*ifreq = (const struct ifreq *)ptr;
 	struct ifreq		ifrcopy;
+	
+	// Get the length of the ifreq entry
 #ifdef HAVE_SA_LEN
 	len = MAX(sizeof(struct sockaddr), ifreq->ifr_addr.sa_len);
 #else
@@ -99,27 +101,24 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	//
 	char tmp_if_name[IFNAMSIZ+1];
 	strncpy(tmp_if_name, ifreq->ifr_name, sizeof(tmp_if_name));
-#ifdef HOST_OS_SOLARIS
 	char *cptr;
 	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) {
-	    // Replace colon with null. Needed because in Solaris the
-	    // interface name changes for aliases
+	    // Replace colon with null. Needed because in Solaris and Linux
+	    // the interface name changes for aliases.
 	    *cptr = '\0';
 	}
-#endif // HOST_OS_SOLARIS
-	if_name = string(tmp_if_name);
+	if_name = string(ifreq->ifr_name);
+	alias_if_name = string(tmp_if_name);
+	debug_msg("interface: %s\n", if_name.c_str());
+	debug_msg("alias interface: %s\n", alias_if_name.c_str());
 	
 	//
-	// Try to get the physical interface index
+	// Get the physical interface index
 	//
 	do {
 	    if_index = 0;
 	    
 #ifdef HAVE_IF_NAMETOINDEX
-	    // TODO: check whether for Solaris we have to use the
-	    // original interface name instead (i.e., the one that has
-	    // unique vif name per alias (see the ':' substitution
-	    // above).
 	    if_index = if_nametoindex(if_name.c_str());
 	    if (if_index > 0)
 		break;
@@ -135,32 +134,35 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		if (ioctl(sock(family), SIOCGIFINDEX, &ifridx) < 0) {
 		    XLOG_ERROR("ioctl(SIOCGIFINDEX) for interface %s failed: %s",
 			       if_name.c_str(), strerror(errno));
-		    return false;
+		} else {
+		    if_index = ifridx.ifr_ifindex;
 		}
-		if_index = ifridx.ifr_ifindex;
 	    }
 	    if (if_index > 0)
 		break;
 #endif // SIOCGIFINDEX
+	    
+	    break;
 	} while (false);
 	if (if_index == 0) {
-	    // TODO: what to do? Shall I assign my own pseudo-indexes?
-	    XLOG_FATAL("Could not find index for interface %s", if_name.c_str());
+	    XLOG_FATAL("Could not find physical interface index "
+		       "for interface %s",
+		       if_name.c_str());
 	}
+	debug_msg("interface index: %d\n", if_index);
 	
 	//
 	// Add the interface (if a new one)
 	//
-	ifc().map_ifindex(if_index, if_name);
-	it.add_if(if_name);
-	IfTreeInterface& fi = it.get_if(if_name)->second;
+	ifc().map_ifindex(if_index, alias_if_name);
+	it.add_if(alias_if_name);
+	IfTreeInterface& fi = it.get_if(alias_if_name)->second;
 	
 	//
 	// Get the MAC address
 	//
-	// TODO: XXX: PAVPAVPAV: this won't work on Linux!!
+	do {
 #ifdef AF_LINK
-	{
 	    const sockaddr *sa = &ifreq->ifr_addr;
 	    if (sa->sa_family == AF_LINK) {
 		const sockaddr_dl* sdl = reinterpret_cast<const sockaddr_dl*>(sa);
@@ -170,14 +172,31 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 			memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen,
 			       sdl->sdl_alen);
 			fi.set_mac(EtherMac(ea));
+			break;
 		    } else if (sdl->sdl_alen != 0) {
 			XLOG_ERROR("Address size %d uncatered for interface %s",
 				   sdl->sdl_alen, if_name.c_str());
-		}
+		    }
 		}
 	    }
-	}
 #endif // AF_LINK
+	    
+#ifdef SIOCGIFHWADDR
+	    memcpy(&ifrcopy, ifreq, sizeof(ifrcopy));
+	    if (ioctl(soc, SIOCGIFHWADDR, &ifrcopy) < 0) {
+		XLOG_ERROR("ioctl(SIOCGIFHWADDR) for interface %s failed: %s",
+			   if_name.c_str(), strerror(errno));
+	    } else {
+		ether_addr ea;
+		memcpy(&ea, ifrcopy.ifr_hwaddr.sa_data, sizeof(ea));
+		fi.set_mac(EtherMac(ea));
+		break;
+	    }
+#endif // SIOCGIFHWADDR
+	    
+	    break;
+	} while (false);
+	debug_msg("MAC address: %s\n", fi.mac().str().c_str());
 	
 	//
 	// Get the MTU
@@ -189,8 +208,9 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		       if_name.c_str(), strerror(errno));
 	} else {
 	    mtu = ifrcopy.ifr_mtu;
-	    fi.set_mtu(mtu);
 	}
+	fi.set_mtu(mtu);
+	debug_msg("MTU: %d\n", fi.mtu());
 	
 	//
 	// Get the flags
@@ -204,24 +224,40 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    flags = ifrcopy.ifr_flags;
 	}
 	fi.set_enabled(flags & IFF_UP);
+	debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
 	
-	debug_msg("%s flags %s\n",
-		  if_name.c_str(), IfConfigGet::iff_flags(flags).c_str());
 	// XXX: vifname == ifname on this platform
-	fi.add_vif(if_name);
-	IfTreeVif& fv = fi.get_vif(if_name)->second;
+	fi.add_vif(alias_if_name);
+	IfTreeVif& fv = fi.get_vif(alias_if_name)->second;
+	
+	//
+	// Set the physical interface index for the vif
+	//
 	fv.set_pif_index(if_index);
+	
+	//
+	// Set the vif flags
+	//
 	fv.set_enabled(fi.enabled() && (flags & IFF_UP));
 	fv.set_broadcast(flags & IFF_BROADCAST);
 	fv.set_loopback(flags & IFF_LOOPBACK);
 	fv.set_point_to_point(flags & IFF_POINTOPOINT);
 	fv.set_multicast(flags & IFF_MULTICAST);
+	debug_msg("vif enabled: %s\n", fv.enabled() ? "true" : "false");
+	debug_msg("vif broadcast: %s\n", fv.broadcast() ? "true" : "false");
+	debug_msg("vif loopback: %s\n", fv.loopback() ? "true" : "false");
+	debug_msg("vif point_to_point: %s\n", fv.point_to_point() ? "true"
+		  : "false");
+	debug_msg("vif multicast: %s\n", fv.multicast() ? "true" : "false");
 	
 	//
-	// Get the interface addresses for the same address family
+	// Get the interface addresses for the same address family only.
+	// XXX: if the address family is zero, then we query the address.
 	//
-	if (ifreq->ifr_addr.sa_family != family)
+	if ((ifreq->ifr_addr.sa_family != family)
+	    && (ifreq->ifr_addr.sa_family != 0)) {
 	    continue;
+	}
 	
 	//
 	// Get the IP address, netmask, broadcast address, P2P destination
@@ -234,15 +270,78 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	bool has_broadcast_addr = false;
 	bool has_peer_addr = false;
 	
+	struct ifreq ip_ifrcopy;
+	memcpy(&ip_ifrcopy, ifreq, sizeof(ip_ifrcopy));
+	ip_ifrcopy.ifr_addr.sa_family = family;
+#ifdef SIOCGIFADDR_IN6
+	struct in6_ifreq ip_ifrcopy6;
+	memcpy(&ip_ifrcopy6, ifreq, sizeof(ip_ifrcopy6));
+	ip_ifrcopy6.ifr_ifru.ifru_addr.sin6_family = family;
+#endif // SIOCGIFADDR_IN6
+	
 	// Get the IP address
-	lcl_addr.copy_in(ifreq->ifr_addr);
+	if (ifreq->ifr_addr.sa_family == family) {
+	    lcl_addr.copy_in(ifreq->ifr_addr);
+	    memcpy(&ip_ifrcopy, ifreq, sizeof(ip_ifrcopy));
+#ifdef SIOCGIFADDR_IN6
+	    memcpy(&ip_ifrcopy6, ifreq, sizeof(ip_ifrcopy6));
+#endif
+	} else {
+	    // XXX: we need to query the local IP address
+	    XLOG_ASSERT(ifreq->ifr_addr.sa_family == 0);
+	    
+	    switch (family) {
+	    case AF_INET:
+#ifdef SIOCGIFADDR
+		memset(&ifrcopy, 0, sizeof(ifrcopy));
+		strncpy(ifrcopy.ifr_name, if_name.c_str(),
+			sizeof(ifrcopy.ifr_name));
+		ifrcopy.ifr_addr.sa_family = family;
+		if (ioctl(sock(family), SIOCGIFADDR, &ifrcopy) < 0) {
+		    XLOG_ERROR("ioctl(SIOCGIFADDR) failed: %s",
+			       strerror(errno));
+		} else {
+		    lcl_addr.copy_in(ifrcopy.ifr_addr);
+		    memcpy(&ip_ifrcopy, &ifrcopy, sizeof(ip_ifrcopy));
+		}
+#endif // SIOCGIFADDR
+		break;
+		
+#ifdef HAVE_IPV6
+	    case AF_INET6:
+#ifdef SIOCGIFADDR_IN6
+	    {
+		struct in6_ifreq ifrcopy6;
+		
+		memset(&ifrcopy6, 0, sizeof(ifrcopy6));
+		strncpy(ifrcopy6.ifr_name, if_name.c_str(),
+			sizeof(ifrcopy6.ifr_name));
+		ifrcopy6.ifr_ifru.ifru_addr.sin6_family = family;
+		if (ioctl(sock(family), SIOCGIFADDR_IN6, &ifrcopy6) < 0) {
+		    XLOG_ERROR("ioctl(SIOCGIFADDR_IN6) failed: %s",
+			       strerror(errno));
+		} else {
+		    lcl_addr.copy_in(ifrcopy6.ifr_ifru.ifru_addr);
+		    memcpy(&ip_ifrcopy6, &ifrcopy6, sizeof(ip_ifrcopy6));
+		}
+	    }
+#endif // SIOCGIFADDR_IN6
+	    break;
+#endif // HAVE_IPV6
+	    
+	    default:
+		XLOG_UNREACHABLE();
+		break;
+	    }
+	}
 	lcl_addr = kernel_ipvx_adjust(lcl_addr);
+	debug_msg("IP address: %s\n", lcl_addr.str().c_str());
 	
 	// Get the netmask
 	switch (family) {
 	case AF_INET:
 #ifdef SIOCGIFNETMASK
-	    memcpy(&ifrcopy, ifreq, sizeof(ifrcopy));
+	    memcpy(&ifrcopy, &ip_ifrcopy, sizeof(ifrcopy));
 	    if (ioctl(sock(family), SIOCGIFNETMASK, &ifrcopy) < 0) {
 		if (! fv.point_to_point()) {
 		    XLOG_ERROR("ioctl(SIOCGIFNETMASK) failed: %s",
@@ -256,14 +355,14 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    }
 #endif // SIOCGIFNETMASK
 	    break;
+	    
 #ifdef HAVE_IPV6
 	case AF_INET6:
 #ifdef SIOCGIFNETMASK_IN6
 	{
-	    const struct in6_ifreq *ifreq6 = (const struct in6_ifreq *)ifreq;
-	    struct in6_ifreq	ifrcopy6;
+	    struct in6_ifreq ifrcopy6;
 	    
-	    memcpy(&ifrcopy6, ifreq6, sizeof(ifrcopy6));
+	    memcpy(&ifrcopy6, &ip_ifrcopy6, sizeof(ifrcopy6));
 	    if (ioctl(sock(family), SIOCGIFNETMASK_IN6, &ifrcopy6) < 0) {
 		if (! fv.point_to_point()) {
 		    XLOG_ERROR("ioctl(SIOCGIFNETMASK_IN6) failed: %s",
@@ -279,17 +378,19 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 #endif // SIOCGIFNETMASK_IN6
 	break;
 #endif // HAVE_IPV6
+	
 	default:
 	    XLOG_UNREACHABLE();
 	    break;
 	}
+	debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	
 	// Get the broadcast address	
 	if (fv.broadcast()) {
 	    switch (family) {
 	    case AF_INET:
 #ifdef SIOCGIFBRDADDR
-		memcpy(&ifrcopy, ifreq, sizeof(ifrcopy));
+		memcpy(&ifrcopy, &ip_ifrcopy, sizeof(ifrcopy));
 		if (ioctl(sock(family), SIOCGIFBRDADDR, &ifrcopy) < 0) {
 		    XLOG_ERROR("ioctl(SIOCGIFBRADDR) failed: %s",
 			       strerror(errno));
@@ -301,14 +402,17 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		}
 #endif // SIOCGIFBRDADDR
 		break;
+		
 #ifdef HAVE_IPV6
 	    case AF_INET6:
 		break;	// IPv6 doesn't have the idea of broadcast
 #endif // HAVE_IPV6
+		
 	    default:
 		XLOG_UNREACHABLE();
 		break;
 	    }
+	    debug_msg("Broadcast address: %s\n", broadcast_addr.str().c_str());
 	}
 	
 	// Get the p2p address
@@ -316,7 +420,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    switch (family) {
 	    case AF_INET:
 #ifdef SIOCGIFDSTADDR
-		memcpy(&ifrcopy, ifreq, sizeof(ifrcopy));
+		memcpy(&ifrcopy, &ip_ifrcopy, sizeof(ifrcopy));
 		if (ioctl(sock(family), SIOCGIFDSTADDR, &ifrcopy) < 0) {
 		    // Probably the p2p address is not configured
 		} else {
@@ -328,14 +432,14 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		}
 #endif // SIOCGIFDSTADDR
 		break;
+		
 #ifdef HAVE_IPV6
 	    case AF_INET6:
 #ifdef SIOCGIFDSTADDR_IN6
 	    {
-		const struct in6_ifreq *ifreq6 = (const struct in6_ifreq *)ifreq;
-		struct in6_ifreq	ifrcopy6;
+		struct in6_ifreq ifrcopy6;
 		
-		memcpy(&ifrcopy6, ifreq6, sizeof(ifrcopy6));
+		memcpy(&ifrcopy6, &ip_ifrcopy6, sizeof(ifrcopy6));
 		if (ioctl(sock(family), SIOCGIFDSTADDR_IN6, &ifrcopy6) < 0) {
 		    // Probably the p2p address is not configured
 		} else {
@@ -349,11 +453,15 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 #endif // SIOCGIFDSTADDR_IN6
 	    break;
 #endif // HAVE_IPV6
+	    
 	    default:
 		XLOG_UNREACHABLE();
 		break;
 	    }
+	    debug_msg("Peer address: %s\n", peer_addr.str().c_str());
 	}
+	
+	debug_msg("\n");	// put an empty line between interfaces
 	
 	// Add the address
 	switch (family) {
