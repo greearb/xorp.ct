@@ -1,12 +1,9 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/fea.xif,v 1.1 2003/05/21 00:13:04 atanu Exp $ */
 
 /*
  * Common fea interfaces.
  */
 
 interface fea/0.1 {
-	/**
-	 * Terminate fea process
-	 */
-	terminate
+
 }

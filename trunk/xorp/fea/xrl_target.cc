@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.19 2003/05/23 23:35:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.20 2003/05/29 21:17:14 mjh Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -97,16 +97,6 @@ XrlFeaTarget::common_0_1_get_status(
 
 XrlCmdError 
 XrlFeaTarget::common_0_1_shutdown()
-{
-    _done = true;
-    
-    return XrlCmdError::OKAY();
-}
-
-//XXX we shouldn't need two different calls to do this.
-//fea_0_1_terminate is deprecated.
-XrlCmdError 
-XrlFeaTarget::fea_0_1_terminate()
 {
     _done = true;
     
