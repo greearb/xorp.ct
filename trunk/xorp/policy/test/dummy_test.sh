@@ -1,11 +1,13 @@
 #!/bin/sh
 
 #
-# $XORP$
+# $XORP: xorp/policy/test/dummy_test.sh,v 1.1 2004/09/17 13:49:00 abittau Exp $
 #
 
+if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
 test_policy() {
-	./test_policy.sh $1 $2 $3
+	${srcdir}/test_policy.sh $1 $2 $3
 
 	if [ $? -ne 0 ]
 	then
@@ -22,7 +24,7 @@ test_reject() {
 }
 
 
-test_accept "policy1.src" "policy1.var"
+test_accept "${srcdir}/policy1.src" "${srcdir}/policy1.var"
 test_reject "policy2.src" "policy2.var"
 
 exit 0
