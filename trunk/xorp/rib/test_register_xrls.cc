@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.15 2003/05/29 17:59:10 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -347,6 +347,21 @@ main(int /* argc */, char *argv[])
     XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager, NULL);
 
     XrlRibV0p1Client xc(&xrl_router);
+
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+	
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrl_router.ready() == false && timed_out == false) {
+	    eventloop.run();
+	}
+	
+	if (xrl_router.ready() == false && timed_out) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	    exit (1);
+	}
+    }
 
     add_igp_table(xc, eventloop, "ospf");
     add_egp_table(xc, eventloop, "ebgp");

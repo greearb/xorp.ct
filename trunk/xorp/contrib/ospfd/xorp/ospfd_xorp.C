@@ -585,6 +585,20 @@ static void ospfd_main()
 
     // Instantiate Xrl Handler object
     XrlOspfTarget xrl_target(eventloop, xrtr, ospfd_sys, &ospf);
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+	
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrtr.ready() == false && timed_out == false) {
+	    eventloop.run();
+	}
+	
+	if (xrtr.ready() == false && timed_out) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	    exit (1);
+	}
+    }
 
     XLOG_INFO("Starting v%d.%d", OSPF::vmajor, OSPF::vminor);
     XLOG_INFO("Awaiting router id");

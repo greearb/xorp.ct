@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.19 2003/09/16 06:50:53 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.20 2003/09/16 07:06:30 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -85,6 +85,21 @@ parser_main()
     vif_manager.enable();
     vif_manager.start();
     XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager, NULL);
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+	
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrl_router.ready() == false && timed_out == false) {
+	    eventloop.run();
+	}
+	
+	if (xrl_router.ready() == false && timed_out) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	    exit (1);
+	}
+    }
+
     XrlRibV0p1Client xrl_client(&xrl_router);
 
     {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.11 2003/06/02 01:58:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.12 2003/09/16 01:15:52 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -123,6 +123,20 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     //
     XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea, fticonfig, ifm,
 				ifreporter, 0);
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+	
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrl_std_router_fea.ready() == false && timed_out == false) {
+	    eventloop.run();
+	}
+	
+	if (xrl_std_router_fea.ready() == false && timed_out) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	    exit (1);
+	}
+    }
     
     //
     // CLI (for debug purpose)
@@ -133,6 +147,20 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
 				     finder_hostname, finder_port);
     XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+	
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrl_std_router_cli4.ready() == false && timed_out == false) {
+	    eventloop.run();
+	}
+	
+	if (xrl_std_router_cli4.ready() == false && timed_out) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	    exit (1);
+	}
+    }
     
     //
     //  MFEA node
@@ -143,6 +171,21 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 				      finder_hostname, finder_port);
     XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA, eventloop,
 			       &xrl_std_router_mfea4, fticonfig);
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+	
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrl_std_router_mfea4.ready() == false && timed_out == false) {
+	    eventloop.run();
+	}
+	
+	if (xrl_std_router_mfea4.ready() == false && timed_out) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	    exit (1);
+	}
+    }
+
 #ifdef HAVE_IPV6_MULTICAST
     XrlStdRouter xrl_std_router_mfea6(eventloop,
 				      xorp_module_name(AF_INET6,
@@ -150,6 +193,20 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 				      finder_hostname, finder_port);
     XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA, eventloop,
 			       &xrl_std_router_mfea6, fticonfig);
+    {
+	// Wait until the XrlRouter becomes ready
+	bool timed_out = false;
+	
+	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+	while (xrl_std_router_mfea6.ready() == false && timed_out == false) {
+	    eventloop.run();
+	}
+	
+	if (xrl_std_router_mfea6.ready() == false && timed_out) {
+	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+	    exit (1);
+	}
+    }
 #endif // HAVE_IPV6_MULTICAST
     
     //
