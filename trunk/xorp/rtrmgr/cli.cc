@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.26 2004/02/27 21:21:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.27 2004/03/04 17:49:57 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -165,6 +165,151 @@ which would have been necessary without changing the current position in \n\
 the configuration tree.\n\
 \n\
 See also the \"exit\", \"quit\", \"top\" and \"up\" commands.";
+
+    _help_long_c["exit"] = "\
+The \"exit\" command will cause the current position in the configuration \n\
+to exit one level.  For example, if the configuration was:\n\
+\n\
+   protocols {\n\
+       bgp {\n\
+          peer 10.0.0.1 {\n\
+             as 65001 \n\
+          }\n\
+   }\n\
+\n\
+and the current position is \"protocols bgp peer 10.0.0.1\", then typing \n\
+\"exit\" would cause the current position to become \"protocols bgp\".  In\n\
+this case \"peer 10.0.0.1\" is a single level of configuration\n\
+corresponding to a BGP peering session.\n\
+\n\
+If the current position is at the top level of the configuration, then \n\
+\"exit\" will return the login session to operational mode.\n\
+\n\
+See also \"exit discard\" and \"exit configuration-mode\" for other\n\
+uses of the exit command.";
+
+     _help_long_c["exit configuration-mode"] = "\
+The \"exit configuration-mode\" command will cause the login session to \n\
+return to operational mode.  If there are uncommitted changes, the command\n\
+will fail.\n\
+\n\
+See also \"exit\", \"exit discard\".";
+
+     _help_long_c["exit discard"] = "\
+The \"exit discard\" command will cause the login session to return\n\
+to operational mode, discarding any changes to the current configuration\n\
+that have not been committed.\n\
+\n\
+See also \"commit\", \"exit configuration-mode\".";
+
+    _help_long_c["help"] = "\
+The \"help\" command is used to provide help on many aspects of the command\n\
+line interface.  If a command has options, usually separate help will be \n\
+available for those options.  For example, \"help exit\" and \"help exit discard\"\n\
+give different and complementory information.";
+
+    _help_long_c["load"] = "\
+The \"load\" command loads a complete router configuration from a named file\n\
+and causes the new configuration to become the running configuration.\n\
+By default, files are loaded from your own home directory unless an absolute\n\
+pathname is given.  Directories in the path should be separated by \n\
+slashes (\"/\") and not backslashes (\"\\\\\").\n\
+\n\
+For example:\n\
+   load xorp-config\n\
+   load /tmp/test-config\n\
+\n\
+See also: \"save\".";
+
+    _help_long_c["quit"] = "\
+The \"quit\" command will cause the current position in the configuration \n\
+to quit one level.  For example, if the configuration was:\n\
+\n\
+   protocols {\n\
+       bgp {\n\
+          peer 10.0.0.1 {\n\
+             as 65001 \n\
+          }\n\
+   }\n\
+\n\
+and the current position is \"protocols bgp peer 10.0.0.1\", then typing \n\
+\"quit\" would cause the current position to become \"protocols bgp\".  In\n\
+this case \"peer 10.0.0.1\" is a single level of configuration\n\
+corresponding to a BGP peering session.\n\
+\n\
+If the current position is at the top level of the configuration, then \n\
+\"quit\" has no effect.\n\
+\n\
+See also \"exit\", \"up\", \"top\".";
+
+
+    _help_long_c["run"] = "\
+The \"run\" command allows operational-mode commands to be executed without\n\
+leaving configuration-mode.  This is particularly important if there are\n\
+uncommitted changes to the configuration.\n\
+\n\
+For example, the operational-mode command \"show bgp peers\" can be run from\n\
+configuration-mode as \"run show bgp peers\".\n\
+\n\
+Navigation commands such as the operational-mode \"configure\" command are not\n\
+available using the run command.";
+
+
+    _help_long_c["save"] = "\
+The \"save\" command causes the current running configuration to be saved to\n\
+a named file.  By default, files are loaded from your own home directory \n\
+unless an absolute pathname is given.  Directories in the path should be\n\
+separated by slashes (\"/\") and not backslashes (\"\\\").\n\
+\n\
+For example:\n\
+   save xorp-config\n\
+   save /tmp/test-config\n\
+\n\
+See also: \"load\".";
+
+    _help_long_c["set"] = "Set the value of a parameter";
+    _help_long_c["show"] = "Show the value of a parameter";
+
+    _help_long_c["top"] = "\
+The \"top\" command will cause the current position in the configuration \n\
+to return to the top level of the configuration.  For example, if the 
+configuration was:\n\
+\n\
+   protocols {\n\
+       bgp {\n\
+          peer 10.0.0.1 {\n\
+             as 65001 \n\
+          }\n\
+   }\n\
+\n\
+and the current position is \"protocols bgp peer 10.0.0.1\", then \n\
+typing \"top\" would cause the current position to become the top \n\
+of the configuration, outside of the \"protocols\" grouping.  The same \n\
+result could have been obtained by using the \"exit\" command three \n\
+times.\n\
+\n\
+See also \"exit\", \"quit\", \"up\".";
+
+    _help_long_c["up"] = "\
+The \"up\" command will cause the current position in the configuration \n\
+to move up one level.  For example, if the configuration was:\n\
+\n\
+   protocols {\n\
+       bgp {\n\
+          peer 10.0.0.1 {\n\
+             as 65001 \n\
+          }\n\
+   }\n\
+\n\
+and the current position is \"protocols bgp peer 10.0.0.1\", then typing \n\
+\"up\" would cause the current position to become \"protocols bgp\".  In\n\
+this case \"peer 10.0.0.1\" is a single level of configuration\n\
+corresponding to a BGP peering session.\n\
+\n\
+If the current position is at the top level of the configuration, then \n\
+\"up\" has no effect.\n\
+\n\
+See also \"exit\", \"quit\", \"top\".";
 
 
     _current_config_node = &(config_tree()->root_node());
