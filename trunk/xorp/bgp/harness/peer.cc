@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.44 2003/09/18 23:26:31 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.45 2003/09/19 04:45:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -695,6 +695,9 @@ Peer::expect(const string& line, const vector<string>& words)
 **
 ** peer assert established
 ** 0    1      2
+**
+** peer assert idle
+** 0    1      2
 */
 void
 Peer::assertX(const string& line, const vector<string>& words)
@@ -731,10 +734,14 @@ Peer::assertX(const string& line, const vector<string>& words)
 	if(!_established)
 	    xorp_throw(InvalidString,
 		       c_format("No session established"));
+    } else if("idle" == words[2]) {
+	if(_established)
+	    xorp_throw(InvalidString,
+		       c_format("Session established"));
     } else
 	xorp_throw(InvalidString,
 		   c_format(
-		   "\"queue\" \"established\" accepted not <%s>\n[%s]",
+		   "\"queue\" \"established\" \"idle\"accepted not <%s>\n[%s]",
 		   words[2].c_str(), line.c_str()));
 }
 

@@ -356,6 +356,11 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
   Verify that a session has actually been established. Some tests can pass
   without a BGP process being present. These tests require this interface.
 
+\item {\sf assert idle}
+
+  Verify that no session is currently established. Useful for
+  verifying that after an error the session has actually been torn down.
+
 \item {\sf dump $<$recv/sent$>$ $<$mtrd/text$>$ $<$ipv4/ipv6$>$ $<$traffic/routeview/replay/debug$>$ $<$filename$>$}
 
   A mechanism for saving conversations or dumping routing tables. The
