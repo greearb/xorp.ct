@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.3 2003/09/30 18:27:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.4 2003/10/01 22:49:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -229,7 +229,7 @@ nlm_newlink_to_fea_cfg(IfConfig& ifc, IfTree& it,
     //
     // Get the flags
     //
-    int flags = ifinfomsg->ifi_flags;
+    unsigned int flags = ifinfomsg->ifi_flags;
     fi.set_enabled(flags & IFF_UP);
     debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
     
