@@ -4,22 +4,20 @@
 [PEER: ADD_ROUTE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PEER: PUSH_PACKET]
 [separator]-------------------------------------
 [PEER: START_PACKET, IBGP]
 [PEER: DELETE_ROUTE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PEER: PUSH_PACKET]
 [separator]-------------------------------------
 [comment] TEST 2
@@ -28,29 +26,26 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PEER: ADD_ROUTE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PEER: ADD_ROUTE]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PEER: PUSH_PACKET]
 [PEER: START_PACKET, IBGP]
 [PEER: ADD_ROUTE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [PEER: PUSH_PACKET]
 [separator]-------------------------------------
 [comment] TEST 3
@@ -60,19 +55,17 @@ AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [PEER: OLD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PEER: NEW]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PEER: PUSH_PACKET]
 [separator]-------------------------------------
 [comment] TEST 4
@@ -81,11 +74,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PEER: ADD_ROUTE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PEER: PUSH_PACKET]
 [OUTPUT_STATE: BUSY]
 [separator]-------------------------------------

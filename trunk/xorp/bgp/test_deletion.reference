@@ -6,11 +6,10 @@
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] PEERING GOES DOWN
 [PUSH]
@@ -19,11 +18,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -36,31 +34,28 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] PEERING GOES DOWN
 [PUSH]
@@ -69,27 +64,24 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [DELETE]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -102,31 +94,28 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [separator]-------------------------------------
 [comment] PEERING GOES DOWN
 [PUSH]
@@ -135,29 +124,26 @@ AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -170,41 +156,37 @@ AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] PEERING GOES DOWN
 [PUSH]
@@ -213,36 +195,32 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [DELETE]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -269,41 +247,37 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] PEERING GOES DOWN
 [PUSH]
@@ -314,54 +288,48 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [REPLACE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [REPLACE]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] LET EVENT QUEUE DRAIN
 [DELETE]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -373,20 +341,18 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -400,41 +366,37 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] PEERING GOES DOWN
 [PUSH]
@@ -445,54 +407,48 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [REPLACE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [REPLACE]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [separator]-------------------------------------
 [comment] LET EVENT QUEUE DRAIN
 [DELETE]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -504,20 +460,18 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -531,41 +485,37 @@ AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] PEERING GOES DOWN
 [PUSH]
@@ -576,53 +526,47 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [REPLACE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [REPLACE]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [separator]-------------------------------------
 [comment] LET EVENT QUEUE DRAIN
 [DELETE]
 SubnetRoute:
   Net: 1.0.4.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -634,19 +578,17 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [DELETE]
 SubnetRoute:
   Net: 1.0.3.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -660,21 +602,19 @@ AS Path Attribute AsPath: [AS/8, AS/7, AS/6, AS/6]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] PEERING GOES DOWN
 [PUSH]
@@ -685,35 +625,31 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [REPLACE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] ADD A ROUTE
 [REPLACE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] LET EVENT QUEUE DRAIN
 [separator]-------------------------------------
@@ -726,20 +662,18 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP
@@ -751,11 +685,10 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] PEERING GOES DOWN
 [PUSH]
@@ -766,11 +699,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [separator]-------------------------------------
 [comment] PEERING GOES DOWN
 [PUSH]
@@ -781,20 +713,18 @@ AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PUSH]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/5, AS/4, AS/3]
 [PUSH]
 [separator]-------------------------------------
 [comment] PEERING COMES UP

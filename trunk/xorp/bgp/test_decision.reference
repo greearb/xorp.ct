@@ -5,24 +5,22 @@
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [PUSH]
 [separator]-------------------------------------
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] ******************************************
@@ -45,12 +43,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
@@ -58,21 +55,19 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -80,12 +75,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 2B
@@ -96,33 +90,30 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [separator]-------------------------------------
@@ -131,12 +122,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 2C
@@ -148,33 +138,30 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -183,12 +170,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 2D
@@ -200,12 +186,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [separator]-------------------------------------
@@ -213,21 +198,19 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -235,12 +218,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 3
@@ -250,12 +232,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
@@ -263,21 +244,19 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -285,12 +264,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 3B
@@ -300,33 +278,30 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -335,12 +310,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 4
@@ -351,33 +325,30 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -386,12 +357,11 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 4B
@@ -402,12 +372,11 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
@@ -415,21 +384,19 @@ Local Preference Attribute - 200
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -437,12 +404,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5
@@ -453,13 +419,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
@@ -467,23 +432,21 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -491,13 +454,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5B
@@ -508,36 +470,33 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -546,13 +505,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5C
@@ -563,35 +521,32 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -600,12 +555,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5D
@@ -616,12 +570,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
@@ -629,22 +582,20 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -652,13 +603,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5E
@@ -669,36 +619,33 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -707,13 +654,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5F1
@@ -724,84 +670,77 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [comment] NEW ROUTE WINS ON BGP ID
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 3
 [comment] ROUTE 1 RE-INSTATED
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 3
 [comment] ROUTE 2 TAKES OVER
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -809,23 +748,21 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -833,13 +770,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5F2
@@ -851,37 +787,34 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [comment] WINS ON BGP ID
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [comment] NO CHANGE
@@ -894,23 +827,21 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 3
@@ -918,13 +849,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5F3
@@ -936,13 +866,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [comment] NO CHANGE
@@ -952,47 +881,43 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 3
 [comment] ROUTE 2 TAKES OVER
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -1003,13 +928,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5F4
@@ -1021,13 +945,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 3
 [comment] NO CHANGE
@@ -1046,13 +969,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5F5
@@ -1063,84 +985,77 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 3
 [comment] ROUTE 3 NOW WINS
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [comment] ROUTE 1 NOW WINS
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [comment] ROUTE 3 TAKES OVER
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 3
@@ -1148,23 +1063,21 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -1172,13 +1085,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=200
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=200
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 5F6
@@ -1190,13 +1102,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [comment] NO CHANGE
@@ -1206,47 +1117,43 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [comment] ROUTE 3 TAKES OVER
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Multiple Exit Descriminator Attribute: MED=100
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Multiple Exit Descriminator Attribute: MED=100
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -1257,13 +1164,12 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Multiple Exit Descriminator Attribute: MED=50
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Multiple Exit Descriminator Attribute: MED=50
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 6
@@ -1275,12 +1181,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [comment] EXPECT: LOSES
@@ -1290,21 +1195,19 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - EGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - EGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
@@ -1315,21 +1218,19 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - EGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - EGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - INCOMPLETE
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - INCOMPLETE
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -1337,12 +1238,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - INCOMPLETE
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - INCOMPLETE
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 6B
@@ -1355,34 +1255,31 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - INCOMPLETE
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - INCOMPLETE
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [comment] EXPECT: WINS
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - INCOMPLETE
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - INCOMPLETE
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - EGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - EGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [comment] EXPECT: NO CHANGE
@@ -1392,42 +1289,38 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - EGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - EGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - EGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - EGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -1435,12 +1328,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - EGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - EGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 7
@@ -1451,12 +1343,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
@@ -1464,21 +1355,19 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -1486,12 +1375,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 7B
@@ -1502,33 +1390,30 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -1537,12 +1422,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 7C
@@ -1554,12 +1438,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
@@ -1568,12 +1451,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [separator]-------------------------------------
@@ -1589,12 +1471,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -1603,12 +1484,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 7E
@@ -1633,44 +1513,40 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [REPLACE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 8B
@@ -1684,24 +1560,22 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 8C
@@ -1713,23 +1587,21 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -1755,12 +1627,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
@@ -1768,42 +1639,38 @@ Local Preference Attribute - 200
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -1811,12 +1678,11 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 9B
@@ -1828,74 +1694,67 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -1903,12 +1762,11 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 9C
@@ -1920,12 +1778,11 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
@@ -1938,12 +1795,11 @@ Local Preference Attribute - 300
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 9D
@@ -1955,73 +1811,66 @@ Local Preference Attribute - 300
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [REPLACE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -2029,12 +1878,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 9E
@@ -2046,74 +1894,67 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -2121,12 +1962,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 10A
@@ -2138,53 +1978,48 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] NEXTHOP 2.0.0.3 BECOMES UNRESOLVABLE
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -2192,12 +2027,11 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [separator]-------------------------------------
@@ -2211,33 +2045,30 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] NEXTHOP 2.0.0.2 BECOMES UNRESOLVABLE
 [PUSH]
@@ -2247,12 +2078,11 @@ Local Preference Attribute - 300
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -2266,12 +2096,11 @@ Local Preference Attribute - 300
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [separator]-------------------------------------
@@ -2279,42 +2108,38 @@ Local Preference Attribute - 200
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -2322,12 +2147,11 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 11A
@@ -2342,12 +2166,11 @@ Local Preference Attribute - 200
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
@@ -2357,12 +2180,11 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 11B
@@ -2377,12 +2199,11 @@ Local Preference Attribute - 200
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [PUSH]
 [PUSH]
 [separator]-------------------------------------
@@ -2390,21 +2211,19 @@ Local Preference Attribute - 300
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -2412,12 +2231,11 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 11C
@@ -2429,44 +2247,40 @@ Local Preference Attribute - 200
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] NEXTHOP 2.0.0.1 BECOMES UNRESOLVABLE
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [PUSH]
 [PUSH]
 [separator]-------------------------------------
@@ -2483,95 +2297,86 @@ Local Preference Attribute - 300
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 3
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 3
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 300
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 300
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 200
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 200
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -2579,12 +2384,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 13
@@ -2596,34 +2400,31 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [comment] EXPECT: WINS
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [ADD]
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -2632,12 +2433,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
 [comment] TEST 13B
@@ -2651,12 +2451,11 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [comment] EXPECT: LOSES
@@ -2665,21 +2464,19 @@ Local Preference Attribute - 100
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.3
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.3
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	Local Preference Attribute - 100
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
@@ -2687,11 +2484,10 @@ Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-Local Preference Attribute - 100
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SHUTDOWN AND CLEAN UP

@@ -6,11 +6,10 @@
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [** TABLE DebugTable-D1 **]
 [PUSH]
 [** TABLE DebugTable-D2 **]
@@ -20,11 +19,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [** TABLE DebugTable-D1 **]
 [PUSH]
 [** TABLE DebugTable-D2 **]
@@ -35,11 +33,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [** TABLE DebugTable-D1 **]
 [PUSH]
 [** TABLE DebugTable-D2 **]
@@ -49,11 +46,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [** TABLE DebugTable-D1 **]
 [PUSH]
 [** TABLE DebugTable-D2 **]
@@ -71,11 +67,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
 [** TABLE DebugTable-D2 **]
@@ -93,11 +88,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
 [** TABLE DebugTable-D2 **]
@@ -117,22 +111,20 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
 [** TABLE DebugTable-D1 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
 [separator]-------------------------------------
@@ -141,22 +133,20 @@ AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
 [** TABLE DebugTable-D2 **]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
 [separator]-------------------------------------
@@ -172,11 +162,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
 [** TABLE DebugTable-D1 **]
@@ -189,11 +178,10 @@ AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
 [** TABLE DebugTable-D2 **]
@@ -213,11 +201,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [separator]-------------------------------------
 [comment] PEER 1 GET_NEXT_MESSAGE
 [** TABLE DebugTable-D1 **]
@@ -230,11 +217,10 @@ AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] PEER 2 GET_NEXT_MESSAGE
 [** TABLE DebugTable-D2 **]
@@ -247,11 +233,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.1.0/24
-  PAList: Next Hop Attribute 2.0.0.1
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] PEER 3 GET_NEXT_MESSAGE
 [** TABLE DebugTable-D3 **]
@@ -262,11 +247,10 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [ADD]
 SubnetRoute:
   Net: 1.0.2.0/24
-  PAList: Next Hop Attribute 2.0.0.2
-Origin Path Attribute - IGP
-AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
-
-
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
 [separator]-------------------------------------
 [comment] PEER 3 GET_NEXT_MESSAGE
 [** TABLE DebugTable-D3 **]

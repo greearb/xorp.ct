@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.16 2004/02/24 03:16:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.17 2004/02/25 05:03:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -46,7 +46,7 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
 	      tablename().c_str(),
-	      caller->tablename().c_str(),
+	      caller ? caller->tablename().c_str() : "NULL",
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
@@ -124,7 +124,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	      "new route: %p"
 	      "old: %s\n new: %s\n",
 	      tablename().c_str(),
-	      caller->tablename().c_str(),
+	      caller ? caller->tablename().c_str() : "NULL",
 	      &old_rtmsg,
 	      &new_rtmsg,
 	      old_rtmsg.route(),
@@ -229,7 +229,7 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
 	      tablename().c_str(),
-	      caller->tablename().c_str(),
+	      caller ? caller->tablename().c_str() : "NULL",
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());

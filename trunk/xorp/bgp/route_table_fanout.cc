@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.21 2004/02/25 05:03:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.22 2004/02/25 05:30:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -188,7 +188,7 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
 	      tablename().c_str(),
-	      caller->tablename().c_str(),
+	      caller ? caller->tablename().c_str() : "NULL",
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
@@ -304,7 +304,7 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
 	      tablename().c_str(),
-	      caller->tablename().c_str(),
+	      caller ? caller->tablename().c_str() : "NULL",
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
