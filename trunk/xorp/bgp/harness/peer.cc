@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.54 2004/05/30 06:00:51 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.55 2004/06/10 22:40:40 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1061,7 +1061,7 @@ Peer::dump(const string& line, const vector<string>& words)
 	xorp_throw(InvalidString,
 		   c_format(
 "\"traffic\" or \"routeview\" or \"replay\" or \"debug\" accepted not <%s>\n[%s]",
-			    words[4].c_str(), line.c_str()));
+			    words[5].c_str(), line.c_str()));
 }
 
 bool
