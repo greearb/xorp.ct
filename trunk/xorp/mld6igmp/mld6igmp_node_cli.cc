@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.3 2003/02/14 23:55:58 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.4 2003/03/10 23:20:42 hodson Exp $"
 
 
 //
@@ -93,25 +93,39 @@ Mld6igmpNodeCli::add_all_cli_commands()
 {
     // XXX: command "show" must have been installed by the CLI itself.
     
-    add_cli_dir_command("show igmp",	"Display information about IGMP");
-    
-    add_cli_command("show igmp group",
-		    "Display information about IGMP group membership",
-		    callback(this, &Mld6igmpNodeCli::cli_show_igmp_group));
-    add_cli_command("show igmp interface",
-		    "Display information about IGMP configured interfaces",
-		    callback(this, &Mld6igmpNodeCli::cli_show_igmp_interface));
+    if (mld6igmp_node().proto_is_igmp()) {
+	add_cli_dir_command("show igmp", "Display information about IGMP");
+	
+	add_cli_command("show igmp group",
+			"Display information about IGMP group membership",
+			callback(this, &Mld6igmpNodeCli::cli_show_mld6igmp_group));
+	add_cli_command("show igmp interface",
+			"Display information about IGMP configured interfaces",
+			callback(this, &Mld6igmpNodeCli::cli_show_mld6igmp_interface));
+    }
+
+    if (mld6igmp_node().proto_is_mld6()) {
+	add_cli_dir_command("show mld", "Display information about MLD");
+	
+	add_cli_command("show mld group",
+			"Display information about MLD group membership",
+			callback(this, &Mld6igmpNodeCli::cli_show_mld6igmp_group));
+	add_cli_command("show mld interface",
+			"Display information about MLD configured interfaces",
+			callback(this, &Mld6igmpNodeCli::cli_show_mld6igmp_interface));
+    }
     
     return (XORP_OK);
 }
 
 //
+// CLI COMMAND: "show mld interface [interface-name]"
 // CLI COMMAND: "show igmp interface [interface-name]"
 //
-// Display information about the interfaces on which IGMP is configured.
+// Display information about the interfaces on which MLD/IGMP is configured.
 //
 int
-Mld6igmpNodeCli::cli_show_igmp_interface(const vector<string>& argv)
+Mld6igmpNodeCli::cli_show_mld6igmp_interface(const vector<string>& argv)
 {
     string interface_name;
     
@@ -164,12 +178,13 @@ Mld6igmpNodeCli::cli_show_igmp_interface(const vector<string>& argv)
 }
 
 //
+// CLI COMMAND: "show mld group [group-name [...]]"
 // CLI COMMAND: "show igmp group [group-name [...]]"
 //
-// Display information about IGMP group membership.
+// Display information about MLD/IGMP group membership.
 //
 int
-Mld6igmpNodeCli::cli_show_igmp_group(const vector<string>& argv)
+Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 {
     vector<IPvX> groups;
     
