@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.7 2004/06/10 22:40:56 hodson Exp $"
+#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.8 2004/06/18 21:51:52 pavlin Exp $"
 
 
 //
@@ -156,6 +156,8 @@ MfeaVif::start(string& error_msg)
 int
 MfeaVif::stop(string& error_msg)
 {
+    int ret_value = XORP_OK;
+
     if (is_down())
 	return (XORP_OK);
 
@@ -168,28 +170,19 @@ MfeaVif::stop(string& error_msg)
 
     if (ProtoUnit::stop() < 0) {
 	error_msg = "internal error";
-	return (XORP_ERROR);
+	ret_value = XORP_ERROR;
     }
 
     if (mfea_node().delete_multicast_vif(vif_index()) < 0) {
-	error_msg = "cannot delete the multicast vif from the kernel";
-	return (XORP_ERROR);
+	XLOG_ERROR("Cannot delete multicast vif %s with the kernel",
+		   name().c_str());
+	ret_value = XORP_ERROR;
     }
 
     XLOG_INFO("STOPPED %s%s",
 	      this->str().c_str(), flags_string().c_str());
 
-    //
-    // Test if time to completely stop the MfeaNode itself because
-    // of this vif
-    //
-    string dummy_string;
-    if (mfea_node().is_pending_down()
-	&& (! mfea_node().has_pending_down_units(dummy_string))) {
-	mfea_node().final_stop();
-    }
-
-    return (XORP_OK);
+    return (ret_value);
 }
 
 /**
