@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.33 2004/09/10 02:17:30 bms Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.34 2004/10/02 03:42:09 atanu Exp $"
 
 #include "fea_module.h"
 
@@ -36,6 +36,7 @@
 #include "xrl_socket_server.hh"
 #include "xrl_target.hh"
 #include "xrl_firewall.hh"
+#include "profile_vars.hh"
 
 static const char* xrl_entity = "fea";
 #ifndef FEA_DUMMY
@@ -157,6 +158,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     // Profile entity.
     //
     Profile profile;
+    initialize_profiling_variables(profile);
 
     //
     // XRL Target
