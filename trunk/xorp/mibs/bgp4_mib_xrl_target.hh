@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/bgp4_mib_xrl_target.hh,v 1.1 2003/05/14 18:34:33 jcardona Exp $
+// $XORP: xorp/mibs/bgp4_mib_xrl_target.hh,v 1.2 2003/05/20 00:58:34 jcardona Exp $
 
 #ifndef __MIBS_BGP4_MIB_XRL_TARGET_HH__
 #define __MIBS_BGP4_MIB_XRL_TARGET_HH__
@@ -43,6 +43,11 @@ public:
 				      uint32_t& status,
 				      string&	reason);
 
+    XrlCmdError common_0_1_shutdown()
+    {
+	return XrlCmdError::COMMAND_FAILED("Not Implemented");
+    }
+    
 private:
     /**
     * The main object that all requests go to.
