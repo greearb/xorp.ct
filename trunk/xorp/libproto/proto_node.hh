@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.10 2003/06/01 02:07:12 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.11 2003/06/02 01:57:16 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -502,6 +502,19 @@ public:
 				       string& reason);
     
     /**
+     * Set the pif_index to a configured vif.
+     * 
+     * @param vif_name the name of the vif.
+     * @param pif_index the physical interface index.
+     * @param reason return-by-reference string that contains human-readable
+     * string with information about the reason for failure (if any).
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_config_pif_index(const string& vif_name,
+				     uint16_t pif_index,
+				     string& reason);
+    
+    /**
      * Set the vif flags to a configured vif.
      * 
      * @param vif_name the name of the vif.
@@ -865,6 +878,14 @@ ProtoNode<V>::add_config_vif(const Vif& vif, string& reason)
 	}
     }
     
+    if (set_config_pif_index(vif.name(),
+			     vif.pif_index(),
+			     reason) < 0) {
+	string dummy_reason;
+	delete_config_vif(vif.name(), dummy_reason);
+	return (XORP_ERROR);
+    }
+    
     if (set_config_vif_flags(vif.name(),
 			     vif.is_pim_register(),
 			     vif.is_p2p(),
@@ -1015,6 +1036,33 @@ ProtoNode<V>::delete_config_vif_addr(const string& vif_name, const IPvX& addr,
     
     // Delete the address
     vif->delete_address(addr);
+    
+    return (XORP_OK);
+}
+
+template<class V>
+inline int
+ProtoNode<V>::set_config_pif_index(const string& vif_name,
+				   uint16_t pif_index,
+				   string& reason)
+{
+    map<string, Vif>::iterator iter;
+    
+    if (start_config(reason) != XORP_OK)
+	return (XORP_ERROR);
+
+    // Find the vif
+    iter = _configured_vifs.find(vif_name);
+    if (iter == _configured_vifs.end()) {
+	reason = c_format("Cannot set pif_index for vif %s: no such vif",
+			  vif_name.c_str());
+	XLOG_ERROR(reason.c_str());
+	return (XORP_ERROR);
+    }
+    
+    Vif* vif = &iter->second;
+    
+    vif->set_pif_index(pif_index);
     
     return (XORP_OK);
 }
