@@ -10,8 +10,6 @@
 #  (1) that snmpd is running
 #
 
- . ../snmpconfig/snmpenv.sh
-
 snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i unload
 echo "The module in position $1 should appear as unloaded"
 snmptable localhost UCD-DLMOD-MIB::dlmodTable

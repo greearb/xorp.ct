@@ -1,6 +1,5 @@
 
 
-
 How to configure your Net-SNMP agent to run with XORP
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -17,28 +16,33 @@ To run the scripts in this directory
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 - These scripts rely on file snmp.conf to provide valid default values
-  for the SNMP version to use, the user, community and security level.
-  For that, you have two options, depending on wether you where using Net-SNMP
-  or not:  
+  for the SNMP version to use, the user, community and security level.  This way
+  the scripts do not need to be modified to be executed by different users.
 
-    * For new Net-SNMP users, just copy the provided snmp.conf to your home
-      directory and create the following user (with the command net-snmp-config
-      --create-snmpv3-user):
+  If you are using a clean Net-SNMP installation, just copy the provided
+  snmp.conf to your home directory and create the following user (with the
+  command net-snmp-config --create-snmpv3-user):
 
     user           pass-phrase         sec level
     --------------------------------------------
     privuser      I am priv user       auth+priv
  
-    * If you already have Net-SNMP running, and you would like to run the scripts as
-      an existing user, make sure the following variables are defined in your
-      snmp.conf file: defVersion, defCommunity, defSecurityName, defPassphrase, 
-                      defAuthType, defPrivType, defSecurityLevel 
+  If you already have a running Net-SNMP installation, create a snmp.conf file
+  (man snmp.conf(5)) in your home directory if you have not done that already.
+  In that file you should define your user parameters.  Make sure that you
+  define at least all the directives that you'll find in this directory's
+  snmp.conf
 
-- Finally, you must define the environment variable XORP to point to xorp's top
-  source directory.  
+Make snmpd responsive to Xrls
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+- snmpd can only respond to Xrls after xorp_if_mib_module has been loaded.
+  Adding the following line to the file snmpd.conf (by default located in 
+  /usr/local/share/snmp) will preload this module when snmpd is started.  
 
- 
+  dlmod xorp_if_mib_module <absolute path full filename>
 
- 
+  for instance...
+
+  dlmod xorp_if_mib_module /home/panther/u0/jcardona/mibs/xorp_if_module.so
 
