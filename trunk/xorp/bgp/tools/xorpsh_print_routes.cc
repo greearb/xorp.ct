@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.2 2003/03/10 23:20:10 hodson Exp $"
+#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.3 2003/07/25 02:10:38 atanu Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     xlog_add_default_output();
     xlog_start();
 
-    PrintRoutes::detail_t verbose = PrintRoutes::NORMAL;
+    PrintRoutes<IPv4>::detail_t verbose = PrintRoutes<IPv4>::NORMAL;
     int interval = -1;
         if (argc > 5) {
 	usage();
@@ -63,16 +63,16 @@ int main(int argc, char **argv)
     }
     if (argc == 5) {
 	if (strcmp(argv[4], "summary")==0) {
-	    verbose = PrintRoutes::SUMMARY;
+	    verbose = PrintRoutes<IPv4>::SUMMARY;
 	} else if (strcmp(argv[4], "detail")==0) {
-	    verbose = PrintRoutes::DETAIL;
+	    verbose = PrintRoutes<IPv4>::DETAIL;
 	} else {
 	    usage();
 	    return -1;
 	}
     }
     try {
-	PrintRoutes route_printer(verbose, interval);
+	PrintRoutes<IPv4> route_printer(verbose, interval, true, false);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }

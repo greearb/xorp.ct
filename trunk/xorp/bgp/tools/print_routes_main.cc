@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes_main.cc,v 1.1 2003/02/24 12:53:47 mjh Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes_main.cc,v 1.2 2003/03/10 23:20:10 hodson Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -38,13 +38,30 @@ int main(int argc, char **argv)
     xlog_add_default_output();
     xlog_start();
 
-    PrintRoutes::detail_t verbose = PrintRoutes::NORMAL;
+    bool ipv4, ipv6, unicast, multicast;
+    ipv4 = ipv6 = unicast = multicast = false;
+
+    PrintRoutes<IPv4>::detail_t verbose_ipv4 = PrintRoutes<IPv4>::NORMAL;
+    PrintRoutes<IPv6>::detail_t verbose_ipv6 = PrintRoutes<IPv6>::NORMAL;
     int c;
     int interval = -1;
-    while ((c = getopt(argc, argv, "i:v")) != -1) {
+    while ((c = getopt(argc, argv, "46umvi:")) != -1) {
 	switch (c) {
+	case '4':
+	    ipv4 = true;
+	    break;
+	case '6':
+	    ipv6 = true;
+	    break;
+	case 'u':
+	    unicast = true;
+	    break;
+	case 'm':
+	    multicast = true;
+	    break;
 	case 'v':
-	    verbose = PrintRoutes::DETAIL;
+	    verbose_ipv4 = PrintRoutes<IPv4>::DETAIL;
+	    verbose_ipv6 = PrintRoutes<IPv6>::DETAIL;
 	    break;
 	case 'i':
 	    interval = atoi(optarg);
@@ -54,8 +71,21 @@ int main(int argc, char **argv)
 	    return -1;
 	}
     }
+
+    if (ipv4 == false && ipv6 == false)
+	ipv4 = true;
+
+    if (unicast == false && multicast == false)
+	unicast = true;
+
     try {
-	PrintRoutes route_printer(verbose, interval);
+	if (ipv4)
+	    PrintRoutes<IPv4> route_printer(verbose_ipv4, interval, unicast,
+					    multicast);
+	if (ipv6)
+	    PrintRoutes<IPv6> route_printer(verbose_ipv6, interval, unicast,
+					    multicast);
+	    
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
