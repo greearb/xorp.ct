@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.19 2004/05/06 23:07:02 hodson Exp $
+// $XORP: xorp/rib/rib.hh,v 1.20 2004/05/12 21:55:22 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -157,19 +157,43 @@ public:
     virtual int delete_vif(const string& vifname);
 
     /**
+     * Set the vif flags of a configured vif.
+     * 
+     * @param vifname the name of the vif.
+     * @param is_pim_register true if the vif is a PIM Register interface.
+     * @param is_p2p true if the vif is point-to-point interface.
+     * @param is_loopback true if the vif is a loopback interface.
+     * @param is_multicast true if the vif is multicast capable.
+     * @param is_broadcast true if the vif is broadcast capable.
+     * @param is_up true if the underlying vif is UP.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int set_vif_flags(const string& vifname,
+			      bool is_p2p,
+			      bool is_loopback,
+			      bool is_multicast,
+			      bool is_broadcast,
+			      bool is_up);
+
+    /**
      * Add an address and subnet to a existing VIF. Each VIF may have
      * multiple addresses and associated subnets.
      *
      * @param vifname the name of the VIF the address will be added to.
      * @param addr the address to be added.  This must be one of the
      * addresses of this router.
-     * @param net the subnet that is connected to this VIF
+     * @param subnet the subnet that is connected to this VIF
      * corresponding to the address addr.
+     * @param broadcast the broadcast address to add. In case of IPv6
+     * this address is ignored.
+     * @param peer the peer address to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int add_vif_address(const string&	vifname,
 				const A& 	addr,
-				const IPNet<A>&	net);
+				const IPNet<A>&	subnet,
+				const A&	broadcast_addr,
+				const A&	peer_addr);
 
     /**
      * Remove an address and the associated subnet from an existing VIF.

@@ -105,7 +105,7 @@ noinst_PROGRAMS = main_routemap test_register test_register_xrls test_rib_client
 noinst_LIBRARIES = librib.a libribxrl.a
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) ./librib.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libredist4xif.a $(top_builddir)/xrl/interfaces/libredist6xif.a $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libredist4xif.a $(top_builddir)/xrl/interfaces/libredist6xif.a $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 main_routemap_SOURCES = rib_module.h protocol.hh route.hh routemap.hh main_routemap.cc routemap.cc
@@ -175,38 +175,44 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_main_routemap_OBJECTS = main_routemap.$(OBJEXT) routemap.$(OBJEXT)
 main_routemap_OBJECTS = $(am_main_routemap_OBJECTS)
-main_routemap_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
+main_routemap_DEPENDENCIES = librib.a libribxrl.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a
 main_routemap_LDFLAGS =
 am_test_deletion_OBJECTS = rt_tab_expect.$(OBJEXT) \
 	test_deletion.$(OBJEXT)
 test_deletion_OBJECTS = $(am_test_deletion_OBJECTS)
-test_deletion_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
+test_deletion_DEPENDENCIES = librib.a libribxrl.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a
 test_deletion_LDFLAGS =
 am_test_redist_OBJECTS = test_redist.$(OBJEXT)
 test_redist_OBJECTS = $(am_test_redist_OBJECTS)
@@ -215,116 +221,134 @@ test_redist_LDFLAGS =
 am_test_register_OBJECTS = dummy_register_server.$(OBJEXT) \
 	dummy_rib_manager.$(OBJEXT) test_register.$(OBJEXT)
 test_register_OBJECTS = $(am_test_register_OBJECTS)
-test_register_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
+test_register_DEPENDENCIES = librib.a libribxrl.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
-test_register_LDFLAGS =
-am_test_register_xrls_OBJECTS = rib_manager.$(OBJEXT) \
-	test_register_xrls.$(OBJEXT) xrl_target.$(OBJEXT)
-test_register_xrls_OBJECTS = $(am_test_register_xrls_OBJECTS)
-test_register_xrls_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_register_LDFLAGS =
+am_test_register_xrls_OBJECTS = rib_manager.$(OBJEXT) \
+	test_register_xrls.$(OBJEXT) xrl_target.$(OBJEXT)
+test_register_xrls_OBJECTS = $(am_test_register_xrls_OBJECTS)
+test_register_xrls_DEPENDENCIES = librib.a libribxrl.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/targets/libribbase.a \
 	$(top_builddir)/xrl/targets/libribclientbase.a
 test_register_xrls_LDFLAGS =
 am_test_rib_client_OBJECTS = test_rib_client.$(OBJEXT)
 test_rib_client_OBJECTS = $(am_test_rib_client_OBJECTS)
-test_rib_client_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
+test_rib_client_DEPENDENCIES = librib.a libribxrl.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
-test_rib_client_LDFLAGS =
-am_test_rib_direct_OBJECTS = dummy_register_server.$(OBJEXT) \
-	dummy_rib_manager.$(OBJEXT) parser.$(OBJEXT) \
-	test_rib_direct.$(OBJEXT)
-test_rib_direct_OBJECTS = $(am_test_rib_direct_OBJECTS)
-test_rib_direct_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
-	$(top_builddir)/xrl/interfaces/libredist4xif.a \
-	$(top_builddir)/xrl/interfaces/libredist6xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
-test_rib_direct_LDFLAGS =
-am_test_rib_xrls_OBJECTS = dummy_register_server.$(OBJEXT) \
-	dummy_rib_manager.$(OBJEXT) parser.$(OBJEXT) \
-	test_rib_xrls.$(OBJEXT) xrl_target.$(OBJEXT)
-test_rib_xrls_OBJECTS = $(am_test_rib_xrls_OBJECTS)
-test_rib_xrls_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
-	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_rib_client_LDFLAGS =
+am_test_rib_direct_OBJECTS = dummy_register_server.$(OBJEXT) \
+	dummy_rib_manager.$(OBJEXT) parser.$(OBJEXT) \
+	test_rib_direct.$(OBJEXT)
+test_rib_direct_OBJECTS = $(am_test_rib_direct_OBJECTS)
+test_rib_direct_DEPENDENCIES = librib.a libribxrl.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_rib_direct_LDFLAGS =
+am_test_rib_xrls_OBJECTS = dummy_register_server.$(OBJEXT) \
+	dummy_rib_manager.$(OBJEXT) parser.$(OBJEXT) \
+	test_rib_xrls.$(OBJEXT) xrl_target.$(OBJEXT)
+test_rib_xrls_OBJECTS = $(am_test_rib_xrls_OBJECTS)
+test_rib_xrls_DEPENDENCIES = librib.a libribxrl.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
+	$(top_builddir)/xrl/interfaces/libftixif.a \
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
+	$(top_builddir)/xrl/interfaces/libredist4xif.a \
+	$(top_builddir)/xrl/interfaces/libredist6xif.a \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/targets/libribbase.a
 test_rib_xrls_LDFLAGS =
 am_xorp_rib_OBJECTS = main_rib.$(OBJEXT) rib_manager.$(OBJEXT) \
 	xrl_target.$(OBJEXT)
 xorp_rib_OBJECTS = $(am_xorp_rib_OBJECTS)
-xorp_rib_DEPENDENCIES = librib.a libribxrl.a ./librib.a \
+xorp_rib_DEPENDENCIES = librib.a libribxrl.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
-	$(top_builddir)/libxipc/libfinder.a \
-	$(top_builddir)/libxipc/libxipc.a \
-	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libproto/libproto.a \
-	$(top_builddir)/libxorp/libxorp.a \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libredist4xif.a \
 	$(top_builddir)/xrl/interfaces/libredist6xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.a \
 	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.a \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/xrl/targets/libribbase.a
 xorp_rib_LDFLAGS =
 

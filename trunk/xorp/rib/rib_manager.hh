@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.22 2004/05/06 23:06:03 hodson Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.23 2004/05/12 08:28:50 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -49,8 +49,10 @@ public:
      *
      * @param eventloop the event loop to user.
      * @param xrl_std_router the XRL router to use.
+     * @param fea_target the FEA XRL target name.
      */
-    RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router);
+    RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
+	       const string& fea_target);
 
     /**
      * RibManager destructor
@@ -119,13 +121,38 @@ public:
     int delete_vif(const string& vifname, string& err);
 
     /**
+     * Set the vif flags of a configured vif.
+     * 
+     * @param vifname the name of the vif.
+     * @param is_pim_register true if the vif is a PIM Register interface.
+     * @param is_p2p true if the vif is point-to-point interface.
+     * @param is_loopback true if the vif is a loopback interface.
+     * @param is_multicast true if the vif is multicast capable.
+     * @param is_broadcast true if the vif is broadcast capable.
+     * @param is_up true if the underlying vif is UP.
+     * @param err reference to string in which to store the
+     * human-readable error message in case anything goes wrong.  Used
+     * for debugging purposes.
+     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_vif_flags(const string& vifname,
+			      bool is_p2p,
+			      bool is_loopback,
+			      bool is_multicast,
+			      bool is_broadcast,
+			      bool is_up,
+			      string& err);
+
+    /**
      * add_vif_address is called to inform all the RIBs that a new IPv4
      * address has been added to a virtual interface.
      *
      * @param vifname the name of the VIF that the address was added to.
      * @param addr the new address.
-     * @param net the subnet (masked address) that the new address
+     * @param subnet the subnet (masked address) that the new address
      * resides on.
+     * @param broadcast the broadcast address to add.
+     * @param peer the peer address to add.
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
@@ -133,7 +160,9 @@ public:
      */
     int add_vif_address(const string& vifname,
 			const IPv4& addr,
-			const IPv4Net& net,
+			const IPv4Net& subnet,
+			const IPv4& broadcast_addr,
+			const IPv4& peer_addr,
 			string& err);
 
     /**
@@ -158,8 +187,9 @@ public:
      *
      * @param vifname the name of the VIF that the address was added to.
      * @param addr the new address.
-     * @param net the subnet (masked address) that the new address
+     * @param subnet the subnet (masked address) that the new address
      * resides on.
+     * @param peer the peer address to add.
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
@@ -167,7 +197,8 @@ public:
      */
     int add_vif_address(const string& vifname,
 			const IPv6& addr,
-			const IPv6Net& net,
+			const IPv6Net& subnet,
+			const IPv6& peer,
 			string& err);
 
     /**
@@ -429,6 +460,8 @@ private:
     XrlRibTarget	_xrl_rib_target;
     set<string>		_targets_of_interest;	// Monitored XRL targets
     XorpTimer		_status_update_timer;	// Timer for periodic checks of RIB status
+
+    const string	_fea_target;
 };
 
 #endif // __RIB_RIB_MANAGER_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.23 2004/02/06 22:44:12 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.24 2004/02/11 08:48:50 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -335,7 +335,7 @@ main(int /* argc */, char* argv[])
     XrlStdRouter client_xrl_router(eventloop, "ribclient");
     RibClientTarget ribclienttarget(&client_xrl_router);
 
-    RibManager rib_manager(eventloop, xrl_router);
+    RibManager rib_manager(eventloop, xrl_router, "fea");
 
     // RIB Instantiations for XrlRibTarget
     RIB<IPv4> urib4(UNICAST, rib_manager, eventloop);
@@ -354,7 +354,7 @@ main(int /* argc */, char* argv[])
     RIB<IPv6> mrib6(MULTICAST, rib_manager, eventloop);
     mrib6.add_igp_table("connected", "", "");
 
-    VifManager vif_manager(xrl_router, eventloop, NULL);
+    VifManager vif_manager(xrl_router, eventloop, NULL, "fea");
     vif_manager.enable();
     vif_manager.start();
     XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.29 2004/05/07 23:29:09 hodson Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.30 2004/05/12 21:55:22 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -450,9 +450,37 @@ RIB<A>::delete_vif(const string& vifname)
 
 template <typename A>
 int
+RIB<A>::set_vif_flags(const string& vifname,
+		      bool is_p2p,
+		      bool is_loopback,
+		      bool is_multicast,
+		      bool is_broadcast,
+		      bool is_up)
+{
+    map<const string, Vif>::iterator vi = _vifs.find(vifname);
+    if (vi == _vifs.end()) {
+	XLOG_ERROR("Attempting to set flags to non-existant Vif \"%s\"",
+		   vifname.c_str());
+	return XORP_ERROR;
+    }
+
+    Vif& vif = vi->second;
+    vif.set_p2p(is_p2p);
+    vif.set_loopback(is_loopback);
+    vif.set_multicast_capable(is_multicast);
+    vif.set_broadcast_capable(is_broadcast);
+    vif.set_underlying_vif_up(is_up);
+
+    return XORP_OK;
+}
+
+template <typename A>
+int
 RIB<A>::add_vif_address(const string&	vifname,
 			const A&	addr,
-			const IPNet<A>&	subnet)
+			const IPNet<A>&	subnet,
+			const A&	broadcast_addr,
+			const A&	peer_addr)
 {
     map<const string, Vif>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
@@ -460,7 +488,7 @@ RIB<A>::add_vif_address(const string&	vifname,
 		   vifname.c_str());
 	return XORP_ERROR;
     }
-    vi->second.add_address(VifAddr(addr, subnet, A::ZERO(), A::ZERO()));
+    vi->second.add_address(VifAddr(addr, subnet, broadcast_addr, peer_addr));
     // Add a route for this subnet
     add_route("connected", subnet, addr, "", "", /* best possible metric */ 0);
     return XORP_OK;

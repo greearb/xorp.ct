@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.17 2004/02/11 08:48:45 pavlin Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.18 2004/05/15 23:16:23 pavlin Exp $"
 
 #include <sysexits.h>
 
@@ -48,7 +48,7 @@ main (int /* argc */, char* argv[])
 	//
 	// The RIB manager
 	//
-	RibManager rib_manager(eventloop, xrl_std_router_rib);
+	RibManager rib_manager(eventloop, xrl_std_router_rib, "fea");
 	rib_manager.enable();
 
 	{

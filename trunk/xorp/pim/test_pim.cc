@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.28 2004/04/29 23:39:28 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.29 2004/05/06 20:22:52 pavlin Exp $"
 
 
 //
@@ -287,7 +287,8 @@ pim_main(const char* finder_hostname, uint16_t finder_port, bool start_finder)
 				    xorp_module_name(AF_INET,
 						     XORP_MODULE_RIB),
 				    finder_hostname, finder_port);
-    RibManager rib_manager(eventloop, xrl_std_router_rib);
+    RibManager rib_manager(eventloop, xrl_std_router_rib,
+			   xorp_module_name(AF_INET, XORP_MODULE_FEA));
     rib_manager.no_fea();
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_rib);
 

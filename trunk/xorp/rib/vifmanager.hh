@@ -12,23 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.13 2004/02/11 08:48:51 pavlin Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.14 2004/04/10 07:46:41 pavlin Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
 
-#include <map>
-
-#include "libxorp/timer.hh"
-
 #include "libproto/proto_state.hh"
 
-#include "xrl/interfaces/fea_ifmgr_xif.hh"
+#include "libfeaclient/ifmgr_xrl_mirror.hh"
 
-
-#define IF_EVENT_CREATED 1
-#define IF_EVENT_DELETED 2
-#define IF_EVENT_CHANGED 3
 
 class EventLoop;
 class RibManager;
@@ -47,9 +39,11 @@ class XrlRouter;
  * connected subnets, and which are nexthops that need to be resolved
  * using other routes to figure out where next to send the packet.
  * Only routes with nexthops that are on directly connected subnets
- * can be sent to the FEA. 
+ * can be sent to the FEA.
  */
-class VifManager : public ProtoState {
+class VifManager : public IfMgrHintObserver,
+		   public ServiceChangeObserverBase,
+		   public ProtoState {
 public:
     /**
      * VifManager constructor
@@ -57,10 +51,11 @@ public:
      * @param xrl_router this process's XRL router.
      * @param eventloop this process's EventLoop.
      * @param rib_manager this class contains the actual RIBs for IPv4
-     * and IPv4, unicast and multicast.
+     * and IPv6, unicast and multicast.
+     * @param fea_target the FEA target name.
      */
     VifManager(XrlRouter& xrl_router, EventLoop& eventloop,
-	       RibManager* rib_manager);
+	       RibManager* rib_manager, const string& fea_target);
 
     /**
      * VifManager destructor
@@ -71,6 +66,9 @@ public:
      * Start operation.
      * 
      * Start the process of registering with the FEA, etc.
+     * After the startup operations are completed,
+     * @ref VifManager::final_start() is called internally
+     * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -80,204 +78,100 @@ public:
      * Stop operation.
      * 
      * Gracefully stop operation.
+     * After the shutdown operations are completed,
+     * @ref VifManager::final_stop() is called internally
+     * to complete the job.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int	stop();
 
     /**
-     * Set test-mode - don't try to communicate with the FEA.
+     * Completely start the node operation.
+     * 
+     * This method should be called internally after @ref VifManager::start()
+     * to complete the job.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    void no_fea() { _no_fea = true; }
+    int		final_start();
 
     /**
-     * The state of the VifManager. It it hasn't yet successfully
-     * registered with the FEA, it will be in INITIALIZING state. If
-     * it has permanently failed to register with the FEA it will be
-     * in FAILED state. Otherwise it should be in READY state.
+     * Completely stop the node operation.
+     * 
+     * This method should be called internally after @ref VifManager::stop()
+     * to complete the job.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    enum State { INITIALIZING, READY, FAILED };
+    int		final_stop();
 
-    /**
-     * Get the state of the VifManager.
-     * 
-     * @return the state of the VifManager. 
-     * @see VifManager::State.
-     */
-    State state() const { return _state; }
+protected:
+    //
+    // IfMgrHintObserver methods
+    //
+    void tree_complete();
+    void updates_made();
 
-    /**
-     * Update the status of a physical interface.
-     * 
-     * This method is called when receiving an XRL from the FEA
-     * indicating that a physical interface on the router has been added,
-     * deleted, or reconfigured.
-     * 
-     * @param ifname the name of the physical interface that changed.
-     * @param event the event that occured. Should be one of the following:
-     * IF_EVENT_CREATED, IF_EVENT_DELETED, or IF_EVENT_CHANGED.
-     */
-    void interface_update(const string& ifname, const uint32_t& event);
-
-    /**
-     * Update the status of a virtual interface.
-     * 
-     * This method is called when receiving an XRL from the FEA
-     * indicating that a virtual interface on the router has been added,
-     * deleted, or reconfigured.
-     * 
-     * @param ifname the name of the physical interface on which the
-     * virtual interface resides.
-     * @param vifname the name of the virtual interface that changed.
-     * @param event the event that occured. Should be one of the following:
-     * IF_EVENT_CREATED, IF_EVENT_DELETED, or IF_EVENT_CHANGED.
-     */
-    void vif_update(const string& ifname, const string& vifname,
-		    const uint32_t& event);
-
-    /**
-     * Update the IPv4 address of a virtual interface.
-     * 
-     * This method is called when receiving an XRL from the FEA
-     * indicating that a virtual interface has undergone an address
-     * change. An IPv4 address (and associated prefix length) has
-     * been added, deleted, or reconfigured on this VIF.
-     * 
-     * @param ifname the name of the interface containing the VIF.
-     * @param vifname the name of the VIF on which the address change occured.
-     * @param addr the address that was added or deleted.
-     * @param event the event that occured. Should be one of the following:
-     * IF_EVENT_CREATED or IF_EVENT_DELETED.
-     */
-    void vifaddr4_update(const string& ifname,
-			 const string& vifname,
-			 const IPv4& addr,
-			 const uint32_t& event);
-
-    /**
-     * Update the IPv6 address of a virtual interface.
-     * 
-     * This method is called when receiving an XRL from the FEA
-     * indicating that a virtual interface has undergone an address
-     * change. An IPv6 address (and associated prefix length) has
-     * been added, deleted, or reconfigured on this VIF.
-     *
-     * @param ifname the name of the interface containing the VIF.
-     * @param vifname the name of the VIF on which the address change occured.
-     * @param addr the address that was added or deleted.
-     * @param event the event that occured. Should be one of the following:
-     * IF_EVENT_CREATED or IF_EVENT_DELETED.
-     */
-    void vifaddr6_update(const string& ifname,
-			 const string& vifname,
-			 const IPv6& addr,
-			 const uint32_t& event);
-
-    /**
-     * The interface updates have been completed.
-     */
-    void updates_completed();
+    void incr_startup_requests_n();
+    void decr_startup_requests_n();
+    void incr_shutdown_requests_n();
+    void decr_shutdown_requests_n();
+    void update_status();
 
 private:
-    void update_state();
-    void set_vif_state();
-    
-    void clean_out_old_state();
-    void xrl_result_unregister_client(const XrlError& e);
-    void register_if_spy();
-    void xrl_result_register_client(const XrlError& e);
-    void xrl_result_get_configured_interface_names(const XrlError& e,
-						   const XrlAtomList* alist);
-    void xrl_result_get_configured_vif_names(const XrlError& e,
-					     const XrlAtomList* alist,
-					     string ifname);
-    void xrl_result_get_configured_vif_flags(const XrlError& e,
-					     const bool* enabled,
-					     const bool* broadcast,
-					     const bool* loopback,
-					     const bool* point_to_point,
-					     const bool* multicast,
-					     string ifname,
-					     string vifname);
-    void xrl_result_get_configured_vif_addresses4(const XrlError& e,
-						  const XrlAtomList* alist,
-						  string ifname,
-						  string vifname);
-    void xrl_result_get_configured_vif_addresses6(const XrlError& e,
-						  const XrlAtomList* alist,
-						  string ifname,
-						  string vifname);
-    void interface_deleted(const string& ifname);
-    void vif_deleted(const string& ifname, const string& vifname);
-    void vif_created(const string& ifname, const string& vifname);
-    void vifaddr4_created(const string& ifname, const string& vifname,
-			  const IPv4& addr);
-    void vifaddr6_created(const string& ifname, const string& vifname,
-			  const IPv6& addr);
-    void xrl_result_get_configured_address_flags4(const XrlError& e,
-						  const bool* enabled,
-						  const bool* broadcast,
-						  const bool* loopback,
-						  const bool* point_to_point,
-						  const bool* multicast,
-						  string ifname,
-						  string vifname,
-						  IPv4 addr);
-    void xrl_result_get_configured_address_flags6(const XrlError& e,
-						  const bool* enabled,
-						  const bool* loopback,
-						  const bool* point_to_point,
-						  const bool* multicast,
-						  string ifname,
-						  string vifname,
-						  IPv6 addr);
-    void xrl_result_get_configured_prefix4(const XrlError& e,
-					   const uint32_t* prefix_len,
-					   string ifname, string vifname,
-					   IPv4 addr);
-    void xrl_result_get_configured_prefix6(const XrlError& e,
-					   const uint32_t* prefix_len,
-					   string ifname, string vifname,
-					   IPv6 addr);
-    void xrl_result_get_configured_broadcast4(const XrlError& e,
-					      const IPv4* broadcast,
-					      string ifname, string vifname,
-					      IPv4 addr);
-    void xrl_result_get_configured_endpoint4(const XrlError& e,
-					     const IPv4* endpoint,
-					     string ifname, string vifname,
-					     IPv4 addr);
-    void xrl_result_get_configured_endpoint6(const XrlError& e,
-					     const IPv6* endpoint,
-					     string ifname, string vifname,
-					     IPv6 addr);
-    void vifaddr4_deleted(const string& ifname, const string& vifname,
-			  const IPv4& addr);
-    void vifaddr6_deleted(const string& ifname, const string& vifname,
-			  const IPv6& addr);
+    /**
+     * A method invoked when the status of a service changes.
+     * 
+     * @param service the service whose status has changed.
+     * @param old_status the old status.
+     * @param new_status the new status.
+     */
+    void status_change(ServiceBase*  service,
+		       ServiceStatus old_status,
+		       ServiceStatus new_status);
+
+    /**
+     * Get a reference to the service base of the interface manager.
+     * 
+     * @return a reference to the service base of the interface manager.
+     */
+    const ServiceBase* ifmgr_mirror_service_base() const { return dynamic_cast<const ServiceBase*>(&_ifmgr); }
+
+    /**
+     * Get a reference to the interface manager tree.
+     * 
+     * @return a reference to the interface manager tree.
+     */
+    const IfMgrIfTree&	ifmgr_iftree() const { return _ifmgr.iftree(); }
+
+    /**
+     * Initiate startup of the interface manager.
+     * 
+     * @return true on success, false on failure.
+     */
+    bool ifmgr_startup();
+
+    /**
+     * Initiate shutdown of the interface manager.
+     * 
+     * @return true on success, false on failure.
+     */
+    bool ifmgr_shutdown();
 
     XrlRouter&		_xrl_router;
     EventLoop&		_eventloop;
     RibManager*		_rib_manager;
-    XrlIfmgrV0p1Client	_ifmgr_client;
-    
-    bool		_no_fea;
-    XorpTimer		_register_retry_timer;
-    State		_state;
-    
-    // The following variables keep track of how many answers we're
-    // still expecting from various pipelined queries to the FEA.
-    size_t		_interfaces_remaining;
-    size_t		_vifs_remaining;
-    size_t		_addrs_remaining;
-    
-    // The maps with the interfaces and vifs
-    map<string, Vif* >	_vifs_by_name;
-    multimap<string, Vif* > _vifs_by_interface;
-    
-    map<string, Vif* >	_saved_vifs_by_name;	// The local copy
-    
-    string _fea_target_name;	// The FEA target name
+
+    IfMgrXrlMirror	_ifmgr;
+    IfMgrIfTree		_iftree;
+    IfMgrIfTree		_old_iftree;
+
+    //
+    // Status-related state
+    //
+    size_t		_startup_requests_n;
+    size_t		_shutdown_requests_n;
 };
 
 #endif // __RIB_VIFMANAGER_HH__

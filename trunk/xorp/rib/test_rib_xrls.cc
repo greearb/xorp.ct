@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.28 2004/04/28 15:44:48 hodson Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.29 2004/05/06 23:05:24 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -82,7 +82,7 @@ parser_main()
     RIB<IPv6> urib6(UNICAST, rib_manager, eventloop);
     RIB<IPv6> mrib6(MULTICAST, rib_manager, eventloop);
 
-    VifManager vif_manager(xrl_router, eventloop, NULL);
+    VifManager vif_manager(xrl_router, eventloop, NULL, "fea");
     vif_manager.enable();
     vif_manager.start();
     XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.33 2004/05/06 23:07:47 hodson Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.34 2004/05/12 08:28:50 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -796,12 +796,14 @@ XrlRibTarget::rib_0_1_add_vif_addr4(const string&	name,
 				    const IPv4&		addr,
 				    const IPv4Net&	subnet)
 {
-    if (_urib4.add_vif_address(name, addr, subnet) != XORP_OK) {
+    if (_urib4.add_vif_address(name, addr, subnet, IPv4::ZERO(), IPv4::ZERO())
+	!= XORP_OK) {
 	string err = "Failed to add IPv4 Vif address to unicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
-    if (_mrib4.add_vif_address(name, addr, subnet) != XORP_OK) {
+    if (_mrib4.add_vif_address(name, addr, subnet, IPv4::ZERO(), IPv4::ZERO())
+	!= XORP_OK) {
 	string err = "Failed to add IPv4 Vif address to multicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
@@ -814,12 +816,14 @@ XrlRibTarget::rib_0_1_add_vif_addr6(const string&	name,
 				    const IPv6&		addr,
 				    const IPv6Net&	subnet)
 {
-    if (_urib6.add_vif_address(name, addr, subnet) != XORP_OK) {
+    if (_urib6.add_vif_address(name, addr, subnet, IPv6::ZERO(), IPv6::ZERO())
+	!= XORP_OK) {
 	string err = "Failed to add IPv6 Vif address to unicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
-    if (_mrib6.add_vif_address(name, addr, subnet) != XORP_OK) {
+    if (_mrib6.add_vif_address(name, addr, subnet, IPv6::ZERO(), IPv6::ZERO())
+	!= XORP_OK) {
 	string err = "Failed to add IPv6 Vif address to multicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
@@ -1092,58 +1096,6 @@ XrlRibTarget::rib_0_1_deregister_interest6(// Input values,
     }
     return XrlCmdError::OKAY();
 }
-
-XrlCmdError
-XrlRibTarget::fea_ifmgr_client_0_1_interface_update(// Input values,
-						    const string& ifname,
-						    const uint32_t& event)
-{
-    _vif_manager.interface_update(ifname, event);
-    return XrlCmdError::OKAY();
-}
-
-
-XrlCmdError
-XrlRibTarget::fea_ifmgr_client_0_1_vif_update(// Input values,
-					      const string& ifname,
-					      const string& vifname,
-					      const uint32_t& event)
-{
-    _vif_manager.vif_update(ifname, vifname, event);
-    return XrlCmdError::OKAY();
-}
-
-
-XrlCmdError
-XrlRibTarget::fea_ifmgr_client_0_1_vifaddr4_update(// Input values,
-						   const string& ifname,
-						   const string& vifname,
-						   const IPv4& addr,
-						   const uint32_t& event)
-{
-    _vif_manager.vifaddr4_update(ifname, vifname, addr, event);
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::fea_ifmgr_client_0_1_vifaddr6_update(// Input values,
-						   const string& ifname,
-						   const string& vifname,
-						   const IPv6& addr,
-						   const uint32_t& event)
-{
-    _vif_manager.vifaddr6_update(ifname, vifname, addr, event);
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::fea_ifmgr_client_0_1_updates_completed()
-{
-    _vif_manager.updates_completed();
-    
-    return XrlCmdError::OKAY();
-}
-
 
 XrlCmdError
 XrlRibTarget::finder_event_observer_0_1_xrl_target_birth(

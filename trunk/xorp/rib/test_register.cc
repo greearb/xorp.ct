@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.11 2004/03/23 11:24:25 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.12 2004/04/28 00:07:22 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -133,11 +133,14 @@ main (int /* argc */, char* argv[])
     rib.add_igp_table("connected", "", "");
 
     rib.new_vif("vif0", vif0);
-    rib.add_vif_address("vif0", IPv4("10.0.0.1"), IPv4Net("10.0.0.0", 24));
+    rib.add_vif_address("vif0", IPv4("10.0.0.1"), IPv4Net("10.0.0.0", 24),
+			IPv4::ZERO(), IPv4::ZERO());
     rib.new_vif("vif1", vif1);
-    rib.add_vif_address("vif1", IPv4("10.0.1.1"), IPv4Net("10.0.1.0", 24));
+    rib.add_vif_address("vif1", IPv4("10.0.1.1"), IPv4Net("10.0.1.0", 24),
+			IPv4::ZERO(), IPv4::ZERO());
     rib.new_vif("vif2", vif2);
-    rib.add_vif_address("vif2", IPv4("10.0.2.1"), IPv4Net("10.0.2.0", 24));
+    rib.add_vif_address("vif2", IPv4("10.0.2.1"), IPv4Net("10.0.2.0", 24),
+			IPv4::ZERO(), IPv4::ZERO());
 
     rib.add_igp_table("static", "", "");
     rib.add_igp_table("ospf", "", "");

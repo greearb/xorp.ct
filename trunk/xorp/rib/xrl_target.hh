@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.19 2004/05/06 23:07:47 hodson Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.20 2004/05/12 08:28:50 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -614,33 +614,6 @@ protected:
         const string&	target,
 	const IPv6&	addr,
 	const uint32_t&	prefix_len);
-
-    XrlCmdError fea_ifmgr_client_0_1_interface_update(
-	// Input values,
-	const string&	ifname,
-	const uint32_t&	event);
-
-    XrlCmdError fea_ifmgr_client_0_1_vif_update(
-	// Input values,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	event);
-
-    XrlCmdError fea_ifmgr_client_0_1_vifaddr4_update(
-	// Input values,
-	const string&	ifname,
-	const string&	vifname,
-	const IPv4&	addr,
-	const uint32_t&	event);
-
-    XrlCmdError fea_ifmgr_client_0_1_vifaddr6_update(
-	// Input values,
-	const string&	ifname,
-	const string&	vifname,
-	const IPv6&	addr,
-	const uint32_t&	event);
-
-    XrlCmdError fea_ifmgr_client_0_1_updates_completed();
 
     /**
      *  Announce target birth.

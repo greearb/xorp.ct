@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.31 2004/05/12 21:55:22 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.32 2004/05/14 20:45:57 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -57,7 +57,8 @@ initialize_rib(RIB<A>& 			rib,
     }
 }
 
-RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router)
+RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
+		       const string& fea_target)
     : _status_code(PROC_NOT_READY),
       _status_reason("Initializing"),
       _eventloop(eventloop),
@@ -67,9 +68,10 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router)
       _mrib4(MULTICAST, *this, _eventloop),
       _urib6(UNICAST, *this, _eventloop),
       _mrib6(MULTICAST, *this, _eventloop),
-      _vif_manager(_xrl_router, _eventloop, this),
+      _vif_manager(_xrl_router, _eventloop, this, fea_target),
       _xrl_rib_target(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6,
-		      _vif_manager, this)
+		      _vif_manager, this),
+      _fea_target(fea_target)
 {
     initialize_rib(_urib4, _urib4_clients_list, _register_server);
     initialize_rib(_mrib4, _mrib4_clients_list, _register_server);
@@ -125,39 +127,42 @@ RibManager::status_updater()
     //
     // Check the VifManager's status
     //
-    VifManager::State vif_mgr_state = _vif_manager.state();
-    switch (vif_mgr_state) {
-    case VifManager::INITIALIZING:
+    ServiceStatus vif_mgr_status = _vif_manager.status();
+    switch (vif_mgr_status) {
+    case STARTING:
 	s = PROC_NOT_READY;
-	reason = "VifManager initializing";
+	reason = "VifManager starting";
 	break;
-    case VifManager::READY:
+    case RUNNING:
 	break;
-    case VifManager::FAILED:
+    case FAILED:
 	// VifManager failed: set process state to failed.
 	// TODO: XXX: Should we exit here, or wait to be restarted?
 	_status_code = PROC_FAILED;
 	_status_reason = "VifManager Failed";
 	return false;
+    default:
+	// TODO: XXX: PAVPAVPAV: more cases may need to be added
+	break;
     }
 
     //
     // Check the unicast RIBs can still talk to the FEA
     //
     RibClient* fea_client;
-    fea_client = find_rib_client("fea", AF_INET, true, false);
+    fea_client = find_rib_client(_fea_target, AF_INET, true, false);
     if (fea_client != NULL) {
 	if (fea_client->failed()) {
 	    _status_code = PROC_FAILED;
-	    _status_reason = "Fatal error talking to FEA (v4, unicast)";
+	    _status_reason = "Fatal error talking to FEA (IPv4, unicast)";
 	    return false;
 	}
     }
-    fea_client = find_rib_client("fea", AF_INET6, true, false);
+    fea_client = find_rib_client(_fea_target, AF_INET6, true, false);
     if (fea_client != NULL) {
 	if (fea_client->failed()) {
 	    _status_code = PROC_FAILED;
-	    _status_reason = "Fatal error talking to FEA (v6, unicast)";
+	    _status_reason = "Fatal error talking to FEA (IPv6, unicast)";
 	    return false;
 	}
     }
@@ -223,17 +228,58 @@ RibManager::delete_vif(const string& vifname, string& err)
 
 
 template <typename A>
+static int
+set_rib_vif_flags(RIB<A>& rib, const string& vifname, bool is_p2p,
+		  bool is_loopback, bool is_multicast, bool is_broadcast,
+		  bool is_up, string& err)
+{
+    int result = rib.set_vif_flags(vifname, is_p2p, is_loopback, is_multicast,
+				   is_broadcast, is_up);
+    if (result != XORP_OK) {
+	err = c_format("Failed to add flags for VIF \"%s\" to %s",
+			vifname.c_str(), rib.name().c_str());
+    }
+    return result;
+}
+
+int
+RibManager::set_vif_flags(const string& vifname,
+			  bool is_p2p,
+			  bool is_loopback,
+			  bool is_multicast,
+			  bool is_broadcast,
+			  bool is_up,
+			  string& err)
+{
+    if (set_rib_vif_flags(_urib4, vifname, is_p2p, is_loopback, is_multicast,
+			  is_broadcast, is_up, err) != XORP_OK ||
+	set_rib_vif_flags(_mrib4, vifname, is_p2p, is_loopback, is_multicast,
+			  is_broadcast, is_up, err) != XORP_OK ||
+	set_rib_vif_flags(_urib6, vifname, is_p2p, is_loopback, is_multicast,
+			  is_broadcast, is_up, err) != XORP_OK ||
+	set_rib_vif_flags(_mrib6, vifname, is_up, is_loopback, is_multicast,
+			  is_broadcast, is_up, err) != XORP_OK) {
+	return XORP_ERROR;
+    }
+    return XORP_OK;
+}
+
+
+template <typename A>
 int
 add_vif_address_to_ribs(RIB<A>& 	urib,
 			RIB<A>& 	mrib,
 			const string&	vifn,
 			const A& 	addr,
 			const IPNet<A>& subnet,
+			const A&	broadcast_addr,
+			const A&	peer_addr,
 			string& 	err)
 {
     RIB<A>* ribs[2] = { &urib, &mrib };
     for (uint32_t i = 0; i < sizeof(ribs)/sizeof(ribs[0]); i++) {
-	if (ribs[i]->add_vif_address(vifn, addr, subnet) != XORP_OK) {
+	if (ribs[i]->add_vif_address(vifn, addr, subnet, broadcast_addr,
+				     peer_addr) != XORP_OK) {
 	    err = c_format("Failed to add VIF address %s to %s\n",
 			   addr.str().c_str(), ribs[i]->name().c_str());
 	    return XORP_ERROR;
@@ -265,9 +311,12 @@ int
 RibManager::add_vif_address(const string& 	vifn,
 			    const IPv4& 	addr,
 			    const IPv4Net& 	subnet,
+			    const IPv4&		broadcast_addr,
+			    const IPv4&		peer_addr,
 			    string& 		err)
 {
-    return add_vif_address_to_ribs(_urib4, _mrib4, vifn, addr, subnet, err);
+    return add_vif_address_to_ribs(_urib4, _mrib4, vifn, addr, subnet,
+				   broadcast_addr, peer_addr, err);
 }
 
 int
@@ -279,12 +328,14 @@ RibManager::delete_vif_address(const string& 	vifn,
 }
 
 int
-RibManager::add_vif_address(const string& vifn,
-			    const IPv6& addr,
-			    const IPv6Net& subnet,
-			    string& err)
+RibManager::add_vif_address(const string&	vifn,
+			    const IPv6&		addr,
+			    const IPv6Net&	subnet,
+			    const IPv6&		peer_addr,
+			    string&		err)
 {
-    int r = add_vif_address_to_ribs(_urib6, _mrib6, vifn, addr, subnet, err);
+    int r = add_vif_address_to_ribs(_urib6, _mrib6, vifn, addr, subnet,
+				    IPv6::ZERO(), peer_addr, err);
     return r;
 }
 
@@ -495,10 +546,8 @@ int
 RibManager::no_fea()
 {
     // TODO: FEA target name hardcoded
-    disable_rib_client("fea", AF_INET, true, false);
-    disable_rib_client("fea", AF_INET6, true, false);
-
-    _vif_manager.no_fea();
+    disable_rib_client(_fea_target, AF_INET, true, false);
+    disable_rib_client(_fea_target, AF_INET6, true, false);
 
     return (XORP_OK);
 }
