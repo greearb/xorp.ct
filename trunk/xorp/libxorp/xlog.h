@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.4 2003/05/21 00:24:20 pavlin Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.5 2003/05/21 17:47:27 pavlin Exp $
  */
 
 
@@ -334,17 +334,20 @@ do {									\
  */
 #define XLOG_UNREACHABLE()						\
 do {									\
-	XLOG_FATAL("Internal fatal error");				\
+	XLOG_FATAL("Internal fatal error: unreachable code reached");	\
 } while (0)
 
 /**
- * Write a FATAL message to the xlog output streams and aborts the program.
- * 
- * This is similar to XLOG_FATAL, except that it should be used for
- * code that is yet to be implemented.
- * 
+ * A marker that can be used to indicate code that is not yet
+ * implemented and hence should not be run.
+ * Always calls XLOG_FATAL.
  */
-#define XLOG_UNFINISHED(fmt...)	XLOG_FN(fatal, fmt)
+#define XLOG_UNFINISHED()						\
+do {									\
+	XLOG_FATAL("Internal fatal error: unfinished code reached");	\
+} while (0)
+
+
 
 /*
  * The macros below define the XLOG_TRACE(), the macro responsible for
