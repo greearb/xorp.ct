@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.13 2004/08/13 00:36:10 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.14 2005/03/09 22:50:40 pavlin Exp $ */
 
 protocols {
     pimsm6 {
@@ -106,6 +106,7 @@ protocols {
 	    vif @ {
 		%help:	short "Configure IPv6 PIM-SM on a virtual interface";
 		%activate: xrl "$(pimsm6.targetname)/pim/0.1/start_vif?vif_name:txt=$(vif.@)";
+		%update: xrl "$(pimsm6.targetname)/pim/0.1/start_vif?vif_name:txt=$(vif.@)";
 
 		disable {
 		    %help:	short "Disable IPv6 PIM-SM on an interface";
@@ -138,11 +139,13 @@ protocols {
 	static-rps {
 	    %help:	short "Configure the set of static RPs";
 	    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/config_static_rp_done";
+	    %update:	xrl "$(pimsm6.targetname)/pim/0.1/config_static_rp_done";
 	    rp @ {
 		%help:	short "Configure a static RP";
 		group-prefix @ {
 		    %help:	short "Configure the group prefix address covered by the RP";
 		    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(@.rp-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
+		    %update:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(@.rp-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/delete_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)";
 
 		    rp-priority {
@@ -163,6 +166,7 @@ protocols {
 	bootstrap {
 	    %help:	short "Configure the IPv6 Bootstrap mechanism";
 	    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/start_bsr";
+	    %update:	xrl "$(pimsm6.targetname)/pim/0.1/start_bsr";
 
 	    disable {
 		%help:	short "Disable the IPv6 Bootstrap mechanism";
@@ -186,6 +190,8 @@ protocols {
 		    %mandatory: cand-bsr-by-vif-name;
 
 		    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_cand_bsr_by_vif_name6?scope_zone_id:ipv6net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
+		    /* TODO: currently the %update below probably doesn't work */
+		    %update:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_cand_bsr_by_vif_name6?scope_zone_id:ipv6net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/delete_config_cand_bsr6?scope_zone_id:ipv6net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)";
 
 		    is-scope-zone {
@@ -219,6 +225,7 @@ protocols {
 		    %mandatory:	cand-rp-by-vif-name;
 
 		    %activate: xrl "$(pimsm6.targetname)/pim/0.1/add_config_cand_rp_by_vif_name6?group_prefix:ipv6net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&rp_priority:u32=$(@.rp-priority)&rp_holdtime:u32=$(@.rp-holdtime)";
+		    %update: xrl "$(pimsm6.targetname)/pim/0.1/add_config_cand_rp_by_vif_name6?group_prefix:ipv6net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&rp_priority:u32=$(@.rp-priority)&rp_holdtime:u32=$(@.rp-holdtime)";
 		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/delete_config_cand_rp_by_vif_name6?group_prefix:ipv6net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)";
 
 		    is-scope-zone {
@@ -249,6 +256,7 @@ protocols {
 	switch-to-spt-threshold {
 	    %help:	short "Configure the shortest-path switch threshold";
 	    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=`~$(@.disable)`&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
+	    %update:	xrl "$(pimsm6.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=`~$(@.disable)`&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
 	    %delete: xrl "$(pimsm6.targetname)/pim/0.1/reset_switch_to_spt_threshold";
 
 	    disable {
