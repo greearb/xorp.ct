@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.27 2004/04/15 16:13:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.28 2004/05/11 00:44:35 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -436,6 +436,7 @@ BGPMain::enable_peer(const Iptuple& iptuple)
 
     peer->event_start();
     start_server(iptuple); // Start a server for this peer.
+    peer->set_current_peer_state(true);
     return true;
 }
 
@@ -451,6 +452,7 @@ BGPMain::disable_peer(const Iptuple& iptuple)
 
     peer->event_stop();
     stop_server(iptuple); // Stop the server for this peer.
+    peer->set_current_peer_state(false);
     return true;
 }
 
@@ -464,7 +466,7 @@ BGPMain::set_peer_state(const Iptuple& iptuple, bool state)
 	return false;
     }
 
-    peer->set_peer_state(state);
+    peer->set_next_peer_state(state);
     return true;
 }
 
@@ -478,7 +480,10 @@ BGPMain::activate(const Iptuple& iptuple)
 	return false;
     }
 
-    if(peer->get_peer_state()) {
+    if (peer->get_current_peer_state() == peer->get_next_peer_state())
+	return true;
+
+    if (peer->get_next_peer_state()) {
 	enable_peer(iptuple);
     } else {
 	disable_peer(iptuple);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.12 2004/04/26 19:31:53 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.13 2004/05/11 00:44:35 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -221,10 +221,13 @@ private:
 private:
     friend class BGPMain;
 
-    void set_peer_state(bool state) {_enabled = state;}
-    bool get_peer_state() {return _enabled;}
+    bool _current_state;
+    void set_current_peer_state(bool state) {_current_state = state;}
+    bool get_current_peer_state() {return _current_state;}
 
-    bool _enabled;	// Is this peering about to be enabled or disabled.
+    bool _next_state;
+    void set_next_peer_state(bool state) {_next_state = state;}
+    bool get_next_peer_state() {return _next_state;}
 };
 
 #endif // __BGP_PEER_HH__
