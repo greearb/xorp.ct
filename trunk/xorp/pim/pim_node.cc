@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.33 2004/02/25 02:48:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.34 2004/02/26 15:38:47 pavlin Exp $"
 
 
 //
@@ -1306,11 +1306,8 @@ PimNode::delete_membership(uint16_t vif_index, const IPvX& source,
  * PimNode::is_directly_connected:
  * @ipaddr_test: The address to test.
  * 
- * Note that we should check whether MRIB-based RPF info points toward
- * the same interface. However, if the address belongs to one of my
- * virtual interfaces, then in some cases the MRIB may point toward
- * the loopback interface (e.g., FreeBSD IPv6 Kame stack).
- * Hence, we ignore the MRIB-based RPF check.
+ * Note that the virtual interface the address is directly connected to
+ * must be UP.
  * 
  * Return value: True if @ipaddr_test is directly connected to one of
  * my virtual interfaces, otherwise false.
@@ -1337,11 +1334,8 @@ PimNode::is_directly_connected(const IPvX& ipaddr_test) const
  * @pim_vif: The virtual interface to test against.
  * @ipaddr_test: The address to test.
  * 
- * Note that we should check whether MRIB-based RPF info points toward
- * the same interface. However, if the address belongs to one of my
- * virtual interfaces, then in some cases the MRIB may point toward
- * the loopback interface (e.g., FreeBSD IPv6 Kame stack).
- * Hence, we ignore the MRIB-based RPF check.
+ * Note that the virtual interface the address is directly connected to
+ * must be UP.
  * 
  * Return value: True if @ipaddr_test is directly connected to @pim_vif,
  * otherwise false.
@@ -1350,16 +1344,9 @@ bool
 PimNode::is_directly_connected(const PimVif& pim_vif,
 			       const IPvX& ipaddr_test) const
 {
-#if 0
-    // XXX: ignore the MRIB-based RPF, because it may point toward
-    // the loopback interface for my own addresses.
-    const Mrib *mrib = _pim_mrib_table.find(ipaddr_test);
-    if (mrib == NULL)
+    if (! pim_vif.is_up())
 	return (false);
-    if (mrib->next_hop_vif_index() != pim_vif.vif_index())
-	return (false);
-#endif // 0
-    
+
     return (pim_vif.is_same_subnet(ipaddr_test)
 	    || pim_vif.is_same_p2p(ipaddr_test));
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.30 2004/02/22 04:00:02 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.31 2004/02/26 15:38:47 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -686,11 +686,8 @@ public:
      * Test if an address is directly connected to one of my virtual
      * interfaces.
      * 
-     * Note that we should check whether MRIB-based RPF info points toward
-     * the same interface. However, if the address belongs to one of my
-     * virtual interfaces, then in some cases the MRIB may point toward
-     * the loopback interface (e.g., FreeBSD IPv6 Kame stack).
-     * Hence, we ignore the MRIB-based RPF check.
+     * Note that the virtual interface the address is directly connected to
+     * must be UP.
      * 
      * @param ipaddr_test the address to test.
      * @return true if @ref ipaddr_test is directly connected to one of
@@ -702,11 +699,8 @@ public:
      * Test if an address is directly connected to a specified virtual
      * interface.
      * 
-     * Note that we should check whether MRIB-based RPF info points toward
-     * the same interface. However, if the address belongs to one of my
-     * virtual interfaces, then in some cases the MRIB may point toward
-     * the loopback interface (e.g., FreeBSD IPv6 Kame stack).
-     * Hence, we ignore the MRIB-based RPF check.
+     * Note that the virtual interface the address is directly connected to
+     * must be UP.
      * 
      * @param pim_vif the virtual interface to test against.
      * @param ipaddr_test the address to test.
