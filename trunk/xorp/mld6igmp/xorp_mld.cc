@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xorp_static_routes.cc,v 1.4 2004/04/22 01:14:29 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xorp_mld6igmp.cc,v 1.4 2004/04/30 02:38:45 pavlin Exp $"
 
 
 //
@@ -111,18 +111,6 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port)
     //
     // MLD6IGMP node
     //
-    XrlStdRouter xrl_std_router_mld6igmp4(eventloop,
-					  xorp_module_name(AF_INET,
-							   XORP_MODULE_MLD6IGMP),
-					  finder_hostname, finder_port);
-    XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET,
-				       XORP_MODULE_MLD6IGMP,
-				       eventloop,
-				       &xrl_std_router_mld6igmp4,
-				       xorp_module_name(AF_INET,
-							XORP_MODULE_MFEA));
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mld6igmp4);
-
 #ifdef HAVE_IPV6
     XrlStdRouter xrl_std_router_mld6igmp6(eventloop,
 					  xorp_module_name(AF_INET6,
@@ -138,19 +126,23 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port)
 #endif // HAVE_IPV6
 
     // Startup
-    xrl_mld6igmp_node4.startup();
-    // xrl_mld6igmp_node6.startup();
+#ifdef HAVE_IPV6_MULTICAST
+    xrl_mld6igmp_node6.enable_mld6igmp();
+    xrl_mld6igmp_node6.startup();
+#endif
 
     //
     // Main loop
     //
-    while (! xrl_mld6igmp_node4.is_done()) {
+#ifdef HAVE_IPV6_MULTICAST
+    while (! xrl_mld6igmp_node6.is_done()) {
 	eventloop.run();
     }
 
-    while (xrl_std_router_mld6igmp4.pending()) {
+    while (xrl_std_router_mld6igmp6.pending()) {
 	eventloop.run();
     }
+#endif // HAVE_IPV6_MULTICAST
 }
 
 int

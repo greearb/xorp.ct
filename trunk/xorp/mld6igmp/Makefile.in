@@ -93,7 +93,7 @@ snmpd2 = @snmpd2@
 bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
-bin_PROGRAMS = xorp_mld6igmp
+bin_PROGRAMS = xorp_igmp xorp_mld
 
 # -- Test Programs
 TESTS = 
@@ -116,7 +116,8 @@ noinst_LIBRARIES = libmld6igmp.a
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a $(top_builddir)/xrl/targets/libmld6igmpbase.a $(top_builddir)/fea/libfea.a $(top_builddir)/xrl/interfaces/libfeafibclientxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-xorp_mld6igmp_SOURCES = xorp_mld6igmp.cc
+xorp_igmp_SOURCES = xorp_igmp.cc
+xorp_mld_SOURCES = xorp_mld.cc
 
 test_mld6igmp_SOURCES = test_mld6igmp.cc
 test_mld6igmp_LDADD = $(LDADD) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libsocket4userxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/xrl/interfaces/libsocket6userxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/targets/libsocketserverbase.a
@@ -144,7 +145,7 @@ am_libmld6igmp_a_OBJECTS = igmp_proto.$(OBJEXT) mld6_proto.$(OBJEXT) \
 	mld6igmp_proto.$(OBJEXT) mld6igmp_vif.$(OBJEXT) \
 	xrl_mld6igmp_node.$(OBJEXT)
 libmld6igmp_a_OBJECTS = $(am_libmld6igmp_a_OBJECTS)
-bin_PROGRAMS = xorp_mld6igmp$(EXEEXT)
+bin_PROGRAMS = xorp_igmp$(EXEEXT) xorp_mld$(EXEEXT)
 noinst_PROGRAMS = test_mld6igmp$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
@@ -181,10 +182,10 @@ test_mld6igmp_DEPENDENCIES = libmld6igmp.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/targets/libsocketserverbase.a
 test_mld6igmp_LDFLAGS =
-am_xorp_mld6igmp_OBJECTS = xorp_mld6igmp.$(OBJEXT)
-xorp_mld6igmp_OBJECTS = $(am_xorp_mld6igmp_OBJECTS)
-xorp_mld6igmp_LDADD = $(LDADD)
-xorp_mld6igmp_DEPENDENCIES = libmld6igmp.a \
+am_xorp_igmp_OBJECTS = xorp_igmp.$(OBJEXT)
+xorp_igmp_OBJECTS = $(am_xorp_igmp_OBJECTS)
+xorp_igmp_LDADD = $(LDADD)
+xorp_igmp_DEPENDENCIES = libmld6igmp.a \
 	$(top_builddir)/xrl/interfaces/libmfeaxif.a \
 	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a \
 	$(top_builddir)/xrl/targets/libmld6igmpbase.a \
@@ -206,7 +207,33 @@ xorp_mld6igmp_DEPENDENCIES = libmld6igmp.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
-xorp_mld6igmp_LDFLAGS =
+xorp_igmp_LDFLAGS =
+am_xorp_mld_OBJECTS = xorp_mld.$(OBJEXT)
+xorp_mld_OBJECTS = $(am_xorp_mld_OBJECTS)
+xorp_mld_LDADD = $(LDADD)
+xorp_mld_DEPENDENCIES = libmld6igmp.a \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.a \
+	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a \
+	$(top_builddir)/xrl/targets/libmld6igmpbase.a \
+	$(top_builddir)/fea/libfea.a \
+	$(top_builddir)/xrl/interfaces/libfeafibclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
+	$(top_builddir)/xrl/targets/libfeabase.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.a \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.a \
+	$(top_builddir)/xrl/targets/libmfeabase.a \
+	$(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a \
+	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
+	$(top_builddir)/xrl/targets/libclibase.a \
+	$(top_builddir)/libproto/libproto.a \
+	$(top_builddir)/libxipc/libfinder.a \
+	$(top_builddir)/libxipc/libxipc.a \
+	$(top_builddir)/libcomm/libcomm.a \
+	$(top_builddir)/libxorp/libxorp.a
+xorp_mld_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -221,8 +248,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_node_cli.Po \
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_proto.Po \
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_vif.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_mld6igmp.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xorp_mld6igmp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_mld6igmp.Po $(DEPDIR)/xorp_igmp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_mld.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_mld6igmp_node.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -236,9 +263,9 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libmld6igmp_a_SOURCES) $(test_mld6igmp_SOURCES) \
-	$(xorp_mld6igmp_SOURCES)
+	$(xorp_igmp_SOURCES) $(xorp_mld_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libmld6igmp_a_SOURCES) $(test_mld6igmp_SOURCES) $(xorp_mld6igmp_SOURCES)
+SOURCES = $(libmld6igmp_a_SOURCES) $(test_mld6igmp_SOURCES) $(xorp_igmp_SOURCES) $(xorp_mld_SOURCES)
 
 all: all-am
 
@@ -289,9 +316,12 @@ clean-noinstPROGRAMS:
 test_mld6igmp$(EXEEXT): $(test_mld6igmp_OBJECTS) $(test_mld6igmp_DEPENDENCIES) 
 	@rm -f test_mld6igmp$(EXEEXT)
 	$(CXXLINK) $(test_mld6igmp_LDFLAGS) $(test_mld6igmp_OBJECTS) $(test_mld6igmp_LDADD) $(LIBS)
-xorp_mld6igmp$(EXEEXT): $(xorp_mld6igmp_OBJECTS) $(xorp_mld6igmp_DEPENDENCIES) 
-	@rm -f xorp_mld6igmp$(EXEEXT)
-	$(CXXLINK) $(xorp_mld6igmp_LDFLAGS) $(xorp_mld6igmp_OBJECTS) $(xorp_mld6igmp_LDADD) $(LIBS)
+xorp_igmp$(EXEEXT): $(xorp_igmp_OBJECTS) $(xorp_igmp_DEPENDENCIES) 
+	@rm -f xorp_igmp$(EXEEXT)
+	$(CXXLINK) $(xorp_igmp_LDFLAGS) $(xorp_igmp_OBJECTS) $(xorp_igmp_LDADD) $(LIBS)
+xorp_mld$(EXEEXT): $(xorp_mld_OBJECTS) $(xorp_mld_DEPENDENCIES) 
+	@rm -f xorp_mld$(EXEEXT)
+	$(CXXLINK) $(xorp_mld_LDFLAGS) $(xorp_mld_OBJECTS) $(xorp_mld_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -308,7 +338,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_proto.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_vif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_mld6igmp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_mld6igmp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_igmp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_mld.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_mld6igmp_node.Po@am__quote@
 
 distclean-depend:
