@@ -1,4 +1,4 @@
-# $XORP: other/testbed/config/XORP-4.7,v 1.6 2003/02/06 22:21:43 atanu Exp $
+# $XORP: other/testbed/config/XORP-4.7,v 1.7 2003/02/06 22:29:19 atanu Exp $
 # GENERIC -- Generic kernel configuration file for FreeBSD/i386
 #
 # For more information on this file, please read the handbook section on
@@ -91,8 +91,8 @@ options		GDB_REMOTE_CHAT
 
 # XORP: Enable SMP
 # To make an SMP kernel, the next two are needed
-options 	SMP			# Symmetric MultiProcessor Kernel
-options 	APIC_IO			# Symmetric (APIC) I/O
+#options 	SMP			# Symmetric MultiProcessor Kernel
+#options 	APIC_IO			# Symmetric (APIC) I/O
 
 device		isa
 device		eisa
@@ -323,4 +323,4 @@ options		INCLUDE_CONFIG_FILE	# Include this file in kernel
 # Only the "dc" "fxp" and "sis" devices support this mode of operation at
 # the time of this writing.
  
-#options         DEVICE_POLLING
+options         DEVICE_POLLING
