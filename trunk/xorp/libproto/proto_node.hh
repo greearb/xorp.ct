@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.2 2003/01/16 19:27:57 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -197,7 +197,7 @@ public:
      * 
      * @return the maximum number of vifs we can have.
      */
-    size_t	maxvifs() const { return (_proto_vifs.size()); }
+    uint16_t	maxvifs() const { return (_proto_vifs.size()); }
 
     /**
      * Get the event loop this node is added to.
