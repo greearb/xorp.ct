@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.25 2004/11/12 02:44:51 bms Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.26 2004/11/29 00:32:06 bms Exp $
 ##
 
 ###############################################################################
@@ -83,10 +83,20 @@ noinst_LTLIBRARIES += libfearawpkt4.la
 libfearawpkt4_la_SOURCES  = fea_rawpkt4_xif.hh
 libfearawpkt4_la_SOURCES += fea_rawpkt4_xif.cc
 
-# FEA Raw Packet Client Interface
+# FEA IPv4 Raw Packet Client Interface
 noinst_LTLIBRARIES += libfearawpkt4client.la
 libfearawpkt4client_la_SOURCES  = fea_rawpkt4_client_xif.hh
 libfearawpkt4client_la_SOURCES += fea_rawpkt4_client_xif.cc
+
+# FEA IPv6 Raw Packet Server Interface
+noinst_LTLIBRARIES += libfearawpkt6.la
+libfearawpkt6_la_SOURCES  = fea_rawpkt6_xif.hh
+libfearawpkt6_la_SOURCES += fea_rawpkt6_xif.cc
+
+# FEA IPv6 Raw Packet Client Interface
+noinst_LTLIBRARIES += libfearawpkt6client.la
+libfearawpkt6client_la_SOURCES  = fea_rawpkt6_client_xif.hh
+libfearawpkt6client_la_SOURCES += fea_rawpkt6_client_xif.cc
 
 # Finder Interface
 noinst_LTLIBRARIES += libfinderxif.la

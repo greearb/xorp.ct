@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.56 2004/11/18 14:25:28 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.57 2004/11/29 00:32:02 bms Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -35,6 +35,7 @@
 #include "libfeaclient_bridge.hh"
 #include "xrl_ifupdate.hh"
 #include "xrl_rawsock4.hh"
+//#include "xrl_rawsock6.hh"
 #include "xrl_socket_server.hh"
 #include "xrl_target.hh"
 #include "profile_vars.hh"
@@ -46,10 +47,12 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
 			   XrlIfConfigUpdateReporter&	xifcur,
 			   Profile&			profile,
 			   XrlRawSocket4Manager*	xrsm4,
+//			   XrlRawSocket6Manager*	xrsm6,
 			   LibFeaClientBridge*		lfcb,
 			   XrlSocketServer*		xss)
     : XrlFeaTargetBase(&r), _xrl_router(r), _xftm(e, ftic, &r),
-      _xifmgr(e, ifmgr), _xifcur(xifcur), _profile(profile), _xrsm4(xrsm4),
+      _xifmgr(e, ifmgr), _xifcur(xifcur), _profile(profile),
+      _xrsm4(xrsm4), //_xrsm6(xrsm6),
       _lfcb(lfcb), _xss(xss), _done(false),
       _have_ipv4(false), _have_ipv6(false)
 {
@@ -2068,9 +2071,9 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
 }
 
 // ----------------------------------------------------------------------------
-// Raw Socket related
+// IPv4 Raw Socket related
 
-static const char* XRL_RAW_SOCKET_NULL = "XrlRawSocket4Manager not present" ;
+static const char* XRL_RAW_SOCKET4_NULL = "XrlRawSocket4Manager not present" ;
 
 XrlCmdError
 XrlFeaTarget::raw_packet4_0_1_send(
@@ -2089,7 +2092,7 @@ XrlFeaTarget::raw_packet4_0_1_send(
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     if (_xrsm4 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET_NULL);
+	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
     }
     return _xrsm4->send(src_address, dst_address, vifname,
 		       proto, ttl, tos, options, payload);
@@ -2106,7 +2109,7 @@ XrlFeaTarget::raw_packet4_0_1_send_raw(
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     if (_xrsm4 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET_NULL);
+	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
     }
     return _xrsm4->send(vifname, packet);
 }
@@ -2121,7 +2124,7 @@ XrlFeaTarget::raw_packet4_0_1_register_vif_receiver(
 						   )
 {
     if (_xrsm4 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET_NULL);
+	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
     }
     return _xrsm4->register_vif_receiver(router_name, ifname, vifname, proto);
 }
@@ -2136,10 +2139,91 @@ XrlFeaTarget::raw_packet4_0_1_unregister_vif_receiver(
 						     )
 {
     if (_xrsm4 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET_NULL);
+	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
     }
     return _xrsm4->unregister_vif_receiver(router_name, ifname, vifname, proto);
 }
+
+// ----------------------------------------------------------------------------
+// IPv6 Raw Socket related
+
+static const char* XRL_RAW_SOCKET6_NULL = "XrlRawSocket6Manager not present" ;
+
+XrlCmdError
+XrlFeaTarget::raw_packet6_0_1_send_raw(
+				       // Input values,
+				       const string&		vifname,
+				       const vector<uint8_t>&	pktinfo,
+				       const vector<uint8_t>&	packet
+				       )
+{
+    if (! have_ipv6())
+	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
+
+#ifdef notyet
+    if (_xrsm6 == 0) {
+	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
+    }
+    return _xrsm6->send(vifname, pktinfo, packet);
+#else
+    return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
+
+    UNUSED(vifname);
+    UNUSED(pktinfo);
+    UNUSED(packet);
+#endif
+}
+
+XrlCmdError
+XrlFeaTarget::raw_packet6_0_1_register_vif_receiver(
+						   // Input values,
+						   const string&   router_name,
+						   const string&   ifname,
+						   const string&   vifname,
+						   const uint32_t& proto
+						   )
+{
+#ifdef notyet
+    if (_xrsm6 == 0) {
+	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
+    }
+    return _xrsm6->register_vif_receiver(router_name, ifname, vifname, proto);
+#else
+    return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
+
+    UNUSED(router_name);
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(proto);
+#endif
+}
+
+XrlCmdError
+XrlFeaTarget::raw_packet6_0_1_unregister_vif_receiver(
+						     // Input values,
+						     const string& router_name,
+						     const string& ifname,
+						     const string& vifname,
+						     const uint32_t& proto
+						     )
+{
+#ifdef notyet
+    if (_xrsm6 == 0) {
+	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
+    }
+    return _xrsm6->unregister_vif_receiver(router_name, ifname, vifname, proto);
+#else
+    return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
+
+    UNUSED(router_name);
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(proto);
+#endif
+}
+
+// ----------------------------------------------------------------------------
+// Socket Server related
 
 XrlCmdError
 XrlFeaTarget::socket4_locator_0_1_find_socket_server_for_addr(
@@ -2188,6 +2272,9 @@ XrlFeaTarget::socket6_locator_0_1_find_socket_server_for_addr(
     svr = _xss->instance_name();
     return XrlCmdError::OKAY();
 }
+
+// ----------------------------------------------------------------------------
+// Profiling related
 
 XrlCmdError
 XrlFeaTarget::profile_0_1_enable(const string& pname)

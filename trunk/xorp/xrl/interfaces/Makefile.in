@@ -133,7 +133,11 @@ install_sh = @install_sh@
 
 # FEA IPv4 Raw Packet Server Interface
 
-# FEA Raw Packet Client Interface
+# FEA IPv4 Raw Packet Client Interface
+
+# FEA IPv6 Raw Packet Server Interface
+
+# FEA IPv6 Raw Packet Client Interface
 
 # Finder Interface
 
@@ -206,7 +210,7 @@ install_sh = @install_sh@
 #
 # Sample Test Client Interface
 #
-noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la libclimanagerxif.la libcliprocessorxif.la libcommonxif.la libcoordxif.la libdatainxif.la libfeaclickxif.la libfeaifmgrxif.la libfeafibxif.la libfeafibclientxif.la libfirewallxif.la libfeaifmgrclientxif.la libfeaifmgrmirrorxif.la libfeaifmgrreplicatorxif.la libfib2mribxif.la libftixif.la libfearawpkt4.la libfearawpkt4client.la libfinderxif.la libfindereventnotifierxif.la libfindereventobserverxif.la libfinderclientxif.la libmfeaxif.la libmfeaclientxif.la libmld6igmpxif.la libmld6igmpclientxif.la libospfxif.la libpimxif.la libpolicyxif.la libpolicybackendxif.la libpolicyredist4xif.la libpolicyredist6xif.la libprofilexif.la libprofileclientxif.la libredist4xif.la libredist6xif.la libredisttransaction4xif.la libredisttransaction6xif.la libribxif.la libribclientxif.la libripxif.la libripngxif.la librtrmgrxif.la librtrmgr_clientxif.la libsocket4xif.la libsocket4locatorxif.la libsocket4userxif.la libsocket6xif.la libsocket6locatorxif.la libsocket6userxif.la libstaticroutesxif.la libtestpeerxif.la libtestxrlsxif.la libxorpifmibxif.la libtestxif.la
+noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la libclimanagerxif.la libcliprocessorxif.la libcommonxif.la libcoordxif.la libdatainxif.la libfeaclickxif.la libfeaifmgrxif.la libfeafibxif.la libfeafibclientxif.la libfirewallxif.la libfeaifmgrclientxif.la libfeaifmgrmirrorxif.la libfeaifmgrreplicatorxif.la libfib2mribxif.la libftixif.la libfearawpkt4.la libfearawpkt4client.la libfearawpkt6.la libfearawpkt6client.la libfinderxif.la libfindereventnotifierxif.la libfindereventobserverxif.la libfinderclientxif.la libmfeaxif.la libmfeaclientxif.la libmld6igmpxif.la libmld6igmpclientxif.la libospfxif.la libpimxif.la libpolicyxif.la libpolicybackendxif.la libpolicyredist4xif.la libpolicyredist6xif.la libprofilexif.la libprofileclientxif.la libredist4xif.la libredist6xif.la libredisttransaction4xif.la libredisttransaction6xif.la libribxif.la libribclientxif.la libripxif.la libripngxif.la librtrmgrxif.la librtrmgr_clientxif.la libsocket4xif.la libsocket4locatorxif.la libsocket4userxif.la libsocket6xif.la libsocket6locatorxif.la libsocket6userxif.la libstaticroutesxif.la libtestpeerxif.la libtestxrlsxif.la libxorpifmibxif.la libtestxif.la
 libbgpmibtrapsxif_la_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_la_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_la_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -226,6 +230,8 @@ libfib2mribxif_la_SOURCES = fib2mrib_xif.hh fib2mrib_xif.cc
 libftixif_la_SOURCES = fti_xif.hh fti_xif.cc
 libfearawpkt4_la_SOURCES = fea_rawpkt4_xif.hh fea_rawpkt4_xif.cc
 libfearawpkt4client_la_SOURCES = fea_rawpkt4_client_xif.hh fea_rawpkt4_client_xif.cc
+libfearawpkt6_la_SOURCES = fea_rawpkt6_xif.hh fea_rawpkt6_xif.cc
+libfearawpkt6client_la_SOURCES = fea_rawpkt6_client_xif.hh fea_rawpkt6_client_xif.cc
 libfinderxif_la_SOURCES = finder_xif.hh finder_xif.cc
 libfindereventnotifierxif_la_SOURCES = finder_event_notifier_xif.hh finder_event_notifier_xif.cc
 libfindereventobserverxif_la_SOURCES = finder_event_observer_xif.hh finder_event_observer_xif.cc
@@ -345,6 +351,14 @@ libfearawpkt4client_la_LDFLAGS =
 libfearawpkt4client_la_LIBADD =
 am_libfearawpkt4client_la_OBJECTS = fea_rawpkt4_client_xif.lo
 libfearawpkt4client_la_OBJECTS = $(am_libfearawpkt4client_la_OBJECTS)
+libfearawpkt6_la_LDFLAGS =
+libfearawpkt6_la_LIBADD =
+am_libfearawpkt6_la_OBJECTS = fea_rawpkt6_xif.lo
+libfearawpkt6_la_OBJECTS = $(am_libfearawpkt6_la_OBJECTS)
+libfearawpkt6client_la_LDFLAGS =
+libfearawpkt6client_la_LIBADD =
+am_libfearawpkt6client_la_OBJECTS = fea_rawpkt6_client_xif.lo
+libfearawpkt6client_la_OBJECTS = $(am_libfearawpkt6client_la_OBJECTS)
 libfib2mribxif_la_LDFLAGS =
 libfib2mribxif_la_LIBADD =
 am_libfib2mribxif_la_OBJECTS = fib2mrib_xif.lo
@@ -530,6 +544,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/fea_ifmgr_xif.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/fea_rawpkt4_client_xif.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/fea_rawpkt4_xif.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/fea_rawpkt6_client_xif.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/fea_rawpkt6_xif.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/fib2mrib_xif.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/finder_client_xif.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/finder_event_notifier_xif.Plo \
@@ -589,7 +605,8 @@ DIST_SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libfeaifmgrmirrorxif_la_SOURCES) \
 	$(libfeaifmgrreplicatorxif_la_SOURCES) \
 	$(libfeaifmgrxif_la_SOURCES) $(libfearawpkt4_la_SOURCES) \
-	$(libfearawpkt4client_la_SOURCES) $(libfib2mribxif_la_SOURCES) \
+	$(libfearawpkt4client_la_SOURCES) $(libfearawpkt6_la_SOURCES) \
+	$(libfearawpkt6client_la_SOURCES) $(libfib2mribxif_la_SOURCES) \
 	$(libfinderclientxif_la_SOURCES) \
 	$(libfindereventnotifierxif_la_SOURCES) \
 	$(libfindereventobserverxif_la_SOURCES) \
@@ -615,7 +632,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libtestxif_la_SOURCES) $(libtestxrlsxif_la_SOURCES) \
 	$(libxorpifmibxif_la_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) $(libclimanagerxif_la_SOURCES) $(libcliprocessorxif_la_SOURCES) $(libcommonxif_la_SOURCES) $(libcoordxif_la_SOURCES) $(libdatainxif_la_SOURCES) $(libfeaclickxif_la_SOURCES) $(libfeafibclientxif_la_SOURCES) $(libfeafibxif_la_SOURCES) $(libfeaifmgrclientxif_la_SOURCES) $(libfeaifmgrmirrorxif_la_SOURCES) $(libfeaifmgrreplicatorxif_la_SOURCES) $(libfeaifmgrxif_la_SOURCES) $(libfearawpkt4_la_SOURCES) $(libfearawpkt4client_la_SOURCES) $(libfib2mribxif_la_SOURCES) $(libfinderclientxif_la_SOURCES) $(libfindereventnotifierxif_la_SOURCES) $(libfindereventobserverxif_la_SOURCES) $(libfinderxif_la_SOURCES) $(libfirewallxif_la_SOURCES) $(libftixif_la_SOURCES) $(libmfeaclientxif_la_SOURCES) $(libmfeaxif_la_SOURCES) $(libmld6igmpclientxif_la_SOURCES) $(libmld6igmpxif_la_SOURCES) $(libospfxif_la_SOURCES) $(libpimxif_la_SOURCES) $(libpolicybackendxif_la_SOURCES) $(libpolicyredist4xif_la_SOURCES) $(libpolicyredist6xif_la_SOURCES) $(libpolicyxif_la_SOURCES) $(libprofileclientxif_la_SOURCES) $(libprofilexif_la_SOURCES) $(libredist4xif_la_SOURCES) $(libredist6xif_la_SOURCES) $(libredisttransaction4xif_la_SOURCES) $(libredisttransaction6xif_la_SOURCES) $(libribclientxif_la_SOURCES) $(libribxif_la_SOURCES) $(libripngxif_la_SOURCES) $(libripxif_la_SOURCES) $(librtrmgr_clientxif_la_SOURCES) $(librtrmgrxif_la_SOURCES) $(libsocket4locatorxif_la_SOURCES) $(libsocket4userxif_la_SOURCES) $(libsocket4xif_la_SOURCES) $(libsocket6locatorxif_la_SOURCES) $(libsocket6userxif_la_SOURCES) $(libsocket6xif_la_SOURCES) $(libstaticroutesxif_la_SOURCES) $(libtestpeerxif_la_SOURCES) $(libtestxif_la_SOURCES) $(libtestxrlsxif_la_SOURCES) $(libxorpifmibxif_la_SOURCES)
+SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) $(libclimanagerxif_la_SOURCES) $(libcliprocessorxif_la_SOURCES) $(libcommonxif_la_SOURCES) $(libcoordxif_la_SOURCES) $(libdatainxif_la_SOURCES) $(libfeaclickxif_la_SOURCES) $(libfeafibclientxif_la_SOURCES) $(libfeafibxif_la_SOURCES) $(libfeaifmgrclientxif_la_SOURCES) $(libfeaifmgrmirrorxif_la_SOURCES) $(libfeaifmgrreplicatorxif_la_SOURCES) $(libfeaifmgrxif_la_SOURCES) $(libfearawpkt4_la_SOURCES) $(libfearawpkt4client_la_SOURCES) $(libfearawpkt6_la_SOURCES) $(libfearawpkt6client_la_SOURCES) $(libfib2mribxif_la_SOURCES) $(libfinderclientxif_la_SOURCES) $(libfindereventnotifierxif_la_SOURCES) $(libfindereventobserverxif_la_SOURCES) $(libfinderxif_la_SOURCES) $(libfirewallxif_la_SOURCES) $(libftixif_la_SOURCES) $(libmfeaclientxif_la_SOURCES) $(libmfeaxif_la_SOURCES) $(libmld6igmpclientxif_la_SOURCES) $(libmld6igmpxif_la_SOURCES) $(libospfxif_la_SOURCES) $(libpimxif_la_SOURCES) $(libpolicybackendxif_la_SOURCES) $(libpolicyredist4xif_la_SOURCES) $(libpolicyredist6xif_la_SOURCES) $(libpolicyxif_la_SOURCES) $(libprofileclientxif_la_SOURCES) $(libprofilexif_la_SOURCES) $(libredist4xif_la_SOURCES) $(libredist6xif_la_SOURCES) $(libredisttransaction4xif_la_SOURCES) $(libredisttransaction6xif_la_SOURCES) $(libribclientxif_la_SOURCES) $(libribxif_la_SOURCES) $(libripngxif_la_SOURCES) $(libripxif_la_SOURCES) $(librtrmgr_clientxif_la_SOURCES) $(librtrmgrxif_la_SOURCES) $(libsocket4locatorxif_la_SOURCES) $(libsocket4userxif_la_SOURCES) $(libsocket4xif_la_SOURCES) $(libsocket6locatorxif_la_SOURCES) $(libsocket6userxif_la_SOURCES) $(libsocket6xif_la_SOURCES) $(libstaticroutesxif_la_SOURCES) $(libtestpeerxif_la_SOURCES) $(libtestxif_la_SOURCES) $(libtestxrlsxif_la_SOURCES) $(libxorpifmibxif_la_SOURCES)
 
 all: all-am
 
@@ -672,6 +689,10 @@ libfearawpkt4.la: $(libfearawpkt4_la_OBJECTS) $(libfearawpkt4_la_DEPENDENCIES)
 	$(CXXLINK)  $(libfearawpkt4_la_LDFLAGS) $(libfearawpkt4_la_OBJECTS) $(libfearawpkt4_la_LIBADD) $(LIBS)
 libfearawpkt4client.la: $(libfearawpkt4client_la_OBJECTS) $(libfearawpkt4client_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libfearawpkt4client_la_LDFLAGS) $(libfearawpkt4client_la_OBJECTS) $(libfearawpkt4client_la_LIBADD) $(LIBS)
+libfearawpkt6.la: $(libfearawpkt6_la_OBJECTS) $(libfearawpkt6_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfearawpkt6_la_LDFLAGS) $(libfearawpkt6_la_OBJECTS) $(libfearawpkt6_la_LIBADD) $(LIBS)
+libfearawpkt6client.la: $(libfearawpkt6client_la_OBJECTS) $(libfearawpkt6client_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfearawpkt6client_la_LDFLAGS) $(libfearawpkt6client_la_OBJECTS) $(libfearawpkt6client_la_LIBADD) $(LIBS)
 libfib2mribxif.la: $(libfib2mribxif_la_OBJECTS) $(libfib2mribxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libfib2mribxif_la_LDFLAGS) $(libfib2mribxif_la_OBJECTS) $(libfib2mribxif_la_LIBADD) $(LIBS)
 libfinderclientxif.la: $(libfinderclientxif_la_OBJECTS) $(libfinderclientxif_la_DEPENDENCIES) 
@@ -775,6 +796,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_ifmgr_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_rawpkt4_client_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_rawpkt4_xif.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_rawpkt6_client_xif.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_rawpkt6_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fib2mrib_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_client_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_event_notifier_xif.Plo@am__quote@

@@ -813,6 +813,7 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/redist_transaction4.xif		\
 		$(INTERFACES_DIR)/redist_transaction6.xif		\
 		$(INTERFACES_DIR)/fea_rawpkt4.xif			\
+		$(INTERFACES_DIR)/fea_rawpkt6.xif			\
 		$(INTERFACES_DIR)/socket4_locator.xif			\
 		$(INTERFACES_DIR)/socket6_locator.xif			\
 		$(INTERFACES_DIR)/profile.xif

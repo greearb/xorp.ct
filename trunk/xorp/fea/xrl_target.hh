@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.43 2004/11/18 14:25:28 bms Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.44 2004/11/29 00:32:03 bms Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -949,7 +949,7 @@ public:
 	const string&	cookie);
 
     //
-    // Raw Socket Server Interface
+    // IPv4 Raw Socket Server Interface
     //
 
     XrlCmdError raw_packet4_0_1_send(
@@ -976,6 +976,30 @@ public:
 	const uint32_t&	proto);
 
     XrlCmdError raw_packet4_0_1_unregister_vif_receiver(
+	// Input values,
+	const string&	router_name,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	proto);
+
+    //
+    // IPv6 Raw Socket Server Interface
+    //
+
+    XrlCmdError raw_packet6_0_1_send_raw(
+	// Input values,
+	const string&		vifname,
+	const vector<uint8_t>&	pktinfo,
+	const vector<uint8_t>&	packet);
+
+    XrlCmdError raw_packet6_0_1_register_vif_receiver(
+	// Input values,
+	const string&	router_name,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	proto);
+
+    XrlCmdError raw_packet6_0_1_unregister_vif_receiver(
 	// Input values,
 	const string&	router_name,
 	const string&	ifname,
