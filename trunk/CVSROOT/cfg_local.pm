@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/cfg_local.pm,v 1.15 2004/07/31 01:08:20 pavlin Exp $
+# $XORP: CVSROOT/cfg_local.pm,v 1.1 2004/08/02 07:06:53 pavlin Exp $
 # $FreeBSD: CVSROOT-src/cfg_local.pm,v 1.27 2004/06/05 10:47:00 des Exp $
 #
 
@@ -37,7 +37,7 @@ $UNEXPAND_RCSID = 1;
 $MAILCMD = "/usr/sbin/sendmail";
 $MAIL_SUBJECT_PREAMBLE = "XORP cvs commit:";
 $MAIL_BRANCH_HDR  = "X-XORP-CVS-Branch";
-$ADD_TO_LINE = 0;
+$ADD_TO_LINE = 1;
 $MAILBANNER = "XORP CVS repository";
 if (defined $ENV{'CVS_COMMIT_ATTRIB'}) {
   my $attrib = $ENV{'CVS_COMMIT_ATTRIB'};
