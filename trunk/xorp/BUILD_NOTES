@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.13 2004/06/17 05:20:52 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.14 2004/06/21 06:35:49 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -93,7 +93,7 @@ gmake check
 	  [ 2004/06/20 22:26:09  ERROR test_pim:31634 LIBCOMM +582 comm_sock.c comm_sock_accept ] Error accepting socket 4: Too many open files
 
       then you should increase the file descriptors limit by
-      "limit descriptors 500" in tcsh or "ulimit -n 400" in sh.
+      "limit descriptors 400" in tcsh or "ulimit -n 400" in sh.
 
 3.4. Linux
 ==========
