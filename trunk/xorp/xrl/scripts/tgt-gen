@@ -209,7 +209,7 @@ def prepare_target_hh(modulename, hh_file):
 """ % (protect(hh_file), protect(hh_file), modulename)
     return s
 
-def output_target_hh(cls, tgt_name, methods):
+def output_target_hh(cls, tgt_name, tgt_version, methods):
     s = """
 class %s {
 protected:
@@ -220,10 +220,11 @@ public:
     virtual ~%s() { remove_handlers(); }
 
     inline const string& name() const { return _cmds->name(); }
+    inline const char* version() const { return "%s/%s"; }
 
 protected:
 
-""" % (cls, cls, cls)
+""" % (cls, cls, cls, tgt_name, tgt_version)
 
     s += target_virtual_fns(methods)
     s += "private:\n"
@@ -306,9 +307,9 @@ def main():
     for tgt in tgts:
         tgt_methods = generate_target_methods(tgt, xp.interfaces())
         cls = "Xrl%sTargetBase" % cpp_classname(tgt.name())
-        hh_txt  += output_target_hh(cls, tgt.name(), tgt_methods)
-        hh_txt  += finish_target_hh(hh_file) 
-        cc_txt  += output_target_cc(cls, tgt.name(), tgt_methods)
+        hh_txt += output_target_hh(cls, tgt.name(), tgt.version(), tgt_methods)
+        hh_txt += finish_target_hh(hh_file) 
+        cc_txt += output_target_cc(cls, tgt.name(), tgt_methods)
         xrl_txt += output_xrls(tgt.name(), tgt_methods)
 
     Xif.util.file_write_string(hh_file, hh_txt)
