@@ -12,15 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.17 2004/10/05 02:24:35 atanu Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.18 2005/02/01 01:53:43 pavlin Exp $"
 
 #include <list>
 #include <string>
 
 #include "rib_module.h"
-#include "config.h"
 
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "libxorp/safe_callback_obj.hh"
+
 #include "libxipc/xrl_router.hh"
 
 #include "xrl/interfaces/redist4_xif.hh"
@@ -191,13 +194,14 @@ AddRoute<A>::dispatch_complete(const XrlError& xe)
 	this->signal_complete_ok();
 	return;
     } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to redistribute route add for %s",
-		   _net.str().c_str());
+	XLOG_ERROR("Failed to redistribute route add for %s: %s",
+		   _net.str().c_str(),
+		   xe.str().c_str());
 	this->signal_complete_ok();
 	return;
     }
     // For now all errors are signalled fatal
-    XLOG_ERROR("Fatal error during route redistribution \"%s\"",
+    XLOG_ERROR("Fatal error during route redistribution: %s",
 	       xe.str().c_str());
 
     this->signal_fatal_failure();
@@ -260,13 +264,14 @@ DeleteRoute<A>::dispatch_complete(const XrlError& xe)
 	this->signal_complete_ok();
 	return;
     } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to redistribute route delete for %s",
-		   _net.str().c_str());
+	XLOG_ERROR("Failed to redistribute route delete for %s: %s",
+		   _net.str().c_str(),
+		   xe.str().c_str());
 	this->signal_complete_ok();
 	return;
     }
     // XXX For now all errors signalled as fatal
-    XLOG_ERROR("Fatal error during route redistribution \"%s\"",
+    XLOG_ERROR("Fatal error during route redistribution: %s",
 	       xe.str().c_str());
     this->signal_fatal_failure();
 }
@@ -317,12 +322,13 @@ StartingRouteDump<A>::dispatch_complete(const XrlError& xe)
 	this->signal_complete_ok();
 	return;
     } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to send starting route dump.");
+	XLOG_ERROR("Failed to send starting route dump: %s",
+		   xe.str().c_str());
 	this->signal_complete_ok();
 	return;
     }
     // XXX For now all errors signalled as fatal
-    XLOG_ERROR("Fatal error during route redistribution \"%s\"",
+    XLOG_ERROR("Fatal error during route redistribution: %s",
 	       xe.str().c_str());
     this->signal_fatal_failure();
 }
@@ -373,12 +379,13 @@ FinishingRouteDump<A>::dispatch_complete(const XrlError& xe)
 	this->signal_complete_ok();
 	return;
     } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to send finishing route dump.");
+	XLOG_ERROR("Failed to send finishing route dump: %s",
+		   xe.str().c_str());
 	this->signal_complete_ok();
 	return;
     }
     // XXX For now all errors signalled as fatal
-    XLOG_ERROR("Fatal error during route redistribution \"%s\"",
+    XLOG_ERROR("Fatal error during route redistribution: %s",
 	       xe.str().c_str());
     this->signal_fatal_failure();
 }
@@ -828,14 +835,14 @@ StartTransaction<A>::dispatch_complete(const XrlError& xe, const uint32_t* tid)
 	this->signal_complete_ok();
 	return;
     } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to start transaction");
+	XLOG_ERROR("Failed to start transaction: %s", xe.str().c_str());
 	p->set_transaction_in_progress(false);
 	p->set_transaction_in_error(true);
 	this->signal_complete_ok();
 	return;
     }
     // For now all errors are signalled fatal
-    XLOG_ERROR("Fatal error during start transaction \"%s\"",
+    XLOG_ERROR("Fatal error during start transaction: %s",
 	       xe.str().c_str());
 
     this->signal_fatal_failure();
@@ -893,12 +900,12 @@ CommitTransaction<A>::dispatch_complete(const XrlError& xe)
 	this->signal_complete_ok();
 	return;
     } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to commit transaction");
+	XLOG_ERROR("Failed to commit transaction: %s", xe.str().c_str());
 	this->signal_complete_ok();
 	return;
     }
     // For now all errors are signalled fatal
-    XLOG_ERROR("Fatal error during commit transaction \"%s\"",
+    XLOG_ERROR("Fatal error during commit transaction: %s",
 	       xe.str().c_str());
 
     this->signal_fatal_failure();
@@ -956,12 +963,12 @@ AbortTransaction<A>::dispatch_complete(const XrlError& xe)
 	this->signal_complete_ok();
 	return;
     } else if (xe == XrlError::COMMAND_FAILED()) {
-	XLOG_ERROR("Failed to abort transaction");
+	XLOG_ERROR("Failed to abort transaction: %s", xe.str().c_str());
 	this->signal_complete_ok();
 	return;
     }
     // For now all errors are signalled fatal
-    XLOG_ERROR("Fatal error during abort transaction \"%s\"",
+    XLOG_ERROR("Fatal error during abort transaction: %s",
 	       xe.str().c_str());
 
     this->signal_fatal_failure();
