@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.7 2003/05/14 18:32:17 jcardona Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.8 2003/05/14 19:27:56 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -29,6 +29,7 @@ noinst_LIBRARIES += libribbase.a
 noinst_LIBRARIES += libribclientbase.a
 noinst_LIBRARIES += librtrmgrbase.a
 noinst_LIBRARIES += libtestbase.a
+noinst_LIBRARIES += libtestfindereventsbase.a
 noinst_LIBRARIES += libtestpeerbase.a
 noinst_LIBRARIES += libxorpshbase.a
 
@@ -125,7 +126,7 @@ $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rib.xif
 
-# RIBCLIENT
+# RIB client
 libribclientbase_a_SOURCES = ribclient_base.hh ribclient_base.cc
 $(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
 		$(INTERFACES_DIR)/rib_client.xif
@@ -136,13 +137,20 @@ $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr.xif
 
+# Test finder events
+libtestfindereventsbase_a_SOURCES  = test_finder_events_base.hh
+libtestfindereventsbase_a_SOURCES += test_finder_events_base.cc
+$(srcdir)/test_finder_events_base.hh $(srcdir)/test_finder_events_base.hh: \
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif
+
 # TEST PEER
 libtestpeerbase_a_SOURCES = test_peer_base.hh test_peer_base.cc
 $(srcdir)/test_peer_base.hh $(srcdir)/test_peer_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
 
-# XORPSH
+# Xorpsh
 libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
 $(srcdir)/xorpsh_base.hh $(srcdir)/xorpsh_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
@@ -174,7 +182,8 @@ TGTGEN_PY=$(SCRIPT_DIR)/tgt-gen
 
 # If this code is commented out, please upgrade to python2.0 or above.
 
-@PY_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc $(srcdir)/%.xrls: $(srcdir)/%.tgt $(TGTGEN_PY)
+@PY_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc %_base.hh %_base.cc	\
+@PY_BUILD@$(srcdir)/%.xrls: $(srcdir)/%.tgt $(TGTGEN_PY)
 @PY_BUILD@	$(PYTHON) $(TGTGEN_PY) -I$(INTERFACES_DIR) $<
 
 
