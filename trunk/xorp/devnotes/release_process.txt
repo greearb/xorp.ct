@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.13 2003/10/17 00:58:27 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.14 2003/11/07 01:04:35 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -203,7 +203,9 @@ the login shell is csh or tcsh):
 	COMMANDS:
  # In the command below, if the new release is, say, 0.5,
  # then $ReleaseTag must be RELEASE_0_5
- # The release tag is defined in the third line below:
+ # The release tag is defined in the third command below.
+ # If you make a mistake and you need to re-tag, then use flag -F after "rtag"
+ # to move the tag.
  cd xorp
  cvs update VERSION
  setenv ReleaseTag RELEASE_`cat VERSION | sed 'y/./_/' | sed 'y/-/_/'`
