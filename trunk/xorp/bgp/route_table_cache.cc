@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.26 2004/05/06 00:29:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.27 2004/05/15 15:12:15 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -274,6 +274,7 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	const SubnetRoute<A> *existing_route = iter.payload().route();
 	uint32_t existing_genid = iter.payload().genid();
 	XLOG_ASSERT(rtmsg.genid() == existing_genid);
+	XLOG_ASSERT(rtmsg.route()->nexthop() == existing_route->nexthop());
 	debug_msg("Found cached route: %s\n", existing_route->str().c_str());
 
 	//Delete it from our cache trie.  The actual deletion will
