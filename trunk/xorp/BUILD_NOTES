@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.10 2004/06/14 23:25:33 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.11 2004/06/14 23:35:20 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -83,13 +83,12 @@ gmake check
       tests fail.
     - The default datasize limit per user may not be sufficient to compile
       some parts of the code, hence you may need to increase the datasize
-      limit.  If you see a similar compilation error:
-	  nm: Cannot allocate memory
-	  collect2: /usr/bin/nm returned 1 exit status
-      then you can run "limit datasize 200000" in tcsh
+      limit.  If you see a compilation error like:
+	  /usr/bin/ld: final link failed: Memory exhausted
+	  collect2: ld returned 1 exit status
+      then you should run "limit datasize 200000" in tcsh
       or "ulimit -d 200000" in sh. If necessary, increase further the
       the datasize limit.
-
 
 3.4. Linux
 ==========
