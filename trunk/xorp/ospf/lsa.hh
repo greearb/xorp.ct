@@ -468,7 +468,7 @@ class RouterLsa : public Lsa {
 	    return 20;
 	    break;
 	case OspfTypes::V3:
-	    return 24;
+	    return 20;
 	    break;
 	}
 	XLOG_UNREACHABLE();
