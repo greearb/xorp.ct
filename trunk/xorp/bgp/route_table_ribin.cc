@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.5 2003/01/16 23:18:58 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.6 2003/01/17 03:50:48 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -267,6 +267,7 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 
     if (dump_iter.route_iterator_is_valid()) {
 	debug_msg("route_iterator is valid\n");
+#if 0
 	if (_table_version == dump_iter.rib_version()) {
 	    debug_msg("no change to RIB\n");
 	    // no deletions have occured since we were last here so the
@@ -281,10 +282,12 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 	    route_iterator = _route_table->lower_bound(dump_iter.net());
 	    dump_iter.set_rib_version(_table_version);
 	}
+#endif
+	route_iterator =  dump_iter.route_iterator();
     } else {
 	debug_msg("route_iterator is not valid\n");
 	route_iterator = _route_table->begin();
-	dump_iter.set_rib_version(_table_version);
+	//dump_iter.set_rib_version(_table_version);
     }
 
     if (route_iterator == _route_table->end()) {
@@ -308,7 +311,7 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
     dump_iter.set_route_iterator(route_iterator);
     if (route_iterator == _route_table->end())
 	return false;
-    dump_iter.set_route_iterator_net(route_iterator.payload().net());
+    //    dump_iter.set_route_iterator_net(route_iterator.payload().net());
     return true;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.2 2003/01/16 23:18:57 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -56,7 +56,7 @@ DumpIterator<A>::DumpIterator<A>(
     debug_msg("Peers to dump has %d members\n", ctr);
     _current_peer = _peers_to_dump.begin();
     _route_iterator_is_valid = false;
-    _rib_version = 0;
+    //    _rib_version = 0;
     _routes_dumped_on_current_peer = false;
 }
 

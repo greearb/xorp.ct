@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/attribute_manager.hh,v 1.12 2002/12/09 18:28:40 hodson Exp $
+// $XORP: xorp/bgp/attribute_manager.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_ATTRIBUTE_MANAGER_HH__
 #define __BGP_ATTRIBUTE_MANAGER_HH__
@@ -24,13 +24,13 @@ template <class A>
 class StoredAttributeList {
 public:
     StoredAttributeList(const PathAttributeList<A> *att) {
-	_attribute = att;
+	_attribute_list = att;
 	_references = 1;
     }
 
     ~StoredAttributeList() {
 	if (_references == 0) {
-	    delete _attribute;
+	    delete _attribute_list;
 	}
     }
 
@@ -38,13 +38,13 @@ public:
     void increase() { _references++; }
     void decrease() { _references--; }
     void clone_data() {
-	_attribute = new PathAttributeList<A>(*_attribute);
+	_attribute_list = new PathAttributeList<A>(*_attribute_list);
     }
-    const PathAttributeList<A> *attribute() const { return _attribute; }
-    const uint8_t* hash() const { return _attribute->hash(); }
+    const PathAttributeList<A> *attribute() const { return _attribute_list; }
+    const uint8_t* hash() const { return _attribute_list->hash(); }
     bool operator<(const StoredAttributeList<A>& them) const;
 private:
-    const PathAttributeList<A> *_attribute;
+    const PathAttributeList<A> *_attribute_list;
     int _references;
 };
 

@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.3 2002/12/17 22:06:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.4 2003/01/17 06:01:03 mjh Exp $"
 
+//#define DEBUG_LOGGING
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
@@ -125,7 +126,10 @@ DumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     debug_msg("DumpTable<A>::route_dump %s\n", rtmsg.net().str().c_str());
     /* turn the route_dump into a route_add */
     _dump_iter.route_dump(rtmsg);
-    return _next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
+    _dumped++;
+    int result = _next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
+    _next_table->push((BGPRouteTable<A>*)this);
+    return result;
 }
 
 /*
@@ -266,8 +270,8 @@ DumpTable<A>::do_next_route_dump()
 	cp(24);
     }
 
-    if (_dump_iter.route_iterator_is_valid())
-	debug_msg("dump route with net %p\n", _dump_iter.net().str().c_str());
+    //    if (_dump_iter.route_iterator_is_valid())
+    //	debug_msg("dump route with net %p\n", _dump_iter.net().str().c_str());
     if (_parent->dump_next_route(_dump_iter) == false) {
 	cp(25);
 	if (_dump_iter.next_peer() == false) {

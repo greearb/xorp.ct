@@ -97,6 +97,8 @@ Local Preference Attribute - 100
 
 
 [** TABLE DebugTable-D3 **]
+[PUSH]
+[** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
 SubnetRoute:
@@ -107,6 +109,8 @@ AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
 [** TABLE DebugTable-D2 **]
@@ -231,6 +235,8 @@ Local Preference Attribute - 100
 
 
 [** TABLE DebugTable-D3 **]
+[PUSH]
+[** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
 SubnetRoute:
@@ -241,6 +247,8 @@ AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
@@ -253,6 +261,8 @@ Local Preference Attribute - 100
 
 
 [** TABLE DebugTable-D3 **]
+[PUSH]
+[** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
 SubnetRoute:
@@ -263,6 +273,8 @@ AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
 [** TABLE DebugTable-D2 **]
@@ -440,6 +452,8 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [** TABLE DebugTable-D1 **]
 [DELETE]
 SubnetRoute:
@@ -475,6 +489,8 @@ AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
 [** TABLE DebugTable-D3 **]
@@ -569,6 +585,8 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] ONE EVENT RUN
 [comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
@@ -583,6 +601,8 @@ AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] PEER 2 GOES DOWN
 [** TABLE DebugTable-D1 **]
@@ -710,6 +730,8 @@ AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [** TABLE DebugTable-D2 **]
 [DELETE]
 SubnetRoute:
@@ -807,6 +829,8 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] PEER 2 GOES DOWN
 [** TABLE DebugTable-D1 **]
@@ -936,6 +960,8 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [** TABLE DebugTable-D1 **]
 [DELETE]
 SubnetRoute:
@@ -1140,6 +1166,8 @@ AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] ONE EVENT RUN
 [comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
@@ -1154,6 +1182,8 @@ AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] ONE EVENT RUN
 [comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
@@ -1168,6 +1198,8 @@ AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [comment] EXPECT RECEIVED BY PEER 1
@@ -1227,6 +1259,8 @@ Local Preference Attribute - 100
 
 
 [** TABLE DebugTable-D3 **]
+[PUSH]
+[** TABLE DebugTable-D3 **]
 [ADD]
 PUSH flag is set
 SubnetRoute:
@@ -1237,6 +1271,8 @@ AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2
@@ -1483,6 +1519,8 @@ AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] ONE EVENT RUN
 [comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
@@ -1497,6 +1535,8 @@ AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [comment] EXPECT REPLACE AT PEER 1
@@ -1579,6 +1619,8 @@ AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
 Local Preference Attribute - 100
 
 
+[** TABLE DebugTable-D3 **]
+[PUSH]
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2

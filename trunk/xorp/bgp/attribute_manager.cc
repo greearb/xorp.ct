@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.2 2003/01/16 23:18:57 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -22,9 +22,7 @@ template <class A>
 bool
 StoredAttributeList<A>::operator<(const StoredAttributeList<A>& them) const
 {
-    if (memcmp(hash(), them.hash(), 16) < 0)
-	return true;
-    return false;
+    return (memcmp(hash(), them.hash(), 16) < 0);
 }
 
 template <class A>
