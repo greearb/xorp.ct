@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.2 2003/01/08 21:59:58 hodson Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.3 2003/03/10 23:20:18 hodson Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -377,15 +377,6 @@ public:
 	const string&	ifname,
 	const string&	vifname);
 
-    XrlCmdError fti_0_1_delete_entry4(
-	// Input values,
-	const uint32_t&	tid,
-	const IPv4Net&	dst);
-
-    XrlCmdError fti_0_1_delete_all_entries4(
-	// Input values,
-	const uint32_t&	tid);
-
     XrlCmdError fti_0_1_add_entry6(
 	// Input values,
 	const uint32_t&	tid,
@@ -394,16 +385,25 @@ public:
 	const string&	ifname,
 	const string&	vifname);
 
+    XrlCmdError fti_0_1_delete_entry4(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv4Net&	dst);
+
     XrlCmdError fti_0_1_delete_entry6(
 	// Input values,
 	const uint32_t&	tid,
 	const IPv6Net&	dst);
 
-    XrlCmdError fti_0_1_delete_all_entries6(
+    XrlCmdError fti_0_1_delete_all_entries(
 	// Input values,
 	const uint32_t&	tid);
 
-    XrlCmdError fti_0_1_delete_all_entries(
+    XrlCmdError fti_0_1_delete_all_entries4(
+	// Input values,
+	const uint32_t&	tid);
+
+    XrlCmdError fti_0_1_delete_all_entries6(
 	// Input values,
 	const uint32_t&	tid);
 
@@ -416,20 +416,20 @@ public:
 	string&		ifname,
 	string&		vifname);
 
-    XrlCmdError fti_0_1_lookup_entry4(
-	// Input values,
-	const IPv4Net&	dst,
-	// Output values,
-	IPv4&		gateway,
-	string&		ifname,
-	string&		vifname);
-
     XrlCmdError fti_0_1_lookup_route6(
 	// Input values,
 	const IPv6&	host,
 	// Output values,
 	IPv6Net&	netmask,
 	IPv6&		gateway,
+	string&		ifname,
+	string&		vifname);
+
+    XrlCmdError fti_0_1_lookup_entry4(
+	// Input values,
+	const IPv4Net&	dst,
+	// Output values,
+	IPv4&		gateway,
 	string&		ifname,
 	string&		vifname);
 

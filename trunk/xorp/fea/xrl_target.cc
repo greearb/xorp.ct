@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.4 2003/03/10 23:20:18 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.5 2003/03/14 23:20:54 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -778,6 +778,24 @@ XrlFeaTarget::fti_0_1_add_entry4(
 }
 
 XrlCmdError
+XrlFeaTarget::fti_0_1_add_entry6(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv6Net&	dst,
+	const IPv6&	gw,
+	const string&	ifname,
+	const string&	vifname)
+{
+    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // memory here is handed it to to manage.
+    FtiTransactionManager::Operation op(
+	new FtiAddEntry6(_xftm.fti(), dst, gw, ifname, vifname)
+	);
+
+    return _xftm.add(tid, op);
+}
+
+XrlCmdError
 XrlFeaTarget::fti_0_1_delete_entry4(
 	// Input values,
 	const uint32_t&	tid,
@@ -787,6 +805,35 @@ XrlFeaTarget::fti_0_1_delete_entry4(
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
 	new FtiDeleteEntry4(_xftm.fti(), dst)
+	);
+    return _xftm.add(tid, op);
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_1_delete_entry6(
+	// Input values,
+	const uint32_t&	tid,
+	const IPv6Net&	dst)
+{
+    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // memory here is handed it to to manage.
+    FtiTransactionManager::Operation op(
+	new FtiDeleteEntry6(_xftm.fti(), dst)
+	);
+
+    return _xftm.add(tid, op);
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_1_delete_all_entries(
+	// Input values,
+	const uint32_t&	tid)
+{
+    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // memory here is handed it to to manage.
+
+    FtiTransactionManager::Operation op(
+	new FtiDeleteAllEntries(_xftm.fti())
 	);
     return _xftm.add(tid, op);
 }
@@ -806,6 +853,21 @@ XrlFeaTarget::fti_0_1_delete_all_entries4(
 }
 
 XrlCmdError
+XrlFeaTarget::fti_0_1_delete_all_entries6(
+	// Input values,
+	const uint32_t&	tid)
+{
+    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // memory here is handed it to to manage.
+
+    FtiTransactionManager::Operation op(
+	new FtiDeleteAllEntries6(_xftm.fti())
+	);
+
+    return _xftm.add(tid, op);
+}
+
+XrlCmdError
 XrlFeaTarget::fti_0_1_lookup_route4(
 	// Input values,
 	const IPv4&	dst,
@@ -817,6 +879,27 @@ XrlFeaTarget::fti_0_1_lookup_route4(
 {
     Fte4 fte;
     if (_xftm.fti().lookup_route4(dst, fte)) {
+	netmask = fte.net();
+	gateway = fte.gateway();
+	ifname = fte.ifname();
+	vifname = fte.vifname();
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED("No route for " + dst.str());
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_1_lookup_route6(
+	// Input values,
+	const IPv6&	dst,
+	// Output values,
+	IPv6Net&	netmask,
+	IPv6&		gateway,
+	string&		ifname,
+	string&		vifname)
+{
+    Fte6 fte;
+    if (_xftm.fti().lookup_route6(dst, fte)) {
 	netmask = fte.net();
 	gateway = fte.gateway();
 	ifname = fte.ifname();
@@ -846,75 +929,6 @@ XrlFeaTarget::fti_0_1_lookup_entry4(
 }
 
 XrlCmdError
-XrlFeaTarget::fti_0_1_add_entry6(
-	// Input values,
-	const uint32_t&	tid,
-	const IPv6Net&	dst,
-	const IPv6&	gw,
-	const string&	ifname,
-	const string&	vifname)
-{
-    // FtiTransactionManager::Operation is a ref_ptr object, allocated
-    // memory here is handed it to to manage.
-    FtiTransactionManager::Operation op(
-	new FtiAddEntry6(_xftm.fti(), dst, gw, ifname, vifname)
-	);
-
-    return _xftm.add(tid, op);
-}
-
-XrlCmdError
-XrlFeaTarget::fti_0_1_delete_entry6(
-	// Input values,
-	const uint32_t&	tid,
-	const IPv6Net&	dst)
-{
-    // FtiTransactionManager::Operation is a ref_ptr object, allocated
-    // memory here is handed it to to manage.
-    FtiTransactionManager::Operation op(
-	new FtiDeleteEntry6(_xftm.fti(), dst)
-	);
-
-    return _xftm.add(tid, op);
-}
-
-XrlCmdError
-XrlFeaTarget::fti_0_1_delete_all_entries6(
-	// Input values,
-	const uint32_t&	tid)
-{
-    // FtiTransactionManager::Operation is a ref_ptr object, allocated
-    // memory here is handed it to to manage.
-
-    FtiTransactionManager::Operation op(
-	new FtiDeleteAllEntries6(_xftm.fti())
-	);
-
-    return _xftm.add(tid, op);
-}
-
-XrlCmdError
-XrlFeaTarget::fti_0_1_lookup_route6(
-	// Input values,
-	const IPv6&	dst,
-	// Output values,
-	IPv6Net&	netmask,
-	IPv6&		gateway,
-	string&		ifname,
-	string&		vifname)
-{
-    Fte6 fte;
-    if (_xftm.fti().lookup_route6(dst, fte)) {
-	netmask = fte.net();
-	gateway = fte.gateway();
-	ifname = fte.ifname();
-	vifname = fte.vifname();
-	return XrlCmdError::OKAY();
-    }
-    return XrlCmdError::COMMAND_FAILED("No route for " + dst.str());
-}
-
-XrlCmdError
 XrlFeaTarget::fti_0_1_lookup_entry6(
 	// Input values,
 	const IPv6Net&	dst,
@@ -931,20 +945,6 @@ XrlFeaTarget::fti_0_1_lookup_entry6(
 	return XrlCmdError::OKAY();
     }
     return XrlCmdError::COMMAND_FAILED("No entry for " + dst.str());
-}
-
-XrlCmdError
-XrlFeaTarget::fti_0_1_delete_all_entries(
-	// Input values,
-	const uint32_t&	tid)
-{
-    // FtiTransactionManager::Operation is a ref_ptr object, allocated
-    // memory here is handed it to to manage.
-
-    FtiTransactionManager::Operation op(
-	new FtiDeleteAllEntries(_xftm.fti())
-	);
-    return _xftm.add(tid, op);
 }
 
 // ----------------------------------------------------------------------------
