@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.24 2003/10/28 21:01:36 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.25 2003/10/29 16:22:51 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -65,6 +65,7 @@ enum Notify {
 #define		UNSUPOPTPAR  4		// Unsupported Optional Parameter
 #define		AUTHFAIL     5		// Authentication Failure
 #define		UNACCEPTHOLDTIME 6	// Unacceptable Hold Time
+#define		UNSUPCAPABILITY	7	// Unsupported Capability (RFC 3392)
     UPDATEMSGERR = 3,		// UPDATE Message Error
 #define		MALATTRLIST  1		// Malformed Attribute List
 #define		UNRECOGWATTR 2		// Unrecognized Well-known Attribute

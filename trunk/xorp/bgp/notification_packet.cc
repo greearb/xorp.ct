@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.14 2003/08/27 02:08:14 atanu Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.15 2003/10/03 00:26:58 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -207,6 +207,9 @@ NotificationPacket::pretty_print_error_code(const int error, const int subcode,
 	    break;
 	case UNACCEPTHOLDTIME:
 	    s += "Unacceptable Hold Time.";
+	    break;
+	case UNSUPCAPABILITY:
+	    s += "Unsuported Capability";
 	    break;
 	}
 	break;
