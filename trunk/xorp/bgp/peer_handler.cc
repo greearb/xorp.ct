@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.13 2003/04/22 19:20:17 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.14 2003/05/23 00:02:06 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -91,48 +91,117 @@ int
 PeerHandler::process_update_packet(const UpdatePacket *p)
 {
     debug_msg("Processing packet\n %s\n", p->str().c_str());
-    // The way multiprotocol BGP works, the routes from the Withdrawn
-    // Routes part of the update packet can only be IPv4 routes.  IPv6
-    // withdrawn routes would be in an MP_UNREACH_NLRI attribute.
-    BGPUpdateAttribList::const_iterator wi;
-    wi = p->wr_list().begin();
-    while (wi != p->wr_list().end()) {
-	_plumbing->delete_route(wi->net(), this);
-	++wi;
-    }
 
-    if (p->nlri_list().empty()) {
-	_plumbing->push(this);
-	return 0;
-    }
+    /*
+    ** Loop through the path attributes:
+    **
+    ** 1) Find IPv6 Unicast MP_REACH_NLRI.
+    ** 2) Find IPv6 Unicast MP_UNREACH_NLRI.
+    ** 3) Construct two common path attribute lists (IPv4 and IPv6).
+    **
+    ** XXX
+    ** A single update packet can contain both IPv4 and IPv6
+    ** NLRIs. Each NLRI is sent through as a separate IPv4 or IPv6
+    ** subnet route. All the subnet routes that win the decision
+    ** process, arrive at the RibOut, and an attempt is made to build
+    ** a single update packet. Because we separate IPv4 and IPv6 a
+    ** single update packet carrying both will never be generated. 
+    */
+    
+    PathAttributeList<IPv4> pa_list4;
+    PathAttributeList<IPv6> pa_list6;
 
-    PathAttributeList<IPv4> pa_list;
+    MPReachNLRIAttribute<IPv6> *mpreach = 0;
+    MPUNReachNLRIAttribute<IPv6> *mpunreach = 0;
 
     list <PathAttribute*>::const_iterator pai;
-    pai = p->pa_list().begin();
-    while (pai != p->pa_list().end()) {
+    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
 	const PathAttribute* pa;
 	pa = *pai;
-	pa_list.add_path_attribute(*pa);
-	++pai;
+	
+	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
+	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
+	    const IPv6NextHopAttribute nh6(mpreach->nexthop());
+	    pa_list6.add_path_attribute(nh6);
+	    continue;
+	}
+	
+	if (dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai)) {
+	    mpunreach = dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai);
+	    continue;
+	}
+
+	pa_list4.add_path_attribute(*pa);
+
+	/*
+	** Don't put the IPv4 next hop in here.
+	*/
+	if (NEXT_HOP != pa->type())
+	    pa_list6.add_path_attribute(*pa);
     }
-    pa_list.rehash();
-    assert(pa_list.complete());
-    debug_msg("Built path attribute list: %s\n", pa_list.str().c_str());
 
+    /*
+    ** IPv4 Withdraws
+    */
+    if (!p->wr_list().empty()) {
+	BGPUpdateAttribList::const_iterator wi;
+	wi = p->wr_list().begin();
+	while (wi != p->wr_list().end()) {
+	    _plumbing->delete_route(wi->net(), this);
+	    ++wi;
+	}
+    }
 
-    // The way multiprotocol BGP works, the routes from the NLRI part
-    // of the update packet can only be IPv4 routes.  IPv6 withdrawn
-    // routes would be in an MP_REACH_NLRI attribute.
-    BGPUpdateAttribList::const_iterator ni;
-    ni = p->nlri_list().begin();
-    while (ni != p->nlri_list().end()) {
-	SubnetRoute<IPv4>* msg_route 
-	    = new SubnetRoute<IPv4>(ni->net(), &pa_list, NULL);
-	InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
-	_plumbing->add_route(msg, this);
-	msg_route->unref();
-	++ni;
+    /*
+    ** IPv6 Withdraws
+    */
+    if (mpunreach) {
+	list<IPNet<IPv6> >::const_iterator wi6;
+	wi6 = mpunreach->wr_list().begin();
+	while (wi6 != mpunreach->wr_list().end()) {
+	    _plumbing->delete_route(*wi6, this);
+	    ++wi6;
+	}
+    }
+
+    /*
+    ** IPv4 Route add.
+    */
+    if (!p->nlri_list().empty()) {
+	pa_list4.rehash();
+	XLOG_ASSERT(pa_list4.complete());
+	debug_msg("Built path attribute list: %s\n", pa_list4.str().c_str());
+
+	BGPUpdateAttribList::const_iterator ni4;
+	ni4 = p->nlri_list().begin();
+	while (ni4 != p->nlri_list().end()) {
+	    SubnetRoute<IPv4>* msg_route 
+		= new SubnetRoute<IPv4>(ni4->net(), &pa_list4, NULL);
+	    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
+	    _plumbing->add_route(msg, this);
+	    msg_route->unref();
+	    ++ni4;
+	}
+    }
+
+    /*
+    ** IPv6 Route add.
+    */
+    if (mpreach) {
+	pa_list6.rehash();
+	XLOG_ASSERT(pa_list6.complete());
+	debug_msg("Built path attribute list: %s\n", pa_list6.str().c_str());
+
+	list<IPNet<IPv6> >::const_iterator ni6;
+	ni6 = mpreach->nlri_list().begin();
+	while (ni6 != mpreach->nlri_list().end()) {
+	    SubnetRoute<IPv6>* msg_route 
+		= new SubnetRoute<IPv6>(*ni6, &pa_list6, NULL);
+	    InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
+	    _plumbing->add_route(msg, this);
+	    msg_route->unref();
+	    ++ni6;
+	}
     }
 
     _plumbing->push(this);

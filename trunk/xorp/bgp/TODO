@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.3 2002/12/13 01:35:45 pavlin Exp $
+# $XORP: xorp/bgp/TODO,v 1.4 2003/08/28 17:17:45 atanu Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -43,6 +43,12 @@ that were meant for the previous session. This problem can be
 reproduced by running "test_peering2.sh" with the "-b" flag.
 
 -- added 2003-08-28 by AG
+
+30) An incoming update packet carrying both IPv4 and IPv6 NLRI in the
+current code will always generate a separate IPv4 and IPv6
+packet. This is not good.
+
+-- added 2003-09--2 by AG
 
 ------------------------------ DONE -----------------------------
 1) Holdtimers in from milliseconds to seconds in config files. Plus
