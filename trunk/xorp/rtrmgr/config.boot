@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot,v 1.11 2003/11/17 22:11:51 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot,v 1.12 2003/11/21 02:06:03 pavlin Exp $ */
 
 /* router config file for tinderbox test on xorp8 */ 
 
@@ -18,6 +18,20 @@ interfaces {
     }
   }
 }
+
+/*
+protocols {
+  static_routes {
+    route4 10.10.0.0/16 {
+      nexthop: 192.150.187.108
+    }
+    route4 10.20.0.0/16 {
+      nexthop: 192.150.187.108
+      metric: 10
+    }
+  }
+}
+*/
 
 /*
 protocols {
