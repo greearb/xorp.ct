@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.74 2005/03/18 00:14:05 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.75 2005/03/18 01:16:57 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -331,7 +331,7 @@ XrlPimNode::mfea_register_startup()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again.
+	// If an error, then try again
 	//
 	_mfea_register_startup_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
@@ -437,7 +437,7 @@ XrlPimNode::mfea_register_shutdown()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again.
+	// If an error, then try again
 	//
 	_mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
@@ -591,7 +591,7 @@ XrlPimNode::send_mfea_add_delete_protocol()
     if (! success) {
 	if (is_add) {
 	    //
-	    // If an error, then start a timer to try again
+	    // If an error, then try again
 	    //
 	    XLOG_ERROR("Failed to add protocol with the MFEA. "
 		       "Will try again.");
@@ -621,7 +621,7 @@ XrlPimNode::mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_error)
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then send the next change
+	// If success, then schedule the next task
 	//
 	if (is_add) {
 	    _is_mfea_add_protocol_registered = true;
@@ -723,7 +723,7 @@ XrlPimNode::send_mfea_allow_signal_messages()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again
+	// If an error, then try again
 	//
 	XLOG_ERROR("Failed to enable the receiving of kernel signal messages "
 		   "with the MFEA. "
@@ -747,7 +747,7 @@ XrlPimNode::mfea_client_send_allow_signal_messages_cb(
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then we are done
+	// If success, then schedule the next task
 	//
 	_is_mfea_allow_signal_messages_registered = true;
 	PimNode::decr_startup_requests_n();
@@ -833,7 +833,7 @@ XrlPimNode::rib_register_startup()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again.
+	// If an error, then try again
 	//
 	_rib_register_startup_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
@@ -940,7 +940,7 @@ XrlPimNode::rib_register_shutdown()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again.
+	// If an error, then try again
 	//
 	_rib_register_shutdown_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
@@ -1054,7 +1054,7 @@ XrlPimNode::send_rib_redist_transaction_enable()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again
+	// If an error, then try again
 	//
 	XLOG_ERROR("Failed to enable receiving MRIB information from the RIB. "
 		   "Will try again.");
@@ -1369,9 +1369,9 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
     }
 
     if (! success) {
-        //
-        // If an error, then start a timer to try again
-        //
+	//
+	// If an error, then try again
+	//
 	XLOG_ERROR("Failed to %s protocol vif %s with the MFEA. "
 		   "Will try again.",
 		   (is_start)? "start" : "stop",
@@ -1397,7 +1397,7 @@ XrlPimNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then send the next change
+	// If success, then schedule the next task
 	//
 	if (is_start)
 	    PimNode::decr_startup_requests_n();
@@ -1599,9 +1599,9 @@ XrlPimNode::send_join_leave_multicast_group()
     }
 
     if (! success) {
-        //
-        // If an error, then start a timer to try again
-        //
+	//
+	// If an error, then try again
+	//
 	XLOG_ERROR("Failed to %s group %s on vif %s with the MFEA. "
 		   "Will try again.",
 		   (is_join)? "join" : "leave",
@@ -1630,7 +1630,7 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then send the next change
+	// If success, then schedule the next task
 	//
 	if (is_join)
 	    PimNode::decr_startup_requests_n();
@@ -1807,9 +1807,9 @@ XrlPimNode::send_add_delete_mfc()
     }
 
     if (! success) {
-        //
-        // If an error, then start a timer to try again
-        //
+	//
+	// If an error, then try again
+	//
 	XLOG_ERROR("Failed to %s MFC entry for (%s,%s) with the MFEA. "
 		   "Will try again.",
 		   (is_add)? "add" : "delete",
@@ -1835,7 +1835,7 @@ XrlPimNode::mfea_client_send_add_delete_mfc_cb(
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then send the next change
+	// If success, then schedule the next task
 	//
 	pop_xrl_task();
 	send_xrl_task();
@@ -2087,9 +2087,9 @@ XrlPimNode::send_add_delete_dataflow_monitor()
     }
 
     if (! success) {
-        //
-        // If an error, then start a timer to try again
-        //
+	//
+	// If an error, then try again
+	//
 	XLOG_ERROR("Failed to %s dataflow entry for (%s,%s) with the MFEA. "
 		   "Will try again.",
 		   (is_delete_all)? "delete all" : (is_add)? "add" : "delete",
@@ -2116,7 +2116,7 @@ XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then send the next change
+	// If success, then schedule the next task
 	//
 	pop_xrl_task();
 	send_xrl_task();
@@ -2304,9 +2304,9 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
     }
 
     if (! success) {
-        //
-        // If an error, then start a timer to try again
-        //
+	//
+	// If an error, then try again
+	//
 	XLOG_ERROR("Cannot %s vif %s with the MLD6IGMP. "
 		   "Will try again.",
 		   (is_add)? "add" : "delete",
@@ -2327,7 +2327,7 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then send the next change
+	// If success, then schedule the next task
 	//
 	if (is_add)
 	    PimNode::decr_startup_requests_n();
@@ -2446,7 +2446,7 @@ XrlPimNode::schedule_add_protocol_mld6igmp()
  * the TTL will be set by the lower layers.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * the TOS will be set by the lower layers.
- * @router_alert_bool: If true, the Router Alert IP option for the IP
+ * @is_router_alert: If true, the Router Alert IP option for the IP
  * packet of the incoming message should be set.
  * @sndbuf: The data buffer with the message to send.
  * @sndlen: The data length in @sndbuf.
@@ -2457,97 +2457,147 @@ XrlPimNode::schedule_add_protocol_mld6igmp()
  **/
 int
 XrlPimNode::proto_send(const string& dst_module_instance_name,
-		       xorp_module_id	, // dst_module_id,
+		       xorp_module_id dst_module_id,
 		       uint16_t vif_index,
 		       const IPvX& src,
 		       const IPvX& dst,
 		       int ip_ttl,
 		       int ip_tos,
-		       bool router_alert_bool,
+		       bool is_router_alert,
 		       const uint8_t *sndbuf,
 		       size_t sndlen)
 {
+    add_task(new SendProtocolMessage(*this,
+				     dst_module_instance_name,
+				     dst_module_id,
+				     vif_index,
+				     src,
+				     dst,
+				     ip_ttl,
+				     ip_tos,
+				     is_router_alert,
+				     sndbuf,
+				     sndlen));
+
+    return (XORP_OK);
+}
+
+/**
+ * Send a protocol message through the FEA/MFEA.
+ **/
+void
+XrlPimNode::send_protocol_message()
+{
     bool success = true;
-    PimVif *pim_vif = PimNode::vif_find_by_vif_index(vif_index);
+    PimVif *pim_vif = NULL;
 
     if (! _is_finder_alive)
-	return (XORP_ERROR);	// The Finder is dead
+	return;		// The Finder is dead
 
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    SendProtocolMessage* entry;
+
+    entry = dynamic_cast<SendProtocolMessage*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
+    uint16_t vif_index = entry->vif_index();
+
+    //
+    // Check whether we have already registered with the MFEA
+    //
+    if (! _is_mfea_add_protocol_registered) {
+	retry_xrl_task();
+	return;
+    }
+
+    pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL) {
 	XLOG_ERROR("Cannot send a protocol message on vif with vif_index %d: "
 		   "no such vif",
 		   vif_index);
-	return (XORP_ERROR);
+	pop_xrl_task();
+	retry_xrl_task();
+	return;
     }
 
-    if (! _is_mfea_alive) {
-	XLOG_ERROR("Cannot send a protocol message on vif %s: "
-		   "the MFEA is down",
-		   pim_vif->name().c_str());
-	return (XORP_ERROR);	// The MFEA is dead
-    }
+    //
+    // Send the protocol message
+    //
+    do {
+	if (PimNode::is_ipv4()) {
+	    success = _xrl_mfea_client.send_send_protocol_message4(
+		entry->dst_module_instance_name().c_str(),
+		my_xrl_target_name(),
+		string(PimNode::module_name()),
+		PimNode::module_id(),
+		pim_vif->name(),
+		vif_index,
+		entry->src().get_ipv4(),
+		entry->dst().get_ipv4(),
+		entry->ip_ttl(),
+		entry->ip_tos(),
+		entry->is_router_alert(),
+		entry->message(),
+		callback(this, &XrlPimNode::mfea_client_send_protocol_message_cb));
+	    if (success)
+		return;
+	    break;
+	}
 
-    // Copy 'sndbuf' to a vector
-    vector<uint8_t> snd_vector;
-    snd_vector.resize(sndlen);
-    for (size_t i = 0; i < sndlen; i++)
-	snd_vector[i] = sndbuf[i];
-    
-    if (PimNode::is_ipv4()) {
-	success = _xrl_mfea_client.send_send_protocol_message4(
-	    dst_module_instance_name.c_str(),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    pim_vif->name(),
-	    vif_index,
-	    src.get_ipv4(),
-	    dst.get_ipv4(),
-	    ip_ttl,
-	    ip_tos,
-	    router_alert_bool,
-	    snd_vector,
-	    callback(this, &XrlPimNode::mfea_client_send_protocol_message_cb));
-	if (success)
-	    return (XORP_OK);
-    }
+	if (PimNode::is_ipv6()) {
+	    success = _xrl_mfea_client.send_send_protocol_message6(
+		entry->dst_module_instance_name().c_str(),
+		my_xrl_target_name(),
+		string(PimNode::module_name()),
+		PimNode::module_id(),
+		pim_vif->name(),
+		vif_index,
+		entry->src().get_ipv6(),
+		entry->dst().get_ipv6(),
+		entry->ip_ttl(),
+		entry->ip_tos(),
+		entry->is_router_alert(),
+		entry->message(),
+		callback(this, &XrlPimNode::mfea_client_send_protocol_message_cb));
+	    if (success)
+		return;
+	    break;
+	}
 
-    if (PimNode::is_ipv6()) {
-	success = _xrl_mfea_client.send_send_protocol_message6(
-	    dst_module_instance_name.c_str(),
-	    my_xrl_target_name(),
-	    string(PimNode::module_name()),
-	    PimNode::module_id(),
-	    pim_vif->name(),
-	    vif_index,
-	    src.get_ipv6(),
-	    dst.get_ipv6(),
-	    ip_ttl,
-	    ip_tos,
-	    router_alert_bool,
-	    snd_vector,
-	    callback(this, &XrlPimNode::mfea_client_send_protocol_message_cb));
-	if (success)
-	    return (XORP_OK);
-    }
+	XLOG_UNREACHABLE();
+	break;
+    } while (false);
 
     if (! success) {
-	XLOG_ERROR("Failed to send a protocol message on vif %s",
+	//
+	// If an error, then try again
+	//
+	XLOG_ERROR("Failed to send a protocol message on vif %s. "
+		   "Will try again.",
 		   pim_vif->name().c_str());
-	return (XORP_ERROR);
+	retry_xrl_task();
+	return;
     }
-
-    return (XORP_OK);
 }
 
 void
 XrlPimNode::mfea_client_send_protocol_message_cb(const XrlError& xrl_error)
 {
+    XLOG_ASSERT(! _xrl_tasks_queue.empty());
+    XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
+    SendProtocolMessage* entry;
+
+    entry = dynamic_cast<SendProtocolMessage*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
+
     switch (xrl_error.error_code()) {
     case OKAY:
 	//
-	// If success, then we are done
+	// If success, then schedule the next task
 	//
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -2570,6 +2620,8 @@ XrlPimNode::mfea_client_send_protocol_message_cb(const XrlError& xrl_error)
 	//
 	XLOG_ERROR("Cannot send a protocol message: %s",
 		   xrl_error.str().c_str());
+	pop_xrl_task();
+	send_xrl_task();
 	break;
 
     case BAD_ARGS:
@@ -2593,6 +2645,8 @@ XrlPimNode::mfea_client_send_protocol_message_cb(const XrlError& xrl_error)
 	//
 	XLOG_ERROR("Failed to send a protocol message: %s",
 		   xrl_error.str().c_str());
+	pop_xrl_task();
+	send_xrl_task();
 	break;
     }
 }
