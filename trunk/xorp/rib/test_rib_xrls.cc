@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.2 2002/12/14 23:43:10 hodson Exp $"
 
 #include "urib_module.h"
 #include "libxorp/xorp.h"
@@ -29,6 +29,12 @@
 #include "xrl_target.hh"
 #include "fea_client.hh"
 #include "dummy_register_server.hh"
+
+#ifdef ORIGINAL_FINDER
+typedef FinderServer TestFinderServer;
+#else
+typedef FinderNGServer TestFinderServer;
+#endif
 
 bool verbose = false;
 
@@ -67,7 +73,7 @@ parser_main()
     EventLoop event_loop;
 
     /* Finder Server */
-    FinderServer fs(event_loop);
+    TestFinderServer fs(event_loop);
 
     /* Rib Server component */
     XrlStdRouter xrl_rtr(event_loop, "rib");

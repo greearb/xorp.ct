@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_factory.hh,v 1.2 2002/12/19 01:29:13 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_factory.hh,v 1.3 2003/02/26 00:12:14 hodson Exp $
 
 #ifndef __XRLPF_FACTORY_HH__
 #define __XRLPF_FACTORY_HH__
@@ -23,7 +23,11 @@
 class XrlPFSenderFactory {
 public:
     static XrlPFSender* create(EventLoop& event_loop,
-			       const char *protocol_colon_address);
+			       const char* protocol_colon_address);
+
+    static XrlPFSender* create(EventLoop&	e,
+			       const char*	protocol,
+			       const char*	address);
 };
 
 #endif // __XRLPF_FACTORY_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_ng.cc,v 1.1 2003/02/24 19:39:20 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_ng.cc,v 1.2 2003/02/25 18:58:50 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -21,7 +21,6 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "sockutil.hh"
-
 
 #include "finder_ng.hh"
 #include "finder_ng_xrl_target.hh"
@@ -63,7 +62,7 @@ do {									\
 } while(0)
 
 static void
-resolve_callback(XrlError		e,
+resolve_callback(const XrlError&	e,
 		 const FinderDBEntry*	fdbe,
 		 const string*		s,
 		 string*		result,
@@ -246,11 +245,17 @@ test_main(void)
     r = test_xrls_locally_resolve(e, fc1, xrls);
     if (r)
 	return r;
-#endif    
     // Close connection
     FinderTcpMessenger* ftm =
 	dynamic_cast<FinderTcpMessenger*>(fc1.messenger());
     ftm->close();
+#endif    
+
+    expired = false;
+    t = e.set_flag_after_ms(1000, &expired);
+    while (expired == false)
+	e.run();
+    
 
     r = test_xrls_resolve(e, fc1, xrls); 
     if (r)
@@ -286,6 +291,7 @@ test_main(void)
     }
     verbose_log("succeeded.\n");
 
+    verbose_log("Testing Client 2 can resolve Client 1 registrations\n");
     // Test second finder client can resolve xrls on first finder
     r = test_xrls_resolve(e, fc2, xrls); 
     if (r)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.3 2002/12/19 01:29:14 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.4 2003/02/26 00:12:14 hodson Exp $
 
 #ifndef __XRLPF_SUDP_HH__
 #define __XRLPF_SUDP_HH__
@@ -28,7 +28,7 @@ public:
 	throw (XrlPFConstructorError);
     ~XrlPFSUDPListener();
 
-    const char* address() const	{ return _address_slash_port.c_str(); }
+    const char* address() const	{ return _addr.c_str(); }
     const char* protocol() const { return _protocol; }
 
 private:
@@ -39,7 +39,7 @@ private:
     void recv(int fd, SelectorMask m);
 
     int	_fd;
-    string _address_slash_port;
+    string _addr;
     static const char* _protocol;
 };
 

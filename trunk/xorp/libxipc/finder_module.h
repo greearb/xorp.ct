@@ -15,13 +15,12 @@
  */
 
 /*
- * $XORP: xorp/libxipc/finder_module.h,v 1.2 2003/02/24 19:39:18 hodson Exp $
+ * $XORP: xorp/libxipc/finder_module.h,v 1.3 2003/02/24 19:42:13 hodson Exp $
  */
 
 /*
  * Module definitions.
  */
-/* XXX: this file must be included first by each *.c or *.cc file in a module */
 
 #define XORP_MODULE_NAME	"FINDER"
 #define XORP_MODULE_VERSION	"0.2"

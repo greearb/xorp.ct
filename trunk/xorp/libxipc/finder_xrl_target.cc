@@ -12,12 +12,43 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.2 2003/02/24 19:39:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_xrl_target.cc,v 1.3 2003/02/26 18:33:38 hodson Exp $"
+
+#include "libxorp/debug.h"
 
 #include "finder_ng_xrl_target.hh"
 #include "finder_ng.hh"
 #include "permits.hh"
 #include "xuid.hh"
+
+static class TraceFinder {
+public:
+    TraceFinder() {
+	_do_trace = !(getenv("FINDERTRACE") == 0);
+    }
+    inline bool on() const { return _do_trace; }
+    operator bool() { return _do_trace; }
+    inline void set_context(const string& s) { _context = s; }
+    inline const string& context() const { return _context; }
+protected:
+    bool _do_trace;
+    string _context;
+} finder_tracer;
+
+#define finder_trace_init(x...) 					      \
+do {									      \
+    if (finder_tracer.on()) finder_tracer.set_context(c_format(x));	      \
+} while (0)
+
+#define finder_trace_result(x...)					      \
+do {									      \
+    if (finder_tracer.on()) {						      \
+	string r = c_format(x);						      \
+	XLOG_INFO(c_format("%s -> %s\n",				      \
+		  finder_tracer.context().c_str(), r.c_str()).c_str());	      \
+    }									      \
+} while(0)
+
 
 /**
  * Helper method to pass back consistent message when it is discovered that
@@ -72,6 +103,10 @@ FinderNGXrlTarget::finder_0_1_register_finder_client(const string& tgt_name,
 						     const string& in_cookie,
 						     string&	   out_cookie)
 {
+    finder_trace_init("register_finder_client(\"%s\", \"%s\", \"%s\")",
+		      tgt_name.c_str(), class_name.c_str(),
+		      in_cookie.c_str());		      
+
     if (in_cookie.empty() == false) {
 	out_cookie = in_cookie;
 	_finder.remove_target_with_cookie(out_cookie);
@@ -80,19 +115,27 @@ FinderNGXrlTarget::finder_0_1_register_finder_client(const string& tgt_name,
     }
     
     if (_finder.add_target(tgt_name, class_name, out_cookie) == false) {
+	finder_trace_result("failed (already registered)");
 	return XrlCmdError::COMMAND_FAILED(c_format("%s already registered.",
 						    tgt_name.c_str()));
     }
+
+    finder_trace_result("\"%s\" okay",  out_cookie.c_str());
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 FinderNGXrlTarget::finder_0_1_unregister_finder_client(const string& tgt_name)
 {
+    finder_trace_init("unregister_finder_client(\"%s\"", tgt_name.c_str());
+
     if (_finder.active_messenger_represents_target(tgt_name)) {
 	_finder.remove_target(tgt_name);
+	finder_trace_result("okay");
 	return XrlCmdError::OKAY();
     }
+
+    finder_trace_result("failed");
 
     return XrlCmdError::COMMAND_FAILED(bad_target_message(tgt_name));
 }
@@ -105,16 +148,22 @@ FinderNGXrlTarget::finder_0_1_add_xrl(const string& xrl,
 {
     Xrl u;
 
+    finder_trace_init("add_xrl(\"%s\", \"%s\", \"%s\")",
+		      xrl.c_str(), protocol_name.c_str(),
+		      protocol_args.c_str());
+    
     // Construct unresolved Xrl
     try {
 	u = Xrl(xrl.c_str());
     } catch (InvalidString&) {
+	finder_trace_result("fail (bad xrl).");
 	return XrlCmdError::COMMAND_FAILED("Invalid xrl string");
     }
 
     // Check active messenger is responsible for target described in
     // unresolved Xrl
     if (false == _finder.active_messenger_represents_target(u.target())) {
+	finder_trace_result("fail (inappropriate message source).");
 	return XrlCmdError::COMMAND_FAILED(bad_target_message(u.target()));
     }
 
@@ -124,8 +173,10 @@ FinderNGXrlTarget::finder_0_1_add_xrl(const string& xrl,
 
     // Register Xrl
     if (false == _finder.add_resolution(u.target(), u.str(), r.str())) {
+	finder_trace_result("fail (already registered).");
 	return XrlCmdError::COMMAND_FAILED("Xrl already registered");
     }
+    finder_trace_result("okay");
     return XrlCmdError::OKAY();
 }
 
@@ -134,22 +185,28 @@ FinderNGXrlTarget::finder_0_1_remove_xrl(const string&	xrl)
 {
     Xrl u;
 
+    finder_trace_init("remove_xrl(\"%s\")", xrl.c_str());
+    
     // Construct Xrl
     try {
 	u = Xrl(xrl.c_str());
     } catch (InvalidString&) {
+	finder_trace_result("fail (bad xrl).");
 	return XrlCmdError::COMMAND_FAILED("Invalid xrl string");
     }
 
     // Check active messenger is responsible for target described in Xrl
     if (false == _finder.active_messenger_represents_target(u.target())) {
+	finder_trace_result("fail (inappropriate message source).");
 	return XrlCmdError::COMMAND_FAILED(bad_target_message(u.target()));
     }
 
     // Unregister Xrl
     if (false == _finder.remove_resolutions(u.target(), u.str())) {
+	finder_trace_result("fail (xrl does not exist).");
 	return XrlCmdError::COMMAND_FAILED("Xrl does not exist");
     }
+    finder_trace_result("okay");
     return XrlCmdError::OKAY();
 }
 
@@ -159,17 +216,22 @@ FinderNGXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 {
     Xrl u;
 
+    finder_trace_init("resolve_xrl(\"%s\")", xrl.c_str());
+    
     // Construct Xrl
     try {
 	u = Xrl(xrl.c_str());
     } catch (InvalidString&) {
+	finder_trace_result("fail (bad xrl).");
 	return XrlCmdError::COMMAND_FAILED("Invalid xrl string");
     }
 
     const FinderNG::Resolveables* resolutions = _finder.resolve(u.target(),
 								u.str());
-    if (0 == resolutions)
+    if (0 == resolutions) {
+	finder_trace_result("fail (does not resolve).");
 	return XrlCmdError::COMMAND_FAILED("Xrl does not resolve");
+    }
 
     FinderNG::Resolveables::const_iterator ci = resolutions->begin();
     while (resolutions->end() != ci) {
@@ -177,12 +239,14 @@ FinderNGXrlTarget::finder_0_1_resolve_xrl(const string&	xrl,
 	try {
 	    s = Xrl(ci->c_str()).str();
 	} catch (const InvalidString& ) {
+	    finder_trace_result("fail (does not resolve as an xrl).");
 	    XLOG_ERROR("Resolved something that did not look an xrl: \"%s\"\n",
 		       ci->c_str());
 	}
 	resolved_xrls.append(XrlAtom(s));
 	++ci;
     }
+    finder_trace_result("resolves okay.");
     return XrlCmdError::OKAY();
 }
 

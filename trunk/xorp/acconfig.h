@@ -44,6 +44,12 @@
 #undef ENABLE_ADVANCED_MCAST_API
 
 /*
+ * Preprocessor control of debug message output
+ */
+#undef ORIGINAL_FINDER
+
+
+/*
  * Define this if you have a /dev/urandom which can supply good random numbers.
  */
 #undef HAVE_DEV_URANDOM

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.2 2002/12/14 23:43:00 hodson Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.3 2002/12/19 01:29:11 hodson Exp $
 
 #ifndef __XRL_H__
 #define __XRL_H__
@@ -28,8 +28,6 @@
  */
 class Xrl {
 public:
-    //    class InvalidString {};
-
     /**
      * Construct an Xrl.
      */
@@ -85,6 +83,11 @@ public:
      */
     const string& target() const { return _target; }
 
+    /**
+     * @return string representation of Xrl without arguments.
+     */
+    string string_no_args() const;
+    
     /**
      * @return the name of the command
      */

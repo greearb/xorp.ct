@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.2 2003/02/26 00:11:08 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.3 2003/02/27 01:58:24 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -53,6 +53,8 @@ protected:
 class FinderNGClientOneOffOp : public FinderNGClientOp {
 public:
     FinderNGClientOneOffOp(FinderNGClient& fc) : FinderNGClientOp(fc) {}
+
+    virtual void force_failure(const XrlError&) = 0;
 };
 
 /**
@@ -108,6 +110,7 @@ public:
     {
 	if (e != XrlError::OKAY()) {
 	    _qcb->dispatch(e, 0);
+	    debug_msg("Query failed\n");
 	    client().notify_failed(this);
 	    return;
 	}
@@ -115,7 +118,7 @@ public:
 	pair<ResolvedTable::iterator, bool> result = 
 	    _rt.insert(std::make_pair(_key, FinderDBEntry(_key)));
 
-	if (result.second == false) {
+	if (result.second == false && result.first == _rt.end()) {
 	    // Out of memory (?)
 	    XLOG_ERROR("Failed to add entry for %s to resolve table.\n",
 		       _key.c_str());
@@ -124,10 +127,19 @@ public:
 	    return;
 	}
 
+	// NB if result.second == false and result.first != _rt.end we've
+	// made back to back requests for something that is not in cache
+	// and both results have come in.  WE take the more recent result
+	// as the one to use.
+
 	ResolvedTable::iterator& rt_entry = result.first;
-	
+	if (false == rt_entry->second.values().empty()) {
+	    rt_entry->second.clear();
+	}
+
 	for (size_t i = 0; i < al->size(); i++) {
 	    try {
+		debug_msg("Adding resolved \"%s\"\n", al->get(i).text().c_str());
 		rt_entry->second.values().push_back(al->get(i).text());
 	    } catch (const XrlAtom::NoData&) {
 		_rt.erase(rt_entry);
@@ -143,6 +155,11 @@ public:
 	}
 	_qcb->dispatch(e, &rt_entry->second);
 	client().notify_done(this);
+    }
+
+    void force_failure(const XrlError& e)
+    {
+	_qcb->dispatch(e, 0);
     }
     
 protected:
@@ -174,7 +191,7 @@ public:
 	    XLOG_ERROR("Failed on send_register_xrl");
 	    client().notify_failed(this);
 	} else {
-	    debug_msg("Registered client %s / %s\n",
+	    debug_msg("Sent register_finder_client(\"%s\", \"%s\")\n",
 		      _iname.c_str(), _cname.c_str());
 	}
     }
@@ -183,13 +200,14 @@ public:
     {
 	if (e == XrlError::OKAY()) {
 	    _cookie = *out_cookie;
-	    debug_msg("Cookie = %s\n", _cookie.c_str());
+	    debug_msg("register_finder_client gave cookie = %s\n",
+		      _cookie.c_str());
 	    client().notify_done(this);
 	    return;
 	}
 
 	XLOG_ERROR("Failed to register client named %s of class %s: \"%s\"\n",
-		   _iname.c_str(), _iname.c_str(), e.str().c_str());
+		   _iname.c_str(), _cname.c_str(), e.str().c_str());
 	client().notify_failed(this);
     }
     
@@ -220,6 +238,8 @@ public:
     void execute(FinderMessengerBase* m)
     {
 	XrlFinderV0p1Client cl(m);
+	debug_msg("Sending add_xrl(\"%s\", \"%s\", \"%s\")\n",
+		  _xrl.c_str(), _pf.c_str(), _pf_args.c_str());
 	if (!cl.send_add_xrl(finder, _xrl, _pf, _pf_args,
 		callback(this, &FinderNGClientRegisterXrl::reg_callback))) {
 	    XLOG_ERROR("Failed on send_add_xrl");
@@ -358,8 +378,8 @@ FinderNGClient::crank()
     if (_todo_list.empty())
 	return;
 
-    _todo_list.front()->execute(_messenger);
     _pending_result = true;
+    _todo_list.front()->execute(_messenger);
 }
 
 void
@@ -380,11 +400,37 @@ FinderNGClient::notify_done(const FinderNGClientOp* op)
 }
 
 void
-FinderNGClient::notify_failed(const FinderNGClientOp*)
+FinderNGClient::notify_failed(const FinderNGClientOp* op)
 {
     debug_msg("Client op failed, restarting...\n");
+
+    // These assertions probably want revising.
+    XLOG_ASSERT(_todo_list.empty() == false);
+    XLOG_ASSERT(_todo_list.front().get() == op);
+    XLOG_ASSERT(_pending_result == true);
+
+    if (dynamic_cast<const FinderNGClientRepeatOp*>(op)) {
+	_done_list.push_back(_todo_list.front());
+    }
+    _todo_list.erase(_todo_list.begin());
+
+    // Walk todo list and clear up one off requests.
+    OperationQueue::iterator i = _todo_list.begin();
+    while (i != _todo_list.end()) {
+	OperationQueue::iterator curr = i++;
+	FinderNGClientOneOffOp* o = 
+	    dynamic_cast<FinderNGClientOneOffOp*>(curr->get());
+	if (o) {
+	    o->force_failure(XrlError::NO_FINDER());
+	}
+	_todo_list.erase(curr);
+    }
+    
+    _pending_result = false;
+
     // trigger restart
-    delete _messenger;
+    //    delete _messenger;
+    //    _messenger = 0;
 }
 
 void
@@ -449,7 +495,8 @@ FinderNGClient::messenger_stopped_event(FinderMessengerBase* m)
 {
     debug_msg("messenger %p stopped\n", m);
     XLOG_ASSERT(m == _messenger);
-    delete m;
+    //    delete _messenger;
+    //    _messenger = 0;
 }
 
 bool

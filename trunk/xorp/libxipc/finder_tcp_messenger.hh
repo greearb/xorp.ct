@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.2 2003/01/28 00:42:24 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.3 2003/02/24 19:39:20 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
@@ -54,6 +54,8 @@ protected:
 
     void close_event();
 
+    void error_event();
+    
 protected:
     void reply(uint32_t seqno, const XrlError& xe, const XrlArgs* reply_args);
 

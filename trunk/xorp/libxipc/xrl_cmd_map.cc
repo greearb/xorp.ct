@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_cmd_map.cc,v 1.3 2002/12/19 01:29:12 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_cmd_map.cc,v 1.4 2003/01/13 20:27:51 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -31,10 +31,16 @@ XrlCmdMap::add_handler(const XrlCmdEntry& cmd)
     return true;
 }
 
+bool
+XrlCmdMap::add_handler(const string& cmd, const XrlRecvCallback& rcb)
+{
+    return add_handler(XrlCmdEntry(cmd, rcb));
+}
+
 const XrlCmdEntry*
 XrlCmdMap::get_handler(const string& name) const
 {
-    CMI c = _cmd_map.find(name);
+    CmdMap::const_iterator c = _cmd_map.find(name);
     if (c == _cmd_map.end())
 	return 0;
     return &c->second;
@@ -43,7 +49,7 @@ XrlCmdMap::get_handler(const string& name) const
 bool
 XrlCmdMap::remove_handler(const string& name)
 {
-    MI c = _cmd_map.find(name);
+    CmdMap::iterator c = _cmd_map.find(name);
     if (c == _cmd_map.end())
 	return false;
     _cmd_map.erase(c);
@@ -53,7 +59,8 @@ XrlCmdMap::remove_handler(const string& name)
 const XrlCmdEntry*
 XrlCmdMap::get_handler(uint32_t index) const
 {
-    for (CMI c = _cmd_map.begin(); c != _cmd_map.end(); c++, index--) {
+    CmdMap::const_iterator c;
+    for (c = _cmd_map.begin(); c != _cmd_map.end(); c++, index--) {
 	if (index == 0) {
 	    return &c->second;
 	}

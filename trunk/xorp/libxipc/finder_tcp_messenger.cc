@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.3 2003/02/24 19:39:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.4 2003/02/27 02:03:28 pavlin Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -36,6 +36,7 @@ FinderTcpMessenger::FinderTcpMessenger(EventLoop&		e,
 
 FinderTcpMessenger::~FinderTcpMessenger()
 {
+    manager().messenger_death_event(this);
     drain_queue();
 }
 
@@ -54,6 +55,7 @@ FinderTcpMessenger::read_event(int	      errval,
     }
 
     string s(data, data + data_bytes);
+
     string ex;
     try {
 	try {
@@ -64,13 +66,17 @@ FinderTcpMessenger::read_event(int	      errval,
 	    ParsedFinderXrlResponse fm(s.c_str());
 	    dispatch_xrl_response(fm.seqno(), fm.xrl_error(), fm.xrl_args());
 	    return;
-	}
+	} 
     } catch (const InvalidString& e) {
 	ex = e.str();
     } catch (const BadFinderMessageFormat& e) {
 	ex = e.str();
     } catch (const WrongFinderMessageType& e) {
 	ex = e.str();
+    } catch (const XorpException& e) {
+	ex = e.str();
+    } catch (...) {
+	ex = "Unexpected ?";
     }
     XLOG_ERROR("Got exception %s, closing connection", ex.c_str());
     close();
@@ -190,6 +196,12 @@ void
 FinderTcpMessenger::close_event()
 {
     manager().messenger_stopped_event(this);
+}
+
+void
+FinderTcpMessenger::error_event()
+{
+    delete this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.7 2003/02/25 19:52:01 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.8 2003/02/26 00:12:14 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -235,7 +235,7 @@ XrlPFSUDPSender::send(const Xrl& x, const XrlPFSender::SendCallback& cb)
     requests_pending[request.xuid] = request;
 
     // Prepare data
-    string xrl = request.xrl.str();
+    string xrl = request.xrl->str();
     string header = render_dispatch_header(request.xuid, xrl.size());
     string msg = header + xrl;
 
@@ -268,7 +268,7 @@ XrlPFSUDPSender::timeout_hook(XUID xuid)
     assert (i != requests_pending.end());
 
     Request& r = i->second;
-    r.callback->dispatch(XrlError::REPLY_TIMED_OUT(), r.xrl, 0);
+    r.callback->dispatch(XrlError::REPLY_TIMED_OUT(), *r.xrl, 0);
 
     debug_msg("Erasing state for %s (timeout)\n", r.xuid.str().c_str());
     requests_pending.erase(i);
@@ -316,10 +316,10 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
     r.timeout.unschedule();
     try {
 	XrlArgs response(buf + header_bytes);
-	r.callback->dispatch(err, r.xrl, &response);
+	r.callback->dispatch(err, *r.xrl, &response);
     } catch (const InvalidString&) {
 	debug_msg("Corrupt response: header_bytes %u content_bytes %u\n\t\"%s\"\n", (uint32_t)header_bytes, (uint32_t)content_bytes, buf + header_bytes);
-	r.callback->dispatch(XrlError::CORRUPT_RESPONSE(), r.xrl, 0);
+	r.callback->dispatch(XrlError::CORRUPT_RESPONSE(), *r.xrl, 0);
     }
     debug_msg("Erasing state for %s (answered)\n", r.xuid.str().c_str());
     requests_pending.erase(i);
@@ -347,7 +347,7 @@ XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlCmdDispatcher* xr)
 		   c_format("Could not get local socket details: %s",
 			    strerror(errno)));
     }
-    _address_slash_port = address_slash_port(addr, port);
+    _addr = address_slash_port(addr, port);
 
     _event_loop.add_selector(_fd, SEL_RD,
 			     callback(this, &XrlPFSUDPListener::recv));

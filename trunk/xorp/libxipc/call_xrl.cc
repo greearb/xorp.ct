@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.5 2003/01/17 00:49:11 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.6 2003/02/26 19:07:56 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -32,15 +32,18 @@ static void
 response_handler(const XrlError& e,
 		 XrlArgs*	 response,
 		 bool*		 done_flag,
-		 bool* 		 resolve_failed)
+		 bool* 		 resolve_failed,
+		 Xrl*		 xrl)
 {
     if (e == XrlError::RESOLVE_FAILED()) {
-	XLOG_ERROR("Failed.  Reason: %s", e.str().c_str());
+	XLOG_ERROR("Failed.  Reason: %s (\"%s\")",
+		   e.str().c_str(), xrl->str().c_str());
 	*resolve_failed = true;
 	return;
     }
     if (e !=  XrlError::OKAY()) {
-	XLOG_ERROR("Failed.  Reason: %s", e.str().c_str());
+	XLOG_ERROR("Failed.  Reason: %s (\"%s\")",
+		   e.str().c_str(), xrl->str().c_str());
 	exit(-1);
     }
     printf("%s\n", response->str().c_str());
@@ -65,10 +68,6 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 
 	// Wait for the finder
 	int i;
-	for (i = 0; !router.connected() && i < retry_count; i++) {
-	    e.run();
-	}
-
 	bool done_flag = false;
 	bool resolve_failed = true;
 	i = 0;
@@ -77,13 +76,19 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 		if (i++ > retry_count)
 		    break;
 		resolve_failed = false;
-		router.send(x, callback(&response_handler, &done_flag,
-					&resolve_failed));
+		router.send(x,
+			    callback(&response_handler,
+				     &done_flag,
+				     &resolve_failed,
+				     &x));
 		// Retry the request sleep for 1 second between requests.
 		if (1 != i)
 		    sleep(1);
 	    }
 	    e.run();
+	}
+	if (router.connected() == false) {
+	    XLOG_FATAL("Lost connection to finder\n");
 	}
 	return 0;
     } catch(const InvalidString& s) {
@@ -128,11 +133,10 @@ input_file(EventLoop& event_loop,
 }
 
 static void
-input_files(int argc,  char* const argv[], bool pponly)
+input_files(EventLoop& e,
+	    XrlRouter& router,
+	    int argc,  char* const argv[], bool pponly)
 {
-    EventLoop	 event_loop;
-    XrlStdRouter router(event_loop, ROUTER_NAME);
-
     do {
 	if (argc == 0 || argv[0][0] == '-') {
 	    do {
@@ -140,7 +144,7 @@ input_files(int argc,  char* const argv[], bool pponly)
 		if (pponly) {
 		    preprocess_file(xfp);
 		} else {
-		    input_file(event_loop, router, xfp);
+		    input_file(e, router, xfp);
 		}
 		usleep(250000);
 	    } while (stdin_forever);
@@ -149,7 +153,7 @@ input_files(int argc,  char* const argv[], bool pponly)
 	    if (pponly) {
 		preprocess_file(xfp);
 	    } else {
-		input_file(event_loop, router, xfp);
+		input_file(e, router, xfp);
 	    }
 	}
 	argc--;
@@ -158,12 +162,11 @@ input_files(int argc,  char* const argv[], bool pponly)
 }
 
 static void
-input_cmds(int argc, char* const argv[])
+input_cmds(EventLoop& e, XrlRouter& router,
+	   int argc, char* const argv[])
 {
-    EventLoop	 event_loop;
-    XrlStdRouter router(event_loop, ROUTER_NAME);
     for (int i = 0; i < argc; i++) {
-	if (call_xrl(event_loop, router, argv[i]) < 0) {
+	if (call_xrl(e, router, argv[i]) < 0) {
 	    XLOG_ERROR("Bad XRL syntax: %s\nStopping.", argv[i]);
 	    return;
 	}
@@ -210,11 +213,25 @@ main(int argc, char* const argv[])
     argc -= optind;
     argv += optind;
 
+    EventLoop	 e;
+    XrlStdRouter router(e, ROUTER_NAME);
+    bool	 timeout = false;
+    XorpTimer	 to = e.set_flag_after_ms(1000, &timeout);
+
+    while (false == timeout && false == router.connected()) {
+	e.run();
+    }
+
+    if (false == router.connected()) {
+	XLOG_ERROR("Could not connect to finder\n");
+	exit(-1);
+    }
+    
     try {
 	if (fileinput) {
-	    input_files(argc, argv, pponly);
+	    input_files(e, router, argc, argv, pponly);
 	} else if (argc != 0) {
-	    input_cmds(argc, argv);
+	    input_cmds(e, router, argc, argv);
 	} else {
 	    usage();
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.7 2003/02/25 19:52:01 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.8 2003/02/26 00:12:14 hodson Exp $
 
 // XRL Protocol Family Header
 
@@ -87,12 +87,12 @@ public:
     struct Request {
 	XrlPFSender*	parent;
 	XUID		xuid;		// to match requests and responses
-	Xrl		xrl;
+	const Xrl*	xrl;
 	SendCallback	callback;
 	XorpTimer	timeout;
 	Request(XrlPFSender* p, const Xrl& x, const SendCallback& cb)
-	    : parent(p), xuid(), xrl(x), callback(cb) {}
-	Request() {}
+	    : parent(p), xuid(), xrl(&x), callback(cb) {}
+	Request() : xrl(0) {}
 	bool operator==(const XUID& x) const { return xuid == x; }
     };
 

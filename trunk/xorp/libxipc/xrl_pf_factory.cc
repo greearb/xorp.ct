@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.2 2002/12/19 01:29:13 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.3 2003/02/26 00:12:14 hodson Exp $"
 
 #include "config.h"
 
@@ -22,33 +22,43 @@
 
 #include "xrl_module.h"
 #include "xrl_pf_factory.hh"
+#include "xrl_pf_inproc.hh"
 #include "xrl_pf_sudp.hh"
+#include "xrl_pf_stcp.hh"
 
 #include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+
+XrlPFSender*
+XrlPFSenderFactory::create(EventLoop&	event_loop,
+			   const char*	protocol,
+			   const char*	address)
+{
+    try {
+	if (string(XrlPFSUDPSender::protocol()) == protocol)
+	    return new XrlPFSUDPSender(event_loop, address);
+	else if (string(XrlPFSTCPSender::protocol()) == protocol)
+	    return new XrlPFSTCPSender(event_loop, address);
+	else if (string(XrlPFInProcSender::protocol()) == protocol)
+	    return new XrlPFInProcSender(event_loop, address);
+    } catch (XorpException& e) {
+	XLOG_ERROR("XrlPFSenderFactory::create failed: %s\n", e.str().c_str());
+    }
+    return 0;
+}
 
 XrlPFSender*
 XrlPFSenderFactory::create(EventLoop& event_loop,
 			   const char* protocol_colon_address) {
     char *colon = strstr(protocol_colon_address, ":");
-    if (colon == NULL) {
+    if (colon == 0) {
 	debug_msg("No colon in supposedly colon separated <protocol><address>"
 		  "combination\n\t\"%s\".\n", protocol_colon_address);
-	return NULL;
+	return 0;
     }
 
     string protocol(protocol_colon_address, colon - protocol_colon_address);
-    string address(colon + 1);
-
-    try {
-	char *address = colon + 1;
-
-	if (string(XrlPFSUDPSender::protocol()) == protocol)
-	    return new XrlPFSUDPSender(event_loop, address);
-    } catch (exception& e) {
-	debug_msg("XrlPFSenderFactory::create failed: %s\n", e.what());
-    }
-
-    return NULL;
+    return create(event_loop, protocol.c_str(), colon + 1);
 }
 
 

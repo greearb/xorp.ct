@@ -82,22 +82,21 @@ RIP_OS = @RIP_OS@
 
 noinst_LIBRARIES = libxipc.a libfinder.a
 
-# -- Programs
-bin_PROGRAMS = call_xrl finder finder_ng
+# -- Prograsm
+bin_PROGRAMS = call_xrl finder
+@ORIGINAL_FINDER_TRUE@finder_SOURCES = finder.cc
+@ORIGINAL_FINDER_FALSE@finder_SOURCES = finder_ng_main.cc
 noinst_PROGRAMS = test_finder_client test_finder_ipc test_finder_ipc2 test_finder_msg test_finder_transport test_header test_finder_msgs test_finder_tcp test_finder_messenger test_finder_ng test_inproc test_lemming test_sudp test_stcp test_xrl_error test_xrl test_xrl_atom test_xrl_args  test_xrl_router test_xrl_parser
 
 TESTS = $(noinst_PROGRAMS) test_xrl_parser.sh
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = -all-static
-LDADD = ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
+LDADD = ./libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
+finder_LDADD =  libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 
 # -- Program Sources
 call_xrl_SOURCES = call_xrl.cc
-finder_SOURCES = finder.cc
-
-finder_ng_SOURCES =  finder_ng_main.cc
-finder_ng_LDADD =  libfinder.a ./libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 
 test_finder_client_SOURCES = test_finder_client.cc
 test_finder_ipc_SOURCES = test_finder_ipc.cc
@@ -116,8 +115,10 @@ test_xrl_SOURCES = test_xrl.cc
 test_xrl_atom_SOURCES = test_xrl_atom.cc
 test_xrl_args_SOURCES = test_xrl_args.cc
 test_xrl_parser_SOURCES = test_xrl_parser.cc
-test_xrl_router_SOURCES = test_xrl_router.cc
 test_xrl_error_SOURCES = test_xrl_error.cc
+
+test_xrl_router_SOURCES = test_xrl_router.cc
+test_xrl_router_LDADD = libfinder.a $(LDADD)
 
 test_finder_ng_SOURCES = test_finder_ng.cc
 test_finder_ng_LDADD = libfinder.a $(LDADD)
@@ -166,115 +167,110 @@ PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 call_xrl_OBJECTS =  call_xrl.o
 call_xrl_LDADD = $(LDADD)
-call_xrl_DEPENDENCIES =  ./libxipc.a $(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/libcomm/libcomm.a
-call_xrl_LDFLAGS = 
-finder_OBJECTS =  finder.o
-finder_LDADD = $(LDADD)
-finder_DEPENDENCIES =  ./libxipc.a $(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/libcomm/libcomm.a
-finder_LDFLAGS = 
-finder_ng_OBJECTS =  finder_ng_main.o
-finder_ng_DEPENDENCIES =  libfinder.a ./libxipc.a \
+call_xrl_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
-finder_ng_LDFLAGS = 
+call_xrl_LDFLAGS = 
+@ORIGINAL_FINDER_TRUE@finder_OBJECTS =  finder.o
+@ORIGINAL_FINDER_FALSE@finder_OBJECTS =  finder_ng_main.o
+finder_DEPENDENCIES =  libfinder.a ./libxipc.a \
+$(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
+finder_LDFLAGS = 
 test_finder_client_OBJECTS =  test_finder_client.o
 test_finder_client_LDADD = $(LDADD)
-test_finder_client_DEPENDENCIES =  ./libxipc.a \
+test_finder_client_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_finder_client_LDFLAGS = 
 test_finder_ipc_OBJECTS =  test_finder_ipc.o
 test_finder_ipc_LDADD = $(LDADD)
-test_finder_ipc_DEPENDENCIES =  ./libxipc.a \
+test_finder_ipc_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_finder_ipc_LDFLAGS = 
 test_finder_ipc2_OBJECTS =  test_finder_ipc2.o
 test_finder_ipc2_LDADD = $(LDADD)
-test_finder_ipc2_DEPENDENCIES =  ./libxipc.a \
+test_finder_ipc2_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_finder_ipc2_LDFLAGS = 
 test_finder_msg_OBJECTS =  test_finder_msg.o
 test_finder_msg_LDADD = $(LDADD)
-test_finder_msg_DEPENDENCIES =  ./libxipc.a \
+test_finder_msg_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_finder_msg_LDFLAGS = 
 test_finder_transport_OBJECTS =  test_finder_transport.o
 test_finder_transport_LDADD = $(LDADD)
-test_finder_transport_DEPENDENCIES =  ./libxipc.a \
+test_finder_transport_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_finder_transport_LDFLAGS = 
 test_header_OBJECTS =  test_header.o
 test_header_LDADD = $(LDADD)
-test_header_DEPENDENCIES =  ./libxipc.a \
+test_header_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_header_LDFLAGS = 
 test_finder_msgs_OBJECTS =  test_finder_msgs.o
 test_finder_msgs_LDADD = $(LDADD)
-test_finder_msgs_DEPENDENCIES =  ./libxipc.a \
+test_finder_msgs_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_finder_msgs_LDFLAGS = 
 test_finder_tcp_OBJECTS =  test_finder_tcp.o
 test_finder_tcp_LDADD = $(LDADD)
-test_finder_tcp_DEPENDENCIES =  ./libxipc.a \
+test_finder_tcp_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_finder_tcp_LDFLAGS = 
 test_finder_messenger_OBJECTS =  test_finder_messenger.o
 test_finder_messenger_LDADD = $(LDADD)
-test_finder_messenger_DEPENDENCIES =  ./libxipc.a \
+test_finder_messenger_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_finder_messenger_LDFLAGS = 
 test_finder_ng_OBJECTS =  test_finder_ng.o
-test_finder_ng_DEPENDENCIES =  libfinder.a ./libxipc.a \
+test_finder_ng_DEPENDENCIES =  libfinder.a ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_finder_ng_LDFLAGS = 
 test_inproc_OBJECTS =  test_inproc.o
 test_inproc_LDADD = $(LDADD)
-test_inproc_DEPENDENCIES =  ./libxipc.a \
+test_inproc_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_inproc_LDFLAGS = 
 test_lemming_OBJECTS =  test_lemming.o
 test_lemming_LDADD = $(LDADD)
-test_lemming_DEPENDENCIES =  ./libxipc.a \
+test_lemming_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_lemming_LDFLAGS = 
 test_sudp_OBJECTS =  test_sudp.o
 test_sudp_LDADD = $(LDADD)
-test_sudp_DEPENDENCIES =  ./libxipc.a $(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/libcomm/libcomm.a
+test_sudp_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
+$(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_sudp_LDFLAGS = 
 test_stcp_OBJECTS =  test_stcp.o
 test_stcp_LDADD = $(LDADD)
-test_stcp_DEPENDENCIES =  ./libxipc.a $(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/libcomm/libcomm.a
+test_stcp_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
+$(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_stcp_LDFLAGS = 
 test_xrl_error_OBJECTS =  test_xrl_error.o
 test_xrl_error_LDADD = $(LDADD)
-test_xrl_error_DEPENDENCIES =  ./libxipc.a \
+test_xrl_error_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_xrl_error_LDFLAGS = 
 test_xrl_OBJECTS =  test_xrl.o
 test_xrl_LDADD = $(LDADD)
-test_xrl_DEPENDENCIES =  ./libxipc.a $(top_builddir)/libxorp/libxorp.a \
-$(top_builddir)/libcomm/libcomm.a
+test_xrl_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
+$(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_xrl_LDFLAGS = 
 test_xrl_atom_OBJECTS =  test_xrl_atom.o
 test_xrl_atom_LDADD = $(LDADD)
-test_xrl_atom_DEPENDENCIES =  ./libxipc.a \
+test_xrl_atom_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_xrl_atom_LDFLAGS = 
 test_xrl_args_OBJECTS =  test_xrl_args.o
 test_xrl_args_LDADD = $(LDADD)
-test_xrl_args_DEPENDENCIES =  ./libxipc.a \
+test_xrl_args_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_xrl_args_LDFLAGS = 
 test_xrl_router_OBJECTS =  test_xrl_router.o
-test_xrl_router_LDADD = $(LDADD)
-test_xrl_router_DEPENDENCIES =  ./libxipc.a \
+test_xrl_router_DEPENDENCIES =  libfinder.a ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_xrl_router_LDFLAGS = 
 test_xrl_parser_OBJECTS =  test_xrl_parser.o
 test_xrl_parser_LDADD = $(LDADD)
-test_xrl_parser_DEPENDENCIES =  ./libxipc.a \
+test_xrl_parser_DEPENDENCIES =  ./libfinder.a ./libxipc.a \
 $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 test_xrl_parser_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
@@ -318,8 +314,8 @@ DEP_FILES =  .deps/call_xrl.P .deps/common_xif.P .deps/finder.P \
 .deps/xrl_pf_inproc.P .deps/xrl_pf_stcp.P .deps/xrl_pf_stcp_ph.P \
 .deps/xrl_pf_sudp.P .deps/xrl_router.P .deps/xrl_std_router.P \
 .deps/xrl_tokens.P .deps/xuid.P
-SOURCES = $(libxipc_a_SOURCES) $(libfinder_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(finder_ng_SOURCES) $(test_finder_client_SOURCES) $(test_finder_ipc_SOURCES) $(test_finder_ipc2_SOURCES) $(test_finder_msg_SOURCES) $(test_finder_transport_SOURCES) $(test_header_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_ng_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_sudp_SOURCES) $(test_stcp_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_router_SOURCES) $(test_xrl_parser_SOURCES)
-OBJECTS = $(libxipc_a_OBJECTS) $(libfinder_a_OBJECTS) $(call_xrl_OBJECTS) $(finder_OBJECTS) $(finder_ng_OBJECTS) $(test_finder_client_OBJECTS) $(test_finder_ipc_OBJECTS) $(test_finder_ipc2_OBJECTS) $(test_finder_msg_OBJECTS) $(test_finder_transport_OBJECTS) $(test_header_OBJECTS) $(test_finder_msgs_OBJECTS) $(test_finder_tcp_OBJECTS) $(test_finder_messenger_OBJECTS) $(test_finder_ng_OBJECTS) $(test_inproc_OBJECTS) $(test_lemming_OBJECTS) $(test_sudp_OBJECTS) $(test_stcp_OBJECTS) $(test_xrl_error_OBJECTS) $(test_xrl_OBJECTS) $(test_xrl_atom_OBJECTS) $(test_xrl_args_OBJECTS) $(test_xrl_router_OBJECTS) $(test_xrl_parser_OBJECTS)
+SOURCES = $(libxipc_a_SOURCES) $(libfinder_a_SOURCES) $(call_xrl_SOURCES) $(finder_SOURCES) $(test_finder_client_SOURCES) $(test_finder_ipc_SOURCES) $(test_finder_ipc2_SOURCES) $(test_finder_msg_SOURCES) $(test_finder_transport_SOURCES) $(test_header_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_ng_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_sudp_SOURCES) $(test_stcp_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_router_SOURCES) $(test_xrl_parser_SOURCES)
+OBJECTS = $(libxipc_a_OBJECTS) $(libfinder_a_OBJECTS) $(call_xrl_OBJECTS) $(finder_OBJECTS) $(test_finder_client_OBJECTS) $(test_finder_ipc_OBJECTS) $(test_finder_ipc2_OBJECTS) $(test_finder_msg_OBJECTS) $(test_finder_transport_OBJECTS) $(test_header_OBJECTS) $(test_finder_msgs_OBJECTS) $(test_finder_tcp_OBJECTS) $(test_finder_messenger_OBJECTS) $(test_finder_ng_OBJECTS) $(test_inproc_OBJECTS) $(test_lemming_OBJECTS) $(test_sudp_OBJECTS) $(test_stcp_OBJECTS) $(test_xrl_error_OBJECTS) $(test_xrl_OBJECTS) $(test_xrl_atom_OBJECTS) $(test_xrl_args_OBJECTS) $(test_xrl_router_OBJECTS) $(test_xrl_parser_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -408,10 +404,6 @@ call_xrl: $(call_xrl_OBJECTS) $(call_xrl_DEPENDENCIES)
 finder: $(finder_OBJECTS) $(finder_DEPENDENCIES)
 	@rm -f finder
 	$(CXXLINK) $(finder_LDFLAGS) $(finder_OBJECTS) $(finder_LDADD) $(LIBS)
-
-finder_ng: $(finder_ng_OBJECTS) $(finder_ng_DEPENDENCIES)
-	@rm -f finder_ng
-	$(CXXLINK) $(finder_ng_LDFLAGS) $(finder_ng_OBJECTS) $(finder_ng_LDADD) $(LIBS)
 
 test_finder_client: $(test_finder_client_OBJECTS) $(test_finder_client_DEPENDENCIES)
 	@rm -f test_finder_client

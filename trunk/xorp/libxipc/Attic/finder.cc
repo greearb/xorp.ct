@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.2 2002/12/14 23:42:53 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.3 2002/12/19 01:29:08 hodson Exp $"
 
 #include <signal.h>
 #include <setjmp.h>
@@ -23,6 +23,7 @@
 #include "config.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
+#include "finder_ipc.hh"
 #include "finder_server.hh"
 
 // ----------------------------------------------------------------------------
@@ -67,6 +68,7 @@ finder_main(int argc, char* const argv[])
     while ((ch = getopt(argc, argv, "hv")) != -1) {
 	switch (ch) {
 	case 'v':
+	    fprintf(stderr, "Finder (original)\n");
 	    run_verbose = true;
 	    break;
 	case 'h':

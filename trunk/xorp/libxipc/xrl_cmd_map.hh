@@ -36,15 +36,17 @@ struct XrlCmdEntry {
 
 class XrlCmdMap {
 public:
-    XrlCmdMap(const string& name = "anonymous") : _name(name) {}
+    typedef map<string, XrlCmdEntry> CmdMap;
 
+public:
+    XrlCmdMap(const string& name = "anonymous") : _name(name) {}
+    virtual ~XrlCmdMap() {}
+    
     const string& name() const { return _name; }
 
-    inline bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
+    virtual bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
 
-    bool add_handler (const XrlCmdEntry& c);
-
-    bool remove_handler (const string& name);
+    virtual bool remove_handler (const string& name);
 
     const XrlCmdEntry* get_handler(const string& name) const;
     
@@ -53,19 +55,12 @@ public:
     const XrlCmdEntry* get_handler(uint32_t index) const;
 
 protected:
+    bool add_handler (const XrlCmdEntry& c);
+    
+protected:
     const string _name;
-
-    typedef map<string, XrlCmdEntry> CmdMap;
-    typedef CmdMap::const_iterator CMI;
-    typedef CmdMap::iterator MI;
 
     CmdMap _cmd_map;
 };
-
-inline bool
-XrlCmdMap::add_handler(const string& cmd, const XrlRecvCallback& rcb)
-{
-    return add_handler(XrlCmdEntry(cmd, rcb));
-}
 
 #endif // __XRL_CMD_MAP_HH__

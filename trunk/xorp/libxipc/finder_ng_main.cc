@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.3 2003/02/24 19:39:18 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_main.cc,v 1.4 2003/02/25 18:58:50 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -107,7 +107,7 @@ finder_main(int argc, char* const argv[])
 {
     bool	run_verbose = false;
     IPv4	bind_addr = IPv4::ANY();
-    uint16_t	bind_port = FINDER_TCP_DEFAULT_PORT;
+    uint16_t	bind_port = FINDER_NG_TCP_DEFAULT_PORT;
 
     int ch;
     while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) {
@@ -165,6 +165,7 @@ finder_main(int argc, char* const argv[])
 	    }
 	    break;
 	case 'v':
+	    fprintf(stderr, "FinderNG\n");
 	    run_verbose = true;
 	    break;
 	case 'h':
@@ -186,6 +187,11 @@ finder_main(int argc, char* const argv[])
     // Add listening address to list of accepted addresses
     //
     add_permitted_host(bind_addr);
+
+    //
+    // Add preferred ipc address on host
+    //
+    add_permitted_host(if_get_preferred());
     
     install_signal_traps(trigger_exit);
     XorpUnexpectedHandler x(xorp_unexpected_handler);
@@ -195,9 +201,7 @@ finder_main(int argc, char* const argv[])
 	FinderNGTcpListener	 finder_tcp4_source(e,
 						    finder, finder.commands(),
 						    bind_addr, bind_port);
-
-	//	FinderNGXrlTarget finder_xrl_target(finder);
-
+	FinderNGXrlTarget finder_xrl_target(finder);
 	
 	XorpTimer twirl;
 	if (run_verbose)

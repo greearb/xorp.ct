@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.2 2002/12/14 23:43:00 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.3 2002/12/19 01:29:11 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -70,12 +70,18 @@ Xrl::Xrl(const char* c_str) throw (InvalidString)
 }
 
 string
+Xrl::string_no_args() const
+{
+    return _protocol + string(XrlToken::PROTO_TGT_SEP) + _target +
+	string(XrlToken::TGT_CMD_SEP) + _command;
+}
+
+string
 Xrl::str() const
 {
-    string s = _protocol + string(XrlToken::PROTO_TGT_SEP) + _target +
-	       string(XrlToken::TGT_CMD_SEP) + _command;
+    string s = string_no_args();
     if (_args.size()) {
-	s += string(XrlToken::CMD_ARGS_SEP) + _args.str();
+	return s + string(XrlToken::CMD_ARGS_SEP) + _args.str();
     }
     return s;
 }

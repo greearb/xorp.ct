@@ -24,6 +24,7 @@
 #include <string>
 
 #include "config.h"
+
 #include "finder_ipc.hh"
 #include "libxorp/eventloop.hh"
 
@@ -58,6 +59,44 @@ protected:
     typedef list<FinderConnectionInfo*>::iterator connection_iterator;
 
     friend class FinderConnectionInfo;
+};
+
+// Compatibility shim
+
+#include "libxorp/xlog.h"
+
+#include "finder_ng.hh"
+#include "finder_tcp_messenger.hh"
+#include "finder_ng_xrl_target.hh"
+#include "permits.hh"
+#include "sockutil.hh"
+
+class FinderNGServer {
+public:
+    FinderNGServer(EventLoop& e) {
+	IPv4 	 bind_addr = IPv4(if_get_preferred());
+	uint16_t bind_port = FINDER_NG_TCP_DEFAULT_PORT;
+	_f = new FinderNG();
+	_ft = new FinderNGTcpListener(e, *_f, _f->commands(),
+				      bind_addr, bind_port);
+	_fxt = new FinderNGXrlTarget(*_f);
+	add_permitted_host(bind_addr);
+	add_permitted_host(IPv4("127.0.0.1"));
+    }
+    ~FinderNGServer()
+    {
+	delete _fxt;
+	delete _ft;
+	delete _f;
+    }
+    inline uint32_t connection_count() const
+    {
+	return _f ? _f->messengers() : 0;
+    }
+protected:
+    FinderNG*		 _f;
+    FinderNGTcpListener* _ft;
+    FinderNGXrlTarget*	 _fxt; 
 };
 
 #endif // __FINDER_SERVER_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.6 2003/02/24 19:39:19 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.7 2003/02/25 18:58:50 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -31,7 +31,7 @@
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ref_ptr.hh"
 
-static const uint16_t FINDER_TCP_DEFAULT_PORT = 19999;
+static const uint16_t FINDER_NG_TCP_DEFAULT_PORT = 19999;
 
 class FinderTcpBase {
 public:
@@ -93,6 +93,8 @@ public:
      * the underlying socket is closed.
      */
     virtual void close_event();
+
+    virtual void error_event();
     
     void close();
     bool closed() const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.7 2003/02/25 18:58:50 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.8 2003/02/26 18:32:57 hodson Exp $"
 
 #include <functional>
 
@@ -36,6 +36,7 @@
 FinderTcpBase::FinderTcpBase(EventLoop& e, int fd)
     : _fd(fd), _reader(e, fd), _writer(e, fd), _isize(0), _osize(0)
 {
+    debug_msg("Constructor for FinderTcpBase object 0x%p\n", this);
     _reader.add_buffer(reinterpret_cast<uint8_t*>(&_isize), sizeof(_isize),
 		       callback(this, &FinderTcpBase::read_callback));
     _reader.start();
@@ -43,8 +44,11 @@ FinderTcpBase::FinderTcpBase(EventLoop& e, int fd)
 
 FinderTcpBase::~FinderTcpBase()
 {
+    debug_msg("Destructor for FinderTcpBase object 0x%p\n", this);
     _writer.stop();
     _reader.stop();
+    _writer.flush_buffers();
+    _reader.flush_buffers();
     if (!closed())
 	close();
 }
@@ -125,6 +129,7 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
 	debug_msg("End of file (%s)\n", strerror(errno));
 	_reader.stop();
 	close();
+	error_event();
 	return;
     case AsyncFileOperator::ERROR_CHECK_ERRNO:
 	if (EAGAIN == errno) {
@@ -132,6 +137,7 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
 	} else {
 	    read_event(errno, buffer, 0);
 	    close();
+	    error_event();
 	}
 	return;
     }
@@ -150,6 +156,7 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
 	    XLOG_ERROR("Bad input buffer size (%d bytes) from wire, "
 		       "dropping connection", _isize);
 	    close();
+	    error_event();
 	}
 	_input_buffer.resize(_isize);
 	_reader.add_buffer(&_input_buffer[0], _input_buffer.size(),
@@ -189,6 +196,7 @@ FinderTcpBase::write_callback(AsyncFileOperator::Event	ev,
 	    debug_msg("Error encountered, shutting down");
 	    write_event(errno, buffer, 0);
 	    close();
+	    error_event();
 	}
 	return;
     }
@@ -218,6 +226,11 @@ FinderTcpBase::close_event()
 }
 
 void
+FinderTcpBase::error_event()
+{
+}
+
+void
 FinderTcpBase::set_read_enabled(bool en)
 {
     bool running = _reader.running();
@@ -236,9 +249,12 @@ FinderTcpBase::read_enabled() const
 void
 FinderTcpBase::close()
 {
+    _writer.flush_buffers();
     _writer.stop();
+    _reader.flush_buffers();
     _reader.stop();
     comm_close(_fd);
+    debug_msg("Closing fd = %d\n", _fd);
     _fd = -1;
     close_event();
 }
@@ -271,11 +287,15 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
 
     if (en)
 	set_enabled(en);
+
+    debug_msg("Created new listener with fd %d\n", _lfd);
 }
 
 FinderTcpListenerBase::~FinderTcpListenerBase()
 {
     set_enabled(false);
+    _e.remove_selector(_lfd);
+    debug_msg("Destructing Listener with fd = %d\n", _lfd);
     comm_close(_lfd);
 }
 
@@ -324,6 +344,7 @@ FinderTcpListenerBase::connect_hook(int fd, SelectorMask m)
 
     IPv4 peer(name);
     if (host_is_permitted(peer)) {
+	debug_msg("Created fd %d\n", fd);
 	int fl = fcntl(fd, F_GETFL);
 	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
 	    XLOG_WARNING("Failed to set socket non-blocking.");

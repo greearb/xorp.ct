@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.2 2003/02/27 19:54:14 hodson Exp $
 ##
 
 # -- Real Programs
@@ -22,6 +22,7 @@ noinst_LIBRARIES	 = librib.a
 LDFLAGS			 = -all-static
 LDADD			 = $(noinst_LIBRARIES)
 LDADD			+= $(top_builddir)/xrl/interfaces/libfeaftixif.a
+LDADD			+= $(top_builddir)/libxipc/libfinder.a
 LDADD			+= $(top_builddir)/libxipc/libxipc.a
 LDADD			+= $(top_builddir)/libcomm/libcomm.a
 LDADD			+= $(top_builddir)/libxorp/libxorp.a

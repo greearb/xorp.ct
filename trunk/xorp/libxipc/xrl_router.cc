@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.6 2003/02/04 23:59:06 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.7 2003/02/26 00:12:14 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -24,16 +24,42 @@
 #include "xrl_pf.hh"
 #include "xrl_pf_factory.hh"
 
-inline void
-trace_xrl(const string& preamble, const Xrl& xrl)
-{
-    static const char* do_trace = getenv("XRLTRACE");
+// ----------------------------------------------------------------------------
+// Xrl Tracing central
 
-    if (do_trace) {
-	string s(preamble + xrl.str());
-	XLOG_INFO(s.c_str());
+static class TraceXrl {
+public:
+    TraceXrl() {
+	_do_trace = !(getenv("XRLTRACE") == 0);
     }
+    inline bool on() const { return _do_trace; }
+    operator bool() { return _do_trace; }
+
+protected:
+    bool _do_trace;
+} xrl_trace;
+
+#define trace_xrl(p, x) 						      \
+do {									      \
+    if (xrl_trace.on()) XLOG_INFO(string((p) + (x).str()).c_str());	      \
+} while (0)
+
+
+// ----------------------------------------------------------------------------
+// XrlCmdDispatcher methods (temporary class and location?)
+
+XrlError
+XrlCmdDispatcher::dispatch_xrl(const Xrl& xrl, XrlArgs& response) const
+{
+    const XrlCmdEntry *c = get_handler(xrl.command().c_str());
+    if (c) {
+	return c->callback->dispatch(xrl, &response);	
+    }
+    debug_msg("No handler for %s\n", xrl.command().c_str());
+    return XrlError::NO_SUCH_METHOD();
 }
+
+#ifdef ORIGINAL_FINDER
 
 // ----------------------------------------------------------------------------
 // Xrl Resolve and return handling
@@ -218,13 +244,234 @@ XrlRouter::add_listener(XrlPFListener* pfl)
     }
 }
 
-XrlError
-XrlCmdDispatcher::dispatch_xrl(const Xrl& xrl, XrlArgs& response) const
-{
-    const XrlCmdEntry *c = get_handler(xrl.command().c_str());
-    if (c) {
-	return c->callback->dispatch(xrl, &response);	
+///////////////////////////////////////////////////////////////////////////////
+#else // ndef ORIGINAL_FINDER
+///////////////////////////////////////////////////////////////////////////////
+
+#include "finder_ng_client.hh"
+#include "finder_ng_client_xrl_target.hh"
+#include "finder_tcp_messenger.hh"
+
+#include "sockutil.hh"
+
+struct DLinkElement {
+    DLinkElement() : _next(this), _prev(this) {}
+
+    DLinkElement(DLinkElement& de) : _next(de._next), _prev(&de)
+    {
+	de._next = _next->_prev = this;
     }
-    debug_msg("No handler for %s\n", xrl.command().c_str());
-    return XrlError::NO_SUCH_METHOD();
+    
+    virtual ~DLinkElement()
+    {
+	_next->_prev = _prev;
+	_prev->_next = _next;
+    }
+
+private:
+    struct DLinkElement *_next;
+    struct DLinkElement *_prev;
+};
+
+struct XrlRouterDispatchState : protected DLinkElement {
+public:
+    typedef XrlRouter::XrlCallback XrlCallback;
+
+public:
+    XrlRouterDispatchState(DLinkElement&	de,
+			   const XrlRouter*	r,
+			   const Xrl&		x,
+			   const XrlCallback&	xcb)
+	: DLinkElement(de), _rtr(r), _xrl(x), _xcb(xcb)
+    {
+    }
+
+    inline const XrlRouter* router() const { return _rtr; }
+
+    inline const Xrl& xrl() const { return _xrl; }
+
+    inline void dispatch(const XrlError& e, XrlArgs* a = 0)
+    {
+	_xcb->dispatch(e, a);
+    }
+
+protected:
+    const XrlRouter*		_rtr;
+    Xrl				_xrl;
+    XrlRouter::XrlCallback	_xcb;
+};
+
+static class DispatchStateManager {
+public:
+
+    XrlRouterDispatchState* new_dispatch(const XrlRouter* rtr,
+					 const Xrl& xrl,
+					 const XrlRouter::XrlCallback& xcb)
+    {
+	return new XrlRouterDispatchState(_sentinel, rtr, xrl, xcb);
+    }
+
+    void dispose(XrlRouterDispatchState* ds)
+    {
+	delete ds;
+    }
+
+protected:
+    DLinkElement _sentinel;
+} dispatch_manager;
+
+//
+// This is scatty and temporary
+//
+static IPv4
+finder_host(const char* host)
+    throw (InvalidAddress)
+{
+    in_addr ia;
+    if (address_lookup(host, ia) == false) {
+	xorp_throw(InvalidAddress,
+		   c_format("Could resolve finder host %s\n", host));
+    }
+    return IPv4(ia);
 }
+
+XrlRouter::XrlRouter(EventLoop&  e,
+		     const char* entity_name,
+		     const char* host,
+		     uint16_t	 port)
+    throw (InvalidAddress)
+    : XrlCmdDispatcher(entity_name), _e(e), _rpend(0), _spend(0)
+{
+    _fc = new FinderNGClient();
+    _fxt = new FinderNGClientXrlTarget(_fc, &_fc->commands());
+
+    if (0 == port)
+	port = FINDER_NG_TCP_DEFAULT_PORT;
+    _fac = new FinderNGTcpAutoConnector(e, *_fc, _fc->commands(),
+					finder_host(host), port);
+
+    if (_fc->register_xrl_target(entity_name, "undisclosed", _id) == false) {
+	XLOG_FATAL("Failed to register target %s\n", entity_name);
+    }
+}
+
+XrlRouter::~XrlRouter()
+{
+    _fac->set_enabled(false);
+    delete _fac;
+    delete _fxt;
+    delete _fc;
+}
+
+bool
+XrlRouter::connected() const
+{
+    return _fc->connected();
+}
+
+bool
+XrlRouter::pending() const
+{
+    return _rpend != 0 || _spend != 0;
+}
+
+bool
+XrlRouter::add_listener(XrlPFListener* l)
+{
+    _listeners.push_back(l);
+    l->set_dispatcher(this);
+    
+    // Walk list of Xrl in command map and register them with finder client
+    XrlCmdMap::CmdMap::const_iterator ci = _cmd_map.begin();
+    while (ci != _cmd_map.end()) {
+	Xrl x("finder", name(), ci->first);
+	debug_msg("adding handler for %s protocol %s address %s\n",
+		  x.str().c_str(), l->protocol(), l->address());
+	_fc->register_xrl(_id, x.str(), l->protocol(), l->address());
+	++ci;
+    }
+    
+    return true;
+}
+
+bool
+XrlRouter::add_handler(const string& cmd, const XrlRecvCallback& rcb)
+{
+    if (XrlCmdMap::add_handler(cmd, rcb) == false) {
+	return false;
+    }
+    // Walk list of listeners and register xrl corresponding to listener with
+    // finder client.
+    list<XrlPFListener*>::const_iterator pli = _listeners.begin();
+
+    while (pli != _listeners.end()) {
+	Xrl x("finder", name(), cmd);
+	debug_msg("adding handler for %s protocol %s address %s\n",
+		  x.str().c_str(), (*pli)->protocol(), (*pli)->address());
+	_fc->register_xrl(_id, x.str(), (*pli)->protocol(), (*pli)->address());
+	++pli;
+    }
+
+    return true;
+}
+
+void
+XrlRouter::send_callback(const XrlError&	 e,
+			 const Xrl&		 /* xrl */,
+			 XrlArgs*	 	 args,
+			 XrlRouterDispatchState* ds)
+{
+    _spend--;
+    ds->dispatch(e, args);
+    dispatch_manager.dispose(ds);
+}
+
+void
+XrlRouter::resolve_callback(const XrlError&	 	e,
+			    const FinderDBEntry*	dbe,
+			    XrlRouterDispatchState*	ds)
+{
+    _rpend--;
+    if (e != XrlError::OKAY()) {
+	ds->dispatch(e, 0);
+	dispatch_manager.dispose(ds);
+	return;
+    }
+
+    if (dbe->values().size() > 1) {
+	XLOG_WARNING("Xrl resolves multiple times, using first.");
+    }
+
+    try {
+	Xrl x(dbe->values().front().c_str());
+	XrlPFSender* s = XrlPFSenderFactory::create(_e,
+						    x.protocol().c_str(),
+						    x.target().c_str());
+	if (s) {
+	    trace_xrl("Sending ", x);
+	    _spend++;
+	    s->send(ds->xrl(),
+		    callback(this, &XrlRouter::send_callback, ds));
+	    return;
+	}
+	ds->dispatch(XrlError::SEND_FAILED(), 0);
+    } catch (const InvalidString&) {
+	ds->dispatch(XrlError::CORRUPT_XRL());
+    }
+    dispatch_manager.dispose(ds);
+
+    return;    
+}
+
+bool
+XrlRouter::send(const Xrl& xrl, const XrlCallback& xcb)
+{
+    trace_xrl("Resolving xrl:", xrl);
+    _rpend++;
+    DispatchState *ds = dispatch_manager.new_dispatch(this, xrl, xcb);
+    _fc->query(xrl.string_no_args(),
+	       callback(this, &XrlRouter::resolve_callback, ds));
+    return true;
+}
+
+#endif // ORIGINAL_FINDER

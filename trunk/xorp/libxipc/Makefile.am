@@ -1,13 +1,21 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.8 2003/02/24 19:39:18 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.9 2003/02/25 18:58:49 hodson Exp $
 ##
+
+
 
 # - The library
 noinst_LIBRARIES = libxipc.a libfinder.a
 
-# -- Programs
-bin_PROGRAMS  =	call_xrl finder finder_ng
+# -- Prograsm
+bin_PROGRAMS  =	call_xrl finder
+
+if ORIGINAL_FINDER
+finder_SOURCES = finder.cc
+else
+finder_SOURCES = finder_ng_main.cc
+endif
 
 # -- Test Programs - clunkiness is due to automake's inability to handle
 #    variables itself
@@ -23,19 +31,19 @@ TESTS = $(noinst_PROGRAMS) test_xrl_parser.sh
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS		 = -all-static
-LDADD		 = ./libxipc.a
+LDADD		 = ./libfinder.a
+LDADD		+= ./libxipc.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 
+finder_LDADD			+= libfinder.a
+finder_LDADD		 	+= ./libxipc.a
+finder_LDADD			+= $(top_builddir)/libxorp/libxorp.a
+finder_LDADD			+= $(top_builddir)/libcomm/libcomm.a
+
 # -- Program Sources
 call_xrl_SOURCES		= call_xrl.cc
-finder_SOURCES			= finder.cc
 
-finder_ng_SOURCES		+= finder_ng_main.cc
-finder_ng_LDADD			+= libfinder.a
-finder_ng_LDADD		 	+= ./libxipc.a
-finder_ng_LDADD			+= $(top_builddir)/libxorp/libxorp.a
-finder_ng_LDADD			+= $(top_builddir)/libcomm/libcomm.a
 
 test_finder_client_SOURCES	= test_finder_client.cc
 test_finder_ipc_SOURCES		= test_finder_ipc.cc
@@ -54,8 +62,10 @@ test_xrl_SOURCES		= test_xrl.cc
 test_xrl_atom_SOURCES		= test_xrl_atom.cc
 test_xrl_args_SOURCES		= test_xrl_args.cc
 test_xrl_parser_SOURCES		= test_xrl_parser.cc
-test_xrl_router_SOURCES		= test_xrl_router.cc
 test_xrl_error_SOURCES		= test_xrl_error.cc
+
+test_xrl_router_SOURCES		= test_xrl_router.cc
+test_xrl_router_LDADD		= libfinder.a $(LDADD)
 
 test_finder_ng_SOURCES		= test_finder_ng.cc
 test_finder_ng_LDADD		= libfinder.a $(LDADD)

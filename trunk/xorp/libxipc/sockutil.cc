@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.2 2002/12/19 01:29:09 hodson Exp $"
 
 #include "config.h"
 
@@ -386,11 +386,11 @@ bool
 split_address_slash_port(const string& address_slash_port,
 			 string& address, uint16_t& port)
 {
-    size_t slash = address_slash_port.find("/");
+    size_t slash = address_slash_port.find(":");
 
     if (slash == string::npos || 			// no slash
 	slash == address_slash_port.size() - 1 ||	// slash is last char
-	slash != address_slash_port.rfind("/")		// multiple slashes
+	slash != address_slash_port.rfind(":")		// multiple slashes
 	) {
 	return false;
     }
@@ -403,7 +403,7 @@ split_address_slash_port(const string& address_slash_port,
 
 string address_slash_port(const string& addr, uint16_t port)
 {
-    return c_format("%s/%d", addr.c_str(), port);
+    return c_format("%s:%d", addr.c_str(), port);
 }
 
 bool

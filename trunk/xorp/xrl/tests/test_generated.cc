@@ -12,19 +12,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.1.1.1 2002/12/11 23:56:19 hodson Exp $"
+#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.2 2002/12/14 23:43:16 hodson Exp $"
 
 #include <iostream>
+
+#include "config.h"
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 
+#include "libxipc/ipc_module.h"
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 #include "libxipc/xrl_pf_sudp.hh"
 
 #include "test_xifs.hh"
 #include "test_tgt.hh"
+
+#ifdef ORIGINAL_FINDER
+typedef FinderServer TestFinderServer;
+#else
+typedef FinderNGServer TestFinderServer;
+#endif
 
 static const char* g_tgt_name = "test_tgt";
 static const char* g_clnt_name = "test_clnt";
@@ -33,7 +42,7 @@ static void
 run_test()
 {
     EventLoop e;
-    FinderServer finder(e);
+    TestFinderServer finder(e);
 
     // Configure target for test    
     XrlStdRouter tgt_router(e, g_tgt_name); 
@@ -42,8 +51,23 @@ run_test()
     // Configure client for test
     XrlRouter clnt_router(e, g_clnt_name);
 
+    bool timeout = false;
+    XorpTimer t = e.set_flag_after_ms(2000, &timeout);
+    while (tgt_router.connected() == false && clnt_router.connected() == false)
+	e.run();
+
+    if (timeout) {
+	fprintf(stderr, "Timed out connecting to finder\n");
+	exit(-1);
+    }
+
+    while (timeout == false)
+	e.run();
+    
     // Run test
+    fprintf(stderr, "common xif methods\n");
     try_common_xif_methods(&e, &clnt_router, tgt_router.name().c_str());
+    fprintf(stderr, "test xif methods\n");
     try_test_xif_methods(&e, &clnt_router, tgt_router.name().c_str());
 }
 

@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_messenger.cc,v 1.2 2003/01/28 00:42:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_messenger.cc,v 1.3 2003/02/24 19:39:18 hodson Exp $"
 
 #include "finder_module.h"
 #include "finder_messenger.hh"
 
+#include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
 FinderMessengerBase::FinderMessengerBase(EventLoop&		 e,
@@ -25,11 +26,13 @@ FinderMessengerBase::FinderMessengerBase(EventLoop&		 e,
     : _event_loop(e), _manager(fmm), _cmds(cmds)
 {
     //    _manager.messenger_birth_event(this);
+    debug_msg("Constructor for %p\n", this);
 }
 
 FinderMessengerBase::~FinderMessengerBase()
 {
-    _manager.messenger_death_event(this);
+    //   _manager.messenger_death_event(this);
+    debug_msg("Destructor for %p\n", this);
 }
 
 bool
@@ -38,11 +41,14 @@ FinderMessengerBase::dispatch_xrl_response(uint32_t	   seqno,
 					   XrlArgs*	   args)
 {
     SeqNoResponseMap::iterator i = _expected_responses.find(seqno);
-    if (_expected_responses.end() == i)
+    if (_expected_responses.end() == i) {
+	debug_msg("Attempting to make response for invalid seqno\n");
 	return false;
+    }
 
-    i->second.scb->dispatch(xe, args);
+    SendCallback scb = i->second.scb;
     _expected_responses.erase(i);
+    scb->dispatch(xe, args);
 
     return true;
 }

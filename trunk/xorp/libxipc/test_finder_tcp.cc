@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.3 2003/01/24 02:47:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.4 2003/02/25 18:58:50 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -87,7 +87,7 @@ public:
     inline uint32_t write_events() const { return _writes; }
 
     inline bool can_write() const { return !_writer.running(); }
-    
+
 protected:
     const char*	_name;
     char	_buf[255];
@@ -99,7 +99,7 @@ class DummyFinder : public FinderTcpListenerBase {
 public:
     DummyFinder(EventLoop&  e,
 		IPv4	    interface,
-		uint16_t    port = FINDER_TCP_DEFAULT_PORT)
+		uint16_t    port = FINDER_NG_TCP_DEFAULT_PORT)
 	throw (InvalidPort)
 	: FinderTcpListenerBase(e, interface, port), _connection(0)
     {
@@ -134,7 +134,7 @@ connect_client(EventLoop* e, bool* client_connect_failed)
     struct in_addr ia;
     ia.s_addr = ipc_addr.addr();
 
-    int fd = comm_connect_tcp4(&ia, FINDER_TCP_DEFAULT_PORT);
+    int fd = comm_connect_tcp4(&ia, FINDER_NG_TCP_DEFAULT_PORT);
     if (fd < 0) {
 	fprintf(stderr, "Client failed to connect\n");
 	*client_connect_failed = true;
