@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.17 2004/03/19 11:45:58 mjh Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.18 2004/04/01 19:54:10 mjh Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -869,11 +869,22 @@ public:
     /**
      * stl map interface
      */
-    RefTrie() : _root(0), _payload_count(0)	{}
+    RefTrie() : _root(0), _payload_count(0), _deleted(false)	{}
 
     ~RefTrie()					{ delete_all_nodes(); }
 
-    void set_root(Node *root) { _root = root; }
+    void delete_self() {
+	_deleted = true;
+	if (_root == NULL)
+	    delete this;
+    }
+
+    void set_root(Node *root) { 
+	_root = root; 
+	if (_deleted) {
+	    delete this;
+	}
+    }
 
     /**
      * insert a key, payload pair, returns an iterator
@@ -1027,6 +1038,18 @@ private:
 
     Node	*_root;
     int		_payload_count;
+
+    /**
+     * RefTrie's nodes are reference counted, so it's possible to
+     * delete all the nodes in the trie, and for the actually routes
+     * to remain around until their reference counts go to zero
+     * because iterators still point at a node.  If you then delete
+     * the trie itself, the nodes will be deleted but the iterator
+     * will be invalidated.  Instead delete_self() should be called,
+     * which sets _deleted, and only finally deletes the trie when all
+     * the nodes themselves have gone away.
+     */
+    bool        _deleted;
 };
 
 
