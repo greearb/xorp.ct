@@ -25,8 +25,8 @@
 template <typename A>
 class AreaRouter {
  public:
-    AreaRouter(Ospf<A>& ospf, Area area, bool border, bool stub) 
-	: _ospf(ospf), _area(area), _border(border), _stub(stub)
+    AreaRouter(Ospf<A>& ospf, Area area, OspfTypes::AreaType area_type) 
+	: _ospf(ospf), _area(area), _area_type(area_type)
     {}
 
     /**
@@ -59,8 +59,7 @@ class AreaRouter {
  private:
     Ospf<A>& _ospf;		// Reference to the controlling class.
     Area _area;			// Area: That is represented.
-    bool _border;		// True: If this is the border router.
-    bool _stub;			// True: If this is a stub area.
+    OspfTypes::AreaType _area_type;
 
     set<PeerID>	_peers;		// Peers that this area is associated with.
 };
