@@ -119,7 +119,9 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_bu
 
 # -- Program Sources
 xorp_mld6igmp_SOURCES = xorp_mld6igmp.cc
+
 test_mld6igmp_SOURCES = test_mld6igmp.cc
+test_mld6igmp_LDADD = $(LDADD) $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 
 # -- Library Sources
 libmld6igmp_a_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h mld6igmp_member_query.hh mld6igmp_node.hh mld6igmp_node_cli.hh mld6igmp_private.hh mld6igmp_vif.hh xrl_mld6igmp_node.hh igmp_proto.cc mld6_proto.cc mld6igmp_config.cc mld6igmp_member_query.cc mld6igmp_node.cc mld6igmp_node_cli.cc mld6igmp_proto.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
@@ -150,7 +152,6 @@ PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_test_mld6igmp_OBJECTS = test_mld6igmp.$(OBJEXT)
 test_mld6igmp_OBJECTS = $(am_test_mld6igmp_OBJECTS)
-test_mld6igmp_LDADD = $(LDADD)
 test_mld6igmp_DEPENDENCIES = libmld6igmp.a \
 	$(top_builddir)/xrl/interfaces/libmfeaxif.a \
 	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a \
@@ -172,7 +173,9 @@ test_mld6igmp_DEPENDENCIES = libmld6igmp.a \
 	$(top_builddir)/libxipc/libfinder.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/libfeaclient/libfeaclient.a \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 test_mld6igmp_LDFLAGS =
 am_xorp_mld6igmp_OBJECTS = xorp_mld6igmp.$(OBJEXT)
 xorp_mld6igmp_OBJECTS = $(am_xorp_mld6igmp_OBJECTS)

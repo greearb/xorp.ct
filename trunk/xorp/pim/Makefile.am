@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.11 2003/09/30 20:41:21 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.12 2003/12/04 07:20:04 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -77,6 +77,9 @@ test_pim_SOURCES += $(top_builddir)/rib/rib_manager.cc
 test_pim_SOURCES += $(top_builddir)/rib/xrl_target.hh
 test_pim_SOURCES += $(top_builddir)/rib/xrl_target.cc
 
+test_pim_LDADD	  = $(LDADD)
+test_pim_LDADD	 += $(top_builddir)/libfeaclient/libfeaclient.a
+test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 
 # -- Library Sources
 libpim_a_SOURCES  = pim_module.h
