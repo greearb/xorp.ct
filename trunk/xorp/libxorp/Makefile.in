@@ -106,7 +106,7 @@ test_timer_SOURCES = test_timer.cc
 test_trie_SOURCES = test_trie.cc
 test_types_SOURCES = test_types.cc
 test_vif_SOURCES = test_vif.cc
-libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh selector.hh time_slice.hh timer.hh timeval.hh token.hh transaction.hh trie.hh utils.hh vif.hh debug.c xlog.c asnum.cc asyncio.cc c_format.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc selector.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
+libxorp_a_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh c_format.hh callback.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh ref_ptr.hh selector.hh time_slice.hh timer.hh timeval.hh token.hh transaction.hh trie.hh utils.hh vif.hh debug.c xlog.c asyncio.cc c_format.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc ref_ptr.cc selector.cc time_slice.cc timer.cc token.cc transaction.cc vif.cc
 
 BUILT_SOURCES = callback.hh
 
@@ -122,9 +122,9 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 libxorp_a_LIBADD = 
-libxorp_a_OBJECTS =  debug.o xlog.o asnum.o asyncio.o c_format.o \
-eventloop.o exceptions.o heap.o ipv4.o ipv6.o ipvx.o mac.o nexthop.o \
-ref_ptr.o selector.o time_slice.o timer.o token.o transaction.o vif.o
+libxorp_a_OBJECTS =  debug.o xlog.o asyncio.o c_format.o eventloop.o \
+exceptions.o heap.o ipv4.o ipv6.o ipvx.o mac.o nexthop.o ref_ptr.o \
+selector.o time_slice.o timer.o token.o transaction.o vif.o
 PROGRAMS =  $(noinst_PROGRAMS)
 
 test_asyncio_OBJECTS =  test_asyncio.o
@@ -209,17 +209,16 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/asnum.P .deps/asyncio.P .deps/c_format.P \
-.deps/debug.P .deps/eventloop.P .deps/exceptions.P .deps/heap.P \
-.deps/ipv4.P .deps/ipv6.P .deps/ipvx.P .deps/mac.P .deps/nexthop.P \
-.deps/ref_ptr.P .deps/selector.P .deps/test_asyncio.P \
-.deps/test_callback.P .deps/test_config_param.P .deps/test_ipnet.P \
-.deps/test_ipv4.P .deps/test_ipv4net.P .deps/test_ipv6.P \
-.deps/test_ipv6net.P .deps/test_ipvx.P .deps/test_ipvxnet.P \
-.deps/test_mac.P .deps/test_time_slice.P .deps/test_timer.P \
-.deps/test_trie.P .deps/test_types.P .deps/test_vif.P \
-.deps/time_slice.P .deps/timer.P .deps/token.P .deps/transaction.P \
-.deps/vif.P .deps/xlog.P
+DEP_FILES =  .deps/asyncio.P .deps/c_format.P .deps/debug.P \
+.deps/eventloop.P .deps/exceptions.P .deps/heap.P .deps/ipv4.P \
+.deps/ipv6.P .deps/ipvx.P .deps/mac.P .deps/nexthop.P .deps/ref_ptr.P \
+.deps/selector.P .deps/test_asyncio.P .deps/test_callback.P \
+.deps/test_config_param.P .deps/test_ipnet.P .deps/test_ipv4.P \
+.deps/test_ipv4net.P .deps/test_ipv6.P .deps/test_ipv6net.P \
+.deps/test_ipvx.P .deps/test_ipvxnet.P .deps/test_mac.P \
+.deps/test_time_slice.P .deps/test_timer.P .deps/test_trie.P \
+.deps/test_types.P .deps/test_vif.P .deps/time_slice.P .deps/timer.P \
+.deps/token.P .deps/transaction.P .deps/vif.P .deps/xlog.P
 SOURCES = $(libxorp_a_SOURCES) $(test_asyncio_SOURCES) $(test_callback_SOURCES) $(test_config_param_SOURCES) $(test_ipnet_SOURCES) $(test_ipv4_SOURCES) $(test_ipv4net_SOURCES) $(test_ipv6_SOURCES) $(test_ipv6net_SOURCES) $(test_ipvx_SOURCES) $(test_ipvxnet_SOURCES) $(test_mac_SOURCES) $(test_time_slice_SOURCES) $(test_timer_SOURCES) $(test_trie_SOURCES) $(test_types_SOURCES) $(test_vif_SOURCES)
 OBJECTS = $(libxorp_a_OBJECTS) $(test_asyncio_OBJECTS) $(test_callback_OBJECTS) $(test_config_param_OBJECTS) $(test_ipnet_OBJECTS) $(test_ipv4_OBJECTS) $(test_ipv4net_OBJECTS) $(test_ipv6_OBJECTS) $(test_ipv6net_OBJECTS) $(test_ipvx_OBJECTS) $(test_ipvxnet_OBJECTS) $(test_mac_OBJECTS) $(test_time_slice_OBJECTS) $(test_timer_OBJECTS) $(test_trie_OBJECTS) $(test_types_OBJECTS) $(test_vif_OBJECTS)
 

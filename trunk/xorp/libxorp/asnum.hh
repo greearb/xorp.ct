@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.11 2002/12/09 18:29:10 hodson Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.1.1.1 2002/12/11 23:56:04 hodson Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include <inttypes.h>
 #include <string>
+#include "c_format.hh"
 
 /**
  * @short A class for storing an AS number used by protocols such as BGP
@@ -29,45 +30,39 @@
  * 16 or 32 bits.  Originally, the AS numbers were defined as 16-bit
  * unsigned numbers.  Later the "extended" AS numbers were introduced,
  * which are unsigned 32-bit numbers.
+ *
+ * An AsNum must always be initialized, so the default constructor
+ * is never called.
+ * Also, extended state only depends on the numeric value.
+ * Temporarily we use the constant invalid_As to fill an AsNum
+ * for which we have nothing to store in.
  */
 class AsNum {
 public:
     /**
-     * Default constructor
-     * 
-     * The AS number is set to a value that is invalid: 0xffffffffU,
-     * but defined as non-extended.
+     * in those cases where we really do not know better, initialize
+     * the As number to invalid_As (and is_extended is not set
+     * to true so the vailidity checks will fail).
      */
-    AsNum();
-    
+    static const uint32_t invalid_As = 0xffffffffU;
+
+    AsNum(); // unimplemented
+    // AsNum() : _asnum(invalid_As), _is_extended(false)	{}
+
     /**
      * Constructor for a non-extended AS number.
      * 
      * @param value the value to assign to this AS number.
      */
-    AsNum(uint16_t value);
+    AsNum(uint16_t value) : _asnum(value), _is_extended(false) {}
     
     /**
      * Constructor for an extended AS number.
      * 
      * @param value the value to assign to this AS number.
      */
-    AsNum(uint32_t value);
-    
-    /**
-     * Set the AS number to a non-extended value.
-     * 
-     * @param value the value to assign to this AS number.
-     */
-    void set_asnum(uint16_t value);
-
-    /**
-     * Set the AS number to an extended value.
-     * 
-     * @param value the value to assign to this AS number.
-     */
-    void set_asnum(uint32_t value);
-
+    AsNum(uint32_t value) : _asnum(value), _is_extended(true) {}
+ 
     /**
      * Get the non-extended AS number value.
      * 
@@ -87,7 +82,7 @@ public:
      * 
      * @return true if this is an extended AS number.
      */
-    bool is_extended() const { return _is_extended; };
+    bool is_extended() const			{ return _is_extended; };
     
     /**
      * Equality Operator
@@ -96,7 +91,11 @@ public:
      * @return true if the left-hand operand is numerically same as the
      * right-hand operand.
      */
-    bool operator==(const AsNum& other) const;
+    bool operator==(const AsNum& other) const		{
+	return (_is_extended == other._is_extended &&
+		_asnum == other._asnum);
+    }
+
     
     /**
      * Less-Than Operator
@@ -105,7 +104,9 @@ public:
      * @return true if the left-hand operand is numerically smaller than the
      * right-hand operand.
      */
-    bool operator<(const AsNum& other) const;
+    bool operator<(const AsNum& other) const		{
+	return _asnum < other._asnum;
+    }
     
     /**
      * Test if this AS number is valid.
@@ -122,7 +123,9 @@ public:
      * @return C++ string with the human-readable ASCII representation
      * of the AS number.
      */
-    string str() const;
+    string str() const					{
+	return c_format("AS/%d%s", _asnum, _is_extended ? " extended" : "");
+    }
     
 private:
     inline void force_valid() const { if (is_valid() == false ) abort(); }
