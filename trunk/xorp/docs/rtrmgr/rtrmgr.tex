@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.9 2003/11/17 00:34:37 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.10 2003/11/18 23:06:31 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -195,6 +195,7 @@ protocols ospf {
   %modinfo: depends rib;
   %modinfo: path "ospfd/xorp/ospfd";
   %modinfo: default_targetname "ospf";
+  %mandatory: targetname router-id;
   targetname {
     %set:;
   }
@@ -228,6 +229,11 @@ the following:
     (\eg {\tt \$(ospf.targetname)}) to specify the XRL target.
 
 \end{itemize}
+
+The ``\%mandatory'' annotation contains the list of child nodes or variables
+that must be configured in the user configuration file or that must
+have a default value. In the above example, this applies to variables ``{\tt
+  targetname}'' and ``{\tt router-id}''.
 
 The ``{\tt protocols ospf targetname}'' node carries an annotation to
 specify the existence of variable name ``{\tt targetname}'' that
@@ -310,6 +316,7 @@ they are found to be needed.
 \subsection{Template Tree Commands}
 This section provides a complete listing of all the template tree
 commands that the rtrmgr supports.
+
 \subsubsection{The {\tt \%modinfo} Command.}
 The sub-commands to the {\tt \%modinfo} command are:
 \begin{description}
@@ -364,6 +371,13 @@ specification as an argument.
 If the process does not then transition to {\tt PROC\_SHUTDOWN} state, the
 rtrmgr will then kill the process.
 \end{description}
+
+\subsubsection{The {\tt \%mandatory} Command.}
+{\tt \%mandatory} is used to specify the list of child nodes or variables
+that must be configured in the user configuration file or that must
+have a default value. This command can appear multiple times anywhere in the
+template tree. If it appears multiple times within the same template node,
+then all listed child nodes are mandatory.
 
 \subsubsection{The {\tt \%create} Command.}
 {\tt \%create} is used to create a new instance of an interior node in
