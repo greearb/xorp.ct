@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.13 2003/01/29 05:43:55 rizzo Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.14 2003/01/30 04:15:50 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -181,7 +181,7 @@ PathAttribute::operator<(const PathAttribute& him) const
     // same size, must compare payload
     switch (type()) {
     default:
-	return memcmp(data(), him.data(), size());
+	return (memcmp(data(), him.data(), size()) < 0);
 	break;
 
     case AS_PATH:
