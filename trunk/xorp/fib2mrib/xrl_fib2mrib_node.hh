@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.3 2004/04/12 01:52:22 pavlin Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.4 2004/04/22 01:14:11 pavlin Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -46,7 +46,7 @@ public:
     ~XrlFib2mribNode();
 
     /**
-     * Start the node operation.
+     * Startup the node operation.
      *
      * @return true on success, false on failure.
      */

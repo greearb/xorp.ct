@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.6 2004/04/12 01:52:22 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.7 2004/04/22 01:14:11 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -185,17 +185,15 @@ XrlFib2mribNode::send_fea_fib_client_registration()
 	}
     }
 
-    if (success)
-	return;		// OK
-
-    //
-    // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
-    //
-    _fea_fib_client_registration_timer
-	= Fib2mribNode::eventloop().new_oneoff_after(
+    if (! success) {
+	//
+	// If an error, then start a timer to try again
+	// TODO: XXX: the timer value is hardcoded here!!
+	//
+	_fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+    }
 }
 
 void
@@ -215,10 +213,9 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_erro
     //
     if (_fea_fib_client_registration_timer.scheduled())
 	return;
-    _fea_fib_client_registration_timer
-	= Fib2mribNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+    _fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
+	TimeVal(1, 0),
+	callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
 }
 
 void
@@ -238,10 +235,9 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_erro
     //
     if (_fea_fib_client_registration_timer.scheduled())
 	return;
-    _fea_fib_client_registration_timer
-	= Fib2mribNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+    _fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
+	TimeVal(1, 0),
+	callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
 }
 
 //
@@ -278,11 +274,10 @@ XrlFib2mribNode::send_fea_fib_client_deregistration()
 	}
     }
 
-    if (success)
-	return;		// OK
-
-    Fib2mribNode::set_status(FAILED);
-    Fib2mribNode::update_status();
+    if (! success) {
+	Fib2mribNode::set_status(FAILED);
+	Fib2mribNode::update_status();
+    }
 }
 
 void
@@ -363,17 +358,15 @@ XrlFib2mribNode::send_rib_registration()
 	}
     }
 
-    if (success)
-	return;		// OK
-
-    //
-    // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
-    //
-    _rib_igp_table_registration_timer
-	= Fib2mribNode::eventloop().new_oneoff_after(
+    if (! success) {
+	//
+	// If an error, then start a timer to try again
+	// TODO: XXX: the timer value is hardcoded here!!
+	//
+	_rib_igp_table_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &XrlFib2mribNode::send_rib_registration));
+    }
 }
 
 void
@@ -393,10 +386,9 @@ XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
     //
     if (_rib_igp_table_registration_timer.scheduled())
 	return;
-    _rib_igp_table_registration_timer
-	= Fib2mribNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlFib2mribNode::send_rib_registration));
+    _rib_igp_table_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
+	TimeVal(1, 0),
+	callback(this, &XrlFib2mribNode::send_rib_registration));
 }
 
 void
@@ -416,10 +408,9 @@ XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
     //
     if (_rib_igp_table_registration_timer.scheduled())
 	return;
-    _rib_igp_table_registration_timer
-	= Fib2mribNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlFib2mribNode::send_rib_registration));
+    _rib_igp_table_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
+	TimeVal(1, 0),
+	callback(this, &XrlFib2mribNode::send_rib_registration));
 }
 
 //
@@ -464,11 +455,10 @@ XrlFib2mribNode::send_rib_deregistration()
 	}
     }
 
-    if (success)
-	return;		// OK
-
-    Fib2mribNode::set_status(FAILED);
-    Fib2mribNode::update_status();
+    if (! success) {
+	Fib2mribNode::set_status(FAILED);
+	Fib2mribNode::update_status();
+    }
 }
 
 void
@@ -994,17 +984,16 @@ XrlFib2mribNode::send_rib_route_change()
 	}
     }
 
-    if (success)
-	return;		// OK
-
- error_label:
-    //
-    // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
-    //
-    _inform_rib_queue_timer = Fib2mribNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlFib2mribNode::send_rib_route_change));
+    if (! success) {
+    error_label:
+	//
+	// If an error, then start a timer to try again
+	// TODO: XXX: the timer value is hardcoded here!!
+	//
+	_inform_rib_queue_timer = Fib2mribNode::eventloop().new_oneoff_after(
+	    TimeVal(1, 0),
+	    callback(this, &XrlFib2mribNode::send_rib_route_change));
+    }
 }
 
 void
