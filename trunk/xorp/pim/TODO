@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.23 2003/02/07 00:26:39 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.24 2003/02/07 19:13:21 pavlin Exp $
 #
 
 * IMPL+SPEC: if the current Assert winner neighbor timeout, then
@@ -137,10 +137,6 @@ probably should be replaced with
   there is no entry for it in the PimBsr table, and there is no timer
   running to time it out.
 
-* TESTSUITE:
-  Perform test scenario (Section 4.6 Sending (*,G) Join/Prune Messages, Part G)
-  after test-generation of Assert messages is implemented and tested.
-
 * SPEC+IMPL:
     DR--------R1----RP
          |
@@ -171,9 +167,6 @@ probably should be replaced with
 * IMPL: Make sure that t_joinsuppress is used as appropriate instead
   of t_suppress
 
-* IMPL: The subnets that are allowed for access CLI should not be hard-coded,
-  but should be configurable: PIM, CLI, MFEA, MLD6IGMP.
-  
 * Add this text somewhere else:
   ECN bits setup for PIM Registers.
   Issue: we don't know whether the encapsulating router (the DR in PIM)
@@ -198,6 +191,7 @@ probably should be replaced with
 * IMPL: "show pim join" CLI command should not print
   all info for all entries: e.g, only the (*,G) related
   info should be print for (*,G) entry, and so on.
+
 * TEST: rerun all tests that use "show pim join" command
   up to Section 4.3 (included), so the output examples
   are consistent.
@@ -213,9 +207,12 @@ probably should be replaced with
   do we ignore all other (S,G) and (S,G,rpt) entries within same group
   and message?
 
-* IMPL+TESTSUITE: fix the case when a Prune message is received, but
+* TESTSUITE: in case when a Prune message is received, but
   the router has no (*,*,RP) or (*,G) or (S,G) or (S,G,rpt) matching
-  entry. Currently, a no-info entry is created, but it is never deleted.
+  entry, a no-info entry might be created. The current implementation
+  creates such entry for (S,G,rpt), which is deleted after the pruned
+  interface timeout. Previously, (*,*,RP), (*,G) or (S,G) entries were
+  created as well, and they were never deleted.
   Add the appropriate test scenarion in the testsuite to test that.
 
 * SPEC: correct PruneEcho sending condition: currently the spec
@@ -233,7 +230,7 @@ probably should be replaced with
 * IMPL: add PimConfig class to PimNode.
 
 * IMPL: all signals from the kernel should be parsed by the MFEA
-  before sent to PIM
+  before sent to PIM.
 
 * IMPL: In all *.hh files, use same distance from return argument of a method
   and the method name (this applies everywhere not only PIM).
@@ -256,7 +253,8 @@ probably should be replaced with
   mfc is not deleted; instead, a mfc with olist=NULL is installed when
   leave.
 
-* IMPL: keep a copy of installed dataflow meters in PIM and/or MFEA.
+* IMPL: keep a copy of installed kernel dataflow meters in PIM
+  and/or MFEA (OK?)
 
 * SPEC+IMPL: How to set the outer TTL for PIM Register packets:
   (a) Fixed value (similar to cisco)
@@ -330,9 +328,11 @@ probably should be replaced with
         } else {
 
   
-* IMPL: make sure that the following is implemented:
-Additionally a router sets SPTbit(S,G) to TRUE when it receives an
-Assert(S,G) on RPF_interface(S).
+* SPEC+IMPL: make sure that the following is implemented:
+"Additionally a router sets SPTbit(S,G) to TRUE when it receives an
+Assert(S,G) on RPF_interface(S)."
+However, the Assert-related text says that the SPTbit(S,G) is set to TRUE
+only in case of A6. Which one is accurate?
 
 * SPEC + IMPL:
 "Thus, at the RP, KeepaliveTimer(S,G) should be restarted to ( 3 *
@@ -981,8 +981,6 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
 
 * Add the xlog init stuff
 
-* Cleanup PimVif to use the libxorp/vif.hh
-
 * When the BSR collects all cand. RPs for a prefix, if their number is
   larger than 255, distribute only the best 255 prefixes.
 
@@ -992,8 +990,6 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
   - first parse to determine the zone ID, and then process the rest
 
 * Bug-fix when deleting lists
-
-* Make PimVif and Mld6igmpVif to use Vif as a base class
 
 * TODO: take care of the SZ Timer in the BSR spec: unclear when set,
   what means "always running", etc. See page 8 and 9 of the spec.
@@ -1065,8 +1061,6 @@ for the kernel patches as well.
 
 * PimVif::pim_process() : check whether the destination unicast address
   is my own address.
-
-* Go again through "Rational for Assert Rules" page 63
 
 * See assert macros on page 62 and 63 and rething the implementation whether
   it is correct. Also, I still don't get the lost_assert(S,G,I) extra
