@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/constants.hh,v 1.7 2003/08/01 04:08:11 hodson Exp $
+// $XORP: xorp/rip/constants.hh,v 1.8 2003/08/01 17:10:05 hodson Exp $
 
 #ifndef __RIP_CONSTANTS_HH__
 #define __RIP_CONSTANTS_HH__
@@ -57,6 +57,11 @@ static const uint32_t DEFAULT_INTERQUERY_GAP_MS = 250;
  * host or network.
  */
 static const uint32_t RIP_INFINITY = 16;
+
+/**
+ * Time-To-Live value that should be used for multicast packets.
+ */
+static const uint32_t RIP_TTL = 1;
 
 /**
  * RIP IPv4 protocol port
