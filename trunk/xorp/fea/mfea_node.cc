@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.10 2003/07/16 02:56:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.11 2003/07/29 01:01:47 pavlin Exp $"
 
 
 //
@@ -1747,6 +1747,27 @@ MfeaNode::proto_comm_find_by_module_id(xorp_module_id module_id) const
     for (size_t i = 0; i < _proto_comms.size(); i++) {
 	if (_proto_comms[i] != NULL) {
 	    if (_proto_comms[i]->module_id() == module_id)
+		return (_proto_comms[i]);
+	}
+    }
+    
+    return (NULL);
+}
+
+/**
+ * MfeaNode::proto_comm_find_by_ipproto:
+ * @ipproto: The IP protocol number to search for.
+ * 
+ * Return the #ProtoComm entry that corresponds to @ipproto IP protocol number.
+ * 
+ * Return value: The corresponding #ProtoComm entry if found, otherwise NULL.
+ **/
+ProtoComm *
+MfeaNode::proto_comm_find_by_ipproto(int ipproto) const
+{
+    for (size_t i = 0; i < _proto_comms.size(); i++) {
+	if (_proto_comms[i] != NULL) {
+	    if (_proto_comms[i]->ipproto() == ipproto)
 		return (_proto_comms[i]);
 	}
     }

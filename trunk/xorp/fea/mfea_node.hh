@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.8 2003/06/19 01:24:18 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.9 2003/07/16 02:56:55 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -1182,6 +1182,14 @@ public:
      * @return the corresponding @ref ProtoComm entry if found, otherwise NULL.
      */
     ProtoComm	*proto_comm_find_by_module_id(xorp_module_id module_id) const;
+
+    /**
+     * Find an @ref ProtoComm entry for a given IP protocol number.
+     * 
+     * @param ipproto the IP protocol number ot search for.
+     * @return the corresponding @ref ProtoComm entry if found, otherwise NULL.
+     */
+    ProtoComm	*proto_comm_find_by_ipproto(int ipproto) const;
     
     /**
      * Test if trace log is enabled.
