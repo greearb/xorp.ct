@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.24 2005/03/25 03:53:22 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.25 2005/03/31 19:42:23 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -69,12 +69,19 @@ gmake check
 3.2. NetBSD
 ===========
 
-  * NetBSD-1.6.1:
-    - The code compiles, but some of the internal tests fail.
+  * NetBSD-2.0-current:
+    - The code compiles, and the internal tests appear to succeed.
     - If the compilation fails with the following error:
       "/usr/pkg/bin/bash: Undefined PLT symbol "read" (reloc type = 7, symnum = 92)"
       then just run "gmake" again, and the compilation should continue from
       the point it has failed.
+    - The default datasize limit per user may not be sufficient to compile
+      some parts of the code, hence you may need to increase the datasize
+      limit.  If you see a compilation error like:
+	  ld: final link failed: Memory exhausted
+      then you should increase the data size limit by
+      "limit datasize 200000" in csh/tcsh or "ulimit -d 200000" in sh.
+      If necessary, increase further the datasize limit.
     - The default limit of maximum opened file descriptors per process
       is 64 which may not be sufficient. If you run a XORP program and
       there are errors like:
