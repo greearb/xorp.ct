@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.6 2003/06/05 02:39:36 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.7 2003/10/13 23:32:40 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -72,14 +72,45 @@ public:
      */
     virtual bool get_table6(list<Fte6>& fte_list) = 0;
 
-    int sock(int family);
-    
-protected:
+    /**
+     * Parse information about routing table information received from
+     * the underlying system.
+     * 
+     * The information to parse is in RTM format
+     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
+     * 
+     * @param family the address family to consider only ((e.g., AF_INET
+     * or AF_INET6 for IPv4 and IPv6 respectively).
+     * @param fte_list the list with the Fte entries to store the result.
+     * @param buf the buffer with the data to parse.
+     * @param buf_bytes the size of the data in the buffer.
+     * @return true on success, otherwise false.
+     * @see FteX.
+     */
     bool parse_buffer_rtm(int family, list<FteX>& fte_list, const uint8_t *buf,
 			  size_t buf_bytes);
+
+    /**
+     * Parse information about routing table information received from
+     * the underlying system.
+     * 
+     * The information to parse is in NETLINK format
+     * (e.g., obtained by netlink(7) sockets mechanism).
+     * 
+     * @param family the address family to consider only ((e.g., AF_INET
+     * or AF_INET6 for IPv4 and IPv6 respectively).
+     * @param fte_list the list with the Fte entries to store the result.
+     * @param buf the buffer with the data to parse.
+     * @param buf_bytes the size of the data in the buffer.
+     * @return true on success, otherwise false.
+     * @see FteX.
+     */
     bool parse_buffer_nlm(int family, list<FteX>& fte_list, const uint8_t* buf,
 			  size_t buf_bytes);
     
+protected:
+    int sock(int family);
+
     int	_s4;
     int _s6;
     
