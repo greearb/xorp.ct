@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.32 2003/05/15 23:40:38 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.33 2003/05/16 05:17:59 pavlin Exp $
 #
 
 * PIM SPEC: Address questions by "Suresh Boddapati" <suresh@timetra.com>
@@ -56,16 +56,6 @@ the line
   "OR (RPF_interface(RP)==I AND JoinDesired(*,G)==TRUE"
 probably should be replaced with
   "OR (RPF_interface(RP)==I AND RPTJoinDesired(G)"
-
-* IMPL:
-  TR1----RUT---TR2---TR4---S1
-  a) Send (S,G) Join from TR1 to RUT
-  b) Start S1
-  c) Crash RUT
-  d) Start RUT
-  e) The PimMre and MFC entry in the RUT are with iif=iif toward S, olist=NULL,
-  but they are never timeout (there is no dataflow message from the MFEA).
-  Debug the problem, though it cannot always be reproduced.
 
 * IMPL: what to do when (S,G) packet received on wrong iif, and there
   is no routing entry yet? Currently, PimMrt::receive_data() processing
