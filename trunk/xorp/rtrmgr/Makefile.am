@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.37 2004/12/06 00:18:58 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.38 2004/12/06 01:10:42 mjh Exp $
 ##
 
 # -- Real Programs
@@ -159,54 +159,54 @@ xorp_profiler_LDADD	+= $(LDADD)
 
 #
 # test_templates
-#
-test_templates_SOURCES	 = rtrmgr_module.h
-test_templates_SOURCES	+= y.boot_tab.h
-test_templates_SOURCES	+= y.tplt_tab.h
+# #
+# test_templates_SOURCES	 = rtrmgr_module.h
+# test_templates_SOURCES	+= y.boot_tab.h
+# test_templates_SOURCES	+= y.tplt_tab.h
 
-test_templates_SOURCES	+= command_tree.hh
-test_templates_SOURCES	+= conf_tree.hh
-test_templates_SOURCES	+= conf_tree_node.hh
-test_templates_SOURCES	+= master_conf_tree.hh
-test_templates_SOURCES	+= module_commands.hh
-test_templates_SOURCES	+= generic_module_manager.hh
-test_templates_SOURCES	+= module_manager.hh
-test_templates_SOURCES	+= path_segment.hh
-test_templates_SOURCES	+= rtrmgr_error.hh
-test_templates_SOURCES	+= task.hh
-test_templates_SOURCES	+= template_commands.hh
-test_templates_SOURCES	+= template_tree.hh
-test_templates_SOURCES	+= template_tree_node.hh
-test_templates_SOURCES	+= unexpanded_xrl.hh
-test_templates_SOURCES	+= userdb.hh
-test_templates_SOURCES	+= util.hh
-test_templates_SOURCES	+= xorp_client.hh
-test_templates_SOURCES	+= xrl_rtrmgr_interface.hh
-test_templates_SOURCES	+= xrldb.hh
+# test_templates_SOURCES	+= command_tree.hh
+# test_templates_SOURCES	+= conf_tree.hh
+# test_templates_SOURCES	+= conf_tree_node.hh
+# test_templates_SOURCES	+= master_conf_tree.hh
+# test_templates_SOURCES	+= module_commands.hh
+# test_templates_SOURCES	+= generic_module_manager.hh
+# test_templates_SOURCES	+= module_manager.hh
+# test_templates_SOURCES	+= path_segment.hh
+# test_templates_SOURCES	+= rtrmgr_error.hh
+# test_templates_SOURCES	+= task.hh
+# test_templates_SOURCES	+= template_commands.hh
+# test_templates_SOURCES	+= template_tree.hh
+# test_templates_SOURCES	+= template_tree_node.hh
+# test_templates_SOURCES	+= unexpanded_xrl.hh
+# test_templates_SOURCES	+= userdb.hh
+# test_templates_SOURCES	+= util.hh
+# test_templates_SOURCES	+= xorp_client.hh
+# test_templates_SOURCES	+= xrl_rtrmgr_interface.hh
+# test_templates_SOURCES	+= xrldb.hh
 
-test_templates_SOURCES	+= command_tree.cc
-test_templates_SOURCES	+= conf_tree.cc
-test_templates_SOURCES	+= conf_tree_node.cc
-test_templates_SOURCES	+= lex.boot.cc
-test_templates_SOURCES	+= lex.tplt.cc
-test_templates_SOURCES	+= master_conf_tree.cc
-test_templates_SOURCES	+= module_command.cc
-test_templates_SOURCES	+= generic_module_manager.cc
-test_templates_SOURCES	+= module_manager.cc
-test_templates_SOURCES	+= task.cc
-test_templates_SOURCES	+= template_commands.cc
-test_templates_SOURCES	+= template_tree.cc
-test_templates_SOURCES	+= template_tree_node.cc
-test_templates_SOURCES	+= test_templates.cc
-test_templates_SOURCES	+= unexpanded_xrl.cc
-test_templates_SOURCES	+= util.cc
-test_templates_SOURCES	+= xorp_client.cc
-test_templates_SOURCES	+= xrl_rtrmgr_interface.xx
-test_templates_SOURCES	+= xrldb.cc
-test_templates_SOURCES	+= y.boot_tab.cc
-test_templates_SOURCES	+= y.tplt_tab.cc
+# test_templates_SOURCES	+= command_tree.cc
+# test_templates_SOURCES	+= conf_tree.cc
+# test_templates_SOURCES	+= conf_tree_node.cc
+# test_templates_SOURCES	+= lex.boot.cc
+# test_templates_SOURCES	+= lex.tplt.cc
+# test_templates_SOURCES	+= master_conf_tree.cc
+# test_templates_SOURCES	+= module_command.cc
+# test_templates_SOURCES	+= generic_module_manager.cc
+# test_templates_SOURCES	+= module_manager.cc
+# test_templates_SOURCES	+= task.cc
+# test_templates_SOURCES	+= template_commands.cc
+# test_templates_SOURCES	+= template_tree.cc
+# test_templates_SOURCES	+= template_tree_node.cc
+# test_templates_SOURCES	+= test_templates.cc
+# test_templates_SOURCES	+= unexpanded_xrl.cc
+# test_templates_SOURCES	+= util.cc
+# test_templates_SOURCES	+= xorp_client.cc
+# test_templates_SOURCES	+= xrl_rtrmgr_interface.xx
+# test_templates_SOURCES	+= xrldb.cc
+# test_templates_SOURCES	+= y.boot_tab.cc
+# test_templates_SOURCES	+= y.tplt_tab.cc
 
-test_templates_LDADD	 = $(LDADD)
+# test_templates_LDADD	 = $(LDADD)
 
 #
 # test_sample_config
