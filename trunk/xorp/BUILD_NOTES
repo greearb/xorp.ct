@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.22 2005/03/24 20:16:26 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.23 2005/03/24 21:54:27 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -32,11 +32,11 @@ gmake check
 3.1. FreeBSD
 ============
 
-  * FreeBSD-4.5 and FreeBSD-4.6.2:
+  * FreeBSD-4.5, FreeBSD-4.6.2, FreeBSD-4.6-RELEASE, FreeBSD-4.8-RELEASE:
     - Earlier XORP releases have been developed and tested on those
       platforms.
 
-  * FreeBSD-4.6-RELEASE and FreeBSD-4.8-RELEASE:
+  * FreeBSD-4.9-RELEASE and FreeBSD-4.10-RELEASE:
     - No known issues.
     - The code should compile with the following versions of the
       gcc/g++ compiler: 2.95.4 (default), 3.3.4, and
@@ -53,6 +53,10 @@ gmake check
       appear to succeed.
 
   * FreeBSD-5.2:
+    - The code compiles with the default compiler, and the internal tests
+      appear to succeed.
+
+  * FreeBSD-5.3:
     - The code compiles with the default compiler, and the internal tests
       appear to succeed.
 
@@ -162,12 +166,14 @@ gmake check
       - ncurses (e.g., ncurses-5.3-4.i386.rpm)
     - The code compiles, and the internal tests appear to succeed.
 
+  * Linux Fedora Core2 (kernel 2.6.5-1.358)
+    - The code compiles, but some of the internal tests may fail.
+
 3.5. Mac OS X
 =============
 
-  * OS X 10.3.4 (Darwin 7.4.0)
+  * OS X 10.3.8 (Darwin 7.8.0)
     - gcc version 3.3 20030304 (Apple Computer, Inc. build 1495)
-    - Some of the internal tests may fail.
     - Packet forwarding has never been attempted.
 
 4. Known problems
