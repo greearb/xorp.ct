@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.10 2003/05/22 19:07:48 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.11 2003/06/01 21:37:27 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -32,6 +32,8 @@
 #include "sockutil.hh"
 #include "finder_server.hh"
 #include "permits.hh"
+
+static bool gbl_sig_exit = false;			// Exit signal() recv
 
 static bool
 print_twirl()
@@ -68,7 +70,7 @@ valid_interface(const IPv4& addr)
 	in_addr if_addr;
 	uint16_t flags;
 
-	if (if_probe(n, name, if_addr, flags) == false) 
+	if (if_probe(n, name, if_addr, flags) == false)
 	    continue;
 
 	any_up |= (flags & IFF_UP);
@@ -84,12 +86,33 @@ valid_interface(const IPv4& addr)
     return false;
 }
 
+void
+finder_sig_handler(int s)
+{
+    if (s == SIGHUP) {
+	fprintf(stderr, "SIGHUP received. Exiting.\n");
+    } else if (s == SIGINT) {
+	fprintf(stderr, "SIGINT received. Exiting.\n");
+    } else if (s == SIGTERM) {
+	fprintf(stderr, "SIGTERM received. Exiting.\n");
+    } else {
+	fprintf(stderr, "SIGNAL (%d) received. Exiting.\n", s);
+    }
+    gbl_sig_exit = true;
+}
+
 static void
 finder_main(int argc, char* const argv[])
 {
     bool	run_verbose = false;
     list<IPv4>  bind_addrs;
     uint16_t	bind_port = FINDER_DEFAULT_PORT;
+
+    signal(SIGHUP, finder_sig_handler);
+    signal(SIGINT, finder_sig_handler);
+    signal(SIGTERM, finder_sig_handler);
+
+    signal(SIGPIPE, finder_sig_handler);
 
     int ch;
     while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) {
@@ -189,7 +212,7 @@ finder_main(int argc, char* const argv[])
 	if (run_verbose)
 	    twirl = e.new_periodic(250, callback(print_twirl));
 
-	for (;;) {
+	while (gbl_sig_exit == false) {
 	    e.run();
 	}
     } catch (const InvalidPort& i) {
