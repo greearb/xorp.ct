@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.28 2003/08/28 00:49:40 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.29 2003/11/06 19:48:02 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -71,7 +71,9 @@ Version 0.4		& August 28, 2003  & Modify the ``show pim join''
 			reflect some recent changes to \\
 			&		   & the PIM-SM protocol
 			specification. \\
-Version 0.5		& November 6, 2003 & Added ``last page''.
+Version 0.5		& November 6, 2003 & Added ``last page''. \\
+Version 1.0		& XXXX XX, 2004	   & PIM-SM spec version updated to\\
+			&		   & \verb=draft-ietf-pim-sm-v2-new-09.{ps,tex}=.
 \end{tabular}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -160,23 +162,23 @@ values from the PIM-SM Bootstrap protocol specification.
 % PIM-SM spec values
 %
 \newcommand{\PimsmVersionDefault}{PIM-SMv2}	       % PIM_SM_version_default
-\newcommand{\PimsmLanDelayDefault}{0.5 sec}		% LAN_delay_default
-\newcommand{\PimsmTOverrideDefault}{2.5 sec}		% t_override_default
-\newcommand{\PimsmHelloPeriod}{30 sec}			% Hello_Period
-\newcommand{\PimsmTriggeredHelloDelay}{5 sec}		% Triggered_Hello_Delay
-\newcommand{\PimsmDefaultHelloHoldtime}{105 sec}       % Default_Hello_Holdtime
-\newcommand{\PimsmHelloHoldtime}{105 sec}		% Hello_Holdtime
-\newcommand{\PimsmJPHoldTime}{210}			% J/P_HoldTime
-\newcommand{\PimsmJPOverrideIntervalI}{3 sec}	     % J/P_Override_Interval(I)
-\newcommand{\PimsmAssertOverrideInterval}{3 sec}     % Assert_Override_Interval
-\newcommand{\PimsmAssertTime}{180 sec}			% Assert_Time
-\newcommand{\PimsmTPeriodic}{60 sec}			% t_periodic
-\newcommand{\PimsmTSuppressed}{rand(66, 84) sec}	% t_suppressed
-\newcommand{\PimsmTOverride}{rand(0, 2.5) sec}		% t_override
-\newcommand{\PimsmKeepalivePeriod}{210 sec}		% Keepalive_Period
-\newcommand{\PimsmRPKeepalivePeriod}{185 sec}		% RP_Keepalive_Period
-\newcommand{\PimsmRegisterSuppressionTime}{60 sec}  % Register_Suppression_Time
-\newcommand{\PimsmRegisterProbeTime}{5 sec}		% Register_Probe_Time
+\newcommand{\PimsmLanDelayDefault}{0.5 secs}		% LAN_delay_default
+\newcommand{\PimsmTOverrideDefault}{2.5 secs}		% t_override_default
+\newcommand{\PimsmHelloPeriod}{30 secs}			% Hello_Period
+\newcommand{\PimsmTriggeredHelloDelay}{5 secs}		% Triggered_Hello_Delay
+\newcommand{\PimsmDefaultHelloHoldtime}{105 secs}      % Default_Hello_Holdtime
+\newcommand{\PimsmHelloHoldtime}{105 secs}		% Hello_Holdtime
+\newcommand{\PimsmJPHoldTime}{210 secs}			% J/P_HoldTime
+\newcommand{\PimsmJPOverrideIntervalI}{3 secs}	     % J/P_Override_Interval(I)
+\newcommand{\PimsmAssertOverrideInterval}{3 secs}    % Assert_Override_Interval
+\newcommand{\PimsmAssertTime}{180 secs}			% Assert_Time
+\newcommand{\PimsmTPeriodic}{60 secs}			% t_periodic
+\newcommand{\PimsmTSuppressed}{rand(66, 84) secs}	% t_suppressed
+\newcommand{\PimsmTOverride}{rand(0, 2.5) secs}		% t_override
+\newcommand{\PimsmKeepalivePeriod}{210 secs}		% Keepalive_Period
+\newcommand{\PimsmRPKeepalivePeriod}{185 secs}		% RP_Keepalive_Period
+\newcommand{\PimsmRegisterSuppressionTime}{60 secs} % Register_Suppression_Time
+\newcommand{\PimsmRegisterProbeTime}{5 secs}		% Register_Probe_Time
 
 \begin{table}[h]
 \begin{center}
@@ -186,23 +188,23 @@ Protocol Timer or Variable Name	& Value		\\
 \hline
 \hline
 \verb=PIM_SM_version_default=	& 2		\\	% XXX: no such variable
-\verb=LAN_delay_default=	& 0.5 sec	\\
-\verb=t_override_default=	& 2.5 sec	\\
-\verb=Hello_Period=		& 30 sec	\\
-\verb=Triggered_Hello_Delay=	& 5 sec		\\
-\verb=Default_Hello_Holdtime=	& 105 sec	\\
-\verb=Hello_Holdtime=		& 105 sec	\\
-\verb=J/P_HoldTime=		& 210 sec	\\
-\verb=J/P_Override_Interval(I)=	& 3 sec		\\
-\verb=Assert_Override_Interval=	& 3 sec		\\
-\verb=Assert_Time=		& 180 sec	\\
-\verb=t_periodic=		& 60 sec	\\
-\verb=t_suppressed=		& rand(66, 84) sec \\
-\verb=t_override=		& rand(0, 2.5) sec \\
-\verb=Keepalive_Period=		& 210 sec	\\
-\verb=RP_Keepalive_Period=	& 185 sec	\\
-\verb=Register_Suppression_Time= & 60 sec	\\
-\verb=Register_Probe_Time=	& 5 sec		\\
+\verb=LAN_delay_default=	& 0.5 secs	\\
+\verb=t_override_default=	& 2.5 secs	\\
+\verb=Hello_Period=		& 30 secs	\\
+\verb=Triggered_Hello_Delay=	& 5 secs	\\
+\verb=Default_Hello_Holdtime=	& 105 secs	\\
+\verb=Hello_Holdtime=		& 105 secs	\\
+\verb=J/P_HoldTime=		& 210 secs	\\
+\verb=J/P_Override_Interval(I)=	& 3 secs	\\
+\verb=Assert_Override_Interval=	& 3 secs	\\
+\verb=Assert_Time=		& 180 secs	\\
+\verb=t_periodic=		& 60 secs	\\
+\verb=t_suppressed=		& rand(66, 84) secs \\
+\verb=t_override=		& rand(0, 2.5) secs \\
+\verb=Keepalive_Period=		& 210 secs	\\
+\verb=RP_Keepalive_Period=	& 185 secs	\\
+\verb=Register_Suppression_Time= & 60 secs	\\
+\verb=Register_Probe_Time=	& 5 secs	\\
 \hline
 \end{tabular}
 \caption{PIM-SM base protocol specification timers and default values}
@@ -213,12 +215,12 @@ Protocol Timer or Variable Name	& Value		\\
 %
 % PIM-SM Bootstrap mechanism spec values
 %
-\newcommand{\PimsmBSPeriod}{60 sec}			% BS_Period
-\newcommand{\PimsmBSTimeout}{130 sec}			% BS_Timeout
-\newcommand{\PimsmRandOverride}{weighted\_rand(5.0, 23.0) sec} % rand_override
-\newcommand{\PimsmCRPTimeout}{150 sec}			% C-RP_Timeout
-\newcommand{\PimsmCRPAdvPeriod}{60 sec}			% C-RP-Adv_Period
-\newcommand{\PimsmSZTimeout}{1300 sec}			% SZ_Timeout
+\newcommand{\PimsmBSPeriod}{60 secs}			% BS_Period
+\newcommand{\PimsmBSTimeout}{130 secs}			% BS_Timeout
+\newcommand{\PimsmRandOverride}{weighted\_rand(5.0, 23.0) secs} % rand_override
+\newcommand{\PimsmCRPTimeout}{150 secs}			% C-RP_Timeout
+\newcommand{\PimsmCRPAdvPeriod}{60 secs}		% C-RP-Adv_Period
+\newcommand{\PimsmSZTimeout}{1300 secs}			% SZ_Timeout
 
 \begin{table}[h]
 \begin{center}
@@ -227,12 +229,12 @@ Protocol Timer or Variable Name	& Value		\\
 Protocol Timer or Variable Name	& Value		\\
 \hline
 \hline
-\verb=BS_Period=		& 60 sec	\\
-\verb=BS_Timeout=		& 130 sec	\\
-\verb=rand_override=		& weighted\_rand(5.0, 23.0) sec \\
-\verb=C-RP_Timeout=		& 150 sec	\\
-\verb=C-RP-Adv_Period=		& 60 sec	\\
-\verb=SZ_Timeout=		& 1300 sec	\\
+\verb=BS_Period=		& 60 secs	\\
+\verb=BS_Timeout=		& 130 secs	\\
+\verb=rand_override=		& weighted\_rand(5.0, 23.0) secs \\
+\verb=C-RP_Timeout=		& 150 secs	\\
+\verb=C-RP-Adv_Period=		& 60 secs	\\
+\verb=SZ_Timeout=		& 1300 secs	\\
 \hline
 \end{tabular}
 \caption{PIM-SM Bootstrap protocol specification timers and default values}
@@ -293,7 +295,7 @@ The following documents are referenced in this text:
 
 \begin{itemize}
 
- \item \verb=draft-ietf-pim-sm-v2-new-05.{ps,tex}= -- Protocol Independent
+ \item \verb=draft-ietf-pim-sm-v2-new-09.{ps,tex}= -- Protocol Independent
 		  Multicast - Sparse Mode (PIM-SM): Protocol Specification
 		  (Revised)
 
@@ -350,7 +352,7 @@ implementation in a multicast network.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4
 \end{itemize}
 
 \para{Discussion:}
@@ -466,7 +468,7 @@ Verify that a router properly sends Hello messages.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.3.1
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.3.1
 \end{itemize}
 
 \para{Discussion:}
@@ -534,7 +536,7 @@ adjacency.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.3.1
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.3.1
 \end{itemize}
 
 \para{Discussion:}
@@ -672,7 +674,7 @@ Verify that a router properly receives Hello messages.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Sections 4.3.1, 4.10, and 4.10.2
+  \item draft-ietf-pim-sm-v2-new-09 -- Sections 4.3.1, 4.10, and 4.10.2
 \end{itemize}
 
 \para{Discussion:}
@@ -822,7 +824,7 @@ option.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Sections 4.3.1 and 4.10.2
+  \item draft-ietf-pim-sm-v2-new-09 -- Sections 4.3.1 and 4.10.2
 \end{itemize}
 
 \para{Discussion:}
@@ -1043,7 +1045,7 @@ Priority option.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Sections 4.3.1, 4.3.2, and 4.10.2
+  \item draft-ietf-pim-sm-v2-new-09 -- Sections 4.3.1, 4.3.2, and 4.10.2
 \end{itemize}
 
 \para{Discussion:}
@@ -1284,7 +1286,7 @@ Generation ID option.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Sections 4.3.1 and 4.10.2
+  \item draft-ietf-pim-sm-v2-new-09 -- Sections 4.3.1 and 4.10.2
 \end{itemize}
 
 \para{Discussion:}
@@ -1437,7 +1439,7 @@ even if no Hello message was received.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Sections 4.3.1, and 4.5
+  \item draft-ietf-pim-sm-v2-new-09 -- Sections 4.3.1, and 4.5
   \item draft-ietf-pim-sm-bsr-03 -- Section 3
 \end{itemize}
 
@@ -1570,12 +1572,12 @@ Test sending and receiving of PIM Register messages.
 \para{Overview:}
 The Designated Router (DR) on a LAN or point-to-point link encapsulates
 multicast packets from local sources to the RP for the relevant group
-unless it recently received a Register Stop message for that (S,G) or
-(*,G) from the RP.  When the DR receives a Register Stop message from
-the RP, it starts a Register Stop timer to maintain this state.  Just
-before the Register Stop timer expires, the DR sends a Null-Register
-message to the RP to allow the RP to refresh the Register Stop
-information at the DR.  If the Register Stop timer actually expires, the
+unless it recently received a Register-Stop message for that (S,G) or
+(*,G) from the RP.  When the DR receives a Register-Stop message from
+the RP, it starts a Register-Stop Timer to maintain this state.  Just
+before the Register-Stop Timer expires, the DR sends a Null-Register
+message to the RP to allow the RP to refresh the Register-Stop
+information at the DR.  If the Register-Stop Timer actually expires, the
 DR will resume encapsulating packets from the source to the RP.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1587,7 +1589,7 @@ Verify that a DR properly sends Register messages.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.4.1
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.4.1
 \end{itemize}
 
 \para{Discussion:}
@@ -1661,7 +1663,7 @@ Register messages.}
 
 \end{enumerate}
 
-\subpara{Part D: Handling of RegisterStop(S,G) messages at the DR.}
+\subpara{Part D: Handling of Register-Stop(S,G) messages at the DR.}
 
 \begin{enumerate}
 
@@ -1723,9 +1725,9 @@ forward them to Rx1).
   and unicast them to the RP (TR1, that should decapsulate and forward them to
   Rx1).
 
-  \item After Rx1 is stopped, TR1 should send PIM Register Stop message to
+  \item After Rx1 is stopped, TR1 should send PIM Register-Stop message to
   the RUT for each PIM Register message it receives from the RUT (including
-  the PIM Null Register messages). After receiving the first PIM Register Stop
+  the PIM Null Register messages). After receiving the first PIM Register-Stop
   message, the RUT should stop sending PIM Register messages to the RP (TR1)
   with the encapsulated data packets from S1.
   However, from time to time the RUT should be sending PIM Null Register
@@ -1737,7 +1739,7 @@ forward them to Rx1).
   = ( (0.5 * {\PimsmRegisterSuppressionTime}, 1.5 *
   {\PimsmRegisterSuppressionTime}) - {\PimsmRegisterProbeTime} ). \\
   To each PIM Null Register message, the RP (TR1) should respond with a PIM
-  Register Stop message, therefore the RUT should continue not to encapsulate
+  Register-Stop message, therefore the RUT should continue not to encapsulate
   the data packets from S1.
 
   \item After Rx1 is started again, the RP (TR1) should send an SPT (S,G) Join
@@ -1762,7 +1764,7 @@ or changed.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.4.1
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.4.1
 \end{itemize}
 
 \para{Discussion:}
@@ -1900,10 +1902,10 @@ Group           Source          RP              Flags
   Further, each data packet from S1 should be encapsulated by the RUT in a
   PIM Register message and unicast to the RP (TR1).
 
-  \item After Rx1 is stopped, the RP (TR1) should send PIM Register Stop
+  \item After Rx1 is stopped, the RP (TR1) should send PIM Register-Stop
   message to the RUT for each PIM Register message it receives from the RUT
   (PIM Null Register messages excluded). After the RUT receives the first
-  PIM Register Stop message, the Register tunnel virtual interface to the RP
+  PIM Register-Stop message, the Register tunnel virtual interface to the RP
   (TR1) should be in Prune state:
 
 \begin{verbatim}
@@ -2035,7 +2037,7 @@ Group           Source          RP              Flags
 \para{Possible Problems:}
 In Part B, if the RP-set converges such that the RUT learns that TR2 is the RP
 before TR2 itself, the PIM Register messages the RUT sends to TR2 may result
-in TR2 sending-back PIM Register Stop messages. Those PIM Register Stop
+in TR2 sending-back PIM Register-Stop messages. Those PIM Register-Stop
 messages would change the state for source S1 and group 224.0.1.20 in the RUT
 to Prune, and will stop the PIM Register encapsulation of the data packets
 from S1. Further, after TR2 learns that it is the RP, it may actually send an
@@ -2052,14 +2054,14 @@ Verify that an RP properly receives and decapsulates Register messages.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.4.2
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.4.2
 \end{itemize}
 
 \para{Discussion:}
 If the RP for a multicast group receives Register messages for that group,
 and if there are receivers that have joined that group, the RP decapsulates
 the data packets, and forwards them natively to the receivers. If the
-multicast group has no receivers, the RP sends Register Stop to the originator
+multicast group has no receivers, the RP sends Register-Stop to the originator
 of the Register messages.
 
 \para{Test Setup:}
@@ -2154,9 +2156,9 @@ receiver.}
   RUT). The RUT should decapsulate them, and forward the inner multicast
   packets down the shared multicast tree to Rx1.
 
-  \item After Rx1 is stopped, the RUT should send PIM Register Stop message to
+  \item After Rx1 is stopped, the RUT should send PIM Register-Stop message to
   TR2 for each PIM Register message it receives from the RUT (including
-  the PIM Null Register messages). After receiving the first PIM Register Stop
+  the PIM Null Register messages). After receiving the first PIM Register-Stop
   message, TR2 should stop sending PIM Register messages to the RP (the RUT)
   with the encapsulated data packets from S1.
   However, from time to time TR2 should be sending PIM Null Register
@@ -2168,7 +2170,7 @@ receiver.}
   = ( (0.5 * {\PimsmRegisterSuppressionTime}, 1.5 *
   {\PimsmRegisterSuppressionTime}) - {\PimsmRegisterProbeTime} ). \\
   To each PIM Null Register message, the RP (the RUT) should respond with a
-  PIM Register Stop message, therefore TR2 should continue not to
+  PIM Register-Stop message, therefore TR2 should continue not to
   encapsulate the data packets from S1.
 
   \item After Rx1 is started again, the RUT should send an SPT (S,G) Join
@@ -2185,8 +2187,8 @@ receiver.}
   \item After S1 is started, the first one or few data messages it transmits
   should be encapsulated in PIM Register messages by TR2, and sent to the RP
   (the RUT). The RUT should respond to each PIM Register message with a PIM
-  Register Stop message for source S1 and group 224.0.1.20. After TR2 receives
-  the first Register Stop message, it should stop encapsulating the data
+  Register-Stop message for source S1 and group 224.0.1.20. After TR2 receives
+  the first Register-Stop message, it should stop encapsulating the data
   packets and sending them to the RP (the RUT).
 
   \item From time to time TR2 should be sending PIM Null Register
@@ -2198,7 +2200,7 @@ receiver.}
   = ( (0.5 * {\PimsmRegisterSuppressionTime}, 1.5 *
   {\PimsmRegisterSuppressionTime}) - {\PimsmRegisterProbeTime} ). \\
   To each PIM Null Register message, the RP (the RUT) should respond with a
-  PIM Register Stop message, therefore TR2 should continue not to
+  PIM Register-Stop message, therefore TR2 should continue not to
   encapsulate the data packets from S1.
 
   \item After Rx1 is started, the RUT should send an SPT (S,G) Join message
@@ -2225,8 +2227,8 @@ receiver.}
   should be encapsulated in PIM Register messages by TR2, and sent to the RUT,
   which TR2 thinks is the RP for group 224.0.1.20.
   However, because the RUT is not the RP, it should respond to each PIM
-  Register message with a PIM Register Stop message for source S1 and group
-  224.0.1.20. After TR2 receives the first Register Stop message, it should
+  Register message with a PIM Register-Stop message for source S1 and group
+  224.0.1.20. After TR2 receives the first Register-Stop message, it should
   stop encapsulating the data packets and sending them to the RUT.
 
   \item From time to time TR2 should be sending PIM Null Register
@@ -2238,7 +2240,7 @@ receiver.}
   = ( (0.5 * {\PimsmRegisterSuppressionTime}, 1.5 *
   {\PimsmRegisterSuppressionTime}) - {\PimsmRegisterProbeTime} ). \\
   To each PIM Null Register message, the RUT should respond with a
-  PIM Register Stop message, therefore TR2 should continue not to
+  PIM Register-Stop message, therefore TR2 should continue not to
   encapsulate the data packets from S1.
 
 \end{itemize}
@@ -2287,7 +2289,7 @@ properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.5.1
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.5.1
 \end{itemize}
 
 \para{Discussion:}
@@ -2601,11 +2603,11 @@ Group           Source          RP              Flags
 
   \item After the (*,*,RP) Prune message from TR1 is received by the RUT,
   the (*,*,RP) state machine for the interface that connects the RUT to
-  LAN3 should transition to PrunePending state (the reason that it does
+  LAN3 should transition to Prune-Pending state (the reason that it does
   not transit to NoInfo instead is because the RUT has more than one PIM
   neighbors on that interface).
   After \verb=J/P_Override_Interval(I)= (\PimsmJPOverrideIntervalI),
-  the PrunePending timer on that interface should expire, and the
+  the Prune-Pending Timer on that interface should expire, and the
   (*,*,RP) state machine for the interface should send (*,*,RP) PruneEcho
   on LAN3 and transit to NoInfo
   state (\ie the (*,*,RP) entry in the RUT should expire).
@@ -2624,7 +2626,7 @@ Group           Source          RP              Flags
 
   \item After the (*,*,RP) Prune message from TR1 is received by the RUT,
   the (*,*,RP) state machine for the interface that connects the RUT to
-  LAN3 should transition to PrunePending state (the reason that it does
+  LAN3 should transition to Prune-Pending state (the reason that it does
   not transit to NoInfo instead is because the RUT has more than one PIM
   neighbors on that interface).
   Assuming that TR2 has (*,*,RP) multicast routing entry in Joined state
@@ -2653,7 +2655,7 @@ properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.5.2
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.5.2
 \end{itemize}
 
 \para{Discussion:}
@@ -3000,11 +3002,11 @@ Group           Source          RP              Flags
 
   \item After the (*,G) Prune message from TR1 is received by the RUT,
   the (*,G) state machine for the interface that connects the RUT to
-  LAN3 should transition to PrunePending state (the reason that it does
+  LAN3 should transition to Prune-Pending state (the reason that it does
   not transit to NoInfo instead is because the RUT has more than one PIM
   neighbors on that interface).
   After \verb=J/P_Override_Interval(I)= (\PimsmJPOverrideIntervalI),
-  the PrunePending timer on that interface should expire, and the
+  the Prune-Pending Timer on that interface should expire, and the
   (*,G) state machine for the interface should send (*,G) PruneEcho
   on LAN3 and transit to NoInfo
   state (\ie the (*,G) entry in the RUT should expire).
@@ -3023,7 +3025,7 @@ Group           Source          RP              Flags
 
   \item After the (*,G) Prune message from TR1 is received by the RUT,
   the (*,G) state machine for the interface that connects the RUT to
-  LAN3 should transition to PrunePending state (the reason that it does
+  LAN3 should transition to Prune-Pending state (the reason that it does
   not transit to NoInfo instead is because the RUT has more than one PIM
   neighbors on that interface).
   Assuming that TR2 has (*,G) multicast routing entry in Joined state
@@ -3060,7 +3062,7 @@ properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.5.3
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.5.3
 \end{itemize}
 
 \para{Discussion:}
@@ -3601,11 +3603,11 @@ Group           Source          RP              Flags
 
   \item After the (S,G) Prune message from TR1 is received by the RUT,
   the (S,G) state machine for the interface that connects the RUT to
-  LAN3 should transition to PrunePending state (the reason that it does
+  LAN3 should transition to Prune-Pending state (the reason that it does
   not transit to NoInfo instead is because the RUT has more than one PIM
   neighbors on that interface).
   After \verb=J/P_Override_Interval(I)= (\PimsmJPOverrideIntervalI),
-  the PrunePending timer on that interface should expire, and the
+  the Prune-Pending Timer on that interface should expire, and the
   (S,G) state machine for the interface should send (S,G) PruneEcho
   on LAN3 and transit to NoInfo
   state. This may or may not remove the (S,G) entry itself (see the observable
@@ -3625,7 +3627,7 @@ Group           Source          RP              Flags
 
   \item After the (S,G) Prune message from TR1 is received by the RUT,
   the (S,G) state machine for the interface that connects the RUT to
-  LAN3 should transition to PrunePending state (the reason that it does
+  LAN3 should transition to Prune-Pending state (the reason that it does
   not transit to NoInfo instead is because the RUT has more than one PIM
   neighbors on that interface).
   Assuming that TR2 has (S,G) multicast routing entry in Joined state
@@ -3654,7 +3656,7 @@ properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.5.4
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.5.4
 \end{itemize}
 
 \para{Discussion:}
@@ -3823,7 +3825,7 @@ first-hop router.}
 
   \item After the (S,G,rpt) Prune message is received by the RUT,
   the (S,G,rpt) state machine for the interface that connects the RUT to
-  LAN3 should transition to PrunePending state. The state machine should
+  LAN3 should transition to Prune-Pending state. The state machine should
   remain in that state for \verb=J/P_Override_Interval(I)=
   ({\PimsmJPOverrideIntervalI}). After that it should transition to Prune
   state:
@@ -3836,7 +3838,7 @@ Group           Source          RP              Flags
     Upstream interface (RP):   register_vif
     Upstream MRIB next hop (RP): UNKNOWN
     Upstream RPF'(S,G,rpt):    UNKNOWN
-    Upstream state:            RptNotJoined 
+    Upstream state:            RPTNotJoined 
     Override timer:           -1
     Local receiver include WC: ................
     Joins RP:                  ................
@@ -4087,7 +4089,7 @@ Verify that (*,*,RP) Join/Prune messages are sent properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.5.5
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.5.5
 \end{itemize}
 
 \para{Discussion:}
@@ -4558,7 +4560,7 @@ Verify that (*,G) Join/Prune messages are sent properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.5.6
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.5.6
 \end{itemize}
 
 \para{Discussion:}
@@ -5152,7 +5154,7 @@ Verify that (S,G) Join/Prune messages are sent properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.5.7
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.5.7
 \end{itemize}
 
 \para{Discussion:}
@@ -5892,7 +5894,7 @@ Verify that (S,G,rpt) Prune periodic messages are sent properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.5.8
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.5.8
 \end{itemize}
 
 \para{Discussion:}
@@ -6356,7 +6358,7 @@ Verify that (S,G,rpt) Prune triggered messages are sent properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.5.9
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.5.9
 \end{itemize}
 
 \para{Discussion:}
@@ -7375,7 +7377,7 @@ Group           Source          RP              Flags
     Upstream interface (RP):   dc1
     Upstream MRIB next hop (RP): 10.2.0.2
     Upstream RPF'(S,G,rpt):    10.2.0.2
-    Upstream state:            RptNotJoined 
+    Upstream state:            RPTNotJoined 
     Override timer:           -1
     Local receiver include WC: ..............
     Joins RP:                  ..............
@@ -7475,7 +7477,7 @@ Group           Source          RP              Flags
 \end{itemize}
 
 \para{Possible Problems:}
-% TODO: XXX: after the spec if fixed, remove this?
+% TODO: XXX: PAVPAV: after the spec if fixed, remove this?
 The current protocol specification (draft-ietf-pim-sm-v2-new-05.{txt,ps}) is
 incomplete in 
 specifying whether (*,*,RP) Join messages should include (S,G,rpt) Prune
@@ -7523,7 +7525,7 @@ Verify that the (S,G) Assert state machine operates properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.6.1
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.6.1
 \end{itemize}
 
 \para{Discussion:}
@@ -8183,8 +8185,8 @@ Group           Source          RP              Flags
 \end{verbatim}
 
   In addition, the RUT should store self as AssertWinner(S,G,I), it should
-  store spt\_assert\_metric(S,I) as AssertWinnerMetric(S,G,I), and the assert
-  timer should be set to \newline
+  store spt\_assert\_metric(S,I) as AssertWinnerMetric(S,G,I), and the
+  Assert Timer should be set to \newline
   (\verb=Assert_Time= - \verb=Assert_Override_Interval=)
   ({\PimsmAssertTime} - {\PimsmAssertOverrideInterval}).
   After that, the RUT should continue to forward the data packets from S1 on
@@ -8261,7 +8263,7 @@ Group           Source          RP              Flags
 
   In addition, the RUT should store TR1 as AssertWinner(S,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(S,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(S,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
 
   \item After TR3 transmits the first Assert message on LAN2, the (S,G) Assert
@@ -8317,7 +8319,7 @@ Group           Source          RP              Flags
 
   In addition, the RUT should store TR3 as AssertWinner(S,G,I) for the
   interface that connects the RUT to LAN2, it should store the assert metric
-  of TR3 as AssertWinnerMetric(S,G,I), and the assert timer should be set to
+  of TR3 as AssertWinnerMetric(S,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
 
 \end{itemize}
@@ -8348,7 +8350,7 @@ Group           Source          RP              Flags
   the RUT should transmit an Assert message on LAN1 with the RPT bit set to
   zero, the metric and metric preference set to 100. The (S,G) Assert state
   machine for the interface that connects the RUT to LAN1 should continue to
-  be in I Am Assert Winner state. In addition, the assert timer should be set
+  be in I Am Assert Winner state. In addition, the Assert Timer should be set
   to \newline
   (\verb=Assert_Time= - \verb=Assert_Override_Interval=)
   ({\PimsmAssertTime} - {\PimsmAssertOverrideInterval}).
@@ -8409,7 +8411,7 @@ Group           Source          RP              Flags
 
   In addition, the RUT should store TR1 as AssertWinner(S,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(S,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(S,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   Further, it should stop forwarding the data packets from S1 on LAN1.
 
@@ -8538,7 +8540,7 @@ Group           Source          RP              Flags
 
   In addition, the RUT should store TR1 as AssertWinner(S,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(S,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(S,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   Further, it should stop forwarding the data packets from S1 on LAN1.
 
@@ -8548,7 +8550,7 @@ Group           Source          RP              Flags
 
   In addition, the RUT should store TR1 as AssertWinner(S,G,I) for the
   interface that connects the RUT to LAN1, it should store the new assert
-  metric of TR1 as AssertWinnerMetric(S,G,I), and the assert timer should be
+  metric of TR1 as AssertWinnerMetric(S,G,I), and the Assert Timer should be
   set to (\verb=Assert_Time=) ({\PimsmAssertTime}).
 
 \end{itemize}
@@ -8584,7 +8586,7 @@ The results should be same as in Part I.
 
   \item The (S,G) Assert state machine for the interface that connects the RUT
   to LAN1 should continue to be in I Am Assert Loser state for
-  (\verb=Assert_Time=) ({\PimsmAssertTime}). After that the assert timer for
+  (\verb=Assert_Time=) ({\PimsmAssertTime}). After that the Assert Timer for
   that interface should expire, and the assert state machine should be in No
   Info state.
   Further, the RUT should delete the AssertWinner(S,G,I) and
@@ -8631,7 +8633,7 @@ The results should be same as in Part I.
 
   In addition, the RUT should store TR3 as AssertWinner(S,G,I) for the
   interface that connects the RUT to LAN2, it should store the assert metric
-  of TR3 as AssertWinnerMetric(S,G,I), and the assert timer should be set to
+  of TR3 as AssertWinnerMetric(S,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   The data packets from S1 should continue to be forwarded on LAN1.
 
@@ -8641,7 +8643,7 @@ The results should be same as in Part I.
 
   In addition, the RUT should store TR1 as AssertWinner(S,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(S,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(S,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   Further, it should stop forwarding the data packets from S1 on LAN1.
 
@@ -8678,7 +8680,7 @@ The results should be same as in Part I.
 
   In addition, the RUT should store TR1 as AssertWinner(S,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(S,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(S,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   Further, it should stop forwarding the data packets from S1 on LAN1.
 
@@ -8734,7 +8736,7 @@ The results should be same as in Part I.
 \para{Possible Problems:}
 In Part C, TR1 may transmit two identical Assert messages on LAN1 instead of
 one message. Strictly speaking, according to the PIM-SM spec
-(draft-ietf-pim-sm-v2-new-05), a router would send two Assert messages
+(draft-ietf-pim-sm-v2-new-09), a router would send two Assert messages
 when the first data packet is received on the wrong interface.
 However, an implementation may choose to apply an optimization, and
 transmit only one Assert message instead.
@@ -8748,7 +8750,7 @@ Verify that the (*,G) Assert state machine operates properly.
 
 \para{References:}
 \begin{itemize}
-  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.6.2
+  \item draft-ietf-pim-sm-v2-new-09 -- Section 4.6.2
 \end{itemize}
 
 \para{Discussion:}
@@ -9426,8 +9428,8 @@ Group           Source          RP              Flags
 \end{verbatim}
 
   In addition, the RUT should store self as AssertWinner(*,G,I), it should
-  store rpt\_assert\_metric(G,I) as AssertWinnerMetric(*,G,I), and the assert
-  timer should be set to \newline
+  store rpt\_assert\_metric(G,I) as AssertWinnerMetric(*,G,I), and the
+  Assert Timer should be set to \newline
   (\verb=Assert_Time= - \verb=Assert_Override_Interval=)
   ({\PimsmAssertTime} - {\PimsmAssertOverrideInterval}).
   After that, the RUT should continue to forward the data packets from S1 on
@@ -9492,7 +9494,7 @@ Group           Source          RP              Flags
 
   In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(*,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
 
   \item After TR3 transmits the first Assert message on LAN2, the (*,G) Assert
@@ -9536,7 +9538,7 @@ Group           Source          RP              Flags
 
   In addition, the RUT should store TR3 as AssertWinner(*,G,I) for the
   interface that connects the RUT to LAN2, it should store the assert metric
-  of TR3 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  of TR3 as AssertWinnerMetric(*,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
 
 \end{itemize}
@@ -9567,7 +9569,7 @@ Group           Source          RP              Flags
   the RUT should transmit Assert an message on LAN1 with the RPT bit set to
   one, the metric and metric preference set to 100. The (*,G) Assert state
   machine for the interface that connects the RUT to LAN1 should continue to
-  be in I Am Assert Winner state. In addition, the assert timer should be set
+  be in I Am Assert Winner state. In addition, the Assert Timer should be set
   to \newline
   (\verb=Assert_Time= - \verb=Assert_Override_Interval=)
   ({\PimsmAssertTime} - {\PimsmAssertOverrideInterval}).
@@ -9616,7 +9618,7 @@ Group           Source          RP              Flags
 
   In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(*,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   Further, it should stop forwarding the data packets from S1 on LAN1.
 
@@ -9720,7 +9722,7 @@ Group           Source          RP              Flags
 
   In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(*,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   Further, it should stop forwarding the data packets from S1 on LAN1.
 
@@ -9730,7 +9732,7 @@ Group           Source          RP              Flags
 
   In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
   interface that connects the RUT to LAN1, it should store the new assert
-  metric of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be
+  metric of TR1 as AssertWinnerMetric(*,G,I), and the Assert Timer should be
   set to (\verb=Assert_Time=) ({\PimsmAssertTime}).
 
 \end{itemize}
@@ -9766,7 +9768,7 @@ The results should be same as in Part I.
 
   \item The (*,G) Assert state machine for the interface that connects the RUT
   to LAN1 should continue to be in I Am Assert Loser state for
-  (\verb=Assert_Time=) ({\PimsmAssertTime}). After that the assert timer for
+  (\verb=Assert_Time=) ({\PimsmAssertTime}). After that the Assert Timer for
   that interface should expire, and the assert state machine should be in No
   Info state.
   Further, the RUT should delete the AssertWinner(*,G,I) and
@@ -9812,7 +9814,7 @@ The results should be same as in Part I.
 
   In addition, the RUT should store TR3 as AssertWinner(*,G,I) for the
   interface that connects the RUT to LAN2, it should store the assert metric
-  of TR3 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  of TR3 as AssertWinnerMetric(*,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   The data packets from S1 should continue to be forwarded on LAN1.
 
@@ -9822,7 +9824,7 @@ The results should be same as in Part I.
 
   In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(*,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   Further, it should stop forwarding the data packets from S1 on LAN1.
 
@@ -9859,7 +9861,7 @@ The results should be same as in Part I.
 
   In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(*,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   Further, it should stop forwarding the data packets from S1 on LAN1.
 
@@ -9935,7 +9937,7 @@ The results should be same as in Part I.
 
   In addition, the RUT should store TR1 as AssertWinner(S,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(S,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(S,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
   Further, it should stop forwarding the data packets from S1 on LAN1.
 
@@ -9983,7 +9985,7 @@ The results should be same as in Part I.
 
   In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
   interface that connects the RUT to LAN1, it should store the assert metric
-  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  of TR1 as AssertWinnerMetric(*,G,I), and the Assert Timer should be set to
   (\verb=Assert_Time=) ({\PimsmAssertTime}).
 
   \item After the RUT receives the second Assert message from TR1, the (*,G)
@@ -9998,7 +10000,7 @@ The results should be same as in Part I.
 \para{Possible Problems:}
 In Part C, TR1 may transmit two identical Assert messages on LAN1 instead of
 one message. Strictly speaking, according to the PIM-SM spec
-(draft-ietf-pim-sm-v2-new-05), a router would send two Assert messages
+(draft-ietf-pim-sm-v2-new-09), a router would send two Assert messages
 when the first data packet is received on the wrong interface.
 However, an implementation may choose to apply an optimization, and
 transmit only one Assert message instead.
@@ -13550,7 +13552,7 @@ None.
 
 % \para{References:}
 % \begin{itemize}
-%   \item draft-ietf-pim-sm-v2-new-05 -- Section TODO
+%   \item draft-ietf-pim-sm-v2-new-09 -- Section TODO
 % \end{itemize}
 
 % \para{Discussion:}
