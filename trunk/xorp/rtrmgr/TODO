@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.2 2003/05/10 23:33:17 mjh Exp $
 #
 
 Urgent
@@ -10,7 +10,6 @@ Configure Mode
  - Implement node locking in MasterConfigTree
  - Use node locking to prevent two users editing the same node.
  - Templates need %delete commands adding.
- - Module unloading when relevant config is deleted.
  - Can't delete leaf nodes.
     - Can delete some leaf nodes, but the xorpsh thinks there are still 
       uncommitted changes.
@@ -59,3 +58,6 @@ RESOLVED: restart is detected and user is advised to logout and login again.
  - TemplateTree destructor doesn't clean up properly.
 
 RESOLVED: actually it was correct, the comment was wrong.
+
+ - Module unloading when relevant config is deleted. (Done)
+
