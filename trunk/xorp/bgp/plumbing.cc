@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.16 2003/06/23 22:09:12 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.17 2003/08/06 17:52:55 atanu Exp $"
 
-//#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
@@ -50,7 +50,7 @@ BGPPlumbing::add_peering(PeerHandler* peer_handler)
 {
     int result = 0;
     result |= _v4_plumbing.add_peering(peer_handler);
-    //    result |= _v6_plumbing.add_peering(peer_handler);
+    result |= _v6_plumbing.add_peering(peer_handler);
     return result;
 }
 
@@ -60,7 +60,7 @@ BGPPlumbing::stop_peering(PeerHandler* peer_handler)
     debug_msg("BGPPlumbing::stop_peering\n");
     int result = 0;
     result |= _v4_plumbing.stop_peering(peer_handler);
-    //    result |=_v6_plumbing.stop_peering(peer_handler);
+    result |= _v6_plumbing.stop_peering(peer_handler);
     return result;
 }
 
@@ -70,7 +70,7 @@ BGPPlumbing::peering_went_down(PeerHandler* peer_handler)
     debug_msg("BGPPlumbing::peering_went_down\n");
     int result = 0;
     result |= _v4_plumbing.peering_went_down(peer_handler);
-    //    result |=_v6_plumbing.peering_went_down(peer_handler);
+    result |= _v6_plumbing.peering_went_down(peer_handler);
     return result;
 }
 
@@ -80,7 +80,7 @@ BGPPlumbing::peering_came_up(PeerHandler* peer_handler)
     debug_msg("BGPPlumbing::peering_came_up\n");
     int result = 0;
     result |= _v4_plumbing.peering_came_up(peer_handler);
-    //    result |=_v6_plumbing.peering_came_up(peer_handler);
+    result |= _v6_plumbing.peering_came_up(peer_handler);
     return result;
 }
 
@@ -90,7 +90,7 @@ BGPPlumbing::delete_peering(PeerHandler* peer_handler)
     debug_msg("BGPPlumbing::delete_peering\n");
     int result = 0;
     result |= _v4_plumbing.delete_peering(peer_handler);
-    //    result |=_v6_plumbing.delete_peering(peer_handler);
+    result |= _v6_plumbing.delete_peering(peer_handler);
     return result;
 }
 
@@ -98,6 +98,7 @@ int
 BGPPlumbing::add_route(const InternalMessage<IPv4> &rtmsg, 
 		       PeerHandler* peer_handler) 
 {
+    debug_msg("BGPPlumbing::add_route IPv4\n");
     return _v4_plumbing.add_route(rtmsg, peer_handler);
 }
 
@@ -105,6 +106,7 @@ int
 BGPPlumbing::add_route(const InternalMessage<IPv6> &rtmsg, 
 		       PeerHandler* peer_handler)  
 {
+    debug_msg("BGPPlumbing::add_route IPv6\n");
     return _v6_plumbing.add_route(rtmsg, peer_handler);
 }
 
@@ -153,7 +155,7 @@ BGPPlumbing::push(PeerHandler* peer_handler)
 {
     debug_msg("BGPPlumbing::push\n");
     _v4_plumbing.push(peer_handler);
-    //    _v6_plumbing.push(peer_handler);
+    _v6_plumbing.push(peer_handler);
 }
 
 void
@@ -631,6 +633,8 @@ int
 BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    PeerHandler* peer_handler) 
 {
+    debug_msg("BGPPlumbingAF<A>::add_route\n");
+
     int result = 0;
     RibInTable<A> *rib_in;
     typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
