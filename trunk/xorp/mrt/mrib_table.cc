@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.8 2004/06/10 22:41:28 hodson Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.9 2004/07/28 04:48:06 pavlin Exp $"
 
 
 //
@@ -188,7 +188,6 @@ MribTable::insert(const Mrib& mrib)
 	}
     }
     
-    assert(false);
     XLOG_FATAL("Unexpected internal error adding prefix %s to the "
 	       "Multicast Routing Information Base Table",
 	       mrib.str().c_str());
@@ -216,7 +215,7 @@ MribTable::remove(const IPvXNet& dest_prefix)
     MribLookup *mrib_lookup = find_prefix_mrib_lookup(dest_prefix);
     
     if (mrib_lookup == NULL)
-	return;			// TODO: should we use assert() instead?
+	return;			// TODO: should we return an error instead?
     
     if (mrib_lookup->_mrib != NULL) {
 	delete mrib_lookup->_mrib;
@@ -273,7 +272,7 @@ MribTable::remove_mrib_lookup(MribLookup *mrib_lookup)
 	if (mrib_lookup->_parent->_left_child == mrib_lookup) {
 	    mrib_lookup->_parent->_left_child = NULL;
 	} else {
-	    assert(mrib_lookup->_parent->_right_child == mrib_lookup);
+	    XLOG_ASSERT(mrib_lookup->_parent->_right_child == mrib_lookup);
 	    mrib_lookup->_parent->_right_child = NULL;
 	}
     }
@@ -338,7 +337,7 @@ MribTable::find(const IPvX& lookup_addr) const
 	}
     }
     
-    assert(mrib_lookup->_mrib != NULL);
+    XLOG_ASSERT(mrib_lookup->_mrib != NULL);
     return (mrib_lookup->_mrib);
 }
 
@@ -405,7 +404,6 @@ MribTable::find_prefix_mrib_lookup(const IPvXNet& addr_prefix) const
 	}
     }
     
-    assert(false);
     XLOG_FATAL("Unexpected internal error lookup prefix %s in the "
 	       "Multicast Routing Information Base Table",
 	       addr_prefix.str().c_str());
@@ -542,7 +540,7 @@ MribLookup::get_next() const
 	    parent_mrib_lookup = mrib_lookup->_parent;
 	    continue;
 	}
-	assert(parent_mrib_lookup->_left_child == mrib_lookup);
+	XLOG_ASSERT(parent_mrib_lookup->_left_child == mrib_lookup);
 	if (parent_mrib_lookup->_right_child != NULL)
 	    return (parent_mrib_lookup->_right_child);	// The right child
 	// Go UP
