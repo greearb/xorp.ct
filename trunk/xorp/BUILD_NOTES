@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.16 2004/07/14 13:24:32 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.17 2004/07/16 23:27:10 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -65,7 +65,14 @@ gmake check
       "/usr/pkg/bin/bash: Undefined PLT symbol "read" (reloc type = 7, symnum = 92)"
       then just run "gmake" again, and the compilation should continue from
       the point it has failed.
+    - The default limit of maximum opened file descriptors per process
+      is 64 which may not be sufficient. If you run a XORP program and
+      there are errors like:
 
+	  [ 2004/06/20 22:26:09  ERROR test_pim:31634 LIBCOMM +582 comm_sock.c comm_sock_accept ] Error accepting socket 4: Too many open files
+
+      then you should increase the file descriptors limit by
+      "limit descriptors 400" in tcsh or "ulimit -n 400" in sh.
 
 3.3. OpenBSD
 ============
