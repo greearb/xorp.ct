@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.4 2002/12/17 20:12:25 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.5 2003/01/07 02:36:00 pavlin Exp $"
 
 
 //
@@ -558,7 +558,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		} else {
 		    pim_mre_sg = pim_mrt().pim_mre_find(source_addr,
 							group_addr,
-							lookup_flags, 0);
+							PIM_MRE_SG, 0);
 		}
 		if (pim_mre_sg != NULL)
 		    pim_mre_sg->sg_see_prune_sg_rpt(vif_index, holdtime,
@@ -634,7 +634,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		} else {
 		    pim_mre_sg_rpt = pim_mrt().pim_mre_find(source_addr,
 							    group_addr,
-							    lookup_flags, 0);
+							    PIM_MRE_SG_RPT, 0);
 		}
 		if (pim_mre_sg_rpt != NULL)
 		    pim_mre_sg_rpt->sg_rpt_see_prune_sg(vif_index, holdtime,
