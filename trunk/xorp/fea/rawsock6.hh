@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock6.hh,v 1.2 2004/11/23 00:53:20 pavlin Exp $
+// $XORP: xorp/fea/rawsock6.hh,v 1.3 2004/11/29 07:19:07 bms Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -192,7 +192,7 @@ private:
     FilterRawSocket6 operator=(const FilterRawSocket6&); // Not implemented.
 
 protected:
-    list<InputFilter*> _filters;
+    list<InputFilter*>	_filters;
 };
 
 #endif // __FEA_RAWSOCK6_HH__
