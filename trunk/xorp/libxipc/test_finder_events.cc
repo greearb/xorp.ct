@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.8 2004/06/10 22:41:07 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.9 2004/06/18 17:06:35 hodson Exp $"
 
 #include <list>
 #include <vector>
@@ -52,11 +52,12 @@ static const char *program_return_value = "0 on success, 1 if test error, 2 if i
 // Verbosity level control
 //
 
+
 static bool s_verbose = false;
 bool verbose()                  { return s_verbose; }
 void set_verbose(bool v)        { s_verbose = v; }
 
-#define verbose_log(x...) _verbose_log(__FILE__,__LINE__, x)
+#define verbose_log(x...) _verbose_log(__FUNCTION__,__LINE__, x)
 
 #define _verbose_log(file, line, x...)					\
 do {									\
@@ -70,6 +71,20 @@ do {									\
 	       static_cast<long>(t.tv_usec));				\
 	printf(x);							\
     }									\
+} while(0)
+
+static int ready = 0;
+static bool observing = true;
+#define WAIT_FOR_CALLBACK() 						\
+do {									\
+    ready++;								\
+    verbose_log("up ready: %d\n", ready);				\
+} while(0)
+
+#define CALLBACK_CALLED() 						\
+do {									\
+    ready--;								\
+    verbose_log("down ready: %d\n", ready);				\
 } while(0)
 
 
@@ -96,10 +111,14 @@ public:
     {
 	XLOG_ASSERT(e == XrlError::OKAY());
 	_watches[class_name];
+
+	CALLBACK_CALLED();
     }
 
     void add_class_to_watch(const string& class_name)
     {
+	WAIT_FOR_CALLBACK();
+
 	XrlFinderEventNotifierV0p1Client cl(&_xrl_router);
 	bool r = cl.send_register_class_event_interest(
 			 "finder", _xrl_router.instance_name(), class_name,
@@ -116,10 +135,14 @@ public:
 	map<string,Watch>::iterator wi = _watches.find(class_name);
 	XLOG_ASSERT(wi != _watches.end());
 	_watches.erase(wi);
+
+	CALLBACK_CALLED();
     }
 
     void remove_class_to_watch(const string& class_name)
     {
+	WAIT_FOR_CALLBACK();
+
 	XrlFinderEventNotifierV0p1Client cl(&_xrl_router);
 	bool r = cl.send_deregister_class_event_interest(
 			 "finder", _xrl_router.instance_name(), class_name,
@@ -139,6 +162,7 @@ public:
 	w.instance_names.insert(instance_name);
 	verbose_log("Birth in class \"%s\", it's a \"%s\"\n",
 		    class_name.c_str(), instance_name.c_str());
+	CALLBACK_CALLED();
     }
 
     void death_event(const string& class_name, const string& instance_name)
@@ -151,6 +175,8 @@ public:
 	w.instance_names.erase(si);
 	verbose_log("Death in class \"%s\", it's a \"%s\"\n",
 		    class_name.c_str(), instance_name.c_str());
+
+	CALLBACK_CALLED();
     }
 
     uint32_t instance_count(const string& class_name)
@@ -381,6 +407,10 @@ create_xrl_target(EventLoop*		e,
 		  const char*		class_name,
 		  list<AnXrlTarget*>* store)
 {
+    if (observing) {
+	WAIT_FOR_CALLBACK();
+    }
+
     AnXrlTarget* a = new AnXrlTarget(*e, class_name, finder_addr, finder_port);
     store->push_back(a);
     verbose_log("Creating Xrl target \"%s\" in class \"%s\"\n",
@@ -390,6 +420,8 @@ create_xrl_target(EventLoop*		e,
 static void
 remove_oldest_xrl_target(list<AnXrlTarget*>* store)
 {
+    WAIT_FOR_CALLBACK();;
+
     XLOG_ASSERT(store != 0 && store->empty() == false);
     AnXrlTarget* a = store->front();
     store->pop_front();
@@ -401,6 +433,8 @@ remove_oldest_xrl_target(list<AnXrlTarget*>* store)
 static void
 remove_any_xrl_target(list<AnXrlTarget*>* store)
 {
+    WAIT_FOR_CALLBACK();;
+
     uint32_t n = store->size();
     XLOG_ASSERT(n > 0);
 
@@ -437,15 +471,22 @@ assert_xrl_target_count(list<AnXrlTarget*>* store,
 // cycles.
 //
 static void
-drip_run(EventLoop& e, list<OneoffTimerCallback>& locb)
+drip_run(EventLoop& e, list<OneoffTimerCallback>& locb, bool delay = false)
 {
-    static const uint32_t tstep = 500;
+    static const uint32_t tstep = 5000;
 
     while (locb.empty() == false) {
 	XorpTimer pause = e.new_oneoff_after_ms(tstep, callback(&no_op));
-	while (pause.scheduled()) {
+	while(pause.scheduled()) {
+	    if (!delay && 0 == ready)
+		    break;
 	    e.run();
 	}
+	verbose_log("Events: %d ready: %d scheduled: %d delay %d\n",
+		    e.timer_list_length(), ready, pause.scheduled(), delay);
+	if (0 != ready)
+	    XLOG_WARNING("ready is %d not zero", ready);
+	// XLOG_ASSERT(0 == ready);
 	locb.front()->dispatch();
 	locb.pop_front();
     }
@@ -661,7 +702,9 @@ test4(IPv4		finder_addr,
 				finder_port, "class_a", &tgt_store));
     }
 
-    drip_run(e, locb);
+    observing = false;
+    drip_run(e, locb, true);
+    observing = true;
 
     create_observer(&e, &pfeo, finder_addr, finder_port);
     while (pfeo->xrl_router_ready() == false &&
@@ -710,12 +753,33 @@ static int
 test_main(IPv4		 finder_addr,
 	  uint16_t	 finder_port,
 	  const uint32_t burst_cnt,
-	  bool		 use_internal_finder)
+	  bool		 use_internal_finder, int which)
 {
-    test1(finder_addr, finder_port, burst_cnt, use_internal_finder);
-    test2(finder_addr, finder_port, burst_cnt, use_internal_finder);
-    test3(finder_addr, finder_port, burst_cnt, use_internal_finder);
-    test4(finder_addr, finder_port, burst_cnt, use_internal_finder);
+    switch(which) {
+    case 0:
+	test1(finder_addr, finder_port, burst_cnt, use_internal_finder);
+	ready = 0;
+	test2(finder_addr, finder_port, burst_cnt, use_internal_finder);
+	ready = 0;
+	test3(finder_addr, finder_port, burst_cnt, use_internal_finder);
+	ready = 0;
+	test4(finder_addr, finder_port, burst_cnt, use_internal_finder);
+	break;
+    case 1:
+	test1(finder_addr, finder_port, burst_cnt, use_internal_finder);
+	break;
+    case 2:
+	test2(finder_addr, finder_port, burst_cnt, use_internal_finder);
+	break;
+    case 3:
+	test3(finder_addr, finder_port, burst_cnt, use_internal_finder);
+	break;
+    case 4:
+	test4(finder_addr, finder_port, burst_cnt, use_internal_finder);
+	break;
+    default:
+	XLOG_FATAL("Unknown test");
+    }
 
     return 0;
 }
@@ -759,6 +823,8 @@ usage(const char* progname)
 	    "Set the number of simulated clients\n");
     fprintf(stderr, "  -r <n>                 "
 	    "Set the number of test runs\n");
+    fprintf(stderr, "  -t <n>                 "
+	    "Test number to run\n");
     fprintf(stderr, "  -h                     Display this information\n");
     fprintf(stderr, "  -v                     Verbose output\n");
 }
@@ -828,8 +894,9 @@ main(int argc, char * const argv[])
 
     int ch;
     char* bp = NULL;
+    int which = 0;
 
-    while ((ch = getopt(argc, argv, "F:b:r:hv")) != -1) {
+    while ((ch = getopt(argc, argv, "F:b:r:t:hv")) != -1) {
         switch (ch) {
 	case 'F':
 	    if (parse_finder_arg(optarg, finder_addr, finder_port) == false) {
@@ -851,6 +918,9 @@ main(int argc, char * const argv[])
 		usage(argv[0]);
 		return 1;
 	    }
+	    break;
+	case 't':
+	    which = atoi(optarg);
 	    break;
         case 'v':
             set_verbose(true);
@@ -887,7 +957,7 @@ main(int argc, char * const argv[])
 	    verbose_log("============================\n");
 	    ret_value = test_main(finder_addr, finder_port,
 				  burst_cnt,
-				  use_internal_finder);
+				  use_internal_finder, which);
 	    if (ret_value != 0)
 		break;
 	    iter++;
