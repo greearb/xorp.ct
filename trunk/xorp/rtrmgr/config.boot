@@ -1,4 +1,5 @@
-/* $XORP: xorp/rtrmgr/config.boot,v 1.17 2004/05/13 00:05:31 pavlin Exp $ */
+/*XORP Configuration File*/
+/* $XORP: xorp/rtrmgr/config.boot,v 1.18 2004/05/16 07:15:16 pavlin Exp $ */
 
 /* router config file for tinderbox test on xorp8 */ 
 
