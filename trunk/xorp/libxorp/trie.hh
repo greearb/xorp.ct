@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.9 2003/04/01 18:38:53 hodson Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.10 2003/04/02 04:41:11 hodson Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -193,9 +193,9 @@ public:
 	    // on the right branch if not done already.
 	    if (was_left_child && n->_right) {
 		n = n->_right->leftmost();
-	    } else if (n->_k == root) {
-		// We were right child and parent is root, we're done.
-		return NULL;
+	    }
+	    if (root.contains(n->_k) == false) {
+		 return NULL;
 	    }
 	} while (n->has_payload() == false);	// found a good node.
 	return n;
