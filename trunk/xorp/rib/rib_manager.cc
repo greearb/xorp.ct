@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.17 2003/05/24 23:35:26 mjh Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.18 2003/05/31 23:08:30 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -114,6 +114,7 @@ RibManager::stop(void)
     ProtoState::stop();
  
     _status_code = PROC_SHUTDOWN;
+    _status_reason = "Shutting down";
     status_updater();
     return (XORP_OK);
 }
