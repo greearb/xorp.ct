@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.13 2003/09/24 23:26:03 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.14 2003/11/07 07:42:52 pavlin Exp $
 #
 
 #
@@ -120,7 +120,7 @@ xref()
 #
 kdocify() {
     title="Processing lib $lib"
-    rule=`echo $title | tr '[A-Za-z -]' '='`
+    rule=`echo $title | tr '[A-Za-z0-9_ -]' '='`
     echo "$rule"
     echo "$title"
     echo "$rule"
@@ -343,6 +343,34 @@ kdoc_libxipc()
 }
 
 #
+# xrl_interfaces
+#
+kdoc_xrl_interfaces()
+{
+    lib="xrl-sender-interfaces"
+    desc="Generated code for sending Xrl's to Targets"
+    html_start_page="index.html"
+    files="xrl/interfaces/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc"
+    kdocify
+}
+
+#
+# xrl_targets
+#
+kdoc_xrl_targets()
+{
+    lib="xrl-targets"
+    desc="Generated Xrl Target base classes"
+    html_start_page="index.html"
+    files="xrl/targets/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc"
+    kdocify
+}
+
+#
 # libproto
 #
 kdoc_libproto()
@@ -380,7 +408,7 @@ kdoc_cli()
     html_start_page="index.html"
     files="cli/*.h cli/*.hh"
     excludes=""
-    xref="libxorp libxorp-callback libcomm libxipc libproto"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto"
     kdocify
 }
 
@@ -394,7 +422,7 @@ kdoc_fea()
     html_start_page="index.html"
     files="fea/*.hh"
     excludes="fea/*click*hh"
-    xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto mrt cli "
     kdocify
 }
 
@@ -407,7 +435,7 @@ kdoc_libfeaclient()
     desc="Forwarind Engine Abstraction Library"
     html_start_page="index.html"
     files="libfeaclient/*h"
-    xref="libxorp libxorp-callback libcomm libxipc"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets"
     kdocify
 }
 
@@ -421,7 +449,7 @@ kdoc_mld6igmp()
     html_start_page="index.html"
     files="mld6igmp/*.h mld6igmp/*.hh"
     excludes=""
-    xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea"
+    xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea xrl-interfaces xrl-targets"
     kdocify
 }
 
@@ -435,7 +463,7 @@ kdoc_pim()
     html_start_page="index.html"
     files="pim/*.h pim/*.hh"
     excludes=""
-    xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea mld6igmp"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto mrt cli fea mld6igmp"
     kdocify
 }
 
@@ -449,7 +477,7 @@ kdoc_bgp()
     html_start_page="index.html"
     files="bgp/*.hh"
     excludes="bgp/*test*h"
-    xref="libxorp libxorp-callback libcomm libxipc"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets"
     kdocify
 }
 
@@ -463,7 +491,7 @@ kdoc_mibs()
     html_start_page="index.html"
     files="mibs/*.hh"
     excludes=""
-    xref="libxorp libxipc"
+    xref="libxorp libxipc xrl-interfaces xrl-targets"
     kdocify
 }
 
@@ -477,7 +505,7 @@ kdoc_rib()
     html_start_page="index.html"
     files="rib/*.hh"
     excludes="rib/dummy_register_server.hh rib/parser_direct_cmds.hh rib/parser_xrl_cmds.hh rib/parser.hh"
-    xref="libxorp libxorp-callback libproto"
+    xref="libxorp libxorp-callback xrl-interfaces xrl-targets libproto"
     kdocify
 }
 
@@ -491,7 +519,7 @@ kdoc_rip()
     html_start_page="index.html"
     files="rip/*.hh"
     excludes=""
-    xref="libxorp libxorp-callback"
+    xref="libxorp libxorp-callback libxipc xrl-interfaces xrl-targets libfeaclient"
     kdocify
 }
 
@@ -505,12 +533,13 @@ kdoc_rtrmgr()
     html_start_page="index.html"
     files="rtrmgr/*.hh"
     excludes="rtrmgr/*test*h"
-    xref="libxorp libxorp-callback libcomm libxipc"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets"
     kdocify
 }
 
-KDOC_ALL_TGTS="libxorp callback libcomm libxipc libproto mrt cli fea\
-               libfeaclient mld6igmp pim bgp mibs rib rip rtrmgr"
+KDOC_ALL_TGTS="libxorp callback libcomm libxipc libproto xrl_interfaces \
+	       xrl_targets mrt cli fea libfeaclient mld6igmp pim bgp mibs \
+	       rib rip rtrmgr"
 : ${KDOC_TGTS:=${KDOC_ALL_TGTS}}
 for i in ${KDOC_TGTS} ; do
     kdoc_$i
