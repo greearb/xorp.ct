@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.12 2003/11/10 18:42:47 hodson Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.13 2004/02/12 20:02:43 pavlin Exp $
 ##
 
 ###############################################################################
@@ -35,10 +35,6 @@ libcoordxif_a_SOURCES = coord_xif.hh coord_xif.cc
 noinst_LIBRARIES += libdatainxif.a
 libdatainxif_a_SOURCES = datain_xif.hh datain_xif.cc
 
-# General FEA Interface
-noinst_LIBRARIES += libfeaxif.a
-libfeaxif_a_SOURCES = fea_xif.hh fea_xif.cc
-
 # FEA Client Interface
 noinst_LIBRARIES += libfeaifmgrxif.a
 libfeaifmgrxif_a_SOURCES = fea_ifmgr_xif.hh fea_ifmgr_xif.cc
@@ -57,6 +53,10 @@ libfeaifmgrmirrorxif_a_SOURCES += fea_ifmgr_mirror_xif.cc
 noinst_LIBRARIES += libfeaifmgrreplicatorxif.a
 libfeaifmgrreplicatorxif_a_SOURCES  = fea_ifmgr_replicator_xif.hh
 libfeaifmgrreplicatorxif_a_SOURCES += fea_ifmgr_replicator_xif.cc
+
+# Fib2mrib Interface
+noinst_LIBRARIES += libfib2mribxif.a
+libfib2mribxif_a_SOURCES = fib2mrib_xif.hh fib2mrib_xif.cc
 
 # Forwarding Table Interface Client Interface
 noinst_LIBRARIES += libftixif.a

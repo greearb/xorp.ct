@@ -109,8 +109,6 @@ snmpd2 = @snmpd2@
 
 # Datain client of the test peer interface.
 
-# General FEA Interface
-
 # FEA Client Interface
 
 # FEA Interface Manager Client Interface
@@ -118,6 +116,8 @@ snmpd2 = @snmpd2@
 # FEA Interface Manager Mirror Interface
 
 # FEA Interface Manager Replicator Interface
+
+# Fib2mrib Interface
 
 # Forwarding Table Interface Client Interface
 
@@ -168,7 +168,7 @@ snmpd2 = @snmpd2@
 #
 # Sample Test Client Interface
 #
-noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libsocket4xif.a libsocket4locatorxif.a libsocket4userxif.a libstaticroutesxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
+noinst_LIBRARIES = libbgpmibtrapsxif.a libbgpxif.a libclimanagerxif.a libcliprocessorxif.a libcommonxif.a libcoordxif.a libdatainxif.a libfeaifmgrxif.a libfeaifmgrclientxif.a libfeaifmgrmirrorxif.a libfeaifmgrreplicatorxif.a libfib2mribxif.a libftixif.a libfearawpkt.a libfearawpktclient.a libfinderxif.a libfindereventnotifierxif.a libfindereventobserverxif.a libfinderclientxif.a libmfeaxif.a libmfeaclientxif.a libmld6igmpxif.a libmld6igmpclientxif.a libospfxif.a libpimxif.a libribxif.a libribclientxif.a librtrmgrxif.a librtrmgr_clientxif.a libsocket4xif.a libsocket4locatorxif.a libsocket4userxif.a libstaticroutesxif.a libtestpeerxif.a libxorpifmibxif.a libtestxif.a
 libbgpmibtrapsxif_a_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_a_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_a_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -176,11 +176,11 @@ libcliprocessorxif_a_SOURCES = cli_processor_xif.hh cli_processor_xif.cc
 libcommonxif_a_SOURCES = common_xif.hh common_xif.cc
 libcoordxif_a_SOURCES = coord_xif.hh coord_xif.cc
 libdatainxif_a_SOURCES = datain_xif.hh datain_xif.cc
-libfeaxif_a_SOURCES = fea_xif.hh fea_xif.cc
 libfeaifmgrxif_a_SOURCES = fea_ifmgr_xif.hh fea_ifmgr_xif.cc
 libfeaifmgrclientxif_a_SOURCES = fea_ifmgr_client_xif.hh fea_ifmgr_client_xif.cc
 libfeaifmgrmirrorxif_a_SOURCES = fea_ifmgr_mirror_xif.hh fea_ifmgr_mirror_xif.cc
 libfeaifmgrreplicatorxif_a_SOURCES = fea_ifmgr_replicator_xif.hh fea_ifmgr_replicator_xif.cc
+libfib2mribxif_a_SOURCES = fib2mrib_xif.hh fib2mrib_xif.cc
 libftixif_a_SOURCES = fti_xif.hh fti_xif.cc
 libfearawpkt_a_SOURCES = fea_rawpkt_xif.hh fea_rawpkt_xif.cc
 libfearawpktclient_a_SOURCES = fea_rawpkt_client_xif.hh fea_rawpkt_client_xif.cc
@@ -276,10 +276,10 @@ libfearawpktclient_a_AR = $(AR) cru
 libfearawpktclient_a_LIBADD =
 am_libfearawpktclient_a_OBJECTS = fea_rawpkt_client_xif.$(OBJEXT)
 libfearawpktclient_a_OBJECTS = $(am_libfearawpktclient_a_OBJECTS)
-libfeaxif_a_AR = $(AR) cru
-libfeaxif_a_LIBADD =
-am_libfeaxif_a_OBJECTS = fea_xif.$(OBJEXT)
-libfeaxif_a_OBJECTS = $(am_libfeaxif_a_OBJECTS)
+libfib2mribxif_a_AR = $(AR) cru
+libfib2mribxif_a_LIBADD =
+am_libfib2mribxif_a_OBJECTS = fib2mrib_xif.$(OBJEXT)
+libfib2mribxif_a_OBJECTS = $(am_libfib2mribxif_a_OBJECTS)
 libfinderclientxif_a_AR = $(AR) cru
 libfinderclientxif_a_LIBADD =
 am_libfinderclientxif_a_OBJECTS = finder_client_xif.$(OBJEXT)
@@ -389,7 +389,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/fea_ifmgr_replicator_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/fea_ifmgr_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/fea_rawpkt_client_xif.Po \
-@AMDEP_TRUE@	$(DEPDIR)/fea_rawpkt_xif.Po $(DEPDIR)/fea_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fea_rawpkt_xif.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fib2mrib_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/finder_client_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/finder_event_notifier_xif.Po \
 @AMDEP_TRUE@	$(DEPDIR)/finder_event_observer_xif.Po \
@@ -424,7 +425,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
 	$(libfeaifmgrmirrorxif_a_SOURCES) \
 	$(libfeaifmgrreplicatorxif_a_SOURCES) \
 	$(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) \
-	$(libfearawpktclient_a_SOURCES) $(libfeaxif_a_SOURCES) \
+	$(libfearawpktclient_a_SOURCES) $(libfib2mribxif_a_SOURCES) \
 	$(libfinderclientxif_a_SOURCES) \
 	$(libfindereventnotifierxif_a_SOURCES) \
 	$(libfindereventobserverxif_a_SOURCES) \
@@ -439,7 +440,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) \
 	$(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) \
 	$(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfeaxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libsocket4locatorxif_a_SOURCES) $(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) $(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
+SOURCES = $(libbgpmibtrapsxif_a_SOURCES) $(libbgpxif_a_SOURCES) $(libclimanagerxif_a_SOURCES) $(libcliprocessorxif_a_SOURCES) $(libcommonxif_a_SOURCES) $(libcoordxif_a_SOURCES) $(libdatainxif_a_SOURCES) $(libfeaifmgrclientxif_a_SOURCES) $(libfeaifmgrmirrorxif_a_SOURCES) $(libfeaifmgrreplicatorxif_a_SOURCES) $(libfeaifmgrxif_a_SOURCES) $(libfearawpkt_a_SOURCES) $(libfearawpktclient_a_SOURCES) $(libfib2mribxif_a_SOURCES) $(libfinderclientxif_a_SOURCES) $(libfindereventnotifierxif_a_SOURCES) $(libfindereventobserverxif_a_SOURCES) $(libfinderxif_a_SOURCES) $(libftixif_a_SOURCES) $(libmfeaclientxif_a_SOURCES) $(libmfeaxif_a_SOURCES) $(libmld6igmpclientxif_a_SOURCES) $(libmld6igmpxif_a_SOURCES) $(libospfxif_a_SOURCES) $(libpimxif_a_SOURCES) $(libribclientxif_a_SOURCES) $(libribxif_a_SOURCES) $(librtrmgr_clientxif_a_SOURCES) $(librtrmgrxif_a_SOURCES) $(libsocket4locatorxif_a_SOURCES) $(libsocket4userxif_a_SOURCES) $(libsocket4xif_a_SOURCES) $(libstaticroutesxif_a_SOURCES) $(libtestpeerxif_a_SOURCES) $(libtestxif_a_SOURCES) $(libxorpifmibxif_a_SOURCES)
 
 all: all-am
 
@@ -509,10 +510,10 @@ libfearawpktclient.a: $(libfearawpktclient_a_OBJECTS) $(libfearawpktclient_a_DEP
 	-rm -f libfearawpktclient.a
 	$(libfearawpktclient_a_AR) libfearawpktclient.a $(libfearawpktclient_a_OBJECTS) $(libfearawpktclient_a_LIBADD)
 	$(RANLIB) libfearawpktclient.a
-libfeaxif.a: $(libfeaxif_a_OBJECTS) $(libfeaxif_a_DEPENDENCIES) 
-	-rm -f libfeaxif.a
-	$(libfeaxif_a_AR) libfeaxif.a $(libfeaxif_a_OBJECTS) $(libfeaxif_a_LIBADD)
-	$(RANLIB) libfeaxif.a
+libfib2mribxif.a: $(libfib2mribxif_a_OBJECTS) $(libfib2mribxif_a_DEPENDENCIES) 
+	-rm -f libfib2mribxif.a
+	$(libfib2mribxif_a_AR) libfib2mribxif.a $(libfib2mribxif_a_OBJECTS) $(libfib2mribxif_a_LIBADD)
+	$(RANLIB) libfib2mribxif.a
 libfinderclientxif.a: $(libfinderclientxif_a_OBJECTS) $(libfinderclientxif_a_DEPENDENCIES) 
 	-rm -f libfinderclientxif.a
 	$(libfinderclientxif_a_AR) libfinderclientxif.a $(libfinderclientxif_a_OBJECTS) $(libfinderclientxif_a_LIBADD)
@@ -621,7 +622,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_ifmgr_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_rawpkt_client_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_rawpkt_xif.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_xif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fib2mrib_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_client_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_event_notifier_xif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_event_observer_xif.Po@am__quote@

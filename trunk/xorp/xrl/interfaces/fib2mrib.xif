@@ -1,0 +1,55 @@
+/* $XORP: xorp/xrl/interfaces/static_routes.xif,v 1.1 2004/02/12 20:02:43 pavlin Exp $ */
+
+/*
+ * Fib2mrib XRL interface.
+ */
+
+
+interface fib2mrib/0.1 {
+
+	/**
+	 * Enable/disable/start/stop Fib2mrib.
+	 *
+	 * @param enable if true, then enable Fib2mrib, otherwise
+	 * disable it.
+	 */
+	enable_fib2mrib		? enable:bool
+	start_fib2mrib
+	stop_fib2mrib
+
+	/**
+	 * Add/replace/delete a route.
+	 *
+	 * @param unicast if true, then the route would be used for unicast
+	 * routing.
+	 * @param multicast if true, then the route would be used in the
+	 * MRIB (Multicast Routing Information Base) for multicast purpose
+	 * (e.g., computing the Reverse-Path Forwarding information).
+	 * @param network the network address prefix this route applies to.
+	 * @param nexthop the address of the next-hop router for this route.
+	 * @param metric the metric distance for this route.
+	 */
+	add_route4	? unicast:bool & multicast:bool & network:ipv4net \
+			& nexthop:ipv4 & metric:u32
+
+	add_route6	? unicast:bool & multicast:bool & network:ipv6net \
+			& nexthop:ipv6 & metric:u32
+
+	replace_route4	? unicast:bool & multicast:bool & network:ipv4net \
+			& nexthop:ipv4 & metric:u32
+
+	replace_route6	? unicast:bool & multicast:bool & network:ipv6net \
+			& nexthop:ipv6 & metric:u32
+
+	delete_route4	? unicast:bool & multicast:bool & network:ipv4net
+
+	delete_route6	? unicast:bool & multicast:bool & network:ipv6net
+
+	/**
+	 * Enable/disable the Fib2mrib trace log for all operations.
+	 *
+	 * @param enable if true, then enable the trace log, otherwise
+	 * disable it.
+	 */
+	enable_log_trace_all	? enable:bool
+}
