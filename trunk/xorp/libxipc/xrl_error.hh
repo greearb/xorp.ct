@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_error.hh,v 1.1 2002/12/14 23:43:01 hodson Exp $
+// $XORP: xorp/libxipc/xrl_error.hh,v 1.2 2002/12/19 01:29:13 hodson Exp $
 
 #ifndef	__XRLERROR_HH__
 #define __XRLERROR_HH__
@@ -209,6 +209,11 @@ private:
 inline bool operator==(const XrlError& e1, const XrlError& e2)
 {
     return e1.error_code() == e2.error_code();
+}
+
+inline bool operator!=(const XrlError& e1, const XrlError& e2)
+{
+    return e1.error_code() != e2.error_code();
 }
 
 #endif // __XRLERROR_HH__
