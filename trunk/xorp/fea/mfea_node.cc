@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.3 2003/05/19 06:48:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.4 2003/05/21 05:32:51 pavlin Exp $"
 
 
 //
@@ -36,6 +36,8 @@
 #include "mfea_kernel_messages.hh"
 #include "mfea_vif.hh"
 
+// TODO: XXX: PAVPAVPAV: TEMPORARY HERE!!
+#include "fticonfig.hh"
 
 //
 // Exported variables
@@ -65,18 +67,22 @@
  * for IPv4 and IPv6 respectively).
  * @module_id: The module ID (must be %XORP_MODULE_MFEA).
  * @eventloop: The event loop.
+ * @ftic the @ref FtiConfig entry to use to obtain the routing
+ * table (NOTE (TODO: XXX: PAVPAVPAV: this parameter is only temporary here,
+ * and will be removed in the near future).
  * 
  * MFEA node constructor.
  **/
 MfeaNode::MfeaNode(int family, xorp_module_id module_id,
-		   EventLoop& eventloop)
+		   EventLoop& eventloop, FtiConfig& ftic)
     : ProtoNode<MfeaVif>(family, module_id, eventloop),
     _mfea_mrouter(*this),
     _mrib_table(family),
     _mrib_table_default_metric_preference(MRIB_TABLE_DEFAULT_METRIC_PREFERENCE),
     _mrib_table_default_metric(MRIB_TABLE_DEFAULT_METRIC),
     _mfea_dft(*this),
-    _is_log_trace(true)			// XXX: default to print trace logs
+    _is_log_trace(true),		// XXX: default to print trace logs
+    _ftic(ftic)
 {
     XLOG_ASSERT(module_id == XORP_MODULE_MFEA);
     
@@ -1727,18 +1733,97 @@ MfeaNode::proto_comm_find_by_module_id(xorp_module_id module_id) const
 int
 MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 {
-    int ret_value = XORP_ERROR;
-
-    // TODO: XXX: PAVPAVPAV: IMPLEMENT IT!!!
-    UNUSED(return_mrib_table);
-#if 0
-    ret_value = proto_comm->get_mrib_table(return_mrib_table);
+    Mrib	*mrib_table;
+    int		mrib_table_n = 0;
     
-    if (ret_value < 0)
-	return (XORP_ERROR);
-#endif // 0
+    *return_mrib_table = NULL;
     
-    return (ret_value);
+    switch (family()) {
+    case AF_INET:
+    {
+	list<Fte4> fte_list4;
+	list<Fte4>::iterator iter;
+	
+	if (_ftic.get_table4(fte_list4) != true)
+	    return (XORP_ERROR);
+	mrib_table = new Mrib[fte_list4.size()](family());
+	for (iter = fte_list4.begin(); iter != fte_list4.end(); ++iter) {
+	    Fte4& fte = *iter;
+	    Mrib& mrib = mrib_table[mrib_table_n++];
+	    MfeaVif *mfea_vif;
+	    mrib.set_dest_prefix(IPvXNet(fte.net()));
+	    mrib.set_metric_preference(mrib_table_default_metric_preference().get());
+	    mrib.set_metric(mrib_table_default_metric().get());
+	    mrib.set_next_hop_router_addr(IPvX(fte.gateway()));
+	    
+	    // Get the vif index
+	    mfea_vif = vif_find_direct(mrib.next_hop_router_addr());
+	    if (mfea_vif != NULL) {
+		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
+	    }
+	    // If it didn't work, then try (again) in case it is a LAN addr.
+	    if (mrib.next_hop_vif_index() >= maxvifs()) {
+		mfea_vif = vif_find_direct(mrib.dest_prefix().masked_addr());
+		if (mfea_vif != NULL)
+		    mrib.set_next_hop_vif_index(mfea_vif->vif_index());
+	    }
+	    if (mrib.next_hop_vif_index() >= maxvifs()) {
+		XLOG_WARNING("get_mrib_table() error: "
+			     "cannot find interface toward next-hop "
+			     "router %s for destination %s",
+			     cstring(mrib.next_hop_router_addr()),
+			     cstring(mrib.dest_prefix()));
+	    }
+	}
+	break;
+    }
+#ifdef HAVE_IPV6
+    case AF_INET6:
+    {
+	list<Fte6> fte_list6;
+	list<Fte6>::iterator iter;
+	
+	if (_ftic.get_table6(fte_list6) != true)
+	    return (XORP_ERROR);
+	mrib_table = new Mrib[fte_list6.size()](family());
+	for (iter = fte_list6.begin(); iter != fte_list6.end(); ++iter) {
+	    Fte6& fte = *iter;
+	    Mrib& mrib = mrib_table[mrib_table_n++];
+	    MfeaVif *mfea_vif;
+	    mrib.set_dest_prefix(IPvXNet(fte.net()));
+	    mrib.set_metric_preference(mrib_table_default_metric_preference().get());
+	    mrib.set_metric(mrib_table_default_metric().get());
+	    mrib.set_next_hop_router_addr(IPvX(fte.gateway()));
+	    
+	    // Get the vif index
+	    mfea_vif = vif_find_direct(mrib.next_hop_router_addr());
+	    if (mfea_vif != NULL) {
+		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
+	    }
+	    // If it didn't work, then try (again) in case it is a LAN addr.
+	    if (mrib.next_hop_vif_index() >= maxvifs()) {
+		mfea_vif = vif_find_direct(mrib.dest_prefix().masked_addr());
+		if (mfea_vif != NULL)
+		    mrib.set_next_hop_vif_index(mfea_vif->vif_index());
+	    }
+	    if (mrib.next_hop_vif_index() >= maxvifs()) {
+		XLOG_WARNING("get_mrib_table() error: "
+			     "cannot find interface toward next-hop "
+			     "router %s for destination %s",
+			     cstring(mrib.next_hop_router_addr()),
+			     cstring(mrib.dest_prefix()));
+	    }
+	}
+	break;
+    }
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
+    
+    *return_mrib_table = mrib_table;
+    return (mrib_table_n);
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.2 2003/05/18 03:19:57 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.3 2003/05/19 03:15:18 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -48,8 +48,9 @@ class XrlMfeaNode : public MfeaNode,
 		    public MfeaNodeCli {
 public:
     XrlMfeaNode(int family, xorp_module_id module_id,
-		EventLoop& eventloop, XrlRouter* xrl_router)
-	: MfeaNode(family, module_id, eventloop),
+		EventLoop& eventloop, XrlRouter* xrl_router,
+		FtiConfig& ftic)	// TODO: XXX: PAVPAVPAV: remove ftic
+	: MfeaNode(family, module_id, eventloop, ftic),
 	  XrlMfeaTargetBase(xrl_router),
 	  XrlCommonV0p1Client(xrl_router),
 	  XrlMfeaClientV0p1Client(xrl_router),

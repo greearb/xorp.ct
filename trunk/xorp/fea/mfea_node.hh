@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.2 2003/05/19 00:27:17 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.3 2003/05/19 06:48:37 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -49,6 +49,7 @@ class MfeaVif;
 class ProtoComm;
 class SgCount;
 class VifCount;
+class FtiConfig;	// TODO: XXX: PAVPAVPAV: temporary here!!
 
 // The MFEA node
 /**
@@ -67,8 +68,12 @@ public:
      * @param module_id the module ID (@ref xorp_module_id). Should be
      * equal to XORP_MODULE_MFEA.
      * @param eventloop the event loop to use.
+     * @param ftic the @ref FtiConfig entry to use to obtain the routing
+     * table (NOTE: this parameter is only temporary here, and will
+     * be removed in the near future).
      */
-    MfeaNode(int family, xorp_module_id module_id, EventLoop& eventloop);
+    MfeaNode(int family, xorp_module_id module_id, EventLoop& eventloop,
+	     FtiConfig& ftic);
     
     /**
      * Destructor
@@ -1004,6 +1009,9 @@ private:
     // Debug and test-related state
     //
     bool	_is_log_trace;		// If true, enable XLOG_TRACE()
+    
+    //
+    FtiConfig&	_ftic;			// TODO: XXX: PAVPAVPAV: temp. here!!
 };
 
 
