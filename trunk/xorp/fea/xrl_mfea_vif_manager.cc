@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.9 2003/05/14 10:32:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.1 2003/05/19 03:15:18 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -146,6 +146,8 @@ XrlMfeaVifManager::set_vif_state()
 	Vif* node_vif = _mfea_node.vif_find_by_vif_index(i);
 	if (node_vif == NULL)
 	    continue;
+	if (node_vif->is_pim_register())
+	    continue;		// XXX: don't delete the PIM Register vif
 	if (_vifs_by_name.find(node_vif->name()) == _vifs_by_name.end()) {
 	    // Delete the interface
 	    string vif_name = node_vif->name();
@@ -276,12 +278,12 @@ XrlMfeaVifManager::xrl_result_register_client(const XrlError& e)
 	//
 	// The registration was successful. Now we need to query the
 	// entries that are already there. First, find out the set of
-	// configured interfaces.
+	// all interfaces.
 	//
 	XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_configured_interface_names);
-	_ifmgr_client.send_get_configured_interface_names(_fea_target_name.c_str(),
-							  cb);
+	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_interface_names);
+	_ifmgr_client.send_get_all_interface_names(_fea_target_name.c_str(),
+						   cb);
 	return;
     }
     
@@ -303,7 +305,7 @@ XrlMfeaVifManager::xrl_result_register_client(const XrlError& e)
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_configured_interface_names(
+XrlMfeaVifManager::xrl_result_get_all_interface_names(
     const XrlError& e,
     const XrlAtomList* alist) 
 {
@@ -318,9 +320,9 @@ XrlMfeaVifManager::xrl_result_get_configured_interface_names(
 	    debug_msg("got interface name: %s\n", ifname.c_str());
 	    
 	    XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
-	    cb = callback(this, &XrlMfeaVifManager::xrl_result_get_configured_vif_names, ifname);
-	    _ifmgr_client.send_get_configured_vif_names(_fea_target_name.c_str(),
-							ifname, cb);
+	    cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_vif_names, ifname);
+	    _ifmgr_client.send_get_all_vif_names(_fea_target_name.c_str(),
+						 ifname, cb);
 	    _interfaces_remaining++;
 	}
 	return;
@@ -332,7 +334,7 @@ XrlMfeaVifManager::xrl_result_get_configured_interface_names(
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_configured_vif_names(
+XrlMfeaVifManager::xrl_result_get_all_vif_names(
     const XrlError& e,
     const XrlAtomList* alist,
     string ifname)
@@ -340,7 +342,7 @@ XrlMfeaVifManager::xrl_result_get_configured_vif_names(
     if (_interfaces_remaining == 0) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_configured_vif_names for interface %s",
+		     "get_all_vif_names for interface %s",
 		     ifname.c_str());
 	return;
     }
@@ -359,21 +361,21 @@ XrlMfeaVifManager::xrl_result_get_configured_vif_names(
 	    XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
 	    switch (family()) {
 	    case AF_INET:
-		cb = callback(this, &XrlMfeaVifManager::xrl_result_get_configured_vif_addresses4,
+		cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_vif_addresses4,
 			      ifname, vifname);
-		_ifmgr_client.send_get_configured_vif_addresses4(_fea_target_name.c_str(),
-								 ifname,
-								 vifname,
-								 cb);
+		_ifmgr_client.send_get_all_vif_addresses4(_fea_target_name.c_str(),
+							  ifname,
+							  vifname,
+							  cb);
 		break;
 #ifdef HAVE_IPV6
 	    case AF_INET6:
-		cb = callback(this, &XrlMfeaVifManager::xrl_result_get_configured_vif_addresses6,
+		cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_vif_addresses6,
 			      ifname, vifname);
-		_ifmgr_client.send_get_configured_vif_addresses6(_fea_target_name.c_str(),
-								 ifname,
-								 vifname,
-								 cb);
+		_ifmgr_client.send_get_all_vif_addresses6(_fea_target_name.c_str(),
+							  ifname,
+							  vifname,
+							  cb);
 		break;
 #endif // HAVE_IPV6
 	    default:
@@ -398,7 +400,7 @@ XrlMfeaVifManager::xrl_result_get_configured_vif_names(
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_configured_vif_addresses4(
+XrlMfeaVifManager::xrl_result_get_all_vif_addresses4(
     const XrlError& e,
     const XrlAtomList* alist,
     string ifname,
@@ -407,7 +409,7 @@ XrlMfeaVifManager::xrl_result_get_configured_vif_addresses4(
     if (family() != AF_INET) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_configured_vif_addresses4 for interface %s, vif %s: "
+		     "get_all_vif_addresses4 for interface %s, vif %s: "
 		     "unexpected family",
 		     ifname.c_str(), vifname.c_str());
 	return;
@@ -416,7 +418,7 @@ XrlMfeaVifManager::xrl_result_get_configured_vif_addresses4(
     if (_vifs_remaining == 0) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_configured_vif_addresses4 for interface %s, vif %s",
+		     "get_all_vif_addresses4 for interface %s, vif %s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
@@ -445,7 +447,7 @@ XrlMfeaVifManager::xrl_result_get_configured_vif_addresses4(
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_configured_vif_addresses6(
+XrlMfeaVifManager::xrl_result_get_all_vif_addresses6(
     const XrlError& e,
     const XrlAtomList* alist,
     string ifname,
@@ -467,7 +469,7 @@ XrlMfeaVifManager::xrl_result_get_configured_vif_addresses6(
 	if (is_invalid_family) {
 	    // Unexpected response: invalid address family
 	    XLOG_WARNING("Received unexpected XRL response for "
-			 "get_configured_vif_addresses6 for interface %s, vif %s: "
+			 "get_all_vif_addresses6 for interface %s, vif %s: "
 			 "unexpected family",
 			 ifname.c_str(), vifname.c_str());
 	    return;
@@ -477,7 +479,7 @@ XrlMfeaVifManager::xrl_result_get_configured_vif_addresses6(
     if (_vifs_remaining == 0) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_configured_vif_addresses6 for interface %s, vif %s",
+		     "get_all_vif_addresses6 for interface %s, vif %s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
@@ -666,40 +668,20 @@ XrlMfeaVifManager::vifaddr4_created(const string& ifname,
 	// Get the address flags
 	XorpCallback6<void, const XrlError&, const bool*, const bool*,
 	    const bool*, const bool*, const bool*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_address_flags4,
+	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_address_flags4,
 		      ifname, vifname, addr);
-	_ifmgr_client.send_get_address_flags4(_fea_target_name.c_str(), ifname,
-					      vifname, addr, cb);
+	_ifmgr_client.send_get_all_address_flags4(_fea_target_name.c_str(),
+						  ifname, vifname, addr, cb);
 	_addrs_remaining++;
     }
     
     {
 	// Get the prefix length
 	XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_prefix4,
+	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_prefix4,
 		      ifname, vifname, addr);
-	_ifmgr_client.send_get_prefix4(_fea_target_name.c_str(), ifname,
-				       vifname, addr, cb);
-	_addrs_remaining++;
-    }
-    
-    {
-	// Get the broadcast address
-	XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_broadcast4,
-		      ifname, vifname, addr);
-	_ifmgr_client.send_get_broadcast4(_fea_target_name.c_str(), ifname,
-					  vifname, addr, cb);
-	_addrs_remaining++;
-    }
-    
-    {
-	// Get the endpoint address
-	XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_endpoint4,
-		      ifname, vifname, addr);
-	_ifmgr_client.send_get_endpoint4(_fea_target_name.c_str(), ifname,
-					 vifname, addr, cb);
+	_ifmgr_client.send_get_all_prefix4(_fea_target_name.c_str(), ifname,
+					   vifname, addr, cb);
 	_addrs_remaining++;
     }
 }
@@ -718,54 +700,39 @@ XrlMfeaVifManager::vifaddr6_created(const string& ifname,
 	// Get the address flags
 	XorpCallback5<void, const XrlError&, const bool*,
 	    const bool*, const bool*, const bool*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_address_flags6,
+	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_address_flags6,
 		      ifname, vifname, addr);
-	_ifmgr_client.send_get_address_flags6(_fea_target_name.c_str(), ifname,
-					      vifname, addr, cb);
+	_ifmgr_client.send_get_all_address_flags6(_fea_target_name.c_str(),
+						  ifname, vifname, addr, cb);
 	_addrs_remaining++;
     }
     
     {
 	// Get the prefix length
 	XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_prefix6,
+	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_prefix6,
 		      ifname, vifname, addr);
-	_ifmgr_client.send_get_prefix6(_fea_target_name.c_str(), ifname,
-				       vifname, addr, cb);
-	_addrs_remaining++;
-    }
-    
-    {
-	// Get the broadcast address
-	// XXX: IPv6 doesn't have broadcast addresses, hence we don't do it
-    }
-    
-    {
-	// Get the endpoint address
-	XorpCallback2<void, const XrlError&, const IPv6*>::RefPtr cb;
-	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_endpoint6,
-		      ifname, vifname, addr);
-	_ifmgr_client.send_get_endpoint6(_fea_target_name.c_str(), ifname,
-					 vifname, addr, cb);
+	_ifmgr_client.send_get_all_prefix6(_fea_target_name.c_str(), ifname,
+					   vifname, addr, cb);
 	_addrs_remaining++;
     }
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_address_flags4(const XrlError& e,
-						 const bool* enabled,
-						 const bool* broadcast,
-						 const bool* loopback,
-						 const bool* point_to_point,
-						 const bool* multicast,
-						 string ifname,
-						 string vifname,
-						 IPv4 addr) 
+XrlMfeaVifManager::xrl_result_get_all_address_flags4(const XrlError& e,
+						     const bool* enabled,
+						     const bool* broadcast,
+						     const bool* loopback,
+						     const bool* point_to_point,
+						     const bool* multicast,
+						     string ifname,
+						     string vifname,
+						     IPv4 addr)
 {
     if (family() != AF_INET) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_address_flags4 for interface %s, vif %s: "
+		     "get_all_address_flags4 for interface %s, vif %s: "
 		     "unexpected family",
 		     ifname.c_str(), vifname.c_str());
 	return;
@@ -774,7 +741,7 @@ XrlMfeaVifManager::xrl_result_get_address_flags4(const XrlError& e,
     if (_addrs_remaining == 0) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_address_flags4 for interface %s, vif %s",
+		     "get_all_address_flags4 for interface %s, vif %s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
@@ -795,6 +762,27 @@ XrlMfeaVifManager::xrl_result_get_address_flags4(const XrlError& e,
 	vif->set_loopback(*loopback);
 	vif->set_p2p(*point_to_point);
 	vif->set_multicast_capable(*multicast);
+	
+	if (*broadcast) {
+	    // Get the broadcast address
+	    XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
+	    cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_broadcast4,
+			  ifname, vifname, addr);
+	    _ifmgr_client.send_get_all_broadcast4(_fea_target_name.c_str(),
+						  ifname, vifname, addr, cb);
+	    _addrs_remaining++;
+	}
+	
+	if (*point_to_point) {
+	    // Get the endpoint address
+	    XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr cb;
+	    cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_endpoint4,
+			  ifname, vifname, addr);
+	    _ifmgr_client.send_get_all_endpoint4(_fea_target_name.c_str(),
+						 ifname, vifname, addr, cb);
+	    _addrs_remaining++;
+	}
+	
 	update_state();
 	return;
     }
@@ -811,14 +799,14 @@ XrlMfeaVifManager::xrl_result_get_address_flags4(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_address_flags6(const XrlError& e,
-						 const bool* enabled,
-						 const bool* loopback,
-						 const bool* point_to_point,
-						 const bool* multicast,
-						 string ifname,
-						 string vifname,
-						 IPv6 addr) 
+XrlMfeaVifManager::xrl_result_get_all_address_flags6(const XrlError& e,
+						     const bool* enabled,
+						     const bool* loopback,
+						     const bool* point_to_point,
+						     const bool* multicast,
+						     string ifname,
+						     string vifname,
+						     IPv6 addr)
 {
     //
     // Verify the address family
@@ -836,7 +824,7 @@ XrlMfeaVifManager::xrl_result_get_address_flags6(const XrlError& e,
 	if (is_invalid_family) {
 	    // Unexpected response: invalid address family
 	    XLOG_WARNING("Received unexpected XRL response for "
-			 "get_address_flags6 for interface %s, vif %s: "
+			 "get_all_address_flags6 for interface %s, vif %s: "
 			 "unexpected family",
 			 ifname.c_str(), vifname.c_str());
 	    return;
@@ -846,7 +834,7 @@ XrlMfeaVifManager::xrl_result_get_address_flags6(const XrlError& e,
     if (_addrs_remaining == 0) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_address_flags6 for interface %s, vif %s",
+		     "get_all_address_flags6 for interface %s, vif %s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
@@ -866,6 +854,22 @@ XrlMfeaVifManager::xrl_result_get_address_flags6(const XrlError& e,
 	vif->set_loopback(*loopback);
 	vif->set_p2p(*point_to_point);
 	vif->set_multicast_capable(*multicast);
+	
+	{
+	    // Get the broadcast address
+	    // XXX: IPv6 doesn't have broadcast addresses, hence we don't do it
+	}
+	
+	if (*point_to_point) {
+	    // Get the endpoint address
+	    XorpCallback2<void, const XrlError&, const IPv6*>::RefPtr cb;
+	    cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_endpoint6,
+			  ifname, vifname, addr);
+	    _ifmgr_client.send_get_all_endpoint6(_fea_target_name.c_str(),
+						 ifname, vifname, addr, cb);
+	    _addrs_remaining++;
+	}
+	
 	update_state();
 	return;
     }
@@ -882,15 +886,15 @@ XrlMfeaVifManager::xrl_result_get_address_flags6(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_prefix4(const XrlError& e,
-					  const uint32_t* prefix_len,
-					  string ifname, string vifname,
-					  IPv4 addr) 
+XrlMfeaVifManager::xrl_result_get_all_prefix4(const XrlError& e,
+					      const uint32_t* prefix_len,
+					      string ifname, string vifname,
+					      IPv4 addr) 
 {
     if (family() != AF_INET) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_prefix4 for interface %s, vif %s: "
+		     "get_all_prefix4 for interface %s, vif %s: "
 		     "unexpected family",
 		     ifname.c_str(), vifname.c_str());
 	return;
@@ -899,7 +903,7 @@ XrlMfeaVifManager::xrl_result_get_prefix4(const XrlError& e,
     if (_addrs_remaining == 0) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_prefix4 for interface %s, vif %s",
+		     "get_all_prefix4 for interface %s, vif %s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
@@ -938,10 +942,10 @@ XrlMfeaVifManager::xrl_result_get_prefix4(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_prefix6(const XrlError& e,
-					  const uint32_t* prefix_len,
-					  string ifname, string vifname,
-					  IPv6 addr) 
+XrlMfeaVifManager::xrl_result_get_all_prefix6(const XrlError& e,
+					      const uint32_t* prefix_len,
+					      string ifname, string vifname,
+					      IPv6 addr) 
 {
     //
     // Verify the address family
@@ -959,7 +963,7 @@ XrlMfeaVifManager::xrl_result_get_prefix6(const XrlError& e,
 	if (is_invalid_family) {
 	    // Unexpected response: invalid address family
 	    XLOG_WARNING("Received unexpected XRL response for "
-			 "get_prefix6 for interface %s, vif %s: "
+			 "get_all_prefix6 for interface %s, vif %s: "
 			 "unexpected family",
 			 ifname.c_str(), vifname.c_str());
 	    return;
@@ -969,7 +973,7 @@ XrlMfeaVifManager::xrl_result_get_prefix6(const XrlError& e,
     if (_addrs_remaining == 0) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_prefix6 for interface %s, vif %s",
+		     "get_all_prefix6 for interface %s, vif %s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
@@ -1008,15 +1012,15 @@ XrlMfeaVifManager::xrl_result_get_prefix6(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_broadcast4(const XrlError& e,
-					     const IPv4* broadcast,
-					     string ifname, string vifname,
-					     IPv4 addr) 
+XrlMfeaVifManager::xrl_result_get_all_broadcast4(const XrlError& e,
+						 const IPv4* broadcast,
+						 string ifname, string vifname,
+						 IPv4 addr) 
 {
     if (family() != AF_INET) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_broadcast4 for interface %s, vif %s: "
+		     "get_all_broadcast4 for interface %s, vif %s: "
 		     "unexpected family",
 		     ifname.c_str(), vifname.c_str());
 	return;
@@ -1025,7 +1029,7 @@ XrlMfeaVifManager::xrl_result_get_broadcast4(const XrlError& e,
     if (_addrs_remaining == 0) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_broadcast4 for interface %s, vif %s",
+		     "get_all_broadcast4 for interface %s, vif %s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
@@ -1047,7 +1051,7 @@ XrlMfeaVifManager::xrl_result_get_broadcast4(const XrlError& e,
 	    vif_addr = vif->find_address(IPvX(addr));
 	}
 	XLOG_ASSERT(vif_addr != NULL);
-	vif_addr->set_broadcast_addr(IPvX(addr));
+	vif_addr->set_broadcast_addr(IPvX(*broadcast));
 	update_state();
 	return;
     }
@@ -1064,15 +1068,15 @@ XrlMfeaVifManager::xrl_result_get_broadcast4(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_endpoint4(const XrlError& e,
-					    const IPv4* endpoint,
-					    string ifname, string vifname,
-					    IPv4 addr) 
+XrlMfeaVifManager::xrl_result_get_all_endpoint4(const XrlError& e,
+						const IPv4* endpoint,
+						string ifname, string vifname,
+						IPv4 addr) 
 {
     if (family() != AF_INET) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_endpoint4 for interface %s, vif %s: "
+		     "get_all_endpoint4 for interface %s, vif %s: "
 		     "unexpected family",
 		     ifname.c_str(), vifname.c_str());
 	return;
@@ -1081,7 +1085,7 @@ XrlMfeaVifManager::xrl_result_get_endpoint4(const XrlError& e,
     if (_addrs_remaining == 0) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_endpoint4 for interface %s, vif %s",
+		     "get_all_endpoint4 for interface %s, vif %s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
@@ -1103,7 +1107,7 @@ XrlMfeaVifManager::xrl_result_get_endpoint4(const XrlError& e,
 	    vif_addr = vif->find_address(IPvX(addr));
 	}
 	XLOG_ASSERT(vif_addr != NULL);
-	vif_addr->set_peer_addr(IPvX(addr));
+	vif_addr->set_peer_addr(IPvX(*endpoint));
 	update_state();
 	return;
     }
@@ -1120,15 +1124,15 @@ XrlMfeaVifManager::xrl_result_get_endpoint4(const XrlError& e,
 }
 
 void
-XrlMfeaVifManager::xrl_result_get_endpoint6(const XrlError& e,
-					    const IPv6* endpoint,
-					    string ifname, string vifname,
-					    IPv6 addr) 
+XrlMfeaVifManager::xrl_result_get_all_endpoint6(const XrlError& e,
+						const IPv6* endpoint,
+						string ifname, string vifname,
+						IPv6 addr) 
 {
     if (family() != AF_INET) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_endpoint6 for interface %s, vif %s: "
+		     "get_all_endpoint6 for interface %s, vif %s: "
 		     "unexpected family",
 		     ifname.c_str(), vifname.c_str());
 	return;
@@ -1137,7 +1141,7 @@ XrlMfeaVifManager::xrl_result_get_endpoint6(const XrlError& e,
     if (_addrs_remaining == 0) {
 	// Unexpected response
 	XLOG_WARNING("Received unexpected XRL response for "
-		     "get_endpoint6 for interface %s, vif %s",
+		     "get_all_endpoint6 for interface %s, vif %s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
@@ -1159,7 +1163,7 @@ XrlMfeaVifManager::xrl_result_get_endpoint6(const XrlError& e,
 	    vif_addr = vif->find_address(IPvX(addr));
 	}
 	XLOG_ASSERT(vif_addr != NULL);
-	vif_addr->set_peer_addr(IPvX(addr));
+	vif_addr->set_peer_addr(IPvX(*endpoint));
 	update_state();
 	return;
     }

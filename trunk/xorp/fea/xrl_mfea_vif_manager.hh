@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.9 2003/03/21 01:25:14 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.1 2003/05/19 03:15:18 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_VIF_MANAGER_HH__
 #define __FEA_XRL_MFEA_VIF_MANAGER_HH__
@@ -182,19 +182,19 @@ private:
     void xrl_result_unregister_client(const XrlError& e);
     void register_if_spy();
     void xrl_result_register_client(const XrlError& e);
-    void xrl_result_get_configured_interface_names(const XrlError& e,
-						   const XrlAtomList *alist);
-    void xrl_result_get_configured_vif_names(const XrlError& e,
-					     const XrlAtomList *alist,
-					     string ifname);
-    void xrl_result_get_configured_vif_addresses4(const XrlError& e,
-						  const XrlAtomList *alist,
-						  string ifname,
-						  string vifname);
-    void xrl_result_get_configured_vif_addresses6(const XrlError& e,
-						  const XrlAtomList *alist,
-						  string ifname,
-						  string vifname);
+    void xrl_result_get_all_interface_names(const XrlError& e,
+					    const XrlAtomList *alist);
+    void xrl_result_get_all_vif_names(const XrlError& e,
+				      const XrlAtomList *alist,
+				      string ifname);
+    void xrl_result_get_all_vif_addresses4(const XrlError& e,
+					   const XrlAtomList *alist,
+					   string ifname,
+					   string vifname);
+    void xrl_result_get_all_vif_addresses6(const XrlError& e,
+					   const XrlAtomList *alist,
+					   string ifname,
+					   string vifname);
     void interface_deleted(const string& ifname);
     void vif_deleted(const string& ifname, const string& vifname);
     void vif_created(const string& ifname, const string& vifname);
@@ -202,33 +202,39 @@ private:
 			  const IPv4& addr);
     void vifaddr6_created(const string& ifname, const string& vifname,
 			  const IPv6& addr);
-    void xrl_result_get_address_flags4(const XrlError& e,
-				       const bool* enabled,
-				       const bool* broadcast,
-				       const bool* loopback,
-				       const bool* point_to_point,
-				       const bool* multicast,
-				       string ifname,
-				       string vifname,
-				       IPv4 addr);
-    void xrl_result_get_address_flags6(const XrlError& e,
-				       const bool* enabled,
-				       const bool* loopback,
-				       const bool* point_to_point,
-				       const bool* multicast,
-				       string ifname,
-				       string vifname,
-				       IPv6 addr);
-    void xrl_result_get_prefix4(const XrlError& e, const uint32_t* prefix_len,
-				string ifname, string vifname, IPv4 addr);
-    void xrl_result_get_prefix6(const XrlError& e, const uint32_t* prefix_len,
+    void xrl_result_get_all_address_flags4(const XrlError& e,
+					   const bool* enabled,
+					   const bool* broadcast,
+					   const bool* loopback,
+					   const bool* point_to_point,
+					   const bool* multicast,
+					   string ifname,
+					   string vifname,
+					   IPv4 addr);
+    void xrl_result_get_all_address_flags6(const XrlError& e,
+					   const bool* enabled,
+					   const bool* loopback,
+					   const bool* point_to_point,
+					   const bool* multicast,
+					   string ifname,
+					   string vifname,
+					   IPv6 addr);
+    void xrl_result_get_all_prefix4(const XrlError& e,
+				    const uint32_t* prefix_len,
+				    string ifname, string vifname, IPv4 addr);
+    void xrl_result_get_all_prefix6(const XrlError& e,
+				    const uint32_t* prefix_len,
 				string ifname, string vifname, IPv6 addr);
-    void xrl_result_get_broadcast4(const XrlError& e, const IPv4* broadcast,
-				   string ifname, string vifname, IPv4 addr);
-    void xrl_result_get_endpoint4(const XrlError& e, const IPv4* endpoint,
-				  string ifname, string vifname, IPv4 addr);
-    void xrl_result_get_endpoint6(const XrlError& e, const IPv6* endpoint,
-				  string ifname, string vifname, IPv6 addr);
+    void xrl_result_get_all_broadcast4(const XrlError& e,
+				       const IPv4* broadcast,
+				       string ifname, string vifname,
+				       IPv4 addr);
+    void xrl_result_get_all_endpoint4(const XrlError& e, const IPv4* endpoint,
+				      string ifname, string vifname,
+				      IPv4 addr);
+    void xrl_result_get_all_endpoint6(const XrlError& e, const IPv6* endpoint,
+				      string ifname, string vifname,
+				      IPv6 addr);
     void vifaddr4_deleted(const string& ifname, const string& vifname,
 			  const IPv4& addr);
     void vifaddr6_deleted(const string& ifname, const string& vifname,
