@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_args.hh,v 1.8 2003/10/20 22:37:00 hodson Exp $
+// $XORP: xorp/libxipc/xrl_args.hh,v 1.9 2004/06/10 22:41:10 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_ARGS_HH__
 #define __LIBXIPC_XRL_ARGS_HH__
@@ -250,6 +250,14 @@ public:
     inline const XrlAtom& item(const string& name) const
 	throw (XrlAtomNotFound);
 
+    inline void push_front(const XrlAtom& xa);
+    inline const XrlAtom& front() throw (XrlAtomNotFound);
+    inline void pop_front() throw (XrlAtomNotFound);
+
+    inline void push_back(const XrlAtom& xa);
+    inline const XrlAtom& back() throw (XrlAtomNotFound);
+    inline void pop_back() throw (XrlAtomNotFound);
+
     inline const_iterator begin() const		{ return _args.begin(); }
     inline const_iterator end() const		{ return _args.end(); }
 
@@ -455,5 +463,48 @@ XrlArgs::item(const string& name) const throw (XrlAtomNotFound)
     return operator[](name);
 }
 
+inline void
+XrlArgs::push_front(const XrlAtom& xa)
+{
+    _args.push_front(xa);
+}
+
+inline const XrlAtom&
+XrlArgs::front() throw (XrlAtomNotFound)
+{
+    if (_args.empty())
+	throw XrlAtomNotFound();
+    return _args.front();
+}
+
+inline void
+XrlArgs::pop_front() throw (XrlAtomNotFound)
+{
+    if (_args.empty())
+	throw XrlAtomNotFound();
+    _args.pop_front();
+}
+
+inline void
+XrlArgs::push_back(const XrlAtom& xa)
+{
+    _args.push_back(xa);
+}
+
+inline const XrlAtom&
+XrlArgs::back() throw (XrlAtomNotFound)
+{
+    if (_args.empty())
+	throw XrlAtomNotFound();
+    return _args.back();
+}
+
+inline void
+XrlArgs::pop_back() throw (XrlAtomNotFound)
+{
+    if (_args.empty())
+	throw XrlAtomNotFound();
+    _args.pop_back();
+}
 
 #endif // __LIBXIPC_XRL_ARGS_HH__
