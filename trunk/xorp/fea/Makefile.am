@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.32 2004/02/19 04:33:12 hodson Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.33 2004/03/15 23:34:37 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -127,7 +127,6 @@ test_mfea_LDADD		+= $(top_builddir)/cli/libcli.a
 test_mfea_LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
 test_mfea_LDADD		+= @CLI_CURSES_LIB@
 test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
-test_mfea_LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 test_mfea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
 ### libfeaclient libraries
 test_mfea_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.a

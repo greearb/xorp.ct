@@ -109,7 +109,7 @@ noinst_LIBRARIES = libcli.a
 # -- Libraries and library flags to link the binary programs
 ### CLI libraries
 ### XORP misc libraries
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/interfaces/libcommonxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 test_cli_SOURCES = test_cli.cc
@@ -145,7 +145,6 @@ test_cli_OBJECTS = $(am_test_cli_OBJECTS)
 test_cli_LDADD = $(LDADD)
 test_cli_DEPENDENCIES = libcli.a $(top_builddir)/cli/libtecla/libtecla.a \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.a \
-	$(top_builddir)/xrl/interfaces/libcommonxif.a \
 	$(top_builddir)/xrl/targets/libclibase.a \
 	$(top_builddir)/libproto/libproto.a \
 	$(top_builddir)/libxipc/libfinder.a \

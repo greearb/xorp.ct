@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.17 2004/02/19 05:48:07 hodson Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.18 2004/03/15 23:34:53 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -22,7 +22,6 @@ noinst_LIBRARIES = libmld6igmp.a
 ### MLD6IGMP libraries
 LDADD		 = $(noinst_LIBRARIES)
 #LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
-#LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libmld6igmpbase.a
@@ -36,7 +35,6 @@ LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 # FEA-specific end
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.a
-#LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.a
 ### MRT libraries
@@ -46,7 +44,6 @@ LDADD		+= $(top_builddir)/cli/libcli.a
 LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
 LDADD		+= @CLI_CURSES_LIB@
 LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
-LDADD		+= $(top_builddir)/xrl/interfaces/libcommonxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
 ### XORP misc libraries
 LDADD		+= $(top_builddir)/libproto/libproto.a
