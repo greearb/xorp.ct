@@ -1,6 +1,14 @@
 #
-# $XORP: xorp/pim/TODO,v 1.42 2003/06/24 20:38:22 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.43 2003/06/26 00:54:13 pavlin Exp $
 #
+
+* IMPL+SPEC: if a data packet arrives on interface I, and both
+  CouldAssert(S,G,I) and CouldAssert(*,G,I) are true,
+  then should both assert-state machines for (S,G) and (*,G)
+  transition? Or should the (*,G) assert-state machine transition
+  when a data packet arrives ONLY if the (S,G) assert state machine
+  is in NoInfo state AND the data packet arrival didn't trigger
+  any (S,G) assert-state machine. Maybe the latter one?
 
 * IMPL: Implement the upstream (*,G) and (S,G) spec modifications
   regarding "RPF'(*,G) changes" -> "RPF'(*,G) changes due to an Assert"
