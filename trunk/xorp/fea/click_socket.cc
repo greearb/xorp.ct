@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.6 2004/11/23 00:53:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.7 2004/11/29 04:10:15 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -60,12 +60,17 @@ ClickSocket::ClickSocket(EventLoop& eventloop)
 
 ClickSocket::~ClickSocket()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the Click socket: %s", error_msg.c_str());
+    }
+
     XLOG_ASSERT(_ol.empty());
 }
 
 int
-ClickSocket::start()
+ClickSocket::start(string& error_msg)
 {
     if (is_kernel_click()) {
 	//
@@ -90,7 +95,7 @@ ClickSocket::start()
 		arguments += " " + _user_click_command_extra_arguments;
 
 	    if (execute_user_click_command(command, arguments) != XORP_OK) {
-		XLOG_ERROR("Could not execute the user-level Click");
+		error_msg = c_format("Could not execute the user-level Click");
 		return (XORP_ERROR);
 	    }
 	}
@@ -131,8 +136,8 @@ ClickSocket::start()
 			     strerror(errno));
 		continue;
 	    }
-	    XLOG_ERROR("Could not open user-level Click socket: %s",
-		       strerror(errno));
+	    error_msg = c_format("Could not open user-level Click socket: %s",
+				 strerror(errno));
 	    terminate_user_click_command();
 	    return (XORP_ERROR);
 	} while (true);
@@ -141,10 +146,10 @@ ClickSocket::start()
 	// Read the expected banner
 	//
 	vector<uint8_t> message;
-	string errmsg;
-	if (force_read_message(message, errmsg) != XORP_OK) {
-	    XLOG_ERROR("Could not read on startup from user-level Click "
-		       "socket: %s", errmsg.c_str());
+	string error_msg2;
+	if (force_read_message(message, error_msg2) != XORP_OK) {
+	    error_msg = c_format("Could not read on startup from user-level "
+				 "Click socket: %s", error_msg2.c_str());
 	    terminate_user_click_command();
 	    comm_close(_fd);
 	    _fd = -1;
@@ -165,7 +170,8 @@ ClickSocket::start()
 	    // Find the version number and check it.
 	    slash1 = banner.find('/');
 	    if (slash1 == string::npos) {
-		XLOG_ERROR("Invalid Click banner: %s", banner.c_str());
+		error_msg = c_format("Invalid Click banner: %s",
+				     banner.c_str());
 		goto error_label;
 	    }
 	    slash2 = banner.find('/', slash1 + 1);
@@ -176,7 +182,8 @@ ClickSocket::start()
 
 	    dot1 = version.find('.');
 	    if (dot1 == string::npos) {
-		XLOG_ERROR("Invalid Click version: %s", version.c_str());
+		error_msg = c_format("Invalid Click version: %s",
+				     version.c_str());
 		goto error_label;
 	    }
 	    dot2 = version.find('.', dot1 + 1);
@@ -188,8 +195,9 @@ ClickSocket::start()
 	    if ((major < CLICK_MAJOR_VERSION)
 		|| ((major == CLICK_MAJOR_VERSION)
 		    && (minor < CLICK_MINOR_VERSION))) {
-		XLOG_ERROR("Invalid Click version: expected at least %d.%d "
-			   "(found %s)",
+		error_msg = c_format("Invalid Click version: "
+				     "expected at least %d.%d "
+				     "(found %s)",
 			   CLICK_MAJOR_VERSION, CLICK_MINOR_VERSION,
 			   version.c_str());
 		goto error_label;
@@ -209,7 +217,8 @@ ClickSocket::start()
 	if (_eventloop.add_selector(_fd, SEL_RD,
 				    callback(this, &ClickSocket::select_hook))
 	    == false) {
-	    XLOG_ERROR("Failed to add user-level Click socket to EventLoop");
+	    error_msg = c_format("Failed to add user-level Click socket "
+				 "to EventLoop");
 	    terminate_user_click_command();
 	    comm_close(_fd);
 	    _fd = -1;
@@ -221,11 +230,30 @@ ClickSocket::start()
 }
 
 int
-ClickSocket::stop()
+ClickSocket::stop(string& error_msg)
 {
-    shutdown();
-    
+    if (is_kernel_click()) {
+	//
+	// TODO: XXX: PAVPAVPAV: Unmount the Click FS, etc.
+	//
+    }
+
+    if (is_user_click()) {
+	terminate_user_click_command();
+	if (_fd >= 0) {
+	    //
+	    // Remove the socket from the event loop and close it
+	    //
+	    _eventloop.remove_selector(_fd, SEL_ALL);
+	    comm_close(_fd);
+	    _fd = -1;
+	}
+    }
+
     return (XORP_OK);
+
+    // TODO: check for errors
+    UNUSED(error_msg);
 }
 
 int
@@ -284,28 +312,6 @@ ClickSocket::user_click_command_done_cb(RunCommand* run_command, bool success,
     }
     delete _user_click_run_command;
     _user_click_run_command = NULL;
-}
-
-void
-ClickSocket::shutdown()
-{
-    if (is_kernel_click()) {
-	//
-	// TODO: XXX: PAVPAVPAV: Unmount the Click FS, etc.
-	//
-    }
-
-    if (is_user_click()) {
-	terminate_user_click_command();
-	if (_fd >= 0) {
-	    //
-	    // Remove the socket from the event loop and close it
-	    //
-	    _eventloop.remove_selector(_fd, SEL_ALL);
-	    comm_close(_fd);
-	    _fd = -1;
-	}
-    }
 }
 
 int

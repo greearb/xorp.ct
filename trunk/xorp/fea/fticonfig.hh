@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.25 2004/11/11 07:48:21 bms Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.26 2004/11/27 04:14:04 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -130,16 +130,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int start();
+    int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int stop();
+    int stop(string& error_msg);
 
     /**
      * Enable/disable Click support.
@@ -239,16 +241,18 @@ public:
      * Start a configuration interval. All modifications must be
      * within a marked "configuration" interval.
      *
+     * @param error_msg the error message (if error).
      * @return true if configuration successfully started.
      */
-    bool start_configuration();
+    bool start_configuration(string& error_msg);
     
     /**
      * End of configuration interval.
      *
+     * @param error_msg the error message (if error).
      * @return true configuration success pushed down into forwarding table.
      */
-    bool end_configuration();
+    bool end_configuration(string& error_msg);
     
     /**
      * Add a single routing entry. Must be within a configuration interval.

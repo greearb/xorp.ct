@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.6 2004/11/12 07:49:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.7 2004/11/30 22:56:58 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -41,19 +41,28 @@ FtiConfigEntrySetClick::FtiConfigEntrySetClick(FtiConfig& ftic)
 
 FtiConfigEntrySetClick::~FtiConfigEntrySetClick()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the Click mechanism to set "
+		   "information about forwarding table from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-FtiConfigEntrySetClick::start()
+FtiConfigEntrySetClick::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
 
-    if (! ClickSocket::is_enabled())
+    if (! ClickSocket::is_enabled()) {
+	error_msg = c_format("Click is not enabled");
 	return (XORP_ERROR);	// XXX: Not enabled
+    }
 
-    if (ClickSocket::start() < 0)
+    if (ClickSocket::start(error_msg) < 0)
 	return (XORP_ERROR);
 
     // XXX: add myself as an observer to the NexthopPortMapper
@@ -72,7 +81,7 @@ FtiConfigEntrySetClick::start()
 }
 
 int
-FtiConfigEntrySetClick::stop()
+FtiConfigEntrySetClick::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
 
@@ -82,7 +91,7 @@ FtiConfigEntrySetClick::stop()
     // XXX: delete myself as an observer to the NexthopPortMapper
     ftic().nexthop_port_mapper().delete_observer(this);
 
-    ret_value = ClickSocket::stop();
+    ret_value = ClickSocket::stop(error_msg);
 
     _is_running = false;
 

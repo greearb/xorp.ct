@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_dummy.cc,v 1.8 2004/09/01 18:12:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_dummy.cc,v 1.9 2004/10/26 23:55:16 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -42,11 +42,18 @@ FtiConfigEntryGetDummy::FtiConfigEntryGetDummy(FtiConfig& ftic)
 
 FtiConfigEntryGetDummy::~FtiConfigEntryGetDummy()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the dummy mechanism to get "
+		   "information about forwarding table from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-FtiConfigEntryGetDummy::start()
+FtiConfigEntryGetDummy::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -54,10 +61,12 @@ FtiConfigEntryGetDummy::start()
     _is_running = true;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
     
 int
-FtiConfigEntryGetDummy::stop()
+FtiConfigEntryGetDummy::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -65,6 +74,8 @@ FtiConfigEntryGetDummy::stop()
     _is_running = false;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 /**

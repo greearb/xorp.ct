@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.15 2004/11/11 07:48:22 bms Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.16 2004/11/30 20:08:09 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -49,16 +49,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start() = 0;
+    virtual int start(string& error_msg) = 0;
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop() = 0;
+    virtual int stop(string& error_msg) = 0;
     
     /**
      * Obtain the unicast forwarding table.
@@ -141,16 +143,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
     
     /**
      * Obtain the unicast forwarding table.
@@ -184,16 +188,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
     
     /**
      * Obtain the unicast forwarding table.
@@ -230,16 +236,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
 
     /**
      * Obtain the unicast forwarding table.
@@ -276,16 +284,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
 
     /**
      * Obtain the unicast forwarding table.

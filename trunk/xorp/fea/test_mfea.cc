@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.14 2004/11/05 00:47:43 bms Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.15 2004/11/30 07:29:40 bms Exp $"
 
 
 //
@@ -106,10 +106,12 @@ static void
 mfea_main(const char* finder_hostname, uint16_t finder_port,
 	  bool start_finder)
 {
+    string error_msg;
+    EventLoop eventloop;
+
     //
     // Init stuff
     //
-    EventLoop eventloop;
 
     //
     // Start our own finder
@@ -166,7 +168,9 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
     IfConfig ifconfig(eventloop, ifc_repl, if_err, nexthop_port_mapper);
     if (is_dummy)
 	ifconfig.set_dummy();
-    ifconfig.start();
+    if (ifconfig.start(error_msg) != XORP_OK) {
+	XLOG_FATAL("Cannot start IfConfig: %s", error_msg.c_str());
+    }
 
     //
     // Interface manager
@@ -186,7 +190,9 @@ mfea_main(const char* finder_hostname, uint16_t finder_port,
     FtiConfig fticonfig(eventloop, profile, ifm.iftree(), nexthop_port_mapper);
     if (is_dummy)
 	fticonfig.set_dummy();
-    fticonfig.start();
+    if (fticonfig.start(error_msg) != XORP_OK) {
+	XLOG_FATAL("Cannot start FtiConfig: %s", error_msg.c_str());
+    }
 
     //
     // Raw Socket TODO

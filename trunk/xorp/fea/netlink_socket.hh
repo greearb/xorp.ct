@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.11 2004/09/09 18:53:38 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.12 2004/11/23 00:53:19 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -39,16 +39,18 @@ public:
      * Start the netlink socket operation.
      * 
      * @param af the address family.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int start(int af);
+    int start(int af, string& error_msg);
 
     /**
      * Stop the netlink socket operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int stop();
+    int stop(string& error_msg);
 
     /**
      * Test if the netlink socket is open.
@@ -173,8 +175,6 @@ private:
      */
     void select_hook(int fd, SelectorMask sm);
 
-    void shutdown();
-
     NetlinkSocket& operator=(const NetlinkSocket&);	// Not implemented
     NetlinkSocket(const NetlinkSocket&);		// Not implemented
 
@@ -206,9 +206,12 @@ public:
     /**
      * Start the netlink socket operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int start() { return NetlinkSocket::start(AF_INET); }
+    int start(string& error_msg) {
+	return NetlinkSocket::start(AF_INET, error_msg);
+    }
 };
 
 /**
@@ -221,12 +224,15 @@ public:
     /**
      * Start the netlink socket operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int start() {
+    int start(string& error_msg) {
 #ifdef HAVE_IPV6
-	return NetlinkSocket::start(AF_INET6);
+	return NetlinkSocket::start(AF_INET6, error_msg);
 #else
+	error_msg = c_format("Cannot start IPv6 netlink sockets: "
+			     "the system does not support IPv6");
 	return (XORP_ERROR);
 #endif
     }

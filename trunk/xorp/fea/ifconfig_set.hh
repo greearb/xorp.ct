@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.23 2004/11/30 13:02:31 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.24 2004/11/30 20:10:03 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -42,16 +42,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start() = 0;
+    virtual int start(string& error_msg) = 0;
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop() = 0;
+    virtual int stop(string& error_msg) = 0;
 
     /**
      * Push the network interface configuration into the underlying system.
@@ -257,16 +259,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
 
     /**
      * Push the network interface configuration into the underlying system.
@@ -345,16 +349,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
 
     /**
      * Determine if the interface's underlying provider implements discard
@@ -448,16 +454,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
 
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
 
     /**
      * Determine if the interface's underlying provider implements discard
@@ -531,16 +539,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
 
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
 
     /**
      * Determine if the interface's underlying provider implements discard

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.35 2004/11/27 04:14:04 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.36 2004/11/30 20:06:26 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -55,7 +55,7 @@ public:
     /**
      * Virtual destructor (in case this class is used as base class).
      */
-    virtual ~IfConfig() { stop(); }
+    virtual ~IfConfig();
 
     /**
      * Get a reference to the @see EventLoop instance.
@@ -113,16 +113,18 @@ public:
     /**
      * Start operation.
      *
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int start();
+    int start(string& error_msg);
 
     /**
      * Stop operation.
      *
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int stop();
+    int stop(string& error_msg);
 
     /**
      * Return true if the underlying system supports IPv4.

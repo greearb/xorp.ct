@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer_dummy.cc,v 1.5 2004/08/17 02:20:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_observer_dummy.cc,v 1.6 2004/09/01 18:12:24 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -45,11 +45,18 @@ FtiConfigTableObserverDummy::FtiConfigTableObserverDummy(FtiConfig& ftic)
 
 FtiConfigTableObserverDummy::~FtiConfigTableObserverDummy()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the dummy mechanism to observe "
+		   "whole forwarding table from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-FtiConfigTableObserverDummy::start()
+FtiConfigTableObserverDummy::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -59,10 +66,12 @@ FtiConfigTableObserverDummy::start()
     _is_running = true;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
     
 int
-FtiConfigTableObserverDummy::stop()
+FtiConfigTableObserverDummy::stop(string& error_msg)
 {
     // TODO: XXX: PAVPAVPAV: implement it!
 
@@ -72,6 +81,8 @@ FtiConfigTableObserverDummy::stop()
     _is_running = false;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 void

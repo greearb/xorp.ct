@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_netlink.cc,v 1.4 2004/08/17 02:20:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_netlink.cc,v 1.5 2004/09/01 18:12:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -41,25 +41,40 @@ FtiConfigTableSetNetlink::FtiConfigTableSetNetlink(FtiConfig& ftic)
 
 FtiConfigTableSetNetlink::~FtiConfigTableSetNetlink()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the netlink(7) sockets mechanism to set "
+		   "whole forwarding table from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-FtiConfigTableSetNetlink::start()
+FtiConfigTableSetNetlink::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
 
+    // Cleanup any leftover entries from previously run XORP instance
     delete_all_entries4();
     delete_all_entries6();
+
+    //
+    // XXX: This mechanism relies on the FtiConfigEntrySet mechanism
+    // to set the forwarding table, hence there is nothing else to do.
+    //
 
     _is_running = true;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 int
-FtiConfigTableSetNetlink::stop()
+FtiConfigTableSetNetlink::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -67,9 +82,16 @@ FtiConfigTableSetNetlink::stop()
     delete_all_entries4();
     delete_all_entries6();
 
+    //
+    // XXX: This mechanism relies on the FtiConfigEntrySet mechanism
+    // to set the forwarding table, hence there is nothing else to do.
+    //
+
     _is_running = false;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 bool

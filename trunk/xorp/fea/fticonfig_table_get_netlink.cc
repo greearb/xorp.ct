@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.20 2004/09/01 18:12:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.21 2004/09/09 19:01:51 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -52,25 +52,33 @@ FtiConfigTableGetNetlink::FtiConfigTableGetNetlink(FtiConfig& ftic)
 
 FtiConfigTableGetNetlink::~FtiConfigTableGetNetlink()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the netlink(7) sockets mechanism to get "
+		   "whole forwarding table from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-FtiConfigTableGetNetlink::start()
+FtiConfigTableGetNetlink::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
 
     if (ftic().have_ipv4()) {
-	if (NetlinkSocket4::start() < 0)
+	if (NetlinkSocket4::start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
     
 #ifdef HAVE_IPV6
     if (ftic().have_ipv6()) {
-	if (NetlinkSocket6::start() < 0) {
+	if (NetlinkSocket6::start(error_msg) < 0) {
+	    string error_msg2;
 	    if (ftic().have_ipv4())
-		NetlinkSocket4::stop();
+		NetlinkSocket4::stop(error_msg2);
 	    return (XORP_ERROR);
 	}
     }
@@ -82,7 +90,7 @@ FtiConfigTableGetNetlink::start()
 }
 
 int
-FtiConfigTableGetNetlink::stop()
+FtiConfigTableGetNetlink::stop(string& error_msg)
 {
     int ret_value4 = XORP_OK;
     int ret_value6 = XORP_OK;
@@ -91,11 +99,15 @@ FtiConfigTableGetNetlink::stop()
 	return (XORP_OK);
 
     if (ftic().have_ipv4())
-	ret_value4 = NetlinkSocket4::stop();
+	ret_value4 = NetlinkSocket4::stop(error_msg);
     
 #ifdef HAVE_IPV6
-    if (ftic().have_ipv6())
-	ret_value6 = NetlinkSocket6::stop();
+    if (ftic().have_ipv6()) {
+	string error_msg2;
+	ret_value6 = NetlinkSocket6::stop(error_msg2);
+	if ((ret_value6 < 0) && (ret_value4 >= 0))
+	    error_msg = error_msg2;	// XXX: update the error message
+    }
 #endif
     
     if ((ret_value4 < 0) || (ret_value6 < 0))

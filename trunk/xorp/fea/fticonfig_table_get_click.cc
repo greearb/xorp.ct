@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_click.cc,v 1.2 2004/11/10 00:39:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_click.cc,v 1.3 2004/11/12 00:31:05 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -42,19 +42,28 @@ FtiConfigTableGetClick::FtiConfigTableGetClick(FtiConfig& ftic)
 
 FtiConfigTableGetClick::~FtiConfigTableGetClick()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the Click mechanism to get "
+		   "whole forwarding table from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-FtiConfigTableGetClick::start()
+FtiConfigTableGetClick::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
 
-    if (! ClickSocket::is_enabled())
+    if (! ClickSocket::is_enabled()) {
+	error_msg = c_format("Click is not enabled");
 	return (XORP_ERROR);	// XXX: Not enabled
+    }
 
-    if (ClickSocket::start() < 0)
+    if (ClickSocket::start(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -70,14 +79,14 @@ FtiConfigTableGetClick::start()
 }
 
 int
-FtiConfigTableGetClick::stop()
+FtiConfigTableGetClick::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
 
     if (! _is_running)
 	return (XORP_OK);
 
-    ret_value = ClickSocket::stop();
+    ret_value = ClickSocket::stop(error_msg);
 
     _is_running = false;
 

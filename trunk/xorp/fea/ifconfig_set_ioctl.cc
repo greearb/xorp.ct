@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.30 2004/10/21 00:28:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.31 2004/11/12 00:47:36 bms Exp $"
 
 
 #include "fea_module.h"
@@ -86,11 +86,18 @@ IfConfigSetIoctl::IfConfigSetIoctl(IfConfig& ifc)
 
 IfConfigSetIoctl::~IfConfigSetIoctl()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the ioctl(2) mechanism to set "
+		   "information about network interfaces into the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-IfConfigSetIoctl::start()
+IfConfigSetIoctl::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -99,7 +106,9 @@ IfConfigSetIoctl::start()
 	if (_s4 < 0) {
 	    _s4 = socket(AF_INET, SOCK_DGRAM, 0);
 	    if (_s4 < 0) {
-		XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+		error_msg = c_format("Could not initialize IPv4 ioctl() "
+				     "socket: %s", strerror(errno));
+		XLOG_FATAL("%s", error_msg.c_str());
 	    }
 	}
     }
@@ -109,7 +118,9 @@ IfConfigSetIoctl::start()
 	if (_s6 < 0) {
 	    _s6 = socket(AF_INET6, SOCK_DGRAM, 0);
 	    if (_s6 < 0) {
-		XLOG_FATAL("Could not initialize IPv6 ioctl() socket");
+		error_msg = c_format("Could not initialize IPv6 ioctl() "
+				     "socket: %s", strerror(errno));
+		XLOG_FATAL("%s", error_msg.c_str());
 	    }
 	}
     }
@@ -121,19 +132,33 @@ IfConfigSetIoctl::start()
 }
 
 int
-IfConfigSetIoctl::stop()
+IfConfigSetIoctl::stop(string& error_msg)
 {
+    int ret_value4 = XORP_OK;
+    int ret_value6 = XORP_OK;
+
     if (! _is_running)
 	return (XORP_OK);
 
     if (_s4 >= 0) {
-	close(_s4);
+	ret_value4 = close(_s4);
 	_s4 = -1;
+	if (ret_value4 < 0) {
+	    error_msg = c_format("Could not close IPv4 ioctl() "
+				 "socket: %s", strerror(errno));
+	}
     }
     if (_s6 >= 0) {
-	close(_s6);
+	ret_value6 = close(_s6);
 	_s6 = -1;
+	if ((ret_value6 < 0) && (ret_value4 >= 0)) {
+	    error_msg = c_format("Could not close IPv6 ioctl() "
+				 "socket: %s", strerror(errno));
+	}
     }
+
+    if ((ret_value4 < 0) || (ret_value6 < 0))
+	return (XORP_ERROR);
 
     _is_running = false;
 

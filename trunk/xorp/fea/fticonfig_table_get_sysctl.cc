@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.13 2004/09/01 18:12:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.14 2004/11/11 07:48:22 bms Exp $"
 
 
 #include "fea_module.h"
@@ -45,11 +45,18 @@ FtiConfigTableGetSysctl::FtiConfigTableGetSysctl(FtiConfig& ftic)
 
 FtiConfigTableGetSysctl::~FtiConfigTableGetSysctl()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the sysctl(3) mechanism to get "
+		   "whole forwarding table from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-FtiConfigTableGetSysctl::start()
+FtiConfigTableGetSysctl::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -57,10 +64,12 @@ FtiConfigTableGetSysctl::start()
     _is_running = true;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
-    
+
 int
-FtiConfigTableGetSysctl::stop()
+FtiConfigTableGetSysctl::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -68,6 +77,8 @@ FtiConfigTableGetSysctl::stop()
     _is_running = false;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 bool

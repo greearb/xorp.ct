@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.23 2004/11/09 20:40:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.24 2004/11/23 00:53:19 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -62,22 +62,31 @@ NetlinkSocket::NetlinkSocket(EventLoop& eventloop)
 
 NetlinkSocket::~NetlinkSocket()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the netlink socket: %s", error_msg.c_str());
+    }
+
     XLOG_ASSERT(_ol.empty());
 }
 
 #ifndef HAVE_NETLINK_SOCKETS
 
 int
-NetlinkSocket::start(int )
+NetlinkSocket::start(int af, string& error_msg)
 {
+    error_msg = c_format("The system does not support netlink sockets");
     XLOG_UNREACHABLE();
     return (XORP_ERROR);
+
+    UNUSED(af);
 }
 
 int
-NetlinkSocket::stop()
+NetlinkSocket::stop(string& error_msg)
 {
+    error_msg = c_format("The system does not support netlink sockets");
     return (XORP_ERROR);
 }
 
@@ -94,7 +103,7 @@ NetlinkSocket::force_read(string& errmsg)
 #else // HAVE_NETLINK_SOCKETS
 
 int
-NetlinkSocket::start(int af)
+NetlinkSocket::start(int af, string& error_msg)
 {
     int			socket_protocol = -1;
     struct sockaddr_nl	snl;
@@ -131,7 +140,8 @@ NetlinkSocket::start(int af)
     //
     _fd = socket(AF_NETLINK, SOCK_RAW, socket_protocol);
     if (_fd < 0) {
-	XLOG_ERROR("Could not open netlink socket: %s", strerror(errno));
+	error_msg = c_format("Could not open netlink socket: %s",
+			     strerror(errno));
 	return (XORP_ERROR);
     }
     //
@@ -150,7 +160,7 @@ NetlinkSocket::start(int af)
     snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
     snl.nl_groups = _nl_groups;
     if (bind(_fd, reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl)) < 0) {
-	XLOG_ERROR("bind(AF_NETLINK) failed: %s", strerror(errno));
+	error_msg = c_format("bind(AF_NETLINK) failed: %s", strerror(errno));
 	close(_fd);
 	_fd = -1;
 	return (XORP_ERROR);
@@ -161,23 +171,24 @@ NetlinkSocket::start(int af)
     //
     snl_len = sizeof(snl);
     if (getsockname(_fd, reinterpret_cast<struct sockaddr*>(&snl), &snl_len) < 0) {
-	XLOG_ERROR("getsockname(AF_NETLINK) failed: %s", strerror(errno));
+	error_msg = c_format("getsockname(AF_NETLINK) failed: %s",
+			     strerror(errno));
 	close(_fd);
 	_fd = -1;
 	return (XORP_ERROR);
     }
     if (snl_len != sizeof(snl)) {
-	XLOG_ERROR("Wrong address length of AF_NETLINK socket: "
-		   "%d instead of %d",
-		   snl_len, sizeof(snl));
+	error_msg = c_format("Wrong address length of AF_NETLINK socket: "
+			     "%d instead of %d",
+			     snl_len, sizeof(snl));
 	close(_fd);
 	_fd = -1;
 	return (XORP_ERROR);
     }
     if (snl.nl_family != AF_NETLINK) {
-	XLOG_ERROR("Wrong address family of AF_NETLINK socket: "
-		   "%d instead of %d",
-		   snl.nl_family, AF_NETLINK);
+	error_msg = c_format("Wrong address family of AF_NETLINK socket: "
+			     "%d instead of %d",
+			     snl.nl_family, AF_NETLINK);
 	close(_fd);
 	_fd = -1;
 	return (XORP_ERROR);
@@ -185,8 +196,9 @@ NetlinkSocket::start(int af)
 #if 0				// XXX
     // XXX: 'nl_pid' is supposed to be defined as 'pid_t'
     if ( (pid_t)snl.nl_pid != pid()) {
-	XLOG_ERROR("Wrong nl_pid of AF_NETLINK socket: %d instead of %d",
-		   snl.nl_pid, pid());
+	error_msg = c_format("Wrong nl_pid of AF_NETLINK socket: "
+			     "%d instead of %d",
+			     snl.nl_pid, pid());
 	close(_fd);
 	_fd = -1;
 	return (XORP_ERROR);
@@ -199,7 +211,7 @@ NetlinkSocket::start(int af)
     if (_eventloop.add_selector(_fd, SEL_RD,
 				callback(this, &NetlinkSocket::select_hook))
 	== false) {
-	XLOG_ERROR("Failed to add netlink socket to EventLoop");
+	error_msg = c_format("Failed to add netlink socket to EventLoop");
 	close(_fd);
 	_fd = -1;
 	return (XORP_ERROR);
@@ -209,21 +221,17 @@ NetlinkSocket::start(int af)
 }
 
 int
-NetlinkSocket::stop()
-{
-    shutdown();
-    
-    return (XORP_OK);
-}
-
-void
-NetlinkSocket::shutdown()
+NetlinkSocket::stop(string& error_msg)
 {
     if (_fd >= 0) {
 	_eventloop.remove_selector(_fd, SEL_ALL);
 	close(_fd);
 	_fd = -1;
     }
+    
+    return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 ssize_t

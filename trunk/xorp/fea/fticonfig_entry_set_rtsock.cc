@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.20 2004/10/26 00:20:06 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.21 2004/11/05 00:48:32 bms Exp $"
 
 
 #include "fea_module.h"
@@ -42,16 +42,23 @@ FtiConfigEntrySetRtsock::FtiConfigEntrySetRtsock(FtiConfig& ftic)
 
 FtiConfigEntrySetRtsock::~FtiConfigEntrySetRtsock()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the routing sockets mechanism to set "
+		   "information about forwarding table from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-FtiConfigEntrySetRtsock::start()
+FtiConfigEntrySetRtsock::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
 
-    if (RoutingSocket::start() < 0)
+    if (RoutingSocket::start(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -60,12 +67,12 @@ FtiConfigEntrySetRtsock::start()
 }
 
 int
-FtiConfigEntrySetRtsock::stop()
+FtiConfigEntrySetRtsock::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
 
-    if (RoutingSocket::stop() < 0)
+    if (RoutingSocket::stop(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = false;

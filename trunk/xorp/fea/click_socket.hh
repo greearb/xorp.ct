@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.5 2004/11/29 04:10:15 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.6 2004/11/29 11:06:20 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -90,16 +90,18 @@ public:
     /**
      * Start the Click socket operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int start();
+    int start(string& error_msg);
 
     /**
      * Stop the Click socket operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int stop();
+    int stop(string& error_msg);
 
     /**
      * Get the name of the external program to generate the Click
@@ -317,8 +319,6 @@ private:
      */
     void user_click_command_done_cb(RunCommand* run_command, bool success,
 				    const string& error_msg);
-
-    void shutdown();
 
     ClickSocket& operator=(const ClickSocket&);		// Not implemented
     ClickSocket(const ClickSocket&);			// Not implemented

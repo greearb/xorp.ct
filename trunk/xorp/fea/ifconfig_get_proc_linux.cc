@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.16 2004/08/17 02:20:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.17 2004/09/01 18:17:01 pavlin Exp $"
 
 #define PROC_LINUX_FILE_V4 "/proc/net/dev"
 #define PROC_LINUX_FILE_V6 "/proc/net/if_inet6"
@@ -54,17 +54,24 @@ IfConfigGetProcLinux::IfConfigGetProcLinux(IfConfig& ifc)
 
 IfConfigGetProcLinux::~IfConfigGetProcLinux()
 {
-   stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the Lunux's /proc mechanism to get "
+		   "information about network interfaces from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-IfConfigGetProcLinux::start()
+IfConfigGetProcLinux::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
 
     // XXX: this method relies on the ioctl() method
-    if (ifc().ifc_get_ioctl().start() < 0)
+    if (ifc().ifc_get_ioctl().start(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -73,13 +80,14 @@ IfConfigGetProcLinux::start()
 }
 
 int
-IfConfigGetProcLinux::stop()
+IfConfigGetProcLinux::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
 
     // XXX: this method relies on the ioctl() method
-    ifc().ifc_get_ioctl().stop();
+    if (ifc().ifc_get_ioctl().stop(error_msg) < 0)
+	return (XORP_ERROR);
 
     _is_running = false;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket.hh,v 1.8 2004/09/09 18:46:38 pavlin Exp $
+// $XORP: xorp/fea/routing_socket.hh,v 1.9 2004/11/23 00:53:20 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_HH__
 #define __FEA_ROUTING_SOCKET_HH__
@@ -36,19 +36,29 @@ public:
     ~RoutingSocket();
 
     /**
-     * Start the routing socket operation.
+     * Start the routing socket operation for a given address family.
      * 
      * @param af the address family.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int start(int af = AF_UNSPEC);
+    int start(int af, string& error_msg);
+
+    /**
+     * Start the routing socket operation for an unspecified address family.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int start(string& error_msg) { return start(AF_UNSPEC, error_msg); }
 
     /**
      * Stop the routing socket operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int stop();
+    int stop(string& error_msg);
 
     /**
      * Test if the routing socket is open.
@@ -109,8 +119,6 @@ private:
      * socket.
      */
     void select_hook(int fd, SelectorMask sm);
-
-    void shutdown();
 
     RoutingSocket& operator=(const RoutingSocket&);	// Not implemented
     RoutingSocket(const RoutingSocket&);		// Not implemented

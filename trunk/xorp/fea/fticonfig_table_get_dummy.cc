@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_dummy.cc,v 1.6 2004/08/17 02:20:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_dummy.cc,v 1.7 2004/09/01 18:12:24 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -41,11 +41,18 @@ FtiConfigTableGetDummy::FtiConfigTableGetDummy(FtiConfig& ftic)
 
 FtiConfigTableGetDummy::~FtiConfigTableGetDummy()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the dummy mechanism to get "
+		   "whole forwarding table from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-FtiConfigTableGetDummy::start()
+FtiConfigTableGetDummy::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -53,10 +60,12 @@ FtiConfigTableGetDummy::start()
     _is_running = true;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
     
 int
-FtiConfigTableGetDummy::stop()
+FtiConfigTableGetDummy::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -64,6 +73,8 @@ FtiConfigTableGetDummy::stop()
     _is_running = false;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 bool

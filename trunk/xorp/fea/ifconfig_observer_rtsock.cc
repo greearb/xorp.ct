@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_rtsock.cc,v 1.7 2004/08/17 02:20:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_rtsock.cc,v 1.8 2004/09/01 18:17:01 pavlin Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -43,16 +43,23 @@ IfConfigObserverRtsock::IfConfigObserverRtsock(IfConfig& ifc)
 
 IfConfigObserverRtsock::~IfConfigObserverRtsock()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the routing sockets mechanism to observe "
+		   "information about network interfaces from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-IfConfigObserverRtsock::start()
+IfConfigObserverRtsock::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
 
-    if (RoutingSocket::start() < 0)
+    if (RoutingSocket::start(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -61,12 +68,12 @@ IfConfigObserverRtsock::start()
 }
 
 int
-IfConfigObserverRtsock::stop()
+IfConfigObserverRtsock::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
 
-    if (RoutingSocket::stop() < 0)
+    if (RoutingSocket::stop(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = false;

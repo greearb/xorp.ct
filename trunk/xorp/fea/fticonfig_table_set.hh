@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.12 2004/11/10 00:39:47 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.13 2004/11/30 20:08:09 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_SET_HH__
 #define __FEA_FTICONFIG_TABLE_SET_HH__
@@ -48,16 +48,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start() = 0;
+    virtual int start(string& error_msg) = 0;
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop() = 0;
+    virtual int stop(string& error_msg) = 0;
     
     /**
      * Start a configuration interval. All modifications to FtiConfig
@@ -67,11 +69,12 @@ public:
      * any actions necessary before forwarding table modifications can
      * be made.
      *
+     * @param error_msg the error message (if error).
      * @return true if configuration successfully started.
      */
-    virtual bool start_configuration() {
+    virtual bool start_configuration(string& error_msg) {
 	// Nothing particular to do, just label start.
-	return mark_configuration_start();
+	return mark_configuration_start(error_msg);
     }
 
     /**
@@ -81,11 +84,12 @@ public:
      * perform any actions necessary at the end of a configuration, eg
      * write a file.
      *
+     * @param error_msg the error message (if error).
      * @return true configuration success pushed down into forwarding table.
      */
-    virtual bool end_configuration() {
+    virtual bool end_configuration(string& error_msg) {
 	// Nothing particular to do, just label start.
-	return mark_configuration_end();
+	return mark_configuration_end(error_msg);
     }
 
     /**
@@ -128,26 +132,32 @@ protected:
     /**
      * Mark start of a configuration.
      *
+     * @param error_msg the error message (if error).
      * @return true if configuration can be marked as started, false otherwise.
      */
-    inline bool mark_configuration_start() {
+    inline bool mark_configuration_start(string& error_msg) {
 	if (false == _in_configuration) {
 	    _in_configuration = true;
 	    return true;
 	}
+	error_msg = c_format("Cannot start configuration: "
+			     "configuration in progress");
 	return false;
     }
 
     /**
      * Mark end of a configuration.
      *
+     * @param error_msg the error message (if error).
      * @return true if configuration can be marked as ended, false otherwise.
      */
-    inline bool mark_configuration_end() {
+    inline bool mark_configuration_end(string& error_msg) {
 	if (true == _in_configuration) {
 	    _in_configuration = false;
 	    return true;
 	}
+	error_msg = c_format("Cannot end configuration: "
+			     "configuration not in progress");
 	return false;
     }
     
@@ -170,16 +180,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
     
     /**
      * Set the unicast forwarding table.
@@ -229,16 +241,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
     
     /**
      * Set the unicast forwarding table.
@@ -288,16 +302,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
     
     /**
      * Set the unicast forwarding table.
@@ -348,16 +364,18 @@ public:
     /**
      * Start operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start();
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop();
+    virtual int stop(string& error_msg);
     
     /**
      * Set the unicast forwarding table.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.15 2004/11/09 20:40:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.16 2004/11/23 00:53:20 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -52,22 +52,31 @@ RoutingSocket::RoutingSocket(EventLoop& eventloop)
 
 RoutingSocket::~RoutingSocket()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the routing socket: %s", error_msg.c_str());
+    }
+
     XLOG_ASSERT(_ol.empty());
 }
 
 #ifndef HAVE_ROUTING_SOCKETS
 
 int
-RoutingSocket::start(int )
+RoutingSocket::start(int af, string& error_msg)
 {
+    error_msg = c_format("The system does not support routing sockets");
     XLOG_UNREACHABLE();
     return (XORP_ERROR);
+
+    UNUSED(af);
 }
 
 int
-RoutingSocket::stop()
+RoutingSocket::stop(string& error_msg)
 {
+    error_msg = c_format("The system does not support routing sockets");
     return (XORP_ERROR);
 }
 
@@ -84,7 +93,7 @@ RoutingSocket::force_read(string& errmsg)
 #else // HAVE_ROUTING_SOCKETS
 
 int
-RoutingSocket::start(int af)
+RoutingSocket::start(int af, string& error_msg)
 {
     if (_fd >= 0)
 	return (XORP_OK);
@@ -94,7 +103,8 @@ RoutingSocket::start(int af)
     //
     _fd = socket(AF_ROUTE, SOCK_RAW, af);
     if (_fd < 0) {
-	XLOG_ERROR("Could not open routing socket: %s", strerror(errno));
+	error_msg = c_format("Could not open routing socket: %s",
+			     strerror(errno));
 	return (XORP_ERROR);
     }
     //
@@ -111,7 +121,7 @@ RoutingSocket::start(int af)
     if (_eventloop.add_selector(_fd, SEL_RD,
 				callback(this, &RoutingSocket::select_hook))
 	== false) {
-	XLOG_ERROR("Failed to add routing socket to EventLoop");
+	error_msg = c_format("Failed to add routing socket to EventLoop");
 	close(_fd);
 	_fd = -1;
 	return (XORP_ERROR);
@@ -121,21 +131,17 @@ RoutingSocket::start(int af)
 }
 
 int
-RoutingSocket::stop()
-{
-    shutdown();
-    
-    return (XORP_OK);
-}
-
-void
-RoutingSocket::shutdown()
+RoutingSocket::stop(string& error_msg)
 {
     if (_fd >= 0) {
 	_eventloop.remove_selector(_fd, SEL_ALL);
 	close(_fd);
 	_fd = -1;
     }
+    
+    return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 ssize_t

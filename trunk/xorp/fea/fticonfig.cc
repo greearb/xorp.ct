@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.33 2004/11/27 09:08:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.34 2004/11/29 04:02:08 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -139,7 +139,13 @@ FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile, IfTree& iftree,
 
 FtiConfig::~FtiConfig()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the mechanism for manipulating "
+		   "the forwarding table information: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
@@ -290,7 +296,7 @@ FtiConfig::set_dummy()
 }
 
 int
-FtiConfig::start()
+FtiConfig::start(string& error_msg)
 {
     list<FtiConfigEntryGet*>::iterator ftic_entry_get_iter;
     list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
@@ -306,14 +312,14 @@ FtiConfig::start()
     // Start the FtiConfigEntryGet methods
     //
     if (_ftic_entry_get_primary != NULL) {
-	if (_ftic_entry_get_primary->start() < 0)
+	if (_ftic_entry_get_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
     for (ftic_entry_get_iter = _ftic_entry_gets_secondary.begin();
 	 ftic_entry_get_iter != _ftic_entry_gets_secondary.end();
 	 ++ftic_entry_get_iter) {
 	FtiConfigEntryGet* ftic_entry_get = *ftic_entry_get_iter;
-	if (ftic_entry_get->start() < 0)
+	if (ftic_entry_get->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -321,14 +327,14 @@ FtiConfig::start()
     // Start the FtiConfigEntrySet methods
     //
     if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->start() < 0)
+	if (_ftic_entry_set_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
     for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
 	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
 	 ++ftic_entry_set_iter) {
 	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->start() < 0)
+	if (ftic_entry_set->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -336,14 +342,14 @@ FtiConfig::start()
     // Start the FtiConfigEntryObserver methods
     //
     if (_ftic_entry_observer_primary != NULL) {
-	if (_ftic_entry_observer_primary->start() < 0)
+	if (_ftic_entry_observer_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
     for (ftic_entry_observer_iter = _ftic_entry_observers_secondary.begin();
 	 ftic_entry_observer_iter != _ftic_entry_observers_secondary.end();
 	 ++ftic_entry_observer_iter) {
 	FtiConfigEntryObserver* ftic_entry_observer = *ftic_entry_observer_iter;
-	if (ftic_entry_observer->start() < 0)
+	if (ftic_entry_observer->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -351,14 +357,14 @@ FtiConfig::start()
     // Start the FtiConfigTableGet methods
     //
     if (_ftic_table_get_primary != NULL) {
-	if (_ftic_table_get_primary->start() < 0)
+	if (_ftic_table_get_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
     for (ftic_table_get_iter = _ftic_table_gets_secondary.begin();
 	 ftic_table_get_iter != _ftic_table_gets_secondary.end();
 	 ++ftic_table_get_iter) {
 	FtiConfigTableGet* ftic_table_get = *ftic_table_get_iter;
-	if (ftic_table_get->start() < 0)
+	if (ftic_table_get->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -366,14 +372,14 @@ FtiConfig::start()
     // Start the FtiConfigTableSet methods
     //
     if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->start() < 0)
+	if (_ftic_table_set_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
     for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
 	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
 	 ++ftic_table_set_iter) {
 	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->start() < 0)
+	if (ftic_table_set->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -381,14 +387,14 @@ FtiConfig::start()
     // Start the FtiConfigTableObserver methods
     //
     if (_ftic_table_observer_primary != NULL) {
-	if (_ftic_table_observer_primary->start() < 0)
+	if (_ftic_table_observer_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
     for (ftic_table_observer_iter = _ftic_table_observers_secondary.begin();
 	 ftic_table_observer_iter != _ftic_table_observers_secondary.end();
 	 ++ftic_table_observer_iter) {
 	FtiConfigTableObserver* ftic_table_observer = *ftic_table_observer_iter;
-	if (ftic_table_observer->start() < 0)
+	if (ftic_table_observer->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -398,7 +404,7 @@ FtiConfig::start()
 }
 
 int
-FtiConfig::stop()
+FtiConfig::stop(string& error_msg)
 {
     list<FtiConfigEntryGet*>::iterator ftic_entry_get_iter;
     list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
@@ -406,11 +412,13 @@ FtiConfig::stop()
     list<FtiConfigTableGet*>::iterator ftic_table_get_iter;
     list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
     list<FtiConfigTableObserver*>::iterator ftic_table_observer_iter;
-    string error_msg;
     int ret_value = XORP_OK;
+    string error_msg2;
 
     if (! _is_running)
 	return (XORP_OK);
+
+    error_msg.erase();
 
     //
     // Stop the FtiConfigTableObserver methods
@@ -419,12 +427,18 @@ FtiConfig::stop()
 	 ftic_table_observer_iter != _ftic_table_observers_secondary.end();
 	 ++ftic_table_observer_iter) {
 	FtiConfigTableObserver* ftic_table_observer = *ftic_table_observer_iter;
-	if (ftic_table_observer->stop() < 0)
+	if (ftic_table_observer->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     if (_ftic_table_observer_primary != NULL) {
-	if (_ftic_table_observer_primary->stop() < 0)
+	if (_ftic_table_observer_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     //
@@ -434,12 +448,18 @@ FtiConfig::stop()
 	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
 	 ++ftic_table_set_iter) {
 	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->stop() < 0)
+	if (ftic_table_set->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->stop() < 0)
+	if (_ftic_table_set_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     //
@@ -449,12 +469,18 @@ FtiConfig::stop()
 	 ftic_table_get_iter != _ftic_table_gets_secondary.end();
 	 ++ftic_table_get_iter) {
 	FtiConfigTableGet* ftic_table_get = *ftic_table_get_iter;
-	if (ftic_table_get->stop() < 0)
+	if (ftic_table_get->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     if (_ftic_table_get_primary != NULL) {
-	if (_ftic_table_get_primary->stop() < 0)
+	if (_ftic_table_get_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     //
@@ -464,12 +490,18 @@ FtiConfig::stop()
 	 ftic_entry_observer_iter != _ftic_entry_observers_secondary.end();
 	 ++ftic_entry_observer_iter) {
 	FtiConfigEntryObserver* ftic_entry_observer = *ftic_entry_observer_iter;
-	if (ftic_entry_observer->stop() < 0)
+	if (ftic_entry_observer->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     if (_ftic_entry_observer_primary != NULL) {
-	if (_ftic_entry_observer_primary->stop() < 0)
+	if (_ftic_entry_observer_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     //
@@ -479,12 +511,18 @@ FtiConfig::stop()
 	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
 	 ++ftic_entry_set_iter) {
 	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->stop() < 0)
+	if (ftic_entry_set->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->stop() < 0)
+	if (_ftic_entry_set_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     //
@@ -494,12 +532,18 @@ FtiConfig::stop()
 	 ftic_entry_get_iter != _ftic_entry_gets_secondary.end();
 	 ++ftic_entry_get_iter) {
 	FtiConfigEntryGet* ftic_entry_get = *ftic_entry_get_iter;
-	if (ftic_entry_get->stop() < 0)
+	if (ftic_entry_get->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     if (_ftic_entry_get_primary != NULL) {
-	if (_ftic_entry_get_primary->stop() < 0)
+	if (_ftic_entry_get_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     //
@@ -551,31 +595,25 @@ FtiConfig::enable_click(bool enable)
 int
 FtiConfig::start_click(string& error_msg)
 {
-    // TODO: XXX: PAVPAVPAV: pass "error_msg" as an argument to the start() methods below
-    if (_ftic_entry_get_click.start() < 0) {
-	error_msg = "Cannot start the mechanism to get single-entry "
-	    "information from the unicast forwarding table from Click";
+    if (_ftic_entry_get_click.start(error_msg) < 0) {
 	return (XORP_ERROR);
     }
-    if (_ftic_entry_set_click.start() < 0) {
-	_ftic_entry_get_click.stop();
-	error_msg = "Cannot start the mechanism to set single-entry "
-	    "information into the unicast forwarding table for Click";
+    if (_ftic_entry_set_click.start(error_msg) < 0) {
+	string error_msg2;
+	_ftic_entry_get_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ftic_table_get_click.start() < 0) {
-	_ftic_entry_get_click.stop();
-	_ftic_entry_set_click.stop();
-	error_msg = "Cannot start the mechanism to get the whole table "
-	    "information from the unicast forwarding table from Click";
+    if (_ftic_table_get_click.start(error_msg) < 0) {
+	string error_msg2;
+	_ftic_entry_get_click.stop(error_msg2);
+	_ftic_entry_set_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ftic_table_set_click.start() < 0) {
-	_ftic_entry_get_click.stop();
-	_ftic_entry_set_click.stop();
-	_ftic_table_get_click.stop();
-	error_msg = "Cannot start the mechanism to set the whole table "
-	    "information into the unicast forwarding table for Click";
+    if (_ftic_table_set_click.start(error_msg) < 0) {
+	string error_msg2;
+	_ftic_entry_get_click.stop(error_msg2);
+	_ftic_entry_set_click.stop(error_msg2);
+	_ftic_table_get_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
 
@@ -591,31 +629,25 @@ FtiConfig::start_click(string& error_msg)
 int
 FtiConfig::stop_click(string& error_msg)
 {
-    // TODO: XXX: PAVPAVPAV: pass "error_msg" as an argument to the stop() methods below
-    if (_ftic_entry_get_click.stop() < 0) {
-	_ftic_entry_set_click.stop();
-	_ftic_table_get_click.stop();
-	_ftic_table_set_click.stop();
-	error_msg = "Cannot stop the mechanism to get single-entry "
-	    "information from the unicast forwarding table from Click";
+    if (_ftic_entry_get_click.stop(error_msg) < 0) {
+	string error_msg2;
+	_ftic_entry_set_click.stop(error_msg2);
+	_ftic_table_get_click.stop(error_msg2);
+	_ftic_table_set_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ftic_entry_set_click.stop() < 0) {
-	_ftic_table_get_click.stop();
-	_ftic_table_set_click.stop();
-	error_msg = "Cannot stop the mechanism to set single-entry "
-	    "information into the unicast forwarding table for Click";
+    if (_ftic_entry_set_click.stop(error_msg) < 0) {
+	string error_msg2;
+	_ftic_table_get_click.stop(error_msg2);
+	_ftic_table_set_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ftic_table_get_click.stop() < 0) {
-	_ftic_table_set_click.stop();
-	error_msg = "Cannot stop the mechanism to get the whole table "
-	    "information from the unicast forwarding table from Click";
+    if (_ftic_table_get_click.stop(error_msg) < 0) {
+	string error_msg2;
+	_ftic_table_set_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ftic_table_set_click.stop() < 0) {
-	error_msg = "Cannot stop the mechanism to set the whole table "
-	    "information into the unicast forwarding table for Click";
+    if (_ftic_table_set_click.stop(error_msg) < 0) {
 	return (XORP_ERROR);
     }
 
@@ -759,11 +791,14 @@ FtiConfig::set_user_click_startup_config_file(const string& v)
 }
 
 bool
-FtiConfig::start_configuration()
+FtiConfig::start_configuration(string& error_msg)
 {
     list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
     list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
     bool ret_value = true;
+    string error_msg2;
+
+    error_msg.erase();
 
     //
     // XXX: we need to call start_configuration() for "entry" and "table",
@@ -771,66 +806,93 @@ FtiConfig::start_configuration()
     // does not distinguish between "entry" and "table" modification.
     //
     if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->start_configuration() != true)
+	if (_ftic_entry_set_primary->start_configuration(error_msg2) != true) {
 	    ret_value = false;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
 	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
 	 ++ftic_entry_set_iter) {
 	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->start_configuration() != true)
+	if (ftic_entry_set->start_configuration(error_msg2) != true) {
 	    ret_value = false;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->start_configuration() != true)
+	if (_ftic_table_set_primary->start_configuration(error_msg2) != true) {
 	    ret_value = false;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
 	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
 	 ++ftic_table_set_iter) {
 	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->start_configuration() != true)
+	if (ftic_table_set->start_configuration(error_msg2) != true) {
 	    ret_value = false;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     
     return (ret_value);
 }
 
 bool
-FtiConfig::end_configuration()
+FtiConfig::end_configuration(string& error_msg)
 {
     list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
     list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
     bool ret_value = true;
-    
+    string error_msg2;
+
+    error_msg.erase();
+
     //
     // XXX: we need to call end_configuration() for "entry" and "table",
     // because the top-level start/end configuration interface
     // does not distinguish between "entry" and "table" modification.
     //
     if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->end_configuration() != true)
+	if (_ftic_entry_set_primary->end_configuration(error_msg) != true) {
 	    ret_value = false;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
 	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
 	 ++ftic_entry_set_iter) {
 	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->end_configuration() != true)
+	if (ftic_entry_set->end_configuration(error_msg) != true) {
 	    ret_value = false;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->end_configuration() != true)
+	if (_ftic_table_set_primary->end_configuration(error_msg) != true) {
 	    ret_value = false;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
 	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
 	 ++ftic_table_set_iter) {
 	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->end_configuration() != true)
+	if (ftic_table_set->end_configuration(error_msg) != true) {
 	    ret_value = false;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     
     return (ret_value);

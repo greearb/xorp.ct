@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.38 2004/11/05 00:47:43 bms Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.39 2004/11/29 09:25:09 bms Exp $"
 
 #include "fea_module.h"
 
@@ -94,6 +94,7 @@ usage(const char *argv0, int exit_value)
 static void
 fea_main(const char* finder_hostname, uint16_t finder_port)
 {
+    string error_msg;
     EventLoop eventloop;
 
     XrlStdRouter xrl_std_router_fea(eventloop, xrl_entity, finder_hostname,
@@ -130,7 +131,9 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     IfConfig ifconfig(eventloop, ifc_repl, if_err, nexthop_port_mapper);
     if (is_dummy)
 	ifconfig.set_dummy();
-    ifconfig.start();
+    if (ifconfig.start(error_msg) != XORP_OK) {
+	XLOG_FATAL("Cannot start IfConfig: %s", error_msg.c_str());
+    }
 
     //
     // Interface manager
@@ -150,7 +153,9 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     FtiConfig fticonfig(eventloop, profile, ifm.iftree(), nexthop_port_mapper);
     if (is_dummy)
 	fticonfig.set_dummy();
-    fticonfig.start();
+    if (fticonfig.start(error_msg) != XORP_OK) {
+	XLOG_FATAL("Cannot start FtiConfig: %s", error_msg.c_str());
+    }
 
     //
     // Raw Socket TODO
@@ -256,8 +261,13 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	// TODO: this may not work if we depend on reading asynchronously
 	// data from sockets. To fix this, we need to run the eventloop
 	// until we get all the data we need. Tricky...
-	ifconfig.stop();
-	fticonfig.stop();
+	//
+	if (fticonfig.stop(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot stop FtiConfig: %s", error_msg.c_str());
+	}
+	if (ifconfig.stop(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot stop IfConfig: %s", error_msg.c_str());
+	}
 
 #ifndef FEA_DUMMY
 	if (xrl_mfea_node4.MfeaNode::node_status() != PROC_STARTUP) {

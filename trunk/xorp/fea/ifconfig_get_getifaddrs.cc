@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_getifaddrs.cc,v 1.7 2004/08/17 02:20:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_getifaddrs.cc,v 1.8 2004/09/01 18:17:01 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -45,11 +45,18 @@ IfConfigGetGetifaddrs::IfConfigGetGetifaddrs(IfConfig& ifc)
 
 IfConfigGetGetifaddrs::~IfConfigGetGetifaddrs()
 {
-    
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the getifaddrs(3) mechanism to get "
+		   "information about network interfaces from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-IfConfigGetGetifaddrs::start()
+IfConfigGetGetifaddrs::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -57,10 +64,12 @@ IfConfigGetGetifaddrs::start()
     _is_running = true;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 int
-IfConfigGetGetifaddrs::stop()
+IfConfigGetGetifaddrs::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -68,6 +77,8 @@ IfConfigGetGetifaddrs::stop()
     _is_running = false;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 bool

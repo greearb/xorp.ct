@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.37 2004/11/27 09:08:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.38 2004/11/29 04:02:08 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -103,6 +103,17 @@ IfConfig::IfConfig(EventLoop& eventloop,
     _have_ipv6 = test_have_ipv6();
 }
 
+IfConfig::~IfConfig()
+{
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the mechanism for manipulating "
+		   "the network interfaces: %s",
+		   error_msg.c_str());
+    }
+}
+
 int
 IfConfig::register_ifc_get_primary(IfConfigGet *ifc_get)
 {
@@ -185,7 +196,7 @@ IfConfig::set_dummy()
 }
 
 int
-IfConfig::start()
+IfConfig::start(string& error_msg)
 {
     list<IfConfigGet*>::iterator ifc_get_iter;
     list<IfConfigSet*>::iterator ifc_set_iter;
@@ -198,14 +209,14 @@ IfConfig::start()
     // Start the IfConfigGet methods
     //
     if (_ifc_get_primary != NULL) {
-	if (_ifc_get_primary->start() < 0)
+	if (_ifc_get_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
     for (ifc_get_iter = _ifc_gets_secondary.begin();
 	 ifc_get_iter != _ifc_gets_secondary.end();
 	 ++ifc_get_iter) {
 	IfConfigGet* ifc_get = *ifc_get_iter;
-	if (ifc_get->start() < 0)
+	if (ifc_get->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -213,14 +224,14 @@ IfConfig::start()
     // Start the IfConfigSet methods
     //
     if (_ifc_set_primary != NULL) {
-	if (_ifc_set_primary->start() < 0)
+	if (_ifc_set_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
     for (ifc_set_iter = _ifc_sets_secondary.begin();
 	 ifc_set_iter != _ifc_sets_secondary.end();
 	 ++ifc_set_iter) {
 	IfConfigSet* ifc_set = *ifc_set_iter;
-	if (ifc_set->start() < 0)
+	if (ifc_set->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -228,14 +239,14 @@ IfConfig::start()
     // Start the IfConfigObserver methods
     //
     if (_ifc_observer_primary != NULL) {
-	if (_ifc_observer_primary->start() < 0)
+	if (_ifc_observer_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
     for (ifc_observer_iter = _ifc_observers_secondary.begin();
 	 ifc_observer_iter != _ifc_observers_secondary.end();
 	 ++ifc_observer_iter) {
 	IfConfigObserver* ifc_observer = *ifc_observer_iter;
-	if (ifc_observer->start() < 0)
+	if (ifc_observer->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -251,15 +262,18 @@ IfConfig::start()
 }
 
 int
-IfConfig::stop()
+IfConfig::stop(string& error_msg)
 {
     list<IfConfigGet*>::iterator ifc_get_iter;
     list<IfConfigSet*>::iterator ifc_set_iter;
     list<IfConfigObserver*>::iterator ifc_observer_iter;
     int ret_value = XORP_OK;
+    string error_msg2;
 
     if (! _is_running)
 	return (XORP_OK);
+
+    error_msg.erase();
 
     //
     // Stop the IfConfigObserver methods
@@ -268,12 +282,18 @@ IfConfig::stop()
 	 ifc_observer_iter != _ifc_observers_secondary.end();
 	 ++ifc_observer_iter) {
 	IfConfigObserver* ifc_observer = *ifc_observer_iter;
-	if (ifc_observer->stop() < 0)
+	if (ifc_observer->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     if (_ifc_observer_primary != NULL) {
-	if (_ifc_observer_primary->stop() < 0)
+	if (_ifc_observer_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     //
@@ -283,12 +303,18 @@ IfConfig::stop()
 	 ifc_set_iter != _ifc_sets_secondary.end();
 	 ++ifc_set_iter) {
 	IfConfigSet* ifc_set = *ifc_set_iter;
-	if (ifc_set->stop() < 0)
+	if (ifc_set->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     if (_ifc_set_primary != NULL) {
-	if (_ifc_set_primary->stop() < 0)
+	if (_ifc_set_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     //
@@ -298,12 +324,18 @@ IfConfig::stop()
 	 ifc_get_iter != _ifc_gets_secondary.end();
 	 ++ifc_get_iter) {
 	IfConfigGet* ifc_get = *ifc_get_iter;
-	if (ifc_get->stop() < 0)
+	if (ifc_get->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
     if (_ifc_get_primary != NULL) {
-	if (_ifc_get_primary->stop() < 0)
+	if (_ifc_get_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
     }
 
     _is_running = false;
@@ -376,16 +408,12 @@ IfConfig::enable_click(bool enable)
 int
 IfConfig::start_click(string& error_msg)
 {
-    // TODO: XXX: PAVPAVPAV: pass "error_msg" as an argument to the start() methods below
-    if (_ifc_get_click.start() < 0) {
-	error_msg = "Cannot start the mechanism to get information about "
-	    "network interfaces from Click";
+    if (_ifc_get_click.start(error_msg) < 0) {
 	return (XORP_ERROR);
     }
-    if (_ifc_set_click.start() < 0) {
-	_ifc_get_click.stop();
-	error_msg = "Cannot start the mechanism to set information about "
-	    "network interfaces with Click";
+    if (_ifc_set_click.start(error_msg) < 0) {
+	string error_msg2;
+	_ifc_get_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
 
@@ -401,16 +429,12 @@ IfConfig::start_click(string& error_msg)
 int
 IfConfig::stop_click(string& error_msg)
 {
-    // TODO: XXX: PAVPAVPAV: pass "error_msg" as an argument to the stop() methods below
-    if (_ifc_get_click.stop() < 0) {
-	_ifc_set_click.stop();
-	error_msg = "Cannot stop the mechanism to get information about "
-	    "network interfaces from Click";
+    if (_ifc_get_click.stop(error_msg) < 0) {
+	string error_msg2;
+	_ifc_set_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ifc_set_click.stop() < 0) {
-	error_msg = "Cannot stop the mechanism to set information about "
-	    "network interfaces with Click";
+    if (_ifc_set_click.stop(error_msg) < 0) {
 	return (XORP_ERROR);
     }
 

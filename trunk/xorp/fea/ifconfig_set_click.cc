@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.8 2004/11/29 11:28:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.9 2004/11/30 13:02:31 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -45,19 +45,28 @@ IfConfigSetClick::IfConfigSetClick(IfConfig& ifc)
 
 IfConfigSetClick::~IfConfigSetClick()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the Click mechanism to set "
+		   "information about network interfaces into the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-IfConfigSetClick::start()
+IfConfigSetClick::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
 
-    if (! ClickSocket::is_enabled())
+    if (! ClickSocket::is_enabled()) {
+	error_msg = c_format("Click is not enabled");
 	return (XORP_ERROR);	// XXX: Not enabled
+    }
 
-    if (ClickSocket::start() < 0)
+    if (ClickSocket::start(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -73,7 +82,7 @@ IfConfigSetClick::start()
 }
 
 int
-IfConfigSetClick::stop()
+IfConfigSetClick::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
 
@@ -82,7 +91,7 @@ IfConfigSetClick::stop()
 
     terminate_click_config_generator();
 
-    ret_value = ClickSocket::stop();
+    ret_value = ClickSocket::stop(error_msg);
 
     _is_running = false;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_dummy.cc,v 1.5 2004/08/17 02:20:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_dummy.cc,v 1.6 2004/09/01 18:17:01 pavlin Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -42,11 +42,18 @@ IfConfigObserverDummy::IfConfigObserverDummy(IfConfig& ifc)
 
 IfConfigObserverDummy::~IfConfigObserverDummy()
 {
-    stop();
+    string error_msg;
+
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the dummy mechanism to observe "
+		   "information about network interfaces from the underlying "
+		   "system: %s",
+		   error_msg.c_str());
+    }
 }
 
 int
-IfConfigObserverDummy::start()
+IfConfigObserverDummy::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -56,10 +63,12 @@ IfConfigObserverDummy::start()
     _is_running = true;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 int
-IfConfigObserverDummy::stop()
+IfConfigObserverDummy::stop(string& error_msg)
 {
     // TODO: XXX: PAVPAVPAV: implement it!
 
@@ -69,6 +78,8 @@ IfConfigObserverDummy::stop()
     _is_running = false;
 
     return (XORP_OK);
+
+    UNUSED(error_msg);
 }
 
 void
