@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.5 2003/03/04 23:41:23 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.6 2003/03/07 18:23:44 hodson Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -87,9 +87,12 @@ FinderTcpMessenger::read_event(int	      errval,
 bool
 FinderTcpMessenger::send(const Xrl& xrl, const SendCallback& scb)
 {
-    if (pending())
+#if 0
+    if (pending()) {
+	XLOG_FATAL("Hit pending");
 	return false;
-
+    }
+#endif
     FinderXrlMessage* msg = new FinderXrlMessage(xrl);
 
     if (store_xrl_response(msg->seqno(), scb) == false) {
