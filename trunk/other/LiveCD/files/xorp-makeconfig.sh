@@ -76,7 +76,6 @@ welcome() {
     else
 	echo ${TERM}
     fi 
-    exit 0
     ${DIALOG} --title "${TITLE}" --infobox "XORP LiveCD is starting..." 6 70 
 }
 
