@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.22 2003/10/09 00:11:01 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.23 2003/10/13 02:23:18 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -196,6 +196,7 @@ libfea_a_SOURCES	+= ifconfig_get_proc_linux.cc
 libfea_a_SOURCES	+= ifconfig_get_sysctl.cc
 libfea_a_SOURCES	+= ifconfig_observer.cc
 libfea_a_SOURCES	+= ifconfig_observer_dummy.cc
+libfea_a_SOURCES	+= ifconfig_observer_netlink.cc
 libfea_a_SOURCES	+= ifconfig_observer_rtsock.cc
 libfea_a_SOURCES	+= ifconfig_parse_ifaddrs.cc
 libfea_a_SOURCES	+= ifconfig_parse_ifreq.cc
