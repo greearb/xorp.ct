@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/status_codes.h,v 1.3 2003/05/09 05:23:07 mjh Exp $
+ * $XORP: xorp/libxorp/status_codes.h,v 1.4 2003/05/29 18:52:55 mjh Exp $
  */
 
 #ifndef __LIBXORP_STATUS_CODES_H__
@@ -31,7 +31,7 @@ Explanation of Process States
     |                V
     |             STARTUP
     |                |
-    |                | (2
+    |                | (2)
     |                V
     |            NOT_READY
     |             |     ^
@@ -41,14 +41,14 @@ Explanation of Process States
     |              /   \
     |          (5)/     \(6)
     |            V       V
-    |       SHUTDOWN    FAIL
+    |       SHUTDOWN   FAILED
     |            |       |
     |            |       |
     +------------+-------+
 
 Events/Actions
 --------------
-(1) Register with finder
+(1) Register with finder.
 (2) External dependencies satisfied, ready to be configured.
 (3) Finished processing any config changes, ready for other processes that 
     depend on this process to be configured.
@@ -77,18 +77,18 @@ SHUTDOWN  Process has received a shutdown request is shutting down cleanly.
           Normally the process will terminate by itself after being in this 
           state.
 
-FAIL      Process has suffered a fatal error, and is in the process of 
+FAILED    Process has suffered a fatal error, and is in the process of 
           cleaning up the mess.  Normally the process will terminate by 
           itself after being in this state.
 
 Notes
 -----
 
-A process may spend zero time in STARTUP, NOT_READY, READY, SHUTDOWN or FAIL 
+A process may spend zero time in STARTUP, NOT_READY, READY, SHUTDOWN or FAILED 
 states.  For example, a process may effectively go directly from NULL to 
 READY state on startup if there are no dependencies that need to be taken 
 into account.  A process may go from STARTUP or NOT_READY states to SHUTDOWN 
-or FAIL states without spending any time in READY state if required.
+or FAILED states without spending any time in READY state if required.
 
 On reconfiguration, a process does not need to go to NOT_READY state unless 
 it needs to delay the reconfiguration of processes that depend on the 
