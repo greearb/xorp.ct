@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.2 2002/12/13 18:51:12 atanu Exp $
 #
 
 CALLXRL=../../libxipc/call_xrl
@@ -14,6 +14,11 @@ coord()
 {
     echo -n "Coord $* "
     $CALLXRL "finder://coord/coord/0.1/command?command:txt=$*"
+
+    if [ "${NOBLOCK:-false}" = "true" ]
+    then
+	return
+    fi
 
     # Only try five times for the operation to complete.
     local i
