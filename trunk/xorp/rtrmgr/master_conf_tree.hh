@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.11 2003/11/18 23:03:56 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.12 2003/11/20 06:05:05 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -20,22 +20,24 @@
 #include <map>
 #include <list>
 #include <set>
-#include "config.h"
 #include "libxorp/xorp.h"
 #include "task.hh"
 #include "parse_error.hh"
 #include "conf_tree.hh"
 
-class RouterCLI;
+
 class CommandTree;
 class ConfTemplate;
+class RouterCLI;
 
-class MasterConfigTree :public ConfigTree {
+class MasterConfigTree : public ConfigTree {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+
 public:
-    MasterConfigTree(const string& config_file, TemplateTree *ct,
+    MasterConfigTree(const string& config_file, TemplateTree* tt,
 		     ModuleManager& mmgr, XorpClient& xclient,
 		     bool global_do_exec);
+
     bool read_file(string& configuration, const string& config_file,
 		   string& errmsg);
     bool parse(const string& configuration, const string& config_file);
@@ -47,10 +49,10 @@ public:
     void commit_changes_pass2();
     void commit_pass2_done(bool success, string errmsg);
 
-    bool commit_in_progress() const {return _commit_in_progress;}
-    bool check_commit_status(string &response);
+    bool commit_in_progress() const { return _commit_in_progress; }
+    bool check_commit_status(string& response);
     string discard_changes();
-    string mark_subtree_for_deletion(const list <string>& path_segments, 
+    string mark_subtree_for_deletion(const list<string>& path_segments, 
 				     uid_t user_id);
     void delete_entire_config();
     bool lock_node(const string& node, uid_t user_id, uint32_t timeout, 
@@ -58,34 +60,31 @@ public:
     bool unlock_node(const string& node, uid_t user_id);
 
     bool save_to_file(const string& filename, uid_t user_id, string& errmsg);
-    bool load_from_file(const string& filename, uid_t user_id,
-			string& errmsg, string& deltas, string& deletions);
+    bool load_from_file(const string& filename, uid_t user_id, string& errmsg,
+			string& deltas, string& deletions);
 
 private:
     void diff_configs(const ConfigTree& new_tree, ConfigTree& delta_tree,
 		      ConfigTree& deletion_tree);
-    list <string> find_changed_modules() const;
-    list <string> find_active_modules() const;
-    list <string> find_inactive_modules() const;
-    void order_module_list(const set <string>& module_set,
-			   list <string>& ordered_modules) const;
-    bool module_config_start(const string& module_name,
-			     string& errmsg);
-    bool module_shutdown(const string& module_name,
-			 string& errmsg);
+    list<string> find_changed_modules() const;
+    list<string> find_active_modules() const;
+    list<string> find_inactive_modules() const;
+    void order_module_list(const set<string>& module_set,
+			   list<string>& ordered_modules) const;
+    bool module_config_start(const string& module_name, string& errmsg);
+    bool module_shutdown(const string& module_name, string& errmsg);
 
-    bool do_exec() const {return _task_manager.do_exec();}
+    bool do_exec() const { return _task_manager.do_exec(); }
 
-    ModuleManager& module_manager() const 
-    {
+    ModuleManager& module_manager() const {
 	return _task_manager.module_manager();
     }
 
-    XorpClient& xorp_client() const {return _task_manager.xorp_client();}
+    XorpClient& xorp_client() const { return _task_manager.xorp_client(); }
 
-    TaskManager _task_manager;
-    CallBack _commit_cb;
-    bool _commit_in_progress;
+    TaskManager		_task_manager;
+    CallBack		_commit_cb;
+    bool		_commit_in_progress;
 };
 
 #endif // __RTRMGR_MASTER_CONF_TREE_HH__
