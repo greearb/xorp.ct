@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.2 2003/09/10 19:21:33 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.3 2003/09/20 00:15:46 hodson Exp $"
 
 #include "config.h"
 
@@ -152,6 +152,7 @@ IfMgrXrlReplicationManager::remove_mirror(const string& target_name)
     for (Outputs::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
 	if ((*i)->xrl_target_name() == target_name) {
 	    _outputs.erase(i);
+	    delete *i;
 	    return true;
 	}
     }

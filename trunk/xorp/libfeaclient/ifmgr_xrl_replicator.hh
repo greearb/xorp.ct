@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.3 2003/09/20 00:15:46 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.4 2003/10/14 21:47:17 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
 #define __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
@@ -22,6 +22,7 @@
 #include "ifmgr_cmd_queue.hh"
 
 #include "libxorp/eventloop.hh"
+#include "libxorp/safe_callback_obj.hh"
 #include "libxipc/xrl_error.hh"
 
 /**
@@ -109,7 +110,8 @@ class IfMgrXrlReplicationManager;
  * error occurs with IPC the objects request removal from the manager,
  * which causes their destruction.
  */
-class IfMgrManagedXrlReplicator : public IfMgrXrlReplicator {
+class IfMgrManagedXrlReplicator :
+    public IfMgrXrlReplicator, public CallbackSafeObject {
 public:
     IfMgrManagedXrlReplicator(IfMgrXrlReplicationManager& manager,
 			      XrlSender&		 sender,
