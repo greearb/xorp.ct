@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.17 2003/05/29 17:59:10 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -85,8 +85,20 @@ parser_main()
     vif_manager.enable();
     vif_manager.start();
     XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager, NULL);
-
     XrlRibV0p1Client xrl_client(&xrl_router);
+
+    {
+	bool timed_out(false);
+	XorpTimer t = eventloop.set_flag_after_ms(1000, &timed_out);
+	while (xrl_router.ready() == false) {
+	    eventloop.run();
+	}
+	if (timed_out) {
+	    cout << "XrlRouter did not become ready." << endl;
+	    return;
+	}
+    }
+
 
     // Variable used to signal completion of Xrl parse completion
     XrlCompletion cv;
