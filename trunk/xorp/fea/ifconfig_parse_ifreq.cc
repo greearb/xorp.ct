@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.4 2003/05/21 05:32:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.5 2003/06/17 23:14:28 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -231,6 +231,8 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	IPvX subnet_mask = IPvX::ZERO(family);
 	IPvX broadcast_addr = IPvX::ZERO(family);
 	IPvX peer_addr = IPvX::ZERO(family);
+	bool has_broadcast_addr = false;
+	bool has_peer_addr = false;
 	
 	// Get the IP address
 	lcl_addr.copy_in(ifreq->ifr_addr);
@@ -295,6 +297,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		    // XXX: in case it doesn't return proper family
 		    ifrcopy.ifr_broadaddr.sa_family = family;
 		    broadcast_addr.copy_in(ifrcopy.ifr_addr);
+		    has_broadcast_addr = true;
 		}
 #endif // SIOCGIFBRDADDR
 		break;
@@ -321,6 +324,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		    // XXX: in case it doesn't return proper family
 		    ifrcopy.ifr_dstaddr.sa_family = family;
 		    peer_addr.copy_in(ifrcopy.ifr_dstaddr);
+		    has_peer_addr = true;
 		}
 #endif // SIOCGIFDSTADDR
 		break;
@@ -339,6 +343,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		    // Just in case it doesn't return proper family
 		    ifrcopy6.ifr_ifru.ifru_dstaddr.sin6_family = family;
 		    peer_addr.copy_in(ifrcopy6.ifr_ifru.ifru_dstaddr);
+		    has_peer_addr = true;
 		}
 	    }
 #endif // SIOCGIFDSTADDR_IN6
@@ -357,9 +362,13 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    fv.add_addr(lcl_addr.get_ipv4());
 	    IfTreeAddr4& fa = fv.get_addr(lcl_addr.get_ipv4())->second;
 	    fa.set_enabled(fv.enabled() && (flags & IFF_UP));
-	    fa.set_broadcast(fv.broadcast() && (flags & IFF_BROADCAST));
+	    fa.set_broadcast(fv.broadcast()
+			     && (flags & IFF_BROADCAST)
+			     && has_broadcast_addr);
 	    fa.set_loopback(fv.loopback() && (flags & IFF_LOOPBACK));
-	    fa.set_point_to_point(fv.point_to_point() && (flags & IFF_POINTOPOINT));
+	    fa.set_point_to_point(fv.point_to_point()
+				  && (flags & IFF_POINTOPOINT)
+				  && has_peer_addr);
 	    fa.set_multicast(fv.multicast() && (flags & IFF_MULTICAST));
 	    
 	    fa.set_prefix(subnet_mask.prefix_length());

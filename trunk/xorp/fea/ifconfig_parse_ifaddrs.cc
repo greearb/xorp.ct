@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.4 2003/06/06 23:56:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.5 2003/06/17 23:14:28 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -217,6 +217,8 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    IPv4 subnet_mask;
 	    IPv4 broadcast_addr;
 	    IPv4 peer_addr;
+	    bool has_broadcast_addr = false;
+	    bool has_peer_addr = false;
 	    
 	    // Get the IP address
 	    if (ifa->ifa_addr != NULL)
@@ -232,21 +234,27 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    if (fv.broadcast() && (ifa->ifa_broadaddr != NULL)) {
 		const sockaddr_in *sin = (sockaddr_in *)ifa->ifa_broadaddr;
 		broadcast_addr.copy_in(sin->sin_addr);
+		has_broadcast_addr = true;
 	    }
 	    
 	    // Get the p2p address
 	    if (fv.point_to_point() && (ifa->ifa_dstaddr != NULL)) {
 		const sockaddr_in *sin = (sockaddr_in *)ifa->ifa_dstaddr;
 		peer_addr.copy_in(sin->sin_addr);
+		has_peer_addr = true;
 	    }
 	    
 	    // Add the address
 	    fv.add_addr(lcl_addr);
 	    IfTreeAddr4& fa = fv.get_addr(lcl_addr)->second;
 	    fa.set_enabled(fv.enabled() && (flags & IFF_UP));
-	    fa.set_broadcast(fv.broadcast() && (flags & IFF_BROADCAST));
+	    fa.set_broadcast(fv.broadcast()
+			     && (flags & IFF_BROADCAST)
+			     && has_broadcast_addr);
 	    fa.set_loopback(fv.loopback() && (flags & IFF_LOOPBACK));
-	    fa.set_point_to_point(fv.point_to_point() && (flags & IFF_POINTOPOINT));
+	    fa.set_point_to_point(fv.point_to_point()
+				  && (flags & IFF_POINTOPOINT)
+				  && has_peer_addr);
 	    fa.set_multicast(fv.multicast() && (flags & IFF_MULTICAST));
 	    
 	    fa.set_prefix(subnet_mask.prefix_length());
@@ -264,6 +272,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    IPv6 lcl_addr;
 	    IPv6 subnet_mask;
 	    IPv6 peer_addr;
+	    bool has_peer_addr = false;
 	    
 	    // Get the IP address
 	    if (ifa->ifa_addr != NULL)
@@ -280,6 +289,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    if (fv.point_to_point() && (ifa->ifa_dstaddr != NULL)) {
 		const sockaddr_in6 *sin6 = (sockaddr_in6 *)ifa->ifa_dstaddr;
 		peer_addr.copy_in(sin6->sin6_addr);
+		has_peer_addr = true;
 	    }
 	    
 	    // Add the address
@@ -287,7 +297,9 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	    IfTreeAddr6& fa = fv.get_addr(lcl_addr)->second;
 	    fa.set_enabled(fv.enabled() && (flags & IFF_UP));
 	    fa.set_loopback(fv.loopback() && (flags & IFF_LOOPBACK));
-	    fa.set_point_to_point(fv.point_to_point() && (flags & IFF_POINTOPOINT));
+	    fa.set_point_to_point(fv.point_to_point()
+				  && (flags & IFF_POINTOPOINT)
+				  && has_peer_addr);
 	    fa.set_multicast(fv.multicast() && (flags & IFF_MULTICAST));
 	    
 	    fa.set_prefix(subnet_mask.prefix_length());
