@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libproto/test_spt.cc,v 1.1 2004/11/02 23:15:22 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -208,13 +208,34 @@ test2(TestInfo& info)
     spt->set_origin("A");
 
     int weight;
-    spt->get_edge_weight("A", weight, "B");
+    if (!spt->get_edge_weight("A", weight, "B")) {
+	DOUT(info) << "Failed to get weight from A to B\n";
+	return false;
+    }
     DOUT(info) << "Edge weight from A to B is " << weight << endl;
+    if (weight != 10) {
+	DOUT(info) << "Edge weight from A to B should be 10 not " << weight
+		   << endl;
+	return false;
+    }
 
     spt->update_edge_weight("A", 5, "B");
-
-    spt->get_edge_weight("A", weight, "B");
+    if (!spt->get_edge_weight("A", weight, "B")) {
+	DOUT(info) << "Failed to get weight from A to B\n";
+	return false;
+    }
     DOUT(info) << "Edge weight from A to B is " << weight << endl;
+    if (weight != 5) {
+	DOUT(info) << "Edge weight from A to B should be 5 not " << weight
+		   << endl;
+	return false;
+    }
+
+    if (spt->get_edge_weight("B", weight, "A")) {
+	DOUT(info) <<
+"Got edge weight from B to A should not be possible on unidirectional link\n";
+	return false;
+    }
 
     delete spt;
 
