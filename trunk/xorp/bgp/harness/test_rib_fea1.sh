@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.9 2003/10/30 04:37:45 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.10 2003/10/30 04:55:40 atanu Exp $
 #
 
 #
@@ -248,7 +248,8 @@ config_peers_ipv6()
     coord peer1 establish AS $PEER1_AS_IPV6 \
 	holdtime $HOLDTIME \
 	id 10.10.10.1 \
-	keepalive false
+	keepalive false \
+	ipv6 true
 
     coord peer1 assert established
 
@@ -258,7 +259,8 @@ config_peers_ipv6()
     coord peer2 establish AS $PEER2_AS_IPV6 \
 	holdtime $HOLDTIME \
 	id 10.10.10.2 \
-	keepalive false
+	keepalive false \
+	ipv6 true
 
     coord peer2 assert established
 
@@ -268,7 +270,8 @@ config_peers_ipv6()
     coord peer3 establish AS $PEER3_AS_IPV6 \
 	holdtime $HOLDTIME \
 	id 10.10.10.3 \
-	keepalive false
+	keepalive false \
+	ipv6 true
 
     coord peer3 assert established
 }
