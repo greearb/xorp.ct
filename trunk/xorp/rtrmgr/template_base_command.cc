@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.47 2004/09/17 14:09:02 abittau Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.1 2004/12/11 21:29:59 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -200,7 +200,11 @@ AllowRangeCommand::verify_variable_value(const ConfigTreeNode&	ctn,
 
     int32_t ival = atoi(value.c_str());
     if (ival < _lower || ival > _upper) {
-	errmsg = c_format("Value %s is outside valid range, %d...%d,  for variable %s.", value.c_str(), _lower, _upper, _varname.c_str());
+	errmsg = c_format("Value %s is outside valid range, %d...%d,  for variable %s.",
+			  value.c_str(),
+			  XORP_INT_CAST(_lower),
+			  XORP_INT_CAST(_upper),
+			  _varname.c_str());
 	return false;
     }
 
@@ -210,6 +214,9 @@ AllowRangeCommand::verify_variable_value(const ConfigTreeNode&	ctn,
 string
 AllowRangeCommand::str() const
 {
-    return c_format("AllowRangeCommand: varname = %s\n       Allowed range: %d...%d", _varname.c_str(), _lower, _upper);
+    return c_format("AllowRangeCommand: varname = %s\n       Allowed range: %d...%d",
+		    _varname.c_str(),
+		    XORP_INT_CAST(_lower),
+		    XORP_INT_CAST(_upper));
 }
 
