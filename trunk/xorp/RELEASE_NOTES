@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.6 2003/03/13 09:56:03 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.7 2003/03/14 12:32:57 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -43,6 +43,10 @@ Release 0.3 (2003/??/??)
     - Critical bug fix (could be triggered if a program like
       xorp/pim/test_pim is run in background, and is accessed
       by the built-in CLI).
+
+  SNMP:
+    - Integrated with Net-SNMP agent
+    - Implemented bgpVersion and bgpPeerTable from BGP4-MIB (RFC 1657)
 
 
 Release 0.2 (2003/03/10)
