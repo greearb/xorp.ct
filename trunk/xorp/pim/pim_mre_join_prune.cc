@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.8 2003/01/17 22:57:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.9 2003/01/17 23:07:38 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -1994,6 +1994,54 @@ PimMre::recompute_is_prune_desired_sg_rpt()
     // XXX: no need to try to remove the (S,G,rpt) routing state, because
     // it is in Pruned state.
     return (true);
+}
+
+//
+// Upstream J/P (S,G,rpt) state machine (recomputed via (S,G) state)
+//
+// Note: applies only for (S,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_is_prune_desired_sg_rpt_sg()
+{
+    PimMre *pim_mre_sg_rpt;
+    bool ret_value = false;
+    
+    if (! is_sg())
+	return (false);
+    
+    pim_mre_sg_rpt = sg_rpt_entry();
+    
+    //
+    // Try to recompute PruneDesired(S,G,rpt) indirectly through the
+    // (S,G,rpt) routing entry (if exists).
+    //
+    if (pim_mre_sg_rpt != NULL)
+	return (pim_mre_sg_rpt->recompute_is_prune_desired_sg_rpt());
+    
+    //
+    // The (S,G,rpt) routing entry doesn't exist, hence create it
+    // and then use it to recompute PruneDesired(S,G,rpt)
+    //
+    pim_mre_sg_rpt = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+					    PIM_MRE_SG_RPT, PIM_MRE_SG_RPT);
+    if (pim_mre_sg_rpt == NULL) {
+	XLOG_ASSERT(false);
+	XLOG_ERROR("INTERNAL PimMrt ERROR: "
+		   "cannot create entry for (%s,%s) create_flags = %#x",
+		   cstring(source_addr()), cstring(group_addr()),
+		   PIM_MRE_SG_RPT);
+	return (false);
+    }
+    ret_value = pim_mre_sg_rpt->recompute_is_prune_desired_sg_rpt();
+
+    //
+    // Try to remove the (S,G,rpt) entry that was just created (in case
+    // it is not needed).
+    //
+    pim_mre_sg_rpt->entry_try_remove();
+    
+    return (ret_value);
 }
 
 //

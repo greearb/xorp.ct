@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.6 2003/01/17 22:57:01 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.7 2003/01/22 19:12:54 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -377,6 +377,8 @@ public:
     bool	recompute_is_join_desired_sg();
     // Note: applies only for (S,G,rpt)
     bool	recompute_is_prune_desired_sg_rpt();
+    // Note: applies only for (S,G)
+    bool	recompute_is_prune_desired_sg_rpt_sg();
     // Note: applies only for (S,G,rpt)
     bool	recompute_is_rpt_join_desired_g();
 

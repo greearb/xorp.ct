@@ -17,6 +17,7 @@ Input = INPUT_STATE_RP_CHANGED
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_RP_REGISTER_SG_CHANGED                           (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
@@ -42,6 +43,7 @@ Input = INPUT_STATE_MRIB_RP_CHANGED
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
@@ -56,6 +58,7 @@ Input = INPUT_STATE_MRIB_S_CHANGED
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_MRIB_NEXT_HOP_S                                  (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
@@ -68,6 +71,7 @@ Input = INPUT_STATE_MRIB_NEXT_HOP_RP_CHANGED
         OUTPUT_STATE_MRIB_NEXT_HOP_RP                              (*,*,RP)
         OUTPUT_STATE_MRIB_NEXT_HOP_RP_G                               (*,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
 
 Input = INPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED
@@ -76,15 +80,18 @@ Input = INPUT_STATE_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED
 Input = INPUT_STATE_MRIB_NEXT_HOP_RP_G_CHANGED
         OUTPUT_STATE_MRIB_NEXT_HOP_RP_G                               (*,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
 
 Input = INPUT_STATE_MRIB_NEXT_HOP_S_CHANGED
         OUTPUT_STATE_MRIB_NEXT_HOP_S                                  (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
 
 Input = INPUT_STATE_RPFP_NBR_WC_CHANGED
         OUTPUT_STATE_RPFP_NBR_WC                                      (*,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_RPFP_NBR_SG_RPT                              (S,G,rpt)
 
 Input = INPUT_STATE_RPFP_NBR_WC_GEN_ID_CHANGED
@@ -93,6 +100,7 @@ Input = INPUT_STATE_RPFP_NBR_WC_GEN_ID_CHANGED
 Input = INPUT_STATE_RPFP_NBR_SG_CHANGED
         OUTPUT_STATE_RPFP_NBR_SG                                      (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
 
 Input = INPUT_STATE_RPFP_NBR_SG_GEN_ID_CHANGED
         OUTPUT_STATE_RPFP_NBR_SG_GEN_ID                               (S,G)
@@ -121,6 +129,7 @@ Input = INPUT_STATE_RECEIVE_PRUNE_WC
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
@@ -150,6 +159,7 @@ Input = INPUT_STATE_DOWNSTREAM_JP_STATE_RP
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
@@ -163,6 +173,7 @@ Input = INPUT_STATE_DOWNSTREAM_JP_STATE_WC
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
@@ -179,6 +190,7 @@ Input = INPUT_STATE_DOWNSTREAM_JP_STATE_SG_RPT
         OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
@@ -195,6 +207,7 @@ Input = INPUT_STATE_LOCAL_RECEIVER_INCLUDE_WC
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
@@ -213,6 +226,7 @@ Input = INPUT_STATE_LOCAL_RECEIVER_EXCLUDE_SG
         OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
@@ -228,6 +242,7 @@ Input = INPUT_STATE_ASSERT_STATE_WC
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
@@ -240,6 +255,7 @@ Input = INPUT_STATE_ASSERT_STATE_SG
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_RPFP_NBR_SG                                      (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
@@ -255,6 +271,7 @@ Input = INPUT_STATE_I_AM_DR
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_RPT_JOIN_DESIRED_G                        (S,G,rpt)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
@@ -267,6 +284,7 @@ Input = INPUT_STATE_MY_IP_ADDRESS
         OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_IS_COULD_REGISTER_SG                             (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
@@ -290,6 +308,7 @@ Input = INPUT_STATE_SPTBIT_SG
         OUTPUT_STATE_INHERITED_OLIST_SG_RPT                       (S,G,rpt)
         OUTPUT_STATE_IS_JOIN_DESIRED_SG                               (S,G)
         OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT                      (S,G,rpt)
+        OUTPUT_STATE_IS_PRUNE_DESIRED_SG_RPT_SG                       (S,G)
         OUTPUT_STATE_ASSERT_TRACKING_DESIRED_SG                       (S,G)
         OUTPUT_STATE_COULD_ASSERT_SG                                  (S,G)
         OUTPUT_STATE_MY_ASSERT_METRIC_SG                              (S,G)
