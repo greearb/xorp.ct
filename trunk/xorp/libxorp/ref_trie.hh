@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.19 2004/05/14 18:30:59 mjh Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.20 2004/06/10 22:41:18 hodson Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -1379,7 +1379,8 @@ RefTrie<A, Payload>::print() const
 	if (ti.cur()->has_active_payload())
 	    printf("PL\n");
 	else if (ti.cur()->has_payload())
-	    printf("PL *DELETED* (%d refs)\n", ti.cur()->references());
+	    printf("PL *DELETED* (%u refs)\n",
+		   XORP_UINT_CAST(ti.cur()->references()));
 	else
 	    printf("[]\n");
     }
