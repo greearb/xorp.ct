@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.3 2003/03/22 03:26:42 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.4 2004/02/28 09:41:49 pavlin Exp $"
 
 //
 // PIM Multicast Routing Information Base Table implementation.
@@ -84,7 +84,8 @@ PimMribTable::find(const IPvX& address) const
 }
 
 void
-PimMribTable::add_pending_insert(uint32_t tid, const Mrib& mrib)
+PimMribTable::add_pending_insert(uint32_t tid, const Mrib& mrib,
+				 const string& next_hop_vif_name)
 {
     add_modified_prefix(mrib.dest_prefix());
 
@@ -109,6 +110,9 @@ PimMribTable::add_pending_insert(uint32_t tid, const Mrib& mrib)
 	}
     }
     MribTable::add_pending_insert(tid, mrib);
+
+    if (pim_vif == NULL)
+	add_unresolved_prefix(mrib.dest_prefix(), next_hop_vif_name);
 }
 
 void
@@ -116,6 +120,8 @@ PimMribTable::add_pending_remove(uint32_t tid, const Mrib& mrib)
 {
     add_modified_prefix(mrib.dest_prefix());
     MribTable::add_pending_remove(tid, mrib);
+
+    delete_unresolved_prefix(mrib.dest_prefix());
 }
 
 void
@@ -143,11 +149,13 @@ PimMribTable::apply_mrib_changes()
     }
 }
 
+//
 // Search the list of modified address prefixes and remove
 // all smaller prefixes. If there is a prefix that is larger
-// than the new_addr_prefix, then don't do anything.
+// than the modified_prefix, then don't do anything.
+//
 void
-PimMribTable::add_modified_prefix(const IPvXNet& new_addr_prefix)
+PimMribTable::add_modified_prefix(const IPvXNet& modified_prefix)
 {
     //
     // Search the list for overlapping address prefixes.
@@ -159,9 +167,9 @@ PimMribTable::add_modified_prefix(const IPvXNet& new_addr_prefix)
 	++iter1;
 	IPvXNet& old_addr_prefix = *iter2;
 	
-	if (old_addr_prefix.contains(new_addr_prefix))
+	if (old_addr_prefix.contains(modified_prefix))
 	    return;		// Nothing to merge/enlarge
-	if (new_addr_prefix.contains(old_addr_prefix)) {
+	if (modified_prefix.contains(old_addr_prefix)) {
 	    // Remove the old address prefix, because the new one is larger
 	    _modified_prefix_list.erase(iter2);
 	}
@@ -170,5 +178,57 @@ PimMribTable::add_modified_prefix(const IPvXNet& new_addr_prefix)
     //
     // Add the new address prefix to the list of modifed prefixes
     //
-    _modified_prefix_list.push_back(new_addr_prefix);
+    _modified_prefix_list.push_back(modified_prefix);
+}
+
+void
+PimMribTable::add_unresolved_prefix(const IPvXNet& dest_prefix,
+				    const string& next_hop_vif_name)
+{
+    map<IPvXNet, string>::iterator iter;
+
+    // Erase old unresolved entry (if exists)
+    iter = _unresolved_prefixes.find(dest_prefix);
+    if (iter != _unresolved_prefixes.end())
+	_unresolved_prefixes.erase(iter);
+
+    _unresolved_prefixes.insert(make_pair(dest_prefix, next_hop_vif_name));
+}
+
+void
+PimMribTable::delete_unresolved_prefix(const IPvXNet& dest_prefix)
+{
+    map<IPvXNet, string>::iterator iter;
+
+    // Erase unresolved entry (if exists)
+    iter = _unresolved_prefixes.find(dest_prefix);
+    if (iter != _unresolved_prefixes.end())
+	_unresolved_prefixes.erase(iter);
+}
+
+void
+PimMribTable::resolve_prefixes_by_vif_name(const string& next_hop_vif_name,
+					   uint16_t next_hop_vif_index)
+{
+    map<IPvXNet, string>::iterator iter, iter2;
+
+    //
+    // Find all unresolved prefixes for the given vif name
+    // and update their vif index.
+    //
+    for (iter = _unresolved_prefixes.begin();
+	 iter != _unresolved_prefixes.end();
+	 ) {
+	iter2 = iter;
+	++iter;
+	if (iter2->second != next_hop_vif_name)
+	    continue;
+	// Update the mrib entry
+	MribTable::update_entry_vif_index(iter2->first,
+					  next_hop_vif_index);
+	_modified_prefix_list.push_back(iter2->first);
+	_unresolved_prefixes.erase(iter2);
+    }
+
+    apply_mrib_changes();
 }

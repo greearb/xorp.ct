@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.43 2004/05/06 20:22:07 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.44 2004/05/15 23:58:41 pavlin Exp $"
 
 
 //
@@ -382,7 +382,14 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
     // Set the PIM Register vif index if needed
     if (pim_vif->is_pim_register())
 	_pim_register_vif_index = pim_vif->vif_index();
-    
+
+    //
+    // Resolve all destination prefixes whose next-hop vif name was not
+    // resolved earlier (e.g., the vif was unknown).
+    //
+    _pim_mrib_table.resolve_prefixes_by_vif_name(pim_vif->name(),
+						 pim_vif->vif_index());
+
     XLOG_INFO("New vif: %s", pim_vif->str().c_str());
     
     return (XORP_OK);
