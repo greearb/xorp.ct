@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.11 2004/11/05 03:39:40 bms Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.12 2005/01/14 01:26:14 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -88,6 +88,12 @@ interfaces {
 	    %help:	short "Set the MAC address";
 	    %set:	xrl  "$(interfaces.targetname)/ifmgr/0.1/set_mac?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&mac:mac=$(@)";
 	    %get:	xrl  "$(interfaces.targetname)/ifmgr/0.1/get_configured_mac?ifname:txt=$(interface.@)->mac:mac=$(@)";
+	}
+
+	mtu {
+	    %help:	short "Set the MTU";
+	    %set:	xrl  "$(interfaces.targetname)/ifmgr/0.1/set_mtu?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&mtu:u32=$(@)";
+	    %get:	xrl  "$(interfaces.targetname)/ifmgr/0.1/get_configured_mtu?ifname:txt=$(interface.@)->mtu:u32=$(@)";
 	}
 
 	vif @: txt {
