@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/harness/NOTES,v 1.8 2002/12/09 10:59:36 pavlin Exp $
+# $XORP: xorp/bgp/harness/NOTES,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 #
 
 #
@@ -182,7 +182,7 @@ Packet Format
 	[] 			202.222.192.0/18
 }
 
-Comamnds currently accepted by coord
+Commands currently accepted by coord
 ====================================
 
 * reset
