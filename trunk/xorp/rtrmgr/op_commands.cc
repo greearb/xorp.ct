@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.25 2004/06/09 03:14:13 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.26 2004/06/10 22:41:52 hodson Exp $"
 
 
 #include <glob.h>
@@ -123,17 +123,19 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 	    done(!_error);
 	    return;
 	}
-	size_t len = offset - _last_offset;
-	const char *newdata = (const char *)buffer + _last_offset;
-	char tmpbuf[len + 1];
-	memcpy(tmpbuf, newdata, len);
-	tmpbuf[len] = '\0';
-	_response += tmpbuf;
+
+	if (offset != _last_offset) {
+	    const char* p   = (const char*)buffer + _last_offset;
+	    size_t 	len = offset - _last_offset;
+	    _response.append(p, p + len);
+	    _last_offset = offset;
+	}
+
 	if (e == AsyncFileOperator::END_OF_FILE) {
 	    done(!_error);
 	    return;
 	}
-	_last_offset = offset;
+
 	if (offset == OP_BUF_SIZE) {
 	    // The buffer is exhausted
 	    _last_offset = 0;
