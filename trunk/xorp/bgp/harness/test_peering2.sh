@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.34 2004/04/27 18:01:58 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.35 2004/11/15 21:01:07 atanu Exp $
 #
 
 #
@@ -568,7 +568,7 @@ test12()
 {
     echo "TEST12 (Behave sanely when a peer reuses a router ID):"
     echo "	1) Bring up peering (peer1)"
-    echo "      2) Tear down the peering (peer1)"
+    echo "	2) Tear down the peering (peer1)"
     echo "	2) Bring up a second peering (peer2) with the same router ID"
     echo "	3) Tear down peering (peer2)"
 
