@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fea.cc,v 1.6 2003/05/21 03:52:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_fea.cc,v 1.7 2004/05/16 00:26:24 pavlin Exp $"
 
 /* TODO: XXX: THIS CODE NEEDS UPDATING AS XRL INTERFACE HAS CHANGED */
 
@@ -303,11 +303,12 @@ void
 print_routing_table(const char *host)
 {
     EventLoop eventloop;
+    string hostname = host;
 
     if (0 == host)
-	host = FINDER_DEFAULT_HOST.str().c_str();
+	hostname = FINDER_DEFAULT_HOST.str();
 
-    XrlStdRouter test_fea(eventloop, client, host);
+    XrlStdRouter test_fea(eventloop, client, hostname.c_str());
 
     routing_cookie rc;
 
