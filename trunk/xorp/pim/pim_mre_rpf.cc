@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.22 2004/02/25 00:35:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.23 2004/02/25 00:41:24 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -93,9 +93,11 @@ PimMre::rpf_interface_rp() const
 	    vif_index = pim_register_vif_index();
 	    break;
 	}
-	if (mrib_rp() == NULL)
-	    return (Vif::VIF_INDEX_INVALID);
-	vif_index = mrib_rp()->next_hop_vif_index();
+	if (mrib_rp() != NULL) {
+	    vif_index = mrib_rp()->next_hop_vif_index();
+	    break;
+	}
+	return (Vif::VIF_INDEX_INVALID);
     } while (false);
     
     //
@@ -114,19 +116,34 @@ PimMre::rpf_interface_s() const
     uint16_t vif_index;
     PimVif *pim_vif;
     
-    if (mrib_s() == NULL)
-	return (Vif::VIF_INDEX_INVALID);
-    
-    vif_index = mrib_s()->next_hop_vif_index();
-    
+    do {
+	if (mrib_s() == NULL)
+	    break;
+	vif_index = mrib_s()->next_hop_vif_index();
+
+	//
+	// Check if the PimVif is valid and UP
+	//
+	pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+	if ((pim_vif == NULL) || (! pim_vif->is_up()))
+	    break;
+
+	return (vif_index);
+    } while (false);
+
     //
-    // Check if the PimVif is valid and UP
+    // XXX: we need to consider the case when the source address
+    // belongs to the addresses of one of our virtual interfaces,
+    // because the corresponding MRIB entry may point toward the
+    // loopback interface.
     //
-    pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
-    if ((pim_vif == NULL) || (! pim_vif->is_up()))
-	return (Vif::VIF_INDEX_INVALID);
-    
-    return (vif_index);
+    pim_vif = pim_mrt().pim_node().vif_find_by_addr(source_addr());
+    if ((pim_vif != NULL) && pim_vif->is_up()) {
+	vif_index = pim_vif->vif_index();
+	return (vif_index);
+    }
+
+    return (Vif::VIF_INDEX_INVALID);
 }
 
 // Return true if @pim_nbr is in use by this PimMre entry, otherwise
