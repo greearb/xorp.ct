@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/work_plan.txt,v 1.21 2003/07/15 22:35:44 pavlin Exp $
+# $XORP: xorp/devnotes/work_plan.txt,v 1.22 2003/07/24 23:50:56 pavlin Exp $
 #
 
 Priority:
@@ -62,7 +62,7 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.4:
-* Add test for unrecognized optional transitive attributes H	AG
+* Add support and tests for unrecognized attributes	Done	AG
 * IPv6 support						L	AG
 * Finish Kdoc'ing BGP                                   L	as needed
 * Make the BGP tests working again			Done	AG
