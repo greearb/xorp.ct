@@ -12,11 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.12 2003/05/27 04:33:07 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.13 2003/05/28 04:02:58 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
-#include "libxorp/status_codes.h"
 #include "task.hh"
 #include "module_manager.hh"
 #include "xorp_client.hh"
@@ -40,7 +39,8 @@ void DelayValidation::timer_expired()
     _cb->dispatch(true);
 }
 
-StatusReadyValidation::StatusReadyValidation(const string& target, 
+
+XrlStatusValidation::XrlStatusValidation(const string& target, 
 					     TaskManager& taskmgr)
     : _target(target), _task_manager(taskmgr), 
     _retries(0)
@@ -49,13 +49,13 @@ StatusReadyValidation::StatusReadyValidation(const string& target,
 
 
 EventLoop&
-StatusReadyValidation::eventloop()
+XrlStatusValidation::eventloop()
 {
     return _task_manager.eventloop();
 }
 
 void 
-StatusReadyValidation::validate(CallBack cb)
+XrlStatusValidation::validate(CallBack cb)
 {
     _cb = cb;
     if (_task_manager.do_exec()) {
@@ -63,7 +63,7 @@ StatusReadyValidation::validate(CallBack cb)
 	printf("XRL: >%s<\n", xrl.str().c_str());
 	string response = "status:bool&reason:txt";
 	_task_manager.xorp_client().
-	    send_now(xrl, callback(this, &StatusReadyValidation::xrl_done),
+	    send_now(xrl, callback(this, &XrlStatusValidation::xrl_done),
 		     response, true);
     } else {
 	//when we're running with do_exec == false, we want to
@@ -72,12 +72,12 @@ StatusReadyValidation::validate(CallBack cb)
 	//though we're not going to call the XRL
 	_retry_timer = 
 	    eventloop().new_oneoff_after_ms(1000,
-                callback(this, &StatusReadyValidation::dummy_response));
+                callback(this, &XrlStatusValidation::dummy_response));
     }
 }
 
 void 
-StatusReadyValidation::dummy_response()
+XrlStatusValidation::dummy_response()
 {
     XrlError e = XrlError::OKAY();
     XrlArgs a;
@@ -87,7 +87,7 @@ StatusReadyValidation::dummy_response()
 }
 
 void
-StatusReadyValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
+XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 {
     if (e == XrlError::OKAY()) {
 	try {
@@ -95,30 +95,8 @@ StatusReadyValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 	    status = (ProcessStatus)(xrlargs->get_uint32("status"));
 	    string reason;
 	    reason = xrlargs->get_string("reason");
-
-	    switch (status) {
-	    case PROC_NULL:
-	    case PROC_STARTUP:
-		//these are not valid responses.
-		XLOG_ERROR(("Bad status response; reason: " 
-			    + reason + "\n").c_str());
-		_cb->dispatch(false);
-		return;
-	    case PROC_FAILED:
-	    case PROC_SHUTDOWN:
-		_cb->dispatch(false);
-		return;
-	    case PROC_NOT_READY:
-		//got a valid response saying we should wait.
-		_retry_timer = 
-		    eventloop().new_oneoff_after_ms(1000,
-                         callback(this, &StatusReadyValidation::validate,_cb));
-		return;
-	    case PROC_READY:
-		//the process is ready
-		_cb->dispatch(true);
-		return;
-	    }
+	    handle_status_response(status, reason);
+	    return;
 	} catch (XrlArgs::XrlAtomNotFound) {
 	    //not a valid response
 	    XLOG_ERROR("Bad XRL response to get_status\n");
@@ -157,6 +135,81 @@ StatusReadyValidation::xrl_done(const XrlError& e, XrlArgs* xrlargs)
 	_cb->dispatch(true);
     }
 }
+
+StatusReadyValidation::StatusReadyValidation(const string& target, 
+					     TaskManager& taskmgr)
+    : XrlStatusValidation(target, taskmgr)
+{
+}
+
+void 
+StatusReadyValidation::handle_status_response(ProcessStatus status,
+					      const string& reason) 
+{
+    switch (status) {
+    case PROC_NULL:
+	//this is not a valid responses.
+	XLOG_ERROR(("Bad status response; reason: " 
+		    + reason + "\n").c_str());
+	_cb->dispatch(false);
+	return;
+    case PROC_FAILED:
+    case PROC_SHUTDOWN:
+	_cb->dispatch(false);
+	return;
+    case PROC_STARTUP:
+    case PROC_NOT_READY:
+	//got a valid response saying we should wait.
+	_retry_timer = 
+	    eventloop().new_oneoff_after_ms(1000,
+                callback((XrlStatusValidation*)this, 
+			 &XrlStatusValidation::validate,_cb));
+	return;
+    case PROC_READY:
+	//the process is ready
+	_cb->dispatch(true);
+	return;
+    }
+    XLOG_UNREACHABLE();
+}
+
+StatusConfigMeValidation::StatusConfigMeValidation(const string& target, 
+						   TaskManager& taskmgr)
+    : XrlStatusValidation(target, taskmgr)
+{
+}
+
+void 
+StatusConfigMeValidation::handle_status_response(ProcessStatus status,
+						 const string& reason) 
+{
+    switch (status) {
+    case PROC_NULL:
+	//this is not a valid responses.
+	XLOG_ERROR(("Bad status response; reason: " 
+		    + reason + "\n").c_str());
+	_cb->dispatch(false);
+	return;
+    case PROC_FAILED:
+    case PROC_SHUTDOWN:
+	_cb->dispatch(false);
+	return;
+    case PROC_STARTUP:
+	//got a valid response saying we should wait.
+	_retry_timer = 
+	    eventloop().new_oneoff_after_ms(1000,
+                callback((XrlStatusValidation*)this, 
+			 &XrlStatusValidation::validate,_cb));
+	return;
+    case PROC_NOT_READY:
+    case PROC_READY:
+	//the process is ready to be configured
+	_cb->dispatch(true);
+	return;
+    }
+    XLOG_UNREACHABLE();
+}
+
 
 TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
 			 const XrlRouter::XrlCallback& cb, Task& task) 

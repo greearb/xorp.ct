@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.9 2003/05/09 23:47:47 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.10 2003/05/28 04:02:58 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -20,6 +20,7 @@
 #include <map>
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
+#include "libxorp/status_codes.h"
 #include "libxipc/xrl_router.hh"
 #include "unexpanded_xrl.hh"
 
@@ -51,14 +52,17 @@ private:
     XorpTimer _timer;
 };
 
-class StatusReadyValidation : public Validation {
+class XrlStatusValidation : public Validation {
 public:
-    StatusReadyValidation(const string& target, 
-			  TaskManager& taskmgr);
+    XrlStatusValidation(const string& target, 
+			TaskManager& taskmgr);
+    virtual ~XrlStatusValidation() {}
     void validate(CallBack cb);
-private:
+protected:
     void dummy_response();
-    void xrl_done(const XrlError& e, XrlArgs* xrlargs);
+    virtual void xrl_done(const XrlError& e, XrlArgs* xrlargs);
+    virtual void handle_status_response(ProcessStatus status,
+					const string& reason) = 0;
     EventLoop& eventloop();
 
     string _target;
@@ -66,6 +70,24 @@ private:
     CallBack _cb;
     XorpTimer _retry_timer;
     uint32_t _retries;
+};
+
+class StatusReadyValidation : public XrlStatusValidation {
+public:
+    StatusReadyValidation(const string& target, 
+			  TaskManager& taskmgr);
+private:
+    void handle_status_response(ProcessStatus status,
+				const string& reason);
+};
+
+class StatusConfigMeValidation : public XrlStatusValidation {
+public:
+    StatusConfigMeValidation(const string& target, 
+			     TaskManager& taskmgr);
+private:
+    void handle_status_response(ProcessStatus status,
+				const string& reason);
 };
 
 class TaskXrlItem {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.7 2003/05/28 17:37:57 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.8 2003/05/28 17:40:26 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -28,6 +28,7 @@ ModuleCommand::ModuleCommand(const string& cmd_name, TemplateTree& tt)
       _tt(tt), 
       _startcommit(NULL), _endcommit(NULL), 
       _status_method(NO_STATUS_METHOD), 
+      _shutdown_method(NO_SHUTDOWN_METHOD), 
       _execute_done(false)
 {
     assert(cmd_name == "%modinfo");
@@ -104,6 +105,14 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	    _status_method = STATUS_BY_XRL;
 	} else {
 	    throw ParseError("Unknown statusmethod " + newaction.front());
+	}
+    } else if (cmd == "shutdownmethod") {
+	list <string> newaction = action;
+	newaction.pop_front();
+	if (newaction.front() == "xrl") {
+	    _shutdown_method = SHUTDOWN_BY_XRL;
+	} else {
+	    throw ParseError("Unknown shutdownmethod " + newaction.front());
 	}
     } else {
 	string err = "invalid subcommand \"" + cmd + "\" to %modinfo";
