@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_deletion.hh,v 1.14 2004/06/12 13:20:50 mjh Exp $
+// $XORP: xorp/bgp/route_table_deletion.hh,v 1.15 2004/11/04 01:30:42 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DELETION_HH__
 #define __BGP_ROUTE_TABLE_DELETION_HH__
@@ -103,11 +103,10 @@ private:
     const PeerHandler *_peer;
     uint32_t _genid;
     BgpTrie<A>* _route_table;
-    typename map<const PathAttributeList<A> *,
-	const ChainedSubnetRoute<A>*, Path_Att_Ptr_Cmp<A> >::const_iterator _del_sweep;
+    typename BgpTrie<A>::PathmapType::const_iterator _del_sweep;
+
     int _deleted, _chains;
     XorpTimer _deletion_timer;
-
 };
 
 #endif // __BGP_ROUTE_TABLE_DELETION_HH__
