@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.40 2004/01/14 08:25:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.41 2004/02/26 15:28:23 mjh Exp $"
 
 #include <signal.h>
 
@@ -42,6 +42,7 @@
 #include "randomness.hh"
 #include "rtrmgr_error.hh"
 #include "util.hh"
+#include "main_rtrmgr.hh"
 
 //
 // Default values
@@ -60,6 +61,7 @@ list<IPv4>	bind_addrs;
 uint16_t	bind_port = FINDER_DEFAULT_PORT;
 int32_t		quit_time = -1;
 
+void cleanup_and_exit(int errcode);
 
 static void signalhandler(int)
 {
@@ -123,8 +125,25 @@ valid_interface(const IPv4& addr)
     return false;
 }
 
+Rtrmgr::Rtrmgr(const string& template_dir, 
+	       const string& xrl_dir,
+	       const string& boot_file,
+	       const list<IPv4>& bind_addrs,
+	       uint16_t bind_port,
+	       bool	do_exec,
+	       int32_t quit_time)
+    : _template_dir(template_dir),
+      _xrl_dir(xrl_dir),
+      _boot_file(boot_file),
+      _bind_addrs(bind_addrs),
+      _bind_port(bind_port),
+      _do_exec(do_exec),
+      _quit_time(quit_time)
+{
+}
+
 int
-rtrmgr_main()
+Rtrmgr::run()
 {
     int errcode = 0;
 
@@ -148,7 +167,7 @@ rtrmgr_main()
     //
     TemplateTree* tt = NULL;
     try {
-	tt = new TemplateTree(xorp_config_root_dir(), template_dir, xrl_dir);
+	tt = new TemplateTree(xorp_config_root_dir(), _template_dir, _xrl_dir);
     } catch (const InitError& e) {
 	XLOG_ERROR("Shutting down due to an init error: %s", e.why().c_str());
 	return (1);
@@ -164,13 +183,13 @@ rtrmgr_main()
     //
     FinderServer* fs = NULL;
     try {
-	fs = new FinderServer(eventloop, bind_port);
-	while (bind_addrs.empty() == false) {
-	    if (fs->add_binding(bind_addrs.front(), bind_port) == false) {
+	fs = new FinderServer(eventloop, _bind_port);
+	while (_bind_addrs.empty() == false) {
+	    if (fs->add_binding(_bind_addrs.front(), _bind_port) == false) {
 		XLOG_WARNING("Finder failed to bind interface %s port %d",
-			     bind_addrs.front().str().c_str(), bind_port);
+			     _bind_addrs.front().str().c_str(), _bind_port);
 	    }
-	    bind_addrs.pop_front();
+	    _bind_addrs.pop_front();
 	}
     } catch (const InvalidPort& i) {
 	fprintf(stderr, "%s: a finder may already be running.\n",
@@ -218,7 +237,7 @@ rtrmgr_main()
 	}
 
 	MasterConfigTree* mct = new MasterConfigTree(boot_file, tt,
-						     mmgr, xclient, do_exec);
+						     mmgr, xclient, _do_exec);
 	//
 	// XXX: note that theoretically we may receive an XRL before
 	// we call XrlRtrmgrInterface::set_conf_tree().
@@ -228,9 +247,9 @@ rtrmgr_main()
 
 	// For testing purposes, rtrmgr can terminate itself after some time.
 	XorpTimer quit_timer;
-	if (quit_time > 0) {
+	if (_quit_time > 0) {
 	    quit_timer =
-		eventloop.new_oneoff_after_ms(quit_time * 1000,
+		eventloop.new_oneoff_after_ms(_quit_time * 1000,
 					      callback(signalhandler, 0));
 	}
 
@@ -336,8 +355,7 @@ main(int argc, char* const argv[])
 	    bind_port = static_cast<uint16_t>(atoi(optarg));
 	    if (bind_port == 0) {
 		fprintf(stderr, "0 is not a valid port.\n");
-		errcode = 1;
-		goto cleanup;
+		cleanup_and_exit(1);
 	    }
 	    break;
 	case 'i':
@@ -350,15 +368,13 @@ main(int argc, char* const argv[])
 		    fprintf(stderr,
 			    "%s is not the address of an active interface.\n",
 			    optarg);
-		    errcode = 1;
-		    goto cleanup;
+		    cleanup_and_exit(1);
 		}
 		bind_addrs.push_back(bind_addr);
 	    } catch (const InvalidString&) {
 		fprintf(stderr, "%s is not a valid interface address.\n",
 			optarg);
-		errcode = 1;
-		goto cleanup;
+		cleanup_and_exit(1);
 	    }
 	    break;
 	case 'h':
@@ -366,18 +382,22 @@ main(int argc, char* const argv[])
 	default:
 	    usage(argv[0]);
 	    display_defaults();
-	    errcode = 1;
-	    goto cleanup;
+	    cleanup_and_exit(1);
 	}
     }
 
     //
     // The main procedure
     //
-    errcode = rtrmgr_main();
+    Rtrmgr rtrmgr(template_dir, xrl_dir, boot_file, bind_addrs,
+		  bind_port, do_exec, quit_time);
+    errcode = rtrmgr.run();
 
- cleanup:
+    cleanup_and_exit(errcode);
+}
 
+void cleanup_and_exit(int errcode) 
+{
     //
     // Gracefully stop and exit xlog
     //
