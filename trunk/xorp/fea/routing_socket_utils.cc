@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.21 2004/11/05 01:27:53 bms Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.22 2004/11/05 21:01:55 bms Exp $"
 
 
 #include "fea_module.h"
@@ -283,6 +283,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     int family = fte.nexthop().af();
     bool is_family_match = false;
     bool is_deleted = false;
+    bool lookup_ifindex = true;
     bool xorp_route = false;
     
     XLOG_ASSERT((rtm->rtm_type == RTM_ADD)
@@ -329,7 +330,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 	nexthop_addr = IPvX::ZERO(family);
 	dst_mask_len = IPvX::addr_bitlen(family);
 	if_name = "";
-	goto skip_ifindex;
+	lookup_ifindex = false;
     }
 
     //
@@ -408,13 +409,13 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 
 	if_name = pi->ifname();		// XXX: ifname == vifname
 	// XXX: Do we need to change nexthop_addr?
-	goto skip_ifindex;
+	lookup_ifindex = false;
     }
 
     //
     // Get the interface name and index
     //
-    if ( (sa = rti_info[RTAX_IFP]) != NULL) {
+    if (lookup_ifindex && (sa = rti_info[RTAX_IFP]) != NULL) {
 	if (sa->sa_family != AF_LINK) {
 	    // TODO: verify whether this is really an error.
 	    XLOG_ERROR("Ignoring RTM_GET for RTAX_IFP with sa_family = %d",
@@ -442,8 +443,6 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 	}
     }
 
-skip_ifindex:
-    
     //
     // TODO: define default routing metric and admin distance instead of ~0
     //
