@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.25 2004/05/30 07:03:56 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.26 2004/06/08 00:21:36 atanu Exp $
 #
 
 #
@@ -1029,7 +1029,7 @@ test30()
     enable_peer $LOCALHOST $PORT1 $PEER1 $PEER1_PORT $PEER1_AS
 
     # Need to find out that the BGP process still exists so make a peering.
-    BASE=peer1 ./xrl_shell_funcs.sh reset
+    BASE=peer1 ${srcdir}/xrl_shell_funcs.sh reset
     sleep 2
 
     coord reset
