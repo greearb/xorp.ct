@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.3 2003/01/17 04:07:23 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.4 2003/01/18 04:02:29 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -118,9 +118,9 @@ BGPPeerList::get_peer_list_next(const uint32_t& token,
     list<BGPPeer *>::iterator i = mi->second;
     BGPPeer *peer = *i;
     local_ip = peer->peerdata()->iptuple().get_local_addr();
-    local_port = peer->peerdata()->iptuple().get_local_port();
+    local_port = htons(peer->peerdata()->iptuple().get_local_port());
     peer_ip = peer->peerdata()->iptuple().get_peer_addr();
-    peer_port = peer->peerdata()->iptuple().get_peer_port();
+    peer_port = htons(peer->peerdata()->iptuple().get_peer_port());
 
     i++;
     if (i == _peers.end()) {
