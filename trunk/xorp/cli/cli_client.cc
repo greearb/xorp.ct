@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.2 2003/03/10 23:20:11 hodson Exp $"
 
 
 //
@@ -858,9 +858,9 @@ CliClient::post_process_command(bool timer_timeout)
 	// presenting the prompt back to the user
 	// TODO: currently, the waiting time is hardcoded to 5000ms (5 sec)
 	if (! timer_timeout) {
-	    _waiting_for_result_timer
-		= cli_node().event_loop().new_oneoff_after_ms(5000,
-							      callback(this, &CliClient::post_process_command, true));
+	    _waiting_for_result_timer =
+		cli_node().event_loop().new_oneoff_after_ms(5000,
+							    callback(this, &CliClient::post_process_command, true));
 	    return;
 	}
 	// Timeout waiting for data
