@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.41 2004/12/11 21:29:57 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.42 2004/12/18 02:08:11 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -68,6 +68,10 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
     // specified in the template tree that aren't already configured.
     //
     add_default_children();
+
+    if (root_node().check_config_tree(errmsg) != true) {
+	xorp_throw(InitError, errmsg);
+    }
 
     //
     // If we got this far, it looks like we have a good bootfile.
@@ -523,7 +527,7 @@ MasterConfigTree::commit_changes_pass2()
     _commit_in_progress = true;
 
     if (root_node().check_config_tree(result) == false) {
-	XLOG_ERROR("Commit failed in deciding startups");
+	XLOG_ERROR("Configuration tree error: %s", result.c_str());
 	_commit_in_progress = false;
 	_commit_cb->dispatch(false, result);
 	return;
