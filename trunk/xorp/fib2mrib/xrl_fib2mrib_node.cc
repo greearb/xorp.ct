@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.1 2004/02/18 00:10:56 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.2 2004/03/15 23:36:31 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -38,10 +38,13 @@ XrlFib2mribNode::XrlFib2mribNode(EventLoop& eventloop,
       XrlFib2mribTargetBase(xrl_router),
       _class_name(xrl_router->class_name()),
       _instance_name(xrl_router->instance_name()),
+      _xrl_fea_fib_client(xrl_router),
       _xrl_rib_client(xrl_router),
       _fea_target(fea_target),
       _rib_target(rib_target),
       _ifmgr(eventloop, fea_target.c_str(), finder_host, finder_port),
+      _is_fea_fib_client4_registered(false),
+      _is_fea_fib_client6_registered(false),
       _is_rib_igp_table4_registered(false),
       _is_rib_igp_table6_registered(false)
 {
@@ -94,6 +97,28 @@ XrlFib2mribNode::ifmgr_shutdown()
 }
 
 void
+XrlFib2mribNode::fea_fib_client_register_startup()
+{
+    if (! _is_fea_fib_client4_registered)
+	Fib2mribNode::incr_startup_requests_n();
+    if (! _is_fea_fib_client6_registered)
+	Fib2mribNode::incr_startup_requests_n();
+
+    send_fea_fib_client_registration();
+}
+
+void
+XrlFib2mribNode::fea_fib_client_register_shutdown()
+{
+    if (_is_fea_fib_client4_registered)
+	Fib2mribNode::incr_shutdown_requests_n();
+    if (_is_fea_fib_client6_registered)
+	Fib2mribNode::incr_shutdown_requests_n();
+
+    send_fea_fib_client_deregistration();
+}
+
+void
 XrlFib2mribNode::rib_register_startup()
 {
     if (! _is_rib_igp_table4_registered)
@@ -116,6 +141,176 @@ XrlFib2mribNode::rib_register_shutdown()
 }
 
 //
+// Register as an FEA FIB client
+//
+void
+XrlFib2mribNode::send_fea_fib_client_registration()
+{
+    bool success = true;
+
+    if (! _is_fea_fib_client4_registered) {
+	bool success4;
+	success4 = _xrl_fea_fib_client.send_add_fib_client4(
+	    _fea_target.c_str(),
+	    my_xrl_target_name(),
+	    callback(this, &XrlFib2mribNode::send_add_fib_client4_cb));
+	if (success4 != true) {
+	    XLOG_ERROR("Failed to register IPv4 FIB client with the FEA. "
+		"Will try again.");
+	    success = false;
+	}
+    }
+
+    if (! _is_fea_fib_client6_registered) {
+	bool success6;
+	success6 = _xrl_fea_fib_client.send_add_fib_client6(
+	    _fea_target.c_str(),
+	    my_xrl_target_name(),
+	    callback(this, &XrlFib2mribNode::send_add_fib_client6_cb));
+	if (success6 != true) {
+	    XLOG_ERROR("Failed to register IPv6 FIB client with the FEA. "
+		"Will try again.");
+	    success = false;
+	}
+    }
+
+    if (success)
+	return;		// OK
+
+    //
+    // If an error, then start a timer to try again
+    // TODO: XXX: the timer value is hardcoded here!!
+    //
+    _fea_fib_client_registration_timer
+	= Fib2mribNode::eventloop().new_oneoff_after(
+	    TimeVal(1, 0),
+	    callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+}
+
+void
+XrlFib2mribNode::send_add_fib_client4_cb(const XrlError& xrl_error)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_fea_fib_client4_registered = true;
+	Fib2mribNode::decr_startup_requests_n();
+	return;
+    }
+
+    //
+    // If an error, then start a timer to try again (unless the timer is
+    // already running).
+    // TODO: XXX: the timer value is hardcoded here!!
+    //
+    if (_fea_fib_client_registration_timer.scheduled())
+	return;
+    _fea_fib_client_registration_timer
+	= Fib2mribNode::eventloop().new_oneoff_after(
+	    TimeVal(1, 0),
+	    callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+}
+
+void
+XrlFib2mribNode::send_add_fib_client6_cb(const XrlError& xrl_error)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_fea_fib_client6_registered = true;
+	Fib2mribNode::decr_startup_requests_n();
+	return;
+    }
+
+    //
+    // If an error, then start a timer to try again (unless the timer is
+    // already running).
+    // TODO: XXX: the timer value is hardcoded here!!
+    //
+    if (_fea_fib_client_registration_timer.scheduled())
+	return;
+    _fea_fib_client_registration_timer
+	= Fib2mribNode::eventloop().new_oneoff_after(
+	    TimeVal(1, 0),
+	    callback(this, &XrlFib2mribNode::send_fea_fib_client_registration));
+}
+
+//
+// De-register as an FEA FIB client
+//
+void
+XrlFib2mribNode::send_fea_fib_client_deregistration()
+{
+    bool success = true;
+
+    if (_is_fea_fib_client4_registered) {
+	bool success4;
+	success4 = _xrl_fea_fib_client.send_delete_fib_client4(
+	    _fea_target.c_str(),
+	    my_xrl_target_name(),
+	    callback(this, &XrlFib2mribNode::send_delete_fib_client4_cb));
+	if (success4 != true) {
+	    XLOG_ERROR("Failed to deregister IPv4 FIB client with the FEA. "
+		"Will give up.");
+	    success = false;
+	}
+    }
+
+    if (_is_fea_fib_client6_registered) {
+	bool success6;
+	success6 = _xrl_fea_fib_client.send_delete_fib_client6(
+	    _fea_target.c_str(),
+	    my_xrl_target_name(),
+	    callback(this, &XrlFib2mribNode::send_delete_fib_client6_cb));
+	if (success6 != true) {
+	    XLOG_ERROR("Failed to deregister IPv6 FIB client with the FEA. "
+		"Will give up.");
+	    success = false;
+	}
+    }
+
+    if (success)
+	return;		// OK
+
+    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::update_status();
+}
+
+void
+XrlFib2mribNode::send_delete_fib_client4_cb(const XrlError& xrl_error)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_fea_fib_client4_registered = false;
+	Fib2mribNode::decr_shutdown_requests_n();
+	return;
+    }
+
+    XLOG_ERROR("Failed to deregister IPv4 FIB client with the FEA: %s. "
+	       "Will give up.",
+	       xrl_error.str().c_str());
+
+    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::update_status();
+}
+
+void
+XrlFib2mribNode::send_delete_fib_client6_cb(const XrlError& xrl_error)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_fea_fib_client6_registered = false;
+	Fib2mribNode::decr_shutdown_requests_n();
+	return;
+    }
+
+    XLOG_ERROR("Failed to deregister IPv6 FIB client with the FEA: %s. "
+	       "Will give up.",
+	       xrl_error.str().c_str());
+
+    Fib2mribNode::set_status(FAILED);
+    Fib2mribNode::update_status();
+}
+
+//
 // Register with the RIB
 //
 void
@@ -130,7 +325,7 @@ XrlFib2mribNode::send_rib_registration()
 	    Fib2mribNode::protocol_name(),
 	    _class_name,
 	    _instance_name,
-	    true,	/* unicast */
+	    false,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlFib2mribNode::send_add_igp_table4_cb));
 	if (success4 != true) {
@@ -147,11 +342,11 @@ XrlFib2mribNode::send_rib_registration()
 	    Fib2mribNode::protocol_name(),
 	    _class_name,
 	    _instance_name,
-	    true,	/* unicast */
+	    false,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlFib2mribNode::send_add_igp_table6_cb));
 	if (success6 != true) {
-	    XLOG_ERROR("Failed to register IPv4 IGP table with the RIB. "
+	    XLOG_ERROR("Failed to register IPv6 IGP table with the RIB. "
 		"Will try again.");
 	    success = false;
 	}
@@ -231,7 +426,7 @@ XrlFib2mribNode::send_rib_deregistration()
 	    Fib2mribNode::protocol_name(),
 	    _class_name,
 	    _instance_name,
-	    true,	/* unicast */
+	    false,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlFib2mribNode::send_delete_igp_table4_cb));
 	if (success4 != true) {
@@ -248,7 +443,7 @@ XrlFib2mribNode::send_rib_deregistration()
 	    Fib2mribNode::protocol_name(),
 	    _class_name,
 	    _instance_name,
-	    true,	/* unicast */
+	    false,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlFib2mribNode::send_delete_igp_table6_cb));
 	if (success6 != true) {
@@ -358,6 +553,194 @@ XrlFib2mribNode::common_0_1_shutdown()
 }
 
 /**
+ *  Add a route.
+ *
+ *  @param network the network address prefix of the route to add.
+ *
+ *  @param nexthop the address of the next-hop router toward the
+ *  destination.
+ *
+ *  @param ifname the name of the physical interface toward the
+ *  destination.
+ *
+ *  @param vifname the name of the virtual interface toward the
+ *  destination.
+ *
+ *  @param metric the routing metric toward the destination.
+ *
+ *  @param admin_distance the administratively defined distance toward the
+ *  destination.
+ *
+ *  @param protocol_origin the name of the protocol that originated this
+ *  route.
+ *
+ *  @param xorp_route true if this route was installed by XORP.
+ */
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_add_route4(
+    // Input values,
+    const IPv4Net&	network,
+    const IPv4&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
+    const string&	protocol_origin,
+    const bool&		xorp_route)
+{
+    string error_msg;
+
+    if (Fib2mribNode::add_route4(network, nexthop, ifname, vifname,
+				 metric, admin_distance,
+				 protocol_origin, xorp_route,
+				 error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_add_route6(
+    // Input values,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
+    const string&	protocol_origin,
+    const bool&	xorp_route)
+{
+    string error_msg;
+
+    if (Fib2mribNode::add_route6(network, nexthop, ifname, vifname,
+				 metric, admin_distance,
+				 protocol_origin, xorp_route,
+				 error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Replace a route.
+ *
+ *  @param network the network address prefix of the route to replace.
+ *
+ *  @param nexthop the address of the next-hop router toward the
+ *  destination.
+ *
+ *  @param ifname the name of the physical interface toward the
+ *  destination.
+ *
+ *  @param vifname the name of the virtual interface toward the
+ *  destination.
+ *
+ *  @param metric the routing metric toward the destination.
+ *
+ *  @param admin_distance the administratively defined distance toward the
+ *  destination.
+ *
+ *  @param protocol_origin the name of the protocol that originated this
+ *  route.
+ *
+ *  @param xorp_route true if this route was installed by XORP.
+ */
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_replace_route4(
+    // Input values,
+    const IPv4Net&	network,
+    const IPv4&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
+    const string&	protocol_origin,
+    const bool&		xorp_route)
+{
+    string error_msg;
+
+    if (Fib2mribNode::replace_route4(network, nexthop, ifname, vifname,
+				     metric, admin_distance,
+				     protocol_origin, xorp_route,
+				     error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_replace_route6(
+    // Input values,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
+    const string&	protocol_origin,
+    const bool&	xorp_route)
+{
+    string error_msg;
+
+    if (Fib2mribNode::replace_route6(network, nexthop, ifname, vifname,
+				     metric, admin_distance,
+				     protocol_origin, xorp_route,
+				     error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Delete a route.
+ *
+ *  @param network the network address prefix of the route to delete.
+ *
+ *  @param ifname the name of the physical interface toward the
+ *  destination.
+ *
+ *  @param vifname the name of the virtual interface toward the
+ */
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_delete_route4(
+    // Input values,
+    const IPv4Net&	network,
+    const string&	ifname,
+    const string&	vifname)
+{
+    string error_msg;
+
+    if (Fib2mribNode::delete_route4(network, ifname, vifname, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_delete_route6(
+    // Input values,
+    const IPv6Net&	network,
+    const string&	ifname,
+    const string&	vifname)
+{
+    string error_msg;
+
+    if (Fib2mribNode::delete_route6(network, ifname, vifname, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
  *  Enable/disable/start/stop Fib2mrib.
  *
  *  @param enable if true, then enable Fib2mrib, otherwise disable it.
@@ -386,133 +769,6 @@ XrlCmdError
 XrlFib2mribNode::fib2mrib_0_1_stop_fib2mrib()
 {
     XLOG_UNFINISHED();
-
-    return XrlCmdError::OKAY();
-}
-
-/**
- *  Add/replace/delete a route.
- *
- *  @param unicast if true, then the route would be used for unicast
- *  routing.
- *
- *  @param multicast if true, then the route would be used in the MRIB
- *  (Multicast Routing Information Base) for multicast purpose (e.g.,
- *  computing the Reverse-Path Forwarding information).
- *
- *  @param network the network address prefix this route applies to.
- *
- *  @param nexthop the address of the next-hop router for this route.
- *
- *  @param metric the metric distance for this route.
- */
-XrlCmdError
-XrlFib2mribNode::fib2mrib_0_1_add_route4(
-    // Input values,
-    const bool&		unicast,
-    const bool&		multicast,
-    const IPv4Net&	network,
-    const IPv4&		nexthop,
-    const uint32_t&	metric)
-{
-    string error_msg;
-
-    if (Fib2mribNode::add_route4(unicast, multicast, network, nexthop,
-				 metric, error_msg) != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFib2mribNode::fib2mrib_0_1_add_route6(
-    // Input values,
-    const bool&		unicast,
-    const bool&		multicast,
-    const IPv6Net&	network,
-    const IPv6&		nexthop,
-    const uint32_t&	metric)
-{
-    string error_msg;
-
-    if (Fib2mribNode::add_route6(unicast, multicast, network, nexthop,
-				 metric, error_msg) != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-
-XrlCmdError
-XrlFib2mribNode::fib2mrib_0_1_replace_route4(
-    // Input values,
-    const bool&		unicast,
-    const bool&		multicast,
-    const IPv4Net&	network,
-    const IPv4&		nexthop,
-    const uint32_t&	metric)
-{
-    string error_msg;
-
-    if (Fib2mribNode::replace_route4(unicast, multicast, network, nexthop,
-				     metric, error_msg) != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFib2mribNode::fib2mrib_0_1_replace_route6(
-    // Input values,
-    const bool&		unicast,
-    const bool&		multicast,
-    const IPv6Net&	network,
-    const IPv6&		nexthop,
-    const uint32_t&	metric)
-{
-    string error_msg;
-
-    if (Fib2mribNode::replace_route6(unicast, multicast, network, nexthop,
-				     metric, error_msg) != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFib2mribNode::fib2mrib_0_1_delete_route4(
-    // Input values,
-    const bool&		unicast,
-    const bool&		multicast,
-    const IPv4Net&	network)
-{
-    string error_msg;
-
-    if (Fib2mribNode::delete_route4(unicast, multicast, network,
-				    error_msg) != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFib2mribNode::fib2mrib_0_1_delete_route6(
-    // Input values,
-    const bool&		unicast,
-    const bool&		multicast,
-    const IPv6Net&	network)
-{
-    string error_msg;
-
-    if (Fib2mribNode::delete_route6(unicast, multicast, network,
-				    error_msg) != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
 
     return XrlCmdError::OKAY();
 }
@@ -576,8 +832,8 @@ XrlFib2mribNode::send_rib_route_change()
 	    success = _xrl_rib_client.send_add_route4(
 		_rib_target.c_str(),
 		Fib2mribNode::protocol_name(),
-		fib2mrib_route.unicast(),
-		fib2mrib_route.multicast(),
+		false,			/* unicast */
+		true,			/* multicast */
 		fib2mrib_route.network().get_ipv4net(),
 		fib2mrib_route.nexthop().get_ipv4(),
 		fib2mrib_route.metric(),
@@ -587,8 +843,8 @@ XrlFib2mribNode::send_rib_route_change()
 	    success = _xrl_rib_client.send_add_route6(
 		_rib_target.c_str(),
 		Fib2mribNode::protocol_name(),
-		fib2mrib_route.unicast(),
-		fib2mrib_route.multicast(),
+		false,			/* unicast */
+		true,			/* multicast */
 		fib2mrib_route.network().get_ipv6net(),
 		fib2mrib_route.nexthop().get_ipv6(),
 		fib2mrib_route.metric(),
@@ -601,8 +857,8 @@ XrlFib2mribNode::send_rib_route_change()
 	    success = _xrl_rib_client.send_replace_route4(
 		_rib_target.c_str(),
 		Fib2mribNode::protocol_name(),
-		fib2mrib_route.unicast(),
-		fib2mrib_route.multicast(),
+		false,			/* unicast */
+		true,			/* multicast */
 		fib2mrib_route.network().get_ipv4net(),
 		fib2mrib_route.nexthop().get_ipv4(),
 		fib2mrib_route.metric(),
@@ -612,8 +868,8 @@ XrlFib2mribNode::send_rib_route_change()
 	    success = _xrl_rib_client.send_replace_route6(
 		_rib_target.c_str(),
 		Fib2mribNode::protocol_name(),
-		fib2mrib_route.unicast(),
-		fib2mrib_route.multicast(),
+		false,			/* unicast */
+		true,			/* multicast */
 		fib2mrib_route.network().get_ipv6net(),
 		fib2mrib_route.nexthop().get_ipv6(),
 		fib2mrib_route.metric(),
@@ -626,8 +882,8 @@ XrlFib2mribNode::send_rib_route_change()
 	    success = _xrl_rib_client.send_delete_route4(
 		_rib_target.c_str(),
 		Fib2mribNode::protocol_name(),
-		fib2mrib_route.unicast(),
-		fib2mrib_route.multicast(),
+		false,			/* unicast */
+		true,			/* multicast */
 		fib2mrib_route.network().get_ipv4net(),
 		callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 	}
@@ -635,8 +891,8 @@ XrlFib2mribNode::send_rib_route_change()
 	    success = _xrl_rib_client.send_delete_route6(
 		_rib_target.c_str(),
 		Fib2mribNode::protocol_name(),
-		fib2mrib_route.unicast(),
-		fib2mrib_route.multicast(),
+		false,			/* unicast */
+		true,			/* multicast */
 		fib2mrib_route.network().get_ipv6net(),
 		callback(this, &XrlFib2mribNode::send_rib_route_change_cb));
 	}

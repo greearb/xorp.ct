@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.2 2004/02/14 00:05:03 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.1 2004/02/18 00:10:56 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -42,36 +42,52 @@ public:
     /**
      * Constructor for a given IPv4 route.
      * 
-     * @param unicast if true, then the route would be used for unicast
-     * routing.
-     * @param multicast if true, then the route would be used in the MRIB
-     * (Multicast Routing Information Base) for multicast purpose (e.g.,
-     * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
-     * @param metric the metric distance for this route.
+     * @param ifname the name of the physical interface toward the
+     * destination.
+     * @param vifname the name of the virtual interface toward the
+     * destination.
+     * @param metric the routing metric for this route.
+     * @param admin_distance the administratively defined distance for this
+     * route.
+     * @param protocol_origin the name of the protocol that originated this
+     * route.
+     * @param xorp_route true if this route was installed by XORP.
      */
-    Fib2mribRoute(bool unicast, bool multicast, const IPv4Net& network,
-		  const IPv4& nexthop, uint32_t metric)
-	: _unicast(unicast), _multicast(multicast),
-	  _network(network), _nexthop(nexthop), _metric(metric) {}
+    Fib2mribRoute(const IPv4Net& network, const IPv4& nexthop,
+		  const string& ifname, const string& vifname,
+		  uint32_t metric, uint32_t admin_distance,
+		  const string& protocol_origin, bool xorp_route)
+	: _network(network), _nexthop(nexthop),
+	  _ifname(ifname), _vifname(vifname),
+	  _metric(metric), _admin_distance(admin_distance),
+	  _protocol_origin(protocol_origin), _xorp_route(xorp_route) {}
 
     /**
      * Constructor for a given IPv6 route.
      * 
-     * @param unicast if true, then the route would be used for unicast
-     * routing.
-     * @param multicast if true, then the route would be used in the MRIB
-     * (Multicast Routing Information Base) for multicast purpose (e.g.,
-     * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
-     * @param metric the metric distance for this route.
+     * @param ifname the name of the physical interface toward the
+     * destination.
+     * @param vifname the name of the virtual interface toward the
+     * destination.
+     * @param metric the routing metric for this route.
+     * @param admin_distance the administratively defined distance for this
+     * route.
+     * @param protocol_origin the name of the protocol that originated this
+     * route.
+     * @param xorp_route true if this route was installed by XORP.
      */
-    Fib2mribRoute(bool unicast, bool multicast, const IPv6Net& network,
-		  const IPv6& nexthop, uint32_t metric)
-	: _unicast(unicast), _multicast(multicast),
-	  _network(network), _nexthop(nexthop), _metric(metric) {}
+    Fib2mribRoute(const IPv6Net& network, const IPv6& nexthop,
+		  const string& ifname, const string& vifname,
+		  uint32_t metric, uint32_t admin_distance,
+		  const string& protocol_origin, bool xorp_route)
+	: _network(network), _nexthop(nexthop),
+	  _ifname(ifname), _vifname(vifname),
+	  _metric(metric), _admin_distance(admin_distance),
+	  _protocol_origin(protocol_origin), _xorp_route(xorp_route) {}
 
     /**
      * Test if this is an IPv4 route.
@@ -88,22 +104,6 @@ public:
     bool is_ipv6() const { return _network.is_ipv6(); }
 
     /**
-     * Test if this route would be used for unicast routing.
-     * 
-     * @return true if this route would be used for unicast routing,
-     * otherwise false.
-     */
-    bool unicast() const { return _unicast; }
-
-    /**
-     * Test if this route would be used for multicast routing.
-     * 
-     * @return true if this route would be used for multicast routing,
-     * otherwise false.
-     */
-    bool multicast() const { return _multicast; }
-
-    /**
      * Get the network address prefix this route applies to.
      * 
      * @return the network address prefix this route appies to.
@@ -118,11 +118,46 @@ public:
     const IPvX& nexthop() const { return _nexthop; }
 
     /**
+     * Get the name of the physical interface toward the destination.
+     * 
+     * @return the name of the physical interface toward the destination.
+     */
+    const string& ifname() const { return _ifname; }
+
+    /**
+     * Get the name of the virtual interface toward the destination.
+     * 
+     * @return the name of the virtual interface toward the destination.
+     */
+    const string& vifname() const { return _vifname; }
+
+    /**
+     * Get the the administratively defined distance for this route.
+     * 
+     * @return the administratively defined distance for this route.
+     */
+    uint32_t admin_distance() const { return _admin_distance; }
+
+    /**
      * Get the metric distance for this route.
      * 
      * @return the metric distance for this route.
      */
     uint32_t metric() const { return _metric; }
+
+    /**
+     * Get the name of the protocol that originated this route.
+     * 
+     * @return the name of the protocol that originated this route.
+     */
+    const string& protocol_origin() const { return _protocol_origin; }
+
+    /**
+     * Test if this route was installed by XORP.
+     * 
+     * @return true if this route was installed by XORP.
+     */
+    bool xorp_route() const { return _xorp_route; }
 
     /**
      * Test if this is a route to add.
@@ -169,11 +204,14 @@ public:
     bool is_valid_entry(string& error_msg) const;
 
 private:
-    bool	_unicast;
-    bool	_multicast;
     IPvXNet	_network;
     IPvX	_nexthop;
+    string	_ifname;
+    string	_vifname;
     uint32_t	_metric;
+    uint32_t	_admin_distance;
+    string	_protocol_origin;
+    bool	_xorp_route;
     enum RouteType { ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
     RouteType	_route_type;
 };
@@ -241,104 +279,126 @@ public:
     /**
      * Add an IPv4 route.
      *
-     * @param unicast if true, then the route would be used for unicast
-     * routing.
-     * @param multicast if true, then the route would be used in the MRIB
-     * (Multicast Routing Information Base) for multicast purpose (e.g.,
-     * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
-     * @param metric the metric distance for this route.
+     * @param ifname the name of the physical interface toward the
+     * destination.
+     * @param vifname the name of the virtual interface toward the
+     * destination.
+     * @param metric the routing metric for this route.
+     * @param admin_distance the administratively defined distance for this
+     * route.
+     * @param protocol_origin the name of the protocol that originated this
+     * route.
+     * @param xorp_route true if this route was installed by XORP.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route4(bool unicast, bool multicast,
-		   const IPv4Net& network, const IPv4& nexthop,
-		   uint32_t metric, string& error_msg);
+    int add_route4(const IPv4Net& network, const IPv4& nexthop,
+		   const string& ifname, const string& vifname,
+		   uint32_t metric, uint32_t admin_distance,
+		   const string& protocol_origin, bool xorp_route,
+		   string& error_msg);
 
     /**
      * Add an IPv6 route.
      *
-     * @param unicast if true, then the route would be used for unicast
-     * routing.
-     * @param multicast if true, then the route would be used in the MRIB
-     * (Multicast Routing Information Base) for multicast purpose (e.g.,
-     * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
-     * @param metric the metric distance for this route.
+     * @param ifname the name of the physical interface toward the
+     * destination.
+     * @param vifname the name of the virtual interface toward the
+     * destination.
+     * @param metric the routing metric for this route.
+     * @param admin_distance the administratively defined distance for this
+     * route.
+     * @param protocol_origin the name of the protocol that originated this
+     * route.
+     * @param xorp_route true if this route was installed by XORP.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route6(bool unicast, bool multicast,
-		   const IPv6Net& network, const IPv6& nexthop,
-		   uint32_t metric, string& error_msg);
+    int add_route6(const IPv6Net& network, const IPv6& nexthop,
+		   const string& ifname, const string& vifname,
+		   uint32_t metric, uint32_t admin_distance,
+		   const string& protocol_origin, bool xorp_route,
+		   string& error_msg);
 
     /**
      * Replace an IPv4 route.
      *
-     * @param unicast if true, then the route would be used for unicast
-     * routing.
-     * @param multicast if true, then the route would be used in the MRIB
-     * (Multicast Routing Information Base) for multicast purpose (e.g.,
-     * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
-     * @param metric the metric distance for this route.
+     * @param ifname the name of the physical interface toward the
+     * destination.
+     * @param vifname the name of the virtual interface toward the
+     * destination.
+     * @param metric the routing metric for this route.
+     * @param admin_distance the administratively defined distance for this
+     * route.
+     * @param protocol_origin the name of the protocol that originated this
+     * route.
+     * @param xorp_route true if this route was installed by XORP.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int replace_route4(bool unicast, bool multicast,
-		       const IPv4Net& network, const IPv4& nexthop,
-		       uint32_t metric, string& error_msg);
+    int replace_route4(const IPv4Net& network, const IPv4& nexthop,
+		       const string& ifname, const string& vifname,
+		       uint32_t metric, uint32_t admin_distance,
+		       const string& protocol_origin, bool xorp_route,
+		       string& error_msg);
 
     /**
      * Replace an IPv6 route.
      *
-     * @param unicast if true, then the route would be used for unicast
-     * routing.
-     * @param multicast if true, then the route would be used in the MRIB
-     * (Multicast Routing Information Base) for multicast purpose (e.g.,
-     * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
      * @param nexthop the address of the next-hop router for this route.
-     * @param metric the metric distance for this route.
+     * @param ifname the name of the physical interface toward the
+     * destination.
+     * @param vifname the name of the virtual interface toward the
+     * destination.
+     * @param metric the routing metric for this route.
+     * @param admin_distance the administratively defined distance for this
+     * route.
+     * @param protocol_origin the name of the protocol that originated this
+     * route.
+     * @param xorp_route true if this route was installed by XORP.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int replace_route6(bool unicast, bool multicast,
-		       const IPv6Net& network, const IPv6& nexthop,
-		       uint32_t metric, string& error_msg);
+    int replace_route6(const IPv6Net& network, const IPv6& nexthop,
+		       const string& ifname, const string& vifname,
+		       uint32_t metric, uint32_t admin_distance,
+		       const string& protocol_origin, bool xorp_route,
+		       string& error_msg);
 
     /**
      * Delete an IPv4 route.
      *
-     * @param unicast if true, then the route would be used for unicast
-     * routing.
-     * @param multicast if true, then the route would be used in the MRIB
-     * (Multicast Routing Information Base) for multicast purpose (e.g.,
-     * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
+     * @param ifname the name of the physical interface toward the
+     * destination.
+     * @param vifname the name of the virtual interface toward the
+     * destination.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route4(bool unicast, bool multicast,
-		      const IPv4Net& network, string& error_msg);
+    int delete_route4(const IPv4Net& network, const string& ifname,
+		      const string& vifname, string& error_msg);
 
     /**
      * Delete an IPv6 route.
      *
-     * @param unicast if true, then the route would be used for unicast
-     * routing.
-     * @param multicast if true, then the route would be used in the MRIB
-     * (Multicast Routing Information Base) for multicast purpose (e.g.,
-     * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
+     * @param ifname the name of the physical interface toward the
+     * destination.
+     * @param vifname the name of the virtual interface toward the
+     * destination.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route6(bool unicast, bool multicast,
-		      const IPv6Net& network, string& error_msg);
+    int delete_route6(const IPv6Net& network, const string& ifname,
+		      const string& vifname, string& error_msg);
 
     //
     // Debug-related methods
@@ -391,6 +451,22 @@ private:
      * by the communication-wrapper class that inherits this base class.
      */
     virtual void ifmgr_shutdown() = 0;
+
+    /**
+     * Initiate registration as an FEA FIB client.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void fea_fib_client_register_startup() = 0;
+
+    /**
+     * Initiate de-registration as an FEA FIB client.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void fea_fib_client_register_shutdown() = 0;
 
     /**
      * Initiate registration with the RIB.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.2 2004/02/20 05:17:52 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.3 2004/02/20 06:48:00 atanu Exp $"
 
 
 //
@@ -73,6 +73,11 @@ Fib2mribNode::startup()
     ifmgr_startup();
 
     //
+    // Register as an FEA FIB client
+    //
+    fea_fib_client_register_startup();
+
+    //
     // Register with the RIB
     //
     rib_register_startup();
@@ -88,8 +93,15 @@ Fib2mribNode::shutdown()
     //
     ServiceBase::set_status(SHUTTING_DOWN);
 
+    //
     // De-register with the RIB
+    //
     rib_register_shutdown();
+
+    //
+    // De-register with as an FEA FIB client
+    //
+    fea_fib_client_register_shutdown();
 
     //
     // Shutdown the interface manager
@@ -234,23 +246,31 @@ Fib2mribNode::node_status(string& reason_msg)
 /**
  * Add an IPv4 route.
  *
- * @param unicast if true, then the route would be used for unicast
- * routing.
- * @param multicast if true, then the route would be used in the MRIB
- * (Multicast Routing Information Base) for multicast purpose (e.g.,
- * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
  * @param nexthop the address of the next-hop router for this route.
- * @param metric the metric distance for this route.
+ * @param ifname the name of the physical interface toward the
+ * destination.
+ * @param vifname the name of the virtual interface toward the
+ * destination.
+ * @param metric the routing metric for this route.
+ * @param admin_distance the administratively defined distance for this
+ * route.
+ * @param protocol_origin the name of the protocol that originated this
+ * route.
+ * @param xorp_route true if this route was installed by XORP.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-Fib2mribNode::add_route4(bool unicast, bool multicast,
-			 const IPv4Net& network, const IPv4& nexthop,
-			 uint32_t metric, string& error_msg)
+Fib2mribNode::add_route4(const IPv4Net& network, const IPv4& nexthop,
+			 const string& ifname, const string& vifname,
+			 uint32_t metric, uint32_t admin_distance,
+			 const string& protocol_origin, bool xorp_route,
+			 string& error_msg)
 {
-    Fib2mribRoute fib2mrib_route(unicast, multicast, network, nexthop, metric);
+    Fib2mribRoute fib2mrib_route(network, nexthop, ifname, vifname,
+				 metric, admin_distance,
+				 protocol_origin, xorp_route);
 
     fib2mrib_route.set_add_route();
 
@@ -260,23 +280,31 @@ Fib2mribNode::add_route4(bool unicast, bool multicast,
 /**
  * Add an IPv6 route.
  *
- * @param unicast if true, then the route would be used for unicast
- * routing.
- * @param multicast if true, then the route would be used in the MRIB
- * (Multicast Routing Information Base) for multicast purpose (e.g.,
- * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
  * @param nexthop the address of the next-hop router for this route.
- * @param metric the metric distance for this route.
+ * @param ifname the name of the physical interface toward the
+ * destination.
+ * @param vifname the name of the virtual interface toward the
+ * destination.
+ * @param metric the routing metric for this route.
+ * @param admin_distance the administratively defined distance for this
+ * route.
+ * @param protocol_origin the name of the protocol that originated this
+ * route.
+ * @param xorp_route true if this route was installed by XORP.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-Fib2mribNode::add_route6(bool unicast, bool multicast,
-			 const IPv6Net& network, const IPv6& nexthop,
-			 uint32_t metric, string& error_msg)
+Fib2mribNode::add_route6(const IPv6Net& network, const IPv6& nexthop,
+			 const string& ifname, const string& vifname,
+			 uint32_t metric, uint32_t admin_distance,
+			 const string& protocol_origin, bool xorp_route,
+			 string& error_msg)
 {
-    Fib2mribRoute fib2mrib_route(unicast, multicast, network, nexthop, metric);
+    Fib2mribRoute fib2mrib_route(network, nexthop, ifname, vifname,
+				 metric, admin_distance,
+				 protocol_origin, xorp_route);
 
     fib2mrib_route.set_add_route();
 
@@ -286,23 +314,31 @@ Fib2mribNode::add_route6(bool unicast, bool multicast,
 /**
  * Replace an IPv4 route.
  *
- * @param unicast if true, then the route would be used for unicast
- * routing.
- * @param multicast if true, then the route would be used in the MRIB
- * (Multicast Routing Information Base) for multicast purpose (e.g.,
- * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
  * @param nexthop the address of the next-hop router for this route.
- * @param metric the metric distance for this route.
+ * @param ifname the name of the physical interface toward the
+ * destination.
+ * @param vifname the name of the virtual interface toward the
+ * destination.
+ * @param metric the routing metric for this route.
+ * @param admin_distance the administratively defined distance for this
+ * route.
+ * @param protocol_origin the name of the protocol that originated this
+ * route.
+ * @param xorp_route true if this route was installed by XORP.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-Fib2mribNode::replace_route4(bool unicast, bool multicast,
-				 const IPv4Net& network, const IPv4& nexthop,
-				 uint32_t metric, string& error_msg)
+Fib2mribNode::replace_route4(const IPv4Net& network, const IPv4& nexthop,
+			     const string& ifname, const string& vifname,
+			     uint32_t metric, uint32_t admin_distance,
+			     const string& protocol_origin, bool xorp_route,
+			     string& error_msg)
 {
-    Fib2mribRoute fib2mrib_route(unicast, multicast, network, nexthop, metric);
+    Fib2mribRoute fib2mrib_route(network, nexthop, ifname, vifname,
+				 metric, admin_distance,
+				 protocol_origin, xorp_route);
 
     fib2mrib_route.set_replace_route();
 
@@ -312,23 +348,31 @@ Fib2mribNode::replace_route4(bool unicast, bool multicast,
 /**
  * Replace an IPv6 route.
  *
- * @param unicast if true, then the route would be used for unicast
- * routing.
- * @param multicast if true, then the route would be used in the MRIB
- * (Multicast Routing Information Base) for multicast purpose (e.g.,
- * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
  * @param nexthop the address of the next-hop router for this route.
- * @param metric the metric distance for this route.
+ * @param ifname the name of the physical interface toward the
+ * destination.
+ * @param vifname the name of the virtual interface toward the
+ * destination.
+ * @param metric the routing metric for this route.
+ * @param admin_distance the administratively defined distance for this
+ * route.
+ * @param protocol_origin the name of the protocol that originated this
+ * route.
+ * @param xorp_route true if this route was installed by XORP.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-Fib2mribNode::replace_route6(bool unicast, bool multicast,
-			     const IPv6Net& network, const IPv6& nexthop,
-			     uint32_t metric, string& error_msg)
+Fib2mribNode::replace_route6(const IPv6Net& network, const IPv6& nexthop,
+			     const string& ifname, const string& vifname,
+			     uint32_t metric, uint32_t admin_distance,
+			     const string& protocol_origin, bool xorp_route,
+			     string& error_msg)
 {
-    Fib2mribRoute fib2mrib_route(unicast, multicast, network, nexthop, metric);
+    Fib2mribRoute fib2mrib_route(network, nexthop, ifname, vifname,
+				 metric, admin_distance,
+				 protocol_origin, xorp_route);
 
     fib2mrib_route.set_replace_route();
 
@@ -338,21 +382,20 @@ Fib2mribNode::replace_route6(bool unicast, bool multicast,
 /**
  * Delete an IPv4 route.
  *
- * @param unicast if true, then the route would be used for unicast
- * routing.
- * @param multicast if true, then the route would be used in the MRIB
- * (Multicast Routing Information Base) for multicast purpose (e.g.,
- * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
+ * @param ifname the name of the physical interface toward the
+ * destination.
+ * @param vifname the name of the virtual interface toward the
+ * destination.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-Fib2mribNode::delete_route4(bool unicast, bool multicast,
-			    const IPv4Net& network, string& error_msg)
+Fib2mribNode::delete_route4(const IPv4Net& network, const string& ifname,
+			    const string& vifname, string& error_msg)
 {
-    Fib2mribRoute fib2mrib_route(unicast, multicast, network,
-				 network.masked_addr().ZERO(), 0);
+    Fib2mribRoute fib2mrib_route(network, network.masked_addr().ZERO(),
+				 ifname, vifname, 0, 0, "", false);
 
     fib2mrib_route.set_delete_route();
 
@@ -362,21 +405,20 @@ Fib2mribNode::delete_route4(bool unicast, bool multicast,
 /**
  * Delete an IPv6 route.
  *
- * @param unicast if true, then the route would be used for unicast
- * routing.
- * @param multicast if true, then the route would be used in the MRIB
- * (Multicast Routing Information Base) for multicast purpose (e.g.,
- * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
+ * @param ifname the name of the physical interface toward the
+ * destination.
+ * @param vifname the name of the virtual interface toward the
+ * destination.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-Fib2mribNode::delete_route6(bool unicast, bool multicast,
-			    const IPv6Net& network, string& error_msg)
+Fib2mribNode::delete_route6(const IPv6Net& network, const string& ifname,
+			    const string& vifname, string& error_msg)
 {
-    Fib2mribRoute fib2mrib_route(unicast, multicast, network,
-				 network.masked_addr().ZERO(), 0);
+    Fib2mribRoute fib2mrib_route(network, network.masked_addr().ZERO(),
+				 ifname, vifname, 0, 0, "", false);
 
     fib2mrib_route.set_delete_route();
 
@@ -415,13 +457,12 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
 	Fib2mribRoute& tmp_route = *iter;
 	if (tmp_route.network() != fib2mrib_route.network())
 	    continue;
-	if ((tmp_route.unicast() != fib2mrib_route.unicast())
-	    || (tmp_route.multicast() != fib2mrib_route.multicast())) {
+	if ((tmp_route.ifname() != fib2mrib_route.ifname())
+	    || (tmp_route.vifname() != fib2mrib_route.vifname())) {
 	    continue;
 	}
-	error_msg = c_format("Cannot add %s route for %s: "
+	error_msg = c_format("Cannot add route for %s: "
 			     "the route already exists",
-			     (fib2mrib_route.unicast())? "unicast" : "multicast",
 			     fib2mrib_route.network().str().c_str());
 	return XORP_ERROR;
     }
@@ -469,10 +510,12 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
 	 iter != _fib2mrib_routes.end();
 	 ++iter) {
 	Fib2mribRoute& tmp_route = *iter;
-	if (tmp_route.network() != fib2mrib_route.network())
-	    continue;
-	if ((tmp_route.unicast() != fib2mrib_route.unicast())
-	    || (tmp_route.multicast() != fib2mrib_route.multicast())) {
+	// XXX: we may need to test the ifname and the vifname, but
+	// this may not be appropriate. E.g., if we check the ifname/vifname,
+	// then we cannot replace a route that changes its ifname/vifname.
+	// On the other hand, we may have more than one network entries
+	// (e.g., in case of IPv6 with the same subnet address pre interface.
+	if (tmp_route.network() != fib2mrib_route.network()) {
 	    continue;
 	}
 	//
@@ -491,9 +534,8 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Coudn't find the route to replace
     //
-    error_msg = c_format("Cannot replace %s route for %s: "
+    error_msg = c_format("Cannot replace route for %s: "
 			 "no such route",
-			 (fib2mrib_route.unicast())? "unicast" : "multicast",
 			 fib2mrib_route.network().str().c_str());
     return XORP_ERROR;
 }
@@ -530,8 +572,8 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
 	Fib2mribRoute& tmp_route = *iter;
 	if (tmp_route.network() != fib2mrib_route.network())
 	    continue;
-	if ((tmp_route.unicast() != fib2mrib_route.unicast())
-	    || (tmp_route.multicast() != fib2mrib_route.multicast())) {
+	if ((tmp_route.ifname() != fib2mrib_route.ifname())
+	    || (tmp_route.vifname() != fib2mrib_route.vifname())) {
 	    continue;
 	}
 
@@ -550,9 +592,8 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     //
     // Coudn't find the route to delete
     //
-    error_msg = c_format("Cannot delete %s route for %s: "
+    error_msg = c_format("Cannot delete route for %s: "
 			 "no such route",
-			 (fib2mrib_route.unicast())? "unicast" : "multicast",
 			 fib2mrib_route.network().str().c_str());
     return XORP_ERROR;
 }
@@ -566,17 +607,7 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
 bool
 Fib2mribRoute::is_valid_entry(string& error_msg) const
 {
-    //
-    // Check the unicast and multicast flags
-    //
-    if ((_unicast == false) && (_multicast == false)) {
-	error_msg = "the route is neither unicast nor multicast";
-	return false;
-    }
-    if ((_unicast == true) && (_multicast == true)) {
-	error_msg = "the route must be either unicast or multicast";
-	return false;
-    }
+    UNUSED(error_msg);
 
     return true;
 }
