@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.41 2005/02/28 08:13:45 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.42 2005/03/25 02:53:05 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -58,16 +58,16 @@ public:
     virtual ~IfConfig();
 
     /**
-     * Get a reference to the @see EventLoop instance.
+     * Get a reference to the @ref EventLoop instance.
      *
-     * @return a reference to the @see EventLoop instance.
+     * @return a reference to the @ref EventLoop instance.
      */
     EventLoop& eventloop() { return _eventloop; }
 
     /**
-     * Get a reference to the @see NexthopPortMapper instance.
+     * Get a reference to the @ref NexthopPortMapper instance.
      *
-     * @return a reference to the @see NexthopPortMapper instance.
+     * @return a reference to the @ref NexthopPortMapper instance.
      */
     NexthopPortMapper& nexthop_port_mapper() { return _nexthop_port_mapper; }
 

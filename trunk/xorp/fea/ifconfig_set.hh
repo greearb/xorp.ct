@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.33 2005/02/28 08:13:45 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.34 2005/03/25 02:53:08 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -571,16 +571,16 @@ public:
     virtual bool is_discard_emulated(const IfTreeInterface& i) const;
 
     /**
-     * Get a reference to the @see IfTree instance.
+     * Get a reference to the @ref IfTree instance.
      *
-     * @return a reference to the @see IfTree instance.
+     * @return a reference to the @ref IfTree instance.
      */
     const IfTree& iftree() const { return _iftree; }
 
     /**
      * Receive a signal the work of a Click configuration generator is done.
      *
-     * @param click_config_generator a pointer to the @see
+     * @param click_config_generator a pointer to the @ref
      * IfConfigSetClick::ClickConfigGenerator instance that has completed
      * its work.
      * @param success if true, then the generator has successfully finished

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.32 2005/01/20 00:43:17 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.33 2005/03/25 02:53:01 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -73,23 +73,23 @@ public:
     virtual ~FtiConfig();
 
     /**
-     * Get a reference to the @see EventLoop instance.
+     * Get a reference to the @ref EventLoop instance.
      *
-     * @return a reference to the @see EventLoop instance.
+     * @return a reference to the @ref EventLoop instance.
      */
     EventLoop& eventloop() { return _eventloop; }
 
     /**
-     * Get a reference to the @see NexthopPortMapper instance.
+     * Get a reference to the @ref NexthopPortMapper instance.
      *
-     * @return a reference to the @see NexthopPortMapper instance.
+     * @return a reference to the @ref NexthopPortMapper instance.
      */
     NexthopPortMapper& nexthop_port_mapper() { return _nexthop_port_mapper; }
 
     /**
-     * Get a reference to the @see IfTree instance.
+     * Get a reference to the @ref IfTree instance.
      *
-     * @return a reference to the @see IfTree instance.
+     * @return a reference to the @ref IfTree instance.
      */
     IfTree& iftree() { return _iftree; }
     
