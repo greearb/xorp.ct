@@ -44,7 +44,7 @@
  */
 inline
 bool
-verify_checksum(uint8_t *buf, size_t len, size_t offset = 0)
+verify_checksum(uint8_t *buf, size_t len, size_t offset)
 {
     int32_t x, y;
     fletcher_checksum(buf, len, offset, x, y);
@@ -53,6 +53,19 @@ verify_checksum(uint8_t *buf, size_t len, size_t offset = 0)
     }
 
     return true;
+}
+
+/**
+ * Compute the checksum.
+ */
+inline
+uint16_t
+compute_checksum(uint8_t *buf, size_t len, size_t offset)
+{
+    int32_t x, y;
+    fletcher_checksum(buf, len, offset, x, y);
+
+    return (x << 8) | (y);
 }
 
 void
@@ -448,9 +461,61 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 bool
 RouterLsa::encode()
 {
-//     OspfTypes::Version version = get_version();
+    OspfTypes::Version version = get_version();
 
-    
+    size_t router_link_len = RouterLink(version).length();
+    size_t len = _header.length() + 4 + _router_links.size() * router_link_len;
+
+    _pkt.resize(len);
+    uint8_t *ptr = &_pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
+    memset(ptr, 0, len);
+
+    // Copy the header into the packet
+    _header.set_ls_checksum(0);
+    _header.set_length(len);
+    size_t header_length = _header.copy_out(ptr);
+    XLOG_ASSERT(len > header_length);
+
+    uint8_t flag = 0;
+    switch(version) {
+    case OspfTypes::V2:
+	if (get_v_bit())
+	    flag |= 0x4;
+	if (get_e_bit())
+	    flag |= 0x2;
+	if (get_b_bit())
+	    flag |= 0x1;
+	embed_16(&ptr[header_length + 2], _router_links.size());
+	break;
+    case OspfTypes::V3:
+	if (get_w_bit())
+	    flag |= 0x8;
+	if (get_v_bit())
+	    flag |= 0x4;
+	if (get_e_bit())
+	    flag |= 0x2;
+	if (get_b_bit())
+	    flag |= 0x1;
+	// Careful Options occupy 3 bytes, four bytes are written out.
+	embed_32(&ptr[header_length], get_options());
+	break;
+    }
+    ptr[header_length] = flag;
+
+    // Copy out the router links.
+    list<RouterLink> &rl = get_router_links();
+    list<RouterLink>::iterator i = rl.begin();
+    size_t index = header_length + 4;
+    for (; i != rl.begin(); i++, index += router_link_len) {
+	(*i).copy_out(&ptr[index]);
+    }
+
+    XLOG_ASSERT(index == len);
+
+    // Compute the checksum and write the whole header out again.
+    _header.set_ls_checksum(compute_checksum(ptr + 2, len - 2, 16 - 2));
+    _header.copy_out(ptr);
 
     return true;
 }
