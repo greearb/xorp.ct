@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.10 2003/10/22 22:15:28 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.11 2003/10/24 02:09:47 pavlin Exp $
 #
 
 #
@@ -992,6 +992,7 @@ test_delete_all_entries6()
 #
 # The tests
 #
+TESTS_NOT_FIXED=""
 TESTS=""
 TESTS="$TESTS test_have_ipv4"
 # Test IPv4 unicast forwarding enabling/disabling
@@ -1005,6 +1006,18 @@ if [ "${HAVE_IPV6}" = "true" ] ; then
     # Test adding/deleting and lookup of IPv6 forwarding entries
     TESTS="$TESTS test_add_delete_unicast_forwarding_entry6"
     TESTS="$TESTS test_delete_all_entries6"
+fi
+
+# Include command line
+. ${srcdir}/../utils/args.sh
+
+if [ $START_PROGRAMS = "yes" ] ; then
+    CXRL="../libxipc/call_xrl -w 10 -r 10"
+    ../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    ../libxipc/xorp_finder
+    ../fea/xorp_fea        = $CXRL finder://fea/common/0.1/get_target_name
+EOF
+    exit $?
 fi
 
 for t in ${TESTS} ; do

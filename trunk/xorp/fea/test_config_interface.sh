@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.5 2003/10/22 21:45:37 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.6 2003/10/24 02:10:29 pavlin Exp $
 #
 
 #
@@ -1768,6 +1768,7 @@ test_enable_disable_address6()
 #
 # The tests
 #
+TESTS_NOT_FIXED=""
 TESTS=""
 # Interface and vif tests
 TESTS="$TESTS test_configure_interface"
@@ -1788,6 +1789,18 @@ if [ "${HAVE_IPV6}" = "true" ] ; then
 fi
 # Clean-up the mess
 TESTS="$TESTS config_cleanup_interface"
+
+# Include command line
+. ${srcdir}/../utils/args.sh
+
+if [ $START_PROGRAMS = "yes" ] ; then
+    CXRL="../libxipc/call_xrl -w 10 -r 10"
+    ../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    ../libxipc/xorp_finder
+    ../fea/xorp_fea        = $CXRL finder://fea/common/0.1/get_target_name
+EOF
+    exit $?
+fi
 
 for t in ${TESTS} ; do
     $t
