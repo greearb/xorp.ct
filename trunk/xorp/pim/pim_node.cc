@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.28 2003/10/14 22:39:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.29 2003/12/08 20:21:03 pavlin Exp $"
 
 
 //
@@ -185,6 +185,11 @@ PimNode::start()
 int
 PimNode::stop()
 {
+    if (is_down()) {
+	ProtoNode<PimVif>::set_node_status(PROC_DONE);
+	return (XORP_OK);
+    }
+
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
     
@@ -232,10 +237,13 @@ PimNode::final_stop()
 	XLOG_ERROR("Error stopping protocol with the kernel. Ignored.");
     }
     
-    // XXX: don't change the node status, because we are still ready
-    
     if (ProtoUnit::stop() < 0)
 	ret_value = XORP_ERROR;
+
+    //
+    // Set the node status
+    //
+    ProtoNode<PimVif>::set_node_status(PROC_DONE);
     
     return (ret_value);
 }
@@ -399,6 +407,9 @@ PimNode::node_status(string& reason_msg)
     case PROC_FAILED:
 	// TODO: XXX: PAVPAVPAV: when can we be in this stage?
 	XLOG_UNFINISHED();
+	break;
+    case PROC_DONE:
+	// Process has completed operation
 	break;
     default:
 	// Unknown status
