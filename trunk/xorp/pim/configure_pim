@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.10 2003/03/18 04:16:46 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.11 2003/03/21 00:46:08 pavlin Exp $
 #
 
 #
@@ -11,6 +11,7 @@
 . ../cli/xrl_cli_shell_funcs.sh
 . ../mfea/xrl_mfea_shell_funcs.sh
 . ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
+. ../pim/xrl_rib_shell_funcs.sh
 . ../pim/xrl_pim_shell_funcs.sh
 
 MODULE_NAME="PIM-SM"
