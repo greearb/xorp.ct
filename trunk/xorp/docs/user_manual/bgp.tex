@@ -77,21 +77,21 @@ to an alternative path.
 \section{Standards}
 
 XORP BGP Complies with the following standards:
-\begin{itemize}
-\item draft-ietf-idr-bgp4-22.txt: BGP-4 Specification (obsoletes RFC 1771)
-\item RFC 1657: Definitions of Managed Objects for the Fourth Version
+\begin{description}
+\item{\bf draft-ietf-idr-bgp4-22.txt}: BGP-4 Specification (obsoletes RFC 1771)
+\item{\bf RFC 1657}: Definitions of Managed Objects for the Fourth Version
      of the Border Gateway Protocol (BGP-4) using SMIv2.
-\item RFC 2858: Multiprotocol Extensions for BGP-4.
-\item RFC 2545: Use of BGP-4 Multiprotocol Extensions for IPv6
+\item{\bf RFC 2858}: Multiprotocol Extensions for BGP-4.
+\item{\bf RFC 2545}: Use of BGP-4 Multiprotocol Extensions for IPv6
      Inter-Domain Routing.
-\end{itemize}
+\end{description}
 
 \noindent We also have limited support for:
-\begin{itemize}
-\item RFC 1997: BGP Communities Attribute.
-\end{itemize}
+\begin{description}
+\item{\bf RFC 1997}: BGP Communities Attribute.
+\end{description}
 
-
+\newpage
 \section{Configuring BGP}
 
 \subsection{Configuration Syntax}
@@ -313,7 +313,7 @@ is set to 128.16.64.4.
 The second advertisement is for an IPv6 route, usable only by IPv6
 unicast traffic.
 
-
+\newpage
 \section{Monitoring BGP}
 
 On a router running BGP, the BGP routing state can be displayed using
@@ -384,6 +384,7 @@ Peer 5: local 192.150.187.112/179 remote 192.150.187.109/179\\
 \end{minipage}
 }
 
+\newpage
 The command {\stt show bgp peers detail} will give a large amount of
 information about all the peerings:  
 
@@ -440,6 +441,7 @@ is configured to be up on this router, but for some reason the peering
 is not currently up.  Typically this is because the remote peer is
 unreachable, or because no BGP instance is running on the remote peer.
 
+\newpage
 The {\stt show bgp routes} command displays the routes received by BGP
 from its peers.  On a router with a full BGP routing table (140000
 routes as of July 2003) this command will produce a large amount of

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/user_manual.tex,v 1.2 2004/07/21 18:22:20 mjh Exp $
+% $XORP: xorp/docs/user_manual/user_manual.tex,v 1.3 2004/07/22 13:45:21 mjh Exp $
 %
 
 \documentclass[11pt]{book}
@@ -26,6 +26,15 @@
 \textheight=9.0in
 %\textwidth=7.0in
 
+%set style to not indent paragraphs, and to have a blank line between
+%paragraphs.  While this style is not as elegant for prose as the
+%defaults, it's more appropriate for manuals where there are lots of
+%single line paragraphs.
+\setlength{\parindent}{0pt} 
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\topsep}{0pt}
+\setlength{\itemsep}{0pt}
+
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \newcommand{\etc}{\emph{etc.}\xspace}
 \newcommand{\ie}{\emph{i.e.,}\xspace}
@@ -51,11 +60,25 @@ Version 1.0}
 }
 \date{July 21, 2004}
 
+%% Control the fonts and formatting used in the table of contents.
+\usepackage[titles]{tocloft}
+%% Aesthetic spacing redefines to cancel the effects of parskip
+\setlength{\cftbeforechapskip}{2ex}
+\setlength{\cftbeforesecskip}{-1.5ex}
+\setlength{\cftbeforesubsecskip}{-1.5ex}
+%% Use Helvetica-Narrow Bold for Chapter entries
+\renewcommand{\cftchapfont}{%
+  \fontsize{11}{13}\usefont{OT1}{phv}{bc}{n}\selectfont
+}
+
+
 %\twocolumn
 \begin{document}
 \maketitle
 \input{preface}
+%\begin{spacing}{0.0}
 \tableofcontents
+%\end{spacing}
 \input{cli_intro}
 \input{config_overview}
 \input{interfaces}
