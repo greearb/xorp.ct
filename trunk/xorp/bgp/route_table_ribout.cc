@@ -12,10 +12,10 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.45 2002/12/09 18:28:48 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 //#define DEBUG_LOGGING
-//#define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "route_table_ribout.hh"
 #include "peer_handler.hh"
@@ -28,9 +28,9 @@ template<> const char* TypeName<IPv4>::get() { return "IPv4"; }
 template<> const char* TypeName<IPv6>::get() { return "IPv6"; }
 
 template<class A>
-BGPRibOutTable<A>::BGPRibOutTable(string table_name,  
+BGPRibOutTable<A>::BGPRibOutTable(string table_name,
 				  BGPRouteTable<A> *init_parent,
-				  PeerHandler *peer) 
+				  PeerHandler *peer)
     : BGPRouteTable<A>("BGPRibOutTable-" + table_name)
 {
     _parent = init_parent;
@@ -48,7 +48,8 @@ filterbank\n");
 }
 
 template<class A>
-BGPRibOutTable<A>::~BGPRibOutTable() {
+BGPRibOutTable<A>::~BGPRibOutTable() 
+{
     print_queue(_queue);
     list<const RouteQueueEntry<A>*>::iterator i;
     i = _queue.begin();
@@ -60,14 +61,16 @@ BGPRibOutTable<A>::~BGPRibOutTable() {
 
 template<class A>
 void
-BGPRibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue) const {
+BGPRibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue) 
+    const 
+{
 #ifdef DEBUG_LOGGING
     debug_msg("Output Queue:\n");
     list<const RouteQueueEntry<A>*>::const_iterator i;
     i = queue.begin();
     while (i != queue.end()) {
-	string s; 
-	switch((*i)->op()) {
+	string s;
+	switch ((*i)->op()) {
 	case RTQUEUE_OP_ADD:
 	    s = "ADD";
 	    break;
@@ -94,16 +97,17 @@ BGPRibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue) con
 
 template<class A>
 int
-BGPRibOutTable<A>::add_route(const InternalMessage<A> &rtmsg, 
-			    BGPRouteTable<A> *caller) {
-    debug_msg("BGPRibOutTable<%s>::add_route %x for %s ", TypeName<A>::get(), 
+BGPRibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
+			    BGPRouteTable<A> *caller) 
+{
+    debug_msg("BGPRibOutTable<%s>::add_route %x for %s ", TypeName<A>::get(),
 	   (u_int)(&rtmsg), rtmsg.net().str().c_str());
     debug_msg("on %s\n", _tablename.c_str());
     print_queue(_queue);
     if (caller != _parent) abort();
 
-    //check the queue to see if there's a matching delete - if so we
-    //can replace the delete with an add.
+    // check the queue to see if there's a matching delete - if so we
+    // can replace the delete with an add.
     const RouteQueueEntry<A>* queued_entry = NULL;
     list<const RouteQueueEntry<A>*>::iterator i;
     for (i = _queue.begin(); i != _queue.end(); i++) {
@@ -117,15 +121,15 @@ BGPRibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     RouteQueueEntry<A>* entry;
     if (queued_entry == NULL) {
-	//just add the route to the queue.
+	// just add the route to the queue.
 	entry = new RouteQueueEntry<A>(rtmsg.route(), RTQUEUE_OP_ADD);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
     } else if (queued_entry->op() == RTQUEUE_OP_DELETE) {
-	//There was a delete in the queue.  The delete must become a replace.
-	debug_msg("removing delete entry from output queue\n");
+	// There was a delete in the queue.  The delete must become a replace.
+	debug_msg("removing delete entry from output queue to become replace\n");
 	_queue.erase(i);
-	entry = new RouteQueueEntry<A>(queued_entry->route(), 
+	entry = new RouteQueueEntry<A>(queued_entry->route(),
 				       RTQUEUE_OP_REPLACE_OLD);
 	entry->set_origin_peer(queued_entry->origin_peer());
 	_queue.push_back(entry);
@@ -134,8 +138,8 @@ BGPRibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	_queue.push_back(entry);
 	delete queued_entry;
     } else if (queued_entry->op() == RTQUEUE_OP_REPLACE_OLD) {
-	//There was a replace in the queue.  The new part of the
-	//replace must be updated.
+	// There was a replace in the queue.  The new part of the
+	// replace must be updated.
 	i++;
 	queued_entry = *i;
 	assert(queued_entry->op() == RTQUEUE_OP_REPLACE_NEW);
@@ -149,7 +153,7 @@ BGPRibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	abort();
     }
 
-    //handle push
+    // handle push
     if (rtmsg.push())
 	push(_parent);
     debug_msg("After-->:\n");
@@ -160,10 +164,11 @@ BGPRibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPRibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
-				 const InternalMessage<A> &new_rtmsg, 
-				 BGPRouteTable<A> *caller) {
-    debug_msg("BGPRibOutTable<%s>::replace_route %x %x\n", TypeName<A>::get(), 
+BGPRibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
+				 const InternalMessage<A> &new_rtmsg,
+				 BGPRouteTable<A> *caller) 
+{
+    debug_msg("BGPRibOutTable<%s>::replace_route %x %x\n", TypeName<A>::get(),
 	   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg));
     assert(old_rtmsg.push() == false);
 
@@ -173,21 +178,21 @@ BGPRibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-BGPRibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
-			       BGPRouteTable<A> *caller) {
-    
+BGPRibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+			       BGPRouteTable<A> *caller) 
+{
     debug_msg("%s\n", _tablename.c_str());
-    debug_msg("BGPRibOutTable<%s>::delete_route %x\n", TypeName<A>::get(), 
+    debug_msg("BGPRibOutTable<%s>::delete_route %x\n", TypeName<A>::get(),
 	   (u_int)(rtmsg.route()));
     debug_msg("Attribute: %x\n", (u_int)(rtmsg.route()->attributes()));
     print_queue(_queue);
     if (caller != _parent) abort();
 
-    //check the queue to see if there's a matching entry.
-    
+    // check the queue to see if there's a matching entry.
+
     const RouteQueueEntry<A>* queued_entry = NULL;
     list<const RouteQueueEntry<A>*>::iterator i;
-    for (i= _queue.begin(); i != _queue.end(); i++) {
+    for (i = _queue.begin(); i != _queue.end(); i++) {
 	if ( (*i)->net() == rtmsg.net()) {
 	    queued_entry = *i;
 	    break;
@@ -196,40 +201,40 @@ BGPRibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     RouteQueueEntry<A>* entry;
     if (queued_entry == NULL) {
-	//add the route delete operation to the queue.
+	// add the route delete operation to the queue.
 	entry = new RouteQueueEntry<A>(rtmsg.route(), RTQUEUE_OP_DELETE);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
     } else if (queued_entry->op() == RTQUEUE_OP_ADD) {
-	//XXX this probably shouldn't happen.
+	// XXX this probably shouldn't happen.
 	abort();
-	
-	//if it does, then here's how to handle it:
+
+	// if it does, then here's how to handle it:
 	_queue.erase(i);
 	delete queued_entry;
     } else if (queued_entry->op() == RTQUEUE_OP_DELETE) {
-	//This should not happen.
+	// This should not happen.
 	abort();
     } else if (queued_entry->op() == RTQUEUE_OP_REPLACE_OLD) {
-	//XXX this probably shouldn't happen.
+	// XXX this probably shouldn't happen.
 	abort();
-	
-	//if it does, then here's how to handle it:
+
+	// if it does, then here's how to handle it:
 	list<const RouteQueueEntry<A>*>::iterator i2 = i;
 	i++;
 	_queue.erase(i2);
 	assert((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
 	_queue.erase(i);
 	delete *i;
-	
-	entry = new RouteQueueEntry<A>(queued_entry->route(), 
+
+	entry = new RouteQueueEntry<A>(queued_entry->route(),
 				       RTQUEUE_OP_DELETE);
 	entry->set_origin_peer(queued_entry->origin_peer());
 	_queue.push_back(entry);
 	delete queued_entry;
-    }	
+    }
 
-    //handle push
+    // handle push
     if (rtmsg.push())
 	push(_parent);
     return 0;
@@ -237,32 +242,33 @@ BGPRibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPRibOutTable<A>::push(BGPRouteTable<A> *caller) {
+BGPRibOutTable<A>::push(BGPRouteTable<A> *caller) 
+{
     debug_msg("%s\n", _tablename.c_str());
     debug_msg("BGPRibOutTable<%s>::push\n", TypeName<A>::get());
     if (caller != _parent) abort();
-    //In push, we need to collect together all the SubnetRoutes that
-    //have the same Path Attributes, and send them together in an
-    //Update message.  We repeatedly do this until the queue is empty.
+    // In push, we need to collect together all the SubnetRoutes that
+    // have the same Path Attributes, and send them together in an
+    // Update message.  We repeatedly do this until the queue is empty.
 
     bool peer_busy = false;
     while (_queue.empty() == false) {
 
-	//go through _queue and move all of the queue elements that
-	//have the same attribute list as the first element to
-	//tmp_queue
+	// go through _queue and move all of the queue elements that
+	// have the same attribute list as the first element to
+	// tmp_queue
 
 	list <const RouteQueueEntry<A>*> tmp_queue;
 	const PathAttributeList<A> *attributes = NULL;
-	int ctr=1;
+	int ctr = 1;
 	typedef list<const RouteQueueEntry<A>*>::iterator Iter;
 	Iter i = _queue.begin();
 	while (i != _queue.end()) {
 	    if ((*i)->op() == RTQUEUE_OP_REPLACE_OLD) {
-		//we have to handle replace differently from the rest
-		//because replace uses two paired queue entries, and
-		//we must move them together.  We only care about the
-		//attributes on the new one of the pair.
+		// we have to handle replace differently from the rest
+		// because replace uses two paired queue entries, and
+		// we must move them together.  We only care about the
+		// attributes on the new one of the pair.
 		Iter i2 = i;
 		i2++;
 		assert((*i2)->op() == RTQUEUE_OP_REPLACE_NEW);
@@ -291,12 +297,12 @@ BGPRibOutTable<A>::push(BGPRouteTable<A> *caller) {
 		}
 	    }
 	}
-	debug_msg("%d elements with attr %x moved to tmp queue\n", ctr, 
+	debug_msg("%d elements with attr %x moved to tmp queue\n", ctr,
 	       (u_int)attributes);
 	print_queue(tmp_queue);
 
-	//at this point we pass the tmp_queue to the output BGP
-	//session object for output
+	// at this point we pass the tmp_queue to the output BGP
+	// session object for output
 	debug_msg("************************************\n");
 	debug_msg("* Outputting route to BGP peer\n");
 	debug_msg("* Attributes: \n%s", attributes->str().c_str());
@@ -307,24 +313,25 @@ BGPRibOutTable<A>::push(BGPRouteTable<A> *caller) {
 	    debug_msg("* Subnet: %s\n", (*i)->net().str().c_str());
 	    if ((*i)->op() == RTQUEUE_OP_ADD ) {
 		debug_msg("* Announce\n");
-		//the sanity checking was done in add_route...
+		// the sanity checking was done in add_route...
 		_peer->add_route(*((*i)->route()));
 		delete (*i);
-	    } else if ((*i)->op() == RTQUEUE_OP_DELETE ) {	
-		//the sanity checking was done in delete_route...
+	    } else if ((*i)->op() == RTQUEUE_OP_DELETE ) {
+		// the sanity checking was done in delete_route...
 		debug_msg("* Withdraw\n");
 		_peer->delete_route(*((*i)->route()));
 		delete (*i);
-	    } else if ((*i)->op() == RTQUEUE_OP_REPLACE_OLD ) {	
+	    } else if ((*i)->op() == RTQUEUE_OP_REPLACE_OLD ) {
 		debug_msg("* Replace\n");
 		const SubnetRoute<A> *old_route = (*i)->route();
+		const RouteQueueEntry<A> *old_queue_entry = (*i);
 		i++;
-		assert(i!=tmp_queue.end());
+		assert(i != tmp_queue.end());
 		assert((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
 		const SubnetRoute<A> *new_route = (*i)->route();
 		_peer->replace_route(*old_route, *new_route);
-		delete old_route;
-		delete new_route;
+		delete old_queue_entry;
+		delete (*i);
 	    } else {
 		abort();
 	    }
@@ -339,28 +346,29 @@ BGPRibOutTable<A>::push(BGPRouteTable<A> *caller) {
            sending us new data */
 	if (_peer->push_packet() == PEER_OUTPUT_BUSY)
 	    peer_busy = true;
-	
+
 
 	debug_msg("************************************\n");
     }
-    
+
     /* signal our state back upstream */
     if ((peer_busy == true) && (_peer_busy == false)) {
 	debug_msg("RibOut signalling peer busy upstream\n");
 	_parent->output_state(true, this);
 
-	//we now have to assume that a queue will build upstream
+	// we now have to assume that a queue will build upstream
 	_upstream_queue_exists = true;
     }
     _peer_busy = peer_busy;
-    
+
     return 0;
 }
 
 
 template<class A>
 void
-BGPRibOutTable<A>::output_no_longer_busy() {
+BGPRibOutTable<A>::output_no_longer_busy() 
+{
     debug_msg("RibOut: output_no_longer_busy\n");
     if (_peer_busy == false) return;
     debug_msg("RibOut: _peer_busy true->false\n");
@@ -395,14 +403,16 @@ BGPRibOutTable<A>::output_no_longer_busy() {
 
 template<class A>
 const SubnetRoute<A>*
-BGPRibOutTable<A>::lookup_route(const IPNet<A> &net) const {
+BGPRibOutTable<A>::lookup_route(const IPNet<A> &net) const 
+{
     return _parent->lookup_route(net);
 }
 
 template<class A>
 void
 BGPRibOutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
-				    BGPRouteTable<A> *caller) {
+				     BGPRouteTable<A> *caller) 
+{
     XLOG_ASSERT(_parent == caller);
     UNUSED(genid);
     UNUSED(peer);
@@ -410,9 +420,10 @@ BGPRibOutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 
 template<class A>
 void
-BGPRibOutTable<A>::peering_down_complete(const PeerHandler *peer, 
+BGPRibOutTable<A>::peering_down_complete(const PeerHandler *peer,
 					 uint32_t genid,
-					 BGPRouteTable<A> *caller) {
+					 BGPRouteTable<A> *caller) 
+{
     XLOG_ASSERT(_parent == caller);
     UNUSED(genid);
     UNUSED(peer);
@@ -420,7 +431,8 @@ BGPRibOutTable<A>::peering_down_complete(const PeerHandler *peer,
 
 template<class A>
 string
-BGPRibOutTable<A>::str() const {
+BGPRibOutTable<A>::str() const 
+{
     string s = "BGPRibOutTable<A>" + tablename();
     return s;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.4 2002/12/09 18:28:50 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -40,8 +40,9 @@ int main(int, char** argv) {
     //    EventLoop* eventloop = bgpmain.get_eventloop();
     LocalData localdata;
     Iptuple iptuple;
-    BGPPeerData peer_data(iptuple, AsNum((uint16_t)1), IPv4("2.0.0.1"), 30);
-    BGPPeer peer1(&localdata, &peer_data, NULL, &bgpmain);
+    BGPPeerData *peer_data
+	= new BGPPeerData(iptuple, AsNum((uint16_t)1), IPv4("2.0.0.1"), 30);
+    BGPPeer peer1(&localdata, peer_data, NULL, &bgpmain);
     DebugPeerHandler handler(&peer1);
 
     //trivial plumbing
@@ -208,6 +209,9 @@ int main(int, char** argv) {
 
     delete ribout_table;
     delete debug_table;
+    delete palist1;
+    delete palist2;
+    delete palist3;
 
     FILE *file = fopen("/tmp/test_ribout", "r");
     if (file == NULL) {
@@ -249,7 +253,6 @@ int main(int, char** argv) {
 	
     }
     unlink("/tmp/test_ribout");
-    exit(0);
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.20 2002/12/09 18:28:47 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -28,11 +28,11 @@
 #endif
 
 template<class A>
-BGPDumpTable<A>::BGPDumpTable(string table_name,  
+BGPDumpTable<A>::BGPDumpTable(string table_name,
 			      const PeerHandler *peer,
 			      const list <const PeerHandler*>& peer_list,
-			      BGPRouteTable<A> *parent_table) 
-    : BGPRouteTable<A>("BGPDumpTable-" + table_name), 
+			      BGPRouteTable<A> *parent_table)
+    : BGPRouteTable<A>("BGPDumpTable-" + table_name),
     _dump_iter(peer, peer_list)
 {
     cp(1);
@@ -45,8 +45,9 @@ BGPDumpTable<A>::BGPDumpTable(string table_name,
 
 template<class A>
 int
-BGPDumpTable<A>::add_route(const InternalMessage<A> &rtmsg, 
-			    BGPRouteTable<A> *caller) {
+BGPDumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
+			   BGPRouteTable<A> *caller) 
+{
     debug_msg("BGPDumpTable<A>::add_route %x on %s\n",
 	   (u_int)(&rtmsg), tablename().c_str());
     assert(caller == _parent);
@@ -70,9 +71,10 @@ BGPDumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
-				const InternalMessage<A> &new_rtmsg, 
-				BGPRouteTable<A> *caller) {
+BGPDumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
+			       const InternalMessage<A> &new_rtmsg,
+			       BGPRouteTable<A> *caller) 
+{
     debug_msg("BGPDumpTable<A>::replace_route %x -> %x on %s\n",
 	   (u_int)(&old_rtmsg), (u_int)(&new_rtmsg), tablename().c_str());
     assert(caller == _parent);
@@ -80,7 +82,7 @@ BGPDumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     assert(old_rtmsg.net() == new_rtmsg.net());
     cp(4);
 
-    bool old_is_valid = 
+    bool old_is_valid =
 	_dump_iter.route_change_is_valid(old_rtmsg.origin_peer(),
 					 old_rtmsg.net(),
 					 old_rtmsg.genid(),
@@ -112,9 +114,10 @@ BGPDumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-BGPDumpTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
+BGPDumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller,
-			    const PeerHandler* dump_peer) {
+			    const PeerHandler* dump_peer) 
+{
     cp(9);
     assert(caller == _parent);
     assert(_next_table != NULL);
@@ -131,8 +134,9 @@ BGPDumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDumpTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
-			       BGPRouteTable<A> *caller) {
+BGPDumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+			      BGPRouteTable<A> *caller) 
+{
     debug_msg("BGPDumpTable<A>::delete_route %x on %s\n",
 	   (u_int)(&rtmsg), tablename().c_str());
     assert(caller == _parent);
@@ -152,7 +156,8 @@ BGPDumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-BGPDumpTable<A>::push(BGPRouteTable<A> *caller) {
+BGPDumpTable<A>::push(BGPRouteTable<A> *caller) 
+{
     assert(caller == _parent);
     cp(12);
     return _next_table->push((BGPRouteTable<A>*)this);
@@ -160,31 +165,35 @@ BGPDumpTable<A>::push(BGPRouteTable<A> *caller) {
 
 template<class A>
 const SubnetRoute<A>*
-BGPDumpTable<A>::lookup_route(const IPNet<A> &net) const {
+BGPDumpTable<A>::lookup_route(const IPNet<A> &net) const 
+{
     cp(13);
     return _parent->lookup_route(net);
 }
 
 template<class A>
 void
-BGPDumpTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use){
+BGPDumpTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
+{
     cp(14);
     _parent->route_used(rt, in_use);
 }
 
 template<class A>
 string
-BGPDumpTable<A>::str() const {
+BGPDumpTable<A>::str() const 
+{
     string s = "BGPDumpTable<A>" + tablename();
     return s;
 }
 
 template<class A>
 void
-BGPDumpTable<A>::initiate_background_dump() {
+BGPDumpTable<A>::initiate_background_dump() 
+{
     assert(_next_table != NULL);
     cp(15);
-    
+
     _dumped = 0;
     _dump_active = true;
     _dump_timer = get_eventloop()->
@@ -192,20 +201,21 @@ BGPDumpTable<A>::initiate_background_dump() {
 				network events or expired timers */,
 			    callback(this,
 				     &BGPDumpTable<A>::dump_next_route));
-}    
+}
 
 template<class A>
 void
-BGPDumpTable<A>::suspend_dump() {
+BGPDumpTable<A>::suspend_dump() 
+{
     if (_dump_active == false) return;
     cp(16);
     _dump_active = false;
     _dump_timer.unschedule();
 
-    //suspend is being called because the fanout table is unplumbing us.
+    // suspend is being called because the fanout table is unplumbing us.
     _next_table->set_parent(NULL);
 
-    //ensure we can't continue to operate
+    // ensure we can't continue to operate
     _next_table = (BGPRouteTable<A>*)0xd0d0;
     _parent = (BGPRouteTable<A>*)0xd0d0;
     delete this;
@@ -213,17 +223,18 @@ BGPDumpTable<A>::suspend_dump() {
 
 template<class A>
 void
-BGPDumpTable<A>::dump_next_route() {
+BGPDumpTable<A>::dump_next_route() 
+{
     if (_output_busy) {
 	cp(17);
-	//we can't really do anything yet - wait to be triggered by
-	//the output state changing
+	// we can't really do anything yet - wait to be triggered by
+	// the output state changing
 	fprintf(stderr, "Dump: output busy\n");
 	return;
     }
 
-    //process any queue that built up
-    while(_parent->get_next_message(this)==true) {
+    // process any queue that built up
+    while(_parent->get_next_message(this) == true) {
 	cp(18);
 	debug_msg("BGPDumpTable<A>::dump_next_route processed queued message\n");
 	if (_output_busy) {
@@ -232,17 +243,17 @@ BGPDumpTable<A>::dump_next_route() {
 	}
     };
 
-    //if we get here, the output is not busy and there's no queue of
-    //changes upstream of us, so it's time to do more of the route
-    //dump...
+    // if we get here, the output is not busy and there's no queue of
+    // changes upstream of us, so it's time to do more of the route
+    // dump...
     debug_msg("dumped %d routes\n", _dumped);
     if (_dump_iter.is_valid() == false) {
 	cp(20);
 	if (_dump_iter.waiting_for_deletion_completion()) {
 	    cp(21);
-	    //go into final wait state
+	    // go into final wait state
 	    _waiting_for_deletion_completion = true;
-	    //re-enable normal flow control
+	    // re-enable normal flow control
 	    _parent->output_state(_output_busy, this);
 	} else {
 	    cp(22);
@@ -255,7 +266,7 @@ BGPDumpTable<A>::dump_next_route() {
 	cp(24);
     }
 
-    if (_dump_iter.route_iterator_is_valid()) 
+    if (_dump_iter.route_iterator_is_valid())
 	debug_msg("dump route with net %p\n", _dump_iter.net().str().c_str());
     if (_parent->dump_next_route(_dump_iter) == false) {
 	cp(25);
@@ -263,9 +274,9 @@ BGPDumpTable<A>::dump_next_route() {
 	    cp(26);
 	    if (_dump_iter.waiting_for_deletion_completion()) {
 		cp(27);
-		//go into final wait state
+		// go into final wait state
 		_waiting_for_deletion_completion = true;
-		//re-enable normal flow control
+		// re-enable normal flow control
 		_parent->output_state(_output_busy, this);
 	    } else {
 		cp(28);
@@ -289,8 +300,9 @@ BGPDumpTable<A>::dump_next_route() {
 }
 
 template<class A>
-void 
-BGPDumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
+void
+BGPDumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) 
+{
     assert(next_table == _next_table);
     if (busy)
 	fprintf(stderr, "Dump: output state busy\n");
@@ -299,7 +311,7 @@ BGPDumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
 
     if (_waiting_for_deletion_completion) {
 	cp(31);
-	//we're in the final waiting phase, so just stay out of the way.
+	// we're in the final waiting phase, so just stay out of the way.
 	_parent->output_state(busy, next_table);
     } else {
 	cp(32);
@@ -316,8 +328,9 @@ BGPDumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) {
 }
 
 template<class A>
-bool 
-BGPDumpTable<A>::get_next_message(BGPRouteTable<A> *next_table) {
+bool
+BGPDumpTable<A>::get_next_message(BGPRouteTable<A> *next_table) 
+{
     assert(next_table == _next_table);
     if (_waiting_for_deletion_completion) {
 	cp(35);
@@ -339,7 +352,8 @@ BGPDumpTable<A>::get_next_message(BGPRouteTable<A> *next_table) {
 template<class A>
 void
 BGPDumpTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
-				    BGPRouteTable<A> *caller) {
+				   BGPRouteTable<A> *caller) 
+{
     cp(37);
     XLOG_ASSERT(_parent == caller);
     XLOG_ASSERT(_next_table != NULL);
@@ -350,14 +364,15 @@ BGPDumpTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 template<class A>
 void
 BGPDumpTable<A>::peering_down_complete(const PeerHandler *peer, uint32_t genid,
-					BGPRouteTable<A> *caller) {
+				       BGPRouteTable<A> *caller) 
+{
     cp(38);
     XLOG_ASSERT(_parent == caller);
     XLOG_ASSERT(_next_table != NULL);
     _next_table->peering_down_complete(peer, genid, this);
     _dump_iter.peering_down_complete(peer, genid);
 
-    //If we were waiting for this signal, we can now unplumb ourselves.
+    // If we were waiting for this signal, we can now unplumb ourselves.
     if (_waiting_for_deletion_completion
 	&& (_dump_iter.waiting_for_deletion_completion() == false)) {
 	cp(39);
@@ -372,15 +387,16 @@ BGPDumpTable<A>::peering_down_complete(const PeerHandler *peer, uint32_t genid,
 
 template<class A>
 void
-BGPDumpTable<A>::unplumb_self() {
+BGPDumpTable<A>::unplumb_self() 
+{
     debug_msg("unplumbing self\n");
     assert(_next_table != NULL);
     assert(_parent != NULL || (_parent == NULL && _dump_active == false));
     _dump_active = false;
 
 #ifdef NOTDEF
-    //if the output isn't busy, tell the fanout table so it won't
-    //queue changes anymore
+    // if the output isn't busy, tell the fanout table so it won't
+    // queue changes anymore
     if (_parent != NULL) {
 	_parent->output_state(_output_busy, (BGPRouteTable<A>*)this);
 	assert(_parent->type() == FANOUT_TABLE);
@@ -394,7 +410,7 @@ BGPDumpTable<A>::unplumb_self() {
 	    remove_next_table((BGPRouteTable<A>*)this);
 	((BGPFanoutTable<A>*)_parent)->add_next_table(_next_table, _peer);
     }
-    //ensure we can't continue to operate
+    // ensure we can't continue to operate
     _next_table = (BGPRouteTable<A>*)0xd0d0;
     _parent = (BGPRouteTable<A>*)0xd0d0;
 }
