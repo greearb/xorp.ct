@@ -193,15 +193,13 @@ decoder2(TestInfo& info)
     size_t len;
     uint8_t *ptr = hello.encode(len);
 
-    // An attempt to decode a packet with no decoders installed should
-    // fail.
+    // An attempt to decode a packet with a decoder installed should succeed.
     Packet *packet = dec.decode(ptr, len);
 
     DOUT(info) << packet->str() << endl;
 
     return true;
 }
-
 
 int
 main(int argc, char **argv)
