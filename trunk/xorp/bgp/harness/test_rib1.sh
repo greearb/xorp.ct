@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.10 2003/07/17 00:28:32 pavlin Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.11 2003/09/21 00:35:32 atanu Exp $
 #
 
 #
@@ -538,14 +538,13 @@ then
     RIB_CONFIGURED=true
 fi
 
-# Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
-TIME_WAIT=`time_wait_seconds`
-
 for i in $TESTS
 do
-    $i
+# Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
+    TIME_WAIT=`time_wait_seconds`
     echo "Waiting $TIME_WAIT seconds for TCP TIME_WAIT state timeout"
     sleep $TIME_WAIT
+    $i
 done
 
 # Local Variables:

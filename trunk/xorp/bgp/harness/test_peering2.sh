@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.24 2003/07/17 00:28:32 pavlin Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.25 2003/08/29 21:37:56 atanu Exp $
 #
 
 #
@@ -433,9 +433,6 @@ test6()
 TESTS_NOT_FIXED='test2 test3 test5'
 TESTS='test1 test4 test6'
 
-# Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
-TIME_WAIT=`time_wait_seconds`
-
 # Include command line
 . ${srcdir}/args.sh
 
@@ -466,9 +463,11 @@ do
     do 
 	if [ -f $t ]
 	then
-	    $i $t
+# Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
+	    TIME_WAIT=`time_wait_seconds`
 	    echo "Waiting $TIME_WAIT seconds for TCP TIME_WAIT state timeout"
 	    sleep $TIME_WAIT
+	    $i $t
 	else
 	    echo "Traffic file $t missing."
 	fi

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.6 2003/10/22 00:54:20 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.7 2003/10/23 09:39:30 atanu Exp $
 #
 
 #
@@ -584,9 +584,6 @@ test6()
 TESTS_NOT_FIXED='test6'
 TESTS='test1 test1_ipv6 test2 test3 test4 test5'
 
-# Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
-TIME_WAIT=`time_wait_seconds`
-
 # Include command line
 . ${srcdir}/args.sh
 
@@ -615,9 +612,11 @@ fi
 
 for i in $TESTS
 do
-    $i
+# Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
+    TIME_WAIT=`time_wait_seconds`
     echo "Waiting $TIME_WAIT seconds for TCP TIME_WAIT state timeout"
     sleep $TIME_WAIT
+    $i
 done
 
 # Local Variables:
