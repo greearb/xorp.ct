@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.10 2004/05/28 18:26:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.11 2004/05/28 22:27:58 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -82,19 +82,23 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 	    // hierarchy.
 	    //
 	    debug_msg("ACTIVATE NODE: %s\n", _path.c_str());
-	    cmd_tree.instantiate(this, _template_tree_node);
+	    cmd_tree.instantiate(this, _template_tree_node,
+				 true /* has_command */);
 	    instantiated = true;
 	} else {
 	    // Check to see if this node has a command that matches
 	    // what we're looking for.
 	    list<string>::const_iterator iter;
+	    bool has_command = false;
 	    for (iter = cmd_names.begin(); iter != cmd_names.end(); ++iter) {
 		if (_template_tree_node->const_command(*iter) != NULL) {
-		    cmd_tree.instantiate(this, _template_tree_node);
-		    instantiated = true;
+		    has_command = true;
 		    break;
 		}
 	    }
+	    cmd_tree.instantiate(this, _template_tree_node,
+				 true /* has_command */);
+	    instantiated = true;
 	}
     }
 
@@ -155,12 +159,13 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 
 		if ((*ttn_iter)->check_command_tree(cmd_names,
 						    include_intermediates, 
-						    /*depth*/ 0)) {
+						    /* depth */ 0)) {
 
 		    XLOG_TRACE(_verbose, "***done == true\n");
 
 		    cmd_tree.push((*ttn_iter)->segname());
-		    cmd_tree.instantiate(NULL, (*ttn_iter));
+		    cmd_tree.instantiate(NULL, (*ttn_iter),
+					 true /* has_command */);
 		    cmd_tree.pop();
 		    instantiated = true;
 		} else {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.7 2004/05/28 18:26:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.8 2004/05/28 22:27:55 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -144,7 +144,8 @@ CommandTree::pop()
 
 void 
 CommandTree::instantiate(const ConfigTreeNode* ctn, 
-			 const TemplateTreeNode* ttn)
+			 const TemplateTreeNode* ttn,
+			 bool has_command)
 {
     XLOG_ASSERT(! _temp_path.empty());
 
@@ -156,7 +157,8 @@ CommandTree::instantiate(const ConfigTreeNode* ctn,
 	_current_node->add_child(new_ctn);
 	_current_node = new_ctn;
     }
-    _current_node->set_has_command();
+    if (has_command)
+	_current_node->set_has_command();
 
     _temp_path.clear();
 }
