@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.27 2003/10/13 23:42:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.28 2003/10/14 01:54:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -486,9 +486,9 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler)
 	if (rt == NULL) {
 	    //peering was already stopped.  This can happen when we're
 	    //doing an ALLSTOP.
-	    XLOG_WARNING("BGPPlumbingAF<%s>::stop_peering: "
-			 "NULL parent table in stop_peering",
-			 A::ip_version_str().c_str());
+// 	    XLOG_WARNING("BGPPlumbingAF<%s>::stop_peering: "
+// 			 "NULL parent table in stop_peering",
+// 			 A::ip_version_str().c_str());
 	    return 0;
 	}
     }
