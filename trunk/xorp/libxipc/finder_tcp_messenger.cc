@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.11 2003/04/23 20:50:48 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.12 2003/04/24 19:32:47 hodson Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -68,7 +68,7 @@ FinderTcpMessenger::read_event(int	      errval,
 	    ParsedFinderXrlResponse fm(s.c_str());
 	    dispatch_xrl_response(fm.seqno(), fm.xrl_error(), fm.xrl_args());
 	    return;
-	} 
+	}
     } catch (const InvalidString& e) {
 	ex = e.str();
     } catch (const BadFinderMessageFormat& e) {
@@ -107,7 +107,7 @@ FinderTcpMessenger::send(const Xrl& xrl, const SendCallback& scb)
     } else {
 	_out_queue.push_back(msg);
     }
-    
+
     return true;
 }
 
@@ -225,7 +225,7 @@ FinderTcpListener::FinderTcpListener(EventLoop&		     e,
     : FinderTcpListenerBase(e, interface, port, en), _mm(mm), _cmds(cmds)
 {
 }
-					 
+
 FinderTcpListener::~FinderTcpListener()
 {
 }
@@ -358,7 +358,7 @@ FinderTcpAutoConnector::do_auto_connect()
 	}
 	_connected = false;
 	start_timer(CONNECT_RETRY_PAUSE_MS);
-    } 
+    }
     _last_error = r;
 }
 
@@ -397,7 +397,7 @@ void
 FinderTcpAutoConnector::messenger_active_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_active_event(m);
-    
+
 }
 void
 FinderTcpAutoConnector::messenger_inactive_event(FinderMessengerBase* m)
@@ -416,9 +416,4 @@ FinderTcpAutoConnector::manages(const FinderMessengerBase* m) const
 {
     return _real_manager.manages(m);
 }
-
-
-
-
-
 
