@@ -1,3 +1,29 @@
+# -*- mode: shell-script -*-
+#
+# Tinderbox configurations
+#
+# A configuration consists of a set of configuration name postfixed variables:
+#
+# 	host_X = host to run configuration on
+# 	home_X = directory for the tinderbox build and execution
+# 	env_X  = environment variable to be set when 
+#
+# Configurations must be named in the variable TINDERBOX_CONFIGS in order
+# to become part of the tinderbox build.
+#
+
+host_fbsd462_gcc32="xorpc.icir.org"
+env_fbsd462_gcc32="CC=gcc32 CXX=g++32"
+home_fbsd462_gcc32="/home/xorpc/u1/hodson/build/tinderbox_gcc32"
+
+host_fbsd462_gcc295="xorpc.icir.org"
+home_fbsd462_gcc295="/home/xorpc/u1/hodson/build/tinderbox_gcc295"
+
+host_linux24_gcc296="koala.icir.org"
+home_linux24_gcc296="tinderbox"
+
+TINDERBOX_CONFIGS="fbsd462_gcc32 fbsd462_gcc295 linux24_gcc296"
+
 #
 # Configuration variables for tinderbox
 #
@@ -5,13 +31,9 @@
 SCRIPTSDIR=$(dirname $0)
 
 ROOTDIR=${SCRIPTSDIR}/..
+LOGDIR=${ROOTDIR}/log
 
 LOCALHOST=`hostname`
-
-# Remote hosts is a list with each entry taking for host[:directory]
-# the build happens under the specified directory or default home directory
-# on remote host.
-REMOTEHOSTS="xorpc.icir.org:/home/xorpc/u1/hodson/build/tinderbox koala.icir.org:tinderbox" 
 
 # Successful build mail address
 REPORTOKADDR="Xorp Tinderbox <xorp-tinderbox@xorp.org>"
