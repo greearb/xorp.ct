@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_osdep.hh,v 1.2 2003/05/16 19:23:17 pavlin Exp $
+// $XORP: xorp/fea/mfea_osdep.hh,v 1.3 2003/09/16 01:15:52 pavlin Exp $
 
 #ifndef __FEA_MFEA_OSDEP_HH__
 #define __FEA_MFEA_OSDEP_HH__
@@ -23,10 +23,13 @@
 //
 
 
-#include "config.h"
+#include "libxorp/xorp.h"
 
 #include <sys/time.h>
 
+#ifdef HAVE_NETINET_IP6_H
+#include <netinet/ip6.h>
+#endif
 #ifdef HAVE_NETINET_ICMP6_H
 #include <netinet/icmp6.h>
 #endif
@@ -71,6 +74,15 @@
 #define MRT_PIM			MRT_ASSERT
 #endif
 
+#ifndef IP6OPT_RTALERT
+#define IP6OPT_RTALERT		0x05
+#endif
+#ifndef IP6OPT_RTALERT_LEN
+#define IP6OPT_RTALERT_LEN	4
+#endif
+#ifndef IP6OPT_RTALERT_MLD
+#define IP6OPT_RTALERT_MLD	0
+#endif
 
 //
 // Backward-compatibility definitions.
