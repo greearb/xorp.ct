@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.5 2003/05/15 23:10:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.6 2003/05/16 04:18:46 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -120,8 +120,8 @@ fea_main(const char* finder_hostname)
     //
     // 5. XRL Target
     //
-    XrlFeaTarget xrl_tgt(eventloop, xrl_std_router_fea, fticonfig, ifm,
-			 ifreporter, 0);
+    XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea, fticonfig, ifm,
+				ifreporter, 0);
     
     //
     // CLI (for debug purpose)
@@ -151,9 +151,20 @@ fea_main(const char* finder_hostname)
     //
     // Main loop
     //
-    for ( ; ; ) {
+    while (! xrl_fea_target.done()) {
 	eventloop.run();
     }
+    
+    //
+    // Gracefully stop
+    // TODO: this may not work if we depend on reading asynchronously
+    // data from sockets. To fix this, we need to run the eventloop
+    // until we get all the data we need. Tricky...
+    // 
+    // TODO: take care of the MFEA as well.
+    // xrl_mfea_node4.stop();
+    ifconfig.stop();
+    fticonfig.stop();
 }
 
 
