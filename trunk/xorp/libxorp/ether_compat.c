@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.2 2004/06/22 23:46:35 pavlin Exp $"
 
 /*
  * Part of this software is derived from the following file(s):
@@ -70,7 +70,7 @@ ether_aton(const char *a)
 	long l;
 	static struct ether_addr e;
 	const char *s = a;
-	const char *pp;
+	char *pp;
 
 	while (xorp_isspace(*s))
 		s++;
@@ -83,7 +83,7 @@ ether_aton(const char *a)
 		if (!(*pp == ':' ||
 			(i == 5 && (xorp_isspace(*pp) || *pp == '\0'))))
 			return (NULL);
-		e->ether_addr_octet[i] = (u_char)l;
+		e.ether_addr_octet[i] = (u_char)l;
 		s = pp + 1;
 	}
 
