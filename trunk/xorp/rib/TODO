@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rib/TODO,v 1.6 2003/08/01 01:57:39 pavlin Exp $
+# $XORP: xorp/rib/TODO,v 1.7 2003/11/06 19:02:05 atanu Exp $
 #
 
 RIB To Do List
@@ -45,6 +45,17 @@ the same route.
 $ bgp/harness/test_routing2.sh -t test6.
 
 17. Use ref_trie.hh not trie.hh.
+
+18. The RIB provides a "register_interest[46]/deregister_interest[46]"
+interface for routes. The response to the register_interest call
+returns the requested answer. However, if a previous response becomes
+invalid the invalidation call comes via the rib_client interface. The
+client process can therefore information about a route via two
+different channels. This can mean that messages on one channel can
+overtake messages on the other channel. 
+
+Therefore registering interest should not return the answer the answer
+should come later via the rib_client interface.
 
 Done
 =======================
