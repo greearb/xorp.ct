@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.32 2005/03/03 07:29:24 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.33 2005/03/18 08:15:03 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -209,7 +209,7 @@ DumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 					 RTQUEUE_OP_DELETE)) {
 	cp(10);
 #ifdef AUDIT_ENABLE
-	add_audit(c_format("%s::add_route peer:%p/%u net:%s valid",
+	add_audit(c_format("%s::delete_route peer:%p/%u net:%s valid",
 			   this->tablename().c_str(),
 			   rtmsg.origin_peer(),
 			   XORP_UINT_CAST(rtmsg.genid()),
@@ -219,7 +219,7 @@ DumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     } else {
 	cp(11);
 #ifdef AUDIT_ENABLE
-	add_audit(c_format("%s::add_route peer:%p/%u net:%s not valid",
+	add_audit(c_format("%s::delete_route peer:%p/%u net:%s not valid",
 			   this->tablename().c_str(),
 			   rtmsg.origin_peer(),
 			   XORP_UINT_CAST(rtmsg.genid()),
