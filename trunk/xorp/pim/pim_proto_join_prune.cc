@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.6 2003/08/12 15:11:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.7 2003/09/30 18:27:06 pavlin Exp $"
 
 
 //
@@ -255,7 +255,11 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 	    // (*,G) entry
 	    if ((source_flags & (ESADDR_RPT_BIT | ESADDR_WC_BIT))
 		== (ESADDR_RPT_BIT | ESADDR_WC_BIT)) {
+		//
 		// Check if the RP address matches. If not, silently ignore
+		// the (*,G) entry. However, the (S,G) and (S,G,rpt) entries
+		// for same group should still be processed.
+		// 
 		PimRp *pim_rp = pim_node().rp_table().rp_find(group_addr);
 		if ((pim_rp == NULL) || (pim_rp->rp_addr() != source_addr)) {
 		    XLOG_TRACE(pim_node().is_log_trace(),
@@ -377,7 +381,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 int
 PimVif::pim_join_prune_send(PimNbr *pim_nbr, PimJpHeader *jp_header)
 {
-    int ret_value = jp_header->network_commit(this, pim_nbr->addr());
+    int ret_value = jp_header->network_commit(this, pim_nbr->primary_addr());
     
     jp_header->reset();
     
