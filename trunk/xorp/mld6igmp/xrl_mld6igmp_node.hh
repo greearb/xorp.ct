@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.27 2005/02/23 17:37:37 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.28 2005/03/18 01:18:13 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -84,8 +84,15 @@ public:
     int disable_mld6igmp();
     int start_mld6igmp();
     int stop_mld6igmp();
-    
-    
+
+    //
+    // Methods used by the classed derived from XrlTaskBase, that need to
+    // be public.
+    //
+    void send_mfea_add_delete_protocol();
+    void send_start_stop_protocol_kernel_vif();
+    void send_join_leave_multicast_group();
+
 protected:
     //
     // XRL target methods
@@ -615,7 +622,6 @@ private:
     void mfea_register_shutdown();
     void finder_deregister_interest_mfea_cb(const XrlError& xrl_error);
 
-    void send_mfea_add_delete_protocol();
     void mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_error);
 
     //
@@ -623,12 +629,10 @@ private:
     //
     int start_protocol_kernel_vif(uint16_t vif_index);
     int stop_protocol_kernel_vif(uint16_t vif_index);
-    void send_start_stop_protocol_kernel_vif();
     void mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& xrl_error);
 
     int join_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
     int leave_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
-    void send_join_leave_multicast_group();
     void mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error);
     
     int send_add_membership(const string& dst_module_instance_name,

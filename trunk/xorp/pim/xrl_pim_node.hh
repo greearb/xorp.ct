@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.51 2005/03/18 00:04:38 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.52 2005/03/18 01:16:57 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -96,6 +96,17 @@ public:
     int disable_bsr();
     int start_bsr();
     int stop_bsr();
+
+    //
+    // Methods used by the classed derived from XrlTaskBase, that need to
+    // be public.
+    //
+    void send_mfea_add_delete_protocol();
+    void send_mfea_allow_signal_messages();
+    void send_start_stop_protocol_kernel_vif();
+    void send_join_leave_multicast_group();
+    void send_add_delete_mfc();
+    void send_add_delete_dataflow_monitor();
 
 protected:    
     //
@@ -2139,9 +2150,7 @@ private:
     void mfea_register_shutdown();
     void finder_deregister_interest_mfea_cb(const XrlError& xrl_error);
 
-    void send_mfea_add_delete_protocol();
     void mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_error);
-    void send_mfea_allow_signal_messages();
     void mfea_client_send_allow_signal_messages_cb(const XrlError& xrl_error);
 
     void rib_register_startup();
@@ -2159,17 +2168,14 @@ private:
     //
     int start_protocol_kernel_vif(uint16_t vif_index);
     int stop_protocol_kernel_vif(uint16_t vif_index);
-    void send_start_stop_protocol_kernel_vif();
     void mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& xrl_error);
 
     int join_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
     int leave_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
-    void send_join_leave_multicast_group();
     void mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error);
 
     int add_mfc_to_kernel(const PimMfc& pim_mfc);
     int delete_mfc_from_kernel(const PimMfc& pim_mfc);
-    void send_add_delete_mfc();
     void mfea_client_send_add_delete_mfc_cb(const XrlError& xrl_error);
 
     int add_dataflow_monitor(const IPvX& source_addr,
@@ -2194,7 +2200,6 @@ private:
 				bool is_leq_upcall);
     int delete_all_dataflow_monitor(const IPvX& source_addr,
 				    const IPvX& group_addr);
-    void send_add_delete_dataflow_monitor();
     void mfea_client_send_add_delete_dataflow_monitor_cb(const XrlError& xrl_error);
 
     int add_protocol_mld6igmp(uint16_t vif_index);
