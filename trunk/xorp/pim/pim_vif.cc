@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.44 2005/03/19 23:55:04 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.45 2005/03/20 00:21:12 pavlin Exp $"
 
 
 //
@@ -877,16 +877,44 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     default:
 	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
 	cksum = INET_CKSUM_ADD(cksum, cksum2);
-	
-	if (cksum != 0) {
-	    XLOG_WARNING("RX packet from %s to %s on vif %s: "
-			 "checksum error",
-			 cstring(src), cstring(dst),
-			 name().c_str());
-	    ++_pimstat_bad_checksum_messages;
-	    return (XORP_ERROR);
+
+	if (cksum == 0)
+	    break;
+
+	//
+	// If this is a PIM Register packet, and if it was truncated
+	// by the kernel (e.g., in some *BSD systems), then ignore the
+	// checksum error.
+	//
+	if (message_type == PIM_REGISTER) {
+	    bool is_truncated = false;
+
+	    switch (family()) {
+	    case AF_INET:
+		if (BUFFER_DATA_SIZE(buffer) == PIM_REG_MINLEN)
+		    is_truncated = true;
+		break;
+#ifdef HAVE_IPV6	
+	    case AF_INET6:
+		if (BUFFER_DATA_SIZE(buffer) == PIM6_REG_MINLEN)
+		    is_truncated = true;
+		break;
+#endif // HAVE_IPV6
+	    default:
+		XLOG_UNREACHABLE();
+		return (XORP_ERROR);
+	    }
+
+	    if (is_truncated)
+		break;		// XXX: accept the truncated PIM Register
 	}
-	break;
+
+	XLOG_WARNING("RX packet from %s to %s on vif %s: "
+		     "checksum error",
+		     cstring(src), cstring(dst),
+		     name().c_str());
+	++_pimstat_bad_checksum_messages;
+	return (XORP_ERROR);
     }
     
     //
