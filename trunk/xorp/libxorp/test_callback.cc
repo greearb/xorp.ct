@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_callback.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_callback.cc,v 1.2 2003/03/10 23:20:34 hodson Exp $"
 
 //
 // Callback test program
@@ -38,38 +38,71 @@ public:
     }
 private:
 };
-    
+
+class SafeWidget : public CallbackSafeObject {
+public:
+    SafeWidget(int* counter) : _counter(counter) {}
+    void notify(int event) {
+	printf("SafeWidget event %d\n", event);
+	*_counter = *_counter + 1;
+    }
+private:
+    int* _counter;
+};
+
 int
 main()
 {
     Widget w;
-    
     TestCallback cbm;
-    
+
     // The callback should be empty
     if (!cbm.is_empty()) {
 	printf("ERROR: callback is not empty\n");
-	return (1);
+	return -1;
     }
-    
+
     // Set the callback
-    cbm = callback(w, &Widget::notify);
-    
+    cbm = callback(&w, &Widget::notify);
+
     // Test that the callback is not empty
     if (cbm.is_empty()) {
 	printf("ERROR: callback is empty\n");
-	return (1);
+	return -1;
     }
-	
+
     // Call the callback
     cbm->dispatch(3);	// call w.notify(3);
 
-    cbm = callback(w, &Widget::funky_notify,
-		   callback(w, &Widget::funky_notify,
-			    callback(w, &Widget::notify)
+    cbm = callback(&w, &Widget::funky_notify,
+		   callback(&w, &Widget::funky_notify,
+			    callback(&w, &Widget::notify)
 			    )
 		   );
     cbm->dispatch(4);
+
+    cbm = callback(&w, &Widget::notify);
+    for (int i = 0; i < 8; i++) {
+	cbm = callback(&w, &Widget::funky_notify, cbm);
+    }
+    cbm->dispatch(5);
+
+    // Show safe callback - only dispatches if object referred to in
+    // callback() method exists.  ie object deletion prevents further
+    // dispatches upon object
+    int counter = 0;
+    const int stop_point = 5;
+    SafeWidget *sw = new SafeWidget(&counter);
+    cbm = callback(sw, &SafeWidget::notify);
+    for (int i = 0; i < 10; ++i) {
+	if (i == stop_point)
+	    delete sw;
+	cbm->dispatch(i);
+    }
+    if (counter != stop_point) {
+	printf("ERROR: safe callback executed after object deletion\n");
+	return -1;
+    }
 
     return (0);
 }
