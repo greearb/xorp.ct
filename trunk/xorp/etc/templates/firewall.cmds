@@ -1,7 +1,9 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/firewall.cmds,v 1.1 2004/08/31 17:31:18 bms Exp $ */
 
+/*
 show filters {
     %command: "fea/firewall/show_filters" %help: HELP;
     %module: fea;
     %tag: HELP "Show the firewall rule table";
 }
+*/
