@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.33 2004/06/10 22:41:42 hodson Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.34 2004/07/24 01:01:53 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -84,7 +84,7 @@ parser_main()
     vif_manager.enable();
     vif_manager.start();
     XrlRibTarget xrt(&xrl_router, urib4, mrib4, urib6, mrib6, vif_manager,
-		     NULL);
+		     &rib_manager);
 
     wait_until_xrl_router_is_ready(eventloop, xrl_router);
 
