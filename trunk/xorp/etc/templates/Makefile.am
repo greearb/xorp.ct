@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/etc/templates/Makefile.am,v 1.9 2004/06/02 03:49:43 pavlin Exp $
+## $XORP: xorp/etc/templates/Makefile.am,v 1.10 2004/06/12 01:55:47 atanu Exp $
 ##
 
 # Redefine the data installation directory
@@ -25,6 +25,7 @@ data_DATA	 += ripng.tp
 data_DATA	 += snmp.tp
 data_DATA	 += static_routes.tp
 data_DATA	 += xorpsh.cmds
+data_DATA	 += misc.cmds
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = $(data_DATA)
