@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.2 2003/01/17 05:51:07 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -289,6 +289,12 @@ uint32_t
 PeerHandler::id() const
 {
     return ntohl(_peer->peerdata()->get_id().addr());
+}
+
+const IPv4&
+PeerHandler::bgp_id() const
+{
+    return _peer->peerdata()->get_id();
 }
 
 uint32_t

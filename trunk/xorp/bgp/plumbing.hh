@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.2 2002/12/15 04:09:28 mjh Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.3 2002/12/17 22:06:05 mjh Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -30,6 +30,9 @@
 #include "next_hop_resolver.hh"
 
 class BGPPlumbing;
+
+template <class A>
+class RouteTableReader;
 
 template <class A>
 class BGPPlumbingAF {
@@ -57,8 +60,13 @@ public:
      * can be passed through.
      */
     NextHopResolver<A>& next_hop_resolver() {return _next_hop_resolver;}
+    uint32_t create_route_table_reader();
+    bool read_next_route(uint32_t token, 
+			 const SubnetRoute<A>*& route, 
+			 IPv4& peer_id);
 private:
     const A& get_local_nexthop(const PeerHandler *peer_handler) const;
+    list <RibInTable<A>*> ribin_list() const;
 
     map <PeerHandler*, RibInTable<A>* > _in_map;
     map <RibOutTable<A>*,  PeerHandler*> _reverse_out_map;
@@ -69,6 +77,9 @@ private:
     RibOutTable<A> *_ipc_rib_out_table;
     /* _tables is all the tables not covered above*/
     set <BGPRouteTable<A>*> _tables;
+
+    uint32_t _max_reader_token;
+    map <uint32_t, RouteTableReader<A>*> _route_table_readers;
 
     bool _awaits_push;
     string _ribname;
@@ -118,6 +129,15 @@ public:
     RibIpcHandler *rib_handler() const {return _rib_handler;}
     BGPPlumbingAF<IPv4>& plumbing4() {return _v4_plumbing;}
     BGPPlumbingAF<IPv6>& plumbing6() {return _v6_plumbing;}
+
+    uint32_t create_ipv4_route_table_reader();
+    uint32_t create_ipv6_route_table_reader();
+    bool read_next_route(uint32_t token, 
+			 const SubnetRoute<IPv4>*& route, 
+			 IPv4& peer_id);
+    bool read_next_route(uint32_t token, 
+			 const SubnetRoute<IPv6>*& route, 
+			 IPv4& peer_id);
 private:
     RibIpcHandler *_rib_handler;
 

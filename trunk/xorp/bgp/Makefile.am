@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.4 2002/12/18 04:10:41 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.5 2003/01/17 04:07:23 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -141,6 +141,7 @@ libbgp_a_SOURCES += route_table_filter.hh
 libbgp_a_SOURCES += route_table_nhlookup.hh
 libbgp_a_SOURCES += route_table_ribin.hh
 libbgp_a_SOURCES += route_table_ribout.hh
+libbgp_a_SOURCES += route_table_reader.hh
 libbgp_a_SOURCES += socket.hh
 libbgp_a_SOURCES += subnet_route.hh
 libbgp_a_SOURCES += timer_const.hh
@@ -182,6 +183,7 @@ libbgp_a_SOURCES += route_table_filter.cc
 libbgp_a_SOURCES += route_table_nhlookup.cc
 libbgp_a_SOURCES += route_table_ribin.cc
 libbgp_a_SOURCES += route_table_ribout.cc
+libbgp_a_SOURCES += route_table_reader.cc
 libbgp_a_SOURCES += socket.cc
 libbgp_a_SOURCES += subnet_route.cc
 libbgp_a_SOURCES += update_attrib.cc

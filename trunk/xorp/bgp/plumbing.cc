@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.5 2003/01/16 23:18:57 pavlin Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.6 2003/01/17 03:50:48 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -22,6 +22,7 @@
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+#include "route_table_reader.hh"
 
 #include "plumbing.hh"
 
@@ -37,12 +38,14 @@ BGPPlumbing::BGPPlumbing(XrlStdRouter *xrl_router, RibIpcHandler* ribhandler)
 }
 
 void
-BGPPlumbing::set_my_as_number(const AsNum &as_num) {
+BGPPlumbing::set_my_as_number(const AsNum &as_num) 
+{
     _my_AS_number = as_num;
 }
 
 int
-BGPPlumbing::add_peering(PeerHandler* peer_handler) {
+BGPPlumbing::add_peering(PeerHandler* peer_handler) 
+{
     int result = 0;
     result |= _v4_plumbing.add_peering(peer_handler);
     //    result |= _v6_plumbing.add_peering(peer_handler);
@@ -50,7 +53,8 @@ BGPPlumbing::add_peering(PeerHandler* peer_handler) {
 }
 
 int
-BGPPlumbing::stop_peering(PeerHandler* peer_handler) {
+BGPPlumbing::stop_peering(PeerHandler* peer_handler) 
+{
     debug_msg("BGPPlumbing::stop_peering\n");
     int result = 0;
     result |= _v4_plumbing.stop_peering(peer_handler);
@@ -59,7 +63,8 @@ BGPPlumbing::stop_peering(PeerHandler* peer_handler) {
 }
 
 int
-BGPPlumbing::peering_went_down(PeerHandler* peer_handler) {
+BGPPlumbing::peering_went_down(PeerHandler* peer_handler) 
+{
     debug_msg("BGPPlumbing::peering_went_down\n");
     int result = 0;
     result |= _v4_plumbing.peering_went_down(peer_handler);
@@ -68,7 +73,8 @@ BGPPlumbing::peering_went_down(PeerHandler* peer_handler) {
 }
 
 int 
-BGPPlumbing::peering_came_up(PeerHandler* peer_handler) {
+BGPPlumbing::peering_came_up(PeerHandler* peer_handler) 
+{
     debug_msg("BGPPlumbing::peering_came_up\n");
     int result = 0;
     result |= _v4_plumbing.peering_came_up(peer_handler);
@@ -77,7 +83,8 @@ BGPPlumbing::peering_came_up(PeerHandler* peer_handler) {
 }
 
 int
-BGPPlumbing::delete_peering(PeerHandler* peer_handler) {
+BGPPlumbing::delete_peering(PeerHandler* peer_handler) 
+{
     debug_msg("BGPPlumbing::delete_peering\n");
     int result = 0;
     result |= _v4_plumbing.delete_peering(peer_handler);
@@ -87,60 +94,98 @@ BGPPlumbing::delete_peering(PeerHandler* peer_handler) {
 
 int 
 BGPPlumbing::add_route(const InternalMessage<IPv4> &rtmsg, 
-		       PeerHandler* peer_handler) {
+		       PeerHandler* peer_handler) 
+{
     return _v4_plumbing.add_route(rtmsg, peer_handler);
 }
 
 int 
 BGPPlumbing::add_route(const InternalMessage<IPv6> &rtmsg, 
-		       PeerHandler* peer_handler)  {
+		       PeerHandler* peer_handler)  
+{
     return _v6_plumbing.add_route(rtmsg, peer_handler);
 }
 
 int 
 BGPPlumbing::delete_route(const InternalMessage<IPv4> &rtmsg, 
-			  PeerHandler* peer_handler) {
+			  PeerHandler* peer_handler) 
+{
     return _v4_plumbing.delete_route(rtmsg, peer_handler);
 }
 
 int 
 BGPPlumbing::delete_route(const InternalMessage<IPv6> &rtmsg, 
-			  PeerHandler* peer_handler) {
+			  PeerHandler* peer_handler) 
+{
     return _v6_plumbing.delete_route(rtmsg, peer_handler);
 }
 
 int 
 BGPPlumbing::delete_route(const IPNet<IPv4>& net,
-			  PeerHandler* peer_handler) {
+			  PeerHandler* peer_handler) 
+{
     return _v4_plumbing.delete_route(net, peer_handler);
 }
 
 int 
 BGPPlumbing::delete_route(const IPNet<IPv6>& net,
-			  PeerHandler* peer_handler) {
+			  PeerHandler* peer_handler) 
+{
     return _v6_plumbing.delete_route(net, peer_handler);
 }
 
 const SubnetRoute<IPv4>* 
-BGPPlumbing::lookup_route(const IPNet<IPv4> &net) const {
+BGPPlumbing::lookup_route(const IPNet<IPv4> &net) const 
+{
     return _v4_plumbing.lookup_route(net);
 }
 
 const SubnetRoute<IPv6>* 
-BGPPlumbing::lookup_route(const IPNet<IPv6> &net) const {
+BGPPlumbing::lookup_route(const IPNet<IPv6> &net) const 
+{
     return _v6_plumbing.lookup_route(net);
 }
 
 void
-BGPPlumbing::push(PeerHandler* peer_handler) {
+BGPPlumbing::push(PeerHandler* peer_handler) 
+{
     debug_msg("BGPPlumbing::push\n");
     _v4_plumbing.push(peer_handler);
     //    _v6_plumbing.push(peer_handler);
 }
 
 void
-BGPPlumbing::output_no_longer_busy(PeerHandler *peer_handler) {
+BGPPlumbing::output_no_longer_busy(PeerHandler *peer_handler) 
+{
     _v4_plumbing.output_no_longer_busy(peer_handler);
+}
+
+uint32_t 
+BGPPlumbing::create_ipv4_route_table_reader() 
+{
+    return _v4_plumbing.create_route_table_reader();
+}
+
+uint32_t 
+BGPPlumbing::create_ipv6_route_table_reader()
+{
+    return _v6_plumbing.create_route_table_reader();
+}
+
+bool 
+BGPPlumbing::read_next_route(uint32_t token, 
+			     const SubnetRoute<IPv4>*& route, 
+			     IPv4& peer_id)
+{
+    return _v4_plumbing.read_next_route(token, route, peer_id);
+}
+
+bool 
+BGPPlumbing::read_next_route(uint32_t token, 
+			     const SubnetRoute<IPv6>*& route, 
+			     IPv4& peer_id)
+{
+    return _v6_plumbing.read_next_route(token, route, peer_id);
 }
 
 /***********************************************************************/
@@ -153,6 +198,10 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
     debug_msg("BGPPlumbingAF constructor called for RIB %s\n", 
 	      ribname.c_str());
     _awaits_push = false;
+
+    //We want to seed the route table reader token so that if BGP
+    //restarts, an old token is unlikely to be accepted.
+    _max_reader_token = getpid() << 16;
 
     /*
      * Initial plumbing is:
@@ -230,7 +279,8 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
 }
 
 template <class A>
-BGPPlumbingAF<A>::~BGPPlumbingAF<A>() {
+BGPPlumbingAF<A>::~BGPPlumbingAF<A>() 
+{
     typename set <BGPRouteTable<A>*>::iterator i;
     for(i = _tables.begin(); i != _tables.end(); i++) {
 	delete (*i);
@@ -243,7 +293,8 @@ BGPPlumbingAF<A>::~BGPPlumbingAF<A>() {
 
 template <class A>
 int 
-BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler) {
+BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler) 
+{
     /*
      * A new peer just came up.  We need to create all the RouteTables
      * to handle taking routes from this peer, and sending routes out
@@ -378,7 +429,8 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler) {
 
 template <class A>
 int 
-BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler) {
+BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler) 
+{
 
     /* Work our way back to the fanout table from the RibOut so we can
        find the relevant output from the fanout table.  On the way,
@@ -413,7 +465,8 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler) {
 
 template <class A>
 int 
-BGPPlumbingAF<A>::peering_went_down(PeerHandler* peer_handler) {
+BGPPlumbingAF<A>::peering_went_down(PeerHandler* peer_handler) 
+{
     typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
@@ -437,7 +490,8 @@ BGPPlumbingAF<A>::peering_went_down(PeerHandler* peer_handler) {
 
 template <class A>
 int 
-BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler) {
+BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler) 
+{
 
     //plumb the output branch back into the fanout table
     BGPRouteTable<A> *rt, *prevrt;
@@ -480,7 +534,8 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler) {
 
 template <class A>
 int 
-BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler) {
+BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler) 
+{
     debug_msg("BGPPlumbingAF<A>::drop_peering\n");
 
     BGPRouteTable<A> *rt, *parent, *child;
@@ -554,7 +609,8 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler) {
 template <class A>
 int 
 BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg, 
-			    PeerHandler* peer_handler) {
+			    PeerHandler* peer_handler) 
+{
     int result = 0;
     RibInTable<A> *rib_in;
     typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
@@ -581,7 +637,8 @@ has no associated RibIn");
 template <class A>
 int 
 BGPPlumbingAF<A>::delete_route(const InternalMessage<A> &rtmsg, 
-			    PeerHandler* peer_handler) {
+			    PeerHandler* peer_handler) 
+{
     int result = 0;
     RibInTable<A> *rib_in;
     typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
@@ -608,7 +665,8 @@ PeerHandler that has no associated RibIn");
 template <class A>
 int 
 BGPPlumbingAF<A>::delete_route(const IPNet<A>& net,
-			       PeerHandler* peer_handler) {
+			       PeerHandler* peer_handler) 
+{
     int result = 0;
     RibInTable<A> *rib_in;
     typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
@@ -632,7 +690,8 @@ PeerHandler that has no associated RibIn");
 
 template <class A>
 void
-BGPPlumbingAF<A>::push(PeerHandler* peer_handler) {
+BGPPlumbingAF<A>::push(PeerHandler* peer_handler) 
+{
     debug_msg("BGPPlumbingAF::push\n");
     if (_awaits_push == false) {
 	XLOG_WARNING("push when none needed");
@@ -652,7 +711,8 @@ that has no associated RibIn");
 
 template <class A>
 void
-BGPPlumbingAF<A>::output_no_longer_busy(PeerHandler *peer_handler) {
+BGPPlumbingAF<A>::output_no_longer_busy(PeerHandler *peer_handler) 
+{
     RibOutTable<A> *rib_out;
     typename map <PeerHandler*, RibOutTable<A>* >::iterator iter;
     iter = _out_map.find(peer_handler);
@@ -665,7 +725,8 @@ PeerHandler that has no associated RibOut");
 
 template <class A>
 const SubnetRoute<A>* 
-BGPPlumbingAF<A>::lookup_route(const IPNet<A> &net) const {
+BGPPlumbingAF<A>::lookup_route(const IPNet<A> &net) const 
+{
     //lookup_route returns the route currently being told to the RIB.
     //It's possible this differs from the route we tell a peer,
     //because of output filters that may modify attributes.
@@ -673,12 +734,63 @@ BGPPlumbingAF<A>::lookup_route(const IPNet<A> &net) const {
 }
 
 const IPv4& 
-BGPPlumbingAF<IPv4>::get_local_nexthop(const PeerHandler *peerhandler) const {
+BGPPlumbingAF<IPv4>::get_local_nexthop(const PeerHandler *peerhandler) const 
+{
     return peerhandler->my_v4_nexthop();
 }
 
 const IPv6& 
-BGPPlumbingAF<IPv6>::get_local_nexthop(const PeerHandler *peerhandler) const {
+BGPPlumbingAF<IPv6>::get_local_nexthop(const PeerHandler *peerhandler) const 
+{
     return peerhandler->my_v6_nexthop();
 }
 
+
+template <class A>
+list <RibInTable<A>*>
+BGPPlumbingAF<A>::ribin_list() const 
+{
+    list <RibInTable<A>*> _ribin_list;
+    typename map <PeerHandler*, RibInTable<A>* >::const_iterator i;
+    for (i = _in_map.begin(); i != _in_map.end(); i++) {
+	_ribin_list.push_back(i->second);
+    }
+    return _ribin_list;
+}
+
+template <class A>
+uint32_t 
+BGPPlumbingAF<A>::create_route_table_reader()
+{
+    //Generate a new token that can't clash with any in use, even if
+    //the space wraps.
+    _max_reader_token++;
+    while (_route_table_readers.find(_max_reader_token) 
+	   != _route_table_readers.end()) {
+	_max_reader_token++;
+    }
+
+    RouteTableReader<A> *new_reader = new RouteTableReader<A>(ribin_list());
+    _route_table_readers[_max_reader_token] = new_reader;
+    return _max_reader_token;
+}
+
+template <class A>
+bool 
+BGPPlumbingAF<A>::read_next_route(uint32_t token, 
+				  const SubnetRoute<A>*& route, 
+				  IPv4& peer_id) 
+{
+    typename map <uint32_t, RouteTableReader<A>*>::iterator i;
+    i = _route_table_readers.find(token);
+    if (i == _route_table_readers.end())
+	return false;
+    RouteTableReader<A> *_reader = i->second;
+    bool result = _reader->get_next(route, peer_id);
+    if (result == false) {
+	//we've finished reading the routing table.
+	_route_table_readers.erase(i);
+	delete _reader;
+    }
+    return result;
+}
