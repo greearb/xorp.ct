@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.58 2005/02/24 00:31:15 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.59 2005/02/24 02:47:41 pavlin Exp $"
 
 
 //
@@ -118,6 +118,14 @@ PimNode::~PimNode()
 
     stop();
 
+    //
+    // XXX: explicitly clear the PimMrt table now, because PimMrt may utilize
+    // some lists in the PimNode class (e.g., _processing_pim_nbr_list) that
+    // may be deleted prematurely at the end of the PimNode destructor
+    // (depending on the declaration ordering).
+    //
+    _pim_mrt.clear();
+    
     ProtoNode<PimVif>::set_node_status(PROC_NULL);
 
     delete_all_vifs();
