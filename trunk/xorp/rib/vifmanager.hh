@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.9 2003/03/21 01:25:14 pavlin Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.10 2003/05/20 00:20:01 pavlin Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -183,6 +183,14 @@ private:
     void xrl_result_get_configured_vif_names(const XrlError& e,
 					     const XrlAtomList *alist,
 					     string ifname);
+    void xrl_result_get_configured_vif_flags(const XrlError& e,
+					     const bool* enabled,
+					     const bool* broadcast,
+					     const bool* loopback,
+					     const bool* point_to_point,
+					     const bool* multicast,
+					     string ifname,
+					     string vifname);
     void xrl_result_get_configured_vif_addresses4(const XrlError& e,
 						  const XrlAtomList *alist,
 						  string ifname,
