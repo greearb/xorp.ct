@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.19 2003/12/17 00:04:03 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.20 2004/01/09 00:17:05 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -30,6 +30,7 @@ tgt_files		+= rib.tgt
 tgt_files		+= ribclient.tgt
 tgt_files		+= rtrmgr.tgt
 tgt_files		+= socket_server.tgt
+tgt_files		+= static_routes.tgt
 tgt_files		+= test.tgt
 tgt_files		+= test_fea_ifmgr_mirror.tgt
 tgt_files		+= test_finder_events.tgt
@@ -67,6 +68,7 @@ noinst_LIBRARIES	+= librip4base.a
 noinst_LIBRARIES	+= librip6base.a
 noinst_LIBRARIES	+= librtrmgrbase.a
 noinst_LIBRARIES	+= libsocketserverbase.a
+noinst_LIBRARIES	+= libstaticroutesbase.a
 noinst_LIBRARIES	+= libtestbase.a
 noinst_LIBRARIES	+= libtestfeaifmgrmirrorbase.a
 noinst_LIBRARIES	+= libtestfindereventsbase.a
@@ -218,6 +220,12 @@ $(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/socket4.xif
+
+# StaticRoutes
+libstaticroutesbase_a_SOURCES = static_routes_base.hh static_routes_base.cc
+$(srcdir)/static_routes_base.hh $(srcdir)/static_routes_base.cc:	\
+		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/static_routes.xif
 
 # TEST FEA IFMGR MIRROR
 libtestfeaifmgrmirrorbase_a_SOURCES  = test_fea_ifmgr_mirror_base.hh

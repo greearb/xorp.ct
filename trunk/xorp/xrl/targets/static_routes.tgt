@@ -1,0 +1,7 @@
+/* $XORP: xorp/xrl/targets/pim.tgt,v 1.3 2003/03/29 19:03:14 pavlin Exp $ */
+
+#include "common.xif"
+#include "static_routes.xif"
+
+target static_routes implements	common/0.1,				\
+				static_routes/0.1
