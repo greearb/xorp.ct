@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_route.hh,v 1.1 2003/01/30 19:21:10 mjh Exp $
+// $XORP: xorp/policy/policy_route.hh,v 1.2 2003/02/13 00:51:03 mjh Exp $
 
-#ifndef __POLICY_ROUTE_HH__
-#define __POLICY_ROUTE_HH__
+#ifndef __POLICY_POLICY_ROUTE_HH__
+#define __POLICY_POLICY_ROUTE_HH__
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipnet.hh"
@@ -76,4 +76,4 @@ private:
     set <uint32_t> _communities;
 };
 
-#endif // __POLICY_ROUTE_HH__
+#endif // __POLICY_POLICY_ROUTE_HH__
