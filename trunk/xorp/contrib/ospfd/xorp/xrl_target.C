@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospfd/xorp/xrl_target.C,v 1.12 2002/12/09 18:29:24 hodson Exp $"
+#ident "$XORP: xorp/ospfd/xorp/xrl_target.C,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $"
 
 #include <time.h>
 #include <vector>
@@ -129,7 +129,7 @@ XrlOspfTarget::common_0_1_get_target_name(
 					  // Output values, 
 					  string& name)
 {
-    name = _router->name();
+    name = XrlOspfTargetBase::name();
     return XrlCmdError::OKAY();
 }
 

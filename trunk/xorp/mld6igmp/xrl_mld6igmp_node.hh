@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.2 2003/01/13 20:40:22 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.3 2003/01/23 11:14:24 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -856,7 +856,7 @@ protected:
     
 private:
     const string& my_xrl_target_name() {
-	return XrlMld6igmpTargetBase::_router->name();
+	return XrlMld6igmpTargetBase::name();
     }
     
     int family() const { return (Mld6igmpNode::family()); }

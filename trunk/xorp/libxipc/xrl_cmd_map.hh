@@ -38,7 +38,7 @@ class XrlCmdMap {
 public:
     XrlCmdMap(const string& name = "anonymous") : _name(name) {}
 
-    const string& name() { return _name; }
+    const string& name() const { return _name; }
 
     inline bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.4 2003/01/13 20:40:23 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.5 2003/01/23 11:14:25 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -1524,7 +1524,7 @@ protected:
 
 private:
     const string& my_xrl_target_name() {
-	return XrlPimTargetBase::_router->name();
+	return XrlPimTargetBase::name();
     }
     
     int family() const { return (PimNode::family()); }

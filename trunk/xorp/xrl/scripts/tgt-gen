@@ -108,7 +108,7 @@ def target_declare_handlers(methods):
 def target_handler_hooks(cls, name, methods):
     s = "    void add_handlers()\n    {\n"
     for m in methods:
-        s += "\tif (_router->add_handler(\"%s\", " % m.name()
+        s += "\tif (_cmds->add_handler(\"%s\", " % m.name()
         s += "\n%scallback(this, &%s::handle_%s)) == false) {\n" % \
              (xorp_indent(3), cls, cpp_name(m.name()))
         s += "\t    XLOG_ERROR(\"Failed to xrl handler finder://%s/%s\");\n\t}\n" % \
@@ -117,7 +117,7 @@ def target_handler_hooks(cls, name, methods):
 
     s += "    void remove_handlers()\n    {\n"
     for m in methods:
-        s += "\t_router->remove_handler(\"%s\");\n" % m.name()
+        s += "\t_cmds->remove_handler(\"%s\");\n" % m.name()
     s += "    }\n"
     
     return s;
@@ -205,7 +205,7 @@ def prepare_target_hh(modulename, hh_file):
 #define XORP_LIBRARY_NAME "%s"
 
 #include "libxorp/xlog.h"
-#include "libxipc/xrl_router.hh"
+#include "libxipc/xrl_cmd_map.hh"
 """ % (protect(hh_file), protect(hh_file), modulename)
     return s
 
@@ -213,11 +213,13 @@ def output_target_hh(cls, tgt_name, methods):
     s = """
 class %s {
 protected:
-    XrlCmdMap* _router;
+    XrlCmdMap* _cmds;
     
 public:
-    %s(XrlCmdMap* r) : _router(r) { add_handlers(); }
+    %s(XrlCmdMap* cmds) : _cmds(cmds) { add_handlers(); }
     virtual ~%s() { remove_handlers(); }
+
+    inline const string& name() const { return _cmds->name(); }
 
 protected:
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.18 2002/12/10 06:56:09 mjh Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $"
 
 #include "version.h"
 #include "urib_module.h"
@@ -24,7 +24,7 @@
 XrlCmdError
 XrlRibTarget::common_0_1_get_target_name(string &name)
 {
-    name = _router->name();
+    name = XrlRibTargetBase::name();
     return XrlCmdError::OKAY();
 }
 

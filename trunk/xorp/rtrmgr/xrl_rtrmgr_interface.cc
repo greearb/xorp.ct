@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.31 2002/12/09 18:29:40 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
 
 #include <sys/stat.h>
 #include "rtrmgr_module.h"
@@ -48,7 +48,7 @@ XrlRtrmgrInterface::~XrlRtrmgrInterface() {
 XrlCmdError
 XrlRtrmgrInterface::common_0_1_get_target_name(// Output values,
 					       string& name) {
-    name = _router->name();
+    name = XrlRtrmgrTargetBase::name();
     return XrlCmdError::OKAY();
 }
 

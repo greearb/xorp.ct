@@ -5,45 +5,22 @@ interface finder/0.1 {
 	   * must support the finder_client interface in order to be
 	   * able to process messages from the finder.
 	   */
-	  register_xrl_target ? target_name:txt				      \
-			      & callback_pf:txt				      \
-			      & callback_pf_addr:txt			      \
-			      -> target_cookie:txt
+	  register_finder_client ? target_name:txt			      \
+	  			  -> instance_id:txt
 
-	  unregister_xrl_target ? target_cookie:txt			    
+	  unregister_finder_client
 
 	  /** 
 	   * Add resolved Xrl into system, fails if xrl is already
 	   * registered. 
 	   */
-	  add_xrl ? target_cookie:txt & xrl:txt & protocol_name:txt	      \
-		  & protocol_args:txt -> resolved_xrl_method_name:txt
-		   
+	  add_xrl ? xrl:txt			      			      \
+		  & protocol_name:txt					      \
+		  & protocol_args:txt					      \
+		  -> resolved_xrl_method_name:txt
 
 	  /** Remove xrl */
-	  remove_xrl ? target_cookie:txt & xrl:txt
-
-	  /**
-	   * Forcibly add xrl.  The Xrl will remain in the cache
-	   * indefinitely and is only removable with forcibly_remove_xrl 
-	   */ 
-	  add_xrl_override ? target_cookie:txt & xrl:txt & protocol_name:txt  \
-		  & protocol_args:txt -> resolved_xrl_method_name:txt
-
-	  /** Forcibly remove_xrl */
-	  remove_xrl_override ? target_cookie:txt & xrl:txt
-
-	  /** Resolve xrl */
-	  resolve_xrl ? target_cookie:txt & xrl:txt			      \
-		      -> resolved_xrl:txt
-
-	  /** Get information on Xrl */
-	  get_xrl_info ? target_cookie:txt				      \
-		       & xrl:txt					      \
-		       -> resolved_xrl:txt				      \
-		        & registered_by:txt				      \
-		        & when:txt					      \
-
+	  remove_xrl ? xrl:txt
 
 	  /** Get list of registered Xrl targets */
 	  get_xrl_targets -> target_names:list

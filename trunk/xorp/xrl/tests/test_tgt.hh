@@ -12,9 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/xrl/tests/test_tgt.hh,v 1.5 2002/12/09 18:29:41 hodson Exp $
+// $XORP: xorp/xrl/tests/test_tgt.hh,v 1.1.1.1 2002/12/11 23:56:19 hodson Exp $
 
 #include <string>
+
+#include "libxipc/xrl_router.hh"
 #include "xrl/targets/test_base.hh"
 
 class XrlTestTarget: public XrlTestTargetBase {

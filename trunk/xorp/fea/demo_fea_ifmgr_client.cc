@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $"
+#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.2 2002/12/14 23:42:50 hodson Exp $"
 
 //
 // This program is a simple example of what is required to be an interface
@@ -57,7 +57,7 @@ public:
 
     XrlCmdError common_0_1_get_target_name(string&	name)
     {
-	name = _router->name();
+	name = XrlDemoFeaIfmgrClientTargetBase::name();
 	return XrlCmdError::OKAY();
     };
 
@@ -126,10 +126,10 @@ public:
 
     void register_with(const string& who)
     {
-	XrlRouter* rtr = static_cast<XrlRouter*>(_router);
+	XrlRouter* rtr = static_cast<XrlRouter*>(_cmds);
 	XrlIfmgrV0p1Client ifmgr_client(rtr);
 	ifmgr_client.send_register_client(
-	    who.c_str(), _router->name(),
+	    who.c_str(), _cmds->name(),
 	    callback(this,
 		     &DemoFeaIfmgrClientTarget::registration_result, who));
 	_os << "Sending Register to " << who << endl;
