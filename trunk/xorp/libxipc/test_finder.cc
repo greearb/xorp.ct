@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.6 2003/03/10 23:20:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.7 2003/04/23 20:50:48 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -136,7 +136,7 @@ test_xrls_locally_resolve(EventLoop& e, FinderClient& fc1, list<string>& xrls)
 class FinderPackage {
 public:
     FinderPackage(EventLoop& e, IPv4 host, uint16_t port) 
-	: _finder(), _finder_xrl_handler(_finder),
+	: _finder(e), _finder_xrl_handler(_finder),
 	  _finder_tcp4_source(e, _finder, _finder.commands(), IPv4::ANY(), port)
     {
 	add_permitted_host(host);
@@ -149,8 +149,7 @@ protected:
     FinderTcpListener	_finder_tcp4_source;
 };
 
-
-
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // test main

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.7 2003/03/08 20:18:21 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.8 2003/04/23 20:50:46 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -175,7 +175,7 @@ finder_main(int argc, char* const argv[])
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	EventLoop e;
-	Finder f;
+	Finder f(e);
 	FinderTcpListener s(e, f, f.commands(), bind_addr, bind_port);
 	FinderXrlTarget x(f);
 	

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_server.hh,v 1.6 2003/04/02 22:58:55 hodson Exp $
+// $XORP: xorp/libxipc/finder_server.hh,v 1.7 2003/04/23 20:50:48 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_SERVER_HH__
 #define __LIBXIPC_FINDER_SERVER_HH__
@@ -37,7 +37,7 @@ public:
     {
 	IPv4 	 bind_addr = IPv4(if_get_preferred());
 	uint16_t bind_port = FINDER_NG_TCP_DEFAULT_PORT;
-	_f = new Finder();
+	_f = new Finder(e);
 	_ft = new FinderTcpListener(e, *_f, _f->commands(),
 				      bind_addr, bind_port);
 	_fxt = new FinderXrlTarget(*_f);
@@ -55,9 +55,9 @@ public:
 	return _f ? _f->messengers() : 0;
     }
 protected:
-    Finder*		 _f;
+    Finder*	       _f;
     FinderTcpListener* _ft;
-    FinderXrlTarget*	 _fxt; 
+    FinderXrlTarget*   _fxt; 
 };
 
 #endif // __LIBXIPC_FINDER_SERVER_HH__

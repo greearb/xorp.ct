@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.2 2003/03/16 08:20:28 pavlin Exp $
+// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.3 2003/04/23 20:50:48 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
 #define __LIBXIPC_FINDER_NG_XRL_QUEUE_HH__
@@ -22,6 +22,15 @@
 
 class FinderXrlCommandBase;
 
+/**
+ * @short Xrl Queue for Finder.
+ *
+ * The FinderXrlCommandQueue holds and dispatches Xrls for the Finder.
+ * Commands are added with the @ref FinderXrlCommandQueue::enqueue
+ * method and are serially dispatched without any additional
+ * intervention.  During the completion of each Xrl in the queue triggers
+ * the sending of the next Xrl.
+ */
 class FinderXrlCommandQueue {
 public:
     typedef ref_ptr<FinderXrlCommandBase> Command;
@@ -47,17 +56,21 @@ private:
     bool		 _pending;
 };
 
+/**
+ * @short Base class for Xrls sent from Finder.
+ */
 class FinderXrlCommandBase {
 public:
     FinderXrlCommandBase(FinderXrlCommandQueue& q) : _queue(q) {}
     virtual ~FinderXrlCommandBase() {}
 
-    inline FinderXrlCommandQueue& queue() { return _queue; }
-    inline FinderMessengerBase& messenger() { return _queue.messenger(); }
+    inline FinderXrlCommandQueue& queue()	{ return _queue; }
+    inline FinderMessengerBase& messenger()	{ return _queue.messenger(); }
 
     virtual bool dispatch() = 0;
 
-    void dispatch_cb(const XrlError& e) {
+    void dispatch_cb(const XrlError& e)
+    {
 	if (e != XrlCmdError::OKAY())
 	    XLOG_ERROR("Sent xrl got response %s\n", e.str().c_str());
 	queue().crank();
@@ -69,10 +82,13 @@ protected:
 
 #include "finder_client_xif.hh"
 
+/**
+ * @short Send "hello" Xrl to Client.
+ */
 class FinderSendHelloToClient : public FinderXrlCommandBase {
 public:
     FinderSendHelloToClient(FinderXrlCommandQueue& q,
-			      const string&	       tgtname)
+			    const string&	   tgtname)
 	: FinderXrlCommandBase(q), _tgtname(tgtname)
     {
     }
@@ -89,9 +105,14 @@ protected:
     string _tgtname;
 };
 
+/**
+ * @short Send "remove xrl" to client.
+ */
 class FinderSendRemoveXrl : public FinderXrlCommandBase {
 public:
-    FinderSendRemoveXrl(FinderXrlCommandQueue& q, const string& tgtname, const string& xrl)
+    FinderSendRemoveXrl(FinderXrlCommandQueue& q,
+			const string&	       tgtname,
+			const string&	       xrl)
 	: FinderXrlCommandBase(q), _tgtname(tgtname), _xrl(xrl)
     {
     }
@@ -114,9 +135,13 @@ protected:
     string _xrl;
 };
 
+/**
+ * @short Send "remove xrls for target" to client.
+ */
 class FinderSendRemoveXrls : public FinderXrlCommandBase {
 public:
-    FinderSendRemoveXrls(FinderXrlCommandQueue& q, const string& tgtname)
+    FinderSendRemoveXrls(FinderXrlCommandQueue& q,
+			 const string&		tgtname)
 	: FinderXrlCommandBase(q), _tgtname(tgtname)
     {
     }

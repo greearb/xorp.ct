@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.6 2003/03/07 00:19:44 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.7 2003/04/23 20:50:45 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -38,9 +38,9 @@ public:
     typedef map<string, Resolveables> ResolveMap;
 public:
     FinderTarget(const string& name,
-		   const string& classname,
-		   const string& cookie,
-		   FinderMessengerBase* fm)
+		 const string& classname,
+		 const string& cookie,
+		 FinderMessengerBase* fm)
 	: _name(name), _classname(classname), _cookie(cookie),
 	  _enabled(false), _messenger(fm)
     {}
@@ -52,11 +52,18 @@ public:
     inline const string& cookie() const { return _cookie; }
 
     inline bool enabled() const { return _enabled; }
+
     inline void set_enabled(bool en) { _enabled = en; }
     
-    inline const FinderMessengerBase* messenger() const { return _messenger; }
+    inline const FinderMessengerBase* messenger() const
+    {
+	return _messenger;
+    }
 
-    inline const ResolveMap& resolve_map() const { return _resolutions; }
+    inline const ResolveMap& resolve_map() const
+    {
+	return _resolutions;
+    }
 
     bool add_resolution(const string& key, const string& value)
     {
@@ -77,7 +84,8 @@ public:
     }
 
     const Resolveables*
-    resolveables(const string& key) const {
+    resolveables(const string& key) const
+    {
 	ResolveMap::const_iterator i = _resolutions.find(key);
 	if (_resolutions.end() == i)
 	    return false;
@@ -98,8 +106,9 @@ protected:
 // Finder
 //
 
-Finder::Finder() : _cmds("finder"), _active_messenger(0)
-{}
+Finder::Finder(EventLoop& e) : _e(e), _cmds("finder"), _active_messenger(0)
+{
+}
 
 Finder::~Finder()
 {
@@ -198,8 +207,8 @@ Finder::commands()
 
 bool
 Finder::add_target(const string& tgt,
-		     const string& cls,
-		     const string& cookie)
+		   const string& cls,
+		   const string& cookie)
 {
     debug_msg("add_target %s / %s / %s\n", tgt.c_str(), cls.c_str(),
 	      cookie.c_str());
@@ -306,8 +315,8 @@ Finder::target_enabled(const string& tgt, bool& en) const
 
 bool
 Finder::add_resolution(const string& tgt,
-			 const string& key,
-			 const string& value)
+		       const string& key,
+		       const string& value)
 {
     TargetTable::iterator i = _targets.find(tgt);
 
@@ -327,7 +336,7 @@ Finder::add_resolution(const string& tgt,
 
 bool
 Finder::remove_resolutions(const string& tgt,
-			     const string& key)
+			   const string& key)
 {
     TargetTable::iterator i = _targets.find(tgt);
 
@@ -397,7 +406,7 @@ Finder::fill_target_list(list<string>& tgt_list) const
 
 bool
 Finder::fill_targets_xrl_list(const string& target,
-				list<string>& xrl_list) const
+			      list<string>& xrl_list) const
 {
     TargetTable::const_iterator ci = _targets.find(target);
     if (_targets.end() == ci) {

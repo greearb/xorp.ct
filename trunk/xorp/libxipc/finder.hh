@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder.hh,v 1.6 2003/03/07 19:49:56 hodson Exp $
+// $XORP: xorp/libxipc/finder.hh,v 1.7 2003/04/23 20:50:45 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_HH__
 #define __LIBXIPC_FINDER_NG_HH__
@@ -36,7 +36,7 @@ public:
     typedef list<string> Resolveables;
     
 public:
-    Finder();
+    Finder(EventLoop& e);
     virtual ~Finder();
 
 protected:
@@ -83,11 +83,12 @@ public:
 protected:
     void announce_departure(const string& target);
     void announce_departure(const string& target, const string& key);
-
+    
     Finder(const Finder&);			// Not implemented
     Finder& operator=(const Finder&);	// Not implemented
     
 protected:
+    EventLoop&		 _e;
     XrlCmdMap		 _cmds;
     FinderMessengerBase* _active_messenger;
     FinderMessengerList	 _messengers;

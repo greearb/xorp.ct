@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.10 2003/04/22 23:27:18 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.11 2003/04/23 20:50:48 hodson Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -215,13 +215,12 @@ FinderTcpMessenger::error_event()
 // FinderTcpListener methods
 //
 
-FinderTcpListener::FinderTcpListener(
-				 EventLoop&		 e,
-				 FinderMessengerManager& mm,
-				 XrlCmdMap&		 cmds,
-				 IPv4			 interface,
-				 uint16_t		 port,
-				 bool			 en)
+FinderTcpListener::FinderTcpListener(EventLoop&		     e,
+				     FinderMessengerManager& mm,
+				     XrlCmdMap&		     cmds,
+				     IPv4		     interface,
+				     uint16_t		     port,
+				     bool		     en)
     throw (InvalidPort)
     : FinderTcpListenerBase(e, interface, port, en), _mm(mm), _cmds(cmds)
 {
@@ -248,11 +247,11 @@ FinderTcpListener::connection_event(int fd)
 // FinderTcpConnector methods
 //
 
-FinderTcpConnector::FinderTcpConnector(EventLoop& e,
-					   FinderMessengerManager& mm,
-					   XrlCmdMap& cmds,
-					   IPv4 host,
-					   uint16_t port)
+FinderTcpConnector::FinderTcpConnector(EventLoop&		e,
+				       FinderMessengerManager&	mm,
+				       XrlCmdMap&		cmds,
+				       IPv4			host,
+				       uint16_t 		port)
     : _e(e), _mm(mm), _cmds(cmds), _host(host), _port(port)
 {}
 
