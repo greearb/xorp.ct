@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.9 2003/07/03 06:59:38 pavlin Exp $
+// $XORP: xorp/rib/route.hh,v 1.10 2004/02/11 08:48:47 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -186,6 +186,21 @@ public:
      * @return the prefix length (in bits) of the route entry's subnet address.
      */
     inline size_t prefix_len() const { return _net.prefix_len(); }
+
+    /**
+     * Get the route entry's next-hop router address.
+     *
+     * @return the route entry's next-hop router address. If there is no
+     * next-hop router, then the return value is IPv4#ZERO() or IPv6#ZERO().
+     */
+    inline const A& nexthop_addr() const {
+	IPNextHop<A>* nh = reinterpret_cast<IPNextHop<A>* >(nexthop());
+	if (nh != NULL)
+	    return nh->addr();
+	else {
+	    return A::ZERO();
+	}
+    }
 
     /**
      * Get the route entry as a string for debugging purposes.
