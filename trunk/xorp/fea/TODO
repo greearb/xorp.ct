@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.28 2005/01/28 03:34:17 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.29 2005/03/24 02:19:26 pavlin Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -64,17 +64,6 @@
 ==============================================================================
 ==== MFEA-specific TODO (mostly copied-in from the old stand-alone MFEA) =====
 
-* Try to replicate the following error message during shutdown:
-[ 2004/06/07 09:38:21  ERROR xorp_fea:20735 MFEA +1601 mfea_mrouter.cc get_sg_count ] ioctl(SIOCGETSGCNT, (18.18.0.1 224.0.1.1)) failed: Bad file descriptor
-
-* During shutdown, the following code in MfeaNode::final_stop()
-  may actually return XORP_ERROR:
-
-    if (! (is_up() || is_pending_up() || is_pending_down()))
-        return (XORP_ERROR);
-  However, in case of PIM the above check is OK.
-  Investigate the problem and fix it.
-
 * The IPv4 raw packet input in case of OpenBSD has changed between versions.
   E.g., if (defined(__OpenBSD__) && (OpenBSD < 200311))
   then the processing should be same as FreeBSD and NetBSD.
@@ -106,8 +95,6 @@
 
 * If a protocol deletes itself from the MFEA, make sure that all
   the groups it has joined will be left.
-
-* Replace all assert() with XORP_ASSERT() (inside MFEA, CLI, MLD6IGMP, PIM)
 
 * Fix all messages like the one below to print a more explicit information
   where the error happened. Apply same for CLI, MLD6IGMP, PIM
