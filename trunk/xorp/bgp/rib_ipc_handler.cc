@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.22 2003/09/04 03:42:39 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.23 2003/09/16 21:00:26 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -96,18 +96,18 @@ RibIpcHandler::register_ribname(const string& r)
     //name - "ebgp"
     //unicast - true
     //multicast - false
-//     rib.send_add_egp_table6(_ribname.c_str(),
-// 		"ebgp", true, false,
-// 		callback(this, 
-    // 		         &RibIpcHandler::rib_command_done,"add_table"));
+    rib.send_add_egp_table6(_ribname.c_str(),
+		"ebgp", true, false,
+		callback(this, 
+ 		         &RibIpcHandler::rib_command_done,"add_table"));
     //ibgp - v6
     //name - "ibgp"
     //unicast - true
     //multicast - false
-//     rib.send_add_igp_table6(_ribname.c_str(),
-// 		  "ibgp", true, false,
-// 		  callback(this,
-//			   &RibIpcHandler::rib_command_done,"add_table"));
+    rib.send_add_igp_table6(_ribname.c_str(),
+		  "ibgp", true, false,
+		  callback(this,
+			   &RibIpcHandler::rib_command_done,"add_table"));
 
     return true;
 }
