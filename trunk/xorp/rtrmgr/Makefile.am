@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.22 2003/11/19 00:28:07 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.23 2003/11/20 06:05:04 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -41,13 +41,12 @@ xorp_rtrmgr_SOURCES	+= y.tplt_tab.h
 xorp_rtrmgr_SOURCES	+= command_tree.hh
 xorp_rtrmgr_SOURCES	+= conf_tree.hh
 xorp_rtrmgr_SOURCES	+= conf_tree_node.hh
-xorp_rtrmgr_SOURCES	+= main_rtrmgr.hh
 xorp_rtrmgr_SOURCES	+= master_conf_tree.hh
 xorp_rtrmgr_SOURCES	+= module_commands.hh
 xorp_rtrmgr_SOURCES	+= module_manager.hh
-xorp_rtrmgr_SOURCES	+= parse_error.hh
 xorp_rtrmgr_SOURCES	+= path_segment.hh
 xorp_rtrmgr_SOURCES	+= randomness.hh
+xorp_rtrmgr_SOURCES	+= rtrmgr_error.hh
 xorp_rtrmgr_SOURCES	+= task.hh
 xorp_rtrmgr_SOURCES	+= template_commands.hh
 xorp_rtrmgr_SOURCES	+= template_tree.hh
@@ -101,9 +100,9 @@ xorpsh_SOURCES	+= conf_tree_node.hh
 xorpsh_SOURCES	+= module_command.hh
 xorpsh_SOURCES	+= module_manager.hh
 xorpsh_SOURCES	+= op_commands.hh
-xorpsh_SOURCES	+= parse_error.hh
 xorpsh_SOURCES	+= path_segment.hh
 xorpsh_SOURCES	+= popen.hh
+xorpsh_SOURCES	+= rtrmgr_error.hh
 xorpsh_SOURCES	+= slave_conf_tree.hh
 xorpsh_SOURCES	+= slave_conf_tree_node.hh
 xorpsh_SOURCES	+= slave_module_manager.hh
@@ -166,11 +165,10 @@ test_templates_SOURCES	+= y.tplt_tab.h
 test_templates_SOURCES	+= command_tree.hh
 test_templates_SOURCES	+= conf_tree.hh
 test_templates_SOURCES	+= conf_tree_node.hh
-test_templates_SOURCES	+= main_rtrmgr.hh
 test_templates_SOURCES	+= module_commands.hh
 test_templates_SOURCES	+= module_manager.hh
-test_templates_SOURCES	+= parse_error.hh
 test_templates_SOURCES	+= path_segment.hh
+test_templates_SOURCES	+= rtrmgr_error.hh
 test_templates_SOURCES	+= task.hh
 test_templates_SOURCES	+= template_commands.hh
 test_templates_SOURCES	+= template_tree.hh
@@ -213,12 +211,11 @@ test_sample_config_SOURCES	+= y.tplt_tab.h
 test_sample_config_SOURCES	+= command_tree.hh
 test_sample_config_SOURCES	+= conf_tree.hh
 test_sample_config_SOURCES	+= conf_tree_node.hh
-test_sample_config_SOURCES	+= main_rtrmgr.hh
 test_sample_config_SOURCES	+= master_conf_tree.hh
 test_sample_config_SOURCES	+= module_commands.hh
 test_sample_config_SOURCES	+= module_manager.hh
-test_sample_config_SOURCES	+= parse_error.hh
 test_sample_config_SOURCES	+= path_segment.hh
+test_sample_config_SOURCES	+= rtrmgr_error.hh
 test_sample_config_SOURCES	+= task.hh
 test_sample_config_SOURCES	+= template_commands.hh
 test_sample_config_SOURCES	+= template_tree.hh
@@ -262,8 +259,8 @@ test_module_manager_SOURCES	+= conf_tree.hh
 test_module_manager_SOURCES	+= conf_tree_node.hh
 test_module_manager_SOURCES	+= module_commands.hh
 test_module_manager_SOURCES	+= module_manager.hh
-test_module_manager_SOURCES	+= parse_error.hh
 test_module_manager_SOURCES	+= path_segment.hh
+test_module_manager_SOURCES	+= rtrmgr_error.hh
 test_module_manager_SOURCES	+= task.hh
 test_module_manager_SOURCES	+= template_commands.hh
 test_module_manager_SOURCES	+= template_tree.hh

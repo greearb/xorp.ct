@@ -114,7 +114,7 @@ LDADD = $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(
 #
 # xorp_rtrmgr
 #
-xorp_rtrmgr_SOURCES = rtrmgr_module.h version.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh main_rtrmgr.hh master_conf_tree.hh module_commands.hh module_manager.hh parse_error.hh path_segment.hh randomness.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh userdb.hh util.hh xorp_client.hh xrl_rtrmgr_interface.hh xrldb.hh conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc main_rtrmgr.cc master_conf_tree.cc module_command.cc module_manager.cc randomness.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_xrl.cc userdb.cc util.cc xorp_client.cc xrl_rtrmgr_interface.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
+xorp_rtrmgr_SOURCES = rtrmgr_module.h version.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh master_conf_tree.hh module_commands.hh module_manager.hh path_segment.hh randomness.hh rtrmgr_error.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh userdb.hh util.hh xorp_client.hh xrl_rtrmgr_interface.hh xrldb.hh conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc main_rtrmgr.cc master_conf_tree.cc module_command.cc module_manager.cc randomness.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_xrl.cc userdb.cc util.cc xorp_client.cc xrl_rtrmgr_interface.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
 
 xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a $(LDADD)
 
@@ -124,28 +124,28 @@ xorp_rtrmgr_LDADD = $(top_builddir)/xrl/targets/librtrmgrbase.a $(top_builddir)/
 # XXX: slave_module_manager shouldn't really be needed
 # XXX: task.cc shouldn't really be needed
 # XXX: unexpanded_xrl shouldn't really be needed
-xorpsh_SOURCES = rtrmgr_module.h version.h y.boot_tab.h y.opcmd_tab.h y.tplt_tab.h cli.hh command_tree.hh conf_tree.hh conf_tree_node.hh module_command.hh module_manager.hh op_commands.hh parse_error.hh path_segment.hh popen.hh slave_conf_tree.hh slave_conf_tree_node.hh slave_module_manager.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xorpsh_main.hh xrl_xorpsh_interface.hh xrldb.hh cli.cc command_tree.cc conf_tree.cc conf_tree_node.cc lex.boot.cc lex.opcmd.cc lex.tplt.cc module_command.cc op_commands.cc popen.cc slave_conf_tree.cc slave_conf_tree_node.cc slave_module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_xrl.cc util.cc xorp_client.cc xorpsh_main.cc xrl_xorpsh_interface.cc xrldb.cc y.boot_tab.cc y.opcmd_tab.cc y.tplt_tab.cc
+xorpsh_SOURCES = rtrmgr_module.h version.h y.boot_tab.h y.opcmd_tab.h y.tplt_tab.h cli.hh command_tree.hh conf_tree.hh conf_tree_node.hh module_command.hh module_manager.hh op_commands.hh path_segment.hh popen.hh rtrmgr_error.hh slave_conf_tree.hh slave_conf_tree_node.hh slave_module_manager.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xorpsh_main.hh xrl_xorpsh_interface.hh xrldb.hh cli.cc command_tree.cc conf_tree.cc conf_tree_node.cc lex.boot.cc lex.opcmd.cc lex.tplt.cc module_command.cc op_commands.cc popen.cc slave_conf_tree.cc slave_conf_tree_node.cc slave_module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc unexpanded_xrl.cc util.cc xorp_client.cc xorpsh_main.cc xrl_xorpsh_interface.cc xrldb.cc y.boot_tab.cc y.opcmd_tab.cc y.tplt_tab.cc
 
 xorpsh_LDADD = $(top_builddir)/cli/libcli.a $(top_builddir)/libproto/libproto.a $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/librtrmgrxif.a $(top_builddir)/xrl/targets/libxorpshbase.a $(LDADD)
 
 #
 # test_templates
 #
-test_templates_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh main_rtrmgr.hh module_commands.hh module_manager.hh parse_error.hh path_segment.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh userdb.hh util.hh xorp_client.hh xrl_rtrmgr_interface.hh xrldb.hh command_tree.cc conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc module_command.cc module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc test_templates.cc unexpanded_xrl.cc util.cc xorp_client.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
+test_templates_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh module_commands.hh module_manager.hh path_segment.hh rtrmgr_error.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh userdb.hh util.hh xorp_client.hh xrl_rtrmgr_interface.hh xrldb.hh command_tree.cc conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc module_command.cc module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc test_templates.cc unexpanded_xrl.cc util.cc xorp_client.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
 
 test_templates_LDADD = $(LDADD)
 
 #
 # test_sample_config
 #
-test_sample_config_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh main_rtrmgr.hh master_conf_tree.hh module_commands.hh module_manager.hh parse_error.hh path_segment.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xrldb.hh command_tree.cc conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc master_conf_tree.cc module_command.cc module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc test_sample_config.cc unexpanded_xrl.cc util.cc xorp_client.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
+test_sample_config_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh master_conf_tree.hh module_commands.hh module_manager.hh path_segment.hh rtrmgr_error.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xrldb.hh command_tree.cc conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc master_conf_tree.cc module_command.cc module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc test_sample_config.cc unexpanded_xrl.cc util.cc xorp_client.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
 
 test_sample_config_LDADD = $(LDADD)
 
 #
 # test_module_manager
 #
-test_module_manager_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh module_commands.hh module_manager.hh parse_error.hh path_segment.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xrldb.hh conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc module_command.cc module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc test_module_manager.cc unexpanded_xrl.cc util.cc xorp_client.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
+test_module_manager_SOURCES = rtrmgr_module.h y.boot_tab.h y.tplt_tab.h command_tree.hh conf_tree.hh conf_tree_node.hh module_commands.hh module_manager.hh path_segment.hh rtrmgr_error.hh task.hh template_commands.hh template_tree.hh template_tree_node.hh unexpanded_xrl.hh util.hh xorp_client.hh xrldb.hh conf_tree.cc conf_tree_node.cc lex.boot.cc lex.tplt.cc module_command.cc module_manager.cc task.cc template_commands.cc template_tree.cc template_tree_node.cc test_module_manager.cc unexpanded_xrl.cc util.cc xorp_client.cc xrldb.cc y.boot_tab.cc y.tplt_tab.cc
 
 test_module_manager_LDADD = $(LDADD)
 

@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $
+// $XORP: xorp/rtrmgr/parse_error.hh,v 1.3 2003/09/30 18:24:03 hodson Exp $
 
-#ifndef __RTRMGR_MAIN_RTRMGR_HH__
-#define __RTRMGR_MAIN_RTRMGR_HH__
+#ifndef __RTRMGR_RTRMGR_ERROR_HH__
+#define __RTRMGR_RTRMGR_ERROR_HH__
 
 #include "libxorp/exceptions.hh"
+
 
 class InitError : public XorpReasonedException {
 public:
@@ -25,4 +26,11 @@ public:
 	: XorpReasonedException("InitError", file, line, init_why) {}
 };
 
-#endif // __RTRMGR_MAIN_RTRMGR_HH__
+class ParseError : public XorpReasonedException {
+public:
+    ParseError(const char* file, size_t line, const string& reason)
+	: XorpReasonedException("ParseError", file, line, reason)
+    {}
+};
+
+#endif // __RTRMGR_RTRMGR_ERROR_HH__
