@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.9 2003/05/23 23:35:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.10 2003/08/10 22:02:59 pavlin Exp $"
+
+#define DEBUG_LOGGING
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
@@ -53,7 +55,7 @@ XrlCmdError
 XrlInterfaceManager::get_vif_from_config(const IfTree&	it,
 					 const string&		ifname,
 					 const string&		vif,
-					 const IfTreeVif*&		fv) const
+					 const IfTreeVif*&	fv) const
 {
     IfTree::IfMap::const_iterator ii = it.get_if(ifname);
     if (ii == it.ifs().end()) {
