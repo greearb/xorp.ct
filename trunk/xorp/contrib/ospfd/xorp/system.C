@@ -380,7 +380,7 @@ void XorpOspfd::rtadd(InAddr net, InMask mask, MPath *mpp,
 				    /* multicast */ false,
 				    subnet, gateway,
 				    /* metric XXXX */255,
-				    XrlAtomList(), // no policy
+				    XrlAtomList(),	// XXX: no policy
 				    callback(this,
 					     &XorpOspfd::rib_add_delete_route_cb,
 					     "add"));
