@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.6 2003/09/09 02:02:03 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.7 2003/09/10 03:19:26 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -109,7 +109,7 @@ Trie::lookup(const IPv6Net& n) const
     */
     list<IPv6Net>::const_iterator ni;
     ni = mpreach->nlri_list().begin();
-    for(; ni != update->nlri_list().end(); ni++)
+    for(; ni != mpreach->nlri_list().end(); ni++)
 	if(*ni == n)
 	    return update;
 
