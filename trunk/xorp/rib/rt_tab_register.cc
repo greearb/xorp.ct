@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.21 2004/06/10 22:41:42 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.22 2004/07/24 01:01:52 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -376,8 +376,7 @@ RegisterTable<A>::delete_registration(const IPNet<A>& net,
     RouteRegister<A>* rr = iter.payload();
     debug_msg("found registration %p\n", rr);
     if (rr->delete_registrant(tmpmod) != XORP_OK) {
-	fprintf(stderr, "delete_registration failed: %s\n",
-		net.str().c_str());
+	XLOG_ERROR("delete_registration failed: %s\n", net.str().c_str());
 	return XORP_ERROR;
     }
     if (rr->size() > 0) {
