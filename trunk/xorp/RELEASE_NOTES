@@ -1,18 +1,37 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.60 2005/01/24 21:03:00 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.61 2005/03/10 01:08:15 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.1 (2005/??/??)
+Release 1.1-RC (2005/03/24)
 =========================
   ALL:
+    - Numerous improvements, bug fixes and cleanup.
+
+    - XORP now builds on amd64+OpenBSD-3.6-current.
+
+    - The --enable-advanced-mcast-api flag to "./configure" has been
+      replaced  with the --disable-advanced-multicast-api flag.
+
+    - Addition of support for code execution profiling.
+
+    - Currently "gmake" does not build the regression tests.
+      The command "gmake check" should be used to build and run the
+      regression tests.
+
+    - Addition of two new documents:
+      * "An Introduction to Writing a XORP Process"
+      * "XORP User Manual"
+
+  CONFIGURATION:
     - All "enabled: true/false" XORP configuration flags are now
       renamed to "disable: false/true".
 
-    - Change the syntax for configuring the IPv4/IPv6 forwarding:
+    - The syntax for configuring the IPv4/IPv6 forwarding has changed:
+
       OLD:
       fea {
           enable-unicast-forwarding4: true
@@ -30,71 +49,179 @@ Release 1.1 (2005/??/??)
           }
       }
 
+    - The syntax for configuring the AFI/SAFI combinations in BGP has
+      changed:
+
+      OLD:
+      bgp {
+          peer <peer_name> {
+              enable-ipv4-multicast
+              enable-ipv6-unicast
+              enable-ipv6-multicast
+          }
+      }
+
+      NEW:
+      bgp {
+          peer <peer_name> {
+              ipv4-unicast: true
+              ipv4-multicast: true
+              ipv6-unicast: true
+              ipv6-multicast: true
+          }
+      }
+      The new syntax allows IPv4 unicast to be disabled which was not
+      previously possible.
+
   LIBXORP:
     - Bug fix in ordering events scheduled at exactly the same time
       and expiring at exactly the same time.
 
+    - Various improvements to the eventloop implementation.
+
+    - Addition of a mechanism for buffered asynchronous reads and writes.
+
   LIBXIPC:
-    - 
+    - Addition of XRL pipelining support.
+
+    - The Finder client address can be defined by the following variable
+      in the environment: XORP_FINDER_CLIENT_ADDRESS. This re-enables
+      communicating with remote XORP processes.
+
+    - Various other improvements (including performance) and bug fixes.
 
   LIBFEACLIENT:
-    - 
+    - Few bug fixes.
 
   XRL:
-    - 
+    - No significant changes.
 
   RTRMGR:
     - Addition of a new rtrmgr template keyword:
-      %deprecated: "Reason"
+      %deprecated: "Reason".
       This keyword can be used to deprecate old configuration statements.
+
+    - Addition of a new rtrmgr keyword: %update.
+      It is similar to %activate, and is called whenever the configuration
+      in the subtree has changed.
 
     - Modification to the rtrmgr template semantics: the XRLs per template
       nodes are sent in the order those nodes are declared in the template
       files. Previously, the order was alphabetical (by the name of the
       template nodes).
 
-    - Various bug fixes
+    - Various other improvements and bug fixes.
 
   XORPSH:
-    - 
+    - Addition of a mechanism to track the status of the modules, and
+      to provide operational commands for only those modules that are
+      running.
+
+    - Various other improvements and bug fixes.
+
+  POLICY:
+    - Initial implementation of a policy manager. It is still being tested,
+      and should not be used.
 
   FEA/MFEA:
     - Implementation of Click FEA support.
 
+    - Addition of support for discard interfaces and discard routes.
+
+    - Addition of support for ACLs, though currently there is no mechanism
+      to configure them through the XORP configuration file.
+
+    - Initial support for raw sockets.
+
+    - Various bug fixes, improvements and cleanup.
+
   RIB:
-    - Bug fix when adding point-to-point network interfaces.
+    - Bug fix in adding point-to-point network interfaces.
 
     - Removal of the old mechanism (ExportTable) for propagating
       the routes to the FEA and all other interested parties.
 
-    - Various other bug fixes.
+    - Removal of hard-wired "static" table.
+
+    - Various other improvements and bug fixes.
 
   RIP:
-    - 
+    - MD5 authentication now works properly. Previously, it was generating
+      the wrong signature.
+
+    - Cisco compatibility bug fix.
 
   BGP:
-    - 
+    - Addition of support for creating IPv6 TCP connections.
+
+    - Few bug fixes in the Multi-protocol support.
+
+    - Major improvements to the flow control mechanism.
+
+    - Various improvements and bug fixes.
 
   STATIC_ROUTES:
     -  Addition of configuration support for interface-specific static
        routes.
 
+    - Improvements in handling stored routes if they are affected by
+      network interface information updates.
+
+    - Addition of support for tracking the state of the relevant
+      processes, and for graceful registering/deregistering with them.
+
+    - Addition of support for better checking of the XRL error codes.
+
+    - Few other improvements and bug fixes.
+
   MLD/IGMP:
-    - 
+    - Bug fix in updating the primary address of an interface.
+
+    - Addition of support for tracking the state of the relevant
+      processes, and for graceful registering/deregistering with them.
+
+    - Addition of support for better checking of the XRL error codes.
+
+    - Few other improvements and bug fixes.
 
   PIM-SM:
     - Bug fixes in handling the MRIB entries and MRIB-related state.
 
     - Bug fix in scheduling the internal PimMre tasks.
 
+    - Bug fix in updating the primary address of an interface.
+
+    - Bug fix in the computation of the checksum of PIM Register packages
+      received from a Cisco router that itself is not spec-compliant in the
+      checksum computation.
+
+    - Addition of support for tracking the state of the relevant
+      processes, and for graceful registering/deregistering with them.
+
+    - Addition of support for better checking of the XRL error codes.
+
+    - Various other bug fixes, improvements and cleanup.
+
   FIB2MRIB:
     - Bug fix in deleting the Fib2Mrib entries.
+
+    - Improvements in handling stored routes if they are affected by
+      network interface information updates.
+
+    - Addition of support for tracking the state of the relevant
+      processes, and for graceful registering/deregistering with them.
+
+    - Addition of support for better checking of the XRL error codes.
+
+    - Few other bug fixes and improvements.
 
   CLI:
     - Bug fix in <SPACE> auto-completion for sub-commands.
 
+    - Few other bug fixes and improvements.
+
   SNMP:
-    - 
+    - No significant changes.
 
 Release 1.0 (2004/07/08)
 =========================
