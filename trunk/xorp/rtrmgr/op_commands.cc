@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.30 2004/06/12 00:29:11 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.31 2004/06/12 01:34:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -133,7 +133,7 @@ OpInstance::append_data(AsyncFileOperator::Event e,
 	if (offset != _last_offset) {
 	    const char* p   = (const char*)buffer + _last_offset;
 	    size_t 	len = offset - _last_offset;
-	    debug_msg("len = %d\n", len);
+	    debug_msg("len = %u\n", static_cast<uint32_t>(len));
 	    if (!_error) {
 		_print_callback->dispatch(string(p, len));
 	    } else {
