@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers.cc,v 1.8 2004/04/02 00:27:57 mjh Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.9 2004/06/10 22:41:47 hodson Exp $"
 
 #include <set>
 
@@ -173,12 +173,15 @@ test_main()
 	return 1;
     }
 
+    e.timer_list().advance_time(); // XXX
+
     {
 	// Quick route dump test
 	TimeVal t1, t2;
 	e.current_time(t1);
 	vector<typename RouteDB<A>::ConstDBRouteEntry> l;
 	rdb.dump_routes(l);
+	e.timer_list().advance_time(); // XXX
 	e.current_time(t2);
 	t2 -= t1;
 	fprintf(stderr, "route db route dump took %d.%06d seconds\n",
@@ -190,6 +193,7 @@ test_main()
 	e.current_time(t1);
 	vector<const typename RouteEntryOrigin<A>::Route*> l;
 	peer->dump_routes(l);
+	e.timer_list().advance_time(); // XXX
 	e.current_time(t2);
 	t2 -= t1;
 	fprintf(stderr, "peer route dump took %d.%06d seconds\n",
@@ -201,6 +205,7 @@ test_main()
 	e.current_time(t1);
 	vector<typename RouteDB<A>::ConstDBRouteEntry> l;
 	rdb.dump_routes(l);
+	e.timer_list().advance_time(); // XXX
 	e.current_time(t2);
 	t2 -= t1;
 	fprintf(stderr, "route db route dump took %d.%06d seconds\n",
