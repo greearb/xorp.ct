@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.27 2004/11/29 01:59:44 bms Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.28 2004/12/10 14:18:23 bms Exp $
 ##
 
 ###############################################################################
@@ -50,6 +50,10 @@ libfeafibxif_la_SOURCES = fea_fib_xif.hh fea_fib_xif.cc
 # FEA FIB Client Interface
 noinst_LTLIBRARIES += libfeafibclientxif.la
 libfeafibclientxif_la_SOURCES = fea_fib_client_xif.hh fea_fib_client_xif.cc
+
+# FEA Packet ACL (formerly Firewall) Interface
+noinst_LTLIBRARIES += libpacketaclxif.la
+libpacketaclxif_la_SOURCES = packet_acl_xif.hh packet_acl_xif.cc
 
 # FEA Interface Manager Client Interface
 noinst_LTLIBRARIES += libfeaifmgrclientxif.la

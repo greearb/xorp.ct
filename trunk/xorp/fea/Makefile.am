@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.53 2004/12/08 04:59:34 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.54 2004/12/10 14:18:20 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -64,7 +64,7 @@ xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 ### Packet ACL front-end XRL libraries
-#xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libpacketaclbase.la
+xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libpacketaclbase.la
 ### socket server libraries and related
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
@@ -205,6 +205,11 @@ libfea_la_SOURCES	+= mfea_vif.hh
 libfea_la_SOURCES	+= netlink_socket.hh
 libfea_la_SOURCES	+= netlink_socket_utils.hh
 libfea_la_SOURCES	+= nexthop_port_mapper.hh
+libfea_la_SOURCES	+= pa_backend.hh
+libfea_la_SOURCES	+= pa_backend_dummy.hh
+libfea_la_SOURCES	+= pa_entry.hh
+libfea_la_SOURCES	+= pa_table.hh
+libfea_la_SOURCES	+= pa_transaction.hh
 libfea_la_SOURCES	+= profile_vars.hh
 libfea_la_SOURCES	+= rawsock4.hh
 libfea_la_SOURCES	+= rawsock6.hh
@@ -214,6 +219,7 @@ libfea_la_SOURCES	+= xrl_fti.hh
 libfea_la_SOURCES	+= xrl_ifmanager.hh
 libfea_la_SOURCES	+= xrl_ifupdate.hh
 libfea_la_SOURCES	+= xrl_mfea_node.hh
+libfea_la_SOURCES	+= xrl_packet_acl.hh
 libfea_la_SOURCES	+= xrl_rawsock4.hh
 libfea_la_SOURCES	+= xrl_rawsock6.hh
 libfea_la_SOURCES	+= xrl_socket_cmds.hh
@@ -292,12 +298,16 @@ libfea_la_SOURCES	+= mfea_vif.cc
 libfea_la_SOURCES	+= netlink_socket.cc
 libfea_la_SOURCES	+= netlink_socket_utils.cc
 libfea_la_SOURCES	+= nexthop_port_mapper.cc
+libfea_la_SOURCES	+= pa_backend_dummy.cc
+libfea_la_SOURCES	+= pa_entry.cc
+libfea_la_SOURCES	+= pa_table.cc
+libfea_la_SOURCES	+= pa_transaction.cc
 libfea_la_SOURCES	+= profile_vars.cc
 libfea_la_SOURCES	+= rawsock4.cc
 libfea_la_SOURCES	+= rawsock6.cc
 libfea_la_SOURCES	+= routing_socket.cc
 libfea_la_SOURCES	+= routing_socket_utils.cc
-#libfea_la_SOURCES	+= xrl_packet_acl.cc
+libfea_la_SOURCES	+= xrl_packet_acl.cc
 libfea_la_SOURCES	+= xrl_fti.cc
 libfea_la_SOURCES	+= xrl_ifmanager.cc
 libfea_la_SOURCES	+= xrl_ifupdate.cc
