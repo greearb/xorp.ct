@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_manager.hh,v 1.3 2003/11/04 23:38:04 hodson Exp $
+// $XORP: xorp/rip/port_manager.hh,v 1.4 2004/01/09 00:15:14 hodson Exp $
 
 #ifndef __RIP_PORT_MANAGER_HH__
 #define __RIP_PORT_MANAGER_HH__
@@ -63,7 +63,7 @@ public:
     /**
      * Get list of managed RIP Ports.
      */
-    inline const PortList& ports() const	{ return _ports; }
+    inline const PortList& const_ports() const	{ return _ports; }
 
     /**
      * Get EventLoop.
@@ -80,6 +80,11 @@ protected:
      * Get list of managed RIP Ports.
      */
     inline PortList& ports()			{ return _ports; }
+
+    /**
+     * Get list of managed RIP Ports.
+     */
+    inline const PortList& ports() const	{ return _ports; }
 
 protected:
     SystemType&	_system;
