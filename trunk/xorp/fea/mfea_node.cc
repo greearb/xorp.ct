@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.49 2005/03/19 00:31:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.50 2005/03/19 23:41:01 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -1378,7 +1378,7 @@ MfeaNode::delete_allow_kernel_signal_messages(const string& module_instance_name
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: If true, set the Router Alert IP option for the IP
+ * @is_router_alert: If true, set the Router Alert IP option for the IP
  * packet of the outgoung message.
  * @rcvbuf: The data buffer with the message to send.
  * @rcvlen: The data length in @rcvbuf.
@@ -1393,7 +1393,7 @@ MfeaNode::proto_recv(const string&	, // src_module_instance_name,
 		     xorp_module_id src_module_id,
 		     uint16_t vif_index,
 		     const IPvX& src, const IPvX& dst,
-		     int ip_ttl, int ip_tos, bool router_alert_bool,
+		     int ip_ttl, int ip_tos, bool is_router_alert,
 		     const uint8_t *rcvbuf, size_t rcvlen)
 {
     ProtoComm *proto_comm;
@@ -1411,7 +1411,7 @@ MfeaNode::proto_recv(const string&	, // src_module_instance_name,
 				       src, dst,
 				       ip_ttl,
 				       ip_tos,
-				       router_alert_bool,
+				       is_router_alert,
 				       rcvbuf,
 				       rcvlen) < 0) {
 	return (XORP_ERROR);
@@ -1425,7 +1425,7 @@ int
 MfeaNode::proto_comm_recv(xorp_module_id dst_module_id,
 			  uint16_t vif_index,
 			  const IPvX& src, const IPvX& dst,
-			  int ip_ttl, int ip_tos, bool router_alert_bool,
+			  int ip_ttl, int ip_tos, bool is_router_alert,
 			  const uint8_t *rcvbuf, size_t rcvlen)
 {
     XLOG_TRACE(false & is_log_trace(),	// XXX: unconditionally disabled
@@ -1433,7 +1433,7 @@ MfeaNode::proto_comm_recv(xorp_module_id dst_module_id,
 	       "vif_index = %d src = %s dst = %s ttl = %d tos = %#x "
 	       "router_alert = %d rcvbuf = %p rcvlen = %u",
 	       xorp_module_name(family(), dst_module_id), vif_index,
-	       cstring(src), cstring(dst), ip_ttl, ip_tos, router_alert_bool,
+	       cstring(src), cstring(dst), ip_ttl, ip_tos, is_router_alert,
 	       rcvbuf, XORP_UINT_CAST(rcvlen));
     
     //
@@ -1464,7 +1464,7 @@ MfeaNode::proto_comm_recv(xorp_module_id dst_module_id,
 		   src, dst,
 		   ip_ttl,
 		   ip_tos,
-		   router_alert_bool,
+		   is_router_alert,
 		   rcvbuf,
 		   rcvlen);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.43 2005/03/15 00:30:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.44 2005/03/19 23:55:04 pavlin Exp $"
 
 
 //
@@ -540,7 +540,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     int ret_value;
     size_t datalen;
     int ttl = MINTTL;
-    bool router_alert_bool = true;
+    bool is_router_alert = true;
 
     if (! (is_up() || is_pending_down()))
 	return (XORP_ERROR);
@@ -555,7 +555,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	case PIM_REGISTER_STOP:
 	case PIM_CAND_RP_ADV:
 	    ttl = IPDEFTTL;
-	    router_alert_bool = false;
+	    is_router_alert = false;
 	    break;
 	default:
 	    break;
@@ -678,7 +678,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     // Send the message
     //
     ret_value = pim_node().pim_send(vif_index(), src, dst, ttl, ip_tos,
-				    router_alert_bool, buffer);
+				    is_router_alert, buffer);
     
     //
     // Actions after the message is sent
@@ -757,7 +757,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: True if the received IP packet had the Router Alert
+ * @is_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
  * @buffer: The buffer with the received message.
  * 
@@ -770,7 +770,7 @@ PimVif::pim_recv(const IPvX& src,
 		 const IPvX& dst,
 		 int ip_ttl,
 		 int ip_tos,
-		 bool router_alert_bool,
+		 bool is_router_alert,
 		 buffer_t *buffer)
 {
     int ret_value = XORP_ERROR;
@@ -780,7 +780,7 @@ PimVif::pim_recv(const IPvX& src,
 	return (XORP_ERROR);
     }
     
-    ret_value = pim_process(src, dst, ip_ttl, ip_tos, router_alert_bool,
+    ret_value = pim_process(src, dst, ip_ttl, ip_tos, is_router_alert,
 			    buffer);
     
     return (ret_value);
@@ -794,7 +794,7 @@ PimVif::pim_recv(const IPvX& src,
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: True if the received IP packet had the Router Alert
+ * @is_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
  * @buffer: The buffer with the message.
  * 
@@ -806,7 +806,7 @@ int
 PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		    int ip_ttl,
 		    int ip_tos,
-		    bool router_alert_bool,
+		    bool is_router_alert,
 		    buffer_t *buffer)
 {
     uint8_t pim_vt;
@@ -918,11 +918,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     
     //
     // TODO: if we are running in secure mode, then check ip_ttl, ip_tos and
-    // @router_alert_bool (e.g. (ip_ttl == MINTTL) && (router_alert_bool))
+    // @is_router_alert (e.g. (ip_ttl == MINTTL) && (is_router_alert))
     //
     UNUSED(ip_ttl);
     UNUSED(ip_tos);
-    UNUSED(router_alert_bool);
+    UNUSED(is_router_alert);
 #if 0
     //
     // TTL (aka. Hop-limit in IPv6) and Router Alert option checks.

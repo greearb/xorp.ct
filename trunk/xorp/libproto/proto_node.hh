@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.27 2005/02/24 02:19:10 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.28 2005/02/27 21:32:54 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -248,7 +248,7 @@ public:
      * @param ip_tos the IP TOS (Type of Service) of the message. If it has
      * a negative value, it should be ignored.
      * 
-     * @param router_alert_bool if true, the Router Alert IP option for the IP
+     * @param is_router_alert if true, the Router Alert IP option for the IP
      * packet of the incoming message was set.
      * 
      * @param rcvbuf the data buffer with the received message.
@@ -264,7 +264,7 @@ public:
 			   const IPvX& dst,
 			   int ip_ttl,
 			   int ip_tos,
-			   bool router_alert_bool,
+			   bool is_router_alert,
 			   const uint8_t *rcvbuf,
 			   size_t rcvlen) = 0;
     
@@ -292,7 +292,7 @@ public:
      * @param ip_tos the IP TOS of the message. If it has a negative value,
      * the TOS will be set by the lower layers.
      * 
-     * @param router_alert_bool if true, set the Router Alert IP option for
+     * @param is_router_alert if true, set the Router Alert IP option for
      * the IP packet of the outgoung message.
      * 
      * @param sndbuf the data buffer with the outgoing message.
@@ -308,7 +308,7 @@ public:
 			   const IPvX& dst,
 			   int ip_ttl,
 			   int ip_tos,
-			   bool router_alert_bool,
+			   bool is_router_alert,
 			   const uint8_t *sndbuf,
 			   size_t sndlen) = 0;
     

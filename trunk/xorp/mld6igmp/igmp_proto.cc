@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.27 2005/02/01 02:01:09 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.28 2005/02/27 20:49:06 pavlin Exp $"
 
 
 //
@@ -64,7 +64,7 @@
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: True if the received IP packet had the Router Alert
+ * @is_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
  * @buffer: The buffer with the message.
  * 
@@ -76,7 +76,7 @@ int
 Mld6igmpVif::igmp_process(const IPvX& src, const IPvX& dst,
 			  int ip_ttl,
 			  int ip_tos,
-			  bool router_alert_bool,
+			  bool is_router_alert,
 			  buffer_t *buffer)
 {
     uint8_t message_type;
@@ -152,11 +152,11 @@ Mld6igmpVif::igmp_process(const IPvX& src, const IPvX& dst,
     
     //
     // TODO: if we are running in secure mode, then check ip_ttl, ip_tos and
-    // @router_alert_bool (e.g. (ip_ttl == MINTTL) && (router_alert_bool))
+    // @is_router_alert (e.g. (ip_ttl == MINTTL) && (is_router_alert))
     //
     UNUSED(ip_ttl);
     UNUSED(ip_tos);
-    UNUSED(router_alert_bool);
+    UNUSED(is_router_alert);
 #if 0
     //
     // TTL (aka. Hop-limit in IPv6) and Router Alert option check.

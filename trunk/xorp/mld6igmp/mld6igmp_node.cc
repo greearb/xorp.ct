@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.40 2005/03/15 00:32:39 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.41 2005/03/19 23:50:18 pavlin Exp $"
 
 
 //
@@ -914,7 +914,7 @@ Mld6igmpNode::vif_shutdown_completed(const string& vif_name)
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: If true, the Router Alert IP option for the IP
+ * @is_router_alert: If true, the Router Alert IP option for the IP
  * packet of the incoming message was set.
  * @rcvbuf: The data buffer with the received message.
  * @rcvlen: The data length in @rcvbuf.
@@ -928,7 +928,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
 			 xorp_module_id src_module_id,
 			 uint16_t vif_index,
 			 const IPvX& src, const IPvX& dst,
-			 int ip_ttl, int ip_tos, bool router_alert_bool,
+			 int ip_ttl, int ip_tos, bool is_router_alert,
 			 const uint8_t *rcvbuf, size_t rcvlen)
 {
     Mld6igmpVif *mld6igmp_vif = NULL;
@@ -937,7 +937,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
     debug_msg("Received message from %s to %s: "
 	      "ip_ttl = %d ip_tos = %#x router_alert = %d rcvlen = %u\n",
 	      cstring(src), cstring(dst),
-	      ip_ttl, ip_tos, router_alert_bool, XORP_UINT_CAST(rcvlen));
+	      ip_ttl, ip_tos, is_router_alert, XORP_UINT_CAST(rcvlen));
     
     //
     // Check whether the node is up.
@@ -958,7 +958,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
     
     // Process the data by the vif
     ret_value = mld6igmp_vif->mld6igmp_recv(src, dst, ip_ttl, ip_tos,
-					    router_alert_bool,
+					    is_router_alert,
 					    _buffer_recv);
     
     return (ret_value);
@@ -979,7 +979,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
  * the TTL will be set by the lower layers.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * the TOS will be set by the lower layers.
- * @router_alert_bool: If true, set the Router Alert IP option for the IP
+ * @is_router_alert: If true, set the Router Alert IP option for the IP
  * packet of the outgoung message.
  * @buffer: The #buffer_t data buffer with the message to send.
  * 
@@ -990,7 +990,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
 int
 Mld6igmpNode::mld6igmp_send(uint16_t vif_index,
 			    const IPvX& src, const IPvX& dst,
-			    int ip_ttl, int ip_tos, bool router_alert_bool,
+			    int ip_ttl, int ip_tos, bool is_router_alert,
 			    buffer_t *buffer)
 {
     if (! is_up())
@@ -1000,7 +1000,7 @@ Mld6igmpNode::mld6igmp_send(uint16_t vif_index,
     if (proto_send(xorp_module_name(family(), XORP_MODULE_MFEA),
 		   XORP_MODULE_MFEA,
 		   vif_index, src, dst,
-		   ip_ttl, ip_tos, router_alert_bool,
+		   ip_ttl, ip_tos, is_router_alert,
 		   BUFFER_DATA_HEAD(buffer),
 		   BUFFER_DATA_SIZE(buffer)) < 0) {
 	return (XORP_ERROR);

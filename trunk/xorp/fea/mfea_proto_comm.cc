@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.25 2005/03/18 21:58:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.26 2005/03/19 23:27:13 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -979,7 +979,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
     IPvX	dst(family());
     int		ip_ttl = -1;		// a.k.a. Hop-Limit in IPv6
     int		ip_tos = -1;
-    bool	router_alert_bool = false; // Router Alert option received
+    bool	is_router_alert = false; // Router Alert option received
     int		pif_index = 0;
     MfeaVif	*mfea_vif = NULL;
 
@@ -1203,7 +1203,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 		if (test_ip_options_len < option_len)
 		    break;
 		if ((option_value == IPOPT_RA) && (option_len == 4)) {
-		    router_alert_bool = true;
+		    is_router_alert = true;
 		    break;
 		}
 		test_ip_options_len -= option_len;
@@ -1284,7 +1284,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 			    if (currentlen == -1)
 				break;
 			    if (type == IP6OPT_ROUTER_ALERT) {
-				router_alert_bool = true;
+				is_router_alert = true;
 				break;
 			    }
 			}
@@ -1300,7 +1300,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 			uint8_t  *tptr = NULL;
 			while (inet6_option_next(cmsgp, &tptr) == 0) {
 			    if (*tptr == IP6OPT_ROUTER_ALERT) {
-				router_alert_bool = true;
+				is_router_alert = true;
 				break;
 			    }
 			}
@@ -1416,7 +1416,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
     if (mfea_node().proto_comm_recv(module_id(),
 				    mfea_vif->vif_index(),
 				    src, dst, ip_ttl, ip_tos,
-				    router_alert_bool,
+				    is_router_alert,
 				    _rcvbuf0 + ip_hdr_len, nbytes - ip_hdr_len)
 	!= XORP_OK) {
 	return;			// Error
@@ -1436,7 +1436,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
  * negative value, the TTL will be set here or by the lower layers.
  * @ip_tos: The TOS (a.k.a. Traffic Class in IPv6) of the packet. If it has a
  * negative value, the TOS will be set here or by the lower layers.
- * @router_alert_bool: If true, then the IP packet with the data should
+ * @is_router_alert: If true, then the IP packet with the data should
  * have the Router Alert option included.
  * @databuf: The data buffer.
  * @datalen: The length of the data in @databuf.
@@ -1448,7 +1448,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 int
 ProtoComm::proto_socket_write(uint16_t vif_index,
 			      const IPvX& src, const IPvX& dst,
-			      int ip_ttl, int ip_tos, bool router_alert_bool,
+			      int ip_ttl, int ip_tos, bool is_router_alert,
 			      const uint8_t *databuf, size_t datalen)
 {
     struct ip	*ip;
@@ -1473,14 +1473,14 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
     case AF_INET:
 	// Assign the TTL
 	if (ip_ttl < 0) {
-	    if (router_alert_bool)
+	    if (is_router_alert)
 		ip_ttl = MINTTL;
 	    else
 		ip_ttl = IPDEFTTL;
 	}
 	// Assign the TOS
 	if (ip_tos < 0) {
-	    if (router_alert_bool)
+	    if (is_router_alert)
 		ip_tos = IPTOS_PREC_INTERNETCONTROL;  // Internet Control
 	    else
 		ip_tos = 0;
@@ -1491,14 +1491,14 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
     {
 	// Assign the TTL
 	if (ip_ttl < 0) {
-	    if (router_alert_bool)
+	    if (is_router_alert)
 		ip_ttl = MINTTL;
 	    else
 		ip_ttl = IPDEFTTL;
 	}
 	// Assign the TOS
 	if (ip_tos < 0) {
-	    if (router_alert_bool) {
+	    if (is_router_alert) {
 		// TODO: XXX: IPTOS for IPv6 is bogus??
 		// ip_tos = IPTOS_PREC_INTERNETCONTROL;  // Internet Control
 		ip_tos = 0;
@@ -1524,7 +1524,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
     switch (family()) {
     case AF_INET:
 	ip = (struct ip *)_sndbuf0;
-	if (router_alert_bool) {
+	if (is_router_alert) {
 	    // Include the Router Alert option
 	    ip_option	= htonl((IPOPT_RA << 24) | (0x04 << 16));
 	    ip_option_p	= (uint32_t *)(ip + 1);
@@ -1598,7 +1598,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	// Space for IPV6_PKTINFO
 	ctllen = CMSG_SPACE(sizeof(struct in6_pktinfo));
 	
-	if (router_alert_bool) {
+	if (is_router_alert) {
 	    // Space for Router Alert option
 #ifdef HAVE_RFC2292BIS
 	    if ((hbhlen = inet6_opt_init(NULL, 0)) == -1)
@@ -1665,7 +1665,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	//
 	// Include the Router Alert option if needed
 	//
-	if (router_alert_bool) {
+	if (is_router_alert) {
 #ifdef HAVE_RFC2292BIS
 	    int currentlen;
 	    void *hbhbuf, *optp = NULL;

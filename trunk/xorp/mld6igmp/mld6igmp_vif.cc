@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.33 2005/03/15 00:32:39 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.34 2005/03/19 23:45:03 pavlin Exp $"
 
 
 //
@@ -478,7 +478,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @router_alert_bool: True if the received IP packet had the Router Alert
+ * @is_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
  * @buffer: The buffer with the received message.
  * 
@@ -491,7 +491,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 			   const IPvX& dst,
 			   int ip_ttl,
 			   int ip_tos,
-			   bool router_alert_bool,
+			   bool is_router_alert,
 			   buffer_t *buffer)
 {
     int ret_value = XORP_ERROR;
@@ -502,13 +502,13 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
     do {
 	if (proto_is_igmp()) {
 	    ret_value = igmp_process(src, dst, ip_ttl, ip_tos,
-				     router_alert_bool, buffer);
+				     is_router_alert, buffer);
 	    break;
 	}
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
 	if (proto_is_mld6()) {
 	    ret_value = mld6_process(src, dst, ip_ttl, ip_tos,
-				     router_alert_bool, buffer);
+				     is_router_alert, buffer);
 	    break;
 	}
 #endif

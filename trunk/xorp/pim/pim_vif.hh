@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.29 2004/06/18 21:51:53 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.30 2005/03/19 23:55:04 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -144,13 +144,13 @@ public:
      * it should be ignored.
      * @param ip_ttl the IP TOS of the message. If it has a negative value,
      * it should be ignored.
-     * @param router_alert_bool if true, the IP Router Alert option in
+     * @param is_router_alert if true, the IP Router Alert option in
      * the IP packet was set (when applicable).
      * @param buffer the data buffer with the received message.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		pim_recv(const IPvX& src, const IPvX& dst,
-			 int ip_ttl, int ip_tos, bool router_alert_bool,
+			 int ip_ttl, int ip_tos, bool is_router_alert,
 			 buffer_t *buffer);
     
     /**
@@ -662,7 +662,7 @@ private:
     
     // PIM control messages process functions
     int		pim_process(const IPvX& src, const IPvX& dst,
-			    int ip_ttl, int ip_tos, bool router_alert_bool,
+			    int ip_ttl, int ip_tos, bool is_router_alert,
 			    buffer_t *buffer);
     int		pim_assert_process(PimNbr *pim_nbr,
 				   const IPvX& src,

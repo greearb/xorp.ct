@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.18 2005/03/15 00:32:39 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.19 2005/03/19 23:50:18 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -289,7 +289,7 @@ public:
      * @param ip_tos the IP TOS of the message. If it has a negative value,
      * it should be ignored.
      * 
-     * @param router_alert_bool if true, the IP Router Alert option in
+     * @param is_router_alert if true, the IP Router Alert option in
      * the IP packet was set (when applicable).
      * 
      * @param rcvbuf the data buffer with the received message.
@@ -302,7 +302,7 @@ public:
 			   xorp_module_id src_module_id,
 			   uint16_t vif_index,
 			   const IPvX& src, const IPvX& dst,
-			   int ip_ttl, int ip_tos, bool router_alert_bool,
+			   int ip_ttl, int ip_tos, bool is_router_alert,
 			   const uint8_t *rcvbuf, size_t rcvlen);
     
     /**
@@ -318,7 +318,7 @@ public:
      * negative value, the TTL will be set by the lower layers.
      * @param ip_tos the TOS of the IP packet to send. If it has a
      * negative value, the TOS will be set by the lower layers.
-     * @param router_alert_bool if true, set the IP Router Alert option in
+     * @param is_router_alert if true, set the IP Router Alert option in
      * the IP packet to send (when applicable).
      * @param buffer the data buffer with the message to send.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -326,7 +326,7 @@ public:
     int		mld6igmp_send(uint16_t vif_index,
 			      const IPvX& src, const IPvX& dst,
 			      int ip_ttl, int ip_tos,
-			      bool router_alert_bool,
+			      bool is_router_alert,
 			      buffer_t *buffer);
     
     /**

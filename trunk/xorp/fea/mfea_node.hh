@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.27 2005/03/15 00:33:23 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.28 2005/03/19 23:41:00 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -572,7 +572,7 @@ public:
      * @param ip_tos the IP TOS of the message. If it has a negative value,
      * the TOS will be set by the lower layers (including the MFEA).
      * 
-     * @param router_alert_bool if true, set the Router Alert IP option for
+     * @param is_router_alert if true, set the Router Alert IP option for
      * the IP packet of the outgoung message.
      * 
      * @param rcvbuf the data buffer with the received message.
@@ -585,7 +585,7 @@ public:
 			   xorp_module_id src_module_id,
 			   uint16_t vif_index,
 			   const IPvX& src, const IPvX& dst,
-			   int ip_ttl, int ip_tos, bool router_alert_bool,
+			   int ip_ttl, int ip_tos, bool is_router_alert,
 			   const uint8_t *rcvbuf, size_t rcvlen);
     /**
      * Process an incoming message from the kernel.
@@ -610,7 +610,7 @@ public:
      * @param ip_tos the IP TOS (Type of Service) of the message. If it has
      * a negative value, it should be ignored.
      * 
-     * @param router_alert_bool if true, the Router Alert IP option for the IP
+     * @param is_router_alert if true, the Router Alert IP option for the IP
      * packet of the incoming message was set.
      * 
      * @param rcvbuf the data buffer with the received message.
@@ -622,7 +622,7 @@ public:
     int		proto_comm_recv(xorp_module_id dst_module_id,
 				uint16_t vif_index,
 				const IPvX& src, const IPvX& dst,
-				int ip_ttl, int ip_tos, bool router_alert_bool,
+				int ip_ttl, int ip_tos, bool is_router_alert,
 				const uint8_t *rcvbuf, size_t rcvlen);
     
     /**
