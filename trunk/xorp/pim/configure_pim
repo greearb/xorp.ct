@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.19 2003/08/14 02:08:38 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.20 2003/10/15 18:54:29 pavlin Exp $
 #
 
 #
@@ -36,7 +36,14 @@ IP_VERSION=IPV4
 #
 # Select the vifs to enable, and the Candidate-BSR and Candidate-RP vifs.
 #
-case ${HOSTNAME} in
+if [ ! -z "$ENABLE_VIFS" ] ; then
+	echo "Using predefined settings:"
+	echo "  ENABLE_VIFS=${ENABLE_VIFS}"
+	echo "  CAND_BSR_VIF=${CAND_BSR_VIF}"
+	echo "  CAND_RP_VIF=${CAND_RP_VIF}"
+	echo "  STATIC_RPS=${STATIC_RPS}"
+else
+    case ${HOSTNAME} in
 	xorp1)
 	ENABLE_VIFS="dc1 dc2 dc4"
 	CAND_BSR_VIF="dc1"
@@ -126,7 +133,8 @@ case ${HOSTNAME} in
 	echo "Unknown host : ${HOSTNAME}"
 	exit 1
 	;;
-esac
+    esac
+fi
 
 #
 # Comment-out to disable log trace
