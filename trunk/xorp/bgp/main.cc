@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.2 2002/12/20 06:42:47 mjh Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -53,31 +53,45 @@ BGPMain::~BGPMain()
     stop_all_servers();
 
     debug_msg("-------------------------------------------\n");
+    debug_msg("Stopping All Peers\n");
+    _peerlist->all_stop();
+
+    /*
+    ** NOTE: We allow one timer to be pending. The timer is in the xrl_router.
+    */
+    debug_msg("-------------------------------------------\n");
+    debug_msg("Waiting for all peers to go to idle\n");
+    while (_peerlist->not_all_idle()
+	   || get_eventloop()->timers_pending() > 1) {
+	    get_eventloop()->run();
+	    XLOG_INFO("EVENT: peerlist %d timers %d", 
+		      _peerlist->not_all_idle(),
+		      get_eventloop()->timers_pending());
+    }
+
+    /*
+    ** Force the table de-registration from the RIB. Otherwise the
+    ** destructor for the rib_ipc_handler will complain.
+    */
+    _rib_ipc_handler->register_ribname("");
+
+    while(_xrl_router->pending()) {
+	get_eventloop()->run();
+	XLOG_INFO("xrl router still has pending operations");
+    }
+
+    debug_msg("-------------------------------------------\n");
     debug_msg("Deleting rib_ipc_handler\n");
     delete _rib_ipc_handler;
 
-    /*
-    ** Any xrl events added by the destruction of the rib_ipc_hander
-    ** are soaked up before destroying the xrl_router.
-    */
-    while(_xrl_router->pending())
+    while(_xrl_router->pending()) {
 	get_eventloop()->run();
+	XLOG_INFO("xrl router still has pending operations");
+    }
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting xrl_router\n");
     delete _xrl_router;
-
-    debug_msg("-------------------------------------------\n");
-    debug_msg("Stopping All Peers\n");
-    _peerlist->all_stop();
-
-    debug_msg("-------------------------------------------\n");
-    debug_msg("Waiting for all peers to go to idle\n");
-    while (_peerlist->not_all_idle()
-	   || get_eventloop()->timers_pending()) {
-	    get_eventloop()->run();
-	    debug_msg("EVENT\n");
-	}
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting peerlist\n");

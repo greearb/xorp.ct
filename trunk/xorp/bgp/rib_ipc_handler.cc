@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.23 2002/12/09 18:28:46 hodson Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -34,12 +34,18 @@ RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router)
 
 RibIpcHandler::~RibIpcHandler() 
 {
+    if(_v4_queue.busy() || _v6_queue.busy())
+	XLOG_WARNING("Deleting RibIpcHandler with callbacks pending");
+
     set_plumbing(NULL);
 
-    if("" == _ribname)
-	return;
-
-    unregister_rib();
+    if("" != _ribname)
+	XLOG_WARNING("Deleting RibIpcHandler while still registered with RIB");
+    /*
+    ** If would be great to de-register from the RIB here. The problem
+    ** is that if we start a de-register the callback will return to a
+    ** freed data structure.
+    */
 }
 
 bool
@@ -48,10 +54,15 @@ RibIpcHandler::register_ribname(const string& r)
     if(_ribname == r)
 	return true;
 
+    bool res;
+    if("" == r) {
+	res = unregister_rib();
+    }
+
     _ribname = r;
 
-    if("" == _ribname) {
-	return unregister_rib();
+    if("" == r) {
+	return res;
     }
 
     XrlRibV0p1Client rib(_xrl_router);
