@@ -339,6 +339,7 @@ install_xorp() {
     dialog --title "XORP LiveCD" --infobox "Doing XORP install... done" 5 60
 
     cp $LIVEDIR/files/xorp_load.py $CHROOTDIR/usr/local/xorp/bin
+    cp $LIVEDIR/files/xorp-makeconfig.sh $CHROOTDIR/usr/local/xorp/bin
 
 # Tells the user that this process was done.
     dialog --title "XORP LiveCD" --msgbox "XORP binaries, templates, and XIF files were installed in $CHROOTDIR" 5 60
