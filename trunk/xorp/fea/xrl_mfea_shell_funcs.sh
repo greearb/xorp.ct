@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.1 2003/06/03 21:54:42 pavlin Exp $
+# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.2 2003/08/14 02:10:51 pavlin Exp $
 #
 
 #
@@ -24,6 +24,7 @@ case "${IP_VERSION}" in
 	*)
 		echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
 		exit 1
+		;;
 esac
 
 

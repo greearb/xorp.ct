@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.15 2003/08/14 01:00:30 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.16 2003/08/14 02:08:38 pavlin Exp $
 #
 
 #
@@ -24,6 +24,7 @@ case "${IP_VERSION}" in
 	*)
 		echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
 		exit 1
+		;;
 esac
 
 

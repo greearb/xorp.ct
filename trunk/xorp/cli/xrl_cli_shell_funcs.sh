@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.5 2003/06/03 18:52:18 pavlin Exp $
+# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.6 2003/08/14 02:07:41 pavlin Exp $
 #
 
 #
@@ -24,6 +24,7 @@ case "${IP_VERSION}" in
 	*)
 		echo "Error: invalid IP_VERSION = ${IP_VERSION}. Must be either IPV4 or IPV6"
 		exit 1
+		;;
 esac
 
 
