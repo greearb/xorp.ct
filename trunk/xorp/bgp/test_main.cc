@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.2 2003/02/11 00:06:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.3 2003/02/11 20:45:34 mjh Exp $"
 
 #include <stdio.h>
 #include "bgp_module.h"
@@ -28,8 +28,9 @@ bool test_decision();
 bool test_fanout();
 bool test_dump();
 bool test_ribout();
+bool test_next_hop_resolver(int, char**);
 
-int main(int, char** argv) 
+int main(int argc, char** argv) 
 {
     xlog_init(argv[0], NULL);
     xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
@@ -45,6 +46,8 @@ int main(int, char** argv)
     bool test_fanout_succeeded = test_fanout();
     bool test_dump_succeeded = test_dump();
     bool test_ribout_succeeded = test_ribout();
+    bool test_next_hop_resolver_succeeded 
+	= test_next_hop_resolver(argc, argv);
 
 
     bool status = 0;
@@ -107,6 +110,12 @@ int main(int, char** argv)
     } else {
 	status = -1;
 	printf("Test Ribout: FAIL\n");
+    }
+    if (test_next_hop_resolver_succeeded) {
+	printf("Test NextHopResolver: PASS\n");
+    } else {
+	status = -1;
+	printf("Test NextHopResolver: FAIL\n");
     }
     return status;
 }

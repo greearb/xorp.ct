@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.10 2003/02/08 07:30:22 rizzo Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.11 2003/02/10 22:44:00 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -15,7 +15,6 @@ bin_PROGRAMS	+= packet_test plumbing_test update_test
 TESTS		 = aspath_test
 TESTS		+= packet_coding_test
 TESTS		+= isolation_tests
-TESTS		+= test_next_hop_resolver
 
 noinst_PROGRAMS = $(TESTS)
 noinst_LIBRARIES = libbgp.a
@@ -55,6 +54,7 @@ isolation_tests_SOURCES		+= test_decision.cc
 isolation_tests_SOURCES		+= test_fanout.cc
 isolation_tests_SOURCES		+= test_dump.cc
 isolation_tests_SOURCES		+= test_ribout.cc
+isolation_tests_SOURCES		+= test_next_hop_resolver.cc
 isolation_tests_SOURCES		+= route_table_debug.hh
 isolation_tests_SOURCES		+= route_table_debug.cc
 isolation_tests_SOURCES		+= dummy_main.cc
@@ -63,8 +63,6 @@ isolation_tests_SOURCES		+= dummy_next_hop_resolver.hh
 isolation_tests_SOURCES		+= peer_handler_debug.hh
 isolation_tests_SOURCES		+= peer_handler_debug.cc
 
-test_next_hop_resolver_SOURCES	= test_next_hop_resolver.cc
-test_next_hop_resolver_SOURCES += dummy_main.cc
 
 # -- Library Sources
 libbgp_a_SOURCES  = bgp_module.h

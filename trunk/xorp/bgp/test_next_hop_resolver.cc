@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.2 2002/12/18 04:10:41 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.3 2002/12/18 23:22:18 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -96,9 +96,9 @@ private:
 };
 
 template <class A>
-class DummyNextHopResolver : public NextHopResolver<A> {
+class DummyNextHopResolver2 : public NextHopResolver<A> {
 public:
-    DummyNextHopResolver() :
+    DummyNextHopResolver2() :
 	NextHopResolver<A>(0)	
     {
 	// Must set a ribname to force RIB interactions.
@@ -112,12 +112,12 @@ public:
  */
 template <class A>
 int
-test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
+nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver<A> nhr = DummyNextHopResolver<A>();
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -204,12 +204,12 @@ test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
  */
 template <class A>
 int
-test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
+nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 {
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver<A> nhr = DummyNextHopResolver<A>();
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -299,12 +299,12 @@ test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
  */
 template <class A>
 int
-test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
+nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 {
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver<A> nhr = DummyNextHopResolver<A>();
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -400,12 +400,12 @@ test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
  */
 template <class A>
 int
-test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
+nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver<A> nhr = DummyNextHopResolver<A>();
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -486,12 +486,12 @@ test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
  */
 template <class A>
 int
-test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
+nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver<A> nhr = DummyNextHopResolver<A>();
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
 
     DummyDecisionTable<A> dt(info, nhr);
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -637,12 +637,12 @@ test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
  */
 template <class A>
 int
-test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
+nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver<A> nhr = DummyNextHopResolver<A>();
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
 
     DummyNhLookupTable<A> nht(info, &nhr);
 
@@ -714,12 +714,12 @@ test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
  */
 template <class A>
 int
-test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
+nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver<A> nhr = DummyNextHopResolver<A>();
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
 
     DummyDecisionTable<A> dt(info, nhr);
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -847,12 +847,12 @@ test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
  */
 template <class A>
 int
-test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
+nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     if(info.verbose())
 	DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    DummyNextHopResolver<A> nhr = DummyNextHopResolver<A>();
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>();
 
     DummyDecisionTable<A> dt(info, nhr);
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -1152,8 +1152,8 @@ test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     return TestMain::SUCCESS;
 }
 
-int
-main(int argc, char **argv)
+bool
+test_next_hop_resolver(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
 
@@ -1176,29 +1176,29 @@ main(int argc, char **argv)
 	    string test_name;
 	    XorpCallback1<int, TestInfo&>::RefPtr cb;
 	} tests[] = {
-	    {"test1", callback(test1<IPv4>, nh4, rnh4, nlri4)},
-	    {"test1.ipv6", callback(test1<IPv6>, nh6, rnh6, nlri6)},
+	    {"test1", callback(nhr_test1<IPv4>, nh4, rnh4, nlri4)},
+	    {"test1.ipv6", callback(nhr_test1<IPv6>, nh6, rnh6, nlri6)},
 
-	    {"test2", callback(test2<IPv4>, nh4, rnh4, nlri4, iter)},
-	    {"test2.ipv6", callback(test2<IPv6>, nh6, rnh6, nlri6, iter)},
+	    {"test2", callback(nhr_test2<IPv4>, nh4, rnh4, nlri4, iter)},
+	    {"test2.ipv6", callback(nhr_test2<IPv6>, nh6, rnh6, nlri6, iter)},
 
-	    {"test3", callback(test3<IPv4>, nh4, rnh4, nlri4, iter)},
-	    {"test3.ipv6", callback(test3<IPv6>, nh6, rnh6, nlri6, iter)},
+	    {"test3", callback(nhr_test3<IPv4>, nh4, rnh4, nlri4, iter)},
+	    {"test3.ipv6", callback(nhr_test3<IPv6>, nh6, rnh6, nlri6, iter)},
 
-	    {"test4", callback(test4<IPv4>, nh4, rnh4, nlri4)},
-	    {"test4.ipv6", callback(test4<IPv6>, nh6, rnh6, nlri6)},
+	    {"test4", callback(nhr_test4<IPv4>, nh4, rnh4, nlri4)},
+	    {"test4.ipv6", callback(nhr_test4<IPv6>, nh6, rnh6, nlri6)},
 
-	    {"test5", callback(test1<IPv4>, nh4, rnh4, nlri4)},
-	    {"test5.ipv6", callback(test5<IPv6>, nh6, rnh6, nlri6)},
+	    {"test5", callback(nhr_test1<IPv4>, nh4, rnh4, nlri4)},
+	    {"test5.ipv6", callback(nhr_test5<IPv6>, nh6, rnh6, nlri6)},
 
-	    {"test6", callback(test6<IPv4>, nh4, rnh4, nlri4)},
-	    {"test6.ipv6", callback(test6<IPv6>, nh6, rnh6, nlri6)},
+	    {"test6", callback(nhr_test6<IPv4>, nh4, rnh4, nlri4)},
+	    {"test6.ipv6", callback(nhr_test6<IPv6>, nh6, rnh6, nlri6)},
 
-	    {"test7", callback(test7<IPv4>, nh4, rnh4, nlri4)},
-	    {"test7.ipv6", callback(test7<IPv6>, nh6, rnh6, nlri6)},
+	    {"test7", callback(nhr_test7<IPv4>, nh4, rnh4, nlri4)},
+	    {"test7.ipv6", callback(nhr_test7<IPv6>, nh6, rnh6, nlri6)},
 
-	    {"test8", callback(test8<IPv4>, nh4, rnh4, nlri4)},
-	    {"test8.ipv6", callback(test8<IPv6>, nh6, rnh6, nlri6)},
+	    {"test8", callback(nhr_test8<IPv4>, nh4, rnh4, nlri4)},
+	    {"test8.ipv6", callback(nhr_test8<IPv6>, nh6, rnh6, nlri6)},
 	};
 
 	if("" == test_name) {
@@ -1210,7 +1210,10 @@ main(int argc, char **argv)
 		i++)
 		if(test_name == tests[i].test_name) {
 		    t.run(tests[i].test_name, tests[i].cb);
-		    return t.exit();
+		    if (t.exit() == TestMain::SUCCESS)
+			return true;
+		    else
+			return false;
 		}
 	    t.failed("No test with name " + test_name + " found\n");
 	}
@@ -1218,5 +1221,8 @@ main(int argc, char **argv)
 	xorp_catch_standard_exceptions();
     }
 
-    return t.exit();
+    if (t.exit() == TestMain::SUCCESS)
+	return true;
+    else
+	return false;
 }

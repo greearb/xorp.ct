@@ -84,7 +84,7 @@ SUBDIRS = . harness tools
 
 # -- Test Programs
 bin_PROGRAMS = bgp packet_test plumbing_test update_test
-TESTS = aspath_test packet_coding_test isolation_tests test_next_hop_resolver
+TESTS = aspath_test packet_coding_test isolation_tests
 
 noinst_PROGRAMS = $(TESTS)
 noinst_LIBRARIES = libbgp.a
@@ -101,8 +101,7 @@ plumbing_test_DEPENDENCIES = libbgp.a
 aspath_test_SOURCES = aspath_test.cc
 packet_coding_test_SOURCES = packet_coding_test.cc
 update_test_SOURCES = update_test.cc
-isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc test_filter.cc test_cache.cc test_nhlookup.cc test_decision.cc test_fanout.cc test_dump.cc test_ribout.cc route_table_debug.hh route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc dummy_next_hop_resolver.hh peer_handler_debug.hh peer_handler_debug.cc
-test_next_hop_resolver_SOURCES = test_next_hop_resolver.cc dummy_main.cc
+isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc test_filter.cc test_cache.cc test_nhlookup.cc test_decision.cc test_fanout.cc test_dump.cc test_ribout.cc test_next_hop_resolver.cc route_table_debug.hh route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc dummy_next_hop_resolver.hh peer_handler_debug.hh peer_handler_debug.cc
 libbgp_a_SOURCES = bgp_module.h md5.h aspath.hh attribute_manager.hh bgp_trie.hh dump_iterators.hh exceptions.hh internal_message.hh iptuple.hh local_data.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_ribin.hh route_table_ribout.hh route_table_reader.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh xrl_target.hh md5.c aspath.cc attribute_manager.cc bgp_trie.cc dump_iterators.cc internal_message.cc iptuple.cc local_data.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_ribin.cc route_table_ribout.cc route_table_reader.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc xrl_target.cc
 EXTRA_DIST = BUGS configs configure_bgp.sh docs run_tests test_cache.reference test_decision.reference test_deletion.reference test_dump.reference test_fanout.reference test_filter.reference test_nhlookup.reference test_ribin.reference test_ribout.reference xrl_shell_funcs.sh
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -166,21 +165,15 @@ $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
 packet_coding_test_LDFLAGS = 
 isolation_tests_OBJECTS =  test_main.o test_ribin.o test_deletion.o \
 test_filter.o test_cache.o test_nhlookup.o test_decision.o \
-test_fanout.o test_dump.o test_ribout.o route_table_debug.o \
-dummy_main.o dummy_next_hop_resolver.o peer_handler_debug.o
+test_fanout.o test_dump.o test_ribout.o test_next_hop_resolver.o \
+route_table_debug.o dummy_main.o dummy_next_hop_resolver.o \
+peer_handler_debug.o
 isolation_tests_LDADD = $(LDADD)
 isolation_tests_DEPENDENCIES =  libbgp.a \
 $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
 $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
 isolation_tests_LDFLAGS = 
-test_next_hop_resolver_OBJECTS =  test_next_hop_resolver.o dummy_main.o
-test_next_hop_resolver_LDADD = $(LDADD)
-test_next_hop_resolver_DEPENDENCIES =  libbgp.a \
-$(top_builddir)/xrl/targets/libbgpbase.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_next_hop_resolver_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -221,8 +214,8 @@ DEP_FILES =  .deps/aspath.P .deps/aspath_test.P \
 .deps/test_nhlookup.P .deps/test_ribin.P .deps/test_ribout.P \
 .deps/update_attrib.P .deps/update_packet.P .deps/update_test.P \
 .deps/xrl_target.P
-SOURCES = $(libbgp_a_SOURCES) $(bgp_SOURCES) $(packet_test_SOURCES) $(plumbing_test_SOURCES) $(update_test_SOURCES) $(aspath_test_SOURCES) $(packet_coding_test_SOURCES) $(isolation_tests_SOURCES) $(test_next_hop_resolver_SOURCES)
-OBJECTS = $(libbgp_a_OBJECTS) $(bgp_OBJECTS) $(packet_test_OBJECTS) $(plumbing_test_OBJECTS) $(update_test_OBJECTS) $(aspath_test_OBJECTS) $(packet_coding_test_OBJECTS) $(isolation_tests_OBJECTS) $(test_next_hop_resolver_OBJECTS)
+SOURCES = $(libbgp_a_SOURCES) $(bgp_SOURCES) $(packet_test_SOURCES) $(plumbing_test_SOURCES) $(update_test_SOURCES) $(aspath_test_SOURCES) $(packet_coding_test_SOURCES) $(isolation_tests_SOURCES)
+OBJECTS = $(libbgp_a_OBJECTS) $(bgp_OBJECTS) $(packet_test_OBJECTS) $(plumbing_test_OBJECTS) $(update_test_OBJECTS) $(aspath_test_OBJECTS) $(packet_coding_test_OBJECTS) $(isolation_tests_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -326,10 +319,6 @@ packet_coding_test: $(packet_coding_test_OBJECTS) $(packet_coding_test_DEPENDENC
 isolation_tests: $(isolation_tests_OBJECTS) $(isolation_tests_DEPENDENCIES)
 	@rm -f isolation_tests
 	$(CXXLINK) $(isolation_tests_LDFLAGS) $(isolation_tests_OBJECTS) $(isolation_tests_LDADD) $(LIBS)
-
-test_next_hop_resolver: $(test_next_hop_resolver_OBJECTS) $(test_next_hop_resolver_DEPENDENCIES)
-	@rm -f test_next_hop_resolver
-	$(CXXLINK) $(test_next_hop_resolver_LDFLAGS) $(test_next_hop_resolver_OBJECTS) $(test_next_hop_resolver_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
 
