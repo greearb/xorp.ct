@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.9 2004/03/03 01:21:05 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.10 2004/06/10 22:40:42 hodson Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -265,6 +265,11 @@ public:
      * Perform final processing of a command.
      */
     void post_process_command();
+
+    /**
+     * Flush the output of a command while it is still running
+     */
+    void flush_process_command_output();
     
     //
     // Server communication state
@@ -340,6 +345,7 @@ private:
     void	set_current_cli_command(CliCommand *v);
     
     int		process_command(const string& command_line);
+    void	interrupt_command();
     
     CliPipe	*add_pipe(const string& pipe_name);
     CliPipe	*add_pipe(const string& pipe_name,
@@ -387,7 +393,8 @@ private:
     void	set_nomore_mode(bool v) { _is_nomore_mode = v; }
     bool	is_hold_mode() { return (_is_hold_mode); }
     void	set_hold_mode(bool v) { _is_hold_mode = v; }
-    
+    bool	is_prompt_flushed() const { return _is_prompt_flushed; }
+    void	set_prompt_flushed(bool v) { _is_prompt_flushed = v; }
     
     CliNode&	_cli_node;		// The CLI node I belong to
     int		_cli_fd;		// The client socket
@@ -420,8 +427,12 @@ private:
     bool	_is_modified_stdio_termios_icanon;
     bool	_is_modified_stdio_termios_echo;
     bool	_is_modified_stdio_termios_isig;
+
+    // The command we are currently executing and its arguments
+    CliCommand	*_executed_cli_command;	// The command currently executed
+    vector<string> _executed_cli_command_args;	// The arguments
     
-    CliCommand	*_current_cli_command;
+    CliCommand	*_current_cli_command;	// The command we have "cd" to
     string	_current_cli_prompt;	// The CLI prompt
     int		_buff_curpos;		// The cursor position in the buffer
     
@@ -447,6 +458,7 @@ private:
     size_t	_help_buffer_last_line_n; // The current last (visable) line
     bool	_is_help_mode;		// True if enabled help mode
     
+    bool	_is_prompt_flushed;	// True if we have flushed the prompt
     
     // The strings to save the action names that some keys were bind to
     string	_action_name_up_arrow;

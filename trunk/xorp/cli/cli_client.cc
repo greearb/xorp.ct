@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.21 2004/05/31 06:15:24 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.22 2004/06/10 22:40:42 hodson Exp $"
 
 
 //
@@ -83,7 +83,9 @@ CliClient::CliClient(CliNode& init_cli_node, int fd)
     _is_modified_stdio_termios_icanon = false;
     _is_modified_stdio_termios_echo = false;
     _is_modified_stdio_termios_isig = false;
-    
+
+    _executed_cli_command = NULL;
+
     set_current_cli_command(_cli_node.cli_command_root());
     set_current_cli_prompt(current_cli_command()->cd_prompt());
     _buff_curpos = 0;
@@ -105,7 +107,8 @@ CliClient::CliClient(CliNode& init_cli_node, int fd)
     _page_buffer = &_output_buffer;
     _page_buffer_last_line_n = &_output_buffer_last_line_n;
     
-    
+    _is_prompt_flushed = false;
+
     //
     // Session info state
     //
@@ -678,6 +681,7 @@ int
 CliClient::process_char_page_mode(uint8_t val)
 {
     string restore_cli_prompt = current_cli_prompt();	// The current prompt
+    bool old_page_buffer_mode = is_page_buffer_mode();
     
     //
     // Reset the line and clear the current prompt
@@ -744,6 +748,10 @@ CliClient::process_char_page_mode(uint8_t val)
 	|| (val == 'Q')
 	|| (val == CHAR_TO_CTRL('c'))
 	|| (val == CHAR_TO_CTRL('k'))) {
+
+	if (is_waiting_for_data()) {
+	    interrupt_command();
+	}
 	goto exit_page_mode_label;
     }
     
@@ -757,7 +765,9 @@ CliClient::process_char_page_mode(uint8_t val)
 	|| (val == CHAR_TO_CTRL('n'))
 	|| (gl_get_user_event(gl()) == 2)) {
 	if (page_buffer_last_line_n() < page_buffer_lines_n()) {
+	    set_page_buffer_mode(false);
 	    cli_print(page_buffer_line(page_buffer_last_line_n()));
+	    set_page_buffer_mode(old_page_buffer_mode);
 	    incr_page_buffer_last_line_n();
 	}
 	goto redisplay_line_label;
@@ -776,7 +786,9 @@ CliClient::process_char_page_mode(uint8_t val)
 	    i += window_lines_n(page_buffer_last_line_n());
 	    if (i > window_height() / 2)
 		break;
+	    set_page_buffer_mode(false);
 	    cli_print(page_buffer_line(page_buffer_last_line_n()));
+	    set_page_buffer_mode(old_page_buffer_mode);
 	    incr_page_buffer_last_line_n();
 	}
 	goto redisplay_line_label;
@@ -793,7 +805,9 @@ CliClient::process_char_page_mode(uint8_t val)
 	    i += window_lines_n(page_buffer_last_line_n());
 	    if (i > window_height() - 1)
 		break;
+	    set_page_buffer_mode(false);
 	    cli_print(page_buffer_line(page_buffer_last_line_n()));
+	    set_page_buffer_mode(old_page_buffer_mode);
 	    incr_page_buffer_last_line_n();
 	}
 	goto redisplay_line_label;
@@ -814,7 +828,9 @@ CliClient::process_char_page_mode(uint8_t val)
     //
     if ((val == 'N')) {
 	while (page_buffer_last_line_n() < page_buffer_lines_n()) {
+	    set_page_buffer_mode(false);
 	    cli_print(page_buffer_line(page_buffer_last_line_n()));
+	    set_page_buffer_mode(old_page_buffer_mode);
 	    incr_page_buffer_last_line_n();
 	}
 	// TODO: do we want to exit the page mode at the end?
@@ -876,6 +892,7 @@ CliClient::process_char_page_mode(uint8_t val)
     if ((val == CHAR_TO_CTRL('l'))) {
     redisplay_screen_label:
 	size_t i, start_window_line = 0;
+	set_page_buffer_mode(false);
 	// XXX: clean-up the previous window
 	for (i = 0; i < window_height() - 1; i++)
 	    cli_print("\n");
@@ -896,6 +913,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	// XXX: fill-up the rest of the window
 	for ( ; i < window_height() - 1; i++)
 	    cli_print("\n");
+	set_page_buffer_mode(old_page_buffer_mode);
 	goto redisplay_line_label;
     }
     
@@ -938,13 +956,19 @@ void
 CliClient::post_process_command()
 {
     //
-    // Test if we are waiting for the result from a server
+    // Test if we are waiting for the result from a processor
     //
     if (is_waiting_for_data()) {
 	// We are waiting for the result; silently return.
 	return;
     }
     
+    //
+    // Reset the state for the currently executed command
+    //
+    _executed_cli_command = NULL;
+    _executed_cli_command_args.clear();
+
     //
     // Pipe-process the result
     //
@@ -990,8 +1014,46 @@ CliClient::post_process_command()
     //
     command_buffer().reset();
     set_buff_curpos(0);
-    cli_print(current_cli_prompt());
+    if (! is_prompt_flushed())
+	cli_print(current_cli_prompt());
+    set_prompt_flushed(false);
     cli_flush();
+}
+
+void
+CliClient::flush_process_command_output()
+{
+    //
+    // Test if we are waiting for the result from a processor
+    //
+    if (! is_waiting_for_data()) {
+	// We are not waiting for the result; silently return.
+	return;
+    }
+
+    if (is_help_mode()) {
+	// We don't want the output while in help mode
+	return;
+    }
+
+    //
+    // Page-related state
+    //
+    if (is_page_mode() && ! is_prompt_flushed()) {
+	string restore_cli_prompt;
+	bool old_page_buffer_mode = is_page_buffer_mode();
+
+	set_page_buffer_mode(false);
+	if (page_buffer_last_line_n() < page_buffer_lines_n())
+	    restore_cli_prompt = " --More-- ";
+	else
+	    restore_cli_prompt = " --More-- (END) ";
+	set_current_cli_prompt(restore_cli_prompt);
+	cli_print(current_cli_prompt());
+	cli_flush();
+	set_page_buffer_mode(old_page_buffer_mode);
+	set_prompt_flushed(true);
+    }
 }
 
 //
@@ -1010,7 +1072,8 @@ CliClient::process_char(const char *line, uint8_t val)
     
     if ((val == '\n') || (val == '\r')) {
 	// New command
-	// cli_print(c_format("Your command is: %s\n", line));
+	if (is_waiting_for_data())
+	    return (XORP_OK);
 	set_page_buffer_mode(true);
 	process_command(string(line));
 	post_process_command();
@@ -1043,32 +1106,9 @@ CliClient::process_char(const char *line, uint8_t val)
 
     if (val == CHAR_TO_CTRL('c')) {
 	//
-	// Interrupt current command if it still is pending
+	// Interrupt current command
 	//
-	if (is_waiting_for_data()) {
-	    // Reset everything about the command
-	    set_is_waiting_for_data(false);
-	    delete_pipe_all();
-	    set_pipe_mode(false);
-	    set_hold_mode(false);
-	    set_page_mode(false);
-	    reset_page_buffer();
-	    set_page_buffer_mode(false);
-	    
-	    cli_print("\n");		// XXX: new line
-	    cli_print("Command interrupted!\n");
-	}
-	
-	//
-	// Ignore current line, reset buffer, line, cursor, prompt
-	//
-	cli_print("\n");		// XXX: new line
-	gl_redisplay_line(gl());
-	gl_reset_line(gl());
-	set_buff_curpos(0);
-	command_buffer().reset();
-	cli_flush();
-	
+	interrupt_command();
 	return (XORP_OK);
     }
     
@@ -1256,6 +1296,8 @@ CliClient::process_command(const string& command_line)
 	    }
 	    final_string = "";
 	    
+	    _executed_cli_command = parent_cli_command;
+	    _executed_cli_command_args = args_vector;
 	    ret_value = parent_cli_command->_cli_process_callback->dispatch(
 		parent_cli_command->server_name(),
 		cli_session_term_name(),
@@ -1339,6 +1381,54 @@ CliClient::process_command(const string& command_line)
     cli_print(".\n");
     
     return (XORP_ERROR);
+}
+
+void
+CliClient::interrupt_command()
+{
+    if (! is_waiting_for_data())
+	goto cleanup_label;
+
+    if ((_executed_cli_command == NULL)
+	|| (! _executed_cli_command->has_cli_interrupt_callback())) {
+	goto cleanup_label;
+    }
+
+    _executed_cli_command->_cli_interrupt_callback->dispatch(
+	_executed_cli_command->server_name(),
+	cli_session_term_name(),
+	cli_session_session_id(),
+	_executed_cli_command->global_name(),
+	_executed_cli_command_args);
+
+ cleanup_label:
+    // Reset everything about the command
+    _executed_cli_command = NULL;
+    _executed_cli_command_args.clear();
+    delete_pipe_all();
+    set_pipe_mode(false);
+    set_hold_mode(false);
+    set_page_mode(false);
+    reset_page_buffer();
+    set_page_buffer_mode(false);
+
+    if (is_waiting_for_data()) {
+	cli_print("\n");            // XXX: new line
+	cli_print("Command interrupted!\n");
+    }
+
+    //
+    // Ignore current line, reset buffer, line, cursor, prompt
+    //
+    cli_print("\n");                // XXX: new line
+    gl_redisplay_line(gl());
+    gl_reset_line(gl());
+    set_buff_curpos(0);
+    command_buffer().reset();
+    cli_flush();
+
+    set_prompt_flushed(false);
+    set_is_waiting_for_data(false);
 }
 
 int

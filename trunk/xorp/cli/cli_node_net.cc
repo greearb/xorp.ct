@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.26 2004/06/10 22:40:43 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.27 2004/06/11 04:52:19 atanu Exp $"
 
 
 //
@@ -558,17 +558,6 @@ CliClient::client_read(int fd, SelectorMask mask)
 	    }
 	    if (ret == 0) {
 		// Telnet option processed
-		continue;
-	    }
-	}
-	
-	if (is_waiting_for_data()) {
-	    //
-	    // XXX: ignore any input except Ctrl-C if waiting for data
-	    // from previous command.
-	    // TODO: is it OK to ignore, or shall we buffer it?
-	    //
-	    if (val != CHAR_TO_CTRL('c')) {
 		continue;
 	    }
 	}
