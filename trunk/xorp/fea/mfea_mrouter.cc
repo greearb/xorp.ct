@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.17 2004/04/09 06:02:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.18 2004/06/08 12:33:48 pavlin Exp $"
 
 
 //
@@ -953,10 +953,26 @@ MfeaMrouter::delete_multicast_vif(uint16_t vif_index)
     switch (family()) {
     case AF_INET:
     {
+	int ret_value = -1;
+
+	//
+	// XXX: In case of Linux, MRT_DEL_VIF expects an argument
+	// of type "struct vifctl", while other systems expect
+	// an argument of type "vifi_t".
+	//
+#ifdef HOST_OS_LINUX
+	struct vifctl vc;
+	memset(&vc, 0, sizeof(vc));
+	vc.vifc_vifi = mfea_vif->vif_index();
+	ret_value = setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_VIF,
+			       (void *)&vc, sizeof(vc));
+#else
 	vifi_t vifi = mfea_vif->vif_index();
-	
-	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_VIF,
-		       (void *)&vifi, sizeof(vifi)) < 0) {
+	ret_value = setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_VIF,
+			       (void *)&vifi, sizeof(vifi));
+#endif
+
+	if (ret_value < 0) {
 	    XLOG_ERROR("setsockopt(MRT_DEL_VIF, vif %s) failed: %s",
 		       mfea_vif->name().c_str(), strerror(errno));
 	    return (XORP_ERROR);
@@ -972,10 +988,30 @@ MfeaMrouter::delete_multicast_vif(uint16_t vif_index)
 		   "IPv6 multicast routing not supported");
 	return (XORP_ERROR);
 #else
+	int ret_value = -1;
+
+	//
+	// XXX: In case of Linux, MRT_DEL_VIF expects an argument
+	// of type "struct vifctl", while other systems expect
+	// an argument of type "vifi_t".
+	//
+	// TODO: note that currently (2004/06/09) Linux doesn't support
+	// IPv6 multicast routing, hence the above is a guess based on
+	// the difference in case of IPv4.
+	//
+#ifdef HOST_OS_LINUX
+	struct mif6ctl mc;
+	memset(&mc, 0, sizeof(mc));
+	mc.mif6c_mifi = mfea_vif->vif_index();
+	mc.mif6c_pifi = mfea_vif->pif_index();
+	ret_value = setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_VIF,
+			       (void *)&mc, sizeof(mc));
+#else
 	mifi_t vifi = mfea_vif->vif_index();
-	
-	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_DEL_MIF,
-		       (void *)&vifi, sizeof(vifi)) < 0) {
+	ret_value = setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_DEL_MIF,
+			       (void *)&vifi, sizeof(vifi));
+#endif
+	if (ret_value < 0) {
 	    XLOG_ERROR("setsockopt(MRT6_DEL_MIF, vif %s) failed: %s",
 		       mfea_vif->name().c_str(), strerror(errno));
 	    return (XORP_ERROR);
