@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.15 2003/04/10 00:12:05 pavlin Exp $
+% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.16 2003/04/15 22:52:00 kohler Exp $
 %
 
 \documentclass[11pt]{article}
@@ -204,11 +204,11 @@ attempt to restart the process.
 
 \subsubsection{FEA - Forwarding Engine Abstraction}
 
-The FEA primarily excepts routes from the RIB and places them in the
+The FEA primarily accepts routes from the RIB and places them in the
 kernel. The FEA should tag all routes that it has installed in the
 kernel. The FEA on restart should remove all routes that a previous
 incarnation of the FEA has placed in the kernel. When an FEA is
-exiting it should attempt remove all routes that it has installed in
+exiting it should attempt to remove all routes that it has installed in
 the kernel.
 
 The FEA process should register interest in the RIB. If the RIB fails
