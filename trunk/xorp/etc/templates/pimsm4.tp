@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.5 2004/05/18 07:45:20 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.6 2004/05/28 23:12:26 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -7,7 +7,7 @@ protocols {
 
 	interface @: txt {
 	    vif @: txt {
-		enable: bool = true;
+		enabled: bool = true;
 		alternative-subnet @: ipv4net {
 		}
 	    }
@@ -45,7 +45,7 @@ protocols {
 	}
 
 	switch-to-spt-threshold {
-	    enable: bool = false;
+	    enabled: bool = false;
 	    interval-sec: u32 = 0;
 	    bytes: u32 = 0;
 	}
@@ -53,7 +53,7 @@ protocols {
 	traceoptions {
 	    flag {
 		all {
-		    enable: bool = false;
+		    enabled: bool = false;
 		}
 	    }
 	}
@@ -88,7 +88,7 @@ protocols {
 	    vif @ {
 		%activate: xrl "$(pimsm4.targetname)/pim/0.1/start_vif?vif_name:txt=$(vif.@)";
 
-		enable {
+		enabled {
 		    %set: xrl "$(pimsm4.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
 		    %delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
 		}
@@ -179,7 +179,7 @@ protocols {
 	    %activate: xrl "$(pimsm4.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=$(@.enable)&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
 	    %delete: xrl "$(pimsm4.targetname)/pim/0.1/reset_switch_to_spt_threshold";
 
-	    enable {
+	    enabled {
 		%set:;
 	    }
 
@@ -195,7 +195,7 @@ protocols {
 	traceoptions {
 	    flag {
 		all {
-		    enable {
+		    enabled {
 			%set: xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=$(@)";
 		    }
 		}

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mld.tp,v 1.4 2004/05/18 07:45:20 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mld.tp,v 1.5 2004/05/28 23:12:26 pavlin Exp $ */
 
 protocols {
     mld {
@@ -8,14 +8,14 @@ protocols {
 	traceoptions {
 	    flag {
 		all {
-		    enable: bool = false;
+		    enabled: bool = false;
 		}
 	    }
 	}
 
 	interface @: txt {
 	    vif @: txt {
-		enable: bool = true;
+		enabled: bool = true;
 	    }
 	}
     }
@@ -46,7 +46,7 @@ protocols {
 	traceoptions {
 	    flag {
 		all {
-		    enable {
+		    enabled {
 			%set: xrl "$(mld.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=$(@)";
 		    }
 		}
@@ -57,7 +57,7 @@ protocols {
 	    vif @ {
 		%activate: xrl "$(mld.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
 
-		enable {
+		enabled {
 		    %set: xrl "$(mld.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
 		    %delete: xrl "$(mld.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
 		}
