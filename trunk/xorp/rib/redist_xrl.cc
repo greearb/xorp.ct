@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.2 2004/05/12 08:28:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.3 2004/05/12 20:30:02 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -675,7 +675,10 @@ template <typename A>
 void
 RedistXrlOutput<A>::start_running_tasks()
 {
-    XLOG_ASSERT(task_count() == 1);
+    if (! _is_xrl_transaction_output)
+	XLOG_ASSERT(task_count() == 1);
+    else
+	XLOG_ASSERT(task_count() == 2);
     start_next_task();
 }
 
