@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.6 2004/03/03 21:17:40 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.7 2004/03/09 22:17:07 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -1084,6 +1084,9 @@ XrlRipCommonTarget<A>::ripx_0_1_get_peer_counters(
 
     descriptions.append(XrlAtom("", string("Bad Routes Received")));
     values.append(XrlAtom(peer->counters().bad_routes()));
+
+    descriptions.append(XrlAtom("", string("Routes Active")));
+    values.append(XrlAtom(peer->route_count()));
 
     peer_last_active = peer->last_active().secs();
 
