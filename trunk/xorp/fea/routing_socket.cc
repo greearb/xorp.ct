@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.4 2003/10/13 23:32:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.5 2003/10/30 21:38:48 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -68,7 +68,6 @@ RoutingSocket::start(int )
 int
 RoutingSocket::stop()
 {
-    XLOG_UNREACHABLE();
     return (XORP_ERROR);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.10 2003/10/14 01:34:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.11 2003/10/30 21:39:11 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -77,7 +77,6 @@ NetlinkSocket::start(int )
 int
 NetlinkSocket::stop()
 {
-    XLOG_UNREACHABLE();
     return (XORP_ERROR);
 }
 
