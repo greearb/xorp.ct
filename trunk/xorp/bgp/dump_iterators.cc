@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.4 2003/03/10 23:19:58 hodson Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.5 2003/05/23 00:02:05 mjh Exp $"
+
+// #define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -99,9 +102,18 @@ DumpIterator<A>::next_peer()
 
 template <class A>
 void
+DumpIterator<A>::peering_is_down(const PeerHandler *peer, uint32_t genid)
+{
+    debug_msg("peering_is_down %p genid %d\n", peer, genid);
+    _peers_to_dump.push_back(peer);
+    _downed_peers.push_back(DownedPeer<A>(peer, false, IPNet<A>(), genid));
+}
+
+template <class A>
+void
 DumpIterator<A>::peering_went_down(const PeerHandler *peer, uint32_t genid)
 {
-    debug_msg("peering_went_down\n");
+    debug_msg("peering_went_down %p current_peer %p\n", peer, *_current_peer);
     if (_current_peer == _peers_to_dump.end()
 	&& waiting_for_deletion_completion()) {
 	debug_msg("waiting for deletion completion\n");
@@ -164,6 +176,8 @@ void
 DumpIterator<A>::peering_down_complete(const PeerHandler *peer,
 				       uint32_t genid)
 {
+    debug_msg("peering_down_complete %p genid %d\n", peer, genid);
+
     typename list <DownedPeer<A> >::iterator i;
     bool delete_complete = true;
     for (i = _downed_peers.begin(); i != _downed_peers.end(); i++) {

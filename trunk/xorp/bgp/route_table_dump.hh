@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.6 2003/05/29 17:59:08 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -54,8 +54,22 @@ public:
 
     void initiate_background_dump();
     void suspend_dump();
+
+    /**
+     * A peer which is down but still deleting routes when this peer
+     * is brought up.
+     */
+    void peering_is_down(const PeerHandler *peer, uint32_t genid);
+
+    /**
+     * A peer which does down while dumping is taking place.
+     */
     void peering_went_down(const PeerHandler *peer, uint32_t genid,
 			   BGPRouteTable<A> *caller);
+
+    /**
+     * A peer that is down and has now completed deleting all its routes.
+     */
     void peering_down_complete(const PeerHandler *peer, uint32_t genid,
 			       BGPRouteTable<A> *caller);
 private:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dump_iterators.hh,v 1.4 2003/02/08 07:30:23 rizzo Exp $
+// $XORP: xorp/bgp/dump_iterators.hh,v 1.5 2003/03/10 23:19:58 hodson Exp $
 
 #ifndef __BGP_DUMP_ITERATORS_HH__
 #define __BGP_DUMP_ITERATORS_HH__
@@ -79,8 +79,25 @@ public:
 			       const IPNet<A>& net,
 			       uint32_t genid, RouteQueueOp op);
 
+    /**
+     * A peer which is down but still deleting routes when this peer
+     * is brought up.
+     */
+    void peering_is_down(const PeerHandler *peer, uint32_t genid);
+
+    /**
+     * A peer which does down while dumping is taking place.
+     */
     void peering_went_down(const PeerHandler *peer, uint32_t genid);
+
+    /**
+     * A peer that is down and has now completed deleting all its routes.
+     */
     void peering_down_complete(const PeerHandler *peer, uint32_t genid);
+
+    /**
+     * @return true while peers we deleting routes.
+     */
     bool waiting_for_deletion_completion() const;
 private:
     BGPPlumbing *_plumbing;

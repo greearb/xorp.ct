@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.10 2003/11/04 02:27:19 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.11 2003/11/04 09:54:44 mjh Exp $"
 
-//#define DEBUG_LOGGING
+// #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
@@ -352,6 +352,14 @@ DumpTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	   can use to trigger the next batch of work */
 	return false;
     }
+}
+
+template <class A>
+void
+DumpTable<A>::peering_is_down(const PeerHandler *peer, uint32_t genid)
+{
+    debug_msg("peering_is_down %p genid %d\n", peer, genid);
+    _dump_iter.peering_is_down(peer, genid);
 }
 
 template<class A>

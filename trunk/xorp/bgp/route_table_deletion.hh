@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_deletion.hh,v 1.7 2003/05/29 17:59:08 pavlin Exp $
+// $XORP: xorp/bgp/route_table_deletion.hh,v 1.8 2003/08/04 21:58:58 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DELETION_HH__
 #define __BGP_ROUTE_TABLE_DELETION_HH__
@@ -60,6 +60,11 @@ public:
     }
 
     void initiate_background_deletion();
+
+    /**
+     * @return the generation id.
+     */
+    uint32_t genid() const {return _genid;}
 private:
     void unplumb_self();
     void delete_next_chain();

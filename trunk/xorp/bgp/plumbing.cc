@@ -565,6 +565,29 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
     rib_in->ribin_peering_came_up();
 
     _fanout_table->dump_entire_table(filter_out);
+
+    /*
+    ** It is possible that another peer was in the middle of going
+    ** down when this peering came up. So sweep through the peers and
+    ** look for the deletion tables. Treat them as if they have just
+    ** sent a peering_went_down.
+    */
+    for (iter2 = _in_map.begin(); iter2 != _in_map.end(); iter2++) {
+	rib_in = iter2->second;
+	debug_msg("<%s>\n", rib_in->next_table()->str().c_str());
+	DeletionTable<A> *deletion_table =
+	    dynamic_cast<DeletionTable<A> *>(rib_in->next_table());
+	
+	if (0 != deletion_table) {
+	    debug_msg("Found a deletion table\n");
+	    DumpTable<A> *dump_table =
+	    dynamic_cast<DumpTable<A> *>(filter_out->parent());
+	    XLOG_ASSERT(dump_table);
+	    dump_table->
+		peering_is_down(iter2->first, deletion_table->genid());
+	}
+    }
+
     if(_awaits_push)
 	push(peer_handler);
     return 0;
