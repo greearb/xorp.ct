@@ -71,6 +71,7 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 [ \t]+	/* whitespace */
 
 "\n"	{
+	/* newline is not significant */
 	tplt_linenum++;
 	}
 
@@ -195,7 +196,7 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return COMMAND;
 	}
 
-\$\([a-zA-Z@][a-zA-Z0-9\-_.@]*\)	{
+\$\([a-zA-Z@][a-zA-Z0-9\-_\.@]*\)	{
 	tpltlval = strdup(tplttext);
 	return VARIABLE;
 	}
@@ -205,7 +206,7 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return LITERAL;
 	}
 
-\"[a-zA-Z0-9\-_\[\]:/&.,<>!@#$%^*()+=|\\~`{}<>? \t]*\"	{
+\"[a-zA-Z0-9\-_\[\]:/&\.,<>!@#$%^*()+=|\\~`{}<>? \t]*\"	{
 	tpltlval = strdup(tplttext);
 	return STRING;
 	}
