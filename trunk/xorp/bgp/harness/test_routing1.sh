@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.10 2003/07/17 00:28:32 pavlin Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.11 2003/09/19 21:34:04 atanu Exp $
 #
 
 #
@@ -71,12 +71,18 @@ HOLDTIME=20
 # Next Hops
 #NH1=10.10.10.10
 #NH2=20.20.20.20
-NH1=172.16.1.1
-NH2=172.16.2.1
-NH3=172.16.3.1
-NH1_IPV6=40:40:40:40:40:40:40:40
-NH2_IPV6=50:50:50:50:50:50:50:50
-NH3_IPV6=60:60:60:60:60:60:60:60
+IF1=172.16.1.1
+IF2=172.16.2.1
+IF3=172.16.3.1
+IF1_IPV6=40:40:40:40:40:40:40:41
+IF2_IPV6=50:50:50:50:50:50:50:51
+IF3_IPV6=60:60:60:60:60:60:60:61
+NH1=172.16.1.2
+NH2=172.16.2.2
+NH3=172.16.3.2
+NH1_IPV6=40:40:40:40:40:40:40:42
+NH2_IPV6=50:50:50:50:50:50:50:52
+NH3_IPV6=60:60:60:60:60:60:60:62
 
 NEXT_HOP=192.150.187.78
 
@@ -86,8 +92,6 @@ configure_bgp()
     AS=65008
     ID=192.150.187.78
     local_config $AS $ID
-
-    register_rib ""
 
     # EBGP - IPV4
     PEER=$HOST
@@ -153,13 +157,13 @@ configure_rib()
     new_vif $VIF1_IPV6
     new_vif $VIF2_IPV6
 
-    add_vif_addr4 $VIF0 $NH1 $NH1/24
-    add_vif_addr4 $VIF1 $NH2 $NH2/24
-    add_vif_addr4 $VIF2 $NH3 $NH3/24
+    add_vif_addr4 $VIF0 $IF1 $IF1/24
+    add_vif_addr4 $VIF1 $IF2 $IF2/24
+    add_vif_addr4 $VIF2 $IF3 $IF3/24
 
-    add_vif_addr6 $VIF0_IPV6 $NH1_IPV6 $NH1_IPV6/24
-    add_vif_addr6 $VIF1_IPV6 $NH2_IPV6 $NH2_IPV6/24
-    add_vif_addr6 $VIF2_IPV6 $NH3_IPV6 $NH3_IPV6/24
+    add_vif_addr6 $VIF0_IPV6 $IF1_IPV6 $IF1_IPV6/24
+    add_vif_addr6 $VIF1_IPV6 $IF2_IPV6 $IF2_IPV6/24
+    add_vif_addr6 $VIF2_IPV6 $IF3_IPV6 $IF3_IPV6/24
 }
 
 test1()
@@ -713,7 +717,13 @@ test5()
 
 test6()
 {
-    echo "TEST6 - On an EBGP peering send an update with a local preference"
+    echo "TEST6 On an EBGP peering send an update with a local preference"
+
+# Sending an update with a local preference is wrong, but it shouldn't cause
+# any problems. We test that when the update is propogated that the bad local
+# preference is removed and replaced with a local preference of 100. Which
+# is the recommended default. Note we are also testing that peer2 does not
+# receive the med from peer1.
 
     coord reset
 
@@ -756,16 +766,18 @@ test6()
 	    aspath $1
 	    nexthop $2
 	    nlri 10.10.10.0/24
-	    med 1"
+	    med $3"
 
 	echo $PACKET
     }
 
-    coord peer1 expect $(packet $PEER1_AS $LOCAL_NH)
-    coord peer2 expect $(packet $AS,$PEER1_AS $NEXT_HOP)
-    coord peer3 expect $(packet $PEER1_AS $LOCAL_NH) localpref 100
+    local MED=50
 
-    coord peer1 send $(packet $PEER1_AS $LOCAL_NH) localpref 17
+    coord peer1 expect $(packet $PEER1_AS $LOCAL_NH $MED)
+    coord peer2 expect $(packet $AS,$PEER1_AS $NEXT_HOP 0)
+    coord peer3 expect $(packet $PEER1_AS $LOCAL_NH $MED) localpref 100
+
+    coord peer1 send $(packet $PEER1_AS $LOCAL_NH $MED) localpref 17
 
     sleep 2
     
@@ -785,7 +797,6 @@ test6()
 
 TESTS_NOT_FIXED=''
 TESTS='test1 test1_ipv6 test2 test2_ipv6 test3 test4 test5 test6'
-RIB="rib"
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
@@ -813,10 +824,7 @@ fi
 if [ $CONFIGURE = "yes" ]
 then
     configure_bgp
-    if [ ${RIB:-""} != "" ]
-    then
-	configure_rib
-    fi
+    configure_rib
 fi
 
 for i in $TESTS
