@@ -438,7 +438,7 @@ XrlRipTarget::rip_0_1_set_authentication(const string&	ifname,
 	// indicating that it does not expire.
 	//
 	MD5AuthHandler* new_ah = new MD5AuthHandler(_e);
-	if (new_ah->add_key(0, password, /* start */ 0, /* end */ 0) == 0) {
+	if (new_ah->add_key(1, password, /* start */ 0, /* end */ 0) == 0) {
 	    delete new_ah;
 	    return XrlCmdError::COMMAND_FAILED("MD5 key add failed.");
 	}
