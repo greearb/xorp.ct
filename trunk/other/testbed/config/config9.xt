@@ -1,4 +1,4 @@
-# $XORP$
+# $XORP: other/testbed/config/config9.xt,v 1.1 2004/05/10 21:48:54 atanu Exp $
 #
 # Surround a XORP (xorp12) router with a bunch of testbed hosts. 
 #
@@ -18,7 +18,7 @@
 #               	      xorp6
 
 # Kernel to install
-kernel[/home/xorpc/u2/freebsd.kernels/kernel] = xorp0, xor1, xorp6, xorp7
+kernel[/home/xorpc/u2/freebsd.kernels/kernel] = xorp0, xorp1, xorp6, xorp7
 
 # xorp12 is the router. This will create default routes that point at xorp12.
 router = xorp12
