@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.17 2004/03/03 03:32:11 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.18 2004/05/30 04:15:08 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -224,6 +224,45 @@ PimMfc::recompute_iif_olist_mfc()
     add_mfc_to_kernel();
     // XXX: we just recompute the state, hence no need to add
     // a dataflow monitor.
+}
+
+//
+// A method for recomputing and setting the SPT bit that
+// is triggered by the dependency-tracking machinery.
+//
+// Note that the spec says that the recomputation
+// by calling Update_SPTbit(S,G,iif) should happen when a packet
+// arrives. However, given that we do not forward the data packets
+// in user space, we need to emulate that by triggering the
+// recomputation whenever some of the input statements have changed.
+// Also, note that this recomputation is not needed if there is not
+// underlying PimMfc entry; the lack of such entry will anyway trigger
+// a system uncall once the first multicast packet is received for
+// forwarding.
+//
+// Note: the SPT bit setting applies only if there is an (S,G) PimMfc entry.
+// Return true if state has changed, otherwise return false.
+bool
+PimMfc::recompute_update_sptbit_mfc()
+{
+    PimMre *pim_mre_sg = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+						PIM_MRE_SG, 0);
+
+    // XXX: no (S,G) entry, hence nothing to update
+    if (pim_mre_sg == NULL)
+	return false;
+
+    if (pim_mre_sg->is_spt()) {
+	// XXX: nothing to do, because the SPT bit is already set
+	return false;
+    }
+
+    pim_mre_sg->update_sptbit_sg(iif_vif_index());
+
+    if (pim_mre_sg->is_spt())
+	return true;	// XXX: the SPT bit has been set
+
+    return false;
 }
 
 //

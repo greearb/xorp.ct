@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.24 2004/02/24 19:59:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_track_state.cc,v 1.25 2004/02/25 00:35:48 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry state tracking
@@ -140,6 +140,7 @@ PimMreTrackState::PimMreTrackState(PimMrt& pim_mrt)
     output_state_out_remove_pim_mre_sg_rpt_entry_sg(action_list);
     output_state_out_remove_pim_mre_sg_rpt_entry_sg_rpt(action_list);
     output_state_out_remove_pim_mfc_entry_mfc(action_list);
+    output_state_update_sptbit_mfc(action_list);
     
     //
     // Create the final result
@@ -576,6 +577,7 @@ do {									\
     OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG);	// 77
     OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MRE_SG_RPT_ENTRY_SG_RPT);	// 78
     OUTPUT_NAME(OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC);		// 79
+    OUTPUT_NAME(OUTPUT_STATE_UPDATE_SPTBIT_MFC);			// 80
     
 #undef INPUT_NAME
 #undef OUTPUT_NAME
@@ -2241,6 +2243,21 @@ PimMreTrackState::output_state_out_remove_pim_mfc_entry_mfc(list<PimMreAction> a
     return (action_list);
 }
 
+list<PimMreAction>
+PimMreTrackState::output_state_update_sptbit_mfc(list<PimMreAction> action_list)
+{
+    bool init_flag = action_list.empty();
+    PimMreAction action(OUTPUT_STATE_UPDATE_SPTBIT_MFC, PIM_MFC);
+    
+    if (can_add_action_to_list(action_list, action))
+	action_list.push_back(action);
+    
+    if (init_flag)
+	track_state_update_sptbit_mfc(action_list);
+    
+    return (action_list);
+}
+
 //
 // Track state methods
 //
@@ -3446,6 +3463,21 @@ PimMreTrackState::track_state_out_remove_pim_mfc_entry_mfc(list<PimMreAction> ac
     track_state_in_remove_pim_mfc(action_list);
 }
 
+void
+PimMreTrackState::track_state_update_sptbit_mfc(list<PimMreAction> action_list)
+{
+    action_list = output_state_update_sptbit_mfc(action_list);
+
+    track_state_iif_olist_mfc(action_list);
+    track_state_rpf_interface_s(action_list);
+    track_state_is_join_desired_sg(action_list);
+    track_state_is_directly_connected_sg(action_list);
+    track_state_rpf_interface_s(action_list);
+    track_state_rpf_interface_rp(action_list);
+    track_state_inherited_olist_sg_rpt(action_list);
+    track_state_rpfp_nbr_sg(action_list);
+    track_state_rpfp_nbr_wc(action_list);
+}
 
 void
 PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
@@ -3813,6 +3845,11 @@ PimMreAction::perform_action(PimMre& pim_mre, uint16_t vif_index,
 	// pim_mfc.remove_pim_mfc_entry_mfc();
 	break;
 	
+    case PimMreTrackState::OUTPUT_STATE_UPDATE_SPTBIT_MFC:		// 80
+	XLOG_UNREACHABLE();
+	// pim_mfc.recompute_update_sptbit_mfc();
+	break;
+	
     default:
 	XLOG_UNREACHABLE();
 	break;
@@ -3842,6 +3879,10 @@ PimMreAction::perform_action(PimMfc& pim_mfc)
 	
     case PimMreTrackState::OUTPUT_STATE_OUT_REMOVE_PIM_MFC_ENTRY_MFC:	// 79
 	pim_mfc.remove_pim_mfc_entry_mfc();
+	break;
+	
+    case PimMreTrackState::OUTPUT_STATE_UPDATE_SPTBIT_MFC:		// 80
+	pim_mfc.recompute_update_sptbit_mfc();
 	break;
 	
     default:
