@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.2 2003/02/25 01:38:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.3 2003/02/27 03:11:05 pavlin Exp $"
 
 
 //
@@ -314,7 +314,7 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 	    buffer_t *buffer;
 	    
 	    if (! pim_node().is_my_addr(bsr_rp->rp_addr()))
-		continue;
+		return (XORP_ERROR);
 	    
 	    buffer = buffer_send_prepare();
 	    // Write all data to the buffer
