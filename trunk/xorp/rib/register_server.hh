@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/register_server.hh,v 1.5 2003/03/19 09:05:19 pavlin Exp $
+// $XORP: xorp/rib/register_server.hh,v 1.6 2003/03/29 19:03:10 pavlin Exp $
 
 #ifndef __RIB_REGISTER_SERVER_HH__
 #define __RIB_REGISTER_SERVER_HH__
@@ -293,14 +293,14 @@ public:
      * RIB.
      */
     virtual void send_route_changed(const string& modname,
-				    const IPNet<IPv4>& net,
+				    const IPv4Net& net,
 				    const IPv4& nexthop,
 				    uint32_t metric,
 				    uint32_t admin_distance,
 				    const string& protocol_origin,
 				    bool multicast);
     virtual void send_invalidate(const string& modname,
-				 const IPNet<IPv4>& net,
+				 const IPv4Net& net,
 				 bool multicast);
 
     /** 
@@ -320,7 +320,7 @@ public:
      * RIB.
      */
     virtual void send_route_changed(const string& modname,
-				    const IPNet<IPv6>& net,
+				    const IPv6Net& net,
 				    const IPv6& nexthop,
 				    uint32_t metric,
 				    uint32_t admin_distance,
@@ -341,7 +341,7 @@ public:
      * RIB.  
      */
     virtual void send_invalidate(const string& modname,
-				 const IPNet<IPv6>& net,
+				 const IPv6Net& net,
 				 bool multicast);
 
     /**

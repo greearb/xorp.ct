@@ -738,7 +738,7 @@ XrlRibTarget::rib_0_1_deregister_interest4(// Input values,
 					   const IPv4& addr,
 					   const uint32_t& prefix_len)
 {
-    if (_urib4.route_deregister(IPNet<IPv4>(addr, prefix_len), target)
+    if (_urib4.route_deregister(IPv4Net(addr, prefix_len), target)
 	!= XORP_OK) {
 	string error_msg = c_format("Failed to deregister target %s for "
 				    "prefix %s/%u",
@@ -797,7 +797,7 @@ XrlRibTarget::rib_0_1_deregister_interest6(// Input values,
 					   const IPv6&	addr,
 					   const uint32_t& prefix_len)
 {
-    if (_urib6.route_deregister(IPNet<IPv6>(addr, prefix_len), target)
+    if (_urib6.route_deregister(IPv6Net(addr, prefix_len), target)
 	!= XORP_OK) {
 	string error_msg = c_format("Failed to deregister target %s for "
 				    "prefix %s/%u",

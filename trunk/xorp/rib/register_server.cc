@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/register_server.cc,v 1.8 2003/03/29 19:03:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/register_server.cc,v 1.9 2003/05/14 10:32:25 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rib_module.h"
@@ -150,7 +150,7 @@ RegisterServer::add_entry_to_queue(const string& modname,
 
 void
 RegisterServer::send_route_changed(const string& modname,
-				   const IPNet<IPv4>& net,
+				   const IPv4Net& net,
 				   const IPv4& nexthop,
 				   uint32_t metric,
 				   uint32_t admin_distance,
@@ -166,7 +166,7 @@ RegisterServer::send_route_changed(const string& modname,
 
 void
 RegisterServer::send_invalidate(const string& modname,
-				const IPNet<IPv4>& net,
+				const IPv4Net& net,
 				bool multicast) 
 {
     NotifyQueueInvalidateEntry<IPv4>* q_entry;
@@ -177,7 +177,7 @@ RegisterServer::send_invalidate(const string& modname,
 
 void
 RegisterServer::send_route_changed(const string& modname,
-				   const IPNet<IPv6>& net,
+				   const IPv6Net& net,
 				   const IPv6& nexthop,
 				   uint32_t metric,
 				   uint32_t admin_distance,
@@ -193,7 +193,7 @@ RegisterServer::send_route_changed(const string& modname,
 
 void
 RegisterServer::send_invalidate(const string& modname,
-				const IPNet<IPv6>& net,
+				const IPv6Net& net,
 				bool multicast) 
 {
     NotifyQueueInvalidateEntry<IPv6>* q_entry;

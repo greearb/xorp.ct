@@ -133,7 +133,7 @@ public:
      */
     int add_vif_address(const string& vifname, 
 			const IPv4& addr,
-			const IPNet<IPv4>& net,
+			const IPv4Net& net,
 			string& err);
 
     /**
@@ -167,7 +167,7 @@ public:
      */
     int add_vif_address(const string& vifname,
 			const IPv6& addr,
-			const IPNet<IPv6>& net,
+			const IPv6Net& net,
 			string& err);
 
     /**

@@ -118,7 +118,7 @@ public:
 	cout << _addr.str() << "\n";
 	
 	Vif vif(_ifname);
-	IPNet<IPv4> subnet(_addr, _prefix_len);
+	IPv4Net subnet(_addr, _prefix_len);
 	VifAddr vifaddr(_addr, subnet, IPv4::ZERO(), IPv4::ZERO());
 	vif.add_address(vifaddr);
 	cout << "**** Vif: " << vif.str() << endl;

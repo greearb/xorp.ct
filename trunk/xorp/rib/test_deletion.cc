@@ -45,8 +45,8 @@ main (int /* argc */, char *argv[])
     IPPeerNextHop<IPv4> nh1(IPv4("1.0.0.1"));
     IPPeerNextHop<IPv4> nh2(IPv4("1.0.0.2"));
     Protocol proto("test", IGP, 0);
-    IPNet<IPv4> net1("10.0.1.0/24");
-    IPNet<IPv4> net2("10.0.2.0/24");
+    IPv4Net net1("10.0.1.0/24");
+    IPv4Net net2("10.0.2.0/24");
     UNUSED(net2);
 
     IPRouteEntry<IPv4> route1(net1, &vif1, &nh1, proto, 100);

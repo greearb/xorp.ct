@@ -188,7 +188,7 @@ int
 add_vif(XrlRibV0p1Client& client, 
 	EventLoop& loop, 
 	const string& vifname, 
-	IPv4 myaddr, IPNet<IPv4> net)
+	IPv4 myaddr, IPv4Net net)
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
@@ -213,7 +213,7 @@ int
 add_route(XrlRibV0p1Client& client, 
 	  EventLoop& loop, 
 	  const string& protocol, 
-	  IPNet<IPv4> net, IPv4 nexthop, uint32_t metric)
+	  IPv4Net net, IPv4 nexthop, uint32_t metric)
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
@@ -231,7 +231,7 @@ int
 delete_route(XrlRibV0p1Client& client, 
 	     EventLoop& loop, 
 	     const string& protocol, 
-	     IPNet<IPv4> net)
+	     IPv4Net net)
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
@@ -280,7 +280,7 @@ register_interest(XrlRibV0p1Client& client,
 		  EventLoop& loop, 
 		  const IPv4& addr,
 		  bool expected_resolves,
-		  const IPNet<IPv4>& expected_net,
+		  const IPv4Net& expected_net,
 		  const IPv4& expected_nexthop,
 		  uint32_t expected_metric)
 {

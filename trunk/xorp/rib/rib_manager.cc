@@ -236,7 +236,7 @@ RibManager::delete_vif(const string& vifname, string& err)
 int
 RibManager::add_vif_address(const string& vifname,
 			    const IPv4& addr,
-			    const IPNet<IPv4>& subnet,
+			    const IPv4Net& subnet,
 			    string& err)
 {
     if (_urib4.add_vif_address(vifname, addr, subnet) != XORP_OK) {
@@ -273,7 +273,7 @@ RibManager::delete_vif_address(const string& vifname,
 int
 RibManager::add_vif_address(const string& vifname,
 			    const IPv6& addr,
-			    const IPNet<IPv6>& subnet,
+			    const IPv6Net& subnet,
 			    string& err)
 {
     if (_urib6.add_vif_address(vifname, addr, subnet) != XORP_OK) {
