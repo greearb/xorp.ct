@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.5 2003/05/23 00:02:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.6 2004/06/10 22:40:28 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -39,7 +39,7 @@ AttributeManager<A>::add_attribute_list(
     debug_msg("AttributeManager<A>::add_attribute_list\n");
     StoredAttributeList<A> *new_att =
 	new StoredAttributeList<A>(attribute_list);
-    typedef typename set<StoredAttributeList<A>*>::iterator Iter;
+    typedef typename set<StoredAttributeList<A>*, Att_Ptr_Cmp<A> >::iterator Iter;
     Iter i = _attribute_lists.find(new_att);
     if (i == _attribute_lists.end()) {
 	new_att->clone_data();
@@ -66,7 +66,7 @@ AttributeManager<A>::delete_attribute_list(
 	new StoredAttributeList<A>(attribute_list);
     debug_msg("AttributeManager<A>::delete_attribute_list %p\n",
 	      del_att->attribute());
-    typedef typename set<StoredAttributeList<A>*>::iterator Iter;
+    typedef typename set<StoredAttributeList<A>*, Att_Ptr_Cmp<A> >::iterator Iter;
     Iter i = _attribute_lists.find(del_att);
     assert(i != _attribute_lists.end());
     delete del_att;
