@@ -18,7 +18,7 @@
 #define __LIBXIPC_XRL_STD_ROUTER_HH__
 
 #include "xrl_router.hh"
-#include "xrl_pf_stcp.hh"
+#include "xrl_pf_sudp.hh"
 
 /**
  * @short Standard XRL transmission and reception point.
@@ -32,18 +32,18 @@ class XrlStdRouter : public XrlRouter {
 public:
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name)
-	: XrlRouter(eventloop, class_name), _stcp(eventloop, this)
+	: XrlRouter(eventloop, class_name), _sudp(eventloop, this)
     {
-	add_listener(&_stcp);
+	add_listener(&_sudp);
     }
 
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
 		 IPv4		finder_address)
 	: XrlRouter(eventloop, class_name, finder_address),
-	  _stcp(eventloop, this)
+	  _sudp(eventloop, this)
     {
-	add_listener(&_stcp);
+	add_listener(&_sudp);
     }
 
     
@@ -52,18 +52,18 @@ public:
 		 IPv4		finder_address,
 		 uint16_t	finder_port)
 	: XrlRouter(eventloop, class_name, finder_address, finder_port),
-	  _stcp(eventloop, this)
+	  _sudp(eventloop, this)
     {
-	add_listener(&_stcp);
+	add_listener(&_sudp);
     }
     
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
 		 const char*	finder_address)
 	: XrlRouter(eventloop, class_name, finder_address),
-	  _stcp(eventloop, this)
+	  _sudp(eventloop, this)
     {
-	add_listener(&_stcp);
+	add_listener(&_sudp);
     }
 
     XrlStdRouter(EventLoop&	eventloop,
@@ -71,18 +71,18 @@ public:
 		 const char*	finder_address,
 		 uint16_t	finder_port)
 	: XrlRouter(eventloop, class_name, finder_address, finder_port),
-	  _stcp(eventloop, this)
+	  _sudp(eventloop, this)
     {
-	add_listener(&_stcp);
+	add_listener(&_sudp);
     }
 
     ~XrlStdRouter()
     {
-	// remove_listener(&_stcp);
+	// remove_listener(&_sudp);
     }
 
 private:
-    XrlPFSTCPListener _stcp;
+    XrlPFSUDPListener _sudp;
 };
 
 #endif // __LIBXIPC_XRL_STD_ROUTER_HH__
