@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.9 2003/06/19 00:44:42 hodson Exp $
+// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.10 2003/09/12 00:48:13 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
@@ -139,12 +139,15 @@ class FinderTcpAutoConnector
     : public FinderTcpConnector, public FinderMessengerManager
 {
 public:
-    FinderTcpAutoConnector(EventLoop&		     e,
-			     FinderMessengerManager& mm,
-			     XrlCmdMap&		     cmds,
-			     IPv4		     host,
-			     uint16_t		     port,
-			     bool		     enabled = true);
+    FinderTcpAutoConnector(
+			   EventLoop&		     	e,
+			   FinderMessengerManager& 	mm,
+			   XrlCmdMap&		     	cmds,
+			   IPv4		     		host,
+			   uint16_t		     	port,
+			   bool		     		enabled		= true,
+			   uint32_t			give_up_ms	= 0
+			   );
     virtual ~FinderTcpAutoConnector();
 
     void set_enabled(bool en);
@@ -175,6 +178,7 @@ protected:
     bool		    _enabled;
     bool		    _once_active;
     XorpTimer		    _retry_timer;
+    XorpTimer		    _giveup_timer;
     int			    _last_error;
     size_t		    _consec_error;
 

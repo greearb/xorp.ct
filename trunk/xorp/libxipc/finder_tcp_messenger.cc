@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.15 2003/06/19 00:44:42 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.16 2003/09/12 00:48:13 hodson Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -290,18 +290,26 @@ FinderTcpConnector::finder_port() const
 //
 
 FinderTcpAutoConnector::FinderTcpAutoConnector(
-				   EventLoop&		   e,
-				   FinderMessengerManager& real_manager,
-				   XrlCmdMap&		   cmds,
-				   IPv4			   host,
-				   uint16_t		   port,
-				   bool			   en)
+				EventLoop&		e,
+				FinderMessengerManager& real_manager,
+				XrlCmdMap&		cmds,
+				IPv4			host,
+				uint16_t		port,
+				bool			en,
+				uint32_t 		give_up_ms
+				)
     : FinderTcpConnector(e, *this, cmds, host, port),
       _real_manager(real_manager), _connected(false), _enabled(en),
       _once_active(false), _last_error(0), _consec_error(0)
 {
     if (en) {
 	start_timer();
+	if (give_up_ms) {
+	    _giveup_timer =
+		e.new_oneoff_after_ms(give_up_ms,
+			callback(this,
+				 &FinderTcpAutoConnector::set_enabled, false));
+	}
     }
 }
 
