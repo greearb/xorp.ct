@@ -115,8 +115,193 @@ protocols \{\\
 
 \section{Monitoring BGP}
 
-op-mode stuff.
+On a router running BGP, the BGP routing state can be displayed using
+the {\stt show bgp} operational-mode command.  Information is available
+about the status of BGP peerings and about the routes received and
+used.  In the 1.0 release, the set of commands is fairly crude, and
+will be increased in future releases to provide better ways to display
+subsets of this information.
+
+As always, command completion using $<$TAB$>$ or ? will display the
+available sub-commands and parameters:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xxxxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show bgp ?}\\
+Possible completions:\\
+\><[Enter]>\>Execute this command\\
+\>peers\>Show BGP peers info\\
+\>routes\>Print BGP routes\\
+\>|\>Pipe through a command\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+The {\stt show bgp peers} command will display information about the
+BGP peerings that have been configured.  It supports the optional
+paramater {\stt detail} to give a lot more information:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xxxxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show bgp peers ?}\\
+Possible completions:\\
+\><[Enter]>\>Execute this command\\
+\>detail\>Show detailed BGP peers info\\
+\>|\>Pipe through a command\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+By itself, {\stt show bgp peers} provides a short list of the peerings
+that are configured, irrespective of whether the peering is
+in established state or not:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xxxxxxxxxxxxxxxx\=\kill
+Xorp> \textbf{show bgp peers} \\
+Peer 1: local 192.150.187.112/179 remote 69.110.224.158/179\\
+Peer 2: local 192.150.187.112/179 remote 192.150.187.2/179\\
+Peer 3: local 192.150.187.112/179 remote 192.150.187.78/179\\
+Peer 4: local 192.150.187.112/179 remote 192.150.187.79/179\\
+Peer 5: local 192.150.187.112/179 remote 192.150.187.109/179\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+The command {\stt show bgp peers detail} will give a large amount of
+information about all the peerings:  
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+Xorp> \textbf{show bgp peers detail}\\
+Peer 1: local 192.150.187.112/179 remote 69.110.224.158/179\\
+\>Peer ID: none\\
+\>Peer State: ACTIVE\\
+\>Admin State: START\\
+\>Negotiated BGP Version: n/a\\
+\>Peer AS Number: 65014\\
+\>Updates Received: 0,  Updates Sent: 0\\
+\>Messages Received: 0,  Messages Sent: 0\\
+\>Time since last received update: n/a\\
+\>Number of transitions to ESTABLISHED: 0\\
+\>Time since last in ESTABLISHED state: n/a\\
+\>Retry Interval: 120 seconds\\
+\>Hold Time: n/a,  Keep Alive Time: n/a\\
+\>Configured Hold Time: 120 seconds,  Configured Keep Alive Time: 40 seconds\\
+\>Minimum AS Origination Interval: 0 seconds\\
+\>Minimum Route Advertisement Interval: 0 seconds\\
+\\
+Peer 2: local 192.150.187.112/179 remote 192.150.187.2/179\\
+\>Peer ID: 192.150.187.2\\
+\>Peer State: ESTABLISHED\\
+\>Admin State: START\\
+\>Negotiated BGP Version: 4\\
+\>Peer AS Number: 64999\\
+\>Updates Received: 52786,  Updates Sent: 28\\
+\>Messages Received: 52949,  Messages Sent: 189\\
+\>Time since last received update: 2 seconds\\
+\>Number of transitions to ESTABLISHED: 17\\
+\>Time since last entering ESTABLISHED state: 6478 seconds\\
+\>Retry Interval: 120 seconds\\
+\>Hold Time: 120 seconds,  Keep Alive Time: 40 seconds\\
+\>Configured Hold Time: 120 seconds,  Configured Keep Alive Time: 40 seconds\\
+\>Minimum AS Origination Interval: 0 seconds\\
+\>Minimum Route Advertisement Interval: 0 seconds\\
+\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+} 
+
+The most important piece of information is typically whether or not
+the peering is in ESTABLISHED state, indicating that the peering is up
+and capable of exchanging routes.  ACTIVE state means that the peering
+is configured to be up on this router, but for some reason the peering
+is not currently up.  Typically this is because the remote peer is
+unreachable, or because no BGP instance is running on the remote peer.
+
+The {\stt show bgp routes} command displays the routes received by BGP
+from its peers.  On a router with a full BGP routing table (140000
+routes as of July 2003) this command will produce a large amount of
+output:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xx\=\kill
+Xorp> \textbf{show bgp routes}\\
+Status Codes: * valid route, > best route\\
+Origin Codes: i IGP, e EGP, ? incomplete\\
+\\
+\>Prefix\>Nexthop\>Peer\>AS Path\\
+\>------\>-------\>----\>-------\\
+*>\>3.0.0.0/8\>192.150.187.2\>192.150.187.2\>16694 25 2152 3356 7018 80 i\\
+*>\>4.17.225.0/24\>192.150.187.2\>192.150.187.2\>16694 25 2152 11423 209 701 11853 6496 i\\
+*>\>4.17.226.0/23\>192.150.187.2\>192.150.187.2\>16694 25 2152 11423 209 701 11853 6496 i\\
+*>\>4.17.251.0/24\>192.150.187.2\>192.150.187.2\>16694 25 2152 11423 209 701 11853 6496 i\\
+*>\>4.17.252.0/23\>192.150.187.2\>192.150.187.2\>16694 25 2152 11423 209 701 11853 6496 i\\
+*>\>4.21.252.0/23\>192.150.187.2\>192.150.187.2\>16694 25 2152 11423 209 701 6389 8063 19198 i\\
+*>\>4.23.180.0/24\>192.150.187.2\>192.150.187.2\>16694 25 2152 11423 209 3561 6128 30576 i\\
+*>\>4.36.200.0/21\>192.150.187.2\>192.150.187.2\>16694 25 2152 174 3561 14742 11854 14135 i\\
+*>\>4.78.0.0/21\>192.150.187.2\>192.150.187.2\>16694 25 2152 11423 209 3561 6347 23071 22938 i\\
+*>\>4.78.32.0/21\>192.150.187.2\>192.150.187.2\>16694 25 2152 174 3491 29748 i\\
+*>\>4.0.0.0/8\>192.150.187.2\>192.150.187.2\>16694 25 2152 3356 i\\
+...
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The format of the output is one route per line.  On each line:
+\begin{itemize}
+\item A status code is displayed, showing whether the route is valid
+(available for us to use because it isn't filtered by the inbound BGP
+filters and the nexthop is reachable), and whether it was the best BGP
+route this router has received.
+\item The network prefix for which the route applies is listed in the
+  form {\stt 4.17.226.0/23}.  This indicates the base address for the
+  network (address {\stt 4.17.226.0}), and the prefix length ({\stt 23} bits).
+  Thus this route applies for addresses {\stt 4.17.226.0} to {\stt
+  4.17.227.255} inclusive.
+\item The nexthop is the IP address of the intermediate router towards
+  which packet destined for the network prefix should be sent.  In
+  this example all the displayed routes have the same nexthop.
+\item The peer is the IP address of the BGP router which sent us this
+  route.  The nexthop and the peer need not the the same (they often
+  aren't with IBGP peerings for example) but in all the routes in this
+  example they are the same.
+\item The AS path is listed next.  This lists the AS numbers of the
+  autonomous systems that the route has traversed to reach our
+  router.  The AS at the left end of the path is the one nearest to
+  our router and the one at the right end of the path is usually the
+  AS number of the route's originator.  
+\item Finally, whether the route's origin is from an IGP ({\stt i}),
+  from EGP ({\stt e}, mostly obsolete), or incomplete ({\stt ?}) is
+  listed.
+\end{itemize}
 
 \subsection{BGP MIB}
 
-what we support
+say what we support
