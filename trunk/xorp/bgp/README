@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/README,v 1.7 2003/11/07 00:00:10 pavlin Exp $
+# $XORP: xorp/bgp/README,v 1.8 2003/11/07 01:12:03 atanu Exp $
 #
 
 Border Gateway Protocol (BGP) Implementation
@@ -48,7 +48,7 @@ committed to bgp must come with it's own set of validation checks.
 Status
 ======
 
-November 2003: The core functionality of BGP is basically complete. We
+June 2004: The core functionality of BGP is basically complete. We
 have a reasonable number of test suites available, but nowhere near
 enough to be sure of correct operation in all cases.  Pretty much no
 optional functionality is supported:
@@ -58,13 +58,9 @@ optional functionality is supported:
 - Confederations are not supported.
 - Route Reflection is not supported.
 - IPv6 is supported.
-- The code for multicast SAFI is enabled but is untested.
 - Route import from IGPs is not supported.
 
 Known problems:
 
-    * Under certain circumstances a new session may be sent withdraws
-      that were meant for the previous session. This problem can be
-      reproduced by running "test_peering2.sh" with the "-b" flag.
-
-    * Under certain conditions the BGP process leaks memory.
+    * Once BGP selects a route it is taking too long to install it in
+      the kernel.
