@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.7 2003/04/23 00:52:49 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.8 2003/06/02 08:06:22 pavlin Exp $"
 
 
 //
@@ -848,29 +848,14 @@ CliClient::process_char_page_mode(uint8_t val)
 }
 
 void
-CliClient::post_process_command(bool timer_timeout)
+CliClient::post_process_command()
 {
     //
     // Test if we are waiting for the result from a server
     //
     if (is_waiting_for_data()) {
-	// Need to wait to receive the data from a server before
-	// presenting the prompt back to the user
-	// TODO: currently, the waiting time is hardcoded to 5000ms (5 sec)
-	if (! timer_timeout) {
-	    _waiting_for_result_timer =
-		cli_node().eventloop().new_oneoff_after_ms(5000,
-							   callback(this, &CliClient::post_process_command, true));
-	    return;
-	}
-	// Timeout waiting for data
-	// TODO: print information about which command and which server
-	cli_print("Timeout waiting for result!\n");
-	set_is_waiting_for_data(false);
-    } else {
-	// the timer was scheduled, but we're no longer waiting for data.
-	if (_waiting_for_result_timer.scheduled())
-	    _waiting_for_result_timer.unschedule();
+	// We are waiting for the result; silently return.
+	return;
     }
     
     //
@@ -941,7 +926,7 @@ CliClient::process_char(const char *line, uint8_t val)
 	// cli_print(c_format("Your command is: %s\n", line));
 	set_page_buffer_mode(true);
 	process_command(line);
-	post_process_command(false);
+	post_process_command();
 	return (XORP_OK);
     }
     
@@ -976,7 +961,6 @@ CliClient::process_char(const char *line, uint8_t val)
 	if (is_waiting_for_data()) {
 	    // Reset everything about the command
 	    set_is_waiting_for_data(false);
-	    waiting_for_result_timer().unschedule();
 	    delete_pipe_all();
 	    set_pipe_mode(false);
 	    set_hold_mode(false);

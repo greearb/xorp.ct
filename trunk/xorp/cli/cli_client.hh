@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.3 2003/03/10 23:20:11 hodson Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.4 2003/03/30 03:50:43 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -253,15 +253,8 @@ public:
     
     /**
      * Perform final processing of a command.
-     * 
-     * Note: the @ref timer_timeout flag may disappear in the future,
-     * because there will be no command timeout.
-     * 
-     * @param timer_timeout if true, perform processing because
-     * of a command timeout (i.e., failure to complete), otherwise
-     * perform normal processing.
      */
-    void post_process_command(bool timer_timeout);
+    void post_process_command();
     
     //
     // Server communication state
@@ -281,20 +274,6 @@ public:
      * is set as non-waiting.
      */
     void set_is_waiting_for_data(bool v);
-    
-    /**
-     * Get the timer that is waiting for the data to arrive from the
-     * command processor.
-     * 
-     * Note: this method may disappear in the future, because there will be
-     * no command timeout.
-     * 
-     * @return the timer that is waiting for the data to arrive from the
-     * command processor.
-     */
-    XorpTimer& waiting_for_result_timer() { 
-	return (_waiting_for_result_timer); 
-    }
     
     /**
      * Get the current CLI prompt.
@@ -490,7 +469,6 @@ private:
     // Server communication state
     //
     bool _is_waiting_for_data;		// True if waiting for external data
-    XorpTimer _waiting_for_result_timer;
 };
 
 

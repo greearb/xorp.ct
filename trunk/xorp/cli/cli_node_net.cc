@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.12 2003/04/23 00:52:49 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.13 2003/06/02 08:06:22 pavlin Exp $"
 
 
 //
@@ -285,7 +285,7 @@ CliClient::start_connection(void)
 		return (XORP_ERROR);
 	    }
 	}
-	termios.c_lflag &= ~(ICANON | ECHO);
+	termios.c_lflag &= ~(ICANON | ECHO | ISIG);
 	while (tcsetattr(cli_fd(), TCSADRAIN, &termios) != 0) {
 	    if (errno != EINTR) {
 		XLOG_ERROR("start_connection(): tcsetattr() error: %s", 
