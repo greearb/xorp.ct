@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/update_queue.hh,v 1.6 2003/07/15 18:49:08 hodson Exp $
+// $XORP: xorp/rip/update_queue.hh,v 1.7 2003/07/16 05:03:34 hodson Exp $
 
 #ifndef __RIP_UPDATE_QUEUE__
 #define __RIP_UPDATE_QUEUE__
@@ -31,7 +31,7 @@ class UpdateQueueImpl;
  * UpdateQueueReaderPool actually tracks the position of each iterator,
  * this class just maintains a token that the reader pool uses.
  */
-template <class A>
+template <typename A>
 class UpdateQueueReader {
 public:
     UpdateQueueReader(UpdateQueueImpl<A>* i);
