@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.43 2003/06/03 10:40:56 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.44 2003/06/04 01:30:35 jcardona Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -37,7 +37,7 @@ AC_INIT(libxorp/xorp.h)
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_SYSTEM
 AC_CONFIG_SUBDIRS(cli/libtecla)
-AM_INIT_AUTOMAKE(xorp, 0.2)
+AM_INIT_AUTOMAKE(xorp, 0.3)
 AM_CONFIG_HEADER(config.h)
 
 # Add --enable-maintainer-mode as a command-line option for folks who
