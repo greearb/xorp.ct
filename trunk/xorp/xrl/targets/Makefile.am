@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.42 2004/11/08 22:29:19 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.43 2004/11/08 22:32:41 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -136,6 +136,7 @@ $(srcdir)/demo_fea_ifmgr_client_base.cc:				\
 libfeabase_a_SOURCES = fea_base.hh fea_base.cc
 $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/fea_click.xif				\
 		$(INTERFACES_DIR)/fea_fib.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif		\
@@ -240,7 +241,7 @@ libribbase_a_SOURCES = rib_base.hh rib_base.cc
 $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
-                $(INTERFACES_DIR)/policy_backend.xif			\
+		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/rib.xif				\
 		$(INTERFACES_DIR)/profile.xif
 

@@ -1,6 +1,7 @@
-/* $XORP: xorp/xrl/targets/fea.tgt,v 1.9 2004/05/13 08:05:36 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/fea.tgt,v 1.10 2004/10/02 03:42:11 atanu Exp $ */
 
 #include "common.xif"
+#include "fea_click.xif"
 #include "fea_fib.xif"
 #include "fea_ifmgr.xif"
 #include "fea_ifmgr_replicator.xif"
@@ -13,6 +14,7 @@
 #include "profile.xif"
 
 target fea implements	common/0.1,					\
+			fea_click/0.1,					\
 			fea_fib/0.1,					\
 			ifmgr/0.1,					\
 			ifmgr_replicator/0.1,				\
@@ -23,4 +25,3 @@ target fea implements	common/0.1,					\
 			socket4_locator/0.1,				\
 			socket6_locator/0.1,				\
 			profile/0.1
-			

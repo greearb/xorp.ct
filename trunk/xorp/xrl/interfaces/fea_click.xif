@@ -1,0 +1,107 @@
+/* $XORP$ */
+
+/*
+ * Click FEA XRL interface.
+ */
+
+
+interface fea_click/0.1 {
+
+	/**
+	 * Enable/disable Click FEA support.
+	 *
+	 * @param enable if true, then enable the Click FEA support,
+	 * otherwise disable it.
+	 */
+	enable_click	? enable:bool
+
+	/**
+	 * Start Click FEA support.
+	 */
+	start_click
+
+	/**
+	 * Stop Click FEA support.
+	 */
+	stop_click
+
+	/**
+	 * Specify the external program to generate the Click configuration.
+	 *
+	 * @param click_config_generator_file the name of the external program
+	 * to generate the Click configuration.
+	 */
+	set_click_config_generator_file	? click_config_generator_file:txt
+
+	/**
+	 * Enable/disable kernel-level Click FEA support.
+	 *
+	 * @param enable if true, then enable the kernel-level Click FEA
+	 * support, otherwise disable it.
+	 */
+	enable_kernel_click	? enable:bool
+
+	/**
+	 * Enable/disable user-level Click FEA support.
+	 *
+	 * @param enable if true, then enable the user-level Click FEA
+	 * support, otherwise disable it.
+	 */
+	enable_user_click	? enable:bool
+
+	/**
+	 * Specify the user-level Click command file.
+	 *
+	 * @param user_click_command_file the name of the user-level Click
+	 * command file.
+	 */
+	set_user_click_command_file	? user_click_command_file:txt
+
+	/**
+	 * Specify the extra arguments to the user-level Click command.
+	 *
+	 * @param user_click_command_extra_arguments the extra arguments
+	 * to the user-level Click command.
+	 */
+	set_user_click_command_extra_arguments		?		\
+					 user_click_command_extra_arguments:txt
+
+	/**
+	 * Specify whether to execute on startup the user-level Click command.
+	 *
+	 * @param user_click_command_execute_on_startup if true, then execute
+	 * the user-level Click command on startup.
+	 */
+	set_user_click_command_execute_on_startup	?		\
+				 user_click_command_execute_on_startup:bool
+
+	/**
+	 * Specify the address to use for control access to the
+	 * user-level Click.
+	 *
+	 * @param user_click_control_address the address to use for
+	 * control access to the user-level Click.
+	 */
+	set_user_click_control_address		?		\
+				 user_click_control_address:ipv4
+
+	/**
+	 * Specify the socket port to use for control access to the
+	 * user-level Click.
+	 *
+	 * @param user_click_control_socket_port the socket port to use for
+	 * control access to the user-level Click.
+	 */
+	set_user_click_control_socket_port		?		\
+				 user_click_control_socket_port:u32
+
+	/**
+	 * Specify the configuration file to be used by user-level Click
+	 * on startup.
+	 *
+	 * @param user_click_startup_config_file the name of the
+	 * configuration file to be used by user-level Click on startup.
+	 */
+	set_user_click_startup_config_file		?		\
+				user_click_startup_config_file:txt
+}

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.22 2004/09/21 18:09:12 atanu Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.23 2004/09/22 01:49:36 pavlin Exp $
 ##
 
 ###############################################################################
@@ -34,6 +34,10 @@ libcoordxif_a_SOURCES = coord_xif.hh coord_xif.cc
 # Datain client of the test peer interface.
 noinst_LIBRARIES += libdatainxif.a
 libdatainxif_a_SOURCES = datain_xif.hh datain_xif.cc
+
+# FEA Click Interface
+noinst_LIBRARIES += libfeaclickxif.a
+libfeaclickxif_a_SOURCES = fea_click_xif.hh fea_click_xif.cc
 
 # FEA Client Interface
 noinst_LIBRARIES += libfeaifmgrxif.a
