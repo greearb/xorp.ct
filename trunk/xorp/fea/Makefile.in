@@ -98,7 +98,7 @@ bindir = $(prefix)/$(subdir)
 SUBDIRS = . tools
 
 # -- Real Programs
-bin_PROGRAMS = xorp_fea xorp_fea_dummy
+bin_PROGRAMS = xorp_fea xorp_fea_dummy xorp_fea_click_config_generator
 
 # -- Test Programs and Scripts
 TESTS = test_rawsock4 test_ifmanager_transaction test_xrl_sockets4_udp.sh
@@ -133,6 +133,9 @@ xorp_fea_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libfeafibc
 xorp_fea_dummy_CXXFLAGS = -DFEA_DUMMY
 xorp_fea_dummy_SOURCES = fea.cc
 xorp_fea_dummy_LDADD = $(xorp_fea_LDADD)
+
+# -- Sources for xorp_fea_click_config_generator
+xorp_fea_click_config_generator_SOURCES = xorp_fea_click_config_generator
 
 # -- Sources and Linkage for test_mfea
 test_mfea_SOURCES = test_mfea.cc
@@ -223,7 +226,8 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo firewall.lo \
 	xrl_rawsock4.lo xrl_rawsock6.lo xrl_socket_cmds.lo \
 	xrl_socket_server.lo xrl_target.lo
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
-bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT)
+bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT) \
+	xorp_fea_click_config_generator$(EXEEXT)
 check_PROGRAMS = test_ifmanager_transaction$(EXEEXT) test_mfea$(EXEEXT) \
 	test_rawsock4$(EXEEXT) test_xrl_sockets4_udp$(EXEEXT)
 noinst_PROGRAMS = demo_fea_ifmgr_client$(EXEEXT)
@@ -331,6 +335,12 @@ xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 xorp_fea_LDFLAGS =
+am_xorp_fea_click_config_generator_OBJECTS =
+xorp_fea_click_config_generator_OBJECTS = \
+	$(am_xorp_fea_click_config_generator_OBJECTS)
+xorp_fea_click_config_generator_LDADD = $(LDADD)
+xorp_fea_click_config_generator_DEPENDENCIES =
+xorp_fea_click_config_generator_LDFLAGS =
 am_xorp_fea_dummy_OBJECTS = xorp_fea_dummy-fea.$(OBJEXT)
 xorp_fea_dummy_OBJECTS = $(am_xorp_fea_dummy_OBJECTS)
 xorp_fea_dummy_DEPENDENCIES = libfea.la \
@@ -483,7 +493,8 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 DIST_SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) \
 	$(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) \
 	$(test_rawsock4_SOURCES) $(test_xrl_sockets4_udp_SOURCES) \
-	$(xorp_fea_SOURCES) $(xorp_fea_dummy_SOURCES)
+	$(xorp_fea_SOURCES) $(xorp_fea_click_config_generator_SOURCES) \
+	$(xorp_fea_dummy_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -491,7 +502,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) $(test_rawsock4_SOURCES) $(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) $(xorp_fea_dummy_SOURCES)
+SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) $(test_rawsock4_SOURCES) $(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) $(xorp_fea_click_config_generator_SOURCES) $(xorp_fea_dummy_SOURCES)
 
 all: all-recursive
 
@@ -566,6 +577,9 @@ test_xrl_sockets4_udp$(EXEEXT): $(test_xrl_sockets4_udp_OBJECTS) $(test_xrl_sock
 xorp_fea$(EXEEXT): $(xorp_fea_OBJECTS) $(xorp_fea_DEPENDENCIES) 
 	@rm -f xorp_fea$(EXEEXT)
 	$(CXXLINK) $(xorp_fea_LDFLAGS) $(xorp_fea_OBJECTS) $(xorp_fea_LDADD) $(LIBS)
+xorp_fea_click_config_generator$(EXEEXT): $(xorp_fea_click_config_generator_OBJECTS) $(xorp_fea_click_config_generator_DEPENDENCIES) 
+	@rm -f xorp_fea_click_config_generator$(EXEEXT)
+	$(LINK) $(xorp_fea_click_config_generator_LDFLAGS) $(xorp_fea_click_config_generator_OBJECTS) $(xorp_fea_click_config_generator_LDADD) $(LIBS)
 xorp_fea_dummy-fea.$(OBJEXT): fea.cc
 xorp_fea_dummy$(EXEEXT): $(xorp_fea_dummy_OBJECTS) $(xorp_fea_dummy_DEPENDENCIES) 
 	@rm -f xorp_fea_dummy$(EXEEXT)
