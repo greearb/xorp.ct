@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.9 2003/06/06 08:48:18 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.10 2003/08/28 14:15:29 pavlin Exp $
 #
 
 * Do we need to include <asm/types.h> for Linux, when we include
@@ -12,11 +12,6 @@
 * When obtaining the forwarding table from the kernel,
   do we need to take special care of the
   (rtm->rtm_flags & RTF_LLINFO) entries? (see the mfea code for that).
-
-* Explicitly enable forwarding with sysctlbyname("net.inet.ip.forwarding"),
-  or whatever other mechanism exists:
-    size_t enable = 1;
-    sysctlbyname("net.inet.ip.forwarding", 0, 0, &enable, sizeof(enable))
 
 * Make sure that the interfaces in the interface tree are deleted properly
   whenever the underlying interfaces in the kernel change. E.g.,
