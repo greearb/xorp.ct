@@ -86,10 +86,6 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return ASSIGN_OPERATOR;
 	}
 
-","	{
-	return LISTNEXT;
-	}
-
 "true"	{
 	bootlval = strdup(boottext);
 	return BOOL_VALUE;

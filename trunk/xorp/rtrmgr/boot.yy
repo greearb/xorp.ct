@@ -15,7 +15,6 @@
 %token DOWNLEVEL
 %token END
 %left ASSIGN_OPERATOR
-%token LISTNEXT
 %token BOOL_VALUE
 %token UINT_VALUE
 %token IPV4_VALUE
