@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.7 2003/02/25 01:38:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.8 2003/02/28 03:01:23 pavlin Exp $"
 
 
 //
@@ -131,6 +131,10 @@ PimNodeCli::add_all_cli_commands(void)
     add_cli_command("show pim rps",
 		    "Display information about PIM RPs",
 		    callback(this, &PimNodeCli::cli_show_pim_rps));
+
+    add_cli_command("show pim scope",
+		    "Display information about PIM scope zones",
+		    callback(this, &PimNodeCli::cli_show_pim_scope));
     
     return (XORP_OK);
 }
@@ -1197,6 +1201,43 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 		   (uint32_t)(pim_rp->pim_mre_wc_list().size()
 			      + pim_rp->processing_pim_mre_wc_list().size()),
 		   cstring(pim_rp->group_prefix())));
+    }
+    
+    return (XORP_OK);
+}
+
+//
+// CLI COMMAND: "show pim scope"
+//
+// Display information about PIM RPs
+//
+int
+PimNodeCli::cli_show_pim_scope(const vector<string>& argv)
+{
+    // Check the optional argument
+    if (argv.size()) {
+	cli_print(c_format("ERROR: Unexpected argument: %s\n",
+			   argv[0].c_str()));
+	return (XORP_ERROR);
+    }
+    
+    cli_print(c_format("%-18s%-10s\n",
+		       "GroupPrefix", "Interface"));
+    list<PimScopeZone>::const_iterator iter;
+    for (iter = pim_node().pim_scope_zone_table().pim_scope_zone_list().begin();
+	 iter != pim_node().pim_scope_zone_table().pim_scope_zone_list().end();
+	 ++iter) {
+	const PimScopeZone& pim_scope_zone = *iter;
+	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	    if (pim_scope_zone.is_set(i)) {
+		PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
+		if (pim_vif == NULL)
+		    continue;
+		cli_print(c_format("%-18s%-10s\n",
+				   cstring(pim_scope_zone.scope_zone_prefix()),
+				   pim_vif->name().c_str()));
+	    }
+	}
     }
     
     return (XORP_OK);
