@@ -826,6 +826,7 @@ $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 		$(INTERFACES_DIR)/socket4_user.xif
 $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/ripng.xif				\
 		$(INTERFACES_DIR)/socket6_user.xif
 $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\

@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.23 2004/02/17 23:33:56 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.24 2004/02/19 04:33:14 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -217,6 +217,7 @@ $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 libripngbase_a_SOURCES = ripng_base.hh ripng_base.cc
 $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/ripng.xif				\
 		$(INTERFACES_DIR)/socket6_user.xif
 
