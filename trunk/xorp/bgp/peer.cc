@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.71 2004/05/29 01:43:04 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.72 2004/05/29 19:55:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -142,8 +142,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    event_recvupdate(pac);
 	    TIMESPENT_CHECK();
 	    if(TIMESPENT_OVERLIMIT()) {
-		XLOG_WARNING("Processing packet took longer than %d second\n"
-			     "%s\n", TIMESPENT_LIMIT, pac.str().c_str());
+		XLOG_WARNING("Processing packet took longer than %d second %s",
+			     TIMESPENT_LIMIT, pac.str().c_str());
 	    }
 	    break;
 	}
@@ -157,7 +157,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		debug_msg(pac.str().c_str());
 		event_recvnotify(pac);
 	    } catch (InvalidPacket& err) {
-		XLOG_WARNING("Received Invalid Notification Packet\n");
+		XLOG_WARNING("%s Received Invalid Notification Packet",
+			     this->str().c_str());
 		// We received a bad notification packet.  We don't
 		// want to send a notification in response to a
 		// notification, so we need to treat this as if it were
@@ -177,7 +178,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    /*
 	    ** Send a notification to the peer. This is a bad message type.
 	    */
-	    XLOG_ERROR("Unknown packet type %d", header->type);
+	    XLOG_ERROR("%s Unknown packet type %d",
+		       this->str().c_str(), header->type);
 	    notify_peer_of_error(MSGHEADERERR, BADMESSTYPE);
 	    event_tranfatal();
 	    TIMESPENT_CHECK();
@@ -188,8 +190,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	** This peer has sent us a bad message. Send a notification
 	** and drop the the peering.
 	*/
-	XLOG_WARNING("From peer %s: %s", peerdata()->iptuple().str().c_str(),
-		     c.why().c_str());
+	XLOG_WARNING("%s %s", this->str().c_str(),c.why().c_str());
 	notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
 	event_tranfatal();
 	TIMESPENT_CHECK();
@@ -377,7 +378,8 @@ void
 BGPPeer::hook_stopped()
 {
     XLOG_ASSERT(STATESTOPPED == _state);
-    XLOG_WARNING("Unable to send Notification so taking peer to idle");
+    XLOG_WARNING("%s Unable to send Notification so taking peer to idle",
+		 this->str().c_str());
 
     /*
     ** If the original notification was not an error such as sending a
@@ -484,8 +486,9 @@ BGPPeer::event_open()	// EVENTBGPTRANOPEN
     case STATEESTABLISHED:
     case STATESTOPPED:
     case STATEIDLE:
-	XLOG_FATAL("can't get EVENTBGPTRANOPEN in state %s",
-		pretty_print_state(_state) );
+	XLOG_FATAL("%s can't get EVENTBGPTRANOPEN in state %s",
+		   this->str().c_str(),
+		   pretty_print_state(_state));
 	break;
 
     case STATECONNECT:
@@ -569,8 +572,9 @@ BGPPeer::event_openfail()			// EVENTBGPCONNOPENFAIL
     case STATEOPENCONFIRM:
     case STATEESTABLISHED:
     case STATESTOPPED:
-	XLOG_FATAL("can't get EVENTBGPCONNOPENFAIL in state %s",
-		pretty_print_state(_state) );
+	XLOG_FATAL("%s can't get EVENTBGPCONNOPENFAIL in state %s",
+		   this->str().c_str(),
+		   pretty_print_state(_state));
 	break;
 
     case STATECONNECT:
@@ -645,8 +649,9 @@ BGPPeer::event_connexp()			// EVENTCONNTIMEEXP
     case STATEESTABLISHED: {
 	// Send Notification Message with error code of FSM error.
 	// XXX this needs to be revised.
-	XLOG_WARNING("FSM received EVENTCONNTIMEEXP in state %s",
-	    pretty_print_state(_state));
+	XLOG_WARNING("%s FSM received EVENTCONNTIMEEXP in state %s",
+		     this->str().c_str(),
+		     pretty_print_state(_state));
 	NotificationPacket np(FSMERROR);
 	send_notification(np);
 	set_state(STATESTOPPED, true);
@@ -702,8 +707,9 @@ BGPPeer::event_keepexp()			// EVENTKEEPALIVEEXP
     case STATECONNECT:
     case STATEACTIVE:
     case STATEOPENSENT:
-	XLOG_FATAL("FSM received EVENTKEEPALIVEEXP in state %s",
-	    pretty_print_state(_state));
+	XLOG_FATAL("%s FSM received EVENTKEEPALIVEEXP in state %s",
+		   this->str().c_str(),
+		   pretty_print_state(_state));
 	break;
 
     case STATEOPENCONFIRM:
@@ -728,8 +734,9 @@ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
     case STATEIDLE:
     case STATECONNECT:
     case STATEACTIVE:
-	XLOG_FATAL("FSM received EVENTRECOPENMESS in state %s",
-	    pretty_print_state(_state));
+	XLOG_FATAL("%s FSM received EVENTRECOPENMESS in state %s",
+		   this->str().c_str(),
+		   pretty_print_state(_state));
 	break;
 
     case STATEOPENSENT:
@@ -770,8 +777,9 @@ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
     case STATEOPENCONFIRM:
     case STATEESTABLISHED: {
 	// Send Notification - FSM error
-	XLOG_WARNING("FSM received EVENTRECOPENMESS in state %s",
-	    pretty_print_state(_state));
+	XLOG_WARNING("%s FSM received EVENTRECOPENMESS in state %s",
+		     this->str().c_str(),
+		     pretty_print_state(_state));
 	NotificationPacket np(FSMERROR);
 	send_notification(np);
 	set_state(STATESTOPPED, true);
@@ -795,8 +803,9 @@ BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
     case STATEIDLE:
     case STATECONNECT:
     case STATEACTIVE:
-	XLOG_FATAL("FSM received EVENTRECKEEPALIVEMESS in state %s",
-	    pretty_print_state(_state));
+	XLOG_FATAL("%s FSM received EVENTRECKEEPALIVEMESS in state %s",
+		   this->str().c_str(),
+		   pretty_print_state(_state));
 	break;
 
     case STATESTOPPED:
@@ -804,8 +813,9 @@ BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
 
     case STATEOPENSENT: {
 	// Send Notification Message with error code of FSM error.
-	XLOG_WARNING("FSM received EVENTRECKEEPALIVEMESS in state %s",
-	    pretty_print_state(_state));
+	XLOG_WARNING("%s FSM received EVENTRECKEEPALIVEMESS in state %s",
+		     this->str().c_str(),
+		     pretty_print_state(_state));
 	NotificationPacket np(FSMERROR);
 	send_notification(np);
 	set_state(STATESTOPPED, true);
@@ -835,15 +845,17 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
     case STATEIDLE:
     case STATECONNECT:
     case STATEACTIVE:
-	XLOG_FATAL("FSM received EVENTRECUPDATEMESS in state %s",
-	    pretty_print_state(_state));
+	XLOG_FATAL("%s FSM received EVENTRECUPDATEMESS in state %s",
+		   this->str().c_str(),
+		   pretty_print_state(_state));
 	break;
 
     case STATEOPENSENT:
     case STATEOPENCONFIRM: {
 	// Send Notification Message with error code of FSM error.
-	XLOG_WARNING("FSM received EVENTRECUPDATEMESS in state %s",
-	    pretty_print_state(_state));
+	XLOG_WARNING("%s FSM received EVENTRECUPDATEMESS in state %s",
+		     this->str().c_str(),
+		     pretty_print_state(_state));
 	NotificationPacket np(FSMERROR);
 	send_notification(np);
 	set_state(STATESTOPPED, true);
@@ -896,15 +908,18 @@ BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 { 
     TIMESPENT();
 
-    XLOG_WARNING("In state %s received %s",  pretty_print_state(_state),
+    XLOG_WARNING("%s in state %s received %s",
+		 this->str().c_str(),
+		 pretty_print_state(_state),
 		 p.str().c_str());
 
     switch(_state) {
     case STATEIDLE:
     case STATECONNECT:
     case STATEACTIVE:
-	XLOG_FATAL("FSM received EVENTRECNOTMESS in state %s",
-	    pretty_print_state(_state));
+	XLOG_FATAL("%s FSM received EVENTRECNOTMESS in state %s",
+		   this->str().c_str(),
+		   pretty_print_state(_state));
 	break;
 
     case STATEOPENCONFIRM:
@@ -914,7 +929,7 @@ BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 
     case STATEOPENSENT: {
 	// Send Notification Message with error code of FSM error.
-	XLOG_WARNING("FSM received EVENTRECNOTMESS");
+	XLOG_WARNING("%s FSM received EVENTRECNOTMESS", this->str().c_str());
 	NotificationPacket np(FSMERROR);
 	send_notification(np);
 	set_state(STATESTOPPED, true);
@@ -933,8 +948,9 @@ BGPPeer::notify_peer_of_error(const int error, const int subcode,
 		const uint8_t *data, const size_t len)
 {
     if (!NotificationPacket::validate_error_code(error, subcode)) {
-	XLOG_WARNING("Attempt to send invalid error code %d subcode %d",
-		   error, subcode); // XXX make it fatal ?
+	XLOG_WARNING("%s Attempt to send invalid error code %d subcode %d",
+		     this->str().c_str(),
+		     error, subcode); // XXX make it fatal ?
     }
 
     /*
@@ -967,12 +983,13 @@ BGPPeer::event_open(const int sock)
 	event_open();
     } else {
 	debug_msg("rejected\n");
-	XLOG_INFO("Peer %s: rejecting connection: current state %s",
-		     peerdata()->iptuple().str().c_str(),
-		     pretty_print_state(_state));
+	XLOG_INFO("%s rejecting connection: current state %s",
+		  this->str().c_str(),
+		  pretty_print_state(_state));
 		     
 	if (-1 == ::close(sock)) {
-	    XLOG_WARNING("Close of incoming connection failed: %s",
+	    XLOG_WARNING("%s Close of incoming connection failed: %s",
+			 this->str().c_str(),
 			 strerror(errno));
 	}
     }
@@ -1277,12 +1294,12 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 	// if so, we'd discard the route, but not send a notification
 
 	if (ibgp() && !local_pref)
-	    XLOG_WARNING("Update packet from ibgp peer %s: no LOCAL_PREF",
-			 peerdata()->iptuple().str().c_str());
+	    XLOG_WARNING("%s Update packet from ibgp with no LOCAL_PREF",
+			 this->str().c_str());
 
 	if (!ibgp() && local_pref)
-	    XLOG_WARNING("Update packet from ebgp peer %s: with LOCAL_PREF",
-			 peerdata()->iptuple().str().c_str());
+	    XLOG_WARNING("%s Update packet from ebgp with LOCAL_PREF",
+			 this->str().c_str());
 
 	// XXX Check Network layer reachability fields
 
@@ -1296,8 +1313,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 bool
 BGPPeer::established()
 {
-    debug_msg("stage2 initialisation %s\n",
-	      peerdata()->iptuple().str().c_str());
+    debug_msg("%s\n", this->str().c_str());
 
     if (_localdata == NULL) {
 	XLOG_ERROR("No _localdata");
@@ -1329,7 +1345,7 @@ void
 BGPPeer::connected(int sock)
 {
     if (!_SocketClient)
-	XLOG_FATAL("No socket structure");
+	XLOG_FATAL("%s No socket structure", this->str().c_str());
 
     /*
     ** simultaneous open
@@ -1512,7 +1528,7 @@ BGPPeer::release_resources()
 string
 BGPPeer::str()
 {
-    return c_format("Peer %s is on fd is %d\n",
+    return c_format("Peer: %s fd: %d",
 		    peerdata()->iptuple().str().c_str(),
 		    get_sock());
 }
@@ -1626,7 +1642,7 @@ trap_callback(const XrlError& error, const char *comment)
 {
     debug_msg("trap_callback %s %s\n", comment, error.str().c_str());
     if(XrlError::OKAY() != error) {
-	XLOG_WARNING("trap_callback: %s %s",  comment, error.str().c_str());
+	XLOG_WARNING("trap_callback: %s %s", comment, error.str().c_str());
     }
 }
 
