@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/tools/show_interfaces.hh,v 1.4 2003/10/24 20:48:52 pavlin Exp $
+// $XORP: xorp/rtrmgr/tools/show_interfaces.hh,v 1.5 2003/11/14 18:19:01 pavlin Exp $
 
 #ifndef __RTRMGR_TOOLS_SHOW_INTERFACES_HH__
 #define __RTRMGR_TOOLS_SHOW_INTERFACES_HH__
@@ -127,6 +127,7 @@ public:
 			 const IPv6& addr,
 			 const uint32_t& event);
     void print_results() const;
+
 private:
     void unregister_interface_monitor();
     void unregister_interface_monitor_done(const XrlError& e);
@@ -163,22 +164,24 @@ private:
     void vifaddr6_deleted(const string& ifname, const string& vifname,
 			  const IPv6& addr);
 
-    XrlRouter &_xrl_rtr;
-    EventLoop &_eventloop;
-    XrlIfmgrV0p1Client _ifmgr_client;
-    XorpTimer _register_retry_timer;
-    State _state;
-    int _register_retry_counter;
+    XrlRouter&		_xrl_rtr;
+    EventLoop&		_eventloop;
+    XrlIfmgrV0p1Client	_ifmgr_client;
+    XorpTimer		_register_retry_timer;
+    State		_state;
+    int			_register_retry_counter;
 
-    /* the following variables keep track of how many answers we're
-       still expecting from various pipelined queries to the FEA */
-    int _interfaces_remaining;
+    //
+    // The following variables keep track of how many answers we're
+    // still expecting from various pipelined queries to the FEA.
+    //
+    int	_interfaces_remaining;
     int _vifs_remaining;
     int _addrs_remaining;
     int _flags_remaining;
 
-    map <string, Vif*> _vifs_by_name;
-    multimap <string, Vif*> _vifs_by_interface;
+    map<string, Vif*> _vifs_by_name;
+    multimap<string, Vif*> _vifs_by_interface;
 };
 
 #endif // __RTRMGR_TOOLS_SHOW_INTERFACES_HH__
