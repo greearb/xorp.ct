@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $"
+#ident "$XORP: xorp/rib/test_redist.cc,v 1.1 2004/04/23 19:31:01 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -44,6 +44,16 @@ static const char* program_return_value = "0 on success, 1 if test error, "
 // Verbosity level control
 //
 
+static inline const char*
+xorp_path(const char* path)
+{
+    const char* xorp_path = strstr(path, "xorp");
+    if (xorp_path) {
+	return xorp_path;
+    }
+    return path;
+}
+
 static bool s_verbose = false;
 bool verbose()                  { return s_verbose; }
 void set_verbose(bool v)        { s_verbose = v; }
@@ -53,7 +63,7 @@ void set_verbose(bool v)        { s_verbose = v; }
 #define _verbose_log(file, line, x...)					\
 do {									\
     if (verbose()) {							\
-	printf("From %s:%d: ", file, line);				\
+	printf("From %s:%d: ", xorp_path(file), line);			\
 	printf(x);							\
     }									\
 } while(0)
@@ -121,7 +131,11 @@ template <typename A>
 void
 TestOutput<A>::add_route(const IPRouteEntry<A>& route)
 {
-    XLOG_ASSERT(_expect_net == ANY_NET || _expect_net == route.net());
+    if (_expect_net != ANY_NET && _expect_net != route.net()) {
+	XLOG_FATAL("Unexpected add_route call.  Expecting %s got %s",
+		   _expect_net.str().c_str(),
+		   route.net().str().c_str());
+    }
 
     verbose_log("add_route %s\n", route.net().str().c_str());
     XLOG_ASSERT(_rt_index.find(route.net()) == _rt_index.end());
@@ -137,7 +151,11 @@ template <typename A>
 void
 TestOutput<A>::delete_route(const IPRouteEntry<A>& route)
 {
-    XLOG_ASSERT(_expect_net == ANY_NET || _expect_net == route.net());
+    if (_expect_net != ANY_NET && _expect_net != route.net()) {
+	XLOG_FATAL("Unexpected delete_route call.  Expecting %s got %s",
+		   _expect_net.str().c_str(),
+		   route.net().str().c_str());
+    }
 
     verbose_log("delete_route %s\n", route.net().str().c_str());
 
@@ -155,6 +173,18 @@ template <typename A>
 static bool
 unblock_output(TestOutput<A>* to)
 {
+    static struct timeval t0;
+    struct timeval t1;
+    if (t0.tv_sec == 0) {
+	gettimeofday(&t0, 0);
+	t1 = t0;
+    } else {
+	gettimeofday(&t1, 0);
+    }
+
+    TimeVal t = TimeVal(t1) - TimeVal(t0);
+    verbose_log("Unblock output at %s\n", t.str().c_str());
+
     bool r = to->blocked();
     to->unblock();
     return r;
@@ -167,6 +197,7 @@ add_route_before_current(OriginTable<A>* 	ot,
 			 IPRouteEntry<A>	ipr)
 
 {
+    verbose_log("add_route_before_current %s\n", ipr.net().str().c_str());
     IPNet<A> saved = to->expected_net();
     to->set_expected_net(ipr.net());
     ot->add_route(ipr);
@@ -180,6 +211,7 @@ add_route_after_current(OriginTable<A>* 	ot,
 			IPRouteEntry<A>		ipr)
 
 {
+    verbose_log("add_route_after_current %s\n", ipr.net().str().c_str());
     IPNet<A> saved = to->expected_net();
     to->set_expected_net(TestOutput<A>::NO_NET);
     ot->add_route(ipr);
@@ -193,6 +225,7 @@ delete_route_before_current(OriginTable<A>* 	ot,
 			    IPRouteEntry<A>	ipr)
 
 {
+    verbose_log("delete_route_before_current %s\n", ipr.net().str().c_str());
     IPNet<A> saved = to->expected_net();
     to->set_expected_net(ipr.net());
     ot->delete_route(ipr.net());
@@ -206,6 +239,7 @@ delete_route_after_current(OriginTable<A>* 	ot,
 			   IPRouteEntry<A>	ipr)
 
 {
+    verbose_log("delete_route_after_current %s\n", ipr.net().str().c_str());
     IPNet<A> saved = to->expected_net();
     to->set_expected_net(TestOutput<A>::NO_NET);
     ot->delete_route(ipr.net());
@@ -252,40 +286,44 @@ test_deterministic()
     // Each route added causes the output block. This timer unblocks the output
     // once per second.
     XorpTimer u = e.new_periodic(1000, callback(&unblock_output<IPv4>, output));
-
-
-    // After 2 seconds the last route added is 10.3.0.0
+    // After 1 second the last route added is 10.3.0.0
     //
     // Add one route after this
-    XorpTimer a0 = e.new_oneoff_after_ms(2005,
+    XorpTimer a0 = e.new_oneoff_after_ms(1250,
 			callback(&add_route_after_current<IPv4>,
 				 &origin, output,
 				 IPRouteEntry<IPv4>("10.4.0.0/16", &vif, &nh,
 						    protocol, 10)));
     // And two routes before
-    XorpTimer a1 = e.new_oneoff_after_ms(2006,
+    XorpTimer a1 = e.new_oneoff_after_ms(1500,
 			callback(&add_route_before_current<IPv4>,
 				 &origin, output,
 				 IPRouteEntry<IPv4>("10.1.0.0/16", &vif, &nh,
 						    protocol, 10)));
 
-    XorpTimer a2 = e.new_oneoff_after_ms(2007,
+    XorpTimer a2 = e.new_oneoff_after_ms(1750,
 			callback(&add_route_before_current<IPv4>,
 				 &origin, output,
 				 IPRouteEntry<IPv4>("10.2.0.0/16", &vif, &nh,
 						    protocol, 10)));
 
     // Delete first route
-    XorpTimer d1 = e.new_oneoff_after_ms(3005,
+    XorpTimer d1 = e.new_oneoff_after_ms(2250,
 			callback(&delete_route_before_current<IPv4>,
 				 &origin, output,
 				 IPRouteEntry<IPv4>("10.0.0.0/8", &vif, &nh,
 						    protocol, 10)));
     // Delete current route
-    XorpTimer d2 = e.new_oneoff_after_ms(3006,
-			callback(&delete_route_after_current<IPv4>,
+    XorpTimer d2 = e.new_oneoff_after_ms(2500,
+			callback(&delete_route_before_current<IPv4>,
 				 &origin, output,
 				 IPRouteEntry<IPv4>("10.4.0.0/16", &vif, &nh,
+						    protocol, 10)));
+    // Delete last route
+    XorpTimer d3 = e.new_oneoff_after_ms(2750,
+			callback(&delete_route_before_current<IPv4>,
+				 &origin, output,
+				 IPRouteEntry<IPv4>("10.3.192.0/18", &vif, &nh,
 						    protocol, 10)));
 
     bool done = false;
