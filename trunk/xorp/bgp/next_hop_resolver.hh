@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.9 2003/03/16 08:35:03 pavlin Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.10 2003/04/02 19:44:44 mjh Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -80,7 +80,7 @@ template<class A> class NHRequest;
 template<class A>
 class NextHopResolver {
 public:
-    NextHopResolver(XrlStdRouter *xrl_router, TimerList& timer_list);
+    NextHopResolver(XrlStdRouter *xrl_router, EventLoop& event_loop);
 
     virtual ~NextHopResolver();
 
@@ -195,13 +195,13 @@ public:
     /**
      * Get a reference to the main timer list
      */
-    TimerList& timer_list() {return _timer_list;}
+    EventLoop& event_loop() {return _event_loop;}
 protected:
     DecisionTable<A> *_decision;
 private:
     string _ribname;	// RIB name to use in XRL calls
     XrlStdRouter *_xrl_router;
-    TimerList& _timer_list;
+    EventLoop& _event_loop;
     NextHopCache<A> _next_hop_cache;
     NextHopRibRequest<A> _next_hop_rib_request;
 };
@@ -519,8 +519,7 @@ public:
      * @param nexthop The next hop.
      * @param prefix The prefix we registered with.
      */
-    void deregister_from_rib(A nexthop, uint32_t prefix)
-	const;
+    void deregister_from_rib(A nexthop, uint32_t prefix);
 
     /**
      * XRL response method.
@@ -528,7 +527,10 @@ public:
      * @param error Error returned by xrl call.
      * @param comment Comment string used for diagnostic purposes.
      */
-    void callback(const XrlError& error, string comment) const;
+    void deregister_interest_response(const XrlError& error, 
+				      A addr,
+				      uint32_t prefix,
+				      string comment);
 private:
     string _ribname;
     XrlStdRouter *_xrl_router;
@@ -613,9 +615,11 @@ private:
      */
     deque<RibRequest *> _queue;
     /**
-     * Retransmit delay timer
+     * Retransmit delay timer list for sending registrations This is a
+     * list because there might be one register and multiple
+     * deregister requests in retransmit timout.  
      */
-    XorpTimer _rtx_delay_timer;
+    list <XorpTimer> _rtx_delay_timers;
     /**
      * Used by the destructor to delete all the "RibRequest" objects
      * that have been allocated.

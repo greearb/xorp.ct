@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.11 2003/03/10 23:20:02 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.12 2003/04/02 19:44:44 mjh Exp $"
 
 #include "fcntl.h"
 
@@ -24,9 +24,9 @@
 #include "libxorp/xlog.h"
 #include "libxipc/xrl_std_router.hh"
 
-PlumbingTest::PlumbingTest(TimerList& timer_list) 
+PlumbingTest::PlumbingTest(EventLoop& event_loop) 
     //dummy args to BGPPlumbing because we'll not use this constructor
-    : BGPPlumbing(NULL, NULL, timer_list) 
+    : BGPPlumbing(NULL, NULL, event_loop) 
 {
 }
 

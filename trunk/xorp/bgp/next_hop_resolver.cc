@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.9 2003/03/10 23:19:59 hodson Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.10 2003/04/02 19:44:44 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,9 +29,9 @@
 
 template <class A>
 NextHopResolver<A>::NextHopResolver(XrlStdRouter *xrl_router,
-				    TimerList &timer_list)
+				    EventLoop& event_loop)
     : _xrl_router(xrl_router),
-      _timer_list(timer_list),
+      _event_loop(event_loop),
       _next_hop_rib_request(xrl_router, *this, _next_hop_cache)
 {
 }
@@ -696,6 +696,12 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 						 const uint32_t *metric,
 						 const string comment)
 {
+    while (!_rtx_delay_timers.empty() 
+	   && !_rtx_delay_timers.front().scheduled()) {
+	//clean up any expired timers.
+	_rtx_delay_timers.pop_front();
+    }
+
     /*
     ** We attempted to register a next hop with the RIB and an error
     ** ocurred. Its not clear that we should continue.
@@ -713,13 +719,11 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	    //The request will still be on the request queue.
 	    //All we need to do is resend it after a respectable delay
 	    A nexthop = *addr;
-	    _rtx_delay_timer 
-		= _next_hop_resolver
-		.timer_list()
-		.new_oneoff_after_ms(1000,
-				     ::callback(this,
-						&NextHopRibRequest<A>::register_interest,
-						nexthop));
+	    _rtx_delay_timers.push_back(
+                 _next_hop_resolver.event_loop().new_oneoff_after_ms(1000,
+                      ::callback(this,
+				 &NextHopRibRequest<A>::register_interest,
+				 nexthop)));
 	    return;
 	}
 	XLOG_FATAL("%s %s", comment.c_str(), error.str().c_str());
@@ -963,7 +967,6 @@ NextHopRibRequest<A>::lookup(A nexthop, bool& resolvable, uint32_t& metric)
 template<>
 void
 NextHopRibRequest<IPv4>::deregister_from_rib(IPv4 addr, uint32_t prefix)
-    const
 {
     debug_msg("addr %s/%d\n", addr.str().c_str(), prefix);
     if(0 == _xrl_router)	// The test code sets _xrl_router to zero
@@ -974,7 +977,8 @@ NextHopRibRequest<IPv4>::deregister_from_rib(IPv4 addr, uint32_t prefix)
 				  _xrl_router->name(),
 				  addr,
 				  prefix,
-	    ::callback(this,&NextHopRibRequest::callback,
+	    ::callback(this,&NextHopRibRequest::deregister_interest_response,
+		       addr, prefix,
 		       c_format("deregister_from_rib: addr %s/%d",
 				addr.str().c_str(), prefix)));
 }
@@ -982,7 +986,6 @@ NextHopRibRequest<IPv4>::deregister_from_rib(IPv4 addr, uint32_t prefix)
 template<>
 void
 NextHopRibRequest<IPv6>::deregister_from_rib(IPv6 addr, uint32_t prefix)
-    const
 {
     debug_msg("addr %s/%d\n", addr.str().c_str(), prefix);
     if(0 == _xrl_router)	// The test code sets _xrl_router to zero
@@ -993,18 +996,45 @@ NextHopRibRequest<IPv6>::deregister_from_rib(IPv6 addr, uint32_t prefix)
 				  _xrl_router->name(),
 				  addr,
 				  prefix,
-	    ::callback(this,&NextHopRibRequest::callback,
+	    ::callback(this,&NextHopRibRequest::deregister_interest_response,
+		       addr, prefix,
 		       c_format("deregister_from_rib: addr %s/%d",
 				addr.str().c_str(), prefix)));
 }
 
 template <class A>
 void
-NextHopRibRequest<A>::callback(const XrlError& error, string comment)
-    const
+NextHopRibRequest<A>::deregister_interest_response(const XrlError& error, 
+						   A addr,
+						   uint32_t prefix,
+						   string comment)
 {
+    while (!_rtx_delay_timers.empty() 
+	   && !_rtx_delay_timers.front().scheduled()) {
+	//Clean up any expired timers.
+	_rtx_delay_timers.pop_front();
+    }
+
     debug_msg("%s %s\n", comment.c_str(), error.str().c_str());
     if (XrlError::OKAY() != error) {
+	if (error == XrlError::RESOLVE_FAILED()
+	    || error == XrlError::NO_FINDER()
+	    || error == XrlError::SEND_FAILED()
+	    || error == XrlError::REPLY_TIMED_OUT()) {
+	    //These are transport errors.  According to the XORP Error
+	    //Handling spec, we treat these errors as transient and
+	    //resend.
+	    XLOG_WARNING("%s %s", comment.c_str(), error.str().c_str());
+	    
+	    //The request will still be on the request queue.
+	    //All we need to do is resend it after a respectable delay
+	    _rtx_delay_timers.push_back(
+                 _next_hop_resolver.event_loop().new_oneoff_after_ms(1000,
+                      ::callback(this,
+				 &NextHopRibRequest<A>::deregister_from_rib,
+				 addr, prefix)));
+	    return;
+	}
 	XLOG_WARNING("callback: %s %s",  comment.c_str(), error.str().c_str());
     }
 }

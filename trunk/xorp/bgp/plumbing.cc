@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.9 2003/03/10 23:20:02 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.10 2003/04/02 19:44:44 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,10 +28,10 @@
 #include "plumbing.hh"
 
 BGPPlumbing::BGPPlumbing(XrlStdRouter *xrl_router, RibIpcHandler* ribhandler,
-			 TimerList& timer_list)
+			 EventLoop& event_loop)
     : _rib_handler(ribhandler), 
-    _v4_plumbing("IPv4", *this, xrl_router, timer_list), 
-    _v6_plumbing("IPv6", *this, xrl_router, timer_list),
+    _v4_plumbing("IPv4", *this, xrl_router, event_loop), 
+    _v6_plumbing("IPv6", *this, xrl_router, event_loop),
     _my_AS_number(AsNum::AS_INVALID)
 {
     /*most of the interesting stuff happens in the address-family
@@ -195,9 +195,9 @@ BGPPlumbing::read_next_route(uint32_t token,
 template <class A>
 BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
 				    XrlStdRouter *xrl_router,
-				    TimerList& timer_list) 
+				    EventLoop& event_loop) 
     : _ribname(ribname), _master(master), 
-    _next_hop_resolver(xrl_router, timer_list)
+    _next_hop_resolver(xrl_router, event_loop)
 {
     debug_msg("BGPPlumbingAF constructor called for RIB %s\n", 
 	      ribname.c_str());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.12 2003/03/10 23:20:07 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.13 2003/04/02 19:44:45 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -29,8 +29,8 @@
 template <class A>
 class DummyResolver : public NextHopResolver<A> {
 public:
-    DummyResolver(TimerList& timer_list) 
-	: NextHopResolver<A>(0, timer_list) 
+    DummyResolver(EventLoop& event_loop) 
+	: NextHopResolver<A>(0, event_loop) 
     {
 	_ofile = NULL;
 	_response = false;
@@ -70,7 +70,7 @@ int test_nhlookup() {
     BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL);
 
-    DummyResolver<IPv4> nh_resolver(eventloop->timer_list());
+    DummyResolver<IPv4> nh_resolver(*eventloop);
 
     //trivial plumbing
     NhLookupTable<IPv4> *nhlookup_table

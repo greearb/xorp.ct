@@ -12,14 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing_test.hh,v 1.3 2003/03/10 23:20:03 hodson Exp $
+// $XORP: xorp/bgp/plumbing_test.hh,v 1.4 2003/04/02 19:44:44 mjh Exp $
 
 #ifndef __BGP_PLUMBING_TEST_HH__
 #define __BGP_PLUMBING_TEST_HH__
 
 #include "plumbing.hh"
 #include "peer.hh"
-#include "libxorp/timer.hh"
 
 class DummyPeer : public BGPPeer {
 public:
@@ -36,7 +35,7 @@ public:
 
 class PlumbingTest : public BGPPlumbing {
 public:
-    PlumbingTest(TimerList& timer_list);
+    PlumbingTest(EventLoop& event_loop);
     bool run_tests();
     bool test1();
     bool test2();
