@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.13 2003/01/28 03:21:52 rizzo Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.16 2003/01/29 20:32:33 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -303,8 +303,8 @@ Peer::send_packet(const string& line, const vector<string>& words)
     _trie_sent.process_update_packet(tp, buf, len);
 
     send_message(buf, len, ::callback(this, &Peer::callback, "update"));
-    fprintf(stderr, "done with send_pkt %p size %d\n",
-	buf, len);
+    fprintf(stderr, "done with send_pkt %p size %u\n",
+	buf, (uint32_t)len);
 }
 
 struct mrt_header {
