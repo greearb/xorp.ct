@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.3 2003/09/20 00:42:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_nlm.cc,v 1.4 2003/09/20 00:51:44 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -57,7 +57,7 @@ bool
 FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 				    const uint8_t* buf, size_t buf_bytes)
 {
-    const nlmsghdr* nlh;
+    const struct nlmsghdr* nlh;
     bool recognized = false;
     
     for (nlh = reinterpret_cast<const struct nlmsghdr*>(buf);
