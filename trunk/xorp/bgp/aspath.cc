@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.7 2003/01/26 17:03:18 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.8 2003/01/27 19:21:24 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,15 +42,15 @@ extern void dump_bytes(const uint8_t *d, uint8_t l);
 void
 AsSegment::decode(const uint8_t *d)
 {
-    const uint16_t *as = (const uint16_t *)(d + 2);
-
+    size_t n = d[1];
     clear();
     _type = (ASPathSegType)d[0];
-    // XXX do some proper error checking.
     assert(_type == AS_SET || _type == AS_SEQUENCE);
-   
-    for (u_int i = 0; i < d[1]; i++)
-	add_as(ntohs(as[i]));
+    // XXX more error checking ?
+
+    d += 2;	// skip header, d points to the raw data now.
+    for (size_t i = 0; i < n; d += 2, i++)
+	add_as((uint16_t)((d[0] << 8) + d[1]) );
 }
 
 /**
