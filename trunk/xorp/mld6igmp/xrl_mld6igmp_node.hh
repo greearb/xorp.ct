@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.23 2004/06/10 22:41:28 hodson Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.24 2005/01/28 03:34:19 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -22,14 +22,14 @@
 // MLD6IGMP XRL-aware node definition.
 //
 
-#include <string>
+#include "libxipc/xrl_std_router.hh"
 
-#include "libxorp/xlog.h"
-#include "libxipc/xrl_router.hh"
-#include "xrl/targets/mld6igmp_base.hh"
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/mfea_xif.hh"
 #include "xrl/interfaces/cli_manager_xif.hh"
 #include "xrl/interfaces/mld6igmp_client_xif.hh"
+#include "xrl/targets/mld6igmp_base.hh"
+
 #include "mld6igmp_node.hh"
 #include "mld6igmp_node_cli.hh"
 
@@ -38,14 +38,18 @@
 // The top-level class that wraps-up everything together under one roof
 //
 class XrlMld6igmpNode : public Mld6igmpNode,
+			public XrlStdRouter,
 			public XrlMld6igmpTargetBase,
 			public Mld6igmpNodeCli {
 public:
-    XrlMld6igmpNode(int family,
-		    xorp_module_id module_id, 
-		    EventLoop& eventloop,
-		    XrlRouter* xrl_router,
-		    const string& mfea_target);
+    XrlMld6igmpNode(int			family,
+		    xorp_module_id	module_id, 
+		    EventLoop&		eventloop,
+		    const string&	class_name,
+		    const string&	finder_hostname,
+		    uint16_t		finder_port,
+		    const string&	finder_target,
+		    const string&	mfea_target);
     virtual ~XrlMld6igmpNode();
 
     /**
@@ -61,7 +65,14 @@ public:
      * @return true on success, false on failure.
      */
     bool	shutdown();
-    
+
+    /**
+     * Get a reference to the XrlRouter instance.
+     *
+     * @return a reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    XrlRouter&	xrl_router() { return *this; }
+
     //
     // XrlMld6igmpNode front-end interface
     //
@@ -104,6 +115,30 @@ protected:
      * Shutdown cleanly
      */
     XrlCmdError common_0_1_shutdown();
+
+    /**
+     *  Announce target birth to observer.
+     *
+     *  @param target_class the target class name.
+     *
+     *  @param target_instance the target instance name.
+     */
+    XrlCmdError finder_event_observer_0_1_xrl_target_birth(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
+
+    /**
+     *  Announce target death to observer.
+     *
+     *  @param target_class the target class name.
+     *
+     *  @param target_instance the target instance name.
+     */
+    XrlCmdError finder_event_observer_0_1_xrl_target_death(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
 
     /**
      *  Process a CLI command.
@@ -551,13 +586,21 @@ protected:
 	const uint32_t&	vif_index);
     
 private:
+    /**
+     * Called when Finder disconnect occurs.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_disconnect_event();
 
     void mfea_register_startup();
+    void finder_register_interest_mfea_cb(const XrlError& xrl_error);
     void mfea_register_shutdown();
+    void finder_deregister_interest_mfea_cb(const XrlError& xrl_error);
 
-    void send_mfea_registration();
+    void send_mfea_add_protocol();
     void mfea_client_send_add_protocol_cb(const XrlError& xrl_error);
-    void send_mfea_deregistration();
+    void send_mfea_delete_protocol();
     void mfea_client_send_delete_protocol_cb(const XrlError& xrl_error);
 
     //
@@ -669,13 +712,13 @@ private:
 
     const string		_class_name;
     const string		_instance_name;
+    const string		_finder_target;
+    const string		_mfea_target;
 
     XrlMfeaV0p1Client		_xrl_mfea_client;
     XrlMld6igmpClientV0p1Client	_xrl_mld6igmp_client_client;
     XrlCliManagerV0p1Client	_xrl_cli_manager_client;
-    const string		_mfea_target;
-    bool			_is_mfea_add_protocol_registered;
-    XorpTimer			_mfea_registration_timer;
+    XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
 
     list<pair<uint16_t, bool> >	_start_stop_protocol_kernel_vif_queue;
     XorpTimer			_start_stop_protocol_kernel_vif_queue_timer;
@@ -683,6 +726,17 @@ private:
     XorpTimer			_join_leave_multicast_group_queue_timer;
     list<SendAddDeleteMembership> _send_add_delete_membership_queue;
     XorpTimer			_send_add_delete_membership_queue_timer;
+
+    static const TimeVal	RETRY_TIMEVAL;
+
+    bool			_is_mfea_alive;
+    bool			_is_mfea_registered;
+    bool			_is_mfea_registering;
+    bool			_is_mfea_deregistering;
+    XorpTimer			_mfea_register_startup_timer;
+    XorpTimer			_mfea_register_shutdown_timer;
+    bool			_is_mfea_add_protocol_registered;
+    XorpTimer			_mfea_add_protocol_timer;
 };
 
 #endif // __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__

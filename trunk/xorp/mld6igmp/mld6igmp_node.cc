@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.33 2004/12/17 20:30:46 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.34 2005/02/12 08:09:07 pavlin Exp $"
 
 
 //
@@ -122,8 +122,16 @@ Mld6igmpNode::~Mld6igmpNode()
 int
 Mld6igmpNode::start()
 {
-    if (is_up() || is_pending_up())
+    //
+    // Test the service status
+    //
+    if ((ServiceBase::status() == SERVICE_STARTING)
+	|| (ServiceBase::status() == SERVICE_RUNNING)) {
 	return (XORP_OK);
+    }
+    if (ServiceBase::status() != SERVICE_READY) {
+	return (XORP_ERROR);
+    }
 
     if (ProtoNode<Mld6igmpVif>::pending_start() < 0)
 	return (XORP_ERROR);
@@ -137,6 +145,11 @@ Mld6igmpNode::start()
     // Set the node status
     //
     ProtoNode<Mld6igmpVif>::set_node_status(PROC_STARTUP);
+
+    //
+    // Update the node status
+    //
+    // TODO: XXX: PAVPAVPAV: remove it?
     update_status();
 
     return (XORP_OK);
@@ -189,11 +202,21 @@ Mld6igmpNode::final_start()
 int
 Mld6igmpNode::stop()
 {
-    if (is_down())
+    //
+    // Test the service status
+    //
+    if ((ServiceBase::status() == SERVICE_SHUTDOWN)
+	|| (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
+	|| (ServiceBase::status() == SERVICE_FAILED)) {
 	return (XORP_OK);
-
-    if (! (is_up() || is_pending_up() || is_pending_down()))
+    }
+    if ((ServiceBase::status() != SERVICE_RUNNING)
+	&& (ServiceBase::status() != SERVICE_STARTING)
+	&& (ServiceBase::status() != SERVICE_PAUSING)
+	&& (ServiceBase::status() != SERVICE_PAUSED)
+	&& (ServiceBase::status() != SERVICE_RESUMING)) {
 	return (XORP_ERROR);
+    }
     
     //
     // Perform misc. MLD6IGMP-specific stop operations
@@ -215,6 +238,10 @@ Mld6igmpNode::stop()
     // Set the node status
     //
     ProtoNode<Mld6igmpVif>::set_node_status(PROC_SHUTDOWN);
+
+    //
+    // Update the node status
+    //
     update_status();
 
     return (XORP_OK);

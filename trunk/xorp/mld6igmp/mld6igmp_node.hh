@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.14 2004/05/19 19:48:33 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.15 2004/06/10 22:41:27 hodson Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -40,6 +40,7 @@
 // Structures/classes, typedefs and macros
 //
 
+class EventLoop;
 class IPvX;
 class IPvXNet;
 class Mld6igmpVif;

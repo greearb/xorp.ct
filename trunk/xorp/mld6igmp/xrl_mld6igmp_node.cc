@@ -12,35 +12,52 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.30 2005/01/25 00:52:32 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.31 2005/02/12 08:09:07 pavlin Exp $"
 
 #include "mld6igmp_module.h"
-#include "mld6igmp_private.hh"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
 #include "libxorp/status_codes.h"
+
 #include "mld6igmp_node.hh"
 #include "mld6igmp_node_cli.hh"
 #include "mld6igmp_vif.hh"
 #include "xrl_mld6igmp_node.hh"
 
+const TimeVal XrlMld6igmpNode::RETRY_TIMEVAL = TimeVal(1, 0);
 
 //
 // XrlMld6igmpNode front-end interface
 //
 
-XrlMld6igmpNode::XrlMld6igmpNode(int family,
-				 xorp_module_id module_id, 
-				 EventLoop& eventloop,
-				 XrlRouter* xrl_router,
-				 const string& mfea_target)
+XrlMld6igmpNode::XrlMld6igmpNode(int		family,
+				 xorp_module_id	module_id, 
+				 EventLoop&	eventloop,
+				 const string&	class_name,
+				 const string&	finder_hostname,
+				 uint16_t	finder_port,
+				 const string&	finder_target,
+				 const string&	mfea_target)
     : Mld6igmpNode(family, module_id, eventloop),
-      XrlMld6igmpTargetBase(xrl_router),
+      XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+		   finder_port),
+      XrlMld6igmpTargetBase(&xrl_router()),
       Mld6igmpNodeCli(*static_cast<Mld6igmpNode *>(this)),
-      _class_name(xrl_router->class_name()),
-      _instance_name(xrl_router->instance_name()),
-      _xrl_mfea_client(xrl_router),
-      _xrl_mld6igmp_client_client(xrl_router),
-      _xrl_cli_manager_client(xrl_router),
+      _class_name(xrl_router().class_name()),
+      _instance_name(xrl_router().instance_name()),
+      _finder_target(finder_target),
       _mfea_target(mfea_target),
+      _xrl_mfea_client(&xrl_router()),
+      _xrl_mld6igmp_client_client(&xrl_router()),
+      _xrl_cli_manager_client(&xrl_router()),
+      _xrl_finder_client(&xrl_router()),
+      _is_mfea_alive(false),
+      _is_mfea_registered(false),
+      _is_mfea_registering(false),
+      _is_mfea_deregistering(false),
       _is_mfea_add_protocol_registered(false)
 {
 
@@ -139,37 +156,163 @@ XrlMld6igmpNode::stop_mld6igmp()
 }
 
 //
-// Protocol node methods
+// Finder-related events
 //
-
 void
-XrlMld6igmpNode::mfea_register_startup()
+XrlMld6igmpNode::finder_disconnect_event()
 {
-    if (! _is_mfea_add_protocol_registered) {
-	Mld6igmpNode::incr_startup_requests_n();
-	// XXX: another incr to wait for network interface information
-	// on startup.
-	Mld6igmpNode::set_vif_setup_completed(false);
-	Mld6igmpNode::incr_startup_requests_n();
-    }
+    XLOG_ERROR("Finder disconnect event. Exiting immediately...");
 
-    send_mfea_registration();
-}
-
-void
-XrlMld6igmpNode::mfea_register_shutdown()
-{
-    if (_is_mfea_add_protocol_registered)
-	Mld6igmpNode::incr_shutdown_requests_n();
-
-    send_mfea_deregistration();
+    Mld6igmpNode::set_status(SERVICE_FAILED);
+    Mld6igmpNode::update_status();
 }
 
 //
 // Register with the MFEA
 //
 void
-XrlMld6igmpNode::send_mfea_registration()
+XrlMld6igmpNode::mfea_register_startup()
+{
+    bool success;
+
+    _mfea_register_startup_timer.unschedule();
+    _mfea_register_shutdown_timer.unschedule();
+
+    if (_is_mfea_registered)
+	return;		// Already registered
+
+    if (! _is_mfea_registering) {
+	Mld6igmpNode::incr_startup_requests_n();  // XXX: for add_protocol
+	// XXX: another incr to wait for network interface information
+	// on startup.
+	Mld6igmpNode::set_vif_setup_completed(false);
+	Mld6igmpNode::incr_startup_requests_n();
+
+	_is_mfea_registering = true;
+    }
+
+    //
+    // Register interest in the MFEA with the Finder
+    //
+    success = _xrl_finder_client.send_register_class_event_interest(
+	_finder_target.c_str(), _instance_name, _mfea_target,
+	callback(this, &XrlMld6igmpNode::finder_register_interest_mfea_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_mfea_register_startup_timer =
+	    Mld6igmpNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlMld6igmpNode::mfea_register_startup));
+	return;
+    }
+}
+
+void
+XrlMld6igmpNode::finder_register_interest_mfea_cb(
+    const XrlError& xrl_error)
+{
+    // If success, then the MFEA birth event will startup the MFEA registration
+    if (xrl_error == XrlError::OKAY()) {
+	_is_mfea_registering = false;
+	_is_mfea_registered = true;
+	return;
+    }
+
+    //
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot register interest in finder events: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
+    //
+    if (! _mfea_register_startup_timer.scheduled()) {
+	_mfea_register_startup_timer =
+	    Mld6igmpNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlMld6igmpNode::mfea_register_startup));
+    }
+}
+
+//
+// De-register with the MFEA
+//
+void
+XrlMld6igmpNode::mfea_register_shutdown()
+{
+    bool success;
+
+    _mfea_register_startup_timer.unschedule();
+    _mfea_register_shutdown_timer.unschedule();
+
+    if (! _is_mfea_alive)
+	return;		// The MFEA is not there anymore
+
+    if (! _is_mfea_registered)
+	return;		// Not registered
+
+    if (! _is_mfea_deregistering) {
+	Mld6igmpNode::incr_shutdown_requests_n();  // XXX: for delete_protocol
+
+	_is_mfea_deregistering = true;
+    }
+
+    //
+    // De-register interest in the MFEA with the Finder
+    //
+    success = _xrl_finder_client.send_deregister_class_event_interest(
+	_finder_target.c_str(), _instance_name, _mfea_target,
+	callback(this, &XrlMld6igmpNode::finder_deregister_interest_mfea_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_mfea_register_shutdown_timer =
+	    Mld6igmpNode::eventloop().new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlMld6igmpNode::mfea_register_shutdown));
+	return;
+    }
+
+    send_mfea_delete_protocol();
+}
+
+void
+XrlMld6igmpNode::finder_deregister_interest_mfea_cb(
+    const XrlError& xrl_error)
+{
+    // If success, then we are done
+    if (xrl_error == XrlError::OKAY()) {
+	_is_mfea_deregistering = false;
+	_is_mfea_registered = false;
+	return;
+    }
+
+    // TODO: retry de-registration if this was a transport error
+    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	       "Will give up.",
+	       xrl_error.str().c_str());
+
+    _is_mfea_deregistering = false;
+    _is_mfea_registered = false;
+
+    Mld6igmpNode::set_status(SERVICE_FAILED);
+    Mld6igmpNode::update_status();
+}
+
+//
+// Add protocol with the MFEA
+//
+void
+XrlMld6igmpNode::send_mfea_add_protocol()
 {
     bool success = true;
 
@@ -203,13 +346,12 @@ XrlMld6igmpNode::send_mfea_registration()
     if (! success) {
 	//
 	// If an error, then start a timer to try again
-	// TODO: XXX: the timer value is hardcoded here!!
 	//
-	XLOG_ERROR("Failed to register with the MFEA. "
+	XLOG_ERROR("Failed to add protocol with the MFEA. "
 		   "Will try again.");
-	_mfea_registration_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
-	    callback(this, &XrlMld6igmpNode::send_mfea_registration));
+	_mfea_add_protocol_timer = Mld6igmpNode::eventloop().new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlMld6igmpNode::send_mfea_add_protocol));
 	return;
     }
 }
@@ -220,7 +362,7 @@ XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
 	_is_mfea_add_protocol_registered = true;
-	send_mfea_registration();
+	send_mfea_add_protocol();
 	Mld6igmpNode::decr_startup_requests_n();
 	return;
     }
@@ -229,27 +371,26 @@ XrlMld6igmpNode::mfea_client_send_add_protocol_cb(const XrlError& xrl_error)
     // If a command failed because the other side rejected it, this is fatal.
     //
     if (xrl_error == XrlError::COMMAND_FAILED()) {
-	XLOG_FATAL("Cannot register with the MFEA: %s",
+	XLOG_FATAL("Cannot add protocol with the MFEA: %s",
 		   xrl_error.str().c_str());
     }
 
     //
     // If an error, then start a timer to try again (unless the timer is
     // already running).
-    // TODO: XXX: the timer value is hardcoded here!!
     //
-    if (_mfea_registration_timer.scheduled())
+    if (_mfea_add_protocol_timer.scheduled())
 	return;
-    _mfea_registration_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-	TimeVal(1, 0),
-	callback(this, &XrlMld6igmpNode::send_mfea_registration));
+    _mfea_add_protocol_timer = Mld6igmpNode::eventloop().new_oneoff_after(
+	RETRY_TIMEVAL,
+	callback(this, &XrlMld6igmpNode::send_mfea_add_protocol));
 }
 
 //
-// De-register with the MFEA
+// Delete protocol with the MFEA
 //
 void
-XrlMld6igmpNode::send_mfea_deregistration()
+XrlMld6igmpNode::send_mfea_delete_protocol()
 {
     bool success = true;
 
@@ -280,7 +421,7 @@ XrlMld6igmpNode::send_mfea_deregistration()
     }
 
     if (! success) {
-	XLOG_ERROR("Failed to deregister with the MFEA. "
+	XLOG_ERROR("Failed to delete protocol with the MFEA. "
 		   "Will give up.");
 	Mld6igmpNode::set_status(SERVICE_FAILED);
 	Mld6igmpNode::update_status();
@@ -297,7 +438,8 @@ XrlMld6igmpNode::mfea_client_send_delete_protocol_cb(const XrlError& xrl_error)
 	return;
     }
 
-    XLOG_ERROR("Failed to deregister with the MFEA: %s. "
+    // TODO: retry de-registration if this was a transport error
+    XLOG_ERROR("Failed to delete protocol with the MFEA: %s. "
 	       "Will give up.",
 	       xrl_error.str().c_str());
 
@@ -444,7 +586,6 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
     if (! success) {
         //
         // If an error, then start a timer to try again
-        // TODO: XXX: the timer value is hardcoded here!!
         //
 	XLOG_ERROR("Failed to %s protocol vif %s with the MFEA. "
 		   "Will try again.",
@@ -452,7 +593,7 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
 		   mld6igmp_vif->name().c_str());
     start_timer_label:
 	_start_stop_protocol_kernel_vif_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlMld6igmpNode::send_start_stop_protocol_kernel_vif));
     }
 }
@@ -484,10 +625,9 @@ XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlErr
 
     //
     // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     _start_stop_protocol_kernel_vif_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-        TimeVal(1, 0),
+	RETRY_TIMEVAL,
 	callback(this, &XrlMld6igmpNode::send_start_stop_protocol_kernel_vif));
 }
 
@@ -639,7 +779,6 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
     if (! success) {
         //
         // If an error, then start a timer to try again
-        // TODO: XXX: the timer value is hardcoded here!!
         //
 	XLOG_ERROR("Failed to %s group %s on vif %s with the MFEA. "
 		   "Will try again.",
@@ -648,7 +787,7 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 		   mld6igmp_vif->name().c_str());
     start_timer_label:
 	_join_leave_multicast_group_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlMld6igmpNode::send_join_leave_multicast_group));
     }
 }
@@ -680,10 +819,9 @@ XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(const XrlError& 
 
     //
     // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     _join_leave_multicast_group_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-        TimeVal(1, 0),
+	RETRY_TIMEVAL,
 	callback(this, &XrlMld6igmpNode::send_join_leave_multicast_group));
 }
 
@@ -841,7 +979,6 @@ XrlMld6igmpNode::send_add_delete_membership()
     if (! success) {
         //
         // If an error, then start a timer to try again
-        // TODO: XXX: the timer value is hardcoded here!!
         //
 	XLOG_ERROR("Failed to send %s for (%s,%s) on vif %s to %s. "
 		   "Will try again.",
@@ -852,7 +989,7 @@ XrlMld6igmpNode::send_add_delete_membership()
 		   membership.dst_module_instance_name().c_str());
     start_timer_label:
 	_send_add_delete_membership_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-	    TimeVal(1, 0),
+	    RETRY_TIMEVAL,
 	    callback(this, &XrlMld6igmpNode::send_add_delete_membership));
     }
 }
@@ -886,12 +1023,15 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(const XrlError& x
 
     //
     // If an error, then start a timer to try again
-    // TODO: XXX: the timer value is hardcoded here!!
     //
     _send_add_delete_membership_queue_timer = Mld6igmpNode::eventloop().new_oneoff_after(
-        TimeVal(1, 0),
+	RETRY_TIMEVAL,
 	callback(this, &XrlMld6igmpNode::send_add_delete_membership));
 }
+
+//
+// Protocol node methods
+//
 
 /**
  * XrlMld6igmpNode::proto_send:
@@ -1113,6 +1253,57 @@ XrlMld6igmpNode::common_0_1_shutdown()
 
     if (is_error)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Announce target birth to observer.
+ *
+ *  @param target_class the target class name.
+ *
+ *  @param target_instance the target instance name.
+ */
+XrlCmdError
+XrlMld6igmpNode::finder_event_observer_0_1_xrl_target_birth(
+    // Input values,
+    const string&	target_class,
+    const string&	target_instance)
+{
+    if (target_class == _mfea_target) {
+	_is_mfea_alive = true;
+	send_mfea_add_protocol();
+    }
+
+    return XrlCmdError::OKAY();
+    UNUSED(target_instance);
+}
+
+/**
+ *  Announce target death to observer.
+ *
+ *  @param target_class the target class name.
+ *
+ *  @param target_instance the target instance name.
+ */
+XrlCmdError
+XrlMld6igmpNode::finder_event_observer_0_1_xrl_target_death(
+    // Input values,
+    const string&	target_class,
+    const string&	target_instance)
+{
+
+    bool do_shutdown = false;
+
+    if (target_class == _mfea_target) {
+	XLOG_ERROR("FEAM (instance %s) has died, shutting down.",
+		   target_instance.c_str());
+	_is_mfea_alive = false;
+	do_shutdown = true;
+    }
+
+    if (do_shutdown)
+	stop_mld6igmp();
 
     return XrlCmdError::OKAY();
 }

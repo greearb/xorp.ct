@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.26 2004/11/29 00:32:03 bms Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.27 2004/11/30 07:45:27 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -21,6 +21,7 @@ noinst_LTLIBRARIES = libmld6igmp.la
 # -- Libraries and library flags to link the binary programs
 ### MLD6IGMP libraries
 LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 #LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la
@@ -67,7 +68,6 @@ test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
 test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
 test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
 test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
-test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 test_mld6igmp_LDADD	+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
 test_mld6igmp_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.la
 test_mld6igmp_LDADD	+= $(top_builddir)/libxorp/libxorp.la

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xorp_igmp.cc,v 1.6 2004/06/10 22:41:27 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/xorp_igmp.cc,v 1.7 2004/12/09 07:54:39 pavlin Exp $"
 
 
 //
@@ -28,8 +28,6 @@
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
-
-#include "libxipc/xrl_std_router.hh"
 
 #include "xrl_mld6igmp_node.hh"
 
@@ -83,7 +81,7 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-mld6igmp_main(const char* finder_hostname, uint16_t finder_port)
+mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
 {
     //
     // Init stuff
@@ -93,21 +91,21 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port)
     //
     // MLD6IGMP node
     //
-    XrlStdRouter xrl_std_router_mld6igmp4(eventloop,
-					  xorp_module_name(AF_INET,
-							   XORP_MODULE_MLD6IGMP),
-					  finder_hostname, finder_port);
     XrlMld6igmpNode xrl_mld6igmp_node4(AF_INET,
 				       XORP_MODULE_MLD6IGMP,
 				       eventloop,
-				       &xrl_std_router_mld6igmp4,
+				       xorp_module_name(AF_INET,
+							XORP_MODULE_MLD6IGMP),
+				       finder_hostname,
+				       finder_port,
+				       "finder",
 				       xorp_module_name(AF_INET,
 							XORP_MODULE_MFEA));
-    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mld6igmp4);
+    wait_until_xrl_router_is_ready(eventloop, xrl_mld6igmp_node4.xrl_router());
 
     //
     // Startup
-    
+    //
     xrl_mld6igmp_node4.enable_mld6igmp();
     // xrl_mld6igmp_node4.startup();
     xrl_mld6igmp_node4.enable_cli();
@@ -120,7 +118,7 @@ mld6igmp_main(const char* finder_hostname, uint16_t finder_port)
 	eventloop.run();
     }
 
-    while (xrl_std_router_mld6igmp4.pending()) {
+    while (xrl_mld6igmp_node4.xrl_router().pending()) {
 	eventloop.run();
     }
 }
@@ -187,7 +185,7 @@ main(int argc, char *argv[])
     // Run everything
     //
     try {
-	mld6igmp_main(finder_hostname.c_str(), finder_port);
+	mld6igmp_main(finder_hostname, finder_port);
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
