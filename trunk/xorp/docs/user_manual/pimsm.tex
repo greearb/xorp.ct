@@ -390,67 +390,247 @@ protocols \{\\
 \vspace{0.1in}
 
 \begin{description}
-\item{\tt protocols}:
-\item{\tt pimsm4}:
-\item{\tt targetname}:
-\item{\tt enabled}:
-\item{\tt interface}:
-\item{\tt vif}:
+\item{\tt protocols}: this delimits the configuration for all routing
+  protocols in the XORP router configuration.  It is mandatory that
+  PIM-SM configuration is under the {\stt protocols} node in the
+  configuration.
+\item{\tt pimsm4}: this delimits the PIM-SM configuration part of the XORP
+  router configuration related to IPv4 multicast.
+\item{\tt targetname} this is the name for this instance of PIM-SM for
+  IPv4.  It defaults to ``{\stt PIMSM\_4}'', and it is not recommended
+  that this default is overridden under normal usage scenarios.
+\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+  and indicates whether PIM-SM IPv4 multicast routing is currently
+  enabled.  This allows multicast to be taken down temporarily without
+  removing the configuration.
+\item{\tt interface}: this directive specifies that this {\stt
+  interface} is to be used for PIM-SM IPv4 multicast routing.  The
+  parameter value must be the name of an interface that has been
+  configured in the {\stt interfaces} section of the router
+  configuration.
+\item{\tt vif}: this directive specifies that this {\stt vif}
+  on the specified {\stt interface} is to be used for PIM-SM IPv4
+  multicast routing.  The parameter value must be the name of a vif
+  that has been configured in the {\stt interfaces} section of the
+  router configuration.
+
+  A special logical interface called {\stt register\_vif} with a
+  special vif called {\stt register\_vif} must be configured if a
+  PIM-SM router is to be able to send Register messages to the RP.  In
+  general this should {\it always} be configured if the router is to
+  support the ASM multicast service model.
+
+  Each {\stt vif} can take the following optional parameters:
 \begin{description}
-\item{\tt enabled}:
-\item{\tt dr-priority}:
-\item{\tt alternative-subnet}:
+\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+  and indicates whether PIM-SM IPv4 multicast routing is currently
+  enabled on this interface/vif.
+\item{\tt dr-priority}: this directive takes a non-negative integer as
+  its parameter giving this router's Designated Router (DR) priority
+  for this interface/vif.  The default is 1.  The PIM router on this
+  subnet with the highest value of DR priority will become the DR for
+  the subnet.
+\item{\tt alternative-subnet}: this directive is used to associate
+  additional IP subnets with a network interface. The parameter value
+  is an IPv4 subnet address in the {\it address/prefix-length} format.
+
+  One use of this directive is to make incoming traffic with a
+  non-local source address appear as it is coming from a local
+  subnet. Typically, this is needed as a work-around solution when
+  uni-directional interfaces such as satellite links are used for
+  receiving traffic.  The {\stt alternative-subnet} directive should be
+  used with extreme care, because it is possible to create forwarding
+  loops.
 \end{description}
-\item{\tt interface register\_vif}:
-\item{\tt vif register\_vif}:
-\item{\tt enabled}:
-\item{\tt static-rps}:
+\item{\tt static-rps}: this delimits the part of the PIM-SM
+  configuration used to manually configure PIM RP router information.
+  A PIM-SM router must either have some RPs configured as static RPs,
+  or it must run the PIM-SM bootstrap mechanism (see the {\stt
+  bootstrap} directive).  
+
+  Under the {\stt static-rps} part of the configuration, one or more
+  RPs can be configured.  It is important that all routers in a PIM
+  domain make the same choice of RP for the same multicast group, so
+  generally they should be configured with the same RP information.
 \begin{description}
-\item{\tt rp}:
+\item{\tt rp}: this specifies the IPv4 address of a router to be a
+  static RP.  
+
+  For each RP, the following parameters can be configured:
 \begin{description}
-\item{\tt group-prefix}:
+\item{\tt group-prefix}: this specifies the range of multicast
+  addresses for which the specified router is willing to be the RP.
+  The value is in the form of an IP address and prefix-length in the
+  {\it address/prefix-length} format.
 \begin{description}
-\item{\tt rp-priority}:
-\item{\tt hash-mask-len}:
+\item{\tt rp-priority}: this specifies the priority of the specified
+  RP router.  It takes the form of a non-negative integer. 
+
+  If multiple RP routers are known for a particular multicast group,
+  then the one with the most specific {\stt group-prefix} will be
+  used.  If more than one router has the same most specific {\stt
+  group-prefix}, then the one with the highest {\stt rp-priority} is
+  used.  See also {\stt hash-mask-len}.
+
+  The default value is 192.
+\item{\tt hash-mask-len}: If multiple routers have the most specific
+  {\stt group-prefix} and the same highest {\stt rp-priority}, then to
+  balance load, a hash function is used to choose the RP.  However, it
+  is usually desirable for closely associated multicast groups to use
+  the same RP.  Thus the hash function is only applied to the first
+  $n$ bits of the group IP address, ensuring that if two groups have
+  the same first $n$ bits, they will hash to the same RP address.  The
+  {\stt hash-mask-len} parameter specifies the value of $n$; it
+  defaults to 30 bits for IPv4.
 \end{description}
 \end{description}
 \end{description}
-\item{\tt bootstrap}:
+\item{\tt bootstrap}: this delimits the part of the PIM-SM
+  configuration used to configure the automatic bootstrap of PIM RP
+  router information using the PIM {\it BootStrap Router} mechanism.  A
+  PIM-SM router must either run the PIM-SM bootstrap mechanism, or
+  have some RPs configured as static RPs (see the {\stt static-rps}
+  directive).
+
+  Under the {\stt bootstrap} directive, the following additional
+  information can be configured.
 \begin{description}
-\item{\tt enabled}:
-\item{\tt cand-bsr}:
+\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+  and determines whether or not the router will run the {\stt
+  bootstrap} mechanism.  The default is {\stt true}.
+\item{\tt cand-bsr}: this directive specifies that this router is to
+  be a candidate to be the BootStrap Router (BSR) for this PIM-SM domain.
+  It will become the BSR only if it wins the BSR election process.
+
+  One or more {\stt scope-zone}s must be specified for a candidate BSR
+  router:
 \begin{description}
-\item{\tt scope-zone}:
-\item{\tt is-scope-zone}:
-\item{\tt cand-bsr-by-vif-name}:
-\item{\tt bsr-priority}:
-\item{\tt hash-mask-len}:
-\end{description}
-\end{description}
-\item{\tt cand-rp}:
+\item{\tt scope-zone}: this directive specifies one multicast group
+  prefix for which this router is willing to be BSR. 
+ 
+  For each scope zone, the following infomation can be specified: 
 \begin{description}
-\item{\tt group-prefix}:
+\item{\tt is-scope-zone}: this directive takes the value {\stt true}
+  or {\stt false}.  When the value is {\stt true}, this indicates that
+  this multicast group prefix defines a multicast scope zone.  When
+  the value is {\stt false}, this indicates that the group prefix in
+  the {\stt scope-zone} directive merely represents a range of
+  multicast groups for which this router is willing to be BSR.  The
+  default is {\stt false}.
+\item{\tt cand-bsr-by-vif-name}: this specifies the name of the {\stt
+  vif} whose IP address will be used in the PIM bootstap messages.  It
+  is a mandatory parameter.
+\item{\tt bsr-priority}: this specifies the BSR priority for this
+  router.  It takes a positive integer value, which is used in the
+  PIM-SM BSR election process.  For each {\stt scope-zone}, the
+  candidate bootstrap router with the highest BSR priority will be
+  chosen to be BSR.
+\item{\tt hash-mask-len}: The BSR mechanism announces a list of
+  candicate RPs (C-RPs) for each scope zone to the other routers in
+  the scope zone.  To balance load, those routers then use a hash
+  function to choose the RP for each multicast group from amongst the
+  C-RPs.  However, it is usually desirable for closely associated
+  multicast groups to use the same RP.  Thus the hash function is only
+  applied to the first $n$ bits of the group IP address, ensuring that
+  if two groups have the same first $n$ bits, they will hash to the
+  same RP address.  Should this router become the BSR for this
+  scope-zone, the {\stt hash-mask-len} parameter gives the value of
+  $n$ that this router will inform other routers they must use.  It
+  defaults to 30 bits for IPv4.
+\end{description}
+\end{description}
+\end{description}
+\item{\tt cand-rp}: this directive specifies that this router is to be
+  a candidate to be an RP for this PIM-SM domain.  It will become an
+  RP only if the BSR chooses it to be.  
+
+  One or more group-prefixes must be specified for this router
+  to function as an RP:
 \begin{description}
-\item{\tt is-scope-zone}:
-\item{\tt cand-rp-by-vif-name}:
-\item{\tt rp-priority}:
-\item{\tt rp-holdtime}:
-\end{description}
-\end{description}
-\item{\tt switch-to-spt-threshold}:
+\item{\tt group-prefix}: this specifies the range of multicast
+  addresses for which the specified router is willing to be the RP.
+  The value is in the form of an IP address and prefix length in the
+  {\it address/prefix-length} format.  
+
+  For each {\stt group-prefix}, the following parameters can be
+  specified:
 \begin{description}
-\item{\tt enabled}:
-\item{\tt interval-sec}:
-\item{\tt bytes}:
+\item{\tt is-scope-zone}: this directive takes the value {\stt true}
+  or {\stt false}.  When the value is {\stt true}, this indicates that
+  this multicast group prefix defines a multicast scope zone.  When
+  the value is {\stt false}, this indicates that the group prefix in
+  the {\stt scope-zone} directive merely represents a range of
+  multicast groups for which this router is willing to be RP.  The
+  default is {\stt false}.
+\item{\tt cand-rp-by-vif-name}: this specifies the name of the {\stt
+  vif} whose IP address will be used as the RP address if this router
+  becomes an RP.  It is a mandatory parameter.
+\item{\tt rp-priority}: this specifies the RP priority of this router
+  for this {\stt group-prefix}.  It takes the form of a non-negative
+  integer.
+
+  If multiple RP routers are known for a particular multicast group,
+  then the one with the most specific {\stt group-prefix} will be
+  used.  If more than one router has the same most specific {\stt
+  group-prefix}, then the one with the highest {\stt rp-priority} is
+  used.  See also {\stt hash-mask-len}.
+
+  The default value for {\stt rp-priority} is 1.
+\item{\tt rp-holdtime}: this specifies the holdtime that this router
+  will advertise when talking to the BSR.  If the BSR has not heard a
+  Candidate RP Advertisement from this router for {\stt rp-holdtime}
+  seconds, then the BSR will conclude it is dead, and will remove it
+  from the set of possible RPs.  The default value is 150 seconds.
 \end{description}
-\item{\tt traceoptions}:
+\end{description}
+\item{\tt switch-to-spt-threshold}: this directive permits the
+  specification of a bitrate threshold at a last-hop router or RP
+  for switching from the RP Tree to the Shortest-Path Tree.  The
+  following parameters can be specified:
 \begin{description}
-\item{\tt flag all}:
+\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+  and determines whether bitrate-based switching to the shortest
+  path tree is enabled.  The default is false.
+\item{\tt interval-sec}: this specifies the measurement interval in
+  seconds for measuring the bitrate of traffic from a  multicast
+  sender.  The measurement interval should normally not be set too
+  small - values greater than ten seconds are recommended.  The
+  default is zero, indicating that measurement is disabled.
+\item{\tt bytes}: this specifies the maximum number of bytes from a
+  multicast sender that can be received in {\stt interval-sec}
+  seconds.  If this threshold is exceeded, the router will attempt to
+  switch to the shortest-path tree from that multicast sender.
+\end{description}
+\item{\tt traceoptions}: this directive delimits the configuration of
+  debugging and tracing options for PIM-SM.
 \begin{description}
-\item{\tt enabled}:
+\item{\tt flag}: this directive is used to specify which tracing
+  options are enabled.  Possible parameters are:
+\begin{description}
+\item{\tt all}: this directive specifies that all tracing
+  options should be enabled.  Possible parameters are:
+\begin{description}
+\item{\tt enabled}: this takes the value {\stt true} or {\stt false},
+  and enables or disables tracing. The default is {\stt true}.
 \end{description}
 \end{description}
 \end{description}
+\end{description}
+
+The configuration parameters for PIM-SM for IPv6 are the same as those
+for IPv4, except for the following:
+\begin{itemize}
+\item The {\stt pimsm6} directive for IPv6 is used in place of the
+  {\stt pimsm4} directive for IPv4.
+\item The default value of {\stt targetname} is ``{\stt PIMSM\_6}''
+  instead of ``{\stt PIMSM\_4}''
+\item All IP addresses used in configuration are IPv6 addresses
+  instead of IPv4 addresses.
+\item The default value of {\stt hash-mask-len} is 126 for IPv6 rather
+  than 30 for IPv4.
+\end{itemize}
+
+\newpage
 \subsection{Example Configurations}
 
 \vspace{0.1in}
