@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_next_hop_resolver.cc,v 1.3 2002/12/09 18:28:41 hodson Exp $"
+#ident "$XORP: xorp/bgp/dummy_next_hop_resolver.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,7 +40,7 @@ bool
 DummyNextHopResolver<A>::lookup(const A nexthop, bool& resolvable, 
 			   uint32_t& metric) const
 {
-    map <A, uint32_t>::const_iterator i;
+    typename map <A, uint32_t>::const_iterator i;
     i = _metrics.find(nexthop);
     if (i == _metrics.end()) {
 	resolvable = false;
@@ -57,7 +57,7 @@ template <class A>
 void
 DummyNextHopResolver<A>::set_nexthop_metric(const A nexthop, 
 					    uint32_t metric) {
-    map <A, uint32_t>::const_iterator i;
+    typename map <A, uint32_t>::const_iterator i;
     i = _metrics.find(nexthop);
     if (i != _metrics.end()) {
 	abort();
@@ -68,7 +68,7 @@ DummyNextHopResolver<A>::set_nexthop_metric(const A nexthop,
 template <class A>
 void
 DummyNextHopResolver<A>::unset_nexthop_metric(const A nexthop) {
-    map <A, uint32_t>::iterator i;
+    typename map <A, uint32_t>::iterator i;
     i = _metrics.find(nexthop);
     if (i == _metrics.end()) {
 	fprintf(stderr, "Can't unset nexthop %s\n", nexthop.str().c_str());
