@@ -1649,6 +1649,11 @@ INSTALL_STRIP_PROGRAM="\${SHELL} \$(install_sh) -c -s"
 
 
 
+cat >>confdefs.h <<_ACEOF
+#define XORP_ROOT "${ac_default_prefix}"
+_ACEOF
+
+
 # Add --enable-maintainer-mode as a command-line option for folks who
 # want to play with auto* tools.
 echo "$as_me:$LINENO: checking whether to enable maintainer-specific portions of Makefiles" >&5
