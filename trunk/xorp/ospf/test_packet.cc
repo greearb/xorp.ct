@@ -211,6 +211,19 @@ populate_router_lsa(RouterLsa *rlsa, OspfTypes::Version version)
     }
     
     RouterLink rl(version);
+    rl.set_type(RouterLink::p2p);
+    rl.set_metric(2);
+    switch(version) {
+    case OspfTypes::V2:
+	rl.set_link_id(3);
+	rl.set_link_data(4);
+	break;
+    case OspfTypes::V3:
+	rl.set_interface_id(3);
+	rl.set_neighbour_interface_id(4);
+	rl.set_neighbour_router_id(5);
+	break;
+    }
     rlsa->get_router_links().push_back(rl);
 
     // This will set the checksum and the length.
@@ -451,6 +464,59 @@ router_lsa_print(TestInfo& info)
     return true;
 }
 
+inline
+void
+fill_vector(vector<uint8_t>& pkt, uint8_t *ptr, size_t len)
+{
+    pkt.resize(len);
+    for(size_t i = 0; i < len; i++)
+	pkt[i] = ptr[i];
+}
+
+bool
+router_lsa_compare(TestInfo& info, OspfTypes::Version version)
+{
+    RouterLsa *rlsa1= new RouterLsa(version);
+    populate_router_lsa(rlsa1, version);
+
+    DOUT(info) << rlsa1->str() << endl;
+
+    // Encode the Data Description Packet.
+    rlsa1->encode();
+    size_t len1;
+    uint8_t *ptr1 = rlsa1->lsa(len1);
+
+    // Now decode the packet.
+    // Create a new packet to provide the decoder.
+    RouterLsa *rlsa2= new RouterLsa(version);
+
+    Lsa::LsaRef rlsa3 = rlsa2->decode(ptr1, len1);
+
+    DOUT(info) << rlsa3->str() << endl;
+
+    // Encode the second packet and compare.
+    rlsa3->encode();
+
+    DOUT(info) << rlsa3->str() << endl;
+
+    size_t len2;
+    uint8_t *ptr2 = rlsa3->lsa(len2);
+    
+    vector<uint8_t> pkt1;
+    fill_vector(pkt1, ptr1, len1);
+    vector<uint8_t> pkt2;
+    fill_vector(pkt2, ptr2, len2);
+
+    if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    delete rlsa1;
+    delete rlsa2;
+//     delete rlsa3;
+
+    return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -486,6 +552,8 @@ main(int argc, char **argv)
 	{"decoder1V3", callback(decoder1, OspfTypes::V3)},
 	{"decoder2V2", callback(decoder2, OspfTypes::V2)},
 	{"decoder2V3", callback(decoder2, OspfTypes::V3)},
+	{"router_lsa_compareV2", callback(router_lsa_compare, OspfTypes::V2)},
+	{"router_lsa_compareV3", callback(router_lsa_compare, OspfTypes::V3)},
     };
 
     try {
