@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_rtsock.cc,v 1.6 2004/06/10 22:40:53 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_rtsock.cc,v 1.7 2004/08/17 02:20:10 pavlin Exp $"
 
 #include "fea_module.h"
 #include "libxorp/xorp.h"
@@ -49,6 +49,9 @@ IfConfigObserverRtsock::~IfConfigObserverRtsock()
 int
 IfConfigObserverRtsock::start()
 {
+    if (_is_running)
+	return (XORP_OK);
+
     if (RoutingSocket::start() < 0)
 	return (XORP_ERROR);
 

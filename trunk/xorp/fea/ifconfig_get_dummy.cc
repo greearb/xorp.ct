@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_dummy.cc,v 1.5 2004/06/10 22:40:52 hodson Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_dummy.cc,v 1.6 2004/08/17 02:20:09 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -47,6 +47,9 @@ IfConfigGetDummy::~IfConfigGetDummy()
 int
 IfConfigGetDummy::start()
 {
+    if (_is_running)
+	return (XORP_OK);
+
     _is_running = true;
 
     return (XORP_OK);

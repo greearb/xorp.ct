@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.19 2004/08/12 22:18:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.20 2004/08/17 02:20:06 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -60,6 +60,9 @@ FtiConfigEntryGetNetlink::~FtiConfigEntryGetNetlink()
 int
 FtiConfigEntryGetNetlink::start()
 {
+    if (_is_running)
+	return (XORP_OK);
+
     if (ftic().have_ipv4()) {
 	if (NetlinkSocket4::start() < 0)
 	    return (XORP_ERROR);

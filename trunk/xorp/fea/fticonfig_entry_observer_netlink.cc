@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_observer_netlink.cc,v 1.5 2004/08/13 19:36:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_observer_netlink.cc,v 1.6 2004/08/17 02:20:06 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -67,6 +67,9 @@ FtiConfigEntryObserverNetlink::start()
     return (XORP_ERROR);
 
 #else // HAVE_NETLINK_SOCKETS
+
+    if (_is_running)
+	return (XORP_OK);
 
     //
     // Listen to the netlink multicast group for IPv4 routing entries.
