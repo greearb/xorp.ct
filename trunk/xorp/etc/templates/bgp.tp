@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.25 2004/05/18 01:06:47 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.26 2004/05/18 07:11:06 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -63,7 +63,7 @@ protocols {
 	}
 
 	peer @ {
-	    %mandatory: as;
+	    %mandatory: as as;
 	    %mandatory: next-hop;
 	    %mandatory: local-port;
 	    %mandatory: peer-port;
