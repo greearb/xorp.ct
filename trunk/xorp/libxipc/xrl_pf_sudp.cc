@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.9 2003/03/04 23:41:25 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.10 2003/03/07 01:32:27 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -201,7 +201,7 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
     _destination.sin_port = htons(port);
 
     if (sender_fd <= 0) {
-	debug_msg("Creating master socket");
+	debug_msg("Creating master socket\n");
 	sender_fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sender_fd > 0) {
 	    _event_loop.add_selector(sender_fd, SEL_RD,
@@ -325,17 +325,24 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 	return;
     }
 
-    Request& r = i->second;
-    r.timeout.unschedule();
+    // Unschedule timer
+    i->second.timeout.unschedule();
+
+    // Copy out state we'd like to use from request before deleting it.
+    SendCallback callback = i->second.callback;
+    const Xrl* px = i->second.xrl;
+
+    debug_msg("Erasing state for %s (answered)\n",
+	      i->second.xuid.str().c_str());
+    requests_pending.erase(i);
+
     try {
 	XrlArgs response(buf + header_bytes);
-	r.callback->dispatch(err, *r.xrl, &response);
+	callback->dispatch(err, *px, &response);
     } catch (const InvalidString&) {
 	debug_msg("Corrupt response: header_bytes %u content_bytes %u\n\t\"%s\"\n", (uint32_t)header_bytes, (uint32_t)content_bytes, buf + header_bytes);
-	r.callback->dispatch(XrlError::CORRUPT_RESPONSE(), *r.xrl, 0);
+	callback->dispatch(XrlError::CORRUPT_RESPONSE(), *px, 0);
     }
-    debug_msg("Erasing state for %s (answered)\n", r.xuid.str().c_str());
-    requests_pending.erase(i);
 }
 
 // ----------------------------------------------------------------------------
