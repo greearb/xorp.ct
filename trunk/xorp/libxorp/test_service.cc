@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxorp/test_service.cc,v 1.2 2004/03/02 22:11:20 hodson Exp $"
 
 #include "config.h"
 
@@ -78,21 +78,22 @@ public:
 	: _e(e)
     {}
 
-    void
+    bool
     startup()
     {
 	set_status(STARTING, "Waiting for timed start event");
 	_xt = _e.new_oneoff_after_ms(TRANS_MS,
 				     callback(this, &TestService::go_running));
-
+	return true;
     }
 
-    void
+    bool
     shutdown()
     {
 	set_status(SHUTTING_DOWN, "Waiting for timed shutdown event");
 	_xt = _e.new_oneoff_after_ms(TRANS_MS,
 				     callback(this, &TestService::go_shutdown));
+	return true;
     }
 
 protected:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.1 2004/03/11 00:04:20 hodson Exp $"
 
 #include <iomanip>
 
@@ -292,7 +292,7 @@ public:
 	delete _rtr;
     }
 
-    void startup()
+    bool startup()
     {
 	string cls = c_format("%s-%u\n",
 			      xlog_process_name(), (uint32_t)getpid());
@@ -301,14 +301,16 @@ public:
 	set_status(STARTING);
 	_rtr_poll = _e.new_periodic(100,
 			callback(this, &XrlJobQueue::xrl_router_ready_poll));
+	return true;
     }
 
-    void shutdown()
+    bool shutdown()
     {
 	while (_jobs.empty() == false) {
 	    _jobs.pop_front();
 	}
 	set_status(SHUTDOWN);
+	return true;
     }
 
     void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.12 2004/03/24 19:14:07 atanu Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.13 2004/04/01 11:42:47 mjh Exp $"
 
 #include "fea_module.h"
 
@@ -510,17 +510,21 @@ XrlSocketServer::~XrlSocketServer()
     _r = 0;
 }
 
-void
+bool
 XrlSocketServer::startup()
 {
     _r->finalize();
     set_status(STARTING);
+
+    return true;
 }
 
-void
+bool
 XrlSocketServer::shutdown()
 {
     set_status(SHUTTING_DOWN);
+
+    return true;
 }
 
 uint32_t

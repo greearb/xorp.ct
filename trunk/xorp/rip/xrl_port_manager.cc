@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.10 2004/04/02 00:27:57 mjh Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.11 2004/04/04 18:34:53 hodson Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -193,16 +193,18 @@ is_port_for<A>::operator() (Port<A>*& p)
 // XrlPortManager
 
 template <typename A>
-void
+bool
 XrlPortManager<A>::startup()
 {
     set_status(STARTING);
     // Transition to RUNNING occurs when tree_complete() is called, ie
     // we have interface/vif/address state available.
+
+    return true;
 }
 
 template <typename A>
-void
+bool
 XrlPortManager<A>::shutdown()
 {
     set_status(SHUTTING_DOWN);
@@ -231,6 +233,8 @@ XrlPortManager<A>::shutdown()
 	    debug_msg("   XXX skipping port %p\n", p);
 	}
     }
+
+    return true;
 }
 
 template <typename A>

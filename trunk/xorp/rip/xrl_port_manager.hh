@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_manager.hh,v 1.5 2004/02/14 00:28:22 hodson Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.6 2004/03/20 18:03:59 hodson Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -57,13 +57,17 @@ public:
 
     /**
      * Request start up of instance.
+     *
+     * @return true on success, false on failure.
      */
-    void startup();
+    bool startup();
 
     /**
      * Request shutdown of instance.
+     *
+     * @return true on success, false on failure.
      */
-    void shutdown();
+    bool shutdown();
 
     /**
      * Request the addition of an address to run RIP on.  If the

@@ -120,14 +120,18 @@ public:
      * interface configuration tree data.  When data is received
      * transition into the RUNNING state (see @ref ServiceBase for
      * states).
+     *
+     * @return true on success, false on failure.
      */
-    void startup();
+    bool startup();
 
     /**
      * Stop running and shutdown.  Deregister with the registration
      * target and transition to SHUTDOWN state when complete.
+     *
+     * @return true on success, false on failure.
      */
-    void shutdown();
+    bool shutdown();
 
     /**
      * @return interface configuration tree.  Should only be trusted when

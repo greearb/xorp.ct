@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/service.hh,v 1.2 2004/01/09 23:18:25 hodson Exp $
+// $XORP: xorp/libxorp/service.hh,v 1.3 2004/01/13 06:09:33 hodson Exp $
 
 #ifndef __LIBXORP_SERVICE_HH__
 #define __LIBXORP_SERVICE_HH__
@@ -75,15 +75,19 @@ public:
      * Start service.  Service should transition from READY to
      * STARTING immediately and onto RUNNING or FAILED in the near
      * future.
+     *
+     * @return true on success, false on failure.
      */
-    virtual void startup() = 0;
+    virtual bool startup() = 0;
 
     /**
      * Shutdown service.  Service should transition from RUNNING to
      * SHUTTING_DOWN immediately and onto SHUTDOWN or FAILED in the
      * near future.
+     *
+     * @return true on success, false on failure.
      */
-    virtual void shutdown() = 0;
+    virtual bool shutdown() = 0;
 
     /**
      * Reset service.  Service should transition in READY from

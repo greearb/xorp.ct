@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.7 2004/03/20 18:03:59 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.8 2004/04/02 00:27:57 mjh Exp $"
 
 #define DEBUG_LOGGING
 
@@ -321,18 +321,21 @@ XrlPortIO<A>::pending() const
 }
 
 template <typename A>
-void
+bool
 XrlPortIO<A>::startup()
 {
     _pending = true;
     set_status(STARTING);
     if (request_socket_server() == false) {
 	set_status(FAILED, "Failed to find appropriate socket server.");
+	return false;
     }
+
+    return true;
 }
 
 template <typename A>
-void
+bool
 XrlPortIO<A>::shutdown()
 {
     _pending = true;
@@ -341,6 +344,8 @@ XrlPortIO<A>::shutdown()
     if (request_socket_leave() == false) {
 	set_status(SHUTDOWN);
     }
+
+    return true;
 }
 
 template <typename A>

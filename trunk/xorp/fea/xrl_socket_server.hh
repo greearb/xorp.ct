@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.3 2004/02/19 04:33:12 hodson Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.4 2004/03/20 18:00:53 hodson Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -47,13 +47,17 @@ public:
      *
      * Causes instance to register Xrls with the Finder subsequently
      * become operational.
+     *
+     * @return true on success, false on failure.
      */
-    void startup();
+    bool startup();
 
     /**
      * Shutdown XrlSocketServer.
+     *
+     * @return true on success, false on failure.
      */
-    void shutdown();
+    bool shutdown();
 
     /**
      * Get count of number of socket owners.  These are XrlTargets that own

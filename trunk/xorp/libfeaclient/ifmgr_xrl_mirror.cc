@@ -851,27 +851,32 @@ IfMgrXrlMirror::~IfMgrXrlMirror()
     _rtr = 0;
 }
 
-void
+bool
 IfMgrXrlMirror::startup()
 {
-    if (status() == READY) {
-	_rtr = new IfMgrXrlMirrorRouter(_e, CLSNAME,
-					_finder_host, _finder_port);
-	_xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
-	_rtr->attach(this);
-	_xrl_tgt->attach(this);
-	set_status(STARTING, "Initializing Xrl Router.");
-    }
+    if (status() != READY)
+	return false;
+
+    _rtr = new IfMgrXrlMirrorRouter(_e, CLSNAME, _finder_host, _finder_port);
+    _xrl_tgt = new IfMgrXrlMirrorTarget(*_rtr, _dispatcher);
+    _rtr->attach(this);
+    _xrl_tgt->attach(this);
+    set_status(STARTING, "Initializing Xrl Router.");
+
+    return true;
 }
 
-void
+bool
 IfMgrXrlMirror::shutdown()
 {
-    if (status() == RUNNING) {
-	set_status(SHUTTING_DOWN);
-	_iftree.clear();
-	unregister_with_ifmgr();
-    }
+    if (status() != RUNNING)
+	return false;
+
+    set_status(SHUTTING_DOWN);
+    _iftree.clear();
+    unregister_with_ifmgr();
+
+    return true;
 }
 
 void

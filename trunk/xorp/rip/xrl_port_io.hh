@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_io.hh,v 1.2 2004/01/13 20:37:09 hodson Exp $
+// $XORP: xorp/rip/xrl_port_io.hh,v 1.3 2004/03/20 18:03:59 hodson Exp $
 
 #ifndef __XRL_PORT_IO_HH__
 #define __XRL_PORT_IO_HH__
@@ -47,15 +47,19 @@ public:
      * and then attempts to instantiate socket with socket server.  If
      * both operations are successful, instance status transitions to
      * RUNNING.  Otherwise, it transitions to failed.
+     *
+     * @return true on success, false on failure.
      */
-    void startup();
+    bool startup();
 
     /**
      * Shutdown.  Sends request to close socket and transitions into
      * SHUTTING_DOWN state.  When socket is closed transition to
      * SHUTDOWN occurs.
+     *
+     * @return true on success, false on failure.
      */
-    void shutdown();
+    bool shutdown();
 
     /**
      * Send packet.  Status of instance must be running.  When packet is sent,

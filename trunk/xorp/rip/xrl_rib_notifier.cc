@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.4 2004/02/20 04:03:50 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.5 2004/04/02 00:27:57 mjh Exp $"
 
 #define DEBUG_LOGGING
 
@@ -184,7 +184,7 @@ XrlRibNotifier<A>::decr_inflight()
 
 
 template<typename A>
-void
+bool
 XrlRibNotifier<A>::startup()
 {
     XrlRibV0p1Client c(&_xs);
@@ -196,9 +196,12 @@ XrlRibNotifier<A>::startup()
 	 callback(this, &XrlRibNotifier<A>::add_igp_cb)) == false) {
 	XLOG_ERROR("Failed to send table creation request.");
 	set_status(FAILED);
+	return false;
     }
     set_status(STARTING);
     incr_inflight();
+
+    return true;
 }
 
 template <typename A>
@@ -217,7 +220,7 @@ XrlRibNotifier<A>::add_igp_cb(const XrlError& xe)
 
 
 template<typename A>
-void
+bool
 XrlRibNotifier<A>::shutdown()
 {
     this->stop_polling();
@@ -233,8 +236,11 @@ XrlRibNotifier<A>::shutdown()
 	 callback(this, &XrlRibNotifier<A>::delete_igp_cb)) == false) {
 	XLOG_ERROR("Failed to send table creation request.");
 	set_status(FAILED);
+	return false;
     }
     incr_inflight();
+
+    return true;
 }
 
 template <typename A>

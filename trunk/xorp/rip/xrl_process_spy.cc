@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_process_spy.cc,v 1.1 2003/11/04 23:39:58 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_process_spy.cc,v 1.2 2004/01/13 20:38:07 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -95,13 +95,15 @@ XrlProcessSpy::death_event(const string& class_name,
 }
 
 
-void
+bool
 XrlProcessSpy::startup()
 {
     if (status() == READY || status() == SHUTDOWN) {
 	send_register(0);
 	set_status(STARTING);
     }
+
+    return true;
 }
 
 void
@@ -146,13 +148,15 @@ XrlProcessSpy::register_cb(const XrlError& xe, uint32_t idx)
 }
 
 
-void
+bool
 XrlProcessSpy::shutdown()
 {
     if (status() == RUNNING) {
 	send_deregister(0);
 	set_status(SHUTTING_DOWN);
     }
+
+    return true;
 }
 
 void
