@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.25 2003/06/27 22:26:15 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.26 2003/09/30 18:27:05 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -519,7 +519,7 @@ PimMre::receive_join_rp(uint16_t vif_index, uint16_t holdtime)
     return;
 
  prune_pending_state_label:
-    // PrunePending state -> Join state
+    // Prune-Pending state -> Join state
     _downstream_prune_pending_timers[vif_index].unschedule();
     _downstream_expiry_timers[vif_index].time_remaining(tv_left);
     if (tv_left < TimeVal(holdtime, 0)) {
@@ -554,7 +554,7 @@ PimMre::receive_prune_rp(uint16_t vif_index, uint16_t holdtime)
     return;		// Ignore
 
  join_state_label:
-    // Join state -> PrunePending state
+    // Join state -> Prune-Pending state
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
@@ -577,7 +577,7 @@ PimMre::receive_prune_rp(uint16_t vif_index, uint16_t holdtime)
     return;
 
  prune_pending_state_label:
-    // PrunePending state
+    // Prune-Pending state
     return;		// Nothing to do
     
     UNUSED(holdtime);
@@ -623,7 +623,7 @@ PimMre::receive_join_wc(uint16_t vif_index, uint16_t holdtime)
     return;
 
  prune_pending_state_label:
-    // PrunePending state -> Join state
+    // Prune-Pending state -> Join state
     _downstream_prune_pending_timers[vif_index].unschedule();
     _downstream_expiry_timers[vif_index].time_remaining(tv_left);
     if (tv_left < TimeVal(holdtime, 0)) {
@@ -659,7 +659,7 @@ PimMre::receive_prune_wc(uint16_t vif_index, uint16_t holdtime)
     return;		// Ignore
     
  join_state_label:
-    // Join state -> PrunePending state
+    // Join state -> Prune-Pending state
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
@@ -682,7 +682,7 @@ PimMre::receive_prune_wc(uint16_t vif_index, uint16_t holdtime)
     return;
 
  prune_pending_state_label:
-    // PrunePending state
+    // Prune-Pending state
     return;		// Nothing to do
     
     UNUSED(holdtime);
@@ -728,7 +728,7 @@ PimMre::receive_join_sg(uint16_t vif_index, uint16_t holdtime)
     return;
     
  prune_pending_state_label:
-    // PrunePending state -> Join state
+    // Prune-Pending state -> Join state
     _downstream_prune_pending_timers[vif_index].unschedule();
     _downstream_expiry_timers[vif_index].time_remaining(tv_left);
     if (tv_left < TimeVal(holdtime, 0)) {
@@ -764,7 +764,7 @@ PimMre::receive_prune_sg(uint16_t vif_index, uint16_t holdtime)
     return;		// Ignore
     
  join_state_label:
-    // Join state -> PrunePending state
+    // Join state -> Prune-Pending state
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
@@ -787,7 +787,7 @@ PimMre::receive_prune_sg(uint16_t vif_index, uint16_t holdtime)
     return;
     
  prune_pending_state_label:
-    // PrunePending state    
+    // Prune-Pending state    
     return;		// Nothing to do
     
     UNUSED(holdtime);
@@ -820,7 +820,7 @@ PimMre::receive_join_wc_by_sg_rpt(uint16_t vif_index)
     return;
     
  prune_pending_state_label:
-    // PrunePending state -> PrunePendingTmp state
+    // Prune-Pending state -> Prune-Pending-Tmp state
     set_downstream_prune_pending_tmp_state(vif_index);
     return;
 }
@@ -852,7 +852,7 @@ PimMre::receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime)
     return;
     
  prune_pending_state_label:
-    // PrunePending state -> NoInfo state
+    // Prune-Pending state -> NoInfo state
     _downstream_expiry_timers[vif_index].unschedule();
     _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
@@ -894,7 +894,7 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     goto noinfo_state_label;
     
  noinfo_state_label:
-    // NoInfo state -> PrunePending state
+    // NoInfo state -> Prune-Pending state
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return;
@@ -938,7 +938,7 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
     return;
     
  prune_pending_tmp_state_label:
-    // PrunePendingTmp state -> PrunePending state
+    // Prune-Pending-Tmp state -> Prune-Pending state
     set_downstream_prune_pending_state(vif_index);
     _downstream_expiry_timers[vif_index].time_remaining(tv_left);
     if (tv_left < TimeVal(holdtime, 0)) {
@@ -948,9 +948,9 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 		callback(this, &PimMre::downstream_expiry_timer_timeout_sg_rpt,
 			 vif_index));
     }
-    // FALLTHROUGH to PrunePending state
+    // FALLTHROUGH to Prune-Pending state
  prune_pending_state_label:
-    // PrunePending state
+    // Prune-Pending state
     return;		// Nothing to do
 }
 
@@ -980,12 +980,11 @@ PimMre::receive_end_of_message_sg_rpt(uint16_t vif_index)
  prune_tmp_state_label:
     // PruneTmp state -> NoInfo state
     _downstream_expiry_timers[vif_index].unschedule();
-    _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
     return;
     
  prune_pending_tmp_state_label:
-    // PrunePendingTmp state -> NoInfo state
+    // Prune-Pending-Tmp state -> NoInfo state
     _downstream_expiry_timers[vif_index].unschedule();
     _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
@@ -1013,7 +1012,7 @@ PimMre::downstream_expiry_timer_timeout_rp(uint16_t vif_index)
  join_state_label:
     // Join state -> NoInfo state
  prune_pending_label:
-    // PrunePending state -> NoInfo state
+    // Prune-Pending state -> NoInfo state
     set_downstream_noinfo_state(vif_index);
 }
 
@@ -1034,7 +1033,7 @@ PimMre::downstream_prune_pending_timer_timeout_rp(uint16_t vif_index)
     return;
     
  prune_pending_label:
-    // PrunePending state -> NoInfo state
+    // Prune-Pending state -> NoInfo state
     // Send PruneEcho(*,*,RP) if more than one PIM neighbors
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
@@ -1070,7 +1069,7 @@ PimMre::downstream_expiry_timer_timeout_wc(uint16_t vif_index)
  join_state_label:
     // Join state -> NoInfo state
  prune_pending_label:
-    // PrunePending state -> NoInfo state
+    // Prune-Pending state -> NoInfo state
     set_downstream_noinfo_state(vif_index);
 }
 
@@ -1092,7 +1091,7 @@ PimMre::downstream_prune_pending_timer_timeout_wc(uint16_t vif_index)
     return;
     
  prune_pending_label:
-    // PrunePending state -> NoInfo state
+    // Prune-Pending state -> NoInfo state
     // Send PruneEcho(*,G) if more than one PIM neighbors
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
@@ -1136,7 +1135,7 @@ PimMre::downstream_expiry_timer_timeout_sg(uint16_t vif_index)
  join_state_label:
     // Join state -> NoInfo state
  prune_pending_label:
-    // PrunePending state -> NoInfo state
+    // Prune-Pending state -> NoInfo state
     set_downstream_noinfo_state(vif_index);
 }
 
@@ -1157,7 +1156,7 @@ PimMre::downstream_prune_pending_timer_timeout_sg(uint16_t vif_index)
     return;
     
  prune_pending_label:
-    // PrunePending state -> NoInfo state
+    // Prune-Pending state -> NoInfo state
     // Send PruneEcho(S,G) if more than one PIM neighbors
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
@@ -1190,8 +1189,6 @@ PimMre::downstream_expiry_timer_timeout_sg_rpt(uint16_t vif_index)
     
  prune_state_label:
     // Prune state -> NoInfo state
-    _downstream_expiry_timers[vif_index].unschedule();
-    _downstream_prune_pending_timers[vif_index].unschedule();
     set_downstream_noinfo_state(vif_index);
     return;
 }
@@ -1210,7 +1207,7 @@ PimMre::downstream_prune_pending_timer_timeout_sg_rpt(uint16_t vif_index)
     return;
     
  prune_pending_state_label:
-    // PrunePending state -> Prune state
+    // Prune-Pending state -> Prune state
     set_downstream_prune_state(vif_index);
     return;
 }
@@ -1241,10 +1238,10 @@ PimMre::rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
 	return;			// XXX: I don't know the MRIB.next_hop(RP).
     if (my_mrib_next_hop_rp->vif_index() != vif_index)
 	return;
-    if (my_mrib_next_hop_rp->addr() != target_nbr_addr)
+    if (! my_mrib_next_hop_rp->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is MRIB.next_hop(RP)
+    // `target_nbr_addr' belongs to NBR(RPF_interface(RP), MRIB.next_hop(RP))
     // Increase Join Timer to t_joinsuppress
     TimeVal t_suppressed, t_joinsuppress, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1287,10 +1284,10 @@ PimMre::rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
 	return;			// XXX: I don't know the MRIB.next_hop(RP)
     if (my_mrib_next_hop_rp->vif_index() != vif_index)
 	return;
-    if (my_mrib_next_hop_rp->addr() != target_nbr_addr)
+    if (! my_mrib_next_hop_rp->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is MRIB.next_hop(RP)
+    // `target_nbr_addr' belongs to NBR(RPF_interface(RP), MRIB.next_hop(RP))
     // Restart JoinTimer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1332,10 +1329,10 @@ PimMre::wc_see_join_wc(uint16_t vif_index, uint16_t holdtime,
 	return;			// XXX: I don't know the RPF'(*,G) nbr
     if (my_rpfp_nbr_wc->vif_index() != vif_index)
 	return;
-    if (my_rpfp_nbr_wc->addr() != target_nbr_addr)
+    if (! my_rpfp_nbr_wc->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is RPF'(*,G)
+    // `target_nbr_addr' belongs to RPF'(*,G)
     // Increase Join Timer to t_joinsuppress
     TimeVal t_suppressed, t_joinsuppress, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1378,10 +1375,10 @@ PimMre::wc_see_prune_wc(uint16_t vif_index, uint16_t holdtime,
 	return;			// XXX: I don't know the RPF'(*,G) nbr
     if (my_rpfp_nbr_wc->vif_index() != vif_index)
 	return;
-    if (my_rpfp_nbr_wc->addr() != target_nbr_addr)
+    if (! my_rpfp_nbr_wc->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is RPF'(*,G)
+    // `target_nbr_addr' belongs to RPF'(*,G)
     // Restart JoinTimer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1423,10 +1420,10 @@ PimMre::sg_see_join_sg(uint16_t vif_index, uint16_t holdtime,
 	return;			// XXX: I don't know the RPF'(S,G) nbr
     if (my_rpfp_nbr_sg->vif_index() != vif_index)
 	return;
-    if (my_rpfp_nbr_sg->addr() != target_nbr_addr)
+    if (! my_rpfp_nbr_sg->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is RPF'(S,G)
+    // `target_nbr_addr' belongs to RPF'(S,G)
     // Increase Join Timer to t_joinsuppress
     TimeVal t_suppressed, t_joinsuppress, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1469,10 +1466,10 @@ PimMre::sg_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
 	return;			// XXX: I don't know the RPF'(S,G) nbr
     if (my_rpfp_nbr_sg->vif_index() != vif_index)
 	return;
-    if (my_rpfp_nbr_sg->addr() != target_nbr_addr)
+    if (! my_rpfp_nbr_sg->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is RPF'(S,G)
+    // `target_nbr_addr' belongs to RPF'(S,G)
     // Restart JoinTimer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1513,10 +1510,10 @@ PimMre::sg_see_prune_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
 	return;			// XXX: I don't know the RPF'(S,G) nbr
     if (my_rpfp_nbr_sg->vif_index() != vif_index)
 	return;
-    if (my_rpfp_nbr_sg->addr() != target_nbr_addr)
+    if (! my_rpfp_nbr_sg->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is RPF'(S,G)
+    // `target_nbr_addr' belongs to RPF'(S,G)
     // Restart JoinTimer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1556,10 +1553,10 @@ PimMre::sg_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 	return;			// XXX: I don't know the RPF'(S,G) nbr
     if (my_rpfp_nbr_sg->vif_index() != vif_index)
 	return;
-    if (my_rpfp_nbr_sg->addr() != target_nbr_addr)
+    if (! my_rpfp_nbr_sg->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is RPF'(S,G)
+    // `target_nbr_addr' belongs to RPF'(S,G)
     // Restart JoinTimer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1600,10 +1597,10 @@ PimMre::sg_rpt_see_join_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 	return;			// XXX: I don't know the RPF'(S,G,rpt) nbr
     if (my_rpfp_nbr_sg_rpt->vif_index() != vif_index)
 	return;
-    if (my_rpfp_nbr_sg_rpt->addr() != target_nbr_addr)
+    if (! my_rpfp_nbr_sg_rpt->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is RPF'(S,G,rpt)
+    // `target_nbr_addr' belongs to RPF'(S,G,rpt)
     // Cancel OverrideTimer
     override_timer().unschedule();
     
@@ -1636,10 +1633,10 @@ PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 	return;			// XXX: I don't know the RPF'(S,G,rpt) nbr
     if (my_rpfp_nbr_sg_rpt->vif_index() != vif_index)
 	return;
-    if (my_rpfp_nbr_sg_rpt->addr() != target_nbr_addr)
+    if (! my_rpfp_nbr_sg_rpt->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is RPF'(S,G)
+    // `target_nbr_addr' belongs to RPF'(S,G,rpt)
     // Restart OverrideTimer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1684,10 +1681,10 @@ PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
 	return;			// XXX: I don't know the RPF'(S,G,rpt) nbr
     if (my_rpfp_nbr_sg_rpt->vif_index() != vif_index)
 	return;
-    if (my_rpfp_nbr_sg_rpt->addr() != target_nbr_addr)
+    if (! my_rpfp_nbr_sg_rpt->is_my_addr(target_nbr_addr))
 	return;
     
-    // `target_nbr_addr' is RPF'(S,G)
+    // `target_nbr_addr' belongs to RPF'(S,G,rpt)
     // Restart OverrideTimer if it is larger than t_override
     TimeVal t_override, tv_left;
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
