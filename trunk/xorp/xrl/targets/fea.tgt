@@ -1,9 +1,8 @@
-/* $XORP: xorp/xrl/targets/fea.tgt,v 1.2 2003/03/29 19:03:13 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/fea.tgt,v 1.3 2003/05/21 00:13:04 atanu Exp $ */
 
 #include "common.xif"
-#include "fea.xif"
 #include "fea_ifmgr.xif"
 #include "fti.xif"
 #include "fea_rawpkt.xif"
 
-target fea implements common/0.1, fea/0.1, ifmgr/0.1, fti/0.2, raw_packet/0.1
+target fea implements common/0.1, ifmgr/0.1, fti/0.2, raw_packet/0.1
