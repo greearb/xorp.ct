@@ -1,0 +1,5 @@
+
+
+echo "Trying snmpwalk localhost BGP4-MIB::bgpPeerTable"
+snmpwalk localhost  BGP4-MIB::bgpPeerTable 
+
