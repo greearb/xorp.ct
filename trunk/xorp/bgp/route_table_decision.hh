@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.2 2002/12/16 03:08:20 mjh Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.3 2002/12/17 22:06:05 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -64,7 +64,7 @@ public:
      *
      * @param bgp_nexthop The next hop that has changed.
      */
-    void igp_nexthop_changed(const A& bgp_nexthop);
+    virtual void igp_nexthop_changed(const A& bgp_nexthop);
 
     void peering_went_down(const PeerHandler *peer, uint32_t genid,
 			   BGPRouteTable<A> *caller);

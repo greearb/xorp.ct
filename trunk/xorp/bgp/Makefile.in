@@ -110,8 +110,7 @@ test_decision_SOURCES = test_decision.cc 	 route_table_debug.hh route_table_debu
 test_fanout_SOURCES = test_fanout.cc 	 route_table_debug.hh route_table_debug.cc dummy_main.cc
 test_dump_SOURCES = test_dump.cc 	 route_table_debug.hh route_table_debug.cc dummy_next_hop_resolver.hh dummy_next_hop_resolver.cc dummy_main.cc
 test_ribout_SOURCES = test_ribout.cc 	 route_table_debug.hh route_table_debug.cc peer_handler_debug.hh peer_handler_debug.cc dummy_main.cc
-
-test_next_hop_resolver_SOURCES = test_next_hop_resolver.cc
+test_next_hop_resolver_SOURCES = test_next_hop_resolver.cc dummy_main.cc
 libbgp_a_SOURCES = bgp_module.h md5.h aspath.hh attribute_manager.hh bgp_trie.hh dump_iterators.hh internal_message.hh iptuple.hh local_data.hh net_layer_reachability.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh path_attribute_list.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_ribin.hh route_table_ribout.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh withdrawn_route.hh xrl_target.hh md5.c aspath.cc attribute_manager.cc bgp_trie.cc dump_iterators.cc internal_message.cc iptuple.cc keepalive_packet.cc local_data.cc net_layer_reachability.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc path_attribute_list.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_ribin.cc route_table_ribout.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc withdrawn_route.cc xrl_target.cc
 EXTRA_DIST = BUGS configs configure_bgp.sh docs run_tests test_cache.reference test_decision.reference test_deletion.reference test_dump.reference test_fanout.reference test_filter.reference test_nhlookup.reference test_ribin.reference test_ribout.reference xrl_shell_funcs.sh
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
@@ -243,7 +242,7 @@ $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
 $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
 test_ribout_LDFLAGS = 
-test_next_hop_resolver_OBJECTS =  test_next_hop_resolver.o
+test_next_hop_resolver_OBJECTS =  test_next_hop_resolver.o dummy_main.o
 test_next_hop_resolver_LDADD = $(LDADD)
 test_next_hop_resolver_DEPENDENCIES =  libbgp.a \
 $(top_builddir)/xrl/targets/libbgpbase.a \
