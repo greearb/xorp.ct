@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.9 2005/03/03 07:31:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.10 2005/03/05 01:41:28 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -50,7 +50,7 @@ RawSocket6::RawSocket6(uint32_t protocol) throw (RawSocket6Exception)
 	"setsockopt(IPV6_RECVPKTINFO) failed", errno);
     }
 #else
-    // The old option (see RFC 2292)
+    // The old option (see RFC-2292)
     if (setsockopt(_fd, IPPROTO_IPV6, IPV6_PKTINFO,
 	(void *)&bool_flag, sizeof(bool_flag)) < 0) {
 	xorp_throw(RawSocket6Exception,

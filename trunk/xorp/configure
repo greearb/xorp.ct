@@ -8798,8 +8798,8 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 fi
 
 
-echo "$as_me:$LINENO: checking for post-RFC2292 IPv6 advanced API" >&5
-echo $ECHO_N "checking for post-RFC2292 IPv6 advanced API... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking for RFC-3542 IPv6 advanced API" >&5
+echo $ECHO_N "checking for RFC-3542 IPv6 advanced API... $ECHO_C" >&6
 
 
 ac_ext=c
@@ -8842,7 +8842,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (exit $ac_status); }; }; then
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_RFC2292BIS 1
+#define HAVE_RFC3542 1
 _ACEOF
 
    echo "$as_me:$LINENO: result: yes" >&5

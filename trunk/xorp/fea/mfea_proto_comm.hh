@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.7 2005/03/15 01:16:48 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.8 2005/03/20 00:21:10 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -127,7 +127,7 @@ public:
      * If set, the IP header of a raw packet should be created
      * by the application itself, otherwise the kernel will build it.
      * Note: used only for IPv4.
-     * In post-RFC-2292, IPV6_PKTINFO has similar functions,
+     * In RFC-3542, IPV6_PKTINFO has similar functions,
      * but because it requires the interface index and outgoing address,
      * it is of little use for our purpose. Also, in RFC-2292 this option
      * was a flag, so for compatibility reasons we better not set it

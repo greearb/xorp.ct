@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.15 2004/06/17 03:58:18 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.16 2004/06/17 06:02:53 pavlin Exp $
 dnl
 
 dnl
@@ -132,10 +132,10 @@ dummy += MRT6MSG_WHOLEPKT;
 fi
 
 dnl ------------------------------------
-dnl Check if the newer (post-RFC2292) IPv6 advanced API is supported
+dnl Check if the newer (RFC-3542) IPv6 advanced API is supported
 dnl ------------------------------------
 
-AC_MSG_CHECKING(for post-RFC2292 IPv6 advanced API)
+AC_MSG_CHECKING(for RFC-3542 IPv6 advanced API)
 AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_RUN([
@@ -151,8 +151,8 @@ main()
   return (0);
 }
 ],
-  [AC_DEFINE(HAVE_RFC2292BIS, 1,
-		[Define to 1 if you have newer IPv6 advanced API])
+  [AC_DEFINE(HAVE_RFC3542, 1,
+		[Define to 1 if you have newer (RFC-3542) IPv6 advanced API])
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.26 2005/03/19 23:27:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.27 2005/03/20 00:21:10 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -112,7 +112,7 @@
 //
 #ifdef HAVE_IPV6
 static uint16_t		rtalert_code;
-#ifndef HAVE_RFC2292BIS
+#ifndef HAVE_RFC3542
 static uint8_t		raopt[IP6OPT_RTALERT_LEN];
 #endif
 #endif // HAVE_IPV6
@@ -137,11 +137,11 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
     // Init Router Alert related option stuff
 #ifdef HAVE_IPV6
     rtalert_code = htons(IP6OPT_RTALERT_MLD); // XXX: used by MLD only (?)
-#ifndef HAVE_RFC2292BIS
+#ifndef HAVE_RFC3542
     raopt[0] = IP6OPT_ROUTER_ALERT;
     raopt[1] = IP6OPT_RTALERT_LEN - 2;
     memcpy(&raopt[2], (caddr_t)&rtalert_code, sizeof(rtalert_code));
-#endif // ! HAVE_RFC2292BIS
+#endif // ! HAVE_RFC3542
 #endif // HAVE_IPV6
     
     _proto_socket = -1;
@@ -281,7 +281,7 @@ ProtoComm::stop()
  * If set, the IP header of a raw packet should be created
  * by the application itself, otherwise the kernel will build it.
  * XXX: Used only for IPv4.
- * In post-RFC-2292, IPV6_PKTINFO has similar functions,
+ * In RFC-3542, IPV6_PKTINFO has similar functions,
  * but because it requires the interface index and outgoing address,
  * it is of little use for our purpose. Also, in RFC-2292 this option
  * was a flag, so for compatibility reasons we better not set it
@@ -364,7 +364,7 @@ ProtoComm::recv_pktinfo(bool enable_bool)
 	    return (XORP_ERROR);
 	}
 #else
-	// The old option (see RFC 2292)
+	// The old option (see RFC-2292)
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_PKTINFO,
 		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_PKTINFO, %u) failed: %s",
@@ -1266,7 +1266,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 		    //
 		    // Check for Router Alert option
 		    //
-#ifdef HAVE_RFC2292BIS
+#ifdef HAVE_RFC3542
 		    {
 			struct ip6_hbh *ext;
 			int currentlen;
@@ -1289,7 +1289,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 			    }
 			}
 		    }
-#else // ! HAVE_RFC2292BIS (i.e., the old advanced API)
+#else // ! HAVE_RFC3542 (i.e., the old advanced API)
 		    {
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
 			//
@@ -1306,7 +1306,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 			}
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 		    }
-#endif // ! HAVE_RFC2292BIS
+#endif // ! HAVE_RFC3542
 		    
 		}
 		
@@ -1600,7 +1600,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	
 	if (is_router_alert) {
 	    // Space for Router Alert option
-#ifdef HAVE_RFC2292BIS
+#ifdef HAVE_RFC3542
 	    if ((hbhlen = inet6_opt_init(NULL, 0)) == -1)
 		XLOG_ERROR("inet6_opt_init(NULL) failed");
 	    if ((hbhlen = inet6_opt_append(NULL, 0, hbhlen,
@@ -1626,7 +1626,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 #else
 	    UNUSED(hbhlen);
 #endif
-#endif // ! HAVE_RFC2292BIS
+#endif // ! HAVE_RFC3542
 	}
 	// Space for IPV6_TCLASS
 #ifdef IPV6_TCLASS 
@@ -1666,7 +1666,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	// Include the Router Alert option if needed
 	//
 	if (is_router_alert) {
-#ifdef HAVE_RFC2292BIS
+#ifdef HAVE_RFC3542
 	    int currentlen;
 	    void *hbhbuf, *optp = NULL;
 	    
@@ -1691,7 +1691,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 		return (XORP_ERROR);
 	    }
 	    
-#else  // ! HAVE_RFC2292BIS (i.e., the old advanced API)
+#else  // ! HAVE_RFC3542 (i.e., the old advanced API)
 
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
 	    //
@@ -1709,7 +1709,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	    }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 	    
-#endif // ! HAVE_RFC2292BIS
+#endif // ! HAVE_RFC3542
 	    
 	    cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 	}

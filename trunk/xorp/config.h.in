@@ -180,8 +180,8 @@
 /* Define to 1 if Linux /proc filesystem exists */
 #undef HAVE_PROC_LINUX
 
-/* Define to 1 if you have newer IPv6 advanced API */
-#undef HAVE_RFC2292BIS
+/* Define to 1 if you have newer (RFC-3542) IPv6 advanced API */
+#undef HAVE_RFC3542
 
 /* Define to 1 if you have BSD-style routing sockets (AF_ROUTE) */
 #undef HAVE_ROUTING_SOCKETS
