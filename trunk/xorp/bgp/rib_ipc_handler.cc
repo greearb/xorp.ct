@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.45 2004/03/04 17:49:55 hodson Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.46 2004/03/24 19:14:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -271,14 +271,14 @@ RibIpcHandler::push_packet()
 }
 
 bool 
-RibIpcHandler::insert_static_route(const OriginType origin,
-				   const AsPath& aspath,
-				   const IPv4& next_hop,
-				   const IPNet<IPv4>& nlri)
+RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
+			       const IPv4Net& nlri, const IPv4& next_hop,
+			       const bool& unicast, const bool& multicast)
 {
-    debug_msg("insert_static_route: origin %d aspath %s next hop %s nlri %s\n",
-	      origin, aspath.str().c_str(), next_hop.str().c_str(), 
-	      nlri.str().c_str());
+    debug_msg("origin %d aspath %s nlri %s next hop %s unicast %d"
+	      " multicast %d\n",
+	      origin, aspath.str().c_str(), nlri.str().c_str(),
+	      next_hop.str().c_str(), unicast, multicast);
 
     /*
     ** Construct the path attribute list.
@@ -299,17 +299,71 @@ RibIpcHandler::insert_static_route(const OriginType origin,
     /*
     ** Inject the message into the plumbing.
     */
-    _plumbing_unicast->add_route(msg, this);
-    _plumbing_unicast->push_ipv4(this);
+    if (unicast) {
+	_plumbing_unicast->add_route(msg, this);
+	_plumbing_unicast->push<IPv4>(this);
+    }
+
+    if (multicast) {
+	_plumbing_multicast->add_route(msg, this);
+	_plumbing_multicast->push<IPv4>(this);
+    }
+
     msg_route->unref();
 
     return true;
 }
 
 bool 
-RibIpcHandler::delete_static_route(const IPNet<IPv4>& nlri)
+RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
+			       const IPv6Net& nlri, const IPv6& next_hop,
+			       const bool& unicast, const bool& multicast)
 {
-    debug_msg("delete_static_route: nlri %s\n", nlri.str().c_str());
+    debug_msg("origin %d aspath %s nlri %s next hop %s unicast %d"
+	      " multicast %d\n",
+	      origin, aspath.str().c_str(), nlri.str().c_str(),
+	      next_hop.str().c_str(), unicast, multicast);
+
+    /*
+    ** Construct the path attribute list.
+    */
+    PathAttributeList<IPv6> pa_list(next_hop, aspath, origin);
+
+    /*
+    ** Create a subnet route
+    */
+    SubnetRoute<IPv6>* msg_route 
+	= new SubnetRoute<IPv6>(nlri, &pa_list, NULL);
+    
+    /*
+    ** Make an internal message.
+    */
+    InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
+
+    /*
+    ** Inject the message into the plumbing.
+    */
+    if (unicast) {
+	_plumbing_unicast->add_route(msg, this);
+	_plumbing_unicast->push<IPv6>(this);
+    }
+
+    if (multicast) {
+	_plumbing_multicast->add_route(msg, this);
+	_plumbing_multicast->push<IPv6>(this);
+    }
+
+    msg_route->unref();
+
+    return true;
+}
+
+bool
+RibIpcHandler::withdraw_route(const IPv4Net& nlri, const bool& unicast,
+			      const bool& multicast)
+{
+    debug_msg("nlri %s unicast %d multicast %d\n", nlri.str().c_str(),
+	      unicast, multicast);
 
     /*
     ** Create a subnet route
@@ -325,8 +379,52 @@ RibIpcHandler::delete_static_route(const IPNet<IPv4>& nlri)
     /*
     ** Inject the message into the plumbing.
     */
-    _plumbing_unicast->delete_route(msg, this);
-    _plumbing_unicast->push_ipv6(this);
+    if (unicast) {
+	_plumbing_unicast->delete_route(msg, this);
+	_plumbing_unicast->push<IPv4>(this);
+    }
+
+    if (multicast) {
+	_plumbing_multicast->delete_route(msg, this);
+	_plumbing_multicast->push<IPv4>(this);
+    }
+
+    msg_route->unref();
+
+    return true;
+}
+
+bool
+RibIpcHandler::withdraw_route(const IPv6Net& nlri, const bool& unicast,
+			      const bool& multicast)
+{
+    debug_msg("nlri %s unicast %d multicast %d\n", nlri.str().c_str(),
+	      unicast, multicast);
+
+    /*
+    ** Create a subnet route
+    */
+    SubnetRoute<IPv6>* msg_route
+	= new SubnetRoute<IPv6>(nlri, 0, NULL);
+
+    /*
+    ** Make an internal message.
+    */
+    InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
+
+    /*
+    ** Inject the message into the plumbing.
+    */
+    if (unicast) {
+	_plumbing_unicast->delete_route(msg, this);
+	_plumbing_unicast->push<IPv6>(this);
+    }
+
+    if (multicast) {
+	_plumbing_multicast->delete_route(msg, this);
+	_plumbing_multicast->push<IPv6>(this);
+    }
+
     msg_route->unref();
 
     return true;

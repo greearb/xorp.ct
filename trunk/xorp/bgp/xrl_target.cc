@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.20 2003/09/16 21:00:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.21 2004/03/23 19:33:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -323,6 +323,9 @@ XrlBgpTarget::bgp_0_2_originate_route4(
     debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
 
+    if (!_bgp.originate_route(nlri, next_hop, unicast, multicast))
+	return XrlCmdError::COMMAND_FAILED();
+
     return XrlCmdError::OKAY();
 }
 
@@ -337,6 +340,9 @@ XrlBgpTarget::bgp_0_2_originate_route6(
     debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
 
+    if (!_bgp.originate_route(nlri, next_hop, unicast, multicast))
+	return XrlCmdError::COMMAND_FAILED();
+
     return XrlCmdError::OKAY();
 }
 
@@ -350,6 +356,9 @@ XrlBgpTarget::bgp_0_2_withdraw_route4(
     debug_msg("nlri %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), unicast, multicast);
 
+    if (!_bgp.withdraw_route(nlri, unicast, multicast))
+	return XrlCmdError::COMMAND_FAILED();
+
     return XrlCmdError::OKAY();
 }
 
@@ -362,6 +371,9 @@ XrlBgpTarget::bgp_0_2_withdraw_route6(
 {
     debug_msg("nlri %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), unicast, multicast);
+
+    if (!_bgp.withdraw_route(nlri, unicast, multicast))
+	return XrlCmdError::COMMAND_FAILED();
 
     return XrlCmdError::OKAY();
 }
@@ -545,63 +557,6 @@ XrlBgpTarget::bgp_0_2_register_rib(
 			    "Couldn't register rib name %s",
 					   name.c_str()));
     }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError 
-XrlBgpTarget::bgp_0_2_add_route(
-		  // Input values, 
-		  const int32_t&	origin, 
-		  const int32_t&	asnum, 
-		  const IPv4&	next_hop, 
-		  const IPv4Net&	nlri)
-{
-    debug_msg("add_route: origin %d asnum %d next hop %s nlri %s\n",
-	      origin, asnum, next_hop.str().c_str(), nlri.str().c_str());
-
-    if(_awaiting_config)
-	return XrlCmdError::COMMAND_FAILED("BGP Not configured!!!");
-
-    if(!_bgp.processes_ready())
-	return XrlCmdError::COMMAND_FAILED("FEA or RIB not running");
-
-    OriginType ot;
-
-    switch(origin) {
-    case IGP:
-	break;
-    case EGP:
-	break;
-    case INCOMPLETE:
-	break;
-    default:
-	XLOG_ERROR("Bad origin value %d", origin);
-	return XrlCmdError::BAD_ARGS();
-    }
-
-    ot = static_cast<OriginType>(origin);
-
-    if(!_bgp.add_route(ot, AsNum(static_cast<uint16_t>(asnum)),
-		       next_hop, nlri))
-	return XrlCmdError::COMMAND_FAILED();
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlBgpTarget::bgp_0_2_delete_route(
-				   // Input values, 
-				   const IPv4Net&	nlri)
-{
-    if(_awaiting_config)
-	return XrlCmdError::COMMAND_FAILED("BGP Not configured!!!");
-
-    if(!_bgp.processes_ready())
-	return XrlCmdError::COMMAND_FAILED("FEA or RIB not running");
-
-    if(!_bgp.delete_route(nlri))
-	return XrlCmdError::COMMAND_FAILED();
 
     return XrlCmdError::OKAY();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.23 2003/12/19 07:39:10 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.24 2003/12/19 20:16:50 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -123,15 +123,65 @@ public:
 	return _v4_queue.busy() || _v4_queue.busy();
     }
 
-    /*
-    ** Insert fake static route into routing table.
-    */
-    bool insert_static_route(const OriginType origin, const AsPath& aspath,
-		      const IPv4& next_hop, const IPNet<IPv4>& nlri);
-    /*
-    ** Delete static route from routing table.
-    */
-    bool delete_static_route(const IPNet<IPv4>& nlri);
+    /**
+     * Originate an IPv4 route
+     *
+     * @param origin of the path information
+     * @param aspath
+     * @param nlri subnet to announce
+     * @param next_hop to forward to
+     * @param unicast if true install in unicast routing table
+     * @param multicast if true install in multicast routing table
+     *
+     * @return true on success
+     */
+    bool originate_route(const OriginType origin,
+			 const AsPath& aspath,
+			 const IPv4Net& nlri,
+			 const IPv4& next_hop,
+			 const bool& unicast,
+			 const bool& multicast);
+
+    /**
+     * Originate an IPv6 route
+     *
+     * @param origin of the path information
+     * @param aspath
+     * @param nlri subnet to announce
+     * @param next_hop to forward to
+     * @param unicast if true install in unicast routing table
+     * @param multicast if true install in multicast routing table
+     *
+     * @return true on success
+     */
+    bool originate_route(const OriginType origin,
+			 const AsPath& aspath,
+			 const IPv6Net& nlri,
+			 const IPv6& next_hop,
+			 const bool& unicast,
+			 const bool& multicast);
+
+    /**
+     * Withdraw an IPv4 route
+     *
+     * @param nlri subnet to withdraw
+     * @param unicast if true withdraw from unicast routing table
+     * @param multicast if true withdraw from multicast routing table
+     *
+     * @return true on success
+     */
+    bool withdraw_route(const IPv4Net&	nlri,
+			const bool& unicast,
+			const bool& multicast);
+
+    /**
+     * Withdraw an IPv6 route
+     *
+     * @return true on success
+     */
+    bool withdraw_route(const IPv6Net&	nlri,
+			const bool& unicast,
+			const bool& multicast);
 
     //fake a zero IP address so the RIB IPC handler gets listed first
     //in the Fanout Table.

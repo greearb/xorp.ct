@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.17 2003/09/16 21:00:27 hodson Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.18 2004/03/23 19:33:20 atanu Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -234,17 +234,6 @@ public:
     XrlCmdError bgp_0_2_register_rib(
 	// Input values,
 	const string&	name);
-
-    XrlCmdError bgp_0_2_add_route(
-	// Input values,
-	const int32_t&	origin,
-	const int32_t&	asnum,
-	const IPv4&	next_hop,
-	const IPv4Net&	nlri);
-
-    XrlCmdError bgp_0_2_delete_route(
-	// Input values,
-	const IPv4Net&	nlri);
 
     XrlCmdError bgp_0_2_get_v4_route_list_start(
 	// Output values,

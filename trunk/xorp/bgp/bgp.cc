@@ -712,31 +712,55 @@ BGPMain::stop_all_servers()
 }
 
 bool
-BGPMain::add_route(const OriginType origin,  const AsNum& as,
-		   const IPv4& next_hop, const IPv4Net&	nlri)
+BGPMain::originate_route(const IPv4Net& nlri, const IPv4& next_hop,
+			  const bool& unicast, const bool& multicast)
 {
-    debug_msg("add_route: origin %d as %s next hop %s nlri %s\n",
-	      origin, as.str().c_str(), next_hop.str().c_str(),
-	      nlri.str().c_str());
+    debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
+	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
 
-    /*
-    ** XXX
-    ** We should really have been passed an AS path in the first
-    ** place.
-    */
+    LocalData *local = get_local_data();
+
     AsPath aspath;
-    aspath.prepend_as(as);
+    aspath.prepend_as(local->as());
 
-    return _rib_ipc_handler->insert_static_route(origin, aspath, next_hop,
-						nlri);
+    return _rib_ipc_handler->originate_route(INCOMPLETE, aspath, nlri,
+					      next_hop, unicast, multicast);
 }
 
 bool
-BGPMain::delete_route(const IPv4Net& nlri)
+BGPMain::originate_route(const IPv6Net& nlri, const IPv6& next_hop,
+			  const bool& unicast, const bool& multicast)
 {
-    debug_msg("delete_route: nlri %s\n", nlri.str().c_str());
+    debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
+	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
 
-    return _rib_ipc_handler->delete_static_route(nlri);
+    LocalData *local = get_local_data();
+
+    AsPath aspath;
+    aspath.prepend_as(local->as());
+
+    return _rib_ipc_handler->originate_route(INCOMPLETE, aspath, nlri,
+					      next_hop, unicast, multicast);
+}
+
+bool
+BGPMain::withdraw_route(const IPv4Net& nlri, const bool& unicast,
+			 const bool& multicast) const
+{
+    debug_msg("nlri %s unicast %d multicast %d\n",
+	      nlri.str().c_str(), unicast, multicast);
+
+    return _rib_ipc_handler->withdraw_route(nlri, unicast, multicast);
+}
+
+bool
+BGPMain::withdraw_route(const IPv6Net& nlri, const bool& unicast,
+			 const bool& multicast) const
+{
+    debug_msg("nlri %s unicast %d multicast %d\n",
+	      nlri.str().c_str(), unicast, multicast);
+
+    return _rib_ipc_handler->withdraw_route(nlri, unicast, multicast);
 }
 
 bool

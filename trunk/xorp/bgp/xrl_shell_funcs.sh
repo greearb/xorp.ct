@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.5 2003/10/31 00:20:38 atanu Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.6 2003/11/05 07:44:32 pavlin Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -61,16 +61,28 @@ register_rib()
     $CALLXRL "finder://bgp/bgp/0.2/register_rib?name:txt=$1"
 }
 
-add_route()
+originate_route4()
 {
-    echo -n "add_route" $*
-    $CALLXRL "finder://bgp/bgp/0.2/add_route?origin:i32=$1&asnum:i32=$2&next_hop:ipv4=$3&nlri:ipv4net=$4"
+    echo -n "originate_route4" $*
+    $CALLXRL "finder://bgp/bgp/0.2/originate_route4?nlri:ipv4net=$1&next_hop:ipv4=$2&unicast:bool=$3&multicast:bool=$4"
 }
 
-delete_route()
+originate_route6()
 {
-    echo -n "delete_route" $*
-    $CALLXRL "finder://bgp/bgp/0.2/delete_route?nlri:ipv4net=$1"
+    echo -n "originate_route4" $*
+    $CALLXRL "finder://bgp/bgp/0.2/originate_route6?nlri:ipv6net=$1&next_hop:ipv6=$2&unicast:bool=$3&multicast:bool=$4"
+}
+
+withdraw_route4()
+{
+    echo -n "withdraw_route4" $*
+    $CALLXRL "finder://bgp/bgp/0.2/withdraw_route4?nlri:ipv4net=$1&unicast:bool&=$2multicast:bool=$3"
+}
+
+withdraw_route6()
+{
+    echo -n "withdraw_route6" $*
+    $CALLXRL "finder://bgp/bgp/0.2/withdraw_route6?nlri:ipv6net=$1&unicast:bool&=$2multicast:bool=$3"
 }
 
 shutdown()

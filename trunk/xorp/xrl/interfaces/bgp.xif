@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.13 2004/03/18 04:55:47 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.14 2004/03/23 19:33:20 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -335,32 +335,6 @@ interface bgp/0.2 {
 	register_rib \
 		? \
 		name:txt
-
-	/**
-	 * add route
-	 *
-	 * @param origin the origin of the path information.
-	 * @param asum an as number will eventually be a path.
-	 * @param next_hop the border router that should be used as a
-	 * destination for the nlri.
-	 * @param nlri network level reachability information.
-	 */
-	add_route \
-		? \
-		origin:i32 \
-		& asnum:i32 \
-		& next_hop:ipv4 \
-		& nlri:ipv4net
-
-	/**
-	 * delete route
-	 *
-	 * @param nlri network level reachability information.
-	 */
-	 delete_route \
-		? \
-		nlri:ipv4net
-
 	/**
 	 * Get the first item of a list of BGP routes
 	 * See RFC 1657 (BGP MIB) for full definitions of return values.

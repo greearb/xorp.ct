@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.30 2003/11/05 06:39:44 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.31 2004/02/20 04:08:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -360,13 +360,13 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     set_if_true(ipv6_multicast, add<IPv6>(p,pa_ipv6_multicast,SAFI_MULTICAST));
 
     if (ipv4_unicast)
-	_plumbing_unicast->push_ipv4(this);
+	_plumbing_unicast->push<IPv4>(this);
     if (ipv6_unicast)
-	_plumbing_unicast->push_ipv6(this);
+	_plumbing_unicast->push<IPv6>(this);
     if (ipv4_multicast)
-	_plumbing_multicast->push_ipv4(this);
+	_plumbing_multicast->push<IPv4>(this);
     if (ipv6_multicast)
-	_plumbing_multicast->push_ipv6(this);
+	_plumbing_multicast->push<IPv6>(this);
     return 0;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.21 2003/10/14 01:54:35 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.22 2003/10/23 10:54:40 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -177,28 +177,56 @@ public:
     void stop_all_servers();
 
     /**
-     * add route
+     * Originate an IPv4 route
      *
-     * Typically called via XRL's to add static routes.
+     * @param nlri subnet to announce
+     * @param next_hop to forward to
+     * @param unicast if true install in unicast routing table
+     * @param multicast if true install in multicast routing table
      *
-     * @param origin the origin of the path information.
-     * @param asum an as number will eventually be a path.
-     * @param next_hop the border router that should be used as a
-     * detination for the nlri.
-     * @param nlri network level reachability information.
-     * @param success returns true if the route was sucessfully added.
+     * @return true on success
      */
-    bool add_route(const OriginType origin,  const AsNum& as,
-		   const IPv4& next_hop, const IPv4Net&	nlri);
+    bool originate_route(const IPv4Net& nlri,
+			 const IPv4& next_hop,
+			 const bool& unicast,
+			 const bool& multicast);
+
     /**
-     * delete route
+     * Originate an IPv6 route
      *
-     * Typically called via XRL's to delete static routes.
+     * @param nlri subnet to announce
+     * @param next_hop to forward to
+     * @param unicast if true install in unicast routing table
+     * @param multicast if true install in multicast routing table
      *
-     * @param nlri network level reachability information.
-     * @param success returns true if the route was sucessfully added.
+     * @return true on success
      */
-    bool delete_route(const IPv4Net& nlri);
+    bool originate_route(const IPv6Net& nlri,
+			 const IPv6& next_hop,
+			 const bool& unicast,
+			 const bool& multicast);
+
+    /**
+     * Withdraw an IPv4 route
+     *
+     * @param nlri subnet to withdraw
+     * @param unicast if true withdraw from unicast routing table
+     * @param multicast if true withdraw from multicast routing table
+     *
+     * @return true on success
+     */
+    bool withdraw_route(const IPv4Net&	nlri,
+			const bool& unicast,
+			const bool& multicast) const;
+
+    /**
+     * Withdraw an IPv6 route
+     *
+     * @return true on success
+     */
+    bool withdraw_route(const IPv6Net&	nlri,
+			const bool& unicast,
+			const bool& multicast) const;
 
     bool get_route_list_start4(uint32_t& token);
     bool get_route_list_start6(uint32_t& token);
