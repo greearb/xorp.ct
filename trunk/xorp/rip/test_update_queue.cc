@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.10 2004/09/18 00:00:32 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.11 2005/02/01 09:04:24 pavlin Exp $"
 
 #include <set>
 
@@ -169,14 +169,14 @@ public:
 	if (uq.updates_queued() != n_routes) {
 	    verbose_log("%u updates queued, expected %u\n",
 			XORP_UINT_CAST(uq.updates_queued()),
-			XOPR_UINT_CAST(n_routes));
+			XORP_UINT_CAST(n_routes));
 	    return 1;
 	}
 
 	uint32_t n = 0;
 	for (n = 0; n < n_routes; n++) {
 	    if (uq.get(_fast_reader) == 0) {
-		verbose_log("Ran out of updates at %u.\n", n);
+		verbose_log("Ran out of updates at %u.\n", XORP_UINT_CAST(n));
 		return 1;
 	    }
 	    uq.next(_fast_reader);
