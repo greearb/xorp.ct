@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.2 2004/03/15 23:36:31 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.3 2004/03/18 13:17:21 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -436,7 +436,7 @@ XrlFib2mribNode::send_rib_deregistration()
 	}
     }
 
-    if (_is_rib_igp_table4_registered) {
+    if (_is_rib_igp_table6_registered) {
 	bool success6;
 	success6 = _xrl_rib_client.send_delete_igp_table6(
 	    _rib_target.c_str(),
