@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.12 2003/08/05 05:37:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.13 2003/08/06 18:50:22 pavlin Exp $"
 
 
 //
@@ -196,14 +196,14 @@ MfeaNode::stop(void)
 /**
  * MfeaNode::add_vif:
  * @vif: Vif information about new MfeaVif to install.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Install a new MFEA vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::add_vif(const Vif& vif, string& err)
+MfeaNode::add_vif(const Vif& vif, string& error_msg)
 {
     //
     // Create a new MfeaVif
@@ -212,9 +212,9 @@ MfeaNode::add_vif(const Vif& vif, string& err)
     
     if (ProtoNode<MfeaVif>::add_vif(mfea_vif) != XORP_OK) {
 	// Cannot add this new vif
-	err = c_format("Cannot add vif %s: internal error",
-		       vif.name().c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot add vif %s: internal error",
+			     vif.name().c_str());
+	XLOG_ERROR(error_msg.c_str());
 	
 	delete mfea_vif;
 	return (XORP_ERROR);
@@ -312,27 +312,27 @@ MfeaNode::add_pim_register_vif()
 /**
  * MfeaNode::delete_vif:
  * @vif_name: The name of the vif to delete.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Delete an existing MFEA vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::delete_vif(const string& vif_name, string& err)
+MfeaNode::delete_vif(const string& vif_name, string& error_msg)
 {
     MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
-	err = c_format("Cannot delete vif %s: no such vif",
+	error_msg = c_format("Cannot delete vif %s: no such vif",
 		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (ProtoNode<MfeaVif>::delete_vif(mfea_vif) != XORP_OK) {
-	err = c_format("Cannot delete vif %s: internal error",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot delete vif %s: internal error",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	delete mfea_vif;
 	return (XORP_ERROR);
     }
@@ -347,20 +347,20 @@ MfeaNode::delete_vif(const string& vif_name, string& err)
 /**
  * MfeaNode::enable_vif:
  * @vif_name: The name of the vif to enable.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Enable an existing MFEA vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::enable_vif(const string& vif_name, string& err)
+MfeaNode::enable_vif(const string& vif_name, string& error_msg)
 {
     MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
-	err = c_format("Cannot enable vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot enable vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -374,20 +374,20 @@ MfeaNode::enable_vif(const string& vif_name, string& err)
 /**
  * MfeaNode::disable_vif:
  * @vif_name: The name of the vif to disable.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Disable an existing MFEA vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::disable_vif(const string& vif_name, string& err)
+MfeaNode::disable_vif(const string& vif_name, string& error_msg)
 {
     MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
-	err = c_format("Cannot disable vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot disable vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -401,27 +401,27 @@ MfeaNode::disable_vif(const string& vif_name, string& err)
 /**
  * MfeaNode::start_vif:
  * @vif_name: The name of the vif to start.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Start an existing MFEA vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::start_vif(const string& vif_name, string& err)
+MfeaNode::start_vif(const string& vif_name, string& error_msg)
 {
     MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
-	err = c_format("Cannot start vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot start vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (mfea_vif->start() != XORP_OK) {
-	err = c_format("Cannot start vif %s: internal error",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot start vif %s: internal error",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -433,27 +433,27 @@ MfeaNode::start_vif(const string& vif_name, string& err)
 /**
  * MfeaNode::stop_vif:
  * @vif_name: The name of the vif to stop.
- * @err: The error message (if error).
+ * @error_msg: The error message (if error).
  * 
  * Stop an existing MFEA vif.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::stop_vif(const string& vif_name, string& err)
+MfeaNode::stop_vif(const string& vif_name, string& error_msg)
 {
     MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
-	err = c_format("Cannot stop vif %s: no such vif",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot stop vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (mfea_vif->stop() != XORP_OK) {
-	err = c_format("Cannot stop vif %s: internal error",
-		       vif_name.c_str());
-	XLOG_ERROR(err.c_str());
+	error_msg = c_format("Cannot stop vif %s: internal error",
+			     vif_name.c_str());
+	XLOG_ERROR(error_msg.c_str());
 	return (XORP_ERROR);
     }
     

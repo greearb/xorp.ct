@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.10 2003/08/05 05:37:29 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.11 2003/08/06 18:50:22 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -98,53 +98,50 @@ public:
      * Install a new MFEA vif.
      * 
      * @param vif vif information about new MfeaVif to install.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_vif(const Vif& vif, string& err);
+    int		add_vif(const Vif& vif, string& error_msg);
     
     /**
      *  Delete an existing MFEA vif.
      * 
      * @param vif_name the name of the vif to delete.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_vif(const string& vif_name, string& err);
+    int		delete_vif(const string& vif_name, string& error_msg);
     
     /**
      * Add a configured vif.
      *
      * @param vif the vif with the information to add.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @param error_msg the error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_config_vif(const Vif& vif, string& reason);
+    int add_config_vif(const Vif& vif, string& error_msg);
     
     /**
      * Add a configured vif.
      * 
      * @param vif_name the name of the vif to add.
      * @param vif_index the vif index of the vif to add.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @param error_msg the error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_config_vif(const string& vif_name,
 			       uint16_t vif_index,
-			       string& reason);
+			       string& error_msg);
     
     /**
      * Delete a configured vif.
      * 
      * @param vif_name the name of the vif to delete.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @param error_msg the error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_config_vif(const string& vif_name,
-				  string& reason);
+				  string& error_msg);
 
     /**
      * Add an address to a configured vif.
@@ -154,8 +151,7 @@ public:
      * @param subnet the subnet address to add.
      * @param broadcast the broadcast address to add.
      * @param peer the peer address to add.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @param error_msg the error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_config_vif_addr(const string& vif_name,
@@ -163,33 +159,31 @@ public:
 				    const IPvXNet& subnet,
 				    const IPvX& broadcast,
 				    const IPvX& peer,
-				    string& reason);
+				    string& error_msg);
     
     /**
      * Delete an address from a configured vif.
      * 
      * @param vif_name the name of the vif.
      * @param addr the address to delete.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @param error_msg the error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_config_vif_addr(const string& vif_name,
 				       const IPvX& addr,
-				       string& reason);
+				       string& error_msg);
     
     /**
      * Set the pif_index to a configured vif.
      * 
      * @param vif_name the name of the vif.
      * @param pif_index the physical interface index.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @param error_msg the error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_pif_index(const string& vif_name,
 				     uint16_t pif_index,
-				     string& reason);
+				     string& error_msg);
     
     /**
      * Set the vif flags to a configured vif.
@@ -201,8 +195,7 @@ public:
      * @param is_multicast true if the vif is multicast capable.
      * @param is_broadcast true if the vif is broadcast capable.
      * @param is_up true if the underlying vif is UP.
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @param error_msg the error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_vif_flags(const string& vif_name,
@@ -212,16 +205,15 @@ public:
 				     bool is_multicast,
 				     bool is_broadcast,
 				     bool is_up,
-				     string& reason);
+				     string& error_msg);
     
     /**
      * Complete the set of vif configuration changes.
      * 
-     * @param reason return-by-reference string that contains human-readable
-     * string with information about the reason for failure (if any).
+     * @param error_msg the error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		set_config_all_vifs_done(string& reason);
+    int		set_config_all_vifs_done(string& error_msg);
     
     /**
      * Send to a client to add a configured vif.
@@ -333,37 +325,37 @@ public:
      * Enable an existing MFEA vif.
      * 
      * @param vif_name the name of the vif to enable.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		enable_vif(const string& vif_name, string& err);
+    int		enable_vif(const string& vif_name, string& error_msg);
 
     /**
      * Disable an existing MFEA vif.
      * 
      * @param vif_name the name of the vif to disable.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		disable_vif(const string& vif_name, string& err);
+    int		disable_vif(const string& vif_name, string& error_msg);
 
     /**
      * Start an existing MFEA vif.
      * 
      * @param vif_name the name of the vif to start.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start_vif(const string& vif_name, string& err);
+    int		start_vif(const string& vif_name, string& error_msg);
     
     /**
      * Stop an existing MFEA vif.
      * 
      * @param vif_name the name of the vif to start.
-     * @param err the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop_vif(const string& vif_name, string& err);
+    int		stop_vif(const string& vif_name, string& error_msg);
     
     /**
      * Start MFEA on all enabled interfaces.

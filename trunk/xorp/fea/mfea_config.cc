@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.4 2003/06/02 02:17:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.5 2003/06/17 23:13:39 pavlin Exp $"
 
 
 //
@@ -33,17 +33,16 @@
  * Add a configured vif.
  * 
  * @param vif the vif with the information to add.
- * @param reason return-by-reference string that contains human-readable
- * string with information about the reason for failure (if any).
+ * @error_msg: The error message (if error).
  * @return  XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-MfeaNode::add_config_vif(const Vif& vif, string& reason)
+MfeaNode::add_config_vif(const Vif& vif, string& error_msg)
 {
     //
     // Perform all the micro-operations that are required to add a vif.
     //
-    if (add_config_vif(vif.name(), vif.vif_index(), reason) < 0)
+    if (add_config_vif(vif.name(), vif.vif_index(), error_msg) < 0)
 	return (XORP_ERROR);
     
     list<VifAddr>::const_iterator vif_addr_iter;
@@ -56,13 +55,13 @@ MfeaNode::add_config_vif(const Vif& vif, string& reason)
 				vif_addr.subnet_addr(),
 				vif_addr.broadcast_addr(),
 				vif_addr.peer_addr(),
-				reason) < 0) {
+				error_msg) < 0) {
 	    return (XORP_ERROR);
 	}
     }
     if (set_config_pif_index(vif.name(),
 			     vif.pif_index(),
-			     reason) < 0) {
+			     error_msg) < 0) {
 	return (XORP_ERROR);
     }
     if (set_config_vif_flags(vif.name(),
@@ -72,7 +71,7 @@ MfeaNode::add_config_vif(const Vif& vif, string& reason)
 			     vif.is_multicast_capable(),
 			     vif.is_broadcast_capable(),
 			     vif.is_underlying_vif_up(),
-			     reason) < 0) {
+			     error_msg) < 0) {
 	return (XORP_ERROR);
     }
     
@@ -84,16 +83,15 @@ MfeaNode::add_config_vif(const Vif& vif, string& reason)
  * 
  * @param vif_name the name of the vif to add.
  * @param vif_index the vif index of the vif to add.
- * @param reason return-by-reference string that contains human-readable
- * string with information about the reason for failure (if any).
+ * @error_msg: The error message (if error).
  * @return  XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 MfeaNode::add_config_vif(const string& vif_name,
 			 uint16_t vif_index,
-			 string& reason)
+			 string& error_msg)
 {
-    if (ProtoNode<MfeaVif>::add_config_vif(vif_name, vif_index, reason) < 0)
+    if (ProtoNode<MfeaVif>::add_config_vif(vif_name, vif_index, error_msg) < 0)
 	return (XORP_ERROR);
     
     //
@@ -116,15 +114,14 @@ MfeaNode::add_config_vif(const string& vif_name,
  * Delete a configured vif.
  * 
  * @param vif_name the name of the vif to delete.
- * @param reason return-by-reference string that contains human-readable
- * string with information about the reason for failure (if any).
+ * @error_msg: The error message (if error).
  * @return  XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 MfeaNode::delete_config_vif(const string& vif_name,
-			    string& reason)
+			    string& error_msg)
 {
-    if (ProtoNode<MfeaVif>::delete_config_vif(vif_name, reason) < 0)
+    if (ProtoNode<MfeaVif>::delete_config_vif(vif_name, error_msg) < 0)
 	return (XORP_ERROR);
     
     //
@@ -151,8 +148,7 @@ MfeaNode::delete_config_vif(const string& vif_name,
  * @param subnet the subnet address to add.
  * @param broadcast the broadcast address to add.
  * @param peer the peer address to add.
- * @param reason return-by-reference string that contains human-readable
- * string with information about the reason for failure (if any).
+ * @error_msg: The error message (if error).
  * @return  XORP_OK on success, otherwise XORP_ERROR.
  */
 int
@@ -161,10 +157,11 @@ MfeaNode::add_config_vif_addr(const string& vif_name,
 			      const IPvXNet& subnet,
 			      const IPvX& broadcast,
 			      const IPvX& peer,
-			      string& reason)
+			      string& error_msg)
 {
     if (ProtoNode<MfeaVif>::add_config_vif_addr(vif_name, addr, subnet,
-						broadcast, peer, reason) < 0)
+						broadcast, peer, error_msg)
+	< 0)
 	return (XORP_ERROR);
     
     //
@@ -188,16 +185,16 @@ MfeaNode::add_config_vif_addr(const string& vif_name,
  * 
  * @param vif_name the name of the vif.
  * @param addr the address to delete.
- * @param reason return-by-reference string that contains human-readable
- * string with information about the reason for failure (if any).
+ * @error_msg: The error message (if error).
  * @return  XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 MfeaNode::delete_config_vif_addr(const string& vif_name,
 				 const IPvX& addr,
-				 string& reason)
+				 string& error_msg)
 {
-    if (ProtoNode<MfeaVif>::delete_config_vif_addr(vif_name, addr, reason) < 0)
+    if (ProtoNode<MfeaVif>::delete_config_vif_addr(vif_name, addr,
+						   error_msg) < 0)
 	return (XORP_ERROR);
     
     //
@@ -221,17 +218,16 @@ MfeaNode::delete_config_vif_addr(const string& vif_name,
  * 
  * @param vif_name the name of the vif.
  * @param pif_index the physical interface index.
- * @param reason return-by-reference string that contains human-readable
- * string with information about the reason for failure (if any).
+ * @error_msg: The error message (if error).
  * @return  XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 MfeaNode::set_config_pif_index(const string& vif_name,
 			       uint16_t pif_index,
-			       string& reason)
+			       string& error_msg)
 {
     if (ProtoNode<MfeaVif>::set_config_pif_index(vif_name, pif_index,
-						 reason) < 0)
+						 error_msg) < 0)
 	return (XORP_ERROR);
     
     //
@@ -251,8 +247,7 @@ MfeaNode::set_config_pif_index(const string& vif_name,
  * @param is_multicast true if the vif is multicast capable.
  * @param is_broadcast true if the vif is broadcast capable.
  * @param is_up true if the underlying vif is UP.
- * @param reason return-by-reference string that contains human-readable
- * string with information about the reason for failure (if any).
+ * @error_msg: The error message (if error).
  * @return  XORP_OK on success, otherwise XORP_ERROR.
  */
 int
@@ -263,12 +258,12 @@ MfeaNode::set_config_vif_flags(const string& vif_name,
 			       bool is_multicast,
 			       bool is_broadcast,
 			       bool is_up,
-			       string& reason)
+			       string& error_msg)
 {
     if (ProtoNode<MfeaVif>::set_config_vif_flags(vif_name, is_pim_register,
 						 is_p2p, is_loopback,
 						 is_multicast, is_broadcast,
-						 is_up, reason) < 0)
+						 is_up, error_msg) < 0)
 	return (XORP_ERROR);
     
     //
@@ -292,12 +287,11 @@ MfeaNode::set_config_vif_flags(const string& vif_name,
 /**
  * Complete the set of vif configuration changes.
  * 
- * @param reason return-by-reference string that contains human-readable
- * string with information about the reason for failure (if any).
+ * @error_msg: The error message (if error).
  * @return  XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-MfeaNode::set_config_all_vifs_done(string& reason)
+MfeaNode::set_config_all_vifs_done(string& error_msg)
 {
     map<string, Vif>::iterator vif_iter;
     string err;
@@ -403,7 +397,7 @@ MfeaNode::set_config_all_vifs_done(string& reason)
         send_set_config_all_vifs_done(dst_module_instance_name, dst_module_id);
     }
     
-    if (end_config(reason) != XORP_OK)
+    if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
