@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_server.hh,v 1.8 2003/04/24 19:32:47 hodson Exp $
+// $XORP: xorp/libxipc/finder_server.hh,v 1.9 2003/05/22 16:52:15 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_SERVER_HH__
 #define __LIBXIPC_FINDER_SERVER_HH__
@@ -33,17 +33,35 @@
  */
 class FinderServer {
 public:
+    /**
+     * Constructor taking user supplied arguments for Finder request socket
+     *
+     * @param e EventLoop to be used by Finder components.
+     * @param if_addr interface address to bind Finder request socket to.
+     * @param port port to bind Finder request socket to.
+     */
+    FinderServer(EventLoop& e, IPv4 if_addr, uint16_t port)
+	: _addr(if_addr), _port(port)
+    {
+	initialize(e);
+    }
+
+    /**
+     * Constructor using default values for Finder request socket.
+     *
+     * The default interface is first useable interface on the host.
+     * The default port is specified by @ref FINDER_NG_TCP_DEFAULT_PORT.
+     */
     FinderServer(EventLoop& e)
     {
 	_addr = IPv4(if_get_preferred());
 	_port = FINDER_NG_TCP_DEFAULT_PORT;
-	_f = new Finder(e);
-	_ft = new FinderTcpListener(e, *_f, _f->commands(), _addr, _port);
-	_fxt = new FinderXrlTarget(*_f);
-	add_permitted_host(_addr);
-	add_permitted_host(IPv4("127.0.0.1"));
+	initialize(e);
     }
 
+    /**
+     * Destructor
+     */
     ~FinderServer()
     {
 	delete _fxt;
@@ -51,14 +69,34 @@ public:
 	delete _f;
     }
 
+    /**
+     * Accessor to the number of connections the Finder has.
+     */
     inline uint32_t connection_count() const
     {
 	return _f ? _f->messengers() : 0;
     }
 
+    /**
+     * Accessor to the interface address the Finder is bound to.
+     */
     inline IPv4 addr() const		{ return _addr; }
+
+    /**
+     * Accessor to the port the Finder is bound to.
+     */
     inline uint16_t port() const	{ return _port; }
 
+protected:
+    void initialize(EventLoop& e)
+    {
+	_f = new Finder(e);
+	_ft = new FinderTcpListener(e, *_f, _f->commands(), _addr, _port);
+	_fxt = new FinderXrlTarget(*_f);
+	add_permitted_host(_addr);
+	add_permitted_host(IPv4("127.0.0.1"));
+    }
+    
 protected:
     Finder*		_f;
     FinderTcpListener*	_ft;
