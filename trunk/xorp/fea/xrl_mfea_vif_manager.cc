@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.8 2003/05/21 05:32:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.9 2003/05/23 05:49:21 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -281,6 +281,7 @@ XrlMfeaVifManager::xrl_result_register_client(const XrlError& e)
 	// entries that are already there. First, find out the set of
 	// all interfaces.
 	//
+	debug_msg("Vif manager registration completed\n");
 	XorpCallback2<void, const XrlError&, const XrlAtomList*>::RefPtr cb;
 	cb = callback(this, &XrlMfeaVifManager::xrl_result_get_all_interface_names);
 	_ifmgr_client.send_get_all_interface_names(_fea_target_name.c_str(),
@@ -400,8 +401,8 @@ XrlMfeaVifManager::xrl_result_get_all_vif_flags(const XrlError& e,
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
-	debug_msg("setting flags for vif %s\n",
-		  vifname.c_str());
+	debug_msg("setting flags for interface %s vif %s\n",
+		  ifname.c_str(), vifname.c_str());
 	vif->set_underlying_vif_up(*enabled);
 	vif->set_broadcast_capable(*broadcast);
 	vif->set_loopback(*loopback);
@@ -602,6 +603,8 @@ XrlMfeaVifManager::vifaddr6_update(const string& ifname,
 void
 XrlMfeaVifManager::interface_deleted(const string& ifname)
 {
+    debug_msg("interface_deleted %s\n", ifname.c_str());
+    
     // Reomve all vifs for the same interface name
     multimap<string, Vif*>::iterator iter;
     iter = _vifs_by_interface.find(ifname);
@@ -646,7 +649,7 @@ XrlMfeaVifManager::vif_deleted(const string& ifname, const string& vifname)
 void
 XrlMfeaVifManager::vif_created(const string& ifname, const string& vifname)
 {
-    debug_msg("vif_created: %s\n", vifname.c_str());
+    debug_msg("vif_created: %s %s\n", ifname.c_str(), vifname.c_str());
     
     if (_vifs_by_name.find(vifname) != _vifs_by_name.end()) {
 	XLOG_ERROR("vif_created: vif %s already exists", vifname.c_str());
@@ -710,6 +713,9 @@ XrlMfeaVifManager::vifaddr4_created(const string& ifname,
 				    const string& vifname,
 				    const IPv4& addr)
 {
+    debug_msg("vifaddr4_created for interface %s vif %s: %s\n",
+	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
+    
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr4_created on unknown vif: %s", vifname.c_str());
 	return;
@@ -742,6 +748,9 @@ XrlMfeaVifManager::vifaddr6_created(const string& ifname,
 				    const string& vifname,
 				    const IPv6& addr)
 {
+    debug_msg("vifaddr6_created for interface %s vif %s: %s\n",
+	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
+    
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr6_created on unknown vif: %s", vifname.c_str());
 	return;
@@ -802,8 +811,8 @@ XrlMfeaVifManager::xrl_result_get_all_address_flags4(const XrlError& e,
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
-	debug_msg("setting flags for address %s to vif %s\n",
-		  addr.str().c_str(), vifname.c_str());
+	debug_msg("setting flags for address %s to interface %s vif %s\n",
+		  addr.str().c_str(), ifname.c_str(), vifname.c_str());
 	vif->set_underlying_vif_up(*enabled);
 	vif->set_broadcast_capable(*broadcast);
 	vif->set_loopback(*loopback);
@@ -882,8 +891,8 @@ XrlMfeaVifManager::xrl_result_get_all_address_flags6(const XrlError& e,
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
-	debug_msg("setting flags for address %s to vif %s\n",
-		  addr.str().c_str(), vifname.c_str());
+	debug_msg("setting flags for address %s to interface %s vif %s\n",
+		  addr.str().c_str(), ifname.c_str(), vifname.c_str());
 	vif->set_underlying_vif_up(*enabled);
 	vif->set_loopback(*loopback);
 	vif->set_p2p(*point_to_point);
@@ -948,8 +957,9 @@ XrlMfeaVifManager::xrl_result_get_all_prefix4(const XrlError& e,
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
-	debug_msg("adding address %s prefix_len %d to vif %s\n",
-		  addr.str().c_str(), *prefix_len, vifname.c_str());
+	debug_msg("adding address %s prefix_len %d to interface %s vif %s\n",
+		  addr.str().c_str(), *prefix_len,
+		  ifname.c_str(), vifname.c_str());
 	VifAddr* vif_addr = vif->find_address(IPvX(addr));
 	if (vif_addr == NULL) {
 	    vif->add_address(IPvX(addr));
@@ -1005,8 +1015,9 @@ XrlMfeaVifManager::xrl_result_get_all_prefix6(const XrlError& e,
 	    return;
 	}
 	Vif *vif = _vifs_by_name[vifname];
-	debug_msg("adding address %s prefix_len %d to vif %s\n",
-		  addr.str().c_str(), *prefix_len, vifname.c_str());
+	debug_msg("adding address %s prefix_len %d to interface %s vif %s\n",
+		  addr.str().c_str(), *prefix_len,
+		  ifname.c_str(), vifname.c_str());
 	VifAddr* vif_addr = vif->find_address(IPvX(addr));
 	if (vif_addr == NULL) {
 	    vif->add_address(IPvX(addr));
@@ -1058,8 +1069,9 @@ XrlMfeaVifManager::xrl_result_get_all_broadcast4(const XrlError& e,
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
-	debug_msg("adding address %s broadcast %s to vif %s\n",
-		  addr.str().c_str(), broadcast->str().c_str(), vifname.c_str());
+	debug_msg("adding address %s broadcast %s to interface %s vif %s\n",
+		  addr.str().c_str(), broadcast->str().c_str(),
+		  ifname.c_str(), vifname.c_str());
 	VifAddr* vif_addr = vif->find_address(IPvX(addr));
 	if (vif_addr == NULL) {
 	    vif->add_address(IPvX(addr));
@@ -1111,8 +1123,9 @@ XrlMfeaVifManager::xrl_result_get_all_endpoint4(const XrlError& e,
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
-	debug_msg("adding address %s endpoint %s to vif %s\n",
-		  addr.str().c_str(), endpoint->str().c_str(), vifname.c_str());
+	debug_msg("adding address %s endpoint %s to interface %s vif %s\n",
+		  addr.str().c_str(), endpoint->str().c_str(),
+		  ifname.c_str(), vifname.c_str());
 	VifAddr* vif_addr = vif->find_address(IPvX(addr));
 	if (vif_addr == NULL) {
 	    vif->add_address(IPvX(addr));
@@ -1168,8 +1181,9 @@ XrlMfeaVifManager::xrl_result_get_all_endpoint6(const XrlError& e,
 	    return;
 	}
 	Vif* vif = _vifs_by_name[vifname];
-	debug_msg("adding address %s endpoint %s to vif %s\n",
-		  addr.str().c_str(), endpoint->str().c_str(), vifname.c_str());
+	debug_msg("adding address %s endpoint %s to interface %s vif %s\n",
+		  addr.str().c_str(), endpoint->str().c_str(),
+		  ifname.c_str(), vifname.c_str());
 	VifAddr* vif_addr = vif->find_address(IPvX(addr));
 	if (vif_addr == NULL) {
 	    vif->add_address(IPvX(addr));
@@ -1198,7 +1212,9 @@ XrlMfeaVifManager::vifaddr4_deleted(const string& ifname,
 				    const string& vifname,
 				    const IPv4& addr)
 {
-    UNUSED(ifname);
+    debug_msg("vifaddr4_deleted for interface %s vif %s: %s\n",
+	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
+    
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr4_deleted on unknown vif: %s", vifname.c_str());
 	return;
@@ -1214,7 +1230,9 @@ XrlMfeaVifManager::vifaddr6_deleted(const string& ifname,
 				    const string& vifname,
 				    const IPv6& addr)
 {
-    UNUSED(ifname);
+    debug_msg("vifaddr6_deleted for interface %s vif %s: %s\n",
+	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
+    
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr6_deleted on unknown vif: %s", vifname.c_str());
 	return;
