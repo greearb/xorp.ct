@@ -1,10 +1,9 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/Makefile.am,v 1.17 2004/11/17 00:30:31 bms Exp $
+## $XORP: xorp/Makefile.am,v 1.18 2004/11/17 02:42:58 bms Exp $
 ##
 
 # --- Options
-AUTOMAKE_OPTIONS	= foreign
 ETAGS_ARGS		= --c++
 
 # --- Libraries and utilities (directory ordering is important)
