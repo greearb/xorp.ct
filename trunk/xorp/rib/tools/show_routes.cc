@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.4 2004/06/12 14:50:20 hodson Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.5 2004/08/03 03:01:08 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -244,6 +244,9 @@ ShowRoutesProcessor::shutdown()
     ServiceStatus st = this->status();
     if (st == FAILED || st == SHUTTING_DOWN || st == SHUTDOWN)
 	return false;
+
+    // Withdraw the Xrl methods
+    this->set_command_map(NULL);
 
     set_status(SHUTTING_DOWN);
     step_1000_request_cease();
