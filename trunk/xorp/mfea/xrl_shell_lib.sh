@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mfea/xrl_shell_lib.sh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+# $XORP: xorp/mfea/xrl_shell_lib.sh,v 1.2 2003/03/24 19:57:06 pavlin Exp $
 #
 
 #
@@ -29,17 +29,17 @@ has_xrl_variable()
     XRL_RESULT="$1"
     XRL_VARIABLE_XRL_TYPE="$2"
     
-    echo "$XRL_RESULT" |						\
-	awk -F "$XRL_VARIABLE_SEPARATOR" -v xrl_variable_xrl_type="$XRL_VARIABLE_XRL_TYPE" '
+    echo "${XRL_RESULT}" |						\
+	awk -F "${XRL_VARIABLE_SEPARATOR}" -v xrl_variable_xrl_type="${XRL_VARIABLE_XRL_TYPE}" '
 # AWK CODE STARTS
 # XXX: do NOT put single quotas in the awk code below, otherwise
 # it may not work!!
 #
 # Assume that there is in the command line
-#	-F "$XRL_VARIABLE_SEPARATOR"
+#	-F "${XRL_VARIABLE_SEPARATOR}"
 #	to specify the XRL variable separator (e.g, "\&")
 #
-#	-v xrl_variable_xrl_type="$XRL_VARIABLE_XRL_TYPE"
+#	-v xrl_variable_xrl_type="${XRL_VARIABLE_XRL_TYPE}"
 #	to specify the variable name and type
 
 BEGIN {
@@ -86,17 +86,17 @@ get_xrl_variable_value()
     XRL_RESULT="$1"
     XRL_VARIABLE_XRL_TYPE="$2"
 
-    echo "$XRL_RESULT" |						\
-	awk -F "$XRL_VARIABLE_SEPARATOR" -v xrl_variable_xrl_type="$XRL_VARIABLE_XRL_TYPE" '
+    echo "${XRL_RESULT}" |						\
+	awk -F "${XRL_VARIABLE_SEPARATOR}" -v xrl_variable_xrl_type="${XRL_VARIABLE_XRL_TYPE}" '
 # AWK CODE STARTS
 # XXX: do NOT put single quotas in the awk code below, otherwise
 # it may not work!!
 #
 # Assume that there is in the command line
-#	-F "$XRL_VARIABLE_SEPARATOR"
+#	-F "${XRL_VARIABLE_SEPARATOR}"
 #	to specify the XRL variable separator (e.g, "\&")
 #
-#	-v xrl_variable_xrl_type="$XRL_VARIABLE_XRL_TYPE"
+#	-v xrl_variable_xrl_type="${XRL_VARIABLE_XRL_TYPE}"
 #	to specify the variable name and type
 
 BEGIN {
@@ -152,31 +152,41 @@ test_xrl_result()
     XRL_VARIABLE_XRL_TYPE="$2"
     TEST_OPERATOR="$3"
     TEST_VALUE="$4"
+
+    if [ "X${XRL_VARIABLE_XRL_TYPE}" = "X" ] ; then
+	# Nothing to test for
+	return 0
+    fi
+
+    if [ "X${TEST_OPERATOR}" = "X" ] ; then
+	ERROR="missing <test-operator> argument"
+	return 1
+    fi
+    if [ "X${TEST_VALUE}" = "X" ] ; then
+	ERROR="missing <test-value> argument"
+	return 1
+    fi
     
     # Test if the variable was returned
-    has_xrl_variable "$XRL_RESULT" "$XRL_VARIABLE_XRL_TYPE"
+    has_xrl_variable "${XRL_RESULT}" "${XRL_VARIABLE_XRL_TYPE}"
     if [ $? -ne 0 ] ; then
-	# ERROR: variable not found
+	ERROR="cannot find variable type '${XRL_VARIABLE_XRL_TYPE}' inside return string '${XRL_RESULT}'"
 	return 1
     fi
 
     # Get the return value
-    XRL_VARIABLE_VALUE=`get_xrl_variable_value "$XRL_RESULT" "$XRL_VARIABLE_XRL_TYPE"`
+    XRL_VARIABLE_VALUE=`get_xrl_variable_value "${XRL_RESULT}" "${XRL_VARIABLE_XRL_TYPE}"`
     
     # Test the return value
-    if [ "X${XRL_VARIABLE_VALUE}" = "X" -a "X${TEST_VALUE}" = "X" ] ; then
-	# OK: no value was returned, but the expected return value was empty
-	return 0
-    fi
-    if [ "X${XRL_VARIABLE_VALUE}" = "X" -a "X${TEST_VALUE}" != "X" ] ; then
-	# ERROR: no value was returned, but the expected return value
-	# was not empty.
+    if [ "X${XRL_VARIABLE_VALUE}" = "X" ] ; then
+	ERROR="cannot find variable value-type '${XRL_VARIABLE_XRL_TYPE}' inside return string '${XRL_RESULT}'"
 	return 1
     fi
     
-    if [ "$XRL_VARIABLE_VALUE" "$TEST_OPERATOR" "$TEST_VALUE" ] ; then
+    if [ "${XRL_VARIABLE_VALUE}" "${TEST_OPERATOR}" "${TEST_VALUE}" ] ; then
 	return 0
     else
+	ERROR="return variable value of '${XRL_VARIABLE_XRL_TYPE}' is '${XRL_VARIABLE_VALUE}', but expected is '${TEST_OPERATOR} ${TEST_VALUE}' inside return string '${XRL_RESULT}'"
 	return 1
     fi
 }
@@ -207,11 +217,11 @@ print_xrl_result()
 	PRINT_XRL_VARIABLE_XRL_TYPE="$1"
 	if [ "X${PRINT_XRL_VARIABLE_XRL_TYPE}" != "X" ] ; then
 	    if [ "X${PRINT_XRL_VARIABLE_XRL_TYPE}" = "Xall" ] ; then
-		echo "$XRL_RESULT"
+		echo "${XRL_RESULT}"
 	    else
-		PRINT_XRL_VARIABLE_VALUE=`get_xrl_variable_value "$XRL_RESULT" "$PRINT_XRL_VARIABLE_XRL_TYPE"`
+		PRINT_XRL_VARIABLE_VALUE=`get_xrl_variable_value "${XRL_RESULT}" "${PRINT_XRL_VARIABLE_XRL_TYPE}"`
 		if [ "X${PRINT_XRL_VARIABLE_VALUE}" != "X" ] ; then
-		    echo $PRINT_XRL_VARIABLE_XRL_TYPE=$PRINT_XRL_VARIABLE_VALUE
+		    echo ${PRINT_XRL_VARIABLE_XRL_TYPE}=${PRINT_XRL_VARIABLE_VALUE}
 		else
 		    echo "${PRINT_XRL_VARIABLE_XRL_TYPE}: NOT FOUND"
 		fi
@@ -243,8 +253,8 @@ print_xrl_result()
 # mfea_enable_vif()
 # {
 #     echo "mfea_enable_vif" $*
-#     XRL="finder://$MFEA_TARGET/mfea/0.1/enable_vif?vif_name:txt=$1"
-#     call_xrl -r 0 $XRL fail:bool = false
+#     XRL="finder://${MFEA_TARGET}/mfea/0.1/enable_vif?vif_name:txt=$1"
+#     call_xrl -r 0 ${XRL} fail:bool = false
 # }
 #
 #
@@ -275,7 +285,7 @@ call_xrl()
 		    exit 1
 		fi
 		shift
-		PRINT_LIST_XRL_VARIABLE_XRL_TYPE="$PRINT_LIST_XRL_VARIABLE_XRL_TYPE $1"
+		PRINT_LIST_XRL_VARIABLE_XRL_TYPE="${PRINT_LIST_XRL_VARIABLE_XRL_TYPE} $1"
 		;;
 	    * )			# Default case
 		break
@@ -294,32 +304,45 @@ call_xrl()
     XRL_VARIABLE_XRL_TYPE="$2"
     TEST_OPERATOR="$3"
     TEST_VALUE="$4"
+    if [ "X${XRL_VARIABLE_XRL_TYPE}" != "X" ] ; then
+	if [ "X${TEST_OPERATOR}" = "X" ] ; then
+	    echo "ERROR: missing <test-operator> argument"
+	    exit 1
+	fi
+	if [ "X${TEST_VALUE}" = "X" ] ; then
+	    echo "ERROR: missing <test-value> argument"
+	    exit 1
+	fi
+    fi
     
     # Initialize the iterator
-    if [ "$MAX_REPEAT_NUMBER" -eq 0 ] ; then
+    if [ "${MAX_REPEAT_NUMBER}" -eq 0 ] ; then
 	_iter=-1
     else
 	_iter=0
     fi
     while [ true ] ; do
-	XRL_RESULT=`"$CALLXRL" "$XRL"`
+	XRL_RESULT=`"${CALLXRL}" "${XRL}"`
 	ret_value=$?
-	if [ $ret_value -eq 0 -a X$TEST_OPERATOR != X -a X$TEST_VALUE != X ] ; then
-	    test_xrl_result "$XRL_RESULT" "$XRL_VARIABLE_XRL_TYPE" "$TEST_OPERATOR" "$TEST_VALUE"
+	if [ ${ret_value} -ne 0 ] ; then
+	    ERROR="failure calling '${CALLXRL} ${XRL}'"
+	fi
+	if [ ${ret_value} -eq 0 -a "X${TEST_OPERATOR}" != "X" -a "X${TEST_VALUE}" != "X" ] ; then
+	    test_xrl_result "${XRL_RESULT}" "${XRL_VARIABLE_XRL_TYPE}" "${TEST_OPERATOR}" "${TEST_VALUE}"
 	    ret_value=$?
 	fi
-	if [ $ret_value -eq 0 ] ; then
-	    print_xrl_result $XRL_RESULT $PRINT_LIST_XRL_VARIABLE_XRL_TYPE
+	if [ ${ret_value} -eq 0 ] ; then
+	    print_xrl_result ${XRL_RESULT} ${PRINT_LIST_XRL_VARIABLE_XRL_TYPE}
 	    echo "OK"
 	    break;
 	fi
 	
-	echo "ERROR: $XRL_RESULT"
+	echo "ERROR: ${ERROR}"
 	
-	if [ "$MAX_REPEAT_NUMBER" -ne 0 ] ; then
-	    _iter=$(($_iter+1))
+	if [ "${MAX_REPEAT_NUMBER}" -ne 0 ] ; then
+	    _iter=$((${_iter}+1))
 	fi
-	if [ $_iter -ge $MAX_REPEAT_NUMBER ] ; then
+	if [ ${_iter} -ge ${MAX_REPEAT_NUMBER} ] ; then
 	    echo "ERROR: reached maximum number of trials. Giving-up..."
 	    break;
 	fi
