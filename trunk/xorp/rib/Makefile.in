@@ -125,7 +125,7 @@ test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $
 test_rib_client_SOURCES = test_rib_client.cc
 
 # -- Library Sources
-librib_a_SOURCES = rib_module.h version.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_client.cc rib_manager.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc xrl_target.cc
+librib_a_SOURCES = rib_module.h version.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_deletion.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_client.cc rib_manager.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_deletion.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = commands test_rib_direct.sh.in test_rib_xrls.sh.in xrl_shell_funcs.sh
@@ -145,9 +145,9 @@ am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
 	rib.$(OBJEXT) rib_client.$(OBJEXT) rib_manager.$(OBJEXT) \
 	route.$(OBJEXT) rt_tab_base.$(OBJEXT) rt_tab_export.$(OBJEXT) \
 	rt_tab_extint.$(OBJEXT) rt_tab_merged.$(OBJEXT) \
-	rt_tab_origin.$(OBJEXT) rt_tab_redist.$(OBJEXT) \
-	rt_tab_register.$(OBJEXT) vifmanager.$(OBJEXT) \
-	xrl_target.$(OBJEXT)
+	rt_tab_origin.$(OBJEXT) rt_tab_deletion.$(OBJEXT) \
+	rt_tab_redist.$(OBJEXT) rt_tab_register.$(OBJEXT) \
+	vifmanager.$(OBJEXT) xrl_target.$(OBJEXT)
 librib_a_OBJECTS = $(am_librib_a_OBJECTS)
 bin_PROGRAMS = xorp_rib$(EXEEXT)
 noinst_PROGRAMS = main_routemap$(EXEEXT) test_rib_client$(EXEEXT) \
@@ -265,7 +265,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/register_server.Po $(DEPDIR)/rib.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rib_client.Po $(DEPDIR)/rib_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/route.Po $(DEPDIR)/routemap.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_base.Po $(DEPDIR)/rt_tab_export.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_base.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_deletion.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_export.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_extint.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_merged.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_origin.Po \
@@ -381,6 +383,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/routemap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_deletion.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_export.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_extint.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_merged.Po@am__quote@

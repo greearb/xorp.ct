@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.19 2003/05/31 23:14:15 mjh Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.20 2003/08/07 01:10:13 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -27,10 +27,10 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router)
       _eventloop(eventloop),
       _xrl_router(xrl_std_router),
       _register_server(&_xrl_router),
-      _urib4(UNICAST),
-      _mrib4(MULTICAST),
-      _urib6(UNICAST),
-      _mrib6(MULTICAST),
+      _urib4(UNICAST, _eventloop),
+      _mrib4(MULTICAST, _eventloop),
+      _urib6(UNICAST, _eventloop),
+      _mrib6(MULTICAST, _eventloop),
       _vif_manager(_xrl_router, _eventloop, this),
       _xrl_rib_target(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6, 
 		      _vif_manager, this)

@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rib/test_rib_direct.cc,v 1.5 2003/05/29 17:59:10 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/xlog.h"
+#include "libxorp/eventloop.hh"
 #include "parser.hh"
 #include "parser_direct_cmds.hh"
 #include "rib.hh"
@@ -58,7 +59,8 @@ RibParser::RibParser(RIB<IPv4>& rib) : _rib(rib)
 static void
 parser_main()
 {
-    RIB<IPv4> rib(UNICAST);
+    EventLoop eventloop;
+    RIB<IPv4> rib(UNICAST, eventloop);
     DummyRegisterServer regserv;
     rib.initialize_register(&regserv);
 

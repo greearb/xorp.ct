@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.5 2003/05/29 17:59:10 pavlin Exp $"
 
 #include "rib_module.h"
 #include "config.h"
@@ -107,8 +107,9 @@ main (int /* argc */, char *argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
+    EventLoop eventloop;
     
-    RIB<IPv4> rib(UNICAST);
+    RIB<IPv4> rib(UNICAST, eventloop);
     rib_ptr = &rib;
 
     Vif vif0("vif0");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.9 2003/03/20 04:29:22 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.10 2003/05/24 23:35:26 mjh Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -63,8 +63,9 @@ public:
      * @param rib_type indicates whether this RIB holds UNICAST or
      * MULTICAST routing information.  In the case of multicast, this
      * is the topology information, not the forwarding information.
+     * @param eventloop the main event loop.
      */
-    RIB(RibTransportType rib_type);
+    RIB(RibTransportType rib_type, EventLoop& eventloop);
 
     /**
      * RIB Destructor.
@@ -519,6 +520,7 @@ private:
     void flush();
 
 protected:
+    EventLoop& _eventloop;
     RouteTable<A>	*_final_table;
     RegisterTable<A>	*_register_table;
     bool _mcast;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.9 2003/05/29 17:59:10 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -29,8 +29,10 @@
 template<class A>
 OriginTable<A>::OriginTable<A>(const string& tablename,
 			       int admin_distance,
-			       int igp)
-    : RouteTable<A>(tablename)
+			       int igp,
+			       EventLoop& eventloop)
+    : RouteTable<A>(tablename), 
+    _eventloop(eventloop)
 {
     cp(1);
     XLOG_ASSERT((igp == IGP) || (igp == EGP));
@@ -38,17 +40,15 @@ OriginTable<A>::OriginTable<A>(const string& tablename,
 
     XLOG_ASSERT(admin_distance >= 0 && admin_distance <= 255);
     _admin_distance = admin_distance;
+    _ip_route_table = new Trie<A, const IPRouteEntry<A> *>();
 }
 
 template<class A>
 OriginTable<A>::~OriginTable<A>() 
 {
     // delete all the routes in the trie.
-    typename Trie<A, const IPRouteEntry<A>*>::iterator i;
-    for (i = _ip_route_table.begin(); i != _ip_route_table.end(); i++) {
-	delete i.payload();
-    }
-    _ip_route_table.delete_all_nodes();
+    delete_all_routes();
+    delete _ip_route_table;
 }
 
 template<class A>
@@ -84,12 +84,12 @@ OriginTable<A>::add_route(const IPRouteEntry<A>& route)
     // now add the route to this table
     debug_msg("BEFORE:\n");
 #ifdef DEBUG_LOGGING
-    _ip_route_table.print();
+    _ip_route_table->print();
 #endif
-    _ip_route_table.insert(route.net(), routecopy);
+    _ip_route_table->insert(route.net(), routecopy);
     debug_msg("AFTER:\n");
 #ifdef DEBUG_LOGGING
-    _ip_route_table.print();
+    _ip_route_table->print();
 #endif
 
     // propagate to next table
@@ -107,15 +107,15 @@ int OriginTable<A>::delete_route(const IPNet<A>& net)
     debug_msg("OT[%s]: Deleting route %s\n", _tablename.c_str(),
 	   net.str().c_str());
 #ifdef DEBUG_LOGGING
-    _ip_route_table.print();
+    _ip_route_table->print();
 #endif
     typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
-	= _ip_route_table.lookup_node(net);
+	= _ip_route_table->lookup_node(net);
     cp(3);
-    if (iter != _ip_route_table.end()) {
+    if (iter != _ip_route_table->end()) {
 	const IPRouteEntry<A> *found = iter.payload();
 	cp(4);
-	_ip_route_table.erase(net);
+	_ip_route_table->erase(net);
 	// propagate to next table
 	if (_next_table != NULL)
 	    _next_table->delete_route(found, this);
@@ -135,10 +135,10 @@ void OriginTable<A>::delete_all_routes()
 {
     cp(5);
     typename Trie<A, const IPRouteEntry<A>*>::iterator i;
-    for (i = _ip_route_table.begin(); i != _ip_route_table.end(); i++) {
+    for (i = _ip_route_table->begin(); i != _ip_route_table->end(); i++) {
 	delete i.payload();
     }
-    _ip_route_table.delete_all_nodes();
+    _ip_route_table->delete_all_nodes();
 }
 
 
@@ -151,8 +151,8 @@ OriginTable<A>::lookup_route(const IPNet<A>& net) const
 	tablename().c_str());
     debug_msg("OriginTable: Looking up route %s\n", net.str().c_str());
     typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
-	= _ip_route_table.lookup_node(net);
-    return (iter == _ip_route_table.end()) ? NULL : iter.payload();
+	= _ip_route_table->lookup_node(net);
+    return (iter == _ip_route_table->end()) ? NULL : iter.payload();
 }
 
 template<class A>
@@ -166,11 +166,11 @@ OriginTable<A>::lookup_route(const A& addr) const
 
     cp(7);
     typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
-	= _ip_route_table.find(addr);
-    if (iter == _ip_route_table.end()) {
+	= _ip_route_table->find(addr);
+    if (iter == _ip_route_table->end()) {
 	debug_msg("No match found\n");
     }
-    return (iter == _ip_route_table.end()) ? NULL : iter.payload();
+    return (iter == _ip_route_table->end()) ? NULL : iter.payload();
 }
 
 template<class A>
@@ -179,12 +179,12 @@ OriginTable<A>::lookup_route_range(const A& addr) const
 {
     const IPRouteEntry<A>* route;
     typename Trie<A, const IPRouteEntry<A>*>::iterator iter 
-	= _ip_route_table.find(addr);
+	= _ip_route_table->find(addr);
 
-    route = (iter == _ip_route_table.end()) ? NULL : iter.payload();
+    route = (iter == _ip_route_table->end()) ? NULL : iter.payload();
 
     A bottom_addr, top_addr;
-    _ip_route_table.find_bounds(addr, bottom_addr, top_addr);
+    _ip_route_table->find_bounds(addr, bottom_addr, top_addr);
     RouteRange<A>* rr = new RouteRange<A>(addr, route, top_addr, bottom_addr);
     debug_msg("Origin Table: %s returning lower bound for %s of %s\n",
 	      tablename().c_str(), addr.str().c_str(),

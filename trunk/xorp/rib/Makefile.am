@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.14 2003/07/31 21:59:40 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.15 2003/08/01 02:11:50 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -83,6 +83,7 @@ librib_a_SOURCES += rt_tab_export.hh
 librib_a_SOURCES += rt_tab_extint.hh
 librib_a_SOURCES += rt_tab_merged.hh
 librib_a_SOURCES += rt_tab_origin.hh
+librib_a_SOURCES += rt_tab_deletion.hh
 librib_a_SOURCES += rt_tab_redist.hh
 librib_a_SOURCES += rt_tab_register.hh
 librib_a_SOURCES += vifmanager.hh
@@ -99,6 +100,7 @@ librib_a_SOURCES += rt_tab_export.cc
 librib_a_SOURCES += rt_tab_extint.cc
 librib_a_SOURCES += rt_tab_merged.cc
 librib_a_SOURCES += rt_tab_origin.cc
+librib_a_SOURCES += rt_tab_deletion.cc
 librib_a_SOURCES += rt_tab_redist.cc
 librib_a_SOURCES += rt_tab_register.cc
 librib_a_SOURCES += vifmanager.cc

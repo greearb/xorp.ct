@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.4 2003/03/19 09:05:19 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.5 2003/08/04 21:29:23 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
@@ -37,7 +37,8 @@
 #define REDIST_TABLE 8
 #define EXPORT_TABLE 16
 #define REGISTER_TABLE 32
-#define MAX_TABLE_TYPE 32
+#define DELETION_TABLE 64
+#define MAX_TABLE_TYPE 64
 
 /**
  * @short Stores a Route and bounds on the validity of the route.

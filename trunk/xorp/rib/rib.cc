@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.14 2003/07/03 06:59:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.15 2003/07/30 19:06:43 pavlin Exp $"
 
 #include "config.h"
 #include "rib_module.h"
@@ -173,8 +173,9 @@ merge_tablename(const string& table_a, const string& table_b)
 // RIB class 
 
 template<class A>
-RIB<A>::RIB(RibTransportType t)
-    : _final_table(NULL),
+RIB<A>::RIB(RibTransportType t, EventLoop& eventloop)
+    : _eventloop(eventloop),
+      _final_table(NULL),
       _register_table(NULL),
       _errors_are_fatal(false)
 {
@@ -262,7 +263,8 @@ RIB<A>::new_origin_table(const string&	tablename,
 			 int		admin_distance,
 			 int		igp)
 {
-    OriginTable<A> *ot = new OriginTable<A>(tablename, admin_distance, igp);
+    OriginTable<A> *ot = new OriginTable<A>(tablename, admin_distance, igp,
+					    _eventloop);
     if (ot == 0 || add_table(tablename, ot) != 0) {
 	XLOG_WARNING("Could not add origin table %s", tablename.c_str());
 	delete ot;

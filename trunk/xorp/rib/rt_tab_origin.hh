@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.4 2003/05/24 23:35:27 mjh Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.5 2003/08/04 21:29:23 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
 
 #include "rt_tab_base.hh"
+#include "libxorp/eventloop.hh"
 
 /**
  * @short RouteTable that receives and stores raw routes sent by
@@ -49,8 +50,10 @@ public:
      * immediate neighbor as a nexthop).  false if the routing
      * protocol is an EGP (nexthop is not always an immediate
      * neighbor) 
+     * @param eventloop the main event loop.
      */
-    OriginTable(const string& tablename, int admin_distance, int igp);
+    OriginTable(const string& tablename, int admin_distance, int igp,
+		EventLoop& eventloop);
 
     /**
      * OriginTable destructor.
@@ -148,9 +151,10 @@ public:
      */
     string str() const;
 private:
-    Trie<A, const IPRouteEntry<A> *> _ip_route_table;
+    Trie<A, const IPRouteEntry<A> *> *_ip_route_table;
     int		_admin_distance;		// 0 .. 255
     int		_igp;				// IGP or EGP
+    EventLoop& _eventloop;
 };
 
 #endif // __RIB_RT_TAB_ORIGIN_HH__
