@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.12 2003/01/30 00:39:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.13 2003/01/30 02:36:16 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1354,6 +1354,7 @@ PimMre::recompute_my_assert_metric_sg(uint16_t vif_index)
     my_assert_metric = my_assert_metric_sg(vif_index);
     winner_metric = assert_winner_metric_sg(vif_index);
     XLOG_ASSERT(winner_metric != NULL);
+    XLOG_ASSERT(my_assert_metric != NULL);
     XLOG_ASSERT(my_assert_metric->addr() != winner_metric->addr());
     // Test if my metric has become better
     if (! my_assert_metric->is_better(winner_metric))
@@ -1391,6 +1392,7 @@ PimMre::recompute_my_assert_metric_wc(uint16_t vif_index)
     my_assert_metric = rpt_assert_metric(vif_index);
     winner_metric = assert_winner_metric_wc(vif_index);
     XLOG_ASSERT(winner_metric != NULL);	// TODO: XXX: PAVPAVPAV: is this assert OK? E.g, what about if loser to (S,G) Winner?
+    XLOG_ASSERT(my_assert_metric != NULL);
     XLOG_ASSERT(my_assert_metric->addr() != winner_metric->addr());
     // Test if my metric has become better
     if (! my_assert_metric->is_better(winner_metric))
@@ -1577,18 +1579,9 @@ PimMre::rpt_assert_metric(uint16_t vif_index) const
 {
     static AssertMetric assert_metric(IPvX::ZERO(family()));
     PimVif *pim_vif;
-    const PimMre *pim_mre_wc;
     
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (NULL);
-    
-    if (is_wc()) {
-	pim_mre_wc = this;
-    } else {
-	pim_mre_wc = wc_entry();
-	if (pim_mre_wc == NULL)
-	    return (NULL);
-    }
     
     pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
@@ -1596,8 +1589,8 @@ PimMre::rpt_assert_metric(uint16_t vif_index) const
     
     assert_metric.set_addr(pim_vif->addr());
     assert_metric.set_rpt_bit_flag(true);
-    assert_metric.set_metric_preference(pim_mre_wc->metric_preference_rp());
-    assert_metric.set_metric(pim_mre_wc->metric_rp());
+    assert_metric.set_metric_preference(metric_preference_rp());
+    assert_metric.set_metric(metric_rp());
     
     return (&assert_metric);
 }
