@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.16 2004/09/17 20:02:27 pavlin Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.17 2004/09/18 00:00:32 pavlin Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -224,7 +224,7 @@ public:
     typedef typename RouteDB<A>::RouteContainer	RouteContainer;
     typedef typename RouteDB<A>::Route		Route;
 
-    enum State { RUNNING, PAUSED };
+    enum State { STATE_RUNNING, STATE_PAUSED };
 
 public:
     RouteWalker(RouteDB<A>& route_db);
@@ -240,7 +240,7 @@ public:
      * Move iterator to next available route.
      *
      * @return true on success, false if route not available or instance is
-     *         not in the RUNNING state.
+     *         not in the STATE_RUNNING state.
      */
     const Route* next_route();
 
@@ -248,13 +248,13 @@ public:
      * Get current route.
      *
      * @return pointer to route if available, 0 if route not available or
-     *	       not in RUNNING state.
+     *	       not in STATE_RUNNING state.
      */
     const Route* current_route();
 
     /**
      * Pause route walking operation.  The instance state is
-     * transitioned from RUNNING to PAUSED on the assumption that
+     * transitioned from STATE_RUNNING to STATE_PAUSED on the assumption that
      * route walking will be resumed at some point in the future (@ref
      * resume).  If the current route has a deletion timer associated
      * with it that would expire within pause_ms, the timer expiry is
@@ -268,14 +268,15 @@ public:
 
     /**
      * Resume route walking.  The instance state is transitioned from
-     * PAUSED to RUNNING.  The internal iterator is checked for validity and
-     * recovery steps taken should the route pointed to have been deleted.
+     * STATE_PAUSED to STATE_RUNNING.  The internal iterator is checked for
+     * validity and recovery steps taken should the route pointed to have
+     * been deleted.
      */
     void resume();
 
     /**
      * Effect a reset.  The internal iterator is moved to the first
-     * stored route and the state is set to RUNNING.
+     * stored route and the state is set to STATE_RUNNING.
      */
     void reset();
 
@@ -288,11 +289,13 @@ private:
 
 private:
     RouteDB<A>& _route_db;	// RouteDB to be walked.
-    State	_state;		// Current state (RUNNING/PAUSED).
-    Net		_last_visited;	// Last route output before entering PAUSED.
-    				// if set to RouteWalker::no_net there was
+    State	_state;		// Current state (STATE_RUNNING/STATE_PAUSED).
+    Net		_last_visited;	// Last route output before entering
+				// STATE_PAUSED.
+    				// If set to RouteWalker::no_net there was
     				// no valid route when paused.
-    typename RouteContainer::iterator _pos;	// Current route when RUNNING.
+    typename RouteContainer::iterator _pos;	// Current route when the
+						// state is STATE_RUNNING.
 };
 
 #endif // __RIP_ROUTE_DB_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/redist.cc,v 1.5 2004/09/17 13:57:15 abittau Exp $"
+#ident "$XORP: xorp/rip/redist.cc,v 1.6 2004/09/18 00:00:31 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -154,7 +154,7 @@ RouteRedistributor<A>::withdraw_batch()
 	_wdrawer->reset();
     }
 
-    XLOG_ASSERT(_wdrawer->state() == RouteWalker<A>::RUNNING);
+    XLOG_ASSERT(_wdrawer->state() == RouteWalker<A>::STATE_RUNNING);
 
     uint32_t visited = 0;
     const RouteEntry<A>* r = _wdrawer->current_route();

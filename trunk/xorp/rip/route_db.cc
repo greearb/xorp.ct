@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.18 2004/09/18 00:00:32 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.19 2005/02/01 02:20:35 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -402,7 +402,7 @@ const typename RouteWalker<A>::Net RouteWalker<A>::NO_NET(~A::ZERO(), 0);
 
 template <typename A>
 RouteWalker<A>::RouteWalker(RouteDB<A>& rdb)
-    : _route_db(rdb), _state(RUNNING),
+    : _route_db(rdb), _state(STATE_RUNNING),
       _last_visited(NO_NET),
       _pos(rdb.routes().begin())
 {
@@ -417,9 +417,9 @@ template <typename A>
 const typename RouteWalker<A>::Route*
 RouteWalker<A>::next_route()
 {
-    if (state() != RUNNING) {
-	XLOG_ERROR("Calling RouteWalker::next_route() whilst not in RUNNING "
-		   "state.");
+    if (state() != STATE_RUNNING) {
+	XLOG_ERROR("Calling RouteWalker::next_route() whilst not in "
+		   "STATE_RUNNING state.");
 	return 0;
     }
     if (++_pos == _route_db.routes().end()) {
@@ -432,9 +432,9 @@ template <typename A>
 const typename RouteWalker<A>::Route*
 RouteWalker<A>::current_route()
 {
-    if (state() != RUNNING) {
-	XLOG_ERROR("Calling RouteWalker::next_route() whilst not in RUNNING "
-		   "state.");
+    if (state() != STATE_RUNNING) {
+	XLOG_ERROR("Calling RouteWalker::next_route() whilst not in "
+		   "STATE_RUNNING state.");
 	return 0;
     }
     if (_pos == _route_db.routes().end()) {
@@ -447,10 +447,10 @@ template <typename A>
 void
 RouteWalker<A>::pause(uint32_t pause_ms)
 {
-    if (state() == PAUSED)
+    if (state() == STATE_PAUSED)
 	return;
 
-    _state = PAUSED;
+    _state = STATE_PAUSED;
     if (_pos == _route_db.routes().end()) {
 	_last_visited = NO_NET;
 	return;
@@ -479,10 +479,10 @@ template <typename A>
 void
 RouteWalker<A>::resume()
 {
-    if (state() != PAUSED)
+    if (state() != STATE_PAUSED)
 	return;
 
-    _state = RUNNING;
+    _state = STATE_RUNNING;
     if (_last_visited == NO_NET) {
 	_pos = _route_db.routes().end();
 	return;
@@ -499,7 +499,7 @@ template <typename A>
 void
 RouteWalker<A>::reset()
 {
-    _state = RUNNING;
+    _state = STATE_RUNNING;
     _pos = _route_db.routes().begin();
 }
 
