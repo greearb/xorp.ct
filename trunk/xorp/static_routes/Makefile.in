@@ -111,13 +111,13 @@ noinst_LIBRARIES = libstaticroutes.a
 LDFLAGS = 
 ### XRL libraries
 ### XORP misc libraries
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libstaticroutesbase.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libstaticroutesbase.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/policy/backend/libpolicybackend.a
 
 # -- Program Sources
 xorp_static_routes_SOURCES = xorp_static_routes.cc
 
 # -- Library Sources
-libstaticroutes_a_SOURCES = static_routes_module.h static_routes_node.hh xrl_static_routes_node.hh static_routes_node.cc xrl_static_routes_node.cc
+libstaticroutes_a_SOURCES = static_routes_module.h static_routes_node.hh static_routes_varrw.hh xrl_static_routes_node.hh static_routes_node.cc static_routes_varrw.cc xrl_static_routes_node.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = command_static_routes
@@ -134,7 +134,7 @@ LIBRARIES = $(noinst_LIBRARIES)
 libstaticroutes_a_AR = $(AR) cru
 libstaticroutes_a_LIBADD =
 am_libstaticroutes_a_OBJECTS = static_routes_node.$(OBJEXT) \
-	xrl_static_routes_node.$(OBJEXT)
+	static_routes_varrw.$(OBJEXT) xrl_static_routes_node.$(OBJEXT)
 libstaticroutes_a_OBJECTS = $(am_libstaticroutes_a_OBJECTS)
 bin_PROGRAMS = xorp_static_routes$(EXEEXT)
 noinst_PROGRAMS =
@@ -152,7 +152,8 @@ xorp_static_routes_DEPENDENCIES = libstaticroutes.a \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
-	$(top_builddir)/libxorp/libxorp.a
+	$(top_builddir)/libxorp/libxorp.a \
+	$(top_builddir)/policy/backend/libpolicybackend.a
 xorp_static_routes_LDFLAGS =
 SCRIPTS = $(noinst_SCRIPTS)
 
@@ -163,6 +164,7 @@ CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/static_routes_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/static_routes_varrw.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xorp_static_routes.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_static_routes_node.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -238,6 +240,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/static_routes_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/static_routes_varrw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_static_routes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_static_routes_node.Po@am__quote@
 

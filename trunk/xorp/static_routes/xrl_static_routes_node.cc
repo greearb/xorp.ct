@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.13 2004/06/02 18:33:25 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.14 2004/06/10 22:41:57 hodson Exp $"
 
 #include "static_routes_module.h"
 
@@ -761,6 +762,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.ifname(),
 		    static_route.vifname(),
 		    static_route.metric(),
+		    static_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -773,6 +775,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.network().get_ipv4net(),
 		    static_route.nexthop().get_ipv4(),
 		    static_route.metric(),
+		    static_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -790,6 +793,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.ifname(),
 		    static_route.vifname(),
 		    static_route.metric(),
+		    static_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -802,13 +806,14 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.network().get_ipv6net(),
 		    static_route.nexthop().get_ipv6(),
 		    static_route.metric(),
+		    static_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
 		if (success)
 		    return;
 	    }
 	}
     }
-
+    
     if (static_route.is_replace_route()) {
 	if (static_route.is_ipv4()) {
 	    if (static_route.is_interface_route()) {
@@ -822,6 +827,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.ifname(),
 		    static_route.vifname(),
 		    static_route.metric(),
+		    static_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -834,6 +840,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.network().get_ipv4net(),
 		    static_route.nexthop().get_ipv4(),
 		    static_route.metric(),
+		    static_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -851,6 +858,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.ifname(),
 		    static_route.vifname(),
 		    static_route.metric(),
+		    static_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -863,6 +871,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    static_route.network().get_ipv6net(),
 		    static_route.nexthop().get_ipv6(),
 		    static_route.metric(),
+		    static_route.policytags().xrl_atomlist(),
 		    callback(this, &XrlStaticRoutesNode::send_rib_route_change_cb));
 		if (success)
 		    return;
@@ -943,4 +952,34 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
     _inform_rib_queue_timer = StaticRoutesNode::eventloop().new_oneoff_after(
 	TimeVal(1, 0),
 	callback(this, &XrlStaticRoutesNode::send_rib_route_change));
+}
+
+XrlCmdError
+XrlStaticRoutesNode::policy_backend_0_1_configure(const uint32_t& filter,
+						  const string& conf) {
+    try {
+	StaticRoutesNode::configure_filter(filter,conf);
+    } catch(const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+					   e.str());
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::policy_backend_0_1_reset(const uint32_t& filter) {
+    try {
+	StaticRoutesNode::reset_filter(filter);
+    } catch(const PolicyException& e) {
+	// Will never happen... but for the future...
+	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " + e.str());
+    }
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::policy_backend_0_1_push_routes() {
+    StaticRoutesNode::push_routes(); 
+    return XrlCmdError::OKAY();
 }

@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,12 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.12 2004/06/10 22:41:57 hodson Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.13 2004/07/26 06:29:00 pavlin Exp $"
 
 
 //
 // StaticRoutes node implementation.
 //
+
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 
 #include "static_routes_module.h"
@@ -29,6 +33,7 @@
 
 #include "static_routes_node.hh"
 
+#include "static_routes_varrw.hh"
 
 StaticRoutesNode::StaticRoutesNode(EventLoop& eventloop)
     : ServiceBase("StaticRoutes"),
@@ -670,19 +675,23 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     //
     _static_routes.push_back(static_route);
 
+
+    // Do policy filtering
     //
-    // Inform the RIB about the change
-    //
-    if (static_route.is_interface_route()) {
-	const IfMgrVifAtom* vif_atom;
-	vif_atom = _iftree.find_vif(static_route.ifname(),
-				    static_route.vifname());
-	if ((vif_atom != NULL) && (vif_atom->enabled()))
-	    inform_rib_route_change(static_route);
-    } else {
-	if (is_directly_connected(_iftree, static_route.nexthop()))
-	    inform_rib_route_change(static_route);
-    }
+    StaticRoute& added_route = _static_routes.back();
+
+    // We do not want to modify original route, so we may re-filter routes on
+    // filter configuration changes. Hence, copy route.
+    StaticRoute route_copy = added_route;
+    
+    bool accepted = doFiltering(route_copy);
+
+    // Tag the original route as filtered or not
+    added_route.set_filtered(!accepted);
+
+    // Inform rib the possibly modified route if it was accepted 
+    if(accepted) 
+	inform_rib(route_copy);
 
     return XORP_OK;
 }
@@ -721,24 +730,39 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
 	    || (tmp_route.multicast() != static_route.multicast())) {
 	    continue;
 	}
+
+
 	//
 	// Route found. Overwrite its value.
 	//
+	bool was_filtered = tmp_route.is_filtered();
 	tmp_route = static_route;
 
+	// Do policy Filtering
+	StaticRoute route_copy = static_route;
+	bool accepted = doFiltering(route_copy);
+	tmp_route.set_filtered(!accepted);
+
+	// Decide what to do
+	if(accepted) {
+	    if(was_filtered)
+		route_copy.set_add_route();
+	    else {
+	    }
+	}
+	else {
+	    if(was_filtered) {
+		return XORP_OK;
+	    }
+	    else {
+		route_copy.set_delete_route();
+	    }
+	}
+	
 	//
 	// Inform the RIB about the change
 	//
-	if (static_route.is_interface_route()) {
-	    const IfMgrVifAtom* vif_atom;
-	    vif_atom = _iftree.find_vif(static_route.ifname(),
-					static_route.vifname());
-	    if ((vif_atom != NULL) && (vif_atom->enabled()))
-		inform_rib_route_change(static_route);
-	} else {
-	    if (is_directly_connected(_iftree, static_route.nexthop()))
-		inform_rib_route_change(static_route);
-	}
+	inform_rib(route_copy);
 
 	return XORP_OK;
     }
@@ -795,19 +819,14 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
 	copy_route.set_delete_route();
 	_static_routes.erase(iter);
 
+	// it's filtered... rib doesn't know about it.
+	if(copy_route.is_filtered())
+	    return XORP_OK;
+
 	//
 	// Inform the RIB about the change
 	//
-	if (copy_route.is_interface_route()) {
-	    const IfMgrVifAtom* vif_atom;
-	    vif_atom = _iftree.find_vif(copy_route.ifname(),
-					copy_route.vifname());
-	    if ((vif_atom != NULL) && (vif_atom->enabled()))
-		inform_rib_route_change(copy_route);
-	} else {
-	    if (is_directly_connected(_iftree, copy_route.nexthop()))
-		inform_rib_route_change(copy_route);
-	}
+	inform_rib(copy_route);
 
 	return XORP_OK;
     }
@@ -844,4 +863,127 @@ StaticRoute::is_valid_entry(string& error_msg) const
     }
 
     return true;
+}
+
+void
+StaticRoutesNode::configure_filter(const uint32_t& filter, const string& conf) {
+    _policy_filters.configure(filter,conf);
+}
+
+void
+StaticRoutesNode::reset_filter(const uint32_t& filter) {
+    _policy_filters.reset(filter);
+}
+
+void
+StaticRoutesNode::push_routes() {
+    // XXX: not a background task
+    for(list<StaticRoute>::iterator i = _static_routes.begin();
+	i != _static_routes.end(); ++i) {
+
+	StaticRoute& orig_route = *i;
+	bool was_filtered = orig_route.is_filtered();
+
+	
+	StaticRoute copy = orig_route;
+	bool accepted = doFiltering(copy);
+
+	debug_msg("[STATIC] Push route: %s, was filtered: %d, accepted %d\n",
+		  orig_route.network().str().c_str(),
+		  was_filtered, accepted);
+
+	orig_route.set_filtered(!accepted);
+
+	if(accepted) {
+	    if(was_filtered) {
+		copy.set_add_route();
+	    }
+	    else {
+		copy.set_replace_route();
+	    }
+	}
+	// not accepted
+	else {
+	    if(was_filtered) {
+		continue;
+	    }
+	    else {
+		copy.set_delete_route();
+	    }
+	}
+
+	inform_rib(copy);
+    }	
+}
+
+void
+StaticRoutesNode::inform_rib(const StaticRoute& route) {
+    //
+    // Inform the RIB about the change
+    //
+    if (route.is_interface_route()) {
+	const IfMgrVifAtom* vif_atom;
+	vif_atom = _iftree.find_vif(route.ifname(),
+				    route.vifname());
+	if ((vif_atom != NULL) && (vif_atom->enabled()))
+	    inform_rib_route_change(route);
+    } else {
+	if (is_directly_connected(_iftree, route.nexthop()))
+	    inform_rib_route_change(route);
+    }
+}
+
+bool
+StaticRoutesNode::doFiltering(StaticRoute& route) {
+
+try {
+    ostringstream trace;
+
+    StaticRoutesVarRW varrw(route);
+
+    // Import filtering
+    bool accepted;
+
+    debug_msg("[STATIC] Running filter: %s on route: %s\n",
+	      filter::filter2str(filter::IMPORT).c_str(),
+	      route.network().str().c_str());
+    accepted = _policy_filters.run_filter(filter::IMPORT,
+					  varrw, &trace);
+   
+   
+    debug_msg("[STATIC] filter trace:\n%s\nEnd of trace.\n",
+	      trace.str().c_str());
+    
+    // clear trace
+    trace.str("");
+    
+    route.set_filtered(!accepted); 
+   
+    // Route Rejected 
+    if(!accepted) 
+	return accepted;
+
+
+    StaticRoutesVarRW varrw2(route);
+
+    // Export source-match filtering
+    debug_msg("[STATIC] Running filter: %s on route: %s\n",
+	      filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
+	      route.network().str().c_str());
+
+    _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH,
+			       varrw2, &trace);
+
+    debug_msg("[STATIC] filter trace:\n%s\nEnd of trace.\n",
+	      trace.str().c_str());
+
+    return accepted;
+} catch(const PolicyException& e) {
+    XLOG_FATAL("PolicyException: %s",e.str().c_str());
+    
+    // FIXME: What do we do ?
+    abort();
+}
+
+
 }

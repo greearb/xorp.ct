@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2004 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.9 2004/05/06 19:32:04 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.10 2004/06/10 22:41:57 hodson Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -29,6 +30,8 @@
 
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
+#include "policy/backend/policytags.hh"
+#include "policy/backend/policy_filters.hh"
 
 class EventLoop;
 
@@ -62,8 +65,9 @@ public:
 	: _unicast(unicast), _multicast(multicast),
 	  _network(network), _nexthop(nexthop),
 	  _ifname(ifname), _vifname(vifname),
-	  _metric(metric),
-	  _route_type(IDLE_ROUTE), _is_ignored(false) {}
+	  _metric(metric), 
+	  _route_type(IDLE_ROUTE), _is_ignored(false),
+	  _is_filtered(false) {}
 
     /**
      * Constructor for a given IPv6 static route.
@@ -89,7 +93,8 @@ public:
 	  _network(network), _nexthop(nexthop),
 	  _ifname(ifname), _vifname(vifname),
 	  _metric(metric),
-	  _route_type(IDLE_ROUTE), _is_ignored(false) {}
+	  _route_type(IDLE_ROUTE), _is_ignored(false),
+	  _is_filtered(false) {}
 
     /**
      * Equality Operator
@@ -106,7 +111,8 @@ public:
 		&& (_ifname == other.ifname())
 		&& (_vifname == other.vifname())
 		&& (_metric == other.metric())
-		&& (_route_type == other._route_type));
+		&& (_route_type == other._route_type)
+		&& (_policytags == other._policytags));
     }
 
     /**
@@ -247,6 +253,32 @@ public:
      */
     void set_ignored(bool v) { _is_ignored = v; }
 
+    /**
+     * @return policy-tags for this route.
+     */
+    const PolicyTags& policytags() const { return _policytags; }
+    
+    /**
+     * Set policy-tags for route.
+     *
+     * @param tags the new policy-tags for this route.
+     */
+    void set_policytags(const PolicyTags& tags) { _policytags = tags; }
+
+    /**
+     * @return whether route has been rejected by policy filter.
+     */
+    bool is_filtered() const { return _is_filtered; }
+
+    /**
+     * Sets whether the route is to be considered filtered [rejected by the
+     * policy filter].
+     *
+     * @param v true if the route should be considered rejected.
+     */
+    void set_filtered(bool v) { _is_filtered = v; }
+
+
 private:
     bool	_unicast;
     bool	_multicast;
@@ -255,9 +287,12 @@ private:
     string	_ifname;
     string	_vifname;
     uint32_t	_metric;
+    PolicyTags	_policytags;
     enum RouteType { IDLE_ROUTE, ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
     RouteType	_route_type;
     bool	_is_ignored;	// True if the route is to be ignored
+
+    bool	_is_filtered;	// rejected by policy filter
 };
 
 
@@ -470,6 +505,32 @@ public:
      */
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
 
+   
+    /**
+     * Configure a policy filter.
+     *
+     * Will throw an exception on error.
+     *
+     * Export filter is not supported by static routes.
+     *
+     * @param filter identifier of filter to configure.
+     * @param conf configuration of the filter.
+     */
+    void configure_filter(const uint32_t& filter, const string& conf);
+
+    /**
+     * Reset a policy filter.
+     *
+     * @param filter identifier of filter to reset.
+     */
+    void reset_filter(const uint32_t& filter);
+
+    /**
+     * Push all the routes through the policy filters for re-filtering.
+     */
+    void push_routes();
+
+
 protected:
     //
     // IfMgrHintObserver methods
@@ -615,6 +676,23 @@ private:
     bool is_directly_connected(const IfMgrIfTree& if_tree,
 			       const IPvX& addr) const;
 
+   
+    /**
+     * Do policy filtering on a route.
+     *
+     * @param route route to filter
+     * @return true if route was accepted by policy filter, false otherwise.
+     */
+    bool doFiltering(StaticRoute& route);
+    
+    /**
+     * Inform the RIB about a route
+     *
+     * @param r route which should be updated in the RIB.
+     */
+    void inform_rib(const StaticRoute& r);
+
+
     EventLoop&		_eventloop;		// The event loop
     ProcessStatus	_node_status;		// The node/process status
     const string	_protocol_name;		// The protocol name
@@ -636,6 +714,8 @@ private:
     // Debug and test-related state
     //
     bool	_is_log_trace;		// If true, enable XLOG_TRACE()
+
+    PolicyFilters	_policy_filters;    // only one instance of this!
 };
 
 #endif // __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
