@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.9 2003/06/09 20:02:20 pavlin Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.10 2003/08/28 13:44:58 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Libxorp Library Overview \\
 \vspace{1ex}
-Version 0.4}
+Version 0.5}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{August 28, 2003}
+\date{November 6, 2003}
 
 \maketitle
 
@@ -94,8 +94,7 @@ components (in alphabetical order):
 
   \item \emph{exceptions.hh}: Standard XORP C++ exceptions.
 
-  \item \emph{heap.hh: class Heap}: A heap that implements a priority
-  queue.
+  \item \emph{heap.hh: class Heap}: Provides Heap data structure.
 
   \item \emph{ipnet.hh, ipv4net.hh, ipv6net.hh, ipvxnet.hh: class
   IPv4Net, class IPv6Net, class IPvXNet}: Implementation of classes for
@@ -122,7 +121,10 @@ components (in alphabetical order):
 
   \item \emph{selector.hh}: I/O multiplexing interface.
 
-  \item \emph{status\_codes.h}: Process states status codes.
+  \item \emph{service.hh}: Provides base for asynchronous service classes.
+
+  \item \emph{status\_codes.h}: Process states status codes used by
+  processes when reporting their operational status to the router manager.
 
   \item \emph{time\_slice.hh: class TimeSlice}: A class for computing
   whether some processing is taking too long.
@@ -181,7 +183,7 @@ which are unsigned 32-bit numbers.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{asyncio.hh}
 
-This file contains 
+This file contains
 asynchronous file transfer classes.  These utilize XORP EventLoop
 and its SelectorList to read or write files asynchronously.  The
 user creates an AsyncFile\{Reader,Writer\} and adds a buffer for
@@ -223,9 +225,9 @@ invoked to signify the completion or advancement of an asynchronous
 operation.
 
 XORP provides a generic and flexible callback interface that utilizes
-overloaded templatized functions for for generating callbacks
-in conjunction with many small templatized classes. Whilst this makes
-the syntax a little unpleasant, it provides a great deal of flexibility.
+overloaded templatized functions for generating callbacks in
+conjunction with many small templatized classes. Whilst this makes the
+syntax a little unpleasant, it provides a great deal of flexibility.
 
 XorpCallback objects are objects created by the callback()
 function which returns a reference pointer to a newly created
@@ -253,7 +255,7 @@ invoked whenever the value of the configuration parameter is changed.
 
 This file provides facility for debug messages generation.
 More specifically, it defines the \verb=debug_msg()=, the macro
-responsible for generating debug messages. 
+responsible for generating debug messages.
 It takes the same arguments as printf(3). For example:
 
 \begin{verbatim}
@@ -357,7 +359,7 @@ specialized subclasses. The specialized subclasses are:
 \subsection{ref\_ptr.hh}
 
 This file declares \emph{template class ref\_ptr}: reference counted
-pointer class. 
+pointer class.
 
 The ref\_ptr class is a strong reference class.  It maintains a count of
 how many references to an object exist and releases the memory associated
@@ -403,6 +405,16 @@ are invoked when one of the select methods is called and I/O
 is pending on the particular descriptors.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{service.hh}
+
+This declares \emph{class ServiceBase}.  A service is a class that can
+be started and stopped and would typically involve some asynchronous
+processing to transition between states.  The base class provides a
+state model and methods for transitioning between states.  Mandatary
+transition methods, like start and stop, are abstract in the base
+class.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{status\_codes.h}
 
 This file contains the enumerated \emph{ProcessStatus} codes
@@ -429,7 +441,7 @@ from a developer's point of view is \emph{class XorpTimer}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{timeval.hh}
 
-This file contains implementation of \emph{class TimeVal} for 
+This file contains implementation of \emph{class TimeVal} for
 storing time values (similar to \emph{struct timeval}).
 \emph{TimeVal} implements the appropriate constructors and numerous
 helper methods (\eg Less-Than and Addition operators, etc).
@@ -477,7 +489,7 @@ macro to suppress warnings about unused functions arguments, etc.
 
 This file contains various helper utilities. Currently, the only two
 utilities are template functions to delete a list or array
-of pointers and the objects pointed to. 
+of pointers and the objects pointed to.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{vif.hh}
@@ -518,7 +530,7 @@ simultaneously. Below is a description of how to use the log utility.
 \begin{verbatim}
 int xlog_init(const char *process_name, const char *preamble_message);
 \end{verbatim}
-	
+
    Further, if a program tries to use xlog without initializing it
    first, the program will exit.
 
@@ -528,7 +540,7 @@ int xlog_init(const char *process_name, const char *preamble_message);
 int xlog_add_output(FILE* fp);
 int xlog_add_default_output(void);
 \end{verbatim}
-	
+
   \item To change the verbosity of all xlog messages, use:
 
 \begin{verbatim}
@@ -586,7 +598,7 @@ typedef enum {
 \begin{verbatim}
 int xlog_start(void);
 \end{verbatim}
-	
+
 
   \item To enable or disable a particular message type, use:
 
@@ -594,7 +606,7 @@ int xlog_start(void);
 int xlog_enable(xlog_level_t log_level);
 int xlog_disable(xlog_level_t log_level);
 \end{verbatim}
-	
+
 	By default, all levels are enabled.
 	Note that \verb=XLOG_LEVEL_FATAL= cannot be disabled.
 
@@ -611,7 +623,7 @@ int xlog_stop(void);
 \begin{verbatim}
 int     xlog_exit(void);
 \end{verbatim}
-	
+
 	(think of this as the xlog destructor).
 	An example:
 
@@ -698,7 +710,7 @@ This is the XORP main include file that should be included by all XORP
 C and C++ files. This file itself includes a number of frequently used system
 header files, defines several commonly used values, etc.
 
- 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     APPENDIX
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -714,7 +726,10 @@ header files, defines several commonly used values, etc.
 
   \item June 9, 2003: Updated to match XORP version 0.3 release code.
 
-  \item August 28, 2003: Updated to match XORP version 0.4 release code.
+  \item August 28, 2003: Updated to match XORP version 0.4 release
+  code.
+
+  \item November 6, 2003: Updated to match XORP version 0.5 release code.
 
 \end{itemize}
 
