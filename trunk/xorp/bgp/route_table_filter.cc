@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.12 2003/09/05 02:42:47 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.13 2003/09/10 21:37:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -21,7 +21,7 @@
 #include "libxorp/xlog.h"
 #include "route_table_filter.hh"
 #include "peer_handler.hh"
-#include "main.hh"
+#include "bgp.hh"
 
 /*************************************************************************/
 

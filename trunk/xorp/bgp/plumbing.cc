@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.23 2003/09/05 02:55:34 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.24 2003/09/10 21:37:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -26,7 +26,7 @@
 #include "route_table_reader.hh"
 
 #include "plumbing.hh"
-#include "main.hh"
+#include "bgp.hh"
 
 BGPPlumbing::BGPPlumbing(XrlStdRouter *xrl_router, RibIpcHandler* ribhandler,
 			 EventLoop& eventloop, BGPMain& bgp)

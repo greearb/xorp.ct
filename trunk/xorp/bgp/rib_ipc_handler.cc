@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.21 2003/07/13 06:23:22 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.22 2003/09/04 03:42:39 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -24,7 +24,7 @@
 #define MAX_ERR_RETRIES FLYING_LIMIT
 
 #include "bgp_module.h"
-#include "main.hh"
+#include "bgp.hh"
 #include "rib_ipc_handler.hh"
 
 RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop, 

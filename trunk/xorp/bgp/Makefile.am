@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.23 2003/08/25 23:01:33 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.24 2003/08/28 00:00:08 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -38,15 +38,15 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 xorp_bgp_SOURCES		 = bgp.cc
-xorp_bgp_SOURCES		+= main.hh
+xorp_bgp_SOURCES		+= bgp.hh
 xorp_bgp_SOURCES		+= main.cc
 
 test_packet_SOURCES		 = test_test.hh test_packet.cc
 
 plumbing_test_SOURCES		 = plumbing_test.hh
 plumbing_test_SOURCES		+= plumbing_test.cc
-plumbing_test_SOURCES		+= main.hh
-plumbing_test_SOURCES		+= main.cc
+plumbing_test_SOURCES		+= bgp.hh
+plumbing_test_SOURCES		+= bgp.cc
 plumbing_test_DEPENDENCIES	 = libbgp.a
 
 aspath_test_SOURCES		 = aspath_test.cc

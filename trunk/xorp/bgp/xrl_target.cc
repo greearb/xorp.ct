@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.18 2003/07/25 02:12:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.19 2003/08/08 16:38:06 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -26,6 +26,9 @@
 
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
+
+#include "bgp.hh"
+#include "iptuple.hh"
 #include "xrl_target.hh"
 
 XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
@@ -36,6 +39,20 @@ XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
 	  _awaiting_bgp_id(true),
 	  _done(false)
 {
+}
+
+XrlCmdError
+XrlBgpTarget::common_0_1_get_target_name(string& name)
+{
+    name = "bgp";
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::common_0_1_get_version(string& version)
+{
+    version = "0.1";
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError

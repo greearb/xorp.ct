@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.4 2003/03/10 23:19:57 hodson Exp $"
+#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.5 2003/04/22 19:20:16 mjh Exp $"
 
 #include <sys/time.h>
 
@@ -22,7 +22,7 @@
 #include "libxorp/selector.hh"
 #include "libxorp/xlog.h"
 
-#include "main.hh"
+#include "bgp.hh"
 #include "path_attribute.hh"
 #include "iptuple.hh"
 

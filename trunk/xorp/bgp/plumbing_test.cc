@@ -12,12 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.15 2003/06/17 06:44:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing_test.cc,v 1.16 2003/09/04 03:42:39 atanu Exp $"
 
 #include "fcntl.h"
 
 #include "bgp_module.h"
-#include "main.hh"
+#include "bgp.hh"
 #include "plumbing_test.hh"
 
 #include "libxorp/debug.h"

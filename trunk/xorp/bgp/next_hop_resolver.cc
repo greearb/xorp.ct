@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.18 2003/06/13 01:24:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.19 2003/06/17 06:44:16 atanu Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,7 +23,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/timer.hh"
 
-#include "main.hh"
+#include "bgp.hh"
 #include "next_hop_resolver.hh"
 #include "route_table_nhlookup.hh"
 #include "route_table_decision.hh"

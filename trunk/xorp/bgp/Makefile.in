@@ -111,11 +111,11 @@ noinst_LIBRARIES = libbgp.a
 LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-xorp_bgp_SOURCES = bgp.cc main.hh main.cc
+xorp_bgp_SOURCES = bgp.cc bgp.hh main.cc
 
 test_packet_SOURCES = test_test.hh test_packet.cc
 
-plumbing_test_SOURCES = plumbing_test.hh plumbing_test.cc main.hh main.cc
+plumbing_test_SOURCES = plumbing_test.hh plumbing_test.cc bgp.hh bgp.cc
 plumbing_test_DEPENDENCIES = libbgp.a
 
 aspath_test_SOURCES = aspath_test.cc
@@ -196,7 +196,7 @@ isolation_tests_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 isolation_tests_LDFLAGS =
-am_plumbing_test_OBJECTS = plumbing_test.$(OBJEXT) main.$(OBJEXT)
+am_plumbing_test_OBJECTS = plumbing_test.$(OBJEXT) bgp.$(OBJEXT)
 plumbing_test_OBJECTS = $(am_plumbing_test_OBJECTS)
 plumbing_test_LDADD = $(LDADD)
 plumbing_test_LDFLAGS =

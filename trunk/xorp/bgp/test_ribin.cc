@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.16 2003/05/29 18:56:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.17 2003/07/03 02:03:17 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -21,7 +21,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/test_main.hh"
 
-#include "main.hh"
+#include "bgp.hh"
 #include "route_table_base.hh"
 #include "route_table_ribin.hh"
 #include "route_table_debug.hh"

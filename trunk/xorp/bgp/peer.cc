@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.44 2003/09/03 18:39:04 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.45 2003/09/05 01:37:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,7 +25,7 @@
 #include "xrl/interfaces/bgp_mib_traps_xif.hh"
 
 #include "peer.hh"
-#include "main.hh"
+#include "bgp.hh"
 
 #define DEBUG_BGPPeer
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.12 2003/07/03 00:25:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.13 2003/07/03 02:03:17 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,7 +28,7 @@
 #include "next_hop_resolver.hh"
 #include "route_table_nhlookup.hh"
 #include "route_table_decision.hh"
-#include "main.hh"
+#include "bgp.hh"
 
 template<class A>
 class DummyNhLookupTable : public NhLookupTable<A> {
