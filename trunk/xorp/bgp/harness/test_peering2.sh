@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.5 2003/02/05 00:04:15 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.6 2003/05/29 18:56:27 hodson Exp $
 #
 
 #
@@ -22,7 +22,7 @@ set -e
 # srcdir is set by make for check target
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/xrl_shell_funcs.sh ""
-. ${srcdir}/xrl_shell_funcs.sh ""
+. ${srcdir}/../xrl_shell_funcs.sh ""
 
 onexit()
 {
