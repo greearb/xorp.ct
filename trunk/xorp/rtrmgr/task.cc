@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.41 2004/12/11 21:29:58 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.42 2005/02/03 13:45:33 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -665,12 +665,20 @@ XrlShutdown::shutdown_done(const XrlError& err, XrlArgs* xrl_args)
 // ----------------------------------------------------------------------------
 // TaskXrlItem implementation
 
+const uint32_t	TaskXrlItem::DEFAULT_RESEND_COUNT = 10;
+const int	TaskXrlItem::DEFAULT_RESEND_DELAY_MS = 1000;
+
 TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
-			 const XrlRouter::XrlCallback& cb, Task& task)
+			 const XrlRouter::XrlCallback& cb,
+			 Task& task,
+			 uint32_t xrl_resend_count,
+			 int xrl_resend_delay_ms)
     : _unexpanded_xrl(uxrl),
       _xrl_callback(cb),
       _task(task),
-      _resend_counter(0),
+      _xrl_resend_count_limit(xrl_resend_count),
+      _xrl_resend_count(_xrl_resend_count_limit),
+      _xrl_resend_delay_ms(xrl_resend_delay_ms),
       _verbose(task.verbose())
 {
 }
@@ -679,7 +687,9 @@ TaskXrlItem::TaskXrlItem(const TaskXrlItem& them)
     : _unexpanded_xrl(them._unexpanded_xrl),
       _xrl_callback(them._xrl_callback),
       _task(them._task),
-      _resend_counter(0),
+      _xrl_resend_count_limit(them._xrl_resend_count_limit),
+      _xrl_resend_count(_xrl_resend_count_limit),
+      _xrl_resend_delay_ms(them._xrl_resend_delay_ms),
       _verbose(them._verbose)
 {
 }
@@ -704,7 +714,7 @@ TaskXrlItem::execute(string& errmsg)
     // For debugging purposes, record what we were doing
     errmsg = _unexpanded_xrl.str();
 
-    _resend_counter = 0;
+    _xrl_resend_count = _xrl_resend_count_limit;
     _task.xorp_client().send_now(*xrl,
 				 callback(this, &TaskXrlItem::execute_done),
 				 xrl_return_spec,
@@ -785,20 +795,18 @@ TaskXrlItem::execute_done(const XrlError& err, XrlArgs* xrl_args)
 	// validation has done it's job correctly, but just in case
 	// we'll be lenient and give it ten more seconds to be
 	// functioning before we declare it dead.
-	// TODO: get rid of the hard-coded value of "10" below.
-	if (_resend_counter > 10) {
+	if (--_xrl_resend_count > 0) {
+	    // Re-send the Xrl after a short delay.
+	    _xrl_resend_timer = _task.eventloop().new_oneoff_after_ms(
+		_xrl_resend_delay_ms,
+		callback(this, &TaskXrlItem::resend));
+	    return;
+	} else {
 	    // Give up.
 	    // The error was a fatal one for the target - we now
 	    // consider the target to be fatally wounded.
 	    XLOG_ERROR("%s", err.str().c_str());
 	    fatal = true;
-	} else {
-	    // Re-send the Xrl after a short delay.
-	    // TODO: get rid of the hard-coded value of "1000" below.
-	    _resend_counter++;
-	    _resend_timer = _task.eventloop().new_oneoff_after_ms(1000,
-				callback(this, &TaskXrlItem::resend));
-	    return;
 	}
 	break;
 

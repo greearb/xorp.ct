@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.27 2004/06/10 22:41:54 hodson Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.28 2004/12/11 21:29:59 mjh Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -196,7 +196,9 @@ private:
 class TaskXrlItem {
 public:
     TaskXrlItem(const UnexpandedXrl& uxrl, const XrlRouter::XrlCallback& cb,
-		Task& task);
+		Task& task,
+		uint32_t xrl_resend_count = TaskXrlItem::DEFAULT_RESEND_COUNT,
+		int xrl_resend_delay_ms = TaskXrlItem::DEFAULT_RESEND_DELAY_MS);
     TaskXrlItem::TaskXrlItem(const TaskXrlItem& them);
 
     bool execute(string& errmsg);
@@ -205,12 +207,17 @@ public:
     void unschedule();
 
 private:
-    UnexpandedXrl	_unexpanded_xrl;
-    XrlRouter::XrlCallback _xrl_callback;
-    Task&		_task;
-    XorpTimer		_resend_timer;
-    uint32_t		_resend_counter;
-    bool		_verbose;	 // Set to true if output is verbose
+    static const uint32_t	DEFAULT_RESEND_COUNT;
+    static const int		DEFAULT_RESEND_DELAY_MS;
+
+    UnexpandedXrl		_unexpanded_xrl;
+    XrlRouter::XrlCallback	_xrl_callback;
+    Task&			_task;
+    uint32_t			_xrl_resend_count_limit;
+    uint32_t			_xrl_resend_count;
+    int				_xrl_resend_delay_ms;
+    XorpTimer			_xrl_resend_timer;
+    bool			_verbose;   // Set to true if output is verbose
 };
 
 class Task {
