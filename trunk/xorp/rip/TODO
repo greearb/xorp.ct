@@ -5,18 +5,10 @@ o Validate origin address in Port<A>::port_io_receive If packet does
   not come from a host on the same network or from the end of a point
   to point link it should not be processed.
 
-o Re-jig socket code.  1 socket to receive multicast on.  One socket
-  per interface to send mcast on, one socket per interface to receive
-  unicast on.
-
 o Add HopCount check on received RIPng packets.
 
 o Check and double check nexthop handling paying attention to incoming
   and outgoing interfaces and their properties.
-
-o Reception of static routes from FEA / statics process.
-
-o Advertising of interface addresses.
 
 o Handle interfaces coming up and down and socket errors.
 
@@ -27,8 +19,8 @@ o Inter-op testing.
 
 o MIB.
 
-o Clean up RIB interaction.  Add flag signifying RIB aware of route
-  state to RouteEntry structure.  Twiddle flag when route is updated.
+o Clean up RIB interaction.  Add flag to each router indicating that
+  the RIB is aware it and nobble flag when route is updated.
 
 o Consider keeping losing routes, age them in the normal way, etc, and
   be prepared to fall back to them if/when winning routes expire.
