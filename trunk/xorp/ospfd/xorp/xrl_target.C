@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001,2002 International Computer Science Institute
+// Copyright (c) 2001-2003 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospfd/xorp/xrl_target.C,v 1.2 2003/01/28 00:37:54 hodson Exp $"
+// You may also (at your option) redistribute this software and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or any later version.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+#ident "$XORP: xorp/ospfd/xorp/ospf_config.C,v 1.2 2003/05/29 17:58:33 pavlin Exp $"
 
 #include <time.h>
 #include <vector>
