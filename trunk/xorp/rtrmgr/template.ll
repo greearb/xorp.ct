@@ -1,5 +1,5 @@
 %{
-#include "string.h"
+#include <string.h>
 #include "y.tplt_tab.h"
 #define YY_NO_UNPUT
 %}

@@ -1,5 +1,5 @@
 %{
-#include "string.h"
+#include <string.h>
 #include "y.opcmd_tab.h"
 #define YY_NO_UNPUT
 //#define DEBUG_OPCMD_PARSER

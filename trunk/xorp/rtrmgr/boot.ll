@@ -1,5 +1,5 @@
 %{
-#include "string.h"
+#include <string.h>
 #include "y.boot_tab.h"
 #define YY_NO_UNPUT
 #define SBUFSIZE 1024
