@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.19 2002/12/09 18:29:41 hodson Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
 
 #include "config.h"
 
@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <iostream>
 #include <string>
 #include <vector>
 
