@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.5 2003/05/20 17:24:59 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.6 2003/05/23 23:26:34 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -28,6 +28,14 @@ interface ifmgr/0.1 {
 				& loopback:bool				\
 				& point_to_point:bool			\
 				& multicast:bool 			      
+
+	get_all_vif_pif_index	? ifname:txt				\
+				& vif:txt				\
+				-> pif_index:u32
+
+	get_configured_vif_pif_index	? ifname:txt			\
+					& vif:txt			\
+					-> pif_index:u32
 
 	get_all_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
 
