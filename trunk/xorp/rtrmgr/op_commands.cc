@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.18 2004/05/26 15:04:09 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.19 2004/05/28 22:27:57 pavlin Exp $"
 
 
 #include <glob.h>
@@ -386,9 +386,11 @@ OpCommand::prefix_matches(const list<string>& path_parts,
 void
 OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree,
 		       map<string, string>& return_matches,
-		       bool& is_executable) const
+		       bool& is_executable,
+		       bool& can_pipe) const
 {
     is_executable = false;
+    can_pipe = false;
 
     list<string>::const_iterator ci = _command_parts.begin();
     for (size_t i = 0; i < wordnum; i++) {
@@ -403,6 +405,7 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree,
 	    return_matches.insert(*opi);
 	}
 	is_executable = true;
+	can_pipe = true;
     } else {
 	string match = *ci;
 	if (match[0] == '$') {
@@ -417,6 +420,11 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* conf_tree,
 	} else {
 	    return_matches.insert(make_pair(match, _help_string));
 	}
+    }
+
+    if (! _command_action.empty()) {
+	is_executable = true;
+	can_pipe = true;
     }
 }
 
@@ -594,37 +602,58 @@ OpCommandList::find_executable_filename(const string& command_filename,
     return false;
 }
 
-set<string>
+map<string, string>
 OpCommandList::top_level_commands() const
 {
-    set<string> commands;
+    map<string, string> commands;
 
+    //
+    // Add the first word of every command, and the help if this
+    // indeed is a top-level command
+    //
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
-	// Add the first word of every command
-	list<string> path_parts = split((*iter)->command_name(), ' ');
-	commands.insert(path_parts.front());
+	const OpCommand* op_command = *iter;
+	list<string> path_parts = split(op_command->command_name(), ' ');
+	const string& top_command = path_parts.front();
+	bool is_top_command = false;
+
+	if (path_parts.size() == 1)
+	    is_top_command = true;
+
+	if (is_top_command) {
+	    commands.insert(make_pair(top_command, op_command->help_string()));
+	    continue;
+	}
+
+	// TODO: XXX: Get rid of this hard-coded "help" string!!
+	commands.insert(make_pair(top_command, "help"));
     }
     return commands;
 }
 
 map<string, string>
-OpCommandList::childlist(const string& path, bool& is_executable) const
+OpCommandList::childlist(const string& path, bool& is_executable,
+			 bool& can_pipe) const
 {
     map<string, string> children;
     list<string> path_parts = split(path, ' ');
 
     is_executable = false;
+    can_pipe = false;
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	const OpCommand* op_command = *iter;
 	if (op_command->prefix_matches(path_parts, _conf_tree)) {
 	    map<string, string> matches;
 	    bool tmp_is_executable;
+	    bool tmp_can_pipe;
 	    op_command->get_matches(path_parts.size(), _conf_tree,
-				    matches, tmp_is_executable);
+				    matches, tmp_is_executable, tmp_can_pipe);
 	    if (tmp_is_executable)
 		is_executable = true;
+	    if (tmp_can_pipe)
+		can_pipe = true;
 	    map<string, string>::iterator mi;
 	    for (mi = matches.begin(); mi != matches.end(); ++mi) {
 		string command_string = mi->first;
