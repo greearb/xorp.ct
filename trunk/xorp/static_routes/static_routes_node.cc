@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.3 2004/02/20 05:17:40 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.4 2004/02/20 06:46:23 atanu Exp $"
 
 
 //
@@ -88,7 +88,9 @@ StaticRoutesNode::shutdown()
     //
     ServiceBase::set_status(SHUTTING_DOWN);
 
+    //
     // De-register with the RIB
+    //
     rib_register_shutdown();
 
     //
