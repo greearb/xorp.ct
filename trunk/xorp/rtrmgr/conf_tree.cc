@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.17 2004/05/18 01:06:49 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.18 2004/05/26 19:17:52 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -33,9 +33,11 @@ extern int booterror(const char* s) throw (ParseError);
  * Config File class
  *************************************************************************/
 
-ConfigTree::ConfigTree(TemplateTree* tt)
+ConfigTree::ConfigTree(TemplateTree* tt, bool verbose)
     : _template_tree(tt),
-      _current_node(&_root_node)
+      _root_node(verbose),
+      _current_node(&_root_node),
+      _verbose(verbose)
 {
 
 }
@@ -210,7 +212,7 @@ ConfigTree::add_node(const string& segment) throw (ParseError)
 	else
 	    path += " " + segment;
 	found = new ConfigTreeNode(segment, path, ttn, _current_node,
-				   /* user_id */ 0);
+				   /* user_id */ 0, _verbose);
 	_current_node = found;
     }
 }
@@ -381,29 +383,25 @@ ConfigTree::find_config_module(const string& module_name) const
     return _root_node.find_config_module(module_name);
 }
 
-void
-ConfigTree::print() const
+string
+ConfigTree::tree_str() const
 {
-    _root_node.print_tree();
+    return _root_node.subtree_str();
 }
 
 bool
 ConfigTree::apply_deltas(uid_t user_id, const string& deltas,
 			 bool provisional_change, string& response)
 {
-#ifdef DEBUG_CONFIG_CHANGE
-    printf("CT apply_deltas %d %s\n", user_id, deltas.c_str());
-#endif
+    XLOG_TRACE(_verbose, "CT apply_deltas %d %s\n", user_id, deltas.c_str());
 
-    ConfigTree delta_tree(_template_tree);
+    ConfigTree delta_tree(_template_tree, _verbose);
     if (delta_tree.parse(deltas, "", response) == false)
 	return false;
 
-#ifdef DEBUG_CONFIG_CHANGE
-    printf("Delta tree:\n");
-    delta_tree.print();
-    printf("end delta tree.\n");
-#endif
+    debug_msg("Delta tree:\n");
+    debug_msg("%s", delta_tree.tree_str().c_str());
+    debug_msg("end delta tree.\n");
 
     response = "";
     return _root_node.merge_deltas(user_id, delta_tree.const_root_node(),
@@ -414,19 +412,16 @@ bool
 ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
 			    bool provisional_change, string& response)
 {
-#ifdef DEBUG_CONFIG_CHANGE
-    printf("CT apply_deletions %d %s\n", user_id, deletions.c_str());
-#endif
+    XLOG_TRACE(_verbose, "CT apply_deletions %d %s\n",
+	       user_id, deletions.c_str());
 
-    ConfigTree deletion_tree(_template_tree);
+    ConfigTree deletion_tree(_template_tree, _verbose);
     if (deletion_tree.parse(deletions, "", response) == false)
 	return false;
 
-#ifdef DEBUG_CONFIG_CHANGE
-    printf("Deletion tree:\n");
-    deletion_tree.print();
-    printf("end deletion tree.\n");
-#endif
+    debug_msg("Deletion tree:\n");
+    debug_msg("%s", deletion_tree.tree_str().c_str());
+    debug_msg("end deletion tree.\n");
 
     response = "";
     return _root_node.merge_deletions(user_id,

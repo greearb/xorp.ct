@@ -12,12 +12,8 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.40 2004/05/22 06:09:06 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.41 2004/05/26 19:18:22 hodson Exp $"
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
-// #define DEBUG_VARIABLES
-// #define DEBUG_COMMIT
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -31,7 +27,7 @@
 
 extern int booterror(const char *s) throw (ParseError);
 
-ConfigTreeNode::ConfigTreeNode()
+ConfigTreeNode::ConfigTreeNode(bool verbose)
     : _template_tree_node(NULL),
       _deleted(false),
       _has_value(false),
@@ -44,7 +40,8 @@ ConfigTreeNode::ConfigTreeNode()
       _actions_pending(0),
       _actions_succeeded(true),
       _cmd_that_failed(NULL),
-      _on_parent_path(false)
+      _on_parent_path(false),
+      _verbose(verbose)
 
 {
 }
@@ -53,7 +50,8 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 			       const string& path, 
 			       const TemplateTreeNode* ttn,
 			       ConfigTreeNode* parent,
-			       uid_t user_id)
+			       uid_t user_id,
+			       bool verbose)
     : _template_tree_node(ttn),
       _deleted(false),
       _has_value(false),
@@ -68,9 +66,9 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
       _actions_pending(0),
       _actions_succeeded(true),
       _cmd_that_failed(NULL),
-      _on_parent_path(false)
+      _on_parent_path(false),
+      _verbose(verbose)
 {
-
     TimerList::system_gettimeofday(&_modification_time);
     parent->add_child(this);
 }
@@ -93,7 +91,8 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _actions_pending(0),
       _actions_succeeded(true),
       _cmd_that_failed(NULL),
-      _on_parent_path(false)
+      _on_parent_path(false),
+      _verbose(ctn._verbose)
 {
 }
 
@@ -130,11 +129,11 @@ ConfigTreeNode::operator==(const ConfigTreeNode& them) const
 	return false;
     if (_template_tree_node != them.template_tree_node())
 	return false;
-#ifdef DEBUG_EQUALS
-    printf("Equal nodes:\n");
-    printf("Node1: %s\n", str().c_str());
-    printf("Node2: %s\n\n", them.str().c_str());
-#endif
+
+    debug_msg("Equal nodes:\n");
+    debug_msg("Node1: %s\n", str().c_str());
+    debug_msg("Node2: %s\n\n", them.str().c_str());
+
     return true;
 }
 
@@ -189,7 +188,8 @@ ConfigTreeNode::add_default_children()
 		string name = (*tci)->segname();
 		string path = _path + " " + name;
 		ConfigTreeNode *new_node = new ConfigTreeNode(name, path, *tci,
-							      this, _user_id);
+							      this, _user_id,
+							      _verbose);
 		new_node->set_value((*tci)->default_str(), _user_id);
 	    }
 	}
@@ -300,7 +300,8 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 					  delta_child->path(),
 					  delta_child->template_tree_node(),
 					  this,
-					  user_id);
+					  user_id,
+					  _verbose);
 	    if (!provisional_change)
 		new_node->set_existence_committed(true);
 	    new_node->merge_deltas(user_id, *delta_child, provisional_change,
@@ -573,16 +574,14 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
     const Command *cmd = NULL;
     bool changes_made = false;
 
-#ifdef DEBUG_COMMIT
-    printf("*****COMMIT CHANGES node >%s< >%s<\n", _path.c_str(),
-	   _value.c_str());
+    debug_msg("*****COMMIT CHANGES node >%s< >%s<\n",
+	      _path.c_str(), _value.c_str());
     if (do_commit)
-	printf("do_commit\n");
+	debug_msg("do_commit\n");
     if (_existence_committed == false)
-	printf("_existence_committed == false\n");
+	debug_msg("_existence_committed == false\n");
     if (_value_committed == false)
-	printf("_value_committed == false\n");
-#endif
+	debug_msg("_value_committed == false\n");
 
     // The root node has a NULL template
     if (_template_tree_node != NULL) {
@@ -597,9 +596,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 	    }
 	}
 	if ((_existence_committed == false || _value_committed == false)) {
-#ifdef DEBUG_COMMIT
-	    printf("we have changes to handle\n");
-#endif
+	    debug_msg("we have changes to handle\n");
 	    // First handle deletions
 	    if (_deleted) {
 		if (do_commit == false) {
@@ -624,9 +621,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 			    result = "Something went wrong.\n";
 			    result += "The problem was with \"" + path() + "\"\n";
 			    result += "WARNING: Partially commited changes exist\n";
-#ifdef DEBUG_COMMIT
-			    printf("%s\n", result.c_str());
-#endif
+			    XLOG_WARNING("%s\n", result.c_str());
 			    return false;
 			}
 			_actions_pending += actions;
@@ -644,9 +639,8 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 		}
 		if (cmd != NULL) {
 		    const AllowCommand* allow_cmd;
-#ifdef DEBUG_COMMIT
-		    printf("found ALLOW command: %s\n", cmd->str().c_str());
-#endif
+		    debug_msg("found ALLOW command: %s\n",
+			      cmd->str().c_str());
 		    allow_cmd = dynamic_cast<const AllowCommand*>(cmd);
 		    XLOG_ASSERT(allow_cmd != NULL);
 		    string errmsg;
@@ -662,9 +656,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 					  path().c_str(), errmsg.c_str());
 			result += "No changes have been committed. ";
 			result += "Correct this error and try again.";
-#ifdef DEBUG_COMMIT
-			printf("%s\n", result.c_str());
-#endif
+			XLOG_WARNING("%s\n", result.c_str());
 			return false;
 		    }
 		}
@@ -678,21 +670,16 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 		if (cmd == NULL)
 		    cmd = _template_tree_node->const_command("%set");
 		if (cmd == NULL) {
-#ifdef DEBUG_COMMIT
-		    printf("no appropriate command found\n");
-#endif
+		    debug_msg("no appropriate command found\n");
 		} else {
-#ifdef DEBUG_COMMIT
-		    printf("found commands: %s\n", cmd->str().c_str());
-#endif
+		    debug_msg("found commands: %s\n",
+			      cmd->str().c_str());
 		    int actions = cmd->execute(*this, task_manager);
 		    if (actions < 0) {
 			result = "Parameter error for \"" + path() + "\"\n";
 			result += "No changes have been committed.\n";
 			result += "Correct this error and try again.\n";
-#ifdef DEBUG_COMMIT
-			printf("%s\n", result.c_str());
-#endif
+			XLOG_WARNING("%s\n", result.c_str());
 			return false;
 		    }
 		    _actions_pending += actions;
@@ -708,9 +695,7 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
     while (iter != _children.end()) {
 	prev_iter = iter;
 	++iter;
-#ifdef DEBUG_COMMIT
-	printf("  child: %s\n", (*prev_iter)->path().c_str());
-#endif
+	debug_msg("  child: %s\n", (*prev_iter)->path().c_str());
 	string child_response;
 	success = (*prev_iter)->commit_changes(task_manager, do_commit,
 					       depth + 1, last_depth, 
@@ -727,17 +712,14 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 	    // Finally, on the way back out, we run the %activate commands
 	    cmd = _template_tree_node->const_command("%activate");
 	    if (cmd != NULL) {
-#ifdef DEBUG_COMMIT
-		printf("found commands: %s\n", cmd->str().c_str());
-#endif
+		debug_msg("found commands: %s\n",
+			  cmd->str().c_str());
 		int actions = cmd->execute(*this, task_manager);
 		if (actions < 0) {
 		    result = "Parameter error for \"" + path() + "\"\n";
 		    result += "No changes have been committed.\n";
 		    result += "Correct this error and try again.\n";
-#ifdef DEBUG_COMMIT
-		    printf("%s\n", result.c_str());
-#endif
+		    XLOG_WARNING("%s\n", result.c_str());
 		    return false;
 		}
 		_actions_pending += actions;
@@ -758,12 +740,11 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 	    }
 	}
     }
-#ifdef DEBUG_COMMIT
-    printf("Result: %s\n", result.c_str());
-    printf("COMMIT, leaving node >%s<\n", _path.c_str());
-    printf("final node %s actions_pending = %d\n",
-	   _segname.c_str(), _actions_pending);
-#endif
+
+    debug_msg("Result: %s\n", result.c_str());
+    debug_msg("COMMIT, leaving node >%s<\n", _path.c_str());
+    debug_msg("final node %s actions_pending = %d\n",
+	      _segname.c_str(), _actions_pending);
 
     return success;
 }
@@ -771,9 +752,8 @@ ConfigTreeNode::commit_changes(TaskManager& task_manager,
 bool 
 ConfigTreeNode::check_commit_status(string& response) const
 {
-#ifdef DEBUG_COMMIT
-    printf("ConfigTreeNode::check_commit_status %s\n", _segname.c_str());
-#endif
+    debug_msg("ConfigTreeNode::check_commit_status %s\n",
+	      _segname.c_str());
 
     if ((_existence_committed == false) || (_value_committed == false)) {
 	XLOG_ASSERT(_actions_pending == 0);
@@ -799,9 +779,7 @@ ConfigTreeNode::check_commit_status(string& response) const
     list<ConfigTreeNode *>::const_iterator iter;
     bool result = true;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
-#ifdef DEBUG_COMMIT
-	printf("  child: %s\n", (*iter)->path().c_str());
-#endif
+	debug_msg("  child: %s\n", (*iter)->path().c_str());
 	result = (*iter)->check_commit_status(response);
 	if (result == false)
 	    return false;
@@ -813,15 +791,12 @@ ConfigTreeNode::check_commit_status(string& response) const
 void 
 ConfigTreeNode::finalize_commit()
 {
-#ifdef DEBUG_COMMIT
-    printf("ConfigTreeNode::finalize_commit %s\n", _segname.c_str());
-#endif
+    debug_msg("ConfigTreeNode::finalize_commit %s\n",
+	      _segname.c_str());
 
     if (_deleted) {
+	debug_msg("node deleted\n");
 
-#ifdef DEBUG_COMMIT
-	printf("node deleteded\n");
-#endif
 	//
 	// Delete the entire subtree. We expect a deleted node here
 	// to have previously had its existence committed
@@ -835,9 +810,8 @@ ConfigTreeNode::finalize_commit()
 	return;
     }
     if ((_existence_committed == false) || (_value_committed == false)) {
-#ifdef DEBUG_COMMIT
-	printf("node finalized\n");
-#endif
+	debug_msg("node finalized\n");
+
 	XLOG_ASSERT(_actions_pending == 0);
 	XLOG_ASSERT(_actions_succeeded);
 	_existence_committed = true;
@@ -866,9 +840,7 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
     string result;
     bool changes_made = false;
 
-#ifdef DEBUG_COMMIT
-    printf("DISCARD CHANGES node >%s<\n", _path.c_str());
-#endif
+    debug_msg("DISCARD CHANGES node >%s<\n", _path.c_str());
 
     // The root node has a NULL template
     if (_template_tree_node != NULL) {
@@ -877,9 +849,8 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
 	    delete_subtree_silently();
 	    return result;
 	} else if (_value_committed == false) {
-#ifdef DEBUG_COMMIT
-	    printf("discarding changes from node %s\n", _path.c_str());
-#endif
+	    debug_msg("discarding changes from node %s\n",
+		      _path.c_str());
 	    _value_committed = true;
 	    _user_id = _committed_user_id;
 	    _value = _committed_value;
@@ -902,9 +873,7 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
 	// Be careful, or discard_changes can invalidate the iterator
 	prev_iter = iter;
 	++iter;
-#ifdef DEBUG_COMMIT
-	printf("  child: %s\n", (*prev_iter)->path().c_str());	
-#endif
+	debug_msg("  child: %s\n", (*prev_iter)->path().c_str());
 	result != (*prev_iter)->discard_changes(depth + 1, last_depth);
     }
 
@@ -1176,15 +1145,19 @@ ConfigTreeNode::str() const
     return s;
 }
 
-void
-ConfigTreeNode::print_tree() const
+string
+ConfigTreeNode::subtree_str() const
 {
-    printf("%s\n", node_str().c_str());
+    string s;
+
+    s = c_format("%s\n", node_str().c_str());
 
     list<ConfigTreeNode*>::const_iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	(*iter)->print_tree();
+	s += (*iter)->subtree_str();
     }
+
+    return s;
 }
 
 ConfigTreeNode* 
@@ -1236,10 +1209,8 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
     VarType type = NONE;
     const ConfigTreeNode *varname_node;
 
-#ifdef DEBUG_VARIABLES
-    printf("ConfigTreeNode::expand_variable at %s: >%s<\n",
-	   _segname.c_str(), varname.c_str());
-#endif
+    debug_msg("ConfigTreeNode::expand_variable at %s: >%s<\n",
+	      _segname.c_str(), varname.c_str());
 
     varname_node = find_const_varname_node(varname, type);
 
@@ -1322,17 +1293,13 @@ ConfigTreeNode::find_const_varname_node(const string& varname,
 ConfigTreeNode*
 ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
 {
-#ifdef DEBUG_VARIABLES
-    printf("ConfigTreeNode::expand_variable at %s: >%s<\n",
-	   _segname.c_str(), varname.c_str());
-#endif
+    debug_msg("ConfigTreeNode::expand_variable at %s: >%s<\n",
+	      _segname.c_str(), varname.c_str());
 
     if (varname == "$(@)" || (varname == "$(" + _segname + ")") ) {
 	XLOG_ASSERT(!_template_tree_node->is_tag());
 	type = NODE_VALUE;
-#ifdef DEBUG_VARIABLES
-	printf("varname node is >%s<\n", _segname.c_str());
-#endif
+	debug_msg("varname node is >%s<\n", _segname.c_str());
 	return this;
     }
 
@@ -1415,7 +1382,7 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
 	s += ">" + (*iter) + "< ";
     }
     s += "\n";
-    debug_msg(s.c_str());
+    debug_msg("%s", s.c_str());
 
     //
     // @ can only expand when we've already gone through this node
@@ -1440,9 +1407,7 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     if (var_parts.size() == 1) {
 	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
 	    type = NODE_VALUE;
-#ifdef DEBUG_VARIABLES
-	    printf("varname V node is >%s<\n", _segname.c_str());
-#endif
+	    debug_msg("varname V node is >%s<\n", _segname.c_str());
 	    return this;
 	}
     }
@@ -1451,9 +1416,7 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
 	// The name might refer to a named variable on this node
 	if (_variables.find(var_parts.back()) != _variables.end()) {
 	    type = NAMED;
-#ifdef DEBUG_VARIABLES
-	    printf("varname N node is >%s<\n", _segname.c_str());
-#endif
+	    debug_msg("varname N node is >%s<\n", _segname.c_str());
 	    return this;
 	}
     }
@@ -1477,9 +1440,7 @@ void
 ConfigTreeNode::split_up_varname(const string& varname, 
 				 list<string>& var_parts) const
 {
-#ifdef DEBUG_VARIABLES
-    printf("split up varname >%s<\n", varname.c_str());
-#endif
+    debug_msg("split up varname >%s<\n", varname.c_str());
 
     XLOG_ASSERT(varname[0] == '$');
     XLOG_ASSERT(varname[1] == '(');
@@ -1488,13 +1449,15 @@ ConfigTreeNode::split_up_varname(const string& varname,
     string trimmed = varname.substr(2, varname.size() - 3);
     var_parts = split(trimmed, '.');
 
-#ifdef DEBUG_VARIABLES
-    list<string>::iterator iter;
-    for (iter = var_parts.begin(); iter != var_parts.end(); ++iter) {
-	printf(">%s<, ", iter->c_str());
+    if (_verbose) {
+	string debug_output;
+	list<string>::iterator iter;
+	for (iter = var_parts.begin(); iter != var_parts.end(); ++iter) {
+	    debug_output += c_format(">%s<, ", iter->c_str());
+	}
+	debug_output += "\n";
+	debug_msg("%s", debug_output.c_str());
     }
-    printf("\n");
-#endif
 }
 
 string
@@ -1585,7 +1548,7 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
 	    errmsg = c_format("Attempt to set variable \"%s\" "
 			      "which is the name of a configuration node",
 			      varname.c_str());
-	    XLOG_ERROR(errmsg.c_str());
+	    XLOG_ERROR("%s", errmsg.c_str());
 	    return false;
 	case NAMED:
 	{
@@ -1614,7 +1577,7 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
     if (var_parts.size() < 2) {
 	errmsg = c_format("Attempt to set incomplete variable \"%s\"",
 			  varname.c_str());
-	XLOG_ERROR(errmsg.c_str());
+	XLOG_ERROR("%s", errmsg.c_str());
 	return false;
     }
     var_parts.pop_back();
@@ -1634,20 +1597,20 @@ ConfigTreeNode::set_variable(const string& varname, string& value)
 	    errmsg = c_format("Attempt to set variable \"%s\" "
 			      "which is the child of a named variable",
 			      varname.c_str());
-	    XLOG_ERROR(errmsg.c_str());
+	    XLOG_ERROR("%s", errmsg.c_str());
 	    return false;
 	case TEMPLATE_DEFAULT:
 	    errmsg = c_format("Attempt to set variable \"%s\" "
 			      "which is on a non-existent node",
 			      varname.c_str());
-	    XLOG_ERROR(errmsg.c_str());
+	    XLOG_ERROR("%s", errmsg.c_str());
 	    return false;
 	}
     }
 
     errmsg = c_format("Attempt to set unknown variable \"%s\"",
 		      varname.c_str());
-    XLOG_ERROR(errmsg.c_str());
+    XLOG_ERROR("%s", errmsg.c_str());
     return false;
 }
 

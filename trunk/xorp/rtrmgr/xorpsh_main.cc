@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.25 2004/03/09 05:51:52 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.26 2004/05/24 01:22:35 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -34,9 +34,15 @@
 
 
 //
+// Default values
+//
+static bool default_verbose = false;
+
+//
 // Local state
 //
-static bool running = false;
+static bool	running = false;
+static bool	verbose = default_verbose;
 
 static void signal_handler(int signal_value);
 static void exit_handler(CliClient*);
@@ -71,7 +77,8 @@ wait_for_xrlrouter_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 XorpShell::XorpShell(const string& IPCname,
 		     const string& xorp_root_dir,
 		     const string& config_template_dir,
-		     const string& xrl_dir) throw (InitError)
+		     const string& xrl_targets_dir,
+		     bool verbose) throw (InitError)
     : _eventloop(),
       _xrlrouter(_eventloop, IPCname.c_str()),
       _xclient(_eventloop, _xrlrouter),
@@ -83,20 +90,33 @@ XorpShell::XorpShell(const string& IPCname,
       _cli_node(AF_INET, XORP_MODULE_CLI, _eventloop),
       _router_cli(NULL),
       _xorp_root_dir(xorp_root_dir),
+      _verbose(verbose),
       _got_config(false),
       _mode(MODE_INITIALIZING)
 {
     _ipc_name = IPCname;
 
+    //
+    // Print various information
+    //
+    XLOG_TRACE(_verbose, "XORP root directory        := %s\n",
+	       xorp_root_dir.c_str());
+    XLOG_TRACE(_verbose, "Templates directory        := %s\n",
+	       config_template_dir.c_str());
+    XLOG_TRACE(_verbose, "Xrl targets directory      := %s\n",
+	       xrl_targets_dir.c_str());
+    XLOG_TRACE(_verbose, "Print verbose information  := %s\n",
+	       _verbose ? "true" : "false");
+
     // Read the router config template files
     try {
-	_tt = new TemplateTree(xorp_root_dir, config_template_dir, xrl_dir);
+	_tt = new TemplateTree(xorp_root_dir, config_template_dir,
+			       xrl_targets_dir, _verbose);
     } catch (const InitError& e) {
 	xorp_throw(InitError, e.why());
     }
-#if DEBUG_STARTUP
-    _tt->display_tree();
-#endif
+
+    debug_msg("%s", _tt->tree_str().c_str());
 
     // Read the router operational template files
     try {
@@ -145,10 +165,8 @@ XorpShell::run()
 	_eventloop.run();
     }
 
-#ifdef DEBUG_STARTUP
-    printf("Registry with rtrmgr successful: token is %s\n",
-	   _authfile.c_str());
-#endif
+    XLOG_TRACE(_verbose, "Registry with rtrmgr successful: token is %s\n",
+	       _authfile.c_str());
 
     FILE* file = fopen(_authfile.c_str(), "r");
     if (file == NULL) {
@@ -167,9 +185,7 @@ XorpShell::run()
     }
     _authtoken = buf;
 
-#ifdef DEBUG_STARTUP
-    printf("authtoken = >%s<\n", _authtoken.c_str());
-#endif
+    XLOG_TRACE(_verbose, "authtoken = >%s<\n", _authtoken.c_str());
 
     _done = false;
     _rtrmgr_client.send_authenticate_client("rtrmgr", uid, _ipc_name,
@@ -184,28 +200,25 @@ XorpShell::run()
 
     request_config();
 
+    XLOG_TRACE(_verbose, "Waiting to receive configuration from rtrmgr...");
     while (_got_config == false) {
-#ifdef DEBUG_STARTUP
-	printf("+");
-	fflush(stdout);
-#endif
 	_eventloop.run();
     }
 
-#ifdef DEBUG_STARTUP
-    printf("==============================================================\n");
-    printf("%s", _configuration.c_str());
-    printf("==============================================================\n");
-#endif
+    XLOG_TRACE(_verbose,
+	       "==========================================================\n");
+    XLOG_TRACE(_verbose, "%s", _configuration.c_str());
+    XLOG_TRACE(_verbose,
+	       "==========================================================\n");
 
     try {
-	_ct = new SlaveConfigTree(_configuration, _tt, _xclient);
+	_ct = new SlaveConfigTree(_configuration, _tt, _xclient, _verbose);
 
 	_ocl->set_config_tree(_ct);
 
 	// Start up the CLI
 	_cli_node.enable();
-	_router_cli = new RouterCLI(*this, _cli_node);
+	_router_cli = new RouterCLI(*this, _cli_node, _verbose);
     } catch (const InitError& e) {
 	XLOG_ERROR("shutting down due to a parse error: %s", e.why().c_str());
 	running = false;
@@ -234,7 +247,7 @@ XorpShell::register_done(const XrlError& e, const string* file,
     if (e == XrlError::OKAY()) {
 	_authfile = *file;
 	_rtrmgr_pid = *pid;
-	printf("rtrmgr PID=%d\n", _rtrmgr_pid);
+	XLOG_TRACE(_verbose, "rtrmgr PID=%d\n", _rtrmgr_pid);
 	return;
     } else {
 	fprintf(stderr, "Failed to register with router manager process\n");
@@ -446,7 +459,7 @@ usage(const char *argv0)
     fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -h        Display this information\n");
-    fprintf(stderr, "  -d        Display defaults\n");
+    fprintf(stderr, "  -v        Print verbose information\n");
     fprintf(stderr, "  -t <dir>  Specify templates directory\n");
     fprintf(stderr, "  -x <dir>  Specify Xrl targets directory\n");
 }
@@ -455,10 +468,12 @@ static void
 display_defaults()
 {
     fprintf(stderr, "Defaults:\n");
-    fprintf(stderr, "  Templates directory   := %s\n",
+    fprintf(stderr, "  Templates directory        := %s\n",
 	    xorp_template_dir().c_str());
-    fprintf(stderr, "  Xrl targets directory := %s\n",
+    fprintf(stderr, "  Xrl targets directory      := %s\n",
 	    xorp_xrl_targets_dir().c_str());
+    fprintf(stderr, "  Print verbose information  := %s\n",
+	    default_verbose ? "true" : "false");
 }
 
 int
@@ -487,20 +502,20 @@ main(int argc, char *argv[])
     // Expand the default variables to include the XORP root path
     //
     xorp_path_init(argv[0]);
-    string template_dir = xorp_template_dir();
-    string xrl_dir	= xorp_xrl_targets_dir();
+    string template_dir		= xorp_template_dir();
+    string xrl_targets_dir	= xorp_xrl_targets_dir();
 
     int c;
-    while ((c = getopt (argc, argv, "t:x:dh")) != EOF) {
+    while ((c = getopt (argc, argv, "t:x:vh")) != EOF) {
 	switch(c) {
 	case 't':
 	    template_dir = optarg;
 	    break;
 	case 'x':
-	    xrl_dir = optarg;
+	    xrl_targets_dir = optarg;
 	    break;
-	case 'd':
-	    display_defaults();
+	case 'v':
+	    verbose = true;
 	    break;
 	case '?':
 	case 'h':
@@ -524,7 +539,8 @@ main(int argc, char *argv[])
 
     try {
 	string xname = "xorpsh" + c_format("-%d-%s", getpid(), hostname);
-	XorpShell xorpsh(xname, xorp_binary_root_dir(), template_dir, xrl_dir);
+	XorpShell xorpsh(xname, xorp_binary_root_dir(), template_dir,
+			 xrl_targets_dir, verbose);
 	xorpsh.run();
     } catch (const InitError& e) {
 	XLOG_ERROR("xorpsh exiting due to an init error: %s", e.why().c_str());

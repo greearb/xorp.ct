@@ -12,10 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.18 2004/05/18 01:06:49 pavlin Exp $"
-
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.19 2004/05/22 06:09:07 atanu Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -34,9 +31,11 @@ extern void parse_template() throw (ParseError);
 
 TemplateTree::TemplateTree(const string& xorp_root_dir,
 			   const string& config_template_dir,
-			   const string& xrl_dir) throw (InitError)
-    : _xrldb(xrl_dir),
-      _xorp_root_dir(xorp_root_dir)
+			   const string& xrl_targets_dir,
+			   bool verbose) throw (InitError)
+    : _xrldb(xrl_targets_dir, verbose),
+      _xorp_root_dir(xorp_root_dir),
+      _verbose(verbose)
 {
     string errmsg;
     list<string> files;
@@ -111,10 +110,10 @@ TemplateTree::~TemplateTree()
     delete _root_node;
 }
 
-void
-TemplateTree::display_tree()
+string
+TemplateTree::tree_str() const
 {
-    _root_node->print();
+    return _root_node->subtree_str();
 }
 
 void
@@ -348,7 +347,7 @@ TemplateTree::find_node(const list<string>& path_segments) const
 	if (matches.size() > 1) {
 	    string err = "Ambiguous value for node " + (*iter) +
 		" - I can't tell which type this is.\n";
-	    debug_msg(err.c_str());
+	    debug_msg("%s", err.c_str());
 	    return NULL;
 	}
 	ttn = matches.front();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.8 2004/05/22 21:35:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.9 2004/05/26 19:18:22 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -32,8 +32,9 @@ SlaveConfigTreeNode::SlaveConfigTreeNode(const string& nodename,
 					 const string &path, 
 					 const TemplateTreeNode *ttn,
 					 SlaveConfigTreeNode *parent,
-					 uid_t user_id)
-    : ConfigTreeNode(nodename, path, ttn, parent, user_id)
+					 uid_t user_id,
+					 bool verbose)
+    : ConfigTreeNode(nodename, path, ttn, parent, user_id, verbose)
 {
 
 }
@@ -107,18 +108,21 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 	}
     }
 
-#ifdef DEBUG
-    printf("-------\n***back at %s\n", _path.c_str());
-    printf("***templates_done.size()==%d\n", templates_done.size());
-    printf("***templates_done = ");
-    set<const TemplateTreeNode*>::const_iterator done_iter;
-    for (done_iter = templates_done.begin();
-	 done_iter != templates_done.end();
-	 ++done_iter) {
-	printf("%p ", *done_iter);
+    XLOG_TRACE(_verbose, "-------\n***back at %s\n", _path.c_str());
+    XLOG_TRACE(_verbose, "***templates_done.size()==%u\n",
+	       static_cast<uint32_t>(templates_done.size()));
+    XLOG_TRACE(_verbose, "***templates_done = ");
+    if (_verbose) {
+	string debug_output;
+	set<const TemplateTreeNode*>::const_iterator done_iter;
+	for (done_iter = templates_done.begin();
+	     done_iter != templates_done.end();
+	     ++done_iter) {
+	    debug_output += c_format("%p ", *done_iter);
+	}
+	debug_output += "\n";
+	XLOG_TRACE(_verbose, "%s", debug_output.c_str());
     }
-    printf("\n");
-#endif
 
     //
     // If we haven't already added the children of the template node,
@@ -131,33 +135,32 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 	     ++ttn_iter) {
 	    if (templates_done.find(*ttn_iter) == templates_done.end()) {
 
-#ifdef DEBUG
-		printf("***We might add TTN %s [%p] for ",
-		       (*ttn_iter)->segname().c_str(), *ttn_iter);
-		list<string>::const_iterator cmd_iter;
-		for (cmd_iter = cmd_names.begin();
-		     cmd_iter != cmd_names.end(); ++cmd_iter) {
-		    printf("%s ", cmd_iter->c_str());
+		XLOG_TRACE(_verbose, "***We might add TTN %s [%p] for ",
+			   (*ttn_iter)->segname().c_str(), *ttn_iter);
+		if (_verbose) {
+		    string debug_output;
+		    list<string>::const_iterator cmd_iter;
+		    for (cmd_iter = cmd_names.begin();
+			 cmd_iter != cmd_names.end(); ++cmd_iter) {
+			debug_output += c_format("%s ", cmd_iter->c_str());
+		    }
+		    debug_output += c_format("\n*** at path %s\n",
+					     _path.c_str());
+		    XLOG_TRACE(_verbose, "%s", debug_output.c_str());
 		}
-		printf("\n*** at path %s\n", _path.c_str());
-#endif
 
 		if ((*ttn_iter)->check_command_tree(cmd_names,
 						    include_intermediates, 
 						    /*depth*/ 0)) {
 
-#ifdef DEBUG
-		    printf("***done == true\n");
-#endif
+		    XLOG_TRACE(_verbose, "***done == true\n");
 
 		    cmd_tree.push((*ttn_iter)->segname());
 		    cmd_tree.instantiate(NULL, (*ttn_iter));
 		    cmd_tree.pop();
 		    instantiated = true;
 		} else {
-#ifdef DEBUG
-		    printf("***done == false\n");
-#endif
+		    XLOG_TRACE(_verbose, "***done == false\n");
 		}
 	    }
 	}
@@ -166,9 +169,7 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
     if (depth > 0)
 	cmd_tree.pop();
 
-#ifdef DEBUG
-    printf("leaving build_command_tree\n");
-#endif
+    XLOG_TRACE(_verbose, "leaving build_command_tree\n");
 
     return instantiated;
 }
@@ -178,17 +179,13 @@ SlaveConfigTreeNode::get_deltas(const SlaveConfigTreeNode& master_node)
 {
     int deltas = 0;
 
-#ifdef DEBUG
-    printf("get_deltas >%s<\n", _path.c_str());
-#endif
+    XLOG_TRACE(_verbose, "get_deltas >%s<\n", _path.c_str());
 
     if (!_deleted) {
 	if ((!_existence_committed || !_value_committed)
 	    && (_parent != NULL)) {
 	    deltas++;
-#ifdef DEBUG
-	    printf(">%s< CHANGED\n", _path.c_str());
-#endif
+	    XLOG_TRACE(_verbose, ">%s< CHANGED\n", _path.c_str());
 	}
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = master_node.const_children().begin();
@@ -204,14 +201,10 @@ SlaveConfigTreeNode::get_deltas(const SlaveConfigTreeNode& master_node)
 		get_deltas(*(const SlaveConfigTreeNode*)my_child);
 	}
     } else {
-#ifdef DEBUG
-	printf(">%s< was deleted\n", _path.c_str());
-#endif
+	XLOG_TRACE(_verbose, ">%s< was deleted\n", _path.c_str());
     }
     if ((deltas == 0) && (_parent != NULL)) {
-#ifdef DEBUG
-	printf("removing >%s<\n", _path.c_str());
-#endif
+	XLOG_TRACE(_verbose, "removing >%s<\n", _path.c_str());
 	_parent->remove_child(this);
 	delete this;
     }
@@ -223,9 +216,7 @@ SlaveConfigTreeNode::get_deletions(const SlaveConfigTreeNode& master_node)
 {
     int deletions = 0;
 
-#ifdef DEBUG
-    printf("get_deletions >%s<\n", _path.c_str());
-#endif
+    XLOG_TRACE(_verbose, "get_deletions >%s<\n", _path.c_str());
 
     if ((! master_node.deleted())
 	|| (_template_tree_node != NULL && is_tag())) {
@@ -244,20 +235,15 @@ SlaveConfigTreeNode::get_deletions(const SlaveConfigTreeNode& master_node)
 	}
     } else {
 	if (_existence_committed) {
-#ifdef DEBUG
-	    printf("%s deleted\n", _path.c_str());
-#endif
+	    XLOG_TRACE(_verbose, "%s deleted\n", _path.c_str());
 	    deletions = 1;
 	} else {
-#ifdef DEBUG
-	    printf("%s deleted but not committed\n", _path.c_str());
-#endif
+	    XLOG_TRACE(_verbose, "%s deleted but not committed\n",
+		       _path.c_str());
 	}
     }
     if ((deletions == 0) && (_parent != NULL)) {
-#ifdef DEBUG
-	printf("removing >%s<\n", _path.c_str());
-#endif
+	XLOG_TRACE(_verbose, "removing >%s<\n", _path.c_str());
 	_parent->remove_child(this);
 	delete this;
     }

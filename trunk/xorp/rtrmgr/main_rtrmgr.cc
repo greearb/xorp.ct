@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.46 2004/05/24 01:22:35 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.47 2004/05/28 05:00:37 hodson Exp $"
 
 #include <signal.h>
 
@@ -49,16 +49,18 @@
 // Default values
 //
 static bool default_do_exec = true;
+static bool default_verbose = false;
 
 //
 // Local state
 //
 static bool	running = false;
 static string	template_dir;
-static string	xrl_dir;
+static string	xrl_targets_dir;
 static string	boot_file;
 static string	save_hook;
 static bool	do_exec = default_do_exec;
+static bool	verbose = default_verbose;
 list<IPv4>	bind_addrs;
 uint16_t	bind_port = FINDER_DEFAULT_PORT;
 int32_t		quit_time = -1;
@@ -76,7 +78,7 @@ usage(const char* argv0)
     fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -h        Display this information\n");
-    fprintf(stderr, "  -d        Display defaults\n");
+    fprintf(stderr, "  -v        Print verbose information\n");
     fprintf(stderr, "  -b <file> Specify boot file\n");
     fprintf(stderr, "  -s <app>  Specify save config file hook\n");
     fprintf(stderr, "  -n        Do not execute XRLs\n");
@@ -91,14 +93,16 @@ static void
 display_defaults()
 {
     fprintf(stderr, "Defaults:\n");
-    fprintf(stderr, "  Execute Xrls          := %s\n",
-	    default_do_exec ? "true" : "false");
-    fprintf(stderr, "  Boot file             := %s\n",
+    fprintf(stderr, "  Boot file                  := %s\n",
 	    xorp_boot_file().c_str());
-    fprintf(stderr, "  Templates directory   := %s\n",
+    fprintf(stderr, "  Templates directory        := %s\n",
 	    xorp_template_dir().c_str());
-    fprintf(stderr, "  Xrl targets directory := %s\n",
+    fprintf(stderr, "  Xrl targets directory      := %s\n",
 	    xorp_xrl_targets_dir().c_str());
+    fprintf(stderr, "  Execute Xrls               := %s\n",
+	    default_do_exec ? "true" : "false");
+    fprintf(stderr, "  Print verbose information  := %s\n",
+	    default_verbose ? "true" : "false");
 }
 
 static bool
@@ -129,20 +133,22 @@ valid_interface(const IPv4& addr)
 }
 
 Rtrmgr::Rtrmgr(const string& template_dir, 
-	       const string& xrl_dir,
+	       const string& xrl_targets_dir,
 	       const string& boot_file,
 	       const list<IPv4>& bind_addrs,
 	       uint16_t bind_port,
 	       const string& save_hook,
 	       bool	do_exec,
+	       bool	verbose,
 	       int32_t quit_time)
     : _template_dir(template_dir),
-      _xrl_dir(xrl_dir),
+      _xrl_targets_dir(xrl_targets_dir),
       _boot_file(boot_file),
       _bind_addrs(bind_addrs),
       _bind_port(bind_port),
       _save_hook(save_hook),
       _do_exec(do_exec),
+      _verbose(verbose),
       _quit_time(quit_time),
       _ready(false),
       _mct(NULL)
@@ -179,18 +185,31 @@ Rtrmgr::run()
     }
 
     //
+    // Print various information
+    //
+    XLOG_TRACE(_verbose, "Boot file                  := %s\n",
+	       boot_file.c_str());
+    XLOG_TRACE(_verbose, "Templates directory        := %s\n",
+	       template_dir.c_str());
+    XLOG_TRACE(_verbose, "Xrl targets directory      := %s\n",
+	       xrl_targets_dir.c_str());
+    XLOG_TRACE(_verbose, "Execute Xrls               := %s\n",
+	       do_exec ? "true" : "false");
+    XLOG_TRACE(_verbose, "Print verbose information  := %s\n",
+	       _verbose ? "true" : "false");
+
+    //
     // Read the router config template files
     //
     TemplateTree* tt = NULL;
     try {
-	tt = new TemplateTree(xorp_config_root_dir(), _template_dir, _xrl_dir);
+	tt = new TemplateTree(xorp_config_root_dir(), _template_dir,
+			      _xrl_targets_dir, _verbose);
     } catch (const InitError& e) {
 	XLOG_ERROR("Shutting down due to an init error: %s", e.why().c_str());
 	return (1);
     }
-#if 1
-    tt->display_tree();
-#endif
+    debug_msg("%s", tt->tree_str().c_str());
 
     //
     // Start the finder and the rest of the rtrmgr components.
@@ -226,7 +245,7 @@ Rtrmgr::run()
     //
     // Start the module manager
     //
-    ModuleManager mmgr(eventloop, /*verbose = */false, xorp_binary_root_dir());
+    ModuleManager mmgr(eventloop, _verbose, xorp_binary_root_dir());
 
     try {
 	//
@@ -234,13 +253,15 @@ Rtrmgr::run()
 	// start the processes required, and initialize them.
 	//
 	RandomGen randgen;
-	UserDB userdb;
+	UserDB userdb(_verbose);
+
 	userdb.load_password_file();
 	XrlRtrmgrInterface xrt(xrl_router, userdb, eventloop, randgen, *this);
 
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
 
-	_mct = new MasterConfigTree(boot_file, tt, mmgr, xclient, _do_exec);
+	_mct = new MasterConfigTree(boot_file, tt, mmgr, xclient, _do_exec,
+				    _verbose);
 	//
 	// XXX: note that theoretically we may receive an XRL before
 	// we call XrlRtrmgrInterface::set_conf_tree().
@@ -325,7 +346,7 @@ Rtrmgr::validate_save_hook() {
 	    char c = _save_hook[i];
 	    if ((c == '*') || (c == '?') || (c == '[')) {
 		string err = _save_hook + ": bad filename";
-		XLOG_ERROR(err.c_str());
+		XLOG_ERROR("%s", err.c_str());
 		return XORP_ERROR;
 	    }
 	}
@@ -333,7 +354,7 @@ Rtrmgr::validate_save_hook() {
 	glob(_save_hook.c_str(), GLOB_TILDE, NULL, &pglob);
 	if (pglob.gl_pathc != 1) {
 	    string err(_save_hook + ": File does not exist.");
-	    XLOG_ERROR(err.c_str());
+	    XLOG_ERROR("%s", err.c_str());
 	    return XORP_ERROR;
 	}
 	expanded_path = pglob.gl_pathv[0];
@@ -361,7 +382,7 @@ Rtrmgr::validate_save_hook() {
 	default:
 	    err += "Unknown error accessing file.";
 	}
-	XLOG_ERROR(err.c_str());
+	XLOG_ERROR("%s", err.c_str());
 	return XORP_ERROR;
     }
     _save_hook = expanded_path;
@@ -395,12 +416,12 @@ main(int argc, char* const argv[])
     //
     xorp_path_init(argv[0]);
     template_dir	= xorp_template_dir();
-    xrl_dir		= xorp_xrl_targets_dir();
+    xrl_targets_dir	= xorp_xrl_targets_dir();
     boot_file		= xorp_boot_file();
     save_hook           = "";
 
     int c;
-    while ((c = getopt(argc, argv, "t:b:s:x:i:p:q:ndh")) != EOF) {
+    while ((c = getopt(argc, argv, "t:b:s:x:i:p:q:nvh")) != EOF) {
 	switch(c) {
 	case 't':
 	    template_dir = optarg;
@@ -412,7 +433,7 @@ main(int argc, char* const argv[])
 	    save_hook = optarg;
 	    break;
 	case 'x':
-	    xrl_dir = optarg;
+	    xrl_targets_dir = optarg;
 	    break;
 	case 'q':
 	    quit_time = atoi(optarg);
@@ -420,8 +441,8 @@ main(int argc, char* const argv[])
 	case 'n':
 	    do_exec = false;
 	    break;
-	case 'd':
-	    display_defaults();
+	case 'v':
+	    verbose = true;
 	    break;
 	case 'p':
 	    bind_port = static_cast<uint16_t>(atoi(optarg));
@@ -461,14 +482,15 @@ main(int argc, char* const argv[])
     //
     // The main procedure
     //
-    Rtrmgr rtrmgr(template_dir, xrl_dir, boot_file, bind_addrs,
-		  bind_port, save_hook, do_exec, quit_time);
+    Rtrmgr rtrmgr(template_dir, xrl_targets_dir, boot_file, bind_addrs,
+		  bind_port, save_hook, do_exec, verbose, quit_time);
     errcode = rtrmgr.run();
 
     cleanup_and_exit(errcode);
 }
 
-void cleanup_and_exit(int errcode) 
+void
+cleanup_and_exit(int errcode) 
 {
     //
     // Gracefully stop and exit xlog

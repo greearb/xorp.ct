@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.10 2004/01/13 00:40:07 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.11 2004/03/11 22:31:44 mjh Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -33,7 +33,7 @@ class ConfTemplate;
 
 class ConfigTree {
 public:
-    ConfigTree(TemplateTree *tt);
+    ConfigTree(TemplateTree *tt, bool verbose);
     ~ConfigTree();
 
     ConfigTree& operator=(const ConfigTree& orig_tree);
@@ -54,7 +54,7 @@ public:
     string show_subtree(const list<string>& path_segments) const;
     string show_tree() const;
     string show_unannotated_tree() const;
-    void print() const;
+    string tree_str() const;
 
     bool apply_deltas(uid_t user_id, const string& deltas, 
 		      bool provisional_change, string& response);
@@ -79,6 +79,7 @@ protected:
     ConfigTreeNode*	_current_node;
     list<string>	_path_segments;
     list<size_t>	_segment_lengths;
+    bool		_verbose;
 };
 
 #endif // __RTRMGR_CONF_TREE_HH__

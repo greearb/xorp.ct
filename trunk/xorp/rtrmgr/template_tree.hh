@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.11 2004/01/13 01:15:09 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.12 2004/03/11 22:31:45 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -38,7 +38,8 @@ class TemplateTree {
 public:
     TemplateTree(const string& xorp_root_dir,
 		 const string& config_template_dir,
-		 const string& xrl_dir)  throw (InitError);
+		 const string& xrl_targets_dir,
+		 bool verbose)  throw (InitError);
     ~TemplateTree();
 
     void extend_path(const string& segment, bool is_tag);
@@ -50,13 +51,14 @@ public:
     string path_as_string();
     void add_cmd(char* cmd);
     void add_cmd_action(const string& cmd, const list<string>& action);
-    void display_tree();
+    string tree_str() const;
     void register_module(const string& name, ModuleCommand* mc);
     ModuleCommand* find_module(const string& name);
     bool check_variable_name(const string& s) const;
     const XRLdb& xrldb() const { return _xrldb; }
     TemplateTreeNode* root_node() const { return _root_node; }
     const string& xorp_root_dir() const { return _xorp_root_dir; }
+    bool verbose() const { return _verbose; }
 
 private:
     TemplateTreeNode* new_node(TemplateTreeNode* parent,
@@ -72,6 +74,7 @@ private:
     list<size_t>	_segment_lengths;
     XRLdb		_xrldb;
     string		_xorp_root_dir;	// The root of the XORP tree
+    bool		_verbose;	// Set to true if output is verbose
 };
 
 #endif // __RTRMGR_TEMPLATE_TREE_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.5 2003/05/29 21:17:17 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.6 2003/12/02 09:39:01 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_XORPSH_INTERFACE_HH__
 #define __RTRMGR_XRL_XORPSH_INTERFACE_HH__
@@ -62,8 +62,9 @@ public:
 	const string&	deletions);
 
 private:
-    XorpShell& _xorpsh;
+    XorpShell&	_xorpsh;
 
+    bool	_verbose;		// Set to true if output is verbose
 };
 
 #endif // __RTRMGR_XRL_XORPSH_INTERFACE_HH__

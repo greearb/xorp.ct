@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.18 2004/05/10 14:41:10 mjh Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.19 2004/05/11 16:50:57 mjh Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -38,7 +38,7 @@ class MasterConfigTree : public ConfigTree {
 public:
     MasterConfigTree(const string& config_file, TemplateTree* tt,
 		     ModuleManager& mmgr, XorpClient& xclient,
-		     bool global_do_exec) throw (InitError);
+		     bool global_do_exec, bool verbose) throw (InitError);
 
     bool read_file(string& configuration, const string& config_file,
 		   string& errmsg);
@@ -80,6 +80,7 @@ private:
     bool module_shutdown(const string& module_name, string& errmsg);
 
     bool do_exec() const { return _task_manager.do_exec(); }
+    bool verbose() const { return _task_manager.verbose(); }
 
     ModuleManager& module_manager() const {
 	return _task_manager.module_manager();

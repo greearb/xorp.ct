@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.23 2004/05/11 16:50:58 mjh Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.24 2004/05/18 00:05:13 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -36,19 +36,21 @@ class Validation {
 public:
     typedef XorpCallback1<void, bool>::RefPtr CallBack;
 
-    Validation(const string& module_name) : _module_name(module_name) {};
+    Validation(const string& module_name, bool verbose)
+	: _module_name(module_name), _verbose(verbose) {};
     virtual ~Validation() {};
 
     virtual void validate(CallBack cb) = 0;
 
 protected:
     const string _module_name;
+    bool	_verbose;	 // Set to true if output is verbose
 };
 
 class DelayValidation : public Validation {
 public:
     DelayValidation(const string& module_name, EventLoop& eventloop,
-		    uint32_t ms);
+		    uint32_t ms, bool verbose);
 
     void validate(CallBack cb);
 
@@ -127,13 +129,14 @@ private:
 class Startup {
 public:
     typedef XorpCallback1<void, bool>::RefPtr CallBack;
-    Startup(const string& module_name);
+    Startup(const string& module_name, bool verbose);
     virtual ~Startup() {}
 
     virtual void startup(CallBack cb) = 0;
 
 protected:
     const string _module_name;
+    bool	_verbose;	 // Set to true if output is verbose
 };
 
 class XrlStartup : public Startup {
@@ -158,13 +161,14 @@ private:
 class Shutdown {
 public:
     typedef XorpCallback1<void, bool>::RefPtr CallBack;
-    Shutdown(const string& module_name);
+    Shutdown(const string& module_name, bool verbose);
     virtual ~Shutdown() {}
 
     virtual void shutdown(CallBack cb) = 0;
 
 protected:
     const string _module_name;
+    bool	_verbose;	 // Set to true if output is verbose
 };
 
 class XrlShutdown : public Shutdown {
@@ -203,6 +207,7 @@ private:
     Task&		_task;
     XorpTimer		_resend_timer;
     uint32_t		_resend_counter;
+    bool		_verbose;	 // Set to true if output is verbose
 };
 
 class Task {
@@ -227,6 +232,8 @@ public:
 
     const string& name() const { return _name; }
     EventLoop& eventloop() const;
+
+    bool verbose() const { return _verbose; }
 
 protected:
     void step1_start();
@@ -279,6 +286,7 @@ private:
     bool	_config_done;	// True if we changed the module's config
     CallBack	_task_complete_cb; // The task completion callback
     XorpTimer	_wait_timer;
+    bool	_verbose;	 // Set to true if output is verbose
 };
 
 class TaskManager {
@@ -286,7 +294,8 @@ class TaskManager {
 
 public:
     TaskManager::TaskManager(ConfigTree& config_tree, ModuleManager& mmgr,
-			     XorpClient& xclient, bool global_do_exec);
+			     XorpClient& xclient, bool global_do_exec,
+			     bool verbose);
     ~TaskManager();
 
     void set_do_exec(bool do_exec);
@@ -300,6 +309,7 @@ public:
     ModuleManager& module_manager() const { return _module_manager; }
     ConfigTree& config_tree() const { return _config_tree; }
     bool do_exec() const { return _current_do_exec; }
+    bool verbose() const { return _verbose; }
     EventLoop& eventloop() const;
 
     /**
@@ -342,7 +352,8 @@ private:
     bool		_global_do_exec; // Set to false if we're never going
 					// to execute anything because we're
 					// in a debug mode
-    bool _current_do_exec;
+    bool		_current_do_exec;
+    bool		_verbose;	// Set to true if output is verbose
 
     // _tasks provides fast access to a Task by name
     map<string, Task*> _tasks;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.34 2004/05/11 16:50:58 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.35 2004/05/18 00:05:12 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
@@ -25,14 +25,15 @@
 
 #define MAX_STATUS_RETRIES 30
 
-// #define DEBUG_TASKS
 
 
 // ----------------------------------------------------------------------------
 // DelayValidation implementation
 DelayValidation::DelayValidation(const string& module_name,
-				 EventLoop& eventloop, uint32_t ms)
-    : Validation(module_name),
+				 EventLoop& eventloop,
+				 uint32_t ms,
+				 bool verbose)
+    : Validation(module_name, verbose),
       _eventloop(eventloop),
       _delay_in_ms(ms)
 {
@@ -59,7 +60,7 @@ DelayValidation::timer_expired()
 XrlStatusValidation::XrlStatusValidation(const string& module_name,
 					 const XrlAction& xrl_action,
 					 TaskManager& taskmgr)
-    : Validation(module_name),
+    : Validation(module_name, taskmgr.verbose()),
       _xrl_action(xrl_action),
       _task_manager(taskmgr),
       _retries(0)
@@ -75,9 +76,8 @@ XrlStatusValidation::eventloop()
 void
 XrlStatusValidation::validate(CallBack cb)
 {
-#ifdef DEBUG_TASKS
-    printf("validate\n");
-#endif
+    debug_msg("validate\n");
+
     _cb = cb;
     if (_task_manager.do_exec()) {
 	string xrl_request, errmsg;
@@ -124,9 +124,9 @@ XrlStatusValidation::validate(CallBack cb)
 		       xrl_request.c_str(), _module_name.c_str());
 	}
 
-#ifdef DEBUG_TASKS
-	printf("XRL: >%s<\n", xrl->str().c_str());
-#endif
+	XLOG_TRACE(_verbose, "Validating with XRL: >%s<\n",
+		   xrl->str().c_str());
+
 	string response = _xrl_action.xrl_return_spec();
 	_task_manager.xorp_client().send_now(*xrl,
 			callback(this, &XrlStatusValidation::xrl_done),
@@ -410,8 +410,8 @@ StatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 // ----------------------------------------------------------------------------
 // Startup implementation
 
-Startup::Startup(const string& module_name)
-    : _module_name(module_name)
+Startup::Startup(const string& module_name, bool verbose)
+    : _module_name(module_name, verbose)
 {
 }
 
@@ -422,7 +422,7 @@ Startup::Startup(const string& module_name)
 XrlStartup::XrlStartup(const string& module_name,
 		       const XrlAction& xrl_action,
 		       TaskManager& taskmgr)
-    : Startup(module_name),
+    : Startup(module_name, taskmgr.verbose()),
       _xrl_action(xrl_action),
       _task_manager(taskmgr)
 {
@@ -483,9 +483,8 @@ XrlStartup::startup(CallBack cb)
 		       xrl_request.c_str(), _module_name.c_str());
 	}
 
-#ifdef DEBUG_TASKS
-	printf("XRL: >%s<\n", xrl->str().c_str());
-#endif
+	XLOG_TRACE(_verbose, "Startup with XRL: >%s<\n", xrl->str().c_str());
+
 	string response = _xrl_action.xrl_return_spec();
 	_task_manager.xorp_client().send_now(*xrl,
 				callback(this, &XrlStartup::startup_done),
@@ -498,9 +497,8 @@ XrlStartup::startup(CallBack cb)
 	// that the xrl_done response gets the right arguments even
 	// though we're not going to call the XRL.
 	//
-#ifdef DEBUG_TASKS
-	printf("XRL: dummy call to %s\n", _xrl_action.request().c_str());
-#endif
+	XLOG_TRACE(_verbose, "XRL: dummy call to %s\n",
+		   _xrl_action.request().c_str());
 	_dummy_timer = eventloop().new_oneoff_after_ms(1000,
 			callback(this, &XrlStartup::dummy_response));
     }
@@ -533,8 +531,9 @@ XrlStartup::startup_done(const XrlError& err, XrlArgs* xrl_args)
 // ----------------------------------------------------------------------------
 // Shutdown implementation
 
-Shutdown::Shutdown(const string& module_name)
-    : _module_name(module_name)
+Shutdown::Shutdown(const string& module_name, bool verbose)
+    : _module_name(module_name),
+      _verbose(verbose)
 {
 }
 
@@ -545,7 +544,7 @@ Shutdown::Shutdown(const string& module_name)
 XrlShutdown::XrlShutdown(const string& module_name,
 			 const XrlAction& xrl_action,
 			 TaskManager& taskmgr)
-    : Shutdown(module_name),
+    : Shutdown(module_name, taskmgr.verbose()),
       _xrl_action(xrl_action),
       _task_manager(taskmgr)
 {
@@ -560,6 +559,8 @@ XrlShutdown::eventloop() const
 void
 XrlShutdown::shutdown(CallBack cb)
 {
+    XLOG_INFO("Shutting down module: %s\n", _module_name.c_str());
+
     _cb = cb;
     if (_task_manager.do_exec()) {
 	string xrl_request, errmsg;
@@ -606,9 +607,8 @@ XrlShutdown::shutdown(CallBack cb)
 		       xrl_request.c_str(), _module_name.c_str());
 	}
 
-#ifdef DEBUG_TASKS
-	printf("XRL: >%s<\n", xrl->str().c_str());
-#endif
+	XLOG_TRACE(_verbose, "Shutdown with XRL: >%s<\n", xrl->str().c_str());
+
 	string response = _xrl_action.xrl_return_spec();
 	_task_manager.xorp_client().send_now(*xrl,
 				callback(this, &XrlShutdown::shutdown_done),
@@ -621,9 +621,8 @@ XrlShutdown::shutdown(CallBack cb)
 	// that the xrl_done response gets the right arguments even
 	// though we're not going to call the XRL.
 	//
-#ifdef DEBUG_TASKS
-	printf("XRL: dummy call to %s\n", _xrl_action.request().c_str());
-#endif
+	XLOG_TRACE(_verbose, "XRL: dummy call to %s\n",
+		   _xrl_action.request().c_str());
 	_dummy_timer = eventloop().new_oneoff_after_ms(1000,
 			callback(this, &XrlShutdown::dummy_response));
     }
@@ -663,7 +662,8 @@ TaskXrlItem::TaskXrlItem(const UnexpandedXrl& uxrl,
     : _unexpanded_xrl(uxrl),
       _xrl_callback(cb),
       _task(task),
-      _resend_counter(0)
+      _resend_counter(0),
+      _verbose(task.verbose())
 {
 }
 
@@ -671,17 +671,15 @@ TaskXrlItem::TaskXrlItem(const TaskXrlItem& them)
     : _unexpanded_xrl(them._unexpanded_xrl),
       _xrl_callback(them._xrl_callback),
       _task(them._task),
-      _resend_counter(0)
+      _resend_counter(0),
+      _verbose(them._verbose)
 {
 }
 
 bool
 TaskXrlItem::execute(string& errmsg)
 {
-#ifdef DEBUG_TASKS
-    printf("TaskXrlItem::execute\n");
-    printf("  %s\n", _unexpanded_xrl.str().c_str());
-#endif
+    XLOG_TRACE(_verbose, "Expanding %s\n", _unexpanded_xrl.str().c_str());
 
     Xrl* xrl = _unexpanded_xrl.expand(errmsg);
     if (xrl == NULL) {
@@ -689,9 +687,7 @@ TaskXrlItem::execute(string& errmsg)
 			  _unexpanded_xrl.str().c_str(), errmsg.c_str());
 	return false;
     }
-#ifdef DEBUG_TASKS
-    printf("  XRL: >%s<\n", xrl->str().c_str());
-#endif
+    XLOG_TRACE(_verbose, "Executing XRL: >%s<\n", xrl->str().c_str());
 
     string xrl_return_spec = _unexpanded_xrl.return_spec();
 
@@ -711,9 +707,7 @@ TaskXrlItem::unschedule()
 {
     XrlArgs xrl_args;	    // Empty XRL args should be OK here.
 
-#ifdef DEBUG_TASKS
-    printf("TaskXrlItem::unschedule()\n");
-#endif
+    debug_msg("TaskXrlItem::unschedule()\n");
 
     // We need to dispatch the callbacks, or the accounting of which
     // actions were taken will be incorrect.
@@ -745,9 +739,7 @@ TaskXrlItem::execute_done(const XrlError& err, XrlArgs* xrl_args)
 {
     bool fatal = false;
 
-#ifdef DEBUG_TASKS
-    printf("TaskXrlItem::execute_done\n");
-#endif
+    debug_msg("TaskXrlItem::execute_done\n");
 
     if (err != XrlError::OKAY()) {
 	// XXX: handle XRL errors here
@@ -758,7 +750,7 @@ TaskXrlItem::execute_done(const XrlError& err, XrlArgs* xrl_args)
 	    // The error was a fatal one for the target - we now
 	    // consider the target to be fatally wounded.
 	    //
-	    XLOG_ERROR(err.str().c_str());
+	    XLOG_ERROR("%s", err.str().c_str());
 	    fatal = true;
 	} else if ((err == XrlError::COMMAND_FAILED())
 		   || (err == XrlError::BAD_ARGS())) {
@@ -788,7 +780,7 @@ TaskXrlItem::execute_done(const XrlError& err, XrlArgs* xrl_args)
 		// Give up.
 		// The error was a fatal one for the target - we now
 		// consider the target to be fatally wounded.
-		XLOG_ERROR(err.str().c_str());
+		XLOG_ERROR("%s", err.str().c_str());
 		fatal = true;
 	    } else {
 		// Re-send the Xrl after a short delay.
@@ -805,7 +797,7 @@ TaskXrlItem::execute_done(const XrlError& err, XrlArgs* xrl_args)
 	    // prove to be so.  XXX revisit this issue when we've more
 	    // experience with XRL errors.
 	    //
-	    XLOG_ERROR(err.str().c_str());
+	    XLOG_ERROR("%s", err.str().c_str());
 	    fatal = false;
 	} else {
 	    // We intended to explicitly handle all errors above, so if
@@ -841,7 +833,8 @@ Task::Task(const string& name, TaskManager& taskmgr)
       _shutdown_validation(NULL),
       _startup_method(NULL),
       _shutdown_method(NULL),
-      _config_done(false)
+      _config_done(false),
+      _verbose(taskmgr.verbose())
 {
 }
 
@@ -910,9 +903,7 @@ Task::set_ready_validation(Validation* validation)
 void
 Task::run(CallBack cb)
 {
-#ifdef DEBUG_TASKS
-    printf("Task::run %s\n", _module_name.c_str());
-#endif
+    debug_msg("Task::run %s\n", _module_name.c_str());
 
     _task_complete_cb = cb;
     step1_start();
@@ -921,9 +912,7 @@ Task::run(CallBack cb)
 void
 Task::step1_start()
 {
-#ifdef DEBUG_TASKS
-    printf("step1 (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step1 (%s)\n", _module_name.c_str());
 
     if (_start_module) {
 	_taskmgr.module_manager().start_module(_module_name, do_exec(),
@@ -936,9 +925,7 @@ Task::step1_start()
 void
 Task::step1_done(bool success)
 {
-#ifdef DEBUG_TASKS
-    printf("step1_done (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step1_done (%s)\n", _module_name.c_str());
 
     if (success)
 	step2_wait();
@@ -949,9 +936,7 @@ Task::step1_done(bool success)
 void
 Task::step2_wait()
 {
-#ifdef DEBUG_TASKS
-    printf("step2 (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step2 (%s)\n", _module_name.c_str());
 
     if (_start_module && (_startup_validation != NULL)) {
 	_startup_validation->validate(callback(this, &Task::step2_done));
@@ -963,9 +948,7 @@ Task::step2_wait()
 void
 Task::step2_done(bool success)
 {
-#ifdef DEBUG_TASKS
-    printf("step2_done (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step2_done (%s)\n", _module_name.c_str());
 
     if (success)
 	step2_2_wait();
@@ -976,9 +959,7 @@ Task::step2_done(bool success)
 void
 Task::step2_2_wait()
 {
-#ifdef DEBUG_TASKS
-    printf("step2_2 (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step2_2 (%s)\n", _module_name.c_str());
 
     if (_start_module && (_startup_method != NULL)) {
 	_startup_method->startup(callback(this, &Task::step2_2_done));
@@ -990,9 +971,7 @@ Task::step2_2_wait()
 void
 Task::step2_2_done(bool success)
 {
-#ifdef DEBUG_TASKS
-    printf("step2_2_done (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step2_2_done (%s)\n", _module_name.c_str());
 
     if (success)
 	step2_3_wait();
@@ -1003,9 +982,7 @@ Task::step2_2_done(bool success)
 void
 Task::step2_3_wait()
 {
-#ifdef DEBUG_TASKS
-    printf("step2_3 (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step2_3 (%s)\n", _module_name.c_str());
 
     if (_start_module && (_config_validation != NULL)) {
 	_config_validation->validate(callback(this, &Task::step2_3_done));
@@ -1017,9 +994,7 @@ Task::step2_3_wait()
 void
 Task::step2_3_done(bool success)
 {
-#ifdef DEBUG_TASKS
-    printf("step2_3_done (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step2_3_done (%s)\n", _module_name.c_str());
 
     if (success)
 	step3_config();
@@ -1031,9 +1006,7 @@ Task::step2_3_done(bool success)
 void
 Task::step3_config()
 {
-#ifdef DEBUG_TASKS
-    printf("step3 (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step3 (%s)\n", _module_name.c_str());
 
     if (_xrls.empty()) {
 	step4_wait();
@@ -1052,9 +1025,8 @@ Task::step3_config()
 	    step5_stop();
 	} else {
 	    string errmsg;
-#ifdef DEBUG_TASKS
-	    printf("step3: execute\n");
-#endif
+	    debug_msg("step3: execute\n");
+
 	    if (_xrls.front().execute(errmsg) == false) {
 		XLOG_WARNING("Failed to execute XRL: %s", errmsg.c_str());
 		task_fail(errmsg, false);
@@ -1067,9 +1039,7 @@ Task::step3_config()
 void
 Task::xrl_done(bool success, bool fatal, string errmsg)
 {
-#ifdef DEBUG_TASKS
-    printf("xrl_done (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("xrl_done (%s)\n", _module_name.c_str());
 
     if (success) {
 	_xrls.pop_front();
@@ -1083,9 +1053,7 @@ Task::xrl_done(bool success, bool fatal, string errmsg)
 void
 Task::step4_wait()
 {
-#ifdef DEBUG_TASKS
-    printf("step4 (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step4 (%s)\n", _module_name.c_str());
 
     if (_ready_validation && _config_done) {
 	_ready_validation->validate(callback(this, &Task::step4_done));
@@ -1108,9 +1076,7 @@ Task::step4_done(bool success)
 void
 Task::step5_stop()
 {
-#ifdef DEBUG_TASKS
-    printf("step5 (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step5 (%s)\n", _module_name.c_str());
 
     if (_stop_module) {
 	if (_shutdown_method != NULL) {
@@ -1126,9 +1092,7 @@ Task::step5_stop()
 void
 Task::step5_done(bool success)
 {
-#ifdef DEBUG_TASKS
-    printf("step5_done (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step5_done (%s)\n", _module_name.c_str());
 
     if (success) {
 	step6_wait();
@@ -1142,9 +1106,7 @@ Task::step5_done(bool success)
 void
 Task::step6_wait()
 {
-#ifdef DEBUG_TASKS
-    printf("step6 (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step6 (%s)\n", _module_name.c_str());
 
     if (_stop_module && (_shutdown_validation != NULL)) {
 	_shutdown_validation->validate(callback(this, &Task::step6_done));
@@ -1156,15 +1118,13 @@ Task::step6_wait()
 void
 Task::step6_done(bool success)
 {
-#ifdef DEBUG_TASKS
-    printf("step6_done (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step6_done (%s)\n", _module_name.c_str());
 
     if (success) {
 	step7_wait();
     } else {
 	string msg = "Can't validate stop of process " + _module_name;
-	XLOG_WARNING(msg.c_str());
+	XLOG_WARNING("%s", msg.c_str());
 	// An error here isn't fatal - module manager will simply kill
 	// the process less subtly.
 	step7_kill();
@@ -1188,9 +1148,7 @@ Task::step7_kill()
 void
 Task::step8_report()
 {
-#ifdef DEBUG_TASKS
-    printf("step8 (%s)\n", _module_name.c_str());
-#endif
+    debug_msg("step8 (%s)\n", _module_name.c_str());
 
     debug_msg("Task done\n");
 
@@ -1200,7 +1158,7 @@ Task::step8_report()
 void
 Task::task_fail(string errmsg, bool fatal)
 {
-    debug_msg((errmsg + "\n").c_str());
+    debug_msg("%s\n", errmsg.c_str());
 
     if (fatal) {
 	XLOG_ERROR("Shutting down fatally wounded process %s",
@@ -1233,11 +1191,13 @@ Task::eventloop() const
 // TaskManager implementation
 
 TaskManager::TaskManager(ConfigTree& config_tree, ModuleManager& mmgr,
-			 XorpClient& xclient, bool global_do_exec)
+			 XorpClient& xclient, bool global_do_exec,
+			 bool verbose)
     : _config_tree(config_tree),
       _module_manager(mmgr),
       _xorp_client(xclient),
-      _global_do_exec(global_do_exec)
+      _global_do_exec(global_do_exec),
+      _verbose(verbose)
 {
 }
 
@@ -1313,9 +1273,8 @@ TaskManager::add_xrl(const string& module_name, const UnexpandedXrl& xrl,
 void
 TaskManager::shutdown_module(const string& module_name)
 {
-#ifdef DEBUG_TASKS
-    printf("shutdown_module: %s\n", module_name.c_str());
-#endif
+    debug_msg("shutdown_module: %s\n", module_name.c_str());
+
     Task& t(find_task(module_name));
 
     map<string, const ModuleCommand*>::iterator iter;
@@ -1330,25 +1289,30 @@ TaskManager::shutdown_module(const string& module_name)
 void
 TaskManager::run(CallBack cb)
 {
-#ifdef DEBUG_TASKS
-    printf("TaskManager::run, tasks (old order): ");
+    debug_msg("TaskManager::run, tasks (old order): ");
 
-    list<Task*>::const_iterator iter;
-    for (iter = _tasklist.begin(); iter != _tasklist.end(); ++iter) {
-	printf("%s ", (*iter)->name().c_str());
+    if (_verbose) {
+	string debug_output;
+	list<Task*>::const_iterator iter;
+	for (iter = _tasklist.begin(); iter != _tasklist.end(); ++iter) {
+	    debug_output += c_format("%s ", (*iter)->name().c_str());
+	}
+	debug_output += "\n";
+	debug_msg("%s", debug_output.c_str());
     }
-    printf("\n");
-#endif
 
     reorder_tasks();
 
-#ifdef DEBUG_TASKS
-    printf("TaskManager::run, tasks: ");
-    for (iter = _tasklist.begin(); iter != _tasklist.end(); ++iter) {
-	printf("%s ", (*iter)->name().c_str());
+    debug_msg("TaskManager::run, tasks: ");
+    if (_verbose) {
+	string debug_output;
+	list<Task*>::const_iterator iter;
+	for (iter = _tasklist.begin(); iter != _tasklist.end(); ++iter) {
+	    debug_output += c_format("%s ", (*iter)->name().c_str());
+	}
+	debug_output += "\n";
+	debug_msg("%s", debug_output.c_str());
     }
-    printf("\n");
-#endif
 
     _completion_cb = cb;
     run_task();
@@ -1388,14 +1352,10 @@ TaskManager::reorder_tasks()
 void
 TaskManager::run_task()
 {
-#ifdef DEBUG_TASKS
-    printf("TaskManager::run_task()\n");
-#endif
+    debug_msg("TaskManager::run_task()\n");
 
     if (_tasklist.empty()) {
-#ifdef DEBUG_TASKS
-	printf("No more tasks to run\n");
-#endif
+	XLOG_INFO("No more tasks to run\n");
 	_completion_cb->dispatch(true, "");
 	return;
     }
@@ -1405,14 +1365,10 @@ TaskManager::run_task()
 void
 TaskManager::task_done(bool success, string errmsg)
 {
-#ifdef DEBUG_TASKS
-    printf("TaskManager::task_done\n");
-#endif
+    debug_msg("TaskManager::task_done\n");
 
     if (!success) {
-#ifdef DEBUG_TASKS
-	printf("task failed\n");
-#endif
+	debug_msg("task failed\n");
 	_completion_cb->dispatch(false, errmsg);
 	reset();
 	return;
@@ -1424,7 +1380,7 @@ TaskManager::task_done(bool success, string errmsg)
 void
 TaskManager::fail_tasklist_initialization(const string& errmsg)
 {
-    XLOG_ERROR(errmsg.c_str());
+    XLOG_ERROR("%s", errmsg.c_str());
     reset();
     return;
 }

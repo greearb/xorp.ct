@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrldb.hh,v 1.4 2003/12/02 09:39:01 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrldb.hh,v 1.5 2004/01/14 03:00:36 pavlin Exp $
 
 #ifndef __RTRMGR_XRLDB_HH__
 #define __RTRMGR_XRLDB_HH__
@@ -33,35 +33,39 @@ enum XRLMatchType {
 
 class XrlSpec {
 public:
-    XrlSpec(const Xrl& xrl, const XrlArgs& rspec);
+    XrlSpec(const Xrl& xrl, const XrlArgs& rspec, bool verbose);
     XRLMatchType matches(const Xrl& xrl, const XrlArgs& rspec) const;
     string str() const;
 
 private:
     Xrl		_xrl;		// The XRL itself
     XrlArgs	_rspec;		// The return spec
+    bool	_verbose;	// Set to true if output is verbose
 };
 
 class XRLtarget {
 public:
-    XRLtarget(const string& xrlfilename);
+    XRLtarget(const string& xrlfilename, bool verbose);
+
     XRLMatchType xrl_matches(const Xrl& test_xrl, const XrlArgs& rspec) const;
     string str() const;
 
 private:
     string	_targetname;
     list<XrlSpec> _xrlspecs;
+    bool	_verbose;	// Set to true if output is verbose
 };
 
 class XRLdb {
 public:
-    XRLdb(const string& xrldir) throw (InitError);
+    XRLdb(const string& xrldir, bool verbose) throw (InitError);
     bool check_xrl_syntax(const string& xrl) const;
     XRLMatchType check_xrl_exists(const string& xrl) const;
     string str() const;
 
 private:
     list<XRLtarget> _targets;
+    bool	_verbose;	// Set to true if output is verbose
 };
 
 #endif // __RTRMGR_XRLDB_HH__

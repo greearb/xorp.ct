@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.10 2004/01/13 01:17:32 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.11 2004/03/09 05:51:52 mjh Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -38,7 +38,8 @@ public:
     XorpShell(const string& IPCname, 
 	      const string& xorp_root_dir,
 	      const string& config_template_dir, 
-	      const string& xrl_dir) throw (InitError);
+	      const string& xrl_targets_dir,
+	      bool verbose) throw (InitError);
     ~XorpShell();
 
     void run();
@@ -101,6 +102,7 @@ public:
     OpCommandList* op_cmd_list()	{ return _ocl; }
     XorpClient& xorp_client()		{ return _xclient; }
     const string& xorp_root_dir() const	{ return _xorp_root_dir; }
+    bool verbose() const		{ return _verbose; }
     uint32_t rtrmgr_pid() const		{ return _rtrmgr_pid; }
 
 private:
@@ -115,7 +117,8 @@ private:
     OpCommandList*	_ocl;
     CliNode		_cli_node;
     RouterCLI*		_router_cli;
-    string		_xorp_root_dir;		// The root of the XORP tree
+    string		_xorp_root_dir;	// The root of the XORP tree
+    bool		_verbose;	// Set to true if output is verbose
     string		_ipc_name;
     string		_authfile;
     string		_authtoken;

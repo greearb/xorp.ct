@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.15 2004/05/18 00:05:12 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.16 2004/05/18 07:11:09 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -71,6 +71,7 @@ private:
     Action*		_startup_method;
     Action*		_shutdown_method;
     bool		_execute_done;
+    bool		_verbose;	// Set to true if output is verbose
 };
 
 #endif // __RTRMGR_MODULE_COMMAND_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.8 2004/01/13 01:18:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.9 2004/01/14 03:00:35 pavlin Exp $"
 
 #include <signal.h>
 
@@ -39,23 +39,23 @@ static const char* c_srcdir = getenv("srcdir");
 static const string srcdir = c_srcdir ? c_srcdir : ".";
 static const string default_xorp_root_dir = srcdir + "/..";
 static const string default_config_template_dir = srcdir + "/../etc/templates";
-static const string default_xrl_dir = srcdir + "/../xrl/targets";
+static const string default_xrl_targets_dir = srcdir + "/../xrl/targets";
 
 void
 usage(const char* name)
 {
     fprintf(stderr,
-	"usage: %s [-t cfg_dir] [-x xrl_dir]\n",
+	"usage: %s [-t cfg_dir] [-x xrl_targets_dir]\n",
 	    name);
     fprintf(stderr, "options:\n");
 
     fprintf(stderr, 
-	    "\t-t cfg_dir	specify config directory	[ %s ]\n",
+	    "\t-t cfg_dir		specify config directory	[ %s ]\n",
 	    default_config_template_dir.c_str());
 
     fprintf(stderr, 
-	    "\t-x xrl_dir	specify xrl directory		[ %s ]\n",
-	    default_xrl_dir.c_str());
+	    "\t-x xrl_targets_dir	specify xrl directory		[ %s ]\n",
+	    default_xrl_targets_dir.c_str());
 
     exit(1);
 }
@@ -74,7 +74,7 @@ main(int argc, char* const argv[])
     xlog_start();
 
     string config_template_dir = default_config_template_dir;
-    string xrl_dir = default_xrl_dir;
+    string xrl_targets_dir = default_xrl_targets_dir;
 
     int c;
 
@@ -84,7 +84,7 @@ main(int argc, char* const argv[])
 	    config_template_dir = optarg;
 	    break;
 	case 'x':
-	    xrl_dir = optarg;
+	    xrl_targets_dir = optarg;
 	    break;
 	case '?':
 	default:
@@ -96,7 +96,7 @@ main(int argc, char* const argv[])
     TemplateTree *tt = NULL;
     try {
 	tt = new TemplateTree(default_xorp_root_dir, config_template_dir,
-			      xrl_dir);
+			      xrl_targets_dir, true /* verbose */);
     } catch (const InitError& e) {
 	fprintf(stderr, "test_templates: template tree init error: %s\n",
 		e.why().c_str());
@@ -109,7 +109,8 @@ main(int argc, char* const argv[])
 	exit(1);
     }
 
-    tt->display_tree();
+    XLOG_INFO("%s", tt->tree_str().c_str());
+
     delete tt;
 
     return (0);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.18 2003/12/13 00:16:39 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.19 2004/05/11 16:50:57 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -80,15 +80,15 @@ private:
     string	_name;
     string	_path;		// relative path
     string	_expath;	// absolute path
-    vector <string> _argv;        // command line arguments
-    uid_t       _userid;        /* userid to execute process as, zero
-				   for current user */
+    vector<string> _argv;	// command line arguments
+    uid_t       _userid;        // userid to execute process as, zero
+				// for current user
     pid_t	_pid;
     ModuleStatus _status;
-    bool	_do_exec;	// false indicates we're running in debug mode,
-				// so shouldn't actually start any processes
+    bool	_do_exec;	// false indicates we're running in test mode,
+				// when we may not actually start any processes
 
-    bool	_verbose;	// verbose output of important events
+    bool	_verbose;	// Set to true if output is verbose
     XorpTimer	_shutdown_timer;
 };
 
@@ -138,7 +138,7 @@ private:
 
     map<string, Module *> _modules;
     EventLoop&	_eventloop;
-    bool	_verbose;	// verbose output of important events
+    bool	_verbose;	// Set to true if output is verbose
     string	_xorp_root_dir;	// The root of the XORP tree
 };
 

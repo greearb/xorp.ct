@@ -14,15 +14,20 @@
 
 #ident "$XORP: xorp/rtrmgr/xrl_xorpsh_interface.cc,v 1.11 2004/01/15 08:51:59 pavlin Exp $"
 
-// #define DEBUG_CONFIG_CHANGE
+#include "rtrmgr_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/status_codes.h"
+
 #include "libxipc/xrl_router.hh"
+
 #include "xrl_xorpsh_interface.hh"
 #include "xorpsh_main.hh"
 
 XrlXorpshInterface::XrlXorpshInterface(XrlRouter* r, XorpShell& xorpsh)
     : XrlXorpshTargetBase(r),
-      _xorpsh(xorpsh)
+      _xorpsh(xorpsh),
+      _verbose(xorpsh.verbose())
 {
 }
 
@@ -73,13 +78,11 @@ XrlXorpshInterface::rtrmgr_client_0_1_config_change_done(// Input values,
 							 const bool& success, 
 							 const string& errmsg)
 {
-#ifdef DEBUG_CONFIG_CHANGE
-    printf("received cfg change done\n");
+    XLOG_TRACE(_verbose, "received cfg change done\n");
     if (success)
-	printf("success\n");
+	XLOG_TRACE(_verbose, "success\n");
     else
-	printf("%s\n", errmsg.c_str());
-#endif
+	XLOG_TRACE(_verbose, "%s\n", errmsg.c_str());
     _xorpsh.commit_done(success, errmsg);
     return XrlCmdError::OKAY();
 }
@@ -90,10 +93,9 @@ XrlXorpshInterface::rtrmgr_client_0_1_config_changed(// Input values,
 						     const string& deltas, 
 						     const string& deletions)
 {
-#ifdef DEBUG_CONFIG_CHANGE
-    printf("config changed: user_id: %d\nDELTAS:\n%sDELETIONS:\n%s\n",
-	   user_id, deltas.c_str(), deletions.c_str());
-#endif
+    XLOG_TRACE(_verbose,
+	       "config changed: user_id: %d\nDELTAS:\n%sDELETIONS:\n%s\n",
+	       user_id, deltas.c_str(), deletions.c_str());
     _xorpsh.config_changed(user_id, deltas, deletions);
     return XrlCmdError::OKAY();
 }

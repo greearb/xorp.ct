@@ -12,9 +12,8 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.16 2004/02/26 15:28:23 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.17 2004/03/20 17:59:35 mjh Exp $"
 
-// #define DEBUG_COMMIT
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -33,18 +32,21 @@ extern int booterror(const char *s) throw (ParseError);
  * Slave Config Tree class
  *************************************************************************/
 
-SlaveConfigTree::SlaveConfigTree(XorpClient& xclient)
-    : ConfigTree(NULL),
-      _xclient(xclient)
+SlaveConfigTree::SlaveConfigTree(XorpClient& xclient, bool verbose)
+    : ConfigTree(NULL, verbose),
+      _xclient(xclient),
+      _verbose(verbose)
 {
 
 }
 
 SlaveConfigTree::SlaveConfigTree(const string& configuration,
 				 TemplateTree* tt,
-				 XorpClient& xclient) throw (InitError)
-    : ConfigTree(tt),
-      _xclient(xclient)
+				 XorpClient& xclient,
+				 bool verbose) throw (InitError)
+    : ConfigTree(tt, verbose),
+      _xclient(xclient),
+      _verbose(verbose)
 {
     string errmsg;
 
@@ -70,10 +72,9 @@ SlaveConfigTree::commit_changes(string& result, XorpShell& xorpsh, CallBack cb)
 {
     bool success = true;
 
-#ifdef DEBUG_COMMIT
-    printf("##############################################################\n");
-    printf("SlaveConfigTree::commit_changes\n");
-#endif
+    XLOG_TRACE(_verbose,
+	       "##########################################################\n");
+    XLOG_TRACE(_verbose, "SlaveConfigTree::commit_changes\n");
 
 #if 0	// TODO: XXX: FIX IT!!
     // XXX: we really should do this check, but we need to deal with
@@ -119,17 +120,15 @@ SlaveConfigTree::commit_phase2(const XrlError& e, const bool* locked,
     }
 
     // We managed to get the master lock
-    SlaveConfigTree delta_tree(_xclient);
+    SlaveConfigTree delta_tree(_xclient, _verbose);
     delta_tree.get_deltas(*this);
     string deltas = delta_tree.show_unannotated_tree();
 
-    SlaveConfigTree withdraw_tree(_xclient);
+    SlaveConfigTree withdraw_tree(_xclient, _verbose);
     withdraw_tree.get_deletions(*this);
     string deletions = withdraw_tree.show_unannotated_tree();
 
-#ifdef DEBUG_COMMIT
-    printf("deletions = >>>\n%s<<<\n", deletions.c_str());
-#endif
+    XLOG_TRACE(_verbose, "deletions = >>>\n%s<<<\n", deletions.c_str());
 
     _root_node.initialize_commit();
     xorpsh->commit_changes(deltas, deletions,
@@ -142,9 +141,7 @@ void
 SlaveConfigTree::commit_phase3(const XrlError& e, CallBack cb,
 			       XorpShell* xorpsh)
 {
-#ifdef DEBUG_COMMIT
-    printf("commit_phase3\n");
-#endif
+    XLOG_TRACE(_verbose, "commit_phase3\n");
 
     //
     // We get here when the rtrmgr has received our request, but before
@@ -164,9 +161,7 @@ void
 SlaveConfigTree::commit_phase4(bool success, const string& errmsg, CallBack cb,
 			       XorpShell *xorpsh)
 {
-#ifdef DEBUG_COMMIT
-    printf("commit_phase4\n");
-#endif
+    XLOG_TRACE(_verbose, "commit_phase4\n");
 
     //
     // We get here when we're called back by the rtrmgr with the
@@ -183,9 +178,7 @@ SlaveConfigTree::commit_phase5(const XrlError& /* e */,
 			       CallBack cb,
 			       XorpShell* /* xorpsh */)
 {
-#ifdef DEBUG_COMMIT
-    printf("commit_phase5\n");
-#endif
+    XLOG_TRACE(_verbose, "commit_phase5\n");
 
     if (success) {
 	_root_node.finalize_commit();
@@ -198,15 +191,11 @@ SlaveConfigTree::commit_phase5(const XrlError& /* e */,
 bool
 SlaveConfigTree::get_deltas(const SlaveConfigTree& main_tree)
 {
-#ifdef DEBUG_COMMIT
-    printf("SlaveConfigTree::get_deltas\n");
-#endif
+    XLOG_TRACE(_verbose, "SlaveConfigTree::get_deltas\n");
 
     if (root_node().get_deltas(main_tree.const_root_node()) > 0) {
-#ifdef DEBUG_COMMIT
-	printf("FOUND DELTAS:\n");
-	print();
-#endif
+	debug_msg("FOUND DELTAS:\n");
+	debug_msg("%s", tree_str().c_str());
 	return true;
     }
 
@@ -216,16 +205,12 @@ SlaveConfigTree::get_deltas(const SlaveConfigTree& main_tree)
 bool
 SlaveConfigTree::get_deletions(const SlaveConfigTree& main_tree)
 {
-#ifdef DEBUG_COMMIT
-    printf("SlaveConfigTree::get_deltas\n");
-#endif
+    XLOG_TRACE(_verbose, "SlaveConfigTree::get_deltas\n");
 
     if (root_node().get_deletions(main_tree.const_root_node()) > 0) {
-#ifdef DEBUG_COMMIT
-	printf("FOUND DELETIONS:>>>>\n");
-	print();
-	printf("<<<<\n");
-#endif
+	debug_msg("FOUND DELETIONS:>>>>\n");
+	debug_msg("%s", tree_str().c_str());
+	debug_msg("<<<<\n");
 	return true;
     }
 
@@ -235,16 +220,14 @@ SlaveConfigTree::get_deletions(const SlaveConfigTree& main_tree)
 string
 SlaveConfigTree::discard_changes()
 {
-#ifdef DEBUG_COMMIT
-    printf("##############################################################\n");
-    printf("SlaveConfigTree::discard_changes\n");
-#endif
+    XLOG_TRACE(_verbose,
+	       "##########################################################\n");
+    XLOG_TRACE(_verbose, "SlaveConfigTree::discard_changes\n");
 
     string result = _root_node.discard_changes(0, 0);
 
-#ifdef DEBUG_COMMIT
-    printf("##############################################################\n");
-#endif
+    XLOG_TRACE(_verbose,
+	       "##########################################################\n");
 
     return result;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.9 2003/12/02 09:39:00 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.10 2004/03/09 05:51:52 mjh Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -182,6 +182,8 @@ private:
     bool	_config_locked;
     uint32_t	_lock_holder;
     XorpTimer	_lock_timer;
+
+    bool	_verbose;	//  Set to true if output is verbose
 };
 
 #endif // __RTRMGR_XRL_RTRMGR_INTERFACE_HH__

@@ -12,15 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.3 2003/12/02 09:38:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.4 2004/05/22 18:14:30 mjh Exp $"
 
 #include <sys/types.h>
 #include <grp.h>
+#include <pwd.h>
+
 #include "rtrmgr_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "userdb.hh"
-#include <pwd.h>
+
+
 User::User(uint32_t user_id, const string& username)
     : _user_id(user_id),
       _username(username)
@@ -59,7 +65,8 @@ UserInstance::UserInstance(uint32_t user_id, const string& username)
 }
 
 
-UserDB::UserDB()
+UserDB::UserDB(bool verbose)
+    : _verbose(verbose)
 {
 
 }
@@ -80,9 +87,7 @@ UserDB::load_password_file()
 
     pwent = getpwent();
     while (pwent != NULL) {
-#ifdef DEBUG_USERDB
-	printf("User: %s UID: %u\n", pwent->pw_name, pwent->pw_uid);
-#endif
+	debug_msg("User: %s UID: %u\n", pwent->pw_name, pwent->pw_uid);
 	add_user(pwent->pw_uid, pwent->pw_name);
 	pwent = getpwent();
     }
@@ -96,14 +101,10 @@ UserDB::add_user(uint32_t user_id, const string& username)
 	User* newuser = new User(user_id, username);
 	struct group* grp = getgrnam("xorp");
 	if (grp != NULL) {
-#ifdef DEBUG_USERDB
-	    printf("group xorp exists, id=%d\n", grp->gr_gid);
-#endif
+	    debug_msg("group xorp exists, id=%d\n", grp->gr_gid);
 	    char **gr_mem = grp->gr_mem;
 	    while (*gr_mem != NULL) {
-#ifdef DEBUG_USERDB
-		printf("found user %s in group xorp\n", *gr_mem);
-#endif
+		debug_msg("found user %s in group xorp\n", *gr_mem);
 		if (*gr_mem == username) {
 		    newuser->add_acl_capability("config");
 		    break;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.13 2004/03/11 22:31:44 mjh Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.14 2004/03/20 17:59:35 mjh Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -44,7 +44,7 @@ enum CliModeType {
 
 class RouterCLI {
 public:
-    RouterCLI(XorpShell& xorpsh, CliNode& cli_node);
+    RouterCLI(XorpShell& xorpsh, CliNode& cli_node, bool verbose);
     ~RouterCLI();
 
     bool is_config_mode() const;
@@ -235,6 +235,7 @@ private:
 
     CliNode&		_cli_node;
     CliClient&		_cli_client;
+    bool		_verbose;	// Set to true if output is verbose
     CliModeType		_mode;
     CliCommand*		_set_node;
     CliCommand*		_show_node;
@@ -242,25 +243,25 @@ private:
     CliCommand*		_delete_node;
     CliCommand*		_run_node;
     list<string>	_path;
-    list<uint32_t>      _braces; //keep trace of the indent depth of
-				 //braces in text_entry mode
+    list<uint32_t>      _braces; // keep trace of the indent depth of
+				 // braces in text_entry mode
     list<uint32_t>	_config_mode_users;
     list<string>	_alerts;
-    //    size_t		_nesting_depth;	// for text_entry mode: number of
+    // size_t		_nesting_depth;	// for text_entry mode: number of
 					// brackets deep
-    //    list<size_t>	_nesting_lengths; // for text_entry mode: number of
+    // list<size_t>	_nesting_lengths; // for text_entry mode: number of
 					// nodes for each backet nested
     bool		_changes_made;	// true if there are uncommitted
 					// changes
 
-    map<string,string> _help_o;  //short help strings for operational
-				 //mode commands
-    map<string,string> _help_long_o; //detailed help information for
-                                     //operational mode commands
-    map<string,string> _help_c;  //short help strings for configuration
-				 //mode commands
-    map<string,string> _help_long_c; //detailed help information for
-                                     //configuration mode commands
+    map<string,string> _help_o;  // short help strings for operational
+				 // mode commands
+    map<string,string> _help_long_o; // detailed help information for
+                                     // operational mode commands
+    map<string,string> _help_c;  // short help strings for configuration
+				 // mode commands
+    map<string,string> _help_long_c; // detailed help information for
+                                     // configuration mode commands
 };
 
 #endif // __RTRMGR_CLI_HH__

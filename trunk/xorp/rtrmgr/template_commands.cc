@@ -12,9 +12,8 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.40 2004/05/22 23:38:01 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.41 2004/05/26 19:18:22 hodson Exp $"
 
-//#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -455,7 +454,7 @@ XrlAction::execute(const ConfigTreeNode& ctn,
 	if (words < 2) {
 	    string err = c_format("XRL command is missing the XRL on node %s",
 				  ctn.path().c_str());
-	    XLOG_WARNING(err.c_str());
+	    XLOG_WARNING("%s", err.c_str());
 	}
 
 	string xrlstr = unquote(args[1]);
@@ -467,7 +466,7 @@ XrlAction::execute(const ConfigTreeNode& ctn,
 	result = XORP_OK;
 	debug_msg("result = %d\n", result);
     } else {
-	fprintf(stderr, "Bad command: %s\n", args[0].c_str());
+	XLOG_ERROR("Bad command: %s\n", args[0].c_str());
 	return XORP_ERROR;
     }
     return result;

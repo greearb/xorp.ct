@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.12 2003/12/02 09:38:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.13 2004/01/13 01:18:25 pavlin Exp $"
 
 #include <signal.h>
 
@@ -42,7 +42,7 @@ static const char* c_srcdir = getenv("srcdir");
 static const string srcdir = c_srcdir ? c_srcdir : ".";
 static const string default_xorp_root_dir = "..";
 static const string default_config_template_dir = srcdir + "/../etc/templates";
-static const string default_xrl_dir = srcdir + "/../xrl/targets";
+static const string default_xrl_targets_dir = srcdir + "/../xrl/targets";
 static const string default_config_boot = srcdir + "/config.boot.sample";
 
 //
@@ -66,14 +66,14 @@ main(int argc, char* const argv[])
     xlog_start();
 
     const string& config_template_dir = default_config_template_dir;
-    const string& xrl_dir = default_xrl_dir;
+    const string& xrl_targets_dir = default_xrl_targets_dir;
     const string& config_boot = default_config_boot;
 
     // Read the router config template files
     TemplateTree *tt = NULL;
     try {
 	tt = new TemplateTree(default_xorp_root_dir, config_template_dir,
-			      xrl_dir);
+			      xrl_targets_dir, true /* verbose */);
     } catch (const InitError& e) {
 	fprintf(stderr, "test_sample_config: template tree init error: %s\n",
 		e.why().c_str());
@@ -106,7 +106,9 @@ main(int argc, char* const argv[])
 	// Read the router startup configuration file, start the processes
 	// required, and initialize them.
 	//
-	MasterConfigTree ct(config_boot, tt, mmgr, xclient, false);
+	MasterConfigTree ct(config_boot, tt, mmgr, xclient,
+			    false /* do_exec */,
+			    true /* verbose */);
     } catch (const InitError& e) {
 	fprintf(stderr, "test_sample_config: config tree init error: %s\n",
 		e.why().c_str());

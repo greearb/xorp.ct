@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.33 2004/03/11 22:31:44 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.34 2004/03/20 17:59:34 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -26,10 +26,11 @@
 #include "util.hh"
 
 
-RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node)
+RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node, bool verbose)
     : _xorpsh(xorpsh),
       _cli_node(cli_node),
       _cli_client(*(_cli_node.add_stdio_client())),
+      _verbose(verbose),
       _mode(CLI_MODE_NONE),
       _changes_made(false)
 {
@@ -860,7 +861,7 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
     }
 }
 
-#ifdef NOTDEF
+#if 0
 void
 RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 				  const CommandTree& command_tree,
@@ -936,7 +937,7 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 	}
     }
 }
-#endif
+#endif // 0
 
 void
 RouterCLI::clear_command_set()
@@ -1004,12 +1005,10 @@ RouterCLI::add_edit_subtree()
 					      cmds,
 					      /* include_intermediates */ true,
 					      /* include templates */ true);
-#ifdef DEBUG_CMD_TREES
-    printf("==============================================================\n");
-    printf("edit subtree is:\n\n");
-    cmd_tree->print();
-    printf("==============================================================\n");
-#endif
+    debug_msg("==========================================================\n");
+    debug_msg("edit subtree is:\n\n");
+    debug_msg("%s", cmd_tree.tree_str().c_str());
+    debug_msg("==========================================================\n");
 
     if (_braces.size() == 0) {
 	string cmdpath;
@@ -1047,12 +1046,11 @@ RouterCLI::add_delete_subtree()
 					     cmds,
 					     /* include_intermediates */ true,
 					     /* include templates */ false);
-#ifdef DEBUG_CMD_TREES
-    printf("==============================================================\n");
-    printf("delete subtree is:\n\n");
-    cmd_tree->print();
-    printf("==============================================================\n");
-#endif
+
+    debug_msg("==========================================================\n");
+    debug_msg("delete subtree is:\n\n");
+    debug_msg("%s", cmd_tree.tree_str().c_str());
+    debug_msg("==========================================================\n");
 
     string cmdpath;
     if (_path.empty())
@@ -1078,12 +1076,10 @@ RouterCLI::add_set_subtree()
 					      /* include_intermediates */false,
 					      /* include templates */ true);
 
-#ifdef DEBUG_CMD_TREES
-    printf("==============================================================\n");
-    printf("set subtree is:\n\n");
-    cmd_tree->print();
-    printf("==============================================================\n");
-#endif
+    debug_msg("==========================================================\n");
+    debug_msg("set subtree is:\n\n");
+    debug_msg("%s", cmd_tree.tree_str().c_str());
+    debug_msg("==========================================================\n");
 
     if (_braces.size() == 0) {
 	string cmdpath;
@@ -1096,14 +1092,14 @@ RouterCLI::add_set_subtree()
 			    callback(this, &RouterCLI::set_func),
 			    cmdpath, 0);
     }
-#ifdef NOTDEF
+#if 0
     add_immediate_commands(*(_cli_node.cli_command_root()),
 			   cmd_tree,
 			   cmds,
 			   /* include_intermediates */ false,
 			   callback(this, &RouterCLI::immediate_set_func),
 			   pathstr());
-#endif
+#endif // 0
 }
 
 void
@@ -1119,12 +1115,10 @@ RouterCLI::add_show_subtree()
 					     /* include_intermediates */ true,
 					     /* include templates */ false);
 
-#ifdef DEBUG_CMD_TREES
-    printf("==============================================================\n");
-    printf("show subtree is:\n\n");
-    cmd_tree->print();
-    printf("==============================================================\n");
-#endif
+    debug_msg("==========================================================\n");
+    debug_msg("show subtree is:\n\n");
+    debug_msg("%s", cmd_tree.tree_str().c_str());
+    debug_msg("==========================================================\n");
 
     string cmdpath;
     if (_path.empty())
@@ -1140,16 +1134,13 @@ RouterCLI::add_show_subtree()
 void
 RouterCLI::add_text_entry_commands()
 {
-#ifdef DEBUG_TEXT_ENTRY
-    printf("add_text_entry_commands\n");
-#endif
+    XLOG_TRACE(_verbose, "add_text_entry_commands\n");
     
     SlaveConfigTreeNode *current_config_node = config_tree()->find_node(_path);
     const TemplateTreeNode *ttn = current_config_node->template_tree_node();
     if (ttn == NULL) {
-#ifdef DEBUG_TEXT_ENTRY
-	printf("ttn == NULL >>%s<<\n", current_config_node->segname().c_str());
-#endif
+	XLOG_TRACE(_verbose, "ttn == NULL >>%s<<\n",
+		   current_config_node->segname().c_str());
 	ttn = template_tree()->root_node();
     }
     list<TemplateTreeNode*>::const_iterator tti;
@@ -1498,7 +1489,7 @@ RouterCLI::edit_func(const string& ,
     }
 }
 
-#ifdef NOTDEF
+#if 0
 int
 RouterCLI::text_entry_func(const string& ,
 			   const string& ,
@@ -1738,7 +1729,7 @@ RouterCLI::text_entry_func(const string& ,
 	}
     }
 }
-#endif
+#endif // 0
 
 
 int
@@ -1752,9 +1743,7 @@ RouterCLI::text_entry_func(const string& ,
     //complete.  The remainder is in argv.
     string path = command_global_name;
     list<string> path_segments;
-#ifdef DEBUG_TEXT_ENTRY
-    printf("text_entry_func: %s\n", path.c_str());
-#endif
+    XLOG_TRACE(_verbose, "text_entry_func: %s\n", path.c_str());
     SlaveConfigTreeNode *ctn = NULL, *original_ctn = NULL, *brace_ctn;
 
 
@@ -1787,9 +1776,7 @@ RouterCLI::text_entry_func(const string& ,
     while (!path_segments.empty()) {
 	ctn = config_tree()->find_node(path_segments);
 	if (ctn != NULL) {
-#ifdef DEBUG_TEXT_ENTRY
-	    printf("ctn: %s\n", ctn->segname().c_str());
-#endif
+	    XLOG_TRACE(_verbose, "ctn: %s\n", ctn->segname().c_str());
 	    break;
 	}
 	new_path_segments.push_front(path_segments.back());
@@ -1825,10 +1812,8 @@ RouterCLI::text_entry_func(const string& ,
 	    for (cti = ctn->children().begin();
 		 cti != ctn->children().end();  cti++) {
 		if ((*cti)->segname() == new_path_segments.front()) {
-#ifdef DEBUG_TEXT_ENTRY
-		    printf("Found pre-existing node: %s\n", 
-			   (*cti)->segname().c_str());
-#endif
+		    XLOG_TRACE(_verbose, "Found pre-existing node: %s\n", 
+			       (*cti)->segname().c_str());
 		    ConfigTreeNode *existing_ctn = (*cti);
 		    ctn = (SlaveConfigTreeNode*)(existing_ctn);
 		    path_segments.push_back(new_path_segments.front());
@@ -1875,22 +1860,19 @@ RouterCLI::text_entry_func(const string& ,
 		    goto cleanup;
 		}
 		path_segments.push_back(value);
-#ifdef DEBUG_TEXT_ENTRY
-		printf("creating node %s\n", value.c_str());
-#endif
+		XLOG_TRACE(_verbose, "creating node %s\n", value.c_str());
 		ctn = new SlaveConfigTreeNode(value, 
 					      makepath(path_segments),
-					      data_ttn, ctn, getuid());
+					      data_ttn, ctn, getuid(),
+					      _verbose);
 		_changes_made = true;
 		value_expected = false;
 	    } else if (ctn->is_leaf()) {
 		//it must be a leaf, and we're expecting a value
 		if (ttn->type_match(value)) {
-#ifdef DEBUG_TEXT_ENTRY
-		    printf("setting node %s to %s\n", 
-			   ctn->segname().c_str(), 
-			   value.c_str());
-#endif
+		    XLOG_TRACE(_verbose, "setting node %s to %s\n", 
+			       ctn->segname().c_str(),
+			       value.c_str());
 		    ctn->set_value(value, getuid());
 		    value_expected = false;
 		} else {
@@ -1919,20 +1901,16 @@ RouterCLI::text_entry_func(const string& ,
 		    goto cleanup;
 		}
 		// the last brace we entered should match the current depth
-#ifdef DEBUG_TEXT_ENTRY
-		printf("braces: %u ctn depth: %u ctn: %s\n", 
-		       _braces.back(),
-		       ctn->depth(), ctn->segname().c_str());
-#endif
+		XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n", 
+			   _braces.back(),
+			   ctn->depth(), ctn->segname().c_str());
 		XLOG_ASSERT(_braces.back() == ctn->depth());
 		_braces.pop_back();
 		// the next brace should be where we're jumping to.
 		uint32_t new_depth = 0;
 		XLOG_ASSERT(!_braces.empty());
 		new_depth = _braces.back();
-#ifdef DEBUG_TEXT_ENTRY
-		printf("new_depth: %u\n", new_depth);
-#endif
+		XLOG_TRACE(_verbose, "new_depth: %u\n", new_depth);
 		XLOG_ASSERT(ctn->depth() > new_depth);
 		while (ctn->depth() > new_depth) {
 		    ctn = ctn->parent();
@@ -1941,9 +1919,8 @@ RouterCLI::text_entry_func(const string& ,
 		    path_segments.pop_back();
 		}
 		brace_ctn = ctn;
-#ifdef DEBUG_TEXT_ENTRY
-		printf("brace_ctn = %s\n", brace_ctn->segname().c_str());
-#endif
+		XLOG_TRACE(_verbose, "brace_ctn = %s\n",
+			   brace_ctn->segname().c_str());
 		new_path_segments.pop_front();
 		continue;
 	    }
@@ -1952,22 +1929,17 @@ RouterCLI::text_entry_func(const string& ,
 	    ttn = config_tree()->find_template(path_segments);
 
 	    XLOG_ASSERT(ttn != NULL);
-#ifdef DEBUG_TEXT_ENTRY
-	    printf("creating node %s\n", ttn->segname().c_str());
-#endif
+	    XLOG_TRACE(_verbose, "creating node %s\n", ttn->segname().c_str());
 	    ctn = new SlaveConfigTreeNode(ttn->segname(), 
 					  makepath(path_segments),
-					  ttn, ctn, getuid());
+					  ttn, ctn, getuid(),
+					  _verbose);
 	    _changes_made = true;
 	    if (ttn->is_tag() || ctn->is_leaf()) {
-#ifdef DEBUG_TEXT_ENTRY
-		printf("value expected\n");
-#endif
+		XLOG_TRACE(_verbose, "value expected\n");
 		value_expected = true;
 	    } else {
-#ifdef DEBUG_TEXT_ENTRY
-		printf("value not expected\n");
-#endif
+		XLOG_TRACE(_verbose, "value not expected\n");
 		value_expected = false;
 	    }
 
@@ -2023,9 +1995,8 @@ RouterCLI::text_entry_func(const string& ,
     }
 
     if (original_ctn != NULL) {
-#ifdef DEBUG_TEXT_ENTRY
-	printf("deleting node %s\n", original_ctn->segname().c_str());
-#endif
+	XLOG_TRACE(_verbose, "deleting node %s\n",
+		   original_ctn->segname().c_str());
 	original_ctn->delete_subtree_silently();
     }
     return (XORP_ERROR);
@@ -2037,9 +2008,7 @@ RouterCLI::text_entry_children_func(const string& path,
 {
     map <string, string> children;
     list<string> path_segments;
-#ifdef DEBUG_TEXT_ENTRY
-    printf("text_entry_func: %s\n", path.c_str());
-#endif
+    XLOG_TRACE(_verbose, "text_entry_func: %s\n", path.c_str());
 
     string newpath = path;
     while (newpath.size() > 0) {
@@ -2066,18 +2035,18 @@ RouterCLI::text_entry_children_func(const string& path,
 		help = "-- no help available --";
 	    }
 	    if ((*tti)->segname() == "@") {
-#ifdef NOTDEF
+#if 0
 		string typestr = "<" + (*tti)->typestr() + ">";
 		children[typestr] = help;
-#endif
+#endif // 0
 	    } else {
 		children[(*tti)->segname()] = help;
 	    }
 	}
-#ifdef NOTDEF
+#if 0
 	if (ttn->is_tag())
 	    is_executable = false;
-#endif
+#endif // 0
 	if (!ttn->is_tag() && (ttn->children().size() > 0)) {
 	    children["{"] = "enter text on multiple lines";
 	}
@@ -2214,7 +2183,8 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 	ConfigTreeNode* newnode = new ConfigTreeNode(path_parts.back(),
 						     newpath, ttn,
 						     ctn,
-						     getuid());
+						     getuid(),
+						     _verbose);
 	ctn = newnode;
 	ctn->set_value(argv[0], getuid());
     } else {
@@ -2469,9 +2439,7 @@ RouterCLI::load_func(const string& ,
 	return (XORP_ERROR);
     } else {
 	XLOG_ASSERT(command_global_name == "load");
-#ifdef DEBUG_LOADING
-	printf("load, filename = %s\n", argv[0].c_str());
-#endif
+	XLOG_TRACE(_verbose, "load, filename = %s\n", argv[0].c_str());
 	_xorpsh.load_from_file(argv[0],
 				callback(this, &RouterCLI::load_communicated),
 				callback(this, &RouterCLI::load_done));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.18 2004/01/15 08:51:58 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.19 2004/03/11 22:31:45 mjh Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -34,11 +34,11 @@ class TemplateTreeNode;
 
 class ConfigTreeNode {
 public:
-    ConfigTreeNode();
+    ConfigTreeNode(bool verbose);
     ConfigTreeNode(const ConfigTreeNode& ctn);
     ConfigTreeNode(const string& node_name, const string& path, 
 		   const TemplateTreeNode* ttn, ConfigTreeNode* parent,
-		   uid_t user_id);
+		   uid_t user_id, bool verbose);
     ~ConfigTreeNode();
 
     bool operator==(const ConfigTreeNode& them) const;
@@ -104,7 +104,7 @@ public:
 				bool retain_changed_values);
     void retain_common_nodes(const ConfigTreeNode& them);
     ConfigTreeNode* find_node(list<string>& path);
-    void print_tree() const;
+    string subtree_str() const;
     bool expand_variable(const string& varname, string& value) const;
     bool expand_expression(const string& expression, string& value) const;
     void expand_varname_to_matchlist(const vector<string>& v, size_t depth,
@@ -156,6 +156,10 @@ protected:
     // on_parent_path is used during variable expansion to keep track of where
     // we came from
     bool _on_parent_path;
+
+    bool _verbose;		// Set to true if output is verbose
+
+private:
 };
 
 #endif // __RTRMGR_CONF_TREE_NODE_HH__

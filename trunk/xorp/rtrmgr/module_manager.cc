@@ -12,10 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.28 2004/05/11 16:50:57 mjh Exp $"
-
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.29 2004/05/22 06:09:07 atanu Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -145,8 +142,7 @@ Module::~Module()
 void
 Module::terminate(XorpCallback0<void>::RefPtr cb)
 {
-    if (_verbose)
-	printf("Shutting down %s\n", _name.c_str());
+    debug_msg("Module::terminate : %s\n", _name.c_str());
 
     if (! _do_exec) {
 	cb->dispatch();
@@ -163,6 +159,8 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
 	cb->dispatch();
 	return;
     }
+
+    XLOG_INFO("Terminating module: %s\n", _name.c_str());
 
     //
     // Find whether this is the last module running within this process
@@ -205,8 +203,11 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
 	return;
     }
 
-    debug_msg("sending kill to pid %d\n", _pid);
+    //
     // We need to kill the process
+    //
+    XLOG_INFO("Killing module: %s (pid = %d)\n",
+	      _name.c_str(), _pid);
     new_status(MODULE_SHUTTING_DOWN);
     kill(_pid, SIGTERM);
 
@@ -280,11 +281,8 @@ Module::set_execution_path(const string& path)
 	// Add the XORP root path to the front
 	_path = _mmgr.xorp_root_dir() + "/" + path;
     }
-    if (_verbose) {
-	printf("**********************************************************\n");
-	printf("new module: %s path: %s\n", _name.c_str(), _path.c_str());
-	printf("**********************************************************\n");
-    }
+    XLOG_TRACE(_verbose, "New module: %s (%s)\n",
+	       _name.c_str(), _path.c_str());
 
     if (_path[0] != '/') {
 	// we're going to call glob, but don't want to allow wildcard expansion
@@ -292,7 +290,7 @@ Module::set_execution_path(const string& path)
 	    char c = _path[i];
 	    if ((c == '*') || (c == '?') || (c == '[')) {
 		string err = _path + ": bad filename";
-		XLOG_ERROR(err.c_str());
+		XLOG_ERROR("%s", err.c_str());
 		return XORP_ERROR;
 	    }
 	}
@@ -300,7 +298,7 @@ Module::set_execution_path(const string& path)
 	glob(_path.c_str(), GLOB_TILDE, NULL, &pglob);
 	if (pglob.gl_pathc != 1) {
 	    string err(_path + ": File does not exist.");
-	    XLOG_ERROR(err.c_str());
+	    XLOG_ERROR("%s", err.c_str());
 	    return XORP_ERROR;
 	}
 	_expath = pglob.gl_pathv[0];
@@ -328,7 +326,7 @@ Module::set_execution_path(const string& path)
 	default:
 	    err += "Unknown error accessing file.";
 	}
-	XLOG_ERROR(err.c_str());
+	XLOG_ERROR("%s", err.c_str());
 	return XORP_ERROR;
     }
     return XORP_OK;
@@ -352,11 +350,8 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 {
     bool is_process_running = false;
 
-    if (_verbose) {
-	printf("**********************************************************\n");
-	printf("running module: %s path: %s\n", _name.c_str(), _path.c_str());
-	printf("**********************************************************\n");
-    }
+    XLOG_INFO("Running module: %s (%s)\n", _name.c_str(), _path.c_str());
+
     _do_exec = do_exec;
 
     if (!_do_exec) {
@@ -427,8 +422,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 		}
 	    }
 	}
-	if (_verbose)
-	    printf("New module has PID %d\n", _pid);
+	debug_msg("New module has PID %d\n", _pid);
 
 	// Insert the new process in the map of processes
 	XLOG_ASSERT(module_pids.find(_pid) == module_pids.end());
@@ -457,7 +451,7 @@ Module::module_run_done(bool success)
     // Is it still running?
     if (_status == MODULE_FAILED) {
 	string err = _expath + ": module startup failed";
-	XLOG_ERROR(err.c_str());
+	XLOG_ERROR("%s", err.c_str());
 	return;
     }
     if (_status == MODULE_STARTUP) {
@@ -468,8 +462,7 @@ Module::module_run_done(bool success)
 void
 Module::set_stalled()
 {
-    if (_verbose)
-	printf("Module stalled: %s\n", _name.c_str());
+    XLOG_INFO("Module stalled: %s\n", _name.c_str());
 
     new_status(MODULE_STALLED);
 }
@@ -477,8 +470,7 @@ Module::set_stalled()
 void
 Module::normal_exit()
 {
-    if (_verbose)
-	printf("Module normal exit: %s\n", _name.c_str());
+    XLOG_INFO("Module normal exit: %s\n", _name.c_str());
 
     new_status(MODULE_NOT_STARTED);
     _pid = 0;
@@ -487,9 +479,8 @@ Module::normal_exit()
 void
 Module::abnormal_exit(int child_wait_status)
 {
-    if (_verbose)
-	printf("Module abnormal exit: %s status:%d\n",
-	       _name.c_str(), child_wait_status);
+    XLOG_INFO("Module abnormal exit: %s status:%d\n",
+	      _name.c_str(), child_wait_status);
 
     new_status(MODULE_FAILED);
     _pid = 0;
@@ -500,13 +491,12 @@ Module::killed()
 {
     if (_status == MODULE_SHUTTING_DOWN) {
 	// It may have been shutting down already, in which case this is OK.
-	if (_verbose)
-	    printf("Module killed during shutdown: %s\n", _name.c_str());
+	XLOG_INFO("Module killed during shutdown: %s\n",
+		  _name.c_str());
 	new_status(MODULE_NOT_STARTED);
     } else {
 	// We don't know why it was killed.
-	if (_verbose)
-	    printf("Module abnormally killed: %s\n", _name.c_str());
+	XLOG_INFO("Module abnormally killed: %s\n", _name.c_str());
 	new_status(MODULE_FAILED);
     }
     _pid = 0;
@@ -551,8 +541,7 @@ ModuleManager::~ModuleManager()
 bool
 ModuleManager::new_module(const string& module_name, const string& path)
 {
-    if (_verbose)
-	printf("ModuleManager::new_module %s\n", module_name.c_str());
+    debug_msg("ModuleManager::new_module %s\n", module_name.c_str());
 
     map<string, Module*>::iterator found_mod;
     found_mod = _modules.find(module_name);
@@ -564,8 +553,8 @@ ModuleManager::new_module(const string& module_name, const string& path)
 	    return false;
 	return true;
     } else {
-	if (_verbose)
-	    printf("module %s already exists\n", module_name.c_str());
+	XLOG_TRACE(_verbose, "Module %s already exists\n",
+		   module_name.c_str());
 	return true;
     }
 }

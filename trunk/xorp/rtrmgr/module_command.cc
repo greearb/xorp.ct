@@ -12,9 +12,8 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.24 2004/05/18 00:05:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.25 2004/05/18 07:11:08 pavlin Exp $"
 
-// #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
 #include "libxorp/xlog.h"
 
@@ -60,7 +59,8 @@ ModuleCommand::ModuleCommand(TemplateTree& template_tree,
       _status_method(NULL),
       _startup_method(NULL),
       _shutdown_method(NULL),
-      _execute_done(false)
+      _execute_done(false),
+      _verbose(template_tree.verbose())
 {
     XLOG_ASSERT(cmd_name == "%modinfo");
 }
@@ -213,7 +213,8 @@ ModuleCommand::startup_validation(TaskManager& taskmgr) const
 	else
 	    return NULL;
     } else {
-	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000);
+	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
+				   _verbose);
     }
 }
 
@@ -228,7 +229,8 @@ ModuleCommand::config_validation(TaskManager& taskmgr) const
 	else
 	    return NULL;
     } else {
-	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000);
+	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
+				   _verbose);
     }
 }
 
@@ -243,7 +245,8 @@ ModuleCommand::ready_validation(TaskManager& taskmgr) const
 	else
 	    return NULL;
     } else {
-	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000);
+	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
+				   _verbose);
     }
 }
 
@@ -258,7 +261,8 @@ ModuleCommand::shutdown_validation(TaskManager& taskmgr) const
 	else
 	    return NULL;
     } else {
-	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000);
+	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
+				   _verbose);
     }
 }
 

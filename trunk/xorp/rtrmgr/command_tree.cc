@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.5 2003/11/20 20:31:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.6 2004/02/27 12:12:48 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -78,26 +78,30 @@ CommandTreeNode::subroot(list<string> path) const
 	}
     }
     // Debugging only below this point
-    printf("ERROR doing subroot at node >%s<\n", _name.c_str());
+    XLOG_TRACE(_verbose, "ERROR doing subroot at node >%s<\n", _name.c_str());
     for (iter =_children.begin(); iter !=  _children.end(); ++iter) {
-	printf("Child: %s\n", (*iter)->name().c_str());
+	XLOG_TRACE(_verbose, "Child: %s\n", (*iter)->name().c_str());
     }
     while (!path.empty()) {
-	printf("Path front is >%s<\n", path.front().c_str());
+	XLOG_TRACE(_verbose, "Path front is >%s<\n", path.front().c_str());
 	path.pop_front();
     }
     return NULL;
 }
 #endif // 0
 
-void
-CommandTreeNode::print() const
+string
+CommandTreeNode::subtree_str() const
 {
-    printf("Node: %s\n", str().c_str());
+    string s;
+
+    s = c_format("Node: %s\n", str().c_str());
     list<CommandTreeNode*>::const_iterator iter;
     for (iter = _children.begin(); iter !=  _children.end(); ++iter) {
-	(*iter)->print();
+	s += (*iter)->subtree_str();
     }
+
+    return s;
 }
 
 const string& 
@@ -161,8 +165,8 @@ CommandTree::activate_current()
 
 
 
-void 
-CommandTree::print() const
+string
+CommandTree::tree_str() const
 {
-    _root_node.print();
+    return _root_node.subtree_str();
 }

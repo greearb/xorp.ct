@@ -12,10 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.21 2004/05/22 06:09:07 atanu Exp $"
-
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.22 2004/05/26 19:18:23 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -42,7 +39,8 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
       _segname(path),
       _varname(varname),
       _has_default(false),
-      _is_tag(false)
+      _is_tag(false),
+      _verbose(template_tree.verbose())
 {
     if (_parent != NULL) {
 	_parent->add_child(this);
@@ -241,7 +239,7 @@ TemplateTreeNode::path() const
 }
 
 string
-TemplateTreeNode::s() const
+TemplateTreeNode::str() const
 {
     string tmp;
 
@@ -260,15 +258,19 @@ TemplateTreeNode::s() const
     return tmp;
 }
 
-void
-TemplateTreeNode::print() const
+string
+TemplateTreeNode::subtree_str() const
 {
-    debug_msg("%s\n", s().c_str());
+    string s;
+
+    s = c_format("%s\n", str().c_str());
 
     list<TemplateTreeNode*>::const_iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	(*iter)->print();
+	s += (*iter)->subtree_str();
     }
+
+    return s;
 }
 
 bool
@@ -559,9 +561,8 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 {
     bool instantiated = false;
 
-#ifdef DEBUG
-    printf("TTN:check_command_tree %s type %s depth %u\n", _segname.c_str(), typestr().c_str(), (uint32_t)depth);
-#endif
+    debug_msg("TTN:check_command_tree %s type %s depth %u\n",
+	      _segname.c_str(), typestr().c_str(), (uint32_t)depth);
 
     if (_parent != NULL && _parent->is_tag() && (depth == 0)) {
 	//
@@ -569,24 +570,18 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 	// variable. We don't want to instantiate any pure variable
 	// nodes in the command tree.
 	//
-#ifdef DEBUG
-	printf("pure variable\n");
-#endif
+	debug_msg("pure variable\n");
 	return false;
     }
 
     list<string>::const_iterator iter;
     for (iter = cmd_names.begin(); iter != cmd_names.end(); ++iter) {
 	if (const_command(*iter) != NULL) {
-#ifdef DEBUG
-	    printf("node has command %s\n", (*iter).c_str());
-#endif
+	    debug_msg("node has command %s\n", (*iter).c_str());
 	    instantiated = true;
 	    break;
 	} else {
-#ifdef DEBUG
-	    printf("node doesn't have command %s\n", (*iter).c_str());
-#endif
+	    debug_msg("node doesn't have command %s\n", (*iter).c_str());
 	}
     }
 
@@ -614,8 +609,8 @@ bool
 TemplateTreeNode::check_variable_name(const vector<string>& parts,
 				      size_t part) const
 {
-    // printf("check_variable_name: us>%s< match>%s<, %d\n",
-    //   _segname.c_str(), parts[part].c_str(), part);
+    debug_msg("check_variable_name: us>%s< match>%s<, %d\n",
+	      _segname.c_str(), parts[part].c_str(), part);
     bool ok = false;
     if (_parent == NULL) {
 	// Root node
@@ -626,11 +621,11 @@ TemplateTreeNode::check_variable_name(const vector<string>& parts,
 	if (parts[part] == "*") {
 	    ok = true;
 	} else {
-	    // printf("--varname but not wildcarded\n");
+	    debug_msg("--varname but not wildcarded\n");
 	}
     } else {
 	if (parts[part] != _segname) {
-	    // printf("--mismatch\n");
+	    debug_msg("--mismatch\n");
 	    return false;
 	}
 	ok = true;
@@ -638,12 +633,12 @@ TemplateTreeNode::check_variable_name(const vector<string>& parts,
     if (ok) {
 	if (part == parts.size() - 1) {
 	    // Everything that we were looking for matched
-	    // printf("**match successful**\n");
+	    debug_msg("**match successful**\n");
 	    return true;
 	}
 	if (_children.empty()) {
-	    // printf("--no children\n");
 	    // No more children, but the search string still has components
+	    debug_msg("--no children\n");
 	    return false;
 	}
 	list<TemplateTreeNode*>::const_iterator tti;
@@ -652,7 +647,7 @@ TemplateTreeNode::check_variable_name(const vector<string>& parts,
 		return true;
 	    }
 	}
-	// printf("--no successful children, %d\n", part);
+	debug_msg("--no successful children, %d\n", part);
     }
     return false;
 }

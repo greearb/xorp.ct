@@ -12,37 +12,40 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.6 2004/01/14 03:00:36 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.7 2004/01/15 08:51:59 pavlin Exp $"
 
 #include <glob.h>
+
 #include "rtrmgr_module.h"
+
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 #include "libxorp/exceptions.hh"
+
 #include "libxipc/xrl_parser.hh"
+
 #include "xrldb.hh"
 
 
-XrlSpec::XrlSpec(const Xrl& xrl, const XrlArgs& rspec) 
+XrlSpec::XrlSpec(const Xrl& xrl, const XrlArgs& rspec, bool verbose)
     : _xrl(xrl),
-      _rspec(rspec)
+      _rspec(rspec),
+      _verbose(verbose)
 {
-#ifdef DEBUG_XRLDB
-    cout << "XrlSpec " + xrl.str() + " -> " + rspec.str() + "\n";
-#endif
+    debug_msg("XrlSpec %s -> %s\n", xrl.str().c_str(), rspec.str().c_str());
 }
 
 XRLMatchType
 XrlSpec::matches(const Xrl& xrl, const XrlArgs& rspec) const
 {
-#if 0
-    cout << "------\n";
-    cout << "TEST:" << xrl.str() << " -> " << rspec.str() << "\n";
-    cout << "DB:  " << _xrl.str() << " -> " << _rspec.str() << "\n";
+    debug_msg("------\n");
+    debug_msg("TEST: %s -> %s\n", xrl.str().c_str(), rspec.str().c_str());
+    debug_msg("DB:   %s -> %s\n", _xrl.str().c_str(), _rspec.str().c_str());
     if (xrl == _xrl) 
-	cout << "XRL matches\n";
+	debug_msg("XRL matches\n");
     if (rspec == _rspec) 
-	cout << "RSPEC matches\n";
-#endif
+	debug_msg("RSPEC matches\n");
     XRLMatchType m = MATCH_FAIL;
 
     if (xrl == _xrl) {
@@ -61,12 +64,12 @@ XrlSpec::str() const
     return s;
 }
 
-XRLtarget::XRLtarget(const string& xrlfilename) 
-    : _targetname(xrlfilename)
+XRLtarget::XRLtarget(const string& xrlfilename, bool verbose)
+    : _targetname(xrlfilename),
+      _verbose(verbose)
 {
-#ifdef DEBUG_XRLDB
-    cout << "Loading xrl file " << xrlfilename << endl;
-#endif
+    debug_msg("Loading xrl file %s\n", xrlfilename.c_str());
+
     XrlParserFileInput xpi(xrlfilename.c_str());
     XrlParser parser(xpi);
 
@@ -77,42 +80,35 @@ XRLtarget::XRLtarget(const string& xrlfilename)
 
 	try {
 	    if (parser.get(s)) {
-#ifdef DEBUG_XRLDB
-		cout << "Xrl " + s + "\n";
-#endif
+		debug_msg("Xrl %s\n", s.c_str());
 		if (parser.get_return_specs(rspec)) {
-#ifdef DEBUG_XRLDB
-		    cout << "Return Spec:" << endl;
-#endif
+		    debug_msg("Return Spec:\n");
 		    list<XrlAtomSpell>::const_iterator si;
 		    for (si = rspec.begin(); si != rspec.end(); si++) {
 			rargs.add(si->atom());
-#ifdef DEBUG_XRLDB
-			cout << "\t -> " 
-			     << si->atom().str() << " - " << si->spell() 
-			     << endl;
-#endif
+			debug_msg("\t -> %s - %s\n",
+				  si->atom().str().c_str(),
+				  si->spell().c_str());
 		    }
 		} else {
-#ifdef DEBUG_XRLDB
-		    cout << "No return spec for XRL " + s + "\n";
-#endif
+		    debug_msg("No return spec for XRL %s\n", s.c_str());
 		}
 		Xrl xrl(s.c_str());
-		_xrlspecs.push_back(XrlSpec(xrl, rargs));
+		_xrlspecs.push_back(XrlSpec(xrl, rargs, _verbose));
 	    }
 	} catch (const XrlParseError& xpe) {
-	    cout << string(79, '-') << endl;
-	    cout << xpe.pretty_print() << "\n";
-	    cout << string(79, '=') << endl; 
-	    cout << "Attempting resync...";
+	    s = string(79, '-') + "\n";
+	    s += xpe.pretty_print() + "\n";
+	    s += string(79, '=') + "\n"; 
+	    s += "Attempting resync...";
 	    if (parser.resync()) 
-		cout << "okay"; 
+		s += "okay"; 
 	    else 
-		cout << "fail";
-	    cout << endl;
+		s += "fail";
+	    s += "\n";
+	    XLOG_ERROR("%s", s.c_str());
 	} catch (const InvalidString& is) {
-	    cout << is.str() << endl;
+	    XLOG_ERROR("%s\n", is.str().c_str());
 	}
     }
 }
@@ -146,7 +142,8 @@ XRLtarget::str() const
     return s;
 }
 
-XRLdb::XRLdb(const string& xrldir) throw (InitError)
+XRLdb::XRLdb(const string& xrldir, bool verbose) throw (InitError)
+    : _verbose(verbose)
 {
     string errmsg;
     list<string> files;
@@ -181,23 +178,20 @@ XRLdb::XRLdb(const string& xrldir) throw (InitError)
     }
     
     for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
-	_targets.push_back(XRLtarget(pglob.gl_pathv[i]));
+	_targets.push_back(XRLtarget(pglob.gl_pathv[i], _verbose));
     }
 
     globfree(&pglob);
 
-#ifdef DEBUG_XRLDB
-    printf("XRLdb initialized\n");
-    printf("%s\n", str().c_str());
-#endif
+    debug_msg("XRLdb initialized\n");
+    debug_msg("%s\n", str().c_str());
 }
 
 bool
 XRLdb::check_xrl_syntax(const string& xrlstr) const
 {
-#ifdef DEBUG_XRLDB
-    printf("XRLdb: checking xrl syntax: %s\n", xrlstr.c_str());
-#endif
+    debug_msg("XRLdb: checking xrl syntax: %s\n", xrlstr.c_str());
+
     try {
 	string::size_type start = xrlstr.find("->");
 	string rspec;
@@ -220,9 +214,8 @@ XRLdb::check_xrl_syntax(const string& xrlstr) const
 XRLMatchType
 XRLdb::check_xrl_exists(const string& xrlstr) const
 {
-#if DEBUG_XRLDB
-    printf("XRLdb: checking xrl exists: %s\n", xrlstr.c_str());
-#endif
+    debug_msg("XRLdb: checking xrl exists: %s\n", xrlstr.c_str());
+
     string::size_type start = xrlstr.find("->");
     string xrlspec;
     string rspec;

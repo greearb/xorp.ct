@@ -12,31 +12,34 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.5 2004/03/09 05:51:52 mjh Exp $
+// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.6 2004/05/10 14:41:09 mjh Exp $
 
-#ifndef __MAIN_RTRMGR_HH__
-#define __MAIN_RTRMGR_HH__
+#ifndef __RTRMGR_MAIN_RTRMGR_HH__
+#define __RTRMGR_MAIN_RTRMGR_HH__
 
 class Rtrmgr {
 public:
     Rtrmgr(const string& template_dir,
-	   const string& xrl_dir,
+	   const string& xrl_targets_dir,
 	   const string& boot_file,
 	   const list<IPv4>& bind_addrs,
 	   uint16_t bind_port,
 	   const string& save_hook,
 	   bool	do_exec,
+	   bool verbose,
 	   int32_t quit_time);
     int run();
     bool ready() const;
-    const string& save_hook() const {return _save_hook;}
+    const string& save_hook() const { return _save_hook; }
+    bool verbose() const { return _verbose; }
+
 private:
     int validate_save_hook();
-    string _template_dir;
-    string _xrl_dir;
-    string _boot_file;
-    list<IPv4> _bind_addrs;
-    uint16_t _bind_port;
+    string	_template_dir;
+    string	_xrl_targets_dir;
+    string	_boot_file;
+    list<IPv4>	_bind_addrs;
+    uint16_t	_bind_port;
 
     /**
      * _save_hook should either be an empty string, or should contain
@@ -49,14 +52,14 @@ private:
      * running out of a memory filesystem,, such as when run from a
      * live CD. 
      */
-    string _save_hook;
+    string	_save_hook;
 
-    bool _do_exec;
-    int32_t _quit_time;
+    bool	_do_exec;
+    bool	_verbose;		// Set to true if output is verbose
+    int32_t	_quit_time;
 
-    bool _ready;
+    bool	_ready;
     MasterConfigTree* _mct;
 };
 
-#endif // __MAIN_RTRMGR_HH__
-
+#endif // __RTRMGR_MAIN_RTRMGR_HH__

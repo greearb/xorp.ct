@@ -12,9 +12,8 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.18 2004/03/20 18:45:32 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.19 2004/05/10 14:41:10 mjh Exp $"
 
-// #define DEBUG_LOGGING
 #include <sys/stat.h>
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -38,7 +37,8 @@ XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter& r, UserDB& userdb,
       _rtrmgr(rtrmgr),
       _exclusive(false),
       _config_locked(false),
-      _lock_holder((uint32_t)-1)
+      _lock_holder((uint32_t)-1),
+      _verbose(rtrmgr.verbose())
 {
 
 }
@@ -123,7 +123,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     //
     filename = "/tmp/rtrmgr-" + clientname;
     mode_t oldmode = umask(S_IRWXG|S_IRWXO);
-    printf("newmode: %o oldmode: %o\n", S_IRWXG|S_IRWXO, oldmode);
+    XLOG_TRACE(_verbose, "newmode: %o oldmode: %o\n",
+	       S_IRWXG|S_IRWXO, oldmode);
 
     FILE* file = fopen(filename.c_str(), "w+");
     if (file == NULL) {
@@ -237,11 +238,11 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
 	response = "You do not have permission for this operation.";
 	return XrlCmdError::COMMAND_FAILED(response);
     }
-    printf("user %d entering config mode\n", user_id);
+    XLOG_TRACE(_verbose, "user %d entering config mode\n", user_id);
     if (exclusive)
-	printf("user requested exclusive config\n");
+	XLOG_TRACE(_verbose, "user requested exclusive config\n");
     else
-	printf("user requested non-exclusive config\n");
+	XLOG_TRACE(_verbose, "user requested non-exclusive config\n");
 
     //
     // If he's asking for exclusive, and we've already got config users,
@@ -280,7 +281,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_leave_config_mode(
 	string err = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
-    printf("user %d leaving config mode\n", get_user_id_from_token(token));
+    XLOG_TRACE(_verbose, "user %d leaving config mode\n",
+	       get_user_id_from_token(token));
     multimap<uint32_t, UserInstance*>::iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
 	if (iter->second->authtoken() == token) {
@@ -359,8 +361,9 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 	return XrlCmdError::COMMAND_FAILED(err);
     }
     // XXX: TBD
-    printf("\nXRL got config change: deltas: \n%s\nend deltas\ndeletions:\n%s\nend deletions\n",
-	   deltas.c_str(), deletions.c_str());
+    XLOG_TRACE(_verbose,
+	       "\nXRL got config change: deltas: \n%s\nend deltas\ndeletions:\n%s\nend deletions\n",
+	       deltas.c_str(), deletions.c_str());
 
     string response;
     if (_conf_tree->apply_deltas(user_id, deltas, 
@@ -398,18 +401,20 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
 					     string deltas,
 					     string deletions)
 {
-    printf("XRL apply_config_change_done:\n  status:%d\n  response: %s\n  target: %s\n",
-	   success, errmsg.c_str(), target.c_str());
+    XLOG_TRACE(_verbose,
+	       "XRL apply_config_change_done:\n  status:%d\n  response: %s\n  target: %s\n",
+	       success, errmsg.c_str(), target.c_str());
 
     if (success) {
 	// Check everything really worked, and finalize the commit
 	if (_conf_tree->check_commit_status(errmsg) == false) {
-	    printf("check commit status indicates failure: >%s<\n",
-		   errmsg.c_str());
+	    XLOG_TRACE(_verbose,
+		       "check commit status indicates failure: >%s<\n",
+		       errmsg.c_str());
 	    success = false;;
 	}
     }  else {
-	printf("request failed: >%s<\n", errmsg.c_str());
+	XLOG_TRACE(_verbose, "request failed: >%s<\n", errmsg.c_str());
     }
 
     GENERIC_CALLBACK cb1;
@@ -445,9 +450,8 @@ void
 XrlRtrmgrInterface::apply_config_change_done_cb(const XrlError& e)
 {
     if (e != XrlError::OKAY()) {
-	fprintf(stderr, 
-		"Failed to notify client that config change was done: %s\n",
-		e.error_msg());
+	XLOG_ERROR("Failed to notify client that config change was done: %s\n",
+		   e.error_msg());
     }
 }
 
@@ -456,9 +460,8 @@ XrlRtrmgrInterface::client_updated(const XrlError& e, uid_t user_id,
 				   UserInstance* user)
 {
     if (e != XrlError::OKAY()) {
-	fprintf(stderr, 
-		"Failed to notify client that config changed: %s\n",
-		e.error_msg());
+	XLOG_ERROR("Failed to notify client that config changed: %s\n",
+		   e.error_msg());
 	if (e != XrlError::COMMAND_FAILED()) {
 	    // We failed to notify the user instance, so we note that
 	    // they are probably dead.  We can't guarantee that the
@@ -660,7 +663,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
 	cb = callback(this, &XrlRtrmgrInterface::apply_config_change_done,
 		      user_id, string(target), 
 		      string(deltas), string(deletions));
-	printf("here1: success\n");
+	debug_msg("here1: success\n");
 	response = "";
 	_conf_tree->commit_changes_pass1(cb);
 	if (_conf_tree->config_failed()) {

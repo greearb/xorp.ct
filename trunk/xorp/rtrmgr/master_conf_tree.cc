@@ -12,10 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.31 2004/05/11 16:50:57 mjh Exp $"
-
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.32 2004/05/22 06:09:06 atanu Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -42,9 +39,10 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
 				   TemplateTree* tt,
 				   ModuleManager& mmgr,
 				   XorpClient& xclient,
-				   bool global_do_exec) throw (InitError)
-    : ConfigTree(tt),
-      _task_manager(*this, mmgr, xclient, global_do_exec),
+				   bool global_do_exec,
+				   bool verbose) throw (InitError)
+    : ConfigTree(tt, verbose),
+      _task_manager(*this, mmgr, xclient, global_do_exec, verbose),
       _commit_in_progress(false),
       _config_failed(false)
 {
@@ -110,7 +108,7 @@ MasterConfigTree::parse(const string& configuration,
 
     string s = show_tree();
     debug_msg("== MasterConfigTree::parse yields ==\n%s\n"
-	   "====================================\n", s.c_str());
+	      "====================================\n", s.c_str());
 
     return true;
 }
@@ -123,13 +121,15 @@ MasterConfigTree::execute()
 
     list<string> changed_modules = find_changed_modules();
     list<string>::const_iterator iter;
-    debug_msg("Changed Modules:\n");
+    string s;
     for (iter = changed_modules.begin();
 	 iter != changed_modules.end();
 	 ++iter) {
-	debug_msg("%s ", (*iter).c_str());
+	if (! s.empty())
+	    s += ", ";
+	s += (*iter);
     }
-    debug_msg("\n");
+    XLOG_INFO("Changed modules: %s", s.c_str());
 
     _commit_cb = callback(this, &MasterConfigTree::config_done);
     commit_changes_pass2();
@@ -138,18 +138,14 @@ MasterConfigTree::execute()
 void
 MasterConfigTree::config_done(bool success, string errmsg)
 {
-    debug_msg("MasterConfigTree::config_done: ");
-
     if (success)
-	debug_msg("success\n");
+	debug_msg("Configuration done: success\n");
     else
-	XLOG_ERROR("fail: %s", errmsg.c_str());
+	XLOG_ERROR("Configuration failed: %s", errmsg.c_str());
 
     _config_failed = !success;
 
-    if (!success) {
-	string msg = "Startup failed (" + errmsg + ")\n";
-	XLOG_ERROR(msg.c_str());
+    if (! success) {
 	_config_failed = true;
 	_config_failed_msg = errmsg;
 	return;
@@ -157,7 +153,7 @@ MasterConfigTree::config_done(bool success, string errmsg)
 
     string errmsg2;
     if (check_commit_status(errmsg2) == false) {
-	XLOG_ERROR(errmsg2.c_str());
+	XLOG_ERROR("%s", errmsg2.c_str());
 	_config_failed = true;
 	_config_failed_msg = errmsg2;
 	return;
@@ -388,7 +384,7 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
     list<string> changed_modules = find_changed_modules();
     list<string> inactive_modules = find_inactive_modules();
     list<string>::const_iterator iter;
-    debug_msg("Changed Modules:\n");
+    debug_msg("Changed modules:\n");
     for (iter = changed_modules.begin();
 	 iter != changed_modules.end();
 	 ++iter) {
@@ -455,7 +451,7 @@ MasterConfigTree::commit_pass1_done(bool success, string result)
 	commit_changes_pass2();
     } else {
 	string msg = "Commit pass 1 failed: " + result;
-	XLOG_WARNING(msg.c_str());
+	XLOG_ERROR("%s", msg.c_str());
 	_commit_cb->dispatch(false, result);
     }
 }
@@ -526,7 +522,7 @@ MasterConfigTree::commit_pass2_done(bool success, string result)
     if (success)
 	debug_msg("## commit seems successful\n");
     else
-	XLOG_ERROR("## commit failed: %s", result.c_str());
+	XLOG_ERROR("Commit failed: %s", result.c_str());
 
     _commit_cb->dispatch(success, result);
     _commit_in_progress = false;
@@ -854,7 +850,7 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     // Test out parsing the config on a new config tree to detect any
     // parse errors before we reconfigure ourselves with the new config.
     //
-    ConfigTree new_tree(_template_tree);
+    ConfigTree new_tree(_template_tree, _verbose);
     if (new_tree.parse(configuration, filename, errmsg) != true)
 	return false;
 
@@ -863,8 +859,8 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     // differs from the existing config so we don't need to modify
     // anything that hasn't changed.
     //
-    ConfigTree delta_tree(_template_tree);
-    ConfigTree deletion_tree(_template_tree);
+    ConfigTree delta_tree(_template_tree, _verbose);
+    ConfigTree deletion_tree(_template_tree, _verbose);
     diff_configs(new_tree, delta_tree, deletion_tree);
 
     string response;
@@ -910,17 +906,17 @@ MasterConfigTree::diff_configs(const ConfigTree& new_tree,
 
     debug_msg("=========================================================\n");
     debug_msg("ORIG:\n");
-    print();
+    debug_msg("%s", tree_str().c_str());
     debug_msg("=========================================================\n");
     debug_msg("NEW:\n");
-    new_tree.print();
+    debug_msg("%s", new_tree.tree_str().c_str());
     debug_msg("=========================================================\n");
     debug_msg("=========================================================\n");
     debug_msg("DELTAS:\n");
-    delta_tree.print();
+    debug_msg("%s", delta_tree.tree_str().c_str());
     debug_msg("=========================================================\n");
     debug_msg("DELETIONS:\n");
-    deletion_tree.print();
+    debug_msg("%s", deletion_tree.tree_str().c_str());
     debug_msg("=========================================================\n");
 
 }
