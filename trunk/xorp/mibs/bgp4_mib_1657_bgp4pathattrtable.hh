@@ -12,9 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
+// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
 
-#ifndef BGP4PATHATTRTABLE_H
-#define BGP4PATHATTRTABLE_H
+
+#ifndef __MIBS_BGP4_MIB_1657_PATHATTRTABLE_HH__
+#define __MIBS_BGP4_MIB_1657_PATHATTRTABLE_HH__
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +32,7 @@ extern "C" {
 #endif
 
 #include <net-snmp/agent/table_array.h>
+#include "fixconfigs.h"
 
 
 /**
@@ -76,4 +79,4 @@ extern size_t bgp4PathAttrTable_oid_len;
 };
 #endif
 
-#endif /** BGP4PATHATTRTABLE_H */
+#endif // __MIBS_BGP4_MIB_1657_PATHATTRTABLE_HH__

@@ -12,18 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$Header$"
+#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
 
-#include "xorp_if_module.h"
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "fixconfigs.h"
+
+#include "xorp_if_module.h"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 
 #include "xorpevents.hh"
-#include "libxorp/xlog.h"
 #include "xorp_if_mib_module.hh"
-
 
 
 void

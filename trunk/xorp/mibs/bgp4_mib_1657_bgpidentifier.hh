@@ -26,4 +26,4 @@ Netsnmp_Node_Handler get_bgpIdentifier;
 
 }
 
-#endif /* __MIBS_BGP4_MIB_1657_BGPIDENTIFIER_HH__ */
+#endif // __MIBS_BGP4_MIB_1657_BGPIDENTIFIER_HH__

@@ -12,11 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
+#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
 
-#include "bgp4_mib_module.h"
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "fixconfigs.h"
+
+#include "bgp4_mib_module.h"
+#include "libxorp/xorp.h"
+
 #include "xorpevents.hh"
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_1657_bgpversion.hh"

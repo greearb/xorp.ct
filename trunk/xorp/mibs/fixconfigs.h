@@ -1,5 +1,4 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
-// vim: set ts=8  sts=4 sw=4:
 
 // Copyright (c) 2001-2003 International Computer Science Institute
 //
@@ -13,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/mibs/fixconfigs.h,v 1.2 2004/03/27 19:07:59 pavlin Exp $
 
 
+//
 // MIB modules include autoconf generated config.h files from both xorp and
 // net-snmp.  This header file resolves the conflicts between the two.  It
-// should be included between the net-snmp and the xorp includes.  Or just
-// ensure that xorpevents.h precedes any other xorp include
+// should be included between the net-snmp and the xorp includes.
+//
 
 #ifdef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT

@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
+// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+
 
 #ifndef __MIBS_BGP4_MIB_1657_HH__
 #define __MIBS_BGP4_MIB_1657_HH__ 
 
-#include "config.h"
 #include <queue>
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"

@@ -74,8 +74,9 @@ xorp_if_mib_module_so_DEPENDENCIES = libnetsnmpxorp.so
 test_xorpevents_SOURCES  = test_xorpevents.cc
 
 # -- Library Sources (libnetsnmpxorp)
-libnetsnmpxorp_so_SOURCES  = xorpevents.cc
+libnetsnmpxorp_so_SOURCES  = xorp_netsnmp_module.h
 libnetsnmpxorp_so_SOURCES += xorpevents.hh
+libnetsnmpxorp_so_SOURCES += xorpevents.cc
  
 # -- Library Sources (bgp4_mib_1657)
 bgp4_mib_1657_so_SOURCES  = bgp4_mib_1657.hh

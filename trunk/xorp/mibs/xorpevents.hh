@@ -12,12 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.9 2004/03/27 16:48:35 jcardona Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.10 2004/03/27 19:11:14 pavlin Exp $
 
 #ifndef __MIBS_XORPEVENTS_HH__
 #define __MIBS_XORPEVENTS_HH__
 
-#include "fixconfigs.h"
 #include <set>
 #include <map>
 #include "libxorp/timeval.hh"
@@ -104,6 +103,5 @@ private:
     static const char * _log_name;
     static SnmpEventLoop _sel;
 };
-
 
 #endif // __MIBS_XORPEVENTS_HH__
