@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.10 2003/04/02 02:53:51 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.11 2003/04/02 17:10:39 hodson Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -124,6 +124,7 @@ public:
     
     /**
      * Apply uniform randomization on the time value of this object.
+     * [deprecated]
      * 
      * The randomized time value is chosen randomly uniform in the interval
      * ( curr_value - factor*curr_value, curr_value + factor*curr_value ).
@@ -395,6 +396,53 @@ inline TimeVal
 TimeVal::MINIMUM()
 {
     return TimeVal(- 0x7fffffff - 1, - (ONE_MILLION - 1));
+}
+
+/**
+ * Generate a TimeVal value from a uniform random distribution between
+ * specified bounds.
+ * @param lower lower bound of generated value.
+ * @param upper upper bound of generated value.
+ * @return value chosen from uniform random distribution.
+ */
+inline TimeVal
+random_uniform(const TimeVal& lower, const TimeVal& upper)
+{
+    double d = (upper - lower).get_double();
+    d *= double(random()) / double(RAND_MAX);
+    return lower + TimeVal(d);
+}
+
+/**
+ * Generate a TimeVal value from a uniform random distribution between
+ * zero and specified bound.
+ * @param upper upper bound of generated value.
+ * @return value chosen from uniform random distribution.
+ */
+inline TimeVal
+random_uniform(const TimeVal& upper)
+{
+    double d = upper.get_double();
+    d *= double(random()) / double(RAND_MAX);
+    return TimeVal(d);
+}
+
+/**
+ * Generate a TimeVal value from a uniform random distribution between
+ * the bounds center - factor * center and center + factor * center.
+ * If the lower bound is less than TimeVal::ZERO() it is rounded up to
+ * TimeVal::ZERO().
+ *
+ * @param center mid-point of generated time value.
+ * @param factor the spread of the uniform random distribution.
+ * @return value chosen from uniform random distribution.
+ */
+inline TimeVal
+positive_random_uniform(const TimeVal& center, const double& factor)
+{
+    TimeVal l = max(center - center * factor, TimeVal::ZERO());
+    TimeVal u = center + center * factor;
+    return random_uniform(l, u);
 }
 
 #endif // __LIBXORP_TIMEVAL_HH__
