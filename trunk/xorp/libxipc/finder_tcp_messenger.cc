@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.2 2003/01/28 00:42:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.3 2003/02/24 19:39:19 hodson Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -334,8 +334,9 @@ FinderNGTcpAutoConnector::do_auto_connect()
 		       _host.str().c_str(), _port, strerror(r));
 	    _consec_error = 0;
 	} else if ((++_consec_error % CONNECT_FAILS_BEFORE_LOGGING) == 0) {
-	    XLOG_ERROR("Failed %d times to connect to %s/%u: %s",
-		       _consec_error, _host.str().c_str(), _port, strerror(r));
+	    XLOG_ERROR("Failed %u times to connect to %s/%u: %s",
+		       (uint32_t)_consec_error, _host.str().c_str(), _port,
+		       strerror(r));
 	    _consec_error = 0;
 	}
 	_connected = false;
