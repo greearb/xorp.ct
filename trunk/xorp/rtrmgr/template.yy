@@ -23,7 +23,6 @@
 %token VARIABLE
 %token VARDEF
 %token LISTNEXT
-%token INITIALIZER
 %token RETURN
 %token TEXT
 %token UINT
@@ -36,6 +35,13 @@
 %token IPV6
 %token IPV6PREFIX
 %token INTEGER
+%token BOOL_INITIALIZER
+%token IPV4_INITIALIZER
+%token IPV4PREFIX_INITIALIZER
+%token IPV6_INITIALIZER
+%token IPV6PREFIX_INITIALIZER
+%token MACADDR_INITIALIZER
+
 
 %%
 input:		/* empty */
@@ -78,12 +84,36 @@ init_type:	TEXT ASSIGN_DEFAULT STRING {
 			tplt_type = NODE_UINT;
 			tplt_initializer = $3;
 		}
-		| BOOL ASSIGN_DEFAULT INITIALIZER {
+		| INT ASSIGN_DEFAULT INTEGER {
+			tplt_type = NODE_INT;
+			tplt_initializer = $3;
+		}
+		| BOOL ASSIGN_DEFAULT BOOL_INITIALIZER {
 			tplt_type = NODE_BOOL;
 			tplt_initializer = $3;
 		}
-		| TOGGLE ASSIGN_DEFAULT INITIALIZER {
+		| TOGGLE ASSIGN_DEFAULT BOOL_INITIALIZER {
 			tplt_type = NODE_TOGGLE;
+			tplt_initializer = $3;
+		}
+		| IPV4 ASSIGN_DEFAULT IPV4_INITIALIZER {
+			tplt_type = NODE_IPV4;
+			tplt_initializer = $3;
+		}
+		| IPV4PREFIX ASSIGN_DEFAULT IPV4PREFIX_INITIALIZER {
+			tplt_type = NODE_IPV4PREFIX;
+			tplt_initializer = $3;
+		}
+		| IPV6 ASSIGN_DEFAULT IPV6_INITIALIZER {
+			tplt_type = NODE_IPV6;
+			tplt_initializer = $3;
+		}
+		| IPV6PREFIX ASSIGN_DEFAULT IPV6PREFIX_INITIALIZER {
+			tplt_type = NODE_IPV6PREFIX;
+			tplt_initializer = $3;
+		}
+		| MACADDR ASSIGN_DEFAULT MACADDR_INITIALIZER {
+			tplt_type = NODE_MACADDR;
 			tplt_initializer = $3;
 		}
 
