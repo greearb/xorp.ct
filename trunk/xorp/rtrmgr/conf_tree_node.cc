@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.26 2003/12/02 09:38:54 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.27 2003/12/04 20:27:11 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -37,6 +37,7 @@ ConfigTreeNode::ConfigTreeNode()
       _parent(NULL),
       _user_id(0),
       _committed_user_id(0),
+      _committed_modification_time(TimeVal::ZERO()),
       _existence_committed(false),
       _value_committed(false),
       _actions_pending(0),
@@ -1044,7 +1045,8 @@ ConfigTreeNode::delete_subtree_silently()
     if (_parent != NULL)
 	_parent->remove_child(this);
 
-    delete this;
+    if (! is_root_node())
+	delete this;
 }
 
 void
