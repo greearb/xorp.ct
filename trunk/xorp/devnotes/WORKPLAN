@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/WORKPLAN,v 1.11 2003/04/02 00:36:44 mjh Exp $
+# $XORP: xorp/devnotes/WORKPLAN,v 1.12 2003/04/15 22:23:27 pavlin Exp $
 #
 
 Priority:
@@ -38,7 +38,7 @@ Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.3:
 * Handle errors as specified in the error doc		H	MH
-* Support for pipelining of requests to FEA		H	AG
+* Support for pipelining of requests to FEA		H(BUG!)	AG
 
 For 0.x:
 * Add route tag support to routing->RIB interface 	M	MH
@@ -55,15 +55,15 @@ Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.3:
 * Correct behaviour on error + tests			H	AG + MH
-* Integration tests 					H	AG
-* Make plan for monitoring interface
+* Integration tests 					Done	AG
 * Finish Kdoc'ing BGP                                   M	as needed
 
 For 0.x:
 * IPv6 support						L	AG
-* Add test for unrecognized optional transitive attributes	H	MH
+* Add test for unrecognized optional transitive attributes H	MH
 * Test harness vs Cisco and Zebra to validate tests     L	AG
 * Monitoring/Instrumentation (show ip bgp, MIB)		H	AG + MH
+
 
 For 1.0:
 * Filters						M	??
@@ -92,13 +92,13 @@ Immediate Tasks                                       Priority Who  Time
 For 0.3:
 * Finish PIM testing (manual)				Done	PR  < 1 month
 * Testing of IGMPv1,2 (manual)				Done	PR  1 weeks
-* RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
-* Commit PIM patches to FreeBSD				H       PR+LR Jan 2003
 * FEA and MFEA merging					H	PR  2w - 1m
-* Integration of PIM/MLD/MFEA and RTRMGR		M	PR  2 weeks
+* Commit PIM patches to FreeBSD				H       PR+LR Jan 2003
 * Finish Kdoc'ing PIM, MLD6IGMP, MFEA			M	PR  background
 
 For 0.x:
+* RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
+* Integration of PIM/MLD/MFEA and RTRMGR		M	PR  2 weeks
 * Framework for regression tests for multicast		H-M	PR+other 1 m
 * IPv6 support and tests for PIM/MLD/MFEA		M	PR  1-1.5m
   - Initial support: e.g. no scoping
@@ -115,11 +115,12 @@ Longer Term tasks
 Immediate Tasks                                       Priority Who
 ---------------                                       -------- ---
 For 0.3:
-* Isolation test suite					H	MH
-* Add target name and instance				H	MH+PR
-* Support for PIM and MLD/IGMP				H	MH+PR
+* Isolation test suite				     PartlyDone	MH
+* Refactoring						H	MH
 
 For 0.x:
+* Add target name and instance				H	MH+PR
+* Support for PIM and MLD/IGMP				H	MH+PR
 
 Longer Term tasks
 -----------------
@@ -146,18 +147,25 @@ Longer Term tasks
 * Rewrite CLI						L	PR  2-3 weeks
 
 ================================ SNMP  =======================================
-* Writing autoconf tests for Net-SNMP			M	JC    2 weeks
-* Write module to make snmpd responsive to XORP events  H	JC    2 weeks
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.3:
+* Document mib development framework			M	JC  < 1 week
+* Sample MIB handling (BGP peers, etc)			H	JC
+
+* Writing autoconf tests for Net-SNMP			Done	JC    2 weeks
+* Write module to make snmpd responsive to XORP events  Done	JC    2 weeks
 * Write bgp4_mib_1657 module				H	JC    3 weeks
 * Write bgp4_mib_1657 tests using Net-SNMP tools	H	JC    1 week
-* Document mib development framework			M	JC  < 1 week
 * Generate Net-SNMP configuration file for XORP		Wish	JC    1 week
 
 ================================ Next Release ================================
-* Next release (xorp-0.3): May 15, 2003
-  - Open CVSWEB for public
-  - Add a wishlist of tasks that other people may choose to do
-  - Add a pointer from the web page to xorp/RELEASE_NOTES
+* Next release (xorp-0.3): May 29, 2003
+  - Add second CVSWEB for public
+  - Write a wishlist of tasks/projects that other people may choose to do
+  - Add a pointer from the web page to xorp/RELEASE_NOTES (PR)
+  - Finder supports target failure registration/notification requests
+  - Defer Finder notifications handling for release-0.4
 
 ================================ Next Stable Release =========================
 * Next stable release (xorp-1.0): ?? ??, 200?
