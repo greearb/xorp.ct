@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.21 2003/09/27 10:42:40 mjh Exp $"
+#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.1 2003/09/27 22:32:45 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -39,6 +39,12 @@ int
 RibManager::stop()
 {
     return 0;
+}
+
+ProcessStatus 
+RibManager::status(string&) const
+{
+    return PROC_READY;
 }
 
 void 
