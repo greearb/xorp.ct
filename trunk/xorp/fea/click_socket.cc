@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.9 2004/12/02 02:37:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.10 2004/12/03 04:59:28 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -85,6 +85,9 @@ int
 ClickSocket::start(string& error_msg)
 {
     if (is_kernel_click()) {
+	if (_fd >= 0)
+	    return (XORP_OK);
+
 	//
 	// Install kernel Click (if necessary)
 	//
@@ -104,7 +107,18 @@ ClickSocket::start(string& error_msg)
 	    }
 	}
 
-	// TODO: XXX: PAVPAVPAV: open extra reader files, etc.
+	//
+	// Open the Click error file (for reading error messages)
+	//
+	string click_error_filename;
+	click_error_filename = _kernel_click_mount_directory + "/errors";
+	_fd = open(click_error_filename.c_str(), O_RDONLY | O_NONBLOCK);
+	if (_fd < 0) {
+	    error_msg = c_format("Cannot open kernel Click error file %s: %s",
+				 click_error_filename.c_str(),
+				 strerror(errno));
+	    return (XORP_ERROR);
+	}
     }
 
     if (is_user_click()) {
@@ -199,7 +213,7 @@ ClickSocket::start(string& error_msg)
 	    // Find the version number and check it.
 	    slash1 = banner.find('/');
 	    if (slash1 == string::npos) {
-		error_msg = c_format("Invalid Click banner: %s",
+		error_msg = c_format("Invalid user-level Click banner: %s",
 				     banner.c_str());
 		goto error_label;
 	    }
@@ -211,7 +225,7 @@ ClickSocket::start(string& error_msg)
 
 	    dot1 = version.find('.');
 	    if (dot1 == string::npos) {
-		error_msg = c_format("Invalid Click version: %s",
+		error_msg = c_format("Invalid user-level Click version: %s",
 				     version.c_str());
 		goto error_label;
 	    }
@@ -224,7 +238,7 @@ ClickSocket::start(string& error_msg)
 	    if ((major < CLICK_MAJOR_VERSION)
 		|| ((major == CLICK_MAJOR_VERSION)
 		    && (minor < CLICK_MINOR_VERSION))) {
-		error_msg = c_format("Invalid Click version: "
+		error_msg = c_format("Invalid user-level Click version: "
 				     "expected at least %d.%d "
 				     "(found %s)",
 			   CLICK_MAJOR_VERSION, CLICK_MINOR_VERSION,
@@ -262,6 +276,13 @@ int
 ClickSocket::stop(string& error_msg)
 {
     if (is_kernel_click()) {
+	//
+	// Close the Click error file (for reading error messages)
+	//
+	if (_fd >= 0) {
+	    close(_fd);
+	    _fd = -1;
+	}
 	if (unmount_click_file_system(error_msg) != XORP_OK) {
 	    string error_msg2;
 	    unload_kernel_click_modules(error_msg2);
@@ -270,8 +291,6 @@ ClickSocket::stop(string& error_msg)
 	if (unload_kernel_click_modules(error_msg) != XORP_OK) {
 	    return (XORP_ERROR);
 	}
-
-	// TODO: XXX: PAVPAVPAV: close extra reader files, etc.
     }
 
     if (is_user_click()) {
@@ -650,7 +669,7 @@ ClickSocket::mount_click_file_system(string& error_msg)
 	    return (XORP_OK);	// Directory already mounted
 	}
 
-	error_msg = c_format("Cannot mount Click on directory %s: "
+	error_msg = c_format("Cannot mount Click file system on directory %s: "
 			     "Click file system already mounted on "
 			     "directory %s",
 			     _kernel_click_mount_directory.c_str(),
@@ -683,7 +702,8 @@ ClickSocket::mount_click_file_system(string& error_msg)
 	if (files_found == click_files.size()) {
 	    return (XORP_OK);	// Directory already mounted
 	}
-	error_msg = c_format("Mount directory contains some Click files");
+	error_msg = c_format("Click file system mount directory contains "
+			     "some Click files");
 	return (XORP_ERROR);
     }
 
@@ -802,24 +822,85 @@ ClickSocket::user_click_command_done_cb(RunCommand* run_command, bool success,
 }
 
 int
-ClickSocket::write_config(const string& handler, const string& data,
-			  string& errmsg)
+ClickSocket::write_config(const string& element, const string& handler,
+			  const string& data, string& errmsg)
 {
     if (is_kernel_click()) {
 	//
-	// TODO: XXX: PAVPAVPAV: implement it.
+	// Prepare the output handler name
 	//
+	string output_handler = element;
+	if (! output_handler.empty())
+	    output_handler += "/" + handler;
+	else
+	    output_handler = handler;
+	output_handler = _kernel_click_mount_directory + "/" + output_handler;
+
+	//
+	// Prepare the socket to write the data
+	//
+	int fd = ::open(output_handler.c_str(), O_WRONLY | O_TRUNC | O_FSYNC);
+	if (fd < 0) {
+	    errmsg = c_format("Cannot open kernel Click handler '%s' "
+			      "for writing: %s",
+			      output_handler.c_str(), strerror(errno));
+	    return (XORP_ERROR);
+	}
+
+	//
+	// Write the data
+	//
+	if (::write(fd, data.c_str(), data.size())
+	    != static_cast<ssize_t>(data.size())) {
+	    errmsg = c_format("Error writing to kernel Click handler '%s': %s",
+			      output_handler.c_str(), strerror(errno));
+	    return (XORP_ERROR);
+	}
+	// XXX: we must close the socket before checking the result
+	close(fd);
+
+	//
+	// Check the command status
+	//
+	char error_buf[8 * 1024];
+	int error_bytes;
+	error_bytes = ::read(_fd, error_buf, sizeof(error_buf));
+	if (error_bytes < 0) {
+	    errmsg = c_format("Error verifying the command status after "
+			      "writing to kernel Click handler: %s",
+			      strerror(errno));
+	    return (XORP_ERROR);
+	}
+	if (error_bytes > 0) {
+	    errmsg = c_format("Kernel Click command error: %s", error_buf);
+	    return (XORP_ERROR);
+	}
     }
 
     if (is_user_click()) {
+	//
+	// Prepare the output handler name
+	//
+	string output_handler = element;
+	if (! output_handler.empty())
+	    output_handler += "." + handler;
+	else
+	    output_handler = handler;
+
+	//
+	// Prepare the data to write
+	//
 	string config = c_format("WRITEDATA %s %u\n",
-				 handler.c_str(),
+				 output_handler.c_str(),
 				 static_cast<uint32_t>(data.size()));
 	config += data;
 
+	//
+	// Write the data
+	//
 	if (ClickSocket::write(config.c_str(), config.size())
 	    != static_cast<ssize_t>(config.size())) {
-	    errmsg = c_format("Error writing to Click socket: %s",
+	    errmsg = c_format("Error writing to user-level Click socket: %s",
 			      strerror(errno));
 	    return (XORP_ERROR);
 	}
@@ -829,20 +910,22 @@ ClickSocket::write_config(const string& handler, const string& data,
 	//
 	bool is_warning, is_error;
 	string command_warning, command_error;
-	if (check_command_status(is_warning, command_warning,
-				 is_error, command_error,
-				 errmsg) != XORP_OK) {
+	if (check_user_command_status(is_warning, command_warning,
+				      is_error, command_error,
+				      errmsg)
+	    != XORP_OK) {
 	    errmsg = c_format("Error verifying the command status after "
-			      "writing to Click socket: %s",
+			      "writing to user-level Click socket: %s",
 			      errmsg.c_str());
 	    return (XORP_ERROR);
 	}
 
 	if (is_warning) {
-	    XLOG_WARNING("Click command warning: %s", command_warning.c_str());
+	    XLOG_WARNING("User-level Click command warning: %s",
+			 command_warning.c_str());
 	}
 	if (is_error) {
-	    errmsg = c_format("Click command error: %s",
+	    errmsg = c_format("User-level Click command error: %s",
 			      command_error.c_str());
 	    return (XORP_ERROR);
 	}
@@ -859,9 +942,11 @@ ClickSocket::write(const void* data, size_t nbytes)
 }
 
 int
-ClickSocket::check_command_status(bool& is_warning, string& command_warning,
-				  bool& is_error, string& command_error,
-				  string& errmsg)
+ClickSocket::check_user_command_status(bool& is_warning,
+				       string& command_warning,
+				       bool& is_error,
+				       string& command_error,
+				       string& errmsg)
 {
     vector<uint8_t> buffer;
 
@@ -899,8 +984,8 @@ ClickSocket::check_command_status(bool& is_warning, string& command_warning,
 	if (is_last_command_response)
 	    break;
 	if (line.size() < CLICK_COMMAND_RESPONSE_MIN_SIZE) {
-	    errmsg = c_format("Command line response is too short "
-			      "(expected min size %u received %u): %s",
+	    errmsg = c_format("User-level Click command line response is too "
+			      "short (expected min size %u received %u): %s",
 			      static_cast<uint32_t>(CLICK_COMMAND_RESPONSE_MIN_SIZE),
 			      static_cast<uint32_t>(line.size()),
 			      line.c_str());
@@ -912,7 +997,7 @@ ClickSocket::check_command_status(bool& is_warning, string& command_warning,
 	//
 	char separator = line[CLICK_COMMAND_RESPONSE_CODE_SEPARATOR_INDEX];
 	if ((separator != ' ') && (separator != '-')) {
-	    errmsg = c_format("Invalid command line response "
+	    errmsg = c_format("Invalid user-level Click command line response "
 			      "(missing code separator): %s",
 			      line.c_str());
 	    return (XORP_ERROR);
@@ -943,7 +1028,8 @@ ClickSocket::check_command_status(bool& is_warning, string& command_warning,
 	}
 
 	// Unknown error code
-	errmsg = c_format("Unknown error code: %s", line.c_str());
+	errmsg = c_format("Unknown user-level Click error code: %s",
+			  line.c_str());
 	return (XORP_ERROR);
     }
 

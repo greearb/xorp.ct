@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.8 2004/12/01 03:28:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.9 2004/12/03 03:52:38 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -256,9 +256,11 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
 			     fte.net().str().c_str(),
 			     fte.nexthop().str().c_str(),
 			     port);
-    string handler = "_xorp_rt.add";
+    string element = "_xorp_rt";
+    string handler = "add";
     string errmsg;
-    if (ClickSocket::write_config(handler, config, errmsg) != XORP_OK) {
+    if (ClickSocket::write_config(element, handler, config, errmsg)
+	!= XORP_OK) {
 	XLOG_ERROR("%s", errmsg.c_str());
 	return (false);
     }
@@ -324,9 +326,11 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 			     fte.net().str().c_str(),
 			     fte.nexthop().str().c_str(),
 			     port);
-    string handler = "_xorp_rt.remove";
+    string element = "_xorp_rt";
+    string handler = "remove";
     string errmsg;
-    if (ClickSocket::write_config(handler, config, errmsg) != XORP_OK) {
+    if (ClickSocket::write_config(element, handler, config, errmsg)
+	!= XORP_OK) {
 	XLOG_ERROR("%s", errmsg.c_str());
 	return (false);
     }

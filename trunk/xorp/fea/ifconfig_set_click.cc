@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.10 2004/12/01 03:28:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.11 2004/12/01 03:48:27 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -750,9 +750,10 @@ IfConfigSetClick::click_config_generator_done_cb(RunCommand* run_command,
 int
 IfConfigSetClick::write_generated_config(const string& config, string& errmsg)
 {
+    string element = "";
     string handler = "hotconfig";
 
-    if (ClickSocket::write_config(handler, config, errmsg) != XORP_OK)
+    if (ClickSocket::write_config(element, handler, config, errmsg) != XORP_OK)
 	return (XORP_ERROR);
 
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.9 2004/12/02 07:02:38 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.10 2004/12/03 04:59:28 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -225,13 +225,16 @@ public:
     /**
      * Write Click configuration.
      *
+     * @param element the Click element to write the configuration to. If it
+     * is an empty string, then we use only the @see handler to write the
+     * configuration.
      * @param handler the Click handler to write the configuration to.
      * @param data the configuration data to write.
      * @param errmsg the error message (if an error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int write_config(const string& handler, const string& data,
-		     string& errmsg);
+    int write_config(const string& element, const string& handler,
+		     const string& data, string& errmsg);
 
     /**
      * Write data to Click socket.
@@ -256,9 +259,9 @@ public:
      * the error message with the reason.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int check_command_status(bool& is_warning, string& command_warning,
-			     bool& is_error, string& command_error,
-			     string& errmsg);
+    int check_user_command_status(bool& is_warning, string& command_warning,
+				  bool& is_error, string& command_error,
+				  string& errmsg);
 
     /**
      * Get the sequence number for next message written into Click.
