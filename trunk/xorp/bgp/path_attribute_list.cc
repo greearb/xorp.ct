@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute_list.cc,v 1.5 2003/01/26 17:22:00 rizzo Exp $"
+#ident "$XORP$"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -54,84 +54,55 @@ PathAttributeList<A>::PathAttributeList<A>(const PathAttributeList<A>& palist)
     _aspath_att = NULL;
     _origin_att = NULL;
     const_iterator i = palist._att_list.begin();
-    while (i != palist._att_list.end()) {
+    for ( ; i != palist._att_list.end() ; ++i)
 	add_path_attribute(**i);
-	++i;
-    }
     rehash();
 }
 
 template<class A>
 PathAttributeList<A>::~PathAttributeList<A>()
 {
-    const_iterator i = _att_list.begin();
-    while (i != _att_list.end()) {
+    debug_msg("++ ~PathAttributeList delete:\n%s\n", str().c_str());
+    for (const_iterator i = _att_list.begin(); i != _att_list.end() ; ++i)
 	delete (*i);
-	++i;
-    }
-    _nexthop_att = (NextHopAttribute<A>*)0xd0d0;
-    _aspath_att = (ASPathAttribute*)0xd0d0;
-    _origin_att = (OriginAttribute*)0xd0d0;
 }
 
 template<class A>
 void
 PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 {
-    PathAttribute *new_att = NULL;
-    // store a reference to the mandatory attributes
+    size_t l;
+    PathAttribute *a = PathAttribute::create(att.data(), att.size(), l);
+    // store a reference to the mandatory attributes, ignore others
     switch (att.type()) {
+    default:
+	break;
+
     case ORIGIN:
-	_origin_att = new OriginAttribute((const OriginAttribute&)att);
-	new_att = _origin_att;
+	_origin_att = (OriginAttribute *)a;
 	break;
+
     case AS_PATH:
-	_aspath_att = new ASPathAttribute((const ASPathAttribute&)att);
-	new_att = _aspath_att;
+	_aspath_att = (ASPathAttribute *)a;
 	break;
+
     case NEXT_HOP:
-	_nexthop_att =
-	    new NextHopAttribute<A>((const NextHopAttribute<A>&)att);
-	new_att = _nexthop_att;
-	break;
-    case MED:
-	new_att = new MEDAttribute((const MEDAttribute&)att);
-	break;
-    case LOCAL_PREF:
-	new_att = new LocalPrefAttribute((const LocalPrefAttribute&)att);
-	break;
-    case ATOMIC_AGGREGATE:
-	new_att = new AtomicAggAttribute((const AtomicAggAttribute&)att);
-	break;
-    case AGGREGATOR:
-	new_att =
-	    new AggregatorAttribute((const AggregatorAttribute&)att);
-	break;
-    case COMMUNITY:
-	new_att =
-	    new CommunityAttribute((const CommunityAttribute&)att);
-	break;
-    case UNKNOWN:
-	new_att =
-	    new UnknownAttribute((const UnknownAttribute&)att);
+	_nexthop_att = (NextHopAttribute<A> *)a;
 	break;
     }
-    if (new_att != NULL) {
-	// Keep the list sorted
-	if (_att_list.empty()) {
-	    _att_list.push_back(new_att);
-	} else {
-	    iterator i;
-	    for (i = _att_list.begin(); i != _att_list.end(); i++) {
-		if ((*i)->sorttype() > att.sorttype()) {
-		    _att_list.insert(i, new_att);
-		    memset(_hash, 0, 16);
-		    return;
-		}
+    // Keep the list sorted
+    debug_msg("++ add_path_attribute %s\n", att.str().c_str());
+    if (!_att_list.empty()) {
+	iterator i;
+	for (i = _att_list.begin(); i != _att_list.end(); i++)
+	    if ( *(*i) > *a) {
+		_att_list.insert(i, a);
+		memset(_hash, 0, 16);
+		return;
 	    }
-	    _att_list.push_back(new_att);
-	}
     }
+    // list empty, or tail insertion:
+    _att_list.push_back(a);
     memset(_hash, 0, 16);
 }
 
@@ -140,16 +111,8 @@ string
 PathAttributeList<A>::str() const
 {
     string s;
-#if 0
-    s = _nexthop_att->str() + "\n";
-    s += _aspath_att->str() + "\n";
-    s += _origin_att->str() + "\n";
-#endif
-    const_iterator i = _att_list.begin();
-    while (i != _att_list.end()) {
+    for (const_iterator i = _att_list.begin(); i != _att_list.end() ; ++i)
 	s += (*i)->str() + "\n";
-	++i;
-    }
     return s;
 }
 
@@ -159,10 +122,8 @@ PathAttributeList<A>::rehash()
 {
     MD5_CTX context;
     MD5Init(&context);
-    const_iterator i;
-    for (i = _att_list.begin(); i != _att_list.end(); i++) {
+    for (const_iterator i = _att_list.begin(); i != _att_list.end(); i++)
 	(*i)->add_hash(&context);
-    }
     MD5Final(_hash, &context);
 }
 
@@ -171,9 +132,9 @@ bool
 PathAttributeList<A>::
 operator< (const PathAttributeList<A> &him) const
 {
-    // XXX we should be using hashes, not direct comparisons!
     assert_rehash();
     him.assert_rehash();
+    debug_msg("PathAttributeList operator< %p %p\n", this, &him);
     if ((*_nexthop_att) < (*(him._nexthop_att)))
         return true;
     if ((*(him._nexthop_att)) < (*_nexthop_att))
@@ -182,11 +143,11 @@ operator< (const PathAttributeList<A> &him) const
         return true;
     if (him._att_list.size() < _att_list.size())
         return false;
-    return (memcmp(_hash, him.hash(), 16) < 0);
+//    return (memcmp(_hash, him.hash(), 16) < 0);
 
     const_iterator my_i = _att_list.begin();
     const_iterator his_i = him.att_list().begin();
-    while (1) {
+    for (;;) {
 	// are they equal.
 	if ((my_i == _att_list.end()) && (his_i == him.att_list().end())) {
 	    return false;
@@ -214,23 +175,39 @@ bool
 PathAttributeList<A>::
 operator == (const PathAttributeList<A> &him) const
 {
+    debug_msg("PathAttributeList operator== %p %p\n", this, &him);
     assert_rehash();
     him.assert_rehash();
-    if (memcmp(_hash, him.hash(), 16) == 0)
-	return true;
-    return false;
+    return (memcmp(_hash, him.hash(), 16) == 0);
 }
 
 template<class A>
 void
-PathAttributeList<A>::replace_attribute(PathAttribute* new_att,
-					PathAttType type)
+PathAttributeList<A>::replace_attribute(PathAttribute* new_att)
 {
+    PathAttType type = new_att->type();
+
+    switch (new_att->type()) {
+    default:
+	break;
+
+    case ORIGIN:
+	_origin_att = (OriginAttribute *)new_att;
+	break;
+
+    case AS_PATH:
+	_aspath_att = (ASPathAttribute *)new_att;
+	break;
+
+    case NEXT_HOP:
+	_nexthop_att = (NextHopAttribute<A> *)new_att;
+	break;
+    }
+
     debug_msg("Replace attribute\n");
     debug_msg("Before: \n%s\n", str().c_str());
     debug_msg("New Att: %s\n", new_att->str().c_str());
-    iterator i = _att_list.begin();
-    while (i != _att_list.end()) {
+    for (iterator i = _att_list.begin(); i != _att_list.end() ; ++i)
 	if ((*i)->type() == type) {
 	    _att_list.insert(i, new_att);
 	    delete (*i);
@@ -239,8 +216,6 @@ PathAttributeList<A>::replace_attribute(PathAttribute* new_att,
 	    memset(_hash, 0, 16);
 	    return;
 	}
-	++i;
-    }
     abort();
 }
 
@@ -248,18 +223,14 @@ template<class A>
 void
 PathAttributeList<A>::replace_AS_path(const AsPath& new_as_path)
 {
-    ASPathAttribute *aspath_att = new ASPathAttribute(new_as_path);
-    _aspath_att = aspath_att;
-    replace_attribute(aspath_att, AS_PATH);
+    replace_attribute(new ASPathAttribute(new_as_path));
 }
 
 template<class A>
 void
 PathAttributeList<A>::replace_nexthop(const A& new_nexthop)
 {
-    NextHopAttribute<A> *nh_att = new NextHopAttribute<A>(new_nexthop);
-    _nexthop_att = nh_att;
-    replace_attribute(nh_att, NEXT_HOP);
+    replace_attribute(new NextHopAttribute<A>(new_nexthop));
 }
 
 template<class A>
@@ -282,13 +253,10 @@ template<class A>
 const PathAttribute*
 PathAttributeList<A>::find_attribute_by_type(PathAttType type) const
 {
-    // we only remove the first instance of an attribute with matching type
     const_iterator i;
-    for (i = _att_list.begin(); i != _att_list.end(); i++) {
-	if ((*i)->type() == type) {
+    for (i = _att_list.begin(); i != _att_list.end(); i++)
+	if ((*i)->type() == type)
 	    return *i;
-	}
-    }
     return NULL;
 }
 
@@ -304,7 +272,7 @@ const LocalPrefAttribute*
 PathAttributeList<A>::local_pref_att() const 
 {
     return dynamic_cast<const LocalPrefAttribute*>(
-               find_attribute_by_type(LOCAL_PREF));
+		find_attribute_by_type(LOCAL_PREF));
 }
 
 template<class A>
@@ -312,7 +280,7 @@ const AtomicAggAttribute*
 PathAttributeList<A>::atomic_aggregate_att() const 
 {
     return dynamic_cast<const AtomicAggAttribute*>(
-               find_attribute_by_type(ATOMIC_AGGREGATE));
+	find_attribute_by_type(ATOMIC_AGGREGATE));
 }
 
 template<class A>
@@ -320,7 +288,7 @@ const AggregatorAttribute*
 PathAttributeList<A>::aggregator_att() const 
 {
     return dynamic_cast<const AggregatorAttribute*>(
-              find_attribute_by_type(AGGREGATOR));
+	find_attribute_by_type(AGGREGATOR));
 }
 
 /*
@@ -342,11 +310,3 @@ PathAttributeList<A>::assert_rehash() const
 
 template class PathAttributeList<IPv4>;
 template class PathAttributeList<IPv6>;
-
-
-
-
-
-
-
-

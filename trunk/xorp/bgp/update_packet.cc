@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.10 2003/01/26 04:06:18 pavlin Exp $"
+#ident "$XORP$"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -73,61 +73,10 @@ UpdatePacket::add_nlri(const NetLayerReachability& nlri)
 void
 UpdatePacket::add_pathatt(const PathAttribute& pa)
 {
-    PathAttribute *attribute;
-    switch (pa.type()) {
-    case ORIGIN:
-	attribute = new OriginAttribute((const OriginAttribute&)pa);
-	break;
-    case AS_PATH:
-	attribute = new ASPathAttribute((const ASPathAttribute&)pa);
-	break;
-    case NEXT_HOP: {
-	/*
-	 * We know pa is a NextHopAttribute, but we don't know if
-	 * it's the IPv4 version or the IPv6 version.  We need to use
-	 * dynamic_cast to find out.  
-         */
-	const NextHopAttribute<IPv4> *v4nh;
-	v4nh = dynamic_cast<const NextHopAttribute<IPv4>*>(&pa);
-	if (v4nh != NULL) {
-	    attribute = 
-		new NextHopAttribute<IPv4>((const NextHopAttribute<IPv4>&)pa);
-	    break;
-	} 
-	const NextHopAttribute<IPv6> *v6nh;
-	v6nh = dynamic_cast<const NextHopAttribute<IPv6>*>(&pa);
-	if (v6nh != NULL) {
-	    attribute = 
-		new NextHopAttribute<IPv6>((const NextHopAttribute<IPv6>&)pa);
-	    break;
-	} 
-	abort();
-    }
-    case MED:
-	attribute = new MEDAttribute((const MEDAttribute&)pa);
-	break;
-    case LOCAL_PREF:
-	attribute = new LocalPrefAttribute((const LocalPrefAttribute&)pa);
-	break;
-    case ATOMIC_AGGREGATE:
-	attribute = 
-	    new AtomicAggAttribute((const AtomicAggAttribute&)pa);
-	break;
-    case AGGREGATOR:
-	attribute = 
-	    new AggregatorAttribute((const AggregatorAttribute&)pa);
-	break;
-    case COMMUNITY:
-	attribute = 
-	    new CommunityAttribute((const CommunityAttribute&)pa);
-	break;
-    case UNKNOWN:
-	attribute = 
-	    new UnknownAttribute((const UnknownAttribute&)pa);
-	break;
-    }	
-	
-    _att_list.push_back(attribute);
+    size_t l;
+    PathAttribute *a = PathAttribute::create(pa.data(), pa.size(), l);
+
+    _att_list.push_back(a);
 }
 
 void
@@ -146,8 +95,8 @@ UpdatePacket::big_enough() const
 
     //quick and dirty check
     if (((_withdrawn_list.size() + _nlri_list.size())* 4) > 2048) {
-	debug_msg("withdrawn size = %u\n", (uint32_t)_withdrawn_list.size());
-	debug_msg("nlri size = %u\n", (uint32_t)_withdrawn_list.size());
+	debug_msg("withdrawn size = %d\n", _withdrawn_list.size());
+	debug_msg("nlri size = %d\n", _withdrawn_list.size());
 	return true;
     }
     return false;
@@ -159,9 +108,8 @@ UpdatePacket::encode(size_t &len) const
     int size = 5 + _att_list.size() + 
 	(2*_withdrawn_list.size()) +(2*_nlri_list.size()); 
     int position = 2; // counter only starts after marker and length have been set.
-    debug_msg("Path Att: %u Withdrawn Routes: %u Net Reach: %u size: %d\n",
-	      (uint32_t)_att_list.size(), (uint32_t)_withdrawn_list.size(),
-	      (uint32_t)_nlri_list.size(), size);
+    debug_msg("Path Att: %d Withdrawn Routes: %d Net Reach: %d size: %d\n",
+	      _att_list.size(),_withdrawn_list.size(),_nlri_list.size(), size);
 	
     XLOG_ASSERT(0 == _nlri_list.size() || 0 != _att_list.size());
 
@@ -188,7 +136,7 @@ UpdatePacket::encode(size_t &len) const
     list <BGPWithdrawnRoute>::const_iterator wi = _withdrawn_list.begin();
     while (wi != _withdrawn_list.end()) {
 	assert(position < size);
-	io[position].iov_base =
+	io[position].iov_base = 
 	    (char *)(const_cast<uint8_t*>(wi->get_size()));
 	io[position].iov_len = 1;
 	position++;
@@ -211,10 +159,10 @@ UpdatePacket::encode(size_t &len) const
     while(pai != _att_list.end()) {
 	PathAttribute* pa = *pai;
 	debug_msg("Looping through path attributes\n");
-	io[position].iov_base = 
-	    (char *)const_cast<uint8_t *>(pa->encode_and_get_data());
+	io[position].iov_base =
+		(char *)const_cast<uint8_t *>( pa->data());
 	io[position].iov_len = pa->size();
-	path_size = path_size + pa->size();
+	path_size += pa->size();
 	position++;
 	++pai;
     }	
@@ -224,7 +172,7 @@ UpdatePacket::encode(size_t &len) const
     list <NetLayerReachability>::const_iterator ni = _nlri_list.begin();
     while (ni != _nlri_list.end()) {
 	assert(position < size);
-	io[position].iov_base = // XXX what ?>>
+	io[position].iov_base = 
 	    (char *)const_cast<uint8_t *>(ni->get_size());		
 	io[position].iov_len = 1;
 	position++;
@@ -255,15 +203,15 @@ UpdatePacket::encode(size_t &len) const
     total_size = total_size + 2;
 	
     if (total_size < MINPACKETSIZE || total_size > MAXPACKETSIZE) {
-	debug_msg("Throw exception packet length invalid (%u)\n",
-		  (uint32_t)total_size);
+	debug_msg("Throw exception packet length invalid (%d)\n",
+		  total_size);
 	XLOG_FATAL("Attempt to encode a packet that is too big");
     }
     uint16_t net_total_size = total_size;
     net_total_size = htons(net_total_size);
     io[1].iov_base = (char *)&net_total_size;
     io[1].iov_len = 2;
-    debug_msg("size %d total_size %u\n", size, (uint32_t)total_size);
+    debug_msg("size %d total_size %d\n",size,total_size);
 
     return flatten(&io[0], size, len);
 }
@@ -307,7 +255,7 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
 	//done elsewhere
 	if ((bytes > (uint)urlength) || (bytes > 4))
 	    xorp_throw(CorruptMessage,
-		   c_format("inconsistent length %u %d", (uint32_t)bytes, urlength),
+		   c_format("inconsistent length %d %d", bytes, urlength),
 		   UPDATEMSGERR, ATTRLEN);
 	data++;
 
@@ -338,88 +286,23 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
 		   c_format("negative length %d", nlength),
 		   UPDATEMSGERR, ATTRLEN);
     
-    data = data + sizeof(uint16_t); // move passed Total Path Attributes Length field
+    data += 2; // move past Total Path Attributes Length field
 	
-    uint8_t paflags = 0; // Parameter flags
-    size_t palength = 0; // Parameter length
-    uint8_t pa_type; // Parameter type
-    size_t shift = 0; // if extended Parameter need to shift by 3 instead of 4.
-
-    PathAttribute* pa_temp = NULL;
-
     assert(_att_list.size() == 0);
 
     assert(plength >= 0);
     while (plength > 0) {
-	paflags = (uint8_t &)(*data);
-	if ((paflags & 0x10) == 0x10) {
-	    palength = (uint16_t &)*(data + 2*sizeof(uint8_t));
-	    shift = 4;
-	} else {
-	    palength = (uint8_t &)*(data + 2*sizeof(uint8_t));
-	    shift = 3;
-	}
-	if (palength + shift > (uint)plength)
+	size_t used = 0;
+        PathAttribute *pa = PathAttribute::create(data, plength, used);
+	debug_msg("attribute size %d\n", used);
+	if (used == 0)
 	    xorp_throw(CorruptMessage,
-		       c_format("inconsistent length %u %d",
-				(uint32_t)(palength + shift),
-				plength),
-		       UPDATEMSGERR, ATTRLEN);
+		   c_format("failed to read path attribute"),
+		   UPDATEMSGERR, ATTRLEN);
 
-	debug_msg("palength=%u\n", (uint32_t)palength);
-
-	// get the path parameter type.
-	pa_type = (uint8_t &)*(data + sizeof(uint8_t));
-	switch (pa_type) {
-	case ORIGIN:
-	    pa_temp = new OriginAttribute(data,palength+shift);
-	    break;
-
-	case AS_PATH:
-	    pa_temp = new ASPathAttribute(data,palength+shift);
-	    break;
-
-	case NEXT_HOP:
-	    pa_temp = new IPv4NextHopAttribute(data,palength+shift);
-	    break;
-
-	case MED:
-	    pa_temp = new MEDAttribute(data,palength+shift);
-	    break;
-
-	case LOCAL_PREF:
-	    pa_temp = new LocalPrefAttribute(data,palength+shift);
-	    break;
-
-	case ATOMIC_AGGREGATE:
-	    pa_temp = new AtomicAggAttribute(data,palength+shift);
-	    break;
-
-	case AGGREGATOR:
-	    pa_temp = new AggregatorAttribute(data,palength+shift);
-	    break;
-
-	case COMMUNITY:
-	    pa_temp = new CommunityAttribute(data,palength+shift);
-	    break;
-
-	default:
-	    //this will throw an error if the attribute isn't
-	    //optional transitive.
-	    pa_temp = new UnknownAttribute(data,palength+shift);
-	    break;
-	}
-
-	_att_list.push_back(pa_temp);
-	debug_msg("plength %d, palength %u, shift %u, pathatt size %u\n",
-		  plength, (uint32_t)palength, (uint32_t)shift,
-		  (uint32_t)_att_list.size());
-	data = data + palength + shift;
-	plength = plength - (palength + shift);
-	debug_msg("plength %d, palength %u, shift %u, pathatt size %u\n",
-		  plength, (uint32_t)palength, (uint32_t)shift,
-		  (uint32_t)_att_list.size());
-	dump_bytes(data,10);
+	_att_list.push_back(pa);
+	data += used;
+	plength -= used;
     }
     if (plength < 0)
 	xorp_throw(CorruptMessage,
@@ -435,11 +318,10 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
     while (nlength > 0) {
 	nnlength = (uint8_t &)(*data);
 	bytes = (nnlength+7)/8;
-	debug_msg("bits: %u bytes: %u\n", (uint32_t)nnlength, (uint32_t)bytes);
+	debug_msg("bits: %d bytes: %d\n", nnlength, bytes);
 	if ((bytes > (uint)nlength) || (bytes > 4))
 	    xorp_throw(CorruptMessage,
-		       c_format("inconsistent length %u %d", (uint32_t)bytes,
-				nlength),
+		       c_format("inconsistent length %d %d", bytes, nlength),
 		       UPDATEMSGERR, ATTRLEN);
 	data++;
 	nlength--;
@@ -462,20 +344,20 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
 		   UPDATEMSGERR, ATTRLEN);
 	
     /* End of decoding of Network Reachability */
-    debug_msg("No of withdrawn routes %u. No of path attributes %u. "
-	      "No of networks %u.\n",
-	      (uint32_t)_withdrawn_list.size(), (uint32_t)_att_list.size(),
-	      (uint32_t)_nlri_list.size());
+    debug_msg("No of withdrawn routes %d. No of path attributes %d. "
+		"No of networks %d.\n",
+		  _withdrawn_list.size(), _att_list.size(),
+		  _nlri_list.size());
 }
 
 string
 UpdatePacket::str() const
 {
     string s = "Update Packet\n";
-    debug_msg("No of withdrawn routes %u. No of path attributes %u. "
-	      "No of networks %u.\n",
-	      (uint32_t)_withdrawn_list.size(), (uint32_t)_att_list.size(),
-	      (uint32_t)_nlri_list.size());
+    debug_msg("No of withdrawn routes %d. No of path attributes %d. "
+		"No of networks %d.\n",
+	      _withdrawn_list.size(), _att_list.size(),
+	      _nlri_list.size());
 
     list <BGPWithdrawnRoute>::const_iterator wi = _withdrawn_list.begin();
     while (wi != _withdrawn_list.end()) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.6 2003/01/26 17:55:48 rizzo Exp $
+// $XORP$
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -25,7 +25,8 @@
 #include "config.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
-#include "exceptions.hh"       // for CorruptMessage exception
+#include "exceptions.hh"	// for CorruptMessage exception
+
 #include "aspath.hh"
 #include "md5.h"
 
@@ -43,10 +44,9 @@
  * represent the various attributes.
  * A PathAttribute object of a given type can be created explicitly,
  * using one of the constructors, and then adding components to it;
- *
- * (XXX this is still to be implemented)
  * or it can be created by calling the create() method on a block
  * of data received from the wire.
+ *
  * In addition to the parsed components (next hops, AS numbers and paths,
  * and various other attributes), the objects always contain the wire
  * representation of the object, a pointer to which is accessible with
@@ -67,31 +67,7 @@ enum PathAttType {
     UNKNOWN = 255
 };
 
-// PathAttSortType is only used in sorting a path attribute list - it's
-// different from PathAttType because we want to sort the path
-// attribute list on NextHop for less expensive processing when the IGP
-// information for a nexthop changes.
-typedef uint8_t  PathAttSortType;
-
-#define SORT_NEXT_HOP  1
-#define SORT_ORIGIN  2
-#define SORT_AS_PATH  3
-#define SORT_MED  4
-#define SORT_LOCAL_PREF  5
-#define SORT_ATOMIC_AGGREGATE 6
-#define SORT_AGGREGATOR 7
-#define SORT_COMMUNITY 8
-
-
-//Origin values
-enum OriginType {
-    IGP = 0,
-    EGP = 1,
-    INCOMPLETE = 2
-};
-
-class PathAttribute
-{
+class PathAttribute {
 public:
     enum Flags {
 	Optional	= 0x80,
@@ -102,36 +78,72 @@ public:
 	NoFlags		= 0
     };
 
-    PathAttribute(uint8_t f) : _data(0), _attribute_length(0), _length(0) {
-	set_flags(f);
-    }
+    /**
+     * main routine to create a PathAttribute from incoming data.
+     * Takes a chunk of memory of size l, returns an object of the
+     * appropriate type and actual_length is the number of bytes used
+     * from the packet.
+     * Throws an exception on error.
+     */
+    static PathAttribute *create(const uint8_t* d, uint16_t max_len,
+                size_t& actual_length) throw(CorruptMessage);
 
+    /*
+     * The destructor, invoked after the derived class' destructors,
+     * frees the internal representation of the object.
+     */
     virtual ~PathAttribute()			{ delete[] _data; }
-    virtual void encode() = 0;
-    virtual void decode() = 0;
-    virtual const PathAttType type() const = 0;
-    virtual const PathAttSortType sorttype() const = 0;
-    virtual void add_hash(MD5_CTX *context);
 
-    const uint8_t * encode_and_get_data();
-    const uint8_t * data() const {
-	assert(_data != NULL);
+    /*@
+     * @return a pointer to the wire representation of the packet.
+     */
+    const uint8_t *data() const			{
+	assert( _data != 0 );
 	return _data;
     }
-    uint16_t size() const			{ return _length; }
 
-    void pretty_print();
+    /**
+     * @return the size of the wire representation.
+     */
+    size_t size() const				{
+	return _size + header_size();
+    }
 
-    void dump();
-    uint8_t flags() const			{ return _flags; }
-    void set_flags(const uint8_t f)		{
-	assert ( (f & ValidFlags) == f);
-	_flags = f;
+    /**
+     * @return the size of the header.
+     */
+    size_t header_size() const				{
+	return extended() ? 4 : 3;
+    }
+    /**
+     * @return the type of the attribute
+     */
+    PathAttType type() const			{ return (PathAttType)_type; }
+
+    /**
+     * @return the flags for the attribute
+     */
+    Flags flags() const				{ return (Flags)_flags; }
+
+    /**
+     * comparison operators are used to sort attributes.
+     * Right now the sort order is based on the type,
+     * size() and payload representation.
+     */
+    bool operator<(const PathAttribute& him) const;
+    bool operator==(const PathAttribute& him) const;
+
+    /**
+     * compute the hash for this object.
+     */
+    void add_hash(MD5_CTX *context) const	{
+	MD5Update(context, data(), size());
     }
 
     virtual string str() const;
-    bool operator<(const PathAttribute& him) const;
-    bool operator==(const PathAttribute& him) const;
+
+    void pretty_print();
+
     bool optional() const			{ return _flags & Optional; }
     bool transitive() const			{ return _flags & Transitive; }
     bool partial() const			{ return _flags & Partial; }
@@ -139,144 +151,180 @@ public:
     bool well_known() const			{ return !optional(); }
 
 protected:
-    const uint8_t* _data; // data includes the PathAttribute header
+    /**
+     * sorttype() is only used in sorting a path attribute list.
+     * It is different from PathAttType because we want to sort the path
+     * attribute list on NextHop for less expensive processing when the IGP
+     * information for a nexthop changes.
+     * So we give priority to NEXT_HOP and keep other values unchanged.
+     */
+    const int sorttype() const			{
+	return type() == NEXT_HOP ? -1 : type();
+    }
 
-    uint16_t _attribute_length; // the length of the attribute, minus
-                                // the PathAttribute header
-    uint8_t _length; // the length of the _data buffer (ie the
-                             // attribute data plus the PathAttribute header
+    /**
+     * helper constructor used when creating an object from a derived class.
+     * NOTE: it does not provide a usable object as _data is invalid.
+     */
+    PathAttribute(Flags f, PathAttType t)
+	    : _size(0), _data(0),
+		_flags(f & ValidFlags), _type(t)	{}
+
+    /**
+     * basic constructor from data, assumes that the block has at least the
+     * required size.
+     * NOTE: it does not provide a usable object as _data is invalid.
+     */
+    PathAttribute(const uint8_t *d)
+	    : _size(length(d)), _data(0),
+		_flags(d[0] & ValidFlags), _type(d[1])	{}
+
+    /**
+     * helper function to fill the header. Needs _flags and _type
+     * properly initialized, overwrites _size and _data by allocating a
+     * new block of appropriate size (payload_size + 3 or 4 header bytes).
+     */
+    uint8_t *set_header(size_t payload_size);
+
+    /**
+     * fetch the length from the header. Assume the header is there.
+     */
+    static size_t length(const uint8_t* d)	{
+	return (d[0] & Extended) ?
+		( (d[2]<<8) + d[3] ) : d[2] ;
+    }
+
+    // helper function returning a pointer to the payload
+    const uint8_t *payload(const uint8_t *d)	{
+	return d + ((d[0] & Extended) ? 4 : 3);
+    }
+
+    // storage for information in the attribute.
+
+    size_t	_size;	// this is only the size of the payload.
+    uint8_t *	_data;	// wire representation
     uint8_t	_flags;
+    uint8_t	_type;
+
 private:
-    PathAttribute();	// not allowed.
+    PathAttribute();	// forbidden
+    PathAttribute(const PathAttribute &); // forbidden
+    PathAttribute& operator=(const PathAttribute &); // forbidden
 };
+
+
+// Origin values
+enum OriginType {
+    IGP = 0,
+    EGP = 1,
+    INCOMPLETE = 2
+};
+
+/**
+ * OriginAttribute has a payload of size 1 containing the origin type.
+ */
 
 class OriginAttribute : public PathAttribute
 {
 public:
     OriginAttribute(OriginType t);
-    OriginAttribute(const OriginAttribute& origin);
-    OriginAttribute(const uint8_t* d, uint16_t l);
-    void encode();
-    void decode();
-    void add_hash(MD5_CTX *context);
-    const PathAttType type() const { return ORIGIN; }
-    const PathAttSortType sorttype() const { return SORT_ORIGIN; }
-    OriginType origintype() const { return _origin; }
+    OriginAttribute(const uint8_t* d) throw(CorruptMessage);
     string str() const;
-    bool operator<(const OriginAttribute& him) const {
-	return (_origin < him.origintype());
-    }
-    bool operator==(const OriginAttribute& him) const {
-	return (_origin == him.origintype());
-    }
+
+    OriginType origin() const			{ return _origin; }
+
 protected:
 private:
-    OriginType _origin;
+    void encode();
+    OriginType	_origin;
 };
 
+/**
+ * ASPathAttribute contain an ASPath, whose structure is documented
+ * in aspath.hh
+ */
 class ASPathAttribute : public PathAttribute
 {
 public:
-    ASPathAttribute(const AsPath& as_path);
-    ASPathAttribute(const ASPathAttribute& as_path);
-    ASPathAttribute(const uint8_t* d, uint16_t l);
-    void encode();
-    void decode();
-    const PathAttType type() const { return AS_PATH; }
-    const PathAttSortType sorttype() const { return SORT_AS_PATH; }
-    const AsPath &as_path() const { return _as_path; }
-    string str() const;
-    bool operator<(const ASPathAttribute& him) const {
-	return _as_path < him.as_path();
+    ~ASPathAttribute()				{ delete _as_path; }
+
+    ASPathAttribute(const AsPath& p);
+    ASPathAttribute(const uint8_t* d) throw(CorruptMessage);
+
+    string str() const				{
+	return "AS Path Attribute " + as_path().str();
     }
-    bool operator==(const ASPathAttribute& him) const {
-	return _as_path == him.as_path();
-    }
+
+    const AsPath &as_path() const		{ return (AsPath &)*_as_path; }
+
 protected:
 private:
-    AsPath _as_path;
-    uint8_t _as_path_len;
-    bool _as_path_ordered;
+    void encode();
+    AsPath *_as_path;
 };
 
+/**
+ * NextHopAttribute contains the IP address of the next hop.
+ */
 template <class A>
 class NextHopAttribute : public PathAttribute
 {
 public:
     NextHopAttribute(const A& n);
-    NextHopAttribute(const NextHopAttribute& nexthop);
-    NextHopAttribute(const uint8_t* d, uint16_t l);
-    // void set_nexthop(uint32_t t);
-    //    void set_nexthop(const A &n) { _next_hop = n; debug_msg("IPv4 addr %s set as next hop\n", cstring(n)); }
-    const A& nexthop() const { return _next_hop; }
-    void encode();
-    void decode();
-    void add_hash(MD5_CTX *context);
-    const PathAttType type() const { return NEXT_HOP; }
-    const PathAttSortType sorttype() const { return SORT_NEXT_HOP; }
-    string str() const;
-    bool operator<(const NextHopAttribute& him) const {
-	return (_next_hop < him.nexthop());
+    NextHopAttribute(const uint8_t* d) throw(CorruptMessage);
+
+    string str() const				{
+	return "Next Hop Attribute " + _next_hop.str();
     }
-    bool operator==(const NextHopAttribute& him) const {
-	return (_next_hop == him.nexthop());
-    }
+
+    const A& nexthop() const			{ return _next_hop; }
 protected:
 private:
+    void encode();
     A _next_hop;
 };
 
 typedef NextHopAttribute<IPv4> IPv4NextHopAttribute;
 typedef NextHopAttribute<IPv6> IPv6NextHopAttribute;
 
+
+/**
+ * MEDAttribute is an optional non-transitive uint32
+ */
 class MEDAttribute : public PathAttribute
 {
 public:
-    MEDAttribute(uint32_t med);
-    MEDAttribute(const MEDAttribute& med_att);
-    MEDAttribute(const uint8_t* d, uint16_t l);
-    void encode();
-    void decode();
-    const PathAttType type() const { return MED; }
-    const PathAttSortType sorttype() const { return SORT_MED; }
-    uint32_t med() const { return _multiexitdisc; }
+    MEDAttribute(const uint32_t med);
+    MEDAttribute(const uint8_t* d) throw(CorruptMessage);
     string str() const;
-    bool operator<(const MEDAttribute& him) const {
-	return (_multiexitdisc < him.med());
-    }
-     bool operator==(const MEDAttribute& him) const {
-	return (_multiexitdisc == him.med());
-     }
+
+    uint32_t med() const			{ return _med; }
 protected:
 private:
-    uint32_t _multiexitdisc;
+    void encode();
+    uint32_t _med;	// XXX stored in host format!
 };
 
+
+/**
+ * LocalPrefAttribute is a well-known uint32
+ */
 class LocalPrefAttribute : public PathAttribute
 {
 public:
-    LocalPrefAttribute(uint32_t localpref);
-    LocalPrefAttribute(const LocalPrefAttribute& local_pref);
-    LocalPrefAttribute(const uint8_t* d, uint16_t l);
-    void encode();
-    void decode();
-    const PathAttType type() const { return LOCAL_PREF; }
-    const PathAttSortType sorttype() const { return SORT_LOCAL_PREF; }
-    uint32_t localpref() const { return _localpref; }
+    LocalPrefAttribute(const uint32_t localpref);
+    LocalPrefAttribute(const uint8_t* d) throw(CorruptMessage);
     string str() const;
-    bool operator<(const LocalPrefAttribute& him) const {
-	return (_localpref < him.localpref());
-    }
-    bool operator==(const LocalPrefAttribute& him) const {
-	return (_localpref == him.localpref());
-    }
-    inline static uint32_t default_value() {
+
+    uint32_t localpref() const			{ return _localpref; }
+    static uint32_t default_value() {
 	// The default Local Preference value is 100 according to Halabi.
 	// This should probably be a configuration option.
 	return 100;
     }
 protected:
 private:
+    void encode();
     uint32_t _localpref;
 
 };
@@ -285,18 +333,10 @@ class AtomicAggAttribute : public PathAttribute
 {
 public:
     AtomicAggAttribute();
-    AtomicAggAttribute(const AtomicAggAttribute& atomic);
-    AtomicAggAttribute(const uint8_t* d, uint16_t l);
-    void encode();
-    void decode();
-    const PathAttType type() const { return ATOMIC_AGGREGATE; }
-    const PathAttSortType sorttype() const { return SORT_ATOMIC_AGGREGATE; }
-    string str() const;
-    bool operator<(const AtomicAggAttribute&) const {
-	return false;
-    }
-    bool operator==(const AtomicAggAttribute&) const {
-	return true;
+    AtomicAggAttribute(const uint8_t* d) throw(CorruptMessage);
+
+    string str() const				{
+	return "Atomic Aggregate Attribute";
     }
 protected:
 private:
@@ -305,71 +345,42 @@ private:
 class AggregatorAttribute : public PathAttribute
 {
 public:
-    AggregatorAttribute(const IPv4& routeaggregator,
-			   const AsNum& aggregatoras);
-    AggregatorAttribute(const AggregatorAttribute& agg);
-    AggregatorAttribute(const uint8_t* d, uint16_t l);
-    void encode();
-    void decode();
-    const PathAttType type() const { return AGGREGATOR; }
-    const PathAttSortType sorttype() const { return SORT_AGGREGATOR; }
-    const IPv4& route_aggregator() const { return _routeaggregator; }
-    const AsNum& aggregator_as() const { return _aggregatoras; }
+    AggregatorAttribute(const IPv4& speaker, const AsNum& as);
+    AggregatorAttribute(const uint8_t* d) throw(CorruptMessage);
     string str() const;
-    bool operator<(const AggregatorAttribute& him) const {
-	if (_routeaggregator == him.route_aggregator())
-	    return (_aggregatoras < him.aggregator_as());
-	return (_routeaggregator < him.route_aggregator());
-    }
-    bool operator==(const AggregatorAttribute& him) const {
-	if ((_routeaggregator == him.route_aggregator())
-	    && (_aggregatoras == him.aggregator_as()))
-	    return true;
 
-	return false;
-    }
+    const IPv4& route_aggregator() const	{ return _speaker; }
+    const AsNum& aggregator_as() const		{ return _as; }
 protected:
 private:
-    IPv4 _routeaggregator;
-    AsNum _aggregatoras;
+    void encode();
+    IPv4 _speaker;
+    AsNum _as;
 };
 
 class CommunityAttribute : public PathAttribute
 {
 public:
+    typedef set <uint32_t>::const_iterator const_iterator;
     CommunityAttribute();
-    CommunityAttribute(const CommunityAttribute& agg);
-    CommunityAttribute(const uint8_t* d, uint16_t l);
-    void add_community(uint32_t community);
-    const set <uint32_t>& community_set() const { return _communities; }
-    void encode();
-    void decode();
-    const PathAttType type() const { return COMMUNITY; }
-    const PathAttSortType sorttype() const { return SORT_COMMUNITY; }
+    CommunityAttribute(const uint8_t* d) throw(CorruptMessage);
     string str() const;
-    bool operator<(const CommunityAttribute& him) const;
-    bool operator==(const CommunityAttribute& him) const;
+
+    const set <uint32_t>& community_set() const { return _communities; }
+    void add_community(uint32_t community);
 protected:
 private:
+    void encode();
     set <uint32_t> _communities;
 };
 
 class UnknownAttribute : public PathAttribute
 {
 public:
-    UnknownAttribute();
-    UnknownAttribute(const UnknownAttribute& agg);
-    UnknownAttribute(const uint8_t* d, uint16_t l);
-    void encode();
-    void decode();
-    const PathAttType type() const { return UNKNOWN; }
-    const PathAttSortType sorttype() const { return _type; }
+    UnknownAttribute(const uint8_t* d) throw(CorruptMessage);
     string str() const;
-    bool operator<(const UnknownAttribute& him) const;
-    bool operator==(const UnknownAttribute& him) const;
 protected:
 private:
-    uint8_t _type;
 };
 
 #endif // __BGP_PATH_ATTRIBUTE_HH__

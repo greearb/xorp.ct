@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute_list.hh,v 1.4 2003/01/26 17:22:00 rizzo Exp $
+// $XORP$
 
 #ifndef __BGP_PATH_ATTRIBUTE_LIST_HH__
 #define __BGP_PATH_ATTRIBUTE_LIST_HH__
@@ -30,13 +30,12 @@
  * it also stores a pointer to the newly created attribute into a
  * class member (e.g. _aspath_att ...) for ease of use.
  */
-
 template<class A>
 class PathAttributeList
 {
 public:
-   typedef list<PathAttribute*>::const_iterator const_iterator;
-   typedef list<PathAttribute*>::iterator iterator;
+    typedef list<PathAttribute*>::const_iterator const_iterator;
+    typedef list<PathAttribute*>::iterator iterator;
 
     PathAttributeList();
     PathAttributeList(const NextHopAttribute<A> &nexthop,
@@ -47,7 +46,7 @@ public:
     void add_path_attribute(const PathAttribute &att);
     const A& nexthop() const		{ return _nexthop_att->nexthop(); }
     const AsPath& aspath() const	{ return _aspath_att->as_path(); }
-    const uint8_t origin() const	{ return _origin_att->origintype(); }
+    const uint8_t origin() const	{ return _origin_att->origin(); }
 
     const MEDAttribute* med_att() const;
     const LocalPrefAttribute* local_pref_att() const;
@@ -61,8 +60,8 @@ public:
     }
 
     const list<PathAttribute*>& att_list() const {
-	debug_msg("PathAttributeList:att_list(): size = %u\n",
-		  (uint32_t)_att_list.size());
+ 	debug_msg("PathAttributeList:att_list(): size = %u\n",
+		(uint32_t)_att_list.size());
 	return _att_list;
     }
 
@@ -90,13 +89,14 @@ public:
     bool operator== (const PathAttributeList<A> &them) const;
 protected:
 private:
-    void replace_attribute(PathAttribute *att, PathAttType type);
+    void replace_attribute(PathAttribute *att);
     void assert_rehash() const;
     const PathAttribute* find_attribute_by_type(PathAttType type) const;
 
     NextHopAttribute<A> *	_nexthop_att;
     ASPathAttribute *		_aspath_att;
     OriginAttribute *		_origin_att;
+
     list <PathAttribute*>	_att_list;
 
     uint8_t			_hash[16];	// used for fast comparisons

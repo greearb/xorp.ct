@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.13 2003/01/29 00:38:56 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.14 2003/01/29 01:05:31 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -255,6 +255,8 @@ AsPath::AsPath(const char *as_path) throw(InvalidString)
 void
 AsPath::decode(const uint8_t *d, size_t l)
 {
+    _num_segments = 0;
+    _path_len = 0;
     while (l > 0) {		// grab segments
 	int len = 2 + d[1]*2;	// XXX length in bytes for 16bit AS's
 
