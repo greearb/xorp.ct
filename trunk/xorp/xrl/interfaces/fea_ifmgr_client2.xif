@@ -7,7 +7,6 @@ interface fea_ifmgr_client/0.5 {
 	interface_add ? ifname:txt
 	interface_remove ? ifname:txt
 	interface_set_enabled ? ifname:txt & enabled:bool
-	interface_set_flags ? ifname:txt & flags:u32
 	interface_set_mtu ? ifname:txt & mtu_bytes:u32
 	interface_set_mac ? ifname:txt & mac:mac
 
