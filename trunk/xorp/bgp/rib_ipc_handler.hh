@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.9 2003/06/12 03:01:01 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.10 2003/06/12 06:02:22 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -32,7 +32,8 @@ class EventLoop;
 template <class A>
 class XrlQueue {
 public:
-    XrlQueue(RibIpcHandler *rib_ipc_handler, XrlStdRouter *xrl_router);
+    XrlQueue(RibIpcHandler *rib_ipc_handler, XrlStdRouter *xrl_router,
+	     BGPMain *_bgp);
 
     void queue_add_route(string ribname, bool ibgp, const IPNet<A>& net,
 			 const A& nexthop);
@@ -43,6 +44,7 @@ public:
 private:
     RibIpcHandler *_rib_ipc_handler;
     XrlStdRouter *_xrl_router;
+    BGPMain *_bgp;
 
     uint32_t _id;
 
@@ -97,7 +99,8 @@ private:
 
 class RibIpcHandler : public PeerHandler {
 public:
-    RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop);
+    RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop,
+		  BGPMain& bgp);
 
     ~RibIpcHandler();
 

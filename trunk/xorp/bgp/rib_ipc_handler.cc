@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.17 2003/06/12 06:02:22 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.18 2003/06/13 00:19:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -24,15 +24,17 @@
 #define MAX_ERR_RETRIES FLYING_LIMIT
 
 #include "bgp_module.h"
+#include "main.hh"
 #include "rib_ipc_handler.hh"
 
-RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop) 
+RibIpcHandler::RibIpcHandler(XrlStdRouter *xrl_router, EventLoop& eventloop, 
+			     BGPMain& bgp) 
     : PeerHandler("RIBIpcHandler", NULL, NULL), 
     _ribname(""),
-    _xrl_router(xrl_router), _eventloop(eventloop),
+      _xrl_router(xrl_router), _eventloop(eventloop),
     _interface_failed(false),
-    _v4_queue(this, xrl_router),
-    _v6_queue(this, xrl_router)
+    _v4_queue(this, xrl_router, &bgp),
+    _v6_queue(this, xrl_router, &bgp)
 {
 }
 
@@ -344,9 +346,9 @@ RibIpcHandler::status(string& reason) const
 
 template<class A>
 XrlQueue<A>::XrlQueue(RibIpcHandler *rib_ipc_handler,
-		      XrlStdRouter *xrl_router) 
+		      XrlStdRouter *xrl_router, BGPMain *bgp)
     : _rib_ipc_handler(rib_ipc_handler),
-      _xrl_router(xrl_router),
+      _xrl_router(xrl_router), _bgp(bgp),
       _flying(0), _previously_succeeded(false), _synchronous_mode(false),
       _errors(0), _interface_failed(false)
 {
@@ -566,7 +568,6 @@ XrlQueue<A>::callback(const XrlError& error, uint32_t sequence,
 	/* FALLTHROUGH */
     case SEND_FAILED:
     case SEND_FAILED_TRANSIENT:
-    case NO_FINDER:
     case NO_SUCH_METHOD:
 	if (_previously_succeeded) {
 	    XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
@@ -580,7 +581,9 @@ XrlQueue<A>::callback(const XrlError& error, uint32_t sequence,
 			  + " " + error.str());
 	}
 	break;
-
+    case NO_FINDER:
+	_bgp->finder_death();
+	break;
     case BAD_ARGS:
     case COMMAND_FAILED:
     case INTERNAL_ERROR:

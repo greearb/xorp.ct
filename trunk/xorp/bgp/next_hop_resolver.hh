@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.15 2003/05/08 23:45:11 mjh Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.16 2003/05/14 09:32:47 pavlin Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -77,10 +77,14 @@ template<class A> class NHRequest;
  * more than one also exists. All route deletions should explicitly
  * call a routine in here to decrement the reference count.
  */
+
+class BGPMain;
+
 template<class A>
 class NextHopResolver {
 public:
-    NextHopResolver(XrlStdRouter *xrl_router, EventLoop& eventloop);
+    NextHopResolver(XrlStdRouter *xrl_router, EventLoop& eventloop,
+		    BGPMain& bgp);
 
     virtual ~NextHopResolver();
 
@@ -212,6 +216,7 @@ private:
     string _ribname;	// RIB name to use in XRL calls
     XrlStdRouter *_xrl_router;
     EventLoop& _eventloop;
+    BGPMain& _bgp;
     NextHopCache<A> _next_hop_cache;
     NextHopRibRequest<A> _next_hop_rib_request;
 };
@@ -574,7 +579,8 @@ class NextHopRibRequest {
 public:
     NextHopRibRequest(XrlStdRouter *,
 		      NextHopResolver<A>& next_hop_resolver,
-		      NextHopCache<A>& next_hop_cache);
+		      NextHopCache<A>& next_hop_cache,
+		      BGPMain& bgp);
     ~NextHopRibRequest();
 
     bool register_ribname(const string& r) { _ribname = r; return true; }
@@ -707,6 +713,8 @@ private:
     XrlStdRouter *_xrl_router;
     NextHopResolver<A>& _next_hop_resolver;
     NextHopCache<A>& _next_hop_cache;
+    BGPMain& _bgp;
+
     /**
      * Are we currently waiting for a response from the RIB.
      */
@@ -720,8 +728,6 @@ private:
      */
     XorpTimer _rtx_delay_timer;
 
-    bool _previously_successful; /* true if we've managed to
-                                    communicate with the RIB already */
     bool _interface_failed; /* true if we've received a fatal error */
 
     /**

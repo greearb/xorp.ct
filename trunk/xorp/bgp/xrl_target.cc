@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.14 2003/05/29 21:17:13 mjh Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.15 2003/05/29 23:34:02 atanu Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -710,7 +710,34 @@ XrlCmdError XrlBgpTarget::bgp_0_2_set_parameter(
     return XrlCmdError::OKAY();
 }
 
-				     
+XrlCmdError 
+XrlBgpTarget::finder_event_observer_0_1_xrl_target_birth(
+	// Input values, 
+	const string&	target_class, 
+	const string&	target_instance)
+{
+    debug_msg("birth class %s instance %s\n", target_class.c_str(),
+	      target_instance.c_str());
+
+    _bgp.notify_birth(target_class, target_instance);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::finder_event_observer_0_1_xrl_target_death(
+	// Input values, 
+	const string&	target_class, 
+	const string&	target_instance)
+{
+    debug_msg("death class %s instance %s\n", target_class.c_str(),
+	      target_instance.c_str());
+
+    _bgp.notify_death(target_class, target_instance);
+
+    return XrlCmdError::OKAY();
+}
+
 bool 
 XrlBgpTarget::waiting()
 {

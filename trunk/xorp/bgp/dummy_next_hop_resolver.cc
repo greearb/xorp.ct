@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_next_hop_resolver.cc,v 1.6 2003/04/22 23:27:14 hodson Exp $"
+#ident "$XORP: xorp/bgp/dummy_next_hop_resolver.cc,v 1.7 2003/05/23 00:02:05 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,8 +25,9 @@
 #include "dummy_next_hop_resolver.hh"
 
 template <class A>
-DummyNextHopResolver<A>::DummyNextHopResolver(EventLoop& eventloop)
-    : NextHopResolver<A>(NULL, eventloop)
+DummyNextHopResolver<A>::DummyNextHopResolver(EventLoop& eventloop,
+					      BGPMain& bgp)
+    : NextHopResolver<A>(NULL, eventloop, bgp)
 {
 }
 

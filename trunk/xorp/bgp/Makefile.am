@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.15 2003/04/15 16:37:48 hodson Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.16 2003/05/07 21:58:07 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -23,6 +23,7 @@ noinst_LIBRARIES = libbgp.a
 LDADD		 = $(noinst_LIBRARIES)
 LDADD		+= $(top_builddir)/xrl/targets/libbgpbase.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
+LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 LDADD		+= $(top_builddir)/libxipc/libxipc.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
@@ -83,6 +84,7 @@ libbgp_a_SOURCES += peer_data.hh
 libbgp_a_SOURCES += peer_handler.hh
 libbgp_a_SOURCES += peer_list.hh
 libbgp_a_SOURCES += plumbing.hh
+libbgp_a_SOURCES += process_watch.hh
 libbgp_a_SOURCES += rib_ipc_handler.hh
 libbgp_a_SOURCES += route_queue.hh
 libbgp_a_SOURCES += route_table_base.hh
@@ -120,6 +122,7 @@ libbgp_a_SOURCES += peer_data.cc
 libbgp_a_SOURCES += peer_handler.cc
 libbgp_a_SOURCES += peer_list.cc
 libbgp_a_SOURCES += plumbing.cc
+libbgp_a_SOURCES += process_watch.cc
 libbgp_a_SOURCES += rib_ipc_handler.cc
 libbgp_a_SOURCES += route_queue.cc
 libbgp_a_SOURCES += route_table_base.cc

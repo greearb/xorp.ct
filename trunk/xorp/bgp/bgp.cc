@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.5 2003/03/10 23:19:57 hodson Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.6 2003/04/22 19:20:16 mjh Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -64,7 +64,14 @@ main(int /*argc*/, char **argv)
 	/*
 	** Wait for our local configuration information.
 	*/
-	while (bgp.get_xrl_target()->waiting()) {
+	while (bgp.get_xrl_target()->waiting() && bgp.run()) {
+	    bgp.eventloop().run();
+	}
+
+	/*
+	** Wait for FEA and RIB to start.
+	*/
+	while (bgp.processes_ready() && bgp.run()) {
 	    bgp.eventloop().run();
 	}
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.17 2003/04/22 19:20:21 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.18 2003/05/29 18:56:26 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -41,7 +41,7 @@ bool test_filter() {
     PeerHandler handler1("test1", &peer1, NULL);
     BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL);
-    DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop());
+    DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop(), bgpmain);
 
     // Trivial plumbing. We're not testing the RibInTable here, so
     // mostly we'll just inject directly into the FilterTable, but we

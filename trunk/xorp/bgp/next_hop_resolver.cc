@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.17 2003/05/23 00:02:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.18 2003/06/13 01:24:13 atanu Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,16 +23,19 @@
 #include "libxorp/xlog.h"
 #include "libxorp/timer.hh"
 
+#include "main.hh"
 #include "next_hop_resolver.hh"
 #include "route_table_nhlookup.hh"
 #include "route_table_decision.hh"
 
 template <class A>
 NextHopResolver<A>::NextHopResolver(XrlStdRouter *xrl_router,
-				    EventLoop& eventloop)
+				    EventLoop& eventloop,
+				    BGPMain& bgp)
     : _xrl_router(xrl_router),
       _eventloop(eventloop),
-      _next_hop_rib_request(xrl_router, *this, _next_hop_cache)
+      _bgp(bgp),
+      _next_hop_rib_request(xrl_router, *this, _next_hop_cache,  bgp)
 {
 }
 
@@ -612,10 +615,11 @@ NextHopCache<A>::rpe_to_pe_delete(RealPrefixEntry& rpe, A addr,
 template<class A>
 NextHopRibRequest<A>::NextHopRibRequest(XrlStdRouter *xrl_router,
 					NextHopResolver<A>& next_hop_resolver,
-					NextHopCache<A>& next_hop_cache)
+					NextHopCache<A>& next_hop_cache,
+					BGPMain& bgp)
     : _xrl_router(xrl_router), _next_hop_resolver(next_hop_resolver),
-      _next_hop_cache(next_hop_cache), _busy(false), 
-      _previously_successful(false), _interface_failed(false)
+      _next_hop_cache(next_hop_cache), _bgp(bgp), _busy(false), 
+      _interface_failed(false)
 {
 }
 
@@ -745,7 +749,7 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 						 const uint32_t *real_prefix_len,
 						 const A *actual_nexthop,
 						 const uint32_t *metric,
-						 const A nexthop_interest,
+						 const A /*nexthop_interest*/,
 						 const string comment)
 {
     /*
@@ -754,7 +758,6 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     */
     switch (error.error_code()) {
     case OKAY:
-	_previously_successful = true;
 	break;
 
     case REPLY_TIMED_OUT:
@@ -763,31 +766,19 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	break;
 
     case RESOLVE_FAILED:
-	if (!_previously_successful) {
-	    //RESOLVE_FAILED when we hadn't been previously successful
-	    //might indicate an ordering problem at startup.  In both
-	    //cases, we resend.
-	    XLOG_WARNING("%s %s", comment.c_str(), error.str().c_str());
-	    
-	    //The request will still be on the request queue.
-	    //All we need to do is resend it after a respectable delay
-	    _rtx_delay_timer = 
-                 _next_hop_resolver.eventloop().new_oneoff_after_ms(1000,
-                      ::callback(this,
-				 &NextHopRibRequest<A>::register_interest,
-				 nexthop_interest));
-	    return;
-	}
-	/* FALLTHROUGH */
     case SEND_FAILED:
     case SEND_FAILED_TRANSIENT:
-    case NO_FINDER:
     case NO_SUCH_METHOD:
     case BAD_ARGS:
     case COMMAND_FAILED:
     case INTERNAL_ERROR:
 	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
 	break;
+
+    case NO_FINDER:
+	_bgp.finder_death();
+	break;
+
     }
 
     debug_msg("Error %s resolves %d addr %s "
@@ -1142,7 +1133,6 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
     debug_msg("%s %s\n", comment.c_str(), error.str().c_str());
     switch (error.error_code()) {
     case OKAY:
-	_previously_successful = true;
 	break;
 
     case REPLY_TIMED_OUT:
@@ -1151,19 +1141,20 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
 	break;
 
     case NO_FINDER:
+	_bgp.finder_death();
+	break;
+
     case RESOLVE_FAILED:
-	if (_previously_successful) {
-	    //A NO_FINDER or FATAL_TRANSPORT_ERROR error is always
-	    //unrecoverable.  A RESOLVE_FAILED error when it had
-	    //previously been successful is also unrecoverable.
-	    _interface_failed = true;
-	    while (!_queue.empty()) {
-		delete _queue.front();
+	//A NO_FINDER or FATAL_TRANSPORT_ERROR error is always
+	//unrecoverable.  A RESOLVE_FAILED error when it had
+	//previously been successful is also unrecoverable.
+	_interface_failed = true;
+	while (!_queue.empty()) {
+	    delete _queue.front();
 		_queue.pop_front();
-	    }
-	    return;
 	}
-	/* FALLTHROUGH */
+	return;
+	break;
     case SEND_FAILED:
 	//SEND_FAILED can be a transient error.  RESOLVE_FAILED
 	//when we hadn't been previously successful might indicate

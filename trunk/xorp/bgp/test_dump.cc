@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.16 2003/04/22 19:20:21 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.17 2003/05/29 18:56:26 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -65,7 +65,7 @@ bool test_dump() {
     BGPPeer peer3(&localdata, peer_data3, NULL, &bgpmain);
     PeerHandler handler3("test3", &peer3, NULL);
 
-    DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop());
+    DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop(), bgpmain);
 
     DecisionTable<IPv4> *decision_table
 	= new DecisionTable<IPv4>("DECISION", next_hop_resolver);

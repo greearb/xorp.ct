@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.8 2003/04/22 23:27:15 hodson Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.9 2003/05/08 23:45:11 mjh Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -38,7 +38,7 @@ template <class A>
 class BGPPlumbingAF {
 public:
     BGPPlumbingAF(string ribname, BGPPlumbing& master, XrlStdRouter *,
-		  EventLoop& eventloop);
+		  EventLoop& eventloop, BGPMain& bgp);
     ~BGPPlumbingAF();
     int add_peering(PeerHandler* peer_handler);
     int stop_peering(PeerHandler* peer_handler);
@@ -111,7 +111,7 @@ class RibIpcHandler;
 class BGPPlumbing {
 public:
     BGPPlumbing(XrlStdRouter *, RibIpcHandler* rib_handler,
-		EventLoop& eventloop);
+		EventLoop& eventloop, BGPMain& bgp);
     void set_my_as_number(const AsNum& my_AS_number);
 
     int add_peering(PeerHandler* peer_handler);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.13 2003/05/08 21:27:00 mjh Exp $
+// $XORP: xorp/bgp/main.hh,v 1.14 2003/05/29 21:17:13 mjh Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -30,6 +30,7 @@
 #include "iptuple.hh"
 #include "path_attribute.hh"
 #include "peer_handler.hh"
+#include "process_watch.hh"
 
 class XrlBgpTarget;
 
@@ -164,6 +165,7 @@ public:
      * shutdown BGP cleanly
      */
     void terminate() { _exit_loop = true; }
+    bool run() {return !_exit_loop;}
 
     int create_listener(const Iptuple& iptuple);
     LocalData *get_local_data();
@@ -282,6 +284,44 @@ public:
     EventLoop& eventloop() { return _eventloop; }
     XrlBgpTarget *get_xrl_target() { return _xrl_target; }
 
+    /**
+     * Call via XrlBgpTarget when the finder reports that a process
+     * has started.
+     * 
+     * @param target_class Class of process that has started.
+     * @param target_instance Instance name of process that has started.
+     */
+    void notify_birth(const string& target_class,
+		      const string& target_instance) {
+	_process_watch->birth(target_class, target_instance);
+    }
+
+    /**
+     * Call via XrlBgpTarget when the finder reports that a process
+     * has terminated.
+     * 
+     * @param target_class Class of process that has terminated.
+     * @param target_instance Instance name of process that has terminated.
+     */
+    void notify_death(const string& target_class,
+		      const string& target_instance) {
+	_process_watch->death(target_class, target_instance);
+    }
+
+    /**
+     * @return Return true when all the processes that BGP is
+     * dependent on are ready.
+     */
+    bool processes_ready() {
+	return _process_watch->ready();
+    }
+
+    /**
+     * To be called when the finder dies.
+     */
+    void finder_death() {
+	_process_watch->finder_death();
+    }
 protected:
 private:
     /**
@@ -339,6 +379,7 @@ private:
     LocalData _local_data;
     XrlStdRouter *_xrl_router;
     static EventLoop _eventloop;
+    ProcessWatch *_process_watch;
 };
 
 #endif // __BGP_MAIN_HH__

@@ -1,7 +1,8 @@
-/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.6 2002/11/06 04:24:44 atanu Exp $ */
+/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
 
 #include "common.xif"
 #include "bgp.xif"
 #include "rib_client.xif"
+#include "finder_event_observer.xif"
 
-target bgp implements common/0.1, bgp/0.2, rib_client/0.1
+target bgp implements common/0.1, bgp/0.2, rib_client/0.1, finder_event_observer/0.1

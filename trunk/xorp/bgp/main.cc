@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.25 2003/05/15 16:09:55 hodson Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.26 2003/05/31 22:56:14 mjh Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -43,9 +43,13 @@ BGPMain::BGPMain()
     _peerlist = new BGPPeerList();
     _xrl_router = new XrlStdRouter(eventloop(), "bgp");
     _xrl_target = new XrlBgpTarget(_xrl_router, *this);
-    _rib_ipc_handler = new RibIpcHandler(_xrl_router, eventloop());
+    _rib_ipc_handler = new RibIpcHandler(_xrl_router, eventloop(), *this);
     _plumbing = new BGPPlumbing(_xrl_router, _rib_ipc_handler,
-				eventloop());
+				eventloop(), *this);
+
+    _process_watch = new ProcessWatch(_xrl_router, eventloop(),
+				      ::callback(this,
+						 &BGPMain::terminate));
 }
 
 BGPMain::~BGPMain()
@@ -109,6 +113,10 @@ BGPMain::~BGPMain()
     delete _plumbing;
 
     debug_msg("-------------------------------------------\n");
+    debug_msg("Deleting process watcher\n");
+    delete _process_watch;
+
+    debug_msg("-------------------------------------------\n");
     debug_msg("Delete BGPMain complete\n");
     debug_msg("-------------------------------------------\n");
 }
@@ -155,14 +163,13 @@ check_callback_duration()
 void
 BGPMain::main_loop()
 {
-    _exit_loop = false;
-
     debug_msg("BGPMain::main_loop started\n");
+
 #if defined(DEBUG_MAXIMUM_DELAY)
     static XorpTimer t = eventloop().
 	new_periodic(1000, callback(check_callback_duration));
 #endif
-    while ( !_exit_loop ) {
+    while ( run() ) {
 #if defined(DEBUG_MAXIMUM_DELAY)
 	static time_t last = 0;
 	time_t current = time(0);
