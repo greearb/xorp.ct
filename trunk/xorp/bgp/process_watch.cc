@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/process_watch.cc,v 1.3 2003/06/17 21:47:31 atanu Exp $"
+#ident "$XORP: xorp/bgp/process_watch.cc,v 1.4 2003/06/17 23:45:00 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -32,16 +32,16 @@ ProcessWatch::ProcessWatch(XrlStdRouter *xrl_router, EventLoop& eventloop,
     */
     XrlFinderEventNotifierV0p1Client finder(xrl_router);
     finder.send_register_class_event_interest("finder",
-			      xrl_router->instance_name(), "fea",
-			      ::callback(this, &ProcessWatch::callback));
+	xrl_router->instance_name(), "fea",
+	    callback(this, &ProcessWatch::interest_callback));
     finder.send_register_class_event_interest("finder",
-			      xrl_router->instance_name(), "rib",
-			      ::callback(this, &ProcessWatch::callback));
+	xrl_router->instance_name(), "rib",
+	    callback(this, &ProcessWatch::interest_callback));
 	
 }
 
 void
-ProcessWatch::callback(const XrlError& error)
+ProcessWatch::interest_callback(const XrlError& error)
 {
     debug_msg("callback %s\n", error.str().c_str());
 

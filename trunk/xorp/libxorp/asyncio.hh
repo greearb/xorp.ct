@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.4 2003/03/10 23:20:30 hodson Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.5 2003/04/22 23:27:20 hodson Exp $
 
 #ifndef __LINXORP_ASYNCIO_HH__
 #define __LINXORP_ASYNCIO_HH__
@@ -176,16 +176,16 @@ public:
 protected:
     struct BufferInfo {
 	BufferInfo(uint8_t* b, size_t bb, Callback cb)
-	    : buffer(b), buffer_bytes(bb), offset(0), callback(cb) {}
+	    : _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
 	BufferInfo(uint8_t* b, size_t bb, size_t off, Callback cb) 
-	    : buffer(b), buffer_bytes(bb), offset(off), callback(cb) {} 
+	    : _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb) {} 
 	inline void dispatch_callback(AsyncFileOperator::Event e) {
-	    callback->dispatch(e, buffer, buffer_bytes, offset);
+	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
 	}
-	uint8_t*	buffer;
-	size_t		buffer_bytes;
-	size_t		offset;
-	Callback	callback;
+	uint8_t*	_buffer;
+	size_t		_buffer_bytes;
+	size_t		_offset;
+	Callback	_cb;
     };
 
     void read(int fd, SelectorMask m);
@@ -257,19 +257,19 @@ public:
 protected:
     struct BufferInfo {
 	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb) 
-	    : buffer(b), buffer_bytes(bb), offset(0), callback(cb) {}
+	    : _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
 	BufferInfo(const uint8_t* b, size_t bb, size_t off, 
 		   const Callback& cb) 
-	    : buffer(b), buffer_bytes(bb), offset(off), callback(cb)
+	    : _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb)
 	{}
 	inline void dispatch_callback(AsyncFileOperator::Event e) {
-	    callback->dispatch(e, buffer, buffer_bytes, offset);
+	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
 	}
 
-	const uint8_t*	buffer;
-	size_t		buffer_bytes;
-	size_t		offset;
-	Callback	callback;
+	const uint8_t*	_buffer;
+	size_t		_buffer_bytes;
+	size_t		_offset;
+	Callback	_cb;
     };
 
     void write(int, SelectorMask);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.18 2003/06/13 00:19:19 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.19 2003/06/17 06:44:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -80,16 +80,16 @@ RibIpcHandler::register_ribname(const string& r)
     //multicast - false
     rib.send_add_egp_table4(_ribname.c_str(),
 			    "ebgp", true, false,
-			    ::callback(this, 
-				       &RibIpcHandler::callback,"add_table"));
+			    callback(this, 
+				     &RibIpcHandler::rib_command_done,"add_table"));
     //ibgp - v4
     //name - "ibgp"
     //unicast - true
     //multicast - false
     rib.send_add_egp_table4(_ribname.c_str(),
 			    "ibgp", true, false,
-			    ::callback(this, 
-				       &RibIpcHandler::callback,"add_table"));
+			    callback(this, 
+				     &RibIpcHandler::rib_command_done,"add_table"));
 
     //create our tables
     //ebgp - v6
@@ -97,17 +97,17 @@ RibIpcHandler::register_ribname(const string& r)
     //unicast - true
     //multicast - false
 //     rib.send_add_egp_table6(_ribname.c_str(),
-// 			    "ebgp", true, false,
-// 			    ::callback(this, 
-// 				       &RibIpcHandler::callback,"add_table"));
+// 		"ebgp", true, false,
+// 		callback(this, 
+    // 		         &RibIpcHandler::rib_command_done,"add_table"));
     //ibgp - v6
     //name - "ibgp"
     //unicast - true
     //multicast - false
 //     rib.send_add_igp_table6(_ribname.c_str(),
-// 			    "ibgp", true, false,
-// 			    ::callback(this, 
-// 				       &RibIpcHandler::callback,"add_table"));
+// 		  "ibgp", true, false,
+// 		  callback(this,
+//			   &RibIpcHandler::rib_command_done,"add_table"));
 
     return true;
 }
@@ -124,18 +124,18 @@ RibIpcHandler::unregister_rib()
     //multicast - false
     rib.send_delete_egp_table4(_ribname.c_str(),
 			       "ebgp", true, false,
-			       ::callback(this,
-					  &RibIpcHandler::callback,
-					  "delete_table"));
+			       callback(this,
+					&RibIpcHandler::rib_command_done,
+					"delete_table"));
     //ibgp - v4
     //name - "ibgp"
     //unicast - true
     //multicast - false
     rib.send_delete_igp_table4(_ribname.c_str(),
 			       "ibgp", true, false,
-			       ::callback(this,
-					  &RibIpcHandler::callback,
-					  "delete_table"));
+			       callback(this,
+					&RibIpcHandler::rib_command_done,
+					"delete_table"));
 
     //create our tables
     //ebgp - v6
@@ -144,9 +144,9 @@ RibIpcHandler::unregister_rib()
     //multicast - false
 //     rib.send_delete_egp_table6(_ribname.c_str(),
 // 			       "ebgp", true, false,
-// 			       ::callback(this,
-// 					  &RibIpcHandler::callback,
-// 					  "delete_table"));
+// 			       callback(this,
+// 				  	&RibIpcHandler::rib_command_done,
+// 					"delete_table"));
 
     //ibgp - v6
     //name - "ibgp"
@@ -154,9 +154,9 @@ RibIpcHandler::unregister_rib()
     //multicast - false
 //     rib.send_delete_igp_table6(_ribname.c_str(),
 // 			       "ibgp", true, false,
-// 			       ::callback(this,
-// 					  &RibIpcHandler::callback,
-// 					  "delete_table"));
+// 			       callback(this,
+// 					&RibIpcHandler::rib_command_done,
+// 					"delete_table"));
 
     return true;
 }
@@ -239,7 +239,7 @@ RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt)
 }
 
 void
-RibIpcHandler::callback(const XrlError& error, const char *comment)
+RibIpcHandler::rib_command_done(const XrlError& error, const char *comment)
 {
     debug_msg("callback %s %s\n", comment, error.str().c_str());
     if(XrlError::OKAY() != error) {
@@ -465,18 +465,15 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 			    bgp,
 			    true, false,
 			    q.net, q.nexthop, /*metric*/0, 
-			    ::callback(this, &XrlQueue::callback,
-				       q.id,
-				       "add_route"));
+			    callback(this, &XrlQueue::route_command_done,
+				     q.id, "add_route"));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	sent = rib.send_delete_route4(q.ribname.c_str(),
 			       bgp,
-			       true, false,
-			       q.net,
-			       ::callback(this, &XrlQueue::callback,
-					  q.id,
-					  "delete_route"));
+			       true, false, q.net,
+			       ::callback(this, &XrlQueue::route_command_done,
+					  q.id, "delete_route"));
     }
 
     return sent;
@@ -494,18 +491,16 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 			    bgp,
 			    true, false,
 			    q.net, q.nexthop, /*metric*/0, 
-			    ::callback(this, &XrlQueue::callback,
-				       q.id,
-				       "add_route"));
+			    callback(this, &XrlQueue::route_command_done,
+				     q.id, "add_route"));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	sent = rib.send_delete_route6(q.ribname.c_str(),
 			       bgp,
 			       true, false,
 			       q.net,
-			       ::callback(this, &XrlQueue::callback,
-					  q.id,
-					  "delete_route"));
+			       callback(this, &XrlQueue::route_command_done,
+					q.id, "delete_route"));
     }
 
     return sent;
@@ -513,8 +508,9 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 
 template<class A>
 void
-XrlQueue<A>::callback(const XrlError& error, uint32_t sequence, 
-		      const char *comment)
+XrlQueue<A>::route_command_done(const XrlError& error,
+				uint32_t	sequence, 
+				const char*	comment)
 {
     _flying--;
     debug_msg("callback %d %s %s\n", sequence, comment, error.str().c_str());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.21 2003/06/12 21:58:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.22 2003/06/19 00:46:09 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -96,12 +96,13 @@ Peer::listen(const string& /*line*/, const vector<string>& /*words*/)
     debug_msg("About to listen on: %s\n", _peername.c_str());
     XrlTestPeerV0p1Client test_peer(&_xrlrouter);
     test_peer.send_register(_peername.c_str(), _coordinator,
-			    ::callback(this, &Peer::callback, "register"));
+			    callback(this, &Peer::xrl_callback, "register"));
     test_peer.send_packetisation(_peername.c_str(), "bgp",
-			   ::callback(this, &Peer::callback, "packetisation"));
+			   callback(this, &Peer::xrl_callback,
+				    "packetisation"));
     test_peer.send_listen(_peername.c_str(),
 			   _target_hostname, atoi(_target_port.c_str()),
-			   ::callback(this, &Peer::callback, "listen"));
+			   callback(this, &Peer::xrl_callback, "listen"));
 }
 
 void 
@@ -112,12 +113,12 @@ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
     debug_msg("About to connect to: %s\n", _peername.c_str());
     XrlTestPeerV0p1Client test_peer(&_xrlrouter);
     test_peer.send_register(_peername.c_str(), _coordinator,
-			    ::callback(this, &Peer::callback, "register"));
+			    callback(this, &Peer::xrl_callback, "register"));
     test_peer.send_packetisation(_peername.c_str(), "bgp",
-			   ::callback(this, &Peer::callback, "packetisation"));
+	callback(this, &Peer::xrl_callback, "packetisation"));
     test_peer.send_connect(_peername.c_str(),
 			   _target_hostname, atoi(_target_port.c_str()),
-			   ::callback(this, &Peer::callback, "connect"));
+			   callback(this, &Peer::xrl_callback, "connect"));
 }
 
 void 
@@ -130,7 +131,7 @@ Peer::disconnect(const string& /*line*/, const vector<string>& /*words*/)
     _session = false;
     _established = false;
     test_peer.send_disconnect(_peername.c_str(),
-			      ::callback(this, &Peer::callback, "disconnect"));
+	callback(this, &Peer::xrl_callback, "disconnect"));
 }
 
 /*
@@ -282,7 +283,7 @@ Peer::send_packet(const string& line, const vector<string>& words)
     _eventloop.current_time(tv);
     _trie_sent.process_update_packet(tv, buf, len);
 
-    send_message(buf, len, ::callback(this, &Peer::callback, "update"));
+    send_message(buf, len, callback(this, &Peer::xrl_callback, "update"));
     fprintf(stderr, "done with send_pkt %p size %u\n",
 	buf, (uint32_t)len);
 }
@@ -393,9 +394,8 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp, const char *comment)
 	const fixed_header *header = 
 	    reinterpret_cast<const struct fixed_header *>(buf);
 	if(MESSAGETYPEUPDATE == header->type) {
-	    _smcb = ::callback(this, &Peer::send_dump_callback,
-			       fp,
-			       "mrtd_traffic_send");
+	    _smcb = callback(this, &Peer::send_dump_callback,
+			     fp, "mrtd_traffic_send");
 	    send_message(buf, len, _smcb);
 	    return;
 	} else {
@@ -728,9 +728,9 @@ Peer::dump(const string& line, const vector<string>& words)
 	    return;
 	}
  	if(mrtd)
- 	    *dumper = ::callback(mrtd_traffic_dump, filename);
+ 	    *dumper = callback(mrtd_traffic_dump, filename);
  	else
-	    *dumper = ::callback(text_traffic_dump, filename);
+	    *dumper = callback(text_traffic_dump, filename);
     } else if("routeview" == words[4]) {
     } else if("current" == words[4]) {
     } else if("debug" == words[4]) {
@@ -740,9 +740,9 @@ Peer::dump(const string& line, const vector<string>& words)
 	}
 	Trie::TreeWalker tw;
 	if(mrtd)
-	    tw = ::callback(mrtd_debug_dump, filename);
+	    tw = callback(mrtd_debug_dump, filename);
 	else
-	    tw = ::callback(text_debug_dump, filename);
+	    tw = callback(text_debug_dump, filename);
 	op->tree_walk_table(tw);
     } else
 	xorp_throw(InvalidString,
@@ -877,7 +877,7 @@ Peer::check_expect(BGPPacket *rec)
 }
 
 void
-Peer::callback(const XrlError& error, const char *comment)
+Peer::xrl_callback(const XrlError& error, const char *comment)
 {
     debug_msg("callback %s %s\n", comment, error.str().c_str());
     if(XrlError::OKAY() != error) {
@@ -958,8 +958,8 @@ Peer::datain(const bool& status, const TimeVal& tv,
 		XrlTestPeerV0p1Client test_peer(&_xrlrouter);
 		debug_msg("KEEPALIVE Packet SENT\n");
 		test_peer.send_send(_peername.c_str(), data,
-				    ::callback(this, &Peer::callback,
-					       "keepalive"));
+				    callback(this, &Peer::xrl_callback,
+					     "keepalive"));
 	    }
 	    _established = true;
 	    check_expect(&pac);
@@ -1047,7 +1047,7 @@ Peer::send_open()
     size_t len;
     const uint8_t *buf = bgpopen.encode(len);
     debug_msg("OPEN Packet SENT\n%s", bgpopen.str().c_str());
-    send_message(buf, len, ::callback(this, &Peer::callback, "open"));
+    send_message(buf, len, callback(this, &Peer::xrl_callback, "open"));
 }
 
 /*

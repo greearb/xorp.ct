@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.23 2003/06/09 22:14:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.24 2003/06/19 00:44:44 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -75,7 +75,7 @@ public:
     {}
 
     inline const Xrl& xrl() const		{ return _xrl; }
-    inline XrlCallback& callback()		{ return _xcb; }
+    inline XrlCallback& cb()			{ return _xcb; }
 
 protected:
     Xrl				_xrl;
@@ -320,9 +320,9 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
     _dsl.erase(i);
     
     if (e == XrlError::OKAY()) {
-	send_resolved(ds->xrl(), dbe, ds->callback());
+	send_resolved(ds->xrl(), dbe, ds->cb());
     } else {
-	ds->callback()->dispatch(e, 0);
+	ds->cb()->dispatch(e, 0);
     }
     delete ds;
 

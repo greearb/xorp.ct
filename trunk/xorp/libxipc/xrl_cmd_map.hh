@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_cmd_map.hh,v 1.11 2003/03/16 08:20:32 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_cmd_map.hh,v 1.12 2003/06/19 00:44:43 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_CMD_MAP_HH__
 #define __LIBXIPC_XRL_CMD_MAP_HH__
@@ -29,9 +29,19 @@ XorpCallback2<const XrlCmdError, const XrlArgs&, XrlArgs*>::RefPtr XrlRecvCallba
 
 struct XrlCmdEntry {
     XrlCmdEntry(const string& s, XrlRecvCallback cb) :
-	name(s), callback(cb) {}
-    string		name;
-    XrlRecvCallback	callback;
+	_name(s), _cb(cb) {}
+
+    inline const string& name() const { return _name; }
+
+    inline const XrlCmdError
+    dispatch(const XrlArgs& inputs, XrlArgs* outputs) const
+    {
+	return _cb->dispatch(inputs, outputs);
+    }
+
+protected:
+    string		_name;
+    XrlRecvCallback	_cb;
 };
 
 class XrlCmdMap {

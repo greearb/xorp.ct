@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.18 2003/06/10 19:12:48 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.19 2003/06/19 00:44:44 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -461,15 +461,15 @@ XrlPFSTCPSender::die(const char* reason)
 
     for (list<RequestState>::iterator i = _requests_pending.begin();
 	i != _requests_pending.end(); i++) {
-	if (i->callback.is_empty() == false)
-	    i->callback->dispatch(XrlError::SEND_FAILED(), 0);
+	if (i->cb.is_empty() == false)
+	    i->cb->dispatch(XrlError::SEND_FAILED(), 0);
     }
     _requests_pending.clear();
 
     for (list<RequestState>::iterator i = _requests_sent.begin();
 	i != _requests_sent.end(); i++) {
-	if (i->callback.is_empty() == false)
-	    i->callback->dispatch(XrlError::SEND_FAILED(), 0);
+	if (i->cb.is_empty() == false)
+	    i->cb->dispatch(XrlError::SEND_FAILED(), 0);
     }
     _requests_sent.clear();
 }
@@ -527,9 +527,10 @@ void
 XrlPFSTCPSender::timeout_request(uint32_t seqno)
 {
     RequestState* rs = find_request(seqno);
-    if (rs->callback.is_empty() == false)
-	rs->callback->dispatch(REPLY_TIMED_OUT, 0);
-    rs->callback = 0; // set to null because we don't want to call this again
+    if (rs->cb.is_empty() == false)
+	rs->cb->dispatch(REPLY_TIMED_OUT, 0);
+    // set callback to null because we don't want to call this again
+    rs->cb = 0;
     rs->timeout.unschedule();
     debug_msg("timeout_request:\nseqno %d xrl >> %s <<\n",
 	      rs->seqno, rs->xrl.str().c_str());
@@ -628,11 +629,11 @@ XrlPFSTCPSender::dispatch_reply()
 
     try {
 	XrlArgs response(xrl_data);
-	rs->callback->dispatch(rcv_err, &response);
+	rs->cb->dispatch(rcv_err, &response);
     } catch (InvalidString& ) {
 	XrlError xe (XrlError::INTERNAL_ERROR().error_code(),
 		    "corrupt xrl response");
-	rs->callback->dispatch(xe, 0);
+	rs->cb->dispatch(xe, 0);
 	debug_msg("Corrupt response: %s\n", xrl_data);
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/test_peer.hh,v 1.5 2003/05/29 22:18:29 mjh Exp $
+// $XORP: xorp/bgp/harness/test_peer.hh,v 1.6 2003/06/19 00:46:09 hodson Exp $
 
 #ifndef __BGP_HARNESS_TEST_PEER_HH__
 #define __BGP_HARNESS_TEST_PEER_HH__
@@ -52,7 +52,7 @@ protected:
     void datain(status st, uint8_t *ptr, size_t len, string error = "");
     void queue_data(status st, uint8_t *ptr, size_t len, string error);
     void sendit();
-    void callback(const XrlError& error);
+    void xrl_callback(const XrlError& error);
 
 private:
     TestPeer(const TestPeer&);

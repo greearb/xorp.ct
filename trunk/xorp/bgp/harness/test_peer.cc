@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.11 2003/05/29 22:18:29 mjh Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.12 2003/06/19 00:46:09 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -283,7 +283,7 @@ TestPeer::connect(const string& host, const uint32_t& port,
    */
    if(0 != _coordinator.length() &&
        !_eventloop.add_selector(s, SEL_RD,
-				::callback(this, &TestPeer::receive))) {
+				callback(this, &TestPeer::receive))) {
 	::close(s);
 	XLOG_WARNING("Failed to add socket %d to eventloop", s);
 	return false;
@@ -356,8 +356,8 @@ TestPeer::listen(const string& host, const uint32_t& port,
     }
 
     if(!_eventloop.add_selector(s, SEL_RD,
-				 ::callback(this,
-					    &TestPeer::connect_attempt))) {
+				callback(this,
+					 &TestPeer::connect_attempt))) {
 	::close(s);
 	error_string = c_format("Failed to add socket %d to eventloop", s);
 	return false;
@@ -383,7 +383,7 @@ TestPeer::send(const vector<uint8_t>& data, string& error_string)
     for(i = 0; i < len; i++)
 	buf[i] = data[i];
     _async_writer->add_buffer(buf, len,
-			     ::callback(this, &TestPeer::send_complete));
+			      callback(this, &TestPeer::send_complete));
     _async_writer->start();
 
     if(_verbose && _bgp)
@@ -518,7 +518,7 @@ TestPeer::connect_attempt(int fd, SelectorMask m)
    */
    if(0 != _coordinator.length() &&
        !_eventloop.add_selector(connfd, SEL_RD,
-				::callback(this, &TestPeer::receive))) {
+				callback(this, &TestPeer::receive))) {
 	::close(connfd);
 	XLOG_WARNING("Failed to add socket %d to eventloop", connfd);
 	return;
@@ -702,24 +702,24 @@ TestPeer::sendit()
     switch(q.len) {
     case 0:
 	datain.send_closed(_coordinator.c_str(), _server,
-			   ::callback(this, &TestPeer::callback));
+			   callback(this, &TestPeer::xrl_callback));
 	break;
     case -1:
 	datain.send_error(_coordinator.c_str(), _server, q.error,
-			   ::callback(this, &TestPeer::callback));
+			  callback(this, &TestPeer::xrl_callback));
 	break;
     default:
 	datain.send_receive(_coordinator.c_str(), _server,
 			    GOOD == q.st ? true : false,
 			    q.secs, q.micro,
 			    q.v,
-			    ::callback(this, &TestPeer::callback));
+			    callback(this, &TestPeer::xrl_callback));
 	break;
     }
 }
 
 void
-TestPeer::callback(const XrlError& error)
+TestPeer::xrl_callback(const XrlError& error)
 {
     debug_msg("callback %s\n", error.str().c_str());
 

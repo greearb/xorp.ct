@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_cmd_map.cc,v 1.7 2003/03/05 19:58:53 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_cmd_map.cc,v 1.8 2003/03/10 23:20:27 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -22,12 +22,12 @@
 bool
 XrlCmdMap::add_handler(const XrlCmdEntry& cmd)
 {
-    if (get_handler(cmd.name.c_str())) {
+    if (get_handler(cmd.name())) {
 	debug_msg("XrlCmdMap::add_handler for \"%s\" failed"
-		  ": a handler already exists\n", cmd.name.c_str());
+		  ": a handler already exists\n", cmd.name().c_str());
 	return false;
     }
-    _cmd_map.insert(CmdMap::value_type(cmd.name, cmd));
+    _cmd_map.insert(CmdMap::value_type(cmd.name(), cmd));
     return true;
 }
 

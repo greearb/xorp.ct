@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/process_watch.hh,v 1.1 2003/06/17 06:44:51 atanu Exp $
+// $XORP: xorp/bgp/process_watch.hh,v 1.2 2003/06/17 16:57:10 atanu Exp $
 
 #ifndef __BGP_PROCESS_WATCH_HH__
 #define __BGP_PROCESS_WATCH_HH__
@@ -30,8 +30,6 @@ public:
 
     ProcessWatch(XrlStdRouter *xrl_router, EventLoop& eventloop,
 		 TerminateCallback cb);
-
-    void callback(const XrlError& error);
 
     /**
      * Method to call when the birth of the finder has been detected.
@@ -53,6 +51,10 @@ public:
      * for correct operation are running.
      */
     bool ready() const;
+
+protected:
+    void interest_callback(const XrlError& error);
+
 private:
     EventLoop& _eventloop;
     TerminateCallback _shutdown;

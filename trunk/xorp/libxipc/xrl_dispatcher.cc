@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_dispatcher.cc,v 1.2 2003/05/09 21:00:53 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_dispatcher.cc,v 1.3 2003/06/19 00:44:43 hodson Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_dispatcher.hh"
@@ -27,7 +27,7 @@ XrlDispatcher::dispatch_xrl(const string&  method_name,
 {
     const XrlCmdEntry* c = get_handler(method_name.c_str());
     if (c) {
-	return c->callback->dispatch(inputs, &outputs);
+	return c->dispatch(inputs, &outputs);
     }
     debug_msg("No handler for %s\n", method_name.c_str());
     return XrlError::NO_SUCH_METHOD();

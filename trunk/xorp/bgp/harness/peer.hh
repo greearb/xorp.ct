@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.4 2003/06/12 21:58:56 atanu Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.5 2003/06/19 00:46:09 hodson Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -73,7 +73,7 @@ public:
 
     void check_expect(BGPPacket *rec);
 
-    void callback(const XrlError& error, const char *comment);
+    void xrl_callback(const XrlError& error, const char *comment);
 
     void datain(const bool& status, const TimeVal& tv,
 		const vector<uint8_t>&  data);

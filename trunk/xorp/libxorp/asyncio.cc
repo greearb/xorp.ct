@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.4 2003/03/10 23:20:30 hodson Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.5 2003/04/22 23:27:19 hodson Exp $"
 
 #include <signal.h>
 
@@ -78,8 +78,8 @@ AsyncFileReader::read(int fd, SelectorMask m) {
     BufferInfo& head = _buffers.front();
 
     errno = 0;
-    ssize_t done = ::read(_fd, head.buffer + head.offset,
-			      head.buffer_bytes - head.offset);
+    ssize_t done = ::read(_fd, head._buffer + head._offset,
+			      head._buffer_bytes - head._offset);
 
     if (done < 0 && is_pseudo_error("AsyncFileReader", _fd, errno)) {
 	errno = 0;
@@ -97,8 +97,8 @@ AsyncFileReader::complete_transfer(int err, ssize_t done) {
 
     if (done > 0) {
 	BufferInfo& head = _buffers.front();
-	head.offset += done;
-	if (head.offset == head.buffer_bytes) {
+	head._offset += done;
+	if (head._offset == head._buffer_bytes) {
 	    BufferInfo copy = head; 		// copy head
 	    _buffers.erase(_buffers.begin());	// remove head
 	    if (_buffers.empty()) {
@@ -190,8 +190,8 @@ AsyncFileWriter::write(int fd, SelectorMask m)
     BufferInfo& head = _buffers.front();
 
     sig_t   saved_sigpipe = signal(SIGPIPE, SIG_IGN);
-    ssize_t done = ::write(_fd, head.buffer + head.offset,
-			   head.buffer_bytes - head.offset);
+    ssize_t done = ::write(_fd, head._buffer + head._offset,
+			   head._buffer_bytes - head._offset);
     signal(SIGPIPE, saved_sigpipe);
     if (done < 0 && is_pseudo_error("AsyncFileWriter", _fd, errno)) {
 	errno = 0;
@@ -210,8 +210,8 @@ AsyncFileWriter::complete_transfer(ssize_t done)
 
     if (done >= 0) {
 	BufferInfo& head = _buffers.front();
-	head.offset += done;
-	if (head.offset == head.buffer_bytes) {
+	head._offset += done;
+	if (head._offset == head._buffer_bytes) {
 	    BufferInfo copy = head; 		// copy head
 	    _buffers.erase(_buffers.begin());	// remove head
 	    if (_buffers.empty()) {

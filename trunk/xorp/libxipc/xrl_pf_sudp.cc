@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.20 2003/06/10 19:12:48 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.21 2003/06/19 00:44:44 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -66,12 +66,12 @@ const char* XrlPFSUDPListener::_protocol = SUDP_PROTOCOL_NAME;
 
 struct Request {
     XrlPFSender*		parent;		// Request creator
-    XrlPFSender::SendCallback	callback;	// User Callback
+    XrlPFSender::SendCallback	cb;		// User Callback
     XUID			xuid;		// Unique Request ID
     XorpTimer			timeout;	// Timeout timer
 
-    Request(XrlPFSender* p, const XrlPFSender::SendCallback& cb)
-	: parent(p), callback(cb) {}
+    Request(XrlPFSender* p, const XrlPFSender::SendCallback& scb)
+	: parent(p), cb(scb) {}
     bool operator==(const XUID& x) const { return xuid == x; }
 };
 
@@ -218,7 +218,7 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 	sender_fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sender_fd > 0) {
 	    _eventloop.add_selector(sender_fd, SEL_RD,
-				     callback(&XrlPFSUDPSender::recv));
+				    callback(&XrlPFSUDPSender::recv));
 	} else {
 	    xorp_throw(XrlPFConstructorError,
 		       c_format("Could not create master socket: %s\n",
@@ -302,7 +302,7 @@ XrlPFSUDPSender::timeout_hook(XUID xuid)
     assert (i != requests_pending.end());
 
     Request& r = i->second;
-    SendCallback cb = r.callback;
+    SendCallback cb = r.cb;
 
     debug_msg("%p Erasing state for %s (timeout)\n",
 	      this, r.xuid.str().c_str());
@@ -353,7 +353,7 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
     i->second.timeout.unschedule();
 
     // Copy out state we'd like to use from request before deleting it.
-    SendCallback callback = i->second.callback;
+    SendCallback cb = i->second.cb;
 
     debug_msg("Erasing state for %s (answered)\n",
 	      i->second.xuid.str().c_str());
@@ -369,10 +369,10 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
 		  (uint32_t)content_bytes,
 		  buf + header_bytes);
 	XrlError xe(INTERNAL_ERROR, "corrupt xrl response");
-	callback->dispatch(xe, 0);
+	cb->dispatch(xe, 0);
 	return;
     }
-    callback->dispatch(err, response);
+    cb->dispatch(err, response);
     delete response;
 }
 

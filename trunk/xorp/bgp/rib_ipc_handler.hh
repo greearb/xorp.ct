@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.10 2003/06/12 06:02:22 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.11 2003/06/17 06:44:16 atanu Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -86,10 +86,12 @@ private:
     bool sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp);
 
     void delayed_send(uint32_t delay_ms);
-    EventLoop& eventloop() {return _rib_ipc_handler->eventloop();}
 
-    void callback(const XrlError& error, uint32_t sequence, 
-		  const char *comment);
+    inline EventLoop& eventloop() { return _rib_ipc_handler->eventloop(); }
+
+    void route_command_done(const XrlError& error,
+			    uint32_t sequence, 
+			    const char *comment);
 };
 
 /*
@@ -120,7 +122,7 @@ public:
 		      const SubnetRoute<IPv6> &new_rt);
     int delete_route(const SubnetRoute<IPv4> &rt);
     int delete_route(const SubnetRoute<IPv6> &rt);
-    void callback(const XrlError& error, const char *comment);
+    void rib_command_done(const XrlError& error, const char *comment);
     PeerOutputState push_packet();
 
     void set_plumbing(BGPPlumbing *plumbing) {_plumbing = plumbing;}
