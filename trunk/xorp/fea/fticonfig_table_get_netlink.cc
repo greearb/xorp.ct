@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.8 2003/09/20 06:51:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.9 2003/10/01 22:49:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -156,8 +156,8 @@ FtiConfigTableGetNetlink::nlsock_data(const uint8_t* , size_t )
 bool
 FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
 {
-#define RTMBUFSIZE (sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + 512)
-    char		rtmbuf[RTMBUFSIZE];
+    static const size_t	buffer_size = sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + 512;
+    char		buffer[buffer_size];
     struct nlmsghdr	*nlh;
     struct sockaddr_nl	snl;
     struct rtgenmsg	*rtgenmsg;
@@ -195,8 +195,8 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     snl.nl_groups = 0;
     
     // Set the request
-    memset(rtmbuf, 0, sizeof(rtmbuf));
-    nlh = reinterpret_cast<struct nlmsghdr*>(rtmbuf);
+    memset(buffer, 0, sizeof(buffer));
+    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtgenmsg));
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
@@ -205,7 +205,7 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     rtgenmsg = reinterpret_cast<struct rtgenmsg*>(NLMSG_DATA(nlh));
     rtgenmsg->rtgen_family = family;
     
-    if (ns_ptr->sendto(rtmbuf, nlh->nlmsg_len, 0,
+    if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl),
 		       sizeof(snl)) != (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("error writing to netlink socket: %s",

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.9 2003/09/16 19:29:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.10 2003/10/12 22:07:07 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -115,7 +115,7 @@ bool
 FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
-    char		rtmbuf[buffer_size];
+    char		buffer[buffer_size];
     struct rt_msghdr	*rtm;
     struct sockaddr_in	*sin_dst, *sin_gateway, *sin_netmask;
     RoutingSocket&	rs = *this;
@@ -124,8 +124,8 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     //
     // Set the request
     //
-    memset(rtmbuf, 0, sizeof(rtmbuf));
-    rtm = (struct rt_msghdr *)rtmbuf;
+    memset(buffer, 0, sizeof(buffer));
+    rtm = (struct rt_msghdr *)buffer;
     
     switch (family) {
     case AF_INET:
@@ -189,7 +189,7 @@ bool
 FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
-    char		rtmbuf[buffer_size];
+    char		buffer[buffer_size];
     struct rt_msghdr	*rtm;
     struct sockaddr_in	*sin_dst, *sin_netmask = NULL;
     RoutingSocket&	rs = *this;
@@ -198,8 +198,8 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     //
     // Set the request
     //
-    memset(rtmbuf, 0, sizeof(rtmbuf));
-    rtm = (struct rt_msghdr *)rtmbuf;
+    memset(buffer, 0, sizeof(buffer));
+    rtm = (struct rt_msghdr *)buffer;
     
     switch (family) {
     case AF_INET:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.7 2003/09/20 06:41:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.8 2003/09/20 07:00:11 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -186,8 +186,8 @@ FtiConfigEntryGetRtsock::rtsock_data(const uint8_t* , size_t )
 bool
 FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
 {
-#define RTMBUFSIZE (sizeof(struct rt_msghdr) + 512)
-    char		rtmbuf[RTMBUFSIZE];
+    static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
+    char		buffer[buffer_size];
     struct rt_msghdr	*rtm, *rtm_answer;
     struct sockaddr_in	*sin;
     RoutingSocket&	rs = *this;
@@ -203,8 +203,8 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
     //
     // Set the request
     //
-    memset(rtmbuf, 0, sizeof(rtmbuf));
-    rtm = reinterpret_cast<struct rt_msghdr*>(rtmbuf);
+    memset(buffer, 0, sizeof(buffer));
+    rtm = reinterpret_cast<struct rt_msghdr*>(buffer);
     
     switch (dst.af()) {
     case AF_INET:
@@ -263,8 +263,8 @@ FtiConfigEntryGetRtsock::lookup_route(const IPvX& dst, FteX& fte)
 bool
 FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
 {
-#define RTMBUFSIZE (sizeof(struct rt_msghdr) + 512)
-    char		rtmbuf[RTMBUFSIZE];
+    static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
+    char		buffer[buffer_size];
     struct rt_msghdr	*rtm, *rtm_answer;
     struct sockaddr_in	*sin;
     RoutingSocket&	rs = *this;
@@ -281,8 +281,8 @@ FtiConfigEntryGetRtsock::lookup_entry(const IPvXNet& dst, FteX& fte)
     //
     // Set the request
     //
-    memset(rtmbuf, 0, sizeof(rtmbuf));
-    rtm = reinterpret_cast<struct rt_msghdr*>(rtmbuf);
+    memset(buffer, 0, sizeof(buffer));
+    rtm = reinterpret_cast<struct rt_msghdr*>(buffer);
     
     switch (dst.af()) {
     case AF_INET:

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.9 2003/09/22 17:40:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.10 2003/10/01 22:49:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -218,8 +218,8 @@ FtiConfigEntryGetNetlink::nlsock_data(const uint8_t* , size_t )
 bool
 FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
 {
-#define RTMBUFSIZE (sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + sizeof(struct rtattr) + 512)
-    char		rtmbuf[RTMBUFSIZE];
+    static const size_t	buffer_size = sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + sizeof(struct rtattr) + 512;
+    char		buffer[buffer_size];
     struct nlmsghdr	*nlh, *nlh_answer;
     struct sockaddr_nl	snl;
     socklen_t		snl_len;
@@ -265,8 +265,8 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     snl.nl_groups = 0;
     
     // Set the request
-    memset(rtmbuf, 0, sizeof(rtmbuf));
-    nlh = reinterpret_cast<struct nlmsghdr*>(rtmbuf);
+    memset(buffer, 0, sizeof(buffer));
+    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtmsg));
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST;
@@ -277,9 +277,9 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     rtmsg->rtm_dst_len = IPvX::addr_bitlen(family);
     // Add the 'ipaddr' address as an attribute
     rta_len = RTA_LENGTH(IPvX::addr_size(family));
-    if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(rtmbuf)) {
+    if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	XLOG_FATAL("AF_NETLINK buffer size error: %d instead of %d",
-		   sizeof(rtmbuf), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
+		   sizeof(buffer), NLMSG_ALIGN(nlh->nlmsg_len) + rta_len);
     }
     rtattr = RTM_RTA(rtmsg);
     rtattr->rta_type = RTA_DST;
@@ -293,7 +293,7 @@ FtiConfigEntryGetNetlink::lookup_route(const IPvX& dst, FteX& fte)
     rtmsg->rtm_type  = RTN_UNSPEC;
     rtmsg->rtm_flags = 0;
     
-    if (ns_ptr->sendto(rtmbuf, nlh->nlmsg_len, 0,
+    if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
 		       reinterpret_cast<struct sockaddr*>(&snl),
 		       sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
