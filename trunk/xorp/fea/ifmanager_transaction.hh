@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.7 2004/06/10 22:40:54 hodson Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.8 2004/11/05 03:37:14 bms Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -133,7 +133,7 @@ public:
     }
 
     string str() const {
-	return string("ConfigureInterfacefromSystem: ") + ifname();
+	return string("ConfigureInterfaceFromSystem: ") + ifname();
     }
 
     bool path_valid() const	{ return true; }
