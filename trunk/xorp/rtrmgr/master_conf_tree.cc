@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.34 2004/05/28 22:27:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.35 2004/06/04 22:42:24 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -861,6 +861,12 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     ConfigTree new_tree(_template_tree, _verbose);
     if (new_tree.parse(configuration, filename, errmsg) != true)
 	return false;
+
+    //
+    // Go through the config tree, and create nodes for any defaults
+    // specified in the template tree that aren't already configured.
+    //
+    new_tree.add_default_children();
 
     //
     // Ok, so the new config parses.  Now we need to figure out how it
