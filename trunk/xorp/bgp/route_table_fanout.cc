@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.44 2005/03/03 07:29:24 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.45 2005/03/04 03:51:20 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -208,7 +208,6 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
     typename NextTableMap<A>::iterator i = _next_tables.begin();
-    int result = ADD_USED, r;
     list <PeerTableInfo<A>*> queued_peers;
     while (i != _next_tables.end()) {
 	const PeerHandler *next_peer = i.second().peer_handler();
@@ -223,29 +222,27 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 		      XORP_UINT_CAST(A::ip_version()),
 		      pretty_string_safi(this->safi()),
 		      &rtmsg, (i.first())->tablename().c_str());
-
-	    if (i.second().busy()) {
-		debug_msg("Fanout: queuing route, queue len is %u\n",
-			  XORP_UINT_CAST(queued_peers.size()));
-		queued_peers.push_back(&(i.second()));
-		r = ADD_USED;
-	    } else {
-		debug_msg("Fanout: passing route on\n");
-		r = i.first()->add_route(rtmsg, (BGPRouteTable<A>*)this);
-	    }
+	    //we now always add to the queue, and require a
+	    //get_next_message from downstream to liberate a queued
+	    //entry.
+	    debug_msg("Fanout: queuing route, queue len is %u\n",
+		      XORP_UINT_CAST(queued_peers.size()));
+	    queued_peers.push_back(&(i.second()));
 
 	    // we don't bother to return ADD_UNUSED or ADD_FILTERED,
 	    // but if there's a failure, we'll return the last failure
 	    // code.  Not clear how useful this is, but best not to
 	    // hide the failure completely.
-	    if (r != ADD_USED && r != ADD_UNUSED && r != ADD_FILTERED)
-		result = r;
 	}
 	i++;
     }
-    if (queued_peers.empty() == false)
+    //queue it if anyone needs it.
+    if (queued_peers.empty() == false) {
 	add_to_queue(RTQUEUE_OP_ADD, rtmsg, queued_peers);
-    return result;
+	wakeup_downstream(queued_peers);
+    }
+
+    return ADD_USED;
 }
 
 template<class A>
@@ -276,7 +273,6 @@ FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     const PeerHandler *origin_peer = old_rtmsg.origin_peer();
     XLOG_ASSERT(origin_peer == new_rtmsg.origin_peer());
 
-    int result = ADD_USED, r;
     list <PeerTableInfo<A>*> queued_peers;
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
@@ -290,26 +286,17 @@ FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 		      &old_rtmsg, &new_rtmsg,
 		      (i.first())->tablename().c_str());
 
-	    if (i.second().busy()) {
-		debug_msg("queueing replace_route\n");
-		queued_peers.push_back(&(i.second()));
-		r = ADD_USED;
-	    } else {
-		debug_msg("not queuing replace_route\n");
-		r = i.first()->replace_route(old_rtmsg, new_rtmsg,
-					    (BGPRouteTable<A>*)this);
-	    }
+	    debug_msg("queueing replace_route\n");
+	    queued_peers.push_back(&(i.second()));
 
-	    // we don't bother to return ADD_UNUSED, but if there's a
-	    // failure, we'll return the last failure code.  Not clear how
-	    // useful this is, but best not to hide the failure completely.
-	    if (r != ADD_USED && r != ADD_UNUSED && r != ADD_FILTERED)
-		result = r;
 	}
     }
-    if (queued_peers.empty() == false)
+    if (queued_peers.empty() == false) {
 	add_replace_to_queue(old_rtmsg, new_rtmsg, queued_peers);
-    return result;
+	wakeup_downstream(queued_peers);
+    }
+
+    return ADD_USED;
 }
 
 template<class A>
@@ -343,16 +330,15 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 		      XORP_UINT_CAST(A::ip_version()),
 		      pretty_string_safi(this->safi()),
 		      &rtmsg, (i.first())->tablename().c_str());
-	    if (i.second().busy()) {
-		queued_peers.push_back(&(i.second()));
-	    } else {
-		XLOG_ASSERT(!i.second().has_queued_data());
-		i.first()->delete_route(rtmsg, (BGPRouteTable<A>*)this);
-	    }
+	    queued_peers.push_back(&(i.second()));
+
 	}
     }
-    if (queued_peers.empty() == false)
+    if (queued_peers.empty() == false) {
 	add_to_queue(RTQUEUE_OP_DELETE, rtmsg, queued_peers);
+	wakeup_downstream(queued_peers);
+    }
+
     return 0;
 }
 
@@ -374,7 +360,6 @@ FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	}
     }
     XLOG_ASSERT(i != _next_tables.end());
-    XLOG_ASSERT(i.second().busy());
 
     int result;
     result = dump_child->route_dump(rtmsg, (BGPRouteTable<A>*)this, dump_peer);
@@ -395,19 +380,30 @@ FanoutTable<A>::push(BGPRouteTable<A> *caller)
 	// a push needs to go to all peers because an add may cause a
 	// delete (or vice versa) of a route that originated from a
 	// different peer.
-	if (i.second().busy()) {
-	    queued_peers.push_back(&(i.second()));
-	} else {
-	    i.first()->push((BGPRouteTable<A>*)this);
-	}
+	queued_peers.push_back(&(i.second()));
     }
 
-    if (queued_peers.empty() == false)
+    if (queued_peers.empty() == false) {
 	// if the origin peer we send to add_push_to_queue is NULL, the
 	// push will go to all peers
 	add_push_to_queue(queued_peers, NULL);
+	wakeup_downstream(queued_peers);
+    }
 
     return 0;
+}
+
+template<class A>
+void
+FanoutTable<A>::wakeup_downstream(list <PeerTableInfo<A>*>& queued_peers)
+{
+    //send a wakeup downstream if they're currently waiting
+    typename list <PeerTableInfo<A>*>::iterator i;
+    for (i = queued_peers.begin(); i != queued_peers.end(); i++) {
+	if ((*i)->is_ready()) {
+	    (*i)->route_table()->wakeup();
+	}
+    }
 }
 
 template<class A>
@@ -493,7 +489,6 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
 	    peer_info = &(i.second());
     }
     XLOG_ASSERT(peer_info != NULL);
-    peer_info->set_busy(true);
 
     add_dump_table(dump_table);
 
@@ -518,7 +513,8 @@ FanoutTable<A>::add_to_queue(RouteQueueOp operation,
     set_queue_positions(queued_peers);
 
     if (rtmsg.push())
-	add_push_to_queue(queued_peers, rtmsg.origin_peer());
+	queue_entry->set_push(true);
+
 }
 
 template<class A>
@@ -545,17 +541,20 @@ FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
 					 RTQUEUE_OP_REPLACE_NEW);
     queue_entry->set_origin_peer(new_rtmsg.origin_peer());
     queue_entry->set_genid(new_rtmsg.genid());
+    
     _output_queue.push_back(queue_entry);
 
 
     if (new_rtmsg.push()) {
 	if (new_rtmsg.origin_peer() == old_rtmsg.origin_peer())
-	    add_push_to_queue(queued_peers, new_rtmsg.origin_peer());
+	    //add_push_to_queue(queued_peers, new_rtmsg.origin_peer());
+	    queue_entry->set_push(true);
 	else
 	    // if the origin peer we send to add_push_to_queue, the push will
 	    // go to all peers
 	    add_push_to_queue(queued_peers, NULL);
     }
+
 }
 
 template<class A>
@@ -578,7 +577,7 @@ FanoutTable<A>::set_queue_positions(const list<PeerTableInfo<A>*>&
 {
     typename list<PeerTableInfo<A>*>::const_iterator i;
     for (i = queued_peers.begin(); i != queued_peers.end(); i++) {
-	if ((*i)->busy() && ((*i)->has_queued_data() == false)) {
+	if ((*i)->has_queued_data() == false) {
 	    /* set the queue position to the current last element */
 	    (*i)->set_queue_position( --(_output_queue.end()) );
 	    (*i)->set_has_queued_data(true);
@@ -586,30 +585,6 @@ FanoutTable<A>::set_queue_positions(const list<PeerTableInfo<A>*>&
     }
 }
 
-template<class A>
-void
-FanoutTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) 
-{
-    debug_msg("%s \n next table: %s\n", this->tablename().c_str(),
-	      next_table->tablename().c_str());
-
-    typename NextTableMap<A>::iterator i;
-    i = _next_tables.find(next_table);
-    XLOG_ASSERT(i != _next_tables.end());
-
-    PeerTableInfo<A> *peer_info = &(i.second());
-
-    if (busy)
-	debug_msg("Fanout: Peer output state is BUSY\n");
-    else {
-	// downstream must drain the queue using get_next_message or
-	// skip_entire_queue before we reset the output state to NOT BUSY
-	XLOG_ASSERT(peer_info->has_queued_data() == false);
-	debug_msg("Fanout: Peer output state is not busy\n");
-    }
-    peer_info->set_busy(busy);
-    //    peer_info->set_has_queued_data(false);
-}
 
 template<class A>
 bool
@@ -624,6 +599,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     PeerTableInfo<A> *peer_info = &(i.second());
     if (peer_info->has_queued_data() == false) {
 	debug_msg("no data queued\n");
+	peer_info->set_is_ready();
 	return false;
     }
 
@@ -639,6 +615,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	InternalMessage<A> rtmsg((*queue_ptr)->route(),
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
+	if ((*queue_ptr)->push()) rtmsg.set_push();
 	next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
 	break;
     }
@@ -647,6 +624,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	InternalMessage<A> rtmsg((*queue_ptr)->route(),
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
+	if ((*queue_ptr)->push()) rtmsg.set_push();
 	next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 	break;
     }
@@ -662,6 +640,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	InternalMessage<A> new_rtmsg((*queue_ptr)->route(),
 				     (*queue_ptr)->origin_peer(),
 				     (*queue_ptr)->genid());
+	if ((*queue_ptr)->push()) new_rtmsg.set_push();
 	next_table->replace_route(old_rtmsg, new_rtmsg,
 				  (BGPRouteTable<A>*)this);
 	skipped = 2;

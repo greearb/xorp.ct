@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribout.hh,v 1.9 2004/05/15 15:12:17 mjh Exp $
+// $XORP: xorp/bgp/route_table_ribout.hh,v 1.10 2004/06/10 22:40:36 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
@@ -22,9 +22,11 @@
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
+#include "libxorp/eventloop.hh"
 #include "route_table_base.hh"
 #include "route_queue.hh"
 #include "parameter.hh"
+
 
 template<class A>
 class RibOutTable : public BGPRouteTable<A>  {
@@ -52,9 +54,7 @@ public:
     int dump_entire_table() { abort(); return 0; }
 
     /* mechanisms to implement flow control in the output plumbing */
-    void output_state(bool /*busy*/, BGPRouteTable<A> */*next_table*/) {
-	abort();
-    }
+    void wakeup();
 
     /* output_no_longer_busy is called asynchronously by the peer
        handler when the state of the output queue goes from busy to
@@ -68,22 +68,20 @@ public:
 	return false;
     }
 
+    void reschedule_self();
+
     void peering_went_down(const PeerHandler *peer, uint32_t genid,
 			   BGPRouteTable<A> *caller);
     void peering_down_complete(const PeerHandler *peer, uint32_t genid,
 			       BGPRouteTable<A> *caller);
 private:
-    //pointers to all the active routes, so we can efficiently handle
-    //route refresh.
-    //set <const SubnetRoute<A>*> _routes;
-
     //the queue that builds, prior to receiving a push, so we can
     //send updates to our peers atomically
     list <const RouteQueueEntry<A> *> _queue;
 
     PeerHandler *_peer;
     bool _peer_busy;
-    bool _upstream_queue_exists;
+    XorpTimer _wakeup_timer;
 };
 
 #endif // __BGP_ROUTE_TABLE_RIBOUT_HH__

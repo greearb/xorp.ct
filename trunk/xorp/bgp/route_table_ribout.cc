@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.22 2005/03/02 01:31:43 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.23 2005/03/03 07:29:24 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -30,7 +30,6 @@ RibOutTable<A>::RibOutTable(string table_name,
     this->_parent = init_parent;
     _peer = peer;
     _peer_busy = false;
-    _upstream_queue_exists = false;
 }
 
 template<class A>
@@ -249,7 +248,6 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
     // have the same Path Attributes, and send them together in an
     // Update message.  We repeatedly do this until the queue is empty.
 
-    bool peer_busy = false;
     while (_queue.empty() == false) {
 
 	// go through _queue and move all of the queue elements that
@@ -338,55 +336,42 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 
 	/* push the packet */
 	/* if the peer is busy (a queue has built up), there's not
-           much the RibOut can do for the things already in it's
+           much the RibOut can do for the things already in its
            output queue - we just keep sending those to the
-           peer_handler.  But we want to signal back upstream to stop
-           sending us new data */
+           peer_handler.  But we want to not request any more data for now. */
 	if (_peer->push_packet() == PEER_OUTPUT_BUSY)
-	    peer_busy = true;
+	    _peer_busy = true;
 
 
 	debug_msg("************************************\n");
     }
 
-    /* signal our state back upstream */
-    if ((peer_busy == true) && (_peer_busy == false)) {
-	debug_msg("RibOut signalling peer busy upstream\n");
-	this->_parent->output_state(true, this);
-
-	// we now have to assume that a queue will build upstream
-	_upstream_queue_exists = true;
-    }
-    _peer_busy = peer_busy;
-
     return 0;
 }
 
+/* value is a tradeoff between not too many calls to timers, and not
+   being away from eventloop for too long - probably needs tuning*/
+#define MAX_MSGS_IN_BATCH 10
 
 template<class A>
 void
-RibOutTable<A>::output_no_longer_busy() 
+RibOutTable<A>::wakeup()
 {
-    debug_msg("%s: output_no_longer_busy\n", this->tablename().c_str());
-    if (_peer_busy == false) return;
-    debug_msg("%s: _peer_busy true->false\n", this->tablename().c_str());
+    /* don't do anything if we can't sent to the peer handler yet */
+    if (_peer_busy == true)
+	return;
 
-    _peer_busy = false;
-    while (1) {
+    for (int msgs = 0; msgs < MAX_MSGS_IN_BATCH; msgs++) {
+	/* only request a limited about of messages, so we don't hog
+	   the eventloop for too long */
+
 	/* get_next_message will cause the upstream queue to send
            another update (add, delete, replace or push) through the
            normal RouteTable interfaces*/
-
 	bool upstream_queue_exists = this->_parent->get_next_message(this);
 
 	if (upstream_queue_exists == false) {
 	    /*the queue upstream has now drained*/
-	    if (_peer_busy == false) {
-		/*if the queue downstream is no longer busy then go
-                  back to normal operation*/
-		_upstream_queue_exists = false;
-		this->_parent->output_state(false, this);
-	    }
 	    /*there's nothing left to do here*/
 	    return;
 	}
@@ -396,6 +381,29 @@ RibOutTable<A>::output_no_longer_busy()
 	    return;
 	}
     }
+    reschedule_self();
+}
+
+template<class A>
+void
+RibOutTable<A>::output_no_longer_busy() 
+{
+    debug_msg("%s: output_no_longer_busy\n", this->tablename().c_str());
+    debug_msg("%s: _peer_busy true->false\n", this->tablename().c_str());
+    _peer_busy = false;
+    wakeup();
+}
+
+template<class A>
+void
+RibOutTable<A>::reschedule_self()
+{
+    /*call back immediately, but after network events or expired
+      timers */    
+    if (_wakeup_timer.scheduled())
+	return;
+    _wakeup_timer = _peer->eventloop().
+	new_oneoff_after_ms(0, callback(this, &RibOutTable<A>::wakeup));
 }
 
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.15 2004/06/10 22:40:35 hodson Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.16 2004/09/17 13:50:54 abittau Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -105,7 +105,6 @@ public:
     int dump_entire_table(BGPRouteTable<A> *child_to_dump_to, Safi safi,
 			  string ribname);
     /* mechanisms to implement flow control in the output plumbing */
-    void output_state(bool busy, BGPRouteTable<A> *next_table);
     bool get_next_message(BGPRouteTable<A> *next_table);
 
     void peering_went_down(const PeerHandler *peer, uint32_t genid,
@@ -127,6 +126,7 @@ private:
 			   const PeerHandler *origin_peer);
     void set_queue_positions(const list<PeerTableInfo<A>*>& queued_peers);
     void skip_entire_queue(BGPRouteTable<A> *next_table);
+    void wakeup_downstream(list <PeerTableInfo<A>*>& queued_peers);
 
     void add_dump_table(DumpTable<A> *dump_table); 
     void remove_dump_table(DumpTable<A> *dump_table);

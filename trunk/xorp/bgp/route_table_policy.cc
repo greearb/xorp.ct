@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.2 2004/09/17 20:02:26 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.3 2004/09/18 02:06:19 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -263,18 +263,6 @@ string
 PolicyTable<A>::str() const
 {
     return "not implemented yet";
-}
-
-template <class A>
-void
-PolicyTable<A>::output_state(bool busy, BGPRouteTable<A>* next_table)
-{
-    BGPRouteTable<A>* parent = this->_parent;
-
-    XLOG_ASSERT(parent);
-    XLOG_ASSERT(this->_next_table == next_table);
-
-    parent->output_state(busy, this);
 }
 
 template <class A>

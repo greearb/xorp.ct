@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.28 2004/05/22 22:55:05 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.29 2004/06/10 22:40:33 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -383,18 +383,8 @@ CacheTable<A>::str() const {
     return s;
 }
 
-/* mechanisms to implement flow control in the output plumbing */
 template<class A>
-void 
-CacheTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
-{
-    XLOG_ASSERT(this->_next_table == next_table);
-
-    this->_parent->output_state(busy, this);
-}
-
-template<class A>
-bool 
+bool
 CacheTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 {
     XLOG_ASSERT(this->_next_table == next_table);

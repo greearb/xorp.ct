@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.19 2004/06/12 13:20:50 mjh Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.20 2005/03/07 21:48:12 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -78,11 +78,6 @@ public:
     RouteTableType type() const { return RIB_IN_TABLE; }
 
     string str() const;
-
-    /* mechanisms to implement flow control in the output plumbing */
-    void output_state(bool /*busy*/, BGPRouteTable<A> */*next_table*/) {
-	abort();
-    }
 
     bool get_next_message(BGPRouteTable<A> */*next_table*/) {
 	abort();

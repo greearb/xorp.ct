@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.31 2005/01/31 22:04:16 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.32 2005/03/03 07:29:24 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -269,14 +269,25 @@ DumpTable<A>::initiate_background_dump()
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(!_completed);
     cp(15);
-
     _dumped = 0;
     _dump_active = true;
+
+    //delay the actual start of the dump to allow whoever is calling
+    //us to get their act in order before we wake up the downstream
+    //branch
     _dump_timer = eventloop().
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
 			    callback(this,
-				     &DumpTable<A>::do_next_route_dump));
+				     &DumpTable<A>::wakeup_downstream));
+}
+
+template<class A>
+void
+DumpTable<A>::wakeup_downstream()
+{
+    //wakeup the folks downstream so they start requesting data from us
+    this->_next_table->wakeup();
 }
 
 template<class A>
@@ -301,108 +312,40 @@ DumpTable<A>::suspend_dump()
     delete this;
 }
 
+
 template<class A>
-void
+bool
 DumpTable<A>::do_next_route_dump() 
 {
     XLOG_ASSERT(!_completed);
-
-    if (_output_busy) {
-	cp(17);
-	// we can't really do anything yet - wait to be triggered by
-	// the output state changing
-	debug_msg("Dump: output busy\n");
-	return;
-    }
-
-    // process any queue that built up
-    while(this->_parent->get_next_message(this) == true) {
-	cp(18);
-	debug_msg("DumpTable<A>::do_next_route_dump processed queued message\n");
-	if (_output_busy) {
-	    cp(19);
-	    return;
-	}
-    };
 
     // if we get here, the output is not busy and there's no queue of
     // changes upstream of us, so it's time to do more of the route
     // dump...
     debug_msg("dumped %d routes\n", _dumped);
     if (_dump_iter.is_valid() == false) {
-	cp(20);
 	if (_dump_iter.waiting_for_deletion_completion()) {
-	    cp(21);
 	    // go into final wait state
 	    _waiting_for_deletion_completion = true;
-	    // re-enable normal flow control
-	    this->_parent->output_state(_output_busy, this);
 	} else {
-	    cp(22);
 	    completed();
 	}
-	cp(23);
-	return;
-    } else {
-	cp(24);
+	return false;
     }
 
-    //    if (_dump_iter.route_iterator_is_valid())
     //	debug_msg("dump route with net %p\n", _dump_iter.net().str().c_str());
     if (this->_parent->dump_next_route(_dump_iter) == false) {
-	cp(25);
 	if (_dump_iter.next_peer() == false) {
-	    cp(26);
 	    if (_dump_iter.waiting_for_deletion_completion()) {
-		cp(27);
 		// go into final wait state
 		_waiting_for_deletion_completion = true;
-		// re-enable normal flow control
-		this->_parent->output_state(_output_busy, this);
 	    } else {
-		cp(28);
 		completed();
 	    }
-	    return;
-	} else {
-	    cp(29);
+	    return false;
 	}
-    } else {
-	cp(30);
     }
-
-    _dump_timer = eventloop().
-	new_oneoff_after_ms(0 /*call back immediately, but after
-				network events or expired timers */,
-			    callback(this,
-				     &DumpTable<A>::do_next_route_dump));
-}
-
-template<class A>
-void
-DumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table) 
-{
-    XLOG_ASSERT(next_table == this->_next_table);
-    if (busy)
-	debug_msg("Dump: output state busy\n");
-    else
-	debug_msg("Dump: output state not busy\n");
-
-    if (_completed || _waiting_for_deletion_completion) {
-	//we've finished dumping - just stay out of the way
-	_output_busy = busy;
-	return this->_parent-> output_state(busy, this);
-    } 
-
-    if (_output_busy == true && busy == false) {
-	cp(33);
-	_output_busy = false;
-	debug_msg("Dump: output went idle so dump next\n");
-	do_next_route_dump();
-    } else {
-	cp(34);
-	_output_busy = busy;
-    }
+    return true;
 }
 
 template<class A>
@@ -411,22 +354,18 @@ DumpTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 {
     XLOG_ASSERT(next_table == this->_next_table);
 
+    bool messages_queued;
     if (_completed) {
 	//we completed a while ago, but haven't removed ourselves yet.
 	//typically this is because we're waiting for the queue
 	//upstream to drain before it's safe to do so.
 
-	bool messages_queued = this->_parent->
+	messages_queued = this->_parent->
 	    get_next_message(static_cast<BGPRouteTable<A>*>(this));
 
 	if (messages_queued == false) {
 	    //the queue upstream has now drained
 	    //we can finally delete ourselves
-
-	    if (!_output_busy) {
-		//indicate to upstream that output is not busy anymore
-		this->_parent->output_state(false, this);
-	    }
 
 	    unplumb_self();
 	    delete this;
@@ -437,20 +376,17 @@ DumpTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     }
 
     if (_waiting_for_deletion_completion) {
-	cp(35);
 	//just stay out of the way
 	return this->_parent->get_next_message(this);
     } else {
-	cp(36);
-	debug_msg("Dump: get_next_message\n");
-	/* get_next_message is normally used so that the RibOut can cause
-	   the fanout table queue to drain clocked by transmit complete
-	   interrupts.  But with a dump table, it's not the RibOut that
-	   manages the draining of the upstream queue, so we simply return
-	   false, pretending there's no queue.  If the output is no longer
-	   busy, then we'll get our output_state method called, which we
-	   can use to trigger the next batch of work */
-	return false;
+	// retrieve all queued routes from upstream before we dump the
+	// next route
+	messages_queued = this->_parent->
+	    get_next_message(static_cast<BGPRouteTable<A>*>(this));
+	if (messages_queued)
+	    return true;
+	else
+	    return do_next_route_dump();
     }
 }
 
@@ -573,11 +509,6 @@ DumpTable<A>::completed()
 	return;
     } 
 
-    if (!_output_busy) {
-	//indicate to upstream that output is not busy anymore
-	this->_parent->output_state(false, this);
-    }
-
     unplumb_self();
     delete this;
 }
@@ -598,10 +529,6 @@ DumpTable<A>::unplumb_self()
 	cp(42);
 	FanoutTable<A> *ftp = dynamic_cast<FanoutTable<A>*>(this->_parent);
 	XLOG_ASSERT(ftp);
-#ifdef NOTDEF
-	ftp->remove_next_table(static_cast<BGPRouteTable<A>*>(this));
-	ftp->add_next_table(this->_next_table, _peer);
-#endif
 	ftp->replace_next_table(static_cast<BGPRouteTable<A>*>(this), 
 				this->_next_table);
     }

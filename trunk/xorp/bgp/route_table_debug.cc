@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.9 2004/05/15 15:12:15 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.10 2004/06/10 22:40:33 hodson Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -30,6 +30,7 @@ DebugTable<A>::DebugTable(string table_name,
     _print_tablename = false;
     _msgs = 0;
     _ofile = NULL;
+    _get_on_wakeup = false;
 }
 
 template<class A>
@@ -150,6 +151,13 @@ DebugTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use){
 }
 
 template<class A>
+void
+DebugTable<A>::wakeup() {
+    if (_get_on_wakeup)
+	while (this->_parent->get_next_message(this)) {}
+}
+
+template<class A>
 string
 DebugTable<A>::str() const {
     string s = "DebugTable<A>" + this->tablename();
@@ -217,6 +225,7 @@ DebugTable<A>::set_output_file(const string& filename) {
 template<class A>
 void
 DebugTable<A>::set_output_file(FILE *file) {
+    printf("set_output_file: %p\n", file);
     _close_on_delete = false;
     _ofile = file;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_route_pair.hh,v 1.7 2004/06/10 22:40:32 hodson Exp $
+// $XORP: xorp/bgp/peer_route_pair.hh,v 1.8 2004/11/05 01:35:23 pavlin Exp $
 
 #ifndef __BGP_PEER_ROUTE_PAIR_HH__
 #define __BGP_PEER_ROUTE_PAIR_HH__
@@ -35,14 +35,14 @@ public:
 	_route_table = init_route_table;
 	_peer_handler = ph;
 	_genid = genid;
-	_busy = false;
+	_is_ready = true;
 	_has_queued_data = false;
     }
     PeerTableInfo(const PeerTableInfo& other) {
 	_route_table = other._route_table;
 	_peer_handler = other._peer_handler;
 	_genid = other._genid;
-	_busy = other._busy;
+	_is_ready = other._is_ready;
 	_has_queued_data = other._has_queued_data;
 	_peer_number = other._peer_number;
 	if (_has_queued_data) {
@@ -65,9 +65,10 @@ public:
 	return _genid;
     }
 
-    bool busy() const {return _busy;}
-    void set_busy(bool busy) {_busy = busy;}
-    
+    bool is_ready() const {return _is_ready;}
+    void set_is_ready() {_is_ready = true;}
+    void set_is_not_ready() {_is_ready = false;}
+
     bool has_queued_data() const {return _has_queued_data;}
     void set_has_queued_data(bool has_data) {_has_queued_data = has_data;}
     
@@ -84,15 +85,17 @@ private:
 
     const PeerHandler *_peer_handler;
 
-    bool _busy; //the RibOut has determined it's queue is too large,
-                //so no more updates should be sent
-
     bool _has_queued_data; //there is data queued for this peer in the
                            //fanout table
 
     int _peer_number; //used to ensure consistency of ordering 
 
     uint32_t _genid;
+
+    // this is set when downstream has requested a message be sent,
+    // and we didn't have anything to send.  It indicates that a
+    // message may be immediately sent downstream.
+    bool _is_ready;
 
     typename list<const RouteQueueEntry<A>*>::iterator _posn; 
     /*the next item of data to send to this peer in the fanout table

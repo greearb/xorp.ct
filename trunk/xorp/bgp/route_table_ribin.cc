@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.34 2004/11/16 01:48:51 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.35 2005/03/07 21:48:12 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -88,8 +88,8 @@ RibInTable<A>::ribin_peering_went_down()
 	this->_next_table->set_parent(deletion_table);
 	this->_next_table = deletion_table;
 
-	deletion_table->initiate_background_deletion();
 	this->_next_table->peering_went_down(_peer, _genid, this);
+	deletion_table->initiate_background_deletion();
     } else {
 	//nothing to delete - just notify everyone
 	this->_next_table->peering_went_down(_peer, _genid, this);

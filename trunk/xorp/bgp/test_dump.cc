@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.41 2004/06/10 22:40:37 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.42 2004/10/06 06:42:32 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -141,14 +141,17 @@ test_dump(TestInfo& /*info*/)
     debug_table1->set_output_file(filename);
     debug_table1->set_canned_response(ADD_USED);
     debug_table1->enable_tablename_printing();
+    debug_table1->set_get_on_wakeup(true);
 
     debug_table2->set_output_file(debug_table1->output_file());
     debug_table2->set_canned_response(ADD_USED);
     debug_table2->enable_tablename_printing();
+    debug_table2->set_get_on_wakeup(true);
 
     debug_table3->set_output_file(debug_table1->output_file());
     debug_table3->set_canned_response(ADD_USED);
     debug_table3->enable_tablename_printing();
+    debug_table3->set_get_on_wakeup(true);
 
     //create a load of attributes 
     IPNet<IPv4> net0("1.0.0.0/24");
@@ -302,6 +305,10 @@ test_dump(TestInfo& /*info*/)
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
+    while (debug_table3->parent()->get_next_message(debug_table3)) {}
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
 
     //delete the routes
     debug_table1->write_separator();
@@ -386,6 +393,10 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
+    while (bgpmain.eventloop().timers_pending()) {
+	bgpmain.eventloop().run();
+    }
+    while (debug_table3->parent()->get_next_message(debug_table3)) {}
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
@@ -486,22 +497,28 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("BRING PEER 3 UP");
+    printf("---------------peering up\n");
     ribin_table3->ribin_peering_came_up();
     fanout_table->add_next_table(debug_table3, &handler3, 
 				 ribin_table3->genid());
     debug_table3->set_parent(fanout_table);
+    printf("---------------dump_entire\n");
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
 
     debug_table1->write_separator();
     debug_table1->write_comment("PEER 2 GOES DOWN");
+    printf("---------------remove_next_table\n");
     fanout_table->remove_next_table(debug_table2);
+    debug_table1->write_comment("XXXX");
+    printf("---------------peering_down\n");
     ribin_table2->ribin_peering_went_down();
-
     debug_table1->write_separator();
+    printf("---------------eventloop run\n");
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     while (bgpmain.eventloop().timers_pending()) {
 	bgpmain.eventloop().run();
     }
+    printf("---------------eventloop done\n");
 
     //delete the routes
     debug_table1->write_separator();
@@ -1371,6 +1388,7 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("TAKE PEER 1 DOWN");
+    int genid = ribin_table1->genid();
     fanout_table->remove_next_table(debug_table1);
     ribin_table1->ribin_peering_went_down();
 
@@ -1381,6 +1399,8 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table3->genid());
     debug_table3->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
+    ((DumpTable<IPv4>*)debug_table3->parent())
+	->peering_is_down(&handler1, genid);
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.11 2004/06/12 13:20:50 mjh Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.12 2004/09/17 13:50:54 abittau Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -309,7 +309,6 @@ public:
     string str() const;
 
     /* mechanisms to implement flow control in the output plumbing */
-    void output_state(bool busy, BGPRouteTable<A> *next_table);
     bool get_next_message(BGPRouteTable<A> *next_table);
 
     int add_simple_AS_filter(const AsNum &asn);

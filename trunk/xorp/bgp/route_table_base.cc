@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_base.cc,v 1.6 2004/05/07 11:45:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_base.cc,v 1.7 2004/06/10 22:40:33 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -52,6 +52,14 @@ BGPRouteTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 {
     XLOG_ASSERT(_next_table != NULL);
     return _next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this, peer);
+}
+
+template<class A>
+void 
+BGPRouteTable<A>::wakeup()
+{
+    XLOG_ASSERT(_next_table != NULL);
+    _next_table->wakeup();
 }
 
 template<class A>

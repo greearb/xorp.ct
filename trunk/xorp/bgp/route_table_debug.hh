@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_debug.hh,v 1.7 2004/05/15 15:12:15 mjh Exp $
+// $XORP: xorp/bgp/route_table_debug.hh,v 1.8 2004/06/10 22:40:34 hodson Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DEBUG_HH__
 #define __BGP_ROUTE_TABLE_DEBUG_HH__
@@ -38,6 +38,7 @@ public:
 		   const PeerHandler *peer);
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
 				       uint32_t& genid) const;
+    void wakeup();
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
     RouteTableType type() const {return DEBUG_TABLE;}
@@ -58,6 +59,9 @@ public:
     void set_next_messages(int msgs) {
 	_msgs = msgs;
     }
+    void set_get_on_wakeup(bool get_on_wakeup) {
+	_get_on_wakeup = get_on_wakeup;
+    }
     bool set_output_file(const string& filename);
     void set_output_file(FILE *file);
     FILE *output_file() const {return _ofile;}
@@ -70,6 +74,7 @@ private:
     FILE *_ofile;
     bool _close_on_delete;
     bool _print_tablename;
+    bool _get_on_wakeup;
 };
 
 #endif // __BGP_ROUTE_TABLE_DEBUG_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy.hh,v 1.2 2004/09/17 20:02:26 pavlin Exp $
+// $XORP: xorp/bgp/route_table_policy.hh,v 1.3 2004/09/18 02:06:19 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_HH__
 #define __BGP_ROUTE_TABLE_POLICY_HH__
@@ -61,7 +61,6 @@ public:
     int push(BGPRouteTable<A> *caller);
 
     void route_used(const SubnetRoute<A>* route, bool in_use);
-    void output_state(bool busy, BGPRouteTable<A> *next_table);
     bool get_next_message(BGPRouteTable<A> *next_table);
 
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,

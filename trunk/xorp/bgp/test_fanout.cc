@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.21 2004/05/19 13:23:10 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.22 2004/06/10 22:40:37 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -132,6 +132,8 @@ test_fanout(TestInfo& /*info*/)
     debug_table1->write_comment("TEST 1");
     debug_table1->write_comment("ADD AND DELETE");
     debug_table1->write_comment("SENDING FROM PEER 1");
+    debug_table1->set_get_on_wakeup(true);
+    debug_table2->set_get_on_wakeup(true);
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
@@ -171,7 +173,8 @@ test_fanout(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
 
     //set output state on peer 2 to be busy
-    fanout_table->output_state(true, debug_table2);
+    //    fanout_table->output_state(true, debug_table2);
+    debug_table2->set_get_on_wakeup(false);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     sr1->set_nexthop_resolved(true);
@@ -204,7 +207,7 @@ test_fanout(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
 
     //set output state on peer 2 to be busy
-    fanout_table->output_state(true, debug_table2);
+    debug_table2->set_get_on_wakeup(false);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     sr1->set_nexthop_resolved(true);
@@ -238,8 +241,10 @@ test_fanout(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
 
     //set output state on both peers to be busy
-    fanout_table->output_state(true, debug_table1);
-    fanout_table->output_state(true, debug_table2);
+    //fanout_table->output_state(true, debug_table1);
+    //fanout_table->output_state(true, debug_table2);
+    debug_table1->set_get_on_wakeup(false);
+    debug_table2->set_get_on_wakeup(false);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     sr1->set_nexthop_resolved(true);
@@ -294,8 +299,10 @@ test_fanout(TestInfo& /*info*/)
     debug_table1->write_comment("SENDING FROM PEER 1");
 
     //set output state on both peers to be busy
-    fanout_table->output_state(true, debug_table1);
-    fanout_table->output_state(true, debug_table2);
+    //fanout_table->output_state(true, debug_table1);
+    //fanout_table->output_state(true, debug_table2);
+    debug_table1->set_get_on_wakeup(false);
+    debug_table2->set_get_on_wakeup(false);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     sr1->set_nexthop_resolved(true);
@@ -354,18 +361,19 @@ test_fanout(TestInfo& /*info*/)
 	 = new DebugTable<IPv4>("D3", (BGPRouteTable<IPv4>*)fanout_table);
     fanout_table->add_next_table(debug_table3, &handler3, 1);
 
-    debug_table3->set_output_file(debug_table1->output_file());
+    //debug_table3->set_output_file(debug_table1->output_file());
     debug_table3->set_canned_response(ADD_USED);
     debug_table3->enable_tablename_printing();
+    debug_table3->set_output_file(debug_table1->output_file());
 
     debug_table1->write_comment("******************************************");
     debug_table1->write_comment("TEST 5");
     debug_table1->write_comment("INTERLEAVED FLOW CONTROL - THREE PEERS BUSY");
     debug_table1->write_comment("SENDING FROM PEER 1");
 
-    fanout_table->output_state(true, debug_table1);
-    fanout_table->output_state(true, debug_table2);
-    fanout_table->output_state(true, debug_table3);
+    //fanout_table->output_state(true, debug_table1);
+    //fanout_table->output_state(true, debug_table2);
+    //fanout_table->output_state(true, debug_table3);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     sr1->set_nexthop_resolved(true);
@@ -450,7 +458,7 @@ test_fanout(TestInfo& /*info*/)
 	fclose(file);
 	return false;
    }
-#define BUFSIZE 8192
+#define BUFSIZE 16384
     char testout[BUFSIZE];
     memset(testout, 0, BUFSIZE);
     int bytes1 = fread(testout, 1, BUFSIZE, file);

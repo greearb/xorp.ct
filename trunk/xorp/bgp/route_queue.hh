@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_queue.hh,v 1.9 2003/03/10 23:20:03 hodson Exp $
+// $XORP: xorp/bgp/route_queue.hh,v 1.10 2004/06/10 22:40:33 hodson Exp $
 
 #ifndef __BGP_ROUTE_QUEUE_HH__
 #define __BGP_ROUTE_QUEUE_HH__
@@ -37,6 +37,7 @@ public:
     {
 	_op = op;
 	_origin_peer = 0;
+	_push = false;
     }
 
     //for push only
@@ -46,6 +47,7 @@ public:
 	assert(op == RTQUEUE_OP_PUSH);
 	_op = op;
 	_origin_peer = origin_peer; // NULL is valid.
+	_push = false;
     }
 
     ~RouteQueueEntry() {
@@ -71,6 +73,8 @@ public:
     const PeerHandler *origin_peer() const	{ return _origin_peer;	}
     void set_genid(uint32_t genid)		{ _genid = genid; 	}
     uint32_t genid() const			{ return _genid;	}
+    void set_push(bool push)		{ _push = push; }
+    bool push() const		{ return _push;}
 
     string str() const;
 private:
@@ -79,6 +83,7 @@ private:
     SubnetRouteConstRef<A> _route_ref;
     const PeerHandler *_origin_peer;
     uint32_t _genid;
+    bool _push;
 };
 
 #endif // __BGP_ROUTE_QUEUE_HH__

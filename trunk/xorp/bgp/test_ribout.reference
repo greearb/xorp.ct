@@ -79,12 +79,10 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [PEER: PUSH_PACKET]
-[OUTPUT_STATE: BUSY]
 [separator]-------------------------------------
 [comment] PEER_GOES IDLE
 [GET_NEXT_MESSAGE]:  RETURNING TRUE
 [GET_NEXT_MESSAGE]:  RETURNING TRUE
 [GET_NEXT_MESSAGE]:  RETURNING FALSE
-[OUTPUT_STATE: IDLE]
 [separator]-------------------------------------
 [comment] SHUTDOWN AND CLEAN UP

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.17 2005/01/05 22:04:31 atanu Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.18 2005/03/11 01:56:58 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -102,7 +102,6 @@ public:
     string str() const;
 
     /* mechanisms to implement flow control in the output plumbing */
-    void output_state(bool busy, BGPRouteTable<A> *next_table);
     bool get_next_message(BGPRouteTable<A> *next_table);
 
     int route_count() const {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_base.hh,v 1.9 2004/06/12 13:20:50 mjh Exp $
+// $XORP: xorp/bgp/route_table_base.hh,v 1.10 2004/09/17 13:50:54 abittau Exp $
 
 #ifndef __BGP_ROUTE_TABLE_BASE_HH__
 #define __BGP_ROUTE_TABLE_BASE_HH__
@@ -102,7 +102,7 @@ public:
     virtual string str() const = 0;
 
     /* mechanisms to implement flow control in the output plumbing */
-    virtual void output_state(bool, BGPRouteTable *) {abort();}
+    virtual void wakeup();
     virtual bool get_next_message(BGPRouteTable *) {abort(); return false; }
 
     virtual bool dump_next_route(DumpIterator<A>& dump_iter);

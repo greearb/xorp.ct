@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.14 2004/06/10 22:40:34 hodson Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.15 2004/11/27 23:35:32 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -55,7 +55,6 @@ public:
     string str() const;
 
     /* mechanisms to implement flow control in the output plumbing */
-    void output_state(bool busy, BGPRouteTable<A> *next_table);
     bool get_next_message(BGPRouteTable<A> *next_table);
 
     void initiate_background_dump();
@@ -94,7 +93,8 @@ private:
      */
     void completed();
     void unplumb_self();
-    void do_next_route_dump();
+    void wakeup_downstream();
+    bool do_next_route_dump();
     EventLoop& eventloop() const {return _peer->eventloop();}
 
     const PeerHandler *_peer;

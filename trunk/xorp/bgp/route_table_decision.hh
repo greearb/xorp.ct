@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.16 2004/06/25 12:32:09 mjh Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.17 2005/03/01 02:43:45 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -118,11 +118,6 @@ public:
 
     RouteTableType type() const {return DECISION_TABLE;}
     string str() const;
-
-    /* mechanisms to implement flow control in the output plumbing */
-    void output_state(bool /*busy*/, BGPRouteTable<A> */*next_table*/) {
-	abort();
-    }
 
     bool get_next_message(BGPRouteTable<A> */*next_table*/) {
 	abort();

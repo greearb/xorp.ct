@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.24 2005/03/03 07:29:24 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.25 2005/03/09 02:48:00 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -881,16 +881,6 @@ FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg) const
     return filtered_msg;
 }
 
-
-/* mechanisms to implement flow control in the output plumbing */
-template<class A>
-void 
-FilterTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
-{
-    XLOG_ASSERT(this->_next_table == next_table);
-
-    this->_parent->output_state(busy, this);
-}
 
 template<class A>
 bool 
