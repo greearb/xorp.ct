@@ -17,11 +17,10 @@
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
 
+#include "xorp.h"
+
 #include <math.h>
 #include <sys/time.h>
-
-#include "config.h"
-#include "xorp.h"
 
 
 #define ONE_MILLION	1000000
@@ -53,7 +52,7 @@ public:
      * @param timeval the "struct timeval" time value to initialize this
      * object with.
      */
-    TimeVal(const struct timeval& timeval)
+    explicit TimeVal(const struct timeval& timeval)
 	: _sec(timeval.tv_sec), _usec(timeval.tv_usec) {}
     
     /**
@@ -61,18 +60,8 @@ public:
      * 
      * @param d the double-float time value to initialize this object with.
      */
-    TimeVal(const double& d)
-	: _sec((uint32_t)d),
-	  _usec((uint32_t)((d - ((double)_sec)) * ONE_MILLION + 1.0e-7)) {
-	//
-	// Adjust
-	//
-	if (_usec >= ONE_MILLION) {
-	    _sec += _usec / ONE_MILLION;
-	    _usec %= ONE_MILLION;
-	}
-    }
-
+    explicit inline TimeVal(const double& d);
+    
     /**
      * Get the number of seconds.
      * 
@@ -88,25 +77,40 @@ public:
     uint32_t usec() const	{ return _usec; }
     
     /**
-     * Copy the time to a timeval structure.
+     * Set the time value.
+     * 
+     * @param sec the number of seconds.
+     * @param usec the number of microseconds.
+     */
+    void set(uint32_t sec, uint32_t usec) { _sec = sec; _usec = usec; }
+    
+    /**
+     * Set the time value to zero.
+     */
+    void clear() { _sec = 0; _usec = 0; }
+
+    /**
+     * Copy the time value from a timeval structure.
+     * 
+     * @param timeval the storage to copy the time from.
+     * @return the number of copied octets.
+     */
+    inline size_t copy_in(const struct timeval& timeval);
+    
+    /**
+     * Copy the time value to a timeval structure.
      * 
      * @param timeval the storage to copy the time to.
      * @return the number of copied octets.
      */
-    size_t copy_out(struct timeval& timeval) {
-	timeval.tv_sec = _sec;
-	timeval.tv_usec = _usec;
-	return (sizeof(_sec) + sizeof(_usec));
-    }
+    inline size_t copy_out(struct timeval& timeval) const;
     
     /**
      * Convert a TimeVal value to a double-float value.
      * 
      * @return the double-float value of this TimeVal time.
      */
-    double get_double() const {
-	return (_sec * 1.0 + _usec * 1.0e-6);
-    }
+    double get_double() const { return (_sec * 1.0 + _usec * 1.0e-6); }
     
     /**
      * Apply uniform randomization on the time value of this object.
@@ -123,35 +127,7 @@ public:
      * @param factor the randomization factor to apply.
      * @return the randomized time value.
      */
-    TimeVal& randomize_uniform(const double& factor) {
-	TimeVal delta(factor * get_double());
-	uint32_t random_sec = delta.sec();
-	uint32_t random_usec = delta.usec();
-	
-	// Randomize the offset
-	if (random_sec != 0)
-	    random_sec = random() % random_sec;
-	if (random_usec != 0)
-	    random_usec = random() % random_usec;
-	TimeVal random_delta(random_sec, random_usec);
-	
-	// Either add or substract the randomized offset
-	if (random() % 2) {
-	    // Add
-	    *this += random_delta;
-	} else {
-	    // Substract
-	    if (random_delta < *this) {
-		*this -= random_delta;
-	    } else {
-		// The offset is too large. Set the result to zero.
-		_sec = 0;
-		_usec = 0;
-	    }
-	}
-	
-	return (*this);
-    }
+    inline const TimeVal& randomize_uniform(const double& factor);
     
     /**
      * Equality Operator
@@ -160,9 +136,7 @@ public:
      * @return true if the left-hand operand is numerically same as the
      * right-hand operand.
      */
-    bool operator==(const TimeVal& other) const {
-	return (_sec == other.sec()) && (_usec == other.usec());
-    }
+    inline bool operator==(const TimeVal& other) const;
     
     /**
      * Less-Than Operator
@@ -171,10 +145,7 @@ public:
      * @return true if the left-hand operand is numerically smaller than the
      * right-hand operand.
      */
-    bool operator<(const TimeVal& other) const {
-	return (_sec == other.sec()) ?
-	    _usec < other.usec() : _sec < other.sec();
-    }
+    inline bool operator<(const TimeVal& other) const;
     
     /**
      * Assign-Sum Operator
@@ -182,15 +153,7 @@ public:
      * @param delta the TimeVal value to add to this TimeVal object.
      * @return the TimeVal value after the addition of @ref delta.
      */
-    TimeVal& operator+=(const TimeVal& delta) {
-	_sec += delta.sec();
-	_usec += delta.usec();
-	if (_usec >= ONE_MILLION) {
-	    ++_sec;
-	    _usec -= ONE_MILLION;
-	}
-	return (*this);
-    }
+    inline const TimeVal& operator+=(const TimeVal& delta);
     
     /**
      * Addition Operator
@@ -199,10 +162,7 @@ public:
      * TimeVal object.
      * @return the TimeVal value after the addition of @ref other. 
      */
-    TimeVal operator+(const TimeVal& other) const {
-	TimeVal tmp_timeval(*this);
-	return tmp_timeval += other;
-    }
+    inline TimeVal operator+(const TimeVal& other) const;
     
     /**
      * Assign-Difference Operator
@@ -210,15 +170,7 @@ public:
      * @param delta the TimeVal value to substract from this TimeVal object.
      * @return the TimeVal value after the substraction of @ref delta.
      */
-    TimeVal& operator-=(const TimeVal& delta) {
-	_sec -= delta.sec();
-	_usec -= delta.usec();
-	if ((signed)_usec < 0) {
-	    --_sec;
-	    _usec += ONE_MILLION;
-	}
-	return (*this);
-    }
+    inline const TimeVal& operator-=(const TimeVal& delta);
     
     /**
      * Substraction Operator
@@ -227,10 +179,7 @@ public:
      * TimeVal object.
      * @return the TimeVal value after the substraction of @ref other.
      */
-    TimeVal operator-(const TimeVal& other) const {
-	TimeVal tmp_timeval(*this);
-	return tmp_timeval -= other;
-    }
+    inline TimeVal operator-(const TimeVal& other) const;
     
     /**
      * Division Operator
@@ -240,9 +189,7 @@ public:
      * @return the TimeVal value of dividing the value of this object
      * by @ref n.
      */
-    TimeVal operator/(int n) const {
-	return TimeVal(_sec / n, ((_sec % n) * ONE_MILLION + _usec) / n);
-    }
+    inline TimeVal operator/(int n) const;
     
     /**
      * Multiplication Operator
@@ -252,19 +199,145 @@ public:
      * @return the TimeVal value of multiplying the value of this object
      * by @ref n.
      */
-    TimeVal operator*(int n) const {
-	uint32_t tmp_sec, tmp_usec;
-	
-	tmp_usec = _usec * n;
-	tmp_sec = _sec * n + tmp_usec / ONE_MILLION;
-	tmp_usec %= ONE_MILLION;
-	return TimeVal(tmp_sec, tmp_usec);
-    }
+    inline TimeVal operator*(int n) const;
     
 private:
     uint32_t _sec;		// The number of seconds
     uint32_t _usec;		// The number of microseconds
 };
+
+inline
+TimeVal::TimeVal(const double& d)
+    : _sec((uint32_t)d),
+      _usec((uint32_t)((d - ((double)_sec)) * ONE_MILLION + 0.5e-6))
+{
+    //
+    // Adjust
+    //
+    if (_usec >= ONE_MILLION) {
+	_sec += _usec / ONE_MILLION;
+	_usec %= ONE_MILLION;
+    }
+}
+
+inline size_t
+TimeVal::copy_in(const struct timeval& timeval)
+{
+    _sec = timeval.tv_sec;
+    _usec = timeval.tv_usec;
+    return (sizeof(_sec) + sizeof(_usec));
+}
+
+inline size_t
+TimeVal::copy_out(struct timeval& timeval) const
+{
+    timeval.tv_sec = _sec;
+    timeval.tv_usec = _usec;
+    return (sizeof(_sec) + sizeof(_usec));
+}
+
+inline const TimeVal&
+TimeVal::randomize_uniform(const double& factor)
+{
+    TimeVal delta(factor * get_double());
+    uint32_t random_sec = delta.sec();
+    uint32_t random_usec = delta.usec();
+    
+    // Randomize the offset
+    if (random_sec != 0)
+	random_sec = random() % random_sec;
+    if (random_usec != 0)
+	random_usec = random() % random_usec;
+    TimeVal random_delta(random_sec, random_usec);
+    
+    // Either add or substract the randomized offset
+    if (random() % 2) {
+	// Add
+	*this += random_delta;
+    } else {
+	// Substract
+	if (random_delta < *this) {
+	    *this -= random_delta;
+	} else {
+	    // The offset is too large. Set the result to zero.
+	    _sec = 0;
+	    _usec = 0;
+	}
+    }
+    
+    return (*this);
+}
+
+inline bool
+TimeVal::operator==(const TimeVal& other) const
+{
+    return (_sec == other.sec()) && (_usec == other.usec());
+}
+
+inline bool
+TimeVal::operator<(const TimeVal& other) const
+{
+    return (_sec == other.sec()) ? _usec < other.usec() : _sec < other.sec();
+}
+
+inline const TimeVal&
+TimeVal::operator+=(const TimeVal& delta)
+{
+    _sec += delta.sec();
+    _usec += delta.usec();
+    if (_usec >= ONE_MILLION) {
+	_sec++;
+	_usec -= ONE_MILLION;
+    }
+    return (*this);
+}
+
+inline TimeVal
+TimeVal::operator+(const TimeVal& other) const
+{
+    TimeVal tmp_timeval(*this);
+    return tmp_timeval += other;
+}
+
+inline const TimeVal&
+TimeVal::operator-=(const TimeVal& delta)
+{
+    _sec -= delta.sec();
+    if (_usec < delta.usec()) {
+	// Compensate
+	_sec--;
+	_usec += ONE_MILLION;
+    }
+    _usec -= delta.usec();
+    
+    return (*this);
+}
+
+inline TimeVal
+TimeVal::operator-(const TimeVal& other) const
+{
+    TimeVal tmp_timeval(*this);
+    return tmp_timeval -= other;
+}
+
+inline TimeVal
+TimeVal::operator/(int n) const
+{
+    return TimeVal(_sec / n, ((_sec % n) * ONE_MILLION + _usec) / n);
+}
+
+inline TimeVal
+TimeVal::operator*(int n) const
+{
+    uint32_t tmp_sec, tmp_usec;
+    
+    tmp_usec = _usec * n;
+    tmp_sec = _sec * n + tmp_usec / ONE_MILLION;
+    tmp_usec %= ONE_MILLION;
+    return TimeVal(tmp_sec, tmp_usec);
+}
+
+
 
 /**
  * Make a timeval value.
