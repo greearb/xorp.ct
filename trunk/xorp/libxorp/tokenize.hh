@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/tokenize.hh,v 1.1 2003/08/05 21:56:48 atanu Exp $
+// $XORP$
 
-#ifndef __BGP_HARNESS_TOKENIZE_HH__
-#define __BGP_HARNESS_TOKENIZE_HH__
+#ifndef __LIBXORP_TOKENIZE_HH__
+#define __LIBXORP_TOKENIZE_HH__
 
 /*
 ** Tokenizer.
@@ -36,4 +36,4 @@ tokenize(const string& str,
     }
 }
 
-#endif // __BGP_HARNESS_TOKENIZE_HH__
+#endif // __LIBXORP_TOKENIZE_HH__

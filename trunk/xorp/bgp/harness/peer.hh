@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.13 2004/05/30 06:00:52 atanu Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.14 2004/06/10 22:40:40 hodson Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
 
 #include "trie.hh"
 #include "libxorp/callback.hh"
-#include "tokenize.hh"
+#include "libxorp/tokenize.hh"
 
 class EventLoop;
 class TimeVal;
