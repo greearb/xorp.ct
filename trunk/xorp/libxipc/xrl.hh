@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.6 2003/03/16 08:20:30 pavlin Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.7 2003/06/19 00:44:43 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -31,77 +31,83 @@ public:
     /**
      * Construct an Xrl.
      */
-    Xrl(const string&	protocol,
-	const string&	protocol_target,
-	const string&	command,
-	const XrlArgs&	args)
+    inline Xrl(const string&	protocol,
+	       const string&	protocol_target,
+	       const string&	command,
+	       const XrlArgs&	args)
 	: _protocol(protocol), _target(protocol_target), _command(command),
-	  _args(args) {}
+	  _args(args)
+    {}
 
     /**
      * Construct an Xrl (with implicit finder protocol).
      */
-    Xrl(const string&	target,
-	const string&	command,
-	const XrlArgs&	args)
+    inline Xrl(const string&	target,
+	       const string&	command,
+	       const XrlArgs&	args)
 	: _protocol(_finder_protocol), _target(target), _command(command),
-	  _args(args) {}
+	  _args(args)
+    {}
 
     /**
      * Construct an Xrl that does not have an argument list.
      */
-    Xrl(const string& protocol,
-	const string& protocol_target,
-	const string& command)
-	: _protocol(protocol), _target(protocol_target), _command(command) {}
+    inline Xrl(const string& protocol,
+	       const string& protocol_target,
+	       const string& command)
+	: _protocol(protocol), _target(protocol_target), _command(command)
+    {}
 
     /**
      * Construct an Xrl that does not have an argument list.
      */
-    Xrl(const string& target,
-	const string& command)
-	: _protocol(_finder_protocol), _target(target), _command(command) {}
+    inline Xrl(const string& target,
+	       const string& command)
+	: _protocol(_finder_protocol), _target(target), _command(command)
+    {}
 
     /**
      * Construct an Xrl object from the string representation of Xrl.
      */
     Xrl(const char* xrl_c_str) throw (InvalidString);
 
-    Xrl() {}
-    ~Xrl() {}
+    inline Xrl() {}
+    ~Xrl();
 
-    /* Render Xrl as a string */
+    /**
+     * Render Xrl as a string
+     */
     string str() const;
 
     /**
      * @return the protocol associated with XRL.
      */
-    const string& protocol() const { return _protocol; }
+    inline const string& protocol() const		{ return _protocol; }
 
     /**
      * @return the name of the XRL target entity.
      */
-    const string& target() const { return _target; }
+    inline const string& target() const			{ return _target; }
 
     /**
      * @return string representation of Xrl without arguments.
      */
     string string_no_args() const;
-    
+
     /**
      * @return the name of the command
      */
-    const string& command() const { return _command; }
+    inline const string& command() const		{ return _command; }
 
     /**
      * Retrieve list of arguments associated with the XRL.
      */
-    XrlArgs& args() { return _args; }
+    inline XrlArgs& args()				{ return _args; }
 
     /**
      * Retrieve list of arguments associated with the XRL.
      */
-    const XrlArgs& args() const { return _args; }
+    inline const XrlArgs& args() const			{ return _args; }
 
     /**
      * Test the equivalence of two XRL's.
@@ -113,10 +119,8 @@ public:
     /**
      * @return true if Xrl is resolved, ie protocol == finder.
      */
-    inline bool is_resolved() const {
-	// This value is ripe for caching.
-	return strcasecmp(_protocol.c_str(), _finder_protocol.c_str());
-    }
+    bool is_resolved() const;
+
 private:
     string	_protocol;
     string	_target;   // if protocol != finder, target = protocol params
