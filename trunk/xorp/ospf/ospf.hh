@@ -68,6 +68,44 @@ struct OspfTypes {
     };
 };
 
+/**
+ * Pretty print the link type.
+ */
+inline
+string
+pp_link_type(OspfTypes::LinkType link_type)
+{
+    switch(link_type) {
+    case OspfTypes::BROADCAST:
+	return "BROADCAST";
+    case OspfTypes::NBMA:
+	return "NBMA";
+    case OspfTypes::PointToMultiPoint:
+	return "PointToMultiPoint";
+    case OspfTypes::VirtualLink:
+	return "VirtualLink";
+    }
+    XLOG_UNREACHABLE();
+}
+
+/**
+ * Pretty print the area type.
+ */
+inline
+string
+pp_area_type(OspfTypes::AreaType area_type)
+{
+    switch(area_type) {
+    case OspfTypes::BORDER:
+	return "BORDER";
+    case OspfTypes::STUB:
+	return "STUB";
+    case OspfTypes::NSSA:
+	return "NSSA";
+    }
+    XLOG_UNREACHABLE();
+}
+
 #include "io.hh"
 #include "exceptions.hh"
 #include "lsa.hh"
