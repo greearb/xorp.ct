@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.31 2003/08/06 05:04:46 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.32 2003/08/27 22:42:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1327,6 +1327,8 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 				line.c_str()));
 
 	UpdatePacket *bgpupdate = new UpdatePacket();
+	MPReachNLRIAttribute<IPv6> mpipv6_nlri;
+	MPUNReachNLRIAttribute<IPv6> mpipv6_withdraw;
 
 	for(size_t i = index + 1; i < size; i += 2) {
 	    debug_msg("name: %s value: %s\n",
@@ -1344,15 +1346,21 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	    } else if("nexthop" == words[i]) {
 		bgpupdate->add_pathatt(IPv4NextHopAttribute(IPv4(
 						      words[i+1].c_str())));
+	    } else if("nexthop6" == words[i]) {
+		mpipv6_nlri.set_nexthop(IPv6(words[i+1].c_str()));
 	    } else if("localpref" == words[i]) {
 		bgpupdate->add_pathatt(LocalPrefAttribute(atoi(
 						      words[i+1].c_str())));
 	    } else if("nlri" == words[i]) {
 		bgpupdate->add_nlri(BGPUpdateAttrib(IPv4Net(
 						      words[i+1].c_str())));
+	    } else if("nlri6" == words[i]) {
+		mpipv6_nlri.add_nlri(IPv6Net(words[i+1].c_str()));
 	    } else if("withdraw" == words[i]) {
 		bgpupdate->add_withdrawn(BGPUpdateAttrib(IPv4Net(
 						      words[i+1].c_str())));
+	    } else if("withdraw6" == words[i]) {
+		mpipv6_withdraw.add_withdrawn(IPv6Net(words[i+1].c_str()));
 	    } else if("med" == words[i]) {
 		bgpupdate->add_pathatt(MEDAttribute(atoi(
 						      words[i+1].c_str())));
@@ -1363,6 +1371,11 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 		       c_format("Illegal argument to update: <%s>\n[%s]",
 				words[i].c_str(), line.c_str()));
 	}
+	if(!mpipv6_nlri.nlri_list().empty())
+	    bgpupdate->add_pathatt(mpipv6_nlri);
+	if(!mpipv6_withdraw.wr_list().empty())
+	    bgpupdate->add_pathatt(mpipv6_withdraw);
+
 	pac = bgpupdate;
     } else if("open" == words[index]) {
 	size_t size = words.size();
