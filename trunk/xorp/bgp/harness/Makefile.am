@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/harness/Makefile.am,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+## $XORP: xorp/bgp/harness/Makefile.am,v 1.2 2002/12/13 21:23:35 mjh Exp $
 ##
 
 # -- Real Programs
@@ -8,6 +8,7 @@ bin_PROGRAMS	 = coord test_peer
 
 # -- Test Programs
 TESTS		 = test_peering1.sh
+TESTS		+ = test_peering2.sh
 TESTS		+= test_routing1.sh
 TESTS		+= test_rib1.sh
 TESTS		+= test_rib_fea1.sh
