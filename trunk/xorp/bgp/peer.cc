@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.24 2003/02/04 21:53:47 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.25 2003/02/04 23:48:41 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -685,15 +685,12 @@ BGPPeer::event_openmess(const OpenPacket* p)		// EVENTRECOPENMESS
 	    // extract open msg data into peerdata.
 	    send_message(KeepAlivePacket());
 
-	    // set negotiated hold time as the holdtime
-	    // if negotiated hold time is zero don't start either
-	    // keepalive or hold timer
-	    if ( _peerdata->get_hold_duration() > 0) {
-		// start timers
-		debug_msg("Starting timers\n");
-		start_keepalive_timer();
-		start_hold_timer();
-	    }
+	    // start timers
+	    debug_msg("Starting timers\n");
+	    clear_all_timers();
+	    start_keepalive_timer();
+	    start_hold_timer();
+
 	    // if AS number is the same as the local AS number set
 	    // connection as internal otherwise set as external
 	    if ( _localdata->as() == _peerdata->as() )
