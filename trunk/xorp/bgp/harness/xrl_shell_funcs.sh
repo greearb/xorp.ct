@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.6 2003/06/24 23:30:43 atanu Exp $
+# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.7 2003/06/26 02:22:04 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../../libxipc/call_xrl -w 10}
@@ -81,10 +81,22 @@ listen()
     $CALLXRL "finder://$BASE/test_peer/0.1/listen?address:txt=$1&port:u32=$2"
 }
 
+bind()
+{
+    echo -n "Bind $* "
+    $CALLXRL "finder://$BASE/test_peer/0.1/bind?address:txt=$1&port:u32=$2"
+}
+
 disconnect()
 {
     echo -n "Disconnect $* "
     $CALLXRL "finder://$BASE/test_peer/0.1/disconnect"
+}
+
+reset()
+{
+    echo -n "Reset $* "
+    $CALLXRL "finder://$BASE/test_peer/0.1/reset"
 }
 
 terminate()
