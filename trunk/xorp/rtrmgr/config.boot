@@ -42,4 +42,16 @@ protocols {
   }
 }
 
+/*  see xorp/mibs/snmpdscripts/README on how to configure Net-SNMP in your host
+ *  before uncommenting this section
+ 
+protocols {
+  snmp {
+    mib-module bgp4_mib_1657 {
+      abs-path: "/home/panther/u0/jcardona/nobackup/cvs/xorp/mibs/bgp4_mib_1657.so"
+    }
+  }
+}
+*/
+
 
