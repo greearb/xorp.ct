@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.21 2004/05/28 22:27:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.22 2004/06/03 07:02:56 atanu Exp $"
 
 
 #include <glob.h>
@@ -347,10 +347,13 @@ TemplateTree::find_node(const list<string>& path_segments) const
 	// There's no exact name match, so we're probably looking for a
 	// match of a value against a typed variable.
 	for (ti = ttn->children().begin(); ti != ttn->children().end(); ++ti) {
-	    if ((*ti)->type() != NODE_VOID) {
-		if ((*ti)->type_match(*iter))
-		    matches.push_back(*ti);
-	    }
+	    TemplateTreeNode* t = *ti;
+	    if (t->type() == NODE_VOID)
+		continue;
+	    if ((t->parent() == NULL) || (! t->parent()->is_tag()))
+		continue;
+	    if (t->type_match(*iter))
+		matches.push_back(t);
 	}
 	if (matches.size() == 0)
 	    return NULL;
