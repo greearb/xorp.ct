@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.11 2004/03/21 04:03:37 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.12 2004/03/24 19:14:07 atanu Exp $"
 
 #include "fea_module.h"
 
@@ -389,7 +389,7 @@ XrlSocketServer::RemoteSocket<A>::connect_sel_cb(int fd, SelectorMask)
 
     sockaddr sa;
     socklen_t sa_len = sizeof(sa);
-    int afd = accept(_fd, sa, &sa_len);
+    int afd = accept(_fd, &sa, &sa_len);
     if (afd < 0) {
 	ref_ptr<XrlSocketCommandBase*> ecmd = new
 	    SocketUserSendErrorEvent<A>(owner()->tgt_name(),
