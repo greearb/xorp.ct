@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.6 2003/05/10 23:23:03 mjh Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.7 2003/11/20 00:39:52 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -44,7 +44,9 @@ enum CliModeType {
 
 class RouterCLI {
 public:
-    RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node);
+    RouterCLI(XorpShell& xorpsh, CliNode& cli_node);
+    ~RouterCLI();
+
     bool is_config_mode() const;
     void commit_done_by_user(int uid);
     void clear_command_set();

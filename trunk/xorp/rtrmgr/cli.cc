@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.15 2003/11/14 18:15:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.16 2003/11/20 00:39:52 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -34,6 +34,12 @@ RouterCLI::RouterCLI(XorpShell& xorpsh, CliNode& cli_node)
 {
     _current_config_node = &(config_tree()->root());
     operational_mode();
+}
+
+RouterCLI::~RouterCLI()
+{
+    // TODO: for now we leave the deletion to be implicit when xorpsh exits
+    // _cli_node.delete_stdio_client(&_cli_client);
 }
 
 void
@@ -878,32 +884,32 @@ RouterCLI::text_entry_func(const char* ,
 			   const vector<string>& argv)
 {
     string path(command_global_name);
-    list<string> pathsegs;
+    list<string> path_segments;
 
     while (path.size() > 0) {
 	string::size_type ix = path.find(' ');
 	if ((ix == string::npos) && (path.size() > 0)) {
-	    pathsegs.push_back(path);
+	    path_segments.push_back(path);
 	    break;
 	} else {
-	    pathsegs.push_back(path.substr(0, ix));
+	    path_segments.push_back(path.substr(0, ix));
 	    path = path.substr(ix + 1, path.size() - ix + 1);
 	}
     }
 
-    SlaveConfigTreeNode* ctn = config_tree()->find_node(pathsegs);
+    SlaveConfigTreeNode* ctn = config_tree()->find_node(path_segments);
     const TemplateTreeNode *tag_ttn, *data_ttn;
     bool create_needed = false;
     string nodename;
 
-    if (argv.size() != 0 || (pathsegs.back() != "}")) {
+    if (argv.size() != 0 || (path_segments.back() != "}")) {
 	if (ctn == NULL) {
 	    create_needed = true;
-	    tag_ttn = config_tree()->find_template(pathsegs);
+	    tag_ttn = config_tree()->find_template(path_segments);
 	    XLOG_ASSERT(tag_ttn != NULL);
-	    nodename = pathsegs.back();
-	    pathsegs.pop_back();
-	    ctn = config_tree()->find_node(pathsegs);
+	    nodename = path_segments.back();
+	    path_segments.pop_back();
+	    ctn = config_tree()->find_node(path_segments);
 	} else {
 	    tag_ttn = ctn->template_node();
 	}
@@ -992,16 +998,17 @@ RouterCLI::text_entry_func(const char* ,
 	string newpath = pathstr();
 	SlaveConfigTreeNode* newnode;
 	if (create_needed) {
-	    pathsegs.push_back(nodename);
+	    path_segments.push_back(nodename);
 	    list<string>::const_iterator iter;
-	    for (iter = pathsegs.begin(); iter != pathsegs.end(); ++iter) {
+	    for (iter = path_segments.begin(); iter != path_segments.end();
+		 ++iter) {
 		if (newpath.empty())
 		    newpath = *iter;
 		else
 		    newpath += " " + *iter;
 	    }
-	    ctn = new SlaveConfigTreeNode(pathsegs.back(), newpath, tag_ttn,
-					  _current_config_node,
+	    ctn = new SlaveConfigTreeNode(path_segments.back(), newpath,
+					  tag_ttn, _current_config_node,
 					  getuid());
 	}
 
@@ -1039,7 +1046,7 @@ RouterCLI::text_entry_func(const char* ,
 
 	    if (argv.size() > 1) {
 		_current_config_node = newnode;
-		_path.push_back(pathsegs.back());
+		_path.push_back(path_segments.back());
 		_path.push_back(argv[0]);
 		_nesting_lengths.push_back(2);
 		_nesting_depth++;
@@ -1059,7 +1066,7 @@ RouterCLI::text_entry_func(const char* ,
 
 	    XLOG_ASSERT(tag_ttn->type() == NODE_VOID);
 	    _current_config_node = ctn;
-	    _path.push_back(pathsegs.back());
+	    _path.push_back(path_segments.back());
 	    _nesting_lengths.push_back(1);
 	    _nesting_depth++;
 	}
@@ -1075,7 +1082,7 @@ RouterCLI::text_entry_func(const char* ,
 	_changes_made = true;
 	return (XORP_OK);
     } else {
-	XLOG_ASSERT(pathsegs.back() == "}");
+	XLOG_ASSERT(path_segments.back() == "}");
 	XLOG_ASSERT(_nesting_depth > 0);
 	for (int i = 0; i < _nesting_lengths.back(); i++) {
 	    _current_config_node = _current_config_node->parent();
@@ -1118,24 +1125,25 @@ RouterCLI::delete_func(const char* ,
 	string cmd_name(command_global_name);
 	XLOG_ASSERT(cmd_name.substr(0, 7) == "delete ");
 	string path = cmd_name.substr(7, cmd_name.size() - 7);
-	list<string> pathsegs;
+	list<string> path_segments;
 
 	while (path.size() > 0) {
 	    string::size_type ix = path.find(' ');
 	    if ((ix == string::npos) && (path.size() > 0)) {
-		pathsegs.push_back(path);
+		path_segments.push_back(path);
 		break;
 	    } else {
-		pathsegs.push_back(path.substr(0, ix));
+		path_segments.push_back(path.substr(0, ix));
 		path = path.substr(ix + 1, path.size() - ix + 1);
 	    }
 	}
 
-	string result = config_tree()->show_subtree(pathsegs);
+	string result = config_tree()->show_subtree(path_segments);
 	_cli_client.cli_print("Deleting: \n");
 	_cli_client.cli_print(result + "\n");
 
-	result = config_tree()->mark_subtree_for_deletion(pathsegs, getuid());
+	result = config_tree()->mark_subtree_for_deletion(path_segments,
+							  getuid());
 	_cli_client.cli_print(result + "\n");
 
 	// Regenerate the available command tree without the deleted stuff
@@ -1333,18 +1341,18 @@ RouterCLI::show_func(const char* ,
 	} else {
 	    path = cmd_name.substr(5, cmd_name.size() - 5);
 	}
-	list<string> pathsegs;
+	list<string> path_segments;
 	while (path.size() > 0) {
 	    string::size_type ix = path.find(' ');
 	    if (ix == string::npos && path.size() > 0) {
-		pathsegs.push_back(path);
+		path_segments.push_back(path);
 		break;
 	    } else {
-		pathsegs.push_back(path.substr(0, ix));
+		path_segments.push_back(path.substr(0, ix));
 		path = path.substr(ix + 1, path.size() - ix + 1);
 	    }
 	}
-	string result = config_tree()->show_subtree(pathsegs);
+	string result = config_tree()->show_subtree(path_segments);
 	_cli_client.cli_print(result + "\n");
 	config_mode_prompt();
 	return (XORP_OK);
@@ -1361,19 +1369,19 @@ RouterCLI::op_mode_func(const char* ,
 			const vector<string>& argv)
 {
     string full_command = command_global_name;
-    list<string> pathsegs;
+    list<string> path_segments;
 
-    pathsegs = split(string(command_global_name), ' ');
+    path_segments = split(string(command_global_name), ' ');
     for (size_t i = 0; i < argv.size(); i++) {
-	pathsegs.push_back(argv[i]);
+	path_segments.push_back(argv[i]);
 	full_command += " " + argv[i];
     }
 
-    if (op_cmd_list()->prefix_matches(pathsegs)) {
+    if (op_cmd_list()->prefix_matches(path_segments)) {
 	// Clear the UI
 	idle_ui();
 
-	op_cmd_list()->execute(&(_xorpsh.eventloop()), pathsegs,
+	op_cmd_list()->execute(&(_xorpsh.eventloop()), path_segments,
 			       callback(this, &RouterCLI::op_mode_cmd_done));
     } else {
 	//
@@ -1385,8 +1393,9 @@ RouterCLI::op_mode_func(const char* ,
 	string cmd_error;
 
 	_cli_client.cli_print("Error: no matching command:\n");
-	for (iter = pathsegs.begin(); iter != pathsegs.end(); ++iter) {
-	    if (iter != pathsegs.begin())
+	for (iter = path_segments.begin(); iter != path_segments.end();
+	     ++iter) {
+	    if (iter != path_segments.begin())
 		cmd_error += " ";
 	    test_parts.push_back(*iter);
 	    if (op_cmd_list()->prefix_matches(test_parts)) {
