@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.7 2003/06/12 02:42:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.8 2003/06/13 01:32:33 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -217,9 +217,8 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	    // Take action if directly-connected source
 	    //
 	    // set KeepaliveTimer(S,G) to Keepalive_Period
-	    // # Note: register state transition or UpstreamJPState(S,G)
-	    // # transaction may happen as a result of restarting
-	    // # KeepaliveTimer, and must be dealt with here.
+	    // # Note: a register state transition may happen as a result
+	    // # of restarting KeepaliveTimer, and must be dealt with here.
 	    pim_mre_sg->start_keepalive_timer();
 	    is_keepalive_timer_restarted = true;
 	    
