@@ -42,14 +42,10 @@ interface socket4_user/0.1 {
      * @param error a textual description of the error.
      *
      * @param fatal indication of whether socket is shutdown because of error.
-     *
-     * @param last_sent_request_id id of last successful data sent.  A value
-     *        0 indicates the absence of a last successfully sent data id.
      */
     error_event		? sockid:txt					\
 			& error:txt					\
-			& fatal:bool					\
-			& last_sent_data_id:u32
+			& fatal:bool
 
     /**
      * Method invoked by target implementing socket4/0.1 when a socket is
