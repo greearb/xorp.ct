@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.9 2003/06/03 01:04:19 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.10 2003/06/12 22:06:21 atanu Exp $
 #
 
 #
@@ -18,6 +18,7 @@
 # 5) Run "./coord"
 #
 set -e
+shopt -s xpg_echo
 
 # srcdir is set by make for check target
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
