@@ -1,12 +1,22 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.12 2003/05/23 01:24:20 pavlin Exp $
+# $XORP: xorp/bootstrap,v 1.13 2003/09/23 16:30:06 hodson Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
 # up to date if some of the configuration files are modified
 #
+
+#
+# Allow the autotools commands used to be overridden using environment
+# variables, to help off-site package maintainers.
+#
+ACLOCAL=${ACLOCAL:-"aclocal"}
+AUTOCONF=${AUTOCONF:-"autoconf"}
+AUTOHEADER=${AUTOHEADER:-"autoheader"}
+AUTOMAKE=${AUTOMAKE:-"automake"}
+LIBTOOLIZE=${LIBTOOLIZE:-"libtoolize"}
 
 # Prototype: check_necessary <this_script_name>
 check_necessary()
@@ -127,28 +137,28 @@ run rm -f config/aclocal.m4
 # in the local directory (the default behavior), otherwise newer
 # versions of automake (e.g., automake-1.5) won't work anymore.
 #
-run aclocal -I config
+run ${ACLOCAL} -I config
 
 #
 # XXX: we don't use flag --force because with it libtoolize always
 # overwrites our config.guess and config.sub files, even though our
 # version is probably newer.
 #
-# run libtoolize --automake --copy
+run ${LIBTOOLIZE} --automake --copy
 
 #
 # If we are using newer version of autoconf/autoheader (e.g., autoconf-2.5*),
 # we need to add the new flag "--include=config".
 #
-autoheader_options=`program_flags autoheader 2.50 "--include=config" ""`
-run autoheader ${autoheader_options}
+autoheader_options=`program_flags ${AUTOHEADER} 2.50 "--include=config" ""`
+run ${AUTOHEADER} ${autoheader_options}
 
 #
 # XXX: in case of non-GNU 'make', we must use flag "-i".
 # XXX: we may have to use "-i" before distributing the source code (?)
-# run automake -i --add-missing --copy
+# run ${AUTOMAKE} -i --add-missing --copy
 #
-run automake --add-missing --copy
+run ${AUTOMAKE} --add-missing --copy
 
 #
 # If we are using newer version of autoconf (e.g., autoconf-2.5*),
@@ -156,13 +166,13 @@ run automake --add-missing --copy
 # If necessary, use it again to add more directories to search list
 # for .m4 files.
 #
-autoconf_options=`program_flags autoconf 2.50 "--include=config" "-l config"`
-run autoconf ${autoconf_options}
+autoconf_options=`program_flags ${AUTOCONF} 2.50 "--include=config" "-l config"`
+run ${AUTOCONF} ${autoconf_options}
 
 # Run autoconf in each subdirectory that has configure.in
 run cd cli/libtecla
-autoconf_options=`program_flags autoconf 2.50 "--include=../../config" "-l ../../config"`
-run autoconf ${autoconf_options}
+autoconf_options=`program_flags ${AUTOCONF} 2.50 "--include=../../config" "-l ../../config"`
+run ${AUTOCONF} ${autoconf_options}
 run cd ../..
 
 # Clean-up autom4te.cache directories
