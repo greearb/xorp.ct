@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.6 2003/09/18 17:56:13 atanu Exp $
+# $XORP: xorp/bgp/TODO,v 1.7 2003/10/13 20:43:18 atanu Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -23,11 +23,6 @@ check the results of the decoding against what was encoded.
 
 --added 2002-10-21 by APG---
 
-27) Implement some capability functionality, the hooks to enable per peer
-capability advertisement exist but the functionality doesn't. Personnally
-I don't think this is required for the cvs opening.
-
--- added 2002-12-06 by MJH
 
 28) In FanoutTable's queue, we skip entries if they have the same
 origin peer as the output branch calling get_next_message.  If the
@@ -42,13 +37,24 @@ reproduced by running "test_peering2.sh" with the "-b" flag.
 
 -- added 2003-08-28 by AG
 
-30)
-
-When a next hop changes for a particular address family both the
+30) When a next hop changes for a particular address family both the
 unicast and multicast decision tables will be notified. This is not a
 big deal.
 
 -- added 2003-10-13 by AG
+
+31) The XRL interface for reading routing tables doesn't take a SAFI
+parameter, so only unicast tables can be read.
+
+-- added 2003-11-06 by AG
+
+32) It is possible to set a parameter using set_parameter, but there
+is no way to remove a parameter.
+
+Removing a parameter while a session is established should probably be
+illegal.
+
+-- added 2003-11-06 by AG
 
 ------------------------------ DONE -----------------------------
 1) Holdtimers in from milliseconds to seconds in config files. Plus
@@ -122,6 +128,14 @@ method see item 26
 5) Implement BGP Capability Advertisement
 
 11) Rationalise main.cc and bgp.cc, with respect to where main is.
+
+27) Implement some capability functionality, the hooks to enable per peer
+capability advertisement exist but the functionality doesn't. Personnally
+I don't think this is required for the cvs opening.
+
+-- added 2002-12-06 by MJH
+
+RESOLVED BY AG: Had to be done in order to add multiprotocol functionality.
 
 ------------------------------ TESTING --------------------------
 
