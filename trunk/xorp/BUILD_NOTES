@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.23 2005/03/24 21:54:27 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.24 2005/03/25 03:53:22 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -174,7 +174,10 @@ gmake check
 
   * OS X 10.3.8 (Darwin 7.8.0)
     - gcc version 3.3 20030304 (Apple Computer, Inc. build 1495)
-    - Packet forwarding has never been attempted.
+    - The code compiles, and the internal tests appear to succeed.
+    - Unicast routing appears to work.
+    - Multicast routing doesn't work, because the kernel doesn't have
+      the appropriate support.
 
 4. Known problems
 =================
