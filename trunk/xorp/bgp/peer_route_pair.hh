@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_route_pair.hh,v 1.6 2004/05/15 16:05:21 mjh Exp $
+// $XORP: xorp/bgp/peer_route_pair.hh,v 1.7 2004/06/10 22:40:32 hodson Exp $
 
 #ifndef __BGP_PEER_ROUTE_PAIR_HH__
 #define __BGP_PEER_ROUTE_PAIR_HH__
@@ -38,6 +38,18 @@ public:
 	_busy = false;
 	_has_queued_data = false;
     }
+    PeerTableInfo(const PeerTableInfo& other) {
+	_route_table = other._route_table;
+	_peer_handler = other._peer_handler;
+	_genid = other._genid;
+	_busy = other._busy;
+	_has_queued_data = other._has_queued_data;
+	_peer_number = other._peer_number;
+	if (_has_queued_data) {
+	    _posn = other._posn;
+	}
+    }
+
     BGPRouteTable<A> *route_table() const {
 	return _route_table;
     }
