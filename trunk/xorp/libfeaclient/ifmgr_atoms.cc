@@ -12,18 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.4 2003/10/15 19:19:24 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.5 2003/10/22 21:09:31 hodson Exp $"
 
 #include "ifmgr_atoms.hh"
 
 // ----------------------------------------------------------------------------
 // Find method helpers
-//
-// XXX these might be better as members of individual object types, eg
-//	IfMgrIfTree::find_if()
-//	IfMgrIfAtom::find_vif()
-//	IfMgrVif::find_addr()
-//
 
 static inline const IfMgrIfAtom*
 find_interface(const IfMgrIfTree* tree, const string& ifname)
@@ -205,6 +199,7 @@ IfMgrIfTree::operator==(const IfMgrIfTree& o) const
 
 // ----------------------------------------------------------------------------
 // IfMgrIfAtom methods
+
 bool
 IfMgrIfAtom::operator==(const IfMgrIfAtom& o) const
 {
