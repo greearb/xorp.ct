@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.3 2003/04/02 22:19:00 pavlin Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.4 2003/06/12 21:58:56 atanu Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -25,14 +25,17 @@ class TimeVal;
 
 class Peer {
 public:
-    Peer();
-    ~Peer();
-    Peer(EventLoop *eventloop, XrlRouter *xrlrouter, string peername,
-	 string target_hostname, string target_port);
-    Peer::Peer(const Peer& rhs);
-    Peer operator=(const Peer& rhs);
-    void copy(const Peer& rhs);
 
+    Peer(EventLoop&    eventloop,
+	 IPv4	       finder_address,
+	 uint16_t      finder_port,
+	 const string& coordinator_name,
+	 const string& peer_name,
+	 const string& target_hostname,
+	 const string& target_port);
+
+    ~Peer();
+    
     bool pending();
 
     void listen(const string& line, const vector<string>& words)
@@ -87,10 +90,17 @@ protected:
     void send_dump_callback(const XrlError& error, FILE *fp,
 			    const char *comment);
     void send_open();
+
 private:
-    EventLoop *_eventloop;
-    XrlRouter *_xrlrouter;
+    // Not implemented
+    Peer(const Peer&);
+    Peer& operator=(const Peer&);
     
+private:
+    EventLoop&   _eventloop;
+    XrlStdRouter _xrlrouter;
+
+    string _coordinator;
     string _peername;
     string _target_hostname;
     string _target_port;

@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/command.hh,v 1.3 2003/03/10 23:20:09 hodson Exp $
+// $XORP: xorp/bgp/harness/command.hh,v 1.4 2003/04/02 22:18:59 pavlin Exp $
 
 #ifndef __BGP_HARNESS_COMMAND_HH__
 #define __BGP_HARNESS_COMMAND_HH__
 
+#include "libxorp/ref_ptr.hh"
 #include "peer.hh"
 
 class TimeVal;
@@ -88,7 +89,9 @@ private:
 
     typedef map<const string, PCmd> StringCommandMap;
     StringCommandMap _commands;
-    map<const string, Peer> _peers;
+
+    typedef map<const string, ref_ptr<Peer> > NamePeerMap;
+    NamePeerMap _peers;
 
     string _target_hostname;
     string _target_port;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.6 2003/04/02 22:18:59 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.7 2003/06/12 21:58:56 atanu Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -90,10 +90,13 @@ Command::pending()
     if(_xrlrouter.pending())
 	return true;
 
-    map<const string, Peer>::iterator i;
-    for(i = _peers.begin(); i != _peers.end(); i++)
-	if(i->second.pending())
+    NamePeerMap::iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++) {
+	ref_ptr<Peer> p = i->second;
+	if (p->pending()) {
 	    return true;
+	}
+    }
 
     return false;
 }
@@ -115,13 +118,13 @@ Command::datain(const string&  peer, const bool& status, const TimeVal& tv,
     /*
     ** Are we in the peer table.
     */
-    map<const string, Peer>::iterator cur  = _peers.find(peer);
+    NamePeerMap::iterator cur  = _peers.find(peer);
     if(cur == _peers.end()) {
 	XLOG_WARNING("Data for a peer <%s> that is not in our table",
 		     peer.c_str());
 	return;
     }
-    Peer *p = &cur->second;
+    ref_ptr<Peer> p = cur->second;
     p->datain(status, tv, data);
 }
 
@@ -132,13 +135,13 @@ Command::datain_error(const string&  peer, const string& reason)
     /*
     ** Are we in the peer table.
     */
-    map<const string, Peer>::iterator cur  = _peers.find(peer);
+    NamePeerMap::iterator cur  = _peers.find(peer);
     if(cur == _peers.end()) {
 	XLOG_WARNING("Data for a peer <%s> that is not in our table",
 		     peer.c_str());
 	return;
     }
-    Peer *p = &cur->second;
+    ref_ptr<Peer> p = cur->second;
     p->datain_error(reason);
 }
 
@@ -149,13 +152,13 @@ Command::datain_closed(const string&  peer)
     /*
     ** Are we in the peer table.
     */
-    map<const string, Peer>::iterator cur  = _peers.find(peer);
+    NamePeerMap::iterator cur  = _peers.find(peer);
     if(cur == _peers.end()) {
 	XLOG_WARNING("Data for a peer <%s> that is not in our table",
 		     peer.c_str());
 	return;
     }
-    Peer *p = &cur->second;
+    ref_ptr<Peer> p = cur->second;
     p->datain_closed();
 }
 
@@ -176,7 +179,7 @@ Command::peer(const string& line, const vector<string>& words)
     ** This pointer must be valid. If we are in the command table
     ** there must be an entry in the peer table.
     */
-    Peer *p = &_peers.find(words[0])->second;
+    ref_ptr<Peer> p = _peers.find(words[0])->second;
 
     const string command = words[1];
     if("connect" == command) {
@@ -265,7 +268,7 @@ Command::initialise(const string& line, const vector<string>& v)
     /*
     ** Make sure that this peer doesn't already exist.
     */
-    map<const string, Peer>::iterator cur  = _peers.find(peername);
+    NamePeerMap::iterator cur  = _peers.find(peername);
     if(cur != _peers.end())
 	debug_msg("Peer name %s\n", cur->first.c_str());
 
@@ -309,8 +312,14 @@ Command::initialise_callback(const XrlError& /*error*/, string peername)
     debug_msg("callback: %s\n", peername.c_str());
     
     /* Add to the peer structure */
-    _peers[peername] = Peer(&_eventloop, &_xrlrouter, peername,
-			    _target_hostname, _target_port);
+    Peer* p = new Peer(_eventloop,
+		       _xrlrouter.finder_address(),
+		       _xrlrouter.finder_port(),
+		       _xrlrouter.name(),
+		       peername,
+		       _target_hostname,
+		       _target_port);
+    _peers.insert(NamePeerMap::value_type(peername, p));
 
     /* Add to the command structure */
     _commands.insert(StringCommandMap::value_type(peername, &Command::peer));

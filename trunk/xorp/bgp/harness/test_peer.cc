@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.10 2003/05/07 23:15:13 mjh Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.11 2003/05/29 22:18:29 mjh Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -217,7 +217,7 @@ TestPeer::done()
 void
 TestPeer::register_coordinator(const string& name)
 {
-    debug_msg("\n");
+    debug_msg("Test Peer: coordinator name = \"%s\"\n", name.c_str());
 
     _coordinator = name;
 }
@@ -288,7 +288,7 @@ TestPeer::connect(const string& host, const uint32_t& port,
 	XLOG_WARNING("Failed to add socket %d to eventloop", s);
 	return false;
     }
-
+   
    /*
    ** Set up the async writer.
    */
@@ -363,7 +363,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
     _listen = s;
-
+    
     return true;
 }
 
@@ -427,6 +427,7 @@ TestPeer::zap(int& fd, const char *msg)
     fd = UNCONNECTED;
 
    _eventloop.remove_selector(tempfd);
+   debug_msg("Removing selector for fd = %d\n", tempfd);
    if(-1 == ::close(tempfd)) {
 	XLOG_WARNING("Close of %s failed %s", msg, strerror(errno));
 	return false;
@@ -508,6 +509,7 @@ TestPeer::connect_attempt(int fd, SelectorMask m)
     ** from the eventloop and close the file descriptor.
     */
    _eventloop.remove_selector(fd);
+   debug_msg("Removing selector for fd = %d\n", fd);
    if(-1 == ::close(fd))
 	XLOG_WARNING("Close failed");
 
@@ -521,7 +523,7 @@ TestPeer::connect_attempt(int fd, SelectorMask m)
 	XLOG_WARNING("Failed to add socket %d to eventloop", connfd);
 	return;
     }
-
+   
    /*
    ** Set up the async writer.
    */
