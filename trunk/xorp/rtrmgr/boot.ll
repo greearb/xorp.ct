@@ -76,7 +76,7 @@ IPV4 {DBYTE}.{DBYTE}.{DBYTE}.{DBYTE}
 	bootlval = strdup(boottext);
 	return LITERAL;
 	}
-\"[a-zA-Z0-9"\-""_""\[""\]"":""\/""\&" ]*\"	{
+\"[a-zA-Z0-9"\-""_""\[""\]"":""\/""\&""\." ]*\"	{
 	bootlval = strdup(boottext);
 	return STRING;
 	}
