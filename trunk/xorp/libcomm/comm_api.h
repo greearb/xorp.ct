@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.3 2004/01/16 19:57:25 hodson Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.5 2004/03/04 07:55:42 pavlin Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -385,6 +385,32 @@ extern int	comm_sock_join4(int sock, const struct in_addr *mcast_addr,
  */
 extern int	comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 				unsigned int my_ifindex);
+#endif
+
+/**
+ * Leave an IPv4 multicast group on a socket (and an interface).
+ *
+ * @param sock the socket to leave the group.
+ * @param mcast_addr the multicast address to leave.
+ * @param my_addr the local unicast address of an interface to leave.
+ * If it is NULL, the interface is chosen by the kernel.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_sock_leave4(int sock, const struct in_addr *mcast_addr,
+				 const struct in_addr *my_addr);
+
+#ifdef HAVE_IPV6
+/**
+ * Leave an IPv6 multicast group on a socket (and an interface).
+ *
+ * @param sock he socket to leave the group.
+ * @param mcast_addr the multicast address to leave.
+ * @param my_ifindex the local unicast interface index to leave.
+ * If it is 0, the interface is chosen by the kernel.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
+				 unsigned int my_ifindex);
 #endif /* HAVE_IPV6 */
 
 /**

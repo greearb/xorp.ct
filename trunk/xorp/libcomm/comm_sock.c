@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.4 2004/01/16 19:57:25 hodson Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.5 2004/03/04 07:54:20 pavlin Exp $"
 
 
 /*
@@ -334,6 +334,106 @@ comm_sock_join6(int sock, const struct in6_addr *mcast_addr,
 
     return (XORP_OK);
 }
+#endif /* HAVE_IPV6 */
+
+/**
+ * comm_sock_leave4:
+ * @sock: The socket to leave the group.
+ * @mcast_addr: The multicast address to leave.
+ * @my_addr: The local unicast address of an interface to leave.
+ * If it is NULL, the interface is chosen by the kernel.
+ *
+ * Leave an IPv4 multicast group on a socket (and an interface).
+ *
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+comm_sock_leave4(int sock, const struct in_addr *mcast_addr,
+		const struct in_addr *my_addr)
+{
+    int family;
+    struct ip_mreq imr;		/* the multicast leave address */
+
+    family = socket2family(sock);
+    if (family != AF_INET) {
+	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
+		   sock, family, AF_INET);
+	return (XORP_ERROR);
+    }
+
+    memset(&imr, 0, sizeof(imr));
+    imr.imr_multiaddr.s_addr = mcast_addr->s_addr;
+    if (my_addr != NULL)
+	imr.imr_interface.s_addr = my_addr->s_addr;
+    else
+	imr.imr_interface.s_addr = INADDR_ANY;
+    if (setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP,
+		   (void *)&imr, sizeof(imr)) < 0) {
+	char mcast_addr_str[32], my_addr_str[32];
+	strncpy(mcast_addr_str, inet_ntoa(*mcast_addr),
+		sizeof(mcast_addr_str) - 1);
+	mcast_addr_str[sizeof(mcast_addr_str) - 1] = '\0';
+	if (my_addr != NULL)
+	    strncpy(my_addr_str, inet_ntoa(*my_addr),
+		    sizeof(my_addr_str) - 1);
+	else
+	    strncpy(my_addr_str, "ANY", sizeof(my_addr_str) - 1);
+	my_addr_str[sizeof(my_addr_str) - 1] = '\0';
+	XLOG_ERROR("Error leaving mcast group (family = %d, "
+		   "mcast_addr = %s my_addr = %s): %s",
+		   family, mcast_addr_str, my_addr_str,
+		   strerror(errno));
+	close(sock);
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+#ifdef HAVE_IPV6
+/**
+ * comm_sock_leave6:
+ * @sock: The socket to leave the group.
+ * @mcast_addr: The multicast address to leave.
+ * @my_ifindex: The local unicast interface index to leave.
+ * If it is 0, the interface is chosen by the kernel.
+ *
+ * Leave an IPv6 multicast group on a socket (and an interface).
+ *
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+comm_sock_leave6(int sock, const struct in6_addr *mcast_addr,
+		unsigned int my_ifindex)
+{
+    int family;
+    struct ipv6_mreq imr6;	/* the multicast leave address */
+
+    family = socket2family(sock);
+    if (family != AF_INET6) {
+	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
+		   sock, family, AF_INET6);
+	return (XORP_ERROR);
+    }
+
+    memset(&imr6, 0, sizeof(imr6));
+    memcpy(&imr6.ipv6mr_multiaddr, mcast_addr, sizeof(*mcast_addr));
+    imr6.ipv6mr_interface = my_ifindex;
+    if (setsockopt(sock, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
+		   (void *)&imr6, sizeof(imr6)) < 0) {
+	char addr_str[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
+	XLOG_ERROR("Error leaving mcast group (family = %d, "
+		   "mcast_addr = %s my_ifindex = %d): %s",
+		   family,
+		   inet_ntop(family, mcast_addr, addr_str, sizeof(addr_str)),
+		   my_ifindex, strerror(errno));
+	close(sock);
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
 #endif /* HAVE_IPV6 */
 
 /**
