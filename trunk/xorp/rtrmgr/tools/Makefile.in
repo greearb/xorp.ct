@@ -95,8 +95,7 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS = show_interfaces
 
 # -- Test Programs
-check_PROGRAMS = 
-TESTS = $(check_PROGRAMS)
+TESTS = 
 
 # -- No-install Programs
 noinst_PROGRAMS = 
@@ -125,7 +124,6 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
 bin_PROGRAMS = show_interfaces$(EXEEXT)
-check_PROGRAMS =
 noinst_PROGRAMS =
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
@@ -199,9 +197,6 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-
-clean-checkPROGRAMS:
-	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
@@ -343,7 +338,6 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LIBRARIES) $(PROGRAMS)
@@ -376,8 +370,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-noinstLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 
@@ -413,16 +407,16 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-noinstLIBRARIES clean-noinstPROGRAMS distclean \
-	distclean-compile distclean-depend distclean-generic \
-	distclean-tags distdir dvi dvi-am info info-am install \
-	install-am install-binPROGRAMS install-data install-data-am \
-	install-exec install-exec-am install-info install-info-am \
-	install-man install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic tags \
-	uninstall uninstall-am uninstall-binPROGRAMS uninstall-info-am
+	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic tags uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

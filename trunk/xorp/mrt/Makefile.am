@@ -1,17 +1,17 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mrt/Makefile.am,v 1.4 2003/05/07 21:58:10 pavlin Exp $
+## $XORP: xorp/mrt/Makefile.am,v 1.5 2003/07/30 23:43:29 pavlin Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 = 
 
 # -- Test Programs
-check_PROGRAMS	 = 
-TESTS		 = $(check_PROGRAMS)
+TESTS		 = 
 
 # -- No-install Programs
-noinst_PROGRAMS  = test_mrt test_mrib
+noinst_PROGRAMS  = test_mrt
+noinst_PROGRAMS	+= test_mrib
 
 # -- No-install Libraries
 noinst_LIBRARIES = libmrt.a

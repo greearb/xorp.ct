@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.15 2003/07/17 00:28:35 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.16 2003/07/30 23:43:32 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -10,13 +10,14 @@ SUBDIRS = . tools
 bin_PROGRAMS	 = xorp_rtrmgr xorpsh
 
 # -- Test Programs
-check_PROGRAMS	 = test_templates
-check_PROGRAMS	+= test_sample_config
-check_PROGRAMS	+= test_module_manager
-TESTS		 = $(check_PROGRAMS)
+TESTS		 = test_templates
+TESTS		+= test_sample_config
+TESTS		+= test_module_manager
 
 # -- No-install Programs
-noinst_PROGRAMS  = 
+noinst_PROGRAMS	 = test_templates
+noinst_PROGRAMS	+= test_sample_config
+noinst_PROGRAMS	+= test_module_manager
 
 # -- No-install Libraries
 noinst_LIBRARIES = 

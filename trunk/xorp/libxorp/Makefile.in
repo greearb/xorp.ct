@@ -94,11 +94,10 @@ snmpd2 = @snmpd2@
 bin_PROGRAMS = 
 
 # -- Test Programs
-check_PROGRAMS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie  test_test_main test_time_slice test_timer test_timeval  test_trie test_types test_vif 
-TESTS = $(check_PROGRAMS)
+TESTS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie  test_test_main test_time_slice test_timer test_timeval  test_trie test_types test_vif 
 
 # -- No-install Programs
-noinst_PROGRAMS = 
+noinst_PROGRAMS = test_asyncio test_callback test_config_param test_ipnet test_ipv4 test_ipv4net test_ipv6 test_ipv6net test_ipvx test_ipvxnet test_mac test_observers test_ref_ptr test_ref_trie  test_test_main test_time_slice test_timer test_timeval  test_trie test_types test_vif 
 
 # -- No-install Libraries
 noinst_LIBRARIES = libxorp.a
@@ -156,7 +155,7 @@ am_libxorp_a_OBJECTS = debug.$(OBJEXT) xlog.$(OBJEXT) asyncio.$(OBJEXT) \
 	token.$(OBJEXT) transaction.$(OBJEXT) vif.$(OBJEXT)
 libxorp_a_OBJECTS = $(am_libxorp_a_OBJECTS)
 bin_PROGRAMS =
-check_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
+noinst_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
 	test_config_param$(EXEEXT) test_ipnet$(EXEEXT) \
 	test_ipv4$(EXEEXT) test_ipv4net$(EXEEXT) test_ipv6$(EXEEXT) \
 	test_ipv6net$(EXEEXT) test_ipvx$(EXEEXT) test_ipvxnet$(EXEEXT) \
@@ -165,7 +164,6 @@ check_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
 	test_time_slice$(EXEEXT) test_timer$(EXEEXT) \
 	test_timeval$(EXEEXT) test_trie$(EXEEXT) test_types$(EXEEXT) \
 	test_vif$(EXEEXT)
-noinst_PROGRAMS =
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_test_asyncio_OBJECTS = test_asyncio.$(OBJEXT)
@@ -373,9 +371,6 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-
-clean-checkPROGRAMS:
-	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
@@ -629,7 +624,6 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LIBRARIES) $(PROGRAMS)
@@ -663,8 +657,8 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-noinstLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 
@@ -700,16 +694,16 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 .PHONY: GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-noinstLIBRARIES clean-noinstPROGRAMS distclean \
-	distclean-compile distclean-depend distclean-generic \
-	distclean-tags distdir dvi dvi-am info info-am install \
-	install-am install-binPROGRAMS install-data install-data-am \
-	install-exec install-exec-am install-info install-info-am \
-	install-man install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic tags \
-	uninstall uninstall-am uninstall-binPROGRAMS uninstall-info-am
+	clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic tags uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am
 
 
 debug.o: debug.c

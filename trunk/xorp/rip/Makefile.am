@@ -1,22 +1,26 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.11 2003/07/21 18:05:55 hodson Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.12 2003/07/30 23:43:31 pavlin Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 = 
 
 # -- Test Programs
-check_PROGRAMS	 = test_auth
-check_PROGRAMS	+= test_packets
-check_PROGRAMS	+= test_request
-check_PROGRAMS	+= test_route_walk
-check_PROGRAMS	+= test_timers
-check_PROGRAMS	+= test_update_queue
-TESTS		 = $(check_PROGRAMS)
+TESTS		 = test_auth
+TESTS		+= test_packets
+TESTS		+= test_request
+TESTS		+= test_route_walk
+TESTS		+= test_timers
+TESTS		+= test_update_queue
 
 # -- No-install Programs
-noinst_PROGRAMS  = 
+noinst_PROGRAMS	 = test_auth
+noinst_PROGRAMS	+= test_packets
+noinst_PROGRAMS	+= test_request
+noinst_PROGRAMS	+= test_route_walk
+noinst_PROGRAMS	+= test_timers
+noinst_PROGRAMS	+= test_update_queue
 
 # -- No-install Libraries
 noinst_LIBRARIES		 = librip.a

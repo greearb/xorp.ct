@@ -1,17 +1,16 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/Makefile.am,v 1.4 2003/05/07 21:58:12 pavlin Exp $
+## $XORP: xorp/policy/Makefile.am,v 1.5 2003/07/30 23:43:31 pavlin Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 = 
 
 # -- Test Programs
-check_PROGRAMS	 = test_policy
-TESTS		 = $(check_PROGRAMS)
+TESTS		 = test_policy
 
 # -- No-install Programs
-noinst_PROGRAMS  = 
+noinst_PROGRAMS  = test_policy
 
 # -- No-install Libraries
 noinst_LIBRARIES	 = libpolicy.a

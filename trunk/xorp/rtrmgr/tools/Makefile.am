@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/tools/Makefile.am,v 1.4 2003/05/07 21:58:13 pavlin Exp $
+## $XORP: xorp/rtrmgr/tools/Makefile.am,v 1.5 2003/07/30 23:43:32 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -10,8 +10,7 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS	 = show_interfaces
 
 # -- Test Programs
-check_PROGRAMS	 = 
-TESTS		 = $(check_PROGRAMS)
+TESTS		 = 
 
 # -- No-install Programs
 noinst_PROGRAMS  = 

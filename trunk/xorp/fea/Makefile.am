@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.16 2003/07/30 23:43:28 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.17 2003/07/31 21:59:39 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -10,11 +10,13 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS		 = xorp_fea xorp_fea_dummy
 
 # -- Test Programs
-check_PROGRAMS		 = test_rawsock4 test_ifmanager_transaction
-TESTS			 = $(check_PROGRAMS)
+TESTS			 = test_rawsock4 test_ifmanager_transaction
 
 # -- No-install Programs
-noinst_PROGRAMS 	 = demo_fea_ifmgr_client test_mfea
+noinst_PROGRAMS 	 = demo_fea_ifmgr_client
+noinst_PROGRAMS 	+= test_mfea
+noinst_PROGRAMS		+= test_rawsock4
+noinst_PROGRAMS		+= test_ifmanager_transaction
 
 # -- No-install Libraries
 noinst_LIBRARIES	 = libfea.a

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.13 2003/07/30 23:43:31 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.14 2003/07/31 21:59:40 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -10,16 +10,17 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS	 = xorp_rib
 
 # -- Test Programs
-check_PROGRAMS	 = test_rib_client
-check_PROGRAMS	+= test_register
-check_PROGRAMS	+= test_register_xrls
-check_PROGRAMS	+= test_rib_direct
-check_PROGRAMS	+= test_rib_xrls
-TESTS		 = $(check_PROGRAMS)
-TESTS		+= test_rib_direct.sh test_rib_xrls.sh test_register
+TESTS		 = test_rib_direct.sh
+TESTS		+= test_rib_xrls.sh
+TESTS		+= test_register
 
 # -- No-install Programs
 noinst_PROGRAMS  = main_routemap
+noinst_PROGRAMS	+= test_rib_client
+noinst_PROGRAMS	+= test_register
+noinst_PROGRAMS	+= test_register_xrls
+noinst_PROGRAMS	+= test_rib_direct
+noinst_PROGRAMS	+= test_rib_xrls
 
 # -- No-install Libraries
 noinst_LIBRARIES	 = librib.a

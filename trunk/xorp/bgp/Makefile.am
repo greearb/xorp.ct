@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.19 2003/07/30 23:43:26 pavlin Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.20 2003/07/31 21:59:38 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -13,11 +13,15 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS	 = xorp_bgp
 
 # -- Test Programs
-check_PROGRAMS	 = aspath_test packet_coding_test isolation_tests
-TESTS		 = $(check_PROGRAMS)
+TESTS		 = aspath_test packet_coding_test isolation_tests
 
 # -- No-install Programs
-noinst_PROGRAMS	 = packet_test plumbing_test update_test
+noinst_PROGRAMS	 = packet_test
+noinst_PROGRAMS	+= plumbing_test
+noinst_PROGRAMS	+= update_test
+noinst_PROGRAMS	+= aspath_test
+noinst_PROGRAMS	+= packet_coding_test
+noinst_PROGRAMS	+= isolation_tests
 
 # -- No-install Libraries
 noinst_LIBRARIES = libbgp.a

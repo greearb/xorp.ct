@@ -1,14 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mfea/Makefile.am,v 1.6 2003/06/03 18:52:18 pavlin Exp $
+## $XORP: xorp/mfea/Makefile.am,v 1.7 2003/07/30 23:43:29 pavlin Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 = 
 
 # -- Test Programs
-check_PROGRAMS	 = 
-TESTS		 = $(check_PROGRAMS)
+TESTS		 = 
 
 # -- No-install Programs
 noinst_PROGRAMS  = test_mfea

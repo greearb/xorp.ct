@@ -97,11 +97,10 @@ SUBDIRS = . tools
 bin_PROGRAMS = xorp_rtrmgr xorpsh
 
 # -- Test Programs
-check_PROGRAMS = test_templates test_sample_config test_module_manager
-TESTS = $(check_PROGRAMS)
+TESTS = test_templates test_sample_config test_module_manager
 
 # -- No-install Programs
-noinst_PROGRAMS = 
+noinst_PROGRAMS = test_templates test_sample_config test_module_manager
 
 # -- No-install Libraries
 noinst_LIBRARIES = 
@@ -146,9 +145,8 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
 bin_PROGRAMS = xorp_rtrmgr$(EXEEXT) xorpsh$(EXEEXT)
-check_PROGRAMS = test_templates$(EXEEXT) test_sample_config$(EXEEXT) \
+noinst_PROGRAMS = test_templates$(EXEEXT) test_sample_config$(EXEEXT) \
 	test_module_manager$(EXEEXT)
-noinst_PROGRAMS =
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_test_module_manager_OBJECTS = test_module_manager.$(OBJEXT) \
@@ -327,9 +325,6 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-
-clean-checkPROGRAMS:
-	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
@@ -591,7 +586,6 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LIBRARIES) $(PROGRAMS)
@@ -624,8 +618,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-noinstLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 
@@ -663,9 +657,9 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-noinstLIBRARIES clean-noinstPROGRAMS clean-recursive \
-	distclean distclean-compile distclean-depend distclean-generic \
+	clean clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS clean-recursive distclean \
+	distclean-compile distclean-depend distclean-generic \
 	distclean-recursive distclean-tags distdir dvi dvi-am \
 	dvi-recursive info info-am info-recursive install install-am \
 	install-binPROGRAMS install-data install-data-am \
