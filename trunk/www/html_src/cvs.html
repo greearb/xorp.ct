@@ -33,8 +33,14 @@ that may be of interest are:
 <ul>
 <li>The repository root (CVSROOT) is:
 <pre>:pserver:xorpcvs@cvs.xorp.org:/cvs</pre>
+
 <li>The password for read-only access is empty.
 
+<li> If you see a warning message like this one, just ignore it:
+<pre>
+cvs login: warning: failed to open /path/to/home/dir/.cvspass for reading:
+No such file or directory
+</pre>
 <li>See <a href="#Examples">examples</a> for quick start information.
 </ul>
 
@@ -119,23 +125,32 @@ setenv CVSROOT :ext:&lt;username&gt;@cvs.xorp.org:/usr/local/www/data/cvs
 <PRE>
 % setenv CVSROOT :pserver:xorpcvs@cvs.xorp.org:/cvs
 % cvs login
-(Logging in to xorpcvs@cvs.xorp.org)
-CVS password:
+Logging in to :pserver:xorpcvs@cvs.xorp.org:2401/cvs
+CVS password: 
+cvs login: warning: failed to open /path/to/home/dir/.cvspass for reading:
+No such file or directory
 % cvs checkout xorp
-cvs server: updating xorp
+cvs checkout: Updating xorp
 U xorp/.cvsignore
-U xorp/LICENSE
+U xorp/BUGS
+U xorp/BUILD_NOTES
 ...
-% ls
-./             TODO           config.h.in    libcomm/       pim/
-../            VERSION        config.log     libproto/      rib/
-.cvsignore     acconfig.h     config.status* libxipc/       rip/
-CVS/           bgp/           configure*     libxipc.new/   rtrmgr/
-LICENSE        bootstrap*     configure.in   libxorp/       stamp-h
-Makefile       cli/           devnotes/      mfea/          stamp-h.in
-Makefile.am    config/        docs/          mld6igmp/      utils/
-Makefile.in    config.cache   etc/           mrt/           xrl/
-README         config.h       fea/           ospfd/
+% ls -F xorp
+BUGS                    bootstrap*              libxipc/
+BUILD_NOTES             cli/                    libxorp/
+CVS/                    config/                 mfea/
+ERRATA                  config.h.in             mibs/
+LICENSE                 configure*              mld6igmp/
+Makefile.am             configure.in            mrt/
+Makefile.in             contrib/                ospfd/
+MakefileRootCheck.am    devnotes/               pim/
+MakefileRootCheck.in    docs/                   policy/
+README                  etc/                    rib/
+RELEASE_NOTES           fea/                    rip/
+TODO                    fib2mrib/               rtrmgr/
+VERSION                 libcomm/                static_routes/
+acconfig.h              libfeaclient/           utils/
+bgp/                    libproto/               xrl/
 </PRE>
 
 <a name="Trouble"></a><h2>Troubleshooting</h2>
