@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.3 2003/01/22 02:46:34 rizzo Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.4 2003/01/24 19:50:10 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -96,8 +96,8 @@ OpenPacket::encode(size_t& len) const
     if (_num_parameters > 0)  {
 	list <BGPParameter*>::const_iterator pi = _parameter_list.begin();
 	while(pi != _parameter_list.end()) {
-	    io[8 + offset].iov_base = (char*)((BGPParameter *)*pi)->get_data();
-	    io[8 + offset].iov_len = ((BGPParameter *)*pi)->get_datalength();
+	    io[8 + offset].iov_base = (char*)((BGPParameter *)*pi)->data();
+	    io[8 + offset].iov_len = ((BGPParameter *)*pi)->length();
 
 	    offset++;
 	    pi++;
@@ -319,5 +319,5 @@ OpenPacket::add_parameter(const BGPParameter *p)
     _num_parameters++;
     // TODO add bounds checking
 
-    _OptParmLen = _OptParmLen + p->get_datalength();
+    _OptParmLen = _OptParmLen + p->length();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.2 2002/12/13 22:38:54 rizzo Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.3 2002/12/14 21:25:46 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -158,7 +158,8 @@ BGPPeerData::add_parameter(const BGPParameter* p,
     // p->dump_contents();
     _num_parameters++;
     // TODO add bounds checking
-    _param_length = _param_length+p->get_paramlength();
+    // XXX not sure here.
+    _param_length += p->paramlength();
 }
 
 void

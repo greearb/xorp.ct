@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.3 2002/12/17 04:49:17 mjh Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.4 2003/01/17 05:51:07 mjh Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -27,6 +27,17 @@
 #include "libxorp/ipv6.hh"
 #include "aspath.hh"
 #include "md5.h"
+
+/**
+ * PathAttribute
+ *
+ * components of the path attribute. They have variable sizes
+ * The actual layout in the packet is the following:
+ *	[ flags ]       1 byte
+ *	[ type  ]       1 byte
+ *	[ len   ][....] 1 or 2 bytes
+ *	[ data     ]    len bytes
+ */
 
 enum PathAttType {
     ORIGIN = 1,
@@ -66,10 +77,20 @@ enum OriginType {
 class PathAttribute
 {
 public:
-    PathAttribute();
-    PathAttribute(bool optional, bool transitive,
-		     bool partial, bool extended);
-    virtual ~PathAttribute();
+    enum Flags {
+	Optional	= 0x80,
+	Transitive	= 0x40,
+	Partial		= 0x20,
+	Extended	= 0x10,
+	ValidFlags	= 0xf0,
+	NoFlags		= 0
+    };
+
+    PathAttribute(uint8_t f) : _data(0), _attribute_length(0), _length(0) {
+	set_flags(f);
+    }
+
+    virtual ~PathAttribute()			{ delete[] _data; }
     virtual void encode() = 0;
     virtual void decode() = 0;
     virtual const PathAttType type() const = 0;
@@ -81,34 +102,36 @@ public:
 	assert(_data != NULL);
 	return _data;
     }
-    uint16_t get_size() const { return _length; }
+    uint16_t get_size() const			{ return _length; }
 
     void pretty_print();
 
     void dump();
-    uint8_t get_flags() const;
-    void set_flags(const uint8_t f);
+    uint8_t flags() const			{ return _flags; }
+    void set_flags(const uint8_t f)		{
+	assert ( (f & ValidFlags) == f);
+	_flags = f;
+    }
+
     virtual string str() const;
     bool operator<(const PathAttribute& him) const;
     bool operator==(const PathAttribute& him) const;
-    bool optional() const { return _optional; }
-    bool transitive() const { return _transitive; }
-    bool partial() const { return _partial; }
-    bool extended() const { return _extended; }
-    bool well_known() const { return !_optional; }
+    bool optional() const		{ return _flags & Optional; }
+    bool transitive() const		{ return _flags & Transitive; }
+    bool partial() const		{ return _flags & Partial; }
+    bool extended() const		{ return _flags & Extended; }
+    bool well_known() const		{ return !optional(); }
+
 protected:
     const uint8_t* _data; // data includes the PathAttribute header
 
-    uint8_t _length; // the length of the _data buffer (ie the
-                             // attribute data plus the PathAttribute header
-
     uint16_t _attribute_length; // the length of the attribute, minus
                                 // the PathAttribute header
-    bool _optional;
-    bool _transitive;
-    bool _partial;
-    bool _extended;
+    uint8_t _length; // the length of the _data buffer (ie the
+                             // attribute data plus the PathAttribute header
+    uint8_t	_flags;
 private:
+    PathAttribute();	// not allowed.
 };
 
 class OriginAttribute : public PathAttribute

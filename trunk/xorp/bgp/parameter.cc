@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.30 2002/12/09 18:28:44 hodson Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -23,13 +23,6 @@
 extern void dump_bytes(const uint8_t *d, size_t l);
 
 /* **************** BGPParameter *********************** */
-
-BGPParameter::BGPParameter()
-{
-    debug_msg("BGPParameter() constructor called\n");
-    _length = 0;
-    _data = NULL;
-}
 
 BGPParameter::BGPParameter(uint8_t l, const uint8_t* d)
 {
@@ -54,12 +47,6 @@ BGPParameter::BGPParameter(const BGPParameter& param)
     }
 }
 
-BGPParameter::~BGPParameter()
-{
-    if (_data != NULL)
-	delete[] _data;
-}
-
 void
 BGPParameter::set_length(int l)
 {
@@ -71,12 +58,6 @@ BGPParameter::set_length(int l)
     _length = l;
     _data = new uint8_t[_length];
     _data[1] = _length-2;
-}
-
-uint8_t* BGPParameter::get_data() const
-{
-    encode();
-    return _data;
 }
 
 BGPParameter*
@@ -458,14 +439,6 @@ BGPMultiRouteCapability::encode() const
     // _data[7] = _subsequent_address_family ; // SAFI
 }
 
-string
-BGPMultiRouteCapability::str() const
-{
-    string s;
-    s = "BGP Multiple Route Capability\n";
-    return s;
-}
-
 /************** BGPUnknownCapability - ****************** */
 // This is used when we don't understand / support a capability
 // we are sent.
@@ -536,12 +509,4 @@ BGPUnknownCapability::encode() const
     // should never do this
     debug_msg("we shouldn't ever send an unknown capability\n");
     // abort();
-}
-
-string
-BGPUnknownCapability::str() const
-{
-    string s;
-    s = "Unknown BGP Capability\n";
-    return s;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.5 2002/12/17 04:49:17 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.6 2003/01/17 05:51:07 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -54,27 +54,6 @@ inline static void dump_bytes(const uint8_t*, uint8_t) {}
  * well-known, so you should know :-)
  */
 
-PathAttribute::PathAttribute(bool optional, bool transitive,
-				   bool partial, bool extended)
-    : _optional(optional), _transitive(transitive),
-    _partial(partial), _extended(extended)
-{
-    _length = 0;
-    _data = 0;
-    _attribute_length = 0;
-}
-
-#if 0
-PathAttribute::PathAttribute()
-{
-}
-#endif
-
-PathAttribute::~PathAttribute()
-{
-    delete[] _data;
-}
-
 void
 PathAttribute::decode()
 {
@@ -85,9 +64,7 @@ PathAttribute::decode()
 
     data += 2;	// skip fixed header fields
 
-    debug_msg("attribute type %d %d %d\n", type(), _length, _extended);
-
-    if (_extended) {
+    if (extended()) {
 	debug_msg("Extended\n");
 	_attribute_length = ntohs((uint16_t &)(*data));
 	data += 2;
@@ -117,41 +94,6 @@ void
 PathAttribute::dump()
 {
     debug_msg(str().c_str());
-}
-
-// Returns the flags byte of a Path Attribute
-uint8_t
-PathAttribute::get_flags() const
-{
-    uint8_t flags = 0;
-    if (_optional)
-	flags = flags | 0x80;
-    if (_transitive)
-	flags = flags | 0x40;
-    if (_partial)
-	flags = flags | 0x20;
-    if (_extended)
-	flags = flags | 0x10;
-    return flags;
-}
-
-void
-PathAttribute::set_flags(const uint8_t f)
-{
-    _optional = ((f & 0x80) == 0x80);
-    _transitive = ((f & 0x40) == 0x40);
-    _partial = ((f & 0x20) == 0x20);
-    _extended = ((f & 0x10) == 0x10);
-
-    debug_msg("Flags value : %d\n", f);
-    if (_optional)
-	debug_msg("Optional flag\n");
-    if (_transitive)
-	debug_msg("Transitive flag\n");
-    if (_partial)
-	debug_msg("Partial flag\n");
-    if (_extended)
-	debug_msg("Extended flag\n");
 }
 
 string
@@ -272,8 +214,7 @@ PathAttribute::operator==(const PathAttribute& him) const
 /* ************ OriginAttribute ************* */
 
 OriginAttribute::OriginAttribute(OriginType t)
-    : PathAttribute(false, /*transitive*/true, false, false),
-      _origin(t)
+    : PathAttribute(Transitive), _origin(t)
 {
     XLOG_ASSERT(t == IGP || t == EGP || t == INCOMPLETE);
 
@@ -282,8 +223,7 @@ OriginAttribute::OriginAttribute(OriginType t)
 }
 
 OriginAttribute::OriginAttribute(const OriginAttribute& att)
-    : PathAttribute(att._optional, att._transitive,
-		       att._partial, att._extended)
+    : PathAttribute(att.flags())
 {
     _origin = att._origin;
     if (att._data != NULL) {
@@ -296,7 +236,7 @@ OriginAttribute::OriginAttribute(const OriginAttribute& att)
 }
 
 OriginAttribute::OriginAttribute(const uint8_t* d, uint16_t l)
-    : PathAttribute(false, false, false, false)
+    : PathAttribute(0)
 {
     dump_bytes(d, l);
 
@@ -318,7 +258,7 @@ OriginAttribute::encode()
 
     _length = 4;	// this attribute has static size of 4 bytes.
     uint8_t *data = new uint8_t[_length];
-    data[0] = get_flags();
+    data[0] = flags();
     data[1] = type();
     data[2] = 1; // length of data
     data[3] = _origin;
@@ -331,7 +271,7 @@ OriginAttribute::decode()
     PathAttribute::decode();
 
     const uint8_t *data = _data;
-    if (_extended) {
+    if (extended()) {
 	data += 4;
     } else {
 	data += 3;
@@ -407,17 +347,14 @@ OriginAttribute::set_origintype(OriginType t)
 /* ************ ASPathAttribute ************* */
 
 ASPathAttribute::ASPathAttribute(const AsPath& init_as_path)
-    : PathAttribute(false, /*transitive*/true, false, false),
-    _as_path(init_as_path)
+    : PathAttribute(Transitive), _as_path(init_as_path)
 {
     _length = (uint8_t)0;
     _data = NULL;
 }
 
 ASPathAttribute::ASPathAttribute(const ASPathAttribute& att)
-    : PathAttribute(att._optional, att._transitive,
-		       att._partial, att._extended),
-    _as_path(att._as_path)
+    : PathAttribute(att.flags()), _as_path(att._as_path)
 {
     _as_path_len = att._as_path_len;
     _as_path_ordered = att._as_path_ordered;
@@ -432,7 +369,7 @@ ASPathAttribute::ASPathAttribute(const ASPathAttribute& att)
 }
 
 ASPathAttribute::ASPathAttribute(const uint8_t* d, uint16_t l)
-    : PathAttribute(false, false, false, false)
+    : PathAttribute(NoFlags)
 {
     debug_msg("ASPathAttribute(%x, %d) constructor called\n",
 	      (uint)d, l);
@@ -460,14 +397,14 @@ ASPathAttribute::encode()
     uint8_t *data = new uint8_t[l + 4];
 
     if (l > 255)
-	PathAttribute::_extended = true;
+	_flags |= Extended;
 
     debug_msg("Length %d\n", l);
 
-    data[0] = get_flags();
+    data[0] = flags();
     data[1] = AS_PATH;
 
-    if (_extended) {
+    if (extended()) {
 	uint16_t temp = htons((uint16_t)l);
 	memcpy(data+2, &temp, 2);
 	hdrlen = 4;
@@ -495,7 +432,7 @@ ASPathAttribute::decode()
     const uint8_t *data = _data;
     int length = _attribute_length;
 
-    if (_extended) {
+    if (extended()) {
 	debug_msg("Extended AS Path!\n");
 	data += 4;
     } else {
@@ -550,9 +487,7 @@ ASPathAttribute::str() const
 
 template <class A>
 NextHopAttribute<A>::NextHopAttribute<A>(const A& nh)
-    :  PathAttribute(/*optional*/false, /*transitive*/true,
-			/*partial*/false, /*extended*/false),
-    _next_hop(nh)
+    :  PathAttribute(Transitive), _next_hop(nh)
 {
     _length = 3 + A::addr_size();
     _data = new uint8_t[_length];
@@ -560,8 +495,7 @@ NextHopAttribute<A>::NextHopAttribute<A>(const A& nh)
 
 template <class A>
 NextHopAttribute<A>::NextHopAttribute<A>(const NextHopAttribute<A>& att)
-    : PathAttribute(att._optional, att._transitive,
-		       att._partial, att._extended)
+    : PathAttribute(att.flags())
 {
     _next_hop = att._next_hop;
     if (att._data != NULL) {
@@ -575,7 +509,7 @@ NextHopAttribute<A>::NextHopAttribute<A>(const NextHopAttribute<A>& att)
 
 template <class A>
 NextHopAttribute<A>::NextHopAttribute<A>(const uint8_t* d, uint16_t l)
-    : PathAttribute(false, false, false, false)
+    : PathAttribute(NoFlags)
 {
     uint8_t *data = new uint8_t[l];
     memcpy(data, d, l);
@@ -592,7 +526,7 @@ NextHopAttribute<IPv4>::encode()
     // this attribute has static size of 7 bytes
     _length = 7;
     uint8_t *data = new uint8_t[_length];
-    data[0] = get_flags();
+    data[0] = flags();
     data[1] = NEXT_HOP;
     data[2] = 4; // length of data
     uint32_t addr = _next_hop.addr();
@@ -615,7 +549,7 @@ NextHopAttribute<A>::decode()
     PathAttribute::decode();
 
     const uint8_t *data = _data;
-    if (_extended) {
+    if (extended()) {
 	data += 4;
     } else {
 	data += 3;
@@ -663,18 +597,14 @@ template class NextHopAttribute<IPv6>;
 /* ************ MEDAttribute ************* */
 
 MEDAttribute::MEDAttribute(uint32_t med)
-    : PathAttribute(/*optional*/true, /*transitive*/false,
-		       false, false),
-    _multiexitdisc(med)
+    : PathAttribute(Optional), _multiexitdisc(med)
 {
     _length = 7;
     _data = 0;
 }
 
 MEDAttribute::MEDAttribute(const MEDAttribute& att)
-    : PathAttribute(att._optional, att._transitive,
-		       att._partial, att._extended),
-    _multiexitdisc(att._multiexitdisc)
+    : PathAttribute(att.flags()), _multiexitdisc(att._multiexitdisc)
 {
     if (att._data != NULL) {
 	_length = att._length;
@@ -689,7 +619,7 @@ MEDAttribute::MEDAttribute(const MEDAttribute& att)
 }
 
 MEDAttribute::MEDAttribute(const uint8_t* d, uint16_t l)
-    : PathAttribute(false, false, false, false)
+    : PathAttribute(NoFlags)
 {
     uint8_t *data = new uint8_t[l];
     memcpy(data, d, l);
@@ -706,7 +636,7 @@ MEDAttribute::encode()
     // this attribute has static size of 7 bytes
     _length = 7;
     uint8_t *data = new uint8_t[_length];
-    data[0] = get_flags();
+    data[0] = flags();
     data[1] = MED;
     data[2] = 4; // length of data
     uint32_t med = htonl(_multiexitdisc);
@@ -720,7 +650,7 @@ MEDAttribute::decode()
     PathAttribute::decode();
 
     const uint8_t *data = _data;
-    if (_extended) {
+    if (extended()) {
 	data += 4;
     } else {
 	data += 3;
@@ -747,8 +677,7 @@ MEDAttribute::str() const
 /* ************ LocalPrefAttribute ************* */
 
 LocalPrefAttribute::LocalPrefAttribute(uint32_t localpref)
-    : PathAttribute(false, /*transitive*/true, false, false),
-      _localpref(localpref)
+    : PathAttribute(Transitive), _localpref(localpref)
 {
     //    _type = LOCAL_PREF;
     _length = 7;
@@ -756,9 +685,7 @@ LocalPrefAttribute::LocalPrefAttribute(uint32_t localpref)
 }
 
 LocalPrefAttribute::LocalPrefAttribute(const LocalPrefAttribute& att)
-    : PathAttribute(att._optional, att._transitive,
-		       att._partial, att._extended),
-    _localpref(att._localpref)
+    : PathAttribute(att.flags()), _localpref(att._localpref)
 {
     if (att._data != NULL) {
 	_length = att._length;
@@ -770,7 +697,7 @@ LocalPrefAttribute::LocalPrefAttribute(const LocalPrefAttribute& att)
 }
 
 LocalPrefAttribute::LocalPrefAttribute(const uint8_t* d, uint16_t l)
-    : PathAttribute(false, false, false, false)
+    : PathAttribute(NoFlags)
 {
     uint8_t *data = new uint8_t[l];
     memcpy(data, d, l);
@@ -787,7 +714,7 @@ LocalPrefAttribute::encode()
     // this attribute has static size of 7 bytes
     _length = 7;
     uint8_t *data = new uint8_t[_length];
-    data[0] = get_flags();
+    data[0] = flags();
     data[1] = LOCAL_PREF;
     data[2] = 4; // length of data
     debug_msg("Encoding Local Pref of %u\n", _localpref);
@@ -803,7 +730,7 @@ LocalPrefAttribute::decode()
     PathAttribute::decode();
 
     const uint8_t *data = _data;
-    if (_extended) {
+    if (extended()) {
 	data += 4;
     } else {
 	data += 3;
@@ -832,7 +759,7 @@ LocalPrefAttribute::str() const
 /* ************ AtomicAggAttribute ************* */
 
 AtomicAggAttribute::AtomicAggAttribute()
-    : PathAttribute(false, true, false, false) /*well-known, discretionary*/
+    : PathAttribute(Transitive)
 {
     _data = 0;
     _length = 3;
@@ -840,8 +767,7 @@ AtomicAggAttribute::AtomicAggAttribute()
 
 
 AtomicAggAttribute::AtomicAggAttribute(const AtomicAggAttribute& att)
-    : PathAttribute(att._optional, att._transitive,
-		       att._partial, att._extended)
+    : PathAttribute(att.flags())
 {
     if (att._data != NULL) {
 	_length = att._length;
@@ -853,7 +779,7 @@ AtomicAggAttribute::AtomicAggAttribute(const AtomicAggAttribute& att)
 }
 
 AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d, uint16_t l)
-    : PathAttribute(false, false, false, false)
+    : PathAttribute(NoFlags)
 {
     uint8_t *data = new uint8_t[l];
     memcpy(data, d, l);
@@ -870,7 +796,7 @@ AtomicAggAttribute::encode()
     // this attribute has static size of 3 bytes
     _length = 3;
     uint8_t *data = new uint8_t[_length];
-    data[0] = get_flags();
+    data[0] = flags();
     data[1] = ATOMIC_AGGREGATE;
     data[2] = 0;
     _data = data;
@@ -881,7 +807,7 @@ AtomicAggAttribute::decode()
 {
     PathAttribute::decode();
     const uint8_t *data = _data;
-    if (_extended) {
+    if (extended()) {
 	data += 4;
     } else {
 	data += 3;
@@ -907,7 +833,7 @@ AtomicAggAttribute::str() const
 
 AggregatorAttribute::AggregatorAttribute(const IPv4& routeaggregator,
 		       const AsNum& aggregatoras)
-    : PathAttribute(/*optional*/true, /*transitive*/true, false, false),
+    : PathAttribute(Optional | Transitive),
       _routeaggregator(routeaggregator), _aggregatoras(aggregatoras)
 {
     _length = 9;
@@ -915,8 +841,7 @@ AggregatorAttribute::AggregatorAttribute(const IPv4& routeaggregator,
 }
 
 AggregatorAttribute::AggregatorAttribute(const AggregatorAttribute& att)
-    : PathAttribute(att._optional, att._transitive,
-		       att._partial, att._extended),
+    : PathAttribute(att.flags()),
     _routeaggregator(att._routeaggregator),
     _aggregatoras(att._aggregatoras)
 {
@@ -930,8 +855,7 @@ AggregatorAttribute::AggregatorAttribute(const AggregatorAttribute& att)
 }
 
 AggregatorAttribute::AggregatorAttribute(const uint8_t* d, uint16_t l)
-    : PathAttribute(false, false, false, false),
-    _aggregatoras((uint32_t)0)
+    : PathAttribute(NoFlags), _aggregatoras((uint32_t)0)
 {
     uint8_t *data = new uint8_t[l];
     memcpy(data, d, l);
@@ -948,7 +872,7 @@ AggregatorAttribute::encode()
     // this attribute has static size of 9 bytes;
     _length = 9;
     uint8_t *data = new uint8_t[_length];
-    data[0] = get_flags();
+    data[0] = flags();
     data[1] = AGGREGATOR;
     data[2] = 6;
     uint16_t agg_as = htons(_aggregatoras.as());
@@ -968,7 +892,7 @@ AggregatorAttribute::decode()
     debug_msg("Aggregator Attribute\n");
 
     const uint8_t *data = _data;
-    if (_extended) {
+    if (extended()) {
 	data += 4;
     } else {
 	data += 3;
@@ -999,14 +923,13 @@ string AggregatorAttribute::str() const
 /* ************ CommunityAttribute ************* */
 
 CommunityAttribute::CommunityAttribute()
-    : PathAttribute(true, true, false, false) /*optional transitive*/
+    : PathAttribute(Optional | Transitive)
 {
 }
 
 
 CommunityAttribute::CommunityAttribute(const CommunityAttribute& att)
-    : PathAttribute(att._optional, att._transitive,
-		    att._partial, att._extended)
+    : PathAttribute(att.flags())
 {
     if (att._data != NULL) {
 	_length = att._length;
@@ -1023,7 +946,7 @@ CommunityAttribute::CommunityAttribute(const CommunityAttribute& att)
 }
 
 CommunityAttribute::CommunityAttribute(const uint8_t* d, uint16_t l)
-    : PathAttribute(false, false, false, false)
+    : PathAttribute(NoFlags)
 {
     uint8_t *data = new uint8_t[l];
     memcpy(data, d, l);
@@ -1047,7 +970,7 @@ CommunityAttribute::encode()
     assert(_length < 256);
 
     uint8_t *data = new uint8_t[_length];
-    data[0] = get_flags();
+    data[0] = flags();
     data[1] = COMMUNITY;
     data[2] = 4*_communities.size();
     set <uint32_t>::const_iterator iter = _communities.begin();
@@ -1067,7 +990,7 @@ CommunityAttribute::decode()
 {
     PathAttribute::decode();
     const uint8_t *data = _data;
-    if (_extended) {
+    if (extended()) {
 	uint16_t len;
 	memcpy(&len, data+2, 2);
 	_length = htons(len);
@@ -1141,14 +1064,13 @@ CommunityAttribute::operator==(const CommunityAttribute& him) const
 /* ************ UnknownAttribute ************* */
 
 UnknownAttribute::UnknownAttribute()
-    : PathAttribute(true, true, false, false) /*optional transitive*/
+    : PathAttribute(Optional | Transitive)
 {
 }
 
 
 UnknownAttribute::UnknownAttribute(const UnknownAttribute& att)
-    : PathAttribute(att._optional, att._transitive,
-		    att._partial, att._extended)
+    : PathAttribute(att.flags())
 {
     if (att._data != NULL) {
 	_length = att._length;
@@ -1161,7 +1083,7 @@ UnknownAttribute::UnknownAttribute(const UnknownAttribute& att)
 }
 
 UnknownAttribute::UnknownAttribute(const uint8_t* d, uint16_t l)
-    : PathAttribute(false, false, false, false)
+    : PathAttribute(NoFlags)
 {
     uint8_t *data = new uint8_t[l];
     memcpy(data, d, l);
@@ -1197,7 +1119,7 @@ UnknownAttribute::decode()
 	break;
     }
 
-    if (_extended) {
+    if (extended()) {
 	uint16_t len;
 	memcpy(&len, data+2, 2);
 	_length = htons(len);

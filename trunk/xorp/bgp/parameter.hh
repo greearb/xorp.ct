@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.25 2002/12/09 18:28:44 hodson Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -35,6 +35,7 @@
 #include <string>
 
 enum ParamType {
+    PARAMINVALID = 0,		// param type not set yet.
     PARAMTYPEAUTH = 1,
     PARAMTYPECAP = 2
 };
@@ -49,10 +50,10 @@ enum CapType {
 
 class BGPParameter {
 public:
-    BGPParameter();
+    BGPParameter() : _data(0), _length(0), _type(PARAMINVALID)	{}
     BGPParameter(uint8_t l, const uint8_t* d);
     BGPParameter(const BGPParameter& param);
-    virtual ~BGPParameter();
+    virtual ~BGPParameter()			{ delete[] _data; }
     virtual void decode() = 0;
     virtual void encode() const = 0;
     void dump_contents() const ;
@@ -67,24 +68,28 @@ public:
 
     void set_length(int l);
 
-    uint8_t get_datalength() const {
+    // XXX check- possible discrepancy between length() and paramlength()
+    uint8_t length() const			{
 	debug_msg("_length retrieved %d\n", _length-2);
 	return _length;
     }
 
-    uint8_t get_paramlength() const {
+    uint8_t paramlength() const {
 	debug_msg("_paramlength retrieved %d\n", _length);
 	return _length+2;
     }
 
-    uint8_t* get_data() const;
+    uint8_t* data() const			{
+	encode();
+	return _data;
+    }
 
     BGPParameter* clone() const;
     virtual string str() const = 0;
 protected:
-    ParamType _type;
-    uint8_t _length;
     uint8_t* _data;
+    uint8_t _length;
+    ParamType _type;
 private:
 };
 
@@ -182,7 +187,7 @@ public:
     // uint16_t get_address_family() const { return _address_family; }
     // void set_subsequent_address_family_id(uint8_t f) { _subsequent_address_family = f; }
     // uint8_t get_subsequent_address_family_id() const { return _subsequent_address_family; }
-    string str() const;
+    string str() const			{ return "BGP Multiple Route Capability\n"; }
 protected:
 private:
     // uint16_t _address_family;
@@ -196,8 +201,8 @@ public:
     BGPUnknownCapability(const BGPUnknownCapability& cap);
     void decode();
     void encode() const;
-    string str() const;
-    CapType unknown_cap_code() const { return _unknown_cap_code; }
+    string str() const			{ return "Unknown BGP Capability\n"; }
+    CapType unknown_cap_code() const	{ return _unknown_cap_code; }
 protected:
 private:
    CapType _unknown_cap_code;
