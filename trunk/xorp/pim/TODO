@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.54 2003/07/15 03:26:20 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.55 2003/07/16 03:11:39 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -247,11 +247,6 @@ probably should be replaced with
   is not set properly.
   Similar problem occurs at the RP as well: if the register_vif is
   started after IGMP Membership Join is received.
-
-* IMPL BUG: once, there was a MFC entry in the kernel, and no installed
-  bw_meter in the kernel. When join and leave a local member, the
-  mfc is not deleted; instead, a mfc with olist=NULL is installed when
-  leave.
 
 * IMPL: keep a copy of installed kernel dataflow meters in PIM
   and/or MFEA (OK?)
