@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.20 2004/04/29 23:32:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.21 2004/05/03 23:45:12 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -35,7 +35,11 @@
 #include "xrl_target.hh"
 
 static const char* xrl_entity = "fea";
-static bool is_dummy = false;		// XXX: set to true if fea_dummy
+#ifndef FEA_DUMMY
+static bool is_dummy = false;
+#else
+static bool is_dummy = true;
+#endif
 
 /**
  * Print the program usage.
@@ -171,6 +175,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 				0, &lfc_bridge, &xss);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
 
+#ifndef FEA_DUMMY
     //
     // CLI (for debug purpose)
     //
@@ -185,6 +190,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     //
     //  MFEA node
     //
+    // XXX: for now we don't have dummy MFEA
     XrlStdRouter xrl_std_router_mfea4(eventloop,
 				      xorp_module_name(AF_INET,
 						       XORP_MODULE_MFEA),
@@ -203,13 +209,14 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_mfea6);
 #endif // HAVE_IPV6_MULTICAST
 
-    // Startup
+	// Startup
     xrl_mfea_node4.enable_mfea();
     xrl_mfea_node4.startup();
 #ifdef HAVE_IPV6_MULTICAST
     xrl_mfea_node6.enable_mfea();
     xrl_mfea_node6.startup();
 #endif
+#endif // ! FEA_DUMMY
 
     //
     // Main loop
@@ -227,6 +234,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	ifconfig.stop();
 	fticonfig.stop();
 
+#ifndef FEA_DUMMY
 	while (! xrl_mfea_node4.MfeaNode::is_down()) {
 	    eventloop.run();
 	}
@@ -235,6 +243,7 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	    eventloop.run();
 	}
 #endif
+#endif // ! FEA_DUMMY
 
 	if (xrl_fea_target.done())
 	    break;
@@ -242,11 +251,13 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     xss.shutdown();
 
     while (xrl_std_router_fea.pending()
-	  || xrl_std_router_cli4.pending()
-	  || xrl_std_router_mfea4.pending()
+#ifndef FEA_DUMMY
+	   || xrl_std_router_cli4.pending()
+	   || xrl_std_router_mfea4.pending()
 #ifdef HAVE_IPV6_MULTICAST
-	  || xrl_std_router_mfea6.pending()
+	   || xrl_std_router_mfea6.pending()
 #endif
+#endif // ! FEA_DUMMY
 	) {
 	eventloop.run();
     }

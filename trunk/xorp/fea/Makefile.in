@@ -121,7 +121,8 @@ xorp_fea_SOURCES = fea.cc
 xorp_fea_LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libfeafibclientxif.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libfeaclient/libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/xrl/interfaces/libsocket4userxif.a $(top_builddir)/xrl/interfaces/libsocket4xif.a $(top_builddir)/xrl/interfaces/libsocket6userxif.a $(top_builddir)/xrl/interfaces/libsocket6xif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/xrl/targets/libsocketserverbase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Sources and Linkage for xorp_fea_dummy
-xorp_fea_dummy_SOURCES = fea_dummy.cc
+xorp_fea_dummy_CXXFLAGS = -DFEA_DUMMY
+xorp_fea_dummy_SOURCES = fea.cc
 
 ### FEA XRL libraries
 ### MFEA XRL libraries
@@ -330,7 +331,7 @@ xorp_fea_DEPENDENCIES = libfea.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 xorp_fea_LDFLAGS =
-am_xorp_fea_dummy_OBJECTS = fea_dummy.$(OBJEXT)
+am_xorp_fea_dummy_OBJECTS = xorp_fea_dummy-fea.$(OBJEXT)
 xorp_fea_dummy_OBJECTS = $(am_xorp_fea_dummy_OBJECTS)
 xorp_fea_dummy_DEPENDENCIES = libfea.a \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.a \
@@ -369,8 +370,7 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/addr_table.Po \
 @AMDEP_TRUE@	$(DEPDIR)/demo_fea_ifmgr_client.Po $(DEPDIR)/fea.Po \
-@AMDEP_TRUE@	$(DEPDIR)/fea_dummy.Po $(DEPDIR)/fti_transaction.Po \
-@AMDEP_TRUE@	$(DEPDIR)/fticonfig.Po \
+@AMDEP_TRUE@	$(DEPDIR)/fti_transaction.Po $(DEPDIR)/fticonfig.Po \
 @AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_get.Po \
 @AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_get_dummy.Po \
 @AMDEP_TRUE@	$(DEPDIR)/fticonfig_entry_get_netlink.Po \
@@ -434,6 +434,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_ifmanager_transaction.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_mfea.Po $(DEPDIR)/test_rawsock4.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_sockets4_udp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_fea_dummy-fea.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_fti.Po $(DEPDIR)/xrl_ifmanager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_ifupdate.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_mfea_node.Po \
@@ -524,6 +525,7 @@ test_xrl_sockets4_udp$(EXEEXT): $(test_xrl_sockets4_udp_OBJECTS) $(test_xrl_sock
 xorp_fea$(EXEEXT): $(xorp_fea_OBJECTS) $(xorp_fea_DEPENDENCIES) 
 	@rm -f xorp_fea$(EXEEXT)
 	$(CXXLINK) $(xorp_fea_LDFLAGS) $(xorp_fea_OBJECTS) $(xorp_fea_LDADD) $(LIBS)
+xorp_fea_dummy-fea.$(OBJEXT): fea.cc
 xorp_fea_dummy$(EXEEXT): $(xorp_fea_dummy_OBJECTS) $(xorp_fea_dummy_DEPENDENCIES) 
 	@rm -f xorp_fea_dummy$(EXEEXT)
 	$(CXXLINK) $(xorp_fea_dummy_LDFLAGS) $(xorp_fea_dummy_OBJECTS) $(xorp_fea_dummy_LDADD) $(LIBS)
@@ -537,7 +539,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/addr_table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/demo_fea_ifmgr_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fea_dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fti_transaction.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fticonfig_entry_get.Po@am__quote@
@@ -608,6 +609,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_mfea.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rawsock4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_sockets4_udp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_fea_dummy-fea.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_fti.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_ifmanager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_ifupdate.Po@am__quote@
@@ -632,6 +634,18 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+xorp_fea_dummy-fea.o: fea.cc
+@AMDEP_TRUE@	source='fea.cc' object='xorp_fea_dummy-fea.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_fea_dummy-fea.Po' tmpdepfile='$(DEPDIR)/xorp_fea_dummy-fea.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -c -o xorp_fea_dummy-fea.o `test -f fea.cc || echo '$(srcdir)/'`fea.cc
+
+xorp_fea_dummy-fea.obj: fea.cc
+@AMDEP_TRUE@	source='fea.cc' object='xorp_fea_dummy-fea.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xorp_fea_dummy-fea.Po' tmpdepfile='$(DEPDIR)/xorp_fea_dummy-fea.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -c -o xorp_fea_dummy-fea.obj `cygpath -w fea.cc`
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 

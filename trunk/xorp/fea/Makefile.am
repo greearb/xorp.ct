@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.33 2004/03/15 23:34:37 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.34 2004/03/18 00:39:22 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -69,7 +69,8 @@ xorp_fea_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 xorp_fea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Sources and Linkage for xorp_fea_dummy
-xorp_fea_dummy_SOURCES	 = fea_dummy.cc
+xorp_fea_dummy_CXXFLAGS	 = -DFEA_DUMMY
+xorp_fea_dummy_SOURCES	 = fea.cc
 xorp_fea_dummy_LDADD	 = $(noinst_LIBRARIES)
 
 ### FEA XRL libraries
