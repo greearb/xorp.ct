@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/update_queue.cc,v 1.5 2003/07/15 17:40:43 hodson Exp $"
+#ident "$XORP: xorp/rip/update_queue.cc,v 1.6 2003/07/15 18:49:08 hodson Exp $"
 
 #include <vector>
 #include <list>
@@ -369,6 +369,13 @@ UpdateQueueReader<A>::id() const
     return _id;
 }
 
+template <typename A>
+bool
+UpdateQueueReader<A>::parent_is(const UpdateQueueImpl<A>* o) const
+{
+    return _impl == o;
+}
+
 
 /* ------------------------------------------------------------------------- */
 /* UpdateQueue methods */
@@ -398,6 +405,15 @@ void
 UpdateQueue<A>::destroy_reader(ReadIterator& r)
 {
     r = 0;
+}
+
+template <typename A>
+bool
+UpdateQueue<A>::reader_valid(const ReadIterator& r)
+{
+    if (r.get() == 0)
+	return false;
+    return r->parent_is(this->_impl);
 }
 
 template <typename A>

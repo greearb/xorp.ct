@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/update_queue.hh,v 1.7 2003/07/16 05:03:34 hodson Exp $
+// $XORP: xorp/rip/update_queue.hh,v 1.8 2003/10/07 17:24:28 hodson Exp $
 
 #ifndef __RIP_UPDATE_QUEUE__
 #define __RIP_UPDATE_QUEUE__
@@ -38,6 +38,7 @@ public:
     ~UpdateQueueReader();
 
     uint32_t id() const;
+    inline bool parent_is(const UpdateQueueImpl<A>* o) const;
 
 private:
     UpdateQueueImpl<A>* _impl;
@@ -88,6 +89,14 @@ public:
      * update queue.  Use of the iterator after this call is unsafe.
      */
     void destroy_reader(ReadIterator& r);
+
+    /**
+     * Check ReadIterator's validity.
+     * @param r reader to be checked.
+     * @return true if r is an active read iterator, false if iterator does
+     * not belong to this instance or has been destroyed.
+     */
+    bool reader_valid(const ReadIterator& r);
 
     /**
      * Increment iterator and return pointer to entry if available.
