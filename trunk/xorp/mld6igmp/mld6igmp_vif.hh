@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.9 2003/07/15 00:45:49 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.10 2003/10/20 18:34:11 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -124,6 +124,20 @@ public:
      * @return a reference to the MLD6IGMP node (@ref Mld6igmpNode).
      */
     Mld6igmpNode& mld6igmp_node() const { return (_mld6igmp_node); }
+
+    /**
+     * Get my primary address on this interface.
+     * 
+     * @return my primary address on this interface.
+     */
+    const IPvX&	primary_addr() const	{ return (_primary_addr); }
+
+    /**
+     * Set my primary address on this interface.
+     * 
+     * @param v the value of the primary address.
+     */
+    void	set_primary_addr(const IPvX& v) { _primary_addr = v; }
     
     /**
      * Get the MLD/IGMP querier address.
@@ -223,6 +237,7 @@ private:
     buffer_t	*_buffer_send;		// Buffer for sending messages
 #define MLD6IGMP_VIF_QUERIER  0x00000001U // I am the querier
     uint32_t	_proto_flags;		// Various flags (MLD6IGMP_VIF_*)
+    IPvX	_primary_addr;		// The primary address on this vif
     IPvX	_querier_addr;		// IP address of the current querier
     XorpTimer	_other_querier_timer;	// To timeout the (other) 'querier'
     XorpTimer	_query_timer;		// Timer to send queries
