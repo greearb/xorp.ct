@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie.hh,v 1.3 2003/03/10 23:20:09 hodson Exp $
+// $XORP: xorp/bgp/harness/trie.hh,v 1.4 2003/04/02 22:19:00 pavlin Exp $
 
 #ifndef __BGP_HARNESS_TRIE_HH__
 #define __BGP_HARNESS_TRIE_HH__
@@ -23,7 +23,7 @@
 
 class Trie {
 public:
-    Trie() : _first(0), _last(0), _debug(true), _pretty(true) {
+    Trie() : _first(0), _last(0), _debug(true), _pretty(true), _update_cnt(0) {
 	_head.p._data = 0;
     }
 
@@ -40,6 +40,10 @@ public:
     void tree_walk_table(const TreeWalker& ) const;
 
     void save_routing_table(FILE *fp) const;
+
+    uint32_t update_count() {
+	return _update_cnt;
+    }
 private:
 
     /*
@@ -175,6 +179,8 @@ private:
     bool _pretty;
 
     Tree _head;
+
+    uint32_t _update_cnt;	// Number of update packets seen
 
     bool empty() const;
     void tree_walk_table(const TreeWalker&, const Tree *ptr, const char *st)

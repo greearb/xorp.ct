@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.3 2003/03/10 23:20:09 hodson Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.4 2003/04/02 22:19:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -61,6 +61,8 @@ Trie::lookup(const string& net) const
 void
 Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len)
 {
+    _update_cnt++;
+
     Payload payload(tv, buf, len, this);
     const UpdatePacket *update = payload.get();
 
