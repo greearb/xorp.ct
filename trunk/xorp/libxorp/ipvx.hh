@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.8 2003/09/19 23:28:56 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.9 2003/09/30 03:07:59 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -479,7 +479,7 @@ public:
      * @param masklen the length of the mask to create.
      * @return a new IPvX address that contains a mask of length @ref masklen.
      */
-    static IPvX make_prefix(int family, int masklen)
+    static IPvX make_prefix(int family, size_t masklen)
 	throw (InvalidFamily, InvalidNetmaskLength);
 
     /**
@@ -488,7 +488,7 @@ public:
      * @param masklen the length of the mask to create.
      * @return a new IPvX address that contains a mask of length @ref masklen.
      */
-    IPvX make_prefix(int masklen) const throw (InvalidNetmaskLength) {
+    IPvX make_prefix(size_t masklen) const throw (InvalidNetmaskLength) {
 	return IPvX::make_prefix(_af, masklen);
     }
     
@@ -499,7 +499,7 @@ public:
      * @return a new IPvX address created by masking this address with a mask
      * of length @ref prefix_len.
      */
-    IPvX mask_by_prefix_len(int prefix_len) const throw (InvalidNetmaskLength);
+    IPvX mask_by_prefix_len(size_t prefix_len) const throw (InvalidNetmaskLength);
     
     /**
      * Get the mask length.
@@ -507,7 +507,7 @@ public:
      * @return the prefix length of the contiguous mask presumably stored
      * as an IPvX address.
      */
-    int masklen() const;
+    size_t masklen() const;
     
     /**
      * Test if this address is IPv4 address.

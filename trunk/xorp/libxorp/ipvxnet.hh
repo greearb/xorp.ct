@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.6 2003/09/30 00:05:22 pavlin Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.7 2003/09/30 03:07:59 pavlin Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -129,7 +129,7 @@ public:
      * @param a base address for the subnet.
      * @param prefix_len length of subnet mask.
      */
-    IPvXNet(const IPvX& a, int prefix_len) throw (InvalidNetmaskLength)
+    IPvXNet(const IPvX& a, size_t prefix_len) throw (InvalidNetmaskLength)
 	: BaseIPvXNet(a, prefix_len) {}
 
     // The following methods are specific to IPvXNet

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.6 2003/09/19 23:28:56 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.7 2003/09/30 03:07:59 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -224,7 +224,7 @@ IPvX::operator++() {
 }
 
 IPvX
-IPvX::make_prefix(int family, int masklen)
+IPvX::make_prefix(int family, size_t masklen)
     throw (InvalidFamily, InvalidNetmaskLength)
 {
     if (family == AF_INET)
@@ -237,7 +237,7 @@ IPvX::make_prefix(int family, int masklen)
 }
 
 IPvX
-IPvX::mask_by_prefix_len(int prefix_len) const throw (InvalidNetmaskLength)
+IPvX::mask_by_prefix_len(size_t prefix_len) const throw (InvalidNetmaskLength)
 {
     if (_af == AF_INET)
 	return get_ipv4().mask_by_prefix_len(prefix_len);
@@ -254,7 +254,7 @@ IPvX::str() const
 	return get_ipv6().str();
 }
 
-int
+size_t
 IPvX::masklen() const
 {
     if (is_ipv4())
