@@ -11,7 +11,7 @@
 // The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
-//
+
 // You may also (at your option) redistribute this software and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -20,8 +20,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-//
-// $XORP: xorp/ospfd/xorp/ospf_config.h,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
+
+// $XORP: xorp/ospfd/xorp/ospf_config.h,v 1.2 2003/03/10 23:20:46 hodson Exp $
 
 
 #ifndef OSPF_CONFIG_H
