@@ -13,7 +13,7 @@
  * legally binding. 
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.5 2003/11/04 16:30:44 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/utility.c,v 1.1 2003/11/06 01:21:38 pavlin Exp $"
 
 
 /*
@@ -66,11 +66,17 @@ xorp_isalpha(int c)
     return isascii(c) && isalpha(c);
 }
 
+/*
+ * TODO: for now comment-out xorp_isblank(), because isblank(3) is introduced
+ * with ISO C99, and may not always be available on the system.
+ */
+#if 0
 int
 xorp_isblank(int c)
 {
     return isascii(c) && isblank(c);
 }
+#endif /* 0 */
 
 int
 xorp_iscntrl(int c)

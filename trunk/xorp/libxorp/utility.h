@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.4 2003/11/06 01:21:38 pavlin Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.5 2003/11/06 01:35:15 pavlin Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -56,7 +56,11 @@ extern "C" {
 
 extern int xorp_isalnum(int c);
 extern int xorp_isalpha(int c);
-extern int xorp_isblank(int c);
+/*
+ * TODO: for now comment-out xorp_isblank(), because isblank(3) is introduced
+ * with ISO C99, and may not always be available on the system.
+ */
+/* extern int xorp_isblank(int c); */
 extern int xorp_iscntrl(int c);
 extern int xorp_isdigit(int c);
 extern int xorp_isgraph(int c);
