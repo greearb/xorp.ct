@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.32 2004/11/27 04:14:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.33 2004/11/27 09:08:23 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -703,10 +703,12 @@ FtiConfig::set_user_click_command_extra_arguments(const string& v)
 void
 FtiConfig::set_user_click_command_execute_on_startup(bool v)
 {
-    _ftic_entry_get_click.set_user_click_command_execute_on_startup(v);
-    _ftic_entry_set_click.set_user_click_command_execute_on_startup(v);
-    _ftic_table_get_click.set_user_click_command_execute_on_startup(v);
-    _ftic_table_set_click.set_user_click_command_execute_on_startup(v);
+    // XXX: only IfConfigGet should execute the user-level Click command
+    _ftic_entry_get_click.set_user_click_command_execute_on_startup(false);
+    _ftic_entry_set_click.set_user_click_command_execute_on_startup(false);
+    _ftic_table_get_click.set_user_click_command_execute_on_startup(false);
+    _ftic_table_set_click.set_user_click_command_execute_on_startup(false);
+    UNUSED(v);
 }
 
 /**

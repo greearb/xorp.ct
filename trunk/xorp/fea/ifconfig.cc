@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.36 2004/11/27 04:14:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.37 2004/11/27 09:08:23 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -488,8 +488,9 @@ IfConfig::set_user_click_command_extra_arguments(const string& v)
 void
 IfConfig::set_user_click_command_execute_on_startup(bool v)
 {
+    // XXX: only IfConfigGet should execute the user-level Click command
     _ifc_get_click.set_user_click_command_execute_on_startup(v);
-    _ifc_set_click.set_user_click_command_execute_on_startup(v);
+    _ifc_set_click.set_user_click_command_execute_on_startup(false);
 }
 
 /**
