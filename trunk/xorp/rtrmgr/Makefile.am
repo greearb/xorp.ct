@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.20 2003/11/17 07:02:40 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.21 2003/11/18 23:03:56 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -321,17 +321,17 @@ EXTRA_DIST	+= templatey.yy
 INCLUDES =	-I$(top_srcdir)
 
 ################################################################
-## Yes, this isn't portable, but the portable way in the automake
-## documentation doesn't work for multiple scanners in one binary.
-## Automake sucks.
-##
-## Note use of mv below.  Yacc also sucks, if the output filename
-## does not end .c, it makes the generated header file the output
-## filename plus .h.
-##
 ## Due to portability issues with yacc, we don't build the yacc
 ## generated files automatically.  If you touch the .yy files, you
 ## need to explicitly "gmake yacc" to run yacc.
+##
+## Yes, this isn't portable, but the portable way in the automake
+## documentation doesn't work for multiple scanners in one binary.
+##
+## Note use of mv below.  This is needed, because if the output filename
+## does not end with ".c", then yacc makes the generated header filename
+## as a concatenation of the output filename plus ".h".
+##
 
 yacc:	.yacc_generated_files
 
