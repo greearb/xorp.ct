@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.1 2004/09/17 13:48:59 abittau Exp $"
 
 #include "config.h"
 #include "policy_utils.hh"
@@ -23,9 +23,9 @@ namespace policy_utils {
 
 
 void str_to_list(const string& in, list<string>& out) {
-    unsigned pos1 = 0;	// beginning of token
-    unsigned pos2 = 0;  // end of token
-    unsigned len = in.length();
+    string::size_type pos1 = 0;	// beginning of token
+    string::size_type pos2 = 0;  // end of token
+    string::size_type len = in.length();
     string token;
 
     while(pos1 < len) {
