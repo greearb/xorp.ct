@@ -43,8 +43,8 @@ spot_leaks()
     status=">>> Running LeakTracer on \"$*\""
     echo "$status"
 
-    ${LT_HOME}/LeakCheck $* 1>/dev/null 2>&1
-    ${LT_HOME}/leak-analyze $1 1>leak-log 2>warn-log
+    LeakCheck $* 1>/dev/null 2>&1
+    leak-analyze $1 1>leak-log 2>warn-log
 
     grep -q 'Gathered' warn-log
     if [ $? -ne 0 ] ; then
@@ -73,18 +73,24 @@ tidy_up()
 }
 
 #
-# Find LeakTracer installation directory.
+# Check LeakTracer is installed.
 #
-LEAK_CHECK=`which LeakCheck`
-if [ $? -ne 0 ] ; then
+have_leak_check="no"
+for p in `echo ${PATH} | tr ':' ' '` ; do
+    if [ -x $p/LeakCheck ] ; then
+	have_leak_check=yes
+	break
+    fi
+done
+
+if [ "$have_leak_check" = "no" ] ; then
     echo "LeakCheck binary not found skipping test."
     exit 0
 fi
-LT_HOME=`dirname ${LEAK_CHECK}`
 
 #
 # These are the "simple" libxipc test programs, i.e. they take no
-# arguments
+# arguments.
 #
 SIMPLE_TESTS="./test_xrl_error ./test_xrl ./test_xrl_atom ./test_xrl_args"
 SIMPLE_TESTS="${SIMPLE_TESTS} ./test_inproc ./test_stcp ./test_sudp "
@@ -100,7 +106,7 @@ done
 
 #
 # There are the "harder" libxipc test programs, ie those that take arguments
-# or have test file inputs
+# or have test file inputs.
 #
 spot_leaks ./test_finder_events -b 2 -r 4
 [ $? -eq 0 ] || failures=1
