@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.3 2003/09/10 07:47:20 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.4 2003/09/10 07:50:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -35,8 +35,8 @@ tree_walker(const UpdatePacket *p, const IPNet<A>& net, const TimeVal&,
 	    TestInfo info, map<IPNet<A>, A> nlri)
 {
     DOUT(info) << info.test_name() << endl <<
-	p->str() << " " <<
-	net.str() << "" << endl;
+	p->str() <<
+	"net: " << net.str() << "" << endl;
 
     typename map<IPNet<A>, A>::const_iterator i;
     for(i = nlri.begin(); i != nlri.end(); i++)
@@ -75,11 +75,15 @@ template <>
 void
 add_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
 {
+    debug_msg("%s <%s>\n", p->str().c_str(), net.str().c_str());
+    
     /*
     ** Look for a multiprotocol path attribute, if there is one
     ** present just add the net. Otherwise add a multiprotocol path
-    ** attribute and then add the net.
+    ** attribute and then add the net. Note: if we add the path
+    ** attribute we need operate on a pointer hence the goto.
     */
+ top:
     MPReachNLRIAttribute<IPv6> *mpreach = 0;
     list <PathAttribute*>::const_iterator pai;
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
@@ -88,27 +92,34 @@ add_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
 	
 	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
  	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
-	    break;
+	    mpreach->add_nlri(net);
+	    mpreach->encode();
+
+	    debug_msg("%s\n", p->str().c_str());
+	    return;
 	}
     }
 
-    MPReachNLRIAttribute<IPv6> mp;
     if(0 == mpreach) {
-	mpreach = &mp;
+	MPReachNLRIAttribute<IPv6> mp;
 	p->add_pathatt(mp);
+	goto top;
     }
-    mpreach->add_nlri(net);
 }
 
 template <>
 void
 withdraw_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
 {
+    debug_msg("%s <%s>\n", p->str().c_str(), net.str().c_str());
+
     /*
     ** Look for a multiprotocol path attribute, if there is one
     ** present just add the net. Otherwise add a multiprotocol path
-    ** attribute and then add the net.
+    ** attribute and then add the net. Note: if we add the path
+    ** attribute we need operate on a pointer hence the goto.
     */
+ top:
     MPUNReachNLRIAttribute<IPv6> *mpunreach = 0;
     list <PathAttribute*>::const_iterator pai;
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
@@ -117,16 +128,19 @@ withdraw_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
 	
 	if (dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai)) {
  	    mpunreach = dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai);
-	    break;
+	    mpunreach->add_withdrawn(net);
+	    mpunreach->encode();
+
+	    debug_msg("%s\n", p->str().c_str());
+	    return;
 	}
     }
 
-    MPUNReachNLRIAttribute<IPv6> mp;
     if(0 == mpunreach) {
-	mpunreach = &mp;
+	MPUNReachNLRIAttribute<IPv6> mp;
 	p->add_pathatt(mp);
+	goto top;
     }
-    mpunreach->add_withdrawn(net);
 }
 
 template <>
@@ -264,8 +278,8 @@ main(int argc, char** argv)
     IPNet<IPv4> net1_ipv4("10.10.0.0/16");
     IPv4 nexthop1_ipv4("20.20.20.20");
 
-//     IPNet<IPv6> net1_ipv6("2000::/3");
-//     IPv6 nexthop1_ipv6("20:20:20:20:20:20:20:20");
+    IPNet<IPv6> net1_ipv6("2000::/3");
+    IPv6 nexthop1_ipv6("20:20:20:20:20:20:20:20");
 
     try {
 	uint8_t edata[2];
@@ -278,8 +292,8 @@ main(int argc, char** argv)
 	} tests[] = {
 	    {"single_ipv4", callback(test_single_update<IPv4>,
 				     nexthop1_ipv4, net1_ipv4)},
-//   	    {"single_ipv6", callback(test_single_update<IPv6>,
-// 				     nexthop1_ipv6, net1_ipv6)},
+  	    {"single_ipv6", callback(test_single_update<IPv6>,
+				     nexthop1_ipv6, net1_ipv6)},
 	};
 
 	if("" == test_name) {
