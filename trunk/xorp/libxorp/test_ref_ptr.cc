@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/libxorp/test_ref_ptr.cc,v 1.1 2003/04/01 21:50:45 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -51,7 +51,7 @@ do {                                                                    \
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -67,7 +67,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -185,7 +185,7 @@ int
 main(int argc, char * const argv[])
 {
     int ret_value = 0;
-    
+
     //
     // Initialize and start xlog
     //
@@ -195,7 +195,7 @@ main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
         switch (ch) {
@@ -216,21 +216,30 @@ main(int argc, char * const argv[])
     }
     argc -= optind;
     argv += optind;
-    
+
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
-	ret_value = run_test();
+	for (uint32_t i = 0 ; i < 100; i++) {
+	    ret_value = run_test();
+	    if (ret_value == 0) {
+		if (ref_counter_pool::instance().balance() != 0) {
+		    verbose_log("Ref count balance (%d != 0) non-zero at end",
+				ref_counter_pool::instance().balance());
+		    ret_value = 1;
+		}
+	    }
+	}
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();
         ret_value = 2;
     }
-    
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
+
     return (ret_value);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ref_ptr.cc,v 1.5 2003/04/01 21:50:08 hodson Exp $"
+#ident "$XORP: xorp/libxorp/ref_ptr.cc,v 1.6 2003/05/21 21:29:53 hodson Exp $"
 
 #include <assert.h>
 #include <iostream>
@@ -100,14 +100,16 @@ ref_counter_pool::dump()
 	cout << i << " " << _counters[i] << endl;
     }
     cout << "Free index: " << _free_index << endl;
+    cout << "Balance: " << _balance << endl;
 }
 
 ref_counter_pool::ref_counter_pool()
 {
     const size_t n = 1;
     _counters.resize(n);
-    _free_index = 0; // first free item
     _counters[n - 1] = LAST_FREE;
+    _free_index = 0;
+
     grow();
     grow();
     VERBOSE_POOL_PARANOIA(dump());
@@ -125,6 +127,7 @@ ref_counter_pool::new_counter()
     int32_t new_counter = _free_index;
     _free_index = _counters[_free_index];
     _counters[new_counter] = 1;
+    ++_balance;
     POOL_PARANOIA(check());
     return new_counter;
 }
@@ -136,6 +139,7 @@ ref_counter_pool::incr_counter(int32_t index)
     POOL_PARANOIA(check());
     assert((size_t)index < _counters.size());
     ++_counters[index];
+    ++_balance;
     POOL_PARANOIA(check());
     return _counters[index];
 }
@@ -145,6 +149,7 @@ ref_counter_pool::decr_counter(int32_t index)
 {
     POOL_PARANOIA(assert((size_t)index < _counters.size()));
     int32_t c = --_counters[index];
+    --_balance;
     if (c == 0) {
 	POOL_PARANOIA(check());
 	/* recycle */

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.7 2003/04/07 15:46:33 hodson Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.8 2003/05/21 21:29:53 hodson Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -33,6 +33,7 @@ class ref_counter_pool
 private:
     vector<int32_t> _counters;
     int32_t	    _free_index;
+    int32_t	    _balance;
 
     static const int32_t LAST_FREE = -1;
     static ref_counter_pool _the_instance;
@@ -90,6 +91,11 @@ public:
     bool on_free_list(int32_t index);
 
     /**
+     * Return number of valid ref pointer entries in pool.
+     */
+    inline int32_t balance() const { return _balance; }
+
+    /**
      * @return singleton ref_counter_pool.
      */
     static ref_counter_pool& instance();
@@ -124,9 +130,11 @@ public:
      * when the reference count reaches zero.
      */
     ref_ptr(_Tp* __p = 0)
-        : _M_ptr(__p),
-	_M_counter(ref_counter_pool::instance().new_counter())
-    {}
+        : _M_ptr(__p), _M_counter(0)
+    {
+	if (_M_ptr)
+	    _M_counter = ref_counter_pool::instance().new_counter();
+    }
 
     /**
      * Copy Constructor
