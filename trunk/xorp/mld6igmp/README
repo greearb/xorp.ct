@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/README,v 1.5 2003/06/26 18:36:40 pavlin Exp $
+# $XORP: xorp/mld6igmp/README,v 1.6 2003/08/28 14:56:18 pavlin Exp $
 #
 
 Multicast Listener Discovery/Internet Group Management Protocol
@@ -11,7 +11,7 @@ This directory contains the XORP implementation of the MLD and IGMP protocols.
 Configuration
 =============
 
-MLD/IGMP like most Xorp processes does not take its configuration
+MLD/IGMP like most XORP processes does not take its configuration
 parameters from the command line. Its parameters are provided via
 XRLs. At the very least a MLD/IGMP process must be provided with
 the set of network interfaces to enable for multicast.
@@ -23,7 +23,7 @@ In normal operation, MLD/IGMP would be started by the XORP router manager
 process, not directly from the command line.  
 
 For testing and debugging purposes, MLD/IGMP can be manually started.  The
-Xorp MLD6/IGMP process assumes that the XRL finder and the MFEA
+XORP MLD6/IGMP process assumes that the XRL finder and the MFEA
 are already running. However, the binary program ``test_mld6igmp'' already
 contains them as well, therefore it is sufficient to start only this
 program (as a root).
@@ -31,7 +31,7 @@ program (as a root).
 After ``test_mld6igmp'' is started, the MFEA and MLD/IGMP are
 disabled by default. To start them, and to configure their operation,
 as well as the MLD/IGMP operation, run script ``configure_mld6igmp''.
-Note that it MUST be run from the ``mld6igmp'' directory.
+Note that it MUST be run from the ``$XORP/mld6igmp'' directory.
 
 However, before running ``configure_mld6igmp'', you must configure
 it for each router:
@@ -43,6 +43,9 @@ it for each router:
 	xorp1)
 	ENABLE_VIFS="dc1 dc2 dc4"
 	;;
+
+   Alternatively, you can predefine variable ENABLE_VIFS in your shell
+   environment.
 
  - By default, ``test_mld6igmp'' will log all protocol-related messages.
    To disable them, comment-out the following variables:
@@ -97,7 +100,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (August 2003), the MLD/IGMP implementation is based
+Currently (November 2003), the MLD/IGMP implementation is based
 on the specification in the following documents:
 
  * RFC 2710: Multicast Listener Discovery for IPv6, Version 1
