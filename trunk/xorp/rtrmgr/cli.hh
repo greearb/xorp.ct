@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.17 2004/05/31 02:32:16 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.19 2004/06/01 04:39:54 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -89,7 +89,8 @@ public:
 		  const string& command_global_name,
 		  const vector<string>& argv);
     map<string, string> text_entry_children_func(const string& path,
-						  bool& is_executable) const;
+						 bool& is_executable,
+						 bool& can_pipe) const;
     int text_entry_func(const string& ,
 			const string& ,
 			uint32_t ,
@@ -142,9 +143,11 @@ public:
     void load_done(bool success, string errmsg);
 
     map<string, string> op_mode_help(const string& path,
-				     bool& is_executable) const;
+				     bool& is_executable,
+				     bool& can_pipe) const;
     map<string, string> configure_mode_help(const string& path,
-					    bool& is_executable) const;
+					    bool& is_executable,
+					    bool& can_pipe) const;
     typedef XorpCallback2<void, bool, const string&>::RefPtr OpModeCallback;
     void op_mode_cmd_done(bool success, const string& result);
 
@@ -169,7 +172,7 @@ private:
     void add_command_subtree(CliCommand& current_cli_node,
 			     const CommandTreeNode& current_ctn,
 			     const CLI_PROCESS_CALLBACK& cli_process_callback,
-			     string path, size_t depth);
+			     string path, size_t depth, bool can_pipe);
 
 #if 0
     /**
@@ -198,14 +201,18 @@ private:
      * typed by the user.
      *
      * @param path the configuration path to current position in the config 
-     * tree
+     * tree.
+     *
+     * @param can_pipe if true, then the output can be piped through
+     * the built-in CLI pipes.
      */
     void add_immediate_commands(CliCommand& current_cli_node,
 				const CommandTree& command_tree,
 				const list<string>& cmd_names,
 				bool include_intermediates,
 				const CLI_PROCESS_CALLBACK& cb,
-				const string& path);
+				const string& path,
+				bool can_pipe);
 #endif
 
     void add_text_entry_commands(CliCommand* com0);
