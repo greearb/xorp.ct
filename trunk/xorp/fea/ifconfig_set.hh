@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.2 2003/05/10 00:06:41 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.3 2003/05/14 01:13:43 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -108,6 +108,41 @@ private:
     void push_addr(const IfTreeInterface& i, const IfTreeVif& v,
 		   const IfTreeAddr6& a);
     
+    int _s4;
+    int _s6;
+};
+
+class IfConfigSetNetlink : public IfConfigSet,
+			   public NetlinkSocket4,
+			   public NetlinkSocket6 {
+public:
+    IfConfigSetNetlink(IfConfig& ifc);
+    virtual ~IfConfigSetNetlink();
+
+    /**
+     * Start operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start();
+    
+    /**
+     * Stop operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop();
+    
+    virtual bool push_config(const IfTree& config);
+    
+private:
+    void push_if(const IfTreeInterface& i);
+    void push_vif(const IfTreeInterface& i, const IfTreeVif& v);
+    void push_addr(const IfTreeInterface& i, const IfTreeVif& v,
+		   const IfTreeAddr4& a);
+    void push_addr(const IfTreeInterface& i, const IfTreeVif& v,
+		   const IfTreeAddr6& a);
+
     int _s4;
     int _s6;
 };
