@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.47 2005/03/05 01:41:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.48 2005/03/15 00:33:23 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -1166,6 +1166,18 @@ int
 MfeaNode::delete_protocol(const string& module_instance_name,
 			  xorp_module_id module_id)
 {
+    vector<MfeaVif *>::iterator iter;
+
+    // Explicitly stop the protocol on all vifs
+    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
+	MfeaVif *mfea_vif = (*iter);
+	if (mfea_vif == NULL)
+	    continue;
+	if (! mfea_vif->is_enabled())
+	    continue;
+	mfea_vif->stop_protocol(module_instance_name, module_id);
+    }
+    
     // Delete kernel signal registration
     if (_kernel_signal_messages_register.is_registered(module_instance_name,
 						       module_id)) {
