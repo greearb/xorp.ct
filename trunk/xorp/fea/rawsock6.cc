@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.4 2004/11/29 07:19:07 bms Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.5 2004/11/29 09:18:19 bms Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -191,20 +191,20 @@ IoRawSocket6::recv(int fd, SelectorMask m)
 	    switch (chp->cmsg_type) {
 #ifdef IPV6_PKTINFO
 	    case IPV6_PKTINFO:
-		pip = (struct in6_pktinfo *)CMSG_DATA(&mh);
+		pip = (struct in6_pktinfo *)CMSG_DATA(&chp);
 		_hdrinfo.dst.copy_in(pip->ipi6_addr);
 		_hdrinfo.rcvifindex = pip->ipi6_ifindex;
 		break;
 #endif
 #ifdef IPV6_HOPLIMIT
 	    case IPV6_HOPLIMIT:
-		intp = (uint32_t *)CMSG_DATA(&mh);
+		intp = (uint32_t *)CMSG_DATA(&chp);
 		_hdrinfo.hoplimit = *intp & 0xFF;
 		break;
 #endif
 #ifdef IPV6_TCLASS
 	    case IPV6_TCLASS:
-		intp = (uint32_t *)CMSG_DATA(&mh);
+		intp = (uint32_t *)CMSG_DATA(&chp);
 		_hdrinfo.tclass = *intp & 0xFF;
 		break;
 #endif
