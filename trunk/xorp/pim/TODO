@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.51 2003/07/07 21:42:23 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.52 2003/07/07 22:15:07 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -614,8 +614,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
   misc. timer values, priorities, etc, so the default values don't
   have to be always explicitly set by outside.
 
-* IMPL: Remove OUTPUT_STATE_CHECK_SWITCH_TO_SPT_SG ??
-
 * SPEC: Do we allow SPT switch if only (*,*,RP) entry, but not (*,G) entry?
   See CheckSwitchToSpt(S,G)
 
@@ -653,10 +651,6 @@ delete dataflow monitoring for source 10.4.0.2 and group 224.0.1.20
 * IMPL: make sure that the following function is working fine:
   mifset_timer_timeout(void *data_pointer)
 
-* IMPL: Call PimMrt::add_task_is_switch_to_spt_desired_sg() when needed.
-  Do the same for:
-  add_task_my_ip_address(), add_task_my_ip_subnet_address()
-  
 * IMPL: Add "Mrib *mrib" to PimRp, and use that one inside
   PimMre::compute_mrib_rp() instead of lookup the MRIB table
   per PimMre entry.
@@ -863,12 +857,6 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
 * IMPL:  // TODO: XXX: PAVPAVPAV: recompute_assert_receiver_join_wc()
       // should be called on all (*,G) entries for this (*,*,RP) entry!!
 
-* IMPL: PimMre::recompute_check_switch_to_spt_sg()
-  and is_switch_to_spt_desired_sg()
-  and recompute_is_switch_to_spt_desired_sg() do not need to
-  be PimMre methods, because to check whether we need to switch
-  to the SPT we may not have a (S,G) PimMre.
-
 * IMPL: Do we want to create methods that take care of (S,G,rpt) entries
   when both the MRIB(S) and MRIB(RP) change at the same time?
 
@@ -1002,9 +990,6 @@ IP_HDR_INCLUDE, but let the kernel prepare the IP header. I will put
 this on my TODO list for both the newer PIM-SM implementation, and
 for the kernel patches as well.
 
-
-* IMPL: Implement the SPT policy switching in
-  PimMre::switch_to_spt_desired_sg().
 
 * IMPL: When "wrong iif" signal arrives, if it is not on one of
   our oifs, and if we don't care about it,
