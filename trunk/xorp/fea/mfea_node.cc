@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.7 2003/06/01 02:49:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.8 2003/06/02 02:17:19 pavlin Exp $"
 
 
 //
@@ -1789,15 +1789,16 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 	    mrib.set_next_hop_router_addr(IPvX(fte.gateway()));
 	    
 	    // Get the vif index
-	    mfea_vif = vif_find_direct(mrib.next_hop_router_addr());
-	    if (mfea_vif != NULL) {
+	    mfea_vif = vif_find_same_subnet_or_p2p(mrib.next_hop_router_addr());
+	    if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up()) {
 		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
 	    }
 	    // If it didn't work, then try (again) in case it is a LAN addr.
 	    if (mrib.next_hop_vif_index() >= maxvifs()) {
-		mfea_vif = vif_find_direct(mrib.dest_prefix().masked_addr());
-		if (mfea_vif != NULL)
+		mfea_vif = vif_find_same_subnet(mrib.dest_prefix());
+		if ((mfea_vif != NULL) && mfea_vif->is_underlying_vif_up()) {
 		    mrib.set_next_hop_vif_index(mfea_vif->vif_index());
+		}
 	    }
 	    if (mrib.next_hop_vif_index() >= maxvifs()) {
 		XLOG_WARNING("get_mrib_table() error: "
@@ -1828,15 +1829,20 @@ MfeaNode::get_mrib_table(Mrib **return_mrib_table)
 	    mrib.set_next_hop_router_addr(IPvX(fte.gateway()));
 	    
 	    // Get the vif index
-	    mfea_vif = vif_find_direct(mrib.next_hop_router_addr());
-	    if (mfea_vif != NULL) {
+	    mfea_vif = vif_find_same_subnet_or_p2p(mrib.next_hop_router_addr());
+	    if ((mfea_vif != NULL) && (mfea_vif->is_underlying_vif_up())) {
 		mrib.set_next_hop_vif_index(mfea_vif->vif_index());
+	    } else {
+		mfea_vif = NULL;
 	    }
 	    // If it didn't work, then try (again) in case it is a LAN addr.
 	    if (mrib.next_hop_vif_index() >= maxvifs()) {
-		mfea_vif = vif_find_direct(mrib.dest_prefix().masked_addr());
-		if (mfea_vif != NULL)
+		mfea_vif = vif_find_same_subnet(mrib.dest_prefix());
+		if ((mfea_vif != NULL) && (mfea_vif->is_underlying_vif_up())) {
 		    mrib.set_next_hop_vif_index(mfea_vif->vif_index());
+		} else {
+		    mfea_vif = NULL;
+		}
 	    }
 	    if (mrib.next_hop_vif_index() >= maxvifs()) {
 		XLOG_WARNING("get_mrib_table() error: "
