@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.7 2003/06/20 22:20:28 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.8 2003/09/24 02:16:07 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -53,7 +53,8 @@ Socket::Socket(int s, EventLoop& e) : _s(s), _eventloop(e)
     //    _eventloop = 0;
 }
 
-void Socket::create_listener()
+void
+Socket::create_listener()
 {
     struct sockaddr_in servername;
     debug_msg("create_listener called");
@@ -72,7 +73,8 @@ void Socket::create_listener()
 
 /* **************** BGPSocket - PROTECTED METHODS *********************** */
 
-void Socket::close_socket()
+void
+Socket::close_socket()
 {
     debug_msg("Close socket %s %d\n", get_remote_host(), _s);
 
@@ -80,7 +82,8 @@ void Socket::close_socket()
     _s = UNCONNECTED;
 }
 
-void Socket::create_socket()
+void
+Socket::create_socket()
 {
     debug_msg("create_socket called\n");
 
@@ -92,7 +95,8 @@ void Socket::create_socket()
     debug_msg("BGPSocket socket created (sock - %d)\n", _s);
 }
 
-void Socket::init_sockaddr(struct sockaddr_in *name, 
+void
+Socket::init_sockaddr(struct sockaddr_in *name, 
 			       struct in_addr addr,
 			       uint16_t port)
 {
@@ -133,7 +137,8 @@ SocketClient::~SocketClient()
     async_remove();
 }
 
-void SocketClient::disconnect()
+void
+SocketClient::disconnect()
 {
     debug_msg("Disconnect\n");
     XLOG_ASSERT(UNCONNECTED != get_sock());
@@ -163,7 +168,8 @@ void SocketClient::disconnect()
     _disconnecting = false;
 }
 
-bool SocketClient::connect()
+bool
+SocketClient::connect()
 {
     debug_msg("SocketClient connecting to remote Peer %s\n",
 	      get_remote_host());
@@ -175,7 +181,8 @@ bool SocketClient::connect()
 			  get_local_addr());
 }
 
-void SocketClient::connected(int s)
+void
+SocketClient::connected(int s)
 {
 #ifdef	DEBUG_PEERNAME
     struct sockaddr_in sin;
@@ -192,7 +199,8 @@ void SocketClient::connected(int s)
     async_add(s);
 }
 
-void SocketClient::flush_transmit_queue() 
+void
+SocketClient::flush_transmit_queue() 
 {
     if (_async_writer)
 	_async_writer->flush_buffers();
