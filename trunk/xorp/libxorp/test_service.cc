@@ -135,6 +135,7 @@ public:
 	}
 
 	ServiceStatus e_old, e_new;
+	e_old = e_new = FAILED; // pessimism is...
 	switch (_cc++) {
 	case 0:
 	    // First change expected READY -> STARTING
