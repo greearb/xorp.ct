@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_dummy.cc,v 1.13 2003/09/16 09:02:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_dummy.cc,v 1.14 2003/09/16 18:13:46 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -27,6 +27,7 @@
 #include "fticonfig.hh"
 #include "ifmanager.hh"
 #include "ifconfig.hh"
+#include "libfeaclient_bridge.hh"
 #include "xrl_ifupdate.hh"
 #include "xrl_mfea_node.hh"
 #include "xrl_target.hh"
@@ -36,10 +37,10 @@ static bool is_dummy = true;		// XXX: set to true if fea_dummy
 
 /**
  * Print the program usage.
- * 
+ *
  * If @param exit_value is 0, the usage will be printed to the standart
  * output, otherwise to the standart error.
- * 
+ *
  * @param argv0 argument 0 when the program is called (the program name
  * itself).
  * @param exit_value the exit value of the program.
@@ -49,12 +50,12 @@ usage(const char *argv0, int exit_value)
 {
     FILE *output;
     const char *progname = strrchr(argv0, '/');
-    
+
     if (progname != NULL)
 	progname++;		// Skip the last '/'
     if (progname == NULL)
 	progname = argv0;
-    
+
     //
     // If the usage is printed because of error, output to stderr, otherwise
     // output to stdout.
@@ -72,9 +73,9 @@ usage(const char *argv0, int exit_value)
     fprintf(output, "Program name:   %s\n", progname);
     fprintf(output, "Module name:    %s\n", XORP_MODULE_NAME);
     fprintf(output, "Module version: %s\n", XORP_MODULE_VERSION);
-    
+
     exit (exit_value);
-    
+
     // NOTREACHED
 }
 
@@ -97,22 +98,37 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     if (is_dummy)
 	fticonfig.set_dummy();
     fticonfig.start();
-    
+
+
     //
     // 2. Interface Configurator and reporters
     //
-    XrlIfConfigUpdateReporter ifreporter(xrl_std_router_fea);
-    IfConfigErrorReporter iferr;
-    
-    IfConfig ifconfig(eventloop, ifreporter, iferr);
+    XrlIfConfigUpdateReporter xrl_ifc_reporter(xrl_std_router_fea);
+    LibFeaClientBridge        lfc_bridge(xrl_std_router_fea);
+
+    IfConfigUpdateReplicator ifc_repl;
+    ifc_repl.add_reporter(&xrl_ifc_reporter);
+    ifc_repl.add_reporter(&lfc_bridge);
+
+    IfConfigErrorReporter if_err;
+
+    IfConfig ifconfig(eventloop, ifc_repl, if_err);
     if (is_dummy)
 	ifconfig.set_dummy();
     ifconfig.start();
-    
+
     //
     // 3. Interface manager
     //
     InterfaceManager ifm(ifconfig);
+
+    //
+    // Hook IfTree of interface manager into libfeaclient
+    // so it can read config to determine deltas
+    //
+    const IfTree& iftree = ifm.iftree();
+    lfc_bridge.set_iftree(&iftree);
+
 
     //
     // 4. Raw Socket TODO
@@ -122,21 +138,21 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     // 5. XRL Target
     //
     XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea, fticonfig, ifm,
-				ifreporter, 0);
+				xrl_ifc_reporter, 0);
     {
 	// Wait until the XrlRouter becomes ready
 	bool timed_out = false;
-	
+
 	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
 	while (xrl_std_router_fea.ready() == false && timed_out == false) {
 	    eventloop.run();
 	}
-	
+
 	if (xrl_std_router_fea.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	}
     }
-    
+
     //
     // CLI (for debug purpose)
     //
@@ -149,17 +165,17 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     {
 	// Wait until the XrlRouter becomes ready
 	bool timed_out = false;
-	
+
 	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
 	while (xrl_std_router_cli4.ready() == false && timed_out == false) {
 	    eventloop.run();
 	}
-	
+
 	if (xrl_std_router_cli4.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	}
     }
-    
+
     //
     //  MFEA node
     //
@@ -172,12 +188,12 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     {
 	// Wait until the XrlRouter becomes ready
 	bool timed_out = false;
-	
+
 	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
 	while (xrl_std_router_mfea4.ready() == false && timed_out == false) {
 	    eventloop.run();
 	}
-	
+
 	if (xrl_std_router_mfea4.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	}
@@ -193,31 +209,31 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
     {
 	// Wait until the XrlRouter becomes ready
 	bool timed_out = false;
-	
+
 	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
 	while (xrl_std_router_mfea6.ready() == false && timed_out == false) {
 	    eventloop.run();
 	}
-	
+
 	if (xrl_std_router_mfea6.ready() == false) {
 	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
 	}
     }
 #endif // HAVE_IPV6_MULTICAST
-    
+
     //
     // Main loop
     //
     while (! xrl_fea_target.done()) {
 	eventloop.run();
     }
-    
+
     //
     // Gracefully stop
     // TODO: this may not work if we depend on reading asynchronously
     // data from sockets. To fix this, we need to run the eventloop
     // until we get all the data we need. Tricky...
-    // 
+    //
     // TODO: take care of the MFEA as well.
     // xrl_mfea_node4.stop();
     ifconfig.stop();
@@ -232,9 +248,9 @@ main(int argc, char *argv[])
     const char *argv0 = argv[0];
     char finder_hostname[MAXHOSTNAMELEN + 1];
     uint16_t finder_port = 0;			// XXX: default (in host order)
-    
+
     strcpy(finder_hostname, "localhost");	// XXX: default
-    
+
     //
     // Initialize and start xlog
     //
@@ -280,7 +296,7 @@ main(int argc, char *argv[])
 	usage(argv0, 1);
 	// NOTREACHED
     }
-    
+
     //
     // XXX
     // Do all that daemon stuff take off into the background disable signals
@@ -298,6 +314,6 @@ main(int argc, char *argv[])
     //
     xlog_stop();
     xlog_exit();
-    
+
     return 0;
 }

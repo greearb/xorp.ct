@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.24 2003/10/14 01:36:25 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.25 2003/10/14 02:17:11 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -21,9 +21,7 @@ noinst_PROGRAMS		+= test_ifmanager_transaction
 # -- No-install Libraries
 noinst_LIBRARIES	 = libfea.a
 
-# -- Libraries and library flags to link the binary programs
-
-# -- Program Sources
+# -- Sources and Linkage for xorp_fea
 xorp_fea_SOURCES	= fea.cc
 xorp_fea_LDADD		= $(noinst_LIBRARIES)
 ### FEA XRL libraries
@@ -43,12 +41,16 @@ xorp_fea_LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
 xorp_fea_LDADD		+= @CLI_CURSES_LIB@
 xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
 xorp_fea_LDADD		+= $(top_builddir)/xrl/targets/libclibase.a
+### libfeaclient libraries
+xorp_fea_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.a
+xorp_fea_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 ### XORP misc libraries
 xorp_fea_LDADD		+= $(top_builddir)/libproto/libproto.a
 xorp_fea_LDADD		+= $(top_builddir)/libxipc/libxipc.a
 xorp_fea_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 xorp_fea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
+# -- Sources and Linkage for xorp_fea_dummy
 xorp_fea_dummy_SOURCES	= fea_dummy.cc
 xorp_fea_dummy_LDADD	=  $(noinst_LIBRARIES)
 ### FEA XRL libraries
@@ -68,12 +70,16 @@ xorp_fea_dummy_LDADD	+= $(top_builddir)/cli/libtecla/libtecla.a
 xorp_fea_dummy_LDADD	+= @CLI_CURSES_LIB@
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/targets/libclibase.a
+### libfeaclient libraries
+xorp_fea_dummy_LDADD	+= $(top_builddir)/libfeaclient/libfeaclient.a
+xorp_fea_dummy_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 ### XORP misc libraries
 xorp_fea_dummy_LDADD	+= $(top_builddir)/libproto/libproto.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/libxipc/libxipc.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/libcomm/libcomm.a
 xorp_fea_dummy_LDADD	+= $(top_builddir)/libxorp/libxorp.a
 
+# -- Sources and Linkage for test_mfea
 test_mfea_SOURCES	= test_mfea.cc
 test_mfea_LDADD		= $(noinst_LIBRARIES)
 # FEA-specific begin
@@ -102,13 +108,16 @@ test_mfea_LDADD		+= $(top_builddir)/libxipc/libxipc.a
 test_mfea_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 test_mfea_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
+# -- Sources and Linkage for test_ifmanager_transaction
 test_ifmanager_transaction_SOURCES  = test_ifmanager_transaction.cc
 test_ifmanager_transaction_SOURCES += iftree.cc
 test_ifmanager_transaction_LDADD    = $(top_builddir)/libxorp/libxorp.a
 
+# -- Sources and Linkages for test_rawsock4
 test_rawsock4_SOURCES	 = test_rawsock4.cc rawsock4.cc
 test_rawsock4_LDADD	 = $(top_builddir)/libxorp/libxorp.a
 
+# -- Sources and Linkage for demo_fea_ifmgr_client
 demo_fea_ifmgr_client_SOURCES  = demo_fea_ifmgr_client.cc
 demo_fea_ifmgr_client_LDADD    = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a
 demo_fea_ifmgr_client_LDADD   += $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
@@ -137,6 +146,7 @@ libfea_a_SOURCES	+= ifmanager.hh
 libfea_a_SOURCES	+= ifmanager_transaction.hh
 libfea_a_SOURCES	+= iftree.hh
 libfea_a_SOURCES	+= kernel_utils.hh
+libfea_a_SOURCES	+= libfeaclient_bridge.hh
 libfea_a_SOURCES	+= mfea_dataflow.hh
 libfea_a_SOURCES	+= mfea_kernel_messages.hh
 libfea_a_SOURCES	+= mfea_mrouter.hh
@@ -210,6 +220,7 @@ libfea_a_SOURCES	+= ifconfig_set_ioctl.cc
 libfea_a_SOURCES	+= ifconfig_set_netlink.cc
 libfea_a_SOURCES	+= ifmanager_transaction.cc
 libfea_a_SOURCES	+= iftree.cc
+libfea_a_SOURCES	+= libfeaclient_bridge.cc
 libfea_a_SOURCES	+= mfea_config.cc
 libfea_a_SOURCES	+= mfea_dataflow.cc
 libfea_a_SOURCES	+= mfea_mrouter.cc
