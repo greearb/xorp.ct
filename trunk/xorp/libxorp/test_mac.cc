@@ -12,18 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.2 2003/03/10 23:20:35 hodson Exp $"
 
 #include "config.h"
 #include "libxorp/xorp.h"
+#include "libxorp/ether_compat.h"
 #include "libxorp/mac.hh"
 
 bool
 test1()
 {
-    /*
-    ** Try and create a Mac with a bad format.
-    */
+    //
+    // Try and create a Mac with a bad format.
+    //
     try {
 	Mac m1("hello");
 	return false;
@@ -38,9 +39,9 @@ test1()
 bool
 test2()
 {
-    /*
-    ** Create an EtherMac go to Mac and back to EtherMac.
-    */
+    //
+    // Create an EtherMac go to Mac and back to EtherMac.
+    //
     try {
  	EtherMac m1("aa:aa:aa:aa:aa:aa");
 	cout << "EtherMac: m1 " << m1.str() << "\n";
@@ -63,9 +64,9 @@ test2()
 bool
 test3()
 {
-    /*
-    ** Serialize and deserialize Mac
-    */
+    //
+    // Serialize and deserialize Mac
+    //
     try {
  	Mac m1("bb:aa:aa:aa:aa:aa");
 	string ser = m1.str();
@@ -87,9 +88,9 @@ test3()
 bool
 test4()
 {
-    /*
-    ** Serialize and deserialize EtherMac
-    */
+    //
+    // Serialize and deserialize EtherMac
+    //
     try {
  	EtherMac m1("bb:aa:aa:aa:aa:aa");
 	string ser = m1.str();
@@ -98,6 +99,38 @@ test4()
 	cout << "Deserialized: " <<   m2.str() << "\n";
 	EtherMac m3 = m2;
 	cout << "Back to an EtherMac: " << m3.str() << "\n";
+    } catch(exception& e) {
+	cerr << "Exception: " << e.what() << "\n";
+	return false;
+    } catch(const XorpException& xe) {
+	cout << xe.what() << " from " << xe.where() << " -> " 
+	     << xe.why()  << "\n";
+	return false;
+    }
+
+    return true;
+}
+
+bool
+test5()
+{
+    //
+    // Convert EtherMac to ether_addr representation.
+    //
+    try {
+ 	EtherMac m1("bb:aa:aa:aa:aa:aa");
+	struct ether_addr ether_addr;
+
+	if (m1.get_ether_addr(ether_addr) != true) {
+	    cout << "Cannot get ether_addr from EtherMac " << m1.str() << "\n";
+	    return false;
+	}
+	EtherMac m2(ether_addr);
+	if (m1 != m2) {
+	    cout << "EtherMac " << m1.str() << " is different from "
+		 << m2.str() << "\n";
+	    return false;
+	}
     } catch(exception& e) {
 	cerr << "Exception: " << e.what() << "\n";
 	return false;
@@ -125,6 +158,7 @@ main()
 	{"test2 Mac -> EtherMac -> Mac", test2},
 	{"test3 Serialize/Deserialize Mac", test3},
 	{"test4 Serialize/Deserialize EtherMac", test4},
+	{"test5 Convert EtherMac to ether_addr", test5},
     };
 	
     int ntest = sizeof(tests) / sizeof(test);
