@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mfea4.tp,v 1.8 2004/06/07 18:16:25 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea4.tp,v 1.9 2005/03/09 22:50:39 pavlin Exp $ */
 
 plumbing {
     mfea4 {
@@ -37,7 +37,11 @@ plumbing {
 
 	%mandatory:	targetname;
 
+/* TODO: remove this? */
+/*
 	%activate:	xrl "$(mfea4.targetname)/mfea/0.1/start_mfea";
+	%update:	xrl "$(mfea4.targetname)/mfea/0.1/start_mfea";
+*/
 
 	targetname {
 	    %help:	short "Set the target name";
@@ -64,6 +68,7 @@ plumbing {
 	    vif @ {
 		%help:	short "Configure IPv4 MFEA on a virtual interface";
 		%activate: xrl "$(mfea4.targetname)/mfea/0.1/start_vif?vif_name:txt=$(vif.@)";
+		%update: xrl "$(mfea4.targetname)/mfea/0.1/start_vif?vif_name:txt=$(vif.@)";
 
 		disable {
 		    %help:	short "Disable IPv4 MFEA on an interface";
