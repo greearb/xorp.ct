@@ -383,7 +383,7 @@ redist_transaction4_add_route()
     if [ $# -ne 8 ] ; then
 	cat >&2 <<EOF
 usage: redist_transaction4_add_route <tid> <dest net> <nexthop> <ifname> <vifname> <metric> <admin_distance> <cookie> <protocol_origin>
-eg:    redist_transaction4_add_entry 6987662 187.1.0.0/16 164.27.13.1 ed0 10 20 all BGP
+eg:    redist_transaction4_add_route 6987662 187.1.0.0/16 164.27.13.1 ed0 10 20 all BGP
 EOF
 	return 127
     fi

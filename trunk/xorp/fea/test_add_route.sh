@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.18 2004/08/03 03:51:48 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.19 2004/08/03 05:02:55 pavlin Exp $
 #
 
 #
@@ -428,7 +428,7 @@ config_cleanup_nexthop4()
 
     echo "INFO: Cleanup nexthop (if any) for destination ${DEST4}"
 
-    # Lookup the entry
+    # Lookup the route
     _nexthop=""
     _xrl_result=`fea_fti_lookup_route_by_network4 ${DEST4} 2>&1`
     _ret_value=$?
@@ -455,7 +455,7 @@ config_cleanup_nexthop6()
 
     echo "INFO: Cleanup nexthop (if any) for destination ${DEST6}"
 
-    # Lookup the entry
+    # Lookup the route
     _nexthop=""
     _xrl_result=`fea_fti_lookup_route_by_network6 ${DEST6} 2>&1`
     _ret_value=$?
@@ -768,11 +768,11 @@ subtest_delete_route6()
     fea_redist_transaction6_commit_transaction ${tid}
 }
 
-subtest_lookup_deleted_entry4()
+subtest_lookup_deleted_route4()
 {
     local _xrl_result _ret_value
 
-    echo "SUBTEST: Lookup deleted entry for destination ${DEST4}"
+    echo "SUBTEST: Lookup deleted route for destination ${DEST4}"
 
     _xrl_result=`fea_fti_lookup_route_by_network4 ${DEST4} 2>&1`
     _ret_value=$?
@@ -785,11 +785,11 @@ subtest_lookup_deleted_entry4()
     return 0
 }
 
-subtest_lookup_deleted_entry6()
+subtest_lookup_deleted_route6()
 {
     local _xrl_result _ret_value
 
-    echo "SUBTEST: Lookup deleted entry for destination ${DEST6}"
+    echo "SUBTEST: Lookup deleted route for destination ${DEST6}"
 
     _xrl_result=`fea_fti_lookup_route_by_network6 ${DEST6} 2>&1`
     _ret_value=$?
@@ -816,7 +816,7 @@ subtest_lookup_deleted_route4()
     _xrl_result=`fea_fti_lookup_route_by_dest4 ${DEST_HOST4} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
-	# OK: the entry was deleted
+	# OK: the route was deleted
 	return 0
     fi
 
@@ -846,7 +846,7 @@ subtest_lookup_deleted_route6()
     _xrl_result=`fea_fti_lookup_route_by_dest6 ${DEST_HOST6} 2>&1`
     _ret_value=$?
     if [ ${_ret_value} -ne 0 ] ; then
-	# OK: the entry was deleted
+	# OK: the route was deleted
 	return 0
     fi
 
@@ -874,9 +874,12 @@ test_add_delete_unicast_forwarding_entry4()
     _subtests="${_subtests} subtest_lookup_route_by_network4"
     _subtests="${_subtests} subtest_lookup_route_by_dest4"
     _subtests="${_subtests} subtest_delete_route4"
-    _subtests="${_subtests} subtest_lookup_deleted_entry4"
-    # Comment-out the test below, because in case of Linux a cloned entry
-    # from the default route may be kept in the kernel for very long time.
+    _subtests="${_subtests} subtest_lookup_deleted_route4"
+    #
+    # Comment-out the test below, because in case of Linux a cloned routing
+    # entry from the default route may be kept in the kernel for very long
+    # time.
+    #
     # _subtests="${_subtests} subtest_lookup_deleted_route4"
 
     for t in ${_subtests} ; do
@@ -900,9 +903,12 @@ test_add_delete_unicast_forwarding_entry6()
     _subtests="${_subtests} subtest_lookup_route_by_network6"
     _subtests="${_subtests} subtest_lookup_route_by_dest6"
     _subtests="${_subtests} subtest_delete_route6"
-    _subtests="${_subtests} subtest_lookup_deleted_entry6"
-    # Comment-out the test below, because in case of Linux a cloned entry
-    # from the default route may be kept in the kernel for very long time.
+    _subtests="${_subtests} subtest_lookup_deleted_route6"
+    #
+    # Comment-out the test below, because in case of Linux a cloned routing
+    # entry from the default route may be kept in the kernel for very long
+    # time.
+    #
     #_subtests="${_subtests} subtest_lookup_deleted_route6"
 
     for t in ${_subtests} ; do
