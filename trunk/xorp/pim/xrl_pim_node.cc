@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.63 2005/02/23 17:37:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.64 2005/02/24 00:34:16 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -235,8 +235,7 @@ XrlPimNode::finder_disconnect_event()
 
     _is_finder_alive = false;
 
-    PimNode::set_status(SERVICE_FAILED);
-    PimNode::update_status();
+    stop_pim();
 }
 
 //

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.25 2005/02/23 17:37:38 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.26 2005/02/24 00:13:51 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -111,8 +111,7 @@ XrlStaticRoutesNode::finder_disconnect_event()
 
     _is_finder_alive = false;
 
-    StaticRoutesNode::set_status(SERVICE_FAILED);
-    StaticRoutesNode::update_status();
+    StaticRoutesNode::shutdown();
 }
 
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.24 2005/02/23 17:37:36 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.25 2005/02/24 00:13:30 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -118,8 +118,7 @@ XrlFib2mribNode::finder_disconnect_event()
 
     _is_finder_alive = false;
 
-    Fib2mribNode::set_status(SERVICE_FAILED);
-    Fib2mribNode::update_status();
+    Fib2mribNode::shutdown();
 }
 
 //

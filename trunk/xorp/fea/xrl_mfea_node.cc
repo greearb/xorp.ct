@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.36 2005/02/18 00:39:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.37 2005/02/23 17:37:35 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -189,8 +189,7 @@ XrlMfeaNode::finder_disconnect_event()
 
     _is_finder_alive = false;
 
-    MfeaNode::set_status(SERVICE_FAILED);
-    MfeaNode::update_status();
+    stop_mfea();
 }
 
 //

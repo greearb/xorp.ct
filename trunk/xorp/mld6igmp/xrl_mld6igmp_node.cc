@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.34 2005/02/23 17:37:37 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.35 2005/02/24 00:29:42 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -183,8 +183,7 @@ XrlMld6igmpNode::finder_disconnect_event()
 
     _is_finder_alive = false;
 
-    Mld6igmpNode::set_status(SERVICE_FAILED);
-    Mld6igmpNode::update_status();
+    stop_mld6igmp();
 }
 
 //
