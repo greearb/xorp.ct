@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.2 2003/03/10 23:20:16 hodson Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.3 2003/08/12 21:51:10 pavlin Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -215,7 +215,7 @@ public:
     }
 
     string str() const {
-	return c_format("SetInterfaceMAC: %s %s\n",
+	return c_format("SetInterfaceMAC: %s %s",
 			ifname().c_str(), _mac.str().c_str());
     }
 private:
