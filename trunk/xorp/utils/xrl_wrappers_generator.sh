@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/utils/xrl_wrappers_generator.sh,v 1.1 2003/10/16 18:46:56 pavlin Exp $
+# $XORP: xorp/utils/xrl_wrappers_generator.sh,v 1.2 2003/10/16 19:37:07 pavlin Exp $
 #
 
 #
@@ -100,41 +100,41 @@ get_xrl_arguments()
 get_xrl_arguments_number()
 {
     if [ $# -ne 1 ] ; then
-	echo "Usage: get_xrl_arguments_number <XRL>"
+	echo "Usage: get_xrl_arguments_number <XRL arguments>"
 	exit 1
     fi
 
-    get_xrl_arguments $1 | awk -F "&" '{print NF}'
+    echo $1 | awk -F "&" '{print NF}'
 }
 
 get_xrl_split_arguments_list()
 {
     if [ $# -ne 1 ] ; then
-	echo "Usage: get_xrl_split_arguments_list <XRL>"
+	echo "Usage: get_xrl_split_arguments_list <XRL arguments>"
 	exit 1
     fi
 
-    get_xrl_arguments $1 | awk -F "&" '{for (i = 1; i <= NF; i++) {printf("%s", $i); if (i < NF) printf(" "); }}'
+    echo $1 | awk -F "&" '{for (i = 1; i <= NF; i++) {printf("%s", $i); if (i < NF) printf(" "); }}'
 }
 
 get_xrl_usage_wrap_arguments_list()
 {
     if [ $# -ne 1 ] ; then
-	echo "Usage: get_xrl_usage_wrap_arguments_list <XRL>"
+	echo "Usage: get_xrl_usage_wrap_arguments_list <split XRL arguments>"
 	exit 1
     fi
 
-    get_xrl_split_arguments_list $1 | awk '{for (i = 1; i <= NF; i++) {printf("<%s>", $i); if (i < NF) printf(" "); }}'
+    echo $1 | awk '{for (i = 1; i <= NF; i++) {printf("<%s>", $i); if (i < NF) printf(" "); }}'
 }
 
 get_xrl_call_wrap_arguments_list()
 {
     if [ $# -ne 1 ] ; then
-	echo "Usage: get_xrl_call_wrap_arguments_list <XRL>"
+	echo "Usage: get_xrl_call_wrap_arguments_list <split XRL arguments>"
 	exit 1
     fi
 
-    get_xrl_split_arguments_list $1 | awk '{for (i = 1; i <= NF; i++) {printf("%s=$%d", $i, i); if (i < NF) printf("&"); }}'
+    echo $1 | awk '{for (i = 1; i <= NF; i++) {printf("%s=$%d", $i, i); if (i < NF) printf("&"); }}'
 }
 
 get_xrl_return_values()
@@ -164,10 +164,10 @@ generate_wrapper()
     _interface_version=`get_xrl_interface_version $1`
     _method_name=`get_xrl_method_name $1`
     _arguments=`get_xrl_arguments $1`
-    _arguments_number=`get_xrl_arguments_number $1`
-    _split_arguments_list=`get_xrl_split_arguments_list $1`
-    _usage_wrap_arguments_list=`get_xrl_usage_wrap_arguments_list $1`
-    _return_values=`get_xrl_return_values $1`
+    _arguments_number=`get_xrl_arguments_number "${_arguments}"`
+    _split_arguments_list=`get_xrl_split_arguments_list "${_arguments}"`
+    _usage_wrap_arguments_list=`get_xrl_usage_wrap_arguments_list "${_split_arguments_list}"`
+    #_return_values=`get_xrl_return_values $1`
 
     #
     # The shell function name
@@ -189,7 +189,7 @@ generate_wrapper()
     _constructed_xrl="finder://${_target_name}/${_interface_name}/${_interface_version}/${_method_name}"
     if [ ${_arguments_number} -gt 0 ] ; then
 	# Add the arguments
-	_call_wrap_arguments_list=`get_xrl_call_wrap_arguments_list $1`
+	_call_wrap_arguments_list=`get_xrl_call_wrap_arguments_list "${_split_arguments_list}"`
 	_constructed_xrl="${_constructed_xrl}?${_call_wrap_arguments_list}"
     fi
 
