@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.27 2003/08/14 07:47:06 pavlin Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.28 2003/08/14 16:46:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -456,7 +456,7 @@ MPReachNLRIAttribute<IPv6>::encode()
     const_iterator i;
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
 	len += 1;
-	len += i->prefix_len() / 8;
+	len += (i->prefix_len() + 8) / 8;
     }
 
     uint8_t *d = set_header(len);
@@ -471,11 +471,11 @@ MPReachNLRIAttribute<IPv6>::encode()
 
     if (_link_local_next_hop.is_zero()) {
 	*d++ = IPv6::addr_size();
-	_next_hop.copy_out(d);
+	nexthop().copy_out(d);
 	d += IPv6::addr_size();
     } else {
 	*d++ = IPv6::addr_size() * 2;
-	_next_hop.copy_out(d);
+	nexthop().copy_out(d);
 	d += IPv6::addr_size();
 	_link_local_next_hop.copy_out(d);
 	d += IPv6::addr_size();
@@ -484,11 +484,12 @@ MPReachNLRIAttribute<IPv6>::encode()
     *d++ = 0;	// Number of SNPAs
 
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
-	int bytes = i->prefix_len() / 8;
+	int bytes = (i->prefix_len() + 8)/ 8;
+	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
 	uint8_t buf[IPv6::addr_size()];
 	i->masked_addr().copy_out(buf);
 
-	*d++ = bytes;
+	*d++ = i->prefix_len();
 	memcpy(d, buf, bytes);
 	d += bytes;
     }
@@ -496,7 +497,8 @@ MPReachNLRIAttribute<IPv6>::encode()
 
 template <>
 MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute()
-	: PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI)
+    : PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI),
+      _nexthop_att(IPv6::ZERO())
 {
     _afi = AFI_IPV6;
     _safi = SAFI_NLRI_UNICAST;
@@ -507,7 +509,8 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute()
 template <>
 MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
-    : PathAttribute(d)
+    : PathAttribute(d),
+      _nexthop_att(IPv6::ZERO())
 {
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,
@@ -535,14 +538,17 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     uint8_t len = *data++;
 
     XLOG_ASSERT(16 == IPv6::addr_size());
+    IPv6 temp;
 
     switch(len) {
     case 16:
-	_next_hop.copy_in(data);
+	temp.copy_in(data);
+	set_nexthop(temp);
 	data += IPv6::addr_size();
 	break;
     case 32:
-	_next_hop.copy_in(data);
+	temp.copy_in(data);
+	set_nexthop(temp);
 	data += IPv6::addr_size();
 	_link_local_next_hop.copy_in(data);
 	data += IPv6::addr_size();
@@ -581,13 +587,16 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     */
     while(data < end) {
 	uint8_t prefix_length = *data++;
-	int bytes = prefix_length / 8;
+	int bytes = (prefix_length + 8)/ 8;
 	uint8_t buf[16];
+	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
 	IPv6 nlri;
 	nlri.set_addr(buf);
 	_nlri.push_back(IPNet<IPv6>(nlri, prefix_length));
 	data += bytes;
+	debug_msg("decode %s/%d bytes = %d\n", nlri.str().c_str(), 
+		  prefix_length, bytes);
     }
 
     encode();
@@ -597,7 +606,15 @@ template <class A>
 string
 MPReachNLRIAttribute<A>::str() const
 {
-    return "Multiprotocol Reachable NLRI";
+    string s = c_format("Multiprotocol Reachable NLRI AFI = %d SAFI =%d\n",
+			_afi, _safi);
+    s += c_format("   - Next Hop Attribute %s\n", nexthop().str().c_str());
+    s += c_format("   - Link Local Next Hop Attribute %s\n",
+		  link_local_nexthop().str().c_str());
+    typename list<IPNet<A> >::const_iterator i = nlri_list().begin();
+    for(; i != nlri_list().end(); i++)
+	s += c_format("   - Nlri %s", i->str().c_str());
+    return s;
 }
 
 template <>
@@ -699,7 +716,12 @@ template <class A>
 string
 MPUNReachNLRIAttribute<A>::str() const
 {
-    return "Multiprotocol UNReachable NLRI";
+    string s = c_format("Multiprotocol UNReachable NLRI AFI = %d SAFI =%d\n",
+			_afi, _safi);
+    typename list<IPNet<A> >::const_iterator i = wr_list().begin();
+    for(; i != wr_list().end(); i++)
+	s += c_format("   - Nlri %s", i->str().c_str());
+    return s;
 }
 
 /**
@@ -995,6 +1017,53 @@ PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 	_nexthop_att = (NextHopAttribute<A> *)a;
 	break;
     }
+    // Keep the list sorted
+    debug_msg("++ add_path_attribute %s\n", att.str().c_str());
+    if (!empty()) {
+	iterator i;
+	for (i = begin(); i != end(); i++)
+	    if ( *(*i) > *a) {
+		insert(i, a);
+		memset(_hash, 0, 16);
+		return;
+	    }
+    }
+    // list empty, or tail insertion:
+    push_back(a);
+    memset(_hash, 0, 16);
+}
+
+template<>
+void
+PathAttributeList<IPv6>::add_path_attribute(const PathAttribute &att)
+{
+    size_t l;
+    PathAttribute *a = PathAttribute::create(att.data(), att.wire_size(), l);
+    // store a reference to the mandatory attributes, ignore others
+    switch (att.type()) {
+    default:
+	break;
+
+    case ORIGIN:
+	_origin_att = (OriginAttribute *)a;
+	break;
+
+    case AS_PATH:
+	_aspath_att = (ASPathAttribute *)a;
+	break;
+
+#if	0
+    case NEXT_HOP:
+	_nexthop_att = (NextHopAttribute<A> *)a;
+	break;
+#endif
+    }
+    if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(a)) {
+	MPReachNLRIAttribute<IPv6> *mpreach = 
+	    dynamic_cast<MPReachNLRIAttribute<IPv6>*>(a);
+	_nexthop_att =  mpreach->nexthop_att();
+    }
+
     // Keep the list sorted
     debug_msg("++ add_path_attribute %s\n", att.str().c_str());
     if (!empty()) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.20 2003/08/27 19:15:17 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.21 2003/09/02 22:46:38 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -289,6 +289,8 @@ public:
     }
 
     const A& nexthop() const			{ return _next_hop; }
+    // This method is for use in MPReachNLRIAttribute only.
+    void set_nexthop(const A& n) 		{ _next_hop = n; }
 protected:
 private:
     void encode();
@@ -399,8 +401,9 @@ public:
 
     string str() const;
 
-    const A& nexthop() const		{ return _next_hop; }
-    void set_nexthop(const A& nexthop)	{ _next_hop = nexthop;}
+    const A& nexthop() const		{ return _nexthop_att.nexthop(); }
+    void set_nexthop(const A& nexthop)	{ _nexthop_att.set_nexthop(nexthop); }
+    NextHopAttribute<A> *nexthop_att() { return &_nexthop_att;}
 
     void add_nlri(const IPNet<A>& nlri) {_nlri.push_back(nlri); }
     const list<IPNet<A> >& nlri_list() const { return _nlri;}
@@ -410,15 +413,18 @@ public:
     void set_link_local_nexthop(const A& n) { _link_local_next_hop = n;}
 
     // SNPA - Don't deal. (ATM, FRAME RELAY, SMDS)
-    
+
+    void encode();
 protected:
 private:
-    void encode();
 
     uint16_t _afi;		// Address Family Identifier.
     uint8_t _safi;		// Subsequent Address Family Identifier.
     
-    A _next_hop;		// Next Hop.
+    NextHopAttribute<A> _nexthop_att;	// Place the nexthop value in
+					// a NextHopAttribute so that
+					// we can return a pointer to
+					// a path attribute when required.
 //     list<A> _snpa;		// Subnetwork point of attachment.
     list<IPNet<A> > _nlri;	// Network level reachability information.
 
@@ -442,9 +448,9 @@ public:
     void add_withdrawn(const IPNet<A>& nlri) {_withdrawn.push_back(nlri); }
     const list<IPNet<A> >& wr_list() const { return _withdrawn;}
 
+    void encode();
 protected:
 private:
-    void encode();
 
     uint16_t _afi;		// Address Family Identifier.
     uint8_t _safi;		// Subsequent Address Family Identifier.
