@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.16 2004/04/01 19:54:12 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.17 2004/06/10 22:41:41 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -58,16 +58,6 @@ OriginTable<A>::add_route(const IPRouteEntry<A>& route)
     debug_msg("OT[%s]: Adding route %s\n", this->tablename().c_str(),
 	      route.str().c_str());
 
-    //
-    // The actual map holds pointers, but we also do allocation and
-    // deallocation here. The reason for this is that using the map to
-    // hold objects themselves results in us doing too many copies on
-    // lookup, but we also don't want the table to be referencing
-    // something external that may go away.
-    //
-    IPRouteEntry<A>* routecopy = new IPRouteEntry<A>(route);
-    routecopy->set_admin_distance(_admin_distance);
-
 #if 0
     //
     // BGP can send multiple add routes for the same entry without any
@@ -80,6 +70,16 @@ OriginTable<A>::add_route(const IPRouteEntry<A>& route)
     if (lookup_route(route.net()) != NULL)
 	return XORP_ERROR;
 #endif
+
+    //
+    // The actual map holds pointers, but we also do allocation and
+    // deallocation here. The reason for this is that using the map to
+    // hold objects themselves results in us doing too many copies on
+    // lookup, but we also don't want the table to be referencing
+    // something external that may go away.
+    //
+    IPRouteEntry<A>* routecopy = new IPRouteEntry<A>(route);
+    routecopy->set_admin_distance(_admin_distance);
 
     // Now add the route to this table
     debug_msg("BEFORE:\n");
