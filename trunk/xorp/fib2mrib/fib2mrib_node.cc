@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.16 2005/02/11 04:21:39 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.17 2005/02/12 08:09:06 pavlin Exp $"
 
 
 //
@@ -42,10 +42,7 @@ Fib2mribNode::Fib2mribNode(EventLoop& eventloop)
       _shutdown_requests_n(0),
       _is_log_trace(true)		// XXX: default to print trace logs
 {
-    //
-    // Set the node status
-    //
-    _node_status = PROC_STARTUP;
+    set_node_status(PROC_STARTUP);
 }
 
 Fib2mribNode::~Fib2mribNode()
@@ -76,7 +73,7 @@ Fib2mribNode::startup()
     //
     // Set the node status
     //
-    _node_status = PROC_STARTUP;
+    set_node_status(PROC_STARTUP);
 
     //
     // Register with the FEA
@@ -131,7 +128,7 @@ Fib2mribNode::shutdown()
     //
     // Set the node status
     //
-    _node_status = PROC_SHUTDOWN;
+    set_node_status(PROC_SHUTDOWN);
 
     //
     // Update the node status
@@ -151,14 +148,14 @@ Fib2mribNode::status_change(ServiceBase*  service,
 	if ((old_status == SERVICE_STARTING)
 	    && (new_status == SERVICE_RUNNING)) {
 	    // The startup process has completed
-	    _node_status = PROC_READY;
+	    set_node_status(PROC_READY);
 	    return;
 	}
 
 	if ((old_status == SERVICE_SHUTTING_DOWN)
 	    && (new_status == SERVICE_SHUTDOWN)) {
 	    // The shutdown process has completed
-	    _node_status = PROC_DONE;
+	    set_node_status(PROC_DONE);
 	    return;
 	}
 
@@ -220,7 +217,7 @@ Fib2mribNode::update_status()
 
 	// The startup process has completed
 	ServiceBase::set_status(SERVICE_RUNNING);
-	_node_status = PROC_READY;
+	set_node_status(PROC_READY);
 	return;
     }
 
@@ -233,8 +230,7 @@ Fib2mribNode::update_status()
 
 	// The shutdown process has completed
 	ServiceBase::set_status(SERVICE_SHUTDOWN);
-	// Set the node status
-	_node_status = PROC_DONE;
+	set_node_status(PROC_DONE);
 	return;
     }
 
@@ -242,8 +238,7 @@ Fib2mribNode::update_status()
     // Test if we have failed
     //
     if (ServiceBase::status() == SERVICE_FAILED) {
-	// Set the node status
-	_node_status = PROC_DONE;
+	set_node_status(PROC_DONE);
 	return;
     }
 }

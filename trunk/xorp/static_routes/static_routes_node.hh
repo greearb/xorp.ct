@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.15 2005/02/11 02:49:31 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.16 2005/02/11 04:19:57 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -685,6 +685,12 @@ private:
      */
     void inform_rib(const StaticRoute& r);
 
+    /**
+     * Set the node status.
+     *
+     * @param v the new node status.
+     */
+    void set_node_status(ProcessStatus v) { _node_status = v; }
 
     EventLoop&		_eventloop;		// The event loop
     ProcessStatus	_node_status;		// The node/process status

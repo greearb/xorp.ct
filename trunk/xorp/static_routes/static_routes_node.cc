@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.20 2005/02/11 04:19:57 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.21 2005/02/12 08:09:12 pavlin Exp $"
 
 
 //
@@ -42,10 +42,7 @@ StaticRoutesNode::StaticRoutesNode(EventLoop& eventloop)
       _shutdown_requests_n(0),
       _is_log_trace(true)		// XXX: default to print trace logs
 {
-    //
-    // Set the node status
-    //
-    _node_status = PROC_STARTUP;
+    set_node_status(PROC_STARTUP);
 }
 
 StaticRoutesNode::~StaticRoutesNode()
@@ -76,7 +73,7 @@ StaticRoutesNode::startup()
     //
     // Set the node status
     //
-    _node_status = PROC_STARTUP;
+    set_node_status(PROC_STARTUP);
 
     //
     // Register with the FEA
@@ -131,7 +128,7 @@ StaticRoutesNode::shutdown()
     //
     // Set the node status
     //
-    _node_status = PROC_SHUTDOWN;
+    set_node_status(PROC_SHUTDOWN);
 
     //
     // Update the node status
@@ -151,14 +148,14 @@ StaticRoutesNode::status_change(ServiceBase*  service,
 	if ((old_status == SERVICE_STARTING)
 	    && (new_status == SERVICE_RUNNING)) {
 	    // The startup process has completed
-	    _node_status = PROC_READY;
+	    set_node_status(PROC_READY);
 	    return;
 	}
 
 	if ((old_status == SERVICE_SHUTTING_DOWN)
 	    && (new_status == SERVICE_SHUTDOWN)) {
 	    // The shutdown process has completed
-	    _node_status = PROC_DONE;
+	    set_node_status(PROC_DONE);
 	    return;
 	}
 
@@ -220,7 +217,7 @@ StaticRoutesNode::update_status()
 
 	// The startup process has completed
 	ServiceBase::set_status(SERVICE_RUNNING);
-	_node_status = PROC_READY;
+	set_node_status(PROC_READY);
 	return;
     }
 
@@ -233,8 +230,7 @@ StaticRoutesNode::update_status()
 
 	// The shutdown process has completed
 	ServiceBase::set_status(SERVICE_SHUTDOWN);
-	// Set the node status
-	_node_status = PROC_DONE;
+	set_node_status(PROC_DONE);
 	return;
     }
 
@@ -242,8 +238,7 @@ StaticRoutesNode::update_status()
     // Test if we have failed
     //
     if (ServiceBase::status() == SERVICE_FAILED) {
-	// Set the node status
-	_node_status = PROC_DONE;
+	set_node_status(PROC_DONE);
 	return;
     }
 }

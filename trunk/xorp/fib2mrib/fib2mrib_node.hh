@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.11 2005/02/11 02:57:27 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.12 2005/02/11 04:21:39 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -689,6 +689,13 @@ private:
      * @param r route which should be updated in the RIB.
      */
     void inform_rib(const Fib2mribRoute& r);
+
+    /**
+     * Set the node status.
+     *
+     * @param v the new node status.
+     */
+    void set_node_status(ProcessStatus v) { _node_status = v; }
 
     EventLoop&		_eventloop;		// The event loop
     ProcessStatus	_node_status;		// The node/process status
