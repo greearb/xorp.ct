@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.13 2003/06/19 00:44:43 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.14 2003/09/11 19:25:58 hodson Exp $"
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -209,4 +209,11 @@ XrlPFInProcListener::XrlPFInProcListener(EventLoop& e, XrlDispatcher* xr)
 XrlPFInProcListener::~XrlPFInProcListener()
 {
     remove_inproc_listener(_instance_no);
+}
+
+bool
+XrlPFInProcListener::response_pending() const
+{
+    // Responses are immediate for InProc
+    return false;
 }

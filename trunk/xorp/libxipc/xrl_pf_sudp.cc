@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.25 2003/09/10 18:04:58 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.26 2003/09/11 19:25:58 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -529,4 +529,11 @@ XrlPFSUDPListener::send_reply(sockaddr*			sa,
 	sendmsg(_fd, &m, 0) != v_bytes) {
 	debug_msg("Failed to send reply (%d): %s\n", errno, strerror(errno));
     }
+}
+
+bool
+XrlPFSUDPListener::response_pending() const
+{
+    // Responses are immediate for UDP
+    return false;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.22 2003/09/15 17:46:32 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.23 2003/09/15 23:45:41 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -411,7 +411,11 @@ XrlPFSTCPListener::remove_request_handler(const STCPRequestHandler* rh)
     _request_handlers.erase(i);
 }
 
-
+bool
+XrlPFSTCPListener::response_pending() const
+{
+    return _request_handlers.empty() == false;
+}
 
 
 // ----------------------------------------------------------------------------

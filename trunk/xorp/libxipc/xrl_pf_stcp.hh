@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.13 2003/09/11 19:28:59 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.14 2003/09/15 23:45:41 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -41,6 +41,8 @@ public:
 
     void add_request_handler(STCPRequestHandler* h);
     void remove_request_handler(const STCPRequestHandler* h);
+
+    bool response_pending() const;
 
 private:
     void connect_hook(int fd, SelectorMask m);

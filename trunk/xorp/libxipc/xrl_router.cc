@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.28 2003/09/11 19:24:40 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.29 2003/09/12 00:50:19 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -235,6 +235,13 @@ XrlRouter::ready() const
 bool
 XrlRouter::pending() const
 {
+    list<XrlPFListener*>::const_iterator ci;
+    for (ci = _listeners.begin(); ci != _listeners.end(); ++ci) {
+	XrlPFListener* l = *ci;
+	if (l->response_pending())
+	    return true;
+    }
+
     return _senders.empty() == false && _dsl.empty() == false;
 }
 
