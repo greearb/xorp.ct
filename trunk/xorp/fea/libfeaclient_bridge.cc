@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.4 2003/10/28 20:04:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.5 2004/03/24 19:14:06 atanu Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -33,7 +33,6 @@
 // ----------------------------------------------------------------------------
 // Debug helpers
 
-#ifdef	DEBUG_LOGGING
 static const char*
 update_name(IfConfigUpdateReporterBase::Update u)
 {
@@ -47,7 +46,6 @@ update_name(IfConfigUpdateReporterBase::Update u)
     }
     return "Change";
 }
-#endif
 
 static const char*
 truth_of(bool v)
