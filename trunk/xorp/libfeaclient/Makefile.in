@@ -97,13 +97,15 @@ bin_PROGRAMS =
 noinst_LIBRARIES = libfeaclient.a
 
 # -- Library Sources
-libfeaclient_a_SOURCES = ifmgr_atoms.hh ifmgr_cmds.hh ifmgr_cmd_queue.hh xrl_ifmgr_mirror.hh ifmgr_atoms.cc ifmgr_cmds.cc ifmgr_cmd_queue.cc xrl_ifmgr_mirror.cc
+libfeaclient_a_SOURCES = libfeaclient_module.h ifmgr_atoms.hh ifmgr_cmd_base.hh ifmgr_cmds.hh ifmgr_cmd_queue.hh ifmgr_xrl_replicator.hh xrl_ifmgr_mirror.hh ifmgr_atoms.cc ifmgr_cmds.cc ifmgr_cmd_queue.cc ifmgr_xrl_replicator.cc xrl_ifmgr_mirror.cc
 
 # -- Test Programs
 TESTS = test_local_copy
+#__TESTS		       += test_remote_copy
 
 # -- No-install Programs
 noinst_PROGRAMS = test_local_copy
+#__noinst_PROGRAMS	       += test_remote_copy
 
 # -- Libraries and library flags to link the binary programs
 LDADD = ./libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
@@ -111,6 +113,10 @@ LDADD = ./libfeaclient.a $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a $
 # -- Program Sources
 test_local_copy_SOURCES = test_local_copy.cc
 
+
+# XXX Not yet
+#__test_remote_copy_SOURCES = test_remote_copy.cc
+#__test_remote_copy_LDADD	= $(top_builddir)/libxipc/libfinder.a $(LDADD)
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -123,7 +129,8 @@ LIBRARIES = $(noinst_LIBRARIES)
 libfeaclient_a_AR = $(AR) cru
 libfeaclient_a_LIBADD =
 am_libfeaclient_a_OBJECTS = ifmgr_atoms.$(OBJEXT) ifmgr_cmds.$(OBJEXT) \
-	ifmgr_cmd_queue.$(OBJEXT) xrl_ifmgr_mirror.$(OBJEXT)
+	ifmgr_cmd_queue.$(OBJEXT) ifmgr_xrl_replicator.$(OBJEXT) \
+	xrl_ifmgr_mirror.$(OBJEXT)
 libfeaclient_a_OBJECTS = $(am_libfeaclient_a_OBJECTS)
 bin_PROGRAMS =
 noinst_PROGRAMS = test_local_copy$(EXEEXT)
@@ -148,6 +155,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/ifmgr_atoms.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifmgr_cmd_queue.Po \
 @AMDEP_TRUE@	$(DEPDIR)/ifmgr_cmds.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ifmgr_xrl_replicator.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_local_copy.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_ifmgr_mirror.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -224,6 +232,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifmgr_atoms.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifmgr_cmd_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifmgr_cmds.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ifmgr_xrl_replicator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_local_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_ifmgr_mirror.Po@am__quote@
 

@@ -12,58 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.1 2003/08/22 23:19:02 hodson Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
 
-#include "libxorp/callback.hh"
+#include "ifmgr_cmd_base.hh"
 
-class XrlError;
-class XrlRouter;
-class IfMgrIfTree;
-
-typedef XorpCallback1<void, const XrlError&>::RefPtr IfMgrXrlSendCB;
-
-/**
- * @short Base class for Interface Manager Commands.
- *
- * Commands may be forwarded either on an existing interface
- * configuration tree (represented by IfMgrIfTree objects) or as Xrls.
- * When forwarded as Xrls the command is sent to a remote target.
- * The two methods of forward are intended to facilitate maintaining
- * local and remote copies of IfMgrIfTree objects.
- */
-class IfMgrCommandBase {
-public:
-    virtual ~IfMgrCommandBase() = 0;
-    /**
-     * Execute Command to interface tree.
-     *
-     * @return true on success, false on failure.
-     */
-    virtual bool execute(IfMgrIfTree& tree) const = 0;
-
-    /**
-     * Forward Command as an Xrl call to a remote target.
-     *
-     * @param rtr xrl router to use as the command sender.
-     * @param xrl_target the target to direct the command to.
-     * @param xscb callback to invoke with Xrl result.
-     *
-     * @return true on success, false on failure.
-     */
-    virtual bool forward(XrlRouter&	 rtr,
-			 const string&	 xrl_target,
-			 IfMgrXrlSendCB& xscb) const = 0;
-
-    /**
-     * Render command as string.
-     */
-    virtual string str() const = 0;
-};
-
-
 /**
  * @short Base class for interface state manipulator commands.
  */
@@ -93,9 +48,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 };
@@ -111,9 +66,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 };
@@ -131,9 +86,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -153,9 +108,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -175,9 +130,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -215,9 +170,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 };
@@ -233,9 +188,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 };
@@ -255,9 +210,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -280,9 +235,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -305,9 +260,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -330,9 +285,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -355,9 +310,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -381,9 +336,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -425,9 +380,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	  rtr,
-		  const string&	  xrl_target,
-		  IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		  const string&		xrl_target,
+		  const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 };
@@ -445,9 +400,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	  rtr,
-		  const string&	  xrl_target,
-		  IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		  const string&		xrl_target,
+		  const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 };
@@ -468,9 +423,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -494,9 +449,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -520,9 +475,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -546,9 +501,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -573,9 +528,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -600,9 +555,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -644,9 +599,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	  rtr,
-		  const string&	  xrl_target,
-		  IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		  const string&		xrl_target,
+		  const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 };
@@ -664,9 +619,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	  rtr,
-		  const string&	  xrl_target,
-		  IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		  const string&		xrl_target,
+		  const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 };
@@ -687,9 +642,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -713,9 +668,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -739,9 +694,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -765,9 +720,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 
@@ -792,9 +747,9 @@ public:
 
     bool execute(IfMgrIfTree& tree) const;
 
-    bool forward(XrlRouter&	 rtr,
-		 const string&	 xrl_target,
-		 IfMgrXrlSendCB& xscb) const;
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
 
     string str() const;
 

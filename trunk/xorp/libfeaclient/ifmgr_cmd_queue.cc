@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.2 2003/08/25 16:59:10 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.3 2003/08/26 19:04:38 hodson Exp $"
 
 #include <algorithm>
 #include <iterator>
@@ -45,6 +45,37 @@ IfMgrCommandTee::push(const Cmd& cmd)
 {
     _o1.push(cmd);
     _o2.push(cmd);
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrNWayCommandTee
+
+void
+IfMgrNWayCommandTee::push(const Cmd& cmd)
+{
+    for (OutputList::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+	(*i)->push(cmd);
+    }
+}
+
+bool
+IfMgrNWayCommandTee::add_output(IfMgrCommandSinkBase* o)
+{
+    OutputList::const_iterator ci = find(_outputs.begin(), _outputs.end(), o);
+    if (ci != _outputs.end())
+	return false;
+    _outputs.push_back(o);
+    return true;
+}
+
+bool
+IfMgrNWayCommandTee::remove_output(IfMgrCommandSinkBase* o)
+{
+    OutputList::iterator i = find(_outputs.begin(), _outputs.end(), o);
+    if (i == _outputs.end())
+	return false;
+    _outputs.erase(i);
+    return true;
 }
 
 // ----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.2 2003/08/25 16:59:10 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.3 2003/08/26 19:04:39 hodson Exp $
 
 #ifndef __IFMGR_CMD_QUEUE_HH__
 #define __IFMGR_CMD_QUEUE_HH__
@@ -22,6 +22,12 @@
 
 class IfMgrCommandBase;
 
+class IfMgrIfTree;
+class IfMgrIfAtom;
+class IfMgrVifAtom;
+class IfMgrIPv4Atom;
+class IfMgrIPv6Atom;
+
 class IfMgrCommandSinkBase {
 public:
     typedef ref_ptr<IfMgrCommandBase> Cmd;
@@ -30,6 +36,10 @@ public:
     virtual ~IfMgrCommandSinkBase();
 };
 
+/**
+ * @short 2-way IfMgr Command Tee class.  Instances push commands
+ * pushed into them into two object derived from @ref IfMgrCommandSinkBase.
+ */
 class IfMgrCommandTee : public IfMgrCommandSinkBase {
 public:
     typedef IfMgrCommandSinkBase::Cmd Cmd;
@@ -37,9 +47,40 @@ public:
 public:
     IfMgrCommandTee(IfMgrCommandSinkBase& o1, IfMgrCommandSinkBase& o2);
     void push(const Cmd& cmd);
+
 protected:
     IfMgrCommandSinkBase& _o1;
     IfMgrCommandSinkBase& _o2;
+};
+
+/**
+ * @short 2-way IfMgr Command Tee class.  Instances push commands
+ * pushed into them into two object derived from @ref IfMgrCommandSinkBase.
+ */
+class IfMgrNWayCommandTee : public IfMgrCommandSinkBase {
+public:
+    typedef IfMgrCommandSinkBase::Cmd Cmd;
+
+public:
+    void push(const Cmd& cmd);
+
+    /**
+     * Add an additional output for pushed commands.
+     * @param output receiver for commands pushed into instance.
+     * @return true if output is successfully added, false otherwise.
+     */
+    bool add_output(IfMgrCommandSinkBase* output);
+
+    /**
+     * Remove an output for pushed commands.
+     * @param output receiver for commands pushed into instance.
+     * @return true if output is successfully remove, false otherwise.
+     */
+    bool remove_output(IfMgrCommandSinkBase* output);
+
+protected:
+    typedef list<IfMgrCommandSinkBase*> OutputList;
+    OutputList _outputs;
 };
 
 /**

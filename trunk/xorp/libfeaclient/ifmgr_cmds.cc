@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.2 2003/08/25 16:59:10 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.3 2003/08/28 00:08:54 hodson Exp $"
 
 #include "libxorp/c_format.hh"
 
 #include "ifmgr_atoms.hh"
 #include "ifmgr_cmds.hh"
 
-#include "libxipc/xrl_router.hh"
+#include "libxipc/xrl_sender.hh"
 #include "xrl/interfaces/fea_ifmgr_mirror_xif.hh"
 
 // ----------------------------------------------------------------------------
@@ -139,11 +139,11 @@ IfMgrIfAdd::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfAdd::forward(XrlRouter&		rtr,
-		    const string&	xrl_target,
-		    IfMgrXrlSendCB&	xcb) const
+IfMgrIfAdd::forward(XrlSender&		  sender,
+		    const string&	  xrl_target,
+		    const IfMgrXrlSendCB& xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_interface_add(xt, ifname(), xcb);
 }
@@ -172,11 +172,11 @@ IfMgrIfRemove::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfRemove::forward(XrlRouter&	rtr,
-		       const string&	xrl_target,
-		       IfMgrXrlSendCB&	xcb) const
+IfMgrIfRemove::forward(XrlSender&		sender,
+		       const string&		xrl_target,
+		       const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_interface_remove(xt, ifname(), xcb);
 }
@@ -206,11 +206,11 @@ IfMgrIfSetEnabled::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfSetEnabled::forward(XrlRouter&		rtr,
-			   const string&	xrl_target,
-			   IfMgrXrlSendCB&	xcb) const
+IfMgrIfSetEnabled::forward(XrlSender&		 sender,
+			   const string&	 xrl_target,
+			   const IfMgrXrlSendCB& xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_interface_set_enabled(xt, ifname(), en(), xcb);
 }
@@ -241,11 +241,11 @@ IfMgrIfSetMtu::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfSetMtu::forward(XrlRouter&	rtr,
-		       const string&	xrl_target,
-		       IfMgrXrlSendCB&	xcb) const
+IfMgrIfSetMtu::forward(XrlSender&	     sender,
+		       const string&	     xrl_target,
+		       const IfMgrXrlSendCB& xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_interface_set_mtu(xt, ifname(), mtu_bytes(), xcb);
 }
@@ -276,11 +276,11 @@ IfMgrIfSetMac::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfSetMac::forward(XrlRouter&	rtr,
-		       const string&	xrl_target,
-		       IfMgrXrlSendCB&	xcb) const
+IfMgrIfSetMac::forward(XrlSender&		sender,
+		       const string&		xrl_target,
+		       const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_interface_set_mac(xt, ifname(), mac(), xcb);
 }
@@ -321,11 +321,11 @@ IfMgrVifAdd::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifAdd::forward(XrlRouter&	    rtr,
-		     const string&   xrl_target,
-		     IfMgrXrlSendCB& xscb) const
+IfMgrVifAdd::forward(XrlSender&		   sender,
+		     const string&	   xrl_target,
+		     const IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_vif_add(xt, ifname(), vifname(), xscb);
 }
@@ -358,11 +358,11 @@ IfMgrVifRemove::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifRemove::forward(XrlRouter&      rtr,
-			const string&   xrl_target,
-			IfMgrXrlSendCB& xscb) const
+IfMgrVifRemove::forward(XrlSender&		sender,
+			const string&		xrl_target,
+			const IfMgrXrlSendCB&	xscb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_vif_remove(xt, ifname(), vifname(), xscb);
 }
@@ -388,11 +388,11 @@ IfMgrVifSetEnabled::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetEnabled::forward(XrlRouter&	    rtr,
-			    const string&   xrl_target,
-			    IfMgrXrlSendCB& xscb) const
+IfMgrVifSetEnabled::forward(XrlSender&		  sender,
+			    const string&	  xrl_target,
+			    const IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_vif_set_enabled(xt, ifname(), vifname(), en(), xscb);
 }
@@ -419,11 +419,11 @@ IfMgrVifSetMulticastCapable::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetMulticastCapable::forward(XrlRouter&		rtr,
-				     const string&	xrl_target,
-				     IfMgrXrlSendCB&	xscb) const
+IfMgrVifSetMulticastCapable::forward(XrlSender&		   sender,
+				     const string&	   xrl_target,
+				     const IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& in = ifname();
     const string& vn = vifname();
@@ -452,11 +452,11 @@ IfMgrVifSetBroadcastCapable::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetBroadcastCapable::forward(XrlRouter&		rtr,
-				     const string&	xrl_target,
-				     IfMgrXrlSendCB&	xscb) const
+IfMgrVifSetBroadcastCapable::forward(XrlSender&		   sender,
+				     const string&	   xrl_target,
+				     const IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& in = ifname();
     const string& vn = vifname();
@@ -485,11 +485,11 @@ IfMgrVifSetP2PCapable::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetP2PCapable::forward(XrlRouter&      rtr,
-			       const string&   xrl_target,
-			       IfMgrXrlSendCB& xscb) const
+IfMgrVifSetP2PCapable::forward(XrlSender&	     sender,
+			       const string&	     xrl_target,
+			       const IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const bool& cap = capable();
     return c.send_vif_set_p2p_capable(xt, ifname(), vifname(), cap, xscb);
@@ -517,11 +517,11 @@ IfMgrVifSetLoopbackCapable::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetLoopbackCapable::forward(XrlRouter&      rtr,
-				    const string&   xrl_target,
-				    IfMgrXrlSendCB& xscb) const
+IfMgrVifSetLoopbackCapable::forward(XrlSender&		  sender,
+				    const string&	  xrl_target,
+				    const IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const bool& cap = capable();
     return c.send_vif_set_loopback(xt, ifname(), vifname(), cap, xscb);
@@ -549,11 +549,11 @@ IfMgrVifSetPifIndex::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetPifIndex::forward(XrlRouter&      rtr,
-			     const string&   xrl_target,
-			     IfMgrXrlSendCB& xscb) const
+IfMgrVifSetPifIndex::forward(XrlSender&		   sender,
+			     const string&	   xrl_target,
+			     const IfMgrXrlSendCB& xscb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& in = ifname();
     const string& vn = vifname();
@@ -591,11 +591,11 @@ IfMgrIPv4Add::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4Add::forward(XrlRouter&	rtr,
-		      const string&	xrl_target,
-		      IfMgrXrlSendCB&	xcb) const
+IfMgrIPv4Add::forward(XrlSender&	    sender,
+		      const string&	    xrl_target,
+		      const IfMgrXrlSendCB& xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_ipv4_add(xt, ifname(), vifname(), addr(), xcb);
 }
@@ -626,11 +626,11 @@ IfMgrIPv4Remove::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4Remove::forward(XrlRouter&	 rtr,
-			 const string&	 xrl_target,
-			 IfMgrXrlSendCB& xcb) const
+IfMgrIPv4Remove::forward(XrlSender&		sender,
+			 const string&		xrl_target,
+			 const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_ipv4_remove(xt, ifname(), vifname(), addr(), xcb);
 }
@@ -656,11 +656,11 @@ IfMgrIPv4SetPrefix::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4SetPrefix::forward(XrlRouter&		rtr,
-			    const string&	xrl_target,
-			    IfMgrXrlSendCB&	xcb) const
+IfMgrIPv4SetPrefix::forward(XrlSender&		  sender,
+			    const string&	  xrl_target,
+			    const IfMgrXrlSendCB& xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -689,11 +689,11 @@ IfMgrIPv4SetEnabled::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4SetEnabled::forward(XrlRouter&		rtr,
-			     const string&	xrl_target,
-			     IfMgrXrlSendCB&	xcb) const
+IfMgrIPv4SetEnabled::forward(XrlSender&		   sender,
+			     const string&	   xrl_target,
+			     const IfMgrXrlSendCB& xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_ipv4_set_enabled(xt, ifname(), vifname(), addr(), en(), xcb);
 }
@@ -720,11 +720,11 @@ IfMgrIPv4SetMulticastCapable::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4SetMulticastCapable::forward(XrlRouter&	rtr,
-				      const string&	xrl_target,
-				      IfMgrXrlSendCB&	xcb) const
+IfMgrIPv4SetMulticastCapable::forward(XrlSender&		sender,
+				      const string&		xrl_target,
+				      const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -754,11 +754,11 @@ IfMgrIPv4SetLoopback::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4SetLoopback::forward(XrlRouter&	rtr,
-			      const string&	xrl_target,
-			      IfMgrXrlSendCB&	xcb) const
+IfMgrIPv4SetLoopback::forward(XrlSender&		sender,
+			      const string&		xrl_target,
+			      const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -788,11 +788,11 @@ IfMgrIPv4SetBroadcast::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4SetBroadcast::forward(XrlRouter&	rtr,
-			       const string&	xrl_target,
-			       IfMgrXrlSendCB&	xcb) const
+IfMgrIPv4SetBroadcast::forward(XrlSender&		sender,
+			       const string&		xrl_target,
+			       const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -821,11 +821,11 @@ IfMgrIPv4SetEndpoint::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4SetEndpoint::forward(XrlRouter&	rtr,
-			      const string&	xrl_target,
-			      IfMgrXrlSendCB&	xcb) const
+IfMgrIPv4SetEndpoint::forward(XrlSender&		sender,
+			      const string&		xrl_target,
+			      const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -862,11 +862,11 @@ IfMgrIPv6Add::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv6Add::forward(XrlRouter&	rtr,
-		      const string&	xrl_target,
-		      IfMgrXrlSendCB&	xcb) const
+IfMgrIPv6Add::forward(XrlSender&		sender,
+		      const string&		xrl_target,
+		      const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_ipv6_add(xt, ifname(), vifname(), addr(), xcb);
 }
@@ -897,11 +897,11 @@ IfMgrIPv6Remove::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv6Remove::forward(XrlRouter&		rtr,
+IfMgrIPv6Remove::forward(XrlSender&		sender,
 			 const string&		xrl_target,
-			 IfMgrXrlSendCB&	xcb) const
+			 const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_ipv6_remove(xt, ifname(), vifname(), addr(), xcb);
 }
@@ -927,11 +927,11 @@ IfMgrIPv6SetPrefix::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv6SetPrefix::forward(XrlRouter&		rtr,
-			    const string&	xrl_target,
-			    IfMgrXrlSendCB&	xcb) const
+IfMgrIPv6SetPrefix::forward(XrlSender&			sender,
+			    const string&		xrl_target,
+			    const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -960,11 +960,11 @@ IfMgrIPv6SetEnabled::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv6SetEnabled::forward(XrlRouter&		rtr,
-			     const string&	xrl_target,
-			     IfMgrXrlSendCB&	xcb) const
+IfMgrIPv6SetEnabled::forward(XrlSender&			sender,
+			     const string&		xrl_target,
+			     const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     return c.send_ipv6_set_enabled(xt, ifname(), vifname(), addr(), en(), xcb);
 }
@@ -991,11 +991,11 @@ IfMgrIPv6SetMulticastCapable::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv6SetMulticastCapable::forward(XrlRouter&	rtr,
-				      const string&	xrl_target,
-				      IfMgrXrlSendCB&	xcb) const
+IfMgrIPv6SetMulticastCapable::forward(XrlSender&		sender,
+				      const string&		xrl_target,
+				      const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -1025,11 +1025,11 @@ IfMgrIPv6SetLoopback::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv6SetLoopback::forward(XrlRouter&	rtr,
-			      const string&	xrl_target,
-			      IfMgrXrlSendCB&	xcb) const
+IfMgrIPv6SetLoopback::forward(XrlSender&		sender,
+			      const string&		xrl_target,
+			      const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
@@ -1058,11 +1058,11 @@ IfMgrIPv6SetEndpoint::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv6SetEndpoint::forward(XrlRouter&	rtr,
-			      const string&	xrl_target,
-			      IfMgrXrlSendCB&	xcb) const
+IfMgrIPv6SetEndpoint::forward(XrlSender&		sender,
+			      const string&		xrl_target,
+			      const IfMgrXrlSendCB&	xcb) const
 {
-    XrlFeaIfmgrMirrorV0p1Client c(&rtr);
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
     const string& ifn = ifname();
     const string& vifn = vifname();
