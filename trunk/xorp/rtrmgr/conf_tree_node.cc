@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.35 2004/01/15 08:49:22 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.36 2004/02/26 15:28:23 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_VARIABLES
@@ -72,10 +72,6 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 
     TimerList::system_gettimeofday(&_modification_time);
     parent->add_child(this);
-    if (_segname == "protocols") {
-	printf("contructor 2\n");
-	printf("%p (%s)\n", ttn, ttn->s().c_str());
-    }
 }
 
 ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
@@ -98,9 +94,6 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _cmd_that_failed(NULL),
       _on_parent_path(false)
 {
-    if (_segname == "protocols") {
-	printf("contructor 3\n");
-    }
 }
 
 ConfigTreeNode::~ConfigTreeNode()

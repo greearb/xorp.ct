@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/command_tree.hh,v 1.4 2003/11/20 05:52:01 pavlin Exp $
+// $XORP: xorp/rtrmgr/command_tree.hh,v 1.5 2003/11/20 06:37:38 pavlin Exp $
 
 #ifndef __RTRMGR_COMMAND_TREE_HH__
 #define __RTRMGR_COMMAND_TREE_HH__
@@ -42,6 +42,7 @@ public:
     const ConfigTreeNode* config_tree_node() { return _config_tree_node; }
     const TemplateTreeNode* template_tree_node() { return _template_tree_node;}
     const CommandTreeNode* subroot(list<string> path) const;
+    const string& help() const;
 
 private:
     string			_name;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.22 2004/01/29 01:55:34 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.23 2004/02/26 13:52:16 mjh Exp $"
 
 #include "rtrmgr_module.h"
 #include <pwd.h>
@@ -386,12 +386,16 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	string cmd_name = (*cmd_iter)->name();
 	CliCommand* com;
 	string subpath = path + " " + cmd_name;
+	string help = (*cmd_iter)->help();
+	if (help == "") {
+	    help = "-- no help available --";
+	}
 	if ((*cmd_iter)->has_command()) {
 	    com = current_cli_node.add_command(cmd_name,
-					       "help", cb);
+					       help, cb);
 	} else {
 	    com = current_cli_node.add_command(cmd_name,
-					       "help");
+					       help);
 	}
 	if (com == NULL) {
 	    XLOG_FATAL("add_command %s failed", cmd_name.c_str());
@@ -423,8 +427,12 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 		subpath = path + " " + (*cmd_iter)->name();
 
 	    CliCommand* com;
+	    string help = (*cmd_iter)->help();
+	    if (help == "") {
+		help = "-- no help available --";
+	    }
 	    com = current_cli_node.add_command((*cmd_iter)->name(),
-					       "help", cb);
+					       help, cb);
 	    if (com == NULL) {
 		XLOG_FATAL("AI: add_command %s failed",
 			   (*cmd_iter)->name().c_str());
@@ -457,9 +465,13 @@ RouterCLI::add_immediate_commands(CliCommand& current_cli_node,
 	    else
 		subpath = path + " " + (*tti)->segname();
 
+	    string help = (*tti)->help();
+	    if (help == "") {
+		help = "-- no help available --";
+	    }
 	    CliCommand* com;
 	    com = current_cli_node.add_command((*tti)->segname(),
-					       "help", cb);
+					       help, cb);
 	    if (com == NULL) {
 		XLOG_FATAL("AI: add_command %s for template failed",
 			   (*tti)->segname().c_str());

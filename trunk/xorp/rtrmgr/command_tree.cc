@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.4 2003/11/20 06:37:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.5 2003/11/20 20:31:38 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
+#include "template_tree_node.hh"
 #include "command_tree.hh"
 
 CommandTreeNode::CommandTreeNode(const string& name,
@@ -100,6 +100,13 @@ CommandTreeNode::print() const
     }
 }
 
+const string& 
+CommandTreeNode::help() const 
+{
+    return _template_tree_node->help();
+}
+
+
 CommandTree::CommandTree() 
     : _root_node("ROOT", NULL, NULL)
 {
@@ -151,6 +158,7 @@ CommandTree::activate_current()
 {
     _current_node->set_has_command();
 }
+
 
 
 void 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.10 2004/01/13 01:12:42 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.11 2004/01/14 22:50:06 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -93,6 +93,14 @@ public:
     const TemplateTreeNode* find_varname_node(const string& varname) const;
 
     const list<string>& mandatory_children() const { return _mandatory_children; }
+    const string& help() const {
+	if (_help == "") return _help_long;
+	return _help;
+    }
+    const string& help_long() const {
+	if (_help_long == "") return _help;
+	return _help_long;
+    }
 
 protected:
     void add_child(TemplateTreeNode* child);
@@ -125,6 +133,10 @@ private:
     // Is the node to be regarded as a tag for it's children rather
     // than a true tree node.
     bool _is_tag;
+
+    // The CLI help information associated with this node.
+    string _help;
+    string _help_long;
 
     map<string, Command *> _cmd_map;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.16 2004/01/14 22:50:06 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.17 2004/01/15 08:51:59 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -91,6 +91,8 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
 	    command = new AllowCommand(*this, cmd);
 	    _cmd_map[cmd] = command;
 	}
+    } else if (cmd == "%help") {
+	// Nothing to do - the work is done by add_action
     } else if ((cmd == "%create")
 	       || (cmd == "%activate")
 	       || (cmd == "%list")
@@ -149,6 +151,33 @@ TemplateTreeNode::add_action(const string& cmd,
 	AllowCommand* allow_command = dynamic_cast<AllowCommand*>(command);
 	XLOG_ASSERT(allow_command != NULL);
 	allow_command->add_action(action_list);
+    } else if (cmd == "%help") {
+	if (action_list.size() == 2) {
+	    list<string>::const_iterator li = action_list.begin();
+	    li++;
+	    //trim off quotes if present
+	    string help; 
+	    if ((*li)[0]=='"')
+		//normally strings are quoted
+		help = (*li).substr(1,(*li).size()-2);
+	    else {
+		//this shouldn't be common
+		help = (*li);
+	    }
+	    if (action_list.front() == "short") {
+		_help = help;
+	    } else if (action_list.front() == "long") {
+		_help_long = help;
+	    } else {
+		XLOG_WARNING(string("Ignored help descriptor " 
+				    + action_list.front()
+				    + " in template file - \"short\" "
+				    + "or \"long\" expectted").c_str());
+	    }
+	} else {
+	    //XXX really should say why it's bad.
+	    XLOG_WARNING("Bad help specification in template file ignored\n");
+	}
     } else if (cmd == "%mandatory") {
 	// Add all new mandatory variables
 	list<string>::const_iterator li;
