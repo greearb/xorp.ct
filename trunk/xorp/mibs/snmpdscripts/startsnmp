@@ -1,6 +1,8 @@
 #! /bin/sh
+#
+# 
 
-snmpd -f -Dbgp4_mib_1657,xorp_if_mib_module,dlmod,SnmpEventLoop,usmUser 
+/usr/local/sbin/snmpd -f -Dbgp4_mib_1657,xorp_if_mib_module,dlmod,SnmpEventLoop,usmUser 
 
 
 # useful debug tokens that can be appended to the -D list
