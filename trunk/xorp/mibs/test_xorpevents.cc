@@ -42,7 +42,7 @@ static FakeSnmpdFdSet exported_readfds, exported_writefds, exported_exceptfds;
 // declared here so it can be called by the test program.  Not public
 extern void run_timer_callbacks (u_int, void *);
 
-// ----------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------- 
 // These stubs replace functions provided by the Net-SNMP agent library.  
 //
 
@@ -156,17 +156,17 @@ int snmp_log(int, const char * format, ...)
 // Xrl request callbacks
 
 static const XrlCmdError
-hello_world(const Xrl&	/* request */,
-	    XrlArgs*	/* response */)
+hello_world(const XrlArgs& /* inputs */,
+	    XrlArgs*	   /* outputs */)
 {
     return XrlCmdError::OKAY();
 }
 
 static const XrlCmdError
-passback_integer(const Xrl&	/* request*/,
-		 XrlArgs*	response)
+passback_integer(const XrlArgs&	/* inputs */,
+		 XrlArgs*	outputs)
 {
-    response->add_int32("the_number", 5);
+    outputs->add_int32("the_number", 5);
     return XrlCmdError::OKAY();
 }
 
