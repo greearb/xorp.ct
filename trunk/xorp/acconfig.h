@@ -75,4 +75,25 @@ typedef int socklen_t;
 using namespace std;
 #endif
 
+/*
+ * Include sys/cdefs.h to define __BEGIN_DECLS and __END_DECLS.  Even if
+ * this file exists, not all platforms define these macros.
+ */
+#ifdef HAVE_SYS_CDEFS_H
+#include <sys/cdefs.h>
+#endif
+
+/*
+ * Define C++ decls wrappers if not previously defined.
+ */
+#ifndef __BEGIN_DECLS
+#  if defined(__cplusplus)
+#    define __BEGIN_DECLS	extern "C" {
+#    define __END_DECLS		};    
+#  else /* __BEGIN_DECLS */
+#    define __BEGIN_DECLS
+#    define __END_DECLS
+#  endif /* __BEGIN_DECLS */
+#endif /* __BEGIN_DECLS */
+
 #endif /* __XORP_CONFIG_H__ */

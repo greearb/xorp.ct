@@ -5015,7 +5015,8 @@ fi
 
 
 
-for ac_header in sys/ioctl.h sys/sysctl.h sys/filio.h net/if_types.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h
+
+for ac_header in sys/cdefs.h sys/ioctl.h sys/sysctl.h sys/filio.h net/if_types.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then

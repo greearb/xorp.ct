@@ -113,8 +113,8 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
 	install-exec-recursive installdirs-recursive install-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
-DIST_COMMON = README ./stamp-h.in Makefile.am Makefile.in TODO \
-	acconfig.h aclocal.m4 config.h.in config/config.guess \
+DIST_COMMON = README ./stamp-h.in ChangeLog Makefile.am Makefile.in \
+	TODO acconfig.h aclocal.m4 config.h.in config/config.guess \
 	config/config.sub config/depcomp config/install-sh \
 	config/ltconfig config/ltmain.sh config/missing \
 	config/mkinstalldirs configure configure.in
