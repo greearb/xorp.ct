@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.7 2004/02/25 05:03:05 atanu Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.8 2004/03/03 04:00:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -113,7 +113,11 @@ template <class A>
 bool
 DumpIterator<A>::next_peer()
 {
+
     _current_peer++;
+    // Make sure the iterator no longer points at a trie that may go away.
+    BgpTrie<A>::iterator empty;
+    _route_iterator = empty;	
     _route_iterator_is_valid = false;
     _routes_dumped_on_current_peer = false;
     if (_current_peer == _peers_to_dump.end())
