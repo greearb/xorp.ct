@@ -4674,6 +4674,7 @@ trap 'rm -fr `echo "Makefile
 	bgp/Makefile
 	bgp/harness/Makefile
 	bgp/tools/Makefile
+	cli/Makefile
 	docs/Makefile
 	docs/bgp/Makefile
 	docs/design_arch/Makefile
@@ -4689,7 +4690,6 @@ trap 'rm -fr `echo "Makefile
 	docs/rtrmgr/Makefile
 	docs/snmp/Makefile
 	docs/test_harness/Makefile
-	cli/Makefile
 	fea/Makefile
 	libcomm/Makefile
 	libproto/Makefile
@@ -4702,10 +4702,10 @@ trap 'rm -fr `echo "Makefile
 	ospfd/src/Makefile
 	ospfd/xorp/Makefile
 	pim/Makefile
+	policy/Makefile
 	rib/Makefile
 	rtrmgr/Makefile
 	rtrmgr/tools/Makefile
-	policy/Makefile
 	utils/Makefile
 	xrl/Makefile
 	xrl/interfaces/Makefile
@@ -4836,6 +4836,7 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
 	bgp/Makefile
 	bgp/harness/Makefile
 	bgp/tools/Makefile
+	cli/Makefile
 	docs/Makefile
 	docs/bgp/Makefile
 	docs/design_arch/Makefile
@@ -4851,7 +4852,6 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
 	docs/rtrmgr/Makefile
 	docs/snmp/Makefile
 	docs/test_harness/Makefile
-	cli/Makefile
 	fea/Makefile
 	libcomm/Makefile
 	libproto/Makefile
@@ -4864,10 +4864,10 @@ CONFIG_FILES=\${CONFIG_FILES-"Makefile
 	ospfd/src/Makefile
 	ospfd/xorp/Makefile
 	pim/Makefile
+	policy/Makefile
 	rib/Makefile
 	rtrmgr/Makefile
 	rtrmgr/tools/Makefile
-	policy/Makefile
 	utils/Makefile
 	xrl/Makefile
 	xrl/interfaces/Makefile
