@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.7 2004/03/24 19:34:31 atanu Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.8 2004/05/13 18:43:33 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -47,6 +47,12 @@ disable_peer()
     echo -n "disable_peer" $*
 #    $CALLXRL "finder://bgp/bgp/0.1/disable_peer?peer:txt=$1&as:i32=$2"
     $CALLXRL "finder://bgp/bgp/0.2/disable_peer?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4"
+}
+
+set_peer_md5_password()
+{
+    echo -n "set_peer_md5_password" $*
+    $CALLXRL "finder://bgp/bgp/0.2/set_peer_md5_password?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4&password:txt=$5"
 }
 
 next_hop_rewrite_filter()

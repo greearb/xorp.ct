@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.25 2004/05/15 18:31:39 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.26 2004/06/10 22:40:39 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -284,6 +284,28 @@ XrlBgpTarget::bgp_0_2_set_peer_state(
 
     return XrlCmdError::OKAY();
 }
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_set_peer_md5_password(
+	// Input values, 
+	const string&	local_ip, 
+	const uint32_t&	local_port, 
+	const string&	peer_ip, 
+	const uint32_t&	peer_port, 
+	const string& password)
+{
+    debug_msg("local ip %s local port %d peer ip %s peer port %d password %s\n",
+	  local_ip.c_str(), local_port, peer_ip.c_str(), peer_port,
+	  password.c_str());
+
+    Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(), peer_port);
+
+    if(!_bgp.set_peer_md5_password(iptuple, password))
+	return XrlCmdError::COMMAND_FAILED();
+
+    return XrlCmdError::OKAY();
+}
+
 
 XrlCmdError 
 XrlBgpTarget::bgp_0_2_activate(

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.36 2004/06/10 08:04:28 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.37 2004/06/10 22:40:28 hodson Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -387,7 +387,9 @@ BGPMain::create_peer(BGPPeerData *pd)
 	return false;
     }
 
-    SocketClient *sock = new SocketClient(pd->iptuple(), eventloop());
+    bool md5sig = !pd->get_md5_password().empty();
+
+    SocketClient *sock = new SocketClient(pd->iptuple(), eventloop(), md5sig);
 
     BGPPeer *p = new BGPPeer(&_local_data, pd, sock, this);
     //    sock->set_eventloop(eventloop());
@@ -468,6 +470,24 @@ BGPMain::set_peer_state(const Iptuple& iptuple, bool state)
 	return true;
 
     return activate(iptuple);
+}
+
+bool
+BGPMain::set_peer_md5_password(const Iptuple& iptuple, const string& password)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == NULL) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
+    // The md5-password property has to belong to BGPPeerData, because
+    // it is instantiated before BGPPeer and before SocketClient.
+    BGPPeerData* pd = const_cast<BGPPeerData*>(peer->peerdata());
+    pd->set_md5_password(password);
+
+    return true;
 }
 
 bool

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.6 2003/12/12 23:16:45 atanu Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.7 2004/06/10 22:40:36 hodson Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -93,7 +93,7 @@ public:
     /**
      * @param iptuple specification of the connection endpoints.
      */
-    SocketClient(const Iptuple& iptuple, EventLoop& e);
+    SocketClient(const Iptuple& iptuple, EventLoop& e, bool md5sig = false);
     ~SocketClient();
 
     /**
@@ -246,6 +246,7 @@ private:
 
     bool _disconnecting;
     bool _connecting;
+    bool _md5sig;
 
     uint8_t _read_buf[MAXPACKETSIZE]; // Maximum allowed BGP message
 };

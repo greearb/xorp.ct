@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.26 2004/05/15 19:50:38 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.27 2004/06/10 22:40:28 hodson Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -123,6 +123,16 @@ public:
      * @ return true on success.
      */
     bool set_peer_state(const Iptuple& iptuple, bool state);
+
+    /**
+     * Set peer TCP-MD5 password.
+     *
+     * @param iptuple iptuple.
+     * @param password The password to use for TCP-MD5 authentication; if this is the empty string, then authentication will be disabled.
+     *
+     * @return true on success.
+     */
+    bool set_peer_md5_password(const Iptuple& iptuple, const string& password);
 
     /**
      * Activate peer.

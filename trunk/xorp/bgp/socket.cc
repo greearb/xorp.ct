@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.14 2004/04/15 16:13:29 hodson Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.15 2004/06/10 22:40:36 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -27,6 +27,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/callback.hh"
+#include "libcomm/comm_api.h"
 
 #include "socket.hh"
 #include "packet.hh"
@@ -111,8 +112,9 @@ Socket::init_sockaddr(struct sockaddr_in *name,
 
 /* **************** BGPSocketClient - PUBLIC METHODS *********************** */
 
-SocketClient::SocketClient(const Iptuple& iptuple, EventLoop& e)
-    : Socket(iptuple, e)
+SocketClient::SocketClient(const Iptuple& iptuple, EventLoop& e,
+    bool md5sig = false)
+    : Socket(iptuple, e), _md5sig(md5sig)
 {
     debug_msg("SocketClient constructor called\n");
     _async_writer = 0;
@@ -168,6 +170,10 @@ SocketClient::connect(ConnectCallback cb)
     XLOG_ASSERT(UNCONNECTED == get_sock());
 
     create_socket();
+
+    if (_md5sig)
+	comm_set_tcpmd5(get_sock(), _md5sig);
+
     return connect_socket(get_sock(), get_remote_addr(), get_remote_port(),
 			  get_local_addr(), cb);
 }

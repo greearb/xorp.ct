@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.17 2004/05/15 18:31:40 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.18 2004/05/30 23:17:33 hodson Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -129,6 +129,23 @@ interface bgp/0.2 {
 		& peer_ip:txt \
 		& peer_port:u32 \
 		& toggle:bool
+
+	/**
+	 * Set the peer md5 password.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param password the password to use for TCP-MD5 authentication.
+	 */
+	set_peer_md5_password \
+		? \
+		local_ip:txt \
+		& local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& password:txt
 
 	/**
          * Enable or disable the peering based on the peer state.

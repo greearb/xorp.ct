@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.31 2004/06/07 18:16:25 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.32 2004/06/09 22:40:49 atanu Exp $ */
 
 protocols {
     bgp {
@@ -14,6 +14,7 @@ protocols {
 	    next-hop: ipv4;
 	    holdtime: u32 = 120;
 	    enabled: bool = true;
+	    md5-password: txt = "";
 	}
 
 	/*
@@ -84,6 +85,10 @@ protocols {
 	    }
 
 	    local-ip {
+		%set:;
+	    }
+
+	    md5-password {
 		%set:;
 	    }
 
@@ -208,6 +213,10 @@ protocols {
 
 	    enabled {
 		%help: short "Enable this peering.";
+	    }
+
+	    md5-password {
+		%help: short "Enable and set the password for TCP-MD5 authentication with this peer.";
 	    }
 
 	    set-parameter {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.11 2003/10/28 22:44:43 atanu Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.12 2004/06/10 22:40:32 hodson Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -199,6 +199,9 @@ public:
 	return _next_hop_rewrite;
     }
 
+    void set_md5_password(const string &password) { _md5_password = password; }
+    const string& get_md5_password() const { return _md5_password; }
+
     /**
      * Dump the state of the peer data (debugging).
      */
@@ -272,6 +275,11 @@ private:
     ** temporary hack store the re-write value here.
     */
     IPv4 _next_hop_rewrite;
+
+    /**
+     * The password for TCP-MD5 authentication.
+     */
+    string _md5_password;
 };
 
 #endif // __BGP_PEER_DATA_HH__
