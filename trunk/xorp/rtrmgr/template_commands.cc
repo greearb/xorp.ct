@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.38 2004/03/04 17:49:57 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.39 2004/03/24 19:14:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -629,7 +629,8 @@ Command::execute(ConfigTreeNode& ctn, TaskManager& task_manager) const
 					  &Command::action_complete, &ctn));
 	} else {
 	    // Current we only implement XRL commands
-	    XLOG_FATAL("execute on unimplemented action type");
+	    XLOG_FATAL(("execute on unimplemented action type on node " +
+		       ctn.str()).c_str());
 	}
 	if (result < 0) {
 	    debug_msg("command execute returning %d\n", result);
