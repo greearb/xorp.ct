@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xorp_rip_common.hh,v 1.2 2004/02/24 21:56:42 hodson Exp $
+// $XORP: xorp/rip/xorp_rip_common.hh,v 1.3 2004/02/27 22:14:12 hodson Exp $
 
 #ifndef __RIP_XORP_RIP_COMMON_HH__
 #define __RIP_XORP_RIP_COMMON_HH__
@@ -276,6 +276,8 @@ protected:
 	    smon.remove_service(&xn);
 	    smon.remove_service(&ixm);
 	    smon.remove_service(&xpm);
+
+	    rip_system.route_db().flush_routes();
 	} catch (...) {
 	    xorp_catch_standard_exceptions();
 	}
