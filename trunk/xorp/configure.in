@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.87 2004/03/21 02:00:30 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.88 2004/03/21 04:55:57 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1323,7 +1323,7 @@ if test "${GCC}" = "yes" ; then
 	dnl	- On Linux RedHat 7.2, #elif creates a warning for gcc 2.96
 	dnl
 	CPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs -Wnon-const-format"
-	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wmissing-prototypes -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wnon-const-format -Wtraditional"
+	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wnon-const-format -Wtraditional"
 	XR_TRY_ADD_CFLAGS($CPARANOIDFLAGS)
 	XR_TRY_ADD_CXXFLAGS($CXXPARANOIDFLAGS)
 	XR_TRY_ADD_CXXFLAGS("-ftemplate-depth-20")
