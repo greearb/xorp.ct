@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/Makefile.am,v 1.11 2003/08/06 21:42:18 hodson Exp $
+## $XORP: xorp/Makefile.am,v 1.12 2003/08/22 23:28:55 hodson Exp $
 ##
 
 # --- Options
@@ -15,7 +15,7 @@ SUBDIRS += cli policy utils
 SUBDIRS	+= fea rib
 
 # --- Applications (directory ordering should not matter)
-SUBDIRS += bgp mld6igmp pim rip rtrmgr
+SUBDIRS += bgp mld6igmp pim rip rtrmgr static_routes
 
 # --- Other (directory ordering should not matter)
 SUBDIRS += etc
