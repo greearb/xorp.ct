@@ -237,7 +237,7 @@ RouterLink::length() const
 {
     switch (get_version()) {
     case OspfTypes::V2:
-	return 12;
+	return 16;
 	break;
     case OspfTypes::V3:
 	return 16;
@@ -450,7 +450,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	    break;
 	}
 
-    } catch(XorpReasonedException& e) {
+    } catch(BadPacket& e) {
 	delete lsa;
 	throw e;
     }
