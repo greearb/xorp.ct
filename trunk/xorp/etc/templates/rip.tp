@@ -1,3 +1,5 @@
+/* $XORP: xorp/etc/templates/rib.tp,v 1.15 2004/06/07 18:16:26 pavlin Exp $ */
+
 /*
  * RIP attribute descriptions
  */
