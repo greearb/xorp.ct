@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.2 2003/01/16 19:28:57 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.3 2003/01/23 09:06:55 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -96,8 +96,8 @@ public:
     void	set_cli_port(unsigned short v) { _cli_port = htons(v); }
     
     /**
-     * Add a subnet address to the list of subnet addresses enabled for
-     * CLI access.
+     * Add a subnet address to the list of subnet addresses enabled
+     * for CLI access.
      * 
      * This method can be called more than once to add a number of
      * subnet addresses.
@@ -107,8 +107,8 @@ public:
     void	add_enable_cli_access_from_subnet(const IPvXNet& subnet_addr);
     
     /**
-     * Delete a subnet address from the list of subnet addresses enabled for
-     * CLI access.
+     * Delete a subnet address from the list of subnet addresses enabled
+     * for CLI access.
      * 
      * @param subnet_addr the subnet address to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR (e.g., if the subnet
@@ -117,8 +117,8 @@ public:
     int		delete_enable_cli_access_from_subnet(const IPvXNet& subnet_addr);
     
     /**
-     * Add a subnet address to the list of subnet addresses disabled for
-     * CLI access.
+     * Add a subnet address to the list of subnet addresses disabled
+     * for CLI access.
      * 
      * This method can be called more than once to add a number of
      * subnet addresses.
@@ -128,8 +128,8 @@ public:
     void	add_disable_cli_access_from_subnet(const IPvXNet& subnet_addr);
     
     /**
-     * Delete a subnet address from the list of subnet addresses disabled for
-     * CLI access.
+     * Delete a subnet address from the list of subnet addresses disabled
+     * for CLI access.
      * 
      * @param subnet_addr the subnet address to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR (e.g., if the subnet
