@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.5 2003/01/17 08:02:25 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.6 2003/01/18 00:23:13 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1761,13 +1761,13 @@ PimMre::entry_can_remove() const
     }
 #endif // 1
     
-#if 0		// TODO: XXX: PAVPAVPAV: not needed?
+#if 1		// TODO: XXX: PAVPAVPAV: not needed?
     if (is_wc() || is_sg() || is_sg_rpt()) {	// TODO: apply for (S,G,rpt)?
 	if (i_am_assert_winner_state().any()
 	    || i_am_assert_loser_state().any())
 	    return (false);
     }
-#endif // 0
+#endif // 1
     
     if (is_sg()) {
 	// TODO: OK NOT to remove if the KeepaliveTimer(S,G) is running?
