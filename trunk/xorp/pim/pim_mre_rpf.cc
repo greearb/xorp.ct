@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.5 2003/01/22 19:12:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.6 2003/01/23 06:54:49 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -1266,7 +1266,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_sg_changed()
     // (S,G,rpt) routing entry (if exists).
     //
     if (pim_mre_sg_rpt != NULL) {
-	pim_mre_sg_rpt->recompute_rpfp_nbr_sg_rpt_sg_changed();
+	pim_mre_sg_rpt->recompute_rpfp_nbr_sg_rpt_changed();
 	return;
     }
     
@@ -1284,7 +1284,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_sg_changed()
 	return;
     }
     
-    pim_mre_sg_rpt->recompute_rpfp_nbr_sg_rpt_sg_changed();
+    pim_mre_sg_rpt->recompute_rpfp_nbr_sg_rpt_changed();
     
     //
     // Try to remove the (S,G,rpt) entry that was just created (in cas
