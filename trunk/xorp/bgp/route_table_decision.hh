@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.7 2003/08/04 21:58:58 pavlin Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.8 2003/10/18 15:18:44 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -27,7 +27,7 @@ class RouteData {
 public:
     RouteData(const SubnetRoute<A>* route, 
 	      BGPRouteTable<A>* parent_table,
-	      PeerHandler* peer_handler) 
+	      const PeerHandler* peer_handler) 
 	: _route(route), _parent_table(parent_table), 
 	  _peer_handler(peer_handler) {}
 
@@ -42,7 +42,7 @@ public:
     inline const SubnetRoute<A>* route() const {
 	return _route;
     }
-    inline  PeerHandler* peer_handler() const {
+    inline  const PeerHandler* peer_handler() const {
 	return _peer_handler;
     }
     inline BGPRouteTable<A>* parent_table() const {
@@ -51,7 +51,7 @@ public:
 private:
     const SubnetRoute<A>* _route;
     BGPRouteTable<A>* _parent_table;
-    PeerHandler* _peer_handler;
+    const PeerHandler* _peer_handler;
     
 };
 

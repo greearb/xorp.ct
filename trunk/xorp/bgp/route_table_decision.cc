@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.14 2003/10/18 15:18:44 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.15 2003/10/21 20:20:52 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -61,63 +61,6 @@ DecisionTable<A>::remove_parent(BGPRouteTable<A> *ex_parent) {
     return 0;
 }
 
-/* How do we cope with the different possibilities for one route
- * replacing another one?  Assume we have two peers, A and B.  We hear
- * a route a1 from A, and it wins by default.
- * 
- * Case 1.  New route a2 comes from A.  RibIn A finds it already has
- * route a1.  RibIn sends delete_route for a1, then sends add_route
- * for a2.
- *
- * Case 2.  New worse route b1 comes from B.  RibIn B sends
- * add_route. DecisionTable looks up route in A, finds a1, and doesn't
- * process b1 further.
- *
- * Case 3.  New worse route b1 comes from B.  RibIn B sends
- * add_route. DecisionTable looks up route in A, finds a1.
- * DecisionTable sends delete_route for a1 with peer_handler set to A.
- * DecisionTable then sends add_route for b1 with peer_handler set to
- * B.
- *
- *
- * Now assume we have two routes a1 from A and b1 from B.  a1 won the
- * Decision process.
- *
- * Case 4.  New route a2 from A replaces a1, but is worse than b1.
- * RibIn A sends delete_route a1.  DecisionTable looks up route, and
- * discovers b1.  DecisionTable sends delete_route for a1 with
- * peer_handler set to A.  DecisionTable then sends add_route for b1
- * with peer_handler set to B.  Now RibIn A sends add_route for a2.
- * DecisionTable looks up route, and discovers b1.  a2 loses so no
- * further action is taken.
- *
- * Case 5. New route a2 from A replaces a1, and is better than b1.
- * RibIn A sends delete_route a1.  DecisionTable looks up route, and
- * discovers b1.  DecisionTable sends delete_route for a1 with
- * peer_handler set to A.  DecisionTable then sends add_route for b1
- * with peer_handler set to B.  Now RibIn A sends add_route for a2.
- * DecisionTable looks up route, and discovers b1.  a2 beats b1. 
- * DecisionTable sends delete_route for b1 with peer_handler set to B.
- * DecisionTable now sends add_route for a2 with peer_handler set to A.
- * At RibOut A, we see add_route b1 then delete_route b1.
- * At RibOut B, we see delete_route a1 then add_route a2.
- * At RibOut C (etc) we see delete_route a1, add_route b1,
- * delete_route b1, then add_route a2 and finally a push.
- *
- * Case 6. New route b2 replaces b1 but is worse than a1.  RibIn B
- * sends delete_route b1.  DecisionTable looks up route, discovers
- * that b1 lost to a1, and takes no further action.  RibIn B sends
- * add_route b1.  DecisionTable looks up route, discovers that b2
- * loses to a1, and takes no further action.
- *
- * Case 7. New route b2 replaces b1 and is better than a1.  RibIn B
- * sends delete_route b1.  DecisionTable looks up route, discovers
- * that b1 lost to a1, and takes no further action.  RibIn B sends
- * add_route b2.  DecisionTable looks up route, discovers that b2
- * beats a1.  DecisionTable sends delete_route a1 with peer_handler
- * set to A.  DecisionTable then sends add_route b2 with peer_handler
- * set to B.
- */
 
 template<class A>
 int
@@ -136,66 +79,75 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     }
     debug_msg("route resolvable\n");
 
-#if 0
-    const SubnetRoute<A> *old_winner;
-    const PeerHandler* old_winners_peer;
-    BGPRouteTable<A>* old_winners_parent;
-    
-    find_previous_winner(caller, rtmsg.net(), old_winner, old_winners_peer, 
-			 old_winners_parent);
-#endif
-    RouteData<A>* old_winner_p;
+    //find the alternative routes, and the old winner if there was one.
+    RouteData<A> *old_winner = NULL, *old_winner_clone = NULL;
     list<RouteData<A> > alternatives;
-    old_winner_p = find_alternative_routes(caller, rtmsg.net(), alternatives);
+    old_winner = find_alternative_routes(caller, rtmsg.net(), alternatives);
+
+    //preserve old_winner because the original may be deleted by the
+    //decision process
+    if (old_winner != NULL) {
+	old_winner_clone = new RouteData<A>(*old_winner);
+    }
     
-
-    bool new_is_best = false;
-    if (old_winner_p == NULL) {
-	cp(6);
-	new_is_best = true;
+    RouteData<A> *new_winner = NULL;
+    RouteData<A> new_route(rtmsg.route(), caller, rtmsg.origin_peer());
+    if (!alternatives.empty()) {
+	//add the new route to the pool of possible winners.
+	alternatives.push_back(new_route);
+	new_winner = find_winner(alternatives);
     } else {
-	//preserve old_winner because route_wins may delete the original
-	RouteData<A> old_winner(*old_winner_p);
-	if (route_wins(rtmsg.route(), rtmsg.origin_peer(), alternatives)) {
-	    cp(7);
-	    new_is_best = true;
-	    //propagate a delete_route to clear out the old state.
-	    InternalMessage<A> old_rt_msg(old_winner.route(), 
-					  old_winner.peer_handler(), 
-					  GENID_UNKNOWN);
-	    _next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
-
-#if 0	    
-	    //inform the RibIn the route is no longer being used.
-	    old_winners_parent->route_used(old_winner, false);
-
-	    //the old winner is no longer the winner
-	    old_winner->set_is_not_winner();
-#endif
-	    //the old winner is no longer the winner
-	    old_winner.set_is_not_winner();
-	}
+	//the new route wins by default
+	new_winner = &new_route;
     }
-    if (new_is_best) {
-	cp(8);
-	rtmsg.route()->set_is_winner(igp_distance(rtmsg.route()->nexthop()));
+    assert(new_winner != NULL);
 
-	int result;
-	result = _next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
-
-	if (result == ADD_USED || result == ADD_UNUSED) {
-	    cp(9);
-	    //if it got as far as the decision table, we declare it
-	    //used, even if it gets filtered downstream.
-	    return ADD_USED;
-	} else {
-	    cp(10);
-	    //some sort of failure, so return the error code directly.
-	    return result;
+    if (old_winner_clone != NULL) {
+	if (old_winner_clone->route() == new_winner->route()) {
+	    //the winner didn't change.
+	    assert(old_winner_clone != NULL);
+	    delete old_winner_clone;
+	    return ADD_UNUSED;
 	}
+
+	//the winner did change, so send a delete for the old winner
+	InternalMessage<A> old_rt_msg(old_winner_clone->route(), 
+				      old_winner_clone->peer_handler(), 
+				      GENID_UNKNOWN);
+	_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
+
+	//the old winner is no longer the winner
+	old_winner_clone->set_is_not_winner();
+
+	//clean up temporary state
+	delete old_winner_clone;
     }
-    cp(11);
-    return ADD_UNUSED;
+
+    //send an add for the new winner
+    new_winner->route()->set_is_winner(
+        igp_distance(new_winner->route()->nexthop()));
+    int result;
+    if (new_winner->route() != rtmsg.route()) {
+	//we have a new winner, but it isn't the route that was just added.
+	//this can happen due to MED wierdness.
+	InternalMessage<A> new_rt_msg(new_winner->route(), 
+				      new_winner->peer_handler(), 
+				      GENID_UNKNOWN);
+	if (rtmsg.push())
+	    new_rt_msg.set_push();
+	result = _next_table->add_route(new_rt_msg, 
+					(BGPRouteTable<A>*)this);
+    } else {
+	result = _next_table->add_route(rtmsg, 
+					(BGPRouteTable<A>*)this);
+    }
+
+    if (result == ADD_UNUSED) {
+	//if it got as far as the decision table, we declare it
+	//used, even if it gets filtered downstream.
+	result = ADD_USED;
+    }
+    return result;
 }
 
 template<class A>
