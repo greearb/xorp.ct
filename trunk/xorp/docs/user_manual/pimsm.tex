@@ -600,8 +600,8 @@ protocols \{\\
   multicast sender that can be received in {\stt interval-sec}
   seconds.  If this threshold is exceeded, the router will attempt to
   switch to the shortest-path tree from that multicast sender.
-  If the switch should happen after the first packet, then {\stt bytes}
-  should be set to 0.
+  If the shortest-path switch should happen after the first packet
+  is forwarded, then {\stt bytes} should be set to 0.
 \end{description}
 \item{\tt traceoptions}: this directive delimits the configuration of
   debugging and tracing options for PIM-SM.
