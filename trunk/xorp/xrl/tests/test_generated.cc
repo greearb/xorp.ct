@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.7 2003/04/23 20:50:51 hodson Exp $"
+#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.8 2003/05/09 19:36:05 hodson Exp $"
 
 #include <iostream>
 
