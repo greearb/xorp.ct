@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.6 2003/01/21 18:54:27 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.7 2003/01/22 02:46:35 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -138,7 +138,8 @@ UpdatePacket::add_withdrawn(const BGPWithdrawnRoute& wdr)
 
 
 bool 
-UpdatePacket::big_enough() const {
+UpdatePacket::big_enough() const
+{
     /* is the packet now large enough that we'd be best to send the
        part we already have before it exceeds the 4K size limit? */
     //XXXX needs additional tests for v6
@@ -152,7 +153,8 @@ UpdatePacket::big_enough() const {
     return false;
 }
 
-const uint8_t *UpdatePacket::encode(int &len) const
+const uint8_t *
+UpdatePacket::encode(int &len) const
 {
     int size = 5 + _att_list.size() + 
 	(2*_withdrawn_list.size()) +(2*_nlri_list.size()); 
@@ -205,17 +207,16 @@ const uint8_t *UpdatePacket::encode(int &len) const
     position++;
 
     list <PathAttribute*>::const_iterator pai = _att_list.begin();
-    while(pai != _att_list.end())
-	{
-	    PathAttribute* pa = *pai;
-	    debug_msg("Looping through path attributes\n");
-	    io[position].iov_base = 
-		(char *)const_cast<uint8_t *>(pa->encode_and_get_data());
-	    io[position].iov_len = pa->get_size();
-	    path_size = path_size + pa->get_size();
-	    position++;
-	    ++pai;
-	}	
+    while(pai != _att_list.end()) {
+	PathAttribute* pa = *pai;
+	debug_msg("Looping through path attributes\n");
+	io[position].iov_base = 
+	    (char *)const_cast<uint8_t *>(pa->encode_and_get_data());
+	io[position].iov_len = pa->get_size();
+	path_size = path_size + pa->get_size();
+	position++;
+	++pai;
+    }	
 	
     total_size = total_size + path_size;
 
@@ -226,16 +227,12 @@ const uint8_t *UpdatePacket::encode(int &len) const
 	    (char *)const_cast<uint8_t *>(ni->get_size());		
 	io[position].iov_len = 1;
 	position++;
-		
 	assert(position < size);
 	io[position].iov_base = const_cast<char *>(ni->get_data());
 	io[position].iov_len = ni->get_byte_size();
 	position++;
-		
 	total_size += ni->get_byte_size()+1;
-
 	ni++;
-
     }	
 
     if (route_size > MAXPACKETSIZE)
@@ -300,31 +297,29 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
     /* Start of decoding of Unreachable routes */
     set<BGPWithdrawnRoute> withdrawn_set;
     assert(urlength >=0);
-    while (urlength > 0)
-	{
-	    //urrlength is the number of bits of address prefix. 
-	    urrlength = (uint8_t &)(*data);
-	    //bytes is the number of bytes, excluding header
-	    bytes = (urrlength+7)/8;  
-	    //check bytes is sane.  note this is only for v4, v6 is
-	    //done elsewhere
-	    if ((bytes > (uint)urlength) || (bytes > 4))
-		xorp_throw(CorruptMessage,
-			   c_format("inconsistent length %d %d",
-			    bytes, urlength),
+    while (urlength > 0) {
+	//urrlength is the number of bits of address prefix. 
+	urrlength = (uint8_t &)(*data);
+	//bytes is the number of bytes, excluding header
+	bytes = (urrlength+7)/8;  
+	//check bytes is sane.  note this is only for v4, v6 is
+	//done elsewhere
+	if ((bytes > (uint)urlength) || (bytes > 4))
+	    xorp_throw(CorruptMessage,
+		   c_format("inconsistent length %d %d", bytes, urlength),
 		   UPDATEMSGERR, ATTRLEN);
-	    data++;
+	data++;
 
-	    BGPWithdrawnRoute withdrawn((uint32_t &)(*data), urrlength);
-	    if (withdrawn_set.find(withdrawn) == withdrawn_set.end()) {
-		_withdrawn_list.push_back(withdrawn);
-	    } else {
-		XLOG_WARNING(("Received duplicate " + withdrawn.str() +
-			   " in update message\n").c_str());
-	    }
-	    data += bytes;
-	    urlength -= (bytes + 1);
+	BGPWithdrawnRoute withdrawn((uint32_t &)(*data), urrlength);
+	if (withdrawn_set.find(withdrawn) == withdrawn_set.end()) {
+	    _withdrawn_list.push_back(withdrawn);
+	} else {
+	    XLOG_WARNING(("Received duplicate " + withdrawn.str() +
+		       " in update message\n").c_str());
 	}
+	data += bytes;
+	urlength -= (bytes + 1);
+    }
     if (urlength < 0)
 	xorp_throw(CorruptMessage,
 		   c_format("negative length %d", urlength),
@@ -354,91 +349,75 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
     assert(_att_list.size() == 0);
 
     assert(plength >= 0);
-    while (plength > 0)
-	{
-	    
-	    paflags = (uint8_t &)(*data);
-	    
-	    
-	    if ((paflags & 0x10) == 0x10)
-		{
-		    palength = (uint16_t &)*(data + 2*sizeof(uint8_t));
-		    shift = 4;
-		}
-	    else
-		{
-		    palength = (uint8_t &)*(data + 2*sizeof(uint8_t));
-		    shift = 3;
-		}
-	    if (palength + shift > (uint)plength)
-		xorp_throw(CorruptMessage,
-			   c_format("inconsistent length %d %d",
-				    palength + shift,
-				    plength),
-			   UPDATEMSGERR, ATTRLEN);
-
-	    debug_msg("palength=%d\n", palength);
-
-	    // get the path parameter type.
-	    pa_type = (uint8_t &)*(data + sizeof(uint8_t));
-	    switch (pa_type)
-		{
-		case ORIGIN:
-		    {
-			pa_temp = new OriginAttribute(data,palength+shift);
-			break;
-		    }
-		case AS_PATH:
-		    {
-			pa_temp = new ASPathAttribute(data,palength+shift);
-			break;
-		    }
-		case NEXT_HOP:
-		    {
-			pa_temp = new IPv4NextHopAttribute(data,palength+shift);
-			break;
-		    }
-		case MED:
-		    {
-			pa_temp = new MEDAttribute(data,palength+shift);
-			break;
-		    }
-		case LOCAL_PREF:
-		    {
-			pa_temp = new LocalPrefAttribute(data,palength+shift);
-			break;
-		    }
-		case ATOMIC_AGGREGATE:
-		    {
-			pa_temp = new AtomicAggAttribute(data,palength+shift);
-			break;
-		    }
-		case AGGREGATOR:
-		    {
-			pa_temp = new AggregatorAttribute(data,palength+shift);
-			break;
-		    }
-		case COMMUNITY:
-		    {
-			pa_temp = new CommunityAttribute(data,palength+shift);
-			break;
-		    }
-		default:
-		    {
-			//this will throw an error if the attribute isn't
-			//optional transitive.
-			pa_temp = new UnknownAttribute(data,palength+shift);
-			break;
-		    }
-		}
-
-		_att_list.push_back(pa_temp);
-		debug_msg("plength %d, palength %d, shift %d, pathatt size %d\n",plength,palength,shift,_att_list.size());
-		data = data + palength + shift;
-		plength = plength - (palength + shift);
-		debug_msg("plength %d, palength %d, shift %d, pathatt size %d\n",plength,palength,shift,_att_list.size());
-		dump_bytes(data,10);
+    while (plength > 0) {
+	paflags = (uint8_t &)(*data);
+	if ((paflags & 0x10) == 0x10) {
+	    palength = (uint16_t &)*(data + 2*sizeof(uint8_t));
+	    shift = 4;
+	} else {
+	    palength = (uint8_t &)*(data + 2*sizeof(uint8_t));
+	    shift = 3;
 	}
+	if (palength + shift > (uint)plength)
+	    xorp_throw(CorruptMessage,
+		       c_format("inconsistent length %d %d",
+				palength + shift,
+				plength),
+		       UPDATEMSGERR, ATTRLEN);
+
+	debug_msg("palength=%d\n", palength);
+
+	// get the path parameter type.
+	pa_type = (uint8_t &)*(data + sizeof(uint8_t));
+	switch (pa_type) {
+	case ORIGIN:
+	    pa_temp = new OriginAttribute(data,palength+shift);
+	    break;
+
+	case AS_PATH:
+	    pa_temp = new ASPathAttribute(data,palength+shift);
+	    break;
+
+	case NEXT_HOP:
+	    pa_temp = new IPv4NextHopAttribute(data,palength+shift);
+	    break;
+
+	case MED:
+	    pa_temp = new MEDAttribute(data,palength+shift);
+	    break;
+
+	case LOCAL_PREF:
+	    pa_temp = new LocalPrefAttribute(data,palength+shift);
+	    break;
+
+	case ATOMIC_AGGREGATE:
+	    pa_temp = new AtomicAggAttribute(data,palength+shift);
+	    break;
+
+	case AGGREGATOR:
+	    pa_temp = new AggregatorAttribute(data,palength+shift);
+	    break;
+
+	case COMMUNITY:
+	    pa_temp = new CommunityAttribute(data,palength+shift);
+	    break;
+
+	default:
+	    //this will throw an error if the attribute isn't
+	    //optional transitive.
+	    pa_temp = new UnknownAttribute(data,palength+shift);
+	    break;
+	}
+
+	_att_list.push_back(pa_temp);
+	debug_msg("plength %d, palength %d, shift %d, pathatt size %d\n",
+		plength,palength,shift,_att_list.size());
+	data = data + palength + shift;
+	plength = plength - (palength + shift);
+	debug_msg("plength %d, palength %d, shift %d, pathatt size %d\n",
+		plength,palength,shift,_att_list.size());
+	dump_bytes(data,10);
+    }
     if (plength < 0)
 	xorp_throw(CorruptMessage,
 		   c_format("negative length %d", nlength),
@@ -450,48 +429,47 @@ UpdatePacket::decode(const uint8_t *data, uint16_t /* l */)
 
     set<NetLayerReachability> nlri_set;
     assert(nlength >= 0);
-    while (nlength > 0)
-	{
-	    
-	    nnlength = (uint8_t &)(*data);
-	    bytes = (nnlength+7)/8;
-	    debug_msg("bits: %d bytes: %d\n", nnlength, bytes);
-	    if ((bytes > (uint)nlength) || (bytes > 4))
-		xorp_throw(CorruptMessage,
-			   c_format("inconsistent length %d %d",
-			    bytes, nlength),
-		   UPDATEMSGERR, ATTRLEN);
-	    data++;
-	    nlength--;
+    while (nlength > 0) {
+	nnlength = (uint8_t &)(*data);
+	bytes = (nnlength+7)/8;
+	debug_msg("bits: %d bytes: %d\n", nnlength, bytes);
+	if ((bytes > (uint)nlength) || (bytes > 4))
+	    xorp_throw(CorruptMessage,
+		       c_format("inconsistent length %d %d", bytes, nlength),
+		       UPDATEMSGERR, ATTRLEN);
+	data++;
+	nlength--;
 
-	    NetLayerReachability nlri((uint32_t &)(*data), nnlength);
-	    //check this isn't a duplicate NLRI
-	    if (nlri_set.find(nlri) == nlri_set.end()) {
-		nlri_set.insert(nlri);
-		_nlri_list.push_back(nlri);
-	    } else {
-		XLOG_WARNING(("Received duplicate " + nlri.str() +
+	NetLayerReachability nlri((uint32_t &)(*data), nnlength);
+	//check this isn't a duplicate NLRI
+	if (nlri_set.find(nlri) == nlri_set.end()) {
+	    nlri_set.insert(nlri);
+	    _nlri_list.push_back(nlri);
+	} else {
+	    XLOG_WARNING(("Received duplicate " + nlri.str() +
 			   " in update message\n").c_str());
-	    }
-	    data += bytes;
-	    nlength = nlength - bytes;
 	}
+	data += bytes;
+	nlength = nlength - bytes;
+    }
     if (nlength < 0)
 	xorp_throw(CorruptMessage,
 		   c_format("negative length %d", nlength),
 		   UPDATEMSGERR, ATTRLEN);
 	
     /* End of decoding of Network Reachability */
-	debug_msg("No of withdrawn routes %d. No of path attributes %d. No of networks %d.\n",
+    debug_msg("No of withdrawn routes %d. No of path attributes %d. "
+		"No of networks %d.\n",
 		  _withdrawn_list.size(), _att_list.size(),
 		  _nlri_list.size());
 }
 
-
-string UpdatePacket::str() const
+string
+UpdatePacket::str() const
 {
     string s = "Update Packet\n";
-    debug_msg("No of withdrawn routes %d. No of path attributes %d. No of networks %d.\n",
+    debug_msg("No of withdrawn routes %d. No of path attributes %d. "
+		"No of networks %d.\n",
 	      _withdrawn_list.size(), _att_list.size(),
 	      _nlri_list.size());
 
@@ -516,8 +494,8 @@ string UpdatePacket::str() const
 }
 
 /*
-** Helper function used when sorting Path Attribute lists.
-*/
+ * Helper function used when sorting Path Attribute lists.
+ */
 inline
 bool
 compare_path_attributes(PathAttribute *a, PathAttribute *b)
@@ -536,7 +514,7 @@ UpdatePacket::operator==(const UpdatePacket& him) const
     list <BGPWithdrawnRoute> temp_withdrawn_list_him(him.withdrawn_list());
     temp_withdrawn_list_him.sort();
 
-    if(temp_withdrawn_list.size() != temp_withdrawn_list_him.size())
+    if (temp_withdrawn_list.size() != temp_withdrawn_list_him.size())
 	return false;
 
     list <BGPWithdrawnRoute>::const_iterator wi = temp_withdrawn_list.begin();
@@ -559,7 +537,7 @@ UpdatePacket::operator==(const UpdatePacket& him) const
     list <PathAttribute *> temp_att_list_him(him.pathattribute_list());
     temp_att_list_him.sort(compare_path_attributes);
 
-    if(temp_att_list.size() != temp_att_list_him.size())
+    if (temp_att_list.size() != temp_att_list_him.size())
 	return false;
 
     list <PathAttribute *>::const_iterator pai = temp_att_list.begin();
@@ -582,7 +560,7 @@ UpdatePacket::operator==(const UpdatePacket& him) const
     list <NetLayerReachability> temp_nlri_list_him(him.nlri_list());
     temp_nlri_list_him.sort();
 
-    if(temp_nlri_list.size() != temp_nlri_list_him.size())
+    if (temp_nlri_list.size() != temp_nlri_list_him.size())
 	return false;
 
     list <NetLayerReachability>::const_iterator ni = temp_nlri_list.begin();
@@ -590,7 +568,7 @@ UpdatePacket::operator==(const UpdatePacket& him) const
 	temp_nlri_list_him.begin();
     while (ni != temp_nlri_list.end() && ni_him != temp_nlri_list_him.end()) {
 	
-	if ( (*ni) == (*ni_him) )	    {
+	if ( (*ni) == (*ni_him) ) {
 	    ++ni;
 	    ++ni_him;
 	} else {
