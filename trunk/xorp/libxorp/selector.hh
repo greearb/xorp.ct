@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.18 2002/12/09 18:29:13 hodson Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -191,11 +191,5 @@ private:
     int			_fd;
     SelectorMask	_mask;
 };
-typedef ref_ptr<SelectorTag> Selector;
-
-inline Selector
-SelectorList::add_selector(int fd, SelectorMask mask /* CALLBACK ARG */) {
-    return Selector(new SelectorTag(*this, fd, mask));
-}
 
 #endif // __LIBXORP_SELECTOR_HH__
