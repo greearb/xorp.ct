@@ -63,6 +63,7 @@ protocols {
 		    }
 
 		    metric {
+			%allow-range: $(@) "0" "16" ;
 			%set: xrl "$(rip.targetname)/rip/0.1/set_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&cost:u32=$(@)" ;
 			%get: xrl "$(rip.targetname)/rip/0.1/cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->cost:u32" ;
 			%help: short "Set the cost metric added to routes received on address." ;

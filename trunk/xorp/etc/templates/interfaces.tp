@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.4 2004/05/18 07:11:06 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.5 2004/05/22 23:37:25 mjh Exp $ */
 
 interfaces {
     targetname: txt = "fea";
@@ -96,6 +96,7 @@ interfaces {
 		}
 
 		prefix-length {
+		    %allow-range: $(@) "1" "32";
 		    %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_prefix4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&prefix_len:u32=$(@)"; 
 		    %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_prefix4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->prefix_len:u32"; 
 		}
@@ -134,7 +135,8 @@ interfaces {
 		}
 
 		prefix-length {
-		    %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_prefix6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&prefix_len:u32=$(@)"; 
+		    %allow-range: $(@) "1" "128";
+		    %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_prefix6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&prefix_len:u32=$(@)";
 		    %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_prefix6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->prefix_len:u32"; 
 		}
 
