@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.9 2003/05/23 00:02:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.10 2003/08/27 22:32:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -335,7 +335,7 @@ BGPMultiProtocolCapability::decode()
     assert(_cap_code == CAPABILITYMULTIPROTOCOL);
 
     _cap_length = (uint8_t)*(_data+3);
-    _address_family = ntohs((uint16_t)*(_data+4));
+    _address_family = ntohs(*(uint16_t *)(_data+4));
     debug_msg("address family %d\n", _address_family);
     _subsequent_address_family = (uint8_t)*(_data+7);
 }

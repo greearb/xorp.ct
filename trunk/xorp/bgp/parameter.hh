@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.4 2003/03/10 23:20:01 hodson Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.5 2003/08/11 18:09:56 atanu Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -168,7 +168,6 @@ private:
 			    capability used/will use the obsolete
 			    capability code for refresh */
 };
-
 
 class BGPMultiProtocolCapability : public BGPCapParameter {
 public:

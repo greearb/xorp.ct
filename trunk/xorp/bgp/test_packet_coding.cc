@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.1 2003/08/27 23:59:37 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.2 2003/08/28 01:05:01 atanu Exp $"
 
 #include "libxorp/xorp.h"
 #include "packet.hh"
@@ -21,6 +21,23 @@
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/test_main.hh"
+
+bool
+test_multprotocol(TestInfo& /*info*/)
+{
+    BGPMultiProtocolCapability multi(AFI_IPV6, SAFI_NLRI_UNICAST);
+
+    multi.encode();
+    assert(8 == multi.length());
+
+    BGPMultiProtocolCapability recv(multi.length(), multi.data());
+
+    assert(multi.length() == recv.length());
+
+    assert(memcmp(multi.data(), recv.data(), recv.length()) == 0);
+
+    return true;
+}
 
 bool
 test_simple_open_packet(TestInfo& /*info*/) 
@@ -61,6 +78,56 @@ test_simple_open_packet(TestInfo& /*info*/)
     assert(pl.begin() == pl.end());
     assert(pd->unsupported_parameters() == false);
 #endif
+
+    //try encoding the received packet, and check we get the same
+    //encoded packet as when we encoded the constructed packet
+    const uint8_t *buf2;
+    size_t len2;
+    buf2 = receivedpacket.encode(len2);
+    assert(len == len2);
+    assert(memcmp(buf, buf2, len2) == 0);
+    delete[] buf;
+    delete[] buf2;
+    return true;
+}
+
+bool
+test_open_packet_with_capabilities(TestInfo& /*info*/) 
+{
+    /* In this test we create an Open Packet, pretend to send it,
+       pretend to receive it, and check that what we sent is what we
+       received */
+    OpenPacket openpacket(AsNum(666), IPv4("1.2.3.4"), 1234);
+    // Add a multiprotocol parameter.
+    openpacket.add_parameter(
+	     new BGPMultiProtocolCapability(AFI_IPV6, SAFI_NLRI_UNICAST));
+
+    const uint8_t *buf;
+    size_t len;
+    buf = openpacket.encode(len);
+
+    //open packets with no parameters have a fixed length of 29 bytes
+    // +8 for the multiprotocol parameter.
+    assert(len == MINOPENPACKET + 8);
+
+    //check the common header
+    const uint8_t *skip = buf+MARKER_SIZE;	// skip marker
+    uint16_t plen = htons(*((const uint16_t*)skip));
+    // +8 for the multiprotocol parameter.
+    assert(plen == MINOPENPACKET + 8);
+    skip+=2;
+    uint8_t type = *skip;
+    assert(type == MESSAGETYPEOPEN);
+    skip++;
+
+    OpenPacket receivedpacket(buf, plen);
+    assert(receivedpacket.type()==MESSAGETYPEOPEN);
+
+    //check the information we put in came out again OK.
+    assert(receivedpacket.HoldTime() == 1234);
+    assert(receivedpacket.as() == AsNum(666));
+    assert(receivedpacket.id() == IPv4("1.2.3.4"));
+    assert(receivedpacket.Version() == 4);
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
@@ -467,7 +534,9 @@ main(int argc, char** argv)
 	    string test_name;
 	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
 	} tests[] = {
+	    {"multiprotocol", callback(test_multprotocol)},
 	    {"simple_open_packet", callback(test_simple_open_packet)},
+	    {"open_packet", callback(test_open_packet_with_capabilities)},
 	    {"keepalive_packet", callback(test_keepalive_packet)},
 	    {"notification_packets1",
 	     callback(test_notification_packets,
