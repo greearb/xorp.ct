@@ -105,7 +105,7 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return IPV4_VALUE;
 	}
 
-{RE_IPV4NET} {
+{RE_IPV4NET}	{
 	bootlval = strdup(boottext);
 	return IPV4NET_VALUE;
 	}
@@ -115,7 +115,7 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return IPV6_VALUE;
 	}
 
-{RE_IPV6NET} {
+{RE_IPV6NET}	{
 	bootlval = strdup(boottext);
 	return IPV6NET_VALUE;
 	}
@@ -125,7 +125,7 @@ RE_MACADDR [a-fA-F0-9]{2}(:[a-fA-F0-9]{2}){5}
 	return MACADDR_VALUE;
 	}
 
-[a-z][a-z0-9"\-""_"]*	{
+[a-z][a-z0-9"\-""_"\.]*	{
 	bootlval = strdup(boottext);
 	return LITERAL;
 	}
