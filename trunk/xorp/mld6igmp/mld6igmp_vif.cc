@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.31 2005/02/24 02:44:05 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.32 2005/02/27 20:49:06 pavlin Exp $"
 
 
 //
@@ -327,6 +327,11 @@ Mld6igmpVif::stop(string& error_msg)
     
     XLOG_INFO("STOPPED %s%s",
 	      this->str().c_str(), flags_string().c_str());
+
+    //
+    // Inform the node that the vif has completed the shutdown
+    //
+    mld6igmp_node().vif_shutdown_completed(name());
 
     return (ret_value);
 }

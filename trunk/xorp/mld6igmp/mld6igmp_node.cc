@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.38 2005/02/27 20:49:06 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.39 2005/02/27 21:32:54 pavlin Exp $"
 
 
 //
@@ -261,11 +261,6 @@ Mld6igmpNode::final_stop()
 
     if (ProtoNode<Mld6igmpVif>::stop() < 0)
 	return (XORP_ERROR);
-
-    //
-    // De-register with the MFEA
-    //
-    mfea_register_shutdown();
 
     return (XORP_OK);
 }
@@ -891,6 +886,36 @@ Mld6igmpNode::delete_all_vifs()
 	    XLOG_ERROR(err.c_str());
 	}
     }
+}
+
+/**
+ * A method called when a vif has completed its shutdown.
+ * 
+ * @param vif_name the name of the vif that has completed its shutdown.
+ */
+void
+Mld6igmpNode::vif_shutdown_completed(const string& vif_name)
+{
+    vector<Mld6igmpVif *>::iterator iter;
+
+    //
+    // If all vifs have completed the shutdown, then de-register with
+    // the MFEA.
+    //
+    for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
+	Mld6igmpVif *mld6igmp_vif = *iter;
+	if (mld6igmp_vif == NULL)
+	    continue;
+	if (! mld6igmp_vif->is_down())
+	    return;
+    }
+
+    //
+    // De-register with the MFEA
+    //
+    mfea_register_shutdown();
+
+    UNUSED(vif_name);
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.16 2005/02/17 01:03:36 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.17 2005/02/24 02:47:40 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -261,7 +261,14 @@ public:
      * Delete all MLD/IGMP vifs.
      */
     void	delete_all_vifs();
-    
+
+    /**
+     * A method called when a vif has completed its shutdown.
+     * 
+     * @param vif_name the name of the vif that has completed its shutdown.
+     */
+    void	vif_shutdown_completed(const string& vif_name);
+
     /**
      * Receive a protocol message.
      * 
