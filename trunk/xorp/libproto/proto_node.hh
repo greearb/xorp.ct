@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.22 2004/06/10 18:54:36 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.23 2004/06/10 22:41:03 hodson Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -99,6 +99,10 @@ public:
     /**
      * Find a virtual interface for a given address.
      * 
+     * Note that the PIM Register virtual interfaces are excluded, because
+     * they are special, and because they may share the same address as some
+     * of the other virtual interfaces.
+     * 
      * @param ipaddr_test the address to search for.
      * @return the virtual interface with address @ref ipaddr_test if found,
      * otherwise NULL.
@@ -127,6 +131,10 @@ public:
      * Find a virtual interface that belongs to the same subnet
      * or point-to-point link as a given address.
      * 
+     * Note that the PIM Register virtual interfaces are excluded, because
+     * they are special, and because they may share the same address as some
+     * of the other virtual interfaces.
+     * 
      * @param ipaddr_test the address to search by.
      * @return the virtual interface that belongs to the same subnet
      * or point-to-point link as address @ref ipaddr_test if found,
@@ -136,6 +144,10 @@ public:
 
     /**
      * Test if an address belongs to one of my virtual interfaces.
+     * 
+     * Note that the PIM Register virtual interfaces are excluded, because
+     * they are special, and because they may share the same address as some
+     * of the other virtual interfaces.
      * 
      * @param ipaddr_test the address to test.
      * @return true if @ref ipaddr_test belongs to one of my virtual
@@ -746,6 +758,11 @@ ProtoNode<V>::vif_find_by_addr(const IPvX& ipaddr_test) const
 	V *vif = *iter;
 	if (vif == NULL)
 	    continue;
+	//
+	// XXX: exclude the PIM Register vifs, because they are special
+	//
+	if (vif->is_pim_register())
+	    continue;
 	if (vif->is_my_addr(ipaddr_test))
 	    return (vif);
     }
@@ -791,7 +808,11 @@ ProtoNode<V>::vif_find_same_subnet_or_p2p(const IPvX& ipaddr_test) const
 	V *vif = *iter;
 	if (vif == NULL)
 	    continue;
-	
+	//
+	// XXX: exclude the PIM Register vifs, because they are special
+	//
+	if (vif->is_pim_register())
+	    continue;
 	if (vif->is_same_subnet(ipaddr_test) || vif->is_same_p2p(ipaddr_test))
 	    return (vif);
     }
