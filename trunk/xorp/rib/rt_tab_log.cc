@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_log.cc,v 1.5 2004/04/01 19:54:12 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_log.cc,v 1.6 2004/06/10 22:41:40 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -177,7 +177,8 @@ XLogTraceTable<A>::add_route(const IPRouteEntry<A>& 	route,
 			      RouteTable<A>* 		caller)
 {
     string msg = c_format("%u Add: %s Return: ",
-			  this->update_number(), route.str().c_str());
+			  XORP_UINT_CAST(this->update_number()),
+			  route.str().c_str());
     int s = LogTable<A>::add_route(route, caller);
     msg += c_format("%d\n", s);
     XLOG_TRACE(true, msg.c_str());
@@ -194,7 +195,8 @@ XLogTraceTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 
     if (route != NULL) {
 	msg = c_format("%u Delete: %s Return: ",
-		       this->update_number(), route->str().c_str());
+		       XORP_UINT_CAST(this->update_number()),
+		       route->str().c_str());
     }
 
     int s = LogTable<A>::delete_route(route, caller);
@@ -236,7 +238,8 @@ DebugMsgLogTable<A>::add_route(const IPRouteEntry<A>& 	route,
 			      RouteTable<A>* 		caller)
 {
     string msg = c_format("%u Add: %s Return: ",
-			  this->update_number(), route.str().c_str());
+			  XORP_UINT_CAST(this->update_number()),
+			  route.str().c_str());
     int s = LogTable<A>::add_route(route, caller);
     msg += c_format("%d\n", s);
     debug_msg(msg.c_str());
@@ -253,7 +256,8 @@ DebugMsgLogTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 
     if (route != NULL) {
 	msg = c_format("%u Delete: %s Return: ",
-		       this->update_number(), route->str().c_str());
+		       XORP_UINT_CAST(this->update_number()),
+		       route->str().c_str());
     }
 
     int s = LogTable<A>::delete_route(route, caller);
