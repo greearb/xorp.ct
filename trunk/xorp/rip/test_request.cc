@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.5 2004/01/09 00:13:51 hodson Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.7 2004/01/24 13:33:48 hodson Exp $"
 
 #include <set>
 
@@ -30,6 +30,8 @@
 #include "route_db.hh"
 #include "system.hh"
 
+#include "test_utils.hh"
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Constants
@@ -41,26 +43,6 @@ static const char *program_version_id   = "0.1";
 static const char *program_date         = "July, 2003";
 static const char *program_copyright    = "See file LICENSE.XORP";
 static const char *program_return_value = "0 on success, 1 if test error, 2 if internal error";
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// Verbosity level control
-//
-
-static bool s_verbose = false;
-bool verbose()                  { return s_verbose; }
-void set_verbose(bool v)        { s_verbose = v; }
-
-#define verbose_log(x...) _verbose_log(__FILE__,__LINE__, x)
-
-#define _verbose_log(file, line, x...)					\
-do {									\
-    if (verbose()) {							\
-	printf("From %s:%d: ", file, line);				\
-	printf(x);							\
-	fflush(stdout);							\
-    }									\
-} while(0)
 
 
 // ----------------------------------------------------------------------------
@@ -87,39 +69,6 @@ public:
 
 
 // ----------------------------------------------------------------------------
-// Pseudo random number and network generation
-
-static uint32_t
-fake_random()
-{
-    static uint64_t r = 883652921;
-    r = r * 37 + 1;
-    r = r & 0xffffffff;
-    return r & 0xffffffff;
-}
-
-static void
-make_nets(set<IPv4Net>& nets, uint32_t n)
-{
-    uint32_t fails = 0;
-    // attempt at deterministic nets sequence
-    while (nets.size() != n) {
-	IPv4 addr(htonl(fake_random()));
-	IPv4Net net = IPv4Net(addr, 1 + n % 23 + fake_random() % 8);
-	if (nets.find(net) == nets.end()) {
-	    nets.insert(net);
-	    fails = 0;
-	} else {
-	    // Does not occur with test parameters in practice
-	    if (++fails == 5) {
-		verbose_log("Failed to generate nets.\n");
-	    }
-	}
-    }
-}
-
-
-// ----------------------------------------------------------------------------
 // Type specific helpers
 
 template <typename A>
@@ -131,7 +80,7 @@ template <>
 IPv4 DefaultPeer<IPv4>::get() { return IPv4("10.0.0.1"); }
 
 template <>
-IPv6 DefaultPeer<IPv6>::get() { return IPv6("10:1"); }
+IPv6 DefaultPeer<IPv6>::get() { return IPv6("10::1"); }
 
 // ----------------------------------------------------------------------------
 // Spoof Port Manager instance support a single Spoof Port which in turn
@@ -494,5 +443,3 @@ main(int argc, char* const argv[])
 
     return rval;
 }
-
-template class SpoofPortIO<IPv4>;

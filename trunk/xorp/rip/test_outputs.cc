@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.5 2004/01/09 00:13:51 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.8 2004/02/20 06:29:57 hodson Exp $"
 
 #include <set>
 
@@ -23,7 +23,8 @@
 #include "libxorp/c_format.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
-#include "libxorp/ipv4net.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
 
 #include "auth.hh"
 #include "output_table.hh"
@@ -34,6 +35,8 @@
 #include "route_db.hh"
 #include "system.hh"
 #include "update_queue.hh"
+
+#include "test_utils.hh"
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -65,26 +68,6 @@ static const char *program_date         = "August, 2003";
 static const char *program_copyright    = "See file LICENSE.XORP";
 static const char *program_return_value = "0 on success, 1 if test error, "
 					  "2 if internal error";
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// Verbosity level control
-//
-
-static bool s_verbose = false;
-bool verbose()                  { return s_verbose; }
-void set_verbose(bool v)        { s_verbose = v; }
-
-#define verbose_log(x...) _verbose_log(__FILE__,__LINE__, x)
-
-#define _verbose_log(file, line, x...)					\
-do {									\
-    if (verbose()) {							\
-	printf("From %s:%d: ", file, line);				\
-	printf(x);							\
-	fflush(stdout);							\
-    }									\
-} while(0)
 
 
 // ----------------------------------------------------------------------------
@@ -541,29 +524,22 @@ usage(const char* progname)
 // Injected Network state
 
 template <typename A>
-static void
-make_nets(const IPNet<A>& base, uint32_t n, set<IPNet<A> >& nets)
-{
-    IPNet<A> ipn = base;
-    while (n > 0) {
-	nets.insert(ipn);
-	++ipn;
-	--n;
-    }
-}
-
-template <typename A>
 int
 run_all_test_cases()
 {
     int rval = 0;
 
     static const uint32_t n_routes = 577;
+
+    // Make one large collection of unique nets
+    set<IPNet<A> > all_nets;
+    make_nets<A>(all_nets, 2 * n_routes);
+
     set<IPNet<A> > tpn;	// networks associated with peer under test
     set<IPNet<A> > opn;	// networks associated with other peer.
 
-    make_nets(IPNet<A>(DefaultPeer<A>::get(), 16), n_routes, tpn);
-    make_nets(IPNet<A>(OtherPeer<A>::get(), 16), n_routes, opn);
+    // Split large collection into nets for tpn and opn
+    for_each(all_nets.begin(), all_nets.end(), SplitNets<A>(tpn, opn));
 
     //
     // OutputUpdates class tests
@@ -574,6 +550,8 @@ run_all_test_cases()
 	OutputTester<A, OutputUpdates<A> > tester(tpn, opn);
 	NoHorizonValidator<A> nohv(tpn, opn);
 	rval |= tester.run_test(NONE, nohv);
+	if (rval)
+	    return rval;
     }
     {
 	verbose_log("=== IPv%u Split Horizon updates test ===\n",
@@ -581,6 +559,8 @@ run_all_test_cases()
 	OutputTester<A, OutputUpdates<A> > tester(tpn, opn);
 	SplitHorizonValidator<A> shv(tpn, opn);
 	rval |= tester.run_test(SPLIT, shv);
+	if (rval)
+	    return rval;
     }
     {
 	verbose_log("=== IPv%u Split Horizon Poison Reverse test ===\n",
@@ -588,6 +568,8 @@ run_all_test_cases()
 	OutputTester<A, OutputUpdates<A> > tester(tpn, opn);
 	PoisonReverseValidator<A> prv(tpn, opn);
 	rval |= tester.run_test(SPLIT_POISON_REVERSE, prv);
+	if (rval)
+	    return rval;
     }
 
     //
@@ -599,6 +581,8 @@ run_all_test_cases()
 	OutputTester<A, OutputTable<A> > tester(tpn, opn);
 	NoHorizonValidator<A> nohv(tpn, opn);
 	rval |= tester.run_test(NONE, nohv);
+	if (rval)
+	    return rval;
     }
     {
 	verbose_log("=== IPv%u Split Horizon table test ===\n",
@@ -606,6 +590,8 @@ run_all_test_cases()
 	OutputTester<A, OutputTable<A> > tester(tpn, opn);
 	SplitHorizonValidator<A> shv(tpn, opn);
 	rval |= tester.run_test(SPLIT, shv);
+	if (rval)
+	    return rval;
     }
     {
 	verbose_log("=== IPv%u Split Horizon Poison Reverse table test ===\n",
@@ -655,9 +641,7 @@ main(int argc, char* const argv[])
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	rval = run_all_test_cases<IPv4>();
-#if 0
-	rval |= run_all_test_cases<IPv6>();
-#endif
+	//	rval |= run_all_test_cases<IPv6>();
     } catch (...) {
         // Internal error
         xorp_print_standard_exceptions();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.3 2003/08/01 04:08:13 hodson Exp $"
+#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.4 2003/08/04 23:39:53 hodson Exp $"
 
 #include <set>
 
@@ -31,6 +31,8 @@
 #include "system.hh"
 #include "update_queue.hh"
 
+#include "test_utils.hh"
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Constants
@@ -43,25 +45,6 @@ static const char *program_date         = "July, 2003";
 static const char *program_copyright    = "See file LICENSE.XORP";
 static const char *program_return_value = "0 on success, 1 if test error, 2 if internal error";
 
-///////////////////////////////////////////////////////////////////////////////
-//
-// Verbosity level control
-//
-
-static bool s_verbose = false;
-bool verbose()                  { return s_verbose; }
-void set_verbose(bool v)        { s_verbose = v; }
-
-#define verbose_log(x...) _verbose_log(__FILE__,__LINE__, x)
-
-#define _verbose_log(file, line, x...)					\
-do {									\
-    if (verbose()) {							\
-	printf("From %s:%d: ", file, line);				\
-	printf(x);							\
-	fflush(stdout);							\
-    }									\
-} while(0)
 
 
 // ----------------------------------------------------------------------------
@@ -137,37 +120,6 @@ public:
 };
 
 
-// ----------------------------------------------------------------------------
-// Pseudo random number and network generation
-
-static uint32_t
-fake_random()
-{
-    static uint64_t r = 883652921;
-    r = r * 37 + 1;
-    r = r & 0xffffffff;
-    return r & 0xffffffff;
-}
-
-static void
-make_nets(set<IPv4Net>& nets, uint32_t n)
-{
-    uint32_t fails = 0;
-    // attempt at deterministic nets sequence
-    while (nets.size() != n) {
-	IPv4 addr(htonl(fake_random()));
-	IPv4Net net = IPv4Net(addr, 1 + n % 23 + fake_random() % 8);
-	if (nets.find(net) == nets.end()) {
-	    nets.insert(net);
-	    fails = 0;
-	} else {
-	    // Does not occur with test parameters in practice
-	    if (++fails == 5) {
-		verbose_log("Failed to generate nets.\n");
-	    }
-	}
-    }
-}
 
 template <typename A>
 class UpdateQueueTester
@@ -209,15 +161,8 @@ public:
 
 	verbose_log("Creating routes for nets\n");
 
-	for (typename set<IPNet<A> >::const_iterator n = nets.begin();
-	     n != nets.end(); ++n) {
-	    if (rdb.update_route(*n, A::ZERO(), 5, 0,
-				 _pm.the_peer()) == false) {
-		verbose_log("Failed to add route for %s\n",
-			    n->str().c_str());
-		return 1;
-	    }
-	}
+	for_each(nets.begin(), nets.end(),
+		 RouteInjector<A>(rdb, A::ZERO(), 5, _pm.the_peer()));
 
 	if (uq.updates_queued() != n_routes) {
 	    verbose_log("%u updates queued, expected %u\n",

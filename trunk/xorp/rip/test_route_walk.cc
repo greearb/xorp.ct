@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.4 2004/02/20 07:28:40 hodson Exp $"
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.5 2004/02/20 20:13:25 hodson Exp $"
 
 #include <set>
 
@@ -43,26 +43,6 @@ static const char *program_version_id   = "0.1";
 static const char *program_date         = "July, 2003";
 static const char *program_copyright    = "See file LICENSE.XORP";
 static const char *program_return_value = "0 on success, 1 if test error, 2 if internal error";
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// Verbosity level control
-//
-
-static bool s_verbose = false;
-bool verbose()                  { return s_verbose; }
-void set_verbose(bool v)        { s_verbose = v; }
-
-#define verbose_log(x...) _verbose_log(__FILE__,__LINE__, x)
-
-#define _verbose_log(file, line, x...)					\
-do {									\
-    if (verbose()) {							\
-	printf("From %s:%d: ", file, line);				\
-	printf(x);							\
-	fflush(stdout);							\
-    }									\
-} while(0)
 
 
 // ----------------------------------------------------------------------------

@@ -12,11 +12,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/test_utils.hh,v 1.1 2004/02/20 20:13:25 hodson Exp $
 
 #ifndef __RIP_TEST_UTILS_HH__
 #define __RIP_TEST_UTILS_HH__
 
+#include <functional>
+#include <set>
+
+#include "config.h"
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
+
+#include "peer.hh"
+#include "route_db.hh"
+
+/**
+ * A weak but platform independent random number generator.
+ */
 inline static uint32_t
 weak_random()
 {
@@ -31,6 +45,9 @@ weak_random()
 template <typename A>
 inline A random_addr();
 
+/**
+ * Generate a random IPv4 address.
+ */
 template <>
 IPv4
 random_addr<IPv4>()
@@ -39,16 +56,24 @@ random_addr<IPv4>()
     return IPv4(h);
 }
 
+/**
+ * Generate a random IPv6 address.
+ */
 template <>
 IPv6
 random_addr<IPv6>()
 {
     uint32_t x[4];
-    x[0] = htonl(weak_random()); x[1] = htonl(weak_random());
-    x[2] = htonl(weak_random()); x[3] = htonl(weak_random());
+    x[0] = htonl(weak_random());
+    x[1] = htonl(weak_random());
+    x[2] = htonl(weak_random());
+    x[3] = htonl(weak_random());
     return IPv6(x);
 }
 
+/**
+ * Generate a set of routes.
+ */
 template <typename A>
 void
 make_nets(set<IPNet<A> >& nets, uint32_t n_nets)
@@ -61,6 +86,33 @@ make_nets(set<IPNet<A> >& nets, uint32_t n_nets)
     }
 }
 
+/**
+ * @short Unary function object to split routes evenly into 2 sets.
+ */
+template <typename A>
+struct SplitNets : public unary_function<A,void>
+{
+    SplitNets(set<IPNet<A> >& a, set<IPNet<A> >& b) : _s1(a), _s2(b), _n(0)
+    {}
+
+    void operator() (const IPNet<A>& net)
+    {
+	if (_n % 2) {
+	    _s1.insert(net);
+	} else {
+	    _s2.insert(net);
+	}
+	_n++;
+    }
+protected:
+    set<IPNet<A> >& 	_s1;
+    set<IPNet<A> >& 	_s2;
+    uint32_t 		_n;
+};
+
+/**
+ * @short Unary function object to inject routes into a route database.
+ */
 template <typename A>
 struct RouteInjector : public unary_function<A,void>
 {
@@ -85,5 +137,24 @@ protected:
     uint32_t	_injected;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// Verbosity level control
+//
+
+static bool s_verbose = false;
+bool verbose()                  { return s_verbose; }
+void set_verbose(bool v)        { s_verbose = v; }
+
+#define verbose_log(x...) _verbose_log(__FILE__,__LINE__, x)
+
+#define _verbose_log(file, line, x...)					\
+do {									\
+    if (verbose()) {							\
+	printf("From %s:%d: ", file, line);				\
+	printf(x);							\
+	fflush(stdout);							\
+    }									\
+} while(0)
 
 #endif // __RIP_TEST_UTILS_HH__
