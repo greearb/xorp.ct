@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.27 2004/03/28 20:55:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.28 2004/04/05 05:38:46 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -729,6 +729,12 @@ XrlMfeaVifManager::vifaddr6_update(const string& ifname,
 	XLOG_WARNING("vifaddr6_update invalid event: %u", event);
 	break;
     }
+}
+
+void
+XrlMfeaVifManager::updates_completed()
+{
+    update_state();
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.10 2003/10/24 20:51:06 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_vif_manager.hh,v 1.11 2003/10/28 19:36:27 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_VIF_MANAGER_HH__
 #define __FEA_XRL_MFEA_VIF_MANAGER_HH__
@@ -175,6 +175,11 @@ public:
 			 const string& vifname,
 			 const IPv6& addr,
 			 const uint32_t& event);
+
+    /**
+     * The interface updates have been completed.
+     */
+    void updates_completed();
     
 private:
     void update_state();
