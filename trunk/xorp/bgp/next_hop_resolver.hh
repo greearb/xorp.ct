@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.17 2003/06/17 06:44:16 atanu Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.18 2003/06/26 21:38:53 jcardona Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -26,7 +26,7 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-#include "libxorp/trie.hh"
+#include "libxorp/ref_trie.hh"
 #include "xrl/targets/ribclient_base.hh"
 #include "libxipc/xrl_std_router.hh"
 #include "xrl/interfaces/rib_xif.hh"
@@ -391,10 +391,10 @@ private:
     };
 
     typedef set<NextHopEntry *> RealPrefixEntry;
-    typedef TriePostOrderIterator<A, RealPrefixEntry> RealPrefixIterator;
+    typedef RefTriePostOrderIterator<A, RealPrefixEntry> RealPrefixIterator;
 
     typedef NextHopEntry PrefixEntry;
-    typedef TriePostOrderIterator<A, PrefixEntry *> PrefixIterator;
+    typedef RefTriePostOrderIterator<A, PrefixEntry *> PrefixIterator;
 
     /**
      * The NextHopEntry is indexed in two ways either by prefix_len or by
@@ -402,8 +402,8 @@ private:
      *
      * Both of these data structures need to be kept in sync.
      */
-    Trie<A, PrefixEntry *> _next_hop_by_prefix;
-    Trie<A, RealPrefixEntry> _next_hop_by_real_prefix;
+    RefTrie<A, PrefixEntry *> _next_hop_by_prefix;
+    RefTrie<A, RealPrefixEntry> _next_hop_by_real_prefix;
 
     /**
     * Given a real prefix_len entry return a prefix_len entry.

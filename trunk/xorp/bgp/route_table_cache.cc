@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.12 2003/03/10 23:20:03 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.13 2003/05/23 00:02:06 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -64,7 +64,7 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	//can rely on rtmsg.route() not to go away.
 	const SubnetRoute<A> *msg_route = rtmsg.route();
 	//store it locally
-	typename Trie<A, const SubnetRoute<A> >::iterator ti;
+	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
 	ti = _route_table.insert(msg_route->net(), *msg_route);
 	debug_msg("Caching route: %x net: %s atts: %x  %s\n", (uint)msg_route,
 	       msg_route->net().str().c_str(), 
@@ -126,7 +126,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     //do we have the old route cached?
     if (old_rtmsg.changed()==true) {
-	typename Trie<A, const SubnetRoute<A> >::iterator iter;
+	typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
 	iter = _route_table.lookup_node(net);
 	if (iter == _route_table.end()) {
 	    //We don't flush the cache, so this should not happen
@@ -134,7 +134,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	} else {
 	    // Preserve the route.  Taking a reference will prevent
 	    // the route being immediately deleted when it's erased
-	    // from the Trie.  Deletion will occur later when the
+	    // from the RefTrie.  Deletion will occur later when the
 	    // reference is deleted.
 	    const SubnetRoute<A> *old_route = &(iter.payload());
 	    old_route_reference = new SubnetRouteConstRef<A>(old_route);
@@ -166,7 +166,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	//can rely on rtmsg.route() not to go away.
 	const SubnetRoute<A> *new_route = new_rtmsg.route();
 	//store it locally
-	typename Trie<A, const SubnetRoute<A> >::iterator ti;
+	typename RefTrie<A, const SubnetRoute<A> >::iterator ti;
 	ti = _route_table.insert(net, *new_route);
 
 	//progogate downstream
@@ -216,14 +216,14 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     IPNet<A> net = rtmsg.net();
 
     //do we already have this cached?
-    typename Trie<A, const SubnetRoute<A> >::iterator iter;
+    typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
     iter = _route_table.lookup_node(net);
     if (iter != _route_table.end()) {
 	const SubnetRoute<A> *existing_route = &(iter.payload());
 	debug_msg("Found cached route: %s\n", existing_route->str().c_str());
 
 	// Preserve the route.  Taking a reference will prevent the
-	// route being deleted when it's erased from the Trie.
+	// route being deleted when it's erased from the RefTrie.
 	// Deletion will occur when the reference goes out of scope.
 	SubnetRouteConstRef<A> route_reference(existing_route);
 
@@ -272,7 +272,7 @@ CacheTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	//Check we've got it cached.  Clear the changed bit so we
 	//don't confuse anyone downstream.
 	IPNet<A> net = rtmsg.route()->net();
-	typename Trie<A, const SubnetRoute<A> >::iterator iter;
+	typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
 	iter = _route_table.lookup_node(net);
 	assert(iter != _route_table.end());
 
@@ -293,7 +293,7 @@ template<class A>
 const SubnetRoute<A>*
 CacheTable<A>::lookup_route(const IPNet<A> &net) const {
     //return our cached copy if there is one, otherwise ask our parent
-    typename Trie<A, const SubnetRoute<A> >::iterator iter;
+    typename RefTrie<A, const SubnetRoute<A> >::iterator iter;
     iter = _route_table.lookup_node(net);
     if (iter != _route_table.end())
 	return &(iter.payload());

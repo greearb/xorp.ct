@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.6 2003/03/10 23:20:05 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.7 2003/05/23 00:02:07 mjh Exp $"
 
 #include "route_table_nhlookup.hh"
 
@@ -105,7 +105,7 @@ NhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
     }
 
     // we need to queue the add, pending nexthop resolution
-    typename Trie<A, const MessageQueueEntry<A> >::iterator inserted;
+    typename RefTrie<A, const MessageQueueEntry<A> >::iterator inserted;
     inserted = _queue_by_net.insert(rtmsg.net(),
 				    MessageQueueEntry<A>(&rtmsg, NULL));
     const MessageQueueEntry<A>* mqe = &(inserted.payload());
@@ -130,7 +130,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     // Are we still waiting for the old_rtmsg to resolve?
     bool old_msg_is_queued;
     const MessageQueueEntry<A>* mqe = NULL;
-    typename Trie<A, const MessageQueueEntry<A> >::iterator i;
+    typename RefTrie<A, const MessageQueueEntry<A> >::iterator i;
     i = _queue_by_net.lookup_node(net);
     if (i == _queue_by_net.end()) {
 	old_msg_is_queued = false;
@@ -187,7 +187,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     }
 
     if (new_msg_needs_queuing) {
-	typename Trie<A, const MessageQueueEntry<A> >::iterator inserted;
+	typename RefTrie<A, const MessageQueueEntry<A> >::iterator inserted;
 	if (propagate_as_add) {
 	    inserted
 		= _queue_by_net.insert(net,
@@ -231,7 +231,7 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     // Are we still waiting for the old_rtmsg to resolve?
     bool msg_is_queued;
     const MessageQueueEntry<A>* mqe = NULL;
-    typename Trie<A, const MessageQueueEntry<A> >::iterator i;
+    typename RefTrie<A, const MessageQueueEntry<A> >::iterator i;
     i = _queue_by_net.lookup_node(net);
     if (i == _queue_by_net.end()) {
 	msg_is_queued = false;
@@ -306,7 +306,7 @@ NhLookupTable<A>::lookup_route(const IPNet<A> &net) const
 {
     // Are we still waiting for the old_rtmsg to resolve?
     const MessageQueueEntry<A>* mqe = NULL;
-    typename Trie<A, const MessageQueueEntry<A> >::iterator i;
+    typename RefTrie<A, const MessageQueueEntry<A> >::iterator i;
     i = _queue_by_net.lookup_node(net);
     if (i == _queue_by_net.end()) {
 	return _parent->lookup_route(net);

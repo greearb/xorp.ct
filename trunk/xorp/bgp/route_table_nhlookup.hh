@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.8 2003/05/29 17:59:09 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 #define __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 
 #include "route_table_base.hh"
-#include "libxorp/trie.hh"
+#include "libxorp/ref_trie.hh"
 #include "next_hop_resolver.hh"
 
 template<class A>
@@ -83,7 +83,7 @@ public:
     string str() const;
 private:
     //access the message queue by subnet or an address on the subnet
-    Trie<A, const MessageQueueEntry<A> > _queue_by_net;
+    RefTrie<A, const MessageQueueEntry<A> > _queue_by_net;
     //access the message queue by nexthop
     multimap <A, const MessageQueueEntry<A>*> _queue_by_nexthop;
 

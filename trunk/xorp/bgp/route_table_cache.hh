@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.6 2003/05/29 17:59:08 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
 
 #include "route_table_base.hh"
-#include "libxorp/trie.hh"
+#include "libxorp/ref_trie.hh"
 
 /**
  * Specialize Trie so that the SubnetRoute payload is deleted using
@@ -26,7 +26,7 @@
  */
 template<>
 inline void
-TrieNode<IPv4, const SubnetRoute<IPv4> >
+RefTrieNode<IPv4, const SubnetRoute<IPv4> >
 ::delete_payload(const SubnetRoute<IPv4>* p) 
 {
     p->unref();
@@ -34,7 +34,7 @@ TrieNode<IPv4, const SubnetRoute<IPv4> >
 
 template<>
 inline void
-TrieNode<IPv6, const SubnetRoute<IPv6> >
+RefTrieNode<IPv6, const SubnetRoute<IPv6> >
 ::delete_payload(const SubnetRoute<IPv6>* p) 
 {
     p->unref();
@@ -71,7 +71,7 @@ public:
 	return _route_table.route_count();
     }
 private:
-    Trie<A, const SubnetRoute<A> > _route_table;
+    RefTrie<A, const SubnetRoute<A> > _route_table;
 };
 
 #endif // __BGP_ROUTE_TABLE_CACHE_HH__
