@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.30 2004/09/17 19:43:32 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.31 2004/09/21 18:13:42 atanu Exp $
 ##
 
 # -- Real Programs
@@ -142,7 +142,7 @@ xorpsh_SOURCES	+= y.boot_tab.cc
 xorpsh_SOURCES	+= y.opcmd_tab.cc
 xorpsh_SOURCES	+= y.tplt_tab.cc
 
-xorpsh_LDADD	= $(top_builddir)/cli/libcli.a
+xorpsh_LDADD	 = $(top_builddir)/cli/libcli.a
 xorpsh_LDADD	+= $(top_builddir)/libproto/libproto.a
 xorpsh_LDADD	+= $(top_builddir)/cli/libtecla/libtecla.a
 xorpsh_LDADD	+= @CLI_CURSES_LIB@
@@ -153,11 +153,11 @@ xorpsh_LDADD	+= $(LDADD)
 #
 # xorp_profiler
 #
-xorp_profiler_SOURCES	= profiler.cc
+xorp_profiler_SOURCES	 = profiler.cc
 
-xorp_profiler_LDADD =  $(top_builddir)/xrl/interfaces/libprofilexif.a
-xorp_profiler_LDADD +=  $(top_builddir)/xrl/targets/libprofileclientbase.a
-xorp_profiler_LDADD += $(LDADD)
+xorp_profiler_LDADD	 = $(top_builddir)/xrl/interfaces/libprofilexif.a
+xorp_profiler_LDADD	+= $(top_builddir)/xrl/targets/libprofileclientbase.a
+xorp_profiler_LDADD	+= $(LDADD)
 
 #
 # test_templates
@@ -205,7 +205,7 @@ test_templates_SOURCES	+= xrldb.cc
 test_templates_SOURCES	+= y.boot_tab.cc
 test_templates_SOURCES	+= y.tplt_tab.cc
 
-test_templates_LDADD 	 = $(LDADD)
+test_templates_LDADD	 = $(LDADD)
 
 #
 # test_sample_config

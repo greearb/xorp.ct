@@ -813,7 +813,7 @@ $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
 		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/policy_redist4.xif			\
 		$(INTERFACES_DIR)/policy_redist6.xif			\
-                $(INTERFACES_DIR)/profile.xif				\
+		$(INTERFACES_DIR)/profile.xif				\
 		$(INTERFACES_DIR)/rib_client.xif
 $(srcdir)/bgp4_mib_base.hh $(srcdir)/bgp4_mib_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
@@ -882,9 +882,9 @@ $(srcdir)/policy_base.hh $(srcdir)/policy_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/policy.xif
-$(srcdir)/profiler_base.hh $(srcdir)/profiler_base.cc:      		\
-                $(INTERFACES_DIR)/common.xif                            \
-                $(INTERFACES_DIR)/profile_client.xif
+$(srcdir)/profiler_base.hh $(srcdir)/profiler_base.cc:			\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/profile_client.xif
 $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
