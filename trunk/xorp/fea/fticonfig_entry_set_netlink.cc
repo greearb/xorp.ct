@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.18 2004/12/08 01:41:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.19 2004/12/10 23:12:14 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -288,23 +288,28 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     if_index = if_nametoindex(fte.vifname().c_str());
 #endif // HAVE_IF_NAMETOINDEX
     if (if_index == 0) {
-	// Check for a discard route; the referenced ifname must have
-	// the discard property. These use a separate route type in netlink
-	// land. Unlike BSD, it need not reference a loopback interface.
-	// Because this interface exists only in the FEA, it has no index.
+	do {
+	    //
+	    // Check for a discard route; the referenced ifname must have
+	    // the discard property. These use a separate route type in netlink
+	    // land. Unlike BSD, it need not reference a loopback interface.
+	    // Because this interface exists only in the FEA, it has no index.
+	    //
+	    if (fte.ifname().empty())
+		break;
+	    IfTree& it = ftic().iftree();
+	    IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
+	    XLOG_ASSERT(ii != it.ifs().end());
 
-	IfTree& it = ftic().iftree();
-	IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
-
-	XLOG_ASSERT(ii != it.ifs().end());
-
-	if (ii->second.discard()) {
-	    rtmsg->rtm_type = RTN_BLACKHOLE;
-	} else {
-	    // Catchall.
-	    XLOG_FATAL("Could not find interface index for name %s",
-			fte.vifname().c_str());
-	}
+	    if (ii->second.discard()) {
+		rtmsg->rtm_type = RTN_BLACKHOLE;
+	    } else {
+		// Catchall.
+		XLOG_FATAL("Could not find interface index for name %s",
+			   fte.vifname().c_str());
+	    }
+	    break;
+	} while (false);
     }
 
     // If the interface has an index in the host stack, add it
@@ -459,13 +464,27 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     fte.net().masked_addr().copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    // When deleting a route which points to a discard interface,
-    // pass the correct route type to the kernel.
-    IfTree& it = ftic().iftree();
-    IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
-    XLOG_ASSERT(ii != it.ifs().end());
-    if (ii->second.discard())
-	rtmsg->rtm_type = RTN_BLACKHOLE;
+    do {
+	//
+	// When deleting a route which points to a discard interface,
+	// pass the correct route type to the kernel.
+	//
+	if (fte.ifname().empty())
+	    break;
+	IfTree& it = ftic().iftree();
+	IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
+	//
+	// XXX: unlike adding a route, we don't use XLOG_ASSERT()
+	// to check whether the interface is configured in the system.
+	// E.g., on startup we may attempt to clean-up leftover XORP
+	// routes while we still don't have any interface tree configuration.
+	//
+
+	if ((ii != it.ifs().end()) && ii->second.discard())
+	    rtmsg->rtm_type = RTN_BLACKHOLE;
+
+	break;
+    } while (false);
 
     string error_msg;
     if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.22 2004/12/01 03:28:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.23 2004/12/10 23:12:14 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -210,17 +210,25 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     }
     fte.net().netmask().copy_out(*sin_netmask);
 
-    // Check for a discard route; the referenced ifname must have the
-    // discard property. The next-hop is forcibly rewritten to be the
-    // loopback address, in order for the RTF_BLACKHOLE flag to take
-    // effect on BSD platforms.
-    IfTree& it = ftic().iftree();
-    IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
-    XLOG_ASSERT(ii != it.ifs().end());
-    if (ii->second.discard()) {
-	IPvX::LOOPBACK(family).copy_out(*sin_nexthop);
-	rtm->rtm_flags |= (RTF_BLACKHOLE | RTF_GATEWAY);
-    }
+    do {
+	//
+	// Check for a discard route; the referenced ifname must have the
+	// discard property. The next-hop is forcibly rewritten to be the
+	// loopback address, in order for the RTF_BLACKHOLE flag to take
+	// effect on BSD platforms.
+	//
+	if (fte.ifname().empty())
+	    break;
+	IfTree& it = ftic().iftree();
+	IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
+	XLOG_ASSERT(ii != it.ifs().end());
+
+	if (ii->second.discard()) {
+	    IPvX::LOOPBACK(family).copy_out(*sin_nexthop);
+	    rtm->rtm_flags |= (RTF_BLACKHOLE | RTF_GATEWAY);
+	}
+	break;
+    } while (false);
 
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
