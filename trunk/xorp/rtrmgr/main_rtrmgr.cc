@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.55 2004/12/11 21:29:56 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.56 2004/12/23 17:33:13 mjh Exp $"
 
 #include <signal.h>
 
@@ -239,9 +239,8 @@ Rtrmgr::run()
     //
     // Read the router config template files
     //
-    MasterTemplateTree* tt;
-    tt = new MasterTemplateTree(xorp_config_root_dir(),
-				*xrldb, _verbose);
+    MasterTemplateTree* tt = new MasterTemplateTree(xorp_config_root_dir(),
+						    *xrldb, _verbose);
     if (!tt->load_template_tree(_template_dir, errmsg)) {
 	XLOG_ERROR("Shutting down due to an init error: %s", errmsg.c_str());
 	return (1);
