@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.3 2003/03/10 23:20:18 hodson Exp $
+// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.4 2003/05/02 07:50:49 pavlin Exp $
 
 #ifndef __FEA_XRL_IFMANAGER_HH__
 #define __FEA_XRL_IFMANAGER_HH__
 
 #include "libxorp/eventloop.hh"
+#include "libxorp/status_codes.h"
 #include "libxorp/transaction.hh"
 #include "libxipc/xrl_router.hh"
 #include "ifmanager.hh"
@@ -48,6 +49,14 @@ public:
 			uint32_t	     max_ops = 200)
 	: _itm(e, 5000, 10), _ifm(ifm), _max_ops(max_ops)
     {}
+
+    /**
+     * get the status of the interface manager.
+     *
+     * @param reason the human-readable reason for any failure.
+     * @return the status of the interface manager.
+     */
+    ProcessStatus status(string& reason) const;
 
     //
     // Transaction related methods
@@ -137,6 +146,7 @@ protected:
     InterfaceTransactionManager	_itm;
     InterfaceManager&		_ifm;
     uint32_t			_max_ops;
+    ProcessStatus               _status, _prev_status;
 };
 
 inline XrlCmdError

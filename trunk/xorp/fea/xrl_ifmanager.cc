@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.3 2003/03/18 01:01:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.4 2003/05/02 07:50:49 pavlin Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
@@ -134,6 +134,16 @@ XrlInterfaceManager::get_addr_from_config(const IfTree&	it,
 
     fa = &ai->second;
     return XrlCmdError::OKAY();
+}
+
+ProcessStatus
+XrlInterfaceManager::status(string& reason) const
+{
+    if (_itm.pending() > 0) {
+	reason = "There are transactions pending";
+	return PROC_NOT_READY;
+    }
+    return PROC_READY;
 }
 
 XrlCmdError

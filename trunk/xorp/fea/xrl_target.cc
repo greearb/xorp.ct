@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.9 2003/05/02 07:50:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.10 2003/05/07 23:15:14 mjh Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -63,9 +63,35 @@ XrlFeaTarget::common_0_1_get_status(
 				    uint32_t& status,
 				    string&	reason)
 {
-    //XXX This is a placeholder - need to fill out status correctly.
-    status = PROC_READY;
-    reason = "Ready";
+    ProcessStatus s;
+    string r;
+    s = _xifmgr.status(r);
+    //if it's bad news, don't bother to ask any other modules.
+    switch (s) {
+    case PROC_FAILED:
+    case PROC_SHUTDOWN:
+	status = s;
+	reason = r;
+	return XrlCmdError::OKAY();
+    case PROC_NOT_READY:
+	reason = r;
+	break;
+    case PROC_READY:
+	break;
+    case PROC_NULL:
+	//can't be running and in this state
+	abort();
+    case PROC_STARTUP:
+	//can't be responding to an XRL and in this state
+	abort();
+    }
+    status = s;
+
+    if (_xifcur.busy()) {
+	status = PROC_NOT_READY;
+	reason = "Communicating config changes to other processes";
+    }
+
     return XrlCmdError::OKAY();
 }
 

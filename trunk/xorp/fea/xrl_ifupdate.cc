@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_ifupdate.cc,v 1.2 2003/03/10 23:20:18 hodson Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -62,7 +62,8 @@ xrl_update(IfConfigUpdateReporterBase::Update u)
 /* ------------------------------------------------------------------------- */
 /* XrlIfConfigUpdateReporter */
 
-XrlIfConfigUpdateReporter::XrlIfConfigUpdateReporter(XrlRouter& r) : _rtr(r)
+XrlIfConfigUpdateReporter::XrlIfConfigUpdateReporter(XrlRouter& r) 
+    : _rtr(r), _in_flight(0)
 {}
 
 bool
@@ -93,6 +94,7 @@ XrlIfConfigUpdateReporter::interface_update(const string& ifname,
     for (TgtList::const_iterator ti = _tgts.begin(); ti != _tgts.end(); ++ti) {
 	c.send_interface_update(ti->c_str(), ifname, xrl_update(u),
 	    callback(this, &XrlIfConfigUpdateReporter::xrl_sent, *ti));
+	_in_flight++;
     }
 }
 
@@ -106,6 +108,7 @@ XrlIfConfigUpdateReporter::vif_update(const string& ifname,
     for (TgtList::const_iterator ti = _tgts.begin(); ti != _tgts.end(); ++ti) {
 	c.send_vif_update(ti->c_str(), ifname, vifname, xrl_update(u),
 	    callback(this, &XrlIfConfigUpdateReporter::xrl_sent, *ti));
+	_in_flight++;
     }
 }
 
@@ -120,6 +123,7 @@ XrlIfConfigUpdateReporter::vifaddr4_update(const string& ifname,
     for (TgtList::const_iterator ti = _tgts.begin(); ti != _tgts.end(); ++ti) {
 	c.send_vifaddr4_update(ti->c_str(), ifname, vifname, ip, xrl_update(u),
 	    callback(this, &XrlIfConfigUpdateReporter::xrl_sent, *ti));
+	_in_flight++;
     }
 }
 
@@ -134,12 +138,14 @@ XrlIfConfigUpdateReporter::vifaddr6_update(const string& ifname,
     for (TgtList::const_iterator ti = _tgts.begin(); ti != _tgts.end(); ++ti) {
 	c.send_vifaddr6_update(ti->c_str(), ifname, vifname, ip, xrl_update(u),
 	    callback(this, &XrlIfConfigUpdateReporter::xrl_sent, *ti));
+	_in_flight++;
     }
 }
 
 void
 XrlIfConfigUpdateReporter::xrl_sent(const XrlError& e, const string tgt)
 {
+    _in_flight--;
     if (e != XrlError::OKAY()) {
 	//
 	// On an error we should think about removing target or at least

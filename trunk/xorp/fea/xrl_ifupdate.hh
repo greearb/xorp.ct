@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.3 2003/03/10 23:20:18 hodson Exp $
+// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.4 2003/04/03 22:43:51 pavlin Exp $
 
 #ifndef __FEA_XRL_IFUPDATE_HH__
 #define __FEA_XRL_IFUPDATE_HH__
@@ -100,6 +100,11 @@ public:
 			 const IPv6&	addr,
 			 const Update&	u);
 
+    /**
+     * @return true if we have config changes in flight
+     */
+    bool busy() const {return (_in_flight > 0);}
+
 protected:
     void xrl_sent(const XrlError&e, const string tgt);
 
@@ -109,6 +114,7 @@ protected:
 protected:
     XrlRouter&	_rtr;
     TgtList	_tgts;
+    uint32_t    _in_flight;
 };
 
 #endif // __FEA_XRL_IFUPDATE_HH__
