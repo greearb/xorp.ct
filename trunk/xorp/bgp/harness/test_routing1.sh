@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.2 2002/12/16 03:08:22 mjh Exp $
 #
 
 #
@@ -548,7 +548,8 @@ test6()
 	    origin 2
 	    aspath $1
 	    nexthop $2
-	    nlri 10.10.10.0/24"
+	    nlri 10.10.10.0/24
+	    med 1"
 
 	echo $PACKET
     }
@@ -575,8 +576,8 @@ test6()
     coord peer3 assert established
 }
 
-TESTS_NOT_FIXED='test5 test4 test6'
-TESTS='test1 test2 test3'
+TESTS_NOT_FIXED='test5 test4'
+TESTS='test1 test2 test3 test6'
 RIB="rib"
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT

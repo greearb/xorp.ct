@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.3 2002/12/13 22:38:56 rizzo Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.4 2002/12/14 23:42:49 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1152,6 +1152,9 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 						      words[i+1].c_str())));
 	    } else if("withdraw" == words[i]) {
 		bgpupdate->add_withdrawn(BGPWithdrawnRoute(IPv4Net(
+						      words[i+1].c_str())));
+	    } else if("med" == words[i]) {
+		bgpupdate->add_pathatt(MEDAttribute(atoi(
 						      words[i+1].c_str())));
 	    } else
 		xorp_throw(InvalidString, 
