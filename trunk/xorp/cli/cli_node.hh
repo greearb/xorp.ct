@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.15 2005/03/14 22:39:35 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.16 2005/03/20 00:21:09 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -84,7 +84,22 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
+
+    /**
+     * Enable node operation.
+     * 
+     * If an unit is not enabled, it cannot be start, or pending-start.
+     */
+    void	enable();
     
+    /**
+     * Disable node operation.
+     * 
+     * If an unit is disabled, it cannot be start or pending-start.
+     * If the unit was runnning, it will be stop first.
+     */
+    void	disable();
+
     /**
      * Set the CLI access port.
      * 

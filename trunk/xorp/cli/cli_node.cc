@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.22 2005/03/14 22:39:35 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.23 2005/03/19 23:16:48 pavlin Exp $"
 
 
 //
@@ -122,7 +122,9 @@ CliNode::start()
     }
     
     add_internal_cli_commands();
-    
+
+    XLOG_INFO("CLI started");
+
     return (XORP_OK);
 }
 
@@ -157,7 +159,37 @@ CliNode::stop()
     if (ProtoNode<Vif>::stop() < 0)
 	return (XORP_ERROR);
 
+    XLOG_INFO("CLI stopped");
+
     return (XORP_OK);
+}
+
+/**
+ * Enable the node operation.
+ * 
+ * If an unit is not enabled, it cannot be start, or pending-start.
+ */
+void
+CliNode::enable()
+{
+    ProtoUnit::enable();
+
+    XLOG_INFO("CLI enabled");
+}
+
+/**
+ * Disable the node operation.
+ * 
+ * If an unit is disabled, it cannot be start or pending-start.
+ * If the unit was runnning, it will be stop first.
+ */
+void
+CliNode::disable()
+{
+    stop();
+    ProtoUnit::disable();
+
+    XLOG_INFO("CLI disabled");
 }
 
 /**
