@@ -318,6 +318,28 @@ inter-packet spacing to avoid buffer overflow.  10--50ms is typical.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{slide}
+\T{RIP Response Message Route Entry Fields}
+
+\begin{center}
+\begin{tabular}{ll}
+					  & {\bf Address} \\
+Expected distance vector protocol fields: & {\bf Netmask} \\
+					  & {\bf Cost}	  \\
+\end{tabular}
+\end{center}
+Plus
+
+{\bf Tag}\\ Protocol originating route if non-RIP, eg route redistribution.
+
+{\bf Nexthop}\\
+Used iff multiple routers exist on a LAN and nexthop is on LAN.  Avoids
+unneeded hops.
+
+\end{slide}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{slide}
 \T{RIP docs}
 
 \begin{center}
@@ -329,7 +351,7 @@ inter-packet spacing to avoid buffer overflow.  10--50ms is typical.
 1722 & RIP version 2: Applicability statement \\
 1723 & RIP version 2: Carrying additional Info \\
 1724 & RIP version 2: MIB Extension \\
-2082 & RIP version 2: MD5 Authentication \\
+2082 & RIP version 2: MD5 Authentication \\ \hline
 \end{tabular}
 \end{center}
 
@@ -352,9 +374,27 @@ RIPv1.
 
 RIPng: As RIPv2, but relies on IPv6 for authentication mechanisms and
 v1 equivalent interop.  Must have link-local addresses in packets as
-source addresses and nexthops must have link-local addresses.  May use path MTU discovery for packet sizes.
+source addresses and nexthops must have link-local addresses.  May use
+path MTU discovery for packet sizes.
 
 % The promised land :-)
+
+\end{slide}
+
+\begin{slide}
+
+\T{Link-Local Addresses for RIPng}
+
+Response packets must have a link-local source address.  This lessens
+risk of accepting a packets from a router not on the link.
+Additionally, the IP hop count field is set to 255 to strengthen this
+condition.
+
+When nexthops are present in response packets, they are specified as
+link-local addresses.  By definition, nexthops are only specified only
+links where the nexthop router is visible on the link - the goal being
+to avoid bouncing traffic between multiple routers that are on the
+link.
 
 \end{slide}
 
@@ -389,7 +429,6 @@ Tagged route filtering to help manage route redistribution.
 RIPv1 and RIPv1 Inter-Op.
 
 \end{slide}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -503,13 +542,16 @@ Port} instances simultaneously.  (Less work, correlated output).
 \T{Per Peer Periodic Update [Proposed]}
 
 Each peer has a {\tt PeriodicUpdater} class that iterates through list
-of peers and their sets of routes.  It's timer driven and outputs 1
+of peers and their sets of routes each time a periodic update is
+required.  The {\tt PeriodicUpdater} is timer driven and outputs 1
 response packet per each time it's scheduled.  The timer expiry
-interval is set to the interpacket spacing.
+interval is set to the interpacket spacing and the {\tt
+PeriodicUpdater} run until it has output all the routes.
 
 The {\tt PeriodicUpdater} maintains a reference to the last route it
 puts in each response packet so iteration through a {\tt Peer} objects
-set of {\tt RouteEntry} objects can always resume from a valid point.
+set of {\tt RouteEntry} objects can always resume from a valid 
+{\tt RouteEntry}.
 
 \end{slide}
 
