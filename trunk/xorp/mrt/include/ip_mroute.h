@@ -15,13 +15,15 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.6 2004/07/28 03:03:24 pavlin Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.7 2004/08/13 23:32:57 pavlin Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__
 #define __MRT_INCLUDE_IP_MROUTE_H__
 
 #include "config.h"
+
+#include <net/route.h>
 
 #if defined(HOST_OS_FREEBSD)
 #include <netinet/ip_mroute.h>

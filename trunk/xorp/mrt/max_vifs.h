@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/max_vifs.h,v 1.4 2004/06/10 22:41:28 hodson Exp $
+ * $XORP: xorp/mrt/max_vifs.h,v 1.5 2005/01/28 02:30:16 pavlin Exp $
  */
 
 #ifndef __MRT_MAX_VIFS_H__
@@ -32,7 +32,6 @@
 #include "libxorp/xorp.h"
 
 #include <sys/time.h>
-#include <net/route.h>
 #include "mrt/include/ip_mroute.h"
 
 
