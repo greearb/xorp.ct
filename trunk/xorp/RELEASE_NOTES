@@ -1,10 +1,54 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.32 2003/08/28 19:29:53 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.33 2003/08/28 21:07:23 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
+
+Release 0.5 (2003/??/??)
+========================
+  ALL:
+    - 
+
+  LIBXORP:
+    - 
+
+  LIBXIPC:
+    - 
+
+  XRL:
+    - 
+
+  RTRMGR:
+    - 
+
+  XORPSH:
+    - 
+
+  FEA/MFEA:
+    - 
+
+  RIB: 
+    - 
+
+  BGP:
+    - 
+
+  MLD/IGMP:
+    - 
+
+  PIM-SM:
+    - 
+
+  CLI:
+    - 
+
+  SNMP:
+    - 
+
+  RIP:
+    - 
 
 Release 0.4 (2003/08/28)
 ========================
