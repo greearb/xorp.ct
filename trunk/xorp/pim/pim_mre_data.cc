@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.5 2003/03/27 00:19:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.6 2003/06/13 01:32:33 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry data handling
@@ -118,13 +118,4 @@ PimMre::check_switch_to_spt_sg()
     }
     
     return (false);
-}
-
-void
-PimMre::recompute_check_switch_to_spt_sg()
-{
-    // TODO: XXX: PAVPAVPAV: take any other actions? E.g., what about
-    // "restart KeepaliveTimer(S,G)" comment
-    // in PimMre::check_switch_to_spt_sg();?
-    check_switch_to_spt_sg();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.9 2003/05/21 05:32:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.10 2003/07/07 18:47:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -908,28 +908,6 @@ PimMrt::add_task_my_ip_subnet_address(uint16_t vif_index)
 			     PimMreTrackState::INPUT_STATE_MY_IP_SUBNET_ADDRESS);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
-	
-	add_task(pim_mre_task);
-	schedule_task(pim_mre_task);
-    } while (false);
-}
-
-//
-// TODO: XXX: PAVPAVPAV: USE IT!!
-//
-void
-PimMrt::add_task_is_switch_to_spt_desired_sg(const IPvX& source_addr,
-					     const IPvX& group_addr)
-{
-    PimMreTask *pim_mre_task;
-    
-    do {
-	// Schedule the (S,G)-related changes
-	pim_mre_task
-	    = new PimMreTask(*this,
-			     PimMreTrackState::INPUT_STATE_IS_SWITCH_TO_SPT_DESIRED_SG);
-	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
-	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
 	
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
