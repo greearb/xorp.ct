@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.5 2003/05/20 20:51:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.6 2003/05/23 13:58:29 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -85,8 +85,7 @@ IfTree::finalize_state()
 	// If interface is marked as deleted, delete it.
 	//
 	if (ii->second.is_marked(DELETED)) {
-	    IfMap::iterator ii_tmp = ii++;
-	    _ifs.erase(ii_tmp);
+	    _ifs.erase(ii++);
 	    continue;
 	}
 	//
@@ -226,8 +225,7 @@ IfTreeInterface::finalize_state()
 	// If interface is marked as deleted, delete it.
 	//
 	if (vi->second.is_marked(DELETED)) {
-	    VifMap::iterator vi_tmp = vi++;
-	    _vifs.erase(vi_tmp);
+	    _vifs.erase(vi++);
 	    continue;
 	}
 	//
@@ -309,8 +307,7 @@ IfTreeVif::finalize_state()
 	// If address is marked as deleted, delete it.
 	//
 	if (ai->second.is_marked(DELETED)) {
-	    V4Map::iterator ai_tmp = ai++;
-	    _v4addrs.erase(ai_tmp);
+	    _v4addrs.erase(ai++);
 	    continue;
 	}
 	//
@@ -325,8 +322,7 @@ IfTreeVif::finalize_state()
 	// If address is marked as deleted, delete it.
 	//
 	if (ai->second.is_marked(DELETED)) {
-	    V6Map::iterator ai_tmp = ai++;
-	    _v6addrs.erase(ai_tmp);
+	    _v6addrs.erase(ai++);
 	    continue;
 	}
 	//
