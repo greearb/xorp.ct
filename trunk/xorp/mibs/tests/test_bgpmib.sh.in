@@ -33,15 +33,11 @@ CALLXRL='../../libxipc/call_xrl -r 5 -w 20'
 
 configure_snmp()
 {
-    # these two variables are used by the tests
-    export SNMPCONF='-t 10 -c xorp -v 2c'
-    export SNMPHOST=localhost:51515
-
-    # the rest is to configure the snmp agent
+    # configuration variables for the snmp agent
     SNMPDCONF=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd.conf
     LOGSTAMP=`date "+%y%m%d%H%M%S"`
     export SNMPDLOG=${XORP_TOP_BUILDDIR}/mibs/tests/snmpd${LOGSTAMP}.log
-    SNMPDDBG=bgp4_mib_1657,xorp_if_mib_module
+    SNMPDDBG="bgp4_mib_1657,xorp_if_mib_module,trap"
     echo 'rwcommunity xorp' > ${SNMPDCONF}
     echo "dlmod xorp_if_mib_module "					\
 	 "${XORP_TOP_BUILDDIR}/mibs/xorp_if_mib_module.so"		\
@@ -50,6 +46,16 @@ configure_snmp()
     export LD_LIBRARY_PATH
     MIBDIRS=+`(cd ${srcdir}/../textual; pwd)`
     export MIBDIRS
+
+    # configuration variables for the trap daemon
+    SNMPTRAPPORT=51510
+    export SNMPTRAPLOG=${XORP_TOP_BUILDDIR}/mibs/tests/snmptrap${LOGSTAMP}.log
+    echo "trap2sink localhost xorp ${SNMPTRAPPORT}" >> ${SNMPDCONF}
+
+    # these variables are used by the tests
+    export SNMPCONF='-t 10 -c xorp -v 2c'
+    export SNMPHOST=localhost:51515
+    export SNMPTRAPHOST="localhost:${SNMPTRAPPORT}"
 }
 onexit()
 {
@@ -301,8 +307,55 @@ test2()
     reset
 }
 
+#
+# This test tests the BGP SNMP traps 
+#
+
+test3()
+{
+    TFILE=$1
+
+    echo "TEST3 - Generate traps and verify that they are being received"
+    echo "by the management station"
+
+    # Reset the peers
+    reset
+
+    # Have peer1 connect to BGP and feed it routes 
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+    
+    # load the BGP mib
+    ABS_PATH_TO_MIBS=`(cd ..;pwd)`
+
+    BGP_MIB_IDX=`${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=bgp4_mib_1657&abs_path:txt=${ABS_PATH_TO_MIBS}/bgp4_mib_1657.so" | \
+	sed -e 's/.*mib_index:u32=//'` 
+	
+    # verify that the BGP mib is loaded
+    ${CALLXRL} "finder://bgp4_mib/common/0.1/get_status"
+
+    BOGUS_ERROR=`date "+%y%m%d%H%M%S"`
+
+    # ensure that this string is not in the trap log
+    grep -v ${BOGUS_ERROR} ${SNMPTRAPLOG} > /dev/null
+
+    ${CALLXRL} "finder://bgp4_mib/bgp_mib_traps/0.1/send_bgp_established_trap?bgp_last_error:txt=${BOGUS_ERROR}&bgp_state:u32=6"
+
+    # verify that the trap appears in the trap log
+    grep ${BOGUS_ERROR} ${SNMPTRAPLOG} > /dev/null
+
+    # Unload MIB
+    ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=${BGP_MIB_IDX}"
+    BGP_MIB_IDX=""
+
+    echo OK
+    # Reset the connection
+    reset
+}
+
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test2'
+TESTS='test1 test2 test3'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
@@ -314,6 +367,7 @@ if [ ${START_PROGRAMS} = "yes" ]
 then
     SNMPD=/usr/local/sbin/snmpd
     if [ "$SNMPD" = "not_found" ]; then exit 1; fi
+    SNMPTRAPD=`echo ${SNMPD} | sed -e 's/snmpd/snmptrapd/'`
     configure_snmp
     CXRL="$CALLXRL -r 10"
     XTB=${XORP_TOP_BUILDDIR}
@@ -326,6 +380,7 @@ then
     ${BH}/test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
     ${BH}/coord = $CXRL finder://coord/common/0.1/get_target_name
     ${SNMPD} -f -l ${SNMPDLOG} -D${SNMPDDBG} -C -c ${SNMPDCONF} -r ${SNMPHOST} = $CXRL finder://xorp_if_mib/common/0.1/get_status
+    ${SNMPTRAPD} -f -o ${SNMPTRAPLOG} ${SNMPTRAPHOST}
 EOF
     trap '' 0
     exit $?

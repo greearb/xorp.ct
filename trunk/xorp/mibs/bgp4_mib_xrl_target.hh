@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/bgp4_mib_xrl_target.hh,v 1.2 2003/05/20 00:58:34 jcardona Exp $
+// $XORP: xorp/mibs/bgp4_mib_xrl_target.hh,v 1.3 2003/05/29 23:50:13 hodson Exp $
 
 #ifndef __MIBS_BGP4_MIB_XRL_TARGET_HH__
 #define __MIBS_BGP4_MIB_XRL_TARGET_HH__
@@ -47,6 +47,22 @@ public:
     {
 	return XrlCmdError::COMMAND_FAILED("Not Implemented");
     }
+
+    /**
+     *  Send bgpEstablished trap
+     */
+    XrlCmdError bgp_mib_traps_0_1_send_bgp_established_trap(
+	// Input values, 
+	const string&	bgp_last_error, 
+	const uint32_t&	bgp_state);
+
+    /**
+     *  Send bgpBackwardTransition trap
+     */
+    XrlCmdError bgp_mib_traps_0_1_send_bgp_backward_transition_trap(
+	// Input values, 
+	const string&	bgp_last_error, 
+	const uint32_t&	bgp_state);
     
 private:
     /**

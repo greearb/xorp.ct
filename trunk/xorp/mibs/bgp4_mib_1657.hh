@@ -40,8 +40,8 @@ void          deinit_bgp4_mib_1657 (void);
  *
  */
 
-class BgpMib : public XrlBgpV0p2Client {
-
+class BgpMib : public XrlBgpV0p2Client
+{
 public:
     static BgpMib& the_instance();
     static const char * name()    { return XORP_MODULE_NAME; };
