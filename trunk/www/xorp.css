@@ -31,14 +31,17 @@ img {
 }
 
 #main th {
+   font-size: 12pt;
    background: #b0b0b0;
 }
 
 .odd {
+   font-size: 12pt;
    background: white;
 }
 
 .even {
+   font-size: 12pt;
    background: #e0e0e0;
 }
 
