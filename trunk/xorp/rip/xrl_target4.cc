@@ -258,7 +258,7 @@ XrlRip4Target::rip4_0_1_horizon(const string&	ifname,
 	return XrlCmdError::COMMAND_FAILED(c_format(			\
 	    "RIP not running on %s/%s/%s",				\
 	    ifname.c_str(), vifname.c_str(), addr.str().c_str()));	\
-    t = p->constants().##field ();					\
+    t = p->constants(). field ();					\
     return XrlCmdError::OKAY();
 
 
