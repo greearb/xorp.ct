@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.21 2004/05/20 22:18:18 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.22 2004/06/10 13:49:27 hodson Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -318,7 +318,7 @@ public:
      * @param protocol the name of the table to search for.
      * @return pointer to table if exists, NULL otherwise.
      */
-    inline Protocol* find_protocol(const string& protocol);
+    Protocol* find_protocol(const string& protocol);
 
     /**
      * Get route redistribution table for specified routing protocol.
