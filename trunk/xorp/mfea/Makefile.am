@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mfea/Makefile.am,v 1.24 2002/12/09 09:43:56 pavlin Exp $
+## $XORP: xorp/mfea/Makefile.am,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $
 ##
 
 # -- Real Programs
@@ -49,6 +49,7 @@ libmfea_a_SOURCES += mfea_unix_osdep.hh
 libmfea_a_SOURCES += mfea_vif.hh
 libmfea_a_SOURCES += xrl_mfea_node.hh
 
+libmfea_a_SOURCES += mfea_config.cc
 libmfea_a_SOURCES += mfea_dataflow.cc
 libmfea_a_SOURCES += mfea_node.cc
 libmfea_a_SOURCES += mfea_node_cli.cc

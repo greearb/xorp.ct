@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_unix_osdep.hh,v 1.17 2002/12/09 18:29:18 hodson Exp $
+// $XORP: xorp/mfea/mfea_unix_osdep.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
 
 #ifndef __MFEA_MFEA_UNIX_OSDEP_HH__
 #define __MFEA_MFEA_UNIX_OSDEP_HH__
@@ -104,8 +104,6 @@
 #  error "You need a better OS!"
 #endif // KERNEL_MRIB_METHOD
 
-#define MRIB_DEFAULT_METRIC		100  // TODO: must be configurable
-#define MRIB_DEFAULT_METRIC_PREFERENCE	100  // TODO: must be configurable
 
 //
 // Structures, typedefs and macros

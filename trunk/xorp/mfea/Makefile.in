@@ -91,7 +91,7 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(
 
 # -- Program Sources
 test_mfea_SOURCES = test_mfea.cc
-libmfea_a_SOURCES = mfea_module.h mfea_dataflow.hh mfea_node.hh mfea_node_cli.hh mfea_private.hh mfea_unix_comm.hh mfea_unix_kernel_messages.hh mfea_unix_osdep.hh mfea_vif.hh xrl_mfea_node.hh mfea_dataflow.cc mfea_node.cc mfea_node_cli.cc mfea_unix_comm.cc mfea_unix_if_getifaddrs.cc mfea_unix_if_ioctl.cc mfea_unix_if_sysctl.cc mfea_unix_mrib_netlink.cc mfea_unix_mrib_rawsock.cc mfea_unix_rtread_sysctl.cc mfea_unix_rtread_netlink.cc mfea_vif.cc xrl_mfea_node.cc
+libmfea_a_SOURCES = mfea_module.h mfea_dataflow.hh mfea_node.hh mfea_node_cli.hh mfea_private.hh mfea_unix_comm.hh mfea_unix_kernel_messages.hh mfea_unix_osdep.hh mfea_vif.hh xrl_mfea_node.hh mfea_config.cc mfea_dataflow.cc mfea_node.cc mfea_node_cli.cc mfea_unix_comm.cc mfea_unix_if_getifaddrs.cc mfea_unix_if_ioctl.cc mfea_unix_if_sysctl.cc mfea_unix_mrib_netlink.cc mfea_unix_mrib_rawsock.cc mfea_unix_rtread_sysctl.cc mfea_unix_rtread_netlink.cc mfea_vif.cc xrl_mfea_node.cc
 EXTRA_DIST = DEVNOTES configure_mfea xrl_mfea_shell_funcs.sh xrl_shell_lib.sh
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -103,11 +103,11 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LIBS = @LIBS@
 libmfea_a_LIBADD = 
-libmfea_a_OBJECTS =  mfea_dataflow.o mfea_node.o mfea_node_cli.o \
-mfea_unix_comm.o mfea_unix_if_getifaddrs.o mfea_unix_if_ioctl.o \
-mfea_unix_if_sysctl.o mfea_unix_mrib_netlink.o mfea_unix_mrib_rawsock.o \
-mfea_unix_rtread_sysctl.o mfea_unix_rtread_netlink.o mfea_vif.o \
-xrl_mfea_node.o
+libmfea_a_OBJECTS =  mfea_config.o mfea_dataflow.o mfea_node.o \
+mfea_node_cli.o mfea_unix_comm.o mfea_unix_if_getifaddrs.o \
+mfea_unix_if_ioctl.o mfea_unix_if_sysctl.o mfea_unix_mrib_netlink.o \
+mfea_unix_mrib_rawsock.o mfea_unix_rtread_sysctl.o \
+mfea_unix_rtread_netlink.o mfea_vif.o xrl_mfea_node.o
 PROGRAMS =  $(bin_PROGRAMS)
 
 test_mfea_OBJECTS =  test_mfea.o
@@ -141,7 +141,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/mfea_dataflow.P .deps/mfea_node.P \
+DEP_FILES =  .deps/mfea_config.P .deps/mfea_dataflow.P .deps/mfea_node.P \
 .deps/mfea_node_cli.P .deps/mfea_unix_comm.P \
 .deps/mfea_unix_if_getifaddrs.P .deps/mfea_unix_if_ioctl.P \
 .deps/mfea_unix_if_sysctl.P .deps/mfea_unix_mrib_netlink.P \

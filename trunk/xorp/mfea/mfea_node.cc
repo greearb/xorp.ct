@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mfea/mfea_node.cc,v 1.2 2003/01/26 04:06:21 pavlin Exp $"
 
 
 //
@@ -66,6 +66,8 @@ MfeaNode::MfeaNode(int family, x_module_id module_id,
 		   EventLoop& event_loop)
     : ProtoNode<MfeaVif>(family, module_id, event_loop),
     _mrib_table(family),
+    _mrib_table_default_metric_preference(MRIB_TABLE_DEFAULT_METRIC_PREFERENCE),
+    _mrib_table_default_metric(MRIB_TABLE_DEFAULT_METRIC),
     _mfea_dft(*this),
     _is_log_trace(true)			// XXX: default to print trace logs
 {

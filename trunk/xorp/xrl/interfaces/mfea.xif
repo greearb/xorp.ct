@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.35 2002/12/08 11:02:37 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction XRL interface.
@@ -343,4 +343,29 @@ interface mfea/0.1 {
 	 */
 	enable_log_trace		-> fail:bool & reason:txt
 	disable_log_trace		-> fail:bool & reason:txt
+
+	/**
+	 * Configure MFEA MRIB-related parameters.
+	 * The 'set_foo' XRLs set the particular values. The 'reset_foo'
+	 * XRLs reset the metrics to their default values.
+	 *
+	 * @param metric_preference the MRIB metric preference.
+	 * @param metric the MRIB metric.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	get_mrib_table_default_metric_preference ?			\
+					-> metric_preference:u32	\
+					& fail:bool & reason:txt
+	set_mrib_table_default_metric_preference ? metric_preference:u32 \
+					-> fail:bool & reason:txt
+	reset_mrib_table_default_metric_preference ?			\
+					-> fail:bool & reason:txt
+	get_mrib_table_default_metric ?					\
+					-> metric:u32			\
+					& fail:bool & reason:txt
+	set_mrib_table_default_metric ?	metric:u32			\
+					-> fail:bool & reason:txt
+	reset_mrib_table_default_metric ?				\
+					-> fail:bool & reason:txt
 }

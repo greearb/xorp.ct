@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/mfea_node.hh,v 1.68 2002/12/09 18:29:17 hodson Exp $
+// $XORP: xorp/mfea/mfea_node.hh,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
 
 
 #ifndef __MFEA_MFEA_NODE_HH__
@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "libxorp/ipvx.hh"
+#include "libxorp/config_param.hh"
 #include "libproto/proto_node.hh"
 #include "libproto/proto_register.hh"
 #include "mrt/mrib_table.hh"
@@ -881,6 +882,60 @@ public:
     MribTable&	mrib_table() { return (_mrib_table); }
     
     /**
+     * Get a reference to the default metric preference for the MRIB table.
+     * 
+     * Note that this is a configurable parameter.
+     * 
+     * @return a reference to the default metric preference for the MRIB table.
+     */
+    ConfigParam<uint32_t>& mrib_table_default_metric_preference() {
+	return (_mrib_table_default_metric_preference);
+    }
+    
+    /**
+     * Set the default metric preference for the MRIB table.
+     * 
+     * @param metric_preference the new value for the default metric
+     * preference.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_mrib_table_default_metric_preference(uint32_t metric_preference);
+    
+    /**
+     * Reset the default metric preference for the MRIB table to its original
+     * value.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int reset_mrib_table_default_metric_preference();
+    
+    /**
+     * Get a reference to the default metric for the MRIB table.
+     * 
+     * Note that this is a configurable parameter.
+     * 
+     * @return a reference to the default metric for the MRIB table.
+     */
+    ConfigParam<uint32_t>& mrib_table_default_metric() {
+	return (_mrib_table_default_metric);
+    }
+
+    /**
+     * Set the default metric for the MRIB table.
+     * 
+     * @param metric the new value for the default metric.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_mrib_table_default_metric(uint32_t metric);
+    
+    /**
+     * Reset the default metric for the MRIB table to its original value.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int reset_mrib_table_default_metric();
+    
+    /**
      * Get a reference to the timer for periodic update of the local
      * MRIB table (@ref MribTable) from the kernel.
      * 
@@ -945,7 +1000,12 @@ private:
     
     // Private state
     vector<UnixComm *>	_unix_comms;	// The set of active UnixComm entries
+    
     MribTable	_mrib_table;		// The MRIB table (XXX: optional)
+#define MRIB_TABLE_DEFAULT_METRIC_PREFERENCE	100
+#define MRIB_TABLE_DEFAULT_METRIC		100
+    ConfigParam<uint32_t> _mrib_table_default_metric_preference;
+    ConfigParam<uint32_t> _mrib_table_default_metric;
 #define MRIB_TABLE_READ_PERIOD_SEC 10
 #define MRIB_TABLE_READ_PERIOD_USEC 0
     Timer	_mrib_table_read_timer;	// Timer to (re)read the MRIB table

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.3 2003/01/16 19:31:55 pavlin Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.4 2003/01/26 04:06:22 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -2884,6 +2884,105 @@ XrlMfeaNode::mfea_0_1_disable_log_trace(
     MfeaNode::set_log_trace(false);
     
     fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_get_mrib_table_default_metric_preference(
+    // Output values, 
+    uint32_t&	metric_preference, 
+    bool&	fail, 
+    string&	reason)
+{
+    metric_preference = MfeaNode::mrib_table_default_metric_preference().get();
+    
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_set_mrib_table_default_metric_preference(
+    // Input values, 
+    const uint32_t&	metric_preference, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (MfeaNode::set_mrib_table_default_metric_preference(metric_preference)
+	< 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_reset_mrib_table_default_metric_preference(
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (MfeaNode::reset_mrib_table_default_metric_preference() < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_get_mrib_table_default_metric(
+    // Output values, 
+    uint32_t&	metric, 
+    bool&	fail, 
+    string&	reason)
+{
+    metric = MfeaNode::mrib_table_default_metric().get();
+    
+    fail = false;
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_set_mrib_table_default_metric(
+    // Input values, 
+    const uint32_t&	metric, 
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (MfeaNode::set_mrib_table_default_metric(metric) < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
+    reason = "";
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_reset_mrib_table_default_metric(
+    // Output values, 
+    bool&	fail, 
+    string&	reason)
+{
+    if (MfeaNode::reset_mrib_table_default_metric() < 0) {
+	fail = true;
+    } else {
+	fail = false;
+    }
     reason = "";
     
     return XrlCmdError::OKAY();

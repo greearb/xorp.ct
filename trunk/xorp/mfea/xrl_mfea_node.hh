@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.3 2003/01/28 00:37:52 hodson Exp $
+// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.4 2003/02/06 22:21:31 hodson Exp $
 
 #ifndef __MFEA_XRL_MFEA_NODE_HH__
 #define __MFEA_XRL_MFEA_NODE_HH__
@@ -862,6 +862,53 @@ protected:
 	string&	reason);
 
     XrlCmdError mfea_0_1_disable_log_trace(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    /**
+     *  Configure MFEA MRIB-related parameters. The 'set_foo' XRLs set the
+     *  particular values. The 'reset_foo' XRLs reset the metrics to their
+     *  default values.
+     *  
+     *  @param metric_preference the MRIB metric preference.
+     *  
+     *  @param fail true if failure has occured.
+     *  
+     *  @param reason contains failure reason if it occured.
+     */
+    XrlCmdError mfea_0_1_get_mrib_table_default_metric_preference(
+	// Output values, 
+	uint32_t&	metric_preference, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError mfea_0_1_set_mrib_table_default_metric_preference(
+	// Input values, 
+	const uint32_t&	metric_preference, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError mfea_0_1_reset_mrib_table_default_metric_preference(
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError mfea_0_1_get_mrib_table_default_metric(
+	// Output values, 
+	uint32_t&	metric, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError mfea_0_1_set_mrib_table_default_metric(
+	// Input values, 
+	const uint32_t&	metric, 
+	// Output values, 
+	bool&	fail, 
+	string&	reason);
+
+    XrlCmdError mfea_0_1_reset_mrib_table_default_metric(
 	// Output values, 
 	bool&	fail, 
 	string&	reason);
