@@ -13,14 +13,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_pol_redist.cc,v 1.2 2004/09/18 02:05:52 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_pol_redist.cc,v 1.3 2005/01/27 23:29:36 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "rib_module.h"
-#include "rt_tab_pol_redist.hh"
 
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
+#include "rt_tab_pol_redist.hh"
 
 
 template <class A>

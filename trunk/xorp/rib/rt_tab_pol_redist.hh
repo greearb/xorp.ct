@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_pol_redist.hh,v 1.1 2004/09/17 14:00:04 abittau Exp $
+// $XORP: xorp/rib/rt_tab_pol_redist.hh,v 1.2 2004/09/18 02:05:53 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_POL_REDIST_HH__
 #define __RIB_RT_TAB_POL_REDIST_HH__
@@ -21,8 +21,6 @@
 #include "rt_tab_base.hh"
 
 #include "libxorp/xorp.h"
-#include "libxorp/xlog.h"
-#include "libxorp/debug.h"
 #include "libxorp/utils.hh"
 #include "libxorp/eventloop.hh"
 

@@ -12,11 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.22 2005/03/03 07:42:43 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.23 2005/03/04 08:43:38 pavlin Exp $"
 
 #include "rib_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #include "rt_tab_extint.hh"
 

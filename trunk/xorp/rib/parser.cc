@@ -12,15 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/parser.cc,v 1.12 2004/06/10 22:41:37 hodson Exp $"
+#ident "$XORP: xorp/rib/parser.cc,v 1.13 2005/03/04 08:36:35 pavlin Exp $"
 
 #include <stdexcept>
 
 #include "rib_module.h"
 
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
-#include "libxorp/xlog.h"
 
 #include "parser.hh"
 

@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/rib/profile_vars.cc,v 1.1 2004/09/28 08:14:44 atanu Exp $"
 
-#include "config.h"
 #include "rib_module.h"
 
-#include "libxorp/debug.h"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-
+#include "libxorp/debug.h"
 #include "libxorp/profile.hh"
+
 #include "profile_vars.hh"
 
 struct profile_vars {

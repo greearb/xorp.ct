@@ -12,13 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.15 2004/06/10 22:41:40 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.16 2005/01/27 23:30:27 pavlin Exp $"
 
 #include "rib_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #include "rt_tab_merged.hh"
+
 
 template <typename A>
 inline static string

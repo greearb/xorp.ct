@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/add_route.cc,v 1.2 2004/09/29 02:30:51 atanu Exp $"
+#ident "$XORP: xorp/rib/add_route.cc,v 1.3 2005/02/01 07:24:41 pavlin Exp $"
 
 // Add routes to the RIB.
 
@@ -28,7 +28,6 @@
 #include <cstdlib>
 #include <vector>
 
-#include "config.h"
 #include "rib_module.h"
 
 #include "libxorp/xorp.h"
@@ -36,7 +35,9 @@
 #include "libxorp/debug.h"
 #include "libxorp/callback.hh"
 #include "libxorp/ipv4.hh"
+
 #include "libxipc/xrl_std_router.hh"
+
 #include "xrl/interfaces/rib_xif.hh"
 
 template <typename A>

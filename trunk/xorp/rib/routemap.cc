@@ -12,9 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/routemap.cc,v 1.7 2004/02/11 08:48:47 pavlin Exp $"
+#ident "$XORP: xorp/rib/routemap.cc,v 1.8 2004/06/10 22:41:39 hodson Exp $"
 
 #include "rib_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #include "routemap.hh"
 

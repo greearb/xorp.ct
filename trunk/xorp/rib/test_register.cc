@@ -13,14 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.17 2004/10/06 21:21:06 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.18 2004/10/29 01:10:06 bms Exp $"
 
 #include "rib_module.h"
 
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
-#include "libxorp/xlog.h"
 
 #include "rib_manager.hh"
 #include "rib.hh"
