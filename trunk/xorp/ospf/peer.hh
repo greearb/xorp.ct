@@ -79,6 +79,40 @@ class PeerOut {
      */
     bool received(/* XXX */);
 
+    // Configure the peering.
+
+    /**
+     * Set the network mask OSPFv2 only.
+     */
+    void set_network_mask(OspfTypes::AreaID area, uint32_t network_mask);
+
+    /**
+     * Set the interface ID OSPFv3 only.
+     */
+    void set_interface_id(OspfTypes::AreaID area, uint32_t interface_id);
+
+    /**
+     * Set the hello interval in seconds.
+     */
+    void set_hello_interval(OspfTypes::AreaID area, uint16_t hello_interval);
+
+    /**
+     * Set options.
+     */
+    void set_options(OspfTypes::AreaID area, uint32_t options);
+
+    /**
+     * Set router priority.
+     */
+    void set_router_priority(OspfTypes::AreaID area, uint8_t priority);
+
+    /**
+     * Set the router dead interval in seconds.
+     */
+    void set_router_dead_interval(OspfTypes::AreaID area,
+				  uint32_t router_dead_interval);
+    
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 

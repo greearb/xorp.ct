@@ -109,6 +109,7 @@ class PeerManager {
 			 Packet *packet);
 
     // Configure the peering.
+
     /**
      * Set the network mask OSPFv2 only.
      */
@@ -144,7 +145,6 @@ class PeerManager {
      */
     void set_router_dead_interval(const PeerID, OspfTypes::AreaID area,
 				  uint32_t router_dead_interval);
-
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
