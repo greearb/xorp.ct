@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.7 2003/07/31 21:59:40 pavlin Exp $
+## $XORP: xorp/contrib/ospfd/xorp/Makefile.am,v 1.8 2003/08/01 02:11:49 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -22,7 +22,7 @@ noinst_LIBRARIES =
 AM_CPPFLAGS  = -I$(top_builddir) -I$(srcdir)/../src
 
 # -- Libraries and library flags to link the binary programs
-LDADD	     = $(top_builddir)/ospfd/src/libospfd.a
+LDADD	     = $(top_builddir)/contrib/ospfd/src/libospfd.a
 LDADD	    += $(top_builddir)/xrl/targets/libospfbase.a
 LDADD	    += $(top_builddir)/xrl/interfaces/libribxif.a
 LDADD	    += $(top_builddir)/libxipc/libxipc.a
