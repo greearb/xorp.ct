@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.24 2003/05/31 17:53:37 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.25 2003/06/01 02:13:45 pavlin Exp $"
 
 #include "pim_module.h"
 #include "pim_private.hh"
@@ -3019,11 +3019,23 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name4(
 {
     string err;
     
+    if (bsr_priority > 0xff) {
+	string msg = c_format("Invalid BSR priority = %d",
+			      bsr_priority);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (hash_masklen > 0xff) {
+	string msg = c_format("Invalid hash masklen = %d",
+			      hash_masklen);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_config_cand_bsr_by_vif_name(IPvXNet(scope_zone_id),
 						 is_scope_zone,
 						 vif_name,
-						 bsr_priority,
-						 hash_masklen,
+						 reinterpret_cast<const uint8_t&>(bsr_priority),
+						 reinterpret_cast<const uint8_t&>(hash_masklen),
 						 err)
 	< 0) {
 	string msg = c_format("Failed to add cand-BSR for zone %s on vif %s: %s",
@@ -3048,11 +3060,23 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_vif_name6(
 {
     string err;
     
+    if (bsr_priority > 0xff) {
+	string msg = c_format("Invalid BSR priority = %d",
+			      bsr_priority);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (hash_masklen > 0xff) {
+	string msg = c_format("Invalid hash masklen = %d",
+			      hash_masklen);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_config_cand_bsr_by_vif_name(IPvXNet(scope_zone_id),
 						 is_scope_zone,
 						 vif_name,
-						 bsr_priority,
-						 hash_masklen,
+						 reinterpret_cast<const uint8_t&>(bsr_priority),
+						 reinterpret_cast<const uint8_t&>(hash_masklen),
 						 err)
 	< 0) {
 	string msg = c_format("Failed to add cand-BSR for zone %s on vif %s: %s",
@@ -3077,11 +3101,23 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr4(
 {
     string err;
     
+    if (bsr_priority > 0xff) {
+	string msg = c_format("Invalid BSR priority = %d",
+			      bsr_priority);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (hash_masklen > 0xff) {
+	string msg = c_format("Invalid hash masklen = %d",
+			      hash_masklen);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_config_cand_bsr_by_addr(IPvXNet(scope_zone_id),
 					     is_scope_zone,
 					     IPvX(cand_bsr_addr),
-					     bsr_priority,
-					     hash_masklen,
+					     reinterpret_cast<const uint8_t&>(bsr_priority),
+					     reinterpret_cast<const uint8_t&>(hash_masklen),
 					     err)
 	< 0) {
 	string msg = c_format("Failed to add cand-BSR for zone %s on vif "
@@ -3107,11 +3143,23 @@ XrlPimNode::pim_0_1_add_config_cand_bsr_by_addr6(
 {
     string err;
     
+    if (bsr_priority > 0xff) {
+	string msg = c_format("Invalid BSR priority = %d",
+			      bsr_priority);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (hash_masklen > 0xff) {
+	string msg = c_format("Invalid hash masklen = %d",
+			      hash_masklen);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_config_cand_bsr_by_addr(IPvXNet(scope_zone_id),
 					     is_scope_zone,
 					     IPvX(cand_bsr_addr),
-					     bsr_priority,
-					     hash_masklen,
+					     reinterpret_cast<const uint8_t&>(bsr_priority),
+					     reinterpret_cast<const uint8_t&>(hash_masklen),
 					     err)
 	< 0) {
 	string msg = c_format("Failed to add cand-BSR for zone %s on vif "
@@ -3179,11 +3227,23 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name4(
 {
     string err;
     
+    if (rp_priority > 0xff) {
+	string msg = c_format("Invalid RP priority = %d",
+			      rp_priority);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (rp_holdtime > 0xffff) {
+	string msg = c_format("Invalid RP holdtime = %d",
+			      rp_holdtime);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
 						is_scope_zone,
 						vif_name,
-						rp_priority,
-						rp_holdtime,
+						reinterpret_cast<const uint8_t&>(rp_priority),
+						reinterpret_cast<const uint16_t&>(rp_holdtime),
 						err)
 	< 0) {
 	string msg = c_format("Failed to add Cand-RP for prefix %s on vif %s: %s",
@@ -3207,11 +3267,23 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_vif_name6(
 {
     string err;
     
+    if (rp_priority > 0xff) {
+	string msg = c_format("Invalid RP priority = %d",
+			      rp_priority);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (rp_holdtime > 0xffff) {
+	string msg = c_format("Invalid RP holdtime = %d",
+			      rp_holdtime);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_config_cand_rp_by_vif_name(IPvXNet(group_prefix),
 						is_scope_zone,
 						vif_name,
-						rp_priority,
-						rp_holdtime,
+						reinterpret_cast<const uint8_t&>(rp_priority),
+						reinterpret_cast<const uint16_t&>(rp_holdtime),
 						err)
 	< 0) {
 	string msg = c_format("Failed to add Cand-RP for prefix %s on vif %s: %s",
@@ -3235,11 +3307,23 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr4(
 {
     string err;
     
+    if (rp_priority > 0xff) {
+	string msg = c_format("Invalid RP priority = %d",
+			      rp_priority);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (rp_holdtime > 0xffff) {
+	string msg = c_format("Invalid RP holdtime = %d",
+			      rp_holdtime);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_config_cand_rp_by_addr(IPvXNet(group_prefix),
 					    is_scope_zone,
 					    IPvX(cand_rp_addr),
-					    rp_priority,
-					    rp_holdtime,
+					    reinterpret_cast<const uint8_t&>(rp_priority),
+					    reinterpret_cast<const uint16_t&>(rp_holdtime),
 					    err)
 	< 0) {
 	string msg = c_format("Failed to add Cand-RP for prefix %s on vif "
@@ -3264,11 +3348,23 @@ XrlPimNode::pim_0_1_add_config_cand_rp_by_addr6(
 {
     string err;
     
+    if (rp_priority > 0xff) {
+	string msg = c_format("Invalid RP priority = %d",
+			      rp_priority);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (rp_holdtime > 0xffff) {
+	string msg = c_format("Invalid RP holdtime = %d",
+			      rp_holdtime);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_config_cand_rp_by_addr(IPvXNet(group_prefix),
 					    is_scope_zone,
 					    IPvX(cand_rp_addr),
-					    rp_priority,
-					    rp_holdtime,
+					    reinterpret_cast<const uint8_t&>(rp_priority),
+					    reinterpret_cast<const uint16_t&>(rp_holdtime),
 					    err)
 	< 0) {
 	string msg = c_format("Failed to add Cand-RP for prefix %s on vif "
@@ -3389,10 +3485,22 @@ XrlPimNode::pim_0_1_add_config_static_rp4(
 {
     string err;
     
+    if (rp_priority > 0xff) {
+	string msg = c_format("Invalid RP priority = %d",
+			      rp_priority);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (hash_masklen > 0xff) {
+	string msg = c_format("Invalid hash masklen = %d",
+			      hash_masklen);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_config_static_rp(IPvXNet(group_prefix),
 				      IPvX(rp_addr),
-				      rp_priority,
-				      hash_masklen,
+				      reinterpret_cast<const uint8_t&>(rp_priority),
+				      reinterpret_cast<const uint8_t&>(hash_masklen),
 				      err)
 	< 0) {
 	string msg = c_format("Failed to add %s to RP-Set as static RP for prefix %s: %s",
@@ -3415,10 +3523,22 @@ XrlPimNode::pim_0_1_add_config_static_rp6(
 {
     string err;
     
+    if (rp_priority > 0xff) {
+	string msg = c_format("Invalid RP priority = %d",
+			      rp_priority);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (hash_masklen > 0xff) {
+	string msg = c_format("Invalid hash masklen = %d",
+			      hash_masklen);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_config_static_rp(IPvXNet(group_prefix),
 				      IPvX(rp_addr),
-				      rp_priority,
-				      hash_masklen,
+				      reinterpret_cast<const uint8_t&>(rp_priority),
+				      reinterpret_cast<const uint8_t&>(hash_masklen),
 				      err)
 	< 0) {
 	string msg = c_format("Failed to add %s to RP-Set as static RP for prefix %s: %s",
@@ -3574,14 +3694,14 @@ XrlPimNode::pim_0_1_set_vif_hello_triggered_delay(
 {
     string err;
     
-    if (hello_triggered_delay > (uint16_t)~0) {
+    if (hello_triggered_delay > 0xffff) {
 	err = c_format("Invalid Hello triggered delay value %d: "
 		       "max allowed is %d",
 		       hello_triggered_delay,
-		       (uint16_t)~0);
+		       0xffff);
     }
     
-    if ((hello_triggered_delay > (uint16_t)~0)
+    if ((hello_triggered_delay > 0xffff)
 	|| (PimNode::set_vif_hello_triggered_delay(vif_name,
 						   hello_triggered_delay,
 						   err)
@@ -3642,14 +3762,14 @@ XrlPimNode::pim_0_1_set_vif_hello_period(
 {
     string err;
     
-    if (hello_period > (uint16_t)~0) {
+    if (hello_period > 0xffff) {
 	err = c_format("Invalid Hello period value %d: "
 		       "max allowed is %d",
 		       hello_period,
-		       (uint16_t)~0);
+		       0xffff);
     }
     
-    if ((hello_period > (uint16_t)~0)
+    if ((hello_period > 0xffff)
 	|| (PimNode::set_vif_hello_period(vif_name, hello_period, err)
 	    < 0)) {
 	string msg = c_format("Failed to set 'Hello period' for vif %s to %d: %s",
@@ -3707,14 +3827,14 @@ XrlPimNode::pim_0_1_set_vif_hello_holdtime(
 {
     string err;
     
-    if (hello_holdtime > (uint16_t)~0) {
+    if (hello_holdtime > 0xffff) {
 	err = c_format("Invalid Hello holdtime value %d: "
 		       "max allowed is %d",
 		       hello_holdtime,
-		       (uint16_t)~0);
+		       0xffff);
     }
     
-    if ((hello_holdtime > (uint16_t)~0)
+    if ((hello_holdtime > 0xffff)
 	|| (PimNode::set_vif_hello_holdtime(vif_name, hello_holdtime, err)
 	    < 0)) {
 	string msg = c_format("Failed to set 'Hello holdtime' for vif %s to %d",
@@ -3772,14 +3892,14 @@ XrlPimNode::pim_0_1_set_vif_dr_priority(
 {
     string err;
     
-    if (dr_priority > (uint32_t)~0) {
+    if (dr_priority > 0xffffffff) {
 	err = c_format("Invalid DR priority value %d: "
 		       "max allowed is %d",
 		       dr_priority,
-		       (uint32_t)~0);
+		       0xffffffff);
     }
     
-    if ((dr_priority > (uint32_t)~0)
+    if ((dr_priority > 0xffffffff)
 	|| (PimNode::set_vif_dr_priority(vif_name, dr_priority, err) < 0)) {
 	string msg = c_format("Failed to set 'DR priority' for vif %s to %d: %s",
 			      vif_name.c_str(),
@@ -3837,14 +3957,14 @@ XrlPimNode::pim_0_1_set_vif_lan_delay(
 {
     string err;
     
-    if (lan_delay > (uint16_t)~0) {
+    if (lan_delay > 0xffff) {
 	err = c_format("Invalid LAN delay value %d: "
 		       "max allowed is %d",
 		       lan_delay,
-		       (uint16_t)~0);
+		       0xffff);
     }
     
-    if ((lan_delay > (uint16_t)~0)
+    if ((lan_delay > 0xffff)
 	|| (PimNode::set_vif_lan_delay(vif_name, lan_delay, err) < 0)) {
 	string msg = c_format("Failed to set 'LAN delay' for vif %s to %d: %s",
 			      vif_name.c_str(),
@@ -3902,14 +4022,14 @@ XrlPimNode::pim_0_1_set_vif_override_interval(
 {
     string err;
     
-    if (override_interval > (uint16_t)~0) {
+    if (override_interval > 0xffff) {
 	err = c_format("Invalid Override interval value %d: "
 		       "max allowed is %d",
 		       override_interval,
-		       (uint16_t)~0);
+		       0xffff);
     }
     
-    if ((override_interval > (uint16_t)~0)
+    if ((override_interval > 0xffff)
 	|| (PimNode::set_vif_override_interval(vif_name, override_interval, err)
 	    < 0)) {
 	string msg = c_format("Failed to set 'override interval' for vif %s to %d: %s",
@@ -4086,14 +4206,14 @@ XrlPimNode::pim_0_1_set_vif_join_prune_period(
 {
     string err;
     
-    if (join_prune_period > (uint16_t)~0) {
+    if (join_prune_period > 0xffff) {
 	err = c_format("Invalid Join/Prune period value %d: "
 		       "max allowed is %d",
 		       join_prune_period,
-		       (uint16_t)~0);
+		       0xffff);
     }
     
-    if ((join_prune_period > (uint16_t)~0)
+    if ((join_prune_period > 0xffff)
 	|| (PimNode::set_vif_join_prune_period(vif_name, join_prune_period, err)
 	    < 0)) {
 	string msg = c_format("Failed to set 'Join/Prune period' for vif %s to %d: %s",
@@ -4247,9 +4367,29 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
 	return XrlCmdError::COMMAND_FAILED(msg);
     } while (false);
     
+    if (group_masklen > 0xff) {
+	string msg = c_format("Invalid group masklen = %d",
+			      group_masklen);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+
+    if (group_masklen > 0xff) {
+	string msg = c_format("Invalid group masklen = %d",
+			      group_masklen);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (holdtime > 0xffff) {
+	string msg = c_format("Invalid holdtime = %d",
+			      holdtime);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_test_jp_entry(IPvX(source_addr), IPvX(group_addr),
-				   group_masklen, entry_type, action_type,
-				   holdtime, new_group_bool)
+				   reinterpret_cast<const uint8_t&>(group_masklen),
+				   entry_type, action_type,
+				   reinterpret_cast<const uint16_t&>(holdtime),
+				   new_group_bool)
 	< 0) {
 	string msg = c_format("Failed to add Join/Prune test entry for (%s, %s)",
 			      cstring(source_addr),
@@ -4318,9 +4458,23 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
 	return XrlCmdError::COMMAND_FAILED(msg);
     } while (false);
     
+    if (group_masklen > 0xff) {
+	string msg = c_format("Invalid group masklen = %d",
+			      group_masklen);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
+    if (holdtime > 0xffff) {
+	string msg = c_format("Invalid holdtime = %d",
+			      holdtime);
+	return XrlCmdError::COMMAND_FAILED(msg);
+    }
+    
     if (PimNode::add_test_jp_entry(IPvX(source_addr), IPvX(group_addr),
-				   group_masklen, entry_type, action_type,
-				   holdtime, new_group_bool)
+				   reinterpret_cast<const uint8_t&>(group_masklen),
+				   entry_type, action_type,
+				   reinterpret_cast<const uint16_t&>(holdtime),
+				   new_group_bool)
 	< 0) {
 	string msg = c_format("Failed to add Join/Prune test entry for (%s, %s)",
 			      cstring(source_addr),
@@ -4444,9 +4598,9 @@ XrlPimNode::pim_0_1_add_test_bsr_zone4(
     if (PimNode::add_test_bsr_zone(PimScopeZoneId(zone_id_scope_zone_prefix,
 						  zone_id_is_scope_zone),
 				   IPvX(bsr_addr),
-				   bsr_priority,
-				   hash_masklen,
-				   fragment_tag)
+				   reinterpret_cast<const uint8_t&>(bsr_priority),
+				   reinterpret_cast<const uint8_t&>(hash_masklen),
+				   reinterpret_cast<const uint16_t&>(fragment_tag))
 	< 0) {
 	string msg = c_format("Failed to add BSR test zone %s with BSR address %s",
 			      cstring(PimScopeZoneId(zone_id_scope_zone_prefix,
@@ -4489,9 +4643,9 @@ XrlPimNode::pim_0_1_add_test_bsr_zone6(
     if (PimNode::add_test_bsr_zone(PimScopeZoneId(zone_id_scope_zone_prefix,
 						  zone_id_is_scope_zone),
 				   IPvX(bsr_addr),
-				   bsr_priority,
-				   hash_masklen,
-				   fragment_tag)
+				   reinterpret_cast<const uint8_t&>(bsr_priority),
+				   reinterpret_cast<const uint8_t&>(hash_masklen),
+				   reinterpret_cast<const uint16_t&>(fragment_tag))
 	< 0) {
 	string msg = c_format("Failed to add BSR test zone %s with BSR address %s",
 			      cstring(PimScopeZoneId(zone_id_scope_zone_prefix,
@@ -4523,7 +4677,7 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix4(
 		       zone_id_is_scope_zone),
 	IPvXNet(group_prefix),
 	is_scope_zone,
-	expected_rp_count)
+	reinterpret_cast<const uint8_t&>(expected_rp_count))
 	< 0) {
 	string msg = c_format("Failed to add group prefix %s for BSR test zone %s",
 			      cstring(group_prefix),
@@ -4555,7 +4709,7 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix6(
 		       zone_id_is_scope_zone),
 	IPvXNet(group_prefix),
 	is_scope_zone,
-	expected_rp_count)
+	reinterpret_cast<const uint8_t&>(expected_rp_count))
 	< 0) {
 	string msg = c_format("Failed to add group prefix %s for BSR test zone %s",
 			      cstring(group_prefix),
@@ -4583,7 +4737,7 @@ XrlPimNode::pim_0_1_add_test_bsr_rp4(
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
-    if (rp_holdtime > 0xff) {
+    if (rp_holdtime > 0xffff) {
 	string msg = c_format("Invalid RP holdtime = %d",
 			      rp_holdtime);
 	return XrlCmdError::COMMAND_FAILED(msg);
@@ -4593,8 +4747,8 @@ XrlPimNode::pim_0_1_add_test_bsr_rp4(
 						zone_id_is_scope_zone),
 				 IPvXNet(group_prefix),
 				 IPvX(rp_addr),
-				 rp_priority,
-				 rp_holdtime)
+				 reinterpret_cast<const uint8_t&>(rp_priority),
+				 reinterpret_cast<const uint16_t&>(rp_holdtime))
 	< 0) {
 	string msg = c_format("Failed to add test Cand-RP %s for group prefix %s for BSR zone %s",
 			      cstring(rp_addr),
@@ -4623,7 +4777,7 @@ XrlPimNode::pim_0_1_add_test_bsr_rp6(
 	return XrlCmdError::COMMAND_FAILED(msg);
     }
     
-    if (rp_holdtime > 0xff) {
+    if (rp_holdtime > 0xffff) {
 	string msg = c_format("Invalid RP holdtime = %d",
 			      rp_holdtime);
 	return XrlCmdError::COMMAND_FAILED(msg);
@@ -4633,8 +4787,8 @@ XrlPimNode::pim_0_1_add_test_bsr_rp6(
 						zone_id_is_scope_zone),
 				 IPvXNet(group_prefix),
 				 IPvX(rp_addr),
-				 rp_priority,
-				 rp_holdtime)
+				 reinterpret_cast<const uint8_t&>(rp_priority),
+				 reinterpret_cast<const uint16_t&>(rp_holdtime))
 	< 0) {
 	string msg = c_format("Failed to add test Cand-RP %s for group prefix %s for BSR zone %s",
 			      cstring(rp_addr),
