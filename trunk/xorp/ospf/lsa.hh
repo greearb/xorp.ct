@@ -489,7 +489,9 @@ class RouterLsa : public Lsa {
  public:
     RouterLsa(OspfTypes::Version version)
 	: Lsa(version)
-    {}
+    {
+	_header.set_ls_type(get_lsa_type());
+    }
 
     RouterLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
 	: Lsa(version, buf, len)
