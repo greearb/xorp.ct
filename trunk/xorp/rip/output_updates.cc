@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_updates.cc,v 1.6 2004/02/20 01:22:03 hodson Exp $"
+#ident "$XORP: xorp/rip/output_updates.cc,v 1.7 2004/03/02 18:02:34 hodson Exp $"
 
 #include "output_updates.hh"
 #include "packet_assembly.hh"
@@ -48,14 +48,14 @@ template <typename A>
 void
 OutputUpdates<A>::output_packet()
 {
-    ResponsePacketAssembler<A> rpa(_port);
-    RipPacket<A>* pkt = new RipPacket<A>(ip_addr(), ip_port());
+    ResponsePacketAssembler<A> rpa(this->_port);
+    RipPacket<A>* pkt = new RipPacket<A>(this->ip_addr(), this->ip_port());
     rpa.packet_start(pkt);
 
     uint32_t done = 0;
     const RouteEntry<A>* r = 0;
     for (r = _uq.get(_uq_iter); r != 0; r = _uq.next(_uq_iter)) {
-	pair<A,uint16_t> p = _port.route_policy(*r);
+	pair<A,uint16_t> p = this->_port.route_policy(*r);
 
 	if (p.second > RIP_INFINITY)
 	    continue;
@@ -73,15 +73,16 @@ OutputUpdates<A>::output_packet()
 	// No routes added to packet or error finishing packet off.
 	delete pkt;
     } else {
-	_pkt_queue.enqueue_packet(pkt);
-	_port.push_packets();
-	_port.counters().incr_triggered_updates();
-	incr_packets_sent();
+	this->_pkt_queue.enqueue_packet(pkt);
+	this->_port.push_packets();
+	this->_port.counters().incr_triggered_updates();
+	this->incr_packets_sent();
     }
 
     if (r != 0) {
 	// Not finished with updates so set time to reschedule self
-	_op_timer = _e.new_oneoff_after_ms(interpacket_gap_ms(),
+	this->_op_timer 
+	    = this->_e.new_oneoff_after_ms(this->interpacket_gap_ms(),
 			callback(this, &OutputUpdates<A>::output_packet));
     } else {
 	// Finished with updates for this run.  Do not set timer.
@@ -101,7 +102,7 @@ template <typename A>
 void OutputUpdates<A>::stop_output_processing()
 {
     _uq.destroy_reader(_uq_iter);
-    _op_timer.unschedule();
+    this->_op_timer.unschedule();
 }
 
 

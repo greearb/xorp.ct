@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.31 2004/03/21 01:42:21 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.32 2004/03/24 19:14:09 atanu Exp $"
 
 #include "rip_module.h"
 
@@ -389,8 +389,8 @@ Port<A>::record_bad_packet(const string& why,
 			   Peer<A>*	 p)
 {
     XLOG_INFO("RIP port %s/%s/%s received bad packet from %s:%u - %s\n",
-	      _pio->ifname().c_str(), _pio->vifname().c_str(),
-	      _pio->address().str().c_str(), host.str().c_str(), port,
+	      this->_pio->ifname().c_str(), this->_pio->vifname().c_str(),
+	      this->_pio->address().str().c_str(), host.str().c_str(), port,
 	      why.c_str());
     counters().incr_bad_packets();
     if (p) {
@@ -406,8 +406,8 @@ Port<A>::record_bad_auth_packet(const string&	why,
 				Peer<A>*	p)
 {
     XLOG_INFO("RIP port %s/%s/%s authentication failed %s:%u - %s\n",
-	      _pio->ifname().c_str(), _pio->vifname().c_str(),
-	      _pio->address().str().c_str(), host.str().c_str(), port,
+	      this->_pio->ifname().c_str(), this->_pio->vifname().c_str(),
+	      this->_pio->address().str().c_str(), host.str().c_str(), port,
 	      why.c_str());
     counters().incr_bad_auth_packets();
     if (p) {
@@ -423,8 +423,8 @@ Port<A>::record_bad_route(const string&	why,
 			  Peer<A>*	p)
 {
     XLOG_INFO("RIP port %s/%s/%s received bad route from %s:%u - %s\n",
-	      _pio->ifname().c_str(), _pio->vifname().c_str(),
-	      _pio->address().str().c_str(), host.str().c_str(), port,
+	      this->_pio->ifname().c_str(), this->_pio->vifname().c_str(),
+	      this->_pio->address().str().c_str(), host.str().c_str(), port,
 	      why.c_str());
     counters().incr_bad_routes();
     if (p) {
@@ -457,14 +457,15 @@ template <typename A>
 void
 Port<A>::push_packets()
 {
-    if (io_handler()->pending())
+    if (this->io_handler()->pending())
 	return;
 
     const RipPacket<A>* head = _packet_queue->head();
     if (head == 0)
 	return;
 
-    if (io_handler()->send(head->address(), head->port(), head->data())) {
+    if (this->io_handler()->send(head->address(), head->port(), 
+				 head->data())) {
 	return;
     }
 
@@ -575,7 +576,7 @@ template <typename A>
 bool
 Port<A>::output_allowed() const
 {
-    return enabled() && port_io_enabled() && (passive() == false);
+    return enabled() && this->port_io_enabled() && (passive() == false);
 }
 
 template <typename A>
@@ -633,7 +634,7 @@ Port<A>::parse_request(const Addr&			src_addr,
 		       const PacketRouteEntry<A>*	entries,
 		       uint32_t				n_entries)
 {
-    if (port_io_enabled() == false) {
+    if (this->port_io_enabled() == false) {
 	debug_msg("Discarding RIP request: port io system not enabled.");
 	return;
     }

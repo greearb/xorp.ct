@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.8 2004/02/24 22:46:08 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.9 2004/03/20 18:03:59 hodson Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -207,7 +207,7 @@ XrlPortManager<A>::shutdown()
 {
     set_status(SHUTTING_DOWN);
 
-    typename PortManagerBase<A>::PortList& pl = ports();
+    typename PortManagerBase<A>::PortList& pl = this->ports();
     typename PortManagerBase<A>::PortList::iterator i = pl.begin();
 
     // XXX Walk ports and shut them down.  Only when they are all
@@ -215,7 +215,7 @@ XrlPortManager<A>::shutdown()
 
     debug_msg("XXX XrlPortManager<A>::shutdown (%p)\n", this);
     debug_msg("XXX n_ports = %u n_dead_ports %u\n",
-	      uint32_t(ports().size()),
+	      uint32_t(this->ports().size()),
 	      uint32_t(_dead_ports.size()));
 
     while (i != pl.end()) {
@@ -270,13 +270,14 @@ XrlPortManager<A>::add_rip_address(const string& ifname,
 
     // Check if port already exists
     typename PortManagerBase<A>::PortList::const_iterator pi;
-    pi = find_if(ports().begin(), ports().end(), port_has_address<A>(addr));
-    if (pi != ports().end())
+    pi = find_if(this->ports().begin(), this->ports().end(), 
+		 port_has_address<A>(addr));
+    if (pi != this->ports().end())
 	return true;
 
     // Create port
     Port<A>* p = new Port<A>(*this);
-    ports().push_back(p);
+    this->ports().push_back(p);
 
     // Create XrlPortIO object for port
     XrlPortIO<A>* io = new XrlPortIO<A>(_xr, *p, ifname, vifname, addr);
@@ -299,7 +300,7 @@ XrlPortManager<A>::remove_rip_address(const string& 	/* ifname */,
 				      const string&	/* vifname */,
 				      const A&	addr)
 {
-    typename PortManagerBase<A>::PortList& pl = ports();
+    typename PortManagerBase<A>::PortList& pl = this->ports();
     typename PortManagerBase<A>::PortList::iterator i;
     i = find_if(pl.begin(), pl.end(), port_has_address<A>(addr));
     if (i != pl.end()) {
@@ -321,7 +322,7 @@ XrlPortManager<A>::deliver_packet(const string& 		sockid,
 				  uint16_t 			src_port,
 				  const vector<uint8_t>& 	pdata)
 {
-    typename PortManagerBase<A>::PortList& pl = ports();
+    typename PortManagerBase<A>::PortList& pl = this->ports();
     typename PortManagerBase<A>::PortList::iterator i;
 
     debug_msg("Packet on %s from %s/%u %u bytes\n",
@@ -330,7 +331,7 @@ XrlPortManager<A>::deliver_packet(const string& 		sockid,
     i = find_if(pl.begin(), pl.end(),
 		is_port_for<A>(&sockid, &src_addr, &_ifm));
 
-    if (i == ports().end()) {
+    if (i == this->ports().end()) {
 	debug_msg("Discarding packet %s/%u %u bytes\n",
 		  src_addr.str().c_str(), src_port, pdata.size());
 	return false;
@@ -352,8 +353,9 @@ XrlPortManager<A>::find_port(const string& 	ifname,
 			     const A&		addr)
 {
     typename PortManagerBase<A>::PortList::iterator pi;
-    pi = find_if(ports().begin(), ports().end(), port_has_address<A>(addr));
-    if (pi == ports().end()) {
+    pi = find_if(this->ports().begin(), this->ports().end(), 
+		 port_has_address<A>(addr));
+    if (pi == this->ports().end()) {
 	return 0;
     }
 
@@ -372,8 +374,9 @@ XrlPortManager<A>::find_port(const string& 	ifname,
 			     const A&		addr) const
 {
     typename PortManagerBase<A>::PortList::const_iterator pi;
-    pi = find_if(ports().begin(), ports().end(), port_has_address<A>(addr));
-    if (pi == ports().end()) {
+    pi = find_if(this->ports().begin(), this->ports().end(), 
+		 port_has_address<A>(addr));
+    if (pi == this->ports().end()) {
 	return 0;
     }
 
@@ -425,18 +428,18 @@ void
 XrlPortManager<A>::try_start_next_io_handler()
 {
     typename PortManagerBase<A>::PortList::const_iterator cpi;
-    cpi = find_if(ports().begin(), ports().end(),
+    cpi = find_if(this->ports().begin(), this->ports().end(),
 		  port_has_io_in_state<A>(STARTING));
-    if (cpi != ports().end()) {
+    if (cpi != this->ports().end()) {
 	return;
     }
 
-    typename PortManagerBase<A>::PortList::iterator pi = ports().begin();
+    typename PortManagerBase<A>::PortList::iterator pi = this->ports().begin();
     XrlPortIO<A>* xio = 0;
     while (xio == 0) {
-	pi = find_if(pi, ports().end(),
+	pi = find_if(pi, this->ports().end(),
 		     port_has_io_in_state<A>(READY));
-	if (pi == ports().end()) {
+	if (pi == this->ports().end()) {
 	    return;
 	}
 	Port<A>* p = (*pi);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers.cc,v 1.6 2004/02/20 20:13:25 hodson Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.7 2004/02/20 21:19:11 hodson Exp $"
 
 #include <set>
 
@@ -89,7 +89,7 @@ class SpoofPort : public Port<A> {
 public:
     SpoofPort(PortManagerBase<A>& pm, A addr) : Port<A>(pm)
     {
-	_peers.push_back(new Peer<A>(*this, addr));
+	this->_peers.push_back(new Peer<A>(*this, addr));
 	verbose_log("Constructing SpoofPort<IPv%u> instance\n",
 		    A::ip_version());
     }
@@ -97,9 +97,9 @@ public:
     {
 	verbose_log("Destructing SpoofPort<IPv%u> instance\n",
 		    A::ip_version());
-	while (_peers.empty() == false) {
-	    delete _peers.front();
-	    _peers.pop_front();
+	while (this->_peers.empty() == false) {
+	    delete this->_peers.front();
+	    this->_peers.pop_front();
 	}
     }
 };
@@ -114,28 +114,28 @@ class SpoofPortManager : public PortManagerBase<A> {
 public:
     SpoofPortManager(System<A>& s) : PortManagerBase<A>(s)
     {
-	_ports.push_back(new SpoofPort<A>(*this, Address<A>::me()));
+	this->_ports.push_back(new SpoofPort<A>(*this, Address<A>::me()));
     }
 
     ~SpoofPortManager()
     {
-	while (!_ports.empty()) {
-	    delete _ports.front();
-	    _ports.pop_front();
+	while (!this->_ports.empty()) {
+	    delete this->_ports.front();
+	    this->_ports.pop_front();
 	}
     }
 
     Port<A>* the_port()
     {
-	XLOG_ASSERT(_ports.size() == 1);
-	return _ports.front();
+	XLOG_ASSERT(this->_ports.size() == 1);
+	return this->_ports.front();
     }
 
     Peer<A>* the_peer()
     {
-	XLOG_ASSERT(_ports.size() == 1);
-	XLOG_ASSERT(_ports.front()->peers().size() == 1);
-	return _ports.front()->peers().front();
+	XLOG_ASSERT(this->_ports.size() == 1);
+	XLOG_ASSERT(this->_ports.front()->peers().size() == 1);
+	return this->_ports.front()->peers().front();
     }
 };
 

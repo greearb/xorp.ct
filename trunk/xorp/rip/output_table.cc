@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_table.cc,v 1.6 2004/03/02 18:02:34 hodson Exp $"
+#ident "$XORP: xorp/rip/output_table.cc,v 1.7 2004/03/02 19:48:22 hodson Exp $"
 
 #include "output_table.hh"
 #include "packet_assembly.hh"
@@ -29,14 +29,14 @@ OutputTable<A>::output_packet()
     }
     _rw.resume();
 
-    ResponsePacketAssembler<A> rpa(_port);
-    RipPacket<A>* pkt = new RipPacket<A>(ip_addr(), ip_port());
+    ResponsePacketAssembler<A> rpa(this->_port);
+    RipPacket<A>* pkt = new RipPacket<A>(this->ip_addr(), this->ip_port());
     rpa.packet_start(pkt);
 
     uint32_t done = 0;
     const RouteEntry<A>* r = 0;
     for (r = _rw.current_route(); r != 0; r = _rw.next_route()) {
-	pair<A,uint16_t> p = _port.route_policy(*r);
+	pair<A,uint16_t> p = this->_port.route_policy(*r);
 
 	if (p.second > RIP_INFINITY) {
 	    continue;
@@ -54,14 +54,14 @@ OutputTable<A>::output_packet()
 	// No routes added to packet or error finishing packet off.
 	delete pkt;
     } else {
-	_pkt_queue.enqueue_packet(pkt);
-	_port.push_packets();
-	if (ip_port() == RIP_AF_CONSTANTS<A>::IP_PORT) {
-	    _port.counters().incr_unsolicited_updates();
+	this->_pkt_queue.enqueue_packet(pkt);
+	this->_port.push_packets();
+	if (this->ip_port() == RIP_AF_CONSTANTS<A>::IP_PORT) {
+	    this->_port.counters().incr_unsolicited_updates();
 	} else {
-	    _port.counters().incr_non_rip_updates_sent();
+	    this->_port.counters().incr_non_rip_updates_sent();
 	}
-	incr_packets_sent();
+	this->incr_packets_sent();
     }
 
     if (r == 0) {
@@ -70,9 +70,10 @@ OutputTable<A>::output_packet()
     } else {
 	// Not finished so set time to reschedule self and pause
 	// route walker.
-	_op_timer = _e.new_oneoff_after_ms(interpacket_gap_ms(),
-			callback(this, &OutputTable<A>::output_packet));
-	_rw.pause(interpacket_gap_ms());
+	this->_op_timer 
+	    = this->_e.new_oneoff_after_ms(this->interpacket_gap_ms(),
+                          callback(this, &OutputTable<A>::output_packet));
+	_rw.pause(this->interpacket_gap_ms());
     }
 }
 
@@ -87,7 +88,7 @@ template <typename A>
 void
 OutputTable<A>::stop_output_processing()
 {
-    _op_timer.unschedule();	// stop timer
+    this->_op_timer.unschedule();	// stop timer
 }
 
 

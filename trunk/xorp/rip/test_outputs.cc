@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.11 2004/02/21 00:36:10 hodson Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.12 2004/02/21 15:18:21 hodson Exp $"
 
 #include <set>
 
@@ -105,15 +105,15 @@ class SpoofPort : public Port<A> {
 public:
     SpoofPort(PortManagerBase<A>& pm, A addr) : Port<A>(pm)
     {
-	_peers.push_back(new Peer<A>(*this, addr));
+	this->_peers.push_back(new Peer<A>(*this, addr));
 	// verbose_log("Constructing SpoofPort instance\n");
     }
     ~SpoofPort()
     {
 	// verbose_log("Destructing SpoofPort instance\n");
-	while (_peers.empty() == false) {
-	    delete _peers.front();
-	    _peers.pop_front();
+	while (this->_peers.empty() == false) {
+	    delete this->_peers.front();
+	    this->_peers.pop_front();
 	}
     }
 };
@@ -167,36 +167,36 @@ public:
     SpoofPortManager(System<A>& s)
 	: PortManagerBase<A>(s)
     {
-	_ports.push_back(new SpoofPort<A>(*this, DefaultPeer<A>::get()));
-	_ports.push_back(new SpoofPort<A>(*this, OtherPeer<A>::get()));
+	this->_ports.push_back(new SpoofPort<A>(*this, DefaultPeer<A>::get()));
+	this->_ports.push_back(new SpoofPort<A>(*this, OtherPeer<A>::get()));
     }
 
     ~SpoofPortManager()
     {
-	while (!_ports.empty()) {
-	    delete _ports.front();
-	    _ports.pop_front();
+	while (!this->_ports.empty()) {
+	    delete this->_ports.front();
+	    this->_ports.pop_front();
 	}
     }
 
     Port<A>* test_port()
     {
-	return _ports.front();
+	return this->_ports.front();
     }
 
     const Port<A>* test_port() const
     {
-	return _ports.front();
+	return this->_ports.front();
     }
 
     Port<A>* other_port()
     {
-	return _ports.back();
+	return this->_ports.back();
     }
 
     const Port<A>* other_port() const
     {
-	return _ports.back();
+	return this->_ports.back();
     }
 
     Peer<A>* test_peer()
@@ -338,10 +338,10 @@ public:
 
 	ResponseReader<A> rr(p);
 	while (rr.get(n, nh, cost, tag) == true) {
-	    _total_routes_seen++;
-	    if (_tpn.find(n) != _tpn.end()) {
-		_test_peer_routes_seen++;
-	    } else if (_opn.find(n) != _opn.end()) {
+	    this->_total_routes_seen++;
+	    if (this->_tpn.find(n) != this->_tpn.end()) {
+		this->_test_peer_routes_seen++;
+	    } else if (this->_opn.find(n) != this->_opn.end()) {
 		// No-op
 	    } else {
 		// Not a test peer net and not an other peer net
@@ -358,14 +358,15 @@ public:
 
     bool valid_in_sum() const
     {
-	if (test_peer_routes_seen() != _tpn.size()) {
+	if (this->test_peer_routes_seen() != this->_tpn.size()) {
 	    verbose_log("Test routes seen (%d) does not match expected (%d)\n",
-			test_peer_routes_seen(), (int32_t)_tpn.size());
+			this->test_peer_routes_seen(), 
+			(int32_t)this->_tpn.size());
 	    return false;
 	}
 	verbose_log("total routes seen %d, test peer routes seen = %d\n",
-		    total_routes_seen(), test_peer_routes_seen());
-	return test_peer_routes_seen() * 2 == total_routes_seen();
+		    this->total_routes_seen(), this->test_peer_routes_seen());
+	return this->test_peer_routes_seen() * 2 == this->total_routes_seen();
     }
 };
 
@@ -385,8 +386,8 @@ public:
 
 	ResponseReader<A> rr(p);
 	while (rr.get(n, nh, cost, tag) == true) {
-	    _total_routes_seen++;
-	    if (_opn.find(n) == _opn.end()) {
+	    this->_total_routes_seen++;
+	    if (this->_opn.find(n) == this->_opn.end()) {
 		verbose_log("Saw own or alien route with split horizon\n");
 		// ==> it's bogus
 		verbose_log("Failed Processing entry %d / %d %s cost %u\n",
@@ -400,14 +401,14 @@ public:
 
     bool valid_in_sum() const
     {
-	if (test_peer_routes_seen() != 0) {
+	if (this->test_peer_routes_seen() != 0) {
 	    verbose_log("Test peer routes seen (%d) does not match expected "
-			"(%d)\n", test_peer_routes_seen(), 0);
+			"(%d)\n", this->test_peer_routes_seen(), 0);
 	    return false;
 	}
 	verbose_log("total routes seen %d, test peer routes seen = %d\n",
-		    total_routes_seen(), test_peer_routes_seen());
-	return total_routes_seen() == (uint32_t)_opn.size();
+		    this->total_routes_seen(), this->test_peer_routes_seen());
+	return this->total_routes_seen() == (uint32_t)this->_opn.size();
     }
 };
 
@@ -428,11 +429,12 @@ public:
 
 	ResponseReader<A> rr(p);
 	while (rr.get(n, nh, cost, tag) == true) {
-	    _total_routes_seen++;
+	    this->_total_routes_seen++;
 
-	    if (_tpn.find(n) != _tpn.end() && cost == RIP_INFINITY) {
-		_test_peer_routes_seen++;
-	    } else if (_opn.find(n) != _opn.end()) {
+	    if (this->_tpn.find(n) != this->_tpn.end() 
+		&& cost == RIP_INFINITY) {
+		this->_test_peer_routes_seen++;
+	    } else if (this->_opn.find(n) != this->_opn.end()) {
 		// No-op
 	    } else {
 		// Not a test peer net and not an other peer net
@@ -448,14 +450,15 @@ public:
 
     bool valid_in_sum() const
     {
-	if (test_peer_routes_seen() != _tpn.size()) {
+	if (this->test_peer_routes_seen() != this->_tpn.size()) {
 	    verbose_log("Test routes seen (%d) does not match expected (%d)\n",
-			test_peer_routes_seen(), (int32_t)_tpn.size());
+			this->test_peer_routes_seen(), 
+			(int32_t)this->_tpn.size());
 	    return false;
 	}
 	verbose_log("total routes seen %d, test peer routes seen = %d\n",
-		    total_routes_seen(), test_peer_routes_seen());
-	return test_peer_routes_seen() * 2 == total_routes_seen();
+		    this->total_routes_seen(), this->test_peer_routes_seen());
+	return this->test_peer_routes_seen() * 2 == this->total_routes_seen();
     }
 };
 
@@ -519,8 +522,8 @@ public:
 	}
 
 	verbose_log("Injecting routes from other peer.\n");
-	for (typename set<IPNet<A> >::const_iterator n = _opn.begin();
-	     n != _opn.end(); n++) {
+	for (typename set<IPNet<A> >::const_iterator n = this->_opn.begin();
+	     n != this->_opn.end(); n++) {
 	    RouteEntryOrigin<A>* reo = _pm.other_peer();
 	    if (rdb.update_route(*n, A::ZERO(), 5u, 0u, reo) == false) {
 		verbose_log("Failed to add route for %s\n",

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xorp_rip_common.hh,v 1.3 2004/02/27 22:14:12 hodson Exp $
+// $XORP: xorp/rip/xorp_rip_common.hh,v 1.4 2004/03/21 01:38:38 hodson Exp $
 
 #ifndef __RIP_XORP_RIP_COMMON_HH__
 #define __RIP_XORP_RIP_COMMON_HH__
@@ -29,6 +29,7 @@
 
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
+#include "rip/constants.hh"
 #include "rip/system.hh"
 #include "rip/xrl_target_rip.hh"
 #include "rip/xrl_port_manager.hh"

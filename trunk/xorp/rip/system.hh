@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/system.hh,v 1.2 2003/07/09 00:06:34 hodson Exp $
+// $XORP: xorp/rip/system.hh,v 1.3 2004/02/05 18:55:04 hodson Exp $
 
 #ifndef __RIP_SYSTEM_HH__
 #define __RIP_SYSTEM_HH__
@@ -196,7 +196,7 @@ System<A>::remove_route_redistributor(const string& protocol)
 {
     typename map<string,RouteRedistributor<A>*>::iterator i;
     i = _redists.find(protocol);
-    if (ci == _redists.end()) {
+    if (this->ci == _redists.end()) {
 	return false;
     }
     delete i->second;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.11 2003/09/30 18:27:07 pavlin Exp $
+// $XORP: xorp/rip/packets.hh,v 1.13 2004/02/24 19:39:29 hodson Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -103,6 +103,7 @@ static const size_t RIPv2_MAX_PACKET_BYTES = 4 + 20 * RIPv2_ROUTES_PER_PACKET;
  * accessor methods provide values in host order, and the modifiers
  * take arguments in host order.
  */
+template <>
 struct PacketRouteEntry<IPv4> {
 protected:
     uint16_t _af;
@@ -339,6 +340,7 @@ MD5PacketTrailer::valid() const
  *
  * All fields in this structure are stored in network order.
  */
+template <>
 struct PacketRouteEntry<IPv6> {
 protected:
     uint8_t  _prefix[16];

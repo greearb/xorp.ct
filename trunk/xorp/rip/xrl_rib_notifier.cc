@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.3 2004/02/20 01:22:04 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.4 2004/02/20 04:03:50 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -211,7 +211,7 @@ XrlRibNotifier<A>::add_igp_cb(const XrlError& xe)
 	set_status(FAILED);
 	return;
     }
-    start_polling();
+    this->start_polling();
     set_status(RUNNING);
 }
 
@@ -220,7 +220,7 @@ template<typename A>
 void
 XrlRibNotifier<A>::shutdown()
 {
-    stop_polling();
+    this->stop_polling();
     set_status(SHUTTING_DOWN);
 
     XrlRibV0p1Client c(&_xs);
@@ -316,7 +316,8 @@ void
 XrlRibNotifier<A>::updates_available()
 {
     XLOG_ASSERT(_inflight <= _max_inflight);
-    for (const RouteEntry<A>* r = _uq.get(_ri); r != 0; r = _uq.next(_ri)) {
+    for (const RouteEntry<A>* r = this->_uq.get(this->_ri); 
+	 r != 0; r = this->_uq.next(this->_ri)) {
 	if (_inflight == _max_inflight) {
 	    break;
 	}

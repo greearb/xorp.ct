@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_entry.cc,v 1.4 2003/07/16 05:03:34 hodson Exp $"
+#ident "$XORP: xorp/rip/route_entry.cc,v 1.5 2004/02/20 01:22:04 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -175,7 +175,8 @@ RouteEntryOrigin<A>::associate(Route* r)
 	XLOG_FATAL("entry already exists");
 	return false;
     }
-    _rtstore->routes.insert(RouteEntryStore::Container::value_type(r->net(), r));
+    _rtstore->routes.insert(typename
+			    RouteEntryStore::Container::value_type(r->net(), r));
     return true;
 }
 

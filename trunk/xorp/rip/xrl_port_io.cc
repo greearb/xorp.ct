@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.6 2004/02/25 00:27:34 hodson Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.7 2004/03/20 18:03:59 hodson Exp $"
 
 #define DEBUG_LOGGING
 
@@ -121,7 +121,7 @@ XrlPortIO<IPv4>::request_socket_join()
     XrlSocket4V0p1Client cl(&_xr);
     return cl.send_udp_join_group(
 		_ss.c_str(), socket_id(),
-		RIP_AF_CONSTANTS<IPv4>::IP_GROUP(), address(),
+		RIP_AF_CONSTANTS<IPv4>::IP_GROUP(), this->address(),
 		callback(this, &XrlPortIO<IPv4>::socket_join_cb));
 }
 
@@ -132,7 +132,7 @@ XrlPortIO<IPv4>::request_socket_leave()
     XrlSocket4V0p1Client cl(&_xr);
     return cl.send_udp_leave_group(
 		_ss.c_str(), socket_id(),
-		RIP_AF_CONSTANTS<IPv4>::IP_GROUP(), address(),
+		RIP_AF_CONSTANTS<IPv4>::IP_GROUP(), this->address(),
 		callback(this, &XrlPortIO<IPv4>::socket_leave_cb));
 }
 
@@ -151,13 +151,13 @@ XrlPortIO<IPv4>::send(const IPv4& 		dst_addr,
     if (dst_addr.is_multicast()) {
 	if (cl.send_send_from_multicast_if(
 		_ss.c_str(), socket_id(),
-		dst_addr, dst_port, address(),
+		dst_addr, dst_port, this->address(),
 		rip_packet,
 		callback(this, &XrlPortIO<IPv4>::send_cb))) {
 	    debug_msg("Sent %u bytes to %s/%u from %s\n",
 		      static_cast<uint32_t>(rip_packet.size()),
 		      dst_addr.str().c_str(), dst_port,
-		      address().str().c_str());
+		      this->address().str().c_str());
 	    _pending = true;
 	    return true;
 	}
@@ -234,7 +234,7 @@ XrlPortIO<IPv6>::request_socket_join()
     XrlSocket6V0p1Client cl(&_xr);
     return cl.send_udp_join_group(
 		_ss.c_str(), socket_id(),
-		RIP_AF_CONSTANTS<IPv6>::IP_GROUP(), address(),
+		RIP_AF_CONSTANTS<IPv6>::IP_GROUP(), this->address(),
 		callback(this, &XrlPortIO<IPv6>::socket_join_cb));
 }
 
@@ -245,7 +245,7 @@ XrlPortIO<IPv6>::request_socket_leave()
     XrlSocket6V0p1Client cl(&_xr);
     return cl.send_udp_leave_group(
 		_ss.c_str(), socket_id(),
-		RIP_AF_CONSTANTS<IPv6>::IP_GROUP(), address(),
+		RIP_AF_CONSTANTS<IPv6>::IP_GROUP(), this->address(),
 		callback(this, &XrlPortIO<IPv6>::socket_leave_cb));
 }
 
@@ -264,13 +264,13 @@ XrlPortIO<IPv6>::send(const IPv6& 		dst_addr,
     if (dst_addr.is_multicast()) {
 	if (cl.send_send_from_multicast_if(
 		_ss.c_str(), socket_id(),
-		dst_addr, dst_port, address(),
+		dst_addr, dst_port, this->address(),
 		rip_packet,
 		callback(this, &XrlPortIO<IPv6>::send_cb))) {
 	    debug_msg("Sent %u bytes to %s/%u from %s\n",
 		      static_cast<uint32_t>(rip_packet.size()),
 		      dst_addr.str().c_str(), dst_port,
-		      address().str().c_str());
+		      this->address().str().c_str());
 	    _pending = true;
 	    return true;
 	}
@@ -313,9 +313,9 @@ bool
 XrlPortIO<A>::pending() const
 {
     debug_msg("%s/%s/%s pending %d\n",
-	      ifname().c_str(),
-	      vifname().c_str(),
-	      address().str().c_str(),
+	      this->ifname().c_str(),
+	      this->vifname().c_str(),
+	      this->address().str().c_str(),
 	      _pending);
     return _pending;
 }
@@ -336,7 +336,7 @@ void
 XrlPortIO<A>::shutdown()
 {
     _pending = true;
-    set_enabled(false);
+    this->set_enabled(false);
     set_status(SHUTTING_DOWN);
     if (request_socket_leave() == false) {
 	set_status(SHUTDOWN);
@@ -428,15 +428,15 @@ XrlPortIO<A>::socket_join_cb(const XrlError& e)
     if (e != XrlError::OKAY()) {
 	set_status(FAILED,
 		   c_format("Failed to join group on %s/%s/%s.",
-			    ifname().c_str(), vifname().c_str(),
-			    address().str().c_str())
+			    this->ifname().c_str(), this->vifname().c_str(),
+			    this->address().str().c_str())
 		   );
 	return;
     }
 
     _pending = false;
     set_status(RUNNING);
-    set_enabled(true);
+    this->set_enabled(true);
 }
 
 template <typename A>
@@ -452,7 +452,7 @@ XrlPortIO<A>::send_cb(const XrlError& xe)
 {
     debug_msg("SendCB %s\n", xe.str().c_str());
     _pending = false;
-    _user.port_io_send_completion(xe == XrlError::OKAY());
+    this->_user.port_io_send_completion(xe == XrlError::OKAY());
 }
 
 #ifdef INSTANTIATE_IPV4

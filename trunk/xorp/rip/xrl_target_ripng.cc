@@ -21,6 +21,7 @@
 #include "libxorp/status_codes.h"
 #include "libxipc/xrl_router.hh"
 
+#include "constants.hh"
 #include "system.hh"
 #include "xrl_process_spy.hh"
 #include "xrl_port_manager.hh"
