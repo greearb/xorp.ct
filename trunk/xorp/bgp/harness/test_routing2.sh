@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.11 2004/08/03 05:02:53 pavlin Exp $
+# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.12 2004/12/17 01:31:02 atanu Exp $
 #
 
 #
@@ -585,8 +585,8 @@ test6()
     delete_igp_table4 is-is isis isis true false
 }
 
-TESTS_NOT_FIXED='test6'
-TESTS='test1 test1_ipv6 test2 test3 test4 test5'
+TESTS_NOT_FIXED=''
+TESTS='test1 test1_ipv6 test2 test3 test4 test5 test6'
 
 # Include command line
 . ${srcdir}/args.sh
