@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.112 2004/09/01 20:36:37 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.113 2004/09/01 21:20:31 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1145,6 +1145,32 @@ AC_TRY_COMPILE([
 ],
   [AC_DEFINE(HAVE_FIREWALL_IPTABLES, 1,
 	[Define to 1 if you have an IPTABLES build environment])
+   AC_MSG_RESULT(yes)],
+  [AC_MSG_RESULT(no)])
+AC_LANG_RESTORE
+
+
+dnl -----------------------------------------
+dnl Check for a PF firewall build environment
+dnl -----------------------------------------
+
+AC_MSG_CHECKING(for a PF firewall build environment)
+AC_LANG_SAVE
+AC_LANG_C
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <net/pfvar.h>
+#include <arpa/inet.h>
+],
+[
+ int myioctl = DIOCGETRULESET;
+],
+  [AC_DEFINE(HAVE_FIREWALL_PF, 1,
+	[Define to 1 if you have a PF build environment])
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
