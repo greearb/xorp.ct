@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.9 2003/09/18 19:08:00 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.10 2004/06/10 22:41:11 hodson Exp $"
 
 #include "config.h"
 
@@ -25,6 +25,7 @@
 #include "xrl_pf_inproc.hh"
 #include "xrl_pf_sudp.hh"
 #include "xrl_pf_stcp.hh"
+#include "xrl_pf_kill.hh"
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
@@ -47,6 +48,8 @@ XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
 	    return new XrlPFSTCPSender(eventloop, address);
 	} else if (strcmp(XrlPFInProcSender::protocol_name(), protocol) == 0) {
 	    return new XrlPFInProcSender(eventloop, address);
+	} else if (strcmp(XrlPFKillSender::protocol_name(), protocol) == 0) {
+	    return new XrlPFKillSender(eventloop, address);
 	}
     } catch (XorpException& e) {
 	XLOG_ERROR("XrlPFSenderFactory::create failed: %s\n", e.str().c_str());
