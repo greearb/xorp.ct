@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.18 2005/02/09 23:29:40 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.19 2005/02/11 02:49:31 pavlin Exp $"
 
 
 //
@@ -695,7 +695,7 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     // Tag the original route as filtered or not
     added_route.set_filtered(!accepted);
 
-    // Inform rib the possibly modified route if it was accepted 
+    // Inform RIB about the possibly modified route if it was accepted 
     if (accepted)
 	inform_rib(route_copy);
 
@@ -754,8 +754,7 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
 		route_copy.set_add_route();
 	    } else {
 	    }
-	}
-	else {
+	} else {
 	    if (was_filtered) {
 		return XORP_OK;
 	    } else {
@@ -883,16 +882,15 @@ StaticRoutesNode::reset_filter(const uint32_t& filter) {
 void
 StaticRoutesNode::push_routes()
 {
-    // XXX: not a background task
-    for (list<StaticRoute>::iterator i = _static_routes.begin();
-	 i != _static_routes.end(); ++i) {
+    list<StaticRoute>::iterator iter;
 
-	StaticRoute& orig_route = *i;
+    // XXX: not a background task
+    for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
+	StaticRoute& orig_route = *iter;
 	bool was_filtered = orig_route.is_filtered();
 
-	
-	StaticRoute copy = orig_route;
-	bool accepted = do_filtering(copy);
+	StaticRoute copy_route = orig_route;
+	bool accepted = do_filtering(copy_route);
 
 	debug_msg("[STATIC] Push route: %s, was filtered: %d, accepted %d\n",
 		  orig_route.network().str().c_str(),
@@ -902,20 +900,20 @@ StaticRoutesNode::push_routes()
 
 	if (accepted) {
 	    if (was_filtered) {
-		copy.set_add_route();
+		copy_route.set_add_route();
 	    } else {
-		copy.set_replace_route();
+		copy_route.set_replace_route();
 	    }
 	} else {
 	    // not accepted
 	    if (was_filtered) {
 		continue;
 	    } else {
-		copy.set_delete_route();
+		copy_route.set_delete_route();
 	    }
 	}
 
-	inform_rib(copy);
+	inform_rib(copy_route);
     }
 }
 
@@ -979,7 +977,7 @@ StaticRoutesNode::do_filtering(StaticRoute& route)
 
 	return accepted;
     } catch(const PolicyException& e) {
-	XLOG_FATAL("PolicyException: %s",e.str().c_str());
+	XLOG_FATAL("PolicyException: %s", e.str().c_str());
 
 	// FIXME: What do we do ?
 	XLOG_UNFINISHED();

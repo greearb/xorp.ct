@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.14 2005/02/09 23:29:40 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.15 2005/02/11 02:49:31 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -287,12 +287,11 @@ private:
     string	_ifname;
     string	_vifname;
     uint32_t	_metric;
-    PolicyTags	_policytags;
     enum RouteType { IDLE_ROUTE, ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
     RouteType	_route_type;
     bool	_is_ignored;	// True if the route is to be ignored
-
-    bool	_is_filtered;	// rejected by policy filter
+    bool	_is_filtered;	// True if rejected by policy filter
+    PolicyTags	_policytags;
 };
 
 
