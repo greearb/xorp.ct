@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.6 2003/11/05 07:44:32 pavlin Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.7 2004/03/24 19:34:31 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -69,7 +69,7 @@ originate_route4()
 
 originate_route6()
 {
-    echo -n "originate_route4" $*
+    echo -n "originate_route6" $*
     $CALLXRL "finder://bgp/bgp/0.2/originate_route6?nlri:ipv6net=$1&next_hop:ipv6=$2&unicast:bool=$3&multicast:bool=$4"
 }
 
