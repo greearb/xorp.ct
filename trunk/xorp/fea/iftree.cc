@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.4 2003/05/20 03:23:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.5 2003/05/20 20:51:46 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -85,7 +85,8 @@ IfTree::finalize_state()
 	// If interface is marked as deleted, delete it.
 	//
 	if (ii->second.is_marked(DELETED)) {
-	    _ifs.erase(ii++);
+	    IfMap::iterator ii_tmp = ii++;
+	    _ifs.erase(ii_tmp);
 	    continue;
 	}
 	//
@@ -225,7 +226,8 @@ IfTreeInterface::finalize_state()
 	// If interface is marked as deleted, delete it.
 	//
 	if (vi->second.is_marked(DELETED)) {
-	    _vifs.erase(vi++);
+	    VifMap::iterator vi_tmp = vi++;
+	    _vifs.erase(vi_tmp);
 	    continue;
 	}
 	//
@@ -307,7 +309,8 @@ IfTreeVif::finalize_state()
 	// If address is marked as deleted, delete it.
 	//
 	if (ai->second.is_marked(DELETED)) {
-	    _v4addrs.erase(ai++);
+	    V4Map::iterator ai_tmp = ai++;
+	    _v4addrs.erase(ai_tmp);
 	    continue;
 	}
 	//
@@ -322,7 +325,8 @@ IfTreeVif::finalize_state()
 	// If address is marked as deleted, delete it.
 	//
 	if (ai->second.is_marked(DELETED)) {
-	    _v6addrs.erase(ai++);
+	    V6Map::iterator ai_tmp = ai++;
+	    _v6addrs.erase(ai_tmp);
 	    continue;
 	}
 	//
@@ -430,7 +434,6 @@ IfTreeAddr4::str() const
 bool
 IfTreeAddr6::set_prefix(uint32_t prefix)
 {
-
     if (prefix > IPv6::addr_bitlen())
 	return false;
 
