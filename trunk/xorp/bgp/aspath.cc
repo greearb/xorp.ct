@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.5 2003/01/26 01:22:35 mjh Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.6 2003/01/26 04:06:17 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -285,7 +285,7 @@ AsPath::add_segment(const AsSegment& s)
     _segments.push_back(s);
     _num_segments++;
 
-    size_t n = s.get_as_path_length();
+    size_t n = s.path_length();
     _path_len += n;
     debug_msg("End of add_segment, As Path length by %u to be %u\n",
                 (uint32_t)n, (uint32_t)_path_len);
@@ -389,7 +389,7 @@ AsPath::encode_for_mib(vector<uint8_t>& encode_buf) const
     int buf_size = 0;
     list <AsSegment>::const_iterator i = _segments.begin();
     for(i = _segments.begin(); i != _segments.end(); i++) {
-	buf_size += 2 + (i->get_as_size() * 2);
+	buf_size += 2 + (i->as_size() * 2);
     }
     if (buf_size > 2)
 	encode_buf.resize(buf_size);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.2 2002/12/13 22:38:53 rizzo Exp $"
+#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.3 2002/12/15 04:09:28 mjh Exp $"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -61,7 +61,7 @@ main(int argc, char* argv[])
     aspath->add_segment(set1);
     aspath->add_segment(seq2);
 
-    assert(aspath->get_num_segments() == 3);
+    assert(aspath->num_segments() == 3);
     if (verbose) printf("Original: %s\n", aspath->str().c_str());
 
     AsPath *aspathcopy= new AsPath(*aspath);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.13 2003/01/26 04:06:17 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.14 2003/01/26 06:15:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1061,7 +1061,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 
 	if (!ibgp()) {
 	    // If this is an EBGP peering, the AS Path MUST NOT be empty
-	    if (as_path_attr->as_path().get_path_length() == 0)
+	    if (as_path_attr->as_path().path_length() == 0)
 		return new NotificationPacket(UPDATEMSGERR, MALASPATH);
 
 	    // If this is an EBGP peering, the AS Path MUST start

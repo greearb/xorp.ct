@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.5 2003/01/16 23:18:58 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.6 2003/01/17 05:51:07 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -705,9 +705,9 @@ DecisionTable<A>::route_is_better(const SubnetRoute<A> *our_route,
     ** Shortest AS path length.
     */
     int test_aspath_length = test_route->attributes()->
-	aspath().get_path_length();
+	aspath().path_length();
     int our_aspath_length = our_route->attributes()->
-	aspath().get_path_length();
+	aspath().path_length();
     debug_msg("%s length %d\n", our_route->attributes()->
 	      aspath().str().c_str(), our_aspath_length);
     debug_msg("%s length %d\n", test_route->attributes()->

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.4 2003/01/26 01:22:35 mjh Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.5 2003/01/26 04:06:17 pavlin Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -101,7 +101,11 @@ public:
 	_entries = 0;
     }
 
-    size_t get_as_path_length() const			{
+    /**
+     * @return the path length, which is 1 for an AS_SET,
+     * and the length of the sequence for an AS_SEQUENCE
+     */
+    size_t path_length() const				{
 	if (_type == AS_SET)
 	    return 1;
 	else if (_type == AS_SEQUENCE)
@@ -110,7 +114,7 @@ public:
 	    return 0; // XXX should not be called!
     }
 
-    size_t get_as_size() const				{ return _entries; }
+    size_t as_size() const				{ return _entries; }
 
     /**
      * Add AsNum at the end of the segment (order is irrelevant
@@ -216,7 +220,7 @@ public:
 
     void add_segment(const AsSegment& s);
 
-    size_t get_path_length() const			{ return _path_len; }
+    size_t path_length() const				{ return _path_len; }
 
     bool contains(const AsNum& as_num) const		{
 	list <AsSegment>::const_iterator i = _segments.begin();
@@ -234,7 +238,7 @@ public:
 
     string str() const;
 
-    const AsSegment& get_segment(size_t n) const	{
+    const AsSegment& segment(size_t n) const		{
 	if (n < _num_segments) {
 	    list <AsSegment>::const_iterator iter = _segments.begin();
 	    for (u_int i = 0; i<n; i++)
@@ -242,10 +246,10 @@ public:
 	    return (*iter);
         }
 	assert("Segment doesn't exist.\n"); // XXX eh ?
-	xorp_throw(InvalidString, "get_segment invalid n\n");
+	xorp_throw(InvalidString, "segment invalid n\n");
     }
 
-    size_t get_num_segments() const		{ return _num_segments; }
+    size_t num_segments() const			{ return _num_segments; }
 
     /**
      * From the internal representation, produce the external one.
@@ -262,7 +266,7 @@ public:
 
 private:
     /**
-     * populate an AsPath from received data
+     * populate an AsPath from received data. Only used in the constructor.
      */
     void decode(const uint8_t *d, size_t len);
 
