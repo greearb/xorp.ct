@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.16 2004/06/15 20:45:55 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.17 2004/06/15 20:50:07 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -192,11 +192,11 @@ the login shell is csh or tcsh):
  ./configure
  gmake
  gmake check
- # Check the document building only on the primary development platform: 
+ # Check the documentation building only on the primary development platform: 
  cd docs
  gmake
- # Note: this step can be skipped if the XORP tinderbox has been
- # running for a reasonable amount of time without errors.
+ # Note: the source-code compilation can be skipped if the XORP tinderbox
+ # has been running for a reasonable amount of time without errors.
 
 ========================================================================
 2300.	TASK: Add CVS tag to the source code
