@@ -1,0 +1,1419 @@
+In the following log, modification dates are listed using the European
+convention in which the day comes before the month (ie. DD/MM/YYYY).
+The most recent modifications are listed first.
+
+10/12/2001 mcs@astro.caltech.edu
+           getline.c
+             If the TIOCGWINSZ ioctl doesn't work, as is the case when
+             running in an emacs shell, leave the size unchanged, rather
+             than returning a fatal error.
+
+07/12/2001 mcs@astro.caltech.edu
+           configure.in configure
+             Now that the configure version of CFLAGS is included in
+             the makefile, I noticed that the optimization flags -g
+             and -O2 had been added. It turns out that if CFLAGS isn't
+             already set, the autoconf AC_PROG_CC macro initializes it
+             with these two optimization flags. Since this would break
+             backwards compatibility in embedded distributions that
+             already use the OPT= makefile argument, and because
+             turning debugging on needlessly bloats the library, I now
+             make sure that CFLAGS is set before calling this macro.
+
+07/12/2001 mcs@astro.caltech.edu
+           enhance.c
+             Use argv[0] in error reports instead of using a
+             hardcoded macro.
+
+07/12/2001 mcs@astro.caltech.edu
+           getline.c
+             The cut buffer wasn't being cleared after being
+             used as a work buffer by gl_load_history().
+
+06/12/2001 mcs@astro.caltech.edu
+           configure.in configure
+             I removed my now redundant definition of SUN_TPUTS from
+             CFLAGS. I also added "-I/usr/include" to CFLAGS under
+             Solaris to prevent gcc from seeing conflicting versions
+             of system header files in /usr/local/include.
+
+06/12/2001 Markus Gyger (logged here by mcs)
+           Lots of files.
+             Lots of corrections to misspellings and typos in the
+             comments.
+           getline.c
+             Markus reverted a supposed fix that I added a day or two
+             ago. I had incorrectly thought that in Solaris 8, Sun had
+             finally brought their declaration of the callback
+             function of tputs() into line with other systems, but it
+             turned out that gcc was pulling in a GNU version of
+             term.h from /usr/local/include, and this was what
+             confused me.
+
+05/12/2001 mcs@astro.caltech.edu
+           Makefile.in
+             I added @CFLAGS@ to the CFLAGS assignment, so that
+             if CFLAGS is set as an environment variable when
+             configure is run, the corresponding make variable
+             includes its values in the output makefile.
+
+05/12/2001 mcs@astro.caltech.edu
+           getline.c libtecla.h libtecla.map man3/gl_get_line.3
+           man3/gl_last_signal.3
+             I added a function that programs can use to find out
+             which signal caused gl_get_line() to return EINTR.
+
+05/12/2001 mcs@astro.caltech.edu
+           getline.c
+             When the newline action was triggered by a printable
+             character, it failed to display that character. It now
+             does. Also, extra control codes that I had added, to
+             clear to the end of the display after the carriage return,
+             but before displaying the prompt, were confusing expect
+             scripts, so I have removed them. This step is now done
+             instead in gl_redisplay() after displaying the full input
+             line.
+
+05/12/2001 mcs@astro.caltech.edu
+           getline.c man3/gl_get_line.3
+             A user convinced me that continuing to invoke meta
+             keybindings for meta characters that are printable is a
+             bad idea, as is allowing users to ask to have setlocale()
+             called behind the application's back. I have thus changed
+             this. The setlocale configuration option has gone, and
+             gl_get_line() is now completely 8-bit clean, by default.
+             This means that if a meta character is printable, it is
+             treated as a literal character, rather than a potential
+             M-c binding.  Meta bindings can still be invoked via
+             their Esc-c equivalents, and indeed most terminal
+             emulators either output such escape pairs by default when
+             the meta character is pressed, or can be configured to do
+             so. I have documented how to configure xterm to do this,
+             in the man page.
+
+03/12/2001 mcs@astro.caltech.edu
+           getline.c man3/gl_get_line.3
+             gl_get_line() by default now prints any 8-bit printable
+             characters that don't match keybindings. Previously
+             characters > 127 were only printed if preceded by the
+             literal-next action.  Alternatively, by placing the
+             command literal_if_printable in the tecla configuration
+             file, all printable characters are treated as literal
+             characters, even if they are bound to action functions.
+
+             For international users of programs written by
+             programmers that weren't aware of the need to call
+             setlocale() to support alternate character sets, the
+             configuration file can now also contain the single-word
+             command "setlocale", which tells gl_get_line() to remedy
+             this.
+
+27/11/2001 mcs@astro.caltech.edu
+           demo.c demo2.c enhance man3/gl_get_line.3
+             All demos and programs now call setlocale(LC_CTYPE,"").
+             This makes them support character sets of different
+             locales, where specified with the LC_CTYPE, LC_ALL, or
+             LANG environment variables. I also added this to the demo
+             in the man page, and documented its effect.
+
+27/11/2001 mcs@astro.caltech.edu
+           getline.c
+             When displaying unsigned characters with values over
+             127 literally, previously it was assumed that they would
+             all be displayable. Now isprint() is consulted, and if it
+             says that a character isn't printable, the character code
+             is displayed in octal like \307. In non-C locales, some
+             characters with values > 127 are displayable, and
+             isprint() tells gl_get_line() which are and which aren't.
+
+27/11/2001 mcs@astro.caltech.edu
+           getline.c pathutil.c history.c enhance.c demo2.c
+             All arguments of the ctype.h character class functions
+             are now cast to (int)(unsigned char). Previously they
+             were cast to (int), which doesn't correctly conform to
+             the requirements of the C standard, and could cause
+             problems for characters with values > 127 on systems
+             with signed char's.
+
+26/11/2001 mcs@astro.caltech.edu
+           man3/enhance.3 man3/libtecla.3
+             I started writing a man page for the enhance program.
+
+26/11/2001 mcs@astro.caltech.edu
+           Makefile.in Makefile.rules INSTALL
+             It is now possible to specify whether the demos and other
+             programs are to be built, by overriding the default
+             values of the DEMOS, PROGRAMS and PROGRAMS_R variables.
+             I have also documented the BINDIR variable and the
+             install_bin makefile target.
+
+22/11/2001 mcs@astro.caltech.edu
+           getline.c libtecla.h libtecla.map man3/gl_get_line.3
+           man3/gl_ignore_signal.3 man3/gl_trap_signal.3
+             Signal handling has now been modified to be customizable.
+             Signals that are trapped by default can be removed from
+             the list of trapped signals, and signals that aren't
+             currently trapped, can be added to the list. Applications
+             can also specify the signal and terminal environments in
+             which an application's signal handler is invoked, and
+             what gl_get_line() does after the signal handler returns.
+
+13/11/2001 mcs@astro.caltech.edu
+           getline.c man3/gl_get_line.3
+             Added half-bright, reverse-video and blinking text to the
+             available prompt formatting options.
+           getline.c
+             Removed ^O from the default VT100 sgr0 capability
+             string.  Apparently it can cause problems with some
+             terminal emulators, and we don't need it, since it turns
+             off the alternative character set mode, which we don't
+             use.
+           getline.c
+             gl_tigetstr() and gl_tgetstr() didn't guard against the
+             error returns of tigetstr() and tgetstr() respectively.
+             They now do.
+
+11/11/2001 mcs@astro.caltech.edu
+           getline.c libtecla.h libtecla.map man3/gl_get_line.3
+           man3/gl_prompt_style.3
+             Although the default remains to display the prompt string
+             literally, the new gl_prompt_style() function can be used
+             to enable text attribute formatting directives in prompt
+             strings, such as underlining, bold font, and highlighting
+             directives.
+
+09/11/2001 mcs@astro.caltech.edu
+           enhance.c Makefile.rules configure.in configure
+             I added a new program to the distribution that allows one
+             to run most third party programs with the tecla library
+             providing command-line editing.
+
+08/11/2001 mcs@astro.caltech.edu
+           libtecla.h getline.c man3/gl_get_line.3 history.c history.h
+             I added a max_lines argument to gl_show_history() and
+             _glh_show_history(). This can optionally be used to
+             set a limit on the number of history lines displayed.
+           libtecla.h getline.c man3/gl_get_line.3
+             I added a new function called gl_replace_prompt(). This
+             can be used by gl_get_line() callback functions to
+             request that a new prompt be use when they return.
+
+06/11/2001 mcs@astro.caltech.edu
+           getline.c man3/gl_get_line.3
+             I implemented, bound and documented the list-history
+             action, used for listing historical lines of the current
+             history group.
+           getline.c man3/gl_get_line.3 man3/gl_echo_mode.3
+             I wrote functions to specify and query whether subsequent
+             lines will be visible as they are being typed.
+
+28/10/2001 mcs@astro.caltech.edu
+           getline.c man3/gl_get_line.3
+             For those cases where a terminal provides its own
+             high-level terminal editing facilities, you can now
+             specify an edit-mode argument of 'none'. This disables
+             all tecla key bindings, and by using canonical terminal
+             input mode instead of raw input mode, editing is left up
+             to the terminal driver.
+
+21/10/2001 mcs@astro.caltech.edu
+           libtecla.h getline.c history.c history.h
+           man3/gl_get_line.3 man3/gl_history_info.3
+             I added the new gl_state_of_history(),
+             gl_range_of_history() and gl_size_of_history()
+             functions for querying information about the
+             history list.
+           history.c
+             While testing the new gl_size_of_history()
+             function, I noticed that when the history buffer
+             wrapped, any location nodes of old lines between
+             the most recent line and the end of the buffer
+             weren't being removed. This could result in bogus
+             entries appearing at the start of the history list.
+             Now fixed.
+
+20/10/2001 mcs@astro.caltech.edu
+
+           libtecla.h getline.c history.c history.h
+           man3/gl_get_line.3 man3/gl_lookup_history.3
+             I added a function called gl_lookup_history(), that
+             the application can use to lookup lines in the history
+             list.
+           libtecla.h getline.c history.c history.h man3/gl_get_line.3
+             gl_show_history() now takes a format string argument
+             to control how the line is displayed, and with what
+             information. It also now provides the option of either
+             displaying all history lines or just those of the
+             current history group.
+           getline.c man3/gl_get_line.3
+             gl_get_line() only archives lines in the history buffer
+             if the newline action was invoked by a newline or
+             carriage return character.
+
+16/10/2001 mcs@astro.caltech.edu
+
+           history.c history.h getline.c libtecla.h libtecla.map
+           man3/gl_get_line.3 man3/gl_resize_history.3
+           man3/gl_limit_history.3 man3/gl_clear_history.3
+           man3/gl_toggle_history.3
+	     I added a number of miscellaneous history configuration
+	     functions. You can now resize or delete the history
+	     buffer, limit the number of lines that are allowed in the
+	     buffer, clear either all history or just the history of
+	     the current history group, and temporarily enable and
+	     disable the history mechanism.
+
+13/10/2001 mcs@astro.caltech.edu
+
+           getline.c
+             tputs_fp is now only declared if using termcap or
+             terminfo.
+           getline.c libtecla.map man3/gl_get_line.3
+           man3/gl_terminal_size.3
+             I added a public gl_terminal_size() function for
+             updating and querying the current size of the terminal.
+           update_version configure.in libtecla.h
+             A user noted that on systems where the configure script
+             couldn't be used, it was inconvenient to have the version
+             number macros set by the configure script, so they are
+             now specified in libtecla.h. To reduce the likelihood
+             that the various files where the version number now
+             appears might get out of sync, I have written the
+             update_version script, which changes the version number
+             in all of these files to a given value.
+
+01/10/2001 mcs@astro.caltech.edu
+
+           getline.c history.c history.h man3/gl_get_line.3
+             I added a max_lines argument to gl_save_history(), to
+             allow people to optionally place a ceiling on the number
+             of history lines saved. Specifying this as -1 sets the
+             ceiling to infinity.
+
+01/10/2001 mcs@astro.caltech.edu
+
+           configure.in configure
+             Under digital unix, getline wouldn't compile with
+             _POSIX_C_SOURCE set, due to type definitions needed by
+             select being excluded by this flag. Defining the
+             _OSF_SOURCE macro as well on this system, resolved this.
+
+30/09/2001 mcs@astro.caltech.edu
+
+           getline.c libtecla.h history.c history.h man3/gl_get_line.3
+           man3/gl_group_history.3
+             I implemented history streams. History streams
+             effectively allow multiple history lists to be stored in
+             a single history buffer. Lines in the buffer are tagged
+             with the current stream identification number, and
+             lookups only consider lines that are marked with the
+             current stream identifier.
+           getline.c libtecla.h history.c history.h man3/gl_get_line.3
+           man3/gl_show_history.3
+             The new gl_show_history function displays the current
+             history to a given stdio output stream.
+
+29/09/2001 mcs@astro.caltech.edu
+
+           getline.c
+             Previously new_GetLine() installed a persistent signal
+             handler to be sure to catch the SIGWINCH (terminal size
+             change) signal between calls to gl_get_line(). This had
+             the drawback that if multiple GetLine objects were
+             created, only the first GetLine object used after the
+             signal was received, would see the signal and adapt to
+             the new terminal size. Instead of this, a signal handler
+             for sigwinch is only installed while gl_get_line() is
+             running, and just after installing this handler,
+             gl_get_line() checks for terminal size changes that
+             might have occurred while the signal handler wasn't
+             installed.
+           getline.c
+             Dynamically allocated copies of capability strings looked
+             up in the terminfo or termcap databases are now made, so
+             that calls to setupterm() etc for one GetLine object
+             don't get trashed when another GetLine object calls
+             setupterm() etc. It is now safe to allocate and use
+             multiple GetLine objects, albeit only within a single
+             thread.
+           
+28/09/2001 mcs@astro.caltech.edu
+
+           version.c Makefile.rules
+             I added a function for querying the version number of
+             the library.
+
+26/09/2001 mcs@astro.caltech.edu
+
+           getline.c man3/gl_get_line.3
+             I added the new gl_watch_fd() function, which allows
+             applications to register callback functions to be invoked
+             when activity is seen on arbitrary file descriptors while
+             gl_get_line() is awaiting keyboard input from the user.
+
+           keytab.c
+             If a request is received to delete a non-existent
+             binding, which happens to be an ambiguous prefix of other
+             bindings no complaint is now generated about it being
+             ambiguous.
+
+23/09/2001 mcs@astro.caltech.edu
+
+           getline.c history.c history.h man3/gl_get_line.3
+           libtecla.map demo.c
+             I added new public functions for saving and restoring the
+             contents of the history list. The demo program now uses
+             these functions to load and save history in ~/.demo_history.
+
+23/09/2001 mcs@astro.caltech.edu
+
+           getline.c
+             On trying the demo for the first time on a KDE konsole
+             terminal, I discovered that the default M-O binding
+             to repeat history was hiding the arrow keys, which are
+             M-OA etc. I have removed this binding. The M-o (ie the
+             lower case version of this), is still bound.
+
+18/09/2001 mcs@astro.caltech.edu
+
+           getline.c man3/gl_get_line.3 libtecla.map
+             Automatic reading of ~/.teclarc is now postponed until
+             the first call to gl_get_line(), to give the application
+             the chance to specify alternative configuration sources
+             with the new function gl_configure_getline(). The latter
+             function allows configuration to be done with a string, a
+             specified application-specific file, and/or a specified
+             user-specific file. I also added a read-init-files action
+             function, for re-reading the configuration files, if any.
+             This is by default bound to ^X^R. This is all documented
+             in gl_get_line.3.
+
+08/09/2001 mcs@astro.caltech.edu
+
+           getline.c man3/gl_get_line.3
+             It is now possible to bind actions to key-sequences
+             that start with printable characters. Previously
+             keysequences were required to start with meta or control
+             characters. This is documented in gl_get_line.3.
+
+           getline.c man3/gl_get_line.3
+             A customized completion function can now arrange for
+             gl_get_line() to return the current input line whenever a
+             successful completion has been made. This is signalled by
+             setting the last character of the optional continuation
+             suffix to a newline character. This is documented in
+             gl_get_line.3.
+
+05/07/2001 Bug reported by Mike MacFaden, fixed by mcs
+
+           configure.in
+             There was a bug in the configure script that only
+             revealed itself on systems without termcap but not
+             terminfo (eg. NetBSD). I traced the bug back to a lack of
+             sufficient quoting of multi-line m4 macro arguments in
+             configure.in, and have now fixed this and recreated the
+             configure script.
+
+05/07/2001 Bug reported and patched by Mike MacFaden (patch modified
+           by mcs to match original intentions).
+
+           getline.c
+             getline.c wouldn't compile when termcap was selected as
+             the terminal information database. setupterm() was being
+             passed a non-existent variable, in place of the term[]
+             argument of gl_control_strings(). Also if
+             gl_change_terminal() is called with term==NULL, "ansi"
+             is now substituted.
+
+02/07/2001 Version 1.3.3 released.
+
+27/06/2001 mcs@astro.caltech.edu
+
+           getline.c expand.c cplmatch.c
+             Added checks to fprintf() statements that write to the
+             terminal.
+           getline.c
+             Move the cursor to the end of the line before suspending,
+             so that the cursor doesn't get left in the middle of the
+             input line.
+           Makefile.in
+             On systems that don't support shared libraries, the
+             distclean target of make deleted libtecla.h. This has
+             now been fixed.
+           getline.c
+             gl_change_terminal() was being called by gl_change_editor(),
+             with the unwanted side effect that raw terminal modes were
+             stored as those to be restored later, if called by an
+             action function. gl_change_terminal() was being called in
+             this case to re-establish terminal-specific key bindings,
+             so I have just split this part of the function out into
+             a separate function for both gl_change_editor() and
+             gl_change_terminal() to call.
+
+12/06/2001 mcs@astro.caltech.edu
+
+           getline.c
+             Signal handling has been improved. Many more signals are
+             now trapped, and instead of using a simple flag set by a
+             signal handler, race conditions are avoided by blocking
+             signals during most of the gl_get_line() code, and
+             unblocking them via calls to sigsetjmp(), just before
+             attempting to read each new character from the user.
+             The matching use of siglongjmp() in the signal
+             handlers ensures that signals are reblocked correctly
+             before they are handled. In most cases, signals cause
+             gl_get_line() to restore the terminal modes and signal
+             handlers of the calling application, then resend the
+             signal to the application. In the case of SIGINT, SIGHUP,
+             SIGPIPE, and SIGQUIT, if the process still exists after
+             the signals are resent, gl_get_line() immediately returns
+             with appropriate values assigned to errno. If SIGTSTP,
+             SIGTTIN or SIGTTOU signals are received, the process is
+             suspended. If any other signal is received, and the
+             process continues to exist after the signal is resent to
+             the calling application, line input is resumed after the
+             terminal is put back into raw mode, the gl_get_line()
+             signal handling is restored, and the input line redrawn.
+           man/gl_get_line(3)
+             I added a SIGNAL HANDLING section to the gl_get_line()
+             man page, describing the new signal handling features.
+
+21/05/2001 Version 1.3.2 released.
+
+21/05/2001 mcs@astro.caltech.edu
+
+           getline.c
+             When vi-replace-char was used to replace the character at
+             the end of the line, it left the cursor one character to
+             its right instead of on top of it. Now rememdied.
+           getline.c
+             When undoing, to properly emulate vi, the cursor is now
+             left at the leftmost of the saved and current cursor
+             positions.
+           getline.c man3/gl_get_line.3
+             Implemented find-parenthesis (%), delete-to-paren (M-d%),
+             vi-change-to-paren (M-c%), copy-to-paren (M-y%).
+           cplfile.c pcache.c
+             In three places I was comparing the last argument of
+             strncmp() to zero instead of the return value of
+             strncmp().
+
+20/05/2001 mcs@astro.caltech.edu
+
+           getline.c man3/gl_get_line.3
+             Implemented and documented the vi-repeat-change action,
+             bound to the period key. This repeats the last action
+             that modified the input line.
+
+19/05/2001 mcs@astro.caltech.edu
+
+           man3/gl_get_line.3
+             I documented the new action functions and bindings
+             provided by Tim Eliseo, plus the ring-bell action and
+             the new "nobeep" configuration option.
+           getline.c
+             I modified gl_change_editor() to remove and reinstate the
+             terminal settings as well as the default bindings, since
+             these have editor-specific differences. I also modified
+             it to not abort if a key-sequence can't be bound for some
+             reason. This allows the new vi-mode and emacs-mode
+             bindings to be used safely.
+           getline.c
+             When the line was re-displayed on receipt of a SIGWINCH
+             signal, the result wasn't visible until the next
+             character was typed, since a call to fflush() was needed.
+             gl_redisplay_line() now calls gl_flush_output() to remedy
+             this.
+
+17/05/2001 mcs@astro.catlech.edu
+
+           getline.c
+             Under Linux, calling fflush(gl->output_fd) hangs if
+             terminal output has been suspended with ^S. With the
+             tecla library taking responsability for reading the stop
+             and start characters this was a problem, because once
+             hung in fflush(), the keyboard input loop wasn't entered,
+             so the user couldn't type the start character to resume
+             output.  To remedy this, I now have the terminal process
+             these characters, rather than the library.
+
+12/05/2001 mcs@astro.caltech.edu
+
+           getline.c
+             The literal-next action is now implemented as a single
+             function which reads the next character itself.
+             Previously it just set a flag which effected the
+             interpretation of the next character read by the input
+             loop.
+           getline.c
+             Added a ring-bell action function. This is currently
+             unbound to any key by default, but it is used internally,
+             and can be used by users that want to disable any of the
+             default key-bindings.
+
+12/05/2001 Tim Eliseo    (logged here by mcs)
+
+           getline.c
+             Don't reset gl->number until after calling an action
+             function. By looking at whether gl->number is <0 or
+             not, action functions can then tell whether the count
+             that they were passed was explicitly specified by the
+             user, as opposed to being defaulted to 1.
+           getline.c
+             In vi, the position at which input mode is entered
+             acts as a barrier to backward motion for the few
+             backward moving actions that are enabled in input mode.
+             Tim added this barrier to getline.
+           getline.c
+             In gl_get_line() after reading an input line, or
+             having the read aborted by a signal, the sig_atomic_t
+             gl_pending_signal was being compared to zero instead
+             of -1 to see if no signals had been received.
+             gl_get_line() will thus have been calling raise(-1),
+             which luckily didn't seem to do anything. Tim also
+             arranged for errno to be set to EINTR when a signal
+             aborts gl_get_line().
+           getline.c
+             The test in gl_add_char_to_line() for detecting
+             when overwriting a character with a wider character,
+             had a < where it needed a >. Overwriting with a wider
+             character thus overwrote trailing characters. Tim also
+             removed a redundant copy of the character into the
+             line buffer.
+           getline.c
+             gl_cursor_left() and gl->cursor_right() were executing
+             a lot of redundant code, when the existing call to the
+             recently added gl_place_cursor() function, does all that
+             is necessary.
+           getline.c
+             Remove redundant code from backward_kill_line() by
+             re-implimenting in terms of gl_place_cursor() and
+             gl_delete_chars().
+           getline.c
+             gl_forward_delete_char() now records characters in cut
+             buffer when in vi command mode.
+           getline.c
+             In vi mode gl_backward_delete_char() now only deletes
+             up to the point at which input mode was entered. Also
+             gl_delete_chars() restores from the undo buffer when
+             deleting in vi insert mode.
+           getline.c
+             Added action functions, vi-delete-goto-column,
+             vi-change-to-bol, vi-change-line, emacs-mode, vi-mode,
+             vi-forward-change-find, vi-backward-change-find,
+             vi-forward-change-to, vi-backward-change-to,
+             vi-change-goto-col, forward-delete-find, backward-delete-find,
+             forward-delete-to, backward-delete-to,
+             delete-refind, delete-invert-refind, forward-copy-find,
+             backward-copy-find, forward-copy-to, backward-copy-to
+             copy-goto-column, copy-rest-of-line, copy-to-bol, copy-line,
+             history-re-search-forward, history-re-search-backward.
+
+06/05/2001 Version 1.3.1 released.
+
+03/05/2001 mcs@astro.caltech.edu
+
+           configure.in
+             Old versions of GNU ld don't accept version scripts.
+             Under Linux I thus added a test to try out ld with
+             the --version-script argument to see if it works.
+             If not, version scripts aren't used.
+           configure.in
+             My test for versions of Solaris earlier than 7
+             failed when confronted by a three figure version
+             number (2.5.1). Fixed.
+
+30/04/2001 mcs@astro.caltech.edu
+
+           getline.c
+             In vi mode, history-search-backward and
+             history-search-forward weren't doing anything when
+             invoked at the start of an empty line, whereas
+             they should have acted like up-history and down-history.
+           Makefile.in Makefile.rules
+             When shared libraries are being created, the build
+             procedure now arranges for any alternate library
+             links to be created as well, before linking the
+             demos. Without this the demos always linked to the
+             static libraries (which was perfectly ok, but wasn't a
+             good example).
+           Makefile.in Makefile.rules
+             On systems on which shared libraries were being created,
+             if there were no alternate list of names, make would
+             abort due to a Bourne shell 'for' statement that didn't
+             have any arguments. Currently there are no systems who's
+             shared library configurations would trigger this
+             problem.
+           Makefile.rules
+             The demos now relink to take account of changes to the
+             library.
+           configure.in configure
+             When determining whether the reentrant version of the
+             library should be compiled by default, the configure
+             script now attempts to compile a dummy program that
+             includes all of the appropriate system headers and
+             defines _POSIX_C_SOURCE. This should now be a robust test
+             on systems which use C macros to alias these function
+             names to other internal functions.
+           configure.in
+             Under Solaris 2.6 and earlier, the curses library is in
+             /usr/ccs/lib. Gcc wasn't finding this. In addition to
+             remedying this, I had to remove "-z text" from
+             LINK_SHARED under Solaris to get it to successfully
+             compile the shared library against the static curses
+             library.
+           configure.in
+             Under Linux the -soname directive was being used
+             incorrectly, citing the fully qualified name of the
+             library instead of its major version alias. This will
+             unfortunately mean that binaries linked with the 1.2.3
+             and 1.2.4 versions of the shared library won't use
+             later versions of the library unless relinked.
+
+30/04/2001 mcs@astro.caltech.edu
+
+           getline.c
+             In gl_get_input_line(), don't redundantly copy the
+             start_line if start_line == gl->line.
+
+30/04/2001 Version 1.3.0 released.
+
+28/04/2001 mcs@astro.caltech.edu
+
+           configure.in
+             I removed the --no-undefined directive from the Linux
+             LINK_SHARED command. After recent patches to our RedHat
+             7.0 systems ld started reporting some internal symbols of
+             libc as being undefined.  Using nm on libc indicated that
+             the offending symbols are indeed defined, albeit as
+             "common" symbols, so there appears to be a bug in
+             RedHat's ld. Removing this flag allows the tecla shared
+             library to compile, and programs appear to function fine.
+           man3/gl_get_line.3
+             The default key-sequence used to invoke the
+             read-from-file action was incorrectly cited as ^Xi
+             instead of ^X^F.
+
+26/04/2001 mcs@astro.caltech.edu
+
+           getline.c man3/gl_get_line.3
+             A new vi-style editing mode was added. This involved
+             adding many new action functions, adding support for
+             specifying editing modes in users' ~/.teclarc files,
+             writing a higher level cursor motion function to support
+             the different line-end bounds required in vi command
+             mode, and a few small changes to support the fact that vi
+             has two modes, input mode and command mode with different
+             bindings.
+
+             When vi editing mode is enabled, any binding that starts
+             with an escape or a meta character, is interpreted as a
+             command-mode binding, and switches the library to vi
+             command mode if not already in that mode. Once in command
+             mode the first character of all keysequences entered
+             until input mode is re-enabled, are quietly coerced to
+             meta characters before being looked up in the key-binding
+             table. So, for example, in the key-binding table, the
+             standard vi command-mode 'w' key, which moves the cursor
+             one word to the right, is represented by M-w. This
+             emulates vi's dual sets of bindings in a natural way
+             without needing large changes to the library, or new
+             binding syntaxes. Since cursor keys normally emit
+             keysequences which start with escape, it also does
+             something sensible when a cursor key is pressed during
+             input mode (unlike true vi, which gets upset).
+
+             I also added a ^Xg binding for the new list-glob action
+             to both the emacs and vi key-binding tables. This lists
+             the files that match the wild-card expression that
+             precedes it on the command line.
+
+             The function that reads in ~/.teclarc used to tell
+             new_GetLine() to abort if it encountered anything that it
+             didn't understand in this file. It now just reports an
+             error and continues onto the next line.
+           Makefile.in:
+             When passing LIBS=$(LIBS) to recursive invokations of
+             make, quotes weren't included around the $(LIBS) part.
+             This would cause problems if LIBS ever contained more
+             than one word (with the supplied configure script this
+             doesn't happen currently). I added these quotes.
+           expand.c man3/ef_expand_file.3:
+             I wrote a new public function called ef_list_expansions(),
+             to list the matching filenames returned by
+             ef_expand_file().
+
+             I also fixed the example in the man page, which cited
+             exp->file instead of exp->files, and changed the
+             dangerous name 'exp' with 'expn'.
+           keytab.c:
+             Key-binding tables start with 100 elements, and are
+             supposedly incremented in size by 100 elements whenever
+             the a table runs out of space. The realloc arguments to
+             do this were wrong. This would have caused problems if
+             anybody added a lot of personal bindings in their
+             ~/.teclarc file. I only noticed it because the number of
+             key bindings needed by the new vi mode exceeded this
+             number.
+           libtecla.map
+             ef_expand_file() is now reported as having been added in
+             the upcoming 1.3.0 release.
+
+25/03/2001 Markus Gyger  (logged here by mcs)
+
+           Makefile.in:
+             Make symbolic links to alternative shared library names
+             relative instead of absolute.
+           Makefile.rules:
+             The HP-UX libtecla.map.opt file should be made in the
+             compilation directory, to allow the source code directory
+             to be on a readonly filesystem.
+           cplmatch.c demo2.c history.c pcache.c
+             To allow the library to be compiled with a C++ compiler,
+             without generating warnings, a few casts were added where
+             void* return values were being assigned directly to
+             none void* pointer variables.
+
+25/03/2001 mcs@astro.caltech.edu
+
+           libtecla.map:
+             Added comment header to explain the purpose of the file.
+             Also added cpl_init_FileArgs to the list of exported
+             symbols. This symbol is deprecated, and no longer
+             documented, but for backwards compatibility, it should
+             still be exported.
+           configure:
+             I had forgotten to run autoconf before releasing version
+             1.2.4, so I have just belatedly done so.  This enables
+             Markus' changes to "configure.in" documented previously,
+             (see 17/03/2001).
+
+20/03/2001 John Levon   (logged here by mcs)
+
+           libtecla.h
+             A couple of the function prototypes in libtecla.h have
+             (FILE *) argument declarations, which means that stdio.h
+             needs to be included. The header file should be self
+             contained, so libtecla.h now includes stdio.h.
+
+18/03/2001 Version 1.2.4 released.
+
+           README html/index.html configure.in
+             Incremented minor version from 3 to 4.
+
+18/03/2001 mcs@astro.caltech.edu
+
+           getline.c
+             The fix for the end-of-line problem that I released a
+             couple of weeks ago, only worked for the first line,
+             because I was handling this case when the cursor position
+             was equal to the last column, rather than when the cursor
+             position modulo ncolumn was zero.
+           Makefile.in Makefile.rules
+             The demos are now made by default, their rules now being
+             int Makefile.rules instead of Makefile.in.
+           INSTALL
+             I documented how to compile the library in a different
+             directory than the distribution directory.
+             I also documented features designed to facilitate
+             configuring and building the library as part of another
+             package.
+
+17/03/2001 Markus Gyger (logged here by mcs)
+
+           getline.c
+             Until now cursor motions were done one at a time. Markus
+             has added code to make use the of the terminfo capability
+             that moves the cursor by more than one position at a
+             time. This greatly improves performance when editing near
+             the start of long lines.
+           getline.c
+             To further improve performance, Markus switched from
+             writing one character at a time to the terminal, using
+             the write() system call, to using C buffered output
+             streams. The output buffer is only flushed when
+             necessary.
+           Makefile.rules Makefile.in configure.in
+             Added support for compiling for different architectures
+             in different directories. Simply create another directory
+             and run the configure script located in the original
+             directory.
+           Makefile.in configure.in libtecla.map
+             Under Solaris, Linux and HP-UX, symbols that are to be
+             exported by tecla shared libraries are explicitly specified
+             via symbol map files. Only publicly documented functions
+             are thus visible to applications.
+           configure.in
+             When linking shared libraries under Solaris SPARC,
+             registers that are reserved for applications are marked
+             as off limits to the library, using -xregs=no%appl when
+             compiling with Sun cc, or -mno-app-regs when compiling
+             with gcc. Also removed -z redlocsym for Solaris, which
+             caused problems under some releases of ld.
+           homedir.c  (after minor changes by mcs)
+             Under ksh, ~+ expands to the current value of the ksh
+             PWD environment variable, which contains the path of
+             the current working directory, including any symbolic
+             links that were traversed to get there. The special
+             username "+" is now treated equally by tecla, except
+             that it substitutes the return value of getcwd() if PWD
+             either isn't set, or if it points at a different
+             directory than that reported by getcwd().
+
+08/03/2001 Version 1.2.3 released.
+
+08/03/2001 mcs@astro.caltech.edu
+
+           getline.c
+             On compiling the library under HP-UX for the first time
+             I encountered and fixed a couple of bugs:
+
+             1. On all systems except Solaris, the callback function
+                required by tputs() takes an int argument for the
+                character that is to be printed. Under Solaris it
+                takes a char argument. The callback function was
+                passing this argument, regardless of type, to write(),
+                which wrote the first byte of the argument.  This was
+                fine under Solaris and under little-endian systems,
+                because the first byte contained the character to be
+                written, but on big-endian systems, it always wrote
+                the zero byte at the other end of the word. As a
+                result, no control characters were being written to
+                the terminal.
+             2. While attempting to start a newline after the user hit
+                enter, the library was outputting the control sequence
+                for moving the cursor down, instead of the newline
+                character. On many systems the control sequence for
+                moving the cursor down happends to be a newline
+                character, but under HP-UX it isn't. The result was
+                that no new line was being started under HP-UX.
+
+04/03/2001 mcs@astro.caltech.edu
+
+           configure.in Makefile.in Makefile.stub configure config.guess
+           config.sub Makefile.rules install-sh PORTING README INSTALL
+             Configuration and compilation of the library is now
+             performed with the help of an autoconf configure
+             script. In addition to relieving the user of the need to
+             edit the Makefile, this also allows automatic compilation
+             of the reentrant version of the library on platforms that
+             can handle it, along with the creation of shared
+             libraries where configured. On systems that aren't known
+             to the configure script, just the static tecla library is
+             compiled. This is currently the case on all systems
+             except Linux, Solaris and HP-UX. In the hope that
+             installers will provide specific conigurations for other
+             systems, the configure.in script is heavily commented,
+             and instructions on how to use are included in a new
+             PORTING file.
+
+24/02/2001 Version 1.2b released.
+
+22/02/2001 mcs@astro.caltech.edu
+
+           getline.c
+             It turns out that most terminals, but not all, on writing
+             a character in the rightmost column, don't wrap the
+             cursor onto the next line until the next character is
+             output. This library wasn't aware of this and thus if one
+             tried to reposition the cursor from the last column,
+             gl_get_line() thought that it was moving relative to a
+             point on the next line, and thus moved the cursor up a
+             line. The fix was to write one extra character when in
+             the last column to force the cursor onto the next line,
+             then backup the cursor to the start of the new line.
+           getline.c
+             On terminal initialization, the dynamic LINES and COLUMNS
+             environment variables were ignored unless
+             terminfo/termcap didn't return sensible dimensions. In
+             practice, when present they should override the static
+             versions in the terminfo/termcap databases. This is the
+             new behavior. In reality this probably won't have caused
+             many problems, because a SIGWINCH signal which informs of
+             terminal size changes is sent when the terminal is
+             opened, so the dimensions established during
+             initialization quickly get updated on most systems.
+
+18/02/2001 Version 1.2a released.
+
+18/02/2001 mcs@astro.caltech.edu
+
+           getline.c
+             Three months ago I moved the point at which termios.h
+             was included in getline.c. Unfortunately, I didn't notice
+             that this moved it to after the test for TIOCGWINSZ being
+             defined. This resulted in SIGWINCH signals not being
+             trapped for, and thus terminal size changes went
+             unnoticed. I have now moved the test to after the 
+             inclusion of termios.h.
+
+12/02/2001 Markus Gyger     (described here by mcs)
+
+           man3/pca_lookup_file.3 man3/gl_get_line.3
+           man3/ef_expand_file.3 man3/cpl_complete_word.3
+             In the 1.2 release of the library, all functions in the
+             library were given man pages. Most of these simply
+             include one of the above 4 man pages, which describe the
+             functions while describing the modules that they are in.
+             Markus added all of these function names to the lists in
+             the "NAME" headers of the respective man pages.
+             Previously only the primary function of each module was
+             named there.
+
+11/02/2001 mcs@astro.caltech.edu
+
+           getline.c
+             On entering a line that wrapped over two or more
+             terminal, if the user pressed enter when the cursor
+             wasn't on the last of the wrapped lines, the text of the
+             wrapped lines that followed it got mixed up with the next
+             line written by the application, or the next input
+             line. Somehow this slipped through the cracks and wasn't
+             noticed until now. Anyway, it is fixed now.
+
+09/02/2001 Version 1.2 released.
+
+04/02/2001 mcs@astro.caltech.edu
+
+           pcache.c libtecla.h
+             With all filesystems local, demo2 was very fast to start
+             up, but on a Sun system with one of the target
+             directories being on a remote nfs mounted filesystem, the
+             startup time was many seconds. This was due to the
+             executable selection callback being applied to all files
+             in the path at startup. To avoid this, all files are now
+             included in the cache, and the application specified
+             file-selection callback is only called on files as they
+             are matched. Whether the callback rejected or accepted
+             them is then cached so that the next time an already
+             checked file is looked at, the callback doesn't have to
+             be called. As a result, startup is now fast on all
+             systems, and since usually there are only a few matching
+             file completions at a time, the delay during completion
+             is also usually small. The only exception is if the user
+             tries to complete an empty string, at which point all
+             files have to be checked. Having done this once, however,
+             doing it again is fast.
+           man3/pca_lookup_file.3
+             I added a man page documenting the new PathCache module.
+           man3/<many-new-files>.3
+             I have added man pages for all of the functions in each
+             of the modules. These 1-line pages use the .so directive
+             to redirect nroff to the man page of the parent module.
+           man Makefile update_html
+             I renamed man to man3 to make it easier to test man page
+             rediction, and updated Makefile and update_html
+             accordingly. I also instructed update_html to ignore
+             1-line man pages when making html equivalents of the man
+             pages.
+           cplmatch.c
+             In cpl_list_completions() the size_t return value of
+             strlen() was being used as the length argument of a "%*s"
+             printf directive. This ought to be an int, so the return
+             value of strlen() is now cast to int. This would have
+             caused problems on architectures where the size of a
+             size_t is not equal to the size of an int.
+
+02/02/2001 mcs@astro.caltech.edu
+
+           getline.c
+             Under UNIX, certain terminal bindings are set using the
+             stty command. This, for example, specifies which control
+             key generates a user-interrupt (usually ^C or ^Y). What I
+             hadn't realized was that ASCII NUL is used as the way to
+             specify that one of these bindings is unset. I have now
+             modified the code to skip unset bindings, leaving the
+             corresponding action bound to the built-in default, or a
+             user provided binding.
+
+28/01/2001 mcs@astro.caltech.edu
+
+           pcache.c libtecla.h
+             A new module was added which supports searching for files
+             in any colon separated list of directories, such as the
+             unix execution PATH environment variable. Files in these
+             directories, after being individually okayed for
+             inclusion via an application provided callback, are
+             cached in a PathCache object. You can then look up the
+             full pathname of a given filename, or you can use the
+             provided completion callback to list possible completions
+             in the path-list. The contents of relative directories,
+             such as ".", obviously can't be cached, so these
+             directories are read on the fly during lookups and
+             completions. The obvious application of this facility is
+             to provide Tab-completion of commands, and thus a
+             callback to place executable files in the cache, is
+             provided.
+           demo2.c
+             This new program demonstrates the new PathCache
+             module. It reads and processes lines of input until the
+             word 'exit' is entered, or C-d is pressed. The default
+             tab-completion callback is replaced with one which at the
+             start of a line, looks up completions of commands in the
+             user's execution path, and when invoked in other parts of
+             the line, reverts to normal filename completion. Whenever
+             a new line is entered, it extracts the first word on the
+             line, looks it up in the user's execution path to see if
+             it corresponds to a known command file, and if so,
+             displays the full pathname of the file, along with the
+             remaining arguments.
+           cplfile.c
+             I added an optional pair of callback function/data
+             members to the new cpl_file_completions() configuration
+             structure. Where provided, this callback is asked
+             on a file-by-file basis, which files should be included
+             in the list of file completions. For example, a callback
+             is provided for listing only completions of executable
+             files.
+           cplmatch.c
+             When listing completions, the length of the type suffix
+             of each completion wasn't being taken into account
+             correctly when computing the column widths. Thus the
+             listing appeared ragged sometimes. This is now fixed.
+           pathutil.c
+             I added a function for prepending a string to a path,
+             and another for testing whether a pathname referred to
+             an executable file.
+
+28/01/2001 mcs@astro.caltech.edu
+
+           libtecla.h cplmatch.c man/cpl_complete_word.3
+             The use of a publically defined structure to configure
+             the cpl_file_completions() callback was flawed, so a new
+             approach has been designed, and the old method, albeit
+             still supported, is no longer documented in the man
+             pages. The definition of the CplFileArgs structure in
+             libtecla.h is now accompanied by comments warning people
+             not to modify it, since modifications could break
+             applications linked to shared versions of the tecla
+             library. The new method involves an opaque CplFileConf
+             object, instances of which are returned by a provided
+             constructor function, configured with provided accessor
+             functions, and when no longer needed, deleted with a
+             provided destructor function. This is documented in the
+             cpl_complete_word man page. The cpl_file_completions()
+             callback distinguishes what type of configuration
+             structure it has been sent by virtue of a code placed at
+             the beginning of the CplFileConf argument by its
+             constructor.
+
+04/01/2001 mcs@astro.caltech.edu (Release of version 1.1j)
+
+           getline.c
+             I added upper-case bindings for the default meta-letter
+             keysequences such as M-b. They thus continue to work
+             when the user has caps-lock on.
+           Makefile
+             I re-implemented the "install" target in terms of new
+             install_lib, install_inc and install_man targets. When
+             distributing the library with other packages, these new
+             targets allows for finer grained control of the
+             installation process.
+
+30/12/2000 mcs@astro.caltech.edu
+
+           getline.c man/gl_get_line.3
+             I realized that the recall-history action that I
+             implemented wasn't what Markus had asked me for. What he
+             actually wanted was for down-history to continue going
+             forwards through a previous history recall session if no
+             history recall session had been started while entering
+             the current line. I have thus removed the recall-history
+             action and modified the down-history action function
+             accordingly.
+
+24/12/2000 mcs@astro.caltech.edu
+
+           getline.c
+             I modified gl_get_line() to allow the previously returned
+             line to be passed in the start_line argument.
+           getline.c man/gl_get_line.3
+             I added a recall-history action function, bound to M^P.
+             This recalls the last recalled history line, regardless
+             of whether it was from the current or previous line.
+
+13/12/2000 mcs@astro.caltech.edu (Release of version 1.1i)
+
+           getline.c history.h history.c man/gl_get_line.3
+             I implemented the equivalent of the ksh Operate action. I
+             have named the tecla equivalent "repeat-history". This
+             causes the line that is to be edited to returned, and
+             arranges for the next most recent history line to be
+             preloaded on the next call to gl_get_line(). Repeated
+             invocations of this action thus result in successive
+             history lines being repeated - hence the
+             name. Implementing the ksh Operate action was suggested
+             by Markus Gyger. In ksh it is bound to ^O, but since ^O
+             is traditionally bound by the default terminal settings,
+             to stop-output, I have bound the tecla equivalent to M-o.
+
+01/12/2000 mcs@astro.caltech.edu (Release of version 1.1h)
+
+           getline.c keytab.c keytab.h man/gl_get_line.3
+             I added a digit-argument action, to allow repeat
+             counts for actions to be entered. As in both tcsh
+             and readline, this is bound by default to each of
+             M-0, M-1 through to M-9, the number being appended
+             to the current repeat count. Once one of these has been
+             pressed, the subsequent digits of the repeat count can be
+             typed with or without the meta key pressed. It is also
+             possible to bind digit-argument to other keys, with or
+             without a numeric final keystroke. See man page for
+             details.
+
+           getline.c man/gl_get_line.3
+             Markus noted that my choice of M-< for the default
+             binding of read-from-file, could be confusing, since
+             readline binds this to beginning-of-history. I have
+             thus rebound it to ^X^F (ie. like find-file in emacs).
+
+           getline.c history.c history.h man/gl_get_line.3
+             I have now implemented equivalents of the readline
+             beginning-of-history and end-of-history actions.
+             These are bound to M-< and M-> respectively.
+
+           history.c history.h
+             I Moved the definition of the GlHistory type, and
+             its subordinate types from history.h to history.c.
+             There is no good reason for any other module to
+             have access to the innards of this structure.
+
+27/11/2000 mcs@astro.caltech.edu (Release of version 1.1g)
+
+           getline.c man/gl_get_line.3
+             I added a "read-from-file" action function and bound it
+             by default to M-<. This causes gl_get_line() to
+             temporarily return input from the file who's name
+             precedes the cursor.
+             
+26/11/2000 mcs@astro.caltech.edu
+
+           getline.c keytab.c keytab.h man/gl_get_line.3
+             I have reworked some of the keybinding code again.
+
+             Now, within key binding strings, in addition to the
+             previously existing notation, you can now use M-a to
+             denote meta-a, and C-a to denote control-a. For example,
+             a key binding which triggers when the user presses the
+             meta key, the control key and the letter [
+             simultaneously, can now be denoted by M-C-[, or M-^[ or
+             \EC-[ or \E^[.
+
+             I also updated the man page to use M- instead of \E in
+             the list of default bindings, since this looks cleaner.
+
+           getline.c man/gl_get_line.3
+             I added a copy-region-as-kill action function and
+             gave it a default binding to M-w.
+
+22/11/2000 mcs@astro.caltech.edu
+
+           *.c
+             Markus Gyger sent me a copy of a previous version of
+             the library, with const qualifiers added in appropriate
+             places. I have done the same for the latest version.
+             Among other things, this gets rid of the warnings
+             that are generated if one tells the compiler to
+             const qualify literal strings.
+
+           getline.c getline.h glconf.c
+             I have moved the contents of glconf.c and the declaration
+             of the GetLine structure into getline.c. This is cleaner,
+             since now only functions in getline.c can mess with the
+             innards of GetLine objects. It also clears up some problems
+             with system header inclusion order under Solaris, and also
+             the possibility that this might result in inconsistent
+             system macro definitions, which in turn could cause different
+             declarations of the structure to be seen in different files.
+
+           hash.c
+             I wrote a wrapper function to go around strcmp(), such that
+             when hash.c is compiled with a C++ compiler, the pointer
+             to the wrapper function is a C++ function pointer.
+             This makes it compatible with comparison function pointer
+             recorded in the hash table.
+
+           cplmatch.c getline.c libtecla.h
+             Markus noted that the Sun C++ compiler wasn't able to
+             match up the declaration of cpl_complete_word() in
+             libtecla.h, where it is surrounded by a extern "C" {}
+             wrapper, with the definition of this function in
+             cplmatch.c. My suspicion is that the compiler looks not
+             only at the function name, but also at the function
+             arguments to see if two functions match, and that the
+             match_fn() argument, being a fully blown function pointer
+             declaration, got interpetted as that of a C function in
+             one case, and a C++ function in the other, thus
+             preventing a match.
+
+             To fix this I now define a CplMatchFn typedef in libtecla.h,
+             and use this to declare the match_fn callback.
+
+20/11/2000 (Changes suggested by Markus Gyger to support C++ compilers):
+           expand.c
+             Renamed a variable called "explicit" to "xplicit", to
+             avoid conflicts when compiling with C++ compilers.
+           *.c
+             Added explicit casts when converting from (void *) to
+             other pointer types. This isn't needed in C but it is
+             in C++.
+           getline.c
+             tputs() has a strange declaration under Solaris. I was
+             enabling this declaration when the SPARC feature-test
+             macro was set. Markus changed the test to hinge on the
+             __sun and __SVR4 macros.
+           direader.c glconf.c stringrp.c
+             I had omitted to include string.h in these two files.
+
+           Markus also suggested some other changes, which are still
+           under discussion. With the just above changes however, the
+           library compiles without complaint using g++.
+
+19/11/2000 mcs@astro.caltech.edu
+           getline.h getline.c keytab.c keytab.h glconf.c
+           man/gl_get_line.3
+             I added support for backslash escapes (include \e
+             for the keyboard escape key) and literal binary
+             characters to the characters allowed within key sequences
+             of key bindings.
+
+           getline.h getline.c keytab.c keytab.h glconf.c
+           man/gl_get_line.3
+             I introduced symbolic names for the arrow keys, and
+             modified the library to use the cursor key sequences
+             reported by terminfo/termcap in addition to the default
+             ANSI ones. Anything bound to the symbolically named arrow
+             keys also gets bound to the default and terminfo/termcap
+             cursor key sequences. Note that under Solaris
+             terminfo/termcap report the properties of hardware X
+             terminals when TERM is xterm instead of the terminal
+             emulator properties, and the cursor keys on these two
+             systems generate different key sequences. This is an
+             example of why extra default sequences are needed.
+
+           getline.h getline.c keytab.c
+             For some reason I was using \e to represent the escape
+             character. This is supported by gcc, which thus doesn't
+             emit a warning except with the -pedantic flag, but isn't
+             part of standard C. I now use a macro to define escape
+             as \033 in getline.h, and this is now used wherever the
+             escape character is needed.
+
+17/11/2000 mcs@astro.caltech.edu (Release of version 1.1d)
+
+           getline.c, man/gl_get_line(3), html/gl_get_line.html
+             In tcsh ^D is bound to a function which does different
+             things depending on where the cursor is within the input
+             line. I have implemented its equivalent in the tecla
+             library. When invoked at the end of the line this action
+             function displays possible completions. When invoked on
+             an empty line it causes gl_get_line() to return NULL,
+             thus signalling end of input. When invoked within a line
+             it invokes forward-delete-char, as before. The new action
+             function is called del-char-or-list-or-eof.
+
+           getline.c, man/gl_get_line(3), html/gl_get_line.html
+             I found that the complete-word and expand-file actions
+             had underscores in their names instead of hyphens. This
+             made them different from all other action functions, so I
+             have changed the underscores to hyphens.
+
+           homedir.c
+             On SCO UnixWare while getpwuid_r() is available, the
+             associated _SC_GETPW_R_SIZE_MAX macro used by sysconf()
+             to find out how big to make the buffer to pass to this
+             function to cater for any password entry, doesn't
+             exist. I also hadn't catered for the case where sysconf()
+             reports that this limit is indeterminate. I have thus
+             change the code to substitute a default limit of 1024 if
+             either the above macro isn't defined or if sysconf() says
+             that the associated limit is indeterminate.
+           
+17/11/2000 mcs@astro.caltech.edu (Release of version 1.1c)
+
+           getline.c, getline.h, history.c, history.h
+             I have modified the way that the history recall functions
+             operate, to make them better emulate the behavior of
+             tcsh. Previously the history search bindings always
+             searched for the prefix that preceded the cursor, then
+             left the cursor at the same point in the line, so that a
+             following search would search using the same prefix. This
+             isn't how tcsh operates. On finding a matching line, tcsh
+             puts the cursor at the end of the line, but arranges for
+             the followup search to continue with the same prefix,
+             unless the user does any cursor motion or character
+             insertion operations in between, in which case it changes
+             the search prefix to the new set of characters that are
+             before the cursor. There are other complications as well,
+             which I have attempted to emulate. As far as I can
+             tell, the tecla history recall facilities now fully
+             emulate those of tcsh.
+
+16/11/2000 mcs@astro.caltech.edu (Release of version 1.1b)
+
+           demo.c:
+             One can now quit from the demo by typing exit.
+
+           keytab.c:
+             The first entry of the table was getting deleted
+             by _kt_clear_bindings() regardless of the source
+             of the binding. This deleted the up-arrow binding.
+             Symptoms noted by gazelle@yin.interaccess.com.
+
+           getline.h:
+             Depending on which system include files were include
+             before the inclusion of getline.h, SIGWINCH and
+             TIOCGWINSZ might or might not be defined. This resulted
+             in different definitions of the GetLine object in
+             different files, and thus some very strange bugs! I have
+             now added #includes for the necessary system header files
+             in getline.h itself. The symptom was that on creating a
+             ~/.teclarc file, the demo program complained of a NULL
+             argument to kt_set_keybinding() for the first line of the
+             file.
+
+15/11/2000 mcs@astro.caltech.edu (Release of version 1.1a)
+
+           demo.c:
+             I had neglected to check the return value of
+             new_GetLine() in the demo program. Oops.
+
+           getline.c libtecla.h:
+             I wrote gl_change_terminal(). This allows one to change to
+             a different terminal or I/O stream, by specifying the
+             stdio streams to use for input and output, along with the
+             type of terminal that they are connected to.
+
+           getline.c libtecla.h:
+             Renamed GetLine::isterm to GetLine::is_term. Standard
+             C reserves names that start with "is" followed by
+             alphanumeric characters, so this avoids potential
+             clashes in the future.
+
+           keytab.c keytab.h
+             Each key-sequence can now have different binding
+             functions from different sources, with the user provided
+             binding having the highest precedence, followed by the
+             default binding, followed by any terminal specific
+             binding. This allows gl_change_terminal() to redefine the
+             terminal-specific bindings each time that
+             gl_change_terminal() is called, without overwriting the
+             user specified or default bindings. In the future, it will
+             also allow for reconfiguration of user specified
+             bindings after the call to new_GetLine(). Ie. deleting a
+             user specified binding should reinstate any default or
+             terminal specific binding.
+
+           man/cpl_complete_word.3 html/cpl_complete_word.html
+           man/ef_expand_file.3    html/ef_expand_file.html
+           man/gl_get_line.3       html/gl_get_line.html
+             I added sections on thread safety to the man pages of the
+             individual modules.
+
+           man/gl_get_line.3       html/gl_get_line.html
+             I documented the new gl_change_terminal() function.
+
+           man/gl_get_line.3       html/gl_get_line.html
+             In the description of the ~/.teclarc configuration file,
+             I had omitted the 'bind' command word in the example
+             entry. I have now remedied this.

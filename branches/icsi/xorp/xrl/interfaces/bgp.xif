@@ -1,0 +1,170 @@
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.8 2002/12/04 23:08:18 atanu Exp $ */
+
+/*
+** BGP protocol XRL interface.
+*/
+interface bgp/0.2 {
+	/**
+	 * Get local config
+	 *
+	 * @param as_num our AS number.
+	 * @param id our BGP ID.
+	 */
+
+	local_config \
+		? \
+		as:u32 \
+		& id:ipv4
+
+	/**
+	 * Set the local AS number.
+	 *
+	 * @param as our AS number.
+	 */
+	
+	set_local_as ? as:u32
+
+	/**
+         * Set the BGP id.
+	 *
+	 * @param id our BGP ID.
+	 */
+
+	set_bgpid ? id:ipv4
+
+	/** 
+	 * Add peer.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param as the peer's AS number.
+	 * @param next_hop the local next hop.
+	 * @param holdtime expects traffic in this time interval.
+	 */
+	add_peer \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& as:u32 \
+		& next_hop:ipv4 \
+	        & holdtime:u32
+
+	/**
+	 * Delete peer.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param as the peer's AS number.
+	 */
+	delete_peer \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& as:u32
+
+	/** 
+	 * Enable this peer.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 */
+	enable_peer \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32
+
+	/**
+	 * Disable this peer.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 */
+	disable_peer \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32
+
+	/**
+         * Set the peer state enabled or disabled.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param as the peer's AS number.
+         * @param toggle enabled or disabled.
+	 */
+	set_peer_state \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& toggle:bool
+         
+	/**
+	 * Register rib.
+	 *
+	 * @param name rib name.
+	 */
+	register_rib \
+		? \
+		name:txt
+
+	/**
+	 * add route
+	 *
+	 * @param origin the origin of the path information.
+	 * @param asum an as number will eventually be a path.
+	 * @param next_hop the border router that should be used as a
+	 * detination for the nlri.
+	 * @param nlri network level reachability information.
+	 */
+	add_route \
+		? \
+		origin:i32 \
+		& asnum:i32 \
+		& next_hop:ipv4 \
+		& nlri:ipv4net
+
+	/**
+	 * delete route
+	 *
+	 * @param nlri network level reachability information.
+	 */
+	 delete_route \
+		? \
+		nlri:ipv4net
+
+	/**
+	 * Terminate bgp process
+	 */
+	terminate
+
+	/**
+	 * Set which parameters we support per peer
+	 */
+         set_parameter \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& parameter:txt
+}

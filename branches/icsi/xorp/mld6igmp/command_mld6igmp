@@ -1,0 +1,31 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/mld6igmp/command_mld6igmp,v 1.1 2002/12/09 14:32:08 pavlin Exp $
+#
+
+#
+# Send commands to a running MLD6IGMP process.
+#
+
+. ../mfea/xrl_mfea_shell_funcs.sh
+. ../mld6igmp/xrl_mld6igmp_shell_funcs.sh
+
+MODULE_NAME="IGMP"
+HOSTNAME=`hostname`
+
+echo "Sending command to $MODULE_NAME on $HOSTNAME..."
+
+#
+# The first argument should be the command to call.
+# The rest of the arguments should be the arguments to the command to call.
+#
+
+if [ $# -lt 1 ] ; then
+	echo "Usage: $0 <xrl_command> [xrl_command_arguments ... ]"
+	exit 1
+fi
+
+$*
+
+exit 0

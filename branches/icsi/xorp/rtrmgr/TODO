@@ -1,0 +1,62 @@
+#
+# $XORP: xorp/rtrmgr/TODO,v 1.16 2002/12/09 12:47:47 pavlin Exp $
+#
+
+Urgent
+======
+
+Configure Mode
+
+ - Implement node locking in MasterConfigTree
+ - Use node locking to prevent two users editing the same node.
+ - Templates need %delete commands adding.
+ - Module unloading when relevant config is deleted.
+ - Can't delete leaf nodes.
+    - Can delete some leaf nodes, but the xorpsh thinks there are still 
+      uncommitted changes.
+ - Implement $(@.DEFAULT) varname.
+
+ - In xorpsh, variable expansion can fail (for example with FEA
+   transation IDs).  Currently the xorpsh-side checks are disabled in
+   slave_config_tree.cc, but this is the wrong solution to the
+   problem.
+
+
+Operational Mode
+
+ - Ensure commands only appear when modules are loaded.
+ - Remove 5 second timeout.
+ - Interruption of commands in progress.
+
+
+Non-Urgent
+==========
+
+General
+
+ - user database needs proper implementation of capabilities
+ - Sort-out all *.hh files as appropriate to Makefile.am foo_SOURCE,
+   and list all *.cc files there in alphabetical order
+ - Remove rtrmgr/md6.c ??
+
+Configure Mode
+
+ - Rollback when a commit fails.
+ - Allow more flexible syntax in text_entry_mode.
+ - Add support for "%setting" command.
+
+Operational Mode
+
+
+
+Done
+====
+
+ - If rtrmgr restarts, xorpsh will talk to the new rtrmgr, but will
+   fail all authentication checks.  Handle this more gracefully.
+
+RESOLVED: restart is detected and user is advised to logout and login again.  
+
+ - TemplateTree destructor doesn't clean up properly.
+
+RESOLVED: actually it was correct, the comment was wrong.

@@ -1,0 +1,233 @@
+<html>
+<head>
+<title>OSPFD 2.0 Bug Fixes</title>
+<meta name=description content="Bug fixes for the ospfd2.0 routing software">
+</head>
+<body bgcolor=white text=black>
+<center>
+<table cellpadding=0 cellspacing=0 border=0 width=80%>
+<tr>
+<td>
+<FONT FACE="Verdana, Arial, Helvetica">
+<p>
+<center><big>OSPFD 2.0 Bug fixes</big></center>
+<p>
+This page briefly describes each of the bug fixes made to
+the OSPFD 2.0 implementation. The base 2.0 sources can
+be retrieved as a
+<a href="ftp://ospf.org/ospfd2_0/ospfd2_0_tar.gz">
+gzipped tar file.
+</a>
+For each bug fix a <code>diff</code> file
+is included that can be used to update the source
+distribution using the <code>patch</code> utility. To apply a patch,
+change to the top-level directory of your ospfd distribution,
+and then type <code>patch -Np1 < patch_file</code>, where
+<code>patch_file</code>
+is one of the patches contained in this directory.
+<p>
+Patches must be applied in order. They were produced using
+<code>diff -Nabur old_dir new_dir</code>.
+<p>
+You can download the entire 2.x release in one gzipped tar
+file by clicking
+<a href="ftp://ospf.org/ospfd2_0/ospfd2_x_tar.gz">
+here.
+</a>
+<p>
+<center><big>OSPFD 2.0 Patch listing</big></center>
+<ul>
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.1">
+Patch 2.1</a>.
+Two separate fixes. First, we prevent forwarding addresses
+on directly attached but unadvertised subnets from being resolved,
+which allows static routes with these next hops to be installed
+in the kernel routing table and advertised in AS-external-LSAs
+with forwarding address set to 0.0.0.0. Second, we reference
+<code>lsa_ifp</code> and <code>lsa_ap</code> in <code>opqlsa.C</code>
+iff they are non-zero.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.2">
+Patch 2.2</a>.
+Changes in preparation for the implementation of the hitless
+OSPF restart scheme described in
+<a href="ftp://ospf.org/specs/draft-ietf-ospf-hitless-restart-00.txt">
+draft-ietf-ospf-hitless-restart-00.txt.</a>
+(a) Added the ability to detect routing table entries left
+in the kernel from previous ospfd runs; these are called remnants.
+ospfd calls the system interface routine 
+<code>OspfSysCalls::upload_remnants()</code> to request that it
+be notified of all remnants. Each remnant is then passed to ospfd
+in a call to the API routine <code>OSPF::remnant_notification()</code>,
+whereupon ospfd deletes the remnant if it is no longer valid.
+(b) Have the simulated ospfds keep their own copy of the routing
+table, where it can persist over ospfd restarts. (c) Implement
+a restart menu tab in the ospf simulator.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.3">
+Patch 2.3</a>.
+Since host routes are (a) advertised in other than their
+configured area if their configured area has no active real
+interfaces and (b) have been implemented as a (pseudo) interface,
+we have to remove an interface from all areas' interface maps
+when the interface is deleted.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.4">
+Patch 2.4</a>.
+An implementation of the latest OSPF Hitless Restart specification
+<a href="ftp://ospf.org/specs/draft-ietf-ospf-hitless-restart-01.txt">
+(draft-ietf-ospf-hitless-restart-01.txt).</a>
+All support implemented in the common code, and a port to the OSPF
+simulator is also supplied. To execute a hitless restart of a simulated
+router, select
+<code>Router->Hitless Restart</code> and click on the desired router.
+After the router has prepared for hitless restart it will log a message
+"Hitless restart preparation complete". At that time, selecting
+<code>Router->Hitless Restart</code> and clicking on the router a second
+time will restart the router in hitless restart mode. When hitless
+restart is completed, a message "Exiting hitless restart" will be
+logged along with a success or failure indication.
+
+In addition, the following features were added, and bugs were fixed:
+<ol>
+<li>
+The ability to display link-local Opaque-LSAs from ospfd_browser.
+<li>
+A bug fix to the link-local Opaque-LSA handling, which would previously
+cause the router to crash when parsing such LSAs (<code>opqlsa.C</code>)
+<li>
+Fix a crash that could occur when a down interface is advertised
+due to MinLSInterval (<code>rte.C</code>).
+<li>
+More bug fixes involving the (re)advertising of host routes when the
+connections to their area go away or are restored (<code>rte.C</code> and
+<code>rtrlsa.C</code>).
+<li>
+Don't send Hellos at the slower polled rate until a full window
+of Hellos have been sent. This fix applies to demand circuits only.
+(<code>spfhello.C</code>).
+<li>
+Stop timers when they are destroyed (<code>timer.C</code>).
+</ol>
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.5">
+Patch 2.5</a>.
+Two bug fixes related to memory allocation/deallocation.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.6">
+Patch 2.6</a>.
+Changes required to get the Linux port and simulator working under
+RedHat 7.1 (Linux 2.4). Also, two fixes dealing with deferred LSAs. The first
+fixes a problem where the router would mistakenly defer a received
+self-originated LSA for up to 30 minutes. The second fixes a crash when
+a deferred LSA still references a broadcast/NBMA network that has since
+been deleted from the router's configuration.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.7">
+Patch 2.7</a>.
+Three unrelated bug fixes: a) Interfaces can now be identified
+in the ospfd config file by name (e.g., "eth0", "tunl1", etc.) instead
+of IP address. This allows configuration of unnumbered interfaces, including
+IP-in-IP tunnels, b) Fix <code>OSPF::deferred_lsas()</code> and
+<code>OSPF::schedule_refresh()</code> so that LSA reorigination
+will never corrupt the age bins (Exercise 6.2), and c) Fix the
+cost reported for routing table entries in the ospfd monitor interface.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.8">
+Patch 2.8</a>.
+Completed coding that allows the MOSPF implementation to use the
+Linux kernel mrouted support, thereby turning a Linux machine into a MOSPF
+router. The mrouted support is not quite enough to implement
+a full MOSPF router though. In particular, you don't get support
+for a) NBMA interfaces, b) unnumbered interfaces, or c) multiple
+point-to-point links between a single pair of MOSPF routers. However,
+if you are just using LAN interfaces and IPIP tunnels, everything
+should work fine. One note on supporting IPIP tunnels: ospfd doesn't
+create them. You have to create them manually using <code>/sbin/iptunnel</code>,
+and admin them up using <code>/sbin/ifconfig</code>. Then they can be
+referred to be name (e.g., "tunl1") in the ospfd configuration file.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.9">
+Patch 2.9</a>.
+Two patches to MOSPF. The first fixes a crash that occurred when
+an IGMP message was received on a non-MOSPF interface. The second
+allows the MOSPF router to monitor IGMP membership on all MOSPF
+interfaces, instead of the previous behavior which monitored group
+membership only on broadcast subnets. If you want to monitor
+group membership but you don't want OSPF packets exchanged on an interface,
+configured the interface as passive.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.10">
+Patch 2.10</a>.
+Fix to the Linux routing table interface. Must set TOS to 0 in
+netlink messages, or else kernels with TOS enabled
+(<code>CONFIG_IP_ROUTE_TOS</code>) will install multiple routing
+table entries with random TOS assignments. Thanks to Elwyn Davies
+for pointing this out.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.11">
+Patch 2.11</a>.
+More MOSPF patches. Allow IGMP to be run over interfaces other
+than broadcast interfaces. However, in order to enable IGMP
+on these other interface types in the Linux port, must include
+the <code>igmp</code> interface command for each interface in
+<code>/etc/ospfd.conf</code>. Also, the following MOSPF fixes,
+courtesy of Marc Castejon: (a) Join 224.0.0.2, so that we
+can receive IGMP leave messages, (b) Fix Last Member Query processing and
+(c) ignore MaxAge group-membership-LSAs in multicast path calculation.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.12">
+Patch 2.12</a>.
+Two unrelated changes. The first is to the logic which keeps
+the ospfd routing tabl;e in synch with the Linux kernel's forwarding
+table. When the last address is deleted from an interface, the Linux
+kernel silently deletes all forwarding entries going over the
+interface. The Linux port of ospfd has now been changed so that
+deletion of the last address is treated as an interface down event,
+which causes ospfd to also delete the forwarding entries. The second
+change affects the advertisement of point-to-point links. We key on the
+interface mask configured for the link. If the mask is 0 or all ones, we
+advertise the neighbor's IP address (the previous behavior). Otherwise,
+we advertise a stub link for the entire subnet. In addition, the code
+will now advertise subnets for tunnels, whereas before tunnels were
+always treated as unnumbered links.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.13">
+Patch 2.13</a>.
+When deleting an area or interface, must make sure that the
+associated LSAs are deleted also, but you don't have to reflood
+them. Previously they could hang around if you weren't allowed to
+garbage collect the MaxAge LSAs (for example, one ore more
+neighbors were in Database Exchange state), causing the router to crash.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.14">
+Patch 2.14</a>.
+Implementation of the changes in the latest version
+of the OSPF Hitless Restart draft
+<a href="ftp://ospf.org/specs/draft-ietf-ospf-hitless-restart-02.txt">
+(draft-ietf-ospf-hitless-restart-02.txt).</a>.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.15">
+Patch 2.15</a>.
+Two unrelated bug fixes. First, reparse any remaining network-LSAs
+whose Link State ID match the LSA being deleted, as described
+on page 91 of OSPF Complete Implementation -- this was one of those
+rare occasions where the documentation was mor up-to-date
+than the code. Second, make routers with DR priority of 0 respond
+to the first Hello from a DR-eligible router, otherwise these
+adjacencies would never come up. Added the <code>drpri</code>
+configuration command to the simulator so that you can now test
+differing DR priorities.
+<li>
+<a href="ftp://ospf.org/ospfd2_0/patch2.16">
+Patch 2.16</a>.
+Bug fixes to the NBMA/Point-to-MultiPoint Hello logic. Code
+now sends Hellos at the correct rate depending on neighbor state.
+Previously, would not send hellos to NBMA neighbor that transitioned
+to Down state (should send at the reduced rate of PollInterval).
+</ul>
+</td>
+</tr>
+</table>
+</html>

@@ -1,0 +1,36 @@
+#
+# Set LATEX_SOURCES to list of master latex files.
+# A postscript and a pdf file will be generated for each.
+#
+TARGETS=$(LATEX_SOURCES:%.tex=%.ps) $(LATEX_SOURCES:%.tex=%.pdf)
+
+.PHONY: figs
+
+FIGS=$(wildcard figs)
+ifeq ($(FIGS),figs)
+    FIGSCLEAN=figs-clean
+else
+    FIGSCLEAN=
+endif
+
+all: $(FIGS) $(TARGETS)
+
+%.pdf: %.ps
+	ps2pdf $< $@
+
+%.ps: %.dvi
+	dvips -Ppdf -G0 -o $@ $<
+
+%.dvi: %.tex
+	latex $<
+	latex $<
+
+clean: $(FIGSCLEAN)
+	rm -f *.dvi *.aux *.log *.ps *.pdf *~
+
+figs:
+	cd figs && $(MAKE)
+
+figs-clean:
+	cd figs && $(MAKE) clean
+

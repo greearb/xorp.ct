@@ -1,0 +1,18 @@
+/* $XORP: xorp/xrl/interfaces/cli_processor.xif,v 1.4 2002/04/30 18:50:43 pavlin Exp $ */
+
+/*
+ * CLI processor XRL interface.
+ */
+
+
+interface cli_processor/0.1 {
+	process_command	? processor_name:txt				\
+			& cli_term_name:txt				\
+			& cli_session_id:u32				\
+			& command_name:txt				\
+			& command_args:txt				\
+			-> ret_processor_name:txt			\
+			& ret_cli_term_name:txt				\
+			& ret_cli_session_id:u32			\
+			& ret_command_output:txt
+}

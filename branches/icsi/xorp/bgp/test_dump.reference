@@ -1,0 +1,1661 @@
+[comment] ******************************************
+[comment] TEST 1
+[comment] ADD AND DELETE
+[comment] SENDING FROM PEER 1
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D2 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 2
+[comment] SIMPLE DUMP TO PEER 3
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[** TABLE BGPDebugTable-D2 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 3
+[comment] SIMPLE DUMP TO PEER 3
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[** TABLE BGPDebugTable-D2 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[** TABLE BGPDebugTable-D2 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 4
+[comment] SIMPLE DUMP TO PEER 3, PEER 2 GOES DOWN
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[separator]-------------------------------------
+[comment] PEER 2 GOES DOWN
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 2 UP
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 5
+[comment] DUMP TO PEER 3, PEER 2 GOES DOWN DURING P2 DUMP
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT RECEIVED BY PEER 2
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[separator]-------------------------------------
+[comment] ONE EVENT RUN
+[comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ONE EVENT RUN
+[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] PEER 2 GOES DOWN
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1
+[comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3
+[comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 2 UP
+[comment] EXPECT NO CHANGE
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 6
+[comment] DUMP TO PEER 3, PEER 1 GOES DOWN
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT RECEIVED BY PEER 2
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[comment] EXPECT NO IMMEDIATE CHANGE
+[separator]-------------------------------------
+[comment] PEER 1 GOES DOWN
+[comment] EXPECT NO IMMEDIATE CHANGE
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D2 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 1 UP
+[comment] EXPECT NO CHANGE
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 7
+[comment] DUMP TO PEER 3, PEER 2 GOES DOWN BETWEEN P1 AND P2 DUMPS
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT RECEIVED BY PEER 2
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[separator]-------------------------------------
+[comment] ONE EVENT RUN
+[comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] PEER 2 GOES DOWN
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1
+[comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 2 UP
+[comment] EXPECT NO CHANGE
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 8
+[comment] DUMP TO PEER 3, PEER 2 GOES DOWN BEFORE P1 DUMP
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT RECEIVED BY PEER 2
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[separator]-------------------------------------
+[comment] PEER 2 GOES DOWN
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
+[comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1
+[comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 2 UP
+[comment] EXPECT NO CHANGE
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 9
+[comment] DUMP TO PEER 3, P1 AND P2 GO DOWN BEFORE FIRST DUMP
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT RECEIVED BY PEER 2
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[separator]-------------------------------------
+[comment] PEER 2 GOES DOWN
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] PEER 1 GOES DOWN
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[comment] EXPECT NO CHANGE
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[separator]-------------------------------------
+[comment] BRING PEER 2 UP
+[comment] EXPECT NO CHANGE
+[separator]-------------------------------------
+[comment] BRING PEER 1 UP
+[comment] EXPECT NO CHANGE
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 10
+[comment] DUMP TO PEER 3, SEND NEW ROUTES
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT RECEIVED BY PEER 2
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.4
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT RECEIVED BY PEER 2
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ONE EVENT RUN
+[comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ONE EVENT RUN
+[comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ONE EVENT RUN
+[comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[comment] EXPECT RECEIVED BY PEER 3 WHEN EVENTLOOP RUNS
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.0.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.5.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[comment] EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+SubnetRoute:
+  Net: 1.0.0.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.4
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.5.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D2 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 2
+[comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D2 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: Next Hop Attribute 2.0.0.2
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/6 ,AS/6 ,AS/5 ,AS/4 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1
+[comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[comment] EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 1
+[comment] EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.4
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.4
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[comment] EXPECT DEL 1.0.0.0/24 RECEIVED BY PEER 1
+[comment] EXPECT DEL 1.0.0.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.0.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.0.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[comment] EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 1
+[comment] EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.5.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.5.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[** TABLE BGPDebugTable-D1 **]
+[PUSH]
+[** TABLE BGPDebugTable-D2 **]
+[PUSH]
+[comment] ******************************************
+[comment] TEST 11
+[comment] DUMP TO PEER 3, REPLACE ROUTES
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT RECEIVED BY PEER 2
+[** TABLE BGPDebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT RECEIVED BY PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.4
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] BRING PEER 3 UP
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[comment] EXPECT REPLACE AT PEER 2
+[** TABLE BGPDebugTable-D2 **]
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.1
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/3 ,AS/2 ,AS/1 ]
+Local Preference Attribute - 100
+
+
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ONE EVENT RUN
+[comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] ONE EVENT RUN
+[comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT REPLACE AT PEER 1
+[comment] EXPECT REPLACE AT PEER 3 WHEN EVENTLOOP RUNS
+[** TABLE BGPDebugTable-D1 **]
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[comment] EXPECT REPLACE AT PEER 1
+[** TABLE BGPDebugTable-D1 **]
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.4
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] LET EVENT QUEUE DRAIN
+[comment] EXPECT REPLACE 1.0.3.0/24 RECEIVED BY PEER 3
+[comment] EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D3 **]
+[REPLACE]
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.3
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[PUSH]
+[** TABLE BGPDebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 1
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2
+[comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D2 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1
+[comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.3.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] DELETING FROM PEER 2
+[comment] EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 1
+[comment] EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 3
+[** TABLE BGPDebugTable-D1 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[** TABLE BGPDebugTable-D3 **]
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.4.0/24
+  PAList: Next Hop Attribute 2.0.0.5
+Origin Path Attribute - IGP
+AS Path Attribute As Path : [AS/9 ,AS/8 ,AS/7 ]
+Local Preference Attribute - 100
+
+
+[separator]-------------------------------------
+[comment] SHUTDOWN AND CLEAN UP

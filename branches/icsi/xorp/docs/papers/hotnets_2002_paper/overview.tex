@@ -1,0 +1,115 @@
+% -*- mode: latex; tex-main-file: "pospaper.tex" -*-
+
+\section{Enabling Research}
+
+%% XXX This section re-phrases chunks of intro.  Could be more direct.
+
+Currently to perform an experiment that needs a component implemented
+in routers and exposure to real network traffic, there are two
+options:
+\vspace{-1.0\baselineskip}
+\subsubsection*{Option 1}
+\vspace{-0.5\baselineskip}
+\begin{itemize}\addtolength{\itemsep}{-0.6\baselineskip}
+\item Persuade a large router vendor to implement your protocol.
+\item Persuade ISPs that this new protocol won't make their networks
+less stable.
+\item Conduct Experiment
+\end{itemize}
+\vspace{-1.5\baselineskip}
+\subsubsection*{Option 2}
+\vspace{-0.5\baselineskip}
+\begin{itemize}\addtolength{\itemsep}{-0.6\baselineskip}
+\item Implement the routing protocol part in a routing process or
+write own routing process.
+\item Implement the forwarding path part in the OS kernel.
+\item Persuade your network operator to replace his existing router with
+your PC.
+\item Conduct Experiment
+\end{itemize}
+
+It is left as an exercise to the reader to locate recent Sigcomm
+papers reporting the results of such experiments.
+
+We see two possible solutions to these problems.  The first solution
+would involve a large router vendor making their software platform
+open.  This could take the form of open source, or simply open APIs
+for router ``applications''.  In either case this would significantly
+change the possibilities for the network researcher.  However, unless
+the router platform were architected in such a way as to provide some
+degree of protection from malfunctioning third-party code, then it
+would be likely to remain difficult to persuade network providers that
+it was safe to run such applications.
+
+The second solution entails the development of an open router software
+platform, designed from the outset for extensibility.  Initially this
+would have to run on commodity hardware, which primarily means PCs
+network processor cards.  Over time, the software base might achieve
+sufficient stability and performance for deployment in production
+scenarios, at least as an edge router, which is where flexibility is
+most important.  This is the path that Linux has taken in the server
+OS arena.  It is this idea that we outline in the remainder of this paper.
+
+\subsection{An Extensible Open Router Platform}
+We are in the process of developing an eXtensible Open Router
+Platform called XORP.  There are two main parts to such
+a platform:
+\begin{itemize}
+\item Higher-level routing code comprising the routing protocols, routing
+information bases, and management software necessary to exist in
+today's Internet.
+\item Low-level code to manage the forwarding path, together with the 
+appropriate APIs to talk to routing code and additional future
+higher-level functionality.
+\end{itemize}
+At the higher-level, we have developed an multi-process
+architecture comprising a process per routing protocol, plus ones for
+management, configuration, and coordination.  To enable extensibility
+we developed a novel inter-process communication mechanism for
+communication between these modules.  The goal is for almost all of
+the higher-level code to be agnostic as to the details of the
+forwarding path.
+ 
+At the low level the architecture needs to be capable of spanning a
+large range of hardware forwarding platforms, ranging from commodity
+PC hardware at the low end, through mid-range PC-based platforms
+enhanced with intelligent network interfaces such as Intel's
+IXP1200~\cite{ixp1200}, to high-end hardware-based forwarding engines.
+Initially we have focused on a PC-based hardware platform as this
+allows for easy testing and early deployment, but great care is being
+taken to design a modular forwarding path architecture which can
+support some or all of the forwarding functions happening in hardware.
+For our own work, the preferred forwarding path is based on the
+Click~\cite{click} modular router.  Click provides a
+high-performance forwarding path on commodity hardware and 
+allows for run-time extensions of the kernel forwarding path.  Also the
+modularity of Click allows for many different possible splits of work
+between software and hardware at a later stage when XORP is augmented
+by special-purpose hardware.
+
+XORP's success depends on successfully addressing five ambitious goals:
+\begin{itemize}\addtolength{\itemsep}{-0.5\baselineskip}
+
+\item \textbf{Features.} XORP must begin with high-quality implementations
+for common routing protocols and forwarding engine components. 
+
+\item \textbf{Stability.} Routers face more stringent stability
+requirements than most programs. A XORP router must not crash or misroute
+packets. Even a router containing an experimental protocol should achieve
+high availability.
+
+\item \textbf{Speed.} XORP is not designed for core routers, at least not
+initially. However, forwarding performance is still important, as that
+is the purpose of a router.  Scalability in the face of routing table
+size or number of peers is also critical.
+
+\item \textbf{Open APIs.} The interfaces between XORP components must be
+open and extremely flexible, allowing arbitrary research extensions and
+runtime reconfiguration. 
+
+\item \textbf{Collaboration.} Finally, XORP will require early and deep
+collaboration with both researchers and industry to achieve its full
+potential.  We hope to provide a code base that researchers and
+developers will want to contribute towards.
+
+\end{itemize}

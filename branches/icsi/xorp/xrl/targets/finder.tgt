@@ -1,0 +1,6 @@
+/* $XORP: xorp/xrl/targets/finder.tgt,v 1.3 2002/11/05 17:26:27 hodson Exp $ */
+
+#include "common.xif"
+#include "finder.xif"
+
+target finder implements common/0.1, finder/0.1
