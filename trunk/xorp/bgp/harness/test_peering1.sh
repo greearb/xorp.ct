@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.26 2004/06/08 00:21:36 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.27 2004/08/15 19:30:18 atanu Exp $
 #
 
 #
@@ -226,10 +226,8 @@ test5()
     disable_peer $LOCALHOST $PORT1 $PEER1 $PEER1_PORT $PEER1_AS
     enable_peer $LOCALHOST $PORT1 $PEER1 $PEER1_PORT $PEER1_AS
 
-    echo "Sleeping $HOLDTIME"
-    sleep $HOLDTIME
-
-    coord peer1 expect packet notify $HOLD_TIMER
+    sleep 2
+    coord peer1 assert established
 }
 
 test6()
