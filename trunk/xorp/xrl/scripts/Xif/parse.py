@@ -34,9 +34,16 @@ def get_input_file():
     return g_files[-1]
 
 line_file_flag = re.compile("#\s+(\d+)\s+\"(.*)\"\s+(\d*)")
+pragma=re.compile("#pragma.*")
 
 # Parse C-preprocessor generated # line, return 1 if recognized, 0 otherwise
 def parse_cpp_hash(line):
+
+    # Check if line looks like a pragma, if so ignore it
+    p = pragma.match(line)
+    if p:
+	return 1
+
     # Format is '# LINENUM FILENAME [FLAG]' where FLAG is either:
     #
     # `1' This indicates the start of a new file.
@@ -56,7 +63,7 @@ def parse_cpp_hash(line):
         if flag == '':
             flag = "1"
     else:
-        return 0
+	return 0
 
     if flag == "1":
         push_file(file, line)
