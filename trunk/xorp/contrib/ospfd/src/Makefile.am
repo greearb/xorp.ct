@@ -2,12 +2,6 @@ noinst_LIBRARIES = libospfd.a
 
 AM_CPPFLAGS = -I$(srcdir)/../@OSPFD_OS@
 
-#libospfd_a_SOURCES  = contrib/global.h
-#libospfd_a_SOURCES += contrib/md5.h
-
-#libospfd_a_SOURCES += contrib/md5c.c
-#libospfd_a_SOURCES += contrib/mddriver.c
-
 libospfd_a_SOURCES  = arch.h
 libospfd_a_SOURCES += avl.h
 libospfd_a_SOURCES += config.h
@@ -84,10 +78,6 @@ libospfd_a_SOURCES += summlsa.C
 libospfd_a_SOURCES += timer.C
 libospfd_a_SOURCES += tlv.C
 
-libospfd_a_SOURCES += global.h
-libospfd_a_SOURCES += md5.h
-libospfd_a_SOURCES += md5c.c
-
 ################################################################
 ##
 ## Everything past here is useful to the maintainer, but probably not
@@ -95,19 +85,3 @@ libospfd_a_SOURCES += md5c.c
 ##
 
 INCLUDES =	-I$(top_srcdir)
-
-# -- Automake does not currently like files in other directories when
-# building libraries.  Since there are only a few we symlink other
-# sources rather than shoot for libtool.
-
-BUILT_SOURCES = global.h md5.h md5c.c
-CLEANFILES = global.h md5.h md5c.c 
-
-global.h: contrib/global.h
-	  $(LN_S) $< .
-
-md5.h: contrib/md5.h
-	  $(LN_S) $< .
-
-md5c.c: contrib/md5c.c
-	  $(LN_S) $< .

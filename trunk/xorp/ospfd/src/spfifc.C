@@ -27,7 +27,7 @@
 #include "nbrfsm.h"
 #include "system.h"
 #include "contrib/global.h"
-#include "contrib/md5.h"
+#include "openssl/md5.h"
 
 /* Add, modify, or delete an OSPF interface.
  */
@@ -853,9 +853,9 @@ void SpfIfc::md5_generate(Pkt *pdesc)
 
     // Calculate digest with our secret key
     memcpy(spfend, best_key->key, 16);
-    MD5Init(&context);
-    MD5Update(&context, (byte *) spfpkt, length + 16);
-    MD5Final(digest, &context);
+    MD5_Init(&context);
+    MD5_Update(&context, (byte *) spfpkt, length + 16);
+    MD5_Final(digest, &context);
     // Append digest to end of packet
     memcpy(spfend, digest, 16);
 
@@ -961,9 +961,9 @@ int SpfIfc::md5_verify(Pkt *pdesc, SpfNbr *np)
     memcpy(saved_digest, spfend, 16);
     // Calculate digest with our secret key
     memcpy(spfend, key->key, 16);
-    MD5Init(&context);
-    MD5Update(&context, (byte *) spfpkt, ntoh16(spfpkt->plen) + 16);
-    MD5Final(digest, &context);
+    MD5_Init(&context);
+    MD5_Update(&context, (byte *) spfpkt, ntoh16(spfpkt->plen) + 16);
+    MD5_Final(digest, &context);
     // Compare to saved copy
     if (memcmp(digest, saved_digest, 16) != 0)
 	return(false);

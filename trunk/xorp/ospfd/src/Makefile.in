@@ -93,24 +93,11 @@ noinst_LIBRARIES = libospfd.a
 
 AM_CPPFLAGS = -I$(srcdir)/../@OSPFD_OS@
 
-
-#libospfd_a_SOURCES  = contrib/global.h
-#libospfd_a_SOURCES += contrib/md5.h
-
-#libospfd_a_SOURCES += contrib/md5c.c
-#libospfd_a_SOURCES += contrib/mddriver.c
-libospfd_a_SOURCES = arch.h avl.h config.h dbage.h globals.h ifcfsm.h igmp.h ip.h iterator.h lsa.h lsalist.h lshdr.h mcache.h monitor.h mospf.h nbrfsm.h opqlsa.h ospf.h ospfinc.h pat.h phyint.h priq.h rte.h spfarea.h spfifc.h spflog.h spfnbr.h spfparam.h spfpkt.h spftype.h spfutil.h stack.h system.h timer.h tlv.h asbrlsa.C asexlsa.C avl.C cksum.C config.C dbage.C grplsa.C helper.C hostmode.C ifcfsm.C lsa.C lsalist.C lsdb.C monitor.C mospf.C nbrfsm.C netlsa.C opqlsa.C ospf.C pat.C phyint.C priq.C restart.C rte.C rtrlsa.C spfack.C spfarea.C spfcalc.C spfdd.C spfhello.C spfvl.C spfifc.C spflood.C spfnbr.C spforig.C spfutil.C summlsa.C timer.C tlv.C global.h md5.h md5c.c
+libospfd_a_SOURCES = arch.h avl.h config.h dbage.h globals.h ifcfsm.h igmp.h ip.h iterator.h lsa.h lsalist.h lshdr.h mcache.h monitor.h mospf.h nbrfsm.h opqlsa.h ospf.h ospfinc.h pat.h phyint.h priq.h rte.h spfarea.h spfifc.h spflog.h spfnbr.h spfparam.h spfpkt.h spftype.h spfutil.h stack.h system.h timer.h tlv.h asbrlsa.C asexlsa.C avl.C cksum.C config.C dbage.C grplsa.C helper.C hostmode.C ifcfsm.C lsa.C lsalist.C lsdb.C monitor.C mospf.C nbrfsm.C netlsa.C opqlsa.C ospf.C pat.C phyint.C priq.C restart.C rte.C rtrlsa.C spfack.C spfarea.C spfcalc.C spfdd.C spfhello.C spfvl.C spfifc.C spflood.C spfnbr.C spforig.C spfutil.C summlsa.C timer.C tlv.C
 
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
-
-
-# -- Automake does not currently like files in other directories when
-# building libraries.  Since there are only a few we symlink other
-# sources rather than shoot for libtool.
-BUILT_SOURCES = global.h md5.h md5c.c
-CLEANFILES = global.h md5.h md5c.c 
 subdir = ospfd/src
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -130,7 +117,7 @@ am_libospfd_a_OBJECTS = asbrlsa.$(OBJEXT) asexlsa.$(OBJEXT) \
 	spfcalc.$(OBJEXT) spfdd.$(OBJEXT) spfhello.$(OBJEXT) \
 	spfvl.$(OBJEXT) spfifc.$(OBJEXT) spflood.$(OBJEXT) \
 	spfnbr.$(OBJEXT) spforig.$(OBJEXT) spfutil.$(OBJEXT) \
-	summlsa.$(OBJEXT) timer.$(OBJEXT) tlv.$(OBJEXT) md5c.$(OBJEXT)
+	summlsa.$(OBJEXT) timer.$(OBJEXT) tlv.$(OBJEXT)
 libospfd_a_OBJECTS = $(am_libospfd_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -145,40 +132,39 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/grplsa.Po $(DEPDIR)/helper.Po \
 @AMDEP_TRUE@	$(DEPDIR)/hostmode.Po $(DEPDIR)/ifcfsm.Po \
 @AMDEP_TRUE@	$(DEPDIR)/lsa.Po $(DEPDIR)/lsalist.Po \
-@AMDEP_TRUE@	$(DEPDIR)/lsdb.Po $(DEPDIR)/md5c.Po \
-@AMDEP_TRUE@	$(DEPDIR)/monitor.Po $(DEPDIR)/mospf.Po \
-@AMDEP_TRUE@	$(DEPDIR)/nbrfsm.Po $(DEPDIR)/netlsa.Po \
-@AMDEP_TRUE@	$(DEPDIR)/opqlsa.Po $(DEPDIR)/ospf.Po \
-@AMDEP_TRUE@	$(DEPDIR)/pat.Po $(DEPDIR)/phyint.Po \
-@AMDEP_TRUE@	$(DEPDIR)/priq.Po $(DEPDIR)/restart.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rte.Po $(DEPDIR)/rtrlsa.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spfack.Po $(DEPDIR)/spfarea.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spfcalc.Po $(DEPDIR)/spfdd.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spfhello.Po $(DEPDIR)/spfifc.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spflood.Po $(DEPDIR)/spfnbr.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spforig.Po $(DEPDIR)/spfutil.Po \
-@AMDEP_TRUE@	$(DEPDIR)/spfvl.Po $(DEPDIR)/summlsa.Po \
-@AMDEP_TRUE@	$(DEPDIR)/timer.Po $(DEPDIR)/tlv.Po
+@AMDEP_TRUE@	$(DEPDIR)/lsdb.Po $(DEPDIR)/monitor.Po \
+@AMDEP_TRUE@	$(DEPDIR)/mospf.Po $(DEPDIR)/nbrfsm.Po \
+@AMDEP_TRUE@	$(DEPDIR)/netlsa.Po $(DEPDIR)/opqlsa.Po \
+@AMDEP_TRUE@	$(DEPDIR)/ospf.Po $(DEPDIR)/pat.Po \
+@AMDEP_TRUE@	$(DEPDIR)/phyint.Po $(DEPDIR)/priq.Po \
+@AMDEP_TRUE@	$(DEPDIR)/restart.Po $(DEPDIR)/rte.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rtrlsa.Po $(DEPDIR)/spfack.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spfarea.Po $(DEPDIR)/spfcalc.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spfdd.Po $(DEPDIR)/spfhello.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spfifc.Po $(DEPDIR)/spflood.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spfnbr.Po $(DEPDIR)/spforig.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spfutil.Po $(DEPDIR)/spfvl.Po \
+@AMDEP_TRUE@	$(DEPDIR)/summlsa.Po $(DEPDIR)/timer.Po \
+@AMDEP_TRUE@	$(DEPDIR)/tlv.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 CXXFLAGS = @CXXFLAGS@
+CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-CFLAGS = @CFLAGS@
 DIST_SOURCES = $(libospfd_a_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
 SOURCES = $(libospfd_a_SOURCES)
 
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .C .c .o .obj
+.SUFFIXES: .C .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  ospfd/src/Makefile
@@ -215,7 +201,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsa.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsalist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsdb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/md5c.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/monitor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mospf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/nbrfsm.Po@am__quote@
@@ -258,19 +243,6 @@ distclean-depend:
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
 CXXDEPMODE = @CXXDEPMODE@
-
-.c.o:
-@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c `test -f $< || echo '$(srcdir)/'`$<
-
-.c.obj:
-@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c `cygpath -w $<`
-CCDEPMODE = @CCDEPMODE@
 uninstall-info-am:
 
 tags: TAGS
@@ -348,7 +320,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
@@ -356,7 +327,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
@@ -405,15 +375,6 @@ uninstall-am: uninstall-info-am
 	mostlyclean-generic tags uninstall uninstall-am \
 	uninstall-info-am
 
-
-global.h: contrib/global.h
-	  $(LN_S) $< .
-
-md5.h: contrib/md5.h
-	  $(LN_S) $< .
-
-md5c.c: contrib/md5c.c
-	  $(LN_S) $< .
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
