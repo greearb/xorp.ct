@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.16 2004/02/24 19:51:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.17 2004/03/03 03:32:11 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -201,7 +201,7 @@ PimMfc::recompute_iif_olist_mfc()
     if ((new_iif_vif_index == old_iif_vif_index) && (new_olist == old_olist)) {
 	return;			// Nothing changed
     }
-    
+
     if ((old_iif_vif_index != Vif::VIF_INDEX_INVALID)
 	&& (old_olist.none())) {
 	//
@@ -416,8 +416,16 @@ PimMfc::delete_mfc_from_kernel()
 		   iif_vif_index(),
 		   res.c_str());
     }
-    
-    delete_all_dataflow_monitor();
+
+    //
+    // XXX: we don't call delete_all_dataflow_monitor(), because
+    // the deletion of the MFC entry itself will remove all associated
+    // dataflow monitors.
+    // In addition, due to the output queueing of the add/delete
+    // dataflow or MFC commands, the "delete MFC" command may
+    // actually reach the MFEA before the "delete dataflow" command,
+    // which is an (ignorable) error.
+    //
     if (pim_node().delete_mfc_from_kernel(*this) < 0)
 	return (XORP_ERROR);
     
