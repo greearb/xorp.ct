@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.7 2003/11/20 00:39:52 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.8 2003/11/20 05:45:43 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -50,73 +50,73 @@ public:
     bool is_config_mode() const;
     void commit_done_by_user(int uid);
     void clear_command_set();
-    int configure_func(const char *,
-		       const char *,
-		       uint32_t,		
-		       const char *command_global_name,
+    int configure_func(const string& ,
+		       const string& ,
+		       uint32_t ,
+		       const string& command_global_name,
 		       const vector<string>& argv);
     void enter_config_done(const XrlError& e);
     void got_config_users(const XrlError& e, const XrlAtomList* users);
     void new_config_user(uid_t user_id);
     void leave_config_done(const XrlError& e);
     void notify_user(const string& alert, bool urgent);
-    int exit_func(const char *,
-		  const char *,
-		  uint32_t,		
-		  const char *command_global_name,
+    int exit_func(const string& ,
+		  const string& ,
+		  uint32_t ,
+		  const string& command_global_name,
 		  const vector<string>& argv);
-    int edit_func(const char *,
-		  const char *,
-		  uint32_t,		
-		  const char *command_global_name,
+    int edit_func(const string& ,
+		  const string& ,
+		  uint32_t ,
+		  const string& command_global_name,
 		  const vector<string>& argv);
-    int text_entry_func(const char *,
-			const char *,
-			uint32_t,		
-			const char *command_global_name,
+    int text_entry_func(const string& ,
+			const string& ,
+			uint32_t ,
+			const string& command_global_name,
 			const vector<string>& argv);
-    int delete_func(const char *,
-		    const char *,
-		    uint32_t,		
-		    const char *command_global_name,
+    int delete_func(const string& ,
+		    const string& ,
+		    uint32_t ,
+		    const string& command_global_name,
 		    const vector<string>& argv);
-    int set_func(const char *,
-		  const char *,
-		  uint32_t,		
-		  const char *command_global_name,
-		  const vector<string>& argv);
-    int immediate_set_func(const char *,
-			   const char *,
-			   uint32_t,		
-			   const char *command_global_name,
+    int set_func(const string& ,
+		 const string& ,
+		 uint32_t ,
+		 const string& command_global_name,
+		 const vector<string>& argv);
+    int immediate_set_func(const string& ,
+			   const string& ,
+			   uint32_t ,
+			   const string& command_global_name,
 			   const vector<string>& argv);
-    int commit_func(const char *,
-		    const char *,
-		    uint32_t,		
-		    const char *command_global_name,
+    int commit_func(const string& ,
+		    const string& ,
+		    uint32_t ,
+		    const string& command_global_name,
 		    const vector<string>& argv);
     void commit_done(bool success, string errmsg);
 
-    int show_func(const char *,
-		  const char *,
-		  uint32_t,		
-		  const char *command_global_name,
+    int show_func(const string& ,
+		  const string& ,
+		  uint32_t ,
+		  const string& command_global_name,
 		  const vector<string>& argv);
-    int op_mode_func(const char *,
-		     const char *,
-		     uint32_t,		
-		     const char *command_global_name,
+    int op_mode_func(const string& ,
+		     const string& ,
+		     uint32_t ,
+		     const string& command_global_name,
 		     const vector<string>& argv);
-    int save_func(const char *,
-		  const char *,
-		  uint32_t,		
-		  const char *command_global_name,
+    int save_func(const string& ,
+		  const string& ,
+		  uint32_t ,
+		  const string& command_global_name,
 		  const vector<string>& argv);
     void save_done(const XrlError& e);
-    int load_func(const char *,
-		  const char *,
-		  uint32_t,		
-		  const char *command_global_name,
+    int load_func(const string& ,
+		  const string& ,
+		  uint32_t ,
+		  const string& command_global_name,
 		  const vector<string>& argv);
     void load_communicated(const XrlError& e);
     void load_done(bool success, string errmsg);
@@ -142,9 +142,9 @@ private:
     void configure_mode();
     void text_entry_mode();
     void add_command_subtree(CliCommand& current_cli_node,
-			     const CommandTreeNode& current_command_node,
+			     const CommandTreeNode& current_ctn,
 			     const CLI_PROCESS_CALLBACK& cli_process_callback,
-			     string path, int depth);
+			     string path, size_t depth);
     
     /**
      * @short add commands for direct configuration of new nodes
@@ -197,25 +197,27 @@ private:
     SlaveConfigTree*	config_tree();
     OpCommandList*	op_cmd_list();
 
-    XorpShell& _xorpsh;
+    XorpShell&		_xorpsh;
 
     SlaveConfigTreeNode* _current_config_node;
 
-    CliNode&	_cli_node;
-    CliClient&	_cli_client;
-    CliModeType _mode;
-    CliCommand* _set_node;
-    CliCommand* _show_node;
-    CliCommand* _edit_node;
-    CliCommand*	_delete_node;
-    CliCommand*	_run_node;
-    list<string>   _path;
-    list<uint32_t> _config_mode_users;
-    list<string>   _alerts;
-    int		_nesting_depth;	// for text_entry mode: number of brackets deep
-    list<int>	_nesting_lengths;	// for text_entry mode: number of
+    CliNode&		_cli_node;
+    CliClient&		_cli_client;
+    CliModeType		_mode;
+    CliCommand*		_set_node;
+    CliCommand*		_show_node;
+    CliCommand*		_edit_node;
+    CliCommand*		_delete_node;
+    CliCommand*		_run_node;
+    list<string>	_path;
+    list<uint32_t>	_config_mode_users;
+    list<string>	_alerts;
+    size_t		_nesting_depth;	// for text_entry mode: number of
+					// brackets deep
+    list<size_t>	_nesting_lengths; // for text_entry mode: number of
 					// nodes for each backet nested
-    bool	_changes_made;	// indicates there are uncommitted changes
+    bool		_changes_made;	// true if there are uncommitted
+					// changes
 };
 
 #endif // __RTRMGR_CLI_HH__

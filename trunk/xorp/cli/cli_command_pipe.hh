@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command_pipe.hh,v 1.2 2003/01/16 19:28:56 pavlin Exp $
+// $XORP: xorp/cli/cli_command_pipe.hh,v 1.3 2003/03/10 23:20:11 hodson Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_PIPE_HH__
@@ -62,7 +62,7 @@ public:
      * @param init_pipe_name the pipe name (see above about the list of
      * recogined pipe names).
      */
-    CliPipe(const char *init_pipe_name);
+    CliPipe(const string& init_pipe_name);
     
     /**
      * Destructor
@@ -73,7 +73,7 @@ private:
     friend class CliClient;
     
     bool is_invalid() { return (_pipe_type == CLI_PIPE_MAX); }
-    void add_pipe_arg(const char *v) { _pipe_args_list.push_back(v); }
+    void add_pipe_arg(const string& v) { _pipe_args_list.push_back(v); }
     void set_cli_client(CliClient *v) { _cli_client = v; }
     
     int start_func(string& input_line) { return (this->*_start_func_ptr)(input_line); }
@@ -99,8 +99,8 @@ private:
 	CLI_PIPE_TRIM			= 14,
 	CLI_PIPE_MAX
     };
-    const char *name2help(const char *pipe_name);
-    cli_pipe_t name2pipe_type(const char *pipe_name);
+    string name2help(const string& pipe_name);
+    cli_pipe_t name2pipe_type(const string& pipe_name);
     cli_pipe_t pipe_type() { return (_pipe_type); }
     
     // The line processing functions

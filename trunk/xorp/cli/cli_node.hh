@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.11 2003/11/20 01:06:19 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.12 2003/12/10 21:57:50 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -157,12 +157,11 @@ public:
     /**
      * Find a CLI client @ref CliClient for a given terminal name.
      * 
-     * @param term_name C-style string with the CLI terminal name
-     * to search for.
+     * @param term_name the CLI terminal name to search for.
      * @return the CLI client @ref CliClient with name of @ref term_name
      * on success, otherwise NULL.
      */
-    CliClient	*find_cli_by_term_name(const char *term_name) const;
+    CliClient	*find_cli_by_term_name(const string& term_name) const;
     
     /**
      * Find a CLI client @ref CliClient for a given session ID.
@@ -281,7 +280,7 @@ public:
 	) { assert (false); return (XORP_ERROR); }
     
     typedef XorpCallback6<void,
-	const char*,		// target
+	const string&,		// target
 	const string&,		// server_name
 	const string&,		// cli_term_name
 	uint32_t,		// cli_session_id
@@ -335,41 +334,41 @@ private:
     // Internal CLI commands
     //
     int		add_internal_cli_commands();
-    int		cli_show_log(const char *server_name,
-			     const char *cli_term_name,
+    int		cli_show_log(const string& server_name,
+			     const string& cli_term_name,
 			     uint32_t cli_session_id,
-			     const char *command_global_name,
+			     const string& command_global_name,
 			     const vector<string>& argv);
-    int		cli_show_log_user(const char *server_name,
-				  const char *cli_term_name,
+    int		cli_show_log_user(const string& server_name,
+				  const string& cli_term_name,
 				  uint32_t cli_session_id,
-				  const char *command_global_name,
+				  const string& command_global_name,
 				  const vector<string>& argv);
-    int		cli_set_log_output_cli(const char *server_name,
-				       const char *cli_term_name,
+    int		cli_set_log_output_cli(const string& server_name,
+				       const string& cli_term_name,
 				       uint32_t cli_session_id,
-				       const char *command_global_name,
+				       const string& command_global_name,
 				       const vector<string>& argv);
-    int		cli_set_log_output_file(const char *server_name,
-					const char *cli_term_name,
+    int		cli_set_log_output_file(const string& server_name,
+					const string& cli_term_name,
 					uint32_t cli_session_id,
-					const char *command_global_name,
+					const string& command_global_name,
 					const vector<string>& argv);
-    int		cli_set_log_output_remove_cli(const char *server_name,
-					      const char *cli_term_name,
+    int		cli_set_log_output_remove_cli(const string& server_name,
+					      const string& cli_term_name,
 					      uint32_t cli_session_id,
-					      const char *command_global_name,
+					      const string& command_global_name,
 					      const vector<string>& argv);
-    int		cli_set_log_output_remove_file(const char *server_name,
-					       const char *cli_term_name,
+    int		cli_set_log_output_remove_file(const string& server_name,
+					       const string& cli_term_name,
 					       uint32_t cli_session_id,
-					       const char *command_global_name,
+					       const string& command_global_name,
 					       const vector<string>& argv);
     
-    int send_process_command(const char *server_name,
-			     const char *cli_term_name,
+    int send_process_command(const string& server_name,
+			     const string& cli_term_name,
 			     const uint32_t cli_session_id,
-			     const char *command_global_name,
+			     const string& command_global_name,
 			     const vector<string>& argv);
     
     int		sock_serv_open();

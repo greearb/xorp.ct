@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.5 2003/06/03 09:58:52 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.6 2003/07/10 23:44:31 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -136,8 +136,8 @@ public:
      * 
      * @return the user name.
      */
-    const char	*cli_session_user_name() const {
-	return (_cli_session_user_name.c_str());
+    const string& cli_session_user_name() const {
+	return (_cli_session_user_name);
     }
     
     /**
@@ -145,9 +145,10 @@ public:
      * 
      * @return the terminal name.
      */
-    const char	*cli_session_term_name() const {
-	return (_cli_session_term_name.c_str());
+    const string& cli_session_term_name() const {
+	return (_cli_session_term_name);
     }
+
     /**
      * Get the user network address.
      * 
@@ -156,6 +157,7 @@ public:
     const IPvX&	cli_session_from_address() const {
 	return (_cli_session_from_address);
     }
+
     /**
      * Get the start time for this connection.
      * 
@@ -165,6 +167,7 @@ public:
     const TimeVal& cli_session_start_time() const {
 	return (_cli_session_start_time);
     }
+
     /**
      * Get the stop time for this connection.
      * 
@@ -199,7 +202,7 @@ public:
      * 
      * @param v the user name to set.
      */
-    void	set_cli_session_user_name(const char *v) {
+    void	set_cli_session_user_name(const string& v) {
 	_cli_session_user_name = v;
     }
     
@@ -208,7 +211,7 @@ public:
      * 
      * @param v the terminal name to set.
      */
-    void	set_cli_session_term_name(const char *v) {
+    void	set_cli_session_term_name(const string& v) {
 	_cli_session_term_name = v;
     }
     
@@ -287,14 +290,14 @@ public:
      * 
      * @return the current CLI prompt.
      */
-    const char	*current_cli_prompt() { return (_current_cli_prompt); }
+    const string& current_cli_prompt() const { return (_current_cli_prompt); }
     
     /**
      * Set the current CLI prompt.
      * 
      * @param cli_prompt the current CLI prompt to set.
      */
-    void	set_current_cli_prompt(const char *cli_prompt);
+    void	set_current_cli_prompt(const string& cli_prompt);
     
 private:
     friend class CliPipe;
@@ -336,10 +339,11 @@ private:
     CliCommand	*current_cli_command() { return (_current_cli_command); }
     void	set_current_cli_command(CliCommand *v);
     
-    int		process_command(const char *line);
+    int		process_command(const string& command_line);
     
-    CliPipe	*add_pipe(const char *pipe_name);
-    CliPipe	*add_pipe(const char *pipe_name, const list<string>args_list);
+    CliPipe	*add_pipe(const string& pipe_name);
+    CliPipe	*add_pipe(const string& pipe_name,
+			  const list<string>& args_list);
     void	delete_pipe_all();
     bool	is_pipe_mode() { return (_is_pipe_mode); }
     void	set_pipe_mode(bool v) { _is_pipe_mode = v; }
@@ -352,9 +356,9 @@ private:
     int		process_char_page_mode(uint8_t val);
     int		preprocess_char(uint8_t val);
     void	command_line_help(const char *line, int word_end);
-    CliCommand	*multi_command_find(const char *line, int word_end);
+    CliCommand	*multi_command_find(const string& command_line);
     
-    void	process_line_through_pipes(string &pipe_line);
+    void	process_line_through_pipes(string& pipe_line);
     // Output paging related functions
     bool	is_page_mode() { return (_is_page_mode); }
     void	set_page_mode(bool v);
@@ -363,7 +367,7 @@ private:
     vector<string>& page_buffer() { return (*_page_buffer); }
     void	reset_page_buffer() { page_buffer().clear(); set_page_buffer_last_line(0); }
     size_t	page_buffer_lines_n() { return (page_buffer().size()); }
-    void	add_page_buffer_line(const char *line);
+    void	add_page_buffer_line(const string& buffer_line);
     size_t	page_buffer_last_line() { return (*_page_buffer_last_line); }
     void	set_page_buffer_last_line(size_t v) { *_page_buffer_last_line = v; }
     void	incr_page_buffer_last_line() { (*_page_buffer_last_line)++; }
@@ -409,10 +413,7 @@ private:
     bool	_is_modified_stdio_termios_isig;
     
     CliCommand	*_current_cli_command;
-#ifndef CLI_PROMPT_SIZE_MAX
-#define CLI_PROMPT_SIZE_MAX	128
-#endif
-    char	_current_cli_prompt[CLI_PROMPT_SIZE_MAX]; // The CLI prompt
+    string	_current_cli_prompt;	// The CLI prompt
     int		_buff_curpos;		// The cursor position in the buffer
     
     string	_buffer_line;		// To buffer data when pipe-processing

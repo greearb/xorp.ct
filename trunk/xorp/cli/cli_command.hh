@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.2 2003/01/16 19:28:56 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.3 2003/03/10 23:20:11 hodson Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -46,10 +46,10 @@ class CliClient;
 // The callback to print-out the return result from a processing function
 //
 typedef XorpCallback5<int,	/* return_value */
-    const char *,		/* server_name */
-    const char *,		/* cli_term_name */
+    const string&,		/* server_name */
+    const string&,		/* cli_term_name */
     uint32_t,			/* cli_session_id */
-    const char *,		/* command_global_name */
+    const string&,		/* command_global_name */
     const vector<string>&	/* command_args */
 >::RefPtr CLI_PROCESS_CALLBACK;
 
@@ -61,20 +61,20 @@ typedef XorpCallback2<set<string>, /* return value */
 //
 // The type of a processing function that handles CLI commands
 //
-typedef int (* CLI_PROCESS_FUNC)(const char *server_name,
-				 const char *cli_term_name,
+typedef int (* CLI_PROCESS_FUNC)(const string& server_name,
+				 const string& cli_term_name,
 				 uint32_t cli_session_id,
-				 const char *command_global_name,
+				 const string& command_global_name,
 				 const vector<string>& command_args);
 
 //
 // The type of a function that handles CLI command completions
 //
-#define CLI_COMPLETION_FUNC_(func) bool (func)(void *obj, \
-					      WordCompletion *cpl, \
-					      void *data, \
-					      const char *line, \
-					      int word_end, \
+#define CLI_COMPLETION_FUNC_(func) bool (func)(void *obj,		\
+					      WordCompletion *cpl,	\
+					      void *data,		\
+					      const char *line,		\
+					      int word_end,		\
 					      list<CliCommand *>& cli_command_match_list)
 typedef CLI_COMPLETION_FUNC_(CLI_COMPLETION_FUNC);
 
@@ -91,8 +91,9 @@ public:
      * include the command name of the parent command and its ancestors).
      * @param init_command_help the command help.
      */
-    CliCommand(CliCommand *init_parent_command, const char *init_command_name,
-	       const char *init_command_help);
+    CliCommand(CliCommand *init_parent_command,
+	       const string& init_command_name,
+	       const string& init_command_help);
 
     /**
      * Destructor
@@ -104,9 +105,10 @@ public:
      * 
      * @param v if true, enable "change directory", otherwise disable it.
      * @param init_cd_prompt if @ref v is true, the CLI prompt to display
-     * when "cd" to this command. If NULL, the CLI prompt will not be changed.
+     * when "cd" to this command. If an empty string, the CLI prompt will
+     * not be changed.
      */
-    void set_allow_cd(bool v, const char *init_cd_prompt);
+    void set_allow_cd(bool v, const string& init_cd_prompt);
     
     /**
      * Create the default CLI commands at each level of the command tree.
@@ -134,8 +136,8 @@ public:
      * @param init_command_help the command help.
      * @return the new child command on success, otherwise NULL.
      */
-    CliCommand *add_command(const char *init_command_name,
-			    const char *init_command_help);
+    CliCommand *add_command(const string& init_command_name,
+			    const string& init_command_help);
     
     /**
      * Add a child CLI command we can "cd" to it.
@@ -146,13 +148,13 @@ public:
      * more than one command levels in the middle. E.g., "set pim bsr".
      * However, commands "set" and "set pim" must have been installed first.
      * @param init_command_help the command help.
-     * @param init_cd_prompt if not NULL, the CLI prompt when "cd" to this
-     * command.
-     * @return the enw child command on success, otherwise NULL.
+     * @param init_cd_prompt if not an empty string, the CLI prompt
+     * when "cd" to this command.
+     * @return the new child command on success, otherwise NULL.
      */
-    CliCommand *add_command(const char *init_command_name,
-			    const char *init_command_help,
-			    const char *init_cd_prompt);
+    CliCommand *add_command(const string& init_command_name,
+			    const string& init_command_help,
+			    const string& init_cd_prompt);
     
     /**
      * Add a child command with a callback.
@@ -166,9 +168,9 @@ public:
      * command is entered for execution from the command-line.
      * @return the new child command on success, otherwise NULL.
      */
-    CliCommand *add_command(const char *init_command_name,
-			    const char *init_command_help,
-			    const CLI_PROCESS_CALLBACK &init_cli_process_callback);
+    CliCommand *add_command(const string& init_command_name,
+			    const string& init_command_help,
+			    const CLI_PROCESS_CALLBACK& init_cli_process_callback);
     
     /**
      * Add a child command with a processing function.
@@ -182,8 +184,8 @@ public:
      * command is entered for execution from the command-line.
      * @return the new child command on success, otherwise NULL.
      */
-    CliCommand *add_command(const char *init_command_name,
-			    const char *init_command_help,
+    CliCommand *add_command(const string& init_command_name,
+			    const string& init_command_help,
 			    CLI_PROCESS_FUNC init_cli_process_func) {
 	CLI_PROCESS_CALLBACK cb = callback(init_cli_process_func);
 	return (add_command(init_command_name, init_command_help, cb));
@@ -212,7 +214,7 @@ public:
      * The name can be the full path-name for that command.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_command(const char *delete_command_name);
+    int delete_command(const string& delete_command_name);
     
     /**
      * Recursively delete all children of this command.
@@ -232,38 +234,28 @@ public:
      * 
      * @return the global (full) name of this command.
      */
-    const char *global_name() const {
-	if (! _global_name.empty())
-	    return (_global_name.c_str());
-	else
-	    return (NULL);
-    }
+    const string& global_name() const { return (_global_name); }
     
     /**
      * Set the global name for this command.
      * 
      * @param v the global name value to set.
      */
-    void set_global_name(const char *v) { _global_name = v; }
+    void set_global_name(const string& v) { _global_name = v; }
     
     /**
      * Get the server (i.e., processor) name for this command.
      * 
-     * @return if valid, the server name for this command, otherwise NULL.
+     * @return the server name for this command.
      */
-    const char *server_name() const {
-	if (! _server_name.empty())
-	    return (_server_name.c_str());
-	else
-	    return (NULL);
-    }
+    const string& server_name() const { return (_server_name); }
     
     /**
      * Set the server (i.e., processor) name for this command.
      * 
      * @param v the server name value to set.
      */
-    void set_server_name(const char *v) { _server_name = v; }
+    void set_server_name(const string& v) { _server_name = v; }
     
     // TODO: kdoc-ify the public methods below (after I learn their purpose).
     void set_dynamic_children(DYNAMIC_CHILDREN_CALLBACK dc_cb) {
@@ -287,8 +279,8 @@ protected:
     
 private:
     friend class CliClient;
-    const char *name() const { return (_name.c_str()); }
-    const char *cd_prompt() { return (_cd_prompt.c_str()); }
+    const string& name() const { return (_name); }
+    const string& cd_prompt() { return (_cd_prompt); }
     
     list<CliCommand *>&	child_command_list();
     
@@ -299,8 +291,8 @@ private:
 						      int word_end,
 						      list<CliCommand *>& cli_command_match_list);
     
-    const char *help() const { return (_help.c_str()); }
-    const char *help_completion() const { return (_help_completion.c_str()); }
+    const string& help() const { return (_help); }
+    const string& help_completion() const { return (_help_completion); }
     
     int delete_pipes(void);
     
@@ -309,7 +301,7 @@ private:
     CliCommand *command_find(const string& token);
     CliCommand *multi_command_find(const string& command_line);
     
-    bool find_command_help(const char *line, int word_end, string& ret_string);
+    bool find_command_help(const string& command_line, string& ret_string);
     bool allow_cd() { return (_allow_cd); }
     
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.12 2003/08/27 23:15:30 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.13 2003/10/02 16:47:58 pavlin Exp $"
 
 
 //
@@ -167,7 +167,7 @@ CliClient::set_log_output(bool v)
 }
 
 CliPipe *
-CliClient::add_pipe(const char *pipe_name)
+CliClient::add_pipe(const string& pipe_name)
 {
     CliPipe *cli_pipe;
     
@@ -184,7 +184,7 @@ CliClient::add_pipe(const char *pipe_name)
 }
 
 CliPipe *
-CliClient::add_pipe(const char *pipe_name, const list<string>args_list)
+CliClient::add_pipe(const string& pipe_name, const list<string>& args_list)
 {
     CliPipe *cli_pipe;
     
@@ -196,7 +196,7 @@ CliClient::add_pipe(const char *pipe_name, const list<string>args_list)
     list<string>::const_iterator iter;
     for (iter = args_list.begin(); iter != args_list.end(); ++iter) {
 	string arg = *iter;
-	cli_pipe->add_pipe_arg(arg.c_str());
+	cli_pipe->add_pipe_arg(arg);
     }
     
     return (cli_pipe);
@@ -210,15 +210,14 @@ CliClient::delete_pipe_all()
 }
 
 void
-CliClient::add_page_buffer_line(const char *line)
+CliClient::add_page_buffer_line(const string& buffer_line)
 {
-    string string_line = line;
-    page_buffer().push_back(string_line);
+    page_buffer().push_back(buffer_line);
 }
 
 // Process the line throught the pipes
 void
-CliClient::process_line_through_pipes(string &pipe_line)
+CliClient::process_line_through_pipes(string& pipe_line)
 {
     list<CliPipe*>::iterator iter;
     
@@ -483,11 +482,10 @@ int
 CliClient::cli_print(const string& msg)
 {
     int ret_value;
-    const char* buf_ptr = msg.c_str();
     string pipe_line, pipe_result;
     bool eof_input_bool = false;
 
-    if (msg.size() == 0 || (buf_ptr[0] == '\0')) {
+    if (msg.size() == 0 || (msg[0] == '\0')) {
 	eof_input_bool = true;
     }
     
@@ -495,9 +493,9 @@ CliClient::cli_print(const string& msg)
     pipe_line += _buffer_line;
     _buffer_line = "";
     size_t i = 0;
-    while (buf_ptr[i] != '\0') {
-	pipe_line += buf_ptr[i];
-	if (buf_ptr[i] == '\n') {
+    while (msg[i] != '\0') {
+	pipe_line += msg[i];
+	if (msg[i] == '\n') {
 	    // Process the line throught the pipe
 	    process_line_through_pipes(pipe_line);
 	    pipe_result += pipe_line;
@@ -539,7 +537,7 @@ CliClient::cli_print(const string& msg)
 	    size_t window_line_n = pipe_line.size() / window_width()
 		+ (pipe_line.size() % window_width)? (1) : (0);
 #endif
-	    add_page_buffer_line(pipe_line.c_str());
+	    add_page_buffer_line(pipe_line);
 	    if ((page_buffer_lines_n() >= window_height())
 		&& (! is_nomore_mode())) {
 		set_page_mode(true);
@@ -576,21 +574,15 @@ void
 CliClient::set_current_cli_command(CliCommand *cli_command)
 {
     _current_cli_command = cli_command;
-    if (strlen(cli_command->cd_prompt()) > 0)
+    if (cli_command->cd_prompt().size() > 0)
 	set_current_cli_prompt(cli_command->cd_prompt());
 }
 
 void
-CliClient::set_current_cli_prompt(const char *cli_prompt)
+CliClient::set_current_cli_prompt(const string& cli_prompt)
 {
-    if (cli_prompt == NULL) {
-	_current_cli_prompt[0] = '\0';
-    } else {
-	strncpy(_current_cli_prompt, cli_prompt,
-		sizeof(_current_cli_prompt) -1);
-	_current_cli_prompt[sizeof(_current_cli_prompt) - 1] = '\0';
-    }
-    gl_replace_prompt(gl(), _current_cli_prompt);
+    _current_cli_prompt = cli_prompt;
+    gl_replace_prompt(gl(), _current_cli_prompt.c_str());
 }
 
 //
@@ -847,7 +839,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	else
 	    restore_cli_prompt = " --More-- (END) ";
     }
-    set_current_cli_prompt(restore_cli_prompt.c_str());
+    set_current_cli_prompt(restore_cli_prompt);
     gl_redisplay_line(gl());
     cli_flush();
     return (XORP_OK);
@@ -879,7 +871,7 @@ CliClient::post_process_command()
     if (final_string.size()) {
 	bool old_pipe_mode = is_pipe_mode();
 	set_pipe_mode(false);
-	cli_print(c_format("%s", final_string.c_str()));
+	cli_print(final_string);
 	set_pipe_mode(old_pipe_mode);
     }
     if (is_hold_mode()) {
@@ -909,7 +901,7 @@ CliClient::post_process_command()
     //
     command_buffer().reset();
     set_buff_curpos(0);
-    cli_print(c_format("%s", current_cli_prompt()));
+    cli_print(current_cli_prompt());
     cli_flush();
 }
 
@@ -931,7 +923,7 @@ CliClient::process_char(const char *line, uint8_t val)
 	// New command
 	// cli_print(c_format("Your command is: %s\n", line));
 	set_page_buffer_mode(true);
-	process_command(line);
+	process_command(string(line));
 	post_process_command();
 	return (XORP_OK);
     }
@@ -950,7 +942,7 @@ CliClient::process_char(const char *line, uint8_t val)
 	//} else {
 	//reset_page_buffer();
 	//}
-	//cli_print(c_format("%s", current_cli_prompt()));
+	//cli_print(current_cli_prompt());
 	//command_buffer().reset();
 	//set_buff_curpos(0);
 	return (XORP_OK);
@@ -974,14 +966,14 @@ CliClient::process_char(const char *line, uint8_t val)
 	    reset_page_buffer();
 	    set_page_buffer_mode(false);
 	    
-	    cli_print(c_format("\n"));	// XXX: new line
-	    cli_print(c_format("Command interrupted!\n"));
+	    cli_print("\n");		// XXX: new line
+	    cli_print("Command interrupted!\n");
 	}
 	
 	//
 	// Ignore current line, reset buffer, line, cursor, prompt
 	//
-	cli_print(c_format("\n"));	// XXX: new line
+	cli_print("\n");		// XXX: new line
 	gl_redisplay_line(gl());
 	gl_reset_line(gl());
 	set_buff_curpos(0);
@@ -1030,6 +1022,7 @@ CliClient::command_line_help(const char *line, int word_end)
 {
     CliCommand *curr_cli_command = _current_cli_command;
     string command_help_string = "";
+    string command_line = string(line, word_end);
     bool found_bool = false;
     
     word_end--;			// XXX: exclude the '?' character
@@ -1040,12 +1033,12 @@ CliClient::command_line_help(const char *line, int word_end)
 	 iter != curr_cli_command->child_command_list().end();
 	 ++iter) {
 	CliCommand *tmp_cli_command = *iter;
-	if (tmp_cli_command->find_command_help(line, word_end,
+	if (tmp_cli_command->find_command_help(command_line,
 					       command_help_string))
 	    found_bool = true;
     }
     if (found_bool)
-	cli_print(c_format("%s", command_help_string.c_str()));
+	cli_print(command_help_string);
     
     gl_redisplay_line(gl());
     // XXX: Move the cursor over the '?'
@@ -1054,25 +1047,22 @@ CliClient::command_line_help(const char *line, int word_end)
 }
 
 CliCommand *
-CliClient::multi_command_find(const char *line, int word_end)
+CliClient::multi_command_find(const string& command_line)
 {
-    string command_line = string(line, word_end);
-    
     return (_current_cli_command->multi_command_find(command_line));
 }
 
-
 int
-CliClient::process_command(const char *line)
+CliClient::process_command(const string& command_line)
 {
     string token, token_line;
     CliCommand *parent_cli_command = current_cli_command();
     CliCommand *child_cli_command = NULL;
-    int syntax_error_offset_next = strlen(current_cli_prompt());
+    int syntax_error_offset_next = current_cli_prompt().size();
     int syntax_error_offset_prev = syntax_error_offset_next;
     int i, old_len, new_len;
     
-    token_line = line;
+    token_line = command_line;
     new_len = token_line.size();
     old_len = new_len;
     
@@ -1126,8 +1116,7 @@ CliClient::process_command(const char *line)
 		pipe_command_empty = true;
 		if (pipe_command_name.size()) {
 		    // Add the previous pipe command
-		    add_pipe(pipe_command_name.c_str(),
-			     pipe_command_args_list);
+		    add_pipe(pipe_command_name, pipe_command_args_list);
 		    pipe_command_name = "";
 		    pipe_command_args_list.clear();
 		}
@@ -1150,7 +1139,7 @@ CliClient::process_command(const char *line)
 	}
 	if (pipe_command_name.size()) {
 	    // Add the last pipe command
-	    add_pipe(pipe_command_name.c_str(), pipe_command_args_list);
+	    add_pipe(pipe_command_name, pipe_command_args_list);
 	    pipe_command_name = "";
 	    pipe_command_args_list.clear();
 	}
@@ -1174,13 +1163,17 @@ CliClient::process_command(const char *line)
 	    if (final_string.size()) {
 		bool old_pipe_mode = is_pipe_mode();
 		set_pipe_mode(false);
-		cli_print(c_format("%s", final_string.c_str()));
+		cli_print(final_string);
 		set_pipe_mode(old_pipe_mode);
 	    }
 	    final_string = "";
 	    
-	    ret_value = parent_cli_command->_cli_process_callback->dispatch(parent_cli_command->server_name(), cli_session_term_name(), cli_session_session_id(), parent_cli_command->global_name(), args_vector);
-	    
+	    ret_value = parent_cli_command->_cli_process_callback->dispatch(
+		parent_cli_command->server_name(),
+		cli_session_term_name(),
+		cli_session_session_id(),
+		parent_cli_command->global_name(),
+		args_vector);
 	    return (ret_value);
 	}
     }
@@ -1231,7 +1224,8 @@ CliClient::process_command(const char *line)
 			cli_print(" or");
 		}
 		i++;
-		cli_print(c_format(" `%s'", child_cli_command->name()));
+		cli_print(c_format(" `%s'",
+				   child_cli_command->name().c_str()));
 	    }
 	    cli_print(".\n");
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.12 2003/12/10 21:57:50 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.13 2003/12/20 01:43:33 pavlin Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -303,7 +303,7 @@ XrlCliNode::cli_manager_0_1_delete_cli_command(
 // Send a request to a CLI processor
 //
 void
-XrlCliNode::send_process_command(const char *target,
+XrlCliNode::send_process_command(const string& target,
 				 const string& processor_name,
 				 const string& cli_term_name,
 				 uint32_t cli_session_id,
@@ -314,7 +314,7 @@ XrlCliNode::send_process_command(const char *target,
     // Send the request
     //
     XrlCliProcessorV0p1Client::send_process_command(
-	target,
+	target.c_str(),
 	processor_name,
 	cli_term_name,
 	cli_session_id,

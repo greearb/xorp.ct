@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.14 2003/12/10 21:57:50 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.15 2003/12/10 22:53:07 pavlin Exp $"
 
 
 //
@@ -317,17 +317,13 @@ CliNode::is_allow_cli_access(const IPvX& ipvx) const
  * otherwise NULL.
  **/
 CliClient *
-CliNode::find_cli_by_term_name(const char *term_name) const
+CliNode::find_cli_by_term_name(const string& term_name) const
 {
     list<CliClient *>::const_iterator iter;
     
-    for (iter = _client_list.begin();
-	 iter != _client_list.end();
-	 ++ iter) {
+    for (iter = _client_list.begin(); iter != _client_list.end(); ++ iter) {
 	CliClient *cli_client = *iter;
-	if (strncmp(term_name, cli_client->cli_session_term_name(),
-		    strlen(term_name))
-	    == 0) {
+	if (term_name == cli_client->cli_session_term_name()) {
 	    return (cli_client);
 	}
     }
@@ -414,16 +410,15 @@ CliNode::add_cli_command(
     
     if (! is_command_processor) {
 	if (is_command_cd) {
-	    c1 = c0->add_command(command_name.c_str(), command_help.c_str(),
-				 command_cd_prompt.c_str());
+	    c1 = c0->add_command(command_name, command_help,
+				 command_cd_prompt);
 	} else {
-	    c1 = c0->add_command(command_name.c_str(), command_help.c_str());
+	    c1 = c0->add_command(command_name, command_help);
 	}
     } else {
 	// Command processor
-	c1 = c0->add_command(command_name.c_str(), command_help.c_str(),
-			     callback(this,
-				      &CliNode::send_process_command));
+	c1 = c0->add_command(command_name, command_help,
+			     callback(this, &CliNode::send_process_command));
 	if (c1 != NULL)
 	    c1->set_can_pipe(true);
     }
@@ -437,8 +432,8 @@ CliNode::add_cli_command(
 	return (XORP_ERROR);
     }
     
-    c1->set_global_name(command_name.c_str());
-    c1->set_server_name(processor_name.c_str());
+    c1->set_global_name(command_name);
+    c1->set_server_name(processor_name);
     
     return (XORP_OK);
 }
@@ -447,17 +442,17 @@ CliNode::add_cli_command(
 // Send a command request to a remote node
 //
 int
-CliNode::send_process_command(const char *server_name,
-			      const char *cli_term_name,
+CliNode::send_process_command(const string& server_name,
+			      const string& cli_term_name,
 			      uint32_t cli_session_id,
-			      const char *command_global_name,
+			      const string& command_global_name,
 			      const vector<string>& argv)
 {
-    if (server_name == NULL)
+    if (server_name.empty())
 	return (XORP_ERROR);
-    if (cli_term_name == NULL)
+    if (cli_term_name.empty())
 	return (XORP_ERROR);
-    if (command_global_name == NULL)
+    if (command_global_name.empty())
 	return (XORP_ERROR);
     
     CliClient *cli_client = find_cli_by_session_id(cli_session_id);
@@ -479,11 +474,11 @@ CliNode::send_process_command(const char *server_name,
     //
     if (! _send_process_command_callback.is_empty()) {
 	(_send_process_command_callback)->dispatch(server_name,
-						   string(server_name),
-						   string(cli_term_name),
+						   server_name,
+						   cli_term_name,
 						   cli_session_id,
-						   string(command_global_name),
-						   string(command_args));
+						   command_global_name,
+						   command_args);
     }
     
     cli_client->set_is_waiting_for_data(true);
@@ -508,7 +503,7 @@ CliNode::recv_process_command_output(const string * , // processor_name,
     CliClient *cli_client = find_cli_by_session_id(*cli_session_id);
     if (cli_client == NULL)
 	return;
-    if (cli_client != find_cli_by_term_name(cli_term_name->c_str()))
+    if (cli_client != find_cli_by_term_name(*cli_term_name))
 	return;
     
     if (! cli_client->is_waiting_for_data()) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $"
+#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.2 2003/03/10 23:20:11 hodson Exp $"
 
 
 //
@@ -48,14 +48,14 @@
 //
 // Local functions prototypes
 //
-static int cli_pipe_dummy_func(const char *server_name,
-			       const char *cli_term_name,
+static int cli_pipe_dummy_func(const string& server_name,
+			       const string& cli_term_name,
 			       uint32_t cli_session_id,
-			       const char *command_global_name,
+			       const string& command_global_name,
 			       const vector<string>& argv);
 
 
-CliPipe::CliPipe(const char *init_pipe_name)
+CliPipe::CliPipe(const string& init_pipe_name)
     : CliCommand(NULL, init_pipe_name, CliPipe::name2help(init_pipe_name))
 {
     _pipe_type = name2pipe_type(init_pipe_name);
@@ -157,8 +157,8 @@ CliPipe::~CliPipe()
     
 }
 
-const char *
-CliPipe::name2help(const char *pipe_name)
+string
+CliPipe::name2help(const string& pipe_name)
 {
     switch (name2pipe_type(pipe_name)) {
     case CLI_PIPE_COMPARE:
@@ -192,13 +192,14 @@ CliPipe::name2help(const char *pipe_name)
     case CLI_PIPE_TRIM:
 	return ("Trip specified number of columns from the start line (NOT IMPLEMENTED YET)");
     case CLI_PIPE_MAX:
+	// FALLTHROUGH
     default:
 	return ("Pipe type unknown");
     }
 }
 
 CliPipe::cli_pipe_t
-CliPipe::name2pipe_type(const char *pipe_name)
+CliPipe::name2pipe_type(const string& pipe_name)
 {
     string token_line = pipe_name;
     string token;
@@ -711,10 +712,10 @@ CliPipe::pipe_unknown_eof(string& input_line)
 // A dummy function
 //
 static int
-cli_pipe_dummy_func(const char *		, // server_name,
-		    const char *		, // cli_term_name
+cli_pipe_dummy_func(const string&		, // server_name,
+		    const string&		, // cli_term_name
 		    uint32_t			, // cli_session_id
-		    const char *		, // command_global_name
+		    const string&		, // command_global_name
 		    const vector<string>&	  // argv
     )
 {

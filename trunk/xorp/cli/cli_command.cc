@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.2 2003/01/26 04:06:19 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.3 2003/03/10 23:20:11 hodson Exp $"
 
 
 //
@@ -50,8 +50,8 @@
 
 
 CliCommand::CliCommand(CliCommand *init_parent_command,
-		       const char *init_command_name,
-		       const char *init_command_help)
+		       const string& init_command_name,
+		       const string& init_command_help)
     : _parent_command(init_parent_command),
       _name(init_command_name),
       _help(init_command_help)
@@ -61,7 +61,7 @@ CliCommand::CliCommand(CliCommand *init_parent_command,
     else
 	_root_command = this;
     
-    set_allow_cd(false, NULL);
+    set_allow_cd(false, "");
     set_can_pipe(false);	// XXX: default
     set_cli_command_pipe(NULL);
     
@@ -69,8 +69,9 @@ CliCommand::CliCommand(CliCommand *init_parent_command,
     // TODO: parameterize the hard-coded number
     _help_completion = c_format(" %*s%s\r\n", (int)(15 - _name.size()), " ",
 				_help.c_str());
-    
-    set_cli_completion_func(cli_attempt_command_completion_byname);	// XXX: default
+
+    // XXX: set the CLI completion function to its default value
+    set_cli_completion_func(cli_attempt_command_completion_byname);
     
     _has_dynamic_children = false;
 }
@@ -85,10 +86,10 @@ CliCommand::~CliCommand()
 // Enable/disable "cd" to this command, and set the "cd prompt"
 //
 void
-CliCommand::set_allow_cd(bool v, const char *init_cd_prompt)
+CliCommand::set_allow_cd(bool v, const string& init_cd_prompt)
 {
     _allow_cd = v;
-    if (init_cd_prompt != NULL)
+    if (init_cd_prompt.size())
 	_cd_prompt = init_cd_prompt;
 }
 
@@ -113,7 +114,7 @@ CliCommand::add_command(CliCommand *child_command)
 	    XLOG_ERROR("Command already installed");
 	    return (XORP_ERROR);
 	}
-	if (string(cli_command->name()) < string(child_command->name())) {
+	if (cli_command->name() < child_command->name()) {
 	    insert_pos = iter;
 	    ++insert_pos;
 	}
@@ -138,8 +139,8 @@ CliCommand::add_command(CliCommand *child_command)
 // have been installed first.
 //
 CliCommand *
-CliCommand::add_command(const char *init_command_name,
-			const char *init_command_help)
+CliCommand::add_command(const string& init_command_name,
+			const string& init_command_help)
 {
     CliCommand *parent_cli_command = NULL;
     CliCommand *cli_command = NULL;
@@ -170,7 +171,7 @@ CliCommand::add_command(const char *init_command_name,
 	goto error_label_missing;
     
     cli_command = new CliCommand(parent_cli_command,
-				 command_name_string.c_str(),
+				 command_name_string,
 				 init_command_help);
     
     if (parent_cli_command->add_command(cli_command) < 0) {
@@ -178,20 +179,18 @@ CliCommand::add_command(const char *init_command_name,
 	goto error_label_failed;
     }
     
-    cli_command->set_allow_cd(false, NULL);
+    cli_command->set_allow_cd(false, "");
     
     return (cli_command);
     
  error_label_missing:
     XLOG_ERROR("Error installing '%s' on non-existent node '%s'", 
-	       init_command_name,
-	       ((this->name() != NULL) && strlen(this->name())) ?
-	       this->name() : "<ROOT>");
+	       init_command_name.c_str(),
+	       (this->name().size() > 0) ? this->name().c_str() : "<ROOT>");
     return (NULL);		// Invalid path to the command
  error_label_failed:
-    XLOG_ERROR("Error installing '%s' on '%s'", init_command_name,
-	       ((this->name() != NULL) && strlen(this->name())) ?
-	       this->name() : "<ROOT>");
+    XLOG_ERROR("Error installing '%s' on '%s'", init_command_name.c_str(),
+	       (this->name().size() > 0) ? this->name().c_str() : "<ROOT>");
     return (NULL);		// Invalid path to the command
 }
 
@@ -200,8 +199,8 @@ CliCommand::add_command(const char *init_command_name,
 // Return the new child command on success, otherwise NULL.
 //
 CliCommand *
-CliCommand::add_command(const char *init_command_name,
-			const char *init_command_help,
+CliCommand::add_command(const string& init_command_name,
+			const string& init_command_help,
 			const CLI_PROCESS_CALLBACK& init_cli_process_callback)
 {
     CliCommand *cli_command = add_command(init_command_name,
@@ -210,7 +209,7 @@ CliCommand::add_command(const char *init_command_name,
     if (cli_command == NULL)
 	return (NULL);
     cli_command->set_cli_process_callback(init_cli_process_callback);
-    cli_command->set_allow_cd(false, NULL);
+    cli_command->set_allow_cd(false, "");
     if (! init_cli_process_callback.is_empty()) {
 	// XXX: by default, enable pipe processing if there is a callback func
 	cli_command->set_can_pipe(true);
@@ -226,9 +225,9 @@ CliCommand::add_command(const char *init_command_name,
 // otherwise, it will remain unchanged.
 //
 CliCommand *
-CliCommand::add_command(const char *init_command_name,
-			const char *init_command_help,
-			const char *init_cd_prompt)
+CliCommand::add_command(const string& init_command_name,
+			const string& init_command_help,
+			const string& init_cd_prompt)
 {
     CliCommand *cli_command = add_command(init_command_name,
 					  init_command_help);
@@ -268,7 +267,7 @@ CliCommand::delete_command(CliCommand *child_command)
 // XXX: @delete_command_name can be the full path-name for that command
 //
 int
-CliCommand::delete_command(const char *delete_command_name)
+CliCommand::delete_command(const string& delete_command_name)
 {
     CliCommand *parent_cli_command = NULL;
     CliCommand *delete_cli_command = NULL;
@@ -303,7 +302,8 @@ CliCommand::delete_command(const char *delete_command_name)
     return (XORP_OK);
     
  error_label:
-    XLOG_ERROR("Error deleting %s on %s", delete_command_name, this->name());
+    XLOG_ERROR("Error deleting %s on %s", delete_command_name.c_str(),
+	       this->name().c_str());
     return (XORP_ERROR);
 }
 
@@ -431,7 +431,8 @@ CliCommand::delete_pipes(void)
 bool
 CliCommand::cli_attempt_command_completion_byname(void *obj,
 						  WordCompletion *cpl,
-						  void *data, const char *line,
+						  void *data,
+						  const char *line,
 						  int word_end,
 						  list<CliCommand *>& cli_command_match_list)
 {
@@ -463,7 +464,8 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
 	int name_end = token.length();
 	string name_complete = name_string.substr(name_end);
 	
-	type_suffix = cli_command->help_completion();
+	if (cli_command->help_completion().size() > 0)
+	    type_suffix = cli_command->help_completion().c_str();
 	// Add two empty spaces in front
 	string line_string = "  ";
 	if (token.empty()) {
@@ -499,7 +501,8 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     if (cli_command->can_pipe() && (cli_command->cli_command_pipe() != NULL)) {
 	// Add the pipe completions
 	if (cli_command->_cli_completion_func(cli_command->cli_command_pipe(),
-					      cpl, data,
+					      cpl,
+					      data,
 					      token_line.c_str(),
 					      token_line.length(),
 					      cli_command_match_list)) {
@@ -516,7 +519,8 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
 	if (! cli_command_child->has_cli_completion_func())
 	    continue;
 	if (cli_command_child->_cli_completion_func(cli_command_child,
-						    cpl, data,
+						    cpl,
+						    data,
 						    token_line.c_str(),
 						    token_line.length(),
 						    cli_command_match_list)) {
@@ -595,18 +599,16 @@ CliCommand::is_same_command(const string& token)
 }
 
 bool
-CliCommand::find_command_help(const char *line, int word_end,
-			      string& ret_string)
+CliCommand::find_command_help(const string& command_line, string& ret_string)
 {
     string token, token_line;
     bool ret_bool = false;
     bool no_space_at_end_bool;
     
-    if ((line == NULL) || (word_end < 0)) {
+    if (command_line.empty())
 	return (false);
-    }
     
-    token_line = string(line, word_end);
+    token_line = command_line;
     token = pop_token(token_line);
     if (! is_same_prefix(token))
 	return (false);
@@ -626,7 +628,7 @@ CliCommand::find_command_help(const char *line, int word_end,
     if ((token.length() == 0) && no_space_at_end_bool) {
 	// The last token, and there is no space, so print my help.
 	ret_string += c_format("  %-15s %s\r\n",
-			       name(), help());
+			       name().c_str(), help().c_str());
 	return (true);
     }
     
@@ -645,18 +647,14 @@ CliCommand::find_command_help(const char *line, int word_end,
 	 ++iter) {
 	CliCommand *cli_command = *iter;
 	string tmp_token_line = copy_token(token) + token_line;
-	ret_bool |= cli_command->find_command_help(tmp_token_line.c_str(),
-						   tmp_token_line.length(),
-						   ret_string);
+	ret_bool |= cli_command->find_command_help(tmp_token_line, ret_string);
     }
     
     if (can_pipe() && (cli_command_pipe() != NULL)) {
 	// Add the pipe completions
 	string tmp_token_line = copy_token(token) + token_line;
-	ret_bool |= cli_command_pipe()->find_command_help(
-	    tmp_token_line.c_str(),
-	    tmp_token_line.length(),
-	    ret_string);
+	ret_bool |= cli_command_pipe()->find_command_help(tmp_token_line,
+							  ret_string);
     }
     
     return (ret_bool);
@@ -679,13 +677,15 @@ CliCommand::has_dynamic_process_callback()
 bool
 CliCommand::has_cli_process_callback()
 {
-    if (_has_dynamic_children) 
-	//force the children to be evaluated, which forces the
-	//cli_process_callback to be set
+    if (_has_dynamic_children) {
+	//
+	// Force the children to be evaluated, which forces the
+	// cli_process_callback to be set.
+	//
 	child_command_list();
+    }
     return (!_cli_process_callback.is_empty());
 }
-
 
 list<CliCommand *>&	
 CliCommand::child_command_list()
@@ -698,8 +698,8 @@ CliCommand::child_command_list()
 	//now we've run this, we won't need to run it again.
 	_has_dynamic_children = false;
 
-	//add dynamic children
-	assert(global_name() != NULL);
+	// Add dynamic children
+	XLOG_ASSERT(global_name().size() > 0);
 	bool can_be_run;
 	set <string> dynamic_children = 
 	    _dynamic_children_callback->dispatch(global_name(), can_be_run);
@@ -709,12 +709,12 @@ CliCommand::child_command_list()
 	}
 	set <string>::iterator dci;
 	CliCommand *new_cmd;
-	for(dci = dynamic_children.begin(); 
+	for(dci = dynamic_children.begin();
 	    dci != dynamic_children.end();
-	    dci++) {
-	    new_cmd = add_command(dci->c_str(), "help");
+	    ++dci) {
+	    new_cmd = add_command(*dci, "help");
 	    string child_name = global_name() + (" " + *dci);
-	    new_cmd->set_global_name(child_name.c_str());
+	    new_cmd->set_global_name(child_name);
 	    new_cmd->set_dynamic_children(_dynamic_children_callback);
 	    new_cmd->set_dynamic_process_callback(dynamic_process_callback());
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.9 2003/05/29 21:17:14 mjh Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.10 2003/12/20 01:43:34 pavlin Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -186,7 +186,7 @@ protected:
     //
     // The CLI client-side (i.e., the CLI sending XRLs)
     //
-    void send_process_command(const char *target,
+    void send_process_command(const string& target,
 			      const string& processor_name,
 			      const string& cli_term_name,
 			      uint32_t cli_session_id,

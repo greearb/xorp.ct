@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.19 2003/09/16 18:13:46 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.20 2003/12/20 00:04:39 pavlin Exp $"
 
 
 //
@@ -355,19 +355,19 @@ wakeup_hook2(int a, int b)
 }
 
 int
-cli_myset_func(const char * ,		// server_name
-	       const char *cli_term_name,
+cli_myset_func(const string& ,		// server_name
+	       const string& cli_term_name,
 	       uint32_t ,		// cli_session_id
-	       const char *command_global_name,
+	       const string& command_global_name,
 	       const vector<string>& argv)
 {
     CliClient *cli_client = cli_node().find_cli_by_term_name(cli_term_name);
     if (cli_client == NULL)
 	return (XORP_ERROR);
 
-    if (command_global_name != NULL)
+    if (command_global_name.size() > 0)
 	cli_client->cli_print(c_format("MYSET_FUNC command_global_name = %s\n",
-				       command_global_name));
+				       command_global_name.c_str()));
     for (size_t i = 0; i < argv.size(); i++)
 	cli_client->cli_print(c_format("MYSET_FUNC arg = %s\n",
 				       argv[i].c_str()));
@@ -376,10 +376,10 @@ cli_myset_func(const char * ,		// server_name
 }
 
 int
-cli_print(const char * ,		// server_name
-	  const char *cli_term_name,
+cli_print(const string& ,		// server_name
+	  const string& cli_term_name,
 	  uint32_t ,			// cli_session_id
-	  const char * ,		// command_global_name,
+	  const string& ,		// command_global_name,
 	  const vector<string>& argv)
 {
     CliClient *cli_client = cli_node().find_cli_by_term_name(cli_term_name);
@@ -410,10 +410,10 @@ cli_print(const char * ,		// server_name
 }
 
 int
-cli_print2(const char * ,		// server_name
-	   const char *cli_term_name,
+cli_print2(const string& ,		// server_name
+	   const string& cli_term_name,
 	   uint32_t ,			// cli_session_id
-	   const char * ,		// command_global_name,
+	   const string& ,		// command_global_name,
 	   const vector<string>& argv)
 {
     CliClient *cli_client = cli_node().find_cli_by_term_name(cli_term_name);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.4 2003/03/30 03:50:43 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.5 2003/04/01 02:00:03 pavlin Exp $"
 
 
 //
@@ -105,10 +105,10 @@ CliNode::add_internal_cli_commands(void)
 // Display information about log files
 // TODO: probably should change the command name to "show log file" ??
 int
-CliNode::cli_show_log(const char *		, // server_name
-		      const char *cli_term_name,
+CliNode::cli_show_log(const string&		, // server_name
+		      const string& cli_term_name,
 		      uint32_t			, // cli_session_id
-		      const char *		, // command_global_name
+		      const string&		, // command_global_name
 		      const vector<string>& argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);
@@ -130,10 +130,10 @@ CliNode::cli_show_log(const char *		, // server_name
 // Display information about users
 // TODO: add the missing info at the end to make it 'who'-like
 int
-CliNode::cli_show_log_user(const char *		, // server_name
-			   const char *cli_term_name,
+CliNode::cli_show_log_user(const string& 	, // server_name
+			   const string& cli_term_name,
 			   uint32_t		, // cli_session_id
-			   const char *		, // command_global_name
+			   const string&	, // command_global_name
 			   const vector<string>&argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);
@@ -152,16 +152,11 @@ CliNode::cli_show_log_user(const char *		, // server_name
     }
     
     list<CliClient *>::iterator iter;
-    for (iter = client_list().begin();
-	 iter != client_list().end();
-	 ++iter) {
+    for (iter = client_list().begin(); iter != client_list().end(); ++iter) {
 	CliClient *tmp_cli_client = *iter;
 	
 	if (user_name.size()
-	    && (strncmp(user_name.c_str(),
-			tmp_cli_client->cli_session_user_name(),
-			user_name.size())
-		!= 0)) {
+	    && (user_name != tmp_cli_client->cli_session_user_name())) {
 	    continue;
 	}
 	user_name_found = true;
@@ -170,7 +165,7 @@ CliNode::cli_show_log_user(const char *		, // server_name
 	TimeVal start_time_tv = tmp_cli_client->cli_session_start_time();
 	string start_time;
 	{
-	    int maxlen = sizeof("999999999/99/99 99/99/99.999999999 ");
+	    size_t maxlen = sizeof("999999999/99/99 99/99/99.999999999 ");
 	    char buf[maxlen];
 	    time_t time_clock = start_time_tv.sec();
 	    struct tm *local_time = localtime(&time_clock);
@@ -183,8 +178,8 @@ CliNode::cli_show_log_user(const char *		, // server_name
 	
 	cli_client->cli_print(
 	    c_format("%-16s%-16s%-16s%-16s\n",
-		     tmp_cli_client->cli_session_user_name(),
-		     tmp_cli_client->cli_session_term_name(),
+		     tmp_cli_client->cli_session_user_name().c_str(),
+		     tmp_cli_client->cli_session_term_name().c_str(),
 		     cstring(tmp_cli_client->cli_session_from_address()),
 		     start_time.c_str())
 	    );
@@ -204,12 +199,12 @@ CliNode::cli_show_log_user(const char *		, // server_name
 	
 	cli_client->cli_print(
 	    c_format("%-16s%-16s%-16s%-16s - %-16s (%s)\n",
-		     tmp_cli_client->cli_session_user_name(),
-		     tmp_cli_client->cli_session_term_name(),
+		     tmp_cli_client->cli_session_user_name().c_str(),
+		     tmp_cli_client->cli_session_term_name().c_str(),
 		     cstring(tmp_cli_client->cli_session_from_address()),
-		     tmp_cli_client->cli_session_start_time(),
-		     tmp_cli_client->cli_session_stop_time(),
-		     tmp_cli_client->cli_session_duration_time())
+		     tmp_cli_client->cli_session_start_time().c_str(),
+		     tmp_cli_client->cli_session_stop_time().c_str(),
+		     tmp_cli_client->cli_session_duration_time().c_str())
 	    );
     }
 #endif
@@ -226,11 +221,11 @@ CliNode::cli_show_log_user(const char *		, // server_name
 // start getting the logs from each of them (through XRLs) instead
 // of applying it only to the local process logs.
 int
-CliNode::cli_set_log_output_cli(const char *	, // server_name
-				const char *cli_term_name,
+CliNode::cli_set_log_output_cli(const string&	, // server_name
+				const string& cli_term_name,
 				uint32_t	, // cli_session_id
-				const char *	, // command_global_name
-				const vector<string>&argv)
+				const string&	, // command_global_name
+				const vector<string>& argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);
     if (cli_client == NULL)
@@ -259,12 +254,12 @@ CliNode::cli_set_log_output_cli(const char *	, // server_name
 		    cli_client->cli_print(
 			c_format("ERROR: cannot add CLI terminal "
 				 "'%s' as log output\n",
-				 tmp_cli_client->cli_session_term_name()));
+				 tmp_cli_client->cli_session_term_name().c_str()));
 		}
 	    }
 	}
     } else {
-	tmp_cli_client = find_cli_by_term_name(term_name.c_str());
+	tmp_cli_client = find_cli_by_term_name(term_name);
 	if (tmp_cli_client == NULL) {
 	    cli_client->cli_print(
 		c_format("ERROR: cannot find CLI terminal '%s'\n",
@@ -279,7 +274,7 @@ CliNode::cli_set_log_output_cli(const char *	, // server_name
 		cli_client->cli_print(
 		    c_format("ERROR: cannot add CLI terminal "
 			     "'%s' as log output\n",
-			     tmp_cli_client->cli_session_term_name())
+			     tmp_cli_client->cli_session_term_name().c_str())
 		    );
 		return (XORP_ERROR);
 	    }
@@ -298,10 +293,10 @@ CliNode::cli_set_log_output_cli(const char *	, // server_name
 // TODO: this is a home-brew own command
 // TODO: merge this function with "set log output cli"
 int
-CliNode::cli_set_log_output_remove_cli(const char *	, // server_name
-				       const char *cli_term_name,
+CliNode::cli_set_log_output_remove_cli(const string&	, // server_name
+				       const string& cli_term_name,
 				       uint32_t		, // cli_session_id
-				       const char *	, // command_global_name
+				       const string&	, // command_global_name
 				       const vector<string>& argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);
@@ -331,12 +326,12 @@ CliNode::cli_set_log_output_remove_cli(const char *	, // server_name
 		    cli_client->cli_print(
 			c_format("ERROR: cannot remove CLI terminal "
 				 "'%s' as log output\n",
-				 tmp_cli_client->cli_session_term_name()));
+				 tmp_cli_client->cli_session_term_name().c_str()));
 		}
 	    }
 	}
     } else {
-	tmp_cli_client = find_cli_by_term_name(term_name.c_str());
+	tmp_cli_client = find_cli_by_term_name(term_name);
 	if (tmp_cli_client == NULL) {
 	    cli_client->cli_print(
 		c_format("ERROR: cannot find CLI terminal '%s'\n",
@@ -351,7 +346,7 @@ CliNode::cli_set_log_output_remove_cli(const char *	, // server_name
 		cli_client->cli_print(
 		    c_format("ERROR: cannot remove CLI terminal "
 			     "'%s' from log output\n",
-			     tmp_cli_client->cli_session_term_name()));
+			     tmp_cli_client->cli_session_term_name().c_str()));
 		return (XORP_ERROR);
 	    }
 	}
@@ -371,10 +366,10 @@ CliNode::cli_set_log_output_remove_cli(const char *	, // server_name
 // start getting the logs from each of them (through XRLs) instead
 // of applying it only to the local process logs.
 int
-CliNode::cli_set_log_output_file(const char *		, // server_name
-				 const char *cli_term_name,
+CliNode::cli_set_log_output_file(const string&		, // server_name
+				 const string& cli_term_name,
 				 uint32_t		, // cli_session_id
-				 const char *		, // command_global_name
+				 const string&		, // command_global_name
 				 const vector<string>& argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);
@@ -400,10 +395,10 @@ CliNode::cli_set_log_output_file(const char *		, // server_name
 // Remove a file from the set of output destinations of log messages
 // TODO: this is a home-brew own command
 int
-CliNode::cli_set_log_output_remove_file(const char * ,	// server_name
-					const char *cli_term_name,
+CliNode::cli_set_log_output_remove_file(const string& ,	// server_name
+					const string& cli_term_name,
 					uint32_t ,	// cli_session_id
-					const char * ,	// command_global_name
+					const string& ,	// command_global_name
 					const vector<string>& argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);

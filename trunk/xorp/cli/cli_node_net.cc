@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.17 2003/10/31 22:11:25 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.18 2003/12/10 21:57:50 pavlin Exp $"
 
 
 //
@@ -205,7 +205,7 @@ CliNode::add_connection(int client_socket)
 	
 	for (i = 0; i < CLI_MAX_CONNECTIONS; i++) {
 	    term_name = c_format("cli%u", i);
-	    if (find_cli_by_term_name(term_name.c_str()) == NULL)
+	    if (find_cli_by_term_name(term_name) == NULL)
 		break;
 	}
 	if (i >= CLI_MAX_CONNECTIONS) {
@@ -213,7 +213,7 @@ CliNode::add_connection(int client_socket)
 	    delete_connection(cli_client);
 	    return (NULL);
 	}
-	cli_client->set_cli_session_term_name(term_name.c_str());
+	cli_client->set_cli_session_term_name(term_name);
     }
     
     //
@@ -383,9 +383,12 @@ CliClient::start_connection(void)
     // the default libtecla behavior is to delete the whole line.
     gl_configure_getline(_gl, "bind ^W backward-delete-word", NULL, NULL);
 
-    // Print the welcome message and show the prompt
-    cli_print(c_format("%s\n%s", XORP_CLI_WELCOME, current_cli_prompt()));
-    
+    // Print the welcome message
+    cli_print(c_format("%s\n", XORP_CLI_WELCOME));
+
+    // Show the prompt
+    cli_print(current_cli_prompt());
+
     return (XORP_OK);
 }
 
@@ -525,7 +528,7 @@ CliClient::client_read(int fd, SelectorMask mask)
 	//
 	do {
 	    line = gl_get_line_net(gl(),
-				   current_cli_prompt(),
+				   current_cli_prompt().c_str(),
 				   (char *)command_buffer().data(),
 				   buff_curpos(),
 				   val);
@@ -566,10 +569,10 @@ CliClient::preprocess_char(uint8_t val)
     if (val == ' ') {
 	int tmp_buff_curpos = buff_curpos();
 	char *tmp_line = (char *)command_buffer().data();
-	string token_line = string(tmp_line, tmp_buff_curpos);
+	string command_line = string(tmp_line, tmp_buff_curpos);
+	string token_line = command_line;
 	string token = pop_token(token_line);
-	if (token.empty()
-	    || (multi_command_find(tmp_line, tmp_buff_curpos) != NULL)) {
+	if (token.empty() || (multi_command_find(command_line) != NULL)) {
 	    // Un-bind the "SPACE" to complete-word
 	    // Don't ask why we need six '\' to specify the ASCII value
 	    // of 'SPACE'...
