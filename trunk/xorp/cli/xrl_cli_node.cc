@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.20 2005/02/18 00:39:58 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.21 2005/02/23 17:37:35 pavlin Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -113,9 +113,6 @@ XrlCliNode::finder_disconnect_event()
     _is_finder_alive = false;
 
     stop_cli();
-
-    // CliNode::set_status(SERVICE_FAILED);
-    // CliNode::update_status();
 }
 
 XrlCmdError
