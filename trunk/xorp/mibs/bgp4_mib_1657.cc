@@ -42,6 +42,7 @@ init_bgp4_mib_1657 (void)
     init_bgp4_mib_1657_bgpidentifier();
     init_bgp4_mib_1657_bgp4pathattrtable();
 
+    static XorpUnexpectedHandler x(xorp_unexpected_handler);
     // NOTE:  these xlog calls are required by each mib module, since the
     // runtime linker seems to reset the values of xlog.c static variables
     // everytime a new mib module is loaded.  Only the last unloaded mib module

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/utils/Makefile.am,v 1.6 2003/08/01 02:11:51 pavlin Exp $
+## $XORP: xorp/mibs/snmpdscripts/Makefile.am,v 1.1 2003/08/01 23:38:57 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -10,10 +10,8 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS	 = 
 bin_SCRIPTS	 = getbgppeertable
 bin_SCRIPTS	+= getbgpversion
-bin_SCRIPTS	+= loadmib
 bin_SCRIPTS	+= startsnmp
 bin_SCRIPTS	+= stopsnmp
-bin_SCRIPTS	+= unloadmib
 
 # -- Test Programs
 TESTS		 = 
@@ -33,11 +31,9 @@ LDADD		 = $(noinst_LIBRARIES)
 EXTRA_DIST	 = README
 EXTRA_DIST	+= getbgppeertable
 EXTRA_DIST	+= getbgpversion
-EXTRA_DIST	+= loadmib
 EXTRA_DIST	+= snmp.conf
 EXTRA_DIST	+= startsnmp.in
 EXTRA_DIST	+= stopsnmp
-EXTRA_DIST	+= unloadmib
 
 
 ################################################################

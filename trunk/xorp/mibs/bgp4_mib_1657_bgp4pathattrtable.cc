@@ -24,28 +24,29 @@
 #include "bgp4_mib_1657.hh"
 #include "bgp4_mib_1657_bgp4pathattrtable.hh"
 
-#ifdef USE_MPATROL
-// relevant declarations from mpatrol.h
-extern "C" {
-void __mp_clearleaktable(void);
-int __mp_startleaktable(void);
-int __mp_stopleaktable(void);
-void __mp_leaktable(size_t, int, unsigned char);
-int __mp_printf(const char *, ...);
-}
-#endif /* USE_MPATROL */
-
-
-#define MP_LT_ALLOCATED 0
-#define MP_LT_FREED     1
-#define MP_LT_UNFREED   2
-
-#define MP_LT_COUNTS    1
-#define MP_LT_BOTTOM    2
-
-
-
 // Local classes and typedefs
+
+typedef struct bgp4PathAttrTable_context_s {
+    netsnmp_index index; // THIS MUST BE FIRST!!! /
+    unsigned long bgp4PathAttrPeer;
+    unsigned long bgp4PathAttrIpAddrPrefixLen;
+    unsigned long bgp4PathAttrIpAddrPrefix;
+    long bgp4PathAttrOrigin;
+    u_char * bgp4PathAttrASPathSegment;
+    unsigned long bgp4PathAttrASPathSegmentLen;
+    unsigned long bgp4PathAttrNextHop;
+    long bgp4PathAttrMultiExitDisc;
+    long bgp4PathAttrLocalPref;
+    long bgp4PathAttrAtomicAggregate;
+    long bgp4PathAttrAggregatorAS;
+    unsigned long bgp4PathAttrAggregatorAddr;
+    long bgp4PathAttrCalcLocalPref;
+    long bgp4PathAttrBest;
+    u_char * bgp4PathAttrUnknown;
+    unsigned long bgp4PathAttrUnknownLen; 
+    uint32_t update_signature;
+} bgp4PathAttrTable_context;
+
 class UpdateManager
 {
 public:
@@ -81,6 +82,14 @@ static void bgp4PathAttrTable_delete_row(bgp4PathAttrTable_context * ctx);
 static int bgp4PathAttrTable_extract_index(bgp4PathAttrTable_context * ctx, 
     netsnmp_index * hdr);
 static u_char * stl_vector_to_char(const vector<uint8_t>*, unsigned long &);
+static void initialize_table_bgp4PathAttrTable(void);
+
+const bgp4PathAttrTable_context * 
+    bgp4PathAttrTable_get_by_idx(netsnmp_index *); 
+int bgp4PathAttrTable_get_value(netsnmp_request_info *, 
+    netsnmp_index *, netsnmp_table_request_info *);
+
+
 
 /************************************************************
  * local_route_table_update - update local table
@@ -172,10 +181,6 @@ init_bgp4_mib_1657_bgp4pathattrtable(void)
     pLocalUpdateTimer = new XorpTimer;
     tcb = callback(local_route_table_update);
     *pLocalUpdateTimer = eventloop.new_oneoff_after_ms(0, tcb);
-#ifdef USE_MPATROL
-    __mp_clearleaktable();
-    __mp_startleaktable();
-#endif /* USE_MPATROL */
 }
 
 /*********************************************************************
@@ -191,15 +196,6 @@ deinit_bgp4_mib_1657_bgp4pathattrtable(void)
 	delete pLocalUpdateTimer;
 	pLocalUpdateTimer = NULL;
     }
-#ifdef USE_MPATROL
-    __mp_stopleaktable();
-    __mp_leaktable(0, MP_LT_ALLOCATED, MP_LT_BOTTOM);
-    __mp_printf("\n");
-    __mp_leaktable(0, MP_LT_FREED, MP_LT_COUNTS);
-    __mp_printf("\n");
-    __mp_leaktable(0, MP_LT_UNFREED, 0);
-    __mp_printf("\n");
-#endif /* USE_MPATROL */
 }
 
 /*********************************************************************

@@ -93,7 +93,7 @@ bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
 bin_PROGRAMS = 
-bin_SCRIPTS = getbgppeertable getbgpversion loadmib startsnmp stopsnmp unloadmib
+bin_SCRIPTS = getbgppeertable getbgpversion startsnmp stopsnmp
 
 # -- Test Programs
 TESTS = 
@@ -110,7 +110,7 @@ LDADD = $(noinst_LIBRARIES)
 # -- Program Sources
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = README getbgppeertable getbgpversion loadmib snmp.conf startsnmp.in stopsnmp unloadmib
+EXTRA_DIST = README getbgppeertable getbgpversion snmp.conf startsnmp.in stopsnmp
 
 
 ################################################################

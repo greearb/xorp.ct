@@ -28,7 +28,24 @@
 
 /* dlopen functions */
 extern "C" {
+/**
+ * This is the first and only function that gets called when the SNMP
+ * agent loads the bgp_mib_1657 module.  This function is responsible for
+ * instantiating the @ref BgpMib object and for registering the scalars and
+ * tables that are implemented by this MIB.
+ *
+ * @short BGP MIB initialization function called by the SNMP agent
+ */
 void            init_bgp4_mib_1657 (void);
+/**
+ * This is the function called by the SNMP agent immediately before unloading
+ * the bgp_mib_1657 module.  After this function is called, the shared object
+ * will be unloaded and therefore inaccessible.  This function unregisters any
+ * alarms and file descriptors to prevent callbacks to non-accessible
+ * functions.
+ *
+ * @short BGP MIB clean up function called by the SNMP agent before unloading
+ */
 void          deinit_bgp4_mib_1657 (void);
 }
 
@@ -36,14 +53,23 @@ void          deinit_bgp4_mib_1657 (void);
 
 
 /**
- * @short Class that implements the BGP MIB tree 
+ * This is the top level class for the BGP MIB tree.  It is a singleton class
+ * that implements an @ref XrlBgpV0p2Client for BGP, and contains an 
+ * @ref XrlStdRouter and an @ref XrlBgpMibTarget.
+ *
+ * @short Top level class for the BGP MIB tree 
  *
  */
-
 class BgpMib : public XrlBgpV0p2Client
 {
 public:
+    /**
+     * @return the one and only instance in this class
+     */
     static BgpMib& the_instance();
+    /**
+     * @return the name that will be used to identify this mib in the logfile
+     */
     static const char * name()    { return XORP_MODULE_NAME; };
     
     ~BgpMib();
