@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.12 2003/10/28 19:36:28 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_fib_client.xif,v 1.1 2004/03/15 23:26:42 pavlin Exp $ */
 
 /*
  * FEA Forwarding Information Base Client XRL interface.
@@ -30,10 +30,37 @@ interface fea_fib_client/0.1 {
 			& protocol_origin:txt & xorp_route:bool
 
 	/**
+	 * Replace a route.
+	 *
+	 * @param network the network address prefix of the route to replace.
+	 * @param nexthop the address of the next-hop router toward the
+	 * destination.
+	 * @param ifname the name of the physical interface toward the
+	 * destination.
+	 * @param vifname the name of the virtual interface toward the
+	 * destination.
+	 * @param metric the routing metric toward the destination.
+	 * @param admin_distance the administratively defined distance
+	 * toward the destination.
+	 * @param protocol_origin the name of the protocol that originated
+	 * this route.
+	 * @param xorp_route true if this route was installed by XORP.
+	 */
+	replace_route4	? network:ipv4net & nexthop:ipv4 & ifname:txt	\
+			& vifname:txt & metric:u32 & admin_distance:u32	\
+			& protocol_origin:txt & xorp_route:bool
+	replace_route6	? network:ipv6net & nexthop:ipv6 & ifname:txt	\
+			& vifname:txt & metric:u32 & admin_distance:u32	\
+			& protocol_origin:txt & xorp_route:bool
+
+	/**
 	 * Delete a route.
 	 *
 	 * @param network the network address prefix of the route to delete.
+	 * @param ifname the name of the physical interface toward the
+	 * destination.
+	 * @param vifname the name of the virtual interface toward the
 	 */
-	delete_route4	? network:ipv4net
-	delete_route6	? network:ipv6net
+	delete_route4	? network:ipv4net & ifname:txt & vifname: txt
+	delete_route6	? network:ipv6net & ifname:txt & vifname: txt
 }
