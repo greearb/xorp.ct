@@ -12,9 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.8 2004/12/09 07:54:36 pavlin Exp $"
-
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.8 2004/12/09 07:54:36 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.9 2005/02/12 08:09:06 pavlin Exp $"
 
 #include "libfeaclient_module.h"
 
