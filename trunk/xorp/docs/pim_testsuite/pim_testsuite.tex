@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.8 2003/02/01 00:37:03 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.9 2003/02/09 00:52:19 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -8156,7 +8156,6 @@ upstream forwarder for that LAN.
 
 \para{Test Setup:}
 Connect the RUT, TR1, TR2, TR3, TR4, and S1 according to
-Figure~\ref{fig:pim_test_4_9_state_machine_for_sg_rpt_triggered_messages}.
 Figure~\ref{fig:pim_test_5_1_sg_assert_message_state_machine}.
 Configure the IP address of the interface that connects TR4 to LAN6 as the RP.
 Configure the RUT such that the next-hop router toward the RP is TR2.
@@ -8193,7 +8192,7 @@ CouldAssert(S,G,I) in NoInfo state.}
 
   \item Compose an Assert message at TR3 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
-  10000, and send it on LAN3.
+  1000, and send it on LAN3.
 
   \item Start observing the Assert messages transmitted by the RUT on
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
@@ -8201,7 +8200,7 @@ CouldAssert(S,G,I) in NoInfo state.}
 
   \item Compose an Assert message at TR1 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
-  10000, and send it on LAN1.
+  1000, and send it on LAN1.
 
   \item Continue observing the Assert messages transmitted by the RUT on
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
@@ -8234,6 +8233,13 @@ CouldAssert(S,G,I) in NoInfo state.}
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
   LAN1. 
 
+  \item Compose a data packet at TR3 with the S address set to the
+  address of S1, and send it on LAN3.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
   \item Compose a data packet at TR1 with the S address set to the
   address of S1, and send it on LAN1.
 
@@ -8260,19 +8266,19 @@ AssertTrackingDesired(S,G,I) in NoInfo state.}
 
   \item Compose an Assert message at TR3 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
-  zero, and send it on LAN3.
+  10, and send it on LAN3.
 
   \item Continue observing the (S,G) Assert state in the RUT.
 
   \item Compose an Assert message at TR1 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
-  zero, and send it on LAN1.
+  10, and send it on LAN1.
 
   \item Continue observing the (S,G) Assert state in the RUT.
 
   \item Compose an Assert message at TR3 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
-  zero, and send it on LAN2.
+  10, and send it on LAN2.
 
   \item Continue observing the (S,G) Assert state in the RUT.
 
@@ -8283,7 +8289,7 @@ AssertTrackingDesired(S,G,I) in NoInfo state.}
 
   \item Compose an Assert message at TR3 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
-  zero, and send it on LAN2.
+  10, and send it on LAN2.
 
   \item Continue observing the (S,G) Assert state in the RUT.
 
@@ -8305,11 +8311,11 @@ AssertTrackingDesired(S,G,I) in NoInfo state.}
 
   \item Start observing the Assert messages transmitted by the RUT on
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
-  LAN1. 
+  LAN1.
 
   \item Compose an Assert message at TR1 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
-  10000, and send it on LAN1.
+  1000, and send it on LAN1.
 
   \item Continue observing the Assert messages transmitted by the RUT on
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
@@ -8327,8 +8333,7 @@ The setup is same as in Part A, except that TR3 does not need to transmit an
 Assert message, and that TR1 transmits another Assert
 message on LAN1 few seconds after its first Assert message.
 
-\subpara{Part G: Receive Preferred Assert with RPTbit clear in I Am Assert
-Winner State.}
+\subpara{Part G: Receive Preferred Assert in I Am Assert Winner State.}
 
 \begin{enumerate}
 
@@ -8348,7 +8353,7 @@ Winner State.}
 
   \item Compose an Assert message at TR1 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
-  10000, and send it on LAN1.
+  1000, and send it on LAN1.
 
   \item Continue observing the Assert messages transmitted by the RUT on
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
@@ -8390,7 +8395,7 @@ in I Am Assert Winner state.}
 
   \item Compose an Assert message at TR1 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
-  10000, and send it on LAN1.
+  1000, and send it on LAN1.
 
   \item Continue observing the Assert messages transmitted by the RUT on
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
@@ -8423,7 +8428,7 @@ in I Am Assert Winner state.}
 
   \item Start observing the Assert messages transmitted by the RUT on
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
-  LAN1. 
+  LAN1.
 
   \item Compose an Assert message at TR1 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
@@ -8471,7 +8476,7 @@ transmits on LAN1 should have metric and metric preference set to 1000.
 
   \item Start observing the Assert messages transmitted by the RUT on
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
-  LAN1. 
+  LAN1.
 
   \item Compose an Assert message at TR1 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
@@ -8499,7 +8504,7 @@ transmits on LAN1 should have metric and metric preference set to 1000.
 
   \item Start observing the Assert messages transmitted by the RUT on
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
-  LAN1. 
+  LAN1.
 
   \item Compose an Assert message at TR1 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
@@ -8535,7 +8540,7 @@ transaction in I Am Assert Loser State.}
 
   \item Start observing the Assert messages transmitted by the RUT on
   LAN1 and LAN2, the (S,G) Assert state in the RUT, and the data packets
-  forwarded on LAN1. 
+  forwarded on LAN1.
 
   \item Compose an Assert message at TR3 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
@@ -8591,7 +8596,7 @@ metric in I Am Assert Loser State.}
 
   \item Start observing the Assert messages transmitted by the RUT on
   LAN1, the (S,G) Assert state in the RUT, and the data packets forwarded on
-  LAN1. 
+  LAN1.
 
   \item Compose an Assert message at TR1 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
@@ -8628,7 +8633,7 @@ metric in I Am Assert Loser State.}
 
   \item Start observing the Assert messages transmitted by the RUT on
   LAN2 and LAN3, the (S,G) Assert state in the RUT, and the data packets
-  forwarded on LAN1. 
+  forwarded on LAN1.
 
   \item Compose an Assert message at TR3 with the S address set to the
   address of S1, the RPT-bit set to zero, metric and metric preference set to
@@ -8819,7 +8824,7 @@ The results should be same as in Part A.
 
 \subpara{Part C:}
 
-The results should be similar as in Part A, except that the Assert message
+The results should be same as in Part A, except that the Assert message
 transmitted by the RUT is triggered by the data packet.
 
 \subpara{Part D:}
@@ -8963,8 +8968,8 @@ Group           Source          RP              Flags
   should be same as in Part A. After that, once every \newline
   (\verb=Assert_Time= - \verb=Assert_Override_Interval=)
   ({\PimsmAssertTime} - {\PimsmAssertOverrideInterval}).
-  the RUT should transmit Assert message on LAN1 with the RPT bit set to zero,
-  the metric and metric preference set to 100. The (S,G) Assert state
+  the RUT should transmit an Assert message on LAN1 with the RPT bit set to
+  zero, the metric and metric preference set to 100. The (S,G) Assert state
   machine for the interface that connects the RUT to LAN1 should continue to
   be in I Am Assert Winner state.
 
@@ -8978,8 +8983,8 @@ Group           Source          RP              Flags
   results should be same as in Part A.
 
   \item After the RUT receives the second Assert message from TR1, the RUT
-  the RUT should transmit Assert message on LAN1 with the RPT bit set to zero,
-  the metric and metric preference set to 100. The (S,G) Assert state
+  the RUT should transmit an Assert message on LAN1 with the RPT bit set to
+  zero, the metric and metric preference set to 100. The (S,G) Assert state
   machine for the interface that connects the RUT to LAN1 should continue to
   be in I Am Assert Winner state. In addition, the assert timer should be set
   to \newline
@@ -9343,7 +9348,7 @@ The results should be same as in Part I.
   LAN1.
 
   \item After the test is repeated with MRIB.pref(S) = 50 and  MRIB.metric(S)
-  = 50, the Assert state machine for the interface taht connects the RUT to
+  = 50, the Assert state machine for the interface that connects the RUT to
   LAN1 should continue to be in I Am Assert Loser State.
 
 \end{itemize}
@@ -9378,6 +9383,1354 @@ The results should be same as in Part I.
   AssertWinnerMetric(S,G,I) information for the interface that connects it to
   LAN1.
   In addition, the RUT should start forwarding the data packets from S1 on
+  LAN1.
+
+\end{itemize}
+
+\para{Possible Problems:}
+None.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{(*,G) Assert Message State Machine}
+
+\para{Purpose:}
+Verify that the (*,G) Assert state machine operates properly.
+
+\para{References:}
+\begin{itemize}
+  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.6.2
+\end{itemize}
+
+\para{Discussion:}
+When a PIM-SM router receives a PIM Assert message, first the per-interface
+(S,G) state machine should be updated appropriately. Only if no change of
+state has occured in the (S,G) assert state machine, and only if the (S,G)
+assert state machine is in NoInfo state, then the per-interface
+(*,G) state machine should be updated appropriately. Typically, if an
+Assert message is received on an outgoing interface for the corresponding
+(*,G) routing state, the router may either send Assert message on the
+same interface if it considers itself as the Assert winner; if the router
+considers itself as the Assert loser, it would remove that interface from the
+set of outgoing interfaces. Similarly, if data packet is received on an
+outgoing interface for corresponding (*,G) routing state, the router will
+originate Assert message on that interface. Eventually, this Assert message
+will be received by the other upstream router that has forwarded that data
+packet on that LAN, and will trigger the Assert mechanism to elect the (*,G)
+upstream forwarder for that LAN.
+
+\para{Test Setup:}
+Connect the RUT, TR1, TR2, TR3, TR4, and S1 according to
+Figure~\ref{fig:pim_test_5_2_wc_assert_message_state_machine}.
+Configure the IP address of the interface that connects TR4 to LAN6 as the RP.
+Configure the RUT such that the next-hop router toward the RP is TR2.
+Configure TR3 such that the next-hop router toward S1 is TR4.
+Configure the RUT such that MRIB.pref(S) = 100, MRIB.metric(S) = 100,
+MRIB.pref(RP(G)) = 100, and MRIB.metric(RP(G)) = 100.
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[scale=0.8]{figs/pim_test_5_2_wc_assert_message_state_machine}
+    \caption{(*,G) Assert message state machine test setup}
+    \label{fig:pim_test_5_2_wc_assert_message_state_machine}
+  \end{center}
+\end{figure}
+
+\para{Procedure:}
+
+\subpara{Part A: Receive Inferior Assert with RPTbit set and
+CouldAssert(*,G,I) in NoInfo state.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN3, and the (*,G) Assert state in the RUT.
+
+  \item Compose an Assert message at TR3 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  1000, and send it on LAN3.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1. 
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  1000, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+\end{enumerate}
+
+\subpara{Part B: [This part is intentionally left blank.]}
+
+\subpara{Part C: Data arrives for G on I and
+CouldAssert(*,G,I) in NoInfo state.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1. 
+
+  \item Compose a data packet at TR3 with the S address set to the
+  address of S1, and send it on LAN3.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Compose a data packet at TR1 with the S address set to the
+  address of S1, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+\end{enumerate}
+
+\subpara{Part D: Receive Preferred Assert with RPTbit set and
+AssertTrackingDesired(*,G,I) in NoInfo state.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start observing the (*,G) Assert state in the RUT.
+
+  \item Compose an Assert message at TR3 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN3.
+
+  \item Continue observing the (*,G) Assert state in the RUT.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN1.
+
+  \item Continue observing the (*,G) Assert state in the RUT.
+
+  \item Compose an Assert message at TR3 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN2.
+
+  \item Continue observing the (*,G) Assert state in the RUT.
+
+  \item Compose an (*,G) Join message at TR3, and send it to the RUT on LAN3.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an Assert message at TR3 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN2.
+
+  \item Continue observing the (*,G) Assert state in the RUT.
+
+\end{enumerate}
+
+\subpara{Part E: Timer expires in I Am Assert Winner state.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  1000, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1 for at least \newline
+  (\verb=Assert_Time= - \verb=Assert_Override_Interval=)
+  ({\PimsmAssertTime} - {\PimsmAssertOverrideInterval}).
+  In the mean time, every \verb=t_periodic= ({\PimsmTPeriodic}) compose same
+  (*,G) Join message at TR1, and send it to the RUT.
+
+\end{enumerate}
+
+\subpara{Part F: Receive inferior Assert in I Am Assert Winner state.}
+
+The setup is same as in Part A, except that TR3 does not need to transmit an
+Assert message, and that TR1 transmits another Assert
+message on LAN1 few seconds after its first Assert message.
+
+\subpara{Part G: Receive Preferred Assert in I Am Assert Winner State.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1. 
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  1000, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+\end{enumerate}
+
+\subpara{Part H: CouldAssert(*,G,I) $\Longrightarrow$ FALSE transaction
+in I Am Assert Winner state.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (*,G) Join message at TR3, and send it to the RUT on LAN3.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1. 
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  1000, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Compose an (*,G) Prune message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+\end{enumerate}
+
+\subpara{Part I: Receive Preferred Assert in I Am Assert Loser State.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  1, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+\end{enumerate}
+
+\subpara{Part J: Receive Acceptable Assert from Current Winner in I Am Assert
+Loser State.}
+
+The setup is same as in Part I, except that the second Assert message that TR1
+transmits on LAN1 should have metric and metric preference set to 50.
+
+\subpara{Part K: Receive Inferior Assert from Current Winner in I Am Assert
+Loser State.}
+
+The setup is same as in Part I, except that the second Assert message that TR1
+transmits on LAN1 should have metric and metric preference set to 1000.
+
+\subpara{Part L: Timer expires in I Am Assert Loser State.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1 for at least (\verb=Assert_Time=) ({\PimsmAssertTime}).
+
+\end{enumerate}
+
+\subpara{Part M: Current winner's GenID changes in I Am Assert Loser State.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Quit TR1 (\ie stop it without graceful shutdown), and start it
+  immediately.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+\end{enumerate}
+
+\subpara{Part N: AssertTrackingDesired(*,G,I)  $\Longrightarrow$ FALSE
+transaction in I Am Assert Loser State.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1 and LAN2, the (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+  \item Compose an Assert message at TR3 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN2.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1 and LAN2, the (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1 and LAN2, the (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+  \item Compose an (*,G) Join message at TR3, and send it to the RUT on LAN2.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (*,G) Prune message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1 and LAN2, the (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+\end{enumerate}
+
+\subpara{Part O: my\_assert\_metric $\Longrightarrow$ better than winner's
+metric in I Am Assert Loser State.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (*,G) Join message at TR3, and send it to the RUT on LAN3.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Reconfigure the MRIB in the RUT, such that MRIB.pref(RP(G)) = 1, and
+  MRIB.metric(RP(G)) = 1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Repeat the test with MRIB.pref(RP(G)) = 50,
+  and MRIB.metric(RP(G)) = 50.
+
+\end{enumerate}
+
+\subpara{Part P: RPF\_interface(RP(G)) stops being I in I Am Assert Loser
+State.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN2 and LAN3, the (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+  \item Compose an Assert message at TR3 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN2.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN2 and LAN3, the (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+  \item Reconfigure the RPF information in the RUT, such that
+  RPF\_interface(RP(G)) is the interface that connects the RUT to LAN3.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN2 and LAN3, the (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+\end{enumerate}
+
+\subpara{Part Q: Receive Join(*,G) on interface I in I Am Assert Loser State.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1. 
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (*,G) Assert state in the RUT, and the data packets forwarded on
+  LAN1.
+
+\end{enumerate}
+
+\subpara{Part R: (*,G) assert state machine suppressed by (S,G) assert state
+machine.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (S,G) Join message at TR1 with the S address set to the
+  address of S1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (S,G) and (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1. 
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to zero, metric and metric preference set to
+  10, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (S,G) and (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  1000, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (S,G) and (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+\end{enumerate}
+
+\subpara{Part S: (*,G) assert state machine not suppressed by (S,G) assert
+state machine.}
+
+\begin{enumerate}
+
+  \item Start the RUT, TR1, TR2, and TR4. If necessary, wait until the RP-set
+  in the RUT, TR1, TR2 and TR4 converges.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (S,G) Join message at TR3 with the S address set to the
+  address of S1, and send it to the RUT on LAN3.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (S,G,rpt) Prune message at TR1, and send it to the RUT.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Start S1.
+
+  \item Start observing the Assert messages transmitted by the RUT on
+  LAN1, the (S,G) and (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1. 
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  10, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (S,G) and (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+  \item Compose an Assert message at TR1 with the S address set to the
+  address of S1, the RPT-bit set to one, metric and metric preference set to
+  1000, and send it on LAN1.
+
+  \item Continue observing the Assert messages transmitted by the RUT on
+  LAN1, the (S,G) and (*,G) Assert state in the RUT, and the data packets
+  forwarded on LAN1.
+
+\end{enumerate}
+
+
+\para{Observable Results:}
+
+\subpara{Part A:}
+
+\begin{itemize}
+
+  \item After TR1 sends the (*,G) Join message to the RUT, the interface that
+  connects the RUT to LAN1 should be added to the set of joined interfaces for
+  the corresponding (*,G) routing state; the incoming interface for that state
+  should be the interface that connects the RUT to LAN2.
+
+  \item After S1 is started, the data packets should be forwarded on LAN1.
+
+  \item After TR3 transmits the Assert message on LAN3, the (*,G) Assert state
+  machine for the interface that connects the RUT to LAN3 should continue to
+  be in NoInfo state.
+
+  \item After TR1 transmits the Assert message on LAN1, the RUT itself should
+  transmit an (*,G) Assert message on LAN1 with the RPT bit set to one,
+  and the metric and metric preference set to 100. The (*,G) Assert state
+  machine for the interface that connects the RUT to LAN1 should be in I Am
+  Assert Winner state:
+
+\begin{verbatim}
+Xorp> show pim join 
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.1        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.2
+    Upstream state:           Joined 
+    Join timer:               9
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ........O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ........O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ........O.....
+    I am assert loser state:  ..............
+    Assert winner WC:         ........O.....
+    Assert winner SG:         ..............
+    Assert lost WC:           ..............
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       .....O..O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ........O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ........O.....
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  In addition, the RUT should store self as AssertWinner(*,G,I), it should
+  store rpt\_assert\_metric(G,I) as AssertWinnerMetric(*,G,I), and the assert
+  timer should be set to \newline
+  (\verb=Assert_Time= - \verb=Assert_Override_Interval=)
+  ({\PimsmAssertTime} - {\PimsmAssertOverrideInterval}).
+  After that, the RUT should continue to forward the data packets from S1 on
+  LAN1.
+
+\end{itemize}
+
+\subpara{Part B:}
+
+[This part is intentionally left blank].
+
+\subpara{Part C:}
+
+The results should be same as in Part A, except that the Assert message
+transmitted by the RUT is triggered by the data packet.
+
+\subpara{Part D:}
+
+\begin{itemize}
+
+  \item After TR1 sends the (*,G) Join message to the RUT, the interface that
+  connects the RUT to LAN1 should be added to the set of joined interfaces for
+  the corresponding (*,G) routing state; the incoming interface for that state
+  should be the interface that connects the RUT to LAN2.
+
+  \item After TR3 transmits the Assert message on LAN3, the (*,G) Assert state
+  machine for the interface that connects the RUT to LAN3 should continue to
+  be in NoInfo state.
+
+  \item After TR1 transmits the Assert message on LAN1, the (*,G) Assert state
+  machine for the interface that connects the RUT to LAN1 should be in I Am
+  Assert Loser state:
+
+\begin{verbatim}
+Xorp> show pim join 
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.1        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.2
+    Upstream state:           NotJoined 
+    Join timer:               -1
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ........O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ........O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  ........O.....
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ........O.....
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       ........O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ........O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ..............
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
+  interface that connects the RUT to LAN1, it should store the assert metric
+  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  (\verb=Assert_Time=) ({\PimsmAssertTime}).
+
+  \item After TR3 transmits the first Assert message on LAN2, the (*,G) Assert
+  state machine for the interface that connects the RUT to LAN2 should
+  continue to be in NoInfo state.
+
+  \item After TR3 transmits the second Assert message on LAN2, the (*,G) Assert
+  state machine for the interface that connects the RUT to LAN2 should be in I
+  Am Assert Loser state. In addition,
+  the RPF'(*,G) should be set to the interface that connects TR3
+  to LAN2:
+
+\begin{verbatim}
+Xorp> show pim join 
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.1        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.4
+    Upstream state:           Joined 
+    Join timer:               59
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ......O.O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ......O.O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  .....O..O.....
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ........O.....
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       .....OO.O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ......O.O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ......O.......
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  In addition, the RUT should store TR3 as AssertWinner(*,G,I) for the
+  intarface that connects the RUT to LAN2, it should store the assert metric
+  of TR3 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  (\verb=Assert_Time=) ({\PimsmAssertTime}).
+
+\end{itemize}
+
+\subpara{Part E:}
+
+\begin{itemize}
+
+  \item Until after the RUT receives the Assert message from TR1, the results
+  should be same as in Part A. After that, once every \newline
+  (\verb=Assert_Time= - \verb=Assert_Override_Interval=)
+  ({\PimsmAssertTime} - {\PimsmAssertOverrideInterval}).
+  the RUT should transmit an Assert message on LAN1 with the RPT bit set to
+  one, the metric and metric preference set to 100. The (*,G) Assert state
+  machine for the interface that connects the RUT to LAN1 should continue to
+  be in I Am Assert Winner state.
+
+\end{itemize}
+
+\subpara{Part F:}
+
+\begin{itemize}
+
+  \item Until after the RUT receives the first Assert message from TR1, the
+  results should be same as in Part A.
+
+  \item After the RUT receives the second Assert message from TR1, the RUT
+  the RUT should transmit Assert an message on LAN1 with the RPT bit set to
+  one, the metric and metric preference set to 100. The (*,G) Assert state
+  machine for the interface that connects the RUT to LAN1 should continue to
+  be in I Am Assert Winner state. In addition, the assert timer should be set
+  to \newline
+  (\verb=Assert_Time= - \verb=Assert_Override_Interval=)
+  ({\PimsmAssertTime} - {\PimsmAssertOverrideInterval}).
+
+\end{itemize}
+
+\subpara{Part G:}
+
+\begin{itemize}
+
+  \item Until after the RUT receives the first Assert message from TR1, the
+  results should be same as in Part A.
+
+  \item After the RUT receives the second Assert message from TR1, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in I Am Assert Loser state:
+
+\begin{verbatim}
+Xorp> show pim join 
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.1        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.2
+    Upstream state:           NotJoined 
+    Join timer:               -1
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ........O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ........O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  ........O.....
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ........O.....
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       ........O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ........O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ..............
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
+  interface that connects the RUT to LAN1, it should store the assert metric
+  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  (\verb=Assert_Time=) ({\PimsmAssertTime}).
+  Further, it should stop forwarding the data packets from S1 on LAN1.
+
+\end{itemize}
+
+\subpara{Part H:}
+
+\begin{itemize}
+
+  \item Until after the RUT receives the Assert message from TR1, the results
+  should be similar as in Part A, except that the interface that connects the
+  RUT to LAN3 should also be added to the set of (*,G) Joined interfaces, and
+  to the set of outgoing interfaces:
+
+\begin{verbatim}
+Xorp> show pim join 
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.1        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.2
+    Upstream state:           Joined 
+    Join timer:               40
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ......O.O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ......O.O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  ..............
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ..............
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       .....OO.O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ......O.O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ......O.O.....
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  \item After TR1 transmits the (*,G) Prune message to the RUT, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in NoInfo state:
+
+\begin{verbatim}
+Xorp> show pim join 
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.1        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.2
+    Upstream state:           Joined 
+    Join timer:               11
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ......O.......
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ......O.......
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  ..............
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ..............
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       .....OO.......
+    Assert tracking SG:       ..............
+    Could assert WC:          ......O.......
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ......O.......
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  The RUT should send AssertCancel(*,G) on LAN1 (\ie an (*,G) Assert message
+  with the source address set to RP(G), the RPT bit set to one, the metric set
+  to 0xffffffff, and the metric preference set to 0x7fffffff).
+  Further, the RUT should delete the AssertWinner(*,G,I) and
+  AssertWinnerMetric(*,G,I) information for the interface that connects it to
+  LAN1.
+  In addition, the RUT should stop forwarding the data packets from S1 on LAN1.
+
+\end{itemize}
+
+\subpara{Part I:}
+
+\begin{itemize}
+
+  \item After TR1 sends the (*,G) Join message to the RUT, the interface that
+  connects the RUT to LAN1 should be added to the set of joined interfaces for
+  the corresponding (*,G) routing state; the incoming interface for that state
+  should be the interface that connects the RUT to LAN2.
+
+  \item After S1 is started, the data packets should be forwarded on LAN1.
+
+  \item After the RUT receives the first Assert message from TR1, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in I Am Assert Loser state.
+
+  In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
+  interface that connects the RUT to LAN1, it should store the assert metric
+  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  (\verb=Assert_Time=) ({\PimsmAssertTime}).
+  Further, it should stop forwarding the data packets from S1 on LAN1.
+
+  \item After the RUT receives the second Assert message from TR1, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  continue to be in I Am Assert Loser state.
+
+  In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
+  interface that connects the RUT to LAN1, it should store the new assert
+  metric of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be
+  set to (\verb=Assert_Time=) ({\PimsmAssertTime}).
+
+\end{itemize}
+
+\subpara{Part J:}
+
+The results should be same as in Part I.
+
+\subpara{Part K:}
+
+\begin{itemize}
+
+  \item Until after the RUT receives the first Assert message from TR1, the
+  results should be same as in Part I.
+
+  \item After the RUT receives the second Assert message from TR1, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in NoInfo state.
+  Further, the RUT should delete the AssertWinner(*,G,I) and
+  AssertWinnerMetric(*,G,I) information for the interface that connects it to
+  LAN1.
+  In addition, the RUT should start forwarding the data packets from S1 on
+  LAN1.
+
+\end{itemize}
+
+\subpara{Part L:}
+
+\begin{itemize}
+
+  \item Until after the RUT receives the first Assert message from TR1, the
+  results should be same as in Part I.
+
+  \item The (*,G) Assert state machine for the interface that connects the RUT
+  to LAN1 should continue to be in I Am Assert Loser state for
+  (\verb=Assert_Time=) ({\PimsmAssertTime}). After that the assert timer for
+  that interface should expire, and the assert shate machine should be in No
+  Info state.
+  Further, the RUT should delete the AssertWinner(*,G,I) and
+  AssertWinnerMetric(*,G,I) information for the interface that connects it to
+  LAN1.
+  In addition, the RUT should start forwarding the data packets from S1 on
+  LAN1.
+
+\end{itemize}
+
+\subpara{Part M:}
+
+\begin{itemize}
+
+  \item Until after the RUT receives the first Assert message from TR1, the
+  results should be same as in Part I.
+
+  \item After TR1 is restarted and the RUT has received the first Hello
+  message from it, the (*,G) Assert state machine for the
+  interface that connects the RUT to LAN1 should be in NoInfo state.
+  Further, the RUT should delete the AssertWinner(*,G,I) and
+  AssertWinnerMetric(*,G,I) information for the interface that connects it to
+  LAN1.
+  In addition, the RUT should start forwarding the data packets from S1 on
+  LAN1.
+
+\end{itemize}
+
+\subpara{Part N:}
+
+\begin{itemize}
+
+  \item After TR1 sends the (*,G) Join message to the RUT, the interface that
+  connects the RUT to LAN1 should be added to the set of joined interfaces for
+  the corresponding (*,G) routing state; the incoming interface for that state
+  should be the interface that connects the RUT to LAN2.
+
+  \item After S1 is started, the data packets should be forwarded on LAN1.
+
+  \item After the RUT receives the Assert message from TR3, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN2 should
+  be in I Am Assert Loser state.
+
+  In addition, the RUT should store TR3 as AssertWinner(*,G,I) for the
+  interface that connects the RUT to LAN2, it should store the assert metric
+  of TR3 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  (\verb=Assert_Time=) ({\PimsmAssertTime}).
+  The data packets from S1 should continue to be forwarded on LAN1.
+
+  \item After the RUT receives the Assert message from TR1, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in I Am Assert Loser state.
+
+  In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
+  interface that connects the RUT to LAN1, it should store the assert metric
+  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  (\verb=Assert_Time=) ({\PimsmAssertTime}).
+  Further, it should stop forwarding the data packets from S1 on LAN1.
+
+  Also, the (*,G) Assert state machine for the interface that connects the RUT
+  to LAN2 should be in NoInfo state, and the RUT should delete the
+  AssertWinner(*,G,I) and AssertWinnerMetric(*,G,I) information for the
+  interface that connects it to LAN2.
+
+  \item After the RUT receives the (*,G) Prune message from TR1, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in NoInfo state.
+  Further, the RUT should delete the AssertWinner(*,G,I) and
+  AssertWinnerMetric(*,G,I) information for the interface that connects it to
+  LAN1.
+
+\end{itemize}
+
+\subpara{Part O:}
+
+\begin{itemize}
+
+  \item After the RUT receives the (*,G) Join messages from TR1 and TR3, the
+  interfaces that connect the RUT to LAN1 and LAN3 respectively should be
+  added to the set of joined interfaces for the corresponding (*,G) routing
+  state; the incoming interface for that state should be the interface that
+  connects the RUT to LAN2.
+
+  \item After S1 is started, the data packets should be forwarded on LAN1 and
+  LAN3.
+
+  \item After the RUT receives the Assert message from TR1, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in I Am Assert Loser state.
+
+  In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
+  interface that connects the RUT to LAN1, it should store the assert metric
+  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  (\verb=Assert_Time=) ({\PimsmAssertTime}).
+  Further, it should stop forwarding the data packets from S1 on LAN1.
+
+  \item After the MRIB in the RUT is reconfigured, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in NoInfo state.
+  Further, the RUT should delete the AssertWinner(*,G,I) and
+  AssertWinnerMetric(*,G,I) information for the interface that connects it to
+  LAN1.
+  In addition, the RUT should start forwarding the data packets from S1 on
+  LAN1.
+
+  \item After the test is repeated with MRIB.pref(RP(G)) = 50
+  and MRIB.metric(RP(G)) = 50, the Assert state machine for the interface that
+  connects the RUT to LAN1 should continue to be in I Am Assert Loser State.
+
+\end{itemize}
+
+\subpara{Part P:}
+
+\begin{itemize}
+
+  \item Until after the RUT receives the Assert message from TR3, the
+  results should be same as in Part N.
+
+  \item After RPF\_interface(S) in the RUT is changed, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN2 should
+  be in NoInfo state.
+  Further, the RUT should delete the AssertWinner(*,G,I) and
+  AssertWinnerMetric(*,G,I) information for the interface that connects it to
+  LAN1.
+
+\end{itemize}
+
+\subpara{Part Q:}
+
+\begin{itemize}
+
+  \item Until after the RUT receives the Assert message from TR1, the
+  results should be same as in Part I.
+
+  \item After the RUT receives the (*,G) Join message from TR1, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in NoInfo state.
+  Further, the RUT should delete the AssertWinner(*,G,I) and
+  AssertWinnerMetric(*,G,I) information for the interface that connects it to
+  LAN1.
+  In addition, the RUT should start forwarding the data packets from S1 on
+  LAN1.
+
+\end{itemize}
+
+\subpara{Part R:}
+
+\begin{itemize}
+
+  \item After the RUT receives the (*,G) and (S,G) Join messages from TR1, the
+  interface that connects the RUT to LAN1 should be
+  added to the set of joined interfaces for the corresponding (*,G) and (S,G)
+  routing states; the incoming interface for those states should be the
+  interface that connects the RUT to LAN2.
+
+  \item After S1 is started, the data packets should be forwarded on LAN1.
+
+  \item After the RUT receives the first Assert message from TR1, the (S,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in I Am Assert Loser state. The (*,G) Assert state machine for the
+  interface that connects the RUT to LAN1 should continue to be in NoInfo
+  state.
+
+  In addition, the RUT should store TR1 as AssertWinner(S,G,I) for the
+  interface that connects the RUT to LAN1, it should store the assert metric
+  of TR1 as AssertWinnerMetric(S,G,I), and the assert timer should be set to
+  (\verb=Assert_Time=) ({\PimsmAssertTime}).
+  Further, it should stop forwarding the data packets from S1 on LAN1.
+
+  \item After the RUT receives the second Assert message from TR1, the (S,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in NoInfo state. The (*,G) Assert state machine for the
+  interface that connects the RUT to LAN1 should continue to be in NoInfo
+  state.
+  Further, the RUT should delete the AssertWinner(S,G,I) and
+  AssertWinnerMetric(S,G,I) information for the interface that connects it to
+  LAN1.
+  In addition, the RUT should start forwarding the data packets from S1 on
+  LAN1.
+
+\end{itemize}
+
+\subpara{Part S:}
+
+\begin{itemize}
+
+  \item After the RUT receives the (*,G) Join message from TR1, the
+  interface that connects the RUT to LAN1 should be
+  added to the set of joined interfaces for the corresponding (*,G)
+  routing state; the incoming interface for that state should be the
+  interface that connects the RUT to LAN2.
+
+  \item After the RUT receives the (S,G) Join message from TR3, the
+  interface that connects the RUT to LAN3 should be
+  added to the set of joined interfaces for the corresponding (S,G)
+  routing state; the incoming interface for that state should be the
+  interface that connects the RUT to LAN2.
+
+  \item After the RUT receives the (S,G,rpt) Prune message from TR1, the
+  interface that connects the RUT to LAN1 should be
+  added to the set of prune interfaces for the corresponding (S,G,rpt)
+  routing state; the incoming interface for that state should be the
+  interface that connects the RUT to LAN2.
+
+  \item After S1 is started, the data packets should be forwarded on LAN3, but
+  not on LAN1.
+
+  \item After the RUT receives the first Assert message from TR1, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in I Am Assert Loser state.
+
+  In addition, the RUT should store TR1 as AssertWinner(*,G,I) for the
+  interface that connects the RUT to LAN1, it should store the assert metric
+  of TR1 as AssertWinnerMetric(*,G,I), and the assert timer should be set to
+  (\verb=Assert_Time=) ({\PimsmAssertTime}).
+
+  \item After the RUT receives the second Assert message from TR1, the (*,G)
+  Assert state machine for the interface that connects the RUT to LAN1 should
+  be in NoInfo state.
+  Further, the RUT should delete the AssertWinner(*,G,I) and
+  AssertWinnerMetric(*,G,I) information for the interface that connects it to
   LAN1.
 
 \end{itemize}
