@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.28 2004/12/10 22:50:40 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.29 2004/12/10 23:14:01 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -44,7 +44,7 @@ XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter& r, UserDB& userdb,
       _rtrmgr(rtrmgr),
       _exclusive(false),
       _config_locked(false),
-      _lock_holder((uint32_t)-1),
+      _lock_holder_token(""),
       _verbose(rtrmgr.verbose())
 {
 
@@ -583,12 +583,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
     if (_config_locked) {
 	// Can't return COMMAND_FAILED and return the lock holder
 	success = false;
-	holder = _lock_holder;
+	holder = get_user_id_from_token(_lock_holder_token);
 	return XrlCmdError::OKAY();
     } else {
 	success = true;
 	_config_locked = true;
-	_lock_holder = get_user_id_from_token(token);
+	_lock_holder_token = token;
 	_lock_timer = _eventloop.new_oneoff_after_ms(
 	    timeout, 
 	    callback(this, &XrlRtrmgrInterface::lock_timeout));
@@ -599,7 +599,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
 void XrlRtrmgrInterface::lock_timeout()
 {
     _config_locked = false;
-    _lock_holder = (uint32_t)-1;
+    _lock_holder_token = "";
 }
 
 XrlCmdError
@@ -612,14 +612,14 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_config(
 	return XrlCmdError::COMMAND_FAILED(err);
     }
     if (_config_locked) {
-	uint32_t user_id = get_user_id_from_token(token);
-	if (user_id != _lock_holder) {
-	    string err = c_format("Config not held by USER_ID %d.", user_id);
+	if (token != _lock_holder_token) {
+	    string err = c_format("Config not held by process %s.", 
+				  token.c_str());
 	    return XrlCmdError::COMMAND_FAILED(err);
 	}
 	_config_locked = false;
 	_lock_timer.unschedule();
-	_lock_holder = (uint32_t)-1;
+	_lock_holder_token = "";
 	return XrlCmdError::OKAY();
     } else {
 	string err = "Config not locked.";
@@ -696,7 +696,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_save_config(// Input values:
 	return XrlCmdError::COMMAND_FAILED(response);
     }
     if (_config_locked) {
-	string holder = _userdb.find_user_by_user_id(_lock_holder)->username();
+	uint32_t uid = get_user_id_from_token(_lock_holder_token);
+	string holder = _userdb.find_user_by_user_id(uid)->username();
 	response = "ERROR: The config is currently locked by user " +
 	    holder + 
 	    ", and so may be in an inconsistent state.  \n" + 
@@ -728,9 +729,10 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
 	response = "You do not have permission to reload the configuration.";
 	return XrlCmdError::COMMAND_FAILED(response);
     }
-    if (_config_locked) {
+    if (_config_locked && (token != _lock_holder_token)) {
+	uint32_t uid = get_user_id_from_token(_lock_holder_token);
 	string holder = 
-	    _userdb.find_user_by_user_id(_lock_holder)->username();
+	    _userdb.find_user_by_user_id(uid)->username();
 	response = "ERROR: The config is currently locked by user " +
 	    holder + 
 	    "\n" + 

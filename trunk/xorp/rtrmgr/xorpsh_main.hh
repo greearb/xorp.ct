@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.17 2004/12/11 13:36:02 mjh Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.18 2004/12/21 16:16:50 mjh Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -94,6 +94,11 @@ public:
 
     void load_from_file(const string& filename, GENERIC_CALLBACK cb,
 			CallBack final_cb);
+
+    void load_lock_achieved(const XrlError& e, const bool* locked,
+			    const uint32_t* lock_holder,
+			    const string filename,
+			    GENERIC_CALLBACK cb);
 
     void config_changed(uid_t user_id, const string& deltas, 
 			const string& deletions);

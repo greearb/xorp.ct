@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.16 2004/12/06 00:51:40 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.17 2004/12/08 22:47:27 mjh Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -190,7 +190,7 @@ private:
 
     // Variables to implement global lock on config changes
     bool	_config_locked;
-    uint32_t	_lock_holder;
+    string	_lock_holder_token;
     XorpTimer	_lock_timer;
 
     // generic place to store background task callback timers

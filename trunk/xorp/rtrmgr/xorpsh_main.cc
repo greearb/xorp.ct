@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.35 2004/12/11 21:30:00 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.36 2004/12/21 16:16:50 mjh Exp $"
 
 
 #include <sys/types.h>
@@ -399,6 +399,22 @@ XorpShell::load_from_file(const string& filename, GENERIC_CALLBACK cb,
 			  CallBack final_cb)
 {
     _commit_callback = final_cb;
+    LOCK_CALLBACK locked_cb 
+	= callback(this, &XorpShell::load_lock_achieved, filename, cb);
+    _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 30000, locked_cb);
+}
+
+void
+XorpShell::load_lock_achieved(const XrlError& e, const bool* locked,
+			      const uint32_t* /* lock_holder */,
+			      const string filename,
+			      GENERIC_CALLBACK cb)
+{
+    if (!locked || (e != XrlError::OKAY())) {
+	_commit_callback->dispatch(false, "Failed to get configuration lock");
+	return;
+    }
+
     _rtrmgr_client.send_load_config("rtrmgr", _authtoken, _ipc_name,
 				    filename, cb);
 }
