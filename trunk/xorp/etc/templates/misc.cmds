@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/misc.cmds,v 1.1 2004/07/20 23:03:00 mjh Exp $ */
 
 ping {
     %command: "" %help: "Ping a hostname or IP address";
@@ -13,6 +13,6 @@ traceroute {
 }
 
 traceroute <host> {
-    %command: "ping $2" %help: "Give a hostname or IP address to traceroute to.";
+    %command: "traceroute $2" %help: "Give a hostname or IP address to traceroute to.";
 }
 
