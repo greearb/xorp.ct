@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.15 2003/10/11 22:08:18 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.16 2003/10/17 21:04:06 hodson Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -130,6 +130,15 @@ public:
      * @return true on success, false if ifname is invalid.
      */
     bool remove_if(const string& ifname);
+
+    /**
+     * Create a new interface or update its state if it already exists.
+     *
+     * @param other_iface the interface with the state to copy from.
+     *
+     * @return true on success, false if an error.
+     */
+    bool update_if(const IfTreeInterface& other_iface);
 
     /**
      * Get iterator of corresponding to named interface.

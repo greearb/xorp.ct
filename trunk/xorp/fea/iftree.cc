@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.18 2003/10/11 22:08:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.19 2003/10/17 21:04:05 hodson Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -79,6 +79,136 @@ IfTree::remove_if(const string& ifname)
 	return false;
 
     ii->second.mark(DELETED);
+    return true;
+}
+
+/**
+ * Create a new interface or update its state if it already exists.
+ *
+ * @param other_iface the interface with the state to copy from.
+ *
+ * @return true on success, false if an error.
+ */
+bool
+IfTree::update_if(const IfTreeInterface& other_iface)
+{
+    IfTree::IfMap::iterator ii;
+    IfTreeInterface::VifMap::iterator vi;
+    IfTreeInterface::VifMap::const_iterator ov;
+
+    //
+    // Add the interface if we don't have it already
+    //
+    ii = get_if(other_iface.ifname());
+    if (ii == ifs().end()) {
+	add_if(other_iface.ifname());
+	ii = get_if(other_iface.ifname());
+    }
+    IfTreeInterface& this_iface = ii->second;
+
+    //
+    // Update the interface state
+    //
+    if (! this_iface.is_same_state(other_iface))
+	this_iface.copy_state(other_iface);
+
+    //
+    // Update existing vifs and addresses
+    //
+    for (vi = this_iface.vifs().begin();
+	 vi != this_iface.vifs().end();
+	 ++vi) {
+	IfTreeVif& this_vif = vi->second;
+
+	ov = other_iface.get_vif(this_vif.vifname());
+	if (ov == other_iface.vifs().end()) {
+	    this_vif.mark(DELETED);
+	    continue;
+	}
+	const IfTreeVif& other_vif = ov->second;
+
+	if (! this_vif.is_same_state(this_vif))
+	    this_vif.copy_state(other_vif);
+
+	IfTreeVif::V4Map::iterator ai4;
+	for (ai4 = this_vif.v4addrs().begin();
+	     ai4 != this_vif.v4addrs().end();
+	     ++ai4) {
+	    IfTreeVif::V4Map::const_iterator oa4;
+	    oa4 = other_vif.get_addr(ai4->second.addr());
+	    if (oa4 == other_vif.v4addrs().end()) {
+		ai4->second.mark(DELETED);
+		continue;
+	    }
+	    if (! ai4->second.is_same_state(oa4->second))
+		ai4->second.copy_state(oa4->second);
+	}
+
+	IfTreeVif::V6Map::iterator ai6;
+	for (ai6 = this_vif.v6addrs().begin();
+	     ai6 != this_vif.v6addrs().end();
+	     ++ai6) {
+	    IfTreeVif::V6Map::const_iterator oa6;
+	    oa6 = other_vif.get_addr(ai6->second.addr());
+	    if (oa6 == other_vif.v6addrs().end()) {
+		ai6->second.mark(DELETED);
+		continue;
+	    }
+	    if (! ai6->second.is_same_state(oa6->second))
+		ai6->second.copy_state(oa6->second);
+	}
+    }
+
+    //
+    // Add the new vifs and addresses
+    //
+    for (ov = other_iface.vifs().begin();
+	 ov != other_iface.vifs().end();
+	 ++ov) {
+	const IfTreeVif& other_vif = ov->second;
+
+	if (this_iface.get_vif(other_vif.vifname()) != this_iface.vifs().end())
+	    continue;		// The vif was already updated
+
+	// Add the vif
+	this_iface.add_vif(other_vif.vifname());
+	vi = this_iface.get_vif(other_vif.vifname());
+	IfTreeVif& this_vif = vi->second;
+	this_vif.copy_state(other_vif);
+
+	// Add the IPv4 addresses
+	IfTreeVif::V4Map::const_iterator oa4;
+	for (oa4 = other_vif.v4addrs().begin();
+	     oa4 != other_vif.v4addrs().end();
+	     ++oa4) {
+	    IfTreeVif::V4Map::iterator ai4;
+	    ai4 = this_vif.get_addr(oa4->second.addr());
+	    if (ai4 != this_vif.v4addrs().end())
+		continue;	// The address was already updated
+
+	    // Add the address
+	    this_vif.add_addr(oa4->second.addr());
+	    ai4 = this_vif.get_addr(oa4->second.addr());
+	    ai4->second.copy_state(oa4->second);
+	}
+
+	// Add the IPv6 addresses
+	IfTreeVif::V6Map::const_iterator oa6;
+	for (oa6 = other_vif.v6addrs().begin();
+	     oa6 != other_vif.v6addrs().end();
+	     ++oa6) {
+	    IfTreeVif::V6Map::iterator ai6;
+	    ai6 = this_vif.get_addr(oa6->second.addr());
+	    if (ai6 != this_vif.v6addrs().end())
+		continue;	// The address was already updated
+
+	    // Add the address
+	    this_vif.add_addr(oa6->second.addr());
+	    ai6 = this_vif.get_addr(oa6->second.addr());
+	    ai6->second.copy_state(oa6->second);
+	}
+    }
+
     return true;
 }
 
