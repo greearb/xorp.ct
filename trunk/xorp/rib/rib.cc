@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.15 2003/07/30 19:06:43 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.16 2003/09/27 10:42:39 mjh Exp $"
 
 #include "config.h"
 #include "rib_module.h"
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "register_server.hh"
+#include "rib_manager.hh"
 #include "rib.hh"
 
 //#define DEBUG_LOGGING
@@ -33,6 +34,22 @@ RIB<A>::find_table(const string& tablename)
 {
     typename map<string, RouteTable<A> *>::iterator mi = _tables.find(tablename);
     if (mi == _tables.end()) {
+	return 0;
+    }
+    return mi->second;
+}
+
+template<class A>
+inline OriginTable<A> *
+RIB<A>::find_table_by_instance(const string& tablename, 
+			       const string& tgt_class,
+			       const string& tgt_instance)
+{
+    typename map<string, OriginTable<A> *>::iterator mi 
+	= _routing_protocol_instances.find(tablename + " " 
+					   + tgt_class + " " 
+					   + tgt_instance);
+    if (mi == _routing_protocol_instances.end()) {
 	return 0;
     }
     return mi->second;
@@ -173,8 +190,9 @@ merge_tablename(const string& table_a, const string& table_b)
 // RIB class 
 
 template<class A>
-RIB<A>::RIB(RibTransportType t, EventLoop& eventloop)
-    : _eventloop(eventloop),
+RIB<A>::RIB(RibTransportType t, RibManager& rib_manager, EventLoop& eventloop)
+    : _rib_manager(rib_manager),
+      _eventloop(eventloop),
       _final_table(NULL),
       _register_table(NULL),
       _errors_are_fatal(false)
@@ -260,6 +278,8 @@ RIB<A>::initialize_register(RegisterServer *regserv)
 template<class A>
 int
 RIB<A>::new_origin_table(const string&	tablename, 
+			 const string&	tgt_class, 
+			 const string&	tgt_instance, 
 			 int		admin_distance,
 			 int		igp)
 {
@@ -271,6 +291,15 @@ RIB<A>::new_origin_table(const string&	tablename,
 	return -1;
     } else if (_final_table == 0) {
 	_final_table = ot;
+    }
+
+    //Store the XRL target instance, so we know which OriginTable to
+    //shutdown if the routing protocol dies.
+    if (!tgt_instance.empty()) {
+	_rib_manager.register_interest_in_target(tgt_class);
+	_routing_protocol_instances[tablename + " " 
+				   + tgt_class + " "
+				   + tgt_instance] = ot;
     }
     return 0;
 }
@@ -786,25 +815,32 @@ RIB<A>::redist_disable(const string& fromtable, const string& totable)
 
 template<class A> 
 int 
-RIB<A>::add_igp_table(const string& tablename)
+RIB<A>::add_igp_table(const string& tablename, 
+		      const string& tgt_class,
+		      const string& tgt_instance)
 {
     debug_msg("add_igp_table %s\n", tablename.c_str());
-    return add_origin_table(tablename, IGP);
+    return add_origin_table(tablename, tgt_class, tgt_instance, IGP);
 }
 
 template<class A> 
 int
-RIB<A>::add_egp_table(const string& tablename)
+RIB<A>::add_egp_table(const string& tablename, 
+		      const string& tgt_class,
+		      const string& tgt_instance)
 {
     debug_msg("add_egp_table %s\n", tablename.c_str());
-    return add_origin_table(tablename, EGP);
+    return add_origin_table(tablename, tgt_class, tgt_instance, EGP);
 }
 
 // All the magic is in add_origin_table - XXX split into smaller units (?)
 
 template<class A> 
 int
-RIB<A>::add_origin_table(const string& tablename, int type)
+RIB<A>::add_origin_table(const string& tablename, 
+			 const string& tgt_class,
+			 const string& tgt_instance,
+			 int type)
 {
     debug_msg("add_origin_table %s type: %dn\n",
 	      tablename.c_str(), type);
@@ -829,7 +865,8 @@ RIB<A>::add_origin_table(const string& tablename, int type)
 	}
     }
 
-    if (new_origin_table(tablename, admin_distance(tablename), type) < 0) {
+    if (new_origin_table(tablename, tgt_class, tgt_instance, 
+			 admin_distance(tablename), type) < 0) {
 	debug_msg("new_origin_table failed\n");
 	return -1;
     }
@@ -1002,29 +1039,67 @@ RIB<A>::add_origin_table(const string& tablename, int type)
 
 template<class A>
 int
-RIB<A>::delete_igp_table(const string& tablename) 
+RIB<A>::delete_igp_table(const string& tablename, 
+			 const string& tgt_class,
+			 const string& tgt_instance) 
 {
-    return delete_origin_table(tablename);
+    return delete_origin_table(tablename, tgt_class, tgt_instance);
 }
 
 template<class A>
 int
-RIB<A>::delete_egp_table(const string& tablename)
+RIB<A>::delete_egp_table(const string& tablename, 
+			 const string& tgt_class,
+			 const string& tgt_instance)
 {
-    return delete_origin_table(tablename);
+    return delete_origin_table(tablename, tgt_class, tgt_instance);
 }
 
 template <class A>
 int
-RIB<A>::delete_origin_table(const string& tablename) 
+RIB<A>::delete_origin_table(const string& tablename,
+			    const string& tgt_class,
+			    const string& tgt_instance) 
 {
     OriginTable<A> *ot = dynamic_cast<OriginTable<A> *>(find_table(tablename));
     if (0 == ot)
 	return -1;
 
+    if (!tgt_instance.empty()) {
+	if (find_table_by_instance(tablename, tgt_class, tgt_instance) != ot) {
+	    XLOG_ERROR("Got delete_origin_table for wrong target name\n");
+	    return -1;
+	} else {
+	    _routing_protocol_instances.erase(tablename + " " 
+					      + tgt_class + " " 
+					      + tgt_instance);
+	}
+    }
+
     // Remove all the routes this table used to originate, but keep table
-    ot->delete_all_routes();
+    ot->routing_protocol_shutdown();
     return 0;
+}
+
+template <class A>
+void
+RIB<A>::target_death(const string& tgt_class,
+		     const string& tgt_instance)
+{
+    string s = " " + tgt_class + " " + tgt_instance;
+    typename map<const string, OriginTable<A> *>::iterator i;
+    for (i = _routing_protocol_instances.begin();
+	 i != _routing_protocol_instances.end();
+	 i++) {
+	if (i->first.find(s) != string::npos) {
+	    //We've found the target.
+	    i->second->routing_protocol_shutdown();
+	    _routing_protocol_instances.erase(i);
+
+	    //No need to go any further.
+	    return;
+	}
+    }
 }
 
 //

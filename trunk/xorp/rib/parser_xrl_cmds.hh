@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.3 2003/03/16 07:18:57 pavlin Exp $
+// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.4 2003/04/22 19:20:23 mjh Exp $
 
 #ifndef __RIB_PARSER_XRL_CMDS_HH__
 #define __RIB_PARSER_XRL_CMDS_HH__
@@ -170,7 +170,7 @@ public:
 	bool unicast = true, multicast = false;
 
 	_xrl_client.send_add_igp_table4(
-	    "rib", _tablename, unicast, multicast,
+	    "rib", _tablename, "", "", unicast, multicast,
 	    callback(&pass_fail_handler, &_completion));
 
 	return _completion;
@@ -197,7 +197,7 @@ public:
 	bool unicast = true, multicast = false;
 
 	_xrl_client.send_delete_igp_table4(
-	    "rib", _tablename, unicast, multicast, 
+	    "rib", _tablename, "", "", unicast, multicast, 
 	    callback(&pass_fail_handler, &_completion)
 	    );
 
@@ -224,7 +224,7 @@ public:
 
 	bool unicast = true, multicast = false;
 	_xrl_client.send_add_egp_table4(
-	    "rib", _tablename, unicast, multicast,
+	    "rib", _tablename, "", "", unicast, multicast,
 	    callback(&pass_fail_handler, &_completion));
 
 	return _completion;
@@ -249,7 +249,7 @@ public:
 	_completion = XRL_PENDING;
 	bool unicast = true, multicast = false;
 	_xrl_client.send_delete_egp_table4(
-	    "rib", _tablename, unicast, multicast, 
+	    "rib", _tablename, "", "", unicast, multicast, 
 	    callback(&pass_fail_handler, &_completion));
 	return _completion;
     }

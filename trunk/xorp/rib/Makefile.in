@@ -104,28 +104,28 @@ noinst_PROGRAMS = main_routemap test_rib_client test_register test_register_xrls
 noinst_LIBRARIES = librib.a
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 
 # -- Program Sources
 main_routemap_SOURCES = routemap.hh routemap.cc main_routemap.cc
 
-xorp_rib_SOURCES = main_rib.cc
+xorp_rib_SOURCES = main_rib.cc rib_manager.hh rib_manager.cc xrl_target.hh xrl_target.cc
 xorp_rib_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libribbase.a
 
-test_rib_direct_SOURCES = parser.hh parser_direct_cmds.hh parser.cc test_rib_direct.cc dummy_register_server.hh dummy_register_server.cc
+test_rib_direct_SOURCES = parser.hh parser_direct_cmds.hh parser.cc test_rib_direct.cc dummy_register_server.hh dummy_register_server.cc dummy_rib_manager.hh dummy_rib_manager.cc
 
-test_rib_xrls_SOURCES = parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh parser.cc test_rib_xrls.cc dummy_register_server.hh dummy_register_server.cc
+test_rib_xrls_SOURCES = parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh parser.cc test_rib_xrls.cc dummy_register_server.hh dummy_register_server.cc dummy_rib_manager.hh dummy_rib_manager.cc xrl_target.hh xrl_target.cc
 test_rib_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a
 
-test_register_SOURCES = test_register.cc dummy_register_server.hh dummy_register_server.cc
+test_register_SOURCES = test_register.cc dummy_register_server.hh dummy_register_server.cc dummy_rib_manager.hh dummy_rib_manager.cc
 
-test_register_xrls_SOURCES = parser_direct_cmds.hh parser_xrl_cmds.hh test_register_xrls.cc
+test_register_xrls_SOURCES = parser_direct_cmds.hh parser_xrl_cmds.hh test_register_xrls.cc rib_manager.hh rib_manager.cc xrl_target.hh xrl_target.cc
 test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/targets/libribclientbase.a
 
 test_rib_client_SOURCES = test_rib_client.cc
 
 # -- Library Sources
-librib_a_SOURCES = rib_module.h version.h protocol.hh register_server.hh rib.hh rib_client.hh rib_manager.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_deletion.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh xrl_target.hh protocol.cc register_server.cc rib.cc rib_client.cc rib_manager.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_deletion.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc xrl_target.cc
+librib_a_SOURCES = rib_module.h version.h protocol.hh register_server.hh rib.hh rib_client.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_deletion.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh protocol.cc register_server.cc rib.cc rib_client.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_deletion.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = commands test_rib_direct.sh.in test_rib_xrls.sh.in xrl_shell_funcs.sh
@@ -142,12 +142,12 @@ LIBRARIES = $(noinst_LIBRARIES)
 librib_a_AR = $(AR) cru
 librib_a_LIBADD =
 am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
-	rib.$(OBJEXT) rib_client.$(OBJEXT) rib_manager.$(OBJEXT) \
-	route.$(OBJEXT) rt_tab_base.$(OBJEXT) rt_tab_export.$(OBJEXT) \
+	rib.$(OBJEXT) rib_client.$(OBJEXT) route.$(OBJEXT) \
+	rt_tab_base.$(OBJEXT) rt_tab_export.$(OBJEXT) \
 	rt_tab_extint.$(OBJEXT) rt_tab_merged.$(OBJEXT) \
 	rt_tab_origin.$(OBJEXT) rt_tab_deletion.$(OBJEXT) \
 	rt_tab_redist.$(OBJEXT) rt_tab_register.$(OBJEXT) \
-	vifmanager.$(OBJEXT) xrl_target.$(OBJEXT)
+	vifmanager.$(OBJEXT)
 librib_a_OBJECTS = $(am_librib_a_OBJECTS)
 bin_PROGRAMS = xorp_rib$(EXEEXT)
 noinst_PROGRAMS = main_routemap$(EXEEXT) test_rib_client$(EXEEXT) \
@@ -166,10 +166,11 @@ main_routemap_DEPENDENCIES = librib.a \
 	$(top_builddir)/libproto/libproto.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 main_routemap_LDFLAGS =
 am_test_register_OBJECTS = test_register.$(OBJEXT) \
-	dummy_register_server.$(OBJEXT)
+	dummy_register_server.$(OBJEXT) dummy_rib_manager.$(OBJEXT)
 test_register_OBJECTS = $(am_test_register_OBJECTS)
 test_register_LDADD = $(LDADD)
 test_register_DEPENDENCIES = librib.a \
@@ -180,9 +181,11 @@ test_register_DEPENDENCIES = librib.a \
 	$(top_builddir)/libproto/libproto.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_register_LDFLAGS =
-am_test_register_xrls_OBJECTS = test_register_xrls.$(OBJEXT)
+am_test_register_xrls_OBJECTS = test_register_xrls.$(OBJEXT) \
+	rib_manager.$(OBJEXT) xrl_target.$(OBJEXT)
 test_register_xrls_OBJECTS = $(am_test_register_xrls_OBJECTS)
 test_register_xrls_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
@@ -193,6 +196,7 @@ test_register_xrls_DEPENDENCIES = librib.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/targets/libribbase.a \
 	$(top_builddir)/xrl/targets/libribclientbase.a
@@ -208,10 +212,11 @@ test_rib_client_DEPENDENCIES = librib.a \
 	$(top_builddir)/libproto/libproto.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_rib_client_LDFLAGS =
 am_test_rib_direct_OBJECTS = parser.$(OBJEXT) test_rib_direct.$(OBJEXT) \
-	dummy_register_server.$(OBJEXT)
+	dummy_register_server.$(OBJEXT) dummy_rib_manager.$(OBJEXT)
 test_rib_direct_OBJECTS = $(am_test_rib_direct_OBJECTS)
 test_rib_direct_LDADD = $(LDADD)
 test_rib_direct_DEPENDENCIES = librib.a \
@@ -222,10 +227,12 @@ test_rib_direct_DEPENDENCIES = librib.a \
 	$(top_builddir)/libproto/libproto.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-	$(top_builddir)/xrl/interfaces/libribclientxif.a
+	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_rib_direct_LDFLAGS =
 am_test_rib_xrls_OBJECTS = parser.$(OBJEXT) test_rib_xrls.$(OBJEXT) \
-	dummy_register_server.$(OBJEXT)
+	dummy_register_server.$(OBJEXT) dummy_rib_manager.$(OBJEXT) \
+	xrl_target.$(OBJEXT)
 test_rib_xrls_OBJECTS = $(am_test_rib_xrls_OBJECTS)
 test_rib_xrls_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
@@ -236,10 +243,12 @@ test_rib_xrls_DEPENDENCIES = librib.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/targets/libribbase.a
 test_rib_xrls_LDFLAGS =
-am_xorp_rib_OBJECTS = main_rib.$(OBJEXT)
+am_xorp_rib_OBJECTS = main_rib.$(OBJEXT) rib_manager.$(OBJEXT) \
+	xrl_target.$(OBJEXT)
 xorp_rib_OBJECTS = $(am_xorp_rib_OBJECTS)
 xorp_rib_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
@@ -250,6 +259,7 @@ xorp_rib_DEPENDENCIES = librib.a \
 	$(top_builddir)/libxorp/libxorp.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/xrl/targets/libribbase.a
 xorp_rib_LDFLAGS =
 
@@ -260,6 +270,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/dummy_register_server.Po \
+@AMDEP_TRUE@	$(DEPDIR)/dummy_rib_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/main_rib.Po $(DEPDIR)/main_routemap.Po \
 @AMDEP_TRUE@	$(DEPDIR)/parser.Po $(DEPDIR)/protocol.Po \
 @AMDEP_TRUE@	$(DEPDIR)/register_server.Po $(DEPDIR)/rib.Po \
@@ -372,6 +383,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_register_server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dummy_rib_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_rib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/main_routemap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parser.Po@am__quote@

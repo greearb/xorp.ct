@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.9 2003/05/29 17:59:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.10 2003/09/27 10:42:40 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
 #include "rt_tab_origin.hh"
+#include "rt_tab_deletion.hh"
 
 #ifdef DEBUG_CODEPATH
 #define cp(x) printf("OriginTabCodePath: %2d\n", x)
@@ -131,7 +132,8 @@ int OriginTable<A>::delete_route(const IPNet<A>& net)
 
 
 template<class A>
-void OriginTable<A>::delete_all_routes() 
+void 
+OriginTable<A>::delete_all_routes() 
 {
     cp(5);
     typename Trie<A, const IPRouteEntry<A>*>::iterator i;
@@ -141,6 +143,22 @@ void OriginTable<A>::delete_all_routes()
     _ip_route_table->delete_all_nodes();
 }
 
+template<class A>
+void 
+OriginTable<A>::routing_protocol_shutdown() 
+{
+    //Pass our entire routing table into a DeletionTable, which will
+    //handle the background deletion task.  The DeletionTable will
+    //plumb itself in.
+    DeletionTable<A> *dt;
+    dt = new DeletionTable<A>("Delete(" + _tablename + ")",
+						this,
+						_ip_route_table,
+						_eventloop);
+    //Create a new routing table, ready for when the routing protocol
+    //comes back up.
+    _ip_route_table = new Trie<A, const IPRouteEntry<A> *>();
+}
 
 template<class A>
 const IPRouteEntry<A> *

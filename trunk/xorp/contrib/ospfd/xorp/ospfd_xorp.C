@@ -552,11 +552,12 @@ XorpOspfd::rib_add_delete_route_cb(const XrlError& e,
 void
 XorpOspfd::rib_add_table()
 {
-    _rib_client.send_add_igp_table4("rib", "ospf", 
-				   /* unicast */ true, 
-				   /* multicast */ false,
-				   callback(this, 
-					    &XorpOspfd::rib_add_table_cb));
+    _rib_client.send_add_igp_table4("rib", "ospf", _router.class_name(),
+				    _router.instance_name(),
+				    /* unicast */ true, 
+				    /* multicast */ false,
+				    callback(this, 
+					     &XorpOspfd::rib_add_table_cb));
 }
 
 void

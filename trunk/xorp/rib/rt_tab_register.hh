@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_register.hh,v 1.4 2003/03/16 07:19:00 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_register.hh,v 1.5 2003/03/19 09:05:20 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
@@ -285,9 +285,7 @@ public:
      * routing protocol of a change, because the same route might be
      * in both unicast and multicast RIBs.
      */
-    RegisterTable(const string& tablename, RegisterServer *rs, bool mcast) :
-	RouteTable<A>(tablename),
-	_parent(NULL), _register_server(rs), _mcast(mcast) {}
+    RegisterTable(const string& tablename, RegisterServer *rs, bool mcast);
 
     /**
      * RegisterTable destructor
@@ -349,12 +347,7 @@ public:
      * the same as the existing parent)
      * @param new_parent the new parent RouteTable
      */
-    void replumb(RouteTable<A> *old_parent, RouteTable<A> *new_parent) {
-	    if (_parent == old_parent)
-		_parent = new_parent;
-	    else	// shouldn't be possible
-		abort();
-    }
+    void replumb(RouteTable<A> *old_parent, RouteTable<A> *new_parent);
 
     /**
      * @return the parent @ref RouteTable of this RegisterTable

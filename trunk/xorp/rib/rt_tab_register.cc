@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.11 2003/05/29 17:59:10 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rib_module.h"
@@ -55,6 +55,25 @@ RouteRegister<A>::str() const
     return s;
 }
 
+template<class A>
+RegisterTable<A>::RegisterTable(const string& tablename, 
+			     RegisterServer *rs, 
+			     bool mcast) :
+    RouteTable<A>(tablename),
+    _parent(NULL), _register_server(rs), _mcast(mcast) 
+{ 
+};
+
+template<class A>
+void 
+RegisterTable<A>::replumb(RouteTable<A> *old_parent, 
+			  RouteTable<A> *new_parent) {
+    
+    if (_parent == old_parent)
+	_parent = new_parent;
+    else	// shouldn't be possible
+	abort();
+}
 
 template<class A>
 bool

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.20 2003/07/14 22:27:47 atanu Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.21 2003/09/21 00:18:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -246,14 +246,16 @@ XrlRibTarget::rib_0_1_make_errors_fatal()
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_igp_table4(const string&	protocol,
+				     const string&	tgt_class,
+				     const string&	tgt_instance,
 				     const bool&	unicast,
 				     const bool&	multicast)
 {
-    if (unicast && _urib4.add_igp_table(protocol))
+    if (unicast && _urib4.add_igp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not add unicast IPv4 igp table \"%s\"",
 			     protocol.c_str()));
 
-    if (multicast && _mrib4.add_igp_table(protocol))
+    if (multicast && _mrib4.add_igp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not add multicast IPv4 igp table \"%s\"",
 			     protocol.c_str()));
 
@@ -262,14 +264,16 @@ XrlRibTarget::rib_0_1_add_igp_table4(const string&	protocol,
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_igp_table6(const string&	protocol,
+				     const string&	tgt_class,
+				     const string&	tgt_instance,
 				     const bool&	unicast,
 				     const bool&	multicast)
 {
-    if (unicast && _urib6.add_igp_table(protocol))
+    if (unicast && _urib6.add_igp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not add unicast IPv6 igp table \"%s\"",
 			     protocol.c_str()));
 
-    if (multicast && _mrib6.add_igp_table(protocol))
+    if (multicast && _mrib6.add_igp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not add multicast IPv6 igp table \"%s\"",
 			     protocol.c_str()));
 
@@ -278,14 +282,18 @@ XrlRibTarget::rib_0_1_add_igp_table6(const string&	protocol,
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_igp_table4(const string&	protocol,
+				     const string&	tgt_class,
+					const string&	tgt_instance,
 					const bool&	unicast,
 					const bool&	multicast)
 {
-    if (unicast && _urib4.delete_igp_table(protocol))
+    if (unicast 
+	&& _urib4.delete_igp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not delete unicast IPv4 igp table \"%s\"",
 			     protocol.c_str()));
 
-    if (multicast && _mrib4.delete_igp_table(protocol))
+    if (multicast 
+	&& _mrib4.delete_igp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not delete multicast IPv4 igp table "
 			     "\"%s\"", protocol.c_str()));
 
@@ -294,14 +302,18 @@ XrlRibTarget::rib_0_1_delete_igp_table4(const string&	protocol,
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_igp_table6(const string&	protocol,
+					const string&	tgt_class,
+					const string&	tgt_instance,
 					const bool&	unicast,
 					const bool&	multicast)
 {
-    if (unicast && _urib6.delete_igp_table(protocol))
+    if (unicast 
+	&& _urib6.delete_igp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not delete unicast IPv6 igp table \"%s\"",
 			     protocol.c_str()));
 
-    if (multicast && _mrib6.delete_igp_table(protocol))
+    if (multicast 
+	&& _mrib6.delete_igp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not delete multicast IPv6 igp table "
 			     "\"%s\"", protocol.c_str()));
 
@@ -310,14 +322,16 @@ XrlRibTarget::rib_0_1_delete_igp_table6(const string&	protocol,
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_egp_table4(const string&	protocol,
+				     const string&	tgt_class,
+				     const string&	tgt_instance,
 				     const bool&	unicast,
 				     const bool&	multicast)
 {
-    if (unicast && _urib4.add_egp_table(protocol))
+    if (unicast && _urib4.add_egp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not add unicast IPv4 egp table \"%s\"",
 			     protocol.c_str()));
 
-    if (multicast && _mrib4.add_egp_table(protocol))
+    if (multicast && _mrib4.add_egp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not add multicast IPv4 egp table \"%s\"",
 			     protocol.c_str()));
 
@@ -326,14 +340,16 @@ XrlRibTarget::rib_0_1_add_egp_table4(const string&	protocol,
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_egp_table6(const string&	protocol,
+				     const string&	tgt_class,
+				     const string&	tgt_instance,
 				     const bool&	unicast,
 				     const bool&	multicast)
 {
-    if (unicast && _urib6.add_egp_table(protocol))
+    if (unicast && _urib6.add_egp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not add unicast IPv6 egp table \"%s\"",
 			     protocol.c_str()));
 
-    if (multicast && _mrib6.add_egp_table(protocol))
+    if (multicast && _mrib6.add_egp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not add multicast IPv6 egp table \"%s\"",
 			     protocol.c_str()));
 
@@ -342,14 +358,18 @@ XrlRibTarget::rib_0_1_add_egp_table6(const string&	protocol,
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_egp_table4(const string&	protocol,
+					const string&	tgt_class,
+					const string&	tgt_instance,
 					const bool&	unicast,
 					const bool&	multicast)
 {
-    if (unicast && _urib4.delete_egp_table(protocol))
+    if (unicast 
+	&& _urib4.delete_egp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not delete unicast IPv4 egp table \"%s\"",
 			     protocol.c_str()));
 
-    if (multicast && _mrib4.delete_egp_table(protocol))
+    if (multicast 
+	&& _mrib4.delete_egp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not delete multicast IPv4 egp table "
 			     "\"%s\"", protocol.c_str()));
 
@@ -358,14 +378,18 @@ XrlRibTarget::rib_0_1_delete_egp_table4(const string&	protocol,
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_egp_table6(const string&	protocol,
+					const string&	tgt_class,
+					const string&	tgt_instance,
 					const bool&	unicast,
 					const bool&	multicast)
 {
-    if (unicast && _urib6.delete_egp_table(protocol))
+    if (unicast 
+	&& _urib6.delete_egp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not delete unicast IPv6 egp table \"%s\"",
 			     protocol.c_str()));
 
-    if (multicast && _mrib6.delete_egp_table(protocol))
+    if (multicast 
+	&& _mrib6.delete_egp_table(protocol, tgt_class, tgt_instance))
 	RETURN_FAIL(c_format("Could not delete multicast IPv6 egp table "
 			     "\"%s\"", protocol.c_str()));
 
@@ -797,3 +821,24 @@ XrlRibTarget::fea_ifmgr_client_0_1_vifaddr6_update(// Input values,
     return XrlCmdError::OKAY();
 }
 
+
+XrlCmdError 
+XrlRibTarget::finder_event_observer_0_1_xrl_target_birth(
+        const string&	target_class, 
+	const string&	target_instance)
+{
+    debug_msg(("Target Birth: " + target_class + " " + target_instance 
+	       + "\n").c_str());
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlRibTarget::finder_event_observer_0_1_xrl_target_death(
+	const string&	target_class, 
+	const string&	target_instance)
+{
+    debug_msg(("Target Death: " + target_class + " " + target_instance 
+	       + "\n").c_str());
+    _rib_manager->target_death(target_class, target_instance);
+    return XrlCmdError::OKAY();
+}

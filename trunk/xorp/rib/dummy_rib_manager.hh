@@ -51,7 +51,7 @@ public:
      * @param eventloop the event loop to user.
      * @param xrl_std_router the XRL router to use.
      */
-    RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router);
+    RibManager();
 
     /**
      * RibManager destructor
@@ -86,23 +86,8 @@ public:
      *
      * @return process status code
      */
-    ProcessStatus status(string& reason) const 
-    {
-	reason = _status_reason;
-	return _status_code;
-    }
+    ProcessStatus status(string& reason) const; 
     
-    /**
-     * new_vif is called to inform all the RIBs that a new virtual
-     * interface has been created.
-     *
-     * @param vifname the name of the new VIF.
-     * @param vif the Vif class instance holding information about the
-     * new VIF.
-     * @param err reference to string in which to store the
-     * human-readable error message in case anything goes wrong.  Used
-     * for debugging purposes.
-     */
     int new_vif(const string& vifname, const Vif& vif, string& err);
 
     /**
@@ -292,56 +277,8 @@ public:
      */
     void register_interest_in_target_done(const XrlError& e);
 
-
-    /**
-     * Target Death is called when an XRL target that we've registered
-     * an interest in dies.
-     *
-     * @param tgt_class the XRL Class of the target that died.
-     * @param tgt_instance the XRL Class Instance of the target that died.  
-     */
-
     void target_death(const string& tgt_class, const string& tgt_instance);
-
 private:
-    /**
-     * Select the appropriate list of RIB clients.
-     * 
-     * Select a list of RIB clients for a given address family and
-     * unicast/multicast flags.
-     * 
-     * @param family the address family (AF_INET or AF_INET6 for
-     * IPv4 and IPv6 respectively).
-     * @param unicast true if we want to select the list of RIB clients
-     * for the unicast RIB.
-     * @param multicast true if we want to select the list of RIB clients
-     * for the multicast RIB.
-     * @return a pointer to the appropriate list if found, otherwise NULL.
-     */
-    list<RibClient *>	*select_rib_clients_list(int family, bool unicast,
-						 bool multicast);
-    
-    ProcessStatus       _status_code;
-    string              _status_reason;
-    EventLoop&		_eventloop;	// The event loop to use
-    XrlStdRouter&	_xrl_router;	// The XRL router to use
-    list<RibClient *>	_urib4_clients_list; // The list of IPv4 URIB clients
-    list<RibClient *>	_mrib4_clients_list; // The list of IPv4 MRIB clients
-    list<RibClient *>	_urib6_clients_list; // The list of IPv6 URIB clients
-    list<RibClient *>	_mrib6_clients_list; // The list of IPv6 MRIB clients
-    RegisterServer	_register_server;    // To notify clients about route change
-    
-    RIB<IPv4>		_urib4;		// The IPv4 unicast RIB
-    RIB<IPv4>		_mrib4;		// The IPv4 multicast RIB
-    RIB<IPv6>		_urib6;		// The IPv6 unicast RIB
-    RIB<IPv6>		_mrib6;		// The IPv6 multicast RIB
-    
-    VifManager		_vif_manager;	// The VIF manager
-    XrlRibTarget	_xrl_rib_target;
-
-    set <string>        _targets_of_interest; // XRL targets we're monitoring.
-
-    XorpTimer _status_update_timer;  //used for periodic checks of RIB status.
 };
 
 #endif // __RIB_RIB_MANAGER_HH__

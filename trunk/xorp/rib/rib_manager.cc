@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.20 2003/08/07 01:10:13 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.21 2003/09/27 10:42:40 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
+#include "libxipc/xrl_error.hh"
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "rib_manager.hh"
 
 RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router)
@@ -27,38 +29,38 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router)
       _eventloop(eventloop),
       _xrl_router(xrl_std_router),
       _register_server(&_xrl_router),
-      _urib4(UNICAST, _eventloop),
-      _mrib4(MULTICAST, _eventloop),
-      _urib6(UNICAST, _eventloop),
-      _mrib6(MULTICAST, _eventloop),
+      _urib4(UNICAST, *this, _eventloop),
+      _mrib4(MULTICAST, *this, _eventloop),
+      _urib6(UNICAST, *this, _eventloop),
+      _mrib6(MULTICAST, *this, _eventloop),
       _vif_manager(_xrl_router, _eventloop, this),
       _xrl_rib_target(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6, 
 		      _vif_manager, this)
 {
     _urib4.initialize_export(&_urib4_clients_list);
     _urib4.initialize_register(&_register_server);
-    if (_urib4.add_igp_table("connected") < 0) {
+    if (_urib4.add_igp_table("connected", "", "") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib4");
 	return;
     }
 
     _mrib4.initialize_export(&_mrib4_clients_list);
     _mrib4.initialize_register(&_register_server);
-    if (_mrib4.add_igp_table("connected") < 0) {
+    if (_mrib4.add_igp_table("connected", "", "") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for mrib4");
 	return;
     }
 
     _urib6.initialize_export(&_urib6_clients_list);
     _urib6.initialize_register(&_register_server);
-    if (_urib6.add_igp_table("connected") < 0) {
+    if (_urib6.add_igp_table("connected", "", "") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib6");
 	return;
     }
 
     _mrib6.initialize_export(&_mrib6_clients_list);
     _mrib6.initialize_register(&_register_server);
-    if (_mrib6.add_igp_table("connected") < 0) {
+    if (_mrib6.add_igp_table("connected", "", "") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for mrib6");
 	return;
     }
@@ -519,4 +521,85 @@ RibManager::make_errors_fatal()
     _urib6.set_errors_are_fatal();
     _mrib4.set_errors_are_fatal();
     _mrib6.set_errors_are_fatal();
+}
+
+void 
+RibManager::register_interest_in_target(const string& tgt_class)
+{
+    if (_targets_of_interest.find(tgt_class) 
+	== _targets_of_interest.end()) {
+	_targets_of_interest.insert(tgt_class);
+	XrlFinderEventNotifierV0p1Client finder(&_xrl_router);
+	XrlFinderEventNotifierV0p1Client::RegisterClassEventInterestCB cb =
+	    callback(this, &RibManager::register_interest_in_target_done);
+	finder.send_register_class_event_interest("finder",
+						  _xrl_router.instance_name(),
+						  tgt_class, cb);
+    } else {
+	return;
+    }
+}
+
+void 
+RibManager::register_interest_in_target_done(const XrlError& e)
+{
+    if (e != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to register interest in an XRL target\n");
+    }
+}
+
+
+void
+RibManager::target_death(const string& tgt_class, const string& tgt_instance)
+{
+    if (tgt_class == "fea") {
+	//No cleanup - we just exit.
+	XLOG_ERROR("FEA died, so RIB is exiting too\n");
+	exit(0);
+    }
+
+    //inform the RIBs in case this was a routing protocol that died.
+    _urib4.target_death(tgt_class, tgt_instance);
+    _urib6.target_death(tgt_class, tgt_instance);
+    _mrib4.target_death(tgt_class, tgt_instance);
+    _mrib6.target_death(tgt_class, tgt_instance);
+
+    //remove any RibClients that died.
+    list<RibClient *>::iterator i;
+
+    for (i=_urib4_clients_list.begin(); i!= _urib4_clients_list.end(); i++) {
+	if (((*i)->target_name() == tgt_instance)
+	    || ((*i)->target_name() == tgt_class)) {
+	    delete (*i);
+	    _urib4_clients_list.erase(i);
+	    break;
+	}
+    }
+
+    for (i=_mrib4_clients_list.begin(); i!= _mrib4_clients_list.end(); i++) {
+	if (((*i)->target_name() == tgt_instance)
+	    || ((*i)->target_name() == tgt_class)) {
+	    delete (*i);
+	    _mrib4_clients_list.erase(i);
+	    break;
+	}
+    }
+
+    for (i=_urib6_clients_list.begin(); i!= _urib6_clients_list.end(); i++) {
+	if (((*i)->target_name() == tgt_instance)
+	    || ((*i)->target_name() == tgt_class)) {
+	    delete (*i);
+	    _urib6_clients_list.erase(i);
+	    break;
+	}
+    }
+
+    for (i=_mrib6_clients_list.begin(); i!= _mrib6_clients_list.end(); i++) {
+	if (((*i)->target_name() == tgt_instance)
+	    || ((*i)->target_name() == tgt_class)) {
+	    delete (*i);
+	    _mrib6_clients_list.erase(i);
+	    break;
+	}
+    }
 }

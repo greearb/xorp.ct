@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.10 2003/05/24 23:35:26 mjh Exp $
+// $XORP: xorp/rib/rib.hh,v 1.11 2003/09/27 10:42:40 mjh Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -37,6 +37,7 @@
 
 class RegisterServer;
 class RibClient;
+class RibManager;
 
 enum RibTransportType {
     UNICAST = 1,
@@ -63,9 +64,11 @@ public:
      * @param rib_type indicates whether this RIB holds UNICAST or
      * MULTICAST routing information.  In the case of multicast, this
      * is the topology information, not the forwarding information.
-     * @param eventloop the main event loop.
-     */
-    RIB(RibTransportType rib_type, EventLoop& eventloop);
+     * @param rib_manager the main RIB manager process holding stuff
+     * that's common to all the individual RIBs.
+     * @param eventloop the main event loop.  */
+    RIB(RibTransportType rib_type, RibManager& rib_manager, 
+	EventLoop& eventloop);
 
     /**
      * RIB Destructor.
@@ -107,6 +110,10 @@ public:
      * @see OriginTable
      * @param tablename human-readable name for this table to help in
      * debugging
+     * @param tgt_class the XRL target class of the routing
+     * protocol that will supply routes to this OriginTable.
+     * @param tgt_instance the XRL target instance of the routing
+     * protocol that will supply routes to this OriginTable.
      * @param admin_distance default administrative distance to be
      * applied to routes that enter the RIB through this OriginTable.
      * @param igp true if the routing protocol that will inject routes
@@ -115,6 +122,8 @@ public:
      * @return -1 if table cannot be created, 0 otherwise.
      */
     int new_origin_table(const string&	tablename,
+			 const string&	tgt_class,
+			 const string&	tgt_instance,
 			 int		admin_distance,
 			 int		igp);
 
@@ -324,9 +333,14 @@ public:
      * @param tablename the routing protocol name.  This should be one
      * of the list of names the RIB knows about, or the incorrect
      * default administrative distance will be applied.
-     * @return 0 on success, -1 otherwise.
-     */
-    virtual int add_igp_table(const string& tablename);
+     * @param tgt_class the XRL target class of the routing
+     * protocol that will supply routes to this OriginTable.
+     * @param tgt_instance the XRL target instance of the routing
+     * protocol that will supply routes to this OriginTable.
+     * @return 0 on success, -1 otherwise.  */
+    virtual int add_igp_table(const string& tablename,
+			      const string& tgt_class,
+			      const string& tgt_instance);
 
     /**
      * Delete the OriginTable for an IGP protocol and unplumb it from
@@ -335,9 +349,15 @@ public:
      *
      * @param tablename the routing protocol name, previously
      * registered using @ref add_igp_table .
+     * @param tgt_class the XRL target class of the routing
+     * protocol that supplied routes to this OriginTable.
+     * @param tgt_instance the XRL target instance of the routing
+     * protocol that supplied routes to this OriginTable.
      * @return 0 on success, -1 otherwise.
      */
-    virtual int delete_igp_table(const string& tablename);
+    virtual int delete_igp_table(const string& tablename,
+				 const string& tgt_class,
+				 const string& tgt_instance);
 
     /**
      * Create the OriginTable for an EGP protocol and plumb it into
@@ -348,9 +368,15 @@ public:
      * @param tablename the routing protocol name.  This should be one
      * of the list of names the RIB knows about, or the incorrect
      * default administrative distance will be applied.
+     * @param tgt_class the XRL target class of the routing
+     * protocol that will supply routes to this OriginTable.
+     * @param tgt_instance the XRL target instance of the routing
+     * protocol that will supply routes to this OriginTable.
      * @return 0 on success, -1 otherwise.
      */
-    virtual int add_egp_table(const string& tablename);
+    virtual int add_egp_table(const string& tablename,
+			      const string& tgt_class,
+			      const string& tgt_instance);
 
     /**
      * Delete the OriginTable for an EGP protocol and unplumb it from
@@ -359,9 +385,25 @@ public:
      *
      * @param tablename the routing protocol name, previously
      * registered using @ref add_igp_table .
+     * @param tgt_class the XRL target class of the routing
+     * protocol that supplied routes to this OriginTable.
+     * @param tgt_instance the XRL target instance of the routing
+     * protocol that supplied routes to this OriginTable.
      * @return 0 on success, -1 otherwise.
      */
-    virtual int delete_egp_table(const string& tablename);
+    virtual int delete_egp_table(const string& tablename,
+				 const string& tgt_class,
+				 const string& tgt_instance);
+
+    /**
+     * An XRL Target died.  We need to check if it's a routing
+     * protocol, and if it was, clean up after it.
+     *
+     * @param tgt_class the XRL Class of the target that died.
+     * @param tgt_instance the XRL Class Instance of the target that died.
+     */
+    void target_death(const string& tgt_class,
+		      const string& tgt_instance);
 
     /**
      * Print the RIB structure for debugging
@@ -373,16 +415,29 @@ private:
      * Used to implement @ref add_igp_table and @ref add_egp_table.
      *
      * @param tablename the routing protocol name.
+     * @param tgt_class the XRL target class of the routing
+     * protocol that will supply routes to this OriginTable.
+     * @param tgt_instance the XRL target instance of the routing
+     * protocol that will supply routes to this OriginTable.
      * @param type IGP == 1, EGP == 2
      */
-    int add_origin_table(const string& tablename, int type);
+    int add_origin_table(const string& tablename, 
+			 const string& tgt_class,
+			 const string& tgt_instance,
+			 int type);
 
     /**
      * Used to implement @ref delete_igp_table and @ref delete_egp_table.
      *
      * @param tablename the routing protocol name.
+     * @param tgt_class the XRL target class of the routing
+     * protocol that will supply routes to this OriginTable.
+     * @param tgt_instance the XRL target instance of the routing
+     * protocol that supplied routes to this OriginTable.
      */
-    int delete_origin_table(const string& tablename);
+    int delete_origin_table(const string& tablename,
+			    const string& tgt_class,
+			    const string& tgt_instance);
 
     /**
      * track_back trough the RouteTables' parent pointers to find the
@@ -418,6 +473,19 @@ private:
      * @return pointer to table if exists, 0 otherwise.
      */
     inline RouteTable<A> *find_table(const string& tablename);
+
+    /**
+     * Find a routing table, given its protocol name and XRL target
+     * instance name.
+     *
+     * @param tablename the name of the protocol to search for.
+     * @param tgt_class the name of the target class to search for.
+     * @param tgt_instance the name of the target instance to search for.
+     * @return pointer to table if exists, 0 otherwise.  
+     */
+    inline OriginTable<A> *find_table_by_instance(const string& tablename,
+						  const string&	tgt_class,
+						  const string& tgt_instance);
 
     /**
      * Find a routing protcol, given its protocol name
@@ -520,6 +588,7 @@ private:
     void flush();
 
 protected:
+    RibManager& _rib_manager;
     EventLoop& _eventloop;
     RouteTable<A>	*_final_table;
     RegisterTable<A>	*_register_table;
@@ -529,6 +598,7 @@ protected:
 
     map<const string, RouteTable<A> *>	_tables;
     map<const string, Protocol *>	_protocols;
+    map<const string, OriginTable<A> *> _routing_protocol_instances;
     map<const string, Vif>		_vifs;
     map<const string, int>		_admin_distances;
     map<const A, IPExternalNextHop<A> >	_external_nexthops;

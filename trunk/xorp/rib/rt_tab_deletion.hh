@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.5 2003/08/04 21:29:23 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_deletion.hh,v 1.1 2003/09/27 10:42:40 mjh Exp $
 
-#ifndef __RIB_RT_TAB_ORIGIN_HH__
-#define __RIB_RT_TAB_ORIGIN_HH__
+#ifndef __RIB_RT_TAB_DELETION_HH__
+#define __RIB_RT_TAB_DELETION_HH__
 
 #include "rt_tab_base.hh"
 #include "libxorp/eventloop.hh"
@@ -122,7 +122,11 @@ public:
     /**
      * Change the parent of this route table.
      */
-    void replumb(RouteTable<A> *old_parent, RouteTable<A> *new_parent);
+    void replumb(RouteTable<A> *old_parent, RouteTable<A> *new_parent)
+    {
+	XLOG_ASSERT(_parent == old_parent);
+	_parent = new_parent;
+    }
 
     /**
      * Render the DeletionTable as a string for debugging purposes

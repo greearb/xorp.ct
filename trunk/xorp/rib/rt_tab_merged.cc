@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.6 2003/05/29 17:59:09 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -156,8 +156,9 @@ MergedTable<A>::lookup_route(const A& addr) const
 {
     const IPRouteEntry<A> *found_b, *found_a;
 
-    debug_msg("MergedTable::lookup_route\n");
+    debug_msg("MergedTable::lookup_route.  Table_b: %p\n", _table_b);
     found_b = _table_b->lookup_route(addr);
+    debug_msg("MergedTable::lookup_route.  Table_a: %p\n", _table_a);
     found_a = _table_a->lookup_route(addr);
     if (found_b == NULL) {
 	cp(20);

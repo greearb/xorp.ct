@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.23 2003/09/16 21:00:26 hodson Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.24 2003/09/21 00:30:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -79,17 +79,19 @@ RibIpcHandler::register_ribname(const string& r)
     //unicast - true
     //multicast - false
     rib.send_add_egp_table4(_ribname.c_str(),
-			    "ebgp", true, false,
-			    callback(this, 
-				     &RibIpcHandler::rib_command_done,"add_table"));
+		"ebgp", _xrl_router->class_name(),
+                 _xrl_router->instance_name(), true, false,
+                 callback(this, 
+			  &RibIpcHandler::rib_command_done,"add_table"));
     //ibgp - v4
     //name - "ibgp"
     //unicast - true
     //multicast - false
     rib.send_add_egp_table4(_ribname.c_str(),
-			    "ibgp", true, false,
-			    callback(this, 
-				     &RibIpcHandler::rib_command_done,"add_table"));
+		"ibgp", _xrl_router->class_name(),
+                _xrl_router->instance_name(), true, false,
+		callback(this, 
+			 &RibIpcHandler::rib_command_done,"add_table"));
 
     //create our tables
     //ebgp - v6
@@ -97,17 +99,19 @@ RibIpcHandler::register_ribname(const string& r)
     //unicast - true
     //multicast - false
     rib.send_add_egp_table6(_ribname.c_str(),
-		"ebgp", true, false,
+                "ebgp",  _xrl_router->class_name(),
+                _xrl_router->instance_name(), true, false,
 		callback(this, 
  		         &RibIpcHandler::rib_command_done,"add_table"));
     //ibgp - v6
     //name - "ibgp"
     //unicast - true
     //multicast - false
-    rib.send_add_igp_table6(_ribname.c_str(),
-		  "ibgp", true, false,
-		  callback(this,
-			   &RibIpcHandler::rib_command_done,"add_table"));
+    rib.send_add_egp_table6(_ribname.c_str(),
+		"ibgp", _xrl_router->class_name(),
+                _xrl_router->instance_name(), true, false,
+		callback(this,
+			 &RibIpcHandler::rib_command_done,"add_table"));
 
     return true;
 }
@@ -123,7 +127,9 @@ RibIpcHandler::unregister_rib()
     //unicast - true
     //multicast - false
     rib.send_delete_egp_table4(_ribname.c_str(),
-			       "ebgp", true, false,
+			       "ebgp", _xrl_router->class_name(),
+                               _xrl_router->instance_name(),
+			       true, false,
 			       callback(this,
 					&RibIpcHandler::rib_command_done,
 					"delete_table"));
@@ -131,8 +137,10 @@ RibIpcHandler::unregister_rib()
     //name - "ibgp"
     //unicast - true
     //multicast - false
-    rib.send_delete_igp_table4(_ribname.c_str(),
-			       "ibgp", true, false,
+    rib.send_delete_egp_table4(_ribname.c_str(),
+			       "ibgp", _xrl_router->class_name(),
+                               _xrl_router->instance_name(), 
+			       true, false,
 			       callback(this,
 					&RibIpcHandler::rib_command_done,
 					"delete_table"));
@@ -142,21 +150,25 @@ RibIpcHandler::unregister_rib()
     //name - "ebgp"
     //unicast - true
     //multicast - false
-//     rib.send_delete_egp_table6(_ribname.c_str(),
-// 			       "ebgp", true, false,
-// 			       callback(this,
-// 				  	&RibIpcHandler::rib_command_done,
-// 					"delete_table"));
+    rib.send_delete_egp_table6(_ribname.c_str(),
+ 			       "ebgp", _xrl_router->class_name(),
+                               _xrl_router->instance_name(), 
+			       true, false,
+ 			       callback(this,
+ 				  	&RibIpcHandler::rib_command_done,
+ 					"delete_table"));
 
     //ibgp - v6
     //name - "ibgp"
     //unicast - true
     //multicast - false
-//     rib.send_delete_igp_table6(_ribname.c_str(),
-// 			       "ibgp", true, false,
-// 			       callback(this,
-// 					&RibIpcHandler::rib_command_done,
-// 					"delete_table"));
+    rib.send_delete_egp_table6(_ribname.c_str(),
+ 			       "ibgp", _xrl_router->class_name(),
+                               _xrl_router->instance_name(), 
+			       true, false,
+ 			       callback(this,
+ 					&RibIpcHandler::rib_command_done,
+ 					"delete_table"));
 
     return true;
 }

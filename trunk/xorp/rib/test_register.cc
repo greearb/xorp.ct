@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.5 2003/05/29 17:59:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.6 2003/09/27 10:42:40 mjh Exp $"
 
 #include "rib_module.h"
 #include "config.h"
@@ -20,6 +20,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
+#include "dummy_rib_manager.hh"
 #include "rib.hh"
 #include "dummy_register_server.hh"
 
@@ -108,8 +109,10 @@ main (int /* argc */, char *argv[])
     xlog_add_default_output();
     xlog_start();
     EventLoop eventloop;
+    XrlStdRouter xrl_router(eventloop, "rib");
+    RibManager rib_manager;
     
-    RIB<IPv4> rib(UNICAST, eventloop);
+    RIB<IPv4> rib(UNICAST, rib_manager, eventloop);
     rib_ptr = &rib;
 
     Vif vif0("vif0");
@@ -118,7 +121,7 @@ main (int /* argc */, char *argv[])
 
     DummyRegisterServer regserv;
     rib.initialize_register(&regserv);
-    rib.add_igp_table("connected");
+    rib.add_igp_table("connected", "", "");
 
     rib.new_vif("vif0", vif0);
     rib.add_vif_address("vif0", IPv4("10.0.0.1"), IPv4Net("10.0.0.0", 24));
@@ -127,10 +130,10 @@ main (int /* argc */, char *argv[])
     rib.new_vif("vif2", vif2);
     rib.add_vif_address("vif2", IPv4("10.0.2.1"), IPv4Net("10.0.2.0", 24));
 
-    rib.add_igp_table("static");
-    rib.add_igp_table("ospf");
-    rib.add_egp_table("ebgp");
-    rib.add_egp_table("ibgp");
+    rib.add_igp_table("static", "", "");
+    rib.add_igp_table("ospf", "", "");
+    rib.add_egp_table("ebgp", "", "");
+    rib.add_egp_table("ibgp", "", "");
     // rib.add_route("connected", IPv4Net("10.0.0.0", 24), IPv4("10.0.0.1"));
     // rib.add_route("connected", IPv4Net("10.0.1.0", 24), IPv4("10.0.1.1"));
     // rib.add_route("connected", IPv4Net("10.0.2.0", 24), IPv4("10.0.2.1"));

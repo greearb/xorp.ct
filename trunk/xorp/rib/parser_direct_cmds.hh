@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.3 2003/03/16 07:18:57 pavlin Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.4 2003/07/04 19:59:51 pavlin Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -31,7 +31,7 @@ public:
 	// On the context of this test code, we don't care whether it's an
 	// IGP or an EGP, because we do the plumbing explicitly.  So it's
 	// safe to just say it's an IGP, even if its not
-	return _rib.new_origin_table(_tablename, _admin_distance, IGP);
+	return _rib.new_origin_table(_tablename, "", "", _admin_distance, IGP);
     }
 private:
     RIB<IPv4>& _rib;
@@ -163,7 +163,7 @@ public:
 	AddIGPTableCommand(), _rib(rib) {}
     int execute() {
 	cout << "AddIGPTableCommand::execute " << _tablename << "\n";
-	return _rib.add_igp_table(_tablename);
+	return _rib.add_igp_table(_tablename, "", "");
     }
 private:
     RIB<IPv4>& _rib;
@@ -175,7 +175,7 @@ public:
 	DeleteIGPTableCommand(), _rib(rib) {}
     int execute() {
 	cout << "DeleteIGPTableCommand::execute " << _tablename << "\n";
-	return _rib.delete_igp_table(_tablename);
+	return _rib.delete_igp_table(_tablename, "", "");
     }
 private:
     RIB<IPv4>& _rib;
@@ -187,7 +187,7 @@ public:
 	AddEGPTableCommand(), _rib(rib) {}
     int execute() {
 	cout << "AddEGPTableCommand::execute " << _tablename << "\n";
-	return _rib.add_egp_table(_tablename);
+	return _rib.add_egp_table(_tablename, "", "");
     }
 private:
     RIB<IPv4>& _rib;
@@ -199,7 +199,7 @@ public:
 	DeleteEGPTableCommand(), _rib(rib) {}
     int execute() {
 	cout << "DeleteEGPTableCommand::execute " << _tablename << "\n";
-	return _rib.delete_egp_table(_tablename);
+	return _rib.delete_egp_table(_tablename, "", "");
     }
 private:
     RIB<IPv4>& _rib;

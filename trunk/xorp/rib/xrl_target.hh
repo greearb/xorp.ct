@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.10 2003/05/24 23:35:27 mjh Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.11 2003/05/29 21:17:16 mjh Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -163,48 +163,64 @@ protected:
     XrlCmdError rib_0_1_add_igp_table4(
 	// Input values, 
 	const string&	protocol, 
+	const string&	tgt_class, 
+	const string&	tgt_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_add_igp_table6(
 	// Input values, 
 	const string&	protocol, 
+	const string&	tgt_class, 
+	const string&	tgt_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_igp_table4(
 	// Input values, 
 	const string&	protocol, 
+	const string&	tgt_class, 
+	const string&	tgt_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_igp_table6(
 	// Input values, 
 	const string&	protocol, 
+	const string&	tgt_class, 
+	const string&	tgt_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_add_egp_table4(
 	// Input values, 
 	const string&	protocol, 
+	const string&	tgt_class, 
+	const string&	tgt_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_add_egp_table6(
 	// Input values, 
 	const string&	protocol, 
+	const string&	tgt_class, 
+	const string&	tgt_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_egp_table4(
 	// Input values, 
 	const string&	protocol, 
+	const string&	tgt_class, 
+	const string&	tgt_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
     XrlCmdError rib_0_1_delete_egp_table6(
 	// Input values, 
 	const string&	protocol, 
+	const string&	tgt_class, 
+	const string&	tgt_instance, 
 	const bool&	unicast,
 	const bool&	multicast);
 
@@ -378,6 +394,24 @@ protected:
 	const string&	vifname, 
 	const IPv6&	addr, 
 	const uint32_t&	event);
+
+    /**
+     *  Announce target birth.
+     */
+    XrlCmdError finder_event_observer_0_1_xrl_target_birth(
+	// Input values, 
+	const string&	target_class, 
+	const string&	target_instance);
+
+    /**
+     *  Announce target death.
+     */
+    XrlCmdError finder_event_observer_0_1_xrl_target_death(
+	// Input values, 
+	const string&	target_class, 
+	const string&	target_instance);
+
+    
 };
 
 #endif // __RIB_XRL_TARGET_HH__

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.15 2003/08/01 02:11:50 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.16 2003/09/27 10:42:39 mjh Exp $
 ##
 
 # Redefine the bin installation directory
@@ -35,11 +35,16 @@ LDADD			+= $(top_builddir)/libproto/libproto.a
 LDADD			+= $(top_builddir)/libxorp/libxorp.a
 LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 LDADD			+= $(top_builddir)/xrl/interfaces/libribclientxif.a
+LDADD			+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 
 # -- Program Sources
 main_routemap_SOURCES	 = routemap.hh routemap.cc main_routemap.cc
 
 xorp_rib_SOURCES	 = main_rib.cc
+xorp_rib_SOURCES        += rib_manager.hh
+xorp_rib_SOURCES        += rib_manager.cc
+xorp_rib_SOURCES 	+= xrl_target.hh
+xorp_rib_SOURCES 	+= xrl_target.cc
 xorp_rib_LDADD		 = $(LDADD)
 xorp_rib_LDADD		+= $(top_builddir)/xrl/targets/libribbase.a
 
@@ -47,11 +52,17 @@ test_rib_direct_SOURCES	 = parser.hh parser_direct_cmds.hh
 test_rib_direct_SOURCES	+= parser.cc test_rib_direct.cc
 test_rib_direct_SOURCES	+= dummy_register_server.hh
 test_rib_direct_SOURCES	+= dummy_register_server.cc
+test_rib_direct_SOURCES	+= dummy_rib_manager.hh
+test_rib_direct_SOURCES	+= dummy_rib_manager.cc
 
 test_rib_xrls_SOURCES	 = parser.hh parser_direct_cmds.hh parser_xrl_cmds.hh
 test_rib_xrls_SOURCES	+= parser.cc test_rib_xrls.cc
 test_rib_xrls_SOURCES	+= dummy_register_server.hh
 test_rib_xrls_SOURCES	+= dummy_register_server.cc
+test_rib_xrls_SOURCES 	+= dummy_rib_manager.hh
+test_rib_xrls_SOURCES 	+= dummy_rib_manager.cc
+test_rib_xrls_SOURCES 	+= xrl_target.hh
+test_rib_xrls_SOURCES 	+= xrl_target.cc
 test_rib_xrls_LDADD	 = $(LDADD)
 test_rib_xrls_LDADD	+= $(top_builddir)/xrl/interfaces/libribxif.a
 test_rib_xrls_LDADD	+= $(top_builddir)/xrl/targets/libribbase.a
@@ -59,13 +70,19 @@ test_rib_xrls_LDADD	+= $(top_builddir)/xrl/targets/libribbase.a
 test_register_SOURCES	 = test_register.cc
 test_register_SOURCES	+= dummy_register_server.hh
 test_register_SOURCES	+= dummy_register_server.cc
+test_register_SOURCES	+= dummy_rib_manager.hh
+test_register_SOURCES	+= dummy_rib_manager.cc
 
 test_register_xrls_SOURCES  = parser_direct_cmds.hh parser_xrl_cmds.hh
 test_register_xrls_SOURCES += test_register_xrls.cc
-test_register_xrls_LDADD  = $(LDADD)
-test_register_xrls_LDADD += $(top_builddir)/xrl/interfaces/libribxif.a
-test_register_xrls_LDADD += $(top_builddir)/xrl/targets/libribbase.a
-test_register_xrls_LDADD += $(top_builddir)/xrl/targets/libribclientbase.a
+test_register_xrls_SOURCES += rib_manager.hh
+test_register_xrls_SOURCES += rib_manager.cc
+test_register_xrls_SOURCES += xrl_target.hh
+test_register_xrls_SOURCES += xrl_target.cc
+test_register_xrls_LDADD    = $(LDADD)
+test_register_xrls_LDADD   += $(top_builddir)/xrl/interfaces/libribxif.a
+test_register_xrls_LDADD   += $(top_builddir)/xrl/targets/libribbase.a
+test_register_xrls_LDADD   += $(top_builddir)/xrl/targets/libribclientbase.a
 
 test_rib_client_SOURCES  = test_rib_client.cc
 
@@ -76,7 +93,6 @@ librib_a_SOURCES += protocol.hh
 librib_a_SOURCES += register_server.hh
 librib_a_SOURCES += rib.hh
 librib_a_SOURCES += rib_client.hh
-librib_a_SOURCES += rib_manager.hh
 librib_a_SOURCES += route.hh
 librib_a_SOURCES += rt_tab_base.hh
 librib_a_SOURCES += rt_tab_export.hh
@@ -87,13 +103,11 @@ librib_a_SOURCES += rt_tab_deletion.hh
 librib_a_SOURCES += rt_tab_redist.hh
 librib_a_SOURCES += rt_tab_register.hh
 librib_a_SOURCES += vifmanager.hh
-librib_a_SOURCES += xrl_target.hh
 
 librib_a_SOURCES += protocol.cc
 librib_a_SOURCES += register_server.cc
 librib_a_SOURCES += rib.cc
 librib_a_SOURCES += rib_client.cc
-librib_a_SOURCES += rib_manager.cc
 librib_a_SOURCES += route.cc
 librib_a_SOURCES += rt_tab_base.cc
 librib_a_SOURCES += rt_tab_export.cc
@@ -104,7 +118,6 @@ librib_a_SOURCES += rt_tab_deletion.cc
 librib_a_SOURCES += rt_tab_redist.cc
 librib_a_SOURCES += rt_tab_register.cc
 librib_a_SOURCES += vifmanager.cc
-librib_a_SOURCES += xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = commands

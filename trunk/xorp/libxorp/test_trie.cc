@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_trie.cc,v 1.2 2003/03/10 23:20:36 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_trie.cc,v 1.3 2003/06/26 21:38:54 jcardona Exp $"
 
 #include "xorp.h"
 #include "ipv4net.hh"
@@ -184,6 +184,15 @@ void test_upper_bound6(IPv6 test_addr, IPv6 test_answer) {
 }
 
 int main() {
+    //test that find works OK with an empty trie (ie finds nothing).
+    IPv4 a("1.0.0.0");
+    TriePostOrderIterator<IPv4, IPv4RouteEntry*> ti_post
+	= trie.find(a);
+    if (ti_post != trie.end()) {
+	printf("FAIL\n");
+	abort();
+    }
+    printf("PASS: find on empty trie found nothing\n");
 
     IPv4RouteEntry d1;
     IPv4Net n1(IPv4("1.2.1.0"), 24);

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.8 2003/07/30 23:43:30 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.9 2003/08/01 02:11:49 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -38,6 +38,7 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libribclientxif.a
 LDADD		+= $(top_builddir)/xrl/targets/libribbase.a
+LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 ### MFEA libraries
 LDADD		+= $(top_builddir)/fea/libfea.a
 # FEA-specific begin
@@ -68,6 +69,11 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
 test_pim_SOURCES = test_pim.cc
+test_pim_SOURCES += $(top_builddir)/rib/rib_manager.hh
+test_pim_SOURCES += $(top_builddir)/rib/rib_manager.cc
+test_pim_SOURCES += $(top_builddir)/rib/xrl_target.hh
+test_pim_SOURCES += $(top_builddir)/rib/xrl_target.cc
+
 
 # -- Library Sources
 libpim_a_SOURCES  = pim_module.h

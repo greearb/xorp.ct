@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.22 2003/09/16 18:13:47 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_rib_xrls.cc,v 1.23 2003/09/27 10:42:40 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -23,6 +23,7 @@
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 
+#include "dummy_rib_manager.hh"
 #include "parser.hh"
 #include "parser_direct_cmds.hh"
 #include "parser_xrl_cmds.hh"
@@ -71,15 +72,17 @@ parser_main()
     XrlStdRouter xrl_router(eventloop, "rib", fs.addr(), fs.port());
     RibClient rib_client(xrl_router, "fea");
 
+    RibManager rib_manager;
+
     // RIB Instantiations for XrlRibTarget
-    RIB<IPv4> urib4(UNICAST, eventloop);
+    RIB<IPv4> urib4(UNICAST, rib_manager, eventloop);
     DummyRegisterServer regserv;
     urib4.initialize_register(&regserv);
 
     // Instantiated but not used
-    RIB<IPv4> mrib4(MULTICAST, eventloop);
-    RIB<IPv6> urib6(UNICAST, eventloop);
-    RIB<IPv6> mrib6(MULTICAST, eventloop);
+    RIB<IPv4> mrib4(MULTICAST, rib_manager, eventloop);
+    RIB<IPv6> urib6(UNICAST, rib_manager, eventloop);
+    RIB<IPv6> mrib6(MULTICAST, rib_manager, eventloop);
 
     VifManager vif_manager(xrl_router, eventloop, NULL);
     vif_manager.enable();

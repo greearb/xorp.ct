@@ -119,10 +119,10 @@ noinst_LIBRARIES = libpim.a
 ### MRT libraries
 ### CLI libraries
 ### XORP misc libraries
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmld6igmpxif.a $(top_builddir)/xrl/targets/libpimbase.a $(top_builddir)/mld6igmp/libmld6igmp.a $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a $(top_builddir)/xrl/targets/libmld6igmpbase.a $(top_builddir)/rib/librib.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/fea/libfea.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/interfaces/libcommonxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/interfaces/libmld6igmpxif.a $(top_builddir)/xrl/targets/libpimbase.a $(top_builddir)/mld6igmp/libmld6igmp.a $(top_builddir)/xrl/interfaces/libmfeaxif.a $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.a $(top_builddir)/xrl/targets/libmld6igmpbase.a $(top_builddir)/rib/librib.a $(top_builddir)/xrl/interfaces/libftixif.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/interfaces/libribclientxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a $(top_builddir)/fea/libfea.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/xrl/interfaces/libclimanagerxif.a $(top_builddir)/xrl/interfaces/libmfeaclientxif.a $(top_builddir)/xrl/targets/libmfeabase.a $(top_builddir)/mrt/libmrt.a $(top_builddir)/cli/libcli.a $(top_builddir)/cli/libtecla/libtecla.a -lcurses $(top_builddir)/xrl/interfaces/libcliprocessorxif.a $(top_builddir)/xrl/interfaces/libcommonxif.a $(top_builddir)/xrl/targets/libclibase.a $(top_builddir)/libproto/libproto.a $(top_builddir)/libxipc/libfinder.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
-test_pim_SOURCES = test_pim.cc
+test_pim_SOURCES = test_pim.cc $(top_builddir)/rib/rib_manager.hh $(top_builddir)/rib/rib_manager.cc $(top_builddir)/rib/xrl_target.hh $(top_builddir)/rib/xrl_target.cc
 
 # -- Library Sources
 libpim_a_SOURCES = pim_module.h pim_proto.h pim_bsr.hh pim_mfc.hh pim_mre.hh pim_mre_task.hh pim_mre_track_state.hh pim_mrib_table.hh pim_mrt.hh pim_nbr.hh pim_node.hh pim_node_cli.hh pim_private.hh pim_proto_assert.hh pim_proto_join_prune_message.hh pim_rp.hh pim_scope_zone_table.hh pim_vif.hh xrl_pim_node.hh pim_bsr.cc pim_config.cc pim_mfc.cc pim_mre.cc pim_mre_assert.cc pim_mre_data.cc pim_mre_join_prune.cc pim_mre_register.cc pim_mre_rpf.cc pim_mre_task.cc pim_mre_track_state.cc pim_mrib_table.cc pim_mrt.cc pim_mrt_mfc.cc pim_mrt_task.cc pim_nbr.cc pim_node.cc pim_node_cli.cc pim_proto_assert.cc pim_proto_bootstrap.cc pim_proto_cand_rp_adv.cc pim_proto_graft.cc pim_proto_graft_ack.cc pim_proto_hello.cc pim_proto_join_prune.cc pim_proto_join_prune_message.cc pim_proto_register.cc pim_proto_register_stop.cc pim_rp.cc pim_scope_zone_table.cc pim_vif.cc xrl_pim_node.cc
@@ -162,7 +162,8 @@ bin_PROGRAMS =
 noinst_PROGRAMS = test_pim$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
-am_test_pim_OBJECTS = test_pim.$(OBJEXT)
+am_test_pim_OBJECTS = test_pim.$(OBJEXT) rib_manager.$(OBJEXT) \
+	xrl_target.$(OBJEXT)
 test_pim_OBJECTS = $(am_test_pim_OBJECTS)
 test_pim_LDADD = $(LDADD)
 test_pim_DEPENDENCIES = libpim.a \
@@ -178,6 +179,7 @@ test_pim_DEPENDENCIES = libpim.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libribclientxif.a \
 	$(top_builddir)/xrl/targets/libribbase.a \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/fea/libfea.a \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
 	$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
@@ -228,8 +230,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/pim_proto_register_stop.Po \
 @AMDEP_TRUE@	$(DEPDIR)/pim_rp.Po \
 @AMDEP_TRUE@	$(DEPDIR)/pim_scope_zone_table.Po \
-@AMDEP_TRUE@	$(DEPDIR)/pim_vif.Po $(DEPDIR)/test_pim.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_pim_node.Po
+@AMDEP_TRUE@	$(DEPDIR)/pim_vif.Po $(DEPDIR)/rib_manager.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_pim.Po $(DEPDIR)/xrl_pim_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_target.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -291,6 +294,8 @@ clean-binPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+rib_manager.$(OBJEXT): $(top_builddir)/rib/rib_manager.cc
+xrl_target.$(OBJEXT): $(top_builddir)/rib/xrl_target.cc
 test_pim$(EXEEXT): $(test_pim_OBJECTS) $(test_pim_DEPENDENCIES) 
 	@rm -f test_pim$(EXEEXT)
 	$(CXXLINK) $(test_pim_LDFLAGS) $(test_pim_OBJECTS) $(test_pim_LDADD) $(LIBS)
@@ -332,8 +337,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pim_rp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pim_scope_zone_table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pim_vif.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rib_manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_pim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_pim_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_target.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -349,6 +356,30 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+rib_manager.o: $(top_builddir)/rib/rib_manager.cc
+@AMDEP_TRUE@	source='$(top_builddir)/rib/rib_manager.cc' object='rib_manager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/rib_manager.Po' tmpdepfile='$(DEPDIR)/rib_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rib_manager.o `test -f $(top_builddir)/rib/rib_manager.cc || echo '$(srcdir)/'`$(top_builddir)/rib/rib_manager.cc
+
+rib_manager.obj: $(top_builddir)/rib/rib_manager.cc
+@AMDEP_TRUE@	source='$(top_builddir)/rib/rib_manager.cc' object='rib_manager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/rib_manager.Po' tmpdepfile='$(DEPDIR)/rib_manager.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rib_manager.obj `cygpath -w $(top_builddir)/rib/rib_manager.cc`
+
+xrl_target.o: $(top_builddir)/rib/xrl_target.cc
+@AMDEP_TRUE@	source='$(top_builddir)/rib/xrl_target.cc' object='xrl_target.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xrl_target.Po' tmpdepfile='$(DEPDIR)/xrl_target.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xrl_target.o `test -f $(top_builddir)/rib/xrl_target.cc || echo '$(srcdir)/'`$(top_builddir)/rib/xrl_target.cc
+
+xrl_target.obj: $(top_builddir)/rib/xrl_target.cc
+@AMDEP_TRUE@	source='$(top_builddir)/rib/xrl_target.cc' object='xrl_target.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/xrl_target.Po' tmpdepfile='$(DEPDIR)/xrl_target.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xrl_target.obj `cygpath -w $(top_builddir)/rib/xrl_target.cc`
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 

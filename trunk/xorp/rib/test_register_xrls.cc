@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.17 2003/09/16 18:13:47 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.18 2003/09/27 10:42:40 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -29,6 +29,7 @@
 #include "xrl_target.hh"
 #include "rib_client.hh"
 #include "register_server.hh"
+#include "rib_manager.hh"
 #include "xrl/targets/ribclient_base.hh"
 
 bool callback_flag;
@@ -158,7 +159,7 @@ add_igp_table(XrlRibV0p1Client& client,
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
-    client.send_add_igp_table4("rib", tablename, true, false, cb);
+    client.send_add_igp_table4("rib", tablename, "", "", true, false, cb);
 
     xrl_done_flag = false;
     while (xrl_done_flag == false) {
@@ -174,7 +175,7 @@ add_egp_table(XrlRibV0p1Client& client,
 {
     XorpCallback1<void, const XrlError&>::RefPtr cb;
     cb = callback(xrl_done);
-    client.send_add_egp_table4("rib", tablename, true, false, cb);
+    client.send_add_egp_table4("rib", tablename, "", "", true, false, cb);
 
     xrl_done_flag = false;
     while (xrl_done_flag == false) {
@@ -324,22 +325,24 @@ main(int /* argc */, char *argv[])
     XrlStdRouter client_xrl_router(eventloop, "ribclient");
     RibClientTarget ribclienttarget(&client_xrl_router);
 
+    RibManager rib_manager(eventloop, xrl_router);
+
     // RIB Instantiations for XrlRibTarget
-    RIB<IPv4> urib4(UNICAST, eventloop);
+    RIB<IPv4> urib4(UNICAST, rib_manager, eventloop);
     RegisterServer regserv(&xrl_router);
     urib4.initialize_register(&regserv);
-    if (urib4.add_igp_table("connected") < 0) {
+    if (urib4.add_igp_table("connected", "", "") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib4");
 	abort();
     }
 
     // Instantiated but not used
-    RIB<IPv4> mrib4(MULTICAST, eventloop);
-    mrib4.add_igp_table("connected");
-    RIB<IPv6> urib6(UNICAST, eventloop);
-    urib6.add_igp_table("connected");
-    RIB<IPv6> mrib6(MULTICAST, eventloop);
-    mrib6.add_igp_table("connected");
+    RIB<IPv4> mrib4(MULTICAST, rib_manager, eventloop);
+    mrib4.add_igp_table("connected", "", "");
+    RIB<IPv6> urib6(UNICAST, rib_manager, eventloop);
+    urib6.add_igp_table("connected", "", "");
+    RIB<IPv6> mrib6(MULTICAST, rib_manager, eventloop);
+    mrib6.add_igp_table("connected", "", "");
 
     VifManager vif_manager(xrl_router, eventloop, NULL);
     vif_manager.enable();

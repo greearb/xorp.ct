@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_origin.cc,v 1.9 2003/05/29 17:59:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_deletion.cc,v 1.1 2003/09/27 10:42:40 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -37,9 +37,10 @@ DeletionTable<A>::DeletionTable<A>(
 {
     _parent = parent;
     _next_table = _parent->next_table();
-    _next_table->replumb(_parent, this);
-    _parent->set_next_table(this);
+    _next_table->replumb(parent, this);
+    parent->set_next_table(this);
     _ip_route_table = ip_route_trie;
+
     _background_deletion_timer = _eventloop.
 	new_oneoff_after_ms(0 /*call back immediately, but after
 				network events or expired timers */,
@@ -217,6 +218,7 @@ void
 DeletionTable<A>::unplumb_self()
 {
     _parent->set_next_table(_next_table);
+    _next_table->replumb(this, _parent);
     delete this;
 }
 
