@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.17 2003/05/27 04:33:07 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.18 2003/05/28 19:02:30 mjh Exp $"
 
 #include <signal.h>
 
@@ -135,10 +135,11 @@ main(int argc, char* const argv[])
     const char*	config_boot         = default_config_boot;
     IPv4	bind_addr = IPv4::ANY();
     uint16_t	bind_port = FINDER_NG_TCP_DEFAULT_PORT;
+    int32_t     quit_time = -1;
 
     int c;
 
-    while ((c = getopt (argc, argv, "t:b:x:i:p:n")) != EOF) {
+    while ((c = getopt (argc, argv, "t:b:x:i:p:q:n")) != EOF) {
 	switch(c) {  
 	case 't':
 	    config_template_dir = optarg;
@@ -148,6 +149,9 @@ main(int argc, char* const argv[])
 	    break;
 	case 'x':
 	    xrl_dir = optarg;
+	    break;
+	case 'q':
+	    quit_time = atoi(optarg);
 	    break;
 	case 'n':
 	    do_exec = false;
@@ -256,6 +260,14 @@ main(int argc, char* const argv[])
 	XrlRtrmgrInterface rtrmgr_target(xrlrouter, userdb,
 					 ct, eventloop, randgen);
 
+	//for testing, rtrmgr can terminate itself after some time.
+	XorpTimer quit_timer;
+	if (quit_time > 0) {
+	    quit_timer = 
+		eventloop.new_oneoff_after_ms(quit_time*1000,
+					      callback(signalhandler, 0));
+	}
+
 	//loop while handling configuration events and signals
 	while (running) {
 	    printf("+");
@@ -297,6 +309,9 @@ main(int argc, char* const argv[])
 
     return (errcode);
 }
+
+
+
 
 
 
