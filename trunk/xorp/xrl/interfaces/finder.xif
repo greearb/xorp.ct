@@ -6,9 +6,9 @@ interface finder/0.1 {
 	   * able to process messages from the finder.
 	   */
 	  register_finder_client ? target_name:txt			      \
-	  			  -> instance_id:txt
+				 & class_name:txt
 
-	  unregister_finder_client
+	  unregister_finder_client ? target_name:txt
 
 	  /** 
 	   * Add resolved Xrl into system, fails if xrl is already
@@ -22,12 +22,14 @@ interface finder/0.1 {
 	  /** Remove xrl */
 	  remove_xrl ? xrl:txt
 
+	  /**
+	   * Resolve Xrl
+	   */
+	   resolve_xrl ? xrl:txt -> resolutions:list
+
 	  /** Get list of registered Xrl targets */
 	  get_xrl_targets -> target_names:list
 
 	  /** Get list of Xrls registered by target */
 	  get_xrls_registered_by ? target_name:txt -> xrls:list
-
-	  /** Get list of all Xrls registered with finder */
-	  get_all_xrls -> xrls:list
 }
