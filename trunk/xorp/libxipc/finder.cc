@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.12 2003/05/22 22:25:21 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.13 2003/06/05 02:11:21 atanu Exp $"
 
 #include <set>
 
@@ -133,12 +133,41 @@ public:
 	return _classwatches.find(class_name) != _classwatches.end();
     }
 
+    bool add_instance_watch(const string& instance_name)
+    {
+	pair<set<string>::iterator,bool> r = _instancewatches.insert(instance_name);
+	return r.second;
+    }
+
+    void remove_instance_watch(const string& instance_name)
+    {
+	set<string>::iterator i = _instancewatches.find(instance_name);
+ 	if (i != _instancewatches.end()) {
+	    _instancewatches.erase(i);
+	}
+    }
+
+    bool has_instance_watch(const string& instance_name) const
+    {
+#ifdef DEBUG_LOGGING
+	debug_msg("tgt %s has watches on:\n", _name.c_str());
+	set<string>::const_iterator wi = _instancewatches.begin();
+	while (wi != _instancewatches.end()) {
+	    debug_msg("-> %s\n", wi->c_str());
+	    ++wi;
+	}
+#endif
+	return _instancewatches.find(instance_name) != _instancewatches.end();
+    }
+
 protected:
     string			_name;		// name of target
     string			_class_name;	// name of target class
     string			_cookie;
     bool			_enabled;
-    set<string>			_classwatches;	// list of classes being
+    set<string>			_classwatches;	// set of classes being
+    						// watched
+    set<string>			_instancewatches; // set of targets being
     						// watched
     ResolveMap			_resolutions;	// items registered by target
     FinderMessengerBase*	_messenger;	// source of registrations
@@ -855,7 +884,7 @@ Finder::add_class_watch(const string& target,
     TargetTable::iterator i = _targets.find(target);
 
     if (i != _targets.end() && i->second.add_class_watch(class_to_watch)) {
-	announce_class_instances(class_to_watch, target);
+	announce_class_instances(target, class_to_watch);
 	return true;
     }
     return false;
@@ -863,12 +892,49 @@ Finder::add_class_watch(const string& target,
 
 bool
 Finder::remove_class_watch(const string& target,
-			const string& class_to_watch)
+			   const string& class_to_watch)
 {
     TargetTable::iterator i = _targets.find(target);
     if (i == _targets.end())
 	return false;
     i->second.remove_class_watch(class_to_watch);
+    return true;
+}
+
+bool
+Finder::add_instance_watch(const string& target,
+			   const string& instance_to_watch)
+{
+    TargetTable::iterator watcher_i = _targets.find(target);
+    if (watcher_i == _targets.end())
+	return false;	// watcher does not exist
+
+    TargetTable::const_iterator watched_i = _targets.find(instance_to_watch);
+    if (watched_i == _targets.end())
+	return false;	// watched does not exist
+
+    FinderTarget& watcher = watcher_i->second;
+    if (watcher.add_instance_watch(instance_to_watch)) {
+	OutQueueTable::iterator oqi = _out_queues.find(watcher.messenger());
+	XLOG_ASSERT(oqi != _out_queues.end());
+	FinderXrlCommandQueue& out_queue = oqi->second;
+	const FinderTarget& watched = watched_i->second;
+	announce_new_instance(watcher.name(), out_queue,
+			      watched.class_name(),
+			      watched.name());
+	return true;
+    }
+    return false;
+}
+
+bool
+Finder::remove_instance_watch(const string& target,
+			      const string& instance_to_watch)
+{
+    TargetTable::iterator i = _targets.find(target);
+    if (i == _targets.end())
+	return false;
+    i->second.remove_instance_watch(instance_to_watch);
     return true;
 }
 
@@ -888,8 +954,12 @@ Finder::announce_events_externally()
 	TargetTable::iterator i;
 	for (i = _targets.begin(); i != _targets.end(); ++i) {
 	    FinderTarget& t = i->second;
-	    if (t.has_class_watch(ev.class_name()) == false)
+	    if (t.has_class_watch(ev.class_name()) == false &&
+		t.has_instance_watch(ev.instance_name()) == false) {
+		// t has neither an instance watch nor a class watch
+		// on event entity
 		continue;
+	    }
 
 	    // Build Xrl to tunnel to FinderClient.
 
@@ -947,8 +1017,8 @@ Finder::announce_events_externally()
 }
 
 void
-Finder::announce_class_instances(const string& class_name,
-				 const string& recv_instance_name)
+Finder::announce_class_instances(const string& recv_instance_name,
+				 const string& class_name)
 {
     ClassTable::const_iterator cti = _classes.find(class_name);
     if (cti == _classes.end())
@@ -963,34 +1033,45 @@ Finder::announce_class_instances(const string& class_name,
     const list<string>& instances = cti->second.instances();
     for (list<string>::const_iterator cii = instances.begin();
 	 cii != instances.end(); cii++) {
-	    string xrl_to_tunnel;
-	    XrlFakeSender s(xrl_to_tunnel);
-	    XrlFinderEventObserverV0p1Client eo(&s);
-
-	    eo.send_xrl_target_birth(recv_instance_name.c_str(),
-				     class_name, *cii,
-				     callback(dummy_xrl_cb));
-	    XLOG_ASSERT(xrl_to_tunnel.empty() == false);
-
-	    //
-	    // Message has form of unresolved xrl.  We send resolved form
-	    // to make spoofing harder.  This is circuitous.
-	    //
-	    Xrl x(xrl_to_tunnel.c_str());
-	    const Resolveables* r = resolve(recv_instance_name,
-					    x.string_no_args());
-	    if (r == 0 || r->empty()) {
-		XLOG_ERROR("Failed to resolve %s\n", xrl_to_tunnel.c_str());
-		continue;
-	    }
-	    Xrl y(r->front().c_str());
-	    Xrl z(x.target(), y.command(), x.args());
-	    xrl_to_tunnel = z.str();
-
-	    FinderXrlCommandQueue& q = oqi->second;
-	    q.enqueue(new FinderSendTunneledXrl(q, recv_instance_name,
-						xrl_to_tunnel));
-	    debug_msg("Enqueued xrl \"%s\"\n", xrl_to_tunnel.c_str());
+	announce_new_instance(recv_instance_name,
+			      oqi->second,
+			      class_name,
+			      *cii);
     }
+}
+
+void
+Finder::announce_new_instance(const string& recv_instance_name,
+			      FinderXrlCommandQueue& oq,
+			      const string& class_name,
+			      const string& new_instance_name)
+{
+    string xrl_to_tunnel;
+    XrlFakeSender s(xrl_to_tunnel);
+    XrlFinderEventObserverV0p1Client eo(&s);
+
+    eo.send_xrl_target_birth(recv_instance_name.c_str(),
+			     class_name, new_instance_name,
+			     callback(dummy_xrl_cb));
+    XLOG_ASSERT(xrl_to_tunnel.empty() == false);
+
+    //
+    // Message has form of unresolved xrl.  We send resolved form
+    // to make spoofing harder.  This is circuitous.
+    //
+    Xrl x(xrl_to_tunnel.c_str());
+    const Resolveables* r = resolve(recv_instance_name,
+				    x.string_no_args());
+    if (r == 0 || r->empty()) {
+	XLOG_ERROR("Failed to resolve %s\n", xrl_to_tunnel.c_str());
+	return;
+    }
+    Xrl y(r->front().c_str());
+    Xrl z(x.target(), y.command(), x.args());
+    xrl_to_tunnel = z.str();
+
+    oq.enqueue(new FinderSendTunneledXrl(oq, recv_instance_name,
+					 xrl_to_tunnel));
+    debug_msg("Enqueued xrl \"%s\"\n", xrl_to_tunnel.c_str());
 }
 

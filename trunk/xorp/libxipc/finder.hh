@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder.hh,v 1.11 2003/05/22 22:25:21 hodson Exp $
+// $XORP: xorp/libxipc/finder.hh,v 1.12 2003/06/01 21:37:27 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_HH__
 #define __LIBXIPC_FINDER_HH__
@@ -85,6 +85,12 @@ public:
     bool remove_class_watch(const string& target,
 			    const string& class_to_watch);
 
+    bool add_instance_watch(const string& target,
+			    const string& instance_to_watch);
+
+    bool remove_instance_watch(const string& target,
+			       const string& instance_to_watch);
+
     const string& primary_instance(const string& instance_or_class) const;
 
     const Resolveables* resolve(const string& target, const string& key);
@@ -109,9 +115,16 @@ protected:
 			     const string& instance_name);
 
     void announce_xrl_departure(const string& target, const string& key);
+
     void announce_events_externally();
-    void announce_class_instances(const string& class_name,
-				  const string& recv_instance_name);
+
+    void announce_class_instances(const string& recv_instance_name,
+				  const string& class_name);
+
+    void announce_new_instance(const string& recv_instance_name,
+			       FinderXrlCommandQueue& out_queue,
+			       const string& class_name,
+			       const string& instance_name);
 
     inline bool hello_timer_running() const { return _hello.scheduled(); }
     void start_hello_timer();

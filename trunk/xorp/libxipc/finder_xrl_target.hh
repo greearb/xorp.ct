@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.10 2003/05/22 22:25:22 hodson Exp $
+// $XORP: xorp/libxipc/finder_xrl_target.hh,v 1.11 2003/05/29 21:17:15 mjh Exp $
 
 #ifndef __LIBXIPC_FINDER_XRL_TARGET_HH__
 #define __LIBXIPC_FINDER_XRL_TARGET_HH__
@@ -51,7 +51,7 @@ public:
 						  const string&	class_name,
 						  const bool&	singleton,
 						  const string& in_cookie,
-						  string&	out_cookie);  
+						  string&	out_cookie);
 
     XrlCmdError finder_0_2_unregister_finder_client(const string& target_name);
 
@@ -64,9 +64,9 @@ public:
     /**
      *  Add resolved Xrl into system, fails if xrl is already registered.
      */
-    XrlCmdError finder_0_2_add_xrl(const string& xrl, 
-				   const string& protocol_name, 
-				   const string& protocol_args, 
+    XrlCmdError finder_0_2_add_xrl(const string& xrl,
+				   const string& protocol_name,
+				   const string& protocol_args,
 				   string&	 resolved_xrl_method_name);
 
     /**
@@ -79,7 +79,7 @@ public:
      */
     XrlCmdError finder_0_2_resolve_xrl(const string&	xrl,
 				       XrlAtomList&	resolutions);
-    
+
     /**
      *  Get list of registered Xrl targets
      */
@@ -88,7 +88,7 @@ public:
     /**
      *  Get list of Xrls registered by target
      */
-    XrlCmdError finder_0_2_get_xrls_registered_by(const string&	target_name, 
+    XrlCmdError finder_0_2_get_xrls_registered_by(const string&	target_name,
 						  XrlAtomList&	xrls);
 
     XrlCmdError finder_0_2_get_ipv4_permitted_hosts(XrlAtomList& ipv4s);
@@ -107,7 +107,13 @@ public:
 
     XrlCmdError finder_event_notifier_0_1_deregister_class_event_interest(
 		    const string& who, const string& class_name);
-    
+
+    XrlCmdError finder_event_notifier_0_1_register_instance_event_interest(
+		    const string& who, const string& instance_name);
+
+    XrlCmdError finder_event_notifier_0_1_deregister_instance_event_interest(
+		    const string& who, const string& instance_name);
+
 protected:
     Finder& _finder;
 };

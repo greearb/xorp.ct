@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.16 2003/06/01 21:37:28 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.17 2003/06/19 00:44:42 hodson Exp $"
 
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
@@ -136,7 +136,7 @@ FinderXrlTarget::finder_0_2_register_finder_client(const string& tgt_name,
 		      "cookie = \"%s\")",
 		      tgt_name.c_str(), class_name.c_str(),
 		      singleton, in_cookie.c_str());
-    
+
     if (in_cookie.empty() == false) {
 	out_cookie = in_cookie;
 	_finder.remove_target_with_cookie(out_cookie);
@@ -457,6 +457,46 @@ FinderXrlTarget::finder_event_notifier_0_1_deregister_class_event_interest(
 	return XrlCmdError::COMMAND_FAILED("failed (not originator).");
     }
     if (_finder.remove_class_watch(who, class_name)) {
+	finder_trace_result("okay, but watch was non-existent.");
+	return XrlCmdError::OKAY();
+    }
+    finder_trace_result("okay");
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderXrlTarget::finder_event_notifier_0_1_register_instance_event_interest(
+						 const string& who,
+						 const string& instance_name
+						 )
+{
+    finder_trace_init("register_instance_event_interest (who = %s, instance = %s)",
+		      who.c_str(), instance_name.c_str());
+    if (_finder.active_messenger_represents_target(who) == false) {
+	finder_trace_result("messenger does not represent target.");
+	return XrlCmdError::COMMAND_FAILED("failed (not originator).");
+    }
+    if (_finder.add_instance_watch(who, instance_name) == false) {
+	finder_trace_result("failed to add watch.");
+	return XrlCmdError::COMMAND_FAILED("failed to add watch");
+    }
+    finder_trace_result("okay");
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+FinderXrlTarget::finder_event_notifier_0_1_deregister_instance_event_interest(
+						 const string& who,
+						 const string& instance_name
+						 )
+{
+    finder_trace_init("deregister_instance_event_interest (who = %s, instance = %s)",
+		      who.c_str(), instance_name.c_str());
+    if (_finder.active_messenger_represents_target(who) == false) {
+	finder_trace_result("messenger does not represent target.");
+	return XrlCmdError::COMMAND_FAILED("failed (not originator).");
+    }
+    if (_finder.remove_instance_watch(who, instance_name)) {
 	finder_trace_result("okay, but watch was non-existent.");
 	return XrlCmdError::OKAY();
     }
