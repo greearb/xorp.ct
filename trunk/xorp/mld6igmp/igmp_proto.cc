@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.23 2004/02/24 21:02:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.24 2004/02/26 13:14:20 pavlin Exp $"
 
 
 //
@@ -375,7 +375,7 @@ Mld6igmpVif::igmp_membership_query_recv(const IPvX& src,
     int igmp_message_version;
     
     // Ignore my own queries
-    if (mld6igmp_node().vif_find_by_addr(src) != NULL)
+    if (mld6igmp_node().is_my_addr(src))
 	return (XORP_ERROR);
     
     igmp_message_version = IGMP_V2;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.14 2004/02/28 00:52:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.15 2004/02/29 22:57:01 pavlin Exp $"
 
 
 //
@@ -1343,7 +1343,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
     // XXX: silently ignore the messages originated by myself
     // TODO: this search is probably too much overhead?
     if (ignore_my_packets()) {
-	if (mfea_node().vif_find_by_addr(src) != NULL)
+	if (mfea_node().is_my_addr(src))
 	    return;		// Error
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.26 2004/02/26 13:14:20 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.27 2004/03/04 00:14:20 pavlin Exp $"
 
 
 //
@@ -359,7 +359,7 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
 				      buffer_t *buffer)
 {
     // Ignore my own queries
-    if (mld6igmp_node().vif_find_by_addr(src) != NULL)
+    if (mld6igmp_node().is_my_addr(src))
 	return (XORP_ERROR);
     
     //

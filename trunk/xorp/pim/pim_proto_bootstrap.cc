@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.11 2004/02/24 21:04:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.12 2004/02/24 21:11:08 pavlin Exp $"
 
 
 //
@@ -110,7 +110,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 	    ++_pimstat_rx_bsr_not_rpf_interface;
 	    goto ret_label;
 	}
-    } else if (pim_node().vif_find_by_addr(dst) != NULL) {
+    } else if (pim_node().is_my_addr(dst)) {
 	// BSM.dst_ip_address is one of my addresses
 	is_unicast_message = true;
     } else {

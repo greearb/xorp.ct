@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.33 2004/03/01 10:05:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.34 2004/03/02 00:32:32 pavlin Exp $"
 
 
 //
@@ -775,7 +775,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     int ret_value = XORP_ERROR;
     
     // Ignore my own PIM messages
-    if (pim_node().vif_find_by_addr(src) != NULL)
+    if (pim_node().is_my_addr(src))
 	return (XORP_ERROR);
     
     //
