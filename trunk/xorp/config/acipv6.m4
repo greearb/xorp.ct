@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.2 2003/01/29 02:59:06 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.3 2003/04/16 04:39:27 pavlin Exp $
 dnl
 
 dnl
@@ -80,8 +80,8 @@ for i in KAME; do
   case $i in
   KAME)
     dnl http://www.kame.net/
-    AC_EGREP_CPP(yes, [dnl
-#include <netinet/in.h>
+    AC_EGREP_CPP(yes,
+[#include <netinet/in.h>
 #ifdef __KAME__
 yes
 #endif],
