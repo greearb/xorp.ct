@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_expect.cc,v 1.7 2004/04/01 19:54:12 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_expect.cc,v 1.8 2004/06/10 22:41:40 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -113,21 +113,21 @@ ExpectTable<A>::ExpectTable(const string&   tablename,
 template<class A>
 ExpectTable<A>::~ExpectTable()
 {
-    XLOG_ASSERT(_expected.empty());
+    XLOG_ASSERT(_expected_route_changes.empty());
 }
 
 template<class A>
 void
 ExpectTable<A>::expect_add(const IPRouteEntry<A>& route)
 {
-    _expected.push_back(ExpectedRouteChange<A>(true, route));
+    _expected_route_changes.push_back(ExpectedRouteChange<A>(true, route));
 }
 
 template<class A>
 void
 ExpectTable<A>::expect_delete(const IPRouteEntry<A>& route)
 {
-    _expected.push_back(ExpectedRouteChange<A>(false, route));
+    _expected_route_changes.push_back(ExpectedRouteChange<A>(false, route));
 }
 
 template<class A>
@@ -138,16 +138,16 @@ ExpectTable<A>::add_route(const IPRouteEntry<A>& 	route,
     XLOG_ASSERT(caller == _parent);
     debug_msg("DT[%s]: Adding route %s\n", this->tablename().c_str(),
 	      route.str().c_str());
-    if (_expected.empty()) {
+    if (_expected_route_changes.empty()) {
 	XLOG_FATAL("ExpectTable: unexpected add_route received");
     }
-    if (_expected.front().matches_add(route)) {
-	_expected.pop_front();
+    if (_expected_route_changes.front().matches_add(route)) {
+	_expected_route_changes.pop_front();
 	return XORP_OK;
     }
     XLOG_FATAL("ExpectTable: unexpected add_route received. "
 	       "Expected: %s; Received: Add of %s",
-	       _expected.front().str().c_str(),
+	       _expected_route_changes.front().str().c_str(),
 	       route.str().c_str());
     return XORP_ERROR;
 }
@@ -160,16 +160,16 @@ ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route,
     XLOG_ASSERT(caller == _parent);
     debug_msg("DT[%s]: Deleting route %s\n", this->tablename().c_str(),
 	      route->str().c_str());
-    if (_expected.empty()) {
+    if (_expected_route_changes.empty()) {
 	XLOG_FATAL("ExpectTable: unexpected delete_route received");
     }
-    if (_expected.front().matches_delete(route)) {
-	_expected.pop_front();
+    if (_expected_route_changes.front().matches_delete(route)) {
+	_expected_route_changes.pop_front();
 	return XORP_OK;
     }
     XLOG_FATAL("ExpectTable: unexpected delete_route received. "
 	       "Expected: %s; Received: Delete of %s",
-	       _expected.front().str().c_str(),
+	       _expected_route_changes.front().str().c_str(),
 	       route->str().c_str());
     return XORP_ERROR;
 }

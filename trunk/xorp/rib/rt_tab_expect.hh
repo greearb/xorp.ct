@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_expect.hh,v 1.3 2004/02/11 08:48:48 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_expect.hh,v 1.4 2004/06/10 22:41:40 hodson Exp $
 
 #ifndef __RIB_RT_TAB_EXPECT_HH__
 #define __RIB_RT_TAB_EXPECT_HH__
@@ -40,6 +40,10 @@ public:
     ExpectTable(const string& tablename, RouteTable<A>* parent);
     ~ExpectTable();
 
+    const list<ExpectedRouteChange<A> >& expected_route_changes() const {
+	return _expected_route_changes;
+    }
+
     void expect_add(const IPRouteEntry<A>& route);
     void expect_delete(const IPRouteEntry<A>& route);
     int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
@@ -53,8 +57,8 @@ public:
     string str() const;
 
 private:
-    RouteTable<A>* _parent;
-    list<ExpectedRouteChange<A> > _expected;
+    RouteTable<A>*			_parent;
+    list<ExpectedRouteChange<A> >	_expected_route_changes;
 };
 
 #endif // __RIB_RT_TAB_EXPECT_HH__
