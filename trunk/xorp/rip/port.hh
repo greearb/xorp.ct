@@ -23,6 +23,7 @@
 #include "libxorp/eventloop.hh"
 
 #include "constants.hh"
+#include "port_vars.hh"
 #include "port_io.hh"
 
 //
@@ -31,213 +32,25 @@
 class AuthHandlerBase;
 
 template <typename A>
-class PortManagerBase;
+class OutputTable;
 
 template <typename A>
-class Peer;
+class OutputUpdates;
+
+template <typename A>
+class PacketRouteEntry;
 
 template <typename A>
 class PacketQueue;
 
 template <typename A>
-class RouteEntry;
+class Peer;
 
 template <typename A>
-class PacketRouteEntry;
+class PortManagerBase;
 
-
-/**
- * @short Container of timer constants associated with a RIP port.
- */
-class PortTimerConstants {
-public:
-    /**
-     * Initialize contants with default values from RIPv2 spec.  The values
-     * are defined in constants.hh.
-     */
-    inline PortTimerConstants();
-
-    /**
-     * Set the route expiration time.
-     * @param t the expiration time in seconds.
-     */
-    inline void set_expiry_secs(uint32_t t);
-
-    /**
-     * Get the route route expiration time.
-     * @return expiry time in seconds.
-     */
-    inline uint32_t expiry_secs() const;
-
-    /**
-     * Set the route deletion time.
-     * @param t the deletion time in seconds (must be >= 1).
-     * @return true on success, false if t == 0.
-     */
-    inline bool set_deletion_secs(uint32_t t);
-
-    /**
-     * Get the route deletion time.
-     * @return deletion time in seconds.
-     */
-    inline uint32_t deletion_secs() const;
-
-    /**
-     * Set request packet transmission period.  Request packets are only
-     * sent when there are no peers associated with a port.
-     * @param t inter-packet interval in seconds.
-     */
-    inline void set_table_request_period_secs(uint32_t t);
-
-    /**
-     * Set request packet transmission period.
-     * @return inter-packet interval in seconds.
-     */
-    inline uint32_t table_request_period_secs() const;
-
-    /**
-     * Set the lower bound of the triggered update interval.
-     * @param t the lower bound of the triggered update interval in seconds.
-     */
-    inline void set_triggered_update_min_wait_secs(uint32_t t);
-
-    /**
-     * Get the lower bound of the triggered update interval.
-     * @return the lower bound of the triggered update interval in seconds.
-     */
-    inline uint32_t triggered_update_min_wait_secs() const;
-
-    /**
-     * Set the upper bound of the triggered update interval.
-     * @param t the upper bound of the triggered update interval in seconds.
-     */
-    inline void set_triggered_update_max_wait_secs(uint32_t t);
-
-    /**
-     * Get the upper bound of the triggered update interval.
-     * @return the upper bound of the triggered update interval in seconds.
-     */
-    inline uint32_t triggered_update_max_wait_secs() const;
-
-    /**
-     * Set the interpacket packet delay.
-     * @param t the interpacket delay for back-to-back packets in
-     * milliseconds.
-     * @return true on success, false if t is greater than
-     * MAXIMUM_INTERPACKET_DELAY_MS.
-     */
-    inline bool	set_interpacket_delay_ms(uint32_t t);
-
-    /**
-     * Get the interpacket packet delay in milliseconds.
-     */
-    inline uint32_t interpacket_delay_ms() const;
-
-    /**
-     * Set the interquery gap.  This is the minimum temporal gap between
-     * route request packets that query specific routes.  Queries arriving
-     * at a faster rate are ignored.
-     * @param t the interquery delay in milliseconds.
-     */
-    inline void	set_interquery_delay_ms(uint32_t t);
-
-    /**
-     * Get the interquery gap.  This is the minimum temporal gap between
-     * route request packets that query specific routes.  Fast arriving
-     * queries are ignored.
-     * @return the interquery delay in milliseconds.
-     */
-    inline uint32_t interquery_delay_ms() const;
-
-protected:
-    uint32_t _expiry_secs;
-    uint32_t _deletion_secs;
-    uint32_t _table_request_secs;
-    uint32_t _triggered_update_min_wait_secs;
-    uint32_t _triggered_update_max_wait_secs;
-    uint32_t _interpacket_msecs;
-    uint32_t _interquery_msecs;
-};
-
-
-/**
- * @short Container of counters associated with a Port.
- */
-struct PortCounters {
-public:
-    PortCounters() : _packets_recv(0), _bad_routes(0), _bad_packets(0),
-		     _tr_sent(0), _tr_recv(), _triggered_updates(0)
-    {}
-
-    /**
-     * Get the total number of packets received.
-     */
-    inline uint32_t packets_recv() const	{ return _packets_recv; }
-
-    /**
-     * Increment the total number of packets received.
-     */
-    inline void incr_packets_recv()		{ _packets_recv++; }
-
-    /**
-     * Get the number of bad routes received (eg invalid metric,
-     * invalid address family).
-     */
-    inline uint32_t bad_routes() const		{ return _bad_routes; }
-
-    /**
-     * Increment the number of bad routes received.
-     */
-    inline void incr_bad_routes()		{ _bad_routes++; }
-
-    /**
-     * Get the number of bad response packets received.
-     */
-    inline uint32_t bad_packets() const		{ return _bad_packets; }
-
-    /**
-     * Increment the number of bad response packets received.
-     */
-    inline void incr_bad_packets()		{ _bad_packets++; }
-
-    /**
-     * Get the number of triggered updates sent.
-     */
-    inline uint32_t triggered_updates() const	{ return _triggered_updates; }
-
-    /**
-     * Increment the number of triggered updates sent.
-     */
-    inline void incr_triggered_updates() 	{ _triggered_updates++; }
-
-    /**
-     * Get the number of table requests sent.
-     */
-    inline uint32_t table_requests_sent() const	{ return _tr_sent; }
-
-    /**
-     * Increment the number of table requests updates sent.
-     */
-    inline void incr_table_requests_sent() 	{ _tr_sent++; }
-
-    /**
-     * Get the number of table requests received.
-     */
-    inline uint32_t table_requests_recv() const	{ return _tr_recv; }
-
-    /**
-     * Increment the number of table requests updates received.
-     */
-    inline void incr_table_requests_recv() 	{ _tr_recv++; }
-
-protected:
-    uint32_t _packets_recv;
-    uint32_t _bad_routes;
-    uint32_t _bad_packets;
-    uint32_t _tr_sent;			// table requests sent
-    uint32_t _tr_recv;			// table requests received
-    uint32_t _triggered_updates;
-};
+template <typename A>
+class RouteEntry;
 
 
 /**
@@ -568,6 +381,30 @@ protected:
      */
     bool queries_blocked() const;
 
+    /**
+     * Unsolicited update output timer timeout.
+     */
+    void unsolicited_response_timeout();
+
+    /**
+     * Triggered update timeout.
+     */
+    void triggered_update_timeout();
+
+    /**
+     * Start output processing.
+     *
+     * Starts timers for unsolicited updates and triggered updates.
+     */
+    void start_output_processing();
+
+    /**
+     * Stop output processing.
+     *
+     * Stops timers for unsolicited updates and triggered updates.
+     */
+    void stop_output_processing();
+
 public:
     /**
      * If I/O handler is not already sending a packet, take a packet from
@@ -621,7 +458,7 @@ protected:
 
     XorpTimer		_rt_timer;		// Request table timer
     XorpTimer		_gc_timer;		// Peer garbage collection
-    XorpTimer		_us_timer;		// Unsolicited update timer
+    XorpTimer		_ur_timer;		// Unsolicited response timer
     XorpTimer		_tu_timer;		// Triggered update timer
     XorpTimer		_query_blocked_timer;	// Rate limiting on queries
 
@@ -634,111 +471,10 @@ protected:
     PacketQueue<A>*	_packet_queue;		// Outbound packet queue
     PortTimerConstants	_constants;		// Port related timer constants
     PortCounters	_counters;		// Packet counters
+
+    OutputTable<A>*	_ur_out;		// Unsolicited update output
+    OutputUpdates<A>*	_tu_out;		// Triggered update output
+    OutputTable<A>*	_su_out;		// Solicited update output
 };
-
-
-// ----------------------------------------------------------------------------
-// Inline PortTimerConstants accessor and modifiers.
-
-PortTimerConstants::PortTimerConstants()
-    : _expiry_secs(DEFAULT_EXPIRY_SECS),
-      _deletion_secs(DEFAULT_DELETION_SECS),
-      _table_request_secs(DEFAULT_TABLE_REQUEST_SECS),
-      _triggered_update_min_wait_secs(DEFAULT_TRIGGERED_UPDATE_MIN_WAIT_SECS),
-      _triggered_update_max_wait_secs(DEFAULT_TRIGGERED_UPDATE_MAX_WAIT_SECS),
-      _interpacket_msecs(DEFAULT_INTERPACKET_DELAY_MS),
-      _interquery_msecs(DEFAULT_INTERQUERY_GAP_MS)
-{
-}
-
-inline void
-PortTimerConstants::set_expiry_secs(uint32_t t)
-{
-    _expiry_secs = t;
-}
-
-inline uint32_t
-PortTimerConstants::expiry_secs() const
-{
-    return _expiry_secs;
-}
-
-inline bool
-PortTimerConstants::set_deletion_secs(uint32_t t)
-{
-    if (t < 1)
-	return false;
-    _deletion_secs = t;
-    return true;
-}
-
-inline uint32_t
-PortTimerConstants::deletion_secs() const
-{
-    return _deletion_secs;
-}
-
-inline void
-PortTimerConstants::set_table_request_period_secs(uint32_t t)
-{
-    _table_request_secs = t;
-}
-
-inline uint32_t
-PortTimerConstants::table_request_period_secs() const
-{
-    return _table_request_secs;
-}
-
-inline void
-PortTimerConstants::set_triggered_update_min_wait_secs(uint32_t t)
-{
-    _triggered_update_min_wait_secs = t;
-}
-
-inline uint32_t
-PortTimerConstants::triggered_update_min_wait_secs() const
-{
-    return _triggered_update_min_wait_secs;
-}
-
-inline void
-PortTimerConstants::set_triggered_update_max_wait_secs(uint32_t t)
-{
-    _triggered_update_max_wait_secs = t;
-}
-
-inline uint32_t
-PortTimerConstants::triggered_update_max_wait_secs() const
-{
-    return _triggered_update_max_wait_secs;
-}
-
-inline bool
-PortTimerConstants::set_interpacket_delay_ms(uint32_t t)
-{
-    if (t > MAXIMUM_INTERPACKET_DELAY_MS)
-	return false;
-    _interpacket_msecs = t;
-    return true;
-}
-
-inline uint32_t
-PortTimerConstants::interpacket_delay_ms() const
-{
-    return _interpacket_msecs;
-}
-
-inline void
-PortTimerConstants::set_interquery_delay_ms(uint32_t t)
-{
-    _interquery_msecs = t;
-}
-
-inline uint32_t
-PortTimerConstants::interquery_delay_ms() const
-{
-    return _interquery_msecs;
-}
 
 #endif // __RIP_PORT_HH__

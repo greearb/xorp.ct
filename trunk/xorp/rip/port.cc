@@ -17,6 +17,7 @@
 #include "rip_module.h"
 
 #include "libxorp/xorp.h"
+#include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
@@ -32,6 +33,18 @@
 #include "packet_assembly.hh"
 #include "packet_queue.hh"
 #include "system.hh"
+
+#include "output_table.hh"
+#include "output_updates.hh"
+
+// ----------------------------------------------------------------------------
+// Utilities
+
+uint32_t
+range_random(const uint32_t lo, const uint32_t hi)
+{
+    return lo + ( random() % (hi - lo) );
+}
 
 // ----------------------------------------------------------------------------
 // Address Family specific Port methods
@@ -76,7 +89,10 @@ Port<A>::Port(PortManagerBase<A>& pm)
        _horizon(SPLIT_POISON_REVERSE),
        _advertise(false),
        _adv_def_rt(false),
-       _acc_def_rt(false)
+       _acc_def_rt(false),
+       _ur_out(0),
+       _tu_out(0),
+       _su_out(0)
 {
     _packet_queue = new PacketQueue<A>();
 }
@@ -88,6 +104,11 @@ Port<A>::~Port()
 	delete _peers.front();
 	_peers.pop_front();
     }
+
+    delete _ur_out;
+    delete _su_out;
+    delete _tu_out;
+
     delete _packet_queue;
 }
 
@@ -101,7 +122,6 @@ Port<A>::create_peer(const Addr& addr)
 	start_peer_gc_timer();
 	return peer;
     }
-
     return 0;
 }
 
@@ -131,6 +151,118 @@ Port<A>::peer(const Addr& addr) const
 	++i;
     }
     return 0;
+}
+
+template <typename A>
+void
+Port<A>::unsolicited_response_timeout()
+{
+    debug_msg("Unsolicited response timeout %p\n", this);
+
+    //
+    // Fast forward triggered updater because we're about to dump entire
+    // table.
+    //
+    _tu_out->ffwd();
+
+    //
+    // Check if unsolicited response process already exists and kill
+    // it if so.
+    //
+    if (_ur_out->running()) {
+	XLOG_WARNING("Starting unsolicited response process while an "
+		     "existing one is already running.\n");
+	_ur_out->stop();
+    }
+
+    // Start output process.
+    _ur_out->start();
+
+    //
+    // Reschedule this callback in next interval
+    //
+    uint32_t ms = 1000 *
+	range_random(constants().unsolicited_response_min_secs(),
+		     constants().unsolicited_response_max_secs());
+    _ur_timer.reschedule_after_ms(ms);
+}
+
+template <typename A>
+void
+Port<A>::triggered_update_timeout()
+{
+    debug_msg("Triggered update timeout %p\n", this);
+    {
+	RouteDB<A>& rdb = _pm.system().route_db();
+	debug_msg("- Route DB routes = %u\n", rdb.route_count());
+    }
+
+    // Table dump is running, we should not be doing triggered updates.
+    if (_ur_out->running())
+	    goto reschedule;
+
+    //
+    // Push triggered updater along.  It wont be running if we've just
+    // instantiated it, or if it was running and ran out of updates to
+    // announce.
+    //
+    if (_tu_out->running() == false) {
+	_tu_out->start();
+    }
+
+ reschedule:
+    uint32_t ms = 1000 *
+	range_random(constants().triggered_update_min_wait_secs(),
+		     constants().triggered_update_max_wait_secs());
+    _tu_timer.reschedule_after_ms(ms);
+
+}
+
+template <typename A>
+void
+Port<A>::start_output_processing()
+{
+    EventLoop& e = _pm.eventloop();
+    RouteDB<A>& rdb = _pm.system().route_db();
+
+    // Create triggered update output process
+    _tu_out = new OutputUpdates<A>(e, *this, *_packet_queue, rdb);
+
+    // Schedule triggered update process
+    uint32_t ms;
+    ms = 1000 * range_random(constants().unsolicited_response_min_secs(),
+			     constants().unsolicited_response_max_secs());
+    _ur_timer =
+	e.new_oneoff_after_ms(ms,
+			      callback(this,
+				       &Port<A>::unsolicited_response_timeout)
+			      );
+
+    // Create unsolicited response (table dump) output process
+    _ur_out = new OutputTable<A>(e, *this, *_packet_queue, rdb);
+
+    // Schedule unsolicited output process
+    ms = 1000 * range_random(constants().triggered_update_min_wait_secs(),
+			     constants().triggered_update_max_wait_secs());
+    _tu_timer =
+	e.new_oneoff_after_ms(ms,
+			      callback(this,
+				       &Port<A>::triggered_update_timeout)
+			      );
+}
+
+template <typename A>
+void
+Port<A>::stop_output_processing()
+{
+    delete _ur_out;
+    _ur_out = 0;
+
+    delete _tu_out;
+    _tu_out = 0;
+
+    _ur_timer.unschedule();
+    _tu_timer.unschedule();
 }
 
 template <typename A>
@@ -169,7 +301,7 @@ Port<A>::request_table_timeout()
 	delete pkt;
     }
     push_packets();
-    fprintf(stderr, "Sending Request.\n");
+    debug_msg("Sending Request.\n");
     return true;
 }
 
@@ -197,7 +329,12 @@ Port<A>::peer_gc_timeout()
 	    i++;
 	}
     }
-    return _peers.empty() == false;
+
+    if (_peers.empty()) {
+	start_request_table_timer();
+	return false;
+    }
+    return true;
 }
 
 template <typename A>
@@ -346,8 +483,10 @@ Port<A>::port_io_enabled_change(bool en)
 {
     if (en) {
 	start_request_table_timer();
+	start_output_processing();
     } else {
 	stop_request_table_timer();
+	stop_output_processing();
     }
 }
 
@@ -393,7 +532,6 @@ Port<A>::parse_request(const Addr&			src_addr,
 
     if (queries_blocked())
 	return;
-
 
     // XXXX
     // NEED TO DISTINGUISH BETWEEN FULL TABLE QUERIES AND ROUTE QUERIES
@@ -569,15 +707,6 @@ Port<IPv4>::port_io_receive(const IPv4&		src_address,
 				   " (%d != %d)", src_port, RIP_PORT),
 			  src_address, src_port, p);
 	return;
-    }
-
-    //
-    // Authenticate packet (actually we should check what packet wants
-    // before authenticating - we may not care in all cases...)
-    //
-    if (af_state().auth_handler() == NULL) {
-	XLOG_FATAL("Received packet on interface without an authentication "
-		   "handler.");
     }
 
     const PacketRouteEntry<IPv4>* entries = 0;
