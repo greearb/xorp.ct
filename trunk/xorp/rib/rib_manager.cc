@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.33 2004/05/20 22:18:18 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.34 2004/05/20 23:45:46 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -184,8 +184,13 @@ add_rib_vif(RIB<A>& rib, const string& vifname, const Vif& vif, string& err)
 {
     int result = rib.new_vif(vifname, vif);
     if (result != XORP_OK) {
-	err = c_format("Failed to add VIF \"%s\" to %s",
-			vifname.c_str(), rib.name().c_str());
+	if (err.size() == 0) {
+	    err = c_format("Failed to add VIF \"%s\" to %s",
+			   vifname.c_str(), rib.name().c_str());
+	} else {
+	    err = c_format(", and failed to add VIF \"%s\" to %s",
+			   vifname.c_str(), rib.name().c_str());
+	}
     }
     return result;
 }
@@ -193,13 +198,11 @@ add_rib_vif(RIB<A>& rib, const string& vifname, const Vif& vif, string& err)
 int
 RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
 {
-    if (add_rib_vif(_urib4, vifname, vif, err) != XORP_OK ||
-	add_rib_vif(_mrib4, vifname, vif, err) != XORP_OK ||
-	add_rib_vif(_urib6, vifname, vif, err) != XORP_OK ||
-	add_rib_vif(_mrib6, vifname, vif, err) != XORP_OK) {
-	return XORP_ERROR;
-    }
-    return XORP_OK;
+    err.resize(0);
+    return (add_rib_vif(_urib4, vifname, vif, err)
+	    | add_rib_vif(_mrib4, vifname, vif, err)
+	    | add_rib_vif(_urib6, vifname, vif, err)
+	    | add_rib_vif(_mrib6, vifname, vif, err));
 }
 
 template <typename A>
@@ -208,8 +211,13 @@ delete_rib_vif(RIB<A>& rib, const string& vifname, string& err)
 {
     int result = rib.delete_vif(vifname);
     if (result != XORP_OK) {
-	err = c_format("Failed to delete VIF \"%s\" from %s",
-			vifname.c_str(), rib.name().c_str());
+	if (err.empty()) {
+	    err = c_format("Failed to delete VIF \"%s\" from %s",
+			   vifname.c_str(), rib.name().c_str());
+	} else {
+	    err += c_format(", and failed to delete VIF \"%s\" from %s",
+			    vifname.c_str(), rib.name().c_str());
+	}
     }
     return result;
 }
@@ -217,13 +225,11 @@ delete_rib_vif(RIB<A>& rib, const string& vifname, string& err)
 int
 RibManager::delete_vif(const string& vifname, string& err)
 {
-    if (delete_rib_vif(_urib4, vifname, err) != XORP_OK ||
-	delete_rib_vif(_mrib4, vifname, err) != XORP_OK ||
-	delete_rib_vif(_urib6, vifname, err) != XORP_OK ||
-	delete_rib_vif(_mrib6, vifname, err) != XORP_OK) {
-	return XORP_ERROR;
-    }
-    return XORP_OK;
+    err.resize(0);
+    return (delete_rib_vif(_urib4, vifname, err)
+	    | delete_rib_vif(_mrib4, vifname, err)
+	    | delete_rib_vif(_urib6, vifname, err)
+	    | delete_rib_vif(_mrib6, vifname, err));
 }
 
 
