@@ -41,7 +41,9 @@ xorp_ospfv3_SOURCES		= xorp_ospfv3.cc
 test_packet_SOURCES		= test_packet.cc
 
 # -- Library Sources
-libospf_la_SOURCES  = ls_database_manager.hh
+libospf_la_SOURCES  = exceptions.hh
+libospf_la_SOURCES  += lsa.hh
+libospf_la_SOURCES  += ls_database_manager.hh
 libospf_la_SOURCES  += ospf.hh
 libospf_la_SOURCES  += packet.hh
 libospf_la_SOURCES  += peer_manager.hh
@@ -50,6 +52,7 @@ libospf_la_SOURCES  += xrl_io.hh
 libospf_la_SOURCES  += xrl_target.hh
 
 libospf_la_SOURCES  += ls_database_manager.cc
+libospf_la_SOURCES  += lsa.cc
 libospf_la_SOURCES  += ospf.cc
 libospf_la_SOURCES  += packet.cc
 libospf_la_SOURCES  += peer_manager.cc
