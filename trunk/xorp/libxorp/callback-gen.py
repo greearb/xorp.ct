@@ -120,9 +120,15 @@ def output_header(args, dbg):
  * This file is PROGRAMMATICALLY GENERATED.
  *"""
     print " * This instance was generated with:\n *     ",
-    o = ""
-    for a in args:
-        o += "%s " % a
+
+    ls = args[0].rfind("/")
+    if (ls >= 0):
+        o = args[0][ls + 1:]
+    else:
+        o = args[0]
+
+    for a in args[1:]:
+        o += " %s" % a
     print o.strip()
     print " */"
 

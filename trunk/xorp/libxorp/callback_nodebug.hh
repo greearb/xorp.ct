@@ -5,7 +5,7 @@
  * This file is PROGRAMMATICALLY GENERATED.
  *
  * This instance was generated with:
- *      ./callback-gen.py -b 6 -l 13
+ *      callback-gen.py -b 6 -l 13
  */
 
 /**
