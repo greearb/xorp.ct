@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/README,v 1.8 2003/11/06 23:34:13 pavlin Exp $
+# $XORP: xorp/mld6igmp/README,v 1.9 2003/11/07 00:00:12 pavlin Exp $
 #
 
 Multicast Listener Discovery/Internet Group Management Protocol
@@ -32,6 +32,7 @@ After ``test_mld6igmp'' is started, the MFEA and MLD/IGMP are
 disabled by default. To start them, and to configure their operation,
 as well as the MLD/IGMP operation, run script ``configure_mld6igmp''.
 Note that it MUST be run from the ``${XORP}/mld6igmp'' directory.
+To run MLD/IGMP in IPv6 mode, then run ``./configure_mld6igmp -6'' instead.
 
 However, before running ``configure_mld6igmp'', you must configure
 it for each router:

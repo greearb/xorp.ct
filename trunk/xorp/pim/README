@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.12 2003/11/07 00:00:12 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.13 2004/02/22 03:18:45 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -41,6 +41,7 @@ After ``./test_pim'' is started, the MFEA, MLD/IGMP, and PIM-SM are
 disabled by default. To start them, and to configure their operation,
 as well as the PIM-SM operation, run script ``./configure_pim''.
 Note that it MUST be run from the ``${XORP}/pim'' directory.
+To run PIM-SM in IPv6 mode, then run ``./configure_pim -6'' instead.
 
 However, before running ``./configure_pim'', you must configure
 it for each router:

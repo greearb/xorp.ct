@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.7 2003/11/06 23:08:01 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.8 2003/11/07 00:00:11 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -56,6 +56,7 @@ this program (as a root).
 After ``test_mfea'' is started, the MFEA is disabled by default. To
 start it, and to configure its operation, run script ``configure_mfea''.
 Note that it MUST be run from the ``$XORP/fea'' directory.
+To run MFEA in IPv6 mode, then run ``./configure_mfea -6'' instead.
 
 However, before running ``configure_mfea'', you must configure
 it for each router:
