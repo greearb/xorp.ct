@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.16 2004/03/02 00:32:31 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.17 2004/03/02 00:46:34 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -37,6 +37,15 @@ are already running. However, the binary program ``./test_pim'' already
 contains them as well, therefore it is sufficient to start only this
 program (as a root).
 
+First, make sure that IP forwarding is enabled.
+ - In case of FreeBSD run as a root (for IPv4 and IPv6 respectively):
+     sysctl net.inet.ip.forwarding=1
+     sysctl net.inet6.ip6.forwarding=1
+
+ - In case of Linux run as a root (for IPv4):
+      echo 1 > /proc/sys/net/ipv4/ip_forward
+   Note that currently Linux doesn't support IPv6 multicast routing.
+
 After ``./test_pim'' is started, the MFEA, MLD/IGMP, and PIM-SM are
 disabled by default. To start them, and to configure their operation,
 as well as the PIM-SM operation, run script ``./configure_pim''.
@@ -56,6 +65,10 @@ it for each router:
 	CAND_BSR_VIF="dc1"
 	CAND_RP_VIF="dc1"
 	;;
+
+   Note that each enabled vif must have a domain-wide reachable
+   address. E.g., in case of IPv6 link-local addresses are not
+   sufficient.
 
  - If you don't want to configure the PIM-SM router as a Candidate-BSR
    or a Candidate-RP, then comment-out CAND_BSR_VIF or CAND_RP_VIF
