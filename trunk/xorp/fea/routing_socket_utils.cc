@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.11 2004/02/18 01:53:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.12 2004/03/17 07:18:54 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -291,7 +291,10 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 		|| (rtm->rtm_type == RTM_GET));
     debug_msg("%p index %d type %s\n", rtm, if_index,
 	      rtm_msg_type(rtm->rtm_type).c_str());
-    
+
+    if (rtm->rtm_errno != 0)
+	return false;		 // XXX: ignore entries with an error
+
     // Reset the result
     fte.zero();
 

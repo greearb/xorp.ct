@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.5 2003/09/20 06:53:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.6 2004/03/17 07:33:32 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -80,6 +80,9 @@ FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 	    && (rtm->rtm_type != RTM_GET)) {
 	    continue;
 	}
+
+	if (rtm->rtm_errno != 0)
+	    continue;		// XXX: ignore entries with an error
 
 #ifdef RTF_WASCLONED
 	if (rtm->rtm_flags & RTF_WASCLONED)
