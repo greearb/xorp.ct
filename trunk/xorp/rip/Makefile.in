@@ -94,12 +94,13 @@ LDFLAGS =
 LDADD = ./librip.a $(top_builddir)/libxorp/libxorp.a
 
 noinst_PROGRAMS = $(TESTS)
-TESTS = test_auth test_packets test_route_walk test_timers
+TESTS = test_auth test_packets test_route_walk test_timers test_update_queue
 
 test_auth_SOURCES = test_auth.cc
 test_packets_SOURCES = test_packets.cc
 test_route_walk_SOURCES = test_route_walk.cc
 test_timers_SOURCES = test_timers.cc
+test_update_queue_SOURCES = test_update_queue.cc
 
 librip_a_SOURCES = rip_module.h auth.hh constants.hh packets.hh peer.hh port.hh port_io.hh port_manager.hh redist.hh route_db.hh route_entry.hh update_queue.hh auth.cc peer.cc port.cc redist.cc route_db.cc route_entry.cc update_queue.cc
 
@@ -119,7 +120,8 @@ am_librip_a_OBJECTS = auth.$(OBJEXT) peer.$(OBJEXT) port.$(OBJEXT) \
 	update_queue.$(OBJEXT)
 librip_a_OBJECTS = $(am_librip_a_OBJECTS)
 noinst_PROGRAMS = test_auth$(EXEEXT) test_packets$(EXEEXT) \
-	test_route_walk$(EXEEXT) test_timers$(EXEEXT)
+	test_route_walk$(EXEEXT) test_timers$(EXEEXT) \
+	test_update_queue$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 
 am_test_auth_OBJECTS = test_auth.$(OBJEXT)
@@ -143,6 +145,12 @@ test_timers_OBJECTS = $(am_test_timers_OBJECTS)
 test_timers_LDADD = $(LDADD)
 test_timers_DEPENDENCIES = ./librip.a $(top_builddir)/libxorp/libxorp.a
 test_timers_LDFLAGS =
+am_test_update_queue_OBJECTS = test_update_queue.$(OBJEXT)
+test_update_queue_OBJECTS = $(am_test_update_queue_OBJECTS)
+test_update_queue_LDADD = $(LDADD)
+test_update_queue_DEPENDENCIES = ./librip.a \
+	$(top_builddir)/libxorp/libxorp.a
+test_update_queue_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -154,7 +162,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/route_db.Po $(DEPDIR)/route_entry.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_auth.Po $(DEPDIR)/test_packets.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_route_walk.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_timers.Po $(DEPDIR)/update_queue.Po
+@AMDEP_TRUE@	$(DEPDIR)/test_timers.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_update_queue.Po \
+@AMDEP_TRUE@	$(DEPDIR)/update_queue.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -168,9 +178,9 @@ CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) \
 	$(test_packets_SOURCES) $(test_route_walk_SOURCES) \
-	$(test_timers_SOURCES)
+	$(test_timers_SOURCES) $(test_update_queue_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) $(test_packets_SOURCES) $(test_route_walk_SOURCES) $(test_timers_SOURCES)
+SOURCES = $(librip_a_SOURCES) $(test_auth_SOURCES) $(test_packets_SOURCES) $(test_route_walk_SOURCES) $(test_timers_SOURCES) $(test_update_queue_SOURCES)
 
 all: all-am
 
@@ -207,6 +217,9 @@ test_route_walk$(EXEEXT): $(test_route_walk_OBJECTS) $(test_route_walk_DEPENDENC
 test_timers$(EXEEXT): $(test_timers_OBJECTS) $(test_timers_DEPENDENCIES) 
 	@rm -f test_timers$(EXEEXT)
 	$(CXXLINK) $(test_timers_LDFLAGS) $(test_timers_OBJECTS) $(test_timers_LDADD) $(LIBS)
+test_update_queue$(EXEEXT): $(test_update_queue_OBJECTS) $(test_update_queue_DEPENDENCIES) 
+	@rm -f test_update_queue$(EXEEXT)
+	$(CXXLINK) $(test_update_queue_LDFLAGS) $(test_update_queue_OBJECTS) $(test_update_queue_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -224,6 +237,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_route_walk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_timers.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_update_queue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_queue.Po@am__quote@
 
 distclean-depend:

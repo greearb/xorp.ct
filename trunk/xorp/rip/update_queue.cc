@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/update_queue.cc,v 1.3 2003/07/08 15:45:27 hodson Exp $"
+#ident "$XORP: xorp/rip/update_queue.cc,v 1.4 2003/07/08 16:56:17 hodson Exp $"
 
 #include <vector>
+#include <list>
 
 #include "rip_module.h"
 
+#include "libxorp/debug.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/xlog.h"
@@ -25,103 +27,314 @@
 #include "update_queue.hh"
 
 /**
- * Class used to manage read iterators into update queue buffer.
+ * @short Store for a fixed block of update.
+ *
+ * Stores a group of updates in a block.  They are stored like this
+ * for two reasons.  Firstly, we can track readers entering and
+ * leaving blocks which makes garbage collection decisions easy.
+ * Secondly, it involves minimal copying of ref_ptrs (compared to say
+ * a scrolling vector of ref_ptrs).
  */
-class UpdateQueueReaderPool {
+template <typename A>
+struct UpdateBlock {
 public:
-    UpdateQueueReaderPool()
-	: _icnt (0)
+    typedef typename UpdateQueue<A>::RouteUpdate RouteUpdate;
+    static const size_t MAX_UPDATES = 100;
+
+public:
+    UpdateBlock()
+	: _updates(MAX_UPDATES), _update_cnt(0), _refs(0)
+    {}
+
+    ~UpdateBlock()
+    {
+	XLOG_ASSERT(_refs == 0);
+    }
+
+    bool full() const
+    {
+	return _update_cnt == MAX_UPDATES;
+    }
+
+    bool empty() const
+    {
+	return _update_cnt == 0;
+    }
+
+    size_t count() const
+    {
+	return _update_cnt;
+    }
+
+    bool add_update(const RouteUpdate& u)
+    {
+	XLOG_ASSERT(u.get() != 0);
+
+	if ( full() ) {
+	    XLOG_WARNING("Attempting to add update to full block");
+	    return false;
+	}
+	_updates[_update_cnt++] = u;
+	return true;
+    }
+
+    const RouteUpdate& get(uint32_t pos) const
+    {
+	XLOG_ASSERT(pos < MAX_UPDATES);
+
+	return _updates[pos];
+    }
+
+    void ref()
+    {
+	_refs++;
+    }
+
+    void unref()
+    {
+	XLOG_ASSERT( _refs > 0 );
+	_refs--;
+    }
+
+    uint32_t ref_cnt() const
+    {
+	return _refs;
+    }
+
+private:
+    vector<RouteUpdate> _updates;
+    size_t		_update_cnt;
+    uint32_t		_refs;
+};
+
+
+// ----------------------------------------------------------------------------
+// UpdateQueueImpl
+
+/**
+ * @short Internal implementation of UpdateQueue class.
+ */
+template <typename A>
+class UpdateQueueImpl
+{
+private:
+    typedef typename UpdateQueue<A>::RouteUpdate RouteUpdate;
+    typedef list<UpdateBlock<A> >		 UpdateBlockList;
+
+    /**
+     * @short State associated with an UpdateQueue reader.
+     */
+    struct ReaderPos {
+	typename UpdateBlockList::iterator _bi;
+	uint32_t		  	   _pos;
+
+	ReaderPos(const typename UpdateBlockList::iterator& bi, uint32_t pos)
+	    : _bi(bi), _pos(pos)
+	{
+	    _bi->ref();
+	}
+
+	~ReaderPos()
+	{
+	    _bi->unref();
+	}
+
+	typename UpdateBlockList::const_iterator
+	block() const
+	{
+	    return _bi;
+	}
+
+	uint32_t
+	position() const
+	{
+	    return _pos;
+	}
+
+	void advance_position()
+	{
+	    if (_pos < _bi->count())
+		_pos++;
+	}
+
+	void advance_block()
+	{
+	    _bi->unref();
+	    _bi++;
+	    _bi->ref();
+	    _pos = 0;
+	}
+
+	void move_to(const typename UpdateBlockList::iterator& bi,
+		     uint32_t pos)
+	{
+	    _bi->unref();
+	    _bi = bi;
+	    _bi->ref();
+	    _pos = pos;
+	}
+    };
+
+private:
+    UpdateBlockList	_update_blocks;
+    vector<ReaderPos*>	_readers;
+    uint32_t		_num_readers;
+
+public:
+    UpdateQueueImpl()
+	: _num_readers(0)
+    {
+	_update_blocks.push_back(UpdateBlock<A>());
+    }
+
+    ~UpdateQueueImpl()
     {
     }
 
-    ~UpdateQueueReaderPool()
+    /**
+     * Create state for a new reader.
+     * @return id for reader.
+     */
+    uint32_t add_reader()
     {
-	for (uint32_t i = 0; i < _pos.size(); i++)
-	    assert(_pos[i] == npos);
-    }
+	typename UpdateBlockList::iterator lb = --_update_blocks.end();
+	ReaderPos* new_reader = new ReaderPos(lb, lb->count());
+	_num_readers++;
 
-    inline uint32_t make_reader()
-    {
-	// Claim an empty slot if available
-	for (uint32_t i = 0; i < _pos.size(); i++) {
-	    if (_pos[i] == npos) {
-		_pos[i] = 0;
-		_icnt++;
+	for (uint32_t i = 0; i < _readers.size(); ++i) {
+	    if (_readers[i] == 0) {
+		_readers[i] = new_reader;
 		return i;
 	    }
 	}
-	// Create and use new slot.
-	_pos.push_back(0);
-	_icnt++;
-	return (uint32_t)(_pos.size() - 1);
+	_readers.push_back(new_reader);
+	return _readers.size() - 1;
     }
 
-    inline void remove_reader(uint32_t reader)
+    /**
+     * Destroy state for reader.
+     * @param id unique id of reader.
+     */
+    void remove_reader(uint32_t id)
     {
-	XLOG_ASSERT(reader < _pos.size() && _pos[reader] != npos);
-	_pos[reader] = npos;
-	_icnt--;
-
-	// Clean up tail entries
-	reader = _pos.size();
-	while (reader > 1 && _pos[reader - 1] == npos) {
-	    reader--;
-	}
-	_pos.resize(reader);
-    }
-
-    inline void incr_reader(uint32_t reader)
-    {
-	XLOG_ASSERT(reader < _pos.size() && _pos[reader] != npos);
-	_pos[reader]++;
-    }
-
-    inline uint32_t reader_position(uint32_t reader) const
-    {
-	XLOG_ASSERT(reader < _pos.size() && _pos[reader] != npos);
-	return _pos[reader];
-    }
-
-    void reset_all_positions()
-    {
-	for (uint32_t i = 0; i < _pos.size(); i++) {
-	    if (_pos[i] == npos)
-		continue;
-	    _pos[i] = 0;
-	}
-    }
-
-    void shift_all_positions(uint32_t reduction)
-    {
-	for (uint32_t i = 0; i < _pos.size(); i++) {
-	    if (_pos[i] == npos)
-		continue;
-	    XLOG_ASSERT(_pos[i] >= reduction);
-	    _pos[i] -= reduction;
-	}
-    }
-
-    uint32_t minimum_position() const
-    {
-	uint32_t m = npos;
-	for (uint32_t i = 0; i < _pos.size(); i++) {
-	    if (_pos[i] < m) {
-		m = _pos[i];
+	if (id < _readers.size() && _readers[id] != 0) {
+	    delete _readers[id];
+	    _readers[id] = 0;
+	    _num_readers--;
+	    if (_num_readers == 0 && _update_blocks.back().empty() == false) {
+		_update_blocks.push_back(UpdateBlock<A>());
 	    }
+	    garbage_collect();
 	}
-	return m;
     }
 
-    uint32_t reader_count() const
+    /**
+     * Remove blocks at front of queue who have no referrers.
+     */
+    void garbage_collect()
     {
-	return _icnt;
+	typename UpdateBlockList::iterator last = --_update_blocks.end();
+	while (_update_blocks.begin() != last &&
+	       _update_blocks.front().ref_cnt() == 0) {
+	    _update_blocks.erase(_update_blocks.begin());
+	}
     }
 
-protected:
-    static const uint32_t npos = ~0;	// Invalid iterator position rep.
+    /**
+     * Advance position of reader by 1 update.
+     * @param id unique id of reader.
+     * @return true if reader advanced, false if reader has reached end.
+     */
+    bool advance_reader(uint32_t id)
+    {
+	XLOG_ASSERT(id < _readers.size());
+	XLOG_ASSERT(_readers[id] != 0);
 
-    vector<uint32_t> _pos;		// Reader positions in updatequeue
-    uint32_t	     _icnt;		// Number of valid iterators
+	ReaderPos* rp = _readers[id];
+	if (rp->position() != UpdateBlock<A>::MAX_UPDATES) {
+	    // debug_msg("Advancing position\n");
+	    rp->advance_position();
+	}
+
+	if (rp->position() == UpdateBlock<A>::MAX_UPDATES &&
+	    rp->block() != --_update_blocks.end()) {
+	    // debug_msg("Advancing block\n");
+	    rp->advance_block();
+	    garbage_collect();
+	}
+	return true;
+    }
+
+    /**
+     * Fast forward reader to end of updates.
+     * @param id unique id of reader.
+     */
+    void ffwd_reader(uint32_t id)
+    {
+	XLOG_ASSERT(id < _readers.size());
+	XLOG_ASSERT(_readers[id] != 0);
+
+	typename UpdateBlockList::iterator bi = --_update_blocks.end();
+	_readers[id]->move_to(bi, bi->count());
+
+	garbage_collect();
+    }
+
+    /**
+     * Fast forward all readers to end of updates.
+     */
+    void
+    flush()
+    {
+	_update_blocks.push_back(UpdateBlock<A>());
+	for (size_t i = 0; i < _readers.size(); i++) {
+	    if (_readers[i] != 0) ffwd_reader(i);
+	}
+    }
+
+    /**
+     * Get data associated with reader.
+     */
+    const RouteEntry<A>*
+    read(uint32_t id)
+    {
+	XLOG_ASSERT(id < _readers.size());
+	XLOG_ASSERT(_readers[id] != 0);
+
+	ReaderPos* rp = _readers[id];
+	// debug_msg("Reading from %d %u/%u\n",
+	//	  id, rp->position(), rp->block()->size());
+
+	// Reader may have reached end of last block and stopped, but
+	// more data may now have been added.
+	if (rp->position() == UpdateBlock<A>::MAX_UPDATES) {
+	    advance_reader(id);
+	}
+
+	if (rp->position() < rp->block()->count()) {
+	    const RouteUpdate& u = rp->block()->get(rp->position());
+	    return u.get();
+	}
+	return 0;
+    }
+
+    bool
+    push_back(const RouteUpdate& u)
+    {
+	if (_num_readers == 0) {
+	    return true;
+	}
+	if (_update_blocks.back().full() == true) {
+	    _update_blocks.push_back(UpdateBlock<A>());
+	}
+	return _update_blocks.back().add_update(u);
+    }
+
+    uint32_t updates_queued() const
+    {
+	return (_update_blocks.size() - 1) * UpdateBlock<A>::MAX_UPDATES
+	    + _update_blocks.back().count();
+    }
 };
 
 
@@ -129,30 +342,23 @@ protected:
 /* UpdateQueueReader methods */
 
 template <typename A>
-UpdateQueueReader<A>::UpdateQueueReader(UpdateQueueReaderPool* p)
-    : _pool(p)
+UpdateQueueReader<A>::UpdateQueueReader(UpdateQueueImpl<A>* impl)
+    : _impl(impl)
 {
-    _reader_no = _pool->make_reader();
+    _id = _impl->add_reader();
 }
 
 template <typename A>
 UpdateQueueReader<A>::~UpdateQueueReader()
 {
-    _pool->remove_reader(_reader_no);
-}
-
-template <typename A>
-inline void
-UpdateQueueReader<A>::incr()
-{
-    _pool->incr_reader(_reader_no);
+    _impl->remove_reader(_id);
 }
 
 template <typename A>
 inline uint32_t
-UpdateQueueReader<A>::position() const
+UpdateQueueReader<A>::id() const
 {
-    return (uint32_t)_pool->reader_position(_reader_no);
+    return _id;
 }
 
 
@@ -162,21 +368,20 @@ UpdateQueueReader<A>::position() const
 template <typename A>
 UpdateQueue<A>::UpdateQueue()
 {
-    _pool = new ReaderPool;
+    _impl = new UpdateQueueImpl<A>();
 }
 
 template <typename A>
 UpdateQueue<A>::~UpdateQueue()
 {
-    delete _pool;
-    _pool = 0;
+    delete _impl;
 }
 
 template <typename A>
 typename UpdateQueue<A>::ReadIterator
 UpdateQueue<A>::create_reader()
 {
-    Reader* r = new Reader(_pool);
+    Reader* r = new UpdateQueueReader<A>(_impl);
     return ReadIterator(r);
 }
 
@@ -191,19 +396,14 @@ template <typename A>
 const RouteEntry<A>*
 UpdateQueue<A>::get(ReadIterator& r) const
 {
-    uint32_t pos = r->position();
-    if (pos < _queue.size()) {
-	return _queue[pos].get();
-    }
-    return 0;
+    return _impl->read(r->id());
 }
 
 template <typename A>
 const RouteEntry<A>*
-UpdateQueue<A>::next(ReadIterator& r) const
+UpdateQueue<A>::next(ReadIterator& r)
 {
-    if (r->position() < _queue.size()) {
-	r->incr();
+    if (_impl->advance_reader(r->id())) {
 	return get(r);
     }
     return 0;
@@ -211,19 +411,30 @@ UpdateQueue<A>::next(ReadIterator& r) const
 
 template <typename A>
 void
+UpdateQueue<A>::ffwd(ReadIterator& r)
+{
+    _impl->ffwd_reader(r->id());
+}
+
+template <typename A>
+void
 UpdateQueue<A>::flush()
 {
-    _pool->reset_all_positions();
-    _queue.resize(0);
+    _impl->flush();
 }
 
 template <typename A>
 void
 UpdateQueue<A>::push_back(const RouteUpdate& u)
 {
-    // Only enqueue if readers are present, no interested parties otherwise
-    if (_pool->reader_count())
-	_queue.push_back(u);
+    _impl->push_back(u);
+}
+
+template <typename A>
+uint32_t
+UpdateQueue<A>::updates_queued() const
+{
+    return _impl->updates_queued();
 }
 
 template class UpdateQueue<IPv4>;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/update_queue.hh,v 1.3 2003/07/08 16:56:17 hodson Exp $
+// $XORP: xorp/rip/update_queue.hh,v 1.4 2003/07/09 00:06:53 hodson Exp $
 
 #ifndef __RIP_UPDATE_QUEUE__
 #define __RIP_UPDATE_QUEUE__
@@ -20,7 +20,8 @@
 #include <vector>
 #include "route_db.hh"
 
-class UpdateQueueReaderPool;
+template <typename A>
+class UpdateQueueImpl;
 
 
 /**
@@ -33,22 +34,14 @@ class UpdateQueueReaderPool;
 template <class A>
 class UpdateQueueReader {
 public:
-    UpdateQueueReader(UpdateQueueReaderPool* p);
+    UpdateQueueReader(UpdateQueueImpl<A>* i);
     ~UpdateQueueReader();
 
-    /**
-     * Advance position by one.
-     */
-    inline void incr();
-
-    /**
-     * Retrieve current position.
-     */
-    inline uint32_t position() const;
+    uint32_t id() const;
 
 private:
-    UpdateQueueReaderPool* _pool;
-    uint32_t		   _reader_no;
+    UpdateQueueImpl<A>* _impl;
+    uint32_t		_id;
 };
 
 
@@ -61,12 +54,12 @@ private:
  */
 template <typename A>
 class UpdateQueue {
+protected:
+    typedef UpdateQueueReader<A>	Reader;
+
 public:
-    typedef UpdateQueueReader<A>	  Reader;
-    typedef UpdateQueueReaderPool	  ReaderPool;
-    typedef ref_ptr<Reader>		  ReadIterator;
-    typedef ref_ptr<const RouteEntry<A> > RouteUpdate;
-    typedef vector<RouteUpdate>		  Queue;
+    typedef ref_ptr<Reader>		ReadIterator;
+    typedef ref_ptr<RouteEntry<A> >	RouteUpdate;
 
 public:
     UpdateQueue();
@@ -100,7 +93,7 @@ public:
      *
      * @return A pointer to a RouteEntry if available, 0 otherwise.
      */
-    const RouteEntry<A>* next(ReadIterator& r) const;
+    const RouteEntry<A>* next(ReadIterator& r);
 
     /**
      * Get the RouteEntry associated with the read iterator.
@@ -114,11 +107,19 @@ public:
      * @ref next and @ref get will return 0 until further
      * updates occur.
      */
-    void ffwd(ReadIterator& r) const;
+    void ffwd(ReadIterator& r);
+
+    /**
+     * Return number of updates held.  Note: this may be more than are
+     * available for reading since there is internal buffering and
+     * UpdateQueue iterators attach at the end of the UpdateQueue.
+     *
+     * @return number of updates queued.
+     */
+    uint32_t updates_queued() const;
 
 protected:
-    struct ReaderPool* _pool;
-    Queue	       _queue;
+    UpdateQueueImpl<A>*	_impl;
 };
 
 #endif // __RIP_UPDATE_QUEUE__
