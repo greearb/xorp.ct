@@ -31,15 +31,14 @@ remote_run $HOST rm -rf "${DESTDIR}/xorp"
 remote_run $HOST rm -rf "${DESTDIR}/data"
 
 # We make tmp as it forces DESTDIR to be created if it doesn't exist and
-# doesn't cause an error if it already does since previous command deletes tmp
+# doesn't cause an error if it already does since previous command deletes
+# tmp.
 
 remote_run $HOST mkdir -p ${DESTDIR}/tmp
 
 for i in xorp scripts data ; do
-    scp ${SSH_FLAGS} -pr ${i} $1:${DESTDIR}
+    tar cfps - ${i} | ssh ${SSH_FLAGS} $1 cd ${DESTDIR} \&\& tar xfps -
     if [ $? -ne 0 ] ; then
 	exit 1
     fi
 done
-
-
