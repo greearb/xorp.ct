@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.45 2004/04/15 16:13:28 hodson Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.46 2004/05/05 18:35:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -97,6 +97,14 @@ BGPPlumbing::delete_peering(PeerHandler* peer_handler)
     result |= plumbing_ipv4().delete_peering(peer_handler);
     result |= plumbing_ipv6().delete_peering(peer_handler);
     return result;
+}
+
+void
+BGPPlumbing::flush(PeerHandler* peer_handler) 
+{
+    debug_msg("BGPPlumbing::flush\n");
+    plumbing_ipv4().flush(peer_handler);
+    plumbing_ipv6().flush(peer_handler);
 }
 
 int 
@@ -728,7 +736,29 @@ BGPPlumbingAF<A>::dump_entire_table(FilterTable<A> *filter_out, string ribname)
 }
 
 template <class A>
-int 
+void
+BGPPlumbingAF<A>::flush(PeerHandler* peer_handler) 
+{
+    debug_msg("BGPPlumbingAF<IPv%u:%s>::flush\n", A::ip_version(),
+	      pretty_string_safi(_master.safi()));
+
+    RibInTable<A> *rib_in;
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
+    iter = _in_map.find(peer_handler);
+    if (iter == _in_map.end())
+	XLOG_FATAL("BGPPlumbingAF<IPv%u:%s>: "
+		   "flush called for a PeerHandler "
+		   "that has no associated RibIn", A::ip_version(),
+		   pretty_string_safi(_master.safi()));
+
+    rib_in = iter->second;
+    // Only allow flushing of static routes
+    XLOG_ASSERT(rib_in == _ipc_rib_in_table);
+    _ipc_rib_in_table->flush();
+}
+
+template <class A>
+int
 BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg, 
 			    PeerHandler* peer_handler) 
 {

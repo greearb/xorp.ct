@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.24 2004/04/01 19:54:07 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.25 2004/04/15 16:13:29 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -44,6 +44,14 @@ template<class A>
 RibInTable<A>::~RibInTable()
 {
     delete _route_table;
+}
+
+template<class A>
+void
+RibInTable<A>::flush()
+{
+    debug_msg("%s\n", this->tablename().c_str());
+    _route_table->delete_all_nodes();
 }
 
 template<class A>

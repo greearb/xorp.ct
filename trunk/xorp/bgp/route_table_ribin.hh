@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.13 2004/02/24 03:16:56 atanu Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.14 2004/04/01 19:54:07 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -30,6 +30,10 @@ class RibInTable : public BGPRouteTable<A>  {
 public:
     RibInTable(string tablename, Safi safi, const PeerHandler *peer);
     ~RibInTable();
+    /**
+     * Remove all the stored routes. Used to flush static routes only.
+     */
+    void flush();
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
 
