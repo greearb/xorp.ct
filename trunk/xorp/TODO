@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.5 2004/06/08 22:52:59 pavlin Exp $
+# $XORP: xorp/TODO,v 1.6 2004/09/02 03:18:05 pavlin Exp $
 #
 
 * Standardize the version string format return by the
@@ -14,12 +14,6 @@
 * Make all #include "config.h" to be #ifdef HAVE_CONFIG_H  (??)
 
 * Make the code as POSIX as possible.
-
-* When checking for AF_ROUTE, AF_NETLINK, etc. in configure.in, instead
-  of trying to run the test program, do only try to compile it instead.
-  After all, the software may be compiled on a machine that may not be
-  used to run the software, hence AF_NETLINK for example may not have
-  to be enabled.
 
 * Fix all file names.
   E.g. all names non-capital letters + numbers, and use underscores.

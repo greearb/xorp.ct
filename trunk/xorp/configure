@@ -8745,8 +8745,8 @@ fi
 
 
 
-echo "$as_me:$LINENO: checking whether the system has routing sockets (AF_ROUTE)" >&5
-echo $ECHO_N "checking whether the system has routing sockets (AF_ROUTE)... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether the build environment has routing sockets (AF_ROUTE)" >&5
+echo $ECHO_N "checking whether the build environment has routing sockets (AF_ROUTE)... $ECHO_C" >&6
 
 
 ac_ext=c
@@ -8755,11 +8755,7 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-if test "$cross_compiling" = yes; then
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
+cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
@@ -8768,24 +8764,37 @@ else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/route.h>
-main()
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
 {
+
   int sock;
   int rtm_version = RTM_VERSION;
 
   sock = socket(AF_ROUTE, SOCK_RAW, 0);
   if ((sock < 0) && (errno == EINVAL))
     return (1);
-  return (0);
-}
 
+  return (0);
+
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -8799,15 +8808,12 @@ _ACEOF
    echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest.$ac_ext
 ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -9289,8 +9295,8 @@ echo "${ECHO_T}no" >&6
 ;;
 esac
 
-echo "$as_me:$LINENO: checking whether the system has netlink sockets (AF_NETLINK)" >&5
-echo $ECHO_N "checking whether the system has netlink sockets (AF_NETLINK)... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking whether the build environment has netlink sockets (AF_NETLINK)" >&5
+echo $ECHO_N "checking whether the build environment has netlink sockets (AF_NETLINK)... $ECHO_C" >&6
 
 
 ac_ext=c
@@ -9299,11 +9305,7 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-if test "$cross_compiling" = yes; then
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
+cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
@@ -9311,23 +9313,36 @@ else
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-main()
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
 {
+
   int sock;
 
   sock = socket(AF_NETLINK, SOCK_RAW, AF_INET);
   if ((sock < 0) && (errno == EINVAL))
     return (1);
-  return (0);
-}
 
+  return (0);
+
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest.$ac_objext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -9351,15 +9366,12 @@ _ACEOF
    echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest.$ac_ext
 ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'

@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.117 2004/09/18 00:35:22 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.118 2004/10/15 09:08:00 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1008,34 +1008,33 @@ if test "${ipv6}" = "yes"; then
 fi
 
 
-dnl ------------------------------------
-dnl Check for routing sockets (AF_ROUTE)
-dnl ------------------------------------
+dnl -------------------------------------------------------------
+dnl Check for routing sockets in the build environment (AF_ROUTE)
+dnl -------------------------------------------------------------
 
-AC_MSG_CHECKING(whether the system has routing sockets (AF_ROUTE))
+AC_MSG_CHECKING(whether the build environment has routing sockets (AF_ROUTE))
 AC_LANG_SAVE
 AC_LANG_C
-AC_TRY_RUN([
+AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/route.h>
-main()
-{
+],
+[
   int sock;
   int rtm_version = RTM_VERSION;
 
   sock = socket(AF_ROUTE, SOCK_RAW, 0);
   if ((sock < 0) && (errno == EINVAL))
     return (1);
+
   return (0);
-}
 ],
   [AC_DEFINE(HAVE_ROUTING_SOCKETS, 1,
 	[Define to 1 if you have BSD-style routing sockets (AF_ROUTE)])
    AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
 
@@ -1234,9 +1233,9 @@ case "${host_os}" in
 ;;
 esac
 
-dnl ------------------------------------
-dnl Check for netlink sockets (AF_NETLINK)
-dnl ------------------------------------
+dnl ---------------------------------------------------------------
+dnl Check for netlink sockets in the build environment (AF_NETLINK)
+dnl ---------------------------------------------------------------
 dnl
 dnl Note that if we have netlink sockets, then we unconditionally set
 dnl HAVE_NETLINK_SOCKETS_SET_MTU_IS_BROKEN and
@@ -1248,23 +1247,23 @@ dnl an error. The test whether we can really set the MTU and the interface
 dnl flags in the kernel is rather complicated, and would require root
 dnl privileges. Enjoy... :-(
 dnl
-AC_MSG_CHECKING(whether the system has netlink sockets (AF_NETLINK))
+AC_MSG_CHECKING(whether the build environment has netlink sockets (AF_NETLINK))
 AC_LANG_SAVE
 AC_LANG_C
-AC_TRY_RUN([
+AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-main()
-{
+],
+[
   int sock;
 
   sock = socket(AF_NETLINK, SOCK_RAW, AF_INET);
   if ((sock < 0) && (errno == EINVAL))
     return (1);
+
   return (0);
-}
 ],
   [AC_DEFINE(HAVE_NETLINK_SOCKETS, 1,
 	[Define to 1 if you have Linux-style netlink sockets (AF_NETLINK)])
@@ -1273,7 +1272,6 @@ main()
    AC_DEFINE(HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN, 1,
 	[Define to 1 if you have Linux-style netlink sockets (AF_NETLINK), but they cannot be used to set the flags on an interface])
    AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 AC_LANG_RESTORE
 
