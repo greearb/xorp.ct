@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.10 2003/07/05 15:06:42 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.11 2003/08/01 23:07:29 pavlin Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -72,11 +72,11 @@ usage(char *name)
 	    name);
     fprintf(stderr, "options:\n");
 
-    fprintf(stderr, 
+    fprintf(stderr,
 	    "\t-t cfg_dir	specify config directory	[ %s ]\n",
 	    default_config_template_dir.c_str());
 
-    fprintf(stderr, 
+    fprintf(stderr,
 	    "\t-x xrl_dir	specify xrl directory		[ %s ]\n",
 	    default_xrl_dir.c_str());
 
@@ -92,14 +92,14 @@ string
 find_exec_path_name(const char *progname)
 {
     char *b, *p;
-    
+
     // Check if we have already specified a path to the program
     do {
 	char max_path[MAXPATHLEN + 1];
-	
+
 	strncpy(max_path, progname,  sizeof(max_path) - 1);
 	max_path[sizeof(max_path) - 1] = '\0';
-	
+
 	p = strrchr(max_path, '/');
 	if ( p != NULL) {
 	    // We have specified a path to the program; return that path
@@ -109,23 +109,23 @@ find_exec_path_name(const char *progname)
 	    return (string(max_path));
 	}
     } while (false);
-    
+
     //
     // Go through the PATH environment variable and find the program location
     //
     char* exec_path = getenv("PATH");
     if (exec_path == NULL)
 	return (string(""));
-    
+
     char buff[strlen(exec_path)];
     strncpy(buff, exec_path, sizeof(buff) - 1);
     buff[sizeof(buff) - 1] = '\0';
-    
+
     b = buff;
     do {
 	if ((b == NULL) || (*b == '\0'))
 	    break;
-	
+
 	// Cut-off the next directory name
 	p = strchr(b, ':');
 	if (p != NULL) {
@@ -136,21 +136,21 @@ find_exec_path_name(const char *progname)
 	    b[strlen(b) - 1] = '\0';
 	string prefix_name = string(b);
 	string abs_progname = prefix_name + string("/") + string(progname);
-	
+
 	if (access(abs_progname.c_str(), X_OK) == 0) {
 	    return (prefix_name);	// Found
 	}
 	b = p;
     } while (true);
-    
+
     return (string(""));
 }
 
-XorpShell::XorpShell(const string& IPCname, 
+XorpShell::XorpShell(const string& IPCname,
 		     const string& xorp_root_dir,
-		     const string& config_template_dir, 
+		     const string& config_template_dir,
 		     const string& xrl_dir)
-    : _eventloop(), 
+    : _eventloop(),
     _xrlrouter(_eventloop, IPCname.c_str()),
     _xclient(_eventloop, _xrlrouter),
     _rtrmgr_client(&_xrlrouter),
@@ -184,11 +184,11 @@ XorpShell::XorpShell(const string& IPCname,
 	printf("caught exception\n");
 #endif
 	xorp_unexpected_handler();
-    } 
+    }
     _ocl->display_list();
 }
 
-void 
+void
 XorpShell::run()
 {
     // signal handlers so we can clean up when we're killed
@@ -198,19 +198,19 @@ XorpShell::run()
 
     // Set the callback when the CLI exits (e.g., after Ctrl-D)
     _cli_node.set_cli_client_delete_callback(callback(exit_handler));
-    
+
     const uint32_t uid = getuid();
-    _rtrmgr_client.send_register_client("rtrmgr", uid, _ipc_name, 
-					callback(this, 
+    _rtrmgr_client.send_register_client("rtrmgr", uid, _ipc_name,
+					callback(this,
 						 &XorpShell::register_done));
-    
+
     _mode = MODE_AUTHENTICATING;
     while (_authfile.empty()) {
 	_eventloop.run();
     }
 
 #ifdef DEBUG_STARTUP
-    printf("Registry with rtrmgr successful: token is %s\n", 
+    printf("Registry with rtrmgr successful: token is %s\n",
 	   _authfile.c_str());
 #endif
 
@@ -238,9 +238,9 @@ XorpShell::run()
 #endif
 
     _done = false;
-    _rtrmgr_client.send_authenticate_client("rtrmgr", uid, _ipc_name, 
+    _rtrmgr_client.send_authenticate_client("rtrmgr", uid, _ipc_name,
 					    _authtoken,
-					    callback(this, 
+					    callback(this,
 						     &XorpShell::generic_done));
     while (!_done) {
 	_eventloop.run();
@@ -265,7 +265,7 @@ XorpShell::run()
     printf("%s", _configuration.c_str());
     printf("==============================================================\n");
 #endif
-    
+
     _ct = new SlaveConfigTree(_configuration, _tt, _xclient);
     _ocl->set_config_tree(_ct);
 
@@ -281,8 +281,8 @@ XorpShell::run()
     }
 
     _done = false;
-    _rtrmgr_client.send_unregister_client("rtrmgr",_authtoken, 
-					  callback(this, 
+    _rtrmgr_client.send_unregister_client("rtrmgr",_authtoken,
+					  callback(this,
 						   &XorpShell::generic_done));
     _mode = MODE_SHUTDOWN;
     // we need to return to the event loop to cause the unregister to be sent
@@ -299,8 +299,8 @@ XorpShell::~XorpShell()
     delete _router_cli;
 }
 
-void 
-XorpShell::register_done(const XrlError& e, const string* file, 
+void
+XorpShell::register_done(const XrlError& e, const string* file,
 			 const uint32_t* pid)
 {
     if (e == XrlError::OKAY()) {
@@ -315,13 +315,13 @@ XorpShell::register_done(const XrlError& e, const string* file,
     }
 }
 
-void 
+void
 XorpShell::generic_done(const XrlError& e)
 {
     if (e == XrlError::OKAY()) {
 	_done = true;
 	return;
-    } else if ((e == XrlError::COMMAND_FAILED()) 
+    } else if ((e == XrlError::COMMAND_FAILED())
 	       && (e.note()=="AUTH_FAIL")) {
 	fprintf(stderr, "Authentication Failure\n");
 	exit(1);
@@ -332,14 +332,14 @@ XorpShell::generic_done(const XrlError& e)
     }
 }
 
-void 
+void
 XorpShell::receive_config(const XrlError& e, const string* config)
 {
     if (e == XrlError::OKAY()) {
 	_configuration = *config;
 	_got_config = true;
 	return;
-    } else if ((e == XrlError::COMMAND_FAILED()) 
+    } else if ((e == XrlError::COMMAND_FAILED())
 	       && (e.note()=="AUTH_FAIL")) {
 	fprintf(stderr, "Authentication Failure\n");
 	exit(1);
@@ -364,12 +364,12 @@ XorpShell::commit_changes(const string& deltas, const string& deletions,
 			  CallBack final_cb)
 {
     _commit_callback = final_cb;
-    _rtrmgr_client.send_apply_config_change("rtrmgr", _authtoken, 
+    _rtrmgr_client.send_apply_config_change("rtrmgr", _authtoken,
 					    _ipc_name,
 					    deltas, deletions, cb);
 }
 
-void 
+void
 XorpShell::commit_done(bool success, const string& errmsg)
 {
     // Call unlock_config.  The callback from unlock will finally clear
@@ -389,7 +389,7 @@ XorpShell::enter_config_mode(bool exclusive, GENERIC_CALLBACK cb)
     _rtrmgr_client.send_enter_config_mode("rtrmgr", _authtoken, exclusive, cb);
 }
 
-void 
+void
 XorpShell::leave_config_mode(GENERIC_CALLBACK cb)
 {
     _rtrmgr_client.send_leave_config_mode("rtrmgr", _authtoken, cb);
@@ -401,19 +401,19 @@ XorpShell::get_config_users(GET_USERS_CALLBACK cb)
     _rtrmgr_client.send_get_config_users("rtrmgr", _authtoken, cb);
 }
 
-void 
+void
 XorpShell::new_config_user(uid_t user_id)
 {
     _router_cli->new_config_user(user_id);
 }
 
-void 
+void
 XorpShell::save_to_file(const string& filename, GENERIC_CALLBACK cb)
 {
     _rtrmgr_client.send_save_config("rtrmgr", _authtoken, filename, cb);
 }
 
-void 
+void
 XorpShell::load_from_file(const string& filename, GENERIC_CALLBACK cb,
 			  CallBack final_cb)
 {
@@ -422,8 +422,8 @@ XorpShell::load_from_file(const string& filename, GENERIC_CALLBACK cb,
 				    filename, cb);
 }
 
-void 
-XorpShell::config_changed(uid_t user_id, const string& deltas, 
+void
+XorpShell::config_changed(uid_t user_id, const string& deltas,
 			  const string& deletions)
 {
     if (_mode == MODE_COMMITTING) {
@@ -431,26 +431,26 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	return;
     }
     string response;
-    if (!_ct->apply_deltas(user_id, deltas, 
-			   /*this is not a provisional change*/false, 
+    if (!_ct->apply_deltas(user_id, deltas,
+			   /*this is not a provisional change*/false,
 			   response)) {
 	_router_cli->notify_user("WARNING: Failed to merge deltas "
-				 "from rtrmgr\n", 
+				 "from rtrmgr\n",
 				 /*urgent*/ true);
 	_router_cli->notify_user(response, /*urgent*/true);
 	// XXX it's not clear we can continue if this happens
     }
     response == "";
-    if (!_ct->apply_deletions(user_id, deletions, 
+    if (!_ct->apply_deletions(user_id, deletions,
 			      /* this is not a provisional change */false,
 			      response)) {
 	_router_cli->notify_user("WARNING: Failed to merge deletions "
-				 "from rtrmgr\n", 
+				 "from rtrmgr\n",
 				 /*urgent*/ true);
 	_router_cli->notify_user(response, /*urgent*/true);
 	// XXX it's not clear we can continue if this happens
     }
-    
+
     // notfiy the user that the config changed
     struct passwd *pwent = getpwuid(user_id);
     string username;
@@ -499,7 +499,7 @@ main(int argc, char *argv[])
 	    default_xorp_root_dir = p;
 	    break;
 	}
-	
+
 	// Try the parent directory
 	string s = find_exec_path_name(argv[0]);
 	if (strlen(s.c_str()) > 0) {
@@ -515,27 +515,27 @@ main(int argc, char *argv[])
 		break;
 	    }
 	}
-	
+
 	// The XORP_ROOT value
 	default_xorp_root_dir = DEFAULT_XORP_ROOT_DIR;
 	break;
     } while (false);
 
     //
-    // Expand the default variables to include the XORP root path    
+    // Expand the default variables to include the XORP root path
     //
     default_config_template_dir = default_xorp_root_dir + "/"
 	+ default_config_template_dir;
     default_xrl_dir = default_xorp_root_dir + "/" + default_xrl_dir;
-    
+
     string config_template_dir = default_config_template_dir;
     string xrl_dir = default_xrl_dir;
 
     string configuration;
 
     int c;
-    while ((c = getopt (argc, argv, "t:x")) != EOF) {
-	switch(c) {  
+    while ((c = getopt (argc, argv, "t:x:")) != EOF) {
+	switch(c) {
 	case 't':
 	    config_template_dir = optarg;
 	    break;
