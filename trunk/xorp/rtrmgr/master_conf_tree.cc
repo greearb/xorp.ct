@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.33 2004/05/28 18:26:26 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.34 2004/05/28 22:27:56 pavlin Exp $"
 
 
 #include <sys/stat.h>
@@ -411,15 +411,17 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 
     if (_root_node.check_config_tree(result) == false) {
 	// Something went wrong - return the error message.
+	_commit_in_progress = false;
 	cb->dispatch(false, result);
 	return;
     }
 
-    // sort the changes in order of module dependencies
+    // Sort the changes in order of module dependencies
     for (iter = changed_modules.begin();
 	 iter != changed_modules.end();
 	 ++iter) {
 	if (!module_config_start(*iter, result)) {
+	    _commit_in_progress = false;
 	    cb->dispatch(false, result);
 	    return;
 	}
@@ -431,6 +433,7 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 				  result)
 	== false) {
 	// Something went wrong - return the error message.
+	_commit_in_progress = false;
 	cb->dispatch(false, result);
 	return;
     }
@@ -470,6 +473,7 @@ MasterConfigTree::commit_changes_pass2()
 
     if (_root_node.check_config_tree(result) == false) {
 	XLOG_ERROR("Commit failed in deciding startups");
+	_commit_in_progress = false;
 	_commit_cb->dispatch(false, result);
 	return;
     }
@@ -492,6 +496,7 @@ MasterConfigTree::commit_changes_pass2()
 	 ++iter) {
 	if (!module_config_start(*iter, result)) {
 	    XLOG_ERROR("Commit failed in deciding startups");
+	    _commit_in_progress = false;
 	    _commit_cb->dispatch(false, result);
 	    return;
 	}
@@ -502,6 +507,7 @@ MasterConfigTree::commit_changes_pass2()
 				   0, 0, result)) {
 	// Abort the commit
 	XLOG_ERROR("Commit failed in config tree");
+	_commit_in_progress = false;
 	_commit_cb->dispatch(false, result);
 	return;
     }
