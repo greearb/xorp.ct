@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.8 2002/12/11 10:19:32 pavlin Exp $
+% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.1.1.1 2002/12/11 23:55:55 hodson Exp $
 %
 
 \documentclass[11pt]{article}
@@ -37,13 +37,13 @@
 
 \title{XORP Design Overview \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 5, 2003}
 
 \maketitle
 
@@ -104,8 +104,8 @@ example:
 \section{Functionality}
 
 XORP is designed to support both IPv4 and IPv6. However, even though
-most of the code is written to support both, as of Release 0.1
-(December 2002) only IPv4 has been tested.
+most of the code is written to support both, as of Release 0.2
+(March 2003) only IPv4 has been tested.
 
 Below is our initial target list of protocols and features to be
 supported by XORP. Those in bold are already implemented or supported
@@ -241,13 +241,13 @@ Forwarding Engines (FEs) are not in the same chassis as the control
 software, then the FEA will also handle control communications with the
 remote FEs.  Note that strictly speaking it is not required that all
 communication with the FE must go through the FEA. For example, Click
-modules can communicate directly with an user-space process. However,
+modules can communicate directly with a user-space process. However,
 the FEA abstracts all the details about the underlying system
 from the user-level XORP processes; therefore by using the common API
 provided by the FEA we can greatly simplify the rest of the XORP
 components.
 
-Note that in release 0.1 (December 2002), the multicast-related
+Note that in release 0.2 (March 2003), the multicast-related
 functionalities are separated from the unicast-based functionalities
 in the MFEA (Multicast Forwarding Engine Abstraction).
 
@@ -261,10 +261,10 @@ The RIB holds a user-space copy of the entire routing/forwarding table,
 complete with information about where each route came from (\eg which
 protocol, and when). It communicates with the routing protocols such as
 BGP, RIP and OSPF to instantiate routes, and with the FEA to install the
-appropriate forwarding entries in in the FEs.
+appropriate forwarding entries in the FEs.
 
 The RIB also holds the routing information for multicast-capable routes
-(MRIB) to be used for Reverse-Path Forwarding (RPF) information. etc.
+(MRIB) to be used for multicast Reverse-Path Forwarding (RPF) information.
 For example, PIM-SM uses the MRIB information to route joins/prunes and
 to determine the RPF interface for sources and for RPs.
 
@@ -294,31 +294,30 @@ For more information about the RIB see \cite{xorp:rib}.
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{BGP4+}
 
-This is the BGP routing daemon. It implements IPv4 and IPv6
-unicast routing, as well as MBGP for both IPv4 and IPv6 multicast RIBs
-for multicast routing purpose.
+This is the BGP routing daemon. It implements IPv4 and IPv6 unicast
+routing in a single process, as well as MBGP for both IPv4 and IPv6
+multicast RIBs for multicast routing purpose.  As of version 0.2, only
+IPv4 is working, but most of the support for IPv6 is present.
 
 For more information about the XORP BGP implementation, see \cite{xorp:bgp}.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{OSPF}
 
-This is the OSPF routing daemon. There are separate IPv4 and IPv6
+This is the OSPF routing daemon. There will be separate IPv4 and IPv6
 daemons, because unlike BGP there is no real need to tie them together.
 
-Currently (December 2002), we intend to use a port of an existing OSPF
-implementation (http://www.ospf.org/) to the XORP architecture.
-However this does not support IPv6.
+Currently, we are using a port of an existing OSPF implementation
+(http://www.ospf.org/) to the XORP architecture.  However this does
+not support IPv6.  In the future, we may decide to implement a new
+OSPF implementation to support both IPv4 and IPv6.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{RIP}
 
 This is the RIP routing daemon. Similarly to OSPF, the IPv4 and IPv6
-daemons are separate.
-
-Currently (December 2002), we intend to port existing RIP
-implementations ({\emph routed} and {\emph route6d} from FreeBSD) to
-the XORP architecture.
+daemons will be separate.  Work on our RIP implementation is only just
+beginning.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{IGMP/MLD}
@@ -346,35 +345,38 @@ For more information about the XORP PIM-SM implementation see
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{RTRMGR: XORP Router Manager}
 
-The RTRMGR is the process responsible for starting all components of
+The {\em rtrmgr} is the process responsible for starting all components of
 the router, to configure each of them, and to monitor and restart any
 failing process.  It also provides the interface for the CLI to change
 the router configuration.
 
-For more information about the RTRMGR see
+For more information about the {\em rtrmgr} see
 \cite{xorp:rtrmgr}.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{CLI: Command Line Interface}
 
-The CLI is intended to be used by an user to access the router, view
+The CLI can be used by an user to access the router, view
 its internal state, or to configure it on-the-fly. Its functionality
-is closely related to the RTRMGR. However, because the robustness of
-the RTRMGR itself is extremely important, all functionality that can
-be run as a separate CLI process are separated from the RTRMGR.
+is closely related to the {\em rtrmgr}. However, because the robustness of
+the {\em rtrmgr} itself is extremely important, all functionality that can
+be run as a separate CLI process are separated from the {\em rtrmgr}.  The
+process implementing this CLI functionality is called {\em xorpsh}.
 
-For more information about the CLI see
+For more information about the CLI and the xorpsh process see
 \cite{xorp:rtrmgr}.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Inter-Process Communication Finder}
 
-The IPC finder is needed by the communication method used among all XORP
-components, \ie the XRLs. Each of the XORP components registers with the
-IPC finder. The finder assists the XRL communications (more specifically,
-it knows the location of each XRL target), therefore a XORP process does
-not need to know explicitly the location of all other processes, or how
-to communicate with them.
+The IPC finder is needed by the communication method used among all
+XORP components, \ie the XRLs. Each of the XORP components registers
+with the IPC finder. The finder assists the XRL communications (more
+specifically, it knows the location of each XRL target), therefore a
+XORP process does not need to know explicitly the location of all
+other processes, or how to communicate with them.  The router manager
+process (rtrmgr) incorporates a finder, so a separate finder process
+is only needed if rtrmgr is not being used such as during testing.
 
 For more information about the IPC finder and XRLs see
 \cite{xorp:xrl} and \cite{xorp:xrl_interfaces}.
@@ -384,8 +386,8 @@ For more information about the IPC finder and XRLs see
 
 This is the SNMP management process. It is used for SNMP access to the
 router. For example, it can be used to translate SNMP requests into XRL
-requests. Currently (December 2002) it has not been
-implemented yet.
+requests. Internally, SNMP will communicate with the other processes
+using XRLs.  As of March 2003, work on SNMP is only just beginning.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -397,6 +399,7 @@ implemented yet.
 \begin{itemize}
 
   \item December 11, 2002: Version 0.1 completed.
+  \item March 5, 2003: Updated to match XORP version 0.2 release code.
 
 \end{itemize}
 
