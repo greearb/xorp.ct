@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.2 2003/01/30 01:43:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.3 2003/01/30 20:20:27 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -205,6 +205,22 @@ PimMfc::add_mfc_to_kernel()
 int
 PimMfc::delete_mfc_from_kernel()
 {
+    do {
+	string res;
+	for (size_t i = 0; i < pim_node().maxvifs(); i++) {
+	    if (olist().test(i))
+		res += "O";
+	    else
+		res += ".";
+	}
+	XLOG_TRACE(pim_node().is_log_trace(),
+		   "Delete MFC entry: (%s,%s) iif = %d olist = %s",
+		   cstring(source_addr()),
+		   cstring(group_addr()),
+		   iif_vif_index(),
+		   res.c_str());
+    } while (false);
+    
     delete_all_dataflow_monitor();
     if (pim_node().delete_mfc_from_kernel(*this) < 0)
 	return (XORP_ERROR);
