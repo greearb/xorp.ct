@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.19 2003/09/04 03:42:39 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.20 2003/09/04 04:17:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -26,6 +26,7 @@
 #include "route_table_reader.hh"
 
 #include "plumbing.hh"
+#include "main.hh"
 
 BGPPlumbing::BGPPlumbing(XrlStdRouter *xrl_router, RibIpcHandler* ribhandler,
 			 EventLoop& eventloop, BGPMain& bgp)
@@ -722,9 +723,9 @@ template <class A>
 void
 BGPPlumbingAF<A>::push(PeerHandler* peer_handler) 
 {
-    debug_msg("BGPPlumbingAF<%s>::push\n", typeid(A).name());
+    debug_msg("BGPPlumbingAF<%s>::push\n", NameOf<A>::get());
     if (_awaits_push == false) {
-	XLOG_WARNING("push <%s> when none needed", typeid(A).name());
+	XLOG_WARNING("push <%s> when none needed", NameOf<A>::get());
 	return;
     }
     RibInTable<A> *rib_in;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/main.hh,v 1.16 2003/08/25 21:52:42 atanu Exp $
+// $XORP: xorp/bgp/main.hh,v 1.17 2003/08/27 01:29:32 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -395,5 +395,12 @@ private:
     static EventLoop _eventloop;
     ProcessWatch *_process_watch;
 };
+
+template <typename A>
+struct NameOf {
+    static const char* get() { return "Unknown"; }
+};
+template <> const char* NameOf<IPv4>::get() { return "IPv4"; }
+template <> const char* NameOf<IPv6>::get() { return "IPv6"; }
 
 #endif // __BGP_MAIN_HH__
