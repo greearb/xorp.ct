@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.3 2003/05/10 00:06:39 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.4 2003/05/14 01:13:39 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -61,7 +61,7 @@ public:
     /**
      * Virtual destructor (in case this class is used as base class).
      */
-    virtual ~FtiConfig() { }
+    virtual ~FtiConfig() { stop(); }
 
     EventLoop& eventloop() { return _eventloop; }
 

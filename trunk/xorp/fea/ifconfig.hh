@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.6 2003/05/14 01:13:42 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.7 2003/05/14 09:37:55 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -52,7 +52,7 @@ public:
     /**
      * Virtual destructor (in case this class is used as base class).
      */
-    virtual ~IfConfig() {}
+    virtual ~IfConfig() { stop(); }
     
     EventLoop& eventloop() { return _eventloop; }
     
