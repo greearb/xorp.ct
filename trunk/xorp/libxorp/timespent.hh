@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timespent.hh,v 1.2 2004/05/05 16:38:23 pavlin Exp $
+// $XORP: xorp/libxorp/timespent.hh,v 1.3 2004/05/05 18:46:44 atanu Exp $
 
 #ifndef __LIBXORP_TIMESPENT_HH__
 #define __LIBXORP_TIMESPENT_HH__
 
 #include "libxorp/timeval.hh"
 
-static const int LIMIT = 1;	// Time allowed in seconds.
+static const int TIMESPENT_LIMIT = 1;	// Time allowed in seconds.
 
 /**
  * @short (Debugging) Used to find code that has taken too long to execute
@@ -90,7 +90,8 @@ private:
 /**
  * To be placed in suspect method.
  */
-#define	TIMESPENT()       TimeSpent _t(__FUNCTION__,__FILE__,__LINE__, LIMIT)
+#define	TIMESPENT()       TimeSpent _t(__FUNCTION__,__FILE__,__LINE__, \
+				       TIMESPENT_LIMIT)
 /**
  * Verify that thus far into the method the time limit has not been exceeded.
  *
