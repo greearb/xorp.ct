@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timespent.hh,v 1.5 2004/05/29 19:55:34 atanu Exp $
+// $XORP: xorp/libxorp/timespent.hh,v 1.6 2004/06/10 22:41:22 hodson Exp $
 
 #ifndef __LIBXORP_TIMESPENT_HH__
 #define __LIBXORP_TIMESPENT_HH__
@@ -22,10 +22,10 @@
 static const int TIMESPENT_LIMIT = 10;	// Time allowed in seconds.
 
 /**
- * @short (Debugging) Used to find code that has taken too long to execute
+ * @short (Debugging) Used to find code that has taken too long to execute.
  *
  * It is expected that this class will not be used directly but via
- * the macros below. Thus allowing file,function and line number
+ * the macros below. Thus allowing file, function and line number
  * information to be captured.
  */
 class TimeSpent {
@@ -69,7 +69,7 @@ public:
     {
 	TimeVal delta;
 
-	if(overlimit(delta))
+	if (overlimit(delta))
 	    XLOG_WARNING("Function %s +%d %s took %s\n", function, line, file,
 		   delta.str().c_str());
     }
@@ -78,6 +78,7 @@ public:
     {
 	check(_function, _file, _line);
     }
+
 private:
     TimeVal _start;
     const char *_function;
@@ -98,13 +99,16 @@ private:
  * If the alloted time has been exceeded a warning message will be printed.
  */
 #define TIMESPENT_CHECK()	_t.check(__FUNCTION__, __FILE__, __LINE__)
+
 /**
  * A boolean that will return true if the alloted time has been exceeded.
  */
 #define TIMESPENT_OVERLIMIT()	_t.overlimit()
-#else
+
+#else	// ! CHECK_TIME
 #define	TIMESPENT()
 #define TIMESPENT_CHECK()
 #define TIMESPENT_OVERLIMIT()	0
 #endif
+
 #endif // __LIBXORP_TIMESPENT_HH__
