@@ -1,6 +1,10 @@
 #
-# $XORP: xorp/pim/TODO,v 1.22 2003/02/06 02:09:26 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.23 2003/02/07 00:26:39 pavlin Exp $
 #
+
+* IMPL+SPEC: if the current Assert winner neighbor timeout, then
+  the action is A5, and move to NI state (this applies for both
+  the (S,G) and (*,G) Assert state machine).
 
 * IMPL: if the interface address changes, add a task to recompute all
   PimMre::set_directly_connected_s().
