@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.3 2003/05/14 01:13:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.4 2003/05/20 23:25:14 atanu Exp $"
 
 
 #include "fea_module.h"
@@ -335,9 +335,9 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const struct rt_msghdr* rtm)
 	    dst_masklen = IPvX::addr_bitlen(family);
     }
     
-    /*
-    ** Did we install this route.
-    */
+    //
+    // Test whether we installed this route
+    //
     bool xorp_route = false;
     if (rtm->rtm_flags & RTF_PROTO1)
 	xorp_route = true;
