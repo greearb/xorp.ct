@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.28 2004/06/10 02:20:02 atanu Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.29 2004/08/19 02:00:20 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -298,6 +298,7 @@ EXTRA_DIST	+= boot.yy
 EXTRA_DIST	+= config.boot.sample
 EXTRA_DIST	+= op_commands.ll
 EXTRA_DIST	+= op_commands.yy
+EXTRA_DIST	+= policyvarmap.conf
 EXTRA_DIST	+= template.ll
 EXTRA_DIST	+= templatey.yy
 
