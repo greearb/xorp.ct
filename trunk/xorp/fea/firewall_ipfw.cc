@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.cc,v 1.5 2004/09/16 07:16:32 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.cc,v 1.6 2004/09/16 11:42:28 bms Exp $
 
 #include "fea/fea_module.h"
 
@@ -424,18 +424,18 @@ IpfwFwProvider::ifname_to_ifu(const string& ifname, union ip_fw_if& ifu)
 
 template <>
 static void
-convert_to_ipfw(IpfwFwRule<IPv4>& nr, const FwRule<IPv4>& or)
+convert_to_ipfw(IpfwFwRule<IPv4>& new_rule, const FwRule<IPv4>& old_rule)
 {
-	UNUSED(nr);
-	UNUSED(or);
+	UNUSED(new_rule);
+	UNUSED(old_rule);
 }
 
 template <>
 static void
-convert_to_ipfw(IpfwFwRule<IPv6>& nr, const FwRule<IPv6>& or)
+convert_to_ipfw(IpfwFwRule<IPv6>& new_rule, const FwRule<IPv6>& old_rule)
 {
-	UNUSED(nr);
-	UNUSED(or);
+	UNUSED(new_rule);
+	UNUSED(old_rule);
 }
 
 #endif /* HAVE_FIREWALL_IPFW */
