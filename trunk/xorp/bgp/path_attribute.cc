@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.42 2003/10/23 06:26:52 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.43 2003/10/25 00:30:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1611,6 +1611,23 @@ PathAttributeList<A>::remove_attribute_by_type(PathAttType type)
 	    return;
 	}
     }
+}
+
+template<class A>
+void
+PathAttributeList<A>::remove_attribute_by_pointer(PathAttribute *p)
+{
+    iterator i;
+    for (i = begin(); i != end(); i++) {
+	if ((*i) == p) {
+	    delete *i;
+	    erase(i);
+	    memset(_hash, 0, 16);
+	    return;
+	}
+    }
+
+    XLOG_UNREACHABLE();
 }
 
 template<class A>
