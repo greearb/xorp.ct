@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.13 2003/04/02 22:58:53 hodson Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.14 2003/04/15 16:37:47 hodson Exp $
 ##
 
 
@@ -14,7 +14,7 @@ bin_PROGRAMS  =	call_xrl finder
 finder_SOURCES = finder_ng_main.cc
 
 # -- Test Programs 
-noinst_PROGRAMS += test_finder_messenger test_finder_msgs test_finder_ng
+noinst_PROGRAMS  = test_finder_messenger test_finder_msgs test_finder_ng
 noinst_PROGRAMS += test_finder_tcp
 noinst_PROGRAMS += test_header test_inproc test_lemming test_sudp test_stcp
 noinst_PROGRAMS += test_xrl_error test_xrl test_xrl_atom test_xrl_args 
@@ -28,7 +28,7 @@ LDADD		+= ./libxipc.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 LDADD		+= $(top_builddir)/libcomm/libcomm.a
 
-finder_LDADD			+= libfinder.a
+finder_LDADD			 = libfinder.a
 finder_LDADD		 	+= ./libxipc.a
 finder_LDADD			+= $(top_builddir)/libxorp/libxorp.a
 finder_LDADD			+= $(top_builddir)/libcomm/libcomm.a
@@ -38,7 +38,6 @@ call_xrl_SOURCES		= call_xrl.cc
 
 test_finder_messenger_SOURCES	= test_finder_messenger.cc
 test_finder_msgs_SOURCES	= test_finder_msgs.cc
-test_finder_ng_SOURCES		= test_finder_ng.cc
 test_finder_tcp_SOURCES		= test_finder_tcp.cc
 
 test_header_SOURCES		= test_header.cc
@@ -129,8 +128,8 @@ libxipc_a_SOURCES += xrl_error.cc
 libxipc_a_SOURCES += xuid.cc
 
 # -- Library Sources (libfinder) 
-libfinder_a_SOURCES += finder_base.hh
-libfinder_a_SOURCES  = finder_ng.hh 
+libfinder_a_SOURCES  = finder_base.hh
+libfinder_a_SOURCES += finder_ng.hh 
 libfinder_a_SOURCES += finder_ng_xrl_queue.hh
 libfinder_a_SOURCES += finder_ng_xrl_target.hh
 
@@ -151,7 +150,7 @@ libfinder_a_SOURCES += finder_ng_xrl_target.cc
 ##
 
 # -- Generated Sources used in libxipc and libfinder (see explanation at end of file)
-BUILT_SOURCES += common_xif.hh
+BUILT_SOURCES  = common_xif.hh
 BUILT_SOURCES += common_xif.cc
 BUILT_SOURCES += finder_base.hh
 BUILT_SOURCES += finder_base.cc
@@ -214,13 +213,3 @@ finder_client_xif.%: $(IDIR)/finder_client_xif.%
 	cd $(IDIR) && $(MAKE) $(notdir $@)
 	$(RM) $@
 	$(LN_S) $(IDIR)/$@ .
-
-
-
-
-
-
-
-
-
-

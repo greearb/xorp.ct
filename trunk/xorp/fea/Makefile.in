@@ -100,10 +100,10 @@ net_snmp_found = @net_snmp_found@
 @FEA_BUILD_RTSOCK_TRUE@FEA_BINARY = fea_rtsock
 @FEA_BUILD_RTSOCK_FALSE@FEA_BINARY = fea_dummy
 bin_PROGRAMS = fea fea_dummy $(host_programs) demo_fea_ifmgr_client
-check_PROGRAMS =  test_rawsock4 test_ifmanager_transaction $(host_test_programs)
+check_PROGRAMS = test_rawsock4 test_ifmanager_transaction $(host_test_programs)
 TESTS = $(check_PROGRAMS)
 
-demo_fea_ifmgr_client_SOURCES =  demo_fea_ifmgr_client.cc
+demo_fea_ifmgr_client_SOURCES = demo_fea_ifmgr_client.cc
 demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # disabled test_fea
@@ -120,7 +120,7 @@ test_ifmanager_transaction_SOURCES = test_ifmanager_transaction.cc iftree.cc
 test_ifmanager_transaction_LDADD = $(top_builddir)/libxorp/libxorp.a
 
 test_rawsock4_SOURCES = test_rawsock4.cc rawsock4.cc
-test_rawsock4_LDADD =  $(top_builddir)/libxorp/libxorp.a
+test_rawsock4_LDADD = $(top_builddir)/libxorp/libxorp.a
 libfea_a_SOURCES = fea_module.h fti.hh fti_dummy.hh fti_transaction.hh ifconfig.hh ifconfig_dummy.hh ifmanager.hh ifmanager_transaction.hh iftree.hh rawsock4.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh xrl_rawsock4.hh xrl_target.hh fti_dummy.cc fti_transaction.cc ifconfig.cc ifconfig_dummy.cc ifmanager_transaction.cc iftree.cc rawsock4.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc xrl_rawsock4.cc xrl_target.cc $(host_lib_sources)
 
 # -- Extra files and directories to add to the distribution
