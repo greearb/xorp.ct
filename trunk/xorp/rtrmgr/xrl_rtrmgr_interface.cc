@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.29 2004/12/10 23:14:01 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.30 2004/12/21 23:43:15 mjh Exp $"
 
 
 #include <sys/stat.h>
@@ -238,7 +238,11 @@ XrlRtrmgrInterface::initialize_client_state(uint32_t user_id,
     // schedule this on a zero-second timer.
     //
     XorpTimer t;
-    t = _eventloop.new_oneoff_after_ms(0,
+    uint32_t delay = 0;
+    if (!_rtrmgr.ready()) {
+	delay = 2000;
+    }
+    t = _eventloop.new_oneoff_after_ms(delay,
              callback(this, &XrlRtrmgrInterface::send_client_state, 
 		      user_id, user));
     _background_tasks.push_front(t);
@@ -248,6 +252,13 @@ void
 XrlRtrmgrInterface::send_client_state(uint32_t user_id, UserInstance *user)
 {
     debug_msg("send_client_state %s\n", user->clientname().c_str());
+    if (!_rtrmgr.ready()) {
+	//we're still in the process of reconfiguring, so delay this
+	//til later
+	initialize_client_state(user_id, user);
+	return;
+    }
+
     string config = _master_config_tree->show_tree();
     string client = user->clientname();
     GENERIC_CALLBACK cb2;
