@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/xrl_firewall.cc,v 1.1 2004/09/08 08:29:51 bms Exp $"
 
 #include "fea_module.h"
 
@@ -31,6 +31,7 @@
 #include "xrl_firewall.hh"
 
 static const char* NOT_IMPLEMENTED_MSG = "Not yet implemented.";
+static const char* NOT_READY_MSG = "Underlying provider is NULL.";
 
 // ----------------------------------------------------------------------------
 // XrlFirewallTarget concrete instance constructor/destructor
@@ -65,15 +66,19 @@ XrlCmdError
 XrlFirewallTarget::common_0_1_get_status(uint32_t& status,
        string& reason)
 {
-    // XXX This could be more informative.
-    UNUSED(status);
-    UNUSED(reason);
+    // TODO: Make this XRL more informative about the state of the
+    // firewall subsystem.
+    status = PROC_READY;
+    reason = "";
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFirewallTarget::common_0_1_shutdown()
 {
+    // TODO: Make this XRL tear down XORP-managed firewall rules.
+    //_fw->destroy_all_rules();
+    //_fw->destroy_provider();
     return XrlCmdError::OKAY();
 }
 
@@ -90,8 +95,13 @@ XrlFirewallTarget::firewall_0_1_get_fw_enabled(
 	// Output values,
 	bool&	enabled)
 {
-    UNUSED(enabled);
-    return XrlCmdError::COMMAND_FAILED(NOT_IMPLEMENTED_MSG);
+
+    if (NULL != _fw._fwp) {
+	enabled = _fw._fwp->get_enabled();
+	return XrlCmdError::OKAY();
+    }
+
+    return XrlCmdError::COMMAND_FAILED(NOT_READY_MSG);
 }
 
 /**
@@ -106,8 +116,13 @@ XrlFirewallTarget::firewall_0_1_set_fw_enabled(
 	// Input values,
 	const bool&	enabled)
 {
-    UNUSED(enabled);
-    return XrlCmdError::COMMAND_FAILED(NOT_IMPLEMENTED_MSG);
+
+    if (NULL != _fw._fwp) {
+	_fw._fwp->set_enabled(enabled);
+	return XrlCmdError::OKAY();
+    }
+
+    return XrlCmdError::COMMAND_FAILED(NOT_READY_MSG);
 }
 
 /**
@@ -148,8 +163,13 @@ XrlFirewallTarget::firewall_0_1_get_fw_provider(
 	// Output values,
 	string&	provider)
 {
-    UNUSED(provider);
-    return XrlCmdError::COMMAND_FAILED(NOT_IMPLEMENTED_MSG);
+
+    if (NULL != _fw._fwp) {
+	provider = _fw._fwp->get_provider_name();
+	return XrlCmdError::OKAY();
+    }
+
+    return XrlCmdError::COMMAND_FAILED(NOT_READY_MSG);
 }
 
 /**
@@ -165,8 +185,21 @@ XrlFirewallTarget::firewall_0_1_set_fw_provider(
 	// Input values,
 	const string&	provider)
 {
+
+#ifdef notyet
+    if (NULL != _fw._fwp) {
+	if (_fw._fwp->set_new_provider(provider) == true)
+	    return XrlCmdError::OKAY();
+	else
+	    return XrlCmdError::COMMAND_FAILED(
+"Failed to instantiate new provider.");
+    }
+
+    return XrlCmdError::COMMAND_FAILED(NOT_READY_MSG);
+#else
     UNUSED(provider);
     return XrlCmdError::COMMAND_FAILED(NOT_IMPLEMENTED_MSG);
+#endif
 }
 
 /**
@@ -179,8 +212,13 @@ XrlFirewallTarget::firewall_0_1_get_fw_version(
 	// Output values,
 	string&	version)
 {
-    UNUSED(version);
-    return XrlCmdError::COMMAND_FAILED(NOT_IMPLEMENTED_MSG);
+
+    if (NULL != _fw._fwp) {
+	version = _fw._fwp->get_provider_version();
+	return XrlCmdError::OKAY();
+    }
+
+    return XrlCmdError::COMMAND_FAILED(NOT_READY_MSG);
 }
 
 /**
@@ -193,8 +231,13 @@ XrlFirewallTarget::firewall_0_1_get_num_xorp_rules4(
 	// Output values,
 	uint32_t&	nrules)
 {
-    UNUSED(nrules);
-    return XrlCmdError::COMMAND_FAILED(NOT_IMPLEMENTED_MSG);
+
+    if (NULL != _fw._fwp) {
+	nrules = _fw._fwp->get_num_xorp_rules4();
+	return XrlCmdError::OKAY();
+    }
+
+    return XrlCmdError::COMMAND_FAILED(NOT_READY_MSG);
 }
 
 /**
@@ -208,8 +251,13 @@ XrlFirewallTarget::firewall_0_1_get_num_provider_rules4(
 	// Output values,
 	uint32_t&	nrules)
 {
-    UNUSED(nrules);
-    return XrlCmdError::COMMAND_FAILED(NOT_IMPLEMENTED_MSG);
+
+    if (NULL != _fw._fwp) {
+	nrules = _fw._fwp->get_num_system_rules4();
+	return XrlCmdError::OKAY();
+    }
+
+    return XrlCmdError::COMMAND_FAILED(NOT_READY_MSG);
 }
 
 /**
@@ -222,8 +270,13 @@ XrlFirewallTarget::firewall_0_1_get_num_xorp_rules6(
 	// Output values,
 	uint32_t&	nrules)
 {
-    UNUSED(nrules);
-    return XrlCmdError::COMMAND_FAILED(NOT_IMPLEMENTED_MSG);
+
+    if (NULL != _fw._fwp) {
+	nrules = _fw._fwp->get_num_xorp_rules6();
+	return XrlCmdError::OKAY();
+    }
+
+    return XrlCmdError::COMMAND_FAILED(NOT_READY_MSG);
 }
 
 /**
@@ -237,8 +290,13 @@ XrlFirewallTarget::firewall_0_1_get_num_provider_rules6(
 	// Output values,
 	uint32_t&	nrules)
 {
-    UNUSED(nrules);
-    return XrlCmdError::COMMAND_FAILED(NOT_IMPLEMENTED_MSG);
+
+    if (NULL != _fw._fwp) {
+	nrules = _fw._fwp->get_num_system_rules6();
+	return XrlCmdError::OKAY();
+    }
+
+    return XrlCmdError::COMMAND_FAILED(NOT_READY_MSG);
 }
 
 /**

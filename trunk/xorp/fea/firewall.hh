@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall.hh,v 1.3 2004/09/08 08:45:00 bms Exp $
+// $XORP: xorp/fea/firewall.hh,v 1.4 2004/09/08 09:52:04 bms Exp $
 
 #ifndef __FEA_FIREWALL_HH__
 #define __FEA_FIREWALL_HH__
@@ -140,6 +140,7 @@ typedef vector<FwRule4 *> FwTable4;
 typedef vector<FwRule6 *> FwTable6;
 
 class FwProvider;
+class XrlFirewallTarget;
 
 /**
  * @short Firewall manager.
@@ -153,6 +154,8 @@ public:
 
 	inline FwTable4& get_fwtable4() { return _fwtable4; }
 	inline FwTable6& get_fwtable6() { return _fwtable6; }
+
+	friend class XrlFirewallTarget;
 
 private:
 	// Underlying firewall provider interface in use, or NULL
