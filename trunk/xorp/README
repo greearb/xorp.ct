@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.15 2003/11/06 22:13:03 atanu Exp $
+# $XORP: xorp/README,v 1.16 2003/11/06 22:24:22 atanu Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -65,7 +65,7 @@ Supported platforms:
   * Linux RedHat-7.3 (kernel 2.4-20) with:
     - gcc/g++ version 2.96 (default)
 
-  * MacOS X 10.2.8 (Jaguar) / Darwin roo 6.8
+  * MacOS X 10.2.8 (Jaguar) / Darwin 6.8
     - gcc  3.3 20030304 (Apple Computer, Inc. build 1493)
     - Note: The code compiles and the validation tests run. Forwarding
       has never been attempted.
