@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.3 2003/02/22 20:21:30 mjh Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.4 2003/03/10 23:20:59 hodson Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -35,8 +35,8 @@ class ConfTemplate;
 class MasterConfigTree :public ConfigTree {
 public:
     MasterConfigTree(const string& conffile, TemplateTree *ct, 
-		     ModuleManager *mm,
-		     XorpClient *xclient, bool no_execute);
+		     ModuleManager& mm,
+		     XorpClient& xclient, bool no_execute);
     bool read_file(string& configuration, const string& conffile,
 		   string& errmsg);
     bool parse(const string& configuration, const string& conffile);
@@ -75,8 +75,8 @@ private:
 			    uint tid, bool no_commit,
 			    string& result);
 
-    ModuleManager *_module_manager;
-    XorpClient *_xclient;
+    ModuleManager &_module_manager;
+    XorpClient &_xclient;
 
     //if _no_execute is true, run in debug mode, saying what we'd do,
     //but not actually doing anything

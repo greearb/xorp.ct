@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.8 2003/04/02 02:53:52 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.9 2003/04/02 17:10:39 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_VARIABLES
@@ -399,9 +399,9 @@ ConfigTreeNode::initialize_commit() {
 }
 
 bool
-ConfigTreeNode::commit_changes(ModuleManager *mm, 
+ConfigTreeNode::commit_changes(ModuleManager& mm, 
 			       string module,
-			       XorpClient *xclient, 
+			       XorpClient& xclient, 
 			       uint tid,
 			       bool no_execute, bool no_commit, 
 			       int depth, int last_depth,
@@ -431,9 +431,6 @@ ConfigTreeNode::commit_changes(ModuleManager *mm,
 	    = dynamic_cast<const ModuleCommand*>(cmd);
 	if (modcmd != NULL 
 	    && (modcmd->name() == module)) {
-#if 0
-	    modcmd->execute(xclient, tid, mm, no_execute, no_commit);
-#endif
 	    if (modcmd->start_transaction(*this, xclient, tid,
 					  no_execute, 
 					  no_commit) != XORP_OK) {
@@ -727,9 +724,7 @@ ConfigTreeNode::finalize_commit() {
 }
 
 string
-ConfigTreeNode::discard_changes(ModuleManager *mm, XorpClient *xclient, 
-				bool no_execute,
-				int depth, int last_depth) {
+ConfigTreeNode::discard_changes(int depth, int last_depth) {
 #ifdef DEBUG_COMMIT
     printf("DISCARD CHANGES node >%s<\n", _path.c_str());
 #endif
@@ -772,8 +767,7 @@ ConfigTreeNode::discard_changes(ModuleManager *mm, XorpClient *xclient,
 #ifdef DEBUG_COMMIT
 	printf("  child: %s\n", (*previter)->path().c_str());	
 #endif
-	result != (*previter)->discard_changes(mm, xclient, no_execute, 
-					       depth+1, last_depth);
+	result != (*previter)->discard_changes(depth+1, last_depth);
     }
 
     return result;
@@ -946,11 +940,20 @@ ConfigTreeNode::mark_subtree_for_deletion(uid_t user_id) {
 
 void
 ConfigTreeNode::delete_subtree_silently() {
-    delete_subtree(NULL, 0, true);
+    /* delete_subtree calls remove_child, so we just iterate until no
+       children are left */
+    while (!_children.empty()) {
+	_children.front()->delete_subtree_silently();
+    }
+
+    if (_parent != NULL)
+	_parent->remove_child(this);
+
+    delete this;
 }	
 
 void
-ConfigTreeNode::delete_subtree(XorpClient *xclient, uint tid, 
+ConfigTreeNode::delete_subtree(XorpClient &xclient, uint tid, 
 			       bool no_execute) {
     /* we delete all the children of this node, then delete the node
        itself */
@@ -967,7 +970,7 @@ ConfigTreeNode::delete_subtree(XorpClient *xclient, uint tid,
     if (_parent != NULL)
 	_parent->remove_child(this);
 
-    if (_template != NULL && xclient != NULL) {
+    if ((!no_execute) && _template != NULL) {
 	//finally, on the way back out, we run the %delete commands
 	const Command *cmd = _template->const_command("%delete");
 	if (cmd != NULL) {

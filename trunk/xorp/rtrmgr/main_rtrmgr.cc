@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.7 2003/04/03 00:24:01 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.8 2003/04/22 19:42:17 mjh Exp $"
 
 #include <signal.h>
 
@@ -155,41 +155,20 @@ main(int argc, char* const argv[])
 
 	//initialize the IPC mechanism
 	XrlStdRouter xrlrouter(eventloop, "rtrmgr");
+	XorpClient xclient(eventloop, xrlrouter);
 
-	if (no_execute == false) {
-	
-	    XorpClient xclient(eventloop, &xrlrouter);
-
-	    //read the router startup configuration file,
-	    //start the processes required, and initialize them
-	    MasterConfigTree ct(config_boot, tt, &mmgr, &xclient, no_execute);
-	    XrlRtrmgrInterface rtrmgr_target(&xrlrouter, &userdb,
+	//read the router startup configuration file,
+	//start the processes required, and initialize them
+	MasterConfigTree ct(config_boot, tt, mmgr, xclient, no_execute);
+	XrlRtrmgrInterface rtrmgr_target(&xrlrouter, &userdb,
 					     &ct, eventloop,
 					     &randgen);
 
-	    //loop while handling configuration events and signals
-	    while (running) {
-		printf("+");
-		fflush(stdout);
-		eventloop.run();
-	    }
-	} else {
-	    //no-execute mode, for debugging purposes
-
-	    XorpClient xclient(eventloop, NULL);
-
-	    printf("here0_______________________\n");
-	    MasterConfigTree ct(config_boot, tt, &mmgr, &xclient, no_execute);
-	    printf("here1_______________________\n");
-	    XrlRtrmgrInterface rtrmgr_target(&xrlrouter, &userdb,
-					     &ct, eventloop,
-					     &randgen);
-
-	    while (running) {
-		printf("+");
-		fflush(stdout);
-		eventloop.run();
-	    }
+	//loop while handling configuration events and signals
+	while (running) {
+	    printf("+");
+	    fflush(stdout);
+	    eventloop.run();
 	}
     } catch (InitError& e) {
 	XLOG_ERROR("rtrmgr shutting down due to error\n");

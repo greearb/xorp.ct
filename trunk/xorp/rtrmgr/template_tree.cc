@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.2 2003/03/10 23:21:02 hodson Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -25,12 +25,12 @@
 
 //#define DEBUG_TEMPLATE_PARSER
 
-extern int init_template_parser(const char *, TemplateTree *c);
+extern int init_template_parser(const char* , TemplateTree* c);
 extern int parse_template();
-extern void tplterror(const char *s);
+extern void tplterror(const char* s);
 
-TemplateTree::TemplateTree(const string &templatedirname, 
-			   const string &xrldirname) 
+TemplateTree::TemplateTree(const string& templatedirname, 
+			   const string& xrldirname) 
     : _xrldb(xrldirname)
 {
     _root = new TemplateTreeNode(NULL, "", "");
@@ -147,11 +147,11 @@ TemplateTree::path_as_string() {
     return path;
 }
 
-TemplateTreeNode *
-TemplateTree::new_node(TemplateTreeNode *parent,
-		       const string &path, const string &varname,
-		       int type, const string &initializer) {
-    TemplateTreeNode *t;
+TemplateTreeNode* 
+TemplateTree::new_node(TemplateTreeNode* parent,
+		       const string& path, const string& varname,
+		       int type, const string& initializer) {
+    TemplateTreeNode* t;
     switch (type) {
     case NODE_VOID:
 	t = new TemplateTreeNode(parent, path, varname);
@@ -190,7 +190,7 @@ TemplateTree::new_node(TemplateTreeNode *parent,
 }
 
 void 
-TemplateTree::push_path(int type, char *cinit) {
+TemplateTree::push_path(int type, char* cinit) {
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("push_path\n");
 #endif
@@ -217,7 +217,7 @@ TemplateTree::add_untyped_node(string segment, bool is_tag) {
 #endif
     list <TemplateTreeNode*>::const_iterator i;
     i = _current_node->children().begin();
-    TemplateTreeNode *found = NULL;
+    TemplateTreeNode* found = NULL;
     while (i!= _current_node->children().end()) {
 	if ((*i)->segname() == segment) {
 	    if (found != NULL) {
@@ -248,7 +248,7 @@ TemplateTree::add_untyped_node(string segment, bool is_tag) {
 }
 
 void 
-TemplateTree::add_node(const string& segment, int type, char *cinit) {
+TemplateTree::add_node(const string& segment, int type, char* cinit) {
 #ifdef DEBUG_TEMPLATE_PARSER
     printf("add_node: segment=%s type: %d\n", segment.c_str(), type);
     printf("cn=%p\n", _current_node);
@@ -277,7 +277,7 @@ TemplateTree::add_node(const string& segment, int type, char *cinit) {
 
     list <TemplateTreeNode*>::const_iterator i;
     i = _current_node->children().begin();
-    TemplateTreeNode *found = NULL;
+    TemplateTreeNode* found = NULL;
     while (i!= _current_node->children().end()) {
 	if ((*i)->segname() == segment) {
 	    if (((*i)->type() == type)
@@ -305,9 +305,9 @@ TemplateTree::add_node(const string& segment, int type, char *cinit) {
     }
 }
 
-TemplateTreeNode *
-TemplateTree::find_node(const list<string> &segs) {
-    TemplateTreeNode *ttn = _root;
+TemplateTreeNode* 
+TemplateTree::find_node(const list<string>& segs) {
+    TemplateTreeNode* ttn = _root;
     list <string>::const_iterator i;
     for (i=segs.begin(); i!= segs.end(); ++i) {
 	list <TemplateTreeNode*> matches;
@@ -362,22 +362,22 @@ TemplateTree::find_node(const list<string> &segs) {
 
 
 void
-TemplateTree::add_cmd(char *cmd) {
-    _current_node->add_cmd(string(cmd), this);
+TemplateTree::add_cmd(char* cmd) {
+    _current_node->add_cmd(string(cmd), *this);
 }
 
 void 
-TemplateTree::add_cmd_action(string cmd, const list<string> &action) {
+TemplateTree::add_cmd_action(string cmd, const list<string>& action) {
     _current_node->add_action(cmd, action, _xrldb);
 }
 
 void 
-TemplateTree::register_module(const string &name, ModuleCommand *mc) {
+TemplateTree::register_module(const string& name, ModuleCommand* mc) {
     _registered_modules[name] = mc;
 }
  
-ModuleCommand *
-TemplateTree::find_module(const string &name) {
+ModuleCommand* 
+TemplateTree::find_module(const string& name) {
     typedef map<string, ModuleCommand*>::const_iterator CI;
     CI rpair = _registered_modules.find(name);
     if (rpair == _registered_modules.end())

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.4 2003/03/18 02:44:37 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.5 2003/04/22 19:42:18 mjh Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -68,7 +68,7 @@ XorpShell::XorpShell(const string& IPCname,
 		     const string& xrl_dir)
     : _eventloop(), 
     _xrlrouter(_eventloop, IPCname.c_str()),
-    _xclient(_eventloop, &_xrlrouter),
+    _xclient(_eventloop, _xrlrouter),
     _rtrmgr_client(&_xrlrouter),
     _xorpsh_interface(&_xrlrouter, this),
     _cli_node(AF_INET, XORP_MODULE_CLI, _eventloop),
@@ -178,7 +178,7 @@ XorpShell::run() {
     printf("==============================================================\n");
 #endif
     
-    _ct = new SlaveConfigTree(_configuration, _tt, &_xclient);
+    _ct = new SlaveConfigTree(_configuration, _tt, _xclient);
     _ocl->set_config_tree(_ct);
 
     //start up the CLI

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.2 2003/03/10 23:20:59 hodson Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.3 2003/04/02 02:53:52 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -60,17 +60,15 @@ public:
 			 string& response);
     void find_changed_modules(set <string>& changed_modules) const;
     void initialize_commit();
-    bool commit_changes(ModuleManager *mm, string module,
-			XorpClient *xclient, 
+    bool commit_changes(ModuleManager &mm, string module,
+			XorpClient &xclient, 
 			uint tid, 
 			bool no_execute, bool no_commit,
 			int depth, int last_depth,
 			string& result);
     bool check_commit_status(string &response) const;
     void finalize_commit();
-    string discard_changes(ModuleManager *mm, XorpClient *xclient, 
-			   bool no_execute, 
-			   int depth, int last_depth);
+    string discard_changes(int depth, int last_depth);
     int type() const;
     bool is_root_node() const {return _parent==NULL;}
     bool is_tag() const;
@@ -101,7 +99,7 @@ public:
     string str() const;
     void mark_subtree_for_deletion(uid_t user_id);
     void delete_subtree_silently();
-    void delete_subtree(XorpClient *xclient, uint tid, bool no_execute);
+    void delete_subtree(XorpClient &xclient, uint tid, bool no_execute);
     void clone_subtree(const ConfigTreeNode& orig_node);
     bool retain_different_nodes(const ConfigTreeNode& them, 
 				bool retain_changed_values);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.2 2003/03/10 23:21:01 hodson Exp $"
 
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
@@ -29,19 +29,17 @@ extern int booterror(const char *s);
  * Slave Config Tree class 
  *************************************************************************/
 
-SlaveConfigTree::SlaveConfigTree()
-    : ConfigTree(NULL) {
-    _xclient = NULL;
+SlaveConfigTree::SlaveConfigTree(XorpClient &xclient)
+    : ConfigTree(NULL), _xclient(xclient) {
 }
 
 SlaveConfigTree::SlaveConfigTree(const string& configuration, 
 				 TemplateTree *tt, 
-				 XorpClient *xclient) 
-    : ConfigTree(tt)
+				 XorpClient &xclient) 
+    : ConfigTree(tt), _xclient(xclient)
 {
     parse(configuration, "");
     _root_node.mark_subtree_as_committed();
-    _xclient = xclient;
 }
 
 int SlaveConfigTree::parse(const string& configuration, 
@@ -73,7 +71,7 @@ SlaveConfigTree::commit_changes(string &result,
     /* Two passes: the first checks for errors.  If no errors are
        found, attempt the actual commit */
     uint tid = 0;
-    tid = _xclient->begin_transaction();
+    tid = _xclient.begin_transaction();
     _root_node.initialize_commit();
     if (_root_node.commit_changes(NULL, "", _xclient, tid, 
 				  /*no_execute*/true, 
@@ -84,7 +82,7 @@ SlaveConfigTree::commit_changes(string &result,
     }
     XorpBatch::CommitCallback empty_cb;
     try {
-	_xclient->end_transaction(tid, empty_cb);
+	_xclient.end_transaction(tid, empty_cb);
     } catch (UnexpandedVariable& uvar) {
 	printf("%s\n", uvar.str().c_str());
     }
@@ -109,11 +107,11 @@ void SlaveConfigTree::commit_phase2(const XrlError& e,
 	return;
     }
     //we managed to get the master lock
-    SlaveConfigTree delta_tree;
+    SlaveConfigTree delta_tree(_xclient);
     delta_tree.get_deltas(*this);
     string deltas = delta_tree.show_unannotated_tree();
 
-    SlaveConfigTree withdraw_tree;
+    SlaveConfigTree withdraw_tree(_xclient);
     withdraw_tree.get_deletions(*this);
     string deletions = withdraw_tree.show_unannotated_tree();
 #ifdef DEBUG_COMMIT
@@ -207,8 +205,7 @@ SlaveConfigTree::discard_changes() {
     printf("SlaveConfigTree::discard_changes\n");
 #endif
     string result =
-	_root_node.discard_changes(NULL, _xclient, 
-				   /*no_execute*/true, 0, 0);
+	_root_node.discard_changes(0, 0);
 #ifdef DEBUG_COMMIT
     printf("##############################################################\n");
 #endif

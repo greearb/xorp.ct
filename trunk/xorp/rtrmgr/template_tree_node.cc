@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.2 2003/03/10 23:21:02 hodson Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -24,13 +24,13 @@
 
 #define DEBUG_TEMPLATE_PARSER
 
-extern int init_template_parser(const char *, TemplateTree *c);
+extern int init_template_parser(const char *, TemplateTree* c);
 extern int parse_template();
-extern void tplterror(const char *s);
+extern void tplterror(const char* s);
 
-TemplateTreeNode::TemplateTreeNode(TemplateTreeNode *parent, 
-				   const string &path, 
-				   const string &varname)
+TemplateTreeNode::TemplateTreeNode(TemplateTreeNode* parent, 
+				   const string& path, 
+				   const string& varname)
     : _segname(path), _varname(varname)
 {
     _parent = parent;
@@ -57,19 +57,19 @@ TemplateTreeNode::~TemplateTreeNode() {
 }
 
 void 
-TemplateTreeNode::add_child(TemplateTreeNode *child) {
+TemplateTreeNode::add_child(TemplateTreeNode* child) {
     _children.push_back(child);
 }
 
 void
-TemplateTreeNode::add_cmd(const string &cmd, TemplateTree *ct) {
-    Command *command;
+TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt) {
+    Command* command;
     typedef map<string, Command*>::iterator I;
     I iter;
     if (cmd == "%modinfo") {
 	iter = _cmd_map.find("%modinfo");
 	if (iter == _cmd_map.end()) {
-	    command = new ModuleCommand(cmd, ct);
+	    command = new ModuleCommand(cmd, tt);
 	    _cmd_map[cmd] = command;
 	} else {
 	    command = iter->second;
@@ -114,10 +114,10 @@ TemplateTreeNode::commands() const {
 }
 
 void
-TemplateTreeNode::add_action(const string &cmd, 
-			     const list<string> &action_list,
+TemplateTreeNode::add_action(const string& cmd, 
+			     const list<string>& action_list,
 			     const XRLdb& xrldb) {
-    Command *command;
+    Command* command;
     typedef map<string, Command*>::iterator I;
     I iter;
     if (cmd == "%modinfo") {
@@ -140,7 +140,7 @@ map <string,string>
 TemplateTreeNode::create_variable_map(const list <string>& segments) const 
 {
     map <string,string> varmap;
-    const TemplateTreeNode *ttn = this;
+    const TemplateTreeNode* ttn = this;
     list <string>::const_reverse_iterator i;
     for (i = segments.rbegin(); i != segments.rend(); i++) {
 	if (ttn->name_is_variable())
@@ -190,11 +190,11 @@ void TemplateTreeNode::print() const {
 }
 
 bool
-TemplateTreeNode::type_match(const string &) const {
+TemplateTreeNode::type_match(const string& ) const {
     return true;
 }
 
-string TemplateTreeNode::strip_quotes(const string &s) const {
+string TemplateTreeNode::strip_quotes(const string& s) const {
     int len = s.length();
     if (len < 2) return s;
     if ((s[0]=='"') && (s[len-1]=='"'))
@@ -312,9 +312,9 @@ TemplateTreeNode::check_variable_name(const vector<string>& parts,
  * TextTemplate
  **************************************************************************/
 
-TextTemplate::TextTemplate(TemplateTreeNode *parent,
-			   const string &path, const string &varname, 
-			   const string &initializer)
+TextTemplate::TextTemplate(TemplateTreeNode* parent,
+			   const string& path, const string& varname, 
+			   const string& initializer)
     throw (ParseError)
     : TemplateTreeNode(parent, path, varname), _default("") 
 {
@@ -343,9 +343,9 @@ bool TextTemplate::type_match(const string &) const {
  * UIntTemplate
  **************************************************************************/
 
-UIntTemplate::UIntTemplate(TemplateTreeNode *parent,
-			   const string &path, const string &varname, 
-			   const string &initializer)  
+UIntTemplate::UIntTemplate(TemplateTreeNode* parent,
+			   const string& path, const string& varname, 
+			   const string& initializer)  
     throw (ParseError)
     : TemplateTreeNode(parent, path, varname)
 {
@@ -361,7 +361,7 @@ UIntTemplate::UIntTemplate(TemplateTreeNode *parent,
     set_has_default();
 }
 
-bool UIntTemplate::type_match(const string &orig) const {
+bool UIntTemplate::type_match(const string& orig) const {
     string s = strip_quotes(orig);
     for(u_int i=0; i<s.length(); i++)
 	if (s[i] < '0' || s[i] > '9')
@@ -379,9 +379,9 @@ UIntTemplate::default_str() const {
  * IntTemplate
  **************************************************************************/
 
-IntTemplate::IntTemplate(TemplateTreeNode *parent,
-			 const string &path, const string &varname, 
-			 const string &initializer)  
+IntTemplate::IntTemplate(TemplateTreeNode* parent,
+			 const string& path, const string& varname, 
+			 const string& initializer)  
     throw (ParseError)
     : TemplateTreeNode(parent, path, varname)
 {
@@ -397,7 +397,7 @@ IntTemplate::IntTemplate(TemplateTreeNode *parent,
     set_has_default();
 }
 
-bool IntTemplate::type_match(const string &orig) const {
+bool IntTemplate::type_match(const string& orig) const {
     string s = strip_quotes(orig);
     int start=0;
     if (s[0]=='-') {
@@ -421,9 +421,9 @@ IntTemplate::default_str() const {
  * BoolTemplate
  **************************************************************************/
 
-BoolTemplate::BoolTemplate(TemplateTreeNode *parent,
-			   const string &path, const string &varname, 
-			   const string &initializer)
+BoolTemplate::BoolTemplate(TemplateTreeNode* parent,
+			   const string& path, const string& varname, 
+			   const string& initializer)
     throw (ParseError)
     : TemplateTreeNode(parent, path, varname) {
     if (initializer == "")
@@ -440,7 +440,7 @@ BoolTemplate::BoolTemplate(TemplateTreeNode *parent,
     set_has_default();
 }
 
-bool BoolTemplate::type_match(const string &s) const {
+bool BoolTemplate::type_match(const string& s) const {
     if (s == "true") 
 	return true;
     else if (s == "false") 
@@ -455,9 +455,9 @@ string BoolTemplate::default_str() const {
 	return "false";
 }
 
-IPv4Template::IPv4Template(TemplateTreeNode *parent,
-			   const string &path, const string &varname, 
-			   const string &initializer)
+IPv4Template::IPv4Template(TemplateTreeNode* parent,
+			   const string& path, const string& varname, 
+			   const string& initializer)
     throw (ParseError)
     : TemplateTreeNode(parent, path, varname), _default(0)
 {
@@ -477,12 +477,12 @@ IPv4Template::~IPv4Template()
     delete _default;
 }
 
-bool IPv4Template::type_match(const string &s) const {
+bool IPv4Template::type_match(const string& s) const {
     string tmp = strip_quotes(s);
     if (tmp.empty())
 	return false;
     try {
-	IPv4 *ipv4 = new IPv4(tmp.c_str());
+	IPv4* ipv4 = new IPv4(tmp.c_str());
 	delete ipv4;
     } catch (InvalidString) {
 	return false;
@@ -491,9 +491,9 @@ bool IPv4Template::type_match(const string &s) const {
 }
 
 
-IPv6Template::IPv6Template(TemplateTreeNode *parent,
-			   const string &path, const string &varname, 
-			   const string &initializer)
+IPv6Template::IPv6Template(TemplateTreeNode* parent,
+			   const string& path, const string& varname, 
+			   const string& initializer)
     throw (ParseError)
     : TemplateTreeNode(parent, path, varname), _default(0)
 {
@@ -513,12 +513,12 @@ IPv6Template::~IPv6Template()
     delete _default;
 }
 
-bool IPv6Template::type_match(const string &s) const {
+bool IPv6Template::type_match(const string& s) const {
     string tmp = strip_quotes(s);
     if (tmp.empty())
 	return false;
     try {
-	IPv6 *ipv6 = new IPv6(tmp.c_str());
+	IPv6* ipv6 = new IPv6(tmp.c_str());
 	delete ipv6;
     } catch (InvalidString) {
 	return false;
@@ -527,9 +527,9 @@ bool IPv6Template::type_match(const string &s) const {
 }
 
 
-IPv4NetTemplate::IPv4NetTemplate(TemplateTreeNode *parent,
-				 const string &path, const string &varname, 
-				 const string &initializer)
+IPv4NetTemplate::IPv4NetTemplate(TemplateTreeNode* parent,
+				 const string& path, const string& varname, 
+				 const string& initializer)
     throw (ParseError)
     : TemplateTreeNode(parent, path, varname), _default(0)
 {
@@ -549,12 +549,12 @@ IPv4NetTemplate::~IPv4NetTemplate()
     delete _default;
 }
 
-bool IPv4NetTemplate::type_match(const string &s) const {
+bool IPv4NetTemplate::type_match(const string& s) const {
     string tmp = strip_quotes(s);
     if (tmp.empty())
 	return false;
     try {
-	IPv4Net *ipv4net = new IPv4Net(tmp.c_str());
+	IPv4Net* ipv4net = new IPv4Net(tmp.c_str());
 	delete ipv4net;
     } catch (InvalidString) {
 	return false;
@@ -563,9 +563,9 @@ bool IPv4NetTemplate::type_match(const string &s) const {
 }
 
 
-IPv6NetTemplate::IPv6NetTemplate(TemplateTreeNode *parent,
-				 const string &path, const string &varname, 
-				 const string &initializer)
+IPv6NetTemplate::IPv6NetTemplate(TemplateTreeNode* parent,
+				 const string& path, const string& varname, 
+				 const string& initializer)
     throw (ParseError)
     : TemplateTreeNode(parent, path, varname), _default(0)
 {
@@ -585,12 +585,12 @@ IPv6NetTemplate::~IPv6NetTemplate()
     delete _default;
 }
 
-bool IPv6NetTemplate::type_match(const string &s) const {
+bool IPv6NetTemplate::type_match(const string& s) const {
     string tmp = strip_quotes(s);
     if (tmp.empty())
 	return false;
     try {
-	IPv6Net *ipv6net = new IPv6Net(tmp.c_str());
+	IPv6Net* ipv6net = new IPv6Net(tmp.c_str());
 	delete ipv6net;
     } catch (InvalidString) {
 	return false;
@@ -599,9 +599,9 @@ bool IPv6NetTemplate::type_match(const string &s) const {
 }
 
 
-MacaddrTemplate::MacaddrTemplate(TemplateTreeNode *parent,
-				 const string &path, const string &varname, 
-				 const string &initializer)
+MacaddrTemplate::MacaddrTemplate(TemplateTreeNode* parent,
+				 const string& path, const string& varname, 
+				 const string& initializer)
     throw (ParseError)
     : TemplateTreeNode(parent, path, varname), _default(0) {
     if (!initializer.empty()) {
@@ -620,12 +620,12 @@ MacaddrTemplate::~MacaddrTemplate()
     delete _default;
 }
 
-bool MacaddrTemplate::type_match(const string &s) const {
+bool MacaddrTemplate::type_match(const string& s) const {
     string tmp = strip_quotes(s);
     if (tmp.empty())
 	return false;
     try {
-	EtherMac *mac = new EtherMac(tmp.c_str());
+	EtherMac* mac = new EtherMac(tmp.c_str());
 	delete mac;
     } catch (BadMac) {
 	return false;

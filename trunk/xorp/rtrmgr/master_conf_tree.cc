@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.4 2003/02/23 22:08:04 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.5 2003/03/10 23:20:59 hodson Exp $"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -32,12 +32,10 @@ extern string booterrormsg(const char *s);
  *************************************************************************/
 
 MasterConfigTree::MasterConfigTree(const string& conffile, TemplateTree *tt, 
-				   ModuleManager *mm,
-				   XorpClient *xclient, bool no_execute) 
-    : ConfigTree(tt)
+				   ModuleManager &mm,
+				   XorpClient &xclient, bool no_execute) 
+    : ConfigTree(tt), _module_manager(mm), _xclient(xclient)
 {
-    _module_manager = mm;
-    _xclient = xclient;
     _no_execute = no_execute;
 
     string configuration;
@@ -113,7 +111,7 @@ void MasterConfigTree::execute() {
     printf("\n");
 
     uint tid;
-    tid = _xclient->begin_transaction();
+    tid = _xclient.begin_transaction();
     string result;
     //configure the modules in the order of their dependencies
     _root_node.initialize_commit();
@@ -131,7 +129,7 @@ void MasterConfigTree::execute() {
 	}
     }
     try {
-	_xclient->end_transaction(tid, callback(this, &MasterConfigTree::config_done));
+	_xclient.end_transaction(tid, callback(this, &MasterConfigTree::config_done));
     } catch (UnexpandedVariable& uvar) {
 	XLOG_FATAL(uvar.str().c_str());
     }
@@ -293,7 +291,7 @@ MasterConfigTree::commit_changes(string &result,
 
 
     uint tid;
-    tid = _xclient->begin_transaction();
+    tid = _xclient.begin_transaction();
     _root_node.initialize_commit();
     //sort the changes in order of module dependencies
     for (i=changed_modules.begin(); i!=changed_modules.end(); i++) {
@@ -315,13 +313,13 @@ MasterConfigTree::commit_changes(string &result,
     }
     XorpBatch::CommitCallback empty_cb;
     try {
-	_xclient->end_transaction(tid, empty_cb);
+	_xclient.end_transaction(tid, empty_cb);
     } catch (UnexpandedVariable& uvar) {
 	//ignore this?
 	//XXX
     }
 
-    tid = _xclient->begin_transaction();
+    tid = _xclient.begin_transaction();
     _root_node.initialize_commit();
     result = "";
     //sort the changes in order of module dependencies
@@ -342,7 +340,7 @@ MasterConfigTree::commit_changes(string &result,
 	}
     }
     try {
-	_xclient->end_transaction(tid, cb);
+	_xclient.end_transaction(tid, cb);
     } catch (UnexpandedVariable& uvar) {
 	result = uvar.str();
 	return false;
@@ -365,8 +363,7 @@ MasterConfigTree::discard_changes() {
     printf("##############################################################\n");
     printf("MasterConfigTree::discard_changes\n");
     string result =
-	_root_node.discard_changes(_module_manager, _xclient, 
-				   _no_execute, 0, 0);
+	_root_node.discard_changes(0, 0);
     printf("##############################################################\n");
     return result;
 }

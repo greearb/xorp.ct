@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.6 2003/03/14 23:18:46 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.7 2003/04/22 19:42:18 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -22,18 +22,19 @@
 #include "module_manager.hh"
 #include "template_commands.hh"
 
-XorpBatch::XorpBatch(XorpClient *xclient, uint tid) {
-    _xclient = xclient;
+XorpBatch::XorpBatch(XorpClient& xclient, uint tid)
+    : _xclient(xclient)
+{
     _tid = tid;
 }
 
 EventLoop&
 XorpBatch::eventloop() const 
 {
-    return _xclient->eventloop();
+    return _xclient.eventloop();
 }
 
-XorpClient*
+XorpClient&
 XorpBatch::client() const
 {
     return _xclient;
@@ -45,7 +46,7 @@ XorpBatch::start(CommitCallback ending_cb) {
 	   (uint32_t)_batch_items.size());
     _list_complete_callback = ending_cb;
     if (_batch_items.empty()) {
-	_xclient->remove_transaction(_tid);
+	_xclient.remove_transaction(_tid);
 	if (!_list_complete_callback.is_empty())
 	    _list_complete_callback->dispatch(XORP_OK, "");
 	delete this;
@@ -83,7 +84,7 @@ XorpBatch::add_xrl(const UnexpandedXrl&   xrl,
 }
 
 int
-XorpBatch::add_module_start(ModuleManager* mmgr, Module* module,
+XorpBatch::add_module_start(ModuleManager& mmgr, Module* module,
 			    XCCommandCallback cb, 
 			    bool no_execute) {
     debug_msg("XorpBatch::add_module_start\n");
@@ -106,7 +107,7 @@ XorpBatch::batch_item_done(XorpBatchItem* batch_item, bool success,
 	_batch_items.pop_front();
 
 	if (_batch_items.empty()) {
-	    _xclient->remove_transaction(_tid);
+	    _xclient.remove_transaction(_tid);
 	    if (!_list_complete_callback.is_empty())
 		_list_complete_callback->dispatch(XORP_OK, "");
 	    delete this;
@@ -128,7 +129,7 @@ void XorpBatch::abort_transaction(const string& errmsg) {
 	delete _batch_items.front();
 	_batch_items.pop_front();
     }
-    _xclient->remove_transaction(_tid);
+    _xclient.remove_transaction(_tid);
     if (!_list_complete_callback.is_empty())
 	_list_complete_callback->dispatch(XORP_ERROR, errmsg);
     delete this;
@@ -151,7 +152,7 @@ XorpBatchXrlItem::XorpBatchXrlItem(const UnexpandedXrl&		 uxrl,
 }
 
 int
-XorpBatchXrlItem::execute(XorpClient *xclient, 
+XorpBatchXrlItem::execute(XorpClient& xclient, 
 			  XorpBatch *batch,
 			  string &errmsg)
 {
@@ -163,7 +164,7 @@ XorpBatchXrlItem::execute(XorpClient *xclient,
     }
 
     string xrl_return_spec = _unexpanded_xrl.xrl_return_spec();
-    return xclient->
+    return xclient.
 	send_now(*xrl, callback(this,
 				&XorpBatchXrlItem::response_callback),
 		 xrl_return_spec, 
@@ -204,7 +205,7 @@ XorpBatchXrlItem::response_callback(const XrlError& err,
     _batch->batch_item_done(this, success, errmsg);
 }
 
-XorpBatchModuleItem::XorpBatchModuleItem(ModuleManager* mmgr, Module* module,
+XorpBatchModuleItem::XorpBatchModuleItem(ModuleManager& mmgr, Module* module,
 					 bool start,
 					 XCCommandCallback cb, 
 					 bool no_execute) 
@@ -215,7 +216,7 @@ XorpBatchModuleItem::XorpBatchModuleItem(ModuleManager* mmgr, Module* module,
 }
 
 int 
-XorpBatchModuleItem::execute(XorpClient */*xclient*/, XorpBatch *batch, 
+XorpBatchModuleItem::execute(XorpClient& /*xclient*/, XorpBatch *batch, 
 			     string& errmsg) {
     debug_msg("XorpBatchModuleItem::execute (start %d)", _start);
     _batch = batch;
@@ -226,7 +227,7 @@ XorpBatchModuleItem::execute(XorpClient */*xclient*/, XorpBatch *batch,
 	    cb = callback(this, &XorpBatchModuleItem::response_callback,
 			  true, string(""));
 	    _startup_timer 
-		= _mmgr->eventloop().new_oneoff_after_ms(2000, cb);
+		= _mmgr.eventloop().new_oneoff_after_ms(2000, cb);
 	    return XORP_OK;
 	} else {
 	    //we failed - trigger the callback immediately
@@ -261,10 +262,9 @@ XorpBatchModuleItem::response_callback(bool success, string errmsg) {
 /* XorpClient                                                          */
 /***********************************************************************/
 
-XorpClient::XorpClient(EventLoop& eventloop, XrlRouter *xrlrouter) 
-    : _eventloop(eventloop)
+XorpClient::XorpClient(EventLoop& eventloop, XrlRouter& xrlrouter) 
+    : _eventloop(eventloop), _xrlrouter(xrlrouter)
 {
-    _xrlrouter = xrlrouter;
 }
 
 int
@@ -273,7 +273,7 @@ XorpClient::send_now(const Xrl &xrl, XrlRouter::XrlCallback cb,
 		     bool no_execute) {
     if (no_execute == false) {
 	debug_msg("send_sync before sending\n");
-	_xrlrouter->send(xrl, cb);
+	_xrlrouter.send(xrl, cb);
 	debug_msg("send_sync after sending\n");
     } else {
 	debug_msg("send_sync before sending\n");
@@ -334,10 +334,12 @@ XorpClient::fake_return_args(const string& xrl_return_spec) {
 	case xrlatom_ipv4net:
 	    xargs.add(XrlAtom(atom.name().c_str(), IPv4Net("0.0.0.0/0")) );
 	    break;
+	case xrlatom_text:
+	    xargs.add(XrlAtom(atom.name().c_str(), string("")) );
+	    break;
 	case xrlatom_ipv6:
 	case xrlatom_ipv6net:
 	case xrlatom_mac:
-	case xrlatom_text:
 	case xrlatom_list:
 	case xrlatom_boolean:
 	case xrlatom_binary:
@@ -368,7 +370,7 @@ XorpClient::send_xrl(uint		  tid,
 }
 
 int XorpClient::start_module(uint tid, 
-			     ModuleManager *module_manager, 
+			     ModuleManager& module_manager, 
 			     Module *module,
 			     XCCommandCallback cb,
 			     bool no_execute) {
@@ -385,7 +387,7 @@ int XorpClient::start_module(uint tid,
 uint 
 XorpClient::begin_transaction() {
     _max_tid++; 
-    _transactions[_max_tid] = new XorpBatch(this, _max_tid);
+    _transactions[_max_tid] = new XorpBatch(*this, _max_tid);
     return _max_tid;
 }
 

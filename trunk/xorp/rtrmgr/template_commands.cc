@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.11 2003/03/10 23:21:01 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.12 2003/03/14 23:18:46 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -377,7 +377,7 @@ Action::execute(const ConfigTreeNode& ctn,
 	if ((args[1])[0]=='"' && args[1][args[1].size()-1]=='"')
 	    args[1] = args[1].substr(1,args[1].size()-2);
 	debug_msg("CALL XRL: %s\n", args[1].c_str());
-	result = xclient->run_command(tid, ctn, args[1], cb, no_execute);
+	result = xclient.run_command(tid, ctn, args[1], cb, no_execute);
 	if ((i>=4) && !(args[3].empty()))
 	    debug_msg("Need to do something here to get the response back\n");
     } else {
@@ -392,8 +392,8 @@ Action::execute(const ConfigTreeNode& ctn,
 #endif
 
 int
-XrlAction::execute(const ConfigTreeNode& ctn,
-		   XorpClient *xclient,  uint tid,
+XrlAction::execute(const ConfigTreeNode &ctn,
+		   XorpClient &xclient,  uint tid,
 		   bool no_execute, XCCommandCallback cb) const {
 
     //first, go back through and merge all the separate words in the
@@ -446,7 +446,7 @@ XrlAction::execute(const ConfigTreeNode& ctn,
 	debug_msg("CALL XRL: %s\n", xrlstr.c_str());
 
 	UnexpandedXrl x(&ctn, this);
-	result = xclient->send_xrl(tid, x, cb, no_execute);
+	result = xclient.send_xrl(tid, x, cb, no_execute);
 	debug_msg("result = %d\n", result);
     } else {
 	fprintf(stderr, "Bad command: %s\n", args[0].c_str());
@@ -552,12 +552,10 @@ Command::add_action(const list <string> &action, const XRLdb& xrldb) {
 }
 
 int
-Command::execute(ConfigTreeNode& ctn,
-		 XorpClient *xclient, uint tid, bool no_execute) const {
+Command::execute(ConfigTreeNode &ctn,
+		 XorpClient &xclient, uint tid, bool no_execute) const {
     int result = 0;
     int actions = 0;
-    if (xclient==NULL)
-	return 0;
     list <Action*>::const_iterator i;
     for (i= _actions.begin(); i != _actions.end(); i++) {
 	const XrlAction *xa = dynamic_cast<const XrlAction*>(*i);
@@ -628,7 +626,7 @@ Command::str() const {
    return tmp;
 }
 
-ModuleCommand::ModuleCommand(const string &cmd_name, TemplateTree *tt)
+ModuleCommand::ModuleCommand(const string& cmd_name, TemplateTree& tt)
     : Command(cmd_name),
       _tt(tt), _procready(NULL), _startcommit(NULL), _endcommit(NULL),
       _execute_done(false)
@@ -665,7 +663,7 @@ ModuleCommand::add_action(const list<string> &action, const XRLdb& xrldb)
     string value = *ptr;
     if (cmd == "provides") {
 	_modname = value;
-	_tt->register_module(_modname, this);
+	_tt.register_module(_modname, this);
     } else if (cmd == "depends") {
 	if (_modname.empty()) {
 	    throw ParseError("\"depends\" must be preceded by \"provides\"");
@@ -716,8 +714,8 @@ ModuleCommand::add_action(const list<string> &action, const XRLdb& xrldb)
 }
 
 int 
-ModuleCommand::execute(XorpClient *xclient, uint tid,
-		       ModuleManager *module_manager, 
+ModuleCommand::execute(XorpClient &xclient, uint tid,
+		       ModuleManager &module_manager, 
 		       bool no_execute, 
 		       bool no_commit) const {
     debug_msg("ModuleCommand::execute %s (no_execute %d, no_commit %d)\n",
@@ -727,9 +725,9 @@ ModuleCommand::execute(XorpClient *xclient, uint tid,
 	//OK, we're actually going to do the commit
 
 	//find or create the module in the module manager
-	Module *m = module_manager->find_module(_modname);
+	Module *m = module_manager.find_module(_modname);
 	if (m == NULL) {
-	    m = module_manager->new_module(this);
+	    m = module_manager.new_module(this);
 	    if (m == NULL)
 		return XORP_ERROR;
 	} else {
@@ -740,16 +738,16 @@ ModuleCommand::execute(XorpClient *xclient, uint tid,
 	debug_msg("Starting module\n");
 	XCCommandCallback cb = callback(const_cast<ModuleCommand*>(this),
 					    &ModuleCommand::exec_complete);
-	int r = xclient->start_module(tid, module_manager, m, cb,
+	int r = xclient.start_module(tid, module_manager, m, cb,
 				      no_execute);
 
 	XrlAction* xrl_procready = dynamic_cast<XrlAction*>(_procready);
 	if (xrl_procready) {
 	    debug_msg("proc ready xrl \"%s\"\n",
 		      xrl_procready->request().c_str());
-	    int r2 = xclient->send_xrl(tid,
-				       UnexpandedXrl(0, xrl_procready),
-				       0, no_execute, 30, 250);
+	    int r2 = xclient.send_xrl(tid,
+				      UnexpandedXrl(0, xrl_procready),
+				      0, no_execute, 30, 250);
 	    debug_msg("Send Xrl okay %d\n", r2 == XORP_OK);
 	}
 	return r;
@@ -762,7 +760,7 @@ ModuleCommand::execute(XorpClient *xclient, uint tid,
 
 int 
 ModuleCommand::start_transaction(ConfigTreeNode &ctn,
-				 XorpClient *xclient,  uint tid, 
+				 XorpClient &xclient,  uint tid, 
 				 bool no_execute, 
 				 bool no_commit) const {
     if (_startcommit == NULL || no_commit)
@@ -781,7 +779,7 @@ ModuleCommand::start_transaction(ConfigTreeNode &ctn,
 
 int 
 ModuleCommand::end_transaction(ConfigTreeNode &ctn,
-			       XorpClient *xclient,  uint tid, 
+			       XorpClient &xclient,  uint tid, 
 			       bool no_execute, 
 			       bool no_commit) const {
     if (_endcommit == NULL || no_commit)

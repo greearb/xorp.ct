@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.2 2003/03/10 23:21:01 hodson Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -36,9 +36,9 @@ class SlaveConfigTreeNode;
 
 class SlaveConfigTree : public ConfigTree {
 public:
-    SlaveConfigTree();
+    SlaveConfigTree(XorpClient& xclient);
     SlaveConfigTree(const string& configuration, TemplateTree *ct,
-		    XorpClient *xclient);
+		    XorpClient& xclient);
     int parse(const string& configuration, 
 	      const string& conffile);
     bool commit_changes(string &response,
@@ -79,7 +79,7 @@ public:
     }
     
 private:
-    XorpClient *_xclient;
+    XorpClient &_xclient;
 
     XorpShell::LOCK_CALLBACK _stage2_cb;
 

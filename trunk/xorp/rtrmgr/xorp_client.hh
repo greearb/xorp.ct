@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.5 2003/03/14 23:18:46 hodson Exp $
+// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.6 2003/04/22 19:42:18 mjh Exp $
 
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
@@ -40,12 +40,12 @@ class Module;
 
 class XorpBatch {
 public:
-    XorpBatch(XorpClient *xclient, uint tid);
+    XorpBatch(XorpClient& xclient, uint tid);
     typedef XorpCallback2<void, int, const string&>::RefPtr CommitCallback;
     int start(CommitCallback ending_cb);
     int add_xrl(const UnexpandedXrl &xrl, XCCommandCallback cb, 
 		bool no_execute, uint32_t retries = 0, uint32_t retry_ms = 0);
-    int add_module_start(ModuleManager* mmgr, Module* module,
+    int add_module_start(ModuleManager& mmgr, Module* module,
 			 XCCommandCallback cb, bool no_execute);
     
     void batch_item_done(XorpBatchItem* tran_xrl, bool status, 
@@ -54,11 +54,11 @@ public:
 
     EventLoop& eventloop() const;
 
-    XorpClient* client() const;
+    XorpClient& client() const;
     
 private:
     uint _tid;
-    XorpClient *_xclient;
+    XorpClient& _xclient;
     list <XorpBatchItem*> _batch_items;
     CommitCallback _list_complete_callback;
 };
@@ -67,7 +67,7 @@ class XorpBatchItem {
 public:
     XorpBatchItem(XrlRouter::XrlCallback cb, bool no_execute);
     virtual ~XorpBatchItem() {};
-    virtual int execute(XorpClient *xclient, XorpBatch *batch, 
+    virtual int execute(XorpClient& xclient, XorpBatch *batch, 
 			string& errmsg) = 0;
 protected:
     XCCommandCallback _callback;
@@ -83,7 +83,7 @@ public:
 		     uint32_t		      retries = 0,
 		     uint32_t 		      retry_ms = 1000);
 
-    int execute(XorpClient* xclient,
+    int execute(XorpClient& xclient,
 		XorpBatch*  batch, 
 		string&	    errmsg);
 
@@ -104,14 +104,14 @@ protected:
 
 class XorpBatchModuleItem : public XorpBatchItem {
 public:
-    XorpBatchModuleItem(ModuleManager* mmgr, Module* module,
+    XorpBatchModuleItem(ModuleManager& mmgr, Module* module,
 			bool start,
 			XCCommandCallback cb, bool no_execute);
-    int execute(XorpClient *xclient, XorpBatch *batch, 
+    int execute(XorpClient& xclient, XorpBatch *batch, 
 		string& errmsg);
     void response_callback(bool success, string errmsg);
 public:
-    ModuleManager* _mmgr;
+    ModuleManager& _mmgr;
     Module* _module;
     bool _start; //true = start module, false = stop module
     XorpTimer _startup_timer;
@@ -119,7 +119,7 @@ public:
 
 class XorpClient  {
 public:
-    XorpClient(EventLoop& eventloop, XrlRouter *xrlrouter);
+    XorpClient(EventLoop& eventloop, XrlRouter& xrlrouter);
     ~XorpClient() {};
     int send_xrl(uint tid, 
 		 const UnexpandedXrl &xrl, 
@@ -127,9 +127,9 @@ public:
 		 bool no_execute,
 		 uint32_t retries = 0,
 		 uint32_t retry_ms = 0);
-    int start_module(uint tid, ModuleManager* mmgr, Module* module,
+    int start_module(uint tid, ModuleManager& mmgr, Module* module,
 		     XCCommandCallback cb, bool no_execute);
-    int stop_module(uint tid, ModuleManager* mmgr, Module* module,
+    int stop_module(uint tid, ModuleManager& mmgr, Module* module,
 		    XCCommandCallback cb, bool no_execute);
     int send_now(const Xrl &xrl, XrlRouter::XrlCallback cb, 
 		 const string& expected_response, bool no_execute);
@@ -143,7 +143,7 @@ public:
     
 private:
     EventLoop& _eventloop;
-    XrlRouter *_xrlrouter;
+    XrlRouter& _xrlrouter;
 #ifdef OLDWAY
     int _cmd_done;
     int _result;
