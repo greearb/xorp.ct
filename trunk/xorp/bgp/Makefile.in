@@ -102,7 +102,7 @@ bin_PROGRAMS = xorp_bgp
 TESTS = aspath_test packet_coding_test isolation_tests
 
 # -- No-install Programs
-noinst_PROGRAMS = packet_test plumbing_test update_test aspath_test packet_coding_test isolation_tests
+noinst_PROGRAMS = test_packet plumbing_test update_test aspath_test packet_coding_test isolation_tests
 
 # -- No-install Libraries
 noinst_LIBRARIES = libbgp.a
@@ -113,7 +113,7 @@ LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_build
 # -- Program Sources
 xorp_bgp_SOURCES = bgp.cc main.hh main.cc
 
-packet_test_SOURCES = packet_test.hh packet_test.cc
+test_packet_SOURCES = test_test.hh test_packet.cc
 
 plumbing_test_SOURCES = plumbing_test.hh plumbing_test.cc main.hh main.cc
 plumbing_test_DEPENDENCIES = libbgp.a
@@ -160,7 +160,7 @@ am_libbgp_a_OBJECTS = aspath.$(OBJEXT) attribute_manager.$(OBJEXT) \
 	update_packet.$(OBJEXT) xrl_target.$(OBJEXT)
 libbgp_a_OBJECTS = $(am_libbgp_a_OBJECTS)
 bin_PROGRAMS = xorp_bgp$(EXEEXT)
-noinst_PROGRAMS = packet_test$(EXEEXT) plumbing_test$(EXEEXT) \
+noinst_PROGRAMS = test_packet$(EXEEXT) plumbing_test$(EXEEXT) \
 	update_test$(EXEEXT) aspath_test$(EXEEXT) \
 	packet_coding_test$(EXEEXT) isolation_tests$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
@@ -205,21 +205,21 @@ packet_coding_test_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
 packet_coding_test_LDFLAGS =
-am_packet_test_OBJECTS = packet_test.$(OBJEXT)
-packet_test_OBJECTS = $(am_packet_test_OBJECTS)
-packet_test_LDADD = $(LDADD)
-packet_test_DEPENDENCIES = libbgp.a \
+am_plumbing_test_OBJECTS = plumbing_test.$(OBJEXT) main.$(OBJEXT)
+plumbing_test_OBJECTS = $(am_plumbing_test_OBJECTS)
+plumbing_test_LDADD = $(LDADD)
+plumbing_test_LDFLAGS =
+am_test_packet_OBJECTS = test_packet.$(OBJEXT)
+test_packet_OBJECTS = $(am_test_packet_OBJECTS)
+test_packet_LDADD = $(LDADD)
+test_packet_DEPENDENCIES = libbgp.a \
 	$(top_builddir)/xrl/targets/libbgpbase.a \
 	$(top_builddir)/xrl/interfaces/libribxif.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a \
 	$(top_builddir)/libxipc/libxipc.a \
 	$(top_builddir)/libcomm/libcomm.a \
 	$(top_builddir)/libxorp/libxorp.a
-packet_test_LDFLAGS =
-am_plumbing_test_OBJECTS = plumbing_test.$(OBJEXT) main.$(OBJEXT)
-plumbing_test_OBJECTS = $(am_plumbing_test_OBJECTS)
-plumbing_test_LDADD = $(LDADD)
-plumbing_test_LDFLAGS =
+test_packet_LDFLAGS =
 am_update_test_OBJECTS = update_test.$(OBJEXT)
 update_test_OBJECTS = $(am_update_test_OBJECTS)
 update_test_LDADD = $(LDADD)
@@ -260,9 +260,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/notification_packet.Po \
 @AMDEP_TRUE@	$(DEPDIR)/open_packet.Po $(DEPDIR)/packet.Po \
 @AMDEP_TRUE@	$(DEPDIR)/packet_coding_test.Po \
-@AMDEP_TRUE@	$(DEPDIR)/packet_test.Po $(DEPDIR)/parameter.Po \
-@AMDEP_TRUE@	$(DEPDIR)/path_attribute.Po $(DEPDIR)/peer.Po \
-@AMDEP_TRUE@	$(DEPDIR)/peer_data.Po $(DEPDIR)/peer_handler.Po \
+@AMDEP_TRUE@	$(DEPDIR)/parameter.Po $(DEPDIR)/path_attribute.Po \
+@AMDEP_TRUE@	$(DEPDIR)/peer.Po $(DEPDIR)/peer_data.Po \
+@AMDEP_TRUE@	$(DEPDIR)/peer_handler.Po \
 @AMDEP_TRUE@	$(DEPDIR)/peer_handler_debug.Po \
 @AMDEP_TRUE@	$(DEPDIR)/peer_list.Po $(DEPDIR)/plumbing.Po \
 @AMDEP_TRUE@	$(DEPDIR)/plumbing_test.Po \
@@ -287,8 +287,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_fanout.Po $(DEPDIR)/test_filter.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_main.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_next_hop_resolver.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_nhlookup.Po $(DEPDIR)/test_ribin.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_ribout.Po $(DEPDIR)/update_attrib.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_nhlookup.Po $(DEPDIR)/test_packet.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_ribin.Po $(DEPDIR)/test_ribout.Po \
+@AMDEP_TRUE@	$(DEPDIR)/update_attrib.Po \
 @AMDEP_TRUE@	$(DEPDIR)/update_packet.Po $(DEPDIR)/update_test.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_target.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -304,7 +305,7 @@ CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) \
 	$(isolation_tests_SOURCES) $(packet_coding_test_SOURCES) \
-	$(packet_test_SOURCES) $(plumbing_test_SOURCES) \
+	$(plumbing_test_SOURCES) $(test_packet_SOURCES) \
 	$(update_test_SOURCES) $(xorp_bgp_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
@@ -313,7 +314,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) $(isolation_tests_SOURCES) $(packet_coding_test_SOURCES) $(packet_test_SOURCES) $(plumbing_test_SOURCES) $(update_test_SOURCES) $(xorp_bgp_SOURCES)
+SOURCES = $(libbgp_a_SOURCES) $(aspath_test_SOURCES) $(isolation_tests_SOURCES) $(packet_coding_test_SOURCES) $(plumbing_test_SOURCES) $(test_packet_SOURCES) $(update_test_SOURCES) $(xorp_bgp_SOURCES)
 
 all: all-recursive
 
@@ -370,12 +371,12 @@ isolation_tests$(EXEEXT): $(isolation_tests_OBJECTS) $(isolation_tests_DEPENDENC
 packet_coding_test$(EXEEXT): $(packet_coding_test_OBJECTS) $(packet_coding_test_DEPENDENCIES) 
 	@rm -f packet_coding_test$(EXEEXT)
 	$(CXXLINK) $(packet_coding_test_LDFLAGS) $(packet_coding_test_OBJECTS) $(packet_coding_test_LDADD) $(LIBS)
-packet_test$(EXEEXT): $(packet_test_OBJECTS) $(packet_test_DEPENDENCIES) 
-	@rm -f packet_test$(EXEEXT)
-	$(CXXLINK) $(packet_test_LDFLAGS) $(packet_test_OBJECTS) $(packet_test_LDADD) $(LIBS)
 plumbing_test$(EXEEXT): $(plumbing_test_OBJECTS) $(plumbing_test_DEPENDENCIES) 
 	@rm -f plumbing_test$(EXEEXT)
 	$(CXXLINK) $(plumbing_test_LDFLAGS) $(plumbing_test_OBJECTS) $(plumbing_test_LDADD) $(LIBS)
+test_packet$(EXEEXT): $(test_packet_OBJECTS) $(test_packet_DEPENDENCIES) 
+	@rm -f test_packet$(EXEEXT)
+	$(CXXLINK) $(test_packet_LDFLAGS) $(test_packet_OBJECTS) $(test_packet_LDADD) $(LIBS)
 update_test$(EXEEXT): $(update_test_OBJECTS) $(update_test_DEPENDENCIES) 
 	@rm -f update_test$(EXEEXT)
 	$(CXXLINK) $(update_test_LDFLAGS) $(update_test_OBJECTS) $(update_test_LDADD) $(LIBS)
@@ -406,7 +407,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/open_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet_coding_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parameter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/path_attribute.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer.Po@am__quote@
@@ -442,6 +442,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_next_hop_resolver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_nhlookup.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ribin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ribout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_attrib.Po@am__quote@
