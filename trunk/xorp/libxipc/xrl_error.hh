@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_error.hh,v 1.2 2002/12/19 01:29:13 hodson Exp $
+// $XORP: xorp/libxipc/xrl_error.hh,v 1.3 2003/02/10 22:19:41 hodson Exp $
 
 #ifndef	__XRLERROR_HH__
 #define __XRLERROR_HH__
@@ -38,73 +38,73 @@ public:
      * The value that should be returned by functions whose execution
      * completed normally.
      */
-    static const XrlError& OKAY() 		{ return E_OKAY; }
+    static const XrlError& OKAY();
 
     /**
      * The value that should be returned when the arguments in an XRL
      * do not match what the receiver expected.
      */
-    static const XrlError& BAD_ARGS() 		{ return E_BAD_ARGS; }
+    static const XrlError& BAD_ARGS();
 
     /**
      * The value that should be returned when the command cannot be
      * executed by Xrl Target.
      */
-    static const XrlError& COMMAND_FAILED()	{ return E_COMMAND_FAILED; }
+    static const XrlError& COMMAND_FAILED();
 
     /**
      * Returned when an XRL cannot be dispatched because the target name
      * is not registered in the system.
      */
-    static const XrlError& RESOLVE_FAILED()	{ return E_RESOLVE_FAILED; }
+    static const XrlError& RESOLVE_FAILED();
 
     /**
      * The Xrl Finder process is not running or not ready to resolve
      * Xrl target names
      */
-    static const XrlError& NO_FINDER() 		{ return E_NO_FINDER; }
+    static const XrlError& NO_FINDER();
 
     /**
      * Returned when the underlying XRL transport mechanism fails.
      */
-    static const XrlError& SEND_FAILED()	{ return E_SEND_FAILED; }
+    static const XrlError& SEND_FAILED();
 
     /**
      * Returned when the reply is not returned within the timeout
      * period of the underlying transport mechanism.
      */
-    static const XrlError& REPLY_TIMED_OUT()	{ return E_REPLY_TIMED_OUT; }
+    static const XrlError& REPLY_TIMED_OUT();
 
     /**
      * Returned when the method within the XRL is not recognized by
      * the receiver.
      */
-    static const XrlError& NO_SUCH_METHOD()	{ return E_NO_SUCH_METHOD; }
+    static const XrlError& NO_SUCH_METHOD();
 
     /**
      * XRL appears to have been corrupted by transport protocol.
      */
-    static const XrlError& CORRUPT_XRL() 	{ return E_CORRUPT_XRL; }
+    static const XrlError& CORRUPT_XRL();
 
     /**
      * XRL response appears to have been corrupted by transport protocol.
      */
-    static const XrlError& CORRUPT_RESPONSE() 	{ return E_CORRUPT_RESPONSE; }
+    static const XrlError& CORRUPT_RESPONSE();
 
     /**
      * System call failed in transport protocol implementation.
      */
-    static const XrlError& SYSCALL_FAILED() 	{ return E_SYSCALL_FAILED; }
+    static const XrlError& SYSCALL_FAILED();
 
     /**
      * Xrl transport protocol version mismatch.
      */
-    static const XrlError& BAD_PROTOCOL_VERSION() { return E_BAD_PROTOCOL; }
+    static const XrlError& BAD_PROTOCOL_VERSION();
 
     /**
      * Unspecified error.
      */
-    static const XrlError& FAILED_UNKNOWN() 	{ return E_FAILED_UNKNOWN; }
+    static const XrlError& FAILED_UNKNOWN();
 
     /**
      * @return the unique identifer number associated with error.
@@ -144,16 +144,11 @@ public:
     XrlError(const XrlErrlet& x, const string& note = "") :
 	_errlet(&x), _note(note) {}
 
+    XrlError(const XrlErrlet*);
+
 protected:
     const XrlErrlet* _errlet;
     string	     _note;
-
-    XrlError(const XrlErrlet*);
-
-    static const XrlError E_OKAY, E_BAD_ARGS, E_COMMAND_FAILED,
-	E_RESOLVE_FAILED, E_NO_FINDER, E_SEND_FAILED, E_REPLY_TIMED_OUT,
-	E_NO_SUCH_METHOD, E_CORRUPT_XRL, E_CORRUPT_RESPONSE, E_BAD_PROTOCOL,
-	E_SYSCALL_FAILED, E_FAILED_UNKNOWN;
 };
 
 /**
