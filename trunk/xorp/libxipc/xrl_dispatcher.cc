@@ -12,10 +12,34 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_dispatcher.cc,v 1.3 2003/06/19 00:44:43 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_dispatcher.cc,v 1.4 2003/06/20 18:55:57 hodson Exp $"
+
+#include "ipc_module.h"
 
 #include "libxorp/debug.h"
+#include "libxorp/xlog.h"
 #include "xrl_dispatcher.hh"
+
+
+// ----------------------------------------------------------------------------
+// Xrl Tracing central
+
+static class TraceXrl {
+public:
+    TraceXrl() {
+	_do_trace = !(getenv("XRLDISPATCHTRACE") == 0);
+    }
+    inline bool on() const { return _do_trace; }
+    operator bool() { return _do_trace; }
+
+protected:
+    bool _do_trace;
+} xrl_trace;
+
+#define trace_xrl_dispatch(p, x) 					      \
+do {									      \
+    if (xrl_trace.on()) XLOG_INFO((string(p) + x).c_str());	      	      \
+} while (0)
 
 // ----------------------------------------------------------------------------
 // XrlDispatcher methods
@@ -26,9 +50,12 @@ XrlDispatcher::dispatch_xrl(const string&  method_name,
 			    XrlArgs&       outputs) const
 {
     const XrlCmdEntry* c = get_handler(method_name.c_str());
-    if (c) {
-	return c->dispatch(inputs, &outputs);
+    if (c == 0) {
+	trace_xrl_dispatch("dispatch_xrl (invalid) ", method_name);
+	debug_msg("No handler for %s\n", method_name.c_str());
+	return XrlError::NO_SUCH_METHOD();
     }
-    debug_msg("No handler for %s\n", method_name.c_str());
-    return XrlError::NO_SUCH_METHOD();
+
+    trace_xrl_dispatch("dispatch_xrl (valid) ", method_name);
+    return c->dispatch(inputs, &outputs);
 }
