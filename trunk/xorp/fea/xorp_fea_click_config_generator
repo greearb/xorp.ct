@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.2 2004/12/07 22:43:36 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.3 2004/12/11 02:20:33 pavlin Exp $
 #
 
 #
@@ -428,6 +428,8 @@ function process_statement(statement)
 		v = tokens[i];
 		iftree_interfaces_max++;
 		iftree_interfaces_ifname[iftree_interfaces_max - 1] = v;
+		# XXX: by default each interface is enabled
+		iftree_interfaces_enabled[iftree_interfaces_max - 1] = 1;
 		continue;
 	    }
 	    syntax_error("Invalid keyword");
@@ -440,7 +442,10 @@ function process_statement(statement)
 		    syntax_error("Missing value");
 		i++;
 		v = tokens[i];
-		iftree_interfaces_enabled[iftree_interfaces_max - 1] = v;
+		if (v == "true")
+		    iftree_interfaces_enabled[iftree_interfaces_max - 1] = 1;
+		else
+		    iftree_interfaces_enabled[iftree_interfaces_max - 1] = 0;
 		continue;
 	    }
 
@@ -498,6 +503,8 @@ function process_statement(statement)
 		iftree_interfaces_vifs_max[p]++;
 		q = iftree_interfaces_vifs_max[p] - 1;
 		iftree_interfaces_vifs_vifname[p,q] = v;
+		# XXX: by default each vif is enabled
+		iftree_interfaces_vifs_enabled[p,q] = 1;
 		continue;
 	    }
 	    syntax_error("Invalid keyword");
@@ -511,7 +518,10 @@ function process_statement(statement)
 		v = tokens[i];
 		p = iftree_interfaces_max - 1;
 		q = iftree_interfaces_vifs_max[p] - 1;
-		iftree_interfaces_vifs_enabled[p,q] = v;
+		if (v == "true")
+		    iftree_interfaces_vifs_enabled[p,q] = 1;
+		else
+		    iftree_interfaces_vifs_enabled[p,q] = 0;
 		continue;
 	    }
 
@@ -663,11 +673,17 @@ function process_statement(statement)
 		q = iftree_interfaces_vifs_max[p] - 1;
 		if (is_ipv4_address) {
 		    r = iftree_interfaces_vifs_addresses4_max[p,q] - 1;
-		    iftree_interfaces_vifs_addresses4_enabled[p,q,r] = v;
+		    if (v == "true")
+			iftree_interfaces_vifs_addresses4_enabled[p,q,r] = 1;
+		    else
+			iftree_interfaces_vifs_addresses4_enabled[p,q,r] = 0;
 		}
 		if (is_ipv6_address) {
 		    r = iftree_interfaces_vifs_addresses6_max[p,q] - 1;
-		    iftree_interfaces_vifs_addresses6_enabled[p,q,r] = v;
+		    if (v == "true")
+			iftree_interfaces_vifs_addresses6_enabled[p,q,r] = 1;
+		    else
+			iftree_interfaces_vifs_addresses6_enabled[p,q,r] = 0;
 		}
 		continue;
 	    }
