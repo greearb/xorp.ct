@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.8 2003/03/07 07:03:22 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.9 2003/03/07 18:23:44 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -394,35 +394,52 @@ public:
     FinderNGClientEnableXrls(FinderNGClient& fc,
 			     uint32_t        target_id,
 			     const string&   instance_name,
-			     bool	     en)
-	: FinderNGClientRepeatOp(fc, target_id), _iname(instance_name), _en(en)
-    {}
+			     bool	     en,
+			     bool&	     update_var)
+	: FinderNGClientRepeatOp(fc, target_id), _iname(instance_name),
+	  _en(en), _update_var(update_var)
+    {
+	finder_trace("Constructing EnableXrls \"%s\"", _iname.c_str());
+    }
 
+    ~FinderNGClientEnableXrls()
+    {
+	finder_trace("Destructing EnableXrls \"%s\"", _iname.c_str());
+    }
+    
     void execute(FinderMessengerBase* m)
     {
+	finder_trace_init("execute EnableXrls \"%s\"", _iname.c_str());
 	FinderTcpMessenger *ftm = dynamic_cast<FinderTcpMessenger*>(m);
 	XLOG_ASSERT(ftm != 0);
 	XrlFinderV0p1Client cl(m);
 	if (!cl.send_set_finder_client_enabled(finder, _iname, _en,
 		callback(this, &FinderNGClientEnableXrls::en_callback))) {
 	    XLOG_ERROR("Failed on send_set_finder_client_enabled");
+	    finder_trace_result("failed (send)");
 	    client().notify_failed(this);
 	}
+	finder_trace_result("okay");
     }
     void en_callback(const XrlError& e)
     {
+	finder_trace_init("EnableXrls callback \"%s\"", _iname.c_str());
 	if (e == XrlError::OKAY()) {
+	    _update_var = _en;
+	    finder_trace_result("okay");
 	    client().notify_done(this);
 	    return;
 	}
 	XLOG_ERROR("Failed to enable client \"%s\": %s\n",
 		   _iname.c_str(), e.str().c_str());
+	finder_trace_result("failed");
 	client().notify_failed(this);
     }
 
 protected:
     string	_iname;
     bool	_en;
+    bool&	_update_var;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -431,7 +448,7 @@ protected:
 //
 
 FinderNGClient::FinderNGClient()
-    : _messenger(0), _pending_result(false) 
+    : _messenger(0), _pending_result(false), _xrls_registered(false)
 {
     finder_trace("Constructing FinderNGClient (%p)", this);
 }
@@ -496,7 +513,8 @@ FinderNGClient::enable_xrls(uint32_t target_id)
 	return false;
 
     Operation op(new FinderNGClientEnableXrls(*this, target_id,
-					      _tids[target_id], true));
+					      _tids[target_id], true,
+					      _xrls_registered));
     _todo_list.push_back(op);
     crank();
     return true;
@@ -506,6 +524,18 @@ void
 FinderNGClient::query(const string& key,
 		      const QueryCallback& qcb)
 {
+    if (!_xrls_registered) {
+	// there is a finder, but we've not finished registering our xrls.
+	// there's a risk that if we allow program to send xrls before
+	// we're done, then we may inadvertantly trigger other processes
+	// to try to invoke xrls on us and we've not finised registering
+	// so they are doomed to fail and may get confused.
+	XLOG_WARNING("Attempting to resolve %s before registration finished\n",
+		     key.c_str());
+	qcb->dispatch(XrlError::NO_FINDER(), 0);
+	return;
+    }
+    
     ResolvedTable::const_iterator i = _rt.find(key);
     if (_rt.end() != i) {
 	// Entry exists.
@@ -628,6 +658,7 @@ FinderNGClient::prepare_for_restart()
     _lrt.clear();
     
     _pending_result = false;
+    _xrls_registered = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

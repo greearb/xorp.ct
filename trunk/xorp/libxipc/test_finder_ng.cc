@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_ng.cc,v 1.3 2003/03/04 23:41:24 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_ng.cc,v 1.4 2003/03/06 01:19:22 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -201,9 +201,9 @@ test_main(void)
     //
     // Register target
     //
-    verbose_log("Registering client 1...\n");
+    verbose_log("Registering target...\n");
     uint32_t id;
-    if (fc1.register_xrl_target("test_client1", "experimental", id) != true) {
+    if (fc1.register_xrl_target("test_target", "experimental", id) != true) {
 	verbose_log("failed.\n");
 	return 1;
     }
@@ -216,9 +216,9 @@ test_main(void)
     // Register a set of xrl's
     //
     list<string> xrls;
-    xrls.push_back("finder://test_client1/test_command1");
-    xrls.push_back("finder://test_client1/test_command2");
-    xrls.push_back("finder://test_client1/test_command3");
+    xrls.push_back("finder://test_target/test_command1");
+    xrls.push_back("finder://test_target/test_command2");
+    xrls.push_back("finder://test_target/test_command3");
 
     expired = false;
     t = e.set_flag_after_ms(1000, &expired);
@@ -269,6 +269,19 @@ test_main(void)
     FinderNGTcpAutoConnector fc2_connector(e, fc2, fc2.commands(),
 					   test_host, test_port);
 
+    // Register test client
+    uint32_t id2;
+    verbose_log("Registering client...\n");
+    if (fc2.register_xrl_target("test_client", "experimental", id2) != true) {
+	verbose_log("failed.\n");
+	return 1;
+    }
+    verbose_log("succeeded.\n");
+    if (fc2.enable_xrls(id2) == false) {
+	verbose_log("Failed to enable xrls on test client\n");
+	return 1;
+    }
+    
     //
     // Start an expiry timer
     //
@@ -281,8 +294,8 @@ test_main(void)
     verbose_log("Establishing connection between second finder client and "
 		"finder...\n");
     while (!expired &&
-	   fc2.connected() == false && 
-	   finder_box->finder().messengers() < 2)
+	   (fc2.connected() == false || 
+	    finder_box->finder().messengers() < 2))
 	e.run();
 
     if (expired) {

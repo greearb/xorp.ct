@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng_client.hh,v 1.3 2003/03/05 18:19:44 hodson Exp $
+// $XORP: xorp/libxipc/finder_ng_client.hh,v 1.4 2003/03/06 01:18:57 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_CLIENT_HH__
 #define __LIBXIPC_FINDER_NG_CLIENT_HH__
@@ -101,7 +101,7 @@ public:
 
     inline XrlCmdMap& commands() { return _commands; }
 
-    inline bool connected() const { return _messenger != 0; }
+    inline bool connected() const { return _messenger != 0 && _xrls_registered; }
     
 protected:
     // FinderMessengerManager interface
@@ -132,6 +132,7 @@ protected:
     
     FinderMessengerBase* _messenger;
     bool		 _pending_result;
+    bool		 _xrls_registered;
 };
 
 #endif // __LIBXIPC_FINDER_NG_CLIENT_HH__
