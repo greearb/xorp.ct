@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.10 2003/05/09 21:00:52 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.11 2003/06/01 21:37:28 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -313,6 +313,8 @@ test_main(void)
     while (expired == false)
 	e.run();
 
+    delete finder_box;
+    
     return 0;
 }
 
