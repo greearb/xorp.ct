@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.5 2003/01/17 04:07:23 mjh Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.6 2003/01/25 02:10:07 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -49,56 +49,56 @@ plumbing_test_SOURCES		+= main.hh
 plumbing_test_SOURCES		+= main.cc
 plumbing_test_DEPENDENCIES	 = libbgp.a
 
-aspath_test_SOURCES		 = aspath_test.cc		
+aspath_test_SOURCES		 = aspath_test.cc
 packet_coding_test_SOURCES	 = packet_coding_test.cc
 update_test_SOURCES		 = update_test.cc
 
-test_ribin_SOURCES		 = test_ribin.cc 	
+test_ribin_SOURCES		 = test_ribin.cc
 test_ribin_SOURCES		+= route_table_debug.hh
 test_ribin_SOURCES		+= route_table_debug.cc
 test_ribin_SOURCES		+= dummy_main.cc
 
-test_deletion_SOURCES		 = test_deletion.cc 	
+test_deletion_SOURCES		 = test_deletion.cc
 test_deletion_SOURCES		+= route_table_debug.hh
 test_deletion_SOURCES		+= route_table_debug.cc
 test_deletion_SOURCES		+= dummy_main.cc
 
-test_filter_SOURCES		 = test_filter.cc 	
+test_filter_SOURCES		 = test_filter.cc
 test_filter_SOURCES		+= route_table_debug.hh
 test_filter_SOURCES		+= route_table_debug.cc
 test_filter_SOURCES		+= dummy_main.cc
 test_filter_SOURCES		+= dummy_next_hop_resolver.cc
 
-test_cache_SOURCES		 = test_cache.cc 	
+test_cache_SOURCES		 = test_cache.cc
 test_cache_SOURCES		+= route_table_debug.hh
 test_cache_SOURCES		+= route_table_debug.cc
 test_cache_SOURCES		+= dummy_main.cc
 
-test_nhlookup_SOURCES		 = test_nhlookup.cc 	
+test_nhlookup_SOURCES		 = test_nhlookup.cc
 test_nhlookup_SOURCES		+= route_table_debug.hh
 test_nhlookup_SOURCES		+= route_table_debug.cc
 test_nhlookup_SOURCES		+= dummy_main.cc
 
-test_decision_SOURCES		 = test_decision.cc 	
+test_decision_SOURCES		 = test_decision.cc
 test_decision_SOURCES		+= route_table_debug.hh
 test_decision_SOURCES		+= route_table_debug.cc
 test_decision_SOURCES		+= dummy_next_hop_resolver.hh
 test_decision_SOURCES		+= dummy_next_hop_resolver.cc
 test_decision_SOURCES		+= dummy_main.cc
 
-test_fanout_SOURCES		 = test_fanout.cc 	
+test_fanout_SOURCES		 = test_fanout.cc
 test_fanout_SOURCES		+= route_table_debug.hh
 test_fanout_SOURCES		+= route_table_debug.cc
 test_fanout_SOURCES		+= dummy_main.cc
 
-test_dump_SOURCES		 = test_dump.cc 	
+test_dump_SOURCES		 = test_dump.cc
 test_dump_SOURCES		+= route_table_debug.hh
 test_dump_SOURCES		+= route_table_debug.cc
 test_dump_SOURCES		+= dummy_next_hop_resolver.hh
 test_dump_SOURCES		+= dummy_next_hop_resolver.cc
 test_dump_SOURCES		+= dummy_main.cc
 
-test_ribout_SOURCES		 = test_ribout.cc 	
+test_ribout_SOURCES		 = test_ribout.cc
 test_ribout_SOURCES		+= route_table_debug.hh
 test_ribout_SOURCES		+= route_table_debug.cc
 test_ribout_SOURCES		+= peer_handler_debug.hh
