@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.2 2003/01/16 19:26:41 pavlin Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.3 2003/03/05 02:11:48 atanu Exp $"
 
 #include "config.h"
 
@@ -164,9 +164,11 @@ sigchld(int)
 
     if(wait_command_pid == pid) {
 	wait_command_pid = Command::EMPTY;
-	if(WIFEXITED(status) && 0 != WEXITSTATUS(status))
+	if(WIFEXITED(status) && 0 != WEXITSTATUS(status)) {
 	   cerr << "Wait command: " << wait_command 
 	   << " exited with not zero status: " << WEXITSTATUS(status) << endl;
+	   exit(-1);
+	}
 	return;
     }
 
