@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.15 2003/06/11 23:08:47 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.16 2003/06/12 03:01:01 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -367,6 +367,7 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, const IPNet<A>& net,
     q.ibgp = ibgp;
     q.net = net;
     q.nexthop = nexthop;
+    q.id = _id++;
 
     _xrl_queue.push_back(q);
 
@@ -386,6 +387,7 @@ XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, const IPNet<A>& net)
     q.ribname = ribname;
     q.ibgp = ibgp;
     q.net = net;
+    q.id = _id++;
 
     _xrl_queue.push_back(q);
 
@@ -403,48 +405,50 @@ template<class A>
 void
 XrlQueue<A>::sendit()
 {
-    debug_msg("queue length %u\n", (uint32_t)_xrl_queue.size());
+    for(;;) {
+	debug_msg("queue length %u\n", (uint32_t)_xrl_queue.size());
 
-    if(_flying >= FLYING_LIMIT || (_flying >= 1 && _synchronous_mode))
-	return;
+	if(_flying >= FLYING_LIMIT || (_flying >= 1 && _synchronous_mode))
+	    return;
 
-    if(_xrl_queue.empty()) {
+	if(_xrl_queue.empty()) {
 #ifdef	FLOW_CONTROL
-	debug_msg("Output no longer busy\n");
-	_rib_ipc_handler->output_no_longer_busy();
+	    debug_msg("Output no longer busy\n");
+	    _rib_ipc_handler->output_no_longer_busy();
 #endif	
-	return;
+	    return;
+	}
+
+	if (_xrl_queue.size() <= _flying)
+	    return;
+
+	typename deque <XrlQueue<A>::Queued>::const_iterator qi;
+	size_t i = 0;
+
+	for (qi = _xrl_queue.begin(); qi != _xrl_queue.end(); qi++, i++)
+	    if (i == _flying)
+		break;
+
+	XLOG_ASSERT(qi != _xrl_queue.end());
+
+	Queued q = *qi;
+	XrlRibV0p1Client rib(_xrl_router);
+	const char *bgp = q.ibgp ? "ibgp" : "ebgp";
+	bool sent = sendit_spec(q, rib, bgp);
+
+	if (sent) {
+	    _flying++;
+	    continue;
+	}
+
+	// We expect that the send may fail if the socket buffer is full.
+	// It should therefore be the case that we have some route
+	// adds/deletes in flight. If _flying is zero then something
+	// unexpected has happended. We have no outstanding sends and
+	// still its gone to poo.
+
+	XLOG_ASSERT(0 != _flying);
     }
-
-    if (_xrl_queue.size() <= _flying)
-	return;
-
-    typename deque <XrlQueue<A>::Queued>::const_iterator qi;
-    size_t i = 0;
-
-    for (qi = _xrl_queue.begin(); qi != _xrl_queue.end(); qi++, i++)
-	if (i == _flying)
-	    break;
-
-    XLOG_ASSERT(qi != _xrl_queue.end());
-
-    Queued q = *qi;
-    XrlRibV0p1Client rib(_xrl_router);
-    const char *bgp = q.ibgp ? "ibgp" : "ebgp";
-    bool sent = sendit_spec(q, rib, bgp);
-
-    if (sent) {
-	_flying++;
-	return;
-    }
-
-    // We expect that the send may fail if the socket buffer is full.
-    // It should therefore be the case that we have some route
-    // adds/deletes in flight. If _flying is zero then something
-    // unexpected has happended. We have no outstanding sends and
-    // still its gone to poo.
-
-    XLOG_ASSERT(0 != _flying);
 }
 
 template<>
@@ -460,6 +464,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 			    true, false,
 			    q.net, q.nexthop, /*metric*/0, 
 			    ::callback(this, &XrlQueue::callback,
+				       q.id,
 				       "add_route"));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
@@ -468,6 +473,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q,  XrlRibV0p1Client& rib, const char *bgp)
 			       true, false,
 			       q.net,
 			       ::callback(this, &XrlQueue::callback,
+					  q.id,
 					  "delete_route"));
     }
 
@@ -487,6 +493,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 			    true, false,
 			    q.net, q.nexthop, /*metric*/0, 
 			    ::callback(this, &XrlQueue::callback,
+				       q.id,
 				       "add_route"));
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
@@ -495,6 +502,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 			       true, false,
 			       q.net,
 			       ::callback(this, &XrlQueue::callback,
+					  q.id,
 					  "delete_route"));
     }
 
@@ -503,18 +511,37 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, XrlRibV0p1Client& rib, const char *bgp)
 
 template<class A>
 void
-XrlQueue<A>::callback(const XrlError& error, const char *comment)
+XrlQueue<A>::callback(const XrlError& error, uint32_t sequence, 
+		      const char *comment)
 {
     _flying--;
-    debug_msg("callback %s %s\n", comment, error.str().c_str());
+    debug_msg("callback %d %s %s\n", sequence, comment, error.str().c_str());
 
     switch (error.error_code()) {
     case OKAY:
+	{
 	_errors = 0;
 	_synchronous_mode = false;
 	_previously_succeeded = true;
-	_xrl_queue.pop_front();
+
+	Queued q = _xrl_queue.front();
+	if (q.id == sequence) {
+	    _xrl_queue.pop_front();
+	} else {
+	    typename deque <XrlQueue<A>::Queued>::iterator qi;
+
+	    bool found = false;
+	    for (qi = _xrl_queue.begin(); qi != _xrl_queue.end(); qi++)
+		if ((*qi).id == sequence) {
+ 		    _xrl_queue.erase(qi);
+		    found = true;
+		    break;
+		}
+	    XLOG_ASSERT(found);
+	}
+
 	sendit();
+	}
 	break;
 
     case REPLY_TIMED_OUT:
