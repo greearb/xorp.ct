@@ -1,16 +1,16 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.12 2003/12/04 07:20:04 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.13 2004/01/15 19:14:15 hodson Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
-bin_PROGRAMS	 = 
+bin_PROGRAMS	 =
 
 # -- Test Programs
-TESTS		 = 
+TESTS		 =
 
 # -- No-install Programs
 noinst_PROGRAMS  = test_pim
@@ -80,6 +80,11 @@ test_pim_SOURCES += $(top_builddir)/rib/xrl_target.cc
 test_pim_LDADD	  = $(LDADD)
 test_pim_LDADD	 += $(top_builddir)/libfeaclient/libfeaclient.a
 test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
+### socket server libraries and related
+test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket4userxif.a
+test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket4xif.a
+test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
+test_pim_LDADD	 += $(top_builddir)/xrl/targets/libsocketserverbase.a
 
 # -- Library Sources
 libpim_a_SOURCES  = pim_module.h
