@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/split.cc,v 1.3 2002/12/09 18:29:39 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/split.cc,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $"
 
 #include "rtrmgr_module.h"
-#include <string>
+#include "config.h"
+#include "libxorp/xorp.h"
 #include <list>
 
-list <string> split(const string& s, char ch) {
+list<string> split(const string& s, char ch) {
     list <string> parts;
     string s2 = s;
     size_t ix;

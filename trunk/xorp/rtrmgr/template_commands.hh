@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.1.1.1 2002/12/11 23:56:16 hodson Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.2 2003/01/10 00:30:25 hodson Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -76,11 +76,11 @@ class Command {
 public:
     Command(const string &cmd_name);
     virtual ~Command();
-    virtual void add_action(const list <string> &action,
+    void add_action(const list <string> &action,
 			    const XRLdb& xrldb);
-    virtual int execute(ConfigTreeNode& ctn,
-			XorpClient *xclient, uint tid, bool no_execute) const ;
-    virtual void action_complete(const XrlError& err, 
+    int execute(ConfigTreeNode& ctn,
+		XorpClient *xclient, uint tid, bool no_execute) const ;
+    void action_complete(const XrlError& err, 
 			 XrlArgs* xrlargs,
 			 ConfigTreeNode *ctn);
     set <string> affected_xrl_modules() const;
