@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.14 2004/04/22 01:11:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.15 2004/06/10 22:40:59 hodson Exp $"
 
 #include "fea_module.h"
 
@@ -650,7 +650,7 @@ XrlSocketServer::socket4_0_1_tcp_open_and_bind(const string&	creator,
 
     in_addr ia;
     local_addr.copy_out(ia);
-    int fd = comm_bind_tcp4(&ia, htons(local_port));
+    int fd = comm_bind_tcp4(&ia, htons(local_port), COMM_SOCK_NONBLOCKING);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -683,7 +683,7 @@ XrlSocketServer::socket4_0_1_udp_open_and_bind(const string&	creator,
 
     in_addr ia;
     local_addr.copy_out(ia);
-    int fd = comm_bind_udp4(&ia, htons(local_port));
+    int fd = comm_bind_udp4(&ia, htons(local_port), COMM_SOCK_NONBLOCKING);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -728,7 +728,8 @@ XrlSocketServer::socket4_0_1_udp_open_bind_join(const string&	creator,
     in_addr grp;
     mcast_addr.copy_out(grp);
 
-    int fd = comm_bind_join_udp4(&grp, &ia, htons(local_port), reuse);
+    int fd = comm_bind_join_udp4(&grp, &ia, htons(local_port), reuse,
+				 COMM_SOCK_NONBLOCKING);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -786,14 +787,15 @@ XrlSocketServer::socket4_0_1_tcp_open_bind_connect(
     in_addr ia;
     local_addr.copy_out(ia);
 
-    int fd = comm_bind_tcp4(&ia, htons(local_port));
+    int fd = comm_bind_tcp4(&ia, htons(local_port), COMM_SOCK_NONBLOCKING);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
     in_addr ra;
     remote_addr.copy_out(ra);
-    if (comm_sock_connect4(fd, &ra, htons(remote_port)) != XORP_OK) {
+    if (comm_sock_connect4(fd, &ra, htons(remote_port), COMM_SOCK_NONBLOCKING)
+	!= XORP_OK) {
 	comm_close(fd);
 	return XrlCmdError::COMMAND_FAILED("Connect failed.");
     }
@@ -835,7 +837,8 @@ XrlSocketServer::socket4_0_1_udp_open_bind_connect(
     remote_addr.copy_out(ra);
 
     int fd = comm_bind_connect_udp4(&ia, htons(local_port),
-				    &ra, htons(remote_port));
+				    &ra, htons(remote_port),
+				    COMM_SOCK_NONBLOCKING);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -1279,7 +1282,7 @@ XrlSocketServer::socket6_0_1_tcp_open_and_bind(const string&	creator,
 
     in6_addr ia;
     local_addr.copy_out(ia);
-    int fd = comm_bind_tcp6(&ia, htons(local_port));
+    int fd = comm_bind_tcp6(&ia, htons(local_port), COMM_SOCK_NONBLOCKING);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -1314,7 +1317,7 @@ XrlSocketServer::socket6_0_1_udp_open_and_bind(const string&	creator,
 
     in6_addr ia;
     local_addr.copy_out(ia);
-    int fd = comm_bind_udp6(&ia, htons(local_port));
+    int fd = comm_bind_udp6(&ia, htons(local_port), COMM_SOCK_NONBLOCKING);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -1360,7 +1363,8 @@ XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
     in6_addr grp;
     mcast_addr.copy_out(grp);
 
-    int fd = comm_bind_join_udp6(&grp, pif_index, htons(local_port), reuse);
+    int fd = comm_bind_join_udp6(&grp, pif_index, htons(local_port), reuse,
+				 COMM_SOCK_NONBLOCKING);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -1412,14 +1416,15 @@ XrlSocketServer::socket6_0_1_tcp_open_bind_connect(
     in6_addr ia;
     local_addr.copy_out(ia);
 
-    int fd = comm_bind_tcp6(&ia, htons(local_port));
+    int fd = comm_bind_tcp6(&ia, htons(local_port), COMM_SOCK_NONBLOCKING);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
     in6_addr ra;
     remote_addr.copy_out(ra);
-    if (comm_sock_connect6(fd, &ra, htons(remote_port)) != XORP_OK) {
+    if (comm_sock_connect6(fd, &ra, htons(remote_port), COMM_SOCK_NONBLOCKING)
+	!= XORP_OK) {
 	comm_close(fd);
 	return XrlCmdError::COMMAND_FAILED("Connect failed.");
     }
@@ -1464,7 +1469,8 @@ XrlSocketServer::socket6_0_1_udp_open_bind_connect(
     remote_addr.copy_out(ra);
 
     int fd = comm_bind_connect_udp6(&ia, htons(local_port),
-				    &ra, htons(remote_port));
+				    &ra, htons(remote_port),
+				    COMM_SOCK_NONBLOCKING);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.10 2003/06/01 21:37:28 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.11 2004/06/10 22:41:08 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -136,7 +136,8 @@ connect_client(EventLoop* e, bool* client_connect_failed)
     struct in_addr ia;
     ia.s_addr = FINDER_DEFAULT_HOST.addr();
 
-    int fd = comm_connect_tcp4(&ia, htons(FINDER_DEFAULT_PORT));
+    int fd = comm_connect_tcp4(&ia, htons(FINDER_DEFAULT_PORT),
+			       COMM_SOCK_NONBLOCKING);
     if (fd < 0) {
 	fprintf(stderr, "Client failed to connect\n");
 	*client_connect_failed = true;
