@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/add_route.cc,v 1.1 2004/09/28 00:38:13 atanu Exp $"
+#ident "$XORP: xorp/rib/add_route.cc,v 1.2 2004/09/29 02:30:51 atanu Exp $"
 
 // Add routes to the RIB.
 
@@ -247,8 +247,8 @@ main(int argc, char **argv)
 	    TimeVal end = TimeVal(now);
 	    TimeVal delta = end - start;
 	    if (!silent)
-		printf("%s seconds taken to add/delete %d routes\n",
-		       delta.str().c_str(), static_cast<uint32_t>(v.size()));
+		printf("%s seconds taken to add/delete %u routes\n",
+		       delta.str().c_str(), XORP_UINT_CAST(v.size()));
 	} while (repeat);
 	       
     } catch (...) {
