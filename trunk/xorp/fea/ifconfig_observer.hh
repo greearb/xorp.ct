@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.9 2004/08/17 02:20:10 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_observer.hh,v 1.10 2004/10/21 00:27:32 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_OBSERVER_HH__
 #define __FEA_IFCONFIG_OBSERVER_HH__
@@ -38,6 +38,7 @@ public:
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
     virtual bool is_secondary() const { return !_is_primary; }
+    virtual bool is_running() const { return _is_running; }
 
     /**
      * Start operation.
