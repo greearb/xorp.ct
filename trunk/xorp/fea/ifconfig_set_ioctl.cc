@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.12 2003/10/02 16:58:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.13 2003/10/03 00:27:47 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -104,7 +104,14 @@ IfConfigSetIoctl::stop()
     return (XORP_OK);
 }
 
-#ifdef HAVE_IOCTL_SIOCGIFCONF
+#ifndef HAVE_IOCTL_SIOCGIFCONF
+bool
+IfConfigSetIoctl::push_config(const IfTree&)
+{
+    return false;
+}
+
+#else // HAVE_IOCTL_SIOCGIFCONF
 
 /**
  * @short Base class for Ioctl operations
@@ -469,9 +476,8 @@ IfConfigSetIoctl::push_config(const IfTree& it)
     //
     for (ii = it.ifs().begin(); ii != it.ifs().end(); ++ii) {
 	const IfTreeInterface& i = ii->second;
-	if (if_nametoindex(i.ifname().c_str()) <= 0) {
-	    ifc().er().interface_error(i.ifname(),
-				       "O/S does not recognise interface");
+	if (ifc().get_ifindex(i.ifname()) == 0) {
+	    ifc().er().interface_error(i.ifname(), "interface not recognized");
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return false;
 	}
@@ -551,7 +557,12 @@ IfConfigSetIoctl::push_if(const IfTreeInterface& i)
     do {
 	if (i.mac().empty())
 	    break;
-	
+
+	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	if ((ii != ifc().pulled_config().ifs().end())
+	    && (ii->second.mac() == i.mac()))
+	    break;		// Ignore: the MAC hasn't changed
+
 	struct ether_addr ea;
 	try {
 	    EtherMac em;
