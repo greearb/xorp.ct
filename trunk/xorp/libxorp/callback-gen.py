@@ -345,10 +345,10 @@ if (! cb.is_empty()) {
 #endif
 
 void trace_dispatch_enter(const char* file, int line);
-void trace_dispatch_leave(const char* file, int line);
+void trace_dispatch_leave();
 
 #define record_dispatch_enter() trace_dispatch_enter(file(), line())
-#define record_dispatch_leave() trace_dispatch_leave(file(), line())
+#define record_dispatch_leave() trace_dispatch_leave()
 """
 
 def output_trailer():

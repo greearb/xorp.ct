@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $"
+#ident "$XORP: xorp/libxorp/callback.cc,v 1.1 2004/03/05 18:39:43 hodson Exp $"
 
 #include "config.h"
 /*
@@ -26,6 +26,8 @@
  */
 
 #ifdef DEBUG_CALLBACKS
+
+#include <stack>
 
 #include "libxorp_module.h"
 #include "xlog.h"
@@ -41,32 +43,51 @@
 static const TimeVal MAX_CALLBACK_DURATION(5, 0);
 
 /**
- * Start time of last callback.
+ * Stack because one callback can dispatch another and callback data
+ * structures can be deleted so we can't rely on file and line stored
+ * there.
  */
-static timeval s_tv;
+struct CBStackElement {
+    TimeVal	start;
+    const char* file;
+    int 	line;
+
+    CBStackElement(const timeval& now, const char* f, int l)
+	: start(now), file(f), line(l)
+    {}
+};
+static stack<CBStackElement> cb_stack;
 
 void
-trace_dispatch_enter(const char*, int)
-{
-    gettimeofday(&s_tv, 0);
-}
-
-void
-trace_dispatch_leave(const char* file, int line)
+trace_dispatch_enter(const char* file, int line)
 {
     timeval now;
     gettimeofday(&now, 0);
-    TimeVal delta = TimeVal(now) - TimeVal(s_tv);
+    cb_stack.push(CBStackElement(now, file, line));
+}
+
+void
+trace_dispatch_leave()
+{
+    XLOG_ASSERT(cb_stack.empty() == false);
+
+    timeval now;
+    gettimeofday(&now, 0);
+
+    const CBStackElement& e     = cb_stack.top();
+    TimeVal 		  delta = TimeVal(now) - e.start;
+
     if (delta >= MAX_CALLBACK_DURATION) {
 	string s = c_format("Callback originating at %s:%d took "
 			    "%d.%06d seconds\n",
-			    file, line, delta.secs(), delta.usecs());
+			    e.file, e.line, delta.secs(), delta.usecs());
 	if (xlog_is_running()) {
 	    XLOG_ERROR(s.c_str());
 	} else {
 	    fprintf(stderr, "ERROR: %s\n", s.c_str());
 	}
     }
+    cb_stack.pop();
 }
 
 #endif /* DEBUG_CALLBACKS */
