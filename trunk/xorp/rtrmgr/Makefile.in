@@ -97,12 +97,12 @@ install_sh = @install_sh@
 bin_PROGRAMS = xorp_rtrmgr xorpsh xorp_profiler
 
 # -- Test Programs
-#TESTS		 = test_templates
+TESTS = test_templates
 #TESTS		+= test_sample_config
 #TESTS		+= test_module_manager
 
 # -- No-install Programs
-#check_PROGRAMS	 = test_templates
+check_PROGRAMS = test_templates
 #check_PROGRAMS	+= test_sample_config
 #check_PROGRAMS	+= test_module_manager
 
@@ -135,13 +135,10 @@ xorp_profiler_LDADD = $(top_builddir)/xrl/interfaces/libprofilexif.la $(top_buil
 #
 # test_templates
 # #
-# test_templates_SOURCES	 = rtrmgr_module.h
-# test_templates_SOURCES	+= y.boot_tab.h
-# test_templates_SOURCES	+= y.tplt_tab.h
+#test_templates_SOURCES	+= y.boot_tab.h
 
 # test_templates_SOURCES	+= command_tree.hh
 # test_templates_SOURCES	+= conf_tree.hh
-# test_templates_SOURCES	+= conf_tree_node.hh
 # test_templates_SOURCES	+= generic_module_manager.hh
 # test_templates_SOURCES	+= master_conf_tree.hh
 # test_templates_SOURCES	+= module_commands.hh
@@ -150,38 +147,29 @@ xorp_profiler_LDADD = $(top_builddir)/xrl/interfaces/libprofilexif.la $(top_buil
 # test_templates_SOURCES	+= rtrmgr_error.hh
 # test_templates_SOURCES	+= task.hh
 # test_templates_SOURCES	+= template_commands.hh
-# test_templates_SOURCES	+= template_tree.hh
-# test_templates_SOURCES	+= template_tree_node.hh
 # test_templates_SOURCES	+= unexpanded_xrl.hh
 # test_templates_SOURCES	+= userdb.hh
-# test_templates_SOURCES	+= util.hh
 # test_templates_SOURCES	+= xorp_client.hh
 # test_templates_SOURCES	+= xrl_rtrmgr_interface.hh
 # test_templates_SOURCES	+= xrldb.hh
 
 # test_templates_SOURCES	+= command_tree.cc
 # test_templates_SOURCES	+= conf_tree.cc
-# test_templates_SOURCES	+= conf_tree_node.cc
 # test_templates_SOURCES	+= generic_module_manager.cc
 # test_templates_SOURCES	+= lex.boot.cc
-# test_templates_SOURCES	+= lex.tplt.cc
 # test_templates_SOURCES	+= master_conf_tree.cc
 # test_templates_SOURCES	+= module_command.cc
 # test_templates_SOURCES	+= module_manager.cc
 # test_templates_SOURCES	+= task.cc
 # test_templates_SOURCES	+= template_commands.cc
-# test_templates_SOURCES	+= template_tree.cc
-# test_templates_SOURCES	+= template_tree_node.cc
-# test_templates_SOURCES	+= test_templates.cc
 # test_templates_SOURCES	+= unexpanded_xrl.cc
-# test_templates_SOURCES	+= util.cc
 # test_templates_SOURCES	+= xorp_client.cc
 # test_templates_SOURCES	+= xrl_rtrmgr_interface.xx
 # test_templates_SOURCES	+= xrldb.cc
 # test_templates_SOURCES	+= y.boot_tab.cc
-# test_templates_SOURCES	+= y.tplt_tab.cc
+test_templates_SOURCES = rtrmgr_module.h y.tplt_tab.h conf_tree_node.hh template_base_command.hh template_tree.hh template_tree_node.hh util.hh conf_tree_node.cc lex.tplt.cc template_base_command.cc template_tree.cc template_tree_node.cc test_templates.cc util.cc y.tplt_tab.cc
 
-# test_templates_LDADD	 = $(LDADD)
+test_templates_LDADD = $(LDADD)
 
 #
 # test_sample_config
@@ -292,8 +280,19 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 bin_PROGRAMS = xorp_rtrmgr$(EXEEXT) xorpsh$(EXEEXT) \
 	xorp_profiler$(EXEEXT)
+check_PROGRAMS = test_templates$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
+am_test_templates_OBJECTS = conf_tree_node.$(OBJEXT) lex.tplt.$(OBJEXT) \
+	template_base_command.$(OBJEXT) template_tree.$(OBJEXT) \
+	template_tree_node.$(OBJEXT) test_templates.$(OBJEXT) \
+	util.$(OBJEXT) y.tplt_tab.$(OBJEXT)
+test_templates_OBJECTS = $(am_test_templates_OBJECTS)
+test_templates_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
+test_templates_LDFLAGS =
 am_xorp_profiler_OBJECTS = profiler.$(OBJEXT)
 xorp_profiler_OBJECTS = $(am_xorp_profiler_OBJECTS)
 xorp_profiler_DEPENDENCIES = \
@@ -372,6 +371,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/template_commands.Po \
 @AMDEP_TRUE@	$(DEPDIR)/template_tree.Po \
 @AMDEP_TRUE@	$(DEPDIR)/template_tree_node.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_templates.Po \
 @AMDEP_TRUE@	$(DEPDIR)/unexpanded_xrl.Po $(DEPDIR)/userdb.Po \
 @AMDEP_TRUE@	$(DEPDIR)/util.Po $(DEPDIR)/xorp_client.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xorpsh_main.Po \
@@ -396,10 +396,10 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(xorp_profiler_SOURCES) $(xorp_rtrmgr_SOURCES) \
-	$(xorpsh_SOURCES)
+DIST_SOURCES = $(test_templates_SOURCES) $(xorp_profiler_SOURCES) \
+	$(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in TODO
-SOURCES = $(xorp_profiler_SOURCES) $(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
+SOURCES = $(test_templates_SOURCES) $(xorp_profiler_SOURCES) $(xorp_rtrmgr_SOURCES) $(xorpsh_SOURCES)
 
 all: all-am
 
@@ -445,6 +445,12 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+test_templates$(EXEEXT): $(test_templates_OBJECTS) $(test_templates_DEPENDENCIES) 
+	@rm -f test_templates$(EXEEXT)
+	$(CXXLINK) $(test_templates_LDFLAGS) $(test_templates_OBJECTS) $(test_templates_LDADD) $(LIBS)
 xorp_profiler$(EXEEXT): $(xorp_profiler_OBJECTS) $(xorp_profiler_DEPENDENCIES) 
 	@rm -f xorp_profiler$(EXEEXT)
 	$(CXXLINK) $(xorp_profiler_LDFLAGS) $(xorp_profiler_OBJECTS) $(xorp_profiler_LDADD) $(LIBS)
@@ -487,6 +493,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_commands.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/template_tree_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_templates.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/unexpanded_xrl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/userdb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/util.Po@am__quote@
@@ -554,6 +561,61 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
 
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xpass=`expr $$xpass + 1`; \
+	        failed=`expr $$failed + 1`; \
+	        echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+	        echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+	        xfail=`expr $$xfail + 1`; \
+	        echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+	        failed=`expr $$failed + 1`; \
+	        echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes=`echo "$$banner" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	fi
+
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 top_distdir = ..
@@ -576,6 +638,8 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(PROGRAMS)
 
@@ -607,7 +671,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 
@@ -643,17 +708,17 @@ mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
-.PHONY: GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-libtool distclean distclean-compile \
-	distclean-depend distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am info info-am install \
-	install-am install-binPROGRAMS install-data install-data-am \
-	install-exec install-exec-am install-info install-info-am \
-	install-man install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+.PHONY: GTAGS all all-am check check-TESTS check-am clean \
+	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool distclean distclean-compile distclean-depend \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool tags uninstall \
+	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 
 ################################################################

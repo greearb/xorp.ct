@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.11 2004/05/28 22:27:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.12 2004/06/10 22:41:55 hodson Exp $"
 
 
 #include <signal.h>
@@ -24,15 +24,15 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 
-#include "libxipc/finder_server.hh"
+//#include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 
 #include "rtrmgr_error.hh"
 #include "template_commands.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
-#include "userdb.hh"
-#include "xrl_rtrmgr_interface.hh"
+//#include "userdb.hh"
+//#include "xrl_rtrmgr_interface.hh"
 
 
 //
@@ -61,6 +61,21 @@ usage(const char* name)
 	    default_xrl_targets_dir.c_str());
 
     exit(1);
+}
+
+// the following two functions are an ugly hack to cause the C code in
+// the parser to call methods on the right version of the TemplateTree
+
+void add_cmd_adaptor(char *cmd, TemplateTree* tt)
+{
+    tt->add_cmd(cmd);
+}
+
+
+void add_cmd_action_adaptor(const string& cmd, 
+			    const list<string>& action, TemplateTree* tt)
+{
+    tt->add_cmd_action(cmd, action);
 }
 
 int
@@ -98,8 +113,8 @@ main(int argc, char* const argv[])
     // Read the router config template files
     TemplateTree *tt = NULL;
     try {
-	tt = new TemplateTree(default_xorp_root_dir, config_template_dir,
-			      xrl_targets_dir, true /* verbose */);
+	tt = new TemplateTree(default_xorp_root_dir,
+			      true /* verbose */);
     } catch (const InitError& e) {
 	fprintf(stderr, "test_templates: template tree init error: %s\n",
 		e.why().c_str());
@@ -108,6 +123,13 @@ main(int argc, char* const argv[])
     } catch (...) {
 	xorp_unexpected_handler();
 	fprintf(stderr, "test_templates: unexpected error\n");
+	fprintf(stderr, "test_templates: TEST FAILED\n");
+	exit(1);
+    }
+
+    string errmsg;
+    if (tt->load_template_tree(config_template_dir, errmsg) == false) {
+	fprintf(stderr, "%s", errmsg.c_str());
 	fprintf(stderr, "test_templates: TEST FAILED\n");
 	exit(1);
     }
