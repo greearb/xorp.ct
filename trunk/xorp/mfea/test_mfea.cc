@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.17 2003/05/29 21:56:00 pavlin Exp $"
+#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.18 2003/05/31 16:41:22 pavlin Exp $"
 
 
 //
@@ -64,7 +64,7 @@ static	void usage(const char *argv0, int exit_value);
  * usage:
  * @argv0: Argument 0 when the program was called (the program name itself).
  * @exit_value: The exit value of the program.
- * 
+ *
  * Print the program usage.
  * If @exit_value is 0, the usage will be printed to the standart output,
  * otherwise to the standart error.
@@ -74,12 +74,12 @@ usage(const char *argv0, int exit_value)
 {
     FILE *output;
     const char *progname = strrchr(argv0, '/');
-    
+
     if (progname != NULL)
 	progname++;		// Skip the last '/'
     if (progname == NULL)
 	progname = argv0;
-    
+
     //
     // If the usage is printed because of error, output to stderr, otherwise
     // output to stdout.
@@ -88,7 +88,7 @@ usage(const char *argv0, int exit_value)
 	output = stdout;
     else
 	output = stderr;
-    
+
     fprintf(output, "Usage: %s [-F <finder_hostname>[:<finder_port>]]\n",
 	    progname);
     fprintf(output, "           -F <finder_hostname>[:<finder_port>]  : finder hostname and port\n");
@@ -97,9 +97,9 @@ usage(const char *argv0, int exit_value)
     fprintf(output, "Program name:   %s\n", progname);
     fprintf(output, "Module name:    %s\n", XORP_MODULE_NAME);
     fprintf(output, "Module version: %s\n", XORP_MODULE_VERSION);
-    
+
     exit (exit_value);
-    
+
     // NOTREACHED
 }
 
@@ -109,9 +109,9 @@ main(int argc, char *argv[])
     int ch;
     const char *argv0 = argv[0];
     char *finder_hostname_port = NULL;
-    IPv4 finder_addr = IPv4::ANY();
-    uint16_t finder_port =  FINDER_NG_TCP_DEFAULT_PORT;	// XXX: host order
-    
+    IPv4 finder_addr = FINDER_DEFAULT_HOST;
+    uint16_t finder_port =  FINDER_DEFAULT_PORT;	// XXX: host order
+
     //
     // Initialize and start xlog
     //
@@ -121,7 +121,7 @@ main(int argc, char *argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     //
     // Get the program options
     //
@@ -155,7 +155,7 @@ main(int argc, char *argv[])
 	char buf[1024];
 	char *p;
 	struct hostent *h;
-	
+
 	// Get the finder address
 	strcpy(buf, finder_hostname_port);
 	p = strrchr(buf, ':');
@@ -167,7 +167,7 @@ main(int argc, char *argv[])
 		    buf, hstrerror(h_errno));
 	    usage(argv0, 1);
 	}
-	
+
 	try {
 	    IPvX addr(h->h_addrtype, (uint8_t *)h->h_addr_list[0]);
 	    finder_addr = addr.get_ipv4();
@@ -180,7 +180,7 @@ main(int argc, char *argv[])
 		    h->h_addrtype);
 	    usage(argv0, 1);
 	}
-	
+
 	// Get the finder port
 	strcpy(buf, finder_hostname_port);
 	p = strrchr(buf, ':');
@@ -193,7 +193,7 @@ main(int argc, char *argv[])
 	    }
 	}
     }
-    
+
     //
     // The main body
     //
@@ -202,7 +202,7 @@ main(int argc, char *argv[])
 	// Init stuff
 	//
 	EventLoop eventloop;
-	
+
 	//
 	// Finder
 	//
@@ -210,15 +210,14 @@ main(int argc, char *argv[])
 	if (finder_hostname_port == NULL) {
 	    // Start our own finder
 	    try {
-		add_permitted_host(if_get_preferred());
-		finder = new FinderServer(eventloop, finder_addr, finder_port);
+		finder = new FinderServer(eventloop,finder_port, finder_addr);
 	    } catch (const InvalidPort&) {
 		XLOG_FATAL("Could not start in-process Finder");
 	    }
 	    finder_addr = finder->addr();
 	    finder_port = finder->port();
 	}
-	
+
 	//
 	// CLI
 	//
@@ -251,7 +250,7 @@ main(int argc, char *argv[])
 					 finder_addr, finder_port);
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
 #endif // ! DO_IPV4
-	
+
 	//
 	// MFEA node
 	//
@@ -273,17 +272,17 @@ main(int argc, char *argv[])
 				   eventloop,
 				   &xrl_std_router_mfea6);
 #endif // ! DO_IPV4
-	
+
 	//
 	// Start the nodes
 	//
-	
+
 	// cli_node4.enable();
 	// cli_node4.start();
 	//
 	// cli_node6.enable();
 	// cli_node6.start();
-	
+
 	// xrl_mfea_node4.enable_cli();
 	// xrl_mfea_node4.start_cli();
 	// xrl_mfea_node4.enable_mfea();
@@ -297,17 +296,17 @@ main(int argc, char *argv[])
 	// xrl_mfea_node6.start_mfea();
 	// xrl_mfea_node6.enable_all_vifs();
 	// xrl_mfea_node6.start_all_vifs();
-	
-	
+
+
 	// Main loop
 	for (;;) {
 	    eventloop.run();
 	}
-	
+
 	//
 	// Stop the nodes
 	//
-	
+
 	// xrl_mfea_node4.stop_all_vifs();
 	// xrl_mfea_node4.stop_mfea();
 	// xrl_mfea_node4.stop_cli();
@@ -315,23 +314,23 @@ main(int argc, char *argv[])
 	// xrl_mfea_node6.stop_all_vifs();
 	// xrl_mfea_node6.stop_mfea();
 	// xrl_mfea_node6.stop_cli();
-	
+
 	// cli_node4.stop();
 	//
 	// cli_node6.stop();
-	
+
 	if (finder != NULL)
 	    delete finder;
-	
+
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
-    
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
+
     exit(0);
 }

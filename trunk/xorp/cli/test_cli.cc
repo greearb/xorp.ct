@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.15 2003/05/29 21:55:59 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.16 2003/05/31 16:41:21 pavlin Exp $"
 
 
 //
@@ -67,7 +67,7 @@ static	void usage(const char *argv0, int exit_value);
  * usage:
  * @argv0: Argument 0 when the program was called (the program name itself).
  * @exit_value: The exit value of the program.
- * 
+ *
  * Print the program usage.
  * If @exit_value is 0, the usage will be printed to the standart output,
  * otherwise to the standart error.
@@ -77,12 +77,12 @@ usage(const char *argv0, int exit_value)
 {
     FILE *output;
     const char *progname = strrchr(argv0, '/');
-    
+
     if (progname != NULL)
 	progname++;		// Skip the last '/'
     if (progname == NULL)
 	progname = argv0;
-    
+
     //
     // If the usage is printed because of error, output to stderr, otherwise
     // output to stdout.
@@ -100,9 +100,9 @@ usage(const char *argv0, int exit_value)
     fprintf(output, "Program name:   %s\n", progname);
     fprintf(output, "Module name:    %s\n", XORP_MODULE_NAME);
     fprintf(output, "Module version: %s\n", XORP_MODULE_VERSION);
-    
+
     exit (exit_value);
-    
+
     // NOTREACHED
 }
 
@@ -127,9 +127,9 @@ main(int argc, char *argv[])
     int ch;
     const char *argv0 = argv[0];
     char *finder_hostname_port = NULL;
-    IPv4 finder_addr = IPv4::ANY();
-    uint16_t finder_port = FINDER_NG_TCP_DEFAULT_PORT;	// XXX: host order
-    
+    IPv4 finder_addr = FINDER_DEFAULT_HOST;
+    uint16_t finder_port = FINDER_DEFAULT_PORT;	// XXX: host order
+
     //
     // Initialize and start xlog
     //
@@ -139,7 +139,7 @@ main(int argc, char *argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     //
     // Get the program options
     //
@@ -173,7 +173,7 @@ main(int argc, char *argv[])
 	char buf[1024];
 	char *p;
 	struct hostent *h;
-	
+
 	// Get the finder address
 	strcpy(buf, finder_hostname_port);
 	p = strrchr(buf, ':');
@@ -185,7 +185,7 @@ main(int argc, char *argv[])
 		    buf, hstrerror(h_errno));
 	    usage(argv0, 1);
 	}
-	
+
 	try {
 	    IPvX addr(h->h_addrtype, (uint8_t *)h->h_addr_list[0]);
 	    finder_addr = addr.get_ipv4();
@@ -194,11 +194,12 @@ main(int argc, char *argv[])
 		    h->h_addrtype);
 	    usage(argv0, 1);
 	} catch (const InvalidCast&) {
-	    fprintf(stderr, "Invalid finder address family: %d (expected IPv4)\n",
+	    fprintf(stderr,
+		    "Invalid finder address family: %d (expected IPv4)\n",
 		    h->h_addrtype);
 	    usage(argv0, 1);
 	}
-	
+
 	// Get the finder port
 	strcpy(buf, finder_hostname_port);
 	p = strrchr(buf, ':');
@@ -211,14 +212,14 @@ main(int argc, char *argv[])
 	    }
 	}
     }
-    
+
     //
     // The main body
     //
     try {
 	Foo f;
 	EventLoop eventloop;
-	
+
 	//
 	// Finder
 	//
@@ -226,17 +227,13 @@ main(int argc, char *argv[])
 	if (finder_hostname_port == NULL) {
 	    // Start our own finder
 	    try {
-		add_permitted_host(if_get_preferred());
-		finder = new FinderServer(eventloop, finder_addr, finder_port);
+		finder = new FinderServer(eventloop, finder_port, finder_addr);
 	    } catch (const InvalidPort&) {
 		XLOG_FATAL("Could not start in-process Finder");
 	    }
 	    finder_addr = finder->addr();
 	    finder_port = finder->port();
 	}
-	
-	add_permitted_host(IPv4("127.0.0.1"));
-	
 	//
 	// CLI
 	//
@@ -257,7 +254,7 @@ main(int argc, char *argv[])
 	cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet1);
 	// cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet2);
 	cli_node4.add_disable_cli_access_from_subnet(disable_ipvxnet1);
-	
+
 	//
 	// Create and configure the CLI XRL interface
 	//
@@ -270,14 +267,14 @@ main(int argc, char *argv[])
 					 finder_addr, finder_port);
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
 #endif // ! DO_IPV4
-	
+
 	//
 	// XXX: CLI test-specific setup
 	//
 	global_cli_node = &cli_node4;
 	add_my_cli_commands(cli_node4);
 	// add_my_cli_commands(cli_node6);
-	
+
 	//
 	// Start the nodes
 	//
@@ -285,20 +282,19 @@ main(int argc, char *argv[])
 	cli_node4.start();
 	// cli_node6.enable();
 	// cli_node6.start();
-	
-	// Test timer    
+
+	// Test timer
 	XorpTimer wakeywakey = eventloop.new_periodic(1000, callback(wakeup_hook));
 	XorpTimer wakeywakey2 = eventloop.new_periodic(5000, callback(wakeup_hook2, 3, 5));
 	XorpTimer wakeywakey3 = eventloop.new_periodic(2000, callback(f, &Foo::print));
-	
-	
+
 	//
 	// Main loop
 	//
 	for (;;) {
 	    eventloop.run();
 	}
-	
+
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
@@ -308,7 +304,7 @@ main(int argc, char *argv[])
     //
     xlog_stop();
     xlog_exit();
-    
+
     exit (0);
 }
 
@@ -317,7 +313,7 @@ wakeup_hook()
 {
     fprintf(stdout, "%s\n", xlog_localtime2string());
     fflush(stdout);
-    
+
     return (true);
 }
 
@@ -326,7 +322,7 @@ wakeup_hook2(int a, int b)
 {
     fprintf(stdout, "%s ARGS = %d %d\n", xlog_localtime2string(), a, b);
     fflush(stdout);
-    
+
     return (true);
 }
 
@@ -340,14 +336,14 @@ cli_myset_func(const char * ,		// server_name
     CliClient *cli_client = cli_node().find_cli_by_term_name(cli_term_name);
     if (cli_client == NULL)
 	return (XORP_ERROR);
-    
+
     if (command_global_name != NULL)
 	cli_client->cli_print(c_format("MYSET_FUNC command_global_name = %s\n",
 				       command_global_name));
     for (size_t i = 0; i < argv.size(); i++)
-	cli_client->cli_print(c_format("MYSET_FUNC arg = %s\n", 
+	cli_client->cli_print(c_format("MYSET_FUNC arg = %s\n",
 				       argv[i].c_str()));
-    
+
     return (XORP_OK);
 }
 
@@ -361,12 +357,12 @@ cli_print(const char * ,		// server_name
     CliClient *cli_client = cli_node().find_cli_by_term_name(cli_term_name);
     if (cli_client == NULL)
 	return (XORP_ERROR);
-    
+
     if (argv.size() > 0) {
 	cli_client->cli_print("Error: unexpected arguments\n");
 	return (XORP_ERROR);
     }
-    
+
     //
     // Test to print a number of lines at once
     //
@@ -374,7 +370,7 @@ cli_print(const char * ,		// server_name
     for (uint32_t i = 0; i < 100; i++)
 	my_string += c_format("This is my multi-line number %u\n", i);
     cli_client->cli_print(my_string);
-    
+
     //
     // Test to print a number of lines one-by-one
     //
@@ -395,12 +391,12 @@ cli_print2(const char * ,		// server_name
     CliClient *cli_client = cli_node().find_cli_by_term_name(cli_term_name);
     if (cli_client == NULL)
 	return (XORP_ERROR);
-    
+
     if (argv.size() > 0) {
 	cli_client->cli_print("Error: unexpected arguments\n");
 	return (XORP_ERROR);
     }
-    
+
 #if 1
     for (int i = 0; i < 10; i++)
 	cli_client->cli_print(c_format("This is my line number %d\n", i));
@@ -419,18 +415,18 @@ int
 add_my_cli_commands(CliNode& cli_node)
 {
     CliCommand *com0, *com1, *com2, *com3;
-    
+
     com0 = cli_node.cli_command_root();
-#if 0    
+#if 0
     com2 = com0->add_command("myset", "Set my variable", cli_myset_func);
     com1 = com0->add_command("myshow", "Show my information", "Myshow> ");
     com2 = com1->add_command("version", "Show my information about system");
     com3 = com2->add_command("pim", "Show my information about PIM");
     com3 = com2->add_command("igmp", "Show my information about IGMP");
-    
+
     com1 = com0->add_command("myset2", "Set my variable2", cli_myset_func);
     com1 = com0->add_command("myshow2", "Show my information2", "Myshow2> ");
-    
+
     com1 = com0->add_command("print", "Print numbers", cli_print);
     com1 = com0->add_command("print2", "Print few numbers", cli_print2);
 #endif
@@ -442,13 +438,13 @@ add_my_cli_commands(CliNode& cli_node)
 			     "Show my information about PIM");
     com3 = com0->add_command("myshow version igmp",
 			     "Show my information about IGMP");
-    
+
     com1 = com0->add_command("myset2", "Set my variable2", cli_myset_func);
     com1 = com0->add_command("myshow2", "Show my information2", "Myshow2> ");
-    
+
     com1 = com0->add_command("print", "Print numbers", cli_print);
     com1 = com0->add_command("print2", "Print few numbers", cli_print2);
-    
+
     return (XORP_OK);
 }
 
