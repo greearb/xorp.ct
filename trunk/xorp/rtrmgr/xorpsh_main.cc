@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.11 2003/08/01 23:07:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.12 2003/09/11 23:00:49 hodson Exp $"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -188,6 +188,28 @@ XorpShell::XorpShell(const string& IPCname,
     _ocl->display_list();
 }
 
+static void
+announce_waiting()
+{
+    fprintf(stderr, "Waiting for xorp_rtrmgr...\n");
+}
+
+static bool
+wait_for_xrlrouter_ready(EventLoop& e, XrlRouter& rtr)
+{
+    bool bad_router = false;
+    XorpTimer timeout = e.set_flag_after_ms(10 * 1000, &bad_router);
+    XorpTimer announcer = e.new_oneoff_after_ms(3 * 1000,
+						callback(&announce_waiting));
+    while (rtr.ready() == false) {
+	e.run();
+	if (bad_router) {
+	    return false;
+	}
+    }
+    return true;
+}
+
 void
 XorpShell::run()
 {
@@ -198,6 +220,12 @@ XorpShell::run()
 
     // Set the callback when the CLI exits (e.g., after Ctrl-D)
     _cli_node.set_cli_client_delete_callback(callback(exit_handler));
+
+    if (wait_for_xrlrouter_ready(_eventloop, _xrlrouter) == false) {
+	// RtrMgr contains finder
+	fprintf(stderr, "Failed to connect to xorp_rtrmgr.\n");
+	return;
+    }
 
     const uint32_t uid = getuid();
     _rtrmgr_client.send_register_client("rtrmgr", uid, _ipc_name,
