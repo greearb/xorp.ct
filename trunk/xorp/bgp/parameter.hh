@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.5 2003/08/11 18:09:56 atanu Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.6 2003/08/28 02:33:41 atanu Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -20,14 +20,14 @@
 // address family assignments from
 // http:// www.iana.org/assignments/address-family-numbers
 // not a complete list
-#define AFI_IPV4 1
-#define AFI_IPV6 2
+const size_t AFI_IPV4 = 1;
+const size_t AFI_IPV6 = 2;
 
 // sub-address family assignments from
 // RFC 2858
 // NLRI = Network Layer Reachability Information
-#define SAFI_NLRI_UNICAST 1
-#define SAFI_NLRI_MULTICAST 2 
+const size_t SAFI_NLRI_UNICAST = 1;
+const size_t SAFI_NLRI_MULTICAST = 2;
 // #define SAFI_NLRI_UNICASTMULTICAST 3 - Removed in:
 //					  draft-ietf-idr-rfc2858bis-03.txt
 
