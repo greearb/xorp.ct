@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.8 2003/08/28 13:25:50 pavlin Exp $
+% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.9 2003/11/06 20:21:01 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Design Overview \\
 \vspace{1ex}
-Version 0.5}
+Version 1.0}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{November 6, 2003}
+\date{June 24, 2004}
 
 \maketitle
 
@@ -105,8 +105,8 @@ example:
 \section{Functionality}
 
 XORP is designed to support both IPv4 and IPv6. However, even though
-most of the code is written to support both, as of Release 0.5
-(November 2003) only IPv4 has been tested in details.
+most of the code is written to support both, as of Release 1.0
+(June 2004) majority of the testing has been limited to IPv4 only.
 
 Below is our initial target list of protocols and features to be
 supported by XORP. Those in bold are already implemented or supported
@@ -119,7 +119,7 @@ yet.
 \begin{itemize}
   \item {\bf BGP4+} ({\bf IPv4} and {\bf IPv6})
   \item OSPF ({\bf IPv4} and IPv6)
-  \item RIPv2 (IPv4), RIPng (IPv6)
+  \item {\bf RIPv2 (IPv4)}, {\bf RIPng (IPv6)}
   \item IS-IS
 \end{itemize}
 
@@ -127,9 +127,9 @@ yet.
 \subsubsection*{Multicast Routing Protocols}
 
 \begin{itemize}
-  \item {\bf PIM-SM}, PIM-SSM, Bidir-PIM ({\bf IPv4} and IPv6)
-  \item {\bf IGMPv1, v2}, v3 ({\bf IPv4 only})
-  \item {\bf MLDv1}, v2 ({\bf IPv6 only})
+  \item {\bf PIM-SM}, PIM-SSM, Bidir-PIM ({\bf IPv4} and {\bf IPv6})
+  \item {\bf IGMPv1, v2}, v3 ({\bf IPv4})
+  \item {\bf MLDv1}, v2 ({\bf IPv6})
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -316,8 +316,7 @@ OSPF implementation to support both IPv4 and IPv6.
 \subsubsection{RIP}
 
 This is the RIP routing daemon. Similarly to OSPF, the IPv4 and IPv6
-daemons will be separate.
-As of November 2003, the RIP implementation is work in progress.
+daemons are separate.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{MLD/IGMP}
@@ -326,6 +325,8 @@ This is Multicast Listener Discovery/Internet Group Management Protocol
 handler. It implements the router-side part of MLD and IGMP. Its main
 purpose is to discover local multicast members and propagate this
 information to multicast routing daemons such as PIM-SM.
+Similar to OSPF and RIP, the IGMP (IPv4) and MLD (IPv6) daemons are
+separate.
 
 For more information about the XORP MLD/IGMP implementation see
 \cite{xorp:mld_igmp}.
@@ -375,8 +376,8 @@ with the IPC finder. The finder assists the XRL communications (more
 specifically, it knows the location of each XRL target), therefore a
 XORP process does not need to know explicitly the location of all
 other processes, or how to communicate with them.  The router manager
-process (rtrmgr) incorporates a finder, so a separate finder process
-is only needed if rtrmgr is not being used such as during testing.
+process ({\em rtrmgr}) incorporates a finder, so a separate finder process
+is only needed if the {\em rtrmgr} is not being used such as during testing.
 
 For more information about the IPC finder and XRLs see
 \cite{xorp:xrl} and \cite{xorp:xrl_interfaces}.
@@ -406,6 +407,8 @@ using XRLs.
   version to 0.4, and the date.
   \item November 6, 2003: Updated the BGP status (now it supports
   IPv6). Bump-up the version to 0.5, and the date.
+  \item June 22, 2004: Updated the status (now there is support for RIP and
+  RIPng); bump-up the version to 1.0, and the date.
 
 \end{itemize}
 
