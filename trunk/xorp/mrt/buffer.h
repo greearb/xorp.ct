@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/buffer.h,v 1.7 2002/12/09 18:29:21 hodson Exp $
+ * $XORP: xorp/mrt/buffer.h,v 1.1.1.1 2002/12/11 23:56:07 hodson Exp $
  */
 
 
@@ -80,6 +80,12 @@ do {									      \
 			(buffer_to),					      \
 			buffer_data_size_);				      \
 } while (0)
+
+#define BUFFER_COMPARE(buffer1, buffer2)				      \
+	((BUFFER_DATA_SIZE(buffer1) == BUFFER_DATA_SIZE(buffer2)) ?	      \
+	 memcmp(BUFFER_DATA_HEAD(buffer1), BUFFER_DATA_HEAD(buffer2),	      \
+		BUFFER_DATA_SIZE(buffer1))				      \
+	 : ((BUFFER_DATA_SIZE(buffer1) < BUFFER_DATA_SIZE(buffer2)) ? -1 : 1))
 
 #define BUFFER_COPYGET_DATA(to, buffer, datalen)			      \
 do {									      \
