@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.15 2003/10/14 22:39:46 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.16 2003/11/01 01:38:58 pavlin Exp $"
 
 
 //
@@ -170,7 +170,12 @@ Mld6igmpNode::stop()
     
     if (ProtoNode<Mld6igmpVif>::stop() < 0)
 	return (XORP_ERROR);
-    
+
+    //
+    // Set the node status
+    //
+    ProtoNode<Mld6igmpVif>::set_node_status(PROC_SHUTDOWN);
+
     return (XORP_OK);
 }
 
