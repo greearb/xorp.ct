@@ -42,7 +42,7 @@ Version 0.2}
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{December 11, 2002}
+\date{March 6, 2003}
 
 \begin{document}
 
@@ -51,7 +51,7 @@ Version 0.2}
 \begin{abstract}
 XORP Resource Locators are the XORP projects preferred means for
 inter-process communication.  A description of the XRL's can be found
-in [XX].  This document describes an important aspect of the XRL
+in \cite{xorp:xrl}.  This document describes an important aspect of the XRL
 world: the specification of XRL Interfaces and Targets.  Following
 these specifications this document then describes tools that generate
 XRL marshalling and unmarshalling routines and assist in common case
@@ -61,7 +61,7 @@ XRL handling.
 \section{Introduction}
 
 Up until the interface specification language and tools described
-here, only low-level API was available for dispatching and handling
+here, only a low-level API was available for dispatching and handling
 XRL requests.  The primary goal of the interface specification
 language and tools is to make the common case XRL code less cumbersome
 and more consistent.  In addition, the interface specification
@@ -76,7 +76,7 @@ directed to in order to be executed.  Multiple XRL targets can
 exist within a single process, though there will typically be one
 target per process.  Each XRL Target has an associated name and a set
 of IPC mechanisms that it supports.  At start-up each target registers
-its name and IPC mechanisms with the Finder, so other targets are
+its name and IPC mechanisms with the Finder, so other processes are
 able to direct requests to it.
 
 We define an \emph{XRL Interface} to be a set of related methods that
@@ -85,11 +85,11 @@ identified by a name and version number.  An XRL Target will nearly
 always implement multiple interfaces and potentially multiple versions
 of particular interface.  For instance, every XRL Target could
 implement a process information interface that would return
-information on the process hosting the target.  Each XRL Target will
-implement interfaces specific to their field of operation: a routing
-process would implement the ``routing process interface'' so that the
-RIB process can make identity agnostic XRL calls for tasks like adding
-a route.
+information about the process hosting the target.  Each XRL Target
+will implement interfaces specific to their field of operation: a
+routing process would implement the ``routing process interface'' so
+that the RIB process can make identity-agnostic XRL calls for tasks
+like redistributing a route to another routing protocol.
 
 We define an \emph{XRL Interface Client} to be a process that accesses
 a particular XRL Interface.
@@ -147,7 +147,8 @@ single return values (for XRL's return values should be document with
 returned).
 
 By convention, XRL Interfaces are specified in \texttt{.xif} files and these
-are located in the \texttt{xorp/xrl/interfaces} directory.
+are located in the \\
+\texttt{xorp/xrl/interfaces} directory.
 
 \subsection{Target Specifications}
 
@@ -261,7 +262,7 @@ As far as the generated base class is concerned, it implements a set
 of pure-virtual Xrl handler methods each of which is associated with
 handling a specific XRL.  The implementor derives from the base class,
 implementing the pure-virtual methods.  When an XRL request is
-received, it will be forwarded to the derived classes implementation
+received, it will be forwarded to the derived class's implementation
 handler method.  The base class takes care of marshalling and
 unmarshalling Xrl arguments and error handling.
 
@@ -280,6 +281,12 @@ arguments are just reference arguments.
 \lstinputlisting[caption={Example Xrl Target C++ Base Class %
                           \label{lst:eg-tgt-header}}, basicstyle=\ttfamily\scriptsize]%
                 {../../xrl/targets/test_base.hh}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     BIBLIOGRAPHY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{../tex/xorp}
+\bibliographystyle{plain}
 
 \end{document}
 

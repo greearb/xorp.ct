@@ -110,7 +110,7 @@ DOCS = libxipc_overview 							  xrl_interfaces
 # -- Document Sources
 libxipc_overview_LATEX = libxipc_overview.tex
 
-xrl_interfaces_LATEX = xrl_interfaces.tex
+xrl_interfaces_LATEX = ../tex/xorp.bib xrl_interfaces.tex
 xrl_interfaces_FIGURES = figs/xrl_ifs.eps
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
