@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.21 2003/06/24 18:28:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.22 2003/06/26 22:17:19 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -713,7 +713,8 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 // Note: applies only for (*,G)
 int
 PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
-				  const IPvX& assert_source_addr)
+				  const IPvX& assert_source_addr,
+				  bool& is_assert_sent)
 {
     uint16_t vif_index = pim_vif->vif_index();
     
@@ -724,7 +725,10 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
 	return (XORP_OK);	// XXX: we are rate-limiting the Asserts
     
     // Send Assert(*,G)
-    pim_vif->pim_assert_mre_send(this, assert_source_addr);
+    if (! is_assert_sent) {
+	pim_vif->pim_assert_mre_send(this, assert_source_addr);
+	is_assert_sent = true;
+    }
     
     // Set the bit-flag, and restart the rate-limited timer (if not running)
     // XXX: On average, the data packets trigger no more than one Assert
@@ -742,7 +746,8 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
 // Note: applies only for (S,G)
 int
 PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
-				  const IPvX& assert_source_addr)
+				  const IPvX& assert_source_addr,
+				  bool& is_assert_sent)
 {
     uint16_t vif_index = pim_vif->vif_index();
     
@@ -754,7 +759,10 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
 	return (XORP_OK);	// XXX: we are rate-limiting the Asserts
     
     // Send Assert(S,G)
-    pim_vif->pim_assert_mre_send(this, source_addr());
+    if (! is_assert_sent) {
+	pim_vif->pim_assert_mre_send(this, source_addr());
+	is_assert_sent = true;
+    }
     
     // Set the bit-flag, and restart the rate-limited timer (if not running)
     // XXX: On average, the data packets trigger no more than one Assert
@@ -792,8 +800,10 @@ PimMre::asserts_rate_limit_timer_timeout()
 //
 // Note: applies for all entries
 int
-PimMre::data_arrived_could_assert(PimVif *pim_vif, const IPvX& src,
-				  const IPvX& dst)
+PimMre::data_arrived_could_assert(PimVif *pim_vif,
+				  const IPvX& src,
+				  const IPvX& dst,
+				  bool& is_assert_sent)
 {
     uint16_t vif_index = pim_vif->vif_index();
     int ret_value;
@@ -828,7 +838,7 @@ PimMre::data_arrived_could_assert(PimVif *pim_vif, const IPvX& src,
 	    break;
 	
 	is_sg_noinfo_old = is_assert_noinfo_state(vif_index);
-	ret_value = data_arrived_could_assert_sg(pim_vif, src);
+	ret_value = data_arrived_could_assert_sg(pim_vif, src, is_assert_sent);
 	is_sg_noinfo_new = is_assert_noinfo_state(vif_index);
 	
 	//
@@ -851,7 +861,7 @@ PimMre::data_arrived_could_assert(PimVif *pim_vif, const IPvX& src,
     // Apply the event to the (*,G) assert state machine.
     //
     if (is_wc()) {
-	return (data_arrived_could_assert_wc(pim_vif, src));
+	return (data_arrived_could_assert_wc(pim_vif, src, is_assert_sent));
     }
     
     PimMre *pim_mre_wc;
@@ -864,7 +874,8 @@ PimMre::data_arrived_could_assert(PimVif *pim_vif, const IPvX& src,
 	return (XORP_ERROR);
     }
     
-    ret_value = pim_mre_wc->data_arrived_could_assert_wc(pim_vif, src);
+    ret_value = pim_mre_wc->data_arrived_could_assert_wc(pim_vif, src,
+							 is_assert_sent);
     
     // Try to remove the entry in case we don't need it
     pim_mre_wc->entry_try_remove();
@@ -875,7 +886,8 @@ PimMre::data_arrived_could_assert(PimVif *pim_vif, const IPvX& src,
 // Note: applies only for (*,G)
 int
 PimMre::data_arrived_could_assert_wc(PimVif *pim_vif,
-				     const IPvX& assert_source_addr)
+				     const IPvX& assert_source_addr,
+				     bool& is_assert_sent)
 {
     uint16_t vif_index = pim_vif->vif_index();
     AssertMetric *new_assert_metric;
@@ -899,7 +911,10 @@ PimMre::data_arrived_could_assert_wc(PimVif *pim_vif,
     
  a1:
     //  * Send Assert(*,G)
-    pim_vif->pim_assert_mre_send(this, assert_source_addr);
+    if (! is_assert_sent) {
+	pim_vif->pim_assert_mre_send(this, assert_source_addr);
+	is_assert_sent = true;
+    }
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
 	pim_node().eventloop().new_oneoff_after(
@@ -917,7 +932,8 @@ PimMre::data_arrived_could_assert_wc(PimVif *pim_vif,
 // Note: applies only for (S,G)
 int
 PimMre::data_arrived_could_assert_sg(PimVif *pim_vif,
-				     const IPvX& assert_source_addr)
+				     const IPvX& assert_source_addr,
+				     bool& is_assert_sent)
 {
     uint16_t vif_index = pim_vif->vif_index();
     AssertMetric *new_assert_metric;
@@ -942,7 +958,10 @@ PimMre::data_arrived_could_assert_sg(PimVif *pim_vif,
     
  a1:
     //  * Send Assert(S,G)
-    pim_vif->pim_assert_mre_send(this, source_addr());
+    if (! is_assert_sent) {
+	pim_vif->pim_assert_mre_send(this, source_addr());
+	is_assert_sent = true;
+    }
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
 	pim_node().eventloop().new_oneoff_after(

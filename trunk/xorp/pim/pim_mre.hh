@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.24 2003/06/24 18:29:52 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.25 2003/06/26 22:17:19 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -668,19 +668,24 @@ public:
     // Note: applies for all entries
     int		data_arrived_could_assert(PimVif *pim_vif,
 					  const IPvX& src,
-					  const IPvX& dst);
+					  const IPvX& dst,
+					  bool& is_assert_sent);
     // Note: applies only for (S,G)
     int		data_arrived_could_assert_sg(PimVif *pim_vif,
-					     const IPvX& assert_source_addr);
+					     const IPvX& assert_source_addr,
+					     bool& is_assert_sent);
     // Note: applies only for (*,G)
     int		data_arrived_could_assert_wc(PimVif *pim_vif,
-					     const IPvX& assert_source_addr);
+					     const IPvX& assert_source_addr,
+					     bool& is_assert_sent);
     // Note: applies only for (S,G)
     int		wrong_iif_data_arrived_sg(PimVif *pim_vif,
-					  const IPvX& assert_source_addr);
+					  const IPvX& assert_source_addr,
+					  bool& is_assert_sent);
     // Note: applies only for (*,G)
     int		wrong_iif_data_arrived_wc(PimVif *pim_vif,
-					  const IPvX& assert_source_addr);
+					  const IPvX& assert_source_addr,
+					  bool& is_assert_sent);
     // Note: applies only for (S,G)
     bool	recompute_assert_tracking_desired_sg();
     // Note: applies only for (S,G)

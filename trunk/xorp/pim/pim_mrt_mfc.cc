@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.9 2003/06/13 18:23:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.10 2003/06/26 22:17:19 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -167,6 +167,7 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     bool is_directly_connected_s = false;
     bool is_keepalive_timer_restarted = false;
     bool is_wrong_iif = true;
+    bool is_assert_sent = false;
     
     if (iif_vif_index == Vif::VIF_INDEX_INVALID) {
 	return;		// Invalid vif
@@ -270,9 +271,10 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
     // Process the "Data arrived" event that may trigger an Assert message.
     //
     if (pim_mre_sg != NULL) {
-	pim_mre_sg->data_arrived_could_assert(pim_vif, src, dst);
+	pim_mre_sg->data_arrived_could_assert(pim_vif, src, dst,
+					      is_assert_sent);
     } else {
-	pim_mre->data_arrived_could_assert(pim_vif, src, dst);
+	pim_mre->data_arrived_could_assert(pim_vif, src, dst, is_assert_sent);
     }
     
     //
@@ -316,7 +318,8 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 	    && pim_mre->inherited_olist_sg().test(iif_vif_index)) {
 	    // send Assert(S,G) on iif_vif_index
 	    XLOG_ASSERT(pim_mre_sg != NULL);
-	    pim_mre_sg->wrong_iif_data_arrived_sg(pim_vif, src);
+	    pim_mre_sg->wrong_iif_data_arrived_sg(pim_vif, src,
+						  is_assert_sent);
 	} else if ((is_sptbit_set == false)
 		   && (pim_mre->inherited_olist_sg_rpt().test(
 		       iif_vif_index))) {
@@ -337,7 +340,8 @@ PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
 		is_new_entry = true;
 	    }
 	    XLOG_ASSERT(pim_mre_wc != NULL);
-	    pim_mre_wc->wrong_iif_data_arrived_wc(pim_vif, src);
+	    pim_mre_wc->wrong_iif_data_arrived_wc(pim_vif, src,
+						  is_assert_sent);
 	    if (is_new_entry)
 		pim_mre_wc->entry_try_remove();
 	}
