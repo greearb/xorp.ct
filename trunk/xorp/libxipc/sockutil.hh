@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/sockutil.hh,v 1.6 2003/06/01 21:37:28 hodson Exp $
+// $XORP: xorp/libxipc/sockutil.hh,v 1.7 2004/06/10 22:41:07 hodson Exp $
 
 /* Some helper functions for sockets */
 
@@ -145,8 +145,9 @@ bool if_set_preferred(in_addr addr);
 
 /**
  * Get preferred interface for IPC communication.  If not set by
- * if_set_preferred, it is the first valid non-loopback interface.
- * Otherwise it is the loopback interface.
+ * if_set_preferred, it is the first valid loopback interface.
+ * If there is no valid loopback interface, then it is the first valid
+ * interface.
  */
 in_addr if_get_preferred();
 
