@@ -10,7 +10,7 @@
 
 \title{XORP BGP Test Harness \\
 \vspace{1ex}
-Version 0.1}
+Version 0.2}
 \author{ XORP Project                                   \\
          International Computer Science Institute       \\
          Berkeley, CA 94704, USA                        \\
@@ -155,7 +155,7 @@ example of a code fragment that is waiting for a notify packet on
 peer1. A notify packet is added to the queue of expected
 packets, then an update packet without an origin is sent to the BGP
 process. An update packet without an origin is an error and should
-generate the notify packet that we are waiting for. Note that it is
+generate the notify packet that is expected. Note that it is
 the responsibility of test script to add a delay between sending the
 {\em update packet} and the {\em assert}.
 
@@ -184,7 +184,7 @@ types of {\em lookups} can be performed on a trie (Figure
 returned. A test might therefore involve sending many update packets
 from different peers and then verifying that the routing tables at the
 various peers are correct.  Saving the update packets in the tries
-makes it possible to dump the routing tables.
+makes it possible to dump the routing tables for post processing.
 
 \begin{figure}
 \small
@@ -362,7 +362,9 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
 
 \end{itemize}
 \subsection{TEST PEER XRL's}
-Commands that are accepted by the test peer.
+Commands that are accepted by the test peer. This interface is
+used by the coordinating process to control the test peers. It should
+never be used directly and is documented here for completeness.
 
 \begin{itemize}
 \item Register("coord")
@@ -399,6 +401,9 @@ Commands that are accepted by the test peer.
 \end{itemize}
 
 \subsection{TEST PEER CLIENT XRL's}
+
+This interface is implemented by the coordinator which is a client of
+the the test peer.
 
 \begin{itemize}
 \item Packet("peer", "status", "time", "data")
