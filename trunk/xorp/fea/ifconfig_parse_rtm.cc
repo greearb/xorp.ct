@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.3 2003/05/20 17:26:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.4 2003/06/17 23:14:28 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -370,11 +370,11 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	fv->add_addr(a);
 	
 	IfTreeAddr4& fa = fv->get_addr(a)->second;
-	fa.set_enabled(fv->enabled() && (ifa->ifam_flags & IFF_UP));
-	fa.set_broadcast(fv->broadcast() && (ifa->ifam_flags & IFF_BROADCAST));
-	fa.set_loopback(fv->loopback() && (ifa->ifam_flags & IFF_LOOPBACK));
-	fa.set_point_to_point(fv->point_to_point() && (ifa->ifam_flags & IFF_POINTOPOINT));
-	fa.set_multicast(fv->multicast() && (ifa->ifam_flags & IFF_MULTICAST));
+	fa.set_enabled(fv->enabled());
+	fa.set_broadcast(fv->broadcast());
+	fa.set_loopback(fv->loopback());
+	fa.set_point_to_point(fv->point_to_point());
+	fa.set_multicast(fv->multicast());
 
 	// Get the netmask
 	if (rti_info[RTAX_NETMASK] != NULL) {
@@ -412,10 +412,10 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	fv->add_addr(a);
 	
 	IfTreeAddr6& fa = fv->get_addr(a)->second;
-	fa.set_enabled(fv->enabled() && (ifa->ifam_flags & IFF_UP));
-	fa.set_loopback(fv->loopback() && (ifa->ifam_flags & IFF_LOOPBACK));
-	fa.set_point_to_point(fv->point_to_point() && (ifa->ifam_flags & IFF_POINTOPOINT));
-	fa.set_multicast(fv->multicast() && (ifa->ifam_flags & IFF_MULTICAST));
+	fa.set_enabled(fv->enabled());
+	fa.set_loopback(fv->loopback());
+	fa.set_point_to_point(fv->point_to_point());
+	fa.set_multicast(fv->multicast());
 	
 	// Get the netmask
 	if (rti_info[RTAX_NETMASK] != NULL) {
