@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.15 2004/07/09 04:41:25 pavlin Exp $
+% $XORP: xorp/docs/xorpdev-101/xorpdev101.tex,v 1.1 2004/07/18 22:57:35 mjh Exp $
 %
 
 \documentclass[11pt]{article}
@@ -62,14 +62,14 @@ Version 1.0}
          {\it http://www.xorp.org}\\
 	 {\it feedback@xorp.org}
 }
-\date{July 16, 2004}
+\date{July 19, 2004}
 
 \maketitle
 
 \thispagestyle{empty}
 \tableofcontents
 
-
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
@@ -620,6 +620,10 @@ protected:
 
 ...
 
+private:
+...
+    XrlRibV0p1Client    _xrl_rib_client;
+...
 }
 \end{lstlisting}
 
@@ -665,6 +669,8 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop& eventloop,
                                          const string& rib_target)
     : StaticRoutesNode(eventloop),
       XrlStaticRoutesTargetBase(xrl_router),
+      ...
+     _xrl_rib_client(xrl_router),
       ...
 {
   ...
@@ -902,6 +908,298 @@ first we'll know about it is when {\stt
 \newpage
 \section{Calling XRLs on the RIB}
 
+So far we have seen how we define an XRL interface, how we implement
+the target side of such an interface, and how the main loop of a XORP
+process is structured.  In the case of \SRI, we can now receive XRLs
+informing us of routes.  The \SRI process will do some checks and
+internal processing on these routes (such as checking that they go out
+over a network interface that is currently up).  Finally it will
+communicate the remaining routes to the RIB process for use by the
+forwarding plane.  We will now examine how we send these routes to the
+RIB.
+
+If we look in {\stt xorp/xrl/interfaces} we find the file {\stt
+rib.xif} which defines the XRLs available on the {\stt rib} interface.
+Listing \ref{lst:rib.xif} shows some extracts from this file.  As
+we've been following through the {\stt add\_route4} XRL, we'll again
+look at that here.  But it is worth noting in passing that the RIB
+requires a routing protocol (such as \SRI) to call {\stt
+add\_igp\_table4} before sending routes to the RIB, or the RIB will not
+know what to do with the routes.  We'll also look at the {\stt
+lookup\_route4} XRL because this is an example of an XRL that returns
+some data, although this particular XRL is not actually used by the
+\SRI process.
+
+As we saw with the {\stt static\_routes.xif} file, the {\stt rib.xif}
+file is processes by a python script to produce the files {\stt
+rib\_xif.hh} and {\stt rib\_xif.cc} in the {\stt xorp/xrl/interfaces}
+directory which are then compiled and linked to produce the {\stt
+libribxif.a} library.  This library provides a class definition which
+does all the work of marshalling C++ arguments into XRLs, sending the
+XRL to the RIB process,  receiving the response, and calling the
+relevant callback in the caller process with the response data.
+
+Listing \ref{lst:ribxif.hh} shows some extracts from {\stt
+rib\_xif.hh} so we can see what the C++ interface to this library
+looks like.  The library implements a class called {\stt
+XrlRibV0p1Client}.  To use this code, we must first create an instance
+of this class, calling the constructor and supplying a pointer to an
+{\stt XrlSender}.  Typically such an XrlSender is an instance of an
+{\stt XrlRouter} object.  
+
+In Listing \ref{lst:srn.hh} we can see that our implemenation of class
+{\stt XrlStaticRoutesNode} actually defined an instance of {\stt
+XrlRibV0p1Client} called {\stt \_xrl\_rib\_client} as a member
+variable, so this object is created automatically when our main loop
+creates {\stt xrl\_static\_routes\_node} in listing
+\ref{lst:srn.main}.  In Listing \ref{lst:srn.cc} we can see that we
+passed {\stt xrl\_router} into the constructor for {\stt
+\_xrl\_rib\_client}.
+
+So, once everything else has been initialized, we'll also have access
+to {\stt \_xrl\_rib\_client} from within {\stt
+xrl\_static\_routes\_node}.  Now, how do we make use of this generated
+code?  The answer is simple: to send a route to the RIB we simply call
+{\stt \_xrl\_rib\_client.send\_add\_route4()} with the appropriate
+parameters, and the generated library code will do the rest.  We can
+see this in Listing \ref{sr.send}, where this code is actually used.
+
+The only real complication here is related to how we get the response
+back from the XRL.  Recall that {\stt
+\_xrl\_rib\_client.send\_add\_route4()} will return immediated with a local
+success or failure response, before the XRL has actually been
+transmitted to the RIB.  This we need to pass a {\it callback} in to
+{\stt send\_add\_route4()}.  This callback will wrap up enough state so
+that when the response finally returns to the XrlRouter in the \SRI
+process, it will know which method to call on which object with which
+parameters to send the response to the right place.
+
+We can see in {\stt XrlRibV0p1Client} (Listing \ref{lst:srn.hh}) that
+the type of the callback is:\\
+{\stt XorpCallback1<void, const XrlError\&>::RefPtr}\\
+This defines a callback function that returns {\stt void} and which
+takes one argument of type {\stt const XrlError\&}.  If we look in
+Listing \ref{lst:sr.send} we seen that the method {\stt
+XrlStaticRoutesNode::send\_rib\_route\_change\_cb()} fits exactly these
+criteria.  This is the method we are going to use to receive the
+response from our XRL request.
+
+
+\newpage
+\begin{lstlisting}[caption={Extracts from {\stt xorp/xrl/interfaces/rib.xif} %
+                                     \label{lst:rib.xif} } ]{}
+interface rib/0.1 {
+...
+
+        /**
+         * Add/delete an IGP or EGP table.
+         *
+         * @param protocol the name of the protocol.
+         * @param target_class the target class of the protocol.
+         * @param target_instance the target instance of the protocol.
+         * @param unicast true if the table is for the unicast RIB.
+         * @param multicast true if the table is for the multicast RIB.
+         */
+        add_igp_table4          ? protocol:txt                          \
+                                & target_class:txt & target_instance:txt\
+                                & unicast:bool & multicast:bool
+...
+        /**
+         * Add/replace/delete a route.
+         *
+         * @param protocol the name of the protocol this route comes from.
+         * @param unicast true if the route is for the unicast RIB.
+         * @param multicast true if the route is for the multicast RIB.
+         * @param network the network address prefix of the route.
+         * @param nexthop the address of the next-hop router toward the
+         * destination.
+         * @param metric the routing metric.
+         */
+        add_route4      ? protocol:txt & unicast:bool & multicast:bool  \
+                        & network:ipv4net & nexthop:ipv4 & metric:u32
+
+        replace_route4  ? protocol:txt & unicast:bool & multicast:bool  \
+                        & network:ipv4net & nexthop:ipv4 & metric:u32
+
+        delete_route4   ? protocol:txt & unicast:bool & multicast:bool  \
+                        & network:ipv4net
+...
+        /**
+         * Lookup nexthop.
+         * @param addr address to lookup.
+         * @param unicast look in unicast RIB.
+         * @param multicast look in multicast RIB.
+         * @param nexthop contains the resolved nexthop if successful,
+         * IPv4::ZERO otherwise.  It is an error for the unicast and multicast
+         * fields to both be true or both false.
+         */
+        lookup_route4 ? addr:ipv4 & unicast:bool & multicast:bool \
+                -> nexthop:ipv4
+...
+}
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Extracts from {\stt xorp/xrl/interfaces/rib\_xif.hh} %
+                                     \label{lst:ribxif.hh} } ]{}
+class XrlRibV0p1Client {
+public:
+    XrlRibV0p1Client(XrlSender* s) : _sender(s) {}
+...
+    typedef XorpCallback1<void, const XrlError&>::RefPtr AddRoute4CB;
+    /**
+     *  Send Xrl intended to:
+     *
+     *  Add/replace/delete a route.
+     *
+     *  @param tgt_name Xrl Target name
+     *  @param protocol the name of the protocol this route comes from.
+     *  @param unicast true if the route is for the unicast RIB.
+     *  @param multicast true if the route is for the multicast RIB.
+     *  @param network the network address prefix of the route.
+     *  @param nexthop the address of the next-hop router toward the
+     *  destination.
+     *  @param metric the routing metric.
+     */
+    bool send_add_route4(
+        const char*     target_name,
+        const string&   protocol,
+        const bool&     unicast,
+        const bool&     multicast,
+        const IPv4Net&  network,
+        const IPv4&     nexthop,
+        const uint32_t& metric,
+        const AddRoute4CB&      cb
+    );
+...
+    typedef XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr LookupRout
+e4CB;
+    /**
+     *  Send Xrl intended to:
+     *
+     *  Lookup nexthop.
+     *
+     *  @param tgt_name Xrl Target name
+     *  @param addr address to lookup.
+     *  @param unicast look in unicast RIB.
+     *  @param multicast look in multicast RIB.
+     */
+    bool send_lookup_route4(
+        const char*     target_name,
+        const IPv4&     addr,
+        const bool&     unicast,
+        const bool&     multicast,
+        const LookupRoute4CB&   cb
+    );
+}
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[caption={Extracts from {\stt xorp/static\_routes/xrl\_static\_routes\_node.cc} %
+                                     \label{lst:sr.send} } ]{}
+void
+XrlStaticRoutesNode::send_rib_route_change()
+{
+    bool success = true;
+...
+    StaticRoute& static_route = _inform_rib_queue.front();
+    //
+    // Send the appropriate XRL
+    //
+    if (static_route.is_add_route()) {
+        if (static_route.is_ipv4()) {
+            if (static_route.is_interface_route()) {
+...
+            } else {
+                success = _xrl_rib_client.send_add_route4(
+                    _rib_target.c_str(),
+                    StaticRoutesNode::protocol_name(),
+                    static_route.unicast(),
+                    static_route.multicast(),
+                    static_route.network().get_ipv4net(),
+                    static_route.nexthop().get_ipv4(),
+                    static_route.metric(),
+                    callback(this, &XrlStaticRoutesNode::send_rib_route_change_c
+b));
+                if (success)
+                    return;
+            }
+        }
+...
+}
+
+void
+XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
+{
+    // If success, then send the next route change
+    if (xrl_error == XrlError::OKAY()) {
+        _inform_rib_queue.pop_front();
+        send_rib_route_change();
+        return;
+    }
+
+    //
+    // If a command failed because the other side rejected it,
+    // then send the next route change.
+    //
+
+...
+
+}
+
+
+\end{lstlisting}
+\newpage
+\noindent We actually create the callback using the call:\\ {\stt callback(this,
+\&XrlStaticRoutesNode::send\_rib\_route\_change\_cb)}\\ In the context of
+Listing \ref{lst:sr.send}, {\stt this} refers to a pointer to the
+current instance of {\stt XrlStaticRoutesNode}.  So, what this
+callback does is to wrap a pointer to the method {\stt
+send\_rib\_route\_change\_cb()} on the current instance of {\stt
+XrlStaticRoutesNode}.  Later on, when the response returns, the
+XrlRouter will call the {\stt send\_rib\_route\_change\_cb()} method on
+this specific instance of {\stt XrlStaticRoutesNode} and supply it
+with a parameter of type {\stt const XrlError\&}.
+
+In the implementation of {\stt send\_rib\_route\_change\_cb()} we can see
+that we then check the value of the {\stt xrl\_error} parameter to see
+whether the XRL call was actually successful or not.
+
+\subsection{Returning values in XRLs}
+
+Because the \SRI proces is so simple, none of the XRLs it actually
+calls return any information in the response.  However, it's rather
+common that we want to make a request of a target and get back some
+information.  This is quite easy to do, but just requires a different
+callback that can receive the relevant parameters.
+
+In Listing \ref{lst:rib.xif} we saw that the XRL {\stt lookup\_route4}
+returns one value of type {\stt ipv4} called {\stt nexthop}.  XRLs can
+actually return multiple parameters, and this is merely a simple
+example.
+
+In Listing \ref{lst:ribxif.hh} we can see that the callback we need to
+suuply to {\stt send\_lookup\_route4()} is of type:\\ {\stt
+XorpCallback2<void, const XrlError\&, const IPv4*>::RefPtr}\\ This is
+just like the callback we have already seen, except that the method
+the callback will call must take two arguments.  The first must be of
+type {\stt const XrlError\&} and the second must be of type {\stt
+const IPv4*}.  Although \SRI has no such callback method, if it did it
+might look like the function {\stt lookup\_route4\_cb} in Listing
+\ref{lst:lookup}.  The callback itself to be passed into {\stt
+send\_lookup\_route4()} is created in exactly the same way as the one
+we passed into {\stt send\_add\_route4()}.
+
+\begin{lstlisting}[caption={Hypothetical callback for  {\stt
+	send\_lookup\_route4()} \label{lst:lookup} }]{} %
+void
+XrlStaticRoutesNode::lookup_route4_cb(const XrlError& xrl_error,
+                                      const IPv4* nexthop)
+{
+    if (xrl_error == XrlError::OKAY()) {
+        printf("the nexthop is %s\n", nexthop->str().c_str());
+    }
+...
+}
+\end{lstlisting}
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     APPENDIX
@@ -911,7 +1209,7 @@ first we'll know about it is when {\stt
 
 \begin{itemize}
 
-  \item July 16th, 2004: Version 1.0.
+  \item July 19th, 2004: Version 1.0.
 
 \end{itemize}
 
