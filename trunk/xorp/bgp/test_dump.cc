@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.20 2003/09/16 21:00:27 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.21 2003/10/11 03:17:57 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -76,7 +76,7 @@ test_dump(TestInfo& /*info*/)
 	= new RibInTable<IPv4>("RIB-IN1", &handler1);
 
     //In principle the cache shouldn't be needed, but ribin can't be
-    //directly dollowed by decision because the dump_table calls
+    //directly followed by decision because the dump_table calls
     //set_parent on the next table, and decision table doesn't support
     //set_parent because it is the only table with multiple parents.
     CacheTable<IPv4>* cache_table1
