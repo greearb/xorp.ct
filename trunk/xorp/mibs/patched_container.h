@@ -248,7 +248,7 @@ extern "C" {
      * compiler (-O flag). Either turn them back on, or make sure that
      * NETSNMP_INLINE is not defined in net-snmp-config.h.
      */
-#ifdef NETSNMP_NO_INLINE
+#if defined(NETSNMP_NO_INLINE) || !defined(NETSNMP_INLINE)
     int CONTAINER_INSERT(netsnmp_container *x, const void *k);
     int CONTAINER_REMOVE(netsnmp_container *x, const void *k);
     int CONTAINER_FREE(netsnmp_container *x);
