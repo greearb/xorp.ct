@@ -28,6 +28,9 @@ Configure Mode
    specification.
 
 Operational Mode
+ - Fix the CLI command completion for optional parameters:
+   if an optional parameter is typed, then the list of optional parameters
+   should not be shown again after it.
  - Change MasterConfigTree::parse() to return error message string
    by reference.
  - Ensure commands only appear when modules are loaded.
