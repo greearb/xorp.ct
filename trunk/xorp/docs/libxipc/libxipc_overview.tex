@@ -80,10 +80,10 @@ XRL describes a procedure call.  A resolver process, the
 communication.  Each XRL has a textual description and each XORP
 process supports multiple XRL call interfaces, each comprised of a
 group of related XRLs that implement some aspect of the processes
-exported functionality.  When a XORP process starts it registers its
+exported functionality.  When a XORP process starts, it registers its
 supported XRLs and transport protocols with the Finder.  The Finder is
 then able to inform processes with sufficient privileges how to
-resolve to resolve those XRLs.
+resolve those XRLs.
 
 The XIPC library consists of a set of routines for building and
 manipulating XRLs, for dispatching and handling the responses from
@@ -94,7 +94,7 @@ some portions, such as access control, are not yet implemented in the
 library.
 
 In addition to the XIPC library, an interface definition language
-exists, and tools to translate these into callable C++ interfaces and
+exists, together with tools to translate these into callable C++ interfaces and
 into a set of C++ handler routines for handling the receipt of XRL
 calls.  These tools are described in document \cite{xorp:xrl_interfaces}.
 The tools reduce 
@@ -105,9 +105,9 @@ the library.
 
 \section{XORP Resource Locators (XRL's)}
 
-The mechanism we've settled for IPC within XORP processes is mediated
+The mechanism we've settled on for IPC within XORP processes is mediated
 through \emph{Xorp Resource Locators} (XRL's).  An XRL describes a
-procedure call.  It comprises of the protocol family to be used for
+procedure call.  It comprises the protocol family to be used for
 transport, the arguments for the protocol family, the interface of the
 target being called and its version, the method, and an argument
 list.  Examples of XRLs in their human readable forms are shown in
@@ -157,7 +157,7 @@ Protocol Family
 
 \small
 \begin{verbatim}
-xudp://192.150.1.5:1992/fti/0.1/add_route?net:ipv4net=10.0.0.1&gateway:ipv4=192.150.1.1
+stcp://192.150.1.5:1992/fti/0.1/add_route?net:ipv4net=10.0.0.1&gateway:ipv4=192.150.1.1
 +---   +--------------  +-- +-- +-------- +--------------------------------------------
 |      |                |   |   |         |
 |      |                |   |   Method    Arguments
