@@ -12,15 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_redist.hh,v 1.4 2004/02/11 08:48:49 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_redist.hh,v 1.5 2004/04/01 19:31:21 hodson Exp $
 
 #ifndef __RIB_RT_TAB_REDIST_HH__
 #define __RIB_RT_TAB_REDIST_HH__
 
-#include <set>
-#include <functional>
-
 #include "rt_tab_base.hh"
+
+class EventLoop;
 
 template <typename A>
 class RedistOutputFeeder;
@@ -64,7 +63,7 @@ public:
     virtual uint32_t low_water_backlog() const			= 0;
     virtual uint32_t high_water_backlog() const			= 0;
 
-private:
+protected:
     /**
      * Announce to feeder that instance is no longer valid.
      * Invokes @ref RedistOutputFeeder::output_invalid_event().
@@ -155,15 +154,35 @@ public:
      *
      * @param eventloop the EventLoop to be used for timers and file
      *		 	descriptor events.
-     *
-     * @param output to receive redistributed routes.  The output is
-     * deleted automatically when the RedistTable Instance is destructed.
      */
     RedistTable(const string&	tablename,
 		OriginTable<A>*	from_table,
 		OriginTable<A>*	to_table,
-		EventLoop&	eventloop,
-		RedistOutputBase<A>* output = 0);
+		EventLoop&	eventloop);
+
+    /**
+     * Constructor
+     *
+     * Plumbs RedistTable in RIB graph after from_table.
+     *
+     * @param from_table table to redistribute routes from.
+     *
+     * @param to_tablename name of table to redistribute routes to.
+     *
+     * @param eventloop the EventLoop to be used for timers and file
+     *		 	descriptor events.
+     */
+    RedistTable(const string&	tablename,
+		OriginTable<A>*	from_table,
+		const string&	to_tablename,
+		EventLoop&	eventloop);
+
+    /**
+     * Set output to receive redistributed routes.  The output is
+     * deleted automatically when the RedistTable Instance is
+     * destructed.
+     */
+    void set_output(RedistOutputBase<A>* output);
 
     ~RedistTable();
 
@@ -210,7 +229,7 @@ private:
 					// Deletion table or another redist
 					// table has been plumbed in.
 
-    string		_to_table_name;	// Protocol routes are being dumped to
+    string		_to_tablename;	// Protocol routes are being dumped to
 
     RedistOutputBase<A>* _output;
     RedistDumpState<A>*	 _ds;
