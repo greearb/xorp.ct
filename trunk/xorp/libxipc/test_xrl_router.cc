@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.9 2003/04/22 23:27:19 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.10 2003/04/23 20:50:49 hodson Exp $"
 
 #include <stdlib.h>
 
@@ -111,7 +111,7 @@ test_main()
     FinderServer* finder = new FinderServer(eventloop);
     
     // Create and configure "party_A"
-    XrlRouter		party_a(eventloop, "party_A");
+    XrlRouter party_a(eventloop, "party_A", finder->addr(), finder->port());
     XrlPFSUDPListener	listener_a(eventloop);
     party_a.add_listener(&listener_a);
 
@@ -122,7 +122,7 @@ test_main()
     party_a.finalize();
     
     // Create and configure "party_B"
-    XrlRouter		party_b(eventloop, "party_B");
+    XrlRouter party_b(eventloop, "party_B", finder->addr(), finder->port());
     XrlPFSUDPListener	listener_b(eventloop);
     party_b.add_listener(&listener_b);
     party_b.finalize();
