@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxipc/finder_module.h,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+ * $XORP: xorp/libxipc/finder_module.h,v 1.2 2003/02/24 19:39:18 hodson Exp $
  */
 
 /*
@@ -25,4 +25,4 @@
 
 #define XORP_MODULE_NAME	"FINDER"
 #define XORP_MODULE_VERSION	"0.2"
-#define DEBUG_LOGGING
+
