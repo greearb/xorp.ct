@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.14 2004/03/02 17:14:30 atanu Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.15 2004/03/19 00:41:56 pavlin Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -23,6 +23,7 @@
 //#define VALIDATE_XORP_TRIE
 //#define DEBUG_LOGGING
 
+#include "xlog.h"
 #include "debug.h"
 #include "minitraits.hh"
 #include "stack"
@@ -82,7 +83,7 @@ public:
     {
 	// assert that the node has been deleted and it's reference
 	// count is zero
-	assert((_references&(NODE_DELETED|NODE_REFS_MASK)) == NODE_DELETED);
+	XLOG_ASSERT((_references&(NODE_DELETED|NODE_REFS_MASK)) == NODE_DELETED);
 	if (_p)
 	    delete_payload(_p);
     }
@@ -148,13 +149,13 @@ public:
     }
 
     void incr_refcount() {
-	assert((_references & NODE_REFS_MASK) != NODE_REFS_MASK);
+	XLOG_ASSERT((_references & NODE_REFS_MASK) != NODE_REFS_MASK);
 	_references++;
 	// printf("++ _references = %d\n", _references & NODE_REFS_MASK);
     }
 
     void decr_refcount() {
-	assert((_references & NODE_REFS_MASK) > 0);
+	XLOG_ASSERT((_references & NODE_REFS_MASK) > 0);
 	_references--;
 	// printf("-- _references = %d\n", _references & NODE_REFS_MASK);
     }
@@ -544,13 +545,13 @@ public:
            we'd have to assert here anyway.  Doing it this way makes
            it more likely that a failure to check will be noticed
            early */
-	assert(!_cur->deleted());
+	XLOG_ASSERT(!_cur->deleted());
 	return _cur->p();
     };
     const Key & key() const
     {
 	/* see payload() for usage note*/
-	assert(!_cur->deleted());
+	XLOG_ASSERT(!_cur->deleted());
 	return _cur->k();
     };
 
@@ -794,13 +795,13 @@ public:
            we'd have to assert here anyway.  Doing it this way makes
            it more likely that a failure to check will be noticed
            early */
-	assert(!_cur->deleted());
+	XLOG_ASSERT(!_cur->deleted());
 	return _cur->p();
     };
     const Key & key() const
     {
 	/* see payload() for usage note*/
-	assert(!_cur->deleted());
+	XLOG_ASSERT(!_cur->deleted());
 	return _cur->k();
     };
 
@@ -981,7 +982,7 @@ public:
      * Implemented as a find() with a less specific key.
      */
     iterator find_less_specific(const Key &key)	const {
-	assert(key.prefix_len() > 0);
+	XLOG_ASSERT(key.prefix_len() > 0);
 	Key x(key.masked_addr(), key.prefix_len() - 1);
 
 	return iterator(this, _root->find(x));
