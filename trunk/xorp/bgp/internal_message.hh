@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/internal_message.hh,v 1.3 2003/02/07 05:35:37 mjh Exp $
+// $XORP: xorp/bgp/internal_message.hh,v 1.4 2003/03/10 23:19:58 hodson Exp $
 
 #ifndef __BGP_INTERNAL_MESSAGES_HH__
 #define __BGP_INTERNAL_MESSAGES_HH__
@@ -23,6 +23,20 @@ class PeerHandler;
 
 #define GENID_UNKNOWN 0
 
+/**
+ * @short InternalMessage is used to pass route changes between BGP
+ * route table classes.
+ *
+ * XORP BGP is implemented as a pipelined series of route_tables,
+ * starting with a RibInTable for each peering, converging on a
+ * DecisionTable to decide which competing route is prefered, and then
+ * fanning out again to a RibOutTable for each peer.  Routing changes
+ * such as add_route, delete_route, and replace_route propagate
+ * through this pipeline.  The "payload" of these changes is an
+ * InternalMessage, which contains the route itself, the peering from
+ * which this route originated, and the generation ID of the RibIn at
+ * that peering.
+ */
 template<class A>
 class InternalMessage
 {
