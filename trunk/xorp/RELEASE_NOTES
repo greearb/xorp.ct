@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.29 2003/08/28 13:18:24 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.30 2003/08/28 15:41:46 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -24,6 +24,9 @@ Release 0.4 (2003/08/28)
       the organization in the XORP source code tree.
       Only the following binaries are installed in subdirectory "bin":
       call_xrl, xorp_rtrmgr, xorpsh.
+
+    - Removed old directory "mfea", because it is not needed anymore
+      (all the MFEA code has been merged with the FEA).
 
     - The code does not compile anymore on MacOS X 10.2.x (or earlier),
       due to compiler issues. After Apple starts distributing a better
