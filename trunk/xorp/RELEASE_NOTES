@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.25 2003/08/27 23:53:41 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.26 2003/08/28 01:24:42 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -50,7 +50,9 @@ Release 0.4 (2003/??/??)
     - Update packets with unknown path attributes are now correctly handled.
 
   MLD/IGMP:
-    - 
+    - Change the "RX" log messages to include the vif name a message was
+      received on.
+    - Initial support for returning the process status via get_status XRL.
 
   PIM-SM:
     - Implement Join/Prune items fragmentation across Join/Prune messages
