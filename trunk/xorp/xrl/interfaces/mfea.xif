@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.3 2003/03/25 06:55:09 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.4 2003/09/23 03:35:39 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction XRL interface.
@@ -304,10 +304,12 @@ interface mfea/0.1 {
 	stop_cli
 
 	/**
-	 * Enable/disable the MFEA trace log.
+	 * Enable/disable the MFEA trace log for all operations.
+	 *
+	 * @param enable if true, then enable the trace log, otherwise
+	 * disable it.
 	 */
-	enable_log_trace
-	disable_log_trace
+	log_trace_all	? enable:bool
 
 	/**
 	 * Configure MFEA MRIB-related parameters.

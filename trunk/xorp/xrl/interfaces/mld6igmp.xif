@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mld6igmp.xif,v 1.2 2003/03/13 00:32:06 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mld6igmp.xif,v 1.3 2003/03/25 06:55:09 pavlin Exp $ */
 
 /*
  * Multicast Listener Discovery/Internet Group Management Protocol
@@ -55,11 +55,12 @@ interface mld6igmp/0.1 {
 	reset_vif_proto_version		? vif_name:txt
 
 	/**
-	 * Enable/disable the MLD6IGMP trace log.
+	 * Enable/disable the MLD6IGMP trace log for all operations.
+	 *
+	 * @param enable if true, then enable the trace log, otherwise
+	 * disable it.
 	 */
-	enable_log_trace
-	disable_log_trace
-
+	log_trace_all	? enable:bool
 
 	/**
 	 * Add/delete a client protocol in the MLD/IGMP protocol.

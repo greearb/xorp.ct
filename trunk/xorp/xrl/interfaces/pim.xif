@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.12 2003/08/13 07:29:57 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.13 2003/09/30 18:27:07 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -266,10 +266,12 @@ interface pim/0.1 {
 	reset_switch_to_spt_threshold
 
 	/**
-	 * Enable/disable the PIM trace log.
+	 * Enable/disable the PIM trace log for all operations.
+	 *
+	 * @param enable if true, then enable the trace log, otherwise
+	 * disable it.
 	 */
-	enable_log_trace
-	disable_log_trace
+	log_trace_all	? enable:bool
 
 	/**
 	 * Test-related methods: add Join/Prune entries, and send them
