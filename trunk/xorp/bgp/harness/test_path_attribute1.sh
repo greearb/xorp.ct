@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP$
+# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.1 2003/08/05 23:55:14 atanu Exp $
 #
 
 #
@@ -166,7 +166,7 @@ test2()
     echo "TEST2:"
     echo "	1) Send an update packet with an optional transitive path"
     echo "	   attribute. This path attribute should be propogated"
-    echo "         by the BGP process"
+    echo "         by the BGP process with the partial bit set."
 
     # Reset the peers
     reset
@@ -197,7 +197,7 @@ test2()
 	aspath $ASPATH
 	nexthop $NEXTHOP
 	localpref 100
-	pathattr 0xc0,0xff,1,1
+	pathattr 0xe0,0xff,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -206,7 +206,7 @@ test2()
 	aspath $AS,$ASPATH
 	nexthop $NEXT_HOP
 	med 1
-	pathattr 0xc0,0xff,1,1
+	pathattr 0xe0,0xff,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -231,7 +231,8 @@ test3()
     echo "	1) Send an update packet with two optional path"
     echo "	   attributes. One has the transitive bit set the other"
     echo "         doesn't. Only the path attribute with the transitive bit"
-    echo "         set should be propogated by the BGP process"
+    echo "         set should be propogated by the BGP process, with the"
+    echo "         partial bit set."
 
     # Reset the peers
     reset
@@ -263,7 +264,7 @@ test3()
 	aspath $ASPATH
 	nexthop $NEXTHOP
 	localpref 100
-	pathattr 0xc0,0xff,1,1
+	pathattr 0xe0,0xff,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -272,7 +273,7 @@ test3()
 	aspath $AS,$ASPATH
 	nexthop $NEXT_HOP
 	med 1
-	pathattr 0xc0,0xff,1,1
+	pathattr 0xe0,0xff,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -291,8 +292,8 @@ test3()
     coord peer3 assert established
 }
 
-TESTS_NOT_FIXED='test1 test3'
-TESTS='test2'
+TESTS_NOT_FIXED=''
+TESTS='test1 test2 test3'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
