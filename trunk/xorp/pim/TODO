@@ -1,6 +1,10 @@
 #
-# $XORP: xorp/pim/TODO,v 1.27 2003/02/28 22:52:02 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.28 2003/03/12 22:58:41 pavlin Exp $
 #
+
+* SPEC: Don't use "link-local" terminology, because it has no meaning
+  for IPv4? Or, at least, clarify that it is only for IPv6, and describe
+  what happens in case of IPv4.
 
 * IMPL+SPEC+TESTSUITE(?):
   In the bootstrap spec, if we receive and accept an unicast BSM,
