@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.21 2004/09/03 03:46:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.22 2004/09/09 18:53:38 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -101,7 +101,7 @@ NetlinkSocket::start(int af)
     socklen_t		snl_len;
 
     if (_fd >= 0)
-	return (_fd);
+	return (XORP_OK);
     
     //
     // Select the protocol
