@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.8 2003/03/06 19:54:33 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.9 2003/03/06 21:43:40 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -81,12 +81,13 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 				    &done,
 				    &resolve_failed,
 				    &x));
-
+	    
 	    bool to = false;
 	    XorpTimer timeout = e.set_flag_after_ms(1000, &to);
 	    while (to == false && done == false) {
 		e.run();
 	    }
+	    tries++;
 	}
 	
 	if (router.connected() == false) {
