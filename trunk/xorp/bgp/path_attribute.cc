@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.25 2003/08/11 18:11:48 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.26 2003/08/14 03:12:12 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -56,181 +56,6 @@ inline static void dump_bytes(const uint8_t*, uint8_t) {}
  * mandatory and well-known discretionary from the flags.  They're
  * well-known, so you should know :-)
  */
-
-PathAttribute *
-PathAttribute::create(const uint8_t* d, uint16_t max_len,
-		size_t& l /* actual length */)
-	throw(CorruptMessage)
-{
-    PathAttribute *pa;
-
-    if (max_len < 3)	// must be at least 3 bytes!
-	xorp_throw(CorruptMessage,
-                c_format("PathAttribute too short %d bytes", max_len),
-                        UPDATEMSGERR, UNSPECIFIED);
-
-    // compute length, which is 1 or 2 bytes depending on flags d[0]
-    if ( (d[0] & Extended) && max_len < 4)
-	xorp_throw(CorruptMessage,
-                c_format("PathAttribute (extended) too short %d bytes",
-			    max_len),
-                        UPDATEMSGERR, UNSPECIFIED);
-    l = length(d) + (d[0] & Extended ? 4 : 3);
-    if (max_len < l)
-	xorp_throw(CorruptMessage,
-                c_format("PathAttribute too short %d bytes need %u",
-			    max_len, (uint32_t)l),
-                        UPDATEMSGERR, UNSPECIFIED);
-
-    // now we are sure that the data block is large enough.
-    debug_msg("++ create type %d max_len %d actual_len %u\n",
-	d[1], max_len, (uint32_t)l);
-    switch (d[1]) {	// depending on type, do the right thing.
-    case ORIGIN:
-	pa = new OriginAttribute(d);
-	break; 
-
-    case AS_PATH:
-	pa = new ASPathAttribute(d);
-	break;  
-     
-    case NEXT_HOP:
-	pa = new IPv4NextHopAttribute(d);
-	break;
-
-    case MED:
-	pa = new MEDAttribute(d);
-	break;
-    
-    case LOCAL_PREF:
-	pa = new LocalPrefAttribute(d);
-	break;
-
-    case ATOMIC_AGGREGATE:
-	pa = new AtomicAggAttribute(d);
-	break;
-
-    case AGGREGATOR:
-	pa = new AggregatorAttribute(d);
-	break;
-
-    case COMMUNITY:
-	pa = new CommunityAttribute(d);
-	break;
-         
-    case MP_REACH_NLRI:
-	pa = new MPReachNLRIAttribute<IPv6>(d);
-	break;
-
-    case MP_UNREACH_NLRI:
-	pa = new MPUNReachNLRIAttribute<IPv6>(d);
-	break;
-	
-    default:
-	pa = new UnknownAttribute(d);
-	break;
-    }
-    return pa;
-}
-
-string
-PathAttribute::str() const
-{
-    string s = "Path attribute of type ";
-    switch (type()) {
-    case ORIGIN:
-	s += "ORIGIN";
-	break;
-
-    case AS_PATH:
-	s += "AS_PATH";
-	break;
-
-    case NEXT_HOP:
-	s += "NEXT_HOP";
-	break;
-
-    case MED:
-	s += "MED";
-	break;
-
-    case LOCAL_PREF:
-	s += "LOCAL_PREF";
-	break;
-
-    case ATOMIC_AGGREGATE:
-	s += "ATOMIC_AGGREGATOR";
-	break;
-
-    case AGGREGATOR:
-	s += "AGGREGATOR";
-	break;
-
-    case COMMUNITY:
-	s += "COMMUNITY";
-	break;
-    default:
-	s += c_format("UNKNOWN(%d)", type());
-    }
-    return s;
-}
-
-bool
-PathAttribute::operator<(const PathAttribute& him) const
-{
-    if (sorttype() < him.sorttype())
-	return true;
-    if (sorttype() > him.sorttype())
-	return false;
-    // equal sorttypes imply equal types
-    if (wire_size() < him.wire_size())
-	return true;
-    if (wire_size() > him.wire_size())
-	return false;
-    // same size, must compare payload
-    switch (type()) {
-    default:
-	return (memcmp(data(), him.data(), wire_size()) < 0);
-	break;
-
-    case AS_PATH:
-	return ( ((ASPathAttribute &)*this).as_path() <
-		((ASPathAttribute &)him).as_path() );
-
-    case NEXT_HOP:
-	return ( ((NextHopAttribute<IPv4> &)*this).nexthop() <
-		((NextHopAttribute<IPv4> &)him).nexthop() );
-    }
-}
-
-bool
-PathAttribute::operator==(const PathAttribute& him) const
-{
-    return (type() == him.type() && wire_size() == him.wire_size() &&
-    	memcmp(data(), him.data(), wire_size()) == 0);
-}
-
-uint8_t *
-PathAttribute::set_header(size_t payload_size)
-{
-    _size = payload_size;
-    if (payload_size > 255)
-	_flags |= Extended;
-    else
-	_flags &= ~Extended;
-	
-    _data = new uint8_t[wire_size()];	// allocate buffer
-    _data[0] = flags() & ValidFlags;
-    _data[1] = type();
-    if (extended()) {
-	_data[2] = (_size>>8) & 0xff;
-	_data[3] = _size & 0xff;
-	return _data + 4;
-    } else {
-	_data[2] = _size & 0xff;
-	return _data + 3;
-    }
-}
 
 /******************** DERIVED CLASSES ***************************/
 
@@ -900,6 +725,186 @@ UnknownAttribute::str() const
     for (size_t i=0; i< wire_size(); i++)
 	s += c_format("%x ", _data[i]);
     return s;
+}
+
+
+/**
+ * PathAttribute
+ */
+
+PathAttribute *
+PathAttribute::create(const uint8_t* d, uint16_t max_len,
+		size_t& l /* actual length */)
+	throw(CorruptMessage)
+{
+    PathAttribute *pa;
+
+    if (max_len < 3)	// must be at least 3 bytes!
+	xorp_throw(CorruptMessage,
+                c_format("PathAttribute too short %d bytes", max_len),
+                        UPDATEMSGERR, UNSPECIFIED);
+
+    // compute length, which is 1 or 2 bytes depending on flags d[0]
+    if ( (d[0] & Extended) && max_len < 4)
+	xorp_throw(CorruptMessage,
+                c_format("PathAttribute (extended) too short %d bytes",
+			    max_len),
+                        UPDATEMSGERR, UNSPECIFIED);
+    l = length(d) + (d[0] & Extended ? 4 : 3);
+    if (max_len < l)
+	xorp_throw(CorruptMessage,
+                c_format("PathAttribute too short %d bytes need %u",
+			    max_len, (uint32_t)l),
+                        UPDATEMSGERR, UNSPECIFIED);
+
+    // now we are sure that the data block is large enough.
+    debug_msg("++ create type %d max_len %d actual_len %u\n",
+	d[1], max_len, (uint32_t)l);
+    switch (d[1]) {	// depending on type, do the right thing.
+    case ORIGIN:
+	pa = new OriginAttribute(d);
+	break; 
+
+    case AS_PATH:
+	pa = new ASPathAttribute(d);
+	break;  
+     
+    case NEXT_HOP:
+	pa = new IPv4NextHopAttribute(d);
+	break;
+
+    case MED:
+	pa = new MEDAttribute(d);
+	break;
+    
+    case LOCAL_PREF:
+	pa = new LocalPrefAttribute(d);
+	break;
+
+    case ATOMIC_AGGREGATE:
+	pa = new AtomicAggAttribute(d);
+	break;
+
+    case AGGREGATOR:
+	pa = new AggregatorAttribute(d);
+	break;
+
+    case COMMUNITY:
+	pa = new CommunityAttribute(d);
+	break;
+         
+    case MP_REACH_NLRI:
+	pa = new MPReachNLRIAttribute<IPv6>(d);
+	break;
+
+    case MP_UNREACH_NLRI:
+	pa = new MPUNReachNLRIAttribute<IPv6>(d);
+	break;
+	
+    default:
+	pa = new UnknownAttribute(d);
+	break;
+    }
+    return pa;
+}
+
+string
+PathAttribute::str() const
+{
+    string s = "Path attribute of type ";
+    switch (type()) {
+    case ORIGIN:
+	s += "ORIGIN";
+	break;
+
+    case AS_PATH:
+	s += "AS_PATH";
+	break;
+
+    case NEXT_HOP:
+	s += "NEXT_HOP";
+	break;
+
+    case MED:
+	s += "MED";
+	break;
+
+    case LOCAL_PREF:
+	s += "LOCAL_PREF";
+	break;
+
+    case ATOMIC_AGGREGATE:
+	s += "ATOMIC_AGGREGATOR";
+	break;
+
+    case AGGREGATOR:
+	s += "AGGREGATOR";
+	break;
+
+    case COMMUNITY:
+	s += "COMMUNITY";
+	break;
+    default:
+	s += c_format("UNKNOWN(%d)", type());
+    }
+    return s;
+}
+
+bool
+PathAttribute::operator<(const PathAttribute& him) const
+{
+    if (sorttype() < him.sorttype())
+	return true;
+    if (sorttype() > him.sorttype())
+	return false;
+    // equal sorttypes imply equal types
+    if (wire_size() < him.wire_size())
+	return true;
+    if (wire_size() > him.wire_size())
+	return false;
+    // same size, must compare payload
+    switch (type()) {
+    default:
+	return (memcmp(data(), him.data(), wire_size()) < 0);
+	break;
+
+    case AS_PATH:
+	return ( ((ASPathAttribute &)*this).as_path() <
+		((ASPathAttribute &)him).as_path() );
+
+    case NEXT_HOP:
+	return ( ((NextHopAttribute<IPv4> &)*this).nexthop() <
+		((NextHopAttribute<IPv4> &)him).nexthop() );
+    }
+}
+
+bool
+PathAttribute::operator==(const PathAttribute& him) const
+{
+    return (type() == him.type() && wire_size() == him.wire_size() &&
+    	memcmp(data(), him.data(), wire_size()) == 0);
+}
+
+uint8_t *
+PathAttribute::set_header(size_t payload_size)
+{
+    _size = payload_size;
+    if (payload_size > 255)
+	_flags |= Extended;
+    else
+	_flags &= ~Extended;
+	
+    _data = new uint8_t[wire_size()];	// allocate buffer
+    _data[0] = flags() & ValidFlags;
+    _data[1] = type();
+    if (extended()) {
+	_data[2] = (_size>>8) & 0xff;
+	_data[3] = _size & 0xff;
+	return _data + 4;
+    } else {
+	_data[2] = _size & 0xff;
+	return _data + 3;
+    }
 }
 
 /*
