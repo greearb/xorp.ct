@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifmanager_transaction.cc,v 1.3 2004/06/10 22:40:57 hodson Exp $"
+#ident "$XORP: xorp/fea/test_ifmanager_transaction.cc,v 1.4 2005/03/05 01:41:29 pavlin Exp $"
 
 #include <assert.h>
 #include <deque>
@@ -94,7 +94,7 @@ protected:
     }
 
     bool get_result(uint32_t tid) {
-	assert(results_empty(tid) == false);
+	XLOG_ASSERT(results_empty(tid) == false);
 	bool r = _trm[tid].front();
 	_trm[tid].pop_front();
 	return r;

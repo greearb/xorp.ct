@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.11 2005/02/27 21:32:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.12 2005/03/05 01:41:29 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -72,7 +72,7 @@ public:
     void recv(const vector<uint8_t>& data)
     {
 
-	assert(data.size() >= MIN_IP_PKT_BYTES);
+	XLOG_ASSERT(data.size() >= MIN_IP_PKT_BYTES);
 
 	const ip* hdr = reinterpret_cast<const ip*>(&data[0]);
 	if (hdr->ip_p != protocol()) {
@@ -170,7 +170,7 @@ XrlRawSocket4Manager::erase_filters(const FilterBag4::iterator& begin,
 	_filters.erase(fi++);
 
 	// Assert count of filters on rawsocket matches number we've added
-	assert(_rs.empty() == _filters.empty());
+	XLOG_ASSERT(_rs.empty() == _filters.empty());
     }
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.10 2005/03/03 07:31:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.11 2005/03/05 01:41:28 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -251,7 +251,7 @@ FilterRawSocket4::remove_filter(InputFilter* filter)
 void
 FilterRawSocket4::process_recv_data(const vector<uint8_t>& buf)
 {
-    assert(buf.size() >= sizeof(struct ip));
+    XLOG_ASSERT(buf.size() >= sizeof(struct ip));
     for (list<InputFilter*>::iterator i = _filters.begin();
 	 i != _filters.end(); ++i) {
 	(*i)->recv(buf);

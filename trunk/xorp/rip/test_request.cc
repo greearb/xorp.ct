@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.13 2004/09/18 00:00:32 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.14 2005/02/01 08:40:23 pavlin Exp $"
 
 #include <set>
 
@@ -230,7 +230,7 @@ public:
 
 	set<IPv4Net>::const_iterator n = _testnets.begin();
 	for (uint32_t i = 0; i < REQUESTED_ROUTES; i++) {
-	    assert(n != _testnets.end());
+	    XLOG_ASSERT(n != _testnets.end());
 	    uint32_t offset = sizeof(RipPacketHeader) +
 		i * sizeof(PacketRouteEntry<IPv4>);
 
@@ -240,7 +240,7 @@ public:
 	    pre->initialize(0, *n, IPv4::ZERO(), 0);
 	    n++;
 	}
-	assert(_pm.the_port() != 0);
+	XLOG_ASSERT(_pm.the_port() != 0);
 	_pm.the_port()->port_io_receive(REQUESTING_HOST, REQUESTING_PORT,
 					&(buf[0]), buf.size());
 	return true;

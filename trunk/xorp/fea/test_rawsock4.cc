@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.8 2005/02/27 21:32:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.9 2005/03/05 01:41:29 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -127,7 +127,7 @@ struct IcmpEchoHeader {
 
     IcmpEchoHeader(const uint8_t* buf, size_t bufbytes)
     {
-	assert(bufbytes >= 8);
+	XLOG_ASSERT(bufbytes >= 8);
 	memcpy(this,  buf, 8);
     }
 
@@ -174,7 +174,7 @@ public:
 
 protected:
     bool send() {
-	assert(_waiting == false);
+	XLOG_ASSERT(_waiting == false);
 	if (_sent == _count) {
 	    return false;
 	}

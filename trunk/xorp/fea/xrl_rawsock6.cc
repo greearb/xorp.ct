@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.2 2005/02/27 21:32:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.3 2005/03/05 01:41:29 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -155,9 +155,9 @@ XrlRawSocket6Manager::erase_filters(const FilterBag6::iterator& begin,
 	XrlRawSocket6Filter* filter = fi->second;
 
 	SocketTable6::iterator sti = _sockets.find(filter->protocol());
-	assert(sti != _sockets.end());
+	XLOG_ASSERT(sti != _sockets.end());
 	FilterRawSocket6* rs = sti->second;
-	assert(rs != NULL);
+	XLOG_ASSERT(rs != NULL);
 
 	rs->remove_filter(filter);
 	delete filter;
@@ -186,7 +186,7 @@ XrlRawSocket6Manager::send(const IPv6& src,
 	return XrlCmdError::COMMAND_FAILED("protocol not registered.");
     }
     FilterRawSocket6* rs = sti->second;
-    assert(rs != NULL);
+    XLOG_ASSERT(rs != NULL);
 
     // XXX Todo
     if (vifname.empty() == false) {
@@ -237,7 +237,7 @@ XrlRawSocket6Manager::register_vif_receiver(const string&	tgt,
     } else {
 	rs = sti->second;
     }
-    assert(rs != NULL);
+    XLOG_ASSERT(rs != NULL);
 
     FilterBag6::iterator end = _filters.upper_bound(tgt);
     for (FilterBag6::iterator fi = _filters.lower_bound(tgt); fi != end; ++fi) {
@@ -280,7 +280,7 @@ XrlRawSocket6Manager::unregister_vif_receiver(const string&	tgt,
 	return XrlCmdError::COMMAND_FAILED("protocol not registered.");
     }
     FilterRawSocket6* rs = sti->second;
-    assert(rs != NULL);
+    XLOG_ASSERT(rs != NULL);
 
     // Walk through list of filters looking for matching vif.
     FilterBag6::iterator end = _filters.upper_bound(tgt);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fea.cc,v 1.11 2004/12/09 07:54:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_fea.cc,v 1.12 2005/03/05 01:41:28 pavlin Exp $"
 
 /* TODO: XXX: THIS CODE NEEDS UPDATING AS XRL INTERFACE HAS CHANGED */
 
@@ -122,7 +122,7 @@ read_entry(const XrlError& e, XrlRouter& xrlrouter,
 	   const Xrl&  debug_use(request),
 	   XrlArgs* response, void* cookie)
 {
-    assert(e == XrlError::OKAY());
+    XLOG_ASSERT(e == XrlError::OKAY());
     debug_msg("%s %s\n", request.command(), string(*response).c_str());
 
     routing_cookie *rc = reinterpret_cast<routing_cookie *>(cookie);
@@ -173,7 +173,7 @@ start_reading(const XrlError& e, XrlRouter& xrlrouter,
 	      const Xrl&  debug_use(request),
 	      XrlArgs* response, void* cookie)
 {
-    assert(e == XrlError::OKAY());
+    XLOG_ASSERT(e == XrlError::OKAY());
     debug_msg("%s %s\n", request.command(), string(*response).c_str());
 
     routing_cookie *rc = reinterpret_cast<routing_cookie *>(cookie);
@@ -211,7 +211,7 @@ start_transaction(const XrlError& e, XrlRouter& xrlrouter,
 		  const Xrl& /* request */,  XrlArgs* response,
 		  void* cookie)
 {
-    assert(e == XrlError::OKAY());
+    XLOG_ASSERT(e == XrlError::OKAY());
 
     routing_cookie *rc = reinterpret_cast<routing_cookie *>(cookie);
 
@@ -255,7 +255,7 @@ response_complete(const XrlError& e, XrlRouter& xrlrouter,
 		  XrlArgs* response,  void* cookie)
 {
     debug_msg("%s %s\n", request.command(), string(*response).c_str());
-    assert(e == XrlError::OKAY());
+    XLOG_ASSERT(e == XrlError::OKAY());
 
     routing_cookie *rc = reinterpret_cast<routing_cookie *>(cookie);
 
@@ -441,7 +441,7 @@ public:
     create_interface(const XrlError& e, XrlRouter& /*xrlrouter*/,
 		  const Xrl& /* request */,  XrlArgs* response)
     {
-	assert(e == XrlError::OKAY());
+	XLOG_ASSERT(e == XrlError::OKAY());
 
 	const char *current;
 	try {
