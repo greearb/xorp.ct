@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/coord.hh,v 1.5 2003/06/26 02:17:42 atanu Exp $
+// $XORP: xorp/bgp/harness/coord.hh,v 1.6 2003/06/26 19:41:48 atanu Exp $
 
 #ifndef __BGP_HARNESS_COORD_HH__
 #define __BGP_HARNESS_COORD_HH__
@@ -33,6 +33,8 @@ public:
 		      const string& reason);
     void datain_closed(const string&  peer, const uint32_t& genid);
     bool done();
+    void mark_done();
+
 private:
     bool _done;
     EventLoop& _eventloop;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.10 2003/06/26 19:41:47 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.11 2003/09/15 18:16:32 hodson Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -73,7 +73,7 @@ XrlCoordTarget::common_0_1_get_status(// Output values,
 XrlCmdError
 XrlCoordTarget::common_0_1_shutdown()
 {
-    _coord._done = true;
+    _coord.mark_done();
     return XrlCmdError::OKAY();
 }
 
@@ -216,6 +216,12 @@ bool
 Coord::done()
 {
     return _done;
+}
+
+void
+Coord::mark_done()
+{
+    _done = true;
 }
 
 void
