@@ -271,6 +271,12 @@ Input = INPUT_STATE_ASSERT_STATE_SG
         OUTPUT_STATE_RPFP_NBR_SG_RPT_SG                               (S,G)
         OUTPUT_STATE_IIF_OLIST_MFC                                    (MFC)
 
+Input = INPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID_CHANGED
+        OUTPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID                      (*,G)
+
+Input = INPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID_CHANGED
+        OUTPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID                      (S,G)
+
 Input = INPUT_STATE_I_AM_DR
         OUTPUT_STATE_IS_JOIN_DESIRED_WC                               (*,G)
         OUTPUT_STATE_COULD_ASSERT_WC                                  (*,G)

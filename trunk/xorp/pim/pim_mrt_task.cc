@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.3 2003/01/24 07:31:36 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.4 2003/01/24 19:50:02 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -307,12 +307,36 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
 	add_task(pim_mre_task);
 	schedule_task(pim_mre_task);
     } while (false);
-
+    
+    do {
+	// Schedule the (*,G)-related changes
+	pim_mre_task
+	    = new PimMreTask(*this,
+			     PimMreTrackState::INPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID_CHANGED);
+	pim_mre_task->set_vif_index(vif_index);
+	pim_mre_task->set_pim_nbr_addr_wc(pim_nbr_addr);
+	
+	add_task(pim_mre_task);
+	schedule_task(pim_mre_task);
+    } while (false);
+    
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
 	    = new PimMreTask(*this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_SG_GEN_ID_CHANGED);
+	pim_mre_task->set_vif_index(vif_index);
+	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
+	
+	add_task(pim_mre_task);
+	schedule_task(pim_mre_task);
+    } while (false);
+    
+    do {
+	// Schedule the (S,G)-related changes
+	pim_mre_task
+	    = new PimMreTask(*this,
+			     PimMreTrackState::INPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID_CHANGED);
 	pim_mre_task->set_vif_index(vif_index);
 	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
 	

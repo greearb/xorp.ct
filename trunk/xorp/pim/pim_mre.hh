@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.15 2003/02/05 05:02:28 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.16 2003/02/07 00:40:22 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -685,6 +685,14 @@ public:
     bool	recompute_assert_receive_join_sg(uint16_t vif_index);
     // Note: applies only for (*,G)
     bool	recompute_assert_receive_join_wc(uint16_t vif_index);
+    // Note: applies only for (S,G)
+    bool	recompute_assert_winner_nbr_sg_gen_id_changed(
+	uint16_t vif_index,
+	const IPvX& nbr_addr);
+    // Note: applies only for (*,G)
+    bool	recompute_assert_winner_nbr_wc_gen_id_changed(
+	uint16_t vif_index,
+	const IPvX& nbr_addr);
     
     
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.9 2003/02/06 04:09:24 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.10 2003/02/07 00:40:22 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -945,4 +945,68 @@ PimMre::set_assert_winner_metric_is_better_than_spt_assert_metric_sg(
 	_assert_winner_metric_is_better_than_spt_assert_metric_sg.set(vif_index);
     else
 	_assert_winner_metric_is_better_than_spt_assert_metric_sg.reset(vif_index);
+}
+
+// Note: applies only for (S,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_assert_winner_nbr_sg_gen_id_changed(uint16_t vif_index,
+						      const IPvX& nbr_addr)
+{
+    PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    
+    if (pim_vif == NULL)
+	return (false);
+    
+    if (! is_sg())
+	return (false);
+    
+    if (is_i_am_assert_loser_state(vif_index)) {
+	if (assert_winner_metric_wc(vif_index)->addr() == nbr_addr)
+	    goto a5;
+	// This is not the assert winner. Ignore.
+	return (false);
+    }
+    // All other states: ignore the change.
+    return (false);
+    
+ a5:
+    //  * Delete assert info (AssertWinner(S,G,I),
+    //	  and AssertWinnerMetric(S,G,I) assume default values).
+    delete_assert_winner_metric_sg(vif_index);
+    // TODO: anything else to remove?
+    set_assert_noinfo_state(vif_index);
+    return (XORP_OK);
+}
+
+// Note: applies only for (*,G)
+// Return true if state has changed, otherwise return false.
+bool
+PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint16_t vif_index,
+						      const IPvX& nbr_addr)
+{
+    PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    
+    if (pim_vif == NULL)
+	return (false);
+    
+    if (! is_wc())
+	return (false);
+    
+    if (is_i_am_assert_loser_state(vif_index)) {
+	if (assert_winner_metric_sg(vif_index)->addr() == nbr_addr)
+	    goto a5;
+	// This is not the assert winner. Ignore.
+	return (false);
+    }
+    // All other states: ignore the change.
+    return (false);
+    
+ a5:
+    //  * Delete assert info (AssertWinner(*,G,I),
+    //	  and AssertWinnerMetric(*,G,I) assume default values).
+    delete_assert_winner_metric_wc(vif_index);
+    // TODO: anything else to remove?
+    set_assert_noinfo_state(vif_index);
+    return (XORP_OK);
 }
