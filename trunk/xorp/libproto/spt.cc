@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/spt.cc,v 1.1 2004/11/02 23:15:22 atanu Exp $"
+#ident "$XORP: xorp/libproto/spt.cc,v 1.2 2004/11/03 00:27:10 atanu Exp $"
 
 // #define INCREMENTAL_SPT
 
@@ -301,6 +301,8 @@ bool
 Spt<A>::incremental_spt()
 {
     XLOG_UNFINISHED();
+
+    return true;
 }
 
 template <typename A>
