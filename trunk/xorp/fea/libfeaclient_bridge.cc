@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.2 2003/10/17 21:03:26 hodson Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.3 2003/10/22 21:09:32 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -101,10 +101,10 @@ LibFeaClientBridge::fea_iftree() const
 void
 LibFeaClientBridge::interface_update(const string& ifname,
 				     const Update& update,
-				     bool	   all)
+				     bool	   system)
 {
     debug_msg("%s update for interface %s (%s)\n",
-	      update_name(update), ifname.c_str(), truth_of(all));
+	      update_name(update), ifname.c_str(), truth_of(system));
 
     XLOG_ASSERT(_iftree != 0);
 
@@ -159,11 +159,11 @@ void
 LibFeaClientBridge::vif_update(const string& ifname,
 			       const string& vifname,
 			       const Update& update,
-			       bool	     all)
+			       bool	     system)
 {
     debug_msg("%s update for vif %s/%s (%s)\n",
 	      update_name(update), ifname.c_str(), vifname.c_str(),
-	      truth_of(all));
+	      truth_of(system));
 
     XLOG_ASSERT(_iftree != 0);
 
@@ -237,11 +237,11 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
 				    const string& vifname,
 				    const IPv4&   addr,
 				    const Update& update,
-				    bool	  all)
+				    bool	  system)
 {
     debug_msg("%s update for address %s/%s/%s (%s)\n",
 	      update_name(update), ifname.c_str(), vifname.c_str(),
-	      addr.str().c_str(), truth_of(all));
+	      addr.str().c_str(), truth_of(system));
 
     XLOG_ASSERT(_iftree != 0);
 
@@ -335,11 +335,11 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
 				    const string& vifname,
 				    const IPv6&	  addr,
 				    const Update& update,
-				    bool	  all)
+				    bool	  system)
 {
     debug_msg("%s update for address %s/%s/%s (%s)\n",
 	      update_name(update), ifname.c_str(), vifname.c_str(),
-	      addr.str().c_str(), truth_of(all));
+	      addr.str().c_str(), truth_of(system));
 
     XLOG_ASSERT(_iftree != 0);
 
