@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.8 2003/09/25 18:47:37 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/tools/show_interfaces.cc,v 1.9 2003/10/10 21:58:56 hodson Exp $"
 
 #include "rtrmgr/rtrmgr_module.h"
 #include "config.h"
@@ -167,7 +167,7 @@ InterfaceMonitor::vif_names_done(const XrlError&    e,
 	    vif_created(ifname, vifname);
 	    XorpCallback2<void, const XrlError&,
 		const XrlAtomList*>::RefPtr cb;
-	    cb = callback(this, &InterfaceMonitor::get_all_vifaddr4_done,
+	    cb = callback(this, &InterfaceMonitor::get_vifaddr4_done,
 			  ifname, vifname);
 	    if (_ifmgr_client.send_get_configured_vif_addresses4("fea",
 								 ifname,
@@ -195,10 +195,10 @@ InterfaceMonitor::vif_names_done(const XrlError&    e,
 }
 
 void
-InterfaceMonitor::get_all_vifaddr4_done(const XrlError&    e,
-					const XrlAtomList* alist,
-					string	 	   ifname,
-					string		   vifname)
+InterfaceMonitor::get_vifaddr4_done(const XrlError&	e,
+				    const XrlAtomList*	alist,
+				    string	 	ifname,
+				    string		vifname)
 
 {
     if (e == XrlError::OKAY()) {
@@ -210,8 +210,11 @@ InterfaceMonitor::get_all_vifaddr4_done(const XrlError&    e,
 		const bool*, const bool*, const bool*, const bool*>::RefPtr cb;
 	    cb = callback(this, &InterfaceMonitor::get_flags4_done,
 			  ifname, vifname, addr);
-	    if (_ifmgr_client.send_get_all_address_flags4("fea", ifname,
-							  vifname, addr, cb)
+	    if (_ifmgr_client.send_get_configured_address_flags4("fea",
+								 ifname,
+								 vifname,
+								 addr,
+								 cb)
 		== false) {
 		XLOG_ERROR("Failed to request interface flags");
 		_state = FAILED;

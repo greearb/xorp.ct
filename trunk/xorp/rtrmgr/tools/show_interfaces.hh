@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/tools/show_interfaces.hh,v 1.2 2003/02/25 06:53:51 mjh Exp $
+// $XORP: xorp/rtrmgr/tools/show_interfaces.hh,v 1.3 2003/03/10 23:21:04 hodson Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -128,8 +128,8 @@ private:
     void interface_names_done(const XrlError& e, const XrlAtomList* alist);
     void vif_names_done(const XrlError& e, const XrlAtomList* alist,
 			string ifname);
-    void get_all_vifaddr4_done(const XrlError& e, const XrlAtomList* alist,
-			       string ifname, string vifname);
+    void get_vifaddr4_done(const XrlError& e, const XrlAtomList* alist,
+			   string ifname, string vifname);
 
     void interface_deleted(const string& ifname);
     void vif_deleted(const string& ifname, const string& vifname);
