@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.4 2003/03/05 02:22:36 atanu Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.5 2003/03/06 20:32:35 atanu Exp $"
 
 #include "config.h"
 
@@ -76,7 +76,7 @@ tokenize(const string& str,
 /**
  * Start a new process in the background.
  * @param process Absolute pathname and arguments.
- * @param output Optional file to redirect file descriptors 0,1 and 2.
+ * @param output Optional file to redirect file descriptors 0 and 1.
  * @return Return the process id of the new process.
  */
 pid_t
