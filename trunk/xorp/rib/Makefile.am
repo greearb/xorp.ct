@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.32 2004/09/28 03:52:32 atanu Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.33 2004/09/28 08:14:43 atanu Exp $
 ##
 
 SUBDIRS = . tools
@@ -19,14 +19,14 @@ TESTS		+= test_register
 TESTS		+= test_deletion
 
 # -- No-install Programs
-noinst_PROGRAMS  = main_routemap
+noinst_PROGRAMS	 = add_route
+noinst_PROGRAMS	+= main_routemap
 noinst_PROGRAMS	+= test_register
 noinst_PROGRAMS	+= test_register_xrls
 noinst_PROGRAMS	+= test_rib_direct
 noinst_PROGRAMS	+= test_rib_xrls
-noinst_PROGRAMS += test_redist
+noinst_PROGRAMS	+= test_redist
 noinst_PROGRAMS	+= test_deletion
-noinst_PROGRAMS	+= add_route
 
 # -- No-install Libraries
 noinst_LIBRARIES	 = librib.a libribxrl.a
@@ -56,6 +56,10 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 
 # -- Program Sources
+add_route_SOURCES	 = add_route.cc
+add_route_LDADD	 	 = $(LDADD)
+add_route_LDADD	 	 += $(top_builddir)/xrl/interfaces/libribxif.a
+
 main_routemap_SOURCES	 = rib_module.h
 main_routemap_SOURCES	+= protocol.hh
 main_routemap_SOURCES	+= route.hh
@@ -198,10 +202,6 @@ test_redist_LDADD	 = ./librib.a
 test_redist_LDADD	+= $(top_builddir)/policy/backend/libpolicybackend.a
 test_redist_LDADD	+= $(top_builddir)/libxipc/libxipc.a
 test_redist_LDADD	+= $(top_builddir)/libxorp/libxorp.a
-
-add_route_SOURCES	 = add_route.cc
-add_route_LDADD	 	 = $(LDADD)
-add_route_LDADD	 	 += $(top_builddir)/xrl/interfaces/libribxif.a
 
 # -- Library Sources
 librib_a_SOURCES	 = rib_module.h
