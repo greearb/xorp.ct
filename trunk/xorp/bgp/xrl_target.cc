@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.19 2003/08/08 16:38:06 hodson Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.20 2003/09/16 21:00:27 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -308,6 +308,60 @@ XrlBgpTarget::bgp_0_2_set_peer_state(
 	if(!_bgp.disable_peer(iptuple))
 	    return XrlCmdError::COMMAND_FAILED();
     }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::bgp_0_2_originate_route4(
+	// Input values,
+	const IPv4Net&	nlri,
+	const IPv4&	next_hop,
+	const bool&	unicast,
+	const bool&	multicast)
+{
+    debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
+	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::bgp_0_2_originate_route6(
+	// Input values,
+	const IPv6Net&	nlri,
+	const IPv6&	next_hop,
+	const bool&	unicast,
+	const bool&	multicast)
+{
+    debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
+	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::bgp_0_2_withdraw_route4(
+	// Input values,
+	const IPv4Net&	nlri,
+	const bool&	unicast,
+	const bool&	multicast)
+{
+    debug_msg("nlri %s unicast %d multicast %d\n",
+	      nlri.str().c_str(), unicast, multicast);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::bgp_0_2_withdraw_route6(
+	// Input values,
+	const IPv6Net&	nlri,
+	const bool&	unicast,
+	const bool&	multicast)
+{
+    debug_msg("nlri %s unicast %d multicast %d\n",
+	      nlri.str().c_str(), unicast, multicast);
 
     return XrlCmdError::OKAY();
 }

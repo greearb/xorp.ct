@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.16 2003/08/08 16:38:06 hodson Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.17 2003/09/16 21:00:27 hodson Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -113,6 +113,32 @@ public:
 	const string&	peer_ip,
 	const uint32_t&	peer_port,
 	const bool&	state);
+
+    XrlCmdError bgp_0_2_originate_route4(
+	// Input values,
+	const IPv4Net&	nlri,
+	const IPv4&	next_hop,
+	const bool&	unicast,
+	const bool&	multicast);
+
+    XrlCmdError bgp_0_2_originate_route6(
+	// Input values,
+	const IPv6Net&	nlri,
+	const IPv6&	next_hop,
+	const bool&	unicast,
+	const bool&	multicast);
+
+    XrlCmdError bgp_0_2_withdraw_route4(
+	// Input values,
+	const IPv4Net&	nlri,
+	const bool&	unicast,
+	const bool&	multicast);
+
+    XrlCmdError bgp_0_2_withdraw_route6(
+	// Input values,
+	const IPv6Net&	nlri,
+	const bool&	unicast,
+	const bool&	multicast);
 
     XrlCmdError bgp_0_2_get_peer_list_start(
         // Output values,
