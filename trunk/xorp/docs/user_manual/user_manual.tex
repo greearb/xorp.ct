@@ -1,0 +1,62 @@
+%
+% $XORP: xorp/docs/rtrmgr/xorpsh_userguide.tex,v 1.12 2004/06/25 00:31:42 pavlin Exp $
+%
+
+\documentclass[11pt]{book}
+
+%\usepackage[dvips]{changebar}
+
+\usepackage{subfigure}
+\usepackage{fullpage}
+\usepackage{setspace}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{psfig}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{alltt}
+\usepackage{stmaryrd}
+%\usepackage[dvipdf]{graphics}
+%\usepackage[dvips]{graphicx}
+%\usepackage{xorp}
+
+\topmargin=0.0in
+\textheight=9.0in
+%\textwidth=7.0in
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\etc}{\emph{etc.}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+%\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+\newcommand{\comment}[1]{}
+
+% Changebar stuff
+% \newenvironment{colorcode}{\color{blue}}{}
+% \renewcommand{\cbstart}{\begin{colorcode}}
+% \renewcommand{\cbend}{\end{colorcode}}
+
+%\newcommand{\xorpsh}{\textsc{xorpsh}}
+\newcommand{\xorpsh}{{\sf\small xorpsh}\xspace}
+
+\title{{\Huge XORP User Manual}\\
+\vspace{1ex}
+Version 1.0}
+\author{ XORP Project					\\
+	 http://www.xorp.org	\\
+	 {\it feedback@xorp.org}
+}
+\date{July 13, 2004}
+
+%\twocolumn
+\begin{document}
+\maketitle
+\input{preface}
+\tableofcontents
+\input{cli_intro}
+\input{config_overview}
+\end{document}
+
+
