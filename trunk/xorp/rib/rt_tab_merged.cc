@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.8 2003/09/30 03:08:00 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_merged.cc,v 1.10 2004/02/11 08:48:49 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -125,7 +125,6 @@ MergedTable<A>::lookup_route(const IPNet<A>& net) const
 	return found_b;
     }
 }
-
 
 template <class A>
 const IPRouteEntry<A>*

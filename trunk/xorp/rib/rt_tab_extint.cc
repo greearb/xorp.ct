@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.13 2004/02/06 22:44:12 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.14 2004/02/11 08:48:48 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -115,7 +115,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 		return XORP_OK;
 	    } else {
 		debug_msg("nexthop resolved to \n   %s\n",
-		       nexthop_route->str().c_str());
+			  nexthop_route->str().c_str());
 		// Resolve the nexthop for non-directly connected nexthops
 
 		const ResolvedIPRouteEntry<A>* resolved_route;
