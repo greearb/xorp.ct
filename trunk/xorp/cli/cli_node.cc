@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.11 2003/06/03 09:58:52 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.12 2003/11/20 00:46:35 pavlin Exp $"
 
 
 //
@@ -523,4 +523,10 @@ CliClient *
 CliNode::add_stdio_client()
 {
     return (add_connection(fileno(stdin)));
+}
+
+int
+CliNode::delete_stdio_client(CliClient *cli_client)
+{
+    return (delete_connection(cli_client));
 }
