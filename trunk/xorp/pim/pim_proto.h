@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.7 2003/09/30 18:42:40 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.8 2004/02/22 04:03:43 pavlin Exp $
  */
 
 
@@ -204,6 +204,9 @@
 						- 4*sizeof(uint8_t))	\
 					: (0))
 #else
+#ifndef IPV6_MAXPACKET
+#define IPV6_MAXPACKET 65535	/* ip6 max packet size without Jumbo payload */
+#endif
 #define PIM_MAXPACKET(ip_family) (((ip_family) == AF_INET) ?		\
 					(IP_MAXPACKET			\
 					- sizeof(struct ip)		\
