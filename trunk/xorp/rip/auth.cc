@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.6 2004/02/27 22:05:00 hodson Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.7 2004/06/10 22:41:43 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -21,6 +21,7 @@
 #include <openssl/md5.h>
 
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 
 #include "constants.hh"
@@ -503,6 +504,18 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
     if (memcmp(digest, mpt->data(), mpt->data_bytes()) != 0) {
 	set_error(c_format("authentication digest doesn't match local key "
 			   "(key id = %d)", k->id()));
+// #define	DUMP_BAD_MD5
+#ifdef	DUMP_BAD_MD5
+	const char badmd5[] = "/tmp/rip_badmd5";
+	// If the file already exists don't dump anything. The file
+	// should contain and only one packet.
+	if (-1 == access(badmd5, R_OK)) {
+	    XLOG_INFO("Dumping bad MD5 to %s", badmd5);
+	    FILE *fp = fopen("/tmp/rip_badmd5", "w");
+	    fwrite(packet, packet_bytes, 1 , fp);
+	    fclose(fp);
+	}
+#endif
 	return 0;
     }
 
