@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.5 2003/04/02 02:53:51 pavlin Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.6 2003/04/06 04:19:04 jcardona Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -53,26 +53,26 @@ typedef ref_ptr<SelectorTag> Selector;
  * is pending on the particular descriptors.
  *
  */
-class SelectorList { 
+class SelectorList {
 public:
-    
+
     /**
-     * Default constructor
+     * Default constructor.
      */
     SelectorList();
 
     /**
-     * Add a hook for pending I/O operations on a callback.  
+     * Add a hook for pending I/O operations on a callback.
      *
      * Only one callback may be registered for each possible I/O event
-     * type (read, write, exception).  
+     * type (read, write, exception).
      *
      * Multiple event types may share the same callback. If multiple
      * event types share the same callback and multiple types of event
      * are pending, the callback is invoked just once and the mask
      * argument to the callback shows which events are pending.
      *
-     * @param file descriptor.  
+     * @param file descriptor.
      *
      * @param mask mask of I/O event types
      * that should invoke callback.  An OR'ed combination of the
@@ -81,9 +81,9 @@ public:
      * @param scb callback object that will be invoked when the
      * descriptor.
      *
-     * @return true if function succeeds, false otherwise.  
+     * @return true if function succeeds, false otherwise.
      */
-     bool add_selector(int fd, SelectorMask mask, 
+     bool add_selector(int fd, SelectorMask mask,
 		       const SelectorCallback& scb);
 
     /**
@@ -118,26 +118,26 @@ public:
 
     /**
      * Get the number of file descriptors with requested callbacks.
-     * 
+     *
      * @return the number of file descriptors that currently have
-     * callbacks registered.  
+     * callbacks registered.
      */
     inline size_t descriptor_count() const { return _descriptor_count; }
 
     /**
-     * Get a copy of the current list of monitored file descriptors in 
+     * Get a copy of the current list of monitored file descriptors in
      * Unix fd_set format
      *
-     * @param the selected mask as @ref SelectorMask (SEL_RD, SEL_WR, or SEL_EX) 
+     * @param the selected mask as @ref SelectorMask (SEL_RD, SEL_WR, or SEL_EX)
      *
-     * @return the selected fd_set 
+     * @return the selected fd_set.
      */
      void get_fd_set(SelectorMask selected_mask, fd_set& fds) const;
 
      /**
-     * Get a the value of the largets monitored file descriptor 
+     * Get a the value of the largets monitored file descriptor
      *
-     * @return the maximum fd 
+     * @return the maximum fd.
      */
     int get_max_fd() const;
 

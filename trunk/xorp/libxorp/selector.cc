@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.12 2003/04/08 18:37:53 jcardona Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.13 2003/05/21 21:15:25 hodson Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -26,22 +26,22 @@
 // SelectorList::Node methods
 
 inline
-SelectorList::Node::Node() 
+SelectorList::Node::Node()
 {
     _mask[SEL_RD_IDX] = _mask[SEL_WR_IDX] = _mask[SEL_EX_IDX] = 0;
 }
 
 inline bool
-SelectorList::Node::add_okay(SelectorMask m, const SelectorCallback& scb) 
+SelectorList::Node::add_okay(SelectorMask m, const SelectorCallback& scb)
 {
     int i;
 
     // always OK to try to register for nothing
     if (!m)
 	return true;
-    
+
     // Sanity Checks
-    
+
     // 0. We understand all bits in 'mode'
     assert((m & (SEL_RD | SEL_WR | SEL_EX)) == m);
 
@@ -60,7 +60,7 @@ SelectorList::Node::add_okay(SelectorMask m, const SelectorCallback& scb)
 	    return true;
 	}
     }
-    
+
     assert(0);
     return false;
 }
@@ -87,7 +87,7 @@ SelectorList::Node::run_hooks(SelectorMask m, int fd)
      * Yet another alternative is to have an object, let's call it a
      * Selector that is a handle state of a file descriptor: ie an fd, a
      * mask, a callback and an enabled flag.  We would process the Selector
-     * state individually.  
+     * state individually.
      */
     SelectorMask already_matched = SelectorMask(0);
 
@@ -108,13 +108,13 @@ SelectorList::Node::clear(SelectorMask zap)
 {
     for (size_t i = 0; i < SEL_MAX_IDX; i++) {
 	_mask[i] &= ~zap;
-	if (_mask[i] == 0) 
+	if (_mask[i] == 0)
 	    _cb[i].release();
     }
 }
 
 inline bool
-SelectorList::Node::is_empty() 
+SelectorList::Node::is_empty()
 {
     return (_mask[SEL_RD_IDX] == _mask[SEL_WR_IDX] == _mask[SEL_EX_IDX] == 0);
 }
@@ -132,15 +132,15 @@ SelectorList::SelectorList()
 }
 
 bool
-SelectorList::add_selector(int			   fd, 
-			   SelectorMask		   mask, 
+SelectorList::add_selector(int			   fd,
+			   SelectorMask		   mask,
 			   const SelectorCallback& scb)
 {
     if (fd < 0) {
 	// Probably want to make this XLOG_FATAL should this ever occur
 	XLOG_ERROR("SelectorList::add_selector: attempt to add invalid file "
 		   "descriptor (fd = %d)\n", fd);
-	return -1; 
+	return -1;
     }
 
     bool resize = false;
@@ -168,7 +168,7 @@ SelectorList::add_selector(int			   fd,
 }
 
 void
-SelectorList::remove_selector(int fd, SelectorMask mask) 
+SelectorList::remove_selector(int fd, SelectorMask mask)
 {
     if (fd < 0 || fd >= (int)_selector_entries.size()) {
 	XLOG_ERROR("Attempting to remove fd = %d that is outside range of file descriptors 0..%u", fd,  (uint32_t)_selector_entries.size());
@@ -208,7 +208,7 @@ SelectorList::select(TimeVal* timeout)
 		     &testfds[SEL_EX_IDX],
 		     &tv_to);
     }
-    
+
     if (n < 0) {
 	if (errno == EBADF) {
 	    callback_bad_descriptors();
@@ -309,5 +309,5 @@ SelectorList::callback_bad_descriptors()
 	}
     }
     /* Assert should only fail if OS checks stat struct before fd (??) */
-    assert(bc != 0); 
+    assert(bc != 0);
 }
