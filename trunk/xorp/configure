@@ -7492,6 +7492,7 @@ done
 
 
 
+ipv6=no
 echo "$as_me:$LINENO: checking whether the system has IPv6 stack" >&5
 echo $ECHO_N "checking whether the system has IPv6 stack... $ECHO_C" >&6
 if test "${enable_ipv6}" = "no"; then
@@ -7509,7 +7510,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   if test "$cross_compiling" = yes; then
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-   ipv6=no
 else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
@@ -7538,8 +7538,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-
-   echo "$as_me:$LINENO: result: yes" >&5
+  echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
    ipv6=yes
 else
@@ -7549,7 +7548,6 @@ cat conftest.$ac_ext >&5
 ( exit $ac_status )
 echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-   ipv6=no
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
@@ -7566,6 +7564,7 @@ if test "${ipv6}" = "yes"; then
 
 echo "$as_me:$LINENO: checking whether the system IPv6 stack implementation is reasonable" >&5
 echo $ECHO_N "checking whether the system IPv6 stack implementation is reasonable... $ECHO_C" >&6
+ipv6=no
 if test "${enable_ipv6}" = "no"; then
   echo "$as_me:$LINENO: result: disabled" >&5
 echo "${ECHO_T}disabled" >&6
@@ -7581,7 +7580,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   if test "$cross_compiling" = yes; then
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-   ipv6=no
 else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
@@ -7616,9 +7614,13 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-
-      echo "$as_me:$LINENO: result: yes" >&5
+  echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_IPV6 1
+_ACEOF
+
    ipv6=yes
 else
   echo "$as_me: program exited with status $ac_status" >&5
@@ -7627,7 +7629,6 @@ cat conftest.$ac_ext >&5
 ( exit $ac_status )
 echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-   ipv6=no
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
@@ -7639,9 +7640,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 fi
 
-echo "$as_me:$LINENO: checking whether the system IPv6 stack supports IPv6 multicast" >&5
+ipv6_multicast=no
+if test "${ipv6}" = "yes"; then
+  echo "$as_me:$LINENO: checking whether the system IPv6 stack supports IPv6 multicast" >&5
 echo $ECHO_N "checking whether the system IPv6 stack supports IPv6 multicast... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
+  cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
@@ -7690,6 +7693,7 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_IPV6_MULTICAST 1
 _ACEOF
 
+   ipv6_multicast=yes
 else
   echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
@@ -7697,8 +7701,11 @@ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
+fi
 
-if test "${ac_cv_header_net_if_var_h+set}" = set; then
+ipv6_multicast_routing=no
+if test "${ipv6_multicast}" = "yes"; then
+  if test "${ac_cv_header_net_if_var_h+set}" = set; then
   echo "$as_me:$LINENO: checking for net/if_var.h" >&5
 echo $ECHO_N "checking for net/if_var.h... $ECHO_C" >&6
 if test "${ac_cv_header_net_if_var_h+set}" = set; then
@@ -7806,7 +7813,7 @@ else
 fi
 
 
-if test "${ac_cv_header_netinet_in_var_h+set}" = set; then
+  if test "${ac_cv_header_netinet_in_var_h+set}" = set; then
   echo "$as_me:$LINENO: checking for netinet/in_var.h" >&5
 echo $ECHO_N "checking for netinet/in_var.h... $ECHO_C" >&6
 if test "${ac_cv_header_netinet_in_var_h+set}" = set; then
@@ -7915,7 +7922,7 @@ fi
 
 
 
-test_multicast_routing_header_files="
+  test_multicast_routing_header_files="
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/socket.h>
@@ -7926,9 +7933,9 @@ ${test_netinet_in_var_h}
 #include <netinet6/ip6_mroute.h>
 "
 
-echo "$as_me:$LINENO: checking whether the system IPv6 stack supports IPv6 multicast routing" >&5
+  echo "$as_me:$LINENO: checking whether the system IPv6 stack supports IPv6 multicast routing" >&5
 echo $ECHO_N "checking whether the system IPv6 stack supports IPv6 multicast routing... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
+  cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
@@ -7987,6 +7994,7 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_IPV6_MULTICAST_ROUTING 1
 _ACEOF
 
+   ipv6_multicast_routing=yes
 else
   echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
@@ -7994,6 +8002,7 @@ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
+fi
 
 echo "$as_me:$LINENO: checking for post-RFC2292 IPv6 advanced API" >&5
 echo $ECHO_N "checking for post-RFC2292 IPv6 advanced API... $ECHO_C" >&6
@@ -8322,14 +8331,6 @@ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.$ac_objext conftest.$ac_ext
-
-fi
-
-if test "${ipv6}" = "yes"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_IPV6 1
-_ACEOF
 
 fi
 

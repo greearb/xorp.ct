@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.72 2003/10/17 01:44:28 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.73 2003/10/22 23:23:42 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -901,6 +901,7 @@ dnl ---------------------------------------------------------------------------
 dnl-----------------------------
 dnl Check for IPv6
 dnl-----------------------------
+ipv6=no
 AC_MSG_CHECKING(whether the system has IPv6 stack)
 if test "${enable_ipv6}" = "no"; then
   AC_MSG_RESULT(disabled)
@@ -919,13 +920,10 @@ main()
    return (0);
 }
 ],
-  [
-   AC_MSG_RESULT(yes)
+  [AC_MSG_RESULT(yes)
    ipv6=yes],
-  [AC_MSG_RESULT(no)
-   ipv6=no],
-  [AC_MSG_RESULT(no)
-   ipv6=no])
+  [AC_MSG_RESULT(no)],
+  [AC_MSG_RESULT(no)])
   AC_LANG_RESTORE
 fi
 
@@ -934,13 +932,6 @@ dnl Misc. IPv6-specific checks
 dnl
 if test "${ipv6}" = "yes"; then
   builtin(include, config/acipv6.m4)
-fi
-
-dnl
-dnl Final word on having IPv6
-dnl
-if test "${ipv6}" = "yes"; then
-  AC_DEFINE(HAVE_IPV6, 1, [Define to 1 if you have IPv6])
 fi
 
 
