@@ -1,6 +1,17 @@
 #
-# $XORP: xorp/pim/TODO,v 1.14 2003/01/30 19:29:54 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.15 2003/02/01 00:40:45 pavlin Exp $
 #
+
+* SPEC+IMPL: Add text to beginning of Section 4.6 that if an implementation
+  incorrectly fails to send Hello messages on p2p interfaces, then the
+  spec should RECOMMEND that a config option is provided o interoperate
+  with such routers (i.e., to accept Assert messages even if no Hello
+  was received). In other words, add text similar to the paragraph
+  right before Section 4.5.1
+  IMPL: the current implementation already allows Assert messages
+  to be accepted similar to Join/Prune messages. If the spec
+  is NOT modified to include that text, then modify the implementation
+  as well to be in sync with the spec.
 
 * TEST: Test Section 4.9, the last case of Part J:
   Prune override behavior in NotPruned(S,G,rpt) state when
