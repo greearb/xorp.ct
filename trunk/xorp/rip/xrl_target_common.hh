@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.7 2004/03/09 22:17:07 hodson Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.8 2004/03/20 17:51:58 hodson Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -1148,6 +1148,12 @@ XrlRipCommonTarget<A>::socketx_user_0_1_connect_event(
     debug_msg("socketx_user_0_1_connect_event %s %s/%u %s\n",
 	      sockid.c_str(), src_host.str().c_str(), src_port,
 	      new_sockid.c_str());
+
+    UNUSED(sockid);
+    UNUSED(src_host);
+    UNUSED(src_port);
+    UNUSED(new_sockid);
+
     accept = false;
     return XrlCmdError::COMMAND_FAILED("Connect not requested.");
 }
@@ -1163,6 +1169,11 @@ XrlRipCommonTarget<A>::socketx_user_0_1_error_event(
     debug_msg("socketx_user_0_1_error_event %s %s %s \n",
 	      sockid.c_str(), reason.c_str(),
 	      fatal ? "fatal" : "non-fatal");
+
+    UNUSED(sockid);
+    UNUSED(reason);
+    UNUSED(fatal);
+
     return XrlCmdError::OKAY();
 }
 
@@ -1175,6 +1186,10 @@ XrlRipCommonTarget<A>::socketx_user_0_1_close_event(
 {
     debug_msg("socketx_user_0_1_close_event %s %s\n",
 	      sockid.c_str(), reason.c_str());
+
+    UNUSED(sockid);
+    UNUSED(reason);
+
     return XrlCmdError::OKAY();
 }
 

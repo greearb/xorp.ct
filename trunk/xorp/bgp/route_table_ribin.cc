@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.21 2004/03/03 04:02:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.22 2004/03/04 03:41:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -375,6 +375,7 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 	_nexthop_push_active = true;
 	_current_chain = pmi;
 	const SubnetRoute<A>* next_route_to_push = _current_chain->second;
+	UNUSED(next_route_to_push);
 	debug_msg("Found route with nexthop %s:\n%s\n",
 		  bgp_nexthop.str().c_str(),
 		  next_route_to_push->str().c_str());

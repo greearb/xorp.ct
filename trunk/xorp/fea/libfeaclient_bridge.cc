@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.3 2003/10/22 21:09:32 hodson Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.4 2003/10/28 20:04:49 pavlin Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -33,6 +33,7 @@
 // ----------------------------------------------------------------------------
 // Debug helpers
 
+#ifdef	DEBUG_LOGGING
 static const char*
 update_name(IfConfigUpdateReporterBase::Update u)
 {
@@ -46,13 +47,13 @@ update_name(IfConfigUpdateReporterBase::Update u)
     }
     return "Change";
 }
+#endif
 
 static const char*
 truth_of(bool v)
 {
     return v ? "true" : "false";
 }
-
 
 // ----------------------------------------------------------------------------
 // LibFeaClientBridge implementation
@@ -105,6 +106,8 @@ LibFeaClientBridge::interface_update(const string& ifname,
 {
     debug_msg("%s update for interface %s (%s)\n",
 	      update_name(update), ifname.c_str(), truth_of(system));
+
+    UNUSED(system);
 
     XLOG_ASSERT(_iftree != 0);
 
@@ -164,6 +167,8 @@ LibFeaClientBridge::vif_update(const string& ifname,
     debug_msg("%s update for vif %s/%s (%s)\n",
 	      update_name(update), ifname.c_str(), vifname.c_str(),
 	      truth_of(system));
+
+    UNUSED(system);
 
     XLOG_ASSERT(_iftree != 0);
 
@@ -243,6 +248,7 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
 	      update_name(update), ifname.c_str(), vifname.c_str(),
 	      addr.str().c_str(), truth_of(system));
 
+    UNUSED(system);
     XLOG_ASSERT(_iftree != 0);
 
     switch (update) {
@@ -341,6 +347,7 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
 	      update_name(update), ifname.c_str(), vifname.c_str(),
 	      addr.str().c_str(), truth_of(system));
 
+    UNUSED(system);
     XLOG_ASSERT(_iftree != 0);
 
     switch (update) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.11 2003/12/12 23:16:44 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.12 2003/12/16 23:58:32 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -449,6 +449,8 @@ SocketClient::connect_socket_complete(int sock, SelectorMask m,
 				      ConnectCallback cb)
 {
     debug_msg("connect socket complete %d %d\n", sock, m);
+
+    UNUSED(m);
 
     XLOG_ASSERT(_connecting);
     _connecting = false;

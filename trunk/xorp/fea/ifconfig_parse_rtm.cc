@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.16 2003/10/05 19:08:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.17 2004/03/17 07:16:14 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -474,6 +474,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 						       rti_info[RTAX_NETMASK]);
 	    fa.set_prefix_len(mask_len);
 	    IPv4 subnet_mask(IPv4::make_prefix(mask_len));
+	    UNUSED(subnet_mask);
 	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	}
 	
@@ -525,6 +526,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 						       rti_info[RTAX_NETMASK]);
 	    fa.set_prefix_len(mask_len);
 	    IPv6 subnet_mask(IPv6::make_prefix(mask_len));
+	    UNUSED(subnet_mask);
 	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	}
 	

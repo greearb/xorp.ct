@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.10 2004/03/20 18:00:53 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.11 2004/03/21 04:03:37 hodson Exp $"
 
 #include "fea_module.h"
 
@@ -589,6 +589,10 @@ XrlSocketServer::finder_event_observer_0_1_xrl_target_birth(
     )
 {
     debug_msg("birth event %s/%s\n", clsname.c_str(), instance.c_str());
+
+    UNUSED(clsname);
+    UNUSED(instance);
+
     return XrlCmdError::OKAY();
 }
 
@@ -599,6 +603,8 @@ XrlSocketServer::finder_event_observer_0_1_xrl_target_death(
     )
 {
     debug_msg("death event %s/%s\n", clsname.c_str(), instance.c_str());
+
+    UNUSED(clsname);
 
     RemoteSocketOwner* rso = find_owner(instance);
     if (rso) {

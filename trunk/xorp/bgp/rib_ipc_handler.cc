@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.42 2003/12/20 02:09:14 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.45 2004/03/04 17:49:55 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -258,12 +258,14 @@ RibIpcHandler::push_packet()
 {
     debug_msg("RibIpcHandler::push packet\n");
 
+#if	0
     if(_v4_queue.busy() || _v6_queue.busy()) {
 	debug_msg("busy\n");
 	return PEER_OUTPUT_BUSY;
     }
 
     debug_msg("not busy\n");
+#endif
 
     return  PEER_OUTPUT_OK;
 }
@@ -412,7 +414,9 @@ XrlQueue<A>::start()
 
 	if(_xrl_queue.empty()) {
 	    debug_msg("Output no longer busy\n");
+#if	0
 	    _rib_ipc_handler->output_no_longer_busy();
+#endif
 	    return;
 	}
 

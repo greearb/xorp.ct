@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.28 2004/02/11 08:48:51 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.29 2004/03/23 11:24:25 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1094,6 +1094,9 @@ XrlRibTarget::finder_event_observer_0_1_xrl_target_birth(
 {
     debug_msg(("Target Birth: " + target_class + " " + target_instance 
 	       + "\n").c_str());
+    UNUSED(target_class);
+    UNUSED(target_instance);
+
     return XrlCmdError::OKAY();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.29 2003/10/02 18:55:05 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.30 2003/12/13 00:09:42 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -587,6 +587,7 @@ XrlPFSTCPSender::~XrlPFSTCPSender()
 void
 XrlPFSTCPSender::die(const char* reason)
 {
+    UNUSED(reason);
     debug_msg("Sender dying (fd = %d) reason: %s\n", _fd, reason);
 
     XLOG_ASSERT(_fd > 0);
@@ -726,6 +727,7 @@ XrlPFSTCPSender::update_writer(AsyncFileWriter::Event	e,
 			       size_t			buffer_bytes,
 			       size_t			bytes_done)
 {
+    UNUSED(buffer_bytes);
     debug_msg("bytes done %u / %u\n", (uint32_t)bytes_done,
 	      (uint32_t)buffer_bytes);
     assert(_keepalive_in_progress == false);

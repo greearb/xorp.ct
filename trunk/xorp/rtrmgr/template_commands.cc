@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.37 2004/02/26 16:02:49 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.38 2004/03/04 17:49:57 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -159,6 +159,7 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
     {
 	list<string>::const_iterator si;
 	int j = 0;
+	UNUSED(j);
 
 	for (si = xrl_parts.begin(); si!= xrl_parts.end(); ++si)
 	    debug_msg("Seg %d: >%s< \n", j++, si->c_str());

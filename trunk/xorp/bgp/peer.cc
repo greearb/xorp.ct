@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.58 2004/03/04 19:41:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.59 2004/03/05 02:39:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -229,6 +229,7 @@ BGPPeer::send_message(const BGPPacket& p)
 	delete[] buf;
     if (ret) {
 	int size = _SocketClient->output_queue_size();
+	UNUSED(size);
 	debug_msg("Output queue size is %d\n", size);
 	if (_SocketClient->output_queue_busy()) {
 	    _output_queue_was_busy = true;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.36 2003/09/16 21:00:25 hodson Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.37 2003/10/30 05:20:21 atanu Exp $"
 
 #include "config.h"
 #include "bgp_module.h"
@@ -32,6 +32,7 @@ void
 terminate_main_loop(int sig)
 {
     debug_msg("Signal %d\n", sig);
+    UNUSED(sig);
     bgpmain->terminate();
 }
 

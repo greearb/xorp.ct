@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.4 2003/10/11 03:17:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.5 2003/10/23 03:10:05 atanu Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -61,6 +61,8 @@ int
 DebugPeerHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
 			     const SubnetRoute<IPv4> &new_rt, Safi) {
     debug_msg("DebugPeerHandler::replace_route(IPv4) %p %p\n", &old_rt, &new_rt);
+    UNUSED(new_rt);
+
     fprintf(_ofile, "[PEER: REPLACE_ROUTE]\n");
     fprintf(_ofile, "[PEER: OLD]\n");
     fprintf(_ofile, "%s\n", old_rt.str().c_str());
@@ -73,6 +75,8 @@ int
 DebugPeerHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
 			     const SubnetRoute<IPv6> &new_rt, Safi) {
     debug_msg("DebugPeerHandler::replace_route(IPv6) %p %p\n", &old_rt, &new_rt);
+    UNUSED(new_rt);
+
     fprintf(_ofile, "[PEER: REPLACE_ROUTE]\n");
     fprintf(_ofile, "[PEER: OLD]\n");
     fprintf(_ofile, "%s\n", old_rt.str().c_str());

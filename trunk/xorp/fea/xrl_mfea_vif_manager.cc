@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.22 2003/12/10 22:11:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.23 2004/02/29 22:57:01 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -1346,6 +1346,8 @@ XrlMfeaVifManager::vifaddr4_deleted(const string& ifname,
     debug_msg("vifaddr4_deleted for interface %s vif %s: %s\n",
 	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
     
+    UNUSED(ifname);
+
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr4_deleted on unknown vif: %s", vifname.c_str());
 	return;
@@ -1364,6 +1366,8 @@ XrlMfeaVifManager::vifaddr6_deleted(const string& ifname,
     debug_msg("vifaddr6_deleted for interface %s vif %s: %s\n",
 	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
     
+    UNUSED(ifname);
+
     if (_vifs_by_name.find(vifname) == _vifs_by_name.end()) {
 	XLOG_ERROR("vifaddr6_deleted on unknown vif: %s", vifname.c_str());
 	return;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.33 2003/09/27 00:25:55 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.34 2003/12/15 19:45:49 hodson Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -522,5 +522,6 @@ XrlRouter::finder_disconnect_event()
 void
 XrlRouter::finder_ready_event(const string& tgt_name)
 {
+    UNUSED(tgt_name);
     debug_msg("Finder target ready event: \"%s\"\n", tgt_name.c_str());
 }

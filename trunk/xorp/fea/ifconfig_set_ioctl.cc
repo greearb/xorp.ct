@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.17 2003/10/30 19:37:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.18 2003/11/11 22:21:43 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -407,7 +407,7 @@ IfConfigSetIoctl::set_vif_address4(const string& ifname,
 	      dst_or_bcast.str().c_str(), prefix_len);
 
     UNUSED(if_index);
-
+    UNUSED(is_broadcast);
 #ifdef SIOCAIFADDR
     //
     // Add an alias address

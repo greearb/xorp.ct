@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.25 2003/10/23 10:54:40 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.27 2004/02/05 09:22:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -178,6 +178,8 @@ NextHopResolver<A>::rib_client_route_info_changed(const A& addr,
 {
     debug_msg("addr %s prefix_len %d nexthop %s metric %d\n",
 	      addr.str().c_str(), real_prefix_len, nexthop.str().c_str(), metric);
+
+    UNUSED(nexthop);
 
     /*
     ** Change the entries in the cache and make an upcall notifying
@@ -746,6 +748,8 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 						 const A /*nexthop_interest*/,
 						 const string comment)
 {
+    UNUSED(actual_nexthop);
+
     /*
     ** We attempted to register a next hop with the RIB and an error
     ** ocurred. Its not clear that we should continue.

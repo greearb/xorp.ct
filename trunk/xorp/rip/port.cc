@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.30 2004/03/20 17:49:49 hodson Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.31 2004/03/21 01:42:21 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -200,6 +200,7 @@ Port<A>::triggered_update_timeout()
     debug_msg("Triggered update timeout %p\n", this);
     {
 	RouteDB<A>& rdb = _pm.system().route_db();
+	UNUSED(rdb);
 	debug_msg("- Route DB routes = %u\n", rdb.route_count());
     }
 
