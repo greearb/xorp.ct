@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.28 2004/05/06 23:06:03 hodson Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.29 2004/05/07 23:31:27 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -596,9 +596,17 @@ RibManager::target_death(const string& target_class,
 
 static inline
 string
-make_redist_name(const string& xrl_target, const string& cookie)
+make_redist_name(const string& xrl_target, const string& cookie,
+		 bool is_xrl_transaction_output)
 {
-    return xrl_target + ":" + cookie;
+    string redist_name = xrl_target + ":" + cookie;
+
+    if (is_xrl_transaction_output)
+	redist_name += " (transaction)";
+    else
+	redist_name += " (no transaction)";
+
+    return redist_name;
 }
 
 template <typename A>
@@ -608,13 +616,15 @@ redist_enable_xrl_output(EventLoop&	eventloop,
 			 RIB<A>&	rib,
 			 const string&	to_xrl_target,
 			 const string&	protocol,
-			 const string&	cookie)
+			 const string&	cookie,
+			 bool		is_xrl_transaction_output)
 {
     RedistTable<A>* rt = rib.protocol_redist_table(protocol);
     if (rt == 0)
 	return XORP_ERROR;
 
-    string redist_name = make_redist_name(to_xrl_target, cookie);
+    string redist_name = make_redist_name(to_xrl_target, cookie,
+					  is_xrl_transaction_output);
     if (rt->redistributor(redist_name) != 0)
 	return XORP_ERROR;
 
@@ -622,7 +632,8 @@ redist_enable_xrl_output(EventLoop&	eventloop,
 						    redist_name);
     redist->set_redist_table(rt);
     redist->set_output(new RedistXrlOutput<A>(redist, rtr, protocol,
-					      to_xrl_target, cookie));
+					      to_xrl_target, cookie,
+					      is_xrl_transaction_output));
     return XORP_OK;
 }
 
@@ -631,13 +642,15 @@ static int
 redist_disable_xrl_output(RIB<A>& rib,
 			  const string& to_xrl_target,
 			  const string& protocol,
-			  const string& cookie)
+			  const string& cookie,
+			  bool is_xrl_transaction_output)
 {
     RedistTable<A>* rt = rib.protocol_redist_table(protocol);
     if (rt == 0)
 	return XORP_ERROR;
 
-    string redist_name = make_redist_name(to_xrl_target, cookie);
+    string redist_name = make_redist_name(to_xrl_target, cookie,
+					  is_xrl_transaction_output);
     Redistributor<A>* redist = rt->redistributor(redist_name);
     if (redist == 0)
 	return XORP_ERROR;
@@ -652,21 +665,25 @@ RibManager::add_redist_xrl_output4(const string&	to_xrl_target,
 				   const string&	from_protocol,
 				   bool			unicast,
 				   bool			multicast,
-				   const string&	cookie)
+				   const string&	cookie,
+				   bool			is_xrl_transaction_output)
 {
     if (unicast) {
 	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _urib4,
-					 to_xrl_target, from_protocol, cookie);
+					 to_xrl_target, from_protocol, cookie,
+					 is_xrl_transaction_output);
 	if (e != XORP_OK) {
 	    return e;
 	}
     }
     if (multicast) {
 	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _mrib4,
-					 to_xrl_target, from_protocol, cookie);
+					 to_xrl_target, from_protocol, cookie,
+					 is_xrl_transaction_output);
 	if (e != XORP_OK && unicast) {
 	    redist_disable_xrl_output(_urib4,
-				      to_xrl_target, from_protocol, cookie);
+				      to_xrl_target, from_protocol, cookie,
+				      is_xrl_transaction_output);
 	}
 	return e;
     }
@@ -678,21 +695,25 @@ RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
 				   const string&	from_protocol,
 				   bool			unicast,
 				   bool			multicast,
-				   const string&	cookie)
+				   const string&	cookie,
+				   bool			is_xrl_transaction_output)
 {
     if (unicast) {
 	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _urib6,
-					 to_xrl_target, from_protocol, cookie);
+					 to_xrl_target, from_protocol, cookie,
+					 is_xrl_transaction_output);
 	if (e != XORP_OK) {
 	    return e;
 	}
     }
     if (multicast) {
 	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _mrib6,
-					 to_xrl_target, from_protocol, cookie);
+					 to_xrl_target, from_protocol, cookie,
+					 is_xrl_transaction_output);
 	if (e != XORP_OK && unicast) {
 	    redist_disable_xrl_output(_urib6,
-				      to_xrl_target, from_protocol, cookie);
+				      to_xrl_target, from_protocol, cookie,
+				      is_xrl_transaction_output);
 	}
 	return e;
     }
@@ -704,12 +725,15 @@ RibManager::delete_redist_xrl_output4(const string&	to_xrl_target,
 				      const string&	from_protocol,
 				      bool	   	unicast,
 				      bool		multicast,
-				      const string&	cookie)
+				      const string&	cookie,
+				      bool		is_xrl_transaction_output)
 {
     if (unicast)
-	redist_disable_xrl_output(_urib4, to_xrl_target, from_protocol, cookie);
+	redist_disable_xrl_output(_urib4, to_xrl_target, from_protocol, cookie,
+				  is_xrl_transaction_output);
     if (multicast)
-	redist_disable_xrl_output(_mrib4, to_xrl_target, from_protocol, cookie);
+	redist_disable_xrl_output(_mrib4, to_xrl_target, from_protocol, cookie,
+				  is_xrl_transaction_output);
     return XORP_OK;
 }
 
@@ -718,11 +742,14 @@ RibManager::delete_redist_xrl_output6(const string&	to_xrl_target,
 				      const string&	from_protocol,
 				      bool	   	unicast,
 				      bool		multicast,
-				      const string&	cookie)
+				      const string&	cookie,
+				      bool		is_xrl_transaction_output)
 {
     if (unicast)
-	redist_disable_xrl_output(_urib6, to_xrl_target, from_protocol, cookie);
+	redist_disable_xrl_output(_urib6, to_xrl_target, from_protocol, cookie,
+				  is_xrl_transaction_output);
     if (multicast)
-	redist_disable_xrl_output(_mrib6, to_xrl_target, from_protocol, cookie);
+	redist_disable_xrl_output(_mrib6, to_xrl_target, from_protocol, cookie,
+				  is_xrl_transaction_output);
     return XORP_OK;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.6 2004/02/11 08:48:45 pavlin Exp $"
+#ident "$XORP: xorp/rib/dummy_rib_manager.cc,v 1.7 2004/05/06 23:06:03 hodson Exp $"
 
 #include "rib_module.h"
 
@@ -201,7 +201,8 @@ RibManager::add_redist_xrl_output4(const string&	/* target_name */,
 				   const string&	/* from_protocol */,
 				   bool			/* unicast */,
 				   bool			/* multicast */,
-				   const string&	/* cookie */)
+				   const string&	/* cookie */,
+				   bool			/* is_xrl_transaction_output */)
 {
     return XORP_OK;
 }
@@ -211,7 +212,8 @@ RibManager::add_redist_xrl_output6(const string&	/* target_name */,
 				   const string&	/* from_protocol */,
 				   bool			/* unicast */,
 				   bool			/* multicast */,
-				   const string&	/* cookie */)
+				   const string&	/* cookie */,
+				   bool			/* is_xrl_transaction_output */)
 {
     return XORP_OK;
 }
@@ -221,7 +223,8 @@ RibManager::delete_redist_xrl_output4(const string&	/* target_name */,
 				      const string&	/* from_protocol */,
 				      bool		/* unicast */,
 				      bool		/* multicast */,
-				      const string&	/* cookie */)
+				      const string&	/* cookie */,
+				      bool		/* is_xrl_transaction_output */)
 {
     return XORP_OK;
 }
@@ -231,7 +234,8 @@ RibManager::delete_redist_xrl_output6(const string&	/* target_name */,
 				      const string&	/* from_protocol */,
 				      bool		/* unicast */,
 				      bool		/* multicast */,
-				      const string&	/* cookie */)
+				      const string&	/* cookie */,
+				      bool		/* is_xrl_transaction_output */)
 {
     return XORP_OK;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.32 2004/04/10 07:47:19 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.33 2004/05/06 23:07:47 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -835,7 +835,7 @@ XrlRibTarget::rib_0_1_redist_enable4(const string&	target_name,
 				     const string&	cookie)
 {
     if (_rib_manager->add_redist_xrl_output4(target_name, from, ucast, mcast,
-					    cookie) != XORP_OK) {
+					     cookie, false) != XORP_OK) {
 	string err = c_format("Failed to enable route redistribution from "
 			      "protocol \"%s\" to XRL target \"%s\"",
 			      from.c_str(), target_name.c_str());
@@ -852,7 +852,7 @@ XrlRibTarget::rib_0_1_redist_enable6(const string&	target_name,
 				     const string&	cookie)
 {
     if (_rib_manager->add_redist_xrl_output6(target_name, from, ucast, mcast,
-					     cookie) != XORP_OK) {
+					     cookie, false) != XORP_OK) {
 	string err = c_format("Failed to enable route redistribution from "
 			      "protocol \"%s\" to XRL target \"%s\"",
 			      from.c_str(), target_name.c_str());
@@ -863,13 +863,14 @@ XrlRibTarget::rib_0_1_redist_enable6(const string&	target_name,
 
 XrlCmdError
 XrlRibTarget::rib_0_1_redist_disable4(const string&	target_name,
-				     const string&	from,
-				     const bool&	ucast,
-				     const bool&	mcast,
-				     const string&	cookie)
+				      const string&	from,
+				      const bool&	ucast,
+				      const bool&	mcast,
+				      const string&	cookie)
 {
-    if (_rib_manager->delete_redist_xrl_output4(target_name, from, ucast, mcast,
-						cookie) != XORP_OK) {
+    if (_rib_manager->delete_redist_xrl_output4(target_name, from,
+						ucast, mcast,
+						cookie, false) != XORP_OK) {
 	string err = c_format("Failed to disable route redistribution from "
 			      "protocol \"%s\" to XRL target \"%s\"",
 			      from.c_str(), target_name.c_str());
@@ -880,14 +881,89 @@ XrlRibTarget::rib_0_1_redist_disable4(const string&	target_name,
 
 XrlCmdError
 XrlRibTarget::rib_0_1_redist_disable6(const string&	target_name,
-				     const string&	from,
-				     const bool&	ucast,
-				     const bool&	mcast,
-				     const string&	cookie)
+				      const string&	from,
+				      const bool&	ucast,
+				      const bool&	mcast,
+				      const string&	cookie)
 {
-    if (_rib_manager->delete_redist_xrl_output6(target_name, from, ucast, mcast,
-						cookie) != XORP_OK) {
+    if (_rib_manager->delete_redist_xrl_output6(target_name, from,
+						ucast, mcast,
+						cookie, false) != XORP_OK) {
 	string err = c_format("Failed to disable route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_redist_transaction_enable4(const string&	target_name,
+						 const string&	from,
+						 const bool&	ucast,
+						 const bool&	mcast,
+						 const string&	cookie)
+{
+    if (_rib_manager->add_redist_xrl_output4(target_name, from, ucast, mcast,
+					     cookie, true) != XORP_OK) {
+	string err = c_format("Failed to enable transaction-based "
+			      "route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_redist_transaction_enable6(const string&	target_name,
+						 const string&	from,
+						 const bool&	ucast,
+						 const bool&	mcast,
+						 const string&	cookie)
+{
+    if (_rib_manager->add_redist_xrl_output6(target_name, from, ucast, mcast,
+					     cookie, true) != XORP_OK) {
+	string err = c_format("Failed to enable transaction-based "
+			      "route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_redist_transaction_disable4(const string&	target_name,
+						  const string&	from,
+						  const bool&	ucast,
+						  const bool&	mcast,
+						  const string&	cookie)
+{
+    if (_rib_manager->delete_redist_xrl_output4(target_name, from,
+						ucast, mcast,
+						cookie, true) != XORP_OK) {
+	string err = c_format("Failed to disable transaction-based "
+			      "route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_redist_transaction_disable6(const string&	target_name,
+						  const string&	from,
+						  const bool&	ucast,
+						  const bool&	mcast,
+						  const string&	cookie)
+{
+    if (_rib_manager->delete_redist_xrl_output6(target_name, from,
+						ucast, mcast,
+						cookie, true) != XORP_OK) {
+	string err = c_format("Failed to disable transaction-based "
+			      "route redistribution from "
 			      "protocol \"%s\" to XRL target \"%s\"",
 			      from.c_str(), target_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.23 2004/05/06 17:59:53 hodson Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.24 2004/05/06 23:08:31 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -43,6 +43,8 @@ LDADD			+= $(top_builddir)/xrl/interfaces/libribclientxif.a
 LDADD			+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 LDADD			+= $(top_builddir)/xrl/interfaces/libredist4xif.a
 LDADD			+= $(top_builddir)/xrl/interfaces/libredist6xif.a
+LDADD			+= $(top_builddir)/xrl/interfaces/libredisttransaction4xif.a
+LDADD			+= $(top_builddir)/xrl/interfaces/libredisttransaction6xif.a
 
 # -- Program Sources
 main_routemap_SOURCES	 = rib_module.h

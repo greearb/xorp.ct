@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.18 2004/04/10 07:47:19 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.19 2004/05/06 23:07:47 hodson Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -443,8 +443,7 @@ protected:
 	const string&	from_protocol,
 	const bool&	unicast,
 	const bool&	multicast,
-	const string&	cookie
-	);
+	const string&	cookie);
 
     XrlCmdError rib_0_1_redist_enable6(
 	// Input values,
@@ -452,8 +451,7 @@ protected:
 	const string&	from_protocol,
 	const bool&	unicast,
 	const bool&	multicast,
-	const string&	cookie
-	);
+	const string&	cookie);
 
     XrlCmdError rib_0_1_redist_disable4(
 	// Input values,
@@ -464,6 +462,38 @@ protected:
 	const string&	cookie);
 
     XrlCmdError rib_0_1_redist_disable6(
+	// Input values,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const string&	cookie);
+
+    XrlCmdError rib_0_1_redist_transaction_enable4(
+	// Input values,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const string&	cookie);
+
+    XrlCmdError rib_0_1_redist_transaction_enable6(
+	// Input values,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const string&	cookie);
+
+    XrlCmdError rib_0_1_redist_transaction_disable4(
+	// Input values,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const string&	cookie);
+
+    XrlCmdError rib_0_1_redist_transaction_disable6(
 	// Input values,
 	const string&	to_xrl_target,
 	const string&	from_protocol,

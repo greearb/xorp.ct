@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.21 2004/04/28 15:48:47 hodson Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.22 2004/05/06 23:06:03 hodson Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -317,6 +317,8 @@ public:
      * @param unicast apply to unicast rib.
      * @param multicast apply to multicast rib.
      * @param cookie cookie passed in route redistribution XRLs.
+     * @param is_xrl_transaction_output if true the add/delete route XRLs
+     * are grouped into transactions.
      *
      * @return XORP_OK on success, XORP_ERROR on failure.
      */
@@ -324,7 +326,8 @@ public:
 			       const string&	from_protocol,
 			       bool	   	unicast,
 			       bool		multicast,
-			       const string&	cookie);
+			       const string&	cookie,
+			       bool		is_xrl_transaction_output);
 
     /**
      * Add Route Redistributor that generates updates with redist6
@@ -335,6 +338,8 @@ public:
      * @param unicast apply to unicast rib.
      * @param multicast apply to multicast rib.
      * @param cookie cookie passed in route redistribution XRLs.
+     * @param is_xrl_transaction_output if true the add/delete route XRLs
+     * are grouped into transactions.
      *
      * @return XORP_OK on success, XORP_ERROR on failure.
      */
@@ -342,7 +347,8 @@ public:
 			       const string&	from_protocol,
 			       bool	   	unicast,
 			       bool		multicast,
-			       const string&	cookie);
+			       const string&	cookie,
+			       bool		is_xrl_transaction_output);
 
     /**
      * Remove Route Redistributor that generates updates with redist4
@@ -353,6 +359,8 @@ public:
      * @param unicast apply to unicast rib.
      * @param multicast apply to multicast rib.
      * @param cookie cookie passed in route redistribution XRLs.
+     * @param is_xrl_transaction_output if true the add/delete route XRLs
+     * are grouped into transactions.
      *
      * @return XORP_OK on success, XORP_ERROR on failure.
      */
@@ -360,7 +368,8 @@ public:
 				  const string&	from_protocol,
 				  bool	   	unicast,
 				  bool		multicast,
-				  const string&	cookie);
+				  const string&	cookie,
+				  bool		is_xrl_transaction_output);
 
     /**
      * Remove Route Redistributor that generates updates with redist6
@@ -371,6 +380,8 @@ public:
      * @param unicast apply to unicast rib.
      * @param multicast apply to multicast rib.
      * @param cookie cookie passed in route redistribution XRLs.
+     * @param is_xrl_transaction_output if true the add/delete route XRLs
+     * are grouped into transactions.
      *
      * @return XORP_OK on success, XORP_ERROR on failure.
      */
@@ -378,7 +389,8 @@ public:
 				  const string&	from_protocol,
 				  bool	   	unicast,
 				  bool		multicast,
-				  const string&	cookie);
+				  const string&	cookie,
+				  bool		is_xrl_transaction_output);
 
 private:
     /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
+// $XORP: xorp/rib/redist_xrl.hh,v 1.1 2004/05/06 17:59:53 hodson Exp $
 
 #ifndef __RIB_REDIST_XRL_HH__
 #define __RIB_REDIST_XRL_HH__
@@ -44,12 +44,15 @@ public:
      * @param xrl_target_name name of XRL entity to send XRLs to.
      * @param cookie cookie passed in redist interface XRLs to identify
      *        source of updates.
+     * @param is_xrl_transaction_output if true, the add/delete route XRLs
+     *        are grouped into transactions.
      */
     RedistXrlOutput(Redistributor<A>*	redistributor,
 		    XrlRouter& 		xrl_router,
 		    const string& 	from_protocol,
 		    const string& 	xrl_target_name,
-		    const string&	cookie);
+		    const string&	cookie,
+		    bool		is_xrl_transaction_output);
     ~RedistXrlOutput();
 
     void add_route(const IPRouteEntry<A>& ipr);
@@ -60,6 +63,13 @@ public:
 
     inline const string& xrl_target_name() const;
     inline const string& cookie() const;
+
+    uint32_t tid() const { return _tid; }
+    void set_tid(uint32_t v) { _tid = v; }
+    bool transaction_in_progress() const { return _transaction_in_progress; }
+    void set_transaction_in_progress(bool v) { _transaction_in_progress = v; }
+    bool transaction_in_error() const { return _transaction_in_error; }
+    void set_transaction_in_error(bool v) { _transaction_in_error = v; }
 
 public:
     static const uint32_t HI_WATER	 = 100;
@@ -83,9 +93,13 @@ private:
     string	_from_protocol;
     string	_target_name;
     string	_cookie;
+    bool	_is_xrl_transaction_output;
 
     TaskQueue	_tasks;
     uint32_t	_n_tasks;
+    uint32_t	_tid;
+    bool	_transaction_in_progress;
+    bool	_transaction_in_error;
 };
 
 
