@@ -353,6 +353,13 @@ init_template_parser(const char *filename, TemplateTree *c)
 }
 
 void
+complete_template_parser()
+{
+    if (tpltin != NULL)
+        fclose(tpltin);
+}
+
+void
 parse_template() throw (ParseError)
 {
     if (tpltparse() != 0)

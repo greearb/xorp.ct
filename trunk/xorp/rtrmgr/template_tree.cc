@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.20 2004/05/28 18:26:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.21 2004/05/28 22:27:59 pavlin Exp $"
 
 
 #include <glob.h>
@@ -32,6 +32,7 @@
 
 
 extern int init_template_parser(const char* filename, TemplateTree* c);
+extern void complete_template_parser();
 extern void parse_template() throw (ParseError);
 
 TemplateTree::TemplateTree(const string& xorp_root_dir,
@@ -82,6 +83,7 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
 	debug_msg("Loading template file %s\n", pglob.gl_pathv[i]);
 	if (init_template_parser(pglob.gl_pathv[i], this) < 0) {
 	    globfree(&pglob);
+	    complete_template_parser();
 	    errmsg = c_format("Failed to open template file: %s",
 			      config_template_dir.c_str());
 	    xorp_throw(InitError, errmsg);
@@ -90,14 +92,17 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
 	    parse_template();
 	} catch (const ParseError& pe) {
 	    globfree(&pglob);
+	    complete_template_parser();
 	    xorp_throw(InitError, pe.why());
 	}
 	if (_path_segments.size() != 0) {
 	    globfree(&pglob);
+	    complete_template_parser();
 	    errmsg = c_format("File %s is not terminated properly",
 			      pglob.gl_pathv[i]);
 	    xorp_throw(InitError, errmsg);
 	}
+	complete_template_parser();
     }
 
     globfree(&pglob);

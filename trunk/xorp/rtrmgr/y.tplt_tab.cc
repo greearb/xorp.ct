@@ -417,12 +417,19 @@ init_template_parser(const char *filename, TemplateTree *c)
 }
 
 void
+complete_template_parser()
+{
+    if (tpltin != NULL)
+        fclose(tpltin);
+}
+
+void
 parse_template() throw (ParseError)
 {
     if (tpltparse() != 0)
 	tplterror("unknown error");
 }
-#line 426 "y.tplt_tab.c"
+#line 433 "y.tplt_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -855,7 +862,7 @@ case 59:
 			tplterror("syntax error");
 		}
 break;
-#line 859 "y.tplt_tab.c"
+#line 866 "y.tplt_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
