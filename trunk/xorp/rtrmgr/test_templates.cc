@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.2 2003/03/10 23:21:02 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.3 2003/05/29 21:40:33 hodson Exp $"
 
 #include <signal.h>
 
@@ -95,11 +95,12 @@ main(int argc, char* const argv[])
     TemplateTree *tt;
     try {
 	tt = new TemplateTree(config_template_dir, xrl_dir);
+	tt->display_tree();
+	delete tt;
     } catch (const XorpException&) {
 	printf("caught exception\n");
 	xorp_unexpected_handler();
     }
-    tt->display_tree();
     return (0);
 }
 
