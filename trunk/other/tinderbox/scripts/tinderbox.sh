@@ -1,6 +1,6 @@
-#!/bin/sh 
+#!/bin/sh
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.8 2004/04/13 22:14:43 hodson Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.9 2004/04/21 18:15:03 hodson Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -9,7 +9,7 @@ filter_and_post_log()
 {
     local subject toaddr errfile filtfile msgfile
 
-    d=`date "+%y%m%d-%H%M"`
+    d=$(date "+%y%m%d-%H%M")
     subject="[$d] - $1"
     toaddr="$2"
     errfile="$3"
@@ -46,8 +46,8 @@ init_log_header()
     host="$3"
     env="$4"
     dir="$5"
-    now=`date "+%Y-%m-%d %H:%M:%S %Z"`
-    sinfo=`ssh ${SSH_FLAGS} -n ${host} 'uname -s -r'`
+    now=$(date "+%Y-%m-%d %H:%M:%S %Z")
+    sinfo=$(ssh ${SSH_FLAGS} -n ${host} 'uname -s -r')
     cat >${outfile} <<EOF
 -------------------------------------------------------------------------------
 Configuration:    ${cfg}
@@ -96,27 +96,27 @@ run_tinderbox() {
 	errfile="${LOGDIR}/0/${cfg_host}-${cfg}"
 	header="${errfile}.header"
 
-	cat /dev/null > ${errfile}
+	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home}"
+	cp ${header} ${errfile}
+ 
 	if [ -z "${cfg_host}" ] ; then
-	    echo "Configuration \"$cfg\" has no host." > ${errfile}
+	    echo "Configuration \"$cfg\" has no host." >> ${errfile}
 	    harp "${cfg} configuration" "${errfile}"
 	    continue
 	fi
 
 	if [ -z "${cfg_home}" ] ; then
-	    echo "Configuration \"$cfg\" has no directory." > ${errfile}
+	    echo "Configuration \"$cfg\" has no directory." >> ${errfile}
 	    harp "${cfg} configuration" "${err_file}"
 	    continue
 	fi
 
-	echo "Remote copy ${cfg_host} ${cfg_home}" > ${errfile}
-	${SCRIPTSDIR}/remote_xorp_copy.sh ${cfg_host} ${cfg_home} >>${errfile} 2>&1
+	echo "Remote copy ${cfg_host} ${cfg_home}" >> ${errfile}
+	${SCRIPTSDIR}/remote_xorp_copy.sh ${cfg_host} ${cfg_home} >> ${errfile} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp "${cfg} remote copy" "${errfile}"
 	    continue
 	fi
-
-	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home}"
 
 	# Log in to host and build xorp
 	build_errfile="${errfile}-build"
@@ -168,7 +168,7 @@ roll_over_logs()
     rm -rf ${LOGDIR}/${log_history}
     log=${log_history}
     while [ ${log} -ne 0 ] ; do
-	next_log=`expr ${log} - 1`
+	next_log=$((${log} - 1))
 	if [ -d ${LOGDIR}/${next_log} ] ; then
 	    mv ${LOGDIR}/${next_log} ${LOGDIR}/${log}
 	fi
@@ -176,9 +176,22 @@ roll_over_logs()
     done
 }
 
+#
+# Implement some simple locking to make sure we don't run two
+# instances of tinderbox.sh from cron at the same time.
+#
+tinderbox_lockfile="${LOGDIR}/tinderbox.lock"
+if [ -f "${tinderbox_lockfile}" ]; then
+	echo "Tinderbox was invoked whilst already running."
+	exit 255
+fi
+
+touch ${tinderbox_lockfile}
+
 roll_over_logs
 mkdir -p ${LOGDIR}/0
 
 checkout "${LOGDIR}/0/checkout"
 run_tinderbox
 
+rm -f ${tinderbox_lockfile}
