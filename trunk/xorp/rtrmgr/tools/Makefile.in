@@ -93,7 +93,7 @@ bin_PROGRAMS = show_interfaces
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = -all-static
-LDADD = $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
+LDADD = $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 show_interfaces_SOURCES = show_interfaces.hh show_interfaces.cc
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = ../../config.h
@@ -107,7 +107,7 @@ LIBS = @LIBS@
 show_interfaces_OBJECTS =  show_interfaces.o
 show_interfaces_LDADD = $(LDADD)
 show_interfaces_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 show_interfaces_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@

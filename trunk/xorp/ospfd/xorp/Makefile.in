@@ -89,7 +89,7 @@ AM_CPPFLAGS = -I$(top_builddir) -I../src
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = -all-static
-LDADD = $(top_builddir)/ospfd/src/libospfd.a $(top_builddir)/xrl/targets/libospfbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(top_builddir)/ospfd/src/libospfd.a $(top_builddir)/xrl/targets/libospfbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 ospfd_SOURCES = ospf_module.h ospfd_xorp.h os-instance.h tcppkt.h xrl_target.h  ospfd_xorp.C os-instance.C tcppkt.C system.C xrl_target.C
 ospfd_mon_SOURCES = tcppkt.h tcppkt.C lsa_prn.C ospfd_mon.C
 ospfd_browser_SOURCES = tcppkt.h tcppkt.C lsa_prn.C ospfd_browser.C
@@ -108,21 +108,24 @@ ospfd_LDADD = $(LDADD)
 ospfd_DEPENDENCIES =  $(top_builddir)/ospfd/src/libospfd.a \
 $(top_builddir)/xrl/targets/libospfbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 ospfd_LDFLAGS = 
 ospfd_mon_OBJECTS =  tcppkt.o lsa_prn.o ospfd_mon.o
 ospfd_mon_LDADD = $(LDADD)
 ospfd_mon_DEPENDENCIES =  $(top_builddir)/ospfd/src/libospfd.a \
 $(top_builddir)/xrl/targets/libospfbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 ospfd_mon_LDFLAGS = 
 ospfd_browser_OBJECTS =  tcppkt.o lsa_prn.o ospfd_browser.o
 ospfd_browser_LDADD = $(LDADD)
 ospfd_browser_DEPENDENCIES =  $(top_builddir)/ospfd/src/libospfd.a \
 $(top_builddir)/xrl/targets/libospfbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 ospfd_browser_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)

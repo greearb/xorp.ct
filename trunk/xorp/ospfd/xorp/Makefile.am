@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.10 2002/12/09 09:43:57 pavlin Exp $
+## $XORP: xorp/ospfd/xorp/Makefile.am,v 1.1.1.1 2002/12/11 23:56:10 hodson Exp $
 ##
 
 # -- Real Programs
@@ -17,6 +17,7 @@ LDADD	     = $(top_builddir)/ospfd/src/libospfd.a
 LDADD	    += $(top_builddir)/xrl/targets/libospfbase.a
 LDADD	    += $(top_builddir)/xrl/interfaces/libribxif.a
 LDADD	    += $(top_builddir)/libxipc/libxipc.a
+LDADD	    += $(top_builddir)/libcomm/libcomm.a
 LDADD	    += $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources

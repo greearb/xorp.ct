@@ -87,7 +87,7 @@ noinst_LIBRARIES =
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = -all-static
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libbgpxif.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/interfaces/libbgpxif.a
 print_peers_SOURCES = print_peer.cc print_peer.hh print_peers.cc
 xorpsh_print_peers_SOURCES = print_peer.cc print_peer.hh xorpsh_print_peers.cc
 print_routes_SOURCES = print_routes.cc  print_routes.hh  print_routes_main.cc 
@@ -108,23 +108,23 @@ LIBS = @LIBS@
 print_peers_OBJECTS =  print_peer.o print_peers.o
 print_peers_LDADD = $(LDADD)
 print_peers_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/xrl/interfaces/libbgpxif.a
 print_peers_LDFLAGS = 
 xorpsh_print_peers_OBJECTS =  print_peer.o xorpsh_print_peers.o
 xorpsh_print_peers_LDADD = $(LDADD)
 xorpsh_print_peers_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/xrl/interfaces/libbgpxif.a
 xorpsh_print_peers_LDFLAGS = 
 print_routes_OBJECTS =  print_routes.o print_routes_main.o
 print_routes_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/xrl/interfaces/libbgpxif.a $(top_builddir)/bgp/libbgp.a
 print_routes_LDFLAGS = 
 xorpsh_print_routes_OBJECTS =  print_routes.o xorpsh_print_routes.o
 xorpsh_print_routes_DEPENDENCIES =  $(top_builddir)/libxipc/libxipc.a \
-$(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/xrl/interfaces/libbgpxif.a $(top_builddir)/bgp/libbgp.a
 xorpsh_print_routes_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@

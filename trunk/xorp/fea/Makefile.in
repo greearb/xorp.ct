@@ -81,7 +81,7 @@ RIP_OS = @RIP_OS@
 @FEA_BUILD_RTSOCK_FALSE@host_programs = 
 
 @FEA_BUILD_RTSOCK_TRUE@fea_rtsock_SOURCES = fea_rtsock.cc
-@FEA_BUILD_RTSOCK_TRUE@fea_rtsock_LDADD = ./libfea.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+@FEA_BUILD_RTSOCK_TRUE@fea_rtsock_LDADD = ./libfea.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 @FEA_BUILD_RTSOCK_TRUE@host_test_programs = test_ifconfig_rtsock
 @FEA_BUILD_RTSOCK_FALSE@host_test_programs = 
 
@@ -96,7 +96,7 @@ check_PROGRAMS =  test_rawsock4 test_ifmanager_transaction $(host_test_programs)
 TESTS = $(check_PROGRAMS)
 
 demo_fea_ifmgr_client_SOURCES =  demo_fea_ifmgr_client.cc
-demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+demo_fea_ifmgr_client_LDADD = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 
 # disabled test_fea
 
@@ -108,7 +108,7 @@ LDFLAGS = -all-static
 # -- Program Sources
 
 fea_dummy_SOURCES = fea_dummy.cc
-fea_dummy_LDADD = ./libfea.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+fea_dummy_LDADD = ./libfea.a $(top_builddir)/xrl/targets/libfeabase.a $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a $(top_builddir)/xrl/interfaces/libfearawpktclient.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 test_ifmanager_transaction_SOURCES = test_ifmanager_transaction.cc iftree.cc
 test_ifmanager_transaction_LDADD = $(top_builddir)/libxorp/libxorp.a
 
@@ -151,7 +151,8 @@ fea_dummy_DEPENDENCIES =  ./libfea.a \
 $(top_builddir)/xrl/targets/libfeabase.a \
 $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
 $(top_builddir)/xrl/interfaces/libfearawpktclient.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 fea_dummy_LDFLAGS = 
 @FEA_BUILD_RTSOCK_TRUE@fea_rtsock_OBJECTS =  fea_rtsock.o
 @FEA_BUILD_RTSOCK_TRUE@fea_rtsock_DEPENDENCIES =  ./libfea.a \
@@ -159,13 +160,15 @@ fea_dummy_LDFLAGS =
 @FEA_BUILD_RTSOCK_TRUE@$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a \
 @FEA_BUILD_RTSOCK_TRUE@$(top_builddir)/xrl/interfaces/libfearawpktclient.a \
 @FEA_BUILD_RTSOCK_TRUE@$(top_builddir)/libxipc/libxipc.a \
+@FEA_BUILD_RTSOCK_TRUE@$(top_builddir)/libcomm/libcomm.a \
 @FEA_BUILD_RTSOCK_TRUE@$(top_builddir)/libxorp/libxorp.a
 fea_rtsock_LDFLAGS = 
 demo_fea_ifmgr_client_OBJECTS =  demo_fea_ifmgr_client.o
 demo_fea_ifmgr_client_DEPENDENCIES =  \
 $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a \
 $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 demo_fea_ifmgr_client_LDFLAGS = 
 test_rawsock4_OBJECTS =  test_rawsock4.o rawsock4.o
 test_rawsock4_DEPENDENCIES =  $(top_builddir)/libxorp/libxorp.a

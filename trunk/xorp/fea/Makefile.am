@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.49 2002/12/09 09:43:55 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.1.1.1 2002/12/11 23:56:02 hodson Exp $
 ##
 
 if FEA_BUILD_RTSOCK
@@ -14,6 +14,7 @@ fea_rtsock_LDADD	+= $(top_builddir)/xrl/targets/libfeabase.a
 fea_rtsock_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 fea_rtsock_LDADD	+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
 fea_rtsock_LDADD	+= $(top_builddir)/libxipc/libxipc.a
+fea_rtsock_LDADD	+= $(top_builddir)/libcomm/libcomm.a
 fea_rtsock_LDADD	+= $(top_builddir)/libxorp/libxorp.a
 
 host_test_programs	 = test_ifconfig_rtsock
@@ -46,6 +47,7 @@ demo_fea_ifmgr_client_SOURCES += demo_fea_ifmgr_client.cc
 demo_fea_ifmgr_client_LDADD    = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.a
 demo_fea_ifmgr_client_LDADD   += $(top_builddir)/xrl/interfaces/libfeaifmgrxif.a
 demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxipc/libxipc.a
+demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libcomm/libcomm.a
 demo_fea_ifmgr_client_LDADD   += $(top_builddir)/libxorp/libxorp.a
 
 # disabled test_fea
@@ -63,6 +65,7 @@ fea_dummy_LDADD		+= $(top_builddir)/xrl/targets/libfeabase.a
 fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.a
 fea_dummy_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpktclient.a
 fea_dummy_LDADD		+= $(top_builddir)/libxipc/libxipc.a
+fea_dummy_LDADD		+= $(top_builddir)/libcomm/libcomm.a
 fea_dummy_LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 test_ifmanager_transaction_SOURCES  = test_ifmanager_transaction.cc

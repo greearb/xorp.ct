@@ -88,7 +88,7 @@ noinst_LIBRARIES =
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = -all-static
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/bgp/libbgp.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/targets/libtestpeerbase.a $(top_builddir)/xrl/targets/libcoordbase.a $(top_builddir)/xrl/interfaces/libtestpeerxif.a $(top_builddir)/xrl/interfaces/libdatainxif.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/bgp/libbgp.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a $(top_builddir)/xrl/targets/libtestpeerbase.a $(top_builddir)/xrl/targets/libcoordbase.a $(top_builddir)/xrl/interfaces/libtestpeerxif.a $(top_builddir)/xrl/interfaces/libdatainxif.a
 
 # -- Program Sources
 test_peer_SOURCES = bgppp.hh test_peer.hh bgppp.cc test_peer.cc
@@ -108,7 +108,8 @@ LIBS = @LIBS@
 coord_OBJECTS =  bgppp.o command.o coord.o peer.o trie.o
 coord_LDADD = $(LDADD)
 coord_DEPENDENCIES =  $(top_builddir)/bgp/libbgp.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/xrl/targets/libtestpeerbase.a \
 $(top_builddir)/xrl/targets/libcoordbase.a \
 $(top_builddir)/xrl/interfaces/libtestpeerxif.a \
@@ -117,7 +118,8 @@ coord_LDFLAGS =
 test_peer_OBJECTS =  bgppp.o test_peer.o
 test_peer_LDADD = $(LDADD)
 test_peer_DEPENDENCIES =  $(top_builddir)/bgp/libbgp.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a \
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a \
 $(top_builddir)/xrl/targets/libtestpeerbase.a \
 $(top_builddir)/xrl/targets/libcoordbase.a \
 $(top_builddir)/xrl/interfaces/libtestpeerxif.a \

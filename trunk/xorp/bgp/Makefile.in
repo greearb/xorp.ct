@@ -91,7 +91,7 @@ noinst_LIBRARIES = libbgp.a
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS = -all-static
-LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+LDADD = $(noinst_LIBRARIES) $(top_builddir)/xrl/targets/libbgpbase.a $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a $(top_builddir)/libxorp/libxorp.a
 bgp_SOURCES = bgp.cc main.hh main.cc
 
 packet_test_SOURCES = packet_test.hh packet_test.cc
@@ -130,14 +130,16 @@ bgp_OBJECTS =  bgp.o main.o
 bgp_LDADD = $(LDADD)
 bgp_DEPENDENCIES =  libbgp.a $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 bgp_LDFLAGS = 
 packet_test_OBJECTS =  packet_test.o
 packet_test_LDADD = $(LDADD)
 packet_test_DEPENDENCIES =  libbgp.a \
 $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 packet_test_LDFLAGS = 
 plumbing_test_OBJECTS =  plumbing_test.o main.o
 plumbing_test_LDADD = $(LDADD)
@@ -147,21 +149,24 @@ update_test_LDADD = $(LDADD)
 update_test_DEPENDENCIES =  libbgp.a \
 $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 update_test_LDFLAGS = 
 aspath_test_OBJECTS =  aspath_test.o
 aspath_test_LDADD = $(LDADD)
 aspath_test_DEPENDENCIES =  libbgp.a \
 $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 aspath_test_LDFLAGS = 
 packet_coding_test_OBJECTS =  packet_coding_test.o
 packet_coding_test_LDADD = $(LDADD)
 packet_coding_test_DEPENDENCIES =  libbgp.a \
 $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 packet_coding_test_LDFLAGS = 
 isolation_tests_OBJECTS =  test_main.o test_ribin.o test_deletion.o \
 test_filter.o test_cache.o test_nhlookup.o test_decision.o \
@@ -172,7 +177,8 @@ isolation_tests_LDADD = $(LDADD)
 isolation_tests_DEPENDENCIES =  libbgp.a \
 $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
+$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libcomm/libcomm.a \
+$(top_builddir)/libxorp/libxorp.a
 isolation_tests_LDFLAGS = 
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)

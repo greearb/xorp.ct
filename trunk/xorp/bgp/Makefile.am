@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.11 2003/02/10 22:44:00 mjh Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.12 2003/02/12 20:24:26 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -25,6 +25,7 @@ LDADD		 = $(noinst_LIBRARIES)
 LDADD		+= $(top_builddir)/xrl/targets/libbgpbase.a
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.a
 LDADD		+= $(top_builddir)/libxipc/libxipc.a
+LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.2 2003/02/21 22:54:32 mjh Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.3 2003/02/24 12:53:47 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -22,6 +22,7 @@ EXTRA_DIST	 = config.template config.boot
 # -- Libraries and library flags to link the binary programs
 LDFLAGS		 = -all-static
 LDADD		 = $(top_builddir)/libxipc/libxipc.a
+LDADD		+= $(top_builddir)/libcomm/libcomm.a
 LDADD		+= $(top_builddir)/libxorp/libxorp.a
 
 # -- Program Sources
@@ -49,9 +50,9 @@ rtrmgr_SOURCES	+= xrl_rtrmgr_interface.cc
 rtrmgr_SOURCES	+= randomness.cc
 rtrmgr_SOURCES	+= unexpanded_xrl.cc
 
-rtrmgr_LDADD	= $(LDADD) 
-rtrmgr_LDADD	+= $(top_builddir)/xrl/targets/librtrmgrbase.a 
+rtrmgr_LDADD	= $(top_builddir)/xrl/targets/librtrmgrbase.a 
 rtrmgr_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgr_clientxif.a 
+rtrmgr_LDADD	+= $(LDADD) 
 
 xorpsh_SOURCES	 = rtrmgr_module.h
 xorpsh_SOURCES	+= version.h
@@ -86,7 +87,6 @@ xorpsh_LDADD	= $(top_builddir)/cli/libcli.a
 xorpsh_LDADD	+= $(top_builddir)/libproto/libproto.a
 xorpsh_LDADD	+= $(top_builddir)/cli/libtecla/libtecla.a
 xorpsh_LDADD	+= -lcurses
-xorpsh_LDADD	+= $(top_builddir)/libcomm/libcomm.a
 xorpsh_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgrxif.a
 xorpsh_LDADD	+= $(top_builddir)/xrl/targets/libxorpshbase.a
 xorpsh_LDADD	+= $(LDADD)
