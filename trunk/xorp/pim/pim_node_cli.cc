@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.8 2003/02/28 03:01:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.9 2003/03/03 03:26:26 pavlin Exp $"
 
 
 //
@@ -140,7 +140,7 @@ PimNodeCli::add_all_cli_commands(void)
 }
 
 //
-// CLI COMMAND: "show pim bootstrap [scope-zone-group-prefix]"
+// CLI COMMAND: "show pim bootstrap [scope-zone-group-prefix [scoped]]"
 //
 // Display information about PIM bootstrap routers
 //
@@ -151,7 +151,7 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
     bool is_zone_id_set = false;
     list<BsrZone *>::const_iterator zone_iter;
     
-    // Check the optional argument
+    // Check the optional arguments
     if (argv.size()) {
 	try {
 	    zone_id = PimScopeZoneId(argv[0].c_str(), false);
@@ -160,6 +160,11 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
 			   argv[0].c_str()));
 		return (XORP_ERROR);
+	    }
+	    // Test if the second argument specifies scoped zone
+	    if (argv.size() >= 2) {
+		if (argv[1] == "scoped")
+		    zone_id = PimScopeZoneId(argv[0].c_str(), true);
 	    }
 	} catch (InvalidString) {
 	    cli_print(c_format("ERROR: Invalid zone ID: %s\n",
@@ -333,7 +338,7 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 }
 
 //
-// CLI COMMAND: "show pim bootstrap rps [scope-zone-group-prefix]"
+// CLI COMMAND: "show pim bootstrap rps [scope-zone-group-prefix [scoped]]"
 //
 // Display information about PIM bootstrap RPs
 //
@@ -353,6 +358,11 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
 			   argv[0].c_str()));
 		return (XORP_ERROR);
+	    }
+	    // Test if the second argument specifies scoped zone
+	    if (argv.size() >= 2) {
+		if (argv[1] == "scoped")
+		    zone_id = PimScopeZoneId(argv[0].c_str(), true);
 	    }
 	} catch (InvalidString) {
 	    cli_print(c_format("ERROR: Invalid zone ID: %s\n",
