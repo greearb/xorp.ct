@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.2 2002/12/17 10:03:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.3 2003/01/24 07:31:36 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -1158,9 +1158,8 @@ PimMrt::add_task_delete_pim_mre(PimMre *pim_mre)
     } while (false);
     
     //
-    // Remove the entry from the PimMrt only, and mark it as pending deletion
+    // Mark the entry as pending deletion
     //
-    remove_pim_mre(pim_mre);
     pim_mre->set_is_task_delete_pending(true);
     
     //

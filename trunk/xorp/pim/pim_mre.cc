@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.6 2003/01/18 00:23:13 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.7 2003/01/23 08:34:19 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1677,11 +1677,12 @@ PimMre::entry_try_remove()
     // TODO: XXX: PAVPAVPAV: make sure it is called
     // from all appropriate places!!
     
-    ret_value = entry_can_remove();
+    if (is_task_delete_pending())
+	return (true);		// The entry is already pending deletion
     
-    if (ret_value) {
+    ret_value = entry_can_remove();
+    if (ret_value)
 	pim_mrt().add_task_delete_pim_mre(this);
-    }
     
     return (ret_value);
 }
@@ -1832,10 +1833,7 @@ PimMre::keepalive_timer_timeout()
     if (! is_keepalive_timer_running())
 	return;
     cancel_keepalive_timer();
-    
-    // TODO: XXX: PAVPAVPAV: is it OK to unconditionally remove the entry?
-    // entry_try_remove();
-    pim_mrt().add_task_delete_pim_mre(this);
+    entry_try_remove();
 }
 
 //
@@ -2084,18 +2082,44 @@ PimMre::add_pim_mre_sg_rpt_entry()
 void
 PimMre::remove_pim_mre_rp_entry()
 {
+    if (is_rp()) {
+	if (is_task_delete_pending() && entry_can_remove()) {
+	    //
+	    // Remove the entry from the PimMrt, and mark it as deletion done
+	    //
+	    pim_mrt().remove_pim_mre(this);
+	    set_is_task_delete_done(true);
+	} else {
+	    set_is_task_delete_pending(false);
+	    set_is_task_delete_done(false);
+	    return;
+	}
+    }
+    
     if (is_wc() || is_sg() || is_sg_rpt()) {
 	// XXX: the RP-related state is set by a special task
 	// uncond_set_pim_rp(compute_rp());
     }
-    if (is_rp())
-	set_is_task_delete_done(true);
 }
 
 // XXX: applies for (*,G), (S,G), (S,G,rpt)
 void
 PimMre::remove_pim_mre_wc_entry()
 {
+    if (is_wc()) {
+	if (is_task_delete_pending() && entry_can_remove()) {
+	    //
+	    // Remove the entry from the PimMrt, and mark it as deletion done
+	    //
+	    pim_mrt().remove_pim_mre(this);
+	    set_is_task_delete_done(true);
+	} else {
+	    set_is_task_delete_pending(false);
+	    set_is_task_delete_done(false);
+	    return;
+	}
+    }
+    
     if (is_sg() || is_sg_rpt()) {
 	PimMre *pim_mre_wc = pim_mrt().pim_mre_find(source_addr(),
 						    group_addr(),
@@ -2107,14 +2131,26 @@ PimMre::remove_pim_mre_wc_entry()
 	// Add to the PimNbr and PimRp lists.
 	add_pim_mre_lists();
     }
-    if (is_wc())
-	set_is_task_delete_done(true);
 }
 
 // XXX: applies for (S,G), (S,G,rpt)
 void
 PimMre::remove_pim_mre_sg_entry()
 {
+    if (is_sg()) {
+	if (is_task_delete_pending() && entry_can_remove()) {
+	    //
+	    // Remove the entry from the PimMrt, and mark it as deletion done
+	    //
+	    pim_mrt().remove_pim_mre(this);
+	    set_is_task_delete_done(true);
+	} else {
+	    set_is_task_delete_pending(false);
+	    set_is_task_delete_done(false);
+	    return;
+	}
+    }
+    
     if (is_sg_rpt()) {
 	PimMre *pim_mre_sg = pim_mrt().pim_mre_find(source_addr(),
 						    group_addr(),
@@ -2124,14 +2160,26 @@ PimMre::remove_pim_mre_sg_entry()
 	    return;		// Nothing changed
 	set_sg(pim_mre_sg);
     }
-    if (is_sg())
-	set_is_task_delete_done(true);
 }
 
 // XXX: applies for (S,G), (S,G,rpt)
 void
 PimMre::remove_pim_mre_sg_rpt_entry()
 {
+    if (is_sg_rpt()) {
+	if (is_task_delete_pending() && entry_can_remove()) {
+	    //
+	    // Remove the entry from the PimMrt, and mark it as deletion done
+	    //
+	    pim_mrt().remove_pim_mre(this);
+	    set_is_task_delete_done(true);
+	} else {
+	    set_is_task_delete_pending(false);
+	    set_is_task_delete_done(false);
+	    return;
+	}
+    }
+    
     if (is_sg()) {
 	PimMre *pim_mre_sg_rpt = pim_mrt().pim_mre_find(source_addr(),
 							group_addr(),
@@ -2141,6 +2189,4 @@ PimMre::remove_pim_mre_sg_rpt_entry()
 	    return;		// Nothing changed
 	set_sg_rpt(pim_mre_sg_rpt);
     }
-    if (is_sg_rpt())
-	set_is_task_delete_done(true);
 }
