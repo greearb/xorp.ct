@@ -81,6 +81,8 @@ Configure Mode
 
 Operational Mode
  - Add template specification for "show" output: fields formatting, etc.
+ - Modify the *.cmds templates syntax to allow specification of the CLI
+   help per command.
 
 Done
 ====
