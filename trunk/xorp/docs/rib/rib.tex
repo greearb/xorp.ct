@@ -28,7 +28,8 @@ software developers wishing to understand or modify this software.
 
 The RIB process takes routing information from multiple routing
 protocols, stores these routes, and decides which routes should be
-propagated on to the forwarding engine.  The RIB performs these tasks:
+propagated on to the forwarding engine.  The RIB performs the following
+tasks:
 \begin{itemize}
 \item Stores routes provided by the routing protocols running on a
 XORP router.
@@ -51,10 +52,10 @@ notified if a change occurs.
 \end{itemize}
 By default, the RIB process holds four separate RIBs:
 \begin{itemize}
-\item Unicast IPv4
-\item Unicast IPv6
-\item Multicast IPv4
-\item Multicast IPv6
+\item Unicast IPv4 RIB
+\item Unicast IPv6 RIB
+\item Multicast IPv4 RIB
+\item Multicast IPv6 RIB
 \end{itemize}
 C++ templates are used to build specialized IPv4 and IPv6 versions
 from the same code.  Routing protocols such as Multiprotocol BGP are
@@ -143,7 +144,7 @@ that indicates which immediate neighbor to use to reach the nexthop,
 and the nexthop in the route that is propagated downstream will be
 that of this immediate neighbor.  If no route exists to the nexthop,
 the route will not be propagated downstream, but will be stored in a
-table of unresolved routes in case it a route that arrives later can
+table of unresolved routes in case a route that arrives later can
 cause it to resolve.
 
 Each RIB only contains a single ExtIntTable.
@@ -323,7 +324,7 @@ information related to a specific IP address.
 Target is the name of the XRL module that registered the interest.
 
 {\tt resolves} indicates whether or not the address is routable.  If
-it not routable, the values of {\tt nexthop} and {\tt metric} are
+it is not routable, the values of {\tt nexthop} and {\tt metric} are
 undefined.  {\tt realprefix} returns the prefix length of the routing
 entry that matches the address in the request.  {\tt prefix} returns
 the prefix length of the largest subnet that covers the address and is
