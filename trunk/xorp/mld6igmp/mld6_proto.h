@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.4 2003/04/16 15:53:15 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.5 2003/04/16 16:39:17 pavlin Exp $
  */
 
 
@@ -29,7 +29,7 @@
  */
 
 
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
 
 #ifdef HAVE_NETINET_ICMP6_H
 #include <netinet/icmp6.h>
@@ -142,6 +142,6 @@ __BEGIN_DECLS
 
 __END_DECLS
 
-#endif /* HAVE_IPV6 */
+#endif /* HAVE_IPV6_MULTICAST_ROUTING */
 
 #endif /* __MPD6IGMP_MLD6_PROTO_H__ */

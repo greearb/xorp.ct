@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.5 2003/04/22 23:27:22 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.6 2003/07/30 19:05:43 pavlin Exp $"
 
 
 //
@@ -87,7 +87,7 @@ Mld6igmpVif::other_querier_timer_timeout()
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
 
-#ifdef HAVE_IPV6    
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	// Now I am the querier. Send a general membership query.
 	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
@@ -100,7 +100,7 @@ Mld6igmpVif::other_querier_timer_timeout()
 		TimeVal(MLD_QUERY_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
-#endif // HAVE_IPV6
+#endif // HAVE_IPV6_MULTICAST_ROUTING
 }
 
 /**
@@ -132,7 +132,7 @@ Mld6igmpVif::query_timer_timeout()
 	    query_interval = IGMP_QUERY_INTERVAL;
     }
     
-#if HAVE_IPV6
+#if HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	// Send a general membership query
 	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
@@ -147,7 +147,7 @@ Mld6igmpVif::query_timer_timeout()
 	else
 	    query_interval = MLD_QUERY_INTERVAL;
     }
-#endif // HAVE_IPV6
+#endif // HAVE_IPV6_MULTICAST_ROUTING
     
     _query_timer =
 	mld6igmp_node().eventloop().new_oneoff_after(

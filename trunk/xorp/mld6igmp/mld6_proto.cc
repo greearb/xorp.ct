@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.18 2003/07/16 02:56:56 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.19 2003/07/30 19:05:43 pavlin Exp $"
 
 
 //
@@ -28,7 +28,7 @@
 #include "mld6igmp_vif.hh"
 
 
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
 
 
 //
@@ -98,7 +98,7 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst,
     // Checksum verification.
     //
     cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
     // Add the checksum for the IPv6 pseudo-header
     if (proto_is_mld6()) {
 	struct pseudo_header {
@@ -116,7 +116,7 @@ Mld6igmpVif::mld6_process(const IPvX& src, const IPvX& dst,
 	uint16_t cksum2 = INET_CKSUM(&pseudo_header, sizeof(pseudo_header));
 	cksum = INET_CKSUM_ADD(cksum, cksum2);
     }
-#endif // HAVE_IPV6
+#endif // HAVE_IPV6_MULTICAST_ROUTING
     if (cksum) {
 	XLOG_WARNING("RX packet from %s to %s on vif %s: "
 		     "checksum error",
@@ -611,4 +611,4 @@ Mld6igmpVif::mld6_mtrace_recv(const IPvX& , // src
     return (XORP_OK);
 }
 
-#endif /* HAVE_IPV6 */
+#endif // HAVE_IPV6_MULTICAST_ROUTING

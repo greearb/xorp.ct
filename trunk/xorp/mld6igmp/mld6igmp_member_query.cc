@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.5 2003/04/22 23:27:22 hodson Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.6 2003/10/20 18:34:11 pavlin Exp $"
 
 //
 // Multicast group membership information used by
@@ -159,7 +159,7 @@ MemberQuery::last_member_query_timer_timeout()
 		callback(this, &MemberQuery::last_member_query_timer_timeout));
     }
 
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (mld6igmp_vif().proto_is_mld6()) {
 	mld6igmp_vif().mld6igmp_send(group(),
 				     MLD_LISTENER_QUERY,
@@ -171,5 +171,5 @@ MemberQuery::last_member_query_timer_timeout()
 		TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0),
 		callback(this, &MemberQuery::last_member_query_timer_timeout));
     }
-#endif // HAVE_IPV6
+#endif // HAVE_IPV6_MULTICAST_ROUTING
 }

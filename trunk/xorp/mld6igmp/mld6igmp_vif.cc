@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.15 2003/08/07 02:41:44 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.16 2003/09/13 02:56:48 pavlin Exp $"
 
 
 //
@@ -73,7 +73,7 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
     if (proto_is_igmp()) {
 	set_proto_version_default(IGMP_VERSION_DEFAULT);
     }
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	set_proto_version_default(MLD_VERSION_DEFAULT);
     }
@@ -122,13 +122,13 @@ Mld6igmpVif::set_proto_version(int proto_version)
 	return (XORP_ERROR);
     }
     
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	if ((proto_version < MLD_VERSION_MIN)
 	    || (proto_version > MLD_VERSION_MAX))
 	return (XORP_ERROR);
     }
-#endif // HAVE_IPV6
+#endif // HAVE_IPV6_MULTICAST_ROUTING
     
     ProtoUnit::set_proto_version(proto_version);
     
@@ -229,7 +229,7 @@ Mld6igmpVif::start()
 		TimeVal(IGMP_STARTUP_QUERY_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	mld6igmp_send(IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
@@ -241,7 +241,7 @@ Mld6igmpVif::start()
 		TimeVal(MLD_STARTUP_QUERY_INTERVAL, 0),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
-#endif // HAVE_IPV6
+#endif // HAVE_IPV6_MULTICAST_ROUTING
     
     return (XORP_OK);
 }
@@ -361,7 +361,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
     // Compute the checksum
     //
     cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
     // Add the checksum for the IPv6 pseudo-header
     if (proto_is_mld6()) {
 	struct pseudo_header {
@@ -379,7 +379,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& dst,
 	uint16_t cksum2 = INET_CKSUM(&pseudo_header, sizeof(pseudo_header));
 	cksum = INET_CKSUM_ADD(cksum, cksum2);
     }
-#endif // HAVE_IPV6
+#endif // HAVE_IPV6_MULTICAST_ROUTING
     BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the ckecksum
     
     XLOG_TRACE(mld6igmp_node().is_log_trace(), "TX %s from %s to %s",
@@ -440,7 +440,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 				     router_alert_bool, buffer);
 	    break;
 	}
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
 	if (proto_is_mld6()) {
 	    ret_value = mld6_process(src, dst, ip_ttl, ip_tos,
 				     router_alert_bool, buffer);
@@ -541,7 +541,7 @@ Mld6igmpVif::proto_message_type2ascii(uint8_t message_type) const
 {
     if (proto_is_igmp())
 	return (IGMPTYPE2ASCII(message_type));
-#ifdef HAVE_IPV6
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6())
 	return (MLDTYPE2ASCII(message_type));
 #endif
