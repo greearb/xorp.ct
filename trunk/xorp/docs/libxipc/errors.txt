@@ -1,0 +1,133 @@
+This document describes the Xrl errors that currently exist
+libxipc/xrl_error.hh and describes the intended semantics.
+
+All errors in the XRL library are presented as XrlError objects passed
+as arguments to handler functions.  There are a number of standard
+types defined.  In addition to specifying the error that occurred
+symbolicly, an XrlError instance may also have a note associated with
+it that further describes any probably that arises.
+
+The interface and implementation of XrlError is in
+libxipc/xrl_error.hh and libxipc/xrl_error.cc.
+
+Standard Xrl return values
+--------------------------
+
+These occur when everything in the XRL library is functioning
+correctly.  The receiving application may return the following values:
+
+  OKAY				Command executed successfully.
+
+  COMMAND_FAILED		Command failed.  Reason may be
+				specified in the XrlError::note.  In
+				general, COMMAND_FAILED should only be
+				returned when the command has failed.
+				Making a call that re-enforces an
+				existing state should not cause
+				COMMAND_FAILED to be generated unless
+				there is a good reason for it and it
+				is clearly documented in the XRL
+				interface description.
+
+  BAD_ARGS			The wrong arguments were bound to the
+				XRL request.  This error only arises when
+				making XRL requests manually and should never
+				arise through the generated XRL calling 
+				interfaces.
+
+Immediate Xrl Errors
+====================
+
+All send methods relating to XRLs return a boolean where "true"
+indicates success and "false" indicates failure.  Success is defined
+by the availability of resources at the time of the send request.  A
+return value of true can be taken to be an indication that there was
+sufficient buffer space available when the send method was called and
+the XRL now resides in that space.  False indicates lack of resources.
+
+The boolean return values are implemented in the XrlRouter code and
+the interface code.  Any time a send_ method value is called via an
+interface it's return value should be checked.
+
+There is no callback invocation when send() fails.
+
+Xrl Errors
+==========
+
+These error conditions arise following a request to dispatch an XRL.
+They all indicated through the callback associated with the XRL request.
+
+Finder Related
+--------------
+		
+  NO_FINDER			This error occurs when the client
+				library finds there is no Finder
+				process present.  This is always a
+				fatal error as the Finder should
+				always be present.
+
+  RESOLVE_FAILED		This error occurs when a process
+				attempts to resolve an XRL relating to
+				a target that does not export any XRLs
+				at the time of the query.  This may
+				occur because the process is not
+				running or because the process
+				containing the target has not finished
+				registering it's XRLs with the Finder.
+
+  NO_SUCH_METHOD		This error occurs when the named
+				target is running, but it does not
+				support the method named in the XRL it
+				is supposed to dispatch. This error most
+				likely occurs as a result of version
+				mismatch.  The requestor should either
+				try alternative methods, which may be
+				available through earler interface versions,
+				or give up. 
+
+Delayed Transport Errors
+------------------------
+
+  SEND_FAILED			Underlying XRL transport mechanism failed.
+				This is a fatal error for any transport.
+
+  REPLY_TIMED_OUT 		The receiving application did not
+				reply within a transport protocol
+				specific period of time.  This is an
+				indication that the receiving
+				application has gone belly up or
+				unreliability has been experienced.
+				[ Applies to unreliable transports only ]
+
+Open question - do we want SEND_FAILED_TRANSIENT?  For transient
+errors that may occur and application might want to retry after.  An
+example might be a failed system call, returning because of shortage
+of kernel resources.
+
+Internal Errors
+---------------
+
+These are errors that are detected within the XRL library and are most
+likely indicative of design errors.  They should probably be treated
+as fatal and we probably don't want to expose applications to these at
+all.
+
+  CORRUPTED_XRL			The receiving application determined that
+				the XRL request it received was corrupted.
+
+  CORRUPT_RESPONSE		The requesting application received a response
+				that it determined to be corrupt.
+
+  BAD_PROTOCOL_VERSION		Bad Xrl transport protocol version.
+				Mismatched implementations.  Should be
+				exceedingly rare since protocol
+				implementations are reasonably static.
+
+Deprecated Error(s)
+-------------------
+
+  SYSCALL_FAILED		This should be reflected as the appropriate
+				error from the above list.
+
+  FAILED_UNKNOWN		ditto
+
