@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.4 2003/10/12 02:26:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.5 2003/10/22 19:27:23 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -355,14 +355,25 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    ap = &ai->second;
 	    break;
 	} while (false);
-	
-	if ((ap != NULL)
-	    && (ap->addr() == a.addr())
-	    && ((a.broadcast() && (ap->bcast() == a.bcast()))
-		|| (a.point_to_point() && (ap->endpoint() == a.endpoint())))
-	    && (ap->prefix_len() == prefix_len)) {
+
+	// Test if a new address
+	bool new_address = true;
+	do {
+	    if (ap == NULL)
+		break;
+	    if (ap->addr() != a.addr())
+		break;
+	    if (a.broadcast() && (ap->bcast() != a.bcast()))
+		break;
+	    if (a.point_to_point() && (ap->endpoint() != a.endpoint()))
+		break;
+	    if (ap->prefix_len() != prefix_len)
+		break;
+	    new_address = false;
+	    break;
+	} while (false);
+	if (! new_address)
 	    break;		// Ignore: the address hasn't changed
-	}
 
 	string reason;
 	if (set_vif_address(i.ifname(), if_index, a.broadcast(),
@@ -453,13 +464,23 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    ap = &ai->second;
 	    break;
 	} while (false);
-	
-	if ((ap != NULL)
-	    && (ap->addr() == a.addr())
-	    && ((a.point_to_point() && (ap->endpoint() == a.endpoint())))
-	    && (ap->prefix_len() == prefix_len)) {
+
+	// Test if a new address
+	bool new_address = true;
+	do {
+	    if (ap == NULL)
+		break;
+	    if (ap->addr() != a.addr())
+		break;
+	    if (a.point_to_point() && (ap->endpoint() != a.endpoint()))
+		break;
+	    if (ap->prefix_len() != prefix_len)
+		break;
+	    new_address = false;
+	    break;
+	} while (false);
+	if (! new_address)
 	    break;		// Ignore: the address hasn't changed
-	}
 
 	string reason;
 	if (set_vif_address(i.ifname(), if_index, false, a.point_to_point(),
