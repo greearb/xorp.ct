@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.10 2003/11/19 00:31:54 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.11 2003/11/20 02:24:30 pavlin Exp $
 #
 
 Urgent
@@ -7,6 +7,9 @@ Urgent
 
 Configure Mode
 
+ - There are lots of hard-coded values in master_conf_tree.cc
+ - Get rid of the printf() in master_conf_tree.cc and elsewhere.
+   At least, the info should be printed only if in debug mode.
  - Implement node locking in MasterConfigTree
  - Use node locking to prevent two users editing the same node.
  - Templates need %delete commands adding.
