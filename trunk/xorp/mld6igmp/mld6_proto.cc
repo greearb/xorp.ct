@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.23 2004/02/22 03:13:19 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6_proto.cc,v 1.24 2004/02/24 21:02:00 pavlin Exp $"
 
 
 //
@@ -362,7 +362,7 @@ Mld6igmpVif::mld6_listener_query_recv(const IPvX& src,
 				      buffer_t *buffer)
 {
     // Ignore my own queries
-    if (mld6igmp_node().vif_find_by_addr(src))
+    if (mld6igmp_node().vif_find_by_addr(src) != NULL)
 	return (XORP_ERROR);
     
     //
@@ -550,10 +550,10 @@ Mld6igmpVif::mld6_listener_done_recv(const IPvX& src,
 		member_query->_member_query_timer =
 		    mld6igmp_node().eventloop().new_oneoff_after(
 			TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL
-				* MLD_LAST_LISTENER_QUERY_COUNT),
-			0),
-		    callback(member_query,
-			     &MemberQuery::member_query_timer_timeout);
+				* MLD_LAST_LISTENER_QUERY_COUNT,
+				0),
+			callback(member_query,
+				 &MemberQuery::member_query_timer_timeout));
 		
 		// Send group-specific query
 		mld6igmp_send(primary_addr(),
