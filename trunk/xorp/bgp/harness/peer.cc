@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.39 2003/09/16 00:38:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.40 2003/09/16 21:54:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -679,35 +679,6 @@ Peer::expect(const string& line, const vector<string>& words)
 
     if("packet" == words[2]) {
 	_expect._list.push_back(packet(line, words, 3));
-#if	0
-    } else if("check" == words[2]) {
-	if(!_expect._ok)
-	    xorp_throw(InvalidString,
-	       c_format("Expect queue violated\nExpect: %sReceived: %s",
-			_expect._list.front()->str().c_str(),
-			_expect._bad->str().c_str()));
-	    
-	switch(words.size()) {
-	case 4:
-	    break;
-	case 5:
-	    if(static_cast<unsigned int>(atoi(words[4].c_str())) !=
-	       _expect._list.size())
-		xorp_throw(InvalidString, 
-			   c_format("Expected list size to be %d actual %d",
-			      atoi(words[4].c_str()), _expect._list.size()));
-	    break;
-	default:
-	    xorp_throw(InvalidString, 
-		   c_format("Illegal number of arguments to \"check\"\n[%s]",
-			    line.c_str()));
-	    break;
-	}
-    } else if("established" == words[2]) {
-	if(!_established)
-	    xorp_throw(InvalidString,
-		       c_format("No session established"));
-#endif
     } else
 	xorp_throw(InvalidString,
 		   c_format(
@@ -771,18 +742,6 @@ void
 mrtd_traffic_dump(const uint8_t *buf, const size_t len , const TimeVal tv,
 	  const string fname)
 {
-#if	0
-    {
-    /* XXX
-    ** Only save update messages for the time being.
-    */
-    const fixed_header *header = 
-	reinterpret_cast<const struct fixed_header *>(buf);
-    struct fixed_header fh = *header;
-    if(MESSAGETYPEUPDATE != header->type)
-	return;
-    }
-#endif
     FILE *fp = fopen(fname.c_str(), "a");
     if(0 == fp)
 	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(), strerror(errno));
@@ -821,8 +780,9 @@ text_traffic_dump(const uint8_t *buf, const size_t len, const TimeVal,
     fclose(fp);
 }
 
+template <class A>
 void
-mrtd_debug_dump(const UpdatePacket* p, const IPv4Net& /*net*/,
+mrtd_debug_dump(const UpdatePacket* p, const IPNet<A>& /*net*/,
 		const TimeVal& tv,
 		const string fname)
 {
@@ -830,6 +790,20 @@ mrtd_debug_dump(const UpdatePacket* p, const IPv4Net& /*net*/,
     const uint8_t *buf = p->encode(len);
     mrtd_traffic_dump(buf, len , tv, fname);
     delete [] buf;
+}
+
+template <class A>
+void
+text_debug_dump(const UpdatePacket* p, const IPNet<A>& net,
+		const TimeVal& /*tv*/,
+		const string fname)
+{
+    FILE *fp = fopen(fname.c_str(), "a");
+    if(0 == fp)
+	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(), strerror(errno));
+
+    fprintf(fp, "%s\n%s\n", net.str().c_str(), p->str().c_str());
+    fclose(fp);
 }
 
 void
@@ -841,19 +815,6 @@ mrtd_replay_dump(const UpdatePacket* p,
     const uint8_t *buf = p->encode(len);
     mrtd_traffic_dump(buf, len , tv, fname);
     delete [] buf;
-}
-
-void
-text_debug_dump(const UpdatePacket* p, const IPv4Net& net,
-		const TimeVal& /*tv*/,
-		const string fname)
-{
-    FILE *fp = fopen(fname.c_str(), "a");
-    if(0 == fp)
-	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(), strerror(errno));
-
-    fprintf(fp, "%s\n%s\n", net.str().c_str(), p->str().c_str());
-    fclose(fp);
 }
 
 void
@@ -870,15 +831,18 @@ text_replay_dump(const UpdatePacket* p,
 }
 
 /*
-** peer dump <recv/sent> <mtrd/text> <traffic/routeview/replay/debug> <fname>
-** 0    1    2           3           4                                 5
+** peer dump <recv/sent> <mtrd/text> <ipv4/ipv6> 
+** 0    1    2           3           4           
+**
+** 	<traffic/routeview/replay/debug> <fname>
+** 	5				  6
 */
 void
 Peer::dump(const string& line, const vector<string>& words)
     throw(InvalidString)
 {
     
-    if(words.size() < 5)
+    if(words.size() < 6)
 	xorp_throw(InvalidString,
 		   c_format("Insufficient arguments:\n[%s]", line.c_str()));
 
@@ -909,12 +873,22 @@ Peer::dump(const string& line, const vector<string>& words)
 	xorp_throw(InvalidString,
 		   c_format("\"mrtd\" or \"text\" accepted not <%s>\n[%s]",
 			    words[3].c_str(), line.c_str()));
+
+    bool ipv4 = true;
+    if("ipv4" == words[4]) {
+	ipv4 = true;
+    } else if("ipv6" == words[4]) {
+	ipv4 = false;
+    } else
+	xorp_throw(InvalidString,
+		   c_format("\"ipv4\" or \"ipv6\" accepted not <%s>\n[%s]",
+			    words[4].c_str(), line.c_str()));
     
     string filename;
-    if(words.size() == 6)
-	filename = words[5];
+    if(words.size() == 7)
+	filename = words[6];
 
-    if("traffic" == words[4]) {
+    if("traffic" == words[5]) {
 	if("" == filename) {
 	    dumper->release();
 	    return;
@@ -923,8 +897,8 @@ Peer::dump(const string& line, const vector<string>& words)
  	    *dumper = callback(mrtd_traffic_dump, filename);
  	else
 	    *dumper = callback(text_traffic_dump, filename);
-    } else if("routeview" == words[4]) {
-    } else if("replay" == words[4]) {
+    } else if("routeview" == words[5]) {
+    } else if("replay" == words[5]) {
 	if("" == filename) {
 	    xorp_throw(InvalidString,
 		       c_format("no filename provided\n[%s]", line.c_str()));
@@ -935,32 +909,31 @@ Peer::dump(const string& line, const vector<string>& words)
 	else
 	    rw = callback(text_replay_dump, filename);
 	op->replay_walk(rw);
-    } else if("debug" == words[4]) {
+    } else if("debug" == words[5]) {
 	if("" == filename) {
 	    xorp_throw(InvalidString,
 		       c_format("no filename provided\n[%s]", line.c_str()));
 	}
-	Trie::TreeWalker_ipv4 tw;
-	if(mrtd)
-	    tw = callback(mrtd_debug_dump, filename);
-	else
-	    tw = callback(text_debug_dump, filename);
-	op->tree_walk_table(tw);
+	if(ipv4) {
+	    Trie::TreeWalker_ipv4 tw_ipv4;
+	    if(mrtd)
+		tw_ipv4 = callback(mrtd_debug_dump<IPv4>, filename);
+	    else
+		tw_ipv4 = callback(text_debug_dump<IPv4>, filename);
+	    op->tree_walk_table(tw_ipv4);
+	} else {
+	    Trie::TreeWalker_ipv6 tw_ipv6;
+	    if(mrtd)
+		tw_ipv6 = callback(mrtd_debug_dump<IPv6>, filename);
+	    else
+		tw_ipv6 = callback(text_debug_dump<IPv6>, filename);
+	    op->tree_walk_table(tw_ipv6);
+	}
     } else
 	xorp_throw(InvalidString,
 		   c_format(
 "\"traffic\" or \"routeview\" or \"replay\" or \"debug\" accepted not <%s>\n[%s]",
 			    words[4].c_str(), line.c_str()));
-	
-#if	0
-    FILE *fp = fopen(words[2].c_str(), "w");
-    if(0 == fp)
-	xorp_throw(InvalidString,
-		   c_format("fopen of %s failed: %s\n[%s]", words[2].c_str(),
-			    strerror(errno), line.c_str()));
-    _trie_recv.save_routing_table(fp);
-    fclose(fp);
-#endif
 }
 
 bool

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP$
+# $XORP: other/bgp/collect.sh,v 1.1 2003/01/31 03:45:27 atanu Exp $
 #
 
 #
@@ -59,8 +59,8 @@ test_peer()
     
     $TEST_FUNCS coord peer1 establish AS $MY_AS holdtime 0 id 192.150.187.100
 
-    $TEST_FUNCS coord peer1 dump recv mrtd traffic $TRAFFIC
-    $TEST_FUNCS coord peer1 dump sent mrtd traffic $TRAFFIC
+    $TEST_FUNCS coord peer1 dump recv mrtd ipv4 traffic $TRAFFIC
+    $TEST_FUNCS coord peer1 dump sent mrtd ipv4 traffic $TRAFFIC
     sleep 1
 
     $TEST_FUNCS coord peer1 establish AS 65008 holdtime 0 id 192.150.187.78
