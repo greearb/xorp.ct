@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_deletion.hh,v 1.4 2004/02/06 22:44:11 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_deletion.hh,v 1.5 2004/02/11 08:48:48 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_DELETION_HH__
 #define __RIB_RT_TAB_DELETION_HH__
@@ -33,7 +33,7 @@ class EventLoop;
 template<class A>
 class DeletionTable : public RouteTable<A> {
 public:
-    /** 
+    /**
      * DeletionTable constructor.
      *
      * @param tablename used for debugging.
@@ -41,7 +41,7 @@ public:
      * @param ip_route_trie the entire route trie from the OriginTable
      * that contains routes we're going to delete (as a background task).
      */
-    DeletionTable(const string& tablename, 
+    DeletionTable(const string& tablename,
 		  RouteTable<A>* parent,
 		  Trie<A,  const IPRouteEntry<A>* >* ip_route_trie,
 		  EventLoop& eventloop);
@@ -102,7 +102,7 @@ public:
      * length) route in the union of the DeletionTable and the
      * upstream tables that matches this address, along with the
      * RouteRange information for this address and route.
-     * 
+     *
      * @see RouteRange
      * @param addr the IP address to look up.
      * @return a pointer to a RouteRange class instance containing the
@@ -113,7 +113,7 @@ public:
 
     /**
      * Delete a route, and reschedule background_deletion_pass again
-     * on a zero-second timer until all the routes have been deleted 
+     * on a zero-second timer until all the routes have been deleted
      */
     void background_deletion_pass();
 
@@ -136,6 +136,8 @@ public:
      * Render the DeletionTable as a string for debugging purposes.
      */
     string str() const;
+
+    RouteTable* parent() { return _parent; }
 
 private:
     RouteTable<A>*	_parent;
