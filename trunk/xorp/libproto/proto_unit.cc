@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_unit.cc,v 1.2 2003/03/10 23:20:20 hodson Exp $"
+#ident "$XORP: xorp/libproto/proto_unit.cc,v 1.3 2003/03/18 02:44:34 pavlin Exp $"
 
 
 //
@@ -47,7 +47,10 @@ static const char *_xorp_module_name[][2] = {
     { "BGP_4",			"BGP_6"		},	// 7
     { "OSPF_4",			"OSPF_6"	},	// 8
     { "RIP_4",			"RIP_6"		},	// 9
-    { "CLI",			"CLI"		}	// 10
+    { "CLI",			"CLI"		},	// 10
+    { "RIB",			"RIB"		},	// 11
+    { "RTRMGR",			"RTRMGR"	},	// 12
+    { "XORP_MODULE_UNKNOWN",	"XORP_MODULE_UNKNOWN" }
 };
 
 //

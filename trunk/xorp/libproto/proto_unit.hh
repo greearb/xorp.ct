@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_unit.hh,v 1.2 2003/03/10 23:20:20 hodson Exp $
+// $XORP: xorp/libproto/proto_unit.hh,v 1.3 2003/03/18 02:44:34 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_UNIT_HH__
@@ -54,6 +54,8 @@ enum xorp_module_id {
     XORP_MODULE_OSPF		= 8,
     XORP_MODULE_RIP		= 9,
     XORP_MODULE_CLI		= 10,
+    XORP_MODULE_RIB		= 11,
+    XORP_MODULE_RTRMGR		= 12,
     XORP_MODULE_MAX
 };
 
