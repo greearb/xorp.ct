@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.12 2004/09/02 22:45:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.13 2004/09/03 03:46:32 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -71,10 +71,14 @@ RoutingSocket::stop()
     return (XORP_ERROR);
 }
 
-void
-RoutingSocket::force_read()
+int
+RoutingSocket::force_read(string& errmsg)
 {
     XLOG_UNREACHABLE();
+
+    errmsg = "method not supported";
+
+    return (XORP_ERROR);
 }
 
 #else // HAVE_ROUTING_SOCKETS
@@ -141,8 +145,8 @@ RoutingSocket::write(const void* data, size_t nbytes)
     return ::write(_fd, data, nbytes);
 }
 
-void
-RoutingSocket::force_read()
+int
+RoutingSocket::force_read(string& errmsg)
 {
     vector<uint8_t> message;
     vector<uint8_t> buffer(RTSOCK_BYTES);
@@ -166,9 +170,9 @@ RoutingSocket::force_read()
 	if (got < 0) {
 	    if (errno == EINTR)
 		continue;
-	    XLOG_ERROR("Routing socket read error: %s", strerror(errno));
-	    shutdown();
-	    return;
+	    errmsg = c_format("Routing socket read error: %s",
+			      strerror(errno));
+	    return (XORP_ERROR);
 	}
 	message.resize(message.size() + got);
 	memcpy(&message[off], &buffer[0], got);
@@ -188,11 +192,12 @@ RoutingSocket::force_read()
 	//
 	if ((off - last_mh_off)
 	    < (ssize_t)(sizeof(u_short) + 2 * sizeof(u_char))) {
-	    XLOG_ERROR("Routing socket read failed: message truncated: "
-		       "received %d bytes instead of (at least) %u bytes",
-		       got, (uint32_t)(sizeof(u_short) + 2 * sizeof(u_char)));
-	    shutdown();
-	    return;
+	    errmsg = c_format("Routing socket read failed: message truncated: "
+			      "received %d bytes instead of (at least) %u "
+			      "bytes",
+			      got,
+			      (uint32_t)(sizeof(u_short) + 2 * sizeof(u_char)));
+	    return (XORP_ERROR);
 	}
 
 	//
@@ -217,14 +222,21 @@ RoutingSocket::force_read()
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
 	(*i)->rtsock_data(&message[0], message.size());
     }
+
+    return (XORP_OK);
 }
 
 void
 RoutingSocket::select_hook(int fd, SelectorMask m)
 {
+    string errmsg;
+
     XLOG_ASSERT(fd == _fd);
     XLOG_ASSERT(m == SEL_RD);
-    force_read();
+    if (force_read(errmsg) != XORP_OK) {
+	XLOG_ERROR("Error force_read() from routing socket: %s",
+		   errmsg.c_str());
+    }
 }
 
 #endif // HAVE_ROUTING_SOCKETS
@@ -294,15 +306,18 @@ RoutingSocketReader::~RoutingSocketReader()
  *
  * @param rs the routing socket to receive the data from.
  * @param seqno the sequence number of the data to receive.
+ * @param errmsg the error message (if an error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-RoutingSocketReader::receive_data(RoutingSocket& rs, uint32_t seqno)
+RoutingSocketReader::receive_data(RoutingSocket& rs, uint32_t seqno,
+				  string& errmsg)
 {
     _cache_seqno = seqno;
     _cache_valid = false;
     while (_cache_valid == false) {
-	rs.force_read();
+	if (rs.force_read(errmsg) != XORP_OK)
+	    return (XORP_ERROR);
     }
 
     return (XORP_OK);
