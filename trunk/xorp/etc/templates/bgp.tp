@@ -19,7 +19,7 @@ protocols {
   bgp {
     %modinfo: provides bgp;
     %modinfo: depends rib;
-    %modinfo: path "../bgp/xorp_bgp";
+    %modinfo: path "bgp/xorp_bgp";
     %modinfo: statusmethod xrl;
     %modinfo: shutdownmethod xrl;
     bgp-id {

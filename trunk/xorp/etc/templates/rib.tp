@@ -1,9 +1,9 @@
-/* $XORP: xorp/etc/templates/rib.tp,v 1.5 2003/05/30 02:42:57 mjh Exp $ */
+/* $XORP: xorp/etc/templates/rib.tp,v 1.6 2003/07/17 00:28:33 pavlin Exp $ */
 
 plumbing rib {
   %modinfo: provides rib;
   %modinfo: depends fea;
-  %modinfo: path "../rib/xorp_rib";
+  %modinfo: path "rib/xorp_rib";
   %modinfo: statusmethod xrl;
   %modinfo: shutdownmethod xrl;
 }
