@@ -1,193 +1,222 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.22 2004/05/08 11:59:13 mjh Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.23 2004/05/11 00:44:35 atanu Exp $ */
 
 protocols {
-  bgp {
-    targetname: text = "bgp";
-    bgp-id: ipv4;
-    local-as: uint;
+    bgp {
+	targetname: text = "bgp";
+	bgp-id: ipv4;
+	local-as: uint;
 
-    peer @: text {
-      peer-port: uint = 179;
-      local-port: uint = 179;
-      local-ip: text = "";
-      as: uint;
-      next-hop: ipv4;
-      holdtime: uint=120;
-      disable: bool = false;
+	peer @: text {
+	    peer-port: uint = 179;
+	    local-port: uint = 179;
+	    local-ip: text = "";
+	    as: uint;
+	    next-hop: ipv4;
+	    holdtime: uint=120;
+	    disable: bool = false;
+	}
+
+	/*
+	 * Originate IPv4 routes
+	 */
+	network4 @: ipv4_prefix {
+	    next-hop:ipv4;
+	    unicast:bool = true;		/* Default unicast */
+	    multicast:bool = false;
+	}
+
+	/*
+	 * Originate IPv6 routes
+	 */
+	network6 @: ipv6_prefix {
+	    next-hop:ipv6;
+	    unicast:bool = true;		/* Default unicast */
+	    multicast:bool = false;
+	}
     }
-
-    /*
-     * Originate IPv4 routes
-     */
-    network4 @: ipv4_prefix {
-	next-hop:ipv4;
-	unicast:bool = true;		/* Default unicast */
-	multicast:bool = false;
-    }
-
-    /*
-     * Originate IPv6 routes
-     */
-    network6 @: ipv6_prefix {
-	next-hop:ipv6;
-	unicast:bool = true;		/* Default unicast */
-	multicast:bool = false;
-    }
-
-  }
 }
 
 protocols {
-  bgp {
-    %modinfo: provides bgp;
-    %modinfo: depends rib;
-    %modinfo: path "bgp/xorp_bgp";
-    %modinfo: default_targetname "bgp";
-    %modinfo: statusmethod xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
-    %modinfo: shutdownmethod xrl "$(bgp.targetname)/common/0.1/shutdown";
-    %mandatory: bgp-id;
-    %mandatory: local-as;
-    targetname {
-      %set:;
+    bgp {
+	%modinfo: provides bgp;
+	%modinfo: depends rib;
+	%modinfo: path "bgp/xorp_bgp";
+	%modinfo: default_targetname "bgp";
+	%modinfo: statusmethod xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdownmethod xrl "$(bgp.targetname)/common/0.1/shutdown";
+
+	%mandatory: bgp-id;
+	%mandatory: local-as;
+
+	targetname {
+	    %set:;
+	}
+
+	bgp-id {
+	    %set: xrl "$(bgp.targetname)/bgp/0.2/set_bgp_id?id:ipv4=$(@)";
+	    %get: xrl "$(bgp.targetname)/bgp/0.2/get_bgp_id->id:ipv4";
+	}
+
+	local-as {
+	    %set: xrl "$(bgp.targetname)/bgp/0.2/set_local_as?as:u32=$(@)";
+	    %get: xrl "$(bgp.targetname)/bgp/0.2/get_local_as->as:u32";
+	}
+
+	peer @ {
+	    %mandatory: as;
+	    %mandatory: next-hop;
+	    %mandatory: local-port;
+	    %mandatory: peer-port;
+	    %mandatory: local-ip;
+
+	    %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
+	    %activate: xrl "$(bgp.targetname)/bgp/0.2/activate?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
+	    peer-port {
+		%set:;
+	    }
+
+	    local-port {
+		%set:;
+	    }
+
+	    local-ip {
+		%set:;
+	    }
+
+	    as {
+		%set:;
+	    }
+
+	    holdtime {
+		%set:;
+	    }
+
+	    next-hop {
+		%set:;
+	    }
+
+	    disable {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
+	    }
+
+	    set-parameter {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=$(@)";
+	    }
+
+	    enable-ipv4-multicast {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Multicast";
+	    }
+
+	    enable-ipv6-unicast {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Unicast";
+	    }
+
+	    enable-ipv6-multicast {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast";
+	    }
+	}
+
+	network4 @: ipv4_prefix {
+	    %mandatory: next-hop;
+
+	    %activate: xrl "$(bgp.targetname)/bgp/0.2/originate_route4?nlri:ipv4net=$(@)&next_hop:ipv4=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/withdraw_route4?nlri:ipv4net=$(@)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
+
+	    next-hop {
+		%set:;
+	    }
+
+	    unicast {
+		%set:;
+	    }
+
+	    multicast {
+		%set:;
+	    }
+	}
+
+	network6 @: ipv6_prefix {
+	    %mandatory: next-hop;
+
+	    %activate: xrl "$(bgp.targetname)/bgp/0.2/originate_route6?nlri:ipv6net=$(@)&next_hop:ipv6=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/withdraw_route6?nlri:ipv6net=$(@)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
+
+	    next-hop {
+		%set:;
+	    }
+
+	    unicast {
+		%set:;
+	    }
+
+	    multicast {
+		%set:;
+	    }
+	}
     }
-    bgp-id {
-      %set: xrl "$(bgp.targetname)/bgp/0.2/set_bgp_id?id:ipv4=$(@)";
-      %get: xrl "$(bgp.targetname)/bgp/0.2/get_bgp_id->id:ipv4";
-    }
-    local-as {
-      %set: xrl "$(bgp.targetname)/bgp/0.2/set_local_as?as:u32=$(@)";
-      %get: xrl "$(bgp.targetname)/bgp/0.2/get_local_as->as:u32";
-    }
-    peer @ {
-      %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
-      %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
-      %activate: xrl "$(bgp.targetname)/bgp/0.2/activate?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
-      %mandatory: as;
-      %mandatory: next-hop;
-      %mandatory: local-port;
-      %mandatory: peer-port;
-      %mandatory: local-ip;
-      peer-port {
-	%set:; /*the no-op set is to indicate that this node can be set, but 	           not changed*/
-      }
-      local-port {
-	%set:;
-      }
-      local-ip {
-	%set:;
-      }
-      as {
-	%set:;
-      }
-      holdtime {
-	%set:;
-      }
-      next-hop {
-	%set:;
-      }
-      disable {
-	%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
-      }
-      set-parameter {
-	%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=$(@)";
-      }
-      enable-ipv4-multicast {
-        %set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Multicast";
-      }
-      enable-ipv6-unicast {
-        %set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Unicast";
-      }
-      enable-ipv6-multicast {
-        %set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast";
-      }
-    }
-
-    network4 @: ipv4_prefix {
-      %mandatory: next-hop;
-
-      %activate: xrl "$(bgp.targetname)/bgp/0.2/originate_route4?nlri:ipv4net=$(@)&next_hop:ipv4=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
-      %delete: xrl "$(bgp.targetname)/bgp/0.2/withdraw_route4?nlri:ipv4net=$(@)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
-
-      next-hop {
-	%set:;
-      }
-
-      unicast {
-	%set:;
-      }
-
-      multicast {
-	%set:;
-      }
-    }
-
-    network6 @: ipv6_prefix {
-      %mandatory: next-hop;
-
-      %activate: xrl "$(bgp.targetname)/bgp/0.2/originate_route6?nlri:ipv6net=$(@)&next_hop:ipv6=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
-      %delete: xrl "$(bgp.targetname)/bgp/0.2/withdraw_route6?nlri:ipv6net=$(@)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
-
-      next-hop {
-	%set:;
-      }
-
-      unicast {
-	%set:;
-      }
-
-      multicast {
-	%set:;
-      }
-    }
-
-  }
 }
 
 protocols {
-  %help: short "Configure routing protocols";
-  %help: long "The protocols grouping in the router configuration groups together all the \n configuration information for routing protocols.\nTyping protocols { as a command will start direct entry mode, whereby the \nrouter configuration can be entered.";
-  bgp {
-    %help: short "Configure BGP inter-domain routing";
-    targetname {
-    }
-    bgp-id {
-      %help: short "Set the BGP identifier (must be an IPv4 address)";
-    }
-    local-as {
-      %help: short "Set the Autonomous System (AS) number for this domain";
-    }
-    peer @ {
-      %help: short "Configure a peering session with another router.";
-      peer-port {
-	%help: short "Set the TCP port used by on the remote router.";
-      }
-      local-port {
-	%help: short "Set the TCP port used by BGP on this router.";
-      }
-      local-ip {
-	%help: short "Set the IP address on this router to use for this peering.";
-      }
-      as {
-        %help: short "Set the AS number of this peer.";
-      }
-      holdtime {
-	%help: short "Set the length of time before idle timeout.";
-      }
-      next-hop {
-	%set:;
-      }
-      disable {
-	%help: short "Disable this peering";
-      }
-      set-parameter {
-      }
-      enable-ipv4-multicast {
-      }
-      enable-ipv6-unicast {
-      }
-      enable-ipv6-multicast {
-      }
-    }
-  }
-}
+    %help: short "Configure routing protocols";
+    %help: long "The protocols grouping in the router configuration groups together all the \n configuration information for routing protocols.\nTyping protocols { as a command will start direct entry mode, whereby the \nrouter configuration can be entered.";
 
+    bgp {
+	%help: short "Configure BGP inter-domain routing";
+
+	targetname {
+	}
+
+	bgp-id {
+	    %help: short "Set the BGP identifier (must be an IPv4 address)";
+	}
+
+	local-as {
+	    %help: short "Set the Autonomous System (AS) number for this domain";
+	}
+
+	peer @ {
+	    %help: short "Configure a peering session with another router.";
+
+	    peer-port {
+		%help: short "Set the TCP port used by on the remote router.";
+	    }
+
+	    local-port {
+		%help: short "Set the TCP port used by BGP on this router.";
+	    }
+
+	    local-ip {
+		%help: short "Set the IP address on this router to use for this peering.";
+	    }
+
+	    as {
+		%help: short "Set the AS number of this peer.";
+	    }
+
+	    holdtime {
+		%help: short "Set the length of time before idle timeout.";
+	    }
+
+	    next-hop {
+		%set:;
+	    }
+
+	    disable {
+		%help: short "Disable this peering";
+	    }
+
+	    set-parameter {
+	    }
+
+	    enable-ipv4-multicast {
+	    }
+
+	    enable-ipv6-unicast {
+	    }
+
+	    enable-ipv6-multicast {
+	    }
+	}
+    }
+}

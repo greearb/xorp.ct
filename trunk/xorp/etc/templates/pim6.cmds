@@ -1,74 +1,74 @@
-/* $XORP: xorp/etc/templates/fea.cmds,v 1.4 2004/02/01 02:09:37 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pim6.cmds,v 1.1 2004/05/05 07:11:32 pavlin Exp $ */
 
 /* TODO: "show pim6" is temporary here just for the sake of the HELP string */
 show pim6 {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about IPv6 PIM";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about IPv6 PIM";
 }
 
 show pim6 bootstrap {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about PIM IPv6 bootstrap routers";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about PIM IPv6 bootstrap routers";
 }
 
 show pim6 bootstrap rps {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about PIM IPv6 bootstrap RPs";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about PIM IPv6 bootstrap RPs";
 }
 
 show pim6 interface {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about PIM IPv6 interfaces";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about PIM IPv6 interfaces";
 }
 
 show pim6 interface address {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about addresses of PIM IPv6 interfaces";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about addresses of PIM IPv6 interfaces";
 }
 
 show pim6 join {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about PIM IPv6 groups";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about PIM IPv6 groups";
 }
 
 show pim6 join all {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about all PIM IPv6 groups";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about all PIM IPv6 groups";
 }
 
 show pim6 mfc {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about PIM Multicast Forwarding Cache";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about PIM Multicast Forwarding Cache";
 }
 
 show pim6 mrib {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display MRIB IPv6 information inside PIM";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display MRIB IPv6 information inside PIM";
 }
 
 show pim6 neighbors {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about PIM IPv6 neighbors";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about PIM IPv6 neighbors";
 }
 
 show pim6 rps {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about PIM IPv6 RPs";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about PIM IPv6 RPs";
 }
 
 show pim6 scope {
-	%command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
-	%module: pimsm6;
-	%tag: HELP "Display information about PIM IPv6 scope zones";
+    %command: "cli/tools/send_cli_processor_xrl -t PIMSM_6" %help: HELP;
+    %module: pimsm6;
+    %tag: HELP "Display information about PIM IPv6 scope zones";
 }

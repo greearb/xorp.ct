@@ -1,14 +1,14 @@
 /* $XORP: xorp/etc/templates/bgp.cmds,v 1.3 2003/11/17 22:10:44 pavlin Exp $ */
 
 show bgp peers {
-	%command: "bgp/tools/xorpsh_print_peers" %help: "Show BGP peers info";
-	%module: bgp;
-	%opt_parameter: "detail" %help: "Show detailed BGP peers info";
+    %command: "bgp/tools/xorpsh_print_peers" %help: "Show BGP peers info";
+    %module: bgp;
+    %opt_parameter: "detail" %help: "Show detailed BGP peers info";
 }
 
 show bgp routes {
-	%command: "bgp/tools/xorpsh_print_routes" %help: "Print BGP routes";
-	%module: bgp;
-	%opt_parameter: "summary" %help: "Print summary of BGP routes";
-	%opt_parameter: "detail" %help: "Print detailed BGP routes";
+    %command: "bgp/tools/xorpsh_print_routes" %help: "Print BGP routes";
+    %module: bgp;
+    %opt_parameter: "summary" %help: "Print summary of BGP routes";
+    %opt_parameter: "detail" %help: "Print detailed BGP routes";
 }

@@ -1,58 +1,61 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.5 2004/05/13 00:01:55 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.6 2004/05/13 00:05:31 pavlin Exp $ */
 
 
 interfaces {
-  interface fxp0 {
-    description: "control interface"
-    /* default_system_config */
-    vif fxp0 {
-      address 192.150.187.100 {
-	prefix-length: 24
-	broadcast: 192.150.187.255
-      }
+    interface fxp0 {
+	description: "control interface"
+	/* default-system-config */
+	vif fxp0 {
+	    address 192.150.187.100 {
+		prefix-length: 24
+		broadcast: 192.150.187.255
+	    }
+	}
     }
-  }
 }
 
 fea {
-    enable_unicast_forwarding4: true
-    /* enable_unicast_forwarding6: true */
+    enable-unicast-forwarding4: true
+    /* enable-unicast-forwarding6: true */
 }
 
 /*
 protocols {
-  ospf {
-    router-id: 192.150.187.20
-    area 0.0.0.0 {
-      stub: false
-      interface xl0 {
-	hello-interval: 5
-      }
+    ospf {
+	router-id: 192.150.187.20
+	area 0.0.0.0 {
+	    stub: false
+	    interface xl0 {
+		hello-interval: 5
+	    }
+	}
     }
-  }
 }
 */
 
 protocols {
-  bgp {
-    bgp-id: 192.150.187.100
-    local-as: 65002
-    peer xorp-c4000 {
-      local-ip: 192.150.187.100
-      peer-ip: 192.150.187.109
-      as: 65000
-      holdtime: 90
-      next-hop: 192.150.187.100
+    bgp {
+	bgp-id: 192.150.187.100
+	local-as: 65002
+
+	peer xorp-c4000 {
+	    local-ip: 192.150.187.100
+	    peer-ip: 192.150.187.109
+	    as: 65000
+	    holdtime: 90
+	    next-hop: 192.150.187.100
+	}
+
+	network4 192.150.187.100/25 {
+	    next-hop: 192.150.187.100
+	    unicast: true
+	    multicast: true
+	}
+
+	network6 20:20:20:20::/64 {
+	    next-hop: 30:30:30:30:30:30:30:30
+	    unicast: true
+	    multicast: true
+	}
     }
-    network4 192.150.187.100/25 {
-      next-hop: 192.150.187.100
-      unicast: true
-      multicast: true
-    }
-    network6 20:20:20:20::/64 {
-      next-hop: 30:30:30:30:30:30:30:30
-      unicast: true
-      multicast: true
-    }
-  }
 }

@@ -2,35 +2,31 @@
  * RIPng attribute descriptions
  */
 
-protocols
-{
-    ripng
-    {
-        targetname: text = "ripng";
-	interface @: text
-	{
-	    vif @: text
-	    {
-		address @: ipv6
-		{
+protocols {
+    ripng {
+	targetname: text = "ripng";
+	interface @: text {
+	    vif @: text {
+		address @: ipv6 {
 		    cost:			uint	=   1;
 		    horizon:			text    = "split-horizon-poison-reverse" ;
 		    enabled:			bool	= false ;
 		    passive:			bool	= false ;
-		    accept_non_rip_requests:	bool	= true ;
-		    accept_default_route:	bool	= false ;
-		    advertise_default_route:	bool	= false ;
-		    route_expiry_secs:		uint	= 180 ;
-		    route_deletion_secs:	uint	= 120 ;
-		    triggered_update_min_secs:	uint	=   1 ;
-		    triggered_update_max_secs:	uint	=   5 ;
-		    table_announce_min_secs:	uint	=  25 ;
-		    table_announce_max_secs:	uint	=  35 ;
-		    table_request_secs:		uint    =   1 ;
-		    interpacket_delay_msecs:	uint	=  50 ;
+		    accept-non-rip-requests:	bool	= true ;
+		    accept-default-route:	bool	= false ;
+		    advertise-default-route:	bool	= false ;
+		    route-expiry-secs:		uint	= 180 ;
+		    route-deletion-secs:	uint	= 120 ;
+		    triggered-update-min-secs:	uint	=   1 ;
+		    triggered-update-max-secs:	uint	=   5 ;
+		    table-announce-min-secs:	uint	=  25 ;
+		    table-announce-max-secs:	uint	=  35 ;
+		    table-request-secs:		uint    =   1 ;
+		    interpacket-delay-msecs:	uint	=  50 ;
 		}
 	    }
 	}
+
 	import @: text {
 	    cost:uint = 1 ;
 	    tag:uint  = 0 ;
@@ -41,8 +37,7 @@ protocols
 /*
  * RIPNG attribute manipulation.
  */
-protocols
-{
+protocols {
     ripng {
 	%modinfo:	provides		ripng;
 	%modinfo:	depends			rib;
@@ -50,81 +45,99 @@ protocols
 	%modinfo:	default_targetname	"ripng";
 	%modinfo:	statusmethod xrl	"$(ripng.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdownmethod xrl	"$(ripng.targetname)/common/0.1/shutdown";
+
 	interface @ {
 	    vif @ {
 		address @ {
 		    %create: xrl "$(ripng.targetname)/ripng/0.1/add_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)" ;
 		    %delete: xrl "$(ripng.targetname)/ripng/0.1/remove_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)" ;
+
 		    enabled {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&enabled:bool=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->enabled:bool" ;
 		    }
+
 		    cost {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&cost:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->cost:u32" ;
 		    }
+
 		    horizon {
 			%allow: $(@) "none" "split-horizon" "split-horizon-poison-reverse" ;
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&horizon:txt=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->horizon:txt" ;
 		    }
+
 		    passive {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&passive:bool=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->passive:bool" ;
 		    }
-		    accept_non_ripng_requests {
+
+		    accept-non-ripng-requests {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_accept_non_rip_requests?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&accept:bool=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/accept_non_rip_requests?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->accept:bool" ;
 		    }
-		    accept_default_route {
+
+		    accept-default-route {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_accept_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&accept:bool=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/accept_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->accept:bool" ;
 		    }
-		    advertise_default_route {
+
+		    advertise-default-route {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_advertise_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&advertise:bool=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/advertise_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->advertise:bool" ;
 		    }
-		    route_expiry_secs {
+
+		    route-expiry-secs {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_route_expiry_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/route_expiry_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
 		    }
-		    route_deletion_secs {
+
+		    route-deletion-secs {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_route_deletion_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/route_deletion_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
 		    }
-		    trigger_update_min_secs {
+
+		    trigger-update-min-secs {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_triggered_update_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/triggered_update_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
 		    }
-		    trigger_update_max_secs {
+
+		    trigger-update-max-secs {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_triggered_update_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/triggered_update_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
 		    }
-		    table_announce_min_secs {
+
+		    table-announce-min-secs {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_unsolicited_response_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/unsolicited_response_min_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
 		    }
-		    table_announce_max_secs {
+
+		    table-announce-max-secs {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_unsolicited_response_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/unsolicited_response_max_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
 		    }
-		    table_request_secs {
+
+		    table-request-secs {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_table_request_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_secs:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/table_request_seconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_secs:u32" ;
 		    }
-		    interpacket_delay_msecs {
+
+		    interpacket-delay-msecs {
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_interpacket_delay_milliseconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&t_msecs:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/interpacket_delay_milliseconds?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->t_msecs:u32" ;
 		    }
+
 		    status {
-		        %get: xrl "$(ripng.targetname)/ripng/0.1/rip_address_status?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->status:txt=$(@)" ;
+			%get: xrl "$(ripng.targetname)/ripng/0.1/rip_address_status?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->status:txt=$(@)" ;
 		    }
 		}
 	    }
 	}
+
 	import @: text {
-	       %activate: xrl "$(ripng.targetname)/ripng/0.1/import_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.cost)&tag:u32=$(@.tag)";
-	       %delete: xrl "$(ripng.targetname)/ripng/0.1/no_import_protocol_routes?protocol_name:txt=$(@)";
+		%activate: xrl "$(ripng.targetname)/ripng/0.1/import_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.cost)&tag:u32=$(@.tag)";
+		%delete: xrl "$(ripng.targetname)/ripng/0.1/no_import_protocol_routes?protocol_name:txt=$(@)";
 	}
     }
 }

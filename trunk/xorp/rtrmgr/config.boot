@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot,v 1.16 2004/05/13 00:01:55 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot,v 1.17 2004/05/13 00:05:31 pavlin Exp $ */
 
 /* router config file for tinderbox test on xorp8 */ 
 
@@ -8,67 +8,68 @@
  */
 
 interfaces {
-  interface rl0 {
-    description: "control interface"
-    /* default_system_config */
-    vif rl0 {
-      address 192.150.187.108 {
-	prefix-length: 25
-	broadcast: 192.150.187.255
-      }
+    interface rl0 {
+	description: "control interface"
+	/* default-system-config */
+	vif rl0 {
+	    address 192.150.187.108 {
+		prefix-length: 25
+		broadcast: 192.150.187.255
+	    }
+	}
     }
-  }
 }
 
 fea {
-    enable_unicast_forwarding4: true
-    /* enable_unicast_forwarding6: true */
+    enable-unicast-forwarding4: true
+    /* enable-unicast-forwarding6: true */
 }
 
 /*
 protocols {
-  static_routes {
-    route4 10.10.0.0/16 {
-      nexthop: 192.150.187.108
+    static {
+	route4 10.10.0.0/16 {
+	    nexthop: 192.150.187.108
+	}
+
+	route4 10.20.0.0/16 {
+	    nexthop: 192.150.187.108
+	    metric: 10
+	}
     }
-    route4 10.20.0.0/16 {
-      nexthop: 192.150.187.108
-      metric: 10
-    }
-  }
 }
 */
 
 /*
 protocols {
-  ospf {
-    router-id: 192.150.187.20
-    area 0.0.0.0 {
-      stub: false
-      interface xl0 {
-	hello-interval: 5
-      }
+    ospf {
+	router-id: 192.150.187.20
+	area 0.0.0.0 {
+	    stub: false
+	    interface xl0 {
+		hello-interval: 5
+	    }
+	}
     }
-  }
 }
 */
 
 protocols {
-  bgp {
-    bgp-id: 192.150.187.108
-    local-as: 65017
-    peer 192.150.187.109 {
-      local-ip: 192.150.187.108
-      as: 65000
-      holdtime: 90
-      next-hop: 192.150.187.108
+    bgp {
+	bgp-id: 192.150.187.108
+	local-as: 65017
+	peer 192.150.187.109 {
+	    local-ip: 192.150.187.108
+	    as: 65000
+	    holdtime: 90
+	    next-hop: 192.150.187.108
 
-      enable-ipv4-multicast
+	    enable-ipv4-multicast
 
-      enable-ipv6-unicast
-      enable-ipv6-multicast
+	    enable-ipv6-unicast
+	    enable-ipv6-multicast
+	}
     }
-  }
 }
 
 /*
@@ -78,10 +79,10 @@ protocols {
 
 /* 
 protocols {
-  snmp {
-    mib-module bgp4_mib_1657 {
-      abs-path: "/home/panther/u0/jcardona/nobackup/cvs/xorp/mibs/bgp4_mib_1657.so"
+    snmp {
+	mib-module bgp4_mib_1657 {
+	    abs-path: "/home/panther/u0/jcardona/nobackup/cvs/xorp/mibs/bgp4_mib_1657.so"
+	}
     }
-  }
 }
 */
