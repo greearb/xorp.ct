@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.2 2003/03/29 19:03:11 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.3 2003/05/07 21:58:13 pavlin Exp $
 ##
 
 ###############################################################################
@@ -57,6 +57,16 @@ libfearawpktclient_a_SOURCES += fea_rawpkt_client_xif.cc
 # Finder Interface
 noinst_LIBRARIES += libfinderxif.a
 libfinderxif_a_SOURCES = finder_xif.hh finder_xif.cc
+
+# Finder Event Notifier Interface
+noinst_LIBRARIES += libfindereventnotifierxif.a
+libfindereventnotifierxif_a_SOURCES  = finder_event_notifier_xif.hh
+libfindereventnotifierxif_a_SOURCES += finder_event_notifier_xif.cc
+
+# Finder Event Observer Interface
+noinst_LIBRARIES += libfindereventobserverxif.a
+libfindereventobserverxif_a_SOURCES  = finder_event_observer_xif.hh
+libfindereventobserverxif_a_SOURCES += finder_event_observer_xif.cc
 
 # Finder Client Interface (client of Finder)
 noinst_LIBRARIES += libfinderclientxif.a

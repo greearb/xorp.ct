@@ -1,0 +1,29 @@
+/**
+ * An interface supported by Finder to pass on notifications through
+ * Xrl interfaces of Finder events.  The events supported are Xrl target
+ * birth and death events.
+ *
+ * Processes registering interest through this interface are expected to
+ * support finder_event_observer/0.1.
+ */
+interface finder_event_notifier/0.1 {
+	/**
+	 * Register interest in all events.
+	 */
+	register_all_event_interest ? requester_instance:txt
+
+	/**
+	 * Deregister interest in all events.
+	 */
+	deregister_all_event_interest ? requester_instance:txt
+
+	/**
+	 * Register interest in events relating to a particular class.
+	 */
+	register_class_event_interest ? requester_instance:txt & class_name:txt
+
+	/**
+	 * Deregister interest in events relating to a particular class.
+	 */
+	deregister_class_event_interest ? requester_instance:txt & class_name:txt
+}

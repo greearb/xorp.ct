@@ -1,6 +1,7 @@
+##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.2 2003/03/29 19:03:12 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.3 2003/05/07 21:58:14 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_builddir)/xrl/interfaces
@@ -59,7 +60,9 @@ fea_base.hh: $(INTERFACES_DIR)/common.xif 				\
 
 # Finder
 libfinderbase_a_SOURCES = finder_base.hh finder_base.cc
-finder_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/finder.xif
+finder_base.hh: $(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/finder.xif				\
+		$(INTERFACES_DIR)/finder_event_notifier.xif
 
 # Finder client
 libfinderclientbase_a_SOURCES = finder_client_base.hh finder_client_base.cc
@@ -106,14 +109,13 @@ rtrmgr_base.hh:	$(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/rtrmgr.xif
 
 # TEST PEER
 libtestpeerbase_a_SOURCES = test_peer_base.hh test_peer_base.cc
-test_peer_base.hh: $(INTERFACES_DIR)/common.xif \
+test_peer_base.hh: $(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
 
 # XORPSH
 libxorpshbase_a_SOURCES = xorpsh_base.hh xorpsh_base.cc
-xorpsh_base.hh:	$(INTERFACES_DIR)/common.xif \
+xorpsh_base.hh:	$(INTERFACES_DIR)/common.xif				\
 	$(INTERFACES_DIR)/rtrmgr_client.xif
-
 
 # Add your target's library sources like this:
 # Test target

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.6 2003/04/03 00:24:01 hodson Exp $"
+#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.7 2003/04/23 20:50:51 hodson Exp $"
 
 #include <iostream>
 
@@ -47,7 +47,7 @@ run_test()
 
     bool timeout = false;
     XorpTimer t = e.set_flag_after_ms(2000, &timeout);
-    while (tgt_router.connected() == false && clnt_router.connected() == false)
+    while (tgt_router.ready() == false && clnt_router.ready() == false)
 	e.run();
 
     if (timeout) {

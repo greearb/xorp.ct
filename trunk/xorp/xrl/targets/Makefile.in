@@ -524,7 +524,9 @@ fea_base.hh: $(INTERFACES_DIR)/common.xif 				\
 	     $(INTERFACES_DIR)/fea_ifmgr.xif				\
              $(INTERFACES_DIR)/fti.xif					\
 	     $(INTERFACES_DIR)/fea_rawpkt.xif
-finder_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/finder.xif
+finder_base.hh: $(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/finder.xif				\
+		$(INTERFACES_DIR)/finder_event_notifier.xif
 finder_client_base.hh: $(INTERFACES_DIR)/common.xif 			\
                        $(INTERFACES_DIR)/finder_client.xif
 mfea_base.hh: $(INTERFACES_DIR)/common.xif 				\
@@ -544,9 +546,9 @@ pim_base.hh: $(INTERFACES_DIR)/common.xif 				\
 rib_base.hh: $(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/rib.xif
 ribclient_base.hh: $(INTERFACES_DIR)/rib_client.xif
 rtrmgr_base.hh:	$(INTERFACES_DIR)/common.xif $(INTERFACES_DIR)/rtrmgr.xif
-test_peer_base.hh: $(INTERFACES_DIR)/common.xif \
+test_peer_base.hh: $(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
-xorpsh_base.hh:	$(INTERFACES_DIR)/common.xif \
+xorpsh_base.hh:	$(INTERFACES_DIR)/common.xif				\
 	$(INTERFACES_DIR)/rtrmgr_client.xif
 # This is a hack to rebuild files here when interfaces implemented by
 # rib target are touched.  It largely duplicates information inside rib.tgt
