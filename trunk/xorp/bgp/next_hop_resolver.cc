@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.33 2005/01/31 19:16:39 pavlin Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.34 2005/01/31 19:23:03 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -684,9 +684,24 @@ NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net_from_route,
 
 template<class A>
 void
-NextHopRibRequest<A>::deregister_from_rib(const A& base_addr, 
+NextHopRibRequest<A>::deregister_from_rib(const A& base_addr,
 					  uint32_t prefix_len)
 {
+    /*
+    ** Its possible that we are already trying to deregister for this
+    ** addr/prefix. In which case just return.
+    */
+    typename list<RibRequestQueueEntry<A> *>::iterator i = _queue.begin();
+    for ( ;i != _queue.end(); i++) {
+	RibDeregisterQueueEntry<A> *dreg = 
+	    dynamic_cast<RibDeregisterQueueEntry<A> *>(*i);
+	if (dreg) {
+	    if (dreg->base_addr() == base_addr && 
+		dreg->prefix_len() == prefix_len)
+		return;
+	}
+    }
+
     /*
     ** Construct a request.
     */
@@ -868,9 +883,9 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 								lookup_succeeded, m)) {
 		XLOG_ASSERT(rr->new_register() || rr->reregister());
 		/*
-		** See if this request was caused by a downcall from the next hop
-		** table.
-	    */
+		** See if this request was caused by a downcall from
+		** the next hop table.
+		*/
 		if (rr->new_register()) {
 		    NHRequest<A>* request_data = &rr->requests();
 		    /*
@@ -893,10 +908,10 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 		    }
 		}
 		/*
-	    ** See if this request was caused by an upcall from the
-	    ** RIB. If it was then notify decision that this next hop
-	    ** has changed.
-	    */
+		** See if this request was caused by an upcall from the
+		** RIB. If it was then notify decision that this next hop
+		** has changed.
+		*/
 		if (rr->reregister() && 0 != rr->ref_cnt()) {
 		    _next_hop_cache.register_nexthop(rr->nexthop(), rr->ref_cnt());
 		    /*
@@ -913,23 +928,8 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 		break;
 	    }
 	} else {
-	    RibDeregisterQueueEntry<A> *rd
-		= dynamic_cast<RibDeregisterQueueEntry<A> *>(*i);
-	    assert(rd != NULL);
-	    if ((rd->base_addr() == *addr) 
-		&& (rd->prefix_len() == *prefix_len)) {
-		//We got an answer back, and there was a matching
-		//deregister in the queue.  Remove the deregister from
-		//the queue.  It's possible this was actually needed,
-		//but at this point we can't tell for sure.  Later
-		//we'll validate the entry, and back a deregister if
-		//it was needed.
-		delete rd;
-		i = _queue.erase(i);
-	    } else {
-		//skip the deregister
-		i++;
-	    }
+	    //skip the deregister
+	    i++;
 	}
     }
 
@@ -943,11 +943,8 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
     */
     if (!_next_hop_cache.validate_entry(*addr, first_nexthop, *prefix_len,
 					*real_prefix_len)) {
-	RibDeregisterQueueEntry<A> *rd
-	    = new RibDeregisterQueueEntry<A>(*addr, *prefix_len);
-	_queue.push_back(rd);
+	deregister_from_rib(*addr, *prefix_len);
     }
-
 
     /*
     ** There are entries left on the queue, so, fire off another request.
@@ -988,13 +985,50 @@ NextHopRibRequest<A>::premature_invalid(const A& addr,
     if (!_busy)
 	return false;
 
-    XLOG_ASSERT(_busy);
-    XLOG_ASSERT(!_invalid);
+    /*
+    ** An invalid has been received for an entry that we don't have in
+    ** our cache.
+    * 1) The current request may have generated an invalid. Extremely
+    * irritating, we make a request and before receiving the response
+    * we get an invalid from the RIB. In which case set the _invalid
+    * flag and _invalid_net and all should be well.
+    * 2) We receive an invalid for an entry that we are no longer
+    * interested in but the deregister is still in the request queue. In
+    * which case remove the deregister from the queue and continue.
+    */
 
-    _invalid = true;
-    _invalid_net = IPNet<A>(addr, prefix_len);
+    XLOG_ASSERT(!_queue.empty());
+    RibRegisterQueueEntry<A> *first_rr =
+	dynamic_cast<RibRegisterQueueEntry<A> *>(_queue.front());
+    if (first_rr && 
+	(IPNet<A>(addr, prefix_len) ==
+	 IPNet<A>(first_rr->nexthop(), prefix_len))) {
 
-    return true;
+	XLOG_ASSERT(_busy);
+	XLOG_ASSERT(!_invalid);
+
+	_invalid = true;
+	_invalid_net = IPNet<A>(addr, prefix_len);
+
+	return true;
+    }
+
+    typename list<RibRequestQueueEntry<A> *>::iterator i = _queue.begin();
+    for ( ;i != _queue.end(); i++) {
+	RibDeregisterQueueEntry<A> *dreg = 
+	    dynamic_cast<RibDeregisterQueueEntry<A> *>(*i);
+	if (dreg) {
+	    if (dreg->base_addr() == addr && 
+		dreg->prefix_len() == prefix_len) {
+		_queue.erase(i);
+		XLOG_INFO("invalid addr %s prefix len %u matched delete",
+			  cstring(addr), XORP_UINT_CAST(prefix_len));
+		return true;
+	    }
+	}
+    }
+
+    return false;
 }
 
 template<class A>
