@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.10 2003/01/28 20:09:21 rizzo Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.11 2003/01/29 00:38:56 rizzo Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -384,41 +384,29 @@ void
 ASPathAttribute::encode()
 {
     debug_msg("ASPathAttribute encode()\n");
-
-    delete[] _data;
-    uint16_t hdrlen = 0;
-    size_t l;
-    const uint8_t *temp_data;
-
-    // get our copy of the data. Remember to free them when done.
-    // l does not include this header yet.
-    temp_data = _as_path.encode(l);
-    debug_msg("ASPath length is %u\n", (uint32_t)l);
-    uint8_t *data = new uint8_t[l + 4];
-
+    size_t l = _as_path.wire_length();
     if (l > 255)
 	_flags |= Extended;
+    size_t hl = extended() ? 4 : 3;	// header length
+    delete[] _data;
+    uint8_t *d = new uint8_t[l + hl];	// allocate a full buffer.
 
+    _as_path.encode(l, d + hl);		// encode into the buffer
+    debug_msg("ASPath length is %u\n", (uint32_t)l);
     debug_msg("Length %u\n", (uint32_t)l);
 
-    data[0] = flags();
-    data[1] = AS_PATH;
+    d[0] = flags();
+    d[1] = AS_PATH;
 
     if (extended()) {
-	uint16_t temp = htons((uint16_t)l);
-	memcpy(data+2, &temp, 2);
-	hdrlen = 4;
+	d[2] = (l >> 8) & 0xff;
+	d[3] = l & 0xff;
     } else {
-	data[2] = (uint8_t)l;
-	hdrlen = 3;
+	d[2] = l & 0xff;
     }
-
-    memcpy(data+hdrlen, temp_data, l);
-    delete[] temp_data;
-
-    _length = l + hdrlen; // Include header length
+    _length = l + hl;
     debug_msg("ASPath encode: length is %d\n", _length);
-    _data = data;
+    _data = d;
 }
 
 void

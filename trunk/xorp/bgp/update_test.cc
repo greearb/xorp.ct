@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_test.cc,v 1.4 2003/01/28 22:06:59 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_test.cc,v 1.5 2003/01/29 01:05:32 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -22,7 +22,19 @@
 
 #include "packet.hh"
 
+/*
+ * XXX NOTE THAT THIS TEST IS CURRENTLY UNUSED.
+ *
+ * we try to decode a handcrafted update packet.
+ */
 uint8_t buffer[] = {
+	// marker
+	0xff,	0xff,	0xff,	0xff,	0xff,	0xff,	0xff,	0xff,
+	0xff,	0xff,	0xff,	0xff,	0xff,	0xff,	0xff,	0xff,
+
+	0x00,   0x13,	// length (to be filled later)
+	0x02,	// type 2 = update
+#if 0
 	0x00,	0x00,	0x00,	0x32,	0x40,	0x01,	0x01,	0x00,
 	0x40,	0x02,	0x24,	0x02,	0x11,	0xfd,	0xe8,	0xfd,
 	0xec,	0x41,	0x36,	0x00,	0x19,	0x2c,	0x9f,	0x01,
@@ -34,6 +46,7 @@ uint8_t buffer[] = {
 	0x33,	0xef,	0x18,	0xc0,	0xbe,	0xc9,	0x18,	0xc0,
 	0xbe,	0xca,	0x18,	0xc0,	0xc3,	0x69,	0x18,	0xc1,
 	0x20,	0x10,	0x18,	0xc1,	0x20
+#endif
 };
 
 void
@@ -44,9 +57,11 @@ test1(unsigned int as_size)
 	seq1.add_as(AsNum(10));
 
     size_t len;
-    const uint8_t *d = seq1.encode(len);
+    fprintf(stderr, "trying size %d wire_length %d\n",
+	as_size, seq1.wire_length());
+    const uint8_t *d = seq1.encode(len, NULL);
     AsSegment *seq2 = new AsSegment(d);
-    delete d;
+    delete[] d;
 
     AsSegment seq3(*seq2);
     delete seq2;

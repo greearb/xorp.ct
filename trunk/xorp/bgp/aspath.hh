@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.9 2003/01/29 00:38:56 rizzo Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.10 2003/01/29 01:05:32 rizzo Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -170,7 +170,7 @@ public:
      * input buffer, which must be large enough to store the encoding.
      * @return the pointer to the buffer, len is the actual size.
      */
-    const uint8_t *encode(size_t &len, uint8_t *buf = 0) const;
+    const uint8_t *encode(size_t &len, uint8_t *buf) const;
 
     /**
      * @return the length of the list on the wire.
@@ -273,7 +273,7 @@ public:
      * input buffer, which must be large enough to store the encoding.
      * @return the pointer to the buffer, len is the actual size.
      */
-    const uint8_t *encode(size_t &len, uint8_t *buf = 0) const;
+    const uint8_t *encode(size_t &len, uint8_t *buf) const;
 
     /**
      * @return the length of the list on the wire.
