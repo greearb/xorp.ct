@@ -273,7 +273,7 @@ comm_bind_udp6(const struct in6_addr *my_addr, unsigned short my_port)
 
 /**
  * comm_bind_join_udp4:
- * @mcast_addr: The multicast address to bind to and join.
+ * @mcast_addr: The multicast address to join.
  * @join_if_addr: The local unicast interface address (in network order)
  * to join the multicast group on.
  * If it is NULL, the system will choose the interface each
@@ -282,8 +282,16 @@ comm_bind_udp6(const struct in6_addr *my_addr, unsigned short my_port)
  * @reuse_flag: If true, allow other sockets to bind to the same multicast
  * address and port, otherwise disallow it.
  *
- * Open an IPv4 UDP socket on an interface, bind it to a multicast address
- * and a port, and join that multicast group.
+ * Open an IPv4 UDP socket on an interface, bind it to a port,
+ * and join a multicast group.
+ *
+ * Note that we bind to ANY address instead of the multicast address
+ * only. If we bind to the multicast address instead, then using
+ * the same socket for sending multicast packets will trigger a bug
+ * in the FreeBSD kernel: the source IP address will be set to the
+ * multicast address. Hence, the application itself may want to filter
+ * the UDP unicast packets that may have arrived with a destination address
+ * one of the local interface addresses and the same port number.
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
@@ -306,7 +314,7 @@ comm_bind_join_udp4(const struct in_addr *mcast_addr,
 	    XLOG_ERROR("comm_set_reuseport() error: %s", strerror(errno));
     }
     /* Bind the socket */
-    if (comm_sock_bind4(sock, mcast_addr, my_port) < 0)
+    if (comm_sock_bind4(sock, NULL, my_port) < 0)
 	return (XORP_ERROR);
     /* Join the multicast group */
     if (comm_sock_join4(sock, mcast_addr, join_if_addr) < 0)
@@ -318,7 +326,7 @@ comm_bind_join_udp4(const struct in_addr *mcast_addr,
 #ifdef HAVE_IPV6
 /**
  * comm_bind_join_udp6:
- * @mcast_addr: The multicast address to bind to and join.
+ * @mcast_addr: The multicast address to join.
  * @join_if_index: The local unicast interface index to join the multicast
  * group on. If it is 0, the system will choose the interface each
  * time a datagram is sent.
@@ -326,8 +334,16 @@ comm_bind_join_udp4(const struct in_addr *mcast_addr,
  * @reuse_flag: If true, allow other sockets to bind to the same multicast
  * address and port, otherwise disallow it.
  *
- * Open an IPv6 UDP socket on an interface, bind it to a multicast address
- * and a port, and join that multicast group.
+ * Open an IPv6 UDP socket on an interface, bind it to a port,
+ * and join a multicast group.
+ *
+ * Note that we bind to ANY address instead of the multicast address
+ * only. If we bind to the multicast address instead, then using
+ * the same socket for sending multicast packets will trigger a bug
+ * in the FreeBSD kernel: the source IP address will be set to the
+ * multicast address. Hence, the application itself may want to filter
+ * the UDP unicast packets that may have arrived with a destination address
+ * one of the local interface addresses and the same port number.
  *
  * Return value: The new socket on success, otherwise %XORP_ERROR.
  **/
@@ -349,7 +365,7 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr, uint join_if_index,
 	    XLOG_ERROR("comm_set_reuseport() error: %s", strerror(errno));
     }
     /* Bind the socket */
-    if (comm_sock_bind6(sock, mcast_addr, my_port) < 0)
+    if (comm_sock_bind6(sock, NULL, my_port) < 0)
 	return (XORP_ERROR);
     /* Join the multicast group */
     if (comm_sock_join6(sock, mcast_addr, join_if_index) < 0)

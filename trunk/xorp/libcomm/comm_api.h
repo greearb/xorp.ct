@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.2 2003/03/12 22:46:02 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.3 2004/01/16 19:57:25 hodson Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -170,10 +170,18 @@ extern int	comm_bind_udp6(const struct in6_addr *my_addr,
 #endif /* HAVE_IPV6 */
 
 /**
- * Open an IPv4 UDP socket on an interface, bind it to a multicast address
- * and a port, and join that multicast group.
+ * Open an IPv4 UDP socket on an interface, bind it to a port,
+ * and join a multicast group.
  *
- * @param mcast_addr the multicast address to bind to and join.
+ * Note that we bind to ANY address instead of the multicast address
+ * only. If we bind to the multicast address instead, then using
+ * the same socket for sending multicast packets will trigger a bug
+ * in the FreeBSD kernel: the source IP address will be set to the
+ * multicast address. Hence, the application itself may want to filter
+ * the UDP unicast packets that may have arrived with a destination address
+ * one of the local interface addresses and the same port number.
+ *
+ * @param mcast_addr the multicast address to join.
  *
  * @param join_if_addr the local unicast interface address (in network order)
  * to join the multicast group on. If it is NULL, the system will choose the
@@ -193,10 +201,18 @@ extern int	comm_bind_join_udp4(const struct in_addr *mcast_addr,
 
 #ifdef HAVE_IPV6
 /**
- * Open an IPv6 UDP socket on an interface, bind it to a multicast address
- * and a port, and join that multicast group.
+ * Open an IPv6 UDP socket on an interface, bind it to a port,
+ * and join a multicast group.
  *
- * @param mcast_addr the multicast address to bind to and join.
+ * Note that we bind to ANY address instead of the multicast address
+ * only. If we bind to the multicast address instead, then using
+ * the same socket for sending multicast packets will trigger a bug
+ * in the FreeBSD kernel: the source IP address will be set to the
+ * multicast address. Hence, the application itself may want to filter
+ * the UDP unicast packets that may have arrived with a destination address
+ * one of the local interface addresses and the same port number.
+ *
+ * @param mcast_addr the multicast address to join.
  *
  * @param join_if_addr the local unicast interface index to join the multicast
  * group on. If it is 0, the system will choose the interface each time a
