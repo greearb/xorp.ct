@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.16 2003/09/18 19:08:00 hodson Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.17 2003/09/26 21:34:34 hodson Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -64,7 +64,7 @@ class RequestState;
  */
 class XrlPFSTCPSender : public XrlPFSender {
 public:
-    XrlPFSTCPSender(EventLoop& e, const char* address = NULL)
+    XrlPFSTCPSender(EventLoop& e, const char* address = 0)
 	throw (XrlPFConstructorError);
     virtual ~XrlPFSTCPSender();
 
@@ -86,31 +86,12 @@ private:
     void send_first_request();
     void die(const char* reason);
 
-    int _fd;
-
-    // Transmission related
-    AsyncFileWriter* _writer;
-
-    list<ref_ptr<RequestState> > _requests_pending;	// All requests pending
-    list<ref_ptr<RequestState> > _requests_sent;	// All requests sent
-
-    vector<uint8_t>	_request_packet;
-    uint32_t		_current_seqno;
-
     void update_writer(AsyncFileWriter::Event	e,
 		       const uint8_t*		buffer,
 		       size_t 			buffer_bytes,
 		       size_t 			bytes_done);
 
     RequestState* find_request(uint32_t seqno);
-
-    // Tunable timer variables
-    uint32_t _keepalive_ms;
-
-    // Reception related
-    AsyncFileReader*	    _reader;
-    vector<uint8_t>	    _reply;
-    const STCPPacketHeader* _sph;
 
     void prepare_for_reply_header();
 
@@ -121,11 +102,6 @@ private:
 
     void dispatch_reply();
 
-    // Keepalive related
-    XorpTimer		_keepalive_timer;
-    vector<uint8_t>	_keepalive_packet;
-    bool		_keepalive_in_progress;
-
     inline void start_keepalives();
     inline void stop_keepalives();
     inline void postpone_keepalive();
@@ -135,8 +111,35 @@ private:
 			   size_t			buffer_bytes,
 			   size_t			offset);
 
+private:
+    uint32_t 			 _uid;
+    int				 _fd;
+
+    // Transmission related
+    AsyncFileWriter*		  _writer;
+
+    list<ref_ptr<RequestState> > _requests_pending;	// All requests pending
+    list<ref_ptr<RequestState> > _requests_sent;	// All requests sent
+
+    vector<uint8_t>		 _request_packet;
+    uint32_t			 _current_seqno;
+
+    // Tunable timer variables
+    uint32_t			 _keepalive_ms;
+
+    // Reception related
+    AsyncFileReader*	    	 _reader;
+    vector<uint8_t>		 _reply;
+    const STCPPacketHeader*	 _sph;
+
+    // Keepalive related
+    XorpTimer			 _keepalive_timer;
+    vector<uint8_t>		 _keepalive_packet;
+    bool			 _keepalive_in_progress;
+
     // General stuff
-    static const char* _protocol;
+    static const char*		 _protocol;
+    static uint32_t		 _next_uid;
 };
 
 #endif // __LIBXIPC_XRL_PF_STCP_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.27 2003/09/26 21:34:34 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.28 2003/09/27 15:47:01 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -464,11 +464,63 @@ private:
 
 
 // ----------------------------------------------------------------------------
+// XrlPFSenderList
+//
+// A class to track instances of XrlPFSTCPSender.  Whenever a sender
+// is created, it gets add to the SenderList and when it is
+// destructed, it gets removed.
+//
+// This class exists because there's a potential race.  An STCP sender
+// may have a queue of Xrls to dispatch when it fails.  When the
+// failure happens we walk the queue of Xrls and invoke the callbacks
+// with a failure argument.  Unfortunately these callbacks may delete
+// the Sender whilst we are process the list.
+//
+// To make life easier, we splice items on the callback list to a
+// stack allocated list structure (see XrlPFSender::die()).  As we're
+// invoking the callbacks we check that the instance number of the sender
+// that died is on the list.  If it's not, then dispatching the callback is
+// definitely unsafe.
+
+static class XrlPFSTCPSenderList {
+public:
+    void
+    add_instance(uint32_t uid)
+    {
+	_uids.push_back(uid);
+    }
+    void
+    remove_instance(uint32_t uid)
+    {
+	vector<uint32_t>::iterator i = find(_uids.begin(), _uids.end(), uid);
+	if (i != _uids.end()) {
+	    _uids.erase(i);
+	}
+    }
+    bool
+    valid_instance(uint32_t uid) const
+    {
+	vector<uint32_t>::const_iterator i = find(_uids.begin(),
+						  _uids.end(),
+						  uid);
+	return (i != _uids.end());
+    }
+protected:
+    vector<uint32_t> _uids;
+} sender_list;
+
+
+
+// ----------------------------------------------------------------------------
 // Xrl Simple TCP protocol family sender -> -> -> XRLPFSTCPSender
+
+uint32_t XrlPFSTCPSender::_next_uid = 0;
 
 XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
     throw (XrlPFConstructorError)
-    : XrlPFSender(e, addr_slash_port), _fd(-1),
+    : XrlPFSender(e, addr_slash_port),
+      _uid(_next_uid++),
+      _fd(-1),
       _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS)
 {
     _fd = create_connected_ip_socket(TCP, addr_slash_port);
@@ -500,6 +552,7 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
 
     prepare_for_reply_header();
     start_keepalives();
+    sender_list.add_instance(_uid);
 }
 
 XrlPFSTCPSender::~XrlPFSTCPSender()
@@ -510,6 +563,7 @@ XrlPFSTCPSender::~XrlPFSTCPSender()
     _writer = 0;
     _fd = -1;
     debug_msg("~XrlPFSTCPSender (%p)\n", this);
+    sender_list.remove_instance(_uid);
 }
 
 void
@@ -543,16 +597,23 @@ XrlPFSTCPSender::die(const char* reason)
     list<ref_ptr<RequestState> > tmp_pending;
     tmp_pending.splice(tmp_pending.begin(), _requests_pending);
 
+    // Make local copy of uid in case "this" is deleted in callback
+    uint32_t uid = _uid;
+
     debug_msg("Sent requests outstanding = %d\n", (int)tmp_sent.size());
     while (tmp_sent.empty() == false) {
+	if (sender_list.valid_instance(uid) == false)
+	    break;
 	ref_ptr<RequestState>& rp = tmp_sent.front();
 	if (rp->cb().is_empty() == false)
 	    rp->cb()->dispatch(XrlError::SEND_FAILED(), 0);
 	tmp_sent.pop_front();
     }
 
-    debug_msg("Pending requests outstanding= %d\n", (int)tmp_pending.size());
+    debug_msg("Pending requests outstanding = %d\n", (int)tmp_pending.size());
     while (tmp_pending.empty() == false) {
+	if (sender_list.valid_instance(uid) == false)
+	    break;
 	ref_ptr<RequestState>& rp = tmp_pending.front();
 	if (rp->cb().is_empty() == false)
 	    rp->cb()->dispatch(XrlError::SEND_FAILED(), 0);
