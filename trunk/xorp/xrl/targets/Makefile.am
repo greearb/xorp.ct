@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.30 2004/05/03 23:17:16 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.31 2004/05/06 20:18:31 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -194,7 +194,8 @@ $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
 		$(INTERFACES_DIR)/mfea_client.xif			\
-		$(INTERFACES_DIR)/fti.xif				\
+		$(INTERFACES_DIR)/redist_transaction4.xif		\
+		$(INTERFACES_DIR)/redist_transaction6.xif		\
 		$(INTERFACES_DIR)/mld6igmp_client.xif			\
 		$(INTERFACES_DIR)/pim.xif
 

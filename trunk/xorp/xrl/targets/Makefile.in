@@ -814,7 +814,8 @@ $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
 		$(INTERFACES_DIR)/mfea_client.xif			\
-		$(INTERFACES_DIR)/fti.xif				\
+		$(INTERFACES_DIR)/redist_transaction4.xif		\
+		$(INTERFACES_DIR)/redist_transaction6.xif		\
 		$(INTERFACES_DIR)/mld6igmp_client.xif			\
 		$(INTERFACES_DIR)/pim.xif
 $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\

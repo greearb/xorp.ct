@@ -1,15 +1,17 @@
-/* $XORP: xorp/xrl/targets/pim.tgt,v 1.2 2003/03/22 03:26:43 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/pim.tgt,v 1.3 2003/03/29 19:03:14 pavlin Exp $ */
 
 #include "common.xif"
 #include "cli_processor.xif"
 #include "mfea_client.xif"
-#include "fti.xif"
+#include "redist_transaction4.xif"
+#include "redist_transaction6.xif"
 #include "mld6igmp_client.xif"
 #include "pim.xif"
 
 target pim implements		common/0.1,				\
 				cli_processor/0.1,			\
 				mfea_client/0.1,			\
-				fti/0.2,				\
+				redist_transaction4/0.1,		\
+				redist_transaction6/0.1,		\
 				mld6igmp_client/0.1,			\
 				pim/0.1
