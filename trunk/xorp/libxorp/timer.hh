@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.7 2003/03/27 17:01:07 hodson Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.8 2003/03/28 12:37:20 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -51,8 +51,8 @@ class XorpTimer {
 public:
 
     /**
-     * @return true if XorpTimer is associated with a @ref TimerList and
-     * has an expiry time in the future. 
+     * @return true if the timer has been scheduled, and the callback
+     * associated with this timer has not been called yet.
      */
     bool scheduled() const;
 
@@ -111,17 +111,7 @@ public:
      * Release reference to underlying state.
      */
     void clear();			// erase timer
-
-    /**
-     * @return true if @ref XorpTimer object has underlying state.
-     */
-    bool initialized() const		{ return _node != 0; }
-
-    /**
-     * Equivalent to @ref initialized.
-     */
-    bool is_valid() const		{ return initialized(); }
-
+    
     XorpTimer()				: _node(0) { }
     XorpTimer(TimerList* list, BasicTimerCallback cb);
     XorpTimer(const XorpTimer&);
