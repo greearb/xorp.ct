@@ -1,7 +1,7 @@
 #!/bin/sh
 # xorp
 #
-# $XORP: other/testbed/tools/xorp.sh,v 1.8 2002/07/23 21:01:51 atanu Exp $
+# $XORP: other/testbed/tools/xorp.sh,v 1.1.1.1 2002/12/11 23:55:13 hodson Exp $
 #
 # Installed in /usr/local/etc/rc.d/ on testbed machines.
 #
@@ -16,9 +16,11 @@ then
 	/usr/sbin/ntpdate -b www.icir.org
 fi
 
-if [ -d /usr/local/xorp ]
+TESTBEDDIR="/usr/local/xorp/testbed"
+
+if [ -d ${TESTBEDDIR} ]
 then
-	cd /usr/local/xorp
+	cd ${TESTBEDDIR}
 	PATH=$PATH:/usr/local/bin
 	PYTHON=/usr/local/bin/python
 	SCRIPT=xtifset.py
