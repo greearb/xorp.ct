@@ -80,7 +80,7 @@ RANLIB = @RANLIB@
 RIP = @RIP@
 RIP_OS = @RIP_OS@
 
-SUBDIRS = . harness
+SUBDIRS = . harness tools
 
 # -- Test Programs
 bin_PROGRAMS = bgp packet_test plumbing_test update_test
