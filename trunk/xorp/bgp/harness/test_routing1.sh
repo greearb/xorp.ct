@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.9 2003/05/29 18:56:27 hodson Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.10 2003/07/17 00:28:32 pavlin Exp $
 #
 
 #
@@ -49,13 +49,22 @@ HOST=localhost
 PORT1=10001
 PORT2=10002
 PORT3=10003
+PORT1_IPV6=10004
+PORT2_IPV6=10005
+PORT3_IPV6=10006
 PEER_PORT1=20001
 PEER_PORT2=20002
 PEER_PORT3=20003
+PEER_PORT1_IPV6=20004
+PEER_PORT2_IPV6=20005
+PEER_PORT3_IPV6=20006
 AS=65008
 PEER1_AS=64001
 PEER2_AS=64002
 PEER3_AS=$AS
+PEER1_AS_IPV6=64004
+PEER2_AS_IPV6=64005
+PEER3_AS_IPV6=$AS
 
 HOLDTIME=20
 
@@ -65,6 +74,9 @@ HOLDTIME=20
 NH1=172.16.1.1
 NH2=172.16.2.1
 NH3=172.16.3.1
+NH1_IPV6=40:40:40:40:40:40:40:40
+NH2_IPV6=50:50:50:50:50:50:50:50
+NH3_IPV6=60:60:60:60:60:60:60:60
 
 NEXT_HOP=192.150.187.78
 
@@ -77,22 +89,49 @@ configure_bgp()
 
     register_rib ""
 
+    # EBGP - IPV4
     PEER=$HOST
     PORT=$PORT1;PEER_PORT=$PEER_PORT1;PEER_AS=$PEER1_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     enable_peer $IPTUPLE
 
+    # EBGP - IPV4
     PEER=$HOST
     PORT=$PORT2;PEER_PORT=$PEER_PORT2;PEER_AS=$PEER2_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     enable_peer $IPTUPLE
 
+    # IBGP - IPV4
     PEER=$HOST
     PORT=$PORT3;PEER_PORT=$PEER_PORT3;PEER_AS=$PEER3_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
+    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    enable_peer $IPTUPLE
+
+    # EBGP - IPV6
+    PEER=$HOST
+    PORT=$PORT1_IPV6;PEER_PORT=$PEER_PORT1_IPV6;PEER_AS=$PEER1_AS_IPV6
+    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
+    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocolIPv6
+    enable_peer $IPTUPLE
+
+    # EBGP - IPV6
+    PEER=$HOST
+    PORT=$PORT2_IPV6;PEER_PORT=$PEER_PORT2_IPV6;PEER_AS=$PEER2_AS_IPV6
+    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
+    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocolIPv6
+    enable_peer $IPTUPLE
+
+    # IBGP - IPV6
+    PEER=$HOST
+    PORT=$PORT3_IPV6;PEER_PORT=$PEER_PORT3_IPV6;PEER_AS=$PEER3_AS_IPV6
+    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE  $PEER_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocolIPv6
     enable_peer $IPTUPLE
 }
 
@@ -103,14 +142,24 @@ configure_rib()
     VIF0="vif0"
     VIF1="vif1"
     VIF2="vif2"
+    VIF0_IPV6="vif3"
+    VIF1_IPV6="vif4"
+    VIF2_IPV6="vif5"
 
     new_vif $VIF0
     new_vif $VIF1
     new_vif $VIF2
+    new_vif $VIF0_IPV6
+    new_vif $VIF1_IPV6
+    new_vif $VIF2_IPV6
 
     add_vif_addr4 $VIF0 $NH1 $NH1/24
     add_vif_addr4 $VIF1 $NH2 $NH2/24
     add_vif_addr4 $VIF2 $NH3 $NH3/24
+
+    add_vif_addr6 $VIF0_IPV6 $NH1_IPV6 $NH1_IPV6/24
+    add_vif_addr6 $VIF1_IPV6 $NH2_IPV6 $NH2_IPV6/24
+    add_vif_addr6 $VIF2_IPV6 $NH3_IPV6 $NH3_IPV6/24
 }
 
 test1()
@@ -146,6 +195,46 @@ test1()
 	holdtime $HOLDTIME \
 	id 10.10.10.3 \
 	keepalive false
+
+    coord peer3 assert established
+}
+
+test1_ipv6()
+{
+    echo "TEST1 IPV6 - Establish three peerings"
+
+    coord reset
+
+    coord target $HOST $PORT1_IPV6
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER1_AS_IPV6 \
+	holdtime $HOLDTIME \
+	id 10.10.10.1 \
+	keepalive false \
+	ipv6 true
+
+    coord peer1 assert established
+
+    coord target $HOST $PORT2_IPV6
+    coord initialise attach peer2
+
+    coord peer2 establish AS $PEER2_AS_IPV6 \
+	holdtime $HOLDTIME \
+	id 10.10.10.2 \
+	keepalive false \
+	ipv6 true
+
+    coord peer2 assert established
+
+    coord target $HOST $PORT3_IPV6
+    coord initialise attach peer3
+
+    coord peer3 establish AS $PEER3_AS_IPV6 \
+	holdtime $HOLDTIME \
+	id 10.10.10.3 \
+	keepalive false \
+	ipv6 true
 
     coord peer3 assert established
 }
@@ -236,6 +325,121 @@ test2()
 	aspath "65008,$PEER1_AS,2,(3,4,5),6,(7,8),9"
     coord peer3 trie recv lookup 10.10.10.0/24 \
 	aspath "$PEER1_AS,2,(3,4,5),6,(7,8),9"
+
+
+# At the end of the test we expect all the peerings to still be established.
+    coord peer1 assert established
+    coord peer2 assert established
+    coord peer3 assert established
+}
+
+test2_ipv6()
+{
+# 1) Add a route (A) via peer1
+# 2) Verify that route (A) appears at peer3	
+# 3) Add a better route (B) via peer2
+# 4) Verify that route (B) appears at peer3
+# 5) Withdraw route (b) via peer2
+# 6) Verify that route (A) appears at peer3
+    echo "TEST2 IPV6 - Adding and deleting routes"
+
+    coord reset
+
+    coord target $HOST $PORT1_IPV6
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER1_AS_IPV6 \
+	holdtime $HOLDTIME \
+	id 10.10.10.1 \
+	keepalive false
+
+    coord peer1 assert established
+
+    coord target $HOST $PORT2_IPV6
+    coord initialise attach peer2
+
+    coord peer2 establish AS $PEER2_AS_IPV6 \
+	holdtime $HOLDTIME \
+	id 10.10.10.2 \
+	keepalive false
+
+    coord peer2 assert established
+
+    coord target $HOST $PORT3_IPV6
+    coord initialise attach peer3
+
+    coord peer3 establish AS $PEER3_AS_IPV6 \
+	holdtime $HOLDTIME \
+	id 10.10.10.3 \
+	keepalive false
+
+    coord peer3 assert established
+
+    NLRI1=10:10:10:10:10:00:00:00/80
+    NLRI2=20:20:20:20:20:00:00:00/80
+
+    # Add a route from peer1.
+    coord peer1 send packet update \
+	origin 2 \
+	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9" \
+	nexthop6 $NH1_IPV6 \
+	nlri6 $NLRI1 \
+	nlri6 $NLRI2
+
+    sleep 2
+    coord peer1 trie sent lookup $NLRI1 \
+	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+    coord peer2 trie recv lookup $NLRI1 \
+	aspath "65008,$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+    coord peer3 trie recv lookup $NLRI1 \
+	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9" 
+
+    coord peer1 trie sent lookup $NLRI2 \
+	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+    coord peer2 trie recv lookup $NLRI2 \
+	aspath "65008,$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+    coord peer3 trie recv lookup $NLRI2 \
+	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9" 
+
+    # Add a better route from peer2.
+    coord peer2 send packet update \
+	origin 2 \
+	aspath "$PEER2_AS_IPV6" \
+	nexthop6 $NH2_IPV6 \
+	nlri6 $NLRI1 \
+	nlri6 $NLRI2
+
+    sleep 2
+    coord peer1 trie recv lookup $NLRI1 aspath "65008,$PEER2_AS_IPV6"
+    coord peer2 trie sent lookup $NLRI1 aspath "$PEER2_AS_IPV6"
+    coord peer3 trie recv lookup $NLRI1 aspath "$PEER2_AS_IPV6"
+
+    coord peer1 trie recv lookup $NLRI2 aspath "65008,$PEER2_AS_IPV6"
+    coord peer2 trie sent lookup $NLRI2 aspath "$PEER2_AS_IPV6"
+    coord peer3 trie recv lookup $NLRI2 aspath "$PEER2_AS_IPV6"
+
+    # Withdraw the better route.
+    coord peer2 send packet update \
+	origin 2 \
+	aspath "$PEER2_AS_IPV6" \
+	nexthop6 $NH2_IPV6 \
+	withdraw6 $NLRI1 \
+	withdraw6 $NLRI2
+
+    sleep 2
+    coord peer1 trie sent lookup $NLRI1 \
+	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+    coord peer2 trie recv lookup $NLRI1 \
+	aspath "65008,$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+    coord peer3 trie recv lookup $NLRI1 \
+	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+
+    coord peer1 trie sent lookup $NLRI2 \
+	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+    coord peer2 trie recv lookup $NLRI2 \
+	aspath "65008,$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+    coord peer3 trie recv lookup $NLRI2 \
+	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
 
 
 # At the end of the test we expect all the peerings to still be established.
@@ -580,7 +784,7 @@ test6()
 }
 
 TESTS_NOT_FIXED=''
-TESTS='test1 test2 test3 test4 test5 test6'
+TESTS='test1 test1_ipv6 test2 test2_ipv6 test3 test4 test5 test6'
 RIB="rib"
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
