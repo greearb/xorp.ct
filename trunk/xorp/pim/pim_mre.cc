@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.13 2003/01/30 02:36:16 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.14 2003/01/31 21:04:36 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -1754,7 +1754,7 @@ PimMre::entry_can_remove() const
 #endif // 1
     
 #if 1		// TODO: XXX: PAVPAVPAV: not needed?
-    if (is_wc() || is_sg() || is_sg_rpt()) {	// TODO: apply for (S,G,rpt)?
+    if (is_wc() || is_sg()) {
 	if (i_am_assert_winner_state().any()
 	    || i_am_assert_loser_state().any())
 	    return (false);
