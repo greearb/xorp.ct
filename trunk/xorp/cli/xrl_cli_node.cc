@@ -12,9 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.2 2003/01/23 11:14:23 pavlin Exp $"
-
-#include "libxipc/xrl_router.hh"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.3 2003/01/28 00:37:52 hodson Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -82,7 +80,7 @@ XrlCliNode::common_0_1_get_target_name(
     // Output values, 
     string&	name)
 {
-    name = XrlCliTargetBase::name();
+    name = my_xrl_target_name();
     return XrlCmdError::OKAY();
 }
 
