@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.23 2004/05/24 01:22:32 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.24 2004/06/10 22:41:05 hodson Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -164,11 +164,13 @@ public:
     typedef FinderClient::ResolvedTable ResolvedTable;
 
 public:
-    FinderClientQuery(FinderClient&	   fc,
+    FinderClientQuery(EventLoop&	   eventloop,
+		      FinderClient&	   fc,
 		      const string&	   key,
 		      ResolvedTable&	   rt,
 		      const QueryCallback& qcb)
-	: FinderClientOneOffOp(fc), _key(key), _rt(rt), _qcb(qcb)
+	: FinderClientOneOffOp(fc), _eventloop(eventloop),
+	  _key(key), _rt(rt), _qcb(qcb)
     {
 	finder_trace("Constructing ClientQuery \"%s\"", _key.c_str());
     }
@@ -182,16 +184,38 @@ public:
     execute(FinderMessengerBase* m)
     {
 	finder_trace_init("executing ClientQuery \"%s\"", _key.c_str());
+
+	// Test if the request is already resolvable
+	ResolvedTable::iterator rt_iter = _rt.find(_key);
+	if (rt_iter != _rt.end()) {
+	    _query_resolvable_timer = _eventloop.new_oneoff_after(
+		TimeVal::ZERO(), 
+		callback(this, &FinderClientQuery::query_resolvable_callback));
+	    return;
+	}
+
 	XrlFinderV0p2Client cl(m);
 	if (!cl.send_resolve_xrl(finder, _key,
 		callback(this, &FinderClientQuery::query_callback))) {
-	    _qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
-	    XLOG_ERROR("Failed on send_resolve_xrl");
 	    finder_trace_result("failed (send)");
+	    XLOG_ERROR("Failed on send_resolve_xrl");
+	    _qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
 	    client().notify_failed(this);
 	    return;
 	}
 	finder_trace_result("okay");
+    }
+
+    void
+    query_resolvable_callback()
+    {
+	ResolvedTable::iterator rt_iter = _rt.find(_key);
+
+	XLOG_ASSERT(rt_iter != _rt.end());
+	finder_trace_result("okay");
+	_qcb->dispatch(XrlError::OKAY(), &rt_iter->second);
+	client().notify_done(this);
+	return;
     }
 
     void
@@ -219,11 +243,11 @@ public:
 
 	if (result.second == false && result.first == _rt.end()) {
 	    // Out of memory (?)
+	    finder_trace_result("failed (unknown)");
 	    XLOG_ERROR("Failed to add entry for %s to resolve table.\n",
 		       _key.c_str());
 	    XrlError e(RESOLVE_FAILED, "Out of memory");
 	    _qcb->dispatch(e, 0); // :-(
-	    finder_trace_result("failed (unknown)");
 	    client().notify_failed(this);
 	    return;
 	}
@@ -244,21 +268,21 @@ public:
 			  al->get(i).text().c_str());
 		rt_entry->second.values().push_back(al->get(i).text());
 	    } catch (const XrlAtom::NoData&) {
+		finder_trace_result("failed (corrupt response)");
 		_rt.erase(rt_entry);
 		_qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
-		finder_trace_result("failed (corrupt response)");
 		client().notify_done(this);
 		return;
 	    } catch (const XrlAtom::WrongType&) {
+		finder_trace_result("failed (corrupt response)");
 		_rt.erase(rt_entry);
 		_qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
-		finder_trace_result("failed (corrupt response)");
 		client().notify_done(this);
 		return;
 	    }
 	}
-	_qcb->dispatch(e, &rt_entry->second);
 	finder_trace_result("okay");
+	_qcb->dispatch(e, &rt_entry->second);
 	client().notify_done(this);
     }
 
@@ -269,9 +293,13 @@ public:
     }
 
 protected:
+    EventLoop&	   _eventloop;
     string	   _key;
     ResolvedTable& _rt;
     QueryCallback  _qcb;
+
+private:
+    XorpTimer	   _query_resolvable_timer;
 };
 
 /**
@@ -304,10 +332,10 @@ public:
 	    finder_trace_result("okay");
 	    return;
 	}
-	_xcb->dispatch(XrlError::SEND_FAILED(), 0);
-	XLOG_ERROR("Failed to send forwarded Xrl to Finder.");
-	client().notify_failed(this);
 	finder_trace_result("failed (send)");
+	XLOG_ERROR("Failed to send forwarded Xrl to Finder.");
+	_xcb->dispatch(XrlError::SEND_FAILED(), 0);
+	client().notify_failed(this);
 	return;
     }
 
@@ -315,9 +343,9 @@ public:
     execute_callback(const XrlError& e, XrlArgs* args)
     {
 	finder_trace_init("ForwardedXrl callback \"%s\"", _xrl.str().c_str());
+	finder_trace_result("%s", e.str().c_str());
 	_xcb->dispatch(e, args);
 	client().notify_done(this);
-	finder_trace_result("%s", e.str().c_str());
     }
 
     void force_failure(const XrlError& e)
@@ -466,9 +494,10 @@ public:
 	XrlFinderV0p2Client cl(m);
 	if (!cl.send_set_finder_client_enabled(finder, _iname, _en,
 		callback(this, &FinderClientEnableXrls::en_callback))) {
-	    XLOG_ERROR("Failed on send_set_finder_client_enabled");
 	    finder_trace_result("failed (send)");
+	    XLOG_ERROR("Failed on send_set_finder_client_enabled");
 	    client().notify_failed(this);
+	    return;
 	}
 	finder_trace_result("okay");
     }
@@ -478,8 +507,8 @@ public:
 	finder_trace_init("EnableXrls callback \"%s\"", _iname.c_str());
 
 	if (e == XrlError::OKAY()) {
-	    _update_var = _en;
 	    finder_trace_result("okay");
+	    _update_var = _en;
 	    client().notify_done(this);
 	    if (true == _en && _fco) {
 		_fco->finder_ready_event(_iname);
@@ -487,9 +516,9 @@ public:
 	    return;
 	}
 
+	finder_trace_result("failed");
 	XLOG_ERROR("Failed to enable client \"%s\": %s\n",
 		   _iname.c_str(), e.str().c_str());
-	finder_trace_result("failed");
 	client().notify_failed(this);
     }
 
@@ -643,10 +672,11 @@ FinderClient::enable_xrls(const string& instance_name)
 }
 
 void
-FinderClient::query(const string&	 key,
+FinderClient::query(EventLoop&		 eventloop,
+		    const string&	 key,
 		    const QueryCallback& qcb)
 {
-    Operation op(new FinderClientQuery(*this, key, _rt, qcb));
+    Operation op(new FinderClientQuery(eventloop, *this, key, _rt, qcb));
     _todo_list.push_back(op);
     crank();
 }
