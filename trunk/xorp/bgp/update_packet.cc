@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.28 2003/10/28 21:01:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.29 2003/10/30 02:10:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -56,16 +56,15 @@ UpdatePacket::add_nlri(const BGPUpdateAttrib& nlri)
 void
 UpdatePacket::add_pathatt(const PathAttribute& pa)
 {
-    PathAttribute *paclone = pa.clone();
+    _pa_list.add_path_attribute(pa);
 //    _pa_list.push_back(paclone);
-    add_pathatt(paclone);
 }
 
 void
 UpdatePacket::add_pathatt(PathAttribute *pa)
 {
+    _pa_list.add_path_attribute(pa);
 //     _pa_list.push_back(pa);
-    _pa_list.add_path_attribute(*pa);
 }
 
 void
