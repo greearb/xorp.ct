@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.13 2003/05/08 21:27:00 mjh Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.14 2003/05/23 00:02:06 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -486,39 +486,53 @@ XrlQueue<A>::callback(const XrlError& error, const char *comment)
 {
     _flying--;
     debug_msg("callback %s %s\n", comment, error.str().c_str());
-    if (error == XrlError::OKAY()) {
+
+    switch (error.error_code()) {
+    case OKAY:
 	_errors = 0;
 	_synchronous_mode = false;
 	_previously_succeeded = true;
 	_xrl_queue.pop();
 	sendit();
-    } else if (error == XrlError::SEND_FAILED()
-	       || error == XrlError::NO_FINDER()
-	       || error == XrlError::NO_SUCH_METHOD()
-	       || (error == XrlError::RESOLVE_FAILED() 
-		   && _previously_succeeded)) {
-	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
-	XLOG_ERROR("Interface is now permanently disabled\n");
-	//This is fatal for this interface.  Cause the interface to
-	//fail permanently, and await notification from the finder
-	//that the RIB has really gone down.
-	_interface_failed = true;
-	_rib_ipc_handler
-	    ->fatal_error("Fatal error talking to RIB: " + string(comment) 
+	break;
+
+    case RESOLVE_FAILED:
+	if (!_previously_succeeded) {
+	    //give the other end time to get started.  we shouldn't
+	    //really need to do this if we're started from rtrmgr, but
+	    //it doesn't do any harm, and makes us more robust.
+	    XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
+	    _errors++;
+	    _synchronous_mode = true;
+	    delayed_send(1000);
+	}
+	/* FALLTHROUGH */
+    case SEND_FAILED:
+    case NO_FINDER:
+    case NO_SUCH_METHOD:
+	if (_previously_succeeded) {
+	    XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
+	    XLOG_ERROR("Interface is now permanently disabled\n");
+	    //This is fatal for this interface.  Cause the interface to
+	    //fail permanently, and await notification from the finder
+	    //that the RIB has really gone down.
+	    _interface_failed = true;
+	    _rib_ipc_handler
+		->fatal_error("Fatal error talking to RIB: " + string(comment) 
 			  + " " + error.str());
-    } else if (error == XrlError::RESOLVE_FAILED() && !_previously_succeeded) {
-	//give the other end time to get started.  we shouldn't
-	//really need to do this if we're started from rtrmgr, but
-	//it doesn't do any harm, and makes us more robust.
-	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
-	_errors++;
-	_synchronous_mode = true;
-	delayed_send(1000);
-    } else {
+	}
+	break;
+
+    case BAD_ARGS:
+    case COMMAND_FAILED:
+    case INTERNAL_ERROR:
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
 	//XXX need to handle other errors correctly
 	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
 	//XXX to be replaced with exit in production code
 	XLOG_UNFINISHED();
+	break;
     }
 
     if (_errors >= MAX_ERR_RETRIES) {
