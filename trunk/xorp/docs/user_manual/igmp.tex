@@ -228,14 +228,14 @@ dc2        \>224.0.0.13    \>0.0.0.0       \>10.3.0.1     \>\>157
 \vspace{0.1in}
 
 In the above example, {\stt Source} refers to the multicast source
-address in case of source-specific IGMP join entries or is set to
-{\stt 0.0.0.0} in case of any-source IGMP join entries.
-Field {\stt LastReported} contains the address of the last receiver that
-responded by an IGMP Join message.
-The {\stt Timeout} field shows the number of seconds until it is time
-to query for host members (\ie to send an IGMP Query message for this
-particular entry).
+address in the case of source-specific IGMP join entries, or it is set
+to {\stt 0.0.0.0} in case of any-source IGMP join entries.  The {\stt
+LastReported} field contains the address of the most recent receiver
+that responded to an IGMP Join message.  The {\stt Timeout} field
+shows the number of seconds until it is next time to query for host
+members (\ie to send an IGMP Query message for this particular entry).
 
+\vspace{0.1in}
 The {\stt show igmp interface} command can be used to display
 information about IGMP interfaces:
 
@@ -256,10 +256,17 @@ register\_vif\>DISABLED\>0.0.0.0      \>\>None \>\>\>2          \>\>0
 }
 \vspace{0.1in}
 
+The information show indicates whether IGMP is enabled on the
+interface and the IP address of the IGMP querier.  If this router is
+the querier, then the time until the next query message is shown.
+Finally the number of multicast groups with receivers on this subnet
+is shown.
+
 Note that in the above example it is normal for the interface named
 {\stt register\_vif} to be {\stt DISABLED}. This interface has special
 purpose and is used only by PIM-SM.
 
+\vspace{0.1in}
 The {\stt show igmp interface address} command can be used to display
 information about addresses of IGMP interfaces:
 
@@ -280,9 +287,10 @@ register\_vif\>0.0.0.0       \>10.4.0.1
 }
 \vspace{0.1in}
 
-In the above example, the {\stt PrimaryAddr} per interface is the address
-used to originate IGMP messages, and all other alias addresses are listed
-as {\stt SecondaryAddr} with one address per line.
+As shown above, the {\stt PrimaryAddr} per interface is the address
+used to originate IGMP messages, and all other alias addresses on that
+interface are listed as {\stt SecondaryAddr}, with one address per
+line.
 
 The equivalent commands for MLD are:
 \begin{itemize}
