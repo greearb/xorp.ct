@@ -207,10 +207,10 @@ cmd:		LITERAL list_of_cmd_strings {
 
 list_of_cmd_strings:
 		STRING {
-			prepend_cmd($1);
+			append_cmd($1);
 		}
-		| STRING list_of_cmd_strings {
-			prepend_cmd($1);
+		| list_of_cmd_strings STRING {
+			append_cmd($2);
 		}
 		;
 
