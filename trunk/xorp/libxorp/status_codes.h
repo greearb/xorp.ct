@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/status_codes.h,v 1.4 2003/05/29 18:52:55 mjh Exp $
+ * $XORP: xorp/libxorp/status_codes.h,v 1.5 2003/05/29 19:18:27 pavlin Exp $
  */
 
 #ifndef __LIBXORP_STATUS_CODES_H__
@@ -35,7 +35,7 @@ Explanation of Process States
     |                V
     |            NOT_READY
     |             |     ^
-    |(7)      (3) |     | (4)
+    |(9)      (3) |     | (4)
     |             V     |
     |              READY
     |              /   \
@@ -43,8 +43,14 @@ Explanation of Process States
     |            V       V
     |       SHUTDOWN   FAILED
     |            |       |
-    |            |       |
-    +------------+-------+
+    |         (7)|       |(8)
+    |             \     /
+    |              V   V
+    |              DONE
+    |                |
+    |                |
+    |                V
+    +----------------
 
 Events/Actions
 --------------
@@ -56,7 +62,9 @@ Events/Actions
     processes that depend on this process are configured.
 (5) Received a request for a clean shutdown.
 (6) Something failed, this process is no longer functioning correctly.
-(7) Deregister with finder.
+(7) The shutdown has completed.
+(8) The process has completed the cleanup after the failure.
+(9) Deregister with finder.
 
 States
 ------
@@ -81,12 +89,15 @@ FAILED    Process has suffered a fatal error, and is in the process of
           cleaning up the mess.  Normally the process will terminate by 
           itself after being in this state.
 
+DONE      The process has completed operation, but is still capable of
+          responding to XRLs.
+
 Notes
 -----
 
-A process may spend zero time in STARTUP, NOT_READY, READY, SHUTDOWN or FAILED 
-states.  For example, a process may effectively go directly from NULL to 
-READY state on startup if there are no dependencies that need to be taken 
+A process may spend zero time in STARTUP, NOT_READY, READY, SHUTDOWN, FAILED,
+or DONE states.  For example, a process may effectively go directly from NULL
+to READY state on startup if there are no dependencies that need to be taken 
 into account.  A process may go from STARTUP or NOT_READY states to SHUTDOWN 
 or FAILED states without spending any time in READY state if required.
 
@@ -94,6 +105,9 @@ On reconfiguration, a process does not need to go to NOT_READY state unless
 it needs to delay the reconfiguration of processes that depend on the 
 completion of this reconfiguration. 
 
+After shutdown or a failure, the process may remain indefinitely in DONE state
+(e.g., if the process itself shoudn't really exit but rather await further
+instructions).
 */
 
 typedef enum {
@@ -102,7 +116,8 @@ typedef enum {
     PROC_NOT_READY	= 2,
     PROC_READY		= 3,
     PROC_SHUTDOWN	= 4,
-    PROC_FAILED		= 5
+    PROC_FAILED		= 5,
+    PROC_DONE		= 6
 } ProcessStatus;
 
 #endif /* __LIBXORP_STATUS_CODES_H__ */
