@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_command.hh,v 1.8 2003/05/31 22:33:27 mjh Exp $
+// $XORP: xorp/rtrmgr/module_command.hh,v 1.9 2003/06/09 23:38:40 mjh Exp $
 
 #ifndef __RTRMGR_MODULE_COMMAND_HH__
 #define __RTRMGR_MODULE_COMMAND_HH__
@@ -20,13 +20,16 @@
 #include "template_commands.hh"
 
 class TaskManager;
+class TemplateTreeNode;
 class Validation;
 
 class ModuleCommand : public Command {
 public:
     typedef enum {NO_STATUS_METHOD, STATUS_BY_XRL} StatusMethod;
     typedef enum {NO_SHUTDOWN_METHOD, SHUTDOWN_BY_XRL} ShutdownMethod;
-    ModuleCommand(const string &cmd_name, TemplateTree& ct);
+    ModuleCommand(TemplateTree& template_tree,
+		  TemplateTreeNode& template_tree_node,
+		  const string &cmd_name);
     ~ModuleCommand();
     void add_action(const list <string> &action,
 		    const XRLdb& xrldb) throw (ParseError);
@@ -65,6 +68,7 @@ private:
     TemplateTree& _tt;
     string _modname;
     string _modpath;
+    string _default_target_name;
     list <string> _depends;
     Action *_startcommit;
     Action *_endcommit;

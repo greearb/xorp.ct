@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.6 2003/09/24 16:16:07 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.7 2003/09/30 18:24:03 hodson Exp $"
 
 #include <glob.h>
 #include "rtrmgr_module.h"
@@ -36,7 +36,7 @@ TemplateTree::TemplateTree(const string& xorp_root_dir,
     : _xrldb(xrl_dir),
       _xorp_root_dir(xorp_root_dir)
 {
-    _root = new TemplateTreeNode(NULL, "", "");
+    _root = new TemplateTreeNode(*this, NULL, "", "");
     _current_node = _root;
 
     list <string> files;
@@ -158,34 +158,34 @@ TemplateTree::new_node(TemplateTreeNode* parent,
     TemplateTreeNode* t;
     switch (type) {
     case NODE_VOID:
-	t = new TemplateTreeNode(parent, path, varname);
+	t = new TemplateTreeNode(*this, parent, path, varname);
 	break;
     case NODE_TEXT:
-	t = new TextTemplate(parent, path, varname, initializer);
+	t = new TextTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_UINT:
-	t = new UIntTemplate(parent, path, varname, initializer);
+	t = new UIntTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_INT:
-	t = new IntTemplate(parent, path, varname, initializer);
+	t = new IntTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_BOOL:
-	t = new BoolTemplate(parent, path, varname, initializer);
+	t = new BoolTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_IPV4:
-	t = new IPv4Template(parent, path, varname, initializer);
+	t = new IPv4Template(*this, parent, path, varname, initializer);
 	break;
     case NODE_IPV4PREFIX:
-	t = new IPv4NetTemplate(parent, path, varname, initializer);
+	t = new IPv4NetTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_IPV6:
-	t = new IPv6Template(parent, path, varname, initializer);
+	t = new IPv6Template(*this, parent, path, varname, initializer);
 	break;
     case NODE_IPV6PREFIX:
-	t = new IPv6NetTemplate(parent, path, varname, initializer);
+	t = new IPv6NetTemplate(*this, parent, path, varname, initializer);
 	break;
     case NODE_MACADDR:
-	t = new MacaddrTemplate(parent, path, varname, initializer);
+	t = new MacaddrTemplate(*this, parent, path, varname, initializer);
 	break;
     default:
 	XLOG_UNREACHABLE();
@@ -244,7 +244,7 @@ TemplateTree::add_untyped_node(string segment, bool is_tag) {
     if (found != NULL) {
 	_current_node = found;
     } else {
-	found = new TemplateTreeNode(_current_node, segment, "");
+	found = new TemplateTreeNode(*this, _current_node, segment, "");
 	if (is_tag)
 	    found->set_tag();
 	_current_node = found;

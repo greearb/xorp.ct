@@ -1,6 +1,7 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.13 2003/08/01 22:49:15 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.14 2003/09/30 03:07:55 pavlin Exp $ */
 
 interfaces {
+  targetname: text = "fea";
   interface @: text {
     disable: toggle = false;
     description: text = "";
@@ -32,16 +33,20 @@ interfaces {
 interfaces {
   %modinfo: provides fea;
   %modinfo: path "fea/xorp_fea";
+  %modinfo: default_targetname "fea";
   %modinfo: statusmethod xrl;
   %modinfo: shutdownmethod xrl;
-  %modinfo: startcommit xrl "fea/ifmgr/0.1/start_transaction->tid:u32=$(interfaces.TID)";
-  %modinfo: endcommit xrl "fea/ifmgr/0.1/commit_transaction?tid:u32=$(interfaces.TID)";
+  %modinfo: startcommit xrl "$(interfaces.targetname)/ifmgr/0.1/start_transaction->tid:u32=$(interfaces.TID)";
+  %modinfo: endcommit xrl "$(interfaces.targetname)/ifmgr/0.1/commit_transaction?tid:u32=$(interfaces.TID)";
+  targetname {
+    %create:;
+  }
   interface @: text {
-    %create: xrl "fea/ifmgr/0.1/create_interface?tid:u32=$(interfaces.TID)&ifname:txt=$(@)";
-    %delete: xrl "fea/ifmgr/0.1/delete_interface?tid:u32=$(interfaces.TID)&ifname:txt=$(@)";
-    %list: xrl "finder://fea/ifmgr/0.1/get_configured_interface_names->ifnames:list";
+    %create: xrl "$(interfaces.targetname)/ifmgr/0.1/create_interface?tid:u32=$(interfaces.TID)&ifname:txt=$(@)";
+    %delete: xrl "$(interfaces.targetname)/ifmgr/0.1/delete_interface?tid:u32=$(interfaces.TID)&ifname:txt=$(@)";
+    %list: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_interface_names->ifnames:list";
     disable {
-      %set: xrl "fea/ifmgr/0.1/set_interface_enabled?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&enabled:bool=`~$(@)`";
+      %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_interface_enabled?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&enabled:bool=`~$(@)`";
     }
     description {
       %set: local;
@@ -49,71 +54,71 @@ interfaces {
       %delete: local;
     }
     mac {
-      %set: xrl  "fea/ifmgr/0.1/set_mac?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&mac:mac=$(@)";
-      %get: xrl  "fea/ifmgr/0.1/get_configured_mac?ifname:txt=$(interface.@)->mac:mac=$(@)";
+      %set: xrl  "$(interfaces.targetname)/ifmgr/0.1/set_mac?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&mac:mac=$(@)";
+      %get: xrl  "$(interfaces.targetname)/ifmgr/0.1/get_configured_mac?ifname:txt=$(interface.@)->mac:mac=$(@)";
     }
     vif @: text {
-      %create: xrl "fea/ifmgr/0.1/create_vif?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(@)";
-      %delete: xrl "fea/ifmgr/0.1/delete_vif?ifname:txt=$(interface.@)&tid:u32=$(interfaces.TID)&vif:txt=$(@)";
-      %list: xrl "fea/ifmgr/0.1/get_configured_vif_names?ifname:txt=$(interface.@)->vifs:list";
+      %create: xrl "$(interfaces.targetname)/ifmgr/0.1/create_vif?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(@)";
+      %delete: xrl "$(interfaces.targetname)/ifmgr/0.1/delete_vif?ifname:txt=$(interface.@)&tid:u32=$(interfaces.TID)&vif:txt=$(@)";
+      %list: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_names?ifname:txt=$(interface.@)->vifs:list";
       disable {
-        %set: xrl "fea/ifmgr/0.1/set_vif_enabled?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&enabled:bool=`~$(@)`";
-/*        %get: xrl "fea/ifmgr/0.1/get_configured_vif_enabled?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)->enabled:bool=`~$(@)`"; */
+        %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_vif_enabled?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&enabled:bool=`~$(@)`";
+/*        %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_enabled?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)->enabled:bool=`~$(@)`"; */
       }
       address @: ipv4 {
-	%create: xrl "fea/ifmgr/0.1/create_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
-	%delete: xrl "fea/ifmgr/0.1/delete_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
-	%list: xrl "fea/ifmgr/0.1/get_configured_vif_addresses4?ifname:txt=$(interface.@)&vif:txt->addresses:list";
+	%create: xrl "$(interfaces.targetname)/ifmgr/0.1/create_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
+	%delete: xrl "$(interfaces.targetname)/ifmgr/0.1/delete_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
+	%list: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_addresses4?ifname:txt=$(interface.@)&vif:txt->addresses:list";
         disable {
-          %set: xrl "fea/ifmgr/0.1/set_address_enabled4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&enabled:bool=`~$(@)`";
-/*        %get: xrl "fea/ifmgr/0.1/get_configured_address_enabled4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool=`~$(@)`"; */
+          %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_address_enabled4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&enabled:bool=`~$(@)`";
+/*        %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_enabled4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool=`~$(@)`"; */
         }
 	prefix-length {
-	  %set: xrl "fea/ifmgr/0.1/set_prefix4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&prefix_len:u32=$(@)"; 
-	  %get: xrl "fea/ifmgr/0.1/get_configured_prefix4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->prefix_len:u32"; 
+	  %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_prefix4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&prefix_len:u32=$(@)"; 
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_prefix4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->prefix_len:u32"; 
 	}
 	broadcast {
-	  %set: xrl "fea/ifmgr/0.1/set_broadcast4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&broadcast:ipv4=$(@)";
-	  %get: xrl "fea/ifmgr/0.1/get_configured_broadcast4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->broadcast:ipv4=$(@)";
+	  %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_broadcast4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&broadcast:ipv4=$(@)";
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_broadcast4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->broadcast:ipv4=$(@)";
 	}
 	destination {
-	  %set: xrl "fea/ifmgr/0.1/set_endpoint4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&endpoint:ipv4=$(@)";
-	  %get: xrl "fea/ifmgr/0.1/get_configured_endpoint4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->endpoint:ipv4=$(@)";
+	  %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_endpoint4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&endpoint:ipv4=$(@)";
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_endpoint4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->endpoint:ipv4=$(@)";
 	}
 	multicast-capable {
-	  %get: xrl "fea/ifmgr/0.1/get_configured_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool&point_to_point:bool&multicast:bool=$(@)";
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool&point_to_point:bool&multicast:bool=$(@)";
 	}
 	point-to-point {
-	  %get: xrl "fea/ifmgr/0.1/get_configured_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool&point_to_point:bool=$(@)&multicast:bool";
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool&point_to_point:bool=$(@)&multicast:bool";
 	}
 	loopback {
-	  %get: xrl "fea/ifmgr/0.1/get_configured_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool=$(@)&point_to_point:bool&multicast:bool";
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool=$(@)&point_to_point:bool&multicast:bool";
 	}
       }
       address @: ipv6 {
-	%create: xrl "fea/ifmgr/0.1/create_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
-	%delete: xrl "fea/ifmgr/0.1/delete_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
-	%list: xrl "fea/ifmgr/0.1/get_configured_vif_addresses6?ifname:txt=$(interface.@)&vif:txt->addresses:list";
+	%create: xrl "$(interfaces.targetname)/ifmgr/0.1/create_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
+	%delete: xrl "$(interfaces.targetname)/ifmgr/0.1/delete_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
+	%list: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_addresses6?ifname:txt=$(interface.@)&vif:txt->addresses:list";
         disable {
-          %set: xrl "fea/ifmgr/0.1/set_address_enabled6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&enabled:bool=`~$(@)`";
-/*        %get: xrl "fea/ifmgr/0.1/get_configured_address_enabled6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool=`~$(@)`"; */
+          %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_address_enabled6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&enabled:bool=`~$(@)`";
+/*        %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_enabled6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool=`~$(@)`"; */
         }
 	prefix-length {
-	  %set: xrl "fea/ifmgr/0.1/set_prefix6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&prefix_len:u32=$(@)"; 
-	  %get: xrl "fea/ifmgr/0.1/get_configured_prefix6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->prefix_len:u32"; 
+	  %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_prefix6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&prefix_len:u32=$(@)"; 
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_prefix6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->prefix_len:u32"; 
 	}
 	destination {
-	  %set: xrl "fea/ifmgr/0.1/set_endpoint6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&endpoint:ipv6=$(@)";
-	  %get: xrl "fea/ifmgr/0.1/get_configured_endpoint6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->endpoint:ipv6=$(@)";
+	  %set: xrl "$(interfaces.targetname)/ifmgr/0.1/set_endpoint6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&endpoint:ipv6=$(@)";
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_endpoint6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->endpoint:ipv6=$(@)";
 	}
 	multicast-capable {
-	  %get: xrl "fea/ifmgr/0.1/get_configured_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool&point_to_point:bool&multicast:bool=$(@)";
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool&point_to_point:bool&multicast:bool=$(@)";
 	}
 	point-to-point {
-	  %get: xrl "fea/ifmgr/0.1/get_configured_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool&point_to_point:bool=$(@)&multicast:bool";
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool&point_to_point:bool=$(@)&multicast:bool";
 	}
 	loopback {
-	  %get: xrl "fea/ifmgr/0.1/get_configured_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool=$(@)&point_to_point:bool&multicast:bool";
+	  %get: xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool=$(@)&point_to_point:bool&multicast:bool";
 	}
       }
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.18 2003/05/30 23:57:09 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.19 2003/09/24 16:16:07 hodson Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_VARIABLES
@@ -355,7 +355,7 @@ ConfigTreeNode::find_changed_modules(set <string>& changed_modules) const {
 	    if (cmd == NULL)
 		//no need to go to children
 		return;
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_xrl_modules(*this);
 	    for (i = modules.begin(); i!=modules.end(); i++)
 		changed_modules.insert(*i);
 	    return;
@@ -363,20 +363,20 @@ ConfigTreeNode::find_changed_modules(set <string>& changed_modules) const {
 	if (!_existence_committed) {
 	    cmd = _template->const_command("%create");
 	    if (cmd != NULL) {
-		modules = cmd->affected_xrl_modules();
+		modules = cmd->affected_xrl_modules(*this);
 		for (i = modules.begin(); i!=modules.end(); i++)
 		    changed_modules.insert(*i);
 	    }
 	    cmd = _template->const_command("%activate");
 	    if (cmd != NULL) {
-		modules = cmd->affected_xrl_modules();
+		modules = cmd->affected_xrl_modules(*this);
 		for (i = modules.begin(); i!=modules.end(); i++)
 		    changed_modules.insert(*i);
 	    }
 	} else if (!_value_committed) {
 	    cmd = _template->const_command("%set");
 	    if (cmd != NULL) {
-		modules = cmd->affected_xrl_modules();
+		modules = cmd->affected_xrl_modules(*this);
 		for (i = modules.begin(); i!=modules.end(); i++)
 		    changed_modules.insert(*i);
 	    }
@@ -396,19 +396,19 @@ ConfigTreeNode::find_active_modules(set <string>& active_modules) const {
 	set <string>::const_iterator i;
 	cmd = _template->const_command("%create");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_xrl_modules(*this);
 	    for (i = modules.begin(); i!=modules.end(); i++)
 		active_modules.insert(*i);
 	}
 	cmd = _template->const_command("%activate");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_xrl_modules(*this);
 	    for (i = modules.begin(); i!=modules.end(); i++)
 		active_modules.insert(*i);
 	}
 	cmd = _template->const_command("%set");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_xrl_modules(*this);
 	    for (i = modules.begin(); i!=modules.end(); i++)
 		active_modules.insert(*i);
 	}
@@ -429,19 +429,19 @@ ConfigTreeNode::find_all_modules(set <string>& all_modules) const {
 	set <string>::const_iterator i;
 	cmd = _template->const_command("%create");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_xrl_modules(*this);
 	    for (i = modules.begin(); i!=modules.end(); i++)
 		all_modules.insert(*i);
 	}
 	cmd = _template->const_command("%activate");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_xrl_modules(*this);
 	    for (i = modules.begin(); i!=modules.end(); i++)
 		all_modules.insert(*i);
 	}
 	cmd = _template->const_command("%set");
 	if (cmd != NULL) {
-	    modules = cmd->affected_xrl_modules();
+	    modules = cmd->affected_xrl_modules(*this);
 	    for (i = modules.begin(); i!=modules.end(); i++)
 		all_modules.insert(*i);
 	}
@@ -1070,6 +1070,31 @@ ConfigTreeNode::named_value(const string& varname) const {
     i = _variables.find(varname);
     assert(i!=_variables.end());
     return i->second;
+}
+
+string
+ConfigTreeNode::get_module_name_by_variable(const string& varname) const
+{
+    VarType type = NONE;
+    const ConfigTreeNode* varname_node;
+    const TemplateTreeNode* template_tree_node;
+
+    varname_node = find_const_varname_node(varname, type);
+    if (varname_node != NULL) {
+	//
+	// Search all template tree nodes toward the root
+	// to find the module name.
+	//
+	for (template_tree_node = varname_node->template_node();
+	     template_tree_node != NULL;
+	     template_tree_node = template_tree_node->parent()) {
+	    string module_name = template_tree_node->module_name();
+	    if (module_name.length() > 0)
+		return (module_name);
+	}
+    }
+
+    return "";		// XXX: nothing found
 }
 
 bool 

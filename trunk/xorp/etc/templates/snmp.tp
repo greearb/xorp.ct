@@ -1,5 +1,6 @@
 protocols {
   snmp {
+    targetname: text = "xorp_if_mib";
     mib-module @: text {
       abs-path: text = "";
       mib-index: uint = 0;
@@ -12,12 +13,16 @@ protocols {
   snmp {
     %modinfo: provides xorp_if_mib; 
     %modinfo: path "mibs/snmpdscripts/startsnmp";
+    %modinfo: default_targetname "xorp_if_mib";
     %modinfo: statusmethod xrl;
     %modinfo: shutdownmethod xrl;
+    targetname {
+      %set:;
+    }
     mib-module @ {
-      %create: xrl "xorp_if_mib/xorp_if_mib/0.1/load_mib?mod_name:txt=$(@)&abs_path:txt=$(@.abs-path)->mib_index:u32=$(@.mib-index)";
+      %create: xrl "$(snmp.targetname)/xorp_if_mib/0.1/load_mib?mod_name:txt=$(@)&abs_path:txt=$(@.abs-path)->mib_index:u32=$(@.mib-index)";
       %delete: xrl
-      %"xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=$(@.mib-index)->unloaded:bool";
+      %"$(snmp.targetname)/xorp_if_mib/0.1/unload_mib?mib_index:u32=$(@.mib-index)->unloaded:bool";
       abs-path {
 	%set: local;
 	%get: local;

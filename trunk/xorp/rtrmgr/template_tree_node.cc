@@ -12,16 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.6 2003/05/10 23:29:22 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.7 2003/09/30 18:24:03 hodson Exp $"
 
-#include <glob.h>
 #include "rtrmgr_module.h"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include <glob.h>
 #include "template_tree_node.hh"
 #include "template_commands.hh"
 #include "module_command.hh"
 #include "template_tree.hh"
 #include "conf_tree.hh"
 #include "command_tree.hh"
+#include "util.hh"
 
 #define DEBUG_TEMPLATE_PARSER
 
@@ -29,16 +33,19 @@ extern int init_template_parser(const char *, TemplateTree* c);
 extern int parse_template();
 extern void tplterror(const char* s);
 
-TemplateTreeNode::TemplateTreeNode(TemplateTreeNode* parent,
+TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
+				   TemplateTreeNode* parent,
 				   const string& path,
 				   const string& varname)
-    : _segname(path), _varname(varname)
+    : _template_tree(template_tree), _parent(parent), _module_name(""),
+      _default_target_name(""),
+      _segname(path), _varname(varname), _has_default(false), _is_tag(false)
 {
-    _parent = parent;
-    if (parent != NULL)
-	parent->add_child(this);
-    _has_default = false;
-    _is_tag = false;
+    if (_parent != NULL) {
+	_parent->add_child(this);
+	_module_name = _parent->module_name();
+	_default_target_name = _parent->default_target_name();
+    }
 }
 
 TemplateTreeNode::~TemplateTreeNode() {
@@ -70,7 +77,7 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt) {
     if (cmd == "%modinfo") {
 	iter = _cmd_map.find("%modinfo");
 	if (iter == _cmd_map.end()) {
-	    command = new ModuleCommand(cmd, tt);
+	    command = new ModuleCommand(tt, *this, cmd);
 	    _cmd_map[cmd] = command;
 	} else {
 	    command = iter->second;
@@ -79,7 +86,7 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt) {
 	//If the command already exists, no need to create it again.
 	//The command action will simply be added to the existing command.
 	if (_cmd_map.find(cmd) == _cmd_map.end()) {
-	    command = new AllowCommand(cmd);
+	    command = new AllowCommand(*this, cmd);
 	    _cmd_map[cmd] = command;
 	}
     } else if ((cmd == "%create")
@@ -93,7 +100,7 @@ TemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt) {
 	//If the command already exists, no need to create it again.
 	//The command action will simply be added to the existing command.
 	if (_cmd_map.find(cmd) == _cmd_map.end()) {
-	    command = new Command(cmd);
+	    command = new Command(*this, cmd);
 	    _cmd_map[cmd] = command;
 	}
     } else {
@@ -211,7 +218,108 @@ bool TemplateTreeNode::name_is_variable() const {
     return true;
 }
 
+string
+TemplateTreeNode::get_default_target_name_by_variable(const string& varname) const
+{
+    const TemplateTreeNode* ttn;
 
+    ttn = find_varname_node(varname);
+    if (ttn != NULL) {
+	//
+	// Search all template tree nodes toward the root
+	// to find the default target name.
+	//
+	for ( ; ttn != NULL; ttn = ttn->parent()) {
+	    string default_target_name = ttn->default_target_name();
+	    if (default_target_name.length() > 0)
+		return (default_target_name);
+	}
+    }
+
+    return "";		// XXX: nothing found
+}
+
+void
+TemplateTreeNode::split_up_varname(const string& varname,
+				   list <string>& var_parts) const
+{
+    XLOG_ASSERT(varname[0] == '$');
+    XLOG_ASSERT(varname[1] == '(');
+    XLOG_ASSERT(varname[varname.size() - 1] == ')');
+
+    string trimmed = varname.substr(2, varname.size() - 3);
+    var_parts = split(trimmed, '.');
+}
+
+const TemplateTreeNode*
+TemplateTreeNode::find_varname_node(const string& varname) const
+{
+    if (varname == "$(@)" || (varname == "$(" + _segname + ")") ) {
+	XLOG_ASSERT(! is_tag());
+	return this;
+    }
+
+    // Split varname
+    list <string> var_parts;
+    split_up_varname(varname, var_parts);
+
+    if (var_parts.front() == "@") {
+	return find_child_varname_node(var_parts);
+    } else if (var_parts.size() > 1) {
+	// it's a parent node, or a child of a parent node
+	return find_parent_varname_node(var_parts);
+    }
+
+    // XXX: if not "$(@)", then size of 0 or 1 is not valid syntax
+    return NULL;
+}
+
+const TemplateTreeNode*
+TemplateTreeNode::find_parent_varname_node(const list <string>& var_parts) const
+{
+    if (_parent == NULL) {
+	return NULL;
+    }
+    if (is_tag() || (type() == NODE_VOID)) {
+	// when naming a parent node variable, you must start with a tag
+	if (_segname == var_parts.front()) {
+	    // we've found the right place to start
+	    return find_child_varname_node(var_parts);
+	}
+    }
+
+    return _parent->find_parent_varname_node(var_parts);
+}
+
+const TemplateTreeNode*
+TemplateTreeNode::find_child_varname_node(const list <string>& var_parts) const
+{
+    if ((var_parts.front() != "@") && (var_parts.front() != _segname)) {
+	// varname doesn't match us
+	return NULL;
+    }
+
+    // the name might refer to this node
+    if (var_parts.size() == 1) {
+	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
+	    return this;
+	}
+    }
+
+    // the name might refer to a child of ours
+    list <string> child_var_parts = var_parts;
+    child_var_parts.pop_front();
+
+    list <TemplateTreeNode* >::const_iterator ti;
+    for (ti = _children.begin(); ti != _children.end(); ++ti) {
+	const TemplateTreeNode* found_child;
+	found_child = (*ti)->find_child_varname_node(child_var_parts);
+	if (found_child != NULL)
+	    return found_child;
+    }
+
+    return NULL;
+}
 
 bool
 TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
@@ -317,11 +425,12 @@ TemplateTreeNode::check_variable_name(const vector<string>& parts,
  * TextTemplate
  **************************************************************************/
 
-TextTemplate::TextTemplate(TemplateTreeNode* parent,
+TextTemplate::TextTemplate(TemplateTree& template_tree,
+			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
 			   const string& initializer)
     throw (ParseError)
-    : TemplateTreeNode(parent, path, varname), _default("")
+    : TemplateTreeNode(template_tree, parent, path, varname), _default("")
 {
 
     if (initializer == "")
@@ -348,11 +457,12 @@ bool TextTemplate::type_match(const string &) const {
  * UIntTemplate
  **************************************************************************/
 
-UIntTemplate::UIntTemplate(TemplateTreeNode* parent,
+UIntTemplate::UIntTemplate(TemplateTree& template_tree,
+			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
 			   const string& initializer)
     throw (ParseError)
-    : TemplateTreeNode(parent, path, varname)
+    : TemplateTreeNode(template_tree, parent, path, varname)
 {
     if (initializer == "")
 	return;
@@ -384,11 +494,12 @@ UIntTemplate::default_str() const {
  * IntTemplate
  **************************************************************************/
 
-IntTemplate::IntTemplate(TemplateTreeNode* parent,
+IntTemplate::IntTemplate(TemplateTree& template_tree,
+			 TemplateTreeNode* parent,
 			 const string& path, const string& varname,
 			 const string& initializer)
     throw (ParseError)
-    : TemplateTreeNode(parent, path, varname)
+    : TemplateTreeNode(template_tree, parent, path, varname)
 {
     if (initializer == "")
 	return;
@@ -426,11 +537,12 @@ IntTemplate::default_str() const {
  * BoolTemplate
  **************************************************************************/
 
-BoolTemplate::BoolTemplate(TemplateTreeNode* parent,
+BoolTemplate::BoolTemplate(TemplateTree& template_tree,
+			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
 			   const string& initializer)
     throw (ParseError)
-    : TemplateTreeNode(parent, path, varname) {
+    : TemplateTreeNode(template_tree, parent, path, varname) {
     if (initializer == "")
 	return;
 
@@ -460,11 +572,12 @@ string BoolTemplate::default_str() const {
 	return "false";
 }
 
-IPv4Template::IPv4Template(TemplateTreeNode* parent,
+IPv4Template::IPv4Template(TemplateTree& template_tree,
+			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
 			   const string& initializer)
     throw (ParseError)
-    : TemplateTreeNode(parent, path, varname), _default(0)
+    : TemplateTreeNode(template_tree, parent, path, varname), _default(0)
 {
     if (!initializer.empty()) {
 	try {
@@ -496,11 +609,12 @@ bool IPv4Template::type_match(const string& s) const {
 }
 
 
-IPv6Template::IPv6Template(TemplateTreeNode* parent,
+IPv6Template::IPv6Template(TemplateTree& template_tree,
+			   TemplateTreeNode* parent,
 			   const string& path, const string& varname,
 			   const string& initializer)
     throw (ParseError)
-    : TemplateTreeNode(parent, path, varname), _default(0)
+    : TemplateTreeNode(template_tree, parent, path, varname), _default(0)
 {
     if (!initializer.empty()) {
 	try {
@@ -532,11 +646,12 @@ bool IPv6Template::type_match(const string& s) const {
 }
 
 
-IPv4NetTemplate::IPv4NetTemplate(TemplateTreeNode* parent,
+IPv4NetTemplate::IPv4NetTemplate(TemplateTree& template_tree,
+				 TemplateTreeNode* parent,
 				 const string& path, const string& varname,
 				 const string& initializer)
     throw (ParseError)
-    : TemplateTreeNode(parent, path, varname), _default(0)
+    : TemplateTreeNode(template_tree, parent, path, varname), _default(0)
 {
     if (!initializer.empty()) {
 	try {
@@ -568,11 +683,12 @@ bool IPv4NetTemplate::type_match(const string& s) const {
 }
 
 
-IPv6NetTemplate::IPv6NetTemplate(TemplateTreeNode* parent,
+IPv6NetTemplate::IPv6NetTemplate(TemplateTree& template_tree,
+				 TemplateTreeNode* parent,
 				 const string& path, const string& varname,
 				 const string& initializer)
     throw (ParseError)
-    : TemplateTreeNode(parent, path, varname), _default(0)
+    : TemplateTreeNode(template_tree, parent, path, varname), _default(0)
 {
     if (!initializer.empty()) {
 	try {
@@ -604,11 +720,12 @@ bool IPv6NetTemplate::type_match(const string& s) const {
 }
 
 
-MacaddrTemplate::MacaddrTemplate(TemplateTreeNode* parent,
+MacaddrTemplate::MacaddrTemplate(TemplateTree& template_tree,
+				 TemplateTreeNode* parent,
 				 const string& path, const string& varname,
 				 const string& initializer)
     throw (ParseError)
-    : TemplateTreeNode(parent, path, varname), _default(0) {
+    : TemplateTreeNode(template_tree, parent, path, varname), _default(0) {
     if (!initializer.empty()) {
 	try {
 	    _default = new EtherMac(initializer.c_str());

@@ -1,5 +1,6 @@
 protocols {
   bgp {
+    targetname: text = "bgp";
     bgp-id: ipv4;
     local-as: uint;
     peer @: text {
@@ -20,20 +21,24 @@ protocols {
     %modinfo: provides bgp;
     %modinfo: depends rib;
     %modinfo: path "bgp/xorp_bgp";
+    %modinfo: default_targetname "bgp";
     %modinfo: statusmethod xrl;
     %modinfo: shutdownmethod xrl;
+    targetname {
+      %set:;
+    }
     bgp-id {
-      %set: xrl "bgp/bgp/0.2/set_bgp_id?id:ipv4=$(@)";
-      %get: xrl "bgp/bgp/0.2/get_bgp_id->id:ipv4";
+      %set: xrl "$(bgp.targetname)/bgp/0.2/set_bgp_id?id:ipv4=$(@)";
+      %get: xrl "$(bgp.targetname)/bgp/0.2/get_bgp_id->id:ipv4";
     }
     local-as {
-      %set: xrl "bgp/bgp/0.2/set_local_as?as:u32=$(@)";
-      %get: xrl "bgp/bgp/0.2/get_local_as->as:u32";
+      %set: xrl "$(bgp.targetname)/bgp/0.2/set_local_as?as:u32=$(@)";
+      %get: xrl "$(bgp.targetname)/bgp/0.2/get_local_as->as:u32";
     }
     peer @ {
-      %create: xrl "bgp/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
-      %delete: xrl "bgp/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
-      %activate: xrl "bgp/bgp/0.2/enable_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
+      %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
+      %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
+      %activate: xrl "$(bgp.targetname)/bgp/0.2/enable_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
       peer-port {
 	%set:; /*the no-op set is to indicate that this node can be set, but 	           not changed*/
       }
@@ -53,12 +58,11 @@ protocols {
 	%set:;
       }
       disable {
-        %set: xrl "bgp/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
+        %set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
       }
       set-parameter {
-	%set: xrl "bgp/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=$(@)";
+	%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=$(@)";
       }
     }
   }
 }
-		

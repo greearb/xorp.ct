@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.14 2003/06/09 23:38:40 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.15 2003/09/30 18:24:03 hodson Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -23,12 +23,15 @@
 #include "module_command.hh"
 #include "xrldb.hh"
 #include "template_tree.hh"
+#include "template_tree_node.hh"
 #include "task.hh"
 #include "parse_error.hh"
 
-ModuleCommand::ModuleCommand(const string& cmd_name, TemplateTree& tt)
-    : Command(cmd_name),
-      _tt(tt),
+ModuleCommand::ModuleCommand(TemplateTree& template_tree,
+			     TemplateTreeNode& template_tree_node,
+			     const string& cmd_name)
+    : Command(template_tree_node, cmd_name),
+      _tt(template_tree),
       _startcommit(NULL), _endcommit(NULL),
       _status_method(NO_STATUS_METHOD),
       _shutdown_method(NO_SHUTDOWN_METHOD),
@@ -75,6 +78,7 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
     if (cmd == "provides") {
 	_modname = value;
 	_tt.register_module(_modname, this);
+	template_tree_node().set_module_name(_modname);
     } else if (cmd == "depends") {
 	if (_modname.empty()) {
 	    xorp_throw(ParseError, "\"depends\" must be preceded by \"provides\"");
@@ -91,6 +95,21 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	    _modpath = value.substr(1,value.length()-2);
 	else
 	    _modpath = value;
+    } else if (cmd == "default_targetname") {
+	if (_modname == "") {
+	    xorp_throw(ParseError, "\"default_targetname\" must be preceded by \"provides\"");
+	}
+	if (_default_target_name != "") {
+	    xorp_throw(ParseError, "duplicate \"default_targetname\" subcommand");
+	}
+	if (value[0] == '"')
+	    _default_target_name = value.substr(1, value.length() - 2);
+	else
+	    _default_target_name = value;
+	if (_default_target_name.empty()) {
+	    xorp_throw(ParseError, "Empty \"default_targetname\" subcommand");
+	}
+	template_tree_node().set_default_target_name(_default_target_name);
     } else if (cmd == "startcommit") {
 	debug_msg("startcommit:\n");
 	list <string>::const_iterator i;
@@ -100,16 +119,17 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	list <string> newaction = action;
 	newaction.pop_front();
 	if (newaction.front()=="xrl")
-	    _startcommit = new XrlAction(newaction, xrldb);
+	    _startcommit = new XrlAction(template_tree_node(), newaction,
+					 xrldb);
 	else
-	    _startcommit = new Action(newaction);
+	    _startcommit = new Action(template_tree_node(), newaction);
     } else if (cmd == "endcommit") {
 	list <string> newaction = action;
 	newaction.pop_front();
 	if (newaction.front()=="xrl")
-	    _endcommit = new XrlAction(newaction, xrldb);
+	    _endcommit = new XrlAction(template_tree_node(), newaction, xrldb);
 	else
-	    _endcommit = new Action(newaction);
+	    _endcommit = new Action(template_tree_node(), newaction);
     } else if (cmd == "statusmethod") {
 	list <string> newaction = action;
 	newaction.pop_front();

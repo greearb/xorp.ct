@@ -1,9 +1,19 @@
-/* $XORP: xorp/etc/templates/rib.tp,v 1.6 2003/07/17 00:28:33 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rib.tp,v 1.7 2003/08/01 22:49:15 pavlin Exp $ */
+
+plumbing {
+  rib {
+    targetname: text = "rib";
+  }
+}
 
 plumbing rib {
   %modinfo: provides rib;
   %modinfo: depends fea;
   %modinfo: path "rib/xorp_rib";
+  %modinfo: default_targetname "rib";
   %modinfo: statusmethod xrl;
   %modinfo: shutdownmethod xrl;
+  targetname {
+    %set:;
+  }
 }

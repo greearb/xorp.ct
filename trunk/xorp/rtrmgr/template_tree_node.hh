@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.3 2003/04/22 23:43:02 mjh Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.4 2003/05/10 23:23:04 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -50,7 +50,7 @@ class Command;
 
 class TemplateTreeNode {
 public:
-    TemplateTreeNode(TemplateTreeNode* parent, 
+    TemplateTreeNode(TemplateTree& template_tree, TemplateTreeNode* parent, 
 		     const string& path, const string& varname);
     virtual ~TemplateTreeNode();
     virtual TTNodeType type() const {return NODE_VOID;}
@@ -85,6 +85,10 @@ public:
     void print() const;
     TemplateTreeNode* parent() const {return _parent;}
     const list<TemplateTreeNode*>& children() const {return _children;}
+    const string& module_name() const { return _module_name; }
+    const string& default_target_name() const { return _default_target_name; }
+    void set_module_name(const string& module_name) { _module_name = module_name; }
+    void set_default_target_name(const string& default_target_name) { _default_target_name = default_target_name; }
     const string& segname() const {return _segname;}
     string path() const;
 
@@ -93,17 +97,28 @@ public:
 			    int depth) const;
     bool has_default() const {return _has_default;}
     bool check_variable_name(const vector<string>& parts, uint part) const;
+    string get_default_target_name_by_variable(const string& varname) const;
+
 protected:
     void add_child(TemplateTreeNode* child);
     
     string strip_quotes(const string& s) const ;
     void set_has_default() {_has_default = true;}
     bool name_is_variable() const;
-private:
 
+private:
+    void split_up_varname(const string& varname,
+			  list <string>& var_parts) const;
+    const TemplateTreeNode* find_varname_node(const string& varname) const;
+    const TemplateTreeNode* find_parent_varname_node(const list <string>& var_parts) const;
+    const TemplateTreeNode* find_child_varname_node(const list <string>& var_parts) const;
+
+    TemplateTree&	_template_tree;
     TemplateTreeNode* _parent;
     list <TemplateTreeNode*> _children;
 
+    string _module_name;
+    string _default_target_name;
     string _segname;
 
     //If this node has a variable name associated with it, _varname is
@@ -122,7 +137,7 @@ private:
 
 class UIntTemplate : public TemplateTreeNode {
 public:
-    UIntTemplate(TemplateTreeNode* parent, 
+    UIntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
 		 const string& path, const string& varname, 
 		 const string& initializer) throw (ParseError);
     string typestr() const {return string("uint");}
@@ -136,7 +151,7 @@ private:
 
 class IntTemplate : public TemplateTreeNode {
 public:
-    IntTemplate(TemplateTreeNode* parent, 
+    IntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
 		const string& path, const string& varname, 
 		const string& initializer) throw (ParseError);
     string typestr() const {return string("int");}
@@ -150,13 +165,13 @@ private:
 
 class TextTemplate : public TemplateTreeNode {
 public:
-    TextTemplate(TemplateTreeNode* parent, 
+    TextTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
 		 const string& path, const string& varname, 
 		 const string& initializer)  throw (ParseError);
     string typestr() const {return string("text");}
     TTNodeType type() const {return NODE_TEXT;}
     string default_value() const {return _default;}
-    string default_str() const {return "\"" + _default + "\"";}
+    string default_str() const {return _default;}
     bool type_match(const string& s) const;
 private:
     string _default;
@@ -164,7 +179,7 @@ private:
 
 class BoolTemplate : public TemplateTreeNode {
 public:
-    BoolTemplate(TemplateTreeNode* parent, 
+    BoolTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
 		 const string& path, const string& varname, 
 		 const string& initializer)  throw (ParseError);
     string typestr() const {return string("bool");}
@@ -178,7 +193,7 @@ private:
 
 class IPv4Template : public TemplateTreeNode {
 public:
-    IPv4Template(TemplateTreeNode* parent, 
+    IPv4Template(TemplateTree& template_tree, TemplateTreeNode* parent, 
 		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
     ~IPv4Template();
@@ -193,7 +208,7 @@ private:
 
 class IPv4NetTemplate : public TemplateTreeNode {
 public:
-    IPv4NetTemplate(TemplateTreeNode* parent, 
+    IPv4NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
 		    const string& path, const string& varname, 
 		    const string& initializer) throw (ParseError);
     ~IPv4NetTemplate();
@@ -208,7 +223,7 @@ private:
 
 class IPv6Template : public TemplateTreeNode {
 public:
-    IPv6Template(TemplateTreeNode* parent,
+    IPv6Template(TemplateTree& template_tree, TemplateTreeNode* parent,
 		 const string& path, const string& varname, 
 		 const string& initializer) throw (ParseError);
     ~IPv6Template();
@@ -223,7 +238,7 @@ private:
 
 class IPv6NetTemplate : public TemplateTreeNode {
 public:
-    IPv6NetTemplate(TemplateTreeNode* parent, 
+    IPv6NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
 		    const string& path, const string& varname, 
 		    const string& initializer) throw (ParseError);
     ~IPv6NetTemplate();
@@ -238,7 +253,7 @@ private:
 
 class MacaddrTemplate : public TemplateTreeNode {
 public:
-    MacaddrTemplate(TemplateTreeNode* parent, 
+    MacaddrTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
 		    const string& path, const string& varname, 
 		    const string& initializer) throw (ParseError);
     ~MacaddrTemplate();

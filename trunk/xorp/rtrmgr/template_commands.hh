@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.12 2003/05/02 22:33:54 mjh Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.13 2003/10/01 18:33:38 hodson Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -31,6 +31,7 @@
 class XRLdb;
 class XorpClient;
 class TemplateTree;
+class TemplateTreeNode;
 
 class UnexpandedVariable {
 public:
@@ -45,22 +46,30 @@ private:
 
 class Action {
 public:
-    Action(const list<string> &cmd) throw (ParseError);
+    Action(TemplateTreeNode& template_tree_node,
+	   const list<string> &cmd) throw (ParseError);
     virtual ~Action() {};
     string str() const;
+    TemplateTreeNode& template_tree_node() { return _template_tree_node; }
+    const TemplateTreeNode& template_tree_node() const { return _template_tree_node; }
+
 protected:
     list<string> _split_cmd;
+
+private:
+    TemplateTreeNode& _template_tree_node;
 };
 
 class XrlAction : public Action {
 public:
-    XrlAction(const list<string> &cmd, const XRLdb& xrldb) throw (ParseError);
+    XrlAction(TemplateTreeNode& template_tree_node, const list<string> &cmd,
+	      const XRLdb& xrldb) throw (ParseError);
     int execute(const ConfigTreeNode& ctn,
 		TaskManager& task_manager,
 		XrlRouter::XrlCallback cb) const;
     string expand_xrl_variables(const ConfigTreeNode& ctn) const;
     string xrl_return_spec() const {return _response;}
-    string affected_module() const;
+    string affected_module(const ConfigTreeNode& ctn) const;
 
     inline const string& request() const { return _request; }
 private:
@@ -74,7 +83,7 @@ private:
 
 class Command {
 public:
-    Command(const string &cmd_name);
+    Command(TemplateTreeNode& template_tree_node, const string &cmd_name);
     virtual ~Command();
     void add_action(const list <string> &action,
 			    const XRLdb& xrldb);
@@ -83,17 +92,22 @@ public:
     void action_complete(const XrlError& err, 
 			 XrlArgs* xrlargs,
 			 ConfigTreeNode *ctn);
-    set <string> affected_xrl_modules() const;
-    bool affects_module(const string& module) const;
+    set <string> affected_xrl_modules(const ConfigTreeNode& ctn) const;
+    bool affects_module(const ConfigTreeNode& ctn, const string& module) const;
     virtual string str() const;
+    TemplateTreeNode& template_tree_node() { return _template_tree_node; }
+
 protected:
     string _cmd_name;
     list <Action*> _actions;
+
+private:
+    TemplateTreeNode& _template_tree_node;
 };
 
 class AllowCommand : public Command {
 public:
-    AllowCommand(const string &cmd_name);
+    AllowCommand(TemplateTreeNode& template_tree_node, const string &cmd_name);
 
     void add_action(const list <string> &action) throw (ParseError);
 
