@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.31 2003/05/21 03:05:34 jcardona Exp $
+dnl $XORP: xorp/configure.in,v 1.32 2003/05/21 03:59:26 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -369,12 +369,12 @@ fi
 AC_SUBST(MIBS)
 
 if test ${snmpd} = "not_found" ; then
-    AC_PATH_PROG(snmpd, snmpd, "not_found", /usr/sbin)
+    AC_PATH_PROG(snmpd, snmpd, "not_found", /usr/local/sbin)
 fi
 
 if test ${snmpd} = "not_found" ; then
     echo "checking again for snmpd in another directory"
-    AC_PATH_PROG(snmpd2, snmpd, "not_found", /usr/local/sbin)
+    AC_PATH_PROG(snmpd2, snmpd, "not_found", /usr/sbin)
     snmpd=$snmpd2
 fi
 
