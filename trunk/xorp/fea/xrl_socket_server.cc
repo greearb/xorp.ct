@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.1 2003/12/17 00:04:49 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.2 2003/12/17 17:47:42 hodson Exp $"
 
 #include "fea_module.h"
 
@@ -402,7 +402,7 @@ XrlSocketServer::XrlSocketServer(EventLoop&		e,
 				 AddressTableBase&	atable,
 				 const IPv4&		finder_host,
 				 uint16_t		finder_port)
-    : _e(e), _atable(atable)
+    : ServiceBase("Socket Server"), _e(e), _atable(atable)
 {
     const char* class_name = "socket_server";
     _r = new ChattyXrlStdRouter(e, class_name, finder_host, finder_port, this);
