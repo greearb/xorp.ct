@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.9 2003/09/16 01:15:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.10 2003/09/16 01:19:00 pavlin Exp $"
 
 
 //
@@ -1198,12 +1198,13 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 		       cstring(src), nbytes);
 	    return;		// Error
 	}
-	if (_rcvmh.msg_controllen < sizeof(struct cmsghdr)) {
+	size_t controllen =  static_cast<size_t>(_rcvmh.msg_controllen);
+	if (controllen < sizeof(struct cmsghdr)) {
 	    XLOG_ERROR("proto_socket_read() failed: "
 		       "RX packet from %s has too short msg_controllen "
-		       "(%d instead of %u)",
+		       "(%u instead of %u)",
 		       cstring(src),
-		       _rcvmh.msg_controllen,
+		       (uint32_t)controllen,
 		       (uint32_t)sizeof(struct cmsghdr));
 	    return;		// Error
 	}
