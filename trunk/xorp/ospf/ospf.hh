@@ -50,6 +50,8 @@ struct OspfTypes {
 };
 
 #include "io.hh"
+#include "exceptions.hh"
+#include "lsa.hh"
 #include "packet.hh"
 #include "peer_manager.hh"
 #include "ls_database_manager.hh"
