@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.12 2003/09/20 00:16:29 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.13 2003/09/24 23:26:03 hodson Exp $
 #
 
 #
@@ -36,7 +36,7 @@ HTML_INDEX_DATA="html/index.dat"
 #
 # Misc. pre-defined variables
 #
-HTML_LOGO="file:///home/puma/u0/hodson/src/xorp/docs/kdoc/xorp-cropped.png"
+HTML_LOGO="http://www.xorp.org/xorp2.png"
 
 #
 # Print message to stderr if DEBUG is set to non-zero value
