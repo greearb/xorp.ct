@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.22 2004/06/10 22:40:37 hodson Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.23 2005/03/18 08:15:05 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -437,6 +437,204 @@ test_fanout(TestInfo& /*info*/)
     fanout_table->get_next_message(debug_table3);
 
     debug_table1->write_separator();
+    sr1->unref();
+    sr2->unref();
+
+    //================================================================
+    //Test6: test of queuing
+    //================================================================
+    //add a route
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 6");
+    debug_table1->write_comment("TEST QUEUING");
+
+    debug_table1->set_get_on_wakeup(false);
+    debug_table2->set_get_on_wakeup(false);
+    debug_table3->set_get_on_wakeup(false);
+
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    fanout_table->add_route(*msg, NULL);
+    debug_table1->write_separator();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr2->set_nexthop_resolved(true);
+    msg = new InternalMessage<IPv4>(sr2, &handler2, 0);
+    msg->set_push();
+    fanout_table->add_route(*msg, NULL);
+    debug_table1->write_separator();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 3 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET A ROUTE");
+    fanout_table->get_next_message(debug_table3);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 3 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET A ROUTE");
+    fanout_table->get_next_message(debug_table3);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 3 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET NO ROUTE");
+    fanout_table->get_next_message(debug_table3);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 2 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET A ROUTE");
+    fanout_table->get_next_message(debug_table2);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 2 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET NO ROUTE");
+    fanout_table->get_next_message(debug_table2);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 1 SKIP ENTIRE QUEUE");
+    debug_table1->write_comment("EXPECT TO GET NO ROUTE");
+    fanout_table->remove_next_table(debug_table1);
+    fanout_table->add_next_table(debug_table1, &handler1, 1);
+    debug_table1->write_separator();
+
+    sr1->unref();
+    sr2->unref();
+
+    //================================================================
+    //Test7: test of queuing
+    //================================================================
+    //add a route
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 7");
+    debug_table1->write_comment("TEST QUEUING");
+
+    debug_table1->set_get_on_wakeup(false);
+    debug_table2->set_get_on_wakeup(false);
+    debug_table3->set_get_on_wakeup(false);
+
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    fanout_table->add_route(*msg, NULL);
+    debug_table1->write_separator();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr2->set_nexthop_resolved(true);
+    msg = new InternalMessage<IPv4>(sr2, &handler2, 0);
+    msg->set_push();
+    fanout_table->add_route(*msg, NULL);
+    debug_table1->write_separator();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 3 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET A ROUTE");
+    fanout_table->get_next_message(debug_table3);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 1 SKIP ENTIRE QUEUE");
+    debug_table1->write_comment("EXPECT TO GET NO ROUTE");
+    fanout_table->remove_next_table(debug_table1);
+    fanout_table->add_next_table(debug_table1, &handler1, 1);
+    debug_table1->write_separator();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 3 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET A ROUTE");
+    fanout_table->get_next_message(debug_table3);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 3 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET NO ROUTE");
+    fanout_table->get_next_message(debug_table3);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 2 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET A ROUTE");
+    fanout_table->get_next_message(debug_table2);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 2 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET NO ROUTE");
+    fanout_table->get_next_message(debug_table2);
+
+    sr1->unref();
+    sr2->unref();
+
+    //================================================================
+    //Test8: test of queuing
+    //================================================================
+    //add a route
+    debug_table1->write_comment("******************************************");
+    debug_table1->write_comment("TEST 8");
+    debug_table1->write_comment("TEST QUEUING");
+
+    debug_table1->set_get_on_wakeup(false);
+    debug_table2->set_get_on_wakeup(false);
+    debug_table3->set_get_on_wakeup(false);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("SENDING FROM PEER 2");
+    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
+    sr2->set_nexthop_resolved(true);
+    msg = new InternalMessage<IPv4>(sr2, &handler2, 0);
+    msg->set_push();
+    fanout_table->add_route(*msg, NULL);
+    debug_table1->write_separator();
+    delete msg;
+
+    debug_table1->write_comment("SENDING FROM PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    fanout_table->add_route(*msg, NULL);
+    debug_table1->write_separator();
+    delete msg;
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 3 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET A ROUTE");
+    fanout_table->get_next_message(debug_table3);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 1 SKIP ENTIRE QUEUE");
+    debug_table1->write_comment("EXPECT TO GET NO ROUTE");
+    fanout_table->remove_next_table(debug_table1);
+    fanout_table->add_next_table(debug_table1, &handler1, 1);
+    debug_table1->write_separator();
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 3 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET A ROUTE");
+    fanout_table->get_next_message(debug_table3);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 3 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET NO ROUTE");
+    fanout_table->get_next_message(debug_table3);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 2 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET A ROUTE");
+    fanout_table->get_next_message(debug_table2);
+
+    debug_table1->write_separator();
+    debug_table1->write_comment("PEER 2 GET_NEXT_MESSAGE");
+    debug_table1->write_comment("EXPECT TO GET NO ROUTE");
+    fanout_table->get_next_message(debug_table2);
+
     sr1->unref();
     sr2->unref();
 

@@ -251,4 +251,166 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] PEER 3 GET_NEXT_MESSAGE
 [separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 6
+[comment] TEST QUEUING
+[comment] SENDING FROM PEER 1
+[separator]-------------------------------------
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[separator]-------------------------------------
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET A ROUTE
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET A ROUTE
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET NO ROUTE
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET A ROUTE
+[** TABLE DebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET NO ROUTE
+[separator]-------------------------------------
+[comment] PEER 1 SKIP ENTIRE QUEUE
+[comment] EXPECT TO GET NO ROUTE
+[separator]-------------------------------------
+[comment] ******************************************
+[comment] TEST 7
+[comment] TEST QUEUING
+[comment] SENDING FROM PEER 1
+[separator]-------------------------------------
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[separator]-------------------------------------
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET A ROUTE
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] PEER 1 SKIP ENTIRE QUEUE
+[comment] EXPECT TO GET NO ROUTE
+[separator]-------------------------------------
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET A ROUTE
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET NO ROUTE
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET A ROUTE
+[** TABLE DebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET NO ROUTE
+[comment] ******************************************
+[comment] TEST 8
+[comment] TEST QUEUING
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 1
+[separator]-------------------------------------
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET A ROUTE
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.2.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.2
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/5, AS/4]
+[separator]-------------------------------------
+[comment] PEER 1 SKIP ENTIRE QUEUE
+[comment] EXPECT TO GET NO ROUTE
+[separator]-------------------------------------
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET A ROUTE
+[** TABLE DebugTable-D3 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] PEER 3 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET NO ROUTE
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET A ROUTE
+[** TABLE DebugTable-D2 **]
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] PEER 2 GET_NEXT_MESSAGE
+[comment] EXPECT TO GET NO ROUTE
 [comment] SHUTDOWN AND CLEAN UP
