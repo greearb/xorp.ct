@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.7 2003/03/03 02:07:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.8 2003/03/10 23:20:47 hodson Exp $"
 
 
 //
@@ -39,7 +39,7 @@ PimNode::set_vif_proto_version(const string& vif_name, int proto_version)
     
     return (XORP_OK);
 }
- 
+
 int
 PimNode::reset_vif_proto_version(const string& vif_name)
 {

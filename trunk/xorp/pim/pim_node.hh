@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.6 2003/03/03 02:07:00 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.7 2003/03/10 23:20:49 hodson Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -822,7 +822,23 @@ public:
     //
     // Debug-related methods
     //
+    
+    /**
+     * Test if trace log is enabled.
+     * 
+     * This method is used to test whether to output trace log debug messges.
+     * 
+     * @return true if trace log is enabled, otherwise false.
+     */
     bool	is_log_trace() const { return (_is_log_trace); }
+    
+    /**
+     * Enable/disable trace log.
+     * 
+     * This method is used to enable/disable trace log debug messages output.
+     * 
+     * @param is_enabled if true, trace log is enabled, otherwise is disabled.
+     */
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
     
     //

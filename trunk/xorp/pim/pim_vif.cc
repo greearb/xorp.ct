@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.5 2003/01/31 19:52:07 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.6 2003/03/10 23:20:53 hodson Exp $"
 
 
 //
@@ -124,20 +124,6 @@ PimVif::~PimVif(void)
 }
 
 /**
- * PimVif::pim_mrt:
- * @: 
- * 
- * Get the PIM Multicast Routing Table.
- * 
- * Return value: A reference to the PIM Multicast Routing Table.
- **/
-PimMrt&
-PimVif::pim_mrt() const
-{
-    return (_pim_node.pim_mrt());
-}
-
-/**
  * PimVif::set_default_config:
  * @: 
  * 
@@ -182,6 +168,20 @@ PimVif::set_proto_version(int proto_version)
     ProtoUnit::set_proto_version(proto_version);
     
     return (XORP_OK);
+}
+
+/**
+ * PimVif::pim_mrt:
+ * @: 
+ * 
+ * Get the PIM Multicast Routing Table.
+ * 
+ * Return value: A reference to the PIM Multicast Routing Table.
+ **/
+PimMrt&
+PimVif::pim_mrt() const
+{
+    return (_pim_node.pim_mrt());
 }
 
 /**

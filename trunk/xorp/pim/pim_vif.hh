@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.8 2003/02/27 03:11:05 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.9 2003/03/10 23:20:53 hodson Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -70,6 +70,22 @@ public:
      * Destructor
      */
     virtual ~PimVif();
+
+    /**
+     * Set configuration to default values.
+     */
+    void	set_default_config();
+    
+    /**
+     * Set the current protocol version.
+     * 
+     * The protocol version must be in the interval
+     * [PIM_VERSION_MIN, PIM_VERSION_MAX].
+     * 
+     * @param proto_version the protocol version to set.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_proto_version(int proto_version);
     
     /**
      *  Start PIM on a single virtual interface.
@@ -203,22 +219,6 @@ public:
      */
     const IPvX&	dr_addr() const		{ return (_dr_addr);		}
 
-    /**
-     * Set configuration to default values.
-     */
-    void	set_default_config();
-    
-    /**
-     * Set the current protocol version.
-     * 
-     * The protocol version must be in the interval
-     * [PIM_VERSION_MIN, PIM_VERSION_MAX].
-     * 
-     * @param proto_version the protocol version to set.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		set_proto_version(int proto_version);
-    
     //
     // Hello-related configuration parameters
     //
