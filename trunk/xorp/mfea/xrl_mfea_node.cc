@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $"
+#ident "$XORP: xorp/mfea/xrl_mfea_node.cc,v 1.2 2003/01/13 20:40:21 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "mfea_private.hh"
@@ -2100,7 +2100,7 @@ XrlMfeaNode::mfea_0_1_send_protocol_message4(
 			     ip_ttl,
 			     ip_tos,
 			     is_router_alert,
-			     (const uint8_t *)(protocol_message.begin()),
+			     &protocol_message[0],
 			     protocol_message.size()) < 0) {
 	fail = true;
 	// TODO: must find-out and return the reason for failure
@@ -2183,7 +2183,7 @@ XrlMfeaNode::mfea_0_1_send_protocol_message6(
 			     ip_ttl,
 			     ip_tos,
 			     is_router_alert,
-			     (const uint8_t *)(protocol_message.begin()),
+			     &protocol_message[0],
 			     protocol_message.size()) < 0) {
 	fail = true;
 	// TODO: must find-out and return the reason for failure
