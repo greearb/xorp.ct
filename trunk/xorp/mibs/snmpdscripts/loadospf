@@ -1,0 +1,6 @@
+snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i create
+snmpset localhost UCD-DLMOD-MIB::dlmodName.$1 s "ospf_mib_1850" UCD-DLMOD-MIB::dlmodPath.$1 s "${XORP}/mibs/ospf_mib_1850.so" 
+snmpset localhost UCD-DLMOD-MIB::dlmodStatus.$1 i load
+echo "The module OSPF should appear as loaded in position 2"
+snmptable localhost UCD-DLMOD-MIB::dlmodTable
+

@@ -1,0 +1,44 @@
+
+
+
+How to configure your Net-SNMP agent to run with XORP
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+- You need Net-SNMP version 5.0.6 or greater
+- You must make libnetsnmpxorp.so accessible to your runtime loader.  Depending 
+  on your system, that requires one of the following:  
+	* Copying libnetsnmpxorp.so to your library directory (typically
+	  /usr/local/lib)
+		    OR
+	* Setting a linker environment variable (typically LD_LIBRARY_PATH) to
+	  point to the directory where the library is.
+
+To run the scripts in this directory
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+- These scripts rely on file snmp.conf to provide valid default values
+  for the SNMP version to use, the user, community and security level.
+  For that, you have two options, depending on wether you where using Net-SNMP
+  or not:  
+
+    * For new Net-SNMP users, just copy the provided snmp.conf to your home
+      directory and create the following user (with the command net-snmp-config
+      --create-snmpv3-user):
+
+    user           pass-phrase         sec level
+    --------------------------------------------
+    privuser      I am priv user       auth+priv
+ 
+    * If you already have Net-SNMP running, and you would like to run the scripts as
+      an existing user, make sure the following variables are defined in your
+      snmp.conf file: defVersion, defCommunity, defSecurityName, defPassphrase, 
+                      defAuthType, defPrivType, defSecurityLevel 
+
+- Finally, you must define the environment variable XORP to point to xorp's top
+  source directory.  
+
+
+ 
+
+ 
+
