@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_task.hh,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $
+// $XORP: xorp/pim/pim_mre_task.hh,v 1.2 2003/01/24 07:31:36 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_TASK_HH__
@@ -66,8 +66,8 @@ public:
     void	perform_pim_mfc_actions(const IPvX& source_addr,
 					const IPvX& group_addr);
     void	add_pim_mre(PimMre *pim_mre);
-    void	add_pim_mfc(PimMfc *pim_mfc);
     void	add_pim_mre_delete(PimMre *pim_mre);
+    void	add_pim_mfc(PimMfc *pim_mfc);
     void	add_pim_mfc_delete(PimMfc *pim_mfc);
     
     //
@@ -187,8 +187,9 @@ private:
     IPvX	_rp_addr_rp;
     bool	_is_set_rp_addr_prefix_rp;
     IPvXNet	_rp_addr_prefix_rp;
-    list<PimMre *> _pim_mre_rp_list;		// The (*,*,RP) PimMre list
-    list<PimMre *> _pim_mre_rp_processed_list;	// The (*,*,RP) processed list
+    list<PimMre *> _pim_mre_rp_list;		// (*,*,RP) entries to process
+    list<PimMre *> _pim_mre_rp_processed_list;	// (*,*,RP) processed entries
+    list<PimMre *> _pim_mre_rp_delete_list;	// (*,*,RP) entries to delete
     // State to continue the processing with the next time slice
     bool	_is_processing_rp;
     bool	_is_processing_rp_addr_rp;
@@ -203,8 +204,9 @@ private:
     IPvX	_rp_addr_wc;
     bool	_is_set_group_addr_prefix_wc;
     IPvXNet	_group_addr_prefix_wc;
-    list<PimMre *> _pim_mre_wc_list;		// The (*,G) PimMre list
-    list<PimMre *> _pim_mre_wc_processed_list;	// The (*,G) processed list
+    list<PimMre *> _pim_mre_wc_list;		// (*,G) entries to process
+    list<PimMre *> _pim_mre_wc_processed_list;	// (*,G) processed entries
+    list<PimMre *> _pim_mre_wc_delete_list;	// (*,G) entries to delete
     // State to continue the processing with the next time slice
     bool	_is_processing_wc;
     bool	_is_processing_rp_addr_wc;
@@ -223,10 +225,12 @@ private:
     IPvXNet	_source_addr_prefix_sg_sg_rpt;
     bool	_is_set_rp_addr_sg_sg_rpt;
     IPvX	_rp_addr_sg_sg_rpt;
-    list<PimMre *> _pim_mre_sg_list;		// The (S,G) PimMre list
-    list<PimMre *> _pim_mre_sg_processed_list;	// The (S,G) processed list
-    list<PimMre *> _pim_mre_sg_rpt_list;	// The (S,G,rpt) PimMre list
-    list<PimMre *> _pim_mre_sg_rpt_processed_list;// The (S,G,rpt) processed list
+    list<PimMre *> _pim_mre_sg_list;		// (S,G) entries to process
+    list<PimMre *> _pim_mre_sg_processed_list;	// (S,G) processed entries
+    list<PimMre *> _pim_mre_sg_delete_list;	// (S,G) entries to delete
+    list<PimMre *> _pim_mre_sg_rpt_list;	// (S,G,rpt) entries to process
+    list<PimMre *> _pim_mre_sg_rpt_processed_list;// (S,G,rpt) processed entries
+    list<PimMre *> _pim_mre_sg_rpt_delete_list;	// (S,G,rpt) entries to delete
     // State to continue the processing with the next time slice
     bool	_is_processing_sg_sg_rpt;
     bool	_is_processing_sg_source_addr_sg_sg_rpt;
@@ -252,8 +256,9 @@ private:
     IPvXNet	_source_addr_prefix_mfc;
     bool	_is_set_rp_addr_mfc;
     IPvX	_rp_addr_mfc;
-    list<PimMfc *> _pim_mfc_list;		// The PimMfc list
-    list<PimMfc *> _pim_mfc_processed_list;	// The PimMfc processed list
+    list<PimMfc *> _pim_mfc_list;		// PimMfc entries to process
+    list<PimMfc *> _pim_mfc_processed_list;	// PimMfc processed entries
+    list<PimMfc *> _pim_mfc_delete_list;	// PimMfc entries to delete
     // State to continue the processing with the next time slice
     bool	_is_processing_mfc;
     bool	_is_processing_source_addr_mfc;
@@ -274,12 +279,6 @@ private:
     bool	_is_processing_pim_nbr_addr_wc;
     bool	_is_processing_pim_nbr_addr_sg;
     bool	_is_processing_pim_nbr_addr_sg_rpt;
-    
-    //
-    // Lists of PimMre and PimMfc entries that are pending deletion
-    //
-    list<PimMre *> _pim_mre_delete_list;	// PimMre entries to delete
-    list<PimMfc *> _pim_mfc_delete_list;	// PimMfc entries to delete
     
     // The 'occasionally-used' argument(s).
     uint16_t	_vif_index;

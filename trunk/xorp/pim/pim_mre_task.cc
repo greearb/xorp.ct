@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.1.1.1 2002/12/11 23:56:11 hodson Exp $"
+#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.2 2003/01/24 07:31:36 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry task
@@ -140,12 +140,35 @@ PimMreTask::PimMreTask(PimMrt& pim_mrt,
 
 PimMreTask::~PimMreTask()
 {
-    // Delete the PimMre entries pending deletion
-    while (! _pim_mre_delete_list.empty()) {
-	PimMre *pim_mre = _pim_mre_delete_list.front();
-	_pim_mre_delete_list.pop_front();
-	XLOG_ASSERT(pim_mre->is_task_delete_pending()
-		    || pim_mre->is_task_delete_done());
+    // Delete the (*,*,RP) entries pending deletion
+    while (! _pim_mre_rp_delete_list.empty()) {
+	PimMre *pim_mre = _pim_mre_rp_delete_list.front();
+	_pim_mre_rp_delete_list.pop_front();
+	XLOG_ASSERT(pim_mre->is_task_delete_done());
+	delete pim_mre;
+    }
+    
+    // Delete the (*,G) entries pending deletion
+    while (! _pim_mre_wc_delete_list.empty()) {
+	PimMre *pim_mre = _pim_mre_wc_delete_list.front();
+	_pim_mre_wc_delete_list.pop_front();
+	XLOG_ASSERT(pim_mre->is_task_delete_done());
+	delete pim_mre;
+    }
+    
+    // Delete the (S,G) entries pending deletion
+    while (! _pim_mre_sg_delete_list.empty()) {
+	PimMre *pim_mre = _pim_mre_sg_delete_list.front();
+	_pim_mre_sg_delete_list.pop_front();
+	XLOG_ASSERT(pim_mre->is_task_delete_done());
+	delete pim_mre;
+    }
+    
+    // Delete the (S,G,rpt) entries pending deletion
+    while (! _pim_mre_sg_rpt_delete_list.empty()) {
+	PimMre *pim_mre = _pim_mre_sg_rpt_delete_list.front();
+	_pim_mre_sg_rpt_delete_list.pop_front();
+	XLOG_ASSERT(pim_mre->is_task_delete_done());
 	delete pim_mre;
     }
     
@@ -153,8 +176,7 @@ PimMreTask::~PimMreTask()
     while (! _pim_mfc_delete_list.empty()) {
 	PimMfc *pim_mfc = _pim_mfc_delete_list.front();
 	_pim_mfc_delete_list.pop_front();
-	XLOG_ASSERT(pim_mfc->is_task_delete_pending()
-		    || pim_mfc->is_task_delete_done());
+	XLOG_ASSERT(pim_mfc->is_task_delete_done());
 	delete pim_mfc;
     }
     
@@ -404,11 +426,11 @@ PimMreTask::run_task_rp()
     //
     // Delete the (*,*,RP) PimMre entries that are pending deletion
     //
-    while (! _pim_mre_rp_processed_list.empty()) {
-	PimMre *pim_mre = _pim_mre_rp_processed_list.front();
-	_pim_mre_rp_processed_list.pop_front();
-	if (pim_mre->is_task_delete_done())
-	    delete pim_mre;
+    while (! _pim_mre_rp_delete_list.empty()) {
+	PimMre *pim_mre = _pim_mre_rp_delete_list.front();
+	_pim_mre_rp_delete_list.pop_front();
+	XLOG_ASSERT(pim_mre->is_task_delete_done());
+	delete pim_mre;
 	if (_time_slice.is_expired())
 	    return (true);
     }
@@ -697,11 +719,11 @@ PimMreTask::run_task_wc()
     //
     // Delete the (*,G) PimMre entries that are pending deletion
     //
-    while (! _pim_mre_wc_processed_list.empty()) {
-	PimMre *pim_mre = _pim_mre_wc_processed_list.front();
-	_pim_mre_wc_processed_list.pop_front();
-	if (pim_mre->is_task_delete_done())
-	    delete pim_mre;
+    while (! _pim_mre_wc_delete_list.empty()) {
+	PimMre *pim_mre = _pim_mre_wc_delete_list.front();
+	_pim_mre_wc_delete_list.pop_front();
+	XLOG_ASSERT(pim_mre->is_task_delete_done());
+	delete pim_mre;
 	if (_time_slice.is_expired())
 	    return (true);
     }
@@ -1247,11 +1269,11 @@ PimMreTask::run_task_sg_sg_rpt()
     //
     // Delete the (S,G) PimMre entries that are pending deletion
     //
-    while (! _pim_mre_sg_processed_list.empty()) {
-	PimMre *pim_mre = _pim_mre_sg_processed_list.front();
-	_pim_mre_sg_processed_list.pop_front();
-	if (pim_mre->is_task_delete_done())
-	    delete pim_mre;
+    while (! _pim_mre_sg_delete_list.empty()) {
+	PimMre *pim_mre = _pim_mre_sg_delete_list.front();
+	_pim_mre_sg_delete_list.pop_front();
+	XLOG_ASSERT(pim_mre->is_task_delete_done());
+	delete pim_mre;
 	if (_time_slice.is_expired())
 	    return (true);
     }
@@ -1259,11 +1281,11 @@ PimMreTask::run_task_sg_sg_rpt()
     //
     // Delete the (S,G,rpt) PimMre entries that are pending deletion
     //
-    while (! _pim_mre_sg_rpt_processed_list.empty()) {
-	PimMre *pim_mre = _pim_mre_sg_rpt_processed_list.front();
-	_pim_mre_sg_rpt_processed_list.pop_front();
-	if (pim_mre->is_task_delete_done())
-	    delete pim_mre;
+    while (! _pim_mre_sg_rpt_delete_list.empty()) {
+	PimMre *pim_mre = _pim_mre_sg_rpt_delete_list.front();
+	_pim_mre_sg_rpt_delete_list.pop_front();
+	XLOG_ASSERT(pim_mre->is_task_delete_done());
+	delete pim_mre;
 	if (_time_slice.is_expired())
 	    return (true);
     }
@@ -1470,11 +1492,11 @@ PimMreTask::run_task_mfc()
     //
     // Delete the PimMfc entries that are pending deletion
     //
-    while (! _pim_mfc_processed_list.empty()) {
-	PimMfc *pim_mfc = _pim_mfc_processed_list.front();
-	_pim_mfc_processed_list.pop_front();
-	if (pim_mfc->is_task_delete_done())
-	    delete pim_mfc;
+    while (! _pim_mfc_delete_list.empty()) {
+	PimMfc *pim_mfc = _pim_mfc_delete_list.front();
+	_pim_mfc_delete_list.pop_front();
+	XLOG_ASSERT(pim_mfc->is_task_delete_done());
+	delete pim_mfc;
 	if (_time_slice.is_expired())
 	    return (true);
     }
@@ -1617,21 +1639,36 @@ PimMreTask::add_pim_mre(PimMre *pim_mre)
 }
 
 //
+// Add a PimMre entry to the list of entries to delete
+//
+void
+PimMreTask::add_pim_mre_delete(PimMre *pim_mre)
+{
+    if (pim_mre->is_rp()) {
+	_pim_mre_rp_delete_list.push_back(pim_mre);
+	return;
+    }
+    if (pim_mre->is_wc()) {
+	_pim_mre_wc_delete_list.push_back(pim_mre);
+	return;
+    }
+    if (pim_mre->is_sg()) {
+	_pim_mre_sg_delete_list.push_back(pim_mre);
+	return;
+    }
+    if (pim_mre->is_sg_rpt()) {
+	_pim_mre_sg_rpt_delete_list.push_back(pim_mre);
+	return;
+    }
+}
+
+//
 // Add a PimMfc entry to the appropriate list of entries to process
 //
 void
 PimMreTask::add_pim_mfc(PimMfc *pim_mfc)
 {
     _pim_mfc_list.push_back(pim_mfc);
-}
-
-//
-// Add a PimMre entry to the list of entries to delete
-//
-void
-PimMreTask::add_pim_mre_delete(PimMre *pim_mre)
-{
-    _pim_mre_delete_list.push_back(pim_mre);
 }
 
 //
