@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.19 2004/06/10 22:41:40 hodson Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.20 2004/10/06 21:16:32 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -325,7 +325,7 @@ template<class A>
 void
 ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A>& nexthop_route)
 {
-    typename map<A, const IPRouteEntry<A>* >::iterator rpair, nextpair;
+    typename multimap<A, const IPRouteEntry<A>* >::iterator rpair, nextpair;
 
     A unresolved_nexthop, new_subnet;
     size_t prefix_len = nexthop_route.net().prefix_len();
@@ -378,7 +378,7 @@ ExtIntTable<A>::delete_unresolved_nexthop(const IPRouteEntry<A>* route)
 {
     debug_msg("delete_unresolved_nexthop %s\n", route->str().c_str());
 
-    typename map<A, const IPRouteEntry<A>* >::iterator rpair;
+    typename multimap<A, const IPRouteEntry<A>* >::iterator rpair;
     IPNextHop<A>* rt_nexthop;
     rt_nexthop = reinterpret_cast<IPNextHop<A>* >(route->nexthop());
     rpair = _ip_unresolved_nexthops.find(rt_nexthop->addr());
