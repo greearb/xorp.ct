@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.17 2004/03/18 00:35:28 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.18 2004/06/15 20:31:06 pavlin Exp $
 #
 
 #
@@ -33,11 +33,13 @@ KDOC_LIB_DIR="${KDOC_DEST_DIR}/libdir"
 HTML_TEMPLATES="html_templates"
 HTML_INDEX="html/index.html"
 HTML_INDEX_DATA="html/index.dat"
+HTML_CSS="--html-css http://www.xorp.org/xorp-kdoc.css"
 
 #
 # Misc. pre-defined variables
 #
-HTML_LOGO="http://www.xorp.org/xorp2.png"
+HTML_LOGO="http://www.xorp.org/images/xorp-logo-medium.jpg"
+HTML_LOGO_LINK="http://www.xorp.org/"
 
 #
 # Print message to stderr if DEBUG is set to non-zero value
@@ -142,6 +144,8 @@ kdocify() {
 	 --name $lib         						      \
 	 --libdir ${KDOC_LIB_DIR}					      \
 	 --html-logo ${HTML_LOGO}					      \
+	 --html-logo-link ${HTML_LOGO_LINK}				      \
+	 ${HTML_CSS}							      \
 	 --stdin							      \
     | tee ${OUTDIR}/log
     if [ "${KDOC_FORMAT}" = "html" ] ; then
@@ -176,9 +180,9 @@ html_index_end()
 	while read DIR_NAME DESC START_PAGE ; do
 	    # Frivalous coloring of cell background to match kdoc
 	    if [ `expr $i % 2` -eq 1 ] ; then
-		ROW_BG="bgcolor=\"#eeeeee\""
+		ROW_BG="class=\"leven\""
 	    else
-		ROW_BG=""
+		ROW_BG="class=\"lodd\""
 	    fi
 	    START_URL=${DIR_NAME}/${START_PAGE}
 	    cat ${HTML_TEMPLATES}/index.html.entry | sed 		      \
@@ -296,7 +300,7 @@ kdoc_libxorp()
     desc="XORP core type and utility library"
     html_start_page="index.html"
     files="libxorp/*.h libxorp/*.hh"
-    excludes="libxorp/callback.hh libxorp/old_trie.hh"
+    excludes="libxorp/callback.hh libxorp/callback_debug.hh libxorp/callback_nodebug.hh libxorp/old_trie.hh"
     xref=""
     kdocify
 }
