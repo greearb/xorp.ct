@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.21 2003/12/02 09:38:55 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.22 2004/01/13 00:47:08 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -26,6 +26,29 @@
 #include "template_tree_node.hh"
 #include "task.hh"
 #include "rtrmgr_error.hh"
+
+static string
+strip_quotes(const string& command, const string& value) throw (ParseError)
+{
+    string tmp_value = value;
+    if (tmp_value[0] == '"') {
+	// Strip the quotes
+	if (tmp_value[tmp_value.length() - 1] != '"') {
+	    string errmsg = c_format("subcommand %s has invalid argument: %s",
+				     command.c_str(), value.c_str());
+	    xorp_throw(ParseError, errmsg);
+	}
+	tmp_value = tmp_value.substr(1, tmp_value.length() - 2);
+    }
+
+    if (tmp_value.empty()) {
+	string errmsg = c_format("subcommand %s has empty argument",
+				 command.c_str());
+	xorp_throw(ParseError, errmsg);
+    }
+
+    return tmp_value;
+}
 
 ModuleCommand::ModuleCommand(TemplateTree& template_tree,
 			     TemplateTreeNode& template_tree_node,
@@ -85,7 +108,7 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
     ++ptr;
     string value = *ptr;
     if (cmd == "provides") {
-	_module_name = value;
+	_module_name = strip_quotes(cmd, value);
 	_tt.register_module(_module_name, this);
 	template_tree_node().set_module_name(_module_name);
     } else if (cmd == "depends") {
@@ -93,7 +116,7 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	    xorp_throw(ParseError,
 		       "\"depends\" must be preceded by \"provides\"");
 	}
-	_depends.push_back(value);
+	_depends.push_back(strip_quotes(cmd, value));
     } else if (cmd == "path") {
 	if (_module_name == "") {
 	    xorp_throw(ParseError,
@@ -102,26 +125,13 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 	if (_module_exec_path != "") {
 	    xorp_throw(ParseError, "duplicate \"path\" subcommand");
 	}
-	if (value[0] == '"')
-	    _module_exec_path = value.substr(1, value.length() - 2);
-	else
-	    _module_exec_path = value;
+	_module_exec_path = strip_quotes(cmd, value);
     } else if (cmd == "default_targetname") {
 	if (_module_name == "") {
 	    xorp_throw(ParseError,
 		       "\"default_targetname\" must be preceded by \"provides\"");
 	}
-	if (_default_target_name != "") {
-	    xorp_throw(ParseError,
-		       "duplicate \"default_targetname\" subcommand");
-	}
-	if (value[0] == '"')
-	    _default_target_name = value.substr(1, value.length() - 2);
-	else
-	    _default_target_name = value;
-	if (_default_target_name.empty()) {
-	    xorp_throw(ParseError, "Empty \"default_targetname\" subcommand");
-	}
+	_default_target_name = strip_quotes(cmd, value);
 	template_tree_node().set_default_target_name(_default_target_name);
     } else if (cmd == "startcommit") {
 	debug_msg("startcommit:\n");
