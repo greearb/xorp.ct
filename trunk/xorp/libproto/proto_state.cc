@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_state.cc,v 1.3 2004/04/29 23:23:54 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_state.cc,v 1.4 2004/05/15 23:58:40 pavlin Exp $"
 
 
 //
@@ -144,9 +144,10 @@ bool
 ProtoState::shutdown()
 {
     //
-    // We cannot shutdown if our status is SHUTDOWN or FAILED.
+    // Test the service status
     //
     if ((ServiceBase::status() == SHUTDOWN)
+	|| (ServiceBase::status() == SHUTTING_DOWN)
 	|| (ServiceBase::status() == FAILED)) {
 	return true;
     }
