@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.111 2004/08/31 19:31:54 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.112 2004/09/01 20:36:37 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1073,12 +1073,14 @@ AC_MSG_CHECKING(for an IPF firewall build environment)
 AC_LANG_SAVE
 AC_LANG_C
 AC_TRY_COMPILE([
-#include <stdlib.h>
-#include <errno.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <net/if.h>
+#ifdef __FreeBSD__
 #include <net/if_var.h>
+#endif
+#include <netinet/in.h>
 #include <netinet/ip_compat.h>
 #include <netinet/ip_fil.h>
 ],
