@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.27 2003/11/04 10:08:44 mjh Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.28 2004/02/12 07:00:49 atanu Exp $
 #
 
 #
@@ -259,6 +259,9 @@ test3()
 
     # Wait for the BGP to stabilise
     bgp_peer_unchanged peer1
+
+    # Add a delay so if the BGP process core dumps we detect it.
+    sleep 5
 
     # Make sure that the peer1 connection is still established
     coord peer1 assert established
