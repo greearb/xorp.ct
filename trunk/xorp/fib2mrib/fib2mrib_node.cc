@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.17 2005/02/12 08:09:06 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.18 2005/02/14 23:17:36 pavlin Exp $"
 
 
 //
@@ -57,11 +57,12 @@ Fib2mribNode::startup()
     // Test the service status
     //
     if ((ServiceBase::status() == SERVICE_STARTING)
-	|| (ServiceBase::status() == SERVICE_RUNNING))
+	|| (ServiceBase::status() == SERVICE_RUNNING)) {
 	return true;
-
-    if (ServiceBase::status() != SERVICE_READY)
+    }
+    if (ServiceBase::status() != SERVICE_READY) {
 	return false;
+    }
 
     //
     // Transition to SERVICE_RUNNING occurs when all transient startup
@@ -92,14 +93,13 @@ bool
 Fib2mribNode::shutdown()
 {
     //
-    // We cannot shutdown if our status is SERVICE_SHUTDOWN or SERVICE_FAILED.
+    // Test the service status
     //
     if ((ServiceBase::status() == SERVICE_SHUTDOWN)
 	|| (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
 	|| (ServiceBase::status() == SERVICE_FAILED)) {
 	return true;
     }
-
     if ((ServiceBase::status() != SERVICE_RUNNING)
 	&& (ServiceBase::status() != SERVICE_STARTING)
 	&& (ServiceBase::status() != SERVICE_PAUSING)
