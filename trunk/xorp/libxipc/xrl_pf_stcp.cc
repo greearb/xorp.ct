@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.31 2004/03/24 19:14:07 atanu Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.32 2004/06/10 22:41:12 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -579,6 +579,8 @@ XrlPFSTCPSender::~XrlPFSTCPSender()
     _reader = 0;
     delete _writer;
     _writer = 0;
+    if (_fd >= 0)
+	close(_fd);
     _fd = -1;
     debug_msg("~XrlPFSTCPSender (%p)\n", this);
     sender_list.remove_instance(_uid);
