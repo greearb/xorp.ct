@@ -68,12 +68,7 @@ XorpIfMib::the_instance()
 
 XorpIfMib::XorpIfMib()
     : _xrl_router(SnmpEventLoop::the_instance(),"xorp_if_mib"),
-      _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME)
-
-{
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
-    eventloop.export_events();
-}
+      _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME) {}
 
 void
 XorpIfMib::explicit_destructor()

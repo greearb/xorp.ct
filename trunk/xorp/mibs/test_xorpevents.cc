@@ -49,7 +49,7 @@ extern void run_timer_callbacks (u_int, void *);
 int
 register_readfd(int fd, void (*) (int, void *), void *)
 {
-    XLOG_INFO("Read file descriptor %d exported", fd);
+    fprintf(stderr,"Read file descriptor %d exported\n", fd);
     if (exported_readfds.end() != exported_readfds.find(fd)) 
 	{
 	XLOG_ERROR("fd %d was already exported!!", fd);
@@ -62,7 +62,7 @@ register_readfd(int fd, void (*) (int, void *), void *)
 int
 register_writefd(int fd, void (*) (int, void *), void *)
 {
-    XLOG_INFO("Write file descriptor %d exported", fd);
+    fprintf(stderr,"Write file descriptor %d exported\n", fd);
     if (exported_writefds.end() != exported_writefds.find(fd)) 
 	{
 	XLOG_ERROR("fd %d was already exported!!", fd);
@@ -75,7 +75,7 @@ register_writefd(int fd, void (*) (int, void *), void *)
 int
 register_exceptfd(int fd, void (*) (int, void *), void *)
 {
-    XLOG_INFO("Exception file descriptor %d exported", fd);
+    fprintf(stderr,"Exception file descriptor %d exported\n", fd);
     if (exported_exceptfds.end() != exported_exceptfds.find(fd)) 
 	{
 	XLOG_ERROR("fd %d was already exported!!", fd);
@@ -88,7 +88,7 @@ register_exceptfd(int fd, void (*) (int, void *), void *)
 int
 unregister_readfd(int fd)
 {
-    XLOG_INFO("Read file descriptor %d unregistered", fd);
+    fprintf(stderr,"Read file descriptor %d unregistered\n", fd);
     exported_readfds.erase(fd);
     return FD_UNREGISTERED_OK;
 }
@@ -96,7 +96,7 @@ unregister_readfd(int fd)
 int
 unregister_writefd(int fd)
 {
-    XLOG_INFO("Write file descriptor %d unregistered", fd);
+    fprintf(stderr,"Write file descriptor %d unregistered\n", fd);
     exported_writefds.erase(fd);
     return FD_UNREGISTERED_OK;
 }
@@ -104,7 +104,7 @@ unregister_writefd(int fd)
 int
 unregister_exceptfd(int fd)
 {
-    XLOG_INFO("Exception file descriptor %d unregistered", fd);
+    fprintf(stderr,"Exception file descriptor %d unregistered\n", fd);
     exported_exceptfds.erase(fd);
     return FD_UNREGISTERED_OK;
 }
@@ -116,9 +116,9 @@ snmp_alarm_register_hr(struct timeval t, unsigned int flags,
     static int  alarm_id = 0; 
     long ms = t.tv_sec*1000 + t.tv_usec/1000;
     if (flags)
-	XLOG_INFO("Periodic alarm registered:  %ld ms", ms);
+	fprintf(stderr,"Periodic alarm registered:  %ld ms\n", ms);
     else
-	XLOG_INFO("One time alarm registered:  %ld ms", ms);
+	fprintf(stderr,"One time alarm registered:  %ld ms\n", ms);
     return ++alarm_id;
 }
 
@@ -224,19 +224,19 @@ got_integer(const XrlError&	e,
 
 static bool timer_callback1() {
     cb1_counter++;
-    XLOG_INFO("TCB1 counting...%d", cb1_counter);
+    fprintf(stderr,"TCB1 counting...%d\n", cb1_counter);
     return true;
 }
 
 static bool timer_callback2() {
     cb2_counter++;
-    XLOG_INFO("TCB2 counting...%d", cb2_counter);
+    fprintf(stderr,"TCB2 counting...%d\n", cb2_counter);
     return true;
 }
 
 static bool timer_callback3() {
     cb3_counter++;
-    XLOG_INFO("TCB3 counting...%d", cb3_counter);
+    fprintf(stderr,"TCB3 counting...%d\n", cb3_counter);
     return true;
 }
 // end of timer callbacks
@@ -260,22 +260,23 @@ fake_snmpd()
     FakeSnmpdFdSet::iterator p;
     for (p = exported_readfds.begin(); p != exported_readfds.end(); p++) {
 	FD_SET (*p, &readfds);
-	XLOG_INFO("fake snmp added fd %d to read fd mask", *p);
+	fprintf(stderr,"fake snmp added fd %d to read fd mask\n", *p);
     }
     for (p = exported_writefds.begin(); p != exported_writefds.end(); p++) {
 	FD_SET (*p, &writefds);
-	XLOG_INFO("fake snmp added fd %d to write fd mask", *p);
+	fprintf(stderr,"fake snmp added fd %d to write fd mask\n", *p);
     }
     for (p = exported_exceptfds.begin(); p != exported_exceptfds.end(); p++) {
 	FD_SET (*p, &exceptfds);
-	XLOG_INFO("fake snmp added fd %d to exception fd mask", *p);
+	fprintf(stderr,"fake snmp added fd %d to exception fd mask\n", *p);
     }
     if (select (100, &readfds, &writefds, &exceptfds, &tv)) {
-	XLOG_INFO("fake_select detected activity on xorp file descriptors");
+	fprintf(stderr,"fake_select detected activity on "
+	    "xorp file descriptors\n");
 	run_fd_callbacks(0,0);
     } else {
-	XLOG_INFO("fake_select timed out after %ld ms", tv.tv_sec*1000 +
-		    tv.tv_usec/1000);
+	fprintf(stderr,"fake_select timed out after %ld ms\n", tv.tv_sec*1000 +
+	    tv.tv_usec/1000);
 	run_timer_callbacks(0,0);
     }
 }
@@ -295,21 +296,17 @@ run_test_1()
     SnmpEventLoop& e2 = SnmpEventLoop::the_instance();
     SnmpEventLoop& e3 = SnmpEventLoop::the_instance();
     int period_ms = 1200;
-    XLOG_INFO("Creating periodic events...");
+    fprintf(stderr,"Creating periodic events...\n");
     ptcb1 = callback(timer_callback1);
     ptcb2 = callback(timer_callback2);
     ptcb3 = callback(timer_callback3);
     xt1 = e1.new_periodic (period_ms, ptcb1);
     xt2 = e2.new_periodic (period_ms/2, ptcb2);
     xt3 = e3.new_periodic (period_ms/3, ptcb3);
-    e1.export_events();
-    e2.export_events();
-    e3.export_events();
     bool finito = false;
     const int test1_loops = 10;
     cb1_counter = cb2_counter = cb3_counter = 0;
     XorpTimer t = e1.set_flag_after_ms((test1_loops) * period_ms, &finito);
-    e1.export_events();
     while (finito == false) {
 	fake_snmpd();
     }
@@ -362,7 +359,6 @@ run_test_2()
     //
     bool finito = false;
     XorpTimer t = e.set_flag_after_ms(1000, &finito);
-    e.export_events();
     while (finito == false) {
 	fake_snmpd();
     }
@@ -379,7 +375,6 @@ run_test_2()
     // Just run...
     finito = false;
     t = e.set_flag_after_ms(5000, &finito);
-    e.export_events();
     while (step1_done == false || step2_done == false) {
 	fake_snmpd();
 	if (finito) {
@@ -413,7 +408,7 @@ main(int /* argc */, char *argv[])
     xlog_disable(XLOG_LEVEL_WARNING);
     
     try {
-    run_test_1();
+    // run_test_1();
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }

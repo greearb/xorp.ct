@@ -128,7 +128,8 @@ init_bgp4_mib_1657_bgppeertable(void)
 // For bgpPeerTable_handler we do use asyncronous calls.
 
 netsnmp_variable_list *
-bgpPeerTable_get_first_data_point(void **my_loop_context,void **my_data_context,
+bgpPeerTable_get_first_data_point(void **my_loop_context,
+				  void **my_data_context,
                                   netsnmp_variable_list *put_index_data,
 				  netsnmp_iterator_info *mydata)
 {
@@ -149,7 +150,8 @@ bgpPeerTable_get_first_data_point(void **my_loop_context,void **my_data_context,
     bool timeout = false;
     XorpTimer t = eventloop.set_flag_after_ms(1000, &timeout);
     while (!timeout && !loop_context->valid) {
-	DEBUGMSGTL((BgpMib::the_instance().name(),"waiting for peer list...\n"));
+	DEBUGMSGTL((BgpMib::the_instance().name(),"waiting for peer "
+	    "list...\n"));
 	eventloop.run(); //see note in function header if this shocks you...
     }
 
@@ -207,7 +209,6 @@ bgpPeerTable_get_next_data_point(void **my_loop_context, void **my_data_context,
 	eventloop.run();  
     }
 
-    eventloop.export_events(); 
 
     if (timeout) {
 	DEBUGMSGTL((BgpMib::the_instance().name(), "timeout while reading "
@@ -237,7 +238,6 @@ bgpPeerTable_handler(
     netsnmp_request_info              * requests) {
 
     BgpMib& bgp_mib = BgpMib::the_instance();
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
 
     DEBUGMSGTL((BgpMib::the_instance().name(), "bgpPeerTable_handler\n"));
 
@@ -299,7 +299,6 @@ bgpPeerTable_handler(
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
 			    cntxt->peer_remote_port, cb_peerid);
 			requests->delegated++;
-			eventloop.export_events();
 			break;
 			}
                     case COLUMN_BGPPEERSTATE:  // since they use the same XRL we
@@ -313,7 +312,6 @@ bgpPeerTable_handler(
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port, 
 			    cb_peerstatus);
 			requests->delegated++;
-			eventloop.export_events();
 			break;
 			}
                     case COLUMN_BGPPEERNEGOTIATEDVERSION:
@@ -326,7 +324,6 @@ bgpPeerTable_handler(
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port, 
 			    cb_peernegver);
 			requests->delegated++;
-			eventloop.export_events();
 			break;
 			}
                     case COLUMN_BGPPEERLOCALADDR:	// not delegated
@@ -369,7 +366,6 @@ bgpPeerTable_handler(
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
 			    cntxt->peer_remote_port, cb_peeras);
 			requests->delegated++;
-			eventloop.export_events();
 			break;
 			}
                     case COLUMN_BGPPEERINUPDATES:
@@ -387,7 +383,6 @@ bgpPeerTable_handler(
 			    cntxt->peer_local_port, cntxt->peer_remote_ip,
 			    cntxt->peer_remote_port, cb_peermsgstats);
 			requests->delegated++;
-			eventloop.export_events();
 			break;
 			}
                     case COLUMN_BGPPEERFSMESTABLISHEDTRANSITIONS:
@@ -401,7 +396,6 @@ bgpPeerTable_handler(
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port,
 			    cb_peereststats);
 			requests->delegated++;
-			eventloop.export_events();
 			break;
 			}
                     case COLUMN_BGPPEERCONNECTRETRYINTERVAL:
@@ -420,7 +414,6 @@ bgpPeerTable_handler(
 			    cntxt->peer_remote_ip, cntxt->peer_remote_port, 
 			    cb_peertimercfg);
 			requests->delegated++;
-			eventloop.export_events();
 			break;
 			}
                     default:
@@ -535,8 +528,6 @@ void get_peer_id_done(const XrlError& e, const IPv4* peer_id,
 	    assert(0);
             return;
     }
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
-    eventloop.export_events(); 
     return;
 }
 void 
@@ -587,8 +578,6 @@ get_peer_status_done(const XrlError& e, const uint32_t* state,
 	    assert(0);
             return;
     }
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
-    eventloop.export_events(); 
     return;
 }
 
@@ -635,8 +624,6 @@ get_peer_negotiated_version_done(const XrlError& e, const int32_t * negver,
 	    assert(0);
             return;
     }
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
-    eventloop.export_events(); 
     return;
 }
 
@@ -681,8 +668,6 @@ void get_peer_as_done(const XrlError& e, const uint32_t * asnum,
 	    assert(0);
             return;
     }
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
-    eventloop.export_events(); 
     return;
 }
 
@@ -752,8 +737,6 @@ void get_peer_msg_stats_done(const XrlError& e, const uint32_t * inupd,
 	    assert(0);
             return;
     }
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
-    eventloop.export_events(); 
     return;
 }
 void 
@@ -804,8 +787,6 @@ get_peer_established_stats(const XrlError& e, const uint32_t * trans,
 	    assert(0);
             return;
     }
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
-    eventloop.export_events(); 
     return;
 }
 
@@ -889,7 +870,5 @@ get_peer_timer_config_done(const XrlError& e, const uint32_t * retryint,
 	    assert(0);
             return;
     }
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance();
-    eventloop.export_events(); 
     return;
 }

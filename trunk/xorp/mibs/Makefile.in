@@ -131,6 +131,7 @@ libnetsnmpxorp_so_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
     $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a    \
     $(top_builddir)/libcomm/libcomm.a -Wl,--no-whole-archive
 
+libnetsnmpxorp_so_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.a  $(top_builddir)/libxorp/libxorp.a $(top_builddir)/libcomm/libcomm.a
 
 test_xorpevents_LDADD = $(top_builddir)/libxipc/libfinder.a -lnetsnmpxorp -L${top_builddir}/mibs
 
@@ -182,7 +183,6 @@ bgp4_mib_1657_so_OBJECTS = $(am_bgp4_mib_1657_so_OBJECTS)
 am_libnetsnmpxorp_so_OBJECTS = xorpevents.$(OBJEXT)
 libnetsnmpxorp_so_OBJECTS = $(am_libnetsnmpxorp_so_OBJECTS)
 libnetsnmpxorp_so_LDADD = $(LDADD)
-libnetsnmpxorp_so_DEPENDENCIES =
 libnetsnmpxorp_so_LDFLAGS =
 am_ospf_mib_1850_so_OBJECTS = ospf_mib_1850.$(OBJEXT)
 ospf_mib_1850_so_OBJECTS = $(am_ospf_mib_1850_so_OBJECTS)

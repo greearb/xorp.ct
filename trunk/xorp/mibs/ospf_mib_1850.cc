@@ -34,7 +34,6 @@ init_ospf_mib_1850 (void)
     pXtospf = new XorpTimer;
     *pXtospf = eventloop.new_periodic (1000, ptcb);
     DEBUGMSGTL((mib_mod_name, "Exporting events...\n"));
-    eventloop.export_events();
 }
 
 void 

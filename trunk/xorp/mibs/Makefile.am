@@ -47,6 +47,9 @@ libnetsnmpxorp_so_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
     $(LDFLAGS) -shared -fPIC -fpic -Wl,--whole-archive -o $@               \
     $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a    \
     $(top_builddir)/libcomm/libcomm.a -Wl,--no-whole-archive
+libnetsnmpxorp_so_DEPENDENCIES  = $(top_builddir)/libxipc/libxipc.a 
+libnetsnmpxorp_so_DEPENDENCIES += $(top_builddir)/libxorp/libxorp.a
+libnetsnmpxorp_so_DEPENDENCIES += $(top_builddir)/libcomm/libcomm.a
 
 test_xorpevents_LDADD  = $(top_builddir)/libxipc/libfinder.a
 test_xorpevents_LDADD += -lnetsnmpxorp -L${top_builddir}/mibs

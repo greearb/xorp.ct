@@ -172,14 +172,9 @@ test1()
     echo -n 'read again to check the variables that change with time... '
     snmpwalk ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpPeerTable > bgpPeerTable3.tmp
 
-    # verify that only one peer has bgpPeerFsmEstablishedTime is changing 
+    # verify that bgpPeerFsmEstablishedTime is changing for all 4 peers
     tmp=`diff -y  bgpPeerTable{1,3}.tmp | grep FsmEstablishedTime | wc -l` 
 
-    # This test is failing!  Although there are 4 peers, only one is connected
-    # to this host, thus only one should be incrementing it's EstablishedTime
-    # counter.  Currently all 4 counters are being incremented
-    #
-    ## --> this should be the valid test --> if [ $tmp != '1' ]; then 
     if [ $tmp != '4' ]; then 
 	echo "invalid FsmEstablisedTime values"; exit 1 
     fi

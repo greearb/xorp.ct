@@ -56,8 +56,8 @@ void get_bgp_version_done(const XrlError& e, const uint32_t* ver,
 	return;
     }
 
-    DEBUGMSGTL((BgpMib::the_instance().name(),"continuing delayed req, mode = %d\n", 
-	reqinfo->mode));
+    DEBUGMSGTL((BgpMib::the_instance().name(),"continued delayed req, "
+	"mode = %d\n", reqinfo->mode));
 
     // no longer delegated since we'll answer down below
 
@@ -82,13 +82,11 @@ get_bgpVersion(netsnmp_mib_handler * handler,
     DEBUGMSGTL((BgpMib::the_instance().name(), "get_bgpVersion called\n"));
     BgpMib& bgp_mib = BgpMib::the_instance();
     BgpMib::CB0 cb_version;
-    netsnmp_delegated_cache* req_cache = netsnmp_create_delegated_cache(handler,
-	reginfo, reqinfo, requests, NULL);
+    netsnmp_delegated_cache* req_cache = netsnmp_create_delegated_cache
+	(handler, reginfo, reqinfo, requests, NULL);
     cb_version = callback(get_bgp_version_done, req_cache);
     bgp_mib.send_get_bgp_version("bgp", cb_version); 
 
     requests->delegated = 1;
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
-    eventloop.export_events();
     return SNMP_ERR_NOERROR;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.3 2003/04/23 02:41:23 jcardona Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.4 2003/05/14 18:34:33 jcardona Exp $
 
 #ifndef __MIBS_XORPEVENTLOOP_HH__
 #define __MIBS_XORPEVENTLOOP_HH__
@@ -34,8 +34,9 @@ class SnmpEventLoop;
  */
 
 
-class SnmpEventLoop : public EventLoop {
-
+class SnmpEventLoop : public EventLoop, public SelectorListObserverBase, 
+    public TimerListObserverBase 
+{
 public:
     typedef std::set<int> FdSet;
     typedef std::map<TimeVal, unsigned int> AlarmMap;
@@ -56,26 +57,12 @@ public:
     <pre>
      * XorpTimer xt = e.new_periodic(100, callback);
     </pre>
-     * Before returning from your MIB module, you should export the event
-     * loop events to the snmp agent.
      *
-    <pre>
-     * e.export_events();
-    </pre>
-     *
-     * NOTE:  typically you would never need to call e.run(), since the
-     * MIB modules should not block.
+     * NOTE:  typically you would never need to call e.run().  If you do, you
+     * should set a short timeout, since while your MIB module is blocked, you
+     * cannot process any other SNMP requests. 
      */
     static SnmpEventLoop& the_instance();
-
-    /**
-     * This function transfers the timers and file descriptors
-     * from the XORP event list onto the snmp agent registry. This
-     * way the snmp agent will be able to monitor their activity
-     * and invoke the appropriate callback function in one of XORP's
-     * MIB modules.
-     */
-    void	export_events();
 
      /**
      * This is the name this class will use to identify itself in the
@@ -93,15 +80,20 @@ protected:
 private:
     SnmpEventLoop(SnmpEventLoop& o);		    // Not implemented
     SnmpEventLoop& operator= (SnmpEventLoop& o);    // Not implemented
-    ~SnmpEventLoop();
+    virtual ~SnmpEventLoop();
 
-    SnmpEventLoop() : EventLoop() {}	// Private to prevent instantiation
-    void export_timers();
-    void export_fds();
+    SnmpEventLoop();		    // Private to prevent instantiation
+
     void clear_pending_alarms ();
     void clear_monitored_fds ();
     static SnmpEventLoop * _sel;
     static const char * _log_name;
+
+    void notify_added(int, const SelectorMask&);
+    void notify_removed(int, const SelectorMask&);
+
+    void notify_scheduled(const TimeVal&);
+    void notify_unscheduled(const TimeVal&);
 
     friend void run_fd_callbacks (int, void *);
     friend void run_timer_callbacks(u_int, void *);

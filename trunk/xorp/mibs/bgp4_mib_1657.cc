@@ -56,12 +56,7 @@ BgpMib::the_instance()
 BgpMib::BgpMib() 
     : XrlBgpV0p2Client(&_xrl_router), 
       _xrl_router(SnmpEventLoop::the_instance(),"bgp4_mib"),
-      _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME) 
-
-{
-    SnmpEventLoop& eventloop = SnmpEventLoop::the_instance(); 
-    eventloop.export_events();
-}
+      _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME) {}
 
 void
 BgpMib::explicit_destructor()
