@@ -13,9 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_varrw.cc,v 1.2 2004/09/17 19:49:35 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_varrw.cc,v 1.3 2004/10/04 17:55:07 abittau Exp $"
 
 #include "static_routes_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "static_routes_varrw.hh"
 
 StaticRoutesVarRW::StaticRoutesVarRW(StaticRoute& route)

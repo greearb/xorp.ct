@@ -12,13 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xorp_static_routes.cc,v 1.8 2004/12/09 07:54:42 pavlin Exp $"
-
+#ident "$XORP: xorp/static_routes/xorp_static_routes.cc,v 1.9 2005/02/09 23:29:40 pavlin Exp $"
 
 //
 // XORP StaticRoutes module implementation.
 //
-
 
 #include "static_routes_module.h"
 
