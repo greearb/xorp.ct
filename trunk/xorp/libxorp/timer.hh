@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.11 2003/04/02 17:10:39 hodson Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.12 2003/04/02 18:12:52 hodson Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -291,11 +291,14 @@ public:
      *
      * @param tv reference that is assigned expiry time of next timer.
      * If there is no @ref XorpTimer pending, this value is assigned the
-     * maximum @ref TimeVal::MAXIMUM().
+     * maximum @ref TimeVal::MAXIMUM().  The first function returns the 
+     * absolute time at which the timer expires, where the second returns the 
+     * difference between now and the expiry time.   
      *
      * @return true if there is a XorpTimer awaiting expiry, false otherwise.  
      */
     bool get_next_delay(TimeVal& tv) const;
+    bool get_next_expire(TimeVal& tv) const;
 
     /**
      * Read from clock used by @ref TimerList object.
