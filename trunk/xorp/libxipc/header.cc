@@ -12,14 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/header.cc,v 1.2 2002/12/19 01:29:09 hodson Exp $"
+#ident "$XORP: xorp/libxipc/header.cc,v 1.3 2003/03/10 23:20:24 hodson Exp $"
 
+#include "libxorp/xorp.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "xrl_module.h"
-#include "libxorp/debug.h"
+//#include "libxorp/debug.h"
 #include "header.hh"
 
 static const string HEADER_SEP(":\t");
@@ -90,44 +91,60 @@ HeaderWriter::str() const
     return r;
 }
 
-HeaderReader::HeaderReader(const string& serialized) throw (InvalidString)
+#if 0
+static string::size_type
+skip(const string& buf, const string& skip, string::size_type pos)
 {
-    debug_msg("HeaderReader:\n%s\n", serialized.c_str());
+    if (buf.size() - pos < skip.size())
+	return string::npos;
 
+    string::size_t i = 0;
+    while (i != skip.size()) {
+	if (buf[pos + i] != skip[i])
+	    return string::npos;
+	i++;
+    }
+    return i;
+}
+#endif /* 0 */
+
+HeaderReader::HeaderReader(const string& serialized) throw (InvalidString)
+    : _bytes_consumed(0)
+{
     if (serialized.find(HEADER_EOL + HEADER_EOL) == ~0U)
 	throw InvalidString();
 
-    bool found_terminator = false;
+    string::size_type start = 0;
+    while (start < serialized.size()) {
 
-    const char *start, *sep, *end;
+	// Extract key
+	string::size_type sep = serialized.find(HEADER_SEP, start);
+	if (sep == string::npos) break;
 
-    start = serialized.c_str();
-    size_t remain = serialized.size();
+	string key(serialized, start, sep - start);
 
-    while (remain > 0 && *start != '\0') {
-	sep = strstr(start, HEADER_SEP.c_str());
-	if (sep == NULL) break;
+	// Skip key:value separator
+	start = sep + HEADER_SEP.size();
 
-	end = strstr(sep, HEADER_EOL.c_str());
-	if (end == NULL) break;
+	// Find to end of value
+	sep = serialized.find(HEADER_EOL, start);
+	if (sep == string::npos) break;
 
-	string key(start, sep);
-	string value(sep + HEADER_SEP.size(), end);
-	debug_msg("#%s# #%s#\n", key.c_str(), value.c_str());
+	string value(serialized, start, sep - start);
 
+	// Skip over end of line
+	start = sep + HEADER_EOL.size();
+
+	// Insert <key,value> into map
 	_map[key] = value;
 
-	remain -= end + HEADER_EOL.size() - start;
-	start = end + HEADER_EOL.size();
-	if (*start && !strncmp(start, HEADER_EOL.c_str(), HEADER_EOL.size())) {
-	    found_terminator = true;
-	    _bytes_consumed = start - serialized.c_str() + HEADER_EOL.size();
-	    break;
-	}
+	if (string(serialized, start, HEADER_EOL.size()) == HEADER_EOL) {
+	    _bytes_consumed = start + HEADER_EOL.size();
+	    return;
+	} // else start == start of new entry, we go around again
     }
 
-    if (found_terminator == false)
-	throw InvalidString();
+    throw InvalidString();
 }
 
 HeaderReader&
