@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_ipfw.hh,v 1.4 2004/09/14 15:03:38 bms Exp $
+// $XORP: xorp/fea/firewall_ipfw.hh,v 1.5 2004/09/14 17:04:11 bms Exp $
 
 #ifndef	__FEA_FIREWALL_IPFW_HH__
 #define __FEA_FIREWALL_IPFW_HH__
@@ -27,18 +27,26 @@
 
 class IpfwFwProvider;
 
+// Decorator for Ipfw FwRules
+
 template <typename N>
 class IpfwFwRule : public FwRule<N> {
 	friend class IpfwFwProvider;
-#ifdef HAVE_FIREWALL_IPFW
 protected:
-	uint32_t	_ruleno;
+	IpfwFwRule() {}			// forbid direct instantiation
+#ifdef HAVE_FIREWALL_IPFW
+public:
+	IpfwFwRule(const FwRule<N>&) {}	// permit copy/new from an FwRule
+	~IpfwFwRule() {}		// destructor ALWAYS public
+protected:
+	uint32_t	_idx;	// index, if already assigned
+	struct ip_fw	_ipfw;	// IPFW-specific data
 #endif
 };
 
-typedef IpfwFwRule<IPv4Net> IpfwFwRule4;
-typedef IpfwFwRule<IPv6Net> IpfwFwRule6;
-typedef IpfwFwRule<IPvXNet> IpfwFwRuleX;
+typedef IpfwFwRule<IPv4> IpfwFwRule4;
+typedef IpfwFwRule<IPv6> IpfwFwRule6;
+typedef IpfwFwRule<IPvX> IpfwFwRuleX;
 
 /****************************************************************************/
 
