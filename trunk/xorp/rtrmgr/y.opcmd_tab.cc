@@ -54,53 +54,55 @@ static int yygrowstack();
 #define yysslim opcmdsslim
 #line 56 "y.opcmd_tab.c"
 #define YYERRCODE 256
-#define STRING 257
-#define COMMAND 258
-#define UPLEVEL 259
-#define DOWNLEVEL 260
-#define COLON 261
-#define END 262
+#define UPLEVEL 257
+#define DOWNLEVEL 258
+#define END 259
+#define COLON 260
+#define COMMAND 261
+#define VARIABLE 262
 #define LITERAL 263
-#define VARIABLE 264
+#define SYNTAX_ERROR 264
 const short opcmdlhs[] = {                                        -1,
-    0,    0,    1,    1,    2,    4,    4,    4,    3,    5,
-    7,    6,    6,    8,
+    0,    0,    0,    1,    1,    3,    5,    5,    5,    4,
+    6,    8,    7,    7,    9,    2,
 };
 const short opcmdlen[] = {                                         2,
-    0,    2,    2,    4,    1,    0,    2,    2,    3,    1,
-    1,    1,    2,    4,
+    0,    2,    1,    2,    4,    1,    0,    2,    2,    3,
+    1,    1,    1,    2,    4,    1,
 };
 const short opcmddefred[] = {                                      0,
-    5,    0,    0,    0,    2,   10,    0,    3,    0,    0,
-    0,    0,    0,    0,    0,    8,    7,    4,    0,   11,
-    9,   13,    0,   14,
+    6,   16,    0,    0,    3,    0,    2,   11,    0,    4,
+    0,    0,    0,    0,    0,    0,    0,    9,    8,    5,
+    0,   12,   10,   14,    0,   15,
 };
-const short opcmddgoto[] = {                                       2,
-    3,   11,    8,   12,    9,   14,   21,   15,
+const short opcmddgoto[] = {                                       3,
+    4,    5,   13,   10,   14,   11,   16,   23,   17,
 };
-const short opcmdsindex[] = {                                   -263,
-    0,    0, -263, -257,    0,    0, -256,    0, -255, -256,
- -256, -248, -249, -247, -255,    0,    0,    0, -246,    0,
-    0,    0, -244,    0,
+const short opcmdsindex[] = {                                   -261,
+    0,    0,    0, -261,    0, -257,    0,    0, -254,    0,
+ -249, -254, -254, -253, -247, -244, -249,    0,    0,    0,
+ -248,    0,    0,    0, -243,    0,
 };
-const short opcmdrindex[] = {                                     14,
-    0,    0,   14,    0,    0,    0, -248,    0,    0, -248,
- -248,    0,    0,    0, -245,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,
+const short opcmdrindex[] = {                                     17,
+    0,    0,    0,   17,    0,    0,    0,    0, -239,    0,
+    0, -239, -239,    0,    0,    0, -238,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,
 };
-const short opcmdgindex[] = {                                     13,
-    0,    1,    7,   -1,    0,    5,    0,    0,
+const short opcmdgindex[] = {                                     15,
+    0,    0,    1,    7,   -2,    0,    5,    0,    0,
 };
-#define YYTABLESIZE 20
-const short opcmdtable[] = {                                       1,
-    4,    6,   13,    4,    7,    1,    1,   10,   16,   17,
-    6,   19,   20,    1,   12,    5,   23,   24,   18,   22,
+#define YYTABLESIZE 22
+const short opcmdtable[] = {                                       8,
+    6,    1,    2,    8,    6,    1,    9,   12,    1,   18,
+   19,   15,   21,   22,   25,   26,    1,    7,    7,   13,
+   20,   24,
 };
-const short opcmdcheck[] = {                                     263,
-    0,  259,  258,    3,    4,  263,  263,  264,   10,   11,
-  259,  261,  260,    0,  260,    3,  263,  262,   12,   15,
+const short opcmdcheck[] = {                                     257,
+    0,  263,  264,  257,    4,  263,    6,  262,  263,   12,
+   13,  261,  260,  258,  263,  259,    0,  257,    4,  258,
+   14,   17,
 };
-#define YYFINAL 2
+#define YYFINAL 3
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
@@ -113,13 +115,14 @@ const char * const opcmdname[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"STRING","COMMAND","UPLEVEL",
-"DOWNLEVEL","COLON","END","LITERAL","VARIABLE",
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"UPLEVEL","DOWNLEVEL","END",
+"COLON","COMMAND","VARIABLE","LITERAL","SYNTAX_ERROR",
 };
 const char * const opcmdrule[] = {
 "$accept : input",
 "input :",
 "input : definition input",
+"input : syntax_error",
 "definition : word specification",
 "definition : word word word_or_var_list specification",
 "word : LITERAL",
@@ -132,6 +135,7 @@ const char * const opcmdrule[] = {
 "attributes : attribute",
 "attributes : attribute attributes",
 "attribute : COMMAND COLON LITERAL END",
+"syntax_error : SYNTAX_ERROR",
 };
 #endif
 #ifndef YYSTYPE
@@ -164,33 +168,24 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 62 "op_commands.yy"
+#line 69 "op_commands.yy"
 
-extern FILE *opcmdin;
-extern int op_linenum;
-static const char *opcmd_filename;
-static char lastsymbol[256];
-
-static string current_cmd;
-static list<string> cmd_list;
-static OpCommandList *ocl;
 extern "C" int opcmdparse();
 extern int opcmdlex();
+extern FILE *opcmdin;
+extern int opcmd_linenum;
 
-void
-opcmderror (const char *s)
-{
-    printf("\n ERROR [Operational Command File: %s line %d]: %s\n",
-	   opcmd_filename, op_linenum, s);
-    printf("\n Last symbol parsed was %s\n", lastsymbol);
-    exit(1);
-}
+static OpCommandList *ocl = NULL;
+static string opcmd_filename;
+static string lastsymbol;
+static string current_cmd;
+static list<string> cmd_list;
+
 
 static void
 append_path(char *segment)
 {
-    strncpy(lastsymbol, segment, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = segment;
 
     string segname;
     segname = segment;
@@ -213,8 +208,7 @@ pop_path()
 static void
 add_cmd(char *cmd)
 {
-    strncpy(lastsymbol, cmd, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = cmd;
 
     ocl->add_cmd(cmd);
     current_cmd = cmd;
@@ -225,19 +219,9 @@ add_cmd(char *cmd)
 static void
 append_cmd(char *s)
 {
-    strncpy(lastsymbol, s, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = s;
 
     cmd_list.push_back(string(s));
-
-#ifdef DEBUG_OPCMD_PARSER
-    printf("cmd_str now >");
-    list<string>::const_iterator iter;
-    for (iter = cmd_list.begin(); iter != cmd_list.end(); ++iter) {
-	printf("%s ", iter->c_str());
-    }
-    printf("\n");
-#endif
 
     free(s);
 }
@@ -245,33 +229,43 @@ append_cmd(char *s)
 static void
 end_cmd()
 {
-#ifdef DEBUG_OPCMD_PARSER
-    printf("end_cmd\n");
-#endif
-
     ocl->add_cmd_action(current_cmd, cmd_list);
     cmd_list.clear();
+}
+
+void
+opcmderror(const char *s) throw (ParseError)
+{
+    string errmsg;
+
+    errmsg = c_format("PARSE ERROR [Operational Command File: %s line %d]: %s",
+		      opcmd_filename.c_str(), opcmd_linenum, s);
+    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
+
+    xorp_throw(ParseError, errmsg);
 }
 
 int
 init_opcmd_parser(const char *filename, OpCommandList *o)
 {
     ocl = o;
-    op_linenum = 1;
+    opcmd_linenum = 1;
+
     opcmdin = fopen(filename, "r");
     if (opcmdin == NULL)
 	return -1;
+
     opcmd_filename = filename;
     return 0;
 }
 
-int
-parse_opcmd()
+void
+parse_opcmd() throw (ParseError)
 {
-    opcmdparse();
-    return 0;
+    if (opcmdparse() != 0)
+	opcmderror("unknown error");
 }
-#line 275 "y.opcmd_tab.c"
+#line 269 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -466,46 +460,35 @@ yyreduce:
     yyval = yyvsp[1-yym];
     switch (yyn)
     {
-case 3:
-#line 25 "op_commands.yy"
-{
-		}
-break;
 case 4:
-#line 27 "op_commands.yy"
-{
-		}
+#line 29 "op_commands.yy"
+{ }
 break;
 case 5:
 #line 30 "op_commands.yy"
-{
-			append_path(yyvsp[0]);
-		}
+{ }
 break;
-case 8:
-#line 37 "op_commands.yy"
-{
-			append_path(yyvsp[-1]);
-		}
+case 6:
+#line 33 "op_commands.yy"
+{ append_path(yyvsp[0]); }
 break;
 case 9:
-#line 41 "op_commands.yy"
-{
-		}
+#line 39 "op_commands.yy"
+{ append_path(yyvsp[-1]); }
 break;
 case 10:
-#line 44 "op_commands.yy"
-{
-			push_path();
-		}
+#line 42 "op_commands.yy"
+{ }
 break;
 case 11:
-#line 48 "op_commands.yy"
-{
-			pop_path();
-		}
+#line 45 "op_commands.yy"
+{ push_path(); }
 break;
-case 14:
+case 12:
+#line 48 "op_commands.yy"
+{ pop_path(); }
+break;
+case 15:
 #line 55 "op_commands.yy"
 {
 			add_cmd(yyvsp[-3]);
@@ -513,7 +496,13 @@ case 14:
 			end_cmd();
 		}
 break;
-#line 517 "y.opcmd_tab.c"
+case 16:
+#line 62 "op_commands.yy"
+{
+			opcmderror("syntax error");
+		}
+break;
+#line 506 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -50,130 +50,129 @@ static int yygrowstack();
 #include "rtrmgr_module.h"
 #include "template_tree_node.hh"
 #include "template_tree.hh"
-/* #define DEBUG_TEMPLATE_PARSER */
-/* XXX: sigh - -p flag to yacc should do this for us */
+/* XXX: sigh, the -p flag to yacc should do this for us */
 #define yystacksize tpltstacksize
 #define yysslim tpltsslim
-#line 58 "y.tplt_tab.c"
+#line 57 "y.tplt_tab.c"
 #define YYERRCODE 256
-#define STRING 257
-#define COMMAND 258
-#define UPLEVEL 259
-#define DOWNLEVEL 260
-#define COLON 261
-#define ASSIGN_DEFAULT 262
-#define END 263
-#define LITERAL 264
-#define SLASH 265
-#define VARIABLE 266
-#define VARDEF 267
-#define LISTNEXT 268
-#define RETURN 269
-#define TEXT 270
-#define UINT 271
-#define INT 272
-#define BOOL 273
-#define TOGGLE 274
-#define MACADDR 275
-#define IPV4 276
-#define IPV4PREFIX 277
-#define IPV6 278
-#define IPV6PREFIX 279
-#define INTEGER 280
-#define BOOL_INITIALIZER 281
-#define IPV4_INITIALIZER 282
-#define IPV4PREFIX_INITIALIZER 283
-#define IPV6_INITIALIZER 284
-#define IPV6PREFIX_INITIALIZER 285
-#define MACADDR_INITIALIZER 286
+#define UPLEVEL 257
+#define DOWNLEVEL 258
+#define END 259
+#define COLON 260
+#define ASSIGN_DEFAULT 261
+#define LISTNEXT 262
+#define RETURN 263
+#define TEXT_TYPE 264
+#define INT_TYPE 265
+#define UINT_TYPE 266
+#define BOOL_TYPE 267
+#define TOGGLE_TYPE 268
+#define IPV4_TYPE 269
+#define IPV4PREFIX_TYPE 270
+#define IPV6_TYPE 271
+#define IPV6PREFIX_TYPE 272
+#define MACADDR_TYPE 273
+#define BOOL_VALUE 274
+#define INTEGER_VALUE 275
+#define IPV4_VALUE 276
+#define IPV4PREFIX_VALUE 277
+#define IPV6_VALUE 278
+#define IPV6PREFIX_VALUE 279
+#define MACADDR_VALUE 280
+#define VARDEF 281
+#define COMMAND 282
+#define VARIABLE 283
+#define LITERAL 284
+#define STRING 285
+#define SYNTAX_ERROR 286
 const short tpltlhs[] = {                                        -1,
-    0,    0,    1,    2,    2,    5,    5,    4,    4,    4,
-    6,    6,    6,    6,    6,    6,    6,    6,    6,    6,
-    7,    7,    7,    7,    7,    7,    7,    7,    7,    7,
-    3,    8,    8,    9,    9,    9,   10,   10,   13,   12,
-   11,   11,   14,   15,   16,   17,   17,   18,   18,   18,
-   18,   18,   18,   18,   18,   19,   19,
+    0,    0,    0,    1,    3,    3,    6,    6,    5,    5,
+    5,    7,    7,    7,    7,    7,    7,    7,    7,    7,
+    7,    8,    8,    8,    8,    8,    8,    8,    8,    8,
+    8,    4,    9,    9,   10,   10,   10,   11,   11,   14,
+   13,   12,   12,   15,   16,   17,   18,   18,   19,   19,
+   19,   19,   19,   19,   19,   19,   20,   20,    2,
 };
 const short tpltlen[] = {                                         2,
-    0,    2,    2,    1,    1,    2,    4,    1,    2,    2,
-    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-    3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-    3,    0,    2,    1,    1,    1,    1,    1,    4,    4,
-    1,    1,    4,    3,    1,    1,    3,    2,    4,    3,
-    2,    3,    1,    2,    1,    1,    2,
+    0,    2,    1,    2,    1,    1,    2,    4,    1,    2,
+    2,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+    1,    3,    3,    3,    3,    3,    3,    3,    3,    3,
+    3,    3,    0,    2,    1,    1,    1,    1,    1,    4,
+    4,    1,    1,    4,    3,    1,    1,    3,    2,    4,
+    3,    2,    3,    1,    2,    1,    1,    2,    1,
 };
 const short tpltdefred[] = {                                      0,
-    0,    0,    0,    0,    0,    5,    0,    2,    0,    3,
-    0,   10,    0,   45,    0,   36,    0,    0,   34,   35,
-   37,   38,   41,   42,    0,   11,   12,   13,   14,   15,
-   20,   16,   17,   18,   19,    7,    0,   31,   33,    0,
+    0,   59,    0,    0,    3,    0,    0,    6,    0,    2,
+    0,    4,    0,   11,    0,   46,    0,   37,    0,    0,
+   35,   36,   38,   39,   42,   43,    0,   12,   13,   14,
+   15,   16,   17,   18,   19,   20,   21,    8,    0,   32,
+   34,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,   45,    0,    0,    0,   47,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,   40,
+   41,    0,   55,    0,    0,    0,   49,   44,    0,   22,
+   23,   24,   25,   26,   27,   28,   29,   30,   31,   58,
+   51,   53,    0,   48,   50,
+};
+const short tpltdgoto[] = {                                       3,
+    4,    5,    6,   12,    7,    8,   38,   54,   19,   20,
+   21,   22,   23,   24,   25,   26,   27,   58,   59,   90,
+};
+const short tpltsindex[] = {                                   -276,
+ -270,    0,    0, -276,    0, -234, -279,    0, -204,    0,
+ -227,    0, -270,    0, -251,    0, -248,    0, -196, -227,
+    0,    0,    0,    0,    0,    0, -197,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0, -228,    0,
+    0, -252, -195, -194, -193, -192, -191, -190, -189, -188,
+ -187, -186, -183, -182,    0, -221, -231, -253,    0, -220,
+ -185, -184, -181, -180, -198, -179, -199, -178, -200,    0,
+    0, -221,    0, -251, -203, -259,    0,    0, -225,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,   44,    0,    0,    0,   46,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,   39,   40,    0,
-    0,    0,   48,    0,   54,   43,    0,   21,   22,   23,
-   24,   25,   30,   26,   27,   28,   29,    0,   57,   52,
-   50,   47,   49,
+    0,    0, -202,    0,    0,
 };
-const short tpltdgoto[] = {                                       2,
-    3,    4,   10,    5,    6,   36,   52,   17,   18,   19,
-   20,   21,   22,   23,   24,   25,   56,   57,   89,
-};
-const short tpltsindex[] = {                                   -238,
- -237,    0, -238, -207, -220,    0, -202,    0, -227,    0,
- -237,    0, -268,    0, -228,    0, -199, -227,    0,    0,
-    0,    0,    0,    0, -198,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0, -255,    0,    0, -206,
- -200, -197, -196, -195, -194, -193, -192, -191, -190, -189,
- -188, -187,    0, -232, -183, -225,    0, -180, -216, -201,
- -203, -186, -205, -185, -184, -204, -182,    0,    0, -256,
- -175, -268,    0, -183,    0,    0, -252,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0, -174,    0,    0,
-    0,    0,    0,
-};
-const short tpltrindex[] = {                                     84,
- -219,    0,   84,    0, -173,    0, -218,    0, -172,    0,
- -217,    0,    0,    0, -219,    0,    0, -172,    0,    0,
+const short tpltrindex[] = {                                     81,
+ -256,    0,    0,   81,    0,    0, -173,    0, -255,    0,
+ -172,    0, -254,    0,    0,    0, -256,    0,    0, -172,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
- -178, -176, -171, -170, -169, -167, -165, -163, -162, -161,
-    0,    0,    0, -215, -214,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0, -213,
- -212,    0,    0, -213,    0,    0,    0,    0,    0,    0,
+    0,    0, -174, -171, -170, -167, -164, -163, -162, -160,
+ -159, -157,    0,    0,    0, -235, -213,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,
+    0, -212,    0,    0, -211, -212,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,
 };
-const short tpltgindex[] = {                                     86,
-   18,    0,    0,    0,   85,  -37,    0,   73,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,   27,  -26,
+const short tpltgindex[] = {                                     83,
+   14,    0,    0,    0,    0,   96,  -39,    0,   84,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,   26,    4,
 };
-#define YYTABLESIZE 104
-const short tplttable[] = {                                      51,
-   74,   26,   27,   28,   29,   30,   31,   32,   33,   34,
-   35,   54,   88,   55,   41,   42,   43,   44,   45,   46,
-   47,   48,   49,   50,   70,    1,   16,   73,   75,    7,
-   14,   71,   37,   72,   91,   16,   15,   76,    7,    8,
-    6,    9,   77,   11,    8,    6,    9,   55,   53,   56,
-   51,    9,   55,   53,   56,   51,   53,   54,   13,   55,
-   38,   58,   40,   79,   59,   60,   61,   62,   63,   64,
-   65,   66,   67,   74,   68,   69,   78,   81,   80,   86,
-   83,   90,   93,    1,   11,    4,   12,   32,    8,   12,
-   39,   13,   14,   15,   82,   20,   84,   16,   85,   17,
-   18,   19,   87,   92,
+#define YYTABLESIZE 105
+const short tplttable[] = {                                      53,
+    9,    7,   10,   93,   13,   78,   55,    1,   79,    2,
+    9,   39,   28,   29,   30,   31,   32,   33,   34,   35,
+   36,   37,   11,   54,   18,   72,   54,    9,    7,   10,
+   56,   57,    9,   18,   91,   43,   44,   45,   46,   47,
+   48,   49,   50,   51,   52,   56,   57,   52,   56,   57,
+   52,   74,   75,   76,   16,   15,   17,   56,   57,   73,
+   77,   40,   42,   72,   80,   60,   61,   62,   63,   64,
+   65,   66,   67,   68,   69,   70,   71,   85,   87,   89,
+    1,   92,   95,    5,   12,   33,   10,   13,   14,   81,
+   82,   15,   83,   84,   16,   17,   18,   86,   19,   20,
+   88,   21,   14,   41,   94,
 };
-const short tpltcheck[] = {                                      37,
-  257,  270,  271,  272,  273,  274,  275,  276,  277,  278,
-  279,  264,  269,  266,  270,  271,  272,  273,  274,  275,
-  276,  277,  278,  279,  257,  264,    9,   54,   55,  267,
-  258,  264,  261,  266,   72,   18,  264,  263,  267,  259,
-  259,  259,  268,  264,  264,  264,  264,  263,  263,  263,
-  263,  259,  268,  268,  268,  268,  263,  264,  261,  266,
-  260,  262,  261,  280,  262,  262,  262,  262,  262,  262,
-  262,  262,  262,  257,  263,  263,  257,  281,  280,  284,
-  286,  257,  257,    0,  263,  259,  263,  260,    3,    5,
-   18,  263,  263,  263,  281,  263,  282,  263,  283,  263,
-  263,  263,  285,   77,
+const short tpltcheck[] = {                                      39,
+  257,  257,  257,  263,  284,  259,  259,  284,  262,  286,
+  281,  260,  264,  265,  266,  267,  268,  269,  270,  271,
+  272,  273,  257,  259,   11,  285,  262,  284,  284,  284,
+  283,  284,  281,   20,   74,  264,  265,  266,  267,  268,
+  269,  270,  271,  272,  273,  259,  259,  259,  262,  262,
+  262,  283,  284,  285,  282,  260,  284,  283,  284,   56,
+   57,  258,  260,  285,  285,  261,  261,  261,  261,  261,
+  261,  261,  261,  261,  261,  259,  259,  276,  278,  280,
+    0,  285,  285,  257,  259,  258,    4,  259,  259,  275,
+  275,  259,  274,  274,  259,  259,  259,  277,  259,  259,
+  279,  259,    7,   20,   79,
 };
-#define YYFINAL 2
+#define YYFINAL 3
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
@@ -186,17 +185,18 @@ const char * const tpltname[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"STRING","COMMAND","UPLEVEL",
-"DOWNLEVEL","COLON","ASSIGN_DEFAULT","END","LITERAL","SLASH","VARIABLE",
-"VARDEF","LISTNEXT","RETURN","TEXT","UINT","INT","BOOL","TOGGLE","MACADDR",
-"IPV4","IPV4PREFIX","IPV6","IPV6PREFIX","INTEGER","BOOL_INITIALIZER",
-"IPV4_INITIALIZER","IPV4PREFIX_INITIALIZER","IPV6_INITIALIZER",
-"IPV6PREFIX_INITIALIZER","MACADDR_INITIALIZER",
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"UPLEVEL","DOWNLEVEL","END",
+"COLON","ASSIGN_DEFAULT","LISTNEXT","RETURN","TEXT_TYPE","INT_TYPE","UINT_TYPE",
+"BOOL_TYPE","TOGGLE_TYPE","IPV4_TYPE","IPV4PREFIX_TYPE","IPV6_TYPE",
+"IPV6PREFIX_TYPE","MACADDR_TYPE","BOOL_VALUE","INTEGER_VALUE","IPV4_VALUE",
+"IPV4PREFIX_VALUE","IPV6_VALUE","IPV6PREFIX_VALUE","MACADDR_VALUE","VARDEF",
+"COMMAND","VARIABLE","LITERAL","STRING","SYNTAX_ERROR",
 };
 const char * const tpltrule[] = {
 "$accept : input",
 "input :",
 "input : definition input",
+"input : syntax_error",
 "definition : nodename nodegroup",
 "nodename : literals",
 "nodename : named_literal",
@@ -205,26 +205,26 @@ const char * const tpltrule[] = {
 "literals : LITERAL",
 "literals : literals LITERAL",
 "literals : literals named_literal",
-"type : TEXT",
-"type : UINT",
-"type : INT",
-"type : BOOL",
-"type : TOGGLE",
-"type : IPV4",
-"type : IPV4PREFIX",
-"type : IPV6",
-"type : IPV6PREFIX",
-"type : MACADDR",
-"init_type : TEXT ASSIGN_DEFAULT STRING",
-"init_type : UINT ASSIGN_DEFAULT INTEGER",
-"init_type : INT ASSIGN_DEFAULT INTEGER",
-"init_type : BOOL ASSIGN_DEFAULT BOOL_INITIALIZER",
-"init_type : TOGGLE ASSIGN_DEFAULT BOOL_INITIALIZER",
-"init_type : IPV4 ASSIGN_DEFAULT IPV4_INITIALIZER",
-"init_type : IPV4PREFIX ASSIGN_DEFAULT IPV4PREFIX_INITIALIZER",
-"init_type : IPV6 ASSIGN_DEFAULT IPV6_INITIALIZER",
-"init_type : IPV6PREFIX ASSIGN_DEFAULT IPV6PREFIX_INITIALIZER",
-"init_type : MACADDR ASSIGN_DEFAULT MACADDR_INITIALIZER",
+"type : TEXT_TYPE",
+"type : INT_TYPE",
+"type : UINT_TYPE",
+"type : BOOL_TYPE",
+"type : TOGGLE_TYPE",
+"type : IPV4_TYPE",
+"type : IPV4PREFIX_TYPE",
+"type : IPV6_TYPE",
+"type : IPV6PREFIX_TYPE",
+"type : MACADDR_TYPE",
+"init_type : TEXT_TYPE ASSIGN_DEFAULT STRING",
+"init_type : INT_TYPE ASSIGN_DEFAULT INTEGER_VALUE",
+"init_type : UINT_TYPE ASSIGN_DEFAULT INTEGER_VALUE",
+"init_type : BOOL_TYPE ASSIGN_DEFAULT BOOL_VALUE",
+"init_type : TOGGLE_TYPE ASSIGN_DEFAULT BOOL_VALUE",
+"init_type : IPV4_TYPE ASSIGN_DEFAULT IPV4_VALUE",
+"init_type : IPV4PREFIX_TYPE ASSIGN_DEFAULT IPV4PREFIX_VALUE",
+"init_type : IPV6_TYPE ASSIGN_DEFAULT IPV6_VALUE",
+"init_type : IPV6PREFIX_TYPE ASSIGN_DEFAULT IPV6PREFIX_VALUE",
+"init_type : MACADDR_TYPE ASSIGN_DEFAULT MACADDR_VALUE",
 "nodegroup : UPLEVEL statements DOWNLEVEL",
 "statements :",
 "statements : statement statements",
@@ -252,6 +252,7 @@ const char * const tpltrule[] = {
 "cmd : LITERAL",
 "list_of_cmd_strings : STRING",
 "list_of_cmd_strings : STRING list_of_cmd_strings",
+"syntax_error : SYNTAX_ERROR",
 };
 #endif
 #ifndef YYSTYPE
@@ -284,7 +285,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 194 "template.yy"
+#line 221 "template.yy"
 
 extern char *lstr;
 extern char *vstr;
@@ -292,51 +293,39 @@ extern char *cstr;
 extern char *sstr;
 extern char *istr;
 extern FILE *tpltin;
-extern int linenum;
-static int tplt_type;
-static char *tplt_initializer;
-static const char *tplt_filename;
-static char lastsymbol[256];
-
-#define MAXSTACK 20
-#define MAXPATH 256
-/* static string cmd_str; */
-static string current_cmd;
-/* static string path_hold; */
-static list<string> cmd_list;
-static TemplateTree* tt;
+extern int tplt_linenum;
 extern "C" int tpltparse();
 extern int tpltlex();
 
-void
-tplterror(const char *s)
-{
-    printf("\n ERROR [Template File: %s line %d]: %s\n",
-	tplt_filename, linenum, s);
-    printf("\n Last symbol parsed was %s\n", lastsymbol);
-    exit(1);
-}
+static TemplateTree* tt = NULL;
+static string tplt_filename;
+static string lastsymbol;
+static int tplt_type;
+static char *tplt_initializer = NULL;
+static string current_cmd;
+static list<string> cmd_list;
+
 
 static void
 extend_path(char *segment, bool is_tag)
 {
-    strncpy(lastsymbol, segment, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = segment;
 
     string segname;
     segname = segment;
     tt->extend_path(segname, is_tag);
-    /* free(segment); */
-    /* printf("\n>>> extend path: %s\n", path); */
+    free(segment);
 }
 
 static void
 push_path()
 {
-    /* printf("\n>>>PUSH: %s\n", path); */
     tt->push_path(tplt_type, tplt_initializer);
     tplt_type = NODE_VOID;
-    tplt_initializer = NULL;
+    if (tplt_initializer != NULL) {
+	free(tplt_initializer);
+	tplt_initializer = NULL;
+    }
 }
 
 static void
@@ -344,8 +333,10 @@ pop_path()
 {
     tt->pop_path();
     tplt_type = NODE_VOID;
-    tplt_initializer = NULL;
-    /* printf("\n>>>POP: %s\n", path); */
+    if (tplt_initializer != NULL) {
+	free(tplt_initializer);
+	tplt_initializer = NULL;
+    }
 }
 
 static void
@@ -359,8 +350,7 @@ terminal(char *segment)
 static void
 add_cmd(char *cmd)
 {
-    strncpy(lastsymbol, cmd, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = cmd;
 
     tt->add_cmd(cmd);
     current_cmd = cmd;
@@ -371,59 +361,45 @@ add_cmd(char *cmd)
 static void
 append_cmd(char *s)
 {
-    strncpy(lastsymbol, s, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = s;
 
     cmd_list.push_back(string(s));
-
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("cmd_str now >");
-    list<string>::const_iterator iter;
-    for (iter = cmd_list.begin(); iter != cmd_list.end(); ++iter) {
-	printf("%s ", iter->c_str());
-    }
-    printf("\n");
-#endif /* DEBUG_TEMPLATE_PARSER */
-
     free(s);
 }
 
 static void
 prepend_cmd(char *s)
 {
-    strncpy(lastsymbol, s, sizeof(lastsymbol) - 1);
-    lastsymbol[sizeof(lastsymbol) - 1] = '\0';
+    lastsymbol = s;
 
     cmd_list.push_front(string(s));
-
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("cmd_str now >");
-    list<string>::const_iterator iter;
-    for (iter = cmd_list.begin(); iter != cmd_list.end(); ++iter) {
-	printf("%s ", iter->c_str());
-    }
-    printf("\n");
-#endif /* DEBUG_TEMPLATE_PARSER */
-
     free(s);
 }
 
 static void
 end_cmd()
 {
-#ifdef DEBUG_TEMPLATE_PARSER
-    printf("end_cmd\n");
-#endif
-
     tt->add_cmd_action(current_cmd, cmd_list);
     cmd_list.clear();
 }
 
+void
+tplterror(const char *s) throw (ParseError)
+{
+    string errmsg;
+
+    errmsg = c_format("PARSE ERROR [Template File: %s line %d]: %s",
+		      tplt_filename.c_str(), tplt_linenum, s);
+    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
+
+    xorp_throw(ParseError, errmsg);
+}
+
 int
-init_template_parser (const char *filename, TemplateTree *c)
+init_template_parser(const char *filename, TemplateTree *c)
 {
     tt = c;
-    linenum = 1;
+    tplt_linenum = 1;
 
     tpltin = fopen(filename, "r");
     if (tpltin == NULL)
@@ -435,13 +411,13 @@ init_template_parser (const char *filename, TemplateTree *c)
     return 0;
 }
 
-int
-parse_template()
+void
+parse_template() throw (ParseError)
 {
-    tpltparse();
-    return 0;
+    if (tpltparse() != 0)
+	tplterror("unknown error");
 }
-#line 445 "y.tplt_tab.c"
+#line 421 "y.tplt_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -636,182 +612,173 @@ yyreduce:
     yyval = yyvsp[1-yym];
     switch (yyn)
     {
-case 4:
-#line 52 "template.yy"
-{ push_path(); }
-break;
 case 5:
-#line 53 "template.yy"
+#line 55 "template.yy"
 { push_path(); }
 break;
 case 6:
-#line 55 "template.yy"
+#line 56 "template.yy"
+{ push_path(); }
+break;
+case 7:
+#line 59 "template.yy"
 {
 			extend_path(yyvsp[-1], true);
 			extend_path(yyvsp[0], false);
 		}
 break;
-case 7:
-#line 59 "template.yy"
+case 8:
+#line 63 "template.yy"
 {
 			extend_path(yyvsp[-3], true);
 			extend_path(yyvsp[-2], false);
 		}
 break;
-case 8:
-#line 64 "template.yy"
-{ extend_path(yyvsp[0], false); }
-break;
 case 9:
-#line 65 "template.yy"
+#line 69 "template.yy"
 { extend_path(yyvsp[0], false); }
 break;
-case 11:
-#line 68 "template.yy"
-{ tplt_type = NODE_TEXT; }
+case 10:
+#line 70 "template.yy"
+{ extend_path(yyvsp[0], false); }
 break;
 case 12:
-#line 69 "template.yy"
-{ tplt_type = NODE_UINT; }
+#line 74 "template.yy"
+{ tplt_type = NODE_TEXT; }
 break;
 case 13:
-#line 70 "template.yy"
+#line 75 "template.yy"
 { tplt_type = NODE_INT; }
 break;
 case 14:
-#line 71 "template.yy"
-{ tplt_type = NODE_BOOL; }
+#line 76 "template.yy"
+{ tplt_type = NODE_UINT; }
 break;
 case 15:
-#line 72 "template.yy"
-{ tplt_type = NODE_TOGGLE; }
+#line 77 "template.yy"
+{ tplt_type = NODE_BOOL; }
 break;
 case 16:
-#line 73 "template.yy"
-{ tplt_type = NODE_IPV4; }
+#line 78 "template.yy"
+{ tplt_type = NODE_TOGGLE; }
 break;
 case 17:
-#line 74 "template.yy"
-{ tplt_type = NODE_IPV4PREFIX; }
+#line 79 "template.yy"
+{ tplt_type = NODE_IPV4; }
 break;
 case 18:
-#line 75 "template.yy"
-{ tplt_type = NODE_IPV6; }
+#line 80 "template.yy"
+{ tplt_type = NODE_IPV4PREFIX; }
 break;
 case 19:
-#line 76 "template.yy"
-{ tplt_type = NODE_IPV6PREFIX; }
+#line 81 "template.yy"
+{ tplt_type = NODE_IPV6; }
 break;
 case 20:
-#line 77 "template.yy"
-{ tplt_type = NODE_MACADDR; }
+#line 82 "template.yy"
+{ tplt_type = NODE_IPV6PREFIX; }
 break;
 case 21:
-#line 79 "template.yy"
+#line 83 "template.yy"
+{ tplt_type = NODE_MACADDR; }
+break;
+case 22:
+#line 86 "template.yy"
 {
 			tplt_type = NODE_TEXT;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 22:
-#line 83 "template.yy"
-{
-			tplt_type = NODE_UINT;
-			tplt_initializer = yyvsp[0];
-		}
-break;
 case 23:
-#line 87 "template.yy"
+#line 90 "template.yy"
 {
 			tplt_type = NODE_INT;
 			tplt_initializer = yyvsp[0];
 		}
 break;
 case 24:
-#line 91 "template.yy"
+#line 94 "template.yy"
+{
+			tplt_type = NODE_UINT;
+			tplt_initializer = yyvsp[0];
+		}
+break;
+case 25:
+#line 98 "template.yy"
 {
 			tplt_type = NODE_BOOL;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 25:
-#line 95 "template.yy"
+case 26:
+#line 102 "template.yy"
 {
 			tplt_type = NODE_TOGGLE;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 26:
-#line 99 "template.yy"
+case 27:
+#line 106 "template.yy"
 {
 			tplt_type = NODE_IPV4;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 27:
-#line 103 "template.yy"
+case 28:
+#line 110 "template.yy"
 {
 			tplt_type = NODE_IPV4PREFIX;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 28:
-#line 107 "template.yy"
+case 29:
+#line 114 "template.yy"
 {
 			tplt_type = NODE_IPV6;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 29:
-#line 111 "template.yy"
+case 30:
+#line 118 "template.yy"
 {
 			tplt_type = NODE_IPV6PREFIX;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 30:
-#line 115 "template.yy"
+case 31:
+#line 122 "template.yy"
 {
 			tplt_type = NODE_MACADDR;
 			tplt_initializer = yyvsp[0];
 		}
 break;
-case 31:
-#line 120 "template.yy"
+case 32:
+#line 128 "template.yy"
 { pop_path(); }
 break;
-case 39:
-#line 129 "template.yy"
-{ terminal(yyvsp[-3]); }
-break;
 case 40:
-#line 131 "template.yy"
+#line 141 "template.yy"
 { terminal(yyvsp[-3]); }
 break;
-case 45:
-#line 140 "template.yy"
+case 41:
+#line 144 "template.yy"
+{ terminal(yyvsp[-3]); }
+break;
+case 46:
+#line 157 "template.yy"
 { add_cmd(yyvsp[0]); }
 break;
-case 48:
-#line 145 "template.yy"
+case 49:
+#line 164 "template.yy"
 {
 			prepend_cmd(yyvsp[-1]);
 			end_cmd();
 		}
 break;
-case 49:
-#line 149 "template.yy"
+case 50:
+#line 168 "template.yy"
 {
 			append_cmd(yyvsp[-3]);
-			append_cmd(yyvsp[-2]);
-			append_cmd(strdup("return"));
-			append_cmd(yyvsp[0]);
-			end_cmd();
-		}
-break;
-case 50:
-#line 156 "template.yy"
-{ /* eg: set FOOBAR ipv4 */
 			append_cmd(yyvsp[-2]);
 			append_cmd(yyvsp[-1]);
 			append_cmd(yyvsp[0]);
@@ -819,15 +786,24 @@ case 50:
 		}
 break;
 case 51:
-#line 162 "template.yy"
-{
+#line 175 "template.yy"
+{ /* e.g.: set FOOBAR ipv4 */
+			append_cmd(yyvsp[-2]);
 			append_cmd(yyvsp[-1]);
 			append_cmd(yyvsp[0]);
 			end_cmd();
 		}
 break;
 case 52:
-#line 167 "template.yy"
+#line 181 "template.yy"
+{
+			append_cmd(yyvsp[-1]);
+			append_cmd(yyvsp[0]);
+			end_cmd();
+		}
+break;
+case 53:
+#line 186 "template.yy"
 {
 			append_cmd(yyvsp[-2]);
 			append_cmd(yyvsp[-1]);
@@ -835,39 +811,45 @@ case 52:
 			end_cmd();
 		}
 break;
-case 53:
-#line 173 "template.yy"
+case 54:
+#line 192 "template.yy"
 {
 			append_cmd(yyvsp[0]);
-			end_cmd();
-		}
-break;
-case 54:
-#line 177 "template.yy"
-{
-			prepend_cmd(yyvsp[-1]);
 			end_cmd();
 		}
 break;
 case 55:
-#line 181 "template.yy"
+#line 196 "template.yy"
+{
+			prepend_cmd(yyvsp[-1]);
+			end_cmd();
+		}
+break;
+case 56:
+#line 200 "template.yy"
 {
 			append_cmd(yyvsp[0]);
 		}
 break;
-case 56:
-#line 186 "template.yy"
+case 57:
+#line 206 "template.yy"
 {
 			prepend_cmd(yyvsp[0]);
 		}
 break;
-case 57:
-#line 189 "template.yy"
+case 58:
+#line 209 "template.yy"
 {
 			prepend_cmd(yyvsp[-1]);
 		}
 break;
-#line 871 "y.tplt_tab.c"
+case 59:
+#line 214 "template.yy"
+{
+			tplterror("syntax error");
+		}
+break;
+#line 853 "y.tplt_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

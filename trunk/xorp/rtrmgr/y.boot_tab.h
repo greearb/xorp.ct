@@ -2,20 +2,18 @@
 #define YYERRCODE 256
 #endif
 
-#define STRING 257
-#define UPLEVEL 258
-#define DOWNLEVEL 259
-#define ASSIGN_VALUE 260
-#define ASSIGN_DEFAULT 261
-#define END 262
-#define LITERAL 263
-#define SLASH 264
-#define LISTNEXT 265
-#define TEXT 266
-#define UINT 267
-#define INTEGER 268
-#define BOOL 269
-#define IPV4 270
-#define IPV4NET 271
-#define IPV6 272
-#define IPV6NET 273
+#define UPLEVEL 257
+#define DOWNLEVEL 258
+#define END 259
+#define ASSIGN_OPERATOR 260
+#define LISTNEXT 261
+#define BOOL_VALUE 262
+#define UINT_VALUE 263
+#define IPV4_VALUE 264
+#define IPV4NET_VALUE 265
+#define IPV6_VALUE 266
+#define IPV6NET_VALUE 267
+#define MACADDR_VALUE 268
+#define LITERAL 269
+#define STRING 270
+#define SYNTAX_ERROR 271
