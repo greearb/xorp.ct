@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.28 2005/03/05 01:46:58 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.29 2005/03/10 01:13:43 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -74,7 +74,7 @@ XrlFib2mribNode::XrlFib2mribNode(EventLoop&	eventloop,
 
 XrlFib2mribNode::~XrlFib2mribNode()
 {
-    Fib2mribNode::shutdown();
+    shutdown();
 
     _ifmgr.detach_hint_observer(dynamic_cast<Fib2mribNode*>(this));
     _ifmgr.unset_observer(dynamic_cast<Fib2mribNode*>(this));
@@ -1503,7 +1503,10 @@ XrlFib2mribNode::common_0_1_get_status(
 XrlCmdError
 XrlFib2mribNode::common_0_1_shutdown()
 {
-    Fib2mribNode::shutdown();
+    if (shutdown() != true) {
+	string error_msg = c_format("Failed to shutdown Fib2mrib");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
