@@ -367,7 +367,7 @@ PacketDecoder::decode(uint8_t *ptr, size_t len) throw(BadPacket)
 /* HelloPacket */
 
 Packet *
-HelloPacket::decode(uint8_t *ptr, size_t len) throw(BadPacket)
+HelloPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -514,7 +514,7 @@ HelloPacket::str() const
 /* Database Description packet */
 
 Packet *
-DataDescriptionPacket::decode(uint8_t *ptr, size_t len) throw(BadPacket)
+DataDescriptionPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -670,7 +670,7 @@ DataDescriptionPacket::str() const
 /* Link State Request Packet */
 
 Packet *
-LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) throw(BadPacket)
+LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
 {
     OspfTypes::Version version = get_version();
 

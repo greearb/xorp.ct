@@ -50,7 +50,8 @@ class Packet {
      * Decode the packet.
      * The returned packet must be free'd.
      */
-    virtual Packet *decode(uint8_t *ptr, size_t len) throw(BadPacket) = 0;
+    virtual Packet *decode(uint8_t *ptr, size_t len)
+	const throw(BadPacket) = 0;
 
     /**
      * Encode standard header.
@@ -243,7 +244,7 @@ class HelloPacket : public Packet {
 
     OspfTypes::Type get_type() const { return 1; }
 
-    Packet *decode(uint8_t *ptr, size_t len) throw(BadPacket);
+    Packet *decode(uint8_t *ptr, size_t len) const throw(BadPacket);
 
     /**
      * Encode the packet.
@@ -399,7 +400,7 @@ class DataDescriptionPacket : public Packet {
 	return 0;
     }
 
-    Packet *decode(uint8_t *ptr, size_t len) throw(BadPacket);
+    Packet *decode(uint8_t *ptr, size_t len) const throw(BadPacket);
 
     /**
      * Encode the packet.
@@ -507,7 +508,7 @@ class LinkStateRequestPacket : public Packet {
 
     OspfTypes::Type get_type() const { return 3; }
 
-    Packet *decode(uint8_t *ptr, size_t len) throw(BadPacket);
+    Packet *decode(uint8_t *ptr, size_t len) const throw(BadPacket);
 
     /**
      * Encode the packet.
