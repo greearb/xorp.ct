@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.14 2003/03/03 06:18:43 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.15 2003/03/03 06:20:37 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -12197,6 +12197,532 @@ In Part A, B, and C, the period of periodic transmission of the Cand-RP-Adv
 messages might be different from \verb=C-RP-Adv_Period=
 ({\PimsmCRPAdvPeriod}), though it must be smaller than
 \verb=C-RP_Timeout= ({\PimsmCRPTimeout}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Creating the RP-Set at the BSR}
+
+\para{Purpose:}
+Test that the BSR creates properly the RP-Set from the
+Candidate-RP-Advertisement messages (C-RP-Advs) it receives from the
+Candidate-RPs.
+
+
+\para{References:}
+\begin{itemize}
+  \item draft-ietf-pim-sm-bsr-02 -- Section 3.2
+\end{itemize}
+
+\para{Discussion:}
+Upon receiving a C-RP-Adv, if the router is the BSR, then it adds the RP
+address to its local pool of candidate RPs. The BSR uses the pool of C-RPs to
+construct the RP-Set which is included in the Bootstrap messages and sent to
+all the routers in the PIM domain.
+
+\para{Test Setup:}
+Connect the RUT, TR1, TR2, TR3, and TR4 according to
+Figure~\ref{fig:pim_test_6_4_creating_the_rp_set_at_the_bsr}.
+Enable PIM-SM on the RUT, TR1, TR2, TR3, and TR4. Configure the RUT
+as a Cand-BSR for non-scoped zone 224.0.0.0/4 with default BSR
+priority of 1, unless stated otherwise.
+Configure TR1 as a Candidate-RP for 226.0.0.0/8, Candidate-RP priority
+of 192, and Holdtime of \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), unless stated
+otherwise.
+
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[scale=0.8]{figs/pim_test_6_4_creating_the_rp_set_at_the_bsr}
+    \caption{Creating the RP-Set at the BSR test setup}
+    \label{fig:pim_test_6_4_creating_the_rp_set_at_the_bsr}
+  \end{center}
+\end{figure}
+
+\para{Procedure:}
+
+\subpara{Part A: Receiving C-RP-Adv at non-BSR when the router is not a
+cand-BSR.}
+
+\begin{enumerate}
+
+  \item Disable the Cand-BSR configuration in the RUT.
+
+  \item Start the RUT and TR1, and start observing the Bootstrap messages
+  transmitted on LAN1.
+
+  \item Check the BSR and the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Compose a Cand-RP-Adv message at TR1 composed of TR1 as a
+   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
+
+  \item Check the BSR and the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Compose a Bootstrap message at TR1 with the BSR address set to TR1,
+  BSR priority of 10, and send it on LAN1.
+
+  \item Compose the same Cand-RP-Adv message at TR1 as before, and unicast it
+  to the RUT.
+
+  \item Check the BSR and the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+\end{enumerate}
+
+\subpara{Part B: Receiving C-RP-Adv at non-BSR when the router is a cand-BSR.}
+
+The setup is same as in Part A, except that the Cand-BSR configuration in the
+RUT is not disabled.
+
+\subpara{Part C: Receiving C-RP-Adv at the BSR.}
+
+\begin{enumerate}
+
+  \item Start the RUT and TR1, and start observing the Bootstrap messages
+  transmitted on LAN1.
+
+  \item Wait for up to \verb=BS_Timeout= ({\PimsmBSTimeout}) until the BS
+  Timer in the RUT expires, and the RUT becomes the elected BSR.
+
+  \item Check the BSR and the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Compose a Cand-RP-Adv message at TR1 composed of TR1 as a
+   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
+
+  \item Check the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Wait for up to \verb=BS_Period= ({\PimsmBSPeriod}) until the BS
+  Timer in the RUT expires, and the RUT transmits another Bootstrap message on
+  LAN1.
+
+  \item Check the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Compose a second Cand-RP-Adv message at TR1 composed of TR1 as a
+   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
+
+  \item Check the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Compose a third Cand-RP-Adv message at TR1 composed of TR1 as a
+   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 100, and Holdtime of
+   \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
+
+  \item Check the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Compose a fourth Cand-RP-Adv message at TR1 composed of TR1 as a
+   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 100, and Holdtime of
+   0, and unicast it to the RUT.
+
+  \item Check the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Compose a fifth Cand-RP-Adv message at TR1 composed of TR1 as a
+   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
+
+  \item Check the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Compose a sixth Cand-RP-Adv message at TR1 composed of TR1 as a
+   Candidate-RP for 227.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
+
+  \item Check the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+\end{enumerate}
+
+\subpara{Part D: Expiring C-RP at the BSR.}
+
+\begin{enumerate}
+
+  \item Start the RUT and TR1, and start observing the Bootstrap messages
+  transmitted on LAN1.
+
+  \item Wait for up to \verb=BS_Timeout= ({\PimsmBSTimeout}) until the BS
+  Timer in the RUT expires, and the RUT becomes the elected BSR.
+
+  \item Check the BSR and the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Compose a Cand-RP-Adv message at TR1 composed of TR1 as a
+   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
+
+  \item Check the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Wait for up to \verb=C-RP_Timeout= ({\PimsmCRPTimeout}) until
+  the Expiry Timer of TR1's Cand-RP state in the RUT expires.
+
+  \item Check the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Continue obsrving the Bootstrap messages transmitted on LAN1
+  for at least \verb=BS_Timeout= ({\PimsmBSTimeout}).
+
+\end{enumerate}
+
+\subpara{Part E: Transmission of the RP-Set when the BSR is gracefully shut
+down.}
+
+\begin{enumerate}
+
+  \item Start the RUT and TR1, and start observing the Bootstrap messages
+  transmitted on LAN1.
+
+  \item Wait for up to \verb=BS_Timeout= ({\PimsmBSTimeout}) until the BS
+  Timer in the RUT expires, and the RUT becomes the elected BSR.
+
+  \item Check the BSR and the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Compose a Cand-RP-Adv message at TR1 composed of TR1 as a
+   Candidate-RP for 226.0.0.0/8, Candidate-RP priority of 192, and Holdtime of
+   \verb=C-RP_Timeout= ({\PimsmCRPTimeout}), and unicast it to the RUT.
+
+  \item Check the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+  \item Gracefully shut down the RUT.
+
+  \item Check the BSR and the Cand-RP state in the RUT, and the Bootstrap
+  messages transmitted on LAN1.
+
+\end{enumerate}
+
+\para{Observable Results:}
+
+\subpara{Part A:}
+
+\begin{itemize}
+
+  \item Right after the RUT is started, its BSR state machine should be in
+  No Info state:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  In addition, its RP-Set should be empty:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  \item When the RUT receives the first Cand-RP-Adv message, it should
+  silently ignore it. In addition, its BSR state machine and its RP-Set should
+  not change.
+
+  \item After the RUT receives the Bootstrap message, it should forward it
+        back on LAN1. Its BSR state machine
+        should be in Accept Preferred state, and the elected BSR should be TR1.
+        The BS Timer in the RUT should be set to \verb=BS_Timeout=
+        ({\PimsmBSTimeout}).
+        The SZ Timer in the RUT should be set to \verb=SZ_Timeout=
+        ({\PimsmSZTimeout}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.6.0.1          10 0.0.0.0            0 AcceptPreferred      129      1299
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+\end{verbatim}
+
+  However, the RP-Set should continue to be empty.
+
+  \item When the RUT receives the second Cand-RP-Adv message, it should
+  silently ignore it. In addition, its BSR state machine and its RP-Set should
+  not change.
+
+\end{itemize}
+
+\subpara{Part B:}
+
+\begin{itemize}
+
+  \item Right after the RUT is started, its BSR state machine should be in
+  Pending state:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+0.0.0.0            0 10.2.0.1           1 Pending               78        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, its RP-Set should be empty:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  \item When the RUT receives the first Cand-RP-Adv message, it should
+  silently ignore it. In addition, its BSR state machine and its RP-Set should
+  not change.
+
+  \item After the RUT receives the Bootstrap message, it should forward it
+        back on LAN1. Its BSR state machine
+        should be in Candidate state, and the elected BSR should be TR1.
+        The BS Timer in the RUT should be set to \verb=BS_Timeout=
+        ({\PimsmBSTimeout}).
+        The SZ Timer in the RUT should be set to \verb=SZ_Timeout=
+        ({\PimsmSZTimeout}):
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.6.0.1          10 10.2.0.1           1 Candidate            128        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  However, the RP-Set should continue to be empty.
+
+  \item When the RUT receives the second Cand-RP-Adv message, it should
+  silently ignore it. In addition, its BSR state machine and its RP-Set should
+  not change.
+
+\end{itemize}
+
+\subpara{Part C:}
+
+\begin{itemize}
+
+  \item Until before the first Cand-RP-Adv message is received by the RUT, the
+  RUT should be the elected BSR:
+
+\begin{verbatim}
+Xorp> show pim bootstrap 
+Active zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Elected               59        -1
+Expiring zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+Configured zones:
+BSR              Pri LocalAddress     Pri State            Timeout SZTimeout
+10.2.0.1           1 10.2.0.1           1 Init                  -1        -1
+\end{verbatim}
+
+  In addition, the RP-Set in the RUT should be empty:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  \item After the first Cand-RP-Adv message is received by the RUT, the RP-Set
+  in the RUT should include an entry for TR1 as a C-RP for 226.0.0.0/8,
+  C-RP priority of 192, and holdtime of \verb=C-RP_Timeout=
+  ({\PimsmCRPTimeout}).
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     149 226.0.0.0/8        10.2.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  In addition, the RUT should (TODO: immediately?) transmit a Bootstrap
+  message on LAN1 that contains TR1 as a C-RP for 226.0.0.0/8,
+  C-RP priority of 192, and holdtime of \verb=C-RP_Timeout=
+  ({\PimsmCRPTimeout}).
+
+  \item After the BS Timer in the RUT expires, and it transmits the second
+  Bootstrap message on LAN1, the content of this message should be same as the
+  previous Bootstrap message.
+
+  \item After the second Cand-RP-Adv message is received by the RUT, the C-RP
+  Expiry Timer for TR1 in the RUT should be updated and set to
+  \verb=C-RP_Timeout= ({\PimsmCRPTimeout}). The rest of the information in the
+  RP-Set should not be changed:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     149 226.0.0.0/8        10.2.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  However, no Bootstrap message should be transmitted.
+
+  \item After the third Cand-RP-Adv message is received by the RUT, the RP-Set
+  in the RUT should include an entry for TR1 as a C-RP for 226.0.0.0/8,
+  C-RP priority of 100, and holdtime of \verb=C-RP_Timeout=
+  ({\PimsmCRPTimeout}).
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         100     144 226.0.0.0/8        10.2.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  In addition, the RUT should (TODO: immediately?) transmit a Bootstrap
+  message on LAN1 that contains TR1 as a C-RP for 226.0.0.0/8,
+  C-RP priority of 100, and holdtime of \verb=C-RP_Timeout=
+  ({\PimsmCRPTimeout}).
+
+  \item After the fourth Cand-RP-Adv message is received by the RUT, the RP-Set
+  in the RUT should remove the entry for TR1 as a C-RP for 226.0.0.0/8:
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  In addition, the RUT should (TODO: immediately?) transmit a Bootstrap
+  message on LAN1 that contains empty RP-Set for 226.0.0.0/8.
+
+  \item After the fifth Cand-RP-Adv message is received by the RUT, the RP-Set
+  in the RUT should include an entry for TR1 as a C-RP for 226.0.0.0/8,
+  C-RP priority of 192, and holdtime of \verb=C-RP_Timeout=
+  ({\PimsmCRPTimeout}).
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     144 226.0.0.0/8        10.2.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  In addition, the RUT should (TODO: immediately?) transmit a Bootstrap
+  message on LAN1 that contains TR1 as a C-RP for 226.0.0.0/8,
+  C-RP priority of 192, and holdtime of \verb=C-RP_Timeout=
+  ({\PimsmCRPTimeout}).
+
+  \item After the sixth Cand-RP-Adv message is received by the RUT, the RP-Set
+  in the RUT should include a second entry for TR1 as a C-RP for 227.0.0.0/8,
+  C-RP priority of 192, and holdtime of \verb=C-RP_Timeout=
+  ({\PimsmCRPTimeout}).
+
+\begin{verbatim}
+Xorp> show pim bootstrap rps 
+Active RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+10.6.0.1         192     130 226.0.0.0/8        10.2.0.1                  -1
+10.6.0.1         192     148 227.0.0.0/8        10.2.0.1                  -1
+Expiring RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+Configured RPs:
+RP               Pri Timeout GroupPrefix        BSR         CandRpAdvTimeout
+\end{verbatim}
+
+  In addition, the RUT should (TODO: immediately?) transmit a Bootstrap
+  message on LAN1 that contains TR1 as a C-RP for 226.0.0.0/8 and 227.0.0.0/8,
+  C-RP priority of 192, and holdtime of \verb=C-RP_Timeout=
+  ({\PimsmCRPTimeout}).
+
+\end{itemize}
+
+\subpara{Part D:}
+
+\begin{itemize}
+
+  \item Until after the first Cand-RP-Adv message is received by the RUT, the
+  results should be same as in Part C.
+
+  \item Until before the Expiry Timer of TR1's Cand-RP state in the RUT
+  expires, the RUT should periodically transmit once every
+  \verb=BS_Period= ({\PimsmBSPeriod}) a Bootstrap message on LAN1. The content
+  of this message should be same as the previous Bootstrap message.
+
+  \item After the Expiry Timer of TR1's Cand-RP state in the RUT
+  expires, the RUT should periodically transmit once every
+  \verb=BS_Period= {\PimsmBSPeriod} a Bootstrap message on LAN1. The content
+  of this message should contain empty RP-Set for 226.0.0.0/8.
+
+  \item After \verb=BS_Timeout= ({\PimsmBSTimeout}) of periodic Bootstrap
+  messages with empty RP-Set for 226.0.0.0/8, the RUT should start send
+  periodic Bootstrap messages with empty RP-Set (\ie even the empty
+  226.0.0.0/8 should not be included anymore).
+
+\end{itemize}
+
+\subpara{Part E:}
+
+\begin{itemize}
+
+  \item Until after the first Cand-RP-Adv message is received by the RUT, the
+  results should be same as in Part C.
+
+  \item After the RUT is shut down, it should transmit a Bootstrap message on
+  LAN1 that should be same as the previous Bootstrap message, except that the
+  BSR-priority is set to 0 instead of 1.
+
+\end{itemize}
+
+\para{Possible Problems:}
+In Part D, after TR1 is removed from the RP-Set, the RUT might transmit only
+one Bootstrap message with empty RP-Set for 226.0.0.0/8, and the rest of the
+Bootstrap messages may not include at all 226.0.0.0/8 in the RP-Set.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Multicast Routing Table}
