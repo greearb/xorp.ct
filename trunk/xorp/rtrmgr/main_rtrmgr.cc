@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.14 2003/05/02 04:53:34 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.15 2003/05/02 09:00:01 mjh Exp $"
 
 #include <signal.h>
 
@@ -155,7 +155,7 @@ main(int argc, char* const argv[])
 	userdb.load_password_file();
 
 	//initialize the IPC mechanism
-	XrlStdRouter xrlrouter(eventloop, "rtrmgr");
+	XrlStdRouter xrlrouter(eventloop, "rtrmgr", fs.addr(), fs.port());
 	XorpClient xclient(eventloop, xrlrouter);
 
 	//initialize the Task Manager

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.13 2003/04/22 23:27:20 hodson Exp $"
+#ident "$XORP: xorp/mfea/test_mfea.cc,v 1.14 2003/04/23 20:50:50 hodson Exp $"
 
 
 //
@@ -186,10 +186,12 @@ main(int argc, char *argv[])
 	// Create and configure the CLI XRL interface
 	//
 #if DO_IPV4
-	XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name());
+	XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
+					 finder->addr(), finder->port());
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
 #else
-	XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name());
+	XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
+					 finder->addr(), finder->port());
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
 #endif // ! DO_IPV4
 	
@@ -199,14 +201,19 @@ main(int argc, char *argv[])
 #if DO_IPV4
 	XrlStdRouter xrl_std_router_mfea4(eventloop,
 					  xorp_module_name(AF_INET,
-							   XORP_MODULE_MFEA));
+							   XORP_MODULE_MFEA),
+					  finder->addr(), finder->port()
+					  );
 	XrlMfeaNode xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA,
 				   eventloop,
-				   &xrl_std_router_mfea4);
+				   &xrl_std_router_mfea4
+				   );
 #else
 	XrlStdRouter xrl_std_router_mfea6(eventloop,
 					  xorp_module_name(AF_INET6,
-							   XORP_MODULE_MFEA));
+							   XORP_MODULE_MFEA),
+					  finder->addr(), finder->port()
+					  );
 	XrlMfeaNode xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA,
 				   eventloop,
 				   &xrl_std_router_mfea6);

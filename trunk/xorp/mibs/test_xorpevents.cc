@@ -339,7 +339,7 @@ run_test_2()
     FinderServer* finder = new FinderServer(e);
     
     // Create and configure "party_A"
-    XrlRouter		party_a(e, "party_A");
+    XrlRouter		party_a(e, "party_A", finder->addr(), finder->port());
     XrlPFSUDPListener	listener_a(e);
     party_a.add_listener(&listener_a);
 
@@ -350,7 +350,7 @@ run_test_2()
     party_a.finalize();
     
     // Create and configure "party_B"
-    XrlRouter		party_b(e, "party_B");
+    XrlRouter		party_b(e, "party_B", finder->addr(), finder->port());
     XrlPFSUDPListener	listener_b(e);
     party_b.add_listener(&listener_b);
     party_b.finalize();
