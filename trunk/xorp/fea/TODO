@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.24 2004/11/11 07:45:25 bms Exp $
+# $XORP: xorp/fea/TODO,v 1.25 2004/11/11 10:37:52 bms Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -181,3 +181,20 @@
   explicit restriction to forward more than 4Gbps. However, the UNIX
   kernel uses u_int for that, so we don't have much choice.
 
+==============================================================================
+==== Packet ACL-specific TODO                                            =====
+
+* Optional items:
+
+ * Paranoid checking for top-level snapshot state.
+
+ * If we desire the ability to flush a transaction in progress, we
+   must add a back-reference to the transaction ID to each
+   operation because of how the base classes in libxorp are laid out.
+
+ * Only snapshot a given table in pre_commit() if the operations in
+   the transaction would actually change such tables.
+
+ * IPv6 support.
+
+ * Fixup comments.
