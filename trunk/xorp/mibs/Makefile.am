@@ -29,6 +29,7 @@ noinst_PROGRAMS = bgp4_mib_1657.so ospf_mib_1850.so xorp_if_mib_module.so
 
 # -- Test Programs 
 TESTS           = test_xorpevents
+TESTS_ENVIRONMENT = LD_LIBRARY_PATH="$(top_builddir)/mibs"
 
 noinst_PROGRAMS += $(TESTS)
 
