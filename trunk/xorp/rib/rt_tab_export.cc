@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.8 2003/03/20 00:57:53 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_export.cc,v 1.9 2003/03/20 04:29:22 pavlin Exp $"
 
 #include "rib_module.h"
 #include "rib_client.hh"
@@ -25,11 +25,11 @@
 template<class A>
 ExportTable<A>::ExportTable<A>(const string&	 tablename,
 			       RouteTable<A>	 *parent,
-			       list<RibClient *> *rib_clients_list)
+			       list<RibClient *> *rib_clients)
     : RouteTable<A>(tablename)
 {
     _parent = parent;
-    _rib_clients_list = rib_clients_list;
+    _rib_clients = rib_clients;
 
     // plumb ourselves into the table graph
     if (_parent != NULL) {
@@ -61,10 +61,9 @@ ExportTable<A>::add_route(const IPRouteEntry<A>& route,
     //
     // Add the route to all RIB clients
     //
-    list<RibClient *>::iterator iter;
-    for (iter = _rib_clients_list->begin();
-	 iter != _rib_clients_list->end(); ++iter) {
-	RibClient *rib_client = *iter;
+    list<RibClient *>::iterator i;
+    for (i = _rib_clients->begin(); i != _rib_clients->end(); i++) {
+	RibClient *rib_client = *i;
 	rib_client->add_route(route);
     }
     
@@ -88,10 +87,9 @@ ExportTable<A>::delete_route(const IPRouteEntry<A> *route,
     //
     // Delete the route from all RIB clients
     //
-    list<RibClient *>::iterator iter;
-    for (iter = _rib_clients_list->begin();
-	 iter != _rib_clients_list->end(); ++iter) {
-	RibClient *rib_client = *iter;
+    list<RibClient *>::iterator i;
+    for (i = _rib_clients->begin(); i != _rib_clients->end(); i++) {
+	RibClient *rib_client = *i;
 	rib_client->delete_route(*route);
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_client.hh,v 1.2 2003/03/20 04:29:22 pavlin Exp $
+// $XORP: xorp/rib/rib_client.hh,v 1.3 2003/03/29 19:03:10 pavlin Exp $
 
 #ifndef __RIB_RIB_CLIENT_HH__
 #define __RIB_RIB_CLIENT_HH__
@@ -180,6 +180,13 @@ public:
      */
     bool tasks_pending() const;
 
+    /**
+     * check RibClient failure status
+     *
+     * @return true if RibClient has suffered a fatal error, true otherwise
+     */
+    bool failed() const { return _failed;}
+
 protected:
     /**
      * @return The next task or NULL if there isn't one.
@@ -189,7 +196,7 @@ protected:
     /**
      * Called when a transaction has completed.
      */
-    void transaction_completed();
+    void transaction_completed(bool fatal_error);
 
     /**
      * Called to start a transaction.
@@ -207,6 +214,8 @@ private:
     const size_t _max_ops;		// Max. allowed tasks in a transaction
     size_t	_op_count;		// Number of tasks in this transaction
     bool	_enabled;		// True if enabled
+    bool        _failed;                // True if this interface has 
+                                        // suffered a fatal error.
 };
 
 #endif // __RIB_RIB_CLIENT_HH__

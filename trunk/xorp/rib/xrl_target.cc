@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.14 2003/03/25 00:44:51 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.15 2003/05/07 23:15:16 mjh Exp $"
 
 #include "libxorp/status_codes.h"
 #include "version.h"
@@ -44,9 +44,7 @@ XrlRibTarget::common_0_1_get_status(
     uint32_t& status,
     string&	reason)
 {
-    //XXX need to replace this with something that returns actual status.
-    status = PROC_READY;
-    reason = "Ready";
+    status = _rib_manager->status(reason);
     return XrlCmdError::OKAY();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.13 2003/03/22 04:29:45 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.14 2003/04/22 19:20:24 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -22,43 +22,48 @@
 #include "rib_manager.hh"
 
 RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router)
-    : _eventloop(eventloop),
+    : _status_code(PROC_NOT_READY), 
+      _status_reason("Initializing"), 
+      _eventloop(eventloop),
       _xrl_router(xrl_std_router),
-      _rserv(&_xrl_router),
+      _register_server(&_xrl_router),
       _urib4(UNICAST),
       _mrib4(MULTICAST),
       _urib6(UNICAST),
       _mrib6(MULTICAST),
       _vif_manager(_xrl_router, _eventloop, this),
-      _xrt(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6, _vif_manager, this)
+      _xrl_rib_target(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6, 
+		      _vif_manager, this)
 {
     _urib4.initialize_export(&_urib4_clients_list);
-    _urib4.initialize_register(&_rserv);
+    _urib4.initialize_register(&_register_server);
     if (_urib4.add_igp_table("connected") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib4");
 	return;
     }
 
     _mrib4.initialize_export(&_mrib4_clients_list);
-    _mrib4.initialize_register(&_rserv);
+    _mrib4.initialize_register(&_register_server);
     if (_mrib4.add_igp_table("connected") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for mrib4");
 	return;
     }
 
     _urib6.initialize_export(&_urib6_clients_list);
-    _urib6.initialize_register(&_rserv);
+    _urib6.initialize_register(&_register_server);
     if (_urib6.add_igp_table("connected") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for urib6");
 	return;
     }
 
     _mrib6.initialize_export(&_mrib6_clients_list);
-    _mrib6.initialize_register(&_rserv);
+    _mrib6.initialize_register(&_register_server);
     if (_mrib6.add_igp_table("connected") < 0) {
 	XLOG_ERROR("Could not add igp table \"connected\" for mrib6");
 	return;
     }
+    PeriodicTimerCallback cb = callback(this, &RibManager::status_updater);
+    _status_update_timer = _eventloop.new_periodic(1000, cb);
 }
 
 RibManager::~RibManager()
@@ -109,6 +114,57 @@ RibManager::stop(void)
     ProtoState::stop();
     
     return (XORP_OK);
+}
+
+bool
+RibManager::status_updater()
+{
+    ProcessStatus s = PROC_READY;
+    string reason;
+
+    /*
+     *Check the VifManager's status
+     */
+    VifManager::State vif_mgr_state = _vif_manager.state();
+    switch (vif_mgr_state) {
+    case VifManager::INITIALIZING:
+	s = PROC_NOT_READY;
+	reason = "VifManager initializing";
+	break;
+    case VifManager::READY:
+	break;
+    case VifManager::FAILED:
+	//VifManager failed: set process state to failed.
+	//XXX Should we exit here, or wait to be restarted?
+	_status_code = PROC_FAILED;
+	_status_reason = "VifManager Failed";
+	return false;
+    }
+
+    /*
+     *Check the unicast RIBs can still talk to the FEA
+     */
+    RibClient *fea_client;
+    fea_client = find_rib_client("fea", AF_INET, true, false);
+    if (fea_client != NULL) {
+	if (fea_client->failed()) {
+	    _status_code = PROC_FAILED;
+	    _status_reason = "Fatal error talking to FEA (v4, unicast)";
+	    return false;
+	}
+    }
+    fea_client = find_rib_client("fea", AF_INET6, true, false);
+    if (fea_client != NULL) {
+	if (fea_client->failed()) {
+	    _status_code = PROC_FAILED;
+	    _status_reason = "Fatal error talking to FEA (v6, unicast)";
+	    return false;
+	}
+    }
+    
+    _status_code = s;
+    _status_reason = "Ready";
+    return true;
 }
 
 int

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_export.hh,v 1.6 2003/03/20 00:57:53 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_export.hh,v 1.7 2003/03/20 04:29:22 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXPORT_HH__
 #define __RIB_RT_TAB_EXPORT_HH__
@@ -121,10 +121,10 @@ public:
      * reaching the RIB clients.
      */
     void flush();
-    
+
 private:
     RouteTable<A>	*_parent;
-    list<RibClient *>	*_rib_clients_list;
+    list<RibClient *>	*_rib_clients;
 };
 
 #endif // __RIB_RT_TAB_EXPORT_HH__

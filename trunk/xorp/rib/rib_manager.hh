@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.12 2003/03/22 04:29:45 pavlin Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.13 2003/04/22 19:20:25 mjh Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -22,6 +22,7 @@
 #include "libxorp/exceptions.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
+#include "libxorp/status_codes.h"
 
 #include "libproto/proto_state.hh"
 
@@ -72,6 +73,24 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int	stop();
+
+    /**
+     * Periodic Status Update 
+     *
+     * @return true to reschedule next status check.
+     */
+    bool status_updater();
+
+    /**
+     * Check status of RIB process.
+     *
+     * @return process status code
+     */
+    ProcessStatus status(string& reason) const 
+    {
+	reason = _status_reason;
+	return _status_code;
+    }
     
     /**
      * new_vif is called to inform all the RIBs that a new virtual
@@ -270,13 +289,15 @@ private:
     list<RibClient *>	*select_rib_clients_list(int family, bool unicast,
 						 bool multicast);
     
+    ProcessStatus       _status_code;
+    string              _status_reason;
     EventLoop&		_eventloop;	// The event loop to use
     XrlStdRouter&	_xrl_router;	// The XRL router to use
     list<RibClient *>	_urib4_clients_list; // The list of IPv4 URIB clients
     list<RibClient *>	_mrib4_clients_list; // The list of IPv4 MRIB clients
     list<RibClient *>	_urib6_clients_list; // The list of IPv6 URIB clients
     list<RibClient *>	_mrib6_clients_list; // The list of IPv6 MRIB clients
-    RegisterServer	_rserv;		// To notify clients about route change
+    RegisterServer	_register_server;    // To notify clients about route change
     
     RIB<IPv4>		_urib4;		// The IPv4 unicast RIB
     RIB<IPv4>		_mrib4;		// The IPv4 multicast RIB
@@ -284,7 +305,9 @@ private:
     RIB<IPv6>		_mrib6;		// The IPv6 multicast RIB
     
     VifManager		_vif_manager;	// The VIF manager
-    XrlRibTarget	_xrt;
+    XrlRibTarget	_xrl_rib_target;
+
+    XorpTimer _status_update_timer;  //used for periodic checks of RIB status.
 };
 
 #endif // __RIB_RIB_MANAGER_HH__
