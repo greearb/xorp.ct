@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.26 2004/12/10 01:24:46 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.27 2005/01/13 00:49:41 pavlin Exp $
 #
 
 Urgent
@@ -74,7 +74,14 @@ General
  - Start using the start/end XRL transaction mechanism to update
    configuration changes on-the-fly. After all processes start using
    this mechanism, then deprecate the %update and %activate methods.
-
+ - Take care of the following problem described by Bruce Simpson regarding
+   using access(2) inside rtrmgr/op_commands.cc
+        Comment out the access() calls for now -- xorpsh does not
+        like them, when running under sudo -u xorp (euid?) and
+        as a result xorpsh fails to start up.
+        Consider checking for it in configure.in and shipping
+        our own if we can't find it on the system.
+ 
 Configure Mode
 
  - Rollback when a commit fails.
