@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.10 2003/04/02 04:41:11 hodson Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.11 2003/04/03 00:58:31 hodson Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -22,6 +22,8 @@
 // Macros 
 //#define VALIDATE_XORP_TRIE
 //#define DEBUG_LOGGING
+
+#define trie_debug_msg(x...) /* debug_msg(x) */
 
 #include "debug.h"
 #include "minitraits.hh"
@@ -292,18 +294,18 @@ private:
 	delete p;
     }
 
-    void dump(const char *msg) const			{
-#if 1
-	debug_msg(" %s %s %s\n",
-		  msg,
-		  _k.str().c_str(), _p ? "PL" : "[]");
-	debug_msg("  U   %s\n",
-		  _up ? _up->_k.str().c_str() : "NULL");
-	debug_msg("  L   %s\n",
-		  _left ? _left->_k.str().c_str() : "NULL");
-	debug_msg("  R   %s\n",
-		  _right ? _right->_k.str().c_str() : "NULL");
-#endif
+    void dump(const char *msg) const
+    {
+	trie_debug_msg(" %s %s %s\n",
+		       msg,
+		       _k.str().c_str(), _p ? "PL" : "[]");
+	trie_debug_msg("  U   %s\n",
+		       _up ? _up->_k.str().c_str() : "NULL");
+	trie_debug_msg("  L   %s\n",
+		       _left ? _left->_k.str().c_str() : "NULL");
+	trie_debug_msg("  R   %s\n",
+		       _right ? _right->_k.str().c_str() : "NULL");
+
     }
 
     TrieNode	*_up, *_left, *_right;
@@ -591,7 +593,7 @@ TrieNode<A, Payload>::insert(TrieNode **root,
     TrieNode **oldroot = root;	// do we need it ?
     TrieNode *newroot = NULL, *parent = NULL, *me = NULL;
 
-    debug_msg("++ insert %s\n", x.str().c_str());
+    trie_debug_msg("++ insert %s\n", x.str().c_str());
     for (;;) {
 	newroot = *root;
 	if (newroot == NULL) {
@@ -617,7 +619,7 @@ TrieNode<A, Payload>::insert(TrieNode **root,
 	A y_h = y.top_addr();
 
 	if (x_h < y_l) {			 	/* case A */
-	    //debug_msg("case A:  |--x--|   |--y--|\n");
+	    //trie_debug_msg("case A:  |--x--|   |--y--|\n");
 	    Key k = Key::common_subnet(x, y);
 	    newroot = new TrieNode(k, parent);	// create new root
 	    newroot->_right = *root;		// old root goes right
@@ -625,7 +627,7 @@ TrieNode<A, Payload>::insert(TrieNode **root,
 	    newroot->_left = me = new TrieNode(x, p, newroot);
 	    break;
 	} else if (y_h < x_l) {				/* case B */
-	    //debug_msg("case B:  |--y--|   |--x--|\n");
+	    //trie_debug_msg("case B:  |--y--|   |--x--|\n");
 	    Key k = Key::common_subnet(x, y);
 	    newroot = new TrieNode(k, parent);	// create new root
 	    newroot->_left = *root;
@@ -633,21 +635,21 @@ TrieNode<A, Payload>::insert(TrieNode **root,
 	    newroot->_right = me = new TrieNode(x, p, newroot);
 	    break;
 	} else if (x_l >= y_l && x_h <= y_m) {		/* case C */
-	    //debug_msg("case C:  |--x-.----|\n");
+	    //trie_debug_msg("case C:  |--x-.----|\n");
 	    parent = *root;
 	    root = &(newroot->_left);
 	} else if (x_l > y_m && x_h <= y_h) {		/* case D */
-	    //debug_msg("case D:  |----.-x--|\n");
+	    //trie_debug_msg("case D:  |----.-x--|\n");
 	    parent = *root;
 	    root = &(newroot->_right);
 	} else if (y_l > x_m && y_h <= x_h) {		/* case E */
-	    //debug_msg("case E:  |----.-Y--|\n");
+	    //trie_debug_msg("case E:  |----.-Y--|\n");
 	    newroot = me = new TrieNode(x, p, parent);
 	    newroot->_right = *root;
 	    newroot->_right->_up = newroot;
 	    break;
 	} else if (y_l >= x_l && y_h <= x_m) {		/* case F */
-	    //debug_msg("case F:  |--Y-.----|\n");
+	    //trie_debug_msg("case F:  |--Y-.----|\n");
 	    newroot = me = new TrieNode(x, p, parent);
 	    newroot->_left = *root;
 	    newroot->_left->_up = newroot;
@@ -679,7 +681,7 @@ TrieNode<A, Payload>::erase()
 	_p = NULL;
     }
 
-    debug_msg("++ erase %s\n", this->_k.str().c_str());
+    trie_debug_msg("++ erase %s\n", this->_k.str().c_str());
     /*
      * If the node ("me") exists, has no payload and at most one child,
      * then it is a useless internal node which needs to be removed by
@@ -809,18 +811,18 @@ void
 TrieNode<A,Payload>::print(int indent, const char *msg) const
 {
 #ifdef DEBUG_LOGGING
-    debug_msg_indent(indent);
+    trie_debug_msg_indent(indent);
 
     if (this == NULL) {
-	debug_msg("%sNULL\n", msg);
+	trie_debug_msg("%sNULL\n", msg);
 	return;
     }
-    debug_msg("%skey: %s %s\n",
-	      msg, _k.str().c_str(), _p ? "PL" : "[]");
-    debug_msg("    U: %s\n", _up ? _up->_k.str().c_str() : "NULL");
+    trie_debug_msg("%skey: %s %s\n",
+		   msg, _k.str().c_str(), _p ? "PL" : "[]");
+    trie_debug_msg("    U: %s\n", _up ? _up->_k.str().c_str() : "NULL");
     _left->print(indent+4, "L: ");
     _right->print(indent+4, "R: ");
-    debug_msg_indent(0);
+    trie_debug_msg_indent(0);
 #endif /* DEBUG_LOGGING */
     UNUSED(indent);
     UNUSED(msg);
