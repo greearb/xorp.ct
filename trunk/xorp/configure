@@ -1654,6 +1654,23 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+cat >>confdefs.h <<_ACEOF
+#define XORP_INSTALL_ROOT "${ac_default_prefix}"
+_ACEOF
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define XORP_SRC_ROOT "${srcdir}"
+_ACEOF
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define XORP_BUILD_ROOT "${PWD}"
+_ACEOF
+
+
 # Add --enable-maintainer-mode as a command-line option for folks who
 # want to play with auto* tools.
 echo "$as_me:$LINENO: checking whether to enable maintainer-specific portions of Makefiles" >&5

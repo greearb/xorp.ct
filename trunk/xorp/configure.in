@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.60 2003/08/28 19:41:54 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.61 2003/09/13 02:40:56 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -45,7 +45,16 @@ dnl Change the default installation prefix
 dnl
 AC_PREFIX_DEFAULT(/usr/local/xorp)
 AC_DEFINE_UNQUOTED(XORP_ROOT, "${ac_default_prefix}",
-		[Define the path to the root of the XORP tree])
+		   [Define the path to the root of the XORP installation])
+
+AC_DEFINE_UNQUOTED(XORP_INSTALL_ROOT, "${ac_default_prefix}",
+		   [Define the path to the root of the XORP installation])
+
+AC_DEFINE_UNQUOTED(XORP_SRC_ROOT, "${srcdir}",
+    		   [Define path to the top-level source directory])
+
+AC_DEFINE_UNQUOTED(XORP_BUILD_ROOT, "${PWD}",
+    		   [Define path to the top-level build directory])
 
 # Add --enable-maintainer-mode as a command-line option for folks who
 # want to play with auto* tools.

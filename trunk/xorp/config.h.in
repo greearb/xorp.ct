@@ -292,8 +292,17 @@
    first (like Motorola and SPARC, unlike Intel and VAX). */
 #undef WORDS_BIGENDIAN
 
-/* Define the path to the root of the XORP tree */
+/* Define path to the top-level build directory */
+#undef XORP_BUILD_ROOT
+
+/* Define the path to the root of the XORP installation */
+#undef XORP_INSTALL_ROOT
+
+/* Define the path to the root of the XORP installation */
 #undef XORP_ROOT
+
+/* Define path to the top-level source directory */
+#undef XORP_SRC_ROOT
 
 /* Define to 1 if type `char' is unsigned and you are not using gcc.  */
 #ifndef __CHAR_UNSIGNED__
