@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/transaction.hh,v 1.2 2003/02/26 00:14:14 pavlin Exp $
+// $XORP: xorp/libxorp/transaction.hh,v 1.3 2003/03/10 23:20:37 hodson Exp $
 
 #ifndef __LIBXORP_TRANSACTION_HH__
 #define __LIBXORP_TRANSACTION_HH__
@@ -66,8 +66,7 @@ public:
  * TransactionOperation s.  Each transaction is uniquely identified by
  * a transaction id.
  */
-class TransactionManager
-{
+class TransactionManager {
 public:
     typedef ref_ptr<TransactionOperation> Operation;
 
@@ -96,7 +95,7 @@ public:
      */
     virtual ~TransactionManager() {}
 
-    /** 
+    /**
      * Start transaction
      *
      * @param new_tid variable to assigned new transaction id.
@@ -122,7 +121,7 @@ public:
      */
     bool abort(uint32_t tid);
 
-    /** 
+    /**
      * Add operation to transaction.
      *
      * @param tid the transaction ID.
@@ -131,7 +130,7 @@ public:
      */
     virtual bool add(uint32_t tid, const Operation& op);
 
-    /** 
+    /**
      * Retrieve number of operations in pending transaction.
      *
      * @param tid the transaction ID.
@@ -141,7 +140,7 @@ public:
      *
      * @return true if tid is valid, false otherwise.
      */
-    bool size(uint32_t tid, uint32_t& count) const;
+    bool retrieve_size(uint32_t tid, uint32_t& count) const;
 
     /**
      * Get the inter-operation additional timeout.
@@ -171,7 +170,7 @@ public:
 
 protected:
 
-    /** 
+    /**
      * Overrideable function that can be called before the first
      * operation in a commit is dispatched.
      *
@@ -179,7 +178,7 @@ protected:
      */
     virtual void pre_commit(uint32_t tid);
 
-    /** 
+    /**
      * Overrideable function that can be called after commit occurs 
      *
      * Default implementation is a no-op.
@@ -212,7 +211,7 @@ protected:
     bool flush(uint32_t tid);
     
 protected:
-    /** 
+    /**
      * Transaction class, just a list of operations to be dispatched.
      * 
      * It is defined here so classes derived from TransactionManager

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/transaction.cc,v 1.1.1.1 2002/12/11 23:56:05 hodson Exp $"
+#ident "$XORP: xorp/libxorp/transaction.cc,v 1.2 2003/03/10 23:20:37 hodson Exp $"
 
 #include <assert.h>
 
@@ -45,7 +45,7 @@ TransactionManager::Transaction::commit()
 	Operation op = _ops.front();
 
 	// Erase item from list so if error occurs we don't have to
-	// reference anything on list again, ie error handler could	
+	// reference anything on list again; i.e., error handler could	
 	// abort this transaction...
 	_ops.erase(_ops.begin());
 	_op_count--;
@@ -73,7 +73,7 @@ TransactionManager::Transaction::flush()
     }
 }
 
-inline void 
+inline void
 TransactionManager::Transaction::defer_timeout()
 {
     uint32_t timeout_ms = _mgr.timeout_ms();
@@ -90,11 +90,11 @@ TransactionManager::Transaction::cancel_timeout()
 /* ------------------------------------------------------------------------- */
 /* Transaction Manager methods */
 
-void 
+void
 TransactionManager::crank_tid()
 {
     //
-    // This would be vy bad if number of pending transactions is large.
+    // This would be very bad if number of pending transactions is large.
     // In practice the bad case should be well outside bounds of this code.
     //
     _next_tid++;
@@ -224,7 +224,7 @@ TransactionManager::add(uint32_t tid, const Operation& op)
 }
 
 bool
-TransactionManager::size(uint32_t tid, uint32_t& count) const
+TransactionManager::retrieve_size(uint32_t tid, uint32_t& count) const
 {
     TransactionDB::const_iterator i = _transactions.find(tid);
     if (i == _transactions.end())

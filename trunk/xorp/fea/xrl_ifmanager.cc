@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.2 2003/03/10 23:20:17 hodson Exp $"
 
 #include "libxorp/debug.h"
 #include "xrl_ifmanager.hh"
@@ -158,7 +158,7 @@ XrlInterfaceManager::add(uint32_t tid, const Operation& op)
 {
     uint32_t n_ops = 0;
 
-    if (_itm.size(tid, n_ops) == false)
+    if (_itm.retrieve_size(tid, n_ops) == false)
 	return XrlCmdError::COMMAND_FAILED(BAD_ID);
 
     if (_itm.add(tid, op))
