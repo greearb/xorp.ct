@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.25 2004/03/27 23:29:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_vif_manager.cc,v 1.26 2004/03/28 20:25:49 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -167,7 +167,7 @@ XrlMfeaVifManager::set_vif_state()
     for (vif_name_iter = delete_vifs_list.begin();
 	 vif_name_iter != delete_vifs_list.end();
 	 ++vif_name_iter) {
-	string vif_name = *vif_name_iter;
+	const string& vif_name = *vif_name_iter;
 	if (_mfea_node.delete_config_vif(vif_name, error_msg) < 0) {
 	    XLOG_ERROR("Cannot delete vif %s from the set of configured "
 		       "vifs: %s",
@@ -734,25 +734,25 @@ XrlMfeaVifManager::vifaddr6_update(const string& ifname,
 void
 XrlMfeaVifManager::interface_deleted(const string& ifname)
 {
-    multimap<string, Vif*>::iterator iter;
     list<string> delete_vifs_list;
-    list<string>::iterator vif_name_iter;
 
     debug_msg("interface_deleted %s\n", ifname.c_str());
 
     //
     // Remove all vifs for the same interface name
     //
+    multimap<string, Vif*>::iterator iter;
     iter = _vifs_by_interface.find(ifname);
     for ( ; iter != _vifs_by_interface.end(); ++iter) {
 	if (iter->first != ifname)
 	    break;
 	delete_vifs_list.push_back(iter->second->name());
     }
+    list<string>::iterator vif_name_iter;
     for (vif_name_iter = delete_vifs_list.begin();
 	 vif_name_iter != delete_vifs_list.end();
 	 ++vif_name_iter) {
-	string vif_name = *vif_name_iter;
+	const string& vif_name = *vif_name_iter;
 	vif_deleted(ifname, vif_name);
     }
 }
