@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.32 2003/09/05 00:39:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.33 2003/09/05 01:02:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1079,15 +1079,17 @@ PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
 	break;
 
     case ORIGIN:
-	_origin_att = (OriginAttribute *)a;
+	_origin_att = dynamic_cast<OriginAttribute *>(a);
 	break;
 
     case AS_PATH:
-	_aspath_att = (ASPathAttribute *)a;
+	_aspath_att = dynamic_cast<ASPathAttribute *>(a);
 	break;
 
     case NEXT_HOP:
-	_nexthop_att = (NextHopAttribute<A> *)a;
+	_nexthop_att = dynamic_cast<NextHopAttribute<A> *>(a);
+	/* If a nexthop of the wrong address family sneaks through nail it */
+	XLOG_ASSERT(0 != _nexthop_att);
 	break;
     }
     // Keep the list sorted
