@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.7 2004/06/10 22:41:46 hodson Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.8 2005/01/06 05:37:14 atanu Exp $"
 
 #include "rip_module.h"
 
@@ -215,7 +215,7 @@ uint8_t rip_packet[] = {
 /**
  * Check MD5 authentication against a saved packet.
  */
-static
+inline
 int
 saved_md5()
 {
