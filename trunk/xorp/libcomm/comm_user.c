@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.6 2004/03/21 03:14:08 hodson Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.7 2004/09/02 02:34:40 pavlin Exp $"
 
 
 /*
@@ -79,7 +79,7 @@ comm_init(void)
     static bool init_flag = false;
 
     if (init_flag)
-	return (XORP_ERROR);
+	return (XORP_OK);
 
 #ifndef HOST_OS_SOLARIS
     signal(SIGPIPE, SIG_IGN);	/* XXX */
