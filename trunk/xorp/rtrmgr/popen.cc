@@ -23,7 +23,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.2 2003/03/10 23:21:00 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.3 2003/12/02 09:38:55 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -84,7 +84,7 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
     int fl;
     fl = fcntl(pdes_out[0], F_GETFL);
     if (fcntl(pdes_out[0], F_SETFL, fl | O_NONBLOCK) == -1) {
-	XLOG_FATAL("Cannot set O_NONBLOCK on file descriptor %d\n",
+	XLOG_FATAL("Cannot set O_NONBLOCK on file descriptor %d",
 		   pdes_out[0]);
 	(void)close(pdes_out[0]);
 	(void)close(pdes_out[1]);
@@ -94,7 +94,7 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
     }
     fl = fcntl(pdes_err[0], F_GETFL);
     if (fcntl(pdes_err[0], F_SETFL, fl | O_NONBLOCK) == -1) {
-	XLOG_FATAL("Cannot set O_NONBLOCK on file descriptor %d\n",
+	XLOG_FATAL("Cannot set O_NONBLOCK on file descriptor %d",
 		   pdes_err[0]);
 	(void)close(pdes_out[0]);
 	(void)close(pdes_out[1]);
