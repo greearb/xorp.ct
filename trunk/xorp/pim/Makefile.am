@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.13 2004/01/15 19:14:15 hodson Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.14 2004/01/16 19:24:41 hodson Exp $
 ##
 
 # Redefine the bin installation directory
@@ -83,6 +83,8 @@ test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.a
 ### socket server libraries and related
 test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket4userxif.a
 test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket4xif.a
+test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket6userxif.a
+test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libsocket6xif.a
 test_pim_LDADD	 += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 test_pim_LDADD	 += $(top_builddir)/xrl/targets/libsocketserverbase.a
 
