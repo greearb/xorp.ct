@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.6 2003/03/06 01:18:57 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng_client.cc,v 1.7 2003/03/07 02:14:08 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -157,10 +157,18 @@ public:
     {
 	finder_trace_init("ClientQuery callback \"%s\"", _key.c_str());
 	if (e != XrlError::OKAY()) {
-	    finder_trace_result("failed (%s) -> RESOLVE_FAILED",
-				e.str().c_str());
+	    finder_trace_result("failed on \"%s\" (%s) -> RESOLVE_FAILED",
+				_key.c_str(), e.str().c_str());
 	    _qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
-	    client().notify_failed(this);
+
+	    if (e == XrlError::COMMAND_FAILED()) {
+		// Probably something that doesn't resolve, not a catastrophic
+		// transport failure
+		client().notify_done(this);
+	    } else {
+		// Probably a catastrophic transport failure
+		client().notify_failed(this);
+	    }
 	    return;
 	}
 
