@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.5 2003/03/13 09:37:15 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.6 2003/03/31 03:46:47 pavlin Exp $"
 
 
 //
@@ -193,7 +193,8 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 	try {
 	    IPvX g(argv[i].c_str());
 	    if (g.af() != family()) {
-		cli_print(c_format("ERROR: Address with invalid address family: %s\n", argv[i].c_str()));
+		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
+				   argv[i].c_str()));
 		return (XORP_ERROR);
 	    }
 	    if (! g.is_multicast()) {
