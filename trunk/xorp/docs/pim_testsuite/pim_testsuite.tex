@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.2 2002/12/18 00:50:55 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.3 2003/01/10 05:10:33 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -4137,8 +4137,8 @@ If it sees an (*,*,RP) Prune, it should override that prune by sending an
 correct upstream neighbor change, the router should refresh the state by
 sending an (*,*,RP) Join almost immediately. In addition, if the MRIB changes
 to indicate that the next hop towards the RP has changed, the router should
-send an (*,*,RP) towards the old next hop, and send an (*,*,RP) towards the
-next next hop router.
+send an (*,*,RP) Prune towards the old next hop, and send an (*,*,RP) Join
+towards the next hop router.
 
 \para{Test Setup:}
 Connect the RUT, TR1, TR2, TR3, TR4, and S1 according to
@@ -4513,7 +4513,6 @@ Group           Source          RP              Flags
 
 \end{itemize}
 
-
 \subpara{Part C:}
 
 \begin{itemize}
@@ -4522,7 +4521,7 @@ Group           Source          RP              Flags
   same as in Part A.
 
   \item After the RUT receives the (*,*,RP) Join message, it should
-  transmit itself an (*,*,RP) Join messages on LAN5 with the upstream
+  transmit itself an (*,*,RP) Join message on LAN5 with the upstream
   neighbor address set to TR4. The Join Timer in the corresponding (*,*,RP)
   state to send the next message should be set to \verb=t_periodic=
   ({\PimsmTPeriodic}):
@@ -4645,7 +4644,7 @@ Group           Source          RP              Flags
   the RUT should generate almost immediately an (*,*,RP) Join message to TR4.
 
   \item After that the RUT should continue transmitting 
-  (*,*,RP) Join messages as normal: one message every \verb=t_periodic=
+  (*,*,RP) Join messages to TR4 as normal: one message every \verb=t_periodic=
   ({\PimsmTPeriodic}).
 
 \end{itemize}
@@ -4657,9 +4656,9 @@ Group           Source          RP              Flags
   \item Until before the MRIB is changed, the results should
   be same as in Part C (right before TR3 sends the (*,*,RP) Join message).
 
-  \item After the MRIB is changed, the RUT should send (*,*,RP) Join message
+  \item After the MRIB is changed, the RUT should send an (*,*,RP) Join message
   to TR3 (the new upstream router toward the RP), and right after that
-  it should send (*,*,RP) Prune message to TR2 (the old upstream router
+  it should send an (*,*,RP) Prune message to TR2 (the old upstream router
   toward the RP). The corresponding (*,*,RP) state in the RUT should
   indicate the new upstream router, and the Join Timer should be set
   to \verb=t_periodic= ({\PimsmTPeriodic}):
@@ -4727,14 +4726,678 @@ Group           Source          RP              Flags
   the RUT should generate almost immediately an (*,*,RP) Join message to TR4.
 
   \item After that the RUT should continue transmitting 
-  (*,*,RP) Join messages to TR3 as normal: one message every \verb=t_periodic=
+  (*,*,RP) Join messages to TR4 as normal: one message every \verb=t_periodic=
   ({\PimsmTPeriodic}).
 
 \end{itemize}
 
 
 \para{Possible Problems:}
-None.
+In Part E, after the MRIB is changed, the (*,*,RP) Prune message might
+be sent before the (*,*,RP) Join message.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Sending (*,G) Join/Prune Messages}
+
+\para{Purpose:}
+Verify that (*,G) Join/Prune messages are sent properly.
+
+\para{References:}
+\begin{itemize}
+  \item draft-ietf-pim-sm-v2-new-05 -- Section 4.5.6
+\end{itemize}
+
+\para{Discussion:}
+If a router receives an (*,G) Join/Prune message, it may need to propagate
+it toward the RP for that group. A router should monitor its upstream
+interface for messages
+from other routers on that subnet, and if it sees an (*,G) Join to the
+correct upstream neighbor, it should suporess its own (*,G) Join message.
+If it sees an (*,G) Prune, it should override that prune by sending an
+(*,G) Join almost immediately. If a router sees the Generation ID of the
+correct upstream neighbor change, the router should refresh the state by
+sending an (*,G) Join almost immediately. In addition, if the MRIB changes
+to indicate that the next hop towards the RP has changed, the router should
+send an (*,G) Prune towards the old next hop, and send an (*,G) Join
+towards the next hop router.
+
+\para{Test Setup:}
+Connect the RUT, TR1, TR2, TR3, TR4, and S1 according to
+Figure~\ref{fig:pim_test_4_6_sending_wc_join_prune_messages}.
+In all tests, configure the RUT such that the next-hop route toward LAN6 is
+TR4, unless stated otherwise.
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[scale=0.8]{figs/pim_test_4_6_sending_wc_join_prune_messages}
+    \caption{Sending (*,G) Join/Prune Messages test setup}
+    \label{fig:pim_test_4_6_sending_wc_join_prune_messages}
+  \end{center}
+\end{figure}
+
+\para{Procedure:}
+
+\subpara{Part A: JoinDesired(*,G) $\Longrightarrow$ True/False transaction.}
+
+\begin{enumerate}
+
+  \item Configure TR4 as the RP. Start the RUT, TR1, TR2, and TR4. If
+  necessary, wait until the RP-set in the RUT, TR1, TR2, and TR4
+  converges.
+
+  \item Start observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (*,G) Prune message at TR1, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (*,G) Join message at TR2, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (*,G) Prune message at TR2, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+\end{enumerate}
+
+\subpara{Part B: (*,G) Join Timer expiration.}
+
+\begin{enumerate}
+
+  \item Configure TR4 as the RP. Start the RUT, TR1, and TR4. If
+  necessary, wait until the RP-set in the RUT, TR1, and TR4
+  converges.
+
+  \item Start observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Keep observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5 for at least \verb=J/P_HoldTime= ({\PimsmJPHoldTime}).
+
+\end{enumerate}
+
+\subpara{Part C: See (*,G) Join message to RPF'(*,G).}
+
+\begin{itemize}
+
+  \item Configure TR4 as the RP. Start the RUT, TR1, TR3, and TR4. If
+  necessary, wait until the RP-set in the RUT, TR1, TR3, and TR4
+  converges.
+
+  \item Configure the RUT such that the T-bit in LAN Prune Delay Hello
+  Option in the Hello messages sent by the RUT on LAN5 is not set (\ie joins
+  suppression is not disabled). The T-bit in the Hello messages of TR3 and TR4
+  can be of any value.
+
+  \item Start observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (*,G) Join message at TR3, and send it to TR4 on LAN5.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Every \verb=t_periodic= ({\PimsmTPeriodic}) compose an (*,G) Join
+  message at TR3, and send it to TR4 on LAN5.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Keep observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5 for at least \verb=J/P_HoldTime= ({\PimsmJPHoldTime}).
+
+  \item Repeat the whole test, but this time by configuring the RUT, TR3, and
+  TR4 such that the T-bit in LAN Prune Delay Hello Option is set (\ie joins
+  suppression is disabled).
+
+\end{itemize}
+
+\subpara{Part D: See (*,G) Prune message to RPF'(*,G).}
+
+\begin{itemize}
+
+  \item Configure TR4 as the RP. Start the RUT, TR1, TR3, and TR4. If
+  necessary, wait until the RP-set in the RUT, TR1, TR3, and TR4
+  converges.
+
+  \item Start observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Compose an (*,G) Prune message at TR3, and send it to TR4 on LAN5.
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Keep observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5 for at least \verb=J/P_HoldTime= ({\PimsmJPHoldTime}).
+
+\end{itemize}
+
+\subpara{Part E: MRIB.next\_hop(RP(G)) Changes.}
+
+\begin{itemize}
+
+  \item Configure the IP address of the interface that connects TR4 to LAN6 as
+  the RP. Configure the RUT such that the next-hop route toward the RP is
+  TR4. Start the RUT, TR1, TR3, and TR4. If necessary, wait until the
+  RP-set in the RUT, TR1, TR3, and TR4 converges.
+
+  \item Start observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Change the MRIB in the RUT such that the next-hop
+  router toward the RP is TR3.
+
+  \item Keep observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5 for at least \verb=J/P_HoldTime= ({\PimsmJPHoldTime}).
+
+\end{itemize}
+
+\subpara{Part F: RPF'(*,G) GenID Changes.}
+
+\begin{itemize}
+
+  \item Configure TR4 as the RP. Start the RUT, TR1, TR3, and TR4. If
+  necessary, wait until the RP-set in the RUT, TR1, TR3, and TR4
+  converges.
+
+  \item Start observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Quit TR4 (\ie stop it without graceful shutdown), and start it
+  immediately.
+
+  \item Keep observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5 for at least \verb=J/P_HoldTime= ({\PimsmJPHoldTime}).
+
+\end{itemize}
+
+\subpara{Part G: RPF'(*,G) Changes.}
+
+TODO: XXX: PAVPAVPAV: after composing and sending of test Assert messages is
+implemented, test this scenarios.
+
+\begin{itemize}
+
+  \item Configure the IP address of the interface that connects TR4 to LAN6 as
+  the RP. Configure the RUT such that the next-hop route toward the RP is
+  TR4. Start the RUT, TR1, TR3, and TR4. If necessary, wait until the
+  RP-set in the RUT, TR1, TR3, and TR4 converges.
+
+  \item Start observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5.
+
+  \item Compose an (*,G) Join message at TR1, and send it to the RUT. 
+  The \verb=J/P_HoldTime= of the message should be set to its default
+  value ({\PimsmJPHoldTime}).
+
+  \item Trigger changing of RPF'(*,G) at the RUT by composing an
+  (*,G) Assert message at TR3 with metric and metric 
+  perference set to zero, and sending it on LAN5.
+
+  \item Keep observing the (*,G) Join/Prune messages transmitted by the
+  RUT on LAN5 for at least \verb=J/P_HoldTime= ({\PimsmJPHoldTime}).
+
+\end{itemize}
+
+\para{Observable Results:}
+
+\subpara{Part A:}
+
+\begin{itemize}
+
+  \item After TR1 sends its first (*,G) Join message to the RUT, the RUT
+  itself should transmit an (*,G) Join message on LAN5 with the upstream
+  neighbor address set to TR4. The interface that connects the RUT to LAN3
+  should be added to the set of joined interfaces for the corresponding
+  (*,G) routing state; the incoming interface for that state should be the
+  interface that connects the RUT to LAN5:
+
+\begin{verbatim}
+Xorp> show pim join
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.3        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.2
+    Upstream state:           Joined 
+    Join timer:               52
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ........O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ........O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  ..............
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ..............
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       .....O..O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ........O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ........O.....
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  \item After TR1 sends the (*,G) Prune message to the RUT, the RUT itself
+  should transmit an (*,G) Prune message on LAN5 with the upstream neighbor
+  address set to TR4. The interface that connects the RUT to LAN3 should be
+  removed from the set of joined interfaces for the corresponding (*,G)
+  routing state; as a result, this routing state should be removed.
+
+  \item After TR1 sends its second (*,G) Join message to the RUT, the
+  result should be same as when TR1 sent its first (*,G) Join message.
+
+  \item After TR2 sends the (*,G) Join message to the RUT, the interface
+  that connects the RUT to LAN4 should be added to the set of joined
+  interfaces for the corresponding (*,G) routing state; however, the RUT
+  itself should not transmit an (*,G) Join message as a result of that
+  join:
+
+\begin{verbatim}
+Xorp> show pim join
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.3        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.2
+    Upstream state:           Joined 
+    Join timer:               6
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ......O.O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ......O.O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  ..............
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ..............
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       .....OO.O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ......O.O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ......O.O.....
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  \item After TR2 sends the (*,G) Prune message to the RUT, the interface
+  that connects the RUT to LAN4 should be removed from the set of joined
+  interfaces for the corresponding (*,G) routing state; however, the RUT
+  itself should not transmit an (*,G) Join message as a result of that
+  join:
+
+\begin{verbatim}
+Xorp> show pim join
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.3        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.2
+    Upstream state:           Joined 
+    Join timer:               4
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ........O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ........O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  ..............
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ..............
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       .....O..O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ........O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ........O.....
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+\end{itemize}
+
+\subpara{Part B:}
+
+\begin{itemize}
+
+  \item Until after TR1 sends the (*,G) Join message, the results should be
+  same as in Part A.
+
+  \item After the RUT receives the (*,G) Join message, it should start
+  transmitting itself (*,G) Join messages on LAN5 with the upstream
+  neighbor address set to TR4: one message every \verb=t_periodic=
+  ({\PimsmTPeriodic}).
+
+\end{itemize}
+
+\subpara{Part C:}
+
+\begin{itemize}
+
+  \item Until after TR1 sends the (*,G) Join message, the results should be
+  same as in Part A.
+
+  \item After the RUT receives the (*,G) Join message, it should
+  transmit itself an (*,G) Join message on LAN5 with the upstream
+  neighbor address set to TR4. The Join Timer in the corresponding (*,G)
+  state to send the next message should be set to \verb=t_periodic=
+  ({\PimsmTPeriodic}):
+
+\begin{verbatim}
+Xorp> show pim join 
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.3        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.2
+    Upstream state:           Joined 
+    Join timer:               58
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ........O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ........O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  ..............
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ..............
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       .....O..O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ........O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ........O.....
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  \item After TR3 sends the (*,G) Join message to TR4, it should suppress
+  the generation of the (*,G) Join message at the RUT by uncreasing the
+  Join Timer in the corresponding (*,G) state to \verb=t_joinsuppress=
+  (see the protocol spec for description of its value):
+
+\begin{verbatim}
+Xorp> show pim join 
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.3        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.2
+    Upstream RPF'(*,G):       10.2.0.2
+    Upstream state:           Joined 
+    Join timer:               81
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ........O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ........O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  ..............
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ..............
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       .....O..O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ........O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ........O.....
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  \item While TR3 keeps sending (*,G) Join messages to TR4, the RUT should
+  not generate (*,G) Join messages on its own.
+
+  \item When the test is repeated with the T-bit set, the (*,G) Join
+  messages sent by TR3 should not suppress the (*,G) Join messages
+  generated by the RUT. In other words, after the RUT receives the (*,G)
+  Join message, it should start transmitting itself (*,G) Join messages on
+  LAN5 with the upstream neighbor address set to TR4: one message every
+  \verb=t_periodic= ({\PimsmTPeriodic}).
+
+\end{itemize}
+
+\subpara{Part D:}
+
+\begin{itemize}
+
+  \item Until before TR3 sends the (*,G) Prune message, the results should
+  be same as in Part C (right before TR3 sends the (*,G) Join message).
+
+  \item After TR3 sends the (*,G) Prune message to TR4,
+  the Join Timer in the RUT for the corresponding (*,G) state
+  should be decreased to \verb=t_override= ({\PimsmTOverride}). As a result,
+  the RUT should generate almost immediately an (*,G) Join message to TR4.
+
+  \item After that the RUT should continue transmitting 
+  (*,G) Join messages to TR4 as normal: one message every \verb=t_periodic=
+  ({\PimsmTPeriodic}).
+
+\end{itemize}
+
+\subpara{Part E:}
+
+\begin{itemize}
+
+  \item Until before the MRIB is changed, the results should
+  be same as in Part C (right before TR3 sends the (*,G) Join message).
+
+  \item After the MRIB is changed, the RUT should send an (*,G) Join message
+  to TR3 (the new upstream router toward the RP), and right after that
+  it should send an (*,G) Prune message to TR2 (the old upstream router
+  toward the RP). The corresponding (*,G) state in the RUT should
+  indicate the new upstream router, and the Join Timer should be set
+  to \verb=t_periodic= ({\PimsmTPeriodic}):
+
+\begin{verbatim}
+Xorp> show pim join 
+Group           Source          RP              Flags
+224.0.1.20      0.0.0.0         10.4.0.3        WC   
+    Upstream interface (RP):  dc1
+    Upstream MRIB next hop (RP): 10.2.0.3
+    Upstream RPF'(*,G):       10.2.0.3
+    Upstream state:           Joined 
+    Join timer:               56
+    Local include:            ..............
+    Local exclude:            ..............
+    Local include WC:         ..............
+    Local include SG:         ..............
+    Local exclude SG:         ..............
+    Joins RP:                 ..............
+    Joins WC:                 ........O.....
+    Joins SG:                 ..............
+    Prunes SG_RPT:            ..............
+    Join state:               ........O.....
+    Prune state:              ..............
+    Prune pending state:      ..............
+    Prune tmp state:          ..............
+    Prune pending tmp state:  ..............
+    I am assert winner state: ..............
+    I am assert loser state:  ..............
+    Assert winner WC:         ..............
+    Assert winner SG:         ..............
+    Assert lost WC:           ..............
+    Assert lost SG:           ..............
+    Assert lost SG_RPT:       ..............
+    Assert tracking WC:       .....O..O.....
+    Assert tracking SG:       ..............
+    Could assert WC:          ........O.....
+    Could assert SG:          ..............
+    I am DR:                  ........O.....
+    Immediate olist RP:       ..............
+    Immediate olist WC:       ........O.....
+    Immediate olist SG:       ..............
+    Inherited olist SG:       ..............
+    Inherited olist SG_RPT:   ..............
+    PIM include WC:           ..............
+    PIM include SG:           ..............
+    PIM exclude SG:           ..............
+\end{verbatim}
+
+  \item After that the RUT should continue transmitting 
+  (*,G) Join messages to TR3 as normal: one message every \verb=t_periodic=
+  ({\PimsmTPeriodic}).
+
+\end{itemize}
+
+\subpara{Part F:}
+
+\begin{itemize}
+
+  \item Until before TR4 is restarted, the results should
+  be same as in Part C (right before TR3 sends the (*,G) Join message).
+
+  \item After TR4 is restarted,
+  the Join Timer in the RUT for the corresponding (*,G) state
+  should be decreased to \verb=t_override= ({\PimsmTOverride}). As a result,
+  the RUT should generate almost immediately an (*,G) Join message to TR4.
+
+  \item After that the RUT should continue transmitting 
+  (*,G) Join messages to TR4 as normal: one message every \verb=t_periodic=
+  ({\PimsmTPeriodic}).
+
+\end{itemize}
+
+\subpara{Part G:}
+
+\begin{itemize}
+
+  \item Until before RPF'(*,G) is changed, the results should
+  be same as in Part C (right before TR3 sends the (*,G) Join message).
+
+  \item After RPF'(*,G) is changed,
+  the Join Timer in the RUT for the corresponding (*,G) state
+  should be decreased to \verb=t_override= ({\PimsmTOverride}). As a result,
+  the RUT should generate almost immediately an (*,G) Join message to TR3.
+
+  \item After that the RUT should continue transmitting 
+  (*,G) Join messages to TR3 as normal: one message every \verb=t_periodic=
+  ({\PimsmTPeriodic}).
+
+\end{itemize}
+
+
+\para{Possible Problems:}
+In Part E, after the MRIB is changed, the (*,G) Prune message might
+be sent before the (*,G) Join message. In Part G, if the Assert generated by
+TR3 is not preferred when compared to the assert metric of TR4, the RPF'(*,G)
+in the RUT will not be changed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
