@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_nlm.cc,v 1.5 2003/10/01 22:49:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_nlm.cc,v 1.6 2003/10/21 02:00:11 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -40,10 +40,12 @@
 // The information to parse is in NETLINK format
 // (e.g., obtained by netlink(7) sockets mechanism).
 //
+// Reading netlink(3) manual page is a good start for understanding this
+//
 
 #ifndef HAVE_NETLINK_SOCKETS
 bool
-FtiConfigEntryGet::parse_buffer_nlm(FteX& , const uint8_t* , size_t )
+FtiConfigEntryGet::parse_buffer_nlm(FteX& , const uint8_t* , size_t , bool )
 {
     return false;
 }
@@ -51,10 +53,9 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& , const uint8_t* , size_t )
 #else // HAVE_NETLINK_SOCKETS
 
 
-// Reading netlink(3) manual page is a good start for understanding this
 bool
 FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const uint8_t* buf,
-				    size_t buf_bytes)
+				    size_t buf_bytes, bool is_nlm_get_only)
 {
     const struct nlmsghdr* nlh;
     bool recognized = false;
@@ -89,9 +90,21 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const uint8_t* buf,
 	
 	case NLMSG_NOOP:
 	    break;
-	    
+
 	case RTM_NEWROUTE:
+	case RTM_DELROUTE:
+	case RTM_GETROUTE:
 	{
+	    if (is_nlm_get_only) {
+		//
+		// Consider only the "get" entries returned by RTM_GETROUTE.
+		// XXX: RTM_NEWROUTE below instead of RTM_GETROUTE is not
+		// a mistake, but an artifact of Linux logistics.
+		//
+		if (nlh->nlmsg_type != RTM_NEWROUTE)
+		    break;
+	    }
+
 	    const struct rtmsg* rtmsg;
 	    int rta_len = RTM_PAYLOAD(nlh);
 	    
