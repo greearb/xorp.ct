@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.2 2003/05/14 01:13:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.3 2003/05/20 17:26:37 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -189,6 +189,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
 	    XLOG_FATAL("Could not find IfTreeVif on %s named %s",
 		       if_name.c_str(), if_name.c_str());
 	}
+	fv->set_pif_index(if_index);
 	fv->set_enabled(fi->enabled() && (ifm->ifm_flags & IFF_UP));
 	fv->set_broadcast(ifm->ifm_flags & IFF_BROADCAST);
 	fv->set_loopback(ifm->ifm_flags & IFF_LOOPBACK);
@@ -293,6 +294,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const if_msghdr* ifm, IfTree& it,
     // XXX: vifname == ifname on this platform
     fi.add_vif(if_name);
     IfTreeVif& fv = fi.get_vif(if_name)->second;
+    fv.set_pif_index(if_index);
     fv.set_enabled(fi.enabled() && (ifm->ifm_flags & IFF_UP));
     fv.set_broadcast(ifm->ifm_flags & IFF_BROADCAST);
     fv.set_loopback(ifm->ifm_flags & IFF_LOOPBACK);

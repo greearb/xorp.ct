@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.20 2003/05/29 21:17:14 mjh Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.21 2003/05/29 22:31:17 pavlin Exp $"
 
 #include "config.h"
 #include "fea_module.h"
@@ -219,6 +219,42 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_flags(
     loopback = fv->loopback();
     point_to_point = fv->point_to_point();
     multicast = fv->multicast();
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_all_vif_pif_index(
+    // Input values, 
+    const string&	ifname, 
+    const string&	vif, 
+    // Output values, 
+    uint32_t&		pif_index)
+{
+    const IfTreeVif* fv = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_vif(ifname, vif, fv);
+    if (e != XrlCmdError::OKAY())
+	return e;
+    
+    pif_index = fv->pif_index();
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_vif_pif_index(
+    // Input values, 
+    const string&	ifname, 
+    const string&	vif, 
+    // Output values, 
+    uint32_t&	pif_index)
+{
+    const IfTreeVif* fv = 0;
+    XrlCmdError e = _xifmgr.get_vif(ifname, vif, fv);
+    if (e != XrlCmdError::OKAY())
+	return e;
+    
+    pif_index = fv->pif_index();
     
     return XrlCmdError::OKAY();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.3 2003/05/20 17:26:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.4 2003/06/06 23:56:35 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -196,6 +196,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 	// XXX: vifname == ifname on this platform
 	fi.add_vif(if_name);
 	IfTreeVif& fv = fi.get_vif(if_name)->second;
+	fv.set_pif_index(if_index);
 	fv.set_enabled(fi.enabled() && (flags & IFF_UP));
 	fv.set_broadcast(flags & IFF_BROADCAST);
 	fv.set_loopback(flags & IFF_LOOPBACK);

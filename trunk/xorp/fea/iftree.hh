@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.5 2003/05/23 13:59:10 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.6 2003/05/23 22:17:49 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -277,6 +277,9 @@ public:
 
     const string& vifname() const	{ return _vifname; }
 
+    inline uint16_t pif_index() const	{ return _pif_index; }
+    inline void set_pif_index(uint16_t v) { _pif_index = v; mark(CHANGED); }
+
     inline bool enabled() const		{ return _enabled; }
     inline bool broadcast() const	{ return _broadcast; }
     inline bool loopback() const	{ return _loopback; }
@@ -348,6 +351,7 @@ public:
      */
     inline void copy_state(const IfTreeVif& o)
     {
+	set_pif_index(o.pif_index());
 	set_enabled(o.enabled());
 	set_broadcast(o.broadcast());
 	set_loopback(o.loopback());
@@ -364,7 +368,8 @@ public:
      */
     inline bool is_same_state(const IfTreeVif& o)
     {
-	return ((enabled() == o.enabled())
+	return ((pif_index() == o.pif_index())
+		&& (enabled() == o.enabled())
 		&& (broadcast() == o.broadcast())
 		&& (loopback() == o.loopback())
 		&& (point_to_point() == o.point_to_point())
@@ -380,6 +385,7 @@ protected:
     const string _ifname;
     const string _vifname;
 
+    uint16_t	 _pif_index;
     bool 	 _enabled;
     bool	 _broadcast;
     bool	 _loopback;

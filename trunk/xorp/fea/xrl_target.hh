@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.14 2003/05/29 21:17:14 mjh Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.15 2003/05/29 22:31:17 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -101,6 +101,20 @@ public:
 	bool&	loopback, 
 	bool&	point_to_point, 
 	bool&	multicast);
+
+    XrlCmdError ifmgr_0_1_get_all_vif_pif_index(
+	// Input values, 
+	const string&	ifname, 
+	const string&	vif, 
+	// Output values, 
+	uint32_t&	pif_index);
+
+    XrlCmdError ifmgr_0_1_get_configured_vif_pif_index(
+	// Input values, 
+	const string&	ifname, 
+	const string&	vif, 
+	// Output values, 
+	uint32_t&	pif_index);
 
     XrlCmdError ifmgr_0_1_start_transaction(
 	// Output values,

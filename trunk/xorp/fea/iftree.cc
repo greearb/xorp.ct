@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.8 2003/05/23 19:49:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.9 2003/05/23 22:17:49 pavlin Exp $"
 
 #include "config.h"
 #include "iftree.hh"
@@ -266,7 +266,8 @@ IfTreeInterface::str() const
 /* IfTreeVif code */
 
 IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
-    : IfTreeItem(), _ifname(ifname), _vifname(vifname), _enabled(false),
+    : IfTreeItem(), _ifname(ifname), _vifname(vifname),
+      _pif_index(0), _enabled(false),
       _broadcast(false), _loopback(false), _point_to_point(false),
       _multicast(false), _vif_flags(0)
 {}
