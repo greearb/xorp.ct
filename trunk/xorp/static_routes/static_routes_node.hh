@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.11 2004/09/17 13:58:24 abittau Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.12 2004/09/17 19:50:37 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -681,7 +681,7 @@ private:
      * @param route route to filter.
      * @return true if route was accepted by policy filter, false otherwise.
      */
-    bool doFiltering(StaticRoute& route);
+    bool do_filtering(StaticRoute& route);
     
     /**
      * Inform the RIB about a route.

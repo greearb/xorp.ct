@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/route_table_policy.hh,v 1.1 2004/09/17 13:50:55 abittau Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_HH__
 #define __BGP_ROUTE_TABLE_POLICY_HH__
@@ -84,8 +84,8 @@ public:
      * @param no_modify if true, the filter will not modify the route.
      * @return the possibly modified message, Null if rejected by filter.
      */
-    const InternalMessage<A>* doFiltering(const InternalMessage<A>& rtmsg, 
-					  bool no_modify) const;
+    const InternalMessage<A>* do_filtering(const InternalMessage<A>& rtmsg, 
+					   bool no_modify) const;
 
 private:
     PolicyFilters& _policy_filters;

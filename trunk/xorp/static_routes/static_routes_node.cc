@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.14 2004/09/17 13:58:24 abittau Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.15 2004/09/17 19:52:35 pavlin Exp $"
 
 
 //
@@ -685,7 +685,7 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     //
     StaticRoute route_copy = added_route;
     
-    bool accepted = doFiltering(route_copy);
+    bool accepted = do_filtering(route_copy);
 
     // Tag the original route as filtered or not
     added_route.set_filtered(!accepted);
@@ -740,7 +740,7 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
 
 	// Do policy filtering
 	StaticRoute route_copy = static_route;
-	bool accepted = doFiltering(route_copy);
+	bool accepted = do_filtering(route_copy);
 	tmp_route.set_filtered(!accepted);
 
 	// Decide what to do
@@ -887,7 +887,7 @@ StaticRoutesNode::push_routes()
 
 	
 	StaticRoute copy = orig_route;
-	bool accepted = doFiltering(copy);
+	bool accepted = do_filtering(copy);
 
 	debug_msg("[STATIC] Push route: %s, was filtered: %d, accepted %d\n",
 		  orig_route.network().str().c_str(),
@@ -932,7 +932,7 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
 }
 
 bool
-StaticRoutesNode::doFiltering(StaticRoute& route)
+StaticRoutesNode::do_filtering(StaticRoute& route)
 {
     try {
 	ostringstream trace;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.15 2004/06/10 22:41:46 hodson Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.16 2004/09/17 13:57:15 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -144,7 +144,7 @@ RouteDB<A>::set_expiry_timer(Route* r)
 
 template <typename A>
 bool
-RouteDB<A>::doFiltering(Route* r) {
+RouteDB<A>::do_filtering(Route* r) {
 try {
     RIPVarRW<A> varrw(*r);
 
@@ -235,7 +235,7 @@ RouteDB<A>::update_route(const Net&	    net,
 	    
 	    XLOG_ASSERT(ok);
 	    
-	    bool accepted = doFiltering(r);
+	    bool accepted = do_filtering(r);
 	    r->set_filtered(!accepted);
 
 	    if(!accepted)
@@ -252,7 +252,7 @@ RouteDB<A>::update_route(const Net&	    net,
 	XLOG_ASSERT(ok);
 
 	// XXX: this is wrong
-	bool accepted = doFiltering(r);
+	bool accepted = do_filtering(r);
 	r->set_filtered(!accepted);
 
 	if(accepted)
@@ -266,7 +266,7 @@ RouteDB<A>::update_route(const Net&	    net,
 						 cost,no_origin,tag,
 						 policytags);
     // XXX: lost origin
-    bool accepted = doFiltering(new_route);
+    bool accepted = do_filtering(new_route);
 
     // XXX: this whole section of code is too entangled.
     if (r->origin() == o) {

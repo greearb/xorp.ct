@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.1 2004/09/17 13:50:55 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -56,7 +56,7 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     debug_msg("[BGP] Policy route dump: %s\nWas filtered: %d\n",
 	      rtmsg.str().c_str(), was_filtered);
 
-    const InternalMessage<A>* fmsg = doFiltering(rtmsg,false);
+    const InternalMessage<A>* fmsg = do_filtering(rtmsg,false);
     bool accepted = (fmsg != NULL);
 
     debug_msg("[BGP] Policy route dump accepted: %d\n",accepted);

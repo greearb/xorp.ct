@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_table.cc,v 1.9 2004/06/10 22:41:44 hodson Exp $"
+#ident "$XORP: xorp/rip/output_table.cc,v 1.10 2004/09/17 13:57:14 abittau Exp $"
 
 #include "output_table.hh"
 #include "packet_assembly.hh"
@@ -55,7 +55,7 @@ OutputTable<A>::output_packet()
 	RouteEntry<A>* copy = new RouteEntry<A>(r->net(),p.first,p.second,
 					        origin,r->tag(),r->policytags());
 	
-	bool accepted = doFiltering(copy);
+	bool accepted = do_filtering(copy);
 	if(!accepted) {
 	    delete copy;
 	    continue;

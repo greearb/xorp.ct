@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/rib/rt_tab_pol_conn.hh,v 1.1 2004/09/17 14:00:04 abittau Exp $
 
 #ifndef __RIB_RT_TAB_POL_CONN_HH__
 #define __RIB_RT_TAB_POL_CONN_HH__
@@ -69,7 +69,7 @@ private:
      *
      * @param r route to filter
      */
-    void doFiltering(IPRouteEntry<A>& r);
+    void do_filtering(IPRouteEntry<A>& r);
 
 
     typedef Trie<A, const IPRouteEntry<A>*> RouteContainer;

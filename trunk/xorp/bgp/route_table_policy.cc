@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.1 2004/09/17 13:50:55 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -43,8 +43,8 @@ PolicyTable<A>::~PolicyTable() {
 
 template <class A>
 const InternalMessage<A>*
-PolicyTable<A>::doFiltering(const InternalMessage<A>& rtmsg, 
-			    bool no_modify) const {
+PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg, 
+			     bool no_modify) const {
 
 try {
 
@@ -102,7 +102,7 @@ PolicyTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	      filter::filter2str(_filter_type).c_str(),
 	      rtmsg.str().c_str());
 
-    const InternalMessage<A>* fmsg = doFiltering(rtmsg,false);
+    const InternalMessage<A>* fmsg = do_filtering(rtmsg,false);
 
     if(!fmsg)
 	return ADD_FILTERED;
@@ -134,8 +134,8 @@ PolicyTable<A>::replace_route(const InternalMessage<A>& old_rtmsg,
 	      old_rtmsg.str().c_str(),
 	      new_rtmsg.str().c_str());
 
-    const InternalMessage<A>* fold = doFiltering(old_rtmsg,false);
-    const InternalMessage<A>* fnew = doFiltering(new_rtmsg,false);
+    const InternalMessage<A>* fold = do_filtering(old_rtmsg,false);
+    const InternalMessage<A>* fnew = do_filtering(new_rtmsg,false);
 
     // XXX: We can probably use the is_filtered flag...
     int res;
@@ -175,7 +175,7 @@ PolicyTable<A>::delete_route(const InternalMessage<A>& rtmsg,
 	      filter::filter2str(_filter_type).c_str(),
 	      rtmsg.str().c_str());
 
-    const InternalMessage<A>* fmsg = doFiltering(rtmsg,false);
+    const InternalMessage<A>* fmsg = do_filtering(rtmsg,false);
     if(fmsg == NULL)
 	return 0;
 
@@ -205,7 +205,7 @@ PolicyTable<A>::route_dump(const InternalMessage<A>& rtmsg,
 	      filter::filter2str(_filter_type).c_str(),
 	      rtmsg.str().c_str());
 
-    const InternalMessage<A>* fmsg = doFiltering(rtmsg,false);
+    const InternalMessage<A>* fmsg = do_filtering(rtmsg,false);
     if(fmsg == NULL)
 	return ADD_FILTERED;
 
@@ -249,7 +249,7 @@ PolicyTable<A>::lookup_route(const IPNet<A> &net,
 	      filter::filter2str(_filter_type).c_str(),
 	      rtmsg.str().c_str());
 
-    const InternalMessage<A>* fmsg = doFiltering(rtmsg,false);
+    const InternalMessage<A>* fmsg = do_filtering(rtmsg,false);
     if(!fmsg)
 	return NULL;
     

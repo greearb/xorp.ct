@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.1 2004/09/17 14:00:04 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -69,7 +69,7 @@ PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route,
 
     // make a copy so we may modify it
     IPRouteEntry<A> route_copy(*original);
-    doFiltering(route_copy); 
+    do_filtering(route_copy); 
    
     
     RouteTable<A>* next = this->next_table();
@@ -188,7 +188,7 @@ PolicyConnectedTable<A>::push_routes() {
 	// make a copy so filter may [possibly] modify it
 	IPRouteEntry<A>* copy = new IPRouteEntry<A>(*prev);
 
-	doFiltering(*copy);
+	do_filtering(*copy);
 	
 	
 	// only policytags may change
@@ -216,7 +216,7 @@ PolicyConnectedTable<A>::push_routes() {
 
 template <class A>
 void
-PolicyConnectedTable<A>::doFiltering(IPRouteEntry<A>& route) {
+PolicyConnectedTable<A>::do_filtering(IPRouteEntry<A>& route) {
 
 try {
     debug_msg("[RIB] PolicyConnectedTable Filtering: %s\n",

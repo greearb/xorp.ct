@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/output.hh,v 1.4 2004/06/10 22:41:44 hodson Exp $
+// $XORP: xorp/rip/output.hh,v 1.5 2004/09/17 13:57:14 abittau Exp $
 
 #ifndef __RIP_OUTPUT_HH__
 #define __RIP_OUTPUT_HH__
@@ -124,7 +124,7 @@ protected:
      * @param r route to filter
      * @return true if the route was accepted, false otherwise.
      */
-    bool doFiltering(RouteEntry<A>* r);
+    bool do_filtering(RouteEntry<A>* r);
 
 private:
     OutputBase(const OutputBase<A>& o);			// Not implemented
@@ -186,7 +186,7 @@ OutputBase<A>::interpacket_gap_ms() const
 
 template <typename A>
 bool
-OutputBase<A>::doFiltering(RouteEntry<A>* route) {
+OutputBase<A>::do_filtering(RouteEntry<A>* route) {
 try {
     RIPVarRW<A> varrw(*route);
 

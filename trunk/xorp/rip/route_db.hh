@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.14 2004/06/10 22:41:46 hodson Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.15 2004/09/17 13:57:15 abittau Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -169,7 +169,7 @@ public:
      * @param r route to filter.
      * @return true if route was accepted, false otherwise.
      */
-    bool doFiltering(Route* r);
+    bool do_filtering(Route* r);
 
 protected:
     RouteDB(const RouteDB&);			// not implemented
