@@ -1,6 +1,8 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.7 2003/04/16 04:56:00 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.8 2003/06/06 08:44:48 pavlin Exp $
 #
+
+* Add vif manager config similar to PIM.
 
 * Add configuration option to enable checking for Router Alert option
   (NOTE: applies to PIM as well).
