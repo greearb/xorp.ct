@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.20 2004/06/10 22:40:55 hodson Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.21 2004/07/28 03:03:23 pavlin Exp $"
 
 
 //
@@ -1889,7 +1889,8 @@ MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
     if (nbytes < 0) {
 	if (errno == EINTR)
 	    return;		// OK: restart receiving
-	XLOG_ERROR("recvmsg() failed: %s", strerror(errno));
+	XLOG_ERROR("recvmsg() on socket %d failed: %s",
+		   _mrouter_socket, strerror(errno));
 	return;			// Error
     }
     
