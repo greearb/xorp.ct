@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/TODO,v 1.50 2003/07/01 23:58:22 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.51 2003/07/07 21:42:23 pavlin Exp $
 #
 
 * IMPL+SPEC: if a data packet arrives on interface I, and both
@@ -930,9 +930,6 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
   then modify the MFEA to assign that address itself, and remove
   it from the XRL interface.
 
-* IMPL: Make sure that all flags setting for PimMre are done through access
-  methods instead of bitwise OR.
-
 * IMPL: When receiving PIM Bootstrap message and check them whether
   they can be added, if all the info was received already,
   then just silently drop that message instead of printing a warning.
@@ -963,39 +960,17 @@ PimMre::track_dependency_assert_winner_metric_better_than_spt_assert_metric_sg()
   be a scope boundary (in case of IPv4) for 239.255.0.0/16
   (the IPv4 Local Scope).
 
-* IMPL: Use everywhere uint16_t for vif index type instead of size_t (??)
-
-* IMPL: Make sure that the 'updated_entry' BSR-related flag is used,
-  otherwise remove it.
-
 * IMPL: There is some inconsistency between "show igmp interface"
   and "show pim interfaces" commands: the command name,
   as well as the command output.
 
-* IMPL: Remove maxvifs() (??)
-
-* IMPL: Add functions to start/stop enable/disable a single interface (?)
-  Same applies for MLD6IGMP, MfeaNode, etc...
-
 * IMPL: Implement RFC 1256 (Router Solicitation)
-
-* IMPL: Add the xlog init stuff
 
 * IMPL: When the BSR collects all cand. RPs for a prefix, if their number is
   larger than 255, distribute only the best 255 prefixes.
 
-* IMPL: All debug messages "from %s:" should be "from %s to %s:"
-
-* IMPL: Simplify the Bootstrap message processing:
-  - first parse to determine the zone ID, and then process the rest
-
-* IMPL: Bug-fix when deleting lists
-
 * IMPL+SPEC: take care of the SZ Timer in the BSR spec: unclear when set,
   what means "always running", etc. See page 8 and 9 of the spec.
-
-* SPEC: should PIM_BOOTSTRAP_SCOPE_ZONE_TIMEOUT_DEFAULT be 1500,
-  or 10*BS Timeout??
 
 * SPEC: RP Set or RP-Set??
 
@@ -1014,8 +989,6 @@ this experimental RFC.
 * IMPL: Settle the logistics for start()/stop()/enable()/disable() and
   syncronize the implementation for all modules to use it.
 
-* IMPL: PimVif::pim_data_recv() : implement it!!
-
 * TODO (kernel and PIM-SM impl):
 > One limitation with using this option is, it won't allow fragmentation
 > of unicast packets also (man page says this). This we found , during RP
@@ -1030,15 +1003,8 @@ this on my TODO list for both the newer PIM-SM implementation, and
 for the kernel patches as well.
 
 
-* The spec doesn't say what to do when the Keepalive Timer expires.
-  Delete the (S,G) state, it seems.
-
-* Implement the SPT policy switching in PimMre::switch_to_spt_desired_sg().
-
-* Page 44 and 46 inconsistency re. the actions when JoinDesired(S,G)->false
-  starting from state Joined()
-
-* Implement adding PIM Register tunnel
+* IMPL: Implement the SPT policy switching in
+  PimMre::switch_to_spt_desired_sg().
 
 * IMPL: When "wrong iif" signal arrives, if it is not on one of
   our oifs, and if we don't care about it,
