@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.20 2004/03/24 23:26:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.21 2004/03/27 23:28:25 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -174,27 +174,35 @@ IfConfig::pull_config()
     return _pulled_config;
 }
 
-void
+bool
 IfConfig::report_update(const IfTreeInterface& fi,
 			bool is_system_interfaces_reportee)
 {
     IfConfigUpdateReporterBase::Update u;
-    if (map_changes(fi.state(), u))
+    if (map_changes(fi.state(), u)) {
 	_ur.interface_update(fi.ifname(), u, is_system_interfaces_reportee);
+	return true;
+    }
+
+    return false;
 }
 
-void
+bool
 IfConfig::report_update(const IfTreeInterface&	fi,
 			const IfTreeVif&	fv,
 			bool  is_system_interfaces_reportee)
 {
     IfConfigUpdateReporterBase::Update u;
-    if (map_changes(fv.state(), u))
+    if (map_changes(fv.state(), u)) {
 	_ur.vif_update(fi.ifname(), fv.vifname(), u,
 		       is_system_interfaces_reportee);
+	return true;
+    }
+
+    return false;
 }
 
-void
+bool
 IfConfig::report_update(const IfTreeInterface&	fi,
 			const IfTreeVif&	fv,
 			const IfTreeAddr4&	fa,
@@ -202,26 +210,42 @@ IfConfig::report_update(const IfTreeInterface&	fi,
 
 {
     IfConfigUpdateReporterBase::Update u;
-    if (map_changes(fa.state(), u))
+    if (map_changes(fa.state(), u)) {
 	_ur.vifaddr4_update(fi.ifname(), fv.vifname(), fa.addr(), u,
 			    is_system_interfaces_reportee);
+	return true;
+    }
+
+    return false;
 }
 
-void
+bool
 IfConfig::report_update(const IfTreeInterface&	fi,
 			const IfTreeVif&	fv,
 			const IfTreeAddr6&	fa,
 			bool is_system_interfaces_reportee)
 {
     IfConfigUpdateReporterBase::Update u;
-    if (map_changes(fa.state(), u))
+    if (map_changes(fa.state(), u)) {
 	_ur.vifaddr6_update(fi.ifname(), fv.ifname(), fa.addr(), u,
 			    is_system_interfaces_reportee);
+	return true;
+    }
+
+    return false;
+}
+
+void
+IfConfig::report_updates_completed(bool is_system_interfaces_reportee)
+{
+    _ur.updates_completed(is_system_interfaces_reportee);
 }
 
 void
 IfConfig::report_updates(const IfTree& it, bool is_system_interfaces_reportee)
 {
+    bool updated = false;
+
     //
     // Walk config looking for changes to report
     //
@@ -229,27 +253,35 @@ IfConfig::report_updates(const IfTree& it, bool is_system_interfaces_reportee)
 	 ii != it.ifs().end(); ++ii) {
 
 	const IfTreeInterface& interface = ii->second;
-	report_update(interface, is_system_interfaces_reportee);
+	updated |= report_update(interface, is_system_interfaces_reportee);
 
 	IfTreeInterface::VifMap::const_iterator vi;
 	for (vi = interface.vifs().begin();
 	     vi != interface.vifs().end(); ++vi) {
 
 	    const IfTreeVif& vif = vi->second;
-	    report_update(interface, vif, is_system_interfaces_reportee);
+	    updated |= report_update(interface, vif,
+				     is_system_interfaces_reportee);
 
 	    for (IfTreeVif::V4Map::const_iterator ai = vif.v4addrs().begin();
 		 ai != vif.v4addrs().end(); ai++) {
 		const IfTreeAddr4& addr = ai->second;
-		report_update(interface, vif, addr, is_system_interfaces_reportee);
+		updated |= report_update(interface, vif, addr,
+					 is_system_interfaces_reportee);
 	    }
 
 	    for (IfTreeVif::V6Map::const_iterator ai = vif.v6addrs().begin();
 		 ai != vif.v6addrs().end(); ai++) {
 		const IfTreeAddr6& addr = ai->second;
-		report_update(interface, vif, addr, is_system_interfaces_reportee);
+		updated |= report_update(interface, vif, addr,
+					 is_system_interfaces_reportee);
 	    }
 	}
+    }
+
+    if (updated) {
+	// End if updates
+	report_updates_completed(is_system_interfaces_reportee);
     }
 }
 
@@ -446,6 +478,17 @@ IfConfigUpdateReplicator::vifaddr6_update(const string& ifname,
     while (i != _reporters.end()) {
 	IfConfigUpdateReporterBase*& r = *i;
 	r->vifaddr6_update(ifname, vifname, addr, update, system);
+	++i;
+    }
+}
+
+void
+IfConfigUpdateReplicator::updates_completed(bool	system)
+{
+    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
+    while (i != _reporters.end()) {
+	IfConfigUpdateReporterBase*& r = *i;
+	r->updates_completed(system);
 	++i;
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.21 2004/03/24 23:26:59 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.22 2004/03/27 23:28:25 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -134,31 +134,44 @@ public:
 
     /**
      * Check IfTreeInterface and report updates to IfConfigUpdateReporter.
+     *
+     * @return true if there were updates to report, otherwise false.
      */
-    void   report_update(const IfTreeInterface& fi,
+    bool   report_update(const IfTreeInterface& fi,
 			 bool is_system_interfaces_reportee);
 
     /**
      * Check IfTreeVif and report updates to IfConfigUpdateReporter.
+     *
+     * @return true if there were updates to report, otherwise false.
      */
-    void   report_update(const IfTreeInterface& fi, const IfTreeVif& fv,
+    bool   report_update(const IfTreeInterface& fi, const IfTreeVif& fv,
 			 bool is_system_interfaces_reportee);
 
     /**
      * Check IfTreeAddr4 and report updates to IfConfigUpdateReporter.
+     *
+     * @return true if there were updates to report, otherwise false.
      */
-    void   report_update(const IfTreeInterface&	fi,
+    bool   report_update(const IfTreeInterface&	fi,
 			 const IfTreeVif&	fv,
 			 const IfTreeAddr4&     fa,
 			 bool  is_system_interfaces_reportee);
 
     /**
      * Check IfTreeAddr6 and report updates to IfConfigUpdateReporter.
+     *
+     * @return true if there were updates to report, otherwise false.
      */
-    void   report_update(const IfTreeInterface&	fi,
+    bool   report_update(const IfTreeInterface&	fi,
 			 const IfTreeVif&	fv,
 			 const IfTreeAddr6&     fa,
 			 bool  is_system_interfaces_reportee);
+
+    /**
+     * Report that updates were completed to IfConfigUpdateReporter.
+     */
+    void   report_updates_completed(bool is_system_interfaces_reportee);
 
     /**
      * Check every item within IfTree and report updates to
@@ -262,6 +275,8 @@ public:
 				 const IPv6&   addr,
 				 const Update& u,
 				 bool  is_system_interfaces_reportee) = 0;
+
+    virtual void updates_completed(bool is_system_interfaces_reportee) = 0;
 };
 
 /**
@@ -326,6 +341,12 @@ public:
 			 const IPv6&   addr,
 			 const Update& u,
 			 bool is_system_interfaces_reportee);
+
+    /**
+     * Forward notification that updates were completed to
+     * reporter instances on update notification list.
+     */
+    void updates_completed(bool is_system_interfaces_reportee);
 
 protected:
     list<IfConfigUpdateReporterBase*> _reporters;
