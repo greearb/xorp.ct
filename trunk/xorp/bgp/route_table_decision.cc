@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.3 2002/12/16 21:48:33 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.4 2002/12/17 22:06:05 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -429,7 +429,7 @@ DecisionTable<A>::lookup_route(const BGPRouteTable<A>* ignore_parent,
     const SubnetRoute<A>* best_route, *found_route;
     best_routes_peer = NULL;
     best_route = NULL;
-    map<BGPRouteTable<A>*, PeerHandler * >::const_iterator i;
+    typename map<BGPRouteTable<A>*, PeerHandler * >::const_iterator i;
     best_routes_parent = NULL;
     for (i = _parents.begin(); i!=_parents.end(); i++) {
 	cp(35);
@@ -507,7 +507,7 @@ DecisionTable<A>::find_previous_winner(BGPRouteTable<A> *caller,
 				       const PeerHandler*& winners_peer,
 				       BGPRouteTable<A>*& winners_parent
 				       ) const {
-    map<BGPRouteTable<A>*, PeerHandler * >::const_iterator i;
+    typename map<BGPRouteTable<A>*, PeerHandler * >::const_iterator i;
     winner = NULL;
     winners_peer = NULL;
     winners_parent = NULL;
@@ -854,7 +854,7 @@ template<class A>
 bool
 DecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
     const PeerHandler* peer = dump_iter.current_peer();
-    map<BGPRouteTable<A>*, PeerHandler* >::const_iterator i;
+    typename map<BGPRouteTable<A>*, PeerHandler* >::const_iterator i;
     for (i = _parents.begin(); i != _parents.end(); i++) {
 	if (i->second == peer)
 	    return i->first->dump_next_route(dump_iter);
@@ -879,7 +879,7 @@ template<class A>
 void
 DecisionTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 {
-    map<BGPRouteTable<A>*, PeerHandler* >::const_iterator i;
+    typename map<BGPRouteTable<A>*, PeerHandler* >::const_iterator i;
     for (i = _parents.begin(); i != _parents.end(); i++) {
 	i->first->igp_nexthop_changed(bgp_nexthop);
     }
@@ -890,7 +890,7 @@ void
 DecisionTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 				    BGPRouteTable<A> *caller) {
     XLOG_ASSERT(_next_table != NULL);
-    map <BGPRouteTable<A>*, PeerHandler*>::const_iterator i;
+    typename map <BGPRouteTable<A>*, PeerHandler*>::const_iterator i;
     i = _parents.find(caller);
     XLOG_ASSERT(i !=_parents.end());
     XLOG_ASSERT(i->second == peer);
@@ -904,7 +904,7 @@ DecisionTable<A>::peering_down_complete(const PeerHandler *peer,
 					uint32_t genid,
 					BGPRouteTable<A> *caller) {
     XLOG_ASSERT(_next_table != NULL);
-    map <BGPRouteTable<A>*, PeerHandler*>::const_iterator i;
+    typename map <BGPRouteTable<A>*, PeerHandler*>::const_iterator i;
     i = _parents.find(caller);
     XLOG_ASSERT(i !=_parents.end());
     XLOG_ASSERT(i->second == peer);

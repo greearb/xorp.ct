@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.2 2002/12/14 05:31:55 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.3 2002/12/17 22:06:05 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -56,7 +56,7 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     IPNet<A> net = rtmsg.net();
 
     // check if we have this route in our deletion cache
-    BgpTrie<A>::iterator iter;
+    typename BgpTrie<A>::iterator iter;
     iter = _route_table->lookup_node(net);
 
     if (iter == _route_table->end()) {
@@ -158,7 +158,7 @@ DeletionTable<A>::lookup_route(const IPNet<A> &net) const
     // lookup requests.  This is because we need to be internally
     // consistent - the route is treated as still being active until we
     // explicitly tell the downstream tables that it has been deleted.
-    BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
+    typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
     if (iter != _route_table->end()) {
 	return &(iter.payload());
     } else

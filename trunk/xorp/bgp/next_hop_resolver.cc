@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.6 2002/12/18 23:22:18 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.7 2003/01/10 01:56:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -177,7 +177,7 @@ NextHopResolver<A>::rib_client_route_info_changed(const A& addr,
     ** the decision code that the metrics have changed.
     */
     map<A, int> m = _next_hop_cache.change_entry(addr, real_prefix, metric);
-    map<A, int>::iterator i;
+    typename map<A, int>::iterator i;
     for (i = m.begin(); i != m.end(); i++)
 	next_hop_changed(i->first);
 
@@ -214,7 +214,7 @@ NextHopResolver<A>::rib_client_route_info_invalid(const A& addr,
     }
 
     map<A, int> m = _next_hop_cache.delete_entry(addr, prefix);
-    map<A, int>::iterator i;
+    typename map<A, int>::iterator i;
     for (i = m.begin(); i != m.end(); i++)
 	_next_hop_rib_request.reregister_nexthop(i->first, i->second,
 						 resolvable, metric);
@@ -271,7 +271,7 @@ NextHopCache<A>::~NextHopCache()
     */
     PrefixIterator i;
     for (i = _next_hop_by_prefix.begin(); i != _next_hop_by_prefix.end(); i++){
-	NextHopEntry<A> *entry = i.payload();
+	NextHopEntry *entry = i.payload();
 	delete entry;
     }
 }
@@ -424,7 +424,7 @@ NextHopCache<A>::lookup_by_addr(A addr, int prefix, bool& resolvable,
     if (pi == _next_hop_by_prefix.end())
 	return false;
 
-    NextHopEntry<A> *en = pi.payload();
+    NextHopEntry *en = pi.payload();
 
     XLOG_ASSERT(en->_prefix == prefix);
     resolvable = en->_resolvable;
@@ -443,7 +443,7 @@ NextHopCache<A>::lookup_by_nexthop(A nexthop, bool& resolvable,
     if (pi == _next_hop_by_prefix.end())
 	return false;
 
-    NextHopEntry<A> *en = pi.payload();
+    NextHopEntry *en = pi.payload();
 
     /*
     ** We have found an entry now check that this next hop is recorded
@@ -469,7 +469,7 @@ NextHopCache<A>::lookup_by_nexthop_without_entry(A nexthop,
     if (pi == _next_hop_by_prefix.end())
 	return false;
 
-    NextHopEntry<A> *en = pi.payload();
+    NextHopEntry *en = pi.payload();
 
     resolvable = en->_resolvable;
     metric = en->_metric;
@@ -495,7 +495,7 @@ NextHopCache<A>::register_nexthop(A nexthop, int ref_cnt_incr)
 
     debug_msg("nexthop %s covered\n", nexthop.str().c_str());
 
-    NextHopEntry<A> *en = pi.payload();
+    NextHopEntry *en = pi.payload();
 
     /*
     ** This may be a new nexthop in which case create a new map
@@ -520,9 +520,9 @@ NextHopCache<A>::deregister_nexthop(A nexthop, bool& last,
     if (pi == _next_hop_by_prefix.end())
 	return false;
 
-    NextHopEntry<A> *en = pi.payload();
+    NextHopEntry *en = pi.payload();
 
-    map<A, int>::iterator nhp = en->_nexthop_references.find(nexthop);
+    typename map<A, int>::iterator nhp = en->_nexthop_references.find(nexthop);
     if (nhp == en->_nexthop_references.end())
 	return false;
 
@@ -543,13 +543,13 @@ NextHopCache<A>::deregister_nexthop(A nexthop, bool& last,
 }
 
 template<class A>
-NextHopCache<A>::PrefixEntry *
+typename NextHopCache<A>::PrefixEntry *
 NextHopCache<A>::rpe_to_pe(const RealPrefixEntry& rpe, A addr, int real_prefix)
     const
 {
     debug_msg("addr %s real prefix %d\n", addr.str().c_str(), real_prefix);
 
-    RealPrefixEntry::const_iterator si;
+    typename RealPrefixEntry::const_iterator si;
 
 #ifdef	DEBUG_LOGGING
     for (si = rpe.begin(); si != rpe.end(); si++)
@@ -566,13 +566,13 @@ NextHopCache<A>::rpe_to_pe(const RealPrefixEntry& rpe, A addr, int real_prefix)
 }
 
 template<class A>
-NextHopCache<A>::PrefixEntry *
+typename NextHopCache<A>::PrefixEntry *
 NextHopCache<A>::rpe_to_pe_delete(RealPrefixEntry& rpe, A addr,
 				  int real_prefix)
 {
     debug_msg("addr %s real prefix %d\n", addr.str().c_str(), real_prefix);
 
-    RealPrefixEntry::const_iterator si;
+    typename RealPrefixEntry::const_iterator si;
 
 #ifdef	DEBUG_LOGGING
     for (si = rpe.begin(); si != rpe.end(); si++)
@@ -623,7 +623,7 @@ NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net,
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
     */
-    deque<RibRequest *>::iterator i;
+    typename deque<RibRequest *>::iterator i;
     for (i = _queue.begin(); i != _queue.end(); i++)
 	if ((*i)->_nexthop == nexthop) {
 	    (*i)->register_nexthop(net, requester);
@@ -767,7 +767,7 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 		    _next_hop_cache.register_nexthop(rr->_nexthop,
 						     request_data->requests());
 
-		    set <NhLookupTable<A> *>::const_iterator req_iter;
+		    typename set <NhLookupTable<A> *>::const_iterator req_iter;
 		    for (req_iter = request_data->requesters().begin();
 			 req_iter != request_data->requesters().end();
 			 req_iter++) {
@@ -834,7 +834,7 @@ NextHopRibRequest<A>::deregister_nexthop(A nexthop, IPNet<A> net,
     debug_msg("nexthop %s net %s requested %p\n",
 	      nexthop.str().c_str(), net.str().c_str(), requester);
 
-    deque<RibRequest *>::iterator i;
+    typename deque<RibRequest *>::iterator i;
 
     /*
     ** The deregister may mean that there are no more interested parties.
@@ -885,7 +885,7 @@ NextHopRibRequest<A>::reregister_nexthop(A nexthop, uint32_t ref_cnt,
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
     */
-    deque<RibRequest *>::iterator i;
+    typename deque<RibRequest *>::iterator i;
     for (i = _queue.begin(); i != _queue.end(); i++)
 	if ((*i)->_nexthop == nexthop) {
 	    (*i)->reregister_nexthop(ref_cnt, resolvable, metric);
@@ -921,7 +921,7 @@ NextHopRibRequest<A>::lookup(A nexthop, bool& resolvable, uint32_t& metric)
     ** Make sure that we are not already waiting for a response for
     ** this sucker.
     */
-    deque<RibRequest *>::const_iterator i;
+    typename deque<RibRequest *>::const_iterator i;
     for (i = _queue.begin(); i != _queue.end(); i++)
 	if ((*i)->_reregister && (*i)->_nexthop == nexthop) {
 	    resolvable = (*i)->_resolvable;
@@ -1017,12 +1017,12 @@ template <class A>
 bool
 NHRequest<A>::remove_request(IPNet<A> net, NhLookupTable<A> *requester)
 {
-    map <NhLookupTable<A> *, set<IPNet<A> > >::iterator i;
+    typename map <NhLookupTable<A> *, set<IPNet<A> > >::iterator i;
     i = _request_map.find(requester);
     if (i == _request_map.end())
 	return false;
     set<IPNet<A> >* nets = &(i->second);
-    set<IPNet<A> >::iterator nets_iter = nets->find(net);
+    typename set<IPNet<A> >::iterator nets_iter = nets->find(net);
     if (nets_iter == nets->end())
 	return false;
     nets->erase(nets_iter);
@@ -1035,7 +1035,7 @@ template <class A>
 const set <IPNet<A> >&
 NHRequest<A>::request_nets(NhLookupTable<A>* requester) const
 {
-    map <NhLookupTable<A> *, set<IPNet<A> > >::const_iterator i;
+    typename map <NhLookupTable<A> *, set<IPNet<A> > >::const_iterator i;
     i = _request_map.find(requester);
     assert(i != _request_map.end());
 

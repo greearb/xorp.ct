@@ -12,14 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.2 2002/12/14 00:31:13 rizzo Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
 
 #include "config.h"
 
-#include <iostream.h>
+#include <iostream>
+
 #include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
@@ -170,7 +171,7 @@ protected:
                             length is (_Length - 19) */
     uint16_t _Length;  /*length is the total packet length, including
                          the BGP common header*/
-    uint8_t* _Marker;
+    uint8_t _Marker[MARKER_SIZE];
     uint8_t _Type;
 private:
 };

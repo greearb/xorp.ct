@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.2 2002/12/14 23:15:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.3 2002/12/17 22:06:06 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -51,7 +51,7 @@ template<class A>
 RibOutTable<A>::~RibOutTable() 
 {
     print_queue(_queue);
-    list<const RouteQueueEntry<A>*>::iterator i;
+    typename list<const RouteQueueEntry<A>*>::iterator i;
     i = _queue.begin();
     while (i != _queue.end()) {
 	delete (*i);
@@ -109,7 +109,7 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
     // check the queue to see if there's a matching delete - if so we
     // can replace the delete with an add.
     const RouteQueueEntry<A>* queued_entry = NULL;
-    list<const RouteQueueEntry<A>*>::iterator i;
+    typename list<const RouteQueueEntry<A>*>::iterator i;
     for (i = _queue.begin(); i != _queue.end(); i++) {
 	if ( (*i)->net() == rtmsg.net()) {
 	    debug_msg("old entry %s matches new entry %s\n",
@@ -191,7 +191,7 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     // check the queue to see if there's a matching entry.
 
     const RouteQueueEntry<A>* queued_entry = NULL;
-    list<const RouteQueueEntry<A>*>::iterator i;
+    typename list<const RouteQueueEntry<A>*>::iterator i;
     for (i = _queue.begin(); i != _queue.end(); i++) {
 	if ( (*i)->net() == rtmsg.net()) {
 	    queued_entry = *i;
@@ -220,7 +220,7 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	abort();
 
 	// if it does, then here's how to handle it:
-	list<const RouteQueueEntry<A>*>::iterator i2 = i;
+	typename list<const RouteQueueEntry<A>*>::iterator i2 = i;
 	i++;
 	_queue.erase(i2);
 	assert((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
@@ -261,7 +261,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 	list <const RouteQueueEntry<A>*> tmp_queue;
 	const PathAttributeList<A> *attributes = NULL;
 	int ctr = 1;
-	typedef list<const RouteQueueEntry<A>*>::iterator Iter;
+	typedef typename list<const RouteQueueEntry<A>*>::iterator Iter;
 	Iter i = _queue.begin();
 	while (i != _queue.end()) {
 	    if ((*i)->op() == RTQUEUE_OP_REPLACE_OLD) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.14 2002/12/09 18:28:41 hodson Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "bgp_trie.hh"
 
@@ -55,10 +55,10 @@ ChainedSubnetRoute<A>::unchain() const {
 /*************************************************************************/
 
 template<class A>
-BgpTrie<A>::iterator
+typename BgpTrie<A>::iterator
 BgpTrie<A>::insert(const IPNet& net, const SubnetRoute<A>& route)
 {
-    PathmapType::iterator pmi = _pathmap.find(route.attributes());
+    typename PathmapType::iterator pmi = _pathmap.find(route.attributes());
     const ChainedSubnetRoute* found = (pmi == _pathmap.end()) ? NULL : pmi->second;
     ChainedSubnetRoute chained_rt(route, found);
 
@@ -90,7 +90,7 @@ BgpTrie<A>::erase(const IPNet& net)
 
     debug_msg("deleting route for %s with attributes %p", net.str().c_str(),
 	   found->attributes());
-    PathmapType::iterator pmi = _pathmap.find(found->attributes());
+    typename PathmapType::iterator pmi = _pathmap.find(found->attributes());
     assert(pmi != _pathmap.end());
     if (pmi->second == found) {		// this was the head node
 	if (found->next() == found) {	 // it's the only node in the chain

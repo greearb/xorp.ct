@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_route_pair.hh,v 1.7 2002/12/09 18:28:45 hodson Exp $
+// $XORP: xorp/bgp/peer_route_pair.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_PEER_ROUTE_PAIR_HH__
 #define __BGP_PEER_ROUTE_PAIR_HH__
@@ -46,10 +46,10 @@ public:
     bool has_queued_data() const {return _has_queued_data;}
     void set_has_queued_data(bool has_data) {_has_queued_data = has_data;}
     
-    void set_queue_position(list<const RouteQueueEntry<A>*>::iterator posn) {
+    void set_queue_position(typename list<const RouteQueueEntry<A>*>::iterator posn) {
 	_posn = posn;
     }
-    list<const RouteQueueEntry<A>*>::iterator queue_position() const {
+    typename list<const RouteQueueEntry<A>*>::iterator queue_position() const {
 	return _posn;
     }
 private:
@@ -64,7 +64,7 @@ private:
     bool _has_queued_data; //there is data queued for this peer in the
                            //fanout table
 
-    list<const RouteQueueEntry<A>*>::iterator _posn; 
+    typename list<const RouteQueueEntry<A>*>::iterator _posn; 
     /*the next item of data to send to this peer in the fanout table
       queue.  This only has meaning if _has_queued_data is true */
 };

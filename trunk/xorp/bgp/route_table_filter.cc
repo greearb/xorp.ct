@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.4 2002/12/16 21:48:33 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.5 2002/12/17 22:06:06 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -377,7 +377,7 @@ FilterTable<A>::FilterTable(string table_name,
 
 template<class A>
 FilterTable<A>::~FilterTable() {
-    list <BGPRouteFilter<A> *>::iterator iter;
+    typename list <BGPRouteFilter<A> *>::iterator iter;
     iter = _filters.begin();
     while (iter != _filters.end()) {
 	delete (*iter);
@@ -644,7 +644,7 @@ const InternalMessage<A> *
 FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg) const {
     const InternalMessage<A> *filtered_msg = rtmsg;
     bool modified_by_us = false;
-    list <BGPRouteFilter<A> *>::const_iterator iter;
+    typename list <BGPRouteFilter<A> *>::const_iterator iter;
     iter = _filters.begin();
     while (iter != _filters.end()) {
 	filtered_msg = (*iter)->filter(filtered_msg, modified_by_us);

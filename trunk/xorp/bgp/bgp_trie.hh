@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_trie.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+// $XORP: xorp/bgp/bgp_trie.hh,v 1.2 2002/12/13 22:38:53 rizzo Exp $
 
 #ifndef __BGP_TRIE_HH__
 #define __BGP_TRIE_HH__
@@ -87,7 +87,7 @@ public:
     typedef map<const PathAttributeList<A> *,
 	const ChainedSubnetRoute*, Path_Att_Ptr_Cmp<A> > PathmapType;
     typedef Trie<A, const ChainedSubnetRoute> RouteTrie;
-    typedef RouteTrie::iterator iterator;
+    typedef typename RouteTrie::iterator iterator;
 
     BgpTrie()	{}
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dump_iterators.hh,v 1.9 2002/12/09 18:28:42 hodson Exp $
+// $XORP: xorp/bgp/dump_iterators.hh,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
 
 #ifndef __BGP_DUMP_ITERATORS_HH__
 #define __BGP_DUMP_ITERATORS_HH__
@@ -61,11 +61,11 @@ public:
     bool is_valid() const;
     bool route_iterator_is_valid() const { return _route_iterator_is_valid; }
     bool next_peer();
-    const BgpTrie<A>::iterator& route_iterator() const {
+    const typename BgpTrie<A>::iterator& route_iterator() const {
 	return _route_iterator;
     }
     const IPNet<A>& net() const { return _route_iterator_net; }
-    void set_route_iterator(BgpTrie<A>::iterator& new_iter) {
+    void set_route_iterator(typename BgpTrie<A>::iterator& new_iter) {
 	_route_iterator = new_iter;
 	_route_iterator_is_valid = true;
     }
@@ -88,7 +88,7 @@ private:
     list <const PeerHandler*> _peers_to_dump;
     list <const PeerHandler*>::iterator _current_peer;
     bool _route_iterator_is_valid;
-    BgpTrie<A>::iterator _route_iterator;
+    typename BgpTrie<A>::iterator _route_iterator;
     IPNet<A> _route_iterator_net;
     uint32_t _rib_version;
 

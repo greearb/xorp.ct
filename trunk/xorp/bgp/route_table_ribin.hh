@@ -12,7 +12,7 @@
 // notice is a summary of the Xorp LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.3 2002/12/14 05:31:55 mjh Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.4 2002/12/17 22:06:06 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -94,7 +94,7 @@ private:
     set <A> _changed_nexthops;
     bool _nexthop_push_active;
     A _current_changed_nexthop;
-    BgpTrie<A>::PathmapType::const_iterator _current_chain;
+    typename BgpTrie<A>::PathmapType::const_iterator _current_chain;
     XorpTimer _push_timer;
     void push_next_changed_nexthop();
     void deletion_nexthop_check(const SubnetRoute<A>* route);

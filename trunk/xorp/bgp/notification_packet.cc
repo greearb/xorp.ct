@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.2 2002/12/14 00:31:13 rizzo Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.3 2002/12/15 04:09:28 mjh Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -128,7 +128,7 @@ NotificationPacket::encode(int& len) const
 
     debug_msg("Encode in NotificationPacket called (%d)\n", _Length);
 
-    io[0].iov_base = (char *)_Marker;
+    io[0].iov_base = const_cast<char *>((const char *)&_Marker[0]);
     io[0].iov_len = MARKER_SIZE;
     k = htons(_Length);
 

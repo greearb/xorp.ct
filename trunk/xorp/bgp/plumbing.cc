@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.3 2002/12/16 03:08:20 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.4 2002/12/17 22:06:04 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -231,7 +231,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF<A> (string ribname, BGPPlumbing& master,
 
 template <class A>
 BGPPlumbingAF<A>::~BGPPlumbingAF<A>() {
-    set <BGPRouteTable<A>*>::iterator i;
+    typename set <BGPRouteTable<A>*>::iterator i;
     for(i = _tables.begin(); i != _tables.end(); i++) {
 	delete (*i);
     }
@@ -384,7 +384,7 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler) {
        find the relevant output from the fanout table.  On the way,
        flush any caches we find. */
     BGPRouteTable<A> *rt, *prevrt; 
-    map <PeerHandler*, RibOutTable<A>*>::iterator iter;
+    typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
 	XLOG_FATAL("BGPPlumbingAF<A>::stop_peering: peer %#x not found",
@@ -414,7 +414,7 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler) {
 template <class A>
 int 
 BGPPlumbingAF<A>::peering_went_down(PeerHandler* peer_handler) {
-    map <PeerHandler*, RibInTable<A>* >::iterator iter;
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF<A>::peering_went_down: peer %p not found",
@@ -441,7 +441,7 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler) {
 
     //plumb the output branch back into the fanout table
     BGPRouteTable<A> *rt, *prevrt;
-    map <PeerHandler*, RibOutTable<A>*>::iterator iter;
+    typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end()) 
 	XLOG_FATAL("BGPPlumbingAF<A>::peering_came_up: peer %#x not found",
@@ -463,7 +463,7 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler) {
     filter_out->set_parent(_fanout_table);
 
     //bring the RibIn back up
-    map <PeerHandler*, RibInTable<A>* >::iterator iter2;
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter2;
     iter2 = _in_map.find(peer_handler);
     if (iter2 == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF<A>::peering_went_down: peer %p not found",
@@ -511,7 +511,7 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler) {
      * Step 3 - remove the relevant parent link from the decision table
      */
 
-    map <PeerHandler*, RibInTable<A>* >::iterator iter2;
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter2;
     iter2 = _in_map.find(peer_handler);
     child = iter2->second;
     rt = child;
@@ -531,7 +531,7 @@ BGPPlumbingAF<A>::delete_peering(PeerHandler* peer_handler) {
 	rt = child;
     }
 
-    map <PeerHandler*, RibOutTable<A>*>::iterator iter;
+    typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end())
 	XLOG_FATAL("BGPPlumbingAF<A>::drop_peering: peer %#x not found",
@@ -557,7 +557,7 @@ BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg,
 			    PeerHandler* peer_handler) {
     int result = 0;
     RibInTable<A> *rib_in;
-    map <PeerHandler*, RibInTable<A>* >::iterator iter;
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF: add_route called for a PeerHandler that \
@@ -584,7 +584,7 @@ BGPPlumbingAF<A>::delete_route(const InternalMessage<A> &rtmsg,
 			    PeerHandler* peer_handler) {
     int result = 0;
     RibInTable<A> *rib_in;
-    map <PeerHandler*, RibInTable<A>* >::iterator iter;
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF: delete_route called for a \
@@ -611,7 +611,7 @@ BGPPlumbingAF<A>::delete_route(const IPNet<A>& net,
 			       PeerHandler* peer_handler) {
     int result = 0;
     RibInTable<A> *rib_in;
-    map <PeerHandler*, RibInTable<A>* >::iterator iter;
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF: delete_route called for a \
@@ -639,7 +639,7 @@ BGPPlumbingAF<A>::push(PeerHandler* peer_handler) {
 	return;
     }
     RibInTable<A> *rib_in;
-    map <PeerHandler*, RibInTable<A>* >::iterator iter;
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter;
     iter = _in_map.find(peer_handler);
     if (iter == _in_map.end())
 	XLOG_FATAL("BGPPlumbingAF: Push called for a PeerHandler \
@@ -654,7 +654,7 @@ template <class A>
 void
 BGPPlumbingAF<A>::output_no_longer_busy(PeerHandler *peer_handler) {
     RibOutTable<A> *rib_out;
-    map <PeerHandler*, RibOutTable<A>* >::iterator iter;
+    typename map <PeerHandler*, RibOutTable<A>* >::iterator iter;
     iter = _out_map.find(peer_handler);
     if (iter == _out_map.end())
 	XLOG_FATAL("BGPPlumbingAF: output_no_longer_busy called for a \

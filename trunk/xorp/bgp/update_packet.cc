@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.2 2002/12/14 00:31:13 rizzo Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.3 2002/12/17 04:49:17 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -174,7 +174,7 @@ const uint8_t *UpdatePacket::encode(int &len) const
 
     struct iovec io[size];
 	
-    io[0].iov_base = (char *)_Marker;
+    io[0].iov_base = const_cast<char*>((const char *)&_Marker[0]);
     io[0].iov_len = MARKER_SIZE;
 	
     // 1 is set below, since total size is currently unknown.

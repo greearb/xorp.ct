@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.3 2002/12/14 05:31:55 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.4 2002/12/17 22:06:06 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -122,7 +122,7 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	InternalMessage<A> old_rt_msg(&route_copy, _peer, _genid);
 
 	// Store it locally.  The BgpTrie will copy it into a ChainedSubnetRoute
-	BgpTrie<A>::iterator iter =
+	typename BgpTrie<A>::iterator iter =
 	    _route_table->insert(rtmsg.net(), *(rtmsg.route()));
 	new_route = &(iter.payload());
 
@@ -134,7 +134,7 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 					      (BGPRouteTable<A>*)this);
     } else {
 	// Store it locally.  The BgpTrie will copy it into a ChainedSubnetRoute
-	BgpTrie<A>::iterator iter =
+	typename BgpTrie<A>::iterator iter =
 	    _route_table->insert(rtmsg.net(), *(rtmsg.route()));
 	new_route = &(iter.payload());
 
@@ -226,7 +226,7 @@ RibInTable<A>::lookup_route(const IPNet<A> &net) const
     if (_peer_is_up == false)
 	return NULL;
 
-    BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
+    typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
     if (iter != _route_table->end()) {
 	// assert(iter.payload().net() == net);
 	return &(iter.payload());
@@ -262,7 +262,7 @@ template<class A>
 bool
 RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 {
-    BgpTrie<A>::iterator route_iterator;
+    typename BgpTrie<A>::iterator route_iterator;
     debug_msg("dump_next_route\n");
 
     if (dump_iter.route_iterator_is_valid()) {
@@ -319,7 +319,7 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
     debug_msg("igp_nexthop_changed for bgp_nexthop %s on table %s\n",
 	   bgp_nexthop.str().c_str(), _tablename.c_str());
 
-    set <A>::const_iterator i;
+    typename set <A>::const_iterator i;
     i = _changed_nexthops.find(bgp_nexthop);
     if (i != _changed_nexthops.end()) {
 	debug_msg("nexthop already queued\n");
@@ -336,7 +336,7 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 	NextHopAttribute<A> nh_att(bgp_nexthop);
 	dummy_pa_list.add_path_attribute(nh_att);
 	dummy_pa_list.rehash();
-	BgpTrie<A>::PathmapType::const_iterator pmi;
+	typename BgpTrie<A>::PathmapType::const_iterator pmi;
 #ifdef NOTDEF
 	pmi = _route_table->pathmap().begin();
 	while (pmi != _route_table->pathmap().end()) {
@@ -447,7 +447,7 @@ RibInTable<A>::next_chain()
 	return;
     }
 
-    set <A>::iterator i = _changed_nexthops.begin();
+    typename set <A>::iterator i = _changed_nexthops.begin();
     _current_changed_nexthop = *i;
     _changed_nexthops.erase(i);
 
@@ -455,7 +455,7 @@ RibInTable<A>::next_chain()
     NextHopAttribute<A> nh_att(_current_changed_nexthop);
     dummy_pa_list.add_path_attribute(nh_att);
     dummy_pa_list.rehash();
-    BgpTrie<A>::PathmapType::const_iterator pmi;
+    typename BgpTrie<A>::PathmapType::const_iterator pmi;
 
     pmi = _route_table->pathmap().lower_bound(&dummy_pa_list);
     if (pmi == _route_table->pathmap().end()) {

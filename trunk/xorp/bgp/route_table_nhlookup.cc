@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.2 2002/12/14 21:50:43 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.3 2002/12/17 22:06:06 mjh Exp $"
 
 #include "route_table_nhlookup.hh"
 
@@ -113,7 +113,7 @@ NhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
     }
 
     // we need to queue the add, pending nexthop resolution
-    Trie<A, const MessageQueueEntry<A> >::iterator inserted;
+    typename Trie<A, const MessageQueueEntry<A> >::iterator inserted;
     inserted = _queue_by_net.insert(rtmsg.net(),
 				    MessageQueueEntry<A>(&rtmsg, NULL));
     const MessageQueueEntry<A>* mqe = &(inserted.payload());
@@ -138,7 +138,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     // Are we still waiting for the old_rtmsg to resolve?
     bool old_msg_is_queued;
     const MessageQueueEntry<A>* mqe = NULL;
-    Trie<A, const MessageQueueEntry<A> >::iterator i;
+    typename Trie<A, const MessageQueueEntry<A> >::iterator i;
     i = _queue_by_net.lookup_node(net);
     if (i == _queue_by_net.end()) {
 	old_msg_is_queued = false;
@@ -183,7 +183,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	// we can now remove the old queue entry, because it's no longer
 	// needed
 	A original_nexthop = mqe->added_route()->nexthop();
-	multimap <A, const MessageQueueEntry<A>*>::iterator nh_iter
+	typename multimap <A, const MessageQueueEntry<A>*>::iterator nh_iter
 	    = _queue_by_nexthop.find(original_nexthop);
 	while (nh_iter->second->net() != net) {
 	    nh_iter++;
@@ -195,7 +195,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     }
 
     if (new_msg_needs_queuing) {
-	Trie<A, const MessageQueueEntry<A> >::iterator inserted;
+	typename Trie<A, const MessageQueueEntry<A> >::iterator inserted;
 	if (propagate_as_add) {
 	    inserted
 		= _queue_by_net.insert(net,
@@ -241,7 +241,7 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     // Are we still waiting for the old_rtmsg to resolve?
     bool msg_is_queued;
     const MessageQueueEntry<A>* mqe = NULL;
-    Trie<A, const MessageQueueEntry<A> >::iterator i;
+    typename Trie<A, const MessageQueueEntry<A> >::iterator i;
     i = _queue_by_net.lookup_node(net);
     if (i == _queue_by_net.end()) {
 	msg_is_queued = false;
@@ -276,7 +276,7 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	// we can now remove the old queue entry, because it's no longer
 	// needed
 	A original_nexthop = mqe->added_route()->nexthop();
-	multimap <A, const MessageQueueEntry<A>*>::iterator nh_iter
+	typename multimap <A, const MessageQueueEntry<A>*>::iterator nh_iter
 	    = _queue_by_nexthop.find(original_nexthop);
 	while (nh_iter->second->net() != net) {
 	    nh_iter++;
@@ -316,7 +316,7 @@ NhLookupTable<A>::lookup_route(const IPNet<A> &net) const
 {
     // Are we still waiting for the old_rtmsg to resolve?
     const MessageQueueEntry<A>* mqe = NULL;
-    Trie<A, const MessageQueueEntry<A> >::iterator i;
+    typename Trie<A, const MessageQueueEntry<A> >::iterator i;
     i = _queue_by_net.lookup_node(net);
     if (i == _queue_by_net.end()) {
 	return _parent->lookup_route(net);
@@ -352,7 +352,7 @@ NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
 				  const set <IPNet<A> >& nets,
 				  bool /*lookup_succeeded*/) 
 {
-    multimap <A, const MessageQueueEntry<A>*>::iterator nh_iter, nh_iter2;
+    typename multimap <A, const MessageQueueEntry<A>*>::iterator nh_iter, nh_iter2;
     nh_iter = _queue_by_nexthop.find(nexthop);
     while ((nh_iter != _queue_by_nexthop.end())
 	   && (nh_iter->first == nexthop)) {
@@ -371,7 +371,7 @@ NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
 	_queue_by_nexthop.erase(nh_iter2);
     }
 
-    set <IPNet<A> >::const_iterator net_iter;
+    typename set <IPNet<A> >::const_iterator net_iter;
     for (net_iter = nets.begin(); net_iter != nets.end(); net_iter++) {
 	_queue_by_net.erase(*net_iter);
     }

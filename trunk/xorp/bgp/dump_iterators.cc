@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.12 2002/12/09 18:28:41 hodson Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -164,7 +164,7 @@ void
 DumpIterator<A>::peering_down_complete(const PeerHandler *peer,
 				       uint32_t genid)
 {
-    list <DownedPeer<A> >::iterator i;
+    typename list <DownedPeer<A> >::iterator i;
     bool delete_complete = true;
     for (i = _downed_peers.begin(); i != _downed_peers.end(); i++) {
 	if ((i->peer_handler() == peer) && (i->genid() == genid)){
@@ -179,7 +179,7 @@ template <class A>
 bool
 DumpIterator<A>::waiting_for_deletion_completion() const
 {
-    list <DownedPeer<A> >::const_iterator i;
+    typename list <DownedPeer<A> >::const_iterator i;
     bool wait = false;
     for (i = _downed_peers.begin(); i != _downed_peers.end(); i++) {
 	if (i->delete_complete() == false)
@@ -244,7 +244,7 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 	    /* this peer has already finished being dumped */
 	    /* we need to check whether the peering went down while we
 	       were dumping it */
-	    list <DownedPeer<A> >::iterator dpi;
+	    typename list <DownedPeer<A> >::iterator dpi;
 	    for (dpi = _downed_peers.begin();
 		 dpi != _downed_peers.end(); dpi++) {
 		if (origin_peer == dpi->peer_handler()) {
