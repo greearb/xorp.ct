@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/utils/Makefile.am,v 1.8 2003/10/16 18:46:55 pavlin Exp $
+## $XORP: xorp/utils/Makefile.am,v 1.9 2003/10/17 01:44:28 hodson Exp $
 ##
 
 SUBDIRS = . @FLOWER_MALLOC@
@@ -24,7 +24,8 @@ LDADD		 = $(noinst_LIBRARIES)
 runit_SOURCES	      = runit.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST	 = bogon-be-gone.sed
+EXTRA_DIST	 = args.sh
+EXTRA_DIST	+= bogon-be-gone.sed
 EXTRA_DIST	+= bogon-be-gone.sh
 EXTRA_DIST	+= ndbg
 EXTRA_DIST	+= xorpc.sh

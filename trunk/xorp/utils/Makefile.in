@@ -111,7 +111,7 @@ LDADD = $(noinst_LIBRARIES)
 runit_SOURCES = runit.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = bogon-be-gone.sed bogon-be-gone.sh ndbg xorpc.sh xrl_shell_lib.sh xrl_wrappers_generator.sh
+EXTRA_DIST = args.sh bogon-be-gone.sed bogon-be-gone.sh ndbg xorpc.sh xrl_shell_lib.sh xrl_wrappers_generator.sh
 
 
 ################################################################
