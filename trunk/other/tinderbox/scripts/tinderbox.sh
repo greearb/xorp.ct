@@ -1,6 +1,6 @@
 #!/bin/sh 
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.5 2003/01/22 19:14:58 hodson Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.6 2003/04/11 16:58:49 hodson Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -90,6 +90,7 @@ run_tinderbox() {
 	eval cfg_host=\$host_$cfg
 	eval cfg_home=\$home_$cfg
 	eval cfg_env=\$env_$cfg
+	eval cfg_buildflags=\$buildflags_$cfg
 
 	errfile="${LOGDIR}/0/${cfg_host}-${cfg}"
 	header="${errfile}.header"
@@ -118,7 +119,7 @@ run_tinderbox() {
 
 	build_errfile="${errfile}-build"
 	cp ${header} ${build_errfile}
-	ssh ${SSH_FLAGS} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh " >>${build_errfile} 2>&1
+	ssh ${SSH_FLAGS} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh ${cfg_buildflags}" >>${build_errfile} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp "${cfg} remote build" "${build_errfile}"
 	    continue

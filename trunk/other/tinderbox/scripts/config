@@ -4,9 +4,10 @@
 #
 # A configuration consists of a set of configuration name postfixed variables:
 #
-# 	host_X = host to run configuration on
-# 	home_X = directory for the tinderbox build and execution
-# 	env_X  = environment variable to be set when 
+# 	host_X       = host to run configuration on
+# 	home_X       = directory for the tinderbox build and execution
+# 	env_X        = environment variable to be set when 
+#	buildflags_X = flags to passed to GNU Make during build phase
 #
 # Configurations must be named in the variable TINDERBOX_CONFIGS in order
 # to become part of the tinderbox build.
@@ -15,12 +16,15 @@
 host_fbsd462_gcc32="xorpc.icir.org"
 env_fbsd462_gcc32="CC=gcc32 CXX=g++32"
 home_fbsd462_gcc32="/home/xorpc/u1/hodson/build/tinderbox_gcc32"
+buildflags_fbsd462_gcc32="-j 2"
 
 host_fbsd462_gcc295="xorpc.icir.org"
 home_fbsd462_gcc295="/home/xorpc/u1/hodson/build/tinderbox_gcc295"
+buildflags_fbsd462_gcc295="-j 2"
 
 host_linux24_gcc296="koala.icir.org"
 home_linux24_gcc296="tinderbox"
+buildflags_linux24_gcc296="-j 4"
 
 TINDERBOX_CONFIGS="fbsd462_gcc32 fbsd462_gcc295 linux24_gcc296"
 
