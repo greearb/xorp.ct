@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.2 2003/12/17 17:47:42 hodson Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.3 2004/01/12 22:11:26 hodson Exp $"
 
 #include "fea_module.h"
 
@@ -638,7 +638,7 @@ XrlSocketServer::socket4_0_1_udp_open_bind_join(const string&	creator,
     in_addr grp;
     mcast_addr.copy_out(grp);
 
-    int fd = comm_bind_join_udp4(&ia, &grp, htons(local_port), reuse);
+    int fd = comm_bind_join_udp4(&grp, &ia, htons(local_port), reuse);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
