@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.24 2004/05/15 16:05:21 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.25 2004/05/18 16:21:07 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -455,7 +455,11 @@ DumpTable<A>::peering_down_complete(const PeerHandler *peer, uint32_t genid,
 	return;
     }
 
-    _dump_iter.peering_down_complete(peer, genid);
+    if (peer != _peer) {
+	_dump_iter.peering_down_complete(peer, genid);
+    } else {
+	//do nothing, we'll soon be unplumbed.
+    }
 
     // If we were waiting for this signal, we can now unplumb ourselves.
     if (_waiting_for_deletion_completion
