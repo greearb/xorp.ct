@@ -1,0 +1,149 @@
+body {
+   font-family: "Trebuchet MS", "Bitstream Vera Sans", verdana, lucida, arial, helvetica, sans-serif;
+   background: white;
+}
+
+h1, h2, h3, h4, h5, h6 {
+   color: #990000;
+}
+
+pre {
+   background: #e0e0e0;
+   color: black;
+}
+
+a:link, a:visited {
+   font-weight: normal;
+   text-decoration: none;
+   color: #0047b9;
+}
+
+a:hover {
+   font-weight: normal;
+   text-decoration: underline;
+   color: #0047b9;
+}
+
+img {
+    border: 0px;
+}
+
+#main th {
+   background: #b0b0b0;
+}
+
+.odd {
+   background: white;
+}
+
+.even {
+   background: #e0e0e0;
+}
+
+.answer {
+   font-size: large;
+   font-weight: bold;
+}
+
+.answer p {
+   font-size: medium;
+   font-weight: normal;
+}
+
+.answer ul {
+   font-size: medium;
+   font-weight: normal;
+}
+
+#container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+}
+
+#feedback {
+  color: #b0b0b0;
+  font-size: small;
+  font-style: italic;
+}
+
+#header {
+   position: absolute;
+   margin: 0px;
+   top: 0px;
+   height: 96px;
+   left: 175px;
+   right: 10em;
+   bottom: auto;
+   background: white;
+   clear: both;
+}
+
+#middle {
+   position: absolute;
+   left: 0;
+   height: auto;
+   width: 100%;
+}
+
+#main {
+   position: absolute;
+   top: 96px;
+   left: 175px;
+   right: 100px;
+   background: white;
+   padding: 0em 0em 0em 0em;
+}
+
+#navbar {
+   position: absolute;
+   top: 96px;
+   left: 0em;
+   width: 146px;
+   padding: 0px;
+   margin: 0px;
+   font-size: 10pt;
+}
+
+#navbar a:link, #navbar a:visited {
+   font-weight: normal;
+   text-decoration: none;
+   color: #0047b9;
+}
+
+#navbar a:hover {
+   font-weight: normal;
+   text-decoration: underline;
+   color: #0047b9;
+}
+
+#navbar dl {
+   width: 146px;
+   padding: 0;
+   margin: 0 0 10px 0px;
+   background: #a0b0e0 url(images/box_bottom2.gif) no-repeat bottom left;
+}
+
+#navbar dt {
+   padding: 6px 10px;
+   font-size: 100%;
+   font-weight: bold;
+   background: #0047b9;
+   margin: 0px;
+   border-bottom: 1px solid #fff;
+   color: white;
+   background: #0047b9 url(images/box_top2.gif) no-repeat top left;
+}
+
+#navbar dd {
+   font-size: 100%;
+   margin: 0 0 0 0px;
+   padding: 6px 10px;
+   color: #0047b9;
+}
+
+dd#selected {
+   background: #a0b0e0 url(images/arrow.gif) no-repeat;
+   background-position: 4px 10px;
+}
