@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.5 2003/03/05 20:01:54 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.6 2003/03/10 23:20:09 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -635,13 +635,11 @@ void
 TestPeer::queue_data(status st, uint8_t *ptr, size_t len, string error)
 {
     Queued q;
-    struct timeval tp;
-    struct timezone tzp;
-    if(0 != gettimeofday(&tp, &tzp))
-	XLOG_FATAL("gettimeofday failed: %s", strerror(errno));
-
-    q.secs = tp.tv_sec;
-    q.micro = tp.tv_usec;
+    TimeVal tv;
+    
+    _eventloop.current_time(tv);
+    q.secs = tv.sec();
+    q.micro = tv.usec();
     q.st = st;
     q.len = len;
     for(size_t i = 0; i < len; i++)

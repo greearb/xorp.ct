@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/command.hh,v 1.2 2003/01/30 04:46:04 pavlin Exp $
+// $XORP: xorp/bgp/harness/command.hh,v 1.3 2003/03/10 23:20:09 hodson Exp $
 
 #ifndef __BGP_HARNESS_COMMAND_HH__
 #define __BGP_HARNESS_COMMAND_HH__
 
 #include "peer.hh"
+
+class TimeVal;
 
 /*
 ** All the commands to the coordinating process come via this class.
@@ -26,7 +28,7 @@
 
 class Command {
 public:
-    Command(XrlRouter& xrlrouter);
+    Command(EventLoop& eventloop, XrlRouter& xrlrouter);
 
     /*
     ** Load command map.
@@ -46,7 +48,7 @@ public:
     /*
     ** Data from the test peers.
     */
-    void datain(const string&  peer, const bool& status, const timeval& tv,
+    void datain(const string&  peer, const bool& status, const TimeVal& tv,
 		const vector<uint8_t>&  data);
     void datain_error(const string&  peer, const string& reason);
     void datain_closed(const string&  peer);
@@ -64,6 +66,7 @@ public:
 	throw(InvalidString);
     void initialise_callback(const XrlError& error, string peername);
 private:
+    EventLoop& _eventloop;
     XrlRouter& _xrlrouter;
 
     /*

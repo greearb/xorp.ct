@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.4 2003/01/30 04:46:04 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.5 2003/03/10 23:20:09 hodson Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -43,7 +43,9 @@ tokenize(const string& str,
     }
 }
 
-Command::Command(XrlRouter& xrlrouter) : _xrlrouter(xrlrouter)
+Command::Command(EventLoop& eventloop, XrlRouter& xrlrouter)
+    : _eventloop(eventloop),
+      _xrlrouter(xrlrouter)
 {
     load_command_map();
 }
@@ -102,12 +104,12 @@ Command::pending()
 ** destined for.
 */
 void
-Command::datain(const string&  peer, const bool& status, const timeval& tv,
+Command::datain(const string&  peer, const bool& status, const TimeVal& tv,
 		const vector<uint8_t>&  data)
 {
     debug_msg("peer: %s status: %d secs: %lu micro: %lu data length: %u\n",
 	      peer.c_str(), status,
-	      (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec,
+	      (unsigned long)tv.sec(), (unsigned long)tv.usec(),
 	      (uint32_t)data.size());
 
     /*
@@ -305,8 +307,8 @@ Command::initialise_callback(const XrlError& /*error*/, string peername)
     debug_msg("callback: %s\n", peername.c_str());
     
     /* Add to the peer structure */
-    _peers[peername] = Peer(&_xrlrouter, peername, _target_hostname,
-			    _target_port);
+    _peers[peername] = Peer(&_eventloop, &_xrlrouter, peername,
+			    _target_hostname, _target_port);
 
     /* Add to the command structure */
     _commands.insert(StringCommandMap::value_type(peername, &Command::peer));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.3 2003/01/26 04:06:18 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.4 2003/03/10 23:20:09 hodson Exp $"
 
 #include "config.h"
 #include "bgp/bgp_module.h"
@@ -147,7 +147,7 @@ void
 Coord::datain(const string&  peer, const bool& status, const uint32_t& secs,
 	      const uint32_t& micro, const vector<uint8_t>&  data)
 {
-    timeval tv = {secs, micro};
+    TimeVal tv(secs, micro);
     _command.datain(peer, status, tv, data);
 }
 
@@ -207,7 +207,7 @@ main(int argc, char **argv)
     try {
 	EventLoop eventloop;
 	XrlStdRouter router(eventloop, server, finder_host);
-	Command com(router);
+	Command com(eventloop, router);
 	Coord coord(eventloop, com);
 	XrlCoordTarget xrl_target(&router, coord);
 

@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie.hh,v 1.2 2003/01/22 02:46:35 rizzo Exp $
+// $XORP: xorp/bgp/harness/trie.hh,v 1.3 2003/03/10 23:20:09 hodson Exp $
 
 #ifndef __BGP_HARNESS_TRIE_HH__
 #define __BGP_HARNESS_TRIE_HH__
 
 #include <stdio.h>
+#include "libxorp/timeval.hh"
 #include "bgp/packet.hh"
 
 class Trie {
@@ -29,12 +30,12 @@ public:
     ~Trie();
 
     const UpdatePacket *lookup(const string& net) const;
-    void process_update_packet(const timeval& tv, const uint8_t *buf,
+    void process_update_packet(const TimeVal& tv, const uint8_t *buf,
 			       size_t len);
 
     typedef XorpCallback3<void, const UpdatePacket*,
 			  const IPv4Net&,
-			  const timeval&>::RefPtr TreeWalker;
+			  const TimeVal&>::RefPtr TreeWalker;
 
     void tree_walk_table(const TreeWalker& ) const;
 
@@ -58,7 +59,7 @@ private:
     struct Payload {
 	Payload() : _data(0) {}
 
-	Payload(const timeval& tv, const uint8_t *buf, size_t len,
+	Payload(const TimeVal& tv, const uint8_t *buf, size_t len,
 		Trie *trie) {
 	    _data = new Data(tv, buf, len, trie);
 	}
@@ -96,7 +97,7 @@ private:
 	    return _data->_packet;
 	}
 
-	const UpdatePacket *get(timeval& tv) const {
+	const UpdatePacket *get(TimeVal& tv) const {
 	    if(0 == _data)
 		return 0;
 	    tv = _data->_tv;
@@ -114,7 +115,7 @@ private:
 	}
 
 	struct Data {
-	    Data(const timeval& tv, const uint8_t *buf, size_t len,
+	    Data(const TimeVal& tv, const uint8_t *buf, size_t len,
 		 Trie *trie) : _tv(tv), _trie(trie) {
 		_packet = new UpdatePacket(buf, len);
 		_refcnt = 1;
@@ -144,7 +145,7 @@ private:
 		delete _packet;
 	    }
 
-	    timeval _tv;
+	    TimeVal _tv;
 	    Trie *_trie;
 
 	    int _refcnt;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.17 2003/01/30 04:32:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.18 2003/03/10 23:20:09 hodson Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -26,6 +26,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
+#include "libxorp/eventloop.hh"
 #include "libxorp/ipv4net.hh"
 
 #include "bgp/local_data.hh"
@@ -36,7 +37,8 @@
 #include "peer.hh"
 #include "bgppp.hh"
 
-Peer::Peer() : _as(AsNum::AS_INVALID) // XXX
+Peer::Peer()
+    : _as(AsNum::AS_INVALID) // XXX
 {
 }
 
@@ -44,9 +46,10 @@ Peer::~Peer()
 {
 }
 
-Peer::Peer(XrlRouter *xrlrouter, string peername, string target_hostname,
-	   string target_port)
-    : _xrlrouter(xrlrouter),
+Peer::Peer(EventLoop *eventloop, XrlRouter *xrlrouter, string peername,
+	   string target_hostname, string target_port)
+    : _eventloop(eventloop),
+      _xrlrouter(xrlrouter),
       _peername(peername),
       _target_hostname(target_hostname),
       _target_port(target_port),
@@ -60,7 +63,7 @@ Peer::Peer(XrlRouter *xrlrouter, string peername, string target_hostname,
 }
 
 Peer::Peer(const Peer& rhs)
-      : _as(AsNum::AS_INVALID) // XXX
+    : _as(AsNum::AS_INVALID) // XXX
 {
     debug_msg("Copy constructor\n");
 
@@ -84,6 +87,7 @@ Peer::copy(const Peer& rhs)
 {
     debug_msg("peername: %s\n", rhs._peername.c_str());
 
+    _eventloop = rhs._eventloop;
     _xrlrouter = rhs._xrlrouter;
 
     _peername = rhs._peername;
@@ -296,11 +300,9 @@ Peer::send_packet(const string& line, const vector<string>& words)
     /*
     ** Save the update message in the sent trie.
     */
-    struct timeval tp;
-    struct timezone tzp;
-    if(0 != gettimeofday(&tp, &tzp))
-	XLOG_FATAL("gettimeofday failed: %s", strerror(errno));
-    _trie_sent.process_update_packet(tp, buf, len);
+    TimeVal tv;
+    _eventloop->current_time(tv);
+    _trie_sent.process_update_packet(tv, buf, len);
 
     send_message(buf, len, ::callback(this, &Peer::callback, "update"));
     fprintf(stderr, "done with send_pkt %p size %u\n",
@@ -618,7 +620,7 @@ Peer::assertX(const string& line, const vector<string>& words)
 }
 
 void
-mrtd_traffic_dump(const uint8_t *buf, const size_t len , const timeval tv,
+mrtd_traffic_dump(const uint8_t *buf, const size_t len , const TimeVal tv,
 	  const string fname)
 {
 #if	0
@@ -638,7 +640,7 @@ mrtd_traffic_dump(const uint8_t *buf, const size_t len , const timeval tv,
 	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(), strerror(errno));
 
     mrt_header header;
-    header.time = htonl(tv.tv_sec);
+    header.time = htonl(tv.sec());
     header.type = htons(16);
     header.subtype = htons(1);
     header.length = htonl(len + sizeof(mrt_update));
@@ -660,7 +662,7 @@ mrtd_traffic_dump(const uint8_t *buf, const size_t len , const timeval tv,
 }
 
 void
-text_traffic_dump(const uint8_t *buf, const size_t len, const timeval, 
+text_traffic_dump(const uint8_t *buf, const size_t len, const TimeVal, 
 	  const string fname)
 {
     FILE *fp = fopen(fname.c_str(), "a");
@@ -673,7 +675,7 @@ text_traffic_dump(const uint8_t *buf, const size_t len, const timeval,
 
 void
 mrtd_debug_dump(const UpdatePacket* p, const IPv4Net& /*net*/,
-		const timeval& tv,
+		const TimeVal& tv,
 		const string fname)
 {
     size_t len;
@@ -684,7 +686,7 @@ mrtd_debug_dump(const UpdatePacket* p, const IPv4Net& /*net*/,
 
 void
 text_debug_dump(const UpdatePacket* p, const IPv4Net& net,
-		const timeval& /*tv*/,
+		const TimeVal& /*tv*/,
 		const string fname)
 {
     FILE *fp = fopen(fname.c_str(), "a");
@@ -911,11 +913,11 @@ Peer::callback(const XrlError& error, const char *comment)
 ** messages.
 */
 void
-Peer::datain(const bool& status, const timeval& tv,
+Peer::datain(const bool& status, const TimeVal& tv,
 	     const vector<uint8_t>& data)
 {
     debug_msg("status: %d secs: %lu micro: %lu data length: %u\n",
-	      status, (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec,
+	      status, (unsigned long)tv.sec(), (unsigned long)tv.usec(),
 	      (uint32_t)data.size());
 
     /*
@@ -1040,11 +1042,9 @@ Peer::send_message(const uint8_t *buf, const size_t len, SMCB cb)
     debug_msg("len: %u\n", (uint32_t)len);
 
     if(!_traffic_sent.is_empty()) {
-	struct timeval tp;
-	struct timezone tzp;
-	if(0 != gettimeofday(&tp, &tzp))
-	    XLOG_FATAL("gettimeofday failed: %s", strerror(errno));
-	_traffic_sent->dispatch(buf, len, tp);
+	TimeVal tv;
+	_eventloop->current_time(tv);
+	_traffic_sent->dispatch(buf, len, tv);
     }
 
     vector<uint8_t> v(len);

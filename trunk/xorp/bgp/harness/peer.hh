@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.2 2003/03/10 23:20:09 hodson Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -20,12 +20,15 @@
 #include "trie.hh"
 #include "libxorp/callback.hh"
 
+class EventLoop;
+class TimeVal;
+
 class Peer {
 public:
     Peer();
     ~Peer();
-    Peer(XrlRouter *xrlrouter, string peername, string target_hostname,
-	 string target_port);
+    Peer(EventLoop *eventloop, XrlRouter *xrlrouter, string peername,
+	 string target_hostname, string target_port);
     Peer::Peer(const Peer& rhs);
     Peer operator=(const Peer& rhs);
     void copy(const Peer& rhs);
@@ -66,7 +69,7 @@ public:
 
     void callback(const XrlError& error, const char *comment);
 
-    void datain(const bool& status, const timeval& tv,
+    void datain(const bool& status, const TimeVal& tv,
 		const vector<uint8_t>&  data);
     void datain_error(const string& reason);
     void datain_closed();
@@ -82,6 +85,7 @@ protected:
 			    const char *comment);
     void send_open();
 private:
+    EventLoop *_eventloop;
     XrlRouter *_xrlrouter;
     
     string _peername;
@@ -100,7 +104,7 @@ private:
     Trie _trie_recv;	// Update messages received.
     Trie _trie_sent;	// Update messages sent.
 
-    typedef XorpCallback3<void, const uint8_t*, size_t, timeval>::RefPtr Dumper;
+    typedef XorpCallback3<void, const uint8_t*, size_t, TimeVal>::RefPtr Dumper;
     Dumper _traffic_recv;
     Dumper _traffic_sent;
     

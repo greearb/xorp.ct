@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.2 2003/01/29 20:32:33 rizzo Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.3 2003/03/10 23:20:09 hodson Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -59,7 +59,7 @@ Trie::lookup(const string& net) const
 }
 
 void
-Trie::process_update_packet(const timeval& tv, const uint8_t *buf, size_t len)
+Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len)
 {
     Payload payload(tv, buf, len, this);
     const UpdatePacket *update = payload.get();
@@ -130,7 +130,7 @@ Trie::tree_walk_table(const TreeWalker& tw, const Tree *ptr,
 	return;
     }
 
-    timeval tv;
+    TimeVal tv;
     const UpdatePacket *update = ptr->p.get(tv);
     if(0 != update) {
 	IPv4 nh;
