@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.5 2003/03/13 22:13:26 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.6 2003/03/14 01:34:51 pavlin Exp $"
 
 
 //
@@ -447,8 +447,6 @@ Mld6igmpVif::igmp_membership_report_recv(const IPvX& src,
 		IGMP_GROUP_MEMBERSHIP_INTERVAL, 0);
 	}
     }
-    igmp_v1_config_consistency_check(src, dst, message_type,
-				     igmp_message_version);
     
     return (XORP_OK);
     

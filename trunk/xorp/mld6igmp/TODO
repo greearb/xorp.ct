@@ -1,11 +1,10 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.2 2003/03/12 08:14:12 pavlin Exp $
 #
 
 * Inside igmp_membership_report_recv():
   - member_query->_igmpv1_host_present_timer.start_semaphore()
     probably should happen for any router, not only the querier
-  - igmp_v1_config_consistency_check() probably should not be called.
 
 * Add Mld6igmpConfig class to Mld6igmpNode.
 
