@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/update_queue.cc,v 1.2 2003/04/18 19:45:38 hodson Exp $"
+#ident "$XORP: xorp/rip/update_queue.cc,v 1.3 2003/07/08 15:45:27 hodson Exp $"
 
 #include <vector>
 
@@ -27,15 +27,14 @@
 /**
  * Class used to manage read iterators into update queue buffer.
  */
-template <typename A>
-class UpdateQueue<A>::ReaderPool {
+class UpdateQueueReaderPool {
 public:
-    ReaderPool()
+    UpdateQueueReaderPool()
 	: _icnt (0)
     {
     }
 
-    ~ReaderPool()
+    ~UpdateQueueReaderPool()
     {
 	for (uint32_t i = 0; i < _pos.size(); i++)
 	    assert(_pos[i] == npos);
@@ -126,39 +125,35 @@ protected:
 };
 
 
-/**
- * Class that is opaquely exported to users of update queue.
- *
- * Hooks and unhooks read iterators in update queue.  The ReaderPool
- * actually tracks the position of each iterator, this class just maintains
- * a token that the reader pool uses.
- */
+/* ------------------------------------------------------------------------- */
+/* UpdateQueueReader methods */
+
 template <typename A>
-class UpdateQueue<A>::Reader {
-    Reader(ReaderPool* p) : _pool(p)
-    {
-	_reader_no = _pool->make_reader();
-    }
+UpdateQueueReader<A>::UpdateQueueReader(UpdateQueueReaderPool* p)
+    : _pool(p)
+{
+    _reader_no = _pool->make_reader();
+}
 
-    ~Reader()
-    {
-	_pool->remove_reader(_reader_no);
-    }
+template <typename A>
+UpdateQueueReader<A>::~UpdateQueueReader()
+{
+    _pool->remove_reader(_reader_no);
+}
 
-    inline void incr()
-    {
-	_pool->incr_reader(_reader_no);
-    }
+template <typename A>
+inline void
+UpdateQueueReader<A>::incr()
+{
+    _pool->incr_reader(_reader_no);
+}
 
-    inline uint32_t position() const
-    {
-	return (uint32_t)_pool->reader_position(_reader_no);
-    }
-
-protected:
-    UpdateQueue<A>::ReaderPool* _pool;
-    uint32_t _reader_no;
-};
+template <typename A>
+inline uint32_t
+UpdateQueueReader<A>::position() const
+{
+    return (uint32_t)_pool->reader_position(_reader_no);
+}
 
 
 /* ------------------------------------------------------------------------- */

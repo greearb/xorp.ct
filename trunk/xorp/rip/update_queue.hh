@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/update_queue.hh,v 1.1 2003/04/10 00:27:44 hodson Exp $
+// $XORP: xorp/rip/update_queue.hh,v 1.2 2003/07/08 15:45:27 hodson Exp $
 
 #ifndef __RIP_UPDATE_QUEUE__
 #define __RIP_UPDATE_QUEUE__
@@ -20,6 +20,38 @@
 #include <vector>
 #include "route_db.hh"
 
+class UpdateQueueReaderPool;
+
+
+/**
+ * @short Reader for @ref UpdateQueue class.
+ *
+ * Hooks and unhooks read iterators in update queue.  The opaque
+ * UpdateQueueReaderPool actually tracks the position of each iterator,
+ * this class just maintains a token that the reader pool uses.
+ */
+template <class A>
+class UpdateQueueReader {
+public:
+    UpdateQueueReader(UpdateQueueReaderPool* p);
+    ~UpdateQueueReader();
+
+    /**
+     * Advance position by one.
+     */
+    inline void incr();
+
+    /**
+     * Retrieve current position.
+     */
+    inline uint32_t position() const;
+
+private:
+    UpdateQueueReaderPool* _pool;
+    uint32_t		   _reader_no;
+};
+
+
 /**
  * @short Update Queue for RIP Route entries.
  *
@@ -30,8 +62,8 @@
 template <typename A>
 class UpdateQueue {
 public:
-    struct Reader;
-    struct ReaderPool;
+    typedef UpdateQueueReader<A> Reader;
+    typedef UpdateQueueReaderPool ReaderPool;
     typedef ref_ptr<Reader> ReadIterator;
     typedef ref_ptr<const RouteEntry<A> > RouteUpdate;
     typedef vector<RouteUpdate> Queue;
@@ -50,7 +82,7 @@ public:
      * of the queue.
      */
     void flush();
-    
+
     /**
      * Create a read iterator.  These are reference counted entities that
      * need to be stored in order to operate.
@@ -62,7 +94,7 @@ public:
      * update queue.  Use of the iterator after this call is unsafe.
      */
     void destroy_reader(ReadIterator& r);
-    
+
     /**
      * Increment iterator and return pointer to entry if available.
      *
@@ -83,10 +115,10 @@ public:
      * updates occur.
      */
     void ffwd(ReadIterator& r) const;
-    
+
 protected:
     struct ReaderPool* _pool;
-    Queue   _queue;
+    Queue	       _queue;
 };
 
 #endif // __RIP_UPDATE_QUEUE__
