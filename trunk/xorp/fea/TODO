@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.21 2004/06/22 03:07:04 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.22 2004/10/25 16:52:28 bms Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -60,6 +60,8 @@
   click.hh click_glue.hh fti_click.hh ifconfig_click.hh
   click.cc fea_click.cc test_fea.cc test_fti.cc test_ifmanager.cc
   Refactor them?
+
+* Fix spleling mistakes in xrl_target.[ch][ch].
 
 ==============================================================================
 ==== MFEA-specific TODO (mostly copied-in from the old stand-alone MFEA) =====
