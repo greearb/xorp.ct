@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.11 2004/11/11 07:48:22 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.12 2004/11/18 14:25:28 bms Exp $"
 
 #include "xrl_fti.hh"
 
@@ -127,6 +127,9 @@ XrlFtiTransactionManager::add_fib_client4(const string& target_name,
 				   FibClient4(target_name, *this)));
     FibClient4& fib_client = _fib_clients4.find(target_name)->second;
 
+    fib_client.set_send_updates(send_updates);
+    fib_client.set_send_resolves(send_resolves);
+
     // Activate the client
     list<Fte4> fte_list;
     if (ftic().get_table4(fte_list) != true) {
@@ -136,8 +139,6 @@ XrlFtiTransactionManager::add_fib_client4(const string& target_name,
     fib_client.activate(fte_list);
 
     return XrlCmdError::OKAY();
-    UNUSED(send_updates);
-    UNUSED(send_resolves);
 }
 
 XrlCmdError
@@ -156,6 +157,9 @@ XrlFtiTransactionManager::add_fib_client6(const string& target_name,
 				   FibClient6(target_name, *this)));
     FibClient6& fib_client = _fib_clients6.find(target_name)->second;
 
+    fib_client.set_send_updates(send_updates);
+    fib_client.set_send_resolves(send_resolves);
+
     // Activate the client
     list<Fte6> fte_list;
     if (ftic().get_table6(fte_list) != true) {
@@ -165,8 +169,6 @@ XrlFtiTransactionManager::add_fib_client6(const string& target_name,
     fib_client.activate(fte_list);
 
     return XrlCmdError::OKAY();
-    UNUSED(send_updates);
-    UNUSED(send_resolves);
 }
 
 XrlCmdError
@@ -470,17 +472,25 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change()
     F& fte = _inform_fib_client_queue.front();
 
     //
-    // Send the appropriate XRLs
+    // If FIB route misses and resolution requests were requested to be
+    // heard by the client, then send notifications of such events.
     //
-    if (fte.is_unresolved()) {
-	// Send notification of a route miss or resolve request
+    if (_send_resolves && fte.is_unresolved()) {
 	success = _xftm.send_fib_client_resolve_route(_target_name, fte);
-    } if (! fte.is_deleted()) {
-	// Send notification of a route being added
-	success = _xftm.send_fib_client_add_route(_target_name, fte);
-    } else {
-	// Send notification of a route being deleted
-	success = _xftm.send_fib_client_delete_route(_target_name, fte);
+    }
+
+    //
+    // If FIB updates were requested by the client, then send notification
+    // of a route being added or deleted.
+    //
+    if (_send_updates) {
+	if (!fte.is_deleted()) {
+	    // Send notification of a route being added
+	    success = _xftm.send_fib_client_add_route(_target_name, fte);
+	} else {
+	    // Send notification of a route being deleted
+	    success = _xftm.send_fib_client_delete_route(_target_name, fte);
+	}
     }
 
     if (success != XORP_OK) {

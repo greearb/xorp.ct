@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.10 2004/11/11 07:48:22 bms Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.11 2004/11/18 14:25:28 bms Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -245,10 +245,16 @@ private:
     class FibClient {
     public:
 	FibClient(const string& target_name, XrlFtiTransactionManager& xftm)
-	    : _target_name(target_name), _xftm(xftm) {}
+	    : _target_name(target_name), _xftm(xftm),
+	      _send_updates(false), _send_resolves(false) {}
 
 	void	activate(const list<F>& fte_list);
 	void	send_fib_client_route_change_cb(const XrlError& xrl_error);
+
+	bool get_send_updates() const { return _send_updates; }
+	bool get_send_resolves() const { return _send_resolves; }
+	void set_send_updates(const bool sendit) { _send_updates = sendit; }
+	void set_send_resolves(const bool sendit) { _send_resolves = sendit; }
 
     private:
 	EventLoop& eventloop() { return _xftm.ftic().eventloop(); }
@@ -259,6 +265,9 @@ private:
 
 	string			_target_name;	// Target name of the client
 	XrlFtiTransactionManager& _xftm;
+
+	bool			_send_updates;	// Event filters
+	bool			_send_resolves;
     };
 
     typedef FibClient<Fte4>	FibClient4;
