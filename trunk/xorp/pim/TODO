@@ -1,6 +1,42 @@
 #
-# $XORP: xorp/pim/TODO,v 1.4 2003/01/10 20:01:45 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.5 2003/01/11 02:02:57 pavlin Exp $
 #
+
+* SPEC+IMPL:
+  When accepting an unicast Bootstrap message, should accept
+  it only if it comes from a neighbor on the RPF interface.
+  Otherwise, we may receive obsolete info from downstream neighbors
+  (wrt the BSR) which were partitioned because of this router's reboot.
+
+* IMPL:
+  Bugs in the implementation of the Bootstrap mechanism:
+
+       ----X-----
+       |         |
+  R1---R2---R3---RP
+
+  Setup: In R2, the RPF toward the RP is X. However, X is not running PIM-SM.
+
+  If R2 is restarted, after the restart it receives by unicast
+  Bootstrap message from R3, and R1 (lets assume in this order).
+  Also, if R2 was long enough for the RP-set inside R1 to timeout, but
+  still to keep the BSR info, then the unicast Bootstrap message
+  R2 receives from R1 will have RPcnt=1 FRPcnt=0.
+  PROBLEM: when R2 receives the Bootstrap message from R3,
+    bsr_zone.set_accepted_previous_bsm(true), is not called properly,
+  PROBLEM: R1 sends such message, which appears fragmented simply
+  because one of the RPs has time-out.
+  therefore R2 will accept the unicast Bootstrap message from R1 as well.
+  If the tag of the Bootstrap message from R1 was different from the
+  tag of the Bootstrap message from R3, then the message from R1 will
+  "wipe-out" the previously received Bootstrap info from R3.
+  PROBLEM: when the Bootstrap message from R1 "wipe-out" the previously
+  existing info from R3, this happens even though the Bootstrap message
+  from R1 is incomplete (i.e., it appears fragmented).
+  PROBLEM: the wiping-out doesn't remove the missing RP from the RpTable
+  table; as a result there is an entry in that table, even though
+  there is no entry for it in the PimBsr table, and there is no timer
+  running to time it out.
 
 * TESTSUITE:
   Perform test scenario (Section 4.6 Sending (*,G) Join/Prune Messages, Part G)
