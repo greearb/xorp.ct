@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.41 2004/09/22 01:51:02 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.42 2004/11/08 22:29:19 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -241,7 +241,8 @@ $(srcdir)/rib_base.hh $(srcdir)/rib_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
                 $(INTERFACES_DIR)/policy_backend.xif			\
-		$(INTERFACES_DIR)/rib.xif
+		$(INTERFACES_DIR)/rib.xif				\
+		$(INTERFACES_DIR)/profile.xif
 
 # RIB client
 libribclientbase_a_SOURCES = ribclient_base.hh ribclient_base.cc
