@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.32 2004/06/10 22:40:35 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.33 2004/09/17 13:50:55 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -492,36 +492,37 @@ RibInTable<A>::next_chain()
 	return;
     }
 
-    // that's it for this nexthop - try the next
-    if (_changed_nexthops.empty()) {
-	// no more nexthops to push
-	_nexthop_push_active = false;
+    while (1) {
+	// that's it for this nexthop - try the next
+	if (_changed_nexthops.empty()) {
+	    // no more nexthops to push
+	    _nexthop_push_active = false;
+	    return;
+	}
+
+	typename set <A>::iterator i = _changed_nexthops.begin();
+	_current_changed_nexthop = *i;
+	_changed_nexthops.erase(i);
+
+	PathAttributeList<A> dummy_pa_list;
+	NextHopAttribute<A> nh_att(_current_changed_nexthop);
+	dummy_pa_list.add_path_attribute(nh_att);
+	dummy_pa_list.rehash();
+	typename BgpTrie<A>::PathmapType::const_iterator pmi;
+
+	pmi = _route_table->pathmap().lower_bound(&dummy_pa_list);
+	if (pmi == _route_table->pathmap().end()) {
+	    // no route in this trie has this Nexthop, try the next nexthop
+	    continue;
+	}
+	if (pmi->second->nexthop() != _current_changed_nexthop) {
+	    // no route in this trie has this Nexthop, try the next nexthop
+	    continue;
+	}
+
+	_current_chain = pmi;
 	return;
     }
-
-    typename set <A>::iterator i = _changed_nexthops.begin();
-    _current_changed_nexthop = *i;
-    _changed_nexthops.erase(i);
-
-    PathAttributeList<A> dummy_pa_list;
-    NextHopAttribute<A> nh_att(_current_changed_nexthop);
-    dummy_pa_list.add_path_attribute(nh_att);
-    dummy_pa_list.rehash();
-    typename BgpTrie<A>::PathmapType::const_iterator pmi;
-
-    pmi = _route_table->pathmap().lower_bound(&dummy_pa_list);
-    if (pmi == _route_table->pathmap().end()) {
-	// no route in this trie has this Nexthop, try the next nexthop
-	next_chain();
-	return;
-    }
-    if (pmi->second->nexthop() != _current_changed_nexthop) {
-	// no route in this trie has this Nexthop, try the next nexthop
-	next_chain();
-	return;
-    }
-
-    _current_chain = pmi;
 }
 
 template<class A>
