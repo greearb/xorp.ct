@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.46 2003/09/19 22:07:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.47 2003/09/22 19:22:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -806,9 +806,9 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     header.time = /*htonl(tv.sec())*/0;
     header.type = htons(12);
     if(4 == A::ip_version())
-	header.subtype = htons(1);
+	header.subtype = htons(AFI_IPV4);
     else if(6 == A::ip_version())
-	header.subtype = htons(2);
+	header.subtype = htons(AFI_IPV6);
     else
 	XLOG_FATAL("unknown ip version %d", A::ip_version());
 
