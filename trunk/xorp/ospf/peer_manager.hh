@@ -108,6 +108,44 @@ class PeerManager {
     void incoming_packet(const string& interface, const string& vif,
 			 Packet *packet);
 
+    // Configure the peering.
+    /**
+     * Set the network mask OSPFv2 only.
+     */
+    void set_network_mask(const PeerID, OspfTypes::AreaID area, 
+			  uint32_t network_mask);
+
+    /**
+     * Set the interface ID OSPFv3 only.
+     */
+    void set_interface_id(const PeerID, OspfTypes::AreaID area,
+			  uint32_t interface_id);
+
+    /**
+     * Set the hello interval in seconds.
+     */
+    void set_hello_interval(const PeerID, OspfTypes::AreaID area,
+			    uint16_t hello_interval);
+
+    /**
+     * Set options.
+     */
+    void set_options(const PeerID, OspfTypes::AreaID area,
+		     uint32_t options);
+
+    /**
+     * Set router priority.
+     */
+    void set_router_priority(const PeerID, OspfTypes::AreaID area,
+			     uint8_t priority);
+
+    /**
+     * Set the router dead interval in seconds.
+     */
+    void set_router_dead_interval(const PeerID, OspfTypes::AreaID area,
+				  uint32_t router_dead_interval);
+
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     
