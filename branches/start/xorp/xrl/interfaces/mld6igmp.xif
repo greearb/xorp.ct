@@ -1,0 +1,94 @@
+/* $XORP: xorp/xrl/interfaces/mld6igmp.xif,v 1.7 2002/12/08 11:02:38 pavlin Exp $ */
+
+/*
+ * Multicast Listener Discovery/Internet Group Management Protocol
+ * XRL interface.
+ */
+
+
+interface mld6igmp/0.1 {
+
+	/**
+	 * Add/delete a client protocol in the MLD/IGMP protocol.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param protocol_name the name of the protocol to add/delete.
+	 * @param protocol_id the ID of the protocol to add/delete
+	 * (both sides must agree on the particular values).
+	 * @param vif_name the name of the vif the protocol add/delete to
+	 * apply to.
+	 * @param vif_index the index of the vif the protocol add/delete to
+	 * apply to.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 *
+	 * The added protocol will receive Join/Leave membership information
+	 * about same-LAN members for the particular vif.
+	 */
+	/* TODO: the protocol names have to be globally defined */
+	add_protocol4	? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32			\
+			-> fail:bool & reason:txt
+	add_protocol6	? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32			\
+			-> fail:bool & reason:txt
+	
+	delete_protocol4 ? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32			\
+			-> fail:bool & reason:txt
+	delete_protocol6 ? xrl_sender_name:txt				\
+			& protocol_name:txt & protocol_id:u32		\
+			& vif_name:txt & vif_index:u32			\
+			-> fail:bool & reason:txt
+
+	/**
+	 * Enable/disable/start/stop a MLD6IGMP vif interface.
+	 *
+	 * @param vif_name the name of the vif to enable/disable/start/stop.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	enable_vif	? vif_name:txt	-> fail:bool & reason:txt
+	disable_vif	? vif_name:txt	-> fail:bool & reason:txt
+	start_vif	? vif_name:txt	-> fail:bool & reason:txt
+	stop_vif	? vif_name:txt	-> fail:bool & reason:txt
+
+	/**
+	 * Enable/disable/start/stop all MLD6IGMP vif interfaces.
+	 * 
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	enable_all_vifs			-> fail:bool & reason:txt
+	disable_all_vifs		-> fail:bool & reason:txt
+	start_all_vifs			-> fail:bool & reason:txt
+	stop_all_vifs			-> fail:bool & reason:txt
+	
+	/**
+	 * Enable/disable/start/stop MLD6IGMP protocol and the
+	 * MLD6IGMP CLI access.
+	 * 
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	enable_mld6igmp			-> fail:bool & reason:txt
+	disable_mld6igmp		-> fail:bool & reason:txt
+	enable_cli			-> fail:bool & reason:txt
+	disable_cli			-> fail:bool & reason:txt
+	start_mld6igmp			-> fail:bool & reason:txt
+	stop_mld6igmp			-> fail:bool & reason:txt
+	start_cli			-> fail:bool & reason:txt
+	stop_cli			-> fail:bool & reason:txt
+
+	/**
+	 * Enable/disable the MLD6IGMP trace log.
+	 * 
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */
+	enable_log_trace		-> fail:bool & reason:txt
+	disable_log_trace		-> fail:bool & reason:txt
+}

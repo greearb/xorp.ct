@@ -1,0 +1,281 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+/*  acconfig.h -- `autoheader' will generate config.h.in */
+/*
+ * This file is part of the XORP software.
+ * See file `LICENSE.xorp' for copyright and license information.
+ */
+
+#ifndef __XORP_CONFIG_H__
+#define __XORP_CONFIG_H__
+
+/*
+ * XXX: everything above is unconditionally copied to the generated file
+ */
+
+/* Define if type char is unsigned and you are not using gcc.  */
+#ifndef __CHAR_UNSIGNED__
+#undef __CHAR_UNSIGNED__
+#endif
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef pid_t
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if your <sys/time.h> declares struct tm.  */
+#undef TM_IN_SYS_TIME
+
+/* Define if your processor stores words with the most significant
+   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
+#undef WORDS_BIGENDIAN
+
+/*
+ * Define OS version
+ */
+#undef HOST_OS_LINUX
+#undef HOST_OS_NETBSD
+#undef HOST_OS_OPENBSD
+#undef HOST_OS_FREEBSD
+#undef HOST_OS_BSDI
+#undef HOST_OS_SOLARIS
+
+/*
+ * Preprocessor macro test
+ */
+#undef CPP_SUPPORTS_GNU_VA_ARGS
+
+/*
+ * Preprocessor control of debug message output
+ */
+#undef DEBUG_LOGGING_GLOBAL
+
+/*
+ * Preprocessor control of debug message output format
+ */
+#undef DEBUG_PRINT_FUNCTION_NAME
+
+/*
+ * Preprocessor control of enabling advanced multicast API
+ */
+#undef ENABLE_ADVANCED_MCAST_API
+
+/*
+ * Define this if you have new.h
+ */
+#undef HAVE_NEW_H
+
+/*
+ * Define this if you want IPv6 support.
+ */
+#undef HAVE_IPV6
+
+/*
+ * Define this if you have newer IPv6 advanced API
+ */
+#undef HAVE_RFC2292BIS
+
+/*
+ * Define this if you have KAME project IPv6 stack.
+ */
+#undef IPV6_STACK_KAME
+
+/*
+ * IPv4 structures that host may or may not have.
+ */
+#undef HAVE_ST_IP_MREQN
+
+/*
+ * Define this if your struct sockaddr_in6 has sin6_len field.
+ */
+#undef HAVE_SIN6_LEN
+
+/*
+ * Define these if your C library is missing some functions...
+ */
+#undef NEED_VSNPRINTF
+#undef NEED_INET_PTON
+#undef NEED_INET_NTOP
+#undef NEED_ETHER_ATON
+#undef NEED_ETHER_NTOA
+
+/*
+ * If you don't have these types in <inttypes.h>, #define these to be
+ * the types you do have.
+ */
+#undef int8_t
+#undef int16_t
+#undef int32_t
+#undef int64_t
+#undef uint8_t
+#undef uint16_t
+#undef uint32_t
+
+/*
+ * Define this if you don't have sig_t
+ */
+#undef HAVE_SIG_T
+
+/*
+ * Define this if you have socklen_t.
+ */
+#undef HAVE_SOCKLEN_T
+
+/*
+ * Define these if your struct sockaddr, sockaddr_in, sockaddr_un
+ * have respectively sa_len, sin_len, sun_len fields.
+ */
+#undef HAVE_SA_LEN
+#undef HAVE_SIN_LEN
+#undef HAVE_SUN_LEN
+
+/*
+ * Define these if your system supports the advance multicast API
+ */
+#undef HAVE_MFCCTL2
+#undef HAVE_MFCC_FLAGS
+#undef HAVE_MFCC_RP
+#undef HAVE_MF6CCTL2
+#undef HAVE_MF6CC_FLAGS
+#undef HAVE_MF6CC_RP
+
+/*
+ * Define this if you have the AF_ROUTE socket.
+ */
+#undef HAVE_AF_ROUTE
+
+/*
+ * Define this if you have the Linux-style AF_NETLINK socket.
+ */
+#undef HAVE_AF_NETLINK
+
+/*
+ * Define this if you have ioctl(SIOCGIFCONF)
+ */
+#undef HAVE_SIOCGIFCONF
+
+/*
+ * Define this if you have sysctl(NET_RT_IFLIST) interface read method
+ * (typically in sys/socket.h).
+ */
+#undef HAVE_NET_RT_IFLIST
+
+/*
+ * Define this if you have sysctl(NET_RT_DUMP) routing table read method
+ * (exists in sys/socket.h).
+ */
+#undef HAVE_NET_RT_DUMP
+
+/* Define if you have the getifaddrs function.  */
+#undef HAVE_GETIFADDRS
+
+/* Define if you have the if_nametoindex function.  */
+#undef HAVE_IF_NAMETOINDEX
+
+/* Define if you have the strerror function.  */
+#undef HAVE_STRERROR
+
+/* Define if you have the <ifaddrs.h> header file.  */
+#undef HAVE_IFADDRS_H
+
+/* Define if you have the <inttypes.h> header file.  */
+#undef HAVE_INTTYPES_H
+
+/* Define if you have the <linux/rtnetlink.h> header file.  */
+#undef HAVE_LINUX_RTNETLINK_H
+
+/* Define if you have the <net/ethernet.h> header file.  */
+#undef HAVE_NET_ETHERNET_H
+
+/* Define if you have the <net/if_dl.h> header file.  */
+#undef HAVE_NET_IF_DL_H
+
+/* Define if you have the <net/if_var.h> header file.  */
+#undef HAVE_NET_IF_VAR_H
+
+/* Define if you have the <netinet/icmp6.h> header file.  */
+#undef HAVE_NETINET_ICMP6_H
+
+/* Define if you have the <netinet/ip6.h> header file.  */
+#undef HAVE_NETINET_IP6_H
+
+/* Define if you have the <netinet/pim.h> header file.  */
+#undef HAVE_NETINET_PIM_H
+
+/* Define if you have the <netinet6/in6_var.h> header file.  */
+#undef HAVE_NETINET6_IN6_VAR_H
+
+/* Define if you have the <netinet6/ip6_mroute.h> header file.  */
+#undef HAVE_NETINET6_IP6_MROUTE_H
+
+/* Define if you have the <stdint.h> header file.  */
+#undef HAVE_STDINT_H
+
+/* Define if you have the <sys/ethernet.h> header file.  */
+#undef HAVE_SYS_ETHERNET_H
+
+/* Define if you have the <sys/filio.h> header file.  */
+#undef HAVE_SYS_FILIO_H
+
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
+
+/* Define if you have the <sys/sysctl.h> header file.  */
+#undef HAVE_SYS_SYSCTL_H
+
+/* Define if using the dmalloc debugging malloc package */
+#undef WITH_DMALLOC
+
+/*
+ * XXX: everything below is unconditionally copied to the generated file
+ */
+
+#ifndef HAVE_SIG_T
+typedef RETSIGTYPE (*sig_t)(int);
+#endif
+
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif /* HAVE_SOCKLEN_T */
+
+/* Raw socket raw values */
+#undef IPV4_RAW_OUTPUT_IS_RAW
+#undef IPV4_RAW_INPUT_IS_RAW
+
+/* KAME code likes to use INET6 to ifdef IPv6 code */
+#ifdef HAVE_IPV6
+#ifdef IPV6_STACK_KAME
+#ifndef INET6
+#define INET6
+#endif /* INET6 */
+#endif /* IPV6_STACK_KAME */
+#endif /* HAVE_IPV6 */
+
+#ifndef WORDS_BIGENDIAN
+#define WORDS_SMALLENDIAN
+#endif
+
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
+#ifdef __cplusplus
+#ifdef HAVE_NEW_H
+#include <new.h>
+#else
+inline void *operator new(size_t, void *v) { return v; }
+#endif
+#endif /* __cplusplus */
+
+
+#endif /* __XORP_CONFIG_H__ */

@@ -1,0 +1,22 @@
+#
+# $XORP: xorp/rip/README,v 1.2 2002/12/09 11:13:06 pavlin Exp $
+#
+
+This directory contains RIP implementations that are used by the XORP
+project.  XORP uses a modified versions of routed and route6d.
+
+Top level files for RIP are: 
+
+route6d/			RIPng routing daemon with XORP modifications.
+
+route6d-20011126-101012.tar.gz	Snapshot of FreeBSD's route6d taken from 
+			        FreeBSD's CVS archive on 2001/11/26.
+
+routed/				RIP v1 and v2 routing daemon with XORP 
+				modifications.
+
+routed-20011126-095745.tar.gz	Snapshot of FreeBSD's routed taken from 
+			        FreeBSD's CVS archive on 2001/11/26.
+
+At the time of writing the XORP modifications to routed and route6d
+still have to be completed.

@@ -1,0 +1,28 @@
+.PS
+SNMP: box at 1,0 "SNMP"
+CLI: box at 1,2 "Cisco CLI"
+
+BGP: box at 2,1 "BGP"
+ob = boxwid; boxwid = boxwid + 0.2 ; BGPI: box invis at 2,1; boxwid = ob
+PIM: box at 5,1 "PIM"
+ob = boxwid; boxwid = boxwid + 0.2 ; PIMI: box invis at 5,1; boxwid = ob
+
+arrow from SNMP.e to BGP.w
+arrow from SNMP.e to PIM.w
+arrow from CLI.e to BGP.w
+arrow from CLI.e to PIM.w
+
+"Management" at BGPI.w rjust above
+"Interface" at BGPI.w rjust below
+"Management" at PIMI.w rjust above
+"Interface" at PIMI.w rjust below
+
+arrow from 0,0 to SNMP.w
+"External" at SNMP.w rjust above
+"Interface" at SNMP.w rjust below
+
+arrow from 0,2 to CLI.w
+"External" at CLI.w rjust above
+"Interface" at CLI.w rjust below
+
+.PE

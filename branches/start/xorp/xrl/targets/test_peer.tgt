@@ -1,0 +1,6 @@
+/* $XORP: xorp/xrl/targets/test_peer.tgt,v 1.2 2002/11/05 17:26:28 hodson Exp $ */
+
+#include "common.xif"
+#include "test_peer.xif"
+
+target test_peer implements common/0.1, test_peer/0.1

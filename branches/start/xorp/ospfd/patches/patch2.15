@@ -1,0 +1,189 @@
+diff -X exclude_files -Nabur ospfd2.14/ospf_sim/ospf_sim.tcl ospfd2.15/ospf_sim/ospf_sim.tcl
+--- ospfd2.14/ospf_sim/ospf_sim.tcl	Fri Feb 15 10:29:28 2002
++++ ospfd2.15/ospf_sim/ospf_sim.tcl	Fri Mar  8 13:54:29 2002
+@@ -75,6 +75,7 @@
+ #	ptmp %prefix %area %x %y
+ #	pplink %rtr_id1 %addr1 %cost1 %rtr_id2 %addr2 %cost2 %area
+ #	vlink %rtr_id1 %rtr_id2 %area
++#       drpri %rtr_id %addr %priority
+ #	aggr %rtr_id %area %prefix %noadv
+ #	stub %area %default_cost %import
+ #	extrt %rtr_id %prefix %nh %etype %cost %noadv
+@@ -215,6 +216,7 @@
+     set ifc_att($interface_index,demand) $network_att($prefix,demand)
+     set ifc_att($interface_index,enabled) 1
+     set ifc_att($interface_index,passive) $passive
++    set ifc_att($interface_index,drpri) 1
+     set ifc_att($interface_index,ospf) $ospf
+     set ifc_att($interface_index,rtr) $rtr_id
+     set area $network_att($prefix,area)
+@@ -255,6 +257,7 @@
+     set ifc_att($interface_index,demand) $demand
+     set ifc_att($interface_index,enabled) 1
+     set ifc_att($interface_index,passive) 0
++    set ifc_att($interface_index,drpri) 0
+     set ifc_att($interface_index,ospf) 1
+     set ifc_att($interface_index,rtr) $rtr_id1
+     add_mapping $addr1 $rtr_id1
+@@ -275,6 +278,7 @@
+     set ifc_att($interface_index,demand) $demand
+     set ifc_att($interface_index,enabled) 1
+     set ifc_att($interface_index,passive) 0
++    set ifc_att($interface_index,drpri) 0
+     set ifc_att($interface_index,ospf) 1
+     set ifc_att($interface_index,rtr) $rtr_id2
+     add_mapping $addr2 $rtr_id2
+@@ -306,6 +310,20 @@
+ }
+ 
+ ###############################################################
++#  Set DR priority of a given interface, identified
++#  by the router's Router ID and the interface's address
++###############################################################
++
++proc drpri {rtr_id addr priority} {
++    global ifc_att node_att
++    foreach i $node_att($rtr_id,interfaces) {
++	if {$ifc_att($i,addr) == $addr} {
++	    set ifc_att($i,drpri) $priority
++	}
++    }
++}
++
++###############################################################
+ #  Address aggregation in an area border router
+ #  Last argument says whether to advertise (noadv=0)
+ #  or suppress the aggregate,
+@@ -433,7 +451,8 @@
+ 	sendifc $rtr_id $ifc_att($i,port) $ifc_att($i,type) \
+ 		$ifc_att($i,area) $ifc_att($i,addr) $ifc_att($i,cost) \
+ 		$i $ifc_att($i,prefix) $ifc_att($i,demand) \
+-		$ifc_att($i,enabled) $ifc_att($i,passive) $ifc_att($i,ospf)
++		$ifc_att($i,enabled) $ifc_att($i,passive) $ifc_att($i,ospf) \
++		$ifc_att($i,drpri)
+ 	set prefix $ifc_att($i,prefix)
+ 	if {[lsearch $networks $prefix] != -1} {
+ 	    foreach group $network_att($prefix,groups) {
+@@ -816,7 +835,7 @@
+     sendifc $add_interface_router $ifc_att($i,port) $ifc_att($i,type) \
+ 	    $ifc_att($i,area) $ifc_att($i,addr) $ifc_att($i,cost) \
+ 	    $i $ifc_att($i,prefix) $ifc_att($i,demand) $ifc_att($i,enabled) \
+-	    $ifc_att($i,passive) $ifc_att($i,ospf)
++	    $ifc_att($i,passive) $ifc_att($i,ospf) $ifc_att($i,drpri)
+ }
+ 
+ ###############################################################
+@@ -909,12 +928,14 @@
+     sendifc $add_pp_router1 $ifc_att($i,port) $ifc_att($i,type) \
+ 	    $ifc_att($i,area) $ifc_att($i,addr) $ifc_att($i,cost) \
+ 	    $i $ifc_att($i,prefix) $ifc_att($i,demand) \
+-	    $ifc_att($i,enabled) $ifc_att($i,passive) $ifc_att($i,ospf)
++	    $ifc_att($i,enabled) $ifc_att($i,passive) $ifc_att($i,ospf) \
++	    $ifc_att($i,drpri)
+     incr i
+     sendifc $add_pp_router2 $ifc_att($i,port) $ifc_att($i,type) \
+ 	    $ifc_att($i,area) $ifc_att($i,addr) $ifc_att($i,cost) \
+ 	    $i $ifc_att($i,prefix) $ifc_att($i,demand) \
+-	    $ifc_att($i,enabled) $ifc_att($i,passive) $ifc_att($i,ospf)
++	    $ifc_att($i,enabled) $ifc_att($i,passive) $ifc_att($i,ospf) \
++	    $ifc_att($i,drpri)
+ }
+ 
+ ###############################################################
+@@ -999,7 +1020,8 @@
+ 	sendifc $ifc_att($i,rtr) $ifc_att($i,port) $ifc_att($i,type) \
+ 		$ifc_att($i,area) $ifc_att($i,addr) $ifc_att($i,cost) \
+ 		$i $ifc_att($i,prefix) $ifc_att($i,demand) \
+-		$ifc_att($i,enabled) $ifc_att($i,passive) $ifc_att($i,ospf)
++		$ifc_att($i,enabled) $ifc_att($i,passive) $ifc_att($i,ospf) \
++		$ifc_att($i,drpri)
+ 	put_message ""
+     }
+ }
+@@ -1452,6 +1474,10 @@
+ 		puts $f [concat "interface" $id $ifc_att($ifc,addr) \
+ 			$ifc_att($ifc,cost) $ifc_att($ifc,passive) \
+ 			$ifc_att($ifc,ospf)] 
++		if {$ifc_att($ifc,drpri) != 1} {
++		    puts $f [concat "drpri" $id $ifc_att($ifc,addr) \
++			    $ifc_att($ifc,drpri)]
++		}
+ 	    } else {
+ 		if {$ifc_att($ifc,oifc) != 0} {
+ 		    set oid $ifc_att($ifc,ortr)
+diff -X exclude_files -Nabur ospfd2.14/ospf_sim/sim.C ospfd2.15/ospf_sim/sim.C
+--- ospfd2.14/ospf_sim/sim.C	Fri Feb 15 10:29:28 2002
++++ ospfd2.15/ospf_sim/sim.C	Fri Mar  8 13:54:29 2002
+@@ -1090,7 +1090,7 @@
+     m.mtu = (m.IfType == IFT_BROADCAST ? 1500 : 2048);
+     m.IfIndex = atoi(argv[7]);
+     m.area_id = ntoh32(inet_addr(argv[4]));
+-    m.dr_pri = 1;
++    m.dr_pri = atoi(argv[13]);
+     m.xmt_dly = 1;
+     m.rxmt_int = 5;
+     m.hello_int = 10;
+@@ -1341,7 +1341,7 @@
+ router 10.0.0.6 453.0 246.0 1\n\
+ router 10.0.0.7 387.0 290.0 1\n\
+ router 10.0.0.14 528.0 297.0 1\n\
+-broadcast 10.1.3.0/24 0.0.0.2 125.0 191.0 0\n\
++nbma 10.1.3.0/24 0.0.0.2 125.0 191.0 0\n\
+ broadcast 10.1.2.0/24 0.0.0.2 45.0 119.0 0\n\
+ broadcast 10.1.1.0/24 0.0.0.2 43.0 266.0 0\n\
+ broadcast 10.2.2.0/24 0.0.0.1 380.0 20.0 0\n\
+@@ -1354,6 +1354,8 @@
+ pplink 10.0.0.1 0.0.0.0 2 10.0.0.3 0.0.0.0 2 0.0.0.0 0\n\
+ pplink 10.0.0.1 0.0.0.0 1 10.0.0.4 0.0.0.0 1 0.0.0.0 0\n\
+ interface 10.0.0.1 10.1.3.1 3 0 1\n\
++neighbor 10.0.0.1 10.1.3.8 0\n\
++neighbor 10.0.0.1 10.1.3.9 0\n\
+ loopback 10.0.0.1 1.0.0.1/32 0.0.0.0\n\
+ pplink 10.0.0.2 0.0.0.0 2 10.0.0.4 0.0.0.0 2 0.0.0.0 0\n\
+ loopback 10.0.0.2 1.0.0.2/32 0.0.0.0\n\
+@@ -1363,8 +1365,10 @@
+ pplink 10.0.0.4 192.168.4.2 3 10.0.0.6 192.168.6.1 3 0.0.0.3 0\n\
+ loopback 10.0.0.4 1.0.0.4/32 0.0.0.0\n\
+ interface 10.1.1.8 10.1.3.8 3 0 1\n\
++drpri 10.1.1.8 10.1.3.8 0\n\
+ interface 10.1.1.8 10.1.2.8 1 0 1\n\
+ interface 10.0.0.9 10.1.3.9 3 0 1\n\
++drpri 10.0.0.9 10.1.3.9 0\n\
+ interface 10.0.0.9 10.1.1.9 1 0 1\n\
+ interface 10.0.0.10 10.2.1.10 1 0 1\n\
+ pplink 10.0.0.10 0.0.0.0 3 10.0.0.2 0.0.0.0 3 0.0.0.1 0\n\
+diff -X exclude_files -Nabur ospfd2.14/src/lsdb.C ospfd2.15/src/lsdb.C
+--- ospfd2.14/src/lsdb.C	Fri Feb 15 10:29:22 2002
++++ ospfd2.15/src/lsdb.C	Fri Mar  8 13:54:22 2002
+@@ -502,6 +502,7 @@
+     UnParseLSA(lsap);
+     btree = FindLSdb(lsap->lsa_ifp, lsap->lsa_ap, lsap->lsa_type);
+     btree->remove((AVLitem *) lsap);
++    lsap->delete_actions();
+     lsap->chkref();
+ }
+ 
+diff -X exclude_files -Nabur ospfd2.14/src/ospf.h ospfd2.15/src/ospf.h
+--- ospfd2.14/src/ospf.h	Fri Feb 15 10:29:22 2002
++++ ospfd2.15/src/ospf.h	Fri Mar  8 13:54:22 2002
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 14,	// Minor version number
++	vminor = 15,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+diff -X exclude_files -Nabur ospfd2.14/src/spfhello.C ospfd2.15/src/spfhello.C
+--- ospfd2.14/src/spfhello.C	Fri Feb 15 10:29:22 2002
++++ ospfd2.15/src/spfhello.C	Fri Mar  8 13:54:22 2002
+@@ -278,6 +278,8 @@
+ 		np->nbr_fsm(NBE_EVAL);
+ 	    if (first_hello && !np->ifc()->is_multi_access())
+ 		np->send_hello();
++	    else
++	        send_hello_response(np);
+ 	    return;
+ 	}
+ 	else if (ntoh32(*idp) == ospf->my_id())

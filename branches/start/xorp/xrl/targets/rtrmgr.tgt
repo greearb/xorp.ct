@@ -1,0 +1,6 @@
+/* $XORP: xorp/xrl/targets/rtrmgr.tgt,v 1.2 2002/11/05 17:26:28 hodson Exp $ */
+
+#include "common.xif"
+#include "rtrmgr.xif"
+
+target rtrmgr implements common/0.1, rtrmgr/0.1

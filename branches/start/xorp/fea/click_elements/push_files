@@ -1,0 +1,17 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/fea/click_elements/push_files,v 1.3 2002/12/09 11:30:32 pavlin Exp $
+#
+
+#
+# Push source files to the build host
+#
+
+HOST=xorpc
+DIR=$rh/xorp_click_elements
+FILES="config.h ipv4address.hh \
+forward[12].cc forward[12].hh \
+rtable[12].cc rtable[12].hh xorp.click"
+
+scp $FILES $HOST:$DIR

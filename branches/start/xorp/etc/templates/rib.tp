@@ -1,0 +1,7 @@
+/* $XORP: xorp/etc/templates/rib.tp,v 1.3 2002/10/01 03:10:04 mjh Exp $ */
+
+plumbing rib {
+  %modinfo: provides rib;
+  %modinfo: depends fea;
+  %modinfo: path "../urib/rib";
+}

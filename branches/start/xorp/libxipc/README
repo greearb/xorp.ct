@@ -1,0 +1,35 @@
+$XORP: xorp/libxipc/README,v 1.2 2002/12/05 00:36:43 hodson Exp $
+
+	LIBXIPC: Xrl Inter-Process Communication Library
+
+The libxipc library provides inter-process communication for XORP
+processes.
+
+Documentation
+=============
+
+Overview material is present in:
+	$(XORP)/docs/libxipc 
+
+and programming documentation in:
+	$(XORP)/devnotes/html/libxipc
+
+Status
+======
+
+This code is functional and widely used.  Following the initial
+repository opening a second major revision will be committed addresses
+the following issues:
+
+o Makes the Finder and FinderClient themselves XRL based.  The Finder
+  and FinderClient can use the regular protocol families, and leverage
+  the advantages of other processes with regard to speed of change and
+  flexibility.
+
+o Addresses the file naming anomalies.  The present mix and absence of
+  separators in file names are to be made consistent.
+
+o Rework the xrl parser related routines to make them more akin to the
+  parsing capabilities of the python scripts used to generate XRL
+  interfaces.
+

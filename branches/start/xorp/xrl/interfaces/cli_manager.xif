@@ -1,0 +1,49 @@
+/* $XORP: xorp/xrl/interfaces/cli_manager.xif,v 1.6 2002/10/29 18:31:25 pavlin Exp $ */
+
+/*
+ * CLI manager XRL interface.
+ */
+
+
+interface cli_manager/0.1 {
+	/**
+	 * Add a CLI command to the CLI manager
+	 *
+	 * @param processor_name the name of the module that will process
+	 * that command.
+	 * @param command_name the name of the command to add.
+	 * @param command_help the help for the command to add.
+	 * @param is_command_cd if true, this is a command that allows
+	 * "change directory" inside the CLI command-tree.
+	 * @param command_cd_prompt if @param is_command_cd is true,
+	 * the string that will replace the CLI prompt after we
+	 * "cd" to that level of the CLI command-tree.
+	 * @param is_command_processor if true, this is a processing command
+	 * that would be performed by @processor_name.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */	
+	add_cli_command		? processor_name:txt			\
+				& command_name:txt			\
+				& command_help:txt			\
+				& is_command_cd:bool			\
+				& command_cd_prompt:txt			\
+				& is_command_processor:bool		\
+				-> fail:bool & reason:txt
+	/**
+	 * Delete a CLI command from the CLI manager
+	 *
+	 * @param processor_name the name of the module that sends the request.
+	 * @param command_name the name of the command to delete.
+	 * @param fail true if failure has occured.
+	 * @param reason contains failure reason if it occured.
+	 */	
+	delete_cli_command	? processor_name:txt & command_name:txt	\
+				-> fail:bool & reason:txt
+	
+	/*
+	 * TODO: do we want 'add_cli_commands_done' to indicate
+	 * end-of-adding?
+	 */
+	/* add_cli_commands_done ? processor_name:txt -> fail:bool & reason:txt */
+}

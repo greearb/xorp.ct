@@ -1,0 +1,29 @@
+#
+# $XORP: xorp/fea/click_elements/README,v 1.4 2002/12/09 11:13:05 pavlin Exp $
+#
+
+This directory contains click elements.
+
+1) Click must be installed before configure is run in the directory.
+
+Download click:
+  a) cvs -z5 -d :pserver:clickcvs@butt.lcs.mit.edu:/cvs co -d click release/one
+Configure click:
+  b) ./configure --enable-bsdmodule --with-freebsd=/usr/src/sys --prefix=/usr/local/click
+Install click:
+  c) gmake install
+
+2) Build elements in this directory.
+autoconf
+./configure --enable-bsdmodule --prefix=/usr/local/click
+gmake install
+
+NOTE:
+1) These instructions only apply for building for FreeBSD.
+2) The --prefix argument must be the same in both building click and
+the elements in this directory.
+3) The file /usr/local/click/lib/click.ko is installed by the click
+install process. This file is the click loadable module.
+4) The file /usr/local/click/lib/xorp.bo is installed by the install
+process in the click_elements directory. This file is the xorp
+loadable module.

@@ -1,0 +1,1079 @@
+dnl
+dnl $XORP: xorp/configure.in,v 1.123 2002/12/11 19:42:44 pavlin Exp $
+dnl
+
+dnl ---------------------------------------------------------------------------
+dnl Process this file with autoconf to produce a configure script.
+dnl ---------------------------------------------------------------------------
+
+dnl	Ordering:
+dnl	  Boilerplate (e.g, `AC_INIT(FILE)', etc.)
+dnl	  Command-line options to `configure'
+dnl	  Check for programs
+dnl	  Check for libraries
+dnl	  Check for header files and types
+dnl	  Check for typedefs and structures
+dnl	  Check for library functions
+dnl	  Check for system services
+dnl	  Check for compiler characteristics
+dnl	  Setup compiler flags
+dnl	  Output (e.g., `AC_OUTPUT([FILE...])', etc.)
+
+
+dnl ---------------------------------------------------------------------------
+dnl Boilerplate
+dnl ---------------------------------------------------------------------------
+
+AC_PREREQ(2.13)
+
+AC_INIT(libxorp/xorp.h)
+AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_SUBDIRS(cli/libtecla)
+AC_CANONICAL_SYSTEM
+AC_CANONICAL_HOST
+AM_INIT_AUTOMAKE(xorp, 0.1)
+AM_CONFIG_HEADER(config.h)
+
+# Add --enable-maintainer-mode as a command-line option for folks who
+# want to play with auto* tools.
+AM_MAINTAINER_MODE
+
+dnl ----------------------------
+dnl XXX: libtool options
+dnl ----------------------------
+dnl AC_DISABLED_STATIC
+dnl AC_DISABLE_SHARED
+dnl AC_PROG_LIBTOOL
+
+
+dnl ----------------------------
+dnl Set host, host_alias, host_cpu, host_vendor, host_os
+dnl ----------------------------
+
+case "${host_os}" in
+    solaris* )
+	AC_DEFINE(HOST_OS_SOLARIS)
+    ;;
+    bsdi* )
+	AC_DEFINE(HOST_OS_BSDI)
+    ;;
+    freebsd* )
+	AC_DEFINE(HOST_OS_FREEBSD)
+    ;;
+    openbsd* )
+	AC_DEFINE(HOST_OS_OPENBSD)
+    ;;
+    netbsd* )
+	AC_DEFINE(HOST_OS_NETBSD)
+    ;;
+    linux* )
+	AC_DEFINE(HOST_OS_LINUX)
+    ;;
+esac
+
+AC_VALIDATE_CACHED_SYSTEM_TUPLE(
+	echo "Removing stale config.cache and restarting configure"
+	rm -f config.cache
+	exec ./configure
+)
+
+
+dnl ---------------------------------------------------------------------------
+dnl Command line options
+dnl ---------------------------------------------------------------------------
+
+dnl ----------------------------
+dnl --enable-debug-msgs
+dnl ----------------------------
+AC_ARG_ENABLE(debug-msgs,
+	[  --enable-debug-msgs     Enable debug messages ],
+)
+
+dnl ----------------------------
+dnl --enable-debug-fnames (GCC)
+dnl ----------------------------
+AC_ARG_ENABLE(debug-fnames,
+	[  --enable-debug-fnames   Enable function names in debug messages (requires GCC)],
+)
+
+dnl ----------------------------
+dnl --enable-optimize
+dnl ----------------------------
+AC_ARG_ENABLE(optimize,
+	[  --enable-optimize       Enable compiler optimizations],
+)
+
+dnl ----------------------------
+dnl --enable-profile
+dnl ----------------------------
+AC_ARG_ENABLE(profile,
+	[  --enable-profile        Turn on profiling],
+)
+
+dnl ----------------------------
+dnl --disable-ipv6
+dnl ----------------------------
+AC_ARG_ENABLE(ipv6,
+	[  --disable-ipv6          Disable IPv6 support],
+)
+
+dnl ----------------------------
+dnl --enable-sim
+dnl ----------------------------
+TRY_USE_SIM=false
+AC_ARG_ENABLE(sim,
+	[  --enable-sim            Enable simulator],
+  if eval "test x$enable_sim = xyes"; then
+    TRY_USE_SIM=true;
+  else
+    TRY_USE_SIM=false;
+  fi
+  ,
+)
+AM_CONDITIONAL(TRY_USE_SIM, test x$enable_sim = xyes)
+
+dnl ----------------------------
+dnl --enable-advanced-mcast-api
+dnl ----------------------------
+AC_ARG_ENABLE(advanced-mcast-api,
+	[  --enable-advanced-mcast-api   Enable advanced multicast API ],
+)
+if test "X${enable_advanced_mcast_api}" = "Xyes" ; then
+	AC_DEFINE(ENABLE_ADVANCED_MCAST_API)
+fi
+
+dnl ----------------------------
+dnl --with-dmalloc
+dnl ----------------------------
+dnl XXX: XR_WITH_DMALLOC_DIR (a local modified version of AM_WITH_DMALLOC)
+dnl is specified later, so it will overwrite -ld
+builtin(include, config/dmalloc.m4)
+
+
+
+dnl ---------------------------------------------------------------------------
+dnl Compiler probing
+dnl ---------------------------------------------------------------------------
+
+AC_PROG_CC
+AC_PROG_CPP
+
+AC_PROG_CXX
+AC_PROG_CXXCPP
+
+AC_LANG_CPLUSPLUS
+
+dnl
+dnl Include the macros for testing compiler-supported command-line options
+dnl
+builtin(include, config/compiler_flags.m4)
+
+
+dnl  ----------------------------
+dnl  Get project-specific macros
+dnl ----------------------------
+
+builtin(include, config/acxorp.m4)
+
+
+dnl ---------------------------------------------------------------------------
+dnl Additional tool probes
+dnl ---------------------------------------------------------------------------
+
+dnl ----------------------------
+dnl CPP GNU variable arguments
+dnl ----------------------------
+
+AC_CACHE_CHECK(
+	"whether preprocessor supports GNU style variable argument macros",
+	xorp_cv_cpp_gnu_va_args,
+	AC_TRY_CPP(
+		[
+			#define SOME_PRINTF(args...) printf(args)
+			SOME_PRINTF("hello %s %d", "world", '\n');
+		],
+		xorp_cv_cpp_gnu_va_args=yes,
+		xorp_cv_cpp_gnu_va_args=no
+	)
+)
+if test $xorp_cv_cpp_gnu_va_args = "yes" ; then
+	AC_DEFINE(CPP_SUPPORTS_GNU_VA_ARGS)
+fi
+
+AC_PROG_INSTALL
+dnl XXX: AUTOMAKE
+dnl AM_PROG_LIBTOOL
+AC_PROG_LN_S
+AC_PROG_RANLIB
+
+AC_CHECK_TOOL(AR, ar)
+
+AC_CHECK_TOOL(GMAKE, gmake, :)
+if test "X${ac_cv_prog_GMAKE}" != "Xgmake" ; then
+   echo "The default XORP build process requires GNU make installed."
+   exit
+fi
+
+AC_CACHE_CHECK(if default make is GNU make, xorp_cv_default_gmake,
+		  if (make -version) < /dev/null > /dev/null 2>&1 ; then
+		    DEFAULT_GMAKE="yes"
+		  else
+		    DEFAULT_GMAKE="no"
+		  fi
+		  xorp_cv_default_gmake=${DEFAULT_GMAKE})
+
+AC_CHECK_PROGS(PYTHON, python2 python, "NO_PYTHON")
+if test "${PYTHON}" != "NO_PYTHON" ; then
+  AC_CACHE_CHECK(
+    "python version 2.0 or above", xorp_python_good, 
+    changequote(<<,>>)dnl
+    PY_VERSION=`$PYTHON -c 'import sys; print sys.version[[:3]]' | tr -cd '[[:digit:]]'`
+    changequote([,])dnl
+    if test 0${PY_VERSION} -ge 20 ; then
+      xorp_python_good="yes"
+    else
+      xorp_python_good="no"
+    fi
+  )
+fi
+
+PY_BUILD="#"
+if test "${xorp_python_good}" = "yes" ; then
+   PY_BUILD=''
+fi
+AC_SUBST(PY_BUILD)
+AC_SUBST(PYTHON)
+
+dnl ---------------------------------------------------------------------------
+dnl Check for libraries
+dnl ---------------------------------------------------------------------------
+
+dnl XXX Into C to avoid name mangling problems when checking libraries 
+AC_LANG_C
+
+AC_SEARCH_LIBS(socket, socket)
+AC_SEARCH_LIBS(inet_addr, nsl)
+AC_SEARCH_LIBS(dlopen, dl)
+
+dnl Replace main with a function in -lc:
+dnl AC_CHECK_LIB(c, main)
+dnl XXX: XR_WITH_DMALLOC_DIR must be after -lc otherwise it won't have efect
+dnl XXX: XR_WITH_DMALLOC_DIR is a local modified version of AM_WITH_DMALLOC
+XR_WITH_DMALLOC_DIR
+dnl Replace main with a function in -lutil:
+dnl AC_CHECK_LIB(util, main)
+dnl AC_CHECK_LIB(crypt, crypt)
+
+dnl -- Back to C++ now we've finished checking for libraries
+AC_LANG_CPLUSPLUS
+
+dnl ---------------------------------------------------------------------------
+dnl Check for header files and types
+dnl ---------------------------------------------------------------------------
+
+AC_HEADER_STDC
+
+dnl
+dnl Check for misc. header files
+dnl
+AC_CHECK_HEADERS(sys/ioctl.h sys/sysctl.h sys/filio.h net/if_var.h net/if_dl.h ifaddrs.h netinet/pim.h linux/rtnetlink.h)
+
+dnl
+dnl XXX ether_addr is defined in sys/ethernet.h or net/ethernet.h
+dnl
+AC_CHECK_HEADERS(sys/ethernet.h net/ethernet.h)
+if test "$ac_cv_header_sys_ethernet_h" = "yes"
+then
+	xr_cv_ether_header="sys/ethernet.h"
+fi
+if test "$ac_cv_header_net_ethernet_h" = "yes"
+then
+	xr_cv_ether_header="net/ethernet.h"
+fi
+
+dnl
+dnl Check for ether_ntoa
+dnl
+AC_CACHE_CHECK(for ether_ntoa in $xr_cv_ether_header,
+	       xr_cv_have_ether_ntoa,
+	       AC_EGREP_HEADER(ether_ntoa, 
+			       $xr_cv_ether_header,
+			       xr_cv_have_ether_ntoa=yes,
+			       xr_cv_have_ether_ntoa=no)
+)
+if test x"$xr_cv_have_ether_ntoa" = x"no" ; then
+   AC_DEFINE(NEED_ETHER_NTOA)
+fi
+
+dnl
+dnl Check for ether_aton
+dnl
+AC_CACHE_CHECK(for ether_aton in $xr_cv_ether_header,
+	       xr_cv_have_ether_aton,
+	       AC_EGREP_HEADER(ether_aton, 
+			       $xr_cv_ether_header,
+			       xr_cv_have_ether_aton=yes,
+			       xr_cv_have_ether_aton=no)
+)
+if test x"$xr_cv_have_ether_aton" = x"no" ; then
+   AC_DEFINE(NEED_ETHER_ATON)
+fi
+
+
+dnl ---------------------------------------------------------------------------
+dnl Check for standard size types.  The defaults are only valid on some
+dnl systems so we hope that <inttypes.h> exists when they're wrong.
+dnl ---------------------------------------------------------------------------
+
+AC_CHECK_HEADERS(stdint.h inttypes.h)
+
+dnl Some systems have these in <stdint.h>, just to be difficult...
+AC_CACHE_CHECK(for uint8_t in <stdint.h>, xorp_cv_uint8_t_in_stdint_h,
+        AC_EGREP_HEADER(uint8_t,
+                        stdint.h,
+                        xorp_cv_uint8_t_in_stdint_h=yes,
+                        xorp_cv_uint8_t_in_stdint_h=no))
+if test $xorp_cv_uint8_t_in_stdint_h = "no"
+then
+         AC_CHECK_TYPE(uint8_t,  unsigned char)
+fi
+
+AC_CACHE_CHECK(for uint16_t in <stdint.h>, xorp_cv_uint16_t_in_stdint_h,
+        AC_EGREP_HEADER(uint16_t,
+                        stdint.h,
+                        xorp_cv_uint16_t_in_stdint_h=yes,
+                        xorp_cv_uint16_t_in_stdint_h=no))
+if test $xorp_cv_uint16_t_in_stdint_h = "no"
+then
+         AC_CHECK_TYPE(uint16_t,  unsigned short)
+fi
+
+AC_CACHE_CHECK(for uint32_t in <stdint.h>, xorp_cv_uint32_t_in_stdint_h,
+        AC_EGREP_HEADER(uint32_t,
+                        stdint.h,
+                        xorp_cv_uint32_t_in_stdint_h=yes,
+                        xorp_cv_uint32_t_in_stdint_h=no))
+if test $xorp_cv_uint32_t_in_stdint_h = "no"
+then
+         AC_CHECK_TYPE(uint32_t,  unsigned int)
+fi
+
+dnl ----------------------------
+dnl Try for new.h
+dnl ----------------------------
+
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+AC_CACHE_CHECK(for working new.h, xorp_cv_good_new_h,
+  AC_TRY_RUN([
+		#include <new.h>
+		int main(int c, char **v) {
+		int a;
+		int *b = new(&a) int;
+		return 0;
+		}], 
+		xorp_cv_good_new_h=yes, 
+		xorp_cv_good_new_h=no, 
+		xorp_cv_good_new_h=no))
+AC_LANG_RESTORE
+if test "$xorp_cv_good_new_h" = yes; then
+  AC_DEFINE(HAVE_NEW_H)
+fi
+
+dnl ----------------------------
+dnl TODO: the following two macros cause autoconf to complain.
+dnl ----------------------------
+
+AC_C_BIGENDIAN
+AC_C_CHAR_UNSIGNED
+
+
+dnl ---------------------------------------------------------------------------
+dnl Check for typedefs and structures
+dnl ---------------------------------------------------------------------------
+
+
+dnl ---------------------------------------------------------------------------
+dnl Check for typedefs and structures
+dnl ---------------------------------------------------------------------------
+
+AC_STRUCT_TM
+
+XR_TYPE_SIG_T
+
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_TYPE_SIGNAL
+
+
+
+dnl ----------------------------
+dnl Check for socklen_t
+dnl ----------------------------
+
+AC_MSG_CHECKING(whether socklen_t is defined)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+],
+[
+socklen_t socklen;
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_SOCKLEN_T)],
+ AC_MSG_RESULT(no))
+
+dnl ----------------------------
+dnl Check for sa_len in sockaddr
+dnl ----------------------------
+
+AC_MSG_CHECKING(whether struct sockaddr has a sa_len field)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+],
+[
+static struct sockaddr sockaddr;
+int sa_len = sizeof(sockaddr.sa_len);
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_SA_LEN)],
+ AC_MSG_RESULT(no))
+
+dnl ----------------------------
+dnl Check for sin_len in sockaddr_in
+dnl ----------------------------
+
+AC_MSG_CHECKING(whether struct sockaddr_in has a sin_len field)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <netinet/in.h>
+],
+[
+static struct sockaddr_in sockaddr_in;
+int sin_len = sizeof(sockaddr_in.sin_len);
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_SIN_LEN)],
+ AC_MSG_RESULT(no))
+
+dnl ----------------------------
+dnl Check for sun_len in sockaddr_un
+dnl ----------------------------
+
+AC_MSG_CHECKING(whether struct sockaddr_un has a sun_len field)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/un.h>
+],
+[
+static struct sockaddr_un sockaddr_un;
+int sun_len = sizeof(sockaddr_un.sun_len);
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_SUN_LEN)],
+ AC_MSG_RESULT(no))
+
+dnl ----------------------------
+dnl Check for mreqn
+dnl ----------------------------
+
+AC_MSG_CHECKING(whether struct ip_mreqn is defined)
+AC_EGREP_HEADER(ip_mreqn, netinet/in.h,
+	        [
+		 AC_MSG_RESULT(yes)
+		 AC_DEFINE(HAVE_ST_IP_MREQN)
+		],
+		 AC_MSG_RESULT(no)
+)
+
+dnl ----------------------------
+dnl Check for advanced multicast API support
+dnl ----------------------------
+
+AC_MSG_CHECKING(whether mfcctl2 is defined)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <net/route.h>
+#include <netinet/in.h>
+#include "mrt/include/netinet/ip_mroute_adv_api_freebsd_4_5.h"
+],
+[
+static struct mfcctl2 mfcctl2;
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_MFCCTL2)],
+ AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(whether mfcctl2 has mfcc_flags field)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <net/route.h>
+#include <netinet/in.h>
+#include "mrt/include/netinet/ip_mroute_adv_api_freebsd_4_5.h"
+],
+[
+static struct mfcctl2 mfcctl2;
+int len = sizeof(mfcctl2.mfcc_flags);
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_MFCC_FLAGS)],
+ AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(whether mfcctl2 has mfcc_rp field)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <net/route.h>
+#include <netinet/in.h>
+#include "mrt/include/netinet/ip_mroute_adv_api_freebsd_4_5.h"
+],
+[
+static struct mfcctl2 mfcctl2;
+int len = sizeof(mfcctl2.mfcc_rp);
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_MFCC_RP)],
+ AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(whether mf6cctl2 is defined)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <net/route.h>
+#include <netinet/in.h>
+#include "mrt/include/netinet/ip6_mroute_adv_api_freebsd_4_5.h"
+],
+[
+static struct mf6cctl2 mf6cctl2;
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_MF6CCTL2)],
+ AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(whether mf6cctl2 has mf6cc_flags field)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <net/route.h>
+#include <netinet/in.h>
+#include "mrt/include/netinet/ip6_mroute_adv_api_freebsd_4_5.h"
+],
+[
+static struct mf6cctl2 mf6cctl2;
+int len = sizeof(mf6cctl2.mf6cc_flags);
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_MF6CC_FLAGS)],
+ AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(whether mf6cctl2 has mf6cc_rp field)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <net/route.h>
+#include <netinet/in.h>
+#include "mrt/include/netinet/ip6_mroute_adv_api_freebsd_4_5.h"
+],
+[
+static struct mf6cctl2 mf6cctl2;
+int len = sizeof(mf6cctl2.mf6cc_rp);
+],
+[AC_MSG_RESULT(yes)
+ AC_DEFINE(HAVE_MF6CC_RP)],
+ AC_MSG_RESULT(no))
+
+
+dnl ---------------------------------------------------------------------------
+dnl Check for library functions
+dnl ---------------------------------------------------------------------------
+
+AC_CHECK_FUNCS(strerror)
+AC_CHECK_FUNCS(getifaddrs)
+AC_CHECK_FUNCS(if_nametoindex)
+
+
+dnl ---------------------------------------------------------------------------
+dnl Check for system services
+dnl ---------------------------------------------------------------------------
+
+dnl-----------------------------
+dnl Check for IPv6
+dnl-----------------------------
+AC_MSG_CHECKING(whether the system has IPv6 stack)
+if test "${enable_ipv6}" = "no"; then
+  AC_MSG_RESULT(disabled)
+else
+  AC_LANG_SAVE
+  AC_LANG_C
+  AC_TRY_RUN([ /* AF_INET6 available check */
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+main()
+{
+ if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
+   return (1);
+ else
+   return (0);
+}
+],
+  [
+   dnl AC_DEFINE(HAVE_IPV6)
+   AC_MSG_RESULT(yes)
+   ipv6=yes],
+  [AC_MSG_RESULT(no)
+   ipv6=no],
+  [AC_MSG_RESULT(no)
+   ipv6=no])
+  AC_LANG_RESTORE
+fi
+
+dnl
+dnl Misc. IPv6-specific checks
+dnl
+if test "${ipv6}" = "yes"; then
+  builtin(include, config/acipv6.m4)
+fi
+
+dnl
+dnl Final word on having IPv6
+dnl
+if test "${ipv6}" = "yes"; then
+  AC_DEFINE(HAVE_IPV6)
+fi
+
+
+dnl ------------------------------------
+dnl Check for routing sockets (AF_ROUTE)
+dnl ------------------------------------
+
+AC_MSG_CHECKING(routing sockets (AF_ROUTE))
+AC_LANG_SAVE
+AC_LANG_C
+AC_TRY_RUN([
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/route.h>
+main()
+{
+  int sock;
+  int rtm_version = RTM_VERSION;
+  
+  sock = socket(AF_ROUTE, SOCK_RAW, 0);
+  if ((sock < 0) && (errno == EINVAL))
+    return (1);
+  return (0);
+}
+],
+  [AC_DEFINE(HAVE_AF_ROUTE)
+   AC_MSG_RESULT(yes)],
+  [AC_MSG_RESULT(no)],
+  [AC_MSG_RESULT(no)])
+AC_LANG_RESTORE
+
+dnl ------------------------------------
+dnl Check for netlink (AF_NETLINK)
+dnl ------------------------------------
+
+AC_MSG_CHECKING(netlink kernel access (AF_NETLINK))
+AC_LANG_SAVE
+AC_LANG_C
+AC_TRY_RUN([
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+main()
+{
+  int sock;
+  
+  sock = socket(AF_NETLINK, SOCK_RAW, AF_INET);
+  if ((sock < 0) && (errno == EINVAL))
+    return (1);
+  return (0);
+}
+],
+  [AC_DEFINE(HAVE_AF_NETLINK)
+   AC_MSG_RESULT(yes)],
+  [AC_MSG_RESULT(no)],
+  [AC_MSG_RESULT(no)])
+AC_LANG_RESTORE
+
+dnl ------------------------------------
+dnl Check for ioctl interface read (SIOCGIFCONF)
+dnl ------------------------------------
+
+AC_MSG_CHECKING(ioctl interface read (SIOCGIFCONF))
+AC_LANG_SAVE
+AC_LANG_C
+AC_TRY_RUN([
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+main()
+{
+    int sock, lastlen;
+    struct ifconf ifconf;
+    int ifnum = 1024;
+    
+    ifconf.ifc_buf = NULL;
+    lastlen = 0;
+    
+    if ( (sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	return (1);
+    
+    /* Loop until SIOCGIFCONF success. */
+    for ( ; ; ) {
+        ifconf.ifc_len = ifnum*sizeof(struct ifreq);
+        ifconf.ifc_buf = (caddr_t)realloc(ifconf.ifc_buf, ifconf.ifc_len);
+        if (ioctl(sock, SIOCGIFCONF, &ifconf) < 0) {
+            /* Check UNPv1, 2e, pp 435 for an explanation why we need this */
+            if ((errno != EINVAL) || (lastlen != 0))
+		return (1);
+        } else {
+            if (ifconf.ifc_len == lastlen)
+                break;          /* success, len has not changed */
+            lastlen = ifconf.ifc_len;
+        }
+        ifnum += 10;
+    }
+    
+    return (0);
+}
+],
+  [AC_DEFINE(HAVE_SIOCGIFCONF)
+   AC_MSG_RESULT(yes)],
+  [AC_MSG_RESULT(no)],
+  [AC_MSG_RESULT(no)])
+AC_LANG_RESTORE
+
+dnl ------------------------------------
+dnl Check for sysctl interface read (NET_RT_IFLIST)
+dnl ------------------------------------
+
+AC_MSG_CHECKING(sysctl interface read (NET_RT_IFLIST))
+AC_LANG_SAVE
+AC_LANG_C
+AC_TRY_RUN([
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <sys/socket.h>
+
+main()
+{
+    size_t buflen;
+    /* Interface list and routing table dump MIBs */
+    int mib1[] = {CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_IFLIST, 0};
+    
+    if (sysctl(mib1, sizeof(mib1)/sizeof(mib1[0]), NULL, &buflen, NULL, 0) < 0)
+	return (1);
+    
+    return (0);
+}
+],
+  [AC_DEFINE(HAVE_NET_RT_IFLIST)
+   AC_MSG_RESULT(yes)],
+  [AC_MSG_RESULT(no)],
+  [AC_MSG_RESULT(no)])
+AC_LANG_RESTORE
+
+dnl ------------------------------------
+dnl Check for sysctl routing table read (NET_RT_DUMP)
+dnl ------------------------------------
+
+AC_MSG_CHECKING(sysctl routing table read (NET_RT_DUMP))
+AC_LANG_SAVE
+AC_LANG_C
+AC_TRY_RUN([
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <sys/socket.h>
+
+main()
+{
+    size_t buflen;
+    /* Interface list and routing table dump MIBs */
+    int mib1[] = {CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_DUMP, 0};
+    
+    if (sysctl(mib1, sizeof(mib1)/sizeof(mib1[0]), NULL, &buflen, NULL, 0) < 0)
+	return (1);
+    
+    return (0);
+}
+],
+  [AC_DEFINE(HAVE_NET_RT_DUMP)
+   AC_MSG_RESULT(yes)],
+  [AC_MSG_RESULT(no)],
+  [AC_MSG_RESULT(no)])
+AC_LANG_RESTORE
+
+
+dnl ---------------------------------------------------------------------------
+dnl FEA Related
+dnl ---------------------------------------------------------------------------
+
+dnl ---------------------------------------------------------------------------
+dnl FEA check - only builds on freebsd and uses coarse grained os
+dnl check, should get for prescence of routing socket support, netlink, etc
+dnl ---------------------------------------------------------------------------
+
+build_fea_rtsock=false
+case "${host_os}" in
+freebsd* ) 
+    build_fea_rtsock=true
+    ;;
+* )
+    build_fea_rtsock=false
+    ;;
+esac
+
+AM_CONDITIONAL(FEA_BUILD_RTSOCK, test x$build_fea_rtsock = xtrue)
+
+dnl ---------------------------------------------------------------------------
+dnl OSPFD Related
+dnl ---------------------------------------------------------------------------
+
+dnl ---------------------------------------------------------------------------
+dnl OSPFD check - only builds on linux and freebsd and uses coarse grained os
+dnl check
+dnl ---------------------------------------------------------------------------
+
+AC_CACHE_CHECK(ospfd platform, xorp_cv_ospfd_os,
+[
+    case "${host_os}" in
+	freebsd* ) 
+	    xorp_cv_ospfd_os="freebsd"
+	;;
+	linux* ) 
+	    xorp_cv_ospfd_os="unsupported"
+	    dnl TODO: Uncomment the next line and remove the previous line
+	    dnl TODO: if OSPFD is supported on Linux.
+	    dnl xorp_cv_ospfd_os="linux"
+	;;
+	* )
+	    xorp_cv_ospfd_os="unsupported"
+	;;
+    esac
+])
+
+OSPFD_OS=${xorp_cv_ospfd_os}
+if test ${OSPFD_OS} != "unsupported" ; then
+    OSPFD="ospfd"
+else
+    echo "OSPFD will not be built."
+    OSPFD=""
+fi
+
+AC_SUBST(OSPFD)
+AC_SUBST(OSPFD_OS)
+
+
+dnl ---------------------------------------------------------------------------
+dnl RIP Related
+dnl ---------------------------------------------------------------------------
+
+dnl ---------------------------------------------------------------------------
+dnl RIP check - only builds on freebsd and uses coarse grained os
+dnl check
+dnl ---------------------------------------------------------------------------
+
+AC_CACHE_CHECK(rip platform, xorp_cv_rip_os,
+[
+    case "${host_os}" in
+	freebsd* ) 
+	    xorp_cv_rip_os="freebsd"
+	;;
+	linux* ) 
+	    xorp_cv_rip_os="unsupported"
+	    dnl TODO: Uncomment the next line and remove the previous line
+	    dnl if RIP is supported on Linux.
+	    dnl xorp_cv_rip_os="linux"
+	;;
+	* )
+	    xorp_cv_rip_os="unsupported"
+	;;
+    esac
+])
+
+RIP_OS=${xorp_cv_rip_os}
+if test ${RIP_OS} != "unsupported" ; then
+    RIP="rip"
+else
+    echo "RIP will not be built."
+    RIP=""
+fi
+
+AC_SUBST(RIP)
+AC_SUBST(RIP_OS)
+
+
+dnl ---------------------------------------------------------------------------
+dnl Raw socket
+dnl ---------------------------------------------------------------------------
+dnl
+dnl XXX: What is 'Raw IPv4 header'? Read below.
+dnl
+dnl Different OS-es have a different view of what a raw IPv4 header passed
+dnl between the kernel and the user space looks like. In some OS-es
+dnl such as GNU/Linux nothing in the IP header is modified: e.g., the
+dnl 'ip_len' field is always in network-order and includes the IP header
+dnl length. In other OS-es such as various *BSD flavors the 'ip_len'
+dnl is already in host-order and, for the incoming packets, excludes
+dnl the IP header length (typically in 'ip_input()' in the kernel).
+dnl
+dnl A notable exception is OpenBSD (at least version 2.7) which has
+dnl the 'ip_len' of incoming packets in host-order and excludes the IP header
+dnl length, but the 'ip_len' of the outgoing raw packets prepared by
+dnl the application must be in network order, and must include the IP header
+dnl length. Go figure...
+dnl
+
+case "${host_os}" in
+    openbsd* )
+    AC_DEFINE(IPV4_RAW_OUTPUT_IS_RAW)
+;;
+    linux* )
+    AC_DEFINE(IPV4_RAW_OUTPUT_IS_RAW)
+    AC_DEFINE(IPV4_RAW_INPUT_IS_RAW)
+;;
+esac
+
+dnl ---------------------------------------------------------------------------
+dnl Debug flags
+dnl ---------------------------------------------------------------------------
+
+if test "X${enable_debug_msgs}" = "Xyes" ; then
+	AC_DEFINE(DEBUG_LOGGING_GLOBAL)
+fi
+
+dnl ---------------------------------------------------------------------------
+dnl Check for compiler characteristics
+dnl ---------------------------------------------------------------------------
+
+dnl ----------------------------
+dnl GCC-specific warning flags
+dnl ----------------------------
+
+if test "$GCC" = yes
+then
+	dnl
+	dnl TODO: add -ansi -pedantic
+	dnl XXX: Flag -Wtraditional is not recommended for C, because:
+	dnl	- On FreeBSD-4.5 macros like IN_CLASSA(i) from netinet/in.h
+	dnl	  create a warning for gcc 2.95.3
+	dnl	- On Linux RedHat 7.2, #elif creates a warning for gcc 2.96 
+	dnl
+	CPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs -Wnon-const-format"
+	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wmissing-prototypes -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wnon-const-format -Wtraditional"
+	dnl CFLAGS="$CFLAGS $CPARANOIDFLAGS"
+	dnl CXXFLAGS="$CXXFLAGS $CXXPARANOIDFLAGS"
+	XR_TRY_ADD_CFLAGS($CPARANOIDFLAGS)
+	XR_TRY_ADD_CXXFLAGS($CXXPARANOIDFLAGS)
+	XR_TRY_ADD_CXXFLAGS("-ftemplate-depth-20")
+	dnl echo "C flags = $CFLAGS"
+	dnl echo "C++ flags = $CXXFLAGS"
+
+	dnl default compiler flags have optimization turned on which
+	dnl can cause helpful debugging info to be optimized out.
+	if test "X${enable_optimize}" != "Xyes" ; then
+		dnl Could just append -O0, but two -O args are icky
+		dnl We make assumption change is O2 because extended regex's
+		dnl are not portable...
+		changequote(<<, >>)dnl preserve braces in sed expressions
+		CFLAGS=`echo $CFLAGS | sed 's/-O2//g'`
+		CXXFLAGS=`echo $CXXFLAGS | sed 's/-O2//g'`
+		changequote([, ])dnl
+	fi
+	if test "X${enable_profile}" = "Xyes" ; then
+		CFLAGS="${CFLAGS} -pg"
+		CXXFLAGS="${CXXFLAGS} -pg"
+	fi
+	if test "X${enable_debug_fnames}" = "Xyes" ; then
+		AC_DEFINE(DEBUG_PRINT_FUNCTION_NAME)
+	fi
+fi
+
+
+dnl ---------------------------------------------------------------------------
+dnl Add files to under-go substitution here.
+dnl ---------------------------------------------------------------------------
+
+AC_OUTPUT(
+	Makefile
+	bgp/Makefile
+	bgp/harness/Makefile
+	docs/Makefile
+	docs/bgp/Makefile
+	docs/design_arch/Makefile
+	docs/fea/Makefile
+	docs/libxipc/Makefile
+	docs/libxorp/Makefile
+	docs/mfea/Makefile
+	docs/mld6igmp/Makefile
+	docs/multicast/Makefile
+	docs/pim/Makefile
+	docs/pim_testsuite/Makefile
+	docs/rib/Makefile
+	docs/rtrmgr/Makefile
+	docs/test_harness/Makefile
+	cli/Makefile
+	fea/Makefile
+	libcomm/Makefile
+	libproto/Makefile
+	libxipc/Makefile
+	libxorp/Makefile
+	mfea/Makefile
+	mld6igmp/Makefile 
+	mrt/Makefile
+	ospfd/Makefile
+	ospfd/src/Makefile
+	ospfd/xorp/Makefile
+	pim/Makefile
+	rib/Makefile
+	rip/Makefile
+	rip/routed/Makefile
+	rip/route6d/Makefile
+	rtrmgr/Makefile
+	utils/Makefile
+	xrl/Makefile
+	xrl/interfaces/Makefile
+	xrl/targets/Makefile
+	xrl/tests/Makefile
+, 
+	echo timestamp > stamp-h
+)
+
+dnl ---------------------------------------------------------------------------
+dnl Warn if default make is not gmake
+dnl ---------------------------------------------------------------------------
+
+if test "X${DEFAULT_GMAKE}" != "Xyes" ; then
+   echo
+   echo "=============================================================================="
+   echo "The default \"make\" on this machine is not GNU make, but \"gmake\" exists"
+   echo "and should be used when building XORP."
+   echo "=============================================================================="
+   echo
+fi
+
+
+dnl ---------------------------------------------------------------------------
+dnl END
+dnl ---------------------------------------------------------------------------
+

@@ -1,0 +1,304 @@
+#!/usr/local/bin/perl
+
+# makekdedoc -- Generates HTML documentation KDE libraries using KDOC 2.
+#		Sirtaj Singh Kang <taj@kde.org> Apr 1999.
+# 		$Id$
+
+require 5.000;
+
+use Getopt::Long;
+
+%files = ();
+%libs = ();
+%mods = ();
+%dirs = ();
+
+($ver = '$Revision$') =~ s/\$//g;
+$rulefile= "";
+$libdir=$ENV{KDOCLIBS};
+$outdir="srcdoc";
+$url="";
+$srcdir=".";
+$kdoc= "kdoc";
+$format="html";
+$kdocopt = "--strip-h-path --compress";
+$cwd = `pwd`;
+chop $cwd;
+
+# options
+
+Getopt::Long::config qw( no_ignore_case permute bundling auto_abbrev );
+
+$err = GetOptions( 
+        "url|u=s",	\$url,
+        "outputdir|d=s", \$outdir,
+	"rule-file|r=s", \$rulefile,
+        "help|h",       \&show_usage,
+        "libdir|L=s",   \$libdir,
+	"kdoc|s=s",	\$kdoc,
+	"srcdir|b=s",	\$srcdir,
+	"format|f=s",	\$format,
+	"kdocopt|p=s",  \$extraopts );
+
+if ( $err == 0 ) {
+	show_usage();
+}
+
+$srcdir =~ s#^\.#$cwd#g;
+$outdir =~ s#^\.#$cwd#g;
+$outdir = $cwd."/$outdir" unless $outdir =~ m#^/#;
+$url = $outdir unless $url ne "";
+$libdir=$ENV{HOME}."/.kdoc" unless defined $libdir;
+
+if ( $rulefile eq "" ) {
+	$rulefile = $srcdir."/kdoc.rules";
+}
+else {
+	$rulefile =~ s#^\.#$cwd#g;
+}
+
+# read rule file
+
+readRules();
+
+die "$0: no modules to document.\n" if $#mods < 0;
+
+# generate docs
+
+if ($#ARGV >= 0 ) {
+	@mods = @ARGV;
+}
+
+foreach my $mod ( @mods ) {
+	print "$0: generating $mod...\n";
+
+	die "module $mod: no files defined\n" unless exists $files{ $mod };
+
+	# build the kdoc command
+	chdir $dirs{ $mod } || 
+		die "Couldn't cd to: $dirs{$mod} (try the -h option)\n";
+	@filelist = glob( $files{ $mod } );
+
+	if ( $#filelist < 0 ) {
+		chdir $cwd;
+		die "module $mod: no files defined\n";
+	}
+
+	$cmd = "$kdoc $kdocopt --format $format $extraopts -n '$mod' -d '$outdir/$mod'"
+		." -L '$libdir' "
+		."-u '$url/$mod' '".join( "' '", @filelist)."' ".$libs{ $mod };
+
+	system( $cmd ) == 0 || die "kdoc call failed:\n$cmd\n";
+
+	chdir $cwd;
+}
+
+exit 0;
+### done
+
+sub readRules
+{
+	open ( RULES, "$rulefile" ) || die "$0: couldn't read ",$rulefile,".".
+		"(try the -h option)\n";
+
+	while( <RULES> ) {
+		next unless /^\s*([\w\/]+)	# module
+			_(\w+)			# key
+			\s*=\s*/xs;		# rest: value
+
+			$mod = $1;
+		$key = $2;
+		$v = $';
+		chop $v;
+
+		if ( $key eq "FILES" ) {
+			$files{ $mod } = $v;
+		}
+		elsif ( $key eq "LIBS" ) {
+			$libs{ $mod } = $v;
+		}
+		elsif ( $key eq "MODULES" ) {
+			@mods = split /\s+/, $v;
+
+# default path for module is $srcdir/$mod
+			foreach my $mod ( @mods ) {
+				$dirs{ $mod } = "$srcdir/$mod";
+			}
+		}
+		elsif ( $key eq "PATH" ) {
+			if ( $v =~ m#^/# ) {
+# allow absolute paths
+				$dirs{ $mod } = $v;
+			}
+			else {
+				$dirs{ $mod } = "$srcdir/$v";
+			}
+
+		}
+		else {
+			die "$rulefile:$.: Unrecognized key: $key\n";
+		}
+	}
+
+	close RULES;
+}
+
+
+
+sub show_usage
+{
+	print STDERR<<EOF;
+$0:
+	Generates HTML documentation for KDE libs.
+	Author: Sirtaj S. Kang <taj\@kde.org>
+	$ver
+	
+Usage:
+	$0 [--rule-file=<rulefile>] [--libdir=<libdir>]
+		[--outputdir=<outputdir>] [--url=<url>]
+		[--srcdir=<kdelibs src dir>]
+		[--kdoc=<path to kdoc>] [<library>...]
+
+	By default all libraries defined by the rule file are
+	documented.
+
+Defaults:
+	rulefile	"<srcdir>/kdoc.rules"
+	libdir		"\$KDOCLIBS" or "\$HOME/.kdoc"
+	outputdir	"./srcdoc"
+	url		same as outdir
+	srcdir		current dir
+	kdoc		"kdoc"
+	kdocopts	""
+EOF
+
+	exit 1;
+}
+
+
+
+
+
+
+=head1 NAME
+
+makekdedoc -- Generates HTML documentation for KDE libraries using B<KDOC>.
+
+=head1 SYNOPSIS
+
+	makekdedoc [--rule-file=<rulefile>] [--libdir=<libdir>]
+		[--outputdir=<outputdir>] [--url=<url>]
+		[--srcdir=<kdelibs src dir>]
+		[--kdoc=<path to kdoc>] [<library>...]
+
+	makekdedoc --help
+
+=head1 DESCRIPTION
+
+This is a perl script that uses B<KDOC> to generate documentation for
+kdelibs. A "rule" file is used to figure out the libraries to document,
+the order in which to document them and the libraries with which each
+one will be cross-referenced (eg kdeui uses -lkdecore). See L<"FILES"> 
+for more info.
+
+NOTE: The script assumes that you have already generated a Qt
+cross-reference using qt2kdoc[1].
+
+=head1 OPTIONS
+
+Defaults for each option are in square brackets.
+
+=over 4
+
+=item B<library...>
+
+Specify the libraries to document.  By default, all libraries defined by
+the rule file are documented.
+
+=item B<--outputdir> <path>, B<-d> <path> 
+
+The directory where the output will be written.	[`cwd`/srcdoc]
+
+=item B<--url> <url>, B<-u> <url>
+
+The base URL by which the generated docs will be accessed. For
+example, if your web server is configured to use $HOME/public_html for
+your home page, you could set the outputdir to $HOME/public_html/srcdoc
+and the url to http://myhost/~mylogin/srcdoc. [output dir]
+
+=item B<--rule-file> <path>, B<-r> <path>
+
+The path to the rule file to use for generating the documentation.
+[<srcdir>/kdoc.rules]
+
+=item B<--libdir> <path>, B<-L> <path>	
+
+The directory in which the KDOC cross-reference files are
+stored. [$KDOCLIBS if set, otherwise $HOME/.kdoc]
+
+=item B<--kdoc> <path>, B<-k> <path>	
+
+The path to the kdoc program. [kdoc]
+
+=item B<--kdocopt> <options>, B<-p> <options>
+
+Extra options to be passed to kdoc.
+
+=item B<--srcdir> <path>, B<-b> <path>	
+
+The path to the kdelibs source, eg "$HOME/baseline/kdelibs". [`cwd`]
+
+=item B<--help>, B<-h>
+
+Quit with a usage message.
+
+=back
+
+=head1 EXAMPLES
+
+	makekdedoc --srcdir $HOME/baseline/kdelibs 
+		--outputdir $HOME/public_html/src/kdelibs/
+		--url "http://www.ph.unimelb.edu.au/~ssk/src/kdelibs"
+
+=head1 FILES
+
+=over 4
+
+=item B<Rule file>
+
+This file lists the directories in the source directory to document. It
+also lists the files to document from each directory, and the libraries
+with which to cross-reference the generated documentation. Here is a small
+example that documents two libraries and links the second to the first.
+
+	# makekdedoc rule file
+	doc_MODULES = eenie meenie
+
+	# rules for eenie
+	eenie_FILES = *.h
+	eenie_LIBS = -lqt
+
+	# rules for meenie
+	meenie_FILES = a.h b.h
+	meenie_LIBS = -leenie -lqt
+
+In this example, all files in C<eenie/*.h> will be documented then two files
+from C<meenie/> will be documented, in the order declared in
+C<doc_MODULES>.
+
+=back
+
+=head1 SEE ALSO
+
+See L<kdoc[1]> and L<qt2kdoc[1]>.
+
+=head1 VERSION
+
+	makekdedoc $Revision$
+
+=head1 AUTHOR
+
+The script and this documentation were written by Sirtaj Singh Kang
+<taj@kde.org> in April 1999.
+
+=cut

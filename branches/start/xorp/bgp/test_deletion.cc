@@ -1,0 +1,759 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+
+// Copyright (c) 2001,2002 International Computer Science Institute
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software")
+// to deal in the Software without restriction, subject to the conditions
+// listed in the XORP LICENSE file. These conditions include: you must
+// preserve this copyright notice, and you cannot mention the copyright
+// holders in advertising related to the Software without their permission.
+// The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+// notice is a summary of the XORP LICENSE file; the license in that file is
+// legally binding.
+
+#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.4 2002/12/09 18:28:50 hodson Exp $"
+
+#include "bgp_module.h"
+#include "config.h"
+#include "libxorp/selector.hh"
+#include "libxorp/xlog.h"
+
+#include "main.hh"
+#include "route_table_base.hh"
+#include "route_table_ribin.hh"
+#include "route_table_debug.hh"
+#include "path_attribute_list.hh"
+#include "local_data.hh"
+#include "dump_iterators.hh"
+
+
+int main(int, char** argv) {
+    //stuff needed to create an eventloop
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
+    xlog_add_default_output();
+    xlog_start();
+    BGPMain bgpmain;
+    EventLoop* eventloop = bgpmain.get_eventloop();
+    LocalData localdata;
+    BGPPeer peer1(&localdata, NULL, NULL, &bgpmain);
+    PeerHandler handler1("test1", &peer1, NULL);
+    BGPPeer peer2(&localdata, NULL, NULL, &bgpmain);
+    PeerHandler handler2("test2", &peer2, NULL);
+
+    //trivial plumbing
+    BGPRibInTable<IPv4> *ribin 
+	= new BGPRibInTable<IPv4>("RIB-IN", &handler1);
+    BGPDebugTable<IPv4>* debug_table
+	 = new BGPDebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)ribin);
+    ribin->set_next_table(debug_table);
+    debug_table->set_output_file("/tmp/test_deletion");
+    debug_table->set_canned_response(ADD_USED);
+
+    //create a load of attributes 
+    IPNet<IPv4> net1("1.0.1.0/24");
+    IPNet<IPv4> net2("1.0.2.0/24");
+    IPNet<IPv4> net3("1.0.3.0/24");
+    IPNet<IPv4> net4("1.0.4.0/24");
+
+    IPv4 nexthop1("2.0.0.1");
+    NextHopAttribute<IPv4> nhatt1(nexthop1);
+
+    IPv4 nexthop2("2.0.0.2");
+    NextHopAttribute<IPv4> nhatt2(nexthop2);
+
+    IPv4 nexthop3("2.0.0.3");
+    NextHopAttribute<IPv4> nhatt3(nexthop3);
+
+    OriginAttribute igp_origin_att(IGP);
+
+    AsPath aspath1;
+    aspath1.add_AS_in_sequence(AsNum((uint16_t)1));
+    aspath1.add_AS_in_sequence(AsNum((uint16_t)2));
+    aspath1.add_AS_in_sequence(AsNum((uint16_t)3));
+    ASPathAttribute aspathatt1(aspath1);
+
+    AsPath aspath2;
+    aspath2.add_AS_in_sequence(AsNum((uint16_t)3));
+    aspath2.add_AS_in_sequence(AsNum((uint16_t)4));
+    aspath2.add_AS_in_sequence(AsNum((uint16_t)5));
+    ASPathAttribute aspathatt2(aspath2);
+
+    AsPath aspath3;
+    aspath3.add_AS_in_sequence(AsNum((uint16_t)6));
+    aspath3.add_AS_in_sequence(AsNum((uint16_t)6));
+    aspath3.add_AS_in_sequence(AsNum((uint16_t)7));
+    aspath3.add_AS_in_sequence(AsNum((uint16_t)8));
+    ASPathAttribute aspathatt3(aspath3);
+
+    PathAttributeList<IPv4>* palist1 =
+	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+
+    PathAttributeList<IPv4>* palist2 =
+	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+
+    PathAttributeList<IPv4>* palist3 =
+	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+
+    PathAttributeList<IPv4>*palist4;
+
+    //create a subnet route
+    SubnetRoute<IPv4> *sr1, *sr2;
+    UNUSED(sr2);
+    UNUSED(palist4);
+
+    InternalMessage<IPv4>* msg;
+
+    //================================================================
+    //Test1: trivial add and peering goes down
+    //================================================================
+    //add a route
+    debug_table->write_comment("****************************************************************");
+    debug_table->write_comment("TEST 1");
+    debug_table->write_comment("TRIVIAL ADD AND PEERING GOES DOWN");
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+    debug_table->write_separator();
+
+    //================================================================
+    //Test2: trivial add and peering goes down
+    //================================================================
+    //add a route
+    debug_table->write_comment("****************************************************************");
+    debug_table->write_comment("TEST 2");
+    debug_table->write_comment("3 ADDS, SAME PALIST, PEERING GOES DOWN");
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+    debug_table->write_separator();
+
+    //================================================================
+    //Test3: trivial add and peering goes down
+    //================================================================
+    //add a route
+    debug_table->write_comment("****************************************************************");
+    debug_table->write_comment("TEST 3");
+    debug_table->write_comment("3 ADDS, 3 PALISTS, PEERING GOES DOWN");
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+    debug_table->write_separator();
+
+    //================================================================
+    //Test4: trivial add and peering goes down
+    //================================================================
+    //add a route
+    debug_table->write_comment("****************************************************************");
+    debug_table->write_comment("TEST 4");
+    debug_table->write_comment("4 ADDS, 2 PALISTS, PEERING GOES DOWN");
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+    debug_table->write_separator();
+
+    //================================================================
+    //Test5: trivial add and peering goes down
+    //================================================================
+    //add a route
+    debug_table->write_comment("****************************************************************");
+    debug_table->write_comment("TEST 5");
+    debug_table->write_comment("BOUNCE THE PEERING AGAIN");
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+    debug_table->write_separator();
+
+    //================================================================
+    //Test6: trivial add and peering goes down
+    //================================================================
+    //add a route
+    debug_table->write_comment("****************************************************************");
+    debug_table->write_comment("TEST 6");
+    debug_table->write_comment("4 ADDS, 2 PALISTS, PEERING GOES DOWN");
+    debug_table->write_comment("2 MORE ADDS BEFORE PROCESSING TIMERS");
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    //================================================================
+    //Test7: trivial add and peering goes down
+    //================================================================
+    //add a route
+    debug_table->write_comment("****************************************************************");
+    debug_table->write_comment("TEST 7");
+    debug_table->write_comment("4 ADDS, 2 PALISTS, PEERING GOES DOWN");
+    debug_table->write_comment("2 MORE ADDS BEFORE PROCESSING TIMERS");
+    debug_table->write_comment("AS TEST 6, BUT NEW PALISTS ARE DIFFERENT");
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net4, palist3);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    //================================================================
+    //Test8: 
+    //================================================================
+    //add a route
+    debug_table->write_comment("****************************************************************");
+    debug_table->write_comment("TEST 8");
+    debug_table->write_comment("4 ADDS, 2 PALISTS, PEERING GOES DOWN");
+    debug_table->write_comment("2 MORE ADDS BEFORE PROCESSING TIMERS");
+    debug_table->write_comment("AS TEST 6, NEW ROUTES SHOULD DELETE CHAIN");
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net3, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net4, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist3);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net3, palist3);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    //================================================================
+    //Test9: 
+    //================================================================
+    //add a route
+    debug_table->write_comment("****************************************************************");
+    debug_table->write_comment("TEST 9");
+    debug_table->write_comment("2 ADDS, 2 PALISTS, PEERING GOES DOWN");
+    debug_table->write_comment("SAME 2 ADDS BEFORE PROCESSING TIMERS");
+    debug_table->write_comment("ADDS SHOULD REMOVE ALL ROUTE FROM DEL TAB");
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    //================================================================
+    //Test10: 
+    //================================================================
+    //add a route
+    debug_table->write_comment("****************************************************************");
+    debug_table->write_comment("TEST 10");
+    debug_table->write_comment("TWO DELETION TABLES");
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("ADD A ROUTE");
+    sr1 = new SubnetRoute<IPv4>(net2, palist2);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    ribin->add_route(*msg, NULL);
+    delete sr1;
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING GOES DOWN");
+    ribin->peering_went_down();
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    debug_table->write_separator();
+    debug_table->write_comment("LET EVENT QUEUE DRAIN");
+    while (eventloop->timers_pending()) {
+	eventloop->run();
+    }
+
+    debug_table->write_separator();
+    debug_table->write_comment("PEERING COMES UP");
+    ribin->peering_came_up();
+
+    //================================================================
+
+    debug_table->write_comment("SHUTDOWN AND CLEAN UP");
+    delete ribin;
+    delete debug_table;
+
+    FILE *file = fopen("/tmp/test_deletion", "r");
+    if (file == NULL) {
+	fprintf(stderr, "Failed to read /tmp/test_deletion\n");
+	fprintf(stderr, "TEST FAILED\n");
+	exit(1);
+    }
+#define BUFSIZE 20000
+    char testout[BUFSIZE];
+    memset(testout, 0, BUFSIZE);
+    int bytes1 = fread(testout, 1, BUFSIZE, file);
+    if (bytes1 == BUFSIZE) {
+	fprintf(stderr, "Output too long for buffer\n");
+	fprintf(stderr, "TEST FAILED\n");
+	exit(1);
+    }
+    fclose(file);
+    
+    file = fopen("test_deletion.reference", "r");
+    if (file == NULL) {
+	fprintf(stderr, "Failed to read test_deletion.reference\n");
+	fprintf(stderr, "TEST FAILED\n");
+	exit(1);
+    }
+    char refout[BUFSIZE];
+    memset(refout, 0, BUFSIZE);
+    int bytes2 = fread(refout, 1, BUFSIZE, file);
+    if (bytes2 == BUFSIZE) {
+	fprintf(stderr, "Output too long for buffer\n");
+	fprintf(stderr, "TEST FAILED\n");
+	exit(1);
+    }
+    fclose(file);
+    
+    if ((bytes1 != bytes2) || (memcmp(testout, refout, bytes1)!= 0)) {
+	fprintf(stderr, "Output in /tmp/test_deletion doesn't match reference output\n");
+	fprintf(stderr, "TEST FAILED\n");
+	exit(1);
+	
+    }
+    unlink("/tmp/test_deletion");
+    exit(0);
+}
+
+
