@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fte.hh,v 1.6 2004/03/15 23:31:46 pavlin Exp $
+// $XORP: xorp/fea/fte.hh,v 1.7 2004/03/16 21:40:08 pavlin Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -45,7 +45,7 @@ public:
 	bool		xorp_route)
 	: _net(net), _gateway(gateway), _ifname(ifname), _vifname(vifname),
 	  _metric(metric), _admin_distance(admin_distance),
-	  _xorp_route(xorp_route) {}
+	  _xorp_route(xorp_route), _is_deleted(false) {}
     Fte(const N& net)
 	: _net(net), _gateway(A::ZERO(net.af())),
 	  _metric(0), _admin_distance(0), _xorp_route(false) {}
