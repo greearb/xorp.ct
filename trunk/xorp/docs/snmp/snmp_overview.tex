@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/snmp/snmp_overview.tex,v 1.7 2003/06/03 23:51:27 pavlin Exp $
+% $XORP: xorp/docs/snmp/snmp_overview.tex,v 1.8 2003/06/04 18:56:12 jcardona Exp $
 %
 
 \documentclass[11pt]{article}
@@ -36,7 +36,7 @@
 
 \begin{document}
 
-\title{SNMP agent in XORP\\
+\title{XORP SNMP Agent \\
 \vspace{1ex}
 Version 0.3}
 \author{ XORP Project					\\
@@ -44,7 +44,7 @@ Version 0.3}
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 14, 2003}
+\date{June 6, 2003}
 
 \maketitle
 
@@ -207,7 +207,7 @@ as if they were each executed as independent processes (although they all run
 in \texttt{snmpd}'s process space).  This should make MIB module design much
 easier to someone already familiar with the architecture of XORP processes.
  
-The class that does all the syncronization between XORP and Net-SNMP 
+The class that does all the synchronization between XORP and Net-SNMP 
 is SnmpEventLoop, a subclass of EventLoop.  This singleton class is
 responsible for registering XORP event's with \texttt{snmpd}, so that the agent
 can respond to XORP activity.  Once this class is instantiated by
@@ -280,9 +280,9 @@ and process followed to implement this module.  You should refer to the
 kdoc documentation as well as the source itself for more details.   
 
 \subsection{The textual MIB definition file}
-The first step to write a MIB module should be writting or getting the ASN.1 MIB
-definition file.  If you are implementing an existing protocol, chances are that
-there is already a published RFC with the MIB definition for it.  In this
+The first step to write a MIB module should be writing or getting the ASN.1 MIB
+definition file.  If you are implementing an existing protocol, chances are
+that there is already a published RFC with the MIB definition for it.  In this
 section we'll use BGP4-MIB to illustrate the process of writing a MIB module,
 which is published in RFC 1657 and you will find in
 xorp/mibs/textual/BGP4-MIB.txt.
@@ -360,15 +360,16 @@ indent: Command line: unknown parameter "-orig"
 \end{verbatim}
 
 Note that although there are other conf files, only the two presented in this
-section can be used with XORP's asyncronous architecture.  You can find details
-on those files by ommitting the -c option when invoking \texttt{mib2c}. 
+section can be used with XORP's asynchronous architecture.  You can find
+details on those files by omitting the -c option when invoking \texttt{mib2c}. 
 
 
 \subsection{Using delegated requests}
   
-The asyncronous nature of XORP communications prevents handlers from processing
-SNMP requests syncronously.  Handlers initiate XRL requests for other XORP
-proceses, and return control to the SNMP agent before the reply is received.
+The asynchronous nature of XORP communications prevents handlers from
+processing 
+SNMP requests synchronously.  Handlers initiate XRL requests for other XORP
+processes, and return control to the SNMP agent before the reply is received.
 Net-SNMP allows that by providing the \texttt{delegated} flag in the SNMP
 request structure.  The agent will not send a reply to a request for as long as
 that flag is set.  In XORP MIBs, you would normally set the delegated flag when
