@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.10 2003/04/02 17:10:38 hodson Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.11 2003/04/06 04:13:21 jcardona Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -272,7 +272,11 @@ SelectorList::select(int millisecs)
 void
 SelectorList::get_fd_set(SelectorMask selected_mask, fd_set& fds) const
 {
-    fds = _fds [selected_mask];
+    if ((SEL_RD != selected_mask) && (SEL_WR != selected_mask) &&
+	(SEL_EX != selected_mask)) return;
+    if (SEL_RD == selected_mask) fds = _fds [SEL_RD_IDX];
+    if (SEL_WR == selected_mask) fds = _fds [SEL_WR_IDX];
+    if (SEL_EX == selected_mask) fds = _fds [SEL_EX_IDX];
     return;
 }
 
