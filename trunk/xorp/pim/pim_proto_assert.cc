@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.12 2003/06/16 22:48:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.13 2003/06/26 01:39:59 pavlin Exp $"
 
 
 //
@@ -416,39 +416,3 @@ AssertMetric::is_better(AssertMetric *a)
     
     return (false);
 }
-
-// TODO: XXX: PAVPAVPAV: cleanup/implement the timeout stuff below
-#if 0 // TODO
-static void
-pim_mre_oifs_assert_rate_limit_timeout(void *data_pointer)
-{
-    PimMre *pim_mre;
-    
-    pim_mre = (PimMre *)data_pointer;
-
-#if 0    // TODO
-    pim_mre->oifs_assert_rate_limit()->reset();
-#endif
-}
-#endif //0 TODO
-
-#if 0 // TODO
-static void
-pim_upstream_nbr_asserted_timeout(void *data_pointer)
-{
-    PimMre *pim_mre;
-    
-    pim_mre = (PimMre *)data_pointer;
-    
-#if 0    
-    family = IPADDR2FAMILY(MRE_GROUP_ADDRESS(pim_mre->mre));
-#endif // 0
-    
-#if 0 // TODO
-    pim_mre->set_upstream_nbr_asserted(NULL);
-#endif
-    
-    // TODO: XXX: PAVPAV: reset the routing to the default upstream router
-    // E.g. send a Join/Prune?
-}
-#endif // 0 TODO
