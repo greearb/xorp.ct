@@ -178,9 +178,9 @@ test1()
 
     echo -n getting the BGP version...
     bgp_ver=`snmpget ${SNMPCONF} ${SNMPHOST}  BGP4-MIB::bgpVersion.0 | \
-	sed -e 's/BGP4-MIB::bgpVersion\.0 = STRING: //'`  
+	sed -e 's/BGP4-MIB::bgpVersion\.0 = Hex-STRING: //'`  
     
-    if [ "${bgp_ver}" != '"4"' ]; then exit 1; fi
+    if [ "${bgp_ver}" != "08 " ]; then exit 1; fi
  
     echo "${bgp_ver}"
 

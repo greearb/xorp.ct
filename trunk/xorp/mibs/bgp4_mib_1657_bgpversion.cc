@@ -72,12 +72,10 @@ void get_bgp_version_done(const XrlError& e, const uint32_t* ver,
     // no longer delegated since we'll answer down below
 
     requests->delegated = 0;
-    static const int bgpVerStrMax = 4;
-    char bgpVersion[bgpVerStrMax];
-    int  bgpVersionLen = snprintf(bgpVersion, bgpVerStrMax, "%d", *ver);
+    uint8_t bgpVersion_bin = 1 << (*ver - 1);
 
     snmp_set_var_typed_value(requests->requestvb, ASN_OCTET_STR,
-	(unsigned char *) bgpVersion, bgpVersionLen);
+	(unsigned char *) &bgpVersion_bin, sizeof(uint8_t));
 
     return;
 }
