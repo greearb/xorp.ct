@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.22 2003/10/11 03:17:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.23 2004/02/24 03:16:57 atanu Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -328,6 +328,27 @@ test_filter(TestInfo& /*info*/)
     filter_table->add_localpref_insertion_filter(100);
     // add a route
     debug_table->write_comment("TEST 5");
+    debug_table->write_comment("ADD AND DELETE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    filter_table->add_route(*msg, ribin_table);
+
+    debug_table->write_separator();
+
+    // delete the route
+    filter_table->delete_route(*msg, ribin_table);
+
+    debug_table->write_separator();
+    sr1->unref();
+    delete msg;
+
+    // ================================================================
+    // Test6: add and delete with a local_pref_insertion filter and a 
+    // next_hop_rewrite_filter - both these modify a route
+    // ================================================================
+    filter_table->add_nexthop_rewrite_filter(IPv4("128.16.64.4"));
+    // add a route
+    debug_table->write_comment("TEST 6");
     debug_table->write_comment("ADD AND DELETE");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);

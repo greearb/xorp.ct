@@ -126,4 +126,26 @@ SubnetRoute:
 	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
+[comment] TEST 6
+[comment] ADD AND DELETE
+[ADD]
+CHANGED flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 128.16.64.4
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[DELETE]
+CHANGED flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 128.16.64.4
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
 [comment] SHUTDOWN AND CLEAN UP
