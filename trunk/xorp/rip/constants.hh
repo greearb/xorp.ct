@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/constants.hh,v 1.3 2003/04/23 17:06:48 hodson Exp $
+// $XORP: xorp/rip/constants.hh,v 1.4 2003/07/09 00:05:17 hodson Exp $
 
 #ifndef __RIP_CONSTANTS_HH__
 #define __RIP_CONSTANTS_HH__
@@ -34,6 +34,12 @@ static const uint32_t RIPv2_ROUTES_PER_PACKET = 25;
  * to be sent.
  */
 static const uint32_t DEFAULT_INTERPACKET_DELAY_MS = 50;
+
+/**
+ * The maximum delay between back to back RIP packets when an update
+ * is sent that spans more than 1 packet.
+ */
+static const uint32_t MAXIMUM_INTERPACKET_DELAY_MS = 250;
 
 /**
  * Protocol specified metric corresponding to an unreachable (or expired)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.5 2003/07/09 00:11:02 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.6 2003/07/09 03:14:37 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -51,9 +51,10 @@ public:
 
     /**
      * Set the route deletion time.
-     * @param t the deletion time in seconds.
+     * @param t the deletion time in seconds (must be >= 1).
+     * @return true on success, false if t == 0.
      */
-    inline void		set_deletion_secs(uint32_t t);
+    inline bool		set_deletion_secs(uint32_t t);
 
     /**
      * Get the route deletion time.
@@ -89,8 +90,10 @@ public:
      * Set the interpacket packet delay.
      * @param t the interpacket delay for back-to-back packets in
      * milliseconds.
+     * @return true on success, false if t is greater than
+     * MAXIMUM_INTERPACKET_DELAY_MS.
      */
-    inline void		set_interpacket_delay_ms(uint32_t t);
+    inline bool		set_interpacket_delay_ms(uint32_t t);
 
     /**
      * Get the interpacket packet delay in milliseconds.
@@ -447,10 +450,13 @@ PortTimerConstants::expiry_secs() const
     return _expiry_secs;
 }
 
-inline void
+inline bool
 PortTimerConstants::set_deletion_secs(uint32_t t)
 {
+    if (t < 1)
+	return false;
     _deletion_secs = t;
+    return true;
 }
 
 inline uint32_t
@@ -483,10 +489,13 @@ PortTimerConstants::triggered_update_max_wait_secs() const
     return _triggered_update_max_wait_secs;
 }
 
-inline void
+inline bool
 PortTimerConstants::set_interpacket_delay_ms(uint32_t t)
 {
+    if (t > MAXIMUM_INTERPACKET_DELAY_MS)
+	return false;
     _interpacket_msecs = t;
+    return true;
 }
 
 inline uint32_t
