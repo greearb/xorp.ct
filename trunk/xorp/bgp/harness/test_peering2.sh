@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.11 2003/06/12 22:20:54 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.12 2003/06/12 22:27:58 atanu Exp $
 #
 
 #
@@ -249,8 +249,8 @@ test3()
     coord peer1 assert established
 }
 
-TESTS_NOT_FIXED=''
-TESTS='test1 test2 test3'
+TESTS_NOT_FIXED='test3'
+TESTS='test1 test2'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
