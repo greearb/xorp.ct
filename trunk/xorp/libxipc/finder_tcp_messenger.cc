@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.12 2003/04/24 19:32:47 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.13 2003/06/02 17:22:21 hodson Exp $"
 
 #include "config.h"
 #include "finder_module.h"
@@ -382,6 +382,7 @@ void
 FinderTcpAutoConnector::messenger_birth_event(FinderMessengerBase* m)
 {
     _real_manager.messenger_birth_event(m);
+    set_enabled(false);
 }
 
 void
