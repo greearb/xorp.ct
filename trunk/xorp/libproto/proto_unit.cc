@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_unit.cc,v 1.5 2003/03/19 23:38:22 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_unit.cc,v 1.6 2003/05/18 02:56:49 pavlin Exp $"
 
 
 //
@@ -21,6 +21,7 @@
 
 
 #include "libproto_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "proto_unit.hh"
 

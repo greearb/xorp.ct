@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node_cli.hh,v 1.2 2003/03/10 23:20:20 hodson Exp $
+// $XORP: xorp/libproto/proto_node_cli.hh,v 1.3 2003/03/18 02:44:34 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_CLI_HH__
@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 
+#include "libxorp/xorp.h"
 #include "libxorp/callback.hh"
 #include "proto_unit.hh"
 
