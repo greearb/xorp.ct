@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.4 2003/03/27 01:51:57 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.5 2003/04/02 02:53:51 pavlin Exp $"
 
 //
 // demo program to test timers and event loops (and show
@@ -41,13 +41,12 @@ static bool print_dot() {
     return true;
 }
 
-void
-test_many()
+static void
+test_many(EventLoop& e)
 {
 #define N 100
 
     int i;
-    EventLoop e;
     XorpTimer a[N];
 
     fired = 0 ;
@@ -73,14 +72,14 @@ test_many()
     printf("\ndone with test_many\n"); fflush(stdout);
 }
 
-void
+static void
 print_tv(FILE * s, TimeVal a)
 {
     fprintf(s, "%lu.%06lu", (unsigned long)a.sec(), (unsigned long)a.usec());
     fflush(s);
 }
 
-void
+static void
 test_wrap()
 {
     TimeVal a(INT_MAX, 999998);
@@ -95,13 +94,14 @@ test_wrap()
     fprintf(stderr, "b < c is %d\n", (int)(b < c));
 }
 
-void run_test()
+static void
+run_test()
 {
     EventLoop e;
 
     test_wrap();
 
-    XorpTimer show_stopper; 
+    XorpTimer show_stopper;
     show_stopper = e.new_oneoff_after_ms(500, callback(some_foo));
     assert(show_stopper.scheduled());
 
@@ -109,15 +109,15 @@ void run_test()
     assert(zzz.scheduled());
 
     while(show_stopper.scheduled()) {
-	assert(zzz.scheduled());    
+	assert(zzz.scheduled());
 	e.run(); // run will return after one or more pending events
 		 // have fired.
     }
     zzz.unschedule();
-    test_many();
+    test_many(e);
 }
 
-int main(int /* argc */, const char* argv[]) 
+int main(int /* argc */, const char* argv[])
 {
 
     //
@@ -127,7 +127,7 @@ int main(int /* argc */, const char* argv[])
     xlog_set_verbose(XLOG_VERBOSE_LOW);         // Least verbose messages
     // XXX: verbosity of the error messages temporary increased
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-    
+
     xlog_add_default_output();
     xlog_start();
 
