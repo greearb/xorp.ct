@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.4 2003/04/16 04:53:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.5 2003/04/22 23:27:22 hodson Exp $"
 
 //
 // Multicast group membership information used by
@@ -147,7 +147,7 @@ MemberQuery::last_member_query_timer_timeout()
     // query (see the bottom part of Section 4.)
     //
     if (mld6igmp_vif().proto_is_igmp()) {
-	// TODO: XXX: ignore the fact that now there may be IGPMv1 routers?
+	// TODO: XXX: ignore the fact that now there may be IGMPv1 routers?
 	mld6igmp_vif().mld6igmp_send(group(),
 				     IGMP_MEMBERSHIP_QUERY,
 				     (IGMP_LAST_MEMBER_QUERY_INTERVAL

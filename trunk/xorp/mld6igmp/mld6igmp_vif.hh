@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.8 2003/04/16 04:53:43 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.9 2003/07/15 00:45:49 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -133,7 +133,7 @@ public:
     const IPvX&	querier_addr()	const		{ return (_querier_addr); }
     
     /**
-     * Set the MLD/IMGPquerier address.
+     * Set the MLD6/IGMP querier address.
      * 
      * @param v the value of the MLD/IGMP querier address.
      */
