@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.5 2003/01/19 00:42:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.6 2003/01/19 00:59:26 mjh Exp $"
 
 #include "print_peer.hh"
 
@@ -22,7 +22,7 @@ PrintPeers::PrintPeers(bool verbose, int interval)
 {
     _prev_no_bgp = false;
     _prev_no_peers = false;
-    while (interval > 0) {
+    for (;;) {
 	_done = false;
 	_token = 0;
 	_count = 0;
@@ -30,6 +30,8 @@ PrintPeers::PrintPeers(bool verbose, int interval)
 	while (_done == false) {
 	    _eventloop.run();
 	}
+	if (interval <= 0)
+	    break;
 	sleep(interval);
     }
 }
