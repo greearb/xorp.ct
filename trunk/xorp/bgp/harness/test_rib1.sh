@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.30 2002/12/11 22:22:59 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 #
 
 #
@@ -285,7 +285,7 @@ test6()
     while ((i++ < $ITER))
     do
 	# Using the (()) syntax seems to have invoked a new shell.
-	# Any errors ahev to be explicitly propogated.
+	# Any errors have to be explicitly propagated.
 	trap 'exit $?' 0 2
 	set -e
 	echo "Iteration: $i"
