@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.9 2004/09/02 18:44:43 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.10 2004/09/02 18:50:04 pavlin Exp $"
 
 
 /*
@@ -564,7 +564,7 @@ comm_connect_udp6(const struct in6_addr *remote_addr,
 }
 
 /**
- * comm_connect_udp4:
+ * comm_bind_connect_udp4:
  * @local_addr: The local address to bind to.
  * If it is NULL, will bind to `any' local address.
  * @local_port: The local port to bind to.
@@ -599,7 +599,7 @@ comm_bind_connect_udp4(const struct in_addr *local_addr,
 }
 
 /**
- * comm_connect_udp6:
+ * comm_bind_connect_udp6:
  * @local_addr: The local address to bind to.
  * If it is NULL, will bind to `any' local address.
  * @local_port: The local port to bind to.
