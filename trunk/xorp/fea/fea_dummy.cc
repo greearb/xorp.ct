@@ -235,7 +235,6 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 	ifconfig.stop();
 	fticonfig.stop();
 
-	string reason;
 	while (! xrl_mfea_node4.MfeaNode::is_down()) {
 	    eventloop.run();
 	}
@@ -258,12 +257,15 @@ fea_main(const char* finder_hostname, uint16_t finder_port)
 int
 main(int argc, char *argv[])
 {
-    int c;
+    int ch;
     const char *argv0 = argv[0];
     char finder_hostname[MAXHOSTNAMELEN + 1];
-    uint16_t finder_port = 0;			// XXX: default (in host order)
+    uint16_t finder_port = FINDER_DEFAULT_PORT;	// XXX: default (in host order)
 
-    strcpy(finder_hostname, "localhost");	// XXX: default
+    // Default finder hostname
+    strncpy(finder_hostname, FINDER_DEFAULT_HOST.str().c_str(),
+	    sizeof(finder_hostname) - 1);
+    finder_hostname[sizeof(finder_hostname) - 1] = '\0';
 
     //
     // Initialize and start xlog
@@ -278,8 +280,8 @@ main(int argc, char *argv[])
     //
     // Get the program options
     //
-    while ((c = getopt(argc, argv, "F:h")) != -1) {
-	switch (c) {
+    while ((ch = getopt(argc, argv, "F:h")) != -1) {
+	switch (ch) {
 	case 'F':
 	    // Finder hostname and port
 	    char *p;
@@ -291,6 +293,11 @@ main(int argc, char *argv[])
 	    p = strrchr(optarg, ':');
 	    if (p != NULL) {
 		p++;
+		if (*p == '\0') {
+		    usage(argv0, 1);
+		    // NOTREACHED
+		    break;
+		}
 		finder_port = static_cast<uint16_t>(atoi(p));
 	    }
 	    break;
@@ -298,9 +305,11 @@ main(int argc, char *argv[])
 	case '?':
 	    // Help
 	    usage(argv0, 0);
+	    // NOTREACHED
 	    break;
 	default:
 	    usage(argv0, 1);
+	    // NOTREACHED
 	    break;
 	}
     }
