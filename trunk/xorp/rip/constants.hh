@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/constants.hh,v 1.2 2003/04/11 22:00:18 hodson Exp $
+// $XORP: xorp/rip/constants.hh,v 1.3 2003/04/23 17:06:48 hodson Exp $
 
 #ifndef __RIP_CONSTANTS_HH__
 #define __RIP_CONSTANTS_HH__
@@ -56,7 +56,7 @@ static const uint16_t RIP_NG_PORT = 521;
  */
 enum RipHorizon {
     // No filtering
-    NONE,			
+    NONE,
     // Don't a route origin its own routes.
     SPLIT,
     // Show a route origin its own routes but with cost of infinity.

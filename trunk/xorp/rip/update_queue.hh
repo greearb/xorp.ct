@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/update_queue.hh,v 1.2 2003/07/08 15:45:27 hodson Exp $
+// $XORP: xorp/rip/update_queue.hh,v 1.3 2003/07/08 16:56:17 hodson Exp $
 
 #ifndef __RIP_UPDATE_QUEUE__
 #define __RIP_UPDATE_QUEUE__
@@ -62,11 +62,11 @@ private:
 template <typename A>
 class UpdateQueue {
 public:
-    typedef UpdateQueueReader<A> Reader;
-    typedef UpdateQueueReaderPool ReaderPool;
-    typedef ref_ptr<Reader> ReadIterator;
+    typedef UpdateQueueReader<A>	  Reader;
+    typedef UpdateQueueReaderPool	  ReaderPool;
+    typedef ref_ptr<Reader>		  ReadIterator;
     typedef ref_ptr<const RouteEntry<A> > RouteUpdate;
-    typedef vector<RouteUpdate> Queue;
+    typedef vector<RouteUpdate>		  Queue;
 
 public:
     UpdateQueue();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/rip/port_manager.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
 
 #ifndef __RIP_PORT_MANAGER_HH__
 #define __RIP_PORT_MANAGER_HH__
@@ -39,7 +39,7 @@ class PortManagerBase {
 public:
     typedef list<Port<A>*>	PortList;
     typedef System<A>		SystemType;
-    
+
 public:
     PortManagerBase(SystemType& system) : _system(system) {}
 

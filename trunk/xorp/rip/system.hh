@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/rip/system.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
 
 #ifndef __RIP_SYSTEM_HH__
 #define __RIP_SYSTEM_HH__
@@ -78,7 +78,7 @@ public:
 
 protected:
     System(const System&);				// Not implemented
-    System& operator=(const System&);			// Not implemented    
+    System& operator=(const System&);			// Not implemented
 
 protected:
     EventLoop&		_e;
