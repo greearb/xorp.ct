@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.14 2005/03/09 22:50:40 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.15 2005/03/20 00:02:39 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -145,19 +145,20 @@ protocols {
 		group-prefix @ {
 		    %help:	short "Configure the group prefix address covered by the RP";
 		    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_static_rp4?group_prefix:ipv4net=$(group-prefix.@)&rp_addr:ipv4=$(rp.@)&rp_priority:u32=$(@.rp-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
-		    %update:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_static_rp4?group_prefix:ipv4net=$(group-prefix.@)&rp_addr:ipv4=$(rp.@)&rp_priority:u32=$(@.rp-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/delete_config_static_rp4?group_prefix:ipv4net=$(group-prefix.@)&rp_addr:ipv4=$(rp.@)";
 
 		    rp-priority {
 			%help:	short "Configure the RP priority";
 			%allow-range: $(@) "0" "255";
-			%set:;
+			%create:;
+			%set:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_static_rp4?group_prefix:ipv4net=$(group-prefix.@)&rp_addr:ipv4=$(rp.@)&rp_priority:u32=$(group-prefix.@.rp-priority)&hash_mask_len:u32=$(group-prefix.@.hash-mask-len)";
 		    }
 
 		    hash-mask-len {
 			%help:	short "Configure the hash mask length for the has function";
 			%allow-range: $(@) "4" "32";
-			%set:;
+			%create:;
+			%set:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_static_rp4?group_prefix:ipv4net=$(group-prefix.@)&rp_addr:ipv4=$(rp.@)&rp_priority:u32=$(group-prefix.@.rp-priority)&hash_mask_len:u32=$(group-prefix.@.hash-mask-len)";
 		    }
 		}
 	    }
