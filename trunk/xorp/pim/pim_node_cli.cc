@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.18 2004/02/22 04:01:25 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.19 2004/02/25 00:35:48 pavlin Exp $"
 
 
 //
@@ -105,8 +105,12 @@ PimNodeCli::add_all_cli_commands()
 		    callback(this, &PimNodeCli::cli_show_pim_bootstrap_rps));
     
     add_cli_command("show pim interface",
-		    "Display information about PIM configured interfaces",
+		    "Display information about PIM interfaces",
 		    callback(this, &PimNodeCli::cli_show_pim_interface));
+
+    add_cli_command("show pim interface address",
+		    "Display information about addresses of PIM interfaces",
+		    callback(this, &PimNodeCli::cli_show_pim_interface_address));
 
     add_cli_command("show pim join",
 		    "Display information about PIM groups",
@@ -560,6 +564,88 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
 			   pim_vif->dr_priority().get(),
 			   cstring(pim_vif->dr_addr()),
 			   pim_vif->pim_nbrs_number()));
+    }
+    
+    return (XORP_OK);
+}
+
+//
+// CLI COMMAND: "show pim interface address [interface-name]"
+//
+// Display information about the addresses of PIM interfaces
+//
+int
+PimNodeCli::cli_show_pim_interface_address(const vector<string>& argv)
+{
+    string interface_name;
+
+    // Check the optional argument
+    if (argv.size()) {
+	interface_name = argv[0];
+	if (pim_node().vif_find_by_name(interface_name) == NULL) {
+	    cli_print(c_format("ERROR: Invalid interface name: %s\n",
+			       interface_name.c_str()));
+	    return (XORP_ERROR);
+	}
+    }
+    
+    // XXX: the first field width should be 16 (for consistency with other
+    // "show foo interface" commands, but this makes the line too long
+    // to fit into 80 width-terminal.
+    cli_print(c_format("%-14s%-16s%-19s%-16s\n",
+		       "Interface", "PrimaryAddr", "DomainWideAddr", "SecondaryAddr"));
+    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
+	// Test if we should print this entry
+	bool do_print = true;
+	if (interface_name.size()) {
+	    do_print = false;
+	    if (pim_vif->name() == interface_name) {
+		do_print = true;
+	    }
+	}
+	if (! do_print)
+	    continue;
+	
+	//
+	// Create a list with all secondary addresses
+	//
+	list<IPvX> secondary_addr_list;
+	list<VifAddr>::const_iterator vif_addr_iter;
+	for (vif_addr_iter = pim_vif->addr_list().begin();
+	     vif_addr_iter != pim_vif->addr_list().end();
+	     ++vif_addr_iter) {
+	    const VifAddr& vif_addr = *vif_addr_iter;
+	    if (vif_addr.addr() == pim_vif->primary_addr())
+		continue;
+	    if (vif_addr.addr() == pim_vif->domain_wide_addr())
+		continue;
+	    secondary_addr_list.push_back(vif_addr.addr());
+	}
+	cli_print(c_format("%-14s%-16s%-19s%-16s\n",
+			   pim_vif->name().c_str(),
+			   cstring(pim_vif->primary_addr()),
+			   cstring(pim_vif->domain_wide_addr()),
+			   (secondary_addr_list.size())?
+			   cstring(secondary_addr_list.front()): ""));
+	// Pop the first secondary address
+	if (secondary_addr_list.size())
+	    secondary_addr_list.pop_front();
+
+	//
+	// Print the rest of the secondary addresses
+	//
+	list<IPvX>::iterator secondary_addr_iter;
+	for (secondary_addr_iter = secondary_addr_list.begin();
+	     secondary_addr_iter != secondary_addr_list.end();
+	     ++secondary_addr_iter) {
+	    IPvX& secondary_addr = *secondary_addr_iter;
+	    cli_print(c_format("%-14s%-16s%-19s%-16s\n",
+			       " ",
+			       " ",
+			       " ",
+			       cstring(secondary_addr)));
+	}
     }
     
     return (XORP_OK);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node_cli.hh,v 1.4 2003/03/10 23:20:50 hodson Exp $
+// $XORP: xorp/pim/pim_node_cli.hh,v 1.5 2003/08/07 01:09:10 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_CLI_HH__
@@ -76,6 +76,7 @@ private:
     int		cli_show_pim_bootstrap(const vector<string>& argv);
     int		cli_show_pim_bootstrap_rps(const vector<string>& argv);
     int		cli_show_pim_interface(const vector<string>& argv);
+    int		cli_show_pim_interface_address(const vector<string>& argv);
     int		cli_show_pim_join(const vector<string>& argv);
     int		cli_show_pim_join_all(const vector<string>& argv);
     int		cli_show_pim_mfc(const vector<string>& argv);
