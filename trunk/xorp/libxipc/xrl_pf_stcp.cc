@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.23 2003/09/15 23:45:41 hodson Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.24 2003/09/16 19:06:36 hodson Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -469,6 +469,8 @@ XrlPFSTCPSender::die(const char* reason)
 
     XLOG_ERROR("XrlPFSTCPSender died: %s", reason);
 
+    stop_keepalives();
+
     delete _reader;
     _reader = 0;
 
@@ -778,8 +780,12 @@ XrlPFSTCPSender::stop_keepalives()
 inline bool
 XrlPFSTCPSender::send_keepalive()
 {
-    assert(_writer->buffers_remaining() == 0);	// no-go in middle of a
-    						// transaction.
+    if (_writer->buffers_remaining() != 0) {
+	// no-go in middle of a transaction.
+	postpone_keepalive();
+	return true;
+    }
+
     assert(_keepalive_packet.size() == sizeof(STCPPacketHeader));
 
     STCPPacketHeader* sph =
@@ -827,4 +833,3 @@ XrlPFSTCPSender::confirm_keepalive(AsyncFileWriter::Event e,
 	}
     }
 }
-
