@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.1 2004/09/22 02:48:59 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.2 2004/09/24 01:55:37 pavlin Exp $"
 
 
 //
@@ -47,9 +47,14 @@
 //
 
 //
-// Define to enable debug output
+// Define to 1 to enable printing of debug output
 //
-// #define PRINT_DEBUG
+#define PRINT_DEBUG			0
+
+//
+// Define to 1 to exit after end of transmission
+//
+#define RECEIVE_DO_EXIT			0
 
 
 //
@@ -70,7 +75,7 @@ public:
     inline bool done() const { return _done; }
 
     inline void print_xrl_received() const {
-#ifdef PRINT_DEBUG
+#if PRINT_DEBUG
     	printf(".");
 	if (! (_received_xrls % 10000))
 	    printf("Received %u\n", (uint32_t)_received_xrls);
@@ -194,23 +199,20 @@ private:
 	printf("Received %u XRLs; delta_time = %s secs; speed = %f XRLs/s\n",
 	       (uint32_t)_received_xrls, delta_time.str().c_str(), speed);
 
-#if 0	// XXX: if enabled, then exit after all XRLs have been received.
-	_done_timer = _eventloop.new_oneoff_after(TimeVal(3, 0),
-						  callback(this, &TestReceiver::done_cb));
+#if RECEIVE_DO_EXIT
+	// XXX: if enabled, then exit after all XRLs have been received.
+	if (_exit_timer.scheduled() == false)
+	    _exit_timer = _eventloop.set_flag_after_ms(60000, &_done);
 #endif
 
 	return;
-    }
-
-    void done_cb() {
-	_done = true;
     }
 
     EventLoop&	_eventloop;
     TimeVal	_start_time;
     TimeVal	_end_time;
     size_t	_received_xrls;
-    XorpTimer	_done_timer;
+    XorpTimer	_exit_timer;
     bool	_done;
 };
 
