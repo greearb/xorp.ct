@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xorp_static_routes.cc,v 1.1 2004/02/12 20:11:26 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xorp_static_routes.cc,v 1.2 2004/02/14 00:06:47 pavlin Exp $"
 
 
 //
@@ -29,12 +29,9 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 
-#include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 
-#include "libproto/proto_unit.hh"
-
-#include "static_routes/xrl_static_routes_node.hh"
+#include "xrl_static_routes_node.hh"
 
 
 //
