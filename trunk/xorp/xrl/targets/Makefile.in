@@ -777,7 +777,8 @@ $(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
 		$(INTERFACES_DIR)/rib_client.xif
 $(srcdir)/rip4_base.hh $(srcdir)/rip4_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/rip.xif
+		$(INTERFACES_DIR)/rip.xif				\
+		$(INTERFACES_DIR)/socket4_user.xif
 $(srcdir)/rip6_base.hh $(srcdir)/rip6_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rip.xif

@@ -1,7 +1,11 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/targets/rip4.tgt,v 1.1 2003/11/04 23:39:57 hodson Exp $ */
 
 #include "common.xif"
 #include "finder_event_observer.xif"
 #include "rip.xif"
+#include "socket4_user.xif"
 
-target rip4 implements common/0.1, finder_event_observer/0.1, rip4/0.1
+target rip4 implements common/0.1,					      \
+		       finder_event_observer/0.1,			      \
+		       rip4/0.1,					      \
+		       socket4_user/0.1

@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.18 2003/11/04 23:39:57 hodson Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.19 2003/12/17 00:04:03 hodson Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -196,7 +196,8 @@ $(srcdir)/ribclient_base.hh $(srcdir)/ribclient_base.cc: 		\
 librip4base_a_SOURCES = rip4_base.hh rip4_base.cc
 $(srcdir)/rip4_base.hh $(srcdir)/rip4_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/rip.xif
+		$(INTERFACES_DIR)/rip.xif				\
+		$(INTERFACES_DIR)/socket4_user.xif
 
 # RIP IPv6
 librip6base_a_SOURCES = rip6_base.hh rip6_base.cc
