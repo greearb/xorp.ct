@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.15 2003/06/24 18:32:26 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.16 2003/08/07 01:09:10 pavlin Exp $"
 
 
 //
@@ -158,7 +158,7 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    is_zone_id_set = true;
 	    if (zone_id.scope_zone_prefix().masked_addr().af() != family()) {
 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
-			   argv[0].c_str()));
+				   argv[0].c_str()));
 		return (XORP_ERROR);
 	    }
 	    // Test if the second argument specifies scoped zone
@@ -168,15 +168,15 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    }
 	} catch (InvalidString) {
 	    cli_print(c_format("ERROR: Invalid zone ID: %s\n",
-		       argv[0].c_str()));
+			       argv[0].c_str()));
 	    return (XORP_ERROR);
 	}
     }
     
     cli_print("Active zones:\n");
     cli_print(c_format("%-16s%4s %-16s%4s %-16s%8s%10s\n",
-	       "BSR", "Pri", "LocalAddress", "Pri", "State", "Timeout",
-	       "SZTimeout"));
+		       "BSR", "Pri", "LocalAddress", "Pri", "State", "Timeout",
+		       "SZTimeout"));
     for (zone_iter = pim_node().pim_bsr().active_bsr_zone_list().begin();
 	 zone_iter != pim_node().pim_bsr().active_bsr_zone_list().end();
 	 ++zone_iter) {
@@ -238,8 +238,8 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
     
     cli_print("Expiring zones:\n");
     cli_print(c_format("%-16s%4s %-16s%4s %-16s%8s%10s\n",
-	       "BSR", "Pri", "LocalAddress", "Pri", "State", "Timeout",
-	       "SZTimeout"));
+		       "BSR", "Pri", "LocalAddress", "Pri", "State", "Timeout",
+		       "SZTimeout"));
     for (zone_iter = pim_node().pim_bsr().expire_bsr_zone_list().begin();
 	 zone_iter != pim_node().pim_bsr().expire_bsr_zone_list().end();
 	 ++zone_iter) {
@@ -301,8 +301,8 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
     
     cli_print("Configured zones:\n");
     cli_print(c_format("%-16s%4s %-16s%4s %-16s%8s%10s\n",
-	       "BSR", "Pri", "LocalAddress", "Pri", "State", "Timeout",
-	       "SZTimeout"));
+		       "BSR", "Pri", "LocalAddress", "Pri", "State", "Timeout",
+		       "SZTimeout"));
     for (zone_iter = pim_node().pim_bsr().config_bsr_zone_list().begin();
 	 zone_iter != pim_node().pim_bsr().config_bsr_zone_list().end();
 	 ++zone_iter) {
@@ -341,13 +341,13 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    break;
 	}
 	cli_print(c_format("%-16s%4d %-16s%4d %-16s%8d%10d\n",
-		   cstring(bsr_zone->bsr_addr()),
-		   bsr_zone->bsr_priority(),
-		   cstring(bsr_zone->my_bsr_addr()),
-		   bsr_zone->my_bsr_priority(),
-		   zone_state_string.c_str(),
-		   -1,
-		   -1));
+			   cstring(bsr_zone->bsr_addr()),
+			   bsr_zone->bsr_priority(),
+			   cstring(bsr_zone->my_bsr_addr()),
+			   bsr_zone->my_bsr_priority(),
+			   zone_state_string.c_str(),
+			   -1,
+			   -1));
     }
     
     return (XORP_OK);
@@ -372,7 +372,7 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 	    is_zone_id_set = true;
 	    if (zone_id.scope_zone_prefix().masked_addr().af() != family()) {
 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
-			   argv[0].c_str()));
+				   argv[0].c_str()));
 		return (XORP_ERROR);
 	    }
 	    // Test if the second argument specifies scoped zone
@@ -382,15 +382,15 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 	    }
 	} catch (InvalidString) {
 	    cli_print(c_format("ERROR: Invalid zone ID: %s\n",
-		       argv[0].c_str()));
+			       argv[0].c_str()));
 	    return (XORP_ERROR);
 	}
     }
     
     cli_print("Active RPs:\n");
     cli_print(c_format("%-16s%4s%8s %-19s%-16s%16s\n",
-	       "RP", "Pri", "Timeout", "GroupPrefix", "BSR",
-	       "CandRpAdvTimeout"));
+		       "RP", "Pri", "Timeout", "GroupPrefix", "BSR",
+		       "CandRpAdvTimeout"));
     for (zone_iter = pim_node().pim_bsr().active_bsr_zone_list().begin();
 	 zone_iter != pim_node().pim_bsr().active_bsr_zone_list().end();
 	 ++zone_iter) {
@@ -417,20 +417,20 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		    left_sec = tv_left.sec();
 		}
 		cli_print(c_format("%-16s%4d%8d %-19s%-16s%16d\n",
-			   cstring(bsr_rp->rp_addr()),
-			   bsr_rp->rp_priority(),
-			   left_sec,
-			   cstring(bsr_group_prefix->group_prefix()),
-			   cstring(bsr_zone->bsr_addr()),
-			   -1));
+				   cstring(bsr_rp->rp_addr()),
+				   bsr_rp->rp_priority(),
+				   left_sec,
+				   cstring(bsr_group_prefix->group_prefix()),
+				   cstring(bsr_zone->bsr_addr()),
+				   -1));
 	    }
 	}
     }
 
     cli_print("Expiring RPs:\n");
     cli_print(c_format("%-16s%4s%8s %-19s%-16s%16s\n",
-	       "RP", "Pri", "Timeout", "GroupPrefix", "BSR",
-	       "CandRpAdvTimeout"));
+		       "RP", "Pri", "Timeout", "GroupPrefix", "BSR",
+		       "CandRpAdvTimeout"));
     for (zone_iter = pim_node().pim_bsr().expire_bsr_zone_list().begin();
 	 zone_iter != pim_node().pim_bsr().expire_bsr_zone_list().end();
 	 ++zone_iter) {
@@ -457,20 +457,20 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		    left_sec = tv_left.sec();
 		}
 		cli_print(c_format("%-16s%4d%8d %-19s%-16s%16d\n",
-			   cstring(bsr_rp->rp_addr()),
-			   bsr_rp->rp_priority(),
-			   left_sec,
-			   cstring(bsr_group_prefix->group_prefix()),
-			   cstring(bsr_zone->bsr_addr()),
-			   -1));
+				   cstring(bsr_rp->rp_addr()),
+				   bsr_rp->rp_priority(),
+				   left_sec,
+				   cstring(bsr_group_prefix->group_prefix()),
+				   cstring(bsr_zone->bsr_addr()),
+				   -1));
 	    }
 	}
     }
     
     cli_print("Configured RPs:\n");
     cli_print(c_format("%-16s%4s%8s %-19s%-16s%16s\n",
-	       "RP", "Pri", "Timeout", "GroupPrefix", "BSR",
-	       "CandRpAdvTimeout"));
+		       "RP", "Pri", "Timeout", "GroupPrefix", "BSR",
+		       "CandRpAdvTimeout"));
     for (zone_iter = pim_node().pim_bsr().config_bsr_zone_list().begin();
 	 zone_iter != pim_node().pim_bsr().config_bsr_zone_list().end();
 	 ++zone_iter) {
@@ -499,12 +499,12 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		}
 		
 		cli_print(c_format("%-16s%4d%8d %-19s%-16s%16d\n",
-			   cstring(bsr_rp->rp_addr()),
-			   bsr_rp->rp_priority(),
-			   -1,
-			   cstring(bsr_group_prefix->group_prefix()),
-			   cstring(bsr_zone->bsr_addr()),
-			   left_sec));
+				   cstring(bsr_rp->rp_addr()),
+				   bsr_rp->rp_priority(),
+				   -1,
+				   cstring(bsr_group_prefix->group_prefix()),
+				   cstring(bsr_zone->bsr_addr()),
+				   left_sec));
 	    }
 	}
     }
@@ -527,14 +527,14 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
 	interface_name = argv[0];
 	if (pim_node().vif_find_by_name(interface_name) == NULL) {
 	    cli_print(c_format("ERROR: Invalid interface name: %s\n",
-		       interface_name.c_str()));
+			       interface_name.c_str()));
 	    return (XORP_ERROR);
 	}
     }
     
     cli_print(c_format("%-16s%-9s%-7s%2s %-9s%9s %-16s%10s\n",
-	       "Interface", "State", "Mode", "V", "PIMstate",
-	       "Priority", "DRaddr", "Neighbors"));
+		       "Interface", "State", "Mode", "V", "PIMstate",
+		       "Priority", "DRaddr", "Neighbors"));
     for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
@@ -550,14 +550,16 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
 	if (! do_print)
 	    continue;
 	cli_print(c_format("%-16s%-9s%-7s%2d %-9s%9d %-16s%10d\n",
-		   pim_vif->name().c_str(),
-		   pim_vif->state_string(),
-		   pim_vif->proto_is_pimsm()? "Sparse" : "Dense",
-		   pim_vif->proto_version(),
-		   pim_vif->is_p2p()? "P2P" : pim_vif->i_am_dr()? "DR" : "NotDR",
-		   pim_vif->dr_priority().get(),
-		   cstring(pim_vif->dr_addr()),
-		   pim_vif->pim_nbrs_number()));
+			   pim_vif->name().c_str(),
+			   pim_vif->state_string(),
+			   pim_vif->proto_is_pimsm()? "Sparse" : "Dense",
+			   pim_vif->proto_version(),
+			   // TODO: should we print "only P2P" if P2P link?
+			   // pim_vif->is_p2p()? "P2P" : pim_vif->i_am_dr()? "DR" : "NotDR",
+			   pim_vif->i_am_dr()? "DR" : "NotDR",
+			   pim_vif->dr_priority().get(),
+			   cstring(pim_vif->dr_addr()),
+			   pim_vif->pim_nbrs_number()));
     }
     
     return (XORP_OK);
@@ -682,7 +684,7 @@ PimNodeCli::cli_print_pim_mre_entries(const IPvXNet& group_range,
     // TODO: XXX: PAVPAVPAV: the printing below is very incomplete.
     //
     cli_print(c_format("%-16s%-16s%-16s%-5s\n",
-	       "Group", "Source", "RP", "Flags"));
+		       "Group", "Source", "RP", "Flags"));
     
     //
     // The (*,*,RP) entries
@@ -736,7 +738,7 @@ void
 PimNodeCli::cli_print_pim_mfc_entries(const IPvXNet& group_range)
 {
     cli_print(c_format("%-16s%-16s%-16s\n",
-	       "Group", "Source", "RP"));
+		       "Group", "Source", "RP"));
     
     //
     // The PimMfc entries
@@ -826,18 +828,18 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
     iif_pim_vif_rp = pim_node().vif_find_by_vif_index(vif_index_rp);
     
     cli_print(c_format("%-16s%-16s%-16s%-5s\n",
-	       cstring(pim_mre->group_addr()),
-	       cstring(pim_mre->source_addr()),
-	       pim_mre->rp_addr_string().c_str(),
-	       entry_state_flags.c_str()));
+		       cstring(pim_mre->group_addr()),
+		       cstring(pim_mre->source_addr()),
+		       pim_mre->rp_addr_string().c_str(),
+		       entry_state_flags.c_str()));
     if (pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
 	cli_print(c_format("    Upstream interface (S):    %s\n",
 			   (iif_pim_vif_s != NULL)?
 			   iif_pim_vif_s->name().c_str() : "UNKNOWN"));
     }
     cli_print(c_format("    Upstream interface (RP):   %s\n",
-	       (iif_pim_vif_rp != NULL)?
-	       iif_pim_vif_rp->name().c_str() : "UNKNOWN"));
+		       (iif_pim_vif_rp != NULL)?
+		       iif_pim_vif_rp->name().c_str() : "UNKNOWN"));
     cli_print(c_format("    Upstream MRIB next hop (RP): %s\n",
 		       (pim_mre->mrib_next_hop_rp() != NULL)?
 		       cstring(pim_mre->mrib_next_hop_rp()->addr())
@@ -879,7 +881,8 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 	    pim_mre->const_override_timer().time_remaining(tv_left);
 	    left_sec = tv_left.sec();
 	}
-	cli_print(c_format("    Override timer:            %d\n", left_sec));
+	cli_print(c_format("    Override timer:            %d\n",
+			   left_sec));
     } else {
 	int left_sec = -1;
 	if (pim_mre->const_join_timer().scheduled()) {
@@ -887,7 +890,8 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 	    pim_mre->const_join_timer().time_remaining(tv_left);
 	    left_sec = tv_left.sec();
 	}
-	cli_print(c_format("    Join timer:                %d\n", left_sec));
+	cli_print(c_format("    Join timer:                %d\n",
+			   left_sec));
     }
     
     
@@ -905,7 +909,7 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 			   mifset_str(pim_mre->local_receiver_exclude_sg()).c_str()));
     }
     cli_print(c_format("    Joins RP:                  %s\n",
-	       mifset_str(pim_mre->joins_rp()).c_str()));
+		       mifset_str(pim_mre->joins_rp()).c_str()));
     if (pim_mre->is_wc() || pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
 	cli_print(c_format("    Joins WC:                  %s\n",
 			   mifset_str(pim_mre->joins_wc()).c_str()));
@@ -919,11 +923,11 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 			   mifset_str(pim_mre->prunes_sg_rpt()).c_str()));
     }
     cli_print(c_format("    Join state:                %s\n",
-	       mifset_str(pim_mre->downstream_join_state()).c_str()));
+		       mifset_str(pim_mre->downstream_join_state()).c_str()));
     cli_print(c_format("    Prune state:               %s\n",
-	       mifset_str(pim_mre->downstream_prune_state()).c_str()));
+		       mifset_str(pim_mre->downstream_prune_state()).c_str()));
     cli_print(c_format("    Prune pending state:       %s\n",
-	       mifset_str(pim_mre->downstream_prune_pending_state()).c_str()));
+		       mifset_str(pim_mre->downstream_prune_pending_state()).c_str()));
     if (pim_mre->is_sg_rpt()) {
 	cli_print(c_format("    Prune tmp state:           %s\n",
 			   mifset_str(pim_mre->downstream_prune_tmp_state()).c_str()));
@@ -971,9 +975,9 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 			   mifset_str(pim_mre->could_assert_sg()).c_str()));
     }
     cli_print(c_format("    I am DR:                   %s\n",
-	       mifset_str(pim_mre->i_am_dr()).c_str()));
+		       mifset_str(pim_mre->i_am_dr()).c_str()));
     cli_print(c_format("    Immediate olist RP:        %s\n",
-	       mifset_str(pim_mre->immediate_olist_rp()).c_str()));
+		       mifset_str(pim_mre->immediate_olist_rp()).c_str()));
     if (pim_mre->is_wc() || pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
 	cli_print(c_format("    Immediate olist WC:        %s\n",
 			   mifset_str(pim_mre->immediate_olist_wc()).c_str()));
@@ -983,9 +987,9 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
 			   mifset_str(pim_mre->immediate_olist_sg()).c_str()));
     }
     cli_print(c_format("    Inherited olist SG:        %s\n",
-	       mifset_str(pim_mre->inherited_olist_sg()).c_str()));
+		       mifset_str(pim_mre->inherited_olist_sg()).c_str()));
     cli_print(c_format("    Inherited olist SG_RPT:    %s\n",
-	       mifset_str(pim_mre->inherited_olist_sg_rpt()).c_str()));
+		       mifset_str(pim_mre->inherited_olist_sg_rpt()).c_str()));
     if (pim_mre->is_wc() || pim_mre->is_sg() || pim_mre->is_sg_rpt()) {
 	cli_print(c_format("    PIM include WC:            %s\n",
 			   mifset_str(pim_mre->pim_include_wc()).c_str()));
@@ -1011,18 +1015,18 @@ PimNodeCli::cli_print_pim_mfc(const PimMfc *pim_mfc)
     PimVif *iif_pim_vif = pim_node().vif_find_by_vif_index(pim_mfc->iif_vif_index());
     
     cli_print(c_format("%-16s%-16s%-16s\n",
-	       cstring(pim_mfc->group_addr()),
-	       cstring(pim_mfc->source_addr()),
-	       cstring(pim_mfc->rp_addr())));
+		       cstring(pim_mfc->group_addr()),
+		       cstring(pim_mfc->source_addr()),
+		       cstring(pim_mfc->rp_addr())));
     cli_print(c_format("    Incoming interface :      %s\n",
-	       (iif_pim_vif != NULL)?
-	       iif_pim_vif->name().c_str() : "UNKNOWN"));
+		       (iif_pim_vif != NULL)?
+		       iif_pim_vif->name().c_str() : "UNKNOWN"));
     
     //
     // The outgoing interfaces
     //
     cli_print(c_format("    Outgoing interfaces:      %s\n",
-	       mifset_str(pim_mfc->olist()).c_str()));
+		       mifset_str(pim_mfc->olist()).c_str()));
 }
 
 //
@@ -1040,14 +1044,14 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 	interface_name = argv[0];
 	if (pim_node().vif_find_by_name(interface_name) == NULL) {
 	    cli_print(c_format("ERROR: Invalid interface name: %s\n",
-		       interface_name.c_str()));
+			       interface_name.c_str()));
 	    return (XORP_ERROR);
 	}
     }
     
     cli_print(c_format("%-16s%11s %-16s%2s %-7s%9s%8s\n",
-	       "Interface", "DRpriority", "NeighborAddr", "V", "Mode",
-	       "Holdtime", "Timeout"));
+		       "Interface", "DRpriority", "NeighborAddr", "V", "Mode",
+		       "Holdtime", "Timeout"));
     for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
@@ -1084,13 +1088,13 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 	    }
 	    
 	    cli_print(c_format("%-16s%11s %-16s%2d %-7s%9d%8s\n",
-		       pim_vif->name().c_str(),
-		       dr_priority_string.c_str(),
-		       cstring(pim_nbr->addr()),
-		       pim_nbr->proto_version(),
-		       pim_vif->proto_is_pimsm()? "Sparse" : "Dense",
-		       pim_nbr->hello_holdtime(),
-		       nbr_timeout_sec_string.c_str()));
+			       pim_vif->name().c_str(),
+			       dr_priority_string.c_str(),
+			       cstring(pim_nbr->addr()),
+			       pim_nbr->proto_version(),
+			       pim_vif->proto_is_pimsm()? "Sparse" : "Dense",
+			       pim_nbr->hello_holdtime(),
+			       nbr_timeout_sec_string.c_str()));
 	}
     }
     
@@ -1115,7 +1119,7 @@ PimNodeCli::cli_show_pim_mrib(const vector<string>& argv)
 	    dest_address = IPvX(dest_address_name.c_str());
 	} catch (InvalidString) {
 	    cli_print(c_format("ERROR: Invalid destination address: %s\n",
-		       dest_address_name.c_str()));
+			       dest_address_name.c_str()));
 	    return (XORP_ERROR);
 	}
     }
@@ -1125,29 +1129,29 @@ PimNodeCli::cli_show_pim_mrib(const vector<string>& argv)
 	Mrib *mrib = pim_node().pim_mrib_table().find(dest_address);
 	if (mrib == NULL) {
 	    cli_print(c_format("No matching MRIB entry for %s\n",
-		       dest_address_name.c_str()));
+			       dest_address_name.c_str()));
 	    return (XORP_ERROR);
 	}
 	cli_print(c_format("%-19s%-16s%-8s%-9s%17s%7s\n",
-		   "DestPrefix", "NextHopRouter", "VifName", "VifIndex",
-		   "MetricPreference", "Metric"));
+			   "DestPrefix", "NextHopRouter", "VifName",
+			   "VifIndex", "MetricPreference", "Metric"));
 	string vif_name = "UNKNOWN";
 	Vif *vif = pim_node().vif_find_by_vif_index(mrib->next_hop_vif_index());
 	if (vif != NULL)
 	    vif_name = vif->name();
 	cli_print(c_format("%-19s%-16s%-8s%-9d%17d%7d\n",
-		   cstring(mrib->dest_prefix()),
-		   cstring(mrib->next_hop_router_addr()),
-		   vif_name.c_str(),
-		   mrib->next_hop_vif_index(),
-		   mrib->metric_preference(),
-		   mrib->metric()));
+			   cstring(mrib->dest_prefix()),
+			   cstring(mrib->next_hop_router_addr()),
+			   vif_name.c_str(),
+			   mrib->next_hop_vif_index(),
+			   mrib->metric_preference(),
+			   mrib->metric()));
 	return (XORP_OK);
     }
     
     cli_print(c_format("%-19s%-16s%-8s%-9s%17s%7s\n",
-	       "DestPrefix", "NextHopRouter", "VifName", "VifIndex",
-	       "MetricPreference", "Metric"));
+		       "DestPrefix", "NextHopRouter", "VifName",
+		       "VifIndex", "MetricPreference", "Metric"));
     PimMribTable::iterator iter;
     for (iter = pim_node().pim_mrib_table().begin();
 	 iter != pim_node().pim_mrib_table().end();
@@ -1161,12 +1165,12 @@ PimNodeCli::cli_show_pim_mrib(const vector<string>& argv)
 	if (vif != NULL)
 	    vif_name = vif->name();
 	cli_print(c_format("%-19s%-16s%-8s%-9d%17d%7d\n",
-		   cstring(mrib->dest_prefix()),
-		   cstring(mrib->next_hop_router_addr()),
-		   vif_name.c_str(),
-		   mrib->next_hop_vif_index(),
-		   mrib->metric_preference(),
-		   mrib->metric()));
+			   cstring(mrib->dest_prefix()),
+			   cstring(mrib->next_hop_router_addr()),
+			   vif_name.c_str(),
+			   mrib->next_hop_vif_index(),
+			   mrib->metric_preference(),
+			   mrib->metric()));
     }
     
     return (XORP_OK);
@@ -1188,7 +1192,7 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 	    IPvX group_addr(argv[0].c_str());
 	    if (group_addr.af() != family()) {
 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
-			   argv[0].c_str()));
+				   argv[0].c_str()));
 		return (XORP_ERROR);
 	    }
 	    //
@@ -1197,19 +1201,19 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 	    show_pim_rp = pim_node().rp_table().rp_find(group_addr);
 	    if (show_pim_rp == NULL) {
 		cli_print(c_format("ERROR: no matching RP for group %s\n",
-			   cstring(group_addr)));
+				   cstring(group_addr)));
 		return (XORP_ERROR);
 	    }
 	} catch (InvalidString) {
 	    cli_print(c_format("ERROR: Invalid group address: %s\n",
-		       argv[0].c_str()));
+			       argv[0].c_str()));
 	    return (XORP_ERROR);
 	}
     }
     
     cli_print(c_format("%-16s%-10s%3s%9s%8s%13s %-18s\n",
-	       "RP", "Type", "Pri", "Holdtime", "Timeout", "ActiveGroups",
-	       "GroupPrefix"));
+		       "RP", "Type", "Pri", "Holdtime", "Timeout",
+		       "ActiveGroups", "GroupPrefix"));
     list<PimRp *>::const_iterator iter;
     for (iter = pim_node().rp_table().rp_list().begin();
 	 iter != pim_node().rp_table().rp_list().end();
@@ -1273,14 +1277,14 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 	}
 	
 	cli_print(c_format("%-16s%-10s%3d%9d%8d%13u %-18s\n",
-		   cstring(pim_rp->rp_addr()),
-		   rp_type.c_str(),
-		   pim_rp->rp_priority(),
-		   holdtime,
-		   left_sec,
-		   (uint32_t)(pim_rp->pim_mre_wc_list().size()
-			      + pim_rp->processing_pim_mre_wc_list().size()),
-		   cstring(pim_rp->group_prefix())));
+			   cstring(pim_rp->rp_addr()),
+			   rp_type.c_str(),
+			   pim_rp->rp_priority(),
+			   holdtime,
+			   left_sec,
+			   (uint32_t)(pim_rp->pim_mre_wc_list().size()
+				      + pim_rp->processing_pim_mre_wc_list().size()),
+			   cstring(pim_rp->group_prefix())));
     }
     
     return (XORP_OK);
