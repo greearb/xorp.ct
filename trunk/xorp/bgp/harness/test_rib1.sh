@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.9 2003/06/20 19:33:24 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.10 2003/07/17 00:28:32 pavlin Exp $
 #
 
 #
@@ -46,15 +46,25 @@ if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 HOST=localhost
 AS=65008
 
-# IBGP
+# IBGP - IPV4
 PORT1=10000
 PEER1_PORT=20001
 PEER1_AS=$AS
 
-# EBGP
+# EBGP - IPV4
 PORT2=10001
 PEER2_PORT=20001
 PEER2_AS=65009
+
+# IBGP - IPV6
+PORT1_IPV6=10002
+PEER1_PORT_IPV6=20002
+PEER1_AS_IPV6=$AS
+
+# EBGP - IPV6
+PORT2_IPV6=10003
+PEER2_PORT_IPV6=20003
+PEER2_AS_IPV6=65009
 
 HOLDTIME=5
 
@@ -64,15 +74,39 @@ configure_bgp()
     ID=192.150.187.78
     local_config $AS $ID
 
+    # IBGP - IPV4
     PEER=$HOST
     NEXT_HOP=192.150.187.78
-    add_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
-    enable_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT
+    PORT=$PORT1;PEER_PORT=$PEER1_PORT;PEER_AS=$PEER1_AS
+    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
+    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    enable_peer $IPTUPLE
 
+    # EBGP - IPV4
     PEER=$HOST
     NEXT_HOP=192.150.187.78
-    add_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT $PEER2_AS $NEXT_HOP $HOLDTIME
-    enable_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT
+    PORT=$PORT2;PEER_PORT=$PEER2_PORT;PEER_AS=$PEER2_AS
+    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
+    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    enable_peer $IPTUPLE
+
+    # IBGP - IPV6
+    PEER=$HOST
+    NEXT_HOP=192.150.187.78
+    PORT=$PORT1_IPV6;PEER_PORT=$PEER1_PORT_IPV6;PEER_AS=$PEER1_AS_IPV6
+    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
+    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocolIPv6
+    enable_peer $IPTUPLE
+
+    # EBGP - IPV6
+    PEER=$HOST
+    NEXT_HOP=192.150.187.78
+    PORT=$PORT2_IPV6;PEER_PORT=$PEER2_PORT_IPV6;PEER_AS=$PEER2_AS_IPV6
+    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
+    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocolIPv6
+    enable_peer $IPTUPLE
 }
 
 # Next Hops
@@ -80,6 +114,8 @@ configure_bgp()
 #NH2=20.20.20.20
 NH1=172.16.1.1
 NH2=172.16.2.1
+NH1_IPV6=40:40:40:40:40:40:40:40
+NH2_IPV6=50:50:50:50:50:50:50:50
 
 configure_rib()
 {
@@ -88,12 +124,19 @@ configure_rib()
 
     VIF0="vif0"
     VIF1="vif1"
+    VIF0_IPV6="vif2"
+    VIF1_IPV6="vif3"
 
     new_vif $VIF0
     new_vif $VIF1
+    new_vif $VIF0_IPV6
+    new_vif $VIF1_IPV6
 
     add_vif_addr4 $VIF0 $NH1 $NH1/24
     add_vif_addr4 $VIF1 $NH2 $NH2/24
+
+    add_vif_addr6 $VIF0_IPV6 $NH1_IPV6 $NH1_IPV6/24
+    add_vif_addr6 $VIF1_IPV6 $NH2_IPV6 $NH2_IPV6/24
 }
 
 reset_ibgp()
@@ -105,10 +148,28 @@ reset_ibgp()
     sleep 1
 }
 
+reset_ibgp_ipv6()
+{
+    coord reset
+    coord target $HOST $PORT1_IPV6
+    coord initialise attach peer1
+    # Allow the initialization to take place
+    sleep 1
+}
+
 reset_ebgp()
 {
     coord reset
     coord target $HOST $PORT2
+    coord initialise attach peer1
+    # Allow the initialization to take place
+    sleep 1
+}
+
+reset_ebgp_ipv6()
+{
+    coord reset
+    coord target $HOST $PORT2_IPV6
     coord initialise attach peer1
     # Allow the initialization to take place
     sleep 1
@@ -128,6 +189,30 @@ test1()
 	nexthop $NH1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
+
+    coord peer1 send $PACKET
+    coord peer1 send $PACKET
+    
+    coord peer1 assert established
+}
+
+test1_ipv6()
+{
+    echo "TEST1 IPV6 - Send the same route to IBGP hence RIB twice"
+    reset_ibgp_ipv6
+
+    coord peer1 establish AS $PEER1_AS_IPV6 holdtime 0 id 192.150.187.100
+    sleep 2
+
+    NLRI1=10:10:10:10:10:00:00:00/80
+    NLRI2=20:20:20:20:20:00:00:00/80
+
+    PACKET="packet update
+	origin 2
+	aspath 15
+	nexthop6 $NH1_IPV6
+	nlri6 $NLRI1
+	nlri6 $NLRI2"
 
     coord peer1 send $PACKET
     coord peer1 send $PACKET
@@ -415,7 +500,7 @@ test8()
 }
 
 TESTS_NOT_FIXED=''
-TESTS='test1 test2 test3 test4 test5 test6 test7 test8'
+TESTS='test1 test1_ipv6 test2 test3 test4 test5 test6 test7 test8'
 
 # Include command line
 . ${srcdir}/args.sh
