@@ -1,5 +1,5 @@
-dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.74 2003/11/06 04:02:43 pavlin Exp $
+<dnl -*- sh -*-
+dnl $XORP: xorp/configure.in,v 1.75 2003/11/06 08:40:04 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -474,9 +474,20 @@ else
     fi
 fi
 
-if test "${net_snmp_found}" = "true";  then
+while test "${net_snmp_found}" = "true"; do
+    NETSNMPCFLAGS=`net-snmp-config --cflags`
+    # Darwin 7.0.0 / OS X 10.3 on ppc gives ppc and i386 arch flags which
+    # the default compiler cannot compile.
+    XR_CHECK_CFLAG(${NETSNMPCFLAGS}, ,snmpd_valid=no)
+    if test "${snmpd_valid}" = "no" ; then
+	echo "-------------------------------------------------------------   "
+	echo "'net-snmp-config --cflags' gave invalid invalid cflags!         "
+	echo "-------------------------------------------------------------   "
+	break
+    fi
+
     oldCPPFLAGS=${CPPFLAGS}
-    CPPFLAGS=`net-snmp-config --cflags`
+    CPPFLAGS=${NETSNMPCFLAGS}
     AC_CHECK_HEADERS([net-snmp/library/container.h],net_snmp_container_bug=no,
         net_snmp_container_bug=yes,
         [
@@ -496,7 +507,8 @@ if test "${net_snmp_found}" = "true";  then
     echo "and execute (as root) command 'patch < container.h.patch'"
     echo "-------------------------------------------------------------   "
     fi
-fi
+    break
+done
 
 if test "${snmpd_valid}" = "yes" ; then
     MIBS="mibs"
