@@ -402,6 +402,7 @@ patch_etc() {
     cp $LIVEDIR/files/rc.conf $CHROOTDIR/etc
     cp $LIVEDIR/files/fstab   $CHROOTDIR/etc
     cp $LIVEDIR/files/motd   $CHROOTDIR/etc
+    cp $LIVEDIR/files/shells   $CHROOTDIR/etc
 
     mkdir -p $CHROOTDIR/usr/local/etc/rc.d
     cp $LIVEDIR/files/xorp.sh   $CHROOTDIR/usr/local/etc/rc.d
