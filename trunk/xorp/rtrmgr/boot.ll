@@ -2,11 +2,14 @@
 #include "string.h"
 #include "y.boot_tab.h"
 #define YY_NO_UNPUT
+#define SBUFSIZE 1024
 %}
 	int bootlinenum=1;
 	extern void* bootlval;
+	char stringbuf[SBUFSIZE+1];
 %option noyywrap
 %x comment
+%x string
 DBYTE [12]?[0-9]{1,2}
 IPV4 {DBYTE}.{DBYTE}.{DBYTE}.{DBYTE}
 %%
@@ -76,10 +79,33 @@ IPV4 {DBYTE}.{DBYTE}.{DBYTE}.{DBYTE}
 	bootlval = strdup(boottext);
 	return LITERAL;
 	}
-\"[a-zA-Z0-9"\-""_""\[""\]"":""\/""\&""\." ]*\"	{
-	bootlval = strdup(boottext);
-	return STRING;
-	}
+\"			{
+			BEGIN(string);
+			memset(stringbuf, 0, SBUFSIZE);
+			bootlval = stringbuf;
+			}
+<string>[^\\\n\"]*	/*normal text*/ {
+			strncat(stringbuf, boottext, SBUFSIZE);
+			}
+<string>\\+\"		/*allow quoted quotes*/ {
+			strncat(stringbuf, "\"", SBUFSIZE);
+			}
+<string>\\+\\		/*allow quoted backslash*/ {
+			strncat(stringbuf, "\\", SBUFSIZE);
+			}
+<string>\n		/*allow unquoted newlines*/ {
+			bootlinenum++;
+			strncat(stringbuf, "\n", SBUFSIZE);
+			}
+<string>\\+\n		/*allow quoted newlines*/ {
+			bootlinenum++;
+			strncat(stringbuf, "\n", SBUFSIZE);
+			}
+<string>\"		{
+			BEGIN(INITIAL);
+			printf("STRING:>%s<\n", stringbuf);
+			return STRING;
+			}
 
 "/*"			BEGIN(comment);
 <comment>[^*\n]* 	/*eat up anything that's not a '*' */
