@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.7 2003/03/16 07:18:58 pavlin Exp $
+// $XORP: xorp/rib/route.hh,v 1.8 2003/03/19 09:05:19 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -172,16 +172,6 @@ public:
      * Destructor for Routing Table Entry
      */
     ~IPRouteEntry() {}
-
-    /**
-     * Indicates if the route is for directly connected subnet.
-     * 
-     * @return true is the subnet is directly connected to this
-     * router, otherwise false
-     */
-    inline bool directly_connected() const {
-	return _vif ? _vif->is_same_subnet(IPvXNet(_net)) : false;
-    }
 
     /**
      * Get the route entry's subnet

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.8 2003/05/23 00:02:07 mjh Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.9 2003/05/24 23:35:26 mjh Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -106,7 +106,10 @@ int ExtIntTable<A>::add_route(const IPRouteEntry<A>& route,
 	    cp(7);
 	    return -1;
 	} else {
-	    if (nhroute->directly_connected()) {
+	    Vif *vif = nhroute->vif();
+	    if ((vif != NULL)
+		&& (vif->is_same_subnet(IPvXNet(nhroute->net()))
+		    || vif->is_same_p2p(IPvX(nh)))) {
 		// despite it coming from the Ext table, the nexthop is
 		// directly connected.  Just propagate it.
 		debug_msg("nexthop %s was directly connected\n", nh.str().c_str());

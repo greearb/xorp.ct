@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.12 2003/05/14 10:32:25 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.13 2003/05/24 23:35:26 mjh Exp $"
 
 #include "config.h"
 #include "rib_module.h"
@@ -512,9 +512,12 @@ RIB<A>::add_route(const string& tablename,
     // lookup the nexthop addr, and see it's the subnet is a directly
     // conencted one.
     const IPRouteEntry<A> *re = _final_table->lookup_route(nexthop_addr);
-    if (re) {
-	//We found a route.  Is the subnet directly connected?
-	if (re->directly_connected()) {
+    if (re != NULL) {
+	// We found a route.  Is the subnet directly connected?
+	Vif *vif = re->vif();
+	if ((vif != NULL)
+	    && (vif->is_same_subnet(IPvXNet(re->net()))
+		|| vif->is_same_p2p(IPvX(nexthop_addr)))) {
 	    debug_msg("**directly connected route found for nexthop\n");
 	    IPNextHop<A> *nh = find_or_create_peer_nexthop(nexthop_addr);
 	    ot->add_route(IPRouteEntry<A>(net, re->vif(), nh, *proto, metric));
