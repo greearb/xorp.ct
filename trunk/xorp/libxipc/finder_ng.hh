@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_ng.hh,v 1.4 2003/03/05 02:01:50 hodson Exp $
+// $XORP: xorp/libxipc/finder_ng.hh,v 1.5 2003/03/06 01:18:57 hodson Exp $
 
 #ifndef __LIBXIPC_FINDER_NG_HH__
 #define __LIBXIPC_FINDER_NG_HH__
@@ -83,6 +83,9 @@ public:
 protected:
     void announce_departure(const string& target);
     void announce_departure(const string& target, const string& key);
+
+    FinderNG(const FinderNG&);			// Not implemented
+    FinderNG& operator=(const FinderNG&);	// Not implemented
     
 protected:
     XrlCmdMap		 _cmds;

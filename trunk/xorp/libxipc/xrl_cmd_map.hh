@@ -63,6 +63,9 @@ public:
     
 protected:
     bool add_handler (const XrlCmdEntry& c);
+
+    XrlCmdMap(const XrlCmdMap&);		// not implemented
+    XrlCmdMap& operator=(const XrlCmdMap&);	// not implemented
     
 protected:
     const string _name;
