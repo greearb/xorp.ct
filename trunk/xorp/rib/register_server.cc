@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/register_server.cc,v 1.11 2004/02/06 22:44:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/register_server.cc,v 1.12 2004/02/11 08:48:46 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 
@@ -115,7 +115,7 @@ NotifyQueueInvalidateEntry<IPv4>::send(ResponseSender* response_sender,
 				       const string& module_name,
 				       NotifyQueue::XrlCompleteCB& cb) 
 {
-    printf("Sending route_info_invalid4\n");
+    debug_msg("Sending route_info_invalid4\n");
     response_sender->send_route_info_invalid4(module_name.c_str(),
 					      _net.masked_addr(),
 					      _net.prefix_len(), cb);
