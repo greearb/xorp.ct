@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.5 2003/01/23 11:14:25 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.6 2003/01/28 00:37:54 hodson Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -25,6 +25,7 @@
 #include <string>
 
 #include "libxorp/xlog.h"
+#include "libxipc/xrl_router.hh"
 #include "xrl/targets/pim_base.hh"
 #include "xrl/interfaces/common_xif.hh"
 #include "xrl/interfaces/mfea_xif.hh"

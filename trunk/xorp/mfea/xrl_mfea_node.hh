@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.2 2003/01/23 11:14:23 pavlin Exp $
+// $XORP: xorp/mfea/xrl_mfea_node.hh,v 1.3 2003/01/28 00:37:52 hodson Exp $
 
 #ifndef __MFEA_XRL_MFEA_NODE_HH__
 #define __MFEA_XRL_MFEA_NODE_HH__
@@ -25,6 +25,7 @@
 #include <string>
 
 #include "libxorp/xlog.h"
+#include "libxipc/xrl_router.hh"
 #include "xrl/targets/mfea_base.hh"
 #include "xrl/interfaces/common_xif.hh"
 #include "xrl/interfaces/mfea_client_xif.hh"

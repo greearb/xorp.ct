@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.3 2003/01/23 11:14:24 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.4 2003/01/28 00:37:53 hodson Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -25,6 +25,7 @@
 #include <string>
 
 #include "libxorp/xlog.h"
+#include "libxipc/xrl_router.hh"
 #include "xrl/targets/mld6igmp_base.hh"
 #include "xrl/interfaces/common_xif.hh"
 #include "xrl/interfaces/mfea_xif.hh"

@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.9 2002/12/10 04:53:08 mjh Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.1.1.1 2002/12/11 23:56:14 hodson Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
 
 #include <map>
 #include "libxorp/vif.hh"
+#include "libxipc/xrl_router.hh"
 #include "xrl/interfaces/fea_ifmgr_xif.hh"
 
 #define IF_EVENT_CREATED 1

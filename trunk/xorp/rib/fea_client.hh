@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/fea_client.hh,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $
+// $XORP: xorp/rib/fea_client.hh,v 1.2 2003/01/16 00:29:37 atanu Exp $
 
 #ifndef __RIB_FEA_CLIENT_HH__
 #define __RIB_FEA_CLIENT_HH__
@@ -25,7 +25,6 @@ class XrlRouter;
 
 class SyncFtiCommand;
 typedef ref_ptr<SyncFtiCommand> FeaClientTask;
-
 
 /**
  * @short FeaClient handles communication of routes to the FEA.

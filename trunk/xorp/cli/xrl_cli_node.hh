@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.2 2003/01/23 11:14:23 pavlin Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.3 2003/01/28 01:02:57 pavlin Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -20,10 +20,10 @@
 #include <string>
 
 #include "libxorp/xlog.h"
+#include "libxipc/xrl_router.hh"
 #include "xrl/targets/cli_base.hh"
 #include "xrl/interfaces/cli_processor_xif.hh"
 #include "cli_node.hh"
-
 
 //
 // TODO: XrlCliProcessorV1p0Client should NOT be a base class. Temp. solution..

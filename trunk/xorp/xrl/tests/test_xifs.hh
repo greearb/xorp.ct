@@ -12,7 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/xrl/tests/test_xifs.hh,v 1.2 2002/12/09 18:29:41 hodson Exp $
+// $XORP: xorp/xrl/tests/test_xifs.hh,v 1.1.1.1 2002/12/11 23:56:19 hodson Exp $
+
+#include "libxorp/eventloop.hh"
+#include "libxipc/xrl_router.hh"
 
 void try_common_xif_methods(EventLoop*	e, 
 			    XrlRouter*	r, 

@@ -67,7 +67,7 @@ def implement_send_xrl(cls, method_no, method, ifqname):
     s += "    Xrl x(the_tgt, \"%s\");\n" % ifqname
     for a in method.args():
         s += "    x.args().add(\"%s\", %s);\n" % (a.name(), a.name())
-    s += "    return _router->send(x, callback(this, &%s::unmarshall%d, cb));\n" % (cls, method_no)
+    s += "    return _sender->send(x, callback(this, &%s::unmarshall%d, cb));\n" % (cls, method_no)
     s += "}\n\n"
 
     return s
@@ -131,14 +131,19 @@ def prepare_client_if_hh(modulename, hh_file):
 
     s = Xif.util.standard_preamble(1, hh_file)
     s += \
-"""
-#ifndef %s
+"""#ifndef %s
 #define %s
 
 #undef XORP_LIBRARY_NAME
 #define XORP_LIBRARY_NAME "%s"
+
 #include "libxorp/xlog.h"
-#include "libxipc/xrl_router.hh"
+#include "libxorp/callback.hh"
+
+#include "libxipc/xrl.hh"
+#include "libxipc/xrl_error.hh"
+#include "libxipc/xrl_sender.hh"
+
 """ % (protect(hh_file), protect(hh_file), modulename)
     return s
 
@@ -146,7 +151,7 @@ def client_if_hh(cls, methods):
     s = """
 class %s {
 public:
-    %s(XrlSender* r) : _router(r) {}
+    %s(XrlSender* s) : _sender(s) {}
     virtual ~%s() {}
 
 """ % (cls, cls, cls)
@@ -154,7 +159,7 @@ public:
         s += declare_send_xrl(i, methods[i])
 
     s += """protected:
-    XrlSender* _router;
+    XrlSender* _sender;
 
 private:
 """

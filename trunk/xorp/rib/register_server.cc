@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/register_server.cc,v 1.1.1.1 2002/12/11 23:56:13 hodson Exp $"
+#ident "$XORP: xorp/rib/register_server.cc,v 1.2 2002/12/13 20:01:05 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "urib_module.h"
 #include "config.h"
 #include "libxorp/debug.h"
+#include "libxipc/xrl_router.hh"
 #include "register_server.hh"
 
 NotifyQueue::NotifyQueue(const string& modname)
@@ -120,7 +121,7 @@ NotifyQueueInvalidateEntry<IPv6>::send(ResponseSender* response_sender,
 
 
 RegisterServer::RegisterServer(XrlRouter* xrl_router)
-    : _response_sender(xrl_router) 
+    : _response_sender(xrl_router)
 {
 }
 
