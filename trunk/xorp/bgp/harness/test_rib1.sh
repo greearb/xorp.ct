@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.13 2003/10/30 04:55:40 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.14 2004/05/19 19:19:06 atanu Exp $
 #
 
 #
@@ -498,8 +498,30 @@ test8()
     coord peer1 assert established
 }
 
+test9()
+{
+    if [ ${RIB_CONFIGURED:-""} == "" ]
+    then
+	return
+    fi
+
+    echo "TEST9 - Check nexthop change on originated route"
+    reset_ebgp
+
+    originate_route4 10.10.10.0/24 10.69.1.1 true false
+
+    # Lets get it to resolve.
+    add_route4 connected true false 10.69.1.0/24 172.16.1.2 1
+
+    # Delete the route.
+    delete_route4 connected true false 10.69.1.0/24 
+
+    sleep 2
+    coord peer1 assert established
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test1_ipv6 test2 test3 test4 test5 test6 test7 test8'
+TESTS='test1 test1_ipv6 test2 test3 test4 test5 test6 test7 test8 test9'
 
 # Include command line
 . ${srcdir}/args.sh
