@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.15 2003/05/09 21:00:50 hodson Exp $"
+#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.16 2003/06/01 21:37:27 hodson Exp $"
 
 #include "xrl_module.h"
 #include "config.h"
@@ -236,7 +236,7 @@ main(int argc, char* const argv[])
 	router.finalize();
 
 	bool timeout = false;
-	XorpTimer to = e.set_flag_after_ms(1000, &timeout);
+	XorpTimer to = e.set_flag_after_ms(5000, &timeout);
 
 	while (false == timeout && false == router.ready()) {
 	    e.run();
