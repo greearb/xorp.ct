@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.19 2003/10/17 21:04:05 hodson Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.20 2003/10/28 19:52:50 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -82,6 +82,13 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int set_dummy();
+
+    /**
+     * Test if running in dummy mode.
+     * 
+     * @return true if running in dummy mode, otherwise false.
+     */
+    bool is_dummy() const { return _is_dummy; }
 
     /**
      * Start operation.
@@ -212,6 +219,11 @@ private:
     IfConfigObserverDummy _ifc_observer_dummy;
     IfConfigObserverRtsock _ifc_observer_rtsock;
     IfConfigObserverNetlink _ifc_observer_netlink;
+
+    //
+    // Misc other state
+    //
+    bool	_is_dummy;
 };
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.10 2003/10/14 02:17:12 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.11 2003/10/25 08:13:06 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -85,6 +85,13 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int set_dummy();
+
+    /**
+     * Test if running in dummy mode.
+     * 
+     * @return true if running in dummy mode, otherwise false.
+     */
+    bool is_dummy() const { return _is_dummy; }
     
     /**
      * Start operation.
@@ -422,6 +429,11 @@ private:
     bool _unicast_forwarding_enabled4;
     bool _unicast_forwarding_enabled6;
     bool _accept_rtadv_enabled6;
+
+    //
+    // Misc other state
+    //
+    bool	_is_dummy;
 };
 
 #endif	// __FEA_FTICONFIG_HH__

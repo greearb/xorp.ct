@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.13 2003/10/25 16:23:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.14 2003/11/08 07:20:58 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -58,7 +58,8 @@ FtiConfig::FtiConfig(EventLoop& eventloop)
       _ftic_table_observer_netlink(*this),
       _unicast_forwarding_enabled4(false),
       _unicast_forwarding_enabled6(false),
-      _accept_rtadv_enabled6(false)
+      _accept_rtadv_enabled6(false),
+      _is_dummy(false)
 {
     string error_msg;
     
@@ -153,7 +154,9 @@ FtiConfig::set_dummy()
     register_ftic_table_get(&_ftic_table_get_dummy);
     register_ftic_table_set(&_ftic_table_set_dummy);
     register_ftic_table_observer(&_ftic_table_observer_dummy);
-    
+
+    _is_dummy = true;
+
     return (XORP_OK);
 }
 
