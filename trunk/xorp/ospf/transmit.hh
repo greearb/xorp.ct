@@ -32,6 +32,11 @@
 
 class Transmit {
  public:
+    typedef ref_ptr<Transmit> TransmitRef;
+
+    virtual ~Transmit()
+    {}
+
     /**
      * Is this object still valid?
      *
@@ -52,7 +57,7 @@ class Transmit {
      * multiple locations, provide a mechanism to make a copy for each
      * location.
      */
-    virtual Transmit* clone() = 0;
+    virtual TransmitRef clone() = 0;
 
     /**
      * Generate a packet for transmission.
@@ -64,6 +69,24 @@ class Transmit {
     virtual uint8_t *generate(size_t &len) = 0;
 };
 
-typedef ref_ptr<Transmit> TransmitRef;
+/**
+ * A transmit object that sends fixed data.
+ */
+class SimpleTransmit : public Transmit {
+ public:
+    SimpleTransmit(vector<uint8_t>& pkt) {
+	_pkt.resize(pkt.size());
+	memcpy(&_pkt[0], &pkt[0], pkt.size());
+    }
 
+    bool valid() { return true; }
+    bool multiple() { return false; }
+    TransmitRef clone() { return this; }
+    uint8_t *generate(size_t &len) {
+	len = _pkt.size();
+	return &_pkt[0];
+    }
+ private:
+    vector<uint8_t> _pkt;
+};
 #endif // __OSPF_TRANSMIT_HH__
