@@ -127,7 +127,7 @@ LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libmld6igmpxif.la $
 xorp_pimsm4_SOURCES = xorp_pimsm4.cc
 xorp_pimsm6_SOURCES = xorp_pimsm6.cc
 
-test_pim_SOURCES = test_pim.cc $(top_builddir)/rib/rib_manager.hh $(top_builddir)/rib/rib_manager.cc $(top_builddir)/rib/xrl_target.hh $(top_builddir)/rib/xrl_target.cc $(top_builddir)/rib/redist_xrl.hh $(top_builddir)/rib/redist_xrl.cc
+test_pim_SOURCES = test_pim.cc $(top_srcdir)/rib/rib_manager.hh $(top_srcdir)/rib/rib_manager.cc $(top_srcdir)/rib/xrl_target.hh $(top_srcdir)/rib/xrl_target.cc $(top_srcdir)/rib/redist_xrl.hh $(top_srcdir)/rib/redist_xrl.cc
 
 test_pim_LDADD = $(LDADD) $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/fib2mrib/libfib2mrib.la $(top_builddir)/xrl/targets/libfib2mribbase.la $(top_builddir)/xrl/interfaces/libftixif.la $(top_builddir)/xrl/interfaces/libfeafibxif.la $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libredist4xif.la $(top_builddir)/xrl/interfaces/libredisttransaction4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libredist6xif.la $(top_builddir)/xrl/interfaces/libpolicyredist4xif.la $(top_builddir)/xrl/interfaces/libpolicyredist6xif.la $(top_builddir)/xrl/interfaces/libredisttransaction6xif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la
 #test_pim_LDADD	+= $(top_builddir)/libxorp/libxorp.la
@@ -413,9 +413,9 @@ clean-binPROGRAMS:
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
-rib_manager.$(OBJEXT): $(top_builddir)/rib/rib_manager.cc
-xrl_target.$(OBJEXT): $(top_builddir)/rib/xrl_target.cc
-redist_xrl.$(OBJEXT): $(top_builddir)/rib/redist_xrl.cc
+rib_manager.$(OBJEXT): $(top_srcdir)/rib/rib_manager.cc
+xrl_target.$(OBJEXT): $(top_srcdir)/rib/xrl_target.cc
+redist_xrl.$(OBJEXT): $(top_srcdir)/rib/redist_xrl.cc
 test_pim$(EXEEXT): $(test_pim_OBJECTS) $(test_pim_DEPENDENCIES) 
 	@rm -f test_pim$(EXEEXT)
 	$(CXXLINK) $(test_pim_LDFLAGS) $(test_pim_OBJECTS) $(test_pim_LDADD) $(LIBS)
@@ -492,59 +492,59 @@ distclean-depend:
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 
-rib_manager.o: $(top_builddir)/rib/rib_manager.cc
-@AMDEP_TRUE@	source='$(top_builddir)/rib/rib_manager.cc' object='rib_manager.o' libtool=no @AMDEPBACKSLASH@
+rib_manager.o: $(top_srcdir)/rib/rib_manager.cc
+@AMDEP_TRUE@	source='$(top_srcdir)/rib/rib_manager.cc' object='rib_manager.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/rib_manager.Po' tmpdepfile='$(DEPDIR)/rib_manager.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rib_manager.o `test -f $(top_builddir)/rib/rib_manager.cc || echo '$(srcdir)/'`$(top_builddir)/rib/rib_manager.cc
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rib_manager.o `test -f $(top_srcdir)/rib/rib_manager.cc || echo '$(srcdir)/'`$(top_srcdir)/rib/rib_manager.cc
 
-rib_manager.obj: $(top_builddir)/rib/rib_manager.cc
-@AMDEP_TRUE@	source='$(top_builddir)/rib/rib_manager.cc' object='rib_manager.obj' libtool=no @AMDEPBACKSLASH@
+rib_manager.obj: $(top_srcdir)/rib/rib_manager.cc
+@AMDEP_TRUE@	source='$(top_srcdir)/rib/rib_manager.cc' object='rib_manager.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/rib_manager.Po' tmpdepfile='$(DEPDIR)/rib_manager.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rib_manager.obj `cygpath -w $(top_builddir)/rib/rib_manager.cc`
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rib_manager.obj `cygpath -w $(top_srcdir)/rib/rib_manager.cc`
 
-rib_manager.lo: $(top_builddir)/rib/rib_manager.cc
-@AMDEP_TRUE@	source='$(top_builddir)/rib/rib_manager.cc' object='rib_manager.lo' libtool=yes @AMDEPBACKSLASH@
+rib_manager.lo: $(top_srcdir)/rib/rib_manager.cc
+@AMDEP_TRUE@	source='$(top_srcdir)/rib/rib_manager.cc' object='rib_manager.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/rib_manager.Plo' tmpdepfile='$(DEPDIR)/rib_manager.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rib_manager.lo `test -f $(top_builddir)/rib/rib_manager.cc || echo '$(srcdir)/'`$(top_builddir)/rib/rib_manager.cc
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rib_manager.lo `test -f $(top_srcdir)/rib/rib_manager.cc || echo '$(srcdir)/'`$(top_srcdir)/rib/rib_manager.cc
 
-xrl_target.o: $(top_builddir)/rib/xrl_target.cc
-@AMDEP_TRUE@	source='$(top_builddir)/rib/xrl_target.cc' object='xrl_target.o' libtool=no @AMDEPBACKSLASH@
+xrl_target.o: $(top_srcdir)/rib/xrl_target.cc
+@AMDEP_TRUE@	source='$(top_srcdir)/rib/xrl_target.cc' object='xrl_target.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/xrl_target.Po' tmpdepfile='$(DEPDIR)/xrl_target.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xrl_target.o `test -f $(top_builddir)/rib/xrl_target.cc || echo '$(srcdir)/'`$(top_builddir)/rib/xrl_target.cc
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xrl_target.o `test -f $(top_srcdir)/rib/xrl_target.cc || echo '$(srcdir)/'`$(top_srcdir)/rib/xrl_target.cc
 
-xrl_target.obj: $(top_builddir)/rib/xrl_target.cc
-@AMDEP_TRUE@	source='$(top_builddir)/rib/xrl_target.cc' object='xrl_target.obj' libtool=no @AMDEPBACKSLASH@
+xrl_target.obj: $(top_srcdir)/rib/xrl_target.cc
+@AMDEP_TRUE@	source='$(top_srcdir)/rib/xrl_target.cc' object='xrl_target.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/xrl_target.Po' tmpdepfile='$(DEPDIR)/xrl_target.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xrl_target.obj `cygpath -w $(top_builddir)/rib/xrl_target.cc`
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xrl_target.obj `cygpath -w $(top_srcdir)/rib/xrl_target.cc`
 
-xrl_target.lo: $(top_builddir)/rib/xrl_target.cc
-@AMDEP_TRUE@	source='$(top_builddir)/rib/xrl_target.cc' object='xrl_target.lo' libtool=yes @AMDEPBACKSLASH@
+xrl_target.lo: $(top_srcdir)/rib/xrl_target.cc
+@AMDEP_TRUE@	source='$(top_srcdir)/rib/xrl_target.cc' object='xrl_target.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/xrl_target.Plo' tmpdepfile='$(DEPDIR)/xrl_target.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xrl_target.lo `test -f $(top_builddir)/rib/xrl_target.cc || echo '$(srcdir)/'`$(top_builddir)/rib/xrl_target.cc
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xrl_target.lo `test -f $(top_srcdir)/rib/xrl_target.cc || echo '$(srcdir)/'`$(top_srcdir)/rib/xrl_target.cc
 
-redist_xrl.o: $(top_builddir)/rib/redist_xrl.cc
-@AMDEP_TRUE@	source='$(top_builddir)/rib/redist_xrl.cc' object='redist_xrl.o' libtool=no @AMDEPBACKSLASH@
+redist_xrl.o: $(top_srcdir)/rib/redist_xrl.cc
+@AMDEP_TRUE@	source='$(top_srcdir)/rib/redist_xrl.cc' object='redist_xrl.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/redist_xrl.Po' tmpdepfile='$(DEPDIR)/redist_xrl.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o redist_xrl.o `test -f $(top_builddir)/rib/redist_xrl.cc || echo '$(srcdir)/'`$(top_builddir)/rib/redist_xrl.cc
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o redist_xrl.o `test -f $(top_srcdir)/rib/redist_xrl.cc || echo '$(srcdir)/'`$(top_srcdir)/rib/redist_xrl.cc
 
-redist_xrl.obj: $(top_builddir)/rib/redist_xrl.cc
-@AMDEP_TRUE@	source='$(top_builddir)/rib/redist_xrl.cc' object='redist_xrl.obj' libtool=no @AMDEPBACKSLASH@
+redist_xrl.obj: $(top_srcdir)/rib/redist_xrl.cc
+@AMDEP_TRUE@	source='$(top_srcdir)/rib/redist_xrl.cc' object='redist_xrl.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/redist_xrl.Po' tmpdepfile='$(DEPDIR)/redist_xrl.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o redist_xrl.obj `cygpath -w $(top_builddir)/rib/redist_xrl.cc`
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o redist_xrl.obj `cygpath -w $(top_srcdir)/rib/redist_xrl.cc`
 
-redist_xrl.lo: $(top_builddir)/rib/redist_xrl.cc
-@AMDEP_TRUE@	source='$(top_builddir)/rib/redist_xrl.cc' object='redist_xrl.lo' libtool=yes @AMDEPBACKSLASH@
+redist_xrl.lo: $(top_srcdir)/rib/redist_xrl.cc
+@AMDEP_TRUE@	source='$(top_srcdir)/rib/redist_xrl.cc' object='redist_xrl.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/redist_xrl.Plo' tmpdepfile='$(DEPDIR)/redist_xrl.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o redist_xrl.lo `test -f $(top_builddir)/rib/redist_xrl.cc || echo '$(srcdir)/'`$(top_builddir)/rib/redist_xrl.cc
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o redist_xrl.lo `test -f $(top_srcdir)/rib/redist_xrl.cc || echo '$(srcdir)/'`$(top_srcdir)/rib/redist_xrl.cc
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 

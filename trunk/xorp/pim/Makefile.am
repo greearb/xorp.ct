@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.30 2004/11/29 00:32:04 bms Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.31 2004/11/30 07:47:26 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -76,12 +76,12 @@ xorp_pimsm4_SOURCES  = xorp_pimsm4.cc
 xorp_pimsm6_SOURCES  = xorp_pimsm6.cc
 
 test_pim_SOURCES  = test_pim.cc
-test_pim_SOURCES += $(top_builddir)/rib/rib_manager.hh
-test_pim_SOURCES += $(top_builddir)/rib/rib_manager.cc
-test_pim_SOURCES += $(top_builddir)/rib/xrl_target.hh
-test_pim_SOURCES += $(top_builddir)/rib/xrl_target.cc
-test_pim_SOURCES += $(top_builddir)/rib/redist_xrl.hh
-test_pim_SOURCES += $(top_builddir)/rib/redist_xrl.cc
+test_pim_SOURCES += $(top_srcdir)/rib/rib_manager.hh
+test_pim_SOURCES += $(top_srcdir)/rib/rib_manager.cc
+test_pim_SOURCES += $(top_srcdir)/rib/xrl_target.hh
+test_pim_SOURCES += $(top_srcdir)/rib/xrl_target.cc
+test_pim_SOURCES += $(top_srcdir)/rib/redist_xrl.hh
+test_pim_SOURCES += $(top_srcdir)/rib/redist_xrl.cc
 
 test_pim_LDADD	 = $(LDADD)
 test_pim_LDADD	+= $(top_builddir)/policy/backend/libpolicybackend.la
