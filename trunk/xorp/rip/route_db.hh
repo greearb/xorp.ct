@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.1 2003/04/10 00:27:43 hodson Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -65,8 +65,26 @@ public:
 		      uint32_t	   cost,
 		      uint32_t	   tag,
 		      RipPeer*	   peer);
-
+    /**
+     * Flatten routing table representation from Trie to Vector.
+     *
+     * @param routes vector where routes are to be appended.
+     */
     void dump_routes(vector<ConstDBRouteEntry>& routes);
+
+    /**
+     * Resolve a route and take a reference to it.  While the reference
+     * exists the route will not be deleted from memory, though may be
+     * remove from table.
+     *
+     * @param net network to be resolved.
+     * @param cdbe reference pointer to route entry.
+     *
+     * @return true if route resolves, false otherwise.
+     */
+    bool resolve_and_reference(const Net& net, ConstDBRouteEntry& cdbe);
+
+    
     
     UpdateQueue<A>& update_queue();
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_packets.cc,v 1.1 2003/04/11 22:00:18 hodson Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.1 2003/04/18 19:42:39 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -89,18 +89,18 @@ build_auth_packet(vector<uint8_t>& pkt, AuthHandlerBase& ah, uint32_t n)
     if (ah.head_entries()) {
 	PacketRouteEntry<IPv4>* p = reinterpret_cast<PacketRouteEntry<IPv4>*>
 	    (&pkt[0] + sizeof(RipPacketHeader));
-	if (ah.authenticate(&pkt[0], pkt.size(), p, trailer) == 0) {
-	    verbose_log("Unexpected outbound authentication failure: %s",
+	if (ah.authenticate(&pkt[0], pkt.size(), p, trailer) != n) {
+	    verbose_log("Unexpected outbound authentication failure: %s\n",
 			ah.error().c_str());
 	    return 1;
 	}
     } else {
-	if (ah.authenticate(&pkt[0], pkt.size(), 0, trailer) == 0) {
-	    verbose_log("Unexpected outbound authentication failure: %s",
+	if (ah.authenticate(&pkt[0], pkt.size(), 0, trailer) != n) {
+	    verbose_log("Unexpected outbound authentication failure: %s\n",
 			ah.error().c_str());
 	    return 1;
 	} else if (trailer.size() != 0) {
-	    verbose_log("Trailer had unexpected size.");
+	    verbose_log("Trailer had unexpected size.\n");
 	    return 1;
 	}
     }
@@ -127,24 +127,34 @@ check_auth_packet(const vector<uint8_t>& pkt,
 		  uint32_t		 n,
 		  bool			 expect_fail = false)
 {
-    const PacketRouteEntry<IPv4>* entry0;
+    const PacketRouteEntry<IPv4>* entries = 0;
+    uint32_t n_entries = 0;
 
-    uint32_t actual = ah.authenticate(&pkt[0], pkt.size(), entry0);
-    if (n != actual) {
+    if (ah.authenticate(&pkt[0], pkt.size(), entries, n_entries) == false) {
 	if (expect_fail == false) {
 	    verbose_log("Unexpected failure (actual entries %d, "
-			"expected %d) - %s\n", actual, n,
+			"expected %d) - %s\n", n_entries, n,
 			ah.error().c_str());
 	    return 1;
 	}
 	return 0;
     }
 
+    if (n == 0) {
+	if (entries != 0) {
+	    verbose_log("Got an address for start of entries when no entries "
+			"present in a packet.\n");
+	    return 1;
+	}
+	return 0;
+    }
+    
     const PacketRouteEntry<IPv4>* exp0 =
 	reinterpret_cast<const PacketRouteEntry<IPv4>*>
 	    (&pkt[0] + sizeof(RipPacketHeader));
+
     exp0 += ah.head_entries();
-    if (entry0 != exp0) {
+    if (entries != exp0) {
 	verbose_log("First entry in packet does not correspond with expected "
 		    "position\n");
 	return 1;
@@ -189,8 +199,9 @@ test_main()
     // Static sizing tests
     static_assert(sizeof(RipPacketHeader) == 4);
     static_assert(sizeof(PacketRouteEntry<IPv4>) == 20);
+    static_assert(sizeof(RipPacketHeader) == RIPv2_MIN_PACKET_BYTES);
     static_assert(sizeof(RipPacketHeader) + sizeof(PacketRouteEntry<IPv4>)
-		  == RIPv2_MIN_PACKET_BYTES);
+		  == RIPv2_MIN_AUTH_PACKET_BYTES);
     static_assert(sizeof(PacketRouteEntry<IPv4>)
 		  == sizeof(PlaintextPacketRouteEntry4));
     static_assert(sizeof(PacketRouteEntry<IPv4>)
@@ -206,7 +217,7 @@ test_main()
     //
     
     NullAuthHandler nah;
-    for (uint32_t n = 1; n < nah.max_routing_entries(); n++) {
+    for (uint32_t n = 0; n < nah.max_routing_entries(); n++) {
 	if (build_auth_packet(pkt, nah, n)) {
 	    verbose_log("Failed to build null authentication scheme packet "
 			"with %d entries.\n", n);
@@ -236,7 +247,7 @@ test_main()
     //
     PlaintextAuthHandler pah;
     for (uint32_t i = 0; i < 3; i++) {
-	for (uint32_t n = 1; n < pah.max_routing_entries(); n++) {
+	for (uint32_t n = 0; n < pah.max_routing_entries(); n++) {
 	    if (build_auth_packet(pkt, pah, n)) {
 		verbose_log("Failed to build plaintext authentication scheme "
 			    "packet with %d entries.\n", n);
@@ -272,7 +283,7 @@ test_main()
     EventLoop e;
     MD5AuthHandler mah(e, 0);
     mah.add_key(1, "Hello World!", 0, 0);
-    for (uint32_t n = 1; n < mah.max_routing_entries(); n++) {
+    for (uint32_t n = 0; n < mah.max_routing_entries(); n++) {
 	if (build_auth_packet(pkt, mah, n)) {
 	    verbose_log("Failed to build MD5 authentication scheme packet "
 			"with %d entries.\n", n);
@@ -320,7 +331,7 @@ test_main()
     //
     mah.remove_key(1);
     if (mah.key_chain().size() != 0) {
-	verbose_log("Key removal failed");
+	verbose_log("Key removal failed\n");
 	return 1;
     }
 
@@ -341,7 +352,7 @@ test_main()
     }
 
     if (mah.key_chain().size() != 1) {
-	verbose_log("Bogus key count: expected 1 key left, have %d",
+	verbose_log("Bogus key count: expected 1 key left, have %d\n",
 		    mah.key_chain().size());
 	return 1;
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.2 2003/01/16 19:08:48 mjh Exp $
+// $XORP: xorp/rip/auth.hh,v 1.1 2003/04/18 19:42:38 hodson Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -43,13 +43,16 @@ public:
      * @param packet pointer to first byte of RIP packet.
      * @param packet_bytes number of bytes in RIP packet.
      * @param entries_start output variable set to point to first
-     *        entry in packet.  Set to 0 on authentication failure.
-     * @return number of packet entries, 0 on authentication failure.
+     *        entry in packet.  Set to 0 if there are no entries, or
+     *        on authentication failure.
+     * @param n_entries number of entries in the packet.
+     *
+     * @return true if packet passes authentication checks, false otherwise.
      */
-    virtual uint32_t authenticate(const uint8_t* 		 packet,
-				  size_t			 packet_bytes,
-				  const PacketRouteEntry<IPv4>*& entries_start)
-	= 0;
+    virtual bool authenticate(const uint8_t*			packet,
+			      size_t				packet_bytes,
+			      const PacketRouteEntry<IPv4>*&	entries,
+			      uint32_t&				n_entries) = 0;
 
     /**
      * Outbound authentication method.
@@ -112,9 +115,10 @@ private:
 class NullAuthHandler : public AuthHandlerBase
 {
 public:
-    uint32_t authenticate(const uint8_t*		 packet,
-			  size_t			 packet_bytes,
-			  const PacketRouteEntry<IPv4>*& entries_start);
+    bool authenticate(const uint8_t*			packet,
+		      size_t				packet_bytes,
+		      const PacketRouteEntry<IPv4>*&	entries_start,
+		      uint32_t&				n_entries);
 
     uint32_t authenticate(const uint8_t*	  packet,
 			  size_t		  packet_bytes,
@@ -134,9 +138,10 @@ public:
 class PlaintextAuthHandler : public AuthHandlerBase
 {
 public:
-    uint32_t authenticate(const uint8_t*		 packet,
-			  size_t	 		 packet_bytes,
-			  const PacketRouteEntry<IPv4>*& entries_start);
+    bool authenticate(const uint8_t*			packet,
+		      size_t				packet_bytes,
+		      const PacketRouteEntry<IPv4>*&	entries_start,
+		      uint32_t&				n_entries);
 
     uint32_t authenticate(const uint8_t*	  packet,
 			  size_t		  packet_bytes,
@@ -288,9 +293,11 @@ public:
      */
     MD5AuthHandler(EventLoop& e, uint32_t timing_slack_secs = 3600);
     
-    uint32_t authenticate(const uint8_t* 		 packet,
-			  size_t			 packet_bytes,
-			  const PacketRouteEntry<IPv4>*& entries_start);
+    bool authenticate(const uint8_t*			packet,
+		      size_t				packet_bytes,
+		      const PacketRouteEntry<IPv4>*&	entries_start,
+		      uint32_t&				n_entries
+		      );
 
     uint32_t authenticate(const uint8_t*	  packet,
 			  size_t		  packet_bytes,

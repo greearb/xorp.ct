@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.2 2003/01/16 19:08:48 mjh Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.1 2003/04/18 19:42:38 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -73,29 +73,35 @@ NullAuthHandler::name() const
     return "none";
 }
 
-uint32_t
+bool
 NullAuthHandler::authenticate(const uint8_t*		     packet,
 			      size_t			     packet_bytes,
-			      const PacketRouteEntry<IPv4>*& entries)
+			      const PacketRouteEntry<IPv4>*& entries,
+			      uint32_t&			     n_entries)
 {
+    entries = 0;
+    n_entries = 0;
+
     if (packet_bytes > RIPv2_MAX_PACKET_BYTES) {
 	set_error(c_format("packet too large (%d bytes)", packet_bytes));
-	entries = 0;
-	return 0;
+	return false;
     } else if (packet_bytes < RIPv2_MIN_PACKET_BYTES) {
 	set_error(c_format("packet too small (%d bytes)", packet_bytes));
-	entries = 0;
-	return 0;
+	return false;
     }
 
     size_t entry_bytes = packet_bytes - sizeof(RipPacketHeader);
     if (entry_bytes % sizeof(PacketRouteEntry<IPv4>)) {
 	set_error(c_format("non-integral route entries (%d bytes)",
 			    entry_bytes));
-	entries = 0;
-	return 0;
+	return false;
     }
 
+    n_entries = entry_bytes / sizeof(PacketRouteEntry<IPv4>);
+    if (n_entries == 0) {
+	return true;
+    }
+    
     entries = reinterpret_cast<const PacketRouteEntry<IPv4>*>
 	(packet + sizeof(RipPacketHeader));
 
@@ -104,11 +110,12 @@ NullAuthHandler::authenticate(const uint8_t*		     packet,
 	set_error(c_format("unexpected authentication data (type %d)",
 			   entries[0].tag()));
 	entries = 0;
-	return 0;
+	n_entries = 0;
+	return false;
     }
 
     reset_error();
-    return entry_bytes / sizeof(PacketRouteEntry<IPv4>);
+    return true;
 }
 
 uint32_t
@@ -157,53 +164,56 @@ PlaintextAuthHandler::key() const
     return _key;
 }
 
-uint32_t
+bool
 PlaintextAuthHandler::authenticate(const uint8_t*		  packet,
 				   size_t			  packet_bytes,
-				   const PacketRouteEntry<IPv4>*& entries)
+				   const PacketRouteEntry<IPv4>*& entries,
+				   uint32_t&			  n_entries)
 {
+    entries = 0;
+    n_entries = 0;
+    
     if (packet_bytes > RIPv2_MAX_PACKET_BYTES) {
 	set_error(c_format("packet too large (%d bytes)", packet_bytes));
-	entries = 0;
-	return 0;
+	return false;
+    }
+
+    if (packet_bytes < RIPv2_MIN_AUTH_PACKET_BYTES) {
+	set_error(c_format("packet too small (%d bytes)", packet_bytes));
+	return false;
     }
 
     size_t entry_bytes = packet_bytes - sizeof(RipPacketHeader);
     if (entry_bytes % sizeof(PacketRouteEntry<IPv4>)) {
 	set_error(c_format("non-integral route entries (%d bytes)",
 			   entry_bytes));
-	entries = 0;
-	return 0;
+	return false;
     }
-
-    size_t n_entries = entry_bytes / sizeof(PacketRouteEntry<IPv4>);
-    if (n_entries < 2) {
-	set_error("too few route entries for a plaintext packet");
-	return 0;
-    }
-
-    entries = reinterpret_cast<const PacketRouteEntry<IPv4>*>
-	(packet + sizeof(RipPacketHeader));
 
     const PlaintextPacketRouteEntry4* ppr =
-	reinterpret_cast<const PlaintextPacketRouteEntry4*>(entries++);
+	reinterpret_cast<const PlaintextPacketRouteEntry4*>
+	(packet + sizeof(RipPacketHeader));
 
     if (ppr->addr_family() != PlaintextPacketRouteEntry4::ADDR_FAMILY) {
 	set_error("not an authenticated packet");
-	return 0;
+	return false;
     } else if (ppr->auth_type() != PlaintextPacketRouteEntry4::AUTH_TYPE) {
 	set_error("not a plaintext authenticated packet");
-	return 0;
+	return false;
     }
 
     string passwd = ppr->password();
     if (passwd != key()) {
 	set_error(c_format("wrong password \"%s\"", passwd.c_str()));
-	return 0;
+	return false;
     }
 
     reset_error();
-    return n_entries - 1;
+    n_entries = entry_bytes / sizeof(PacketRouteEntry<IPv4>) - 1;
+    if (n_entries)
+	entries = reinterpret_cast<const PacketRouteEntry<IPv4>*>(ppr + 1);
+    
+    return true;
 }
 
 uint32_t
@@ -223,8 +233,11 @@ PlaintextAuthHandler::authenticate(const uint8_t*	   packet,
 
     trailer_data.resize(0);
     reset_error();
-    return (packet_bytes - sizeof(RipPacketHeader)) /
-	sizeof(PacketRouteEntry<IPv4>);
+
+    uint32_t n = (packet_bytes - sizeof(RipPacketHeader)) /
+	sizeof(PacketRouteEntry<IPv4>) - 1;
+
+    return n;
 }
 
 
@@ -379,23 +392,25 @@ MD5AuthHandler::currently_active_key() const
     return 0xffff;	// an invalid key id
 }
 
-uint32_t
+bool
 MD5AuthHandler::authenticate(const uint8_t*		    packet,
 			     uint32_t			    packet_bytes,
-			     const PacketRouteEntry<IPv4>*& entries)
+			     const PacketRouteEntry<IPv4>*& entries,
+			     uint32_t&			    n_entries)
 {
     static_assert(sizeof(MD5PacketTrailer) == 20);
 
     entries = 0;
-
+    n_entries = 0;
+    
     if (packet_bytes > RIPv2_MAX_PACKET_BYTES + sizeof(MD5PacketTrailer)) {
 	set_error(c_format("packet too large (%d bytes)", packet_bytes));
-	return 0;
+	return false;
     }
 
-    if (packet_bytes < RIPv2_MIN_PACKET_BYTES) {
+    if (packet_bytes < RIPv2_MIN_AUTH_PACKET_BYTES) {
 	set_error(c_format("packet too small (%d bytes)", packet_bytes));
-	return 0;
+	return false;
     }
 
     const MD5PacketRouteEntry4* mpr =
@@ -404,18 +419,18 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
 
     if (mpr->addr_family() != MD5PacketRouteEntry4::ADDR_FAMILY) {
 	set_error("not an authenticated packet");
-	return 0;
+	return false;
     }
 
     if (mpr->auth_type() != MD5PacketRouteEntry4::AUTH_TYPE) {
 	set_error("not an MD5 authenticated packet");
-	return 0;
+	return false;
     }
 
     if (mpr->auth_bytes() != sizeof(MD5PacketTrailer)) {
 	set_error(c_format("wrong number of auth bytes (%d != %d)",
 			   mpr->auth_bytes(), sizeof(MD5PacketTrailer)));
-	return 0;
+	return false;
     }
 
     if (uint32_t(mpr->auth_offset() + mpr->auth_bytes()) != packet_bytes) {
@@ -423,7 +438,7 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
 			   "authentication data offset and size "
 			   "(%d + %d != %d).", mpr->auth_offset(),
 			   mpr->auth_bytes(), packet_bytes));
-	return 0;
+	return false;
     }
 
     KeyChain::iterator k = find_if(_key_chain.begin(), _key_chain.end(),
@@ -432,7 +447,7 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
     if (_key_chain.end() == k) {
 	set_error(c_format("packet with key id %d for which no key is"
 			   "configured", mpr->key_id()));
-	return 0;
+	return false;
     }
 
     if (k->packets_received() &&
@@ -440,7 +455,7 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
 	 mpr->seqno() - k->last_seqno_recv() >= 0x7fffffff)) {
 	set_error(c_format("bad sequence number 0x%08x < 0x%08x",
 			   mpr->seqno(), k->last_seqno_recv()));
-	return 0;
+	return false;
     }
 
     const MD5PacketTrailer* mpt =
@@ -448,7 +463,7 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
 						  mpr->auth_offset());
     if (mpt->valid() == false) {
 	set_error("invalid authentication trailer");
-	return 0;
+	return false;
     }
 
     MD5_CTX ctx;
@@ -469,9 +484,13 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
     k->set_last_seqno_recv(mpr->seqno());
 
     reset_error();
-    entries = reinterpret_cast<const PacketRouteEntry<IPv4>*>(mpr + 1);
-    return (mpr->auth_offset() - sizeof(RipPacketHeader)) /
-	    sizeof(PacketRouteEntry<IPv4>) - 1;
+    n_entries = (mpr->auth_offset() - sizeof(RipPacketHeader)) /
+	sizeof(PacketRouteEntry<IPv4>) - 1;
+
+    if (n_entries > 0)
+	entries = reinterpret_cast<const PacketRouteEntry<IPv4>*>(mpr + 1);
+
+    return true;
 }
 
 uint32_t

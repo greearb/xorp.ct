@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.2 2003/04/11 22:00:18 hodson Exp $
+// $XORP: xorp/rip/packets.hh,v 1.3 2003/04/18 19:42:38 hodson Exp $
 
 #ifndef __RIP_PACKETS_HH__
 #define __RIP_PACKETS_HH__
@@ -74,7 +74,12 @@ struct PacketRouteEntry {
 /**
  * Smallest RIPv2 packet size.
  */
-static const size_t RIPv2_MIN_PACKET_BYTES = 4 + 20;
+static const size_t RIPv2_MIN_PACKET_BYTES = 4;
+
+/**
+ * Smallest authenticated RIPv2 packet size.
+ */
+static const size_t RIPv2_MIN_AUTH_PACKET_BYTES = 4 + 20;
 
 /**
  * Largest RIPv2 packet size.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.2 2003/04/11 22:00:18 hodson Exp $
+// $XORP: xorp/rip/port.hh,v 1.3 2003/04/18 19:42:39 hodson Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -84,11 +84,24 @@ public:
      */
     inline uint32_t	triggered_update_max_wait_secs() const;
 
+    /**
+     * Set the interpacket packet delay.
+     * @param t the interpacket delay for back-to-back packets in
+     * milliseconds.
+     */
+    inline void		set_interpacket_delay_ms(uint32_t t);
+
+    /**
+     * Get the interpacket packet delay in milliseconds.
+     */
+    inline uint32_t	interpacket_delay_ms() const;
+    
 protected:
     uint32_t _expiry_secs;
     uint32_t _deletion_secs;
     uint32_t _triggered_update_min_wait_secs;
     uint32_t _triggered_update_max_wait_secs;
+    uint32_t _interpacket_msecs;
 };
 
 
@@ -201,6 +214,9 @@ class PortManagerBase;
 template <typename A>
 class Peer;
 
+template <typename A>
+class PortPacketQueue;
+
 /**
  * @short RIP Port
  *
@@ -217,8 +233,8 @@ class Port
       public PortIOUserBase<A>
 {
 public:
-    typedef A Addr;
-    typedef list<Peer<A>*> PeerList;
+    typedef A			Addr;
+    typedef list<Peer<A>*>	PeerList;
 
 public:
     Port(PortManagerBase<A>& manager);
@@ -303,6 +319,21 @@ public:
      * @return pointer to Peer on success, 0 otherwise.
      */
     const Peer<A>* peer(const Addr& addr) const;
+
+    /**
+     * Set the maximum packet buffer size.
+     */
+    void set_max_packet_buffer_bytes(uint32_t max_bytes);
+
+    /**
+     * Get the maximum packet buffer size.
+     */
+    uint32_t set_max_packet_buffer_bytes() const;
+
+    /**
+     * Get the current number of bytes buffered in RIP packets.
+     */
+    uint32_t packet_buffer_bytes() const;
     
 protected:
     /**
@@ -390,6 +421,7 @@ protected:
     RipHorizon		_horizon;		// Port Horizon type
     bool		_advertise;		// Advertise IO port
 
+    PortPacketQueue<A>*	_packet_queue;		// Outbound packet queue
     PortTimerConstants	_constants;		// Port related timer constants
     PortCounters	_counters;		// Packet counters
 };
@@ -444,6 +476,18 @@ inline uint32_t
 PortTimerConstants::triggered_update_max_wait_secs() const
 {
     return _triggered_update_max_wait_secs;
+}
+
+inline void
+PortTimerConstants::set_interpacket_delay_ms(uint32_t t)
+{
+    _interpacket_msecs = t;
+}
+
+inline uint32_t
+PortTimerConstants::interpacket_delay_ms() const
+{
+    return _interpacket_msecs;
 }
 
 #endif // __RIP_PORT_HH__

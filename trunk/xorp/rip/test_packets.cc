@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_packets.cc,v 1.1 2003/04/11 22:00:18 hodson Exp $"
+#ident "$XORP: xorp/rip/test_packets.cc,v 1.2 2003/04/18 19:42:39 hodson Exp $"
 
 #include "rip_module.h"
 
@@ -64,8 +64,9 @@ test_main()
     // Static sizing tests
     static_assert(sizeof(RipPacketHeader) == 4);
     static_assert(sizeof(PacketRouteEntry<IPv4>) == 20);
+    static_assert(sizeof(RipPacketHeader) == RIPv2_MIN_PACKET_BYTES);
     static_assert(sizeof(RipPacketHeader) + sizeof(PacketRouteEntry<IPv4>)
-		  == RIPv2_MIN_PACKET_BYTES);
+		  == RIPv2_MIN_AUTH_PACKET_BYTES);
     static_assert(sizeof(PacketRouteEntry<IPv4>)
 		  == sizeof(PlaintextPacketRouteEntry4));
     static_assert(sizeof(PacketRouteEntry<IPv4>)
