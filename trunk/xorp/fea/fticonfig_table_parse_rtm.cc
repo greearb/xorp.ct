@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.4 2003/07/17 00:45:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.5 2003/09/20 06:53:50 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -34,21 +34,23 @@
 // The information to parse is in RTM format
 // (e.g., obtained by routing sockets or by sysctl(3) mechanism).
 //
+// Reading route(4) manual page is a good start for understanding this
+//
 
 #ifndef HAVE_ROUTING_SOCKETS
 bool
 FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const uint8_t* ,
-				    size_t )
+				    size_t , bool )
 {
     return false;
 }
 
 #else // HAVE_ROUTING_SOCKETS
 
-// Reading route(4) manual page is a good start for understanding this
 bool
 FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
-				    const uint8_t* buf, size_t buf_bytes)
+				    const uint8_t* buf, size_t buf_bytes,
+				    bool is_rtm_get_only)
 {
     const struct rt_msghdr* rtm = reinterpret_cast<const struct rt_msghdr *>(buf);
     const uint8_t* last = buf + buf_bytes;
@@ -61,11 +63,24 @@ FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 		       rtm->rtm_version);
 	    continue;
 	}
-	
-	if (rtm->rtm_type != RTM_GET)
+
+	if (is_rtm_get_only) {
+	    //
+	    // Consider only the RTM_GET entries.
+	    //
+	    if (rtm->rtm_type != RTM_GET)
+		continue;
+	    if (! (rtm->rtm_flags & RTF_UP))
+		continue;
+	}
+
+	if ((rtm->rtm_type != RTM_ADD)
+	    && (rtm->rtm_type != RTM_DELETE)
+	    && (rtm->rtm_type != RTM_CHANGE)
+	    && (rtm->rtm_type != RTM_GET)) {
 	    continue;
-	if (! (rtm->rtm_flags & RTF_UP))
-	    continue;
+	}
+
 #ifdef RTF_WASCLONED
 	if (rtm->rtm_flags & RTF_WASCLONED)
 	    continue;		// XXX: ignore cloned entries
