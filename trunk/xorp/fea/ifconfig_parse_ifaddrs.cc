@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.8 2003/09/11 14:19:47 greenhal Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.9 2003/09/11 15:07:20 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -24,7 +24,13 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
 #include <net/if.h>
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
 #ifdef HAVE_IFADDRS_H
 #include <ifaddrs.h>
 #endif
@@ -33,6 +39,9 @@
 #endif
 #ifdef HAVE_NET_IF_TYPES_H
 #include <net/if_types.h>
+#endif
+#ifdef HAVE_NETINET6_IN6_VAR_H
+#include <netinet6/in6_var.h>
 #endif
 
 #include "ifconfig.hh"
@@ -235,7 +244,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const ifaddrs **ifap)
 		    XLOG_ERROR("ioctl(SIOCGIFMTU) for interface %s failed: %s",
 			      if_name.c_str(), strerror(errno));
 		} else {
-		    int mtu = ifrcopy.ifr_mtu;
+		    int mtu = ifridx.ifr_mtu;
 		    fi.set_mtu(mtu);
 		    close(s);
 		    break;
