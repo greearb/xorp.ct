@@ -43,17 +43,6 @@
 
 #include "hmac_md5.h"
 
-/**
- * hmac_md5:
- * @data: pointer to data stream.
- * @data_len: length of data stream in bytes.
- * @key: pointer to authentication key.
- * @key_len: length of authentication key in bytes.
- * @digest: digest to be filled in.
- *
- * Computes MD5 @digest of @data using key @key.
- *
- **/
 void hmac_md5(const unsigned char   *data,
 	      int              data_len,
 	      const unsigned char   *key,
@@ -114,6 +103,27 @@ void hmac_md5(const unsigned char   *data,
         MD5_Update(&context, k_opad, 64);     /* start with outer pad      */
         MD5_Update(&context, digest, 16);     /* then results of 1st hash  */
         MD5_Final(digest, &context);          /* finish up 2nd pass        */
+}
+
+const char*
+hmac_md5_digest_to_ascii(unsigned char	digest[16],
+			 char*		b,
+			 unsigned int	b_bytes)
+{
+	const char* hex = "0123456789abcdef";
+	char* o = b;
+	int i;
+
+	if (b_bytes < 33)
+		return NULL;
+
+	for (i = 0; i < 16; i++) {
+		*o++ = hex[digest[i] >> 4];
+		*o++ = hex[digest[i] & 0x0f];
+	}
+	*o = '\0';
+
+	return b;
 }
 
 /*

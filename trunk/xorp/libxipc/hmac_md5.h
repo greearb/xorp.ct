@@ -38,11 +38,33 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+	/**
+	 * Generate MD5 message digest.
+	 *
+	 * @param data data to be digested.
+	 * @param data_bytes the amount of data to be digested.
+	 * @param key to be used in making digest.
+	 * @param key_bytes the amount of key data.
+	 * @param digest the buffer to write the digested data.
+	 */
+	
+	void hmac_md5(const unsigned char *data, int data_bytes,
+		      const unsigned char *key,  int key_bytes,
+		      unsigned char  digest[16]);
 
-void hmac_md5(const unsigned char *data, int data_len,
-              const unsigned char *key,  int key_len,
-	      unsigned char  digest[16]);
-
+	/**
+	 * Render an MD5 digest as an ascii string.
+	 *
+	 * @param digest digest to be rendered.
+	 * @param b buffered to write rendering to.
+	 * @param b_bytes number of bytes available buffer (at least 33 bytes).
+	 *
+	 * @return pointer to buffer on success, NULL if insufficient
+	 * buffer space is provided.
+	 */
+	const char* hmac_md5_digest_to_ascii(unsigned char digest[16],
+					     char* b, unsigned int b_bytes);
+	
 #ifdef __cplusplus
 }
 #endif
