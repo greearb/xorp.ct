@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -84,7 +84,7 @@ SUBDIRS = . harness tools
 
 # -- Test Programs
 bin_PROGRAMS = bgp packet_test plumbing_test update_test
-TESTS = aspath_test packet_coding_test test_ribin test_deletion test_filter test_cache test_nhlookup test_decision test_fanout test_dump test_ribout test_next_hop_resolver
+TESTS = aspath_test packet_coding_test isolation_tests test_next_hop_resolver
 
 noinst_PROGRAMS = $(TESTS)
 noinst_LIBRARIES = libbgp.a
@@ -101,15 +101,7 @@ plumbing_test_DEPENDENCIES = libbgp.a
 aspath_test_SOURCES = aspath_test.cc
 packet_coding_test_SOURCES = packet_coding_test.cc
 update_test_SOURCES = update_test.cc
-test_ribin_SOURCES = test_ribin.cc route_table_debug.hh route_table_debug.cc dummy_main.cc
-test_deletion_SOURCES = test_deletion.cc route_table_debug.hh route_table_debug.cc dummy_main.cc
-test_filter_SOURCES = test_filter.cc route_table_debug.hh route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc
-test_cache_SOURCES = test_cache.cc route_table_debug.hh route_table_debug.cc dummy_main.cc
-test_nhlookup_SOURCES = test_nhlookup.cc route_table_debug.hh route_table_debug.cc dummy_main.cc
-test_decision_SOURCES = test_decision.cc route_table_debug.hh route_table_debug.cc dummy_next_hop_resolver.hh dummy_next_hop_resolver.cc dummy_main.cc
-test_fanout_SOURCES = test_fanout.cc route_table_debug.hh route_table_debug.cc dummy_main.cc
-test_dump_SOURCES = test_dump.cc route_table_debug.hh route_table_debug.cc dummy_next_hop_resolver.hh dummy_next_hop_resolver.cc dummy_main.cc
-test_ribout_SOURCES = test_ribout.cc route_table_debug.hh route_table_debug.cc peer_handler_debug.hh peer_handler_debug.cc dummy_main.cc
+isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc test_filter.cc test_cache.cc test_nhlookup.cc test_decision.cc test_fanout.cc test_dump.cc test_ribout.cc route_table_debug.hh route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc dummy_next_hop_resolver.hh peer_handler_debug.hh peer_handler_debug.cc
 test_next_hop_resolver_SOURCES = test_next_hop_resolver.cc dummy_main.cc
 libbgp_a_SOURCES = bgp_module.h md5.h aspath.hh attribute_manager.hh bgp_trie.hh dump_iterators.hh exceptions.hh internal_message.hh iptuple.hh local_data.hh next_hop_resolver.hh packet.hh parameter.hh path_attribute.hh peer.hh peer_data.hh peer_handler.hh peer_list.hh plumbing.hh rib_ipc_handler.hh route_queue.hh route_table_base.hh route_table_cache.hh route_table_decision.hh route_table_deletion.hh route_table_dump.hh route_table_fanout.hh route_table_filter.hh route_table_nhlookup.hh route_table_ribin.hh route_table_ribout.hh route_table_reader.hh socket.hh subnet_route.hh timer_const.hh update_attrib.hh xrl_target.hh md5.c aspath.cc attribute_manager.cc bgp_trie.cc dump_iterators.cc internal_message.cc iptuple.cc local_data.cc next_hop_resolver.cc notification_packet.cc open_packet.cc packet.cc parameter.cc path_attribute.cc peer.cc peer_data.cc peer_handler.cc peer_list.cc plumbing.cc rib_ipc_handler.cc route_queue.cc route_table_base.cc route_table_cache.cc route_table_decision.cc route_table_deletion.cc route_table_dump.cc route_table_fanout.cc route_table_filter.cc route_table_nhlookup.cc route_table_ribin.cc route_table_ribout.cc route_table_reader.cc socket.cc subnet_route.cc update_attrib.cc update_packet.cc xrl_target.cc
 EXTRA_DIST = BUGS configs configure_bgp.sh docs run_tests test_cache.reference test_decision.reference test_deletion.reference test_dump.reference test_fanout.reference test_filter.reference test_nhlookup.reference test_ribin.reference test_ribout.reference xrl_shell_funcs.sh
@@ -172,75 +164,16 @@ $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
 $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
 packet_coding_test_LDFLAGS = 
-test_ribin_OBJECTS =  test_ribin.o route_table_debug.o dummy_main.o
-test_ribin_LDADD = $(LDADD)
-test_ribin_DEPENDENCIES =  libbgp.a \
+isolation_tests_OBJECTS =  test_main.o test_ribin.o test_deletion.o \
+test_filter.o test_cache.o test_nhlookup.o test_decision.o \
+test_fanout.o test_dump.o test_ribout.o route_table_debug.o \
+dummy_main.o dummy_next_hop_resolver.o peer_handler_debug.o
+isolation_tests_LDADD = $(LDADD)
+isolation_tests_DEPENDENCIES =  libbgp.a \
 $(top_builddir)/xrl/targets/libbgpbase.a \
 $(top_builddir)/xrl/interfaces/libribxif.a \
 $(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_ribin_LDFLAGS = 
-test_deletion_OBJECTS =  test_deletion.o route_table_debug.o \
-dummy_main.o
-test_deletion_LDADD = $(LDADD)
-test_deletion_DEPENDENCIES =  libbgp.a \
-$(top_builddir)/xrl/targets/libbgpbase.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_deletion_LDFLAGS = 
-test_filter_OBJECTS =  test_filter.o route_table_debug.o dummy_main.o \
-dummy_next_hop_resolver.o
-test_filter_LDADD = $(LDADD)
-test_filter_DEPENDENCIES =  libbgp.a \
-$(top_builddir)/xrl/targets/libbgpbase.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_filter_LDFLAGS = 
-test_cache_OBJECTS =  test_cache.o route_table_debug.o dummy_main.o
-test_cache_LDADD = $(LDADD)
-test_cache_DEPENDENCIES =  libbgp.a \
-$(top_builddir)/xrl/targets/libbgpbase.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_cache_LDFLAGS = 
-test_nhlookup_OBJECTS =  test_nhlookup.o route_table_debug.o \
-dummy_main.o
-test_nhlookup_LDADD = $(LDADD)
-test_nhlookup_DEPENDENCIES =  libbgp.a \
-$(top_builddir)/xrl/targets/libbgpbase.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_nhlookup_LDFLAGS = 
-test_decision_OBJECTS =  test_decision.o route_table_debug.o \
-dummy_next_hop_resolver.o dummy_main.o
-test_decision_LDADD = $(LDADD)
-test_decision_DEPENDENCIES =  libbgp.a \
-$(top_builddir)/xrl/targets/libbgpbase.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_decision_LDFLAGS = 
-test_fanout_OBJECTS =  test_fanout.o route_table_debug.o dummy_main.o
-test_fanout_LDADD = $(LDADD)
-test_fanout_DEPENDENCIES =  libbgp.a \
-$(top_builddir)/xrl/targets/libbgpbase.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_fanout_LDFLAGS = 
-test_dump_OBJECTS =  test_dump.o route_table_debug.o \
-dummy_next_hop_resolver.o dummy_main.o
-test_dump_LDADD = $(LDADD)
-test_dump_DEPENDENCIES =  libbgp.a \
-$(top_builddir)/xrl/targets/libbgpbase.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_dump_LDFLAGS = 
-test_ribout_OBJECTS =  test_ribout.o route_table_debug.o \
-peer_handler_debug.o dummy_main.o
-test_ribout_LDADD = $(LDADD)
-test_ribout_DEPENDENCIES =  libbgp.a \
-$(top_builddir)/xrl/targets/libbgpbase.a \
-$(top_builddir)/xrl/interfaces/libribxif.a \
-$(top_builddir)/libxipc/libxipc.a $(top_builddir)/libxorp/libxorp.a
-test_ribout_LDFLAGS = 
+isolation_tests_LDFLAGS = 
 test_next_hop_resolver_OBJECTS =  test_next_hop_resolver.o dummy_main.o
 test_next_hop_resolver_LDADD = $(LDADD)
 test_next_hop_resolver_DEPENDENCIES =  libbgp.a \
@@ -284,12 +217,12 @@ DEP_FILES =  .deps/aspath.P .deps/aspath_test.P \
 .deps/route_table_ribin.P .deps/route_table_ribout.P .deps/socket.P \
 .deps/subnet_route.P .deps/test_cache.P .deps/test_decision.P \
 .deps/test_deletion.P .deps/test_dump.P .deps/test_fanout.P \
-.deps/test_filter.P .deps/test_next_hop_resolver.P \
+.deps/test_filter.P .deps/test_main.P .deps/test_next_hop_resolver.P \
 .deps/test_nhlookup.P .deps/test_ribin.P .deps/test_ribout.P \
 .deps/update_attrib.P .deps/update_packet.P .deps/update_test.P \
 .deps/xrl_target.P
-SOURCES = $(libbgp_a_SOURCES) $(bgp_SOURCES) $(packet_test_SOURCES) $(plumbing_test_SOURCES) $(update_test_SOURCES) $(aspath_test_SOURCES) $(packet_coding_test_SOURCES) $(test_ribin_SOURCES) $(test_deletion_SOURCES) $(test_filter_SOURCES) $(test_cache_SOURCES) $(test_nhlookup_SOURCES) $(test_decision_SOURCES) $(test_fanout_SOURCES) $(test_dump_SOURCES) $(test_ribout_SOURCES) $(test_next_hop_resolver_SOURCES)
-OBJECTS = $(libbgp_a_OBJECTS) $(bgp_OBJECTS) $(packet_test_OBJECTS) $(plumbing_test_OBJECTS) $(update_test_OBJECTS) $(aspath_test_OBJECTS) $(packet_coding_test_OBJECTS) $(test_ribin_OBJECTS) $(test_deletion_OBJECTS) $(test_filter_OBJECTS) $(test_cache_OBJECTS) $(test_nhlookup_OBJECTS) $(test_decision_OBJECTS) $(test_fanout_OBJECTS) $(test_dump_OBJECTS) $(test_ribout_OBJECTS) $(test_next_hop_resolver_OBJECTS)
+SOURCES = $(libbgp_a_SOURCES) $(bgp_SOURCES) $(packet_test_SOURCES) $(plumbing_test_SOURCES) $(update_test_SOURCES) $(aspath_test_SOURCES) $(packet_coding_test_SOURCES) $(isolation_tests_SOURCES) $(test_next_hop_resolver_SOURCES)
+OBJECTS = $(libbgp_a_OBJECTS) $(bgp_OBJECTS) $(packet_test_OBJECTS) $(plumbing_test_OBJECTS) $(update_test_OBJECTS) $(aspath_test_OBJECTS) $(packet_coding_test_OBJECTS) $(isolation_tests_OBJECTS) $(test_next_hop_resolver_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -390,41 +323,9 @@ packet_coding_test: $(packet_coding_test_OBJECTS) $(packet_coding_test_DEPENDENC
 	@rm -f packet_coding_test
 	$(CXXLINK) $(packet_coding_test_LDFLAGS) $(packet_coding_test_OBJECTS) $(packet_coding_test_LDADD) $(LIBS)
 
-test_ribin: $(test_ribin_OBJECTS) $(test_ribin_DEPENDENCIES)
-	@rm -f test_ribin
-	$(CXXLINK) $(test_ribin_LDFLAGS) $(test_ribin_OBJECTS) $(test_ribin_LDADD) $(LIBS)
-
-test_deletion: $(test_deletion_OBJECTS) $(test_deletion_DEPENDENCIES)
-	@rm -f test_deletion
-	$(CXXLINK) $(test_deletion_LDFLAGS) $(test_deletion_OBJECTS) $(test_deletion_LDADD) $(LIBS)
-
-test_filter: $(test_filter_OBJECTS) $(test_filter_DEPENDENCIES)
-	@rm -f test_filter
-	$(CXXLINK) $(test_filter_LDFLAGS) $(test_filter_OBJECTS) $(test_filter_LDADD) $(LIBS)
-
-test_cache: $(test_cache_OBJECTS) $(test_cache_DEPENDENCIES)
-	@rm -f test_cache
-	$(CXXLINK) $(test_cache_LDFLAGS) $(test_cache_OBJECTS) $(test_cache_LDADD) $(LIBS)
-
-test_nhlookup: $(test_nhlookup_OBJECTS) $(test_nhlookup_DEPENDENCIES)
-	@rm -f test_nhlookup
-	$(CXXLINK) $(test_nhlookup_LDFLAGS) $(test_nhlookup_OBJECTS) $(test_nhlookup_LDADD) $(LIBS)
-
-test_decision: $(test_decision_OBJECTS) $(test_decision_DEPENDENCIES)
-	@rm -f test_decision
-	$(CXXLINK) $(test_decision_LDFLAGS) $(test_decision_OBJECTS) $(test_decision_LDADD) $(LIBS)
-
-test_fanout: $(test_fanout_OBJECTS) $(test_fanout_DEPENDENCIES)
-	@rm -f test_fanout
-	$(CXXLINK) $(test_fanout_LDFLAGS) $(test_fanout_OBJECTS) $(test_fanout_LDADD) $(LIBS)
-
-test_dump: $(test_dump_OBJECTS) $(test_dump_DEPENDENCIES)
-	@rm -f test_dump
-	$(CXXLINK) $(test_dump_LDFLAGS) $(test_dump_OBJECTS) $(test_dump_LDADD) $(LIBS)
-
-test_ribout: $(test_ribout_OBJECTS) $(test_ribout_DEPENDENCIES)
-	@rm -f test_ribout
-	$(CXXLINK) $(test_ribout_LDFLAGS) $(test_ribout_OBJECTS) $(test_ribout_LDADD) $(LIBS)
+isolation_tests: $(isolation_tests_OBJECTS) $(isolation_tests_DEPENDENCIES)
+	@rm -f isolation_tests
+	$(CXXLINK) $(isolation_tests_LDFLAGS) $(isolation_tests_OBJECTS) $(isolation_tests_LDADD) $(LIBS)
 
 test_next_hop_resolver: $(test_next_hop_resolver_OBJECTS) $(test_next_hop_resolver_DEPENDENCIES)
 	@rm -f test_next_hop_resolver
@@ -468,7 +369,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" != "." || dot_seen=yes; \
+	  test "$$subdir" = "." && dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \

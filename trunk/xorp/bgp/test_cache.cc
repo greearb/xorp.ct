@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.8 2003/02/07 05:35:38 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.9 2003/02/08 07:30:24 rizzo Exp $"
 
 #include "bgp_module.h"
 #include "config.h"
@@ -29,7 +29,7 @@
 #include "dump_iterators.hh"
 
 
-int main(int, char** argv) {
+int test_cache(int, char** argv) {
     // stuff needed to create an eventloop
     xlog_init(argv[0], NULL);
     xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
@@ -333,8 +333,9 @@ int main(int, char** argv) {
     FILE *file = fopen(filename.c_str(), "r");
     if (file == NULL) {
 	fprintf(stderr, "Failed to read %s\n", filename.c_str());
-	fprintf(stderr, "TEST FAILED\n");
-	exit(1);
+	fprintf(stderr, "TEST CACHE FAILED\n");
+	fclose(file);
+	return false;
     }
 #define BUFSIZE 8192
     char testout[BUFSIZE];
@@ -342,35 +343,39 @@ int main(int, char** argv) {
     int bytes1 = fread(testout, 1, BUFSIZE, file);
     if (bytes1 == BUFSIZE) {
 	fprintf(stderr, "Output too long for buffer\n");
-	fprintf(stderr, "TEST FAILED\n");
-	exit(1);
+	fprintf(stderr, "TEST CACHE FAILED\n");
+	fclose(file);
+	return false;
     }
     fclose(file);
 
     file = fopen("test_cache.reference", "r");
     if (file == NULL) {
 	fprintf(stderr, "Failed to read test_cache.reference\n");
-	fprintf(stderr, "TEST FAILED\n");
-	exit(1);
+	fprintf(stderr, "TEST CACHE FAILED\n");
+	fclose(file);
+	return false;
     }
     char refout[BUFSIZE];
     memset(refout, 0, BUFSIZE);
     int bytes2 = fread(refout, 1, BUFSIZE, file);
     if (bytes2 == BUFSIZE) {
 	fprintf(stderr, "Output too long for buffer\n");
-	fprintf(stderr, "TEST FAILED\n");
-	exit(1);
+	fprintf(stderr, "TEST CACHE FAILED\n");
+	fclose(file);
+	return false;
     }
     fclose(file);
 
     if ((bytes1 != bytes2) || (memcmp(testout, refout, bytes1) != 0)) {
 	fprintf(stderr, "Output in %s doesn't match reference output\n",
 		filename.c_str());
-	fprintf(stderr, "TEST FAILED\n");
-	exit(1);
+	fprintf(stderr, "TEST CACHE FAILED\n");
+	return false;
 
     }
     unlink(filename.c_str());
+    return true;
 }
 
 

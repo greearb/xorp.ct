@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.9 2003/01/29 22:17:09 rizzo Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.10 2003/02/08 07:30:22 rizzo Exp $
 ##
 
 # -- Subdirectories
@@ -14,15 +14,7 @@ bin_PROGRAMS	+= packet_test plumbing_test update_test
 
 TESTS		 = aspath_test
 TESTS		+= packet_coding_test
-TESTS		+= test_ribin
-TESTS		+= test_deletion
-TESTS		+= test_filter
-TESTS		+= test_cache
-TESTS		+= test_nhlookup
-TESTS		+= test_decision
-TESTS		+= test_fanout
-TESTS		+= test_dump
-TESTS		+= test_ribout
+TESTS		+= isolation_tests
 TESTS		+= test_next_hop_resolver
 
 noinst_PROGRAMS = $(TESTS)
@@ -53,57 +45,23 @@ aspath_test_SOURCES		 = aspath_test.cc
 packet_coding_test_SOURCES	 = packet_coding_test.cc
 update_test_SOURCES		 = update_test.cc
 
-test_ribin_SOURCES		 = test_ribin.cc
-test_ribin_SOURCES		+= route_table_debug.hh
-test_ribin_SOURCES		+= route_table_debug.cc
-test_ribin_SOURCES		+= dummy_main.cc
-
-test_deletion_SOURCES		 = test_deletion.cc
-test_deletion_SOURCES		+= route_table_debug.hh
-test_deletion_SOURCES		+= route_table_debug.cc
-test_deletion_SOURCES		+= dummy_main.cc
-
-test_filter_SOURCES		 = test_filter.cc
-test_filter_SOURCES		+= route_table_debug.hh
-test_filter_SOURCES		+= route_table_debug.cc
-test_filter_SOURCES		+= dummy_main.cc
-test_filter_SOURCES		+= dummy_next_hop_resolver.cc
-
-test_cache_SOURCES		 = test_cache.cc
-test_cache_SOURCES		+= route_table_debug.hh
-test_cache_SOURCES		+= route_table_debug.cc
-test_cache_SOURCES		+= dummy_main.cc
-
-test_nhlookup_SOURCES		 = test_nhlookup.cc
-test_nhlookup_SOURCES		+= route_table_debug.hh
-test_nhlookup_SOURCES		+= route_table_debug.cc
-test_nhlookup_SOURCES		+= dummy_main.cc
-
-test_decision_SOURCES		 = test_decision.cc
-test_decision_SOURCES		+= route_table_debug.hh
-test_decision_SOURCES		+= route_table_debug.cc
-test_decision_SOURCES		+= dummy_next_hop_resolver.hh
-test_decision_SOURCES		+= dummy_next_hop_resolver.cc
-test_decision_SOURCES		+= dummy_main.cc
-
-test_fanout_SOURCES		 = test_fanout.cc
-test_fanout_SOURCES		+= route_table_debug.hh
-test_fanout_SOURCES		+= route_table_debug.cc
-test_fanout_SOURCES		+= dummy_main.cc
-
-test_dump_SOURCES		 = test_dump.cc
-test_dump_SOURCES		+= route_table_debug.hh
-test_dump_SOURCES		+= route_table_debug.cc
-test_dump_SOURCES		+= dummy_next_hop_resolver.hh
-test_dump_SOURCES		+= dummy_next_hop_resolver.cc
-test_dump_SOURCES		+= dummy_main.cc
-
-test_ribout_SOURCES		 = test_ribout.cc
-test_ribout_SOURCES		+= route_table_debug.hh
-test_ribout_SOURCES		+= route_table_debug.cc
-test_ribout_SOURCES		+= peer_handler_debug.hh
-test_ribout_SOURCES		+= peer_handler_debug.cc
-test_ribout_SOURCES		+= dummy_main.cc
+isolation_tests_SOURCES		= test_main.cc
+isolation_tests_SOURCES		+= test_ribin.cc
+isolation_tests_SOURCES		+= test_deletion.cc
+isolation_tests_SOURCES		+= test_filter.cc
+isolation_tests_SOURCES		+= test_cache.cc
+isolation_tests_SOURCES		+= test_nhlookup.cc
+isolation_tests_SOURCES		+= test_decision.cc
+isolation_tests_SOURCES		+= test_fanout.cc
+isolation_tests_SOURCES		+= test_dump.cc
+isolation_tests_SOURCES		+= test_ribout.cc
+isolation_tests_SOURCES		+= route_table_debug.hh
+isolation_tests_SOURCES		+= route_table_debug.cc
+isolation_tests_SOURCES		+= dummy_main.cc
+isolation_tests_SOURCES		+= dummy_next_hop_resolver.cc
+isolation_tests_SOURCES		+= dummy_next_hop_resolver.hh
+isolation_tests_SOURCES		+= peer_handler_debug.hh
+isolation_tests_SOURCES		+= peer_handler_debug.cc
 
 test_next_hop_resolver_SOURCES	= test_next_hop_resolver.cc
 test_next_hop_resolver_SOURCES += dummy_main.cc
