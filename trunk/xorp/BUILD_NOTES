@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.20 2005/03/12 08:57:46 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.21 2005/03/12 21:46:35 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -66,7 +66,7 @@ gmake check
 ===========
 
   * NetBSD-1.6.1:
-    - The code compiles, and the internal tests appear to succeed.
+    - The code compiles, but some of the internal tests fail.
     - If the compilation fails with the following error:
       "/usr/pkg/bin/bash: Undefined PLT symbol "read" (reloc type = 7, symnum = 92)"
       then just run "gmake" again, and the compilation should continue from
@@ -122,7 +122,7 @@ gmake check
 	  setenv CFLAGS -fno-stack-protector
 	  setenv CXXFLAGS -fno-stack-protector
 	  ./configure
-    - The code compiles, and the internal tests appear to succeed.
+    - The code compiles, but some of the internal tests fail.
       Multicast routing seems to work.
     - The default datasize limit per user may not be sufficient to compile
       some parts of the code, hence you may need to increase the datasize
