@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.5 2003/03/12 10:58:59 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.6 2003/04/29 18:30:36 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -79,9 +79,12 @@ it for each router:
  - After PIM-SM is started, if you want to access its internal
    information, you can use the built-in CLI:
      telnet localhost 12000
-   If you want to enable access from other subnets other than the local
-   host only, add the corresponding subnet to test_pim.cc under
-   "CLI access".
+
+ - If you want to enable access from other subnets, add the corresponding
+   subnet to the following variable in ``configure_mld6igmp'':
+
+	CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
+
 
    Currently, the CLI supports primarily "show" commands. For example,
    "show pim interface" will show the list of all interfaces known to
@@ -123,7 +126,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (note: March 10, 2003), the PIM-SM implementation is based
+Currently (June 6, 2003), the PIM-SM implementation is based
 on the specification in the following documents:
 
  * draft-ietf-pim-sm-v2-new-05.{ps,txt} (The core PIM-SM specification).

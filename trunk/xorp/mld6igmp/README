@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/README,v 1.1.1.1 2002/12/11 23:56:06 hodson Exp $
+# $XORP: xorp/mld6igmp/README,v 1.2 2003/03/11 01:22:48 pavlin Exp $
 #
 
 Multicast Listener Discovery/Internet Group Management Protocol
@@ -60,9 +60,12 @@ it for each router:
  - After MLD/IGMP is started, if you want to access its internal
    information, you can use the built-in CLI:
      telnet localhost 12000
-   If you want to enable access from other subnets other than the local
-   host only, add the corresponding subnet to test_mld6igmp.cc under
-   "CLI access".
+
+ - If you want to enable access from other subnets, add the corresponding
+   subnet to the following variable in ``configure_mld6igmp'':
+
+	CLI_ENABLE_SUBNETS="127.0.0.1/32 192.150.187.0/25"
+
 
    Currently, the CLI supports primarily "show" commands. For example,
    "show igmp interface" will show the list of all interfaces known to
@@ -94,7 +97,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (note: March 10, 2003), the MLD/IGMP implementation is based
+Currently (June 6, 2003), the MLD/IGMP implementation is based
 on the specification in the following documents:
 
  * RFC 2710: Multicast Listener Discovery for IPv6, Version 1
