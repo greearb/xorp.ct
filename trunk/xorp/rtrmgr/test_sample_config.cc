@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.3 2003/05/02 09:00:02 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.4 2003/05/22 20:37:54 hodson Exp $"
 
 #include <signal.h>
 
@@ -36,10 +36,12 @@
 //
 // Defaults
 //
-static const char* default_config_boot	       = "config.boot.sample";
-static const char* default_config_template_dir = "../etc/templates";
-static const char* default_xrl_dir 	       = "../xrl/targets";
 
+static const char* c_srcdir = getenv("srcdir");
+static const string srcdir = c_srcdir ? c_srcdir : ".";
+static const string default_config_template_dir = srcdir + "/../etc/templates";
+static const string default_xrl_dir = srcdir + "/../xrl/targets";
+static const string default_config_boot = srcdir + "/config.boot.sample";
 /**
  * This test loads the template tree, then loads the sample config,
  * but doesn't call any XRLs or start any processes.
@@ -61,9 +63,9 @@ main(int argc, char* const argv[])
     xlog_add_default_output();
     xlog_start();
 
-    const char*	config_template_dir = default_config_template_dir;
-    const char*	xrl_dir 	    = default_xrl_dir;
-    const char*	config_boot         = default_config_boot;
+    const string& config_template_dir = default_config_template_dir;
+    const string& xrl_dir = default_xrl_dir;
+    const string& config_boot = default_config_boot;
 
     //read the router config template files
     TemplateTree *tt;

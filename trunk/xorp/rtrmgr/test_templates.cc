@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.1 2003/02/21 22:54:32 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.2 2003/03/10 23:21:02 hodson Exp $"
 
 #include <signal.h>
 
@@ -35,8 +35,10 @@
 //
 // Defaults
 //
-static const char* default_config_template_dir = "../etc/templates";
-static const char* default_xrl_dir 	       = "../xrl/targets";
+static const char* c_srcdir = getenv("srcdir");
+static const string srcdir = c_srcdir ? c_srcdir : ".";
+static const string default_config_template_dir = srcdir + "/../etc/templates";
+static const string default_xrl_dir = srcdir + "/../xrl/targets";
 
 void
 usage(const char *name)
@@ -48,11 +50,11 @@ usage(const char *name)
 
     fprintf(stderr, 
 	    "\t-t cfg_dir	specify config directory	[ %s ]\n",
-	    default_config_template_dir);
+	    default_config_template_dir.c_str());
 
     fprintf(stderr, 
 	    "\t-x xrl_dir	specify xrl directory		[ %s ]\n",
-	    default_xrl_dir);
+	    default_xrl_dir.c_str());
 
     exit(-1);
 }
@@ -70,8 +72,8 @@ main(int argc, char* const argv[])
     xlog_add_default_output();
     xlog_start();
 
-    const char*	config_template_dir = default_config_template_dir;
-    const char*	xrl_dir 	    = default_xrl_dir;
+    string config_template_dir = default_config_template_dir;
+    string xrl_dir = default_xrl_dir;
 
     int c;
 
