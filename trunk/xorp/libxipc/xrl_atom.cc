@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.6 2003/03/16 08:20:31 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.7 2003/04/15 17:16:45 pavlin Exp $"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -25,8 +25,6 @@
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
 #include "libxorp/xlog.h"
-
-#include "libxorp/ether_compat.h"
 
 #include "xrl_atom.hh"
 #include "xrl_atom_encoding.hh"
