@@ -73,9 +73,8 @@ different source tree may encounter compatibility problems.
 \section{Communication Error}
 
 \subsection{BGP}
-The 
 
-\section{Process interactions}
+\section{Process Failure}
 Each process in a XORP router is described and how it should behave
 when another process in the system fails. Processes can explicitly
 register interest in the status of other processes through the
@@ -88,14 +87,48 @@ this possible race if the \finder fails or restarts all processes
 should exit. The assumption is that the \finder failing is a very low
 probability event.
 
-\subsection{RTRMGR - Router manager}
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+Process fails &                &          &      &      &      &         &      &      &      &        \\\hline
+              & Rtrmgr/\finder & FEA      & MFEA & RIB  & IGMP & PIM     & BGP  & RIP  & OSPF & XORPSH \\\hline
+Rtrmgr/finder & /              & Withdraw & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & Exit   \\
+              &                & All      &      &      &      &         &      &      &      &        \\
+              &                & Routes   &      &      &      &         &      &      &      &        \\
+              &                & Exit     &      &      &      &         &      &      &      &        \\\hline
+FEA           &  Restart       & /        & Exit & Exit & Exit & Exit    & Exit & Exit & Exit & Exit   \\\hline
+MFEA          &  Restart       & -        & /    & -    & Exit & Exit    & -    & -    & -    & -      \\\hline
+RIB           &  Restart       & Withdraw & /    & -    & Exit & Exit    & Exit & Exit & Exit & Exit   \\
+              &                & All      &      &      & (G)  & (G)     & (G)  & (G)  & (G)  & (G)    \\
+              &                & Routes   &      &      &      &         &      &      &      &        \\\hline
+IGMP          &  Restart       & -        & -    & -    & /    & Delete  & -    & -    & -    & -      \\
+              &                &          &      &      &      & Local   &      &      &      &        \\
+              &                &          &      &      &      & Members &      &      &      &        \\
+              &                &          &      &      &      & After   &      &      &      &        \\
+              &                &          &      &      &      & Timeout &      &      &      &        \\\hline
+PIM           &  Restart       & -        & -    & -    & -    & /       & -    & -    & -    & -      \\\hline
+BGP           &  Restart       & -        & -    & -    & -    & -       & /    & -    & -    & -      \\\hline
+BGP           &  Restart       & -        & -    & -    & -    & -       & /    & -    & -    & -      \\\hline
+RIP           &  Restart       & -        & -    & -    & -    & -       & -    & /    & -    & -      \\\hline
+OSPF          &  Restart       & -        & -    & -    & -    & -       & -    & -    & /    & -      \\\hline
+XORPSH        &  Restart       & -        & -    & -    & -    & -       & -    & -    & -    & /      \\\hline
+\end{tabular}
+\end{center}
+\caption{\label{stt}Action to take on detecting process failure}
+\end{table}
+
+
+\subsection{RTRMGR/\finder - Router manager}
 
 
 \subsection{FEA - Forwarding Engine Abstraction}
 The FEA primarily excepts routes from the RIB and places them in the
 kernel. The FEA should tag all routes that it has installed in the
 kernel. The FEA on restart should remove all routes that a previous
-incarnation of the FEA has placed in the kernel.
+incarnation of the FEA has placed in the kernel. When an FEA is
+exiting it should attempt remove all routes that it has installed in
+the kernel.
 
 The FEA process should register interest in the RIB. If the RIB fails
 the FEA should withdraw all routes that the RIB has sent it.
