@@ -311,10 +311,11 @@ CliCommand::delete_command(const string& delete_command_name)
 void
 CliCommand::delete_all_commands() 
 {
-    list <CliCommand*>::iterator i;
-    for (i=_child_command_list.begin(); i!= _child_command_list.end(); i++) {
-	(*i)->delete_all_commands();
-	delete *i;
+    list <CliCommand*>::iterator iter;
+    for (iter = _child_command_list.begin();
+	 iter != _child_command_list.end(); ++iter) {
+	(*iter)->delete_all_commands();
+	delete *iter;
     }
     while (! _child_command_list.empty())
 	_child_command_list.pop_front();
@@ -674,6 +675,23 @@ CliCommand::can_complete()
     return false;
 }
 
+CliCommand *
+CliCommand::cli_command_pipe()
+{
+    if (_root_command != this)
+	return (_root_command->cli_command_pipe());
+    else
+	return (_cli_command_pipe);
+}
+
+void
+CliCommand::set_dynamic_children_callback(DYNAMIC_CHILDREN_CALLBACK v)
+{
+    XLOG_ASSERT(!_global_name.empty());
+    _dynamic_children_callback = v;
+    _has_dynamic_children = true;
+}
+
 bool
 CliCommand::has_dynamic_process_callback()
 {
@@ -695,34 +713,37 @@ CliCommand::has_cli_process_callback()
 
 list<CliCommand *>&	
 CliCommand::child_command_list()
-{ 
+{
     if (_has_dynamic_children)
-	assert(_child_command_list.empty());
+	XLOG_ASSERT(_child_command_list.empty());
 
     // Handle dynamic children generation
     if (_child_command_list.empty() && _has_dynamic_children) {
-	//now we've run this, we won't need to run it again.
+	// Now we've run this, we won't need to run it again.
 	_has_dynamic_children = false;
 
 	// Add dynamic children
 	XLOG_ASSERT(global_name().size() > 0);
 	bool can_be_run;
-	set <string> dynamic_children = 
-	    _dynamic_children_callback->dispatch(global_name(), can_be_run);
+	map<string, string> dynamic_children;
+	dynamic_children = _dynamic_children_callback->dispatch(global_name(),
+								can_be_run);
 	if (can_be_run) {
 	    if (_cli_process_callback.is_empty())
 		_cli_process_callback = _dynamic_process_callback;
 	}
-	set <string>::iterator dci;
+	map<string, string>::iterator iter;
 	CliCommand *new_cmd;
-	for(dci = dynamic_children.begin();
-	    dci != dynamic_children.end();
-	    ++dci) {
-	    new_cmd = add_command(*dci, "help");
-	    string child_name = global_name() + (" " + *dci);
+	for (iter = dynamic_children.begin();
+	     iter != dynamic_children.end();
+	     ++iter) {
+	    string command_name = iter->first;
+	    string command_help = iter->second;
+	    new_cmd = add_command(command_name, command_help);
+	    string child_name = global_name() + " " + command_name;
 	    new_cmd->set_global_name(child_name);
-	    new_cmd->set_dynamic_children(_dynamic_children_callback);
-	    new_cmd->set_dynamic_process_callback(dynamic_process_callback());
+	    new_cmd->set_dynamic_children_callback(_dynamic_children_callback);
+	    new_cmd->set_dynamic_process_callback(_dynamic_process_callback);
 	}
     }
 

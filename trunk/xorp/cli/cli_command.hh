@@ -26,7 +26,7 @@
 
 #include <string>
 #include <list>
-#include <set>
+#include <map>
 
 #include "libxorp/callback.hh"
 #include "cli/libtecla/libtecla.h"
@@ -53,7 +53,7 @@ typedef XorpCallback5<int,	/* return_value */
     const vector<string>&	/* command_args */
 >::RefPtr CLI_PROCESS_CALLBACK;
 
-typedef XorpCallback2<set<string>, /* return value */
+typedef XorpCallback2<map<string, string>, /* return value */
     const string&		/* path_so_far */,
     bool&			/* indicate to copy callback to the new node */
 >::RefPtr DYNAMIC_CHILDREN_CALLBACK;
@@ -257,19 +257,21 @@ public:
      */
     void set_server_name(const string& v) { _server_name = v; }
     
-    // TODO: kdoc-ify the public methods below (after I learn their purpose).
-    void set_dynamic_children(DYNAMIC_CHILDREN_CALLBACK dc_cb) {
-	assert(!_global_name.empty());
-	_dynamic_children_callback = dc_cb;
-	_has_dynamic_children = true;
-    }
+    /**
+     * Set the callback for dynamic generation of children commands.
+     * 
+     * @param v the callback for dynamic generation of children commands.
+     */
+    void set_dynamic_children_callback(DYNAMIC_CHILDREN_CALLBACK v);
     
+    /**
+     * Set the callback for command processing for a dynamically generated
+     * child command.
+     * 
+     * @param v the callback for command processing.
+     */
     void set_dynamic_process_callback(const CLI_PROCESS_CALLBACK& v) {
 	_dynamic_process_callback = v;
-    }
-    
-    const CLI_PROCESS_CALLBACK& dynamic_process_callback() const {
-	return _dynamic_process_callback;
     }
     
 protected:
@@ -315,20 +317,15 @@ private:
     CLI_COMPLETION_FUNC *_cli_completion_func;	// The function to call
 						// to complete a command
 
-    //store the callback to generate dynamic children
+    // Store the callback to generate dynamic children
     DYNAMIC_CHILDREN_CALLBACK _dynamic_children_callback;
     bool _has_dynamic_children;
-    //the cli_process_callback to copy to dynamic children
+    // The cli_process_callback to copy to dynamic children
     CLI_PROCESS_CALLBACK _dynamic_process_callback;
     
     bool can_complete();
     bool can_pipe() { return (_can_pipe); }
-    CliCommand *cli_command_pipe() {
-	if (_root_command != this)
-	    return (_root_command->cli_command_pipe());
-	else
-	    return (_cli_command_pipe);
-    }
+    CliCommand *cli_command_pipe();
     void set_cli_command_pipe(CliCommand *v) { _cli_command_pipe = v; }
     
     CliCommand *root_command() { return (_root_command); }
