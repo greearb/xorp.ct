@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.27 2004/12/18 03:24:35 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.28 2005/01/06 00:38:00 atanu Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -926,7 +926,7 @@ FinderClient::uncache_xrls_from_target(const string& target)
 	}
     }
     finder_trace_result("Uncached %u Xrls relating to target \"%s\"\n",
-			(uint32_t)n, target.c_str());
+			XORP_UINT_CAST(n), target.c_str());
 }
 
 XrlCmdError
