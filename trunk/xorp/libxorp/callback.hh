@@ -207,9 +207,9 @@ if (! cb.is_empty()) {
 
 
 #if defined(__GNUC__) && (__GNUC__ < 3)
-#  define callback(x...) dbg_callback(__FILE__,__LINE__,x)
+#define callback(x...) dbg_callback(__FILE__,__LINE__,x)
 #else
-#  define callback(...) dbg_callback(__FILE__,__LINE__,__VA_ARGS__)
+#define callback(...) dbg_callback(__FILE__,__LINE__,__VA_ARGS__)
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

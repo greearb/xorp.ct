@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/c_format.hh,v 1.2 2003/01/16 19:09:27 hodson Exp $
+// $XORP: xorp/libxorp/c_format.hh,v 1.3 2003/03/10 23:20:30 hodson Exp $
 
 #ifndef __LIBXORP_C_FORMAT_HH__
 #define __LIBXORP_C_FORMAT_HH__
@@ -48,19 +48,19 @@
 inline int arg_count() { return 0; }
 
 
-template <class A> 
+template <class A>
 inline int arg_count(A) { return 1; }
 
-template <class A, class B> 
+template <class A, class B>
 inline int arg_count(A,B) { return 2; }
 
-template <class A, class B, class C> 
+template <class A, class B, class C>
 inline int arg_count(A,B,C) { return 3; }
 
-template <class A, class B, class C, class D> 
+template <class A, class B, class C, class D>
 inline int arg_count(A,B,C,D) { return 4; }
 
-template <class A, class B, class C, class D, class E> 
+template <class A, class B, class C, class D, class E>
 inline int arg_count(A,B,C,D,E) { return 5; }
 
 template <class A, class B, class C,class D, class E, class F>
@@ -69,47 +69,43 @@ inline int arg_count(A,B,C,D,E,F) { return 6; }
 template <class A, class B, class C, class D, class E, class F, class G>
 inline int arg_count(A,B,C,D,E,F,G) { return 7; }
 
-template <class A, class B, class C, class D, class E, class F, class G, 
+template <class A, class B, class C, class D, class E, class F, class G,
 	  class H>
 inline int arg_count(A,B,C,D,E,F,G,H) { return 8; }
 
-template <class A, class B, class C, class D, class E, class F, class G, 
+template <class A, class B, class C, class D, class E, class F, class G,
 	  class H, class I>
 inline int arg_count(A,B,C,D,E,F,G,H,I) { return 9; }
 
-template <class A, class B, class C, class D, class E, class F, class G, 
+template <class A, class B, class C, class D, class E, class F, class G,
 	  class H, class I, class J>
 inline int arg_count(A,B,C,D,E,F,G,H,I,J) { return 10; }
 
-template <class A, class B, class C, class D, class E, class F, class G, 
+template <class A, class B, class C, class D, class E, class F, class G,
 	  class H, class I, class J, class K>
 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K) { return 11; }
 
-template <class A, class B, class C, class D, class E, class F, class G, 
+template <class A, class B, class C, class D, class E, class F, class G,
 	  class H, class I, class J, class K, class L>
 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L) { return 12; }
 
-template <class A, class B, class C, class D, class E, class F, class G, 
+template <class A, class B, class C, class D, class E, class F, class G,
 	  class H, class I, class J, class K, class L, class M>
 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M) { return 13; }
 
-template <class A, class B, class C, class D, class E, class F, class G, 
+template <class A, class B, class C, class D, class E, class F, class G,
 	  class H, class I, class J, class K, class L, class M, class N>
 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N) { return 14; }
 
 void c_format_validate(const char* fmt, int n);
 
 #if defined(__printflike)
-string 
-do_c_format(const char* fmt, ...) __printflike(1,2);
-#else 
-#   if (defined(__GNUC__))
-string 
-do_c_format(const char* fmt, ...) __attribute__((__format__(printf, 1, 2)));
-#   else
-string 
-do_c_format(const char* fmt, ...);
-#   endif // __GNUC__
-#endif // __printflike
+string do_c_format(const char* fmt, ...) __printflike(1,2);
+#elif (defined(__GNUC__))
+string do_c_format(const char* fmt, ...)
+    __attribute__((__format__(printf, 1, 2)));
+#else
+string do_c_format(const char* fmt, ...);
+#endif
 
 #endif // __LIBXORP_C_FORMAT_HH__
