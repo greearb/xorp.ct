@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.7 2003/08/28 00:23:16 pavlin Exp $
+% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.8 2003/11/06 18:57:50 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,13 +38,13 @@
 
 \title{XORP Multicast Routing Design Architecture \\
 \vspace{1ex}
-Version 0.5}
+Version 1.0}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
 	 {\it feedback@xorp.org}
 }
-\date{November 6, 2003}
+\date{June 24, 2004}
 
 \maketitle
 
@@ -82,6 +82,8 @@ Acronyms used in this document:
 \begin{itemize}
 
   \item {\bf FEA}: {\bf F}orwarding {\bf E}ngine {\bf A}bstraction
+
+  \item {\bf FIB}: {\bf F}orwarding {\bf I}nformation {\bf B}ase
 
   \item {\bf MFC}: {\bf M}ulticast {\bf F}orwarding {\bf C}ache: another
   name for an entry in the multicast forwarding engine (typically used
@@ -127,9 +129,9 @@ PIM for example, the routing entity has several virtual interfaces one
 per each physical interface it controls.  In case of BGP,
 the routing entity has several ports, one per each BGP peering.
 
-In term of C++ coding, each virtual interface is a class; each protocol
-entity is a separate class: a single protocol object has several virtual
-interfaces (see Figure~\ref{fig:mcast_proto_abstraction}).
+In term of C++ implementation, each virtual interface is a class; each
+protocol entity is a separate class: a single protocol object has several
+virtual interfaces (see Figure~\ref{fig:mcast_proto_abstraction}).
 
 \begin{figure}[htbp]
   \begin{center}
@@ -218,6 +220,12 @@ the multicast-related modules. Those interactions are:
 
   \item RIB--PIM: for PIM to obtain MRIB information.
 
+  \item FEA--FIB2MRIB: to propagate the FIB updates to the FIB2MRIB module.
+
+  \item FIB2MRIB--RIB: to add/delete FIB-derived MRIB entries.
+
+  \item StaticRoutes--RIB: to add/delete MRIB-specific static routes.
+
 \end{itemize}
 
 In the next subsections we describe those interactions.
@@ -267,8 +275,8 @@ PIM-SM needs to interact with the MFEA module for the following:
 
   \item Obtain information about existing interfaces on a router.
 
-  \item Currently (November 2003), the MRIB information is
-  obtained through the MFEA.
+  \item Note that as of (June 2004), the MRIB information is
+  not obtained anymore from the MFEA, but from the RIB.
 
 \end{itemize}
 
@@ -296,9 +304,9 @@ performance, the PIM encapsulation should be done in the kernel, and
 then we need a signaling mechanism between the kernel and the user
 process managing the kernel multicast forwarding entries. That mechanism
 would deal with installing the appropriate information needed by kernel-level
-Register encapsulation. Currently (November 2003), only few systems (\eg
-FreeBSD-CURRENT, FreeBSD-4.9, and DragonFlyBSD) do support such kernel-level
-encapsulation.
+Register encapsulation. Currently (June 2004), only few systems (\eg
+FreeBSD-5.2, FreeBSD-4.9 and later, and DragonFlyBSD) do support such
+kernel-level encapsulation.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interaction between the MFEA and MLD/IGMP modules}
@@ -347,8 +355,46 @@ the handling of such messages is not implemented yet.
 
 The PIM module needs to interact with the RIB module to obtain the MRIB
 information, and to keep track if there is any change.
-Currently (November 2003), this interaction is not implemented;
-instead, the MRIB information is received from the MFEA instead.
+
+Note that previously the MRIB information was received from the MFEA.
+As of June 2004 the MRIB is received from the RIB instead.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Interaction between the FEA and FIB2MRIB modules}
+\label{sec:fea-to-fib2mrib-interaction}
+
+Typically, the MRIB information inside the RIB module will be populated by
+entries from the unicast routing protocols running as part of a XORP
+router. For example, if Multiprotocol BGP is running on the system, it can be
+used to supply routes that are multicast-only; those routes then will be
+stored in the MRIB. However, if a XORP router is used only for multicast
+routing, and if there are no XORP unicast routing protocols to supply the MRIB
+routes, then by default we would use the existing unicast forwarding
+entries from the FIB in the underlying system. Those entries may have been
+statically installed on system startup, or may be managed by a non-XORP
+unicast routing implementation.
+
+The FIB2MRIB module is used to receive the FIB updates from the FEA.
+It also receives network interface related information from the FEA.
+The FIB information is updated by the network interface related information,
+(e.g., FIB entries that use disabled interfaces are withdrawn),
+and the result is propagated as MRIB entries to the RIB module.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Interaction between the FIB2MRIB and the RIB modules}
+
+See Section~\ref{sec:fea-to-fib2mrib-interaction}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Interaction between the StaticRoutes and the RIB modules}
+
+The StaticRoutes module is used to store and manipulate the static unicast and
+multicast routes. A configured static route is added directly to the
+StaticRoutes module. This information is updated by the network interface
+related information obtained from the FEA (not shown on
+Figure~\ref{fig:mcast_modules_interaction}). For example, static routes
+that use disabled interfaces are withdrawn. The result is propagated
+as URIB or MRIB entries to the RIB module.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -372,6 +418,9 @@ instead, the MRIB information is received from the MFEA instead.
 
   \item November 6, 2003: Bump-up the version to 0.5, and the date;
   minor edits.
+
+  \item June 22, 2004: Status updated; added information about the FIB2MRIB
+  and StaticRoutes modules. Bump-up the version to 1.0, and the date.
 
 \end{itemize}
 
