@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.13 2004/06/10 13:35:05 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.14 2004/06/30 18:02:26 mjh Exp $
 #
 
 #
@@ -1863,8 +1863,8 @@ TESTS="$TESTS test_create_address4"
 TESTS="$TESTS test_enable_disable_address4"
 # IPv6 tests
 if [ "${HAVE_IPV6}" = "true" ] ; then
-    TESTS="$TESTS test_create_address4"
-    TESTS="$TESTS test_enable_disable_address4"
+    TESTS="$TESTS test_create_address6"
+    TESTS="$TESTS test_enable_disable_address6"
 fi
 # Clean-up the mess
 TESTS="$TESTS config_cleanup_interface"
