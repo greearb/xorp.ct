@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.20 2003/12/16 23:38:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.21 2003/12/20 01:43:34 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -171,7 +171,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
     
     do {
 	if (dst.is_ipv4()) {
-	    XrlMfeaClientV0p1Client::send_recv_protocol_message4(
+	    _xrl_mfea_client_client.send_recv_protocol_message4(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		string(MfeaNode::module_name()),
@@ -189,7 +189,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 	}
 	
 	if (dst.is_ipv6()) {
-	    XrlMfeaClientV0p1Client::send_recv_protocol_message6(
+	    _xrl_mfea_client_client.send_recv_protocol_message6(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		string(MfeaNode::module_name()),
@@ -276,7 +276,7 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
     
     do {
 	if (dst.is_ipv4()) {
-	    XrlMfeaClientV0p1Client::send_recv_kernel_signal_message4(
+	    _xrl_mfea_client_client.send_recv_kernel_signal_message4(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		string(MfeaNode::module_name()),
@@ -292,7 +292,7 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 	}
 	
 	if (dst.is_ipv6()) {
-	    XrlMfeaClientV0p1Client::send_recv_kernel_signal_message6(
+	    _xrl_mfea_client_client.send_recv_kernel_signal_message6(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		string(MfeaNode::module_name()),
@@ -339,7 +339,7 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
     
     do {
 	if (MfeaNode::is_ipv4()) {
-	    XrlMfeaClientV0p1Client::send_add_mrib4(
+	    _xrl_mfea_client_client.send_add_mrib4(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		mrib.dest_prefix().get_ipv4net(),
@@ -353,7 +353,7 @@ XrlMfeaNode::send_add_mrib(const string& dst_module_instance_name,
 	}
 
 	if (MfeaNode::is_ipv6()) {
-	    XrlMfeaClientV0p1Client::send_add_mrib6(
+	    _xrl_mfea_client_client.send_add_mrib6(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		mrib.dest_prefix().get_ipv6net(),
@@ -392,7 +392,7 @@ XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
 {
     do {
 	if (MfeaNode::is_ipv4()) {
-	    XrlMfeaClientV0p1Client::send_delete_mrib4(
+	    _xrl_mfea_client_client.send_delete_mrib4(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		mrib.dest_prefix().get_ipv4net(),
@@ -401,7 +401,7 @@ XrlMfeaNode::send_delete_mrib(const string& dst_module_instance_name,
 	}
 
 	if (MfeaNode::is_ipv6()) {
-	    XrlMfeaClientV0p1Client::send_delete_mrib6(
+	    _xrl_mfea_client_client.send_delete_mrib6(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		mrib.dest_prefix().get_ipv6net(),
@@ -432,7 +432,7 @@ XrlMfeaNode::send_set_mrib_done(const string& dst_module_instance_name,
 				xorp_module_id	// dst_module_id
     )
 {
-    XrlMfeaClientV0p1Client::send_set_mrib_done(
+    _xrl_mfea_client_client.send_set_mrib_done(
 	    dst_module_instance_name.c_str(),
 	    my_xrl_target_name(),
 	    callback(this, &XrlMfeaNode::xrl_result_set_mrib_done));
@@ -472,7 +472,7 @@ XrlMfeaNode::send_add_config_vif(const string& dst_module_instance_name,
 				 const string& vif_name,
 				 uint16_t vif_index)
 {
-    XrlMfeaClientV0p1Client::send_new_vif(
+    _xrl_mfea_client_client.send_new_vif(
 	dst_module_instance_name.c_str(),
 	vif_name,
 	vif_index,
@@ -496,7 +496,7 @@ XrlMfeaNode::send_delete_config_vif(const string& dst_module_instance_name,
 				    xorp_module_id , // dst_module_id,
 				    const string& vif_name)
 {
-    XrlMfeaClientV0p1Client::send_delete_vif(
+    _xrl_mfea_client_client.send_delete_vif(
 	dst_module_instance_name.c_str(),
 	vif_name,
 	callback(this, &XrlMfeaNode::xrl_result_delete_vif));
@@ -529,7 +529,7 @@ XrlMfeaNode::send_add_config_vif_addr(const string& dst_module_instance_name,
 {
     do {
 	if (MfeaNode::is_ipv4()) {
-	    XrlMfeaClientV0p1Client::send_add_vif_addr4(
+	    _xrl_mfea_client_client.send_add_vif_addr4(
 		dst_module_instance_name.c_str(),
 		vif_name,
 		addr.get_ipv4(),
@@ -541,7 +541,7 @@ XrlMfeaNode::send_add_config_vif_addr(const string& dst_module_instance_name,
 	}
 	
 	if (MfeaNode::is_ipv6()) {
-	    XrlMfeaClientV0p1Client::send_add_vif_addr6(
+	    _xrl_mfea_client_client.send_add_vif_addr6(
 		dst_module_instance_name.c_str(),
 		vif_name,
 		addr.get_ipv6(),
@@ -578,7 +578,7 @@ XrlMfeaNode::send_delete_config_vif_addr(const string& dst_module_instance_name,
 {
     do {
 	if (MfeaNode::is_ipv4()) {
-	    XrlMfeaClientV0p1Client::send_delete_vif_addr4(
+	    _xrl_mfea_client_client.send_delete_vif_addr4(
 		dst_module_instance_name.c_str(),
 		vif_name,
 		addr.get_ipv4(),
@@ -587,7 +587,7 @@ XrlMfeaNode::send_delete_config_vif_addr(const string& dst_module_instance_name,
 	}
 	
 	if (MfeaNode::is_ipv6()) {
-	    XrlMfeaClientV0p1Client::send_delete_vif_addr6(
+	    _xrl_mfea_client_client.send_delete_vif_addr6(
 		dst_module_instance_name.c_str(),
 		vif_name,
 		addr.get_ipv6(),
@@ -629,7 +629,7 @@ XrlMfeaNode::send_set_config_vif_flags(const string& dst_module_instance_name,
 				       bool is_broadcast,
 				       bool is_up)
 {
-    XrlMfeaClientV0p1Client::send_set_vif_flags(
+    _xrl_mfea_client_client.send_set_vif_flags(
 	dst_module_instance_name.c_str(),
 	vif_name,
 	is_pim_register,
@@ -657,7 +657,7 @@ XrlMfeaNode::send_set_config_all_vifs_done(const string& dst_module_instance_nam
 					   xorp_module_id // dst_module_id
     )
 {
-    XrlMfeaClientV0p1Client::send_set_all_vifs_done(
+    _xrl_mfea_client_client.send_set_all_vifs_done(
 	dst_module_instance_name.c_str(),
 	callback(this, &XrlMfeaNode::xrl_result_set_all_vifs_done));
     
@@ -740,7 +740,7 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 {
     do {
 	if (source_addr.is_ipv4()) {
-	    XrlMfeaClientV0p1Client::send_recv_dataflow_signal4(
+	    _xrl_mfea_client_client.send_recv_dataflow_signal4(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		source_addr.get_ipv4(),
@@ -762,7 +762,7 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 	}
 	
 	if (source_addr.is_ipv6()) {
-	    XrlMfeaClientV0p1Client::send_recv_dataflow_signal6(
+	    _xrl_mfea_client_client.send_recv_dataflow_signal6(
 		dst_module_instance_name.c_str(),
 		my_xrl_target_name(),
 		source_addr.get_ipv6(),
@@ -811,7 +811,7 @@ XrlMfeaNode::add_cli_command_to_cli_manager(const char *command_name,
 					    bool is_command_processor
     )
 {
-    XrlCliManagerV0p1Client::send_add_cli_command(
+    _xrl_cli_manager_client.send_add_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
@@ -837,7 +837,7 @@ XrlMfeaNode::xrl_result_add_cli_command(const XrlError& xrl_error)
 int
 XrlMfeaNode::delete_cli_command_from_cli_manager(const char *command_name)
 {
-    XrlCliManagerV0p1Client::send_delete_cli_command(
+    _xrl_cli_manager_client.send_delete_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
 	my_xrl_target_name(),
 	string(command_name),
@@ -1005,7 +1005,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	MfeaVif *mfea_vif = MfeaNode::vif_find_by_vif_index(i);
 	if (mfea_vif == NULL)
 	    continue;
-	XrlMfeaClientV0p1Client::send_new_vif(
+	_xrl_mfea_client_client.send_new_vif(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
 	    mfea_vif->vif_index(),
@@ -1015,7 +1015,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	     iter != mfea_vif->addr_list().end();
 	     ++iter) {
 	    const VifAddr& vif_addr = *iter;
-	    XrlMfeaClientV0p1Client::send_add_vif_addr4(
+	    _xrl_mfea_client_client.send_add_vif_addr4(
 		xrl_sender_name.c_str(),
 		mfea_vif->name(),
 		vif_addr.addr().get_ipv4(),
@@ -1024,7 +1024,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 		vif_addr.peer_addr().get_ipv4(),
 		callback(this, &XrlMfeaNode::xrl_result_add_vif_addr));
 	}
-	XrlMfeaClientV0p1Client::send_set_vif_flags(
+	_xrl_mfea_client_client.send_set_vif_flags(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
 	    mfea_vif->is_pim_register(),
@@ -1037,7 +1037,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
     }
     
     // We are done with the vifs
-    XrlMfeaClientV0p1Client::send_set_all_vifs_done(
+    _xrl_mfea_client_client.send_set_all_vifs_done(
 	xrl_sender_name.c_str(),
 	callback(this, &XrlMfeaNode::xrl_result_set_all_vifs_done));
     
@@ -1090,7 +1090,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	MfeaVif *mfea_vif = MfeaNode::vif_find_by_vif_index(i);
 	if (mfea_vif == NULL)
 	    continue;
-	XrlMfeaClientV0p1Client::send_new_vif(
+	_xrl_mfea_client_client.send_new_vif(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
 	    mfea_vif->vif_index(),
@@ -1100,7 +1100,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	     iter != mfea_vif->addr_list().end();
 	     ++iter) {
 	    const VifAddr& vif_addr = *iter;
-	    XrlMfeaClientV0p1Client::send_add_vif_addr6(
+	    _xrl_mfea_client_client.send_add_vif_addr6(
 		xrl_sender_name.c_str(),
 		mfea_vif->name(),
 		vif_addr.addr().get_ipv6(),
@@ -1109,7 +1109,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 		vif_addr.peer_addr().get_ipv6(),
 		callback(this, &XrlMfeaNode::xrl_result_add_vif_addr));
 	}
-	XrlMfeaClientV0p1Client::send_set_vif_flags(
+	_xrl_mfea_client_client.send_set_vif_flags(
 	    xrl_sender_name.c_str(),
 	    mfea_vif->name(),
 	    mfea_vif->is_pim_register(),
@@ -1122,7 +1122,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
     }
     
     // We are done with the vifs
-    XrlMfeaClientV0p1Client::send_set_all_vifs_done(
+    _xrl_mfea_client_client.send_set_all_vifs_done(
 	xrl_sender_name.c_str(),
 	callback(this, &XrlMfeaNode::xrl_result_set_all_vifs_done));
     
@@ -1497,7 +1497,7 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 
 	    do {
 		if (MfeaNode::is_ipv4()) {
-		    XrlMfeaClientV0p1Client::send_add_mrib4(
+		    _xrl_mfea_client_client.send_add_mrib4(
 			xrl_sender_name.c_str(),
 			my_xrl_target_name(),
 			mrib->dest_prefix().get_ipv4net(),
@@ -1511,7 +1511,7 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 		}
 
 		if (MfeaNode::is_ipv6()) {
-		    XrlMfeaClientV0p1Client::send_add_mrib6(
+		    _xrl_mfea_client_client.send_add_mrib6(
 			xrl_sender_name.c_str(),
 			my_xrl_target_name(),
 			mrib->dest_prefix().get_ipv6net(),
@@ -1532,7 +1532,7 @@ XrlMfeaNode::mfea_0_1_allow_mrib_messages(
 	// Done
 	//
 	if (is_sent) {
-	    XrlMfeaClientV0p1Client::send_set_mrib_done(
+	    _xrl_mfea_client_client.send_set_mrib_done(
 		xrl_sender_name.c_str(),
 		my_xrl_target_name(),
 		callback(this, &XrlMfeaNode::xrl_result_set_mrib_done));

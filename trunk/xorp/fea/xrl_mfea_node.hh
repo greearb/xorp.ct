@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.9 2003/12/16 23:38:04 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.10 2003/12/20 01:43:34 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -27,7 +27,6 @@
 #include "libxorp/xlog.h"
 #include "libxipc/xrl_router.hh"
 #include "xrl/targets/mfea_base.hh"
-#include "xrl/interfaces/common_xif.hh"
 #include "xrl/interfaces/mfea_client_xif.hh"
 #include "xrl/interfaces/cli_manager_xif.hh"
 #include "mfea_node.hh"
@@ -42,22 +41,19 @@ class EventLoop;
 //
 class XrlMfeaNode : public MfeaNode,
 		    public XrlMfeaTargetBase,
-		    public XrlCommonV0p1Client,
-		    public XrlMfeaClientV0p1Client,
-		    public XrlCliManagerV0p1Client,
 		    public MfeaNodeCli {
 public:
+    // TODO: XXX: PAVPAVPAV: remove the ftic argument
     XrlMfeaNode(int family, xorp_module_id module_id,
 		EventLoop& eventloop, XrlRouter* xrl_router,
-		FtiConfig& ftic)	// TODO: XXX: PAVPAVPAV: remove ftic
+		FtiConfig& ftic)
 	: MfeaNode(family, module_id, eventloop, ftic),
 	  XrlMfeaTargetBase(xrl_router),
-	  XrlCommonV0p1Client(xrl_router),
-	  XrlMfeaClientV0p1Client(xrl_router),
-	  XrlCliManagerV0p1Client(xrl_router),
 	  MfeaNodeCli(*static_cast<MfeaNode *>(this)),
-	  _xrl_mfea_vif_manager(*this, eventloop, xrl_router)
-	{ }
+	  _xrl_mfea_vif_manager(*this, eventloop, xrl_router),
+	  _xrl_cli_manager_client(xrl_router),
+	  _xrl_mfea_client_client(xrl_router)
+    { }
     virtual ~XrlMfeaNode() {
 	_xrl_mfea_vif_manager.stop();
 	MfeaNode::stop();
@@ -876,6 +872,9 @@ private:
     int family() const { return (MfeaNode::family()); }
     
     XrlMfeaVifManager	_xrl_mfea_vif_manager;	// The XRL Vif manager
+
+    XrlCliManagerV0p1Client _xrl_cli_manager_client;
+    XrlMfeaClientV0p1Client _xrl_mfea_client_client;
 };
 
 #endif // __FEA_XRL_MFEA_NODE_HH__
