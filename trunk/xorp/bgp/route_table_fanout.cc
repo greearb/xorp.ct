@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.29 2004/04/15 16:13:29 hodson Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.30 2004/05/07 11:45:06 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -435,7 +435,7 @@ template<class A>
 int
 FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
 				  Safi safi,
-				  string ribname, bool unplumb_allowed)
+				  string ribname)
 {
     XLOG_ASSERT(child_to_dump_to->type() != DUMP_TABLE);
 
@@ -455,7 +455,7 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
 			      peer_handler->peername());
     DumpTable<A>* dump_table =
 	new DumpTable<A>(tablename, peer_handler, peer_list,
-			 (BGPRouteTable<A>*)this, safi, unplumb_allowed);
+			 (BGPRouteTable<A>*)this, safi);
 
     dump_table->set_next_table(child_to_dump_to);
     child_to_dump_to->set_parent(dump_table);

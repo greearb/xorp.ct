@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.10 2004/03/04 03:50:30 atanu Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.11 2004/05/07 11:45:07 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -114,7 +114,7 @@ public:
     string str() const;
 
     int dump_entire_table(BGPRouteTable<A> *child_to_dump_to, Safi safi,
-			  string ribname, bool unplumb_allowed = true);
+			  string ribname);
     /* mechanisms to implement flow control in the output plumbing */
     void output_state(bool busy, BGPRouteTable<A> *next_table);
     bool get_next_message(BGPRouteTable<A> *next_table);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.9 2004/03/04 03:50:30 atanu Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.10 2004/05/07 11:45:06 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -30,7 +30,7 @@ public:
 	      const PeerHandler *peer,
 	      const list <const PeerHandler*>& peer_list,
 	      BGPRouteTable<A> *parent,
-	      Safi safi, bool unplumb = true);
+	      Safi safi);
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,
@@ -105,13 +105,6 @@ private:
 
     //The dump table has done its job and can be removed.
     bool _completed;
-
-    /**
-     * The dump table is responsible for removing itself once all the
-     * routes have been dumped, the default setting. It is sometimes
-     * useful while debugging to leave the table in place.
-     */
-    bool _unplumb_allowed;
 };
 
 #endif // __BGP_ROUTE_TABLE_DUMP_HH__

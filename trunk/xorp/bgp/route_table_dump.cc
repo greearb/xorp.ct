@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.19 2004/05/07 11:45:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.20 2004/05/08 16:46:32 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -35,10 +35,9 @@ DumpTable<A>::DumpTable(string table_name,
 			const PeerHandler *peer,
 			const list <const PeerHandler*>& peer_list,
 			BGPRouteTable<A> *parent_table,
-			Safi safi, bool unplumb_allowed)
+			Safi safi)
     : BGPRouteTable<A>("DumpTable-" + table_name, safi),
-      _dump_iter(peer, peer_list),
-      _unplumb_allowed(unplumb_allowed)
+      _dump_iter(peer, peer_list)
 {
     debug_msg("%s peer: %p\n", this->tablename().c_str(), peer);
 
@@ -66,10 +65,6 @@ DumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
-
-    if (_completed)
-	return this->_next_table->add_route(rtmsg,
-				      static_cast<BGPRouteTable<A>*>(this));
 
     cp(1);
     if (_dump_iter.route_change_is_valid(rtmsg.origin_peer(),
@@ -100,10 +95,6 @@ DumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(old_rtmsg.net() == new_rtmsg.net());
-
-    if (_completed)
-	return this->_next_table->replace_route(old_rtmsg, new_rtmsg,
-				      static_cast<BGPRouteTable<A>*>(this));
 
     cp(4);
 
@@ -172,10 +163,6 @@ DumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	      this->tablename().c_str(), (u_int)(&rtmsg));
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
-
-    if (_completed)
-	return this->_next_table->delete_route(rtmsg,
-				  static_cast<BGPRouteTable<A>*>(this));
 
     if (_dump_iter.route_change_is_valid(rtmsg.origin_peer(),
 					 rtmsg.net(),
@@ -348,25 +335,20 @@ DumpTable<A>::output_state(bool busy, BGPRouteTable<A> *next_table)
     else
 	debug_msg("Dump: output state not busy\n");
 
-    if (_completed)
-	return this->_parent->output_state(busy,
-					 static_cast<BGPRouteTable<A>*>(this));
+    if (_completed || _waiting_for_deletion_completion) {
+	//we've finished dumping - just stay out of the way
+	_output_busy = busy;
+	return this->_parent-> output_state(busy, this);
+    } 
 
-    if (_waiting_for_deletion_completion) {
-	cp(31);
-	// we're in the final waiting phase, so just stay out of the way.
-	this->_parent->output_state(busy, /*next_table*/this);
+    if (_output_busy == true && busy == false) {
+	cp(33);
+	_output_busy = false;
+	debug_msg("Dump: output went idle so dump next\n");
+	do_next_route_dump();
     } else {
-	cp(32);
-	if (_output_busy == true && busy == false) {
-	    cp(33);
-	    _output_busy = false;
-	    debug_msg("Dump: output went idle so dump next\n");
-	    do_next_route_dump();
-	} else {
-	    cp(34);
-	    _output_busy = busy;
-	}
+	cp(34);
+	_output_busy = busy;
     }
 }
 
@@ -375,11 +357,35 @@ bool
 DumpTable<A>::get_next_message(BGPRouteTable<A> *next_table) 
 {
     XLOG_ASSERT(next_table == this->_next_table);
-    if (_completed)
-	return this->_parent->get_next_message(static_cast<BGPRouteTable<A>*>(this));
+
+    if (_completed) {
+	//we completed a while ago, but haven't removed ourselves yet.
+	//typically this is because we're waiting for the queue
+	//upstream to drain before it's safe to do so.
+
+	bool messages_queued = this->_parent->
+	    get_next_message(static_cast<BGPRouteTable<A>*>(this));
+
+	if (messages_queued == false) {
+	    //the queue upstream has now drained
+	    //we can finally delete ourselves
+
+	    if (!_output_busy) {
+		//indicate to upstream that output is not busy anymore
+		this->_parent->output_state(false, this);
+	    }
+
+	    unplumb_self();
+	    delete this;
+	    //XXX careful we only access stack state after
+	    //deleting ourselves...
+	}
+	return messages_queued;
+    }
 
     if (_waiting_for_deletion_completion) {
 	cp(35);
+	//just stay out of the way
 	return this->_parent->get_next_message(this);
     } else {
 	cp(36);
@@ -437,7 +443,14 @@ DumpTable<A>::peering_down_complete(const PeerHandler *peer, uint32_t genid,
     cp(38);
     XLOG_ASSERT(this->_parent == caller);
     XLOG_ASSERT(this->_next_table != NULL);
+
     this->_next_table->peering_down_complete(peer, genid, this);
+
+    if (_completed) {
+	//we're already done, just waiting for the queue upstream to drain
+	return;
+    }
+
     _dump_iter.peering_down_complete(peer, genid);
 
     // If we were waiting for this signal, we can now unplumb ourselves.
@@ -475,18 +488,34 @@ DumpTable<A>::completed()
 
     _completed = true;
 
-    // When we started dumping it looks like we asserted flow control
-    // on the queue to us in the fanout. We have finished dumping so
-    // we should release the queue. We should only really do this if
-    // the rib out has not asserted flow control. What the hell one
-    // message will flow and the RIB-OUT can assert flow control if it
-    // wants.
-    this->_parent->output_state(false, this);
+    // When we started dumping it looks we asserted flow control
+    // on the queue to us in the fanout.
 
-    if (_unplumb_allowed) {
-	unplumb_self();
-	delete this;
+    // We need to drain the queue for everything to be consistent.
+    // Otherwise there can be stuff in the queue that came from
+    // background deletion that requires our state to be consistent.
+    // Thus we *still* can't go away if we can't drain that queue.
+
+    bool messages_queued = true;  //assume there are messages queued
+    while(!_output_busy) {
+	messages_queued = this->_parent->get_next_message(this);
+	if (messages_queued == false)
+	    break;
+	debug_msg("DumpTable<A>::completed processed queued message\n");
+    };
+    
+    if (messages_queued) {
+	//we need to stay around.
+	return;
+    } 
+
+    if (!_output_busy) {
+	//indicate to upstream that output is not busy anymore
+	this->_parent->output_state(false, this);
     }
+
+    unplumb_self();
+    delete this;
 }
 
 template<class A>
