@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.20 2004/06/22 03:03:02 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.21 2004/06/22 03:07:04 pavlin Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -46,10 +46,6 @@
 * Fix test files like test_ifconfig_rtsock.cc
 
 * Sync by renaming all "IfTree& iftree" to "IfTree& it" (or vice-versa).
-
-* When obtaining the forwarding table from the kernel,
-  do we need to take special care of the
-  (rtm->rtm_flags & RTF_LLINFO) entries? (see the mfea code for that).
 
 * Make sure that the interfaces in the interface tree are deleted properly
   whenever the underlying interfaces in the kernel change. E.g.,
