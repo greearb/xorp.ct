@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.7 2004/04/10 07:58:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.8 2004/04/12 02:05:09 pavlin Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -105,7 +105,14 @@ LibFeaClientBridge::interface_update(const string& ifname,
     debug_msg("%s update for interface %s (system = %s)\n",
 	      update_name(update), ifname.c_str(), truth_of(system));
 
-    UNUSED(system);
+    if (system) {
+	//
+	// XXX: We don't propagate interface-related changes that just
+	// appear beneath us within the system. I.e., all changes
+	// should be through the FEA.
+	//
+	return;
+    }
 
     XLOG_ASSERT(_iftree != 0);
 
@@ -166,7 +173,14 @@ LibFeaClientBridge::vif_update(const string& ifname,
 	      update_name(update), ifname.c_str(), vifname.c_str(),
 	      truth_of(system));
 
-    UNUSED(system);
+    if (system) {
+	//
+	// XXX: We don't propagate interface-related changes that just
+	// appear beneath us within the system. I.e., all changes
+	// should be through the FEA.
+	//
+	return;
+    }
 
     XLOG_ASSERT(_iftree != 0);
 
@@ -246,7 +260,15 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
 	      update_name(update), ifname.c_str(), vifname.c_str(),
 	      addr.str().c_str(), truth_of(system));
 
-    UNUSED(system);
+    if (system) {
+	//
+	// XXX: We don't propagate interface-related changes that just
+	// appear beneath us within the system. I.e., all changes
+	// should be through the FEA.
+	//
+	return;
+    }
+
     XLOG_ASSERT(_iftree != 0);
 
     switch (update) {
@@ -345,7 +367,15 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
 	      update_name(update), ifname.c_str(), vifname.c_str(),
 	      addr.str().c_str(), truth_of(system));
 
-    UNUSED(system);
+    if (system) {
+	//
+	// XXX: We don't propagate interface-related changes that just
+	// appear beneath us within the system. I.e., all changes
+	// should be through the FEA.
+	//
+	return;
+    }
+
     XLOG_ASSERT(_iftree != 0);
 
     switch (update) {
@@ -429,7 +459,15 @@ LibFeaClientBridge::updates_completed(bool	  system)
 {
     debug_msg("Updates completed (system = %s)\n", truth_of(system));
 
-    UNUSED(system);
+    if (system) {
+	//
+	// XXX: We don't propagate interface-related changes that just
+	// appear beneath us within the system. I.e., all changes
+	// should be through the FEA.
+	//
+	return;
+    }
+
     XLOG_ASSERT(_iftree != 0);
 
     _rm->push(new IfMgrHintUpdatesMade());
