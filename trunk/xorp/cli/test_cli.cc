@@ -29,26 +29,13 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 #include "libxorp/xlog.h"
+
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
-#include "cli/cli_client.hh"
-#include "cli/xrl_cli_node.hh"
 
+#include "cli_client.hh"
+#include "xrl_cli_node.hh"
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-// XXX: set to 1 for IPv4, or set to 0 for IPv6
-#define DO_IPV4 1
 
 //
 // Local variables
@@ -104,6 +91,24 @@ usage(const char *argv0, int exit_value)
     exit (exit_value);
 
     // NOTREACHED
+}
+
+//
+// Wait until the XrlRouter becomes ready
+//
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    bool timed_out = false;
+
+    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+    while (xrl_router.ready() == false && timed_out == false) {
+	eventloop.run();
+    }
+
+    if (xrl_router.ready() == false) {
+	XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+    }
 }
 
 class Foo {
@@ -234,16 +239,14 @@ main(int argc, char *argv[])
 	    finder_addr = finder->addr();
 	    finder_port = finder->port();
 	}
+
 	//
 	// CLI
 	//
-#if DO_IPV4
-	CliNode cli_node4(AF_INET, XORP_MODULE_CLI, eventloop);
-	cli_node4.set_cli_port(12000);
-#else
-	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, eventloop);
-	cli_node6.set_cli_port(12000);
-#endif // ! DO_IPV4
+	// XXX: we use a single CLI node to handle both IPv4 and IPv6
+	CliNode cli_node(AF_INET, XORP_MODULE_CLI, eventloop);
+	cli_node.set_cli_port(12000);
+
 	//
 	// CLI access
 	//
@@ -251,63 +254,40 @@ main(int argc, char *argv[])
 	// IPvXNet enable_ipvxnet2("192.150.187.0/25");
 	IPvXNet disable_ipvxnet1("0.0.0.0/0");	// Disable everything else
 	//
-	cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet1);
-	// cli_node4.add_enable_cli_access_from_subnet(enable_ipvxnet2);
-	cli_node4.add_disable_cli_access_from_subnet(disable_ipvxnet1);
+	cli_node.add_enable_cli_access_from_subnet(enable_ipvxnet1);
+	// cli_node.add_enable_cli_access_from_subnet(enable_ipvxnet2);
+	cli_node.add_disable_cli_access_from_subnet(disable_ipvxnet1);
 
 	//
 	// Create and configure the CLI XRL interface
 	//
-#if DO_IPV4
-	XrlStdRouter xrl_std_router_cli4(eventloop, cli_node4.module_name(),
-					 finder_addr, finder_port);
-	XrlCliNode xrl_cli_node(&xrl_std_router_cli4, cli_node4);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_cli4.ready() == false
-		&& timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_cli4.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-#else
+	XrlStdRouter xrl_std_router_cli(eventloop, cli_node.module_name(),
+					finder_addr, finder_port);
+	XrlCliNode xrl_cli_node(&xrl_std_router_cli, cli_node);
+	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli);
+
+#if 0
+	CliNode cli_node6(AF_INET6, XORP_MODULE_CLI, eventloop);
+	cli_node6.set_cli_port(12000);
 	XrlStdRouter xrl_std_router_cli6(eventloop, cli_node6.module_name(),
 					 finder_addr, finder_port);
 	XrlCliNode xrl_cli_node(&xrl_std_router_cli6, cli_node6);
-	{
-	    // Wait until the XrlRouter becomes ready
-	    bool timed_out = false;
-	    
-	    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	    while (xrl_std_router_cli6.ready() == false
-		   && timed_out == false) {
-		eventloop.run();
-	    }
-	    
-	    if (xrl_std_router_cli6.ready() == false) {
-		XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	    }
-	}
-#endif // ! DO_IPV4
+	wait_until_xrl_router_is_ready(eventloop, xrl_std_router_cli6);
+#endif // 0
+
 
 	//
 	// XXX: CLI test-specific setup
 	//
-	global_cli_node = &cli_node4;
-	add_my_cli_commands(cli_node4);
+	global_cli_node = &cli_node;
+	add_my_cli_commands(cli_node);
 	// add_my_cli_commands(cli_node6);
 
 	//
 	// Start the nodes
 	//
-	cli_node4.enable();
-	cli_node4.start();
+	cli_node.enable();
+	cli_node.start();
 	// cli_node6.enable();
 	// cli_node6.start();
 
