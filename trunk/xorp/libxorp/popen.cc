@@ -23,7 +23,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.7 2004/06/11 06:30:40 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/popen.cc,v 1.8 2004/06/12 00:29:11 pavlin Exp $"
 
 #include <sys/param.h>
 #include <sys/wait.h>
@@ -37,7 +37,7 @@
 #include <string.h>
 #include <paths.h>
 
-#include "rtrmgr_module.h"
+#include "libxorp_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"

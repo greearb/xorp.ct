@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.32 2004/09/21 22:09:59 pavlin Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.33 2004/11/12 02:44:49 bms Exp $
 ##
 
 # -- Real Programs
@@ -93,7 +93,6 @@ xorpsh_SOURCES	+= module_command.hh
 xorpsh_SOURCES	+= module_manager.hh
 xorpsh_SOURCES	+= op_commands.hh
 xorpsh_SOURCES	+= path_segment.hh
-xorpsh_SOURCES	+= popen.hh
 xorpsh_SOURCES	+= rtrmgr_error.hh
 xorpsh_SOURCES	+= slave_conf_tree.hh
 xorpsh_SOURCES	+= slave_conf_tree_node.hh
@@ -118,7 +117,6 @@ xorpsh_SOURCES	+= lex.opcmd.cc
 xorpsh_SOURCES	+= lex.tplt.cc
 xorpsh_SOURCES	+= module_command.cc
 xorpsh_SOURCES	+= op_commands.cc
-xorpsh_SOURCES	+= popen.cc
 xorpsh_SOURCES	+= slave_conf_tree.cc
 xorpsh_SOURCES	+= slave_conf_tree_node.cc
 # XXX: slave_module_manager shouldn't really be needed

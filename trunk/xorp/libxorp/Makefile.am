@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.29 2004/10/13 05:48:49 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.30 2004/11/12 02:44:43 bms Exp $
 ##
 
 # -- Real Programs
@@ -121,6 +121,7 @@ libxorp_la_SOURCES += ipvxnet.hh
 libxorp_la_SOURCES += mac.hh
 libxorp_la_SOURCES += nexthop.hh
 libxorp_la_SOURCES += old_trie.hh
+libxorp_la_SOURCES += popen.hh
 libxorp_la_SOURCES += ref_ptr.hh
 libxorp_la_SOURCES += safe_callback_obj.hh
 libxorp_la_SOURCES += selector.hh
@@ -155,6 +156,7 @@ libxorp_la_SOURCES += ipv6.cc
 libxorp_la_SOURCES += ipvx.cc
 libxorp_la_SOURCES += mac.cc
 libxorp_la_SOURCES += nexthop.cc
+libxorp_la_SOURCES += popen.cc
 libxorp_la_SOURCES += ref_ptr.cc
 libxorp_la_SOURCES += safe_callback_obj.cc
 libxorp_la_SOURCES += selector.cc
