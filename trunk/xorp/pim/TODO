@@ -1,6 +1,14 @@
 #
-# $XORP: xorp/pim/TODO,v 1.20 2003/02/05 05:28:42 pavlin Exp $
+# $XORP: xorp/pim/TODO,v 1.21 2003/02/06 00:37:42 pavlin Exp $
 #
+
+* SPEC+IMPL: Take care of the
+  (*,*,RP) Joins and AssertTrackingDesired(S,G,I) problem.
+   In the AssertTrackingDesired(S,G,I) definition,
+the line
+  "OR (RPF_interface(RP)==I AND JoinDesired(*,G)==TRUE"
+probably should be replaced with
+  "OR (RPF_interface(RP)==I AND RPTJoinDesired(G)"
 
 * IMPL:
   TR1----RUT---TR2---TR4---S1
