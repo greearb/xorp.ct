@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.7 2003/03/24 19:11:42 hodson Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.8 2003/05/07 23:15:17 mjh Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
 
+#include "libxipc/xrl_router.hh"
 #include "xrl/targets/rib_base.hh"
 #include "rib.hh"
 #include "vifmanager.hh"
