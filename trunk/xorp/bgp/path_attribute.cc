@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.24 2003/08/06 20:53:11 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.25 2003/08/11 18:11:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -120,6 +120,10 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
          
     case MP_REACH_NLRI:
 	pa = new MPReachNLRIAttribute<IPv6>(d);
+	break;
+
+    case MP_UNREACH_NLRI:
+	pa = new MPUNReachNLRIAttribute<IPv6>(d);
 	break;
 	
     default:
@@ -603,8 +607,80 @@ CommunityAttribute::add_community(uint32_t community)
  *    local system
  */
 
-template <class A>
-MPReachNLRIAttribute<A>::MPReachNLRIAttribute<A>(const uint8_t* d)
+template <>
+void
+MPReachNLRIAttribute<IPv6>::encode()
+{
+    delete[] _data;	// Zap any old allocation.
+
+    XLOG_ASSERT(AFI_IPV6 == _afi && SAFI_NLRI_UNICAST == _safi);
+    XLOG_ASSERT(16 == IPv6::addr_size());
+
+    /*
+    ** Figure out how many bytes we need to allocate.
+    */
+    size_t len;
+    len = 2;	// AFI
+    len += 1;	// SAFI
+    len += 1;	// Length of Next Hop Address
+    len += IPv6::addr_size();	// Next Hop
+    if (!_link_local_next_hop.is_zero())
+	len += IPv6::addr_size();
+    len += 1;	// Number of SNPAs
+
+    const_iterator i;
+    for (i = _nlri.begin(); i != _nlri.end(); i++) {
+	len += 1;
+	len += i->prefix_len() / 8;
+    }
+
+    uint8_t *d = set_header(len);
+    
+    /*
+    ** Fill in the buffer.
+    */
+    *d++ = (_afi << 8) & 0xff;	// AFI
+    *d++ = _afi & 0xff;		// AFI
+    
+    *d++ = _safi;		// SAFIs
+
+    if (_link_local_next_hop.is_zero()) {
+	*d++ = IPv6::addr_size();
+	_next_hop.copy_out(d);
+	d += IPv6::addr_size();
+    } else {
+	*d++ = IPv6::addr_size() * 2;
+	_next_hop.copy_out(d);
+	d += IPv6::addr_size();
+	_link_local_next_hop.copy_out(d);
+	d += IPv6::addr_size();
+    }
+    
+    *d++ = 0;	// Number of SNPAs
+
+    for (i = _nlri.begin(); i != _nlri.end(); i++) {
+	int bytes = i->prefix_len() / 8;
+	uint8_t buf[IPv6::addr_size()];
+	i->masked_addr().copy_out(buf);
+
+	*d++ = bytes;
+	memcpy(d, buf, bytes);
+	d += bytes;
+    }
+}
+
+template <>
+MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute()
+	: PathAttribute((Flags)(Optional | Transitive), MP_REACH_NLRI)
+{
+    _afi = AFI_IPV6;
+    _safi = SAFI_NLRI_UNICAST;
+
+    encode();
+}
+
+template <>
+MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     throw(CorruptMessage)
     : PathAttribute(d)
 {
@@ -614,39 +690,82 @@ MPReachNLRIAttribute<A>::MPReachNLRIAttribute<A>(const uint8_t* d)
 		   UPDATEMSGERR, ATTRFLAGS);
 
     const uint8_t *data = payload(d);
+    const uint8_t *end = payload(d) + length(d);
 
     _afi = *data++;
+    _afi <<= 8;
+    _afi |= *data++;
 
     _safi = *data++;
-    _safi |= *data++;
+
+    if (_afi != AFI_IPV6 || _safi != SAFI_NLRI_UNICAST)
+	xorp_throw(CorruptMessage,
+		   c_format("Expected AFI/SAFI to be %d/%d not %d/%d",
+			    AFI_IPV6, SAFI_NLRI_UNICAST, _afi, _safi),
+		   UPDATEMSGERR, OPTATTR);
 
     /*
     ** Next Hop
     */
-    if (*data++ != A::addr_size())
+    uint8_t len = *data++;
+
+    XLOG_ASSERT(16 == IPv6::addr_size());
+
+    switch(len) {
+    case 16:
+	_next_hop.copy_in(data);
+	data += IPv6::addr_size();
+	break;
+    case 32:
+	_next_hop.copy_in(data);
+	data += IPv6::addr_size();
+	_link_local_next_hop.copy_in(data);
+	data += IPv6::addr_size();
+	break;
+    default:
 	xorp_throw(CorruptMessage,
-	   "BAD Next Hop size in Multiprotocol Reachable NLRI attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		   c_format("BAD Next Hop size in "
+			    "IPv6 Multiprotocol Reachable NLRI attribute "
+			    "16 and 32 allowed not %u", len),
+		   UPDATEMSGERR, OPTATTR);
+    }
     
-    _next_hop.copy_in(data);
-    data += A::addr_size();
+    if (data > end)
+	xorp_throw(CorruptMessage,
+		   "Premature end of Multiprotocol Reachable NLRI attribute",
+		   UPDATEMSGERR, ATTRLEN);
 
     /*
-    ** SNPA
+    ** SNPA - I have no idea how these are supposed to be used for IPv6
+    ** so lets just step over them.
     */
-    
+    uint8_t snpa_cnt = *data++;
+    for (;snpa_cnt > 0; snpa_cnt--) {
+	uint8_t snpa_length = *data++;
+	data += snpa_length;
+    }
 
+    if (data > end) {
+	xorp_throw(CorruptMessage,
+		   "Premature end of Multiprotocol Reachable NLRI attribute",
+		   UPDATEMSGERR, ATTRLEN);
+    }
 
-//     for (size_t l = _size; l >= 4;  d += 4, l -= 4) {
-// 	uint32_t value;
-// 	memcpy(&value, d, 4);
-// 	_communities.insert(ntohl(value));
-//     }
-    // encode();
+    /*
+    ** NLRI
+    */
+    while(data < end) {
+	uint8_t prefix_length = *data++;
+	int bytes = prefix_length / 8;
+	uint8_t buf[16];
+	memcpy(buf, data, bytes);
+	IPv6 nlri;
+	nlri.set_addr(buf);
+	_nlri.push_back(IPNet<IPv6>(nlri, prefix_length));
+	data += bytes;
+    }
 
-    _size = length(d);
-    _data = new uint8_t[wire_size()];
-    memcpy(_data, d, wire_size());
+    encode();
 }
 
 template <class A>
@@ -654,6 +773,108 @@ string
 MPReachNLRIAttribute<A>::str() const
 {
     return "Multiprotocol Reachable NLRI";
+}
+
+template <>
+void
+MPUNReachNLRIAttribute<IPv6>::encode()
+{
+    delete[] _data;	// Zap any old allocation.
+
+    XLOG_ASSERT(AFI_IPV6 == _afi && SAFI_NLRI_UNICAST == _safi);
+    XLOG_ASSERT(16 == IPv6::addr_size());
+
+    /*
+    ** Figure out how many bytes we need to allocate.
+    */
+    size_t len;
+    len = 2;	// AFI
+    len += 1;	// SAFI
+
+    const_iterator i;
+    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
+	len += 1;
+	len += i->prefix_len() / 8;
+    }
+
+    uint8_t *d = set_header(len);
+    
+    /*
+    ** Fill in the buffer.
+    */
+    *d++ = (_afi << 8) & 0xff;	// AFI
+    *d++ = _afi & 0xff;		// AFI
+
+    *d++ = _safi;		// SAFIs
+    
+    for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
+	int bytes = i->prefix_len() / 8;
+	uint8_t buf[IPv6::addr_size()];
+	i->masked_addr().copy_out(buf);
+
+	*d++ = bytes;
+	memcpy(d, buf, bytes);
+	d += bytes;
+    }
+}
+
+template <>
+MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute()
+	: PathAttribute((Flags)(Optional | Transitive), MP_UNREACH_NLRI)
+{
+    _afi = AFI_IPV6;
+    _safi = SAFI_NLRI_UNICAST;
+
+    encode();
+}
+
+template <>
+MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
+    throw(CorruptMessage)
+    : PathAttribute(d)
+{
+    if (!optional() || !transitive())
+	xorp_throw(CorruptMessage,
+		   "Bad Flags in Multiprotocol UNReachable NLRI attribute",
+		   UPDATEMSGERR, ATTRFLAGS);
+
+    const uint8_t *data = payload(d);
+    const uint8_t *end = payload(d) + length(d);
+
+    _afi = *data++;
+    _afi <<= 8;
+    _afi |= *data++;
+
+    _safi = *data++;
+
+    if (_afi != AFI_IPV6 || _safi != SAFI_NLRI_UNICAST)
+	xorp_throw(CorruptMessage,
+		   c_format("Expected AFI/SAFI to be %d/%d not %d/%d",
+			    AFI_IPV6, SAFI_NLRI_UNICAST, _afi, _safi),
+		   UPDATEMSGERR, OPTATTR);
+
+    /*
+    ** NLRI
+    */
+    while(data < end) {
+	uint8_t prefix_length = *data++;
+	int bytes = prefix_length / 8;
+	uint8_t buf[16];
+	memcpy(buf, data, bytes);
+	IPv6 nlri;
+	nlri.set_addr(buf);
+	_withdrawn.push_back(IPNet<IPv6>(nlri, prefix_length));
+	data += bytes;
+    }
+
+    encode();
+}
+
+template <class A>
+string
+MPUNReachNLRIAttribute<A>::str() const
+{
+    return "Multiprotocol UNReachable NLRI";
 }
 
 /**
@@ -1000,3 +1221,4 @@ PathAttributeList<A>::assert_rehash() const
 
 template class PathAttributeList<IPv4>;
 template class PathAttributeList<IPv6>;
+

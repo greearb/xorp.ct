@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.17 2003/08/07 22:33:16 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.18 2003/08/11 18:11:48 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -30,6 +30,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
 #include "exceptions.hh"	// for CorruptMessage exception
 
 #include "aspath.hh"
@@ -388,18 +389,53 @@ template <class A>
 class MPReachNLRIAttribute : public PathAttribute
 {
 public:
+    typedef typename list<IPNet<A> >::const_iterator const_iterator;
+
+    /**
+     * Specialise these constructors for each AFI/SAFI pairing.
+     */
+    MPReachNLRIAttribute();
     MPReachNLRIAttribute(const uint8_t* d) throw(CorruptMessage);
+
     string str() const;
 
     const A& nexthop() const			{ return _next_hop; }
 protected:
 private:
-    uint8_t _afi;		// Address Family Identifier.
-    uint16_t _safi;		// Subsequent Address Family Identifier.
+    void encode();
+
+    uint16_t _afi;		// Address Family Identifier.
+    uint8_t _safi;		// Subsequent Address Family Identifier.
     
     A _next_hop;		// Next Hop.
     list<A> _snpa;		// Subnetwork point of attachment.
-    list<A> _nlri;		// Network level reachability information.
+    list<IPNet<A> > _nlri;	// Network level reachability information.
+
+    A _link_local_next_hop;	// Link local next hop IPv6 specific.
+};
+
+template <class A>
+class MPUNReachNLRIAttribute : public PathAttribute
+{
+public:
+    typedef typename list<IPNet<A> >::const_iterator const_iterator;
+
+    /**
+     * Specialise these constructors for each AFI/SAFI pairing.
+     */
+    MPUNReachNLRIAttribute();
+    MPUNReachNLRIAttribute(const uint8_t* d) throw(CorruptMessage);
+
+    string str() const;
+
+protected:
+private:
+    void encode();
+
+    uint16_t _afi;		// Address Family Identifier.
+    uint8_t _safi;		// Subsequent Address Family Identifier.
+    
+    list<IPNet<A> > _withdrawn;	// Withdrawn routes.
 };
 
 class UnknownAttribute : public PathAttribute
