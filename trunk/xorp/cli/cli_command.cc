@@ -323,14 +323,14 @@ CliCommand::delete_all_commands()
 
 /**
  * CliCommand::create_default_cli_commands:
- * @void: 
+ * @: 
  * 
  * Create the default CLI commands at each level of the command tree.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-CliCommand::create_default_cli_commands(void)
+CliCommand::create_default_cli_commands()
 {
     // TODO: add commands like "help", "list" (all available subcommands, etc
     
@@ -339,14 +339,14 @@ CliCommand::create_default_cli_commands(void)
 
 /**
  * CliCommand::add_pipes:
- * @void: 
+ * @: 
  * 
  * Create and add the default CLI pipe commands.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-CliCommand::add_pipes(void)
+CliCommand::add_pipes()
 {
     CliPipe *cli_pipe;
     CliCommand *com0;
@@ -409,14 +409,14 @@ CliCommand::add_pipes(void)
 
 /**
  * CliCommand::delete_pipes:
- * @void: 
+ * @: 
  * 
  * Delete the default CLI pipe commands.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-CliCommand::delete_pipes(void)
+CliCommand::delete_pipes()
 {
     if (_cli_command_pipe != NULL)
 	delete _cli_command_pipe;

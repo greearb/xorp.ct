@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.20 2004/02/27 12:10:25 mjh Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.21 2004/02/28 04:38:56 pavlin Exp $"
 
 
 //
@@ -269,7 +269,7 @@ CliNode::delete_connection(CliClient *cli_client)
 }
 
 int
-CliClient::start_connection(void)
+CliClient::start_connection()
 {
     if (cli_node().eventloop().add_selector(cli_fd(), SEL_RD,
 					    callback(this, &CliClient::client_read))

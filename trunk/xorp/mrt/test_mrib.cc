@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/test_mrib.cc,v 1.2 2003/01/26 04:06:23 pavlin Exp $"
+#ident "$XORP: xorp/mrt/test_mrib.cc,v 1.3 2003/03/10 23:20:45 hodson Exp $"
 
 
 //
@@ -46,9 +46,9 @@
 //
 // Local functions prototypes
 //
-static int	run_test1(void);
-static int	run_test2(void);
-static int	run_test3(void);
+static int	run_test1();
+static int	run_test2();
+static int	run_test3();
 
 
 int
@@ -86,7 +86,7 @@ main(int /* argc */, char *argv[])
 }
 
 static int
-run_test1(void)
+run_test1()
 {
     Mrib *t;
     MribTable mrib_table(AF_INET);

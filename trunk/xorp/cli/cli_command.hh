@@ -296,7 +296,7 @@ private:
     const string& help() const { return (_help); }
     const string& help_completion() const { return (_help_completion); }
     
-    int delete_pipes(void);
+    int delete_pipes();
     
     bool is_same_prefix(const string& token);
     bool is_same_command(const string& token);

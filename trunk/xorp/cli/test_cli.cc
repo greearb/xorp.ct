@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.22 2004/02/26 08:12:00 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.23 2004/02/26 08:46:48 pavlin Exp $"
 
 
 //
@@ -47,7 +47,7 @@ CliNode *global_cli_node = NULL;
 //
 static	bool wakeup_hook();
 static	bool wakeup_hook2(int, int);
-static	CliNode& cli_node(void);
+static	CliNode& cli_node();
 static	void usage(const char *argv0, int exit_value);
 
 /**
@@ -121,7 +121,7 @@ int
 add_my_cli_commands(CliNode& cli_node);
 
 static CliNode&
-cli_node(void)
+cli_node()
 {
     return (*global_cli_node);
 }

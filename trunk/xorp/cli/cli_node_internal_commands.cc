@@ -51,7 +51,7 @@
 
 /**
  * CliNode::add_internal_cli_commands:
- * @void: 
+ * @: 
  * 
  * Add the internal default CLI commands from the top.
  * XXX: used by the CLI itself for internal processing of a command.
@@ -60,7 +60,7 @@
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-CliNode::add_internal_cli_commands(void)
+CliNode::add_internal_cli_commands()
 {
     CliCommand *c0, *c1;
     

@@ -82,11 +82,11 @@ CliNode::CliNode(int init_family, xorp_module_id module_id,
 
 /**
  * CliNode::~CliNode:
- * @void: 
+ * @: 
  * 
  * CLI node destructor.
  **/
-CliNode::~CliNode(void)
+CliNode::~CliNode()
 {
     stop();
     
@@ -94,7 +94,7 @@ CliNode::~CliNode(void)
 }
 
 int
-CliNode::start(void)
+CliNode::start()
 {
     if (ProtoNode<Vif>::start() < 0)
 	return (XORP_ERROR);
