@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.31 2005/01/31 23:59:12 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.32 2005/02/27 20:46:55 pavlin Exp $"
 
 
 //
@@ -241,7 +241,7 @@ CliNode::add_connection(int client_socket)
 	if (i >= CLI_MAX_CONNECTIONS) {
 	    // This should not happen: there are available session slots,
 	    // but no available session IDs.
-	    assert(0 && "Cannot assign CLI session ID");
+	    XLOG_FATAL("Cannot assign CLI session ID");
 	    return (NULL);
 	}
 	cli_client->set_cli_session_session_id(session_id);
