@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.15 2003/02/06 19:56:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.16 2003/02/07 00:40:22 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -906,6 +906,10 @@ PimMre::set_local_receiver_include(uint16_t vif_index, bool v)
 	    break;
 	}
     } while (false);
+    
+    // Try to remove the entry
+    if (! v)
+	entry_try_remove();
 }
 
 void
@@ -931,6 +935,10 @@ PimMre::set_local_receiver_exclude(uint16_t vif_index, bool v)
 	    break;
 	}
     } while (false);
+    
+    // Try to remove the entry
+    if (! v)
+	entry_try_remove();
 }
 
 // Note: works for (*,G), (S,G), (S,G,rpt)
@@ -1786,11 +1794,7 @@ PimMre::entry_can_remove() const
 #endif // 0
 #if 1		// TODO: XXX: PAVPAVPAV: not needed?
     if (is_sg()) {
-	if (is_register_join_state()
-	    || is_register_prune_state()
-	    || is_register_join_pending_state())
-	    return (false);
-	if (is_could_register_sg())
+	if (! is_register_noinfo_state())
 	    return (false);
     }
 #endif // 1

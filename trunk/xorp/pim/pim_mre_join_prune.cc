@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.12 2003/01/31 21:01:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.13 2003/02/01 01:28:44 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -93,6 +93,9 @@ PimMre::set_downstream_noinfo_state(uint16_t vif_index)
 	    break;
 	}
     } while (false);
+    
+    // Try to remove the entry
+    entry_try_remove();
 }
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
@@ -435,6 +438,10 @@ PimMre::set_not_joined_state()
     
     if (is_sg())
 	pim_mrt().add_task_upstream_jp_state_sg(source_addr(), group_addr());
+    
+    // Try to remove the entry    
+    if (is_rp() || is_wc() || is_sg())
+	entry_try_remove();
 }
 
 //

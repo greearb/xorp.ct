@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.2 2003/01/30 01:43:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.3 2003/02/06 04:33:36 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -88,6 +88,9 @@ PimMre::set_register_noinfo_state()
     _flags &= ~(PIM_MRE_REGISTER_JOIN_STATE
 		| PIM_MRE_REGISTER_PRUNE_STATE
 		| PIM_MRE_REGISTER_JOIN_PENDING_STATE);
+    
+    // Try to remove the entry    
+    entry_try_remove();
 }
 
 // Note: applies for (S,G)
