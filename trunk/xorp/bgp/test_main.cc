@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.7 2003/09/27 01:21:09 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.8 2004/03/03 02:24:13 atanu Exp $"
 
 #include <stdio.h>
 #include "bgp_module.h"
@@ -31,6 +31,66 @@ bool test_fanout(TestInfo& info);
 bool test_dump_create(TestInfo& info);
 bool test_dump(TestInfo& info);
 bool test_ribout(TestInfo& info);
+
+bool
+validate_reference_file(string reference_file, string output_file,
+			string testname)
+{
+    FILE *file = fopen(output_file.c_str(), "r");
+    if (file == NULL) {
+	fprintf(stderr, "Failed to read %s\n", output_file.c_str());
+	fprintf(stderr, "TEST %s FAILED\n", testname.c_str());
+	fclose(file);
+	return false;
+    }
+#define BUFSIZE 8192
+    char testout[BUFSIZE];
+    memset(testout, 0, BUFSIZE);
+    int bytes1 = fread(testout, 1, BUFSIZE, file);
+    if (bytes1 == BUFSIZE) {
+	fprintf(stderr, "Output too long for buffer\n");
+	fprintf(stderr, "TEST %s FAILED\n", testname.c_str());
+	fclose(file);
+	return false;
+    }
+    fclose(file);
+
+    string ref_filename;
+    const char* srcdir = getenv("srcdir");
+    if (srcdir) {
+	ref_filename = string(srcdir); 
+    } else {
+	ref_filename = ".";
+    }
+    ref_filename += reference_file;
+    file = fopen(ref_filename.c_str(), "r");
+    if (file == NULL) {
+	fprintf(stderr, "Failed to read %s\n", ref_filename.c_str());
+	fprintf(stderr, "TEST %s FAILED\n", testname.c_str());
+	return false;
+    }
+    char refout[BUFSIZE];
+    memset(refout, 0, BUFSIZE);
+    int bytes2 = fread(refout, 1, BUFSIZE, file);
+    if (bytes2 == BUFSIZE) {
+	fprintf(stderr, "Output too long for buffer\n");
+	fprintf(stderr, "TEST %s FAILED\n", testname.c_str());
+	fclose(file);
+	return false;
+    }
+    fclose(file);
+    
+    if ((bytes1 != bytes2) || (memcmp(testout, refout, bytes1)!= 0)) {
+	fprintf(stderr, "Output in %s doesn't match reference output\n",
+		output_file.c_str());
+	fprintf(stderr, "TEST %s FAILED\n", testname.c_str());
+	return false;
+	
+    }
+    unlink(output_file.c_str());
+
+    return true;
+}
 
 int
 main(int argc, char** argv) 
