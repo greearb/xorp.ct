@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.24 2004/06/22 01:28:25 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.25 2004/07/09 05:22:47 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -32,9 +32,9 @@ options		MROUTING		# Multicast routing
 options		PIM			# PIM multicast routing
 
     For Linux kernel, the following options are required:
-enable CONFIG_IP_MULTICAST
-enable CONFIG_IP_PIMSM_V2
-enable CONFIG_IP_MROUTE
+CONFIG_IP_MULTICAST=y
+CONFIG_IP_MROUTE=y
+CONFIG_IP_PIMSM_V2=y
 
  - IPv6: FreeBSD, NetBSD, OpenBSD, DragonFlyBSD
    No kernel options are required.
