@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.41 2004/11/10 00:39:48 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.42 2004/11/11 10:36:38 bms Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -181,14 +181,20 @@ public:
      *  Add a FIB client.
      *
      *  @param target_name the target name of the FIB client to add.
+     *  @param send_updates whether updates should be sent.
+     *  @param send_resolves whether resolve requests should be sent.
      */
     XrlCmdError fea_fib_0_1_add_fib_client4(
 	// Input values,
-	const string&	target_name);
+	const string&	target_name,
+	const bool&	send_updates,
+	const bool&	send_resolves);
 
     XrlCmdError fea_fib_0_1_add_fib_client6(
 	// Input values,
-	const string&	target_name);
+	const string&	target_name,
+	const bool&	send_updates,
+	const bool&	send_resolves);
 
     /**
      *  Delete a FIB client.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.9 2004/08/17 02:20:11 pavlin Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.10 2004/11/11 07:48:22 bms Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -115,19 +115,27 @@ public:
 
     /**
      * Add an IPv4 FIB client.
-     * 
+     *
      * @param target_name the target name of the client to add.
+     * @param send_updates whether updates should be sent.
+     * @param send_resolves whether resolve requests should be sent.
      * @return the XRL command error.
      */
-    XrlCmdError add_fib_client4(const string& target_name);
+    XrlCmdError add_fib_client4(const string& target_name,
+				const bool send_updates,
+				const bool send_resolves);
 
     /**
      * Add an IPv6 FIB client.
      * 
      * @param target_name the target name of the client to add.
+     * @param send_updates whether updates should be sent.
+     * @param send_resolves whether resolve requests should be sent.
      * @return the XRL command error.
      */
-    XrlCmdError add_fib_client6(const string& target_name);
+    XrlCmdError add_fib_client6(const string& target_name,
+				const bool send_updates,
+				const bool send_resolves);
 
     /**
      * Delete an IPv4 FIB client.

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.12 2003/10/28 19:36:28 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_fib.xif,v 1.1 2004/03/15 23:26:42 pavlin Exp $ */
 
 /*
  * FEA Forwarding Information Base XRL interface.
@@ -9,10 +9,15 @@ interface fea_fib/0.1 {
 	 * Add a FIB client.
 	 *
 	 * @param target_name the target name of the FIB client to add.
+	 * @param send_updates whether updates should be sent.
+	 * @param send_resolves whether resolution requests should be sent.
 	 */
-	add_fib_client4		? target_name:txt
-	add_fib_client6		? target_name:txt
-
+	add_fib_client4		? target_name:txt		\
+				& send_updates:bool		\
+				& send_resolves:bool
+	add_fib_client6		? target_name:txt		\
+				& send_updates:bool		\
+				& send_resolves:bool
 	/**
 	 * Delete a FIB client.
 	 *

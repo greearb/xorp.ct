@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.14 2004/09/17 19:39:48 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.15 2004/11/05 04:29:24 bms Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -201,6 +201,8 @@ XrlFib2mribNode::send_fea_fib_client_registration()
 	success = _xrl_fea_fib_client.send_add_fib_client4(
 	    _fea_target.c_str(),
 	    my_xrl_target_name(),
+	    true,		/* send_updates */
+	    false,		/* send_resolves */
 	    callback(this, &XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb));
 	if (success)
 	    return;
@@ -213,6 +215,8 @@ XrlFib2mribNode::send_fea_fib_client_registration()
 	success = _xrl_fea_fib_client.send_add_fib_client6(
 	    _fea_target.c_str(),
 	    my_xrl_target_name(),
+	    true,		/* send_updates */
+	    false,		/* send_resolves */
 	    callback(this, &XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb));
 	if (success)
 	    return;

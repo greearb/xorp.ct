@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.54 2004/11/10 00:39:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.55 2004/11/11 10:36:38 bms Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -381,23 +381,27 @@ XrlFeaTarget::fea_click_0_1_set_user_click_startup_config_file(
 XrlCmdError
 XrlFeaTarget::fea_fib_0_1_add_fib_client4(
     // Input values,
-    const string&	target_name)
+    const string&	target_name,
+    const bool&		send_updates,
+    const bool&		send_resolves)
 {
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    return _xftm.add_fib_client4(target_name);
+    return _xftm.add_fib_client4(target_name, send_updates, send_resolves);
 }
 
 XrlCmdError
 XrlFeaTarget::fea_fib_0_1_add_fib_client6(
     // Input values,
-    const string&	target_name)
+    const string&	target_name,
+    const bool&		send_updates,
+    const bool&		send_resolves)
 {
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    return _xftm.add_fib_client6(target_name);
+    return _xftm.add_fib_client6(target_name, send_updates, send_resolves);
 }
 
 /**

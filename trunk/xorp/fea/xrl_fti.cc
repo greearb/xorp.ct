@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.10 2004/08/03 03:51:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.11 2004/11/11 07:48:22 bms Exp $"
 
 #include "xrl_fti.hh"
 
@@ -112,7 +112,8 @@ XrlFtiTransactionManager::process_fib_changes(const list<Fte6>& fte_list)
 }
 
 XrlCmdError
-XrlFtiTransactionManager::add_fib_client4(const string& target_name)
+XrlFtiTransactionManager::add_fib_client4(const string& target_name,
+	const bool send_updates, const bool send_resolves)
 {
     // Test if we have this client already
     if (_fib_clients4.find(target_name) != _fib_clients4.end()) {
@@ -135,10 +136,13 @@ XrlFtiTransactionManager::add_fib_client4(const string& target_name)
     fib_client.activate(fte_list);
 
     return XrlCmdError::OKAY();
+    UNUSED(send_updates);
+    UNUSED(send_resolves);
 }
 
 XrlCmdError
-XrlFtiTransactionManager::add_fib_client6(const string& target_name)
+XrlFtiTransactionManager::add_fib_client6(const string& target_name,
+	const bool send_updates, const bool send_resolves)
 {
     // Test if we have this client already
     if (_fib_clients6.find(target_name) != _fib_clients6.end()) {
@@ -161,6 +165,8 @@ XrlFtiTransactionManager::add_fib_client6(const string& target_name)
     fib_client.activate(fte_list);
 
     return XrlCmdError::OKAY();
+    UNUSED(send_updates);
+    UNUSED(send_resolves);
 }
 
 XrlCmdError
