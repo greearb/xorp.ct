@@ -1,20 +1,10 @@
 <h1>SNMP Support in XORP</h1>
+
 <P>
 If you wish to have SNMP support in XORP, you need to have <a
 href="http://net-snmp.sourceforge.net/">net-snmp</a> installed.  
-<P>
 The version of net-snmp matters.  XORP needs at least version 5.0.6.
-<P>
-On FreeBSD, net-snmp version 5.0.9 works with no known problems.  
-<P>
-On some versions of Linux, there is a bug in net-snmp 5.0.9, which prevents
-dynamic loading from working.  A patch is available <a
-href="http://sourceforge.net/tracker/index.php?func=detail&aid=905573&group_id=12694&atid=456380">here</a>.
-If you need this patch, XORP's configure program should display a warning.
-<P>
-Version 5.1 does NOT work without modification.  XORP will fail to
-compile.  A patch that can be applied to an installed net-snmp 5.1
-installation is available <a href="net-snmp-patch.txt">here</a>.
+
 <P>
 Although XORP does have SNMP support, at the present time we have very
 few MIBs implemented, so SNMP is of somewhat limited use.  We will
@@ -24,4 +14,20 @@ without SNMP support, use the following option to configure:
 ./configure --without-snmp
 </PRE>
 
+<h2>Known SNMP-related issues</h2>
+On FreeBSD, net-snmp version 5.0.9 works with no known problems.  
 
+<P>
+On some versions of Linux, there are some bugs in net-snmp versions 5.0.8 and
+5.0.9, which prevent dynamic loading from working.
+A patch for net-snmp version 5.0.8 is available <a
+href="http://sf.net/tracker/index.php?func=detail&aid=708409&group_id=12694&atid=112694">here</a>.
+A patch for net-snmp version 5.0.9 is available <a
+href="http://sourceforge.net/tracker/index.php?func=detail&aid=905573&group_id=12694&atid=456380">here</a>.
+If you need one of those patches, XORP's configure program should display a
+warning.
+
+<P>
+Version 5.1 of net-snmp requires a simple modification, otherwise
+XORP will fail to compile.  A patch that can be applied to a
+net-snmp-5.1 installation is available <a href="net-snmp-patch.txt">here</a>.
