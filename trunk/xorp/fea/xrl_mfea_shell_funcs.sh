@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.6 2003/10/16 18:23:06 pavlin Exp $
+# $XORP: xorp/fea/xrl_mfea_shell_funcs.sh,v 1.7 2003/12/16 23:38:04 pavlin Exp $
 #
 
 #
@@ -58,29 +58,16 @@ mfea_have_multicast_routing6()
 
 mfea_enable_vif()
 {
-    if [ $# -lt 1 ] ; then
-	echo "Usage: mfea_enable_vif <vif_name:txt>"
+    if [ $# -lt 2 ] ; then
+	echo "Usage: mfea_enable_vif <vif_name:txt> <enable:bool>"
 	exit 1
     fi
     vif_name=$1
+    enable=$2
     
     echo "mfea_enable_vif" $*
     XRL="finder://$MFEA_TARGET/mfea/0.1/enable_vif"
-    XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mfea_disable_vif()
-{
-    if [ $# -lt 1 ] ; then
-	echo "Usage: mfea_disable_vif <vif_name:txt>"
-	exit 1
-    fi
-    vif_name=$1
-    
-    echo "mfea_disable_vif" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/disable_vif"
-    XRL_ARGS="?vif_name:txt=$vif_name"
+    XRL_ARGS="?vif_name:txt=$vif_name&enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
@@ -114,17 +101,15 @@ mfea_stop_vif()
 
 mfea_enable_all_vifs()
 {
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mfea_enable_all_vifs <enable:bool>"
+	exit 1
+    fi
+    enable=$1
+
     echo "mfea_enable_all_vifs" $*
     XRL="finder://$MFEA_TARGET/mfea/0.1/enable_all_vifs"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mfea_disable_all_vifs()
-{
-    echo "mfea_disable_all_vifs" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/disable_all_vifs"
-    XRL_ARGS=""
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
@@ -146,33 +131,15 @@ mfea_stop_all_vifs()
 
 mfea_enable_mfea()
 {
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mfea_enable_mfea <enable:bool>"
+	exit 1
+    fi
+    enable=$1
+
     echo "mfea_enable_mfea" $*
     XRL="finder://$MFEA_TARGET/mfea/0.1/enable_mfea"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mfea_disable_mfea()
-{
-    echo "mfea_disable_mfea" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/disable_mfea"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mfea_enable_cli()
-{
-    echo "mfea_enable_cli" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/enable_cli"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mfea_disable_cli()
-{
-    echo "mfea_disable_cli" $*
-    XRL="finder://$MFEA_TARGET/mfea/0.1/disable_cli"
-    XRL_ARGS=""
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
@@ -189,6 +156,20 @@ mfea_stop_mfea()
     echo "mfea_stop_mfea" $*
     XRL="finder://$MFEA_TARGET/mfea/0.1/stop_mfea"
     XRL_ARGS=""
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
+}
+
+mfea_enable_cli()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mfea_enable_cli <enable:bool>"
+	exit 1
+    fi
+    enable=$1
+
+    echo "mfea_enable_cli" $*
+    XRL="finder://$MFEA_TARGET/mfea/0.1/enable_cli"
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 

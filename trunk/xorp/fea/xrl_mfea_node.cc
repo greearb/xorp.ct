@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.19 2003/12/10 22:14:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.20 2003/12/16 23:38:04 pavlin Exp $"
 
 #include "mfea_module.h"
 #include "libxorp/xorp.h"
@@ -2321,25 +2321,19 @@ XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor6(
 
 XrlCmdError
 XrlMfeaNode::mfea_0_1_enable_vif(
-    // Input values, 
-    const string&	vif_name)
+	// Input values,
+	const string&	vif_name,
+	const bool&	enable)
 {
     string error_msg;
-    
-    if (MfeaNode::enable_vif(vif_name, error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
-    return XrlCmdError::OKAY();
-}
+    int ret_code;
 
-XrlCmdError
-XrlMfeaNode::mfea_0_1_disable_vif(
-    // Input values, 
-    const string&	vif_name)
-{
-    string error_msg;
-    
-    if (MfeaNode::disable_vif(vif_name, error_msg) != XORP_OK)
+    if (enable)
+	ret_code = MfeaNode::enable_vif(vif_name, error_msg);
+    else
+	ret_code = MfeaNode::disable_vif(vif_name, error_msg);
+
+    if (ret_code != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
@@ -2372,24 +2366,26 @@ XrlMfeaNode::mfea_0_1_stop_vif(
 }
 
 XrlCmdError
-XrlMfeaNode::mfea_0_1_enable_all_vifs()
+XrlMfeaNode::mfea_0_1_enable_all_vifs(
+    // Input values,
+    const bool&	enable)
 {
-    if (MfeaNode::enable_all_vifs() != XORP_OK) {
-	string error_msg = c_format("Failed to enable all vifs");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
+    string error_msg;
+    int ret_code;
 
-XrlCmdError
-XrlMfeaNode::mfea_0_1_disable_all_vifs()
-{
-    if (MfeaNode::disable_all_vifs() != XORP_OK) {
-	string error_msg = c_format("Failed to disable all vifs");
+    if (enable)
+	ret_code = MfeaNode::enable_all_vifs();
+    else
+	ret_code = MfeaNode::disable_all_vifs();
+
+    if (ret_code != XORP_OK) {
+	if (enable)
+	    error_msg = c_format("Failed to enable all vifs");
+	else
+	    error_msg = c_format("Failed to disable all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -2416,46 +2412,26 @@ XrlMfeaNode::mfea_0_1_stop_all_vifs()
 }
 
 XrlCmdError
-XrlMfeaNode::mfea_0_1_enable_mfea()
+XrlMfeaNode::mfea_0_1_enable_mfea(
+	// Input values,
+	const bool&	enable)
 {
-    if (enable_mfea() != XORP_OK) {
-	string error_msg = c_format("Failed to enable MFEA");
+    string error_msg;
+    int ret_value;
+
+    if (enable)
+	ret_value = enable_mfea();
+    else
+	ret_value = disable_mfea();
+
+    if (ret_value != XORP_OK) {
+	if (enable)
+	    error_msg = c_format("Failed to enable MFEA");
+	else
+	    error_msg = c_format("Failed to disable MFEA");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMfeaNode::mfea_0_1_disable_mfea()
-{
-    if (disable_mfea() != XORP_OK) {
-	string error_msg = c_format("Failed to disable MFEA");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMfeaNode::mfea_0_1_enable_cli()
-{
-    if (enable_cli() != XORP_OK) {
-	string error_msg = c_format("Failed to enable MFEA CLI");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMfeaNode::mfea_0_1_disable_cli()
-{
-    if (disable_cli() != XORP_OK) {
-	string error_msg = c_format("Failed to disable MFEA CLI");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
     return XrlCmdError::OKAY();
 }
 
@@ -2495,6 +2471,30 @@ XrlMfeaNode::mfea_0_1_stop_mfea()
     if (is_error)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_enable_cli(
+    // Input values,
+    const bool&	enable)
+{
+    string error_msg;
+    int ret_value;
+
+    if (enable)
+	ret_value = enable_cli();
+    else
+	ret_value = disable_cli();
+
+    if (ret_value != XORP_OK) {
+	if (enable)
+	    error_msg = c_format("Failed to enable MFEA CLI");
+	else
+	    error_msg = c_format("Failed to disable MFEA CLI");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     return XrlCmdError::OKAY();
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.8 2003/05/07 23:15:14 mjh Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.9 2003/05/29 21:17:14 mjh Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -75,10 +75,12 @@ protected:
 
     /**
      *  Enable/disable/start/stop the CLI.
+     *
+     *  @param enable if true, then enable the CLI, otherwise disable it.
      */
-    virtual XrlCmdError cli_manager_0_1_enable_cli();
-
-    virtual XrlCmdError cli_manager_0_1_disable_cli();
+    virtual XrlCmdError cli_manager_0_1_enable_cli(
+	// Input values,
+	const bool&	enable);
 
     virtual XrlCmdError cli_manager_0_1_start_cli();
 

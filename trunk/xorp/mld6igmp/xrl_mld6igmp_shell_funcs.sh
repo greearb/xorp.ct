@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.10 2003/10/16 18:23:06 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.11 2003/12/16 23:39:39 pavlin Exp $
 #
 
 #
@@ -33,29 +33,16 @@ esac
 
 mld6igmp_enable_vif()
 {
-    if [ $# -lt 1 ] ; then
-	echo "Usage: mld6igmp_enable_vif <vif_name:txt>"
+    if [ $# -lt 2 ] ; then
+	echo "Usage: mld6igmp_enable_vif <vif_name:txt> <enable:bool>"
 	exit 1
     fi
     vif_name=$1
+    enable=$2
     
     echo "mld6igmp_enable_vif" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/enable_vif"
-    XRL_ARGS="?vif_name:txt=$vif_name"
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mld6igmp_disable_vif()
-{
-    if [ $# -lt 1 ] ; then
-	echo "Usage: mld6igmp_disable_vif <vif_name:txt>"
-	exit 1
-    fi
-    vif_name=$1
-    
-    echo "mld6igmp_disable_vif" $*
-    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/disable_vif"
-    XRL_ARGS="?vif_name:txt=$vif_name"
+    XRL_ARGS="?vif_name:txt=$vif_name&enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
@@ -89,17 +76,15 @@ mld6igmp_stop_vif()
 
 mld6igmp_enable_all_vifs()
 {
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_enable_all_vifs <enable:bool>"
+	exit 1
+    fi
+    enable=$1
+
     echo "mld6igmp_enable_all_vifs" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/enable_all_vifs"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mld6igmp_disable_all_vifs()
-{
-    echo "mld6igmp_disable_all_vifs" $*
-    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/disable_all_vifs"
-    XRL_ARGS=""
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
@@ -129,33 +114,15 @@ mld6igmp_is_vif_setup_completed()
 
 mld6igmp_enable_mld6igmp()
 {
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_enable_mld6igmp <enable:bool>"
+	exit 1
+    fi
+    enable=$1
+
     echo "mld6igmp_enable_mld6igmp" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/enable_mld6igmp"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mld6igmp_disable_mld6igmp()
-{
-    echo "mld6igmp_disable_mld6igmp" $*
-    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/disable_mld6igmp"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mld6igmp_enable_cli()
-{
-    echo "mld6igmp_enable_cli" $*
-    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/enable_cli"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mld6igmp_disable_cli()
-{
-    echo "mld6igmp_disable_cli" $*
-    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/disable_cli"
-    XRL_ARGS=""
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 
@@ -172,6 +139,20 @@ mld6igmp_stop_mld6igmp()
     echo "mld6igmp_stop_mld6igmp" $*
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/stop_mld6igmp"
     XRL_ARGS=""
+    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
+}
+
+mld6igmp_enable_cli()
+{
+    if [ $# -lt 1 ] ; then
+	echo "Usage: mld6igmp_enable_cli <enable:bool>"
+	exit 1
+    fi
+    enable=$1
+
+    echo "mld6igmp_enable_cli" $*
+    XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/enable_cli"
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 

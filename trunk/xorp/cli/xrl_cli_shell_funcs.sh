@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.8 2003/10/15 18:54:27 pavlin Exp $
+# $XORP: xorp/cli/xrl_cli_shell_funcs.sh,v 1.9 2003/10/16 18:23:06 pavlin Exp $
 #
 
 #
@@ -33,17 +33,14 @@ esac
 
 cli_enable_cli()
 {
-    echo "cli_enable_cli" $*
-    XRL="finder://$CLI_TARGET/cli_manager/0.1/enable_cli"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
+    if [ $# -lt 1 ] ; then
+	echo "Usage: cli_enable_cli <enable:bool>"
+	exit 1
+    fi
+    enable=$1
 
-cli_disable_cli()
-{
-    echo "cli_disable_cli" $*
-    XRL="finder://$CLI_TARGET/cli_manager/0.1/disable_cli"
-    XRL_ARGS=""
+    XRL="finder://$CLI_TARGET/cli_manager/0.1/enable_cli"
+    XRL_ARGS="?enable:bool=$enable"
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
 }
 

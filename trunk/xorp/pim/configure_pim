@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/configure_pim,v 1.21 2003/10/24 22:45:21 pavlin Exp $
+# $XORP: xorp/pim/configure_pim,v 1.22 2003/12/16 23:40:46 pavlin Exp $
 #
 
 #
@@ -215,13 +215,13 @@ done
 #
 # Enable and start CLI
 #
-cli_enable_cli
+cli_enable_cli true
 cli_start_cli
 
 #
 # Enable and start MFEA CLI
 #
-mfea_enable_cli
+mfea_enable_cli true
 mfea_start_cli
 
 #
@@ -233,14 +233,14 @@ fi
 if [ "${MRIB_TABLE_DEFAULT_METRIC}" != "" ] ; then
 	mfea_set_mrib_table_default_metric ${MRIB_TABLE_DEFAULT_METRIC}
 fi
-mfea_enable_mfea
+mfea_enable_mfea true
 mfea_start_mfea
 
 #
 # Enable and start MFEA vifs
 #
 for vif in ${MFEA_ENABLE_VIFS}; do
-	mfea_enable_vif ${vif}
+	mfea_enable_vif ${vif} true
 	mfea_start_vif ${vif}
 done
 
@@ -248,13 +248,13 @@ done
 #
 # Enable and start MLD6IGMP CLI
 #
-mld6igmp_enable_cli
+mld6igmp_enable_cli true
 mld6igmp_start_cli
 
 #
 # Enable and start MLD6IGMP
 #
-mld6igmp_enable_mld6igmp
+mld6igmp_enable_mld6igmp true
 mld6igmp_start_mld6igmp
 
 #
@@ -266,7 +266,7 @@ mld6igmp_is_vif_setup_completed
 # Enable and start MLD6IGMP vifs
 #
 for vif in ${MLD6IGMP_ENABLE_VIFS}; do
-	mld6igmp_enable_vif ${vif}
+	mld6igmp_enable_vif ${vif} true
 	mld6igmp_start_vif ${vif}
 done
 

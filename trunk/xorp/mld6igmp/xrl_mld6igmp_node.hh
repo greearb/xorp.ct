@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.18 2003/07/12 01:05:19 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.19 2003/12/16 23:39:39 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -521,16 +521,15 @@ protected:
 
     /**
      *  Enable/disable/start/stop a MLD6IGMP vif interface.
-     *  
+     *
      *  @param vif_name the name of the vif to enable/disable/start/stop.
+     *
+     *  @param enable if true, then enable the vif, otherwise disable it.
      */
     XrlCmdError mld6igmp_0_1_enable_vif(
-	// Input values, 
-	const string&	vif_name);
-
-    XrlCmdError mld6igmp_0_1_disable_vif(
-	// Input values, 
-	const string&	vif_name);
+	// Input values,
+	const string&	vif_name,
+	const bool&	enable);
 
     XrlCmdError mld6igmp_0_1_start_vif(
 	// Input values, 
@@ -542,29 +541,40 @@ protected:
 
     /**
      *  Enable/disable/start/stop all MLD6IGMP vif interfaces.
+     *
+     *  @param enable if true, then enable the vifs, otherwise disable them.
      */
-    XrlCmdError mld6igmp_0_1_enable_all_vifs();
-
-    XrlCmdError mld6igmp_0_1_disable_all_vifs();
+    XrlCmdError mld6igmp_0_1_enable_all_vifs(
+	// Input values,
+	const bool&	enable);
 
     XrlCmdError mld6igmp_0_1_start_all_vifs();
 
     XrlCmdError mld6igmp_0_1_stop_all_vifs();
 
     /**
-     *  Enable/disable/start/stop MLD6IGMP protocol and MLD6IGMP CLI access.
+     *  Enable/disable/start/stop the MLD6IGMP protocol.
+     *
+     *  @param enable if true, then enable the MLD6IGMP protocol, otherwise
+     *  disable it.
      */
-    XrlCmdError mld6igmp_0_1_enable_mld6igmp();
-
-    XrlCmdError mld6igmp_0_1_disable_mld6igmp();
-
-    XrlCmdError mld6igmp_0_1_enable_cli();
-
-    XrlCmdError mld6igmp_0_1_disable_cli();
+    XrlCmdError mld6igmp_0_1_enable_mld6igmp(
+	// Input values,
+	const bool&	enable);
 
     XrlCmdError mld6igmp_0_1_start_mld6igmp();
 
     XrlCmdError mld6igmp_0_1_stop_mld6igmp();
+
+    /**
+     *  Enable/disable/start/stop the MLD6IGMP CLI access.
+     *
+     *  @param enable if true, then enable the MLD6IGMP CLI access, otherwise
+     *  disable it.
+     */
+    XrlCmdError mld6igmp_0_1_enable_cli(
+	// Input values,
+	const bool&	enable);
 
     XrlCmdError mld6igmp_0_1_start_cli();
 

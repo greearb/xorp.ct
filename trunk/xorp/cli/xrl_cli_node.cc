@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.11 2003/05/31 06:41:03 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.12 2003/12/10 21:57:50 pavlin Exp $"
 
 #include "cli_module.h"
 #include "cli_private.hh"
@@ -114,22 +114,26 @@ XrlCliNode::common_0_1_shutdown()
 }
 
 XrlCmdError
-XrlCliNode::cli_manager_0_1_enable_cli()
+XrlCliNode::cli_manager_0_1_enable_cli(
+    // Input values,
+    const bool&	enable)
 {
-    if (enable_cli() != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED("Failed to enable CLI");
-    }
-    
-    return XrlCmdError::OKAY();
-}
+    string error_msg;
+    int ret_value;
 
-XrlCmdError
-XrlCliNode::cli_manager_0_1_disable_cli()
-{
-    if (disable_cli() != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED("Failed to disable CLI");
+    if (enable)
+	ret_value = enable_cli();
+    else
+	ret_value = disable_cli();
+
+    if (ret_value != XORP_OK) {
+	if (enable)
+	    error_msg = "Failed to enable CLI";
+	else
+	    error_msg = "Failed to disable CLI";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    
+
     return XrlCmdError::OKAY();
 }
 

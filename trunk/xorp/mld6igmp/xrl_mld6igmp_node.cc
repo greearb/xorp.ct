@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.21 2003/11/19 01:03:38 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.22 2003/12/16 23:39:39 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -1063,27 +1063,21 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
 
 XrlCmdError
 XrlMld6igmpNode::mld6igmp_0_1_enable_vif(
-    // Input values, 
-    const string&	vif_name)
+    // Input values,
+    const string&	vif_name,
+    const bool&	enable)
 {
     string error_msg;
-    
-    if (Mld6igmpNode::enable_vif(vif_name, error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
-    return XrlCmdError::OKAY();
-}
+    int ret_value;
 
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_disable_vif(
-    // Input values, 
-    const string&	vif_name)
-{
-    string error_msg;
-    
-    if (Mld6igmpNode::disable_vif(vif_name, error_msg) != XORP_OK)
+    if (enable)
+	ret_value = Mld6igmpNode::enable_vif(vif_name, error_msg);
+    else
+	ret_value = Mld6igmpNode::disable_vif(vif_name, error_msg);
+
+    if (ret_value != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -1114,24 +1108,26 @@ XrlMld6igmpNode::mld6igmp_0_1_stop_vif(
 }
 
 XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_enable_all_vifs()
+XrlMld6igmpNode::mld6igmp_0_1_enable_all_vifs(
+    // Input values,
+    const bool&	enable)
 {
-    if (Mld6igmpNode::enable_all_vifs() != XORP_OK) {
-	string error_msg = c_format("Failed to enable all vifs");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
+    string error_msg;
+    int ret_value;
 
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_disable_all_vifs()
-{
-    if (Mld6igmpNode::disable_all_vifs() != XORP_OK) {
-	string error_msg = c_format("Failed to disable all vifs");
+    if (enable)
+	ret_value = Mld6igmpNode::enable_all_vifs();
+    else
+	ret_value = Mld6igmpNode::enable_all_vifs();
+
+    if (ret_value != XORP_OK) {
+	if (enable)
+	    error_msg = c_format("Failed to enable all vifs");
+	else
+	    error_msg = c_format("Failed to disable all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -1158,46 +1154,26 @@ XrlMld6igmpNode::mld6igmp_0_1_stop_all_vifs()
 }
 
 XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_enable_mld6igmp()
+XrlMld6igmpNode::mld6igmp_0_1_enable_mld6igmp(
+    // Input values,
+    const bool&	enable)
 {
-    if (enable_mld6igmp() != XORP_OK) {
-	string error_msg = c_format("Failed to enable MLD6IGMP");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
+    string error_msg;
+    int ret_value;
 
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_disable_mld6igmp()
-{
-    if (disable_mld6igmp() != XORP_OK) {
-	string error_msg = c_format("Failed to disable MLD6IGMP");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
+    if (enable)
+	ret_value = enable_mld6igmp();
+    else
+	ret_value = disable_mld6igmp();
 
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_enable_cli()
-{
-    if (enable_cli() != XORP_OK) {
-	string error_msg = c_format("Failed to enable MLD6IGMP CLI");
+    if (ret_value != XORP_OK) {
+	if (enable)
+	    error_msg = c_format("Failed to enable MLD6IGMP");
+	else
+	    error_msg = c_format("Failed to disable MLD6IGMP");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    
-    return XrlCmdError::OKAY();
-}
 
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_disable_cli()
-{
-    if (disable_cli() != XORP_OK) {
-	string error_msg = c_format("Failed to disable MLD6IGMP CLI");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
     return XrlCmdError::OKAY();
 }
 
@@ -1220,6 +1196,30 @@ XrlMld6igmpNode::mld6igmp_0_1_stop_mld6igmp()
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMld6igmpNode::mld6igmp_0_1_enable_cli(
+    // Input values,
+    const bool&	enable)
+{
+    string error_msg;
+    int ret_value;
+
+    if (enable)
+	ret_value = enable_cli();
+    else
+	ret_value = disable_cli();
+
+    if (ret_value != XORP_OK) {
+	if (enable)
+	    error_msg = c_format("Failed to enable MLD6IGMP CLI");
+	else
+	    error_msg = c_format("Failed to disable MLD6IGMP CLI");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     return XrlCmdError::OKAY();
 }
 

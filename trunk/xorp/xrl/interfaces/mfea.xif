@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.4 2003/09/23 03:35:39 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.5 2003/12/16 23:35:15 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction XRL interface.
@@ -277,29 +277,40 @@ interface mfea/0.1 {
 	 * Enable/disable/start/stop a MFEA vif interface.
 	 *
 	 * @param vif_name the name of the vif to enable/disable/start/stop.
+	 * @param enable if true, then enable the vif, otherwise
+	 * disable it.
 	 */
-	enable_vif	? vif_name:txt
-	disable_vif	? vif_name:txt
+	enable_vif	? vif_name:txt & enable:bool
 	start_vif	? vif_name:txt
 	stop_vif	? vif_name:txt
 
 	/**
 	 * Enable/disable/start/stop all MFEA vif interfaces.
+	 *
+	 * @param enable if true, then enable the vifs, otherwise
+	 * disable them.
 	 */
-	enable_all_vifs
-	disable_all_vifs
+	enable_all_vifs	? enable:bool
 	start_all_vifs
 	stop_all_vifs
-	
+
 	/**
-	 * Enable/disable/start/stop the MFEA and the MFEA CLI access.
+	 * Enable/disable/start/stop the MFEA.
+	 *
+	 * @param enable if true, then enable the MFEA, otherwise
+	 * disable it.
 	 */
-	enable_mfea
-	disable_mfea
-	enable_cli
-	disable_cli
+	enable_mfea	? enable:bool
 	start_mfea
 	stop_mfea
+
+	/**
+	 * Enable/disable/start/stop the MFEA CLI access.
+	 *
+	 * @param enable if true, then enable the MFEA CLI access, otherwise
+	 * disable it.
+	 */
+	enable_cli	? enable:bool
 	start_cli
 	stop_cli
 
