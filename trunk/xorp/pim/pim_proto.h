@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.9 2004/03/24 07:04:27 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.10 2004/06/10 22:41:33 hodson Exp $
  */
 
 
@@ -44,6 +44,19 @@
 #include "mrt/include/netinet/pim.h"
 #endif
 
+
+/*
+ * Conditionally define constants that may be missing from <netinet/pim.h>
+ */
+#ifndef PIM_MINLEN
+#define PIM_MINLEN		8	/* PIM message min. length	*/
+#endif
+#ifndef PIM_REG_MINLEN
+#define PIM_REG_MINLEN	(PIM_MINLEN+20)	/* PIM Register hdr + inner IPv4 hdr */
+#endif
+#ifndef PIM6_REG_MINLEN
+#define PIM6_REG_MINLEN	(PIM_MINLEN+40)	/* PIM Register hdr + inner IPv6 hdr */
+#endif
 
 /*
  * Constants definitions
