@@ -1,7 +1,22 @@
 #
-# $XORP: xorp/fea/TODO,v 1.16 2004/06/09 19:01:39 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.17 2004/06/09 19:30:47 pavlin Exp $
 #
 
+* Refactor IfTree::align_with() when updating the FEA local config
+  interface tree with the system interface tree. Currenty, some of
+  the logic (see revision 1.22 of fea/iftree.cc) is that an item
+  on the local config interface tree is not updated if the item
+  is disabled. A better solution would be that fields like
+  physical interface index are updated even if the item is disabled.
+  One possible solution is to add align_with() method for each item
+  in the IfTree. That align_with() method would be aware of the internals
+  of the item it serves and can update appropriately some of the fields
+  even if the item is disabled.
+  Note: if this solution is applied, then reverse-back the
+  "fea_ifmgr_set_interface_enabled" and "fea_ifmgr_set_vif_enabled"
+  added to test_get_vif_pif_index() in revision 1.13 of
+  fea/test_config_interface.sh.
+  
 * Check ioctl(SIOCGETTUNNEL) usage from Linux net-tools from USAGI's
   distribution (which returns "struct ip_tunnel_parm"),
   and ioctl(SIOCGETTUNNEL6) which returns "struct ip6_tunnel_parm".
