@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $Header$
+## $XORP$
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am

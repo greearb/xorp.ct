@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# $Header$
+# $XORP$
 #
 #
 # Test the BGP MIB

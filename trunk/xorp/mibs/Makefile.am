@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $Header$
+## $XORP$
 ##
 
 # All of the following shared objects will be installed in
