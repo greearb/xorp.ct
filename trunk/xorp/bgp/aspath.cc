@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.21 2004/05/07 01:08:52 atanu Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.22 2004/06/10 22:40:27 hodson Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -217,7 +217,7 @@ AsPath::AsPath(const char *as_path) throw(InvalidString)
     for (size_t i = 0; i < path.length(); i++) {
 	char c = path[i];
 
-        debug_msg("check <%c> at pos %u\n", c, (uint32_t)i);
+        debug_msg("check <%c> at pos %u\n", c, XORP_UINT_CAST(i));
 	if (xorp_isdigit(c)) {
 	    size_t start = i;
 
@@ -294,7 +294,7 @@ AsPath::add_segment(const AsSegment& s)
     size_t n = s.path_length();
     _path_len += n;
     debug_msg("End of add_segment, As Path length by %u to be %u\n",
-                (uint32_t)n, (uint32_t)_path_len);
+	      XORP_UINT_CAST(n), XORP_UINT_CAST(_path_len));
 }
 
 string

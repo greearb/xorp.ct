@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.15 2003/05/15 16:00:10 hodson Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.16 2004/06/10 22:40:28 hodson Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -127,7 +127,7 @@ public:
      * This is used when initializing from a string.
      */
     void add_as(const AsNum& n)				{
-	debug_msg("Number of As entries %u\n", (uint32_t)_entries);
+	debug_msg("Number of As entries %u\n", XORP_UINT_CAST(_entries));
 	_aslist.push_back(n);
 	_entries++;
     }
@@ -138,7 +138,7 @@ public:
      * This is used e.g. when a node is adding its AsNum to the sequence.
      */
     void prepend_as(const AsNum& n)			{
-	debug_msg("Number of As entries %u\n", (uint32_t)_entries);
+	debug_msg("Number of As entries %u\n", XORP_UINT_CAST(_entries));
 	_aslist.push_front(n);
 	_entries++;
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.23 2004/06/10 22:40:29 hodson Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.24 2004/11/27 23:35:32 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -58,7 +58,8 @@ PeerDumpState<A>::str() const
 {
     return c_format("peer: %p routes_dumped: %s last_net: %s, genid: %d\n",
 		    _peer, _routes_dumped ? "true" : "false",
-		    _last_net_before_down.str().c_str(), _genid);
+		    _last_net_before_down.str().c_str(),
+		    XORP_INT_CAST(_genid));
 
 }
 
@@ -71,7 +72,8 @@ template <class A>
 void
 PeerDumpState<A>::set_delete_complete(uint32_t genid)
 {
-    debug_msg("set_delete_complete: Peer: %p genid: %d\n", _peer, genid);
+    debug_msg("set_delete_complete: Peer: %p genid: %d\n", _peer,
+	      XORP_INT_CAST(genid));
     typename set <uint32_t>::iterator i;
     i = _deleting_genids.find(genid);
     if (i != _deleting_genids.end()) {
@@ -144,7 +146,8 @@ template <class A>
 DumpIterator<A>::~DumpIterator()
 {
     if (_route_iterator.cur() != NULL)
-	debug_msg("refcnt: %d\n", _route_iterator.cur()->references());
+	debug_msg("refcnt: %d\n",
+		  XORP_INT_CAST(_route_iterator.cur()->references()));
     else 
 	debug_msg("iterator not valid\n");
     //delete the payloads of the map
@@ -174,7 +177,8 @@ DumpIterator<A>::route_dump(const InternalMessage<A> &rtmsg)
     state_i = _peers.find(_current_peer->peer_handler());
     XLOG_ASSERT(state_i != _peers.end());
     debug_msg("route_dump: rtmsg.genid():%d state_i->second->genid():%d\n",
-	   rtmsg.genid(), state_i->second->genid());
+	      XORP_INT_CAST(rtmsg.genid()),
+	      XORP_INT_CAST(state_i->second->genid()));
     switch (state_i->second->status()) {
     case STILL_TO_DUMP:
 	debug_msg("STILL_TO_DUMP\n");
@@ -268,7 +272,7 @@ DumpIterator<A>::peering_is_down(const PeerHandler *peer, uint32_t genid)
 {
     XLOG_ASSERT(peer != _peer);
 
-    debug_msg("peering_is_down %p genid %d\n", peer, genid);
+    debug_msg("peering_is_down %p genid %d\n", peer, XORP_INT_CAST(genid));
     /*
      * first we must locate the appropriate state for this peer
      */
@@ -488,7 +492,8 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
 
 
     debug_msg("peer:%p, pa:%s , gi:%d, op:%d\n",
-	      origin_peer, net.str().c_str(), genid, op);
+	      origin_peer, net.str().c_str(), XORP_INT_CAST(genid),
+	      XORP_INT_CAST(op));
     switch (op) {
     case RTQUEUE_OP_DELETE:
 	debug_msg("DELETE\n");
@@ -609,8 +614,6 @@ DumpIterator<A>::route_change_is_valid(const PeerHandler* origin_peer,
     }
     XLOG_UNREACHABLE();
 }
-
-
 
 template class DumpIterator<IPv4>;
 template class DumpIterator<IPv6>;

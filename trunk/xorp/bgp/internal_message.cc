@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/internal_message.cc,v 1.5 2004/05/19 10:25:21 mjh Exp $"
+#ident "$XORP: xorp/bgp/internal_message.cc,v 1.6 2004/06/10 22:40:30 hodson Exp $"
 
 #include <string>
 #include "bgp_module.h"
@@ -53,7 +53,7 @@ string
 InternalMessage<A>::str() const
 {
     string s;
-    s += c_format("GenID is %d\n", _genid);
+    s += c_format("GenID is %d\n", XORP_INT_CAST(_genid));
     if (_changed)
 	s += "CHANGED flag is set\n";
     if (_push)
