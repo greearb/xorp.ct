@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.31 2004/02/22 04:00:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.32 2004/02/24 23:52:31 pavlin Exp $"
 
 
 //
@@ -622,8 +622,15 @@ PimNode::add_vif_addr(const string& vif_name,
     if ((node_vif_addr != NULL) && (*node_vif_addr == vif_addr))
 	return (XORP_OK);		// Already have this address
 
-    // XXX: stop the vif if some of its addresses will change
-    pim_vif->stop();
+    //
+    // Spec:
+    // "Before an interface goes down or changes primary IP address, a Hello
+    // message with a zero HoldTime should be sent immediately (with the old IP
+    // address if the IP address changed)."
+    //
+    // However, by adding or updating an existing address we cannot
+    // change a valid primary address, hence we do nothing here.
+    //
 
     if (node_vif_addr != NULL) {
 	// Update the address
@@ -639,6 +646,15 @@ PimNode::add_vif_addr(const string& vif_name,
 		  pim_vif->name().c_str(), vif_addr.str().c_str());
     }
     
+    //
+    // Spec:
+    // "If an interface changes one of its secondary IP addresses,
+    // a Hello message with an updated Address_List option and a
+    // non-zero HoldTime should be sent immediately."
+    //
+    if (pim_vif->is_up())
+	pim_vif->pim_hello_send();
+
     // Schedule the dependency-tracking tasks
     pim_mrt().add_task_my_ip_address(pim_vif->vif_index());
     pim_mrt().add_task_my_ip_subnet_address(pim_vif->vif_index());
@@ -668,10 +684,20 @@ PimNode::delete_vif_addr(const string& vif_name,
 	return (XORP_ERROR);
     }
 
-    // XXX: stop the vif if some of its addresses will change
-    pim_vif->stop();
-
     VifAddr vif_addr = *tmp_vif_addr;	// Get a copy
+
+    //
+    // Spec:
+    // "Before an interface goes down or changes primary IP address, a Hello
+    // message with a zero HoldTime should be sent immediately (with the old IP
+    // address if the IP address changed)."
+    //
+    if (pim_vif->is_up()) {
+	if (pim_vif->primary_addr() == addr) {
+	    pim_vif->pim_hello_stop();
+	}
+    }
+
     if (pim_vif->delete_address(addr) != XORP_OK) {
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
@@ -679,6 +705,28 @@ PimNode::delete_vif_addr(const string& vif_name,
     
     XLOG_INFO("Deleted address on vif %s: %s",
 	      pim_vif->name().c_str(), vif_addr.str().c_str());
+
+    //
+    // Update the primary and domain-wide addresses.
+    // If the vif has no more primary or a domain-wide address, then stop it.
+    //
+    pim_vif->update_primary_and_domain_wide_address();
+    if (pim_vif->is_up()) {
+	// Check the primary and domain-wide addresses
+	if ((pim_vif->primary_addr() == IPvX::ZERO(family()))
+	    || (pim_vif->domain_wide_addr() == IPvX::ZERO(family()))) {
+	    pim_vif->stop();
+	}
+    }
+
+    //
+    // Spec:
+    // "If an interface changes one of its secondary IP addresses,
+    // a Hello message with an updated Address_List option and a
+    // non-zero HoldTime should be sent immediately."
+    //
+    if (pim_vif->is_up())
+	pim_vif->pim_hello_send();
     
     // Schedule the dependency-tracking tasks
     pim_mrt().add_task_my_ip_address(pim_vif->vif_index());
