@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.9 2003/04/01 00:56:24 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.10 2003/04/02 17:10:41 hodson Exp $"
 
 
 //
@@ -1222,17 +1222,12 @@ const TimeVal&
 PimVif::upstream_join_timer_t_suppressed() const
 {
     static TimeVal tv;
-    double random_factor
-	= (PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MAX
-	   - PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MIN) / 2;
-    double base_ratio
-	= (PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MAX
-	   + PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MIN) / 2;
     
     if (is_lan_suppression_state_enabled()) {
 	tv.set(_join_prune_period.get(), 0);
-	tv = tv * base_ratio;
-	tv.randomize_uniform(random_factor);
+	tv = random_uniform(
+	    tv * PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MIN,
+	    tv * PIM_JOIN_PRUNE_SUPPRESSION_TIMEOUT_RANDOM_FACTOR_MAX);
     } else {
 	tv = TimeVal::ZERO();
     }
@@ -1254,8 +1249,7 @@ PimVif::upstream_join_timer_t_override() const
     tv = vif_override_interval();
     
     // Randomize
-    tv = tv / 2;
-    tv.randomize_uniform(1.0);
+    tv = random_uniform(tv);
     
     return (tv);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.11 2003/04/02 17:10:39 hodson Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.12 2003/04/02 18:14:16 hodson Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -121,24 +121,6 @@ public:
      * @return the double-float value of this TimeVal time.
      */
     double get_double() const { return (_sec * 1.0 + _usec * 1.0e-6); }
-    
-    /**
-     * Apply uniform randomization on the time value of this object.
-     * [deprecated]
-     * 
-     * The randomized time value is chosen randomly uniform in the interval
-     * ( curr_value - factor*curr_value, curr_value + factor*curr_value ).
-     * For example, if the current time value is 10 seconds,
-     * and @param factor is 0.2, the randomized time value is uniformly
-     * chosen in the interval (8, 12) seconds (10 +- 0.2*10).
-     * If the value of @param factor is larger than 1.0, the minimum
-     * time value after the randomization is zero (sec, usec), even though
-     * the beginning of the interval to randomize within has a negative value.
-     * 
-     * @param factor the randomization factor to apply.
-     * @return the randomized time value.
-     */
-    inline const TimeVal& randomize_uniform(const double& factor);
     
     /**
      * Equality Operator
@@ -265,38 +247,6 @@ TimeVal::copy_out(timeval& timeval) const
     timeval.tv_sec = _sec;
     timeval.tv_usec = _usec;
     return (sizeof(_sec) + sizeof(_usec));
-}
-
-inline const TimeVal&
-TimeVal::randomize_uniform(const double& factor)
-{
-    TimeVal delta(factor * get_double());
-    int32_t random_sec = delta.sec();
-    int32_t random_usec = delta.usec();
-    
-    // Randomize the offset
-    if (random_sec != 0)
-	random_sec = random() % random_sec;
-    if (random_usec != 0)
-	random_usec = random() % random_usec;
-    TimeVal random_delta(random_sec, random_usec);
-    
-    // Either add or substract the randomized offset
-    if (random() % 2) {
-	// Add
-	*this += random_delta;
-    } else {
-	// Substract
-	if (random_delta < *this) {
-	    *this -= random_delta;
-	} else {
-	    // The offset is too large. Set the result to zero.
-	    _sec = 0;
-	    _usec = 0;
-	}
-    }
-    
-    return (*this);
 }
 
 inline bool

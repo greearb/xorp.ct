@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.6 2003/03/30 03:50:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.7 2003/04/01 00:56:24 pavlin Exp $"
 
 
 //
@@ -249,8 +249,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	// interval [0, hello_triggered_delay)
 	// XXX: this message should not affect the periodic `hello_timer'.
 	TimeVal tv(hello_triggered_delay().get(), 0);
-	tv = tv / 2;
-	tv.randomize_uniform(1.0);
+	tv = random_uniform(tv);
 	_hello_once_timer =
 	    pim_node().event_loop().new_oneoff_after(
 		tv,
@@ -473,8 +472,7 @@ PimVif::hello_timer_start_random(uint32_t sec, uint32_t usec)
 {
     TimeVal tv(sec, usec);
     
-    tv = tv / 2;
-    tv.randomize_uniform(1.0);
+    tv = random_uniform(tv);
     
     _hello_timer =
 	pim_node().event_loop().new_oneoff_after(
