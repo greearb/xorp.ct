@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libcomm/test_comm.c,v 1.5 2004/06/10 22:41:02 hodson Exp $"
+#ident "$XORP: xorp/libcomm/test_comm.c,v 1.6 2004/09/02 02:34:40 pavlin Exp $"
 
 
 /*
@@ -25,6 +25,12 @@
 #include "comm_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include "libcomm/comm_api.h"
 
 
