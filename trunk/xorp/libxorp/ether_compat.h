@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/ether_compat.h,v 1.4 2003/04/15 18:55:37 pavlin Exp $
+ * $XORP: xorp/libxorp/ether_compat.h,v 1.5 2003/10/02 15:12:59 pavlin Exp $
  */
 
 /* Ethernet manipulation compatibility functions */
@@ -36,6 +36,7 @@
 #include <sys/types.h>
 #include <sys/ethernet.h>
 #elif defined(HAVE_NETINET_IF_ETHER_H)
+#include <net/if.h>
 #include <netinet/if_ether.h>
 #endif
 
