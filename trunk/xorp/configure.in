@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/configure.in,v 1.46 2003/06/09 23:42:49 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.47 2003/06/10 18:04:52 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -418,7 +418,7 @@ else
     for p in ${test_ports}; do
 	${snmpd} -f -r -l conftestsnmp.log -c conftestsnmp.conf udp:localhost:$p&
 	pid=$!
-	sleep 1
+	sleep 3
 	if ( ps | grep ${pid} > /dev/null ); then
 	    kill ${pid} > /dev/null
 	    snmpd_valid=yes

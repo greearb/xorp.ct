@@ -4443,7 +4443,7 @@ echo $ECHO_N "checking if snmpd can be started... $ECHO_C" >&6
     for p in ${test_ports}; do
 	${snmpd} -f -r -l conftestsnmp.log -c conftestsnmp.conf udp:localhost:$p&
 	pid=$!
-	sleep 1
+	sleep 3
 	if ( ps | grep ${pid} > /dev/null ); then
 	    kill ${pid} > /dev/null
 	    snmpd_valid=yes
