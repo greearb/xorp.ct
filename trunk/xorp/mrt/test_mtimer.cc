@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/test_mtimer.cc,v 1.2 2003/03/10 23:20:45 hodson Exp $"
+#ident "$XORP: xorp/mrt/test_mtimer.cc,v 1.3 2003/03/27 01:51:59 hodson Exp $"
 
 
 //
@@ -54,7 +54,7 @@ static	bool wakeup_hook();
 
 static Timer my_mtimer;
 static void
-my_mtimer_timeout(void*)
+my_mtimer_timeout(void *)
 {
     fprintf(stdout, "%s My mtimer expired!\n", xlog_localtime2string());
     fflush(stdout);
