@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.2 2002/12/13 20:52:39 mjh Exp $"
 
 // #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -824,7 +824,7 @@ NextHopRibRequest<A>::reregister_nexthop(A nexthop, uint32_t ref_cnt,
 	** changed. If the metrics have changed we need to make an
 	** upcall to the BGP decision process.
 	*/
-	if (resolvable != new_resolvable && metric != new_metric)
+	if (resolvable != new_resolvable || metric != new_metric)
 	    _next_hop_resolver.next_hop_changed(nexthop);
 
 	return;
