@@ -31,6 +31,8 @@ XrlIO::send(const string& interface, const string& vif,
 {
     debug_msg("send(%s,%s,%p,%d\n", interface.c_str(), vif.c_str(), data, len);
 
+    XLOG_UNFINISHED();
+
     return true;
 }
 
@@ -42,15 +44,39 @@ XrlIO::register_receive(ReceiveCallback cb)
     return true;
 }
 
+bool 
+XrlIO::enable_interface_vif(const string& interface, const string& vif)
+{
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    XLOG_UNFINISHED();
+
+    return true;
+}
+
+bool
+XrlIO::disable_interface_vif(const string& interface, const string& vif)
+{
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    XLOG_UNFINISHED();
+
+    return true;
+}
+
 bool
 XrlIO::add_route()
 {
+    XLOG_UNFINISHED();
+
     return true;
 }
 
 bool
 XrlIO::delete_route()
 {
+    XLOG_UNFINISHED();
+
     return true;
 }
 

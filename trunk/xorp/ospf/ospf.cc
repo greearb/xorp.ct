@@ -84,7 +84,7 @@ void
 Ospf<A>::receive(const string& interface, const string& vif,
 		 uint8_t* data, uint32_t len)
 {
-    debug_msg("Interface %s Vif %s data %p len %u",
+    debug_msg("Interface %s Vif %s data %p len %u\n",
 	      interface.c_str(), vif.c_str(), data, len);
 
     Packet *packet;
@@ -101,6 +101,24 @@ Ospf<A>::receive(const string& interface, const string& vif,
     _peer_manager.incoming_packet(interface, vif, packet);
 
     delete packet;
+}
+
+template <typename A>
+bool
+Ospf<A>::enable_interface_vif(const string& interface, const string& vif)
+{
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    return _io->enable_interface_vif(interface, vif);
+}
+
+template <typename A>
+bool
+Ospf<A>::disable_interface_vif(const string& interface, const string& vif)
+{
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    return _io->disable_interface_vif(interface, vif);
 }
 
 template <typename A>

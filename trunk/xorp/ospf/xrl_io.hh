@@ -44,6 +44,16 @@ class XrlIO : public IO {
     bool register_receive(ReceiveCallback cb);
 
     /**
+     * Enable the interface/vif to receive frames.
+     */
+    bool enable_interface_vif(const string& interface, const string& vif);
+
+    /**
+     * Disable this interface/vif from receiving frames.
+     */
+    bool disable_interface_vif(const string& interface, const string& vif);
+
+    /**
      * Add route to RIB.
      */
     bool add_route();

@@ -42,6 +42,18 @@ class IO {
     virtual bool register_receive(ReceiveCallback) = 0;
 
     /**
+     * Enable the interface/vif to receive frames.
+     */
+    virtual bool enable_interface_vif(const string& interface,
+				      const string& vif) = 0;
+
+    /**
+     * Disable this interface/vif from receiving frames.
+     */
+    virtual bool disable_interface_vif(const string& interface,
+				       const string& vif) = 0;
+    
+    /**
      * Add route
      */
     virtual bool add_route() = 0;

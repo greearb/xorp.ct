@@ -130,6 +130,12 @@ class Ospf {
     bool running() { return _running; }
 
     /**
+     * Used to send traffic on the IO interface.
+     */
+    bool send(const string& interface, const string& vif,
+	      uint8_t* data, uint32_t len);
+
+    /**
      * The callback method that is called when data arrives on the IO
      * interface.
      */
@@ -137,10 +143,14 @@ class Ospf {
 		 uint8_t* data, uint32_t len);
 
     /**
-     * Used to send traffic on the IO interface.
+     * Enable the interface/vif to receive frames.
      */
-    bool send(const string& interface, const string& vif,
-	      uint8_t* data, uint32_t len);
+    bool enable_interface_vif(const string& interface, const string& vif);
+
+    /**
+     * Disable this interface/vif from receiving frames.
+     */
+    bool disable_interface_vif(const string& interface, const string& vif);
 
     /**
      * XXX
