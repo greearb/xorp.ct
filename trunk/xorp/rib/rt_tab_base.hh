@@ -25,21 +25,22 @@
 #include "protocol.hh"
 #include "libxorp/trie.hh"
 
-#define IGP 1
-#define EGP 2
+#define IGP 		1
+#define EGP 		2
 
-#define ROUTE_USED 4
-#define ROUTE_UNUSED 8
+#define ROUTE_USED 	4
+#define ROUTE_UNUSED 	8
 
-#define ORIGIN_TABLE 1
-#define MERGED_TABLE 2
-#define EXTINT_TABLE 4
-#define REDIST_TABLE 8
-#define EXPORT_TABLE 16
-#define REGISTER_TABLE 32
-#define DELETION_TABLE 64
-#define DEBUG_TABLE 128
-#define MAX_TABLE_TYPE 128
+#define ORIGIN_TABLE 	1
+#define MERGED_TABLE 	2
+#define EXTINT_TABLE 	4
+#define REDIST_TABLE 	8
+#define EXPORT_TABLE 	16
+#define REGISTER_TABLE 	32
+#define DELETION_TABLE 	64
+#define EXPECT_TABLE 	128
+#define LOG_TABLE 	256
+#define MAX_TABLE_TYPE 	256
 
 /**
  * @short Stores a Route and bounds on the validity of the route.
@@ -62,7 +63,7 @@
  *   bottom: 1.0.0.0
  *
  * Ie, the route for 1.0.0.10 is 1.0.0.0/16, and this answer is also
- * valid for addresses in the range 1.0.0.0 to 1.0.0.255 inclusive.  
+ * valid for addresses in the range 1.0.0.0 to 1.0.0.255 inclusive.
  */
 template<class A>
 class RouteRange {
@@ -145,7 +146,7 @@ private:
  *
  * RouteTables take route lookup requests from their _next_table, and
  * pass on those requests to their parents.  If more than one parent
- * has a response, only the best is returned as the answer.  
+ * has a response, only the best is returned as the answer.
  */
 template<class A>
 class RouteTable {
@@ -154,9 +155,11 @@ public:
     virtual ~RouteTable() {}
 
     virtual int add_route(const IPRouteEntry<A>& route,
-			  RouteTable *caller) = 0;
-    virtual int delete_route(const IPRouteEntry<A> *,
-			     RouteTable *caller) = 0;
+			  RouteTable*		 caller) = 0;
+
+    virtual int delete_route(const IPRouteEntry<A>* route,
+			     RouteTable*	    caller) = 0;
+
     virtual const
     IPRouteEntry<A> *lookup_route(const IPNet<A>& net) const = 0;
 

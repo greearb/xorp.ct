@@ -87,8 +87,8 @@ test_register_xrls_LDADD   += $(top_builddir)/xrl/targets/libribbase.a
 test_register_xrls_LDADD   += $(top_builddir)/xrl/targets/libribclientbase.a
 
 test_deletion_SOURCES	 = test_deletion.cc
-test_deletion_SOURCES	+= rt_tab_debug.hh
-test_deletion_SOURCES	+= rt_tab_debug.cc
+test_deletion_SOURCES	+= rt_tab_expect.hh
+test_deletion_SOURCES	+= rt_tab_expect.cc
 test_deletion_LDADD	= $(LDADD)
 
 test_rib_client_SOURCES  = test_rib_client.cc
@@ -104,6 +104,7 @@ librib_a_SOURCES += route.hh
 librib_a_SOURCES += rt_tab_base.hh
 librib_a_SOURCES += rt_tab_export.hh
 librib_a_SOURCES += rt_tab_extint.hh
+librib_a_SOURCES += rt_tab_log.hh
 librib_a_SOURCES += rt_tab_merged.hh
 librib_a_SOURCES += rt_tab_origin.hh
 librib_a_SOURCES += rt_tab_deletion.hh
@@ -119,6 +120,7 @@ librib_a_SOURCES += route.cc
 librib_a_SOURCES += rt_tab_base.cc
 librib_a_SOURCES += rt_tab_export.cc
 librib_a_SOURCES += rt_tab_extint.cc
+librib_a_SOURCES += rt_tab_log.cc
 librib_a_SOURCES += rt_tab_merged.cc
 librib_a_SOURCES += rt_tab_origin.cc
 librib_a_SOURCES += rt_tab_deletion.cc

@@ -123,13 +123,13 @@ test_register_SOURCES = test_register.cc dummy_register_server.hh dummy_register
 test_register_xrls_SOURCES = parser_direct_cmds.hh parser_xrl_cmds.hh test_register_xrls.cc rib_manager.hh rib_manager.cc xrl_target.hh xrl_target.cc
 test_register_xrls_LDADD = $(LDADD) $(top_builddir)/xrl/interfaces/libribxif.a $(top_builddir)/xrl/targets/libribbase.a $(top_builddir)/xrl/targets/libribclientbase.a
 
-test_deletion_SOURCES = test_deletion.cc rt_tab_debug.hh rt_tab_debug.cc
+test_deletion_SOURCES = test_deletion.cc rt_tab_expect.hh rt_tab_expect.cc
 test_deletion_LDADD = $(LDADD)
 
 test_rib_client_SOURCES = test_rib_client.cc
 
 # -- Library Sources
-librib_a_SOURCES = rib_module.h version.h protocol.hh register_server.hh rib.hh rib_client.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_deletion.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh protocol.cc register_server.cc rib.cc rib_client.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_deletion.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
+librib_a_SOURCES = rib_module.h version.h protocol.hh register_server.hh rib.hh rib_client.hh route.hh rt_tab_base.hh rt_tab_export.hh rt_tab_extint.hh rt_tab_log.hh rt_tab_merged.hh rt_tab_origin.hh rt_tab_deletion.hh rt_tab_redist.hh rt_tab_register.hh vifmanager.hh protocol.cc register_server.cc rib.cc rib_client.cc route.cc rt_tab_base.cc rt_tab_export.cc rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc rt_tab_deletion.cc rt_tab_redist.cc rt_tab_register.cc vifmanager.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = commands test_rib_direct.sh.in test_rib_xrls.sh.in xrl_shell_funcs.sh
@@ -148,10 +148,10 @@ librib_a_LIBADD =
 am_librib_a_OBJECTS = protocol.$(OBJEXT) register_server.$(OBJEXT) \
 	rib.$(OBJEXT) rib_client.$(OBJEXT) route.$(OBJEXT) \
 	rt_tab_base.$(OBJEXT) rt_tab_export.$(OBJEXT) \
-	rt_tab_extint.$(OBJEXT) rt_tab_merged.$(OBJEXT) \
-	rt_tab_origin.$(OBJEXT) rt_tab_deletion.$(OBJEXT) \
-	rt_tab_redist.$(OBJEXT) rt_tab_register.$(OBJEXT) \
-	vifmanager.$(OBJEXT)
+	rt_tab_extint.$(OBJEXT) rt_tab_log.$(OBJEXT) \
+	rt_tab_merged.$(OBJEXT) rt_tab_origin.$(OBJEXT) \
+	rt_tab_deletion.$(OBJEXT) rt_tab_redist.$(OBJEXT) \
+	rt_tab_register.$(OBJEXT) vifmanager.$(OBJEXT)
 librib_a_OBJECTS = $(am_librib_a_OBJECTS)
 bin_PROGRAMS = xorp_rib$(EXEEXT)
 noinst_PROGRAMS = main_routemap$(EXEEXT) test_rib_client$(EXEEXT) \
@@ -175,7 +175,7 @@ main_routemap_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.a
 main_routemap_LDFLAGS =
 am_test_deletion_OBJECTS = test_deletion.$(OBJEXT) \
-	rt_tab_debug.$(OBJEXT)
+	rt_tab_expect.$(OBJEXT)
 test_deletion_OBJECTS = $(am_test_deletion_OBJECTS)
 test_deletion_DEPENDENCIES = librib.a \
 	$(top_builddir)/xrl/interfaces/libftixif.a \
@@ -295,10 +295,11 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/register_server.Po $(DEPDIR)/rib.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rib_client.Po $(DEPDIR)/rib_manager.Po \
 @AMDEP_TRUE@	$(DEPDIR)/route.Po $(DEPDIR)/routemap.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_base.Po $(DEPDIR)/rt_tab_debug.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_base.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_deletion.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_expect.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_export.Po \
-@AMDEP_TRUE@	$(DEPDIR)/rt_tab_extint.Po \
+@AMDEP_TRUE@	$(DEPDIR)/rt_tab_extint.Po $(DEPDIR)/rt_tab_log.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_merged.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_origin.Po \
 @AMDEP_TRUE@	$(DEPDIR)/rt_tab_redist.Po \
@@ -419,10 +420,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/route.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/routemap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_base.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_deletion.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_expect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_export.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_extint.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_log.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_merged.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_origin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/rt_tab_redist.Po@am__quote@

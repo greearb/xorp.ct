@@ -16,20 +16,34 @@
 
 #include "rib_module.h"
 #include "libxorp/xlog.h"
-#include "rt_tab_debug.hh"
 
+#include "rt_tab_expect.hh"
 
 /*--------------------------------------------------------------------*/
+
+template <typename A>
+class ExpectedRouteChange
+{
+public:
+    ExpectedRouteChange(bool add, const IPRouteEntry<A>& route);
+    bool matches_add(const IPRouteEntry<A>& route) const;
+    bool matches_delete(const IPRouteEntry<A>* route) const;
+    string str() const;
+
+private:
+    bool _add; 			// true = add, false = delete.
+    IPRouteEntry<A> _route;
+};
 
 template<class A>
 ExpectedRouteChange<A>::ExpectedRouteChange<A>(bool add,
 					       const IPRouteEntry<A>& route)
-    : _add(add), _route(route) 
+    : _add(add), _route(route)
 {
 }
 
 template<class A>
-bool 
+bool
 ExpectedRouteChange<A>::matches_add(const IPRouteEntry<A>& route) const
 {
     if (!_add)
@@ -48,7 +62,7 @@ ExpectedRouteChange<A>::matches_add(const IPRouteEntry<A>& route) const
 }
 
 template<class A>
-bool 
+bool
 ExpectedRouteChange<A>::matches_delete(const IPRouteEntry<A>* route) const
 {
     if (_add)
@@ -79,11 +93,12 @@ ExpectedRouteChange<A>::str() const
     return s;
 }
 
+
 /*--------------------------------------------------------------------*/
 
 template<class A>
-DebugTable<A>::DebugTable<A>(const string&   tablename,
-			     RouteTable<A>*  parent) 
+ExpectTable<A>::ExpectTable<A>(const string&   tablename,
+			       RouteTable<A>*  parent)
     : RouteTable<A>(tablename)
 {
     _parent = parent;
@@ -96,116 +111,109 @@ DebugTable<A>::DebugTable<A>(const string&   tablename,
 }
 
 template<class A>
-DebugTable<A>::~DebugTable<A>() 
+ExpectTable<A>::~ExpectTable<A>()
 {
-    if (!_expected.empty()) {
-	fprintf(stderr, "Destructor called on DebugTable while we're still expecting route changes\n");
-	abort();
-    }
+    XLOG_ASSERT(_expected.empty());
 }
 
 template<class A>
 void
-DebugTable<A>::expect_add(const IPRouteEntry<A>& route)
+ExpectTable<A>::expect_add(const IPRouteEntry<A>& route)
 {
-    ExpectedRouteChange<A> *change = new ExpectedRouteChange<A>(true, route);
-    _expected.push_back(change);
+    _expected.push_back(ExpectedRouteChange<A>(true, route));
 }
 
 template<class A>
 void
-DebugTable<A>::expect_delete(const IPRouteEntry<A>& route)
+ExpectTable<A>::expect_delete(const IPRouteEntry<A>& route)
 {
-    ExpectedRouteChange<A> *change = new ExpectedRouteChange<A>(false, route);
-    _expected.push_back(change);
+    _expected.push_back(ExpectedRouteChange<A>(false, route));
 }
-
-
 
 template<class A>
 int
-DebugTable<A>::add_route(const IPRouteEntry<A>& route, 
-			 RouteTable<A> *caller) 
+ExpectTable<A>::add_route(const IPRouteEntry<A>& 	route,
+			  RouteTable<A>* 		caller)
 {
     XLOG_ASSERT(caller == _parent);
-    printf("DT[%s]: Adding route %s\n", _tablename.c_str(), 
+    printf("DT[%s]: Adding route %s\n", _tablename.c_str(),
 	   route.str().c_str());
     if (_expected.empty()) {
-	fprintf(stderr, "DebugTable: unexpected add_route received\n");
+	fprintf(stderr, "ExpectTable: unexpected add_route received\n");
 	abort();
     }
-    if (_expected.front()->matches_add(route)) {
-	delete _expected.front();
+    if (_expected.front().matches_add(route)) {
 	_expected.pop_front();
 	return 0;
     }
-    fprintf(stderr, "DebugTable: add_route received, but not what was expected\n");
-    fprintf(stderr, "Expected: %s\n", _expected.front()->str().c_str());
+    fprintf(stderr, "ExpectTable: add_route received, but not what was expected\n");
+    fprintf(stderr, "Expected: %s\n", _expected.front().str().c_str());
     fprintf(stderr, "Received: Add of %s\n", route.str().c_str());
     abort();
+    return -1;
 }
 
 template<class A>
 int
-DebugTable<A>::delete_route(const IPRouteEntry<A> *route, 
-			  RouteTable<A> *caller) 
+ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route,
+			  RouteTable<A>* 		caller)
 {
     XLOG_ASSERT(caller == _parent);
-    printf("DT[%s]: Deleting route %s\n", _tablename.c_str(), 
+    printf("DT[%s]: Deleting route %s\n", _tablename.c_str(),
 	   route->str().c_str());
     if (_expected.empty()) {
-	fprintf(stderr, "DebugTable: unexpected delete_route received\n");
+	fprintf(stderr, "ExpectTable: unexpected delete_route received\n");
 	abort();
     }
-    if (_expected.front()->matches_delete(route)) {
-	delete _expected.front();
+    if (_expected.front().matches_delete(route)) {
 	_expected.pop_front();
 	return 0;
     }
-    fprintf(stderr, "DebugTable: delete_route received, but not what was expected\n");
-    fprintf(stderr, "Expected: %s\n", _expected.front()->str().c_str());
+    fprintf(stderr, "ExpectTable: delete_route received, but not what was expected\n");
+    fprintf(stderr, "Expected: %s\n", _expected.front().str().c_str());
     fprintf(stderr, "Received: Delete of %s\n", route->str().c_str());
     abort();
+    return -1;
 }
 
 template<class A>
 const IPRouteEntry<A> *
-DebugTable<A>::lookup_route(const IPNet<A>& net) const 
+ExpectTable<A>::lookup_route(const IPNet<A>& net) const
 {
     return _parent->lookup_route(net);
 }
 
 template<class A>
 const IPRouteEntry<A> *
-DebugTable<A>::lookup_route(const A& addr) const 
+ExpectTable<A>::lookup_route(const A& addr) const
 {
     return _parent->lookup_route(addr);
 }
 
 template<class A>
 void
-DebugTable<A>::replumb(RouteTable<A> *old_parent, 
-		       RouteTable<A> *new_parent) 
+ExpectTable<A>::replumb(RouteTable<A> *old_parent,
+		       RouteTable<A> *new_parent)
 {
     XLOG_ASSERT(_parent == old_parent);
     _parent = new_parent;
 }
 
 template<class A>
-RouteRange<A>* 
-DebugTable<A>::lookup_route_range(const A& addr) const 
+RouteRange<A>*
+ExpectTable<A>::lookup_route_range(const A& addr) const
 {
     return _parent->lookup_route_range(addr);
 }
 
 template<class A> string
-DebugTable<A>::str() const 
+ExpectTable<A>::str() const
 {
     string s;
-    s = "-------\nDebugTable: " + _tablename + "\n";
+    s = "-------\nExpectTable: " + _tablename + "\n";
     s += "parent = " + _parent -> tablename() + "\n";
     return s;
 }
 
-template class DebugTable<IPv4>;
-template class DebugTable<IPv6>;
+template class ExpectTable<IPv4>;
+template class ExpectTable<IPv6>;
