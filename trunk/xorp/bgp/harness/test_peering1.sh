@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.9 2003/07/17 00:28:32 pavlin Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.10 2003/09/03 00:49:07 atanu Exp $
 #
 
 #
@@ -697,9 +697,31 @@ test22()
     coord peer1 assert established
 }
 
+test23()
+{
+    echo "TEST23 - EBGP Establish an IPV6 peering and send an update packet"
+
+    coord reset
+    coord target $HOST $PORT3
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER3_AS holdtime 0 id 192.150.187.100 ipv6 true
+
+    PACKET_1="packet update
+	origin 1
+	aspath $PEER3_AS
+	nexthop6 20:20:20:20:20:20:20:20
+	nlri6 2000::/3"
+    
+    coord peer1 send $PACKET_1
+
+    coord peer1 assert established
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11
- test12 test13 test14 test15 test16 test17 test18 test19 test20 test21 test22'
+    test12 test13 test14 test15 test16 test17 test18 test19 test20 test21
+    test22 test23'
 
 # Temporary fix to let TCP sockets created by call_xrl pass through TIME_WAIT
 TIME_WAIT=`time_wait_seconds`
