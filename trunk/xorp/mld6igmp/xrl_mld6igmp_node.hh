@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.17 2003/06/01 02:11:18 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.18 2003/07/12 01:05:19 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -595,11 +595,13 @@ protected:
 	const string&	vif_name);
 
     /**
-     *  Enable/disable the MLD6IGMP trace log.
+     *  Enable/disable the MLD6IGMP trace log for all operations.
+     *
+     *  @param enable if true, then enable the trace log, otherwise disable it.
      */
-    XrlCmdError mld6igmp_0_1_enable_log_trace();
-
-    XrlCmdError mld6igmp_0_1_disable_log_trace();
+    XrlCmdError mld6igmp_0_1_log_trace_all(
+	// Input values,
+	const bool&	enable);
 
     /**
      *  Add/delete a client protocol in the MLD/IGMP protocol.

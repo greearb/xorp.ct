@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.20 2003/08/07 00:30:12 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.21 2003/11/19 01:03:38 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 #include "mld6igmp_private.hh"
@@ -751,8 +751,21 @@ XrlMld6igmpNode::common_0_1_get_status(// Output values,
 XrlCmdError
 XrlMld6igmpNode::common_0_1_shutdown()
 {
-    // TODO: XXX: PAVPAVPAV: implement it!!
-    return XrlCmdError::COMMAND_FAILED("Not implemented yet");
+    bool is_error = false;
+    string error_msg;
+
+    if (stop_mld6igmp() != XORP_OK) {
+	if (! is_error)
+	    error_msg = c_format("Failed to stop %s",
+				 Mld6igmpNode::proto_is_igmp() ?
+				 "IGMP" : "MLD");
+	is_error = true;
+    }
+
+    if (is_error)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1278,18 +1291,12 @@ XrlMld6igmpNode::mld6igmp_0_1_reset_vif_proto_version(
 }
 
 XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_enable_log_trace()
+XrlMld6igmpNode::mld6igmp_0_1_log_trace_all(
+    // Input values,
+    const bool&	enable)
 {
-    Mld6igmpNode::set_log_trace(true);
-    
-    return XrlCmdError::OKAY();
-}
+    Mld6igmpNode::set_log_trace(enable);
 
-XrlCmdError
-XrlMld6igmpNode::mld6igmp_0_1_disable_log_trace()
-{
-    Mld6igmpNode::set_log_trace(false);
-    
     return XrlCmdError::OKAY();
 }
 

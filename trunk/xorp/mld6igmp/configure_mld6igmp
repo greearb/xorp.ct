@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.13 2003/10/15 18:54:28 pavlin Exp $
+# $XORP: xorp/mld6igmp/configure_mld6igmp,v 1.14 2003/10/24 22:47:52 pavlin Exp $
 #
 
 #
@@ -82,8 +82,8 @@ fi
 #
 # Comment-out to disable log trace
 #
-MFEA_ENABLE_LOG_TRACE=yes
-MLD6IGMP_ENABLE_LOG_TRACE=yes
+MFEA_LOG_TRACE_ALL_ENABLE=yes
+MLD6IGMP_LOG_TRACE_ALL_ENABLE=yes
 
 #
 # The subnets to enable/disable CLI access
@@ -102,13 +102,17 @@ MFEA_ENABLE_VIFS="${ENABLE_VIFS} register_vif"
 MLD6IGMP_ENABLE_VIFS="${ENABLE_VIFS}"
 
 #
-# Disable log trace
+# Enable/disable log trace
 #
-if [ "${MFEA_ENABLE_LOG_TRACE}" != "yes" ] ; then
-	mfea_disable_log_trace
+if [ "${MFEA_LOG_TRACE_ALL_ENABLE}" = "yes" ] ; then
+	mfea_log_trace_all true
+else
+	mfea_log_trace_all false
 fi
-if [ "${MLD6IGMP_ENABLE_LOG_TRACE}" != "yes" ] ; then
-	mld6igmp_disable_log_trace
+if [ "${MLD6IGMP_LOG_TRACE_ALL_ENABLE}" = "yes" ] ; then
+	mld6igmp_log_trace_all true
+else
+	mld6igmp_log_trace_all false
 fi
 
 #
