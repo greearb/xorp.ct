@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.9 2003/08/26 19:29:39 hodson Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.10 2003/08/27 23:37:56 jcardona Exp $
 #
 
 #
-# Script to generate kdoc documentation for XORP.  
+# Script to generate kdoc documentation for XORP.
 #
 
 #
@@ -50,7 +50,7 @@ dbg_echo()
 # glob_files [<glob_pattern1> [<glob pattern2> ...]]
 #
 # Return glob expanded list of files
-# Takes glob patterns as arguments, eg 
+# Takes glob patterns as arguments, eg
 #  glob_files *.hh *.h
 #
 glob_files()
@@ -71,7 +71,7 @@ glob_files()
 #
 # Generates list of exclude files from <exclude_glob_pattern> and filters
 # them from <file_list>
-#  
+#
 exclude_files()
 {
     if [ $# -eq 1 ] ; then
@@ -132,7 +132,7 @@ kdocify() {
     XREFS=`xref $xref`
     OUTDIR=${KDOC_DEST_DIR}/${KDOC_FORMAT}/${lib}
     mkdir -p $OUTDIR
-    echo "Created output directory $OUTDIR"    
+    echo "Created output directory $OUTDIR"
     echo ${FILES} |							      \
     kdoc --outputdir ${OUTDIR}						      \
 	 ${XREFS}         						      \
@@ -150,7 +150,7 @@ kdocify() {
 
 html_index_start()
 {
-    mkdir html
+    mkdir -p html
 #
 # All the html here is cut and paste from what kdoc generates, it will need
 # updating if we move to style sheets or kdoc changes.
@@ -215,7 +215,7 @@ html_index_add()
 #
 usage()
 {
-    cat >&2 <<EOF 
+    cat >&2 <<EOF
 usage: gen-kdoc.sh [-f <format>]
 
 <format> must be one of "${KDOC_FORMATS}"
@@ -264,7 +264,7 @@ fi
 #
 # The following MUST  be set before calling kdocify:
 #
-# lib		  := directory name as it appears under the top level 
+# lib		  := directory name as it appears under the top level
 #		     of the xorp tree.
 #
 # desc 		  := textual description for the top-level html documentation.
@@ -278,7 +278,7 @@ fi
 #		     tree.
 #
 # excludes	  := files to excluded from from parsing.  Exists since
-#		     it's easier to to wildcard include files, then exclude 
+#		     it's easier to to wildcard include files, then exclude
 #		     a few.
 #
 # xref		  := list of already kdoc'ed directories to cross reference
@@ -289,168 +289,218 @@ fi
 #
 # libxorp
 #
-lib="libxorp"
-desc="XORP core type and utility library"
-html_start_page="index.html"
-files="libxorp/*.h libxorp/*.hh" 
-excludes="libxorp/callback.hh libxorp/old_trie.hh"
-xref="" 
-kdocify
+kdoc_libxorp()
+{
+    lib="libxorp"
+    desc="XORP core type and utility library"
+    html_start_page="index.html"
+    files="libxorp/*.h libxorp/*.hh"
+    excludes="libxorp/callback.hh libxorp/old_trie.hh"
+    xref=""
+    kdocify
+}
 
 #
 # callback.hh in libxorp
 #
-lib="libxorp-callback"
-desc="XORP callback routines"
-html_start_page="index.html"
-files="libxorp/callback.hh" 
-excludes=""
-xref="libxorp"
-kdocify
+kdoc_callback()
+{
+    lib="libxorp-callback"
+    desc="XORP callback routines"
+    html_start_page="index.html"
+    files="libxorp/callback.hh"
+    excludes=""
+    xref="libxorp"
+    kdocify
+}
 
 #
 # libcomm
 #
-lib="libcomm"
-desc="Socket library"
-html_start_page="all-globals.html"
-files="libcomm/*.h libcomm/*.hh"
-excludes=""
-xref="libxorp libxorp-callback"
-kdocify
+kdoc_libcomm()
+{
+    lib="libcomm"
+    desc="Socket library"
+    html_start_page="all-globals.html"
+    files="libcomm/*.h libcomm/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback"
+    kdocify
+}
 
 #
 # libxipc
 #
-lib="libxipc"
-desc="XORP interprocess communication library"
-html_start_page="index.html"
-files="libxipc/*.h libxipc/*.hh"
-excludes=""
-xref="libxorp libxorp-callback libcomm"
-kdocify
+kdoc_libxipc()
+{
+    lib="libxipc"
+    desc="XORP interprocess communication library"
+    html_start_page="index.html"
+    files="libxipc/*.h libxipc/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm"
+    kdocify
+}
 
 #
 # libproto
 #
-lib="libproto"
-desc="Protocol Node library used by XORP multicast processes"
-html_start_page="index.html"
-files="libproto/*.h libproto/*.hh"
-excludes=""
-xref="libxorp libxorp-callback libcomm libxipc"
-kdocify
+kdoc_libproto()
+{
+    lib="libproto"
+    desc="Protocol Node library used by XORP multicast processes"
+    html_start_page="index.html"
+    files="libproto/*.h libproto/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc"
+    kdocify
+}
 
 #
 # mrt
 #
-lib="mrt"
-desc="Multicast Routing Table library"
-html_start_page="index.html"
-files="mrt/*.h mrt/*.hh"
-excludes=""
-xref="libxorp"
-kdocify
+kdoc_mrt()
+{
+    lib="mrt"
+    desc="Multicast Routing Table library"
+    html_start_page="index.html"
+    files="mrt/*.h mrt/*.hh"
+    excludes=""
+    xref="libxorp"
+    kdocify
+}
 
 #
 # cli
 #
-lib="cli"
-desc="Command Line Interface library"
-html_start_page="index.html"
-files="cli/*.h cli/*.hh"
-excludes=""
-xref="libxorp libxorp-callback libcomm libxipc libproto"
-kdocify
+kdoc_cli()
+{
+    lib="cli"
+    desc="Command Line Interface library"
+    html_start_page="index.html"
+    files="cli/*.h cli/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc libproto"
+    kdocify
+}
 
 #
 # fea
 #
-lib="fea"
-desc="Forwarding Engine Abstraction daemon"
-html_start_page="index.html"
-files="fea/*.hh"
-excludes="fea/*click*hh"
-xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli"
-kdocify
+kdoc_fea()
+{
+    lib="fea"
+    desc="Forwarding Engine Abstraction daemon"
+    html_start_page="index.html"
+    files="fea/*.hh"
+    excludes="fea/*click*hh"
+    xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli"
+    kdocify
+}
 
 #
 # libfeaclient
 #
-lib="libfeaclient"
-desc="Forwarind Engine Abstraction Library"
-html_start_page="index.html"
-files="libfeaclient/*.hh"
-xref="libxorp libxorp-callback libcomm libxipc"
-kdocify
+kdoc_libfeaclient()
+{
+    lib="libfeaclient"
+    desc="Forwarind Engine Abstraction Library"
+    html_start_page="index.html"
+    files="libfeaclient/*.hh"
+    xref="libxorp libxorp-callback libcomm libxipc"
+    kdocify
+}
 
 #
 # mld6igmp
 #
-lib="mld6igmp"
-desc="Multicast Listener Discovery daemon"
-html_start_page="index.html"
-files="mld6igmp/*.h mld6igmp/*.hh"
-excludes=""
-xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea"
-kdocify
+kdoc_mld6igmp()
+{
+    lib="mld6igmp"
+    desc="Multicast Listener Discovery daemon"
+    html_start_page="index.html"
+    files="mld6igmp/*.h mld6igmp/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea"
+    kdocify
+}
 
 #
 # pim
 #
-lib="pim"
-desc="Protocol Independent Multicast (PIM) daemon"
-html_start_page="index.html"
-files="pim/*.h pim/*.hh"
-excludes=""
-xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea mld6igmp"
-kdocify
+kdoc_pim()
+{
+    lib="pim"
+    desc="Protocol Independent Multicast (PIM) daemon"
+    html_start_page="index.html"
+    files="pim/*.h pim/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea mld6igmp"
+    kdocify
+}
 
 #
 # bgp
 #
-lib="bgp"
-desc="BGP4 daemon"
-html_start_page="index.html"
-files="bgp/*.hh"
-excludes="bgp/*test*h"
-xref="libxorp libxorp-callback libcomm libxipc"
-kdocify
+kdoc_bgp()
+{
+    lib="bgp"
+    desc="BGP4 daemon"
+    html_start_page="index.html"
+    files="bgp/*.hh"
+    excludes="bgp/*test*h"
+    xref="libxorp libxorp-callback libcomm libxipc"
+    kdocify
+}
 
 #
-# mibs 
+# mibs
 #
-lib="mibs"
-desc="MIB modules for Net-SNMP"
-html_start_page="index.html"
-files="mibs/*.hh"
-excludes=""
-xref="libxorp libxipc"
-kdocify
+kdoc_mibs()
+{
+    lib="mibs"
+    desc="MIB modules for Net-SNMP"
+    html_start_page="index.html"
+    files="mibs/*.hh"
+    excludes=""
+    xref="libxorp libxipc"
+    kdocify
+}
 
 #
 # rib
 #
-lib="rib"
-desc="Routing Information Base daemon"
-html_start_page="index.html"
-files="rib/*.hh"
-excludes="rib/dummy_register_server.hh rib/parser_direct_cmds.hh rib/parser_xrl_cmds.hh rib/parser.hh"
-xref="libxorp libxorp-callback libproto"
-kdocify
+kdoc_rib()
+{
+    lib="rib"
+    desc="Routing Information Base daemon"
+    html_start_page="index.html"
+    files="rib/*.hh"
+    excludes="rib/dummy_register_server.hh rib/parser_direct_cmds.hh rib/parser_xrl_cmds.hh rib/parser.hh"
+    xref="libxorp libxorp-callback libproto"
+    kdocify
+}
 
 #
 # rip
 #
-lib="rip"
-desc="Routing Information Protocol"
-html_start_page="index.html"
-files="rip/*.hh"
-excludes=""
-xref="libxorp libxorp-callback"
-kdocify
+kdoc_rip()
+{
+    lib="rip"
+    desc="Routing Information Protocol"
+    html_start_page="index.html"
+    files="rip/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback"
+    kdocify
+}
 
-
+KDOC_ALL_TGTS="libxorp callback libcomm libxipc libproto mrt cli fea\
+               libfeaclient mld6igmp pim bgp mibs rib rip"
+: ${KDOC_TGTS:=${KDOC_ALL_TGTS}}
+for i in ${KDOC_TGTS} ; do
+    kdoc_$i
+done
 
 #
 # Build html index if appropriate
