@@ -12,11 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.25 2004/03/24 19:34:29 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.26 2004/04/14 19:05:06 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include <sys/time.h>
 

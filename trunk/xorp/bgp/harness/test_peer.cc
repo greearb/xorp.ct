@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.18 2003/09/16 07:05:39 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.19 2003/09/16 18:13:46 pavlin Exp $"
 
 // #define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp/bgp_module.h"
 #include "config.h"

@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.15 2004/02/25 05:03:06 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.16 2004/04/01 19:54:07 mjh Exp $"
 
 // #define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "route_table_ribout.hh"
 #include "peer_handler.hh"
