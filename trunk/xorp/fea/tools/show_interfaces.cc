@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.4 2004/05/26 06:03:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.5 2004/05/28 05:00:34 hodson Exp $"
 
 #include "fea/fea_module.h"
 
@@ -357,6 +357,8 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 		    fprintf(stdout, " --> %s",
 			    a6.endpoint_addr().str().c_str());
 		}
+		if (! a6.enabled())
+		    fprintf(stdout, " <DISABLED>");
 		fprintf(stdout, "\n");
 	    }
 
@@ -379,6 +381,8 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 		    fprintf(stdout, " --> %s",
 			    a4.endpoint_addr().str().c_str());
 		}
+		if (! a4.enabled())
+		    fprintf(stdout, " <DISABLED>");
 		fprintf(stdout, "\n");
 	    }
 
