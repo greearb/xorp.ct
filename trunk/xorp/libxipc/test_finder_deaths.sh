@@ -3,8 +3,6 @@
 finder_host=127.0.0.1
 finder_port=17777
 
-export MALLOC_OPTIONS=AJ
-
 #
 # Start finder
 #
