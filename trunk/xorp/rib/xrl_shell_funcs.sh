@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.2 2003/03/10 20:26:48 mjh Exp $
+# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.3 2003/05/24 23:35:27 mjh Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -30,16 +30,34 @@ add_vif_addr4()
     $CALLXRL "finder://rib/rib/0.1/add_vif_addr4?name:txt=$1&addr:ipv4=$2&subnet:ipv4net=$3"
 }
 
+add_vif_addr6()
+{
+    echo -n "add_vif_addr6" $*
+    $CALLXRL "finder://rib/rib/0.1/add_vif_addr6?name:txt=$1&addr:ipv6=$2&subnet:ipv6net=$3"
+}
+
 add_route4()
 {
     echo -n "add_route4" $*
     $CALLXRL "finder://rib/rib/0.1/add_route4?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv4net=$4&nexthop:ipv4=$5&metric:u32=$6"
 }
 
+add_route6()
+{
+    echo -n "add_route6" $*
+    $CALLXRL "finder://rib/rib/0.1/add_route6?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv6net=$4&nexthop:ipv6=$5&metric:u32=$6"
+}
+
 delete_route4()
 {
     echo -n "delete_route4" $*
     $CALLXRL "finder://rib/rib/0.1/delete_route4?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv4net=$4"
+}
+
+delete_route6()
+{
+    echo -n "delete_route6" $*
+    $CALLXRL "finder://rib/rib/0.1/delete_route6?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv6net=$4"
 }
 
 # We have arguments.
