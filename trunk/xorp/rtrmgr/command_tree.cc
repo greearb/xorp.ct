@@ -12,63 +12,75 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.1.1.1 2002/12/11 23:56:15 hodson Exp $"
+#ident "$XORP: xorp/rtrmgr/command_tree.cc,v 1.2 2003/03/10 23:20:59 hodson Exp $"
 
 #include "rtrmgr_module.h"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "command_tree.hh"
 
 CommandTreeNode::CommandTreeNode(const string& name,
-				 const ConfigTreeNode *ctn,
-				 const TemplateTreeNode *ttn)
-    : _name(name) {
+				 const ConfigTreeNode* ctn,
+				 const TemplateTreeNode* ttn)
+    : _name(name),
+      _config_tree_node(ctn),
+      _template_tree_node(ttn)
+{
     _parent = NULL;
     _has_command = false;
-    _configtreenode = ctn;
-    _templatetreenode = ttn;
 }
 
-CommandTreeNode::~CommandTreeNode() {
-    list<CommandTreeNode*>::iterator i;
-    for (i=_children.begin(); i!=_children.end(); ++i) {
-	delete *i;
+CommandTreeNode::~CommandTreeNode()
+{
+    list<CommandTreeNode*>::iterator iter;
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	delete *iter;
     }
 }
 
-void CommandTreeNode::add_child(CommandTreeNode* child) {
+void
+CommandTreeNode::add_child(CommandTreeNode* child)
+{
     _children.push_back(child);
     child->set_parent(this);
 }
 
-string CommandTreeNode::str() const {
-    if (_parent == NULL) 
+string
+CommandTreeNode::str() const
+{
+    if (_parent == NULL) {
 	return "";
-    else {
+    } else {
 	string s = _parent->str();
 	if (s != "") 
 	    s += " ";
 	s += _name;
-	if (_has_command) s += "[*]";
+	if (_has_command)
+	    s += "[*]";
 	return s;
     }
 }
 
-#ifdef NOTDEF
+#if 0
 const CommandTreeNode* 
-CommandTreeNode::subroot(list <string> path) const {
-    if (path.size()==0) {
+CommandTreeNode::subroot(list<string> path) const
+{
+    if (path.empty()) {
 	return this;
     }
-    list <CommandTreeNode*>::const_iterator i;
-    for (i=_children.begin(); i!= _children.end(); ++i) {
-	if ((*i)->name() == path.front()) {
+    list<CommandTreeNode*>::const_iterator iter;
+    for (iter = _children.begin(); iter !=  _children.end(); ++iter) {
+	if ((*iter)->name() == path.front()) {
 	    path.pop_front();
-	    return (*i)->subroot(path);
+	    return (*iter)->subroot(path);
 	}
     }
-    /* debugging only below this point */
+    // Debugging only below this point
     printf("ERROR doing subroot at node >%s<\n", _name.c_str());
-    for (i=_children.begin(); i!= _children.end(); ++i) {
-	printf("Child: %s\n", (*i)->name().c_str());
+    for (iter =_children.begin(); iter !=  _children.end(); ++iter) {
+	printf("Child: %s\n", (*iter)->name().c_str());
     }
     while (!path.empty()) {
 	printf("Path front is >%s<\n", path.front().c_str());
@@ -76,14 +88,15 @@ CommandTreeNode::subroot(list <string> path) const {
     }
     return NULL;
 }
+#endif // 0
 
-#endif
-
-void CommandTreeNode::print() const {
+void
+CommandTreeNode::print() const
+{
     printf("Node: %s\n", str().c_str());
-    list <CommandTreeNode*>::const_iterator i;
-    for (i=_children.begin(); i!= _children.end(); ++i) {
-	(*i)->print();
+    list<CommandTreeNode*>::const_iterator iter;
+    for (iter = _children.begin(); iter !=  _children.end(); ++iter) {
+	(*iter)->print();
     }
 }
 
@@ -93,17 +106,20 @@ CommandTree::CommandTree()
     _current_node = &_root;
 }
 
-CommandTree::~CommandTree() {
+CommandTree::~CommandTree()
+{
     
 }
 
 void 
-CommandTree::push(const string& str) {
+CommandTree::push(const string& str)
+{
     _temp_path.push_back(str);
 }
 
 void 
-CommandTree::pop() {
+CommandTree::pop()
+{
     if (_temp_path.size() == 0) {
 	_current_node = _current_node->parent();
     } else {
@@ -113,31 +129,31 @@ CommandTree::pop() {
 
 void 
 CommandTree::instantiate(const ConfigTreeNode *ctn, 
-			 const TemplateTreeNode *ttn) {
-    assert(_temp_path.size() > 0);
+			 const TemplateTreeNode *ttn)
+{
+    XLOG_ASSERT(! _temp_path.empty());
 
-    list <string>::const_iterator i;
-    for (i=_temp_path.begin(); i!= _temp_path.end(); ++i) {
-#ifdef NOTDEF
-	printf("Instantiating node >%s<\n", i->c_str());
-#endif
-	CommandTreeNode *commtn = new CommandTreeNode(*i, ctn, ttn);
-	_current_node->add_child(commtn);
-	_current_node = commtn;
+    list<string>::const_iterator iter;
+    for (iter = _temp_path.begin(); iter != _temp_path.end(); ++iter) {
+	debug_msg("Instantiating node >%s<\n", iter->c_str());
+	CommandTreeNode* new_ctn = new CommandTreeNode(*iter, ctn, ttn);
+	_current_node->add_child(new_ctn);
+	_current_node = new_ctn;
     }
     _current_node->set_has_command();
 
-    while (_temp_path.size() > 0)
-	_temp_path.pop_front();
+    _temp_path.clear();
 }
 
 void 
-CommandTree::activate_current() {
+CommandTree::activate_current()
+{
     _current_node->set_has_command();
 }
 
 
 void 
-CommandTree::print() const {
+CommandTree::print() const
+{
     _root.print();
 }

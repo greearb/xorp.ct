@@ -12,59 +12,62 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/command_tree.hh,v 1.2 2003/03/10 23:20:59 hodson Exp $
+// $XORP: xorp/rtrmgr/command_tree.hh,v 1.3 2003/05/10 23:23:03 mjh Exp $
 
 #ifndef __RTRMGR_COMMAND_TREE_HH__
 #define __RTRMGR_COMMAND_TREE_HH__
 
-#include <list>
 #include "libxorp/xorp.h"
-#include "config.h"
+#include <list>
+
 class ConfigTreeNode;
 class TemplateTreeNode;
 
 class CommandTreeNode {
 public:
     CommandTreeNode(const string& name,
-		    const ConfigTreeNode *ctn,
-		    const TemplateTreeNode *ttn);
+		    const ConfigTreeNode* ctn,
+		    const TemplateTreeNode* ttn);
     ~CommandTreeNode();
+
     void add_child(CommandTreeNode* child);
-    void set_parent(CommandTreeNode* parent) {_parent = parent;}
-    CommandTreeNode* parent() const {return _parent;}
-    const list <CommandTreeNode*>& children() const {return _children;}
+    void set_parent(CommandTreeNode* parent) { _parent = parent; }
+    CommandTreeNode* parent() const { return _parent; }
+    const list<CommandTreeNode*>& children() const { return _children; }
     string str() const;
-    const string& name() const {return _name;}
+    const string& name() const { return _name; }
     void print() const;
-    void set_has_command() {_has_command = true;}
-    bool has_command() const {return _has_command;}
-    const ConfigTreeNode *configtreenode() {return _configtreenode;}
-    const TemplateTreeNode *templatetreenode() {return _templatetreenode;}
-    const CommandTreeNode* subroot(list <string> path) const;
+    void set_has_command() { _has_command = true; }
+    bool has_command() const { return _has_command; }
+    const ConfigTreeNode* config_tree_node() { return _config_tree_node; }
+    const TemplateTreeNode* template_tree_node() { return _template_tree_node;}
+    const CommandTreeNode* subroot(list<string> path) const;
+
 private:
-    string _name;
-    bool _has_command;
-    CommandTreeNode* _parent;
-    const ConfigTreeNode* _configtreenode;
-    const TemplateTreeNode *_templatetreenode;
-    list <CommandTreeNode*> _children;
+    string			_name;
+    bool			_has_command;
+    CommandTreeNode*		_parent;
+    const ConfigTreeNode*	_config_tree_node;
+    const TemplateTreeNode*	_template_tree_node;
+    list<CommandTreeNode*>	_children;
 };
 
 class CommandTree {
 public:
     CommandTree();
     ~CommandTree();
+
     void push(const string& str);
     void pop();
-    void instantiate(const ConfigTreeNode *ctn,
-		     const TemplateTreeNode *ttn);
+    void instantiate(const ConfigTreeNode *ctn, const TemplateTreeNode *ttn);
     void activate_current();
     void print() const;
-    const CommandTreeNode& root() const {return _root;}
+    const CommandTreeNode& root() const { return _root; }
+
 private:
-    list <string> _temp_path;
-    CommandTreeNode _root;
-    CommandTreeNode *_current_node;
+    list<string>	_temp_path;
+    CommandTreeNode	_root;
+    CommandTreeNode*	_current_node;
 };
 
 #endif // __RTRMGR_COMMAND_TREE_HH__
