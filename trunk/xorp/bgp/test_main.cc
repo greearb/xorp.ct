@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.8 2004/03/03 02:24:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.9 2004/03/04 03:21:57 atanu Exp $"
 
 #include <stdio.h>
 #include "bgp_module.h"
@@ -31,6 +31,8 @@ bool test_fanout(TestInfo& info);
 bool test_dump_create(TestInfo& info);
 bool test_dump(TestInfo& info);
 bool test_ribout(TestInfo& info);
+template <class A> bool test_subnet_route1(TestInfo& info, IPNet<A> net);
+template <class A> bool test_subnet_route2(TestInfo& info, IPNet<A> net);
 
 bool
 validate_reference_file(string reference_file, string output_file,
@@ -113,6 +115,9 @@ main(int argc, char** argv)
 	IPv6 nh6("::128.16.64.1");
 	IPv6 rnh6("::1.1.1.1");
 	IPv6Net nlri6("::22.0.0.0/8");
+	
+	IPv4Net route4("128.16.0.0/24");
+	IPv6Net route6("1::0/24");
 	const int iter = 1000;
 
 	struct test {
@@ -130,6 +135,10 @@ main(int argc, char** argv)
 	    {"DumpCreate", callback(test_dump_create)},
 	    {"Dump", callback(test_dump)},
 	    {"Ribout", callback(test_ribout)},
+	    {"SubnetRoute1", callback(test_subnet_route1<IPv4>, route4)},
+	    {"SubnetRoute1.ipv6", callback(test_subnet_route1<IPv6>, route6)},
+	    {"SubnetRoute2", callback(test_subnet_route2<IPv4>, route4)},
+	    {"SubnetRoute2.ipv6", callback(test_subnet_route2<IPv6>, route6)},
 
 	    {"nhr.test1", callback(nhr_test1<IPv4>, nh4, rnh4, nlri4)},
 	    {"nhr.test1.ipv6", callback(nhr_test1<IPv6>, nh6, rnh6, nlri6)},

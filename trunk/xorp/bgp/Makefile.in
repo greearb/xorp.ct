@@ -125,7 +125,7 @@ aspath_test_SOURCES = aspath_test.cc
 test_packet_coding_SOURCES = test_packet_coding.cc
 update_test_SOURCES = update_test.cc
 
-isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc test_filter.cc test_cache.cc test_nhlookup.cc test_decision.cc test_fanout.cc test_dump.cc test_ribout.cc test_next_hop_resolver.cc route_table_debug.hh route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc dummy_next_hop_resolver.hh peer_handler_debug.hh peer_handler_debug.cc
+isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc test_filter.cc test_cache.cc test_nhlookup.cc test_decision.cc test_fanout.cc test_dump.cc test_ribout.cc test_next_hop_resolver.cc route_table_debug.hh route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc dummy_next_hop_resolver.hh peer_handler_debug.hh peer_handler_debug.cc test_subnet_route.cc
 
 test_peer_data_SOURCES = test_peer_data.cc
 
@@ -190,7 +190,7 @@ am_isolation_tests_OBJECTS = test_main.$(OBJEXT) test_ribin.$(OBJEXT) \
 	test_dump.$(OBJEXT) test_ribout.$(OBJEXT) \
 	test_next_hop_resolver.$(OBJEXT) route_table_debug.$(OBJEXT) \
 	dummy_main.$(OBJEXT) dummy_next_hop_resolver.$(OBJEXT) \
-	peer_handler_debug.$(OBJEXT)
+	peer_handler_debug.$(OBJEXT) test_subnet_route.$(OBJEXT)
 isolation_tests_OBJECTS = $(am_isolation_tests_OBJECTS)
 isolation_tests_LDADD = $(LDADD)
 isolation_tests_DEPENDENCIES = libbgp.a \
@@ -313,7 +313,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_packet_coding.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_peer_data.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_plumbing.Po $(DEPDIR)/test_ribin.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_ribout.Po $(DEPDIR)/update_attrib.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_ribout.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_subnet_route.Po \
+@AMDEP_TRUE@	$(DEPDIR)/update_attrib.Po \
 @AMDEP_TRUE@	$(DEPDIR)/update_packet.Po $(DEPDIR)/update_test.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_target.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -474,6 +476,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_plumbing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ribin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ribout.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_subnet_route.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_attrib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/update_test.Po@am__quote@

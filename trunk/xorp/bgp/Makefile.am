@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.28 2003/11/11 00:01:34 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.29 2004/02/13 22:00:14 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -79,6 +79,7 @@ isolation_tests_SOURCES		+= dummy_next_hop_resolver.cc
 isolation_tests_SOURCES		+= dummy_next_hop_resolver.hh
 isolation_tests_SOURCES		+= peer_handler_debug.hh
 isolation_tests_SOURCES		+= peer_handler_debug.cc
+isolation_tests_SOURCES		+= test_subnet_route.cc
 
 test_peer_data_SOURCES		= test_peer_data.cc
 
