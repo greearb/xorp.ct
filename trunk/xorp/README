@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.18 2003/11/06 22:35:21 atanu Exp $
+# $XORP: xorp/README,v 1.19 2003/11/07 00:00:10 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -77,7 +77,7 @@ Currently, XORP implements the following protocols:
    - RFC 2545 (Use of Multiprotocol Extensions for IPv6 Inter-Domain Routing)
 
   * PIM-SM:
-    - draft-ietf-pim-sm-v2-new-05.{ps,txt} (without SSM).
+    - draft-ietf-pim-sm-v2-new-09.{ps,txt} (without SSM).
     - draft-ietf-pim-sm-bsr-03.{ps,txt}
 
   * IGMP v1 and v2:
