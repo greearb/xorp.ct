@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/configure.in,v 1.1.1.1 2002/12/11 23:55:49 hodson Exp $
+dnl $XORP: xorp/configure.in,v 1.2 2003/01/16 18:59:29 hodson Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -1018,6 +1018,7 @@ AC_OUTPUT(
 	Makefile
 	bgp/Makefile
 	bgp/harness/Makefile
+	bgp/tools/Makefile
 	docs/Makefile
 	docs/bgp/Makefile
 	docs/design_arch/Makefile
