@@ -802,7 +802,8 @@ LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
 bool
 LinkStateUpdatePacket::encode(vector<uint8_t>& pkt)
 {
-    size_t offset = get_standard_header_length();
+    size_t header_offset = get_standard_header_length();
+    size_t offset = header_offset;
     // Make a pass over all the LSAs so we can compute the total
     // length of the packet.
     size_t n_lsas = 0;
@@ -838,7 +839,7 @@ LinkStateUpdatePacket::encode(vector<uint8_t>& pkt)
 	offset += lsa_len;
     }
     
-    if (offset != encode_standard_header(ptr, len)) {
+    if (header_offset != encode_standard_header(ptr, len)) {
 	XLOG_ERROR("Encode of %s failed", str().c_str());
 	return false;
     }
