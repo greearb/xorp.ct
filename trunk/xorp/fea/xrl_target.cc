@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.58 2004/11/29 01:59:42 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.59 2004/11/29 02:56:36 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -2152,11 +2152,16 @@ static const char* XRL_RAW_SOCKET6_NULL = "XrlRawSocket6Manager not present" ;
 XrlCmdError
 XrlFeaTarget::raw_packet6_0_1_send_raw(
 				       // Input values,
-				       const string&		vifname,
-				       const vector<uint8_t>&	pktinfo,
-				       const vector<uint8_t>&	packet
-				       )
+				const IPv6&	src_address,
+				const IPv6&	dst_address,
+				const string&	vif_name,
+				const uint32_t&	proto,
+				const uint32_t&	tclass,
+				const uint32_t&	hoplimit,
+				const vector<uint8_t>&	hopopts,
+				const vector<uint8_t>&	packet)
 {
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
@@ -2168,8 +2173,13 @@ XrlFeaTarget::raw_packet6_0_1_send_raw(
 #else
     return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
 
-    UNUSED(vifname);
-    UNUSED(pktinfo);
+    UNUSED(src_address);
+    UNUSED(dst_address);
+    UNUSED(vif_name);
+    UNUSED(proto);
+    UNUSED(tclass);
+    UNUSED(hoplimit);
+    UNUSED(hopopts);
     UNUSED(packet);
 #endif
 }

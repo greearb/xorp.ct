@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.44 2004/11/29 00:32:03 bms Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.45 2004/11/29 01:59:43 bms Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -988,8 +988,13 @@ public:
 
     XrlCmdError raw_packet6_0_1_send_raw(
 	// Input values,
-	const string&		vifname,
-	const vector<uint8_t>&	pktinfo,
+	const IPv6&	src_address,
+	const IPv6&	dst_address,
+	const string&	vif_name,
+	const uint32_t&	proto,
+	const uint32_t&	tclass,
+	const uint32_t&	hoplimit,
+	const vector<uint8_t>&	hopopts,
 	const vector<uint8_t>&	packet);
 
     XrlCmdError raw_packet6_0_1_register_vif_receiver(

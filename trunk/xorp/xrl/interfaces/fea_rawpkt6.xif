@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/fea_rawpkt6.xif,v 1.1 2004/11/29 02:00:57 bms Exp $ */
 
 /*
  * Interface for sending packets on a raw socket. Typically implemented by the
@@ -10,14 +10,25 @@ interface raw_packet6/0.1 {
 	/**
 	 * Send a raw IPv6 datagram, with packet info.
 	 *
-	 * @param vif_name.Vif to send the packet on, essential for multicast.
+	 * @param src_address. Source IPv6 address.
+	 * @param dst_address. Destination IPv6 address.
+	 * @param vif_name. Vif to send the packet on, essential for multicast.
 	 *                  In the unicast case this field should be empty.
-	 * @param pktinfo.  Raw IPv6 packet header information.
-	 * @param packet.  Raw IPv6 packet payload.
+	 * @param proto.  IPv6 protocol number.
+	 *               A protocol number between 1 and 255 must be specified.
+	 * @param hoplimit.  Hop limit.
+	 * @param tclass.  Traffic class.
+	 * @param hopopts.  Hop-by-hop options.
+	 * @param packet.  Packet payload.
 	 */
 	send_raw ?							      \
+		src_address:ipv6 &					      \
+		dst_address:ipv6 &					      \
 		vif_name:txt &						      \
-		pktinfo:binary &					      \
+		proto:u32 &						      \
+		tclass:u32 &						      \
+		hoplimit:u32 &						      \
+		hopopts:binary &					      \
 		packet:binary
 
 	/**
@@ -28,8 +39,7 @@ interface raw_packet6/0.1 {
 	 * @param if_name.  Interface associated with VIF.
 	 * @param vif_name. Vif through which packets should be accepted.
 	 * @param proto. Protocol number that the receiver is interested in.
-	 *               A protocol number of 0 signifies interest in all
-	 *               protocols.
+	 *               A protocol number between 1 and 255 must be specified.
 	 */
 	register_vif_receiver ?		 				      \
 		router_name:txt &					      \

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock6.hh,v 1.3 2004/11/29 07:19:07 bms Exp $
+// $XORP: xorp/fea/rawsock6.hh,v 1.4 2004/11/29 07:33:34 bms Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -104,7 +104,7 @@ public:
 
 protected:
     virtual void process_recv_data(const struct IPv6HeaderInfo& hdrinfo,
-				   const vector<uint8_t>& options,
+				   const vector<uint8_t>& hopopts,
 				   const vector<uint8_t>& payload) = 0;
 
 protected:
@@ -128,7 +128,7 @@ private:
     enum { RECVBUF_BYTES = 131072 };
 
     vector<uint8_t>		_cmsgbuf;
-    vector<uint8_t>		_optbuf;
+    vector<uint8_t>		_hoptbuf;
     vector<uint8_t>		_recvbuf;
 };
 
@@ -150,7 +150,7 @@ public:
 	 * instance.
 	 */
 	virtual void recv(const struct IPv6HeaderInfo& hdrinfo,
-			  const vector<uint8_t>& options,
+			  const vector<uint8_t>& hopopts,
 			  const vector<uint8_t>& payload) = 0;
 
 	/**
@@ -184,7 +184,7 @@ public:
 
 protected:
     void process_recv_data(const struct IPv6HeaderInfo& hdrinfo,
-			   const vector<uint8_t>& options,
+			   const vector<uint8_t>& hopopts,
 			   const vector<uint8_t>& payload);
 
 private:

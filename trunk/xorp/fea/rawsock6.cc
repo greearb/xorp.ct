@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.3 2004/11/23 19:04:08 atanu Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.4 2004/11/29 07:19:07 bms Exp $"
 
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -125,9 +125,9 @@ IoRawSocket6::IoRawSocket6(EventLoop&	eventloop,
     if (_cmsgbuf.capacity() != CMSGBUF_BYTES)
 	xorp_throw(RawSocket6Exception, "cmsg buffer reserve() failed", 0);
 
-    _optbuf.reserve(OPTBUF_BYTES);
-    if (_optbuf.capacity() != OPTBUF_BYTES)
-	xorp_throw(RawSocket6Exception, "options buffer reserve() failed", 0);
+    _hoptbuf.reserve(OPTBUF_BYTES);
+    if (_hoptbuf.capacity() != OPTBUF_BYTES)
+	xorp_throw(RawSocket6Exception, "hopopts buffer reserve() failed", 0);
 
     _recvbuf.reserve(RECVBUF_BYTES);
     if (_recvbuf.capacity() != RECVBUF_BYTES)
@@ -221,7 +221,7 @@ IoRawSocket6::recv(int fd, SelectorMask m)
 	}
     }
 
-    process_recv_data(_hdrinfo, _optbuf, _recvbuf);
+    process_recv_data(_hdrinfo, _hoptbuf, _recvbuf);
 }
 
 bool
@@ -300,11 +300,11 @@ FilterRawSocket6::remove_filter(InputFilter* filter)
 
 void
 FilterRawSocket6::process_recv_data(const struct IPv6HeaderInfo& hdrinfo,
-				    const vector<uint8_t>& options,
+				    const vector<uint8_t>& hopopts,
 				    const vector<uint8_t>& payload)
 {
     for (list<InputFilter*>::iterator i = _filters.begin();
 	 i != _filters.end(); ++i) {
-	(*i)->recv(hdrinfo, options, payload);
+	(*i)->recv(hdrinfo, hopopts, payload);
     }
 }
