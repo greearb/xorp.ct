@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.9 2003/06/26 18:34:57 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.10 2003/08/28 14:55:13 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -10,7 +10,7 @@ This directory contains the XORP implementation of the PIM-SM protocol.
 Configuration
 =============
 
-PIM-SM like most Xorp processes does not take its configuration
+PIM-SM like most XORP processes does not take its configuration
 parameters from the command line. Its parameters are provided via
 XRLs. At the very least a PIM-SM process must be provided with
 the set of network interfaces to enable for multicast.
@@ -27,12 +27,12 @@ configuration, see the README files from the pimd distribution from USC:
 
 http://netweb.usc.edu/pim/pimd/
 
-Note that FreeBSD-current (as of August 28, 2003), and the forthcoming
-FreeBSD-4.9 and later already do have PIM support in the kernel,
+Note that FreeBSD-current (as of August 28, 2003), FreeBSD-4.9,
+and DragonFlyBSD already do have PIM support in the kernel,
 therefore they do not require to be patched anymore.
 
 For testing and debugging purposes, PIM-SM can be manually started.  The
-Xorp PIM-SM process assumes that the XRL finder, the MFEA and MLD/IGMP
+XORP PIM-SM process assumes that the XRL finder, the MFEA and MLD/IGMP
 are already running. However, the binary program ``./test_pim'' already
 contains them as well, therefore it is sufficient to start only this
 program (as a root).
@@ -40,7 +40,7 @@ program (as a root).
 After ``./test_pim'' is started, the MFEA, MLD/IGMP, and PIM-SM are
 disabled by default. To start them, and to configure their operation,
 as well as the PIM-SM operation, run script ``./configure_pim''.
-Note that it MUST be run from the ``xorp/pim'' directory.
+Note that it MUST be run from the ``$(XORP)/pim'' directory.
 
 However, before running ``./configure_pim'', you must configure
 it for each router:
@@ -64,6 +64,10 @@ it for each router:
    variable STATIC_RPS:
 
 	STATIC_RPS="10.2.0.1 10.4.0.2"
+
+ - All configuration variables described above (ENABLE_VIFS, CAND_BSR_VIF,
+   CAND_RP_VIF, and STATIC_RPS) can be predefined in your shell
+   environment instead.
 
  - By default, ``./test_pim'' will log all protocol-related messages.
    To disable them, comment-out the following variables:
@@ -129,7 +133,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (August 2003), the PIM-SM implementation is based
+Currently (November 2003), the PIM-SM implementation is based
 on the specification in the following documents:
 
  * draft-ietf-pim-sm-v2-new-05.{ps,txt} (The core PIM-SM specification).
@@ -138,8 +142,8 @@ on the specification in the following documents:
 The only major features not implemented yet are SSM support and security.
 
 Many detailed tests have been performed so far
-(see the "XORP PIM-SM Test Suite" document in xorp/docs/pim_testsute/ or
-http://www.xorp.org/current-release/docs/index.html), and the code appears
+(see the "XORP PIM-SM Test Suite" document in $(XORP)/docs/pim_testsute/ or
+http://www.xorp.org/releases/current/docs/index.html), and the code appears
 to be spec-compliant and robust, but no guarantees it is bug-free of course.
 Further, even though IPv6 support for PIM-SM has been implemented as well,
 it has not been tested yet.
