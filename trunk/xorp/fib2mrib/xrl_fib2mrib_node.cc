@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.8 2004/04/29 23:27:59 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.9 2004/05/06 19:32:24 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -190,7 +190,7 @@ XrlFib2mribNode::send_fea_fib_client_registration()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again
+	// If an error, then start a timer to try again.
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
 	_fea_fib_client_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
@@ -210,8 +210,16 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_erro
     }
 
     //
-    // If an error, then start a timer to try again (unless the timer is
-    // already running).
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot add IPv4 FIB client to the FEA: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
     // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_fea_fib_client_registration_timer.scheduled())
@@ -232,8 +240,16 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_erro
     }
 
     //
-    // If an error, then start a timer to try again (unless the timer is
-    // already running).
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot add IPv6 FIB client to the FEA: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
     // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_fea_fib_client_registration_timer.scheduled())
@@ -293,6 +309,7 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb(const XrlError& xrl_e
 	return;
     }
 
+    // TODO: retry de-registration if this was a transport error
     XLOG_ERROR("Failed to deregister IPv4 FIB client with the FEA: %s. "
 	       "Will give up.",
 	       xrl_error.str().c_str());
@@ -311,6 +328,7 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_e
 	return;
     }
 
+    // TODO: retry de-registration if this was a transport error
     XLOG_ERROR("Failed to deregister IPv6 FIB client with the FEA: %s. "
 	       "Will give up.",
 	       xrl_error.str().c_str());
@@ -363,7 +381,7 @@ XrlFib2mribNode::send_rib_registration()
 
     if (! success) {
 	//
-	// If an error, then start a timer to try again
+	// If an error, then start a timer to try again.
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
 	_rib_igp_table_registration_timer = Fib2mribNode::eventloop().new_oneoff_after(
@@ -383,8 +401,16 @@ XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
     }
 
     //
-    // If an error, then start a timer to try again (unless the timer is
-    // already running).
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot add IPv4 IGP table to the RIB: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
     // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_rib_igp_table_registration_timer.scheduled())
@@ -405,8 +431,16 @@ XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
     }
 
     //
-    // If an error, then start a timer to try again (unless the timer is
-    // already running).
+    // If a command failed because the other side rejected it, this is fatal.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	XLOG_FATAL("Cannot add IPv4 IGP table to the RIB: %s",
+		   xrl_error.str().c_str());
+    }
+
+    //
+    // If an error, then start a timer to try again
+    // (unless the timer is already running).
     // TODO: XXX: the timer value is hardcoded here!!
     //
     if (_rib_igp_table_registration_timer.scheduled())
@@ -474,6 +508,7 @@ XrlFib2mribNode::rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error)
 	return;
     }
 
+    // TODO: retry de-registration if this was a transport error
     XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB: %s. "
 	       "Will give up.",
 	       xrl_error.str().c_str());
@@ -492,6 +527,7 @@ XrlFib2mribNode::rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error)
 	return;
     }
 
+    // TODO: retry de-registration if this was a transport error
     XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB: %s. "
 	       "Will give up.",
 	       xrl_error.str().c_str());
@@ -990,7 +1026,7 @@ XrlFib2mribNode::send_rib_route_change()
     if (! success) {
     error_label:
 	//
-	// If an error, then start a timer to try again
+	// If an error, then start a timer to try again.
 	// TODO: XXX: the timer value is hardcoded here!!
 	//
 	_inform_rib_queue_timer = Fib2mribNode::eventloop().new_oneoff_after(
@@ -1010,9 +1046,22 @@ XrlFib2mribNode::send_rib_route_change_cb(const XrlError& xrl_error)
     }
 
     //
+    // If a command failed because the other side rejected it,
+    // then send the next route change.
+    //
+    if (xrl_error == XrlError::COMMAND_FAILED()) {
+	_inform_rib_queue.pop_front();
+	send_rib_route_change();
+	return;
+    }
+
+    //
     // If an error, then start a timer to try again
+    // (unless the timer is already running).
     // TODO: XXX: the timer value is hardcoded here!!
     //
+    if (_inform_rib_queue_timer.scheduled())
+	return;
     _inform_rib_queue_timer = Fib2mribNode::eventloop().new_oneoff_after(
 	TimeVal(1, 0),
 	callback(this, &XrlFib2mribNode::send_rib_route_change));
