@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.8 2003/09/10 07:29:29 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.9 2003/09/11 03:38:38 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 #define DEBUG_PRINT_FUNCTION_NAME 
@@ -195,31 +195,6 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len)
 	    ni6 != mpreach->nlri_list().end(); ni6++)
 	    add(*ni6, payload);
     }
-
-#if	0
-    /*
-    ** First process the withdraws, if any are present.
-    */
-    list <BGPUpdateAttrib>::const_iterator wi;
-    wi = update->wr_list().begin();
-    for(; wi != update->wr_list().end(); wi++)
-	del(wi->net(), payload);
-
-    /*
-    ** If there are no nlri's present then there is nothing to save so
-    ** out of here.
-    */
-    if(update->nlri_list().empty())
-	return;
-
-    /*
-    ** Now save the NLRI information.
-    */
-    list <BGPUpdateAttrib>::const_iterator ni;
-    ni = update->nlri_list().begin();
-    for(; ni != update->nlri_list().end(); ni++)
-	add(ni->net(), payload);
-#endif
 }
 
 void
