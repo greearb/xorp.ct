@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.8 2003/09/11 13:01:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.9 2003/09/11 14:01:18 pavlin Exp $"
 
 
 #include "fea_module.h"
@@ -167,8 +167,8 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    if (sa->sa_family == AF_LINK) {
 		const sockaddr_dl* sdl = reinterpret_cast<const sockaddr_dl*>(sa);
 		if (sdl->sdl_type == IFT_ETHER) {
-		    if (sdl->sdl_alen == sizeof(ether_addr)) {
-			ether_addr ea;
+		    if (sdl->sdl_alen == sizeof(struct ether_addr)) {
+			struct ether_addr ea;
 			memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen,
 			       sdl->sdl_alen);
 			fi.set_mac(EtherMac(ea));
@@ -187,7 +187,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		XLOG_ERROR("ioctl(SIOCGIFHWADDR) for interface %s failed: %s",
 			   if_name.c_str(), strerror(errno));
 	    } else {
-		ether_addr ea;
+		struct ether_addr ea;
 		memcpy(&ea, ifrcopy.ifr_hwaddr.sa_data, sizeof(ea));
 		fi.set_mac(EtherMac(ea));
 		break;
