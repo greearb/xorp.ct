@@ -86,8 +86,9 @@ GetOptions( \%options,
 	# HTML options
 	"html-cols=i",
 	"html-logo=s",
+	"html-logo-link=s",
 	"html-css=s",
-	
+
 	"strip-h-path",	\$kdocParser::striphpath,
 	"outputdir|d=s", \$outputdir,
 	"stdin|i",	\$readstdin,
@@ -99,7 +100,7 @@ GetOptions( \%options,
 	"liboutdir|N=s", \$liboutdir,
 	"xref|l=s",	\@libs,
 	"classes|c=s",    \@includeclasses,
-	
+
 	"cpp|P",	\$kdocParser::cpp,
 	"docincluded",  \$kdocParser::docincluded,
 	"cppcmd|C=s",	\$kdocParser::cppcmd,

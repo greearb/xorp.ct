@@ -53,22 +53,32 @@ sub newPgHeader
 		$stylesheet = "";
 	}
 
+	if ( $rest == "" ) {
+	    $rest = "<tr><td>&nbsp;</td></tr>"
+	}
+
 	print $html <<EOF;
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
 <HTML>
 <HEAD>
 <TITLE>$heading</TITLE>
 $stylesheet
 <META NAME="Generator" CONTENT="KDOC $main::version">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
 </HEAD>
-<BODY bgcolor="#ffffff" text="#000000" link="#0000ff" vlink="#000099" alink= "#ffffff">
+<BODY>
+<DIV id="kdoc-titlebox">
 <TABLE WIDTH="100%" BORDER="$bw">
 <TR>
 <TD>
 	<TABLE BORDER="$bw">
-		<TR><TD valign="top" align="left" cellspacing="10">
+		<TR><TD valign="top" align="left">
 		<h1>$heading</h1>
 		</TD>
-		<TD valign="top" align="right" colspan="1">$desc</TD></TR>
+		</TR>
+                <TR>
+		<TD>$desc</TD></TR>
 	</TABLE>
 	<HR>
 	<TABLE BORDER="$bw">
@@ -82,21 +92,29 @@ EOF
 
 	print $html '<TD align="right"><TABLE BORDER="',$bw,'">';
 
+	my ($ll, $le) = ( "", "");
+	if (defined $main::options{"html-logo-link"}) {
+	    $ll = '<a href="' . $main::options{"html-logo-link"} . '">';
+	    $le = '</a>'
+	}
 	# image
-	print $html '<TD rowspan="', ($#klist)+2,'"><IMG SRC="',
-			$main::options{"html-logo"},'"></TD>'
+	print $html '<TR><TD align="right" colspan="', ($#klist)+2, '">',
+	    $ll, '<IMG SRC="', $main::options{"html-logo"},
+	         '" ALT="LOGO" BORDER="0">', $le, '</TD></TR>'
 		if defined $main::options{"html-logo"};
 
 	# TOC
-
+	print $html '<TR>';
 	foreach my $item ( sort @klist ) {
-		print $html '<TR><TD>',
-		'<small><A HREF="',$toclist->{$item},'">',
-			$item, "</A></small></TD></TR>\n";
+	    my $tocitem = ${item};
+	    $tocitem =~ s/[ \t]/&nbsp;/;
+	    print $html '<TD>', '<small>&nbsp;<A HREF="', $toclist->{$item},
+	                '">', $tocitem, "</A></small></TD>\n";
 	}
+	print $html '</TR>';
 
 	print $html "</TABLE></TD></TR></TABLE>\n";
-	
+	print $html "</DIV>\n";
 }
 
 sub writeTable
@@ -111,10 +129,15 @@ sub writeTable
 	my $s = $size * $columns;
 	$size++ if $s < ($#$list+1);
 
+	if ($#$list <= 0) {
+	    return;
+	}
+
+	print $file '<DIV CLASS="listing-table">';
 	print $file '<TABLE WIDTH="100%" BORDER="0"><TR>';
 
 	while ( $ctr <= $#$list ) {
-		print $file '<TD VALIGN="top">';
+		print $file '<TD VALIGN="top" WIDTH="33%">';
 		$s = $ctr+$size-1;
 
 		if ( $s > $#$list ) {
@@ -130,6 +153,7 @@ sub writeTable
 	}
 
 	print $file '</TR></TABLE>';
+	print $file '</DIV>';
 }
 
 =head2
@@ -146,25 +170,26 @@ sub writeListPart
 {
 	my( $file, $list, $start, $stop ) = @_;
 
-	print $file "<TABLE BORDER=\"0\">";
+	print $file "<DIV class=\"listing-subtable\">";
+	print $file "<TABLE BORDER=\"0\" WIDTH=\"100%\">";
 
-	print $file '<TR bgcolor="b0b0b0"><TH>', 
-		$list->[ $start ]->{astNodeName},
-		" - ", $list->[ $stop ]->{astNodeName}, 
+	print $file '<TR><TH>', $list->[ $start ]->{astNodeName};
+	print $file "&nbsp;-&nbsp;<br>", $list->[ $stop ]->{astNodeName}, 
 		"</TH></TR>";
 
 	my $col = 0;
 	my $colour = "";
-	
+
 	for my $ctr ( $start..$stop ) {
 		$col = $col ? 0 : 1;
-		$colour = $col ? "" : 'bgcolor="#eeeeee"';
+		$colour = $col ? 'class="lodd"' : 'class="leven"';
 
-		print $file "<TR $colour><TD>", refNameFull( $list->[ $ctr ] ),
+		print $file "<TR $colour><TD $colour>", refNameFull( $list->[ $ctr ] ),
 			"</TD></TR>\n";
 	}
 
 	print $file "</TABLE>";
+	print $file "</DIV> <!--\"listing-subtable\"-->";
 }
 
 
@@ -414,7 +439,7 @@ sub printDoc
 			print CLASS "<p>";
 		},
 		sub { #end
-			print CLASS "</p>\n";
+			print CLASS "\n";
 		},
 		sub { #text
 			print CLASS "",deref( $_[1], $rootnode );
@@ -434,19 +459,18 @@ sub printDoc
 				"<tr><td><small>$desc</desc></td></tr>" : "";
 
 			print CLASS<<EOF;
-</p><table border="0" width="100%">
-<tr>
-<td bgcolor="#BEEAE0">
+</p>
 <pre>
 $name
 </pre>
-</td></tr>
+
+<p>
 $desc
-</table> <p>
+<p>
 EOF
 		},
 		sub { #image
-			print CLASS "</p>\n<img src=\"", $_[2], "\">\n<p>\n";		
+			print CLASS "</p>\n<img src=\"", $_[2], "\">\n<p>\n";
 		},
 		sub { #para
 			print CLASS "</p>\n<p>";
@@ -462,15 +486,15 @@ EOF
 
 		}
 	);
-	
+
 # Params
 		kdocDocIter::ParamIter( $docNode,
 			sub {
 				print CLASS "<p><b>Parameters</b>:",
-					"<TABLE BORDER=\"0\" CELLPADDING=\"5\">\n";
+					"<TABLE BORDER=\"0\">\n";
 			},
 			sub {
-				print CLASS "</TABLE></P>\n";
+				print CLASS "</TABLE>\n";
 			},
 			sub {
 				my ( $name, $text ) = @_;
@@ -498,7 +522,7 @@ EOF
 
 	# See
 	my $comma = "";
-	
+
 	kdocDocIter::SeeAlso ( $docNode, undef,
 		sub { # start
 			print CLASS "<p><b>See also</b>: ";
@@ -514,7 +538,6 @@ EOF
 			print CLASS "</p>\n";
 		}
 	);
-	
 	return if $comp;
 
 	printTextItem( $docNode, *CLASS, "Since" );
