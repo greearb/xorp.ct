@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.5 2004/06/10 22:41:21 hodson Exp $"
+#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.6 2004/11/03 00:18:56 bms Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -235,11 +235,11 @@ test_vif_addr_methods()
     //
     // Test whether is the same interface address.
     //
-    verbose_assert(vif_addr_b.is_same_addr(IPvX("22.22.22.22")),
-		   "is_same_addr()");
+    verbose_assert(vif_addr_b.is_my_addr(IPvX("22.22.22.22")),
+		   "is_my_addr()");
 
-    verbose_assert(! vif_addr_b.is_same_addr(IPvX("22.22.22.33")),
-		   "is_same_addr()");
+    verbose_assert(! vif_addr_b.is_my_addr(IPvX("22.22.22.33")),
+		   "is_my_addr()");
     
     //
     // Test whether is the same subnet.

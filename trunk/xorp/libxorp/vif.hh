@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.7 2004/06/10 22:41:23 hodson Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.8 2004/11/02 22:46:05 bms Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -115,7 +115,7 @@ public:
     void  set_peer_addr(const IPvX& v)		{ _peer_addr = v;	}
     
     /**
-     * Test whether is the same interface address.
+     * Test whether if an IPvX address is same as my address.
      * 
      * @param ipvx_addr the address to test whether is the same as my
      * interface address.
@@ -123,7 +123,7 @@ public:
      * @return true if @ref ipvx_addr is same as my interface address,
      * otherwise false.
      */
-    bool  is_same_addr(const IPvX& ipvx_addr) const { return (addr() == ipvx_addr); }
+    bool  is_my_addr(const IPvX& ipvx_addr) const { return (addr() == ipvx_addr); }
     
     /**
      * Test whether is the same subnet.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.12 2004/11/02 22:46:05 bms Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.13 2004/11/04 09:01:39 bms Exp $"
 
 #include <functional>
 #include <string>
@@ -231,7 +231,7 @@ Vif::delete_address(const IPvX& ipvx_addr)
     list<VifAddr>::iterator iter;
     
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_same_addr(ipvx_addr)) {
+	if ((iter)->is_my_addr(ipvx_addr)) {
 	    _addr_list.erase(iter);
 	    return (XORP_OK);
 	}
@@ -246,7 +246,7 @@ Vif::find_address(const IPvX& ipvx_addr)
     list<VifAddr>::iterator iter;
     
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_same_addr(ipvx_addr)) {
+	if ((iter)->is_my_addr(ipvx_addr)) {
 	    return &(*iter);
 	}
     }
@@ -260,7 +260,7 @@ Vif::is_my_addr(const IPvX& ipvx_addr) const
     list<VifAddr>::const_iterator iter;
     
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_same_addr(ipvx_addr)) {
+	if ((iter)->is_my_addr(ipvx_addr)) {
 	    return (true);
 	}
     }
@@ -325,7 +325,7 @@ Vif::is_same_p2p(const IPvX& ipvx_addr) const
 	return (false);
     
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	if ((iter)->is_same_addr(ipvx_addr)
+	if ((iter)->is_my_addr(ipvx_addr)
 	    || ((iter)->peer_addr() == ipvx_addr)) {
 	    return (true);
 	}
