@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.3 2002/12/18 22:54:29 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.4 2002/12/19 01:29:10 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -120,9 +120,16 @@ test_int32(EventLoop& e, XrlPFInProcSender& s)
 }
 
 static bool
-print_dot()
+print_twirl()
 {
-    printf("."); fflush(stdout);
+    static const char t[] = { '\\', '|', '/', '-' };
+    static const size_t nt = sizeof(t) / sizeof(t[0]);
+    static size_t n = 0;
+    static char erase = '\0';
+
+    printf("%c%c", erase, t[n % nt]); fflush(stdout);
+    n++;
+    erase = '\b';
     return true;
 }
 
@@ -140,10 +147,10 @@ run_test()
 
     trace("listener address: %s\n", listener.address());
 
-    XorpTimer dp = event_loop.new_periodic(500, callback(&print_dot));
+    XorpTimer dp = event_loop.new_periodic(500, callback(&print_twirl));
     assert(dp.scheduled());
 
-    printf("Testing XRLPFInProc");
+    trace("Testing XRLPFInProc\n");
     for (int i = 0; i < 100000; i++) {
 	test_hello(event_loop, s);
 	test_int32(event_loop, s);

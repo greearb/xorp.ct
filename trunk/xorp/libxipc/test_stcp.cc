@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.3 2002/12/18 22:54:30 hodson Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.4 2002/12/19 01:29:10 hodson Exp $"
 
 /*
 #define DEBUG_LOGGING
@@ -24,7 +24,7 @@
 #include "libxorp/debug.h"
 #include "xrl_pf_stcp.hh"
 
-static bool g_trace = true;
+static bool g_trace = false;
 #define tracef(args...) \
 do { \
     if (g_trace) { printf(args) ; fflush(stdout); } \
@@ -112,7 +112,6 @@ test_int32(EventLoop& e, XrlPFSTCPSender& s)
     s.send(x, callback(int32_reply_handler));
 
     while (int32_done == 0) {
-	printf(".");
 	e.run();
     }
     int32_done = false;
@@ -162,9 +161,16 @@ test_xrlerror_note(EventLoop&e, XrlPFSTCPListener& l)
 }
 
 static bool
-print_dot()
+print_twirl()
 {
-    printf("."); fflush(stdout);
+    static const char t[] = { '\\', '|', '/', '-' };
+    static const size_t nt = sizeof(t) / sizeof(t[0]);
+    static size_t n = 0;
+    static char erase = '\0';
+
+    printf("%c%c", erase, t[n % nt]); fflush(stdout);
+    n++;
+    erase = '\b';
     return true;
 }
 
@@ -185,7 +191,7 @@ run_test()
 
     tracef("listener address: %s\n", listener.address());
 
-    XorpTimer dp = event_loop.new_periodic(500, callback(&print_dot));
+    XorpTimer dp = event_loop.new_periodic(500, callback(&print_twirl));
 
     tracef("Testing XrlPFSTCP\n");
     for (int i = 1; i < 50; i++) {
