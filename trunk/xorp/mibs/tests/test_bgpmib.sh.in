@@ -59,6 +59,7 @@ onexit()
 
     ${CALLXRL} "finder://xorp_if_mib/xorp_if_mib/0.1/unload_mib?mib_index:u32=2"
     sleep 1
+    ${CALLXRL} "finder://xorp_if_mib/common/0.1/shutdown"
 
     rm -fr bgpPeerTable?.tmp
 }

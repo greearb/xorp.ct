@@ -104,4 +104,8 @@ XrlCmdError XrlXorpIfMibTarget::xorp_if_mib_0_1_unload_mib(
  
 }
 
+XrlCmdError XrlXorpIfMibTarget::common_0_1_shutdown()
+{
+    exit(0);
+}
 

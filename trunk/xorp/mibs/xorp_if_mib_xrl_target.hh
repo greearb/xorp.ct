@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorp_if_mib_xrl_target.hh,v 1.1 2003/05/20 01:11:04 jcardona Exp $
+// $XORP: xorp/mibs/xorp_if_mib_xrl_target.hh,v 1.2 2003/05/29 23:50:13 hodson Exp $
 
 #ifndef __MIBS_XORP_IF_MIB_XRL_TARGET_HH__
 #define __MIBS_XORP_IF_MIB_XRL_TARGET_HH___
@@ -43,9 +43,7 @@ public:
 				      uint32_t& status,
 				      string&	reason);
 
-    XrlCmdError common_0_1_shutdown() {
-	return XrlCmdError::COMMAND_FAILED("Not Implemented");
-    }
+    XrlCmdError common_0_1_shutdown(); 
     
     /**
      *  Load a MIB module
