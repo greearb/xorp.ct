@@ -4,7 +4,7 @@
 #define YY_NO_UNPUT
 #define SBUFSIZE 1024
 %}
-	int bootlinenum=1;
+	int bootlinenum = 1;
 	extern void* bootlval;
 	char stringbuf[SBUFSIZE+1];
 %option noyywrap
@@ -14,40 +14,40 @@ DBYTE [12]?[0-9]{1,2}
 IPV4 {DBYTE}.{DBYTE}.{DBYTE}.{DBYTE}
 %%
 "{"	{
-	//printf(" lex({) ");
+	/* printf(" lex({) "); */
 	return UPLEVEL;
 	}
 "}"	{
-	//printf(" lex(}) ");
+	/* printf(" lex(}) "); */
 	return DOWNLEVEL;
 	}
 ";"	{
-	//printf(" lex(;) ");
+	/* printf(" lex(;) "); */
 	return END;
 	}
 "/"	{
-	//printf(" lex(/) ");
+	/* printf(" lex(/) "); */
 	return SLASH;
 	}
 "\\"	{
-	//printf(" lex(\\ (SLASH)) ");
+	/* printf(" lex(\\ (SLASH)) "); */
 	return SLASH;
 	}
 ":"	{
-	//printf(" lex(:) ");
+	/* printf(" lex(:) "); */
 	return ASSIGN_VALUE;
 	}
 ","	{
-	//printf(" lex(,) ");
+	/* printf(" lex(,) "); */
 	return LISTNEXT;
 	}
 "true"	{
-	//printf(" lex(init) ");
+	/* printf(" lex(init) "); */
 	bootlval = strdup(boottext);
 	return BOOL;
 	}
 "false"	{
-	//printf(" lex(init) ");
+	/* printf(" lex(init) "); */
 	bootlval = strdup(boottext);
 	return BOOL;
 	}
@@ -75,7 +75,7 @@ IPV4 {DBYTE}.{DBYTE}.{DBYTE}.{DBYTE}
 [ \t]+	/*whitespace*/
 
 [a-z][a-z0-9"\-""_"]*	{
-	//printf(" lex(literal) at %x\n ", lstr);
+	/* printf(" lex(literal) at %x\n ", lstr); */
 	bootlval = strdup(boottext);
 	return LITERAL;
 	}
@@ -83,26 +83,26 @@ IPV4 {DBYTE}.{DBYTE}.{DBYTE}.{DBYTE}
 			BEGIN(string);
 			memset(stringbuf, 0, SBUFSIZE);
 			}
-<string>[^\\\n\"]*	/*normal text*/ {
+<string>[^\\\n\"]*	/* normal text */ {
 			strncat(stringbuf, boottext, SBUFSIZE);
 			}
-<string>\\+\"		/*allow quoted quotes*/ {
+<string>\\+\"		/* allow quoted quotes */ {
 			strncat(stringbuf, "\"", SBUFSIZE);
 			}
-<string>\\+\\		/*allow quoted backslash*/ {
+<string>\\+\\		/* allow quoted backslash */ {
 			strncat(stringbuf, "\\", SBUFSIZE);
 			}
-<string>\n		/*allow unquoted newlines*/ {
+<string>\n		/* allow unquoted newlines */ {
 			bootlinenum++;
 			strncat(stringbuf, "\n", SBUFSIZE);
 			}
-<string>\\+\n		/*allow quoted newlines*/ {
+<string>\\+\n		/* allow quoted newlines */ {
 			bootlinenum++;
 			strncat(stringbuf, "\n", SBUFSIZE);
 			}
 <string>\"		{
 			BEGIN(INITIAL);
-			printf("STRING:>%s<\n", stringbuf);
+			/* printf("STRING:>%s<\n", stringbuf); */
 			bootlval = strdup(stringbuf);
 			return STRING;
 			}
@@ -119,6 +119,3 @@ IPV4 {DBYTE}.{DBYTE}.{DBYTE}.{DBYTE}
 	}
 
 %%
-
-
-
