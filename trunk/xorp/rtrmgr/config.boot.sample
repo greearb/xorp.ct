@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.13 2004/06/15 00:40:42 atanu Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.14 2004/06/15 03:09:43 pavlin Exp $ */
 
 
 interfaces {
@@ -66,35 +66,30 @@ protocols {
 
 protocols {
     rip {
+/* Redistribute routes for connected interfaces */
 /*
 	import connected {
+	    metric: 0
+	    tag: 0
+	}
+*/
+/* Redistribute static routes */
+/*
+	import static {
 	    metric: 1
 	    tag: 0
 	}
 */
+/* Run on specified network interface addresses */
+/*
 	interface dc0 {
 	    vif dc0 {
 		address 10.10.10.10 {
 		    enabled: true
-/*
-		    metric: 1
-		    horizon: "split-horizon-poison-reverse"
-		    passive: false
-		    accept-non-rip-requests: true
-		    accept-default-route: false
-		    advertise-default-route: false
-		    route-expiry-secs: 180
-		    route-deletion-secs: 120
-		    triggered-update-min-secs: 1
-		    triggered-update-max-secs: 5
-		    table-announce-min-secs: 25
-		    table-announce-max-secs: 35
-		    table-request-secs: 1
-		    interpacket-delay-msecs: 50
-*/
 		}
 	    }
 	}
+*/
     }
 }
 
@@ -369,7 +364,7 @@ protocols {
  * Also check that the "bgp4_mib_1657.so" exists in the correct location.
  */
 
-/* 
+/*
 protocols {
     snmp {
 	mib-module bgp4_mib_1657 {
