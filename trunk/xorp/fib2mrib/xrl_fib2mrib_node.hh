@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.2 2004/03/18 13:17:21 pavlin Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.3 2004/04/12 01:52:22 pavlin Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -42,20 +42,22 @@ public:
     XrlFib2mribNode(EventLoop& eventloop,
 		    XrlRouter* xrl_router,
 		    const string& fea_target,
-		    const string& rib_target,
-		    const IPv4& finder_host,
-		    uint16_t finder_port);
+		    const string& rib_target);
     ~XrlFib2mribNode();
 
     /**
      * Start the node operation.
+     *
+     * @return true on success, false on failure.
      */
-    void	startup();
+    bool	startup();
 
     /**
      * Shutdown the node operation.
+     *
+     * @return true on success, false on failure.
      */
-    void	shutdown();
+    bool	shutdown();
 
 protected:
     //
@@ -227,8 +229,8 @@ protected:
 
 private:
 
-    void ifmgr_startup();
-    void ifmgr_shutdown();
+    bool ifmgr_startup();
+    bool ifmgr_shutdown();
 
     const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
@@ -255,18 +257,18 @@ private:
     void send_rib_route_change_cb(const XrlError& xrl_error);
 
     void send_fea_fib_client_registration();
-    void send_add_fib_client4_cb(const XrlError& xrl_error);
-    void send_add_fib_client6_cb(const XrlError& xrl_error);
+    void fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_error);
+    void fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_error);
     void send_fea_fib_client_deregistration();
-    void send_delete_fib_client4_cb(const XrlError& xrl_error);
-    void send_delete_fib_client6_cb(const XrlError& xrl_error);
+    void fea_fib_client_send_delete_fib_client4_cb(const XrlError& xrl_error);
+    void fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_error);
 
     void send_rib_registration();
-    void send_add_igp_table4_cb(const XrlError& xrl_error);
-    void send_add_igp_table6_cb(const XrlError& xrl_error);
+    void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
+    void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
     void send_rib_deregistration();
-    void send_delete_igp_table4_cb(const XrlError& xrl_error);
-    void send_delete_igp_table6_cb(const XrlError& xrl_error);
+    void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
+    void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
 
     const string& my_xrl_target_name() {
 	return XrlFib2mribTargetBase::name();

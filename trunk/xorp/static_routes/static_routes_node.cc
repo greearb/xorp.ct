@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.6 2004/03/30 03:23:18 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.7 2004/04/10 20:05:46 pavlin Exp $"
 
 
 //
@@ -46,15 +46,22 @@ StaticRoutesNode::StaticRoutesNode(EventLoop& eventloop)
 
 StaticRoutesNode::~StaticRoutesNode()
 {
-    if ((ServiceBase::status() != SHUTDOWN)
-	&& (ServiceBase::status() != FAILED)) {
-	shutdown();
-    }
+    shutdown();
 }
 
-void
+bool
 StaticRoutesNode::startup()
 {
+    //
+    // Test the service status
+    //
+    if ((ServiceBase::status() == STARTING)
+	|| (ServiceBase::status() == RUNNING))
+	return true;
+
+    if (ServiceBase::status() != READY)
+	return false;
+
     //
     // Transition to RUNNING occurs when all transient startup operations
     // are completed (e.g., after we have the interface/vif/address state
@@ -70,17 +77,30 @@ StaticRoutesNode::startup()
     //
     // Startup the interface manager
     //
-    ifmgr_startup();
+    if (ifmgr_startup() != true) {
+	ServiceBase::set_status(FAILED);
+	return false;
+    }
 
     //
     // Register with the RIB
     //
     rib_register_startup();
+
+    return true;
 }
 
-void
+bool
 StaticRoutesNode::shutdown()
 {
+    //
+    // We cannot shutdown if our status is SHUTDOWN or FAILED.
+    //
+    if ((ServiceBase::status() == SHUTDOWN)
+	|| (ServiceBase::status() == FAILED)) {
+	return true;
+    }
+
     //
     // Transition to SHUTDOWN occurs when all transient shutdown operations
     // are completed (e.g., after we have deregistered with the FEA
@@ -96,12 +116,17 @@ StaticRoutesNode::shutdown()
     //
     // Shutdown the interface manager
     //
-    ifmgr_shutdown();
+    if (ifmgr_shutdown() != true) {
+	ServiceBase::set_status(FAILED);
+	return false;
+    }
 
     //
     // Set the node status
     //
     _node_status = PROC_SHUTDOWN;
+
+    return true;
 }
 
 void
@@ -176,13 +201,58 @@ StaticRoutesNode::update_status()
     }
 }
 
+ProcessStatus
+StaticRoutesNode::node_status(string& reason_msg)
+{
+    ProcessStatus status = _node_status;
+
+    // Set the return message with the reason
+    reason_msg = "";
+    switch (status) {
+    case PROC_NULL:
+	// Can't be running and in this state
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_STARTUP:
+	// Get the message about the startup progress
+	reason_msg = c_format("Waiting for %u startup events",
+			      static_cast<uint32_t>(_startup_requests_n));
+	break;
+    case PROC_NOT_READY:
+	// XXX: this state is unused
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_READY:
+	reason_msg = c_format("Node is READY");
+	break;
+    case PROC_SHUTDOWN:
+	// Get the message about the shutdown progress
+	reason_msg = c_format("Waiting for %u shutdown events",
+			      static_cast<uint32_t>(_shutdown_requests_n));
+	break;
+    case PROC_FAILED:
+	// XXX: this state is unused
+	XLOG_UNREACHABLE();
+	break;
+    case PROC_DONE:
+	// Process has completed operation
+	break;
+    default:
+	// Unknown status
+	XLOG_UNREACHABLE();
+	break;
+    }
+    
+    return (status);
+}
+
 void
 StaticRoutesNode::tree_complete()
 {
     decr_startup_requests_n();
 
     //
-    // XXX: we use same actions when the tree is completed and updates are made
+    // XXX: we use same actions when the tree is completed or updates are made
     //
     updates_made();
 }
@@ -341,51 +411,6 @@ StaticRoutesNode::is_directly_connected(const IfMgrIfTree& if_tree,
     }
 
     return (false);
-}
-
-ProcessStatus
-StaticRoutesNode::node_status(string& reason_msg)
-{
-    ProcessStatus status = _node_status;
-
-    // Set the return message with the reason
-    reason_msg = "";
-    switch (status) {
-    case PROC_NULL:
-	// Can't be running and in this state
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_STARTUP:
-	// Get the message about the startup progress
-	reason_msg = c_format("Waiting for %u startup events",
-			      static_cast<uint32_t>(_startup_requests_n));
-	break;
-    case PROC_NOT_READY:
-	// XXX: this state is unused
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_READY:
-	reason_msg = c_format("Node is READY");
-	break;
-    case PROC_SHUTDOWN:
-	// Get the message about the shutdown progress
-	reason_msg = c_format("Waiting for %u shutdown events",
-			      static_cast<uint32_t>(_shutdown_requests_n));
-	break;
-    case PROC_FAILED:
-	// XXX: this state is unused
-	XLOG_UNREACHABLE();
-	break;
-    case PROC_DONE:
-	// Process has completed operation
-	break;
-    default:
-	// Unknown status
-	XLOG_UNREACHABLE();
-	break;
-    }
-    
-    return (status);
 }
 
 /**

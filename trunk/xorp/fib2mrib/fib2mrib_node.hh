@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.3 2004/04/05 09:31:11 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.4 2004/04/12 01:53:22 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -300,13 +300,17 @@ public:
 
     /**
      * Start the node operation.
+     *
+     * @return true on success, false on failure.
      */
-    void	startup();
+    bool	startup();
 
     /**
      * Shutdown the node operation.
+     *
+     * @return true on success, false on failure.
      */
-    void	shutdown();
+    bool	shutdown();
 
     /**
      * Get the node status (see @ref ProcessStatus).
@@ -489,16 +493,20 @@ private:
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
+     *
+     * @return true on success, false on failure.
      */
-    virtual void ifmgr_startup() = 0;
+    virtual bool ifmgr_startup() = 0;
 
     /**
      * Initiate shutdown of the interface manager.
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
+     *
+     * @return true on success, false on failure.
      */
-    virtual void ifmgr_shutdown() = 0;
+    virtual bool ifmgr_shutdown() = 0;
 
     /**
      * Initiate registration as an FEA FIB client.
@@ -602,11 +610,17 @@ private:
     ProcessStatus	_node_status;		// The node/process status
     const string	_protocol_name;		// The protocol name
 
-    list<Fib2mribRoute>	_fib2mrib_routes;
+    list<Fib2mribRoute>	_fib2mrib_routes;	// The routes
 
+    //
+    // Status-related state
+    //
     size_t		_startup_requests_n;
     size_t		_shutdown_requests_n;
 
+    //
+    // A local copy with the interface state information
+    //
     IfMgrIfTree		_iftree;
 
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.6 2004/03/30 03:24:12 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.7 2004/04/10 20:03:52 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -31,9 +31,7 @@
 XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop& eventloop,
 					 XrlRouter* xrl_router,
 					 const string& fea_target,
-					 const string& rib_target,
-					 const IPv4& finder_host,
-					 uint16_t finder_port)
+					 const string& rib_target)
     : StaticRoutesNode(eventloop),
       XrlStaticRoutesTargetBase(xrl_router),
       _class_name(xrl_router->class_name()),
@@ -41,7 +39,8 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop& eventloop,
       _xrl_rib_client(xrl_router),
       _fea_target(fea_target),
       _rib_target(rib_target),
-      _ifmgr(eventloop, fea_target.c_str(), finder_host, finder_port),
+      _ifmgr(eventloop, fea_target.c_str(), xrl_router->finder_address(),
+	     xrl_router->finder_port()),
       _is_rib_igp_table4_registered(false),
       _is_rib_igp_table6_registered(false)
 {
@@ -55,42 +54,50 @@ XrlStaticRoutesNode::~XrlStaticRoutesNode()
     _ifmgr.detach_hint_observer(dynamic_cast<StaticRoutesNode*>(this));
 }
 
-void
+bool
 XrlStaticRoutesNode::startup()
 {
-    StaticRoutesNode::startup();
+    return StaticRoutesNode::startup();
 }
 
-void
+bool
 XrlStaticRoutesNode::shutdown()
 {
-    StaticRoutesNode::shutdown();
+    return StaticRoutesNode::shutdown();
 }
 
-void
+bool
 XrlStaticRoutesNode::ifmgr_startup()
 {
+    bool ret_value;
+
     // TODO: XXX: we should startup the ifmgr only if it hasn't started yet
     StaticRoutesNode::incr_startup_requests_n();
 
-    _ifmgr.startup();
+    ret_value = _ifmgr.startup();
 
     //
     // XXX: when the startup is completed, IfMgrHintObserver::tree_complete()
     // will be called.
     //
+
+    return ret_value;
 }
 
-void
+bool
 XrlStaticRoutesNode::ifmgr_shutdown()
 {
+    bool ret_value;
+
     StaticRoutesNode::incr_shutdown_requests_n();
 
-    _ifmgr.shutdown();
+    ret_value = _ifmgr.shutdown();
 
     // TODO: XXX: PAVPAVPAV: use ServiceChangeObserverBase
     // to signal when the interface manager shutdown has completed.
     StaticRoutesNode::decr_shutdown_requests_n();
+
+    return ret_value;
 }
 
 void
@@ -98,6 +105,7 @@ XrlStaticRoutesNode::rib_register_startup()
 {
     if (! _is_rib_igp_table4_registered)
 	StaticRoutesNode::incr_startup_requests_n();
+
     if (! _is_rib_igp_table6_registered)
 	StaticRoutesNode::incr_startup_requests_n();
 
@@ -109,6 +117,7 @@ XrlStaticRoutesNode::rib_register_shutdown()
 {
     if (_is_rib_igp_table4_registered)
 	StaticRoutesNode::incr_shutdown_requests_n();
+
     if (_is_rib_igp_table6_registered)
 	StaticRoutesNode::incr_shutdown_requests_n();
 
@@ -132,7 +141,8 @@ XrlStaticRoutesNode::send_rib_registration()
 	    _instance_name,
 	    true,	/* unicast */
 	    true,	/* multicast */
-	    callback(this, &XrlStaticRoutesNode::send_add_igp_table4_cb));
+	    callback(this,
+		     &XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb));
 	if (success4 != true) {
 	    XLOG_ERROR("Failed to register IPv4 IGP table with the RIB. "
 		"Will try again.");
@@ -149,7 +159,8 @@ XrlStaticRoutesNode::send_rib_registration()
 	    _instance_name,
 	    true,	/* unicast */
 	    true,	/* multicast */
-	    callback(this, &XrlStaticRoutesNode::send_add_igp_table6_cb));
+	    callback(this,
+		     &XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb));
 	if (success6 != true) {
 	    XLOG_ERROR("Failed to register IPv6 IGP table with the RIB. "
 		"Will try again.");
@@ -171,7 +182,7 @@ XrlStaticRoutesNode::send_rib_registration()
 }
 
 void
-XrlStaticRoutesNode::send_add_igp_table4_cb(const XrlError& xrl_error)
+XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -194,7 +205,7 @@ XrlStaticRoutesNode::send_add_igp_table4_cb(const XrlError& xrl_error)
 }
 
 void
-XrlStaticRoutesNode::send_add_igp_table6_cb(const XrlError& xrl_error)
+XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -233,7 +244,7 @@ XrlStaticRoutesNode::send_rib_deregistration()
 	    _instance_name,
 	    true,	/* unicast */
 	    true,	/* multicast */
-	    callback(this, &XrlStaticRoutesNode::send_delete_igp_table4_cb));
+	    callback(this, &XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb));
 	if (success4 != true) {
 	    XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB. "
 		"Will give up.");
@@ -250,7 +261,7 @@ XrlStaticRoutesNode::send_rib_deregistration()
 	    _instance_name,
 	    true,	/* unicast */
 	    true,	/* multicast */
-	    callback(this, &XrlStaticRoutesNode::send_delete_igp_table6_cb));
+	    callback(this, &XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb));
 	if (success6 != true) {
 	    XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB. "
 		"Will give up.");
@@ -266,7 +277,7 @@ XrlStaticRoutesNode::send_rib_deregistration()
 }
 
 void
-XrlStaticRoutesNode::send_delete_igp_table4_cb(const XrlError& xrl_error)
+XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -284,7 +295,7 @@ XrlStaticRoutesNode::send_delete_igp_table4_cb(const XrlError& xrl_error)
 }
 
 void
-XrlStaticRoutesNode::send_delete_igp_table6_cb(const XrlError& xrl_error)
+XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {

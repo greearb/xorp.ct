@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.5 2004/04/05 09:32:24 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.6 2004/04/12 01:52:22 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -31,9 +31,7 @@
 XrlFib2mribNode::XrlFib2mribNode(EventLoop& eventloop,
 				 XrlRouter* xrl_router,
 				 const string& fea_target,
-				 const string& rib_target,
-				 const IPv4& finder_host,
-				 uint16_t finder_port)
+				 const string& rib_target)
     : Fib2mribNode(eventloop),
       XrlFib2mribTargetBase(xrl_router),
       _class_name(xrl_router->class_name()),
@@ -42,7 +40,8 @@ XrlFib2mribNode::XrlFib2mribNode(EventLoop& eventloop,
       _xrl_rib_client(xrl_router),
       _fea_target(fea_target),
       _rib_target(rib_target),
-      _ifmgr(eventloop, fea_target.c_str(), finder_host, finder_port),
+      _ifmgr(eventloop, fea_target.c_str(), xrl_router->finder_address(),
+	     xrl_router->finder_port()),
       _is_fea_fib_client4_registered(false),
       _is_fea_fib_client6_registered(false),
       _is_rib_igp_table4_registered(false),
@@ -58,42 +57,50 @@ XrlFib2mribNode::~XrlFib2mribNode()
     _ifmgr.detach_hint_observer(dynamic_cast<Fib2mribNode*>(this));
 }
 
-void
+bool
 XrlFib2mribNode::startup()
 {
-    Fib2mribNode::startup();
+    return Fib2mribNode::startup();
 }
 
-void
+bool
 XrlFib2mribNode::shutdown()
 {
-    Fib2mribNode::shutdown();
+    return Fib2mribNode::shutdown();
 }
 
-void
+bool
 XrlFib2mribNode::ifmgr_startup()
 {
+    bool ret_value;
+
     // TODO: XXX: we should startup the ifmgr only if it hasn't started yet
     Fib2mribNode::incr_startup_requests_n();
 
-    _ifmgr.startup();
+    ret_value = _ifmgr.startup();
 
     //
     // XXX: when the startup is completed, IfMgrHintObserver::tree_complete()
     // will be called.
     //
+
+    return ret_value;
 }
 
-void
+bool
 XrlFib2mribNode::ifmgr_shutdown()
 {
+    bool ret_value;
+
     Fib2mribNode::incr_shutdown_requests_n();
 
-    _ifmgr.shutdown();
+    ret_value = _ifmgr.shutdown();
 
     // TODO: XXX: PAVPAVPAV: use ServiceChangeObserverBase
     // to signal when the interface manager shutdown has completed.
     Fib2mribNode::decr_shutdown_requests_n();
+
+    return ret_value;
 }
 
 void
@@ -101,6 +108,7 @@ XrlFib2mribNode::fea_fib_client_register_startup()
 {
     if (! _is_fea_fib_client4_registered)
 	Fib2mribNode::incr_startup_requests_n();
+
     if (! _is_fea_fib_client6_registered)
 	Fib2mribNode::incr_startup_requests_n();
 
@@ -112,6 +120,7 @@ XrlFib2mribNode::fea_fib_client_register_shutdown()
 {
     if (_is_fea_fib_client4_registered)
 	Fib2mribNode::incr_shutdown_requests_n();
+
     if (_is_fea_fib_client6_registered)
 	Fib2mribNode::incr_shutdown_requests_n();
 
@@ -123,6 +132,7 @@ XrlFib2mribNode::rib_register_startup()
 {
     if (! _is_rib_igp_table4_registered)
 	Fib2mribNode::incr_startup_requests_n();
+
     if (! _is_rib_igp_table6_registered)
 	Fib2mribNode::incr_startup_requests_n();
 
@@ -134,6 +144,7 @@ XrlFib2mribNode::rib_register_shutdown()
 {
     if (_is_rib_igp_table4_registered)
 	Fib2mribNode::incr_shutdown_requests_n();
+
     if (_is_rib_igp_table6_registered)
 	Fib2mribNode::incr_shutdown_requests_n();
 
@@ -153,7 +164,7 @@ XrlFib2mribNode::send_fea_fib_client_registration()
 	success4 = _xrl_fea_fib_client.send_add_fib_client4(
 	    _fea_target.c_str(),
 	    my_xrl_target_name(),
-	    callback(this, &XrlFib2mribNode::send_add_fib_client4_cb));
+	    callback(this, &XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb));
 	if (success4 != true) {
 	    XLOG_ERROR("Failed to register IPv4 FIB client with the FEA. "
 		"Will try again.");
@@ -166,7 +177,7 @@ XrlFib2mribNode::send_fea_fib_client_registration()
 	success6 = _xrl_fea_fib_client.send_add_fib_client6(
 	    _fea_target.c_str(),
 	    my_xrl_target_name(),
-	    callback(this, &XrlFib2mribNode::send_add_fib_client6_cb));
+	    callback(this, &XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb));
 	if (success6 != true) {
 	    XLOG_ERROR("Failed to register IPv6 FIB client with the FEA. "
 		"Will try again.");
@@ -188,7 +199,7 @@ XrlFib2mribNode::send_fea_fib_client_registration()
 }
 
 void
-XrlFib2mribNode::send_add_fib_client4_cb(const XrlError& xrl_error)
+XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -211,7 +222,7 @@ XrlFib2mribNode::send_add_fib_client4_cb(const XrlError& xrl_error)
 }
 
 void
-XrlFib2mribNode::send_add_fib_client6_cb(const XrlError& xrl_error)
+XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -246,7 +257,7 @@ XrlFib2mribNode::send_fea_fib_client_deregistration()
 	success4 = _xrl_fea_fib_client.send_delete_fib_client4(
 	    _fea_target.c_str(),
 	    my_xrl_target_name(),
-	    callback(this, &XrlFib2mribNode::send_delete_fib_client4_cb));
+	    callback(this, &XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb));
 	if (success4 != true) {
 	    XLOG_ERROR("Failed to deregister IPv4 FIB client with the FEA. "
 		"Will give up.");
@@ -259,7 +270,7 @@ XrlFib2mribNode::send_fea_fib_client_deregistration()
 	success6 = _xrl_fea_fib_client.send_delete_fib_client6(
 	    _fea_target.c_str(),
 	    my_xrl_target_name(),
-	    callback(this, &XrlFib2mribNode::send_delete_fib_client6_cb));
+	    callback(this, &XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb));
 	if (success6 != true) {
 	    XLOG_ERROR("Failed to deregister IPv6 FIB client with the FEA. "
 		"Will give up.");
@@ -275,7 +286,7 @@ XrlFib2mribNode::send_fea_fib_client_deregistration()
 }
 
 void
-XrlFib2mribNode::send_delete_fib_client4_cb(const XrlError& xrl_error)
+XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -293,7 +304,7 @@ XrlFib2mribNode::send_delete_fib_client4_cb(const XrlError& xrl_error)
 }
 
 void
-XrlFib2mribNode::send_delete_fib_client6_cb(const XrlError& xrl_error)
+XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -327,7 +338,7 @@ XrlFib2mribNode::send_rib_registration()
 	    _instance_name,
 	    false,	/* unicast */
 	    true,	/* multicast */
-	    callback(this, &XrlFib2mribNode::send_add_igp_table4_cb));
+	    callback(this, &XrlFib2mribNode::rib_client_send_add_igp_table4_cb));
 	if (success4 != true) {
 	    XLOG_ERROR("Failed to register IPv4 IGP table with the RIB. "
 		"Will try again.");
@@ -344,7 +355,7 @@ XrlFib2mribNode::send_rib_registration()
 	    _instance_name,
 	    false,	/* unicast */
 	    true,	/* multicast */
-	    callback(this, &XrlFib2mribNode::send_add_igp_table6_cb));
+	    callback(this, &XrlFib2mribNode::rib_client_send_add_igp_table6_cb));
 	if (success6 != true) {
 	    XLOG_ERROR("Failed to register IPv6 IGP table with the RIB. "
 		"Will try again.");
@@ -366,7 +377,7 @@ XrlFib2mribNode::send_rib_registration()
 }
 
 void
-XrlFib2mribNode::send_add_igp_table4_cb(const XrlError& xrl_error)
+XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -389,7 +400,7 @@ XrlFib2mribNode::send_add_igp_table4_cb(const XrlError& xrl_error)
 }
 
 void
-XrlFib2mribNode::send_add_igp_table6_cb(const XrlError& xrl_error)
+XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -428,7 +439,7 @@ XrlFib2mribNode::send_rib_deregistration()
 	    _instance_name,
 	    false,	/* unicast */
 	    true,	/* multicast */
-	    callback(this, &XrlFib2mribNode::send_delete_igp_table4_cb));
+	    callback(this, &XrlFib2mribNode::rib_client_send_delete_igp_table4_cb));
 	if (success4 != true) {
 	    XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB. "
 		"Will give up.");
@@ -445,7 +456,7 @@ XrlFib2mribNode::send_rib_deregistration()
 	    _instance_name,
 	    false,	/* unicast */
 	    true,	/* multicast */
-	    callback(this, &XrlFib2mribNode::send_delete_igp_table6_cb));
+	    callback(this, &XrlFib2mribNode::rib_client_send_delete_igp_table6_cb));
 	if (success6 != true) {
 	    XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB. "
 		"Will give up.");
@@ -461,7 +472,7 @@ XrlFib2mribNode::send_rib_deregistration()
 }
 
 void
-XrlFib2mribNode::send_delete_igp_table4_cb(const XrlError& xrl_error)
+XrlFib2mribNode::rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {
@@ -479,7 +490,7 @@ XrlFib2mribNode::send_delete_igp_table4_cb(const XrlError& xrl_error)
 }
 
 void
-XrlFib2mribNode::send_delete_igp_table6_cb(const XrlError& xrl_error)
+XrlFib2mribNode::rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error)
 {
     // If success, then we are done
     if (xrl_error == XrlError::OKAY()) {

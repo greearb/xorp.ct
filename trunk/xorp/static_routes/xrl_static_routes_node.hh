@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.3 2004/03/30 03:24:12 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.4 2004/04/10 20:03:51 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -41,20 +41,22 @@ public:
     XrlStaticRoutesNode(EventLoop& eventloop,
 			XrlRouter* xrl_router,
 			const string& fea_target,
-			const string& rib_target,
-			const IPv4& finder_host,
-			uint16_t finder_port);
+			const string& rib_target);
     ~XrlStaticRoutesNode();
 
     /**
      * Start the node operation.
+     *
+     * @return true on success, false on failure.
      */
-    void	startup();
+    bool	startup();
 
     /**
      * Shutdown the node operation.
+     *
+     * @return true on success, false on failure.
      */
-    void	shutdown();
+    bool	shutdown();
 
 protected:
     //
@@ -235,8 +237,8 @@ protected:
 
 private:
 
-    void ifmgr_startup();
-    void ifmgr_shutdown();
+    bool ifmgr_startup();
+    bool ifmgr_shutdown();
 
     const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
@@ -261,11 +263,11 @@ private:
     void send_rib_route_change_cb(const XrlError& xrl_error);
 
     void send_rib_registration();
-    void send_add_igp_table4_cb(const XrlError& xrl_error);
-    void send_add_igp_table6_cb(const XrlError& xrl_error);
+    void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
+    void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
     void send_rib_deregistration();
-    void send_delete_igp_table4_cb(const XrlError& xrl_error);
-    void send_delete_igp_table6_cb(const XrlError& xrl_error);
+    void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
+    void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
 
     const string& my_xrl_target_name() {
 	return XrlStaticRoutesTargetBase::name();

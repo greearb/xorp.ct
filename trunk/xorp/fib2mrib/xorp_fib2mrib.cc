@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xorp_static_routes.cc,v 1.2 2004/02/14 00:06:47 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xorp_fib2mrib.cc,v 1.1 2004/02/18 00:10:56 pavlin Exp $"
 
 
 //
@@ -82,6 +82,24 @@ usage(const char *argv0, int exit_value)
     // NOTREACHED
 }
 
+//
+// Wait until the XrlRouter becomes ready
+//
+static void
+wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+{
+    bool timed_out = false;
+
+    XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
+    while (xrl_router.ready() == false && timed_out == false) {
+	eventloop.run();
+    }
+
+    if (xrl_router.ready() == false) {
+	XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
+    }
+}
+
 static void
 fib2mrib_main(const char* finder_hostname, uint16_t finder_port)
 {
@@ -101,22 +119,8 @@ fib2mrib_main(const char* finder_hostname, uint16_t finder_port)
 	eventloop,
 	&xrl_std_router_fib2mrib,
 	"fea",
-	"rib",
-	finder_hostname, finder_port);
-    {
-	// Wait until the XrlRouter becomes ready
-	bool timed_out = false;
-	
-	XorpTimer t = eventloop.set_flag_after_ms(10000, &timed_out);
-	while (xrl_std_router_fib2mrib.ready() == false
-	       && timed_out == false) {
-	    eventloop.run();
-	}
-
-	if (xrl_std_router_fib2mrib.ready() == false) {
-	    XLOG_FATAL("XrlRouter did not become ready.  No Finder?");
-	}
-    }
+	"rib");
+    wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fib2mrib);
 
     // Startup
     xrl_fib2mrib_node.startup();
