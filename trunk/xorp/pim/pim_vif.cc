@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.27 2004/02/22 04:24:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.28 2004/02/24 21:04:54 pavlin Exp $"
 
 
 //
@@ -280,6 +280,11 @@ PimVif::start()
     //
     IPvX primary_a(IPvX::ZERO(family()));
     IPvX domain_wide_a(IPvX::ZERO(family()));
+
+    // Reset the primary and the domain-wide addresses
+    pim_nbr_me().set_primary_addr(IPvX::ZERO(family()));
+    set_domain_wide_addr(IPvX::ZERO(family()));
+
     list<VifAddr>::const_iterator iter;
     for (iter = addr_list().begin(); iter != addr_list().end(); ++iter) {
 	const VifAddr& vif_addr = *iter;
@@ -348,9 +353,11 @@ PimVif::start()
     }
     
     //
-    // Add the task to take care of the PimMre processing
+    // Add the tasks to take care of the PimMre processing
     //
     pim_node().pim_mrt().add_task_start_vif(vif_index());
+    pim_node().pim_mrt().add_task_my_ip_address(vif_index());
+    pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
     
     return (XORP_OK);
 }
@@ -380,10 +387,12 @@ PimVif::stop()
 	return (XORP_ERROR);
     
     //
-    // Add the task to take care of the PimMre processing
+    // Add the tasks to take care of the PimMre processing
     //
     if (is_up()) {
 	pim_node().pim_mrt().add_task_stop_vif(vif_index());
+	pim_node().pim_mrt().add_task_my_ip_address(vif_index());
+	pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
     }
     if ((_usage_by_pim_mre_task == 0)
 	|| is_pending_up()
