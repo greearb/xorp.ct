@@ -1,4 +1,4 @@
-<!-- $XORP: www/getting_started.html,v 1.3 2004/04/21 20:00:39 mjh Exp $ -->
+<!-- $XORP: www/getting_started.html,v 1.4 2004/04/21 21:02:35 pavlin Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -16,7 +16,7 @@ does and how to use it.  It's a work in progress - please let us know
 what additional help you would find useful.
 <P>
 <UL>
-<LI><a href="#what">What exactly is XORP?</a>
+
 <LI><a href="#getting">Getting XORP</a>
 <LI><a href="#os">Supported Operating Systems</a>
 <LI><a href="#compiling">Compiling XORP from source</a>
@@ -24,57 +24,18 @@ what additional help you would find useful.
 <LI><a href="#running">Running XORP</a>
 <LI><a href="#inside">Inside XORP</a>
 <LI><a href="#porting">Porting XORP to a new platform</a>
+<LI><a href="#bugs">Reporting Problems</a>
 </UL>
 <P>
 
-<table border="0" cellpadding="10"  cellspacing="3" 
-width="100%" bgcolor="#b0b0b0">
-<TR><TD bgcolor="#b0b0b0">
-  <a name="what"><h4>What exactly is XORP?</h4></a>
-</TD</TR>
-<TR><TD bgcolor="#ffffff">
-<P>
-XORP is <I>intended</I> to provide a complete and extensible software
-stack for an IP router, including routing protocols, management
-mechanisms and an extensible forwarding path.  The goal is to provide
-a <I>platform</I>, by which we mean that XORP provides the critical
-common infrastructure, and we hope other people will code novel
-applications or protocols to run on the XORP platform.
-<P>
-At the present time, XORP doesn't provide it's own forwarding path,
-but rather relies on the forwarding capabilities of the underlying
-operating system.  This means that although the control plane is
-nicely extensible, the forwarding path isn't.  We have plans to
-address this in the future using the <a
-href="http://www.pdos.lcs.mit.edu/click/">Click</a> modular router
-code, but intend to keep the option of using native forwarding for
-those that prefer it.
-<P>
-XORP does provide routing protocols (BGP, RIP, PIM Sparse Mode),
-support protocols (IGMPv2, MLDv1), and management mechanisms (command
-line interface, SNMP).  This list will grow as more people start
-<a href="contributing.html">contributing</a> to XORP.
-<P>
-The XORP core is not intended to be just research-quality code.  In
-it's role as a research platform, it is critical that XORP can be
-deployed in production environments.  Thus it's really important to us
-that XORP is stable and secure.  While we have an extensive set of
-internal <a href="#validating">test suites</a>, these can only test so
-much.  True stability will only come from real-world testing - if you
-try XORP, and it doesn't do what you expect or hope, please let us
-know, either through email to feedback at xorp.org or <a
-href="http://www.xorp.org/bugzilla/index.cgi">bugzilla</a>.
-</td></tr></table><P>
-
-
-<table border="0" cellpadding="10"  cellspacing="3" 
+<table border="0" cellpadding="10"  cellspacing="3"
 width="100%" bgcolor="#b0b0b0">
 <TR><TD bgcolor="#b0b0b0">
   <a name="getting"><h4>Getting XORP</h4></a>
 </TD</TR>
 <TR><TD bgcolor="#ffffff">
 <P>
-There are three ways to try out XORP.  
+There are three ways to try out XORP.
 <UL>
 <LI><a href="downloads.html">Download</a> a release, and <a
 href="#compiling">compile</a> it from source.
@@ -90,7 +51,7 @@ operating system installed.
 </td></tr></table><P>
 
 
-<table border="0" cellpadding="10"  cellspacing="3" 
+<table border="0" cellpadding="10"  cellspacing="3"
 width="100%" bgcolor="#b0b0b0">
 <TR><TD bgcolor="#b0b0b0">
   <a name="os"><h4>Supported Operating Systems</h4></a>
@@ -100,7 +61,7 @@ width="100%" bgcolor="#b0b0b0">
 XORP should be fairly portable.  At the present time, the main
 development platforms for XORP are FreeBSD and Linux.  XORP should run
 on all recent versions of FreeBSD (as of April 2004, we recommend
-FreeBSD 4.9) and on most versions of Linux with a 2.4.x kernel.  
+FreeBSD 4.9) and on most versions of Linux with a 2.4.x kernel.
 <P>
 XORP compiles on MacOS 10.2 or later, but there is not currently any
 forwarding support.  If you try XORP on another platform, let us know
@@ -110,17 +71,17 @@ in porting XORP to a new platform.
 We aim to add Windows XP to our supported platforms during 2004.
 </td></tr></table><P>
 
-<table border="0" cellpadding="10"  cellspacing="3" 
+<table border="0" cellpadding="10"  cellspacing="3"
 width="100%" bgcolor="#b0b0b0">
 <TR><TD bgcolor="#b0b0b0">
-  <a name="compiling"><h3>Compiling XORP from source</h3></a>
+  <a name="compiling"><h4>Compiling XORP from source</h4></a>
 </TD</TR>
 <TR><TD bgcolor="#ffffff">
 <P>
 XORP is written in C++.  We've endeavoured to comply as far as
 possible with the ANSI standards, but currently XORP has only been
 compiled with variants of gcc.  XORP is known to compile on gcc
-2.95.x, 2.96, 3.2.x, 3.3.x, and pre-releases of 3.4.  
+2.95.x, 2.96, 3.2.x, 3.3.x, and pre-releases of 3.4.
 <P>
 Our <a href="#tinderbox">tinderbox</a> checks daily that XORP still
 compiles and passes its validation tests with 2.95.4, 3.3.4, and
@@ -157,7 +118,7 @@ out.
 </td></tr></table><P>
 
 
-<table border="0" cellpadding="10"  cellspacing="3" 
+<table border="0" cellpadding="10"  cellspacing="3"
 width="100%" bgcolor="#b0b0b0">
 <TR><TD bgcolor="#b0b0b0">
   <a name="validating"><h4>Validating a XORP Compilation</h4></a>
@@ -184,7 +145,7 @@ Hopefully you won't see any lines like:
 <pre>
 FAIL: test_peering1.sh
 </pre>
-which indicates a particular validation test failed.  
+which indicates a particular validation test failed.
 <P>
 There can be warnings such as:
 <pre>
@@ -196,7 +157,7 @@ ignored.
 <P>
 </td></tr></table><P>
 
-<table border="0" cellpadding="10"  cellspacing="3" 
+<table border="0" cellpadding="10"  cellspacing="3"
 width="100%" bgcolor="#b0b0b0">
 <TR><TD bgcolor="#b0b0b0">
   <a name="running"><h4>Running XORP</h4></a>
@@ -254,7 +215,7 @@ href="/releases/current/docs/index.html">relevant user manuals</a>.
 </TD></TR>
 </table><P>
 
-<table border="0" cellpadding="10"  cellspacing="3" 
+<table border="0" cellpadding="10"  cellspacing="3"
 width="100%" bgcolor="#b0b0b0">
 <TR><TD bgcolor="#b0b0b0">
   <a name="inside"><h4>Inside XORP</h4></a>
@@ -272,7 +233,7 @@ href="releases/current/docs/design_arch/design_arch.pdf">here</a>.
 </TD></TR> </table><P>
 
 
-<table border="0" cellpadding="10"  cellspacing="3" 
+<table border="0" cellpadding="10"  cellspacing="3"
 width="100%" bgcolor="#b0b0b0">
 <TR><TD bgcolor="#b0b0b0">
   <a name="porting"><h4>Porting XORP to a new platform</h4></a>
@@ -299,8 +260,21 @@ from OS to OS should not be present in the routing protocols, but
 should rather be relayed through requests via the FEA.  At the present
 time this is not true of all routing protocols.
 
-</TD></TR> </table><P>
+</TD></TR>
+</table><P>
 
+<table border="0" cellpadding="10"  cellspacing="3"
+width="100%" bgcolor="#b0b0b0">
+<TR><TD bgcolor="#b0b0b0">
+  <a name="bugs"><h4>Report Problems</h4></a>
+</TD</TR>
+<TR><TD bgcolor="#ffffff">
+ <p> If you try XORP, and it doesn't do what you expect or hope,
+      please let us know, either through email to feedback at xorp.org
+      or <a href="http://www.xorp.org/bugzilla/index.cgi">bugzilla</a>
+</TD></TR>
+
+</table><P>
 
 <hr>
 <address>feedback&#64;xorp&#46;org</address>

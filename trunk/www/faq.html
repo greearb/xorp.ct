@@ -1,4 +1,4 @@
-<!-- $XORP: www/faq.html,v 1.1 2004/04/21 05:02:04 hodson Exp $ -->
+<!-- $XORP: www/faq.html,v 1.2 2004/04/21 14:49:33 mjh Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -15,7 +15,7 @@
 
 <ol>
 
-  <li><a href="#pronounce">How do you pronounce XORP?</a>
+  <li><a href="#what">What exactly is XORP?</a>
 
   <li><a href="#procon">What are the pros and cons of XORP?</a>
 
@@ -28,6 +28,8 @@
   <li><a href="#impact">What is the impact on the router market of open
   source routing platforms?</a>
 
+  <li><a href="#pronounce">How do you pronounce XORP?</a>
+
 </ol>
 
 
@@ -35,10 +37,42 @@
 <h3>General</h3>
 
 <ol>
-  <li><b><a name="#pronounce">How do you pronouce XORP?</a></b>
 
-  <p>We prefer XORP to be pronounced as a single word "zorp".  But we
-  won't be offended if you pronounce it in other ways.
+  <li> <a name="what"><b>What exactly is XORP?</b></a>
+
+  <P> XORP is <I>intended</I> to provide a complete and extensible
+      software stack for an IP router, including routing protocols,
+      management mechanisms and an extensible forwarding path.  The
+      goal is to provide a <I>platform</I>, by which we mean that XORP
+      provides the critical common infrastructure, and we hope other
+      people will code novel applications or protocols to run on the
+      XORP platform.
+
+  <P> At the present time, XORP doesn't provide it's own forwarding
+      path, but rather relies on the forwarding capabilities of the
+      underlying operating system.  This means that although the
+      control plane is nicely extensible, the forwarding path isn't.
+      We have plans to address this in the future using the <a
+      href="http://www.pdos.lcs.mit.edu/click/">Click</a> modular
+      router code, but intend to keep the option of using native
+      forwarding for those that prefer it.
+
+  <P> XORP does provide routing protocols (BGP, RIP, PIM Sparse Mode),
+      support protocols (IGMPv2, MLDv1), and management mechanisms
+      (command line interface, SNMP).  This list will grow as more
+      people start <a href="contributing.html">contributing</a> to
+      XORP.
+
+  <P> The XORP core is not intended to be just research-quality code.
+      In it's role as a research platform, it is critical that XORP
+      can be deployed in production environments.  Thus it's really
+      important to us that XORP is stable and secure.  While we have
+      an extensive set of internal <a href="#validating">test
+      suites</a>, these can only test so much.  True stability will
+      only come from real-world testing - if you try XORP, and it
+      doesn't do what you expect or hope, please let us know, either
+      through email to feedback at xorp.org or <a
+      href="http://www.xorp.org/bugzilla/index.cgi">bugzilla</a>.
 
   <li><b><a name="#procon">What are the pros and cons of XORP?</a></b>
 
@@ -125,6 +159,13 @@
          where other open source routing products find themselves used
          in large enterprises and with ISPs today.
   </li>
+
+  <li><b><a name="#pronounce">How do you pronouce XORP?</a></b>
+
+  <p> We prefer XORP to be pronounced as a single word "zorp".  But we
+      won't be offended if you pronounce it in other ways.
+  </li>
+
 </ol>
 
 <hr>
