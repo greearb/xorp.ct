@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.28 2005/03/18 01:18:13 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.29 2005/03/18 05:21:14 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -92,6 +92,7 @@ public:
     void send_mfea_add_delete_protocol();
     void send_start_stop_protocol_kernel_vif();
     void send_join_leave_multicast_group();
+    void send_protocol_message();
 
 protected:
     //
@@ -634,6 +635,14 @@ private:
     int join_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
     int leave_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
     void mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error);
+
+    int	proto_send(const string& dst_module_instance_name,
+		   xorp_module_id dst_module_id,
+		   uint16_t vif_index,
+		   const IPvX& src, const IPvX& dst,
+		   int ip_ttl, int ip_tos, bool is_router_alert,
+		   const uint8_t* sndbuf, size_t sndlen);
+    void mfea_client_send_protocol_message_cb(const XrlError& xrl_error);
     
     int send_add_membership(const string& dst_module_instance_name,
 			    xorp_module_id dst_module_id,
@@ -647,14 +656,6 @@ private:
 			       const IPvX& group);
     void send_add_delete_membership();
     void mld6igmp_client_send_add_delete_membership_cb(const XrlError& xrl_error);
-    
-    int	proto_send(const string& dst_module_instance_name,
-		   xorp_module_id dst_module_id,
-		   uint16_t vif_index,
-		   const IPvX& src, const IPvX& dst,
-		   int ip_ttl, int ip_tos, bool router_alert_bool,
-		   const uint8_t* sndbuf, size_t sndlen);
-    void mfea_client_send_protocol_message_cb(const XrlError& xrl_error);
     
     //
     // Protocol node CLI methods
@@ -758,6 +759,61 @@ private:
 	uint16_t	_vif_index;
 	IPvX		_multicast_group;
 	bool		_is_join;
+    };
+
+    /**
+     * Class for handling the task of sending protocol messages
+     */
+    class SendProtocolMessage : public XrlTaskBase {
+    public:
+	SendProtocolMessage(XrlMld6igmpNode&	xrl_mld6igmp_node,
+			    const string&	dst_module_instance_name,
+			    xorp_module_id	dst_module_id,
+			    uint16_t		vif_index,
+			    const IPvX&		src,
+			    const IPvX&		dst,
+			    int			ip_ttl,
+			    int			ip_tos,
+			    bool		is_router_alert,
+			    const uint8_t*	sndbuf,
+			    size_t		sndlen)
+	    : XrlTaskBase(xrl_mld6igmp_node),
+	      _dst_module_instance_name(dst_module_instance_name),
+	      _dst_module_id(dst_module_id),
+	      _vif_index(vif_index),
+	      _src(src),
+	      _dst(dst),
+	      _ip_ttl(ip_ttl),
+	      _ip_tos(ip_tos),
+	      _is_router_alert(is_router_alert) {
+		  _message.resize(sndlen);
+		  for (size_t i = 0; i < sndlen; i++)
+		      _message[i] = sndbuf[i];
+	      }
+
+	void		dispatch() {
+	    _xrl_mld6igmp_node.send_protocol_message();
+	}
+	const string&	dst_module_instance_name() const { return _dst_module_instance_name; }
+	xorp_module_id	dst_module_id() const { return _dst_module_id; }
+	uint16_t	vif_index() const { return _vif_index; }
+	const IPvX&	src() const { return _src; }
+	const IPvX&	dst() const { return _dst; }
+	int		ip_ttl() const { return _ip_ttl; }
+	int		ip_tos() const { return _ip_tos; }
+	bool		is_router_alert() const { return _is_router_alert; }
+	const vector<uint8_t>& message() const { return _message; }
+
+    private:
+	string		_dst_module_instance_name;
+	xorp_module_id	_dst_module_id;
+	uint16_t	_vif_index;
+	IPvX		_src;
+	IPvX		_dst;
+	int		_ip_ttl;
+	int		_ip_tos;
+	bool		_is_router_alert;
+	vector<uint8_t>	_message;
     };
 
     /**
