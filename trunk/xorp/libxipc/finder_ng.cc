@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_ng.cc,v 1.4 2003/03/05 02:01:50 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder_ng.cc,v 1.5 2003/03/06 01:18:57 hodson Exp $"
 
 #include "finder_module.h"
 
@@ -131,7 +131,7 @@ FinderNG::messenger_inactive_event(FinderMessengerBase* m)
 void
 FinderNG::messenger_stopped_event(FinderMessengerBase* m)
 {
-    XLOG_INFO("Messenger %p stopped.", m);
+    debug_msg("Messenger %p stopped.", m);
     delete m;
 }
 
