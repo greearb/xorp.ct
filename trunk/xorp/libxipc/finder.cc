@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.15 2004/06/10 22:41:05 hodson Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.16 2004/11/04 21:54:42 pavlin Exp $"
 
 #include <set>
 
@@ -386,7 +386,7 @@ Finder::~Finder()
 	FinderMessengerBase* old_front = _messengers.front();
 	delete _messengers.front();
 	// Expect death event for messenger to remove item from list
-	assert(_messengers.front() != old_front);
+	assert(_messengers.empty() || (_messengers.front() != old_front));
     }
 }
 
