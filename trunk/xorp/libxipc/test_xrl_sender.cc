@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.2 2004/09/23 12:48:33 mjh Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.3 2004/09/23 12:50:09 mjh Exp $"
 
 
 //
@@ -115,7 +115,7 @@ public:
     inline void print_xrl_sent() const {
 #ifdef PRINT_DEBUG
 	if (! (_next_xrl_send_id % 10000))
-	    printf("Sending %d\n", _next_xrl_send_id);
+	    printf("Sending %u\n", (uint32_t)_next_xrl_send_id);
 #endif // PRINT_DEBUG
     }
 
@@ -123,7 +123,7 @@ public:
 #ifdef PRINT_DEBUG
 	printf(".");
 	if (! (_next_xrl_recv_id % 10000))
-	    printf("Receiving %d\n", _next_xrl_recv_id);
+	    printf("Receiving %u\n", (uint32_t)_next_xrl_recv_id);
 #endif // PRINT_DEBUG
     }
 

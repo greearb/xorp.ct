@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.1 2004/09/22 02:48:59 pavlin Exp $"
 
 
 //
@@ -73,7 +73,7 @@ public:
 #ifdef PRINT_DEBUG
     	printf(".");
 	if (! (_received_xrls % 10000))
-	    printf("Received %d\n", _received_xrls);
+	    printf("Received %u\n", (uint32_t)_received_xrls);
 #endif // PRINT_DEBUG
     }
 
@@ -183,7 +183,7 @@ private:
 	}
 	if (delta_time == TimeVal::ZERO()) {
 	    printf("Received %u XRLs; delta-time = %s secs\n",
-		   _received_xrls, delta_time.str().c_str());
+		   (uint32_t)_received_xrls, delta_time.str().c_str());
 	    return;
 	}
 
@@ -192,7 +192,7 @@ private:
 	speed /= double_time;
 
 	printf("Received %u XRLs; delta_time = %s secs; speed = %f XRLs/s\n",
-	       _received_xrls, delta_time.str().c_str(), speed);
+	       (uint32_t)_received_xrls, delta_time.str().c_str(), speed);
 
 #if 0	// XXX: if enabled, then exit after all XRLs have been received.
 	_done_timer = _eventloop.new_oneoff_after(TimeVal(3, 0),
